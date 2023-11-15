@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ TEST(DfxController, TestResetOptionValueFromString)
     EXPECT_TRUE(DfxController::IsInitialized());
 
     DfxController::ResetOptionValueFromString("dfx-log:1");
-    EXPECT_EQ(DfxController::GetOptionValue(DfxOptionHandler::DFXLOG), 1);
+    EXPECT_EQ(DfxController::GetOptionValue(DfxOptionHandler::DFXLOG), 1U);
 
     DfxController::Destroy();
     EXPECT_FALSE(DfxController::IsInitialized());

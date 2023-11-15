@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ namespace panda {
 void MallocFunc()
 {
     char *ptr = static_cast<char *>(malloc(5_MB));  // NOLINT(cppcoreguidelines-no-malloc)
-    ptr[0] = 'a';                                   // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    ptr[1] = '\0';                                  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ptr[0U] = 'a';                                  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ptr[1U] = '\0';                                 // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::cout << ptr << std::endl;                  // NOLINT(clang-analyzer-unix.Malloc)
 }
 

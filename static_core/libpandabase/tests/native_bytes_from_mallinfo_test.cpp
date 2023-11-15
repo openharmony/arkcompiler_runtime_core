@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ TEST(Mem, GetNativeBytesFromMallinfoTest)
     size_t old_bytes = panda::os::mem::GetNativeBytesFromMallinfo();
     // NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-no-malloc,clang-analyzer-unix.Malloc,modernize-loop-convert)
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    void *p1[1000];
-    for (int i = 0; i < 1000; i++) {
-        p1[i] = malloc(64);
+    void *p1[1000U];
+    for (size_t i = 0; i < 1000U; i++) {
+        p1[i] = malloc(64U);
         ASSERT_NE(p1[i], nullptr);
     }
     size_t new_bytes = panda::os::mem::GetNativeBytesFromMallinfo();
@@ -37,16 +37,16 @@ TEST(Mem, GetNativeBytesFromMallinfoTest)
 
     old_bytes = new_bytes;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    void *p2[10];
-    for (int i = 0; i < 10; i++) {
-        p2[i] = malloc(4 * 1024 * 1024);
+    void *p2[10U];
+    for (size_t i = 0; i < 10U; i++) {
+        p2[i] = malloc(4U * 1024U * 1024U);
         ASSERT_NE(p2[i], nullptr);
     }
     new_bytes = panda::os::mem::GetNativeBytesFromMallinfo();
     ASSERT_TRUE(new_bytes > old_bytes);
 
     old_bytes = new_bytes;
-    for (int i = 0; i < 1000; i++) {
+    for (size_t i = 0; i < 1000U; i++) {
         free(p1[i]);
         p1[i] = nullptr;
     }
@@ -54,7 +54,7 @@ TEST(Mem, GetNativeBytesFromMallinfoTest)
     ASSERT_TRUE(new_bytes < old_bytes);
 
     old_bytes = new_bytes;
-    for (int i = 0; i < 10; i++) {
+    for (size_t i = 0; i < 10U; i++) {
         free(p2[i]);
         p2[i] = nullptr;
     }

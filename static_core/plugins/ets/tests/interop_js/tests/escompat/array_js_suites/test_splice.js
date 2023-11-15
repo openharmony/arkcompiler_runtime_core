@@ -13,34 +13,34 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSSplice = ets_mod.getFunction("Array_TestJSSplice");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSSplice = etsMod.getFunction('Array_TestJSSplice');
 
-{   // Test JS Array<FooClass>
-    TestJSSplice(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSSplice(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    arr.push("spliced");
-    ASSERT_EQ(arr.length(), 3);
-    arr.splice(1, 1);
-    ASSERT_EQ(arr.at(0), 123);
-    ASSERT_EQ(arr.at(1), "spliced");
-    ASSERT_EQ(arr.length(), 2);
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  arr.push('spliced');
+  ASSERT_EQ(arr.length(), 3);
+  arr.splice(1, 1);
+  ASSERT_EQ(arr.at(0), 123);
+  ASSERT_EQ(arr.at(1), 'spliced');
+  ASSERT_EQ(arr.length(), 2);
 
-    let arr1 = CreateEtsSample();
-    arr1.push("spliced");
-    ASSERT_EQ(arr1.length(), 3);
-    // TODO(oignatenko) uncomment below after interop will be supported for this method signature
-    // arr1.splice(1);
-    // ASSERT_EQ(arr1.at(0), 123);
-    // ASSERT_EQ(arr1.length(), 1);
+  let arr1 = CreateEtsSample();
+  arr1.push('spliced');
+  ASSERT_EQ(arr1.length(), 3);
+  // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+  // arr1.splice(1);
+  // ASSERT_EQ(arr1.at(0), 123);
+  // ASSERT_EQ(arr1.length(), 1);
 }
 
 GCJSRuntimeCleanup();

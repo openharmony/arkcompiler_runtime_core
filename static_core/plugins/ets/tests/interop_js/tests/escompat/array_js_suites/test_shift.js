@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSShift = ets_mod.getFunction("Array_TestJSShift");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSShift = etsMod.getFunction('Array_TestJSShift');
 
-{   // Test JS Array<FooClass>
-    TestJSShift(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSShift(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    let shifted = arr.shift();
-    ASSERT_EQ(shifted, 123);
-    ASSERT_EQ(arr.at(0), "foo");
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  let shifted = arr.shift();
+  ASSERT_EQ(shifted, 123);
+  ASSERT_EQ(arr.at(0), 'foo');
 }
 
 GCJSRuntimeCleanup();

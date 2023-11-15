@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,7 +168,7 @@ Token::Type Context::operator--(int)
 {
     Token::Type last_id = id;
 
-    if (1 < number) {
+    if (number > 1) {
         end = false;
 
         --number;
@@ -186,7 +186,7 @@ Token::Type Context::operator--(int)
 
 Token::Type Context::operator--()
 {
-    if (1 < number) {
+    if (number > 1) {
         end = false;
 
         --number;

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ class TaskQueueId {
 public:
     constexpr TaskQueueId(TaskType tt, VMType vt)
         : val_(static_cast<uint16_t>(tt) |
-               static_cast<uint16_t>(static_cast<uint16_t>(vt) << (BITS_PER_BYTE * sizeof(TaskQueueId) / 2)))
+               static_cast<uint16_t>(static_cast<uint16_t>(vt) << (BITS_PER_BYTE * sizeof(TaskQueueId) / 2U)))
     {
         static_assert(sizeof(TaskType) == sizeof(TaskQueueId) / 2);
         static_assert(sizeof(VMType) == sizeof(TaskQueueId) / 2);

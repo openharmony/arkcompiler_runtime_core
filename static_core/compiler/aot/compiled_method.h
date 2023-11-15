@@ -33,7 +33,7 @@ class CompiledMethod {
 public:
     CompiledMethod(Arch arch, Method *method, size_t index) : arch_(arch), method_(method), index_(index) {}
     NO_COPY_OPERATOR(CompiledMethod);
-    DEFAULT_COPY_CTOR(CompiledMethod)
+    DEFAULT_COPY_CTOR(CompiledMethod);
     DEFAULT_MOVE_SEMANTIC(CompiledMethod);
     ~CompiledMethod() = default;
 

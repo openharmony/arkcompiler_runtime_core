@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,20 +71,18 @@ static compiler::Register CalculateNumNeededRangeTemps(const compiler::Graph *gr
             if (!CanHoldRange(inst)) {
                 continue;
             }
-            auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
+            auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1U : 0U);
             if (inst->GetOpcode() == compiler::Opcode::InitObject) {
-                ASSERT(nargs > 0);
+                ASSERT(nargs > 0U);
                 nargs -= 1;  // exclude LoadAndInitClass
             }
             if (inst->GetOpcode() == compiler::Opcode::CallLaunchVirtual ||
                 inst->GetOpcode() == compiler::Opcode::CallLaunchStatic) {
-                ASSERT(nargs > 0);
+                ASSERT(nargs > 0U);
                 nargs -= 1;  // exclude NewObject
             }
-            if (ret < nargs) {
-                if (nargs > MAX_NUM_NON_RANGE_ARGS || IsIntrinsicRange(inst)) {
-                    ret = nargs;
-                }
+            if (ret < nargs && (nargs > MAX_NUM_NON_RANGE_ARGS || IsIntrinsicRange(inst))) {
+                ret = nargs;
             }
         }
     }
@@ -104,7 +102,7 @@ bool RegEncoder::RunImpl()
     }
 
     state_ = RegEncoderState::RESERVE_TEMPS;
-    ASSERT(num_temps_ == 0);
+    ASSERT(num_temps_ == 0U);
 
     const auto num_regs = GetNumRegs();
 
@@ -125,19 +123,19 @@ bool RegEncoder::RunImpl()
 
         max_num_temps = num_temps_;
         CalculateNumNeededTemps();
-        if (num_temps_ == 0) {
+        if (num_temps_ == 0U) {
             break;
         }
     }
 
-    num_temps_ = num_temps_ > 0 ? num_temps_ : num_changed_width_;
-    if (num_temps_ > 0 || num_max_range_input_ > 0) {
+    num_temps_ = num_temps_ > 0U ? num_temps_ : num_changed_width_;
+    if (num_temps_ > 0U || num_max_range_input_ > 0U) {
         state_ = RegEncoderState::INSERT_SPILLS;
         InsertSpills();
 
         auto usage_mask = GetGraph()->GetUsedRegs<compiler::DataType::INT64>();
         for (compiler::Register r = 0; r < num_regs; r++) {
-            usage_mask->at(num_regs + num_temps_ - r - 1) = usage_mask->at(num_regs - r - 1);
+            usage_mask->at(num_regs + num_temps_ - r - 1L) = usage_mask->at(num_regs - r - 1L);
         }
         std::fill(usage_mask->begin(), usage_mask->begin() + num_temps_, true);
     }
@@ -191,7 +189,7 @@ void RegEncoder::RenumberRegs(const compiler::Register min_reg, const compiler::
     // wrapping around on overflows with well-defined behavour.
     // Hence the requirement to keep delta unsigned.
     static_assert(std::is_unsigned<compiler::Register>::value, "compiler::Register must be unsigned");
-    ASSERT(delta > 0);
+    ASSERT(delta > 0U);
 
     for (auto *bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->AllInsts()) {
@@ -236,7 +234,7 @@ bool RegEncoder::RenumberArgRegs()
     }
 
     compiler::Register num_locals = 0;
-    if (num_non_args != 0) {
+    if (num_non_args != 0U) {
         while (num_locals != num_non_args && usage_mask->at(num_locals)) {
             ++num_locals;
         }
@@ -244,7 +242,7 @@ bool RegEncoder::RenumberArgRegs()
 
     compiler::Register num_temps = 0;
     if (num_locals != num_non_args) {
-        compiler::Register r = num_non_args - 1;
+        compiler::Register r = num_non_args - 1L;
         while (r < num_non_args && usage_mask->at(r)) {
             ++num_temps;
             --r;
@@ -260,7 +258,7 @@ bool RegEncoder::RenumberArgRegs()
 
     bool do_renumber = true;
 
-    if (num_non_args == 0 && num_max_range_input_ == 0) {  // all registers are arguments: no need to renumber
+    if (num_non_args == 0U && num_max_range_input_ == 0U) {  // all registers are arguments: no need to renumber
         do_renumber = false;
     }
 
@@ -269,7 +267,7 @@ bool RegEncoder::RenumberArgRegs()
         do_renumber = false;
     }
 
-    if (num_temps + num_args == 0) {  // no temps and no args: nothing to renumber
+    if (num_temps + num_args == 0U) {  // no temps and no args: nothing to renumber
         do_renumber = false;
     }
 
@@ -302,11 +300,11 @@ bool RegEncoder::RenumberArgRegs()
 
 void RegEncoder::InsertSpills()
 {
-    ASSERT(num_max_range_input_ > 0 || (num_temps_ > 0 && num_temps_ <= MAX_NUM_INPUTS));
+    ASSERT(num_max_range_input_ > 0U || (num_temps_ > 0U && num_temps_ <= MAX_NUM_INPUTS));
 
     for (auto *bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->AllInstsSafe()) {
-            if (inst->GetInputsCount() == 0) {
+            if (inst->GetInputsCount() == 0U) {
                 continue;
             }
 
@@ -322,7 +320,7 @@ void RegEncoder::CalculateNumNeededTemps()
 
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->AllInstsSafe()) {
-            if (inst->GetInputsCount() == 0) {
+            if (inst->GetInputsCount() == 0U) {
                 continue;
             }
 
@@ -365,11 +363,11 @@ void RegEncoder::InsertSpillsForDynInputsInst(compiler::Inst *inst)
     RegContentMap spill_map(GetGraph()->GetLocalAllocator()->Adapter());  // src -> (dst, src_type), non-callrange
     RegContentVec spill_vec(GetGraph()->GetLocalAllocator()->Adapter());  // spill_vec is used to handle callrange
 
-    auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
+    auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1U : 0U);
     auto start = GetStartInputIndex(inst);
     bool range = IsIntrinsicRange(inst) || (nargs - start > MAX_NUM_NON_RANGE_ARGS && CanHoldRange(inst));
 
-    compiler::Register temp = range ? range_temps_start_ : 0;
+    compiler::Register temp = range ? range_temps_start_ : 0U;
 
     for (size_t i = start; i < nargs; ++i) {
         auto src_reg = inst->GetSrcReg(i);
@@ -410,8 +408,8 @@ size_t RegEncoder::GetStartInputIndex(compiler::Inst *inst)
     return (inst->GetOpcode() == compiler::Opcode::InitObject ||
             inst->GetOpcode() == compiler::Opcode::CallLaunchStatic ||
             inst->GetOpcode() == compiler::Opcode::CallLaunchVirtual)
-               ? 1
-               : 0;  // exclude LoadAndInitClass and NewObject
+               ? 1U
+               : 0U;  // exclude LoadAndInitClass and NewObject
 }
 
 static void AddMoveAfter(Inst *inst, compiler::Register src, RegContent dst)
@@ -428,8 +426,8 @@ static bool IsBoundDstSrc(const compiler::Inst *inst)
     if (!inst->IsBinaryInst()) {
         return false;
     }
-    auto src0 = inst->GetSrcReg(0);
-    auto src1 = inst->GetSrcReg(1);
+    auto src0 = inst->GetSrcReg(0U);
+    auto src1 = inst->GetSrcReg(1U);
     auto dst = inst->GetDstReg();
     if (inst->IsCommutative()) {
         return src0 == dst || src1 == dst;
@@ -523,9 +521,8 @@ void RegEncoder::CalculateNumNeededTempsForInst(compiler::Inst *inst)
         }
         ASSERT(inst->IsStaticCall() || inst->IsVirtualCall() || inst->IsInitObject() || inst->IsIntrinsic());
 
-        auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
-        size_t start = inst->GetOpcode() == compiler::Opcode::InitObject ? 1 : 0;
-
+        auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1U : 0U);
+        size_t start = inst->GetOpcode() == compiler::Opcode::InitObject ? 1U : 0U;
         if (nargs - start > MAX_NUM_NON_RANGE_ARGS) {  // is call.range
             return;
         }
@@ -669,7 +666,7 @@ void RegEncoder::VisitLoadStatic(GraphVisitor *v, Inst *inst_base)
 
 void RegEncoder::VisitStoreObject(GraphVisitor *v, Inst *inst_base)
 {
-    bool is_acc_type = inst_base->GetSrcReg(1) == compiler::ACC_REG_ID;
+    bool is_acc_type = inst_base->GetSrcReg(1U) == compiler::ACC_REG_ID;
 
     auto re = static_cast<RegEncoder *>(v);
     auto inst = inst_base->CastToStoreObject();

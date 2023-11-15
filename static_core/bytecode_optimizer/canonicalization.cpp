@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +36,8 @@ bool Canonicalization::RunImpl()
 
 static bool IsDominateReverseInputs(const compiler::Inst *inst)
 {
-    auto input0 = inst->GetInput(0).GetInst();
-    auto input1 = inst->GetInput(1).GetInst();
+    auto input0 = inst->GetInput(0U).GetInst();
+    auto input1 = inst->GetInput(1U).GetInst();
     return input0->IsDominate(input1);
 }
 
@@ -48,7 +48,7 @@ static bool ConstantFitsCompareImm(const Inst *cst, uint32_t size)
         return false;
     }
     auto val = cst->CastToConstant()->GetIntValue();
-    return (size == compiler::HALF_SIZE) && (val == 0);
+    return (size == compiler::HALF_SIZE) && (val == 0U);
 }
 
 static bool BetterToSwapCompareInputs(const compiler::Inst *inst, const compiler::Inst *input0,
@@ -72,8 +72,8 @@ static bool SwapInputsIfNecessary(compiler::Inst *inst, const bool necessary)
     if (!necessary) {
         return false;
     }
-    auto input0 = inst->GetInput(0).GetInst();
-    auto input1 = inst->GetInput(1).GetInst();
+    auto input0 = inst->GetInput(0U).GetInst();
+    auto input1 = inst->GetInput(1U).GetInst();
     if ((inst->GetOpcode() == compiler::Opcode::Compare) && !BetterToSwapCompareInputs(inst, input0, input1)) {
         return false;
     }
@@ -84,7 +84,7 @@ static bool SwapInputsIfNecessary(compiler::Inst *inst, const bool necessary)
 
 bool Canonicalization::TrySwapConstantInput(Inst *inst)
 {
-    return SwapInputsIfNecessary(inst, inst->GetInput(0).GetInst()->IsConst());
+    return SwapInputsIfNecessary(inst, inst->GetInput(0U).GetInst()->IsConst());
 }
 
 bool Canonicalization::TrySwapReverseInput(Inst *inst)
@@ -95,7 +95,7 @@ bool Canonicalization::TrySwapReverseInput(Inst *inst)
 void Canonicalization::VisitCommutative(Inst *inst)
 {
     ASSERT(inst->IsCommutative());
-    ASSERT(inst->GetInputsCount() == 2);  // 2 is COMMUTATIVE_INPUT_COUNT
+    ASSERT(inst->GetInputsCount() == 2U);  // 2 is COMMUTATIVE_INPUT_COUNT
     if (OPTIONS.GetOptLevel() > 1) {
         result_ = TrySwapReverseInput(inst);
     }
@@ -106,7 +106,7 @@ void Canonicalization::VisitCommutative(Inst *inst)
 // This is necessary for further merging of the constant and the If instrution in the Lowering pass
 bool AllowSwap(const compiler::Inst *inst)
 {
-    auto input1 = inst->GetInput(1).GetInst();
+    auto input1 = inst->GetInput(1U).GetInst();
     if (!input1->IsConst()) {
         return true;
     }

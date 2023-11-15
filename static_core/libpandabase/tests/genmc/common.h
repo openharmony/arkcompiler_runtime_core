@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ static int g_shared;
 // The function checks if a data race may be present:
 // it writes down the argument to the shared variable
 // and checks if the value is not changed
-static void CheckGlobalVar(int index)
+inline void CheckGlobalVar(int index)
 {
     g_shared = index;
     int r = g_shared;

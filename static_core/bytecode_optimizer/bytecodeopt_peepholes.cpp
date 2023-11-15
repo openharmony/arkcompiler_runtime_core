@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ CallInst *FindCtorCall(Inst *new_object)
             continue;
         }
         auto call = inst->CastToCallStatic();
-        auto call_first_arg = call->GetInput(0).GetInst();
+        auto call_first_arg = call->GetInput(0U).GetInst();
         if (call_first_arg->GetOpcode() == Opcode::NewObject) {
             auto new_object_as_arg = call_first_arg->CastToNewObject();
             if (new_object_as_arg != new_object) {
@@ -136,7 +136,7 @@ void BytecodeOptPeepholes::VisitNewObject(GraphVisitor *v, Inst *inst)
         }
     }
 
-    auto load = static_cast<compiler::ClassInst *>(inst->GetInput(0).GetInst());
+    auto load = static_cast<compiler::ClassInst *>(inst->GetInput(0U).GetInst());
     auto *init_object = CreateInitObject(v, load, call_init);
     call_init->InsertBefore(init_object);
     init_object->SetPc(call_init->GetPc());

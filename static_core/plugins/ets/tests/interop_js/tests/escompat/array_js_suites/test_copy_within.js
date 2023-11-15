@@ -13,29 +13,29 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSCopyWithin = ets_mod.getFunction("Array_TestJSCopyWithin");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSCopyWithin = etsMod.getFunction('Array_TestJSCopyWithin');
 
-{   // Test JS Array<FooClass>
-    TestJSCopyWithin(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSCopyWithin(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    arr.push("something");
-    ASSERT_EQ(arr.at(2), "something");
-    arr.copyWithin(2, 0);
-    ASSERT_EQ(arr.at(2), 123);
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  arr.push('something');
+  ASSERT_EQ(arr.at(2), 'something');
+  arr.copyWithin(2, 0);
+  ASSERT_EQ(arr.at(2), 123);
 
-    ASSERT_EQ(arr.at(1), "foo");
-    // TODO(oignatenko) uncomment below after interop will be supported for this method signature
-    // arr.copyWithin(1);
-    // ASSERT_EQ(arr.at(1), 123);
+  ASSERT_EQ(arr.at(1), 'foo');
+  // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+  // arr.copyWithin(1);
+  // ASSERT_EQ(arr.at(1), 123);
 }
 
 GCJSRuntimeCleanup();

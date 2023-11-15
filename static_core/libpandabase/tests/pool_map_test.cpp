@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,14 +122,14 @@ private:
         return pool_map_.GetSpaceType(addr);
     }
 
-    static constexpr std::array<SpaceType, 6> ALL_SPACE_TYPES = {SpaceType::SPACE_TYPE_OBJECT,
-                                                                 SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT,
-                                                                 SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT,
-                                                                 SpaceType::SPACE_TYPE_INTERNAL,
-                                                                 SpaceType::SPACE_TYPE_CODE,
-                                                                 SpaceType::SPACE_TYPE_COMPILER};
+    static constexpr std::array<SpaceType, 6U> ALL_SPACE_TYPES = {SpaceType::SPACE_TYPE_OBJECT,
+                                                                  SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT,
+                                                                  SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT,
+                                                                  SpaceType::SPACE_TYPE_INTERNAL,
+                                                                  SpaceType::SPACE_TYPE_CODE,
+                                                                  SpaceType::SPACE_TYPE_COMPILER};
 
-    static constexpr std::array<AllocatorType, 8> ALL_ALLOCATOR_TYPES = {
+    static constexpr std::array<AllocatorType, 8U> ALL_ALLOCATOR_TYPES = {
         AllocatorType::RUNSLOTS_ALLOCATOR, AllocatorType::FREELIST_ALLOCATOR, AllocatorType::HUMONGOUS_ALLOCATOR,
         AllocatorType::ARENA_ALLOCATOR,    AllocatorType::BUMP_ALLOCATOR,     AllocatorType::TLAB_ALLOCATOR,
         AllocatorType::REGION_ALLOCATOR,   AllocatorType::FRAME_ALLOCATOR};
@@ -141,8 +141,8 @@ private:
 
 TEST_F(PoolMapTest, TwoConsistentPoolsTest)
 {
-    static constexpr size_t FIRST_POOL_SIZE = 4 * MINIMAL_POOL_SIZE;
-    static constexpr size_t SECOND_POOL_SIZE = 10 * MINIMAL_POOL_SIZE;
+    static constexpr size_t FIRST_POOL_SIZE = 4U * MINIMAL_POOL_SIZE;
+    static constexpr size_t SECOND_POOL_SIZE = 10U * MINIMAL_POOL_SIZE;
     static constexpr uintptr_t FIRST_POOL_ADDR = 0;
     static constexpr uintptr_t SECOND_POOL_ADDR = FIRST_POOL_ADDR + FIRST_POOL_SIZE;
     static constexpr SpaceType FIRST_SPACE_TYPE = SpaceType::SPACE_TYPE_INTERNAL;
@@ -173,7 +173,7 @@ TEST_F(PoolMapTest, TwoConsistentPoolsTest)
 
 TEST_F(PoolMapTest, AddRemoveDifferentPoolsTest)
 {
-    static constexpr size_t MAX_POOL_SIZE = 256 * MINIMAL_POOL_SIZE;
+    static constexpr size_t MAX_POOL_SIZE = 256U * MINIMAL_POOL_SIZE;
     static constexpr size_t ITERATIONS = 200;
     static constexpr uintptr_t POOL_START_ADDR = PANDA_POOL_ALIGNMENT_IN_BYTES;
     for (size_t i = 0; i < ITERATIONS; i++) {

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,11 +63,11 @@ TEST_F(ThreadTest, SetCurrentThreadPriorityTest)
     ASSERT_EQ(prio2, LOWEST_PRIORITY);
 
 #ifdef PANDA_TARGET_UNIX
-    ASSERT_EQ(ret1, 0);
-    ASSERT_EQ(ret2, 0);
+    ASSERT_EQ(ret1, 0U);
+    ASSERT_EQ(ret2, 0U);
 #elif defined(PANDA_TARGET_WINDOWS)
-    ASSERT_NE(ret1, 0);
-    ASSERT_NE(ret2, 0);
+    ASSERT_NE(ret1, 0U);
+    ASSERT_NE(ret2, 0U);
 #endif
 }
 
@@ -100,10 +100,10 @@ TEST_F(ThreadTest, SetOtherThreadPriorityTest)
 
     ASSERT_EQ(parent_prio_before, parent_prio_after);
 #ifdef PANDA_TARGET_UNIX
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(ret, 0U);
     ASSERT(child_prio_before <= child_prio_after);
 #elif defined(PANDA_TARGET_WINDOWS)
-    ASSERT_NE(ret, 0);
+    ASSERT_NE(ret, 0U);
     ASSERT(child_prio_after <= child_prio_before);
 #endif
 }

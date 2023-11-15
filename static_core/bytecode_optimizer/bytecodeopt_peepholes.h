@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BYTECODE_OPTIMIZER_BYTECODEOPT_PEEPHOLES_H_
-#define PANDA_BYTECODE_OPTIMIZER_BYTECODEOPT_PEEPHOLES_H_
+#ifndef PANDA_BYTECODE_OPTIMIZER_BYTECODEOPT_PEEPHOLES_H
+#define PANDA_BYTECODE_OPTIMIZER_BYTECODEOPT_PEEPHOLES_H
 
 #include "bytecodeopt_options.h"
 #include "compiler/optimizer/pass.h"
@@ -89,4 +89,4 @@ private:
 
 }  // namespace panda::bytecodeopt
 
-#endif  // PANDA_BYTECODE_OPTIMIZER_BYTECODEOPT_PEEPHOLES_H_
+#endif  // PANDA_BYTECODE_OPTIMIZER_BYTECODEOPT_PEEPHOLES_H

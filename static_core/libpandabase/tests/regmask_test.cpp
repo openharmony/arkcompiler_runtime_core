@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ void CompareWithBitset(RegMask mask, BitsetType base)
     ASSERT_EQ(mask.Count(), base.count());
     if (base.any()) {
         ASSERT_EQ(mask.GetMinRegister(), Ctz(base.to_ulong()));
-        ASSERT_EQ(mask.GetMaxRegister(), base.size() - Clz(static_cast<RegMask::ValueType>(base.to_ulong())) - 1);
+        ASSERT_EQ(mask.GetMaxRegister(), base.size() - Clz(static_cast<RegMask::ValueType>(base.to_ulong())) - 1L);
     }
     ASSERT_EQ(mask.Size(), base.size());
     ASSERT_EQ(mask.Any(), base.any());
@@ -67,24 +67,24 @@ void TestDistance(RegMask mask, size_t bit, size_t bits_before, size_t bits_afte
 TEST(RegMask, Base)
 {
     // NOLINTBEGIN(readability-magic-numbers)
-    TestRegMask(MakeMask(0, 3, 2, 17, 25, 31));
-    TestRegMask(MakeMask(1, 4, 8, 3, 24, 28, 30));
-    TestRegMask(MakeMaskByExcluding(32, 0));
-    TestRegMask(MakeMaskByExcluding(32, 31));
-    TestRegMask(MakeMaskByExcluding(32, 0, 31));
-    TestRegMask(MakeMaskByExcluding(32, 0, 15, 31));
+    TestRegMask(MakeMask(0U, 3U, 2U, 17U, 25U, 31U));
+    TestRegMask(MakeMask(1U, 4U, 8U, 3U, 24U, 28U, 30U));
+    TestRegMask(MakeMaskByExcluding(32U, 0U));
+    TestRegMask(MakeMaskByExcluding(32U, 31U));
+    TestRegMask(MakeMaskByExcluding(32U, 0U, 31U));
+    TestRegMask(MakeMaskByExcluding(32U, 0U, 15U, 31U));
     TestRegMask(0U);
     TestRegMask(~0U);
 
-    RegMask mask(MakeMask(0, 2, 3, 17, 25, 31));
-    TestDistance(mask, 0, 0, 5);
-    TestDistance(mask, 1, 1, 5);
-    TestDistance(mask, 2, 1, 4);
-    TestDistance(mask, 3, 2, 3);
-    TestDistance(mask, 4, 3, 3);
-    TestDistance(mask, 17, 3, 2);
-    TestDistance(mask, 18, 4, 2);
-    TestDistance(mask, 31, 5, 0);
+    RegMask mask(MakeMask(0U, 2U, 3U, 17U, 25U, 31U));
+    TestDistance(mask, 0U, 0U, 5U);
+    TestDistance(mask, 1U, 1U, 5U);
+    TestDistance(mask, 2U, 1U, 4U);
+    TestDistance(mask, 3U, 2U, 3U);
+    TestDistance(mask, 4U, 3U, 3U);
+    TestDistance(mask, 17U, 3U, 2U);
+    TestDistance(mask, 18U, 4U, 2U);
+    TestDistance(mask, 31U, 5U, 0U);
     // NOLINTEND(readability-magic-numbers)
 }
 

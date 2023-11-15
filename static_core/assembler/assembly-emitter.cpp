@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -326,7 +326,6 @@ bool AsmEmitter::CheckValueArrayCase(const Value *value, const Type &type, const
 {
     auto component_type = type.GetComponentType();
     auto value_component_type = value->GetAsArray()->GetComponentType();
-
     if (value_component_type == Value::Type::VOID && value->GetAsArray()->GetValues().empty()) {
         return true;
     }
@@ -350,7 +349,6 @@ bool AsmEmitter::CheckValueArrayCase(const Value *value, const Type &type, const
 bool AsmEmitter::CheckValue(const Value *value, const Type &type, const Program &program)
 {
     auto value_type = value->GetType();
-
     if (!CheckValueType(value_type, type, program)) {
         SetLastError("Incorrect type: " + GetLastError());
         return false;
@@ -1918,7 +1916,6 @@ std::string GetOwnerName(std::string name)
 {
     name = DeMangleName(name);
     auto super_pos = name.find_last_of(PARSE_AREA_MARKER);
-
     if (super_pos == std::string::npos) {
         return "";
     }
@@ -1930,7 +1927,6 @@ std::string GetItemName(std::string name)
 {
     name = DeMangleName(name);
     auto super_pos = name.find_last_of(PARSE_AREA_MARKER);
-
     if (super_pos == std::string::npos) {
         return name;
     }

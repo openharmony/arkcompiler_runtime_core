@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_DISASM_BACKED_DEBUG_INFO_EXTRACTOR_H_
-#define PANDA_DISASM_BACKED_DEBUG_INFO_EXTRACTOR_H_
+#ifndef PANDA_DISASM_BACKED_DEBUG_INFO_EXTRACTOR_H
+#define PANDA_DISASM_BACKED_DEBUG_INFO_EXTRACTOR_H
 
 #include "disassembler.h"
 
@@ -53,4 +53,4 @@ private:
 };
 }  // namespace panda::disasm
 
-#endif  // PANDA_DISASM_BACKED_DEBUG_INFO_EXTRACTOR_H_
+#endif  // PANDA_DISASM_BACKED_DEBUG_INFO_EXTRACTOR_H

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4339,7 +4339,7 @@ TEST(parsertests, test_function_overloading_13)
                 call f:(i8), a0
                 call f:(), v1
                 call f:(u8), v2
-                call f:(i8,u8), v3, v4
+                call f:(i8, u8), v3, v4
             }
         )";
 
@@ -4465,9 +4465,9 @@ TEST(parsertests, test_accessors)
     {
         Parser p;
         std::string source = R"(
-            .function void f1() <access.function=public> { } 
-            .function void f2() <access.function=protected> { } 
-            .function void f3() <access.function=private> { } 
+            .function void f1() <access.function=public> { }
+            .function void f2() <access.function=protected> { }
+            .function void f3() <access.function=private> { }
             .function void f4() <external, access.function=private>
             )";
 
@@ -4479,9 +4479,9 @@ TEST(parsertests, test_accessors)
     {
         Parser p;
         std::string source = R"(
-            .record A <access.record=public> { } 
-            .record B <access.record=protected> { } 
-            .record C <access.record=private> { } 
+            .record A <access.record=public> { }
+            .record B <access.record=protected> { }
+            .record C <access.record=private> { }
             )";
 
         auto res = p.Parse(source);
@@ -4507,7 +4507,7 @@ TEST(parsertests, test_accessors)
     {
         Parser p;
         std::string source = R"(
-            .function void f1() <access.function=internal> { } 
+            .function void f1() <access.function=internal> { }
             )";
 
         auto res = p.Parse(source);
@@ -4569,7 +4569,7 @@ TEST(parsertests, test_final)
     {
         Parser p;
         std::string source = R"(
-            .function void f1() <final> { } 
+            .function void f1() <final> { }
         )";
 
         auto res = p.Parse(source);
@@ -4580,7 +4580,7 @@ TEST(parsertests, test_final)
     {
         Parser p;
         std::string source = R"(
-            .record A <final> { } 
+            .record A <final> { }
         )";
 
         auto res = p.Parse(source);

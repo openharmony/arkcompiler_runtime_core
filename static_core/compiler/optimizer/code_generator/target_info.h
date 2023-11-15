@@ -329,8 +329,8 @@ class Target {
 public:
     constexpr explicit Target(Arch arch) : arch_(arch) {}
     ~Target() = default;
-    DEFAULT_MOVE_CTOR(Target)
-    DEFAULT_COPY_CTOR(Target)
+    DEFAULT_MOVE_CTOR(Target);
+    DEFAULT_COPY_CTOR(Target);
     NO_MOVE_OPERATOR(Target);
     NO_COPY_OPERATOR(Target);
 

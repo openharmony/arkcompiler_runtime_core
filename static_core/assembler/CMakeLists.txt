@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -109,7 +109,7 @@ endif()
 panda_add_sanitizers(TARGET arkassembler_obj SANITIZERS ${PANDA_SANITIZERS_LIST})
 panda_add_sanitizers(TARGET ark_asm SANITIZERS ${PANDA_SANITIZERS_LIST})
 
-# TODO: remove after all components will use ark_asm instead of pandasm
+# NOTE: remove after all components will use ark_asm instead of pandasm
 add_custom_target(pandasm ALL
                   COMMAND cd $<TARGET_FILE_DIR:ark_asm> && ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_NAME:ark_asm> pandasm)
 

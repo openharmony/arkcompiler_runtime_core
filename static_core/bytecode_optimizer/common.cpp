@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,9 +37,9 @@ uint8_t AccReadIndex(const compiler::Inst *inst)
             if (inst->IsIntrinsic() && inst->IsAccRead()) {
                 ASSERT(inst->GetBasicBlock()->GetGraph()->IsDynamicMethod());
                 ASSERT(inst->GetInputsCount() >= 2U);
-                return inst->GetInputsCount() - 2U;
+                return inst->GetInputsCount() - 2L;
             }
-            return 0;
+            return 0U;
         }
     }
 }
@@ -51,12 +51,12 @@ bool CanConvertToIncI(const compiler::BinaryImmOperation *binop)
     ASSERT(binop->GetOpcode() == compiler::Opcode::AddI || binop->GetOpcode() == compiler::Opcode::SubI);
 
     // IncI works on the same register.
-    if (binop->GetSrcReg(0) != binop->GetDstReg()) {
+    if (binop->GetSrcReg(0U) != binop->GetDstReg()) {
         return false;
     }
 
     // IncI cannot write accumulator.
-    if (binop->GetSrcReg(0) == compiler::ACC_REG_ID) {
+    if (binop->GetSrcReg(0U) == compiler::ACC_REG_ID) {
         return false;
     }
 

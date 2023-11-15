@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_CPU_FEATURES_H_
-#define PANDA_CPU_FEATURES_H_
+#ifndef PANDA_CPU_FEATURES_H
+#define PANDA_CPU_FEATURES_H
 
 #include <cstddef>
 #include "macros.h"
@@ -32,4 +32,4 @@ static_assert(CACHE_LINE_SIZE, "Undefined cacheline size");
 #endif
 }  // namespace panda
 
-#endif  // PANDA_CPU_FEATURES_H_
+#endif  // PANDA_CPU_FEATURES_H

@@ -480,8 +480,8 @@ public:
 
     ~StaticVRegisterRef() = default;
 
-    DEFAULT_COPY_CTOR(StaticVRegisterRef)
-    DEFAULT_MOVE_CTOR(StaticVRegisterRef)
+    DEFAULT_COPY_CTOR(StaticVRegisterRef);
+    DEFAULT_MOVE_CTOR(StaticVRegisterRef);
 
 private:
     VRegister *mirror_ {nullptr};
@@ -566,8 +566,8 @@ public:
 
     ~DynamicVRegisterRef() = default;
 
-    DEFAULT_COPY_CTOR(DynamicVRegisterRef)
-    DEFAULT_MOVE_CTOR(DynamicVRegisterRef)
+    DEFAULT_COPY_CTOR(DynamicVRegisterRef);
+    DEFAULT_MOVE_CTOR(DynamicVRegisterRef);
 };
 
 }  // namespace panda::interpreter

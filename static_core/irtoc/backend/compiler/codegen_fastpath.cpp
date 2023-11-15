@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,51 +43,56 @@ static void RestoreCallerRegistersFromFrame(RegMask mask, Encoder *encoder, cons
     encoder->LoadRegisters(mask, is_fp, -start_slot, fp_reg, GetCallerRegsMask(fl.GetArch(), is_fp));
 }
 
+static bool InsnHasRuntimeCall(const Inst *inst)
+{
+    switch (inst->GetOpcode()) {
+        case Opcode::StoreArray:
+            if (inst->CastToStoreArray()->GetNeedBarrier()) {
+                return true;
+            }
+            break;
+        case Opcode::StoreObject:
+            if (inst->CastToStoreObject()->GetNeedBarrier()) {
+                return true;
+            }
+            break;
+        case Opcode::LoadObjectDynamic:
+        case Opcode::StoreObjectDynamic:
+            return true;
+        case Opcode::Cast:
+            if (inst->CastToCast()->IsDynamicCast()) {
+                return true;
+            }
+            break;
+        default:
+            break;
+    }
+    if (inst->IsRuntimeCall()) {
+        if (!inst->IsIntrinsic()) {
+            return true;
+        }
+        auto intrinsic_id = inst->CastToIntrinsic()->GetIntrinsicId();
+        if (intrinsic_id != RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY &&
+            intrinsic_id != RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL) {
+            return true;
+        }
+    }
+    return false;
+}
 /*
  * We determine runtime calls manually, not using MethodProperties::HasRuntimeCalls, because we need to ignore
  * SLOW_PATH_ENTRY intrinsic, since it doesn't require LR to be preserved.
  */
 static bool HasRuntimeCalls(const Graph &graph)
 {
-    bool has_runtime_calls = false;
     for (auto bb : graph.GetBlocksRPO()) {
         for (auto inst : bb->Insts()) {
-            switch (inst->GetOpcode()) {
-                case Opcode::StoreArray:
-                    has_runtime_calls = inst->CastToStoreArray()->GetNeedBarrier();
-                    break;
-                case Opcode::StoreObject:
-                    has_runtime_calls = inst->CastToStoreObject()->GetNeedBarrier();
-                    break;
-                case Opcode::LoadObjectDynamic:
-                case Opcode::StoreObjectDynamic:
-                    has_runtime_calls = true;
-                    break;
-                case Opcode::Cast:
-                    has_runtime_calls = inst->CastToCast()->IsDynamicCast();
-                    break;
-                default:
-                    break;
+            if (InsnHasRuntimeCall(inst)) {
+                return true;
             }
-            if (has_runtime_calls) {
-                break;
-            }
-            if (inst->IsRuntimeCall()) {
-                if (inst->IsIntrinsic() &&
-                    (inst->CastToIntrinsic()->GetIntrinsicId() ==
-                         RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY ||
-                     inst->CastToIntrinsic()->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL)) {
-                    continue;
-                }
-                has_runtime_calls = true;
-                break;
-            }
-        }
-        if (has_runtime_calls) {
-            break;
         }
     }
-    return has_runtime_calls;
+    return false;
 }
 
 void CodegenFastPath::GeneratePrologue()

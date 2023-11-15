@@ -35,6 +35,8 @@ private:
 
     static bool InitializeInterface(ClassLinker *class_linker, ManagedThread *thread, Class *iface, Class *klass);
 
+    static bool InitClassVerificationMode(Class *klass);
+
     static bool VerifyClass(Class *klass);
 };
 

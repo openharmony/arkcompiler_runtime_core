@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,40 +79,40 @@ TEST_F(AsmTest, BitopsBitwiseAnd)
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            CONSTANT(23, 0x5f5e100).s32();
-            CONSTANT(2, 1).s32();
-            CONSTANT(1, 0x100000000).s64();
-            INST(0, Opcode::SaveStateDeoptimize).NoVregs();
-            INST(26, Opcode::SpillFill);
+            CONSTANT(23U, 0x5f5e100U).s32();
+            CONSTANT(2U, 1U).s32();
+            CONSTANT(1U, 0x100000000U).s64();
+            INST(0U, Opcode::SaveStateDeoptimize).NoVregs();
+            INST(26U, Opcode::SpillFill);
         }
-        BASIC_BLOCK(3, 5, 4)
+        BASIC_BLOCK(3U, 5U, 4U)
         {
-            INST(4, Opcode::Phi).s64().Inputs(1, 10);
-            INST(5, Opcode::Phi).s32().Inputs(2, 20);
-            INST(19, Opcode::If).CC(compiler::CC_GE).SrcType(INT32).Inputs(5, 23);
+            INST(4U, Opcode::Phi).s64().Inputs(1U, 10U);
+            INST(5U, Opcode::Phi).s32().Inputs(2U, 20U);
+            INST(19U, Opcode::If).CC(compiler::CC_GE).SrcType(INT32).Inputs(5U, 23U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(9, Opcode::Cast).s64().SrcType(INT32).Inputs(5);
-            INST(10, Opcode::And).s64().Inputs(9, 4);
-            INST(20, Opcode::AddI).s32().Inputs(5).Imm(1);
+            INST(9U, Opcode::Cast).s64().SrcType(INT32).Inputs(5U);
+            INST(10U, Opcode::And).s64().Inputs(9U, 4U);
+            INST(20U, Opcode::AddI).s32().Inputs(5U).Imm(1U);
         }
-        BASIC_BLOCK(5, 7, 6)
+        BASIC_BLOCK(5U, 7U, 6U)
         {
-            CONSTANT(22, 0).s64();
-            INST(13, Opcode::Cmp).s32().Inputs(4, 22);
-            INST(15, Opcode::IfImm).SrcType(INT32).CC(compiler::CC_EQ).Imm(0).Inputs(13);
+            CONSTANT(22U, 0U).s64();
+            INST(13U, Opcode::Cmp).s32().Inputs(4U, 22U);
+            INST(15U, Opcode::IfImm).SrcType(INT32).CC(compiler::CC_EQ).Imm(0U).Inputs(13U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(16, Opcode::Return).b().Inputs(2);
+            INST(16U, Opcode::Return).b().Inputs(2U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            CONSTANT(21, 2).s32();
-            INST(18, Opcode::Return).b().Inputs(21);
+            CONSTANT(21U, 2U).s32();
+            INST(18U, Opcode::Return).b().Inputs(21U);
         }
     }
     // NOLINTEND(readability-magic-numbers)

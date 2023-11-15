@@ -234,29 +234,8 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
             return false;
         }
 
-        auto &options = Runtime::GetCurrent()->GetOptions();
-        switch (options.GetVerificationMode()) {
-            case VerificationMode::DISABLED:
-                if (!klass->IsVerified()) {
-                    klass->SetState(Class::State::VERIFIED);
-                }
-                break;
-            case VerificationMode::AHEAD_OF_TIME:
-                if (!klass->IsVerified()) {
-                    if (!VerifyClass(klass)) {
-                        klass->SetState(Class::State::ERRONEOUS);
-                        panda::ThrowVerificationException(utf::Mutf8AsCString(klass->GetDescriptor()));
-                        return false;
-                    }
-                }
-                break;
-            case VerificationMode::ON_THE_FLY:
-                if (options.IsArkAot()) {
-                    LOG(FATAL, VERIFIER) << "On the fly verification mode is not compatible with ark_aot";
-                }
-                break;
-            default:
-                UNREACHABLE();
+        if (!InitClassVerificationMode(klass)) {
+            return false;
         }
 
         if (klass->IsInitializing()) {
@@ -292,6 +271,35 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
     LOG(DEBUG, CLASS_LINKER) << "Initializing class " << klass->GetName();
 
     return InitializeClass(class_linker, thread, klass, managed_class_obj_handle);
+}
+
+template <MTModeT MODE>
+bool ClassInitializer<MODE>::InitClassVerificationMode(Class *klass)
+{
+    const auto &options = Runtime::GetCurrent()->GetOptions();
+    switch (options.GetVerificationMode()) {
+        case VerificationMode::DISABLED:
+            if (!klass->IsVerified()) {
+                klass->SetState(Class::State::VERIFIED);
+            }
+            return true;
+        case VerificationMode::AHEAD_OF_TIME:
+            if (!klass->IsVerified()) {
+                if (!VerifyClass(klass)) {
+                    klass->SetState(Class::State::ERRONEOUS);
+                    panda::ThrowVerificationException(utf::Mutf8AsCString(klass->GetDescriptor()));
+                    return false;
+                }
+            }
+            return true;
+        case VerificationMode::ON_THE_FLY:
+            if (options.IsArkAot()) {
+                LOG(FATAL, VERIFIER) << "On the fly verification mode is not compatible with ark_aot";
+            }
+            return true;
+        default:
+            UNREACHABLE();
+    }
 }
 
 /* static */

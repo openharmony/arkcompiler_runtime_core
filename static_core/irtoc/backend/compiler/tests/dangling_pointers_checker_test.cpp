@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ public:
 
 // Correct load accumulator from frame with one instruction:
 //    correct_acc_load  := LoadI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
-//
 // Correct store into frame with instruction:
 //    correct_acc_store := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test0)
@@ -58,21 +57,21 @@ TEST_F(DanglingPointersCheckerTest, test0)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::LoadI).Inputs(0).ref().Imm(frame_acc_offset);
-            INST(6, Opcode::StoreI).ref().Inputs(0, 5).Imm(frame_acc_offset);
+            INST(5U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
 
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 2).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -85,7 +84,6 @@ TEST_F(DanglingPointersCheckerTest, test0)
 // Correct load accumulator from frame with two instructions:
 //    acc_ptr           := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ptr
 //    correct_acc_load  := LoadI(acc_ptr).Imm(frame_acc_offset).ref
-//
 // Correct store into frame with instruction:
 //    correct_acc_store := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test1)
@@ -105,25 +103,25 @@ TEST_F(DanglingPointersCheckerTest, test1)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        CONSTANT(10, 10).i64();
-        CONSTANT(11, 15).i64();
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        CONSTANT(10U, 10U).i64();
+        CONSTANT(11U, 15U).i64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::AddI).Inputs(0).Imm(frame_acc_offset).ptr();
-            INST(6, Opcode::LoadI).Inputs(5).ref().Imm(0);
-            INST(8, Opcode::StoreI).ref().Inputs(0, 6).Imm(frame_acc_offset);
-            INST(7, Opcode::Mul).Inputs(10, 11).i64();
+            INST(5U, Opcode::AddI).Inputs(0U).Imm(frame_acc_offset).ptr();
+            INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frame_acc_offset);
+            INST(7U, Opcode::Mul).Inputs(10U, 11U).i64();
 
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 2).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).Inputs({{compiler::DataType::INT64, 7}}).ptr();
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).Inputs({{compiler::DataType::INT64, 7U}}).ptr();
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -136,7 +134,6 @@ TEST_F(DanglingPointersCheckerTest, test1)
 // Incorrect load accumulator from fake frame with two instructions:
 //    fake_acc_ptr       := AddI(fake_frame).Imm(frame_acc_offset).ptr
 //    incorrect_acc_load := LoadI(fake_acc_ptr).Imm(0).ref
-//
 // Correct store into frame with instruction:
 //    correct_acc_store  := StoreI(LiveIn(frame).ptr, LiveIn(acc).ptr).Imm(frame_acc_offset)
 TEST_F(DanglingPointersCheckerTest, test2)
@@ -156,22 +153,22 @@ TEST_F(DanglingPointersCheckerTest, test2)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).i64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).i64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::AddI).Inputs(1).Imm(frame_acc_offset).ptr();
-            INST(6, Opcode::LoadI).Inputs(5).ref().Imm(0);
-            INST(8, Opcode::StoreI).u64().Inputs(0, 1).Imm(frame_acc_offset);
+            INST(5U, Opcode::AddI).Inputs(1U).Imm(frame_acc_offset).ptr();
+            INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
+            INST(8U, Opcode::StoreI).u64().Inputs(0U, 1U).Imm(frame_acc_offset);
 
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 2).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -184,7 +181,6 @@ TEST_F(DanglingPointersCheckerTest, test2)
 // Incorrect load accumulator from fake frame with two instructions:
 //    fake_acc_ptr        := AddI(fake_frame).Imm(frame_acc_offset).ptr
 //    incorrect_acc_load  := LoadI(fake_acc_ptr).Imm(0).ref
-//
 // Incorrect store fake_acc_load into frame with instruction:
 //    incorrect_acc_store := StoreI(LiveIn(frame).ptr, fake_acc_load).Imm(frame_acc_offset)
 TEST_F(DanglingPointersCheckerTest, test3)
@@ -204,22 +200,22 @@ TEST_F(DanglingPointersCheckerTest, test3)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).i64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).i64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::AddI).Inputs(1).Imm(frame_acc_offset).ptr();
-            INST(6, Opcode::LoadI).Inputs(5).ref().Imm(0);
-            INST(8, Opcode::StoreI).ref().Inputs(0, 6).Imm(frame_acc_offset);
+            INST(5U, Opcode::AddI).Inputs(1U).Imm(frame_acc_offset).ptr();
+            INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frame_acc_offset);
 
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 2).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -232,10 +228,8 @@ TEST_F(DanglingPointersCheckerTest, test3)
 // Incorrect load accumulator from fake frame with two instructions:
 //    fake_acc_ptr        := AddI(fake_frame).Imm(frame_acc_offset).ptr
 //    incorrect_acc_load  := LoadI(fake_acc_ptr).Imm(0).ref
-//
 // Incorrect store fake_acc_load into frame with instruction:
 //    incorrect_acc_store := StoreI(LiveIn(frame).ptr, fake_acc_load).Imm(frame_acc_offset)
-//
 // But acc type is integer: LiveIn(acc).u64; so the check is not performed
 TEST_F(DanglingPointersCheckerTest, test4)
 {
@@ -254,23 +248,23 @@ TEST_F(DanglingPointersCheckerTest, test4)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).i64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        INST(10, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).i64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(10U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::AddI).Inputs(10).Imm(frame_acc_offset).ptr();
-            INST(6, Opcode::LoadI).Inputs(5).ref().Imm(0);
-            INST(8, Opcode::StoreI).ref().Inputs(0, 6).Imm(frame_acc_offset);
+            INST(5U, Opcode::AddI).Inputs(10U).Imm(frame_acc_offset).ptr();
+            INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frame_acc_offset);
 
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 2).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -284,7 +278,6 @@ TEST_F(DanglingPointersCheckerTest, test4)
 //    last_frame_def    := LoadI(LiveIn(frame).ptr).Imm(GetPrevFrameOffset()).ptr
 //    acc_ptr           := AddI(last_frame_def).Imm(frame_acc_offset).ptr
 //    correct_acc_load  := LoadI(acc_ptr).Imm(0).ref
-//
 // Correct store into frame with instruction:
 //    correct_acc_store := StoreI(last_frame_def, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test5)
@@ -304,25 +297,25 @@ TEST_F(DanglingPointersCheckerTest, test5)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        CONSTANT(10, 10).i64();
-        CONSTANT(11, 15).i64();
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        CONSTANT(10U, 10U).i64();
+        CONSTANT(11U, 15U).i64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::LoadI).Inputs(0).ptr().Imm(Frame::GetPrevFrameOffset());
-            INST(5, Opcode::AddI).Inputs(8).Imm(frame_acc_offset).ptr();
-            INST(6, Opcode::LoadI).Inputs(5).ref().Imm(0);
-            INST(7, Opcode::Mul).Inputs(10, 11).i64();
-            INST(9, Opcode::StoreI).ref().Inputs(8, 6).Imm(frame_acc_offset);
+            INST(8U, Opcode::LoadI).Inputs(0U).ptr().Imm(Frame::GetPrevFrameOffset());
+            INST(5U, Opcode::AddI).Inputs(8U).Imm(frame_acc_offset).ptr();
+            INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
+            INST(7U, Opcode::Mul).Inputs(10U, 11U).i64();
+            INST(9U, Opcode::StoreI).ref().Inputs(8U, 6U).Imm(frame_acc_offset);
 
             // store tag
-            INST(31, Opcode::StoreI).u64().Inputs(5, 2).Imm(acc_tag_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(5U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).Inputs({{compiler::DataType::INT64, 7}}).ptr();
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).Inputs({{compiler::DataType::INT64, 7U}}).ptr();
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -335,7 +328,6 @@ TEST_F(DanglingPointersCheckerTest, test5)
 // Correct load accumulator from last frame definition with one instructions:
 //    last_frame_def      := LoadI(LiveIn(frame).ptr).Imm(GetPrevFrameOffset()).ptr
 //    correct_acc_load    := LoadI(last_frame_def).Imm(frame_acc_offset).ref
-//
 // Incorrect store into old frame with instruction:
 //    incorrect_acc_store := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test6)
@@ -355,23 +347,23 @@ TEST_F(DanglingPointersCheckerTest, test6)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
-        INST(10, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
+        INST(10U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::LoadI).Inputs(2).ptr().Imm(ManagedThread::GetFrameOffset());
-            INST(5, Opcode::LoadI).Inputs(8).Imm(frame_acc_offset).ref();
-            INST(9, Opcode::StoreI).ref().Inputs(0, 5).Imm(frame_acc_offset);
+            INST(8U, Opcode::LoadI).Inputs(2U).ptr().Imm(ManagedThread::GetFrameOffset());
+            INST(5U, Opcode::LoadI).Inputs(8U).Imm(frame_acc_offset).ref();
+            INST(9U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
 
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 10).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 10U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -384,7 +376,6 @@ TEST_F(DanglingPointersCheckerTest, test6)
 // Correct load accumulator from last frame definition with one instructions:
 //    last_frame_def      := LoadI(LiveIn(frame).ptr).Imm(GetPrevFrameOffset()).ptr
 //    correct_acc_load    := LoadI(last_frame_def).Imm(frame_acc_offset).ref
-//
 // Incorrect store into old frame with instruction:
 //    incorrect_acc_store := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test7)
@@ -404,26 +395,26 @@ TEST_F(DanglingPointersCheckerTest, test7)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        CONSTANT(10, 10).i64();
-        CONSTANT(11, 15).i64();
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        CONSTANT(10U, 10U).i64();
+        CONSTANT(11U, 15U).i64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::LoadI).Inputs(0).ptr().Imm(Frame::GetPrevFrameOffset());
-            INST(5, Opcode::AddI).Inputs(8).Imm(frame_acc_offset).ptr();
-            INST(6, Opcode::LoadI).Inputs(5).ref().Imm(0);
-            INST(7, Opcode::Mul).Inputs(10, 11).i64();
-            INST(9, Opcode::StoreI).ref().Inputs(0, 6).Imm(frame_acc_offset);
+            INST(8U, Opcode::LoadI).Inputs(0U).ptr().Imm(Frame::GetPrevFrameOffset());
+            INST(5U, Opcode::AddI).Inputs(8U).Imm(frame_acc_offset).ptr();
+            INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
+            INST(7U, Opcode::Mul).Inputs(10U, 11U).i64();
+            INST(9U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frame_acc_offset);
 
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 2).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).Inputs({{compiler::DataType::INT64, 7}}).ptr();
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).Inputs({{compiler::DataType::INT64, 7U}}).ptr();
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -451,22 +442,22 @@ TEST_F(DanglingPointersCheckerTest, test8)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::LoadI).Inputs(0).ref().Imm(frame_acc_offset);
-            INST(6, Opcode::StoreI).ref().Inputs(0, 5).Imm(frame_acc_offset);
+            INST(5U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
 
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 2).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(7, Opcode::StoreI).ref().Inputs(0, 5).Imm(frame_acc_offset);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -477,7 +468,6 @@ TEST_F(DanglingPointersCheckerTest, test8)
 }
 
 // The correct graph. Not use old acc after call.
-//
 //          start_bb
 //             |
 //             V
@@ -517,58 +507,58 @@ TEST_F(DanglingPointersCheckerTest, test9)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        CONSTANT(10, 10);
-        CONSTANT(11, 11);
-        CONSTANT(12, 12);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        CONSTANT(10U, 10U);
+        CONSTANT(11U, 11U);
+        CONSTANT(12U, 12U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::LoadI).Inputs(0).ref().Imm(frame_acc_offset);
-            INST(5, Opcode::StoreI).ref().Inputs(0, 4).Imm(frame_acc_offset);
-            INST(19, Opcode::AddI).Inputs(11).Imm(frame_acc_offset).u64();
-            INST(20, Opcode::Mul).Inputs(12, 19).u64();
-            INST(22, Opcode::If).Inputs(19, 20).b().CC(CC_LE);
+            INST(4U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
+            INST(5U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
+            INST(19U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(20U, Opcode::Mul).Inputs(12U, 19U).u64();
+            INST(22U, Opcode::If).Inputs(19U, 20U).b().CC(CC_LE);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(6, Opcode::StoreI).ref().Inputs(0, 4).Imm(frame_acc_offset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
         }
-        BASIC_BLOCK(4, 8)
+        BASIC_BLOCK(4U, 8U)
         {
-            INST(7, Opcode::StoreI).ref().Inputs(0, 4).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
         }
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 2).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(17, Opcode::AddI).Inputs(11).Imm(frame_acc_offset).u64();
-            INST(18, Opcode::Mul).Inputs(12, 17).u64();
-            INST(21, Opcode::If).Inputs(17, 18).b().CC(CC_NE);
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(17U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(18U, Opcode::Mul).Inputs(12U, 17U).u64();
+            INST(21U, Opcode::If).Inputs(17U, 18U).b().CC(CC_NE);
         }
-        BASIC_BLOCK(6, 9)
+        BASIC_BLOCK(6U, 9U)
         {
-            INST(8, Opcode::AddI).Inputs(10).Imm(frame_acc_offset).u64();
+            INST(8U, Opcode::AddI).Inputs(10U).Imm(frame_acc_offset).u64();
         }
-        BASIC_BLOCK(7, 8, 9)
+        BASIC_BLOCK(7U, 8U, 9U)
         {
-            INST(16, Opcode::AddI).Inputs(11).Imm(frame_acc_offset).u64();
-            INST(9, Opcode::Mul).Inputs(12, 16).u64();
-            INST(15, Opcode::If).Inputs(9, 16).b().CC(CC_EQ);
+            INST(16U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(9U, Opcode::Mul).Inputs(12U, 16U).u64();
+            INST(15U, Opcode::If).Inputs(9U, 16U).b().CC(CC_EQ);
         }
-        BASIC_BLOCK(8, 9)
+        BASIC_BLOCK(8U, 9U)
         {
-            INST(13, Opcode::AddI).Inputs(12).Imm(frame_acc_offset).u64();
+            INST(13U, Opcode::AddI).Inputs(12U).Imm(frame_acc_offset).u64();
         }
 
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(14, Opcode::ReturnVoid).v0id();
+            INST(14U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -579,7 +569,6 @@ TEST_F(DanglingPointersCheckerTest, test9)
 }
 
 // The incorrect graph. Use old acc after call.
-//
 //          start_bb
 //             |
 //             V
@@ -619,59 +608,59 @@ TEST_F(DanglingPointersCheckerTest, test10)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        CONSTANT(10, 10);
-        CONSTANT(11, 11);
-        CONSTANT(12, 12);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        CONSTANT(10U, 10U);
+        CONSTANT(11U, 11U);
+        CONSTANT(12U, 12U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::LoadI).Inputs(0).ref().Imm(frame_acc_offset);
-            INST(5, Opcode::StoreI).ref().Inputs(0, 4).Imm(frame_acc_offset);
-            INST(19, Opcode::AddI).Inputs(11).Imm(frame_acc_offset).u64();
-            INST(20, Opcode::Mul).Inputs(12, 19).u64();
-            INST(22, Opcode::If).Inputs(19, 20).b().CC(CC_LE);
+            INST(4U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
+            INST(5U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
+            INST(19U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(20U, Opcode::Mul).Inputs(12U, 19U).u64();
+            INST(22U, Opcode::If).Inputs(19U, 20U).b().CC(CC_LE);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(6, Opcode::StoreI).ref().Inputs(0, 4).Imm(frame_acc_offset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
         }
-        BASIC_BLOCK(4, 8)
+        BASIC_BLOCK(4U, 8U)
         {
-            INST(7, Opcode::StoreI).ref().Inputs(0, 4).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
         }
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
             // store tag
-            INST(30, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(31, Opcode::StoreI).u64().Inputs(30, 2).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(17, Opcode::AddI).Inputs(11).Imm(frame_acc_offset).u64();
-            INST(18, Opcode::Mul).Inputs(12, 17).u64();
-            INST(21, Opcode::If).Inputs(17, 18).b().CC(CC_NE);
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(17U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(18U, Opcode::Mul).Inputs(12U, 17U).u64();
+            INST(21U, Opcode::If).Inputs(17U, 18U).b().CC(CC_NE);
         }
-        BASIC_BLOCK(6, 9)
+        BASIC_BLOCK(6U, 9U)
         {
-            INST(8, Opcode::AddI).Inputs(10).Imm(frame_acc_offset).u64();
+            INST(8U, Opcode::AddI).Inputs(10U).Imm(frame_acc_offset).u64();
         }
-        BASIC_BLOCK(7, 8, 9)
+        BASIC_BLOCK(7U, 8U, 9U)
         {
-            INST(16, Opcode::AddI).Inputs(11).Imm(frame_acc_offset).u64();
-            INST(9, Opcode::Mul).Inputs(12, 16).u64();
-            INST(15, Opcode::If).Inputs(9, 16).b().CC(CC_EQ);
+            INST(16U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(9U, Opcode::Mul).Inputs(12U, 16U).u64();
+            INST(15U, Opcode::If).Inputs(9U, 16U).b().CC(CC_EQ);
         }
-        BASIC_BLOCK(8, 9)
+        BASIC_BLOCK(8U, 9U)
         {
-            INST(23, Opcode::StoreI).ref().Inputs(0, 4).Imm(frame_acc_offset);
-            INST(13, Opcode::AddI).Inputs(12).Imm(frame_acc_offset).u64();
+            INST(23U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
+            INST(13U, Opcode::AddI).Inputs(12U).Imm(frame_acc_offset).u64();
         }
 
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(14, Opcode::ReturnVoid).v0id();
+            INST(14U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -682,7 +671,6 @@ TEST_F(DanglingPointersCheckerTest, test10)
 }
 
 // The correct graph. Use Phi to define acc that has been changed in one branch.
-//
 //          start_bb
 //             |
 //             V
@@ -722,33 +710,33 @@ TEST_F(DanglingPointersCheckerTest, test11)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        CONSTANT(10, 10);
-        CONSTANT(11, 11);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        CONSTANT(10U, 10U);
+        CONSTANT(11U, 11U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::AddI).Inputs(10).Imm(frame_acc_offset).u64();
-            INST(4, Opcode::If).Inputs(3, 11).b().CC(CC_NE);
+            INST(3U, Opcode::AddI).Inputs(10U).Imm(frame_acc_offset).u64();
+            INST(4U, Opcode::If).Inputs(3U, 11U).b().CC(CC_NE);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(5, Opcode::LoadI).Inputs(0).ref().Imm(frame_acc_offset);
-            INST(6, Opcode::AddI).Inputs(5).ptr().Imm(10);
+            INST(5U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
+            INST(6U, Opcode::AddI).Inputs(5U).ptr().Imm(10U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(7, Opcode::Phi).Inputs(1, 6).ptr();
-            INST(8, Opcode::StoreI).ref().Inputs(0, 7).Imm(frame_acc_offset);
+            INST(7U, Opcode::Phi).Inputs(1U, 6U).ptr();
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 7U).Imm(frame_acc_offset);
 
             // store tag
-            INST(21, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(22, Opcode::StoreI).u64().Inputs(21, 2).Imm(acc_tag_offset);
+            INST(21U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(22U, Opcode::StoreI).u64().Inputs(21U, 2U).Imm(acc_tag_offset);
 
-            INST(9, Opcode::Call).TypeId(0).ptr();
-            INST(20, Opcode::ReturnVoid).v0id();
+            INST(9U, Opcode::Call).TypeId(0U).ptr();
+            INST(20U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -779,21 +767,21 @@ TEST_F(DanglingPointersCheckerTest, test12)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(7, Opcode::StoreI).ref().Inputs(0, 1).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frame_acc_offset);
 
             // store tag
-            INST(8, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(9, Opcode::StoreI).u64().Inputs(8, 2).Imm(acc_tag_offset);
+            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(5, Opcode::AddI).Inputs(1).ptr().Imm(frame_acc_offset);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(5U, Opcode::AddI).Inputs(1U).ptr().Imm(frame_acc_offset);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -825,22 +813,22 @@ TEST_F(DanglingPointersCheckerTest, test13)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::LoadI).Inputs(0).u64().Imm(10);
-            INST(7, Opcode::StoreI).ref().Inputs(0, 1).Imm(frame_acc_offset);
+            INST(6U, Opcode::LoadI).Inputs(0U).u64().Imm(10U);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frame_acc_offset);
 
             // store tag
-            INST(8, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(9, Opcode::StoreI).u64().Inputs(8, 2).Imm(acc_tag_offset);
+            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(5, Opcode::AddI).Inputs(6).u64().Imm(frame_acc_offset);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(5U, Opcode::AddI).Inputs(6U).u64().Imm(frame_acc_offset);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -872,22 +860,22 @@ TEST_F(DanglingPointersCheckerTest, test14)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(7, Opcode::StoreI).ref().Inputs(0, 1).Imm(frame_acc_offset);
+            INST(6U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frame_acc_offset);
 
             // store tag
-            INST(8, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(9, Opcode::StoreI).u64().Inputs(8, 2).Imm(acc_tag_offset);
+            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(5, Opcode::LoadI).Inputs(6).u64().Imm(0);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(5U, Opcode::LoadI).Inputs(6U).u64().Imm(0U);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -918,23 +906,23 @@ TEST_F(DanglingPointersCheckerTest, test15)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(10, Opcode::LoadI).Inputs(0).ref().Imm(10);
-            INST(6, Opcode::AddI).Inputs(1).ptr().Imm(10);
-            INST(7, Opcode::StoreI).ref().Inputs(0, 1).Imm(frame_acc_offset);
+            INST(10U, Opcode::LoadI).Inputs(0U).ref().Imm(10U);
+            INST(6U, Opcode::AddI).Inputs(1U).ptr().Imm(10U);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frame_acc_offset);
 
             // store tag
-            INST(8, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(9, Opcode::StoreI).u64().Inputs(8, 2).Imm(acc_tag_offset);
+            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(acc_tag_offset);
 
-            INST(3, Opcode::Call).TypeId(0).ptr();
-            INST(5, Opcode::LoadI).Inputs(10).u64().Imm(0);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Call).TypeId(0U).ptr();
+            INST(5U, Opcode::LoadI).Inputs(10U).u64().Imm(0U);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -946,7 +934,6 @@ TEST_F(DanglingPointersCheckerTest, test15)
 
 // Correct load accumulator from frame:
 //    correct_acc_load      := LoadI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
-//
 // Correct accumulatore and tag store:
 //    correct_acc_store     := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 //    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
@@ -968,19 +955,19 @@ TEST_F(DanglingPointersCheckerTest, test16)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        INST(3, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(3U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::LoadI).Inputs(0).ref().Imm(frame_acc_offset);
-            INST(5, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(6, Opcode::StoreI).ref().Inputs(0, 4).Imm(frame_acc_offset);
-            INST(7, Opcode::StoreI).u64().Inputs(5, 2).Imm(acc_tag_offset);
-            INST(8, Opcode::Call).TypeId(0).ptr();
-            INST(9, Opcode::ReturnVoid).v0id();
+            INST(4U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
+            INST(5U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).u64().Inputs(5U, 2U).Imm(acc_tag_offset);
+            INST(8U, Opcode::Call).TypeId(0U).ptr();
+            INST(9U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -994,7 +981,6 @@ TEST_F(DanglingPointersCheckerTest, test16)
 //    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ptr
 //    correct_acc_load      := LoadI(acc_ptr).Imm(frame_acc_offset).ref
 //    correct_acc_tag_load  := LoadI(acc_ptr).Imm(acc_tag_offset).u64
-//
 // Correct accumulatore and tag store:
 //    correct_acc_store     := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 //    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
@@ -1016,20 +1002,20 @@ TEST_F(DanglingPointersCheckerTest, test17)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        INST(3, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(3U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(5, Opcode::LoadI).Inputs(4).ref().Imm(0);
-            INST(6, Opcode::LoadI).Inputs(4).i64().Imm(acc_tag_offset);
-            INST(7, Opcode::StoreI).ref().Inputs(0, 5).Imm(frame_acc_offset);
-            INST(8, Opcode::StoreI).u64().Inputs(4, 6).Imm(acc_tag_offset);
-            INST(9, Opcode::Call).TypeId(0).ptr();
-            INST(10, Opcode::ReturnVoid).v0id();
+            INST(4U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(5U, Opcode::LoadI).Inputs(4U).ref().Imm(0U);
+            INST(6U, Opcode::LoadI).Inputs(4U).i64().Imm(acc_tag_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
+            INST(8U, Opcode::StoreI).u64().Inputs(4U, 6U).Imm(acc_tag_offset);
+            INST(9U, Opcode::Call).TypeId(0U).ptr();
+            INST(10U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -1044,7 +1030,6 @@ TEST_F(DanglingPointersCheckerTest, test17)
 //    correct_acc_load      := LoadI(acc_ptr).Imm(frame_acc_offset).ref
 //    acc_tag_ptr           := AddI(acc_ptr).Imm(acc_tag_offset).ref
 //    correct_acc_tag_load  := LoadI(acc_tag_ptr).Imm(0).u64
-//
 // Correct accumulatore and tag store:
 //    correct_acc_store     := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 //    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
@@ -1066,21 +1051,21 @@ TEST_F(DanglingPointersCheckerTest, test18)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        INST(3, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(3U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(5, Opcode::LoadI).Inputs(4).ref().Imm(0);
-            INST(6, Opcode::AddI).Inputs(4).ptr().Imm(acc_tag_offset);
-            INST(7, Opcode::LoadI).Inputs(6).i64().Imm(0);
-            INST(8, Opcode::StoreI).ref().Inputs(0, 5).Imm(frame_acc_offset);
-            INST(9, Opcode::StoreI).u64().Inputs(4, 7).Imm(acc_tag_offset);
-            INST(10, Opcode::Call).TypeId(0).ptr();
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(4U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(5U, Opcode::LoadI).Inputs(4U).ref().Imm(0U);
+            INST(6U, Opcode::AddI).Inputs(4U).ptr().Imm(acc_tag_offset);
+            INST(7U, Opcode::LoadI).Inputs(6U).i64().Imm(0U);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
+            INST(9U, Opcode::StoreI).u64().Inputs(4U, 7U).Imm(acc_tag_offset);
+            INST(10U, Opcode::Call).TypeId(0U).ptr();
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -1095,7 +1080,6 @@ TEST_F(DanglingPointersCheckerTest, test18)
 //    correct_acc_load      := LoadI(acc_ptr).Imm(frame_acc_offset).ref
 //    acc_tag_ptr           := AddI(acc_ptr).Imm(acc_tag_offset).ref
 //    correct_acc_tag_load  := LoadI(acc_tag_ptr).Imm(0).u64
-//
 // Correct accumulatore and tag store:
 //    correct_acc_store       := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 //    acc_ptr                 := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
@@ -1117,21 +1101,21 @@ TEST_F(DanglingPointersCheckerTest, test19)
 
     GRAPH(GetGraph())
     {
-        INST(0, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
-        INST(1, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
-        INST(2, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
-        INST(3, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
+        INST(0U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["frame"]);
+        INST(1U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["acc"]);
+        INST(2U, Opcode::LiveIn).u64().DstReg(DanglingPointersChecker::regmap_[arch]["acc_tag"]);
+        INST(3U, Opcode::LiveIn).ptr().DstReg(DanglingPointersChecker::regmap_[arch]["thread"]);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::AddI).Inputs(0).ptr().Imm(frame_acc_offset);
-            INST(5, Opcode::LoadI).Inputs(4).ref().Imm(0);
-            INST(6, Opcode::AddI).Inputs(4).ptr().Imm(acc_tag_offset);
-            INST(7, Opcode::LoadI).Inputs(6).i64().Imm(0);
-            INST(8, Opcode::StoreI).ref().Inputs(0, 5).Imm(frame_acc_offset);
-            INST(9, Opcode::StoreI).u64().Inputs(4, 2).Imm(acc_tag_offset);
-            INST(10, Opcode::Call).TypeId(0).ptr();
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(4U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(5U, Opcode::LoadI).Inputs(4U).ref().Imm(0U);
+            INST(6U, Opcode::AddI).Inputs(4U).ptr().Imm(acc_tag_offset);
+            INST(7U, Opcode::LoadI).Inputs(6U).i64().Imm(0U);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
+            INST(9U, Opcode::StoreI).u64().Inputs(4U, 2U).Imm(acc_tag_offset);
+            INST(10U, Opcode::Call).TypeId(0U).ptr();
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
 

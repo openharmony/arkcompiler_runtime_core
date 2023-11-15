@@ -39,11 +39,12 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td)
         // here we resolve method in existing class, which is stored as pointer to panda file + entity id
         uint64_t file_ptr;
         uint64_t id;
+        const auto scanf_str = std::string_view {td}.substr(1).data();
         // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg,cert-err34-c)
-        [[maybe_unused]] auto res =
-            sscanf(std::string_view {td}.substr(1).data(), "%" PRIu64 ";%" PRIu64 ";", &file_ptr, &id);
+        [[maybe_unused]] auto res = sscanf_s(scanf_str, "%" PRIu64 ";%" PRIu64 ";", &file_ptr, &id);
         // NOLINTEND(cppcoreguidelines-pro-type-vararg,cert-err34-c)
-        ASSERT(res == 2);
+        [[maybe_unused]] static constexpr int SCANF_PARAM_CNT = 2;
+        ASSERT(res == SCANF_PARAM_CNT);
         auto panda_file = reinterpret_cast<const panda_file::File *>(file_ptr);
         return EtsMethod::FromRuntimeMethod(class_linker->GetMethod(*panda_file, panda_file::File::EntityId(id)));
     }
@@ -182,9 +183,9 @@ PandaString EtsMethod::GetDescriptor() const
     std::array<char, TD_MAX_SIZE> actual_td;  // NOLINT(cppcoreguidelines-pro-type-member-init)
     // initialize in printf
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::snprintf(actual_td.data(), actual_td.size(), "%c%" PRIu64 ";%" PRIu64 ";", METHOD_PREFIX,
-                  reinterpret_cast<uint64_t>(GetPandaMethod()->GetPandaFile()),
-                  static_cast<uint64_t>(GetPandaMethod()->GetFileId().GetOffset()));
+    snprintf_s(actual_td.data(), actual_td.size(), actual_td.size() - 1, "%c%" PRIu64 ";%" PRIu64 ";", METHOD_PREFIX,
+               reinterpret_cast<uint64_t>(GetPandaMethod()->GetPandaFile()),
+               static_cast<uint64_t>(GetPandaMethod()->GetFileId().GetOffset()));
     return {actual_td.data()};
 }
 

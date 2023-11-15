@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <random>
 #include "libpandabase/taskmanager/task_scheduler.h"
 #include "libpandabase/utils/logger.h"
 
@@ -114,8 +115,10 @@ Task TaskScheduler::GetNextTask()
     size_t kinetic_max = 0;
     std::tie(kinetic_max, std::ignore) = *kinetic_priorities.rbegin();  // Get key of the last element in map
 
-    // NOLINTNEXTLINE(cert-msc50-cpp)
-    size_t choice = std::rand() % kinetic_max;  // Get random number in range [0, kinetic_max)
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> distribution(0U, kinetic_max - 1U);
+    size_t choice = distribution(gen);  // Get random number in range [0, kinetic_max)
     TaskQueue *queue = nullptr;
     std::tie(std::ignore, queue) = *kinetic_priorities.upper_bound(choice);  // Get queue of chosen element
 

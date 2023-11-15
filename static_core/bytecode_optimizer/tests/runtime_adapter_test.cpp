@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ Pointers GetPointers(const panda_file::File *arkf)
 TEST(RuntimeAdapter, Common)
 {
     auto source = std::string(R"(
-        .function u1 main(){
+        .function u1 main() {
             ldai 1
             return
         }
@@ -85,29 +85,29 @@ TEST(RuntimeAdapter, Common)
     std::unique_ptr<const panda_file::File> arkf = ParseAndEmit(source);
     auto pointers = GetPointers(arkf.get());
 
-    ASSERT_EQ(pointers.method.size(), 1);
-    ASSERT_EQ(pointers.klass.size(), 1);
-    ASSERT_EQ(pointers.field.size(), 0);
+    ASSERT_EQ(pointers.method.size(), 1U);
+    ASSERT_EQ(pointers.klass.size(), 1U);
+    ASSERT_EQ(pointers.field.size(), 0U);
 
     BytecodeOptimizerRuntimeAdapter adapter(*arkf);
-    auto main = pointers.method[0];
-    auto global = pointers.klass[0];
+    auto main = pointers.method[0U];
+    auto global = pointers.klass[0U];
 
     EXPECT_FALSE(adapter.IsMethodIntrinsic(main));
     EXPECT_NE(adapter.GetBinaryFileForMethod(main), nullptr);
-    EXPECT_EQ(adapter.GetMethodById(main, 0), nullptr);
-    EXPECT_NE(adapter.GetMethodId(main), 0);
-    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 0), compiler::DataType::Type::ANY);
-    EXPECT_EQ(adapter.GetMethodReturnType(pointers.method[0]), compiler::DataType::Type::BOOL);
-    EXPECT_EQ(adapter.GetMethodRegistersCount(main), 0);
+    EXPECT_EQ(adapter.GetMethodById(main, 0U), nullptr);
+    EXPECT_NE(adapter.GetMethodId(main), 0U);
+    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 0U), compiler::DataType::Type::ANY);
+    EXPECT_EQ(adapter.GetMethodReturnType(pointers.method[0U]), compiler::DataType::Type::BOOL);
+    EXPECT_EQ(adapter.GetMethodRegistersCount(main), 0U);
     EXPECT_NE(adapter.GetMethodCode(main), nullptr);
-    EXPECT_NE(adapter.GetMethodCodeSize(main), 0);
+    EXPECT_NE(adapter.GetMethodCodeSize(main), 0U);
     EXPECT_TRUE(adapter.IsMethodStatic(main));
     EXPECT_FALSE(adapter.HasNativeException(main));
     EXPECT_EQ(adapter.GetClassNameFromMethod(main), std::string("L_GLOBAL;"));
     EXPECT_EQ(adapter.GetMethodName(main), std::string("main"));
     EXPECT_EQ(adapter.GetMethodFullName(main, false), std::string("L_GLOBAL;::main"));
-    EXPECT_EQ(adapter.GetBytecodeString(main, 0), std::string("ldai 1"));
+    EXPECT_EQ(adapter.GetBytecodeString(main, 0U), std::string("ldai 1"));
 
     EXPECT_EQ(adapter.GetClassName(global), std::string("L_GLOBAL;"));
     EXPECT_EQ(adapter.GetClass(main), global);
@@ -129,14 +129,14 @@ TEST(RuntimeAdapter, Klass)
     std::unique_ptr<const panda_file::File> arkf = ParseAndEmit(source);
     auto pointers = GetPointers(arkf.get());
 
-    ASSERT_EQ(pointers.method.size(), 2);
-    ASSERT_EQ(pointers.klass.size(), 2);
-    ASSERT_EQ(pointers.field.size(), 1);
+    ASSERT_EQ(pointers.method.size(), 2U);
+    ASSERT_EQ(pointers.klass.size(), 2U);
+    ASSERT_EQ(pointers.field.size(), 1U);
 
     BytecodeOptimizerRuntimeAdapter adapter(*arkf);
-    auto klass = pointers.klass[0];
-    auto ctor = pointers.method[0];
-    auto main = pointers.method[1];
+    auto klass = pointers.klass[0U];
+    auto ctor = pointers.method[0U];
+    auto main = pointers.method[1U];
 
     EXPECT_EQ(adapter.GetMethodName(main), std::string("main"));
     EXPECT_EQ(adapter.GetMethodName(ctor), std::string(".ctor"));
@@ -144,8 +144,8 @@ TEST(RuntimeAdapter, Klass)
     auto class_id = reinterpret_cast<uint64_t>(klass);
     EXPECT_FALSE(adapter.IsMethodExternal(main, ctor));
     EXPECT_FALSE(adapter.IsConstructor(main, SourceLanguage::PANDA_ASSEMBLY));
-    EXPECT_EQ(adapter.GetMethodTotalArgumentType(ctor, 0), compiler::DataType::Type::REFERENCE);
-    EXPECT_EQ(adapter.GetMethodTotalArgumentType(ctor, 1), compiler::DataType::Type::ANY);
+    EXPECT_EQ(adapter.GetMethodTotalArgumentType(ctor, 0U), compiler::DataType::Type::REFERENCE);
+    EXPECT_EQ(adapter.GetMethodTotalArgumentType(ctor, 1U), compiler::DataType::Type::ANY);
     EXPECT_EQ(adapter.IsArrayClass(ctor, class_id), false);
 }
 
@@ -155,15 +155,15 @@ TEST(RuntimeAdapter, Methods)
         .record System <external>
         .function void System.exit(i32 a0) <external>
 
-        .function u64 func_ret_u64(u64 a0){
+        .function u64 func_ret_u64(u64 a0) {
             return
         }
 
-        .function i16 func_ret_i16(i16 a0){
+        .function i16 func_ret_i16(i16 a0) {
             return
         }
 
-        .function u1 main(u32 a0, u16 a1, f32 a2, f64 a3){
+        .function u1 main(u32 a0, u16 a1, f32 a2, f64 a3) {
             movi v0, 0
             call System.exit, v0
             ldai 1
@@ -173,14 +173,14 @@ TEST(RuntimeAdapter, Methods)
     std::unique_ptr<const panda_file::File> arkf = ParseAndEmit(source);
     auto pointers = GetPointers(arkf.get());
 
-    ASSERT_EQ(pointers.method.size(), 3);
-    ASSERT_EQ(pointers.klass.size(), 1);
-    ASSERT_EQ(pointers.field.size(), 0);
+    ASSERT_EQ(pointers.method.size(), 3U);
+    ASSERT_EQ(pointers.klass.size(), 1U);
+    ASSERT_EQ(pointers.field.size(), 0U);
 
     BytecodeOptimizerRuntimeAdapter adapter(*arkf);
-    auto main = pointers.method[0];
-    auto func_ret_i16 = pointers.method[1];
-    auto func_ret_u64 = pointers.method[2];
+    auto main = pointers.method[0U];
+    auto func_ret_i16 = pointers.method[1U];
+    auto func_ret_u64 = pointers.method[2U];
 
     EXPECT_EQ(adapter.GetMethodName(func_ret_u64), std::string("func_ret_u64"));
     EXPECT_EQ(adapter.GetMethodName(func_ret_i16), std::string("func_ret_i16"));
@@ -189,15 +189,15 @@ TEST(RuntimeAdapter, Methods)
     EXPECT_EQ(adapter.GetMethodReturnType(func_ret_i16), compiler::DataType::Type::INT16);
     EXPECT_EQ(adapter.GetMethodReturnType(func_ret_u64), compiler::DataType::Type::UINT64);
 
-    const auto method_id = adapter.ResolveMethodIndex(main, 0);
-    EXPECT_NE(method_id, 0);
-    EXPECT_NE(adapter.GetClassIdForMethod(main, method_id), 0);
-    EXPECT_EQ(adapter.GetMethodArgumentType(main, method_id, 0), compiler::DataType::Type::INT32);
+    const auto method_id = adapter.ResolveMethodIndex(main, 0U);
+    EXPECT_NE(method_id, 0U);
+    EXPECT_NE(adapter.GetClassIdForMethod(main, method_id), 0U);
+    EXPECT_EQ(adapter.GetMethodArgumentType(main, method_id, 0U), compiler::DataType::Type::INT32);
 
-    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 0), compiler::DataType::Type::UINT32);
-    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 1), compiler::DataType::Type::UINT16);
-    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 2), compiler::DataType::Type::FLOAT32);
-    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 3), compiler::DataType::Type::FLOAT64);
+    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 0U), compiler::DataType::Type::UINT32);
+    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 1U), compiler::DataType::Type::UINT16);
+    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 2U), compiler::DataType::Type::FLOAT32);
+    EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 3U), compiler::DataType::Type::FLOAT64);
 }
 
 TEST(RuntimeAdapter, Fields)
@@ -211,7 +211,7 @@ TEST(RuntimeAdapter, Fields)
             i64 v_i64             <static>
         }
 
-        .function void store_to_static(i64 a0){
+        .function void store_to_static(i64 a0) {
             lda.64 a0
             ststatic.64 Record.v_i64
             return.void
@@ -220,26 +220,26 @@ TEST(RuntimeAdapter, Fields)
     std::unique_ptr<const panda_file::File> arkf = ParseAndEmit(source);
     auto pointers = GetPointers(arkf.get());
 
-    ASSERT_EQ(pointers.method.size(), 1);
-    ASSERT_EQ(pointers.klass.size(), 3);
-    ASSERT_EQ(pointers.field.size(), 2);
+    ASSERT_EQ(pointers.method.size(), 1U);
+    ASSERT_EQ(pointers.klass.size(), 3U);
+    ASSERT_EQ(pointers.field.size(), 2U);
 
     BytecodeOptimizerRuntimeAdapter adapter(*arkf);
-    auto store_to_static = pointers.method[0];
-    auto record_with_static_field = pointers.klass[1];
-    auto field = pointers.field[0];
+    auto store_to_static = pointers.method[0U];
+    auto record_with_static_field = pointers.klass[1U];
+    auto field = pointers.field[0U];
 
     EXPECT_EQ(adapter.GetMethodName(store_to_static), std::string("store_to_static"));
 
     EXPECT_EQ(adapter.GetFieldName(field), std::string("field"));
     EXPECT_EQ(adapter.GetFieldType(field), compiler::DataType::Type::INT32);
-    const auto field_id = adapter.ResolveFieldIndex(store_to_static, 0);
-    EXPECT_NE(field_id, 0);
+    const auto field_id = adapter.ResolveFieldIndex(store_to_static, 0U);
+    EXPECT_NE(field_id, 0U);
     EXPECT_EQ(adapter.GetClassIdForField(store_to_static, field_id),
               reinterpret_cast<uint64_t>(record_with_static_field));
     uint32_t immut_var = 0;
     const auto field_ptr = adapter.ResolveField(store_to_static, field_id, false, &immut_var);
-    EXPECT_EQ(immut_var, 0);
+    EXPECT_EQ(immut_var, 0U);
     EXPECT_EQ(adapter.GetClassForField(field_ptr), record_with_static_field);
     EXPECT_EQ(adapter.GetFieldTypeById(store_to_static, field_id), compiler::DataType::Type::INT64);
     EXPECT_EQ(adapter.IsFieldVolatile(field_ptr), false);

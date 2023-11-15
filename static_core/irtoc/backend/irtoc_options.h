@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef IRTOC_BACKEND_IRTOC_OPTIONS_H_
-#define IRTOC_BACKEND_IRTOC_OPTIONS_H_
+#ifndef IRTOC_BACKEND_IRTOC_OPTIONS_H
+#define IRTOC_BACKEND_IRTOC_OPTIONS_H
 
 #include "generated/irtoc_options_gen.h"
 
 namespace panda::irtoc {
 extern Options OPTIONS;
 }  // namespace panda::irtoc
-#endif  // IRTOC_BACKEND_IRTOC_OPTIONS_H_
+#endif  // IRTOC_BACKEND_IRTOC_OPTIONS_H

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,18 @@
 namespace panda {
 
 template <typename Base>
+void BitMemoryRegion<Base>::DumpVal(std::ostream &os, size_t val, bool &is_zero, int width) const
+{
+    if (val != 0 || !is_zero) {
+        if (!is_zero) {
+            os << std::setw(width) << std::setfill('0');
+        }
+        os << std::hex << val;
+        is_zero = false;
+    }
+}
+
+template <typename Base>
 void BitMemoryRegion<Base>::Dump(std::ostream &os) const
 {
     static constexpr size_t BITS_PER_HEX_DIGIT = 4;
@@ -30,13 +42,7 @@ void BitMemoryRegion<Base>::Dump(std::ostream &os) const
         size_t width = BITS_PER_WORD - (BITS_PER_HEX_DIGIT - Size() % BITS_PER_HEX_DIGIT);
         for (ssize_t i = Size() - width; i >= 0; i -= width) {
             auto val = Read(i, width);
-            if (val != 0 || !is_zero) {
-                if (!is_zero) {
-                    os << std::setw(static_cast<int>(width / BITS_PER_HEX_DIGIT)) << std::setfill('0');
-                }
-                os << std::hex << val;
-                is_zero = false;
-            }
+            DumpVal(os, val, is_zero, static_cast<int>(width / BITS_PER_HEX_DIGIT));
             if (i == 0) {
                 break;
             }

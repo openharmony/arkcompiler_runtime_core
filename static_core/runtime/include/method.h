@@ -153,7 +153,7 @@ public:
 
         ~ProtoId() = default;
 
-        DEFAULT_COPY_CTOR(ProtoId)
+        DEFAULT_COPY_CTOR(ProtoId);
         NO_COPY_OPERATOR(ProtoId);
         NO_MOVE_SEMANTIC(ProtoId);
 

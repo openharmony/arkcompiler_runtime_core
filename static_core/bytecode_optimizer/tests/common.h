@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef BYTECODE_OPTIMIZER_TESTS_COMMON_H_
-#define BYTECODE_OPTIMIZER_TESTS_COMMON_H_
+#ifndef BYTECODE_OPTIMIZER_TESTS_COMMON_H
+#define BYTECODE_OPTIMIZER_TESTS_COMMON_H
 
 #include <gtest/gtest.h>
 #include <string>
@@ -364,47 +364,49 @@ public:
 #define CAST(Opc) CastTo##Opc()
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK(Opc, Getter)                                                                               \
-    if (inst1->GetOpcode() == Opcode::Opc && inst1->CAST(Opc)->Getter() != inst2->CAST(Opc)->Getter()) { \
-        inst_compare_map_.erase(inst1);                                                                  \
-        return false;                                                                                    \
-    }
+#define CHECK(Opc, Getter)                                                                                   \
+    do {                                                                                                     \
+        if (inst1->GetOpcode() == Opcode::Opc && inst1->CAST(Opc)->Getter() != inst2->CAST(Opc)->Getter()) { \
+            inst_compare_map_.erase(inst1);                                                                  \
+            return false;                                                                                    \
+        }                                                                                                    \
+    } while (0)
 
-        CHECK(Constant, GetRawValue)
+        CHECK(Constant, GetRawValue);
 
-        CHECK(Cast, GetOperandsType)
-        CHECK(Cmp, GetOperandsType)
+        CHECK(Cast, GetOperandsType);
+        CHECK(Cmp, GetOperandsType);
 
-        CHECK(Compare, GetCc)
-        CHECK(Compare, GetOperandsType)
+        CHECK(Compare, GetCc);
+        CHECK(Compare, GetOperandsType);
 
-        CHECK(If, GetCc)
-        CHECK(If, GetOperandsType)
+        CHECK(If, GetCc);
+        CHECK(If, GetOperandsType);
 
-        CHECK(IfImm, GetCc)
-        CHECK(IfImm, GetImm)
-        CHECK(IfImm, GetOperandsType)
+        CHECK(IfImm, GetCc);
+        CHECK(IfImm, GetImm);
+        CHECK(IfImm, GetOperandsType);
 
-        CHECK(LoadArrayI, GetImm)
-        CHECK(LoadArrayPairI, GetImm)
-        CHECK(LoadPairPart, GetImm)
-        CHECK(StoreArrayI, GetImm)
-        CHECK(StoreArrayPairI, GetImm)
-        CHECK(BoundsCheckI, GetImm)
-        CHECK(ReturnI, GetImm)
-        CHECK(AddI, GetImm)
-        CHECK(SubI, GetImm)
-        CHECK(ShlI, GetImm)
-        CHECK(ShrI, GetImm)
-        CHECK(AShrI, GetImm)
-        CHECK(AndI, GetImm)
-        CHECK(OrI, GetImm)
-        CHECK(XorI, GetImm)
+        CHECK(LoadArrayI, GetImm);
+        CHECK(LoadArrayPairI, GetImm);
+        CHECK(LoadPairPart, GetImm);
+        CHECK(StoreArrayI, GetImm);
+        CHECK(StoreArrayPairI, GetImm);
+        CHECK(BoundsCheckI, GetImm);
+        CHECK(ReturnI, GetImm);
+        CHECK(AddI, GetImm);
+        CHECK(SubI, GetImm);
+        CHECK(ShlI, GetImm);
+        CHECK(ShrI, GetImm);
+        CHECK(AShrI, GetImm);
+        CHECK(AndI, GetImm);
+        CHECK(OrI, GetImm);
+        CHECK(XorI, GetImm);
 
-        CHECK(LoadStatic, GetVolatile)
-        CHECK(StoreStatic, GetVolatile)
-        CHECK(LoadObject, GetVolatile)
-        CHECK(StoreObject, GetVolatile)
+        CHECK(LoadStatic, GetVolatile);
+        CHECK(StoreStatic, GetVolatile);
+        CHECK(LoadObject, GetVolatile);
+        CHECK(StoreObject, GetVolatile);
 #undef CHECK
 #undef CAST
 
@@ -824,4 +826,4 @@ public:
 
 }  // namespace panda::bytecodeopt
 
-#endif  // BYTECODE_OPTIMIZER_TESTS_COMMON_H_
+#endif  // BYTECODE_OPTIMIZER_TESTS_COMMON_H

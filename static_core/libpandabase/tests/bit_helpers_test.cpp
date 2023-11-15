@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,49 +24,49 @@ namespace panda::helpers::test {
 
 TEST(BitHelpers, UnsignedTypeHelper)
 {
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<0>, uint8_t>));
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<1>, uint8_t>));
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<8>, uint8_t>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<0U>, uint8_t>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<1U>, uint8_t>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<8U>, uint8_t>));
 
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<9>, uint16_t>));
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<16>, uint16_t>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<9U>, uint16_t>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<16U>, uint16_t>));
 
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<17>, uint32_t>));
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<32>, uint32_t>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<17U>, uint32_t>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<32U>, uint32_t>));
 
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<33>, uint64_t>));
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<64>, uint64_t>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<33U>, uint64_t>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<64U>, uint64_t>));
 
-    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<65>, void>));
+    EXPECT_TRUE((std::is_same_v<UnsignedTypeHelperT<65U>, void>));
 }
 
 TEST(BitHelpers, TypeHelper)
 {
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<0, false>, uint8_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<1, false>, uint8_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<8, false>, uint8_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<0U, false>, uint8_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<1U, false>, uint8_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<8U, false>, uint8_t>));
 
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<0, true>, int8_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<1, true>, int8_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<8, true>, int8_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<0U, true>, int8_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<1U, true>, int8_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<8U, true>, int8_t>));
 
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<9, false>, uint16_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<16, false>, uint16_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<9U, false>, uint16_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<16U, false>, uint16_t>));
 
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<9, true>, int16_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<16, true>, int16_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<9U, true>, int16_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<16U, true>, int16_t>));
 
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<17, false>, uint32_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<32, false>, uint32_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<17U, false>, uint32_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<32U, false>, uint32_t>));
 
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<17, true>, int32_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<32, true>, int32_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<17U, true>, int32_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<32U, true>, int32_t>));
 
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<33, false>, uint64_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<64, false>, uint64_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<33U, false>, uint64_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<64U, false>, uint64_t>));
 
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<33, true>, int64_t>));
-    EXPECT_TRUE((std::is_same_v<TypeHelperT<64, true>, int64_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<33U, true>, int64_t>));
+    EXPECT_TRUE((std::is_same_v<TypeHelperT<64U, true>, int64_t>));
 }
 
 }  // namespace panda::helpers::test

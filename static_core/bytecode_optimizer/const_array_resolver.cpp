@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,7 @@ static bool IsPatchAllowedOpcode(Opcode opcode)
 static std::optional<compiler::ConstantInst *> GetConstantIfPossible(Inst *inst)
 {
     if (inst->GetOpcode() == Opcode::Cast) {
-        auto input = inst->GetInput(0).GetInst();
+        auto input = inst->GetInput(0U).GetInst();
         if ((input->GetOpcode() == Opcode::NullPtr) || !input->IsConst()) {
             return std::nullopt;
         }
@@ -108,7 +108,6 @@ std::optional<std::vector<pandasm::LiteralArray::Literal>> ConstArrayResolver::F
             return std::nullopt;
         }
         auto index = static_cast<size_t>((*index_const_inst)->GetIntValue());
-
         if (index >= size) {
             return std::nullopt;
         }
@@ -194,7 +193,6 @@ bool ConstArrayResolver::FindConstantArrays()
                 continue;
             }
             auto new_array_inst = array_inst->CastToNewArray();
-
             // the instructions included in the patch must be in one basic block
             if (!IsSameBB(inst, new_array_inst)) {
                 inst = inst->GetPrev();
@@ -203,11 +201,7 @@ bool ConstArrayResolver::FindConstantArrays()
 
             // NOTE(aantipina): add the ability to save multidimensional arrays
             if (IsMultidimensionalArray(new_array_inst)) {
-                if (IsSameBB(inst, new_array_inst)) {
-                    inst = new_array_inst->GetPrev();
-                } else {
-                    inst = inst->GetPrev();
-                }
+                inst = IsSameBB(inst, new_array_inst) ? new_array_inst->GetPrev() : inst->GetPrev();
                 continue;
             }
 
@@ -271,9 +265,9 @@ void ConstArrayResolver::InsertLoadConstArrayInsts()
         compiler::SaveStateInst *save_state = GetGraph()->CreateInstSaveState();
         save_state->SetPc(start_inst->GetPc());
         save_state->SetMethod(method);
-        save_state->ReserveInputs(0);
+        save_state->ReserveInputs(0U);
 
-        new_inst->SetInput(0, save_state);
+        new_inst->SetInput(0U, save_state);
         start_inst->InsertBefore(save_state);
         start_inst->GetBasicBlock()->ReplaceInst(start_inst, new_inst);
     }
@@ -331,11 +325,9 @@ bool ConstArrayResolver::FillLiteral(compiler::StoreInst *store_array_inst, pand
 
     if (pandasm::Type::IsPandaPrimitiveType(component_type_name)) {
         auto value_inst = GetConstantIfPossible(raw_elem_inst);
-
         if (value_inst == std::nullopt) {
             return false;
         }
-
         return FillPrimitiveLiteral(literal, component_type.GetId(), *value_inst);
     }
 

@@ -194,8 +194,8 @@ public:
 
     ~AccVRegisterTRef() = default;
 
-    DEFAULT_COPY_CTOR(AccVRegisterTRef)
-    DEFAULT_MOVE_CTOR(AccVRegisterTRef)
+    DEFAULT_COPY_CTOR(AccVRegisterTRef);
+    DEFAULT_MOVE_CTOR(AccVRegisterTRef);
 
     using BASE = VRegisterRef<AccVRegisterTRef<IS_DYNAMIC>, AccVRegisterT>;
 };
