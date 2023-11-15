@@ -51,6 +51,10 @@
 03.types/01.predefined_types/class_value_types_declaration_5.ets
 03.types/01.predefined_types/class_value_types_declaration_6.ets
 03.types/01.predefined_types/class_value_types_declaration_7.ets
+03.types/01.predefined_types/using_value_types_names_4.ets
+03.types/01.predefined_types/using_value_types_names_5.ets
+03.types/01.predefined_types/using_value_types_names_6.ets
+03.types/01.predefined_types/using_value_types_names_7.ets
 03.types/01.predefined_types/value_types_declaration_4.ets
 03.types/01.predefined_types/value_types_declaration_5.ets
 03.types/01.predefined_types/value_types_declaration_6.ets
@@ -2438,6 +2442,7 @@
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_7.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_8.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_9.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_neg_4.ets
 07.expressions/13.function_call_expression/fcall_1.ets
 # end of es2panda fails
 
