@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,21 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{%- for c in cases %}
 /*---
-desc: Call instance method of a interface with ?? argument.
-assert: A compile-time error occurs if typeArguments is present and any of the type arguments are wildcards (§??).
-tags: [negative]
+desc: >-
+    One function must be selected from all potentially applicable functions as a function can be overloaded.
 ---*/
 
-interface A {
-  static bar(x: int): int {
-    return x * 2;
-  }
-}
+{{c.decl}}
 
-class B implements A {}
-
-function main(): void {
-  let x: int? = 3;
-  assert new B().bar(x) == 6;
+function main() {
+    {{c.use|indent}}
 }
+{%- endfor %}

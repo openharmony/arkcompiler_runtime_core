@@ -14,17 +14,19 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Safe method call instance method of a class
-assert: A method call with ‘?.’ in objectReference is called a safe method call because it handles null safely.
+desc: Call instance method of a interface with wildcard.
+assert: A compile-time error occurs if typeArguments is present and any of the type arguments are wildcards.
+tags: [negative, compile-only]
 ---*/
 
-class A {
-    public foo(x: int): Int {
-        return x * 2;
+class B {}
+
+interface A {
+    static bar<T extends B>(x: T): T {
+        return x;
     }
 }
 
 function main(): void {
-    let instance: A|null = null;
-    assert instance?.foo(3) === undefined;
+    let b: B = A.bar<out B>(new B())
 }

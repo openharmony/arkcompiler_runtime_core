@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,20 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{%- for c in cases %}
 /*---
-desc: Call instance method of a class with ?? argument.
-assert: A compile-time error occurs if typeArguments is present and any of the type arguments are wildcards (§??).
-tags: [negative]
+desc: >-
+    If the last argument of the function call has the spread operator '...',
+    then objectReference that follows the argument must refer to an array
+    whose type is compatible (see Compatible Types) with the type specified
+    in the last parameter of the function declaration.
+tags: [compile-only, negative]
 ---*/
 
-class A {
-  public static foo(x: int): int{ 
-    return x * 2;
-  }
-}
+{{c.decl}}
 
-function main(): void {
-  let x: int? = 3;
-
-  assert A.foo(x) == 6;
+function main() {
+    {{c.use|indent}}
 }
+{%- endfor %}

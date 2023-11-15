@@ -17,16 +17,16 @@ limitations under the License.
 desc: Save function call expression
 ---*/
 
-Class A {
-  check(): int {
-    return null;
-  }
+class A {
+    check(): Int|null {
+        return null;
+    }
 }
 
 function f(): A|null {
-  return new A()
+    return new A()
 }
 
 function main(): void {
-  assert f()?.check() == null;
+    assert f()?.check() === null;
 }

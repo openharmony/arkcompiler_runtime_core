@@ -14,17 +14,20 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Safe method call instance method of a class
-assert: A method call with ‘?.’ in objectReference is called a safe method call because it handles null safely.
+desc: Call instance method of a class with ?? argument.
+assert: A compile-time error occurs if typeArguments is present and any of the type arguments are wildcards.
+tags: [negative, compile-only]
 ---*/
 
+class B {}
+
 class A {
-    public foo(x: int): Int {
-        return x * 2;
+    public static foo <T extends B> (x: T[]): T {
+        return x[0];
     }
 }
 
-function main(): void {
-    let instance: A|null = null;
-    assert instance?.foo(3) === undefined;
+function main() {
+    let bArr: B[] = [ new B() ]
+    let b: B = A.foo<in B>(bArr)
 }

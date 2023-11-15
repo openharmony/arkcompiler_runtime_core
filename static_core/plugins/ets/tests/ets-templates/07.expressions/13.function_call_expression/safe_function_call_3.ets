@@ -14,17 +14,19 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Safe method call instance method of a class
-assert: A method call with ‘?.’ in objectReference is called a safe method call because it handles null safely.
+desc: Save function call expression
 ---*/
 
 class A {
-    public foo(x: int): Int {
-        return x * 2;
+    check(): Int|null {
+        return null;
     }
 }
 
+function f(): A|null {
+    return null
+}
+
 function main(): void {
-    let instance: A|null = null;
-    assert instance?.foo(3) === undefined;
+    assert f()?.check() === undefined;
 }

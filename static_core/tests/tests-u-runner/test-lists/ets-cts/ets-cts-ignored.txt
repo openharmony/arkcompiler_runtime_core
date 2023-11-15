@@ -72,18 +72,6 @@
 03.types/09.default_values_for_types/default_value_for_primitive_types_11.ets
 03.types/09.default_values_for_types/default_value_for_primitive_types_8.ets
 03.types/09.default_values_for_types/default_value_for_primitive_types_9.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_10.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_11.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_12.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_13.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_14.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_3.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_4.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_5.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_6.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_7.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_8.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_9.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_8.ets
 05.generics/01.generic_declarations/generic_classes/generic_class_self_dependency_0.ets
 05.generics/01.generic_declarations/generic_classes/generic_class_self_dependency_1.ets
@@ -283,10 +271,6 @@
 07.expressions/09.this_expression/this_in_lambda.ets
 07.expressions/09.this_expression/this_in_lambda_negative.ets
 07.expressions/09.this_expression/this_primary_expression_in_lambda.ets
-07.expressions/10.method_call_expression/class_method_with_nullable_arg.ets
-07.expressions/10.method_call_expression/class_static_method_with_nullable_arg.ets
-07.expressions/10.method_call_expression/interface_method_with_nullable_arg.ets
-07.expressions/10.method_call_expression/interface_static_method_with_nullable_arg.ets
 07.expressions/11.field_access_expressions/access_through_class_type.ets
 07.expressions/11.field_access_expressions/01.expression_used_by_field_access/nullable_reference_type.ets
 07.expressions/11.field_access_expressions/02.use_super_or_typeReference_to_access_superclass_members/access_by_super_of_generic.ets
@@ -294,7 +278,6 @@
 07.expressions/11.field_access_expressions/02.use_super_or_typeReference_to_access_superclass_members/access_by_super_in_main.ets
 07.expressions/11.field_access_expressions/02.use_super_or_typeReference_to_access_superclass_members/super_in_object.ets
 07.expressions/11.field_access_expressions/access_through_interface_type.ets
-07.expressions/13.function_call_expression/optional_chaining_null_result.ets
 07.expressions/15.unary_expressions/06.unary_minus_operator/unary_minus_corner_0.ets
 07.expressions/17.ensure_not_null_expression/null_check.ets
 07.expressions/19.multiplicative_expressions/02.division_operator/nan_inf_0.ets
@@ -1761,6 +1744,9 @@
 05.generics/05.parameterized_declarations/type_arguments_of_parameterized_declarations/class_variance_6.ets
 05.generics/05.parameterized_declarations/type_arguments_of_parameterized_declarations/class_variance_7.ets
 05.generics/05.parameterized_declarations/type_arguments_of_parameterized_declarations/method_args1_neg_15.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_1.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_2.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_10.ets
 # end of es2panda fails not implemented yet
 #FailKind.ES2PANDA_FAIL panda#11764
 17.experimental_features/05.statements/05.function_overloading/fn_overloading_n_10.ets
@@ -1941,7 +1927,9 @@
 
 # es2panda fails: panda#13139
 07.expressions/10.method_call_expression/safe_method_call_1.ets
-07.expressions/13.function_call_expression/safe_function_call_1.ets
+07.expressions/13.function_call_expression/safe_function_call_2.ets
+07.expressions/13.function_call_expression/safe_function_call_3.ets
+07.expressions/13.function_call_expression/optional_chaining_null_result.ets
 # end of es2panda fails
 
 # es2panda fails: panda#13532
@@ -2474,4 +2462,121 @@
 
 # es2panda fails: panda:14545 es2panda aborts on casting union type value with unboxing
 03.types/08.reference_types/11.union_types/ut_27.ets
+# es2panda fails: panda#14496 Compiler takes two methods with different rest parameters as the same
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_3.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_6.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_8.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_9.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_11.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_12.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_14.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_15.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_16.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_17.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_18.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_19.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_20.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_21.ets
+07.expressions/13.function_call_expression/02.step_2_semantic_correctness_check/step2_5.ets
+07.expressions/13.function_call_expression/02.step_2_semantic_correctness_check/step2_6.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_27.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_28.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_0.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14507 Cannot call static interface method using type alias
+07.expressions/10.method_call_expression/03.step_3_semantic_correctness_check/step3a_3.ets
+# end of es2panda fails
+
+# es2panda fails: panda, 4.8.3 optional parameters not fully implemented
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_10.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_11.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_16.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_17.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_18.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_19.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_20.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_21.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_22.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_23.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_24.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_6.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_7.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_8.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_12.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_13.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_14.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_15.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_10.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_13.ets
+# end of es2panda fails
+
+# verifier fails
+07.expressions/10.method_call_expression/03.step_3_semantic_correctness_check/step3a_n_2.ets
+07.expressions/10.method_call_expression/03.step_3_semantic_correctness_check/step3a_n_3.ets
+# end of verifier fails
+
+# es2panda fails: panda#
+07.expressions/10.method_call_expression/03.step_3_semantic_correctness_check/step3b_n_0.ets
+07.expressions/10.method_call_expression/03.step_3_semantic_correctness_check/step3b_n_1.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14578 es2panda fails to pick the most-specific function
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_22.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_23.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_24.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_25.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_26.ets
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_5.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14579 No CTE on override-equivalent functions
+07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1n_4.ets
+# end of es2panda fails
+
+# es2panda fails: panda:#14588 Enum type alias is not honored
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_14.ets
+# end of es2panda fails
+
+# es2panda fails: panda:#13438 Support type alias with type parameter
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_11.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_12.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_13.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_3.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_4.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_5.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_6.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_7.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_8.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_9.ets
+07.expressions/13.function_call_expression/fcall_1.ets
+# end of es2panda fails
+
+# es2panda fails: panda:14383 CTE cases with the chaining operator
+07.expressions/13.function_call_expression/fcall_n_4.ets
+# end of es2panda fails
+
+# es2panda fails: panda:14594 Cannot resolve function name for a union type
+07.expressions/13.function_call_expression/fcall_8.ets
+# end of es2panda fails
+
+# es2panda fails: panda:14622 Following function call block is always taken as trailing lambda
+17.experimental_features/10.trailing_lambda/trlambda_func_8.ets
+17.experimental_features/10.trailing_lambda/trlambda_met_8.ets
+17.experimental_features/10.trailing_lambda/trlambda_static_met_8.ets
+# end of es2panda fails
+
+# es2panda fails: panda:14623 Cannot reference 'this' in this context
+17.experimental_features/10.trailing_lambda/trlambda_met_1.ets
+17.experimental_features/10.trailing_lambda/trlambda_met_3.ets
+17.experimental_features/10.trailing_lambda/trlambda_met_5.ets
+17.experimental_features/10.trailing_lambda/trlambda_met_7.ets
+17.experimental_features/10.trailing_lambda/trlambda_static_met_1.ets
+17.experimental_features/10.trailing_lambda/trlambda_static_met_3.ets
+17.experimental_features/10.trailing_lambda/trlambda_static_met_5.ets
+17.experimental_features/10.trailing_lambda/trlambda_static_met_7.ets
+# end of es2panda fails
+
+# es2panda fails: panda:14653 es2panda segfault when optional lambda is omitted
+17.experimental_features/10.trailing_lambda/trlambda_func_15.ets
 # end of es2panda fails
