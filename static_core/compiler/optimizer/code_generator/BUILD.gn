@@ -14,207 +14,202 @@
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//build/ohos.gni")
 
-if (enable_codegen) {
-  config("arkencoder_config") {
-    include_dirs = [ "$ark_root/compiler/optimizer/code_generator" ]
-    cflags_cc = [ "-DPANDA_BUILD" ]
-    if (ark_standalone_build) {
-      ldflags = [ "-ldl" ]
-    }
-    if (target_cpu == "amd64" || target_cpu == "x64" ||
-        target_cpu == "x86_64") {
-      configs = [ "$ark_third_party_root/asmjit:asmjit_public_config" ]
-    }
-    is_x64 = current_cpu == "amd64" || current_cpu == "x64" ||
-             current_cpu == "x86_64"
-    if (is_x64 || current_cpu == "arm64") {
-      if (!is_mingw) {
-        include_dirs += [ "$ark_third_party_root/vixl/src" ]
-      }
+config("arkencoder_config") {
+  include_dirs = [ "$ark_root/compiler/optimizer/code_generator" ]
+  cflags_cc = [ "-DPANDA_BUILD" ]
+  if (ark_standalone_build) {
+    ldflags = [ "-ldl" ]
+  }
+  if (target_cpu == "amd64" || target_cpu == "x64" || target_cpu == "x86_64") {
+    configs = [ "$ark_third_party_root/asmjit:asmjit_public_config" ]
+  }
+  is_x64 =
+      current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64"
+  if (is_x64 || current_cpu == "arm64") {
+    if (!is_mingw) {
+      include_dirs += [ "$ark_third_party_root/vixl/src" ]
     }
   }
+}
 
-  ohos_shared_library("libarkencoder") {
-    sources = [
-      "target/asm_printer.cpp",
-      "target/target.cpp",
+ohos_shared_library("libarkencoder") {
+  sources = [
+    "target/asm_printer.cpp",
+    "target/target.cpp",
+  ]
+  deps = []
+  defines = []
+
+  if (target_cpu == "x86") {
+    sources += [
+      "target/x86/callconv.cpp",
+      "target/x86/encode.cpp",
+      "target/x86/regfile.cpp",
     ]
-    deps = []
-    defines = []
-
-    if (target_cpu == "x86") {
-      sources += [
-        "target/x86/callconv.cpp",
-        "target/x86/encode.cpp",
-        "target/x86/regfile.cpp",
-      ]
-      include_dirs =
-          [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
-    } else if (target_cpu == "amd64" || target_cpu == "x64" ||
-               target_cpu == "x86_64") {
-      if (!is_mingw) {
-        deps = [ "$ark_third_party_root/vixl:libvixl" ]
-
-        sources += [
-          "target/amd64/callconv.cpp",
-          "target/amd64/encode.cpp",
-          "target/amd64/regfile.cpp",
-        ]
-        include_dirs = [
-          "$ark_third_party_root/asmjit/src",
-          "$ark_third_party_root/zydis/include",
-          "$ark_third_party_root/zydis/zycore/include",
-        ]
-        deps += [
-          "$ark_third_party_root/asmjit:libasmjit",
-          "$ark_third_party_root/zydis:libZydis",
-        ]
-      }
-    } else if (target_cpu == "arm") {
-      sources += [
-        "target/aarch32/callconv.cpp",
-        "target/aarch32/encode.cpp",
-        "target/aarch32/regfile.cpp",
-      ]
-      include_dirs = [
-        "$ark_root/compiler/optimizer/code_generator/target/aarch32",
-        "$ark_third_party_root/vixl/src/aarch32",
-        "$ark_third_party_root/vixl/src",
-      ]
-      defines += [ "USE_VIXL_ARM32" ]
+    include_dirs = [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
+  } else if (target_cpu == "amd64" || target_cpu == "x64" ||
+             target_cpu == "x86_64") {
+    if (!is_mingw) {
       deps = [ "$ark_third_party_root/vixl:libvixl" ]
-    } else if (target_cpu == "arm64") {
+
       sources += [
-        "target/aarch64/callconv.cpp",
-        "target/aarch64/encode.cpp",
-        "target/aarch64/regfile.cpp",
+        "target/amd64/callconv.cpp",
+        "target/amd64/encode.cpp",
+        "target/amd64/regfile.cpp",
       ]
       include_dirs = [
-        "$ark_root/compiler/optimizer/code_generator/target/aarch64",
-        "$ark_third_party_root/vixl/src/aarch64",
-        "$ark_third_party_root/vixl/src",
+        "$ark_third_party_root/asmjit/src",
+        "$ark_third_party_root/zydis/include",
+        "$ark_third_party_root/zydis/zycore/include",
       ]
-      defines += [ "USE_VIXL_ARM64" ]
+      deps += [
+        "$ark_third_party_root/asmjit:libasmjit",
+        "$ark_third_party_root/zydis:libZydis",
+      ]
+    }
+  } else if (target_cpu == "arm") {
+    sources += [
+      "target/aarch32/callconv.cpp",
+      "target/aarch32/encode.cpp",
+      "target/aarch32/regfile.cpp",
+    ]
+    include_dirs = [
+      "$ark_root/compiler/optimizer/code_generator/target/aarch32",
+      "$ark_third_party_root/vixl/src/aarch32",
+      "$ark_third_party_root/vixl/src",
+    ]
+    defines += [ "USE_VIXL_ARM32" ]
+    deps = [ "$ark_third_party_root/vixl:libvixl" ]
+  } else if (target_cpu == "arm64") {
+    sources += [
+      "target/aarch64/callconv.cpp",
+      "target/aarch64/encode.cpp",
+      "target/aarch64/regfile.cpp",
+    ]
+    include_dirs = [
+      "$ark_root/compiler/optimizer/code_generator/target/aarch64",
+      "$ark_third_party_root/vixl/src/aarch64",
+      "$ark_third_party_root/vixl/src",
+    ]
+    defines += [ "USE_VIXL_ARM64" ]
+    deps = [ "$ark_third_party_root/vixl:libvixl" ]
+  }
+
+  if (is_mac) {
+    defines += [ "VIXL_CODE_BUFFER_MALLOC" ]
+  } else {
+    defines += [ "VIXL_CODE_BUFFER_MMAP" ]
+  }
+  configs = [
+    "$ark_root:ark_config",
+    "$ark_root/libpandabase:arkbase_public_config",
+    "$ark_root/compiler:arkcompiler_public_config",
+    ":arkencoder_config",
+  ]
+
+  deps += [
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsic_codegen_test_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
+    "$ark_root/libpandabase:libarktsbase",
+  ]
+
+  output_extension = "so"
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
+
+ohos_static_library("libarkencoder_frontend_static") {
+  sources = [
+    "target/asm_printer.cpp",
+    "target/target.cpp",
+  ]
+  deps = []
+  defines = []
+
+  if (target_cpu == "x86") {
+    sources += [
+      "target/x86/callconv.cpp",
+      "target/x86/encode.cpp",
+      "target/x86/regfile.cpp",
+    ]
+    include_dirs = [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
+  } else if (target_cpu == "amd64" || target_cpu == "x64" ||
+             target_cpu == "x86_64") {
+    if (!is_mingw) {
       deps = [ "$ark_third_party_root/vixl:libvixl" ]
+
+      sources += [
+        "target/amd64/callconv.cpp",
+        "target/amd64/encode.cpp",
+        "target/amd64/regfile.cpp",
+      ]
+      include_dirs = [
+        "$ark_third_party_root/asmjit/src",
+        "$ark_third_party_root/zydis/include",
+        "$ark_third_party_root/zydis/zycore/include",
+      ]
+      deps += [
+        "$ark_third_party_root/asmjit:libasmjit_frontend_static",
+        "$ark_third_party_root/zydis:libZydis",
+      ]
     }
-
-    if (is_mac) {
-      defines += [ "VIXL_CODE_BUFFER_MALLOC" ]
-    } else {
-      defines += [ "VIXL_CODE_BUFFER_MMAP" ]
-    }
-    configs = [
-      "$ark_root:ark_config",
-      "$ark_root/libpandabase:arkbase_public_config",
-      "$ark_root/compiler:arkcompiler_public_config",
-      ":arkencoder_config",
+  } else if (target_cpu == "arm") {
+    sources += [
+      "target/aarch32/callconv.cpp",
+      "target/aarch32/encode.cpp",
+      "target/aarch32/regfile.cpp",
     ]
-
-    deps += [
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsic_codegen_test_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
-      "$ark_root/libpandabase:libarktsbase",
+    defines = [ "USE_VIXL_ARM32" ]
+    include_dirs = [
+      "$ark_root/compiler/optimizer/code_generator/target/aarch32",
+      "$ark_third_party_root/vixl/src/aarch32",
+      "$ark_third_party_root/vixl/src",
     ]
-
-    output_extension = "so"
-    part_name = ark_part_name
-    subsystem_name = "$ark_subsystem_name"
+    deps = [ "$ark_third_party_root/vixl:libvixl" ]
+  } else if (target_cpu == "arm64") {
+    sources += [
+      "target/aarch64/callconv.cpp",
+      "target/aarch64/encode.cpp",
+      "target/aarch64/regfile.cpp",
+    ]
+    defines = [ "USE_VIXL_ARM64" ]
+    include_dirs = [
+      "$ark_root/compiler/optimizer/code_generator/target/aarch64",
+      "$ark_third_party_root/vixl/src/aarch64",
+      "$ark_third_party_root/vixl/src",
+    ]
+    deps = [ "$ark_third_party_root/vixl:libvixl" ]
   }
 
-  ohos_static_library("libarkencoder_frontend_static") {
-    sources = [
-      "target/asm_printer.cpp",
-      "target/target.cpp",
-    ]
-    deps = []
-    defines = []
-
-    if (target_cpu == "x86") {
-      sources += [
-        "target/x86/callconv.cpp",
-        "target/x86/encode.cpp",
-        "target/x86/regfile.cpp",
-      ]
-      include_dirs =
-          [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
-    } else if (target_cpu == "amd64" || target_cpu == "x64" ||
-               target_cpu == "x86_64") {
-      if (!is_mingw) {
-        deps = [ "$ark_third_party_root/vixl:libvixl_frontend_static" ]
-
-        sources += [
-          "target/amd64/callconv.cpp",
-          "target/amd64/encode.cpp",
-          "target/amd64/regfile.cpp",
-        ]
-        include_dirs = [
-          "$ark_third_party_root/asmjit/src",
-          "$ark_third_party_root/zydis/include",
-          "$ark_third_party_root/zydis/zycore/include",
-        ]
-        deps += [
-          "$ark_third_party_root/asmjit:libasmjit_frontend_static",
-          "$ark_third_party_root/zydis:libZydis",
-        ]
-      }
-    } else if (target_cpu == "arm") {
-      sources += [
-        "target/aarch32/callconv.cpp",
-        "target/aarch32/encode.cpp",
-        "target/aarch32/regfile.cpp",
-      ]
-      defines = [ "USE_VIXL_ARM32" ]
-      include_dirs = [
-        "$ark_root/compiler/optimizer/code_generator/target/aarch32",
-        "$ark_third_party_root/vixl/src/aarch32",
-        "$ark_third_party_root/vixl/src",
-      ]
-      deps = [ "$ark_third_party_root/vixl:libvixl_frontend_static" ]
-    } else if (target_cpu == "arm64") {
-      sources += [
-        "target/aarch64/callconv.cpp",
-        "target/aarch64/encode.cpp",
-        "target/aarch64/regfile.cpp",
-      ]
-      defines = [ "USE_VIXL_ARM64" ]
-      include_dirs = [
-        "$ark_root/compiler/optimizer/code_generator/target/aarch64",
-        "$ark_third_party_root/vixl/src/aarch64",
-        "$ark_third_party_root/vixl/src",
-      ]
-      deps = [ "$ark_third_party_root/vixl:libvixl_frontend_static" ]
-    }
-
-    if (is_mac) {
-      defines += [ "VIXL_CODE_BUFFER_MALLOC" ]
-    } else {
-      defines += [ "VIXL_CODE_BUFFER_MMAP" ]
-    }
-    configs = [
-      "$ark_root:ark_config",
-      "$ark_root/libpandabase:arkbase_public_config",
-      "$ark_root/compiler:arkcompiler_public_config",
-      ":arkencoder_config",
-    ]
-
-    deps += [
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
-      "$ark_root/compiler:libarkcompiler_opcodes_h_arch_info_gen_h",
-      "$ark_root/libpandabase:libarktsbase_frontend_static",
-    ]
-    part_name = ark_part_name
-    subsystem_name = ark_subsystem_name
+  if (is_mac) {
+    defines += [ "VIXL_CODE_BUFFER_MALLOC" ]
+  } else {
+    defines += [ "VIXL_CODE_BUFFER_MMAP" ]
   }
+  configs = [
+    "$ark_root:ark_config",
+    "$ark_root/libpandabase:arkbase_public_config",
+    "$ark_root/compiler:arkcompiler_public_config",
+    ":arkencoder_config",
+  ]
+
+  deps += [
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
+    "$ark_root/compiler:libarkcompiler_opcodes_h_arch_info_gen_h",
+    "$ark_root/libpandabase:libarktsbase_frontend_static",
+  ]
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
 }

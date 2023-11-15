@@ -29,7 +29,8 @@
                 "bounds_checking_function",
                 "icu",
                 "musl",
-                "zlib"
+                "zlib",
+                "vixl"
             ]
         },
         "build": {

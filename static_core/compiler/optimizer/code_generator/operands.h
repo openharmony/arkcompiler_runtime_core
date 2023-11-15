@@ -80,14 +80,7 @@ constexpr uint32_t SHIFT_BITS_DOUBLE = 12;
 constexpr uint32_t SHIFT_BITS_FLOAT = 9;
 
 // Return true, if architecture can be encoded.
-#ifdef PANDA_WITH_CODEGEN
 bool BackendSupport(Arch arch);
-#else
-inline bool BackendSupport([[maybe_unused]] Arch arch)
-{
-    return false;
-}
-#endif
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ENCODE_MATH_LIST(DEF)  \

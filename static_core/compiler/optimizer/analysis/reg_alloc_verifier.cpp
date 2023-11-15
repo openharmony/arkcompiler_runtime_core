@@ -424,12 +424,10 @@ void RegAllocVerifier::ProcessCurrentBlock()
         if (!success_) {
             return;
         }
-#ifdef PANDA_WITH_IRTOC
         if (IsSaveRestoreRegisters(inst)) {
             HandleSaveRestoreRegisters(inst);
             continue;
         }
-#endif
         if (inst->GetOpcode() == Opcode::ReturnInlined) {
             // ReturnInlined is pseudo instruction having SaveState input that
             // only prolongs SaveState input's lifetime. There are no guarantees that
@@ -558,7 +556,6 @@ void RegAllocVerifier::HandleInst(Inst *inst)
     HandleDest(inst);
 }
 
-#ifdef PANDA_WITH_IRTOC
 bool RegAllocVerifier::IsSaveRestoreRegisters(Inst *inst)
 {
     if (!inst->IsIntrinsic()) {
@@ -596,7 +593,6 @@ void RegAllocVerifier::HandleSaveRestoreRegisters(Inst *inst)
 
     HandleDest(inst);
 }
-#endif
 
 // Implicit null checks are not encoded as machine instructions, but instead
 // added to method's metadata that allow to treat some memory-access related

@@ -25,10 +25,8 @@
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/optimizations/inline_intrinsics.h"
-#ifdef PANDA_WITH_IRTOC
 #ifndef __clang_analyzer__
 #include "irtoc_ir_inline.h"
-#endif
 #endif
 
 namespace panda::compiler {

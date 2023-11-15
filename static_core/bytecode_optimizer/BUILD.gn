@@ -101,7 +101,7 @@ ohos_static_library("libarktsbytecodeopt_frontend_static") {
     ":isa_gen_arkbytecodeopt_insn_selection_h",
     ":reg_encoder_visitors_inc",
     "$ark_root/assembler:libarktsassembler_frontend_static",
-    "$ark_root/compiler:libarktscompiler_frontend_static",
+    "$ark_root/compiler:libarktscompiler_set_static",
     "$ark_root/libpandabase:libarktsbase_frontend_static",
     "$ark_root/libpandafile:libarktsfile_frontend_static",
   ]
