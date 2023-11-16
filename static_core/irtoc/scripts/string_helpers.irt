@@ -563,7 +563,7 @@ scoped_macro(:copy_compressed_string_to_array_of_chars) do |str_data, arr_data, 
   # String contains 8-bit chars
   If(char_count, 0).A.Likely.b {
     i1 := Cast(0).u64
-    Label(:CopyLoop)
+Label(:CopyLoop)
     i := Phi(i1, i2).u64
     Store(arr_data, ShlI(i).Imm(1).u64, Cast(Load(str_data, i).u8).u16).u16
     i2 := AddI(i).Imm(1).u64
@@ -880,3 +880,93 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateStringGetCharsTlab
+
+
+###
+# Compute string hashcode
+#
+scoped_macro(:utf8_string_hashcode) do |str_data, char_count|
+  hash := Cast(0).u32
+  If(char_count, 0).A.Likely.b {
+    i1 := Cast(0).u32
+    imm31 := Cast(31).u32
+Label(:Loop_hash)
+    hash1 := Phi(hash, hash2).u32
+    i := Phi(i1, i2).u32
+    ch := Cast(Load(str_data, i).u8).SrcType(Constants::COMPILER_UINT8).u32
+    hash2 := Add(Mul(hash1, imm31).u32, ch).u32
+    i2 := AddI(i).Imm(1).u32
+    If(i2, char_count).B.Likely.b {
+      Goto(:Loop_hash)
+    }
+  }
+  hashcode := Phi(hash, hash2).u32
+end  # utf8_string_hashcode
+
+scoped_macro(:utf16_string_hashcode) do |str_data, char_count|
+  hash := Cast(0).u32
+  If(char_count, 0).A.Likely.b {
+    i1 := Cast(0).u64
+    imm31 := Cast(31).u32
+    stop := ShlI(Cast(char_count).u64).Imm(1).u64
+Label(:Loop_hash)
+    hash1 := Phi(hash, hash2).u32
+    i := Phi(i1, i2).u64
+    ch := Cast(Load(str_data, i).u16).SrcType(Constants::COMPILER_UINT16).u32
+    hash2 := Add(Mul(hash1, imm31).u32, ch).u32
+    i2 := AddI(i).Imm(2).u64
+    If(i2, stop).B.Likely.b {
+      Goto(:Loop_hash)
+    }
+  }
+  hashcode := Phi(hash, hash2).u32
+end  # utf16_string_hashcode
+
+
+def GenerateStringHashCode(string_compression_enabled)
+  suffix = (string_compression_enabled ? "Compressed" : "")
+if Options.arch == :arm64
+  available_regs = $temps_mask + :arg0 + :callee0 + :callee1 + :callee2 + :callee3
+else
+  available_regs = $temps_mask + :arg0 + :callee0 + :caller0 + :caller1
+end
+  function("StringHashCode#{suffix}".to_sym,
+            params: {str: 'ref'},
+            regmap: $full_regmap,
+            regalloc_set: available_regs,
+            mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      ReturnVoid().void
+      next
+    end
+
+    # 1. There is no check of the argument against NullPointer as
+    #    it's done in the InstBuilder (see AddArgNullcheckIfNeeded)
+    # 2. Don't check if hashcode is equal to 0 as it's done in the codegen.
+
+    str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+    length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    if string_compression_enabled
+      length := ShrI(length_packed).Imm(1).u32
+      not_compressed := AndI(length_packed).Imm(1).u32
+      If(not_compressed, 0).EQ.Likely.b {
+        # String contains 8-bit chars
+        h := utf8_string_hashcode(str_data, length)
+        StoreI(str, h).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+        Return(h).u32
+      } Else {
+        # String contains 16-bit chars
+        h := utf16_string_hashcode(str_data, length)
+        StoreI(str, h).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+        Return(h).u32
+      }
+    else
+      # String contains 16-bit chars
+      h := utf16_string_hashcode(str_data, length_packed)
+      StoreI(str, h).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+      Return(h).u32
+    end
+  }
+end  # def GenerateStringHashCode

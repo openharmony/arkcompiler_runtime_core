@@ -201,6 +201,7 @@ module Constants
     COMPILER_REFERENCE = "compiler::DataType::REFERENCE"
     COMPILER_BOOL = "compiler::DataType::BOOL"
     COMPILER_UINT8 = "compiler::DataType::UINT8"
+    COMPILER_UINT16 = "compiler::DataType::UINT16"
     COMPILER_UINT32 = "compiler::DataType::UINT32"
     COMPILER_UINT64 = "compiler::DataType::UINT64"
     COMPILER_INT32 = "compiler::DataType::INT32"

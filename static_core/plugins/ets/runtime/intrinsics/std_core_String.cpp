@@ -379,4 +379,10 @@ ets_char StdCoreStringCodePointToChar(ets_int code_point)
     return static_cast<ets_char>(uni_str.charAt(0));
 }
 
+int32_t StdCoreStringHashCode(EtsString *this_str)
+{
+    ASSERT(this_str != nullptr);
+    return this_str->GetCoreType()->GetHashcode();
+}
+
 }  // namespace panda::ets::intrinsics

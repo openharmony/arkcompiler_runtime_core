@@ -802,6 +802,19 @@ intrinsics:
     impl: panda::ets::intrinsics::StdCoreStringCodePointToChar
     clear_flags: [ ]
 
+  - name: StdCoreStringHashCode
+    space: ets
+    class_name: std.core.String
+    method_name: hashCode
+    static: false
+    signature:
+      ret: i32
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringHashCode
+    codegen_func: CreateStringHashCode
+    codegen_arch: [arm64, amd64]
+    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+
 ##########################
 # std.core.StringBuilder #
 ##########################

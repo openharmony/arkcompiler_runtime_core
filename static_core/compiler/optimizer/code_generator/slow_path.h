@@ -306,6 +306,33 @@ private:
     Reg dst_reg_ {INVALID_REGISTER};
     Reg src_reg_ {INVALID_REGISTER};
 };
+
+class SlowPathStringHashCode : public SlowPathEntrypoint {
+public:
+    using SlowPathEntrypoint::SlowPathEntrypoint;
+
+    ~SlowPathStringHashCode() override = default;
+
+    NO_COPY_SEMANTIC(SlowPathStringHashCode);
+    NO_MOVE_SEMANTIC(SlowPathStringHashCode);
+
+    void SetDstReg(Reg dst_reg)
+    {
+        dst_reg_ = dst_reg;
+    }
+
+    void SetSrcReg(Reg src_reg)
+    {
+        src_reg_ = src_reg;
+    }
+
+    void GenerateImpl(Codegen *codegen) override;
+
+private:
+    Reg dst_reg_ {INVALID_REGISTER};
+    Reg src_reg_ {INVALID_REGISTER};
+};
+
 }  // namespace panda::compiler
 
 #endif  // PANDA_SLOW_PATH_H

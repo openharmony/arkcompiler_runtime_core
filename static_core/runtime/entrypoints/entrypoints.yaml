@@ -1115,6 +1115,22 @@ entrypoints:
     - panda::ObjectHeader*
     - int64_t
 
+- name: StringHashCode
+  entrypoint: StringHashCode
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint32_t  # resulting hashcode
+    - void*     # src string
+
+- name: StringHashCodeCompressed
+  entrypoint: StringHashCodeCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint32_t  # resulting hashcode
+    - void*     # src string
+
 - name: CreateStringFromStringTlab
   entrypoint: CreateStringFromStringTlab
   bridge: none
