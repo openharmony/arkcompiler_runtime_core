@@ -677,10 +677,10 @@ TEST_F(SamplerTest, WriteModuleEventTest)
 
     auto pf = panda_file::OpenPandaFileOrZip(pandafile);
     Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf));
-
-    // NOTE(mmorozov, skurnevich)
-    // this test may fail if the loaded module managed to dump into the trace
-    // ASSERT_EQ(ExtractLoadedPFSize(sp), 1);
+    // NOTE:
+    // It's necessary to add assert that only one module is loaded
+    // But simply add assert on loaded size is UB, because such assert may fail if the WriteLoadedPandaFiles
+    // managed to dump the loaded module into the trace before the assert call occurs in this test
 
     sp->Stop();
 
