@@ -415,6 +415,65 @@ spec/never_type/useWithLambdaAndUnion.ets
 ### Negative test
 spec/never_type/neverTypeInheritance.ets
 ### End never issues
+### Feature: Null safety tests
+### Issue 14510
+spec/nullables/nullable-function-result_2.ets
+spec/nullables/nullable-method-result_2.ets
+spec/nullables/nullable-method-param_2.ets
+spec/nullables/nullable-function-param_2.ets
+spec/nullables/nullable-member_2.ets
+spec/nullables/nullable-function-default-param_2.ets
+spec/nullables/nullable-function-default-param_5.ets
+spec/nullables/nullable-function-default-param_8.ets
+spec/nullables/nullable-method-default-param_2.ets
+spec/nullables/nullable-method-default-param_5.ets
+spec/nullables/nullable-method-default-param_8.ets
+### End Issue 14510
+### Issue 14495
+spec/nullables/defined-primitive-type-nullable-union_2.ets
+spec/nullables/nullable-method-param_0.ets
+spec/nullables/nullable-method-param_1.ets
+spec/nullables/primitive-nullable-union_0.ets
+spec/nullables/primitive-nullable-union_1.ets
+spec/nullables/primitive-nullable-union_2.ets
+spec/nullables/primitive-nullable-union_3.ets
+spec/nullables/primitive-nullable-union_4.ets
+spec/nullables/nullable-method-default-param_1.ets
+spec/nullables/nullable-method-default-param_4.ets
+spec/nullables/nullable-function-default-param_1.ets
+spec/nullables/nullable-function-default-param_4.ets
+spec/nullables/nullable-function-default-param_6.ets
+spec/nullables/nullable-function-default-param_7.ets
+spec/nullables/nullable-function-param_0.ets
+spec/nullables/nullable-function-param_1.ets
+spec/nullables/nullable-lambda-default-param_1.ets
+spec/nullables/nullable-lambda-default-param_4.ets
+spec/nullables/nullable-lambda-default-param_6.ets
+spec/nullables/nullable-method-default-param_7.ets
+spec/nullables/nullable-function-result_1.ets
+spec/nullables/nullable-lambda-param_0.ets
+spec/nullables/eval-lazy_1.ets
+spec/nullables/nullable-method-result_0.ets
+spec/nullables/nullable-method-result_1.ets
+spec/nullables/nullable-function-result_0.ets
+spec/nullables/issue13991.ets
+spec/nullables/issue14113.ets
+### End Issue 14495
+### Issue 14301
+spec/nullables/defined-primitive-type-nullable-union_0.ets
+spec/nullables/defined-primitive-type-nullable-union_1.ets
+spec/nullables/defined-primitive-type-nullable-union_2.ets
+### End Issue 14301
+### Issue 14583
+spec/nullables/nullable-method-default-param_0.ets
+spec/nullables/nullable-method-default-param_3.ets
+spec/nullables/nullable-method-default-param_6.ets
+### End Issue 14583
+### Issue 14584
+spec/nullables/nullable-lambda-default-param_3.ets
+spec/nullables/nullable-lambda-default-param_5.ets
+### Issue 14584
+### End Of Feature: Null safety tests
 
 ### Generic issues
 ### Issue 14498
