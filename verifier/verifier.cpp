@@ -164,6 +164,7 @@ bool Verifier::CheckConstantPoolInfo(const panda_file::File::EntityId &method_id
     const auto bc_ins_last = bc_ins.JumpTo(ins_sz);
 
     while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
+        // fix the scenario when instruction has more than one id, such as defefineclasswithbuffer
         if (bc_ins.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
             if (!VerifyMethodId(bc_ins, method_id)) {
                 return false;
