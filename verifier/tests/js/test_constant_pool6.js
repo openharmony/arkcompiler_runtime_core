@@ -26,13 +26,13 @@ class Student {
   }
 }
 
-let stu = new Student('zhangsan', 12)
-console.log(stu.age)
+let stu = new Student('zhangsan', 12);
+console.log(stu.age);
 
-let arr = [1, 2, 3]
-console.log(arr)
+let arr = [1, 2, 3];
+console.log(arr);
 
 let o = {
   color: 'red'
-}
-console.log(o)
+};
+console.log(o);

@@ -17,13 +17,13 @@
 
 #include <gtest/gtest.h>
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "file.h"
 #include "utils/logger.h"
 
 using namespace testing::ext;
-namespace panda::verifier{
+namespace panda::verifier {
 class VerifierConstantPool : public testing::Test {
 public:
     static void SetUpTestCase(void) {};
@@ -64,7 +64,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
     uint32_t code_id = 0x02f0; // the code id which contains method id in abc file
 
     // For format in this instruction, the method id needs to be offset by one byte
-    long int method_id = static_cast<long int>(code_id)+1;
+    long int method_id = static_cast<long int>(code_id) + 1;
 	
     constexpr char const *mode = "wbe";
     FILE *fp = fopen(file_name.c_str(), mode);
@@ -105,7 +105,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
     uint32_t code_id = 0x0306; // the code id which contains literal id in abc file
 
     // For format in this instruction, the literal id needs to be offset by three byte
-    long int literal_id = static_cast<long int>(code_id)+3;
+    long int literal_id = static_cast<long int>(code_id) + 3;
 	
     constexpr char const *mode = "wbe";
     FILE *fp = fopen(file_name.c_str(), mode);
@@ -145,7 +145,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
     uint32_t code_id = 0x0322; // the code id which contains string id in abc file
 
     // For format in this instruction, the literal id needs to be offset by three byte
-    long int string_id = static_cast<long int>(code_id)+3;
+    long int string_id = static_cast<long int>(code_id) + 3;
 	
     constexpr char const *mode = "wbe";
     FILE *fp = fopen(file_name.c_str(), mode);
