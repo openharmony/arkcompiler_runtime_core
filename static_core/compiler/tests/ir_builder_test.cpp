@@ -265,8 +265,7 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    template <bool IS_OBJ>
-    void CheckCondJumpWithZero(ConditionCode cc)
+    std::string GetCcString(ConditionCode cc)
     {
         std::string cmd;
         switch (cc) {
@@ -291,7 +290,13 @@ public:
             default:
                 UNREACHABLE();
         }
+        return cmd;
+    }
 
+    template <bool IS_OBJ>
+    void CheckCondJumpWithZero(ConditionCode cc)
+    {
+        std::string cmd = GetCcString(cc);
         std::string inst_postfix;
         std::string param_type = "i32";
         auto type = DataType::INT32;

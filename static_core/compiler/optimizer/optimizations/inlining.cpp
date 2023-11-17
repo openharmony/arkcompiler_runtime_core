@@ -51,20 +51,21 @@ size_t Inlining::CalculateInstructionsCount(Graph *graph)
 {
     size_t count = 0;
     for (auto bb : *graph) {
-        if (bb != nullptr && !bb->IsStartBlock() && !bb->IsEndBlock()) {
-            for (auto inst : bb->Insts()) {
-                if (inst->IsSaveState()) {
-                    continue;
-                }
-                switch (inst->GetOpcode()) {
-                    case Opcode::Return:
-                    case Opcode::ReturnI:
-                    case Opcode::ReturnVoid:
-                    case Opcode::Phi:
-                        break;
-                    default:
-                        count++;
-                }
+        if (bb == nullptr || bb->IsStartBlock() || bb->IsEndBlock()) {
+            continue;
+        }
+        for (auto inst : bb->Insts()) {
+            if (inst->IsSaveState()) {
+                continue;
+            }
+            switch (inst->GetOpcode()) {
+                case Opcode::Return:
+                case Opcode::ReturnI:
+                case Opcode::ReturnVoid:
+                case Opcode::Phi:
+                    break;
+                default:
+                    count++;
             }
         }
     }
@@ -1187,6 +1188,32 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *call_inst, CallI
     return {graph_inl, callee_call_runtime};
 }
 
+template <bool CHECK_EXTERNAL>
+bool Inlining::CheckTooBigMethodCanBeInlined(const CallInst *call_inst, InlineContext *ctx, bool method_is_too_big)
+{
+    ctx->replace_to_static = CanReplaceWithCallStatic(call_inst->GetOpcode());
+    if constexpr (!CHECK_EXTERNAL) {
+        if (GetGraph()->GetRuntime()->IsMethodExternal(GetGraph()->GetMethod(), ctx->method)) {
+            // Do not replace to call static if --compiler-inline-external-methods=false
+            ctx->replace_to_static &= OPTIONS.IsCompilerInlineExternalMethods();
+            ASSERT(ctx->method != nullptr);
+            // Allow to replace CallVirtual with CallStatic if the resolved method is same as the called method
+            // In AOT mode the resolved method id can be different from the method id in the call_inst,
+            // but we'll keep the method id from the call_inst because the resolved method id can be not correct
+            // for aot compiled method
+            ctx->replace_to_static &= ctx->method == call_inst->GetCallMethod()
+                                      // Or if it's not aot mode. That is, just replace in other modes
+                                      || !GetGraph()->IsAotMode();
+        }
+    }
+    if (method_is_too_big) {
+        return false;
+    }
+    ASSERT(resolve_wo_inline_);
+    // Continue and return true to give a change to TryInlineExternalAot
+    return true;
+}
+
 template <bool CHECK_EXTERNAL, bool CHECK_INTRINSICS>
 bool Inlining::CheckMethodCanBeInlined(const CallInst *call_inst, InlineContext *ctx)
 {
@@ -1237,28 +1264,8 @@ bool Inlining::CheckMethodCanBeInlined(const CallInst *call_inst, InlineContext 
     }
 
     if (method_is_too_big || resolve_wo_inline_) {
-        ctx->replace_to_static = CanReplaceWithCallStatic(call_inst->GetOpcode());
-        if constexpr (!CHECK_EXTERNAL) {
-            if (GetGraph()->GetRuntime()->IsMethodExternal(GetGraph()->GetMethod(), ctx->method)) {
-                // Do not replace to call static if --compiler-inline-external-methods=false
-                ctx->replace_to_static &= OPTIONS.IsCompilerInlineExternalMethods();
-                ASSERT(ctx->method != nullptr);
-                // Allow to replace CallVirtual with CallStatic if the resolved method is same as the called method
-                // In AOT mode the resolved method id can be different from the method id in the call_inst,
-                // but we'll keep the method id from the call_inst because the resolved method id can be not correct
-                // for aot compiled method
-                ctx->replace_to_static &= ctx->method == call_inst->GetCallMethod()
-                                          // Or if it's not aot mode. That is, just replace in other modes
-                                          || !GetGraph()->IsAotMode();
-            }
-        }
-        if (method_is_too_big) {
-            return false;
-        }
-        ASSERT(resolve_wo_inline_);
-        // Continue and return true to give a change to TryInlineExternalAot
+        return CheckTooBigMethodCanBeInlined<CHECK_EXTERNAL>(call_inst, ctx, method_is_too_big);
     }
-
     return true;
 }
 
@@ -1271,6 +1278,29 @@ void RemoveReturnVoidInst(BasicBlock *end_block)
         }
         ASSERT(return_inst->GetOpcode() == Opcode::ReturnVoid);
         pred->RemoveInst(return_inst);
+    }
+}
+
+/// Embed inlined dataflow graph into the caller graph. A special case where the graph is empty
+void Inlining::UpdateDataflowForEmptyGraph(Inst *call_inst, std::variant<BasicBlock *, PhiInst *> use,
+                                           BasicBlock *end_block)
+{
+    auto pred_block = end_block->GetPredsBlocks().front();
+    auto return_inst = pred_block->GetLastInst();
+    ASSERT(return_inst->GetOpcode() == Opcode::Return || return_inst->GetOpcode() == Opcode::ReturnVoid ||
+           pred_block->IsEndWithThrowOrDeoptimize());
+    if (return_inst->GetOpcode() == Opcode::Return) {
+        ASSERT(return_inst->GetInputsCount() == 1);
+        auto input_inst = return_inst->GetInput(0).GetInst();
+        if (std::holds_alternative<PhiInst *>(use)) {
+            auto phi_inst = std::get<PhiInst *>(use);
+            phi_inst->AppendInput(input_inst);
+        } else {
+            call_inst->ReplaceUsers(input_inst);
+        }
+    }
+    if (!pred_block->IsEndWithThrowOrDeoptimize()) {
+        pred_block->RemoveInst(return_inst);
     }
 }
 
@@ -1316,23 +1346,7 @@ void Inlining::UpdateDataflow(Graph *graph_inl, Inst *call_inst, std::variant<Ba
         }
         call_inst->ReplaceUsers(new_def);
     } else {
-        auto pred_block = end_block->GetPredsBlocks().front();
-        auto return_inst = pred_block->GetLastInst();
-        ASSERT(return_inst->GetOpcode() == Opcode::Return || return_inst->GetOpcode() == Opcode::ReturnVoid ||
-               pred_block->IsEndWithThrowOrDeoptimize());
-        if (return_inst->GetOpcode() == Opcode::Return) {
-            ASSERT(return_inst->GetInputsCount() == 1);
-            auto input_inst = return_inst->GetInput(0).GetInst();
-            if (std::holds_alternative<PhiInst *>(use)) {
-                auto phi_inst = std::get<PhiInst *>(use);
-                phi_inst->AppendInput(input_inst);
-            } else {
-                call_inst->ReplaceUsers(input_inst);
-            }
-        }
-        if (!pred_block->IsEndWithThrowOrDeoptimize()) {
-            pred_block->RemoveInst(return_inst);
-        }
+        UpdateDataflowForEmptyGraph(call_inst, use, end_block);
     }
 }
 

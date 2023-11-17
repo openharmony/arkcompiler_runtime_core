@@ -788,6 +788,22 @@ BasicBlock *GraphCloner::CreateNewOutsideSucc(BasicBlock *outside_succ, BasicBlo
     return new_outside_succ;
 }
 
+GraphCloner::LoopClonerData *GraphCloner::PopulateLoopClonerData(Loop *loop, BasicBlock *pre_header,
+                                                                 BasicBlock *outside_succ)
+{
+    auto allocator = GetGraph()->GetLocalAllocator();
+    auto unroll_data = allocator->New<LoopClonerData>();
+    unroll_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+    unroll_data->blocks->resize(loop->GetBlocks().size() + 1);
+    unroll_data->blocks->at(0) = pre_header;
+    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unroll_data->blocks->begin() + 1);
+    unroll_data->blocks->push_back(outside_succ);
+    unroll_data->outer = outside_succ;
+    unroll_data->header = loop->GetHeader();
+    unroll_data->pre_header = loop->GetPreHeader();
+    return unroll_data;
+}
+
 /**
  * - Split pre-header to contain `Compare` and `IfImm` instructions only;
  * - Make sure `outside_succ` has 2 predecessors only: loop header and back-edge;
@@ -841,17 +857,7 @@ GraphCloner::LoopClonerData *GraphCloner::PrepareLoopToClone(Loop *loop)
         outside_succ = block;
     }
     // Populate `LoopClonerData`
-    auto allocator = GetGraph()->GetLocalAllocator();
-    auto unroll_data = allocator->New<LoopClonerData>();
-    unroll_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
-    unroll_data->blocks->resize(loop->GetBlocks().size() + 1);
-    unroll_data->blocks->at(0) = pre_header;
-    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unroll_data->blocks->begin() + 1);
-    unroll_data->blocks->push_back(outside_succ);
-    unroll_data->outer = outside_succ;
-    unroll_data->header = loop->GetHeader();
-    unroll_data->pre_header = loop->GetPreHeader();
-    return unroll_data;
+    return PopulateLoopClonerData(loop, pre_header, outside_succ);
 }
 
 /// Create new loop, populate it with cloned blocks and build conrlow-flow

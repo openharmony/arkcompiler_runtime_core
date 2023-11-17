@@ -146,25 +146,9 @@ private:
             }
         }
     }
-    // Returns false if block with input instruction doesn't dominate the predecessor of the  PHI block
-    bool CheckPhiInputs(Inst *phi_inst)
+
+    bool CheckPhiRealInputs(Inst *phi_inst)
     {
-        ASSERT(phi_inst->IsPhi() || phi_inst->IsCatchPhi());
-        if (phi_inst->HasType()) {
-            return true;
-        }
-        if (phi_inst->IsPhi()) {
-            if (phi_inst->GetInputsCount() != phi_inst->GetBasicBlock()->GetPredsBlocks().size()) {
-                return false;
-            }
-            for (size_t index = 0; index < phi_inst->GetInputsCount(); ++index) {
-                auto pred = phi_inst->GetBasicBlock()->GetPredBlockByIndex(index);
-                auto input_bb = phi_inst->GetInput(index).GetInst()->GetBasicBlock();
-                if (!input_bb->IsDominate(pred)) {
-                    return false;
-                }
-            }
-        }
         DataType::Type type = DataType::NO_TYPE;
         real_inputs_.clear();
         marker_ = graph_->NewMarker();
@@ -204,6 +188,28 @@ private:
         }
         phi_inst->SetType(type);
         return true;
+    }
+
+    // Returns false if block with input instruction doesn't dominate the predecessor of the  PHI block
+    bool CheckPhiInputs(Inst *phi_inst)
+    {
+        ASSERT(phi_inst->IsPhi() || phi_inst->IsCatchPhi());
+        if (phi_inst->HasType()) {
+            return true;
+        }
+        if (phi_inst->IsPhi()) {
+            if (phi_inst->GetInputsCount() != phi_inst->GetBasicBlock()->GetPredsBlocks().size()) {
+                return false;
+            }
+            for (size_t index = 0; index < phi_inst->GetInputsCount(); ++index) {
+                auto pred = phi_inst->GetBasicBlock()->GetPredBlockByIndex(index);
+                auto input_bb = phi_inst->GetInput(index).GetInst()->GetBasicBlock();
+                if (!input_bb->IsDominate(pred)) {
+                    return false;
+                }
+            }
+        }
+        return CheckPhiRealInputs(phi_inst);
     }
 
     void MarkHasRealUserRec(Inst *inst)

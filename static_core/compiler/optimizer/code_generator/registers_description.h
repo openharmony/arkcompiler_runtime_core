@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_REGFILE_H_
-#define COMPILER_OPTIMIZER_CODEGEN_REGFILE_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_REGFILE_H
+#define COMPILER_OPTIMIZER_CODEGEN_REGFILE_H
 
 #include "operands.h"
 #include "utils/arch.h"
@@ -151,4 +151,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_REGFILE_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_REGFILE_H

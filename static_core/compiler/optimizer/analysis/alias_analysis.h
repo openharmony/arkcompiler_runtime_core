@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_ALIAS_ANALYSIS_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_ALIAS_ANALYSIS_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_ALIAS_ANALYSIS_H
+#define COMPILER_OPTIMIZER_ANALYSIS_ALIAS_ANALYSIS_H
 
 #include <unordered_map>
 #include "optimizer/ir/graph_visitor.h"
@@ -429,4 +429,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_ALIAS_ANALYSIS_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_ALIAS_ANALYSIS_H

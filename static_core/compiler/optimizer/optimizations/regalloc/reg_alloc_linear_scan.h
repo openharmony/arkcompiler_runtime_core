@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_LINEAR_SCAN_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_LINEAR_SCAN_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_LINEAR_SCAN_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_LINEAR_SCAN_H
 
 #include "utils/arena_containers.h"
 #include "optimizer/analysis/liveness_analyzer.h"
@@ -196,4 +196,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_LINEAR_SCAN_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_LINEAR_SCAN_H

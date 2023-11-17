@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_COMPILE_METHOD_H_
-#define COMPILER_COMPILE_METHOD_H_
+#ifndef COMPILER_COMPILE_METHOD_H
+#define COMPILER_COMPILE_METHOD_H
 
 #include "compiler_options.h"
 #include "mem/arena_allocator.h"
@@ -67,4 +67,4 @@ bool CompileInGraph(RuntimeInterface *runtime, Method *method, bool is_osr, Aren
 bool CheckMethodInLists(const std::string &method_name);
 }  // namespace panda::compiler
 
-#endif  // COMPILER_COMPILE_METHOD_H_
+#endif  // COMPILER_COMPILE_METHOD_H

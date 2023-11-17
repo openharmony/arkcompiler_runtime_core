@@ -292,19 +292,7 @@ void BasicBlock::JoinSuccessorBlock()
             GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
         } else {
             // edge can have 2 successors, so it can be back-edge in 2 loops: own loop and outer loop
-            if (loop->HasBackEdge(succ)) {
-                loop->ReplaceBackEdge(succ, this);
-            }
-            auto outer_loop = loop->GetOuterLoop();
-            if (outer_loop != nullptr && outer_loop->HasBackEdge(succ)) {
-                outer_loop->ReplaceBackEdge(succ, this);
-            }
-
-            for (auto inner_loop : loop->GetInnerLoops()) {
-                if (inner_loop->GetPreHeader() == succ) {
-                    inner_loop->SetPreHeader(this);
-                }
-            }
+            ReplaceSuccessorLoopBackEdges(loop, succ);
             loop->RemoveBlock(succ);
         }
     }
@@ -320,6 +308,23 @@ void BasicBlock::JoinSuccessorBlock()
         this->try_id_ = succ->try_id_;
     }
     GetGraph()->RemoveEmptyBlock(succ);
+}
+
+void BasicBlock::ReplaceSuccessorLoopBackEdges(Loop *loop, BasicBlock *succ)
+{
+    if (loop->HasBackEdge(succ)) {
+        loop->ReplaceBackEdge(succ, this);
+    }
+    auto outer_loop = loop->GetOuterLoop();
+    if (outer_loop != nullptr && outer_loop->HasBackEdge(succ)) {
+        outer_loop->ReplaceBackEdge(succ, this);
+    }
+
+    for (auto inner_loop : loop->GetInnerLoops()) {
+        if (inner_loop->GetPreHeader() == succ) {
+            inner_loop->SetPreHeader(this);
+        }
+    }
 }
 
 /**

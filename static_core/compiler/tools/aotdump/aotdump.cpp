@@ -172,7 +172,13 @@ public:
             std::cerr << "Open AOT file failed: " << aot_res.Error() << std::endl;
             return -1;
         }
-        auto aot_file = std::move(aot_res.Value());
+
+        DumpAll(std::move(aot_res.Value()), options);
+        return 0;
+    }
+
+    void DumpAll(std::unique_ptr<AotFile> aot_file, panda::aoutdump::Options options)
+    {
         std::ostream *output_stream;
         std::ofstream out_fstream;
         if (options.WasSetOutputFile()) {
@@ -184,7 +190,6 @@ public:
         auto &stream = *output_stream;
         DumpHeader(stream, aot_file);
         DumpFiles(stream, aot_file, options);
-        return 0;
     }
 
     bool FixElfHeader(std::array<char, NAME_MAX> &tmpfile_buf, PandArg<std::string> &input_file)

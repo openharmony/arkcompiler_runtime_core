@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_CSE_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_CSE_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_CSE_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_CSE_H
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/analysis.h"
@@ -276,4 +276,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CSE_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CSE_H

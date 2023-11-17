@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_IF_CONVERSION_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_IF_CONVERSION_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_IF_CONVERSION_H
+#define COMPILER_OPTIMIZER_ANALYSIS_IF_CONVERSION_H
 
 #include "optimizer/ir/graph.h"
 #include "utils/arena_containers.h"
@@ -61,4 +61,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_IF_CONVERSION_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_IF_CONVERSION_H

@@ -130,6 +130,24 @@ void InstBuilder::UpdateDefsForLoopHead()
     }
 }
 
+bool InstBuilder::UpdateDefsForPreds(size_t vreg, std::optional<Inst *> &value)
+{
+    for (auto pred_bb : current_bb_->GetPredsBlocks()) {
+        // When irreducible loop header is visited before it's back-edge, phi should be created,
+        // since we do not know if definitions are different at this point
+        if (!pred_bb->IsMarked(visited_block_marker_)) {
+            ASSERT(current_bb_->GetLoop()->IsIrreducible());
+            return true;
+        }
+        if (!value.has_value()) {
+            value = defs_[pred_bb->GetId()][vreg];
+        } else if (value.value() != defs_[pred_bb->GetId()][vreg]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void InstBuilder::UpdateDefs()
 {
     current_bb_->SetMarker(visited_block_marker_);
@@ -145,22 +163,7 @@ void InstBuilder::UpdateDefs()
         // If there are multiple predecessors, then add phi for each register that has different definitions
         for (size_t vreg = 0; vreg < GetVRegsCount(); vreg++) {
             std::optional<Inst *> value;
-            bool different = false;
-            for (auto pred_bb : current_bb_->GetPredsBlocks()) {
-                // When irreducible loop header is visited before it's back-edge, phi should be created,
-                // since we do not know if definitions are different at this point
-                if (!pred_bb->IsMarked(visited_block_marker_)) {
-                    ASSERT(current_bb_->GetLoop()->IsIrreducible());
-                    different = true;
-                    break;
-                }
-                if (!value.has_value()) {
-                    value = defs_[pred_bb->GetId()][vreg];
-                } else if (value.value() != defs_[pred_bb->GetId()][vreg]) {
-                    different = true;
-                    break;
-                }
-            }
+            bool different = UpdateDefsForPreds(vreg, value);
             if (different) {
                 auto phi = GetGraph()->CreateInstPhi();
                 phi->SetMarker(GetNoTypeMarker());

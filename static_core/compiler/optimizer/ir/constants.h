@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_CONSTANTS_H_
-#define COMPILER_OPTIMIZER_IR_CONSTANTS_H_
+#ifndef COMPILER_OPTIMIZER_IR_CONSTANTS_H
+#define COMPILER_OPTIMIZER_IR_CONSTANTS_H
 
 #include <cstdint>
 #include <limits>
@@ -58,4 +58,4 @@ constexpr int MAX_SUCCS_NUM = 2;
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_IR_CONSTANTS_H_
+#endif  // COMPILER_OPTIMIZER_IR_CONSTANTS_H

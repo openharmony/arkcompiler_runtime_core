@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_BASICBLOCK_H_
-#define COMPILER_OPTIMIZER_IR_BASICBLOCK_H_
+#ifndef COMPILER_OPTIMIZER_IR_BASICBLOCK_H
+#define COMPILER_OPTIMIZER_IR_BASICBLOCK_H
 
 #include "constants.h"
 #include "inst.h"
@@ -236,6 +236,7 @@ public:
 
     // Join single successor into single predecessor
     void JoinSuccessorBlock();
+    void ReplaceSuccessorLoopBackEdges(Loop *loop, BasicBlock *succ);
 
     // Join successor block into the block, which have another successor;
     // Used in if-conversion pass and fixes dataflow using Select instructions.
@@ -1079,4 +1080,4 @@ private:
 bool BlocksPathDfsSearch(Marker marker, BasicBlock *block, const BasicBlock *target_block,
                          const BasicBlock *exclude_block = nullptr);
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_IR_BASICBLOCK_H_
+#endif  // COMPILER_OPTIMIZER_IR_BASICBLOCK_H

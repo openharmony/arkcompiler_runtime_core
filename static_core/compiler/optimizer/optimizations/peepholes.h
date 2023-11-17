@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_PEEPHOLES_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_PEEPHOLES_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_PEEPHOLES_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_PEEPHOLES_H
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
@@ -235,4 +235,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_PEEPHOLES_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_PEEPHOLES_H

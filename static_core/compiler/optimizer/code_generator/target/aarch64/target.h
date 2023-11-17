@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H_
-#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H
+#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H
 
 #include "operands.h"
 #include "encode.h"
@@ -783,6 +783,9 @@ private:
     template <bool IS_STORE>
     void LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
 
+    template <bool IS_STORE>
+    void LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
+
     void EncodeCastFloat(Reg dst, bool dst_signed, Reg src, bool src_signed);
     // This function not used, but it is working and can be used.
     // Unlike "EncodeCastFloat", it implements castes float32/64 to int8/16.
@@ -858,4 +861,4 @@ public:
     }
 };  // Aarch64CallingConvention
 }  // namespace panda::compiler::aarch64
-#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H

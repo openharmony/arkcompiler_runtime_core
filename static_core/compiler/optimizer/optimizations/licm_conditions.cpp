@@ -385,13 +385,15 @@ void LicmConditions::UpdatePhis(const ConditionChain *chain, BasicBlock *multipl
             multiple_preds_succ->EraseInst(phi);
             // preds order was preserved
             phi_block->AppendPhi(phi);
-            if (phi->GetInputsCount() < phi_block->GetPredsBlocks().size()) {
-                COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Add dummy input";
-                if (DataType::IsReference(phi->GetType())) {
-                    phi->AppendInput(GetGraph()->GetOrCreateNullPtr());
-                } else {
-                    phi->AppendInput(GetGraph()->FindOrCreateConstant(0));
-                }
+            if (phi->GetInputsCount() >= phi_block->GetPredsBlocks().size()) {
+                ASSERT(phi->GetInputsCount() == phi_block->GetPredsBlocks().size());
+                continue;
+            }
+            COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Add dummy input";
+            if (DataType::IsReference(phi->GetType())) {
+                phi->AppendInput(GetGraph()->GetOrCreateNullPtr());
+            } else {
+                phi->AppendInput(GetGraph()->FindOrCreateConstant(0));
             }
             ASSERT(phi->GetInputsCount() == phi_block->GetPredsBlocks().size());
         } else {

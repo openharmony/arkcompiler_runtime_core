@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H_
-#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H
+#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H
 
 #include "compiler/optimizer/code_generator/callconv.h"
 
@@ -899,6 +899,9 @@ private:
     template <typename T>
     void EncodeReverseBitsImpl(Reg dst0, Reg src0);
 
+    void EncodeRoundToPInfFloat(Reg dst, Reg src);
+    void EncodeRoundToPInfDouble(Reg dst, Reg src);
+
     void EncodeCastFloatToScalar(Reg dst, bool dst_signed, Reg src);
     inline void EncodeCastFloatSignCheckRange(Reg dst, Reg src, const asmjit::Label &end);
     inline void EncodeCastFloatUnsignCheckRange(Reg dst, Reg src, const asmjit::Label &end);
@@ -986,4 +989,4 @@ private:
 };  // Amd64CallingConvention
 }  // namespace panda::compiler::amd64
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H

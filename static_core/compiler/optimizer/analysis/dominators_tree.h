@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_DOMINATORS_TREE_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_DOMINATORS_TREE_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_DOMINATORS_TREE_H
+#define COMPILER_OPTIMIZER_ANALYSIS_DOMINATORS_TREE_H
 
 #include "optimizer/pass.h"
 #include "utils/arena_containers.h"
@@ -152,4 +152,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_DOMINATORS_TREE_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_DOMINATORS_TREE_H

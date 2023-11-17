@@ -1687,11 +1687,9 @@ void ScalarReplacement::PatchSaveStates()
     }
 }
 
-// Compute live ref-valued insturctions at each save state and insert any missing live instruction into a save state.
-void ScalarReplacement::PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<ArenaUnorderedSet<Inst *>> &liveness)
+void ScalarReplacement::FillLiveInsts(BasicBlock *block, ArenaUnorderedSet<Inst *> &live_ins,
+                                      ArenaVector<ArenaUnorderedSet<Inst *>> &liveness)
 {
-    auto &live_ins = liveness[block->GetId()];
-
     for (auto succ : block->GetSuccsBlocks()) {
         live_ins.insert(liveness[succ->GetId()].begin(), liveness[succ->GetId()].end());
         for (auto phi_inst : succ->PhiInsts()) {
@@ -1701,6 +1699,13 @@ void ScalarReplacement::PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<Ar
             }
         }
     }
+}
+
+// Compute live ref-valued insturctions at each save state and insert any missing live instruction into a save state.
+void ScalarReplacement::PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<ArenaUnorderedSet<Inst *>> &liveness)
+{
+    auto &live_ins = liveness[block->GetId()];
+    FillLiveInsts(block, live_ins, liveness);
 
     auto loop = block->GetLoop();
     bool loop_is_header = !loop->IsRoot() && loop->GetHeader() == block;

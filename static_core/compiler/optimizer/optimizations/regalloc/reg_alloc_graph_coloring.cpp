@@ -241,19 +241,20 @@ void RegAllocGraphColoring::AddAffinityEdgesToPhysicalNodes(InterferenceGraph *i
         // Add affinity edges to fixed locations
         for (auto i = 0U; i < inst->GetInputsCount(); i++) {
             auto location = inst->GetLocation(i);
-            if (location.IsFixedRegister()) {
-                auto fixed_node = ig->FindPhysicalNode(location);
-                // Possible when general intervals are processing, while input is fp-interval or vice versa
-                if (fixed_node == nullptr) {
-                    continue;
-                }
-                affinity_nodes->push_back(fixed_node->GetNumber());
-
-                auto input_li = la->GetInstLifeIntervals(inst->GetDataFlowInput(i));
-                auto sibling = input_li->FindSiblingAt(interval->GetBegin());
-                ASSERT(sibling != nullptr);
-                AddAffinityEdge(ig, affinity_nodes, *fixed_node, sibling);
+            if (!location.IsFixedRegister()) {
+                continue;
             }
+            auto fixed_node = ig->FindPhysicalNode(location);
+            // Possible when general intervals are processing, while input is fp-interval or vice versa
+            if (fixed_node == nullptr) {
+                continue;
+            }
+            affinity_nodes->push_back(fixed_node->GetNumber());
+
+            auto input_li = la->GetInstLifeIntervals(inst->GetDataFlowInput(i));
+            auto sibling = input_li->FindSiblingAt(interval->GetBegin());
+            ASSERT(sibling != nullptr);
+            AddAffinityEdge(ig, affinity_nodes, *fixed_node, sibling);
         }
     }
 }

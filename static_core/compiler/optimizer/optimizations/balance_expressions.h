@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_BALANCE_EXPRESSIONS_H_
-#define COMPILER_OPTIMIZER_BALANCE_EXPRESSIONS_H_
+#ifndef COMPILER_OPTIMIZER_BALANCE_EXPRESSIONS_H
+#define COMPILER_OPTIMIZER_BALANCE_EXPRESSIONS_H
 
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
@@ -173,4 +173,4 @@ inline std::ostream &operator<<(std::ostream &os, const BalanceExpressions &expr
 }
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_BALANCE_EXPRESSIONS_H_
+#endif  // COMPILER_OPTIMIZER_BALANCE_EXPRESSIONS_H

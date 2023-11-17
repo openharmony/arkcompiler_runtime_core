@@ -203,6 +203,13 @@ bool PassManager::RunPass(Pass *pass, size_t local_mem_size_before_pass)
     }
 
 #ifndef NDEBUG
+    RunPassChecker(pass, result, is_codegen);
+#endif
+    return result;
+}
+
+void PassManager::RunPassChecker(Pass *pass, bool result, bool is_codegen)
+{
     bool checker_enabled = OPTIONS.IsCompilerCheckGraph();
     if (OPTIONS.IsCompilerCheckFinal()) {
         checker_enabled = is_codegen;
@@ -210,8 +217,6 @@ bool PassManager::RunPass(Pass *pass, size_t local_mem_size_before_pass)
     if (result && !pass->IsAnalysis() && checker_enabled) {
         GraphChecker(graph_, pass->GetPassName()).Check();
     }
-#endif
-    return result;
 }
 
 ArenaAllocator *PassManager::GetAllocator()

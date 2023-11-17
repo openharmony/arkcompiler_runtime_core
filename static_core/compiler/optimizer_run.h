@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_COMPILER_RUN_H_
-#define COMPILER_COMPILER_RUN_H_
+#ifndef COMPILER_COMPILER_RUN_H
+#define COMPILER_COMPILER_RUN_H
 
 #include "optimizer/pipeline.h"
 
@@ -27,4 +27,4 @@ inline bool RunOptimizations(Graph *graph)
 }
 
 }  // namespace panda::compiler
-#endif  // COMPILER_COMPILER_RUN_H_
+#endif  // COMPILER_COMPILER_RUN_H

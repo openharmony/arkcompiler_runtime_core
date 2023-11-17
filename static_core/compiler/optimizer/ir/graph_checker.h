@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H_
-#define COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H_
+#ifndef COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H
+#define COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H
 
 #include "compiler_options.h"
 #include "graph.h"
@@ -42,11 +42,11 @@
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_EXT_PRINT(cond, message) \
-    ASSERT_DO((cond), std::cerr << message << std::endl; PrintFailedMethodAndPass();)
+    ASSERT_DO((cond), std::cerr << (message) << std::endl; PrintFailedMethodAndPass();)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_EXT_PRINT_VISITOR(cond, message) \
-    ASSERT_DO((cond), std::cerr << message << std::endl; PrintFailedMethodAndPassVisitor(v);)
+    ASSERT_DO((cond), std::cerr << (message) << std::endl; PrintFailedMethodAndPassVisitor(v);)
 // --------------------------------------------------------------
 
 namespace panda::compiler {
@@ -85,6 +85,7 @@ private:
     void CheckEndBlock();
     void CheckControlFlow(BasicBlock *block);
     void CheckDataFlow(BasicBlock *block);
+    void CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block, Graph *graph);
     void CheckPhiInputs(Inst *phi_inst);
     void CheckInstsRegisters(BasicBlock *block);
     void CheckPhisRegisters(BasicBlock *block);
@@ -227,7 +228,9 @@ private:
     static void VisitCheckCast([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitIsInstance([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static void VisitSelectWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitSelectImm([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static void VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitIf([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitIfImm([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitTry([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -495,4 +498,4 @@ private:
 #undef ASSERT_EXT_PRINT
 #undef ASSERT_EXT_PRINT_VISITOR
 
-#endif  // COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H_
+#endif  // COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H

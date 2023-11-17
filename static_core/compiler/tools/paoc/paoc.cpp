@@ -709,6 +709,46 @@ bool Paoc::CompileOsr(CompilingContext *ctx)
     return true;
 }
 
+bool Paoc::TryCreateGraph(CompilingContext *ctx)
+{
+    auto source_lang = ctx->method->GetClass()->GetSourceLang();
+    bool is_dynamic = panda::panda_file::IsDynamicLanguage(source_lang);
+
+    ctx->graph = ctx->allocator.New<Graph>(&ctx->allocator, &ctx->graph_local_allocator, aot_builder_->GetArch(),
+                                           ctx->method, runtime_, false, nullptr, is_dynamic);
+    if (ctx->graph == nullptr) {
+        PrintError("Graph creation failed!");
+        return false;
+    }
+    ctx->graph->SetLanguage(source_lang);
+    return true;
+}
+
+bool Paoc::FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t code_address)
+{
+    CompiledMethod compiled_method(ctx->graph->GetArch(), ctx->method, ctx->index);
+    compiled_method.SetCode(ctx->graph->GetCode().ToConst());
+    compiled_method.SetCodeInfo(ctx->graph->GetCodeInfoData());
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    compiled_method.SetCfiInfo(ctx->graph->GetCallingConvention()->GetCfiInfo());
+#endif
+    if (ctx->graph->GetCode().empty() || ctx->graph->GetCodeInfoData().empty()) {
+        LOG(INFO, COMPILER) << "Emit code failed";
+        return false;
+    }
+
+    LOG(INFO, COMPILER) << "Ark AOT successfully compiled method: " << runtime_->GetMethodFullName(ctx->method, false);
+    EVENT_PAOC("Compiling " + runtime_->GetMethodFullName(ctx->method, false) + " using panda");
+    ASSERT(ctx->graph != nullptr);
+
+    aot_builder_->AddMethod(compiled_method);
+
+    EVENT_COMPILATION(runtime_->GetMethodFullName(ctx->method, false), false, ctx->method->GetCodeSize(), code_address,
+                      compiled_method.GetCode().size(), compiled_method.GetCodeInfo().size(),
+                      events::CompilationStatus::COMPILED);
+    return true;
+}
+
 /**
  * Compiles a method in AOT mode.
  * @return `false` on error.
@@ -727,16 +767,9 @@ bool Paoc::CompileAot(CompilingContext *ctx)
                    "::" + reinterpret_cast<const char *>(ctx->method->GetName().data));
     }
 
-    auto source_lang = ctx->method->GetClass()->GetSourceLang();
-    bool is_dynamic = panda::panda_file::IsDynamicLanguage(source_lang);
-
-    ctx->graph = ctx->allocator.New<Graph>(&ctx->allocator, &ctx->graph_local_allocator, aot_builder_->GetArch(),
-                                           ctx->method, runtime_, false, nullptr, is_dynamic);
-    if (ctx->graph == nullptr) {
-        PrintError("Graph creation failed!");
+    if (!TryCreateGraph(ctx)) {
         return false;
     }
-    ctx->graph->SetLanguage(source_lang);
 
     uintptr_t code_address = aot_builder_->GetCurrentCodeAddress();
     auto aot_data = ctx->graph->GetAllocator()->New<AotData>(
@@ -778,27 +811,7 @@ bool Paoc::CompileAot(CompilingContext *ctx)
         return false;
     }
 
-    CompiledMethod compiled_method(ctx->graph->GetArch(), ctx->method, ctx->index);
-    compiled_method.SetCode(ctx->graph->GetCode().ToConst());
-    compiled_method.SetCodeInfo(ctx->graph->GetCodeInfoData());
-#ifdef PANDA_COMPILER_DEBUG_INFO
-    compiled_method.SetCfiInfo(ctx->graph->GetCallingConvention()->GetCfiInfo());
-#endif
-    if (ctx->graph->GetCode().empty() || ctx->graph->GetCodeInfoData().empty()) {
-        LOG(INFO, COMPILER) << "Emit code failed";
-        return false;
-    }
-
-    LOG(INFO, COMPILER) << "Ark AOT successfully compiled method: " << runtime_->GetMethodFullName(ctx->method, false);
-    EVENT_PAOC("Compiling " + runtime_->GetMethodFullName(ctx->method, false) + " using panda");
-    ASSERT(ctx->graph != nullptr);
-
-    aot_builder_->AddMethod(compiled_method);
-
-    EVENT_COMPILATION(runtime_->GetMethodFullName(ctx->method, false), false, ctx->method->GetCodeSize(), code_address,
-                      compiled_method.GetCode().size(), compiled_method.GetCodeInfo().size(),
-                      events::CompilationStatus::COMPILED);
-    return true;
+    return FinalizeCompileAot(ctx, code_address);
 }
 
 void Paoc::PrintError(const std::string &error)

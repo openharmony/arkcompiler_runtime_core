@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H_
-#define COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H
+#define COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H
 
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/graph_visitor.h"
@@ -70,4 +70,4 @@ private:
     Reg sp_reg_;
 };
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H

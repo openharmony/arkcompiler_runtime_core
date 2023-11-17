@@ -533,6 +533,15 @@ void SaveStateBridgesBuilder::SearchAndCreateMissingObjInSaveState(Graph *graph,
     }
 }
 
+void SaveStateBridgesBuilder::ProcessSSUserPreds(Graph *graph, Inst *inst, Inst *target_inst)
+{
+    for (auto pred_block : target_inst->GetBasicBlock()->GetPredsBlocks()) {
+        if (target_inst->CastToPhi()->GetPhiInput(pred_block) == inst) {
+            SearchAndCreateMissingObjInSaveState(graph, inst, pred_block->GetLastInst(), nullptr, pred_block);
+        }
+    }
+}
+
 void SaveStateBridgesBuilder::FixInstUsageInSS(Graph *graph, Inst *inst)
 {
     if (!inst->IsMovableObject()) {
@@ -543,11 +552,7 @@ void SaveStateBridgesBuilder::FixInstUsageInSS(Graph *graph, Inst *inst)
         COMPILER_LOG(DEBUG, BRIDGES_SS) << " Check usage: Try to do SSB for real source inst: " << *inst << "\n"
                                         << "  For target inst: " << *target_inst << "\n";
         if (target_inst->IsPhi() && !(graph->IsAnalysisValid<DominatorsTree>() && inst->IsDominate(target_inst))) {
-            for (auto pred_block : target_inst->GetBasicBlock()->GetPredsBlocks()) {
-                if (target_inst->CastToPhi()->GetPhiInput(pred_block) == inst) {
-                    SearchAndCreateMissingObjInSaveState(graph, inst, pred_block->GetLastInst(), nullptr, pred_block);
-                }
-            }
+            ProcessSSUserPreds(graph, inst, target_inst);
         } else {
             SearchAndCreateMissingObjInSaveState(graph, inst, target_inst);
         }

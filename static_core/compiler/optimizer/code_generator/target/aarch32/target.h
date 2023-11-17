@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H_
-#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H
+#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H
 
 #include "operands.h"
 #include "encode.h"
@@ -816,6 +816,9 @@ private:
     template <bool IS_STORE>
     void LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
 
+    template <bool IS_STORE>
+    void LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
+
 private:
     vixl::aarch32::MemOperand PrepareMemLdSForFloat(MemRef mem, vixl::aarch32::Register tmp);
     void EncodeCastFloatToFloat(Reg dst, Reg src);
@@ -905,4 +908,4 @@ private:
 };  // Aarch32CallingConvention
 }  // namespace panda::compiler::aarch32
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H_
-#define COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H
+#define COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H
 
 /*
 Codegen interface for compiler
@@ -1256,4 +1256,4 @@ void Codegen::FillPostWrbCallParams(MemRef mem, Args &&...params)
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H

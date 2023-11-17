@@ -119,15 +119,15 @@ void PhiTypeResolving::PropagateTypeToPhi()
             auto input_inst = phi->GetDataFlowInput(idx);
             if (input_inst->GetOpcode() == Opcode::CastValueToAnyType) {
                 phi->SetInput(idx, input_inst->GetInput(0).GetInst());
-            } else {
+            } else if (phi->GetInput(idx).GetInst() != input_inst) {
                 ASSERT(std::find(phis_.begin(), phis_.end(), phi) != phis_.end());
                 // case:
                 // 2.any Phi v1(bb1), v3(bb3) -> v3
                 // 3.any AnyTypeCheck v2 - > v2
-                if (phi->GetInput(idx).GetInst() != input_inst) {
-                    ASSERT(phi->GetInput(idx).GetInst()->GetOpcode() == Opcode::AnyTypeCheck);
-                    phi->SetInput(idx, input_inst);
-                }
+                ASSERT(phi->GetInput(idx).GetInst()->GetOpcode() == Opcode::AnyTypeCheck);
+                phi->SetInput(idx, input_inst);
+            } else {
+                ASSERT(std::find(phis_.begin(), phis_.end(), phi) != phis_.end());
             }
         }
         auto *cast_to_any_inst = GetGraph()->CreateInstCastValueToAnyType(phi->GetPc(), any_type_, nullptr);

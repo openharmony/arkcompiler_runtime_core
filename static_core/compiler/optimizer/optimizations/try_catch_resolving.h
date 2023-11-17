@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_TRY_CATCH_RESOLVING_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_TRY_CATCH_RESOLVING_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_TRY_CATCH_RESOLVING_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_TRY_CATCH_RESOLVING_H
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/inst.h"
@@ -46,6 +46,7 @@ public:
 
 private:
     void CollectCandidates();
+    BasicBlock *FindCatchBeginBlock(BasicBlock *bb);
     void VisitTryInst(TryInst *try_inst);
     void ConnectThrowCatch();
     void ConnectThrowCatchImpl(BasicBlock *catch_block, BasicBlock *throw_block, uint32_t catch_pc, Inst *new_obj,
@@ -65,4 +66,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_TRY_CATCH_RESOLVING_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_TRY_CATCH_RESOLVING_H

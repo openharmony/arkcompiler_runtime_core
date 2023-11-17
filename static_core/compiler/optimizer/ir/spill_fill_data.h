@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_SPILL_FILL_DATA_H_
-#define COMPILER_OPTIMIZER_IR_SPILL_FILL_DATA_H_
+#ifndef COMPILER_OPTIMIZER_IR_SPILL_FILL_DATA_H
+#define COMPILER_OPTIMIZER_IR_SPILL_FILL_DATA_H
 
 #include "datatype.h"
 #include "optimizer/code_generator/target_info.h"
@@ -105,4 +105,4 @@ inline auto ToString(const SpillFillData &sf, Arch arch)
 }  // namespace sf_data
 
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_IR_SPILL_FILL_DATA_H_
+#endif  // COMPILER_OPTIMIZER_IR_SPILL_FILL_DATA_H

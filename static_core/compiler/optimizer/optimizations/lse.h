@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LSE_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LSE_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LSE_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LSE_H
 
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/graph.h"
@@ -22,6 +22,9 @@
 #include "compiler_options.h"
 
 namespace panda::compiler {
+
+class LseVisitor;
+
 /**
  * Load Store Elimination (Lse) optimization is aimed to eliminate redundant
  * loads and store.  It uses Alias Analysis to determine which memory
@@ -130,6 +133,7 @@ private:
     void ApplyHoistToCandidate(Loop *loop, Inst *alive);
     void TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps,
                                 const ArenaUnorderedMap<Inst *, struct HeapValue> *eliminated);
+    void ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phi_fixup_mrk);
     void DeleteInstruction(Inst *inst, Inst *value);
     void DeleteInstructions(const ArenaUnorderedMap<Inst *, struct HeapValue> &eliminated);
 
@@ -142,4 +146,4 @@ private:
 
 }  // namespace panda::compiler
 
-#endif  //  COMPILER_OPTIMIZER_OPTIMIZATIONS_LSE_H_
+#endif  //  COMPILER_OPTIMIZER_OPTIMIZATIONS_LSE_H

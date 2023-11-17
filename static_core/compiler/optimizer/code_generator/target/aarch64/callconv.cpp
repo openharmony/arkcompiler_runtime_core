@@ -189,7 +189,6 @@ void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frame_info)
         sp_to_regs_slots -= SLOTS_COUNT;
     }
 
-    // Save callee-saved registers
     RegMask callee_regs_mask;
     VRegMask callee_vregs_mask;
     regdescr->FillUsedCalleeSavedRegisters(&callee_regs_mask, &callee_vregs_mask, frame_info.GetSaveUnusedCalleeRegs());

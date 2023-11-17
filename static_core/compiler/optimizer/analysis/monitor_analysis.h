@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_MONITOR_ANALYSIS_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_MONITOR_ANALYSIS_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_MONITOR_ANALYSIS_H
+#define COMPILER_OPTIMIZER_ANALYSIS_MONITOR_ANALYSIS_H
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/marker.h"
@@ -64,4 +64,4 @@ private:
     bool check_non_catch_only_ {false};
 };
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_MONITOR_ANALYSIS_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_MONITOR_ANALYSIS_H

@@ -400,10 +400,9 @@ bool Codegen::VisitGraph()
             SCOPED_DISASM_INST(this, inst);
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
-            if (GetGraph()->IsLineDebugInfoEnabled()) {
-                if (auto debug_info = inst->GetDebugInfo(); debug_info != nullptr) {
-                    debug_info->SetOffset(GetEncoder()->GetCursorOffset());
-                }
+            auto debug_info = inst->GetDebugInfo();
+            if (GetGraph()->IsLineDebugInfoEnabled() && debug_info != nullptr) {
+                debug_info->SetOffset(GetEncoder()->GetCursorOffset());
             }
 #endif
             visitor.VisitInstruction(inst);
@@ -828,12 +827,10 @@ void Codegen::CreateStackMap(Inst *inst, Inst *user)
     if (user == nullptr) {
         user = inst;
         if (inst == save_state && inst->HasUsers()) {
-            for (auto &u : inst->GetUsers()) {
-                if (u.GetInst()->GetOpcode() != Opcode::ReturnInlined) {
-                    user = u.GetInst();
-                    break;
-                }
-            }
+            auto users = inst->GetUsers();
+            auto it = std::find_if(users.begin(), users.end(),
+                                   [](auto &u) { return u.GetInst()->GetOpcode() != Opcode::ReturnInlined; });
+            user = it->GetInst();
         }
     }
     CreateStackMapRec(save_state, require_vreg_map, user);

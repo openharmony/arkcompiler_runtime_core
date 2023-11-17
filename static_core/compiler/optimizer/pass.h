@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZER_H_
-#define COMPILER_OPTIMIZER_OPTIMIZER_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZER_H
+#define COMPILER_OPTIMIZER_OPTIMIZER_H
 
 #include <string>
 #include "utils/bit_field.h"
@@ -121,4 +121,4 @@ public:
     }
 };
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_OPTIMIZER_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZER_H

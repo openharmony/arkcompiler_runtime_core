@@ -87,6 +87,50 @@ bool ConditionOverFlow(const CountableLoopInfo &loop_info, uint32_t unroll_facto
     }
 }
 
+void LoopUnroll::TransformLoopImpl(Loop *loop, std::optional<uint64_t> opt_iterations, bool no_side_exits,
+                                   uint32_t unroll_factor, std::optional<CountableLoopInfo> loop_info)
+{
+    auto graph_cloner = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator());
+    if (opt_iterations && no_side_exits) {
+        // GCC gives false positive here
+#if !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+        auto iterations = *opt_iterations;
+        auto remaining_iters = iterations % unroll_factor;
+#if !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+        Loop *clone_loop = remaining_iters == 0 ? nullptr : graph_cloner.CloneLoop(loop);
+        // Unroll loop without side-exits and fix compare in the pre-header and back-edge
+        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_WITHOUT_SIDE_EXITS>(loop, unroll_factor);
+        FixCompareInst(loop_info.value(), loop->GetHeader(), unroll_factor);
+        // Unroll loop without side-exits for remaining iterations
+        if (remaining_iters != 0) {
+            graph_cloner.UnrollLoopBody<UnrollType::UNROLL_CONSTANT_ITERATIONS>(clone_loop, remaining_iters);
+        }
+        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+            << "Unrolled without side-exits the loop with constant number of iterations (" << iterations
+            << "). Loop id = " << loop->GetId();
+    } else if (no_side_exits) {
+        auto clone_loop = graph_cloner.CloneLoop(loop);
+        // Unroll loop without side-exits and fix compare in the pre-header and back-edge
+        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_WITHOUT_SIDE_EXITS>(loop, unroll_factor);
+        FixCompareInst(loop_info.value(), loop->GetHeader(), unroll_factor);
+        // Unroll loop with side-exits for remaining iterations
+        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_POST_INCREMENT>(clone_loop, unroll_factor - 1);
+        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+            << "Unrolled without side-exits the loop with unroll factor = " << unroll_factor
+            << ". Loop id = " << loop->GetId();
+    } else if (OPTIONS.IsCompilerUnrollWithSideExits()) {
+        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_WITH_SIDE_EXITS>(loop, unroll_factor);
+        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+            << "Unrolled with side-exits the loop with unroll factor = " << unroll_factor
+            << ". Loop id = " << loop->GetId();
+    }
+}
+
 bool LoopUnroll::TransformLoop(Loop *loop)
 {
     auto unroll_params = GetUnrollParams(loop);
@@ -140,44 +184,7 @@ bool LoopUnroll::TransformLoop(Loop *loop)
             !ConditionOverFlow(*loop_info, unroll_factor) && CountableLoopParser::HasPreHeaderCompare(loop, *loop_info);
     }
 
-    if (opt_iterations && no_side_exits) {
-        // GCC gives false paositive here
-#if !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-        auto iterations = *opt_iterations;
-        auto remaining_iters = iterations % unroll_factor;
-#if !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-        Loop *clone_loop = remaining_iters == 0 ? nullptr : graph_cloner.CloneLoop(loop);
-        // Unroll loop without side-exits and fix compare in the pre-header and back-edge
-        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_WITHOUT_SIDE_EXITS>(loop, unroll_factor);
-        FixCompareInst(loop_info.value(), loop->GetHeader(), unroll_factor);
-        // Unroll loop without side-exits for remaining iterations
-        if (remaining_iters != 0) {
-            graph_cloner.UnrollLoopBody<UnrollType::UNROLL_CONSTANT_ITERATIONS>(clone_loop, remaining_iters);
-        }
-        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-            << "Unrolled without side-exits the loop with constant number of iterations (" << iterations
-            << "). Loop id = " << loop->GetId();
-    } else if (no_side_exits) {
-        auto clone_loop = graph_cloner.CloneLoop(loop);
-        // Unroll loop without side-exits and fix compare in the pre-header and back-edge
-        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_WITHOUT_SIDE_EXITS>(loop, unroll_factor);
-        FixCompareInst(loop_info.value(), loop->GetHeader(), unroll_factor);
-        // Unroll loop with side-exits for remaining iterations
-        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_POST_INCREMENT>(clone_loop, unroll_factor - 1);
-        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-            << "Unrolled without side-exits the loop with unroll factor = " << unroll_factor
-            << ". Loop id = " << loop->GetId();
-    } else if (OPTIONS.IsCompilerUnrollWithSideExits()) {
-        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_WITH_SIDE_EXITS>(loop, unroll_factor);
-        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-            << "Unrolled with side-exits the loop with unroll factor = " << unroll_factor
-            << ". Loop id = " << loop->GetId();
-    }
+    TransformLoopImpl(loop, opt_iterations, no_side_exits, unroll_factor, loop_info);
     is_applied_ = true;
     GetGraph()->GetEventWriter().EventLoopUnroll(loop->GetId(), loop->GetHeader()->GetGuestPc(), unroll_factor,
                                                  unroll_params.cloneable_insts,

@@ -579,29 +579,30 @@ void CodeInfo::EnumerateRoots(const StackMap &stack_map, Callback callback)
             }
         }
     }
+    if (!stack_map.HasRootsStackMaskIndex()) {
+        return;
+    }
     // Simplify after renumbering stack slots
-    if (stack_map.HasRootsStackMaskIndex()) {
-        auto stack_slots_count = CountSpillSlots();
-        auto reg_mask = roots_stack_masks_.GetBitMemoryRegion(stack_map.GetRootsStackMaskIndex());
-        for (auto reg_idx : reg_mask) {
-            if (reg_idx >= stack_slots_count) {
-                // Parameter-slots' indexes are added to the root-mask with `stack_slots_count` offset to distinct them
-                // from spill-slots
-                auto param_slot_idx = reg_idx - stack_slots_count;
-                reg_idx = static_cast<size_t>(CFrameLayout::StackArgSlot::Start()) - param_slot_idx -
-                          static_cast<size_t>(CFrameSlots::Start());
-            } else {
-                if constexpr (!ArchTraits<RUNTIME_ARCH>::IS_64_BITS) {  // NOLINT
-                    reg_idx = (reg_idx << 1U) + 1;
-                }
-                // Stack roots are began from spill/fill stack origin, so we need to adjust it according to registers
-                // buffer
-                reg_idx += GetRegsCount(RUNTIME_ARCH);
+    auto stack_slots_count = CountSpillSlots();
+    auto reg_mask = roots_stack_masks_.GetBitMemoryRegion(stack_map.GetRootsStackMaskIndex());
+    for (auto reg_idx : reg_mask) {
+        if (reg_idx >= stack_slots_count) {
+            // Parameter-slots' indexes are added to the root-mask with `stack_slots_count` offset to distinct them
+            // from spill-slots
+            auto param_slot_idx = reg_idx - stack_slots_count;
+            reg_idx = static_cast<size_t>(CFrameLayout::StackArgSlot::Start()) - param_slot_idx -
+                      static_cast<size_t>(CFrameSlots::Start());
+        } else {
+            if constexpr (!ArchTraits<RUNTIME_ARCH>::IS_64_BITS) {  // NOLINT
+                reg_idx = (reg_idx << 1U) + 1;
             }
-            VRegInfo vreg(reg_idx, VRegInfo::Location::SLOT, root_type, VRegInfo::VRegType::VREG);
-            if (!callback(vreg)) {
-                return;
-            }
+            // Stack roots are began from spill/fill stack origin, so we need to adjust it according to registers
+            // buffer
+            reg_idx += GetRegsCount(RUNTIME_ARCH);
+        }
+        VRegInfo vreg(reg_idx, VRegInfo::Location::SLOT, root_type, VRegInfo::VRegType::VREG);
+        if (!callback(vreg)) {
+            return;
         }
     }
 }

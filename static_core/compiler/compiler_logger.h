@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_COMPILER_LOGGER_H_
-#define COMPILER_COMPILER_LOGGER_H_
+#ifndef COMPILER_COMPILER_LOGGER_H
+#define COMPILER_COMPILER_LOGGER_H
 
 #include "utils/logger.h"
 #include <bitset>
@@ -68,4 +68,4 @@ private:
     CompilerLogger::IsComponentEnabled(CompilerLoggerComponents::comp) && LOG(level, COMPILER) << "[" #comp "] "
 }  // namespace panda::compiler
 
-#endif  // COMPILER_COMPILER_LOGGER_H_
+#endif  // COMPILER_COMPILER_LOGGER_H
