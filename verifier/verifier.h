@@ -24,7 +24,7 @@
 namespace panda::verifier {
 class Verifier {
 public:
-    Verifier(const std::string &filename);
+    explicit Verifier(const std::string &filename);
     ~Verifier() = default;
 
     bool Verify();

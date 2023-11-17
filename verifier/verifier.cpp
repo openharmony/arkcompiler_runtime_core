@@ -62,7 +62,7 @@ bool Verifier::VerifyConstantPool()
 
     GetMethodIds();
     GetLiteralIds();
-    if(!CheckConstantPool()) {
+    if (!CheckConstantPool()) {
         return false;
     }
 
