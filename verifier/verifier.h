@@ -28,6 +28,7 @@ public:
     ~Verifier() = default;
 
     bool Verify();
+    bool VerifyRegisterIndex();
     bool VerifyChecksum();
     bool VerifyConstantPool();
 

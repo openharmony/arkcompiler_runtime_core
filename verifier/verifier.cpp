@@ -39,7 +39,43 @@ bool Verifier::Verify()
     if (!VerifyConstantPool()) {
         return false;
     }
+ 
+    if (!VerifyRegisterIndex()) {
+        return false;
+    }
 
+    return true;
+}
+
+bool Verifier::VerifyRegisterIndex()
+{
+    if (file_ == nullptr) {
+        return false;
+    }
+
+    GetMethodIds();
+    for (const auto &method_id : method_ids_) {
+        panda_file::MethodDataAccessor method_accessor {*file_, method_id};
+        if (!method_accessor.GetCodeId().has_value()) {
+            continue;
+        }
+        panda_file::CodeDataAccessor code_data(*file_, method_accessor.GetCodeId().value());
+        const auto reg_nums = code_data.GetNumVregs();
+        const auto arg_nums = code_data.GetNumArgs();
+        auto bc_ins = BytecodeInstruction(code_data.GetInstructions());
+        const auto bc_ins_last = bc_ins.JumpTo(code_data.GetCodeSize());
+        ASSERT(arg_nums >= 3);
+        while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
+            const uint32_t reg_idx = static_cast<uint32_t>(bc_ins.GetVReg());
+            if (reg_idx >= (reg_nums + arg_nums)) {
+                LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
+                                     << bc_ins.GetVReg() << ")" << std::endl;
+                return false;
+            }
+            bc_ins = bc_ins.GetNext();
+        }
+       
+    }
     return true;
 }
 
@@ -71,6 +107,10 @@ bool Verifier::VerifyConstantPool()
 
 void Verifier::GetMethodIds()
 {
+    if (method_ids_.size() != 0) {
+        return;
+    }
+
     auto index_headers = file_->GetIndexHeaders();
     for (const auto &header : index_headers) {
         auto method_index = file_->GetMethodIndex(&header);
