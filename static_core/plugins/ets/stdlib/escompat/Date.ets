@@ -417,7 +417,7 @@ export final class Date {
      * and the date obtained by parsing the given string representation of a date.
      * If the argument doesn't represent a valid date, `InvalidDate` exception is thrown.
      */
-    private static parseDateFromString(dateStr: String): long throws {
+    private static parseDateFromString(dateStr: String): number throws {
         let date = new Date();
         let sub = dateStr.substring(0, 4);
         let val = Double.parseInt(sub, 10) as int;
@@ -450,7 +450,7 @@ export final class Date {
      * @description Initializes Date instance with current time.
      */
     constructor() {
-        this.ms = Date.now();
+        this.ms = Date.now() as long;
         this.TZOffset = Date.getLocalTimezoneOffset()
     }
     /**
@@ -464,7 +464,7 @@ export final class Date {
      */
 
     constructor(d: Date) throws {
-        this.ms = d.valueOf();
+        this.ms = d.valueOf() as long;
         this.TZOffset = Date.getLocalTimezoneOffset()
     }
 
@@ -764,11 +764,11 @@ export final class Date {
      *
      * @throws InvalidDate - Throws if Date object is invalid (@link{isDateValid} is `false`).
      */
-    public valueOf(): long throws {
+    public valueOf(): number throws {
         if (!this.isDateValid()) {
             throw new InvalidDate();
         }
-        return this.ms;
+        return this.ms as number;
     }
 
     /**
@@ -816,7 +816,7 @@ export final class Date {
      *
      * @returns a language-sensitive representation of the time portion of the date.
      */
-    public toLocaleTimeString(): String {
+    public toLocaleTimeString(): string {
         return Date.getLocaleString("%EX", "", this.ms, false);
     }
 
@@ -827,7 +827,7 @@ export final class Date {
      *
      * @returns a language-sensitive representation of the time portion of the date with respect to locale.
      */
-    public toLocaleTimeString(locale: String): String {
+    public toLocaleTimeString(locale: string): string {
         return Date.getLocaleString("%EX", locale, this.ms, false);
     }
 
@@ -836,7 +836,7 @@ export final class Date {
      *
      * @returns a language-sensitive representation of this date.
      */
-    public toLocaleString(): String {
+    public toLocaleString(): string {
         return Date.getLocaleString("%Ex %EX", "", this.ms, false);
     }
 
@@ -847,7 +847,7 @@ export final class Date {
      *
      * @returns a language-sensitive representation of this date.
      */
-    public toLocaleString(locale: String): String {
+    public toLocaleString(locale: string): string {
         return Date.getLocaleString("%Ex %EX", locale, this.ms, false);
     }
 
@@ -858,7 +858,7 @@ export final class Date {
      * @returns a string with a language-sensitive representation
      * of the date portion of the specified date in the user agent's timezone.
      */
-    public toLocaleDateString(): String {
+    public toLocaleDateString(): string {
         return Date.getLocaleString("%Ex", "", this.ms, false);
     }
 
@@ -869,7 +869,7 @@ export final class Date {
      * @returns a string with a language-sensitive representation
      * of the date portion of the specified date in the user agent's timezone.
      */
-    public toLocaleDateString(locale: String): String {
+    public toLocaleDateString(locale: string): string {
         return Date.getLocaleString("%Ex", locale, this.ms, false);
     }
 
@@ -880,12 +880,12 @@ export final class Date {
      *
      * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
      */
-    public getDate(): byte {
+    public getDate(): number {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
         let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
-        let inLeapYear = ecmaInLeapYear(this.getFullYear());
+        let inLeapYear = ecmaInLeapYear(this.getFullYear() as int);
         let firstDay: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
-        return (day - firstDay + 1) as byte;
+        return (day - firstDay + 1) as number;
     }
 
     /**
@@ -897,6 +897,16 @@ export final class Date {
         let day = this.getDate();
         this.ms -= day * msPerDay;
         this.ms += value * msPerDay;
+    }
+
+    /**
+     * Changes the day of the month of a given Date instance, based on local time.
+     *
+     * @param value new day.
+     */
+    public setDate(value: number): number {
+        this.setDate(value as byte);
+        return this.ms as number;
     }
 
     /**
@@ -913,12 +923,12 @@ export final class Date {
      *
      * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
      */
-    public getUTCDate(): byte {
+    public getUTCDate(): number {
         let localTime = this.ms;
         let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
-        let inLeapYear = ecmaInLeapYear(this.getFullYear());
+        let inLeapYear = ecmaInLeapYear(this.getFullYear() as int);
         let firstDay: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
-        return (day - firstDay) as byte;
+        return (day - firstDay) as number;
     }
 
     /**
@@ -927,9 +937,19 @@ export final class Date {
      * @param value new day.
      */
     public setUTCDate(value: byte): void {
-        let day = this.getUTCDate();
+        let day = this.getUTCDate() as byte;
         this.ms -= day * msPerDay;
         this.ms += value * msPerDay;
+    }
+
+    /**
+     * Changes the day of the month of a given Date instance, based on UTC time.
+     *
+     * @param value new day.
+     */
+    public setUTCDate(value: number): number {
+        this.setUTCDate(value as byte);
+        return this.ms as number;
     }
 
     /**
@@ -942,6 +962,16 @@ export final class Date {
     }
 
     /**
+     * Changes the day of the month of a given Date instance, based on UTC time.
+     *
+     * @param value new day.
+     */
+    public setUTCDay(value: number): number {
+        this.setUTCDate(value);
+        return this.ms as number;
+    }
+
+    /**
      * Returns the day of the week for the specified date according to local time,
      * where 0 represents Sunday. For the day of the month, see @link{getDayOfMonth}.
      *
@@ -950,8 +980,8 @@ export final class Date {
      * @returns An integer number, between 0 and 6, corresponding to the day of the week
      * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
      */
-    public getDay(): byte {
-        return ecmaWeekDay(this.ms - this.TZOffset * 60 * msPerSecond);
+    public getDay(): number {
+        return ecmaWeekDay(this.ms - this.TZOffset * 60 * msPerSecond) as number;
     }
 
     /**
@@ -960,8 +990,8 @@ export final class Date {
      * @returns An integer number, between 0 and 6, corresponding to the day of the week
      * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
      */
-    public getUTCDay(): byte {
-        return ecmaWeekDay(this.ms);
+    public getUTCDay(): number {
+        return ecmaWeekDay(this.ms) as number;
     }
 
     /**
@@ -974,7 +1004,7 @@ export final class Date {
      * @returns year
      */
     public getYear(): int {
-        return this.getFullYear();
+        return this.getFullYear() as int;
     }
 
     /**
@@ -988,8 +1018,8 @@ export final class Date {
      *
      * @returns year
      */
-    public getUTCFullYear(): int {
-        return ecmaYearFromTime(this.ms);
+    public getUTCFullYear(): number {
+        return ecmaYearFromTime(this.ms) as number;
     }
 
     /**
@@ -1009,9 +1039,9 @@ export final class Date {
      * const year = today.getYearFull();
      * ```
      */
-    public getFullYear(): int {
+    public getFullYear(): number {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return ecmaYearFromTime(localTime);
+        return ecmaYearFromTime(localTime) as number;
     }
 
     /**
@@ -1019,8 +1049,9 @@ export final class Date {
      *
      * @param value new year
      */
-    public setUTCFullYear(value: number): void {
-        this.setUTCFullYear(value as int)
+    public setUTCFullYear(value: number): number {
+        this.setUTCFullYear(value as int);
+        return this.ms as number;
     }
 
     /**
@@ -1057,8 +1088,9 @@ export final class Date {
      *
      * @param value new year
      */
-    public setFullYear(value: number): void {
-        this.setFullYear(value as int)
+    public setFullYear(value: number): number {
+        this.setFullYear(value as int);
+        return this.ms as number;
     }
 
     /**
@@ -1085,9 +1117,9 @@ export final class Date {
      * const hours = today.getHour();
      * ```
      */
-    public getHours(): byte {
+    public getHours(): number {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return ecmaHourFromTime(localTime);
+        return ecmaHourFromTime(localTime) as number;
     }
 
     /**
@@ -1095,8 +1127,8 @@ export final class Date {
      *
      * @returns An integer number, between 0 and 23, representing the hour for the given date according to UTC time.
      */
-    public getUTCHours(): byte {
-        return ecmaHourFromTime(this.ms);
+    public getUTCHours(): number {
+        return ecmaHourFromTime(this.ms) as number;
     }
 
     /**
@@ -1112,6 +1144,16 @@ export final class Date {
     }
 
     /**
+     * Sets the hours for a specified date according to local time.
+     *
+     * @param value new hours
+     */
+    public setHours(value: number): number {
+        this.setHours(value as byte);
+        return this.ms as number;
+    }
+
+    /**
      * Sets the hour for a specified date according to universal time.
      *
      * @param value new hours
@@ -1121,6 +1163,16 @@ export final class Date {
         let hours = ecmaHourFromTime(this.ms);
         this.ms -= msPerHour * hours;
         this.ms += msPerHour * value;
+    }
+
+    /**
+     * Sets the hour for a specified date according to universal time.
+     *
+     * @param value new hours
+     */
+    public setUTCHours(value: number): number {
+        this.setUTCHours(value as byte);
+        return this.ms as number;
     }
 
     /**
@@ -1136,9 +1188,9 @@ export final class Date {
      * const milliseconds = today.getMilliseconds();
      * ```
      */
-    public getMilliseconds(): short {
+    public getMilliseconds(): number {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return ecmaMsFromTime(localTime);
+        return ecmaMsFromTime(localTime) as number;
     }
 
     /**
@@ -1153,7 +1205,7 @@ export final class Date {
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
     public static UTC(d: Date): long throws {
-        return d.valueOf();
+        return d.valueOf() as long;
     }
 
     /**
@@ -1298,8 +1350,8 @@ export final class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: double): long {
-        return ecmaMakeDate(ecmaMakeDay(year, 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0))
+    public static UTC(year: number): number {
+        return ecmaMakeDate(ecmaMakeDay(year, 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0)) as number
     }
 
     /**
@@ -1313,8 +1365,8 @@ export final class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: double, month: double): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0))
+    public static UTC(year: number, month: number): number {
+        return ecmaMakeDate(ecmaMakeDay(year, month, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0)) as number
     }
 
     /**
@@ -1330,8 +1382,8 @@ export final class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: double, month: double, day: double): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(0.0, 0.0, 0.0, 0.0))
+    public static UTC(year: number, month: number, day: number): number {
+        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(0.0, 0.0, 0.0, 0.0)) as number
     }
 
     /**
@@ -1349,8 +1401,8 @@ export final class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: double, month: double, day: double, hours: double): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, 0.0, 0.0, 0.0))
+    public static UTC(year: number, month: number, day: number, hours: number): number {
+        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, 0.0, 0.0, 0.0)) as number
     }
 
     /**
@@ -1370,8 +1422,8 @@ export final class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: double, month: double, day: double, hours: double, minutes: double): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, 0.0, 0.0))
+    public static UTC(year: number, month: number, day: number, hours: number, minutes: number): number {
+        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, 0.0, 0.0)) as number
     }
 
     /**
@@ -1393,8 +1445,8 @@ export final class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: double, month: double, day: double, hours: double, minutes: double, seconds: double): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, 0.0))
+    public static UTC(year: number, month: number, day: number, hours: number, minutes: number, seconds: number): number {
+        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, 0.0)) as number
     }
 
     /**
@@ -1418,8 +1470,8 @@ export final class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: double, month: double, day: double, hours: double, minutes: double, seconds: double, ms: double): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, ms))
+    public static UTC(year: number, month: number, day: number, hours: number, minutes: number, seconds: number, ms: number): number {
+        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, ms)) as number;
     }
 
     /**
@@ -1427,9 +1479,9 @@ export final class Date {
      *
      * @returns the milliseconds portion of the time object's value according to universal time.
      */
-    public getUTCMilliseconds(): short {
+    public getUTCMilliseconds(): number {
         let localTime = this.ms;
-        return ecmaMsFromTime(localTime);
+        return ecmaMsFromTime(localTime) as number;
     }
 
     /**
@@ -1444,6 +1496,16 @@ export final class Date {
     }
 
     /**
+     * Sets the milliseconds for a specified date according to local time.
+     *
+     * @param value new ms
+     */
+    public setMilliseconds(value: number): number {
+        this.setMilliseconds(value as short);
+        return this.ms as number;
+    }
+
+    /**
      * Sets the milliseconds for a specified date according to universal time.
      *
      * @param value new ms
@@ -1452,6 +1514,16 @@ export final class Date {
         let ms = ecmaMsFromTime(this.ms);
         this.ms -= ms;
         this.ms += value;
+    }
+
+    /**
+     * Sets the milliseconds for a specified date according to universal time.
+     *
+     * @param value new ms
+     */
+    public setUTCMilliseconds(value: number): number {
+        this.setUTCMilliseconds(value as short);
+        return this.ms as number;
     }
 
     /**
@@ -1467,9 +1539,9 @@ export final class Date {
      * const seconds = today.getSeconds();
      * ```
      */
-    public getSeconds(): byte {
+    public getSeconds(): number {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return ecmaSecFromTime(localTime);
+        return ecmaSecFromTime(localTime) as number;
     }
 
     /**
@@ -1477,8 +1549,18 @@ export final class Date {
      *
      * @returns the seconds in the specified date according to universal time.
      */
-    public getUTCSeconds(): byte {
-        return ecmaSecFromTime(this.ms);
+    public getUTCSeconds(): number {
+        return ecmaSecFromTime(this.ms) as number;
+    }
+
+    /**
+     * Sets the seconds for a specified date according to local time.
+     *
+     * @param value new seconds
+     */
+    public setSeconds(value: number): number {
+        this.setSeconds(value as byte);
+        return this.ms as number;
     }
 
     /**
@@ -1506,6 +1588,16 @@ export final class Date {
     }
 
     /**
+     * Sets the seconds for a specified date according to universal time.
+     *
+     * @param value new seconds
+     */
+    public setUTCSeconds(value: number): number {
+        this.setUTCSeconds(value as byte);
+        return this.ms as number;
+    }
+
+    /**
      * Returns the minutes in the specified date according to local time.
      *
      * @see ECMA-262, 21.4.4.7
@@ -1518,9 +1610,9 @@ export final class Date {
      * const minutes = today.getMinutes();
      * ```
      */
-    public getMinutes(): byte {
+    public getMinutes(): number {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return ecmaMinFromTime(localTime);
+        return ecmaMinFromTime(localTime) as number;
     }
 
     /**
@@ -1536,12 +1628,22 @@ export final class Date {
     }
 
     /**
+     * Sets the minutes for a specified date according to universal time.
+     *
+     * @param value new minutes
+     */
+    public setUTCMinutes(value: number): number {
+        this.setUTCMinutes(value as byte);
+        return this.ms as number;
+    }
+
+    /**
      * Returns the minutes in the specified date according to universal time.
      *
      * @returns the minutes in the specified date according to universal time.
      */
-    public getUTCMinutes(): byte {
-        return ecmaMinFromTime(this.ms);
+    public getUTCMinutes(): number {
+        return ecmaMinFromTime(this.ms) as number;
     }
 
     /**
@@ -1554,6 +1656,16 @@ export final class Date {
         let min = ecmaMinFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= min * msPerMinute;
         this.ms += value * msPerMinute;
+    }
+
+    /**
+     * Sets the minutes for a specified date according to local time.
+     *
+     * @param value new minutes
+     */
+    public setMinutes(value: number): number {
+        this.setMinutes(value as byte);
+        return this.ms as number;
     }
 
     /**
@@ -1571,9 +1683,9 @@ export final class Date {
      * const month = today.getMonth();
      * ```
      */
-    public getMonth(): byte {
+    public getMonth(): number {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return ecmaMonthFromTime(localTime);
+        return ecmaMonthFromTime(localTime) as number;
     }
 
     /**
@@ -1582,8 +1694,8 @@ export final class Date {
      * @returns  An integer number, between 0 and 11, representing the month in the given date according to UTC time.
      * 0 corresponds to January, 1 to February, and so on.
      */
-    public getUTCMonth(): byte {
-        return ecmaMonthFromTime(this.ms);
+    public getUTCMonth(): number {
+        return ecmaMonthFromTime(this.ms) as number;
     }
 
     /**
@@ -1591,8 +1703,9 @@ export final class Date {
      *
      * @param month new month
      */
-    public setMonth(month: number): void {
-        this.setMonth(month as int)
+    public setMonth(month: number): number {
+        this.setMonth(month as int);
+        return this.ms as number;
     }
 
     /**
@@ -1601,7 +1714,7 @@ export final class Date {
      * @param month new month
      */
     public setMonth(month: int): void {
-        let inLeapYear = ecmaInLeapYear(this.getFullYear());
+        let inLeapYear = ecmaInLeapYear(this.getFullYear() as int);
         let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms - this.TZOffset * 60 * msPerSecond));
         let daysNew: int = getFirstDayInMonth(inLeapYear, month);
         this.ms -= daysNow * msPerDay;
@@ -1613,8 +1726,9 @@ export final class Date {
      *
      * @param month new month
      */
-    public setUTCMonth(month: number): void {
-        this.setUTCMonth(month as int)
+    public setUTCMonth(month: number): number {
+        this.setUTCMonth(month as int);
+        return this.ms as number;
     }
 
     /**
@@ -1623,7 +1737,7 @@ export final class Date {
      * @param month new month
      */
     public setUTCMonth(month: int): void {
-        let inLeapYear = ecmaInLeapYear(this.getFullYear());
+        let inLeapYear = ecmaInLeapYear(this.getFullYear() as int);
         let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms));
         let daysNew: int = getFirstDayInMonth(inLeapYear, month);
         this.ms -= daysNow * msPerDay;
@@ -1638,7 +1752,7 @@ export final class Date {
      *
      * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
      */
-    public getTime(): long throws {
+    public getTime(): number throws {
         return this.valueOf();
     }
 
@@ -1654,6 +1768,21 @@ export final class Date {
      */
     public setTime(value: long): void {
         this.ms = value;
+    }
+
+    /**
+     * Sets the number of milliseconds since the epoch,
+     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
+     *
+     * @param value new ms
+     *
+     * @see ECMA-262, 21.4.4.10
+     *
+     * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
+     */
+    public setTime(value: number): number {
+        this.setTime(value as long);
+        return this.ms as number;
     }
 
     /**
@@ -1675,8 +1804,8 @@ export final class Date {
      * and the date obtained by parsing the given string representation of a date.
      * If the argument doesn't represent a valid date, `InvalidDate` exception is thrown.
      */
-    public static parse(dateStr: String): long throws {
-        return Date.parseDateFromString(dateStr);
+    public static parse(dateStr: string): number throws {
+        return Date.parseDateFromString(dateStr) as number;
     }
 
     /**
@@ -1686,8 +1815,8 @@ export final class Date {
      * @returns the difference, in minutes, between a date as
      * evaluated in the UTC time zone, and the same date as evaluated in the local time zone.
      */
-    public getTimezoneOffset(): long {
-        return this.TZOffset;
+    public getTimezoneOffset(): number {
+        return this.TZOffset as number;
     }
 
     /**
@@ -1727,7 +1856,7 @@ export final class Date {
      * console.println(today.toISOString()); // Returns 2023-02-05T14:48:00.000Z
      * ```
      */
-    public toISOString(): String {
+    public toISOString(): string {
         let sb = new StringBuilder();
         let year = this.getUTCFullYear();
         if(year < 0 || year > 9999) {
@@ -1786,7 +1915,7 @@ export final class Date {
      *
      * @returns JSON representation of the current instance
      */
-    public toJSON(): String {
+    public toJSON(): string {
         return this.toISOString();
     }
 
@@ -1803,7 +1932,7 @@ export final class Date {
      * console.println(d.toTimeString()); // 13:12:57 GMT
      * ```
      */
-    public toTimeString(): String throws {
+    public toTimeString(): string throws {
         return this.timeString() + " " + this.timeZoneString();
     }
 
@@ -1849,7 +1978,7 @@ export final class Date {
      * console.println(d.toDateString()); // Sat Oct 27 1979
      * ```
      */
-    public toDateString(): String throws {
+    public toDateString(): string throws {
         return this.dateString();
     }
 
@@ -1862,9 +1991,9 @@ export final class Date {
         }
 
         let sb = new StringBuilder();
-        sb.append(dayNames[this.getDay()]);
+        sb.append(dayNames[this.getDay() as int]);
         sb.append(" ");
-        sb.append(monthNames[this.getMonth()]);
+        sb.append(monthNames[this.getMonth() as int]);
         sb.append(" ");
         let d = this.getDate();
         if (d < 10) {
@@ -1930,7 +2059,7 @@ export final class Date {
      * console.println(d.toString()); // Sat Oct 27 1979 13:12:57 GMT
      * ```
      */
-    public override toString(): String {
+    public override toString(): string {
         let res: String = "Invalid date";
         try {
             res = this.toDateString() + " " + this.toTimeString();
@@ -1952,7 +2081,7 @@ export final class Date {
      * console.println(d.toUTCString()); // Sat Oct 27 1979 13:12:57 GMT
      * ```
      */
-    public toUTCString(): String throws {
+    public toUTCString(): string throws {
         this.ms -= this.TZOffset * 60 * msPerSecond;
         let s: String = this.toDateString() + " " + this.toTimeString();
         this.ms += this.TZOffset * 60 * msPerSecond;

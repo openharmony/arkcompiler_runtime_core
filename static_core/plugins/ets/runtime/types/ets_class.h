@@ -59,17 +59,7 @@ public:
         return reinterpret_cast<const char *>(GetRuntimeClass()->GetDescriptor());
     }
 
-    EtsClass *GetBase()
-    {
-        if (IsInterface()) {
-            return nullptr;
-        }
-        auto *base = GetRuntimeClass()->GetBase();
-        if (base == nullptr) {
-            return nullptr;
-        }
-        return FromRuntimeClass(base);
-    }
+    EtsClass *GetBase();
 
     uint32_t GetFieldsNumber();
 
@@ -85,73 +75,21 @@ public:
         return GetRuntimeClass()->GetInstanceFields().size();
     }
 
+    uint32_t GetFieldIndexByName(const char *name);
+
     PandaVector<EtsField *> GetFields();
 
     EtsField *GetFieldByIndex(uint32_t i);
 
+    EtsField *GetFieldIDByOffset(uint32_t field_offset);
+    EtsField *GetFieldByName(EtsString *name);
+    EtsField *GetFieldIDByName(const char *name, const char *sig = nullptr);
+
     EtsField *GetOwnFieldByIndex(uint32_t i);
+    EtsField *GetDeclaredFieldIDByName(const char *name);
 
-    EtsField *GetFieldIDByName(const char *name, const char *sig = nullptr)
-    {
-        auto u8name = reinterpret_cast<const uint8_t *>(name);
-        auto *field = reinterpret_cast<EtsField *>(GetRuntimeClass()->GetInstanceFieldByName(u8name));
-
-        if (sig != nullptr && field != nullptr) {
-            if (strcmp(field->GetTypeDescriptor(), sig) != 0) {
-                return nullptr;
-            }
-        }
-
-        return field;
-    }
-
-    uint32_t GetFieldIndexByName(const char *name)
-    {
-        auto u8name = reinterpret_cast<const uint8_t *>(name);
-        auto fields = GetRuntimeClass()->GetFields();
-        panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(u8name)), u8name};
-        for (uint32_t i = 0; i < GetFieldsNumber(); i++) {
-            if (fields[i].GetName() == sd) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    EtsField *GetStaticFieldIDByName(const char *name, const char *sig = nullptr)
-    {
-        auto u8name = reinterpret_cast<const uint8_t *>(name);
-        auto *field = reinterpret_cast<EtsField *>(GetRuntimeClass()->GetStaticFieldByName(u8name));
-
-        if (sig != nullptr && field != nullptr) {
-            if (strcmp(field->GetTypeDescriptor(), sig) != 0) {
-                return nullptr;
-            }
-        }
-
-        return field;
-    }
-
-    EtsField *GetDeclaredFieldIDByName(const char *name)
-    {
-        return reinterpret_cast<EtsField *>(
-            GetRuntimeClass()->FindDeclaredField([name](const panda::Field &field) -> bool {
-                auto *jfield = EtsField::FromRuntimeField(&field);
-                return ::strcmp(jfield->GetName(), name) == 0;
-            }));
-    }
-
-    EtsField *GetFieldIDByOffset(uint32_t field_offset)
-    {
-        auto pred = [field_offset](const panda::Field &f) { return f.GetOffset() == field_offset; };
-        return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindInstanceField(pred));
-    }
-
-    EtsField *GetStaticFieldIDByOffset(uint32_t field_offset)
-    {
-        auto pred = [field_offset](const panda::Field &f) { return f.GetOffset() == field_offset; };
-        return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindStaticField(pred));
-    }
+    EtsField *GetStaticFieldIDByName(const char *name, const char *sig = nullptr);
+    EtsField *GetStaticFieldIDByOffset(uint32_t field_offset);
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name);
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature);
@@ -210,31 +148,11 @@ public:
         GetRuntimeClass()->SetFieldPrimitive<T, false>(field_offset, value);
     }
 
-    EtsObject *GetStaticFieldObject(EtsField *field)
-    {
-        return reinterpret_cast<EtsObject *>(GetRuntimeClass()->GetFieldObject(*field->GetRuntimeField()));
-    }
+    EtsObject *GetStaticFieldObject(EtsField *field);
+    EtsObject *GetStaticFieldObject(int32_t field_offset, bool is_volatile);
 
-    EtsObject *GetStaticFieldObject(int32_t field_offset, bool is_volatile)
-    {
-        if (is_volatile) {
-            return reinterpret_cast<EtsObject *>(GetRuntimeClass()->GetFieldObject<true>(field_offset));
-        }
-        return reinterpret_cast<EtsObject *>(GetRuntimeClass()->GetFieldObject<false>(field_offset));
-    }
-
-    void SetStaticFieldObject(EtsField *field, EtsObject *value)
-    {
-        GetRuntimeClass()->SetFieldObject(*field->GetRuntimeField(), reinterpret_cast<ObjectHeader *>(value));
-    }
-
-    void SetStaticFieldObject(int32_t field_offset, bool is_volatile, EtsObject *value)
-    {
-        if (is_volatile) {
-            GetRuntimeClass()->SetFieldObject<true>(field_offset, reinterpret_cast<ObjectHeader *>(value));
-        }
-        GetRuntimeClass()->SetFieldObject<false>(field_offset, reinterpret_cast<ObjectHeader *>(value));
-    }
+    void SetStaticFieldObject(EtsField *field, EtsObject *value);
+    void SetStaticFieldObject(int32_t field_offset, bool is_volatile, EtsObject *value);
 
     bool IsEtsObject()
     {
@@ -261,73 +179,21 @@ public:
         return GetRuntimeClass()->IsFinal();
     }
 
-    bool IsAnnotation() const
-    {
-        return GetRuntimeClass()->IsAnnotation();
-    }
-
-    bool IsEnum() const
-    {
-        return GetRuntimeClass()->IsEnum();
-    }
+    bool IsAnnotation() const;
+    bool IsEnum() const;
+    bool IsStringClass() const;
+    bool IsLambdaClass() const;
+    bool IsUnionClass() const;
+    bool IsUndefined() const;
+    bool IsClassClass();
+    bool IsInterface() const;
+    bool IsArrayClass() const;
+    bool IsTupleClass() const;
+    bool IsBoxedClass() const;
 
     static bool IsInSamePackage(std::string_view class_name1, std::string_view class_name2);
 
     bool IsInSamePackage(EtsClass *that);
-
-    bool IsStringClass() const
-    {
-        return GetRuntimeClass()->IsStringClass();
-    }
-
-    bool IsLambdaClass() const
-    {
-        // NOTE(petr-shumilov): Make more clear
-        return !GetRuntimeClass()->IsPrimitive() && GetRuntimeClass()->GetName().rfind(LAMBDA_PREFIX, 0) == 0;
-    }
-
-    bool IsUnionClass() const
-    {
-        // NOTE(petr-shumilov): Not implemented
-        return false;
-    }
-
-    bool IsUndefined() const
-    {
-        // NOTE(petr-shumilov): Not implemented
-        return false;
-    }
-
-    bool IsClassClass();
-
-    bool IsInterface() const
-    {
-        return GetRuntimeClass()->IsInterface();
-    }
-
-    bool IsArrayClass() const
-    {
-        return GetRuntimeClass()->IsArrayClass();
-    }
-
-    bool IsTupleClass() const
-    {
-        // NOTE(petr-shumilov): Not implemented
-        return false;
-    }
-
-    bool IsBoxedClass() const
-    {
-        auto type_desc = GetDescriptor();
-        return (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN ||
-                type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE ||
-                type_desc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR ||
-                type_desc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT ||
-                type_desc == panda::ets::panda_file_items::class_descriptors::BOX_INT ||
-                type_desc == panda::ets::panda_file_items::class_descriptors::BOX_LONG ||
-                type_desc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT ||
-                type_desc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE);
-    }
 
     PandaVector<EtsClass *> GetInterfaces() const;
 
@@ -375,11 +241,26 @@ public:
     }
 
     template <class Callback>
-    void EnumerateInterfaces(const Callback &callback)
+    void EnumerateDirectInterfaces(const Callback &callback)
     {
         for (Class *runtime_interface : GetRuntimeClass()->GetInterfaces()) {
             EtsClass *interface = EtsClass::FromRuntimeClass(runtime_interface);
             bool finished = callback(interface);
+            if (finished) {
+                break;
+            }
+        }
+    }
+
+    void GetInterfaces(PandaUnorderedSet<EtsClass *> &ifaces, EtsClass *iface);
+
+    template <class Callback>
+    void EnumerateInterfaces(const Callback &callback)
+    {
+        PandaUnorderedSet<EtsClass *> ifaces;
+        GetInterfaces(ifaces, this);
+        for (auto iface : ifaces) {
+            bool finished = callback(iface);
             if (finished) {
                 break;
             }
@@ -458,76 +339,17 @@ public:
 
     static EtsClass *GetPrimitiveClass(EtsString *primitive_name);
 
-    void Initialize(EtsArray *if_table, EtsClass *super_class, uint16_t access_flags, bool is_primitive_type)
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
+    void Initialize(EtsArray *if_table, EtsClass *super_class, uint16_t access_flags, bool is_primitive_type);
 
-        SetIfTable(if_table);
-        SetName(nullptr);
-        SetSuperClass(super_class);
+    void SetComponentType(EtsClass *component_type);
 
-        uint32_t flags = access_flags;
-        if (is_primitive_type) {
-            flags |= ETS_ACC_PRIMITIVE;
-        }
+    EtsClass *GetComponentType() const;
 
-        if (super_class != nullptr) {
-            if (super_class->IsSoftReference()) {
-                flags |= IS_SOFT_REFERENCE;
-            } else if (super_class->IsWeakReference()) {
-                flags |= IS_WEAK_REFERENCE;
-            } else if (super_class->IsPhantomReference()) {
-                flags |= IS_PHANTOM_REFERENCE;
-            }
-            if (super_class->IsFinalizerReference()) {
-                flags |= IS_FINALIZE_REFERENCE;
-            }
-            if (super_class->IsFinalizable()) {
-                flags |= IS_CLASS_FINALIZABLE;
-            }
-        }
-        if ((flags & IS_CLASS_FINALIZABLE) == 0) {
-            if (IsClassFinalizable(this)) {
-                flags |= IS_CLASS_FINALIZABLE;
-            }
-        }
-        SetFlags(flags);
-    }
+    void SetIfTable(EtsArray *array);
 
-    void SetComponentType(EtsClass *component_type)
-    {
-        if (component_type == nullptr) {
-            GetRuntimeClass()->SetComponentType(nullptr);
-            return;
-        }
-        GetRuntimeClass()->SetComponentType(component_type->GetRuntimeClass());
-    }
+    void SetName(EtsString *name);
 
-    EtsClass *GetComponentType() const
-    {
-        panda::Class *component_type = GetRuntimeClass()->GetComponentType();
-        if (component_type == nullptr) {
-            return nullptr;
-        }
-        return FromRuntimeClass(component_type);
-    }
-
-    void SetIfTable(EtsArray *array)
-    {
-        GetObjectHeader()->SetFieldObject(GetIfTableOffset(), reinterpret_cast<ObjectHeader *>(array));
-    }
-
-    void SetName(EtsString *name)
-    {
-        GetObjectHeader()->SetFieldObject(GetNameOffset(), reinterpret_cast<ObjectHeader *>(name));
-    }
-
-    bool CompareAndSetName(EtsString *old_name, EtsString *new_name)
-    {
-        return GetObjectHeader()->CompareAndSetFieldObject(GetNameOffset(), reinterpret_cast<ObjectHeader *>(old_name),
-                                                           reinterpret_cast<ObjectHeader *>(new_name),
-                                                           std::memory_order::memory_order_seq_cst, true);
-    }
+    bool CompareAndSetName(EtsString *old_name, EtsString *new_name);
 
     EtsString *GetName();
     static EtsString *CreateEtsClassName([[maybe_unused]] const char *descriptor);

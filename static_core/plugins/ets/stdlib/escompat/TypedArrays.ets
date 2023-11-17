@@ -21,7 +21,7 @@ package escompat;
  * JS Int8Array API-compatible class
  */
 export final class Int8Array {
-    public static readonly BYTES_PER_ELEMENT = 1
+    public static readonly BYTES_PER_ELEMENT : number = 1
 
     /**
      * Creates an empty Int8Array.
@@ -53,14 +53,14 @@ export final class Int8Array {
      * @param length size of elements of type byte in newly created Int8Array
      */
     public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Int8Array.BYTES_PER_ELEMENT != 0) {
+        if (buf.getByteLength() % Int8Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
         }
-        if (byteOffset % Int8Array.BYTES_PER_ELEMENT != 0) {
+        if (byteOffset % Int8Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length * Int8Array.BYTES_PER_ELEMENT > buf.getByteLength()) {
+        if (this.length as int * Int8Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
             throw new RangeError("Range Error: attempt to create Int8Array where length * Int8Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
         }
         this.byteLength = buf.getByteLength() - byteOffset
@@ -77,7 +77,7 @@ export final class Int8Array {
      * @param byteOffset byte offset from begin of the buf
      */
     public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Int8Array.BYTES_PER_ELEMENT)
+        this(buf, byteOffset, buf.getByteLength() / Int8Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -97,7 +97,7 @@ export final class Int8Array {
      * @param buf data initializer
      */
     public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Int8Array.BYTES_PER_ELEMENT)
+        this(buf, 0, buf.getByteLength() / Int8Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -107,7 +107,7 @@ export final class Int8Array {
      */
     public constructor(length: int) {
         this.length = length
-        this.byteLength = length * Int8Array.BYTES_PER_ELEMENT
+        this.byteLength = length * Int8Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength)
     }
@@ -127,7 +127,7 @@ export final class Int8Array {
      * @param other data initializer
      */
     public constructor(other: Int8Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength)
+        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
         this.byteLength = other.byteLength
         this.length = other.length
     }
@@ -152,12 +152,12 @@ export final class Int8Array {
      */
     public at(index: int): byte {
         if (index < 0) {
-            index = this.length + index
+            index = this.length as int + index
         }
-        let byteIndex = index * Int8Array.BYTES_PER_ELEMENT + this.byteOffset
+        let byteIndex = index * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res: byte = 0
-        for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT; ++i) {
-            let byteVal = this.buffer.at(byteIndex + i) as byte
+        for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
+            let byteVal = this.buffer.at(byteIndex as int + i) as byte
             res = (res | byteVal << (8 * i)) as byte;
         }
         return res
@@ -190,34 +190,34 @@ export final class Int8Array {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        if (insertPos < -this.length) {
+        if (insertPos < -this.length as int) {
             insertPos = 0
         }
-        if (insertPos >= this.length) {
+        if (insertPos >= this.length as int) {
             return
         }
         if (insertPos < 0) {
-            insertPos = this.length + insertPos
+            insertPos = this.length as int + insertPos
         }
 
-        if (startPos < -this.length) {
+        if (startPos < -this.length as int) {
             startPos = 0
         }
-        if (startPos >= this.length) {
+        if (startPos >= this.length as int) {
             return
         }
         if (startPos < 0) {
-            startPos = this.length + startPos
+            startPos = this.length as int + startPos
         }
 
-        if (endPos < -this.length) {
+        if (endPos < -this.length as int) {
             endPos = 0
         }
         if (endPos < 0) {
-            endPos = this.length + endPos
+            endPos = this.length as int + endPos
         }
-        if (endPos > this.length) {
-            endPos = this.length
+        if (endPos > this.length as int) {
+            endPos = this.length as int
         }
         if (endPos < startPos) {
             return
@@ -251,7 +251,7 @@ export final class Int8Array {
      * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.length)
+        this.copyWithin(insertPos, startPos, this.length as int)
     }
 
     /**
@@ -271,18 +271,14 @@ export final class Int8Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.length)
+        this.copyWithin(insertPos, 0, this.length as int)
     }
 
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): MapIterator<Int, Byte> {
-        let ret: Entry<Int, Byte>[] = new Entry<Int, Byte>[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = new Entry<Int, Byte>(i, this.at(i));
-        }
-        return new MapIterator<Int, Byte>(ret);
+    /* public */ internal entries(): IterableIterator<Entry<Int, Byte>> {
+        throw new Error("not implemented")
     }
 
     /**
@@ -304,23 +300,23 @@ export final class Int8Array {
      * @returns modified Int8Array
      */
     public fill(value: byte, start: int, end: int): Int8Array {
-        if (start < -this.length) {
+        if (start < -this.length as int) {
             start = 0
         }
         if (start < 0) {
-            start += this.length
+            start += this.length as int
         }
-        if (start >= this.length) {
+        if (start >= this.length as int) {
             return this;
         }
-        if (end < -this.length) {
+        if (end < -this.length as int) {
             end = 0
         }
         if (end < 0) {
-            end += this.length
+            end += this.length as int
         }
-        if (end >= this.length) {
-            end = this.length
+        if (end >= this.length as int) {
+            end = this.length as int
         }
         for (let i = start; i < end; ++i) {
             this.set(i, value)
@@ -347,7 +343,7 @@ export final class Int8Array {
      * @returns modified Int8Array
      */
     public fill(value: byte, start: int): Int8Array {
-        return this.fill(value, start, this.length)
+        return this.fill(value, start, this.length as int)
     }
 
     /**
@@ -358,7 +354,7 @@ export final class Int8Array {
      * @returns modified Int8Array
      */
     public fill(value: byte): Int8Array {
-        return this.fill(value, 0, this.length)
+        return this.fill(value, 0, this.length as int)
     }
 
     /**
@@ -382,13 +378,13 @@ export final class Int8Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: byte): void {
-        if (insertPos < 0 || insertPos >= this.length) {
+        if (insertPos < 0 || insertPos >= this.length as int) {
             throw new RangeError("set: insertPos is out-of-bounds")
         }
 
-        let startByte = insertPos * Int8Array.BYTES_PER_ELEMENT + this.byteOffset
+        let startByte = insertPos * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = val;
-        for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT; ++i) {
+        for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
             let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
             this.buffer.set(startByte + i, byteVal)
         }
@@ -403,13 +399,9 @@ export final class Int8Array {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos1: number): void {
-        const insertPos = insertPos1 as int
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: byte[]): size of arr is greater than Int8Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.set(insertPos + i, arr[i] as double as int as byte)
+    public set(arr: number[], insertPos: number): void {
+        for (let i = 0; i < arr.length as int; ++i) {
+            this.set(insertPos as int + i, arr[i] as double as int as byte)
         }
     }
 
@@ -423,10 +415,7 @@ export final class Int8Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: byte[], insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: byte[]): size of arr is greater than Int8Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
+        for (let i = 0; i < arr.length as int; ++i) {
             this.set(insertPos + i, arr[i])
         }
     }
@@ -499,7 +488,7 @@ export final class Int8Array {
      * @returns true if e is in Int8Array, false otherwise
      */
     public includes(e: byte, fromIndex: int): boolean {
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return true
             }
@@ -553,17 +542,17 @@ export final class Int8Array {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(e: byte, fromIndex: int): int {
-        if (fromIndex >= this.length) {
+        if (fromIndex >= this.length as int) {
             return -1
         }
         if (fromIndex < 0) {
-            fromIndex += this.length
+            fromIndex += this.length as int
             // See TypedArray.indexOf JS docs
             if (fromIndex < 0) {
                 fromIndex = 0
             }
         }
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return i
             }
@@ -603,12 +592,12 @@ export final class Int8Array {
      */
     public join(s: string): string {
         let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(s)
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -627,12 +616,13 @@ export final class Int8Array {
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -662,11 +652,11 @@ export final class Int8Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
     public lastIndexOf(val: byte, fromIndex: int): int {
-        if (fromIndex >= this.length) {
-            fromIndex = this.length - 1
+        if (fromIndex >= this.length as int) {
+            fromIndex = this.length as int - 1
         }
         if (fromIndex < 0) {
-            fromIndex = this.length + fromIndex
+            fromIndex = this.length as int + fromIndex
         }
 
         for (let i = fromIndex; i >= 0; --i) {
@@ -686,7 +676,7 @@ export final class Int8Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as double as int as byte, this.length - 1)
+        return this.lastIndexOf(val as double as int as byte, this.length as int - 1)
     }
 
     /**
@@ -697,7 +687,7 @@ export final class Int8Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: byte): int {
-        return this.lastIndexOf(val, this.length - 1)
+        return this.lastIndexOf(val, this.length as int - 1)
     }
 
    /**
@@ -718,8 +708,8 @@ export final class Int8Array {
      */
     public reverse(): Int8Array {
         let res = new Int8Array(this)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(this.length - 1 - i, this.at(i))
+        for (let i = 0; i < this.length as int; ++i) {
+            res.set(this.length as int - 1 - i, this.at(i))
         }
         return res
     }
@@ -751,7 +741,7 @@ export final class Int8Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int8Array {
-        let buf = this.buffer.sliceInternal(begin * Int8Array.BYTES_PER_ELEMENT, end * Int8Array.BYTES_PER_ELEMENT)
+        let buf = this.buffer.sliceInternal(begin * Int8Array.BYTES_PER_ELEMENT as int, end * Int8Array.BYTES_PER_ELEMENT as int)
         return new Int8Array(buf)
     }
 
@@ -774,7 +764,7 @@ export final class Int8Array {
      * @returns a new Int8Array with elements of current Int8Array[begin, this.length)
      */
     public slice(begin: int): Int8Array {
-        return this.slice(begin, this.length)
+        return this.slice(begin, this.length as int)
     }
 
     /**
@@ -823,7 +813,7 @@ export final class Int8Array {
      * @returns new Int8Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Int8Array {
-        return new Int8Array(this.buffer, begin * Int8Array.BYTES_PER_ELEMENT, end - begin)
+        return new Int8Array(this.buffer, begin * Int8Array.BYTES_PER_ELEMENT as int, end - begin)
     }
 
     /**
@@ -845,7 +835,7 @@ export final class Int8Array {
      * @returns new Int8Array with the same ArrayBuffer
      */
     public subarray(begin: int): Int8Array {
-        return this.subarray(begin, this.length)
+        return this.subarray(begin, this.length as int)
     }
 
     /**
@@ -854,7 +844,7 @@ export final class Int8Array {
      * @returns new Int8Array with the same ArrayBuffer
      */
     public subarray(): Int8Array {
-        return this.subarray(0, this.length)
+        return this.subarray(0, this.length as int)
     }
 
     /**
@@ -915,12 +905,12 @@ export final class Int8Array {
      */
     public override toString(): string {
         let res = new StringBuilder();
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(c',')
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -930,12 +920,13 @@ export final class Int8Array {
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Byte> {
-        const ret = new Byte[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Byte>(ret);
+    public values(): Iterator<Byte> {
+        throw new Error("not implemented")
+        // const ret = new Byte[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Byte>(ret);
     }
 
     /**
@@ -1092,8 +1083,8 @@ export final class Int8Array {
      * @returns sorted Int8Array
      */
     public sort(fn: (a: byte, b: byte) => int): Int8Array {
-        let arr: byte[] = new byte[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: byte[] = new byte[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -1101,7 +1092,7 @@ export final class Int8Array {
             let mustPrecede: (a: byte, b: byte) => boolean =
                 (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -1116,7 +1107,7 @@ export final class Int8Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: byte, index: int, array: Int8Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i), i, this)) {
                 return true
             }
@@ -1148,7 +1139,7 @@ export final class Int8Array {
      */
     public reduce(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte, init: byte): byte {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -1163,7 +1154,7 @@ export final class Int8Array {
      */
     public reduce(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte): byte {
         let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -1180,7 +1171,7 @@ export final class Int8Array {
      */
     public reduceRight(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte, init: byte): byte {
         let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -1194,8 +1185,8 @@ export final class Int8Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte): byte {
-        let acc: byte = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: byte = this.at(this.length as int - 1)
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -1209,9 +1200,9 @@ export final class Int8Array {
     * @returns a new Int8Array where for each element from current Int8Array fn was applied
     */
     public map(fn: (val: byte, index: int) => byte): Int8Array {
-        let resBuf = new ArrayBuffer(this.length * Int8Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Int8Array.BYTES_PER_ELEMENT as int)
         let res = new Int8Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i), i))
         }
         return res
@@ -1225,7 +1216,7 @@ export final class Int8Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: byte, index: int, array: Int8Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i), i, this)) {
                 return false
             }
@@ -1254,17 +1245,17 @@ export final class Int8Array {
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
     public filter(fn: (val: byte, index: int, array: Int8Array) => boolean): Int8Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i), i, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT as int)
         let res = new Int8Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -1295,7 +1286,7 @@ export final class Int8Array {
      * TODO: return byte | undefined as in JS
      */
     public find(fn: (val: byte, index: int, array: Int8Array) => boolean): byte {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -1325,7 +1316,7 @@ export final class Int8Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: byte, index: int, array: Int8Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -1355,7 +1346,7 @@ export final class Int8Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: byte, index: int, array: Int8Array) => boolean): byte {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -1385,7 +1376,7 @@ export final class Int8Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: byte, index: int, array: Int8Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -1415,7 +1406,7 @@ export final class Int8Array {
      * @returns undefined
      */
     public forEach(fn: (val: byte, index: int, array: Int8Array) => byte): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i), i, this))
         }
         throw new Error("Int8Array.forEach: has to return undefined, but returns void for now")
@@ -1571,8 +1562,8 @@ export final class Int8Array {
      * @returns sorted Int8Array
      */
     public sort(fn: (a: number, b: number) => number): Int8Array {
-        let arr: byte[] = new byte[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: byte[] = new byte[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -1580,7 +1571,7 @@ export final class Int8Array {
             let mustPrecede: (a: byte, b: byte) => boolean =
                 (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -1595,7 +1586,7 @@ export final class Int8Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number, array: Int8Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i) as double as number, i as double as number, this)) {
                 return true
             }
@@ -1627,7 +1618,7 @@ export final class Int8Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int8Array) => number, init: number): number {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -1642,7 +1633,7 @@ export final class Int8Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int8Array) => number): number {
         let acc = this.at(0) as double as number
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -1659,7 +1650,7 @@ export final class Int8Array {
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int8Array) => number, init: number): number {
         let acc = init as double as number
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -1673,8 +1664,8 @@ export final class Int8Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int8Array) => number): number {
-        let acc: number = this.at(this.length - 1) as double as number
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: number = this.at(this.length as int - 1) as double as number
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -1688,9 +1679,9 @@ export final class Int8Array {
     * @returns a new Int8Array where for each element from current Int8Array fn was applied
     */
     public map(fn: (val: number, index: number) => number): Int8Array {
-        let resBuf = new ArrayBuffer(this.length * Int8Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Int8Array.BYTES_PER_ELEMENT as int)
         let res = new Int8Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as byte)
         }
         return res
@@ -1704,7 +1695,7 @@ export final class Int8Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number, array: Int8Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i) as double as number, i as double as number, this)) {
                 return false
             }
@@ -1733,17 +1724,17 @@ export final class Int8Array {
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Int8Array) => boolean): Int8Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i) as double as number, i as double as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT as int)
         let res = new Int8Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -1774,7 +1765,7 @@ export final class Int8Array {
      * TODO: return byte | undefined as in JS
      */
     public find(fn: (val: number, index: number, array: Int8Array) => boolean): byte {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -1804,7 +1795,7 @@ export final class Int8Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number, array: Int8Array) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i as double as number
@@ -1834,7 +1825,7 @@ export final class Int8Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number, array: Int8Array) => boolean): byte {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -1864,7 +1855,7 @@ export final class Int8Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number, array: Int8Array) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i
@@ -1894,7 +1885,7 @@ export final class Int8Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number, array: Int8Array) => byte): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i) as double as number, i as double as number, this))
         }
         throw new Error("Int8Array.forEach: has to return undefined, but returns void for now")
@@ -1930,13 +1921,13 @@ export final class Int8Array {
     public readonly buffer: Buffer
 
     /** Byte offset within the underlying ArrayBuffer */
-    public readonly byteOffset: int
+    public readonly byteOffset: number
 
     /** Number of bytes used */
-    public readonly byteLength: int
+    public readonly byteLength: number
 
     /** Number of byte stored in Int8Array */
-    public readonly length: int
+    public readonly length: number
 
     /** String \"Int8Array\" */
     public readonly name = "Int8Array"
@@ -1946,7 +1937,7 @@ export final class Int8Array {
  * JS Int16Array API-compatible class
  */
 export final class Int16Array {
-    public static readonly BYTES_PER_ELEMENT = 2
+    public static readonly BYTES_PER_ELEMENT : number = 2
 
     /**
      * Creates an empty Int16Array.
@@ -1978,14 +1969,14 @@ export final class Int16Array {
      * @param length size of elements of type short in newly created Int16Array
      */
     public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Int16Array.BYTES_PER_ELEMENT != 0) {
+        if (buf.getByteLength() % Int16Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
         }
-        if (byteOffset % Int16Array.BYTES_PER_ELEMENT != 0) {
+        if (byteOffset % Int16Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length * Int16Array.BYTES_PER_ELEMENT > buf.getByteLength()) {
+        if (this.length as int * Int16Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
             throw new RangeError("Range Error: attempt to create Int16Array where length * Int16Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
         }
         this.byteLength = buf.getByteLength() - byteOffset
@@ -2002,7 +1993,7 @@ export final class Int16Array {
      * @param byteOffset byte offset from begin of the buf
      */
     public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Int16Array.BYTES_PER_ELEMENT)
+        this(buf, byteOffset, buf.getByteLength() / Int16Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -2022,7 +2013,7 @@ export final class Int16Array {
      * @param buf data initializer
      */
     public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Int16Array.BYTES_PER_ELEMENT)
+        this(buf, 0, buf.getByteLength() / Int16Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -2032,7 +2023,7 @@ export final class Int16Array {
      */
     public constructor(length: int) {
         this.length = length
-        this.byteLength = length * Int16Array.BYTES_PER_ELEMENT
+        this.byteLength = length * Int16Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength)
     }
@@ -2052,7 +2043,7 @@ export final class Int16Array {
      * @param other data initializer
      */
     public constructor(other: Int16Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength)
+        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
         this.byteLength = other.byteLength
         this.length = other.length
     }
@@ -2077,12 +2068,12 @@ export final class Int16Array {
      */
     public at(index: int): short {
         if (index < 0) {
-            index = this.length + index
+            index = this.length as int + index
         }
-        let byteIndex = index * Int16Array.BYTES_PER_ELEMENT + this.byteOffset
+        let byteIndex = index * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res: short = 0
-        for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT; ++i) {
-            let byteVal = this.buffer.at(byteIndex + i) as short
+        for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
+            let byteVal = this.buffer.at(byteIndex as int + i) as short
             byteVal &= 0xff
             res = (res | byteVal << (8 * i)) as short;
         }
@@ -2116,34 +2107,34 @@ export final class Int16Array {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        if (insertPos < -this.length) {
+        if (insertPos < -this.length as int) {
             insertPos = 0
         }
-        if (insertPos >= this.length) {
+        if (insertPos >= this.length as int) {
             return
         }
         if (insertPos < 0) {
-            insertPos = this.length + insertPos
+            insertPos = this.length as int + insertPos
         }
 
-        if (startPos < -this.length) {
+        if (startPos < -this.length as int) {
             startPos = 0
         }
-        if (startPos >= this.length) {
+        if (startPos >= this.length as int) {
             return
         }
         if (startPos < 0) {
-            startPos = this.length + startPos
+            startPos = this.length as int + startPos
         }
 
-        if (endPos < -this.length) {
+        if (endPos < -this.length as int) {
             endPos = 0
         }
         if (endPos < 0) {
-            endPos = this.length + endPos
+            endPos = this.length as int + endPos
         }
-        if (endPos > this.length) {
-            endPos = this.length
+        if (endPos > this.length as int) {
+            endPos = this.length as int
         }
         if (endPos < startPos) {
             return
@@ -2177,7 +2168,7 @@ export final class Int16Array {
      * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.length)
+        this.copyWithin(insertPos, startPos, this.length as int)
     }
 
     /**
@@ -2197,18 +2188,14 @@ export final class Int16Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.length)
+        this.copyWithin(insertPos, 0, this.length as int)
     }
 
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): MapIterator<Int, Short> {
-        let ret: Entry<Int, Short>[] = new Entry<Int, Short>[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = new Entry<Int, Short>(i, this.at(i));
-        }
-        return new MapIterator<Int, Short>(ret);
+    /* public */ internal entries(): IterableIterator<Entry<Int, Short>> {
+        throw new Error("not implemented")
     }
 
     /**
@@ -2230,23 +2217,23 @@ export final class Int16Array {
      * @returns modified Int16Array
      */
     public fill(value: short, start: int, end: int): Int16Array {
-        if (start < -this.length) {
+        if (start < -this.length as int) {
             start = 0
         }
         if (start < 0) {
-            start += this.length
+            start += this.length as int
         }
-        if (start >= this.length) {
+        if (start >= this.length as int) {
             return this;
         }
-        if (end < -this.length) {
+        if (end < -this.length as int) {
             end = 0
         }
         if (end < 0) {
-            end += this.length
+            end += this.length as int
         }
-        if (end >= this.length) {
-            end = this.length
+        if (end >= this.length as int) {
+            end = this.length as int
         }
         for (let i = start; i < end; ++i) {
             this.set(i, value)
@@ -2273,7 +2260,7 @@ export final class Int16Array {
      * @returns modified Int16Array
      */
     public fill(value: short, start: int): Int16Array {
-        return this.fill(value, start, this.length)
+        return this.fill(value, start, this.length as int)
     }
 
     /**
@@ -2284,7 +2271,7 @@ export final class Int16Array {
      * @returns modified Int16Array
      */
     public fill(value: short): Int16Array {
-        return this.fill(value, 0, this.length)
+        return this.fill(value, 0, this.length as int)
     }
 
     /**
@@ -2308,13 +2295,13 @@ export final class Int16Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: short): void {
-        if (insertPos < 0 || insertPos >= this.length) {
+        if (insertPos < 0 || insertPos >= this.length as int) {
             throw new RangeError("set: insertPos is out-of-bounds")
         }
 
-        let startByte = insertPos * Int16Array.BYTES_PER_ELEMENT + this.byteOffset
+        let startByte = insertPos * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = val;
-        for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT; ++i) {
+        for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
             let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
             this.buffer.set(startByte + i, byteVal)
         }
@@ -2329,13 +2316,9 @@ export final class Int16Array {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos1: number): void {
-        const insertPos = insertPos1 as int
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: short[]): size of arr is greater than Int16Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.set(insertPos + i, arr[i] as double as int as short)
+    public set(arr: number[], insertPos: number): void {
+        for (let i = 0; i < arr.length as int; ++i) {
+            this.set(insertPos as int + i, arr[i] as double as int as short)
         }
     }
 
@@ -2349,10 +2332,7 @@ export final class Int16Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: short[], insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: short[]): size of arr is greater than Int16Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
+        for (let i = 0; i < arr.length as int; ++i) {
             this.set(insertPos + i, arr[i])
         }
     }
@@ -2425,7 +2405,7 @@ export final class Int16Array {
      * @returns true if e is in Int16Array, false otherwise
      */
     public includes(e: short, fromIndex: int): boolean {
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return true
             }
@@ -2479,17 +2459,17 @@ export final class Int16Array {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(e: short, fromIndex: int): int {
-        if (fromIndex >= this.length) {
+        if (fromIndex >= this.length as int) {
             return -1
         }
         if (fromIndex < 0) {
-            fromIndex += this.length
+            fromIndex += this.length as int
             // See TypedArray.indexOf JS docs
             if (fromIndex < 0) {
                 fromIndex = 0
             }
         }
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return i
             }
@@ -2529,12 +2509,12 @@ export final class Int16Array {
      */
     public join(s: string): string {
         let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(s)
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -2553,12 +2533,13 @@ export final class Int16Array {
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -2588,11 +2569,11 @@ export final class Int16Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
     public lastIndexOf(val: short, fromIndex: int): int {
-        if (fromIndex >= this.length) {
-            fromIndex = this.length - 1
+        if (fromIndex >= this.length as int) {
+            fromIndex = this.length as int - 1
         }
         if (fromIndex < 0) {
-            fromIndex = this.length + fromIndex
+            fromIndex = this.length as int + fromIndex
         }
 
         for (let i = fromIndex; i >= 0; --i) {
@@ -2612,7 +2593,7 @@ export final class Int16Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as double as int as short, this.length - 1)
+        return this.lastIndexOf(val as double as int as short, this.length as int - 1)
     }
 
     /**
@@ -2623,7 +2604,7 @@ export final class Int16Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: short): int {
-        return this.lastIndexOf(val, this.length - 1)
+        return this.lastIndexOf(val, this.length as int - 1)
     }
 
    /**
@@ -2644,8 +2625,8 @@ export final class Int16Array {
      */
     public reverse(): Int16Array {
         let res = new Int16Array(this)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(this.length - 1 - i, this.at(i))
+        for (let i = 0; i < this.length as int; ++i) {
+            res.set(this.length as int - 1 - i, this.at(i))
         }
         return res
     }
@@ -2677,7 +2658,7 @@ export final class Int16Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int16Array {
-        let buf = this.buffer.sliceInternal(begin * Int16Array.BYTES_PER_ELEMENT, end * Int16Array.BYTES_PER_ELEMENT)
+        let buf = this.buffer.sliceInternal(begin * Int16Array.BYTES_PER_ELEMENT as int, end * Int16Array.BYTES_PER_ELEMENT as int)
         return new Int16Array(buf)
     }
 
@@ -2700,7 +2681,7 @@ export final class Int16Array {
      * @returns a new Int16Array with elements of current Int16Array[begin, this.length)
      */
     public slice(begin: int): Int16Array {
-        return this.slice(begin, this.length)
+        return this.slice(begin, this.length as int)
     }
 
     /**
@@ -2749,7 +2730,7 @@ export final class Int16Array {
      * @returns new Int16Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Int16Array {
-        return new Int16Array(this.buffer, begin * Int16Array.BYTES_PER_ELEMENT, end - begin)
+        return new Int16Array(this.buffer, begin * Int16Array.BYTES_PER_ELEMENT as int, end - begin)
     }
 
     /**
@@ -2771,7 +2752,7 @@ export final class Int16Array {
      * @returns new Int16Array with the same ArrayBuffer
      */
     public subarray(begin: int): Int16Array {
-        return this.subarray(begin, this.length)
+        return this.subarray(begin, this.length as int)
     }
 
     /**
@@ -2780,7 +2761,7 @@ export final class Int16Array {
      * @returns new Int16Array with the same ArrayBuffer
      */
     public subarray(): Int16Array {
-        return this.subarray(0, this.length)
+        return this.subarray(0, this.length as int)
     }
 
     /**
@@ -2841,12 +2822,12 @@ export final class Int16Array {
      */
     public override toString(): string {
         let res = new StringBuilder();
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(c',')
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -2856,12 +2837,13 @@ export final class Int16Array {
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Short> {
-        const ret = new Short[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Short>(ret);
+    public values(): Iterator<Short> {
+        throw new Error("not implemented")
+        // const ret = new Short[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Short>(ret);
     }
 
     /**
@@ -3018,8 +3000,8 @@ export final class Int16Array {
      * @returns sorted Int16Array
      */
     public sort(fn: (a: short, b: short) => int): Int16Array {
-        let arr: short[] = new short[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: short[] = new short[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -3027,7 +3009,7 @@ export final class Int16Array {
             let mustPrecede: (a: short, b: short) => boolean =
                 (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -3042,7 +3024,7 @@ export final class Int16Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: short, index: int, array: Int16Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i), i, this)) {
                 return true
             }
@@ -3074,7 +3056,7 @@ export final class Int16Array {
      */
     public reduce(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short, init: short): short {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -3089,7 +3071,7 @@ export final class Int16Array {
      */
     public reduce(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short): short {
         let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -3106,7 +3088,7 @@ export final class Int16Array {
      */
     public reduceRight(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short, init: short): short {
         let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -3120,8 +3102,8 @@ export final class Int16Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short): short {
-        let acc: short = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: short = this.at(this.length as int - 1)
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -3135,9 +3117,9 @@ export final class Int16Array {
     * @returns a new Int16Array where for each element from current Int16Array fn was applied
     */
     public map(fn: (val: short, index: int) => short): Int16Array {
-        let resBuf = new ArrayBuffer(this.length * Int16Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Int16Array.BYTES_PER_ELEMENT as int)
         let res = new Int16Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i), i))
         }
         return res
@@ -3151,7 +3133,7 @@ export final class Int16Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: short, index: int, array: Int16Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i), i, this)) {
                 return false
             }
@@ -3180,17 +3162,17 @@ export final class Int16Array {
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
     public filter(fn: (val: short, index: int, array: Int16Array) => boolean): Int16Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i), i, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT as int)
         let res = new Int16Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -3221,7 +3203,7 @@ export final class Int16Array {
      * TODO: return short | undefined as in JS
      */
     public find(fn: (val: short, index: int, array: Int16Array) => boolean): short {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -3251,7 +3233,7 @@ export final class Int16Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: short, index: int, array: Int16Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -3281,7 +3263,7 @@ export final class Int16Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: short, index: int, array: Int16Array) => boolean): short {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -3311,7 +3293,7 @@ export final class Int16Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: short, index: int, array: Int16Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -3341,7 +3323,7 @@ export final class Int16Array {
      * @returns undefined
      */
     public forEach(fn: (val: short, index: int, array: Int16Array) => short): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i), i, this))
         }
         throw new Error("Int16Array.forEach: has to return undefined, but returns void for now")
@@ -3497,8 +3479,8 @@ export final class Int16Array {
      * @returns sorted Int16Array
      */
     public sort(fn: (a: number, b: number) => number): Int16Array {
-        let arr: short[] = new short[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: short[] = new short[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -3506,7 +3488,7 @@ export final class Int16Array {
             let mustPrecede: (a: short, b: short) => boolean =
                 (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -3521,7 +3503,7 @@ export final class Int16Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number, array: Int16Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i) as double as number, i as double as number, this)) {
                 return true
             }
@@ -3553,7 +3535,7 @@ export final class Int16Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int16Array) => number, init: number): number {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -3568,7 +3550,7 @@ export final class Int16Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int16Array) => number): number {
         let acc = this.at(0) as double as number
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -3585,7 +3567,7 @@ export final class Int16Array {
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int16Array) => number, init: number): number {
         let acc = init as double as number
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -3599,8 +3581,8 @@ export final class Int16Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int16Array) => number): number {
-        let acc: number = this.at(this.length - 1) as double as number
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: number = this.at(this.length as int - 1) as double as number
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -3614,9 +3596,9 @@ export final class Int16Array {
     * @returns a new Int16Array where for each element from current Int16Array fn was applied
     */
     public map(fn: (val: number, index: number) => number): Int16Array {
-        let resBuf = new ArrayBuffer(this.length * Int16Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Int16Array.BYTES_PER_ELEMENT as int)
         let res = new Int16Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as short)
         }
         return res
@@ -3630,7 +3612,7 @@ export final class Int16Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number, array: Int16Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i) as double as number, i as double as number, this)) {
                 return false
             }
@@ -3659,17 +3641,17 @@ export final class Int16Array {
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Int16Array) => boolean): Int16Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i) as double as number, i as double as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT as int)
         let res = new Int16Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -3700,7 +3682,7 @@ export final class Int16Array {
      * TODO: return short | undefined as in JS
      */
     public find(fn: (val: number, index: number, array: Int16Array) => boolean): short {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -3730,7 +3712,7 @@ export final class Int16Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number, array: Int16Array) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i as double as number
@@ -3760,7 +3742,7 @@ export final class Int16Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number, array: Int16Array) => boolean): short {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -3790,7 +3772,7 @@ export final class Int16Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number, array: Int16Array) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i
@@ -3820,7 +3802,7 @@ export final class Int16Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number, array: Int16Array) => short): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i) as double as number, i as double as number, this))
         }
         throw new Error("Int16Array.forEach: has to return undefined, but returns void for now")
@@ -3856,13 +3838,13 @@ export final class Int16Array {
     public readonly buffer: Buffer
 
     /** Byte offset within the underlying ArrayBuffer */
-    public readonly byteOffset: int
+    public readonly byteOffset: number
 
     /** Number of bytes used */
-    public readonly byteLength: int
+    public readonly byteLength: number
 
     /** Number of short stored in Int16Array */
-    public readonly length: int
+    public readonly length: number
 
     /** String \"Int16Array\" */
     public readonly name = "Int16Array"
@@ -3872,7 +3854,7 @@ export final class Int16Array {
  * JS Int32Array API-compatible class
  */
 export final class Int32Array {
-    public static readonly BYTES_PER_ELEMENT = 4
+    public static readonly BYTES_PER_ELEMENT : number = 4
 
     /**
      * Creates an empty Int32Array.
@@ -3904,14 +3886,14 @@ export final class Int32Array {
      * @param length size of elements of type int in newly created Int32Array
      */
     public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Int32Array.BYTES_PER_ELEMENT != 0) {
+        if (buf.getByteLength() % Int32Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
         }
-        if (byteOffset % Int32Array.BYTES_PER_ELEMENT != 0) {
+        if (byteOffset % Int32Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length * Int32Array.BYTES_PER_ELEMENT > buf.getByteLength()) {
+        if (this.length as int * Int32Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
             throw new RangeError("Range Error: attempt to create Int32Array where length * Int32Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
         }
         this.byteLength = buf.getByteLength() - byteOffset
@@ -3928,7 +3910,7 @@ export final class Int32Array {
      * @param byteOffset byte offset from begin of the buf
      */
     public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Int32Array.BYTES_PER_ELEMENT)
+        this(buf, byteOffset, buf.getByteLength() / Int32Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -3948,7 +3930,7 @@ export final class Int32Array {
      * @param buf data initializer
      */
     public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Int32Array.BYTES_PER_ELEMENT)
+        this(buf, 0, buf.getByteLength() / Int32Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -3958,7 +3940,7 @@ export final class Int32Array {
      */
     public constructor(length: int) {
         this.length = length
-        this.byteLength = length * Int32Array.BYTES_PER_ELEMENT
+        this.byteLength = length * Int32Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength)
     }
@@ -3978,7 +3960,7 @@ export final class Int32Array {
      * @param other data initializer
      */
     public constructor(other: Int32Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength)
+        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
         this.byteLength = other.byteLength
         this.length = other.length
     }
@@ -4003,12 +3985,12 @@ export final class Int32Array {
      */
     public at(index: int): int {
         if (index < 0) {
-            index = this.length + index
+            index = this.length as int + index
         }
-        let byteIndex = index * Int32Array.BYTES_PER_ELEMENT + this.byteOffset
+        let byteIndex = index * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res: int = 0
-        for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT; ++i) {
-            let byteVal = this.buffer.at(byteIndex + i) as int
+        for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
+            let byteVal = this.buffer.at(byteIndex as int + i) as int
             byteVal &= 0xff
             res = (res | byteVal << (8 * i)) as int;
         }
@@ -4042,34 +4024,34 @@ export final class Int32Array {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        if (insertPos < -this.length) {
+        if (insertPos < -this.length as int) {
             insertPos = 0
         }
-        if (insertPos >= this.length) {
+        if (insertPos >= this.length as int) {
             return
         }
         if (insertPos < 0) {
-            insertPos = this.length + insertPos
+            insertPos = this.length as int + insertPos
         }
 
-        if (startPos < -this.length) {
+        if (startPos < -this.length as int) {
             startPos = 0
         }
-        if (startPos >= this.length) {
+        if (startPos >= this.length as int) {
             return
         }
         if (startPos < 0) {
-            startPos = this.length + startPos
+            startPos = this.length as int + startPos
         }
 
-        if (endPos < -this.length) {
+        if (endPos < -this.length as int) {
             endPos = 0
         }
         if (endPos < 0) {
-            endPos = this.length + endPos
+            endPos = this.length as int + endPos
         }
-        if (endPos > this.length) {
-            endPos = this.length
+        if (endPos > this.length as int) {
+            endPos = this.length as int
         }
         if (endPos < startPos) {
             return
@@ -4103,7 +4085,7 @@ export final class Int32Array {
      * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.length)
+        this.copyWithin(insertPos, startPos, this.length as int)
     }
 
     /**
@@ -4123,18 +4105,14 @@ export final class Int32Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.length)
+        this.copyWithin(insertPos, 0, this.length as int)
     }
 
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): MapIterator<Int, Int> {
-        let ret: Entry<Int, Int>[] = new Entry<Int, Int>[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = new Entry<Int, Int>(i, this.at(i));
-        }
-        return new MapIterator<Int, Int>(ret);
+    /* public */ internal entries(): IterableIterator<Entry<Int, Int>> {
+        throw new Error("not implemented")
     }
 
     /**
@@ -4156,23 +4134,23 @@ export final class Int32Array {
      * @returns modified Int32Array
      */
     public fill(value: int, start: int, end: int): Int32Array {
-        if (start < -this.length) {
+        if (start < -this.length as int) {
             start = 0
         }
         if (start < 0) {
-            start += this.length
+            start += this.length as int
         }
-        if (start >= this.length) {
+        if (start >= this.length as int) {
             return this;
         }
-        if (end < -this.length) {
+        if (end < -this.length as int) {
             end = 0
         }
         if (end < 0) {
-            end += this.length
+            end += this.length as int
         }
-        if (end >= this.length) {
-            end = this.length
+        if (end >= this.length as int) {
+            end = this.length as int
         }
         for (let i = start; i < end; ++i) {
             this.set(i, value)
@@ -4199,7 +4177,7 @@ export final class Int32Array {
      * @returns modified Int32Array
      */
     public fill(value: int, start: int): Int32Array {
-        return this.fill(value, start, this.length)
+        return this.fill(value, start, this.length as int)
     }
 
     /**
@@ -4210,7 +4188,7 @@ export final class Int32Array {
      * @returns modified Int32Array
      */
     public fill(value: int): Int32Array {
-        return this.fill(value, 0, this.length)
+        return this.fill(value, 0, this.length as int)
     }
 
     /**
@@ -4234,13 +4212,13 @@ export final class Int32Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: int): void {
-        if (insertPos < 0 || insertPos >= this.length) {
+        if (insertPos < 0 || insertPos >= this.length as int) {
             throw new RangeError("set: insertPos is out-of-bounds")
         }
 
-        let startByte = insertPos * Int32Array.BYTES_PER_ELEMENT + this.byteOffset
+        let startByte = insertPos * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = val;
-        for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT; ++i) {
+        for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
             let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
             this.buffer.set(startByte + i, byteVal)
         }
@@ -4255,13 +4233,9 @@ export final class Int32Array {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos1: number): void {
-        const insertPos = insertPos1 as int
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: int[]): size of arr is greater than Int32Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.set(insertPos + i, arr[i] as double as int as int)
+    public set(arr: number[], insertPos: number): void {
+        for (let i = 0; i < arr.length as int; ++i) {
+            this.set(insertPos as int + i, arr[i] as double as int as int)
         }
     }
 
@@ -4275,10 +4249,7 @@ export final class Int32Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: int[], insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: int[]): size of arr is greater than Int32Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
+        for (let i = 0; i < arr.length as int; ++i) {
             this.set(insertPos + i, arr[i])
         }
     }
@@ -4351,7 +4322,7 @@ export final class Int32Array {
      * @returns true if e is in Int32Array, false otherwise
      */
     public includes(e: int, fromIndex: int): boolean {
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return true
             }
@@ -4405,17 +4376,17 @@ export final class Int32Array {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(e: int, fromIndex: int): int {
-        if (fromIndex >= this.length) {
+        if (fromIndex >= this.length as int) {
             return -1
         }
         if (fromIndex < 0) {
-            fromIndex += this.length
+            fromIndex += this.length as int
             // See TypedArray.indexOf JS docs
             if (fromIndex < 0) {
                 fromIndex = 0
             }
         }
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return i
             }
@@ -4455,12 +4426,12 @@ export final class Int32Array {
      */
     public join(s: string): string {
         let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(s)
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -4479,12 +4450,13 @@ export final class Int32Array {
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -4514,11 +4486,11 @@ export final class Int32Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
     public lastIndexOf(val: int, fromIndex: int): int {
-        if (fromIndex >= this.length) {
-            fromIndex = this.length - 1
+        if (fromIndex >= this.length as int) {
+            fromIndex = this.length as int - 1
         }
         if (fromIndex < 0) {
-            fromIndex = this.length + fromIndex
+            fromIndex = this.length as int + fromIndex
         }
 
         for (let i = fromIndex; i >= 0; --i) {
@@ -4538,7 +4510,7 @@ export final class Int32Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as double as int as int, this.length - 1)
+        return this.lastIndexOf(val as double as int as int, this.length as int - 1)
     }
 
     /**
@@ -4549,7 +4521,7 @@ export final class Int32Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: int): int {
-        return this.lastIndexOf(val, this.length - 1)
+        return this.lastIndexOf(val, this.length as int - 1)
     }
 
    /**
@@ -4570,8 +4542,8 @@ export final class Int32Array {
      */
     public reverse(): Int32Array {
         let res = new Int32Array(this)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(this.length - 1 - i, this.at(i))
+        for (let i = 0; i < this.length as int; ++i) {
+            res.set(this.length as int - 1 - i, this.at(i))
         }
         return res
     }
@@ -4603,7 +4575,7 @@ export final class Int32Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int32Array {
-        let buf = this.buffer.sliceInternal(begin * Int32Array.BYTES_PER_ELEMENT, end * Int32Array.BYTES_PER_ELEMENT)
+        let buf = this.buffer.sliceInternal(begin * Int32Array.BYTES_PER_ELEMENT as int, end * Int32Array.BYTES_PER_ELEMENT as int)
         return new Int32Array(buf)
     }
 
@@ -4626,7 +4598,7 @@ export final class Int32Array {
      * @returns a new Int32Array with elements of current Int32Array[begin, this.length)
      */
     public slice(begin: int): Int32Array {
-        return this.slice(begin, this.length)
+        return this.slice(begin, this.length as int)
     }
 
     /**
@@ -4675,7 +4647,7 @@ export final class Int32Array {
      * @returns new Int32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Int32Array {
-        return new Int32Array(this.buffer, begin * Int32Array.BYTES_PER_ELEMENT, end - begin)
+        return new Int32Array(this.buffer, begin * Int32Array.BYTES_PER_ELEMENT as int, end - begin)
     }
 
     /**
@@ -4697,7 +4669,7 @@ export final class Int32Array {
      * @returns new Int32Array with the same ArrayBuffer
      */
     public subarray(begin: int): Int32Array {
-        return this.subarray(begin, this.length)
+        return this.subarray(begin, this.length as int)
     }
 
     /**
@@ -4706,7 +4678,7 @@ export final class Int32Array {
      * @returns new Int32Array with the same ArrayBuffer
      */
     public subarray(): Int32Array {
-        return this.subarray(0, this.length)
+        return this.subarray(0, this.length as int)
     }
 
     /**
@@ -4767,12 +4739,12 @@ export final class Int32Array {
      */
     public override toString(): string {
         let res = new StringBuilder();
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(c',')
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -4782,12 +4754,13 @@ export final class Int32Array {
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Int> {
-        const ret = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Int>(ret);
+    public values(): Iterator<Int> {
+        throw new Error("not implemented")
+        // const ret = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -4944,8 +4917,8 @@ export final class Int32Array {
      * @returns sorted Int32Array
      */
     public sort(fn: (a: int, b: int) => int): Int32Array {
-        let arr: int[] = new int[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: int[] = new int[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -4953,7 +4926,7 @@ export final class Int32Array {
             let mustPrecede: (a: int, b: int) => boolean =
                 (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -4968,7 +4941,7 @@ export final class Int32Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: int, index: int, array: Int32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i), i, this)) {
                 return true
             }
@@ -5000,7 +4973,7 @@ export final class Int32Array {
      */
     public reduce(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int, init: int): int {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -5015,7 +4988,7 @@ export final class Int32Array {
      */
     public reduce(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int): int {
         let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -5032,7 +5005,7 @@ export final class Int32Array {
      */
     public reduceRight(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int, init: int): int {
         let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -5046,8 +5019,8 @@ export final class Int32Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int): int {
-        let acc: int = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: int = this.at(this.length as int - 1)
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -5061,9 +5034,9 @@ export final class Int32Array {
     * @returns a new Int32Array where for each element from current Int32Array fn was applied
     */
     public map(fn: (val: int, index: int) => int): Int32Array {
-        let resBuf = new ArrayBuffer(this.length * Int32Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Int32Array.BYTES_PER_ELEMENT as int)
         let res = new Int32Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i), i))
         }
         return res
@@ -5077,7 +5050,7 @@ export final class Int32Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: int, index: int, array: Int32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i), i, this)) {
                 return false
             }
@@ -5106,17 +5079,17 @@ export final class Int32Array {
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
     public filter(fn: (val: int, index: int, array: Int32Array) => boolean): Int32Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i), i, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT as int)
         let res = new Int32Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -5147,7 +5120,7 @@ export final class Int32Array {
      * TODO: return int | undefined as in JS
      */
     public find(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -5177,7 +5150,7 @@ export final class Int32Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -5207,7 +5180,7 @@ export final class Int32Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -5237,7 +5210,7 @@ export final class Int32Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -5267,7 +5240,7 @@ export final class Int32Array {
      * @returns undefined
      */
     public forEach(fn: (val: int, index: int, array: Int32Array) => int): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i), i, this))
         }
         throw new Error("Int32Array.forEach: has to return undefined, but returns void for now")
@@ -5423,8 +5396,8 @@ export final class Int32Array {
      * @returns sorted Int32Array
      */
     public sort(fn: (a: number, b: number) => number): Int32Array {
-        let arr: int[] = new int[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: int[] = new int[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -5432,7 +5405,7 @@ export final class Int32Array {
             let mustPrecede: (a: int, b: int) => boolean =
                 (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -5447,7 +5420,7 @@ export final class Int32Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number, array: Int32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i) as double as number, i as double as number, this)) {
                 return true
             }
@@ -5479,7 +5452,7 @@ export final class Int32Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int32Array) => number, init: number): number {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -5494,7 +5467,7 @@ export final class Int32Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int32Array) => number): number {
         let acc = this.at(0) as double as number
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -5511,7 +5484,7 @@ export final class Int32Array {
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int32Array) => number, init: number): number {
         let acc = init as double as number
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -5525,8 +5498,8 @@ export final class Int32Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int32Array) => number): number {
-        let acc: number = this.at(this.length - 1) as double as number
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: number = this.at(this.length as int - 1) as double as number
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -5540,9 +5513,9 @@ export final class Int32Array {
     * @returns a new Int32Array where for each element from current Int32Array fn was applied
     */
     public map(fn: (val: number, index: number) => number): Int32Array {
-        let resBuf = new ArrayBuffer(this.length * Int32Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Int32Array.BYTES_PER_ELEMENT as int)
         let res = new Int32Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as int)
         }
         return res
@@ -5556,7 +5529,7 @@ export final class Int32Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number, array: Int32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i) as double as number, i as double as number, this)) {
                 return false
             }
@@ -5585,17 +5558,17 @@ export final class Int32Array {
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Int32Array) => boolean): Int32Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i) as double as number, i as double as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT as int)
         let res = new Int32Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -5626,7 +5599,7 @@ export final class Int32Array {
      * TODO: return int | undefined as in JS
      */
     public find(fn: (val: number, index: number, array: Int32Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -5656,7 +5629,7 @@ export final class Int32Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number, array: Int32Array) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i as double as number
@@ -5686,7 +5659,7 @@ export final class Int32Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number, array: Int32Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -5716,7 +5689,7 @@ export final class Int32Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number, array: Int32Array) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i
@@ -5746,7 +5719,7 @@ export final class Int32Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number, array: Int32Array) => int): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i) as double as number, i as double as number, this))
         }
         throw new Error("Int32Array.forEach: has to return undefined, but returns void for now")
@@ -5782,13 +5755,13 @@ export final class Int32Array {
     public readonly buffer: Buffer
 
     /** Byte offset within the underlying ArrayBuffer */
-    public readonly byteOffset: int
+    public readonly byteOffset: number
 
     /** Number of bytes used */
-    public readonly byteLength: int
+    public readonly byteLength: number
 
     /** Number of int stored in Int32Array */
-    public readonly length: int
+    public readonly length: number
 
     /** String \"Int32Array\" */
     public readonly name = "Int32Array"
@@ -5798,7 +5771,7 @@ export final class Int32Array {
  * JS BigInt64Array API-compatible class
  */
 export final class BigInt64Array {
-    public static readonly BYTES_PER_ELEMENT = 8
+    public static readonly BYTES_PER_ELEMENT : number = 8
 
     /**
      * Creates an empty BigInt64Array.
@@ -5830,14 +5803,14 @@ export final class BigInt64Array {
      * @param length size of elements of type long in newly created BigInt64Array
      */
     public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % BigInt64Array.BYTES_PER_ELEMENT != 0) {
+        if (buf.getByteLength() % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
         }
-        if (byteOffset % BigInt64Array.BYTES_PER_ELEMENT != 0) {
+        if (byteOffset % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length * BigInt64Array.BYTES_PER_ELEMENT > buf.getByteLength()) {
+        if (this.length as int * BigInt64Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
             throw new RangeError("Range Error: attempt to create BigInt64Array where length * BigInt64Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
         }
         this.byteLength = buf.getByteLength() - byteOffset
@@ -5854,7 +5827,7 @@ export final class BigInt64Array {
      * @param byteOffset byte offset from begin of the buf
      */
     public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT)
+        this(buf, byteOffset, buf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -5874,7 +5847,7 @@ export final class BigInt64Array {
      * @param buf data initializer
      */
     public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT)
+        this(buf, 0, buf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -5884,7 +5857,7 @@ export final class BigInt64Array {
      */
     public constructor(length: int) {
         this.length = length
-        this.byteLength = length * BigInt64Array.BYTES_PER_ELEMENT
+        this.byteLength = length * BigInt64Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength)
     }
@@ -5904,7 +5877,7 @@ export final class BigInt64Array {
      * @param other data initializer
      */
     public constructor(other: BigInt64Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength)
+        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
         this.byteLength = other.byteLength
         this.length = other.length
     }
@@ -5929,12 +5902,12 @@ export final class BigInt64Array {
      */
     public at(index: int): long {
         if (index < 0) {
-            index = this.length + index
+            index = this.length as int + index
         }
-        let byteIndex = index * BigInt64Array.BYTES_PER_ELEMENT + this.byteOffset
+        let byteIndex = index * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res: long = 0
-        for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT; ++i) {
-            let byteVal = this.buffer.at(byteIndex + i) as long
+        for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
+            let byteVal = this.buffer.at(byteIndex as int + i) as long
             byteVal &= 0xff
             res = (res | byteVal << (8 * i)) as long;
         }
@@ -5968,34 +5941,34 @@ export final class BigInt64Array {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        if (insertPos < -this.length) {
+        if (insertPos < -this.length as int) {
             insertPos = 0
         }
-        if (insertPos >= this.length) {
+        if (insertPos >= this.length as int) {
             return
         }
         if (insertPos < 0) {
-            insertPos = this.length + insertPos
+            insertPos = this.length as int + insertPos
         }
 
-        if (startPos < -this.length) {
+        if (startPos < -this.length as int) {
             startPos = 0
         }
-        if (startPos >= this.length) {
+        if (startPos >= this.length as int) {
             return
         }
         if (startPos < 0) {
-            startPos = this.length + startPos
+            startPos = this.length as int + startPos
         }
 
-        if (endPos < -this.length) {
+        if (endPos < -this.length as int) {
             endPos = 0
         }
         if (endPos < 0) {
-            endPos = this.length + endPos
+            endPos = this.length as int + endPos
         }
-        if (endPos > this.length) {
-            endPos = this.length
+        if (endPos > this.length as int) {
+            endPos = this.length as int
         }
         if (endPos < startPos) {
             return
@@ -6029,7 +6002,7 @@ export final class BigInt64Array {
      * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.length)
+        this.copyWithin(insertPos, startPos, this.length as int)
     }
 
     /**
@@ -6049,18 +6022,14 @@ export final class BigInt64Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.length)
+        this.copyWithin(insertPos, 0, this.length as int)
     }
 
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): MapIterator<Int, Long> {
-        let ret: Entry<Int, Long>[] = new Entry<Int, Long>[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = new Entry<Int, Long>(i, this.at(i));
-        }
-        return new MapIterator<Int, Long>(ret);
+    /* public */ internal entries(): IterableIterator<Entry<Int, Long>> {
+        throw new Error("not implemented")
     }
 
     /**
@@ -6082,23 +6051,23 @@ export final class BigInt64Array {
      * @returns modified BigInt64Array
      */
     public fill(value: long, start: int, end: int): BigInt64Array {
-        if (start < -this.length) {
+        if (start < -this.length as int) {
             start = 0
         }
         if (start < 0) {
-            start += this.length
+            start += this.length as int
         }
-        if (start >= this.length) {
+        if (start >= this.length as int) {
             return this;
         }
-        if (end < -this.length) {
+        if (end < -this.length as int) {
             end = 0
         }
         if (end < 0) {
-            end += this.length
+            end += this.length as int
         }
-        if (end >= this.length) {
-            end = this.length
+        if (end >= this.length as int) {
+            end = this.length as int
         }
         for (let i = start; i < end; ++i) {
             this.set(i, value)
@@ -6125,7 +6094,7 @@ export final class BigInt64Array {
      * @returns modified BigInt64Array
      */
     public fill(value: long, start: int): BigInt64Array {
-        return this.fill(value, start, this.length)
+        return this.fill(value, start, this.length as int)
     }
 
     /**
@@ -6136,7 +6105,7 @@ export final class BigInt64Array {
      * @returns modified BigInt64Array
      */
     public fill(value: long): BigInt64Array {
-        return this.fill(value, 0, this.length)
+        return this.fill(value, 0, this.length as int)
     }
 
     /**
@@ -6160,13 +6129,13 @@ export final class BigInt64Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: long): void {
-        if (insertPos < 0 || insertPos >= this.length) {
+        if (insertPos < 0 || insertPos >= this.length as int) {
             throw new RangeError("set: insertPos is out-of-bounds")
         }
 
-        let startByte = insertPos * BigInt64Array.BYTES_PER_ELEMENT + this.byteOffset
+        let startByte = insertPos * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = val;
-        for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT; ++i) {
+        for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
             let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
             this.buffer.set(startByte + i, byteVal)
         }
@@ -6181,13 +6150,9 @@ export final class BigInt64Array {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: BigInt[], insertPos1: number): void {
-        const insertPos = insertPos1 as int
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: long[]): size of arr is greater than BigInt64Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.set(insertPos + i, arr[i].getLong())
+    public set(arr: BigInt[], insertPos: number): void {
+        for (let i = 0; i < arr.length as int; ++i) {
+            this.set(insertPos as int + i, arr[i].getLong())
         }
     }
 
@@ -6201,10 +6166,7 @@ export final class BigInt64Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: long[], insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: long[]): size of arr is greater than BigInt64Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
+        for (let i = 0; i < arr.length as int; ++i) {
             this.set(insertPos + i, arr[i])
         }
     }
@@ -6277,7 +6239,7 @@ export final class BigInt64Array {
      * @returns true if e is in BigInt64Array, false otherwise
      */
     public includes(e: long, fromIndex: int): boolean {
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return true
             }
@@ -6331,17 +6293,17 @@ export final class BigInt64Array {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(e: long, fromIndex: int): int {
-        if (fromIndex >= this.length) {
+        if (fromIndex >= this.length as int) {
             return -1
         }
         if (fromIndex < 0) {
-            fromIndex += this.length
+            fromIndex += this.length as int
             // See TypedArray.indexOf JS docs
             if (fromIndex < 0) {
                 fromIndex = 0
             }
         }
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return i
             }
@@ -6381,12 +6343,12 @@ export final class BigInt64Array {
      */
     public join(s: string): string {
         let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(s)
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -6405,12 +6367,13 @@ export final class BigInt64Array {
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -6440,11 +6403,11 @@ export final class BigInt64Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
     public lastIndexOf(val: long, fromIndex: int): int {
-        if (fromIndex >= this.length) {
-            fromIndex = this.length - 1
+        if (fromIndex >= this.length as int) {
+            fromIndex = this.length as int - 1
         }
         if (fromIndex < 0) {
-            fromIndex = this.length + fromIndex
+            fromIndex = this.length as int + fromIndex
         }
 
         for (let i = fromIndex; i >= 0; --i) {
@@ -6464,7 +6427,7 @@ export final class BigInt64Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: BigInt): number {
-        return this.lastIndexOf(val.getLong(), this.length - 1)
+        return this.lastIndexOf(val.getLong(), this.length as int - 1)
     }
 
     /**
@@ -6475,7 +6438,7 @@ export final class BigInt64Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: long): int {
-        return this.lastIndexOf(val, this.length - 1)
+        return this.lastIndexOf(val, this.length as int - 1)
     }
 
    /**
@@ -6496,8 +6459,8 @@ export final class BigInt64Array {
      */
     public reverse(): BigInt64Array {
         let res = new BigInt64Array(this)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(this.length - 1 - i, this.at(i))
+        for (let i = 0; i < this.length as int; ++i) {
+            res.set(this.length as int - 1 - i, this.at(i))
         }
         return res
     }
@@ -6529,7 +6492,7 @@ export final class BigInt64Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): BigInt64Array {
-        let buf = this.buffer.sliceInternal(begin * BigInt64Array.BYTES_PER_ELEMENT, end * BigInt64Array.BYTES_PER_ELEMENT)
+        let buf = this.buffer.sliceInternal(begin * BigInt64Array.BYTES_PER_ELEMENT as int, end * BigInt64Array.BYTES_PER_ELEMENT as int)
         return new BigInt64Array(buf)
     }
 
@@ -6552,7 +6515,7 @@ export final class BigInt64Array {
      * @returns a new BigInt64Array with elements of current BigInt64Array[begin, this.length)
      */
     public slice(begin: int): BigInt64Array {
-        return this.slice(begin, this.length)
+        return this.slice(begin, this.length as int)
     }
 
     /**
@@ -6601,7 +6564,7 @@ export final class BigInt64Array {
      * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): BigInt64Array {
-        return new BigInt64Array(this.buffer, begin * BigInt64Array.BYTES_PER_ELEMENT, end - begin)
+        return new BigInt64Array(this.buffer, begin * BigInt64Array.BYTES_PER_ELEMENT as int, end - begin)
     }
 
     /**
@@ -6623,7 +6586,7 @@ export final class BigInt64Array {
      * @returns new BigInt64Array with the same ArrayBuffer
      */
     public subarray(begin: int): BigInt64Array {
-        return this.subarray(begin, this.length)
+        return this.subarray(begin, this.length as int)
     }
 
     /**
@@ -6632,7 +6595,7 @@ export final class BigInt64Array {
      * @returns new BigInt64Array with the same ArrayBuffer
      */
     public subarray(): BigInt64Array {
-        return this.subarray(0, this.length)
+        return this.subarray(0, this.length as int)
     }
 
     /**
@@ -6693,12 +6656,12 @@ export final class BigInt64Array {
      */
     public override toString(): string {
         let res = new StringBuilder();
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(c',')
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -6708,12 +6671,13 @@ export final class BigInt64Array {
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Long> {
-        const ret = new Long[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Long>(ret);
+    public values(): Iterator<Long> {
+        throw new Error("not implemented")
+        // const ret = new Long[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Long>(ret);
     }
 
     /**
@@ -6754,7 +6718,7 @@ export final class BigInt64Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: long, index: int, array: BigInt64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i), i, this)) {
                 return true
             }
@@ -6786,7 +6750,7 @@ export final class BigInt64Array {
      */
     public reduce(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long, init: long): long {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -6801,7 +6765,7 @@ export final class BigInt64Array {
      */
     public reduce(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long): long {
         let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -6818,7 +6782,7 @@ export final class BigInt64Array {
      */
     public reduceRight(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long, init: long): long {
         let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -6832,8 +6796,8 @@ export final class BigInt64Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long): long {
-        let acc: long = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: long = this.at(this.length as int - 1)
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -6847,9 +6811,9 @@ export final class BigInt64Array {
     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
     */
     public map(fn: (val: long, index: int) => long): BigInt64Array {
-        let resBuf = new ArrayBuffer(this.length * BigInt64Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * BigInt64Array.BYTES_PER_ELEMENT as int)
         let res = new BigInt64Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i), i))
         }
         return res
@@ -6863,7 +6827,7 @@ export final class BigInt64Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: long, index: int, array: BigInt64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i), i, this)) {
                 return false
             }
@@ -6892,17 +6856,17 @@ export final class BigInt64Array {
      * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
      */
     public filter(fn: (val: long, index: int, array: BigInt64Array) => boolean): BigInt64Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i), i, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT as int)
         let res = new BigInt64Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -6933,7 +6897,7 @@ export final class BigInt64Array {
      * TODO: return long | undefined as in JS
      */
     public find(fn: (val: long, index: int, array: BigInt64Array) => boolean): long {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -6963,7 +6927,7 @@ export final class BigInt64Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: long, index: int, array: BigInt64Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -6993,7 +6957,7 @@ export final class BigInt64Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: long, index: int, array: BigInt64Array) => boolean): long {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -7023,7 +6987,7 @@ export final class BigInt64Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: long, index: int, array: BigInt64Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -7053,7 +7017,7 @@ export final class BigInt64Array {
      * @returns undefined
      */
     public forEach(fn: (val: long, index: int, array: BigInt64Array) => long): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i), i, this))
         }
         throw new Error("BigInt64Array.forEach: has to return undefined, but returns void for now")
@@ -7209,8 +7173,8 @@ export final class BigInt64Array {
      * @returns sorted BigInt64Array
      */
     public sort(fn: (a: BigInt, b: BigInt) => number): BigInt64Array {
-        let arr: long[] = new long[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: long[] = new long[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -7218,7 +7182,7 @@ export final class BigInt64Array {
             let mustPrecede: (a: long, b: long) => boolean =
                 (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -7233,7 +7197,7 @@ export final class BigInt64Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: BigInt, index: number, array: BigInt64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(new BigInt(this.at(i)), i as double as number, this)) {
                 return true
             }
@@ -7265,7 +7229,7 @@ export final class BigInt64Array {
      */
     public reduce(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigInt64Array) => BigInt, init: BigInt): BigInt {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, new BigInt(this.at(i)), i as double as number, this)
         }
         return acc
@@ -7280,7 +7244,7 @@ export final class BigInt64Array {
      */
     public reduce(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigInt64Array) => BigInt): BigInt {
         let acc = new BigInt(this.at(0))
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, new BigInt(this.at(i)), i as double as number, this)
         }
         return acc
@@ -7297,7 +7261,7 @@ export final class BigInt64Array {
      */
     public reduceRight(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigInt64Array) => BigInt, init: BigInt): BigInt {
         let acc = new BigInt(init)
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, new BigInt(this.at(i)), i as double as number, this)
         }
         return acc
@@ -7311,8 +7275,8 @@ export final class BigInt64Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigInt64Array) => BigInt): BigInt {
-        let acc: BigInt = new BigInt(this.at(this.length - 1))
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: BigInt = new BigInt(this.at(this.length as int - 1))
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, new BigInt(this.at(i)), i as double as number, this)
         }
         return acc
@@ -7326,9 +7290,9 @@ export final class BigInt64Array {
     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
     */
     public map(fn: (val: BigInt, index: number) => BigInt): BigInt64Array {
-        let resBuf = new ArrayBuffer(this.length * BigInt64Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * BigInt64Array.BYTES_PER_ELEMENT as int)
         let res = new BigInt64Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(new BigInt(this.at(i)), i as double as number).getLong())
         }
         return res
@@ -7342,7 +7306,7 @@ export final class BigInt64Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: BigInt, index: number, array: BigInt64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(new BigInt(this.at(i)), i as double as number, this)) {
                 return false
             }
@@ -7371,17 +7335,17 @@ export final class BigInt64Array {
      * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
      */
     public filter(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): BigInt64Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(new BigInt(this.at(i)), i as double as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT as int)
         let res = new BigInt64Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -7412,7 +7376,7 @@ export final class BigInt64Array {
      * TODO: return long | undefined as in JS
      */
     public find(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): long {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(new BigInt(val), i as double as number, this)) {
                 return val
@@ -7442,7 +7406,7 @@ export final class BigInt64Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(new BigInt(val), i as double as number, this)) {
                 return i as double as number
@@ -7472,7 +7436,7 @@ export final class BigInt64Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): long {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(new BigInt(val), i as double as number, this)) {
                 return val
@@ -7502,7 +7466,7 @@ export final class BigInt64Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(new BigInt(val), i as double as number, this)) {
                 return i
@@ -7532,7 +7496,7 @@ export final class BigInt64Array {
      * @returns undefined
      */
     public forEach(fn: (val: BigInt, index: number, array: BigInt64Array) => long): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(new BigInt(this.at(i)), i as double as number, this))
         }
         throw new Error("BigInt64Array.forEach: has to return undefined, but returns void for now")
@@ -7568,13 +7532,13 @@ export final class BigInt64Array {
     public readonly buffer: Buffer
 
     /** Byte offset within the underlying ArrayBuffer */
-    public readonly byteOffset: int
+    public readonly byteOffset: number
 
     /** Number of bytes used */
-    public readonly byteLength: int
+    public readonly byteLength: number
 
     /** Number of long stored in BigInt64Array */
-    public readonly length: int
+    public readonly length: number
 
     /** String \"BigInt64Array\" */
     public readonly name = "BigInt64Array"
@@ -7584,7 +7548,7 @@ export final class BigInt64Array {
  * JS Float32Array API-compatible class
  */
 export final class Float32Array {
-    public static readonly BYTES_PER_ELEMENT = 4
+    public static readonly BYTES_PER_ELEMENT : number = 4
 
     /**
      * Creates an empty Float32Array.
@@ -7616,14 +7580,14 @@ export final class Float32Array {
      * @param length size of elements of type float in newly created Float32Array
      */
     public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Float32Array.BYTES_PER_ELEMENT != 0) {
+        if (buf.getByteLength() % Float32Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
         }
-        if (byteOffset % Float32Array.BYTES_PER_ELEMENT != 0) {
+        if (byteOffset % Float32Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length * Float32Array.BYTES_PER_ELEMENT > buf.getByteLength()) {
+        if (this.length as int * Float32Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
             throw new RangeError("Range Error: attempt to create Float32Array where length * Float32Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
         }
         this.byteLength = buf.getByteLength() - byteOffset
@@ -7640,7 +7604,7 @@ export final class Float32Array {
      * @param byteOffset byte offset from begin of the buf
      */
     public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Float32Array.BYTES_PER_ELEMENT)
+        this(buf, byteOffset, buf.getByteLength() / Float32Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -7660,7 +7624,7 @@ export final class Float32Array {
      * @param buf data initializer
      */
     public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Float32Array.BYTES_PER_ELEMENT)
+        this(buf, 0, buf.getByteLength() / Float32Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -7670,7 +7634,7 @@ export final class Float32Array {
      */
     public constructor(length: int) {
         this.length = length
-        this.byteLength = length * Float32Array.BYTES_PER_ELEMENT
+        this.byteLength = length * Float32Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength)
     }
@@ -7690,7 +7654,7 @@ export final class Float32Array {
      * @param other data initializer
      */
     public constructor(other: Float32Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength)
+        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
         this.byteLength = other.byteLength
         this.length = other.length
     }
@@ -7715,12 +7679,12 @@ export final class Float32Array {
      */
     public at(index: int): float {
         if (index < 0) {
-            index = this.length + index
+            index = this.length as int + index
         }
-        let byteIndex = index * Float32Array.BYTES_PER_ELEMENT + this.byteOffset
+        let byteIndex = index * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res: int = 0
-        for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT; ++i) {
-            let byteVal = this.buffer.at(byteIndex + i) as int
+        for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
+            let byteVal = this.buffer.at(byteIndex as int + i) as int
             byteVal &= 0xff
             res = (res | byteVal << (8 * i)) as int;
         }
@@ -7754,34 +7718,34 @@ export final class Float32Array {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        if (insertPos < -this.length) {
+        if (insertPos < -this.length as int) {
             insertPos = 0
         }
-        if (insertPos >= this.length) {
+        if (insertPos >= this.length as int) {
             return
         }
         if (insertPos < 0) {
-            insertPos = this.length + insertPos
+            insertPos = this.length as int + insertPos
         }
 
-        if (startPos < -this.length) {
+        if (startPos < -this.length as int) {
             startPos = 0
         }
-        if (startPos >= this.length) {
+        if (startPos >= this.length as int) {
             return
         }
         if (startPos < 0) {
-            startPos = this.length + startPos
+            startPos = this.length as int + startPos
         }
 
-        if (endPos < -this.length) {
+        if (endPos < -this.length as int) {
             endPos = 0
         }
         if (endPos < 0) {
-            endPos = this.length + endPos
+            endPos = this.length as int + endPos
         }
-        if (endPos > this.length) {
-            endPos = this.length
+        if (endPos > this.length as int) {
+            endPos = this.length as int
         }
         if (endPos < startPos) {
             return
@@ -7815,7 +7779,7 @@ export final class Float32Array {
      * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.length)
+        this.copyWithin(insertPos, startPos, this.length as int)
     }
 
     /**
@@ -7835,18 +7799,14 @@ export final class Float32Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.length)
+        this.copyWithin(insertPos, 0, this.length as int)
     }
 
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): MapIterator<Int, Float> {
-        let ret: Entry<Int, Float>[] = new Entry<Int, Float>[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = new Entry<Int, Float>(i, this.at(i));
-        }
-        return new MapIterator<Int, Float>(ret);
+    /* public */ internal entries(): IterableIterator<Entry<Int, Float>> {
+        throw new Error("not implemented")
     }
 
     /**
@@ -7868,23 +7828,23 @@ export final class Float32Array {
      * @returns modified Float32Array
      */
     public fill(value: float, start: int, end: int): Float32Array {
-        if (start < -this.length) {
+        if (start < -this.length as int) {
             start = 0
         }
         if (start < 0) {
-            start += this.length
+            start += this.length as int
         }
-        if (start >= this.length) {
+        if (start >= this.length as int) {
             return this;
         }
-        if (end < -this.length) {
+        if (end < -this.length as int) {
             end = 0
         }
         if (end < 0) {
-            end += this.length
+            end += this.length as int
         }
-        if (end >= this.length) {
-            end = this.length
+        if (end >= this.length as int) {
+            end = this.length as int
         }
         for (let i = start; i < end; ++i) {
             this.set(i, value)
@@ -7911,7 +7871,7 @@ export final class Float32Array {
      * @returns modified Float32Array
      */
     public fill(value: float, start: int): Float32Array {
-        return this.fill(value, start, this.length)
+        return this.fill(value, start, this.length as int)
     }
 
     /**
@@ -7922,7 +7882,7 @@ export final class Float32Array {
      * @returns modified Float32Array
      */
     public fill(value: float): Float32Array {
-        return this.fill(value, 0, this.length)
+        return this.fill(value, 0, this.length as int)
     }
 
     /**
@@ -7946,13 +7906,13 @@ export final class Float32Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: float): void {
-        if (insertPos < 0 || insertPos >= this.length) {
+        if (insertPos < 0 || insertPos >= this.length as int) {
             throw new RangeError("set: insertPos is out-of-bounds")
         }
 
-        let startByte = insertPos * Float32Array.BYTES_PER_ELEMENT + this.byteOffset
+        let startByte = insertPos * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = Float.bitCastToInt(val);
-        for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT; ++i) {
+        for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
             let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
             this.buffer.set(startByte + i, byteVal)
         }
@@ -7967,13 +7927,9 @@ export final class Float32Array {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos1: number): void {
-        const insertPos = insertPos1 as int
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: float[]): size of arr is greater than Float32Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.set(insertPos + i, arr[i] as double as int as float)
+    public set(arr: number[], insertPos: number): void {
+        for (let i = 0; i < arr.length as int; ++i) {
+            this.set(insertPos as int + i, arr[i] as double as int as float)
         }
     }
 
@@ -7987,10 +7943,7 @@ export final class Float32Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: float[], insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: float[]): size of arr is greater than Float32Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
+        for (let i = 0; i < arr.length as int; ++i) {
             this.set(insertPos + i, arr[i])
         }
     }
@@ -8063,7 +8016,7 @@ export final class Float32Array {
      * @returns true if e is in Float32Array, false otherwise
      */
     public includes(e: float, fromIndex: int): boolean {
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return true
             }
@@ -8117,17 +8070,17 @@ export final class Float32Array {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(e: float, fromIndex: int): int {
-        if (fromIndex >= this.length) {
+        if (fromIndex >= this.length as int) {
             return -1
         }
         if (fromIndex < 0) {
-            fromIndex += this.length
+            fromIndex += this.length as int
             // See TypedArray.indexOf JS docs
             if (fromIndex < 0) {
                 fromIndex = 0
             }
         }
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return i
             }
@@ -8167,12 +8120,12 @@ export final class Float32Array {
      */
     public join(s: string): string {
         let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(s)
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -8191,12 +8144,13 @@ export final class Float32Array {
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -8226,11 +8180,11 @@ export final class Float32Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
     public lastIndexOf(val: float, fromIndex: int): int {
-        if (fromIndex >= this.length) {
-            fromIndex = this.length - 1
+        if (fromIndex >= this.length as int) {
+            fromIndex = this.length as int - 1
         }
         if (fromIndex < 0) {
-            fromIndex = this.length + fromIndex
+            fromIndex = this.length as int + fromIndex
         }
 
         for (let i = fromIndex; i >= 0; --i) {
@@ -8250,7 +8204,7 @@ export final class Float32Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as double as int as float, this.length - 1)
+        return this.lastIndexOf(val as double as int as float, this.length as int - 1)
     }
 
     /**
@@ -8261,7 +8215,7 @@ export final class Float32Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: float): int {
-        return this.lastIndexOf(val, this.length - 1)
+        return this.lastIndexOf(val, this.length as int - 1)
     }
 
    /**
@@ -8282,8 +8236,8 @@ export final class Float32Array {
      */
     public reverse(): Float32Array {
         let res = new Float32Array(this)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(this.length - 1 - i, this.at(i))
+        for (let i = 0; i < this.length as int; ++i) {
+            res.set(this.length as int - 1 - i, this.at(i))
         }
         return res
     }
@@ -8315,7 +8269,7 @@ export final class Float32Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Float32Array {
-        let buf = this.buffer.sliceInternal(begin * Float32Array.BYTES_PER_ELEMENT, end * Float32Array.BYTES_PER_ELEMENT)
+        let buf = this.buffer.sliceInternal(begin * Float32Array.BYTES_PER_ELEMENT as int, end * Float32Array.BYTES_PER_ELEMENT as int)
         return new Float32Array(buf)
     }
 
@@ -8338,7 +8292,7 @@ export final class Float32Array {
      * @returns a new Float32Array with elements of current Float32Array[begin, this.length)
      */
     public slice(begin: int): Float32Array {
-        return this.slice(begin, this.length)
+        return this.slice(begin, this.length as int)
     }
 
     /**
@@ -8387,7 +8341,7 @@ export final class Float32Array {
      * @returns new Float32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Float32Array {
-        return new Float32Array(this.buffer, begin * Float32Array.BYTES_PER_ELEMENT, end - begin)
+        return new Float32Array(this.buffer, begin * Float32Array.BYTES_PER_ELEMENT as int, end - begin)
     }
 
     /**
@@ -8409,7 +8363,7 @@ export final class Float32Array {
      * @returns new Float32Array with the same ArrayBuffer
      */
     public subarray(begin: int): Float32Array {
-        return this.subarray(begin, this.length)
+        return this.subarray(begin, this.length as int)
     }
 
     /**
@@ -8418,7 +8372,7 @@ export final class Float32Array {
      * @returns new Float32Array with the same ArrayBuffer
      */
     public subarray(): Float32Array {
-        return this.subarray(0, this.length)
+        return this.subarray(0, this.length as int)
     }
 
     /**
@@ -8479,12 +8433,12 @@ export final class Float32Array {
      */
     public override toString(): string {
         let res = new StringBuilder();
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(c',')
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -8494,12 +8448,13 @@ export final class Float32Array {
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Float> {
-        const ret = new Float[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Float>(ret);
+    public values(): Iterator<Float> {
+        throw new Error("not implemented")
+        // const ret = new Float[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Float>(ret);
     }
 
     /**
@@ -8656,8 +8611,8 @@ export final class Float32Array {
      * @returns sorted Float32Array
      */
     public sort(fn: (a: float, b: float) => int): Float32Array {
-        let arr: float[] = new float[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: float[] = new float[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -8665,7 +8620,7 @@ export final class Float32Array {
             let mustPrecede: (a: float, b: float) => boolean =
                 (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -8680,7 +8635,7 @@ export final class Float32Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: float, index: int, array: Float32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i), i, this)) {
                 return true
             }
@@ -8712,7 +8667,7 @@ export final class Float32Array {
      */
     public reduce(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float, init: float): float {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -8727,7 +8682,7 @@ export final class Float32Array {
      */
     public reduce(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float): float {
         let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -8744,7 +8699,7 @@ export final class Float32Array {
      */
     public reduceRight(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float, init: float): float {
         let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -8758,8 +8713,8 @@ export final class Float32Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float): float {
-        let acc: float = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: float = this.at(this.length as int - 1)
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -8773,9 +8728,9 @@ export final class Float32Array {
     * @returns a new Float32Array where for each element from current Float32Array fn was applied
     */
     public map(fn: (val: float, index: int) => float): Float32Array {
-        let resBuf = new ArrayBuffer(this.length * Float32Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Float32Array.BYTES_PER_ELEMENT as int)
         let res = new Float32Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i), i))
         }
         return res
@@ -8789,7 +8744,7 @@ export final class Float32Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: float, index: int, array: Float32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i), i, this)) {
                 return false
             }
@@ -8818,17 +8773,17 @@ export final class Float32Array {
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
     public filter(fn: (val: float, index: int, array: Float32Array) => boolean): Float32Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i), i, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT as int)
         let res = new Float32Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -8859,7 +8814,7 @@ export final class Float32Array {
      * TODO: return float | undefined as in JS
      */
     public find(fn: (val: float, index: int, array: Float32Array) => boolean): float {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -8889,7 +8844,7 @@ export final class Float32Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: float, index: int, array: Float32Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -8919,7 +8874,7 @@ export final class Float32Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: float, index: int, array: Float32Array) => boolean): float {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -8949,7 +8904,7 @@ export final class Float32Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: float, index: int, array: Float32Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -8979,7 +8934,7 @@ export final class Float32Array {
      * @returns undefined
      */
     public forEach(fn: (val: float, index: int, array: Float32Array) => float): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i), i, this))
         }
         throw new Error("Float32Array.forEach: has to return undefined, but returns void for now")
@@ -9135,8 +9090,8 @@ export final class Float32Array {
      * @returns sorted Float32Array
      */
     public sort(fn: (a: number, b: number) => number): Float32Array {
-        let arr: float[] = new float[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: float[] = new float[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -9144,7 +9099,7 @@ export final class Float32Array {
             let mustPrecede: (a: float, b: float) => boolean =
                 (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -9159,7 +9114,7 @@ export final class Float32Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number, array: Float32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i) as double as number, i as double as number, this)) {
                 return true
             }
@@ -9191,7 +9146,7 @@ export final class Float32Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Float32Array) => number, init: number): number {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -9206,7 +9161,7 @@ export final class Float32Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Float32Array) => number): number {
         let acc = this.at(0) as double as number
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -9223,7 +9178,7 @@ export final class Float32Array {
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Float32Array) => number, init: number): number {
         let acc = init as double as number
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -9237,8 +9192,8 @@ export final class Float32Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Float32Array) => number): number {
-        let acc: number = this.at(this.length - 1) as double as number
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: number = this.at(this.length as int - 1) as double as number
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -9252,9 +9207,9 @@ export final class Float32Array {
     * @returns a new Float32Array where for each element from current Float32Array fn was applied
     */
     public map(fn: (val: number, index: number) => number): Float32Array {
-        let resBuf = new ArrayBuffer(this.length * Float32Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Float32Array.BYTES_PER_ELEMENT as int)
         let res = new Float32Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as float)
         }
         return res
@@ -9268,7 +9223,7 @@ export final class Float32Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number, array: Float32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i) as double as number, i as double as number, this)) {
                 return false
             }
@@ -9297,17 +9252,17 @@ export final class Float32Array {
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Float32Array) => boolean): Float32Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i) as double as number, i as double as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT as int)
         let res = new Float32Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -9338,7 +9293,7 @@ export final class Float32Array {
      * TODO: return float | undefined as in JS
      */
     public find(fn: (val: number, index: number, array: Float32Array) => boolean): float {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -9368,7 +9323,7 @@ export final class Float32Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number, array: Float32Array) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i as double as number
@@ -9398,7 +9353,7 @@ export final class Float32Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number, array: Float32Array) => boolean): float {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -9428,7 +9383,7 @@ export final class Float32Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number, array: Float32Array) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i
@@ -9458,7 +9413,7 @@ export final class Float32Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number, array: Float32Array) => float): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i) as double as number, i as double as number, this))
         }
         throw new Error("Float32Array.forEach: has to return undefined, but returns void for now")
@@ -9494,13 +9449,13 @@ export final class Float32Array {
     public readonly buffer: Buffer
 
     /** Byte offset within the underlying ArrayBuffer */
-    public readonly byteOffset: int
+    public readonly byteOffset: number
 
     /** Number of bytes used */
-    public readonly byteLength: int
+    public readonly byteLength: number
 
     /** Number of float stored in Float32Array */
-    public readonly length: int
+    public readonly length: number
 
     /** String \"Float32Array\" */
     public readonly name = "Float32Array"
@@ -9510,7 +9465,7 @@ export final class Float32Array {
  * JS Float64Array API-compatible class
  */
 export final class Float64Array {
-    public static readonly BYTES_PER_ELEMENT = 8
+    public static readonly BYTES_PER_ELEMENT : number = 8
 
     /**
      * Creates an empty Float64Array.
@@ -9542,14 +9497,14 @@ export final class Float64Array {
      * @param length size of elements of type double in newly created Float64Array
      */
     public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Float64Array.BYTES_PER_ELEMENT != 0) {
+        if (buf.getByteLength() % Float64Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
         }
-        if (byteOffset % Float64Array.BYTES_PER_ELEMENT != 0) {
+        if (byteOffset % Float64Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length * Float64Array.BYTES_PER_ELEMENT > buf.getByteLength()) {
+        if (this.length as int * Float64Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
             throw new RangeError("Range Error: attempt to create Float64Array where length * Float64Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
         }
         this.byteLength = buf.getByteLength() - byteOffset
@@ -9566,7 +9521,7 @@ export final class Float64Array {
      * @param byteOffset byte offset from begin of the buf
      */
     public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Float64Array.BYTES_PER_ELEMENT)
+        this(buf, byteOffset, buf.getByteLength() / Float64Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -9586,7 +9541,7 @@ export final class Float64Array {
      * @param buf data initializer
      */
     public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Float64Array.BYTES_PER_ELEMENT)
+        this(buf, 0, buf.getByteLength() / Float64Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -9596,7 +9551,7 @@ export final class Float64Array {
      */
     public constructor(length: int) {
         this.length = length
-        this.byteLength = length * Float64Array.BYTES_PER_ELEMENT
+        this.byteLength = length * Float64Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength)
     }
@@ -9616,7 +9571,7 @@ export final class Float64Array {
      * @param other data initializer
      */
     public constructor(other: Float64Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength)
+        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
         this.byteLength = other.byteLength
         this.length = other.length
     }
@@ -9641,12 +9596,12 @@ export final class Float64Array {
      */
     public at(index: int): double {
         if (index < 0) {
-            index = this.length + index
+            index = this.length as int + index
         }
-        let byteIndex = index * Float64Array.BYTES_PER_ELEMENT + this.byteOffset
+        let byteIndex = index * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res: long = 0
-        for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT; ++i) {
-            let byteVal = this.buffer.at(byteIndex + i) as long
+        for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
+            let byteVal = this.buffer.at(byteIndex as int + i) as long
             byteVal &= 0xff
             res = (res | byteVal << (8 * i)) as long;
         }
@@ -9680,34 +9635,34 @@ export final class Float64Array {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        if (insertPos < -this.length) {
+        if (insertPos < -this.length as int) {
             insertPos = 0
         }
-        if (insertPos >= this.length) {
+        if (insertPos >= this.length as int) {
             return
         }
         if (insertPos < 0) {
-            insertPos = this.length + insertPos
+            insertPos = this.length as int + insertPos
         }
 
-        if (startPos < -this.length) {
+        if (startPos < -this.length as int) {
             startPos = 0
         }
-        if (startPos >= this.length) {
+        if (startPos >= this.length as int) {
             return
         }
         if (startPos < 0) {
-            startPos = this.length + startPos
+            startPos = this.length as int + startPos
         }
 
-        if (endPos < -this.length) {
+        if (endPos < -this.length as int) {
             endPos = 0
         }
         if (endPos < 0) {
-            endPos = this.length + endPos
+            endPos = this.length as int + endPos
         }
-        if (endPos > this.length) {
-            endPos = this.length
+        if (endPos > this.length as int) {
+            endPos = this.length as int
         }
         if (endPos < startPos) {
             return
@@ -9741,7 +9696,7 @@ export final class Float64Array {
      * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.length)
+        this.copyWithin(insertPos, startPos, this.length as int)
     }
 
     /**
@@ -9761,18 +9716,14 @@ export final class Float64Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.length)
+        this.copyWithin(insertPos, 0, this.length as int)
     }
 
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): MapIterator<Int, Double> {
-        let ret: Entry<Int, Double>[] = new Entry<Int, Double>[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = new Entry<Int, Double>(i, this.at(i));
-        }
-        return new MapIterator<Int, Double>(ret);
+    /* public */ internal entries(): IterableIterator<Entry<Int, Double>> {
+        throw new Error("not implemented")
     }
 
     /**
@@ -9794,23 +9745,23 @@ export final class Float64Array {
      * @returns modified Float64Array
      */
     public fill(value: double, start: int, end: int): Float64Array {
-        if (start < -this.length) {
+        if (start < -this.length as int) {
             start = 0
         }
         if (start < 0) {
-            start += this.length
+            start += this.length as int
         }
-        if (start >= this.length) {
+        if (start >= this.length as int) {
             return this;
         }
-        if (end < -this.length) {
+        if (end < -this.length as int) {
             end = 0
         }
         if (end < 0) {
-            end += this.length
+            end += this.length as int
         }
-        if (end >= this.length) {
-            end = this.length
+        if (end >= this.length as int) {
+            end = this.length as int
         }
         for (let i = start; i < end; ++i) {
             this.set(i, value)
@@ -9837,7 +9788,7 @@ export final class Float64Array {
      * @returns modified Float64Array
      */
     public fill(value: double, start: int): Float64Array {
-        return this.fill(value, start, this.length)
+        return this.fill(value, start, this.length as int)
     }
 
     /**
@@ -9848,7 +9799,7 @@ export final class Float64Array {
      * @returns modified Float64Array
      */
     public fill(value: double): Float64Array {
-        return this.fill(value, 0, this.length)
+        return this.fill(value, 0, this.length as int)
     }
 
     /**
@@ -9872,13 +9823,13 @@ export final class Float64Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: double): void {
-        if (insertPos < 0 || insertPos >= this.length) {
+        if (insertPos < 0 || insertPos >= this.length as int) {
             throw new RangeError("set: insertPos is out-of-bounds")
         }
 
-        let startByte = insertPos * Float64Array.BYTES_PER_ELEMENT + this.byteOffset
+        let startByte = insertPos * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = Double.bitCastToLong(val);
-        for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT; ++i) {
+        for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
             let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
             this.buffer.set(startByte + i, byteVal)
         }
@@ -9893,13 +9844,9 @@ export final class Float64Array {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos1: number): void {
-        const insertPos = insertPos1 as int
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: double[]): size of arr is greater than Float64Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.set(insertPos + i, arr[i] as double as int as double)
+    public set(arr: number[], insertPos: number): void {
+        for (let i = 0; i < arr.length as int; ++i) {
+            this.set(insertPos as int + i, arr[i] as double as int as double)
         }
     }
 
@@ -9913,10 +9860,7 @@ export final class Float64Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: double[], insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: double[]): size of arr is greater than Float64Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
+        for (let i = 0; i < arr.length as int; ++i) {
             this.set(insertPos + i, arr[i])
         }
     }
@@ -9981,7 +9925,7 @@ export final class Float64Array {
      * @returns true if e is in Float64Array, false otherwise
      */
     public includes(e: double, fromIndex: int): boolean {
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return true
             }
@@ -10025,17 +9969,17 @@ export final class Float64Array {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(e: double, fromIndex: int): int {
-        if (fromIndex >= this.length) {
+        if (fromIndex >= this.length as int) {
             return -1
         }
         if (fromIndex < 0) {
-            fromIndex += this.length
+            fromIndex += this.length as int
             // See TypedArray.indexOf JS docs
             if (fromIndex < 0) {
                 fromIndex = 0
             }
         }
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return i
             }
@@ -10065,12 +10009,12 @@ export final class Float64Array {
      */
     public join(s: string): string {
         let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(s)
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -10089,12 +10033,13 @@ export final class Float64Array {
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -10124,11 +10069,11 @@ export final class Float64Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
     public lastIndexOf(val: double, fromIndex: int): int {
-        if (fromIndex >= this.length) {
-            fromIndex = this.length - 1
+        if (fromIndex >= this.length as int) {
+            fromIndex = this.length as int - 1
         }
         if (fromIndex < 0) {
-            fromIndex = this.length + fromIndex
+            fromIndex = this.length as int + fromIndex
         }
 
         for (let i = fromIndex; i >= 0; --i) {
@@ -10149,7 +10094,7 @@ export final class Float64Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: double): int {
-        return this.lastIndexOf(val, this.length - 1)
+        return this.lastIndexOf(val, this.length as int - 1)
     }
 
    /**
@@ -10170,8 +10115,8 @@ export final class Float64Array {
      */
     public reverse(): Float64Array {
         let res = new Float64Array(this)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(this.length - 1 - i, this.at(i))
+        for (let i = 0; i < this.length as int; ++i) {
+            res.set(this.length as int - 1 - i, this.at(i))
         }
         return res
     }
@@ -10203,7 +10148,7 @@ export final class Float64Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Float64Array {
-        let buf = this.buffer.sliceInternal(begin * Float64Array.BYTES_PER_ELEMENT, end * Float64Array.BYTES_PER_ELEMENT)
+        let buf = this.buffer.sliceInternal(begin * Float64Array.BYTES_PER_ELEMENT as int, end * Float64Array.BYTES_PER_ELEMENT as int)
         return new Float64Array(buf)
     }
 
@@ -10226,7 +10171,7 @@ export final class Float64Array {
      * @returns a new Float64Array with elements of current Float64Array[begin, this.length)
      */
     public slice(begin: int): Float64Array {
-        return this.slice(begin, this.length)
+        return this.slice(begin, this.length as int)
     }
 
     /**
@@ -10275,7 +10220,7 @@ export final class Float64Array {
      * @returns new Float64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Float64Array {
-        return new Float64Array(this.buffer, begin * Float64Array.BYTES_PER_ELEMENT, end - begin)
+        return new Float64Array(this.buffer, begin * Float64Array.BYTES_PER_ELEMENT as int, end - begin)
     }
 
     /**
@@ -10297,7 +10242,7 @@ export final class Float64Array {
      * @returns new Float64Array with the same ArrayBuffer
      */
     public subarray(begin: int): Float64Array {
-        return this.subarray(begin, this.length)
+        return this.subarray(begin, this.length as int)
     }
 
     /**
@@ -10306,7 +10251,7 @@ export final class Float64Array {
      * @returns new Float64Array with the same ArrayBuffer
      */
     public subarray(): Float64Array {
-        return this.subarray(0, this.length)
+        return this.subarray(0, this.length as int)
     }
 
     /**
@@ -10367,12 +10312,12 @@ export final class Float64Array {
      */
     public override toString(): string {
         let res = new StringBuilder();
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(c',')
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -10382,12 +10327,13 @@ export final class Float64Array {
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Double> {
-        const ret = new Double[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Double>(ret);
+    public values(): Iterator<Double> {
+        throw new Error("not implemented")
+        // const ret = new Double[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Double>(ret);
     }
 
     /**
@@ -10428,7 +10374,7 @@ export final class Float64Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: double, index: int, array: Float64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i), i, this)) {
                 return true
             }
@@ -10460,7 +10406,7 @@ export final class Float64Array {
      */
     public reduce(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double, init: double): double {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -10475,7 +10421,7 @@ export final class Float64Array {
      */
     public reduce(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double): double {
         let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -10492,7 +10438,7 @@ export final class Float64Array {
      */
     public reduceRight(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double, init: double): double {
         let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -10506,8 +10452,8 @@ export final class Float64Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double): double {
-        let acc: double = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: double = this.at(this.length as int - 1)
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i), i, this)
         }
         return acc
@@ -10521,9 +10467,9 @@ export final class Float64Array {
     * @returns a new Float64Array where for each element from current Float64Array fn was applied
     */
     public map(fn: (val: double, index: int) => double): Float64Array {
-        let resBuf = new ArrayBuffer(this.length * Float64Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Float64Array.BYTES_PER_ELEMENT as int)
         let res = new Float64Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i), i))
         }
         return res
@@ -10537,7 +10483,7 @@ export final class Float64Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: double, index: int, array: Float64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i), i, this)) {
                 return false
             }
@@ -10566,17 +10512,17 @@ export final class Float64Array {
      * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
      */
     public filter(fn: (val: double, index: int, array: Float64Array) => boolean): Float64Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i), i, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT as int)
         let res = new Float64Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -10607,7 +10553,7 @@ export final class Float64Array {
      * TODO: return double | undefined as in JS
      */
     public find(fn: (val: double, index: int, array: Float64Array) => boolean): double {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -10637,7 +10583,7 @@ export final class Float64Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: double, index: int, array: Float64Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -10667,7 +10613,7 @@ export final class Float64Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: double, index: int, array: Float64Array) => boolean): double {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return val
@@ -10697,7 +10643,7 @@ export final class Float64Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: double, index: int, array: Float64Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val, i, this)) {
                 return i
@@ -10727,7 +10673,7 @@ export final class Float64Array {
      * @returns undefined
      */
     public forEach(fn: (val: double, index: int, array: Float64Array) => double): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i), i, this))
         }
         throw new Error("Float64Array.forEach: has to return undefined, but returns void for now")
@@ -10883,8 +10829,8 @@ export final class Float64Array {
      * @returns sorted Float64Array
      */
     public sort(fn: (a: number, b: number) => number): Float64Array {
-        let arr: double[] = new double[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: double[] = new double[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -10892,7 +10838,7 @@ export final class Float64Array {
             let mustPrecede: (a: double, b: double) => boolean =
                 (a: double, b: double): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -10907,7 +10853,7 @@ export final class Float64Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number, array: Float64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn(this.at(i) as double as number, i as double as number, this)) {
                 return true
             }
@@ -10939,7 +10885,7 @@ export final class Float64Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Float64Array) => number, init: number): number {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -10954,7 +10900,7 @@ export final class Float64Array {
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Float64Array) => number): number {
         let acc = this.at(0) as double as number
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -10971,7 +10917,7 @@ export final class Float64Array {
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Float64Array) => number, init: number): number {
         let acc = init as double as number
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -10985,8 +10931,8 @@ export final class Float64Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Float64Array) => number): number {
-        let acc: number = this.at(this.length - 1) as double as number
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: number = this.at(this.length as int - 1) as double as number
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, this.at(i) as double as number, i as double as number, this)
         }
         return acc
@@ -11000,9 +10946,9 @@ export final class Float64Array {
     * @returns a new Float64Array where for each element from current Float64Array fn was applied
     */
     public map(fn: (val: number, index: number) => number): Float64Array {
-        let resBuf = new ArrayBuffer(this.length * Float64Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * Float64Array.BYTES_PER_ELEMENT as int)
         let res = new Float64Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as double)
         }
         return res
@@ -11016,7 +10962,7 @@ export final class Float64Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number, array: Float64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn(this.at(i) as double as number, i as double as number, this)) {
                 return false
             }
@@ -11045,17 +10991,17 @@ export final class Float64Array {
      * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Float64Array) => boolean): Float64Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn(this.at(i) as double as number, i as double as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT as int)
         let res = new Float64Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -11086,7 +11032,7 @@ export final class Float64Array {
      * TODO: return double | undefined as in JS
      */
     public find(fn: (val: number, index: number, array: Float64Array) => boolean): double {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -11116,7 +11062,7 @@ export final class Float64Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number, array: Float64Array) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i as double as number
@@ -11146,7 +11092,7 @@ export final class Float64Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number, array: Float64Array) => boolean): double {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return val
@@ -11176,7 +11122,7 @@ export final class Float64Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number, array: Float64Array) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn(val as double as number, i as double as number, this)) {
                 return i
@@ -11206,7 +11152,7 @@ export final class Float64Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number, array: Float64Array) => double): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn(this.at(i) as double as number, i as double as number, this))
         }
         throw new Error("Float64Array.forEach: has to return undefined, but returns void for now")
@@ -11242,13 +11188,13 @@ export final class Float64Array {
     public readonly buffer: Buffer
 
     /** Byte offset within the underlying ArrayBuffer */
-    public readonly byteOffset: int
+    public readonly byteOffset: number
 
     /** Number of bytes used */
-    public readonly byteLength: int
+    public readonly byteLength: number
 
     /** Number of double stored in Float64Array */
-    public readonly length: int
+    public readonly length: number
 
     /** String \"Float64Array\" */
     public readonly name = "Float64Array"

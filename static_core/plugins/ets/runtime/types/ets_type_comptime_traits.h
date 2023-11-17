@@ -17,6 +17,7 @@
 
 #include "ets_type.h"
 #include "ets_primitives.h"
+#include "ets_array.h"
 
 namespace panda::ets {
 
@@ -69,10 +70,61 @@ template <>
 struct EtsTypeEnumToCppTypeT<EtsType::OBJECT> {
     using Type = EtsObject *;
 };
+
+template <EtsType TYPE>
+struct EtsTypeEnumToEtsArrayTypeT;
+
+template <>
+struct EtsTypeEnumToEtsArrayTypeT<EtsType::BOOLEAN> {
+    using Type = EtsBooleanArray;
+};
+
+template <>
+struct EtsTypeEnumToEtsArrayTypeT<EtsType::BYTE> {
+    using Type = EtsByteArray;
+};
+
+template <>
+struct EtsTypeEnumToEtsArrayTypeT<EtsType::CHAR> {
+    using Type = EtsCharArray;
+};
+
+template <>
+struct EtsTypeEnumToEtsArrayTypeT<EtsType::SHORT> {
+    using Type = EtsShortArray;
+};
+
+template <>
+struct EtsTypeEnumToEtsArrayTypeT<EtsType::INT> {
+    using Type = EtsIntArray;
+};
+
+template <>
+struct EtsTypeEnumToEtsArrayTypeT<EtsType::LONG> {
+    using Type = EtsLongArray;
+};
+
+template <>
+struct EtsTypeEnumToEtsArrayTypeT<EtsType::FLOAT> {
+    using Type = EtsFloatArray;
+};
+
+template <>
+struct EtsTypeEnumToEtsArrayTypeT<EtsType::DOUBLE> {
+    using Type = EtsDoubleArray;
+};
+
+template <>
+struct EtsTypeEnumToEtsArrayTypeT<EtsType::OBJECT> {
+    using Type = EtsObjectArray;
+};
 }  // namespace detail
 
 template <EtsType TYPE>
 using EtsTypeEnumToCppType = typename detail::EtsTypeEnumToCppTypeT<TYPE>::Type;
+
+template <EtsType TYPE>
+using EtsTypeEnumToEtsArrayType = typename detail::EtsTypeEnumToEtsArrayTypeT<TYPE>::Type;
 
 /* make switch on EtsType compile-time
  * to func is passed argument, such that

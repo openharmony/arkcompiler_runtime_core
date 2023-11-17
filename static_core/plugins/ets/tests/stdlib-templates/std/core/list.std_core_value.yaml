@@ -1,0 +1,217 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- {
+    name: char,
+    init_values: {"0 as char", "1 as char", "Char.MIN_VALUE as char", "Char.MAX_VALUE as char"},
+    value_name: Char,
+    primitive: true
+  }
+- {
+    name: boolean,
+    init_values: {"false", "true"},
+    value_name: Boolean,
+    primitive: true
+  }
+- {
+    name: byte,
+    init_values: {"0 as byte", "1 as byte", "-1 as byte", "Byte.MIN_VALUE as byte", "Byte.MAX_VALUE as byte"},
+    value_name: Byte,
+    primitive: true
+  }
+- {
+    name: short,
+    init_values: {"0 as short", "1 as short", "-1 as short", "Short.MIN_VALUE as short", "Short.MAX_VALUE as short"},
+    value_name: Short,
+    primitive: true
+  }
+- {
+    name: int,
+    init_values: {"0 as int", "1 as int", "-1 as int", "Int.MIN_VALUE as int", "Int.MAX_VALUE as int"},
+    value_name: Int,
+    primitive: true
+  }
+- {
+    name: long,
+    init_values: {"0 as long", "1 as long", "-1 as long", "Long.MIN_VALUE as long", "Long.MAX_VALUE as long"},
+    value_name: Long,
+    primitive: true
+  }
+- {
+    name: float,
+    init_values: {"0.0 as float", "1.0 as float", "-1.0 as float", "Float.MIN_VALUE as float", "Float.MAX_VALUE as float"},
+    value_name: Float,
+    primitive: true
+  }
+- {
+    name: double,
+    init_values: {"0.0 as double", "1.0 as double", "-1.0 as double", "Double.MIN_VALUE as double", "Double.MAX_VALUE as double"},
+    value_name: Double,
+    primitive: true
+  }
+- {
+    name: Char,
+    init_values: {"Char.valueOf(0 as char)", "Char.valueOf(1 as char)", "Char.valueOf(Char.MIN_VALUE as char)", "Char.valueOf(Char.MAX_VALUE as char)"},
+    value_name: Char,
+    primitive: false
+  }
+- {
+    name: Boolean,
+    init_values: {"Boolean.valueOf(false)", "Boolean.valueOf(true)"},
+    value_name: Boolean,
+    primitive: false
+  }
+- {
+    name: Byte,
+    init_values: {"Byte.valueOf(0 as byte)", "Byte.valueOf(1 as byte)", "Byte.valueOf(-1 as byte)", "Byte.valueOf(Byte.MIN_VALUE as byte)", "Byte.valueOf(Byte.MAX_VALUE as byte)"},
+    value_name: Byte,
+    primitive: false
+  }
+- {
+    name: Short,
+    init_values: {"Short.valueOf(0 as short)", "Short.valueOf(1 as short)", "Short.valueOf(-1 as short)", "Short.valueOf(Short.MIN_VALUE as short)", "Short.valueOf(Short.MAX_VALUE as short)"},
+    value_name: Short,
+    primitive: false
+  }
+- {
+    name: Int,
+    init_values: {"Int.valueOf(0 as int)", "Int.valueOf(1 as int)", "Int.valueOf(-1 as int)", "Int.valueOf(Int.MIN_VALUE as int)", "Int.valueOf(Int.MAX_VALUE as int)"},
+    value_name: Int,
+    primitive: false
+  }
+- {
+    name: Long,
+    init_values: {"Long.valueOf(0 as long)", "Long.valueOf(1 as long)", "Long.valueOf(-1 as long)", "Long.valueOf(Long.MIN_VALUE as long)", "Long.valueOf(Long.MAX_VALUE as long)"},
+    value_name: Long,
+    primitive: false
+  }
+- {
+    name: Float,
+    init_values: {"Float.valueOf(0.0 as float)", "Float.valueOf(1.0 as float)", "Float.valueOf(-1.0 as float)", "Float.valueOf(Float.MIN_VALUE as float)", "Float.valueOf(Float.MAX_VALUE as float)"},
+    value_name: Float,
+    primitive: false
+  }
+- {
+    name: Double,
+    init_values: {"Double.valueOf(0.0 as double)", "Double.valueOf(1.0 as double)", "Double.valueOf(-1.0 as double)", "Double.valueOf(Double.MIN_VALUE as double)", "Double.valueOf(Double.MAX_VALUE as double)"},
+    value_name: Double,
+    primitive: false
+  }
+- {
+    name: String,
+    init_values: {'""', '"\u0000 abcd"', '"abcd"', '"\u0000"'},
+    value_name: String,
+    primitive: false
+  }
+- {
+    name: "char[]",
+    init_values: {"[0 as char]", "[0 as char, 1 as char, Char.MIN_VALUE as char, Char.MAX_VALUE as char]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "boolean[]",
+    init_values: {"[false]", "[false, true]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "byte[]",
+    init_values: {"[0 as byte]", "[0 as byte, 1 as byte, -1 as byte, Byte.MIN_VALUE as byte, Byte.MAX_VALUE as byte]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "short[]",
+    init_values: {"[0 as short]", "[0 as short, 1 as short, -1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "int[]",
+    init_values: {"[0 as int]", "[0 as int, 1 as int, -1 as int, Int.MIN_VALUE as int, Int.MAX_VALUE as int]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "long[]",
+    init_values: {"[0 as long]", "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "float[]",
+    init_values: {"[0.0 as float]", "[0.0 as float, 1.0 as float, -1.0 as float, Float.MIN_VALUE as float, Float.MAX_VALUE as float]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "double[]",
+    init_values: {"[0.0 as double]", "[0.0 as double, 1.0 as double, -1.0 as double, Double.MIN_VALUE as double, Double.MAX_VALUE as double]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "Char[]",
+    init_values: {"[Char.valueOf(0 as char)]", "[Char.valueOf(0 as char), Char.valueOf(1 as char), Char.valueOf(Char.MIN_VALUE as char), Char.valueOf(Char.MAX_VALUE as char)]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "Boolean[]",
+    init_values: {"[Boolean.valueOf(false)]", "[Boolean.valueOf(false), Boolean.valueOf(true)]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "Byte[]",
+    init_values: {"[Byte.valueOf(0 as byte)]", "[Byte.valueOf(0 as byte), Byte.valueOf(1 as byte), Byte.valueOf(-1 as byte), Byte.valueOf(Byte.MIN_VALUE as byte), Byte.valueOf(Byte.MAX_VALUE as byte)]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "Short[]",
+    init_values: {"[Short.valueOf(0 as short)]", "[Short.valueOf(0 as short), Short.valueOf(1 as short), Short.valueOf(-1 as short), Short.valueOf(Short.MIN_VALUE as short), Short.valueOf(Short.MAX_VALUE as short)]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "Int[]",
+    init_values: {"[Int.valueOf(0 as int)]", "[Int.valueOf(0 as int), Int.valueOf(1 as int), Int.valueOf(-1 as int), Int.valueOf(Int.MIN_VALUE as int), Int.valueOf(Int.MAX_VALUE as int)]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "Long[]",
+    init_values: {"[Long.valueOf(0 as long)]", "[Long.valueOf(0 as long), Long.valueOf(1 as long), Long.valueOf(-1 as long), Long.valueOf(Long.MIN_VALUE as long), Long.valueOf(Long.MAX_VALUE as long)]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "Float[]",
+    init_values: {"[Float.valueOf(0.0 as float)]", "[Float.valueOf(0.0 as float), Float.valueOf(1.0 as float), Float.valueOf(-1.0 as float), Float.valueOf(Float.MIN_VALUE as float), Float.valueOf(Float.MAX_VALUE as float)]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "Double[]",
+    init_values: {"[Double.valueOf(0.0 as double),]", "[Double.valueOf(0.0 as double), Double.valueOf(1.0 as double), Double.valueOf(-1.0 as double), Double.valueOf(Double.MIN_VALUE as double), Double.valueOf(Double.MAX_VALUE as double)]"},
+    value_name: Array,
+    primitive: false
+  }
+- {
+    name: "String[]",
+    init_values: {'[""]', '["", "\u0000 abcd", "abcd", "\u0000"]'},
+    value_name: Array,
+    primitive: false
+  }

@@ -46,6 +46,11 @@ export class Math {
     public static readonly LOG2E: number = 1.4426950408889634;
 
     /**
+     * Logarithm base 10 of Euler number as double value
+     */
+    public static readonly LOG10E: number = 0.4342944819032518;
+
+    /**
      * Square root of 1/2 as double value
      */
     public static readonly SQRT1_2: number = 0.7071067811865476;
@@ -238,6 +243,26 @@ export class Math {
     }
 
     /**
+     * Leading zero bits count in 32-bit representation of `v`
+     *
+     * @param v 32-bit integer
+     *
+     * @returns Number of leading zero bits count in bit representation of `v`
+     *
+     * @example
+     * ```
+     * Math.clz32(0xFFFFFFFF) == 0
+     * Math.clz32(0x0000FFFF) == 16
+     * Math.clz32(0x0) == 32
+     * ```
+     */
+    public clz32(value: number): number {
+        let longBits = Double.bitCastToLong(value);
+        let lowBits = (longBits & 0xFFFFFFFF) as int;    
+        return Math.clz32(lowBits) as number;
+    }
+
+    /**
      * Cosine of `x`
      *
      * @param x Angle in radians
@@ -350,6 +375,28 @@ export class Math {
      */
     public static hypot(u: number, v: number): number {
         return hypot(u, v);
+    }
+
+    /**
+     * Square root of the sum of squares of `v` and `u`
+     *
+     * @param u arbitrary number
+     * @param v arbitrary number
+     *
+     * @returns The square root of the sum of squares of its arguments
+     */
+    public hypot(...values: number[]): number {
+        let max: number = 0;
+        for (const value of values) {
+            max = Math.max(max, Math.abs(value)) as number;
+        }
+        if (max == 0) return 0;
+        let sum = 0;
+        for (const value of values) {
+            let normalized = value / max;
+            sum += normalized * normalized;
+        }
+        return max * Math.sqrt(sum);
     }
 
     /**
@@ -467,6 +514,28 @@ export class Math {
     }
 
     /**
+     * Largest value of `u` and `v`
+     *
+     * @param u arbitrary number (of type `Int`)
+     * @param v arbitrary number (of type `Int`)
+     *
+     * @returns Largest value of `u` and `v`
+     */
+
+    public max(...values: number[]): number {
+        if (values.length == 0) {
+            return -Infinity;
+        }
+        let max = values[0];
+        for (let i = 1; i < values.length; i++) {
+            if (values[i] > max) {
+                max = values[i];
+            }
+        }
+        return max;
+    }
+
+    /**
      * Smallest value of `u` and `v`
      *
      * @param u arbitrary number
@@ -488,6 +557,27 @@ export class Math {
      */
     public static min(a: Int, b: Int): number {
         return min(a.intValue(), b.intValue());
+    }
+
+    /**
+     * Smallest value of `u` and `v`
+     *
+     * @param u arbitrary number (of type `Int`)
+     * @param v arbitrary number (of type `Int`)
+     *
+     * @returns Smallest value of `u` and `v`
+     */
+    public min(...values: number[]): number {
+        if (values.length == 0) {
+            return Infinity;
+        }
+        let min = values[0];
+        for (let i = 1; i < values.length; i++) {
+            if (values[i] < min) {
+                min = values[i];
+            }
+        }
+        return min;
     }
 
     /**

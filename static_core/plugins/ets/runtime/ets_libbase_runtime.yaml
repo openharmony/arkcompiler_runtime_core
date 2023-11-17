@@ -1722,6 +1722,17 @@ intrinsics:
     impl: panda::ets::intrinsics::StdCoreRuntimeEquals
     clear_flags: [ ]
 
+  - name: StdRuntimeGetHashCode
+    space: ets
+    class_name: std.core.Runtime
+    method_name: getHashCode
+    static: false
+    signature:
+      ret: i32
+      args: [ std.core.Object ]
+    impl: panda::ets::intrinsics::StdCoreRuntimeGetHashCode
+    clear_flags: [ ]
+
 ##########################
 # std.serialization.JSON #
 ##########################
@@ -2049,17 +2060,6 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetResultType
     clear_flags: [ ]
 
-  - name: TypeAPIGetReceiverType
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetReceiverType
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetReceiverType
-    clear_flags: [ ]
-
   - name: StdMethodInvoke
     space: ets
     class_name: std.core.ETSGLOBAL
@@ -2085,6 +2085,16 @@ intrinsics:
         - std.core.String
         - std.core.Object[]
     impl: panda::ets::intrinsics::TypeAPIMethodInvokeConstructor
+
+  - name: TypeAPIGetReceiverType
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetReceiverType
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetReceiverType
     clear_flags: [ ]
 
 #################
@@ -2137,6 +2147,7 @@ intrinsics:
 ###################
 # std.core.Value  #
 ###################
+
   - name: ValueAPIGetFieldObject
     space: ets
     class_name: std.core.ETSGLOBAL
@@ -2236,6 +2247,104 @@ intrinsics:
     impl: panda::ets::intrinsics::ValueAPIGetFieldDouble
     clear_flags: [ ]
 
+  - name: ValueAPIGetFieldByNameObject
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByNameObject
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameObject
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldByNameBoolean
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByNameBoolean
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameBoolean
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldByNameByte
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByNameByte
+    static: true
+    signature:
+      ret: i8
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameByte
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldByNameChar
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByNameChar
+    static: true
+    signature:
+      ret: u16
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameChar
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldByNameShort
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByNameShort
+    static: true
+    signature:
+      ret: i16
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameShort
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldByNameInt
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByNameInt
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameInt
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldByNameLong
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByNameLong
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameLong
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldByNameFloat
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByNameFloat
+    static: true
+    signature:
+      ret: f32
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameFloat
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldByNameDouble
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByNameDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameDouble
+    clear_flags: [ ]
 
 
   - name: ValueAPISetFieldObject
@@ -2440,6 +2549,17 @@ intrinsics:
 
 
 
+  - name: ValueAPIGetArrayLength
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetArrayLength
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object ]
+    impl: panda::ets::intrinsics::ValueAPIGetArrayLength
+    clear_flags: [ ]
+
   - name: ValueAPISetElementObject
     space: ets
     class_name: std.core.ETSGLOBAL
@@ -2537,6 +2657,106 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f64 ]
     impl: panda::ets::intrinsics::ValueAPISetElementDouble
+    clear_flags: [ ]
+
+
+  - name: ValueAPIGetElementObject
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetElementObject
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetElementObject
+    clear_flags: [ ]
+
+  - name: ValueAPIGetElementBoolean
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetElementBoolean
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetElementBoolean
+    clear_flags: [ ]
+
+  - name: ValueAPIGetElementByte
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetElementByte
+    static: true
+    signature:
+      ret: i8
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetElementByte
+    clear_flags: [ ]
+
+  - name: ValueAPIGetElementChar
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetElementChar
+    static: true
+    signature:
+      ret: u16
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetElementChar
+    clear_flags: [ ]
+
+  - name: ValueAPIGetElementShort
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetElementShort
+    static: true
+    signature:
+      ret: i16
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetElementShort
+    clear_flags: [ ]
+
+  - name: ValueAPIGetElementInt
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetElementInt
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetElementInt
+    clear_flags: [ ]
+
+  - name: ValueAPIGetElementLong
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetElementLong
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetElementLong
+    clear_flags: [ ]
+
+  - name: ValueAPIGetElementFloat
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetElementFloat
+    static: true
+    signature:
+      ret: f32
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetElementFloat
+    clear_flags: [ ]
+
+  - name: ValueAPIGetElementDouble
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetElementDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetElementDouble
     clear_flags: [ ]
 
 ###############################

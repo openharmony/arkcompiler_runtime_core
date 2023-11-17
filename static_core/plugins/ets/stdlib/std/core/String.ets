@@ -18,7 +18,7 @@ package std.core;
 /**
  * Unicode string
  */
-export final class String extends Object implements Comparable<String>, JSONable<String> {
+export class String extends Object implements Comparable<String>, JSONable<String> {
 
     // The constructors below are implemented via initobj instruction
     /**
@@ -606,8 +606,11 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @returns new String which is a concatenation of this + to
      */
-    public concat(to: String): String {
-        return StringBuilder.concatStrings(this, to);
+    public concat(to: String = ""): String {        
+        if (0 < to.length()) {
+            return StringBuilder.concatStrings(this, to);
+        }
+        return this;
     }
 
     /*

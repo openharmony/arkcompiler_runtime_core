@@ -346,8 +346,8 @@ export abstract class Type extends Object {
         if (this.equals(other)) {
             return true
         } else if (other.equals(ObjectType)) {
-            let isNullable = (this) instanceof UndefinedType || (this) instanceof NullType
-            return this.isReference() && !isNullable && !((this) instanceof VoidType)
+            let isNullish = (this) instanceof UndefinedType || (this) instanceof NullType
+            return this.isReference() && !isNullish && !((this) instanceof VoidType)
         }
         return false
     }
@@ -1057,8 +1057,8 @@ export final class ClassType extends Type {
         for (let i = 0; i < args.length; i++) {
             argTypes[i] = Type.of(args[i])
         }
-        const ctors = new Array<Method>()
         // collect all applicable constructors
+        const ctors = new Array<Method>()
         const ctorNum = this.getConstructorsNum()
         for (let i = 0; i < ctorNum; i++) {
             const c = this.getConstructor(i)
@@ -1077,10 +1077,10 @@ export final class ClassType extends Type {
             }
         }
         // inspect if constructor has a more specific one (O(n^2))
-        for (let inspect = 0; inspect < ctors.length(); inspect++) {
+        for (let inspect = 0; inspect < ctors.length; inspect++) {
             const toRem = ctors.at(inspect)!.getType()
             let rem = false
-            for (let c = 0; c < ctors.length(); c++) {
+            for (let c = 0; c < ctors.length; c++) {
                 if (c == inspect) {
                     continue
                 }
@@ -1101,8 +1101,8 @@ export final class ClassType extends Type {
                 inspect--
             }
         }
-        if (ctors.length() != 1) {
-            throw new Error("can't select consturctor: " + ctors.length() + " left")
+        if (ctors.length != 1) {
+            throw new Error("can't select consturctor: " + ctors.length + " left")
         }
         return ctors.at(0)!.invoke(null, args)!
     }
@@ -1143,7 +1143,6 @@ export final class ClassType extends Type {
         }
         return obj
     }
-
 }
 
 
@@ -1197,13 +1196,11 @@ export final class InterfaceType extends Type {
     }
 
     public getMethodsNum(): long {
-        // TODO(shumilov-petr): not implemented
-        return 0
+        return TypeAPIGetMethodsNum(this.td)
     }
 
     public getMethod(i: long): Method {
-        // TODO(shumilov-petr): not implemented
-        throw new Error("Not implemented")
+        return TypeAPIGetMethod(this.td, i)
     }
 
     public getTypeParametersNum(): long {
@@ -1229,7 +1226,7 @@ export final class InterfaceType extends Type {
         queue.push(this)
         used.push(new Long(this.getId()))
 
-        while ((queue.length() - qfront) > 0) {
+        while ((queue.length - qfront) > 0) {
             let iface = queue.at(qfront)
             qfront++
 
@@ -1377,7 +1374,6 @@ export final class ArrayType extends Type {
         return obj
     }
 }
-
 
 export final class TupleType extends Type {
     public constructor(td: TypeDesc) {
@@ -1763,4 +1759,3 @@ export final class UnionType extends Type {
         return obj
     }
 }
-

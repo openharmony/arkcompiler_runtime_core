@@ -16,6 +16,7 @@
 package std.core;
 
 // Class Value
+
 native function ValueAPIGetFieldBoolean(obj: Object, i: long): boolean
 
 native function ValueAPIGetFieldByte(obj: Object, i: long): byte
@@ -33,6 +34,25 @@ native function ValueAPIGetFieldDouble(obj: Object, i: long): double
 native function ValueAPIGetFieldLong(obj: Object, i: long): long
 
 native function ValueAPIGetFieldObject(obj: Object, i: long): Object
+
+
+native function ValueAPIGetFieldByNameBoolean(obj: Object, name: String): boolean
+
+native function ValueAPIGetFieldByNameByte(obj: Object, name: String): byte
+
+native function ValueAPIGetFieldByNameShort(obj: Object, name: String): short
+
+native function ValueAPIGetFieldByNameChar(obj: Object, name: String): char
+
+native function ValueAPIGetFieldByNameInt(obj: Object, name: String): int
+
+native function ValueAPIGetFieldByNameFloat(obj: Object, name: String): float
+
+native function ValueAPIGetFieldByNameDouble(obj: Object, name: String): double
+
+native function ValueAPIGetFieldByNameLong(obj: Object, name: String): long
+
+native function ValueAPIGetFieldByNameObject(obj: Object, name: String): Object
 
 
 native function ValueAPISetFieldBoolean(obj: Object, i: long, val: boolean): void
@@ -73,6 +93,8 @@ native function ValueAPISetFieldByNameLong(obj: Object, name: String, val: long)
 native function ValueAPISetFieldByNameObject(obj: Object, name: String, val: Object): void
 
 // Array Value
+native function ValueAPIGetArrayLength(obj: Object): long
+
 native function ValueAPISetElementBoolean(obj: Object, i: long, val: boolean): void
 
 native function ValueAPISetElementByte(obj: Object, i: long, val: byte): void
@@ -91,39 +113,180 @@ native function ValueAPISetElementLong(obj: Object, i: long, val: long): void
 
 native function ValueAPISetElementObject(obj: Object, i: long, val: Object): void
 
+
+native function ValueAPIGetElementBoolean(obj: Object, i: long): boolean
+
+native function ValueAPIGetElementByte(obj: Object, i: long): byte
+
+native function ValueAPIGetElementShort(obj: Object, i: long): short
+
+native function ValueAPIGetElementChar(obj: Object, i: long): char
+
+native function ValueAPIGetElementInt(obj: Object, i: long): int
+
+native function ValueAPIGetElementFloat(obj: Object, i: long): float
+
+native function ValueAPIGetElementDouble(obj: Object, i: long): double
+
+native function ValueAPIGetElementLong(obj: Object, i: long): long
+
+native function ValueAPIGetElementObject(obj: Object, i: long): Object
+
 export abstract class Value extends Object {
+    public static of(v: boolean): Value {
+        return new BooleanValue(BooleanType.VAL, v)
+    }
+
+    public static of(v: char): Value {
+        return new CharValue(CharType.VAL, v)
+    }
+
+    public static of(v: byte): Value {
+        return new ByteValue(ByteType.VAL, v)
+    }
+
+    public static of(v: short): Value {
+        return new ShortValue(ShortType.VAL, v)
+    }
+
+    public static of(v: int): Value {
+        return new IntValue(IntType.VAL, v)
+    }
+
+    public static of(v: long): Value {
+        return new LongValue(LongType.VAL, v)
+    }
+
+    public static of(v: float): Value {
+        return new FloatValue(FloatType.VAL, v)
+    }
+
+    public static of(v: double): Value {
+        return new DoubleValue(DoubleType.VAL, v)
+    }
+
+    // -----
+
+    public static of(v: Boolean): Value {
+        return new BooleanValue(BooleanType.REF, v)
+    }
+
+    public static of(v: Char): Value {
+        return new CharValue(CharType.REF, v)
+    }
+
+    public static of(v: Byte): Value {
+        return new ByteValue(ByteType.REF, v)
+    }
+
+    public static of(v: Short): Value {
+        return new ShortValue(ShortType.REF, v)
+    }
+
+    public static of(v: Int): Value {
+        return new IntValue(IntType.REF, v)
+    }
+
+    public static of(v: Long): Value {
+        return new LongValue(LongType.REF, v)
+    }
+
+    public static of(v: Float): Value {
+        return new FloatValue(FloatType.REF, v)
+    }
+
+    public static of(v: Double): Value {
+        return new DoubleValue(DoubleType.REF, v)
+    }
+
+    // -----
+
     public static of(o: NullishType): Value {
+        if (o instanceof Value) {
+            return o as Value
+        } else if (o instanceof Boolean) {
+            return new BooleanValue(BooleanType.REF, o as Boolean)
+        } else if (o instanceof Char) {
+            return new CharValue(CharType.REF, o as Char)
+        } else if (o instanceof Byte) {
+            return new ByteValue(ByteType.REF, o as Byte)
+        } else if (o instanceof Short) {
+            return new ShortValue(ShortType.REF, o as Short)
+        } else if (o instanceof Int) {
+            return new IntValue(IntType.REF, o as Int)
+        } else if (o instanceof Long) {
+            return new LongValue(LongType.REF, o as Long)
+        } else if (o instanceof Float) {
+            return new FloatValue(FloatType.REF, o as Float)
+        } else if (o instanceof Double) {
+            return new DoubleValue(DoubleType.REF, o as Double)
+        }
+
         let t = Type.of(o)
         if (t instanceof NullType) {
             return NullValue.INSTANCE
+        } else if (t instanceof VoidType) {
+            return new VoidValue()
+        } else if (t instanceof UndefinedType) {
+            return new UndefinedValue()
         } else if (t instanceof ClassType) {
             return new ClassValue(t as ClassType, o!)
         } else if (t instanceof ArrayType) {
             return new ArrayValue(t as ArrayType, o!)
         } else if (t instanceof StringType) {
-            return new StringValue(t as StringType, o! as String)
-        } else if (t instanceof BooleanType) {
-            return new BooleanValue(t as BooleanType, o! as Boolean)
-        } else if (t instanceof ByteType) {
-            return new ByteValue(t as ByteType, o! as Byte)
-        } else if (t instanceof ShortType) {
-            return new ShortValue(t as ShortType, o! as Short)
-        } else if (t instanceof CharType) {
-            return new CharValue(t as CharType, o! as Char)
-        } else if (t instanceof IntType) {
-            return new IntValue(t as IntType, o! as Int)
-        } else if (t instanceof FloatType) {
-            return new FloatValue(t as FloatType, o! as Float)
-        } else if (t instanceof DoubleType) {
-            return new DoubleValue(t as DoubleType, o! as Double)
-        } else if (t instanceof LongType) {
-            return new LongValue(t as LongType, o! as Long)
-        } else {
+            return new StringValue(t as StringType, o! as string)
+        } else if (t instanceof LambdaType) {
+            return new LambdaValue(t as LambdaType, o!)
+        } else if (t instanceof MethodType) {
+            throw new Error("The MethodType cannot be instantiated")
+        } else if (t instanceof EnumType) {
+            throw new Error("Not implemented")
+        } else if (t instanceof UnionType) {
+            throw new Error("Not implemented")
+        } else if (t instanceof TupleType) {
             throw new Error("Not implemented")
         }
+        // TODO(shumilov-petr): throw `unknown type` exception
+        assert(false)
+    }
+
+    // -----
+
+    public static of(v: boolean[]): Value {
+        return new ArrayValue(ArrayType.BOOLEAN_VAL, v)
+    }
+
+    public static of(v: char[]): Value {
+        return new ArrayValue(ArrayType.CHAR_VAL, v)
+    }
+
+    public static of(v: byte[]): Value {
+        return new ArrayValue(ArrayType.BYTE_VAL, v)
+    }
+
+    public static of(v: short[]): Value {
+        return new ArrayValue(ArrayType.SHORT_VAL, v)
+    }
+
+    public static of(v: int[]): Value {
+        return new ArrayValue(ArrayType.INT_VAL, v)
+    }
+
+    public static of(v: long[]): Value {
+        return new ArrayValue(ArrayType.LONG_VAL, v)
+    }
+
+    public static of(v: float[]): Value {
+        return new ArrayValue(ArrayType.FLOAT_VAL, v)
+    }
+
+    public static of(v: double[]): Value {
+        return new ArrayValue(ArrayType.DOUBLE_VAL, v)
     }
 
     public abstract getType(): Type
+
+    public abstract getData(): Object
 }
 
 export final class ClassValue extends Value {
@@ -134,7 +297,7 @@ export final class ClassValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Object {
+    public override getData(): Object {
         return this.data
     }
 
@@ -148,7 +311,11 @@ export final class ClassValue extends Value {
     }
 
     public getField(i: long): Value {
-        let ft = this.typ.getField(i).getType()
+        let f = this.typ.getField(i)
+        if (f.isStatic()) {
+            throw new Error("Field must be not static")
+        }
+        let ft = f.getType()
         if (!ft.isReference()) {
             if (ft instanceof BooleanType) {
                 return new BooleanValue(ft as BooleanType, ValueAPIGetFieldBoolean(this.data, i))
@@ -171,30 +338,63 @@ export final class ClassValue extends Value {
         return Value.of(ValueAPIGetFieldObject(this.data, i))
     }
 
+    public getFieldByName(name: string): Value {
+        let f = this.typ.getFieldByName(name)
+        if (f.isStatic()) {
+            throw new Error("Field must be not static")
+        }
+        const ft = f.getType()
+        if (!ft.isReference()) {
+            if (ft instanceof BooleanType) {
+                return new BooleanValue(ft as BooleanType, ValueAPIGetFieldByNameBoolean(this.data, name))
+            } else if (ft instanceof ByteType) {
+                return new ByteValue(ft as ByteType, ValueAPIGetFieldByNameByte(this.data, name))
+            } else if (ft instanceof ShortType) {
+                return new ShortValue(ft as ShortType, ValueAPIGetFieldByNameShort(this.data, name))
+            } else if (ft instanceof CharType) {
+                return new CharValue(ft as CharType, ValueAPIGetFieldByNameChar(this.data, name))
+            } else if (ft instanceof IntType) {
+                return new IntValue(ft as IntType, ValueAPIGetFieldByNameInt(this.data, name))
+            } else if (ft instanceof FloatType) {
+                return new FloatValue(ft as FloatType, ValueAPIGetFieldByNameFloat(this.data, name))
+            } else if (ft instanceof DoubleType) {
+                return new DoubleValue(ft as DoubleType, ValueAPIGetFieldByNameDouble(this.data, name))
+            } else if (ft instanceof LongType) {
+                return new LongValue(ft as LongType, ValueAPIGetFieldByNameLong(this.data, name))
+            }
+            assert(false)
+        }
+        return Value.of(ValueAPIGetFieldByNameObject(this.data, name))
+    }
+
     public setFieldByName(name: string, val: Value) {
-        let ft = this.typ.getFieldByName(name).getType()
+        let f = this.typ.getFieldByName(name)
+        if (f.isStatic()) {
+            throw new Error("Field must be not static")
+        }
+        let ft = f.getType()
         let vt = val.getType()
         if (!ft.assignableFrom(vt)) {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
         if (ft instanceof BooleanType && val instanceof BooleanValue) {
-            ValueAPISetFieldByNameBoolean(this.data, name, (val as BooleanValue).getData())
+            ValueAPISetFieldByNameBoolean(this.data, name, (val as BooleanValue).getValueData())
         } else if (ft instanceof ByteType && val instanceof ByteValue) {
-            ValueAPISetFieldByNameByte(this.data, name, (val as ByteValue).getData())
+            ValueAPISetFieldByNameByte(this.data, name, (val as ByteValue).getValueData())
         } else if (ft instanceof ShortType && val instanceof ShortValue) {
-            ValueAPISetFieldByNameShort(this.data, name, (val as ShortValue).getData())
+            ValueAPISetFieldByNameShort(this.data, name, (val as ShortValue).getValueData())
         } else if (ft instanceof CharType && val instanceof CharValue) {
-            ValueAPISetFieldByNameChar(this.data, name, (val as CharValue).getData())
+            ValueAPISetFieldByNameChar(this.data, name, (val as CharValue).getValueData())
         } else if (ft instanceof IntType && val instanceof IntValue) {
-            ValueAPISetFieldByNameInt(this.data, name, (val as IntValue).getData())
+            ValueAPISetFieldByNameInt(this.data, name, (val as IntValue).getValueData())
         } else if (ft instanceof FloatType && val instanceof FloatValue) {
-            ValueAPISetFieldByNameFloat(this.data, name, (val as FloatValue).getData())
+            ValueAPISetFieldByNameFloat(this.data, name, (val as FloatValue).getValueData())
         } else if (ft instanceof DoubleType && val instanceof DoubleValue) {
-            ValueAPISetFieldByNameDouble(this.data, name, (val as DoubleValue).getData())
+            ValueAPISetFieldByNameDouble(this.data, name, (val as DoubleValue).getValueData())
         } else if (ft instanceof LongType && val instanceof LongValue) {
-            ValueAPISetFieldByNameLong(this.data, name, (val as LongValue).getData())
+            ValueAPISetFieldByNameLong(this.data, name, (val as LongValue).getValueData())
         } else if (ft instanceof StringType && val instanceof StringValue) {
-            ValueAPISetFieldByNameObject(this.data, name, (val as StringValue).getData())
+            ValueAPISetFieldByNameObject(this.data, name, (val as StringValue).getData() as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
             ValueAPISetFieldByNameObject(this.data, name, (val as ArrayValue).getData())
         } else if (ft instanceof ClassType && val instanceof ClassValue) {
@@ -205,29 +405,33 @@ export final class ClassValue extends Value {
     }
 
     public setField(i: long, val: Value) {
-        let ft = this.typ.getField(i).getType()
+        let f = this.typ.getField(i)
+        if (f.isStatic()) {
+            throw new Error("Field must be not static")
+        }
+        let ft = f.getType()
         let vt = val.getType()
         if (!ft.assignableFrom(vt)) {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
         if (ft instanceof BooleanType && val instanceof BooleanValue) {
-            ValueAPISetFieldBoolean(this.data, i, (val as BooleanValue).getData())
+            ValueAPISetFieldBoolean(this.data, i, (val as BooleanValue).getValueData())
         } else if (ft instanceof ByteType && val instanceof ByteValue) {
-            ValueAPISetFieldByte(this.data, i, (val as ByteValue).getData())
+            ValueAPISetFieldByte(this.data, i, (val as ByteValue).getValueData())
         } else if (ft instanceof ShortType && val instanceof ShortValue) {
-            ValueAPISetFieldShort(this.data, i, (val as ShortValue).getData())
+            ValueAPISetFieldShort(this.data, i, (val as ShortValue).getValueData())
         } else if (ft instanceof CharType && val instanceof CharValue) {
-            ValueAPISetFieldChar(this.data, i, (val as CharValue).getData())
+            ValueAPISetFieldChar(this.data, i, (val as CharValue).getValueData())
         } else if (ft instanceof IntType && val instanceof IntValue) {
-            ValueAPISetFieldInt(this.data, i, (val as IntValue).getData())
+            ValueAPISetFieldInt(this.data, i, (val as IntValue).getValueData())
         } else if (ft instanceof FloatType && val instanceof FloatValue) {
-            ValueAPISetFieldFloat(this.data, i, (val as FloatValue).getData())
+            ValueAPISetFieldFloat(this.data, i, (val as FloatValue).getValueData())
         } else if (ft instanceof DoubleType && val instanceof DoubleValue) {
-            ValueAPISetFieldDouble(this.data, i, (val as DoubleValue).getData())
+            ValueAPISetFieldDouble(this.data, i, (val as DoubleValue).getValueData())
         } else if (ft instanceof LongType && val instanceof LongValue) {
-            ValueAPISetFieldLong(this.data, i, (val as LongValue).getData())
+            ValueAPISetFieldLong(this.data, i, (val as LongValue).getValueData())
         } else if (ft instanceof StringType && val instanceof StringValue) {
-            ValueAPISetFieldObject(this.data, i, (val as StringValue).getData())
+            ValueAPISetFieldObject(this.data, i, (val as StringValue).getData() as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
             ValueAPISetFieldObject(this.data, i, (val as ArrayValue).getData())
         } else if (ft instanceof ClassType && val instanceof ClassValue) {
@@ -237,6 +441,22 @@ export final class ClassValue extends Value {
         }
     }
 
+    public override toString(): string {
+        const fnum = this.getFieldsNum()
+        let res = new StringBuilder("{")
+        for (let i = 0; i < fnum; i++) {
+            const f = this.typ.getField(i)
+            const fv = this.getField(i)
+            res.append(f.getName())
+            res.append(": ")
+            res.append(fv.toString())
+            if (i != fnum - 1) {
+                res.append(", ")
+            }
+        }
+        res.append("}")
+        return res.toString()
+    }
 }
 
 export final class ArrayValue extends Value {
@@ -247,7 +467,7 @@ export final class ArrayValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Object {
+    public override getData(): Object {
         return this.data
     }
 
@@ -256,30 +476,59 @@ export final class ArrayValue extends Value {
         this.data = data
     }
 
-    public setElementByIndex(i: long, val: Value) {
+    public getLength(): long {
+        return ValueAPIGetArrayLength(this.data)
+    }
+
+    public getElement(i: long): Value {
+        const et = this.typ.getElementType()
+        if (!et.isReference()) {
+            if (et instanceof BooleanType) {
+                return new BooleanValue(et as BooleanType, ValueAPIGetElementBoolean(this.data, i))
+            } else if (et instanceof ByteType) {
+                return new ByteValue(et as ByteType, ValueAPIGetElementByte(this.data, i))
+            } else if (et instanceof ShortType) {
+                return new ShortValue(et as ShortType, ValueAPIGetElementShort(this.data, i))
+            } else if (et instanceof CharType) {
+                return new CharValue(et as CharType, ValueAPIGetElementChar(this.data, i))
+            } else if (et instanceof IntType) {
+                return new IntValue(et as IntType, ValueAPIGetElementInt(this.data, i))
+            } else if (et instanceof FloatType) {
+                return new FloatValue(et as FloatType, ValueAPIGetElementFloat(this.data, i))
+            } else if (et instanceof DoubleType) {
+                return new DoubleValue(et as DoubleType, ValueAPIGetElementDouble(this.data, i))
+            } else if (et instanceof LongType) {
+                return new LongValue(et as LongType, ValueAPIGetElementLong(this.data, i))
+            }
+            assert(false)
+        }
+        return Value.of(ValueAPIGetElementObject(this.data, i))
+    }
+
+    public setElement(i: long, val: Value) {
         let et = this.typ.getElementType()
         let vt = val.getType()
         if (!et.assignableFrom(vt)) {
             throw new Error("Cannot assign array of type " + et + " with value of type " + vt)
         }
         if (et instanceof BooleanType && val instanceof BooleanValue) {
-            ValueAPISetElementBoolean(this.data, i, (val as BooleanValue).getData())
+            ValueAPISetElementBoolean(this.data, i, (val as BooleanValue).getValueData())
         } else if (et instanceof ByteType && val instanceof ByteValue) {
-            ValueAPISetElementByte(this.data, i, (val as ByteValue).getData())
+            ValueAPISetElementByte(this.data, i, (val as ByteValue).getValueData())
         } else if (et instanceof ShortType && val instanceof ShortValue) {
-            ValueAPISetElementShort(this.data, i, (val as ShortValue).getData())
+            ValueAPISetElementShort(this.data, i, (val as ShortValue).getValueData())
         } else if (et instanceof CharType && val instanceof CharValue) {
-            ValueAPISetElementChar(this.data, i, (val as CharValue).getData())
+            ValueAPISetElementChar(this.data, i, (val as CharValue).getValueData())
         } else if (et instanceof IntType && val instanceof IntValue) {
-            ValueAPISetElementInt(this.data, i, (val as IntValue).getData())
+            ValueAPISetElementInt(this.data, i, (val as IntValue).getValueData())
         } else if (et instanceof FloatType && val instanceof FloatValue) {
-            ValueAPISetElementFloat(this.data, i, (val as FloatValue).getData())
+            ValueAPISetElementFloat(this.data, i, (val as FloatValue).getValueData())
         } else if (et instanceof DoubleType && val instanceof DoubleValue) {
-            ValueAPISetElementDouble(this.data, i, (val as DoubleValue).getData())
+            ValueAPISetElementDouble(this.data, i, (val as DoubleValue).getValueData())
         } else if (et instanceof LongType && val instanceof LongValue) {
-            ValueAPISetElementLong(this.data, i, (val as LongValue).getData())
+            ValueAPISetElementLong(this.data, i, (val as LongValue).getValueData())
         } else if (et instanceof StringType && val instanceof StringValue) {
-            ValueAPISetElementObject(this.data, i, (val as StringValue).getData())
+            ValueAPISetElementObject(this.data, i, (val as StringValue).getData() as string)
         } else if (et instanceof ArrayType && val instanceof ArrayValue) {
             ValueAPISetElementObject(this.data, i, (val as ArrayValue).getData())
         } else if (et instanceof ClassType && val instanceof ClassValue) {
@@ -287,6 +536,46 @@ export final class ArrayValue extends Value {
         } else {
             throw new Error("Cannot assign array of type " + et + " with value of type " + vt)
         }
+    }
+
+    public override toString(): string {
+        const len = this.getLength()
+        let res = new StringBuilder("[")
+        for (let i = 0; i < len; i++) {
+            res.append(this.getElement(i).toString())
+            if (i != len - 1) {
+                res.append(", ")
+            }
+        }
+        res.append("]")
+        return res.toString()
+    }
+}
+
+export final class LambdaValue extends Value {
+    private typ: LambdaType
+    private data: Object
+
+    public override getType(): Type {
+        return this.typ as Type
+    }
+
+    public override getData(): Object {
+        return this.data
+    }
+
+    internal constructor(typ: LambdaType, data: Object) {
+        this.typ = typ
+        this.data = data
+    }
+
+    public invoke(...args: Object[]): Object {
+        // TODO(shumilov-petr): not implemented
+        throw new Error("Not implemented")
+    }
+
+    public override toString(): string {
+        return this.typ.toString()
     }
 }
 
@@ -298,7 +587,11 @@ export final class BooleanValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Boolean {
+    public override getData(): Object {
+        return new Boolean(this.data)
+    }
+
+    public getValueData(): boolean {
         return this.data
     }
 
@@ -310,6 +603,10 @@ export final class BooleanValue extends Value {
     internal constructor(typ: BooleanType, data: Boolean) {
         this(typ, data.unboxed())
     }
+
+    public override toString(): string {
+        return new StringBuilder().append(this.data).toString()
+    }
 }
 
 export final class ByteValue extends Value {
@@ -320,7 +617,11 @@ export final class ByteValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Byte {
+    public override getData(): Object {
+        return new Byte(this.data)
+    }
+
+    public getValueData(): byte {
         return this.data
     }
 
@@ -332,6 +633,10 @@ export final class ByteValue extends Value {
     internal constructor(typ: ByteType, data: Byte) {
         this(typ, data.unboxed())
     }
+
+    public override toString(): string {
+        return new StringBuilder().append(this.data).toString()
+    }
 }
 
 export final class ShortValue extends Value {
@@ -342,7 +647,11 @@ export final class ShortValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Short {
+    public override getData(): Object {
+        return new Short(this.data)
+    }
+
+    public getValueData(): short {
         return this.data
     }
 
@@ -354,6 +663,10 @@ export final class ShortValue extends Value {
     internal constructor(typ: ShortType, data: Short) {
         this(typ, data.unboxed())
     }
+
+    public override toString(): string {
+        return new StringBuilder().append(this.data).toString()
+    }
 }
 
 export final class CharValue extends Value {
@@ -364,7 +677,11 @@ export final class CharValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Char {
+    public override getData(): Object {
+        return new Char(this.data)
+    }
+
+    public getValueData(): char {
         return this.data
     }
 
@@ -376,6 +693,10 @@ export final class CharValue extends Value {
     internal constructor(typ: CharType, data: Char) {
         this(typ, data.unboxed())
     }
+
+    public override toString(): string {
+        return new StringBuilder("\"").append(this.data).append("\"").toString()
+    }
 }
 
 export final class IntValue extends Value {
@@ -386,7 +707,11 @@ export final class IntValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Int {
+    public override getData(): Object {
+        return new Int(this.data)
+    }
+
+    public getValueData(): int {
         return this.data
     }
 
@@ -398,6 +723,10 @@ export final class IntValue extends Value {
     internal constructor(typ: IntType, data: Int) {
         this(typ, data.unboxed())
     }
+
+    public override toString(): string {
+        return new StringBuilder().append(this.data).toString()
+    }
 }
 
 export final class FloatValue extends Value {
@@ -408,7 +737,11 @@ export final class FloatValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Float {
+    public override getData(): Object {
+        return new Float(this.data)
+    }
+
+    public getValueData(): float {
         return this.data
     }
 
@@ -420,6 +753,10 @@ export final class FloatValue extends Value {
     internal constructor(typ: FloatType, data: Float) {
         this(typ, data.unboxed())
     }
+
+    public override toString(): string {
+        return new StringBuilder().append(this.data).toString()
+    }
 }
 
 export final class DoubleValue extends Value {
@@ -430,7 +767,11 @@ export final class DoubleValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Double {
+    public override getData(): Object {
+        return this.data
+    }
+
+    public getValueData(): double {
         return this.data
     }
 
@@ -442,6 +783,10 @@ export final class DoubleValue extends Value {
     internal constructor(typ: DoubleType, data: Double) {
         this(typ, data.unboxed())
     }
+
+    public override toString(): string {
+        return new StringBuilder().append(this.data).toString()
+    }
 }
 
 export final class LongValue extends Value {
@@ -452,7 +797,11 @@ export final class LongValue extends Value {
         return this.typ as Type
     }
 
-    public getData(): Long {
+    public override getData(): Object {
+        return new Long(this.data)
+    }
+
+    public getValueData(): long {
         return this.data
     }
 
@@ -464,23 +813,31 @@ export final class LongValue extends Value {
     internal constructor(typ: LongType, data: Long) {
         this(typ, data.unboxed())
     }
+
+    public override toString(): string {
+        return new StringBuilder().append(this.data).toString()
+    }
 }
 
 export final class StringValue extends Value {
     private typ: StringType
-    private data: String
+    private data: string
 
     public override getType(): Type {
         return this.typ as Type
     }
 
-    public getData(): String {
+    public override getData(): Object {
         return this.data
     }
 
     internal constructor(typ: StringType, data: String) {
         this.typ = typ
         this.data = data
+    }
+
+    public override toString(): string {
+        return new StringBuilder("\"").append(this.data).append("\"").toString()
     }
 }
 
@@ -491,15 +848,50 @@ export final class NullValue extends Value {
         return NullType.REF as Type
     }
 
+    public override getData(): Object {
+        return NullValue.INSTANCE
+    }
+
     internal constructor() {}
+
+    public override toString(): string {
+        return NullValue.INSTANCE.toString()
+    }
 }
 
 export final class UndefinedValue extends Value {
+    // TODO(shumilov-petr): replace `new UndefinedValue() into `undefined` when one will be available
     public static readonly INSTANCE = new UndefinedValue()
 
     public override getType(): Type {
         return UndefinedType.REF as Type
     }
 
+    public override getData(): Object {
+        return UndefinedValue.INSTANCE
+    }
+
     internal constructor() {}
+
+    public override toString(): string {
+        return UndefinedValue.INSTANCE.toString()
+    }
+}
+
+export final class VoidValue extends Value {
+    public static readonly INSTANCE = Void
+
+    public override getType(): Type {
+        return VoidType.REF as Type
+    }
+
+    public override getData(): Object {
+        return VoidValue.INSTANCE
+    }
+
+    internal constructor() {}
+
+    public override toString(): string {
+        return VoidValue.INSTANCE.toString()
+    }
 }

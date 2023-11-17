@@ -274,18 +274,33 @@ std::pair<std::vector<Field *>, std::vector<Method *>> EtsClassWrapper::Calculat
             INTEROP_FATAL_IF(!it.second);
         }
     }
-    // Collect methods
-    for (auto &m : klass->GetMethods()) {
-        if (m.IsPrivate()) {
-            continue;
-        }
-        auto name = m.GetName().data;
-        if (overloads != nullptr && overloads->find(name) != overloads->end()) {
-            continue;
-        }
-        auto it = props.insert({m.GetName().data, &m});
-        if (UNLIKELY(!it.second)) {
-            fatal_method_overloaded(&m);
+
+    // If class is std.core.Object
+    auto klass_desc = utf::Mutf8AsCString(klass->GetDescriptor());
+    if (klass_desc == panda_file_items::class_descriptors::OBJECT) {
+        // Ingore all methods of std.core.Object due to names intersection with JS Object
+        // Keep constructors only
+        auto obj_ctors = ets_class_->GetConstructors();
+        // Assuming that ETS StdLib guarantee that Object has the only one ctor
+        ASSERT(obj_ctors.size() == 1);
+        auto ctor = obj_ctors[0]->GetPandaMethod();
+        props.insert({ctor->GetName().data, ctor});
+        // NOTE(shumilov-petr): Think about removing methods from std.core.Object
+        // that are already presented in JS Object, others should be kept
+    } else {
+        // Collect methods
+        for (auto &m : klass->GetMethods()) {
+            if (m.IsPrivate()) {
+                continue;
+            }
+            auto name = m.GetName().data;
+            if (overloads != nullptr && overloads->find(name) != overloads->end()) {
+                continue;
+            }
+            auto it = props.insert({m.GetName().data, &m});
+            if (UNLIKELY(!it.second)) {
+                fatal_method_overloaded(&m);
+            }
         }
     }
 

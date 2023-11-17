@@ -19,6 +19,7 @@
 #include <string_view>
 #include <utility>
 #include "file.h"
+#include "handle_scope.h"
 #include "include/coretypes/class.h"
 #include "include/mem/panda_string.h"
 #include "include/mtmanaged_thread.h"
@@ -303,7 +304,7 @@ EtsObject *TypeAPIGetStaticFieldValue(EtsString *owner_td, EtsString *name)
                 using T = EtsTypeEnumToCppType<decltype(type)::value>;
                 auto val = owner_type->GetRuntimeClass()->GetFieldPrimitive<T>(*field->GetCoreType());
                 // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-                return EtsBoxPrimitive<T>::Create(EtsCoroutine::GetCurrent(), val);
+                return EtsBoxPrimitive<T>::Create(coroutine, val);
             });
     }
 
@@ -314,6 +315,7 @@ EtsVoid *TypeAPISetStaticFieldValue(EtsString *owner_td, EtsString *name, EtsObj
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
     VMHandle<EtsString> fname_ptr(coroutine, name->GetCoreType());
     VMHandle<EtsObject> value_ptr(coroutine, v->GetCoreType());
 
@@ -369,8 +371,8 @@ EtsTypeAPIMethod *CreateMethod(EtsMethod *method, EtsClass *type)
     // Set Type Descriptor
     typeapi_method.GetPtr()->SetTypeDesc(method->GetDescriptor().c_str());
     EtsString *name;
-    if (method->IsConstructor()) {
-        name = EtsString::CreateFromMUtf8("constructor");
+    if (method->IsInstanceConstructor()) {
+        name = EtsString::CreateFromMUtf8(CONSTRUCTOR_NAME);
     } else {
         name = method->GetNameString();
     }
@@ -392,7 +394,7 @@ EtsTypeAPIMethod *CreateMethod(EtsMethod *method, EtsClass *type)
     attr |= (method->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
     attr |= (method->IsConstructor()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::CONSTRUCTOR) : 0U;
     attr |= (method->IsAbstract()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::ABSTRACT) : 0U;
-    attr |= (method->IsDeclaredIn(type)) ? static_cast<uint32_t>(EtsTypeAPIAttributes::INHERITED) : 0U;
+    attr |= (!method->IsDeclaredIn(type)) ? static_cast<uint32_t>(EtsTypeAPIAttributes::INHERITED) : 0U;
     attr |= (method->IsGetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::GETTER) : 0U;
     attr |= (method->IsSetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::SETTER) : 0U;
 
@@ -519,10 +521,44 @@ EtsString *TypeAPIGetArrayElementType(EtsString *td)
     return EtsString::CreateFromMUtf8(arr_class->GetComponentType()->GetDescriptor());
 }
 
+EtsObject *MakeClassInstance(EtsString *td)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
+    auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto type_class = class_linker->GetClass(td->GetMutf8().c_str());
+
+    ASSERT(!type_class->IsArrayClass());
+
+    if (type_class->IsStringClass()) {
+        return EtsString::CreateNewEmptyString()->AsObject();
+    }
+
+    VMHandle<EtsObject> obj_handle(coroutine, EtsObject::Create(type_class)->GetCoreType());
+    auto has_default_constr = false;
+    type_class->EnumerateMethods([&](EtsMethod *method) {
+        if (method->IsConstructor() && method->GetParametersNum() == 0) {
+            std::array<Value, 1> args {Value(obj_handle.GetPtr()->GetCoreType())};
+            method->GetPandaMethod()->InvokeVoid(coroutine, args.data());
+            has_default_constr = true;
+            return true;
+        }
+        return false;
+    });
+    ASSERT(has_default_constr);
+    return obj_handle.GetPtr();
+}
+
 EtsObject *TypeAPIMakeArrayInstance(EtsString *td, EtsLong len)
 {
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
+    VMHandle<EtsString> td_handle(coroutine, td->GetCoreType());
+
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto type_desc = td->GetMutf8();
+    auto type_desc = td_handle->GetMutf8();
     auto type_class = class_linker->GetClass(type_desc.c_str());
 
     auto val_type = panda::panda_file::Type::GetTypeIdBySignature(type_desc[0]);
@@ -543,8 +579,14 @@ EtsObject *TypeAPIMakeArrayInstance(EtsString *td, EtsLong len)
             return EtsFloatArray::Create(len)->AsObject();
         case panda_file::Type::TypeId::F64:
             return EtsDoubleArray::Create(len)->AsObject();
-        case panda_file::Type::TypeId::REFERENCE:
-            return EtsObjectArray::Create(type_class, len)->AsObject();
+        case panda_file::Type::TypeId::REFERENCE: {
+            VMHandle<EtsObjectArray> array_handle(coroutine, EtsObjectArray::Create(type_class, len)->GetCoreType());
+            for (size_t i = 0; i < array_handle->GetLength(); ++i) {
+                VMHandle<EtsObject> element_handle(coroutine, MakeClassInstance(td_handle.GetPtr())->GetCoreType());
+                array_handle->Set(i, element_handle.GetPtr());
+            }
+            return array_handle->AsObject();
+        }
         default:
             return nullptr;
     }
@@ -560,4 +602,5 @@ EtsString *TypeAPIGetBaseType(EtsString *td)
     }
     return EtsString::CreateFromMUtf8(base_class->GetDescriptor());
 }
+
 }  // namespace panda::ets::intrinsics

@@ -103,7 +103,7 @@ export class Uint8ClampedArray
     {
         this(buf, 0, buf.byteLength / Uint8ClampedArray.BYTES_PER_ELEMENT)
     }
-    
+
      /**
      * Creates an Uint8ClampedArray with respect to length.
      *
@@ -275,7 +275,8 @@ export class Uint8ClampedArray
     /**
      * Returns an iterator for all entries
      */
-    // public entries(): MapIterator<Int, Object> {
+    // TODO(ivan-tyulyandin): blocked by tuples implentation
+    // public entries(): Iterator<[Int, Object]> {
     //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.length];
     //     for (let i: int = 0; i < this.length; i++) {
     //         ret[i] = new Entry<Int, Object>(i, this.at(i));
@@ -554,12 +555,13 @@ export class Uint8ClampedArray
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -874,12 +876,13 @@ export class Uint8ClampedArray
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Number> {
-        const ret = new Number[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Number>(ret);
+    public values(): Iterator<Number> {
+        throw new Error("not implemented")
+        // const ret = new Number[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Number>(ret);
     }
 
     /**
@@ -1833,7 +1836,7 @@ export class Uint8Array
     {
         this(buf, 0, buf.byteLength / Uint8Array.BYTES_PER_ELEMENT)
     }
-    
+
      /**
      * Creates an Uint8Array with respect to length.
      *
@@ -2005,7 +2008,8 @@ export class Uint8Array
     /**
      * Returns an iterator for all entries
      */
-    // public entries(): MapIterator<Int, Object> {
+    // TODO(ivan-tyulyandin): blocked by tuples implentation
+    // public entries(): Iterator<[Int, Object]> {
     //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.length];
     //     for (let i: int = 0; i < this.length; i++) {
     //         ret[i] = new Entry<Int, Object>(i, this.at(i));
@@ -2284,12 +2288,13 @@ export class Uint8Array
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -2604,12 +2609,13 @@ export class Uint8Array
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Number> {
-        const ret = new Number[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Number>(ret);
+    public values(): Iterator<Number> {
+        throw new Error("not implemented")
+        // const ret = new Number[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Number>(ret);
     }
 
     /**
@@ -3563,7 +3569,7 @@ export class Uint16Array
     {
         this(buf, 0, buf.byteLength / Uint16Array.BYTES_PER_ELEMENT)
     }
-    
+
      /**
      * Creates an Uint16Array with respect to length.
      *
@@ -3735,7 +3741,8 @@ export class Uint16Array
     /**
      * Returns an iterator for all entries
      */
-    // public entries(): MapIterator<Int, Object> {
+    // TODO(ivan-tyulyandin): blocked by tuples implentation
+    // public entries(): Iterator<[Int, Object]> {
     //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.length];
     //     for (let i: int = 0; i < this.length; i++) {
     //         ret[i] = new Entry<Int, Object>(i, this.at(i));
@@ -4014,12 +4021,13 @@ export class Uint16Array
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -4334,12 +4342,13 @@ export class Uint16Array
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Number> {
-        const ret = new Number[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Number>(ret);
+    public values(): Iterator<Number> {
+        throw new Error("not implemented")
+        // const ret = new Number[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Number>(ret);
     }
 
     /**
@@ -5293,7 +5302,7 @@ export class Uint32Array
     {
         this(buf, 0, buf.byteLength / Uint32Array.BYTES_PER_ELEMENT)
     }
-    
+
      /**
      * Creates an Uint32Array with respect to length.
      *
@@ -5465,7 +5474,8 @@ export class Uint32Array
     /**
      * Returns an iterator for all entries
      */
-    // public entries(): MapIterator<Int, Object> {
+    // TODO(ivan-tyulyandin): blocked by tuples implentation
+    // public entries(): Iterator<[Int, Object]> {
     //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.length];
     //     for (let i: int = 0; i < this.length; i++) {
     //         ret[i] = new Entry<Int, Object>(i, this.at(i));
@@ -5744,12 +5754,13 @@ export class Uint32Array
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -6064,12 +6075,13 @@ export class Uint32Array
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<Number> {
-        const ret = new Number[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<Number>(ret);
+    public values(): Iterator<Number> {
+        throw new Error("not implemented")
+        // const ret = new Number[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<Number>(ret);
     }
 
     /**
@@ -7023,7 +7035,7 @@ export class BigUint64Array
     {
         this(buf, 0, buf.byteLength / BigUint64Array.BYTES_PER_ELEMENT)
     }
-    
+
      /**
      * Creates an BigUint64Array with respect to length.
      *
@@ -7195,7 +7207,8 @@ export class BigUint64Array
     /**
      * Returns an iterator for all entries
      */
-    // public entries(): MapIterator<Int, Object> {
+    // TODO(ivan-tyulyandin): blocked by tuples implentation
+    // public entries(): Iterator<[Int, Object]> {
     //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.length];
     //     for (let i: int = 0; i < this.length; i++) {
     //         ret[i] = new Entry<Int, Object>(i, this.at(i));
@@ -7474,12 +7487,13 @@ export class BigUint64Array
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -7794,12 +7808,13 @@ export class BigUint64Array
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<BigInt> {
-        const ret = new BigInt[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<BigInt>(ret);
+    public values(): Iterator<BigInt> {
+        throw new Error("not implemented")
+        // const ret = new BigInt[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<BigInt>(ret);
     }
 
     /**

@@ -29,6 +29,7 @@ static constexpr char METHOD_PREFIX = 'M';
 static constexpr const char *NULL_TYPE_DESC = "Null";
 static constexpr const char *LAMBDA_PREFIX = "LambdaObject";
 static constexpr const char *LAMBDA_METHOD_NAME = "invoke";
+static constexpr const char *CONSTRUCTOR_NAME = "constructor";
 static constexpr char TYPE_DESC_DELIMITER = ';';
 static constexpr const char *GETTER_BEGIN = "<get>";
 static constexpr const char *SETTER_BEGIN = "<set>";

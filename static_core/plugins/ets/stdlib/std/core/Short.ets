@@ -189,6 +189,15 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
     }
 
     /**
+     * Converts this object to a string
+     *
+     * @returns result of the conversion
+     */
+    public toString(radix: number): string {
+        return (new Long(this.value)).toString(radix);
+    }
+
+    /**
      * Returns a hash code (shorteger representation) for this instance
      *
      * @returns representation of this instance

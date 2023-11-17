@@ -21,17 +21,22 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSLength = etsMod.getFunction('Array_TestJSLength');
 
+// TODO(kprokopenko): change to `x.length` when interop support properties
+const etsArrLen = x => x['<get>length'].call(x);
+
 { // Test JS Array<FooClass>
   TestJSLength(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
 { // Test ETS Array<Object>
   let arr = CreateEtsSample();
-  ASSERT_EQ(arr.length(), 2);
+  const EXPECT_2 = 2;
+  const EXPECT_3 = 3;
+  ASSERT_EQ(etsArrLen(arr), EXPECT_2);
   let something = {};
   arr.push(something);
   ASSERT_EQ(arr.at(2), something);
-  ASSERT_EQ(arr.length(), 3);
+  ASSERT_EQ(etsArrLen(arr), EXPECT_3);
 }
 
 GCJSRuntimeCleanup();

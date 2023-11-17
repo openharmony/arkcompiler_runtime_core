@@ -23,10 +23,40 @@ function checkRange(arrLen: int, startIndex: int, endIndex: int): boolean {
     // startIndex <= endIndex is used to cover empty array case
     return ((0 <= startIndex) && (startIndex <= endIndex) && (endIndex <= arrLen));
 }
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 //
 // Methods for boolean[]
 //
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * fills arr in-place by specified value with respect to passed indexes
@@ -74,6 +104,21 @@ export function fill(arr: boolean[], value: boolean): void {
         assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * copies src array into dst with respect to passed indexes.
@@ -169,6 +214,21 @@ export function copyOf(arr: boolean[]): boolean[] {
     }
     return new boolean[0]
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 function bubbleSort(arr: boolean[], startIndex: int, endIndex: int): void {
@@ -418,99 +478,102 @@ function test_printArr(arr: boolean[], startIndex: int, endIndex: int) {
 export function test_sortAllOn(arr: boolean[]) {
     // block for comparator ``
     if (true) {
-        const sorts: test_SortDataboolean[] = new test_SortDataboolean[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDataboolean>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length)
-        sorts[lastSort++] = new test_SortDataboolean("bubble", bubbled)
+        sorts.push(new test_SortDataboolean("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length)
-        sorts[lastSort++] = new test_SortDataboolean("insertion", insertion)
+        sorts.push(new test_SortDataboolean("insertion", insertion))
 
         
         const bcnt = test_sortCopy(arr)
         countSortBools(bcnt, 0, bcnt.length)
-        sorts[lastSort++] = new test_SortDataboolean("bools cnt()", bcnt)
+        sorts.push(new test_SortDataboolean("bools cnt()", bcnt))
 
         const just = test_sortCopy(arr)
         sort(just)
-        sorts[lastSort++] = new test_SortDataboolean("sort()", just)
+        sorts.push(new test_SortDataboolean("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts  are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for boolean')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts  are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpFwd`
     if (true) {
-        const sorts: test_SortDataboolean[] = new test_SortDataboolean[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDataboolean>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataboolean("bubble", bubbled)
+        sorts.push(new test_SortDataboolean("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataboolean("insertion", insertion)
+        sorts.push(new test_SortDataboolean("insertion", insertion))
 
         
         const bcnt = test_sortCopy(arr)
         countSortBools(bcnt, 0, bcnt.length)
-        sorts[lastSort++] = new test_SortDataboolean("bools cnt()", bcnt)
+        sorts.push(new test_SortDataboolean("bools cnt()", bcnt))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataboolean("sort()", just)
+        sorts.push(new test_SortDataboolean("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for boolean')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpInv`
     if (true) {
-        const sorts: test_SortDataboolean[] = new test_SortDataboolean[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDataboolean>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataboolean("bubble", bubbled)
+        sorts.push(new test_SortDataboolean("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataboolean("insertion", insertion)
+        sorts.push(new test_SortDataboolean("insertion", insertion))
 
         
         const bcnt = test_sortCopy(arr)
         countSortBoolsInv(bcnt, 0, bcnt.length)
-        sorts[lastSort++] = new test_SortDataboolean("bools cnt()", bcnt)
+        sorts.push(new test_SortDataboolean("bools cnt()", bcnt))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataboolean("sort()", just)
+        sorts.push(new test_SortDataboolean("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for boolean')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
                 }
             }
         }
@@ -518,6 +581,21 @@ export function test_sortAllOn(arr: boolean[]) {
 }
 // ======== end of tests section ========
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  *  tries to find key in arr with respect of passed indexes
@@ -607,6 +685,21 @@ export function includes(arr: boolean[], key: boolean): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * tries to find last entry of a key into arr with respect to passed indexes
  *
@@ -664,6 +757,21 @@ export function lastIndexOf(arr: boolean[], key: boolean): int {
 function lastIndexOf(arr: boolean[], key: boolean, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -793,6 +901,21 @@ export function upperBoundSearch(arr: boolean[], key: boolean): int {
 
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * concatenates two arrays into a single one
  *
  * @param a first array to concatenate
@@ -828,6 +951,21 @@ export function reverse(arr: boolean[]): void {
 }
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Joins elements with delimeter
  *
  * @param arr array to be joined in String
@@ -849,6 +987,21 @@ export function join(arr: boolean[], delimiter: String): String {
     return sb.toString();
 }
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * runs fn for elements of arr
@@ -876,6 +1029,21 @@ export function forEach(arr: boolean[], fn: (value: boolean) => void): void {
         fn(arr[i]);
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * updates element arr[i] using fn
@@ -909,6 +1077,21 @@ export function map(arr: boolean[], fn: (value: boolean) => boolean): boolean[] 
     }
     return res;
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * creates an array only with elements of arr where fn applied to element returned true
@@ -975,10 +1158,40 @@ export function filter(arr: boolean[], fn: (value: boolean) => boolean): boolean
     return res;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 //
 // Methods for byte[]
 //
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * fills arr in-place by specified value with respect to passed indexes
@@ -1026,6 +1239,21 @@ export function fill(arr: byte[], value: byte): void {
         assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * copies src array into dst with respect to passed indexes.
@@ -1121,6 +1349,21 @@ export function copyOf(arr: byte[]): byte[] {
     }
     return new byte[0]
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 function bubbleSort(arr: byte[], startIndex: int, endIndex: int): void {
@@ -1323,7 +1566,7 @@ function quickSortImpl3(arr: byte[], startIndex: int, endIndex: int, maxDepth: i
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -1351,7 +1594,7 @@ function quickSortImpl40(arr: byte[], startIndex: int, endIndex: int, maxDepth: 
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -1769,126 +2012,129 @@ function test_printArr(arr: byte[], startIndex: int, endIndex: int) {
 export function test_sortAllOn(arr: byte[]) {
     // block for comparator ``
     if (true) {
-        const sorts: test_SortDatabyte[] = new test_SortDatabyte[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatabyte>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length)
-        sorts[lastSort++] = new test_SortDatabyte("bubble", bubbled)
+        sorts.push(new test_SortDatabyte("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length)
-        sorts[lastSort++] = new test_SortDatabyte("insertion", insertion)
+        sorts.push(new test_SortDatabyte("insertion", insertion))
         const cnt = test_sortCopy(arr)
         countSort(cnt, 0, cnt.length)
-        sorts[lastSort++] = new test_SortDatabyte("cnt()", cnt)
+        sorts.push(new test_SortDatabyte("cnt()", cnt))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
-        sorts[lastSort++] = new test_SortDatabyte("heap", heaped)
+        sorts.push(new test_SortDatabyte("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts[lastSort++] = new test_SortDatabyte("quick", quicked)
+        sorts.push(new test_SortDatabyte("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts[lastSort++] = new test_SortDatabyte("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatabyte("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just)
-        sorts[lastSort++] = new test_SortDatabyte("sort()", just)
+        sorts.push(new test_SortDatabyte("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts  are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for byte')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts  are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpFwd`
     if (true) {
-        const sorts: test_SortDatabyte[] = new test_SortDatabyte[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatabyte>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatabyte("bubble", bubbled)
+        sorts.push(new test_SortDatabyte("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatabyte("insertion", insertion)
+        sorts.push(new test_SortDatabyte("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatabyte("heap", heaped)
+        sorts.push(new test_SortDatabyte("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatabyte("quick", quicked)
+        sorts.push(new test_SortDatabyte("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatabyte("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatabyte("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatabyte("sort()", just)
+        sorts.push(new test_SortDatabyte("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for byte')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpInv`
     if (true) {
-        const sorts: test_SortDatabyte[] = new test_SortDatabyte[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatabyte>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatabyte("bubble", bubbled)
+        sorts.push(new test_SortDatabyte("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatabyte("insertion", insertion)
+        sorts.push(new test_SortDatabyte("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatabyte("heap", heaped)
+        sorts.push(new test_SortDatabyte("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatabyte("quick", quicked)
+        sorts.push(new test_SortDatabyte("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatabyte("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatabyte("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatabyte("sort()", just)
+        sorts.push(new test_SortDatabyte("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for byte')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
                 }
             }
         }
@@ -1896,6 +2142,21 @@ export function test_sortAllOn(arr: byte[]) {
 }
 // ======== end of tests section ========
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  *  tries to find key in arr with respect of passed indexes
@@ -1985,6 +2246,21 @@ export function includes(arr: byte[], key: byte): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * tries to find last entry of a key into arr with respect to passed indexes
  *
@@ -2042,6 +2318,21 @@ export function lastIndexOf(arr: byte[], key: byte): int {
 function lastIndexOf(arr: byte[], key: byte, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -2171,6 +2462,21 @@ export function upperBoundSearch(arr: byte[], key: byte): int {
 
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * concatenates two arrays into a single one
  *
  * @param a first array to concatenate
@@ -2206,6 +2512,21 @@ export function reverse(arr: byte[]): void {
 }
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Joins elements with delimeter
  *
  * @param arr array to be joined in String
@@ -2227,6 +2548,21 @@ export function join(arr: byte[], delimiter: String): String {
     return sb.toString();
 }
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * runs fn for elements of arr
@@ -2254,6 +2590,21 @@ export function forEach(arr: byte[], fn: (value: byte) => void): void {
         fn(arr[i]);
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * updates element arr[i] using fn
@@ -2287,6 +2638,21 @@ export function map(arr: byte[], fn: (value: byte) => byte): byte[] {
     }
     return res;
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * creates an array only with elements of arr where fn applied to element returned true
@@ -2353,10 +2719,40 @@ export function filter(arr: byte[], fn: (value: byte) => boolean): byte[] {
     return res;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 //
 // Methods for short[]
 //
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * fills arr in-place by specified value with respect to passed indexes
@@ -2404,6 +2800,21 @@ export function fill(arr: short[], value: short): void {
         assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * copies src array into dst with respect to passed indexes.
@@ -2499,6 +2910,21 @@ export function copyOf(arr: short[]): short[] {
     }
     return new short[0]
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 function bubbleSort(arr: short[], startIndex: int, endIndex: int): void {
@@ -2701,7 +3127,7 @@ function quickSortImpl3(arr: short[], startIndex: int, endIndex: int, maxDepth: 
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -2729,7 +3155,7 @@ function quickSortImpl40(arr: short[], startIndex: int, endIndex: int, maxDepth:
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -3132,123 +3558,126 @@ function test_printArr(arr: short[], startIndex: int, endIndex: int) {
 export function test_sortAllOn(arr: short[]) {
     // block for comparator ``
     if (true) {
-        const sorts: test_SortDatashort[] = new test_SortDatashort[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatashort>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length)
-        sorts[lastSort++] = new test_SortDatashort("bubble", bubbled)
+        sorts.push(new test_SortDatashort("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length)
-        sorts[lastSort++] = new test_SortDatashort("insertion", insertion)
+        sorts.push(new test_SortDatashort("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
-        sorts[lastSort++] = new test_SortDatashort("heap", heaped)
+        sorts.push(new test_SortDatashort("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts[lastSort++] = new test_SortDatashort("quick", quicked)
+        sorts.push(new test_SortDatashort("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts[lastSort++] = new test_SortDatashort("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatashort("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just)
-        sorts[lastSort++] = new test_SortDatashort("sort()", just)
+        sorts.push(new test_SortDatashort("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts  are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for short')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts  are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpFwd`
     if (true) {
-        const sorts: test_SortDatashort[] = new test_SortDatashort[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatashort>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatashort("bubble", bubbled)
+        sorts.push(new test_SortDatashort("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatashort("insertion", insertion)
+        sorts.push(new test_SortDatashort("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatashort("heap", heaped)
+        sorts.push(new test_SortDatashort("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatashort("quick", quicked)
+        sorts.push(new test_SortDatashort("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatashort("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatashort("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatashort("sort()", just)
+        sorts.push(new test_SortDatashort("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for short')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpInv`
     if (true) {
-        const sorts: test_SortDatashort[] = new test_SortDatashort[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatashort>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatashort("bubble", bubbled)
+        sorts.push(new test_SortDatashort("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatashort("insertion", insertion)
+        sorts.push(new test_SortDatashort("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatashort("heap", heaped)
+        sorts.push(new test_SortDatashort("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatashort("quick", quicked)
+        sorts.push(new test_SortDatashort("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatashort("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatashort("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatashort("sort()", just)
+        sorts.push(new test_SortDatashort("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for short')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
                 }
             }
         }
@@ -3256,6 +3685,21 @@ export function test_sortAllOn(arr: short[]) {
 }
 // ======== end of tests section ========
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  *  tries to find key in arr with respect of passed indexes
@@ -3345,6 +3789,21 @@ export function includes(arr: short[], key: short): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * tries to find last entry of a key into arr with respect to passed indexes
  *
@@ -3402,6 +3861,21 @@ export function lastIndexOf(arr: short[], key: short): int {
 function lastIndexOf(arr: short[], key: short, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -3531,6 +4005,21 @@ export function upperBoundSearch(arr: short[], key: short): int {
 
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * concatenates two arrays into a single one
  *
  * @param a first array to concatenate
@@ -3566,6 +4055,21 @@ export function reverse(arr: short[]): void {
 }
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Joins elements with delimeter
  *
  * @param arr array to be joined in String
@@ -3587,6 +4091,21 @@ export function join(arr: short[], delimiter: String): String {
     return sb.toString();
 }
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * runs fn for elements of arr
@@ -3614,6 +4133,21 @@ export function forEach(arr: short[], fn: (value: short) => void): void {
         fn(arr[i]);
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * updates element arr[i] using fn
@@ -3647,6 +4181,21 @@ export function map(arr: short[], fn: (value: short) => short): short[] {
     }
     return res;
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * creates an array only with elements of arr where fn applied to element returned true
@@ -3713,10 +4262,40 @@ export function filter(arr: short[], fn: (value: short) => boolean): short[] {
     return res;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 //
 // Methods for int[]
 //
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * fills arr in-place by specified value with respect to passed indexes
@@ -3764,6 +4343,21 @@ export function fill(arr: int[], value: int): void {
         assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * copies src array into dst with respect to passed indexes.
@@ -3859,6 +4453,21 @@ export function copyOf(arr: int[]): int[] {
     }
     return new int[0]
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 function bubbleSort(arr: int[], startIndex: int, endIndex: int): void {
@@ -4061,7 +4670,7 @@ function quickSortImpl3(arr: int[], startIndex: int, endIndex: int, maxDepth: in
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -4089,7 +4698,7 @@ function quickSortImpl40(arr: int[], startIndex: int, endIndex: int, maxDepth: i
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -4492,123 +5101,126 @@ function test_printArr(arr: int[], startIndex: int, endIndex: int) {
 export function test_sortAllOn(arr: int[]) {
     // block for comparator ``
     if (true) {
-        const sorts: test_SortDataint[] = new test_SortDataint[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDataint>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length)
-        sorts[lastSort++] = new test_SortDataint("bubble", bubbled)
+        sorts.push(new test_SortDataint("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length)
-        sorts[lastSort++] = new test_SortDataint("insertion", insertion)
+        sorts.push(new test_SortDataint("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
-        sorts[lastSort++] = new test_SortDataint("heap", heaped)
+        sorts.push(new test_SortDataint("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts[lastSort++] = new test_SortDataint("quick", quicked)
+        sorts.push(new test_SortDataint("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts[lastSort++] = new test_SortDataint("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDataint("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just)
-        sorts[lastSort++] = new test_SortDataint("sort()", just)
+        sorts.push(new test_SortDataint("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts  are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for int')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts  are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpFwd`
     if (true) {
-        const sorts: test_SortDataint[] = new test_SortDataint[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDataint>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataint("bubble", bubbled)
+        sorts.push(new test_SortDataint("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataint("insertion", insertion)
+        sorts.push(new test_SortDataint("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataint("heap", heaped)
+        sorts.push(new test_SortDataint("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataint("quick", quicked)
+        sorts.push(new test_SortDataint("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataint("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDataint("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataint("sort()", just)
+        sorts.push(new test_SortDataint("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for int')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpInv`
     if (true) {
-        const sorts: test_SortDataint[] = new test_SortDataint[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDataint>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataint("bubble", bubbled)
+        sorts.push(new test_SortDataint("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataint("insertion", insertion)
+        sorts.push(new test_SortDataint("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataint("heap", heaped)
+        sorts.push(new test_SortDataint("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataint("quick", quicked)
+        sorts.push(new test_SortDataint("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataint("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDataint("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataint("sort()", just)
+        sorts.push(new test_SortDataint("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for int')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
                 }
             }
         }
@@ -4616,6 +5228,21 @@ export function test_sortAllOn(arr: int[]) {
 }
 // ======== end of tests section ========
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  *  tries to find key in arr with respect of passed indexes
@@ -4705,6 +5332,21 @@ export function includes(arr: int[], key: int): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * tries to find last entry of a key into arr with respect to passed indexes
  *
@@ -4762,6 +5404,21 @@ export function lastIndexOf(arr: int[], key: int): int {
 function lastIndexOf(arr: int[], key: int, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -4891,6 +5548,21 @@ export function upperBoundSearch(arr: int[], key: int): int {
 
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * concatenates two arrays into a single one
  *
  * @param a first array to concatenate
@@ -4926,6 +5598,21 @@ export function reverse(arr: int[]): void {
 }
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Joins elements with delimeter
  *
  * @param arr array to be joined in String
@@ -4947,6 +5634,21 @@ export function join(arr: int[], delimiter: String): String {
     return sb.toString();
 }
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * runs fn for elements of arr
@@ -4974,6 +5676,21 @@ export function forEach(arr: int[], fn: (value: int) => void): void {
         fn(arr[i]);
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * updates element arr[i] using fn
@@ -5007,6 +5724,21 @@ export function map(arr: int[], fn: (value: int) => int): int[] {
     }
     return res;
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * creates an array only with elements of arr where fn applied to element returned true
@@ -5073,10 +5805,40 @@ export function filter(arr: int[], fn: (value: int) => boolean): int[] {
     return res;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 //
 // Methods for long[]
 //
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * fills arr in-place by specified value with respect to passed indexes
@@ -5124,6 +5886,21 @@ export function fill(arr: long[], value: long): void {
         assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * copies src array into dst with respect to passed indexes.
@@ -5219,6 +5996,21 @@ export function copyOf(arr: long[]): long[] {
     }
     return new long[0]
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 function bubbleSort(arr: long[], startIndex: int, endIndex: int): void {
@@ -5421,7 +6213,7 @@ function quickSortImpl3(arr: long[], startIndex: int, endIndex: int, maxDepth: i
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -5449,7 +6241,7 @@ function quickSortImpl40(arr: long[], startIndex: int, endIndex: int, maxDepth: 
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -5852,123 +6644,126 @@ function test_printArr(arr: long[], startIndex: int, endIndex: int) {
 export function test_sortAllOn(arr: long[]) {
     // block for comparator ``
     if (true) {
-        const sorts: test_SortDatalong[] = new test_SortDatalong[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatalong>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length)
-        sorts[lastSort++] = new test_SortDatalong("bubble", bubbled)
+        sorts.push(new test_SortDatalong("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length)
-        sorts[lastSort++] = new test_SortDatalong("insertion", insertion)
+        sorts.push(new test_SortDatalong("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
-        sorts[lastSort++] = new test_SortDatalong("heap", heaped)
+        sorts.push(new test_SortDatalong("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts[lastSort++] = new test_SortDatalong("quick", quicked)
+        sorts.push(new test_SortDatalong("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts[lastSort++] = new test_SortDatalong("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatalong("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just)
-        sorts[lastSort++] = new test_SortDatalong("sort()", just)
+        sorts.push(new test_SortDatalong("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts  are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for long')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts  are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpFwd`
     if (true) {
-        const sorts: test_SortDatalong[] = new test_SortDatalong[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatalong>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatalong("bubble", bubbled)
+        sorts.push(new test_SortDatalong("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatalong("insertion", insertion)
+        sorts.push(new test_SortDatalong("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatalong("heap", heaped)
+        sorts.push(new test_SortDatalong("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatalong("quick", quicked)
+        sorts.push(new test_SortDatalong("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatalong("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatalong("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatalong("sort()", just)
+        sorts.push(new test_SortDatalong("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for long')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpInv`
     if (true) {
-        const sorts: test_SortDatalong[] = new test_SortDatalong[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatalong>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatalong("bubble", bubbled)
+        sorts.push(new test_SortDatalong("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatalong("insertion", insertion)
+        sorts.push(new test_SortDatalong("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatalong("heap", heaped)
+        sorts.push(new test_SortDatalong("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatalong("quick", quicked)
+        sorts.push(new test_SortDatalong("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatalong("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatalong("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatalong("sort()", just)
+        sorts.push(new test_SortDatalong("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for long')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
                 }
             }
         }
@@ -5976,6 +6771,21 @@ export function test_sortAllOn(arr: long[]) {
 }
 // ======== end of tests section ========
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  *  tries to find key in arr with respect of passed indexes
@@ -6065,6 +6875,21 @@ export function includes(arr: long[], key: long): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * tries to find last entry of a key into arr with respect to passed indexes
  *
@@ -6122,6 +6947,21 @@ export function lastIndexOf(arr: long[], key: long): int {
 function lastIndexOf(arr: long[], key: long, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -6251,6 +7091,21 @@ export function upperBoundSearch(arr: long[], key: long): int {
 
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * concatenates two arrays into a single one
  *
  * @param a first array to concatenate
@@ -6286,6 +7141,21 @@ export function reverse(arr: long[]): void {
 }
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Joins elements with delimeter
  *
  * @param arr array to be joined in String
@@ -6307,6 +7177,21 @@ export function join(arr: long[], delimiter: String): String {
     return sb.toString();
 }
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * runs fn for elements of arr
@@ -6334,6 +7219,21 @@ export function forEach(arr: long[], fn: (value: long) => void): void {
         fn(arr[i]);
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * updates element arr[i] using fn
@@ -6367,6 +7267,21 @@ export function map(arr: long[], fn: (value: long) => long): long[] {
     }
     return res;
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * creates an array only with elements of arr where fn applied to element returned true
@@ -6433,10 +7348,40 @@ export function filter(arr: long[], fn: (value: long) => boolean): long[] {
     return res;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 //
 // Methods for float[]
 //
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * fills arr in-place by specified value with respect to passed indexes
@@ -6484,6 +7429,21 @@ export function fill(arr: float[], value: float): void {
         assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * copies src array into dst with respect to passed indexes.
@@ -6579,6 +7539,21 @@ export function copyOf(arr: float[]): float[] {
     }
     return new float[0]
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 function bubbleSort(arr: float[], startIndex: int, endIndex: int): void {
@@ -6781,7 +7756,7 @@ function quickSortImpl3(arr: float[], startIndex: int, endIndex: int, maxDepth: 
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -6809,7 +7784,7 @@ function quickSortImpl40(arr: float[], startIndex: int, endIndex: int, maxDepth:
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -7212,123 +8187,126 @@ function test_printArr(arr: float[], startIndex: int, endIndex: int) {
 export function test_sortAllOn(arr: float[]) {
     // block for comparator ``
     if (true) {
-        const sorts: test_SortDatafloat[] = new test_SortDatafloat[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatafloat>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length)
-        sorts[lastSort++] = new test_SortDatafloat("bubble", bubbled)
+        sorts.push(new test_SortDatafloat("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length)
-        sorts[lastSort++] = new test_SortDatafloat("insertion", insertion)
+        sorts.push(new test_SortDatafloat("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
-        sorts[lastSort++] = new test_SortDatafloat("heap", heaped)
+        sorts.push(new test_SortDatafloat("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts[lastSort++] = new test_SortDatafloat("quick", quicked)
+        sorts.push(new test_SortDatafloat("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts[lastSort++] = new test_SortDatafloat("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatafloat("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just)
-        sorts[lastSort++] = new test_SortDatafloat("sort()", just)
+        sorts.push(new test_SortDatafloat("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts  are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for float')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts  are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpFwd`
     if (true) {
-        const sorts: test_SortDatafloat[] = new test_SortDatafloat[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatafloat>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatafloat("bubble", bubbled)
+        sorts.push(new test_SortDatafloat("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatafloat("insertion", insertion)
+        sorts.push(new test_SortDatafloat("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatafloat("heap", heaped)
+        sorts.push(new test_SortDatafloat("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatafloat("quick", quicked)
+        sorts.push(new test_SortDatafloat("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatafloat("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatafloat("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatafloat("sort()", just)
+        sorts.push(new test_SortDatafloat("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for float')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpInv`
     if (true) {
-        const sorts: test_SortDatafloat[] = new test_SortDatafloat[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatafloat>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatafloat("bubble", bubbled)
+        sorts.push(new test_SortDatafloat("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatafloat("insertion", insertion)
+        sorts.push(new test_SortDatafloat("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatafloat("heap", heaped)
+        sorts.push(new test_SortDatafloat("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatafloat("quick", quicked)
+        sorts.push(new test_SortDatafloat("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatafloat("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatafloat("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatafloat("sort()", just)
+        sorts.push(new test_SortDatafloat("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for float')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
                 }
             }
         }
@@ -7336,6 +8314,21 @@ export function test_sortAllOn(arr: float[]) {
 }
 // ======== end of tests section ========
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  *  tries to find key in arr with respect of passed indexes
@@ -7425,6 +8418,21 @@ export function includes(arr: float[], key: float): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * tries to find last entry of a key into arr with respect to passed indexes
  *
@@ -7482,6 +8490,21 @@ export function lastIndexOf(arr: float[], key: float): int {
 function lastIndexOf(arr: float[], key: float, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -7611,6 +8634,21 @@ export function upperBoundSearch(arr: float[], key: float): int {
 
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * concatenates two arrays into a single one
  *
  * @param a first array to concatenate
@@ -7646,6 +8684,21 @@ export function reverse(arr: float[]): void {
 }
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Joins elements with delimeter
  *
  * @param arr array to be joined in String
@@ -7667,6 +8720,21 @@ export function join(arr: float[], delimiter: String): String {
     return sb.toString();
 }
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * runs fn for elements of arr
@@ -7694,6 +8762,21 @@ export function forEach(arr: float[], fn: (value: float) => void): void {
         fn(arr[i]);
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * updates element arr[i] using fn
@@ -7727,6 +8810,21 @@ export function map(arr: float[], fn: (value: float) => float): float[] {
     }
     return res;
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * creates an array only with elements of arr where fn applied to element returned true
@@ -7793,10 +8891,40 @@ export function filter(arr: float[], fn: (value: float) => boolean): float[] {
     return res;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 //
 // Methods for double[]
 //
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * fills arr in-place by specified value with respect to passed indexes
@@ -7844,6 +8972,21 @@ export function fill(arr: double[], value: double): void {
         assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * copies src array into dst with respect to passed indexes.
@@ -7939,6 +9082,21 @@ export function copyOf(arr: double[]): double[] {
     }
     return new double[0]
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 function bubbleSort(arr: double[], startIndex: int, endIndex: int): void {
@@ -8141,7 +9299,7 @@ function quickSortImpl3(arr: double[], startIndex: int, endIndex: int, maxDepth:
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -8169,7 +9327,7 @@ function quickSortImpl40(arr: double[], startIndex: int, endIndex: int, maxDepth
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -8572,123 +9730,126 @@ function test_printArr(arr: double[], startIndex: int, endIndex: int) {
 export function test_sortAllOn(arr: double[]) {
     // block for comparator ``
     if (true) {
-        const sorts: test_SortDatadouble[] = new test_SortDatadouble[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatadouble>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length)
-        sorts[lastSort++] = new test_SortDatadouble("bubble", bubbled)
+        sorts.push(new test_SortDatadouble("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length)
-        sorts[lastSort++] = new test_SortDatadouble("insertion", insertion)
+        sorts.push(new test_SortDatadouble("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
-        sorts[lastSort++] = new test_SortDatadouble("heap", heaped)
+        sorts.push(new test_SortDatadouble("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts[lastSort++] = new test_SortDatadouble("quick", quicked)
+        sorts.push(new test_SortDatadouble("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts[lastSort++] = new test_SortDatadouble("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatadouble("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just)
-        sorts[lastSort++] = new test_SortDatadouble("sort()", just)
+        sorts.push(new test_SortDatadouble("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts  are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for double')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts  are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpFwd`
     if (true) {
-        const sorts: test_SortDatadouble[] = new test_SortDatadouble[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatadouble>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatadouble("bubble", bubbled)
+        sorts.push(new test_SortDatadouble("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatadouble("insertion", insertion)
+        sorts.push(new test_SortDatadouble("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatadouble("heap", heaped)
+        sorts.push(new test_SortDatadouble("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatadouble("quick", quicked)
+        sorts.push(new test_SortDatadouble("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatadouble("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatadouble("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatadouble("sort()", just)
+        sorts.push(new test_SortDatadouble("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for double')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpInv`
     if (true) {
-        const sorts: test_SortDatadouble[] = new test_SortDatadouble[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatadouble>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatadouble("bubble", bubbled)
+        sorts.push(new test_SortDatadouble("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatadouble("insertion", insertion)
+        sorts.push(new test_SortDatadouble("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatadouble("heap", heaped)
+        sorts.push(new test_SortDatadouble("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatadouble("quick", quicked)
+        sorts.push(new test_SortDatadouble("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatadouble("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatadouble("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatadouble("sort()", just)
+        sorts.push(new test_SortDatadouble("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for double')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
                 }
             }
         }
@@ -8696,6 +9857,21 @@ export function test_sortAllOn(arr: double[]) {
 }
 // ======== end of tests section ========
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  *  tries to find key in arr with respect of passed indexes
@@ -8785,6 +9961,21 @@ export function includes(arr: double[], key: double): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * tries to find last entry of a key into arr with respect to passed indexes
  *
@@ -8842,6 +10033,21 @@ export function lastIndexOf(arr: double[], key: double): int {
 function lastIndexOf(arr: double[], key: double, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -8971,6 +10177,21 @@ export function upperBoundSearch(arr: double[], key: double): int {
 
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * concatenates two arrays into a single one
  *
  * @param a first array to concatenate
@@ -9006,6 +10227,21 @@ export function reverse(arr: double[]): void {
 }
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Joins elements with delimeter
  *
  * @param arr array to be joined in String
@@ -9027,6 +10263,21 @@ export function join(arr: double[], delimiter: String): String {
     return sb.toString();
 }
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * runs fn for elements of arr
@@ -9054,6 +10305,21 @@ export function forEach(arr: double[], fn: (value: double) => void): void {
         fn(arr[i]);
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * updates element arr[i] using fn
@@ -9087,6 +10353,21 @@ export function map(arr: double[], fn: (value: double) => double): double[] {
     }
     return res;
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * creates an array only with elements of arr where fn applied to element returned true
@@ -9153,10 +10434,40 @@ export function filter(arr: double[], fn: (value: double) => boolean): double[] 
     return res;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 //
 // Methods for char[]
 //
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * fills arr in-place by specified value with respect to passed indexes
@@ -9204,6 +10515,21 @@ export function fill(arr: char[], value: char): void {
         assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * copies src array into dst with respect to passed indexes.
@@ -9299,6 +10625,21 @@ export function copyOf(arr: char[]): char[] {
     }
     return new char[0]
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 function bubbleSort(arr: char[], startIndex: int, endIndex: int): void {
@@ -9501,7 +10842,7 @@ function quickSortImpl3(arr: char[], startIndex: int, endIndex: int, maxDepth: i
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -9529,7 +10870,7 @@ function quickSortImpl40(arr: char[], startIndex: int, endIndex: int, maxDepth: 
         if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
             continue
@@ -9932,123 +11273,126 @@ function test_printArr(arr: char[], startIndex: int, endIndex: int) {
 export function test_sortAllOn(arr: char[]) {
     // block for comparator ``
     if (true) {
-        const sorts: test_SortDatachar[] = new test_SortDatachar[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatachar>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length)
-        sorts[lastSort++] = new test_SortDatachar("bubble", bubbled)
+        sorts.push(new test_SortDatachar("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length)
-        sorts[lastSort++] = new test_SortDatachar("insertion", insertion)
+        sorts.push(new test_SortDatachar("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
-        sorts[lastSort++] = new test_SortDatachar("heap", heaped)
+        sorts.push(new test_SortDatachar("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts[lastSort++] = new test_SortDatachar("quick", quicked)
+        sorts.push(new test_SortDatachar("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts[lastSort++] = new test_SortDatachar("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatachar("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just)
-        sorts[lastSort++] = new test_SortDatachar("sort()", just)
+        sorts.push(new test_SortDatachar("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts  are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for char')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts  are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpFwd`
     if (true) {
-        const sorts: test_SortDatachar[] = new test_SortDatachar[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatachar>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatachar("bubble", bubbled)
+        sorts.push(new test_SortDatachar("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatachar("insertion", insertion)
+        sorts.push(new test_SortDatachar("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatachar("heap", heaped)
+        sorts.push(new test_SortDatachar("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatachar("quick", quicked)
+        sorts.push(new test_SortDatachar("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatachar("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatachar("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatachar("sort()", just)
+        sorts.push(new test_SortDatachar("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for char')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
                 }
             }
         }
     }
     // block for comparator `est_sortAllOnCmpInv`
     if (true) {
-        const sorts: test_SortDatachar[] = new test_SortDatachar[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortDatachar>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatachar("bubble", bubbled)
+        sorts.push(new test_SortDatachar("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatachar("insertion", insertion)
+        sorts.push(new test_SortDatachar("insertion", insertion))
 
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatachar("heap", heaped)
+        sorts.push(new test_SortDatachar("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatachar("quick", quicked)
+        sorts.push(new test_SortDatachar("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatachar("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortDatachar("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatachar("sort()", just)
+        sorts.push(new test_SortDatachar("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for char')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
                 }
             }
         }
@@ -10056,6 +11400,21 @@ export function test_sortAllOn(arr: char[]) {
 }
 // ======== end of tests section ========
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  *  tries to find key in arr with respect of passed indexes
@@ -10145,6 +11504,21 @@ export function includes(arr: char[], key: char): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * tries to find last entry of a key into arr with respect to passed indexes
  *
@@ -10202,6 +11576,21 @@ export function lastIndexOf(arr: char[], key: char): int {
 function lastIndexOf(arr: char[], key: char, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -10331,6 +11720,21 @@ export function upperBoundSearch(arr: char[], key: char): int {
 
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * concatenates two arrays into a single one
  *
  * @param a first array to concatenate
@@ -10366,6 +11770,21 @@ export function reverse(arr: char[]): void {
 }
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Joins elements with delimeter
  *
  * @param arr array to be joined in String
@@ -10387,6 +11806,21 @@ export function join(arr: char[], delimiter: String): String {
     return sb.toString();
 }
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * runs fn for elements of arr
@@ -10414,6 +11848,21 @@ export function forEach(arr: char[], fn: (value: char) => void): void {
         fn(arr[i]);
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * updates element arr[i] using fn
@@ -10447,6 +11896,21 @@ export function map(arr: char[], fn: (value: char) => char): char[] {
     }
     return res;
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * creates an array only with elements of arr where fn applied to element returned true
@@ -10513,10 +11977,40 @@ export function filter(arr: char[], fn: (value: char) => boolean): char[] {
     return res;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 //
 // Methods for Object[]
 //
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * fills arr in-place by specified value with respect to passed indexes
@@ -10564,6 +12058,21 @@ export function fill(arr: Object[], value: Object): void {
         assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * copies src array into dst with respect to passed indexes.
@@ -10659,6 +12168,21 @@ export function copyOf(arr: Object[]): Object[] {
     }
     return new Object[0]
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 function bubbleSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
@@ -10949,6 +12473,21 @@ export function sort(arr: Object[], startIndex: int, mustPrecede: (lhs: Object, 
 
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  *  tries to find key in arr with respect of passed indexes
  *
  * @param arr array to find a key
@@ -11037,6 +12576,21 @@ export function includes(arr: Object[], key: Object): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * tries to find last entry of a key into arr with respect to passed indexes
  *
@@ -11096,6 +12650,36 @@ function lastIndexOf(arr: Object[], key: Object, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
 
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * concatenates two arrays into a single one
@@ -11133,6 +12717,21 @@ export function reverse(arr: Object[]): void {
 }
 
 /**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Joins elements with delimeter
  *
  * @param arr array to be joined in String
@@ -11154,6 +12753,21 @@ export function join(arr: Object[], delimiter: String): String {
     return sb.toString();
 }
 
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * runs fn for elements of arr
@@ -11181,6 +12795,21 @@ export function forEach(arr: Object[], fn: (value: Object) => void): void {
         fn(arr[i]);
     }
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * updates element arr[i] using fn
@@ -11214,6 +12843,21 @@ export function map(arr: Object[], fn: (value: Object) => Object): Object[] {
     }
     return res;
 }
+
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * creates an array only with elements of arr where fn applied to element returned true

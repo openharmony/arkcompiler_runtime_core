@@ -189,6 +189,15 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
     }
 
     /**
+     * Converts this object to a string
+     *
+     * @returns result of the conversion
+     */
+    public toString(radix: number): string {
+        return (new Long(this.value)).toString(radix);
+    }
+
+    /**
      * Returns a hash code (integer representation) for this instance
      *
      * @returns representation of this instance
