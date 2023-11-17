@@ -1788,4 +1788,15 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
     return unknown_external_methods;
 }
 
+std::string Disassembler::GetColumnNumber()
+{
+    std::string columnNumberStr = "";
+    for (const auto method_info : prog_info_.methods_info) {
+        for (const auto column_number : method_info.second.column_number_table) {
+            columnNumberStr += std::to_string(column_number.column);
+        }
+    }
+    return columnNumberStr;
+}
+
 }  // namespace panda::disasm

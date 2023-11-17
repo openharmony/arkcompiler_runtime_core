@@ -76,6 +76,8 @@ public:
         return prog_info_;
     }
 
+    std::string GetColumnNumber();
+
 private:
     void GetLiteralArrays();
     void FillLiteralData(pandasm::LiteralArray *lit_array, const panda_file::LiteralDataAccessor::LiteralValue &value,
