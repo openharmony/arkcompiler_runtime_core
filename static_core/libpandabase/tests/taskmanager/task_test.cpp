@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 
-namespace panda::taskmanager {
+namespace panda::taskmanager::internal {
 
 class TaskTest : public testing::Test {
 public:
@@ -52,79 +52,76 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
 {
     size_t counter = 0;
     // Creation of TaskQueue
-    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
-    TaskQueue queue(TaskType::GC, VMType::DYNAMIC_VM, QUEUE_PRIORITY);
-    EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
-    EXPECT_TRUE(queue.IsEmpty());
-    EXPECT_EQ(queue.Size(), 0);
-    EXPECT_EQ(queue.GetPriority(), QUEUE_PRIORITY);
-    // Add COUNT_OF_TASKS tasks in queue. Each task increment counter.
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
+    SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(TaskType::GC, VMType::DYNAMIC_VM, QUEUE_PRIORITY);
+    EXPECT_EQ(queue->GetTaskType(), TaskType::GC);
+    EXPECT_TRUE(queue->IsEmpty());
+    EXPECT_EQ(queue->Size(), 0);
+    EXPECT_EQ(queue->GetPriority(), QUEUE_PRIORITY);
+    // Add COUNT_OF_TASKS tasks in queue-> Each task increment counter.
     constexpr size_t COUNT_OF_TASKS = 10;
     for (size_t i = 0; i < COUNT_OF_TASKS; i++) {
-        queue.AddTask(Task::Create({TaskType::GC, VMType::DYNAMIC_VM, TaskExecutionMode::BACKGROUND},
-                                   [&counter]() { counter++; }));
+        queue->AddTask(Task::Create({TaskType::GC, VMType::DYNAMIC_VM, TaskExecutionMode::BACKGROUND},
+                                    [&counter]() { counter++; }));
     }
-    EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
-    EXPECT_FALSE(queue.IsEmpty());
-    EXPECT_EQ(queue.Size(), COUNT_OF_TASKS);
-    EXPECT_EQ(queue.GetPriority(), QUEUE_PRIORITY);
+    EXPECT_EQ(queue->GetTaskType(), TaskType::GC);
+    EXPECT_FALSE(queue->IsEmpty());
+    EXPECT_EQ(queue->Size(), COUNT_OF_TASKS);
     // Pop count_of_done_task tasks from queue and execute them.
     constexpr size_t COUNT_OF_DONE_TASKS = 6;
     ASSERT(COUNT_OF_DONE_TASKS < COUNT_OF_TASKS);
     for (size_t i = 0; i < COUNT_OF_DONE_TASKS; i++) {
-        auto pop_task = queue.PopTask();
+        auto pop_task = static_cast<SchedulableTaskQueueInterface *>(queue)->PopTask();
         EXPECT_EQ(pop_task.value().GetTaskProperties().GetTaskType(), TaskType::GC);
         pop_task.value().RunTask();
         EXPECT_EQ(counter, i + 1);
     }
     // Now in queue counter_of_tasks - COUNT_OF_DONE_TASKS objects.
-    EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
-    EXPECT_EQ(queue.IsEmpty(), COUNT_OF_TASKS == COUNT_OF_DONE_TASKS);
-    EXPECT_EQ(queue.Size(), COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
-    EXPECT_EQ(queue.GetPriority(), QUEUE_PRIORITY);
+    EXPECT_EQ(queue->GetTaskType(), TaskType::GC);
+    EXPECT_EQ(queue->IsEmpty(), COUNT_OF_TASKS == COUNT_OF_DONE_TASKS);
+    EXPECT_EQ(queue->Size(), COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
     // Change priority of this queue
-    constexpr size_t NEW_QUEUE_PRIORITY = TaskQueue::MIN_PRIORITY;
-    queue.SetPriority(NEW_QUEUE_PRIORITY);
-    EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
-    EXPECT_EQ(queue.IsEmpty(), COUNT_OF_TASKS == COUNT_OF_DONE_TASKS);
-    EXPECT_EQ(queue.Size(), COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
-    EXPECT_EQ(queue.GetPriority(), NEW_QUEUE_PRIORITY);
-    // Add in queue counter_of_tasks new tasks. Each add 2 to counter
+    constexpr size_t NEW_QUEUE_PRIORITY = TaskQueueInterface::MIN_PRIORITY;
+    queue->SetPriority(NEW_QUEUE_PRIORITY);
+    EXPECT_EQ(queue->GetTaskType(), TaskType::GC);
+    EXPECT_EQ(queue->IsEmpty(), COUNT_OF_TASKS == COUNT_OF_DONE_TASKS);
+    EXPECT_EQ(queue->Size(), COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
+    EXPECT_EQ(queue->GetPriority(), NEW_QUEUE_PRIORITY);
+    // Add in queue counter_of_tasks new tasks-> Each add 2 to counter
     for (size_t i = 0; i < COUNT_OF_TASKS; i++) {
-        queue.AddTask(Task::Create({TaskType::GC, VMType::DYNAMIC_VM, TaskExecutionMode::BACKGROUND},
-                                   [&counter]() { counter += 2; }));
+        queue->AddTask(Task::Create({TaskType::GC, VMType::DYNAMIC_VM, TaskExecutionMode::BACKGROUND},
+                                    [&counter]() { counter += 2; }));
     }
     // After we have 2 * counter_of_tasks - counter_of_done_tasks objects in queue
-    EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
-    EXPECT_FALSE(queue.IsEmpty());
-    EXPECT_EQ(queue.Size(), 2 * COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
-    EXPECT_EQ(queue.GetPriority(), NEW_QUEUE_PRIORITY);
-    // Pop and execute all tasks in queue.
-    while (!queue.IsEmpty()) {
-        auto next_task = queue.PopTask();
+    EXPECT_EQ(queue->GetTaskType(), TaskType::GC);
+    EXPECT_FALSE(queue->IsEmpty());
+    EXPECT_EQ(queue->Size(), 2 * COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
+    // Pop and execute all tasks in queue->
+    while (!queue->IsEmpty()) {
+        auto next_task = static_cast<SchedulableTaskQueueInterface *>(queue)->PopTask();
         next_task.value().RunTask();
     }
     // After all task is done, counter = 3 * COUNT_OF_TASKS
     EXPECT_EQ(counter, 3 * COUNT_OF_TASKS);
-    EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
-    EXPECT_EQ(queue.Size(), 0);
-    EXPECT_EQ(queue.GetPriority(), NEW_QUEUE_PRIORITY);
+    EXPECT_EQ(queue->GetTaskType(), TaskType::GC);
+    EXPECT_EQ(queue->Size(), 0);
+    TaskQueue<>::Destroy(queue);
 }
 
 TEST_F(TaskTest, TaskQueueMultithreadingOnePushOnePop)
 {
-    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
-    TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
+    SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::atomic_size_t counter = 0;
     constexpr size_t RESULT_COUNT = 10'000;
     auto pusher = [&queue, &counter]() {
         for (size_t i = 0; i < RESULT_COUNT; i++) {
-            queue.AddTask(Task::Create(TASK_PROPERTIES, [&counter]() { counter++; }));
+            queue->AddTask(Task::Create(TASK_PROPERTIES, [&counter]() { counter++; }));
         }
     };
     auto popper = [&queue]() {
         for (size_t i = 0; i < RESULT_COUNT; i++) {
-            auto task = queue.PopTask();
+            auto task = queue->PopTask();
             task->RunTask();
         }
     };
@@ -135,22 +132,23 @@ TEST_F(TaskTest, TaskQueueMultithreadingOnePushOnePop)
     delete worker_1;
     delete worker_2;
     EXPECT_EQ(counter, RESULT_COUNT);
+    TaskQueue<>::Destroy(queue);
 }
 
 TEST_F(TaskTest, TaskQueueMultithreadingNPushNPop)
 {
-    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
-    TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
+    SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::atomic_size_t counter = 0;
     constexpr size_t RESULT_COUNT = 100'000;
     auto pusher = [&queue, &counter]() {
         for (size_t i = 0; i < RESULT_COUNT; i++) {
-            queue.AddTask(Task::Create(TASK_PROPERTIES, [&counter]() { counter++; }));
+            queue->AddTask(Task::Create(TASK_PROPERTIES, [&counter]() { counter++; }));
         }
     };
     auto popper = [&queue]() {
         for (size_t i = 0; i < RESULT_COUNT; i++) {
-            auto task = queue.PopTask();
+            auto task = queue->PopTask();
             task->RunTask();
         }
     };
@@ -168,16 +166,17 @@ TEST_F(TaskTest, TaskQueueMultithreadingNPushNPop)
         delete poppers[i];
     }
     EXPECT_EQ(counter, RESULT_COUNT * COUNT_OF_WORKERS);
+    TaskQueue<>::Destroy(queue);
 }
 
 TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
 {
-    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
-    TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
+    SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::atomic_size_t counter = 0;
     constexpr size_t TASK_COUNT = 100'000;
     for (size_t i = 0; i < TASK_COUNT; i++) {
-        queue.AddTask(Task::Create(TASK_PROPERTIES, [&counter]() { counter++; }));
+        queue->AddTask(Task::Create(TASK_PROPERTIES, [&counter]() { counter++; }));
     }
 
     constexpr size_t THREAD_COUNTER = 10;
@@ -185,7 +184,7 @@ TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
     for (size_t i = 0; i < THREAD_COUNTER; i++) {
         poppers.emplace_back([&queue]() {
             while (true) {
-                auto task = queue.PopTask();
+                auto task = queue->PopTask();
                 if (!task.has_value()) {
                     break;
                 }
@@ -194,33 +193,34 @@ TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
         });
     }
 
-    queue.WaitForQueueEmptyAndFinish();
+    queue->WaitForQueueEmptyAndFinish();
     for (auto &popper : poppers) {
         popper.join();
     }
     EXPECT_EQ(counter, TASK_COUNT);
+    TaskQueue<>::Destroy(queue);
 }
 
 TEST_F(TaskTest, TaskQueueForegroundAndBackgroundTasks)
 {
-    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
-    TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
+    SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::queue<TaskExecutionMode> mode_queue;
     constexpr TaskProperties FOREGROUND_PROPERTIES(TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::FOREGROUND);
     constexpr TaskProperties BACKGROUND_PROPERTIES(TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND);
     constexpr size_t TASKS_COUNT = 100;
 
     for (size_t i = 0; i < TASKS_COUNT; i++) {
-        queue.AddTask(
+        queue->AddTask(
             Task::Create(BACKGROUND_PROPERTIES, [&mode_queue]() { mode_queue.push(TaskExecutionMode::BACKGROUND); }));
     }
     for (size_t i = 0; i < TASKS_COUNT; i++) {
-        queue.AddTask(
+        queue->AddTask(
             Task::Create(FOREGROUND_PROPERTIES, [&mode_queue]() { mode_queue.push(TaskExecutionMode::FOREGROUND); }));
     }
 
     for (size_t i = 0; i < 2 * TASKS_COUNT; i++) {
-        auto task = queue.PopTask();
+        auto task = queue->PopTask();
         ASSERT_TRUE(task.has_value());
         task.value().RunTask();
     }
@@ -236,31 +236,32 @@ TEST_F(TaskTest, TaskQueueForegroundAndBackgroundTasks)
         EXPECT_EQ(mode, TaskExecutionMode::BACKGROUND);
     }
     EXPECT_TRUE(mode_queue.empty());
+    TaskQueue<>::Destroy(queue);
 }
 
 TEST_F(TaskTest, PopTaskWithExecutionMode)
 {
-    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
-    TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
+    SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::queue<TaskExecutionMode> mode_queue;
     constexpr TaskProperties FOREGROUND_PROPERTIES(TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::FOREGROUND);
     constexpr TaskProperties BACKGROUND_PROPERTIES(TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND);
     constexpr size_t TASKS_COUNT = 100;
 
     for (size_t i = 0; i < TASKS_COUNT; i++) {
-        queue.AddTask(
+        queue->AddTask(
             Task::Create(BACKGROUND_PROPERTIES, [&mode_queue]() { mode_queue.push(TaskExecutionMode::BACKGROUND); }));
     }
     for (size_t i = 0; i < TASKS_COUNT; i++) {
-        queue.AddTask(
+        queue->AddTask(
             Task::Create(FOREGROUND_PROPERTIES, [&mode_queue]() { mode_queue.push(TaskExecutionMode::FOREGROUND); }));
     }
 
     for (size_t i = 0; i < TASKS_COUNT; i++) {
-        auto task = queue.PopTask(TaskExecutionMode::FOREGROUND);
+        auto task = queue->PopTask(TaskExecutionMode::FOREGROUND);
         ASSERT_TRUE(task.has_value());
         task.value().RunTask();
-        task = queue.PopTask(TaskExecutionMode::BACKGROUND);
+        task = queue->PopTask(TaskExecutionMode::BACKGROUND);
         ASSERT_TRUE(task.has_value());
         task.value().RunTask();
     }
@@ -274,6 +275,7 @@ TEST_F(TaskTest, PopTaskWithExecutionMode)
         EXPECT_EQ(mode, TaskExecutionMode::BACKGROUND);
     }
     EXPECT_TRUE(mode_queue.empty());
+    TaskQueue<>::Destroy(queue);
 }
 
-}  // namespace panda::taskmanager
+}  // namespace panda::taskmanager::internal

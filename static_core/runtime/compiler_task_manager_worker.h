@@ -38,9 +38,6 @@ public:
 
     void InitializeWorker() override
     {
-        [[maybe_unused]] taskmanager::TaskQueueId id =
-            Runtime::GetTaskScheduler()->RegisterQueue(compiler_task_manager_queue_);
-        ASSERT(!(id == taskmanager::INVALID_TASKQUEUE_ID));
         compiler_worker_joined_ = false;
     }
 
@@ -60,14 +57,15 @@ public:
 
     ~CompilerTaskManagerWorker() override
     {
-        internal_allocator_->Delete(compiler_task_manager_queue_);
+        taskmanager::TaskScheduler::GetTaskScheduler()
+            ->UnregisterAndDestroyTaskQueue<decltype(internal_allocator_->Adapter())>(compiler_task_manager_queue_);
     }
 
 private:
     void AddTaskInTaskManager(CompilerTask &&ctx);
     void CompileNextMethod() REQUIRES(task_queue_lock_);
 
-    taskmanager::TaskQueue *compiler_task_manager_queue_ {nullptr};
+    taskmanager::TaskQueueInterface *compiler_task_manager_queue_ {nullptr};
     os::memory::Mutex task_queue_lock_;
     // This queue is used for methods need to be compiled inside TaskScheduler without compilation_lock_.
     PandaDeque<CompilerTask> compiler_task_deque_ GUARDED_BY(task_queue_lock_);

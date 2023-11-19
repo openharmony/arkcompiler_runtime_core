@@ -56,13 +56,10 @@ GC::GC(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
 {
     if (gc_settings_.UseTaskManagerForGC()) {
         // Create gc task queue for task manager
-        gc_workers_task_queue_ = internal_allocator_->New<taskmanager::TaskQueue>(
+        auto *tm = taskmanager::TaskScheduler::GetTaskScheduler();
+        gc_workers_task_queue_ = tm->CreateAndRegisterTaskQueue<decltype(internal_allocator_->Adapter())>(
             taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, GC_TASK_QUEUE_PRIORITY);
         ASSERT(gc_workers_task_queue_ != nullptr);
-        // Register created gc task queue in task manager
-        [[maybe_unused]] auto gc_queue_id =
-            taskmanager::TaskScheduler::GetTaskScheduler()->RegisterQueue(gc_workers_task_queue_);
-        ASSERT(gc_queue_id != taskmanager::INVALID_TASKQUEUE_ID);
     }
 }
 
@@ -88,7 +85,8 @@ GC::~GC()
         allocator->Delete(workers_task_pool_);
     }
     if (gc_workers_task_queue_ != nullptr) {
-        allocator->Delete(gc_workers_task_queue_);
+        taskmanager::TaskScheduler::GetTaskScheduler()->UnregisterAndDestroyTaskQueue<decltype(allocator->Adapter())>(
+            gc_workers_task_queue_);
     }
 }
 
