@@ -152,6 +152,7 @@ public:
     }
 
     IdType GetMethodReturnTypeId(MethodPtr method) const override;
+    IdType GetMethodArgReferenceTypeId(MethodPtr method, uint16_t num) const override;
 
     compiler::DataType::Type GetMethodTotalArgumentType(MethodPtr method, size_t index) const override
     {
@@ -421,6 +422,7 @@ public:
     ClassPtr GetClass(MethodPtr method, IdType id) const override;
 
     compiler::ClassType GetClassType(MethodPtr method, IdType id) const override;
+    compiler::ClassType GetClassType(ClassPtr klass_ptr) const override;
 
     bool IsArrayClass(MethodPtr method, IdType id) const override;
 

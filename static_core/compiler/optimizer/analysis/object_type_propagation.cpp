@@ -116,6 +116,33 @@ void ObjectTypePropagation::VisitRefTypeCheck([[maybe_unused]] GraphVisitor *v, 
     inst->SetObjectTypeInfo(inst->GetInput(0).GetInst()->GetObjectTypeInfo());
 }
 
+void ObjectTypePropagation::VisitParameter([[maybe_unused]] GraphVisitor *v, Inst *i)
+{
+    auto inst = i->CastToParameter();
+    auto graph = i->GetBasicBlock()->GetGraph();
+    if (inst->GetType() != DataType::REFERENCE || graph->IsBytecodeOptimizer() || inst->HasObjectTypeInfo()) {
+        return;
+    }
+    auto ref_num = inst->GetArgRefNumber();
+    auto runtime = graph->GetRuntime();
+    auto method = graph->GetMethod();
+    RuntimeInterface::ClassPtr klass;
+    if (ref_num == ParameterInst::INVALID_ARG_REF_NUM) {
+        // This parametr doesn't have ArgRefNumber
+        if (inst->GetArgNumber() != 0 || runtime->IsMethodStatic(method)) {
+            return;
+        }
+        klass = runtime->GetClass(method);
+    } else {
+        auto type_id = runtime->GetMethodArgReferenceTypeId(method, ref_num);
+        klass = runtime->GetClass(method, type_id);
+    }
+    if (klass != nullptr) {
+        auto is_exact = runtime->GetClassType(klass) == ClassType::FINAL_CLASS;
+        inst->SetObjectTypeInfo({klass, is_exact});
+    }
+}
+
 void ObjectTypePropagation::ProcessManagedCall(GraphVisitor *v, CallInst *inst)
 {
     if (inst->GetType() != DataType::REFERENCE) {

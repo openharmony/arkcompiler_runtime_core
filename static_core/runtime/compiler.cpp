@@ -123,6 +123,15 @@ compiler::RuntimeInterface::IdType PandaRuntimeInterface::GetMethodReturnTypeId(
     return pda.GetReferenceType(0).GetOffset();
 }
 
+compiler::RuntimeInterface::IdType PandaRuntimeInterface::GetMethodArgReferenceTypeId(MethodPtr method,
+                                                                                      uint16_t num) const
+{
+    auto *pf = MethodCast(method)->GetPandaFile();
+    panda_file::ProtoDataAccessor pda(*pf,
+                                      panda_file::MethodDataAccessor::GetProtoId(*pf, MethodCast(method)->GetFileId()));
+    return pda.GetReferenceType(num).GetOffset();
+}
+
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetClass(MethodPtr method, IdType id) const
 {
     ScopedMutatorLock lock;
@@ -139,6 +148,38 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetStringClass(Metho
     auto *caller = MethodCast(method);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
     return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::STRING);
+}
+
+compiler::ClassType PandaRuntimeInterface::GetClassType(ClassPtr klass_ptr) const
+{
+    if (klass_ptr == nullptr) {
+        return compiler::ClassType::UNRESOLVED_CLASS;
+    }
+    auto klass = ClassCast(klass_ptr);
+    if (klass == nullptr) {
+        return compiler::ClassType::UNRESOLVED_CLASS;
+    }
+    if (klass->IsObjectClass()) {
+        return compiler::ClassType::OBJECT_CLASS;
+    }
+    if (klass->IsInterface()) {
+        return compiler::ClassType::INTERFACE_CLASS;
+    }
+    if (klass->IsArrayClass()) {
+        auto component_class = klass->GetComponentType();
+        ASSERT(component_class != nullptr);
+        if (component_class->IsObjectClass()) {
+            return compiler::ClassType::ARRAY_OBJECT_CLASS;
+        }
+        if (component_class->IsPrimitive()) {
+            return compiler::ClassType::FINAL_CLASS;
+        }
+        return compiler::ClassType::ARRAY_CLASS;
+    }
+    if (klass->IsFinal()) {
+        return compiler::ClassType::FINAL_CLASS;
+    }
+    return compiler::ClassType::OTHER_CLASS;
 }
 
 compiler::ClassType PandaRuntimeInterface::GetClassType(MethodPtr method, IdType id) const

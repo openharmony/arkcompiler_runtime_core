@@ -203,6 +203,11 @@ public:
         return 0;
     }
 
+    virtual IdType GetMethodArgReferenceTypeId([[maybe_unused]] MethodPtr method, [[maybe_unused]] uint16_t num) const
+    {
+        return 0;
+    }
+
     virtual void CleanObjectHandles([[maybe_unused]] MethodPtr method) {}
 
     // Return this argument type for index == 0 in case of instance method
@@ -699,6 +704,11 @@ public:
     }
 
     virtual ClassType GetClassType([[maybe_unused]] MethodPtr method, [[maybe_unused]] IdType id) const
+    {
+        return ClassType::UNRESOLVED_CLASS;
+    }
+
+    virtual ClassType GetClassType([[maybe_unused]] ClassPtr klass_ptr) const
     {
         return ClassType::UNRESOLVED_CLASS;
     }
