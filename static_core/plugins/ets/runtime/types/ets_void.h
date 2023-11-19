@@ -26,22 +26,26 @@ public:
     EtsVoid() = delete;
     ~EtsVoid() = delete;
 
+    // NOTE: vpukhov. replace with undefined or move to TLS
     static EtsVoid *GetInstance()
     {
-        EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-        EtsClassLinker *class_linker = coroutine->GetPandaVM()->GetClassLinker();
+        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+        EtsClassLinker *class_linker = coro->GetPandaVM()->GetClassLinker();
+        EtsClass *void_class = class_linker->GetVoidClass();
+        ASSERT(void_class->IsInitialized());  // do not trigger gc!
 
-        EtsClass *builtin_void_class = class_linker->GetClass(panda_file_items::class_descriptors::VOID.data());
+        EtsField *instance_field = void_class->GetStaticFieldIDByName("void_instance");
+        return reinterpret_cast<EtsVoid *>(void_class->GetStaticFieldObject(instance_field));
+    }
 
-        if (!builtin_void_class->IsInitialized()) {
-            if (coroutine->HasPendingException()) {
-                return nullptr;
-            }
-
-            class_linker->InitializeClass(coroutine, builtin_void_class);
+    static void Initialize()
+    {
+        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+        EtsClassLinker *class_linker = coro->GetPandaVM()->GetClassLinker();
+        EtsClass *void_class = class_linker->GetVoidClass();
+        if (!void_class->IsInitialized()) {
+            class_linker->InitializeClass(coro, void_class);
         }
-        EtsField *instance_field = builtin_void_class->GetStaticFieldIDByName("void_instance");
-        return reinterpret_cast<EtsVoid *>(builtin_void_class->GetStaticFieldObject(instance_field));
     }
 
 private:

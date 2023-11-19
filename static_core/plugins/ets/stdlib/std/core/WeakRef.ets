@@ -25,7 +25,7 @@ package std.core;
  */
 export final class WeakRef<T extends Object> {
     // Reference to target object
-    private referent: T;
+    private referent: T | null;
 
     /**
      * Constructs weak reference object referring to a given target object
@@ -41,7 +41,7 @@ export final class WeakRef<T extends Object> {
      *
      * @returns instance's target object, or null if the target object has been collected
      */
-    public deref(): T {
+    public deref(): T | null {
         return this.referent;
     }
 }

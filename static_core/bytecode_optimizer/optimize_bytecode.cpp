@@ -104,8 +104,9 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     } else if (panda::bytecodeopt::OPTIONS.GetOptLevel() == OPT_LEVEL_2) {
         // ConstArrayResolver Pass is disabled as it requires fixes for stability
         RunOpts<ConstArrayResolver, compiler::BranchElimination, compiler::ValNum, compiler::IfMerging, compiler::Cse,
-                compiler::Peepholes, compiler::Licm, compiler::Lse, compiler::ValNum, compiler::Cse, Canonicalization,
-                compiler::Lowering, compiler::MoveConstants, BytecodeOptPeepholes>(graph, iface);
+                compiler::Peepholes, compiler::Licm, compiler::Lse, compiler::ValNum, compiler::Cse,
+                compiler::BranchElimination, Canonicalization, compiler::Lowering, compiler::MoveConstants,
+                BytecodeOptPeepholes>(graph, iface);
     } else {
         UNREACHABLE();
     }

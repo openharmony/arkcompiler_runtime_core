@@ -115,6 +115,11 @@ public:
         return typeapi_parameter_class_;
     }
 
+    Class *GetVoidClass()
+    {
+        return void_class_;
+    }
+
     Class *GetBoxBooleanClass()
     {
         return box_boolean_class_;
@@ -187,6 +192,9 @@ private:
     ErrorHandler error_handler_;
     LanguageContext lang_ctx_ {nullptr};
     mem::HeapManager *heap_manager_ {nullptr};
+
+    // void class
+    Class *void_class_ = nullptr;
 
     // Box classes
     Class *box_boolean_class_ = nullptr;

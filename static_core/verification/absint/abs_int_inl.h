@@ -2570,22 +2570,40 @@ public:
     bool HandleReturnDyn();
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchShort();
+    bool HandleEtsLaunchShort()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunch();
+    bool HandleEtsLaunch()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchRange();
+    bool HandleEtsLaunchRange()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchVirtShort();
+    bool HandleEtsLaunchVirtShort()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchVirt();
+    bool HandleEtsLaunchVirt()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchVirtRange();
+    bool HandleEtsLaunchVirtRange()
+    {
+        return true;
+    }
 
     template <bool IS_LOAD>
     bool CheckFieldAccessByName(int reg_idx, Type expected_field_type)
@@ -2869,6 +2887,47 @@ public:
         uint16_t vd = inst_.GetVReg<FORMAT>();
         Sync();
         return ProcessStobjObjByName<FORMAT>(vd);
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsLdundefined()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(object_type_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsMovundefined()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t vd = inst_.GetVReg<FORMAT>();
+        Sync();
+        SetReg(vd, object_type_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsIsundefined()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+
+        if (!CheckRegType(ACC, ref_type_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        SetAcc(i32_);
+
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>

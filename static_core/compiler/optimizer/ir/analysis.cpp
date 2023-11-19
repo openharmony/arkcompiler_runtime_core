@@ -203,11 +203,12 @@ bool IsInstNotNull(const Inst *inst)
     if (inst->IsAllocation() || inst->IsNullCheck()) {
         return true;
     }
-    auto graph = inst->GetBasicBlock()->GetGraph();
-    auto runtime = graph->GetRuntime();
-    // The object is not null if the method is virtual and the object is first parameter.
-    return !runtime->IsMethodStatic(graph->GetMethod()) && inst->GetOpcode() == Opcode::Parameter &&
-           inst->CastToParameter()->GetArgNumber() == 0;
+    if (inst->IsParameter() && inst->CastToParameter()->GetArgNumber() == 0) {
+        auto graph = inst->GetBasicBlock()->GetGraph();
+        // The object is not null if object is first parameter and the method is virtual.
+        return !graph->GetRuntime()->IsMethodStatic(graph->GetMethod());
+    }
+    return false;
 }
 
 static bool FindObjectInSaveState(Inst *object, Inst *ss)

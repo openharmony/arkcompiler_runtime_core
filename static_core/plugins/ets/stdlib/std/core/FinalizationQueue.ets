@@ -131,12 +131,10 @@ export final class FinalizationQueue {
     public unregister(token: Object | null): void {
         let prev = 0;
         for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
-            if (this.getToken(i) != null) {
-                let refToken = this.getToken(i);
-                if (refToken.deref() == token) {
-                    this.freeNextTrimplet(prev);
-                    i = prev; // iterator rollback
-                }
+            let refToken = this.getToken(i);
+            if (refToken != null && refToken.deref() == token) {
+                this.freeNextTrimplet(prev);
+                i = prev; // iterator rollback
             }
         }
     }
@@ -169,7 +167,7 @@ export final class FinalizationQueue {
         return new_idx;
     }
 
-    private freeNextTrimplet(index: int): int {
+    private freeNextTrimplet(index: int): void {
         // remove next elem from uselist
         let freed_idx = this.idxarr[index];
         this.idxarr[index] = this.idxarr[freed_idx];
@@ -182,16 +180,16 @@ export final class FinalizationQueue {
         this.setTrimplet(freed_idx, null, null, null);
     }
 
-    private getObject(index: int): WeakRef<Object> {
-        return this.trimplets[3 * index] as WeakRef<Object>;
+    private getObject(index: int): WeakRef<Object> | null {
+        return this.trimplets[3 * index] as (WeakRef<Object> | null);
     }
 
     private getCallbackArg(index: int): Object | null {
         return this.trimplets[3 * index + 1];
     }
 
-    private getToken(index: int): WeakRef<Object> {
-        return this.trimplets[3 * index + 2] as WeakRef<Object>;
+    private getToken(index: int): WeakRef<Object> | null {
+        return this.trimplets[3 * index + 2] as (WeakRef<Object> | null);
     }
 
     private setTrimplet(index: int, obj: WeakRef<Object> | null, cbArg: Object | null, token: WeakRef<Object> | null): void {

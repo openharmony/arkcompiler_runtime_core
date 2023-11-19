@@ -20,7 +20,7 @@ assert: If a class contains no constructor declarations, then a default construc
 
 class A {
   public x: int;
-  public b: B;
+  public b: B | null;
 }
 
 class B {

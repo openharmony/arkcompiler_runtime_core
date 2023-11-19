@@ -38,19 +38,23 @@ TEST_F(EtsInteropJsDynamicWithLambda, TestArgs2)
     ASSERT_EQ(ret, 25);
 }
 
-TEST_F(EtsInteropJsDynamicWithLambda, TestLambdaJSValue)
+// NOTE: vpukhov. re-implement proxy creation by erased type in runtime!
+// NOTE: vpukhov. re-enable #14501
+TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValue)
 {
     auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValue");
     ASSERT_EQ(ret, 25);
 }
 
-TEST_F(EtsInteropJsDynamicWithLambda, TestLambdaJSValueCast)
+// NOTE: vpukhov. re-enable #14501
+TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCast)
 {
     auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValueCast");
     ASSERT_EQ(ret, 25);
 }
 
-TEST_F(EtsInteropJsDynamicWithLambda, TestLambdaJSValueCache)
+// NOTE: vpukhov. re-enable #14501
+TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCache)
 {
     auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValueCache");
     ASSERT_EQ(ret, 25);

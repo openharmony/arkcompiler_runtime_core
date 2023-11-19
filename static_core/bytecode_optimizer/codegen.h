@@ -36,6 +36,7 @@ using compiler::Opcode;
 void DoLdaObj(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoLda(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoLda64(compiler::Register reg, std::vector<pandasm::Ins> &result);
+void DoStaObj(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoSta(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoSta64(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoLdaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result);

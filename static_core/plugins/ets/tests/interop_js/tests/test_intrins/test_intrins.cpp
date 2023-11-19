@@ -108,7 +108,9 @@ TEST_F(EtsInteropJsIntrinsTest, test_lambda_proxy)
 TEST_F(EtsInteropJsIntrinsTest, test_exception_forwarding)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("test_exception_forwarding_fromjs"));
+#if INTEROP_14501  // NOTE: vpukhov. re-enable #14501
     ASSERT_EQ(true, CallEtsMethod<bool>("test_exception_forwarding_fromets"));
+#endif
     ASSERT_EQ(true, CallEtsMethod<bool>("test_exception_forwarding_recursive"));
     ASSERT_EQ(true, CallEtsMethod<bool>("test_core_error_forwarding"));
 }

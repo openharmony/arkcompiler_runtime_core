@@ -55,6 +55,7 @@ public:
     EtsClass *GetArrayBufferClass();
     EtsClass *GetSharedMemoryClass();
     EtsClass *GetObjectClass();
+    EtsClass *GetVoidClass();
     EtsClass *GetTypeAPIFieldClass();
     EtsClass *GetTypeAPIMethodClass();
     EtsClass *GetTypeAPIParameterClass();

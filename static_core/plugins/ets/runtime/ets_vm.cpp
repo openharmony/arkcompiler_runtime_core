@@ -30,6 +30,7 @@
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_void.h"
 #include "runtime/compiler.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/init_icu.h"
@@ -206,6 +207,19 @@ PandaEtsVM *PandaEtsVM::GetCurrent()
     return static_cast<PandaEtsVM *>(Thread::GetCurrent()->GetVM());
 }
 
+static void PreallocSpecialReference(PandaEtsVM *vm, mem::Reference *&ref, const char *desc, bool non_movable = false)
+{
+    EtsClass *cls = vm->GetClassLinker()->GetClass(desc);
+    if (cls == nullptr) {
+        LOG(FATAL, RUNTIME) << "Cannot find a class for special object " << desc;
+    }
+    EtsObject *obj = non_movable ? EtsObject::CreateNonMovable(cls) : EtsObject::Create(cls);
+    if (obj == nullptr) {
+        LOG(FATAL, RUNTIME) << "Cannot preallocate a special object " << desc;
+    }
+    ref = vm->GetGlobalObjectStorage()->Add(obj->GetCoreType(), panda::mem::Reference::ObjectType::GLOBAL);
+}
+
 bool PandaEtsVM::Initialize()
 {
     if (!intrinsics::Initialize(panda::panda_file::SourceLang::ETS)) {
@@ -218,14 +232,15 @@ bool PandaEtsVM::Initialize()
     }
 
     if (Runtime::GetCurrent()->GetOptions().ShouldLoadBootPandaFiles()) {
-        EtsClass *cls = class_linker_->GetClass(panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR.data());
-        EtsObject *oom = EtsObject::Create(cls);
-        if (oom == nullptr) {
-            LOG(FATAL, RUNTIME) << "Cannot preallocate OOM Error object";
-            return false;
-        }
+        PreallocSpecialReference(this, oom_obj_ref_, panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR.data());
+        PreallocSpecialReference(this, undefined_obj_ref_,
+                                 panda_file_items::class_descriptors::INTERNAL_UNDEFINED.data(), true);
 
-        oom_obj_ref_ = GetGlobalObjectStorage()->Add(oom->GetCoreType(), panda::mem::Reference::ObjectType::GLOBAL);
+        if (Thread::GetCurrent() != nullptr) {
+            ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
+            EtsCoroutine::GetCurrent()->SetUndefinedObject(GetUndefinedObject());
+            EtsVoid::Initialize();
+        }
     }
 
     return true;
@@ -447,6 +462,13 @@ Expected<int, Runtime::Error> PandaEtsVM::InvokeEntrypointImpl(Method *entrypoin
 ObjectHeader *PandaEtsVM::GetOOMErrorObject()
 {
     auto obj = GetGlobalObjectStorage()->Get(oom_obj_ref_);
+    ASSERT(obj != nullptr);
+    return obj;
+}
+
+ObjectHeader *PandaEtsVM::GetUndefinedObject()
+{
+    auto obj = GetGlobalObjectStorage()->Get(undefined_obj_ref_);
     ASSERT(obj != nullptr);
     return obj;
 }

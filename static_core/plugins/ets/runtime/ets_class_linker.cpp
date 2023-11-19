@@ -92,6 +92,11 @@ EtsClass *EtsClassLinker::GetObjectClass()
     return EtsClass::FromRuntimeClass(ext_->GetObjectClass());
 }
 
+EtsClass *EtsClassLinker::GetVoidClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetVoidClass());
+}
+
 EtsClass *EtsClassLinker::GetPromiseClass()
 {
     return EtsClass::FromRuntimeClass(ext_->GetPromiseClass());

@@ -73,6 +73,22 @@ public:
         return MEMBER_OFFSET(EtsCoroutine, promise_class_ptr_);
     }
 
+    ALWAYS_INLINE ObjectHeader *GetUndefinedObject() const
+    {
+        return undefined_obj_;
+    }
+
+    // For mainthread initializer
+    void SetUndefinedObject(ObjectHeader *obj)
+    {
+        undefined_obj_ = obj;
+    }
+
+    static constexpr uint32_t GetTlsUndefinedObjectOffset()
+    {
+        return MEMBER_OFFSET(EtsCoroutine, undefined_obj_);
+    }
+
     PANDA_PUBLIC_API PandaEtsVM *GetPandaVM() const;
     PANDA_PUBLIC_API CoroutineManager *GetCoroutineManager() const;
 
@@ -96,6 +112,8 @@ private:
 
     std::unique_ptr<PandaEtsNapiEnv> ets_napi_env_;
     void *promise_class_ptr_ {nullptr};
+
+    ObjectHeader *undefined_obj_ {};
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

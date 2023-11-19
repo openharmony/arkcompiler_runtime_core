@@ -20,7 +20,7 @@ assert: If the class being declared is the primordial class Object, then the def
 
 class A {
   public x: int;
-  public b: B;
+  public b: B | null;
 }
 
 class B extends A{

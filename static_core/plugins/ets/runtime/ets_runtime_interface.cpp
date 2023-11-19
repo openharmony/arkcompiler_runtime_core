@@ -87,6 +87,12 @@ compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::ResolveLookUpCall(Fie
     }
     return nullptr;
 }
+
+uint64_t EtsRuntimeInterface::GetUndefinedObject() const
+{
+    return ToUintPtr(PandaEtsVM::GetCurrent()->GetUndefinedObject());
+}
+
 compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallKind(MethodPtr method_ptr) const
 {
     auto class_name = GetClassNameFromMethod(method_ptr);

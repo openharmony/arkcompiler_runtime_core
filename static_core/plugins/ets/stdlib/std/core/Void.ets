@@ -17,7 +17,17 @@ package std.core;
 
 export final class void {
     static readonly void_instance = new void();
-    private constructor() {}
+    private constructor() { }
 
 }
 export const Void = void.void_instance;
+
+final class __internal_undefined {
+    private constructor() { };
+
+    public override toString(): String { return "undefined"; }
+
+    public override equals(to: Object | null): boolean {
+        throw new Error("Internal error: undefined.equals was called!")
+    }
+}
