@@ -321,7 +321,7 @@ that does not contain an accessible parameterless constructor, or if
 .. _Runtime Evaluation of Array Creation Expressions:
 
 Runtime Evaluation of Array Creation Expressions
-************************************************
+================================================
 
 .. meta:
     frontend_status: Partly
@@ -365,63 +365,193 @@ as follows:
 
 |
 
-.. _Enumeration SuperType:
+.. _Indexable Types:
 
-Enumeration Super Type
-**********************
+Indexable Types
+***************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: None
 
-Any *enum* type has class type *Object* as its supertype. This allows
-polymorphic assignments into *Object* type variables. The *instanceof*
-check can be used to get enumeration variable back by applying 'as' conversion.
+If a class or an interface declares one or two functions with names *$_get* and
+*$_set*, and signatures *(index: Type1): Type2* and *(index: Type1, value: Type2)*
+respectively, then an indexing expression (see :ref:`Indexing Expression`) can
+be applied to variables of such types:
+
+.. code-block:: typescript
+   :linenos:
+   
+    class SomeClass {
+       $_get (index: number): SomeClass { return this }
+       $_set (index: number, value: SomeClass) { }
+    }
+    let x = new SomeClass
+    x = x[1] // This notation implies a call: x = x.$_get (1)
+    x[1] = x // This notation implies a call: x.$_set (1, x)
+
+If only one function is present, then only the appropriate form of the index
+expression (see :ref:`Indexing Expression`) is available:
+
+.. code-block:: typescript
+   :linenos:
+   
+    class ClassWithGet {
+       $_get (index: number): ClassWithGet { return this }
+    }
+    let getClass = new ClassWithGet
+    getClass = getClass[0]
+    getClass[0] = getClass // Error - no $_set function available
+
+
+    class ClassWithSet {
+       $_set (index: number, value: ClassWithSet) { }
+    }
+    let setClass = new ClassWithSet
+    setClass = setClass[0] // Error - no $_get function available
+    setClass[0] = setClass 
+
+Type *string* can be used as a type of the index parameter:
+
+.. code-block:: typescript
+   :linenos:
+   
+    class SomeClass {
+       $_get (index: string): SomeClass { return this }
+       $_set (index: string, value: SomeClass) { }
+    }
+    let x = new SomeClass
+    x = x["index string"] 
+       // This notation implies a call: x = x.$_get ("index string")
+    x["index string"] = x 
+       // This notation implies a call: x.$_set ("index string", x)
+
+Functions *$_get* and *$_set* are ordinary functions with compiler-known
+signatures. The functions can be used like any other functions. 
+The functions can be abstract or defined in an interface and implemented later.
+The functions can be overridden and provide a dynamic dispatch for the indexing
+expression evaluation (see :ref:`Indexing Expression`). They can be used in
+generic classes and interfaces for better flexibility.
+
+A compile-time error occurs if these functions are marked as *async*.
+
+.. code-block:: typescript
+   :linenos:
+   
+    interface ReadonlyIndexable<K, V> {
+       $_get (index: K): V
+    }
+
+    interface Indexable<K, V> extends ReadonlyIndexable<K, V> {
+       $_set (index: K, value: V)
+    }
+
+    class IndexableByNumber<V> extends Indexable<number, V> {
+       private data: V[] = []
+       $_get (index: number): V { return this.data [index] }
+       $_set (index: number, value: V) { this.data[index] = value }
+    }
+
+    class IndexableByString<V> extends Indexable<string, V> {
+       private data = new Map<string, V>
+       $_get (index: string): V { return this.data [index] }
+       $_set (index: string, value: V) { this.data[index] = value }
+    }
+
+    class BadClass extends IndexableByNumber<boolean> {
+       override $_set (index: number, value: boolean) { index / 0 }
+    }
+
+    let x: IndexableByNumber<boolean> = new BadClass
+    x[666] = true // This will be dispatched at runtime to the overridden
+       // version of the $_set method
+    x.$_get ("some string")  // $_get and $_set can be called as ordinary
+       // methods
+
+
+|
+
+
+.. _Iterable Types:
+
+Iterable Types
+**************
+
+.. meta:
+    frontend_status: None
+
+If a class or an interface can be made *iterable*, 
+meaning that their instances can be used in for-of statements
+(see :ref:`For-Of Statements`).
+
+A type is *iterable* if it declares a parameterless function 
+with name *$_iterator* and signature *(): ITER*, where *ITER* is 
+a type that implements *Iterator* interface defined 
+in the standard library (see :ref:`Standard Library`).
+
+The example below defines *iterable* class *C*:
 
 .. code-block:: typescript
    :linenos:
 
-    enum Commands { Open = "fopen", Close = "fclose" }
-    let c: Commands = Commands.Open
-    let o: Object = c // Autoboxing of enum type to its reference version
-    // Such reference version type has no name, but can be detected by instanceof
-    if (o.instanceof (Commands)) {
-       c = o as Commands // And explicitly converted back by 'as' conversion
-    }
+      class C {
+        data: string[] = ['a', 'b', 'c']
+        $_iterator() {
+          return new CIterator(this)
+        }
+      }
 
-.. index::
-   enum type
-   class type
-   Object
-   supertype
-   polymorphic assignment
-   type variable
-   enumeration variable
-   conversion
+      class CIterator implements Iterator<string> {
+        index = 0
+        base: C
+        constructor (base: C) {
+          this.base = base
+        }
+        next(): IteratorResult<string> {
+          return {
+            done: this.index >= this.base.data.length,
+            value: this.base.data[this.index++]
+          }
+        }
+      }
 
-|
+      let c = new C()
+      for (let x of c) { 
+	    console.log(x) 
+	  }
 
-.. _Enumeration Types Conversions:
-
-Enumeration Types Conversions
-=============================
-
-.. meta:
-    frontend_status: Done
-
-Every *enum* type is compatible (see :ref:`Compatible Types`) with type
-*Object* (see :ref:`Enumeration SuperType`). Every variable of *enum* type can
-thus be assigned into a variable of type *Object*.
-
-.. index::
-   enum type
-   compatibility
-   Object
-   variable
-   assignment
-   mutable variable
+In the example above class *C* function *$_iterator* returns 
+*CIterator<string>* which implements *Iterator<string>*. 
+If executed, this code prints:
+ 	
+	.. code-block::
+	
+		"a"
+		"b"
+		"c"
 
 
-|
+The function *$_iterator* is an ordinary function with compiler-known signature. 
+The function can be used like any other functions. 
+It can be abstract or defined in an interface and implemented later.
+
+A compile-time error occurs if this function is marked as async.
+
+**Note**: To support the code compatible with |TS| 
+the name of the *$_iterator* function can be written as *[Symbol.iterator]*.
+In this case, the *iterable* class will look as:
+
+.. code-block:: typescript
+   :linenos:
+
+      class C {
+        data: string[] = ['a', 'b', 'c']; 
+        [Symbol.iterator]() {
+          return new CIterator(this)
+        }
+      }
+
+The use of *[Symbol.iterator]* name considered deprecated, it can be removed in the future
+versions of the language.
 
 
 .. _Statements Experimental:
@@ -459,10 +589,10 @@ An explicit type annotation is allowed for a *for variable*:
 
 |
 
-.. _Multiple Clauses in Statements:
+.. _Multiple Catch Clauses in Try Statements:
 
-Multiple Clauses in Statements
-===============================
+Multiple Catch Clauses in Try Statements
+========================================
 
 .. meta:
     frontend_status: Done
@@ -659,7 +789,7 @@ The execution of the *disabled* assertion has no effect whatsoever.
 .. _Function and Method Overloading:
 
 Function and Method Overloading
-===============================
+*******************************
 
 .. meta:
     frontend_status: Done
@@ -948,7 +1078,7 @@ Final Classes and Methods
 
 |
 
-.. _Final Classes:
+.. _Final Classes Experimental:
 
 Final Classes
 =============
@@ -1213,7 +1343,7 @@ extension function* requires a variable as receiver:
       }                              
       static function A.goo () { ... 
          this.foo() // Compile-time error as instance members are not accessible
-         this.bar() // Compile-time error as instance extension functions are not acessible
+         this.bar() // Compile-time error as instance extension functions are not accessible
          ...
       }
       let a = new A()
@@ -1442,6 +1572,64 @@ argument (see :ref:`Optional Parameters`).
      { console.log ("after call of 'foo' this block is executed") }
      /* here, function foo receives lambda as an argument and a block after
       the call is just a block, not a trailing lambda. */
+
+|
+
+.. _Enumeration SuperType:
+
+Enumeration Super Type
+**********************
+
+.. meta:
+    frontend_status: Partly
+
+Any *enum* type has class type *Object* as its supertype. This allows
+polymorphic assignments into *Object* type variables. The *instanceof*
+check can be used to get enumeration variable back by applying 'as' conversion.
+
+.. code-block:: typescript
+   :linenos:
+
+    enum Commands { Open = "fopen", Close = "fclose" }
+    let c: Commands = Commands.Open
+    let o: Object = c // Autoboxing of enum type to its reference version
+    // Such reference version type has no name, but can be detected by instanceof
+    if (o.instanceof (Commands)) {
+       c = o as Commands // And explicitly converted back by 'as' conversion
+    }
+
+.. index::
+   enum type
+   class type
+   Object
+   supertype
+   polymorphic assignment
+   type variable
+   enumeration variable
+   conversion
+
+|
+
+.. _Enumeration Types Conversions:
+
+Enumeration Types Conversions
+=============================
+
+.. meta:
+    frontend_status: Done
+
+Every *enum* type is compatible (see :ref:`Compatible Types`) with type
+*Object* (see :ref:`Enumeration SuperType`). Every variable of *enum* type can
+thus be assigned into a variable of type *Object*.
+
+.. index::
+   enum type
+   compatibility
+   Object
+   variable
+   assignment
+   mutable variable
+
 
 |
 
@@ -1784,7 +1972,7 @@ Exceptions and Initialization Expression
 ========================================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A *variable declaration* (see :ref:`Variable Declarations`) or a *constant
 declaration* (see :ref:`Constant Declarations`) expression used to initialize
@@ -1818,7 +2006,7 @@ Exceptions and Errors Inside Field Initializers
 ===============================================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Class field initializers cannot call *throwing* or *rethrowing* functions.
 
@@ -2061,7 +2249,7 @@ Channels Classes
 
 *Channels* are used to send data between coroutines.
 
-*Channels classes* are a part of the corouitnes-related package of the
+*Channels classes* are a part of the coroutine-related package of the
 standard library (see :ref:`Standard Library`).
 
 .. index::

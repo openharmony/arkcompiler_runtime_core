@@ -458,7 +458,7 @@ Interface Method Declarations
 *****************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 An ordinary interface method declaration that specifies the method's name and
 signature is called *abstract*.
@@ -507,11 +507,8 @@ A compile-time error occurs if the body of an interface declares:
 Interface Method Overload Signatures
 ====================================
 
-|LANG| allows specifying a method that can be called in different ways by
-writing *overload signatures*. Writing *overload signatures* means writing
-several method headers that have the same name but different signatures.
-
-For *method overload signatures* see :ref:`Methods Overload Signatures`:
+|LANG| allows specifying a method that can have several *overload signatures*
+but the same name.
 
 .. code-block:: abnf
 
@@ -522,13 +519,16 @@ For *method overload signatures* see :ref:`Methods Overload Signatures`:
 Calling a method with *overload signatures* always means calling the method
 header that is textually the last.
 
-A compile-time error occurs if the signature of the last method header is not
-*overload signature-compatible* with each previous overload signature. It means
-that a call of each overload signature must be replaceable for the correct call
-of the last method header. This can be achieved by using optional parameters
-(see :ref:`Optional Parameters`) or *least upper bound* types (see
-:ref:`Least Upper Bound`). See :ref:`Overload Signature Compatibility` for
-the exact semantic rules.
+All rules for the overloaded signatures are discussed in
+:ref:`Overload Signature Compatibility`.
+
+.. A compile-time error occurs if the signature of the last method header is not
+  *overload signature-compatible* with each previous overload signature. It means
+  that a call of each overload signature must be replaceable for the correct call
+  of the last method header. This can be achieved by using optional parameters
+  (see :ref:`Optional Parameters`) or *least upper bound* types (see
+  :ref:`Least Upper Bound`). See :ref:`Overload Signature Compatibility` for
+  the exact semantic rules.
 
 .. index::
    interface method

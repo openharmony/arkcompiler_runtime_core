@@ -28,7 +28,7 @@ of named constants that define its possible values:
         ;
 
     enumConstantList:
-        enumConstant (',' enumConstant)*
+        enumConstant (',' enumConstant)* ','?
         ;
 
     enumConstant:

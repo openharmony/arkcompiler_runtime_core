@@ -277,7 +277,7 @@ a type *T* variable only if:
    variable type
    type compatibility
 
-**Note**: *final* classes (see :ref:`Class Modifiers Final Classes`) cannot
+**Note**: *final* classes (see :ref:`Final Classes`) cannot
 have subclasses. If a class type *F* expression is declared *final*, then
 only a class *F* object can be its value.
 
@@ -1140,8 +1140,8 @@ object literal is an anonymous class implicitly created for interface *I*:
    :linenos:
 
     interface Person {
-      name: string = ""
-      age: number = 0
+      name: string
+      age: number
     }
     let b : Person = {name: "Bob", age: 25}
 
@@ -1906,8 +1906,8 @@ Indexing Expression
     frontend_status: Partly
 
 An indexing expression is used to access elements of arrays (see
-:ref:`Array Types`), and of the *Record* instances (see
-:ref:`Record Utility Type`).
+:ref:`Array Types`) and *Record* instances (see :ref:`Record Utility Type`).
+It can be applied to instances of indexable classes and interfaces.
 
 .. code-block:: abnf
 
@@ -2018,7 +2018,7 @@ illustration is given in the example below:
     string[1] = "Martin"
     console.log(name[1]) // prints Martin
 
-    class refType {
+    class RefType {
         field: number = 666
     }
     const objects: RefType[] = [new RefType(), new RefType()]
@@ -2349,11 +2349,11 @@ The operation **new** instantiates an object of the *class* or *array* type.
         | newArrayInstance
         ;
 
-A *class instance creation expression* creates new objects that are instances
-of classes.
+A *class instance creation expression* creates a new object that is an instance
+of the specified class fully described in detail below.
 
-|LANG| also supports the creation of array instances as an experimental feature
-(see :ref:`Array Creation Expressions`).
+The creation of array instances is an experimental feature discussed in
+:ref:`Array Creation Expressions`.
 
 .. index::
    expression
@@ -2382,15 +2382,17 @@ A *class instance creation expression* can throw an error as specified in
 A class instance creation expression is *standalone* if it has no assignment
 or call context (see :ref:`Assignment and Call Contexts`).
 
-A class is *instantiated* when a class instance creation expression creates an
-instance of that class. The *class instantiation* involves the following to be
-determined:
+A class instance creation expression is executed in two steps:
 
--  The class to be instantiated;
--  The constructor to be called to create that new instance.
+-  A new instance of the class is created;
+-  The constructor of the class is called to fully initialize the
+   created instance.
 
 The validity of the constructor call is similar to the validity of the method
-call as described in :ref:`Step 3 Semantic Correctness Check`.
+call as described in :ref:`Step 3 Semantic Correctness Check`, except the
+cases described in :ref:`Constructor Declaration`.
+
+A compile-time error occurs if *typeReference* is a type parameter.
 
 .. index::
    class instance creation expression
@@ -2504,9 +2506,13 @@ Any ``instanceof`` *expression* is of type *boolean*.
 The *expression* operand of the operator ``instanceof`` must be of a
 reference type. Otherwise, a compile-time error occurs.
 
-During program execution, an ``instanceof`` *expression* checks whether the
-type of the value the expression successfully evaluates to is compatible
-to ``type``.
+If the type of *expression* at compile time is compatible (see
+:ref:`Compatible Types`) to ``type``, then the result of the ``instanceof``
+*expression* is ``true``.
+
+Otherwise, an ``instanceof`` *expression* checks during program execution
+whether the type of the value the expression successfully evaluates to is
+compatible (see :ref:`Compatible Types`) to ``type``.
 If so, then the result of the  ``instanceof`` *expression* is ``true``.
 Otherwise, the result is ``false``.
 If the expression evaluation causes exception or error, then execution
@@ -3028,8 +3034,8 @@ cases to consider are as follows:
    integer
    value
    subtraction
-   two’s complement representation
-   two’s complement value
+   two’s-complement representation
+   two’s-complement value
    overflow
    exception
    error
@@ -4176,8 +4182,7 @@ Reference Equality Operators
 .. meta:
     frontend_status: Partly
 
-The reference equality operator can compare two reference type operands
-(entities of the class, function, and array types).
+The reference equality operator can compare two reference type operands.
 
 A compile-time error occurs if:
 
@@ -4924,6 +4929,9 @@ If none of the above is true, then the following three steps are required:
 #. If that evaluation completes normally, then the value of the right-hand
    operand is converted to the type of the left-hand variable.
    In that case, the result of the conversion is stored into the variable.
+   A compile-time error occurs if the type of the left-hand variable is
+   *readonly* array, while the converted type of the right-hand operand
+   is a non-*readonly* array.
 
 .. index::
    evaluation
@@ -5427,10 +5435,7 @@ Lambda Expressions
 ******************
 
 .. meta:
-    frontend_status: Partly
-    todo: capturing non-effectively final local variables
-    todo: complete lambda and function type checks
-    todo: there are still stability issues can cause compile time segmentation faults, incorrect bytecode generated
+    frontend_status: Done
 
 A '*lambda expression*' is a short block of code that takes in parameters and
 can return a value. *Lambda expressions* are generally similar to functions,

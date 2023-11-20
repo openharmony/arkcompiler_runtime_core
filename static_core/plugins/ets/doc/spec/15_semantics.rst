@@ -44,7 +44,7 @@ in place of an object of type *T*.
 
 By the definition of the *S* <: *T*, the type *T* belongs to the set of
 *supertypes* of type *S*. The set of *supertypes* includes all *direct
-supertypes* (see below), and all their respective *direct supertypes*.
+supertypes* (see below), and all their respective *supertypes*.
 
 .. index::
    subtyping
@@ -224,9 +224,11 @@ return type of *S*:sub:`2`.
 Overload Signature Compatibility
 ********************************
 
-When several functions share the same function body (implementation), then
-all function signatures with no body must *fit* the signature with the function
-implementation. Otherwise, a compile-time error occurs.
+If several functions, methods, or constructors share the same body
+(implementation) or the same method with no implementation in some interface,
+then all first signatures with no body must *fit* the last signature with
+actual implementation, or without actual implementation for the interface
+method. A compile-time error occurs otherwise.
 
 Signature *S*:sub:1 with *n* parameters *fits* signature *S*:sub:`2` with *m*
 parameters if:
@@ -242,7 +244,11 @@ A return type, if available, is present in both signatures, and the return
 type of *S*:sub:`1` is compatible (see :ref:`Compatible Types`) with the
 return type of *S*:sub:`2`.
 
-This is illustrated by the example below:
+All overloaded signatures in functions must be *exported* or *non-exported*.
+All overloaded signatures in methods and constructors must have the same
+access modifier. A compile-time error occurs otherwise.
+
+It is illustrated by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -280,6 +286,14 @@ This is illustrated by the example below:
    function bar() // this 'bar()' fits 'bar(?p: number)'
    function bar(p: number) // this 'bar()' fits 'bar(?p: number)' as well
    function bar(p?: number) { ... }
+
+   function goo()
+   export function goo() {} // Compile-time error due to different export status
+
+   class A {
+      private constructor ()
+      protected constructor () {} // Compile-time error due to different acess modifiers
+   }
 
 
 |

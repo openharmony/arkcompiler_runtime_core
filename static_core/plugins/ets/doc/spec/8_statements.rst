@@ -353,10 +353,8 @@ The key difference is that *whileStatement* first evaluates and checks the
 .. meta:
     frontend_status: Done
 
-A ``for-of`` loop iterates elements of *array* or *string*:
-
-.. or any class which implements interface *Iterable*, which is part of the |LANG| standard library
-   (see :ref:`Standard Library`)
+A ``for-of`` loop iterates elements of *array* or *string*
+or an instance of *iterable* class or interface (see :ref:`Iterable Types`).
 
 
 .. index::
@@ -377,15 +375,13 @@ A ``for-of`` loop iterates elements of *array* or *string*:
 
 
 A compile-time error occurs if the type of an expression is not
-*array* or *string*.
-
-.. or class implementing *Iterable*.
+*array* or *string* or *iterable type*.
 
 The execution of a ``for-of`` loop starts with the evaluation of ``expression``.
-If the evaluation is successful, then the resultant *string* or *array* [or
-class which implements *Iterable*] is used for loop iterations (execution of
+If the evaluation is successful, then the resultant expressin 
+is used for loop iterations (execution of
 the ``statement``). On each iteration, *forVariable* is set to successive
-elements of the *array* or *string* [or result of class iterator advancing].
+elements of the *array* or *string* or result of class iterator advancing.
 
 .. index::
    compile-time error
@@ -884,7 +880,7 @@ The type of *catch identifier* is *Object*.
    Object
 
 For the details of *typed catch clause* see
-:ref:`Multiple Clauses in Statements`.
+:ref:`Multiple Catch Clauses in Try Statements`.
 
 .. index::
    typed catch clause

@@ -831,7 +831,7 @@ Null Literal
 ========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 '*Null literal*' is the only literal to denote a reference without pointing
 at any entity. It is represented by the keyword ``null``. 
@@ -890,19 +890,20 @@ Comments
 *Comment*  is a piece of text added in the stream to document and compliment
 the source code. Comments are insignificant for the syntactic grammar.
 
-*Line comments* start with the character sequence '//' and stop at the end of
-the line.
+*Line comments* begin with the sequence of characters '//' and end with the
+last line separator character. Any character or sequence of characters
+between them is allowed but ignored.
 
-*Multi-line comments* start with the character sequence '/\*' and stop with
-the first subsequent character sequence '\*/'.
+*Multi-line comments* begin with the sequence of  characters '/\*' and end
+with the first subsequent sequence of characters '\*/'. Any character or
+sequence of characters between them is allowed but ignored.
 
-A comment cannot start inside a comment.
+This particularly means that comments cannot be nested.
 
 .. index::
    comment
    syntactic grammar
    multi-line comment
-   nested comment
 
 |
 
