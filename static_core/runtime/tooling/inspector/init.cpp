@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 
-#include "asio_server.h"
+#ifdef PANDA_TOOLING_ASIO
+#include "connection/asio/asio_server.h"
+#else
+#include "connection/ohos_ws/ohos_ws_server.h"
+#endif  // PANDA_TOOLING_ASIO
+
 #include "inspector.h"
 
 #include <cstdint>
@@ -23,11 +28,17 @@ namespace ark::tooling {
 class DebugInterface;
 }  // namespace ark::tooling
 
+#ifdef PANDA_TOOLING_ASIO
+using InspectorWebSocketServer = ark::tooling::inspector::AsioServer;
+#else
+using InspectorWebSocketServer = ark::tooling::inspector::OhosWsServer;
+#endif  // PANDA_TOOLING_ASIO
+
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static ark::Runtime::DebugSessionHandle g_debugSession;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static ark::tooling::inspector::AsioServer g_server;
+static InspectorWebSocketServer g_server;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static std::optional<ark::tooling::inspector::Inspector> g_inspector;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TOOLING_INSPECTOR_EVENT_LOOP_H
-#define PANDA_TOOLING_INSPECTOR_EVENT_LOOP_H
+#ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_EVENT_LOOP_H
+#define PANDA_TOOLING_INSPECTOR_CONNECTION_EVENT_LOOP_H
 
 #include "os/mutex.h"
 
@@ -25,9 +25,6 @@ class EventLoop {
 public:
     // Notify the running event loop to stop.
     bool Kill();
-
-    // Execute ready event handlers without blocking.
-    virtual bool Poll() = 0;
 
     // Run the event loop until paused.
     void Run();
@@ -53,4 +50,4 @@ private:
 };
 }  // namespace ark::tooling::inspector
 
-#endif  // PANDA_TOOLING_INSPECTOR_EVENT_LOOP_H
+#endif  // PANDA_TOOLING_INSPECTOR_CONNECTION_EVENT_LOOP_H

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "endpoint.h"
+#include "endpoint_base.h"
 
 #include "utils/json_parser.h"
 #include "utils/logger.h"
@@ -68,5 +68,22 @@ void EndpointBase::HandleMessage(const std::string &message)
     } else {
         LOG(INFO, DEBUGGER) << "Expected either 'method' or 'result' parameter";
     }
+}
+
+void EndpointBase::Call(const std::string &sessionId, std::optional<Id> id, const char *method,
+                        std::function<void(JsonObjectBuilder &)> &&params)
+{
+    Send([&sessionId, id, method, &params](JsonObjectBuilder &call) {
+        if (id) {
+            call.AddProperty("id", *id);
+        }
+
+        call.AddProperty("method", method);
+        call.AddProperty("params", std::move(params));
+
+        if (!sessionId.empty()) {
+            call.AddProperty("sessionId", sessionId);
+        }
+    });
 }
 }  // namespace ark::tooling::inspector

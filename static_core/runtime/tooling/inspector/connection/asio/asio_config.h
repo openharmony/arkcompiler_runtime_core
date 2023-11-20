@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TOOLING_INSPECTOR_ASIO_CONFIG_H
-#define PANDA_TOOLING_INSPECTOR_ASIO_CONFIG_H
+#ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_CONFIG_H
+#define PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_CONFIG_H
 
 #include "ws_logger.h"
 
@@ -44,4 +44,4 @@ struct AsioConfig : websocketpp::config::asio {
 // NOLINTEND(readability-identifier-naming)
 }  // namespace ark::tooling::inspector
 
-#endif  // PANDA_TOOLING_INSPECTOR_ASIO_CONFIG_H
+#endif  // PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_CONFIG_H

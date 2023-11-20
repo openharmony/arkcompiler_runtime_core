@@ -30,12 +30,10 @@ group("ark_packages") {
         "$ark_root/libziparchive:libarktsziparchive",
         "$ark_root/panda:arkts_bin",
         "$ark_root/runtime:libarkruntime",
+        "$ark_root/runtime/tooling/inspector:libarkinspector",
         "$ark_root/verification/verifier:verifier.config",
         "$ark_root/verification/verifier:verifier_bin",
       ]
-      if (!is_ohos) {
-        deps += [ "$ark_root/runtime/tooling/inspector:libarkinspector" ]
-      }
       if (enable_codegen) {
         deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
       }
@@ -72,7 +70,7 @@ group("ark_host_linux_tools_packages") {
       deps += [
         "$ark_root/compiler/tools/aotdump:ark_aotdump(${host_toolchain})",
         "$ark_root/compiler/tools/paoc:ark_aot(${host_toolchain})",
-        "$ark_root/disassembler:ark_disasm(${host_toolchain})",
+        "$ark_root/disassembler:arkts_disasm(${host_toolchain})",
         "$ark_root/static_linker:ark_link(${host_toolchain})",
       ]
     }
@@ -84,7 +82,7 @@ group("ark_host_windows_tools_packages") {
   if (host_os != "mac" && current_cpu != "arm" && !ark_standalone_build) {
     deps += [
       "$ark_root/assembler:arkts_asm(//build/toolchain/mingw:mingw_x86_64)",
-      "$ark_root/disassembler:ark_disasm(//build/toolchain/mingw:mingw_x86_64)",
+      "$ark_root/disassembler:arkts_disasm(//build/toolchain/mingw:mingw_x86_64)",
       "$ark_root/static_linker:ark_link(//build/toolchain/mingw:mingw_x86_64)",
     ]
   }
@@ -95,7 +93,7 @@ group("ark_host_mac_tools_packages") {
   if (host_os == "mac") {
     deps += [
       "$ark_root/assembler:arkts_asm(//build/toolchain/mac:clang_x64)",
-      "$ark_root/disassembler:ark_disasm(//build/toolchain/mac:clang_x64)",
+      "$ark_root/disassembler:arkts_disasm(//build/toolchain/mac:clang_x64)",
       "$ark_root/libpandabase:libarktsbase(//build/toolchain/mac:clang_x64)",
       "$ark_root/libpandafile:libarktsfile(//build/toolchain/mac:clang_x64)",
       "$ark_root/libziparchive:libarktsziparchive(//build/toolchain/mac:clang_x64)",

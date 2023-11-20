@@ -24,7 +24,8 @@
             "components": [
                 "ets_runtime",
                 "hilog",
-                "napi"
+                "napi",
+                "toolchain"
             ],
             "third_party": [
                 "bounds_checking_function",
