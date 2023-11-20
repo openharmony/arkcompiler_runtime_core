@@ -72,8 +72,7 @@ inline auto TypeToBuffer(const VecT &vec, std::vector<uint8_t> &buffer)
 }
 
 template <class UnMap>
-// NOLINTNEXTLINE(google-runtime-references)
-inline auto TypeToBuffer(const UnMap &map, std::vector<uint8_t> &buffer)
+auto TypeToBuffer(const UnMap &map, std::vector<uint8_t> &buffer)
     -> std::enable_if_t<is_hash_mappable_v<UnMap>, Expected<size_t, const char *>>
 {
     // pack size
@@ -82,21 +81,16 @@ inline auto TypeToBuffer(const UnMap &map, std::vector<uint8_t> &buffer)
         return ret;
     }
 
-    // At the moment, we can't use: [key, value]
-    // because clang-format-8 can't correctly detect the source code language.
-    // https://bugs.llvm.org/show_bug.cgi?id=37433
-    //
-    // NOTE(v.cherkashin): Fix this loop when we switch to clang-format-14.
-    for (const auto &it : map) {
+    for (const auto &[key, value] : map) {
         // pack key
-        auto k = TypeToBuffer(it.first, buffer);
+        auto k = TypeToBuffer(key, buffer);
         if (!k) {
             return k;
         }
         ret.Value() += k.Value();
 
         // pack value
-        auto v = TypeToBuffer(it.second, buffer);
+        auto v = TypeToBuffer(value, buffer);
         if (!v) {
             return v;
         }

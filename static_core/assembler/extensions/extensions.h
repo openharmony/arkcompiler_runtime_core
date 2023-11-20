@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_EXTENSIONS_H_
-#define PANDA_ASSEMBLER_EXTENSIONS_H_
+#ifndef PANDA_ASSEMBLER_EXTENSIONS_H
+#define PANDA_ASSEMBLER_EXTENSIONS_H
 
 #include <memory>
 #include <optional>
@@ -42,4 +42,4 @@ public:
 
 }  // namespace panda::pandasm::extensions
 
-#endif  // PANDA_ASSEMBLER_EXTENSIONS_H_
+#endif  // PANDA_ASSEMBLER_EXTENSIONS_H

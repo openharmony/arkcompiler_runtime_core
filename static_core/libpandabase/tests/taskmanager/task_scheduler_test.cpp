@@ -436,7 +436,7 @@ TEST_F(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
     TaskQueueInterface *jit_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::JIT, VMType::STATIC_VM, QUEUE_PRIORITY);
     // Fill queues with tasks that increment counter with its type.
     constexpr size_t COUNT_OF_TASK = 10'000;
-    std::array<std::atomic_size_t, 3> counters = {0, 0, 0};
+    std::array<std::atomic_size_t, 3U> counters = {0, 0, 0};
     for (size_t i = 0; i < COUNT_OF_TASK; i++) {
         gc_queue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [&counters]() {
             constexpr size_t GC_BACKGROUND_COUNTER = 0;

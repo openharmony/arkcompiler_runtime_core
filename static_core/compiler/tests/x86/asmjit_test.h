@@ -12,3 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef PANDA_COMPILER_TESTS_X86_ASMJIT_TEST_H
+#define PANDA_COMPILER_TESTS_X86_ASMJIT_TEST_H
+#endif  // PANDA_COMPILER_TESTS_X86_ASMJIT_TEST_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_META_H_
-#define PANDA_ASSEMBLER_META_H_
+#ifndef PANDA_ASSEMBLER_META_H
+#define PANDA_ASSEMBLER_META_H
 
 #include <memory>
 #include <stack>
@@ -593,4 +593,4 @@ protected:
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_META_H_
+#endif  // PANDA_ASSEMBLER_META_H

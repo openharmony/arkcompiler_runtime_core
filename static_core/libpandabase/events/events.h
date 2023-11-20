@@ -13,4 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_LIBPANDABASE_EVENTS_EVENTS_H
+#define PANDA_LIBPANDABASE_EVENTS_EVENTS_H
+
 #include "events_gen.h"
+
+#endif  // PANDA_LIBPANDABASE_EVENTS_EVENTS_H
