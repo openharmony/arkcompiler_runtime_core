@@ -171,6 +171,11 @@ function process_manifest
 
         local lib_dir="$ARK_THIRD_PARTY_DIR/$lib_name"
 
+        if [[ -d "$lib_dir" && -z "$REPO_NAME" ]] ; then
+            echo "$MSG_PREFIX $lib_dir already exists. Skip download."
+            continue
+        fi;
+
         if [[ "$commit_type" == "branch" || "$commit_type" == "tag" ]] ; then
             clone_repository_branch "$lib_repo" "$lib_dir" "$commit_id"
         elif [[ "$commit_type" == "commit" ]] ; then
@@ -229,9 +234,8 @@ if [[ "$ARK_THIRD_PARTY_FORCE_CLONE" == "yes" ]] ; then
 fi
 
 if [[ -d "$ARK_THIRD_PARTY_DIR" && -z "$REPO_NAME" ]] ; then
-    echo "$MSG_PREFIX Third-party dependencies are found in $ARK_THIRD_PARTY_DIR, exiting"
-    echo "$MSG_PREFIX If you need to update, restart this script with --force-clone"
-    exit 0
+    echo "$MSG_PREFIX Third-party dependencies are found in $ARK_THIRD_PARTY_DIR"
+    echo "$MSG_PREFIX If you need to update all, restart this script with --force-clone"
 fi
 
 if [[ -n "$REPO_NAME" ]] ; then
