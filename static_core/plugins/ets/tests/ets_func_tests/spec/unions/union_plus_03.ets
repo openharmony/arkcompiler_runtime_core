@@ -24,6 +24,6 @@ type Margin = number | string
 function main(): void {
     let a: Margin = 5
     let b: Margin = " px"
-    let c: Margin = a + b
-    assert (c as string) == "5 px"
+    let c: Margin = (a as number) + (b as string)
+    assert c == "5 px"
 }

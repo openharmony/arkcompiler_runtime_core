@@ -14,22 +14,15 @@
  */
 
 /*---
-desc: >-
-    03.08.11 Union types
-name: 03.types/08.reference_types/03.08.11.union_types/union_compare_03
-tags: []
+desc: 03.08.11 Union types
+name: 03.types/08.reference_types/03.08.11.union_types/union_binary_n_01
+tags: [negative, compile-only]
 ---*/
 type Margin = number | string
-
-class A {}
 
 function main(): void {
     let a: Margin = 5
     let b: Margin = 6
-    assert (a as number) < b as number
-    assert b as number > a as number
-    
-    let c: Margin = 5
-    assert a as number <= c as number
-    assert c as number >= a as number
+    let c: Margin = (a as number) * b
+    assert c == 30
 }

@@ -119,6 +119,8 @@ spec/unions/union01.ets
 spec/unions/union_assignment_n_01.ets
 spec/unions/union_assignment_n_02.ets
 spec/unions/union_assignment_n_03.ets
+spec/unions/union_binary_n_01.ets
+spec/unions/union_binary_n_02.ets
 spec/unions/union_cast_n_01.ets
 spec/unions/union_cast_n_02.ets
 spec/unions/union_cast_n_03.ets
@@ -130,8 +132,11 @@ spec/unions/union_compare_n_05.ets
 spec/unions/union_compare_n_06.ets
 spec/unions/union_compare_n_07.ets
 spec/unions/union_compare_n_08.ets
+spec/unions/union_compare_n_09.ets
 spec/unions/union_param_n_01.ets
 spec/unions/union_param_n_02.ets
+spec/unions/union_plus_n_01.ets
+spec/unions/union_plus_n_02.ets
 spec/unions/union_return_n_01.ets
 spec/unions/union_return_n_02.ets
 spec/unions/union_return_n_03.ets
@@ -139,47 +144,11 @@ spec/unions/union_return_n_04.ets
 spec/unions/union_return_n_05.ets
 spec/unions/union_return_n_06.ets
 spec/unions/union_return_n_07.ets
-### Issue 14158
-spec/unions/union_compare_01.ets
 ### Issue 14165
 spec/unions/union_compare_02_01.ets
 spec/unions/union_compare_02_02.ets
 spec/unions/union_compare_02_03.ets
 spec/unions/union_compare_02_04.ets
-### Issue 14188
-spec/unions/union_binary_01.ets
-spec/unions/union_binary_02.ets
-spec/unions/union_binary_03.ets
-spec/unions/union_plus_01.ets
-spec/unions/union_plus_02.ets
-spec/unions/union_plus_03.ets
-### Issue 14191
-spec/unions/union_param_01.ets
-spec/unions/union_param_02.ets
-spec/unions/union_param_05.ets
-spec/unions/union_param_06.ets
-### Issue 14217
-spec/unions/union_return_01_01.ets
-spec/unions/union_return_01_02.ets
-spec/unions/union_return_01_03.ets
-spec/unions/union_return_02.ets
-spec/unions/union_return_03.ets
-spec/unions/union_return_04.ets
-spec/unions/union_return_05.ets
-spec/unions/union_return_06.ets
-### Issue 14439
-spec/unions/union_assignment_01.ets
-spec/unions/union_assignment_02.ets
-spec/unions/union_assignment_04.ets
-spec/unions/union_assignment_07.ets
-spec/unions/union_cast_01.ets
-spec/unions/union_cast_02.ets
-spec/unions/union_cast_03.ets
-spec/unions/union_cast_05.ets
-spec/unions/union_cast_06.ets
-### Issue 14441
-spec/unions/union_compare_03.ets
-spec/unions/union_compare_04.ets 
 ### Issue 14259
 spec/unions/union_assignment_08.ets
 spec/unions/union_assignment_09.ets
@@ -189,6 +158,7 @@ spec/unions/union_param_10_01.ets
 spec/unions/union_param_10_02.ets
 spec/unions/union_param_10_03.ets
 ### End of Unions
+
 ### Feature: Rest Params
 ### Issue 14111
 spec/rest-params/Issue14111.ets

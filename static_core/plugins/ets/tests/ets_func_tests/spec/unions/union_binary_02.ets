@@ -24,6 +24,6 @@ type Margin = number | string
 function main(): void {
     let a: Margin = 7
     let b: Margin = 5
-    let c: Margin = a % b
+    let c: Margin = (a as number) % (b as number)
     assert (c as number) == 2
 }
