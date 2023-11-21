@@ -204,6 +204,13 @@ add_dependencies(tests core_tests)
 
 include(cmake/Testing.cmake)
 
+#-----Test code quality---------------------------------------------------------
+add_custom_target(es2panda-pre-test
+                  COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/tools/es2panda/scripts/es2panda_pre_test.py --working-dir ${PANDA_ROOT} --build-root ${CMAKE_CURRENT_BINARY_DIR}
+                  COMMENT "Run parser, runtime, ets-cts, function test cases, clang-tidy and clang-format."
+                  JOB_POOL console
+                )
+
 # ----- Template Based Generator -----------------------------------------------
 include(cmake/TemplateBasedGen.cmake)
 
