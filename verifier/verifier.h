@@ -36,7 +36,8 @@ private:
     void GetLiteralIds();
     bool CheckConstantPool();
     bool VerifyMethodId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
-    bool VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
+    bool VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id,
+                         size_t idx);
     bool VerifyStringId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
     bool CheckConstantPoolInfo(const panda_file::File::EntityId &method_id);
 

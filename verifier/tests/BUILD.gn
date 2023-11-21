@@ -30,14 +30,7 @@ verifier_test_deps = [
 
 verifier_test_js_files = [
   "test_checksum",
-  "test_checksum_bit",
-  "test_constant_pool1",
-  "test_constant_pool2",
-  "test_constant_pool3",
-  "test_constant_pool4",
-  "test_constant_pool5",
-  "test_constant_pool6",
-  "test_constant_pool7",
+  "test_constant_pool",
 ]
 
 test_js_path = "//arkcompiler/runtime_core/verifier/tests/js/"
@@ -59,6 +52,7 @@ host_unittest_action("VerifierTest") {
   module_out_path = module_output_path
 
   sources = [
+    "utils.cpp",
     "verify_checksum_test.cpp",
     "verify_constant_pool_tests.cpp",
   ]

@@ -14,7 +14,7 @@
  */
 
 let a = aaa;
-function A() {
+function setValue() {
   let b = a;
   return b;
 }
