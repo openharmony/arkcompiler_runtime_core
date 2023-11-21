@@ -234,13 +234,13 @@ class TestGCOld {
 
         console.println("Initialization complete...");
 
-        let start : long = Date.now();
+        let start : long = Date.now() as long;
 
         for(let step = 0; step < TestGCOld.steps; step++) {
             TestGCOld.executeStep(TestGCOld.MEG);
         }
 
-        let end : long = Date.now();
+        let end : long = Date.now() as long;
         let secs : float = ((end-start)/1000.0) as float;
         
         console.println("\nTook " + secs + " sec in steady state.");

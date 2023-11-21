@@ -927,7 +927,7 @@ intrinsics:
     method_name: now
     static: true
     signature:
-      ret: i64
+      ret: f64
       args: []
     impl: panda::ets::intrinsics::EscompatDateNow
     clear_flags: [ ]

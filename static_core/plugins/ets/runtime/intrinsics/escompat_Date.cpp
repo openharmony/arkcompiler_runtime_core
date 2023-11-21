@@ -24,7 +24,7 @@ namespace panda::ets::intrinsics {
 constexpr const int32_t MINS_IN_HOUR = 60;
 constexpr const int32_t MS_IN_SECOND = 1000;
 
-extern "C" int64_t EscompatDateNow()
+extern "C" double EscompatDateNow()
 {
     auto now = std::chrono::system_clock::now();
     auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);

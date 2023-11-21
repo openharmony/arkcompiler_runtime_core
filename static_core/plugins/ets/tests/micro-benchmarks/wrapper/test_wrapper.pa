@@ -17,7 +17,7 @@
 .record std.core.Console <external>
 .record std.core.void <external>
 .function std.core.void std.core.Console.println(std.core.Console a0, f64 a1) <external>
-.function i64 escompat.Date.now() <external>
+.function f64 escompat.Date.now() <external>
 
 .function void test_loop(A a0, B a1, i32 a2) {
     movi v0, 0
@@ -38,11 +38,10 @@ exit:
     return.void
 }
 
-.function void print_test_time(i64 a0) {
+.function void print_test_time(f64 a0) {
     call.short escompat.Date.now
-    sub2.64 a0
+    fsub2.64 a0
     fmovi.64 v0, 1000
-    i64tof64
     fdiv2.64 v0
     sta.64 v1
     newobj v0, std.core.Console
