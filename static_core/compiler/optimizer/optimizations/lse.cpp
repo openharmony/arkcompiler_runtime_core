@@ -860,6 +860,9 @@ const char *Lse::GetEliminationCode(Inst *inst, Inst *origin)
         if (origin->IsStore()) {
             return "SS";
         }
+        if (origin->IsPhi()) {
+            return "SP";
+        }
     }
     UNREACHABLE();
 }
