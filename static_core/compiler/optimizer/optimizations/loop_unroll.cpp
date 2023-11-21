@@ -254,7 +254,12 @@ void NormalizeControlFlow(BasicBlock *edge, const BasicBlock *loop_header)
         edge->SwapTrueFalseSuccessors<true>();
     }
     auto cmp = if_imm->GetInput(0).GetInst()->CastToCompare();
-    ASSERT(cmp->GetBasicBlock() == edge);
+    if (!cmp->HasSingleUser()) {
+        auto new_cmp = cmp->Clone(edge->GetGraph());
+        if_imm->InsertBefore(new_cmp);
+        if_imm->SetInput(0, new_cmp);
+        cmp = new_cmp->CastToCompare();
+    }
     if (edge->GetFalseSuccessor() == loop_header) {
         auto inversed_cc = GetInverseConditionCode(cmp->GetCc());
         cmp->SetCc(inversed_cc);

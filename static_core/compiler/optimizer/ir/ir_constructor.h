@@ -190,6 +190,17 @@ public:
         return *this;
     }
 
+    IrConstructor &AddNullptrInst(int id)
+    {
+        ASSERT_DO(inst_map_.find(id) == inst_map_.end(),
+                  std::cerr << "Instruction with same Id " << id << "already exists");
+        auto inst = graph_->GetOrCreateNullPtr();
+        inst->SetId(id);
+        inst_map_[id] = inst;
+        current_inst_ = {id, inst};
+        return *this;
+    }
+
     IrConstructor &Succs(std::vector<int> succs)
     {
         bb_succs_map_.emplace_back(CurrentBbIndex(), std::move(succs));
@@ -1454,6 +1465,8 @@ private:
 #define CONSTANT(ID, VALUE) builder_->NewConstant(ID, VALUE)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PARAMETER(ID, ARG_NUM) builder_->NewParameter(ID, ARG_NUM)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define NULLPTR(ID) builder_->AddNullptrInst(ID)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INS(INDEX) builder_->GetInst(INDEX)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
