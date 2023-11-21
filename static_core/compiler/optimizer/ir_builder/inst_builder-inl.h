@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -148,69 +148,87 @@ void InstBuilder::BuildInitClassInstForCallStatic(RuntimeInterface::MethodPtr me
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 template <Opcode OPCODE>
+CallInst *InstBuilder::BuildCallStaticInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc,
+                                           Inst **resolver, uint32_t class_id)
+{
+    constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::METHOD;
+    CallInst *call = nullptr;
+    if (method == nullptr || (runtime_->IsMethodStatic(GetMethod(), method_id) && class_id == 0) || ForceUnresolved() ||
+        (OPCODE == Opcode::CallLaunchStatic && graph_->IsAotMode())) {
+        ResolveStaticInst *resolve_static = graph_->CreateInstResolveStatic(DataType::POINTER, pc, method_id, nullptr);
+        *resolver = resolve_static;
+        if constexpr (OPCODE == Opcode::CallStatic) {
+            call = graph_->CreateInstCallResolvedStatic(GetMethodReturnType(method_id), pc, method_id);
+        } else {
+            call = graph_->CreateInstCallResolvedLaunchStatic(DataType::VOID, pc, method_id);
+        }
+        if (!graph_->IsAotMode() && !graph_->IsBytecodeOptimizer()) {
+            runtime_->GetUnresolvedTypes()->AddTableSlot(GetMethod(), method_id, SLOT_KIND);
+        }
+    } else {
+        if constexpr (OPCODE == Opcode::CallStatic) {
+            call = graph_->CreateInstCallStatic(GetMethodReturnType(method_id), pc, method_id, method);
+        } else {
+            call = graph_->CreateInstCallLaunchStatic(DataType::VOID, pc, method_id, method);
+        }
+    }
+    return call;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <Opcode OPCODE>
+CallInst *InstBuilder::BuildCallVirtualInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc,
+                                            Inst **resolver)
+{
+    constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::VIRTUAL_METHOD;
+    CallInst *call = nullptr;
+    ASSERT(!runtime_->IsMethodStatic(GetMethod(), method_id));
+    if (method != nullptr && (runtime_->IsInterfaceMethod(method) || graph_->IsAotNoChaMode())) {
+        ResolveVirtualInst *resolve_virtual =
+            graph_->CreateInstResolveVirtual(DataType::POINTER, pc, method_id, method);
+        *resolver = resolve_virtual;
+        if constexpr (OPCODE == Opcode::CallVirtual) {
+            call = graph_->CreateInstCallResolvedVirtual(GetMethodReturnType(method_id), pc, method_id, method);
+        } else {
+            call = graph_->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc, method_id, method);
+        }
+    } else if (method == nullptr || ForceUnresolved()) {
+        ResolveVirtualInst *resolve_virtual =
+            graph_->CreateInstResolveVirtual(DataType::POINTER, pc, method_id, nullptr);
+        *resolver = resolve_virtual;
+        if constexpr (OPCODE == Opcode::CallVirtual) {
+            call = graph_->CreateInstCallResolvedVirtual(GetMethodReturnType(method_id), pc, method_id);
+        } else {
+            call = graph_->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc, method_id);
+        }
+        if (!graph_->IsAotMode() && !graph_->IsBytecodeOptimizer()) {
+            runtime_->GetUnresolvedTypes()->AddTableSlot(GetMethod(), method_id, SLOT_KIND);
+        }
+    } else {
+        ASSERT(method != nullptr);
+        if constexpr (OPCODE == Opcode::CallVirtual) {
+            call = graph_->CreateInstCallVirtual(GetMethodReturnType(method_id), pc, method_id, method);
+        } else {
+            call = graph_->CreateInstCallLaunchVirtual(DataType::VOID, pc, method_id, method);
+        }
+    }
+    return call;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <Opcode OPCODE>
 CallInst *InstBuilder::BuildCallInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc, Inst **resolver,
-                                     uint32_t class_id)
+                                     [[maybe_unused]] uint32_t class_id)
 {
     ASSERT(resolver != nullptr);
-    constexpr bool IS_STATIC = (OPCODE == Opcode::CallStatic || OPCODE == Opcode::CallLaunchStatic);
-    constexpr auto SLOT_KIND =
-        IS_STATIC ? UnresolvedTypesInterface::SlotKind::METHOD : UnresolvedTypesInterface::SlotKind::VIRTUAL_METHOD;
     CallInst *call = nullptr;
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
     if constexpr (OPCODE == Opcode::CallStatic || OPCODE == Opcode::CallLaunchStatic) {
-        if (method == nullptr || (runtime_->IsMethodStatic(GetMethod(), method_id) && class_id == 0) ||
-            ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && graph_->IsAotMode())) {
-            ResolveStaticInst *resolve_static =
-                graph_->CreateInstResolveStatic(DataType::POINTER, pc, method_id, nullptr);
-            *resolver = resolve_static;
-            if constexpr (OPCODE == Opcode::CallStatic) {
-                call = graph_->CreateInstCallResolvedStatic(GetMethodReturnType(method_id), pc, method_id);
-            } else {
-                call = graph_->CreateInstCallResolvedLaunchStatic(DataType::VOID, pc, method_id);
-            }
-            if (!graph_->IsAotMode() && !graph_->IsBytecodeOptimizer()) {
-                runtime_->GetUnresolvedTypes()->AddTableSlot(GetMethod(), method_id, SLOT_KIND);
-            }
-        } else {
-            if constexpr (OPCODE == Opcode::CallStatic) {
-                call = graph_->CreateInstCallStatic(GetMethodReturnType(method_id), pc, method_id, method);
-            } else {
-                call = graph_->CreateInstCallLaunchStatic(DataType::VOID, pc, method_id, method);
-            }
-        }
+        call = BuildCallStaticInst<OPCODE>(method, method_id, pc, resolver, class_id);
     }
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
     if constexpr (OPCODE == Opcode::CallVirtual || OPCODE == Opcode::CallLaunchVirtual) {
-        ASSERT(!runtime_->IsMethodStatic(GetMethod(), method_id));
-        if (method != nullptr && (runtime_->IsInterfaceMethod(method) || graph_->IsAotNoChaMode())) {
-            ResolveVirtualInst *resolve_virtual =
-                graph_->CreateInstResolveVirtual(DataType::POINTER, pc, method_id, method);
-            *resolver = resolve_virtual;
-            if constexpr (OPCODE == Opcode::CallVirtual) {
-                call = graph_->CreateInstCallResolvedVirtual(GetMethodReturnType(method_id), pc, method_id, method);
-            } else {
-                call = graph_->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc, method_id, method);
-            }
-        } else if (method == nullptr || ForceUnresolved()) {
-            ResolveVirtualInst *resolve_virtual =
-                graph_->CreateInstResolveVirtual(DataType::POINTER, pc, method_id, nullptr);
-            *resolver = resolve_virtual;
-            if constexpr (OPCODE == Opcode::CallVirtual) {
-                call = graph_->CreateInstCallResolvedVirtual(GetMethodReturnType(method_id), pc, method_id);
-            } else {
-                call = graph_->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc, method_id);
-            }
-            if (!graph_->IsAotMode() && !graph_->IsBytecodeOptimizer()) {
-                runtime_->GetUnresolvedTypes()->AddTableSlot(GetMethod(), method_id, SLOT_KIND);
-            }
-        } else {
-            ASSERT(method != nullptr);
-            if constexpr (OPCODE == Opcode::CallVirtual) {
-                call = graph_->CreateInstCallVirtual(GetMethodReturnType(method_id), pc, method_id, method);
-            } else {
-                call = graph_->CreateInstCallLaunchVirtual(DataType::VOID, pc, method_id, method);
-            }
-        }
+        call = BuildCallVirtualInst<OPCODE>(method, method_id, pc, resolver);
     }
     if (UNLIKELY(call == nullptr)) {
         UNREACHABLE();
@@ -962,6 +980,27 @@ void InstBuilder::BuildLoadArray(const BytecodeInstruction *bc_inst, DataType::T
 }
 
 template <typename T>
+void InstBuilder::BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bc_inst, DataType::Type type,
+                                                  const pandasm::LiteralArray &lit_array, NewArrayInst *array_inst)
+{
+    auto method = GetGraph()->GetMethod();
+    auto array_size = lit_array.literals.size();
+    for (size_t i = 0; i < array_size; i++) {
+        auto index_inst = graph_->FindOrCreateConstant(i);
+        auto save = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
+        auto load_string_inst = GetGraph()->CreateInstLoadString(
+            DataType::REFERENCE, GetPc(bc_inst->GetAddress()), save, std::get<T>(lit_array.literals[i].value), method);
+        AddInstruction(save);
+        AddInstruction(load_string_inst);
+        if (GetGraph()->IsDynamicMethod()) {
+            BuildCastToAnyString(bc_inst);
+        }
+
+        BuildStoreArrayInst<false>(bc_inst, type, array_inst, index_inst, load_string_inst);
+    }
+}
+
+template <typename T>
 void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bc_inst, DataType::Type type,
                                             const pandasm::LiteralArray &lit_array)
 {
@@ -1017,18 +1056,27 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bc_inst, 
     ASSERT(GetRuntime()->CheckStoreArray(array_class, GetRuntime()->GetStringClass(method)));
 
     // Special case for string array
-    for (size_t i = 0; i < array_size; i++) {
-        auto index_inst = graph_->FindOrCreateConstant(i);
-        auto save = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
-        auto load_string_inst = GetGraph()->CreateInstLoadString(
-            DataType::REFERENCE, GetPc(bc_inst->GetAddress()), save, std::get<T>(lit_array.literals[i].value), method);
-        AddInstruction(save);
-        AddInstruction(load_string_inst);
-        if (GetGraph()->IsDynamicMethod()) {
-            BuildCastToAnyString(bc_inst);
-        }
+    BuildUnfoldLoadConstStringArray<T>(bc_inst, type, lit_array, array_inst);
+}
 
-        BuildStoreArrayInst<false>(bc_inst, type, array_inst, index_inst, load_string_inst);
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildLoadConstStringArray(const BytecodeInstruction *bc_inst)
+{
+    auto literal_array_idx = bc_inst->GetId(0).AsIndex();
+    auto lit_array = GetRuntime()->GetLiteralArray(GetMethod(), literal_array_idx);
+    auto array_size = lit_array.literals.size();
+    ASSERT(array_size > 0);
+    if (array_size > OPTIONS.GetCompilerUnfoldConstArrayMaxSize()) {
+        // Create LoadConstArray instruction for String array, because we calls runtime for the case.
+        auto save_state = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
+        auto method = GetGraph()->GetMethod();
+        auto inst = GetGraph()->CreateInstLoadConstArray(DataType::REFERENCE, GetPc(bc_inst->GetAddress()), save_state,
+                                                         literal_array_idx, method);
+        AddInstruction(save_state);
+        AddInstruction(inst);
+        UpdateDefinition(bc_inst->GetVReg(0), inst);
+    } else {
+        BuildUnfoldLoadConstArray<uint32_t>(bc_inst, DataType::REFERENCE, lit_array);
     }
 }
 
@@ -1037,10 +1085,6 @@ void InstBuilder::BuildLoadConstArray(const BytecodeInstruction *bc_inst)
 {
     auto literal_array_idx = bc_inst->GetId(0).AsIndex();
     auto lit_array = GetRuntime()->GetLiteralArray(GetMethod(), literal_array_idx);
-
-    auto array_size = lit_array.literals.size();
-    ASSERT(array_size > 0);
-
     // Unfold LoadConstArray instruction
     auto tag = lit_array.literals[0].tag;
     switch (tag) {
@@ -1077,18 +1121,7 @@ void InstBuilder::BuildLoadConstArray(const BytecodeInstruction *bc_inst)
             break;
         }
         case panda_file::LiteralTag::ARRAY_STRING: {
-            if (array_size > OPTIONS.GetCompilerUnfoldConstArrayMaxSize()) {
-                // Create LoadConstArray instruction for String array, because we calls runtime for the case.
-                auto save_state = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
-                auto method = GetGraph()->GetMethod();
-                auto inst = GetGraph()->CreateInstLoadConstArray(DataType::REFERENCE, GetPc(bc_inst->GetAddress()),
-                                                                 save_state, literal_array_idx, method);
-                AddInstruction(save_state);
-                AddInstruction(inst);
-                UpdateDefinition(bc_inst->GetVReg(0), inst);
-            } else {
-                BuildUnfoldLoadConstArray<uint32_t>(bc_inst, DataType::REFERENCE, lit_array);
-            }
+            BuildLoadConstStringArray(bc_inst);
             break;
         }
         default: {
@@ -1330,7 +1363,6 @@ void InstBuilder::BuildInitObject(const BytecodeInstruction *bc_inst, bool is_ra
 {
     auto method_id = GetRuntime()->ResolveMethodIndex(GetMethod(), bc_inst->GetId(0).AsIndex());
     auto type_id = GetRuntime()->GetClassIdForMethod(GetMethod(), method_id);
-
     if (GetRuntime()->IsArrayClass(GetMethod(), type_id)) {
         if (GetGraph()->IsBytecodeOptimizer()) {
             BuildInitObjectMultiDimensionalArray(bc_inst, is_range);
@@ -1514,7 +1546,6 @@ void InstBuilder::BuildCastToAnyNumber(const BytecodeInstruction *bc_inst)
 {
     auto input = GetDefinitionAcc();
     auto type = input->GetType();
-
     if (input->IsConst() && !DataType::IsFloatType(type)) {
         auto const_insn = input->CastToConstant();
         if (const_insn->GetType() == DataType::INT64) {

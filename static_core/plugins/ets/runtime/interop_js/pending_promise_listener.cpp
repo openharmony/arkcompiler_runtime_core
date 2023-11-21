@@ -37,7 +37,7 @@ void PendingPromiseListener::OnPromiseStateChanged(EtsHandle<EtsPromise> &promis
     auto on_changed_proc = [&]() { OnPromiseStateChangedImpl(promise); };
 
     if (EtsCoroutine::GetCurrent() != main_coro) {
-        // TODO(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
+        // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
         main_coro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(&on_changed_proc, cur_ctx);
     } else {
         on_changed_proc();

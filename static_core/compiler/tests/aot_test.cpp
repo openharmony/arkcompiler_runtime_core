@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,7 +144,7 @@ TEST_F(AotTest, PaocLocation)
     static const std::string PANDA_FILE_PATH = LOCATION + "/" + panda_fname.GetFileName();
 
     auto source = R"(
-        .function u32 add(u64 a0, u64 a1){
+        .function u32 add(u64 a0, u64 a1) {
             add a0, a1
             return
         }
@@ -183,7 +183,7 @@ TEST_F(AotTest, PaocLocation)
 TEST_F(AotTest, BuildAndLoad)
 {
     if (RUNTIME_ARCH == Arch::AARCH32) {
-        // TODO(msherstennikov): for some reason dlopen cannot open aot file in qemu-arm
+        // NOTE(msherstennikov): for some reason dlopen cannot open aot file in qemu-arm
         return;
     }
     uint32_t tid = os::thread::GetCurrentThreadId();
@@ -527,7 +527,7 @@ TEST_F(AotTest, FileManagerLoadAbc)
 TEST_F(AotTest, FileManagerLoadAn)
 {
     if (RUNTIME_ARCH == Arch::AARCH32) {
-        // TODO(msherstennikov): for some reason dlopen cannot open aot file in qemu-arm
+        // NOTE(msherstennikov): for some reason dlopen cannot open aot file in qemu-arm
         return;
     }
     uint32_t tid = os::thread::GetCurrentThreadId();

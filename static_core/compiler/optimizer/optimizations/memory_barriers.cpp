@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,7 +247,7 @@ void OptimizeMemoryBarriers::VisitNullCheck(GraphVisitor *v, Inst *inst)
     static_cast<OptimizeMemoryBarriers *>(v)->CheckInput(inst->GetInput(0).GetInst());
     auto nc = static_cast<NullCheckInst *>(inst);
     auto graph = nc->GetBasicBlock()->GetGraph();
-    // TODO (pishin) support for arm32
+    // NOTE (pishin) support for arm32
     if (graph->GetArch() == Arch::AARCH32) {
         return;
     }

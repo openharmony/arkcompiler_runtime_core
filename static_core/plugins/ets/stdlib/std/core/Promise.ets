@@ -74,9 +74,9 @@ export final class Promise<T> {
         let fn: () => void = (): void => {
             try {
                 if (thisPromise.state == Promise.STATE_RESOLVED) {
-                    promise.resolveImpl(onFulfilled(thisPromise.value));
+                    promise.resolveImpl(onFulfilled(thisPromise.value!));
                 } else {
-                    promise.rejectImpl(thisPromise.value);
+                    promise.rejectImpl(thisPromise.value!);
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -97,9 +97,9 @@ export final class Promise<T> {
         let fn: () => void = (): void => {
             try {
                 if (thisPromise.state == Promise.STATE_RESOLVED) {
-                    promise.resolveImpl(onFulfilled(thisPromise.value));
+                    promise.resolveImpl(onFulfilled(thisPromise.value!));
                 } else {
-                    promise.rejectImpl(onRejected(thisPromise.value));
+                    promise.rejectImpl(onRejected(thisPromise.value!));
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -142,9 +142,9 @@ export final class Promise<T> {
             try {
                 onFinally();
                 if (thisPromise.state == Promise.STATE_RESOLVED) {
-                    promise.resolveImpl(thisPromise.value);
+                    promise.resolveImpl(thisPromise.value!);
                 } else {
-                    promise.rejectImpl(thisPromise.value);
+                    promise.rejectImpl(thisPromise.value!);
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -171,7 +171,7 @@ export final class Promise<T> {
         return p;
     }
 
-    private static pushToQueue(job: Object, queue: Object[]): Object[] {
+    private static pushToQueue(job: Object, queue: Object[] | null): Object[] {
         let oldLength = 0;
         if (queue != null) {
             oldLength = queue.length;
@@ -198,10 +198,10 @@ export final class Promise<T> {
     // 1. Reference fields
     // 2. Primitive fields in mostly size decreasing order
     // filling alignment holes
-    private value: T;
-    private thenQueue: Object[];
-    private catchQueue: Object[];
-    private linkedPromise: Object;
+    private value: T | null = null;
+    private thenQueue: Object[] | null = null;;
+    private catchQueue: Object[] | null = null;
+    private linkedPromise: Object | null = null;
     private eventPtr: long;
     private padding0: int;
     private state: int = Promise.STATE_PENDING;

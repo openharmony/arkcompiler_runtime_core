@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ Licm::Licm(Graph *graph, uint32_t hoist_limit)
 {
 }
 
-// TODO (a.popov) Use `LoopTransform` base class similarly `LoopUnroll`, `LoopPeeling`
+// NOTE (a.popov) Use `LoopTransform` base class similarly `LoopUnroll`, `LoopPeeling`
 bool Licm::RunImpl()
 {
     if (!GetGraph()->GetAnalysis<LoopAnalyzer>().IsValid()) {
@@ -108,66 +108,37 @@ bool AllInputsDominate(Inst *inst, Inst *dom)
     return true;
 }
 
-/*
- * Iterate over all instructions in the loop and move hoistable instructions to the loop preheader
- */
-void Licm::VisitLoop(Loop *loop)
+void Licm::TryAppendHoistableInst(Inst *inst, BasicBlock *block, Loop *loop)
 {
-    auto marker_holder = MarkerHolder(GetGraph());
-    marker_hoist_inst_ = marker_holder.GetMarker();
-    hoistable_instructions_.clear();
-    // Collect instruction, which can be hoisted
-    for (auto block : loop->GetBlocks()) {
-        ASSERT(block->GetLoop() == loop);
-        for (auto inst : block->InstsSafe()) {
-            if (IsInstHoistable(inst)) {
-                if (hoisted_inst_count_ >= hoist_limit_) {
-                    COMPILER_LOG(DEBUG, LICM_OPT)
-                        << "Limit is exceeded, Can't hoist instruction with id = " << inst->GetId();
-                    continue;
-                }
-                if (inst->IsResolver()) {
-                    // If it is not "do-while" or "while(true)" loops then the resolver
-                    // can not be hoisted out as it might perform class loading/initialization.
-                    if (block != loop->GetHeader() && loop->GetHeader()->IsMarked(marker_loop_exit_)) {
-                        COMPILER_LOG(DEBUG, LICM_OPT)
-                            << "Header is a loop exit, Can't hoist (resolver) instruction with id = " << inst->GetId();
-                        continue;
-                    }
-                    // Don't increment hoisted instruction count until check
-                    // if there is another suitable SaveState for the resolver.
-                    hoistable_instructions_.push_back(inst);
-                    inst->SetMarker(marker_hoist_inst_);
-                } else {
-                    COMPILER_LOG(DEBUG, LICM_OPT) << "Hoist instruction with id = " << inst->GetId();
-                    hoistable_instructions_.push_back(inst);
-                    inst->SetMarker(marker_hoist_inst_);
-                    hoisted_inst_count_++;
-                }
-            }
+    if (hoisted_inst_count_ >= hoist_limit_) {
+        COMPILER_LOG(DEBUG, LICM_OPT) << "Limit is exceeded, Can't hoist instruction with id = " << inst->GetId();
+        return;
+    }
+    if (inst->IsResolver()) {
+        // If it is not "do-while" or "while(true)" loops then the resolver
+        // can not be hoisted out as it might perform class loading/initialization.
+        if (block != loop->GetHeader() && loop->GetHeader()->IsMarked(marker_loop_exit_)) {
+            COMPILER_LOG(DEBUG, LICM_OPT)
+                << "Header is a loop exit, Can't hoist (resolver) instruction with id = " << inst->GetId();
+            return;
         }
+        // Don't increment hoisted instruction count until check
+        // if there is another suitable SaveState for the resolver.
+        hoistable_instructions_.push_back(inst);
+        inst->SetMarker(marker_hoist_inst_);
+    } else {
+        COMPILER_LOG(DEBUG, LICM_OPT) << "Hoist instruction with id = " << inst->GetId();
+        hoistable_instructions_.push_back(inst);
+        inst->SetMarker(marker_hoist_inst_);
+        hoisted_inst_count_++;
     }
-    auto pre_header = loop->GetPreHeader();
-    ASSERT(pre_header != nullptr);
-    auto header = loop->GetHeader();
-    if (pre_header->GetSuccsBlocks().size() > 1) {
-        ASSERT(GetGraph()->IsAnalysisValid<DominatorsTree>());
-        // Create new pre-header with single successor: loop header
-        auto new_pre_header = pre_header->InsertNewBlockToSuccEdge(header);
-        pre_header->GetLoop()->AppendBlock(new_pre_header);
-        // Fix Dominators info
-        auto &dom_tree = GetGraph()->GetAnalysis<DominatorsTree>();
-        dom_tree.SetValid(true);
-        ASSERT(header->GetDominator() == pre_header);
-        pre_header->RemoveDominatedBlock(header);
-        dom_tree.SetDomPair(new_pre_header, header);
-        dom_tree.SetDomPair(pre_header, new_pre_header);
-        // Change pre-header
-        loop->SetPreHeader(new_pre_header);
-        pre_header = new_pre_header;
-    }
+}
+
+void Licm::MoveInstructions(BasicBlock *pre_header, Loop *loop)
+{
     // Find position to move: either add first instruction to the empty block or after the last instruction
     Inst *last_inst = pre_header->GetLastInst();
+
     // Move instructions
     for (auto inst : hoistable_instructions_) {
         Inst *target = nullptr;
@@ -212,6 +183,46 @@ void Licm::VisitLoop(Loop *loop)
             ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), inst, target);
         }
     }
+}
+
+/*
+ * Iterate over all instructions in the loop and move hoistable instructions to the loop preheader
+ */
+void Licm::VisitLoop(Loop *loop)
+{
+    auto marker_holder = MarkerHolder(GetGraph());
+    marker_hoist_inst_ = marker_holder.GetMarker();
+    hoistable_instructions_.clear();
+    // Collect instruction, which can be hoisted
+    for (auto block : loop->GetBlocks()) {
+        ASSERT(block->GetLoop() == loop);
+        for (auto inst : block->InstsSafe()) {
+            if (!IsInstHoistable(inst)) {
+                continue;
+            }
+            TryAppendHoistableInst(inst, block, loop);
+        }
+    }
+    auto pre_header = loop->GetPreHeader();
+    ASSERT(pre_header != nullptr);
+    auto header = loop->GetHeader();
+    if (pre_header->GetSuccsBlocks().size() > 1) {
+        ASSERT(GetGraph()->IsAnalysisValid<DominatorsTree>());
+        // Create new pre-header with single successor: loop header
+        auto new_pre_header = pre_header->InsertNewBlockToSuccEdge(header);
+        pre_header->GetLoop()->AppendBlock(new_pre_header);
+        // Fix Dominators info
+        auto &dom_tree = GetGraph()->GetAnalysis<DominatorsTree>();
+        dom_tree.SetValid(true);
+        ASSERT(header->GetDominator() == pre_header);
+        pre_header->RemoveDominatedBlock(header);
+        dom_tree.SetDomPair(new_pre_header, header);
+        dom_tree.SetDomPair(pre_header, new_pre_header);
+        // Change pre-header
+        loop->SetPreHeader(new_pre_header);
+        pre_header = new_pre_header;
+    }
+    MoveInstructions(pre_header, loop);
 }
 
 static bool FindUnsafeInstBetween(BasicBlock *dom_bb, BasicBlock *curr_bb, Marker visited, const Inst *resolver,

@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSLastIndexOf = ets_mod.getFunction("Array_TestJSLastIndexOf");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSLastIndexOf = etsMod.getFunction('Array_TestJSLastIndexOf');
 
-{   // Test JS Array<FooClass>
-    TestJSLastIndexOf(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSLastIndexOf(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    arr.push("foo");
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  arr.push('foo');
 
-    ASSERT_EQ(arr.lastIndexOf("foo"), 2);
-    ASSERT_EQ(arr.lastIndexOf("not in array"), -1);
+  ASSERT_EQ(arr.lastIndexOf('foo'), 2);
+  ASSERT_EQ(arr.lastIndexOf('not in array'), -1);
 
-    // TODO(oignatenko) uncomment below after interop will be supported for this method signature
-    // ASSERT_EQ(arr.lastIndexOf("foo", 1), 2);
-    // ASSERT_EQ(arr.lastIndexOf("not in array", 1), -1);
+  // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+  // ASSERT_EQ(arr.lastIndexOf('foo', 1), 2);
+  // ASSERT_EQ(arr.lastIndexOf('not in array', 1), -1);
 }
 
 GCJSRuntimeCleanup();

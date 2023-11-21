@@ -15,18 +15,8 @@
 #ifndef VERIFIER_VERIFY_H
 #define VERIFIER_VERIFY_H
 
-#include "verifier.h"
-
 #include <string>
 
-bool Verify([[maybe_unused]] const std::string &input_file)
-{
-    panda::verifier::Verifier vf {};
-    if (vf.Verify(input_file)) {
-        return true;
-    }
-
-    return false;
-}
+bool Verify(const std::string &input_file);
 
 #endif

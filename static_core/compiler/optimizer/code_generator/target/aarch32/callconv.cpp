@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,7 +126,7 @@ uint8_t Aarch32CallingConvention::PushRegs(RegMask regs, VRegMask vregs, bool is
     }
 
     if (((regs.count() + vregs.count()) & 1U) == 1) {
-        // TODO(igorban) move them to Sub(sp)
+        // NOTE(igorban) move them to Sub(sp)
         uint8_t align_reg = regdescr->GetAligmentReg(is_callee);
         GetMasm()->PushRegister(vixl::aarch32::Register(align_reg));
         ++real_offset;

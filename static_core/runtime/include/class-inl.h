@@ -647,7 +647,7 @@ inline void Class::SetFieldPrimitive(size_t offset, T value)
 template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */>
 inline ObjectHeader *Class::GetFieldObject(size_t offset) const
 {
-    // TODO(alovkov): GC can skip classes which are IsErroneous #6458
+    // NOTE(alovkov): GC can skip classes which are IsErroneous #6458
     // GC can't easily check state & get fields because state can be changed concurrently and checking on every field
     // is too expensive and it should be atomic {check state, get field}
     ASSERT_DO(IsInitializing() || IsInitialized() || IsErroneous(), LOG(ERROR, RUNTIME) << "class state: " << state_);

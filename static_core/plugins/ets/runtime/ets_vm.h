@@ -230,6 +230,8 @@ public:
 
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
+    PANDA_PUBLIC_API ObjectHeader *GetUndefinedObject();
+
     compiler::RuntimeInterface *GetCompilerRuntimeInterface() const override
     {
         return runtime_iface_;
@@ -355,12 +357,13 @@ private:
     CoroutineManager *coroutine_manager_ {nullptr};
     mem::Reference *oom_obj_ref_ {nullptr};
     compiler::RuntimeInterface *runtime_iface_ {nullptr};
+    mem::Reference *undefined_obj_ref_ {nullptr};
     NativeLibraryProvider native_library_provider_;
     os::memory::Mutex finalization_queue_lock_;
     PandaList<EtsObject *> registered_finalization_queue_instances_ GUARDED_BY(finalization_queue_lock_);
     PandaUniquePtr<JobQueue> job_queue_;
     os::memory::Mutex promise_listeners_lock_;
-    // TODO(audovichenko) Should be refactored #12030
+    // NOTE(audovichenko) Should be refactored #12030
     PandaList<PromiseListenerInfo> promise_listeners_ GUARDED_BY(promise_listeners_lock_);
     // optional for lazy initialization
     std::optional<std::mt19937> random_engine_;

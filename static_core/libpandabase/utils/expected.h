@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public:
         ASSERT(HasValue());
         return std::get<T>(v_);
     }
-    // TODO(aemelenko): Delete next line when the issue 388 is resolved
+    // NOTE(aemelenko): Delete next line when the issue 388 is resolved
     // NOLINTNEXTLINE(bugprone-exception-escape)
     T &Value() &noexcept(ExpectedConfig::RELEASE)
     {

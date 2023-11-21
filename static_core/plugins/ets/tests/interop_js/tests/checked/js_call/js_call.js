@@ -109,4 +109,4 @@ exports.make_swappable = make_swappable;
 exports.StaticClass = StaticClass;
 exports.extract_squared_int = extract_squared_int;
 exports.ObjectWithPrototype = ObjectWithPrototype;
-exports.undefined = undefined;
+exports.vundefined = undefined;

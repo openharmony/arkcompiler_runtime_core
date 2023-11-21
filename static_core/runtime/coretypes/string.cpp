@@ -816,7 +816,7 @@ uint32_t String::ComputeHashcodeMutf8(const uint8_t *mutf8_data, uint32_t utf16_
     if (can_be_compressed) {
         hash = static_cast<uint32_t>(ComputeHashForMutf8(mutf8_data));
     } else {
-        // TODO(alovkov): optimize it without allocation a temporary buffer
+        // NOTE(alovkov): optimize it without allocation a temporary buffer
         auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
         auto tmp_buffer = allocator->AllocArray<uint16_t>(utf16_length);
         utf::ConvertMUtf8ToUtf16(mutf8_data, utf::Mutf8Size(mutf8_data), tmp_buffer);

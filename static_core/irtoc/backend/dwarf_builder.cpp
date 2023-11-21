@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ int DwarfBuilder::CreateSectionCallback([[maybe_unused]] char *name, [[maybe_unu
 {
     auto self = reinterpret_cast<DwarfBuilder *>(user_data);
     ELFIO::section *section = self->GetElfBuilder()->sections.add(name);
-    if (0 == strncmp(name, ".rel", 4U)) {
+    if (strncmp(name, ".rel", 4U) == 0) {
         self->rel_map_.insert(
             {section->get_index(), ELFIO::relocation_section_accessor(*self->GetElfBuilder(), section)});
         section->set_entry_size(self->GetElfBuilder()->get_default_entry_size(ELFIO::SHT_REL));

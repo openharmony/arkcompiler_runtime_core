@@ -135,7 +135,7 @@ public:
         return GetStringTable()->UpdateMoved();
     }
 
-    // TODO(maksenov): remove this method after fixing interpreter performance
+    // NOTE(maksenov): remove this method after fixing interpreter performance
     virtual PandaVMType GetPandaVMType() const
     {
         // Deprecated. Only for Compability with js_runtime.

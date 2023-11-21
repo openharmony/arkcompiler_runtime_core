@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ protected:
     static constexpr size_t KEY32INBYTES = 4;
     static constexpr size_t KEY8INBYTES = 1;
 
-// Some platforms have this macro so do not redefine it.
+    // Some platforms have this macro so do not redefine it.
 #ifndef PAGE_SIZE
-    static constexpr size_t PAGE_SIZE = SIZE_1K * 4;
+    static constexpr size_t PAGE_SIZE = SIZE_1K * 4U;
 #endif
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     unsigned seed_;
@@ -123,19 +123,19 @@ void HashTest::EndOfPageStringHashTest()
 {
     constexpr const int64_t IMM_TWO = 2;
     size_t string_size = 3;
-    constexpr size_t ALLOC_SIZE = PAGE_SIZE * 2;
+    constexpr size_t ALLOC_SIZE = PAGE_SIZE * 2U;
     void *mem = panda::os::mem::MapRWAnonymousRaw(ALLOC_SIZE);
     ASAN_UNPOISON_MEMORY_REGION(mem, ALLOC_SIZE);
     panda::os::mem::MakeMemProtected(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE), PAGE_SIZE);
     auto string = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE) - sizeof(char) * string_size);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    string[0] = 'O';
+    string[0U] = 'O';
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    string[1] = 'K';
+    string[1U] = 'K';
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     string[IMM_TWO] = '\0';
     auto mutf8_string = reinterpret_cast<uint8_t *>(string);
-    uint32_t second_hash = T::GetHash32(mutf8_string, string_size - 1);
+    uint32_t second_hash = T::GetHash32(mutf8_string, string_size - 1L);
     uint32_t first_hash = T::GetHash32String(mutf8_string);
     ASSERT_EQ(first_hash, second_hash);
     auto res = panda::os::mem::UnmapRaw(mem, ALLOC_SIZE);

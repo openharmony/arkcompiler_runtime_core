@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ class BinaryImmOperation;
 }  // namespace panda::compiler
 
 namespace panda::bytecodeopt {
-static constexpr compiler::Register MIN_REGISTER_NUMBER = 0;
-static constexpr compiler::Register MAX_NUM_SHORT_CALL_ARGS = 2;
-static constexpr compiler::Register MAX_NUM_NON_RANGE_ARGS = 4;
-static constexpr compiler::Register MAX_NUM_INPUTS = MAX_NUM_NON_RANGE_ARGS;
-static constexpr panda::compiler::Register NUM_COMPACTLY_ENCODED_REGS = 16;
-[[maybe_unused]] static constexpr compiler::Register MAX_8_BIT_REG = 255 - 1U;  // exclude INVALID_REG
+constexpr compiler::Register MIN_REGISTER_NUMBER = 0;
+constexpr compiler::Register MAX_NUM_SHORT_CALL_ARGS = 2;
+constexpr compiler::Register MAX_NUM_NON_RANGE_ARGS = 4;
+constexpr compiler::Register MAX_NUM_INPUTS = MAX_NUM_NON_RANGE_ARGS;
+constexpr panda::compiler::Register NUM_COMPACTLY_ENCODED_REGS = 16;
+[[maybe_unused]] constexpr compiler::Register MAX_8_BIT_REG = 255 - 1U;  // exclude INVALID_REG
 
 // Get the position where accumulator read happens.
 uint8_t AccReadIndex(const compiler::Inst *inst);

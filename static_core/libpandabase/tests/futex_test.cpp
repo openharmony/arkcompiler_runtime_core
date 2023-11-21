@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ struct panda::os::unix::memory::futex::fmutex FUTEX;
 struct panda::os::unix::memory::futex::CondVar CONDVAR;
 volatile int GLOBAL;
 
-constexpr std::chrono::duration DELAY = std::chrono::milliseconds(10);
+constexpr std::chrono::duration DELAY = std::chrono::milliseconds(10U);
 
 // The thread just modifies shared data under locks
 void Writer()
 {
     MutexLock(&FUTEX, false);
-    int new_val = GLOBAL + 1;
+    int new_val = GLOBAL + 1U;
     std::this_thread::sleep_for(DELAY);
     GLOBAL = new_val;
     MutexUnlock(&FUTEX);
@@ -51,9 +51,9 @@ void Waiter()
         Wait(&CONDVAR, &FUTEX);
     } while (old_val == GLOBAL);
     MutexUnlock(&FUTEX);
-    int new_val = GLOBAL + 1;
+    int new_val = GLOBAL + 1U;
     // Check that waiter is correctly waken
-    ASSERT_EQ(new_val, GLOBAL + 1);
+    ASSERT_EQ(new_val, GLOBAL + 1U);
     GLOBAL = new_val;
 }
 
@@ -69,9 +69,9 @@ void Syncwaiter()
         // spurious wake is possible
         Wait(&CONDVAR, &FUTEX);
     } while (old_val == GLOBAL);
-    int new_val = GLOBAL + 1;
+    int new_val = GLOBAL + 1U;
     // Check that waiter is correctly waken
-    ASSERT_EQ(new_val, GLOBAL + 1);
+    ASSERT_EQ(new_val, GLOBAL + 1U);
     GLOBAL = new_val;
     MutexUnlock(&FUTEX);
 }
@@ -82,7 +82,7 @@ void Timedwaiter()
 {
     MutexLock(&FUTEX, false);
     GLOBAL++;
-    bool ret = TimedWait(&CONDVAR, &FUTEX, 1, 0, false);
+    bool ret = TimedWait(&CONDVAR, &FUTEX, 1U, 0U, false);
     ASSERT_TRUE(ret);
     if (ret) {
         // Timeout
@@ -130,7 +130,7 @@ TEST(FutexTest, LockUnlockTest)
     thr.join();
     val1 = GLOBAL;
     // Check that both Writer and main correctly incremented in critical section
-    ASSERT_EQ(val1, 1);
+    ASSERT_EQ(val1, 1U);
 }
 
 // The test checks trylock operation
@@ -140,7 +140,7 @@ TEST(FutexTest, TrylockTest)
     std::thread thr(Writer);
     do {
     } while (!MutexLock(&FUTEX, true));
-    int new_val = GLOBAL + 1;
+    int new_val = GLOBAL + 1U;
     // Wait a bit, to get a chance to Writer
     std::this_thread::sleep_for(DELAY);
     GLOBAL = new_val;
@@ -148,7 +148,7 @@ TEST(FutexTest, TrylockTest)
     thr.join();
     int val1 = GLOBAL;
     // Check that both Writer and main correctly incremented in critical section
-    ASSERT_EQ(val1, 2);
+    ASSERT_EQ(val1, 2U);
 }
 
 // The test checks work with multiple writers
@@ -167,7 +167,7 @@ TEST(FutexTest, MultiWriteTest)
     thr5.join();
     int val1 = GLOBAL;
     // Check that threads correctly incremented in critical section
-    ASSERT_EQ(val1, 5);
+    ASSERT_EQ(val1, 5U);
 }
 
 // The test checks work with recursive futexes
@@ -216,7 +216,7 @@ TEST(FutexTest, WaitNotifyTest)
     thr.join();
     GLOBAL++;
     // Check that waiter is correctly finished
-    ASSERT_EQ(GLOBAL, 4);
+    ASSERT_EQ(GLOBAL, 4U);
 }
 
 // The test checks basic timedwait-notify actions
@@ -230,7 +230,7 @@ TEST(FutexTest, TimedwaitTest)
     thr.join();
     GLOBAL++;
     // Check that waiter is correctly finished
-    ASSERT_EQ(GLOBAL, 3);
+    ASSERT_EQ(GLOBAL, 3U);
 }
 
 // The test checks wait-notifyAll operations in case of multiple waiters
@@ -269,7 +269,7 @@ TEST(FutexTest, WakeAllTest)
     thr5.join();
     GLOBAL++;
     // Check that waiter is correctly finished by timeout
-    ASSERT_EQ(GLOBAL, 2 * NUM + 2);
+    ASSERT_EQ(GLOBAL, 2U * NUM + 2U);
 }
 
 }  // namespace panda

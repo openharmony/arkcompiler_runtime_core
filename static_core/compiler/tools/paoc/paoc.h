@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,7 @@ private:
     bool CompileJit(CompilingContext *ctx);
     bool CompileOsr(CompilingContext *ctx);
     bool CompileAot(CompilingContext *ctx);
+    bool FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t code_address);
     void PrintError(const std::string &error);
     void PrintUsage(const panda::PandArgParser &pa_parser);
     bool IsMethodInList(const std::string &method_full_name);
@@ -88,6 +89,7 @@ private:
     static std::string GetFileLocation(const panda_file::File &pfile_ref, std::string location);
     static bool CompareBootFiles(std::string filename, std::string paoc_location);
     bool LoadPandaFiles();
+    bool TryCreateGraph(CompilingContext *ctx);
     void BuildClassHashTable(const panda_file::File &pfile_ref);
     std::string GetFilePath(std::string file_name);
 

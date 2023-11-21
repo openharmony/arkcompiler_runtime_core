@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -224,6 +224,16 @@ void LoopAnalyzer::FindAndInsertPreHeaders(Loop *loop)
     }
 }
 
+void LoopAnalyzer::PopulateIrreducibleLoop(Loop *loop)
+{
+    // Add back-edges to the loop for further analysis
+    for (auto back_edge : loop->GetBackEdges()) {
+        if (back_edge->GetLoop() != loop) {
+            loop->AppendBlock(back_edge);
+        }
+    }
+}
+
 /*
  * Visiting existing loop headers to populate loops with blocks
  * Search algorithm starts from the loop back edge and recursively adds all predecessors until loop header not found
@@ -237,12 +247,7 @@ void LoopAnalyzer::PopulateLoops()
         }
         auto loop = block->GetLoop();
         if (loop->IsIrreducible()) {
-            // Add back-edges to the loop for further analysis
-            for (auto back_edge : loop->GetBackEdges()) {
-                if (back_edge->GetLoop() != loop) {
-                    loop->AppendBlock(back_edge);
-                }
-            }
+            PopulateIrreducibleLoop(loop);
         } else {
             black_marker_ = GetGraph()->NewMarker();
             block->SetMarker(black_marker_);

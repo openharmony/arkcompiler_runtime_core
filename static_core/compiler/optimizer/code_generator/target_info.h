@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -329,8 +329,8 @@ class Target {
 public:
     constexpr explicit Target(Arch arch) : arch_(arch) {}
     ~Target() = default;
-    DEFAULT_MOVE_CTOR(Target)
-    DEFAULT_COPY_CTOR(Target)
+    DEFAULT_MOVE_CTOR(Target);
+    DEFAULT_COPY_CTOR(Target);
     NO_MOVE_OPERATOR(Target);
     NO_COPY_OPERATOR(Target);
 
@@ -457,7 +457,7 @@ public:
         return GetReturnFpRegId() == GetFpParamRegId(0U);
     }
 
-    // TODO(msherstennikov): Take into account register size
+    // NOTE(msherstennikov): Take into account register size
     std::string GetRegName(size_t reg, bool is_fp) const
     {
         switch (arch_) {

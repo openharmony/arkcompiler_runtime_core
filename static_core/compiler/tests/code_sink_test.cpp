@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,7 +76,7 @@ TEST_F(CodeSinkTest, OperationPropagation)
  * Move load but the NullCheck is still on its place:
  * exception should be thrown where it was initially.
  */
-// TODO(Kudriashov Evgenii) enable the test after fixing CodeSink
+// NOTE(Kudriashov Evgenii) enable the test after fixing CodeSink
 TEST_F(CodeSinkTest, DISABLED_LoadWithOperationPropagation)
 {
     GRAPH(GetGraph())
@@ -395,7 +395,7 @@ TEST_F(CodeSinkTest, LoadOverMonitor)
 }
 
 /// Reordering of Normal Load and subsequent Volatile Load is allowed
-// TODO(Kudriashov Evgenii) enable the test after fixing CodeSink
+// NOTE(Kudriashov Evgenii) enable the test after fixing CodeSink
 TEST_F(CodeSinkTest, DISABLED_LoadOverVolatileLoad)
 {
     GRAPH(GetGraph())

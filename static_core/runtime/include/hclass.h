@@ -149,7 +149,7 @@ private:
     uint32_t native_fields_ {0};
 
     // Data for language extension flags
-    // TODO(maksenov): maybe merge this with BaseClass flags
+    // NOTE(maksenov): maybe merge this with BaseClass flags
     FIELD_UNUSED uint64_t data_ {0};
 };
 

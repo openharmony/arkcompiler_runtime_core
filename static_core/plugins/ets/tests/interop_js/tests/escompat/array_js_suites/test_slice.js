@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSSlice = ets_mod.getFunction("Array_TestJSSlice");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSSlice = etsMod.getFunction('Array_TestJSSlice');
 
-{   // Test JS Array<FooClass>
-    TestJSSlice(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSSlice(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    let sliced = arr.slice(1);
-    ASSERT_EQ(sliced.at(0), "foo");
-    ASSERT_EQ(sliced.length(), arr.length() - 1);
-    // TODO(oignatenko) uncomment below after interop will be supported for this method signature
-    // let sliced1 = arr.slice(1, 2);
-    // ASSERT_EQ(sliced1.at(0), "foo");
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  let sliced = arr.slice(1);
+  ASSERT_EQ(sliced.at(0), 'foo');
+  ASSERT_EQ(sliced.length(), arr.length() - 1);
+  // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+  // let sliced1 = arr.slice(1, 2);
+  // ASSERT_EQ(sliced1.at(0), 'foo');
 }
 
 GCJSRuntimeCleanup();

@@ -203,7 +203,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     public static native toString(d: double, r: int): String;
 
     public static toString(d: double): String {
-        Double.toString(d, 10);
+        return Double.toString(d, 10);
     }
 
     public toString(r: int): String {

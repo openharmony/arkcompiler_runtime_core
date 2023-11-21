@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -358,7 +358,7 @@ TEST(emittertests, errors)
         Parser p;
         auto source = R"(
             .record A {
-               B b
+                B b
             }
         )";
 
@@ -817,7 +817,7 @@ TEST(emittertests, access_modifiers)
 {
     Parser p;
 
-    auto source = R"(            
+    auto source = R"(
         .record A <access.record=private> {}
 
         .record B <access.record=public> {
@@ -920,7 +920,7 @@ TEST(emittertests, valid_inheritance)
 {
     Parser p;
 
-    auto source = R"(            
+    auto source = R"(
         .record A {}
         .record B <extends=A> {}
     )";
@@ -937,7 +937,7 @@ TEST(emittertests, inheritance_undefined_record)
 {
     Parser p;
 
-    auto source = R"(            
+    auto source = R"(
         .record A <extends=B> {}
     )";
 
@@ -954,7 +954,7 @@ TEST(emittertests, primitive_inheritance)
 {
     Parser p;
 
-    auto source = R"(            
+    auto source = R"(
         .record A <extends=u8> {}
     )";
 
@@ -970,7 +970,7 @@ TEST(emittertests, final_modifier)
 {
     Parser p;
 
-    auto source = R"(            
+    auto source = R"(
         .record A <final> {}
 
         .record B {

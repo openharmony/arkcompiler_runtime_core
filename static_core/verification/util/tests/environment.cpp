@@ -101,7 +101,7 @@ EnvOptions::EnvOptions(const char *env_var_name)
     Context c;
 
     if (!OPTIONS(c, s, s + strlen(s))) {  // NOLINT
-        // TODO(vdyadov): warning that some options were not parsed
+        // NOTE(vdyadov): warning that some options were not parsed
     }
 }
 

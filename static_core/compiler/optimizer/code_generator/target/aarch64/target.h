@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H_
-#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H
+#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H
 
 #include "operands.h"
 #include "encode.h"
@@ -75,7 +75,7 @@ static inline vixl::aarch64::Condition Convert(const Condition cc)
             return vixl::aarch64::Condition::hi;
         case Condition::HS:
             return vixl::aarch64::Condition::hs;
-        // TODO(igorban) : Remove them
+        // NOTE(igorban) : Remove them
         case Condition::MI:
             return vixl::aarch64::Condition::mi;
         case Condition::PL:
@@ -356,7 +356,7 @@ public:
     uint8_t GetAlignmentVreg(bool is_callee)
     {
         auto allignment_vreg = is_callee ? allignment_vreg_callee_ : allignment_vreg_caller_;
-        // !TODO Ishin Pavel fix if allignment_vreg == UNDEF_VREG
+        // !NOTE Ishin Pavel fix if allignment_vreg == UNDEF_VREG
         ASSERT(allignment_vreg != UNDEF_VREG);
 
         return allignment_vreg;
@@ -783,6 +783,9 @@ private:
     template <bool IS_STORE>
     void LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
 
+    template <bool IS_STORE>
+    void LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
+
     void EncodeCastFloat(Reg dst, bool dst_signed, Reg src, bool src_signed);
     // This function not used, but it is working and can be used.
     // Unlike "EncodeCastFloat", it implements castes float32/64 to int8/16.
@@ -858,4 +861,4 @@ public:
     }
 };  // Aarch64CallingConvention
 }  // namespace panda::compiler::aarch64
-#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H

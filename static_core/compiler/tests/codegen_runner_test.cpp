@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,8 +109,6 @@ static constexpr auto CODEGEN_OBJECT_PARAMS_SOURCE = R"(
 #          +0x2000000000000
 # Result  0xAAA000000000000
 # Result  0xAAA00000AAA0AAA
-
-
 
 .function i64 foo(Value a0, Value a1, Value a2, Value a3, Value a4, Value a5) {
     ldai.64 0
@@ -319,8 +317,6 @@ success_label:
     return.64
 }
 
-
-
 )";
 
 constexpr uint64_t CORRUPT_SIZE = 0xFFF;
@@ -347,7 +343,7 @@ TEST_F(CodegenRunnerTest, ObjectParams)
     // hi-part is 1 - to do not rewrite fp, lr in arm64
     std::array<uint64_t, 4U> reg_masks {
         0U, 0xFFFFFFFFFFFFFFF0U, 0xFFFFFFFFF0FFF000U, 0xFFFFFFFFFFFFDFD6U,
-        // TODO (igorban): enable next variants:
+        // NOTE (igorban): enable next variants:
         // 0xFFFFFFFFFF000FFF,
         // 0xFFFFFFFFF000000F,
         // 0xFFFFFFFFF000202A,

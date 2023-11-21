@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,6 +112,34 @@ void Peepholes::VisitNot([[maybe_unused]] GraphVisitor *v, Inst *inst)
     if (ConstFoldingNot(inst)) {
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
         return;
+    }
+}
+
+void Peepholes::VisitAddFinalize([[maybe_unused]] GraphVisitor *v, Inst *inst, Inst *input0, Inst *input1)
+{
+    auto visitor = static_cast<Peepholes *>(v);
+    // Some of the previous transformations might change the opcode of inst.
+    if (inst->GetOpcode() == Opcode::Add) {
+        if (visitor->TryReassociateShlShlAddSub(inst)) {
+            PEEPHOLE_IS_APPLIED(visitor, inst);
+            return;
+        }
+
+        if (input0->GetOpcode() == Opcode::Add && input1->GetOpcode() == Opcode::Sub) {
+            std::swap(input0, input1);
+        }
+
+        if (input0->GetOpcode() == Opcode::Sub && input1->GetOpcode() == Opcode::Add) {
+            if (visitor->TrySimplifyAddSubAdd(inst, input0, input1)) {
+                return;
+            }
+        }
+
+        if (input0->GetOpcode() == Opcode::Sub && input1->GetOpcode() == Opcode::Sub) {
+            if (visitor->TrySimplifyAddSubSub(inst, input0, input1)) {
+                return;
+            }
+        }
     }
 }
 
@@ -243,33 +271,26 @@ void Peepholes::VisitAdd([[maybe_unused]] GraphVisitor *v, Inst *inst)
     visitor->TrySimplifyAddSub<Opcode::Sub, 0>(inst, input0, input1);
     visitor->TrySimplifyAddSub<Opcode::Sub, 0>(inst, input1, input0);
 
+    VisitAddFinalize(v, inst, input0, input1);
+}
+
+void Peepholes::VisitSubFinalize([[maybe_unused]] GraphVisitor *v, Inst *inst, Inst *input0, Inst *input1)
+{
+    auto visitor = static_cast<Peepholes *>(v);
     // Some of the previous transformations might change the opcode of inst.
-    if (inst->GetOpcode() == Opcode::Add) {
+    if (inst->GetOpcode() == Opcode::Sub) {
         if (visitor->TryReassociateShlShlAddSub(inst)) {
             PEEPHOLE_IS_APPLIED(visitor, inst);
             return;
         }
 
-        if (input0->GetOpcode() == Opcode::Add && input1->GetOpcode() == Opcode::Sub) {
-            std::swap(input0, input1);
-        }
-
-        if (input0->GetOpcode() == Opcode::Sub) {
-            if (input1->GetOpcode() == Opcode::Add) {
-                if (visitor->TrySimplifyAddSubAdd(inst, input0, input1)) {
-                    return;
-                }
-            }
-
-            if (input1->GetOpcode() == Opcode::Sub) {
-                if (visitor->TrySimplifyAddSubSub(inst, input0, input1)) {
-                    return;
-                }
+        if (input0->GetOpcode() == Opcode::Add && input1->GetOpcode() == Opcode::Add) {
+            if (visitor->TrySimplifySubAddAdd(inst, input0, input1)) {
+                return;
             }
         }
     }
 }
-
 /**
  * Case 1
  * Subtraction of zero
@@ -369,20 +390,7 @@ void Peepholes::VisitSub([[maybe_unused]] GraphVisitor *v, Inst *inst)
             return;
         }
     }
-
-    // Some of the previous transformations might change the opcode of inst.
-    if (inst->GetOpcode() == Opcode::Sub) {
-        if (visitor->TryReassociateShlShlAddSub(inst)) {
-            PEEPHOLE_IS_APPLIED(visitor, inst);
-            return;
-        }
-
-        if (input0->GetOpcode() == Opcode::Add && input1->GetOpcode() == Opcode::Add) {
-            if (visitor->TrySimplifySubAddAdd(inst, input0, input1)) {
-                return;
-            }
-        }
-    }
+    VisitSubFinalize(v, inst, input0, input1);
 }
 
 void Peepholes::VisitMulOneConst([[maybe_unused]] GraphVisitor *v, Inst *inst, Inst *input0, Inst *input1)
@@ -963,6 +971,67 @@ void Peepholes::VisitCompare(GraphVisitor *v, Inst *inst)
     }
 }
 
+bool Peepholes::TrySimplifyCompareAnyTypeCase1(Inst *inst, Inst *input0, Inst *input1)
+{
+    auto cmp_inst = inst->CastToCompare();
+
+    // 2.any  CastValueToAnyType BOOLEAN_TYPE v0 -> (v4)
+    // 3.any  CastValueToAnyType BOOLEAN_TYPE v1 -> (v4)
+    // 4.     Compare EQ/NE any    v2, v3
+    // =======>
+    // 4.     Compare EQ/NE bool   v0, v1
+    if (input0->CastToCastValueToAnyType()->GetAnyType() != input1->CastToCastValueToAnyType()->GetAnyType()) {
+        return false;
+    }
+    if (SkipThisPeepholeInOSR(cmp_inst, input0->GetInput(0).GetInst()) ||
+        SkipThisPeepholeInOSR(cmp_inst, input1->GetInput(0).GetInst())) {
+        return false;
+    }
+    cmp_inst->SetOperandsType(DataType::BOOL);
+    cmp_inst->SetInput(0, input0->GetInput(0).GetInst());
+    cmp_inst->SetInput(1, input1->GetInput(0).GetInst());
+    return true;
+}
+
+bool Peepholes::TrySimplifyCompareAnyTypeCase2(Inst *inst, Inst *input0, Inst *input1)
+{
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    auto cmp_inst = inst->CastToCompare();
+    auto cc = cmp_inst->GetCc();
+    auto if_imm = input1->CastToConstant()->GetRawValue();
+    auto runtime = graph->GetRuntime();
+    uint64_t new_const;
+
+    // 3.any  CastValueToAnyType BOOLEAN_TYPE v2 -> (v4)
+    // 4.     Compare EQ/NE any    v3, DYNAMIC_TRUE/FALSE
+    // =======>
+    // 4.     Compare EQ/NE bool   v2, 0x1/0x0
+    if (SkipThisPeepholeInOSR(cmp_inst, input0->GetInput(0).GetInst())) {
+        return false;
+    }
+    if (if_imm == runtime->GetDynamicPrimitiveFalse()) {
+        new_const = 0;
+    } else if (if_imm == runtime->GetDynamicPrimitiveTrue()) {
+        new_const = 1;
+    } else {
+        // In this case, we are comparing the dynamic boolean type with not boolean constant.
+        // So the Compare EQ/NE alwayes false/true.
+        // In this case, we can change the Compare to Constant instruction.
+        // NOTE! It is assumed that there is only one Boolean type for each dynamic language.
+        // Support for multiple Boolean types must be maintained separately.
+        if (cc != CC_EQ && cc != CC_NE) {
+            return false;
+        }
+        // We create constant, so we don't need to check SaveStateOSR between insts
+        cmp_inst->ReplaceUsers(graph->FindOrCreateConstant<uint64_t>(cc == CC_NE ? 1 : 0));
+        return true;
+    }
+    cmp_inst->SetOperandsType(DataType::BOOL);
+    cmp_inst->SetInput(0, input0->GetInput(0).GetInst());
+    cmp_inst->SetInput(1, graph->FindOrCreateConstant(new_const));
+    return true;
+}
+
 bool Peepholes::TrySimplifyCompareAnyType(Inst *inst)
 {
     auto graph = inst->GetBasicBlock()->GetGraph();
@@ -991,59 +1060,13 @@ bool Peepholes::TrySimplifyCompareAnyType(Inst *inst)
     }
 
     if (input1->GetOpcode() == Opcode::CastValueToAnyType) {
-        // 2.any  CastValueToAnyType BOOLEAN_TYPE v0 -> (v4)
-        // 3.any  CastValueToAnyType BOOLEAN_TYPE v1 -> (v4)
-        // 4.     Compare EQ/NE any    v2, v3
-        // =======>
-        // 4.     Compare EQ/NE bool   v0, v1
-
-        if (input0->CastToCastValueToAnyType()->GetAnyType() != input1->CastToCastValueToAnyType()->GetAnyType()) {
-            return false;
-        }
-        if (SkipThisPeepholeInOSR(cmp_inst, input0->GetInput(0).GetInst()) ||
-            SkipThisPeepholeInOSR(cmp_inst, input1->GetInput(0).GetInst())) {
-            return false;
-        }
-        cmp_inst->SetOperandsType(DataType::BOOL);
-        cmp_inst->SetInput(0, input0->GetInput(0).GetInst());
-        cmp_inst->SetInput(1, input1->GetInput(0).GetInst());
-        return true;
+        return TrySimplifyCompareAnyTypeCase1(inst, input0, input1);
     }
     if (!input1->IsConst()) {
         return false;
     }
 
-    // 3.any  CastValueToAnyType BOOLEAN_TYPE v2 -> (v4)
-    // 4.     Compare EQ/NE any    v3, DYNAMIC_TRUE/FALSE
-    // =======>
-    // 4.     Compare EQ/NE bool   v2, 0x1/0x0
-    auto if_imm = input1->CastToConstant()->GetRawValue();
-    auto runtime = graph->GetRuntime();
-    uint64_t new_const;
-    if (SkipThisPeepholeInOSR(cmp_inst, input0->GetInput(0).GetInst())) {
-        return false;
-    }
-    if (if_imm == runtime->GetDynamicPrimitiveFalse()) {
-        new_const = 0;
-    } else if (if_imm == runtime->GetDynamicPrimitiveTrue()) {
-        new_const = 1;
-    } else {
-        // In this case, we are comparing the dynamic boolean type with not boolean constant.
-        // So the Compare EQ/NE alwayes false/true.
-        // In this case, we can change the Compare to Constant instruction.
-        // NOTE! It is assumed that there is only one Boolean type for each dynamic language.
-        // Support for multiple Boolean types must be maintained separately.
-        if (cc != CC_EQ && cc != CC_NE) {
-            return false;
-        }
-        // We create constant, so we don't need to check SaveStateOSR between insts
-        cmp_inst->ReplaceUsers(graph->FindOrCreateConstant<uint64_t>(cc == CC_NE ? 1 : 0));
-        return true;
-    }
-    cmp_inst->SetOperandsType(DataType::BOOL);
-    cmp_inst->SetInput(0, input0->GetInput(0).GetInst());
-    cmp_inst->SetInput(1, graph->FindOrCreateConstant(new_const));
-    return true;
+    return TrySimplifyCompareAnyTypeCase2(inst, input0, input1);
 }
 
 // This VisitIf is using only for compile IRTOC
@@ -1189,6 +1212,89 @@ static inline bool IsCastAllowedInBytecode(const Inst *inst)
     }
 }
 
+void Peepholes::VisitCastCase1([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    // case 1:
+    // remove redundant cast, when source type is equal with target type
+    auto input = inst->GetInput(0).GetInst();
+    if (SkipThisPeepholeInOSR(inst, input)) {
+        return;
+    }
+    inst->ReplaceUsers(input);
+    PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
+}
+
+void Peepholes::VisitCastCase2([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    // case 2:
+    // remove redundant cast, when cast from source to target and back
+    // for bytecode optimizer, this operation may cause mistake for float32-converter pass
+    auto input = inst->GetInput(0).GetInst();
+    auto prev_type = input->GetType();
+    auto curr_type = inst->GetType();
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    auto arch = graph->GetArch();
+    auto orig_inst = input->GetInput(0).GetInst();
+    auto orig_type = orig_inst->GetType();
+    if (curr_type == orig_type && DataType::GetTypeSize(prev_type, arch) > DataType::GetTypeSize(curr_type, arch)) {
+        if (SkipThisPeepholeInOSR(inst, orig_inst)) {
+            return;
+        }
+        inst->ReplaceUsers(orig_inst);
+        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
+        return;
+    }
+    // case 2.1:
+    // join two sequent narrowing integer casts, e.g:
+    // replace
+    // cast i64toi32
+    // cast i32toi16
+    // with
+    // cast i64toi16
+    if (ApplyForCastJoin(inst, input, orig_inst, arch)) {
+        auto cast = inst->CastToCast();
+        if (SkipThisPeepholeInOSR(cast, orig_inst)) {
+            return;
+        }
+        cast->SetOperandsType(orig_inst->GetType());
+        cast->SetInput(0, orig_inst);
+        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
+        return;
+    }
+}
+
+void Peepholes::VisitCastCase3([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    auto input = inst->GetInput(0).GetInst();
+    auto curr_type = inst->GetType();
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    auto arch = graph->GetArch();
+
+    // case 3:
+    // i8.Cast(v1 & 0xff)        = i8.Cast(u8.Cast(v1))   = i8.Cast(v1)
+    // i16.Cast(v1 & 0xffff)     = i16.Cast(u16.Cast(v1)) = i16.Cast(v1)
+    // i32.Cast(v1 & 0xffffffff) = i32.Cast(u32.Cast(v1)) = i32.Cast(v1)
+    auto op0 = input->GetInput(0).GetInst();
+    if (graph->IsBytecodeOptimizer() && !IsCastAllowedInBytecode(op0)) {
+        return;
+    }
+    auto op1 = input->GetInput(1).GetInst();
+    auto type_size = DataType::GetTypeSize(curr_type, arch);
+    if (op1->IsConst() && type_size < DOUBLE_WORD_SIZE) {
+        auto val = op1->CastToConstant()->GetIntValue();
+        auto mask = (1ULL << type_size) - 1;
+        if ((val & mask) == mask) {
+            if (SkipThisPeepholeInOSR(inst, op0)) {
+                return;
+            }
+            inst->SetInput(0, op0);
+            inst->CastToCast()->SetOperandsType(op0->GetType());
+            PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
+            return;
+        }
+    }
+}
+
 void Peepholes::VisitCast([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     if (ConstFoldingCast(inst)) {
@@ -1199,76 +1305,20 @@ void Peepholes::VisitCast([[maybe_unused]] GraphVisitor *v, Inst *inst)
     auto prev_type = input->GetType();
     auto curr_type = inst->GetType();
     auto graph = inst->GetBasicBlock()->GetGraph();
-    auto arch = graph->GetArch();
-    // case 1:
-    // remove redundant cast, when source type is equal with target type
+
     if (prev_type == curr_type) {
-        if (SkipThisPeepholeInOSR(inst, input)) {
-            return;
-        }
-        inst->ReplaceUsers(input);
-        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
+        VisitCastCase1(v, inst);
         return;
     }
-    if (!graph->IsBytecodeOptimizer()) {
-        if (input->GetOpcode() == Opcode::Cast) {
-            auto orig_inst = input->GetInput(0).GetInst();
-            auto orig_type = orig_inst->GetType();
-            // case 2:
-            // remove redundant cast, when cast from source to target and back
-            // for bytecode optimizer, this operation may cause mistake for float32-converter pass
-            if (curr_type == orig_type &&
-                DataType::GetTypeSize(prev_type, arch) > DataType::GetTypeSize(curr_type, arch)) {
-                if (SkipThisPeepholeInOSR(inst, orig_inst)) {
-                    return;
-                }
-                inst->ReplaceUsers(orig_inst);
-                PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
-                return;
-            }
-            // case 4:
-            // join two sequent narrowing integer casts, e.g:
-            // replace
-            // cast i64toi32
-            // cast i32toi16
-            // with
-            // cast i64toi16
-            if (ApplyForCastJoin(inst, input, orig_inst, arch)) {
-                auto cast = inst->CastToCast();
-                if (SkipThisPeepholeInOSR(cast, orig_inst)) {
-                    return;
-                }
-                cast->SetOperandsType(orig_inst->GetType());
-                cast->SetInput(0, orig_inst);
-                PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
-                return;
-            }
-        }
+
+    if (!graph->IsBytecodeOptimizer() && input->GetOpcode() == Opcode::Cast) {
+        VisitCastCase2(v, inst);
+        return;
     }
-    // case 3:
-    // i8.Cast(v1 & 0xff)        = i8.Cast(u8.Cast(v1))   = i8.Cast(v1)
-    // i16.Cast(v1 & 0xffff)     = i16.Cast(u16.Cast(v1)) = i16.Cast(v1)
-    // i32.Cast(v1 & 0xffffffff) = i32.Cast(u32.Cast(v1)) = i32.Cast(v1)
+
     if (input->GetOpcode() == Opcode::And && DataType::GetCommonType(curr_type) == DataType::INT64) {
-        auto op0 = input->GetInput(0).GetInst();
-        if (graph->IsBytecodeOptimizer() && !IsCastAllowedInBytecode(op0)) {
-            return;
-        }
-        auto op1 = input->GetInput(1).GetInst();
-        auto type_size = DataType::GetTypeSize(curr_type, arch);
-        if (op1->IsConst() && type_size < DOUBLE_WORD_SIZE) {
-            auto val = op1->CastToConstant()->GetIntValue();
-            auto mask = (1ULL << type_size) - 1;
-            if ((val & mask) == mask) {
-                if (SkipThisPeepholeInOSR(inst, op0)) {
-                    return;
-                }
-                inst->SetInput(0, op0);
-                inst->CastToCast()->SetOperandsType(op0->GetType());
-                PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
-                return;
-            }
-        }
+        VisitCastCase3(v, inst);
+        return;
     }
 }
 
@@ -2040,10 +2090,8 @@ bool Peepholes::TryReassociateShlShlAddSub(Inst *inst)
         return false;
     }
     auto input0 = inst->GetInput(0).GetInst();
-    if (!input0->IsConst() && !input0->IsParameter()) {
-        if (!input0->IsDominate(input1)) {
-            return false;
-        }
+    if (!input0->IsConst() && !input0->IsParameter() && !input0->IsDominate(input1)) {
+        return false;
     }
 
     Opcode op_input1 = input1->GetOpcode();

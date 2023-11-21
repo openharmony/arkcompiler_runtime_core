@@ -58,7 +58,7 @@ int32_t TestUtil::GetValueRegister(Method *method, const char *var_name, uint32_
         param_reg++;
     }
 
-    return -2;  // TODO(maksenov): Replace with invalid register constant;
+    return -2;  // NOTE(maksenov): Replace with invalid register constant;
 }
 
 std::ostream &operator<<(std::ostream &out, DebugEvent value)

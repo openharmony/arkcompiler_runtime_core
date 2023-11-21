@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,7 +166,7 @@ TEST_F(RegAllocLinearScanTest, ARM64Regs)
 }
 
 /**
- * TODO(a.popov) Support test-case
+ * NOTE(a.popov) Support test-case
  *
  * The way to allocate registers in this test is to spill onе of the source registers on the stack:
  * A -> r1

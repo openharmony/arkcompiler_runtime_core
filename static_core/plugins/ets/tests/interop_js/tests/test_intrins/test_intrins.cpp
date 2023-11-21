@@ -55,7 +55,7 @@ TEST_F(EtsInteropJsIntrinsTest, test_convertors)
     ASSERT_EQ(true, CallEtsMethod<bool>("test_number"));
     ASSERT_EQ(true, CallEtsMethod<bool>("test_string"));
     ASSERT_EQ(true, CallEtsMethod<bool>("test_object"));
-    // TODO(vpukhov): symbol, function, external, bigint
+    // NOTE(vpukhov): symbol, function, external, bigint
 
     ASSERT_EQ(true, CallEtsMethod<bool>("test_string_ops"));
 }
@@ -108,7 +108,9 @@ TEST_F(EtsInteropJsIntrinsTest, test_lambda_proxy)
 TEST_F(EtsInteropJsIntrinsTest, test_exception_forwarding)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("test_exception_forwarding_fromjs"));
+#if INTEROP_14501  // NOTE: vpukhov. re-enable #14501
     ASSERT_EQ(true, CallEtsMethod<bool>("test_exception_forwarding_fromets"));
+#endif
     ASSERT_EQ(true, CallEtsMethod<bool>("test_exception_forwarding_recursive"));
     ASSERT_EQ(true, CallEtsMethod<bool>("test_core_error_forwarding"));
 }

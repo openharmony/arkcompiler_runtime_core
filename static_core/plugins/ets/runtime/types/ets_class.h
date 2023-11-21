@@ -282,19 +282,19 @@ public:
 
     bool IsLambdaClass() const
     {
-        // TODO(petr-shumilov): Make more clear
+        // NOTE(petr-shumilov): Make more clear
         return !GetRuntimeClass()->IsPrimitive() && GetRuntimeClass()->GetName().rfind(LAMBDA_PREFIX, 0) == 0;
     }
 
     bool IsUnionClass() const
     {
-        // TODO(petr-shumilov): Not implemented
+        // NOTE(petr-shumilov): Not implemented
         return false;
     }
 
     bool IsUndefined() const
     {
-        // TODO(petr-shumilov): Not implemented
+        // NOTE(petr-shumilov): Not implemented
         return false;
     }
 
@@ -312,7 +312,7 @@ public:
 
     bool IsTupleClass() const
     {
-        // TODO(petr-shumilov): Not implemented
+        // NOTE(petr-shumilov): Not implemented
         return false;
     }
 

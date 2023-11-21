@@ -1843,6 +1843,7 @@
 02.lexical_elements/07.keywords/types_6.ets
 02.lexical_elements/07.keywords/types_7.ets
 02.lexical_elements/07.keywords/types_9.ets
+02.lexical_elements/07.keywords/types_11.ets
 02.lexical_elements/07.keywords/types_n_10.ets
 02.lexical_elements/07.keywords/types_n_11.ets
 02.lexical_elements/07.keywords/types_n_2.ets

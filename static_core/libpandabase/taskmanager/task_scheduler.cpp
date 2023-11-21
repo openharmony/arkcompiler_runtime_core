@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ namespace panda::taskmanager {
 
 TaskScheduler *TaskScheduler::instance_ = nullptr;
 
-TaskScheduler::TaskScheduler(size_t workers_count) : workers_count_(workers_count) {}
+TaskScheduler::TaskScheduler(size_t workers_count) : workers_count_(workers_count), gen_(std::random_device()()) {}
 
 /* static */
 TaskScheduler *TaskScheduler::Create(size_t threads_count)
@@ -45,7 +45,7 @@ void TaskScheduler::Destroy()
     instance_ = nullptr;
 }
 
-TaskQueueId TaskScheduler::RegisterQueue(TaskQueue *queue)
+TaskQueueId TaskScheduler::RegisterQueue(internal::SchedulableTaskQueueInterface *queue)
 {
     os::memory::LockHolder lock_holder(task_manager_lock_);
     ASSERT(!start_);
@@ -54,7 +54,7 @@ TaskQueueId TaskScheduler::RegisterQueue(TaskQueue *queue)
         return INVALID_TASKQUEUE_ID;
     }
     task_queues_[id] = queue;
-    queue->SubscribeCallbackToAddTask(
+    queue->SetNewTasksCallback(
         [this](TaskProperties properties, size_t count) { this->IncrementNewTaskCounter(properties, count); });
     return id;
 }
@@ -68,15 +68,6 @@ void TaskScheduler::Initialize()
         workers_.push_back(new WorkerThread(
             [this](const TaskPropertiesCounterMap &counter_map) { this->IncrementFinishedTaskCounter(counter_map); }));
     }
-}
-
-size_t TaskScheduler::AddTask(Task &&task)
-{
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: AddTask({ type:" << task.GetTaskProperties().GetTaskType() << "})";
-    TaskQueueId id(task.GetTaskProperties().GetTaskType(), task.GetTaskProperties().GetVMType());
-    ASSERT(task_queues_.find(id) != task_queues_.end());
-    auto size = task_queues_[id]->AddTask(std::move(task));
-    return size;
 }
 
 bool TaskScheduler::FillWithTasks(WorkerThread *worker, size_t tasks_count)
@@ -114,20 +105,20 @@ Task TaskScheduler::GetNextTask()
     size_t kinetic_max = 0;
     std::tie(kinetic_max, std::ignore) = *kinetic_priorities.rbegin();  // Get key of the last element in map
 
-    // NOLINTNEXTLINE(cert-msc50-cpp)
-    size_t choice = std::rand() % kinetic_max;  // Get random number in range [0, kinetic_max)
-    TaskQueue *queue = nullptr;
+    std::uniform_int_distribution<size_t> distribution(0U, kinetic_max - 1U);
+    size_t choice = distribution(gen_);  // Get random number in range [0, kinetic_max)
+    internal::SchedulableTaskQueueInterface *queue = nullptr;
     std::tie(std::ignore, queue) = *kinetic_priorities.upper_bound(choice);  // Get queue of chosen element
 
     return queue->PopTask().value();
 }
 
-std::map<size_t, TaskQueue *> TaskScheduler::GetKineticPriorities() const
+std::map<size_t, internal::SchedulableTaskQueueInterface *> TaskScheduler::GetKineticPriorities() const
 {
     ASSERT(!task_queues_.empty());  // no TaskQueues
     size_t kinetic_sum = 0;
-    std::map<size_t, TaskQueue *> kinetic_priorities;
-    TaskQueue *queue = nullptr;
+    std::map<size_t, internal::SchedulableTaskQueueInterface *> kinetic_priorities;
+    internal::SchedulableTaskQueueInterface *queue = nullptr;
     for (auto &traits_queue_pair : task_queues_) {
         std::tie(std::ignore, queue) = traits_queue_pair;
         if (queue->IsEmpty()) {
@@ -146,7 +137,7 @@ void TaskScheduler::PutTaskInWorker(WorkerThread *worker, Task &&task)
 
 bool TaskScheduler::AreQueuesEmpty() const
 {
-    TaskQueue *queue = nullptr;
+    internal::SchedulableTaskQueueInterface *queue = nullptr;
     for (const auto &traits_queue_pair : task_queues_) {
         std::tie(std::ignore, queue) = traits_queue_pair;
         if (!queue->IsEmpty()) {
@@ -172,7 +163,7 @@ std::optional<Task> TaskScheduler::GetTaskFromQueue(TaskQueueId id, TaskExecutio
         }
         LOG(FATAL, COMMON) << "Attempt to take a task from a non-existent queue";
     }
-    TaskQueue *queue = nullptr;
+    internal::SchedulableTaskQueueInterface *queue = nullptr;
     std::tie(std::ignore, queue) = *task_queues_iterator;
     if (!queue->HasTaskWithExecutionMode(mode)) {
         return std::nullopt;
@@ -211,12 +202,6 @@ void TaskScheduler::Finalize()
         worker->Join();
         delete worker;
     }
-    TaskQueue *queue = nullptr;
-    for (auto &traits_queue_pair : task_queues_) {
-        std::tie(std::ignore, queue) = traits_queue_pair;
-        queue->UnsubscribeCallback();
-    }
-    task_queues_.clear();
     LOG(DEBUG, RUNTIME) << "TaskScheduler: Finalized";
 }
 
@@ -240,6 +225,8 @@ TaskScheduler::~TaskScheduler()
 {
     // We can delete TaskScheduler if it wasn't started or it was finished
     ASSERT(start_ == finish_);
+    // Check if all task queue was deleted
+    ASSERT(task_queues_.empty());
     LOG(DEBUG, RUNTIME) << "TaskScheduler: ~TaskScheduler: All threads finished jobs";
 }
 

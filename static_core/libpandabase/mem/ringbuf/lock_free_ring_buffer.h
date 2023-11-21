@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,6 @@ public:
 
         // Atomic with acquire order reason: get the latest value
         auto current_head = head_index_.load(std::memory_order_acquire);
-
         // Atomic with acquire order reason: get the latest value
         if (current_head == tail_index_.load(std::memory_order_acquire)) {
             return false;

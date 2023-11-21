@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,17 +31,16 @@ bool IsAccWriteBetween(compiler::Inst *src_inst, compiler::Inst *dst_inst)
     while (inst != dst_inst) {
         if (UNLIKELY(inst == nullptr)) {
             do {
-                // TODO(rtakacs): visit all the successors to get information about the
+                // NOTE(rtakacs): visit all the successors to get information about the
                 // accumulator usage. Only linear flow is supported right now.
-                if (block->GetSuccsBlocks().size() > 1) {
+                if (block->GetSuccsBlocks().size() > 1U) {
                     return true;
                 }
 
-                ASSERT(block->GetSuccsBlocks().size() == 1);
-                block = block->GetSuccessor(0);
-
-                // TODO(rtakacs): only linear flow is supported right now.
-                if (!dst_inst->IsPhi() && block->GetPredsBlocks().size() > 1) {
+                ASSERT(block->GetSuccsBlocks().size() == 1U);
+                block = block->GetSuccessor(0U);
+                // NOTE(rtakacs): only linear flow is supported right now.
+                if (!dst_inst->IsPhi() && block->GetPredsBlocks().size() > 1U) {
                     return true;
                 }
             } while (block->IsEmpty() && !block->HasPhi());
@@ -159,7 +158,7 @@ bool RegAccAlloc::CanUserReadAcc(compiler::Inst *inst, compiler::Inst *user) con
     }
 
     if (user->IsCall()) {
-        return user->GetInputsCount() <= (MAX_NUM_NON_RANGE_ARGS + 1);  // +1 for SaveState
+        return user->GetInputsCount() <= (MAX_NUM_NON_RANGE_ARGS + 1U);  // +1 for SaveState
     }
 
     return user->GetInput(AccReadIndex(user)).GetInst() == inst || IsCommutative(user);
@@ -174,7 +173,7 @@ bool RegAccAlloc::IsPhiAccReady(compiler::Inst *phi) const
 {
     ASSERT(phi->GetOpcode() == compiler::Opcode::Phi);
 
-    // TODO(rtakacs): there can be cases when the input/output of a Phi is an other Phi.
+    // NOTE(rtakacs): there can be cases when the input/output of a Phi is an other Phi.
     // These cases are not optimized for accumulator.
     for (auto input : phi->GetInputs()) {
         compiler::Inst *phi_input = input.GetInst();
@@ -257,7 +256,7 @@ bool RegAccAlloc::RunImpl()
     }
 
     // Drop the pass if the function contains unsupported opcodes
-    // TODO(rtakacs): support these opcodes.
+    // NOTE(rtakacs): support these opcodes.
     if (!GetGraph()->IsDynamicMethod()) {
         for (auto block : GetGraph()->GetBlocksRPO()) {
             for (auto inst : block->AllInsts()) {
@@ -320,7 +319,7 @@ bool RegAccAlloc::RunImpl()
         }
 
         for (auto inst : block->Insts()) {
-            if (inst->GetInputsCount() == 0) {
+            if (inst->GetInputsCount() == 0U) {
                 continue;
             }
 

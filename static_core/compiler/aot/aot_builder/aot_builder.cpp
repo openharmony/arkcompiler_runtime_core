@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,7 +121,7 @@ void AotBuilder::FillHeader(const std::string &cmdline, const std::string &file_
 {
     aot_header_.magic = compiler::AotFile::MAGIC;
     aot_header_.version = compiler::AotFile::VERSION;
-    aot_header_.checksum = 0;  // TODO(msherstennikov)
+    aot_header_.checksum = 0;  // NOTE(msherstennikov)
     ASSERT(GetRuntime() != nullptr);
     aot_header_.environment_checksum = GetRuntime()->GetEnvironmentChecksum(arch_);
     aot_header_.arch = static_cast<uint32_t>(arch_);

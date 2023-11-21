@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H_
-#define PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H_
+#ifndef PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H
+#define PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H
 
 #include "assembler/assembly-emitter.h"
 #include "assembler/assembly-program.h"
@@ -29,4 +29,4 @@ PANDA_PUBLIC_API bool OptimizeBytecode(pandasm::Program *prog, const pandasm::As
                                        bool has_memory_pool = false);
 }  // namespace panda::bytecodeopt
 
-#endif  // PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H_
+#endif  // PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H

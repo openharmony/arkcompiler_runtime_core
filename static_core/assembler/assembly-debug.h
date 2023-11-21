@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ namespace panda::pandasm::debuginfo {
 struct Ins {
     size_t line_number = 0;
     uint32_t column_number = 0;
-    std::string whole_line;  // TODO(mbolshov): redundant given file and line_number
+    std::string whole_line;  // NOTE(mbolshov): redundant given file and line_number
     size_t bound_left = 0;
     size_t bound_right = 0;
 

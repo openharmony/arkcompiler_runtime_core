@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ bool GCWorker::AddTask(PandaUniquePtr<GCTask> task)
             this->RunGC(std::move(gc_task));
         };
         auto gc_taskmanager_task = taskmanager::Task::Create(GC_WORKER_TASK_PROPERTIES, gc_runner);
-        taskmanager::TaskScheduler::GetTaskScheduler()->AddTask(std::move(gc_taskmanager_task));
+        gc_->GetWorkersTaskQueue()->AddTask(std::move(gc_taskmanager_task));
     }
     return was_added;
 }

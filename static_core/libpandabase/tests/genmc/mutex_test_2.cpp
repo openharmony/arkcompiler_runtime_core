@@ -32,8 +32,7 @@ static void *ThreadN(void *arg)
 {
     intptr_t index = reinterpret_cast<intptr_t>(arg);
 
-    bool ret;
-    ret = MutexLock(&g_x, true);
+    bool ret = MutexLock(&g_x, true);
     __VERIFIER_assume(ret);
     g_shared = index;
     int r = g_shared;

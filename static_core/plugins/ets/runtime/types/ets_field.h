@@ -74,7 +74,7 @@ public:
 
     bool IsReadonly() const
     {
-        // TODO(shumilov-petr): Need to dump extra info in frontend
+        // NOTE(shumilov-petr): Need to dump extra info in frontend
         return false;
     }
 

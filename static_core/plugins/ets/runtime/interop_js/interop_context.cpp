@@ -137,7 +137,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     // To catch `TypeError` or `UserError extends TypeError`
     // 1. Frontend puts catch(compat/TypeError) { <instanceof-rethrow? if UserError expected> }
     //    Where js.UserError will be wrapped into compat/TypeError
-    //    TODO(vpukhov): compat: add intrinsic to obtain JSValue from compat/ instances
+    //    NOTE(vpukhov): compat: add intrinsic to obtain JSValue from compat/ instances
 
     auto obj_refconv = JSRefConvertResolve(ctx, ctx->GetObjectClass());
     LocalObjectHandle<EtsObject> ets_obj(coro, obj_refconv->Unwrap(ctx, val));
@@ -153,7 +153,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
         return;
     }
 
-    // TODO(vpukhov): should throw a special error (JSError?) with cause set
+    // NOTE(vpukhov): should throw a special error (JSError?) with cause set
     auto exc = JSConvertJSError::Unwrap(ctx, ctx->GetJSEnv(), val);
     if (LIKELY(exc.has_value())) {
         ASSERT(exc != nullptr);

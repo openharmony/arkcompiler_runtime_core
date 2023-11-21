@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ class BaseMemStatsTest : public testing::Test {
 protected:
     void SetUp() override
     {
-        panda::mem::MemConfig::Initialize(128_MB, 64_MB, 64_MB, 32_MB, 0, 0);
+        panda::mem::MemConfig::Initialize(128_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
         PoolManager::Initialize();
     }
 
@@ -60,19 +60,19 @@ TEST_F(BaseMemStatsTest, AllocationsOverAllocator)
     CodeAllocator ca(&stats);
 
     // NOLINTBEGIN(modernize-avoid-c-arrays)
-    uint8_t buff1[] = {0xCC};
-    uint8_t buff2[] = {0xCC, 0xCC, 0xCC};
+    uint8_t buff1[] = {0xCCU};
+    uint8_t buff2[] = {0xCCU, 0xCCU, 0xCCU};
     // NOLINTEND(modernize-avoid-c-arrays)
     size_t size1 = sizeof(buff1);
     size_t size2 = sizeof(buff2);
 
     // NOLINTBEGIN(clang-analyzer-deadcode.DeadStores)
-    tmp = ca.AllocateCode(size1, static_cast<void *>(&buff1[0]));
-    tmp = ca.AllocateCode(sizeof(buff2), static_cast<void *>(&buff2[0]));
+    tmp = ca.AllocateCode(size1, static_cast<void *>(&buff1[0U]));
+    tmp = ca.AllocateCode(sizeof(buff2), static_cast<void *>(&buff2[0U]));
     // NOLINTEND(clang-analyzer-deadcode.DeadStores)
 
     ASSERT_EQ(size1 + size2, stats.GetAllocated(SpaceType::SPACE_TYPE_CODE));
-    ASSERT_EQ(0, stats.GetFreed(SpaceType::SPACE_TYPE_CODE));
+    ASSERT_EQ(0U, stats.GetFreed(SpaceType::SPACE_TYPE_CODE));
     ASSERT_EQ(size1 + size2, stats.GetFootprint(SpaceType::SPACE_TYPE_CODE));
 
     stats.RecordFreeRaw(size2, SpaceType::SPACE_TYPE_CODE);

@@ -170,7 +170,7 @@ public:
 
     void GarbageCollectionFinish() override
     {
-        // TODO(dtrubenkov): Add an assertion when 2125 issue is resolved
+        // NOTE(dtrubenkov): Add an assertion when 2125 issue is resolved
         // ASSERT(ManagedThread::GetCurrent() == nullptr)
         // Atomic with acquire order reason: data race with hooks_
         auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
@@ -185,7 +185,7 @@ public:
 
     void GarbageCollectionStart() override
     {
-        // TODO(dtrubenkov): Add an assertion when 2125 issue is resolved
+        // NOTE(dtrubenkov): Add an assertion when 2125 issue is resolved
         // ASSERT(ManagedThread::GetCurrent() == nullptr)
         // Atomic with acquire order reason: data race with hooks_
         auto *loaded_hooks = hooks_.load(std::memory_order_acquire);

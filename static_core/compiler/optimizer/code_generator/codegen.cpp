@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,7 @@ class OsrEntryStub {
                     }
                     break;
                 }
-                // TODO (ekudriashov): UnresolvedLoadAndInitClass
+                // NOTE (ekudriashov): UnresolvedLoadAndInitClass
                 default:
                     break;
             }
@@ -400,10 +400,9 @@ bool Codegen::VisitGraph()
             SCOPED_DISASM_INST(this, inst);
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
-            if (GetGraph()->IsLineDebugInfoEnabled()) {
-                if (auto debug_info = inst->GetDebugInfo(); debug_info != nullptr) {
-                    debug_info->SetOffset(GetEncoder()->GetCursorOffset());
-                }
+            auto debug_info = inst->GetDebugInfo();
+            if (GetGraph()->IsLineDebugInfoEnabled() && debug_info != nullptr) {
+                debug_info->SetOffset(GetEncoder()->GetCursorOffset());
             }
 #endif
             visitor.VisitInstruction(inst);
@@ -520,7 +519,7 @@ void Codegen::IssueDisasm()
                 pc = new_pc;
             }
         } else if (std::holds_alternative<std::string>(item)) {
-            stream << std::get<std::string>(item);
+            stream << (std::get<std::string>(item));
         }
     }
 }
@@ -574,28 +573,7 @@ bool Codegen::RunImpl()
         }
     }
 
-    if (GetDisasm()->IsEnabled()) {
-        GetDisasm()->PrintMethodEntry(this);
-    }
-
-    if (!BeginMethod()) {
-        return false;
-    }
-
-    if (!VisitGraph()) {
-        return false;
-    }
-    EndMethod();
-
-    if (!CopyToCodeCache()) {
-        return false;
-    }
-
-    if (GetDisasm()->IsEnabled()) {
-        IssueDisasm();
-    }
-
-    return true;
+    return Finalize();
 }
 
 void Codegen::Initialize()
@@ -664,6 +642,32 @@ void Codegen::Initialize()
             }
         }
     }
+}
+
+bool Codegen::Finalize()
+{
+    if (GetDisasm()->IsEnabled()) {
+        GetDisasm()->PrintMethodEntry(this);
+    }
+
+    if (!BeginMethod()) {
+        return false;
+    }
+
+    if (!VisitGraph()) {
+        return false;
+    }
+    EndMethod();
+
+    if (!CopyToCodeCache()) {
+        return false;
+    }
+
+    if (GetDisasm()->IsEnabled()) {
+        IssueDisasm();
+    }
+
+    return true;
 }
 
 Reg Codegen::ConvertRegister(Register r, DataType::Type type)
@@ -823,12 +827,10 @@ void Codegen::CreateStackMap(Inst *inst, Inst *user)
     if (user == nullptr) {
         user = inst;
         if (inst == save_state && inst->HasUsers()) {
-            for (auto &u : inst->GetUsers()) {
-                if (u.GetInst()->GetOpcode() != Opcode::ReturnInlined) {
-                    user = u.GetInst();
-                    break;
-                }
-            }
+            auto users = inst->GetUsers();
+            auto it = std::find_if(users.begin(), users.end(),
+                                   [](auto &u) { return u.GetInst()->GetOpcode() != Opcode::ReturnInlined; });
+            user = it->GetInst();
         }
     }
     CreateStackMapRec(save_state, require_vreg_map, user);
@@ -1109,7 +1111,6 @@ void Codegen::CreateNewObjCall(NewObjectInst *new_obj)
     auto runtime = GetRuntime();
 
     auto max_tlab_size = runtime->GetTLABMaxSize();
-
     if (max_tlab_size == 0 ||
         (init_class->GetOpcode() != Opcode::LoadAndInitClass && init_class->GetOpcode() != Opcode::LoadImmediate)) {
         CallRuntime(new_obj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
@@ -1389,7 +1390,7 @@ void Codegen::IntfInlineCachePass(ResolveVirtualInst *resolver, Reg method_reg, 
     // -----------------------------------------------
     auto aot_data = GetGraph()->GetAotData();
     uint64_t intf_inline_cache_index = aot_data->GetIntfInlineCacheIndex();
-    // TODO(liyiming): do LoadMethod in irtoc to reduce use tmp reg
+    // NOTE(liyiming): do LoadMethod in irtoc to reduce use tmp reg
     if (obj_reg.GetId() != tmp_reg.GetId()) {
         auto reg_tmp_64 = tmp_reg.As(INT64_TYPE);
         uint64_t offset =
@@ -1819,7 +1820,6 @@ void Codegen::CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved, bool store
     TryInsertImplicitNullCheck(inst, prev_offset);
     if constexpr (IS_CLASS) {
         enc->EncodeLdr(tmp_ref, false, MemRef(tmp_ref, runtime->GetManagedClassOffset(GetArch())));
-
     } else {
         CheckObject(tmp_ref, label);
     }
@@ -2857,6 +2857,26 @@ void EncodeVisitor::VisitFillConstArray(GraphVisitor *visitor, Inst *inst)
     }
 }
 
+static void GetEntryPointId(uint64_t element_size, RuntimeInterface::EntrypointId &eid)
+{
+    switch (element_size) {
+        case sizeof(uint8_t):
+            eid = RuntimeInterface::EntrypointId::ALLOCATE_ARRAY_TLAB8;
+            break;
+        case sizeof(uint16_t):
+            eid = RuntimeInterface::EntrypointId::ALLOCATE_ARRAY_TLAB16;
+            break;
+        case sizeof(uint32_t):
+            eid = RuntimeInterface::EntrypointId::ALLOCATE_ARRAY_TLAB32;
+            break;
+        case sizeof(uint64_t):
+            eid = RuntimeInterface::EntrypointId::ALLOCATE_ARRAY_TLAB64;
+            break;
+        default:
+            UNREACHABLE();
+    }
+}
+
 void Codegen::VisitNewArray(Inst *inst)
 {
     auto method = inst->CastToNewArray()->GetMethod();
@@ -2868,8 +2888,7 @@ void Codegen::VisitNewArray(Inst *inst)
     auto encoder = GetEncoder();
 
     auto max_tlab_size = runtime->GetTLABMaxSize();
-
-    // TODO(msherstennikov): support NewArray fast path for arm32
+    // NOTE(msherstennikov): support NewArray fast path for arm32
     if (max_tlab_size == 0 || GetArch() == Arch::AARCH32) {
         CallRuntime(inst, EntrypointId::CREATE_ARRAY, dst, RegMask::GetZeroMask(), src_class, src_size);
         if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
@@ -2897,23 +2916,7 @@ void Codegen::VisitNewArray(Inst *inst)
     }
 
     EntrypointId eid;
-    switch (element_size) {
-        case sizeof(uint8_t):
-            eid = EntrypointId::ALLOCATE_ARRAY_TLAB8;
-            break;
-        case sizeof(uint16_t):
-            eid = EntrypointId::ALLOCATE_ARRAY_TLAB16;
-            break;
-        case sizeof(uint32_t):
-            eid = EntrypointId::ALLOCATE_ARRAY_TLAB32;
-            break;
-        case sizeof(uint64_t):
-            eid = EntrypointId::ALLOCATE_ARRAY_TLAB64;
-            break;
-        default:
-            UNREACHABLE();
-    }
-
+    GetEntryPointId(element_size, eid);
     CallFastPath(inst, eid, dst, RegMask::GetZeroMask(), src_class, src_size);
     if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
         encoder->EncodeMemoryBarrier(memory_order::RELEASE);
@@ -2936,7 +2939,6 @@ void EncodeVisitor::VisitParameter(GraphVisitor *visitor, Inst *inst)
     auto codegen = enc->GetCodegen();
     auto param_inst = inst->CastToParameter();
     auto sf = param_inst->GetLocationData();
-
     if (sf.GetSrc() == sf.GetDst()) {
         return;
     }
@@ -3937,7 +3939,7 @@ void EncodeVisitor::VisitStoreResolvedObjectFieldStatic(GraphVisitor *visitor, I
 void EncodeVisitor::VisitNewObject(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    // TODO(msherstennikov): use irtoced entrypoint once spill-fills will be supported for entrypoints mode.
+    // NOTE(msherstennikov): use irtoced entrypoint once spill-fills will be supported for entrypoints mode.
     if (enc->cg_->GetArch() == Arch::AARCH32) {
         enc->GetCodegen()->CreateNewObjCallOld(inst->CastToNewObject());
     } else {
@@ -4199,7 +4201,6 @@ void EncodeVisitor::VisitCheckCast(GraphVisitor *visitor, Inst *inst)
     auto encoder = enc->GetEncoder();
 
     auto klass_type = inst->CastToCheckCast()->GetClassType();
-
     if (klass_type == ClassType::UNRESOLVED_CLASS) {
         FillUnresolvedClass(visitor, inst);
         return;
@@ -5343,7 +5344,7 @@ void EncodeVisitor::VisitCastValueToAnyType(GraphVisitor *visitor, Inst *inst)
     auto enc = static_cast<EncodeVisitor *>(visitor);
     const auto *cvai = inst->CastToCastValueToAnyType();
 
-    /* // TODO(vpukhov): AnyConst
+    /* // NOTE(vpukhov): AnyConst
     if (cvai->GetInputType(0) == DataType::Type::ANY) {
         enc->GetEncoder()->EncodeAbort();
         UNREACHABLE();
@@ -5405,43 +5406,15 @@ void EncodeVisitor::VisitObjByIndexCheck(GraphVisitor *visitor, Inst *inst)
         UNREACHABLE();
     }
     auto id = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::ANY_TYPE_CHECK)->GetLabel();
-
     if (TryObjByIndexCheckPluginGen(check_inst, enc, id)) {
         return;
     }
     UNREACHABLE();
 }
 
-/**
- * Returns true if codegen emits call(s) to some library function(s)
- * while processing the instruction.
- */
-bool Codegen::InstEncodedWithLibCall(const Inst *inst, Arch arch)
+static bool GetNeedBarrierProperty(const Inst *inst)
 {
-    ASSERT(inst != nullptr);
     Opcode op = inst->GetOpcode();
-    if (op == Opcode::Mod) {
-        auto dst_type = inst->GetType();
-        if (arch == Arch::AARCH64 || arch == Arch::X86_64) {
-            return dst_type == DataType::FLOAT32 || dst_type == DataType::FLOAT64;
-        }
-        return arch == Arch::AARCH32;
-    }
-    if (op == Opcode::Div && arch == Arch::AARCH32) {
-        auto dst_type = inst->GetType();
-        return dst_type == DataType::INT64 || dst_type == DataType::UINT64;
-    }
-    if (op == Opcode::Cast && arch == Arch::AARCH32) {
-        auto dst_type = inst->GetType();
-        auto src_type = inst->GetInputType(0);
-        if (dst_type == DataType::FLOAT32 || dst_type == DataType::FLOAT64) {
-            return src_type == DataType::INT64 || src_type == DataType::UINT64;
-        }
-        if (src_type == DataType::FLOAT32 || src_type == DataType::FLOAT64) {
-            return dst_type == DataType::INT64 || dst_type == DataType::UINT64;
-        }
-        return false;
-    }
     if (op == Opcode::LoadObject) {
         return inst->CastToLoadObject()->GetNeedBarrier();
     }
@@ -5479,6 +5452,40 @@ bool Codegen::InstEncodedWithLibCall(const Inst *inst, Arch arch)
         return inst->CastToStoreStatic()->GetNeedBarrier();
     }
     return false;
+}
+
+/**
+ * Returns true if codegen emits call(s) to some library function(s)
+ * while processing the instruction.
+ */
+bool Codegen::InstEncodedWithLibCall(const Inst *inst, Arch arch)
+{
+    ASSERT(inst != nullptr);
+    Opcode op = inst->GetOpcode();
+    if (op == Opcode::Mod) {
+        auto dst_type = inst->GetType();
+        if (arch == Arch::AARCH64 || arch == Arch::X86_64) {
+            return dst_type == DataType::FLOAT32 || dst_type == DataType::FLOAT64;
+        }
+        return arch == Arch::AARCH32;
+    }
+    if (op == Opcode::Div && arch == Arch::AARCH32) {
+        auto dst_type = inst->GetType();
+        return dst_type == DataType::INT64 || dst_type == DataType::UINT64;
+    }
+    if (op == Opcode::Cast && arch == Arch::AARCH32) {
+        auto dst_type = inst->GetType();
+        auto src_type = inst->GetInputType(0);
+        if (dst_type == DataType::FLOAT32 || dst_type == DataType::FLOAT64) {
+            return src_type == DataType::INT64 || src_type == DataType::UINT64;
+        }
+        if (src_type == DataType::FLOAT32 || src_type == DataType::FLOAT64) {
+            return dst_type == DataType::INT64 || dst_type == DataType::UINT64;
+        }
+        return false;
+    }
+
+    return GetNeedBarrierProperty(inst);
 }
 
 Reg Codegen::ConvertInstTmpReg(const Inst *inst, DataType::Type type) const

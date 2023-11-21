@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ class CompiledMethod {
 public:
     CompiledMethod(Arch arch, Method *method, size_t index) : arch_(arch), method_(method), index_(index) {}
     NO_COPY_OPERATOR(CompiledMethod);
-    DEFAULT_COPY_CTOR(CompiledMethod)
+    DEFAULT_COPY_CTOR(CompiledMethod);
     DEFAULT_MOVE_SEMANTIC(CompiledMethod);
     ~CompiledMethod() = default;
 

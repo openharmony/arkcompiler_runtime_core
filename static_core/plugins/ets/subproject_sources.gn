@@ -58,7 +58,6 @@ arkbytecodeopt_deps =
     [ "$_plugin_dir:isa_gen_ets_bytecodeopt_ets_codegen_intrinsics_gen_inc" ]
 
 arkruntime_deps = [
-  "$ark_es2panda_root:libes2panda_frontend_static",
   "$ark_root/assembler:libarktsassembler_frontend_static",
   "$ark_root/libpandafile:libarktsfile_frontend_static",
 ]

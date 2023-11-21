@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include "libpandabase/taskmanager/task_queue.h"
 #include <vector>
 #include <map>
+#include <random>
 
 namespace panda::taskmanager {
 
@@ -49,25 +50,50 @@ public:
     /// @brief Deletes the existed TaskScheduler. You should not use it if you didn't use Create before.
     PANDA_PUBLIC_API static void Destroy();
 
-    /**
-     * @brief Registers a queue that was created externally. It should be valid until all workers finish, and the queue
-     * should have a unique set of TaskType and VMType fields. You can not use this method after Initialize() method
-     * @param queue: pointer to a valid TaskQueue.
-     * @return TaskQueueId of queue that was added. If queue with same TaskType and VMType is already added, method
-     * returns INVALID_TASKQUEUE_ID
-     */
-    PANDA_PUBLIC_API TaskQueueId RegisterQueue(TaskQueue *queue);
-
     /// @brief Creates and starts workers with registered queues. After this method, you can not register new queues.
     PANDA_PUBLIC_API void Initialize();
 
     /**
-     * @brief Adds new task in the queue specified for the inserted for it. Should be used by other task that want to
-     * add new ones. @arg task should have a queue inside Task Managed to be added in it. @return the size of the queue
-     * after the task was added to it.
-     * @param task - task that will be added in one queue with the same TaskType and VMType.
+     * @brief Method allocates, constructs and registers TaskQueue. If it already exists, method returns nullptr.
+     * @param task_type - TaskType of future TaskQueue.
+     * @param vm_type - VMType of future TaskQueue.
+     * @param priority - value of priority:
+     * TaskQueueInterface::MIN_PRIORITY <= priority <= TaskQueueInterface::MIN_PRIORITY
+     * @tparam Allocator - allocator of Task that will be used in internal queues. By default is used
+     * std::allocator<Task>
      */
-    PANDA_PUBLIC_API size_t AddTask(Task &&task);
+    template <class Allocator = std::allocator<Task>>
+    PANDA_PUBLIC_API TaskQueueInterface *CreateAndRegisterTaskQueue(
+        TaskType task_type, VMType vm_type, uint8_t priority = TaskQueueInterface::DEFAULT_PRIORITY)
+    {
+        auto *queue = internal::TaskQueue<Allocator>::Create(task_type, vm_type, priority);
+        if (UNLIKELY(queue == nullptr)) {
+            return nullptr;
+        }
+        auto id = RegisterQueue(queue);
+        if (UNLIKELY(id == INVALID_TASKQUEUE_ID)) {
+            internal::TaskQueue<Allocator>::Destroy(queue);
+            return nullptr;
+        }
+        return queue;
+    }
+
+    /**
+     * @brief Method Destroy and Unregister TaskQueue
+     * @param queue - TaskQueueInterface* of TaskQueue.
+     * @tparam Allocator - allocator of Task that will be used to deallocate TaskQueue. Use the same allocator as you
+     * have used in TaskScheduler::CreateAndRegisterTaskQueue method.
+     */
+    template <class Allocator = std::allocator<Task>>
+    PANDA_PUBLIC_API void UnregisterAndDestroyTaskQueue(TaskQueueInterface *queue)
+    {
+        TaskQueueId id(queue->GetTaskType(), queue->GetVMType());
+        auto *schedulable_queue = task_queues_[id];
+
+        schedulable_queue->UnsetNewTasksCallback();
+        task_queues_.erase(id);
+        internal::TaskQueue<Allocator>::Destroy(schedulable_queue);
+    }
 
     /**
      * @brief Fills @arg worker (local queues) with tasks. It will stop if the size of the queue is equal to @arg
@@ -107,6 +133,15 @@ public:
 private:
     explicit TaskScheduler(size_t workers_count);
 
+    /**
+     * @brief Registers a queue that was created externally. It should be valid until all workers finish, and the queue
+     * should have a unique set of TaskType and VMType fields. You can not use this method after Initialize() method
+     * @param queue: pointer to a valid TaskQueue.
+     * @return TaskQueueId of queue that was added. If queue with same TaskType and VMType is already added, method
+     * returns INVALID_TASKQUEUE_ID
+     */
+    PANDA_PUBLIC_API TaskQueueId RegisterQueue(internal::SchedulableTaskQueueInterface *queue);
+
     /// @brief Method pops one task from internal queues based on priorities.
     [[nodiscard]] Task GetNextTask() REQUIRES(task_manager_lock_);
 
@@ -121,7 +156,8 @@ private:
      * @brief This method @returns map from kinetic sum of non-empty queues to queues pointer
      * in the same order as they place in task_queues_. Use this method to choose next thread
      */
-    std::map<size_t, TaskQueue *> GetKineticPriorities() const REQUIRES(task_manager_lock_);
+    std::map<size_t, internal::SchedulableTaskQueueInterface *> GetKineticPriorities() const
+        REQUIRES(task_manager_lock_);
 
     /// @brief Checks if task queues are empty
     bool AreQueuesEmpty() const REQUIRES(task_manager_lock_);
@@ -158,7 +194,7 @@ private:
      * Since we can change the map only before creating the workers, we do not need to synchronize access after
      * Initialize method
      */
-    std::map<TaskQueueId, TaskQueue *> task_queues_;
+    std::map<TaskQueueId, internal::SchedulableTaskQueueInterface *> task_queues_;
 
     /**
      * task_manager_lock_ is used in case of access to shared resources operated by the task manager:
@@ -193,6 +229,8 @@ private:
      * - it was gotten by main thread;
      */
     TaskPropertiesCounterMap finished_tasks_count_ GUARDED_BY(task_manager_lock_);
+
+    std::mt19937 gen_;
 };
 
 }  // namespace panda::taskmanager

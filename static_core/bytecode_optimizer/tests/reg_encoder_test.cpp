@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,48 +30,48 @@ TEST_F(CommonTest, RegEncoderF32)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0.0).f32();
-        CONSTANT(1, 0.0).f32();
-        CONSTANT(2, 0.0).f32();
-        CONSTANT(3, 0.0).f32();
-        CONSTANT(4, 0.0).f32();
-        CONSTANT(5, 0.0).f32();
-        CONSTANT(6, 0.0).f32();
-        CONSTANT(7, 0.0).f32();
-        CONSTANT(8, 0.0).f32();
-        CONSTANT(9, 0.0).f32();
-        CONSTANT(10, 0.0).f32();
-        CONSTANT(11, 0.0).f32();
-        CONSTANT(12, 0.0).f32();
-        CONSTANT(13, 0.0).f32();
-        CONSTANT(14, 0.0).f32();
-        CONSTANT(15, 0.0).f32();
-        CONSTANT(16, 0.0).f32();
-        CONSTANT(17, 0.0).f32();
-        CONSTANT(18, 0.0).f32();
-        CONSTANT(19, 0.0).f32();
-        CONSTANT(20, 0.0).f32();
-        CONSTANT(21, 0.0).f32();
-        CONSTANT(22, 0.0).f32();
-        CONSTANT(23, 0.0).f32();
-        CONSTANT(24, 0.0).f32();
-        CONSTANT(25, 0.0).f32();
-        CONSTANT(26, 0.0).f32();
-        CONSTANT(27, 0.0).f32();
-        CONSTANT(28, 0.0).f32();
-        CONSTANT(29, 0.0).f32();
-        CONSTANT(30, 0.0).f32();
-        CONSTANT(31, 0.0).f32();
+        CONSTANT(0U, 0.0).f32();
+        CONSTANT(1U, 0.0).f32();
+        CONSTANT(2U, 0.0).f32();
+        CONSTANT(3U, 0.0).f32();
+        CONSTANT(4U, 0.0).f32();
+        CONSTANT(5U, 0.0).f32();
+        CONSTANT(6U, 0.0).f32();
+        CONSTANT(7U, 0.0).f32();
+        CONSTANT(8U, 0.0).f32();
+        CONSTANT(9U, 0.0).f32();
+        CONSTANT(10U, 0.0).f32();
+        CONSTANT(11U, 0.0).f32();
+        CONSTANT(12U, 0.0).f32();
+        CONSTANT(13U, 0.0).f32();
+        CONSTANT(14U, 0.0).f32();
+        CONSTANT(15U, 0.0).f32();
+        CONSTANT(16U, 0.0).f32();
+        CONSTANT(17U, 0.0).f32();
+        CONSTANT(18U, 0.0).f32();
+        CONSTANT(19U, 0.0).f32();
+        CONSTANT(20U, 0.0).f32();
+        CONSTANT(21U, 0.0).f32();
+        CONSTANT(22U, 0.0).f32();
+        CONSTANT(23U, 0.0).f32();
+        CONSTANT(24U, 0.0).f32();
+        CONSTANT(25U, 0.0).f32();
+        CONSTANT(26U, 0.0).f32();
+        CONSTANT(27U, 0.0).f32();
+        CONSTANT(28U, 0.0).f32();
+        CONSTANT(29U, 0.0).f32();
+        CONSTANT(30U, 0.0).f32();
+        CONSTANT(31U, 0.0).f32();
 
-        CONSTANT(32, 1.0).f64();
-        CONSTANT(33, 2.0).f64();
+        CONSTANT(32U, 1.0).f64();
+        CONSTANT(33U, 2.0).f64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             // NOLINTNEXTLINE(google-build-using-namespace)
             using namespace compiler::DataType;
-            INST(40, Opcode::Sub).f64().Inputs(32, 33);
-            INST(41, Opcode::Return).f64().Inputs(40);
+            INST(40U, Opcode::Sub).f64().Inputs(32U, 33U);
+            INST(41U, Opcode::Return).f64().Inputs(40U);
         }
     }
 
@@ -82,15 +82,15 @@ TEST_F(CommonTest, RegEncoderF32)
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
     {
-        CONSTANT(32, 1.0).f64();
-        CONSTANT(33, 2.0).f64();
+        CONSTANT(32U, 1.0).f64();
+        CONSTANT(33U, 2.0).f64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             // NOLINTNEXTLINE(google-build-using-namespace)
             using namespace compiler::DataType;
-            INST(40, Opcode::Sub).f64().Inputs(32, 33);
-            INST(41, Opcode::Return).f64().Inputs(40);
+            INST(40U, Opcode::Sub).f64().Inputs(32U, 33U);
+            INST(41U, Opcode::Return).f64().Inputs(40U);
         }
     }
 
@@ -99,7 +99,7 @@ TEST_F(CommonTest, RegEncoderF32)
 
 TEST_F(CommonTest, RegEncoderHoldingSpillFillInst)
 {
-    RuntimeInterfaceMock interface(2);
+    RuntimeInterfaceMock interface(2U);
     auto graph = CreateEmptyGraph();
     graph->SetRuntime(&interface);
     GRAPH(graph)
@@ -107,55 +107,55 @@ TEST_F(CommonTest, RegEncoderHoldingSpillFillInst)
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
 
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).b();
-        CONSTANT(26, 0xfffffffffffffffa).s64();
-        CONSTANT(27, 0x6).s64();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(26U, 0xfffffffffffffffaU).s64();
+        CONSTANT(27U, 0x6U).s64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::LoadObject).s64().Inputs(0);
-            INST(10, Opcode::LoadObject).s64().Inputs(0);
-            INST(11, Opcode::Add).s64().Inputs(10, 4);
-            CONSTANT(52, 0x5265c00).s64();
-            INST(15, Opcode::Div).s64().Inputs(11, 52);
-            INST(16, Opcode::Mul).s64().Inputs(15, 52);
-            INST(20, Opcode::Sub).s64().Inputs(16, 10);
-            CONSTANT(53, 0x2932e00).s64();
-            INST(22, Opcode::Add).s64().Inputs(20, 53);
-            INST(25, Opcode::IfImm).SrcType(BOOL).CC(compiler::CC_EQ).Imm(0).Inputs(1);
+            INST(4U, Opcode::LoadObject).s64().Inputs(0U);
+            INST(10U, Opcode::LoadObject).s64().Inputs(0U);
+            INST(11U, Opcode::Add).s64().Inputs(10U, 4U);
+            CONSTANT(52U, 0x5265c00U).s64();
+            INST(15U, Opcode::Div).s64().Inputs(11U, 52U);
+            INST(16U, Opcode::Mul).s64().Inputs(15U, 52U);
+            INST(20U, Opcode::Sub).s64().Inputs(16U, 10U);
+            CONSTANT(53U, 0x2932e00U).s64();
+            INST(22U, Opcode::Add).s64().Inputs(20U, 53U);
+            INST(25U, Opcode::IfImm).SrcType(BOOL).CC(compiler::CC_EQ).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 4) {}
+        BASIC_BLOCK(3U, 4U) {}
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(28, Opcode::Phi).s64().Inputs(26, 27);
-            CONSTANT(54, 0x36ee80).s64();
-            INST(31, Opcode::Mul).s64().Inputs(28, 54);
-            INST(32, Opcode::Add).s64().Inputs(31, 22);
-            INST(33, Opcode::SaveState).NoVregs();
-            INST(35, Opcode::CallVirtual).v0id().Inputs({{REFERENCE, 0}, {INT64, 32}, {NO_TYPE, 33}});
-            INST(36, Opcode::SaveState).NoVregs();
-            INST(37, Opcode::LoadAndInitClass).ref().Inputs(36);
-            INST(39, Opcode::SaveState).NoVregs();
-            INST(58, Opcode::InitObject).ref().Inputs({{REFERENCE, 37}, {REFERENCE, 0}, {NO_TYPE, 39}});
-            CONSTANT(55, 0.0093026).f64();
-            CONSTANT(56, 0.0098902).f64();
-            CONSTANT(57, 0x1388).s64();
-            INST(45, Opcode::SaveState).NoVregs();
-            INST(47, Opcode::CallStatic)
+            INST(28U, Opcode::Phi).s64().Inputs(26U, 27U);
+            CONSTANT(54U, 0x36ee80U).s64();
+            INST(31U, Opcode::Mul).s64().Inputs(28U, 54U);
+            INST(32U, Opcode::Add).s64().Inputs(31U, 22U);
+            INST(33U, Opcode::SaveState).NoVregs();
+            INST(35U, Opcode::CallVirtual).v0id().Inputs({{REFERENCE, 0U}, {INT64, 32U}, {NO_TYPE, 33U}});
+            INST(36U, Opcode::SaveState).NoVregs();
+            INST(37U, Opcode::LoadAndInitClass).ref().Inputs(36U);
+            INST(39U, Opcode::SaveState).NoVregs();
+            INST(58U, Opcode::InitObject).ref().Inputs({{REFERENCE, 37U}, {REFERENCE, 0U}, {NO_TYPE, 39U}});
+            CONSTANT(55U, 0.0093026).f64();
+            CONSTANT(56U, 0.0098902).f64();
+            CONSTANT(57U, 0x1388U).s64();
+            INST(45U, Opcode::SaveState).NoVregs();
+            INST(47U, Opcode::CallStatic)
                 .s64()
                 .Inputs({{REFERENCE, 0},
-                         {REFERENCE, 58},
-                         {BOOL, 1},
-                         {FLOAT64, 55},
-                         {FLOAT64, 56},
-                         {INT64, 57},
-                         {NO_TYPE, 45}});
-            INST(48, Opcode::SaveState).NoVregs();
-            INST(50, Opcode::CallVirtual).v0id().Inputs({{REFERENCE, 0}, {INT64, 4}, {NO_TYPE, 48}});
-            INST(51, Opcode::Return).s64().Inputs(47);
+                         {REFERENCE, 58U},
+                         {BOOL, 1U},
+                         {FLOAT64, 55U},
+                         {FLOAT64, 56U},
+                         {INT64, 57U},
+                         {NO_TYPE, 45U}});
+            INST(48U, Opcode::SaveState).NoVregs();
+            INST(50U, Opcode::CallVirtual).v0id().Inputs({{REFERENCE, 0U}, {INT64, 4U}, {NO_TYPE, 48U}});
+            INST(51U, Opcode::Return).s64().Inputs(47U);
         }
     }
 
@@ -167,62 +167,62 @@ TEST_F(CommonTest, RegEncoderHoldingSpillFillInst)
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
 
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).b();
-        CONSTANT(26, 0xfffffffffffffffa).s64();
-        CONSTANT(27, 0x6).s64();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(26U, 0xfffffffffffffffaU).s64();
+        CONSTANT(27U, 0x6U).s64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::LoadObject).s64().Inputs(0);
-            INST(10, Opcode::LoadObject).s64().Inputs(0);
-            INST(11, Opcode::Add).s64().Inputs(10, 4);
-            CONSTANT(52, 0x5265c00).s64();
-            INST(15, Opcode::Div).s64().Inputs(11, 52);
-            INST(16, Opcode::Mul).s64().Inputs(15, 52);
-            INST(20, Opcode::Sub).s64().Inputs(16, 10);
-            CONSTANT(53, 0x2932e00).s64();
-            INST(22, Opcode::Add).s64().Inputs(20, 53);
-            INST(25, Opcode::IfImm).SrcType(BOOL).CC(compiler::CC_EQ).Imm(0).Inputs(1);
+            INST(4U, Opcode::LoadObject).s64().Inputs(0U);
+            INST(10U, Opcode::LoadObject).s64().Inputs(0U);
+            INST(11U, Opcode::Add).s64().Inputs(10U, 4U);
+            CONSTANT(52U, 0x5265c00U).s64();
+            INST(15U, Opcode::Div).s64().Inputs(11U, 52U);
+            INST(16U, Opcode::Mul).s64().Inputs(15U, 52U);
+            INST(20U, Opcode::Sub).s64().Inputs(16U, 10U);
+            CONSTANT(53U, 0x2932e00U).s64();
+            INST(22U, Opcode::Add).s64().Inputs(20U, 53U);
+            INST(25U, Opcode::IfImm).SrcType(BOOL).CC(compiler::CC_EQ).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
             // SpillFill added
-            INST(60, Opcode::SpillFill);
+            INST(60U, Opcode::SpillFill);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(28, Opcode::Phi).s64().Inputs(26, 27);
-            CONSTANT(54, 0x36ee80).s64();
-            INST(31, Opcode::Mul).s64().Inputs(28, 54);
-            INST(32, Opcode::Add).s64().Inputs(31, 22);
-            INST(33, Opcode::SaveState).NoVregs();
-            INST(35, Opcode::CallVirtual).v0id().Inputs({{REFERENCE, 0}, {INT64, 32}, {NO_TYPE, 33}});
-            INST(36, Opcode::SaveState).NoVregs();
-            INST(37, Opcode::LoadAndInitClass).ref().Inputs(36);
-            INST(39, Opcode::SaveState).NoVregs();
-            INST(58, Opcode::InitObject).ref().Inputs({{REFERENCE, 37}, {REFERENCE, 0}, {NO_TYPE, 39}});
-            CONSTANT(55, 0.0093026).f64();
-            CONSTANT(56, 0.0098902).f64();
-            CONSTANT(57, 0x1388).s64();
-            INST(45, Opcode::SaveState).NoVregs();
+            INST(28U, Opcode::Phi).s64().Inputs(26U, 27U);
+            CONSTANT(54U, 0x36ee80U).s64();
+            INST(31U, Opcode::Mul).s64().Inputs(28U, 54U);
+            INST(32U, Opcode::Add).s64().Inputs(31U, 22U);
+            INST(33U, Opcode::SaveState).NoVregs();
+            INST(35U, Opcode::CallVirtual).v0id().Inputs({{REFERENCE, 0U}, {INT64, 32U}, {NO_TYPE, 33U}});
+            INST(36U, Opcode::SaveState).NoVregs();
+            INST(37U, Opcode::LoadAndInitClass).ref().Inputs(36U);
+            INST(39U, Opcode::SaveState).NoVregs();
+            INST(58U, Opcode::InitObject).ref().Inputs({{REFERENCE, 37U}, {REFERENCE, 0U}, {NO_TYPE, 39U}});
+            CONSTANT(55U, 0.0093026).f64();
+            CONSTANT(56U, 0.0098902).f64();
+            CONSTANT(57U, 0x1388U).s64();
+            INST(45U, Opcode::SaveState).NoVregs();
 
             // SpillFill added
-            INST(70, Opcode::SpillFill);
-            INST(47, Opcode::CallStatic)
+            INST(70U, Opcode::SpillFill);
+            INST(47U, Opcode::CallStatic)
                 .s64()
                 .Inputs({{REFERENCE, 0},
-                         {REFERENCE, 58},
-                         {BOOL, 1},
-                         {FLOAT64, 55},
-                         {FLOAT64, 56},
-                         {INT64, 57},
-                         {NO_TYPE, 45}});
-            INST(48, Opcode::SaveState).NoVregs();
-            INST(50, Opcode::CallVirtual).v0id().Inputs({{REFERENCE, 0}, {INT64, 4}, {NO_TYPE, 48}});
-            INST(51, Opcode::Return).s64().Inputs(47);
+                         {REFERENCE, 58U},
+                         {BOOL, 1U},
+                         {FLOAT64, 55U},
+                         {FLOAT64, 56U},
+                         {INT64, 57U},
+                         {NO_TYPE, 45U}});
+            INST(48U, Opcode::SaveState).NoVregs();
+            INST(50U, Opcode::CallVirtual).v0id().Inputs({{REFERENCE, 0U}, {INT64, 4U}, {NO_TYPE, 48U}});
+            INST(51U, Opcode::Return).s64().Inputs(47U);
         }
     }
 
@@ -232,54 +232,54 @@ TEST_F(CommonTest, RegEncoderHoldingSpillFillInst)
 TEST_F(CommonTest, RegEncoderStoreObject)
 {
     // This test covers function CheckWidthVisitor::VisitStoreObject
-    RuntimeInterfaceMock interface(4);
+    RuntimeInterfaceMock interface(4U);
     auto graph = CreateEmptyGraph();
     graph->SetRuntime(&interface);
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).ref();
-        PARAMETER(2, 2).ref();
-        PARAMETER(3, 3).s32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(2U, 2U).ref();
+        PARAMETER(3U, 3U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             // NOLINTNEXTLINE(google-build-using-namespace)
             using namespace compiler::DataType;
 
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 0}, {NO_TYPE, 4}});
-            INST(9, Opcode::StoreObject).ref().Inputs(0, 2);
-            INST(12, Opcode::StoreObject).s32().Inputs(0, 3);
-            INST(15, Opcode::LoadObject).ref().Inputs(1);
-            INST(16, Opcode::SaveState).NoVregs();
-            INST(18, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 15}, {NO_TYPE, 16}});
-            INST(19, Opcode::SaveState).NoVregs();
-            INST(21, Opcode::LoadClass).ref().Inputs(19);
-            INST(20, Opcode::CheckCast).Inputs(18, 21, 19);
-            INST(23, Opcode::StoreObject).ref().Inputs(0, 18);
-            INST(26, Opcode::LoadObject).ref().Inputs(1);
-            INST(27, Opcode::SaveState).NoVregs();
-            INST(29, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 26}, {NO_TYPE, 27}});
-            INST(30, Opcode::SaveState).NoVregs();
-            INST(32, Opcode::LoadClass).ref().Inputs(30);
-            INST(31, Opcode::CheckCast).Inputs(29, 32, 30);
-            INST(34, Opcode::StoreObject).ref().Inputs(0, 29);
-            INST(37, Opcode::LoadObject).ref().Inputs(1);
-            INST(38, Opcode::SaveState).NoVregs();
-            INST(40, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 37}, {NO_TYPE, 38}});
-            INST(41, Opcode::SaveState).NoVregs();
-            INST(43, Opcode::LoadClass).ref().Inputs(41);
-            INST(42, Opcode::CheckCast).Inputs(40, 43, 41);
-            INST(45, Opcode::StoreObject).ref().Inputs(0, 40);
-            INST(48, Opcode::LoadObject).ref().Inputs(1);
-            INST(49, Opcode::SaveState).NoVregs();
-            INST(51, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 48}, {NO_TYPE, 49}});
-            INST(52, Opcode::SaveState).NoVregs();
-            INST(54, Opcode::LoadClass).ref().Inputs(52);
-            INST(53, Opcode::CheckCast).Inputs(51, 54, 52);
-            INST(56, Opcode::StoreObject).ref().Inputs(0, 51);
-            INST(57, Opcode::ReturnVoid).v0id();
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 0U}, {NO_TYPE, 4U}});
+            INST(9U, Opcode::StoreObject).ref().Inputs(0U, 2U);
+            INST(12U, Opcode::StoreObject).s32().Inputs(0U, 3U);
+            INST(15U, Opcode::LoadObject).ref().Inputs(1U);
+            INST(16U, Opcode::SaveState).NoVregs();
+            INST(18U, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 15U}, {NO_TYPE, 16U}});
+            INST(19U, Opcode::SaveState).NoVregs();
+            INST(21U, Opcode::LoadClass).ref().Inputs(19U);
+            INST(20U, Opcode::CheckCast).Inputs(18U, 21U, 19U);
+            INST(23U, Opcode::StoreObject).ref().Inputs(0U, 18U);
+            INST(26U, Opcode::LoadObject).ref().Inputs(1U);
+            INST(27U, Opcode::SaveState).NoVregs();
+            INST(29U, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 26U}, {NO_TYPE, 27U}});
+            INST(30U, Opcode::SaveState).NoVregs();
+            INST(32U, Opcode::LoadClass).ref().Inputs(30U);
+            INST(31U, Opcode::CheckCast).Inputs(29U, 32U, 30U);
+            INST(34U, Opcode::StoreObject).ref().Inputs(0U, 29U);
+            INST(37U, Opcode::LoadObject).ref().Inputs(1U);
+            INST(38U, Opcode::SaveState).NoVregs();
+            INST(40U, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 37U}, {NO_TYPE, 38U}});
+            INST(41U, Opcode::SaveState).NoVregs();
+            INST(43U, Opcode::LoadClass).ref().Inputs(41U);
+            INST(42U, Opcode::CheckCast).Inputs(40U, 43U, 41U);
+            INST(45U, Opcode::StoreObject).ref().Inputs(0U, 40U);
+            INST(48U, Opcode::LoadObject).ref().Inputs(1U);
+            INST(49U, Opcode::SaveState).NoVregs();
+            INST(51U, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 48U}, {NO_TYPE, 49U}});
+            INST(52U, Opcode::SaveState).NoVregs();
+            INST(54U, Opcode::LoadClass).ref().Inputs(52U);
+            INST(53U, Opcode::CheckCast).Inputs(51U, 54U, 52U);
+            INST(56U, Opcode::StoreObject).ref().Inputs(0U, 51U);
+            INST(57U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -290,49 +290,49 @@ TEST_F(CommonTest, RegEncoderStoreObject)
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).ref();
-        PARAMETER(2, 2).ref();
-        PARAMETER(3, 3).s32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(2U, 2U).ref();
+        PARAMETER(3U, 3U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             // NOLINTNEXTLINE(google-build-using-namespace)
             using namespace compiler::DataType;
 
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 0}, {NO_TYPE, 4}});
-            INST(9, Opcode::StoreObject).ref().Inputs(0, 2);
-            INST(12, Opcode::StoreObject).s32().Inputs(0, 3);
-            INST(15, Opcode::LoadObject).ref().Inputs(1);
-            INST(16, Opcode::SaveState).NoVregs();
-            INST(18, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 15}, {NO_TYPE, 16}});
-            INST(60, Opcode::SaveState).NoVregs();
-            INST(21, Opcode::LoadClass).ref().Inputs(60);
-            INST(20, Opcode::CheckCast).Inputs(18, 21, 60);
-            INST(23, Opcode::StoreObject).ref().Inputs(0, 18);
-            INST(26, Opcode::LoadObject).ref().Inputs(1);
-            INST(27, Opcode::SaveState).NoVregs();
-            INST(29, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 26}, {NO_TYPE, 27}});
-            INST(63, Opcode::SaveState).NoVregs();
-            INST(32, Opcode::LoadClass).ref().Inputs(63);
-            INST(31, Opcode::CheckCast).Inputs(29, 32, 63);
-            INST(34, Opcode::StoreObject).ref().Inputs(0, 29);
-            INST(37, Opcode::LoadObject).ref().Inputs(1);
-            INST(38, Opcode::SaveState).NoVregs();
-            INST(40, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 37}, {NO_TYPE, 38}});
-            INST(41, Opcode::SaveState).NoVregs();
-            INST(43, Opcode::LoadClass).ref().Inputs(41);
-            INST(42, Opcode::CheckCast).Inputs(40, 43, 41);
-            INST(45, Opcode::StoreObject).ref().Inputs(0, 40);
-            INST(48, Opcode::LoadObject).ref().Inputs(1);
-            INST(49, Opcode::SaveState).NoVregs();
-            INST(51, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 48}, {NO_TYPE, 49}});
-            INST(52, Opcode::SaveState).NoVregs();
-            INST(54, Opcode::LoadClass).ref().Inputs(52);
-            INST(53, Opcode::CheckCast).Inputs(51, 54, 52);
-            INST(56, Opcode::StoreObject).ref().Inputs(0, 51);
-            INST(57, Opcode::ReturnVoid).v0id();
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 0U}, {NO_TYPE, 4U}});
+            INST(9U, Opcode::StoreObject).ref().Inputs(0U, 2U);
+            INST(12U, Opcode::StoreObject).s32().Inputs(0U, 3U);
+            INST(15U, Opcode::LoadObject).ref().Inputs(1U);
+            INST(16U, Opcode::SaveState).NoVregs();
+            INST(18U, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 15U}, {NO_TYPE, 16U}});
+            INST(60U, Opcode::SaveState).NoVregs();
+            INST(21U, Opcode::LoadClass).ref().Inputs(60U);
+            INST(20U, Opcode::CheckCast).Inputs(18U, 21U, 60U);
+            INST(23U, Opcode::StoreObject).ref().Inputs(0U, 18U);
+            INST(26U, Opcode::LoadObject).ref().Inputs(1U);
+            INST(27U, Opcode::SaveState).NoVregs();
+            INST(29U, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 26U}, {NO_TYPE, 27U}});
+            INST(63U, Opcode::SaveState).NoVregs();
+            INST(32U, Opcode::LoadClass).ref().Inputs(63U);
+            INST(31U, Opcode::CheckCast).Inputs(29U, 32U, 63U);
+            INST(34U, Opcode::StoreObject).ref().Inputs(0U, 29U);
+            INST(37U, Opcode::LoadObject).ref().Inputs(1U);
+            INST(38U, Opcode::SaveState).NoVregs();
+            INST(40U, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 37U}, {NO_TYPE, 38U}});
+            INST(41U, Opcode::SaveState).NoVregs();
+            INST(43U, Opcode::LoadClass).ref().Inputs(41U);
+            INST(42U, Opcode::CheckCast).Inputs(40U, 43U, 41U);
+            INST(45U, Opcode::StoreObject).ref().Inputs(0U, 40U);
+            INST(48U, Opcode::LoadObject).ref().Inputs(1U);
+            INST(49U, Opcode::SaveState).NoVregs();
+            INST(51U, Opcode::CallVirtual).ref().Inputs({{REFERENCE, 48U}, {NO_TYPE, 49U}});
+            INST(52U, Opcode::SaveState).NoVregs();
+            INST(54U, Opcode::LoadClass).ref().Inputs(52U);
+            INST(53U, Opcode::CheckCast).Inputs(51U, 54U, 52U);
+            INST(56U, Opcode::StoreObject).ref().Inputs(0U, 51U);
+            INST(57U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -343,17 +343,17 @@ TEST_F(CommonTest, RegEncoderStoreObject)
 TEST_F(CommonTest, RegEncoderSameArgsInst)
 {
     auto src_graph = CreateEmptyGraph();
-    ArenaVector<bool> reg_mask(254, false, src_graph->GetLocalAllocator()->Adapter());
+    ArenaVector<bool> reg_mask(254U, false, src_graph->GetLocalAllocator()->Adapter());
     src_graph->InitUsedRegs<compiler::DataType::INT64>(&reg_mask);
     GRAPH(src_graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s32();
-        PARAMETER(2, 2).s32();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(2U, 2U).s32();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::StoreArray).s32().Inputs(0, 1, 2).SrcReg(0, 17).SrcReg(1, 17).SrcReg(2, 5);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArray).s32().Inputs(0U, 1U, 2U).SrcReg(0U, 17U).SrcReg(1U, 17U).SrcReg(2U, 5U);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -363,14 +363,14 @@ TEST_F(CommonTest, RegEncoderSameArgsInst)
     opt_graph->InitUsedRegs<compiler::DataType::INT64>(&reg_mask);
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s32();
-        PARAMETER(2, 2).s32();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(2U, 2U).s32();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SpillFill);
-            INST(4, Opcode::StoreArray).s32().Inputs(0, 1, 2);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::SpillFill);
+            INST(4U, Opcode::StoreArray).s32().Inputs(0U, 1U, 2U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -379,7 +379,7 @@ TEST_F(CommonTest, RegEncoderSameArgsInst)
     for (auto bb : src_graph->GetBlocksRPO()) {
         for (auto inst : bb->AllInstsSafe()) {
             if (inst->GetOpcode() == Opcode::StoreArray) {
-                ASSERT_TRUE(inst->GetSrcReg(0) == inst->GetSrcReg(1));
+                ASSERT_TRUE(inst->GetSrcReg(0U) == inst->GetSrcReg(1U));
             }
         }
     }

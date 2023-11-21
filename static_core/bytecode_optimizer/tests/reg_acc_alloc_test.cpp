@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,26 +60,26 @@ TEST_F(RegAccAllocTest, ArithmeticInstructions)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 10).s32();
-        CONSTANT(2, 20).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 10U).s32();
+        CONSTANT(2U, 20U).s32();
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::Mul).s32().Inputs(0, 2);
-            INST(4, Opcode::Add).s32().Inputs(3, 1);
+            INST(3U, Opcode::Mul).s32().Inputs(0U, 2U);
+            INST(4U, Opcode::Add).s32().Inputs(3U, 1U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).s32().Inputs(4);
+            INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({3, 4});
-    CheckInstructionsSrcRegIsAcc({4, 5});
+    CheckInstructionsDestRegIsAcc({3U, 4U});
+    CheckInstructionsSrcRegIsAcc({4U, 5U});
 }
 
 /*
@@ -91,26 +91,26 @@ TEST_F(RegAccAllocTest, Commutativity1)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 10).s32();
-        CONSTANT(2, 20).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 10U).s32();
+        CONSTANT(2U, 20U).s32();
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::Mul).s32().Inputs(0, 2);
-            INST(4, Opcode::Add).s32().Inputs(1, 3);
+            INST(3U, Opcode::Mul).s32().Inputs(0U, 2U);
+            INST(4U, Opcode::Add).s32().Inputs(1U, 3U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).s32().Inputs(4);
+            INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({3, 4});
-    CheckInstructionsSrcRegIsAcc({4, 5});
+    CheckInstructionsDestRegIsAcc({3U, 4U});
+    CheckInstructionsSrcRegIsAcc({4U, 5U});
 }
 
 /*
@@ -122,26 +122,26 @@ TEST_F(RegAccAllocTest, Commutativity2)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 10).s32();
-        CONSTANT(2, 20).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 10U).s32();
+        CONSTANT(2U, 20U).s32();
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::Mul).s32().Inputs(0, 2);
-            INST(4, Opcode::Sub).s32().Inputs(1, 3);
+            INST(3U, Opcode::Mul).s32().Inputs(0U, 2U);
+            INST(4U, Opcode::Sub).s32().Inputs(1U, 3U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).s32().Inputs(4);
+            INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({4});
-    CheckInstructionsSrcRegIsAcc({5});
+    CheckInstructionsDestRegIsAcc({4U});
+    CheckInstructionsSrcRegIsAcc({5U});
 }
 
 /*
@@ -154,28 +154,28 @@ TEST_F(RegAccAllocTest, ArithmeticInstructionsWithDirtyAccumulator)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 10).s32();
-        CONSTANT(2, 20).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 10U).s32();
+        CONSTANT(2U, 20U).s32();
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::Mul).s32().Inputs(0, 2);
-            INST(4, Opcode::Add).s32().Inputs(1, 3);
-            INST(5, Opcode::Sub).s32().Inputs(3, 4);
-            INST(6, Opcode::Mul).s32().Inputs(5, 3);
+            INST(3U, Opcode::Mul).s32().Inputs(0U, 2U);
+            INST(4U, Opcode::Add).s32().Inputs(1U, 3U);
+            INST(5U, Opcode::Sub).s32().Inputs(3U, 4U);
+            INST(6U, Opcode::Mul).s32().Inputs(5U, 3U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({5, 6});
-    CheckInstructionsSrcRegIsAcc({6, 7});
+    CheckInstructionsDestRegIsAcc({5U, 6U});
+    CheckInstructionsSrcRegIsAcc({6U, 7U});
 }
 
 /*
@@ -200,39 +200,39 @@ TEST_F(RegAccAllocTest, SimplePhi)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 10).s32();
-        CONSTANT(2, 20).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 10U).s32();
+        CONSTANT(2U, 20U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Add).s32().Inputs(1, 2);
-            INST(5, Opcode::Compare).b().Inputs(4, 0);
-            INST(6, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0).Inputs(5);
+            INST(4U, Opcode::Add).s32().Inputs(1U, 2U);
+            INST(5U, Opcode::Compare).b().Inputs(4U, 0U);
+            INST(6U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(5U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(8, Opcode::Sub).s32().Inputs(4, 0);
+            INST(8U, Opcode::Sub).s32().Inputs(4U, 0U);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(9, Opcode::Add).s32().Inputs(4, 0);
+            INST(9U, Opcode::Add).s32().Inputs(4U, 0U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(10, Opcode::Phi).s32().Inputs({{3, 8}, {4, 9}});
-            INST(11, Opcode::Add).s32().Inputs(4, 10);
-            INST(7, Opcode::Return).s32().Inputs(11);
+            INST(10U, Opcode::Phi).s32().Inputs({{3U, 8U}, {4U, 9U}});
+            INST(11U, Opcode::Add).s32().Inputs(4U, 10U);
+            INST(7U, Opcode::Return).s32().Inputs(11U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({5, 8, 9, 11});
-    CheckInstructionsSrcRegIsAcc({6, 7, 11});
+    CheckInstructionsDestRegIsAcc({5U, 8U, 9U, 11U});
+    CheckInstructionsSrcRegIsAcc({6U, 7U, 11U});
 }
 
 /*
@@ -244,21 +244,21 @@ TEST_F(RegAccAllocTest, CastInstructions)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u32();
+        PARAMETER(0U, 0U).u32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).f64().SrcType(compiler::DataType::UINT32).Inputs(0);
-            INST(2, Opcode::Cast).s32().SrcType(compiler::DataType::FLOAT64).Inputs(1);
-            INST(3, Opcode::Cast).s16().SrcType(compiler::DataType::INT32).Inputs(2);
-            INST(4, Opcode::Return).s16().Inputs(3);
+            INST(1U, Opcode::Cast).f64().SrcType(compiler::DataType::UINT32).Inputs(0U);
+            INST(2U, Opcode::Cast).s32().SrcType(compiler::DataType::FLOAT64).Inputs(1U);
+            INST(3U, Opcode::Cast).s16().SrcType(compiler::DataType::INT32).Inputs(2U);
+            INST(4U, Opcode::Return).s16().Inputs(3U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({1, 2, 3});
-    CheckInstructionsSrcRegIsAcc({2, 3, 4});
+    CheckInstructionsDestRegIsAcc({1U, 2U, 3U});
+    CheckInstructionsSrcRegIsAcc({2U, 3U, 4U});
 }
 
 /*
@@ -270,22 +270,22 @@ TEST_F(RegAccAllocTest, AbsAndSqrtInstructions)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1.22).f64();
-        PARAMETER(1, 10).f64();
+        CONSTANT(0U, 1.22).f64();
+        PARAMETER(1U, 10U).f64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Sub).f64().Inputs(0, 1);
-            INST(3, Opcode::Abs).f64().Inputs(2);
-            INST(4, Opcode::Sqrt).f64().Inputs(3);
-            INST(5, Opcode::Return).f64().Inputs(4);
+            INST(2U, Opcode::Sub).f64().Inputs(0U, 1U);
+            INST(3U, Opcode::Abs).f64().Inputs(2U);
+            INST(4U, Opcode::Sqrt).f64().Inputs(3U);
+            INST(5U, Opcode::Return).f64().Inputs(4U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({4});
-    CheckInstructionsSrcRegIsAcc({5});
+    CheckInstructionsDestRegIsAcc({4U});
+    CheckInstructionsSrcRegIsAcc({5U});
 }
 
 /*
@@ -297,25 +297,25 @@ TEST_F(RegAccAllocTest, LoadArrayInstruction)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 1).s32();
-        PARAMETER(1, 10).ref();
+        PARAMETER(0U, 1U).s32();
+        PARAMETER(1U, 10U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1, 0).SrcVregs({0, 1, 2});
-            INST(3, Opcode::NullCheck).ref().Inputs(1, 2);
-            INST(4, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::BoundsCheck).s32().Inputs(4, 0, 2);
-            INST(6, Opcode::LoadArray).s32().Inputs(3, 5);
-            INST(7, Opcode::Cast).f64().SrcType(compiler::DataType::INT32).Inputs(6);
-            INST(8, Opcode::Return).f64().Inputs(7);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U, 0U).SrcVregs({0U, 1U, 2U});
+            INST(3U, Opcode::NullCheck).ref().Inputs(1U, 2U);
+            INST(4U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::BoundsCheck).s32().Inputs(4U, 0U, 2U);
+            INST(6U, Opcode::LoadArray).s32().Inputs(3U, 5U);
+            INST(7U, Opcode::Cast).f64().SrcType(compiler::DataType::INT32).Inputs(6U);
+            INST(8U, Opcode::Return).f64().Inputs(7U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({4, 6, 7});
-    CheckInstructionsSrcRegIsAcc({5, 7, 8});
+    CheckInstructionsDestRegIsAcc({4U, 6U, 7U});
+    CheckInstructionsSrcRegIsAcc({5U, 7U, 8U});
 }
 
 /*
@@ -328,31 +328,31 @@ TEST_F(RegAccAllocTest, ThrowInstruction)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 0).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 0U).s32();
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
+            INST(2U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
         }
-        BASIC_BLOCK(3, 4, 5, 6)
+        BASIC_BLOCK(3U, 4U, 5U, 6U)
         {
-            INST(5, Opcode::Try).CatchTypeIds({0x0, 0xE1});
+            INST(5U, Opcode::Try).CatchTypeIds({0x0U, 0xE1U});
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::SaveState).Inputs(4).SrcVregs({0});
-            INST(7, Opcode::Throw).Inputs(4, 6);
+            INST(6U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(7U, Opcode::Throw).Inputs(4U, 6U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(8, Opcode::Return).b().Inputs(1);
+            INST(8U, Opcode::Return).b().Inputs(1U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(9, Opcode::Return).b().Inputs(0);
+            INST(9U, Opcode::Return).b().Inputs(0U);
         }
     }
 
@@ -368,36 +368,36 @@ TEST_F(RegAccAllocTest, PhiInstructionInLoop)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 10).s32();
-        CONSTANT(2, 20).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 10U).s32();
+        CONSTANT(2U, 20U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Phi).s32().Inputs({{0, 0}, {3, 8}});
-            INST(4, Opcode::Phi).s32().Inputs({{0, 1}, {3, 9}});
-            INST(5, Opcode::SafePoint).Inputs(0, 3, 4).SrcVregs({0, 1, 2});
-            INST(6, Opcode::Compare).b().Inputs(4, 0);
-            INST(7, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0).Inputs(6);
+            INST(3U, Opcode::Phi).s32().Inputs({{0U, 0U}, {3U, 8U}});
+            INST(4U, Opcode::Phi).s32().Inputs({{0U, 1U}, {3U, 9U}});
+            INST(5U, Opcode::SafePoint).Inputs(0U, 3U, 4U).SrcVregs({0U, 1U, 2U});
+            INST(6U, Opcode::Compare).b().Inputs(4U, 0U);
+            INST(7U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(6U);
         }
 
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(8, Opcode::Mul).s32().Inputs(3, 4);
-            INST(9, Opcode::Sub).s32().Inputs(4, 0);
+            INST(8U, Opcode::Mul).s32().Inputs(3U, 4U);
+            INST(9U, Opcode::Sub).s32().Inputs(4U, 0U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(10, Opcode::Add).s32().Inputs(2, 3);
-            INST(11, Opcode::Return).s32().Inputs(10);
+            INST(10U, Opcode::Add).s32().Inputs(2U, 3U);
+            INST(11U, Opcode::Return).s32().Inputs(10U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({6, 10});
-    CheckInstructionsSrcRegIsAcc({7, 11});
+    CheckInstructionsDestRegIsAcc({6U, 10U});
+    CheckInstructionsSrcRegIsAcc({7U, 11U});
 }
 
 /*
@@ -418,36 +418,36 @@ TEST_F(RegAccAllocTest, MultipleBranches)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u16();
-        PARAMETER(1, 1).s64();
-        CONSTANT(2, 0x20).s64();
-        CONSTANT(3, 0x25).s64();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u16();
+        PARAMETER(1U, 1U).s64();
+        CONSTANT(2U, 0x20U).s64();
+        CONSTANT(3U, 0x25U).s64();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(5, Opcode::Compare).b().CC(compiler::CC_GT).Inputs(0, 2);
-            INST(6, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0).Inputs(5);
+            INST(5U, Opcode::Compare).b().CC(compiler::CC_GT).Inputs(0U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(5U);
         }
         // v0 <= 0x20
-        BASIC_BLOCK(4, 3, 5)
+        BASIC_BLOCK(4U, 3U, 5U)
         {
-            INST(8, Opcode::Compare).b().CC(compiler::CC_GT).Inputs(1, 3);
-            INST(9, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0).Inputs(8);
+            INST(8U, Opcode::Compare).b().CC(compiler::CC_GT).Inputs(1U, 3U);
+            INST(9U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(8U);
         }
         // v0 <= 0x20 && v1 <= 0x25
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(11, Opcode::Return).u16().Inputs(0);
+            INST(11U, Opcode::Return).u16().Inputs(0U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(14, Opcode::Return).u16().Inputs(1);
+            INST(14U, Opcode::Return).u16().Inputs(1U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({5, 8});
-    CheckInstructionsSrcRegIsAcc({6, 9});
+    CheckInstructionsDestRegIsAcc({5U, 8U});
+    CheckInstructionsSrcRegIsAcc({6U, 9U});
 }
 
 /*
@@ -474,38 +474,38 @@ TEST_F(RegAccAllocTest, PhiWithMultipleInputs)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(2, 3, 6)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 6U)
         {
-            INST(2, Opcode::Compare).b().Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(4, Opcode::Mul).s32().Inputs(0, 0);
-            INST(5, Opcode::Compare).b().Inputs(4, 1);
-            INST(6, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0).Inputs(5);
+            INST(4U, Opcode::Mul).s32().Inputs(0U, 0U);
+            INST(5U, Opcode::Compare).b().Inputs(4U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(7, Opcode::Mul).s32().Inputs(4, 1);
+            INST(7U, Opcode::Mul).s32().Inputs(4U, 1U);
         }
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(8, Opcode::Add).s32().Inputs(4, 1);
+            INST(8U, Opcode::Add).s32().Inputs(4U, 1U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(9, Opcode::Phi).s32().Inputs({{2, 0}, {4, 7}, {5, 8}});
-            INST(10, Opcode::Return).s32().Inputs(9);
+            INST(9U, Opcode::Phi).s32().Inputs({{2U, 0U}, {4U, 7U}, {5U, 8U}});
+            INST(10U, Opcode::Return).s32().Inputs(9U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({2, 5});
-    CheckInstructionsSrcRegIsAcc({3, 6});
+    CheckInstructionsDestRegIsAcc({2U, 5U});
+    CheckInstructionsSrcRegIsAcc({3U, 6U});
 }
 
 /*
@@ -517,39 +517,39 @@ TEST_F(RegAccAllocTest, PhiWithSubsequentCompareInstruction)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 10).s32();
-        CONSTANT(2, 20).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 10U).s32();
+        CONSTANT(2U, 20U).s32();
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::Add).s32().Inputs(0, 1);
+            INST(3U, Opcode::Add).s32().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(4, Opcode::Phi).s32().Inputs({{2, 3}, {4, 8}});
-            INST(5, Opcode::SafePoint).Inputs(0, 4).SrcVregs({0, 1});
-            INST(6, Opcode::Compare).b().Inputs(4, 0);
-            INST(7, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0).Inputs(6);
+            INST(4U, Opcode::Phi).s32().Inputs({{2U, 3U}, {4U, 8U}});
+            INST(5U, Opcode::SafePoint).Inputs(0U, 4U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::Compare).b().Inputs(4U, 0U);
+            INST(7U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(6U);
         }
 
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(8, Opcode::Mul).s32().Inputs(3, 2);
+            INST(8U, Opcode::Mul).s32().Inputs(3U, 2U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(9, Opcode::Add).s32().Inputs(2, 4);
-            INST(10, Opcode::Return).s32().Inputs(9);
+            INST(9U, Opcode::Add).s32().Inputs(2U, 4U);
+            INST(10U, Opcode::Return).s32().Inputs(9U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({6, 9});
-    CheckInstructionsSrcRegIsAcc({7, 10});
+    CheckInstructionsDestRegIsAcc({6U, 9U});
+    CheckInstructionsSrcRegIsAcc({7U, 10U});
 }
 
 /*
@@ -561,63 +561,63 @@ TEST_F(RegAccAllocTest, SwitchCase)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(1, 0x1).s32();
-        CONSTANT(5, 0xa).s32();
-        CONSTANT(8, 0x2).s32();
-        CONSTANT(10, 0x3).s32();
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(1U, 0x1U).s32();
+        CONSTANT(5U, 0xaU).s32();
+        CONSTANT(8U, 0x2U).s32();
+        CONSTANT(10U, 0x3U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::LoadArray).ref().Inputs(0, 1);
-            INST(3, Opcode::SaveState).Inputs(2, 1, 0).SrcVregs({0, 1, 2});
-            INST(4, Opcode::CallStatic)
+            INST(2U, Opcode::LoadArray).ref().Inputs(0U, 1U);
+            INST(3U, Opcode::SaveState).Inputs(2U, 1U, 0U).SrcVregs({0U, 1U, 2U});
+            INST(4U, Opcode::CallStatic)
                 .s32()
-                .Inputs({{compiler::DataType::REFERENCE, 2}, {compiler::DataType::NO_TYPE, 3}});
-            INST(7, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(1, 4);
+                .Inputs({{compiler::DataType::REFERENCE, 2U}, {compiler::DataType::NO_TYPE, 3U}});
+            INST(7U, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(1U, 4U);
         }
 
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(9, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(8, 4);
+            INST(9U, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(8U, 4U);
         }
 
-        BASIC_BLOCK(6, 7, 9)
+        BASIC_BLOCK(6U, 7U, 9U)
         {
-            INST(11, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(10, 4);
+            INST(11U, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(10U, 4U);
         }
 
-        BASIC_BLOCK(9, 10)
+        BASIC_BLOCK(9U, 10U)
         {
-            INST(12, Opcode::Mod).s32().Inputs(5, 4);
+            INST(12U, Opcode::Mod).s32().Inputs(5U, 4U);
         }
 
-        BASIC_BLOCK(7, 10)
+        BASIC_BLOCK(7U, 10U)
         {
-            INST(13, Opcode::Mul).s32().Inputs(4, 5);
+            INST(13U, Opcode::Mul).s32().Inputs(4U, 5U);
         }
 
-        BASIC_BLOCK(5, 10)
+        BASIC_BLOCK(5U, 10U)
         {
-            INST(14, Opcode::Add).s32().Inputs(4, 5);
+            INST(14U, Opcode::Add).s32().Inputs(4U, 5U);
         }
 
-        BASIC_BLOCK(3, 10)
+        BASIC_BLOCK(3U, 10U)
         {
-            INST(15, Opcode::Sub).s32().Inputs(5, 4);
+            INST(15U, Opcode::Sub).s32().Inputs(5U, 4U);
         }
 
-        BASIC_BLOCK(10, -1)
+        BASIC_BLOCK(10U, -1L)
         {
-            INST(16, Opcode::Phi).s32().Inputs({{3, 15}, {5, 14}, {7, 13}, {9, 12}});
-            INST(17, Opcode::Return).s32().Inputs(16);
+            INST(16U, Opcode::Phi).s32().Inputs({{3U, 15U}, {5U, 14U}, {7U, 13U}, {9U, 12U}});
+            INST(17U, Opcode::Return).s32().Inputs(16U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({12, 13, 14, 15, 16});
-    CheckInstructionsSrcRegIsAcc({17});
+    CheckInstructionsDestRegIsAcc({12U, 13U, 14U, 15U, 16U});
+    CheckInstructionsSrcRegIsAcc({17U});
 }
 
 /*
@@ -628,36 +628,36 @@ TEST_F(RegAccAllocTest, CreateArray)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(1, 0x2).s32();
-        CONSTANT(4, 0x1).s32();
-        CONSTANT(10, 0x0).s32();
-        CONSTANT(11, 0xa).s32();
-        CONSTANT(20, 0xc).s32();
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(1U, 0x2U).s32();
+        CONSTANT(4U, 0x1U).s32();
+        CONSTANT(10U, 0x0U).s32();
+        CONSTANT(11U, 0xaU).s32();
+        CONSTANT(20U, 0xcU).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(1, 0).SrcVregs({0, 6});
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs(2).TypeId(68);
-            INST(3, Opcode::NewArray).ref().Inputs(44, 1, 2);
-            INST(5, Opcode::LoadArray).ref().Inputs(0, 4);
-            INST(6, Opcode::SaveState).Inputs(5, 4, 3, 0).SrcVregs({0, 1, 4, 6});
-            INST(7, Opcode::CallStatic)
+            INST(2U, Opcode::SaveState).Inputs(1U, 0U).SrcVregs({0U, 6U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(2U).TypeId(68U);
+            INST(3U, Opcode::NewArray).ref().Inputs(44U, 1U, 2U);
+            INST(5U, Opcode::LoadArray).ref().Inputs(0U, 4U);
+            INST(6U, Opcode::SaveState).Inputs(5U, 4U, 3U, 0U).SrcVregs({0U, 1U, 4U, 6U});
+            INST(7U, Opcode::CallStatic)
                 .s32()
-                .Inputs({{compiler::DataType::REFERENCE, 5}, {compiler::DataType::NO_TYPE, 6}});
-            INST(9, Opcode::Add).s32().Inputs(7, 1);
-            INST(12, Opcode::StoreArray).s32().Inputs(5, 10, 11);
-            INST(14, Opcode::Add).s32().Inputs(7, 20);
-            INST(15, Opcode::StoreArray).s32().Inputs(3, 4, 14);
-            INST(17, Opcode::Mul).s32().Inputs(14, 9);
-            INST(18, Opcode::Return).s32().Inputs(17);
+                .Inputs({{compiler::DataType::REFERENCE, 5U}, {compiler::DataType::NO_TYPE, 6U}});
+            INST(9U, Opcode::Add).s32().Inputs(7U, 1U);
+            INST(12U, Opcode::StoreArray).s32().Inputs(5U, 10U, 11U);
+            INST(14U, Opcode::Add).s32().Inputs(7U, 20U);
+            INST(15U, Opcode::StoreArray).s32().Inputs(3U, 4U, 14U);
+            INST(17U, Opcode::Mul).s32().Inputs(14U, 9U);
+            INST(18U, Opcode::Return).s32().Inputs(17U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({17});
-    CheckInstructionsSrcRegIsAcc({9, 15, 18});
+    CheckInstructionsDestRegIsAcc({17U});
+    CheckInstructionsSrcRegIsAcc({9U, 15U, 18U});
 }
 
 /*
@@ -669,23 +669,23 @@ TEST_F(RegAccAllocTest, StoreObjectInstruction)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, nullptr).ref();
-        CONSTANT(1, 0x2a).s64();
-        CONSTANT(2, 0x1).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, nullptr).ref();
+        CONSTANT(1U, 0x2aU).s64();
+        CONSTANT(2U, 0x1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SaveState).Inputs(0, 2).SrcVregs({0, 1});
-            INST(4, Opcode::NullCheck).ref().Inputs(0, 3);
-            INST(5, Opcode::Add).s64().Inputs(1, 2);
-            INST(6, Opcode::StoreObject).s64().Inputs(4, 5);
-            INST(7, Opcode::Return).s64().Inputs(1);
+            INST(3U, Opcode::SaveState).Inputs(0U, 2U).SrcVregs({0U, 1U});
+            INST(4U, Opcode::NullCheck).ref().Inputs(0U, 3U);
+            INST(5U, Opcode::Add).s64().Inputs(1U, 2U);
+            INST(6U, Opcode::StoreObject).s64().Inputs(4U, 5U);
+            INST(7U, Opcode::Return).s64().Inputs(1U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({5});
-    CheckInstructionsSrcRegIsAcc({6});
+    CheckInstructionsDestRegIsAcc({5U});
+    CheckInstructionsSrcRegIsAcc({6U});
 }
 
 /*
@@ -697,23 +697,23 @@ TEST_F(RegAccAllocTest, StoreStaticInstruction)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::Add).s32().Inputs(0, 1);
-            INST(5, Opcode::StoreStatic).s32().Inputs(3, 4).Volatile();
-            INST(6, Opcode::ReturnVoid).v0id();
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::Add).s32().Inputs(0U, 1U);
+            INST(5U, Opcode::StoreStatic).s32().Inputs(3U, 4U).Volatile();
+            INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    CheckInstructionsDestRegIsAcc({4});
-    CheckInstructionsSrcRegIsAcc({5});
+    CheckInstructionsDestRegIsAcc({4U});
+    CheckInstructionsSrcRegIsAcc({5U});
 }
 
 /*
@@ -725,71 +725,71 @@ TEST_F(RegAccAllocTest, PhiUsesPhiAsInput)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(1, 0x1).s32();
-        CONSTANT(5, 0xa).s32();
-        CONSTANT(8, 0x2).s32();
-        CONSTANT(10, 0x3).s32();
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(1U, 0x1U).s32();
+        CONSTANT(5U, 0xaU).s32();
+        CONSTANT(8U, 0x2U).s32();
+        CONSTANT(10U, 0x3U).s32();
 
-        BASIC_BLOCK(2, 3, 12)
+        BASIC_BLOCK(2U, 3U, 12U)
         {
-            INST(2, Opcode::LoadArray).ref().Inputs(0, 1);
-            INST(3, Opcode::SaveState).Inputs(2, 1, 0).SrcVregs({0, 1, 2});
-            INST(4, Opcode::CallStatic)
+            INST(2U, Opcode::LoadArray).ref().Inputs(0U, 1U);
+            INST(3U, Opcode::SaveState).Inputs(2U, 1U, 0U).SrcVregs({0U, 1U, 2U});
+            INST(4U, Opcode::CallStatic)
                 .s32()
-                .Inputs({{compiler::DataType::REFERENCE, 2}, {compiler::DataType::NO_TYPE, 3}});
-            INST(23, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(5, 4);
+                .Inputs({{compiler::DataType::REFERENCE, 2U}, {compiler::DataType::NO_TYPE, 3U}});
+            INST(23U, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(5U, 4U);
         }
 
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(7, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(1, 4);
+            INST(7U, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(1U, 4U);
         }
 
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(9, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(8, 4);
+            INST(9U, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(8U, 4U);
         }
 
-        BASIC_BLOCK(7, 8, 10)
+        BASIC_BLOCK(7U, 8U, 10U)
         {
-            INST(11, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(10, 4);
+            INST(11U, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Inputs(10U, 4U);
         }
 
-        BASIC_BLOCK(10, 11)
+        BASIC_BLOCK(10U, 11U)
         {
-            INST(12, Opcode::Mod).s32().Inputs(5, 4);
+            INST(12U, Opcode::Mod).s32().Inputs(5U, 4U);
         }
 
-        BASIC_BLOCK(8, 11)
+        BASIC_BLOCK(8U, 11U)
         {
-            INST(13, Opcode::Mul).s32().Inputs(4, 5);
+            INST(13U, Opcode::Mul).s32().Inputs(4U, 5U);
         }
 
-        BASIC_BLOCK(6, 11)
+        BASIC_BLOCK(6U, 11U)
         {
-            INST(14, Opcode::Add).s32().Inputs(4, 5);
+            INST(14U, Opcode::Add).s32().Inputs(4U, 5U);
         }
 
-        BASIC_BLOCK(4, 11)
+        BASIC_BLOCK(4U, 11U)
         {
-            INST(15, Opcode::Sub).s32().Inputs(5, 4);
+            INST(15U, Opcode::Sub).s32().Inputs(5U, 4U);
         }
 
-        BASIC_BLOCK(11, 13)
+        BASIC_BLOCK(11U, 13U)
         {
-            INST(16, Opcode::Phi).s32().Inputs({{4, 15}, {6, 14}, {8, 13}, {10, 12}});
+            INST(16U, Opcode::Phi).s32().Inputs({{4U, 15U}, {6U, 14U}, {8U, 13U}, {10U, 12U}});
         }
 
-        BASIC_BLOCK(12, 13)
+        BASIC_BLOCK(12U, 13U)
         {
-            INST(17, Opcode::Sub).s32().Inputs(5, 1);
+            INST(17U, Opcode::Sub).s32().Inputs(5U, 1U);
         }
 
-        BASIC_BLOCK(13, -1)
+        BASIC_BLOCK(13U, -1L)
         {
-            INST(18, Opcode::Phi).s32().Inputs({{11, 16}, {12, 17}});
-            INST(19, Opcode::Return).s32().Inputs(18);
+            INST(18U, Opcode::Phi).s32().Inputs({{11U, 16U}, {12U, 17U}});
+            INST(19U, Opcode::Return).s32().Inputs(18U);
         }
     }
 
@@ -806,38 +806,38 @@ TEST_F(RegAccAllocTest, NotUseAccDstRegLoadObject)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::LoadObject).s32().Inputs(0);
-            INST(6, Opcode::LoadObject).ref().Inputs(0);
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(9, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 6}, {NO_TYPE, 7}});
-            INST(24, Opcode::If).CC(compiler::ConditionCode::CC_NE).SrcType(INT32).Inputs(9, 3);
+            INST(3U, Opcode::LoadObject).s32().Inputs(0U);
+            INST(6U, Opcode::LoadObject).ref().Inputs(0U);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(9U, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 6U}, {NO_TYPE, 7U}});
+            INST(24U, Opcode::If).CC(compiler::ConditionCode::CC_NE).SrcType(INT32).Inputs(9U, 3U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            CONSTANT(25, 0xffff).s32();
-            INST(13, Opcode::Return).u16().Inputs(25);
+            CONSTANT(25U, 0xffffU).s32();
+            INST(13U, Opcode::Return).u16().Inputs(25U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(16, Opcode::LoadObject).ref().Inputs(0);
-            INST(19, Opcode::LoadObject).s32().Inputs(0);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(22, Opcode::CallVirtual).u16().Inputs({{REFERENCE, 16}, {INT32, 19}, {NO_TYPE, 20}});
-            INST(23, Opcode::Return).u16().Inputs(22);
+            INST(16U, Opcode::LoadObject).ref().Inputs(0U);
+            INST(19U, Opcode::LoadObject).s32().Inputs(0U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(22U, Opcode::CallVirtual).u16().Inputs({{REFERENCE, 16U}, {INT32, 19U}, {NO_TYPE, 20U}});
+            INST(23U, Opcode::Return).u16().Inputs(22U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    ASSERT_NE(INS(3).GetDstReg(), compiler::ACC_REG_ID);
-    ASSERT_EQ(INS(6).GetDstReg(), compiler::ACC_REG_ID);
-    ASSERT_NE(INS(16).GetDstReg(), compiler::ACC_REG_ID);
-    ASSERT_EQ(INS(19).GetDstReg(), compiler::ACC_REG_ID);
+    ASSERT_NE(INS(3U).GetDstReg(), compiler::ACC_REG_ID);
+    ASSERT_EQ(INS(6U).GetDstReg(), compiler::ACC_REG_ID);
+    ASSERT_NE(INS(16U).GetDstReg(), compiler::ACC_REG_ID);
+    ASSERT_EQ(INS(19U).GetDstReg(), compiler::ACC_REG_ID);
 }
 
 /*
@@ -850,32 +850,32 @@ TEST_F(RegAccAllocTest, IsAccWriteBetweenLoadObject)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::LoadObject).s32().Inputs(0);
-            INST(6, Opcode::IfImm).CC(compiler::ConditionCode::CC_NE).SrcType(INT32).Inputs(3).Imm(0);
+            INST(3U, Opcode::LoadObject).s32().Inputs(0U);
+            INST(6U, Opcode::IfImm).CC(compiler::ConditionCode::CC_NE).SrcType(INT32).Inputs(3U).Imm(0U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            CONSTANT(22, 0xffff).s32();
-            INST(8, Opcode::Return).u16().Inputs(22);
+            CONSTANT(22U, 0xffffU).s32();
+            INST(8U, Opcode::Return).u16().Inputs(22U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(21, Opcode::SubI).s32().Imm(1).Inputs(3);
-            INST(16, Opcode::StoreObject).s32().Inputs(0, 21);
-            INST(17, Opcode::SaveState).NoVregs();
-            INST(19, Opcode::CallVirtual).u16().Inputs({{REFERENCE, 0}, {NO_TYPE, 17}});
-            INST(20, Opcode::Return).u16().Inputs(19);
+            INST(21U, Opcode::SubI).s32().Imm(1U).Inputs(3U);
+            INST(16U, Opcode::StoreObject).s32().Inputs(0U, 21U);
+            INST(17U, Opcode::SaveState).NoVregs();
+            INST(19U, Opcode::CallVirtual).u16().Inputs({{REFERENCE, 0U}, {NO_TYPE, 17U}});
+            INST(20U, Opcode::Return).u16().Inputs(19U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    ASSERT_NE(INS(3).GetDstReg(), compiler::ACC_REG_ID);
+    ASSERT_NE(INS(3U).GetDstReg(), compiler::ACC_REG_ID);
 }
 
 /*
@@ -889,32 +889,32 @@ TEST_F(RegAccAllocTest, CallWithAcc)
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
 
-        CONSTANT(0, 0).s32();
-        CONSTANT(1, 1).s32();
-        CONSTANT(2, 2).s32();
+        CONSTANT(0U, 0U).s32();
+        CONSTANT(1U, 1U).s32();
+        CONSTANT(2U, 2U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::LoadString).ref().Inputs(3).TypeId(42);
-            INST(5, Opcode::CallStatic)
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::LoadString).ref().Inputs(3U).TypeId(42U);
+            INST(5U, Opcode::CallStatic)
                 .v0id()
-                .Inputs({{INT32, 0}, {INT32, 1}, {INT32, 2}, {REFERENCE, 4}, {NO_TYPE, 3}});
-            INST(6, Opcode::LoadString).ref().Inputs(3).TypeId(43);
-            INST(7, Opcode::CallStatic).v0id().Inputs({{INT32, 0}, {INT32, 1}, {REFERENCE, 6}, {NO_TYPE, 3}});
-            INST(8, Opcode::LoadString).ref().Inputs(3).TypeId(44);
-            INST(9, Opcode::CallStatic).v0id().Inputs({{INT32, 0}, {REFERENCE, 8}, {NO_TYPE, 3}});
-            INST(10, Opcode::LoadString).ref().Inputs(3).TypeId(45);
-            INST(11, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 10}, {NO_TYPE, 3}});
-            INST(12, Opcode::ReturnVoid).v0id();
+                .Inputs({{INT32, 0U}, {INT32, 1U}, {INT32, 2U}, {REFERENCE, 4U}, {NO_TYPE, 3U}});
+            INST(6U, Opcode::LoadString).ref().Inputs(3U).TypeId(43U);
+            INST(7U, Opcode::CallStatic).v0id().Inputs({{INT32, 0U}, {INT32, 1U}, {REFERENCE, 6U}, {NO_TYPE, 3U}});
+            INST(8U, Opcode::LoadString).ref().Inputs(3U).TypeId(44U);
+            INST(9U, Opcode::CallStatic).v0id().Inputs({{INT32, 0U}, {REFERENCE, 8U}, {NO_TYPE, 3U}});
+            INST(10U, Opcode::LoadString).ref().Inputs(3U).TypeId(45U);
+            INST(11U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 10U}, {NO_TYPE, 3U}});
+            INST(12U, Opcode::ReturnVoid).v0id();
         }
     }
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    EXPECT_EQ(INS(4).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_EQ(INS(6).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_EQ(INS(8).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_EQ(INS(10).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(4U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(6U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(8U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(10U).GetDstReg(), compiler::ACC_REG_ID);
 }
 
 TEST_F(RegAccAllocTest, Ldai)
@@ -922,26 +922,26 @@ TEST_F(RegAccAllocTest, Ldai)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
+        PARAMETER(0U, 0U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            CONSTANT(1, 3).s32();
-            INST(10, Opcode::If).CC(compiler::CC_GE).SrcType(compiler::DataType::INT32).Inputs(1, 0);
+            CONSTANT(1U, 3U).s32();
+            INST(10U, Opcode::If).CC(compiler::CC_GE).SrcType(compiler::DataType::INT32).Inputs(1U, 0U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            CONSTANT(9, 8).s32();
-            INST(7, Opcode::Return).s32().Inputs(9);
+            CONSTANT(9U, 8U).s32();
+            INST(7U, Opcode::Return).s32().Inputs(9U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(8, Opcode::Return).s32().Inputs(0);
+            INST(8U, Opcode::Return).s32().Inputs(0U);
         }
     }
     EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
 
-    EXPECT_EQ(INS(1).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(1U).GetDstReg(), compiler::ACC_REG_ID);
 }
 
 TEST_F(RegAccAllocTest, Ldai_Call)
@@ -951,25 +951,25 @@ TEST_F(RegAccAllocTest, Ldai_Call)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            CONSTANT(1, 1).s32();
-            INST(2, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(5, Opcode::InitObject).ref().Inputs({{REFERENCE, 3}, {INT32, 1}, {NO_TYPE, 4}});
-            INST(6, Opcode::SaveState).Inputs().SrcVregs({});
-            CONSTANT(7, 11).s32();
-            INST(8, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 5}, {INT32, 7}, {NO_TYPE, 6}});
+            CONSTANT(1U, 1U).s32();
+            INST(2U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(5U, Opcode::InitObject).ref().Inputs({{REFERENCE, 3U}, {INT32, 1U}, {NO_TYPE, 4U}});
+            INST(6U, Opcode::SaveState).Inputs().SrcVregs({});
+            CONSTANT(7U, 11U).s32();
+            INST(8U, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 5U}, {INT32, 7U}, {NO_TYPE, 6U}});
 
-            INST(9, Opcode::ReturnVoid).v0id();
+            INST(9U, Opcode::ReturnVoid).v0id();
         }
     }
     graph->RunPass<bytecodeopt::RegAccAlloc>();
 
-    EXPECT_NE(INS(1).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_EQ(INS(5).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_NE(INS(7).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_NE(INS(1U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(5U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_NE(INS(7U).GetDstReg(), compiler::ACC_REG_ID);
 }
 
 TEST_F(RegAccAllocTest, Ldai_Call_2)
@@ -979,25 +979,25 @@ TEST_F(RegAccAllocTest, Ldai_Call_2)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            CONSTANT(1, 1).s32();
-            INST(2, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(5, Opcode::InitObject).ref().Inputs({{REFERENCE, 3}, {INT32, 1}, {NO_TYPE, 4}});
-            INST(6, Opcode::SaveState).Inputs().SrcVregs({});
-            CONSTANT(7, 11).s32();
-            CONSTANT(8, 11).s32();
-            INST(9, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 5}, {INT32, 7}, {INT32, 8}, {NO_TYPE, 6}});
+            CONSTANT(1U, 1U).s32();
+            INST(2U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(5U, Opcode::InitObject).ref().Inputs({{REFERENCE, 3U}, {INT32, 1U}, {NO_TYPE, 4U}});
+            INST(6U, Opcode::SaveState).Inputs().SrcVregs({});
+            CONSTANT(7U, 11U).s32();
+            CONSTANT(8U, 11U).s32();
+            INST(9U, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 5U}, {INT32, 7U}, {INT32, 8U}, {NO_TYPE, 6U}});
 
-            INST(10, Opcode::Return).ref().Inputs(5);
+            INST(10U, Opcode::Return).ref().Inputs(5U);
         }
     }
     graph->RunPass<bytecodeopt::RegAccAlloc>();
 
-    EXPECT_EQ(INS(7).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_NE(INS(8).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(7U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_NE(INS(8U).GetDstReg(), compiler::ACC_REG_ID);
 }
 
 TEST_F(RegAccAllocTest, Ldai_Cast)
@@ -1005,20 +1005,20 @@ TEST_F(RegAccAllocTest, Ldai_Cast)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).s32().SrcType(compiler::DataType::UINT64).Inputs(0);
-            CONSTANT(2, 159).s32();
-            INST(3, Opcode::Add).s32().Inputs(1, 2);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(1U, Opcode::Cast).s32().SrcType(compiler::DataType::UINT64).Inputs(0U);
+            CONSTANT(2U, 159U).s32();
+            INST(3U, Opcode::Add).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     graph->RunPass<bytecodeopt::RegAccAlloc>();
 
-    EXPECT_EQ(INS(1).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_EQ(INS(3).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_EQ(INS(3).GetInput(1).GetInst()->GetOpcode(), Opcode::Constant);
+    EXPECT_EQ(INS(1U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(3U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(3U).GetInput(1U).GetInst()->GetOpcode(), Opcode::Constant);
 }
 
 TEST_F(RegAccAllocTest, Ldai_Cast2)
@@ -1026,21 +1026,21 @@ TEST_F(RegAccAllocTest, Ldai_Cast2)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            CONSTANT(2, 159).s32();
-            INST(1, Opcode::Cast).s32().SrcType(compiler::DataType::INT64).Inputs(0);
-            INST(3, Opcode::Add).s32().Inputs(2, 1);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            CONSTANT(2U, 159U).s32();
+            INST(1U, Opcode::Cast).s32().SrcType(compiler::DataType::INT64).Inputs(0U);
+            INST(3U, Opcode::Add).s32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     graph->RunPass<bytecodeopt::RegAccAlloc>();
 
-    EXPECT_NE(INS(2).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_EQ(INS(1).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_EQ(INS(3).GetInput(0).GetInst()->GetOpcode(), Opcode::Cast);
-    EXPECT_EQ(INS(3).GetInput(1).GetInst()->GetOpcode(), Opcode::Constant);
+    EXPECT_NE(INS(2U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(1U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(3U).GetInput(0U).GetInst()->GetOpcode(), Opcode::Cast);
+    EXPECT_EQ(INS(3U).GetInput(1U).GetInst()->GetOpcode(), Opcode::Constant);
 }
 
 TEST_F(RegAccAllocTest, Ldai_Exist)
@@ -1050,7 +1050,7 @@ TEST_F(RegAccAllocTest, Ldai_Exist)
         .record A {
             f32 a1 <static>
         }
-        .function i32 main(){
+        .function i32 main() {
             fmovi v1, 0x42280000
             lda v1
             ststatic A.a1
@@ -1085,7 +1085,7 @@ TEST_F(RegAccAllocTest, Lda_Extra1)
 {
     pandasm::Parser p;
     auto source = std::string(R"(
-        .function u1 main(){
+        .function u1 main() {
             fldai 0x42280000
             f32toi32
             sta v1
@@ -1125,7 +1125,7 @@ TEST_F(RegAccAllocTest, Lda_Extra2)
 {
     pandasm::Parser p;
     auto source = std::string(R"(
-        .function i32[] main(i32 a0){
+        .function i32[] main(i32 a0) {
             movi v0, 0x4
             newarr v4, v0, i32[]
             mov v1, a0
@@ -1168,7 +1168,7 @@ TEST_F(RegAccAllocTest, Lda_Extra2)
             lda_amount += 1;
         }
     }
-    EXPECT_EQ(lda_amount, 1);
+    EXPECT_EQ(lda_amount, 1U);
 }
 
 TEST_F(RegAccAllocTest, Const_Phi)
@@ -1176,32 +1176,32 @@ TEST_F(RegAccAllocTest, Const_Phi)
     auto graph = GetAllocator()->New<compiler::Graph>(GetAllocator(), GetLocalAllocator(), Arch::X86_64, false, true);
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(8, 0).f64();
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(8U, 0U).f64();
+        BASIC_BLOCK(2U, 3U)
         {
-            CONSTANT(1, 6).f64();
+            CONSTANT(1U, 6U).f64();
         }
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(3, Opcode::Phi).Inputs(0, 7).s32();
-            INST(6, Opcode::Phi).Inputs(8, 1).f64();
-            INST(4, Opcode::Cmp).s32().SrcType(compiler::DataType::FLOAT64).Fcmpg(true).Inputs(6, 8);
-            INST(5, Opcode::IfImm).SrcType(compiler::DataType::INT32).CC(compiler::CC_GE).Imm(0).Inputs(4);
+            INST(3U, Opcode::Phi).Inputs(0U, 7U).s32();
+            INST(6U, Opcode::Phi).Inputs(8U, 1U).f64();
+            INST(4U, Opcode::Cmp).s32().SrcType(compiler::DataType::FLOAT64).Fcmpg(true).Inputs(6U, 8U);
+            INST(5U, Opcode::IfImm).SrcType(compiler::DataType::INT32).CC(compiler::CC_GE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(7, Opcode::AddI).Imm(1).Inputs(3).s32();
+            INST(7U, Opcode::AddI).Imm(1U).Inputs(3U).s32();
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(9, Opcode::Return).Inputs(3).s32();
+            INST(9U, Opcode::Return).Inputs(3U).s32();
         }
     }
     graph->RunPass<bytecodeopt::RegAccAlloc>();
 
-    EXPECT_NE(INS(6).GetDstReg(), compiler::ACC_REG_ID);
-    EXPECT_EQ(INS(4).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_NE(INS(6U).GetDstReg(), compiler::ACC_REG_ID);
+    EXPECT_EQ(INS(4U).GetDstReg(), compiler::ACC_REG_ID);
 }
 
 // NOLINTEND(readability-magic-numbers)

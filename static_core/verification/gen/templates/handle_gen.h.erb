@@ -133,7 +133,7 @@ namespace panda::verifier {
 % # ---------------------------------------------------------------------------------------------
 % # gen not implemented (now .dyn and .ets) inst
 % # ---------------------------------------------------------------------------------------------
-%       res_not_impl = (mnemonic.include?('Dyn') || mnemonic.include?('Ets')) && !mnemonic.include?('MovDyn') && !mnemonic.include?('Ldobj') && !mnemonic.include?('Stobj')
+%       res_not_impl = (mnemonic.include?('Dyn')) && !mnemonic.include?('MovDyn')
 %       if res_not_impl
 
     template <BytecodeInstructionSafe::Format FORMAT>

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,26 +58,27 @@ void Graph::RemoveUnreachableBlocks()
         if (bb == nullptr) {
             continue;
         }
-        if (!bb->IsMarked(mrk)) {
-            RemovePredecessors(bb, false);
-            RemoveSuccessors(bb);
-            if (bb->IsTryBegin()) {
-                EraseTryBeginBlock(bb);
-                // Remove try_end mark from paired bb
-                if (!bb->IsEmpty()) {
-                    GetTryBeginInst(bb)->GetTryEndBlock()->SetTryEnd(false);
-                }
-            }
-            // Clear DF:
-            for (auto inst : bb->AllInsts()) {
-                inst->RemoveInputs();
-                if (IsInstThrowable(inst)) {
-                    RemoveThrowableInst(inst);
-                }
-            }
-            COMPILER_LOG(DEBUG, CLEANUP) << "Erase unreachable block " << bb->GetId();
-            EraseBlock(bb);
+        if (bb->IsMarked(mrk)) {
+            continue;
         }
+        RemovePredecessors(bb, false);
+        RemoveSuccessors(bb);
+        if (bb->IsTryBegin()) {
+            EraseTryBeginBlock(bb);
+            // Remove try_end mark from paired bb
+            if (!bb->IsEmpty()) {
+                GetTryBeginInst(bb)->GetTryEndBlock()->SetTryEnd(false);
+            }
+        }
+        // Clear DF:
+        for (auto inst : bb->AllInsts()) {
+            inst->RemoveInputs();
+            if (IsInstThrowable(inst)) {
+                RemoveThrowableInst(inst);
+            }
+        }
+        COMPILER_LOG(DEBUG, CLEANUP) << "Erase unreachable block " << bb->GetId();
+        EraseBlock(bb);
     }
     EraseMarker(mrk);
 }
@@ -647,14 +648,13 @@ SpillFillData Graph::GetDataForNativeParam(DataType::Type type)
     (void)type;
     return {};
 #else
-    // TODO(pishin) change to ASSERT
+    // NOTE(pishin) change to ASSERT
     if (param_info_ == nullptr) {
-        // TODO(pishin) enable after fixing arch in tests - UNREACHABLE()
+        // NOTE(pishin) enable after fixing arch in tests - UNREACHABLE()
         return {};
     }
 
     auto param = param_info_->GetNativeParam(Codegen::ConvertDataType(type, GetArch()));
-
     if (std::holds_alternative<Reg>(param)) {
         auto reg = std::get<Reg>(param);
         // NOTE! Vector parameter can be put to scalar register in aarch32
@@ -798,7 +798,6 @@ int64_t Graph::GetBranchCounter(const BasicBlock *block, bool true_succ)
 int64_t Graph::GetThrowCounter(const BasicBlock *block)
 {
     auto last_inst = block->GetLastInst();
-
     if (last_inst == nullptr || last_inst->GetOpcode() != Opcode::Throw || last_inst->GetPc() == INVALID_PC) {
         return 0;
     }

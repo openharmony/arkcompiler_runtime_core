@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,38 +22,38 @@ class ProfilingRunnerTest : public testing::Test {};
 
 static constexpr auto SOURCE = R"(
 .function void main() <static> {
-  movi v0, 0x2
-  movi v1, 0x0
-  jump_label_1: lda v1
-  jge v0, jump_label_0
-  call.short foo
-  inci v1, 0x1
-  jmp jump_label_1
-  jump_label_0: return.void
+    movi v0, 0x2
+    movi v1, 0x0
+    jump_label_1: lda v1
+    jge v0, jump_label_0
+    call.short foo
+    inci v1, 0x1
+    jmp jump_label_1
+    jump_label_0: return.void
 }
 
 .function i32 foo() <static> {
-  movi v0, 0x64
-  movi v1, 0x0
-  mov v2, v1
-  jump_label_3: lda v2
-  jge v0, jump_label_0
-  lda v2
-  modi 0x3
-  jnez jump_label_1
-  lda v1
-  addi 0x2
-  sta v3
-  mov v1, v3
-  jmp jump_label_2
-  jump_label_1: lda v1
-  addi 0x3
-  sta v3
-  mov v1, v3
-  jump_label_2: inci v2, 0x1
-  jmp jump_label_3
-  jump_label_0: lda v1
-  return
+    movi v0, 0x64
+    movi v1, 0x0
+    mov v2, v1
+    jump_label_3: lda v2
+    jge v0, jump_label_0
+    lda v2
+    modi 0x3
+    jnez jump_label_1
+    lda v1
+    addi 0x2
+    sta v3
+    mov v1, v3
+    jmp jump_label_2
+    jump_label_1: lda v1
+    addi 0x3
+    sta v3
+    mov v1, v3
+    jump_label_2: inci v2, 0x1
+    jmp jump_label_3
+    jump_label_0: lda v1
+    return
 }
 )";
 

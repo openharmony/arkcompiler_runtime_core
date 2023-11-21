@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1608,7 +1608,7 @@ void Aarch32Encoder::MakeLibCallWithInt64Result(Reg dst, Reg src0, Reg src1, voi
 {
     // Here I look only for this case, because src - is mapped on two regs.
     // (INT64_TYPE), and src0 can't be rewrited
-    // TODO(igorban) If src0==src1 - the result will be 1 or UB(if src0 = 0)
+    // NOTE(igorban) If src0==src1 - the result will be 1 or UB(if src0 = 0)
     // It is better to check them in optimizations
     // ASSERT(src0 != src1); - do not enable for tests
 
@@ -1891,7 +1891,6 @@ void Aarch32Encoder::EncodeVorr(Reg dst, Reg src0, Reg src1)
                         vixl::aarch32::DRegister(src0.GetId() / 2U),
                         vixl::aarch32::DRegister(tmp_reg.GetReg().GetId() / 2U));
         GetMasm()->Vmov(VixlVReg(dst).S(), vixl::aarch32::SRegister(tmp_reg.GetReg().GetId() + (src0.GetId() & 1U)));
-
     } else {
         GetMasm()->Vorr(VixlVReg(dst).D(), VixlVReg(src0).D(), VixlVReg(src1).D());
     }
@@ -2782,7 +2781,7 @@ bool Aarch32Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
 #ifndef NDEBUG
     if (size < DOUBLE_WORD_SIZE) {
         // Test if the highest part is consistent:
-        ASSERT((imm >> size == 0) || ((~imm) >> size == 0));
+        ASSERT(((imm >> size) == 0) || (((~imm) >> size) == 0));
     }
 #endif  // NDEBUG
     return vixl::aarch32::ImmediateA32::IsImmediateA32(imm);
@@ -2791,34 +2790,12 @@ bool Aarch32Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
 using vixl::aarch32::MemOperand;
 
 template <bool IS_STORE>
-void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+void Aarch32Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
 {
-    if (registers.none()) {
-        return;
-    }
-
-    vixl::aarch32::Register base_reg = VixlReg(base);
-    int32_t max_offset = (slot + helpers::ToSigned(registers.GetMaxRegister())) * WORD_SIZE_BYTES;
-
-    ScopedTmpRegU32 tmp_reg(this);
-    auto tmp = VixlReg(tmp_reg);
-    // Construct single add for big offset
-    if (is_fp) {
-        if ((max_offset < -VMEM_OFFSET) || (max_offset > VMEM_OFFSET)) {
-            GetMasm()->Add(tmp, base_reg, VixlImm(slot * WORD_SIZE_BYTES));
-            slot = 0;
-            base_reg = tmp;
-        }
-    } else {
-        if ((max_offset < -MEM_BIG_OFFSET) || (max_offset > MEM_BIG_OFFSET)) {
-            GetMasm()->Add(tmp, base_reg, VixlImm(slot * WORD_SIZE_BYTES));
-            slot = 0;
-            base_reg = tmp;
-        }
-    }
     bool has_mask = mask.any();
     int32_t index = has_mask ? static_cast<int32_t>(mask.GetMinRegister()) : 0;
     slot -= index;
+    vixl::aarch32::Register base_reg = VixlReg(base);
     for (size_t i = index; i < registers.size(); i++) {
         if (has_mask) {
             if (!mask.test(i)) {
@@ -2850,6 +2827,35 @@ void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t s
             }
         }
     }
+}
+
+template <bool IS_STORE>
+void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+{
+    if (registers.none()) {
+        return;
+    }
+
+    vixl::aarch32::Register base_reg = VixlReg(base);
+    int32_t max_offset = (slot + helpers::ToSigned(registers.GetMaxRegister())) * WORD_SIZE_BYTES;
+
+    ScopedTmpRegU32 tmp_reg(this);
+    auto tmp = VixlReg(tmp_reg);
+    // Construct single add for big offset
+    if (is_fp) {
+        if ((max_offset < -VMEM_OFFSET) || (max_offset > VMEM_OFFSET)) {
+            GetMasm()->Add(tmp, base_reg, VixlImm(slot * WORD_SIZE_BYTES));
+            slot = 0;
+            base_reg = tmp;
+        }
+    } else {
+        if ((max_offset < -MEM_BIG_OFFSET) || (max_offset > MEM_BIG_OFFSET)) {
+            GetMasm()->Add(tmp, base_reg, VixlImm(slot * WORD_SIZE_BYTES));
+            slot = 0;
+            base_reg = tmp;
+        }
+    }
+    LoadStoreRegistersMainLoop<IS_STORE>(registers, is_fp, slot, base, mask);
 }
 
 template <bool IS_STORE>
@@ -2909,14 +2915,14 @@ void Aarch32Encoder::PushRegisters(RegMask registers, bool is_fp)
 {
     (void)registers;
     (void)is_fp;
-    // TODO(msherstennikov): Implement
+    // NOTE(msherstennikov): Implement
 }
 
 void Aarch32Encoder::PopRegisters(RegMask registers, bool is_fp)
 {
     (void)registers;
     (void)is_fp;
-    // TODO(msherstennikov): Implement
+    // NOTE(msherstennikov): Implement
 }
 
 size_t Aarch32Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t code_offset) const

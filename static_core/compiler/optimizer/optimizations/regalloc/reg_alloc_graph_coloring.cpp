@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,17 @@ namespace panda::compiler {
 RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph) : RegAllocBase(graph) {}
 RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, size_t regs_count) : RegAllocBase(graph, regs_count) {}
 
+void RegAllocGraphColoring::FillPhysicalNodes(InterferenceGraph *ig, WorkingRanges *ranges,
+                                              ArenaVector<ColorNode *> &physical_nodes)
+{
+    for (auto physical_interval : ranges->physical) {
+        ColorNode *node = ig->AllocNode();
+        node->Assign(physical_interval);
+        node->SetPhysical();
+        physical_nodes.push_back(node);
+    }
+}
+
 void RegAllocGraphColoring::BuildIG(InterferenceGraph *ig, WorkingRanges *ranges, bool remat_constants)
 {
     ig->Reserve(ranges->regular.size() + ranges->physical.size());
@@ -36,12 +47,7 @@ void RegAllocGraphColoring::BuildIG(InterferenceGraph *ig, WorkingRanges *ranges
     ArenaVector<ColorNode *> physical_nodes(GetGraph()->GetLocalAllocator()->Adapter());
     const auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
 
-    for (auto physical_interval : ranges->physical) {
-        ColorNode *node = ig->AllocNode();
-        node->Assign(physical_interval);
-        node->SetPhysical();
-        physical_nodes.push_back(node);
-    }
+    FillPhysicalNodes(ig, ranges, physical_nodes);
 
     for (auto current_interval : ranges->regular) {
         auto range_start = current_interval->GetBegin();
@@ -235,19 +241,20 @@ void RegAllocGraphColoring::AddAffinityEdgesToPhysicalNodes(InterferenceGraph *i
         // Add affinity edges to fixed locations
         for (auto i = 0U; i < inst->GetInputsCount(); i++) {
             auto location = inst->GetLocation(i);
-            if (location.IsFixedRegister()) {
-                auto fixed_node = ig->FindPhysicalNode(location);
-                // Possible when general intervals are processing, while input is fp-interval or vice versa
-                if (fixed_node == nullptr) {
-                    continue;
-                }
-                affinity_nodes->push_back(fixed_node->GetNumber());
-
-                auto input_li = la->GetInstLifeIntervals(inst->GetDataFlowInput(i));
-                auto sibling = input_li->FindSiblingAt(interval->GetBegin());
-                ASSERT(sibling != nullptr);
-                AddAffinityEdge(ig, affinity_nodes, *fixed_node, sibling);
+            if (!location.IsFixedRegister()) {
+                continue;
             }
+            auto fixed_node = ig->FindPhysicalNode(location);
+            // Possible when general intervals are processing, while input is fp-interval or vice versa
+            if (fixed_node == nullptr) {
+                continue;
+            }
+            affinity_nodes->push_back(fixed_node->GetNumber());
+
+            auto input_li = la->GetInstLifeIntervals(inst->GetDataFlowInput(i));
+            auto sibling = input_li->FindSiblingAt(interval->GetBegin());
+            ASSERT(sibling != nullptr);
+            AddAffinityEdge(ig, affinity_nodes, *fixed_node, sibling);
         }
     }
 }

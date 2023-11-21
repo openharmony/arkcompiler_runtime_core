@@ -455,7 +455,41 @@ public:
         }
     }
 
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsLdundefined()
+    {
+        LOG_INST() << "ets.ldundefined";
+
+        this->GetAccAsVReg().SetReference(GetCoro()->GetUndefinedObject());
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsMovundefined()
+    {
+        uint16_t vd = this->GetInst().template GetVReg<FORMAT>();
+        LOG_INST() << "ets.movundefined v" << vd;
+
+        this->GetFrameHandler().GetVReg(vd).SetReference(GetCoro()->GetUndefinedObject());
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsIsundefined()
+    {
+        LOG_INST() << "ets.isundefined";
+
+        ObjectHeader *obj = this->GetAcc().GetReference();
+        this->GetAcc().Set(obj == GetCoro()->GetUndefinedObject() ? 1 : 0);
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
 private:
+    ALWAYS_INLINE EtsCoroutine *GetCoro() const
+    {
+        return EtsCoroutine::CastFromThread(this->GetThread());
+    }
+
     template <BytecodeInstruction::Format FORMAT, bool IS_RANGE>
     ALWAYS_INLINE void HandleLaunchVirt(BytecodeId method_id)
     {

@@ -58,7 +58,7 @@ TEST_F(AccessingObjectsFieldsTest, GetFieldID2)
     ASSERT_NE(member_id, nullptr);
 }
 
-// TODO(m.morozov): uncomment this test when inheritance will be implemented
+// NOTE(m.morozov): uncomment this test when inheritance will be implemented
 // TEST_F(AccessingObjectsFieldsTest, GetBaseFieldID2)
 // {
 //     ets_class cls = env->FindClass("F_sub");
@@ -355,7 +355,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetStaticTypeFieldDeathTests)
     }
 }
 
-// TODO(m.morozov): uncomment this test when inheritance will be implemented
+// NOTE(m.morozov): uncomment this test when inheritance will be implemented
 // TEST_F(AccessingObjectsFieldsTest, GetStaticTypeFieldBase)
 // {
 //     ets_class cls = env->FindClass("F_static_sub");
@@ -439,7 +439,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetStaticTypeFieldDeathTests)
     }
 }
 
-// TODO(m.morozov): uncomment this test when inheritance will be implemented
+// NOTE(m.morozov): uncomment this test when inheritance will be implemented
 // TEST_F(AccessingObjectsFieldsTest, SetStaticFieldBase)
 // {
 //     ets_class cls = env->FindClass("F_static_sub");

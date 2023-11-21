@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_ANALYSIS_H_
-#define COMPILER_OPTIMIZER_IR_ANALYSIS_H_
+#ifndef COMPILER_OPTIMIZER_IR_ANALYSIS_H
+#define COMPILER_OPTIMIZER_IR_ANALYSIS_H
 
 #include "graph.h"
 
@@ -40,7 +40,7 @@ std::optional<bool> IsIfInverted(BasicBlock *phi_block, IfImmInst *if_imm);
 // If object input has known class, return pointer to the class, else returns nullptr
 RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t input_num = 0);
 
-static inline bool IsInstInDifferentBlocks(Inst *i1, Inst *i2)
+inline bool IsInstInDifferentBlocks(Inst *i1, Inst *i2)
 {
     return i1->GetBasicBlock() != i2->GetBasicBlock();
 }
@@ -72,6 +72,7 @@ private:
     void SearchSSOnWay(BasicBlock *block, Inst *start_from, Inst *source_inst, Marker visited,
                        ArenaVector<Inst *> *bridges, Inst *stop_search);
     bool IsSaveStateForGc(Inst *inst);
+    void ProcessSSUserPreds(Graph *graph, Inst *inst, Inst *target_inst);
     void SearchInSaveStateAndFillBridgeVector(Inst *inst, Inst *searched_inst, ArenaVector<Inst *> *bridges);
     void FixUsageInstInOtherBB(BasicBlock *block, Inst *inst);
     void FixUsagePhiInBB(BasicBlock *block, Inst *inst);
@@ -105,4 +106,4 @@ bool IsConditionEqual(const Inst *inst0, const Inst *inst1, bool inverted);
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_IR_ANALYSIS_H_
+#endif  // COMPILER_OPTIMIZER_IR_ANALYSIS_H

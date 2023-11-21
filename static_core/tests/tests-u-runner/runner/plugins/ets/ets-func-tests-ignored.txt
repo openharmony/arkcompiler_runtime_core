@@ -162,4 +162,17 @@ spec/unions/union_return_03.ets
 spec/unions/union_return_04.ets
 spec/unions/union_return_05.ets
 spec/unions/union_return_06.ets
+### Issue 14439
+spec/unions/union_assignment_01.ets
+spec/unions/union_assignment_02.ets
+spec/unions/union_assignment_04.ets
+spec/unions/union_assignment_07.ets
+spec/unions/union_cast_01.ets
+spec/unions/union_cast_02.ets
+spec/unions/union_cast_03.ets
+spec/unions/union_cast_05.ets
+spec/unions/union_cast_06.ets
+### Issue 14441
+spec/unions/union_compare_03.ets
+spec/unions/union_compare_04.ets 
 ### End of Unions

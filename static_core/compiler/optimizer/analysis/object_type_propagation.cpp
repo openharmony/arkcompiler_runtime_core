@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,7 @@ void ObjectTypePropagation::VisitLoadArray([[maybe_unused]] GraphVisitor *v, [[m
 {
     // LoadArray should be processed more carefully, because it may contain object of the derived class with own method
     // implementation. We need to check all array stores and method calls between NewArray and LoadArray.
-    // TODO(mshertennikov): Support it.
+    // NOTE(mshertennikov): Support it.
 }
 
 void ObjectTypePropagation::VisitLoadObject(GraphVisitor *v, Inst *i)
@@ -114,6 +114,33 @@ void ObjectTypePropagation::VisitRefTypeCheck([[maybe_unused]] GraphVisitor *v, 
 {
     auto inst = i->CastToRefTypeCheck();
     inst->SetObjectTypeInfo(inst->GetInput(0).GetInst()->GetObjectTypeInfo());
+}
+
+void ObjectTypePropagation::VisitParameter([[maybe_unused]] GraphVisitor *v, Inst *i)
+{
+    auto inst = i->CastToParameter();
+    auto graph = i->GetBasicBlock()->GetGraph();
+    if (inst->GetType() != DataType::REFERENCE || graph->IsBytecodeOptimizer() || inst->HasObjectTypeInfo()) {
+        return;
+    }
+    auto ref_num = inst->GetArgRefNumber();
+    auto runtime = graph->GetRuntime();
+    auto method = graph->GetMethod();
+    RuntimeInterface::ClassPtr klass;
+    if (ref_num == ParameterInst::INVALID_ARG_REF_NUM) {
+        // This parametr doesn't have ArgRefNumber
+        if (inst->GetArgNumber() != 0 || runtime->IsMethodStatic(method)) {
+            return;
+        }
+        klass = runtime->GetClass(method);
+    } else {
+        auto type_id = runtime->GetMethodArgReferenceTypeId(method, ref_num);
+        klass = runtime->GetClass(method, type_id);
+    }
+    if (klass != nullptr) {
+        auto is_exact = runtime->GetClassType(klass) == ClassType::FINAL_CLASS;
+        inst->SetObjectTypeInfo({klass, is_exact});
+    }
 }
 
 void ObjectTypePropagation::ProcessManagedCall(GraphVisitor *v, CallInst *inst)

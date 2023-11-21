@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,20 +117,67 @@ static bool GetDieRange(Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_h
 }
 
 template <class F>
-bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func)
+bool IterateDieRanges([[maybe_unused]] F func, [[maybe_unused]] Dwarf_Attribute attr, [[maybe_unused]] Dwarf_Half form,
+                      [[maybe_unused]] Dwarf_Unsigned offset)
 {
-    Dwarf_Addr low_pc = DW_DLV_BADADDR;
-    Dwarf_Addr high_pc = DW_DLV_BADADDR;
+#ifdef HAVE_DWARF_RNGLISTS_API
+    Dwarf_Rnglists_Head rnglhead = nullptr;
+    Dwarf_Unsigned count_rnglists_entries = 0;
+    if (dwarf_rnglists_get_rle_head(attr, form, offset, &rnglhead, &count_rnglists_entries, nullptr, nullptr) ==
+        DW_DLV_OK) {
+        AtReturn r([rnglhead]() { dwarf_dealloc_rnglists_head(rnglhead); });
+        for (Dwarf_Unsigned i = 0; i < count_rnglists_entries; i++) {
+            unsigned rle_code = 0;
+            Dwarf_Bool no_debug_addr_available = false;
+            Dwarf_Unsigned cooked1 = 0;
+            Dwarf_Unsigned cooked2 = 0;
 
-    if (GetDieRange(die, &low_pc, &high_pc)) {
-        return func(low_pc, high_pc);
+            if (dwarf_get_rnglists_entry_fields_a(rnglhead, i, nullptr, &rle_code, nullptr, nullptr,
+                                                  &no_debug_addr_available, &cooked1, &cooked2, nullptr) != DW_DLV_OK) {
+                return false;
+            }
+
+            if (rle_code == DW_RLE_base_addressx || rle_code == DW_RLE_base_address || no_debug_addr_available) {
+                continue;
+            }
+
+            if (rle_code == DW_RLE_end_of_list) {
+                break;
+            }
+
+            if (func(cooked1, cooked2)) {
+                return true;
+            }
+        }
+    }
+#endif  // HAVE_DWARF_RNGLISTS_API
+
+    return true;
+}
+
+template <class F>
+bool IterateDieRanges(F func, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr base_addr)
+{
+    for (const Dwarf_Ranges &range : ranges) {
+        if (range.dwr_type == DW_RANGES_ENTRY) {
+            Dwarf_Addr rng_low_pc = base_addr + range.dwr_addr1;
+            Dwarf_Addr rng_high_pc = base_addr + range.dwr_addr2;
+            if (func(rng_low_pc, rng_high_pc)) {
+                return true;
+            }
+        } else if (range.dwr_type == DW_RANGES_ADDRESS_SELECTION) {
+            base_addr = range.dwr_addr2;
+        } else {
+            break;
+        }
     }
 
-    Dwarf_Attribute attr;
-    if (dwarf_attr(die, DW_AT_ranges, &attr, nullptr) != DW_DLV_OK) {
-        return false;
-    }
+    return false;
+}
 
+template <class F>
+bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func, Dwarf_Attribute attr, Dwarf_Addr low_pc)
+{
     Dwarf_Half form = 0;
     if (dwarf_whatform(attr, &form, nullptr) != DW_DLV_OK) {
         return false;
@@ -165,57 +212,29 @@ bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func)
         if (dwarf_get_ranges_a(dbg, offset, die, &buf, &count, nullptr, nullptr) == DW_DLV_OK) {
             AtReturn r([dbg, buf, count]() { dwarf_ranges_dealloc(dbg, buf, count); });
             Span<Dwarf_Ranges> ranges(buf, count);
-            for (const Dwarf_Ranges &range : ranges) {
-                if (range.dwr_type == DW_RANGES_ENTRY) {
-                    Dwarf_Addr rng_low_pc = base_addr + range.dwr_addr1;
-                    Dwarf_Addr rng_high_pc = base_addr + range.dwr_addr2;
-                    if (func(rng_low_pc, rng_high_pc)) {
-                        return true;
-                    }
-                } else if (range.dwr_type == DW_RANGES_ADDRESS_SELECTION) {
-                    base_addr = range.dwr_addr2;
-                } else {
-                    break;
-                }
-            }
+            return IterateDieRanges(func, ranges, base_addr);
         }
+    }
 
+    return IterateDieRanges(func, attr, form, offset);
+}
+
+template <class F>
+bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func)
+{
+    Dwarf_Addr low_pc = DW_DLV_BADADDR;
+    Dwarf_Addr high_pc = DW_DLV_BADADDR;
+
+    if (GetDieRange(die, &low_pc, &high_pc)) {
+        return func(low_pc, high_pc);
+    }
+
+    Dwarf_Attribute attr;
+    if (dwarf_attr(die, DW_AT_ranges, &attr, nullptr) != DW_DLV_OK) {
         return false;
     }
 
-#ifdef HAVE_DWARF_RNGLISTS_API
-    Dwarf_Rnglists_Head rnglhead = nullptr;
-    Dwarf_Unsigned count_rnglists_entries = 0;
-    if (dwarf_rnglists_get_rle_head(attr, form, offset, &rnglhead, &count_rnglists_entries, nullptr, nullptr) ==
-        DW_DLV_OK) {
-        AtReturn r([rnglhead]() { dwarf_dealloc_rnglists_head(rnglhead); });
-        for (Dwarf_Unsigned i = 0; i < count_rnglists_entries; i++) {
-            unsigned rle_code = 0;
-            Dwarf_Bool no_debug_addr_available = false;
-            Dwarf_Unsigned cooked1 = 0;
-            Dwarf_Unsigned cooked2 = 0;
-
-            if (dwarf_get_rnglists_entry_fields_a(rnglhead, i, nullptr, &rle_code, nullptr, nullptr,
-                                                  &no_debug_addr_available, &cooked1, &cooked2, nullptr) != DW_DLV_OK) {
-                return false;
-            }
-
-            if (rle_code == DW_RLE_base_addressx || rle_code == DW_RLE_base_address || no_debug_addr_available) {
-                continue;
-            }
-
-            if (rle_code == DW_RLE_end_of_list) {
-                break;
-            }
-
-            if (func(cooked1, cooked2)) {
-                return true;
-            }
-        }
-    }
-#endif  // HAVE_DWARF_RNGLISTS_API
-
-    return false;
+    return IterateDieRanges(dbg, die, func, attr, low_pc);
 }
 
 DebugInfo::CompUnit::~CompUnit()
@@ -270,7 +289,7 @@ DebugInfo::ErrorCode DebugInfo::ReadFromFile(const char *filename)
 #ifdef PANDA_TARGET_LINUX_UBUNTU_22_04
         dwarf_dealloc(dbg_, err, DW_DLA_ERROR);
 #else
-        // TODO(audovichenko): Libdwarf has a bug (memory leak).
+        // NOTE(audovichenko): Libdwarf has a bug (memory leak).
         // In case dwarf_init fails it allocates memory for the error and  returns it in 'err' variable.
         // But since dbg is NULL, dwarf_dealloc just returns in case of dbg == nullptr and doesn't free this memory
         // A possible solution is to use 20201201 version and call dwarf_dealloc.

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -385,13 +385,15 @@ void LicmConditions::UpdatePhis(const ConditionChain *chain, BasicBlock *multipl
             multiple_preds_succ->EraseInst(phi);
             // preds order was preserved
             phi_block->AppendPhi(phi);
-            if (phi->GetInputsCount() < phi_block->GetPredsBlocks().size()) {
-                COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Add dummy input";
-                if (DataType::IsReference(phi->GetType())) {
-                    phi->AppendInput(GetGraph()->GetOrCreateNullPtr());
-                } else {
-                    phi->AppendInput(GetGraph()->FindOrCreateConstant(0));
-                }
+            if (phi->GetInputsCount() >= phi_block->GetPredsBlocks().size()) {
+                ASSERT(phi->GetInputsCount() == phi_block->GetPredsBlocks().size());
+                continue;
+            }
+            COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Add dummy input";
+            if (DataType::IsReference(phi->GetType())) {
+                phi->AppendInput(GetGraph()->GetOrCreateNullPtr());
+            } else {
+                phi->AppendInput(GetGraph()->FindOrCreateConstant(0));
             }
             ASSERT(phi->GetInputsCount() == phi_block->GetPredsBlocks().size());
         } else {

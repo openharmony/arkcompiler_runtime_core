@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,7 +129,7 @@ TEST_F(CodegenTest, SimpleProgramm)
             INST(17U, Opcode::Phi).Inputs(1U, 10U).s64();  // PHI  v1
             INST(20U, Opcode::Phi).Inputs(2U, 10U).s64();  // result to return
 
-            // TODO (igorban): support CMP instr
+            // NOTE (igorban): support CMP instr
             INST(18U, Opcode::Compare).b().CC(CC_NE).Inputs(0U, 16U);
             INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
         }
@@ -1632,7 +1632,7 @@ TEST_F(CodegenTest, RegallocTwoFreeRegs)
     }
 }
 
-// TODO (igorban): Update FillSaveStates() with filling SaveState from SpillFill
+// NOTE (igorban): Update FillSaveStates() with filling SaveState from SpillFill
 TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
 {
     GRAPH(GetGraph())
@@ -1755,8 +1755,8 @@ TEST_F(CodegenTest, SaveState)
     // End dump
 
     auto ret_data = GetExecModule().GetRetValue();
-    // TODO (igorban) : really need to check array changes
-    EXPECT_EQ(ret_data, 4U * 0x21U);
+    // NOTE (igorban) : really need to check array changes
+    EXPECT_EQ(ret_data, 4U * 0x21);
 
     // Clear data for next execution
     while (auto current = GetGraph()->GetFirstConstInst()) {
@@ -1922,7 +1922,7 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
     ASSERT(code_entry != nullptr && code_exit != nullptr);
     GetExecModule().SetInstructions(code_entry, code_exit);
 
-    // TODO (igorban) : fill Frame array == nullptr [THROW]
+    // NOTE (igorban) : fill Frame array == nullptr [THROW]
 
     uint64_t array[ARRAY_LEN];
     for (auto i = 0U; i < ARRAY_LEN; i++) {
@@ -1938,9 +1938,9 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
     EXPECT_EQ(GetExecModule().GetRetValue(), array[index] * 4U);
 
     /*
-   TODO (igorban) : fill Frame
-   // index < 0 [THROW]
-   */
+    NOTE (igorban) : fill Frame
+    // index < 0 [THROW]
+    */
     GetExecModule().FreeArray(param_1);
 }
 
@@ -2014,7 +2014,7 @@ TEST_F(CodegenTest, ResolveParamSequence)
             auto dst = result[j].first;
             for (uint8_t k = j + 1U; k < reg_size; ++k) {
                 if (result[k].second == dst && result[k].second != tmp_reg) {
-                    std::cerr << " first = " << result[k].first << " tmp = " << reg_size + 5U << "\n";
+                    std::cerr << " first = " << result[k].first << " tmp = " << (reg_size + 5U) << "\n";
                     std::cerr << " Before:\n";
                     for (auto &it : orig_vector) {
                         std::cerr << " " << (size_t)it.first << "<-" << (size_t)it.second << "\n";

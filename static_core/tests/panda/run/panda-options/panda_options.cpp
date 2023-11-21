@@ -43,11 +43,11 @@ private:
     std::string dir_name_;
 };
 
-// TODO(mgonopolskiy): add tests for all possible cases
+// NOTE(mgonopolskiy): add tests for all possible cases
 TEST_F(PandaOptionsTest, PandaFiles)
 {
     // Test basic functionality only in host mode.
-    // TODO(mgonopolskiy): add support for all modes
+    // NOTE(mgonopolskiy): add support for all modes
     if (RUNTIME_ARCH != Arch::X86_64) {
         return;
     }

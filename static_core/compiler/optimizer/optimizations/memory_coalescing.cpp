@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -505,6 +505,28 @@ private:
         candidates_.push_back(inst);
     }
 
+    bool HandleKnownEvolutionArrayAccessVar(Inst *idx, Inst *cand_idx, int64_t idx_initial, int64_t cand_initial)
+    {
+        /* Accesses inside loop */
+        auto idx_step = vars_.GetStep(idx);
+        auto cand_step = vars_.GetStep(cand_idx);
+        /* Indices should be incremented at the same value and their
+            increment should be even to hold alignment */
+        if (idx_step != cand_step) {
+            return false;
+        }
+        /* To keep alignment we need to have even step and even lowest initial */
+        constexpr auto IMM_2 = 2;
+        // NOLINTBEGIN(readability-simplify-boolean-expr)
+        if (aligned_only_ && idx_step % IMM_2 != 0 &&
+            ((idx_initial < cand_initial && idx_initial % IMM_2 != 0) ||
+             (cand_initial < idx_initial && cand_initial % IMM_2 != 0))) {
+            return false;
+        }
+        return true;
+        // NOLINTEND(readability-simplify-boolean-expr)
+    }
+
     void HandleArrayAccess(Inst *inst)
     {
         Inst *obj = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
@@ -528,21 +550,9 @@ private:
                 continue;
             }
             if (vars_.HasKnownEvolution(idx) && vars_.HasKnownEvolution(cand_idx)) {
-                /* Accesses inside loop */
-                auto idx_step = vars_.GetStep(idx);
                 auto idx_initial = vars_.GetInitial(idx);
-                auto cand_step = vars_.GetStep(cand_idx);
                 auto cand_initial = vars_.GetInitial(cand_idx);
-                /* Indices should be incremented at the same value and their
-                   increment should be even to hold alignment */
-                if (idx_step != cand_step) {
-                    continue;
-                }
-                /* To keep alignment we need to have even step and even lowest initial */
-                constexpr auto IMM_2 = 2;
-                if (aligned_only_ && idx_step % IMM_2 != 0 &&
-                    ((idx_initial < cand_initial && idx_initial % IMM_2 != 0) ||
-                     (cand_initial < idx_initial && cand_initial % IMM_2 != 0))) {
+                if (!HandleKnownEvolutionArrayAccessVar(idx, cand_idx, idx_initial, cand_initial)) {
                     continue;
                 }
                 if (TryAddCoalescedPair(inst, idx_initial, cand, cand_initial)) {

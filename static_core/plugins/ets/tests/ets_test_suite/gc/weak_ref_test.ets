@@ -27,10 +27,12 @@ function CreateWeakRefString(): WeakRef<String>
     return new WeakRef<String>(obj);
 }
 
+// Make it global beacuse optimizer is free to kill local variables
+const reachable_obj = new Object();
+
 function main(): int {
     let wr = CreateWeakRefObject();
     let wrs = CreateWeakRefString();
-    let reachable_obj = new Object();
     let wr_with_reachable = new WeakRef<Object>(reachable_obj);
     // Run Full GC for referent collection
     try {

@@ -102,7 +102,7 @@ public:
     void PreZygoteFork();
 
     /**
-     *  TODO :  Not yet implemented
+     *  NOTE :  Not yet implemented
      *  To implement the getTargetHeapUtilization and nativeSetTargetHeapUtilization,
      *  I set two functions and a fixed initial value here. They may need to be rewritten
      */
@@ -226,7 +226,7 @@ private:
     friend class ::panda::Runtime;
 
     /**
-     * TODO : Target ideal heap utilization ratio.
+     * NOTE : Target ideal heap utilization ratio.
      * To implement the getTargetHeapUtilization and nativeSetTargetHeapUtilization, I set a variable here.
      * It may need to be initialized, but now I give it a fixed initial value 0.5
      */

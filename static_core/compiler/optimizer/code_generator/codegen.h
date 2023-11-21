@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H_
-#define COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H
+#define COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H
 
 /*
 Codegen interface for compiler
@@ -250,7 +250,7 @@ public:
 
     /**
      * Insert tracing code to the generated code. See `Trace` method in the `runtime/entrypoints.cpp`.
-     * TODO(compiler): we should rework parameters assigning algorithm, that is duplicated here.
+     * NOTE(compiler): we should rework parameters assigning algorithm, that is duplicated here.
      * @param params parameters to be passed to the TRACE entrypoint, first parameter must be TraceId value.
      */
     template <typename... Args>
@@ -335,13 +335,16 @@ public:
                 GetEncoder()->EncodeMov(dst_reg, ret_reg);
             }
         }
+        CallEntrypointFinalize(live_regs, params_mask, inst);
+    }
 
+    void CallEntrypointFinalize(RegMask &live_regs, RegMask &params_mask, Inst *inst)
+    {
         LoadCallerRegisters(live_regs, VRegMask(), true);
 
         if (!inst->HasImplicitRuntimeCall()) {
             return;
         }
-        ASSERT(!GetRuntime()->IsEntrypointNoreturn(id));
         for (auto i = 0U; i < params_mask.size(); i++) {
             if (params_mask.test(i)) {
                 inst->GetSaveState()->GetRootsRegsMask().reset(i);
@@ -502,6 +505,7 @@ public:
 
     // Initialization internal variables
     void Initialize();
+    bool Finalize();
 
     const Disassembly *GetDisasm() const
     {
@@ -1252,4 +1256,4 @@ void Codegen::FillPostWrbCallParams(MemRef mem, Args &&...params)
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H

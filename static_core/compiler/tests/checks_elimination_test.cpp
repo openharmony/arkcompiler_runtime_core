@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1710,7 +1710,7 @@ TEST_F(ChecksEliminationTest, PhiTest)
 TEST_F(ChecksEliminationTest, SimpleLoopTestInc)
 {
     // new_array(len_array)
-    // for(int i = 0, i < len_array, i++) begin
+    // For(int i = 0, i < len_array, i++) begin
     //  boundscheck(len_array, i) - can remove
     //  a[i] = 0
     // end
@@ -1781,7 +1781,7 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestInc)
 TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling)
 {
     // new_array(len_array)
-    // for(int i = 0, i < len_array, i++) begin
+    // For(int i = 0, i < len_array, i++) begin
     //  boundscheck(len_array, i) - can remove
     //  a[i] = 0
     // end
@@ -1850,7 +1850,7 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling)
 TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling1)
 {
     // new_array(len_array)
-    // for(int i = 0, i < len_array, i++) begin
+    // For(int i = 0, i < len_array, i++) begin
     //  boundscheck(len_array, i) - can remove
     //  a[i] = 0
     // end
@@ -1915,7 +1915,7 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling1)
 TEST_F(ChecksEliminationTest, SimpleLoopTestDec)
 {
     // new_array(len_array)
-    // for(int i = len_array-1, i >= 0, i--) begin
+    // For(int i = len_array-1, i >= 0, i--) begin
     //  boundscheck(len_array, i) - can remove
     //  a[i] = 0
     // end
@@ -4695,7 +4695,7 @@ TEST_F(ChecksEliminationTest, DoNotOmitNullCheck)
     ASSERT_FALSE(INS(11U).CastToIsInstance()->GetOmitNullCheck());
 }
 
-// TODO(schernykh): It's possible to remove boundschecks from this test, but BoundsAnalysis must be upgrade for it.
+// NOTE(schernykh): It's possible to remove boundschecks from this test, but BoundsAnalysis must be upgrade for it.
 TEST_F(ChecksEliminationTest, OptimizeBoundsCheckElimination)
 {
     GRAPH(GetGraph())

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_VN_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_VN_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_VN_H
+#define COMPILER_OPTIMIZER_ANALYSIS_VN_H
 
 #include "utils/hash.h"
 #include "optimizer/pass.h"
@@ -119,7 +119,7 @@ private:
 
     bool TryToApplyCse(Inst *inst, InstVector *equiv_insts);
 
-    // !TODO add own allocator
+    // !NOTE add own allocator
     ArenaUnorderedMap<VnObject *, InstVector, VnObjHash, VnObjEqual> map_insts_;
     SaveStateBridgesBuilder ssb_;
     uint32_t curr_vn_ {0};
@@ -127,4 +127,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_VN_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_VN_H

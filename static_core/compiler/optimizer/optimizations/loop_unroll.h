@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNROLL_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNROLL_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNROLL_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNROLL_H
 
 #include "optimizer/optimizations/loop_transform.h"
 #include "compiler_options.h"
@@ -56,6 +56,8 @@ public:
 private:
     bool TransformLoop(Loop *loop) override;
     UnrollParams GetUnrollParams(Loop *loop);
+    void TransformLoopImpl(Loop *loop, std::optional<uint64_t> opt_iterations, bool no_side_exits,
+                           uint32_t unroll_factor, std::optional<CountableLoopInfo> loop_info);
     void FixCompareInst(const CountableLoopInfo &loop_info, BasicBlock *header, uint32_t unroll_factor);
     Inst *CreateNewTestInst(const CountableLoopInfo &loop_info, Inst *const_inst, Inst *pre_header_cmp);
 
@@ -66,4 +68,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNROLL_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNROLL_H

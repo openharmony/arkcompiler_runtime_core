@@ -13,32 +13,32 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSFilter = ets_mod.getFunction("Array_TestJSFilter");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSFilter = etsMod.getFunction('Array_TestJSFilter');
 
-{   // Test JS Array<FooClass>
-    TestJSFilter(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSFilter(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    function fnTrue(v) { return true; }
-    function fn1True(v, k) { return true; }
-    let filter = arr.filter(fnTrue);
-    let filter1 = arr.filter(fn1True);
-    ASSERT_EQ(filter.at(0), arr.at(0));
-    ASSERT_EQ(filter1.at(0), arr.at(0));
-    function fnFalse(v) { return false; }
-    function fn1False(v, k) { return k < 0; }
-    let filterFalse = arr.filter(fnFalse);
-    let filter1False = arr.filter(fn1False);
-    ASSERT_NE(filterFalse.at(0), arr.at(0));
-    ASSERT_NE(filter1False.at(0), arr.at(0));
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  function fnTrue(v) { return true; }
+  function fn1True(v, k) { return true; }
+  let filter = arr.filter(fnTrue);
+  let filter1 = arr.filter(fn1True);
+  ASSERT_EQ(filter.at(0), arr.at(0));
+  ASSERT_EQ(filter1.at(0), arr.at(0));
+  function fnFalse(v) { return false; }
+  function fn1False(v, k) { return k < 0; }
+  let filterFalse = arr.filter(fnFalse);
+  let filter1False = arr.filter(fn1False);
+  ASSERT_NE(filterFalse.at(0), arr.at(0));
+  ASSERT_NE(filter1False.at(0), arr.at(0));
 }
 
 GCJSRuntimeCleanup();

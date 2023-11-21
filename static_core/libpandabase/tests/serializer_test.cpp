@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ class SerializatorTest : public testing::Test {
 protected:
     void SetUp() override
     {
-        buffer_.resize(0);
+        buffer_.resize(0U);
     }
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     std::vector<uint8_t> buffer_;
 };
 
 template <typename T>
-void SerializerTypeToBuffer(const T &type, /* out */ std::vector<uint8_t> &buffer, size_t ret_val)
+void SerializerTypeToBuffer(const T &type, std::vector<uint8_t> &buffer, size_t ret_val)
 {
     auto ret = serializer::TypeToBuffer(type, buffer);
     ASSERT_TRUE(ret);
@@ -37,7 +37,7 @@ void SerializerTypeToBuffer(const T &type, /* out */ std::vector<uint8_t> &buffe
 }
 
 template <typename T>
-void SerializerBufferToType(const std::vector<uint8_t> &buffer, /* out */ T &type, size_t ret_val)
+void SerializerBufferToType(const std::vector<uint8_t> &buffer, T &type, size_t ret_val)
 {
     auto ret = serializer::BufferToType(buffer.data(), buffer.size(), type);
     ASSERT_TRUE(ret);
@@ -85,39 +85,39 @@ bool operator==(const PodStruct &lhs, const PodStruct &rhs)
 
 TEST_F(SerializatorTest, TestPodTypes)
 {
-    TestPod<uint8_t>(0xac);
-    TestPod<uint16_t>(0xc0de);
-    TestPod<uint32_t>(0x123f567f);
-    TestPod<uint64_t>(0xff12345789103c4b);
+    TestPod<uint8_t>(0xacU);
+    TestPod<uint16_t>(0xc0deU);
+    TestPod<uint32_t>(0x123f567fU);
+    TestPod<uint64_t>(0xff12345789103c4bU);
 
-    TestPod<int8_t>(0x1c);
-    TestPod<int16_t>(0x1ebd);
-    TestPod<int32_t>(0xfe52567f);
-    TestPod<int64_t>(0xff1234fdec57891b);
+    TestPod<int8_t>(0x1cU);
+    TestPod<int16_t>(0x1ebdU);
+    TestPod<int32_t>(0xfe52567fU);
+    TestPod<int64_t>(0xff1234fdec57891bU);
 
     TestPod<float>(0.234664);
     TestPod<double>(22345.3453453);
     TestPod<long double>(99453.64345);
 
-    TestPod<PodStruct>({0xff, -23458, 10345893, -98343451, -3.54634, 1.44e6});
+    TestPod<PodStruct>({0xffU, -23458L, 10345893U, -98343451L, -3.54634, 1.44e6});
 }
 
 TEST_F(SerializatorTest, TestString)
 {
-    DoTest<std::string>({}, 4);
-    DoTest<std::string>("", 4);
-    DoTest<std::string>("Hello World!", 4 + 12);
-    DoTest<std::string>("1", 4 + 1);
-    DoTest<std::string>({}, 4);
+    DoTest<std::string>({}, 4U);
+    DoTest<std::string>("", 4U);
+    DoTest<std::string>("Hello World!", 4U + 12U);
+    DoTest<std::string>("1", 4U + 1U);
+    DoTest<std::string>({}, 4U);
 }
 
 TEST_F(SerializatorTest, TestVectorPod)
 {
-    DoTest<std::vector<uint8_t>>({1, 2, 3, 4}, 4 + 1 * 4);
-    DoTest<std::vector<uint16_t>>({143, 452, 334}, 4 + 2 * 3);
-    DoTest<std::vector<uint32_t>>({15434, 4564562, 33453, 43456, 346346}, 4 + 5 * 4);
-    DoTest<std::vector<uint64_t>>({14345665644345, 34645345465}, 4 + 8 * 2);
-    DoTest<std::vector<char>>({}, 4 + 1 * 0);
+    DoTest<std::vector<uint8_t>>({1U, 2U, 3U, 4U}, 4U + 1U * 4U);
+    DoTest<std::vector<uint16_t>>({143U, 452U, 334U}, 4U + 2U * 3U);
+    DoTest<std::vector<uint32_t>>({15434U, 4564562U, 33453U, 43456U, 346346U}, 4U + 5U * 4U);
+    DoTest<std::vector<uint64_t>>({14345665644345U, 34645345465U}, 4U + 8U * 2U);
+    DoTest<std::vector<char>>({}, 4U + 1U * 0U);
 }
 
 TEST_F(SerializatorTest, TestUnorderedMap1)
@@ -125,11 +125,11 @@ TEST_F(SerializatorTest, TestUnorderedMap1)
     using Map = std::unordered_map<uint32_t, uint16_t>;
     DoTest<Map>(
         {
-            {12343526, 23424},
-            {3, 234356},
-            {45764746, 4},
+            {12343526U, 23424U},
+            {3U, 234356U},
+            {45764746U, 4U},
         },
-        4 + 3 * (4 + 2));
+        4U + 3U * (4 + 2));
 }
 
 TEST_F(SerializatorTest, TestUnorderedMap2)
@@ -142,7 +142,7 @@ TEST_F(SerializatorTest, TestUnorderedMap2)
             {"three", ""},
             {"", {}},
         },
-        4 + 4 + 3 + 4 + 0 + 4 + 3 + 4 + 3 + 4 + 5 + 4 + 0 + 4 + 0 + 4 + 0);
+        4U + 4U + 3U + 4U + 0U + 4U + 3U + 4U + 3U + 4U + 5U + 4U + 0U + 4U + 0U + 4U + 0U);
 }
 
 TEST_F(SerializatorTest, TestUnorderedMap3)
@@ -151,11 +151,11 @@ TEST_F(SerializatorTest, TestUnorderedMap3)
     DoTest<Map>(
         {
             {"one", {}},
-            {"two", {1, 2, 3, 4}},
-            {"three", {9, 34, 45335}},
+            {"two", {1U, 2U, 3U, 4U}},
+            {"three", {9U, 34U, 45335U}},
             {"", {}},
         },
-        4 + 4 + 3 + 4 + 4 * 0 + 4 + 3 + 4 + 4 * 4 + 4 + 5 + 4 + 4 * 3 + 4 + 0 + 4 + 4 * 0);
+        4U + 4U + 3U + 4U + 4U * 0U + 4U + 3U + 4U + 4U * 4U + 4U + 5U + 4U + 4U * 3U + 4U + 0U + 4U + 4U * 0U);
 }
 
 struct TestStruct {
@@ -173,14 +173,14 @@ bool operator==(const TestStruct &lhs, const TestStruct &rhs)
 
 TEST_F(SerializatorTest, TestStruct)
 {
-    TestStruct test_struct {1, 2, 3, 4, "Liza", {8, 9, 5}};
-    unsigned test_ret = 1 + 2 + 4 + 8 + 4 + 4 + 4 + sizeof(int) * 3;
+    TestStruct test_struct {1U, 2U, 3U, 4U, "Liza", {8U, 9U, 5U}};
+    unsigned test_ret = 1U + 2U + 4U + 8U + 4U + 4U + 4U + sizeof(int) * 3U;
 
     TestStruct a = test_struct;
     TestStruct b;
-    ASSERT_EQ(serializer::StructToBuffer<6>(a, buffer_), true);
-    buffer_.resize(4 * buffer_.size());
-    auto ret = serializer::RawBufferToStruct<6>(buffer_.data(), buffer_.size(), b);
+    ASSERT_EQ(serializer::StructToBuffer<6U>(a, buffer_), true);
+    buffer_.resize(4U * buffer_.size());
+    auto ret = serializer::RawBufferToStruct<6U>(buffer_.data(), buffer_.size(), b);
     ASSERT_TRUE(ret.HasValue());
     ASSERT_EQ(ret.Value(), test_ret);
     ASSERT_EQ(a, test_struct);

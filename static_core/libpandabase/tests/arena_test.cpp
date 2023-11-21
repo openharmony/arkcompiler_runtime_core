@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public:
     ArenaTest()
     {
         static constexpr size_t INTERNAL_SIZE = 16_MB;
-        panda::mem::MemConfig::Initialize(0, INTERNAL_SIZE, 0, 0, 0, 0);
+        panda::mem::MemConfig::Initialize(0U, INTERNAL_SIZE, 0U, 0U, 0U, 0U);
         PoolManager::Initialize();
     }
 
@@ -55,8 +55,8 @@ protected:
     template <class ArenaT>
     void GetOccupiedAndFreeSizeTestImplementation(size_t arena_size, size_t alloc_size)
     {
-        ASSERT_TRUE(arena_size != 0);
-        ASSERT_TRUE(alloc_size != 0);
+        ASSERT_TRUE(arena_size != 0U);
+        ASSERT_TRUE(alloc_size != 0U);
         auto *arena = CreateArena<ArenaT>(arena_size);
         size_t old_free_size = arena->GetFreeSize();
         ASSERT_TRUE(arena->Alloc(alloc_size) != nullptr);
@@ -68,8 +68,8 @@ protected:
     void ResizeAndResetTestImplementation(size_t arena_size, size_t alloc_size)
     {
         constexpr const int64_t IMM_TWO = 2;
-        ASSERT_TRUE(arena_size != 0);
-        ASSERT_TRUE(alloc_size != 0);
+        ASSERT_TRUE(arena_size != 0U);
+        ASSERT_TRUE(alloc_size != 0U);
         auto *arena = CreateArena<ArenaT>(arena_size);
         ASSERT_TRUE(alloc_size * IMM_TWO <= arena->GetFreeSize());
         void *first_allocation = arena->Alloc(alloc_size);
@@ -84,13 +84,13 @@ protected:
         ASSERT_TRUE(ToUintPtr(second_allocation) == ToUintPtr(third_allocation));
         ASSERT_TRUE(arena->GetOccupiedSize() == IMM_TWO * alloc_size);
         arena->Reset();
-        ASSERT_TRUE(arena->GetOccupiedSize() == 0);
+        ASSERT_TRUE(arena->GetOccupiedSize() == 0U);
     }
 };
 
 TEST_F(ArenaTest, GetOccupiedAndFreeSizeTest)
 {
-    static constexpr size_t ALLOC_SIZE = AlignUp(ARENA_SIZE / 2, GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT));
+    static constexpr size_t ALLOC_SIZE = AlignUp(ARENA_SIZE / 2U, GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT));
     static constexpr Alignment ARENA_ALIGNMENT = LOG_ALIGN_4;
     static constexpr size_t ALIGNED_ALLOC_SIZE = AlignUp(ALLOC_SIZE, GetAlignmentInBytes(ARENA_ALIGNMENT));
     GetOccupiedAndFreeSizeTestImplementation<Arena>(ARENA_SIZE, ALLOC_SIZE);
@@ -100,7 +100,7 @@ TEST_F(ArenaTest, GetOccupiedAndFreeSizeTest)
 
 TEST_F(ArenaTest, ResizeAndResetTest)
 {
-    static constexpr size_t ALLOC_SIZE = AlignUp(ARENA_SIZE / 3, GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT));
+    static constexpr size_t ALLOC_SIZE = AlignUp(ARENA_SIZE / 3U, GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT));
     static constexpr Alignment ARENA_ALIGNMENT = LOG_ALIGN_4;
     static constexpr size_t ALIGNED_ALLOC_SIZE = AlignUp(ALLOC_SIZE, GetAlignmentInBytes(ARENA_ALIGNMENT));
     ResizeAndResetTestImplementation<Arena>(ARENA_SIZE, ALLOC_SIZE);

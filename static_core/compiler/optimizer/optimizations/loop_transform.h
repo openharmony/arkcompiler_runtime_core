@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/basicblock.h"
@@ -93,7 +93,7 @@ protected:
             }
             for (auto block : loop->GetBlocks()) {
                 if constexpr (EXIT_POINT == LoopExitPoint::LOOP_EXIT_HEADER) {
-                    // TODO (a.popov) Support infinite loops unrolling
+                    // NOTE (a.popov) Support infinite loops unrolling
                     if (!block->IsMarked(marker) && block->IsLoopHeader()) {
                         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
                             << "Loop without exit-point from loop-header isn't visited, id = " << loop->GetId();
@@ -138,4 +138,4 @@ protected:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H

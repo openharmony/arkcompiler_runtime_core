@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ namespace panda::os::unix {
 
 bool operator==(const ::panda::os::unix::SignalCtl &l, const ::panda::os::unix::SignalCtl &r)
 {
-    return 0 == memcmp(&l, &r, sizeof(l));
+    return 0U == memcmp(&l, &r, sizeof(l));
 }
 
 bool operator!=(const ::panda::os::unix::SignalCtl &l, const ::panda::os::unix::SignalCtl &r)
@@ -73,14 +73,14 @@ protected:
         }
     }
 
-    static const uint32_t TIME_TO_WAIT = 100 * 1000;  // 0.1 second
-    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    const uint32_t max_timeout_counter_wait_ = 5 * 60 * 1000 * 1000 / TIME_TO_WAIT;  // 5 minutes
+    static const uint32_t TIME_TO_WAIT = 100U * 1000U;  // 0.1 second
+                                                        // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    const uint32_t max_timeout_counter_wait_ = 5U * 60U * 1000U * 1000U / TIME_TO_WAIT;  // 5 minutes
 
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     os::unix::SignalCtl signal_ctl_ {};
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    std::atomic_int sig_action_count_ {0};
+    std::atomic_int sig_action_count_ {0U};
 };
 
 TEST_F(UnixSignal, CheckRestoringSigSet)
@@ -232,10 +232,10 @@ TEST_F(UnixSignal, AfterThreadStartCallback)
 
     // Wait for the signals inside the cycle
     // NOLINTNEXTLINE(readability-magic-numbers)
-    CheckSignalsInsideCycle(SIGQUIT + 1000);
+    CheckSignalsInsideCycle(SIGQUIT + 1000U);
     catcher_thread.StopThread();
 
-    ASSERT_EQ(sig_action_count_, SIGQUIT + 1000);
+    ASSERT_EQ(sig_action_count_, SIGQUIT + 1000U);
 }
 
 TEST_F(UnixSignal, BeforeThreadStopCallback)
@@ -254,7 +254,7 @@ TEST_F(UnixSignal, BeforeThreadStopCallback)
     CheckSignalsInsideCycle(SIGQUIT);
     catcher_thread.StopThread();
 
-    ASSERT_EQ(sig_action_count_, SIGQUIT + 2000);
+    ASSERT_EQ(sig_action_count_, SIGQUIT + 2000U);
 }
 
 TEST_F(UnixSignal, ThreadCallbacks)
@@ -271,10 +271,10 @@ TEST_F(UnixSignal, ThreadCallbacks)
 
     // Wait for the signals inside the cycle
     // NOLINTNEXTLINE(readability-magic-numbers)
-    CheckSignalsInsideCycle(1000 + SIGQUIT);
+    CheckSignalsInsideCycle(1000U + SIGQUIT);
     catcher_thread.StopThread();
 
-    ASSERT_EQ(sig_action_count_, 1000 + SIGQUIT + 2000);
+    ASSERT_EQ(sig_action_count_, 1000U + SIGQUIT + 2000U);
 }
 
 }  // namespace panda::test

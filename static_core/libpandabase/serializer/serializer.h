@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ inline const uint8_t *ToUint8tPtr(uintptr_t v)
 
 template <typename T>
 // NOLINTNEXTLINE(google-runtime-references)
-inline auto TypeToBuffer(const T &value, /* out */ std::vector<uint8_t> &buffer)
+inline auto TypeToBuffer(const T &value, std::vector<uint8_t> &buffer)
     -> std::enable_if_t<std::is_pod_v<T>, Expected<size_t, const char *>>
 {
     const auto *ptr = reinterpret_cast<const uint8_t *>(&value);
@@ -52,7 +52,7 @@ inline auto TypeToBuffer(const T &value, /* out */ std::vector<uint8_t> &buffer)
 
 template <class VecT>
 // NOLINTNEXTLINE(google-runtime-references)
-inline auto TypeToBuffer(const VecT &vec, /* out */ std::vector<uint8_t> &buffer)
+inline auto TypeToBuffer(const VecT &vec, std::vector<uint8_t> &buffer)
     -> std::enable_if_t<is_vectorable_v<VecT> && std::is_pod_v<typename VecT::value_type>,
                         Expected<size_t, const char *>>
 {
@@ -73,7 +73,7 @@ inline auto TypeToBuffer(const VecT &vec, /* out */ std::vector<uint8_t> &buffer
 
 template <class UnMap>
 // NOLINTNEXTLINE(google-runtime-references)
-inline auto TypeToBuffer(const UnMap &map, /* out */ std::vector<uint8_t> &buffer)
+inline auto TypeToBuffer(const UnMap &map, std::vector<uint8_t> &buffer)
     -> std::enable_if_t<is_hash_mappable_v<UnMap>, Expected<size_t, const char *>>
 {
     // pack size
@@ -86,7 +86,7 @@ inline auto TypeToBuffer(const UnMap &map, /* out */ std::vector<uint8_t> &buffe
     // because clang-format-8 can't correctly detect the source code language.
     // https://bugs.llvm.org/show_bug.cgi?id=37433
     //
-    // TODO(v.cherkashin): Fix this loop when we switch to clang-format-14.
+    // NOTE(v.cherkashin): Fix this loop when we switch to clang-format-14.
     for (const auto &it : map) {
         // pack key
         auto k = TypeToBuffer(it.first, buffer);
@@ -107,21 +107,34 @@ inline auto TypeToBuffer(const UnMap &map, /* out */ std::vector<uint8_t> &buffe
 }
 
 template <typename T>
-Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, /* out */ T &value)
+Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, T &out)
 {
     static_assert(std::is_pod<T>::value, "Type is not supported");
 
-    if (sizeof(value) > size) {
+    if (sizeof(out) > size) {
         return Unexpected("Cannot deserialize POD type, the buffer is too small.");
     }
 
-    auto *ptr = reinterpret_cast<uint8_t *>(&value);
-    memcpy_s(ptr, sizeof(value), data, sizeof(value));
-    return sizeof(value);
+    auto *ptr = reinterpret_cast<uint8_t *>(&out);
+    memcpy_s(ptr, sizeof(out), data, sizeof(out));
+    return sizeof(out);
 }
 
 // NOLINTNEXTLINE(google-runtime-references)
-inline Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, /* out */ std::string &str)
+inline Expected<size_t, const char *> BufferToTypeUnpackString(const uint8_t *data, size_t size, std::string &out,
+                                                               uint32_t str_size, size_t value)
+{
+    if (size < str_size) {
+        return Unexpected("Cannot deserialize string, the buffer is too small.");
+    }
+
+    out.resize(str_size);
+    memcpy_s(out.data(), str_size, data, str_size);
+    return value + str_size;
+}
+
+// NOLINTNEXTLINE(google-runtime-references)
+inline Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, std::string &out)
 {
     // unpack size
     uint32_t str_size = 0;
@@ -132,19 +145,11 @@ inline Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t s
     ASSERT(r.Value() <= size);
     data = ToUint8tPtr(ToUintPtr(data) + r.Value());
     size -= r.Value();
-
-    // unpack string
-    if (size < str_size) {
-        return Unexpected("Cannot deserialize string, the buffer is too small.");
-    }
-
-    str.resize(str_size);
-    memcpy_s(str.data(), str_size, data, str_size);
-    return r.Value() + str_size;
+    return BufferToTypeUnpackString(data, size, out, str_size, r.Value());
 }
 
 template <typename T>
-Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, /* out */ std::vector<T> &vector)
+Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, std::vector<T> &vector)
 {
     static_assert(std::is_pod<T>::value, "Type is not supported");
 
@@ -170,7 +175,7 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, /*
 }
 
 template <typename K, typename V>
-Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, /* out */ std::unordered_map<K, V> &map)
+Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, std::unordered_map<K, V> &out)
 {
     size_t backup_size = size;
     uint32_t count = 0;
@@ -201,7 +206,7 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, /*
         data = ToUint8tPtr(ToUintPtr(data) + v.Value());
         size -= v.Value();
 
-        auto ret = map.emplace(std::make_pair(std::move(key), std::move(value)));
+        auto ret = out.emplace(std::make_pair(std::move(key), std::move(value)));
         if (!ret.second) {
             return Unexpected("Cannot emplace KeyValue to map.");
         }
@@ -282,14 +287,14 @@ private:
 }  // namespace internal
 
 template <size_t N, typename Struct>
-bool StructToBuffer(Struct &&str, /* out */ std::vector<uint8_t> &buffer)  // NOLINT(google-runtime-references)
+bool StructToBuffer(Struct &&str, std::vector<uint8_t> &buffer)
 {
     internal::ForEachTuple(internal::StructToTuple<N>(std::forward<Struct>(str)), internal::Serializer(buffer));
     return true;
 }
 
 template <size_t N, typename Struct>
-Expected<size_t, const char *> RawBufferToStruct(const uint8_t *data, size_t size, /* out */ Struct &str)
+Expected<size_t, const char *> RawBufferToStruct(const uint8_t *data, size_t size, Struct &out)
 {
     using S = std::remove_reference_t<Struct>;
     using TupleType = decltype(internal::StructToTuple<N, S>({}));
@@ -301,14 +306,14 @@ Expected<size_t, const char *> RawBufferToStruct(const uint8_t *data, size_t siz
         return Unexpected(deserializer.GetError());
     }
 
-    str = std::move(internal::TupleToStruct<S>(tuple));
+    out = std::move(internal::TupleToStruct<S>(tuple));
     return deserializer.GetEndPosition();
 }
 
 template <size_t N, typename Struct>
-bool BufferToStruct(const uint8_t *data, size_t size, /* out */ Struct &str)
+bool BufferToStruct(const uint8_t *data, size_t size, Struct &out)
 {
-    auto r = RawBufferToStruct<N>(data, size, str);
+    auto r = RawBufferToStruct<N>(data, size, out);
     if (!r) {
         return false;
     }
@@ -316,9 +321,9 @@ bool BufferToStruct(const uint8_t *data, size_t size, /* out */ Struct &str)
 }
 
 template <size_t N, typename Struct>
-bool BufferToStruct(const std::vector<uint8_t> &buffer, /* out */ Struct &str)
+bool BufferToStruct(const std::vector<uint8_t> &buffer, Struct &out)
 {
-    return BufferToStruct<N>(buffer.data(), buffer.size(), str);
+    return BufferToStruct<N>(buffer.data(), buffer.size(), out);
 }
 
 }  // namespace panda::serializer

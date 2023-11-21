@@ -285,7 +285,7 @@ float CalculateFloat(uint32_t n, float s)
 }
 #endif  // PANDA_PRODUCT_BUILD
 
-// TODO(kbaladurin) : Convert methods should be implemented in managed library
+// NOTE(kbaladurin) : Convert methods should be implemented in managed library
 
 int32_t ConvertStringToI32(coretypes::String *s)
 {

@@ -163,7 +163,7 @@ void AbsIntInstructionHandler::Sync()
 {
     auto addr = inst_.GetAddress();
     ExecContext &exec_ctx = ExecCtx();
-    // TODO(vdyadov): add verification options to show current context and contexts diff in case of incompatibility
+    // NOTE(vdyadov): add verification options to show current context and contexts diff in case of incompatibility
 #ifndef NDEBUG
     exec_ctx.StoreCurrentRegContextForAddr(
         addr, [this, print_hdr = true](int reg_idx, const auto &src, const auto &dst) mutable {

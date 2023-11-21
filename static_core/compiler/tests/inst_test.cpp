@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,7 +119,7 @@ TEST_F(InstTest, Dataflow)
     ASSERT_EQ(static_cast<PhiInst &>(INS(6U)).GetPhiInput(&BB(5U)), &INS(0U));
     GraphChecker(GetGraph()).Check();
 
-    // TODO(A.Popov): refactor RemovePredsBlocks
+    // NOTE(A.Popov): refactor RemovePredsBlocks
     // 2. Remove basic block #4, phi should be fixed properly
     // INS(5).RemoveInputs()
     // INS(5).GetBasicBlock()->EraseInst(&INS(5))

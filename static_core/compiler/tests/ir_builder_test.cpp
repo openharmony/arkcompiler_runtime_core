@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ public:
         }
 
         std::string source = ".function " + curr_type + " main(";
-        source += curr_type + " a0){\n";
+        source += curr_type + " a0) {\n";
         if (inst_name == "mov") {
             source += "mov" + inst_type + " v0, a0\n";
             source += "lda" + inst_type + " v0\n";
@@ -94,7 +94,7 @@ public:
         ASSERT(inst_name == "mov" || inst_name == "fmov" || inst_name == "lda" || inst_name == "flda");
         std::string curr_type = ToString(data_type);
 
-        std::string source = ".function " + curr_type + " main(){\n";
+        std::string source = ".function " + curr_type + " main() {\n";
         if (inst_name == "mov") {
             source += "movi" + inst_type + " v0, 0\n";
             source += "lda" + inst_type + " v0\n";
@@ -141,7 +141,7 @@ public:
         }
         std::string source = ".function i32 main(";
         source += curr_type + " a0, ";
-        source += curr_type + " a1){\n";
+        source += curr_type + " a1) {\n";
         source += "lda" + inst_type + " a0\n";
         source += inst_name + inst_type + " a1\n";
         source += "return\n";
@@ -173,7 +173,7 @@ public:
 
         std::string source = ".function i32 main(";
         source += curr_type + " a0, ";
-        source += curr_type + " a1){\n";
+        source += curr_type + " a1) {\n";
         source += "lda" + inst_type + " a0\n";
         source += inst_name + inst_type + " a1\n";
         source += "return\n";
@@ -265,8 +265,7 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    template <bool IS_OBJ>
-    void CheckCondJumpWithZero(ConditionCode cc)
+    std::string GetCcString(ConditionCode cc)
     {
         std::string cmd;
         switch (cc) {
@@ -291,7 +290,13 @@ public:
             default:
                 UNREACHABLE();
         }
+        return cmd;
+    }
 
+    template <bool IS_OBJ>
+    void CheckCondJumpWithZero(ConditionCode cc)
+    {
+        std::string cmd = GetCcString(cc);
         std::string inst_postfix;
         std::string param_type = "i32";
         auto type = DataType::INT32;
@@ -340,7 +345,7 @@ private:
 TEST_F(IrBuilderTest, LoadArrayType64)
 {
     auto source = R"(
-    .function void main(i64[] a0, i32[] a1){
+    .function void main(i64[] a0, i32[] a1) {
         ldai 0
         ldarr.64 a0
         movi v0, 0
@@ -379,7 +384,7 @@ TEST_F(IrBuilderTest, IntrinsicPrintU64)
     auto source = R"(
     .record IO <external>
     .function void IO.printU64(u64 a0) <external>
-    .function void main(u64 a0){
+    .function void main(u64 a0) {
         ldai.64 23
         sub2.64 a0
         sta.64 a0
@@ -412,7 +417,7 @@ TEST_F(IrBuilderTest, BuiltinIsInf)
     auto source = R"(
         .record Double <external>
         .function u1 Double.isInfinite(f64 a0) <external>
-        .function u1 main(f64 a0){
+        .function u1 main(f64 a0) {
             call.short Double.isInfinite, a0
             return
         }
@@ -440,7 +445,7 @@ TEST_F(IrBuilderTest, IntrinsicAbs)
     auto source = R"(
     .record Math <external>
     .function f64 Math.absF64(f64 a0) <external>
-    .function f64 main(f64 a0){
+    .function f64 main(f64 a0) {
         fldai.64 1.23
         fsub2.64 a0
         sta.64 v5
@@ -470,7 +475,7 @@ TEST_F(IrBuilderTest, IntrinsicMathSqrt)
     auto source = R"(
     .record Math <external>
     .function f64 Math.sqrt(f64 a0) <external>
-    .function f64 main(f64 a0){
+    .function f64 main(f64 a0) {
         fldai.64 3.14
         fsub2.64 a0
         sta.64 v1
@@ -500,7 +505,7 @@ TEST_F(IrBuilderTest, IntrinsicMathFsqrt)
     auto source = R"(
     .record Math <external>
     .function f32 Math.fsqrt(f32 a0) <external>
-    .function f32 main(f32 a0){
+    .function f32 main(f32 a0) {
         fldai 3.14
         fsub2 a0
         sta v1
@@ -736,7 +741,7 @@ TEST_F(IrBuilderTest, IntrinsicMathMaxF32)
 TEST_F(IrBuilderTest, NoCheckForFloatDiv)
 {
     auto source = R"(
-    .function f64 main(f64 a0){
+    .function f64 main(f64 a0) {
         fldai.64 23.0
         fdiv2.64 a0
         return
@@ -762,7 +767,7 @@ TEST_F(IrBuilderTest, MultipleThrow)
 {
     auto source = R"(
     .record array <external>
-    .function void main(array a0){
+    .function void main(array a0) {
         throw a0
         throw a0
         throw a0
@@ -884,7 +889,7 @@ TEST_F(IrBuilderTest, MovNull)
 {
     auto source = R"(
         .record panda.String <external>
-        .function panda.String main(){
+        .function panda.String main() {
             mov.null v0
             lda v0
             return
@@ -981,7 +986,7 @@ TEST_F(IrBuilderTest, LdaNull)
 {
     auto source = R"(
         .record panda.String <external>
-        .function panda.String main(){
+        .function panda.String main() {
             lda.null
             return.obj
         }
@@ -1037,7 +1042,7 @@ TEST_F(IrBuilderTest, LdaStr)
 {
     auto source = R"(
     .record panda.String <external>
-    .function panda.String main(){
+    .function panda.String main() {
         lda.str "lda_test"
         return.obj
     }
@@ -1062,7 +1067,7 @@ TEST_F(IrBuilderTest, LdaType)
 {
     auto source = R"(
     .record R {}
-    .function R main(){
+    .function R main() {
         lda.type R
         return.obj
     }
@@ -1126,7 +1131,7 @@ TEST_F(IrBuilderTest, StaObj)
 TEST_F(IrBuilderTest, Jmp)
 {
     auto source = R"(
-    .function void main(){
+    .function void main() {
         jmp label
     label:
         return.void
@@ -1302,7 +1307,7 @@ TEST_F(IrBuilderTest, Jge)
 TEST_F(IrBuilderTest, Fadd2)
 {
     auto source = R"(
-    .function f32 main(f32 a0, f32 a1){
+    .function f32 main(f32 a0, f32 a1) {
         lda a0
         fadd2 a1
         return
@@ -1328,7 +1333,7 @@ TEST_F(IrBuilderTest, Fadd2)
 TEST_F(IrBuilderTest, Fadd2f64)
 {
     auto source = R"(
-    .function f64 main(f64 a0, f64 a1){
+    .function f64 main(f64 a0, f64 a1) {
         lda.64 a0
         fadd2.64 a1
         return.64
@@ -1354,7 +1359,7 @@ TEST_F(IrBuilderTest, Fadd2f64)
 TEST_F(IrBuilderTest, Fsub2)
 {
     auto source = R"(
-    .function f32 main(f32 a0, f32 a1){
+    .function f32 main(f32 a0, f32 a1) {
         lda a0
         fsub2 a1
         return
@@ -1380,7 +1385,7 @@ TEST_F(IrBuilderTest, Fsub2)
 TEST_F(IrBuilderTest, Fsub2f64)
 {
     auto source = R"(
-    .function f64 main(f64 a0, f64 a1){
+    .function f64 main(f64 a0, f64 a1) {
         lda.64 a0
         fsub2.64 a1
         return.64
@@ -1406,7 +1411,7 @@ TEST_F(IrBuilderTest, Fsub2f64)
 TEST_F(IrBuilderTest, Fmul2)
 {
     auto source = R"(
-    .function f32 main(f32 a0, f32 a1){
+    .function f32 main(f32 a0, f32 a1) {
         lda a0
         fmul2 a1
         return
@@ -1432,7 +1437,7 @@ TEST_F(IrBuilderTest, Fmul2)
 TEST_F(IrBuilderTest, Fmul2f64)
 {
     auto source = R"(
-    .function f64 main(f64 a0, f64 a1){
+    .function f64 main(f64 a0, f64 a1) {
         lda.64 a0
         fmul2.64 a1
         return.64
@@ -1458,7 +1463,7 @@ TEST_F(IrBuilderTest, Fmul2f64)
 TEST_F(IrBuilderTest, Fdiv2)
 {
     auto source = R"(
-    .function f32 main(f32 a0, f32 a1){
+    .function f32 main(f32 a0, f32 a1) {
         lda a0
         fdiv2 a1
         return
@@ -1484,7 +1489,7 @@ TEST_F(IrBuilderTest, Fdiv2)
 TEST_F(IrBuilderTest, Fdiv2f64)
 {
     auto source = R"(
-    .function f64 main(f64 a0, f64 a1){
+    .function f64 main(f64 a0, f64 a1) {
         lda.64 a0
         fdiv2.64 a1
         return.64
@@ -1510,7 +1515,7 @@ TEST_F(IrBuilderTest, Fdiv2f64)
 TEST_F(IrBuilderTest, Fmod2)
 {
     auto source = R"(
-    .function f32 main(f32 a0, f32 a1){
+    .function f32 main(f32 a0, f32 a1) {
         lda a0
         fmod2 a1
         return
@@ -1536,7 +1541,7 @@ TEST_F(IrBuilderTest, Fmod2)
 TEST_F(IrBuilderTest, Fmod2f64)
 {
     auto source = R"(
-    .function f64 main(f64 a0, f64 a1){
+    .function f64 main(f64 a0, f64 a1) {
         lda.64 a0
         fmod2.64 a1
         return.64
@@ -1562,7 +1567,7 @@ TEST_F(IrBuilderTest, Fmod2f64)
 TEST_F(IrBuilderTest, Add2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         add2 a1
         return
@@ -1588,7 +1593,7 @@ TEST_F(IrBuilderTest, Add2)
 TEST_F(IrBuilderTest, Add2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         add2.64 a1
         return.64
@@ -1614,7 +1619,7 @@ TEST_F(IrBuilderTest, Add2i64)
 TEST_F(IrBuilderTest, Sub2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         sub2 a1
         return
@@ -1640,7 +1645,7 @@ TEST_F(IrBuilderTest, Sub2)
 TEST_F(IrBuilderTest, Sub2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         sub2.64 a1
         return.64
@@ -1666,7 +1671,7 @@ TEST_F(IrBuilderTest, Sub2i64)
 TEST_F(IrBuilderTest, Mul2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         mul2 a1
         return
@@ -1692,7 +1697,7 @@ TEST_F(IrBuilderTest, Mul2)
 TEST_F(IrBuilderTest, Mul2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         mul2.64 a1
         return.64
@@ -1718,7 +1723,7 @@ TEST_F(IrBuilderTest, Mul2i64)
 TEST_F(IrBuilderTest, And2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         and2 a1
         return
@@ -1744,7 +1749,7 @@ TEST_F(IrBuilderTest, And2)
 TEST_F(IrBuilderTest, And2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         and2.64 a1
         return.64
@@ -1770,7 +1775,7 @@ TEST_F(IrBuilderTest, And2i64)
 TEST_F(IrBuilderTest, Or2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         or2 a1
         return
@@ -1796,7 +1801,7 @@ TEST_F(IrBuilderTest, Or2)
 TEST_F(IrBuilderTest, Or2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         or2.64 a1
         return.64
@@ -1822,7 +1827,7 @@ TEST_F(IrBuilderTest, Or2i64)
 TEST_F(IrBuilderTest, Xor2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         xor2 a1
         return
@@ -1848,7 +1853,7 @@ TEST_F(IrBuilderTest, Xor2)
 TEST_F(IrBuilderTest, Xor2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         xor2.64 a1
         return.64
@@ -1874,7 +1879,7 @@ TEST_F(IrBuilderTest, Xor2i64)
 TEST_F(IrBuilderTest, Shl2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         shl2 a1
         return
@@ -1900,7 +1905,7 @@ TEST_F(IrBuilderTest, Shl2)
 TEST_F(IrBuilderTest, Shl2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         shl2.64 a1
         return.64
@@ -1926,7 +1931,7 @@ TEST_F(IrBuilderTest, Shl2i64)
 TEST_F(IrBuilderTest, Shr2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         shr2 a1
         return
@@ -1952,7 +1957,7 @@ TEST_F(IrBuilderTest, Shr2)
 TEST_F(IrBuilderTest, Shr2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         shr2.64 a1
         return.64
@@ -1978,7 +1983,7 @@ TEST_F(IrBuilderTest, Shr2i64)
 TEST_F(IrBuilderTest, Ashr2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         ashr2 a1
         return
@@ -2004,7 +2009,7 @@ TEST_F(IrBuilderTest, Ashr2)
 TEST_F(IrBuilderTest, Ashr2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         ashr2.64 a1
         return.64
@@ -2030,7 +2035,7 @@ TEST_F(IrBuilderTest, Ashr2i64)
 TEST_F(IrBuilderTest, Div2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         div2 a1
         return
@@ -2058,7 +2063,7 @@ TEST_F(IrBuilderTest, Div2)
 TEST_F(IrBuilderTest, Div2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         div2.64 a1
         return.64
@@ -2086,7 +2091,7 @@ TEST_F(IrBuilderTest, Div2i64)
 TEST_F(IrBuilderTest, Mod2)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         lda a0
         mod2 a1
         return
@@ -2114,7 +2119,7 @@ TEST_F(IrBuilderTest, Mod2)
 TEST_F(IrBuilderTest, Mod2i64)
 {
     auto source = R"(
-    .function i64 main(i64 a0, i64 a1){
+    .function i64 main(i64 a0, i64 a1) {
         lda.64 a0
         mod2.64 a1
         return.64
@@ -2142,7 +2147,7 @@ TEST_F(IrBuilderTest, Mod2i64)
 TEST_F(IrBuilderTest, Divu2)
 {
     auto source = R"(
-    .function u32 main(u32 a0, u32 a1){
+    .function u32 main(u32 a0, u32 a1) {
         lda a0
         divu2 a1
         return
@@ -2170,7 +2175,7 @@ TEST_F(IrBuilderTest, Divu2)
 TEST_F(IrBuilderTest, Divu2u64)
 {
     auto source = R"(
-    .function u64 main(u64 a0, u64 a1){
+    .function u64 main(u64 a0, u64 a1) {
         lda.64 a0
         divu2.64 a1
         return.64
@@ -2198,7 +2203,7 @@ TEST_F(IrBuilderTest, Divu2u64)
 TEST_F(IrBuilderTest, Modu2)
 {
     auto source = R"(
-    .function u32 main(u32 a0, u32 a1){
+    .function u32 main(u32 a0, u32 a1) {
         lda a0
         modu2 a1
         return
@@ -2226,7 +2231,7 @@ TEST_F(IrBuilderTest, Modu2)
 TEST_F(IrBuilderTest, Modu2u64)
 {
     auto source = R"(
-    .function u64 main(u64 a0, u64 a1){
+    .function u64 main(u64 a0, u64 a1) {
         lda.64 a0
         modu2.64 a1
         return.64
@@ -2254,7 +2259,7 @@ TEST_F(IrBuilderTest, Modu2u64)
 TEST_F(IrBuilderTest, Add)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         add a0, a1
         return
     }
@@ -2279,7 +2284,7 @@ TEST_F(IrBuilderTest, Add)
 TEST_F(IrBuilderTest, Sub)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         sub a0, a1
         return
     }
@@ -2304,7 +2309,7 @@ TEST_F(IrBuilderTest, Sub)
 TEST_F(IrBuilderTest, Mul)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         mul a0, a1
         return
     }
@@ -2329,7 +2334,7 @@ TEST_F(IrBuilderTest, Mul)
 TEST_F(IrBuilderTest, And)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         and a0, a1
         return
     }
@@ -2354,7 +2359,7 @@ TEST_F(IrBuilderTest, And)
 TEST_F(IrBuilderTest, Or)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         or a0, a1
         return
     }
@@ -2379,7 +2384,7 @@ TEST_F(IrBuilderTest, Or)
 TEST_F(IrBuilderTest, Xor)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         xor a0, a1
         return
     }
@@ -2404,7 +2409,7 @@ TEST_F(IrBuilderTest, Xor)
 TEST_F(IrBuilderTest, Shl)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         shl a0, a1
         return
     }
@@ -2429,7 +2434,7 @@ TEST_F(IrBuilderTest, Shl)
 TEST_F(IrBuilderTest, Shr)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         shr a0, a1
         return
     }
@@ -2454,7 +2459,7 @@ TEST_F(IrBuilderTest, Shr)
 TEST_F(IrBuilderTest, Ashr)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         ashr a0, a1
         return
     }
@@ -2479,7 +2484,7 @@ TEST_F(IrBuilderTest, Ashr)
 TEST_F(IrBuilderTest, Div)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         div a0, a1
         return
     }
@@ -2506,7 +2511,7 @@ TEST_F(IrBuilderTest, Div)
 TEST_F(IrBuilderTest, Mod)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32 a1){
+    .function i32 main(i32 a0, i32 a1) {
         mod a0, a1
         return
     }
@@ -2533,7 +2538,7 @@ TEST_F(IrBuilderTest, Mod)
 TEST_F(IrBuilderTest, Addi)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         addi 1
         return
@@ -2559,7 +2564,7 @@ TEST_F(IrBuilderTest, Addi)
 TEST_F(IrBuilderTest, Subi)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         subi 1
         return
@@ -2585,7 +2590,7 @@ TEST_F(IrBuilderTest, Subi)
 TEST_F(IrBuilderTest, Muli)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         muli 1
         return
@@ -2611,7 +2616,7 @@ TEST_F(IrBuilderTest, Muli)
 TEST_F(IrBuilderTest, Andi)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         andi 1
         return
@@ -2637,7 +2642,7 @@ TEST_F(IrBuilderTest, Andi)
 TEST_F(IrBuilderTest, Ori)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         ori 1
         return
@@ -2663,7 +2668,7 @@ TEST_F(IrBuilderTest, Ori)
 TEST_F(IrBuilderTest, Xori)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         xori 1
         return
@@ -2689,7 +2694,7 @@ TEST_F(IrBuilderTest, Xori)
 TEST_F(IrBuilderTest, Shli)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         shli 1
         return
@@ -2715,7 +2720,7 @@ TEST_F(IrBuilderTest, Shli)
 TEST_F(IrBuilderTest, Shri)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         shri 1
         return
@@ -2741,7 +2746,7 @@ TEST_F(IrBuilderTest, Shri)
 TEST_F(IrBuilderTest, Ashri)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         ashri 1
         return
@@ -2767,7 +2772,7 @@ TEST_F(IrBuilderTest, Ashri)
 TEST_F(IrBuilderTest, Divi)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         divi 1
         return
@@ -2795,7 +2800,7 @@ TEST_F(IrBuilderTest, Divi)
 TEST_F(IrBuilderTest, Modi)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         modi 1
         return
@@ -2823,7 +2828,7 @@ TEST_F(IrBuilderTest, Modi)
 TEST_F(IrBuilderTest, Fneg)
 {
     auto source = R"(
-    .function f32 main(f32 a0){
+    .function f32 main(f32 a0) {
         lda a0
         fneg
         return
@@ -2848,7 +2853,7 @@ TEST_F(IrBuilderTest, Fneg)
 TEST_F(IrBuilderTest, Fneg64)
 {
     auto source = R"(
-    .function f64 main(f64 a0){
+    .function f64 main(f64 a0) {
         lda a0
         fneg.64
         return.64
@@ -2873,7 +2878,7 @@ TEST_F(IrBuilderTest, Fneg64)
 TEST_F(IrBuilderTest, Neg)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         neg
         return
@@ -2898,7 +2903,7 @@ TEST_F(IrBuilderTest, Neg)
 TEST_F(IrBuilderTest, Neg64)
 {
     auto source = R"(
-    .function i64 main(i64 a0){
+    .function i64 main(i64 a0) {
         lda a0
         neg.64
         return.64
@@ -2923,7 +2928,7 @@ TEST_F(IrBuilderTest, Neg64)
 TEST_F(IrBuilderTest, Not)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         not
         return
@@ -2948,7 +2953,7 @@ TEST_F(IrBuilderTest, Not)
 TEST_F(IrBuilderTest, Not64)
 {
     auto source = R"(
-    .function i64 main(i64 a0){
+    .function i64 main(i64 a0) {
         lda a0
         not.64
         return.64
@@ -2973,7 +2978,7 @@ TEST_F(IrBuilderTest, Not64)
 TEST_F(IrBuilderTest, Inci)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         inci a0, 1
         lda a0
         return
@@ -3000,7 +3005,7 @@ TEST_F(IrBuilderTest, Inci)
 TEST_F(IrBuilderTest, I32tof32)
 {
     auto source = R"(
-    .function f32 main(i32 a0){
+    .function f32 main(i32 a0) {
         lda a0
         i32tof32
         return
@@ -3026,7 +3031,7 @@ TEST_F(IrBuilderTest, I32tof32)
 TEST_F(IrBuilderTest, I32tof64)
 {
     auto source = R"(
-    .function f64 main(i32 a0){
+    .function f64 main(i32 a0) {
         lda a0
         i32tof64
         return.64
@@ -3052,7 +3057,7 @@ TEST_F(IrBuilderTest, I32tof64)
 TEST_F(IrBuilderTest, U32tof32)
 {
     auto source = R"(
-    .function f32 main(u32 a0){
+    .function f32 main(u32 a0) {
         lda a0
         u32tof32
         return
@@ -3078,7 +3083,7 @@ TEST_F(IrBuilderTest, U32tof32)
 TEST_F(IrBuilderTest, U32tof64)
 {
     auto source = R"(
-    .function f64 main(u32 a0){
+    .function f64 main(u32 a0) {
         lda a0
         u32tof64
         return.64
@@ -3104,7 +3109,7 @@ TEST_F(IrBuilderTest, U32tof64)
 TEST_F(IrBuilderTest, I64tof32)
 {
     auto source = R"(
-    .function f32 main(i64 a0){
+    .function f32 main(i64 a0) {
         lda.64 a0
         i64tof32
         return
@@ -3130,7 +3135,7 @@ TEST_F(IrBuilderTest, I64tof32)
 TEST_F(IrBuilderTest, I64tof64)
 {
     auto source = R"(
-    .function f64 main(i64 a0){
+    .function f64 main(i64 a0) {
         lda.64 a0
         i64tof64
         return.64
@@ -3156,7 +3161,7 @@ TEST_F(IrBuilderTest, I64tof64)
 TEST_F(IrBuilderTest, U64tof32)
 {
     auto source = R"(
-    .function f32 main(u64 a0){
+    .function f32 main(u64 a0) {
         lda.64 a0
         u64tof32
         return
@@ -3182,7 +3187,7 @@ TEST_F(IrBuilderTest, U64tof32)
 TEST_F(IrBuilderTest, U64tof64)
 {
     auto source = R"(
-    .function f64 main(u64 a0){
+    .function f64 main(u64 a0) {
         lda.64 a0
         u64tof64
         return.64
@@ -3208,7 +3213,7 @@ TEST_F(IrBuilderTest, U64tof64)
 TEST_F(IrBuilderTest, F32toi32)
 {
     auto source = R"(
-    .function i32 main(f32 a0){
+    .function i32 main(f32 a0) {
         lda a0
         f32toi32
         return
@@ -3234,7 +3239,7 @@ TEST_F(IrBuilderTest, F32toi32)
 TEST_F(IrBuilderTest, F32toi64)
 {
     auto source = R"(
-    .function i64 main(f32 a0){
+    .function i64 main(f32 a0) {
         lda a0
         f32toi64
         return.64
@@ -3260,7 +3265,7 @@ TEST_F(IrBuilderTest, F32toi64)
 TEST_F(IrBuilderTest, F32tou32)
 {
     auto source = R"(
-    .function u32 main(f32 a0){
+    .function u32 main(f32 a0) {
         lda a0
         f32tou32
         return
@@ -3286,7 +3291,7 @@ TEST_F(IrBuilderTest, F32tou32)
 TEST_F(IrBuilderTest, F32tou64)
 {
     auto source = R"(
-    .function u64 main(f32 a0){
+    .function u64 main(f32 a0) {
         lda a0
         f32tou64
         return.64
@@ -3312,7 +3317,7 @@ TEST_F(IrBuilderTest, F32tou64)
 TEST_F(IrBuilderTest, F32tof64)
 {
     auto source = R"(
-    .function f64 main(f32 a0){
+    .function f64 main(f32 a0) {
         lda a0
         f32tof64
         return.64
@@ -3338,7 +3343,7 @@ TEST_F(IrBuilderTest, F32tof64)
 TEST_F(IrBuilderTest, F64toi32)
 {
     auto source = R"(
-    .function i32 main(f64 a0){
+    .function i32 main(f64 a0) {
         lda.64 a0
         f64toi32
         return
@@ -3364,7 +3369,7 @@ TEST_F(IrBuilderTest, F64toi32)
 TEST_F(IrBuilderTest, F64toi64)
 {
     auto source = R"(
-    .function i64 main(f64 a0){
+    .function i64 main(f64 a0) {
         lda.64 a0
         f64toi64
         return.64
@@ -3390,7 +3395,7 @@ TEST_F(IrBuilderTest, F64toi64)
 TEST_F(IrBuilderTest, F64tou32)
 {
     auto source = R"(
-    .function u32 main(f64 a0){
+    .function u32 main(f64 a0) {
         lda.64 a0
         f64tou32
         return
@@ -3416,7 +3421,7 @@ TEST_F(IrBuilderTest, F64tou32)
 TEST_F(IrBuilderTest, F64tou64)
 {
     auto source = R"(
-    .function u64 main(f64 a0){
+    .function u64 main(f64 a0) {
         lda.64 a0
         f64tou64
         return.64
@@ -3442,7 +3447,7 @@ TEST_F(IrBuilderTest, F64tou64)
 TEST_F(IrBuilderTest, F64tof32)
 {
     auto source = R"(
-    .function f32 main(f64 a0){
+    .function f32 main(f64 a0) {
         lda.64 a0
         f64tof32
         return
@@ -3468,7 +3473,7 @@ TEST_F(IrBuilderTest, F64tof32)
 TEST_F(IrBuilderTest, I32toi64)
 {
     auto source = R"(
-    .function i64 main(i32 a0){
+    .function i64 main(i32 a0) {
         lda a0
         i32toi64
         return
@@ -3493,7 +3498,7 @@ TEST_F(IrBuilderTest, I32toi64)
 TEST_F(IrBuilderTest, I64toi32)
 {
     auto source = R"(
-    .function i32 main(i64 a0){
+    .function i32 main(i64 a0) {
         lda.64 a0
         i64toi32
         return
@@ -3518,7 +3523,7 @@ TEST_F(IrBuilderTest, I64toi32)
 TEST_F(IrBuilderTest, U32toi64)
 {
     auto source = R"(
-    .function i64 main(u32 a0){
+    .function i64 main(u32 a0) {
         lda a0
         u32toi64
         return
@@ -3543,7 +3548,7 @@ TEST_F(IrBuilderTest, U32toi64)
 TEST_F(IrBuilderTest, Ldarr8)
 {
     auto source = R"(
-    .function i8 main(i32 a0, i8[] a1){
+    .function i8 main(i32 a0, i8[] a1) {
         lda a0
         ldarr.8 a1
         return
@@ -3573,7 +3578,7 @@ TEST_F(IrBuilderTest, Ldarr8)
 TEST_F(IrBuilderTest, Ldarru8)
 {
     auto source = R"(
-    .function u8 main(i32 a0, u8[] a1){
+    .function u8 main(i32 a0, u8[] a1) {
         lda a0
         ldarru.8 a1
         return
@@ -3603,7 +3608,7 @@ TEST_F(IrBuilderTest, Ldarru8)
 TEST_F(IrBuilderTest, Ldarr16)
 {
     auto source = R"(
-    .function i16 main(i32 a0, i16[] a1){
+    .function i16 main(i32 a0, i16[] a1) {
         lda a0
         ldarr.16 a1
         return
@@ -3633,7 +3638,7 @@ TEST_F(IrBuilderTest, Ldarr16)
 TEST_F(IrBuilderTest, Ldarru16)
 {
     auto source = R"(
-    .function u16 main(i32 a0, u16[] a1){
+    .function u16 main(i32 a0, u16[] a1) {
         lda a0
         ldarru.16 a1
         return
@@ -3663,7 +3668,7 @@ TEST_F(IrBuilderTest, Ldarru16)
 TEST_F(IrBuilderTest, Ldarr)
 {
     auto source = R"(
-    .function i32 main(i32 a0, i32[] a1){
+    .function i32 main(i32 a0, i32[] a1) {
         lda a0
         ldarr a1
         return
@@ -3693,7 +3698,7 @@ TEST_F(IrBuilderTest, Ldarr)
 TEST_F(IrBuilderTest, Fldarr32)
 {
     auto source = R"(
-    .function f32 main(i32 a0, f32[] a1){
+    .function f32 main(i32 a0, f32[] a1) {
         lda a0
         fldarr.32 a1
         return
@@ -3723,7 +3728,7 @@ TEST_F(IrBuilderTest, Fldarr32)
 TEST_F(IrBuilderTest, Ldarr64)
 {
     auto source = R"(
-    .function u64 main(i32 a0, u64[] a1){
+    .function u64 main(i32 a0, u64[] a1) {
         lda a0
         ldarr.64 a1
         return
@@ -3753,7 +3758,7 @@ TEST_F(IrBuilderTest, Ldarr64)
 TEST_F(IrBuilderTest, Fldarr64)
 {
     auto source = R"(
-    .function f64 main(i32 a0, f64[] a1){
+    .function f64 main(i32 a0, f64[] a1) {
         lda a0
         fldarr.64 a1
         return
@@ -3784,7 +3789,7 @@ TEST_F(IrBuilderTest, LdarrObj)
 {
     auto source = R"(
     .record panda.String <external>
-    .function panda.String main(i32 a0, panda.String[] a1){
+    .function panda.String main(i32 a0, panda.String[] a1) {
         lda a0
         ldarr.obj a1
         return
@@ -3814,7 +3819,7 @@ TEST_F(IrBuilderTest, LdarrObj)
 TEST_F(IrBuilderTest, Starr8)
 {
     auto source = R"(
-    .function void main(i32 a0, u8[] a1, u8 a2){
+    .function void main(i32 a0, u8[] a1, u8 a2) {
         lda a2
         starr.8 a1, a0
         return.void
@@ -3845,7 +3850,7 @@ TEST_F(IrBuilderTest, Starr8)
 TEST_F(IrBuilderTest, Starr16)
 {
     auto source = R"(
-    .function void main(i32 a0, u16[] a1, u16 a2){
+    .function void main(i32 a0, u16[] a1, u16 a2) {
         lda a2
         starr.16 a1, a0
         return.void
@@ -3876,7 +3881,7 @@ TEST_F(IrBuilderTest, Starr16)
 TEST_F(IrBuilderTest, Starr)
 {
     auto source = R"(
-    .function void main(i32 a0, i32[] a1, i32 a2){
+    .function void main(i32 a0, i32[] a1, i32 a2) {
         lda a2
         starr a1, a0
         return.void
@@ -3907,7 +3912,7 @@ TEST_F(IrBuilderTest, Starr)
 TEST_F(IrBuilderTest, Fstarr32)
 {
     auto source = R"(
-    .function void main(i32 a0, f32[] a1, f32 a2){
+    .function void main(i32 a0, f32[] a1, f32 a2) {
         lda a2
         fstarr.32 a1, a0
         return.void
@@ -3938,7 +3943,7 @@ TEST_F(IrBuilderTest, Fstarr32)
 TEST_F(IrBuilderTest, Starr64)
 {
     auto source = R"(
-    .function void main(i32 a0, i64[] a1, i64 a2){
+    .function void main(i32 a0, i64[] a1, i64 a2) {
         lda.64 a2
         starr.64 a1, a0
         return.void
@@ -3969,7 +3974,7 @@ TEST_F(IrBuilderTest, Starr64)
 TEST_F(IrBuilderTest, Fstarr64)
 {
     auto source = R"(
-    .function void main(i32 a0, f64[] a1, f64 a2){
+    .function void main(i32 a0, f64[] a1, f64 a2) {
         lda.64 a2
         fstarr.64 a1, a0
         return.void
@@ -4001,7 +4006,7 @@ TEST_F(IrBuilderTest, StarrObj)
 {
     auto source = R"(
     .record panda.String <external>
-    .function void main(i32 a0, panda.String[] a1, panda.String a2){
+    .function void main(i32 a0, panda.String[] a1, panda.String a2) {
         lda.obj a2
         starr.obj a1, a0
         return.void
@@ -4033,7 +4038,7 @@ TEST_F(IrBuilderTest, StarrObj)
 TEST_F(IrBuilderTest, Lenarr)
 {
     auto source = R"(
-    .function i32 main(i32[] a0){
+    .function i32 main(i32[] a0) {
         lenarr a0
         return
     }
@@ -4059,7 +4064,7 @@ TEST_F(IrBuilderTest, Lenarr)
 TEST_F(IrBuilderTest, Newarr)
 {
     auto source = R"(
-    .function i32[] main(i32 a0){
+    .function i32[] main(i32 a0) {
         newarr a0, a0, i32[]
         lda.obj a0
         return
@@ -4264,7 +4269,7 @@ TEST_F(IrBuilderTest, Newobj)
 {
     auto source = R"(
     .record panda.String <external>
-    .function panda.String main(){
+    .function panda.String main() {
         newobj v0, panda.String
         lda.obj v0
         return
@@ -4291,7 +4296,7 @@ TEST_F(IrBuilderTest, Initobj)
     .record R{
         i32 f
     }
-    .function R main(){
+    .function R main() {
         initobj R.ctor
         return
     }
@@ -4319,12 +4324,12 @@ TEST_F(IrBuilderTest, Initobj)
 // Enable after supporting MultiArray in panda assembly
 TEST_F(IrBuilderTest, DISABLED_MultiArray)
 {
-    // TODO(pishin): fix ctor before enabling
+    // NOTE(pishin): fix ctor before enabling
     auto source = R"(
     .record __I <external>
     .function ___I _init__i32_i32_(i32 a0, i32 a1) <ctor, external>
     .record panda.Array <external>
-    .function panda.Array main(i32 a0){
+    .function panda.Array main(i32 a0) {
         movi v0, 0x1
         initobj _init__i32_i32_ v0, a0
         return
@@ -4359,7 +4364,7 @@ TEST_F(IrBuilderTest, Ldobj)
         i32 v_i32
         panda.String v_string
     }
-    .function i32 main(R a0){
+    .function i32 main(R a0) {
         ldobj a0, R.v_i32
         return
     }
@@ -4390,7 +4395,7 @@ TEST_F(IrBuilderTest, Ldobj64)
         i64 v_i64
         panda.String v_string
     }
-    .function i64 main(R a0){
+    .function i64 main(R a0) {
         ldobj.64 a0, R.v_i64
         return
     }
@@ -4422,7 +4427,7 @@ TEST_F(IrBuilderTest, LdobjObj)
         i32 v_i32
         panda.String v_string
     }
-    .function panda.String main(R a0){
+    .function panda.String main(R a0) {
         ldobj.obj a0, R.v_string
         return.obj
     }
@@ -4453,7 +4458,7 @@ TEST_F(IrBuilderTest, Stobj)
         i32 v_i32
         panda.String v_string
     }
-    .function void main(R a0, i32 a1){
+    .function void main(R a0, i32 a1) {
         lda a1
         stobj a0, R.v_i32
         return.void
@@ -4486,7 +4491,7 @@ TEST_F(IrBuilderTest, Stobj64)
         i64 v_i64
         panda.String v_string
     }
-    .function void main(R a0, i64 a1){
+    .function void main(R a0, i64 a1) {
         lda.64 a1
         stobj.64 a0, R.v_i64
         return.void
@@ -4519,7 +4524,7 @@ TEST_F(IrBuilderTest, StobjObj)
         i32 v_i32
         panda.String v_string
     }
-    .function void main(R a0, panda.String a1){
+    .function void main(R a0, panda.String a1) {
         lda.obj a1
         stobj.obj a0, R.v_string
         return.void
@@ -4552,7 +4557,7 @@ TEST_F(IrBuilderTest, Ldstatic)
         i32 v_i32             <static>
         panda.String v_string <static>
     }
-    .function i32 main(){
+    .function i32 main() {
         ldstatic R.v_i32
         return
     }
@@ -4581,7 +4586,7 @@ TEST_F(IrBuilderTest, Ldstatic64)
         i64 v_i64             <static>
         panda.String v_string <static>
     }
-    .function i64 main(){
+    .function i64 main() {
         ldstatic.64 R.v_i64
         return
     }
@@ -4610,7 +4615,7 @@ TEST_F(IrBuilderTest, LdstaticObj)
         i32 v_i32             <static>
         panda.String v_string <static>
     }
-    .function panda.String main(){
+    .function panda.String main() {
         ldstatic.obj R.v_string
         return
     }
@@ -4639,7 +4644,7 @@ TEST_F(IrBuilderTest, Ststatic)
         i32 v_i32             <static>
         panda.String v_string <static>
     }
-    .function void main(i32 a0){
+    .function void main(i32 a0) {
         lda a0
         ststatic R.v_i32
         return.void
@@ -4671,7 +4676,7 @@ TEST_F(IrBuilderTest, Ststatic64)
         i64 v_i64             <static>
         panda.String v_string <static>
     }
-    .function void main(i64 a0){
+    .function void main(i64 a0) {
         lda.64 a0
         ststatic.64 R.v_i64
         return.void
@@ -4703,7 +4708,7 @@ TEST_F(IrBuilderTest, StstaticObj)
         i32 v_i32             <static>
         panda.String v_string <static>
     }
-    .function void main(panda.String a0){
+    .function void main(panda.String a0) {
         lda.obj a0
         ststatic.obj R.v_string
         return.void
@@ -4730,7 +4735,7 @@ TEST_F(IrBuilderTest, StstaticObj)
 TEST_F(IrBuilderTest, Return)
 {
     auto source = R"(
-    .function i32 main(i32 a0){
+    .function i32 main(i32 a0) {
         lda a0
         return
     }
@@ -4753,7 +4758,7 @@ TEST_F(IrBuilderTest, Return)
 TEST_F(IrBuilderTest, Return64)
 {
     auto source = R"(
-    .function i64 main(i64 a0){
+    .function i64 main(i64 a0) {
         lda.64 a0
         return.64
     }
@@ -4777,7 +4782,7 @@ TEST_F(IrBuilderTest, ReturnObj)
 {
     auto source = R"(
     .record panda.String <external>
-    .function panda.String main(panda.String a0){
+    .function panda.String main(panda.String a0) {
         lda.obj a0
         return.obj
     }
@@ -4800,7 +4805,7 @@ TEST_F(IrBuilderTest, ReturnObj)
 TEST_F(IrBuilderTest, ReturnVoid)
 {
     auto source = R"(
-    .function void main(){
+    .function void main() {
         return.void
     }
     )";
@@ -4821,7 +4826,7 @@ TEST_F(IrBuilderTest, Throw)
 {
     auto source = R"(
     .record panda.String <external>
-    .function void main(panda.String a0){
+    .function void main(panda.String a0) {
         throw a0
     }
     )";
@@ -4844,7 +4849,7 @@ TEST_F(IrBuilderTest, Throw)
 TEST_F(IrBuilderTest, CallShort)
 {
     auto source = R"(
-    .function i32 main(){
+    .function i32 main() {
         movi.64 v0, 1
         call.short foo1, v0, v0
         call.short foo2, v0, v0
@@ -4882,7 +4887,7 @@ TEST_F(IrBuilderTest, CallShort)
 TEST_F(IrBuilderTest, Call)
 {
     auto source = R"(
-    .function i64 main(){
+    .function i64 main() {
         movi.64 v0, 1
         call foo1, v0, v0, v0, v0
         call foo2, v0, v0, v0, v0
@@ -4920,7 +4925,7 @@ TEST_F(IrBuilderTest, Call)
 TEST_F(IrBuilderTest, CallRange)
 {
     auto source = R"(
-    .function i64 main(){
+    .function i64 main() {
         movi.64 v0, 1
         movi.64 v1, 2
         call.range foo, v0
@@ -4955,7 +4960,7 @@ TEST_F(IrBuilderTest, Checkcast)
         i32 asm1
         i64 asm2
     }
-    .function void main(){
+    .function void main() {
         newobj v0, Asm
         lda.obj v0
         checkcast Asm
@@ -4987,7 +4992,7 @@ TEST_F(IrBuilderTest, Isinstance)
         i32 asm1
         i64 asm2
     }
-    .function u1 main(){
+    .function u1 main() {
         newobj v0, Asm
         lda.obj v0
         isinstance Asm
@@ -5746,7 +5751,7 @@ exit:
 TEST_F(IrBuilderTest, OsrMode)
 {
     auto source = R"(
-    .function u32 foo(u32 a0){
+    .function u32 foo(u32 a0) {
         lda a0
     loop:
         jlez exit
@@ -5791,7 +5796,7 @@ TEST_F(IrBuilderTest, OsrMode)
 TEST_F(IrBuilderTest, TestSaveStateDeoptimize)
 {
     auto source = R"(
-    .function u32 foo(u32 a0){
+    .function u32 foo(u32 a0) {
         lda a0
     loop:
         jlez exit
@@ -5837,7 +5842,7 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimize)
 TEST_F(IrBuilderTest, InfiniteLoop)
 {
     auto source = R"(
-    .function u32 foo_inf(i32 a0){
+    .function u32 foo_inf(i32 a0) {
     loop:
         inci a0, 1
         jmp loop
@@ -5867,7 +5872,7 @@ TEST_F(IrBuilderTest, InfiniteLoop)
 TEST_F(IrBuilderTest, TestSaveStateDeoptimizeAuxiliaryBlock)
 {
     auto source = R"(
-    .function u32 foo(i32 a0){
+    .function u32 foo(i32 a0) {
         ldai 0
         jne a0, test
         jmp end_test

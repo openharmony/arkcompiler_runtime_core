@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,147 +17,229 @@
 #define PANDA_LIBPANDABASE_TASKMANAGER_TASK_QUEUE_H
 
 #include "libpandabase/os/mutex.h"
-#include "libpandabase/taskmanager/task.h"
-#include <atomic>
-#include <optional>
-#include <queue>
+#include "libpandabase/taskmanager/schedulable_task_queue_interface.h"
 
-namespace panda::taskmanager {
-
-class TaskQueueId {
-public:
-    constexpr TaskQueueId(TaskType tt, VMType vt)
-        : val_(static_cast<uint16_t>(tt) |
-               static_cast<uint16_t>(static_cast<uint16_t>(vt) << (BITS_PER_BYTE * sizeof(TaskQueueId) / 2)))
-    {
-        static_assert(sizeof(TaskType) == sizeof(TaskQueueId) / 2);
-        static_assert(sizeof(VMType) == sizeof(TaskQueueId) / 2);
-    }
-
-    friend constexpr bool operator==(const TaskQueueId &lv, const TaskQueueId &rv)
-    {
-        return lv.val_ == rv.val_;
-    }
-
-    friend constexpr bool operator!=(const TaskQueueId &lv, const TaskQueueId &rv)
-    {
-        return lv.val_ != rv.val_;
-    }
-
-    friend constexpr bool operator<(const TaskQueueId &lv, const TaskQueueId &rv)
-    {
-        return lv.val_ < rv.val_;
-    }
-
-private:
-    uint16_t val_;
-};
-
-constexpr TaskQueueId INVALID_TASKQUEUE_ID = TaskQueueId(TaskType::UNKNOWN, VMType::UNKNOWN);
+namespace panda::taskmanager::internal {
 
 /**
  * @brief TaskQueue is a thread-safe queue for tasks. Queues can be registered in TaskScheduler and used to execute
  * tasks on workers. Also, queues can notify other threads when a new task is pushed.
+ * @tparam Allocator - allocator of Task that will be used in internal queues. By default is used
+ * std::allocator<Task>
  */
-class TaskQueue {
+template <class Allocator = std::allocator<Task>>
+class TaskQueue : public SchedulableTaskQueueInterface {
+    using TaskAllocatorType = typename Allocator::template rebind<Task>::other;
+    using TaskQueueAllocatorType = typename Allocator::template rebind<TaskQueue<TaskAllocatorType>>::other;
+    template <class OtherAllocator>
+    friend class TaskQueue;
+
 public:
     NO_COPY_SEMANTIC(TaskQueue);
     NO_MOVE_SEMANTIC(TaskQueue);
 
     /**
-     * NewTasksCallback instance should be called after tasks adding. As argument you should input count of added
-     * tasks.
+     * @brief The TaskQueue factory. Intended to be used by the TaskScheduler's CreateAndRegister method.
+     * @param task_type: TaskType of queue.
+     * @param vm_type: VMType of queue.
+     * @param priority: A number from 1 to 10 that determines the weight of the queue during the task selection process
+     * @return a pointer to the created queue.
      */
-    using NewTasksCallback = std::function<void(TaskProperties, size_t)>;
+    static PANDA_PUBLIC_API SchedulableTaskQueueInterface *Create(TaskType task_type, VMType vm_type, uint8_t priority)
+    {
+        TaskQueueAllocatorType allocator;
+        auto *mem = allocator.allocate(sizeof(TaskQueue<TaskAllocatorType>));
+        return new (mem) TaskQueue<TaskAllocatorType>(task_type, vm_type, priority);
+    }
 
-    static constexpr uint8_t MAX_PRIORITY = 10;
-    static constexpr uint8_t MIN_PRIORITY = 1;
-    static constexpr uint8_t DEFAULT_PRIORITY = 5;
+    static PANDA_PUBLIC_API void Destroy(SchedulableTaskQueueInterface *queue)
+    {
+        TaskQueueAllocatorType allocator;
+        std::allocator_traits<TaskQueueAllocatorType>::destroy(allocator, queue);
+        allocator.deallocate(static_cast<TaskQueue<TaskAllocatorType> *>(queue), sizeof(TaskQueue<TaskAllocatorType>));
+    }
 
-    /**
-     * @brief When you construct a queue, you should write @arg task_type and @arg vm_type of Tasks that will be
-     * contained in it. Also, you should write @arg priority, which will be used in Task Manager for task selection.
-     * It's a number from 1 to 10 and determines the weight of the queue for the Task Manager.
-     * MAX_PRIORITY = 10, MIN_PRIORITY = 1, DEFAULT_PRIORITY = 5;
-     */
-    PANDA_PUBLIC_API TaskQueue(TaskType task_type, VMType vm_type, uint8_t priority);
-    PANDA_PUBLIC_API ~TaskQueue();
+    PANDA_PUBLIC_API ~TaskQueue() override
+    {
+        WaitForEmpty();
+    }
 
     /**
      * @brief Adds task in task queue. Operation is thread-safe.
      * @param task - task that will be added
      * @return the size of queue after @arg task was added to it.
      */
-    PANDA_PUBLIC_API size_t AddTask(Task &&task);
+    PANDA_PUBLIC_API size_t AddTask(Task &&task) override
+    {
+        ASSERT(task.GetTaskProperties().GetTaskType() == GetTaskType());
+        ASSERT(task.GetTaskProperties().GetVMType() == GetVMType());
+        auto properties = task.GetTaskProperties();
+        size_t size = 0;
+        {
+            os::memory::LockHolder lock_holder(task_queue_lock_);
+            PushTaskToInternalQueues(std::move(task));
+            task_queue_cond_var_.Signal();
+            size = SumSizeOfInternalQueues();
+        }
+        {
+            os::memory::LockHolder lock_holder(subscriber_lock_);
+            // Notify subscriber about new task
+            if (new_tasks_callback_ != nullptr) {
+                new_tasks_callback_(properties, 1);
+            }
+        }
+        return size;
+    }
 
     /**
      * @brief Pops task from task queue. Operation is thread-safe. The method will wait new task if queue is empty and
      * method WaitForQueueEmptyAndFinish has not been executed. Otherwise it will return std::nullopt.
+     * This method should be used only in TaskScheduler
      */
-    [[nodiscard]] std::optional<Task> PopTask();
+    [[nodiscard]] std::optional<Task> PopTask() override
+    {
+        os::memory::LockHolder lock_holder(task_queue_lock_);
+        while (AreInternalQueuesEmpty()) {
+            if (finish_) {
+                return std::nullopt;
+            }
+            task_queue_cond_var_.Wait(&task_queue_lock_);
+        }
+        auto task = PopTaskFromInternalQueues();
+        finish_var_.Signal();
+        return std::make_optional(std::move(task));
+    }
 
     /**
      * @brief Pops task from task queue with specified execution mode. Operation is thread-safe. The method will wait
      * new task if queue with specified execution mode is empty and method WaitForQueueEmptyAndFinish has not been
      * executed. Otherwise it will return std::nullopt.
+     * This method should be used only in TaskScheduler!
      * @param mode - execution mode of task that we want to pop.
      */
-    [[nodiscard]] std::optional<Task> PopTask(TaskExecutionMode mode);
+    [[nodiscard]] std::optional<Task> PopTask(TaskExecutionMode mode) override
+    {
+        os::memory::LockHolder lock_holder(task_queue_lock_);
+        auto *queue = &foreground_task_queue_;
+        if (mode != TaskExecutionMode::FOREGROUND) {
+            queue = &background_task_queue_;
+        }
+        while (queue->empty()) {
+            if (finish_) {
+                return std::nullopt;
+            }
+            task_queue_cond_var_.Wait(&task_queue_lock_);
+        }
+        auto task = PopTaskFromQueue(*queue);
+        finish_var_.Signal();
+        return std::make_optional(std::move(task));
+    }
 
-    [[nodiscard]] PANDA_PUBLIC_API bool IsEmpty() const;
-    [[nodiscard]] PANDA_PUBLIC_API size_t Size() const;
+    [[nodiscard]] PANDA_PUBLIC_API bool IsEmpty() const override
+    {
+        os::memory::LockHolder lock_holder(task_queue_lock_);
+        return AreInternalQueuesEmpty();
+    }
+
+    [[nodiscard]] PANDA_PUBLIC_API size_t Size() const override
+    {
+        os::memory::LockHolder lock_holder(task_queue_lock_);
+        return SumSizeOfInternalQueues();
+    }
 
     /**
      * @brief Method @returns true if queue does not have queue with specified execution mode
      * @param mode - execution mode of tasks
      */
-    [[nodiscard]] PANDA_PUBLIC_API bool HasTaskWithExecutionMode(TaskExecutionMode mode) const;
-
-    PANDA_PUBLIC_API TaskType GetTaskType() const;
-    PANDA_PUBLIC_API VMType GetVMType() const;
-
-    PANDA_PUBLIC_API uint8_t GetPriority() const;
-    PANDA_PUBLIC_API void SetPriority(uint8_t priority);
+    [[nodiscard]] PANDA_PUBLIC_API bool HasTaskWithExecutionMode(TaskExecutionMode mode) const override
+    {
+        os::memory::LockHolder lock_holder(task_queue_lock_);
+        if (mode == TaskExecutionMode::FOREGROUND) {
+            return !foreground_task_queue_.empty();
+        }
+        return !background_task_queue_.empty();
+    }
 
     /**
      * @brief This method saves the @arg callback. It will be called after adding new task in AddTask method.
+     * This method should be used only in TaskScheduler!
      * @param callback - function that get count of inputted tasks.
      */
-    void SubscribeCallbackToAddTask(NewTasksCallback callback);
+    void SetNewTasksCallback(NewTasksCallback callback) override
+    {
+        os::memory::LockHolder subscriber_lock_holder(subscriber_lock_);
+        new_tasks_callback_ = std::move(callback);
+    }
 
-    /// @brief Removes callback function.
-    void UnsubscribeCallback();
+    /// @brief Removes callback function. This method should be used only in TaskScheduler!
+    void UnsetNewTasksCallback() override
+    {
+        os::memory::LockHolder lock_holder(subscriber_lock_);
+        new_tasks_callback_ = nullptr;
+    }
 
     /**
      * @brief Method waits until internal queue will be empty and finalize using of TaskQueue
      * After this method PopTask will not wait for new tasks.
      */
-    void WaitForQueueEmptyAndFinish();
+    void WaitForQueueEmptyAndFinish() override
+    {
+        WaitForEmpty();
+    }
 
 private:
-    bool AreInternalQueuesEmpty() const REQUIRES(task_queue_lock_);
+    void WaitForEmpty()
+    {
+        os::memory::LockHolder lock_holder(task_queue_lock_);
+        while (!AreInternalQueuesEmpty()) {
+            finish_var_.Wait(&task_queue_lock_);
+        }
+        finish_ = true;
+        task_queue_cond_var_.SignalAll();
+    }
 
-    size_t SumSizeOfInternalQueues() const REQUIRES(task_queue_lock_);
+    using InternalTaskQueue = std::queue<Task, std::deque<Task, TaskAllocatorType>>;
 
-    void PushTaskToInternalQueues(Task &&task) REQUIRES(task_queue_lock_);
-    Task PopTaskFromInternalQueues() REQUIRES(task_queue_lock_);
+    TaskQueue(TaskType task_type, VMType vm_type, uint8_t priority)
+        : SchedulableTaskQueueInterface(task_type, vm_type, priority),
+          foreground_task_queue_(TaskAllocatorType()),
+          background_task_queue_(TaskAllocatorType())
+    {
+    }
 
-    Task PopTaskFromQueue(std::queue<Task> &queue) REQUIRES(task_queue_lock_);
+    bool AreInternalQueuesEmpty() const REQUIRES(task_queue_lock_)
+    {
+        return foreground_task_queue_.empty() && background_task_queue_.empty();
+    }
 
-    std::atomic_uint8_t priority_;
-    TaskType task_type_;
-    VMType vm_type_;
+    size_t SumSizeOfInternalQueues() const REQUIRES(task_queue_lock_)
+    {
+        return foreground_task_queue_.size() + background_task_queue_.size();
+    }
 
-    /**
-     * foreground_task_queue_ is queue that contains task with ExecutionMode::FOREGROUND. If method PopTask() is used,
-     * foreground_task_queue_ will be checked first and if it's not empty, Task will be gotten from it.
-     */
-    std::queue<Task> foreground_task_queue_ GUARDED_BY(task_queue_lock_);
-    /**
-     * background_task_queue_ is queue that contains task with ExecutionMode::BACKGROUND. If method PopTask() is used,
-     * background_task_queue_ will be popped only if foreground_task_queue_ is empty.
-     */
-    std::queue<Task> background_task_queue_ GUARDED_BY(task_queue_lock_);
+    void PushTaskToInternalQueues(Task &&task) REQUIRES(task_queue_lock_)
+    {
+        if (task.GetTaskProperties().GetTaskExecutionMode() == TaskExecutionMode::FOREGROUND) {
+            foreground_task_queue_.push(std::move(task));
+        } else {
+            background_task_queue_.push(std::move(task));
+        }
+    }
+
+    Task PopTaskFromInternalQueues() REQUIRES(task_queue_lock_)
+    {
+        if (!foreground_task_queue_.empty()) {
+            return PopTaskFromQueue(foreground_task_queue_);
+        }
+        return PopTaskFromQueue(background_task_queue_);
+    }
+
+    Task PopTaskFromQueue(InternalTaskQueue &queue) REQUIRES(task_queue_lock_)
+    {
+        auto task = std::move(queue.front());
+        queue.pop();
+        return task;
+    }
 
     /// task_queue_lock_ is used in case of interaction with internal queues
     mutable os::memory::Mutex task_queue_lock_;
@@ -169,8 +251,19 @@ private:
     NewTasksCallback new_tasks_callback_ GUARDED_BY(subscriber_lock_);
 
     bool finish_ {false};
+
+    /**
+     * foreground_task_queue_ is queue that contains task with ExecutionMode::FOREGROUND. If method PopTask() is used,
+     * foreground_task_queue_ will be checked first and if it's not empty, Task will be gotten from it.
+     */
+    InternalTaskQueue foreground_task_queue_ GUARDED_BY(task_queue_lock_);
+    /**
+     * background_task_queue_ is queue that contains task with ExecutionMode::BACKGROUND. If method PopTask() is used,
+     * background_task_queue_ will be popped only if foreground_task_queue_ is empty.
+     */
+    InternalTaskQueue background_task_queue_ GUARDED_BY(task_queue_lock_);
 };
 
-}  // namespace panda::taskmanager
+}  // namespace panda::taskmanager::internal
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_TASK_QUEUE_H

@@ -49,7 +49,7 @@ public:
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
-        options.SetGcType("stw");  // TODO(dtrubenk): fix for gen-gc
+        options.SetGcType("stw");  // NOTE(dtrubenk): fix for gen-gc
         options.SetRunGcInPlace(true);
         Runtime::Create(options);
         thread_ = panda::MTManagedThread::GetCurrent();

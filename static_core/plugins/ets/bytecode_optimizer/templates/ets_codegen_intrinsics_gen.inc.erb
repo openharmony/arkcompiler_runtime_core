@@ -19,9 +19,14 @@
 % if instructions.first
 %   instructions = instructions.group_by(&:intrinsic_name)
 % end
+% lowerings = [["ets.ldobj.name", "VisitEtsLdObjByName"],
+%              ["ets.stobj.name", "VisitEtsStObjByName"],
+%              ["ets.ldundefined", "VisitEtsLdundefined"],
+%             ]
 % instructions.each do |intrinsic_name, group|
 %     inst = group.first
-%     next unless inst.sig.include?(".name")
+%     lowering = lowerings.detect{ |l| inst.sig.start_with?(l[0]) }
+%     next unless lowering
 %     params_arr = inst.operands
 %     if inst.intrinsic_name.class == Array
 %       inst.intrinsic_name.each do | intrinsic_name |
@@ -31,30 +36,7 @@
         case compiler::RuntimeInterface::IntrinsicId::<%= intrinsic_name %>:
 %     end
         {
-%     if inst.acc_read?
-            auto acc_src = inst->GetSrcReg(1U);
-            if (acc_src != compiler::ACC_REG_ID) {
-                DoLda(acc_src, enc->result_);
-            }
-%     end
-%     params_arr.each do |param|
-%       if param.reg?
-            auto v0 = inst->GetSrcReg(0);
-%       elsif param.id?
-%         if inst.properties.include?("field_id")
-            ASSERT(inst->HasImms() && inst->GetImms().size() > 0); // NOLINT(readability-container-size-empty)
-            auto ir_id0 = static_cast<uint32_t>(inst->GetImms()[0]);
-            auto bc_id0 = enc->ir_interface_->GetFieldIdByOffset(ir_id0);
-%         end
-%       end
-%     end
-            enc->result_.emplace_back(pandasm::Create_<%= inst.asm_token %>(v0, bc_id0));
-%     if inst.acc_write?
-            auto acc_dst = inst->GetDstReg();
-            if (acc_dst != compiler::ACC_REG_ID) {
-                DoSta(acc_dst, enc->result_);
-            }
-%     end
+            BytecodeGen::<%= lowering[1] %>(enc, inst);
             break;
         }
 % end

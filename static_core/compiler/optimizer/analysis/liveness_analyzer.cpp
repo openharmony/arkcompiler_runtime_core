@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -861,21 +861,15 @@ LifeNumber LifeIntervals::GetFirstIntersectionWith(const LifeIntervals *other, L
             }
             auto range_begin = std::max<LifeNumber>(search_from, range.GetBegin());
             auto other_range_begin = std::max<LifeNumber>(search_from, other_range.GetBegin());
-
-            if (range_begin <= other_range_begin) {
-                if (other_range_begin < range.GetEnd()) {
-                    // [range]
-                    //    [other]
-                    return other_range_begin;
-                }
-                ASSERT(other_range_begin >= range.GetEnd());
-            } else {
+            if (range_begin <= other_range_begin && other_range_begin < range.GetEnd()) {
+                // [range]
+                //    [other]
+                return other_range_begin;
+                // NOLINTNEXTLINE(readability-else-after-return)
+            } else if (range_begin > other_range_begin && range_begin < other_range.GetEnd()) {
                 //     [range]
                 // [other]
-                if (range_begin < other_range.GetEnd()) {
-                    return range_begin;
-                }
-                ASSERT(range_begin >= other_range.GetEnd());
+                return range_begin;
             }
         }
     }

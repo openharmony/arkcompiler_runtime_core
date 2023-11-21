@@ -89,15 +89,15 @@
     } while (0)
 
 /*
-TODO(vdyadov): add AddrMap to verification context where put marks on all checked bytes.
+NOTE(vdyadov): add AddrMap to verification context where put marks on all checked bytes.
 after absint process ends, check this AddrMap for holes.
 holes are either dead byte-code or issues with absint cflow handling.
 */
 
-// TODO(vdyadov): refactor this file, all utility functions put in separate/other files
+// NOTE(vdyadov): refactor this file, all utility functions put in separate/other files
 
 /*
-TODO(vdyadov): IMPORTANT!!! (Done)
+NOTE(vdyadov): IMPORTANT!!! (Done)
 Current definition of context incompatibility is NOT CORRECT one!
 There are situations when verifier will rule out fully correct programs.
 For instance:
@@ -125,7 +125,7 @@ May be mark them as conflicting? (done)
 conflicting contexts modulo used registers set. It is complex solution, but very preciese.
 */
 
-// TODO(vdyadov): regain laziness, strict evaluation is very expensive!
+// NOTE(vdyadov): regain laziness, strict evaluation is very expensive!
 
 namespace panda::verifier {
 
@@ -133,7 +133,7 @@ class AbsIntInstructionHandler {
 public:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     static constexpr int ACC = -1;
-    static constexpr int INVALID_REG = -2;  // TODO(vdyadov): may be use Index<..> here?
+    static constexpr int INVALID_REG = -2;  // NOTE(vdyadov): may be use Index<..> here?
 
     using TypeId = panda_file::Type::TypeId;
     using Builtin = Type::Builtin;
@@ -581,7 +581,7 @@ public:
         Sync();
         Type cached_type = GetCachedType();
         if (!cached_type.IsConsistent()) {
-            // TODO(vdyadov): refactor to verifier-messages
+            // NOTE(vdyadov): refactor to verifier-messages
             LOG(ERROR, VERIFIER) << "Verifier error: HandleLdaConst cache error";
             status_ = VerificationStatus::ERROR;
             return false;
@@ -726,7 +726,7 @@ public:
             return false;
         }
 
-        // TODO(vdyadov): think of two-pass absint, where we can catch const-null cases
+        // NOTE(vdyadov): think of two-pass absint, where we can catch const-null cases
 
         auto type = GetRegType(ACC);
         SetAccAndOthersOfSameOrigin(null_ref_type_);
@@ -1544,7 +1544,7 @@ public:
 
         auto reg_type = GetRegType(vs);
         if (reg_type == null_ref_type_) {
-            // TODO(vdyadov): redesign next code, after support exception handlers,
+            // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(vs);
@@ -1683,7 +1683,7 @@ public:
         LOG_VERIFIER_DEBUG_TYPE(ToString(type));
         END_SHOW_MSG();
         if (!IsSubtype(type, array_type_, GetTypeSystem())) {
-            // TODO(vdyadov): implement StrictSubtypes function to not include array_type_ in output
+            // NOTE(vdyadov): implement StrictSubtypes function to not include array_type_ in output
             SHOW_MSG(ArrayOfNonArrayType)
             LOG_VERIFIER_ARRAY_OF_NON_ARRAY_TYPE(ToString(type));
             END_SHOW_MSG();
@@ -1728,7 +1728,7 @@ public:
     {
         Type obj_type = TypeOfClass(ctor->GetClass());
 
-        // TODO(vdyadov): put under NDEBUG?
+        // NOTE(vdyadov): put under NDEBUG?
         {
             if (debug_ctx->SkipVerificationOfCall(ctor->GetUniqId())) {
                 SetAcc(obj_type);
@@ -1905,7 +1905,7 @@ public:
             }
             Type obj_type = GetRegType(reg_idx);
             if (obj_type == null_ref_type_) {
-                // TODO(vdyadov): redesign next code, after support exception handlers,
+                // NOTE(vdyadov): redesign next code, after support exception handlers,
                 //                treat it as always throw NPE
                 SHOW_MSG(AlwaysNpe)
                 LOG_VERIFIER_ALWAYS_NPE(reg_idx);
@@ -2507,7 +2507,7 @@ public:
         TypeId ret_type_id = ret_type.ToTypeId();
 
         PandaVector<Type> compatible_acc_types;
-        // TODO (gogabr): why recompute each time?
+        // NOTE (gogabr): why recompute each time?
         for (size_t acc_idx = 0; acc_idx < static_cast<size_t>(TypeId::REFERENCE) + 1; ++acc_idx) {
             auto acc_type_id = static_cast<TypeId>(acc_idx);
             const CheckResult &info = check(ret_type_id, acc_type_id);
@@ -2558,7 +2558,7 @@ public:
             return false;
         }
 
-        // TODO(vdyadov): handle LUB of compatible primitive types
+        // NOTE(vdyadov): handle LUB of compatible primitive types
         if (!CheckType(GetAccType(), bits32_)) {
             LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE(ToString(GetAccType()));
             SET_STATUS_FOR_MSG(BadAccumulatorReturnValueType, WARNING);
@@ -2570,22 +2570,40 @@ public:
     bool HandleReturnDyn();
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchShort();
+    bool HandleEtsLaunchShort()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunch();
+    bool HandleEtsLaunch()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchRange();
+    bool HandleEtsLaunchRange()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchVirtShort();
+    bool HandleEtsLaunchVirtShort()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchVirt();
+    bool HandleEtsLaunchVirt()
+    {
+        return true;
+    }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchVirtRange();
+    bool HandleEtsLaunchVirtRange()
+    {
+        return true;
+    }
 
     template <bool IS_LOAD>
     bool CheckFieldAccessByName(int reg_idx, Type expected_field_type)
@@ -2617,7 +2635,7 @@ public:
         }
         Type obj_type = GetRegType(reg_idx);
         if (obj_type == null_ref_type_) {
-            // TODO(vdyadov): redesign next code, after support exception handlers,
+            // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(reg_idx);
@@ -2872,6 +2890,47 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsLdundefined()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(object_type_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsMovundefined()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t vd = inst_.GetVReg<FORMAT>();
+        Sync();
+        SetReg(vd, object_type_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsIsundefined()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+
+        if (!CheckRegType(ACC, ref_type_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        SetAcc(i32_);
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleReturnWide()
     {
         LOG_INST();
@@ -2918,7 +2977,7 @@ public:
 
         if (!CheckType(acc_type, ReturnType())) {
             LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE_WITH_SUBTYPE(ToString(acc_type), ToString(ReturnType()));
-            // TODO(vdyadov) : after solving issues with set of types in LUB, uncomment next line
+            // NOTE(vdyadov) : after solving issues with set of types in LUB, uncomment next line
             status_ = VerificationStatus::WARNING;
         }
 
@@ -2930,7 +2989,7 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        // TODO(vdyadov): think of introducing void as of separate type, like null
+        // NOTE(vdyadov): think of introducing void as of separate type, like null
         Sync();
 
         if (ReturnType() != Type::Top()) {
@@ -2963,7 +3022,7 @@ public:
             return false;
         }
         auto acc_type = GetAccType();
-        // TODO(vdyadov): remove this check after #2365
+        // NOTE(vdyadov): remove this check after #2365
         auto res =
             !IsSubtype(acc_type, ref_type_, GetTypeSystem()) && !IsSubtype(acc_type, array_type_, GetTypeSystem());
         if (res) {
@@ -3060,7 +3119,7 @@ public:
         }
 
         auto acc_type = GetAccType();
-        // TODO(vdyadov): remove this check after #2365
+        // NOTE(vdyadov): remove this check after #2365
         auto res =
             !IsSubtype(acc_type, ref_type_, GetTypeSystem()) && !IsSubtype(acc_type, array_type_, GetTypeSystem());
         if (res) {
@@ -3094,7 +3153,7 @@ public:
             LOG_VERIFIER_IMPOSSIBLE_IS_INSTANCE(ToString(acc_type));
             SET_STATUS_FOR_MSG(ImpossibleIsInstance, OK);
         }  // else {
-        // TODO(vdyadov): here we may increase precision to concrete values in some cases
+        // NOTE(vdyadov): here we may increase precision to concrete values in some cases
         SetAcc(i32_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3190,7 +3249,7 @@ public:
                     result = false;
                     break;
                 }
-                // !!!!!! FIXME: need to check all possible TypeId-s against formal_id
+                // !!!!!! NOTE: need to check all possible TypeId-s against formal_id
                 TypeId actual_id = actual_type.ToTypeId();
                 if (actual_id != TypeId::INVALID) {
                     check_result = panda::verifier::CheckMethodArgs(formal_id, actual_id);
@@ -3599,7 +3658,7 @@ public:
         Sync();
         Type acc_type = GetAccType();
         if (acc_type == null_ref_type_) {
-            // TODO(vdyadov): redesign next code, after support exception handlers,
+            // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpeAccumulator)
             LOG_VERIFIER_ALWAYS_NPE_ACCUMULATOR();
@@ -3624,7 +3683,7 @@ public:
         Sync();
         Type acc_type = GetAccType();
         if (acc_type == null_ref_type_) {
-            // TODO(vdyadov): redesign next code, after support exception handlers,
+            // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpeAccumulator)
             LOG_VERIFIER_ALWAYS_NPE_ACCUMULATOR();
@@ -3742,7 +3801,7 @@ private:
         Type reg_type = GetRegType(v1);
 
         if (reg_type == null_ref_type_) {
-            // TODO(vdyadov): redesign next code, after support exception handlers,
+            // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(v1);
@@ -3764,7 +3823,7 @@ private:
 
         Type acc_type = GetAccType();
 
-        // TODO(dvyadov): think of subtyping here. Can we really write more precise type into array?
+        // NOTE(dvyadov): think of subtyping here. Can we really write more precise type into array?
         // since there is no problems with storage (all refs are of the same size)
         // and no problems with information losses, it seems fine at first sight.
         bool res = !IsSubtype(acc_type, arr_elt_type, GetTypeSystem());
@@ -4013,7 +4072,7 @@ private:
 
         Type reg_type = GetRegType(vs);
         if (reg_type == null_ref_type_) {
-            // TODO(vdyadov): redesign next code, after support exception handlers,
+            // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(vs);

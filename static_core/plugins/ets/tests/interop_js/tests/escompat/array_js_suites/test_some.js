@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSSome = ets_mod.getFunction("Array_TestJSSome");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSSome = etsMod.getFunction('Array_TestJSSome');
 
-{   // Test JS Array<FooClass>
-    TestJSSome(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSSome(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    function fnTrue(v) { return true; }
-    function fn1True(v, k) { return true; }
-    ASSERT_TRUE(arr.some(fnTrue));
-    ASSERT_TRUE(arr.some(fn1True));
-    function fnFalse(v) { return false; }
-    function fn1False(v, k) { return k < 0; }
-    ASSERT_FALSE(arr.some(fnFalse));
-    ASSERT_FALSE(arr.some(fn1False));
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  function fnTrue(v) { return true; }
+  function fn1True(v, k) { return true; }
+  ASSERT_TRUE(arr.some(fnTrue));
+  ASSERT_TRUE(arr.some(fn1True));
+  function fnFalse(v) { return false; }
+  function fn1False(v, k) { return k < 0; }
+  ASSERT_FALSE(arr.some(fnFalse));
+  ASSERT_FALSE(arr.some(fn1False));
 }
 
 GCJSRuntimeCleanup();

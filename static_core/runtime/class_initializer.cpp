@@ -46,7 +46,7 @@ template <>
 class ObjectLockConfig<MT_MODE_TASK> {
 public:
     /**
-     * TODO(konstanting):
+     * NOTE(konstanting):
      * For the sake of simplicity we use a global mutex-like lock for synchronization. We imply that there will be no
      * coroutine switch during the class initialization and that assumption includes static constructor bodies too.
      * With a global lock, coroutine switch during a class initialiation sequence will possibly lead to deadlocks and
@@ -91,7 +91,7 @@ public:
         {
             // GCC 8 and below has a strange bug: it reports a false syntax error in case
             // when [[maybe_unused]] is set for the first constructor argument.
-            // TODO(konstanting): revert to [[maybe_unused]] when we do not use GCC<=8
+            // NOTE(konstanting): revert to [[maybe_unused]] when we do not use GCC<=8
             UNUSED_VAR(tm);
         }
     };
@@ -234,29 +234,8 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
             return false;
         }
 
-        auto &options = Runtime::GetCurrent()->GetOptions();
-        switch (options.GetVerificationMode()) {
-            case VerificationMode::DISABLED:
-                if (!klass->IsVerified()) {
-                    klass->SetState(Class::State::VERIFIED);
-                }
-                break;
-            case VerificationMode::AHEAD_OF_TIME:
-                if (!klass->IsVerified()) {
-                    if (!VerifyClass(klass)) {
-                        klass->SetState(Class::State::ERRONEOUS);
-                        panda::ThrowVerificationException(utf::Mutf8AsCString(klass->GetDescriptor()));
-                        return false;
-                    }
-                }
-                break;
-            case VerificationMode::ON_THE_FLY:
-                if (options.IsArkAot()) {
-                    LOG(FATAL, VERIFIER) << "On the fly verification mode is not compatible with ark_aot";
-                }
-                break;
-            default:
-                UNREACHABLE();
+        if (!InitClassVerificationMode(klass)) {
+            return false;
         }
 
         if (klass->IsInitializing()) {
@@ -292,6 +271,35 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
     LOG(DEBUG, CLASS_LINKER) << "Initializing class " << klass->GetName();
 
     return InitializeClass(class_linker, thread, klass, managed_class_obj_handle);
+}
+
+template <MTModeT MODE>
+bool ClassInitializer<MODE>::InitClassVerificationMode(Class *klass)
+{
+    const auto &options = Runtime::GetCurrent()->GetOptions();
+    switch (options.GetVerificationMode()) {
+        case VerificationMode::DISABLED:
+            if (!klass->IsVerified()) {
+                klass->SetState(Class::State::VERIFIED);
+            }
+            return true;
+        case VerificationMode::AHEAD_OF_TIME:
+            if (!klass->IsVerified()) {
+                if (!VerifyClass(klass)) {
+                    klass->SetState(Class::State::ERRONEOUS);
+                    panda::ThrowVerificationException(utf::Mutf8AsCString(klass->GetDescriptor()));
+                    return false;
+                }
+            }
+            return true;
+        case VerificationMode::ON_THE_FLY:
+            if (options.IsArkAot()) {
+                LOG(FATAL, VERIFIER) << "On the fly verification mode is not compatible with ark_aot";
+            }
+            return true;
+        default:
+            UNREACHABLE();
+    }
 }
 
 /* static */

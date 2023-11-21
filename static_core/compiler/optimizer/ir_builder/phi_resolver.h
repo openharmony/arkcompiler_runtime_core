@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,18 +47,10 @@ public:
                 if (!inst->IsPhi() && !inst->IsCatchPhi()) {
                     continue;
                 }
-                for (auto &user : inst->GetUsers()) {
-                    auto user_inst = user.GetInst();
-                    auto can_remove_user = user_inst->IsPhi() || user_inst->IsCatchPhi() ||
-                                           (user_inst->IsSaveState() && !user.GetVirtualRegister().IsEnv());
-                    if (!can_remove_user) {
-                        // inst certainly cannot be removed from user's inputs
-                        MarkHasRealUserRec(inst);
-                        break;
-                    }
-                }
+                MarkPhiWithRealUsers(inst);
             }
         }
+
         for (auto bb : graph_->GetBlocksRPO()) {
             for (auto inst : bb->AllInstsSafe()) {
                 if (!inst->IsPhi() && !inst->IsCatchPhi()) {
@@ -84,32 +76,8 @@ public:
                 }
             }
         }
-        // If any input of phi instruction is not defined then we assume that phi is dead.
-        // We move users to the input and remove the PHI
-        for (auto bb : graph_->GetBlocksRPO()) {
-            for (auto inst : bb->PhiInstsSafe()) {
-                // Skip catch phi
-                if (!inst->IsPhi()) {
-                    continue;
-                }
-                if (inst->GetInputsCount() != bb->GetPredsBlocks().size()) {
-                    // if the number of PHI inputs less then the number of block predecessor and all inputs are equal
-                    // Repleace users to the input
-                    if (inst->GetInputsCount() != 0) {
-                        auto input_inst = inst->GetInput(0).GetInst();
-#ifndef NDEBUG
-                        if (!inst->GetUsers().Empty()) {
-                            for ([[maybe_unused]] auto &input : inst->GetInputs()) {
-                                ASSERT(input.GetInst() == input_inst);
-                            }
-                        }
-#endif
-                        inst->ReplaceUsers(input_inst);
-                    }
-                    bb->RemoveInst(inst);
-                }
-            }
-        }
+
+        RemoveDeadPhi();
     }
 
 private:
@@ -178,25 +146,9 @@ private:
             }
         }
     }
-    // Returns false if block with input instruction doesn't dominate the predecessor of the  PHI block
-    bool CheckPhiInputs(Inst *phi_inst)
+
+    bool CheckPhiRealInputs(Inst *phi_inst)
     {
-        ASSERT(phi_inst->IsPhi() || phi_inst->IsCatchPhi());
-        if (phi_inst->HasType()) {
-            return true;
-        }
-        if (phi_inst->IsPhi()) {
-            if (phi_inst->GetInputsCount() != phi_inst->GetBasicBlock()->GetPredsBlocks().size()) {
-                return false;
-            }
-            for (size_t index = 0; index < phi_inst->GetInputsCount(); ++index) {
-                auto pred = phi_inst->GetBasicBlock()->GetPredBlockByIndex(index);
-                auto input_bb = phi_inst->GetInput(index).GetInst()->GetBasicBlock();
-                if (!input_bb->IsDominate(pred)) {
-                    return false;
-                }
-            }
-        }
         DataType::Type type = DataType::NO_TYPE;
         real_inputs_.clear();
         marker_ = graph_->NewMarker();
@@ -236,6 +188,28 @@ private:
         }
         phi_inst->SetType(type);
         return true;
+    }
+
+    // Returns false if block with input instruction doesn't dominate the predecessor of the  PHI block
+    bool CheckPhiInputs(Inst *phi_inst)
+    {
+        ASSERT(phi_inst->IsPhi() || phi_inst->IsCatchPhi());
+        if (phi_inst->HasType()) {
+            return true;
+        }
+        if (phi_inst->IsPhi()) {
+            if (phi_inst->GetInputsCount() != phi_inst->GetBasicBlock()->GetPredsBlocks().size()) {
+                return false;
+            }
+            for (size_t index = 0; index < phi_inst->GetInputsCount(); ++index) {
+                auto pred = phi_inst->GetBasicBlock()->GetPredBlockByIndex(index);
+                auto input_bb = phi_inst->GetInput(index).GetInst()->GetBasicBlock();
+                if (!input_bb->IsDominate(pred)) {
+                    return false;
+                }
+            }
+        }
+        return CheckPhiRealInputs(phi_inst);
     }
 
     void MarkHasRealUserRec(Inst *inst)
@@ -336,6 +310,55 @@ private:
             phi->GetBasicBlock()->RemoveInst(phi);
         }
         graph_->EraseMarker(marker_);
+    }
+
+    void MarkPhiWithRealUsers(Inst *inst)
+    {
+        for (auto &user : inst->GetUsers()) {
+            auto user_inst = user.GetInst();
+            auto can_remove_user = user_inst->IsPhi() || user_inst->IsCatchPhi() ||
+                                   (user_inst->IsSaveState() && !user.GetVirtualRegister().IsEnv());
+            if (!can_remove_user) {
+                // inst certainly cannot be removed from user's inputs
+                MarkHasRealUserRec(inst);
+                break;
+            }
+        }
+    }
+
+    void ReplaceDeadPhiUsers(Inst *inst, BasicBlock *bb)
+    {
+        if (inst->GetInputsCount() != 0) {
+            auto input_inst = inst->GetInput(0).GetInst();
+#ifndef NDEBUG
+            if (!inst->GetUsers().Empty()) {
+                for ([[maybe_unused]] auto &input : inst->GetInputs()) {
+                    ASSERT(input.GetInst() == input_inst);
+                }
+            }
+#endif
+            inst->ReplaceUsers(input_inst);
+        }
+        bb->RemoveInst(inst);
+    }
+
+    void RemoveDeadPhi()
+    {
+        // If any input of phi instruction is not defined then we assume that phi is dead.
+        // We move users to the input and remove the PHI
+        for (auto bb : graph_->GetBlocksRPO()) {
+            for (auto inst : bb->PhiInstsSafe()) {
+                // Skip catch phi
+                if (!inst->IsPhi()) {
+                    continue;
+                }
+                if (inst->GetInputsCount() != bb->GetPredsBlocks().size()) {
+                    // if the number of PHI inputs less than the number of block predecessor and all inputs are equal
+                    // Replace users to the input
+                    ReplaceDeadPhiUsers(inst, bb);
+                }
+            }
+        }
     }
 
 private:

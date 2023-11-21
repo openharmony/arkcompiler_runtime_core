@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,7 +190,7 @@ private:
     static constexpr bool IS_ZERO_CHECK_ENABLED = false;
 #endif
 
-    inline void CheckZeroedMemory(void *mem, size_t size)
+    static void CheckZeroedMemory(void *mem, size_t size)
     {
         // Check that the memory is zeroed:
         [[maybe_unused]] auto iterator64 = static_cast<uint64_t *>(mem);

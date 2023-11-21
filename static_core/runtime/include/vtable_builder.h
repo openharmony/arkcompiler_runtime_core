@@ -148,7 +148,7 @@ public:
 
     ~MethodInfo() = default;
 
-    DEFAULT_COPY_CTOR(MethodInfo)
+    DEFAULT_COPY_CTOR(MethodInfo);
     NO_COPY_OPERATOR(MethodInfo);
     NO_MOVE_SEMANTIC(MethodInfo);
 

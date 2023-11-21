@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H
+#define COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H
 
 #include "optimizer/ir/inst.h"
 #include "optimizer/pass.h"
@@ -230,6 +230,7 @@ private:
     bool PreHeaderExists(Loop *loop);
     BasicBlock *CreatePreHeader(BasicBlock *header);
     void PopulateLoops();
+    void PopulateIrreducibleLoop(Loop *loop);
     void NaturalLoopSearch(Loop *loop, BasicBlock *block);
     void SetLoopProperties(Loop *loop, uint32_t depth);
 
@@ -245,4 +246,4 @@ bool IsLoopSingleBackEdgeExitPoint(Loop *loop);
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H

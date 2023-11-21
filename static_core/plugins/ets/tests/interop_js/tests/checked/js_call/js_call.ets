@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { cons, car, cdr, sum, TreeNode, DynObject, Empty, make_swappable, StaticClass, extract_squared_int, ObjectWithPrototype, undefined }
+import { cons, car, cdr, sum, TreeNode, DynObject, Empty, make_swappable, StaticClass, extract_squared_int, ObjectWithPrototype, vundefined }
     from "/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js"
 
 //! CHECKER      Several js function calls JIT (slow)
@@ -154,7 +154,7 @@ function call_sequence(): int {
 
 function call_chain(): int {
     for (let i = 0; i < 10; i++) {
-        let list = cons(0, cons(1, cons(i, undefined)));
+        let list = cons(0, cons(1, cons(i, vundefined)));
         let tail = car(cdr(cdr(list)));
         if (tail as int != i) {
             return 1;

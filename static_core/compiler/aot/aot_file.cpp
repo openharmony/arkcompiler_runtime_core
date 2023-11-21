@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 
 // In some targets, runtime library is not linked, so linker will fail while searching CallStaticPltResolver symbol.
 // To solve this issue, we define this function as weak.
-// TODO(msherstennikov): find a better way instead of weak function, e.g. make aot_manager library static.
+// NOTE(msherstennikov): find a better way instead of weak function, e.g. make aot_manager library static.
 extern "C" void CallStaticPltResolver([[maybe_unused]] void *slot) __attribute__((weak));
 extern "C" void CallStaticPltResolver([[maybe_unused]] void *slot) {}
 
@@ -40,10 +40,10 @@ static inline Expected<const uint8_t *, std::string> LoadSymbol(const panda::os:
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOAD_AOT_SYMBOL(name)                                           \
-    auto name = LoadSymbol(handle, #name);                              \
-    if (!name) {                                                        \
-        return Unexpected("Cannot load name section: " + name.Error()); \
+#define LOAD_AOT_SYMBOL(name)                                             \
+    auto name = LoadSymbol(handle, (#name));                              \
+    if (!(name)) {                                                        \
+        return Unexpected("Cannot load name section: " + (name).Error()); \
     }
 
 Expected<std::unique_ptr<AotFile>, std::string> AotFile::Open(const std::string &file_name, uint32_t gc_type,
@@ -197,7 +197,7 @@ const MethodHeader *AotClass::FindMethodHeader(size_t index) const
 
 BitVectorSpan AotClass::GetBitmap() const
 {
-    // TODO(msherstennikov): remove const_cast once BitVector support constant storage
+    // NOTE(msherstennikov): remove const_cast once BitVector support constant storage
     auto bitmap_base = const_cast<uint32_t *>(reinterpret_cast<const uint32_t *>(aot_file_->GetMethodsBitmap()));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     return BitVectorSpan(bitmap_base + header_->methods_bitmap_offset, header_->methods_bitmap_size);

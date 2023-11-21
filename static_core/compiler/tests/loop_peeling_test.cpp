@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -232,9 +232,8 @@ TEST_F(LoopPeelingTest, CloneBlock)
  *        \-----[3]    [4]
  *                      |
  *                    [exit]
- *
+
  * Transform to:
- *
  *              [0]
  *               |
  *               v
@@ -312,7 +311,7 @@ TEST_F(LoopPeelingTest, SingleLoop)
     }
 
     EXPECT_TRUE(GetGraph()->RunPass<LoopPeeling>());
-    // TODO(a.popov): remove these calls, see todo in LoopPeeling pass constructor
+    // NOTE(a.popov): remove these calls, see NOTE in LoopPeeling pass constructor
     GetGraph()->RunPass<Cleanup>();
     EXPECT_TRUE(GraphComparator().Compare(GetGraph(), expected_graph));
 }
@@ -333,7 +332,6 @@ TEST_F(LoopPeelingTest, SingleLoop)
  *   \------------------/
  *
  * Transform to:
- *
  *              [0]
  *               |
  *               v
@@ -451,7 +449,6 @@ TEST_F(LoopPeelingTest, InnerLoop)
  *      \-------[6]    [exit]
  *
  *  Transform to:
- *
  *              [0]
  *               |
  *               v
@@ -735,7 +732,7 @@ TEST_F(LoopPeelingTest, SingleBlockLoop)
     EXPECT_TRUE(GraphComparator().Compare(GetGraph(), expected_graph));
 }
 
-// TODO (apopov) Fix GraphComparator and enable test
+// NOTE (apopov) Fix GraphComparator and enable test
 TEST_F(LoopPeelingTest, DISABLED_RepeatedCloneableInputs)
 {
     GRAPH(GetGraph())

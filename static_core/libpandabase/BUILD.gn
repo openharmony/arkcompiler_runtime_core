@@ -79,7 +79,6 @@ if (is_mingw) {
     "$ark_root/libpandabase/os/stacktrace_stub.cpp",
     "$ark_root/libpandabase/os/time.cpp",
     "$ark_root/libpandabase/taskmanager/task.cpp",
-    "$ark_root/libpandabase/taskmanager/task_queue.cpp",
     "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
     "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
     "$ark_root/libpandabase/utils/dfx.cpp",
@@ -112,7 +111,6 @@ if (is_mingw) {
     "$ark_root/libpandabase/os/native_stack.cpp",
     "$ark_root/libpandabase/os/property.cpp",
     "$ark_root/libpandabase/taskmanager/task.cpp",
-    "$ark_root/libpandabase/taskmanager/task_queue.cpp",
     "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
     "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
 

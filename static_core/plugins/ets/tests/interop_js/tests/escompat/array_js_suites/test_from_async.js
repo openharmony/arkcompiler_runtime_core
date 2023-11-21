@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSFromAsync = ets_mod.getFunction("Array_TestJSFromAsync");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSFromAsync = etsMod.getFunction('Array_TestJSFromAsync');
 
-{   // Test JS Array<FooClass>
-    TestJSFromAsync(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSFromAsync(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    function fn_map(v, k) { return "String"; }
-    function fn_map1(v) { return "String1"; }
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  function fnMap(v, k) { return 'String'; }
+  function fnMap1(v) { return 'String1'; }
 
-    Array.fromAsync(arr).then((array) => ASSERT_EQ(array.at(0), arr.at(0)));
-    Array.fromAsync(arr, fn_map).then((array) => ASSERT_EQ(array.at(0), "String"));
-    Array.fromAsync(arr, fn_map1).then((array) => ASSERT_EQ(array.at(0), "String1"));
+  Array.fromAsync(arr).then((array) => ASSERT_EQ(array.at(0), arr.at(0)));
+  Array.fromAsync(arr, fnMap).then((array) => ASSERT_EQ(array.at(0), 'String'));
+  Array.fromAsync(arr, fnMap1).then((array) => ASSERT_EQ(array.at(0), 'String1'));
 }
 
 GCJSRuntimeCleanup();

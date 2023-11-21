@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -196,7 +196,7 @@ private:
 
 using NodeVector = ArenaVector<ColorNode>;
 
-// TODO (Evgeny.Erokhin): In Appel's book described usage of 2 structures in parallel to hold interference:
+// NOTE (Evgeny.Erokhin): In Appel's book described usage of 2 structures in parallel to hold interference:
 // one is for random checks (here is a matrix) and lists on adjacency for sequental access. It's worth to add!
 class InterferenceGraph {
 public:

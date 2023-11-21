@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -455,7 +455,7 @@ void GraphCloner::BuildLoopUnrollDataFlow(LoopUnrollData *unroll_data)
         }
     }
 
-    // TODO (a.popov) use temp container after if would be possible to reset local allocator
+    // NOTE (a.popov) use temp container after if would be possible to reset local allocator
     if (unroll_data->phi_replaced_inputs == nullptr) {
         unroll_data->phi_replaced_inputs = allocator_->New<PhiInputsMap>(allocator_->Adapter());
     } else {
@@ -788,6 +788,22 @@ BasicBlock *GraphCloner::CreateNewOutsideSucc(BasicBlock *outside_succ, BasicBlo
     return new_outside_succ;
 }
 
+GraphCloner::LoopClonerData *GraphCloner::PopulateLoopClonerData(Loop *loop, BasicBlock *pre_header,
+                                                                 BasicBlock *outside_succ)
+{
+    auto allocator = GetGraph()->GetLocalAllocator();
+    auto unroll_data = allocator->New<LoopClonerData>();
+    unroll_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+    unroll_data->blocks->resize(loop->GetBlocks().size() + 1);
+    unroll_data->blocks->at(0) = pre_header;
+    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unroll_data->blocks->begin() + 1);
+    unroll_data->blocks->push_back(outside_succ);
+    unroll_data->outer = outside_succ;
+    unroll_data->header = loop->GetHeader();
+    unroll_data->pre_header = loop->GetPreHeader();
+    return unroll_data;
+}
+
 /**
  * - Split pre-header to contain `Compare` and `IfImm` instructions only;
  * - Make sure `outside_succ` has 2 predecessors only: loop header and back-edge;
@@ -841,17 +857,7 @@ GraphCloner::LoopClonerData *GraphCloner::PrepareLoopToClone(Loop *loop)
         outside_succ = block;
     }
     // Populate `LoopClonerData`
-    auto allocator = GetGraph()->GetLocalAllocator();
-    auto unroll_data = allocator->New<LoopClonerData>();
-    unroll_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
-    unroll_data->blocks->resize(loop->GetBlocks().size() + 1);
-    unroll_data->blocks->at(0) = pre_header;
-    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unroll_data->blocks->begin() + 1);
-    unroll_data->blocks->push_back(outside_succ);
-    unroll_data->outer = outside_succ;
-    unroll_data->header = loop->GetHeader();
-    unroll_data->pre_header = loop->GetPreHeader();
-    return unroll_data;
+    return PopulateLoopClonerData(loop, pre_header, outside_succ);
 }
 
 /// Create new loop, populate it with cloned blocks and build conrlow-flow
@@ -1005,7 +1011,7 @@ void GraphCloner::UpdateCaller(Inst *inst)
 
 bool GraphCloner::IsLoopClonable(Loop *loop, size_t inst_limit)
 {
-    // TODO(schernykh) : implement case when we have inner loops
+    // NOTE(schernykh) : implement case when we have inner loops
     if (!loop->GetOuterLoop()->IsRoot() || !loop->GetInnerLoops().empty() || !IsLoopSingleBackEdgeExitPoint(loop)) {
         return false;
     }
@@ -1015,7 +1021,7 @@ bool GraphCloner::IsLoopClonable(Loop *loop, size_t inst_limit)
     ASSERT(ifimm->GetOpcode() == Opcode::IfImm);
     auto compare = ifimm->GetInput(0).GetInst();
     ASSERT(compare->GetOpcode() == Opcode::Compare);
-    // TODO(schernykh) : Implement case when compare is not before of ifimm
+    // NOTE(schernykh) : Implement case when compare is not before of ifimm
     if (ifimm->GetPrev() != compare) {
         return false;
     }

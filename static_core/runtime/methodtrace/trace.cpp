@@ -35,7 +35,7 @@ static uint64_t SystemMicroSecond()
 {
     timespec current {};
     clock_gettime(CLOCK_MONOTONIC, &current);
-    // TODO(ht): Deleting OS-specific code, move to libpandabase, issue #3210
+    // NOTE(ht): Deleting OS-specific code, move to libpandabase, issue #3210
     return static_cast<uint64_t>(current.tv_sec) * UINT64_C(1000000) +  // 1000000 - time
            current.tv_nsec / UINT64_C(1000);                            // 1000 - time
 }
@@ -44,7 +44,7 @@ static uint64_t RealTimeSecond()
 {
     timespec current {};
     clock_gettime(CLOCK_REALTIME, &current);
-    // TODO(ht): Deleting OS-specific code, move to libpandabase, issue #3210
+    // NOTE(ht): Deleting OS-specific code, move to libpandabase, issue #3210
     return static_cast<uint64_t>(current.tv_sec);
 }
 
@@ -59,7 +59,7 @@ static uint64_t GetCpuMicroSecond()
     ThreadCpuClock(thread_self, &clock_id);
     timespec current {};
     clock_gettime(clock_id, &current);
-    // TODO(ht): Deleting OS-specific code, move to libpandabase, issue #3210
+    // NOTE(ht): Deleting OS-specific code, move to libpandabase, issue #3210
     return static_cast<uint64_t>(current.tv_sec) * UINT64_C(1000000) +  // 1000000 - time
            current.tv_nsec / UINT64_C(1000);                            // 1000 - time
 }

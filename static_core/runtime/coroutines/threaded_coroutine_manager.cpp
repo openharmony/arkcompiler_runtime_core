@@ -82,7 +82,7 @@ void ThreadedCoroutineManager::AddToRegistry(Coroutine *co)
     os::memory::LockHolder lock(coro_list_lock_);
     auto *main_co = GetMainThread();
     if (main_co != nullptr) {
-        // TODO(konstanting, #I67QXC): we should get this callback from GC instead of copying from the main thread
+        // NOTE(konstanting, #I67QXC): we should get this callback from GC instead of copying from the main thread
         co->SetPreWrbEntrypoint(main_co->GetPreWrbEntrypoint());
     }
     coroutines_.insert(co);
@@ -144,7 +144,7 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
     DeleteCoroutineInstance(co);
     cv_await_all_.Signal();
     return true;
-    // TODO(konstanting): issue debug notifications to runtime
+    // NOTE(konstanting): issue debug notifications to runtime
 }
 
 Coroutine *ThreadedCoroutineManager::Launch(CompletionEvent *completion_event, Method *entrypoint,
@@ -262,7 +262,7 @@ void ThreadedCoroutineManager::ResumeAllThreads()
 bool ThreadedCoroutineManager::IsRunningThreadExist()
 {
     UNREACHABLE();
-    // TODO(konstanting): correct implementation. Which coroutine do we consider running?
+    // NOTE(konstanting): correct implementation. Which coroutine do we consider running?
     return false;
 }
 

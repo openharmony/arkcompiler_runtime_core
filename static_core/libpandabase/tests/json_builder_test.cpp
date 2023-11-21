@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ namespace panda::test {
 MATCHER_P(StringifiesAs, string, "")
 {
     auto value = JsonArrayBuilder().Add(arg).Build();
-    if (value.size() < 2) {
+    if (value.size() < 2U) {
         return false;
     }
 
-    value = value.substr(1, value.size() - 2);
+    value = value.substr(1U, value.size() - 2L);
     *result_listener << std::quoted(value);
     return value == string;
 }
@@ -49,18 +49,18 @@ TEST(JsonBuilderTest, StringifiesBooleans)
 
 TEST(JsonBuilderTest, StringifiesNumbers)
 {
-    EXPECT_THAT(1, StringifiesAs("1"));
+    EXPECT_THAT(1U, StringifiesAs("1"));
     EXPECT_THAT(1.5, StringifiesAs("1.5"));
-    EXPECT_THAT(-100, StringifiesAs("-100"));
+    EXPECT_THAT(-100L, StringifiesAs("-100"));
     EXPECT_THAT(1e24, StringifiesAs("1e+24"));
     EXPECT_THAT(1e-24, StringifiesAs("1e-24"));
     EXPECT_THAT(std::numeric_limits<double>::infinity(), StringifiesAs("null"));
     EXPECT_THAT(-std::numeric_limits<double>::infinity(), StringifiesAs("null"));
     EXPECT_THAT(std::numeric_limits<double>::quiet_NaN(), StringifiesAs("null"));
 
-    EXPECT_THAT(-2147483648, StringifiesAs("-2147483648"));
-    EXPECT_THAT(4294967295, StringifiesAs("4294967295"));
-    EXPECT_THAT(1669214558498, StringifiesAs("1669214558498"));
+    EXPECT_THAT(-2147483648L, StringifiesAs("-2147483648"));
+    EXPECT_THAT(4294967295U, StringifiesAs("4294967295"));
+    EXPECT_THAT(1669214558498U, StringifiesAs("1669214558498"));
 }
 
 TEST(JsonBuilderTest, StringifiesStrings)
@@ -79,7 +79,7 @@ TEST(JsonBuilderTest, StringifiesArrays)
     EXPECT_THAT([](JsonArrayBuilder &) {}, StringifiesAs("[]"));
     EXPECT_THAT(
         [](JsonArrayBuilder &array) {
-            array.Add(1);
+            array.Add(1U);
             array.Add("");
             array.Add([](JsonArrayBuilder &) {});
             array.Add([](JsonObjectBuilder &object) {
@@ -97,7 +97,7 @@ TEST(JsonBuilderTest, StringifiesObjects)
     EXPECT_THAT([](JsonObjectBuilder &) {}, StringifiesAs("{}"));
     EXPECT_THAT(
         [](JsonObjectBuilder &object) {
-            object.AddProperty("x", 1);
+            object.AddProperty("x", 1U);
             object.AddProperty("y", [](JsonObjectBuilder &y) {
                 y.AddProperty("a", "foo");
                 y.AddProperty("b", [](JsonObjectBuilder &) {});
@@ -108,16 +108,19 @@ TEST(JsonBuilderTest, StringifiesObjects)
 
 TEST(JsonArrayBuilderTest, BuildsFluently)
 {
-    EXPECT_EQ(
-        JsonArrayBuilder().Add(1).Add("foo").Add([](JsonArrayBuilder &x) { x.Add([](JsonArrayBuilder &) {}); }).Build(),
-        "[1,\"foo\",[[]]]");
+    EXPECT_EQ(JsonArrayBuilder()
+                  .Add(1U)
+                  .Add("foo")
+                  .Add([](JsonArrayBuilder &x) { x.Add([](JsonArrayBuilder &) {}); })
+                  .Build(),
+              "[1,\"foo\",[[]]]");
 }
 
 TEST(JsonArrayBuilderTest, BuildsReferentially)
 {
     JsonArrayBuilder builder;
 
-    builder.Add(1);
+    builder.Add(1U);
     builder.Add("foo");
     builder.Add([](JsonArrayBuilder &x) { x.Add([](JsonArrayBuilder &) {}); });
 
@@ -136,7 +139,7 @@ TEST(JsonObjectBuilderTest, BuildsReferentially)
 {
     JsonObjectBuilder builder;
 
-    builder.AddProperty("x", 1);
+    builder.AddProperty("x", 1U);
     builder.AddProperty("y", "foo");
     builder.AddProperty("z", [](JsonObjectBuilder &z) { z.AddProperty("_", [](JsonObjectBuilder &) {}); });
 

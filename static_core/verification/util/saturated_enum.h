@@ -23,7 +23,7 @@
 namespace panda::verifier {
 
 /*
- TODO: default value?
+ NOTE: default value?
  possible options:
   1. initial value UNDEFINED and any op will lead to fatal error, add constructors etc for proper initialization
     pros: more safety and robustness to programmer errors, cons: more code, more complexity, etc

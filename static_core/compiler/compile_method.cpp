@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,7 +100,7 @@ static bool CheckSingleImplementation(Graph *graph)
 {
     // Check that all methods that were inlined due to its single implementation property, still have this property,
     // otherwise we must drop compiled code.
-    // TODO(compiler): we need to reset hotness counter hereby avoid yet another warmup phase.
+    // NOTE(compiler): we need to reset hotness counter hereby avoid yet another warmup phase.
     auto cha = graph->GetRuntime()->GetCha();
     for (auto si_method : graph->GetSingleImplementationList()) {
         if (!cha->IsSingleImplementation(si_method)) {
@@ -195,7 +195,6 @@ bool JITCompileMethod(RuntimeInterface *runtime, Method *method, bool is_osr, Co
 
     auto arch {Arch::NONE};
     bool is_dynamic = panda::panda_file::IsDynamicLanguage(method->GetClass()->GetSourceLang());
-
     if (!CompileInGraph(runtime, method, is_osr, allocator, local_allocator, is_dynamic, &arch, method_name, &graph,
                         jit_stats)) {
         return false;
@@ -223,7 +222,7 @@ bool JITCompileMethod(RuntimeInterface *runtime, Method *method, bool is_osr, Co
     if (is_osr) {
         if (!runtime->TrySetOsrCode(method, entry_point)) {
             // Compiled code has been deoptimized, so we shouldn't install osr code.
-            // TODO(compiler): release compiled code memory, when CodeAllocator supports freeing the memory.
+            // NOTE(compiler): release compiled code memory, when CodeAllocator supports freeing the memory.
             return false;
         }
     } else {

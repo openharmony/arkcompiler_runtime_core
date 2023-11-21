@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public:
 
     enum DfxOption : uint8_t {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str) e = v,
+#define D(e, v, str) e = (v),
         DFX_OPTION_LIST(D)
 #undef D
     };

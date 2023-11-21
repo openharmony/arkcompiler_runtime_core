@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -292,20 +292,7 @@ void BasicBlock::JoinSuccessorBlock()
             GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
         } else {
             // edge can have 2 successors, so it can be back-edge in 2 loops: own loop and outer loop
-            if (loop->HasBackEdge(succ)) {
-                loop->ReplaceBackEdge(succ, this);
-            }
-            if (auto outer_loop = loop->GetOuterLoop()) {
-                if (outer_loop->HasBackEdge(succ)) {
-                    outer_loop->ReplaceBackEdge(succ, this);
-                }
-            }
-
-            for (auto inner_loop : loop->GetInnerLoops()) {
-                if (inner_loop->GetPreHeader() == succ) {
-                    inner_loop->SetPreHeader(this);
-                }
-            }
+            ReplaceSuccessorLoopBackEdges(loop, succ);
             loop->RemoveBlock(succ);
         }
     }
@@ -316,11 +303,28 @@ void BasicBlock::JoinSuccessorBlock()
     succ->GetSuccsBlocks().clear();
 
     this->bit_fields_ |= succ->bit_fields_;
-    // TODO (a.popov) replace by assert
+    // NOTE (a.popov) replace by assert
     if (succ->try_id_ != INVALID_ID) {
         this->try_id_ = succ->try_id_;
     }
     GetGraph()->RemoveEmptyBlock(succ);
+}
+
+void BasicBlock::ReplaceSuccessorLoopBackEdges(Loop *loop, BasicBlock *succ)
+{
+    if (loop->HasBackEdge(succ)) {
+        loop->ReplaceBackEdge(succ, this);
+    }
+    auto outer_loop = loop->GetOuterLoop();
+    if (outer_loop != nullptr && outer_loop->HasBackEdge(succ)) {
+        outer_loop->ReplaceBackEdge(succ, this);
+    }
+
+    for (auto inner_loop : loop->GetInnerLoops()) {
+        if (inner_loop->GetPreHeader() == succ) {
+            inner_loop->SetPreHeader(this);
+        }
+    }
 }
 
 /**
@@ -496,7 +500,6 @@ void BasicBlock::GenerateSelects(const SavedIfInfo *if_info)
 
         auto inst1 = phi->GetInput(index1).GetInst();
         auto inst2 = phi->GetInput(index2).GetInst();
-
         if (inst1 == inst2) {
             // No select needed
             if (other->GetPredsBlocks().size() > TWO) {

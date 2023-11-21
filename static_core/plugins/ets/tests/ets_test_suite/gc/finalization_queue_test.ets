@@ -14,6 +14,20 @@
  */
 
 let removed_object_callbacks: boolean[] = new boolean[3];
+// Make it global beacuse optimizer is free to kill local variables
+let object1 : Object | null = null;
+let object2 : Object | null = null;
+let object3 : Object | null = null;
+let queue: FinalizationQueue | null = null;
+let unused_queue: FinalizationQueue | null = null;
+
+function doFullGC() {
+    try {
+        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+    } catch (e) {
+        assert false : "Unexpected exception during GC";
+    }
+}
 
 function callback(object: Object): void {
     let string: String = object as String;
@@ -28,20 +42,20 @@ function callback(object: Object): void {
 }
 
 function finalizationQueueTest(queue: FinalizationQueue | null): void {
-    let object1: Object | null = new Object();
-    let object1_token: Object = new Object();
-    let object1_callbackArg: String = new String("First object removed");
-    let object2: Object | null = new Object();
-    let object2_token: Object = new Object();
-    let object2_callbackArg: String = new String("Second object removed, it is an error");
-    let object3: Object | null = new Object();
-    let object3_callbackArg: String = new String("Third object removed");
-    let unregistered_token: Object = new Object();
+    object1 = new Object();
+    let object1_token = new Object();
+    let object1_callbackArg = new String("First object removed");
+    object2 = new Object();
+    let object2_token = new Object();
+    let object2_callbackArg = new String("Second object removed, it is an error");
+    object3 = new Object();
+    let object3_callbackArg = new String("Third object removed");
+    let unregistered_token = new Object();
     queue.register(object1!, object1_callbackArg as Object, object1_token);
     queue.register(object2!, object2_callbackArg as Object, object2_token);
     queue.register(object3!, object3_callbackArg as Object);
 
-    let unused_queue: FinalizationQueue | null = new FinalizationQueue(callback);
+    unused_queue = new FinalizationQueue(callback);
     
     // Try to unregister unknown tokens:
     queue.unregister(unregistered_token);
@@ -51,53 +65,33 @@ function finalizationQueueTest(queue: FinalizationQueue | null): void {
     unused_queue.unregister(null);
 
     // Check that we don't call any callbacks here
-    try {
-        let first_gc_id = GC.startGC(GC.FULL_CAUSE);
-        GC.waitForFinishGC(first_gc_id);
-    } catch (e) {
-        assert false : "Unexpected exception during GC";
-    }
+    doFullGC();
 
     // Unregister object2, remove unused_queue
     // and check that we don't call object2 callback
     unused_queue = null;
     queue.unregister(object2_token);
-    assert (object2.toString() as Object) != null : "Usage of object2 for preventing calling callbacks earlier";
+    assert object2 != null : "Object 2 is alive";
     object2 = null;
-    try {
-        let second_gc_id = GC.startGC(GC.FULL_CAUSE);
-        GC.waitForFinishGC(second_gc_id);
-    } catch (e) {
-        assert false : "Unexpected exception during GC";
-    }
+    doFullGC();
 
     // Clear objects and check correct callback calls:
-    assert (object1.toString() as Object) != null : "Usage of object1 for preventing calling callbacks earlier";
-    assert (object3.toString() as Object) != null : "Usage of object3 for preventing calling callbacks earlier";
+    assert object1 != null : "Object 1 is alive";
+    assert object3 != null : "Object 3 is alive";
     object1 = null;
     object3 = null;
-    try {
-        let third_gc_id = GC.startGC(GC.FULL_CAUSE);
-        GC.waitForFinishGC(third_gc_id);
-    } catch (e) {
-        assert false : "Unexpected exception during GC";
-    }
+    doFullGC();
 }
 
 function main(): void {
     for (let i = 0; i < removed_object_callbacks.length; i++) {
         removed_object_callbacks[i] = false;
     }
-    let queue: FinalizationQueue = new FinalizationQueue(callback);
+    queue = new FinalizationQueue(callback);
     finalizationQueueTest(queue);
     // Check that we successfully remove FinalizationQueue instance
     // elemets and this cause no error during collection.
-    try {
-        let gc_id = GC.startGC(GC.FULL_CAUSE);
-        GC.waitForFinishGC(gc_id);
-    } catch (e) {
-        assert false : "Unexpected exception during GC";
-    }
+    doFullGC();
 
     // Check that all callbacks have been called correctly.
     assert removed_object_callbacks[0] == true : "First callback hasn't been called";

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,7 @@ constexpr void RunOpts(compiler::Graph *graph, [[maybe_unused]] BytecodeOptIrInt
         graph->SetLowLevelInstructionsEnabled();
     }
 #endif  // NDEBUG
-    // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
+        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
     if constexpr (std::is_same_v<T, ConstArrayResolver>) {
         graph->RunPass<ConstArrayResolver>(iface);
         // NOLINTNEXTLINE(readability-misleading-indentation)
@@ -104,8 +104,9 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     } else if (panda::bytecodeopt::OPTIONS.GetOptLevel() == OPT_LEVEL_2) {
         // ConstArrayResolver Pass is disabled as it requires fixes for stability
         RunOpts<ConstArrayResolver, compiler::BranchElimination, compiler::ValNum, compiler::IfMerging, compiler::Cse,
-                compiler::Peepholes, compiler::Licm, compiler::Lse, compiler::ValNum, compiler::Cse, Canonicalization,
-                compiler::Lowering, compiler::MoveConstants, BytecodeOptPeepholes>(graph, iface);
+                compiler::Peepholes, compiler::Licm, compiler::Lse, compiler::ValNum, compiler::Cse,
+                compiler::BranchElimination, Canonicalization, compiler::Lowering, compiler::MoveConstants,
+                BytecodeOptPeepholes>(graph, iface);
     } else {
         UNREACHABLE();
     }
@@ -159,7 +160,7 @@ static void ColumnNumberPropagate(pandasm::Function *function)
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "Failed ColumnNumberPropagate: All insts have invalid column number";
         return;
     }
-    for (size_t j = 0; j < k - 1; j++) {
+    for (size_t j = 0; j < k - 1L; j++) {
         ins_vec[j].ins_debug.SetColumnNumber(cn);
     }
 
@@ -183,20 +184,20 @@ static void LineNumberPropagate(pandasm::Function *function)
 
     // handle the instructions that are at the beginning of code but do not have line number
     size_t i = 0;
-    while (i < ins_vec.size() && ln == 0) {
+    while (i < ins_vec.size() && ln == 0U) {
         ln = ins_vec[i++].ins_debug.line_number;
     }
-    if (ln == 0) {
+    if (ln == 0U) {
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "Failed LineNumberPropagate: All insts have invalid line number";
         return;
     }
-    for (size_t j = 0; j < i - 1; j++) {
+    for (size_t j = 0; j < i - 1L; j++) {
         ins_vec[j].ins_debug.SetLineNumber(ln);
     }
 
     // handle other instructions that do not have line number
     for (; i < ins_vec.size(); i++) {
-        if (ins_vec[i].ins_debug.line_number != 0) {
+        if (ins_vec[i].ins_debug.line_number != 0U) {
             ln = ins_vec[i].ins_debug.line_number;
         } else {
             ins_vec[i].ins_debug.SetLineNumber(ln);
@@ -219,13 +220,13 @@ static bool SkipFunction(const pandasm::Function &function, const std::string &f
     if (panda::bytecodeopt::OPTIONS.WasSetMethodRegex()) {
         static std::regex rgx(panda::bytecodeopt::OPTIONS.GetMethodRegex());
         if (!std::regex_match(func_name, rgx)) {
-            LOG(INFO, BYTECODE_OPTIMIZER) << "Skip Function " << func_name << ": Function's name doesn't match regex";
+            LOG(INFO, BYTECODE_OPTIMIZER) << "Skip Function " << func_name << ":Function's name doesn't match regex";
             return true;
         }
     }
 
     if (panda::bytecodeopt::OPTIONS.IsSkipMethodsWithEh() && !function.catch_blocks.empty()) {
-        LOG(INFO, BYTECODE_OPTIMIZER) << "Was not optimized " << func_name << ": Function has catch blocks";
+        LOG(INFO, BYTECODE_OPTIMIZER) << "Was not optimized " << func_name << ":Function has catch blocks";
         return true;
     }
 
@@ -306,8 +307,8 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     DebugInfoPropagate(function, graph, ir_interface);
 
     function.value_of_first_param =
-        static_cast<int64_t>(graph->GetStackSlotsCount()) - 1;  // Work-around promotion rules
-    function.regs_num = static_cast<size_t>(function.value_of_first_param + 1);
+        static_cast<int64_t>(graph->GetStackSlotsCount()) - 1L;  // Work-around promotion rules
+    function.regs_num = static_cast<size_t>(function.value_of_first_param + 1U);
 
     if (auto frame_size = function.regs_num + function.GetParamsNum(); frame_size >= NUM_COMPACTLY_ENCODED_REGS) {
         LOG(INFO, BYTECODE_OPTIMIZER) << "Function " << func_name << " has frame size " << frame_size;

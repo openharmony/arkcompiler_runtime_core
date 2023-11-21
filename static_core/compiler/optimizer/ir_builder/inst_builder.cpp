@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,8 +73,12 @@ void InstBuilder::Prepare(bool is_inlined_graph)
         param_inst->SetType(DataType::UINT32);
         param_inst->SetLocationData(GetGraph()->GetDataForNativeParam(DataType::UINT32));
     }
-
+    size_t arg_ref_num = 0;
+    if (GetRuntime()->GetMethodReturnType(GetMethod()) == DataType::REFERENCE) {
+        arg_ref_num = 1;
+    }
     auto num_args = GetRuntime()->GetMethodTotalArgumentsCount(GetMethod());
+    bool is_static = GetRuntime()->IsMethodStatic(GetMethod());
     // Create Parameter instructions for all arguments
     for (size_t i = 0; i < num_args; i++) {
         auto param_inst = GetGraph()->AddNewParameter(i);
@@ -83,6 +87,10 @@ void InstBuilder::Prepare(bool is_inlined_graph)
         ASSERT(!GetGraph()->IsBytecodeOptimizer() || reg_num != INVALID_REG);
 
         param_inst->SetType(type);
+        // This parameter in virtaul method is implicit, so skipped
+        if (type == DataType::REFERENCE && (is_static || i > 0)) {
+            param_inst->SetArgRefNumber(arg_ref_num++);
+        }
         SetParamSpillFill(GetGraph(), param_inst, num_args, i, type);
 
         UpdateDefinition(reg_num, param_inst);
@@ -130,6 +138,24 @@ void InstBuilder::UpdateDefsForLoopHead()
     }
 }
 
+bool InstBuilder::UpdateDefsForPreds(size_t vreg, std::optional<Inst *> &value)
+{
+    for (auto pred_bb : current_bb_->GetPredsBlocks()) {
+        // When irreducible loop header is visited before it's back-edge, phi should be created,
+        // since we do not know if definitions are different at this point
+        if (!pred_bb->IsMarked(visited_block_marker_)) {
+            ASSERT(current_bb_->GetLoop()->IsIrreducible());
+            return true;
+        }
+        if (!value.has_value()) {
+            value = defs_[pred_bb->GetId()][vreg];
+        } else if (value.value() != defs_[pred_bb->GetId()][vreg]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void InstBuilder::UpdateDefs()
 {
     current_bb_->SetMarker(visited_block_marker_);
@@ -145,22 +171,7 @@ void InstBuilder::UpdateDefs()
         // If there are multiple predecessors, then add phi for each register that has different definitions
         for (size_t vreg = 0; vreg < GetVRegsCount(); vreg++) {
             std::optional<Inst *> value;
-            bool different = false;
-            for (auto pred_bb : current_bb_->GetPredsBlocks()) {
-                // When irreducible loop header is visited before it's back-edge, phi should be created,
-                // since we do not know if definitions are different at this point
-                if (!pred_bb->IsMarked(visited_block_marker_)) {
-                    ASSERT(current_bb_->GetLoop()->IsIrreducible());
-                    different = true;
-                    break;
-                }
-                if (!value.has_value()) {
-                    value = defs_[pred_bb->GetId()][vreg];
-                } else if (value.value() != defs_[pred_bb->GetId()][vreg]) {
-                    different = true;
-                    break;
-                }
-            }
+            bool different = UpdateDefsForPreds(vreg, value);
             if (different) {
                 auto phi = GetGraph()->CreateInstPhi();
                 phi->SetMarker(GetNoTypeMarker());

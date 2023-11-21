@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
 namespace panda::os::unique_fd {
 
-enum TestValue { DEFAULT_VALUE = -1, STDIN_VALUE, STDOUT_VALUE, STDERR_VALUE };
+enum TestValue { DEFAULT_VALUE = -1L, STDIN_VALUE, STDOUT_VALUE, STDERR_VALUE };
 
 struct DuplicateFD {
     // CHECKER_IGNORE_NEXTLINE(AF0005)

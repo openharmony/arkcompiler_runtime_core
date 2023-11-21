@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_GRAPH_CLONER_H_
-#define COMPILER_OPTIMIZER_IR_GRAPH_CLONER_H_
+#ifndef COMPILER_OPTIMIZER_IR_GRAPH_CLONER_H
+#define COMPILER_OPTIMIZER_IR_GRAPH_CLONER_H
 
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/basicblock.h"
@@ -280,6 +280,7 @@ private:
     void CloneAnalyses(Graph *new_graph);
     // Loop cloning
     LoopClonerData *PrepareLoopToClone(Loop *loop);
+    GraphCloner::LoopClonerData *PopulateLoopClonerData(Loop *loop, BasicBlock *pre_header, BasicBlock *outside_succ);
     void BuildLoopCloneControlFlow(LoopClonerData *unroll_data);
     void BuildLoopCloneDataFlow(LoopClonerData *unroll_data);
     // Unroll cloning
@@ -361,4 +362,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_IR_GRAPH_CLONER_H_
+#endif  // COMPILER_OPTIMIZER_IR_GRAPH_CLONER_H

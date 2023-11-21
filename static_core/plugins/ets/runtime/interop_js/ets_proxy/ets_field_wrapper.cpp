@@ -167,7 +167,7 @@ struct EtsFieldAccessorPRIMITIVE {
         return Convertor::Wrap(env, ets_value);
     }
 
-    // TODO(vpukhov): elide ets_object handle
+    // NOTE(vpukhov): elide ets_object handle
     static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> ets_object,
                        EtsFieldWrapper *ets_field_wrapper, napi_value js_value)
     {
@@ -216,7 +216,7 @@ static napi_property_descriptor DoMakeNapiProperty(EtsFieldWrapper *wrapper)
     prop.attributes = IS_STATIC ? EtsClassWrapper::STATIC_FIELD_ATTR : EtsClassWrapper::FIELD_ATTR;
     prop.data = wrapper;
 
-    // TODO(vpukhov): apply the same rule to instance fields?
+    // NOTE(vpukhov): apply the same rule to instance fields?
     ASSERT(!IS_STATIC || wrapper->GetOwner()->GetEtsClass()->GetRuntimeClass() == field->GetClass());
 
     auto setup_accessors = [&](auto accessor_tag) {

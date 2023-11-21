@@ -337,7 +337,7 @@ PANDA_PUBLIC_API void *MapRWAnonymousWithAlignmentRaw(size_t size, size_t aligme
 // However, all load/store from this memory is prohibited.
 // We can get an error during mmap call only if we use MAP_FIXED_NOREPLACE argument,
 // but it is supported only since Linux 4.17 (Ubuntu 18 has 4.15)
-// TODO(aemelenko): Do smth with this constant.
+// NOTE(aemelenko): Do smth with this constant.
 #ifdef PANDA_TARGET_ARM64
 static constexpr uint64_t MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS = 1ULL << 36ULL;
 #else

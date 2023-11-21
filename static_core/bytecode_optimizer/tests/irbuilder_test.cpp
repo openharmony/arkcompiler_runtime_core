@@ -40,18 +40,18 @@ TEST_F(IrBuilderTest, CallVirtShort)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1);
+        CONSTANT(0U, 1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             using namespace compiler::DataType;  // NOLINT(google-build-using-namespace)
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::NullCheck).ref().Inputs(3, 4);
-            INST(6, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 5}, {INT32, 0}, {NO_TYPE, 4}});
-            INST(7, Opcode::Return).b().Inputs(6);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U);
+            INST(6U, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 5U}, {INT32, 0U}, {NO_TYPE, 4U}});
+            INST(7U, Opcode::Return).b().Inputs(6U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -81,19 +81,19 @@ TEST_F(IrBuilderTest, CallVirt)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1);
-        CONSTANT(1, 2);
+        CONSTANT(0U, 1U);
+        CONSTANT(1U, 2U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             using namespace compiler::DataType;  // NOLINT(google-build-using-namespace)
-            INST(2, Opcode::SaveState).NoVregs();
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::NullCheck).ref().Inputs(4, 5);
-            INST(7, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 6}, {INT32, 0}, {INT32, 1}, {NO_TYPE, 5}});
-            INST(8, Opcode::Return).b().Inputs(7);
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::NullCheck).ref().Inputs(4U, 5U);
+            INST(7U, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 6U}, {INT32, 0U}, {INT32, 1U}, {NO_TYPE, 5U}});
+            INST(8U, Opcode::Return).b().Inputs(7U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -123,19 +123,19 @@ TEST_F(IrBuilderTest, CallVirtRange)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1);
-        CONSTANT(1, 2);
+        CONSTANT(0U, 1U);
+        CONSTANT(1U, 2U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             using namespace compiler::DataType;  // NOLINT(google-build-using-namespace)
-            INST(2, Opcode::SaveState).NoVregs();
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::NullCheck).ref().Inputs(4, 5);
-            INST(7, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 6}, {INT32, 0}, {INT32, 1}, {NO_TYPE, 5}});
-            INST(8, Opcode::Return).b().Inputs(7);
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::NullCheck).ref().Inputs(4U, 5U);
+            INST(7U, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 6U}, {INT32, 0U}, {INT32, 1U}, {NO_TYPE, 5U}});
+            INST(8U, Opcode::Return).b().Inputs(7U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));

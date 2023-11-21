@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@
 #include <limits>
 #include <type_traits>
 #include <bitset>
+
+#include <securec.h>
 
 #define panda_bit_utils_ctz __builtin_ctz      // NOLINT(cppcoreguidelines-macro-usage)
 #define panda_bit_utils_ctzll __builtin_ctzll  // NOLINT(cppcoreguidelines-macro-usage)
@@ -298,7 +300,7 @@ inline To bit_cast(const From &src) noexcept  // NOLINT(readability-identifier-n
 {
     static_assert(sizeof(To) == sizeof(From), "size of the types must be equal");
     To dst;
-    memcpy(&dst, &src, sizeof(To));
+    memcpy_s(&dst, sizeof(To), &src, sizeof(To));
     return dst;
 }
 
@@ -307,7 +309,7 @@ inline To down_cast(const From &src) noexcept  // NOLINT(readability-identifier-
 {
     static_assert(sizeof(To) <= sizeof(From), "size of the types must be lesser");
     To dst;
-    memcpy(&dst, &src, sizeof(To));
+    memcpy_s(&dst, sizeof(To), &src, sizeof(To));
     return dst;
 }
 
@@ -324,7 +326,7 @@ inline constexpr uint32_t BitsNumInType()
 }
 
 template <typename From, typename To>
-inline constexpr To CastFloatToInt(From value)
+constexpr To CastFloatToInt(From value)
 {
     static_assert(std::is_floating_point_v<From>);
     static_assert(std::is_integral_v<To>);

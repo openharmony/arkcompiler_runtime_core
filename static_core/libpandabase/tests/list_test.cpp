@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ struct TestNode : public ListNode {
     // NOLINTNEXTLINE(google-explicit-constructor)
     TestNode(int v) : value(v) {}
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    int value {0};
+    int value {0U};
 };
 
 bool operator==(const TestNode &lhs, const TestNode &rhs)
@@ -86,7 +86,7 @@ TEST_F(ListTest, Common)
 
     ASSERT_TRUE(list.Empty());
 
-    node = NewNode(1);
+    node = NewNode(1U);
     list.PushFront(*node);
 
     ASSERT_FALSE(list.Empty());
@@ -94,62 +94,62 @@ TEST_F(ListTest, Common)
     ASSERT_EQ(node, &*list.begin());
     ASSERT_EQ(++list.begin(), list.end());
 
-    ASSERT_TRUE(IsEqual(list, {1}));
+    ASSERT_TRUE(IsEqual(list, {1U}));
 
-    list.PushFront(*NewNode(2));
+    list.PushFront(*NewNode(2U));
 
-    ASSERT_TRUE(IsEqual(list, {2, 1}));
+    ASSERT_TRUE(IsEqual(list, {2U, 1U}));
 
     list.PopFront();
-    ASSERT_TRUE(IsEqual(list, {1}));
+    ASSERT_TRUE(IsEqual(list, {1U}));
 
-    list.InsertAfter(list.begin(), *NewNode(2));
-    ASSERT_TRUE(IsEqual(list, {1, 2}));
+    list.InsertAfter(list.begin(), *NewNode(2U));
+    ASSERT_TRUE(IsEqual(list, {1U, 2U}));
 
-    list.PushFront(*NewNode(0));
-    ASSERT_TRUE(IsEqual(list, {0, 1, 2}));
+    list.PushFront(*NewNode(0U));
+    ASSERT_TRUE(IsEqual(list, {0U, 1U, 2U}));
 
-    list.EraseAfter(list.begin() + 1);
-    ASSERT_TRUE(IsEqual(list, {0, 1}));
+    list.EraseAfter(list.begin() + 1U);
+    ASSERT_TRUE(IsEqual(list, {0U, 1U}));
 
-    it = list.begin() + 1;
-    for (int i = 0; i < 8; i++) {
-        it = list.InsertAfter(it, *NewNode(i + 2));
+    it = list.begin() + 1U;
+    for (size_t i = 0; i < 8U; i++) {
+        it = list.InsertAfter(it, *NewNode(i + 2U));
     }
-    ASSERT_TRUE(IsEqual(list, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
+    ASSERT_TRUE(IsEqual(list, {0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U}));
 
     list2.Splice(list2.before_begin(), list);
     ASSERT_TRUE(list.Empty());
-    ASSERT_TRUE(IsEqual(list2, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
+    ASSERT_TRUE(IsEqual(list2, {0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U}));
 
-    list.Splice(list.before_begin(), list2, list2.before_begin() + 5, list2.end());
-    ASSERT_TRUE(IsEqual(list, {5, 6, 7, 8, 9}));
-    ASSERT_TRUE(IsEqual(list2, {0, 1, 2, 3, 4}));
+    list.Splice(list.before_begin(), list2, list2.before_begin() + 5U, list2.end());
+    ASSERT_TRUE(IsEqual(list, {5U, 6U, 7U, 8U, 9U}));
+    ASSERT_TRUE(IsEqual(list2, {0U, 1U, 2U, 3U, 4U}));
 
     list.Splice(list.before_begin(), list2);
     ASSERT_TRUE(list2.Empty());
-    ASSERT_TRUE(IsEqual(list, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
+    ASSERT_TRUE(IsEqual(list, {0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U}));
 
-    list2.Splice(list2.before_begin(), list, list.begin() + 1, list.begin() + 5);
-    ASSERT_TRUE(IsEqual(list, {0, 1, 5, 6, 7, 8, 9}));
-    ASSERT_TRUE(IsEqual(list2, {2, 3, 4}));
+    list2.Splice(list2.before_begin(), list, list.begin() + 1U, list.begin() + 5U);
+    ASSERT_TRUE(IsEqual(list, {0U, 1U, 5U, 6U, 7U, 8U, 9U}));
+    ASSERT_TRUE(IsEqual(list2, {2U, 3U, 4U}));
 
     list2.Splice(list2.begin(), list, list.before_begin());
-    ASSERT_TRUE(IsEqual(list, {1, 5, 6, 7, 8, 9}));
-    ASSERT_TRUE(IsEqual(list2, {2, 0, 3, 4}));
+    ASSERT_TRUE(IsEqual(list, {1U, 5U, 6U, 7U, 8U, 9U}));
+    ASSERT_TRUE(IsEqual(list2, {2U, 0U, 3U, 4U}));
 
-    list.Remove(9);
-    ASSERT_TRUE(IsEqual(list, {1, 5, 6, 7, 8}));
+    list.Remove(9U);
+    ASSERT_TRUE(IsEqual(list, {1U, 5U, 6U, 7U, 8U}));
 
-    list.EraseAfter(list.begin() + 1, list.begin() + 4);
-    ASSERT_TRUE(IsEqual(list, {1, 5, 8}));
+    list.EraseAfter(list.begin() + 1U, list.begin() + 4U);
+    ASSERT_TRUE(IsEqual(list, {1U, 5U, 8U}));
 }
 
 struct DTestNode : public DListNode {
     DTestNode() = default;
     explicit DTestNode(int v) : value(v) {}
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    int value {0};
+    int value {0U};
 };
 
 class DListTest : public ::testing::Test {
@@ -219,7 +219,7 @@ TEST_F(DListTest, Common)
 {
     DList list1;
     std::list<DTestNode> list2;
-    for (uint32_t i = 0; i < 20; i++) {
+    for (uint32_t i = 0; i < 20U; i++) {
         auto *node = NewNode(i);
         list1.push_back(node);
         list2.emplace_back(i);
@@ -228,8 +228,8 @@ TEST_F(DListTest, Common)
 
     auto it1 = list1.begin();
     auto it2 = list2.begin();
-    for (uint32_t i = 0; i < 20; i++) {
-        if (i % 3 == 0) {
+    for (uint32_t i = 0; i < 20U; i++) {
+        if (i % 3U == 0U) {
             it1 = list1.erase(it1);
             it2 = list2.erase(it2);
         } else {
@@ -243,15 +243,15 @@ TEST_F(DListTest, Common)
     list2.clear();
     ASSERT_TRUE(IsEqual(list1, list2));
 
-    for (uint32_t i = 30; i < 50; i++) {
+    for (uint32_t i = 30; i < 50U; i++) {
         auto *node = NewNode(i);
         list1.insert(list1.begin(), node);
         list2.insert(list2.begin(), DTestNode(i));
     }
     ASSERT_TRUE(IsEqual(list1, list2));
 
-    list1.remove_if([](DListNode *node) { return reinterpret_cast<const DTestNode *>(node)->value < 41; });
-    list2.remove_if([](DTestNode &node) { return node.value < 41; });
+    list1.remove_if([](DListNode *node) { return reinterpret_cast<const DTestNode *>(node)->value < 41L; });
+    list2.remove_if([](DTestNode &node) { return node.value < 41L; });
     ASSERT_TRUE(IsEqual(list1, list2));
 }
 // NOLINTEND(readability-magic-numbers)

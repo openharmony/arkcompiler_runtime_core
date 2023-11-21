@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -269,7 +269,7 @@ bool CastInst::IsDynamicCast() const
     {                                  \
         v->VisitInst(this);            \
     }
-// TODO(msherstennikov): There must be another way to generate this list
+// NOTE(msherstennikov): There must be another way to generate this list
 OPCODE_CLASS_LIST(DEFINE_INST)
 #undef DEFINE_INST
 

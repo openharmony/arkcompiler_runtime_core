@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -215,13 +215,12 @@ void BranchElimination::EliminateBranch(BasicBlock *if_block, BasicBlock *elimin
         return pred != if_block && !eliminated_block->IsDominate(pred);
     });
     bool dominates_all_preds = (it == preds.cend());
-
     if (preds.size() > 1 && !dominates_all_preds) {
         RemovePredecessorUpdateDF(eliminated_block, if_block);
         if_block->RemoveSucc(eliminated_block);
         if_block->RemoveInst(if_block->GetLastInst());
         GetGraph()->GetAnalysis<Rpo>().SetValid(true);
-        // TODO (a.popov) DominatorsTree could be restored inplace
+        // NOTE (a.popov) DominatorsTree could be restored inplace
         GetGraph()->RunPass<DominatorsTree>();
     } else {
         eliminated_block->SetMarker(rm_block_marker_);
@@ -304,7 +303,7 @@ bool BlockIsReachedFromOnlySuccessor(BasicBlock *target_block, BasicBlock *domin
 }
 
 /**
- * TODO (a.popov) Here can be supported more complex case:
+ * NOTE (a.popov) Here can be supported more complex case:
  * when `dom_compare` has 2 or more `if_imm` users and `target_compare` is reachable from the same successors of these
  * if_imms
  */
@@ -323,22 +322,23 @@ Inst *FindIfImmDominatesCondition(Inst *dom_compare, Inst *target_compare)
 std::optional<bool> BranchElimination::GetConditionResult(Inst *condition)
 {
     ConditionOps ops {condition->GetInput(0).GetInst(), condition->GetInput(1).GetInst()};
-    if (same_input_compares_.count(ops) > 0) {
-        auto instructions = same_input_compares_.at(ops);
-        ASSERT(!instructions.empty());
-        for (auto dom_cond : instructions) {
-            // Find dom_cond's if_imm, that dominates target condition
-            auto if_imm = FindIfImmDominatesCondition(dom_cond, condition);
-            if (if_imm == nullptr) {
-                continue;
-            }
-            if (BlockIsReachedFromOnlySuccessor(condition->GetBasicBlock(), if_imm->GetBasicBlock())) {
-                if (auto result = TryResolveResult(condition, dom_cond, if_imm->CastToIfImm())) {
-                    COMPILER_LOG(DEBUG, BRANCH_ELIM)
-                        << "Equal compare instructions were found. Dominant id = " << dom_cond->GetId()
-                        << ", dominated id = " << condition->GetId();
-                    return result;
-                }
+    if (same_input_compares_.count(ops) <= 0) {
+        return std::nullopt;
+    }
+    auto instructions = same_input_compares_.at(ops);
+    ASSERT(!instructions.empty());
+    for (auto dom_cond : instructions) {
+        // Find dom_cond's if_imm, that dominates target condition
+        auto if_imm = FindIfImmDominatesCondition(dom_cond, condition);
+        if (if_imm == nullptr) {
+            continue;
+        }
+        if (BlockIsReachedFromOnlySuccessor(condition->GetBasicBlock(), if_imm->GetBasicBlock())) {
+            if (auto result = TryResolveResult(condition, dom_cond, if_imm->CastToIfImm())) {
+                COMPILER_LOG(DEBUG, BRANCH_ELIM)
+                    << "Equal compare instructions were found. Dominant id = " << dom_cond->GetId()
+                    << ", dominated id = " << condition->GetId();
+                return result;
             }
         }
     }
@@ -351,7 +351,6 @@ std::optional<bool> BranchElimination::GetCompareAnyTypeResult(IfImmInst *if_imm
     auto compare_any = if_imm->GetInput(0).GetInst()->CastToCompareAnyType();
     Inst *input = compare_any->GetInput(0).GetInst();
     const auto it = same_input_compare_any_type_.find(input);
-
     if (it == same_input_compare_any_type_.end()) {
         return std::nullopt;
     }

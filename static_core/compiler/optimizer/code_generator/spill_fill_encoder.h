@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H_
-#define COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H
+#define COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H
 
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/graph_visitor.h"
@@ -60,6 +60,7 @@ private:
     size_t EncodeRegisterToX(const SpillFillData &sf, const SpillFillData *next, int consecutive_ops_hint = 0);
     size_t EncodeStackToX(const SpillFillData &sf, const SpillFillData *next, int consecutive_ops_hint = 0);
     static bool AreConsecutiveOps(const SpillFillData &pred, const SpillFillData &succ);
+    void EncodeImmWithCorrectType(DataType::Type sf_type, MemRef dst_mem, ConstantInst *const_inst);
 
     SpillFillInst *inst_;
     Graph *graph_;
@@ -69,4 +70,4 @@ private:
     Reg sp_reg_;
 };
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,25 +86,25 @@ TEST_F(IrBuilderTest, PeepholesTryBlockNoInstBetween)
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeOptPeepholes>());
 }
 
-// TODO(aromanov): enable
+// NOTE(aromanov): enable
 TEST_F(CommonTest, DISABLED_NoNullCheck)
 {
-    RuntimeInterfaceMock runtime(0);
+    RuntimeInterfaceMock runtime(0U);
     auto graph = CreateEmptyGraph();
     graph->SetRuntime(&runtime);
     GRAPH(graph)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        CONSTANT(6, 0);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(6U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadAndInitClass).ref().Inputs(0).TypeId(68);
-            INST(2, Opcode::NewObject).ref().Inputs(1, 0).TypeId(68);
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2}, {NO_TYPE, 3}});
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U).TypeId(68U);
+            INST(2U, Opcode::NewObject).ref().Inputs(1U, 0U).TypeId(68U);
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2U}, {NO_TYPE, 3U}});
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
 
@@ -116,41 +116,41 @@ TEST_F(CommonTest, DISABLED_NoNullCheck)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        CONSTANT(6, 0);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(6U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadAndInitClass).ref().Inputs(0).TypeId(68);
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::InitObject).ref().Inputs({{REFERENCE, 1}, {NO_TYPE, 3}});
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U).TypeId(68U);
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::InitObject).ref().Inputs({{REFERENCE, 1U}, {NO_TYPE, 3U}});
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
 
     EXPECT_TRUE(GraphComparator().Compare(graph, after));
 }
 
-// TODO(aromanov): enable
+// NOTE(aromanov): enable
 TEST_F(CommonTest, DISABLED_NotRelatedNullCheck)
 {
-    RuntimeInterfaceMock runtime(1);
+    RuntimeInterfaceMock runtime(1U);
     auto graph = CreateEmptyGraph();
     graph->SetRuntime(&runtime);
     GRAPH(graph)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        PARAMETER(10, 0).ref();
-        CONSTANT(6, 0);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(10U, 0U).ref();
+        CONSTANT(6U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadAndInitClass).ref().Inputs(0);
-            INST(2, Opcode::NewObject).ref().Inputs(1, 0);
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::NullCheck).ref().Inputs(10, 3);
-            INST(5, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2}, {NO_TYPE, 3}});
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U);
+            INST(2U, Opcode::NewObject).ref().Inputs(1U, 0U);
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::NullCheck).ref().Inputs(10U, 3U);
+            INST(5U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2U}, {NO_TYPE, 3U}});
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
 
@@ -159,51 +159,51 @@ TEST_F(CommonTest, DISABLED_NotRelatedNullCheck)
 
 TEST_F(CommonTest, CallStaticOtherBasicBlock)
 {
-    RuntimeInterfaceMock runtime(1);
+    RuntimeInterfaceMock runtime(1U);
     auto graph = CreateEmptyGraph();
     graph->SetRuntime(&runtime);
     GRAPH(graph)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        PARAMETER(10, 0).ref();
-        CONSTANT(6, 0);
-        BASIC_BLOCK(2, 3)
+        PARAMETER(10U, 0U).ref();
+        CONSTANT(6U, 0U);
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadAndInitClass).ref().Inputs(0);
-            INST(2, Opcode::NewObject).ref().Inputs(1, 0);
-            INST(3, Opcode::SaveState).NoVregs();
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U);
+            INST(2U, Opcode::NewObject).ref().Inputs(1U, 0U);
+            INST(3U, Opcode::SaveState).NoVregs();
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2}, {NO_TYPE, 3}});
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(5U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2U}, {NO_TYPE, 3U}});
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
 
     EXPECT_FALSE(graph->RunPass<BytecodeOptPeepholes>());
 }
 
-// TODO(aromanov): enable
+// NOTE(aromanov): enable
 TEST_F(CommonTest, DISABLED_NoSaveStateNullCheckAfterNewObject)
 {
-    RuntimeInterfaceMock runtime(0);
+    RuntimeInterfaceMock runtime(0U);
     auto graph = CreateEmptyGraph();
     graph->SetRuntime(&runtime);
     GRAPH(graph)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadAndInitClass).ref().Inputs(0);
-            INST(2, Opcode::NewObject).ref().Inputs(1, 0);
-            CONSTANT(3, 0).s32();
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2}, {NO_TYPE, 4}});
-            INST(6, Opcode::ReturnVoid).v0id();
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U);
+            INST(2U, Opcode::NewObject).ref().Inputs(1U, 0U);
+            CONSTANT(3U, 0U).s32();
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2U}, {NO_TYPE, 4U}});
+            INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -212,23 +212,23 @@ TEST_F(CommonTest, DISABLED_NoSaveStateNullCheckAfterNewObject)
 
 TEST_F(CommonTest, CallConstructorOtherClass)
 {
-    RuntimeInterfaceMock runtime(1, false);
+    RuntimeInterfaceMock runtime(1U, false);
     auto graph = CreateEmptyGraph();
     graph->SetRuntime(&runtime);
     GRAPH(graph)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        PARAMETER(10, 0).ref();
-        CONSTANT(6, 0);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(10U, 0U).ref();
+        CONSTANT(6U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadAndInitClass).ref().Inputs(0);
-            INST(2, Opcode::NewObject).ref().Inputs(1, 0);
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2}, {NO_TYPE, 3}});
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U);
+            INST(2U, Opcode::NewObject).ref().Inputs(1U, 0U);
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 2U}, {NO_TYPE, 3U}});
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
 

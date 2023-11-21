@@ -14,21 +14,20 @@
 import("//arkcompiler/runtime_core/ark_config.gni")
 
 arkverifier_sources = [
+  "main.cpp",
   "verifier.cpp",
   "verify.cpp",
-  "verify.h",
-]
-
-arkverifier_configs = [
-  "$ark_root:ark_config",
-  "$ark_root/libpandabase:arkbase_public_config",
-  "$ark_root/libpandafile:arkfile_public_config",
-  ":arkverifier_public_config",
 ]
 
 config("arkverifier_public_config") {
   include_dirs = [ "$ark_root/verifier" ]
 }
+
+arkverifier_configs = [
+  "$ark_root:ark_config",
+  "$ark_root/libpandafile:arkfile_public_config",
+  ":arkverifier_public_config",
+]
 
 ohos_executable("ark_verifier") {
   sources = arkverifier_sources
@@ -44,8 +43,13 @@ ohos_executable("ark_verifier") {
   subsystem_name = "arkcompiler"
 }
 
+libarkverifier_sources = [
+  "verifier.cpp",
+  "verify.cpp",
+]
+
 ohos_shared_library("libarkverifier") {
-  sources = arkverifier_sources
+  sources = libarkverifier_sources
 
   deps = [ "$ark_root/libpandafile:libarkfile_static" ]
 

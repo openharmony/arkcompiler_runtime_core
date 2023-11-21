@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,34 @@ private:
 // it conflicts with elfio.
 static constexpr size_t EF_ARM_EABI_VER5 = 0x05000000;
 
+void Compilation::CheckUsedRegisters()
+{
+#if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL && PANDA_LLVMAOT
+    if (used_registers_.gpr.Count() > 0) {
+        LOG(INFO, IRTOC) << "LLVM Irtoc compilation: used registers " << used_registers_.gpr;
+        used_registers_.gpr &= GetCalleeRegsMask(arch_, false);
+        auto diff = used_registers_.gpr ^ GetCalleeRegsMask(arch_, false, true);
+        if (diff.Any()) {
+            LOG(FATAL, IRTOC) << "LLVM Irtoc compilation callee saved register usage is different from optimized set"
+                              << std::endl
+                              << "Expected: " << GetCalleeRegsMask(arch_, false, true) << std::endl
+                              << "Got: " << used_registers_.gpr;
+        }
+    }
+    if (used_registers_.fp.Count() > 0) {
+        LOG(INFO, IRTOC) << "LLVM Irtoc compilation: used fp registers " << used_registers_.fp;
+        used_registers_.fp &= GetCalleeRegsMask(arch_, true);
+        auto diff = used_registers_.fp ^ GetCalleeRegsMask(arch_, true, true);
+        if (diff.Any()) {
+            LOG(FATAL, IRTOC) << "LLVM Irtoc compilation callee saved fp register usage is different from optimized set"
+                              << std::endl
+                              << "Expected: " << GetCalleeRegsMask(arch_, true, true) << std::endl
+                              << "Got: " << used_registers_.fp;
+        }
+    }
+#endif
+}
+
 Compilation::Result Compilation::Run()
 {
     if (compiler::OPTIONS.WasSetCompilerRegex()) {
@@ -156,32 +184,8 @@ Compilation::Result Compilation::Run()
 
     auto result = Compile();
     if (result) {
+        CheckUsedRegisters();
         LOG(INFO, IRTOC) << "Irtoc compilation success";
-#if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL && PANDA_LLVMAOT
-        if (used_registers_.gpr.Count() > 0) {
-            LOG(INFO, IRTOC) << "LLVM Irtoc compilation: used registers " << used_registers_.gpr;
-            used_registers_.gpr &= GetCalleeRegsMask(arch_, false);
-            auto diff = used_registers_.gpr ^ GetCalleeRegsMask(arch_, false, true);
-            if (diff.Any()) {
-                LOG(FATAL, IRTOC)
-                    << "LLVM Irtoc compilation callee saved register usage is different from optimized set" << std::endl
-                    << "Expected: " << GetCalleeRegsMask(arch_, false, true) << std::endl
-                    << "Got: " << used_registers_.gpr;
-            }
-        }
-        if (used_registers_.fp.Count() > 0) {
-            LOG(INFO, IRTOC) << "LLVM Irtoc compilation: used fp registers " << used_registers_.fp;
-            used_registers_.fp &= GetCalleeRegsMask(arch_, true);
-            auto diff = used_registers_.fp ^ GetCalleeRegsMask(arch_, true, true);
-            if (diff.Any()) {
-                LOG(FATAL, IRTOC)
-                    << "LLVM Irtoc compilation callee saved fp register usage is different from optimized set"
-                    << std::endl
-                    << "Expected: " << GetCalleeRegsMask(arch_, true, true) << std::endl
-                    << "Got: " << used_registers_.fp;
-            }
-        }
-#endif
     } else {
         LOG(FATAL, IRTOC) << "Irtoc compilation failed: " << result.Error();
     }

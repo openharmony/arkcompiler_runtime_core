@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public:
 
     PANDA_PUBLIC_API void Unlock() RELEASE();
 
-    // TODO(mwx851039): Extract common part as an interface.
+    // NOTE(mwx851039): Extract common part as an interface.
     static bool DoNotCheckOnTerminationLoop()
     {
         return no_check_for_deadlock_;

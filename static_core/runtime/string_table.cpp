@@ -221,7 +221,7 @@ bool StringTable::Table::UpdateMoved()
     return updated;
 }
 
-// TODO(alovkov): make parallel
+// NOTE(alovkov): make parallel
 void StringTable::Table::Sweep(const GCObjectVisitor &gc_object_visitor)
 {
     os::memory::WriteLockHolder holder(table_lock_);

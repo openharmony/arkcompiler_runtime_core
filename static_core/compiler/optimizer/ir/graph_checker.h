@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H_
-#define COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H_
+#ifndef COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H
+#define COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H
 
 #include "compiler_options.h"
 #include "graph.h"
@@ -29,23 +29,24 @@
 
 // ---- Below extended ASSERT and ASSERT_DO for GraphChecker ----
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_DO_EXT(cond, func) ASSERT_DO(cond, func; PrintFailedMethodAndPass();)
+#define ASSERT_DO_EXT(cond, func) ASSERT_DO((cond), func; PrintFailedMethodAndPass();)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_DO_EXT_VISITOR(cond, func) ASSERT_DO(cond, func; PrintFailedMethodAndPassVisitor(v);)
+#define ASSERT_DO_EXT_VISITOR(cond, func) ASSERT_DO((cond), func; PrintFailedMethodAndPassVisitor(v);)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_EXT(cond) ASSERT_DO_EXT(cond, )
+#define ASSERT_EXT(cond) ASSERT_DO_EXT((cond), )
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_EXT_VISITOR(cond) ASSERT_DO_EXT_VISITOR(cond, )
+#define ASSERT_EXT_VISITOR(cond) ASSERT_DO_EXT_VISITOR((cond), )
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_EXT_PRINT(cond, message) ASSERT_DO(cond, std::cerr << message << std::endl; PrintFailedMethodAndPass();)
+#define ASSERT_EXT_PRINT(cond, message) \
+    ASSERT_DO((cond), std::cerr << (message) << std::endl; PrintFailedMethodAndPass();)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_EXT_PRINT_VISITOR(cond, message) \
-    ASSERT_DO(cond, std::cerr << message << std::endl; PrintFailedMethodAndPassVisitor(v);)
+    ASSERT_DO((cond), std::cerr << (message) << std::endl; PrintFailedMethodAndPassVisitor(v);)
 // --------------------------------------------------------------
 
 namespace panda::compiler {
@@ -84,6 +85,7 @@ private:
     void CheckEndBlock();
     void CheckControlFlow(BasicBlock *block);
     void CheckDataFlow(BasicBlock *block);
+    void CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block, Graph *graph);
     void CheckPhiInputs(Inst *phi_inst);
     void CheckInstsRegisters(BasicBlock *block);
     void CheckPhisRegisters(BasicBlock *block);
@@ -226,7 +228,9 @@ private:
     static void VisitCheckCast([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitIsInstance([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static void VisitSelectWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitSelectImm([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static void VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitIf([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitIfImm([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitTry([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -307,7 +311,7 @@ private:
     {
         // Overflow instruction are used only in dynamic methods.
         // But ASSERT wasn't added because the instructions checks in codegen_test.cpp with default method
-        // TODO(pishin) add an ASSERT after add assembly tests tests and remove the test from codegen_test.cpp
+        // NOTE(pishin) add an ASSERT after add assembly tests tests and remove the test from codegen_test.cpp
         [[maybe_unused]] auto cc = inst->GetCc();
         ASSERT_DO((cc == CC_EQ || cc == CC_NE), (std::cerr << "overflow instruction are used only CC_EQ or CC_NE"));
         CheckBinaryOperationTypes(inst, true);
@@ -494,4 +498,4 @@ private:
 #undef ASSERT_EXT_PRINT
 #undef ASSERT_EXT_PRINT_VISITOR
 
-#endif  // COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H_
+#endif  // COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H

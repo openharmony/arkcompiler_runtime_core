@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1556,7 +1556,6 @@ void Amd64Encoder::EncodeOr(Reg dst, Reg src, Imm imm)
 {
     ASSERT(dst.IsScalar());
     auto imm_val = ImmToUnsignedInt(imm);
-
     if (ImmFitsSize(imm_val, dst.GetSize())) {
         EncodeMov(dst, src);
         GetMasm()->or_(ArchReg(dst), imm_val);
@@ -1576,7 +1575,6 @@ void Amd64Encoder::EncodeXor(Reg dst, Reg src, Imm imm)
 {
     ASSERT(dst.IsScalar());
     auto imm_val = ImmToUnsignedInt(imm);
-
     if (ImmFitsSize(imm_val, dst.GetSize())) {
         EncodeMov(dst, src);
         GetMasm()->xor_(ArchReg(dst), imm_val);
@@ -2097,7 +2095,7 @@ void Amd64Encoder::EncodeRoundAway(Reg dst, Reg src)
     }
 }
 
-void Amd64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
+void Amd64Encoder::EncodeRoundToPInfFloat(Reg dst, Reg src)
 {
     ScopedTmpReg t1(this, src.GetType());
     ScopedTmpReg t2(this, src.GetType());
@@ -2110,56 +2108,77 @@ void Amd64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
     auto skip_incr = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(skip_incr_id);
     auto done = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(done_id);
 
+    GetMasm()->movss(ArchVReg(t2), ArchVReg(src));
+    GetMasm()->roundss(ArchVReg(t1), ArchVReg(src), asmjit::imm(1));
+    GetMasm()->subss(ArchVReg(t2), ArchVReg(t1));
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int32_t, float>(0.5F)));
+    GetMasm()->movd(ArchVReg(t3), ArchReg(t4));
+    GetMasm()->comiss(ArchVReg(t2), ArchVReg(t3));
+    GetMasm()->j(asmjit::x86::Condition::Code::kB, *skip_incr);
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int32_t, float>(1.0F)));
+    GetMasm()->movd(ArchVReg(t3), ArchReg(t4));
+    GetMasm()->addss(ArchVReg(t1), ArchVReg(t3));
+    BindLabel(skip_incr_id);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    GetMasm()->mov(ArchReg(dst), asmjit::imm(0x7FFFFFFF));
+    GetMasm()->cvtsi2ss(ArchVReg(t2), ArchReg(dst));
+    GetMasm()->comiss(ArchVReg(t1), ArchVReg(t2));
+    GetMasm()->j(asmjit::x86::Condition::Code::kAE,
+                 *done);                           // clipped to max (already in dst), does not jump on unordered
+    GetMasm()->mov(ArchReg(dst), asmjit::imm(0));  // does not change flags
+    GetMasm()->j(asmjit::x86::Condition::Code::kParityEven, *done);  // NaN mapped to 0 (just moved in dst)
+    GetMasm()->cvttss2si(ArchReg(dst), ArchVReg(t1));
+    BindLabel(done_id);
+}
+
+void Amd64Encoder::EncodeRoundToPInfDouble(Reg dst, Reg src)
+{
+    ScopedTmpReg t1(this, src.GetType());
+    ScopedTmpReg t2(this, src.GetType());
+    ScopedTmpReg t3(this, src.GetType());
+    ScopedTmpReg t4(this, dst.GetType());
+
+    auto skip_incr_id = CreateLabel();
+    auto done_id = CreateLabel();
+
+    auto skip_incr = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(skip_incr_id);
+    auto done = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(done_id);
+
+    GetMasm()->movsd(ArchVReg(t2), ArchVReg(src));
+    GetMasm()->roundsd(ArchVReg(t1), ArchVReg(src), asmjit::imm(1));
+    GetMasm()->subsd(ArchVReg(t2), ArchVReg(t1));
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int64_t, double>(0.5)));
+    GetMasm()->movq(ArchVReg(t3), ArchReg(t4));
+    GetMasm()->comisd(ArchVReg(t2), ArchVReg(t3));
+    GetMasm()->j(asmjit::x86::Condition::Code::kB, *skip_incr);
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int64_t, double>(1.0)));
+    GetMasm()->movq(ArchVReg(t3), ArchReg(t4));
+    GetMasm()->addsd(ArchVReg(t1), ArchVReg(t3));
+    BindLabel(skip_incr_id);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    GetMasm()->mov(ArchReg(dst), asmjit::imm(0x7FFFFFFFFFFFFFFFL));
+    GetMasm()->cvtsi2sd(ArchVReg(t2), ArchReg(dst));
+    GetMasm()->comisd(ArchVReg(t1), ArchVReg(t2));
+    GetMasm()->j(asmjit::x86::Condition::Code::kAE,
+                 *done);                           // clipped to max (already in dst), does not jump on unordered
+    GetMasm()->mov(ArchReg(dst), asmjit::imm(0));  // does not change flags
+    GetMasm()->j(asmjit::x86::Condition::Code::kParityEven, *done);  // NaN mapped to 0 (just moved in dst)
+    GetMasm()->cvttsd2si(ArchReg(dst), ArchVReg(t1));
+    BindLabel(done_id);
+}
+
+void Amd64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
+{
     if (src.GetType() == FLOAT32_TYPE) {
-        GetMasm()->movss(ArchVReg(t2), ArchVReg(src));
-        GetMasm()->roundss(ArchVReg(t1), ArchVReg(src), asmjit::imm(1));
-        GetMasm()->subss(ArchVReg(t2), ArchVReg(t1));
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int32_t, float>(0.5F)));
-        GetMasm()->movd(ArchVReg(t3), ArchReg(t4));
-        GetMasm()->comiss(ArchVReg(t2), ArchVReg(t3));
-        GetMasm()->j(asmjit::x86::Condition::Code::kB, *skip_incr);
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int32_t, float>(1.0F)));
-        GetMasm()->movd(ArchVReg(t3), ArchReg(t4));
-        GetMasm()->addss(ArchVReg(t1), ArchVReg(t3));
-        BindLabel(skip_incr_id);
-
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        GetMasm()->mov(ArchReg(dst), asmjit::imm(0x7FFFFFFF));
-        GetMasm()->cvtsi2ss(ArchVReg(t2), ArchReg(dst));
-        GetMasm()->comiss(ArchVReg(t1), ArchVReg(t2));
-        GetMasm()->j(asmjit::x86::Condition::Code::kAE,
-                     *done);                           // clipped to max (already in dst), does not jump on unordered
-        GetMasm()->mov(ArchReg(dst), asmjit::imm(0));  // does not change flags
-        GetMasm()->j(asmjit::x86::Condition::Code::kParityEven, *done);  // NaN mapped to 0 (just moved in dst)
-        GetMasm()->cvttss2si(ArchReg(dst), ArchVReg(t1));
-        BindLabel(done_id);
+        EncodeRoundToPInfFloat(dst, src);
     } else if (src.GetType() == FLOAT64_TYPE) {
-        GetMasm()->movsd(ArchVReg(t2), ArchVReg(src));
-        GetMasm()->roundsd(ArchVReg(t1), ArchVReg(src), asmjit::imm(1));
-        GetMasm()->subsd(ArchVReg(t2), ArchVReg(t1));
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int64_t, double>(0.5)));
-        GetMasm()->movq(ArchVReg(t3), ArchReg(t4));
-        GetMasm()->comisd(ArchVReg(t2), ArchVReg(t3));
-        GetMasm()->j(asmjit::x86::Condition::Code::kB, *skip_incr);
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int64_t, double>(1.0)));
-        GetMasm()->movq(ArchVReg(t3), ArchReg(t4));
-        GetMasm()->addsd(ArchVReg(t1), ArchVReg(t3));
-        BindLabel(skip_incr_id);
-
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        GetMasm()->mov(ArchReg(dst), asmjit::imm(0x7FFFFFFFFFFFFFFFL));
-        GetMasm()->cvtsi2sd(ArchVReg(t2), ArchReg(dst));
-        GetMasm()->comisd(ArchVReg(t1), ArchVReg(t2));
-        GetMasm()->j(asmjit::x86::Condition::Code::kAE,
-                     *done);                           // clipped to max (already in dst), does not jump on unordered
-        GetMasm()->mov(ArchReg(dst), asmjit::imm(0));  // does not change flags
-        GetMasm()->j(asmjit::x86::Condition::Code::kParityEven, *done);  // NaN mapped to 0 (just moved in dst)
-        GetMasm()->cvttsd2si(ArchReg(dst), ArchVReg(t1));
-        BindLabel(done_id);
+        EncodeRoundToPInfDouble(dst, src);
     } else {
         UNREACHABLE();
     }
@@ -2229,7 +2248,7 @@ bool Amd64Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
 #ifndef NDEBUG
     if (size < DOUBLE_WORD_SIZE) {
         // Test if the highest part is consistent:
-        ASSERT((imm >> size == 0) || ((~imm) >> size == 0));
+        ASSERT(((imm >> size) == 0) || (((~imm) >> size) == 0));
     }
 #endif  // NDEBUG
     return ImmFitsSize(imm, size);
@@ -2417,7 +2436,7 @@ void Amd64Encoder::EncodeCompareAndSwap(Reg dst, Reg obj, const Reg *offset, Reg
     auto addr_reg = ArchReg(tmp2);
     Reg rax(ConvertRegNumber(asmjit::x86::rax.id()), INT64_TYPE);
 
-    /* TODO(ayodkev) this is a workaround for the failure of
+    /* NOTE(ayodkev) this is a workaround for the failure of
      * jsr166.ScheduledExecutorTest, have to figure out if there
      * is less crude way to avoid this */
     if (newval.GetId() == rax.GetId()) {

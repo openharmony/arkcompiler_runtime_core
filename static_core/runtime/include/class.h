@@ -34,7 +34,7 @@ class ClassLinkerContext;
 class ManagedThread;
 class ObjectHeader;
 
-// TODO (Artem Udovichenko): move BaseClass to another file but still have Class.h
+// NOTE (Artem Udovichenko): move BaseClass to another file but still have Class.h
 class BaseClass {
 public:
     static constexpr uint32_t DYNAMIC_CLASS = 1U;

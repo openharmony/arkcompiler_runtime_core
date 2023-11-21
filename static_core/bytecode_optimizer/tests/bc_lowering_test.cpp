@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,12 +66,12 @@ TEST_F(IrBuilderTest, Lowering)
         auto expected = CreateEmptyGraph();
         GRAPH(expected)
         {
-            CONSTANT(1, 3).s32();
+            CONSTANT(1U, 3U).s32();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(2, opcode.second).s32().Inputs(1).Imm(imm);
-                INST(3, Opcode::Return).s32().Inputs(2);
+                INST(2U, opcode.second).s32().Inputs(1U).Imm(imm);
+                INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
 
@@ -84,27 +84,27 @@ TEST_F(LoweringTest, AddSub)
     auto init = CreateEmptyGraph();
     GRAPH(init)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).f32();
-        CONSTANT(3, 12).s32();
-        CONSTANT(4, 150).s32();
-        CONSTANT(5, 0).s64();
-        CONSTANT(6, 1.2F).f32();
-        CONSTANT(7, -1).s32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).f32();
+        CONSTANT(3U, 12U).s32();
+        CONSTANT(4U, 150U).s32();
+        CONSTANT(5U, 0U).s64();
+        CONSTANT(6U, 1.2F).f32();
+        CONSTANT(7U, -1L).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::Add).u32().Inputs(0, 3);
-            INST(9, Opcode::Sub).u32().Inputs(0, 3);
-            INST(10, Opcode::Add).u32().Inputs(0, 4);
-            INST(11, Opcode::Sub).u32().Inputs(0, 4);
-            INST(12, Opcode::Add).u64().Inputs(1, 5);
-            INST(13, Opcode::Sub).f32().Inputs(2, 6);
-            INST(14, Opcode::Sub).u32().Inputs(0, 7);
-            INST(15, Opcode::SaveState).NoVregs();
-            INST(20, Opcode::CallStatic).b().InputsAutoType(8, 9, 10, 11, 12, 13, 14, 15);
-            INST(21, Opcode::Return).b().Inputs(20);
+            INST(8U, Opcode::Add).u32().Inputs(0U, 3U);
+            INST(9U, Opcode::Sub).u32().Inputs(0U, 3U);
+            INST(10U, Opcode::Add).u32().Inputs(0U, 4U);
+            INST(11U, Opcode::Sub).u32().Inputs(0U, 4U);
+            INST(12U, Opcode::Add).u64().Inputs(1U, 5U);
+            INST(13U, Opcode::Sub).f32().Inputs(2U, 6U);
+            INST(14U, Opcode::Sub).u32().Inputs(0U, 7U);
+            INST(15U, Opcode::SaveState).NoVregs();
+            INST(20U, Opcode::CallStatic).b().InputsAutoType(8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U);
+            INST(21U, Opcode::Return).b().Inputs(20U);
         }
     }
 #ifndef NDEBUG
@@ -116,25 +116,25 @@ TEST_F(LoweringTest, AddSub)
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).f32();
-        CONSTANT(4, 150).s32();
-        CONSTANT(5, 0).s64();
-        CONSTANT(6, 1.2F).f32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).f32();
+        CONSTANT(4U, 150U).s32();
+        CONSTANT(5U, 0U).s64();
+        CONSTANT(6U, 1.2F).f32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(22, Opcode::AddI).u32().Inputs(0).Imm(0xc);
-            INST(23, Opcode::SubI).u32().Inputs(0).Imm(0xc);
-            INST(10, Opcode::Add).u32().Inputs(0, 4);
-            INST(11, Opcode::Sub).u32().Inputs(0, 4);
-            INST(12, Opcode::Add).u64().Inputs(1, 5);
-            INST(13, Opcode::Sub).f32().Inputs(2, 6);
-            INST(24, Opcode::AddI).u32().Inputs(0).Imm(1);
-            INST(19, Opcode::SaveState).NoVregs();
-            INST(20, Opcode::CallStatic).b().InputsAutoType(22, 23, 10, 11, 12, 13, 24, 19);
-            INST(21, Opcode::Return).b().Inputs(20);
+            INST(22U, Opcode::AddI).u32().Inputs(0U).Imm(0xcU);
+            INST(23U, Opcode::SubI).u32().Inputs(0U).Imm(0xcU);
+            INST(10U, Opcode::Add).u32().Inputs(0U, 4U);
+            INST(11U, Opcode::Sub).u32().Inputs(0U, 4U);
+            INST(12U, Opcode::Add).u64().Inputs(1U, 5U);
+            INST(13U, Opcode::Sub).f32().Inputs(2U, 6U);
+            INST(24U, Opcode::AddI).u32().Inputs(0U).Imm(1U);
+            INST(19U, Opcode::SaveState).NoVregs();
+            INST(20U, Opcode::CallStatic).b().InputsAutoType(22U, 23U, 10U, 11U, 12U, 13U, 24U, 19U);
+            INST(21U, Opcode::Return).b().Inputs(20U);
         }
     }
     EXPECT_TRUE(GraphComparator().Compare(init, expected));
@@ -145,39 +145,39 @@ TEST_F(LoweringTest, MulDivMod)
     auto init = CreateEmptyGraph();
     GRAPH(init)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).f32();
-        CONSTANT(3, 12).s32();
-        CONSTANT(4, 150).s32();
-        CONSTANT(5, 0).s64();
-        CONSTANT(6, 1.2F).f32();
-        CONSTANT(7, -1).s32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).f32();
+        CONSTANT(3U, 12U).s32();
+        CONSTANT(4U, 150U).s32();
+        CONSTANT(5U, 0U).s64();
+        CONSTANT(6U, 1.2F).f32();
+        CONSTANT(7U, -1L).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::Div).s32().Inputs(0, 3);
-            INST(9, Opcode::Div).u32().Inputs(0, 4);
-            INST(10, Opcode::Div).u64().Inputs(1, 5);
-            INST(11, Opcode::Div).f32().Inputs(2, 6);
-            INST(12, Opcode::Div).s32().Inputs(0, 7);
+            INST(8U, Opcode::Div).s32().Inputs(0U, 3U);
+            INST(9U, Opcode::Div).u32().Inputs(0U, 4U);
+            INST(10U, Opcode::Div).u64().Inputs(1U, 5U);
+            INST(11U, Opcode::Div).f32().Inputs(2U, 6U);
+            INST(12U, Opcode::Div).s32().Inputs(0U, 7U);
 
-            INST(13, Opcode::Mod).s32().Inputs(0, 3);
-            INST(14, Opcode::Mod).u32().Inputs(0, 4);
-            INST(15, Opcode::Mod).u64().Inputs(1, 5);
-            INST(16, Opcode::Mod).f32().Inputs(2, 6);
-            INST(17, Opcode::Mod).s32().Inputs(0, 7);
+            INST(13U, Opcode::Mod).s32().Inputs(0U, 3U);
+            INST(14U, Opcode::Mod).u32().Inputs(0U, 4U);
+            INST(15U, Opcode::Mod).u64().Inputs(1U, 5U);
+            INST(16U, Opcode::Mod).f32().Inputs(2U, 6U);
+            INST(17U, Opcode::Mod).s32().Inputs(0U, 7U);
 
-            INST(18, Opcode::Mul).s32().Inputs(0, 3);
-            INST(19, Opcode::Mul).u32().Inputs(0, 4);
-            INST(20, Opcode::Mul).u64().Inputs(1, 5);
-            INST(21, Opcode::Mul).f32().Inputs(2, 6);
-            INST(22, Opcode::Mul).s32().Inputs(0, 7);
-            INST(31, Opcode::SaveState).NoVregs();
-            INST(23, Opcode::CallStatic)
+            INST(18U, Opcode::Mul).s32().Inputs(0U, 3U);
+            INST(19U, Opcode::Mul).u32().Inputs(0U, 4U);
+            INST(20U, Opcode::Mul).u64().Inputs(1U, 5U);
+            INST(21U, Opcode::Mul).f32().Inputs(2U, 6U);
+            INST(22U, Opcode::Mul).s32().Inputs(0U, 7U);
+            INST(31U, Opcode::SaveState).NoVregs();
+            INST(23U, Opcode::CallStatic)
                 .b()
-                .InputsAutoType(8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 31);
-            INST(24, Opcode::Return).b().Inputs(23);
+                .InputsAutoType(8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U, 16U, 17U, 18U, 19U, 20U, 21U, 22U, 31U);
+            INST(24U, Opcode::Return).b().Inputs(23U);
         }
     }
 
@@ -190,35 +190,35 @@ TEST_F(LoweringTest, MulDivMod)
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).f32();
-        CONSTANT(4, 150).s32();
-        CONSTANT(5, 0).s64();
-        CONSTANT(6, 1.2F).f32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).f32();
+        CONSTANT(4U, 150U).s32();
+        CONSTANT(5U, 0U).s64();
+        CONSTANT(6U, 1.2F).f32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(25, Opcode::DivI).s32().Inputs(0).Imm(0xc);
-            INST(9, Opcode::Div).u32().Inputs(0, 4);
-            INST(10, Opcode::Div).u64().Inputs(1, 5);
-            INST(11, Opcode::Div).f32().Inputs(2, 6);
-            INST(26, Opcode::DivI).s32().Inputs(0).Imm(static_cast<uint64_t>(-1));
-            INST(27, Opcode::ModI).s32().Inputs(0).Imm(0xc);
-            INST(14, Opcode::Mod).u32().Inputs(0, 4);
-            INST(15, Opcode::Mod).u64().Inputs(1, 5);
-            INST(16, Opcode::Mod).f32().Inputs(2, 6);
-            INST(28, Opcode::ModI).s32().Inputs(0).Imm(static_cast<uint64_t>(-1));
-            INST(29, Opcode::MulI).s32().Inputs(0).Imm(0xc);
-            INST(19, Opcode::Mul).u32().Inputs(0, 4);
-            INST(20, Opcode::Mul).u64().Inputs(1, 5);
-            INST(21, Opcode::Mul).f32().Inputs(2, 6);
-            INST(30, Opcode::MulI).s32().Inputs(0).Imm(static_cast<uint64_t>(-1));
-            INST(31, Opcode::SaveState).NoVregs();
-            INST(23, Opcode::CallStatic)
+            INST(25U, Opcode::DivI).s32().Inputs(0U).Imm(0xcU);
+            INST(9U, Opcode::Div).u32().Inputs(0U, 4U);
+            INST(10U, Opcode::Div).u64().Inputs(1U, 5U);
+            INST(11U, Opcode::Div).f32().Inputs(2U, 6U);
+            INST(26U, Opcode::DivI).s32().Inputs(0U).Imm(static_cast<uint64_t>(-1L));
+            INST(27U, Opcode::ModI).s32().Inputs(0U).Imm(0xcU);
+            INST(14U, Opcode::Mod).u32().Inputs(0U, 4U);
+            INST(15U, Opcode::Mod).u64().Inputs(1U, 5U);
+            INST(16U, Opcode::Mod).f32().Inputs(2U, 6U);
+            INST(28U, Opcode::ModI).s32().Inputs(0U).Imm(static_cast<uint64_t>(-1L));
+            INST(29U, Opcode::MulI).s32().Inputs(0U).Imm(0xcU);
+            INST(19U, Opcode::Mul).u32().Inputs(0U, 4U);
+            INST(20U, Opcode::Mul).u64().Inputs(1U, 5U);
+            INST(21U, Opcode::Mul).f32().Inputs(2U, 6U);
+            INST(30U, Opcode::MulI).s32().Inputs(0U).Imm(static_cast<uint64_t>(-1L));
+            INST(31U, Opcode::SaveState).NoVregs();
+            INST(23U, Opcode::CallStatic)
                 .b()
-                .InputsAutoType(25, 9, 10, 11, 26, 27, 14, 15, 16, 28, 29, 19, 20, 21, 30, 31);
-            INST(24, Opcode::Return).b().Inputs(23);
+                .InputsAutoType(25U, 9U, 10U, 11U, 26U, 27U, 14U, 15U, 16U, 28U, 29U, 19U, 20U, 21U, 30U, 31U);
+            INST(24U, Opcode::Return).b().Inputs(23U);
         }
     }
     EXPECT_TRUE(GraphComparator().Compare(init, expected));
@@ -229,32 +229,34 @@ TEST_F(LoweringTest, Logic)
     auto init = CreateEmptyGraph();
     GRAPH(init)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(24, 1).s64();
-        CONSTANT(1, 12).s32();
-        CONSTANT(2, 50).s32();
-        CONSTANT(25, 0).s64();
-        CONSTANT(27, 300).s32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(24U, 1U).s64();
+        CONSTANT(1U, 12U).s32();
+        CONSTANT(2U, 50U).s32();
+        CONSTANT(25U, 0U).s64();
+        CONSTANT(27U, 300U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Or).u32().Inputs(0, 1);
-            INST(5, Opcode::Or).u32().Inputs(0, 2);
-            INST(6, Opcode::And).u32().Inputs(0, 1);
-            INST(8, Opcode::And).u32().Inputs(0, 2);
-            INST(9, Opcode::Xor).u32().Inputs(0, 1);
-            INST(11, Opcode::Xor).u32().Inputs(0, 2);
-            INST(12, Opcode::Or).u8().Inputs(0, 1);
-            INST(13, Opcode::And).u32().Inputs(0, 0);
-            INST(26, Opcode::And).s64().Inputs(24, 25);
-            INST(28, Opcode::Xor).u32().Inputs(0, 27);
-            INST(29, Opcode::Or).s64().Inputs(24, 25);
-            INST(30, Opcode::Xor).s64().Inputs(24, 25);
-            INST(31, Opcode::And).u32().Inputs(0, 27);
-            INST(32, Opcode::Or).u32().Inputs(0, 27);
-            INST(15, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).b().InputsAutoType(3, 5, 6, 8, 9, 11, 12, 13, 26, 28, 29, 30, 31, 32, 15);
-            INST(23, Opcode::Return).b().Inputs(14);
+            INST(3U, Opcode::Or).u32().Inputs(0U, 1U);
+            INST(5U, Opcode::Or).u32().Inputs(0U, 2U);
+            INST(6U, Opcode::And).u32().Inputs(0U, 1U);
+            INST(8U, Opcode::And).u32().Inputs(0U, 2U);
+            INST(9U, Opcode::Xor).u32().Inputs(0U, 1U);
+            INST(11U, Opcode::Xor).u32().Inputs(0U, 2U);
+            INST(12U, Opcode::Or).u8().Inputs(0U, 1U);
+            INST(13U, Opcode::And).u32().Inputs(0U, 0U);
+            INST(26U, Opcode::And).s64().Inputs(24U, 25U);
+            INST(28U, Opcode::Xor).u32().Inputs(0U, 27U);
+            INST(29U, Opcode::Or).s64().Inputs(24U, 25U);
+            INST(30U, Opcode::Xor).s64().Inputs(24U, 25U);
+            INST(31U, Opcode::And).u32().Inputs(0U, 27U);
+            INST(32U, Opcode::Or).u32().Inputs(0U, 27U);
+            INST(15U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic)
+                .b()
+                .InputsAutoType(3U, 5U, 6U, 8U, 9U, 11U, 12U, 13U, 26U, 28U, 29U, 30U, 31U, 32U, 15U);
+            INST(23U, Opcode::Return).b().Inputs(14U);
         }
     }
 
@@ -267,30 +269,32 @@ TEST_F(LoweringTest, Logic)
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(24, 1).s64();
-        CONSTANT(1, 12).s32();
-        CONSTANT(25, 0).s64();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(24U, 1U).s64();
+        CONSTANT(1U, 12U).s32();
+        CONSTANT(25U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(33, Opcode::OrI).u32().Inputs(0).Imm(0xc);
-            INST(34, Opcode::OrI).u32().Inputs(0).Imm(0x32);
-            INST(35, Opcode::AndI).u32().Inputs(0).Imm(0xc);
-            INST(36, Opcode::AndI).u32().Inputs(0).Imm(0x32);
-            INST(37, Opcode::XorI).u32().Inputs(0).Imm(0xc);
-            INST(38, Opcode::XorI).u32().Inputs(0).Imm(0x32);
-            INST(12, Opcode::Or).u8().Inputs(0, 1);
-            INST(13, Opcode::And).u32().Inputs(0, 0);
-            INST(26, Opcode::And).s64().Inputs(24, 25);
-            INST(39, Opcode::XorI).u32().Inputs(0).Imm(0x12c);
-            INST(29, Opcode::Or).s64().Inputs(24, 25);
-            INST(30, Opcode::Xor).s64().Inputs(24, 25);
-            INST(40, Opcode::AndI).u32().Inputs(0).Imm(0x12c);
-            INST(41, Opcode::OrI).u32().Inputs(0).Imm(0x12c);
-            INST(15, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).b().InputsAutoType(33, 34, 35, 36, 37, 38, 12, 13, 26, 39, 29, 30, 40, 41, 15);
-            INST(23, Opcode::Return).b().Inputs(14);
+            INST(33U, Opcode::OrI).u32().Inputs(0U).Imm(0xcU);
+            INST(34U, Opcode::OrI).u32().Inputs(0U).Imm(0x32U);
+            INST(35U, Opcode::AndI).u32().Inputs(0U).Imm(0xcU);
+            INST(36U, Opcode::AndI).u32().Inputs(0U).Imm(0x32U);
+            INST(37U, Opcode::XorI).u32().Inputs(0U).Imm(0xcU);
+            INST(38U, Opcode::XorI).u32().Inputs(0U).Imm(0x32U);
+            INST(12U, Opcode::Or).u8().Inputs(0U, 1U);
+            INST(13U, Opcode::And).u32().Inputs(0U, 0U);
+            INST(26U, Opcode::And).s64().Inputs(24U, 25U);
+            INST(39U, Opcode::XorI).u32().Inputs(0U).Imm(0x12cU);
+            INST(29U, Opcode::Or).s64().Inputs(24U, 25U);
+            INST(30U, Opcode::Xor).s64().Inputs(24U, 25U);
+            INST(40U, Opcode::AndI).u32().Inputs(0U).Imm(0x12cU);
+            INST(41U, Opcode::OrI).u32().Inputs(0U).Imm(0x12cU);
+            INST(15U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic)
+                .b()
+                .InputsAutoType(33U, 34U, 35U, 36U, 37U, 38U, 12U, 13U, 26U, 39U, 29U, 30U, 40U, 41U, 15U);
+            INST(23U, Opcode::Return).b().Inputs(14U);
         }
     }
     EXPECT_TRUE(GraphComparator().Compare(init, expected));
@@ -301,32 +305,34 @@ TEST_F(LoweringTest, Shift)
     auto init = CreateEmptyGraph();
     GRAPH(init)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(24, 1).s64();
-        CONSTANT(1, 12).s32();
-        CONSTANT(2, 64).s32();
-        CONSTANT(25, 0).s64();
-        CONSTANT(27, 200).s32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(24U, 1U).s64();
+        CONSTANT(1U, 12U).s32();
+        CONSTANT(2U, 64U).s32();
+        CONSTANT(25U, 0U).s64();
+        CONSTANT(27U, 200U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Shr).u32().Inputs(0, 1);
-            INST(5, Opcode::Shr).u32().Inputs(0, 2);
-            INST(6, Opcode::AShr).u32().Inputs(0, 1);
-            INST(8, Opcode::AShr).u32().Inputs(0, 2);
-            INST(9, Opcode::Shl).u32().Inputs(0, 1);
-            INST(11, Opcode::Shl).u32().Inputs(0, 2);
-            INST(12, Opcode::Shl).u8().Inputs(0, 1);
-            INST(13, Opcode::Shr).u32().Inputs(0, 0);
-            INST(26, Opcode::Shr).s64().Inputs(24, 25);
-            INST(28, Opcode::AShr).s32().Inputs(0, 27);
-            INST(29, Opcode::AShr).s64().Inputs(24, 25);
-            INST(30, Opcode::Shl).s64().Inputs(24, 25);
-            INST(31, Opcode::Shr).s32().Inputs(0, 27);
-            INST(32, Opcode::Shl).s32().Inputs(0, 27);
-            INST(15, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).b().InputsAutoType(3, 5, 6, 8, 9, 11, 12, 13, 26, 28, 29, 30, 31, 32, 15);
-            INST(23, Opcode::Return).b().Inputs(14);
+            INST(3U, Opcode::Shr).u32().Inputs(0U, 1U);
+            INST(5U, Opcode::Shr).u32().Inputs(0U, 2U);
+            INST(6U, Opcode::AShr).u32().Inputs(0U, 1U);
+            INST(8U, Opcode::AShr).u32().Inputs(0U, 2U);
+            INST(9U, Opcode::Shl).u32().Inputs(0U, 1U);
+            INST(11U, Opcode::Shl).u32().Inputs(0U, 2U);
+            INST(12U, Opcode::Shl).u8().Inputs(0U, 1U);
+            INST(13U, Opcode::Shr).u32().Inputs(0U, 0U);
+            INST(26U, Opcode::Shr).s64().Inputs(24U, 25U);
+            INST(28U, Opcode::AShr).s32().Inputs(0U, 27U);
+            INST(29U, Opcode::AShr).s64().Inputs(24U, 25U);
+            INST(30U, Opcode::Shl).s64().Inputs(24U, 25U);
+            INST(31U, Opcode::Shr).s32().Inputs(0U, 27U);
+            INST(32U, Opcode::Shl).s32().Inputs(0U, 27U);
+            INST(15U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic)
+                .b()
+                .InputsAutoType(3U, 5U, 6U, 8U, 9U, 11U, 12U, 13U, 26U, 28U, 29U, 30U, 31U, 32U, 15U);
+            INST(23U, Opcode::Return).b().Inputs(14U);
         }
     }
 #ifndef NDEBUG
@@ -338,32 +344,34 @@ TEST_F(LoweringTest, Shift)
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(24, 1).s64();
-        CONSTANT(1, 12).s32();
-        CONSTANT(2, 64).s32();
-        CONSTANT(25, 0).s64();
-        CONSTANT(27, 200).s32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(24U, 1U).s64();
+        CONSTANT(1U, 12U).s32();
+        CONSTANT(2U, 64U).s32();
+        CONSTANT(25U, 0U).s64();
+        CONSTANT(27U, 200U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(33, Opcode::ShrI).u32().Inputs(0).Imm(0xc);
-            INST(5, Opcode::Shr).u32().Inputs(0, 2);
-            INST(34, Opcode::AShrI).u32().Inputs(0).Imm(0xc);
-            INST(8, Opcode::AShr).u32().Inputs(0, 2);
-            INST(35, Opcode::ShlI).u32().Inputs(0).Imm(0xc);
-            INST(11, Opcode::Shl).u32().Inputs(0, 2);
-            INST(12, Opcode::Shl).u8().Inputs(0, 1);
-            INST(13, Opcode::Shr).u32().Inputs(0, 0);
-            INST(26, Opcode::Shr).s64().Inputs(24, 25);
-            INST(28, Opcode::AShr).s32().Inputs(0, 27);
-            INST(29, Opcode::AShr).s64().Inputs(24, 25);
-            INST(30, Opcode::Shl).s64().Inputs(24, 25);
-            INST(31, Opcode::Shr).s32().Inputs(0, 27);
-            INST(32, Opcode::Shl).s32().Inputs(0, 27);
-            INST(15, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).b().InputsAutoType(33, 5, 34, 8, 35, 11, 12, 13, 26, 28, 29, 30, 31, 32, 15);
-            INST(23, Opcode::Return).b().Inputs(14);
+            INST(33U, Opcode::ShrI).u32().Inputs(0U).Imm(0xcU);
+            INST(5U, Opcode::Shr).u32().Inputs(0U, 2U);
+            INST(34U, Opcode::AShrI).u32().Inputs(0U).Imm(0xcU);
+            INST(8U, Opcode::AShr).u32().Inputs(0U, 2U);
+            INST(35U, Opcode::ShlI).u32().Inputs(0U).Imm(0xcU);
+            INST(11U, Opcode::Shl).u32().Inputs(0U, 2U);
+            INST(12U, Opcode::Shl).u8().Inputs(0U, 1U);
+            INST(13U, Opcode::Shr).u32().Inputs(0U, 0U);
+            INST(26U, Opcode::Shr).s64().Inputs(24U, 25U);
+            INST(28U, Opcode::AShr).s32().Inputs(0U, 27U);
+            INST(29U, Opcode::AShr).s64().Inputs(24U, 25U);
+            INST(30U, Opcode::Shl).s64().Inputs(24U, 25U);
+            INST(31U, Opcode::Shr).s32().Inputs(0U, 27U);
+            INST(32U, Opcode::Shl).s32().Inputs(0U, 27U);
+            INST(15U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic)
+                .b()
+                .InputsAutoType(33U, 5U, 34U, 8U, 35U, 11U, 12U, 13U, 26U, 28U, 29U, 30U, 31U, 32U, 15U);
+            INST(23U, Opcode::Return).b().Inputs(14U);
         }
     }
     EXPECT_TRUE(GraphComparator().Compare(init, expected));

@@ -11,5 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+add_irtoc_plugin(${PANDA_ETS_PLUGIN_SOURCE}/irtoc_scripts/common.irt)
 add_irtoc_plugin(${PANDA_ETS_PLUGIN_SOURCE}/irtoc_scripts/interpreter_handlers.irt)
 add_irtoc_plugin(${PANDA_ETS_PLUGIN_SOURCE}/irtoc_scripts/interpreter_main_loop.irt)

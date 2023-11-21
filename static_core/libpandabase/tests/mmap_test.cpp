@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ protected:
         auto *pointer = static_cast<uint64_t *>(start);
         for (size_t i = 0; i < it_end; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (pointer[i] != 0) {
+            if (pointer[i] != 0U) {
                 return false;
             }
         }
@@ -69,7 +69,7 @@ TEST_F(MmapTest, MapRWAnonymousFixedRawTest)
 
 TEST_F(MmapTest, MapRWAnonymousFixedRawZeroSizeTest)
 {
-    void *result = MapRWAnonymousFixedRaw(DEFAULT_MMAP_TEST_HINT, 0);
+    void *result = MapRWAnonymousFixedRaw(DEFAULT_MMAP_TEST_HINT, 0U);
     ASSERT_EQ(result, nullptr) << "result for 0 requested size must be nullptr";
 }
 
@@ -123,19 +123,19 @@ protected:
 TEST_F(MMapFixedTest, MMapAsanTsanTest)
 {
     static constexpr size_t OFFSET = 4_KB;
-    static constexpr size_t MMAP_ALLOC_SIZE = OFFSET * 2;
+    static constexpr size_t MMAP_ALLOC_SIZE = OFFSET * 2U;
     size_t page_size = panda::os::mem::GetPageSize();
     static_assert(OFFSET < panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS);
     static_assert(MMAP_ALLOC_SIZE > OFFSET);
-    ASSERT_TRUE((MMAP_ALLOC_SIZE % page_size) == 0);
+    ASSERT_TRUE((MMAP_ALLOC_SIZE % page_size) == 0U);
     uintptr_t cur_addr = panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS - OFFSET;
     cur_addr = AlignUp(cur_addr, page_size);
-    ASSERT_TRUE((cur_addr % page_size) == 0);
+    ASSERT_TRUE((cur_addr % page_size) == 0U);
     uintptr_t end_addr = panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS;
     end_addr = AlignUp(end_addr, sizeof(uint64_t));
     void *result =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
         mmap(ToVoidPtr(cur_addr), MMAP_ALLOC_SIZE, MMAP_PROT_READ | MMAP_PROT_WRITE,
-             MMAP_FLAG_PRIVATE | MMAP_FLAG_ANONYMOUS | MMAP_FLAG_FIXED, -1, 0);
+             MMAP_FLAG_PRIVATE | MMAP_FLAG_ANONYMOUS | MMAP_FLAG_FIXED, -1L, 0U);
     ASSERT_TRUE(result != nullptr);
 
 #if (defined(PANDA_TSAN_ON) || defined(USE_THREAD_SANITIZER)) && defined(PANDA_TARGET_ARM64)

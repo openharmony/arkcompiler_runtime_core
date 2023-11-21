@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,7 +157,7 @@ bool Pipeline::RunOptimizations()
     // following: we inline the method that has user X within a loop, then peepholes optimize datflow and def of
     // the X become another instruction within inlined method, but SaveStateOsr didn't take it into account, thus,
     // we don't restore value of this new definition.
-    // TODO(msherstennikov): find way to inline in OSR mode
+    // NOTE(msherstennikov): find way to inline in OSR mode
     if (!graph->IsOsrMode()) {
         graph->RunPass<Inlining>();
     }
@@ -208,9 +208,8 @@ bool Pipeline::RunOptimizations()
     /* to be removed once generic loop unrolling is implemented */
     ASSERT(graph->IsUnrollComplete());
 
-    if (graph->RunPass<Peepholes>()) {
-        graph->RunPass<BranchElimination>();
-    }
+    graph->RunPass<Peepholes>();
+    graph->RunPass<BranchElimination>();
     graph->RunPass<BalanceExpressions>();
     graph->RunPass<ValNum>();
     if (graph->IsAotMode()) {

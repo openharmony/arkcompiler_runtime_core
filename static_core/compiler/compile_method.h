@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_COMPILE_METHOD_H_
-#define COMPILER_COMPILE_METHOD_H_
+#ifndef COMPILER_COMPILE_METHOD_H
+#define COMPILER_COMPILE_METHOD_H
 
 #include "compiler_options.h"
 #include "mem/arena_allocator.h"
@@ -67,4 +67,4 @@ bool CompileInGraph(RuntimeInterface *runtime, Method *method, bool is_osr, Aren
 bool CheckMethodInLists(const std::string &method_name);
 }  // namespace panda::compiler
 
-#endif  // COMPILER_COMPILE_METHOD_H_
+#endif  // COMPILER_COMPILE_METHOD_H

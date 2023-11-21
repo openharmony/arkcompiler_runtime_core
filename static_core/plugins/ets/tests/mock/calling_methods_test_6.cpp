@@ -233,7 +233,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
                                                    static_cast<ets_int>(121)),
               static_cast<ets_double>(0.0));
 
-    // TODO(m.morozov): Uncomment this test, when virtual calls will be implemented
+    // NOTE(m.morozov): Uncomment this test, when virtual calls will be implemented
     /*
     // Call<type>Method part
     env->CallVoidMethod(obj, void_id, static_cast<ets_int>(11), static_cast<ets_int>(121));

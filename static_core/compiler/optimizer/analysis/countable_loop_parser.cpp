@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,19 +73,24 @@ std::optional<CountableLoopInfo> CountableLoopParser::Parse()
         return std::nullopt;
     }
 
+    if (!TryProcessBackEdge()) {
+        return std::nullopt;
+    }
+    return loop_info_;
+}
+
+bool CountableLoopParser::TryProcessBackEdge()
+{
     ASSERT(loop_info_.index->IsPhi());
     auto back_edge {loop_.GetBackEdges()[0]};
     auto back_edge_idx {loop_info_.index->CastToPhi()->GetPredBlockIndex(back_edge)};
     if (loop_info_.index->GetInput(back_edge_idx).GetInst() != loop_info_.update) {
-        return std::nullopt;
+        return false;
     }
     ASSERT(loop_info_.index->GetInputsCount() == MAX_SUCCS_NUM);
     loop_info_.init = loop_info_.index->GetInput(1 - back_edge_idx).GetInst();
     SetNormalizedConditionCode();
-    if (!IsConditionCodeAcceptable()) {
-        return std::nullopt;
-    }
-    return loop_info_;
+    return IsConditionCodeAcceptable();
 }
 
 bool CountableLoopParser::HasPreHeaderCompare(Loop *loop, const CountableLoopInfo &loop_info)
@@ -196,7 +201,7 @@ bool CountableLoopParser::IsInstIncOrDec(Inst *inst)
     return cnst != nullptr;
 }
 
-// TODO(a.popov) Suppot 'GetLoopExit()' method in the 'Loop' class
+// NOTE(a.popov) Suppot 'GetLoopExit()' method in the 'Loop' class
 BasicBlock *CountableLoopParser::FindLoopExitBlock()
 {
     auto outer_loop = loop_.GetOuterLoop();

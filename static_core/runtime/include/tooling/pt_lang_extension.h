@@ -19,8 +19,8 @@
 #include "runtime/include/tooling/pt_property.h"
 #include "runtime/include/tooling/pt_value.h"
 
-// TODO(maksenov): remove this file after refactoring js_runtime
-// TODO(a.urakov): move here current InspectorExtension instead
+// NOTE(maksenov): remove this file after refactoring js_runtime
+// NOTE(a.urakov): move here current InspectorExtension instead
 namespace panda::tooling {
 class PtMethod {
 public:

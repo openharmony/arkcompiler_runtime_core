@@ -145,7 +145,7 @@ private:
 
     plugin::Plugin const *const plugin_;
 
-    // TODO(vdyadov): store file_id for double check during verification
+    // NOTE(vdyadov): store file_id for double check during verification
     // offset -> cache item
     PandaUnorderedMap<uint32_t, Field const *> fields_;
     PandaUnorderedMap<uint32_t, Method const *> methods_;

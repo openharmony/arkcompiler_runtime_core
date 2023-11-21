@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_DANGLING_POINTERS_CHECKER_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_DANGLING_POINTERS_CHECKER_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_DANGLING_POINTERS_CHECKER_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_DANGLING_POINTERS_CHECKER_H
 
 #include "compiler/optimizer/pass.h"
 #include "compiler/optimizer/ir/basicblock.h"
@@ -62,16 +62,19 @@ private:
 
     bool CheckAccSyncCallRuntime();
     void InitLiveIns();
+    void UpdateLastAccAndFrameDef(Inst *inst);
     void GetLastAccDefinition(CallInst *runtime_call_inst);
     std::tuple<Inst *, Inst *> GetAccAndFrameDefs(Inst *inst);
     std::tuple<Inst *, Inst *> GetPhiAccDef();
     std::tuple<Inst *, Inst *> GetAccDefFromInputs(Inst *inst);
+
     Inst *GetPhiAccTagDef();
     bool IsAccTagDefInInputs(Inst *inst);
     bool IsAccTagDef(Inst *inst);
     bool IsFrameDef(Inst *inst);
     bool IsAccPtr(Inst *inst);
     bool IsAccTagPtr(Inst *inst);
+    bool IsSaveAcc(const Inst *inst);
     bool CheckObjectInputs(Inst *inst);
     bool CheckStoreAcc(CallInst *runtime_call_inst);
     bool CheckStoreAccTag(CallInst *runtime_call_inst);

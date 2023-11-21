@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,15 +20,15 @@
 #include "compiler/optimizer/analysis/liveness_analyzer.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INITIALIZE_GRAPHS(G_BEFORE, G_AFTER)                    \
-    for (auto __after_resolve : {true, false})                  \
-        if (auto ___g = (__after_resolve ? G_AFTER : G_BEFORE)) \
+#define INITIALIZE_GRAPHS(G_BEFORE, G_AFTER)                        \
+    for (auto __after_resolve : {true, false})                      \
+        if (auto ___g = (__after_resolve ? (G_AFTER) : (G_BEFORE))) \
     GRAPH(___g)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define AFTER_SPLIT_RESOLUTION(OP) \
     if (__after_resolve)           \
-    OP
+    (OP)
 
 namespace panda::compiler {
 class SplitResolverTest : public GraphTest {
@@ -1166,7 +1166,7 @@ TEST_F(SplitResolverTest, SplitAfterLastInstruction)
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
 }
 
-// TODO (a.popov) Merge equal spill-fills
+// NOTE (a.popov) Merge equal spill-fills
 TEST_F(SplitResolverTest, MultipleEndBlockMoves)
 {
     auto initial_graph = CreateEmptyGraph();

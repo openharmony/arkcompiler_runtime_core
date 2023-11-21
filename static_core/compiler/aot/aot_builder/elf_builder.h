@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -419,7 +419,7 @@ public:
             down_cast<typename ElfBuilder<ARCH, IS_JIT_MODE>::ElfAddr>(elf_data) + CodeInfo::GetCodeOffset(ARCH);
 
         // Some dark magic there. Here we patch the address of JIT code in frame debug info entry.
-        // TODO (asidorov): rework to more readable code
+        // NOTE (asidorov): rework to more readable code
         uint8_t *cie_addr_8 {static_cast<uint8_t *>(frame_section_.GetData())};
         uint32_t *cie_addr_32 {reinterpret_cast<uint32_t *>(cie_addr_8)};
         uint32_t cie_length {*cie_addr_32 + static_cast<uint32_t>(sizeof(uint32_t))};
@@ -845,7 +845,7 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::Write(const std::string &file_name)
     elf_file.write(reinterpret_cast<char *>(data_span.Data()), data_span.Size());
 }
 
-static inline void CopyToSpan(Span<uint8_t> to, const char *from, size_t size, size_t begin_index)
+inline void CopyToSpan(Span<uint8_t> to, const char *from, size_t size, size_t begin_index)
 {
     ASSERT(begin_index < to.Size());
     auto max_size {to.Size() - begin_index};

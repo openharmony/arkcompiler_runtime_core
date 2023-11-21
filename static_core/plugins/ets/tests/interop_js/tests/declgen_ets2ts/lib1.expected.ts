@@ -28,7 +28,7 @@ export declare class Fields {
     public doubleAlias_: number;
     public int_: number;
     public string_: string;
-    public nullableString_?: string;
+    public nullableString_: string | null;
     public object_: Object;
     public rangeError_: RangeError;
     public uint8Array_: Uint8Array;
@@ -43,7 +43,7 @@ export declare class Methods {
     public SumString(a: string, b: string): string;
     public static StaticSumDouble(a: number, b: number): number;
     public SumIntArray(a: number[]): number;
-    public OptionalString(a?: string): string;
+    public OptionalString(a?: string | null): string | null;
     constructor();
 };
 exports.Methods = (globalThis as any).Panda.getClass('LMethods;');

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ namespace panda {
 CompilerTaskManagerWorker::CompilerTaskManagerWorker(mem::InternalAllocatorPtr internal_allocator, Compiler *compiler)
     : CompilerWorker(internal_allocator, compiler)
 {
-    compiler_task_manager_queue_ = internal_allocator_->New<taskmanager::TaskQueue>(
-        taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskQueue::DEFAULT_PRIORITY);
+    auto *tm = taskmanager::TaskScheduler::GetTaskScheduler();
+    compiler_task_manager_queue_ = tm->CreateAndRegisterTaskQueue<decltype(internal_allocator_->Adapter())>(
+        taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskQueueInterface::DEFAULT_PRIORITY);
     ASSERT(compiler_task_manager_queue_ != nullptr);
 }
 
 void CompilerTaskManagerWorker::JoinWorker()
 {
-    //  TODO(molotkov): implement method in TaskManager to wait for tasks to finish (#13962)
+    //  NOTE(molotkov): implement method in TaskManager to wait for tasks to finish (#13962)
     os::memory::LockHolder lock(task_queue_lock_);
     compiler_worker_joined_ = true;
     while (!compiler_task_deque_.empty()) {

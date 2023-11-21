@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_INST_H_
-#define COMPILER_OPTIMIZER_IR_INST_H_
+#ifndef COMPILER_OPTIMIZER_IR_INST_H
+#define COMPILER_OPTIMIZER_IR_INST_H
 
 #include <array>
 #include <vector>
@@ -303,7 +303,7 @@ enum Flags : uint32_t {
 
 inline constexpr uintptr_t GetFlagsMask(Opcode opcode)
 {
-#define INST_DEF(OPCODE, BASE, FLAGS) FLAGS,  // NOLINT(cppcoreguidelines-macro-usage)
+#define INST_DEF(OPCODE, BASE, FLAGS) (FLAGS),  // NOLINT(cppcoreguidelines-macro-usage)
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
     constexpr std::array<uintptr_t, static_cast<int>(Opcode::NUM_OPCODES)> INST_FLAGS_TABLE = {OPCODE_LIST(INST_DEF)};
 #undef INST_DEF
@@ -655,6 +655,14 @@ template <typename T>
 class UserList {
     template <typename U>
     struct UserIterator {
+        // NOLINTBEGIN(readability-identifier-naming)
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = U;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type *;
+        using reference = value_type &;
+        // NOLINTEND(readability-identifier-naming)
+
         UserIterator() = default;
         explicit UserIterator(U *u) : user_(u) {}
 
@@ -1385,7 +1393,7 @@ public:
      * Set input instruction in specified index.
      * Old input will be removed.
      * @param index - index of input to be set
-     * @param inst - new input instruction TODO sherstennikov: currently it can be nullptr, is it correct?
+     * @param inst - new input instruction NOTE sherstennikov: currently it can be nullptr, is it correct?
      */
     void SetInput(unsigned index, Inst *inst)
     {
@@ -1677,7 +1685,7 @@ public:
 
     virtual size_t GetHashCode() const
     {
-        // TODO (Aleksandr Popov) calculate hash code
+        // NOTE (Aleksandr Popov) calculate hash code
         return 0;
     }
 
@@ -1705,6 +1713,11 @@ public:
     void Dump(std::ostream *out, bool new_line = true) const;
     virtual bool DumpInputs(std::ostream * /* out */) const;
     virtual void DumpOpcode(std::ostream * /* out */) const;
+    void DumpBytecode(std::ostream * /* out */) const;
+
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    void DumpSourceLine(std::ostream * /* out */) const;
+#endif  // PANDA_COMPILER_DEBUG_INFO
 
     virtual void SetDstReg([[maybe_unused]] unsigned index, Register reg)
     {
@@ -2239,7 +2252,7 @@ private:
 template <typename T>
 class ConditionMixin : public T {
 public:
-    enum class Prediction { NONE, LIKELY, UNLIKELY, SIZE = UNLIKELY };
+    enum class Prediction { NONE = 0, LIKELY, UNLIKELY, SIZE = UNLIKELY };
 
     using T::T;
     explicit ConditionMixin(ConditionCode cc)
@@ -3791,6 +3804,7 @@ public:
     DECLARE_INST(ParameterInst);
     using Inst::Inst;
     static constexpr uint16_t DYNAMIC_NUM_ARGS = std::numeric_limits<uint16_t>::max();
+    static constexpr uint16_t INVALID_ARG_REF_NUM = std::numeric_limits<uint16_t>::max();
 
     explicit ParameterInst(Opcode /* unused */, uint16_t arg_number, DataType::Type type = DataType::NO_TYPE)
         : Inst(Opcode::Parameter, type, INVALID_PC), arg_number_(arg_number)
@@ -3805,13 +3819,22 @@ public:
     {
         arg_number_ = arg_number;
     }
+    uint16_t GetArgRefNumber() const
+    {
+        return arg_ref_number_;
+    }
 
+    void SetArgRefNumber(uint16_t arg_ref_number)
+    {
+        arg_ref_number_ = arg_ref_number;
+    }
     bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *target_graph) const override;
 
 private:
     uint16_t arg_number_ {0};
+    uint16_t arg_ref_number_ {INVALID_ARG_REF_NUM};
 };
 
 inline bool IsZeroConstant(const Inst *inst)
@@ -7420,4 +7443,4 @@ OPCODE_LIST(INST_DEF)
 #undef INST_DEF
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_IR_INST_H_
+#endif  // COMPILER_OPTIMIZER_IR_INST_H

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,23 +128,7 @@ public:
         auto &block_heap = heaps_.at(GetEquivClass(inst)).first.at(inst->GetBasicBlock());
         uint32_t encounters = 0;
         /* Erase all aliased values, because they may be overwritten */
-        for (auto heap_iter = block_heap.begin(), heap_last = block_heap.end(); heap_iter != heap_last;) {
-            auto hinst = heap_iter->first;
-            ASSERT(GetEquivClass(inst) == GetEquivClass(hinst));
-            alias_calls_++;
-            if (aa_.CheckInstAlias(inst, hinst) == NO_ALIAS) {
-                // Keep track if it's the same object but with different offset
-                heap_iter++;
-                alias_calls_++;
-                if (aa_.CheckRefAlias(base_object, hinst->GetDataFlowInput(0)) == MUST_ALIAS) {
-                    encounters++;
-                }
-            } else {
-                COMPILER_LOG(DEBUG, LSE_OPT)
-                    << "\tDrop from heap { " << LogInst(hinst) << ", v" << heap_iter->second.val->GetId() << "}";
-                heap_iter = block_heap.erase(heap_iter);
-            }
-        }
+        EraseAliasedValues(block_heap, inst, base_object, encounters);
 
         // If we reached limit for this object, remove all its MUST_ALIASed instructions from heap
         // and disable this object for this BB
@@ -387,90 +371,10 @@ public:
     /// Add eliminations inside loops if there is no overwrites on backedges.
     void FinalizeLoops(Graph *graph)
     {
-        InstVector insts_must_alias(graph->GetLocalAllocator()->Adapter());
         for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
             for (auto &[loop, phis] : heaps_.at(eq_class).second) {
                 COMPILER_LOG(DEBUG, LSE_OPT) << "Finalizing loop #" << loop->GetId();
-                for (auto &[cand, insts] : phis) {
-                    if (insts.empty()) {
-                        COMPILER_LOG(DEBUG, LSE_OPT) << "Skipping phi candidate " << LogInst(cand) << " (no users)";
-                        continue;
-                    }
-
-                    insts_must_alias.clear();
-
-                    COMPILER_LOG(DEBUG, LSE_OPT) << "Processing phi candidate: " << LogInst(cand);
-
-                    bool has_stores = false;
-                    bool has_loads = false;
-
-                    bool valid = true;
-
-                    for (auto inst : insts) {
-                        // Skip eliminated instructions
-                        if (eliminations_.find(inst) != eliminations_.end()) {
-                            continue;
-                        }
-                        auto alias_result = aa_.CheckInstAlias(cand, inst);
-                        if (alias_result == MAY_ALIAS) {
-                            // Ignore MAY_ALIAS loads, they won't interfere with our analysis
-                            if (inst->IsLoad()) {
-                                continue;
-                            }
-                            // If we have a MAY_ALIAS store we can't be sure about our values
-                            // in phi creation
-                            ASSERT(inst->IsStore());
-                            COMPILER_LOG(DEBUG, LSE_OPT)
-                                << "Skipping phi candidate " << LogInst(cand) << ": MAY_ALIAS by " << LogInst(inst);
-                            valid = false;
-                            break;
-                        }
-                        ASSERT(alias_result == MUST_ALIAS);
-
-                        if (inst->IsStore() && inst->GetBasicBlock()->GetLoop() != loop) {
-                            // We can handle if loads are in inner loop, but if a store is in inner loop
-                            // then we can't replace anything
-                            COMPILER_LOG(DEBUG, LSE_OPT) << "Skipping phi candidate " << LogInst(cand) << ": "
-                                                         << LogInst(inst) << " is in inner loop";
-                            valid = false;
-                            break;
-                        }
-
-                        insts_must_alias.push_back(inst);
-                        if (inst->IsStore()) {
-                            has_stores = true;
-                        } else if (inst->IsLoad()) {
-                            has_loads = true;
-                        }
-                    }
-                    // Other than validity, it's also possible that all instructions are already eliminated
-                    if (!valid || insts_must_alias.empty()) {
-                        continue;
-                    }
-
-                    if (has_stores) {
-                        if (!has_loads) {
-                            // Nothing to replace
-                            COMPILER_LOG(DEBUG, LSE_OPT)
-                                << "Skipping phi candidate " << LogInst(cand) << ": no loads to convert to phi";
-                            continue;
-                        }
-
-                        auto phi = cand->GetBasicBlock()->GetGraph()->CreateInstPhi(cand->GetType(), cand->GetPc());
-                        loop->GetHeader()->AppendPhi(phi);
-
-                        if (!ProcessBackedges(phi, loop, cand, &insts_must_alias)) {
-                            loop->GetHeader()->RemoveInst(phi);
-                            continue;
-                        }
-
-                        LoopDoElimination(cand, loop, phi, &insts_must_alias);
-                    } else {
-                        ASSERT(has_loads);
-                        // Without stores, we can replace all MUST_ALIAS loads with instruction itself
-                        LoopDoElimination(cand, loop, nullptr, &insts_must_alias);
-                    }
-                }
+                FinalizeLoopsWithPhiCands(graph, loop, phis);
             }
 
             COMPILER_LOG(DEBUG, LSE_OPT) << "Fixing elimination list after backedge substitutions";
@@ -573,6 +477,115 @@ private:
                 }
             }
             loop = loop->GetOuterLoop();
+        }
+    }
+
+    void EraseAliasedValues(ArenaUnorderedMap<Inst *, Lse::HeapValue> &block_heap, Inst *inst, Inst *base_object,
+                            uint32_t &encounters)
+    {
+        for (auto heap_iter = block_heap.begin(), heap_last = block_heap.end(); heap_iter != heap_last;) {
+            auto hinst = heap_iter->first;
+            ASSERT(GetEquivClass(inst) == GetEquivClass(hinst));
+            alias_calls_++;
+            if (aa_.CheckInstAlias(inst, hinst) == NO_ALIAS) {
+                // Keep track if it's the same object but with different offset
+                heap_iter++;
+                alias_calls_++;
+                if (aa_.CheckRefAlias(base_object, hinst->GetDataFlowInput(0)) == MUST_ALIAS) {
+                    encounters++;
+                }
+            } else {
+                COMPILER_LOG(DEBUG, LSE_OPT)
+                    << "\tDrop from heap { " << LogInst(hinst) << ", v" << heap_iter->second.val->GetId() << "}";
+                heap_iter = block_heap.erase(heap_iter);
+            }
+        }
+    }
+
+    void FinalizeLoopsWithPhiCands(Graph *graph, Loop *loop, ArenaUnorderedMap<Inst *, InstVector> &phis)
+    {
+        InstVector insts_must_alias(graph->GetLocalAllocator()->Adapter());
+        for (auto &[cand, insts] : phis) {
+            if (insts.empty()) {
+                COMPILER_LOG(DEBUG, LSE_OPT) << "Skipping phi candidate " << LogInst(cand) << " (no users)";
+                continue;
+            }
+
+            insts_must_alias.clear();
+
+            COMPILER_LOG(DEBUG, LSE_OPT) << "Processing phi candidate: " << LogInst(cand);
+            bool has_stores = false;
+            bool has_loads = false;
+            bool valid = true;
+
+            for (auto inst : insts) {
+                // Skip eliminated instructions
+                if (eliminations_.find(inst) != eliminations_.end()) {
+                    continue;
+                }
+                auto alias_result = aa_.CheckInstAlias(cand, inst);
+                if (alias_result == MAY_ALIAS && inst->IsLoad()) {
+                    // Ignore MAY_ALIAS loads, they won't interfere with our analysis
+                    continue;
+                } else if (alias_result == MAY_ALIAS) {  // NOLINT(readability-else-after-return)
+                    // If we have a MAY_ALIAS store we can't be sure about our values
+                    // in phi creation
+                    ASSERT(inst->IsStore());
+                    COMPILER_LOG(DEBUG, LSE_OPT)
+                        << "Skipping phi candidate " << LogInst(cand) << ": MAY_ALIAS by " << LogInst(inst);
+                    valid = false;
+                    break;
+                }
+                ASSERT(alias_result == MUST_ALIAS);
+
+                if (inst->IsStore() && inst->GetBasicBlock()->GetLoop() != loop) {
+                    // We can handle if loads are in inner loop, but if a store is in inner loop
+                    // then we can't replace anything
+                    COMPILER_LOG(DEBUG, LSE_OPT)
+                        << "Skipping phi candidate " << LogInst(cand) << ": " << LogInst(inst) << " is in inner loop";
+                    valid = false;
+                    break;
+                }
+
+                insts_must_alias.push_back(inst);
+                if (inst->IsStore()) {
+                    has_stores = true;
+                } else if (inst->IsLoad()) {
+                    has_loads = true;
+                }
+            }
+            // Other than validity, it's also possible that all instructions are already eliminated
+            if (!valid || insts_must_alias.empty()) {
+                continue;
+            }
+
+            TryLoopDoElimination(cand, loop, &insts_must_alias, has_loads, has_stores);
+        }
+    }
+
+    void TryLoopDoElimination(Inst *cand, Loop *loop, InstVector *insts, bool has_loads, bool has_stores)
+    {
+        if (has_stores) {
+            if (!has_loads) {
+                // Nothing to replace
+                COMPILER_LOG(DEBUG, LSE_OPT)
+                    << "Skipping phi candidate " << LogInst(cand) << ": no loads to convert to phi";
+                return;
+            }
+
+            auto phi = cand->GetBasicBlock()->GetGraph()->CreateInstPhi(cand->GetType(), cand->GetPc());
+            loop->GetHeader()->AppendPhi(phi);
+
+            if (!ProcessBackedges(phi, loop, cand, insts)) {
+                loop->GetHeader()->RemoveInst(phi);
+                return;
+            }
+
+            LoopDoElimination(cand, loop, phi, insts);
+        } else {
+            ASSERT(has_loads);
+            // Without stores, we can replace all MUST_ALIAS loads with instruction itself
+            LoopDoElimination(cand, loop, nullptr, insts);
         }
     }
 
@@ -1056,37 +1069,18 @@ void Lse::TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps,
     }
 }
 
-bool Lse::RunImpl()
+void Lse::ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phi_fixup_mrk)
 {
-    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
-        COMPILER_LOG(DEBUG, LSE_OPT) << "Load-Store Elimination skipped: es bytecode optimizer";
-        return false;
-    }
-
-    HeapEqClasses heaps(GetGraph()->GetLocalAllocator()->Adapter());
-    for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-        std::pair<Heap, PhiCands> heap_phi(GetGraph()->GetLocalAllocator()->Adapter(),
-                                           GetGraph()->GetLocalAllocator()->Adapter());
-        heaps.emplace(eq_class, heap_phi);
-    }
     InstVector invs(GetGraph()->GetLocalAllocator()->Adapter());
-
-    GetGraph()->RunPass<LoopAnalyzer>();
-    GetGraph()->RunPass<AliasAnalysis>();
-
-    LseVisitor visitor(GetGraph(), &heaps);
-    auto marker_holder = MarkerHolder(GetGraph());
-    auto phi_fixup_mrk = marker_holder.GetMarker();
     int alias_calls = 0;
-
     for (auto block : GetGraph()->GetBlocksRPO()) {
         COMPILER_LOG(DEBUG, LSE_OPT) << "Processing BB " << block->GetId();
-        InitializeHeap(block, &heaps);
+        InitializeHeap(block, heaps);
 
         if (block->IsLoopHeader()) {
-            MergeHeapValuesForLoop(block, &heaps);
+            MergeHeapValuesForLoop(block, heaps);
         } else {
-            alias_calls += MergeHeapValuesForBlock(block, &heaps, phi_fixup_mrk);
+            alias_calls += MergeHeapValuesForBlock(block, heaps, phi_fixup_mrk);
         }
 
         for (auto inst : block->Insts()) {
@@ -1115,6 +1109,31 @@ bool Lse::RunImpl()
         visitor.ClearLocalValuesFromHeap(block);
         visitor.ResetLimits();
     }
+}
+
+bool Lse::RunImpl()
+{
+    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
+        COMPILER_LOG(DEBUG, LSE_OPT) << "Load-Store Elimination skipped: es bytecode optimizer";
+        return false;
+    }
+
+    HeapEqClasses heaps(GetGraph()->GetLocalAllocator()->Adapter());
+    for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
+        std::pair<Heap, PhiCands> heap_phi(GetGraph()->GetLocalAllocator()->Adapter(),
+                                           GetGraph()->GetLocalAllocator()->Adapter());
+        heaps.emplace(eq_class, heap_phi);
+    }
+
+    GetGraph()->RunPass<LoopAnalyzer>();
+    GetGraph()->RunPass<AliasAnalysis>();
+
+    LseVisitor visitor(GetGraph(), &heaps);
+    auto marker_holder = MarkerHolder(GetGraph());
+    auto phi_fixup_mrk = marker_holder.GetMarker();
+
+    ProcessAllBBs(visitor, &heaps, phi_fixup_mrk);
+
     visitor.FinalizeShadowedStores();
     visitor.FinalizeLoops(GetGraph());
 

@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSToReversed = ets_mod.getFunction("Array_TestJSToReversed");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSToReversed = etsMod.getFunction('Array_TestJSToReversed');
 
-{   // Test JS Array<FooClass>
-    TestJSToReversed(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSToReversed(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    let reversed_copy = arr.toReversed();
-    ASSERT_EQ(arr.at(0), reversed_copy.at(1));
-    ASSERT_EQ(arr.at(1), reversed_copy.at(0));
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  let reversedCopy = arr.toReversed();
+  ASSERT_EQ(arr.at(0), reversedCopy.at(1));
+  ASSERT_EQ(arr.at(1), reversedCopy.at(0));
 }
 
 GCJSRuntimeCleanup();

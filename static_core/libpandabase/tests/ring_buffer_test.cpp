@@ -6,7 +6,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ *nless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -39,7 +39,7 @@ TEST(RingBufferTest, PushToBufferTest)
 
     for (size_t i = 0; i < DEFAULT_BUFFER_SIZE; ++i) {
         buffer.push_back(i);
-        ASSERT_EQ(buffer.size(), i + 1);
+        ASSERT_EQ(buffer.size(), i + 1U);
         ASSERT_EQ(buffer.front(), 0U);
         ASSERT_EQ(buffer.back(), i);
     }
@@ -91,7 +91,7 @@ TEST(RingBufferTest, PushPopToBufferTest)
 
     for (size_t i = 0; i < DEFAULT_BUFFER_SIZE; ++i) {
         buffer.push_back(i);
-        ASSERT_EQ(buffer.size(), i + 1);
+        ASSERT_EQ(buffer.size(), i + 1U);
         ASSERT_EQ(buffer.front(), 0U);
         ASSERT_EQ(buffer.back(), i);
     }
@@ -99,21 +99,21 @@ TEST(RingBufferTest, PushPopToBufferTest)
     ASSERT_TRUE(buffer.full());
 
     static_assert(DEFAULT_BUFFER_SIZE >= 3U, "Need 3 elements for tests");
-    size_t i = DEFAULT_BUFFER_SIZE - 1U;
+    size_t i = DEFAULT_BUFFER_SIZE - 1L;
     buffer.pop_back();
-    ASSERT_EQ(buffer.size(), DEFAULT_BUFFER_SIZE - 1U);
+    ASSERT_EQ(buffer.size(), DEFAULT_BUFFER_SIZE - 1L);
     ASSERT_EQ(buffer.capacity(), DEFAULT_BUFFER_SIZE);
     ASSERT_EQ(buffer.front(), 0U);
-    ASSERT_EQ(buffer.back(), i - 1U);
+    ASSERT_EQ(buffer.back(), i - 1L);
     ASSERT_NE(buffer.begin(), buffer.end());
     ASSERT_FALSE(buffer.empty());
     ASSERT_FALSE(buffer.full());
 
     buffer.pop_front();
-    ASSERT_EQ(buffer.size(), DEFAULT_BUFFER_SIZE - 2U);
+    ASSERT_EQ(buffer.size(), DEFAULT_BUFFER_SIZE - 2L);
     ASSERT_EQ(buffer.capacity(), DEFAULT_BUFFER_SIZE);
     ASSERT_EQ(buffer.front(), 1U);
-    ASSERT_EQ(buffer.back(), i - 1U);
+    ASSERT_EQ(buffer.back(), i - 1L);
     ASSERT_NE(buffer.begin(), buffer.end());
     ASSERT_FALSE(buffer.empty());
     ASSERT_FALSE(buffer.full());
@@ -122,7 +122,7 @@ TEST(RingBufferTest, PushPopToBufferTest)
     for (const auto &element : buffer) {
         ASSERT_EQ(element, i++);
     }
-    ASSERT_EQ(i, DEFAULT_BUFFER_SIZE - 1U);
+    ASSERT_EQ(i, DEFAULT_BUFFER_SIZE - 1L);
 
     buffer.clear();
     ASSERT_EQ(buffer.size(), 0U);

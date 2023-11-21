@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_TYPEAPI_CREATE_PANDA_CONSTANTS_H_
-#define PANDA_PLUGINS_ETS_TYPEAPI_CREATE_PANDA_CONSTANTS_H_
+#ifndef PANDA_PLUGINS_ETS_TYPEAPI_CREATE_PANDA_CONSTANTS_H
+#define PANDA_PLUGINS_ETS_TYPEAPI_CREATE_PANDA_CONSTANTS_H
 
 #include <array>
 #include <string_view>
@@ -53,4 +53,4 @@ static_assert(TYPE_TYPE_CREATOR_CTX.back() != '.');
 inline constexpr std::string_view CREATOR_CTX_DATA_PREFIX = "TypeAPI$CtxData$";
 }  // namespace panda::ets::typeapi_create_consts
 
-#endif
+#endif  // PANDA_PLUGINS_ETS_TYPEAPI_CREATE_PANDA_CONSTANTS_H

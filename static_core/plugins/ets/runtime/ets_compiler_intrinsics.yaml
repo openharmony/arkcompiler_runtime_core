@@ -141,3 +141,15 @@ intrinsics:
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
+
+  - name: CompilerEtsLdundefined
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: ref
+      args: [ ]
+    impl: panda::ets::intrinsics::CompilerEtsLdundefined
+    codegen_func: EtsLdundefined
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state ]
+    set_flags: [  ]

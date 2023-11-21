@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSReduce = ets_mod.getFunction("Array_TestJSReduce");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSReduce = etsMod.getFunction('Array_TestJSReduce');
 
-{   // Test JS Array<FooClass>
-    TestJSReduce(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSReduce(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
 
-    function fn_reduce(a, b) { return a; }
-    let reduced = arr.reduce(fn_reduce);
-    ASSERT_EQ(reduced, arr.at(0));
+  function fnReduce(a, b) { return a; }
+  let reduced = arr.reduce(fnReduce);
+  ASSERT_EQ(reduced, arr.at(0));
 
-    function fn_reduce2(a, b) { return b; }
-    let reduced2 = arr.reduce(fn_reduce2, "initVal");
-    ASSERT_EQ(reduced, arr.at(1));
+  function fnReduce2(a, b) { return b; }
+  let reduced2 = arr.reduce(fnReduce2, 'initVal');
+  ASSERT_EQ(reduced, arr.at(1));
 }
 
 GCJSRuntimeCleanup();

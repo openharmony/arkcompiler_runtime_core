@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H_
-#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H
+#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H
 
 #include "compiler/optimizer/code_generator/callconv.h"
 
@@ -63,7 +63,7 @@ static inline asmjit::x86::Condition::Code ArchCc(Condition cc, bool is_float = 
             return asmjit::x86::Condition::Code::kUnsignedGT;
         case Condition::HS:
             return asmjit::x86::Condition::Code::kUnsignedGE;
-        // TODO(igorban) : Remove them
+        // NOTE(igorban) : Remove them
         case Condition::MI:
             return asmjit::x86::Condition::Code::kNegative;
         case Condition::PL:
@@ -293,7 +293,6 @@ public:
                 mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), base_size));
             } else {
                 auto scale = mem.GetScale();
-
                 if (scale <= 3U) {
                     mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), base_size), scale);
                 } else {
@@ -900,6 +899,9 @@ private:
     template <typename T>
     void EncodeReverseBitsImpl(Reg dst0, Reg src0);
 
+    void EncodeRoundToPInfFloat(Reg dst, Reg src);
+    void EncodeRoundToPInfDouble(Reg dst, Reg src);
+
     void EncodeCastFloatToScalar(Reg dst, bool dst_signed, Reg src);
     inline void EncodeCastFloatSignCheckRange(Reg dst, Reg src, const asmjit::Label &end);
     inline void EncodeCastFloatUnsignCheckRange(Reg dst, Reg src, const asmjit::Label &end);
@@ -987,4 +989,4 @@ private:
 };  // Amd64CallingConvention
 }  // namespace panda::compiler::amd64
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H

@@ -429,7 +429,7 @@ JSCONVERT_WRAP(JSError)
     auto klass = ets_val->GetClass();
     INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetJSErrorClass());
 
-    // TODO(vpukhov): remove call after adding a mirror-class for JSError
+    // NOTE(vpukhov): remove call after adding a mirror-class for JSError
     auto method = klass->GetMethod("getValue");
     ASSERT(method != nullptr);
     std::array args = {Value(ets_val->GetCoreType())};

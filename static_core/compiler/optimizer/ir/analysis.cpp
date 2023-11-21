@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -203,11 +203,12 @@ bool IsInstNotNull(const Inst *inst)
     if (inst->IsAllocation() || inst->IsNullCheck()) {
         return true;
     }
-    auto graph = inst->GetBasicBlock()->GetGraph();
-    auto runtime = graph->GetRuntime();
-    // The object is not null if the method is virtual and the object is first parameter.
-    return !runtime->IsMethodStatic(graph->GetMethod()) && inst->GetOpcode() == Opcode::Parameter &&
-           inst->CastToParameter()->GetArgNumber() == 0;
+    if (inst->IsParameter() && inst->CastToParameter()->GetArgNumber() == 0) {
+        auto graph = inst->GetBasicBlock()->GetGraph();
+        // The object is not null if object is first parameter and the method is virtual.
+        return !graph->GetRuntime()->IsMethodStatic(graph->GetMethod());
+    }
+    return false;
 }
 
 static bool FindObjectInSaveState(Inst *object, Inst *ss)
@@ -246,6 +247,17 @@ static bool IsSaveStateForGc(Inst *inst)
     return false;
 }
 
+bool FindAndRemindObjectInSaveState(Inst *object, Inst *inst, Inst **failed_ss)
+{
+    if (IsSaveStateForGc(inst) && !FindObjectInSaveState(object, inst)) {
+        if (failed_ss != nullptr) {
+            *failed_ss = inst;
+        }
+        return false;
+    }
+    return true;
+}
+
 // Checks if object is correctly used in SaveStates between it and user
 bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Inst *start_from, Marker visited,
                     Inst **failed_ss)
@@ -260,10 +272,7 @@ bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Ins
             if (inst->SetMarker(visited) || inst == object || inst == user) {
                 return true;
             }
-            if (IsSaveStateForGc(inst) && !FindObjectInSaveState(object, inst)) {
-                if (failed_ss != nullptr) {
-                    *failed_ss = inst;
-                }
+            if (!FindAndRemindObjectInSaveState(object, inst, failed_ss)) {
                 return false;
             }
         }
@@ -525,6 +534,15 @@ void SaveStateBridgesBuilder::SearchAndCreateMissingObjInSaveState(Graph *graph,
     }
 }
 
+void SaveStateBridgesBuilder::ProcessSSUserPreds(Graph *graph, Inst *inst, Inst *target_inst)
+{
+    for (auto pred_block : target_inst->GetBasicBlock()->GetPredsBlocks()) {
+        if (target_inst->CastToPhi()->GetPhiInput(pred_block) == inst) {
+            SearchAndCreateMissingObjInSaveState(graph, inst, pred_block->GetLastInst(), nullptr, pred_block);
+        }
+    }
+}
+
 void SaveStateBridgesBuilder::FixInstUsageInSS(Graph *graph, Inst *inst)
 {
     if (!inst->IsMovableObject()) {
@@ -535,11 +553,7 @@ void SaveStateBridgesBuilder::FixInstUsageInSS(Graph *graph, Inst *inst)
         COMPILER_LOG(DEBUG, BRIDGES_SS) << " Check usage: Try to do SSB for real source inst: " << *inst << "\n"
                                         << "  For target inst: " << *target_inst << "\n";
         if (target_inst->IsPhi() && !(graph->IsAnalysisValid<DominatorsTree>() && inst->IsDominate(target_inst))) {
-            for (auto pred_block : target_inst->GetBasicBlock()->GetPredsBlocks()) {
-                if (target_inst->CastToPhi()->GetPhiInput(pred_block) == inst) {
-                    SearchAndCreateMissingObjInSaveState(graph, inst, pred_block->GetLastInst(), nullptr, pred_block);
-                }
-            }
+            ProcessSSUserPreds(graph, inst, target_inst);
         } else {
             SearchAndCreateMissingObjInSaveState(graph, inst, target_inst);
         }

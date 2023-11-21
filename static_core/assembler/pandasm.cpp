@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ void PrintError(const panda::pandasm::Error &e, const std::string &msg)
 {
     std::stringstream sos;
     std::cerr << msg << ": " << e.message << std::endl;
-    sos << "      Line " << e.line_number << ", Column " << e.pos + 1 << ": ";
+    sos << "      Line " << e.line_number << ", Column " << (e.pos + 1) << ": ";
     std::cerr << sos.str() << e.whole_line << std::endl;
     std::cerr << std::setw(static_cast<int>(e.pos + sos.str().size()) + 1) << "^" << std::endl;
 }
@@ -134,7 +134,6 @@ bool ParseProgram(panda::pandasm::Parser &parser, std::vector<std::vector<panda:
                   panda::Expected<panda::pandasm::Program, panda::pandasm::Error> &res)
 {
     res = parser.Parse(tokens, input_file.GetValue());
-
     if (!res) {
         PrintError(res.Error(), "ERROR");
         return false;

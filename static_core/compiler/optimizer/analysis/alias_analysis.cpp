@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,15 +59,15 @@
  *     - ParseInstruction method: to add a new instruction alias analysis works for
  *     - AliasAnalysis class: to add a visitor for a new instruction that should be analyzed
  *
- * TODO(Evgenii Kudriashov): Prior to walking the graph in steps 5 and 6, We
+ * NOTE(Evgenii Kudriashov): Prior to walking the graph in steps 5 and 6, We
  * need to perform static cycle elimination on the constraint graph, as well as
  * off-line variable substitution.
  *
- * TODO(Evgenii Kudriashov): To add flow-sensitivity the "Flow-sensitive
+ * NOTE(Evgenii Kudriashov): To add flow-sensitivity the "Flow-sensitive
  * pointer analysis for millions of lines of code" by Ben Hardekopf and Calvin
  * Lin may be considered.
  *
- * TODO(Evgenii Kudriashov): After implementing VRP and SCEV the "Loop-Oriented
+ * NOTE(Evgenii Kudriashov): After implementing VRP and SCEV the "Loop-Oriented
  * Array- and Field-Sensitive Pointer Analysis for Automatic SIMD
  * Vectorization" by Yulei Sui, Xiaokang Fan, Hao Zhou, and Jingling Xue may be
  * considered to add advanced analysis of array indices.
@@ -308,6 +308,37 @@ AliasType AliasAnalysis::CheckRefAlias(Inst *ref1, Inst *ref2) const
     return CheckMemAddress(Pointer::CreateObject(ref1), Pointer::CreateObject(ref2));
 }
 
+AliasType AliasAnalysis::CheckMemAddressEmptyIntersectionCase(const PointerSet &aliases1, const PointerSet &aliases2,
+                                                              const Pointer &p1, const Pointer &p2) const
+{
+    // If at least one set of aliases consists of only local aliases then there is NO_ALIAS
+    auto is_outer = [](Pointer const &p) { return !p.IsLocal(); };
+    if (std::find_if(aliases1.begin(), aliases1.end(), is_outer) == aliases1.end() ||
+        std::find_if(aliases2.begin(), aliases2.end(), is_outer) == aliases2.end()) {
+        return NO_ALIAS;
+    }
+    // Different fields cannot alias each other even if they are not created locally
+    if (p1.GetType() == OBJECT_FIELD && !p1.HasSameOffset(p2)) {
+        return NO_ALIAS;
+    }
+    if (p1.GetType() == ARRAY_ELEMENT) {
+        auto equal = IsSameOffsets(p1.GetIdx(), p2.GetIdx());
+        // If it is known that indices are different OR Imm indices are different then there is
+        // no alias.  If they are both different we can't certainly say so.
+        if ((equal == Trilean::FALSE && p1.GetImm() == p2.GetImm()) ||
+            (equal == Trilean::TRUE && p1.GetImm() != p2.GetImm())) {
+            return NO_ALIAS;
+        }
+    }
+    if (p1.GetType() == DICTIONARY_ELEMENT) {
+        auto equal = IsSameOffsets(p1.GetIdx(), p2.GetIdx());
+        if (equal == Trilean::FALSE && p1.GetImm() == p2.GetImm()) {
+            return NO_ALIAS;
+        }
+    }
+    return MAY_ALIAS;
+}
+
 /**
  * We have 5 types of pointers: OBJECT, OBJECT_FIELD, POOL_CONSTANT,
  * STATIC_FIELD and ARRAY_ELEMENT.  They correspond to groups of memory storing
@@ -362,36 +393,10 @@ AliasType AliasAnalysis::CheckMemAddress(const Pointer &p1, const Pointer &p2) c
     if (intersection != nullptr && aliases1.size() == 1 && aliases2.size() == 1) {
         return SingleIntersectionAliasing(p1, p2, intersection);
     }
-
     // Empty intersection: check that both addresses are not parameters
     if (intersection == nullptr) {
-        // If at least one set of aliases consists of only local aliases then there is NO_ALIAS
-        auto is_outer = [](Pointer const &p) { return !p.IsLocal(); };
-        if (std::find_if(aliases1.begin(), aliases1.end(), is_outer) == aliases1.end() ||
-            std::find_if(aliases2.begin(), aliases2.end(), is_outer) == aliases2.end()) {
-            return NO_ALIAS;
-        }
-        // Different fields cannot alias each other even if they are not created locally
-        if (p1.GetType() == OBJECT_FIELD && !p1.HasSameOffset(p2)) {
-            return NO_ALIAS;
-        }
-        if (p1.GetType() == ARRAY_ELEMENT) {
-            auto equal = IsSameOffsets(p1.GetIdx(), p2.GetIdx());
-            // If it is known that indices are different OR Imm indices are different then there is
-            // no alias.  If they are both different we can't certainly say so.
-            if ((equal == Trilean::FALSE && p1.GetImm() == p2.GetImm()) ||
-                (equal == Trilean::TRUE && p1.GetImm() != p2.GetImm())) {
-                return NO_ALIAS;
-            }
-        }
-        if (p1.GetType() == DICTIONARY_ELEMENT) {
-            auto equal = IsSameOffsets(p1.GetIdx(), p2.GetIdx());
-            if (equal == Trilean::FALSE && p1.GetImm() == p2.GetImm()) {
-                return NO_ALIAS;
-            }
-        }
+        return CheckMemAddressEmptyIntersectionCase(aliases1, aliases2, p1, p2);
     }
-
     return MAY_ALIAS;
 }
 
@@ -431,6 +436,62 @@ AliasType AliasAnalysis::SingleIntersectionAliasing(const Pointer &p1, const Poi
         return MAY_ALIAS;
     }
     return MUST_ALIAS;
+}
+
+void AliasAnalysis::SolveConstraintsMainLoop(Pointer &ref, Pointer &edge, bool &added, PointerSet &sols)
+{
+    for (auto &alias : points_to_.at(ref)) {
+        ASSERT(alias.GetBase() == nullptr || alias.GetBase()->GetOpcode() != Opcode::NullCheck);
+        if (edge.GetType() == OBJECT_FIELD && ref.GetBase() == edge.GetBase()) {
+            // Propagating from object to fields: A{a} -> A.F{a.f}
+            if (alias.GetType() == OBJECT) {
+                Pointer p = Pointer::CreateObjectField(alias.GetBase(), edge.GetImm(), edge.GetTypePtr());
+                p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
+
+                added |= sols.insert(p).second;
+                continue;
+            }
+            // In case A{a.g} -> A.F we propagate symbolic name: A{a.g} -> A.F{A.F}
+            Pointer p = Pointer::CreateObjectField(ref.GetBase(), edge.GetImm(), edge.GetTypePtr());
+            p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
+
+            added |= sols.insert(p).second;
+            continue;
+        }
+        if (edge.GetType() == ARRAY_ELEMENT && ref.GetBase() == edge.GetBase()) {
+            // Propagating from object to elements: A{a} -> A[i]{a[i]}
+            if (alias.GetType() == OBJECT) {
+                Pointer p = Pointer::CreateArrayElement(alias.GetBase(), edge.GetIdx(), edge.GetImm());
+                p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
+
+                added |= sols.insert(p).second;
+                continue;
+            }
+            // In case A{a[j]} -> A[i] we propagate symbolic name: A{a[j]} -> A[i]{A[i]}
+            Pointer p = Pointer::CreateArrayElement(ref.GetBase(), edge.GetIdx(), edge.GetImm());
+            p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
+
+            added |= sols.insert(p).second;
+            continue;
+        }
+        if (edge.GetType() == DICTIONARY_ELEMENT && ref.GetBase() == edge.GetBase()) {
+            // Propagating from object to elements: A{a} -> A[i]{a[i]}
+            if (alias.GetType() == OBJECT) {
+                Pointer p = Pointer::CreateDictionaryElement(alias.GetBase(), edge.GetIdx());
+                p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
+
+                added |= sols.insert(p).second;
+                continue;
+            }
+            // In case A{a[j]} -> A[i] we propagate symbolic name: A{a[j]} -> A[i]{A[i]}
+            Pointer p = Pointer::CreateDictionaryElement(ref.GetBase(), edge.GetIdx());
+            p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
+
+            added |= sols.insert(p).second;
+            continue;
+        }
+        added |= sols.insert(alias).second;
+    }
 }
 
 /**
@@ -482,58 +543,9 @@ void AliasAnalysis::SolveConstraints()
             ASSERT(edge.GetType() != POOL_CONSTANT);
             auto &sols = points_to_.try_emplace(edge, GetGraph()->GetAllocator()->Adapter()).first->second;
             bool added = false;
-            for (auto &alias : points_to_.at(ref)) {
-                ASSERT(alias.GetBase() == nullptr || alias.GetBase()->GetOpcode() != Opcode::NullCheck);
-                if (edge.GetType() == OBJECT_FIELD && ref.GetBase() == edge.GetBase()) {
-                    // Propagating from object to fields: A{a} -> A.F{a.f}
-                    if (alias.GetType() == OBJECT) {
-                        Pointer p = Pointer::CreateObjectField(alias.GetBase(), edge.GetImm(), edge.GetTypePtr());
-                        p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
 
-                        added |= sols.insert(p).second;
-                        continue;
-                    }
-                    // In case A{a.g} -> A.F we propagate symbolic name: A{a.g} -> A.F{A.F}
-                    Pointer p = Pointer::CreateObjectField(ref.GetBase(), edge.GetImm(), edge.GetTypePtr());
-                    p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
+            SolveConstraintsMainLoop(ref, edge, added, sols);
 
-                    added |= sols.insert(p).second;
-                    continue;
-                }
-                if (edge.GetType() == ARRAY_ELEMENT && ref.GetBase() == edge.GetBase()) {
-                    // Propagating from object to elements: A{a} -> A[i]{a[i]}
-                    if (alias.GetType() == OBJECT) {
-                        Pointer p = Pointer::CreateArrayElement(alias.GetBase(), edge.GetIdx(), edge.GetImm());
-                        p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
-
-                        added |= sols.insert(p).second;
-                        continue;
-                    }
-                    // In case A{a[j]} -> A[i] we propagate symbolic name: A{a[j]} -> A[i]{A[i]}
-                    Pointer p = Pointer::CreateArrayElement(ref.GetBase(), edge.GetIdx(), edge.GetImm());
-                    p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
-
-                    added |= sols.insert(p).second;
-                    continue;
-                }
-                if (edge.GetType() == DICTIONARY_ELEMENT && ref.GetBase() == edge.GetBase()) {
-                    // Propagating from object to elements: A{a} -> A[i]{a[i]}
-                    if (alias.GetType() == OBJECT) {
-                        Pointer p = Pointer::CreateDictionaryElement(alias.GetBase(), edge.GetIdx());
-                        p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
-
-                        added |= sols.insert(p).second;
-                        continue;
-                    }
-                    // In case A{a[j]} -> A[i] we propagate symbolic name: A{a[j]} -> A[i]{A[i]}
-                    Pointer p = Pointer::CreateDictionaryElement(ref.GetBase(), edge.GetIdx());
-                    p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
-
-                    added |= sols.insert(p).second;
-                    continue;
-                }
-                added |= sols.insert(alias).second;
-            }
             if (added && chains_->find(edge) != chains_->end()) {
                 worklist.push(edge);
             }
@@ -1398,7 +1410,7 @@ void AliasAnalysis::VisitDefault([[maybe_unused]] Inst *inst)
         // No passes that check class references aliasing
         case Opcode::GetInstanceClass:
         case Opcode::LoadImmediate:
-        // TODO(ekudriashov): Probably should be added
+        // NOTE(ekudriashov): Probably should be added
         case Opcode::Monitor:
         // Mitigated by using GetDataFlowInput
         case Opcode::NullCheck:
@@ -1409,7 +1421,7 @@ void AliasAnalysis::VisitDefault([[maybe_unused]] Inst *inst)
         // Irrelevant for analysis
         case Opcode::Return:
         case Opcode::ReturnI:
-        // TODO(compiler team): support Load, Store
+        // NOTE(compiler team): support Load, Store
         case Opcode::Load:
         case Opcode::LoadI:
         case Opcode::Store:

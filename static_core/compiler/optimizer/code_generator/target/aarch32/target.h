@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H_
-#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H
+#define COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H
 
 #include "operands.h"
 #include "encode.h"
@@ -88,7 +88,7 @@ static inline vixl::aarch32::Condition Convert(const Condition cc)
             return vixl::aarch32::hi;
         case Condition::HS:
             return vixl::aarch32::hs;
-        // TODO(igorban) : Remove them
+        // NOTE(igorban) : Remove them
         case Condition::MI:
             return vixl::aarch32::mi;
         case Condition::PL:
@@ -341,7 +341,7 @@ public:
 
     bool IsRegUsed(ArenaVector<Reg> vec_reg, Reg reg) override;
 
-    // TODO(igorban): implement as virtual
+    // NOTE(igorban): implement as virtual
     static bool IsTmp(Reg reg);
 
 public:
@@ -816,6 +816,9 @@ private:
     template <bool IS_STORE>
     void LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
 
+    template <bool IS_STORE>
+    void LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
+
 private:
     vixl::aarch32::MemOperand PrepareMemLdSForFloat(MemRef mem, vixl::aarch32::Register tmp);
     void EncodeCastFloatToFloat(Reg dst, Reg src);
@@ -905,4 +908,4 @@ private:
 };  // Aarch32CallingConvention
 }  // namespace panda::compiler::aarch32
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H

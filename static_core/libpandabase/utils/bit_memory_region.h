@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -269,6 +269,7 @@ public:
         return Popcount(0, Size());
     }
 
+    void DumpVal(std::ostream &os, size_t val, bool &is_zero, int width) const;
     void Dump(std::ostream &os) const;
 
     virtual ~BitMemoryRegion() = default;

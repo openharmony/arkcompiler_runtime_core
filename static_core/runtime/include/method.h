@@ -153,7 +153,7 @@ public:
 
         ~ProtoId() = default;
 
-        DEFAULT_COPY_CTOR(ProtoId)
+        DEFAULT_COPY_CTOR(ProtoId);
         NO_COPY_OPERATOR(ProtoId);
         NO_MOVE_SEMANTIC(ProtoId);
 
@@ -346,7 +346,7 @@ public:
                                                     [[maybe_unused]] AccVRegisterPtrT cc, bool osr = false,
                                                     coretypes::TaggedValue func = coretypes::TaggedValue::Hole());
 
-    // TODO(xucheng): change the input type to uint16_t when we don't input the max num of int32_t
+    // NOTE(xucheng): change the input type to uint16_t when we don't input the max num of int32_t
     inline NO_THREAD_SANITIZE void SetHotnessCounter(uint32_t counter)
     {
         stor_16_pair_.hotness_counter = static_cast<uint16_t>(counter);

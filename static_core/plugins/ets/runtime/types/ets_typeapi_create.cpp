@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,7 +211,6 @@ const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(cons
 
 void LambdaTypeCreator::AddParameter(pandasm::Type param)
 {
-    // auto type = GetPandasmTypeFromDescriptor(creator->ctx, type_descriptor);
     ASSERT(!param.IsVoid());
     auto param_name = param.GetName();
     fn_.params.emplace_back(std::move(param), SourceLanguage::ETS);
@@ -237,11 +236,6 @@ void LambdaTypeCreator::Create()
     // tools/es2panda/binder/ETSBinder.cpp
     // ETSBinder::FormLambdaName
     name_ += "-0";
-
-    // TODO(kprokopenko): check if this class exists, otherwise create it
-    // it is possible that GetClass will throw an exception, so todo
-    // auto panda_name = ClassNameToPandaName(name);
-    // EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetClass(panda_name);
 
     rec_.name = name_;
     fn_name_ = fn_.name = name_ + ".invoke";

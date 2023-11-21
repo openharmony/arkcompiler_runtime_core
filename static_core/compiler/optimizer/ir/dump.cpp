@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -420,8 +420,8 @@ void AnyTypeCheckInst::DumpOpcode(std::ostream *out) const
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
     ArenaString any_base_type(AnyTypeTypeToString(GetAnyType()), adapter);
     (*out) << std::setw(INDENT_OPCODE)
-           << opcode + space + any_base_type + (IsIntegerWasSeen() ? " i" : "") + (IsSpecialWasSeen() ? " s" : "") +
-                  (IsTypeWasProfiled() ? " p" : "") + space;
+           << (opcode + space + any_base_type + (IsIntegerWasSeen() ? " i" : "") + (IsSpecialWasSeen() ? " s" : "") +
+               (IsTypeWasProfiled() ? " p" : "") + space);
 }
 
 void HclassCheckInst::DumpOpcode(std::ostream *out) const
@@ -563,8 +563,8 @@ void CastInst::DumpOpcode(std::ostream *out) const
     const auto &adapter = GetBasicBlock()->GetGraph()->GetLocalAllocator()->Adapter();
     ArenaString space(" ", adapter);
     (*out) << std::setw(INDENT_OPCODE)
-           << ArenaString(GetOpcodeString(GetOpcode()), adapter) + space +
-                  ArenaString(DataType::ToString(GetOperandsType()), adapter);
+           << (ArenaString(GetOpcodeString(GetOpcode()), adapter) + space +
+               ArenaString(DataType::ToString(GetOperandsType()), adapter));
 }
 
 void NewObjectInst::DumpOpcode(std::ostream *out) const
@@ -1001,6 +1001,29 @@ bool IntrinsicInst::DumpInputs(std::ostream *out) const
     return Inst::DumpInputs(out);
 }
 
+void Inst::DumpBytecode(std::ostream *out) const
+{
+    if (pc_ != INVALID_PC) {
+        auto graph = GetBasicBlock()->GetGraph();
+        auto byte_code = graph->GetRuntime()->GetBytecodeString(graph->GetMethod(), pc_);
+        if (!byte_code.empty()) {
+            (*out) << byte_code << '\n';
+        }
+    }
+}
+
+#ifdef PANDA_COMPILER_DEBUG_INFO
+void Inst::DumpSourceLine(std::ostream *out) const
+{
+    auto current_method = GetCurrentMethod();
+    auto pc = GetPc();
+    if (current_method != nullptr && pc != INVALID_PC) {
+        auto line = GetBasicBlock()->GetGraph()->GetRuntime()->GetLineNumberAndSourceFile(current_method, pc);
+        (*out) << " (" << line << " )";
+    }
+}
+#endif  // PANDA_COMPILER_DEBUG_INFO
+
 void Inst::Dump(std::ostream *out, bool new_line) const
 {
     if (OPTIONS.IsCompilerDumpCompact() && IsSaveState()) {
@@ -1041,25 +1064,14 @@ void Inst::Dump(std::ostream *out, bool new_line) const
     }
 #ifdef PANDA_COMPILER_DEBUG_INFO
     if (OPTIONS.IsCompilerDumpSourceLine()) {
-        auto current_method = GetCurrentMethod();
-        auto pc = GetPc();
-        if (current_method != nullptr && pc != INVALID_PC) {
-            auto line = GetBasicBlock()->GetGraph()->GetRuntime()->GetLineNumberAndSourceFile(current_method, pc);
-            (*out) << " (" << line << " )";
-        }
+        DumpSourceLine(out);
     }
 #endif
     if (new_line) {
         (*out) << '\n';
     }
     if (OPTIONS.IsCompilerDumpBytecode()) {
-        if (pc_ != INVALID_PC) {
-            auto graph = GetBasicBlock()->GetGraph();
-            auto byte_code = graph->GetRuntime()->GetBytecodeString(graph->GetMethod(), pc_);
-            if (!byte_code.empty()) {
-                (*out) << byte_code << '\n';
-            }
-        }
+        DumpBytecode(out);
     }
     if (GetOpcode() == Opcode::Parameter) {
         auto spill_fill = static_cast<const ParameterInst *>(this)->GetLocationData();

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ static int g_shared;
 
 static void *Thread1(void *arg)
 {
-    intptr_t index = ((intptr_t)arg);
+    intptr_t index = reinterpret_cast<intptr_t>(arg);
 
     bool ret;
     MutexLock(&g_x, false);
@@ -44,7 +44,7 @@ static void *Thread1(void *arg)
 
 static void *Thread2(void *arg)
 {
-    intptr_t index = ((intptr_t)arg);
+    intptr_t index = reinterpret_cast<intptr_t>(arg);
 
     bool ret;
     MutexLock(&g_x, false);

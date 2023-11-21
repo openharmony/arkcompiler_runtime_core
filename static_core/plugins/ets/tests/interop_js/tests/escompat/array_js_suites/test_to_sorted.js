@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSToSorted = ets_mod.getFunction("Array_TestJSToSorted");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSToSorted = etsMod.getFunction('Array_TestJSToSorted');
 
-{   // Test JS Array<FooClass>
-    TestJSToSorted(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSToSorted(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    function comparator(a, b) {
-        return a.toString().localeCompare(b.toString());
-    }
-    arr.push(111);
-    let toSorted = arr.toSorted(comparator);
-    ASSERT_EQ(toSorted.at(2), "foo");
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  function comparator(a, b) {
+    return a.toString().localeCompare(b.toString());
+  }
+  arr.push(111);
+  let toSorted = arr.toSorted(comparator);
+  ASSERT_EQ(toSorted.at(2), 'foo');
 }
 
 GCJSRuntimeCleanup();

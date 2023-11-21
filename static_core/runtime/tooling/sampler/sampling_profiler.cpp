@@ -248,7 +248,7 @@ void Sampler::CollectThreads()
 {
     auto t_manager = runtime_->GetPandaVM()->GetThreadManager();
     if (UNLIKELY(t_manager == nullptr)) {
-        // TODO(m.strizhak): make it for languages without thread_manager
+        // NOTE(m.strizhak): make it for languages without thread_manager
         LOG(FATAL, PROFILER) << "Thread manager is nullptr";
         UNREACHABLE();
     }

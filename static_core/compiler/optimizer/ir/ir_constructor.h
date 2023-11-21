@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1239,41 +1239,46 @@ public:
         }
     }
 
+    void UpdateSpecialFlagsForReference(Inst *inst)
+    {
+        if (inst->GetType() == DataType::REFERENCE) {
+            if (inst->GetOpcode() == Opcode::StoreArray) {
+                inst->CastToStoreArray()->SetNeedBarrier(true);
+            }
+            if (inst->GetOpcode() == Opcode::StoreArrayI) {
+                inst->CastToStoreArrayI()->SetNeedBarrier(true);
+            }
+            if (inst->GetOpcode() == Opcode::StoreStatic) {
+                inst->CastToStoreStatic()->SetNeedBarrier(true);
+            }
+            if (inst->GetOpcode() == Opcode::UnresolvedStoreStatic) {
+                inst->CastToUnresolvedStoreStatic()->SetNeedBarrier(true);
+            }
+            if (inst->GetOpcode() == Opcode::StoreObject) {
+                inst->CastToStoreObject()->SetNeedBarrier(true);
+            }
+            if (inst->GetOpcode() == Opcode::StoreResolvedObjectField) {
+                inst->CastToStoreResolvedObjectField()->SetNeedBarrier(true);
+            }
+            if (inst->GetOpcode() == Opcode::StoreResolvedObjectFieldStatic) {
+                inst->CastToStoreResolvedObjectFieldStatic()->SetNeedBarrier(true);
+            }
+            if (inst->GetOpcode() == Opcode::StoreArrayPair) {
+                inst->CastToStoreArrayPair()->SetNeedBarrier(true);
+            }
+            if (inst->GetOpcode() == Opcode::StoreArrayPairI) {
+                inst->CastToStoreArrayPairI()->SetNeedBarrier(true);
+            }
+        }
+    }
+
     void UpdateSpecialFlags()
     {
         int max_id = graph_->GetCurrentInstructionId();
         for (auto pair : inst_map_) {
             auto id = pair.first;
             auto inst = pair.second;
-            if (inst->GetType() == DataType::REFERENCE) {
-                if (inst->GetOpcode() == Opcode::StoreArray) {
-                    inst->CastToStoreArray()->SetNeedBarrier(true);
-                }
-                if (inst->GetOpcode() == Opcode::StoreArrayI) {
-                    inst->CastToStoreArrayI()->SetNeedBarrier(true);
-                }
-                if (inst->GetOpcode() == Opcode::StoreStatic) {
-                    inst->CastToStoreStatic()->SetNeedBarrier(true);
-                }
-                if (inst->GetOpcode() == Opcode::UnresolvedStoreStatic) {
-                    inst->CastToUnresolvedStoreStatic()->SetNeedBarrier(true);
-                }
-                if (inst->GetOpcode() == Opcode::StoreObject) {
-                    inst->CastToStoreObject()->SetNeedBarrier(true);
-                }
-                if (inst->GetOpcode() == Opcode::StoreResolvedObjectField) {
-                    inst->CastToStoreResolvedObjectField()->SetNeedBarrier(true);
-                }
-                if (inst->GetOpcode() == Opcode::StoreResolvedObjectFieldStatic) {
-                    inst->CastToStoreResolvedObjectFieldStatic()->SetNeedBarrier(true);
-                }
-                if (inst->GetOpcode() == Opcode::StoreArrayPair) {
-                    inst->CastToStoreArrayPair()->SetNeedBarrier(true);
-                }
-                if (inst->GetOpcode() == Opcode::StoreArrayPairI) {
-                    inst->CastToStoreArrayPairI()->SetNeedBarrier(true);
-                }
-            }
+            UpdateSpecialFlagsForReference(inst);
             if (inst->GetOpcode() == Opcode::Try) {
                 auto bb = inst->GetBasicBlock();
                 bb->SetTryBegin(true);
@@ -1414,10 +1419,11 @@ private:
     {
         for (auto bb : graph_->GetBlocksRPO()) {
             for (auto inst : bb->AllInsts()) {
-                if (inst->GetDstReg() != INVALID_REG && !inst->IsOperandsDynamic()) {
-                    for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-                        inst->SetSrcReg(i, inst->GetInputs()[i].GetInst()->GetDstReg());
-                    }
+                if (inst->GetDstReg() == INVALID_REG || inst->IsOperandsDynamic()) {
+                    continue;
+                }
+                for (size_t i = 0; i < inst->GetInputsCount(); i++) {
+                    inst->SetSrcReg(i, inst->GetInputs()[i].GetInst()->GetDstReg());
                 }
             }
         }

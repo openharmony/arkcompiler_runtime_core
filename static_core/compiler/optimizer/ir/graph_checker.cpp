@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,10 +31,10 @@ namespace panda::compiler {
 // ---- Below extended ASSERT and ASSERT_DO for GraphChecker ----
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_DO_EXT(cond, func) ASSERT_DO(cond, func; PrintFailedMethodAndPass();)
+#define ASSERT_DO_EXT(cond, func) ASSERT_DO((cond), func; PrintFailedMethodAndPass();)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_DO_EXT_VISITOR(cond, func) ASSERT_DO(cond, func; PrintFailedMethodAndPassVisitor(v);)
+#define ASSERT_DO_EXT_VISITOR(cond, func) ASSERT_DO((cond), func; PrintFailedMethodAndPassVisitor(v);)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_EXT(cond) ASSERT_DO_EXT(cond, )
@@ -43,11 +43,12 @@ namespace panda::compiler {
 #define ASSERT_EXT_VISITOR(cond) ASSERT_DO_EXT_VISITOR(cond, )
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_EXT_PRINT(cond, message) ASSERT_DO(cond, std::cerr << message << std::endl; PrintFailedMethodAndPass();)
+#define ASSERT_EXT_PRINT(cond, message) \
+    ASSERT_DO((cond), std::cerr << (message) << std::endl; PrintFailedMethodAndPass();)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_EXT_PRINT_VISITOR(cond, message) \
-    ASSERT_DO(cond, std::cerr << message << std::endl; PrintFailedMethodAndPassVisitor(v);)
+    ASSERT_DO((cond), std::cerr << (message) << std::endl; PrintFailedMethodAndPassVisitor(v);)
 // --------------------------------------------------------------
 
 GraphChecker::GraphChecker(Graph *graph)
@@ -244,17 +245,17 @@ void GraphChecker::PrintFailedMethodAndPassVisitor(GraphVisitor *v)
 
 void GraphChecker::CheckInputType(Inst *inst) const
 {
-    // TODO(mbolshov): Fix types for LiveOut in irtoc
+    // NOTE(mbolshov): Fix types for LiveOut in irtoc
     if (inst->GetOpcode() == Opcode::LiveOut) {
         return;
     }
-    // TODO(dkofanov): Fix get input type for call insts
+    // NOTE(dkofanov): Fix get input type for call insts
     if (inst->IsCall()) {
         return;
     }
     for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
         [[maybe_unused]] auto input = inst->GetInput(i).GetInst();
-        // TODO(mbolshov): Fix types for LiveIn in irtoc
+        // NOTE(mbolshov): Fix types for LiveIn in irtoc
         if (input->GetOpcode() == Opcode::LiveIn) {
             continue;
         }
@@ -288,6 +289,47 @@ uint32_t GetInliningDepth(Inst *inst)
     return inlining_depth;
 }
 
+void GraphChecker::CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block, Graph *graph)
+{
+    for ([[maybe_unused]] auto &user : inst->GetUsers()) {
+        auto user_inst = user.GetInst();
+        ASSERT_DO_EXT(CheckInstHasInput(user_inst, inst), std::cerr << "Instruction is not an input to its user\n"
+                                                                    << "input: " << *inst << std::endl
+                                                                    << "user:  " << *user_inst << std::endl);
+        if (!user_inst->IsPhi() && !user_inst->IsCatchPhi()) {
+            ASSERT_DO_EXT(inst->IsDominate(user_inst) ||
+                              (GetGraph()->IsRegAllocApplied() &&
+                               IsTryCatchDomination(inst->GetBasicBlock(), user_inst->GetBasicBlock())),
+                          std::cerr << "Instruction doesn't dominate its user\n"
+                                    << "input: bb " << inst->GetBasicBlock()->GetId() << *inst << std::endl
+                                    << "user: bb " << user_inst->GetBasicBlock()->GetId() << *user_inst << std::endl);
+        }
+        auto arch = graph->GetArch();
+        if (DataType::Is32Bits(inst->GetType(), arch)) {
+            if (!user_inst->HasType()) {
+                continue;
+            }
+            // Unsigned Load in AARCH64 zerod all high bits
+#ifndef NDEBUG
+            if (inst->IsLoad() && !DataType::IsTypeSigned(inst->GetType()) && arch == Arch::AARCH64 &&
+                graph->IsLowLevelInstructionsEnabled()) {
+#else
+            if (inst->IsLoad() && !DataType::IsTypeSigned(inst->GetType()) && arch == Arch::AARCH64) {
+#endif  // !NDEBUG
+                continue;
+            }
+            [[maybe_unused]] auto user_input_type = user_inst->GetInputType(user.GetIndex());
+            [[maybe_unused]] bool ref_to_ptr =
+                user_input_type == DataType::POINTER && inst->GetType() == DataType::REFERENCE;
+            ASSERT_DO_EXT(DataType::Is32Bits(user_input_type, arch) || ref_to_ptr ||
+                              (block->GetGraph()->IsDynamicMethod() && user_input_type == DataType::ANY),
+                          std::cerr << "Undefined high-part of input instruction for its user\n"
+                                    << "input: " << *inst << std::endl
+                                    << "user:  " << *user_inst << std::endl);
+        }
+    }
+}
+
 void GraphChecker::CheckDataFlow(BasicBlock *block)
 {
     auto graph = block->GetGraph();
@@ -315,45 +357,8 @@ void GraphChecker::CheckDataFlow(BasicBlock *block)
                                     << "Correct depth = " << GetInliningDepth(inst) << std::endl);
         }
 #endif
+        CheckInstUsers(inst, block, graph);
 
-        for ([[maybe_unused]] auto &user : inst->GetUsers()) {
-            auto user_inst = user.GetInst();
-            ASSERT_DO_EXT(CheckInstHasInput(user_inst, inst), std::cerr << "Instruction is not an input to its user\n"
-                                                                        << "input: " << *inst << std::endl
-                                                                        << "user:  " << *user_inst << std::endl);
-            if (!user_inst->IsPhi() && !user_inst->IsCatchPhi()) {
-                ASSERT_DO_EXT(inst->IsDominate(user_inst) ||
-                                  (GetGraph()->IsRegAllocApplied() &&
-                                   IsTryCatchDomination(inst->GetBasicBlock(), user_inst->GetBasicBlock())),
-                              std::cerr << "Instruction doesn't dominate its user\n"
-                                        << "input: bb " << inst->GetBasicBlock()->GetId() << *inst << std::endl
-                                        << "user: bb " << user_inst->GetBasicBlock()->GetId() << *user_inst
-                                        << std::endl);
-            }
-            auto arch = graph->GetArch();
-            if (DataType::Is32Bits(inst->GetType(), arch)) {
-                if (!user_inst->HasType()) {
-                    continue;
-                }
-                // Unsigned Load in AARCH64 zerod all high bits
-#ifndef NDEBUG
-                if (inst->IsLoad() && !DataType::IsTypeSigned(inst->GetType()) && arch == Arch::AARCH64 &&
-                    graph->IsLowLevelInstructionsEnabled()) {
-#else
-                if (inst->IsLoad() && !DataType::IsTypeSigned(inst->GetType()) && arch == Arch::AARCH64) {
-#endif  // !NDEBUG
-                    continue;
-                }
-                [[maybe_unused]] auto user_input_type = user_inst->GetInputType(user.GetIndex());
-                [[maybe_unused]] bool ref_to_ptr =
-                    user_input_type == DataType::POINTER && inst->GetType() == DataType::REFERENCE;
-                ASSERT_DO_EXT(DataType::Is32Bits(user_input_type, arch) || ref_to_ptr ||
-                                  (block->GetGraph()->IsDynamicMethod() && user_input_type == DataType::ANY),
-                              std::cerr << "Undefined high-part of input instruction for its user\n"
-                                        << "input: " << *inst << std::endl
-                                        << "user:  " << *user_inst << std::endl);
-            }
-        }
         for ([[maybe_unused]] auto input : inst->GetInputs()) {
             ASSERT_DO_EXT(CheckInstHasUser(input.GetInst(), inst), std::cerr
                                                                        << "Instruction is not a user to its input:\n"
@@ -383,11 +388,10 @@ void GraphChecker::CheckCallReturnInlined()
             if (inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined()) {
                 ASSERT_EXT_PRINT(inst->NoDest(), "Inlined call should have NO_DST flag");
                 inlined_calles.push(inst);
+            } else if (inst->GetOpcode() == Opcode::ReturnInlined && block->IsEndWithThrowOrDeoptimize()) {
+                // NOTE(Sergey Chernykh) fix checker
+                continue;
             } else if (inst->GetOpcode() == Opcode::ReturnInlined) {
-                // TODO(Sergey Chernykh) fix checker
-                if (block->IsEndWithThrowOrDeoptimize()) {
-                    continue;
-                }
                 ASSERT_EXT(!inlined_calles.empty());
                 ASSERT(inlined_calles.top()->GetSaveState() == inst->GetSaveState() || throw_exit ||
                        GetGraph()->IsRegAllocApplied());
@@ -652,27 +656,27 @@ void GraphChecker::CheckLoops()
         [[maybe_unused]] auto loop = block->GetLoop();
         ASSERT_EXT(loop != nullptr);
         ASSERT_EXT(block->IsMarked(mrk));
-        if (block->IsLoopHeader()) {
-            if (block->IsOsrEntry()) {
-                ASSERT_EXT(GetGraph()->IsOsrMode());
-                auto ss_osr = block->GetFirstInst();
-                while (ss_osr != nullptr && (ss_osr->IsCatchPhi() || ss_osr->GetOpcode() == Opcode::Try)) {
-                    ss_osr = ss_osr->GetNext();
-                }
-                ASSERT_EXT(ss_osr != nullptr && ss_osr->GetOpcode() == Opcode::SaveStateOsr);
-            }
-            [[maybe_unused]] auto preds = block->GetPredsBlocks();
-            for ([[maybe_unused]] auto pred : preds) {
-                ASSERT_EXT(pred->GetLoop() != loop || loop->HasBackEdge(pred));
-            }
-
-            if (!loop->IsIrreducible()) {
-                for ([[maybe_unused]] auto back : loop->GetBackEdges()) {
-                    ASSERT_EXT(std::find(preds.begin(), preds.end(), back) != preds.end());
-                }
-            }
-        } else {
+        if (!block->IsLoopHeader()) {
             ASSERT_EXT(!block->IsOsrEntry());
+            continue;
+        }
+        if (block->IsOsrEntry()) {
+            ASSERT_EXT(GetGraph()->IsOsrMode());
+            auto ss_osr = block->GetFirstInst();
+            while (ss_osr != nullptr && (ss_osr->IsCatchPhi() || ss_osr->GetOpcode() == Opcode::Try)) {
+                ss_osr = ss_osr->GetNext();
+            }
+            ASSERT_EXT(ss_osr != nullptr && ss_osr->GetOpcode() == Opcode::SaveStateOsr);
+        }
+        [[maybe_unused]] auto preds = block->GetPredsBlocks();
+        for ([[maybe_unused]] auto pred : preds) {
+            ASSERT_EXT(pred->GetLoop() != loop || loop->HasBackEdge(pred));
+        }
+
+        if (!loop->IsIrreducible()) {
+            for ([[maybe_unused]] auto back : loop->GetBackEdges()) {
+                ASSERT_EXT(std::find(preds.begin(), preds.end(), back) != preds.end());
+            }
         }
     }
     GetGraph()->EraseMarker(mrk);
@@ -1856,7 +1860,7 @@ void GraphChecker::VisitBoundsCheck([[maybe_unused]] GraphVisitor *v, Inst *inst
     for (int i = 0; i < 1; i++) {
         [[maybe_unused]] auto op = inst->GetInputs()[i].GetInst();
         [[maybe_unused]] auto op_type = op->GetType();
-        // TODO(pishin): actually type should be INT32, but predecessor may be Call instruction with type u16, u8
+        // NOTE(pishin): actually type should be INT32, but predecessor may be Call instruction with type u16, u8
         // e.t.c
         ASSERT_DO_EXT_VISITOR(
             (op->IsConst() && op_type == DataType::INT64) ||
@@ -2066,6 +2070,34 @@ void GraphChecker::VisitIsInstance([[maybe_unused]] GraphVisitor *v, [[maybe_unu
                           (std::cerr << "Types of IsInstance must be BOOL:\n", inst->Dump(&std::cerr)));
 }
 
+void GraphChecker::VisitSelectWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+{
+    [[maybe_unused]] auto op1 = inst->GetInput(1).GetInst();
+    [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
+    [[maybe_unused]] auto op3 = inst->GetInput(3U).GetInst();
+    [[maybe_unused]] auto cc = inst->CastToSelect()->GetCc();
+
+    ASSERT_DO_EXT_VISITOR(
+        cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
+        (std::cerr << "Select reference comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
+    if (op2->IsConst()) {
+        ASSERT_DO_EXT_VISITOR(IsZeroConstant(op2), (std::cerr << "Constant reference input must be integer 0: \n",
+                                                    inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
+    } else {
+        ASSERT_DO_EXT_VISITOR(op2->GetType() == DataType::REFERENCE,
+                              (std::cerr << "Select instruction 3rd operand type is not a reference\n",
+                               inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
+    }
+    if (op3->IsConst()) {
+        ASSERT_DO_EXT_VISITOR(IsZeroConstant(op3), (std::cerr << "Constant reference input must be integer 0: \n",
+                                                    inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
+    } else {
+        ASSERT_DO_EXT_VISITOR(op3->GetType() == DataType::REFERENCE,
+                              (std::cerr << "Select instruction 4th operand type is not a reference\n",
+                               inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
+    }
+}
+
 void GraphChecker::VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     [[maybe_unused]] auto op0 = inst->GetInput(0).GetInst();
@@ -2104,27 +2136,30 @@ void GraphChecker::VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]
     ASSERT_DO_EXT_VISITOR(inst->GetInputType(2U) == inst->GetInputType(3U),
                           std::cerr << "Select comparison arguments has different inputs type: " << *inst << std::endl);
     if (inst->GetInputType(2U) == DataType::REFERENCE) {
-        [[maybe_unused]] auto cc = inst->CastToSelect()->GetCc();
-        ASSERT_DO_EXT_VISITOR(
-            cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
-            (std::cerr << "Select reference comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
-        if (op2->IsConst()) {
-            ASSERT_DO_EXT_VISITOR(IsZeroConstant(op2), (std::cerr << "Constant reference input must be integer 0: \n",
-                                                        inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
-        } else {
-            ASSERT_DO_EXT_VISITOR(op2->GetType() == DataType::REFERENCE,
-                                  (std::cerr << "Select instruction 3rd operand type is not a reference\n",
-                                   inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
-        }
-        if (op3->IsConst()) {
-            ASSERT_DO_EXT_VISITOR(IsZeroConstant(op3), (std::cerr << "Constant reference input must be integer 0: \n",
-                                                        inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
-        } else {
-            ASSERT_DO_EXT_VISITOR(op3->GetType() == DataType::REFERENCE,
-                                  (std::cerr << "Select instruction 4th operand type is not a reference\n",
-                                   inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
-        }
+        VisitSelectWithReference(v, inst);
     }
+}
+
+void GraphChecker::VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+{
+    [[maybe_unused]] auto op1 = inst->GetInput(1).GetInst();
+    [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
+    [[maybe_unused]] auto op3 = inst->CastToSelectImm()->GetImm();
+    [[maybe_unused]] auto cc = inst->CastToSelectImm()->GetCc();
+
+    ASSERT_DO_EXT_VISITOR(
+        cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
+        (std::cerr << "SelectImm reference comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
+    if (op2->IsConst()) {
+        ASSERT_DO_EXT_VISITOR(IsZeroConstant(op2), (std::cerr << "Constant reference input must be integer 0: \n",
+                                                    inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
+    } else {
+        ASSERT_DO_EXT_VISITOR(op2->GetType() == DataType::REFERENCE,
+                              (std::cerr << "Condition with immediate jump 1st operand type is not a reference\n",
+                               inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
+    }
+    ASSERT_DO_EXT_VISITOR(op3 == 0,
+                          (std::cerr << "Reference can be compared only with 0 immediate: \n", inst->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitSelectImm([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
@@ -2163,20 +2198,7 @@ void GraphChecker::VisitSelectImm([[maybe_unused]] GraphVisitor *v, [[maybe_unus
         (std::cerr << "Types of instruction result and its operands are not compatible\n", inst->Dump(&std::cerr)));
 
     if (inst->GetInputType(2U) == DataType::REFERENCE) {
-        [[maybe_unused]] auto cc = inst->CastToSelectImm()->GetCc();
-        ASSERT_DO_EXT_VISITOR(
-            cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
-            (std::cerr << "SelectImm reference comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
-        if (op2->IsConst()) {
-            ASSERT_DO_EXT_VISITOR(IsZeroConstant(op2), (std::cerr << "Constant reference input must be integer 0: \n",
-                                                        inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
-        } else {
-            ASSERT_DO_EXT_VISITOR(op2->GetType() == DataType::REFERENCE,
-                                  (std::cerr << "Condition with immediate jump 1st operand type is not a reference\n",
-                                   inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
-        }
-        ASSERT_DO_EXT_VISITOR(
-            op3 == 0, (std::cerr << "Reference can be compared only with 0 immediate: \n", inst->Dump(&std::cerr)));
+        VisitSelectImmWithReference(v, inst);
     } else {
         ASSERT_EXT_PRINT_VISITOR(DataType::GetCommonType(op2->GetType()) == DataType::INT64 ||
                                      (is_dynamic && DataType::GetCommonType(op2->GetType()) == DataType::ANY),
@@ -2337,7 +2359,7 @@ void GraphChecker::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[m
     auto input_type = inst->GetInputType(0);
     auto output_type = AnyBaseTypeToDataType(inst->CastToCastValueToAnyType()->GetAnyType());
 
-    // ASSERT_DO_EXT(input_type != DataType::ANY, // TODO(vpukhov): AnyConst
+    // ASSERT_DO_EXT(input_type != DataType::ANY, // NOTE(vpukhov): AnyConst
     //          (std::cerr << "CastValueToAnyType cannot accept inputs of ANY type:\n", inst->Dump(&std::cerr)));
 
     if (input_inst->IsConst() && (input_type == DataType::Type::INT64 || input_type == DataType::Type::INT32)) {

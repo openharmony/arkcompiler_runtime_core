@@ -209,7 +209,7 @@ bool StackfulCoroutineWorker::RunnableCoroutinesExist() const
 
 void StackfulCoroutineWorker::WaitForRunnables()
 {
-    // TODO(konstanting): in case of work stealing, use timed wait and try periodically to steal some runnables
+    // NOTE(konstanting): in case of work stealing, use timed wait and try periodically to steal some runnables
     while (!RunnableCoroutinesExist() && IsActive()) {
         runnables_cv_.Wait(
             &runnables_lock_);  // or timed wait? we may miss the signal in some cases (e.g. IsActive() change)...
@@ -227,7 +227,7 @@ void StackfulCoroutineWorker::RequestScheduleImpl()
     ASSERT(GetCurrentContext()->GetWorker() == this);
     runnables_lock_.Lock();
 
-    // TODO(konstanting): implement coro migration, work stealing, etc.
+    // NOTE(konstanting): implement coro migration, work stealing, etc.
     ScopedNativeCodeThread n(Coroutine::GetCurrent());
     if (RunnableCoroutinesExist()) {
         SuspendCurrentCoroAndScheduleNext();

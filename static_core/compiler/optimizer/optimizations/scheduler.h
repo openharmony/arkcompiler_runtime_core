@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_SCHEDULER_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_SCHEDULER_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_SCHEDULER_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_SCHEDULER_H
 
 #include "optimizer/ir/graph.h"
 #include "compiler_options.h"
@@ -63,6 +63,7 @@ private:
                      Inst **last_barrier);
     void ProcessMemory(Inst *inst, uint32_t *prio, Inst *last_barrier);
     void ProcessSpecial(Inst *inst, uint32_t *prio, Inst *last_barrier);
+    void ProcessSpecialBoundsCheckI(Inst *inst, uint32_t *prio, Inst *last_barrier);
     void ProcessRefInst(Inst *inst, uint32_t *prio, Inst *last_barrier);
 
     bool FinalizeBB(BasicBlock *bb, uint32_t cycle);
@@ -91,4 +92,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SCHEDULER_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SCHEDULER_H

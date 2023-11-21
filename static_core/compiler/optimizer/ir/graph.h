@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_GRAPH_H_
-#define COMPILER_OPTIMIZER_IR_GRAPH_H_
+#ifndef COMPILER_OPTIMIZER_IR_GRAPH_H
+#define COMPILER_OPTIMIZER_IR_GRAPH_H
 
 #include "aot_data.h"
 #include "compiler_events_gen.h"
@@ -55,6 +55,16 @@ enum AliasType : uint8_t;
 class GraphMode {
 public:
     explicit GraphMode(uint32_t value) : value_(value) {}
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DECLARE_GRAPH_MODE_MODIFIERS(name) \
+    void Set##name(bool v)                 \
+    {                                      \
+        Flag##name ::Set(v, &value_);      \
+    }                                      \
+    bool Is##name() const                  \
+    {                                      \
+        return Flag##name ::Get(value_);   \
+    }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DECLARE_GRAPH_MODE(name)                    \
@@ -62,14 +72,7 @@ public:
     {                                               \
         return GraphMode(Flag##name ::Encode(set)); \
     }                                               \
-    void Set##name(bool v)                          \
-    {                                               \
-        Flag##name ::Set(v, &value_);               \
-    }                                               \
-    bool Is##name() const                           \
-    {                                               \
-        return Flag##name ::Get(value_);            \
-    }
+    DECLARE_GRAPH_MODE_MODIFIERS(name)
 
     DECLARE_GRAPH_MODE(Osr);
     // The graph is used in BytecodeOptimizer mode
@@ -90,6 +93,7 @@ public:
     DECLARE_GRAPH_MODE(InterpreterEntry);
 
 #undef DECLARE_GRAPH_MODE
+#undef DECLARE_GRAPH_MODE_MODIFIERS
 
     bool SupportManagedCode() const
     {
@@ -945,11 +949,11 @@ public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INST_DEF(OPCODE, BASE, ...)                                      \
             case Opcode::OPCODE: {                                       \
-                auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE);  \
+                auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE); \
                 inst->SetId(instr_current_id_++);                        \
                 return inst;                                             \
-                }
-                OPCODE_LIST(INST_DEF)
+            }
+            OPCODE_LIST(INST_DEF)
 
 #undef INST_DEF
             default:
@@ -1256,13 +1260,13 @@ private:
     ArenaVector<bool> *used_regs_ {nullptr};
     ArenaVector<bool> *used_vregs_ {nullptr};
 
-    // TODO (a.popov) Replace by ArenaMap from throwable_inst* to try_inst*
+    // NOTE (a.popov) Replace by ArenaMap from throwable_inst* to try_inst*
     ArenaMap<const Inst *, ArenaVector<BasicBlock *>> throwable_insts_;
 
     RegMask arch_used_regs_ {0};
 
     mutable size_t instr_current_id_ {0};
-    // first constant instruction in graph !TODO rewrite it to hash-map
+    // first constant instruction in graph !NOTE rewrite it to hash-map
     ConstantInst *first_const_inst_ {nullptr};
     Inst *nullptr_inst_ {nullptr};
     RuntimeInterface *runtime_ {nullptr};
@@ -1360,4 +1364,4 @@ void MarkLoopExits(const Graph *graph, Marker marker);
 void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rm_pred);
 std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr method);
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_IR_GRAPH_H_
+#endif  // COMPILER_OPTIMIZER_IR_GRAPH_H

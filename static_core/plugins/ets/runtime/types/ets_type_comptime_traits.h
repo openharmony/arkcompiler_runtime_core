@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_COMPTIME_TRAITS_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_COMPTIME_TRAITS_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_COMPTIME_TRAITS_H
+#define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_COMPTIME_TRAITS_H
 
 #include "ets_type.h"
 #include "ets_primitives.h"
@@ -112,4 +112,4 @@ auto EtsPrimitiveTypeEnumToComptimeConstant(EtsType type, F &&func)
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_COMPTIME_TRAITS_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_COMPTIME_TRAITS_H

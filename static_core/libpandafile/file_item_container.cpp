@@ -155,7 +155,7 @@ private:
     std::unordered_map<BaseItem *, BaseItem *> already_deduped_items_;
 };
 
-// TODO(nsizov): make method for items deletion
+// NOTE(nsizov): make method for items deletion
 template <class T, class C, class I, class P, class E, class... Args>
 static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool is_foreign, Args &&...args)
 {

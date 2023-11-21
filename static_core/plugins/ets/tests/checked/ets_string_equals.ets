@@ -14,7 +14,7 @@
  */
 
 //! CHECKER      AOT IR Builder, check StringEquals intrinsic
-//! RUN_PAOC     options: "--compiler-regex='.*equals_.*' --compiler-inlining=false"
+//! RUN_PAOC     options: "--compiler-regex='.*(equals_|null_).*'"
 //!
 //! METHOD       "ETSGLOBAL::equals_str_obj"
 //! PASS_AFTER   "IrBuilder"
@@ -47,6 +47,11 @@
 //!
 //! RUN          entry: "ETSGLOBAL::main"
 
+// Prevents comparison elimination by frontend type inferrence
+function getnull() : Object | null {
+    return null;
+}
+
 function equals_str_obj(lhs: String | null, rhs: Object | null): boolean {
     return lhs == rhs;
 }
@@ -56,19 +61,19 @@ function equals_obj_obj(lhs: Object | null, rhs: Object | null): boolean {
 }
 
 function equals_null_str(str: String | null): boolean {
-    return null == str;
+    return getnull() == str;
 }
 
 function not_equals_null_str(str: String | null): boolean {
-    return null != str;
+    return getnull() != str;
 }
 
 function equals_str_null(str: String | null): boolean {
-    return str == null;
+    return str == getnull();
 }
 
 function not_equals_str_null(str: String | null): boolean {
-    return str != null;
+    return str != getnull();
 }
 
 class A {}

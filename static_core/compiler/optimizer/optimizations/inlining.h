@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_INLINING_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_INLINING_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_INLINING_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_INLINING_H
 
 #include <string>
 #include "optimizer/pass.h"
@@ -93,12 +93,15 @@ protected:
 
     void UpdateDataflow(Graph *graph_inl, Inst *call_inst, std::variant<BasicBlock *, PhiInst *> use,
                         Inst *new_def = nullptr);
+    void UpdateDataflowForEmptyGraph(Inst *call_inst, std::variant<BasicBlock *, PhiInst *> use, BasicBlock *end_block);
     void UpdateParameterDataflow(Graph *graph_inl, Inst *call_inst);
     void UpdateControlflow(Graph *graph_inl, BasicBlock *call_bb, BasicBlock *call_cont_bb);
     void MoveConstants(Graph *graph_inl);
 
     template <bool CHECK_EXTERNAL, bool CHECK_INTRINSICS = false>
     bool CheckMethodCanBeInlined(const CallInst *call_inst, InlineContext *ctx);
+    template <bool CHECK_EXTERNAL>
+    bool CheckTooBigMethodCanBeInlined(const CallInst *call_inst, InlineContext *ctx, bool method_is_too_big);
     bool ResolveTarget(CallInst *call_inst, InlineContext *ctx);
     bool CanUseTypeInfo(ObjectTypeInfo type_info, RuntimeInterface::MethodPtr method);
     void InsertChaGuard(CallInst *call_inst);
@@ -150,4 +153,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_INLINING_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_INLINING_H

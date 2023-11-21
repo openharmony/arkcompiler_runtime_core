@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -162,7 +162,7 @@ private:
 
     pandasm::Type FieldTypeToPandasmType(const uint32_t &type) const;
 
-    static inline std::string StringDataToString(panda_file::File::StringData sd)
+    static std::string StringDataToString(panda_file::File::StringData sd)
     {
         std::string str = std::string(utf::Mutf8AsCString(sd.data));
         size_t sym_pos = 0;
@@ -203,8 +203,8 @@ private:
                     UNREACHABLE();
             }
             str = str.replace(sym_pos, 1, sym);
-            ASSERT(sym.size() == 2);
-            sym_pos += 2;
+            ASSERT(sym.size() == 2U);
+            sym_pos += 2U;
         }
         return str;
     }
@@ -224,6 +224,7 @@ private:
 
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode o) const;
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(uint8_t o) const;
+    void CollectExternalFields(const panda_file::FieldDataAccessor &field_accessor);
 
     pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
                                                          panda_file::File::EntityId method_id) const;

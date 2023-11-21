@@ -159,7 +159,7 @@ ObjectHeader *ObjectHeader::Clone(ObjectHeader *src)
 ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
 {
     /*
-     TODO(d.trubenkov):
+     NOTE(d.trubenkov):
         use bariers for possible copied reference fields
     */
     auto object_class = src->ClassAddr<Class>();

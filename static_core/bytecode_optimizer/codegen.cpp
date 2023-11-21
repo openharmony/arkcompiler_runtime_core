@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +78,7 @@ void BytecodeGen::AppendCatchBlock(uint32_t type_id, const compiler::BasicBlock 
                                    const compiler::BasicBlock *catch_end)
 {
     auto cb = pandasm::Function::CatchBlock();
-    if (type_id != 0) {
+    if (type_id != 0U) {
         cb.exception_record = ir_interface_->GetTypeIdByOffset(type_id);
     }
     cb.try_begin_label = BytecodeGen::LabelName(try_begin->GetId());
@@ -102,6 +102,14 @@ void BytecodeGen::VisitTryBegin(const compiler::BasicBlock *bb)
     });
 }
 
+void BytecodeGen::AddLineAndColumnNumber(const compiler::Inst *inst, size_t i)
+{
+    AddLineNumber(inst, i);
+    if (GetGraph()->IsDynamicMethod()) {
+        AddColumnNumber(inst, i);
+    }
+}
+
 bool BytecodeGen::RunImpl()
 {
     Reserve(function_->ins.size());
@@ -120,10 +128,7 @@ bool BytecodeGen::RunImpl()
             auto end = GetResult().size();
             ASSERT(end >= start);
             for (auto i = start; i < end; ++i) {
-                AddLineNumber(inst, i);
-                if (GetGraph()->IsDynamicMethod()) {
-                    AddColumnNumber(inst, i);
-                }
+                AddLineAndColumnNumber(inst, i);
             }
         }
         if (bb->NeedsJump()) {
@@ -149,7 +154,7 @@ void BytecodeGen::EmitJump(const BasicBlock *bb)
 
     if (bb->GetLastInst() == nullptr) {
         ASSERT(bb->IsEmpty());
-        suc_bb = bb->GetSuccsBlocks()[0];
+        suc_bb = bb->GetSuccsBlocks()[0U];
         result_.push_back(pandasm::Create_JMP(BytecodeGen::LabelName(suc_bb->GetId())));
         return;
     }
@@ -162,7 +167,7 @@ void BytecodeGen::EmitJump(const BasicBlock *bb)
             suc_bb = bb->GetFalseSuccessor();
             break;
         default:
-            suc_bb = bb->GetSuccsBlocks()[0];
+            suc_bb = bb->GetSuccsBlocks()[0U];
             break;
     }
     result_.push_back(pandasm::Create_JMP(BytecodeGen::LabelName(suc_bb->GetId())));
@@ -179,7 +184,7 @@ void BytecodeGen::AddLineNumber(const Inst *inst, const size_t idx)
 void BytecodeGen::AddColumnNumber(const Inst *inst, const uint32_t idx)
 {
     if (ir_interface_ != nullptr && idx < result_.size()) {
-        auto cn = ir_interface_->GetLineNumberByPc(inst->GetPc());
+        auto cn = ir_interface_->GetColumnNumberByPc(inst->GetPc());
         result_[idx].ins_debug.SetColumnNumber(cn);
     }
 }
@@ -242,6 +247,99 @@ bool HasUserPredicate(Inst *inst, UnaryPred p)
     return found;
 }
 
+static void VisitConstant32(BytecodeGen *enc, compiler::Inst *inst, std::vector<pandasm::Ins> &res)
+{
+    auto type = inst->GetType();
+    ASSERT(compiler::DataType::Is32Bits(type, Arch::NONE));
+
+    pandasm::Ins movi;
+    auto dst_reg = inst->GetDstReg();
+    movi.regs.emplace_back(inst->GetDstReg());
+
+    switch (type) {
+        case compiler::DataType::BOOL:
+        case compiler::DataType::INT8:
+        case compiler::DataType::UINT8:
+        case compiler::DataType::INT16:
+        case compiler::DataType::UINT16:
+        case compiler::DataType::INT32:
+        case compiler::DataType::UINT32:
+            if (enc->GetGraph()->IsDynamicMethod()) {
+                res.emplace_back(pandasm::Create_LDAI_DYN(inst->CastToConstant()->GetInt32Value()));
+                DoStaDyn(inst->GetDstReg(), res);
+            } else {
+                if (dst_reg == compiler::ACC_REG_ID) {
+                    pandasm::Ins ldai = pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value());
+                    res.emplace_back(ldai);
+                } else {
+                    movi = pandasm::Create_MOVI(dst_reg, inst->CastToConstant()->GetInt32Value());
+                    res.emplace_back(movi);
+                }
+            }
+            break;
+        case compiler::DataType::FLOAT32:
+            if (enc->GetGraph()->IsDynamicMethod()) {
+                res.emplace_back(pandasm::Create_FLDAI_DYN(inst->CastToConstant()->GetFloatValue()));
+                DoStaDyn(inst->GetDstReg(), res);
+            } else {
+                if (dst_reg == compiler::ACC_REG_ID) {
+                    pandasm::Ins ldai = pandasm::Create_FLDAI(inst->CastToConstant()->GetFloatValue());
+                    res.emplace_back(ldai);
+                } else {
+                    movi = pandasm::Create_FMOVI(dst_reg, inst->CastToConstant()->GetFloatValue());
+                    res.emplace_back(movi);
+                }
+            }
+            break;
+        default:
+            UNREACHABLE();
+    }
+}
+
+static void VisitConstant64(BytecodeGen *enc, compiler::Inst *inst, std::vector<pandasm::Ins> &res)
+{
+    auto type = inst->GetType();
+    ASSERT(compiler::DataType::Is64Bits(type, Arch::NONE));
+
+    pandasm::Ins movi;
+    auto dst_reg = inst->GetDstReg();
+    movi.regs.emplace_back(inst->GetDstReg());
+
+    switch (type) {
+        case compiler::DataType::INT64:
+        case compiler::DataType::UINT64:
+            if (enc->GetGraph()->IsDynamicMethod()) {
+                res.emplace_back(pandasm::Create_LDAI_DYN(inst->CastToConstant()->GetInt64Value()));
+                DoStaDyn(inst->GetDstReg(), res);
+            } else {
+                if (dst_reg == compiler::ACC_REG_ID) {
+                    pandasm::Ins ldai = pandasm::Create_LDAI_64(inst->CastToConstant()->GetInt64Value());
+                    res.emplace_back(ldai);
+                } else {
+                    movi = pandasm::Create_MOVI_64(dst_reg, inst->CastToConstant()->GetInt64Value());
+                    res.emplace_back(movi);
+                }
+            }
+            break;
+        case compiler::DataType::FLOAT64:
+            if (enc->GetGraph()->IsDynamicMethod()) {
+                res.emplace_back(pandasm::Create_FLDAI_DYN(inst->CastToConstant()->GetDoubleValue()));
+                DoStaDyn(inst->GetDstReg(), res);
+            } else {
+                if (dst_reg == compiler::ACC_REG_ID) {
+                    pandasm::Ins ldai = pandasm::Create_FLDAI_64(inst->CastToConstant()->GetDoubleValue());
+                    res.emplace_back(ldai);
+                } else {
+                    movi = pandasm::Create_FMOVI_64(dst_reg, inst->CastToConstant()->GetDoubleValue());
+                    res.emplace_back(movi);
+                }
+            }
+            break;
+        default:
+            UNREACHABLE();
+    }
+}
+
 void BytecodeGen::VisitConstant(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<BytecodeGen *>(visitor);
@@ -255,41 +353,7 @@ void BytecodeGen::VisitConstant(GraphVisitor *visitor, Inst *inst)
         }
     }
 
-    pandasm::Ins movi;
-    auto dst_reg = inst->GetDstReg();
-    movi.regs.emplace_back(inst->GetDstReg());
     switch (type) {
-        case compiler::DataType::INT64:
-        case compiler::DataType::UINT64:
-            if (enc->GetGraph()->IsDynamicMethod()) {
-                enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->CastToConstant()->GetInt64Value()));
-                DoStaDyn(inst->GetDstReg(), enc->result_);
-            } else {
-                if (dst_reg == compiler::ACC_REG_ID) {
-                    pandasm::Ins ldai;
-                    ldai = pandasm::Create_LDAI_64(inst->CastToConstant()->GetInt64Value());
-                    enc->result_.emplace_back(ldai);
-                } else {
-                    movi = pandasm::Create_MOVI_64(dst_reg, inst->CastToConstant()->GetInt64Value());
-                    enc->result_.emplace_back(movi);
-                }
-            }
-            break;
-        case compiler::DataType::FLOAT64:
-            if (enc->GetGraph()->IsDynamicMethod()) {
-                enc->result_.emplace_back(pandasm::Create_FLDAI_DYN(inst->CastToConstant()->GetDoubleValue()));
-                DoStaDyn(inst->GetDstReg(), enc->result_);
-            } else {
-                if (dst_reg == compiler::ACC_REG_ID) {
-                    pandasm::Ins ldai;
-                    ldai = pandasm::Create_FLDAI_64(inst->CastToConstant()->GetDoubleValue());
-                    enc->result_.emplace_back(ldai);
-                } else {
-                    movi = pandasm::Create_FMOVI_64(dst_reg, inst->CastToConstant()->GetDoubleValue());
-                    enc->result_.emplace_back(movi);
-                }
-            }
-            break;
         case compiler::DataType::BOOL:
         case compiler::DataType::INT8:
         case compiler::DataType::UINT8:
@@ -297,34 +361,13 @@ void BytecodeGen::VisitConstant(GraphVisitor *visitor, Inst *inst)
         case compiler::DataType::UINT16:
         case compiler::DataType::INT32:
         case compiler::DataType::UINT32:
-            if (enc->GetGraph()->IsDynamicMethod()) {
-                enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->CastToConstant()->GetInt32Value()));
-                DoStaDyn(inst->GetDstReg(), enc->result_);
-            } else {
-                if (dst_reg == compiler::ACC_REG_ID) {
-                    pandasm::Ins ldai;
-                    ldai = pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value());
-                    enc->result_.emplace_back(ldai);
-                } else {
-                    movi = pandasm::Create_MOVI(dst_reg, inst->CastToConstant()->GetInt32Value());
-                    enc->result_.emplace_back(movi);
-                }
-            }
-            break;
         case compiler::DataType::FLOAT32:
-            if (enc->GetGraph()->IsDynamicMethod()) {
-                enc->result_.emplace_back(pandasm::Create_FLDAI_DYN(inst->CastToConstant()->GetFloatValue()));
-                DoStaDyn(inst->GetDstReg(), enc->result_);
-            } else {
-                if (dst_reg == compiler::ACC_REG_ID) {
-                    pandasm::Ins ldai;
-                    ldai = pandasm::Create_FLDAI(inst->CastToConstant()->GetFloatValue());
-                    enc->result_.emplace_back(ldai);
-                } else {
-                    movi = pandasm::Create_FMOVI(dst_reg, inst->CastToConstant()->GetFloatValue());
-                    enc->result_.emplace_back(movi);
-                }
-            }
+            VisitConstant32(enc, inst, enc->result_);
+            break;
+        case compiler::DataType::INT64:
+        case compiler::DataType::UINT64:
+        case compiler::DataType::FLOAT64:
+            VisitConstant64(enc, inst, enc->result_);
             break;
         case compiler::DataType::ANY: {
             UNREACHABLE();
@@ -449,9 +492,9 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst)
            op == compiler::Opcode::InitObject);
     auto *enc = static_cast<BytecodeGen *>(visitor);
     auto call_inst = CastToCall(inst);
-    auto sf_count = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
-    size_t start = op == compiler::Opcode::InitObject ? 1 : 0;  // exclude LoadAndInitClass
-    auto nargs = sf_count - start;                              // exclude LoadAndInitClass
+    auto sf_count = inst->GetInputsCount() - (inst->RequireState() ? 1U : 0U);
+    size_t start = op == compiler::Opcode::InitObject ? 1U : 0U;  // exclude LoadAndInitClass
+    auto nargs = sf_count - start;                                // exclude LoadAndInitClass
     pandasm::Ins ins;
 
     ins.opcode = ChooseCallOpcode(op, nargs);
@@ -501,12 +544,175 @@ void BytecodeGen::VisitInitObject(GraphVisitor *visitor, Inst *inst)
     CallHandler(visitor, inst);
 }
 
+static void VisitIf32(BytecodeGen *enc, compiler::IfInst *inst, std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is32Bits(inst->GetInputType(0U), Arch::NONE));
+
+    if (enc->GetGraph()->IsDynamicMethod()) {
+        DoLdaDyn(inst->GetSrcReg(0U), res);
+    } else {
+        DoLda(inst->GetSrcReg(0U), res);
+    }
+
+    compiler::Register src = inst->GetSrcReg(1);
+    std::string label = BytecodeGen::LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
+
+    switch (inst->GetCc()) {
+        case compiler::CC_EQ: {
+            res.emplace_back(pandasm::Create_JEQ(src, label));
+            break;
+        }
+        case compiler::CC_NE: {
+            res.emplace_back(pandasm::Create_JNE(src, label));
+            break;
+        }
+        case compiler::CC_LT: {
+            res.emplace_back(pandasm::Create_JLT(src, label));
+            break;
+        }
+        case compiler::CC_LE: {
+            res.emplace_back(pandasm::Create_JLE(src, label));
+            break;
+        }
+        case compiler::CC_GT: {
+            res.emplace_back(pandasm::Create_JGT(src, label));
+            break;
+        }
+        case compiler::CC_GE: {
+            res.emplace_back(pandasm::Create_JGE(src, label));
+            break;
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
+}
+
+static void VisitIf64Signed(BytecodeGen *enc, compiler::IfInst *inst, std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is64Bits(inst->GetInputType(0U), Arch::NONE));
+    ASSERT(IsTypeSigned(inst->GetInputType(0U)));
+
+    if (enc->GetGraph()->IsDynamicMethod()) {
+        DoLdaDyn(inst->GetSrcReg(0U), res);
+    } else {
+        DoLda64(inst->GetSrcReg(0U), res);
+    }
+
+    res.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(1U)));
+    std::string label = BytecodeGen::LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
+
+    switch (inst->GetCc()) {
+        case compiler::CC_EQ: {
+            res.emplace_back(pandasm::Create_JEQZ(label));
+            break;
+        }
+        case compiler::CC_NE: {
+            res.emplace_back(pandasm::Create_JNEZ(label));
+            break;
+        }
+        case compiler::CC_LT: {
+            res.emplace_back(pandasm::Create_JLTZ(label));
+            break;
+        }
+        case compiler::CC_LE: {
+            res.emplace_back(pandasm::Create_JLEZ(label));
+            break;
+        }
+        case compiler::CC_GT: {
+            res.emplace_back(pandasm::Create_JGTZ(label));
+            break;
+        }
+        case compiler::CC_GE: {
+            res.emplace_back(pandasm::Create_JGEZ(label));
+            break;
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
+}
+
+static void VisitIf64Unsigned(BytecodeGen *enc, compiler::IfInst *inst, std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is64Bits(inst->GetInputType(0U), Arch::NONE));
+    ASSERT(!IsTypeSigned(inst->GetInputType(0U)));
+
+    if (enc->GetGraph()->IsDynamicMethod()) {
+        DoLdaDyn(inst->GetSrcReg(0U), res);
+    } else {
+        DoLda64(inst->GetSrcReg(0U), res);
+    }
+
+    res.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(1U)));
+    std::string label = BytecodeGen::LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
+
+    switch (inst->GetCc()) {
+        case compiler::CC_EQ: {
+            res.emplace_back(pandasm::Create_JEQZ(label));
+            break;
+        }
+        case compiler::CC_NE: {
+            res.emplace_back(pandasm::Create_JNEZ(label));
+            break;
+        }
+        case compiler::CC_LT: {
+            res.emplace_back(pandasm::Create_JLTZ(label));
+            break;
+        }
+        case compiler::CC_LE: {
+            res.emplace_back(pandasm::Create_JLEZ(label));
+            break;
+        }
+        case compiler::CC_GT: {
+            res.emplace_back(pandasm::Create_JGTZ(label));
+            break;
+        }
+        case compiler::CC_GE: {
+            res.emplace_back(pandasm::Create_JGEZ(label));
+            break;
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
+}
+
+static void VisitIfRef([[maybe_unused]] BytecodeGen *enc, compiler::IfInst *inst, std::vector<pandasm::Ins> &res,
+                       bool &success)
+{
+    ASSERT(IsReference(inst->GetInputType(0U)));
+
+    DoLdaObj(inst->GetSrcReg(0U), res);
+
+    compiler::Register src = inst->GetSrcReg(1);
+    std::string label = BytecodeGen::LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
+
+    switch (inst->GetCc()) {
+        case compiler::CC_EQ: {
+            res.emplace_back(pandasm::Create_JEQ_OBJ(src, label));
+            break;
+        }
+        case compiler::CC_NE: {
+            res.emplace_back(pandasm::Create_JNE_OBJ(src, label));
+            break;
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
+}
+
 // NOLINTNEXTLINE(readability-function-size)
 void BytecodeGen::VisitIf(GraphVisitor *v, Inst *inst_base)
 {
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToIf();
-    switch (inst->GetInputType(0)) {
+    switch (inst->GetInputType(0U)) {
         case compiler::DataType::BOOL:
         case compiler::DataType::UINT8:
         case compiler::DataType::INT8:
@@ -514,244 +720,19 @@ void BytecodeGen::VisitIf(GraphVisitor *v, Inst *inst_base)
         case compiler::DataType::INT16:
         case compiler::DataType::UINT32:
         case compiler::DataType::INT32: {
-            switch (inst->GetCc()) {
-                case compiler::CC_EQ: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-
-                    enc->result_.emplace_back(pandasm::Create_JEQ(
-                        inst->GetSrcReg(1), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_NE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JNE(
-                        inst->GetSrcReg(1), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JLT(
-                        inst->GetSrcReg(1), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JLE(
-                        inst->GetSrcReg(1), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JGT(
-                        inst->GetSrcReg(1), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JGE(
-                        inst->GetSrcReg(1), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            VisitIf32(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::INT64: {
-            switch (inst->GetCc()) {
-                case compiler::CC_EQ: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JEQZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_NE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JNEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            VisitIf64Signed(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::UINT64: {
-            switch (inst->GetCc()) {
-                case compiler::CC_EQ: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JEQZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_NE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JNEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda64(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(1)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            VisitIf64Unsigned(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::REFERENCE: {
-            switch (inst->GetCc()) {
-                case compiler::CC_EQ: {
-                    DoLdaObj(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_JEQ_OBJ(
-                        inst->GetSrcReg(1), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_NE: {
-                    DoLdaObj(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_JNE_OBJ(
-                        inst->GetSrcReg(1), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            VisitIfRef(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::ANY: {
@@ -780,10 +761,10 @@ static std::optional<coretypes::TaggedValue> IsEcmaConstTemplate(Inst const *ins
         return {};
     }
     auto cvat_inst = inst->CastToCastValueToAnyType();
-    if (!cvat_inst->GetInput(0).GetInst()->IsConst()) {
+    if (!cvat_inst->GetInput(0U).GetInst()->IsConst()) {
         return {};
     }
-    auto const_inst = cvat_inst->GetInput(0).GetInst()->CastToConstant();
+    auto const_inst = cvat_inst->GetInput(0U).GetInst()->CastToConstant();
 
     switch (cvat_inst->GetAnyType()) {
         case compiler::AnyBaseType::ECMASCRIPT_UNDEFINED_TYPE:
@@ -793,7 +774,7 @@ static std::optional<coretypes::TaggedValue> IsEcmaConstTemplate(Inst const *ins
         case compiler::AnyBaseType::ECMASCRIPT_DOUBLE_TYPE:
             return coretypes::TaggedValue(const_inst->GetDoubleValue());
         case compiler::AnyBaseType::ECMASCRIPT_BOOLEAN_TYPE:
-            return coretypes::TaggedValue(static_cast<bool>(const_inst->GetInt64Value() != 0));
+            return coretypes::TaggedValue(static_cast<bool>(const_inst->GetInt64Value() != 0U));
         case compiler::AnyBaseType::ECMASCRIPT_NULL_TYPE:
             return coretypes::TaggedValue(coretypes::TaggedValue::VALUE_NULL);
         default:
@@ -809,15 +790,15 @@ void BytecodeGen::IfEcma(GraphVisitor *v, compiler::IfInst *inst)
     compiler::Register reg = compiler::INVALID_REG_ID;
     coretypes::TaggedValue cmp_val;
 
-    auto test_lhs = IsEcmaConstTemplate(inst->GetInput(0).GetInst());
-    auto test_rhs = IsEcmaConstTemplate(inst->GetInput(1).GetInst());
+    auto test_lhs = IsEcmaConstTemplate(inst->GetInput(0U).GetInst());
+    auto test_rhs = IsEcmaConstTemplate(inst->GetInput(1U).GetInst());
 
     if (test_lhs.has_value() && test_lhs->IsBoolean()) {
         cmp_val = test_lhs.value();
-        reg = inst->GetSrcReg(1);
+        reg = inst->GetSrcReg(1U);
     } else if (test_rhs.has_value() && test_rhs->IsBoolean()) {
         cmp_val = test_rhs.value();
-        reg = inst->GetSrcReg(0);
+        reg = inst->GetSrcReg(0U);
     } else {
         LOG(ERROR, BYTECODE_OPTIMIZER) << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
         enc->success_ = false;
@@ -860,11 +841,83 @@ void BytecodeGen::VisitIfImm(GraphVisitor *v, Inst *inst_base)
 {
     auto inst = inst_base->CastToIfImm();
     auto imm = inst->GetImm();
-    if (imm == 0) {
+    if (imm == 0U) {
         IfImmZero(v, inst_base);
         return;
     }
     IfImmNonZero(v, inst_base);
+}
+
+static void IfImmZero32(BytecodeGen *enc, compiler::IfImmInst *inst, std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is32Bits(inst->GetInputType(0U), Arch::NONE));
+
+    if (enc->GetGraph()->IsDynamicMethod()) {
+        DoLdaDyn(inst->GetSrcReg(0U), res);
+    } else {
+        DoLda(inst->GetSrcReg(0U), res);
+    }
+
+    std::string label = BytecodeGen::LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
+
+    switch (inst->GetCc()) {
+        case compiler::CC_EQ: {
+            res.emplace_back(pandasm::Create_JEQZ(label));
+            break;
+        }
+        case compiler::CC_NE: {
+            res.emplace_back(pandasm::Create_JNEZ(label));
+            break;
+        }
+        case compiler::CC_LT: {
+            res.emplace_back(pandasm::Create_JLTZ(label));
+            break;
+        }
+        case compiler::CC_LE: {
+            res.emplace_back(pandasm::Create_JLEZ(label));
+            break;
+        }
+        case compiler::CC_GT: {
+            res.emplace_back(pandasm::Create_JGTZ(label));
+            break;
+        }
+        case compiler::CC_GE: {
+            res.emplace_back(pandasm::Create_JGEZ(label));
+            break;
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
+}
+
+static void IfImmZeroRef(BytecodeGen *enc, compiler::IfImmInst *inst, std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(IsReference(inst->GetInputType(0U)));
+
+    if (enc->GetGraph()->IsDynamicMethod()) {
+        DoLdaDyn(inst->GetSrcReg(0U), res);
+    } else {
+        DoLdaObj(inst->GetSrcReg(0U), res);
+    }
+
+    std::string label = BytecodeGen::LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
+
+    switch (inst->GetCc()) {
+        case compiler::CC_EQ: {
+            res.emplace_back(pandasm::Create_JEQZ_OBJ(label));
+            break;
+        }
+        case compiler::CC_NE: {
+            res.emplace_back(pandasm::Create_JNEZ_OBJ(label));
+            break;
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
 }
 
 // NOLINTNEXTLINE(readability-function-size)
@@ -872,7 +925,7 @@ void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *inst_base)
 {
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToIfImm();
-    switch (inst->GetInputType(0)) {
+    switch (inst->GetInputType(0U)) {
         case compiler::DataType::BOOL:
         case compiler::DataType::UINT8:
         case compiler::DataType::INT8:
@@ -880,72 +933,7 @@ void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *inst_base)
         case compiler::DataType::INT16:
         case compiler::DataType::UINT32:
         case compiler::DataType::INT32: {
-            switch (inst->GetCc()) {
-                case compiler::CC_EQ: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(
-                        pandasm::Create_JEQZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_NE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(
-                        pandasm::Create_JNEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLda(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            IfImmZero32(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::INT64:
@@ -954,32 +942,7 @@ void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *inst_base)
             break;
         }
         case compiler::DataType::REFERENCE: {
-            switch (inst->GetCc()) {
-                case compiler::CC_EQ: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLdaObj(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(
-                        pandasm::Create_JEQZ_OBJ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_NE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        DoLdaDyn(inst->GetSrcReg(0), enc->result_);
-                    } else {
-                        DoLdaObj(inst->GetSrcReg(0), enc->result_);
-                    }
-                    enc->result_.emplace_back(
-                        pandasm::Create_JNEZ_OBJ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            IfImmZeroRef(enc, inst, enc->result_, enc->success_);
             break;
         }
         default:
@@ -989,12 +952,57 @@ void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *inst_base)
     }
 }
 
+static void IfImmNonZero32(BytecodeGen *enc, compiler::IfImmInst *inst, std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is32Bits(inst->GetInputType(0U), Arch::NONE));
+
+    if (enc->GetGraph()->IsDynamicMethod()) {
+        res.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
+    } else {
+        res.emplace_back(pandasm::Create_LDAI(inst->GetImm()));
+    }
+
+    compiler::Register src = inst->GetSrcReg(0);
+    std::string label = BytecodeGen::LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
+
+    switch (inst->GetCc()) {
+        case compiler::CC_EQ: {
+            res.emplace_back(pandasm::Create_JEQ(src, label));
+            break;
+        }
+        case compiler::CC_NE: {
+            res.emplace_back(pandasm::Create_JNE(src, label));
+            break;
+        }
+        case compiler::CC_LT: {
+            res.emplace_back(pandasm::Create_JLT(src, label));
+            break;
+        }
+        case compiler::CC_LE: {
+            res.emplace_back(pandasm::Create_JLE(src, label));
+            break;
+        }
+        case compiler::CC_GT: {
+            res.emplace_back(pandasm::Create_JGT(src, label));
+            break;
+        }
+        case compiler::CC_GE: {
+            res.emplace_back(pandasm::Create_JGE(src, label));
+            break;
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
+}
+
 // NOLINTNEXTLINE(readability-function-size)
 void BytecodeGen::IfImmNonZero(GraphVisitor *v, Inst *inst_base)
 {
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToIfImm();
-    switch (inst->GetInputType(0)) {
+    switch (inst->GetInputType(0U)) {
         case compiler::DataType::BOOL:
         case compiler::DataType::UINT8:
         case compiler::DataType::INT8:
@@ -1002,72 +1010,7 @@ void BytecodeGen::IfImmNonZero(GraphVisitor *v, Inst *inst_base)
         case compiler::DataType::INT16:
         case compiler::DataType::UINT32:
         case compiler::DataType::INT32: {
-            switch (inst->GetCc()) {
-                case compiler::CC_EQ: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JEQ(
-                        inst->GetSrcReg(0), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_NE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JNE(
-                        inst->GetSrcReg(0), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JLT(
-                        inst->GetSrcReg(0), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JLE(
-                        inst->GetSrcReg(0), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JGT(
-                        inst->GetSrcReg(0), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_JGE(
-                        inst->GetSrcReg(0), LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            IfImmNonZero32(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::INT64:
@@ -1095,378 +1038,308 @@ void BytecodeGen::IfImm64(GraphVisitor *v, Inst *inst_base)
 {
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToIfImm();
-    switch (inst->GetInputType(0)) {
+
+    if (enc->GetGraph()->IsDynamicMethod()) {
+        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
+    } else {
+        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
+    }
+
+    std::string label = LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
+
+    switch (inst->GetInputType(0U)) {
         case compiler::DataType::INT64: {
-            switch (inst->GetCc()) {
-                case compiler::CC_EQ: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JEQZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_NE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JNEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(0U)));
             break;
         }
         case compiler::DataType::UINT64: {
-            switch (inst->GetCc()) {
-                case compiler::CC_EQ: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JEQZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_NE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JNEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_LE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JGEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GT: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLTZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                case compiler::CC_GE: {
-                    if (enc->GetGraph()->IsDynamicMethod()) {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
-                    } else {
-                        enc->result_.emplace_back(pandasm::Create_LDAI_64(inst->GetImm()));
-                    }
-                    enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(0)));
-                    enc->result_.emplace_back(
-                        pandasm::Create_JLEZ(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
-                    break;
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(0U)));
             break;
         }
         default:
             LOG(ERROR, BYTECODE_OPTIMIZER)
                 << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
             enc->success_ = false;
+            return;
+    }
+
+    switch (inst->GetCc()) {
+        case compiler::CC_EQ: {
+            enc->result_.emplace_back(pandasm::Create_JEQZ(label));
+            break;
+        }
+        case compiler::CC_NE: {
+            enc->result_.emplace_back(pandasm::Create_JNEZ(label));
+            break;
+        }
+        case compiler::CC_LT: {
+            enc->result_.emplace_back(pandasm::Create_JGTZ(label));
+            break;
+        }
+        case compiler::CC_LE: {
+            enc->result_.emplace_back(pandasm::Create_JGEZ(label));
+            break;
+        }
+        case compiler::CC_GT: {
+            enc->result_.emplace_back(pandasm::Create_JLTZ(label));
+            break;
+        }
+        case compiler::CC_GE: {
+            enc->result_.emplace_back(pandasm::Create_JLEZ(label));
+            break;
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            enc->success_ = false;
+            return;
+    }
+}
+
+static void VisitCastFromI32([[maybe_unused]] BytecodeGen *enc, compiler::CastInst *inst,
+                             std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is32Bits(inst->GetInputType(0U), Arch::NONE));
+
+    constexpr int64_t SHLI_ASHRI_16 = 16;
+    constexpr int64_t SHLI_ASHRI_24 = 24;
+    constexpr int64_t ANDI_16 = 0xffff;
+    constexpr int64_t ANDI_8 = 0xff;
+
+    if (inst->GetType() != compiler::DataType::UINT32) {
+        DoLda(inst->GetSrcReg(0U), res);
+    }
+
+    switch (inst->GetType()) {
+        case compiler::DataType::FLOAT32: {
+            res.emplace_back(pandasm::Create_I32TOF32());
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::FLOAT64: {
+            res.emplace_back(pandasm::Create_I32TOF64());
+            DoSta64(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::INT64: {
+            res.emplace_back(pandasm::Create_I32TOI64());
+            DoSta64(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::UINT32: {
+            break;
+        }
+        case compiler::DataType::INT16: {
+            res.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_16));
+            res.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_16));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::UINT16: {
+            res.emplace_back(pandasm::Create_ANDI(ANDI_16));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::INT8: {
+            res.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_24));
+            res.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_24));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::UINT8: {
+            res.emplace_back(pandasm::Create_ANDI(ANDI_8));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::ANY: {
+            UNREACHABLE();
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
+}
+
+static void VisitCastFromI64([[maybe_unused]] BytecodeGen *enc, compiler::CastInst *inst,
+                             std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is64Bits(inst->GetInputType(0U), Arch::NONE));
+
+    constexpr int64_t SHLI_ASHRI_16 = 16;
+    constexpr int64_t SHLI_ASHRI_24 = 24;
+    constexpr int64_t ANDI_16 = 0xffff;
+    constexpr int64_t ANDI_8 = 0xff;
+    constexpr int64_t ANDI_32 = 0xffffffff;
+
+    DoLda64(inst->GetSrcReg(0U), res);
+
+    switch (inst->GetType()) {
+        case compiler::DataType::INT32: {
+            res.emplace_back(pandasm::Create_I64TOI32());
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::UINT32: {
+            res.emplace_back(pandasm::Create_ANDI(ANDI_32));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::FLOAT32: {
+            res.emplace_back(pandasm::Create_I64TOF32());
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::FLOAT64: {
+            res.emplace_back(pandasm::Create_I64TOF64());
+            DoSta64(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::INT16: {
+            res.emplace_back(pandasm::Create_I64TOI32());
+            res.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_16));
+            res.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_16));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::UINT16: {
+            res.emplace_back(pandasm::Create_I64TOI32());
+            res.emplace_back(pandasm::Create_ANDI(ANDI_16));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::INT8: {
+            res.emplace_back(pandasm::Create_I64TOI32());
+            res.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_24));
+            res.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_24));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::UINT8: {
+            res.emplace_back(pandasm::Create_I64TOI32());
+            res.emplace_back(pandasm::Create_ANDI(ANDI_8));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::ANY: {
+            UNREACHABLE();
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
+}
+
+static void VisitCastFromF32([[maybe_unused]] BytecodeGen *enc, compiler::CastInst *inst,
+                             std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is32Bits(inst->GetInputType(0U), Arch::NONE));
+    ASSERT(IsFloatType(inst->GetInputType(0U)));
+
+    constexpr int64_t ANDI_32 = 0xffffffff;
+
+    DoLda(inst->GetSrcReg(0U), res);
+
+    switch (inst->GetType()) {
+        case compiler::DataType::FLOAT64: {
+            res.emplace_back(pandasm::Create_F32TOF64());
+            DoSta64(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::INT64: {
+            res.emplace_back(pandasm::Create_F32TOI64());
+            DoSta64(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::UINT64: {
+            res.emplace_back(pandasm::Create_F32TOU64());
+            DoSta64(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::INT32: {
+            res.emplace_back(pandasm::Create_F32TOI32());
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::UINT32: {
+            res.emplace_back(pandasm::Create_F32TOU32());
+            res.emplace_back(pandasm::Create_ANDI(ANDI_32));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::ANY: {
+            UNREACHABLE();
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+    }
+}
+
+static void VisitCastFromF64([[maybe_unused]] BytecodeGen *enc, compiler::CastInst *inst,
+                             std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is64Bits(inst->GetInputType(0U), Arch::NONE));
+    ASSERT(IsFloatType(inst->GetInputType(0U)));
+
+    constexpr int64_t ANDI_32 = 0xffffffff;
+
+    DoLda64(inst->GetSrcReg(0U), res);
+
+    switch (inst->GetType()) {
+        case compiler::DataType::FLOAT32: {
+            res.emplace_back(pandasm::Create_F64TOF32());
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::INT64: {
+            res.emplace_back(pandasm::Create_F64TOI64());
+            DoSta64(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::INT32: {
+            res.emplace_back(pandasm::Create_F64TOI32());
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::UINT32: {
+            res.emplace_back(pandasm::Create_F64TOI64());
+            res.emplace_back(pandasm::Create_ANDI(ANDI_32));
+            DoSta(inst->GetDstReg(), res);
+            break;
+        }
+        case compiler::DataType::ANY: {
+            UNREACHABLE();
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
     }
 }
 
 // NOLINTNEXTLINE(readability-function-size)
 void BytecodeGen::VisitCast(GraphVisitor *v, Inst *inst_base)
 {
-    constexpr int64_t SHLI_ASHRI_16 = 16;
-    constexpr int64_t SHLI_ASHRI_24 = 24;
-    constexpr int64_t ANDI_8 = 0xff;
-    constexpr int64_t ANDI_16 = 0xffff;
-    constexpr int64_t ANDI_32 = 0xffffffff;
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToCast();
-    switch (inst->GetInputType(0)) {
+    switch (inst->GetInputType(0U)) {
         case compiler::DataType::INT32: {
-            switch (inst->GetType()) {
-                case compiler::DataType::FLOAT32: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I32TOF32());
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::FLOAT64: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I32TOF64());
-                    DoSta64(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::INT64: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I32TOI64());
-                    DoSta64(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::UINT32: {
-                    break;
-                }
-                case compiler::DataType::INT16: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_16));
-                    enc->result_.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_16));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::UINT16: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_ANDI(ANDI_16));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::INT8: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_24));
-                    enc->result_.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_24));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::UINT8: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_ANDI(ANDI_8));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::ANY: {
-                    UNREACHABLE();
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            VisitCastFromI32(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::INT64: {
-            switch (inst->GetType()) {
-                case compiler::DataType::INT32: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I64TOI32());
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::UINT32: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_ANDI(ANDI_32));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::FLOAT32: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I64TOF32());
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::FLOAT64: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I64TOF64());
-                    DoSta64(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::INT16: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I64TOI32());
-                    enc->result_.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_16));
-                    enc->result_.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_16));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::UINT16: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I64TOI32());
-                    enc->result_.emplace_back(pandasm::Create_ANDI(ANDI_16));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::INT8: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I64TOI32());
-                    enc->result_.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_24));
-                    enc->result_.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_24));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::UINT8: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_I64TOI32());
-                    enc->result_.emplace_back(pandasm::Create_ANDI(ANDI_8));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::ANY: {
-                    UNREACHABLE();
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            VisitCastFromI64(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::FLOAT32: {
-            switch (inst->GetType()) {
-                case compiler::DataType::FLOAT64: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_F32TOF64());
-                    DoSta64(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::INT64: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_F32TOI64());
-                    DoSta64(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::UINT64: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_F32TOU64());
-                    DoSta64(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::INT32: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_F32TOI32());
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::UINT32: {
-                    DoLda(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_F32TOU32());
-                    enc->result_.emplace_back(pandasm::Create_ANDI(ANDI_32));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::ANY: {
-                    UNREACHABLE();
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            VisitCastFromF32(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::FLOAT64: {
-            switch (inst->GetType()) {
-                case compiler::DataType::FLOAT32: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_F64TOF32());
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::INT64: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_F64TOI64());
-                    DoSta64(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::INT32: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_F64TOI32());
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::UINT32: {
-                    DoLda64(inst->GetSrcReg(0), enc->result_);
-                    enc->result_.emplace_back(pandasm::Create_F64TOI64());
-                    enc->result_.emplace_back(pandasm::Create_ANDI(ANDI_32));
-                    DoSta(inst->GetDstReg(), enc->result_);
-                    break;
-                }
-                case compiler::DataType::ANY: {
-                    UNREACHABLE();
-                }
-                default:
-                    LOG(ERROR, BYTECODE_OPTIMIZER)
-                        << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-                    enc->success_ = false;
-            }
+            VisitCastFromF64(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::REFERENCE: {
@@ -1526,19 +1399,19 @@ void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *inst_base)
         case compiler::DataType::UINT32:
         case compiler::DataType::INT32:
         case compiler::DataType::FLOAT32: {
-            DoLda(inst->GetSrcReg(0), enc->result_);
+            DoLda(inst->GetSrcReg(0U), enc->result_);
             enc->result_.emplace_back(pandasm::Create_RETURN());
             break;
         }
         case compiler::DataType::INT64:
         case compiler::DataType::UINT64:
         case compiler::DataType::FLOAT64: {
-            DoLda64(inst->GetSrcReg(0), enc->result_);
+            DoLda64(inst->GetSrcReg(0U), enc->result_);
             enc->result_.emplace_back(pandasm::Create_RETURN_64());
             break;
         }
         case compiler::DataType::REFERENCE: {
-            DoLdaObj(inst->GetSrcReg(0), enc->result_);
+            DoLdaObj(inst->GetSrcReg(0U), enc->result_);
             enc->result_.emplace_back(pandasm::Create_RETURN_OBJ());
             break;
         }
@@ -1548,13 +1421,13 @@ void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *inst_base)
         }
         case compiler::DataType::ANY: {
 #if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT)
-            auto test_arg = IsEcmaConstTemplate(inst->GetInput(0).GetInst());
+            auto test_arg = IsEcmaConstTemplate(inst->GetInput(0U).GetInst());
             if (test_arg.has_value() && test_arg->IsUndefined()) {
                 enc->result_.emplace_back(pandasm::Create_ECMA_RETURNUNDEFINED());
                 break;
             }
 #endif
-            DoLdaDyn(inst->GetSrcReg(0), enc->result_);
+            DoLdaDyn(inst->GetSrcReg(0U), enc->result_);
 #ifdef ARK_INTRINSIC_SET
             enc->result_.emplace_back(pandasm::Create_ECMA_RETURN_DYN());
 #else
@@ -1590,25 +1463,25 @@ void BytecodeGen::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[ma
             enc->result_.emplace_back(pandasm::Create_ECMA_LDUNDEFINED());
             break;
         case compiler::AnyBaseType::ECMASCRIPT_INT_TYPE: {
-            ASSERT(cvat->GetInput(0).GetInst()->IsConst());
-            auto input = cvat->GetInput(0).GetInst()->CastToConstant();
+            ASSERT(cvat->GetInput(0U).GetInst()->IsConst());
+            auto input = cvat->GetInput(0U).GetInst()->CastToConstant();
             enc->result_.emplace_back(pandasm::Create_LDAI_DYN(input->GetIntValue()));
             break;
         }
         case compiler::AnyBaseType::ECMASCRIPT_DOUBLE_TYPE: {
-            ASSERT(cvat->GetInput(0).GetInst()->IsConst());
-            auto input = cvat->GetInput(0).GetInst()->CastToConstant();
+            ASSERT(cvat->GetInput(0U).GetInst()->IsConst());
+            auto input = cvat->GetInput(0U).GetInst()->CastToConstant();
             enc->result_.emplace_back(pandasm::Create_FLDAI_DYN(input->GetDoubleValue()));
             break;
         }
         case compiler::AnyBaseType::ECMASCRIPT_BOOLEAN_TYPE: {
-            ASSERT(cvat->GetInput(0).GetInst()->IsBoolConst());
-            auto input = cvat->GetInput(0).GetInst()->CastToConstant();
+            ASSERT(cvat->GetInput(0U).GetInst()->IsBoolConst());
+            auto input = cvat->GetInput(0U).GetInst()->CastToConstant();
             if (!HasUserPredicate(cvat, [](Inst const *inst) { return inst->GetOpcode() != compiler::Opcode::If; })) {
                 return;
             }
             uint64_t val = input->GetInt64Value();
-            if (val != 0) {
+            if (val != 0U) {
                 enc->result_.emplace_back(pandasm::Create_ECMA_LDTRUE());
             } else {
                 enc->result_.emplace_back(pandasm::Create_ECMA_LDFALSE());
@@ -1616,13 +1489,13 @@ void BytecodeGen::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[ma
             break;
         }
         case compiler::AnyBaseType::ECMASCRIPT_STRING_TYPE: {
-            auto input = cvat->GetInput(0).GetInst()->CastToLoadString();
+            auto input = cvat->GetInput(0U).GetInst()->CastToLoadString();
             enc->result_.emplace_back(
                 pandasm::Create_LDA_STR(enc->ir_interface_->GetStringIdByOffset(input->GetTypeId())));
             break;
         }
         case compiler::AnyBaseType::ECMASCRIPT_BIGINT_TYPE: {
-            auto input = cvat->GetInput(0).GetInst()->CastToLoadString();
+            auto input = cvat->GetInput(0U).GetInst()->CastToLoadString();
             enc->result_.emplace_back(
                 pandasm::Create_ECMA_LDBIGINT(enc->ir_interface_->GetStringIdByOffset(input->GetTypeId())));
             break;
@@ -1647,8 +1520,8 @@ void BytecodeGen::VisitStoreObject(GraphVisitor *v, Inst *inst_base)
     auto enc = static_cast<BytecodeGen *>(v);
     const compiler::StoreObjectInst *inst = inst_base->CastToStoreObject();
 
-    compiler::Register vd = inst->GetSrcReg(0);
-    compiler::Register vs = inst->GetSrcReg(1);
+    compiler::Register vd = inst->GetSrcReg(0U);
+    compiler::Register vs = inst->GetSrcReg(1U);
     std::string id = enc->ir_interface_->GetFieldIdByOffset(inst->GetTypeId());
 
     bool is_acc_type = (vs == compiler::ACC_REG_ID);
@@ -1700,7 +1573,7 @@ void BytecodeGen::VisitStoreStatic(GraphVisitor *v, Inst *inst_base)
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToStoreStatic();
 
-    compiler::Register vs = inst->GetSrcReg(1);
+    compiler::Register vs = inst->GetSrcReg(1U);
     std::string id = enc->ir_interface_->GetFieldIdByOffset(inst->GetTypeId());
 
     switch (inst->GetType()) {
@@ -1746,7 +1619,7 @@ void BytecodeGen::VisitLoadObject(GraphVisitor *v, Inst *inst_base)
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToLoadObject();
 
-    compiler::Register vs = inst->GetSrcReg(0);
+    compiler::Register vs = inst->GetSrcReg(0U);
     compiler::Register vd = inst->GetDstReg();
     std::string id = enc->ir_interface_->GetFieldIdByOffset(inst->GetTypeId());
 

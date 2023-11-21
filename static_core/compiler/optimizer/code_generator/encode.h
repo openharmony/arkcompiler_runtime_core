@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_ENCODE_H_
-#define COMPILER_OPTIMIZER_CODEGEN_ENCODE_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_ENCODE_H
+#define COMPILER_OPTIMIZER_CODEGEN_ENCODE_H
 
 /*
     Hi-level interface for encoding
@@ -50,7 +50,7 @@ public:
     explicit LabelHolder(Encoder *enc) : enc_ {enc} {};
     virtual ~LabelHolder() = default;
 
-    // TODO (igorban) : hide all this methods in CallConv
+    // NOTE (igorban) : hide all this methods in CallConv
     virtual void CreateLabels(LabelId size) = 0;
     virtual LabelId CreateLabel() = 0;
     virtual LabelId Size() = 0;
@@ -1299,4 +1299,4 @@ public:
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_ENCODE_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_ENCODE_H

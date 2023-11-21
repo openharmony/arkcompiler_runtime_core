@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ using compiler::Opcode;
 void DoLdaObj(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoLda(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoLda64(compiler::Register reg, std::vector<pandasm::Ins> &result);
+void DoStaObj(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoSta(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoSta64(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoLdaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result);
@@ -103,6 +104,7 @@ public:
     void EncodeSta(compiler::Register reg, compiler::DataType::Type type);
     void AddLineNumber(const Inst *inst, size_t idx);
     void AddColumnNumber(const Inst *inst, uint32_t idx);
+    void AddLineAndColumnNumber(const Inst *inst, size_t idx);
 
     const ArenaVector<BasicBlock *> &GetBlocksToVisit() const override
     {
