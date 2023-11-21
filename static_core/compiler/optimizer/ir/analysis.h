@@ -24,11 +24,13 @@ namespace panda::compiler {
 
 /// The file contains small analysis functions which can be used in different passes
 class Inst;
+class BasicBlock;
 // returns Store value, for StoreArrayPair and StoreArrayPairI saved not last store value in second_value
 Inst *InstStoredValue(Inst *inst, Inst **secondValue);
 Inst *InstStoredValue(Inst *inst);
-bool HasOsrEntryBetween(Inst *dominateInst, Inst *inst);
-bool HasOsrEntryBetween(BasicBlock *dominateBb, BasicBlock *bb);
+
+template <typename T = Inst>
+bool HasOsrEntryBetween(T *dominate, T *current);
 bool HasTryBlockBetween(Inst *dominateInst, Inst *inst);
 bool IsSuitableForImplicitNullCheck(const Inst *inst);
 bool IsInstNotNull(const Inst *inst);

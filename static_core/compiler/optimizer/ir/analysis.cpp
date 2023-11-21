@@ -91,23 +91,24 @@ RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t inputNum)
     return initClass->CastToLoadImmediate()->GetClass();
 }
 
-bool HasOsrEntryBetween(Inst *dominateInst, Inst *inst)
-{
-    ASSERT(dominateInst->IsDominate(inst));
-    auto bb = inst->GetBasicBlock();
-    auto graph = bb->GetGraph();
-    if (!graph->IsOsrMode()) {
-        return false;
-    }
-    MarkerHolder marker(graph);
-    return FindBlockBetween<IsOsrEntryBlock>(dominateInst->GetBasicBlock(), bb, marker.GetMarker());
-}
+template bool HasOsrEntryBetween(Inst *dominate, Inst *current);
+template bool HasOsrEntryBetween(BasicBlock *dominate, BasicBlock *current);
 
-bool HasOsrEntryBetween(BasicBlock *dominateBb, BasicBlock *bb)
+template <typename T>
+bool HasOsrEntryBetween(T *dominate, T *current)
 {
-    ASSERT(dominateBb->IsDominate(bb));
+    ASSERT(dominate->IsDominate(current));
+    BasicBlock *dominateBb = nullptr;
+    BasicBlock *bb = nullptr;
+    if constexpr (std::is_same_v<T, Inst>) {
+        dominateBb = dominate->GetBasicBlock();
+        bb = current->GetBasicBlock();
+    } else if constexpr (std::is_same_v<T, BasicBlock>) {
+        dominateBb = dominate;
+        bb = current;
+    }
     auto graph = bb->GetGraph();
-    if (!graph->IsOsrMode()) {
+    if (!graph->IsOsrMode() && dominateBb->GetLoop() != bb->GetLoop()) {
         return false;
     }
     MarkerHolder marker(graph);

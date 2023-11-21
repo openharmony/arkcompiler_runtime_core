@@ -162,6 +162,11 @@ public:
         return GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), arch, false);
     }
 
+    Graph *CreateOsrGraph() const
+    {
+        return GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), arch_, true);
+    }
+
     Graph *CreateGraphStartEndBlocks(bool isDynamic = false) const
     {
         auto graph = GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), arch_, isDynamic, false);
