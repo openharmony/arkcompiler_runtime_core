@@ -76,7 +76,7 @@ public:
         return prog_info_;
     }
 
-    std::string GetColumnNumber();
+    std::vector<size_t> GetColumnNumber();
 
 private:
     void GetLiteralArrays();

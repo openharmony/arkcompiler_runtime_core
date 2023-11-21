@@ -3,7 +3,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,18 +23,17 @@ disasm_test_configs = [
 ]
 
 disasm_test_deps = [
+  "$ark_root/disassembler:arkdisassembler",
   "$ark_root/libpandabase:libarkbase_static",
   "$ark_root/libpandafile:libarkfile_static",
-  "$ark_root/disassembler:arkdisassembler",
 ]
 
 disasm_test_js_files = [
-  "disasm_column_numbers1",
-  "disasm_column_numbers2",
-  "disasm_column_numbers3",
-  "disasm_column_numbers4",
-  "disasm_column_numbers5",
-  "disasm_column_numbers6",
+  "column-number1",
+  "column-number2",
+  "column-number3",
+  "column-number4",
+  "column-number5",
 ]
 
 test_js_path = "//arkcompiler/runtime_core/disassembler/tests/js/"
@@ -53,24 +52,26 @@ foreach(file, disasm_test_js_files) {
     out_puts = [ test_abc ]
   }
 }
-host_unittest_action("DisasmTest") {
+
+disasm_include_dirs = [
+  "$ark_root/disassembler",
+  "$ark_root/assembler",
+  "$target_gen_dir",
+  "$target_gen_dir/../",
+  "$target_gen_dir/../../assembler",
+]
+
+script_sources = [ "disassember_column_number_test.cpp" ]
+
+host_unittest_action("DisasmScriptTest") {
   module_out_path = module_output_path
-
-  sources = [ "columnnumber_test.cpp" ]
-
-  include_dirs = [
-    "$ark_root/disassembler",
-    "$ark_root/assembler",
-    "$target_gen_dir",
-    "$target_gen_dir/../",
-    "$target_gen_dir/../../assembler",
-  ]
-
+  sources = script_sources
+  include_dirs = disasm_include_dirs
   configs = disasm_test_configs
-
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+
   foreach(file, disasm_test_js_files) {
     deps += [ ":gen_${file}_abc" ]
   }
@@ -78,5 +79,5 @@ host_unittest_action("DisasmTest") {
 
 group("host_unittest") {
   testonly = true
-  deps = [ ":DisasmTestAction" ]
+  deps = [ ":DisasmScriptTestAction" ]
 }
