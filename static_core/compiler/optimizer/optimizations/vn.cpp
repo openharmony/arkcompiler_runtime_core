@@ -28,6 +28,12 @@ inline bool IsNotCommutativeInst(Inst *inst)
     return !inst->IsCommutative() || DataType::IsFloatType(inst->GetType());
 }
 
+inline bool IsAddressArithmeticInst(Inst *inst)
+{
+    return inst->GetType() == DataType::POINTER &&
+           (inst->GetOpcode() == Opcode::AddI || inst->GetOpcode() == Opcode::SubI);
+}
+
 static bool AddClassInst(Inst *inst, VnObject *obj)
 {
     if (inst->GetOpcode() != Opcode::LoadAndInitClass && inst->GetOpcode() != Opcode::InitClass &&
@@ -56,6 +62,25 @@ static bool AddGlobalVarInst(Inst *inst, VnObject *obj)
     obj->Add(static_cast<uint32_t>(Opcode::GetGlobalVarAddress));
     obj->Add(inst->CastToGetGlobalVarAddress()->GetTypeId());
     inst->SetVnObject(obj);
+    return true;
+}
+
+static bool AddSelectImmInst(Inst *inst, VnObject *obj)
+{
+    if (inst->GetOpcode() != Opcode::SelectImm) {
+        return false;
+    }
+
+    obj->Add(static_cast<uint32_t>(Opcode::SelectImm));
+    obj->Add(static_cast<uint16_t>(inst->GetType()), static_cast<uint16_t>(inst->CastToSelectImm()->GetCc()));
+
+    for (auto input : inst->GetInputs()) {
+        auto input_inst = inst->GetDataFlowInput(input.GetInst());
+        auto vn = input_inst->GetVN();
+        ASSERT(vn != INVALID_VN);
+        obj->Add(vn);
+    }
+    obj->Add(inst->CastToSelectImm()->GetImm());
     return true;
 }
 
@@ -153,6 +178,9 @@ void VnObject::Add(Inst *inst)
     if (AddGlobalVarInst(inst, this)) {
         return;
     }
+    if (AddSelectImmInst(inst, this)) {
+        return;
+    }
 
     Add(static_cast<uint32_t>(inst->GetOpcode()));
     Add(static_cast<uint32_t>(inst->GetType()));
@@ -177,6 +205,15 @@ void VnObject::Add(Inst *inst)
     }
 
     inst->SetVnObject(this);
+}
+
+void VnObject::Add(uint16_t obj1, uint16_t obj2)
+{
+    ASSERT(size_objs_ < MAX_ARRAY_SIZE);
+    static constexpr uint16_t SHIFT16 = 16;
+    uint32_t obj = static_cast<uint32_t>(obj1) << SHIFT16;
+    obj |= static_cast<uint32_t>(obj2);
+    objs_[size_objs_++] = obj;
 }
 
 void VnObject::Add(uint32_t obj)
@@ -237,6 +274,9 @@ bool ValNum::TryToApplyCse(Inst *inst, InstVector *equiv_insts)
                 HasOsrEntryBetween(equiv_inst, inst)) {
                 continue;
             }
+        }
+        if (IsAddressArithmeticInst(inst) && HasSaveStateBetween<IsSaveStateCanTriggerGc>(equiv_inst, inst)) {
+            continue;
         }
         // Check bridges
         if (inst->IsMovableObject()) {

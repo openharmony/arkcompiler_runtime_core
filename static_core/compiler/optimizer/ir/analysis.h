@@ -48,8 +48,12 @@ inline bool IsInstInDifferentBlocks(Inst *i1, Inst *i2)
 // This function bypass all blocks and delete 'SaveStateOSR' if the block is no longer the header of the loop
 void CleanupGraphSaveStateOSR(Graph *graph);
 
-// returns true is there is SaveState/SafePoint beween instructions
+class IsSaveState;
+class IsSaveStateCanTriggerGc;
+// returns true is there is SaveState/SafePoint between instructions
+template <typename T = IsSaveState>
 bool HasSaveStateBetween(Inst *dom_inst, Inst *inst);
+
 /**
  * Functions below are using for create bridge in SaveStates between source instruction and target instruction.
  * It use in GVN etc. It inserts `source` instruction into `SaveStates` on each path between `source` and

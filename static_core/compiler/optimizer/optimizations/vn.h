@@ -41,6 +41,7 @@ public:
     ~VnObject() = default;
 
     void Add(Inst *inst);
+    void Add(uint16_t obj1, uint16_t obj2);
     void Add(uint32_t obj);
     void Add(uint64_t obj);
     bool Compare(VnObject *obj);
@@ -60,8 +61,8 @@ public:
 
 private:
     uint8_t size_objs_ {0};
-    // opcode, type, 2 inputs, 2 advanced property
-    static constexpr uint8_t MAX_ARRAY_SIZE = 6;
+    // opcode, type, 2 inputs, 3 advanced property
+    static constexpr uint8_t MAX_ARRAY_SIZE = 7;
     std::array<uint32_t, MAX_ARRAY_SIZE> objs_;
 };
 

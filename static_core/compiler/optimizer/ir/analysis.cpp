@@ -47,6 +47,16 @@ public:
     }
 };
 
+static bool IsSaveStateForGc(const Inst *inst);
+
+class IsSaveStateCanTriggerGc {
+public:
+    bool operator()(const Inst *inst) const
+    {
+        return IsSaveStateForGc(inst);
+    }
+};
+
 template <typename T>
 bool FindBlockBetween(BasicBlock *dominate_bb, BasicBlock *current_bb, Marker marker)
 {
@@ -232,7 +242,7 @@ static bool FindObjectInSaveState(Inst *object, Inst *ss)
 }
 
 // Returns true if GC can be triggered at this point
-static bool IsSaveStateForGc(Inst *inst)
+static bool IsSaveStateForGc(const Inst *inst)
 {
     if (inst->GetOpcode() == Opcode::SafePoint) {
         return true;
@@ -700,6 +710,10 @@ bool FindInstBetween(Inst *dom_inst, BasicBlock *current_bb, Marker marker)
     return false;
 }
 
+template bool HasSaveStateBetween<IsSaveState>(Inst *dom_inst, Inst *inst);
+template bool HasSaveStateBetween<IsSaveStateCanTriggerGc>(Inst *dom_inst, Inst *inst);
+
+template <typename T>
 bool HasSaveStateBetween(Inst *dom_inst, Inst *inst)
 {
     ASSERT(dom_inst->IsDominate(inst));
@@ -711,7 +725,7 @@ bool HasSaveStateBetween(Inst *dom_inst, Inst *inst)
     auto curr_inst = inst->GetPrev();
     Inst *finish = is_same_block ? dom_inst : nullptr;
     while (curr_inst != finish) {
-        if (curr_inst->IsSaveState()) {
+        if (T()(curr_inst)) {
             return true;
         }
         curr_inst = curr_inst->GetPrev();
@@ -721,7 +735,7 @@ bool HasSaveStateBetween(Inst *dom_inst, Inst *inst)
     }
     MarkerHolder marker(bb->GetGraph());
     for (auto pred : bb->GetPredsBlocks()) {
-        if (FindInstBetween<IsSaveState>(dom_inst, pred, marker.GetMarker())) {
+        if (FindInstBetween<T>(dom_inst, pred, marker.GetMarker())) {
             return true;
         }
     }
