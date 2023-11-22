@@ -214,29 +214,29 @@ private:
 TEST_F(SmallVectorTest, Emplace)
 {
     SmallVector<Item, 1U> vector;
-    vector.emplace_back(1U, 1.1);
+    vector.emplace_back(1U, 1.1L);
     ASSERT_EQ(vector.size(), 1U);
-    ASSERT_EQ(vector[0U], Item(1U, 1.1));
+    ASSERT_EQ(vector[0U], Item(1U, 1.1L));
     ASSERT_TRUE(vector.IsStatic());
-    vector.emplace_back(2U, 2.2);
+    vector.emplace_back(2U, 2.2L);
     ASSERT_FALSE(vector.IsStatic());
-    ASSERT_EQ(vector[1U], Item(2U, 2.2));
-    vector.push_back(Item(3U, 3.3));
-    ASSERT_EQ(vector[2U], Item(3U, 3.3));
+    ASSERT_EQ(vector[1U], Item(2U, 2.2L));
+    vector.push_back(Item(3U, 3.3L));
+    ASSERT_EQ(vector[2U], Item(3U, 3.3L));
 }
 
 TEST_F(SmallVectorTest, ResizeStatic)
 {
     SmallVector<Item, 4U> vector;
 
-    vector.push_back(Item(1U, 1.2));
-    ASSERT_EQ(vector[0U], Item(1U, 1.2));
+    vector.push_back(Item(1U, 1.2L));
+    ASSERT_EQ(vector[0U], Item(1U, 1.2L));
     Item::Reset();
     vector.resize(3U);
     ASSERT_EQ(Item::constructed_, 2U);
     ASSERT_EQ(vector.size(), 3U);
     ASSERT_TRUE(vector.IsStatic());
-    ASSERT_EQ(vector[0U], Item(1U, 1.2));
+    ASSERT_EQ(vector[0U], Item(1U, 1.2L));
     ASSERT_EQ(vector[1U], Item());
     ASSERT_EQ(vector[2U], Item());
 
@@ -253,7 +253,7 @@ TEST_F(SmallVectorTest, ResizeStatic)
 
 TEST_F(SmallVectorTest, ResizeDynamic)
 {
-    std::array values = {Item(1U, 1.2), Item(2U, 2.3), Item(3U, 3.4)};
+    std::array values = {Item(1U, 1.2L), Item(2U, 2.3L), Item(3U, 3.4L)};
     SmallVector<Item, 2U> vector;
 
     Item::Reset();
@@ -280,17 +280,17 @@ TEST_F(SmallVectorTest, ResizeStaticWithValue)
 {
     SmallVector<Item, 4U> vector;
 
-    vector.push_back(Item(1U, 1.2));
-    ASSERT_EQ(vector[0U], Item(1U, 1.2));
+    vector.push_back(Item(1U, 1.2L));
+    ASSERT_EQ(vector[0U], Item(1U, 1.2L));
     Item::Reset();
-    vector.resize(3U, Item(3U, 3.3));
+    vector.resize(3U, Item(3U, 3.3L));
     ASSERT_EQ(vector.size(), 3U);
     ASSERT_TRUE(vector.IsStatic());
-    ASSERT_EQ(vector[0U], Item(1U, 1.2));
-    ASSERT_EQ(vector[1U], Item(3U, 3.3));
-    ASSERT_EQ(vector[2U], Item(3U, 3.3));
+    ASSERT_EQ(vector[0U], Item(1U, 1.2L));
+    ASSERT_EQ(vector[1U], Item(3U, 3.3L));
+    ASSERT_EQ(vector[2U], Item(3U, 3.3L));
 
-    Item item(3U, 3.3);
+    Item item(3U, 3.3L);
     Item::Reset();
     vector.resize(1U, item);
     ASSERT_EQ(vector.size(), 1U);
@@ -304,16 +304,16 @@ TEST_F(SmallVectorTest, ResizeStaticWithValue)
 
 TEST_F(SmallVectorTest, ResizeDynamicWithValue)
 {
-    std::array values = {Item(1U, 1.2), Item(2U, 2.3), Item(3U, 3.4)};
+    std::array values = {Item(1U, 1.2L), Item(2U, 2.3L), Item(3U, 3.4L)};
     SmallVector<Item, 2U> vector;
 
     Item::Reset();
-    vector.resize(6U, Item(3U, 3.3));
+    vector.resize(6U, Item(3U, 3.3L));
     ASSERT_FALSE(vector.IsStatic());
     ASSERT_EQ(vector.size(), 6U);
-    ASSERT_TRUE(std::all_of(vector.begin(), vector.end(), [](const auto &v) { return v == Item(3U, 3.3); }));
+    ASSERT_TRUE(std::all_of(vector.begin(), vector.end(), [](const auto &v) { return v == Item(3U, 3.3L); }));
 
-    Item item(3U, 3.3);
+    Item item(3U, 3.3L);
     Item::Reset();
     vector.resize(3U, item);
     ASSERT_EQ(vector.size(), 3U);

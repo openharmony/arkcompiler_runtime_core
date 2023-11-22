@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_FIELD_HPP
-#define _PANDA_ASSEMBLER_FIELD_HPP
+#ifndef PANDA_ASSEMBLER_FIELD_H
+#define PANDA_ASSEMBLER_FIELD_H
 
 #include <memory>
 #include <string>
@@ -46,4 +46,4 @@ struct Field {
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_FIELD_HPP
+#endif  // !PANDA_ASSEMBLER_FIELD_H

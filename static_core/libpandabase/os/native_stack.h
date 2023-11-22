@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H
+#define PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H
 
 #include "os/thread.h"
 #if defined(PANDA_TARGET_UNIX)
@@ -58,4 +58,4 @@ std::string ChangeJaveStackFormat(const char *descriptor);
 #endif  // PANDA_TARGET_UNIX
 
 }  // namespace panda::os::native_stack
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H_
+#endif  // PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H

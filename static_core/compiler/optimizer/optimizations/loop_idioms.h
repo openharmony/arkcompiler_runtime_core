@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_IDIOMS_H
+#define PANDA_COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_IDIOMS_H
+
 #include "optimizer/optimizations/loop_transform.h"
 #include "compiler_options.h"
-
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_IDIOMS_H
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_IDIOMS_H
 
 // Find loops representing some idiom (like memcpy or memset) and replace
 // it with an intrinsics.
@@ -60,4 +60,4 @@ private:
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_IDIOMS_H
+#endif  // PANDA_COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_IDIOMS_H

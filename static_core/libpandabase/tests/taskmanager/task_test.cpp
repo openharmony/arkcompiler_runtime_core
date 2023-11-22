@@ -95,7 +95,7 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
     // After we have 2 * counter_of_tasks - counter_of_done_tasks objects in queue
     EXPECT_EQ(queue->GetTaskType(), TaskType::GC);
     EXPECT_FALSE(queue->IsEmpty());
-    EXPECT_EQ(queue->Size(), 2 * COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
+    EXPECT_EQ(queue->Size(), 2U * COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
     // Pop and execute all tasks in queue->
     while (!queue->IsEmpty()) {
         auto next_task = static_cast<SchedulableTaskQueueInterface *>(queue)->PopTask();

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H
+#define PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H
+
 #include "bit_memory_region.h"
 
 #include <iomanip>
@@ -65,3 +68,5 @@ inline std::ostream &operator<<(std::ostream &os, const BitMemoryRegion<T> &regi
 }
 
 }  // namespace panda
+
+#endif  // PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H

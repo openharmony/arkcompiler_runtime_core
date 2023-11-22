@@ -129,7 +129,7 @@ TEST_F(SerializatorTest, TestUnorderedMap1)
             {3U, 234356U},
             {45764746U, 4U},
         },
-        4U + 3U * (4 + 2));
+        4U + 3U * (4U + 2U));
 }
 
 TEST_F(SerializatorTest, TestUnorderedMap2)

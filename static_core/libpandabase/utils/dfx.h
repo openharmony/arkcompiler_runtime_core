@@ -34,8 +34,8 @@
 //
 // For developers who want to controll your own DFX capability, add your dfx option in DfxOptionHandler::DfxOption,
 // improve code related to DfxController initialize and runtime options.
-#ifndef PANDA_LIBPANDABASE_UTILS_DFX_H_
-#define PANDA_LIBPANDABASE_UTILS_DFX_H_
+#ifndef PANDA_LIBPANDABASE_UTILS_DFX_H
+#define PANDA_LIBPANDABASE_UTILS_DFX_H
 
 #include "os/mutex.h"
 #include "os/dfx_option.h"
@@ -99,4 +99,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_LOGGER_H_
+#endif  // PANDA_LIBPANDABASE_UTILS_DFX_H

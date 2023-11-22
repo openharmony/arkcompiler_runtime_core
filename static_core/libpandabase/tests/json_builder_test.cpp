@@ -108,12 +108,14 @@ TEST(JsonBuilderTest, StringifiesObjects)
 
 TEST(JsonArrayBuilderTest, BuildsFluently)
 {
+    // clang-format off
     EXPECT_EQ(JsonArrayBuilder()
-                  .Add(1U)
-                  .Add("foo")
-                  .Add([](JsonArrayBuilder &x) { x.Add([](JsonArrayBuilder &) {}); })
-                  .Build(),
+                .Add(1U)
+                .Add("foo")
+                .Add([](JsonArrayBuilder &x) { x.Add([](JsonArrayBuilder &) {}); })
+                .Build(),
               "[1,\"foo\",[[]]]");
+    // clang-format on
 }
 
 TEST(JsonArrayBuilderTest, BuildsReferentially)
