@@ -6,8 +6,8 @@ _LOGGER = logging.getLogger("runner.plugins.ets.es2panda_test_dir")
 
 
 class RuntimeDefaultEtsTestDir:
-    def __init__(self, panda_source_root: str, root: Optional[str] = None) -> None:
-        self.__panda_source_root = Path(panda_source_root)
+    def __init__(self, static_core_root: str, root: Optional[str] = None) -> None:
+        self.__static_core_root = Path(static_core_root)
         self.__root = root
 
     @property
@@ -16,7 +16,7 @@ class RuntimeDefaultEtsTestDir:
 
     @property
     def es2panda_test(self) -> Path:
-        return self.__panda_source_root / "tools" / "es2panda" / "test"
+        return self.__static_core_root / "tools" / "es2panda" / "test"
 
     @property
     def runtime_ets(self) -> Path:

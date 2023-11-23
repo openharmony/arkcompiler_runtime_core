@@ -14,10 +14,10 @@ _LOGGER = logging.getLogger("runner.plugins.test262.runner_js_test262")
 
 class RunnerJSTest262(RunnerJS):
     def __init__(self, config: Config):
-        RunnerJS.__init__(self, config, "test262-ark")
+        RunnerJS.__init__(self, config, "test262")
         self.ignored_name_prefix = "test262"
 
-        self.list_root = path.dirname(__file__) if self.list_root is None else self.list_root
+        self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
         self.collect_excluded_test_lists(test_name=self.ignored_name_prefix)
@@ -26,7 +26,7 @@ class RunnerJSTest262(RunnerJS):
         self.util = UtilTest262(config=self.config, work_dir=self.work_dir)
 
         self.test_root = self.util.generate(
-            harness_path=path.join(self.list_root, "test262harness.js"),
+            harness_path=path.join(path.dirname(__file__), "test262harness.js"),
         )
         Log.summary(_LOGGER, f"TEST_ROOT reset to {self.test_root}")
         self.test_env.util = self.util

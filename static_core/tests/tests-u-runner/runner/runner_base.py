@@ -8,10 +8,11 @@ from datetime import datetime
 from glob import glob
 from itertools import chain
 from os import path
-from typing import List, Set
+from typing import List, Set, Tuple
 
 from tqdm import tqdm
 
+from runner.chapters import parse_chapters
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.plugins.ets.test_ets import TestETS
 from runner.logger import Log
@@ -77,7 +78,12 @@ _LOGGER = logging.getLogger("runner.runner_base")
 
 
 class Runner(ABC):
-    def __init__(self, config: Config, name):
+    def __init__(self, config: Config, name: str):
+        # This file is expected to be located at path:
+        # $PANDA_SOURCE/tests/tests-u-runner/runner/runner_base.py
+        current_folder_parent = path.dirname(path.dirname(path.abspath(__file__)))
+        self.static_core_root = path.dirname(path.dirname(current_folder_parent))
+
         # TODO(vpukhov): adjust es2panda path
         default_ets_arktsconfig = path.join(
             config.general.build,
@@ -99,6 +105,7 @@ class Runner(ABC):
         # directory where list files (files with list of ignored, excluded, and other tests) are located
         # it's either set explicitly to the absolute value or
         # the current folder (where this python file is located!) parent
+        self.default_list_root = path.join(self.static_core_root, "tests", "tests-u-runner", "test-lists")
         self.list_root = config.general.list_root if config.general.list_root is not None else None
         if self.list_root is not None:
             Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
@@ -112,7 +119,7 @@ class Runner(ABC):
             else default_ets_arktsconfig
 
         self.config = config
-        self.name = name
+        self.name: str = name
 
         # Lists:
         # excluded test is a test what should not be loaded and should be tried to run
@@ -236,20 +243,12 @@ class Runner(ABC):
             if not self.config.test_lists.skip_test_lists:
                 self.load_excluded_tests()
                 self.load_ignored_tests()
-            if len(test_files) == 0:
-                glob_expression = path.join(directory, f"**/*.{extension}")
-                test_files.extend(fnmatch.filter(
-                    glob(glob_expression, recursive=True),
-                    path.join(directory, self.config.test_lists.filter)
-                ))
-
-        without_excluded = [test for test in test_files
-                            if self.update_excluded or test not in self.excluded_tests]
+            test_files.extend(self.__load_tests_from_lists(directory, extension))
 
         self._search_both_excluded_and_ignored_tests()
-        self._search_not_used_ignored(without_excluded)
+        self._search_not_used_ignored(test_files)
 
-        all_tests = {self.create_test(test, flags, test in self.ignored_tests) for test in without_excluded}
+        all_tests = {self.create_test(test, flags, test in self.ignored_tests) for test in test_files}
         not_tests = {t for t in all_tests if isinstance(t, TestETS) and not t.is_valid_test}
         valid_tests = all_tests - not_tests
 
@@ -264,6 +263,60 @@ class Runner(ABC):
 
         self.tests.update(valid_tests)
         Log.all(_LOGGER, f"Loaded {len(self.tests)} tests")
+
+    def __load_tests_from_lists(self, directory: str, extension: str):
+        test_files: List[str] = []
+        excluded: List[str] = list(self.excluded_tests)[:]
+        glob_expression = path.join(directory, f"**/*.{extension}")
+        includes, excludes = self.__parse_chapters()
+        for inc in includes:
+            mask = path.join(directory, inc)
+            if path.isfile(mask):
+                test_files.append(mask)
+                continue
+            if not mask.endswith('/*'):
+                mask += '/*'
+            test_files.extend(fnmatch.filter(
+                glob(glob_expression, recursive=True),
+                mask
+            ))
+        for exc in excludes:
+            mask = path.join(directory, exc)
+            if path.isfile(mask):
+                excluded.append(mask)
+                continue
+            if not mask.endswith('/*'):
+                mask += '/*'
+            excluded.extend(fnmatch.filter(
+                glob(glob_expression, recursive=True),
+                mask
+            ))
+        return [
+            test for test in test_files
+            if self.update_excluded or test not in excluded
+        ]
+
+    def __parse_chapters(self) -> Tuple[List[str], List[str]]:
+        if not self.config.test_lists.groups.chapters:
+            return [self.config.test_lists.filter], []
+        if path.isfile(self.config.test_lists.groups.chapters_file):
+            chapters = parse_chapters(self.config.test_lists.groups.chapters_file)
+        else:
+            corrected_chapters_file = correct_path(self.list_root, self.config.test_lists.groups.chapters_file)
+            if path.isfile(corrected_chapters_file):
+                chapters = parse_chapters(corrected_chapters_file)
+            else:
+                Log.exception_and_raise(
+                    _LOGGER,
+                    f"Not found either '{self.config.test_lists.groups.chapters_file}' or "
+                    f"'{corrected_chapters_file}'", FileNotFoundError)
+        __includes: List[str] = []
+        __excludes: List[str] = []
+        for chapter in self.config.test_lists.groups.chapters:
+            if chapter in chapters:
+                __includes.extend(chapters[chapter].includes)
+                __excludes.extend(chapters[chapter].excludes)
+        return __includes, __excludes
 
     def _search_both_excluded_and_ignored_tests(self):
         already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]

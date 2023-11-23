@@ -15,9 +15,10 @@ class RunnerJSParser(RunnerJS):
     def __init__(self, config: Config):
         super().__init__(config, "parser")
 
-        es2panda_test = path.join(config.general.panda_source_root, "tools", "es2panda", "test")
+        es2panda_test = path.join(config.general.static_core_root, "tools", "es2panda", "test")
 
-        self.list_root = es2panda_test if self.list_root is None else self.list_root
+        self.default_list_root = path.join(self.static_core_root, "tools", "es2panda", "test", "test-lists")
+        self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
         self.test_root = es2panda_test if self.test_root is None else self.test_root

@@ -51,9 +51,7 @@ def is_enum_value(value: str, enum_class: Type[EnumClass], option_name: str) -> 
     return enum_value
 
 
-def get_args():  # pylint: disable=too-many-statements
-    parser = argparse.ArgumentParser(description="Regression test runner")
-
+def add_test_suite_args(parser: argparse.ArgumentParser):
     # Test suite options
     parser.add_argument(
         '--test-suite', action='append', dest='test_suites',
@@ -90,11 +88,16 @@ def get_args():  # pylint: disable=too-many-statements
     action.add_argument(
         '--ets-cts', action='store_true', dest='ets_cts',
         default=None, help='run ets-templates tests')
+
+
+def add_ets_args(parser: argparse.ArgumentParser):
     # ETS tests applied options
     parser.add_argument(
         '--force-generate', action='store_true', dest='is_force_generate', default=None,
         help='mandatory generate the ETS test cases from templates')
 
+
+def add_test_group_args(parser: argparse.ArgumentParser):
     # Test groups options
     test_groups = parser.add_argument_group(
         "Test groups",
@@ -112,7 +115,20 @@ def get_args():  # pylint: disable=too-many-statements
         help='run tests only of specified group number. Used only if --groups is set. '
              'Default value 1 - the first available group. '
              'If the value is more than the total number of groups the latest group is taken.')
+    test_groups.add_argument(
+        '--chapter', action='append', dest='chapters',
+        type=str,
+        default=None,
+        help='run tests only of specified chapter. Can be specified several times.')
+    test_groups.add_argument(
+        '--chapters-file', action='store', dest='chapters_file',
+        type=is_file,
+        default=None,
+        help='Full name to the file with chapter description. '
+             'By default chapters.yaml file located along with test lists.')
 
+
+def add_config_args(parser: argparse.ArgumentParser):
     # Configuration
     parser.add_argument(
         '--config', action='store', dest='config',
@@ -124,6 +140,8 @@ def get_args():  # pylint: disable=too-many-statements
         default=None,
         help='generate config file with all options')
 
+
+def add_general_args(parser: argparse.ArgumentParser):
     # General - path options
     parser.add_argument(
         "--build-dir", action="store", dest='build_dir',
@@ -144,8 +162,8 @@ def get_args():  # pylint: disable=too-many-statements
         help='path to the working temp folder with gen, intermediate and report folders')
     # General - other options
     parser.add_argument('--processes', '-j', dest='processes', default=None,
-        help='Number of processes to use in parallel. By default 1. '
-             'Special value `all` - means to use all available processes')
+                        help='Number of processes to use in parallel. By default 1. '
+                             'Special value `all` - means to use all available processes')
     parser.add_argument(
         '--gc-type', dest='gc_type',
         default=None, help='Type of garbage collector')
@@ -164,6 +182,8 @@ def get_args():  # pylint: disable=too-many-statements
         '--arm32-qemu', action='store_true', dest='arm32_qemu', default=None,
         help='launch all binaries in qemu arm')
 
+
+def add_general_other_args(parser: argparse.ArgumentParser):
     parser.add_argument(
         '--report-format', action='store', dest='report_formats', default=None,
         type=lambda arg: is_enum_value(arg, ReportFormat, "--report-format"),
@@ -187,7 +207,6 @@ def get_args():  # pylint: disable=too-many-statements
              'Supported values: all - for all executed tests, '
              'ignored - for new failures and tests from ignored test lists both passed and failed. '
              'new - only for new failures. Default value.')
-
     parser.add_argument(
         '--no-bco', action='store_false', dest='bco', default=None,
         help='disable bytecodeopt. Applied only to test262')
@@ -195,6 +214,8 @@ def get_args():  # pylint: disable=too-many-statements
         '--force-download', action='store_true', dest='force_download',
         default=None, help='force download and prepare test suites')
 
+
+def add_es2panda_args(parser: argparse.ArgumentParser):
     # Es2panda options
     parser.add_argument(
         '--custom-es2panda', action='store', dest='custom_es2panda_path',
@@ -213,6 +234,8 @@ def get_args():  # pylint: disable=too-many-statements
         type=is_file, default=None,
         help='path to arktsconfig file')
 
+
+def add_verifier_args(parser: argparse.ArgumentParser):
     # Verifier options
     parser.add_argument(
         '--disable-verifier', action="store_false", default=None,
@@ -226,6 +249,8 @@ def get_args():  # pylint: disable=too-many-statements
         default=None,
         help='verification config file')
 
+
+def add_ark_aot_quick_args(parser: argparse.ArgumentParser):
     # Ark_aot options
     parser.add_argument(
         '--aot', action='store_true', dest='aot', default=None,
@@ -242,6 +267,8 @@ def get_args():  # pylint: disable=too-many-statements
         '--quick', '-q', action='store_true', dest='quick', default=None,
         help='use bytecode quickener')
 
+
+def add_ark_args(parser: argparse.ArgumentParser):
     # Ark options
     parser.add_argument(
         '--ark-args', action='append', dest='ark_args', default=None,
@@ -275,6 +302,8 @@ def get_args():  # pylint: disable=too-many-statements
              'Possible values: "num_repeats=30,compiler_threshold=20". '
              'Works only with --jit option.')
 
+
+def add_time_report_args(parser: argparse.ArgumentParser):
     # Time report options
     parser.add_argument(
         '--time-report', action='store_true', dest='time_report', default=None,
@@ -283,6 +312,8 @@ def get_args():  # pylint: disable=too-many-statements
         '--time-edges', action='store', dest='time_edges', default=None,
         help='Time edges in the format `1,5,10` where numbers are seconds')
 
+
+def add_test_lists_args(parser: argparse.ArgumentParser):
     # Test lists options
     parser.add_argument(
         '--filter', '-f', action='store', dest='filter', default=None,
@@ -304,7 +335,6 @@ def get_args():  # pylint: disable=too-many-statements
     parser.add_argument(
         '--skip-test-lists', action='store_true', dest='skip_test_lists', default=None,
         help='do not use ignored or excluded lists, run all available tests, report all found failures')
-
     parser.add_argument(
         '--update-excluded', action='store_true', dest='update_excluded', default=None,
         help='update list of excluded tests')
@@ -312,6 +342,8 @@ def get_args():  # pylint: disable=too-many-statements
         '--update-expected', action='store_true', dest='update_expected', default=None,
         help='update files with expected results')
 
+
+def add_coverage_args(parser: argparse.ArgumentParser):
     # Coverage settings
     parser.add_argument(
         '--use-llvm-cov', action='store_true', dest='use_llvm_cov', default=None)
@@ -323,5 +355,23 @@ def get_args():  # pylint: disable=too-many-statements
         '--llvm-cov-html-out-path', dest='llvm_cov_html_out_path', default=None,
         type=make_dir_if_not_exist,
         help='Stacks files in the specified directory')
+
+
+def get_args():
+    parser = argparse.ArgumentParser(description="Regression test runner")
+
+    add_test_suite_args(parser)
+    add_ets_args(parser)
+    add_test_group_args(parser)
+    add_config_args(parser)
+    add_general_args(parser)
+    add_general_other_args(parser)
+    add_es2panda_args(parser)
+    add_verifier_args(parser)
+    add_ark_aot_quick_args(parser)
+    add_ark_args(parser)
+    add_time_report_args(parser)
+    add_test_lists_args(parser)
+    add_coverage_args(parser)
 
     return parser.parse_args()

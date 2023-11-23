@@ -16,7 +16,7 @@ class RunnerJSHermes(RunnerJS):
     def __init__(self, config: Config):
         RunnerJS.__init__(self, config, "hermes")
 
-        self.list_root = path.dirname(__file__) if self.list_root is None else self.list_root
+        self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
         Log.all(_LOGGER, f"LIST_ROOT set to {self.list_root}")
         self.collect_excluded_test_lists()
         self.collect_ignored_test_lists()
