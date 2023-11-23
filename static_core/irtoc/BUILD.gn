@@ -16,171 +16,167 @@ import("//build/ohos.gni")
 import("$ark_root/plugins/plugins.gni")
 import("irtoc.gni")
 
-if (enable_irtoc) {
-  config("irtoc_public_config") {
-    include_dirs = [
-      "$root_build_dir/generated",
-      "$target_gen_dir",
-      "$ark_root/irtoc",
-      "$ark_third_party_root/elfio",
-    ]
-
-    cflags_cc = [
-      "-isystem",
-      rebase_path("$ark_third_party_root/elfio", root_build_dir),
-    ]
-  }
-
-  irtoc_scripts = [
-    "scripts/allocation.irt",
-    "scripts/resolvers.irt",
-    "scripts/interpreter.irt",
-    "scripts/monitors.irt",
-    "scripts/check_cast.irt",
-    "scripts/gc.irt",
-    "scripts/strings.irt",
-    "scripts/string_builder.irt",
+config("irtoc_public_config") {
+  include_dirs = [
+    "$root_build_dir/generated",
+    "$target_gen_dir",
+    "$ark_root/irtoc",
+    "$ark_third_party_root/elfio",
   ]
-  irtoc_scripts += plugin_irtoc_scripts
 
-  generated_file("irtoc_plugins_file") {
-    outputs = [ irtoc_plugins_file ]
-    inputs = plugin_irtoc_plugins
-    output_conversion = "list lines"
-    contents = rebase_path(inputs, ark_root)
-  }
+  cflags_cc = [
+    "-isystem",
+    rebase_path("$ark_third_party_root/elfio", root_build_dir),
+  ]
+}
 
-  action("irtoc_compile") {
-    script = "$ark_root/irtoc/lang/irtoc.rb"
-    outputs = [
-      "$target_gen_dir/generated/irtoc_code.cpp",
-      "$target_gen_dir/generated/irtoc_code_llvm.cpp",
-    ]
+irtoc_scripts = [
+  "scripts/allocation.irt",
+  "scripts/resolvers.irt",
+  "scripts/interpreter.irt",
+  "scripts/monitors.irt",
+  "scripts/check_cast.irt",
+  "scripts/gc.irt",
+  "scripts/strings.irt",
+  "scripts/string_builder.irt",
+]
+irtoc_scripts += plugin_irtoc_scripts
 
-    sources = irtoc_scripts + [ irtoc_plugins_file ]
-    irt_args = rebase_path(irtoc_scripts, root_build_dir)
-    irt_outputs = rebase_path(outputs, root_build_dir)
+generated_file("irtoc_plugins_file") {
+  outputs = [ irtoc_plugins_file ]
+  inputs = plugin_irtoc_plugins
+  output_conversion = "list lines"
+  contents = rebase_path(inputs, ark_root)
+}
 
-    args = [
-      "--input",
-      string_join(":", irt_args),
-      "--output",
-      string_join(":", irt_outputs),
-      "--ark_source_dir",
-      rebase_path("$ark_root", root_build_dir),
-      "--isa",
-      rebase_path("$ark_isa_yaml", root_build_dir),
-    ]
+action("irtoc_compile") {
+  script = "$ark_root/irtoc/lang/irtoc.rb"
+  outputs = [
+    "$target_gen_dir/generated/irtoc_code.cpp",
+    "$target_gen_dir/generated/irtoc_code_llvm.cpp",
+  ]
 
-    if (!is_debug) {
-      args += [
-        "--definitions",
-        "NDEBUG",
-      ]
-    }
+  sources = irtoc_scripts + [ irtoc_plugins_file ]
+  irt_args = rebase_path(irtoc_scripts, root_build_dir)
+  irt_outputs = rebase_path(outputs, root_build_dir)
 
+  args = [
+    "--input",
+    string_join(":", irt_args),
+    "--output",
+    string_join(":", irt_outputs),
+    "--ark_source_dir",
+    rebase_path("$ark_root", root_build_dir),
+    "--isa",
+    rebase_path("$ark_isa_yaml", root_build_dir),
+  ]
+
+  if (!is_debug) {
     args += [
-      "--arch",
-      target_cpu,
-      "--ir-api",
-      "ir-constructor",
-      "--plugins",
-      rebase_path(irtoc_plugins_file, root_build_dir),
-    ]
-
-    deps = [
-      ":irtoc_plugins_file",
-      "$ark_root/isa:isa_combine",
+      "--definitions",
+      "NDEBUG",
     ]
   }
 
-  ark_gen_file("irtoc_options_h") {
-    template_file = "$ark_root/templates/options/options.h.erb"
-    data_file = "backend/options.yaml"
-    requires = [ "$ark_root/templates/common.rb" ]
-    output_file = "$target_gen_dir/generated/irtoc_options_gen.h"
+  args += [
+    "--arch",
+    target_cpu,
+    "--ir-api",
+    "ir-constructor",
+    "--plugins",
+    rebase_path(irtoc_plugins_file, root_build_dir),
+  ]
+
+  deps = [
+    ":irtoc_plugins_file",
+    "$ark_root/isa:isa_combine",
+  ]
+}
+
+ark_gen_file("irtoc_options_h") {
+  template_file = "$ark_root/templates/options/options.h.erb"
+  data_file = "backend/options.yaml"
+  requires = [ "$ark_root/templates/common.rb" ]
+  output_file = "$target_gen_dir/generated/irtoc_options_gen.h"
+}
+
+ohos_executable("irtoc") {
+  sources = [
+    "$target_gen_dir/generated/irtoc_code.cpp",
+    "$target_gen_dir/generated/irtoc_code_llvm.cpp",
+    "backend/compilation.cpp",
+    "backend/compiler/codegen_boundary.cpp",
+    "backend/compiler/codegen_fastpath.cpp",
+    "backend/compiler/dangling_pointers_checker.cpp",
+    "backend/function.cpp",
+    "backend/irtoc.cpp",
+    "backend/irtoc_options.cpp",
+  ]
+  configs = [
+    ":irtoc_public_config",
+    "$ark_root:ark_config",
+    "$ark_root/libpandabase:arkbase_public_config",
+    "$ark_root/libpandafile:arkfile_public_config",
+    "$ark_root/compiler:arkcompiler_public_config",
+    "$ark_root/compiler/optimizer/code_generator:arkencoder_config",
+    "$ark_root/runtime/asm_defines:asmdefines_public_config",
+    "$ark_root/runtime:arkruntime_public_config",
+    "$ark_third_party_root/vixl:vixl_public_config",
+    sdk_libc_secshared_config,
+  ]
+
+  deps = [
+    ":irtoc_options_h",
+    "$ark_root/compiler:irtoc_interface_extensions_includes_inl_h",
+    "$ark_root/compiler:libarktscompiler",
+    "$ark_root/compiler/optimizer/code_generator:libarkencoder",
+    "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
+    "$ark_root/irtoc:irtoc_compile",
+    "$ark_root/libpandabase:libarktsbase",
+    "$ark_root/runtime/asm_defines:asm_defines_generator",
+    sdk_libc_secshared_dep,
+  ]
+
+  if (is_llvmaot) {
+    configs += [ "$ark_root/libllvmaot:libllvmaot_public_config" ]
+    deps += [ "$ark_root/libllvmaot:libllvmaot" ]
   }
 
-  ohos_executable("irtoc") {
-    sources = [
-      "$target_gen_dir/generated/irtoc_code.cpp",
-      "$target_gen_dir/generated/irtoc_code_llvm.cpp",
-      "backend/compilation.cpp",
-      "backend/compiler/codegen_boundary.cpp",
-      "backend/compiler/codegen_fastpath.cpp",
-      "backend/compiler/dangling_pointers_checker.cpp",
-      "backend/function.cpp",
-      "backend/irtoc.cpp",
-      "backend/irtoc_options.cpp",
-    ]
-    configs = [
-      ":irtoc_public_config",
-      "$ark_root:ark_config",
-      "$ark_root/libpandabase:arkbase_public_config",
-      "$ark_root/libpandafile:arkfile_public_config",
-      "$ark_root/compiler:arkcompiler_public_config",
-      "$ark_root/compiler/optimizer/code_generator:arkencoder_config",
-      "$ark_root/runtime/asm_defines:asmdefines_public_config",
-      "$ark_root/runtime:arkruntime_public_config",
-      "$ark_third_party_root/vixl:vixl_public_config",
-      sdk_libc_secshared_config,
-    ]
+  libs = platform_libs
+  ldflags = platform_ldflags
 
-    deps = [
-      ":irtoc_options_h",
-      "$ark_root/compiler:irtoc_interface_extensions_includes_inl_h",
-      "$ark_root/compiler:libarktscompiler",
-      "$ark_root/compiler/optimizer/code_generator:libarkencoder",
-      "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
-      "$ark_root/irtoc:irtoc_compile",
-      "$ark_root/libpandabase:libarktsbase",
-      "$ark_root/runtime/asm_defines:asm_defines_generator",
-      sdk_libc_secshared_dep,
-    ]
+  install_enable = true
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
 
-    if (is_llvmaot) {
-      configs += [ "$ark_root/libllvmaot:libllvmaot_public_config" ]
-      deps += [ "$ark_root/libllvmaot:libllvmaot" ]
-    }
-
-    libs = platform_libs
-    ldflags = platform_ldflags
-
-    install_enable = true
-    part_name = ark_part_name
-    subsystem_name = "$ark_subsystem_name"
+action("irtoc_generate") {
+  irtoc_root_out_dir =
+      get_label_info("$ark_root/irtoc:irtoc(${host_toolchain})", "root_out_dir")
+  if (ark_standalone_build) {
+    irtoc_cmd = irtoc_root_out_dir + "/bin/irtoc"
+  } else {
+    irtoc_cmd = irtoc_root_out_dir + "/$ark_subsystem_name/$ark_part_name/irtoc"
   }
+  script = irtoc_cmd
 
-  action("irtoc_generate") {
-    irtoc_root_out_dir =
-        get_label_info("$ark_root/irtoc:irtoc(${host_toolchain})",
-                       "root_out_dir")
-    if (ark_standalone_build) {
-      irtoc_cmd = irtoc_root_out_dir + "/bin/irtoc"
-    } else {
-      irtoc_cmd =
-          irtoc_root_out_dir + "/$ark_subsystem_name/$ark_part_name/irtoc"
-    }
-    script = irtoc_cmd
+  outputs = [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
+  args = [
+    "--irtoc-output",
+    rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o", root_build_dir),
+    "--compiler-cross-arch",
+    current_cpu,
+  ]
+  deps = [ ":irtoc(${host_toolchain})" ]
 
-    outputs = [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
-    args = [
-      "--irtoc-output",
-      rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o", root_build_dir),
-      "--compiler-cross-arch",
-      current_cpu,
+  if (is_llvmaot) {
+    outputs += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
+    args += [
+      "--irtoc-output-llvm",
+      rebase_path("$ark_root_gen_dir/generated/irtoc_llvm_lib.o"),
+      "--llvmaot-inline-module",
+      rebase_path("$root_gen_dir/libllvmaot/interpreter_inline.bc"),
     ]
-    deps = [ ":irtoc(${host_toolchain})" ]
-
-    if (is_llvmaot) {
-      outputs += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
-      args += [
-        "--irtoc-output-llvm",
-        rebase_path("$ark_root_gen_dir/generated/irtoc_llvm_lib.o"),
-        "--llvmaot-inline-module",
-        rebase_path("$root_gen_dir/libllvmaot/interpreter_inline.bc"),
-      ]
-      deps += [ "$ark_root/libllvmaot:irtoc_int_llvm_inl_module" ]
-    }
+    deps += [ "$ark_root/libllvmaot:irtoc_int_llvm_inl_module" ]
   }
 }

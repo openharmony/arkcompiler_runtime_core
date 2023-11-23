@@ -23,6 +23,7 @@ group("libarktsbase_package") {
 }
 
 config("arkbase_public_config") {
+  configs = [ sdk_libc_secshared_config ]
   include_dirs = [
     "$ark_root_gen_dir/libpandabase",
     "$ark_root/libpandabase",

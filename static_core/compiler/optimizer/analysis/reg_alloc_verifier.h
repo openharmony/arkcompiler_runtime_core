@@ -100,10 +100,8 @@ private:
     void HandleSpillFill(SpillFillInst *inst);
     void HandleConst(ConstantInst *inst);
     void HandleInst(Inst *inst);
-#ifdef PANDA_WITH_IRTOC
     bool IsSaveRestoreRegisters(Inst *inst);
     void HandleSaveRestoreRegisters(Inst *inst);
-#endif
     void TryHandleImplicitNullCheck(Inst *inst);
     void RestoreLiveRegisters(Inst *inst);
 };

@@ -24,7 +24,7 @@
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/linear_order.h"
 #include "optimizer/analysis/loop_analyzer.h"
-#if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
+#if !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
 #include "optimizer/code_generator/callconv.h"
 #include "optimizer/code_generator/codegen.h"
 #include "optimizer/code_generator/encode.h"
@@ -447,7 +447,7 @@ Encoder *Graph::GetEncoder()
         if (IsBytecodeOptimizer()) {
             return encoder_ = GetAllocator()->New<bytecodeopt::BytecodeEncoder>(GetAllocator());
         }
-#if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
+#if !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
         encoder_ = Encoder::Create(GetAllocator(), GetArch(), OPTIONS.IsCompilerEmitAsm(), IsDynamicMethod());
 #endif
     }
@@ -456,7 +456,7 @@ Encoder *Graph::GetEncoder()
 
 RegistersDescription *Graph::GetRegisters() const
 {
-#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
+#if defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
     return nullptr;
 #else
     if (registers_ == nullptr) {
@@ -468,7 +468,7 @@ RegistersDescription *Graph::GetRegisters() const
 
 CallingConvention *Graph::GetCallingConvention()
 {
-#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
+#if defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
     return nullptr;
 #else
     if (callconv_ == nullptr) {
@@ -486,7 +486,7 @@ CallingConvention *Graph::GetCallingConvention()
 
 const MethodProperties &Graph::GetMethodProperties()
 {
-#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
+#if defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
     UNREACHABLE();
 #else
     if (!method_properties_) {
@@ -498,7 +498,7 @@ const MethodProperties &Graph::GetMethodProperties()
 
 void Graph::ResetParameterInfo()
 {
-#if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
+#if !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
     auto callconv = GetCallingConvention();
     if (callconv == nullptr) {
         param_info_ = nullptr;
@@ -644,7 +644,7 @@ std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr me
 
 SpillFillData Graph::GetDataForNativeParam(DataType::Type type)
 {
-#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
+#if defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
     (void)type;
     return {};
 #else
