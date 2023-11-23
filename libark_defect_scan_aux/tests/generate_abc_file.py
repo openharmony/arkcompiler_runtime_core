@@ -41,17 +41,17 @@ def run_command(cmd):
     subprocess.Popen(cmd, shell=True)
 
 
-def get_command(s, ts2js, tc_dir, dst_dir):
+def get_command(s, es2abc, tc_dir, dst_dir):
     testcase, m_flag = s.split(' ')
     tc_name = os.path.basename(testcase)
     tc_name = tc_name[0: tc_name.rfind('.')]
-    cmd = ['node', '--expose-gc', ts2js, '--opt-level=0']
+    cmd = [es2abc, '--opt-level=0']
     if m_flag == '1':
-        cmd.append('-m')
+        cmd.append('--module')
     out_dir = os.path.join(dst_dir, 'defectscanaux_tests',
                            testcase[0: testcase.rfind('/')])
     create_dir(out_dir)
-    cmd.append('-o')
+    cmd.append('--output')
     cmd.append(os.path.join(out_dir, tc_name + '.abc'))
     tc_path = os.path.join(tc_dir, testcase)
     cmd.append(tc_path)
@@ -59,14 +59,14 @@ def get_command(s, ts2js, tc_dir, dst_dir):
 
 
 def generate_abc(args):
-    ts2js = os.path.join(args.build_dir, 'src/index.js')
+    es2abc = os.path.join(args.build_dir, 'es2abc')
     tc_dir = os.path.dirname(args.testcase_list)
     with open(args.testcase_list) as f:
         for line in f.readlines():
             line = line.strip()
             if len(line) == 0:
                 continue
-            cmd = get_command(line, ts2js, tc_dir, args.dst_dir)
+            cmd = get_command(line, es2abc, tc_dir, args.dst_dir)
             run_command(cmd)
 
 
