@@ -49,7 +49,7 @@ export class Atomics {
      * isLockFree(n) returns true if Atomic operations for typed arrays where "BYTER_PER_ELEMENT == n"
      * use hardware atomics instructions instead of locks.
      *
-     * Warning: currently, all Atomic operations use locks, but isLockFree(4) following the ECMA specification returns true.  
+     * Warning: currently, all Atomic operations use locks, but isLockFree(4) following the ECMA specification returns true.
      */
     public isLockFree(byteSize: int): boolean {
         return byteSize == 4
@@ -58,7 +58,7 @@ export class Atomics {
     // Int8Array
 
     public static add(typedArray: Int8Array, index: int, value: byte): byte {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int8Array.BYTES_PER_ELEMENT, typedArray.length, index)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             let oldValue = typedArray.at(indexedPosition)
@@ -72,7 +72,7 @@ export class Atomics {
     }
 
     public static and(typedArray: Int8Array, index: int, value: byte): byte {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int8Array.BYTES_PER_ELEMENT, typedArray.length, index)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             let oldValue = typedArray.at(indexedPosition)
@@ -86,7 +86,7 @@ export class Atomics {
     }
 
     public static compareExchange(typedArray: Int8Array, index: int, expectedValue: byte, replacementValue: byte): byte {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int8Array.BYTES_PER_ELEMENT, typedArray.length, index)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             let oldValue = typedArray.at(indexedPosition)
@@ -101,7 +101,7 @@ export class Atomics {
     }
 
     public static exchange(typedArray: Int8Array, index: int, value: byte): byte {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int8Array.BYTES_PER_ELEMENT, typedArray.length, index)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             let oldValue = typedArray.at(indexedPosition)
@@ -114,7 +114,7 @@ export class Atomics {
     }
 
     public static load(typedArray: Int8Array, index: int): byte {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int8Array.BYTES_PER_ELEMENT, typedArray.length, index)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             return typedArray.at(indexedPosition)
@@ -125,7 +125,7 @@ export class Atomics {
     }
 
     public static or(typedArray: Int8Array, index: int, value: byte): byte {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int8Array.BYTES_PER_ELEMENT, typedArray.length, index)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             let oldValue = typedArray.at(indexedPosition)
@@ -139,7 +139,7 @@ export class Atomics {
     }
 
     public static store(typedArray: Int8Array, index: int, value: byte): byte {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int8Array.BYTES_PER_ELEMENT, typedArray.length, index)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             typedArray.set(indexedPosition, value)
@@ -151,7 +151,7 @@ export class Atomics {
     }
 
     public static sub(typedArray: Int8Array, index: int, value: byte): byte {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int8Array.BYTES_PER_ELEMENT, typedArray.length, index)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             let oldValue = typedArray.at(indexedPosition)
@@ -165,7 +165,7 @@ export class Atomics {
     }
 
     public static xor(typedArray: Int8Array, index: int, value: byte): byte {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int8Array.BYTES_PER_ELEMENT, typedArray.length, index)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             let oldValue = typedArray.at(indexedPosition)
@@ -257,10 +257,10 @@ export class Atomics {
     /**
      * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify.
      *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".  
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      */
     public static wait(typedArray: Int32Array, offset: int, value: int): string {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
         let mem = Atomics.requireSharedMemory(typedArray.buffer)
         let result = mem.atomicWaitI32(indexedPosition, value)
         return Atomics.interpretWaitResult(result)
@@ -273,7 +273,7 @@ export class Atomics {
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      */
     public static wait(typedArray: Int32Array, offset: int, value: int, timeout: long): string {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
         let mem = Atomics.requireSharedMemory(typedArray.buffer)
         let result = mem.atomicTimedWaitI64(indexedPosition, value, timeout)
         return Atomics.interpretWaitResult(result)
@@ -284,10 +284,10 @@ export class Atomics {
      * (index = typedArray.byteOffset + offset * 4)
      *
      * Note: This method also wakes up threads suspended by the BigInt64Array Atomics.wait(t64, offset64) calls.
-     * But if and only if 't64' views the same Buffer as 'typedArray' and 'offset64' and 'offset' point at the same index in that Buffer.   
+     * But if and only if 't64' views the same Buffer as 'typedArray' and 'offset64' and 'offset' point at the same index in that Buffer.
      */
     public static notify(typedArray: Int32Array, offset: int): int {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             return 0
@@ -298,10 +298,10 @@ export class Atomics {
     }
 
     /**
-     * Operates exactly like Atomics.notify(Int32Array, int) but specifies the maximum number of threads to notify using 'count'.  
+     * Operates exactly like Atomics.notify(Int32Array, int) but specifies the maximum number of threads to notify using 'count'.
      */
     public static notify(typedArray: Int32Array, offset: int, count: int): int {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             return 0
@@ -352,10 +352,10 @@ export class Atomics {
     /**
      * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify.
      *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".  
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      */
     public static wait(typedArray: BigInt64Array, offset: int, value: long): string {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
         let mem = Atomics.requireSharedMemory(typedArray.buffer)
         let result = mem.atomicWaitI64(indexedPosition, value)
         return Atomics.interpretWaitResult(result)
@@ -368,7 +368,7 @@ export class Atomics {
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      */
     public static wait(typedArray: BigInt64Array, offset: int, value: long, timeout: long): string {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
         let mem = Atomics.requireSharedMemory(typedArray.buffer)
         let result = mem.atomicTimedWaitI64(indexedPosition, value, timeout)
         return Atomics.interpretWaitResult(result)
@@ -379,10 +379,10 @@ export class Atomics {
      * (index = typedArray.byteOffset + offset * 8)
      *
      * Note: This method also wakes up threads suspended by the Int32Array Atomics.wait(t32, offset32) calls.
-     * But if and only if 't32' views the same Buffer as 'typedArray' and 'offset32' and 'offset' point at the same index in that Buffer.   
+     * But if and only if 't32' views the same Buffer as 'typedArray' and 'offset32' and 'offset' point at the same index in that Buffer.
      */
     public static notify(typedArray: BigInt64Array, offset: int): long {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, BigInt64Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             return 0
@@ -393,10 +393,10 @@ export class Atomics {
     }
 
     /**
-     * Operates exactly like Atomics.notify(Int32Array, int) but specifies the maximum number of threads to notify using 'count'.  
+     * Operates exactly like Atomics.notify(Int32Array, int) but specifies the maximum number of threads to notify using 'count'.
      */
     public static notify(typedArray: BigInt64Array, offset: int, count: int): long {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, BigInt64Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
             return 0

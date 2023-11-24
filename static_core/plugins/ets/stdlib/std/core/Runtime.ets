@@ -23,9 +23,7 @@ final class Runtime {
      *
      * @returns hash code
      */
-    public GetHashCode(o: Object) : int {
-        return 0;
-    }
+    public native getHashCode(o: Object): int
 
     /**
      * Checks if two objects are equal.

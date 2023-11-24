@@ -15,14 +15,101 @@
 
 package escompat;
 
-export final class Map<K extends Comparable<Object>, V> {
-    private tree: Node<K, V> | null;
+export interface ReadonlyMap<K, V> /* TODO(kprokopenko): extends Iterable */ {
+    /**
+     * Returns number of Entries with unique keys in the Map
+     *
+     * @returns number of Entries with unique keys in the Map
+     */
+    size(): int; // TODO(kprokopenko): must be a property
+
+    /**
+     * Returns a value assosiated with key if present
+     *
+     * @param k the key to find in the Map
+     *
+     * @returns value if assosiated with key presents.
+     */
+    get(key: K): V | null; // TODO(kprokopenko): undefined
+
+    /**
+     * Checks if a key is in the Map
+     *
+     * @param k the key to find in the Map
+     *
+     * @returns true if the value is in the Map
+     */
+    has(key: K): boolean;
+
+    /**
+     * Applies a function over all elements of the Map
+     *
+     * @param fn to apply
+     */
+    forEach(callbackfn: (value: V) => void): void;
+
+    /**
+     * Applies a function over all elements of the Map
+     *
+     * @param fn to apply
+     */
+    forEach(callbackfn: (value: V, key: K) => void): void;
+
+    /**
+     * Applies a function over all elements of the Map
+     *
+     * @param fn to apply
+     */
+    forEach(callbackfn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void;
+
+    // TODO(kprokopenko): uncomment when internal issue #14416 is fixed
+
+    /**
+     * Returns elements from the Map as an keys Iterator
+     *
+     * @returns ValueIterator with map keys
+     */
+    //keys(): ValuesIterator<K>;
+
+    /**
+     * Returns elements from the Map as an values Iterator
+     *
+     * @returns ValueIterator with map values
+     */
+    //values(): ValuesIterator<V>;
+
+    /**
+     * Returns elements from the Map as an array of Entries
+     *
+     * @returns an array of Entries
+     */
+    //entries(): MapIterator<K, V>;
+}
+
+class MapEntry<K, V> extends Entry<K, V> {
+    constructor(key: K, value: V) {
+        super(key, value)
+    }
+
+    override equals(o: Object | null): boolean {
+        if (o instanceof MapEntry) {
+            return this.key.equals((o as MapEntry<K, V>).key)
+        }
+        return this.key.equals(o)
+    }
+
+    override hashCode(): int {
+        return this.key.hashCode()
+    }
+}
+
+export final class Map<K, V> implements ReadonlyMap<K, V> {
+    private s: Set<MapEntry<K, V>> = new Set<MapEntry<K, V>>()
 
     /**
      * Constructs an empty Map
      */
     constructor() {
-        this.tree = newEmpty<K, V>();
     }
 
     /**
@@ -33,7 +120,7 @@ export final class Map<K extends Comparable<Object>, V> {
      * @param v the value to put into the Map
      */
     set(k: K, v: V): void {
-        this.tree = addToTree(this.tree, k, v);
+        this.s.add(new MapEntry<K, V>(k, v))
     }
 
     /**
@@ -43,9 +130,8 @@ export final class Map<K extends Comparable<Object>, V> {
      *
      * @returns true if the value is in the Map
      */
-    has(k: K): boolean {
-        let r = lookupTree(this.tree, k);
-        return r != null;
+    override has(k: K): boolean {
+        return this.s.get(k) != null
     }
 
     /**
@@ -53,8 +139,8 @@ export final class Map<K extends Comparable<Object>, V> {
      *
      * @returns number of Entries with unique keys in the Map
      */
-    length(): int {
-        return count(this.tree);
+    override size(): int {
+        return this.s.size()
     }
 
     /**
@@ -62,15 +148,15 @@ export final class Map<K extends Comparable<Object>, V> {
      *
      * @param k the key to remove
      */
-    delete(k: K): void {
-        this.tree = removeFromTree(this.tree, k);
+    delete(k: K): boolean {
+        return this.s.deleteImpl(k)
     }
 
     /**
      * Deletes all elements from the Map
      */
     clear(): void {
-        this.tree = newEmpty<K, V>();
+        this.s.clear()
     }
 
     /**
@@ -79,15 +165,13 @@ export final class Map<K extends Comparable<Object>, V> {
      * @param k the key to find in the Map
      *
      * @returns value if assosiated with key presents.
-     * TODO: specify behaviour if not found
      */
-    get(k: K): V {
-        let r = lookupTree(this.tree, k);
+    override get(k: K): V | null {
+        const r = this.s.get(k)
         if (r != null) {
-            return r!;
-        } else {
-            assert false : "Key not found";
+            return r!.value
         }
+        return null
     }
 
     /**
@@ -100,44 +184,29 @@ export final class Map<K extends Comparable<Object>, V> {
      * @returns value if key presents, def otherwise
      */
     get(k: K, def: V): V {
-        let r = lookupTree(this.tree, k);
+        const r = this.s.get(k)
         if (r != null) {
-            return r!;
-        } else {
-            return def;
+            return r!.value
         }
+        return def
     }
 
     /**
      * Returns elements from the Map as an keys Iterator
      *
-     * @returns ValueIterator with map keys
+     * @returns iterator with map keys
      */
-    keys(): ValuesIterator<K> {
-        let en = treeToArray(this.tree);
-        let ret = new K[en.length];
-
-        for (let i: int = 0; i < ret.length; i++) {
-            ret[i] = en[i].key;
-        }
-
-        return new ValuesIterator<K>(ret);
+    /* override */ keys(): IterableIterator<K> {
+        return this.s.mappedIterator<K>((x: ListNode): Object => { return (x.val as MapEntry<K, V>).key })
     }
 
     /**
      * Returns elements from the Map as an values Iterator
      *
-     * @returns ValueIterator with map values
+     * @returns iterator with map values
      */
-    values(): ValuesIterator<V> {
-        let en = treeToArray(this.tree);
-        let ret = new V[en.length];
-
-        for (let i: int = 0; i < ret.length; i++) {
-            ret[i] = en[i].value;
-        }
-
-        return new ValuesIterator<V>(ret);
+    /* override */ values(): IterableIterator<V> {
+        return this.s.mappedIterator<V>((x: ListNode): Object => { return (x.val as MapEntry<K, V>).value })
     }
 
     /**
@@ -145,17 +214,8 @@ export final class Map<K extends Comparable<Object>, V> {
      *
      * @returns an array of Entries
      */
-    entries(): MapIterator<K, V> {
-        return new MapIterator<K, V>(treeToArray(this.tree));
-    }
-
-    private static forEachNode<K extends Comparable<Object>, V>(node: Node<K,V> | null, fn: (v: V, k: K) => void): void {
-        if (isEmpty<K,V>(node)) {
-            return
-        }
-        Map.forEachNode(node.left, fn)
-        fn(node.value, node.key)
-        Map.forEachNode(node.right, fn)
+    /* override */ entries(): IterableIterator<Entry<K, V>> {
+        return this.s.mappedIterator<Entry<K, V>>((x: ListNode): Object => { return x.val as MapEntry<K, V> })
     }
 
     /**
@@ -163,9 +223,10 @@ export final class Map<K extends Comparable<Object>, V> {
      *
      * @param fn to apply
      */
-    // TODO: return undefined
-    forEach(fn: (v: V, k: K) => void): void {
-        Map.forEachNode(this.tree, fn)
+    forEach(fn: (v: V, k: K, map: Map<K, V>) => void): void {
+        iteratorForEach<Entry<K, V>>(this.entries(), (x: Entry<K, V>): void => {
+            fn(x.value, x.key, this)
+        })
     }
 
     /**
@@ -173,8 +234,29 @@ export final class Map<K extends Comparable<Object>, V> {
      *
      * @param fn to apply
      */
-    forEach(fn: (v: V) => void): void {
-        let l: (v: V, k: K) => void = (v: V, k: K): void => { fn(v) }
-        Map.forEachNode(this.tree, l)
+    override forEach(fn: (v: V, k: K) => void): void {
+        iteratorForEach<Entry<K, V>>(this.entries(), (x: Entry<K, V>): void => {
+            fn(x.value, x.key)
+        })
+    }
+
+    /**
+     * Applies a function over all elements of the Map
+     *
+     * @param fn to apply
+     */
+    override forEach(fn: (v: V) => void): void {
+        iteratorForEach<V>(this.values(), fn)
+    }
+
+    /**
+     * Applies a function over all elements of the Map
+     *
+     * @param fn to apply
+     */
+    override forEach(fn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void {
+        iteratorForEach<Entry<K, V>>(this.entries(), (x: Entry<K, V>): void => {
+            fn(x.value, x.key, this)
+        })
     }
 }

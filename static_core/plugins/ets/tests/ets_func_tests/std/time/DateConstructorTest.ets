@@ -62,7 +62,7 @@ function testIntMsConstructor(): int {
         let cd = new Date(longYears[i]);
         
         try {
-            if(cd.valueOf() != longYears[i]) failures++;
+            if(cd.valueOf() as long != longYears[i]) failures++;
         } catch (e) {
             return 1;
         }
@@ -80,7 +80,7 @@ function testIntYearMonthConstructor(): int {
         let cd = new Date(longYears[i], md[i]);
         let utc = Date.UTC(longYears[i], md[i]);
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != cd.valueOf() as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -100,7 +100,7 @@ function testIntYearMonthDayConstructor(): int {
         let cd = new Date(longYears[i], md[i], day);
         let utc = Date.UTC(longYears[i], md[i], day);
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != cd.valueOf() as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -121,7 +121,7 @@ function testIntYearMonthDayHoursConstructor(): int {
         let cd = new Date(longYears[i], md[i], day, ht[i]);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i]);
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != cd.valueOf() as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -143,7 +143,7 @@ function testIntYearMonthDayHoursMinutesConstructor(): int {
         let cd = new Date(longYears[i], md[i], day, ht[i], mh[i]);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i]);
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != cd.valueOf() as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -166,7 +166,7 @@ function testIntYearMonthDayHoursMinutesSecondsConstructor(): int {
         let cd = new Date(longYears[i], md[i], day, ht[i], mh[i], mh[i]);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i], mh[i]);
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != cd.valueOf() as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -190,7 +190,7 @@ function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
         let cd = new Date(longYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != cd.valueOf() as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -371,7 +371,7 @@ function checkDateWithLongYMDHMS(date: Date, year: long, month: long, day: long,
 function checkDateWithLongYMDHMSM(cd: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long, millis: long): int {
     let failures = 0;
 
-        let tzo: long = cd.getTimezoneOffset();
+        let tzo: long = cd.getTimezoneOffset() as long;
         let hoursOffset = tzo / 60;
         hour = hour - hoursOffset;
         if(hour >= 24) {
@@ -428,7 +428,7 @@ function checkDateWithDoubleYMDHMS(date: Date, year: double, month: double, day:
 function checkDateWithDoubleYMDHMSM(cd: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double, millis: double): int {
     let failures = 0;
 
-        let tzo: long = cd.getTimezoneOffset();
+        let tzo: long = cd.getTimezoneOffset() as long;
         let hoursOffset = tzo / 60;
         hour = hour - hoursOffset;
         if(hour >= 24) {

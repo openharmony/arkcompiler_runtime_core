@@ -16,6 +16,7 @@
 #include "include/language_context.h"
 #include "include/mem/panda_containers.h"
 #include "libpandabase/utils/utf.h"
+#include "macros.h"
 #include "napi/ets_napi.h"
 #include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -80,6 +81,27 @@ EtsField *EtsClass::GetOwnFieldByIndex(uint32_t i)
     return EtsField::FromRuntimeField(&GetRuntimeClass()->GetFields()[i]);
 }
 
+EtsField *EtsClass::GetFieldByName(EtsString *name)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsString> expected_name(coroutine, name->GetCoreType());
+
+    EtsField *res = nullptr;
+    EnumerateBaseClasses([&](EtsClass *c) {
+        auto fields = c->GetRuntimeClass()->GetFields();
+        for (auto &f : fields) {
+            auto ets_field = EtsField::FromRuntimeField(&f);
+            if (ets_field->GetNameString()->StringsAreEqual(expected_name.GetPtr()->AsObject())) {
+                res = ets_field;
+                return true;
+            }
+        }
+        return false;
+    });
+    return res;
+}
+
 EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature)
 {
     auto core_name = reinterpret_cast<const uint8_t *>(name);
@@ -113,27 +135,15 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name, const Method::Proto &prot
 
 uint32_t EtsClass::GetMethodsNum()
 {
-    uint32_t fnumber = 0;
-    EnumerateBaseClasses([&](EtsClass *c) {
-        fnumber += c->GetRuntimeClass()->GetMethods().Size();
-        return false;
-    });
-    return fnumber;
+    return GetMethods().size();
 }
 
-EtsMethod *EtsClass::GetMethodByIndex(uint32_t i)
+EtsMethod *EtsClass::GetMethodByIndex(uint32_t ind)
 {
     EtsMethod *res = nullptr;
-    EnumerateBaseClasses([&](EtsClass *c) {
-        auto methods = c->GetRuntimeClass()->GetMethods();
-        auto fnum = methods.Size();
-        if (i >= fnum) {
-            i -= fnum;
-            return false;
-        }
-        res = EtsMethod::FromRuntimeMethod(&methods[i]);
-        return true;
-    });
+    auto methods = GetMethods();
+    ASSERT(ind < methods.size());
+    res = methods[ind];
     return res;
 }
 
@@ -171,30 +181,60 @@ EtsMethod *EtsClass::GetMethod(const char *name, const char *signature)
     return reinterpret_cast<EtsMethod *>(core_method);
 }
 
+// NOTE(kirill-mitkin): Cache in EtsClass field later
 PandaVector<EtsMethod *> EtsClass::GetMethods()
 {
-    auto ets_methods = PandaVector<EtsMethod *>(Runtime::GetCurrent()->GetInternalAllocator()->Adapter());
-    EnumerateBaseClasses([&](EtsClass *c) {
-        auto methods = c->GetRuntimeClass()->GetMethods();
-        auto fnum = methods.Size();
-        for (uint32_t i = 0; i < fnum; i++) {
-            // Skip constructors of base classes
-            if (methods[i].IsConstructor() && c != this) {
-                continue;
+    PandaUnorderedMap<PandaString, EtsMethod *> unique_methods;
+
+    auto add_direct_methods = [&](const EtsClass *c) {
+        auto direct_methods = c->GetRuntimeClass()->GetMethods();
+        for (auto &method : direct_methods) {
+            auto name = PandaString(utf::Mutf8AsCString((method.GetName().data)));
+            if (unique_methods.find(name) == unique_methods.end()) {
+                unique_methods[name] = EtsMethod::FromRuntimeMethod(&method);
             }
-            ets_methods.push_back(EtsMethod::FromRuntimeMethod(&methods[i]));
         }
-        return false;
-    });
+    };
+
+    if (IsInterface()) {
+        add_direct_methods(this);
+        EnumerateInterfaces([&](const EtsClass *c) {
+            add_direct_methods(c);
+            return false;
+        });
+    } else {
+        EnumerateBaseClasses([&](EtsClass *c) {
+            auto direct_methods = c->GetRuntimeClass()->GetMethods();
+            auto fnum = direct_methods.Size();
+            for (uint32_t i = 0; i < fnum; i++) {
+                // Skip constructors
+                if (direct_methods[i].IsConstructor()) {
+                    continue;
+                }
+                auto name = PandaString(utf::Mutf8AsCString((direct_methods[i].GetName().data)));
+                unique_methods[name] = EtsMethod::FromRuntimeMethod(&direct_methods[i]);
+            }
+            return false;
+        });
+    }
+    auto ets_methods = PandaVector<EtsMethod *>();
+    for (auto &iter : unique_methods) {
+        ets_methods.push_back(iter.second);
+    }
     return ets_methods;
 }
 
 PandaVector<EtsMethod *> EtsClass::GetConstructors()
 {
     auto constructors = PandaVector<EtsMethod *>();
-    auto methods = GetMethods();
-    std::copy_if(methods.begin(), methods.end(), std::back_inserter(constructors),
-                 [this](EtsMethod *method) { return method->IsInstanceConstructor() && method->GetClass() == this; });
+    auto methods = GetRuntimeClass()->GetMethods();
+    // NOTE(kirill-mitkin): cache in ets_class field
+    for (auto &method : methods) {
+        // Skip constructors
+        if (method.IsInstanceConstructor()) {
+            constructors.emplace_back(EtsMethod::FromRuntimeMethod(&method));
+        }
+    }
     return constructors;
 }
 
@@ -328,6 +368,9 @@ EtsString *EtsClass::GetName()
         }
 
         name = CreateEtsClassName(GetDescriptor());
+        if (name == nullptr) {
+            return nullptr;
+        }
         success = CompareAndSetName(nullptr, name);
     } while (!success);
     return name;
@@ -437,6 +480,249 @@ bool EtsClass::IsReference() const
 bool EtsClass::IsFinalizable() const
 {
     return (flags_ & IS_CLASS_FINALIZABLE) != 0;
+}
+
+void EtsClass::Initialize(EtsArray *if_table, EtsClass *super_class, uint16_t access_flags, bool is_primitive_type)
+{
+    ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
+
+    SetIfTable(if_table);
+    SetName(nullptr);
+    SetSuperClass(super_class);
+
+    uint32_t flags = access_flags;
+    if (is_primitive_type) {
+        flags |= ETS_ACC_PRIMITIVE;
+    }
+
+    if (super_class != nullptr) {
+        if (super_class->IsSoftReference()) {
+            flags |= IS_SOFT_REFERENCE;
+        } else if (super_class->IsWeakReference()) {
+            flags |= IS_WEAK_REFERENCE;
+        } else if (super_class->IsPhantomReference()) {
+            flags |= IS_PHANTOM_REFERENCE;
+        }
+        if (super_class->IsFinalizerReference()) {
+            flags |= IS_FINALIZE_REFERENCE;
+        }
+        if (super_class->IsFinalizable()) {
+            flags |= IS_CLASS_FINALIZABLE;
+        }
+    }
+    if ((flags & IS_CLASS_FINALIZABLE) == 0) {
+        if (IsClassFinalizable(this)) {
+            flags |= IS_CLASS_FINALIZABLE;
+        }
+    }
+    SetFlags(flags);
+}
+
+void EtsClass::SetComponentType(EtsClass *component_type)
+{
+    if (component_type == nullptr) {
+        GetRuntimeClass()->SetComponentType(nullptr);
+        return;
+    }
+    GetRuntimeClass()->SetComponentType(component_type->GetRuntimeClass());
+}
+
+EtsClass *EtsClass::GetComponentType() const
+{
+    panda::Class *component_type = GetRuntimeClass()->GetComponentType();
+    if (component_type == nullptr) {
+        return nullptr;
+    }
+    return FromRuntimeClass(component_type);
+}
+
+void EtsClass::SetIfTable(EtsArray *array)
+{
+    GetObjectHeader()->SetFieldObject(GetIfTableOffset(), reinterpret_cast<ObjectHeader *>(array));
+}
+
+void EtsClass::SetName(EtsString *name)
+{
+    GetObjectHeader()->SetFieldObject(GetNameOffset(), reinterpret_cast<ObjectHeader *>(name));
+}
+
+bool EtsClass::CompareAndSetName(EtsString *old_name, EtsString *new_name)
+{
+    return GetObjectHeader()->CompareAndSetFieldObject(GetNameOffset(), reinterpret_cast<ObjectHeader *>(old_name),
+                                                       reinterpret_cast<ObjectHeader *>(new_name),
+                                                       std::memory_order::memory_order_seq_cst, true);
+}
+
+EtsField *EtsClass::GetFieldIDByName(const char *name, const char *sig)
+{
+    auto u8name = reinterpret_cast<const uint8_t *>(name);
+    auto *field = reinterpret_cast<EtsField *>(GetRuntimeClass()->GetInstanceFieldByName(u8name));
+
+    if (sig != nullptr && field != nullptr) {
+        if (strcmp(field->GetTypeDescriptor(), sig) != 0) {
+            return nullptr;
+        }
+    }
+
+    return field;
+}
+
+uint32_t EtsClass::GetFieldIndexByName(const char *name)
+{
+    auto u8name = reinterpret_cast<const uint8_t *>(name);
+    auto fields = GetRuntimeClass()->GetFields();
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(u8name)), u8name};
+    for (uint32_t i = 0; i < GetFieldsNumber(); i++) {
+        if (fields[i].GetName() == sd) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+EtsField *EtsClass::GetStaticFieldIDByName(const char *name, const char *sig)
+{
+    auto u8name = reinterpret_cast<const uint8_t *>(name);
+    auto *field = reinterpret_cast<EtsField *>(GetRuntimeClass()->GetStaticFieldByName(u8name));
+
+    if (sig != nullptr && field != nullptr) {
+        if (strcmp(field->GetTypeDescriptor(), sig) != 0) {
+            return nullptr;
+        }
+    }
+
+    return field;
+}
+
+EtsField *EtsClass::GetDeclaredFieldIDByName(const char *name)
+{
+    return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindDeclaredField([name](const panda::Field &field) -> bool {
+        auto *jfield = EtsField::FromRuntimeField(&field);
+        return ::strcmp(jfield->GetName(), name) == 0;
+    }));
+}
+
+EtsField *EtsClass::GetFieldIDByOffset(uint32_t field_offset)
+{
+    auto pred = [field_offset](const panda::Field &f) { return f.GetOffset() == field_offset; };
+    return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindInstanceField(pred));
+}
+
+EtsField *EtsClass::GetStaticFieldIDByOffset(uint32_t field_offset)
+{
+    auto pred = [field_offset](const panda::Field &f) { return f.GetOffset() == field_offset; };
+    return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindStaticField(pred));
+}
+
+EtsClass *EtsClass::GetBase()
+{
+    if (IsInterface()) {
+        return nullptr;
+    }
+    auto *base = GetRuntimeClass()->GetBase();
+    if (base == nullptr) {
+        return nullptr;
+    }
+    return FromRuntimeClass(base);
+}
+
+bool EtsClass::IsAnnotation() const
+{
+    return GetRuntimeClass()->IsAnnotation();
+}
+
+bool EtsClass::IsEnum() const
+{
+    return GetRuntimeClass()->IsEnum();
+}
+
+bool EtsClass::IsStringClass() const
+{
+    return GetRuntimeClass()->IsStringClass();
+}
+
+bool EtsClass::IsLambdaClass() const
+{
+    // NOTE(petr-shumilov): Make more clear
+    return !GetRuntimeClass()->IsPrimitive() && GetRuntimeClass()->GetName().rfind(LAMBDA_PREFIX, 0) == 0;
+}
+
+bool EtsClass::IsUnionClass() const
+{
+    // NOTE(petr-shumilov): Not implemented
+    return false;
+}
+
+bool EtsClass::IsUndefined() const
+{
+    // NOTE(petr-shumilov): Not implemented
+    return false;
+}
+
+bool EtsClass::IsInterface() const
+{
+    return GetRuntimeClass()->IsInterface();
+}
+
+bool EtsClass::IsArrayClass() const
+{
+    return GetRuntimeClass()->IsArrayClass();
+}
+
+bool EtsClass::IsTupleClass() const
+{
+    // NOTE(petr-shumilov): Not implemented
+    return false;
+}
+
+bool EtsClass::IsBoxedClass() const
+{
+    auto type_desc = GetDescriptor();
+    return (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN ||
+            type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE ||
+            type_desc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR ||
+            type_desc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT ||
+            type_desc == panda::ets::panda_file_items::class_descriptors::BOX_INT ||
+            type_desc == panda::ets::panda_file_items::class_descriptors::BOX_LONG ||
+            type_desc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT ||
+            type_desc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE);
+}
+
+void EtsClass::GetInterfaces(PandaUnorderedSet<EtsClass *> &ifaces, EtsClass *iface)
+{
+    ifaces.insert(iface);
+    EnumerateDirectInterfaces([&](EtsClass *runtime_interface) {
+        if (ifaces.find(runtime_interface) == ifaces.end()) {
+            runtime_interface->GetInterfaces(ifaces, runtime_interface);
+        }
+        return false;
+    });
+}
+
+EtsObject *EtsClass::GetStaticFieldObject(EtsField *field)
+{
+    return reinterpret_cast<EtsObject *>(GetRuntimeClass()->GetFieldObject(*field->GetRuntimeField()));
+}
+
+EtsObject *EtsClass::GetStaticFieldObject(int32_t field_offset, bool is_volatile)
+{
+    if (is_volatile) {
+        return reinterpret_cast<EtsObject *>(GetRuntimeClass()->GetFieldObject<true>(field_offset));
+    }
+    return reinterpret_cast<EtsObject *>(GetRuntimeClass()->GetFieldObject<false>(field_offset));
+}
+
+void EtsClass::SetStaticFieldObject(EtsField *field, EtsObject *value)
+{
+    GetRuntimeClass()->SetFieldObject(*field->GetRuntimeField(), reinterpret_cast<ObjectHeader *>(value));
+}
+
+void EtsClass::SetStaticFieldObject(int32_t field_offset, bool is_volatile, EtsObject *value)
+{
+    if (is_volatile) {
+        GetRuntimeClass()->SetFieldObject<true>(field_offset, reinterpret_cast<ObjectHeader *>(value));
+    }
+    GetRuntimeClass()->SetFieldObject<false>(field_offset, reinterpret_cast<ObjectHeader *>(value));
 }
 
 }  // namespace panda::ets

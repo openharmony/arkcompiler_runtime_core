@@ -77,4 +77,12 @@ export final class Field extends Object {
     public override toString(): string {
         return this.getName() + ": " + this.getType().toString()
     }
+
+    public override equals(oth: NullishType): boolean {
+        return oth instanceof Field &&
+                this.td == (oth as Field).td &&
+                this.name == (oth as Field).name &&
+                this.accessMod == (oth as Field).accessMod &&
+                this.attributes == (oth as Field).attributes
+    }
 }

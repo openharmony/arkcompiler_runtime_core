@@ -34,7 +34,7 @@ package escompat;
  * JS {{N}}Array API-compatible class
  */
 export final class {{N}}Array {
-    public static readonly BYTES_PER_ELEMENT = {{S}}
+    public static readonly BYTES_PER_ELEMENT : number = {{S}}
 
     /**
      * Creates an empty {{N}}Array.
@@ -67,14 +67,14 @@ export final class {{N}}Array {
      */
     public constructor(buf: Buffer, byteOffset: int, length: int) {
 {%- if S != "1" %}
-        if (buf.getByteLength() % {{N}}Array.BYTES_PER_ELEMENT != 0) {
+        if (buf.getByteLength() % {{N}}Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
         }
-        if (byteOffset % {{N}}Array.BYTES_PER_ELEMENT != 0) {
+        if (byteOffset % {{N}}Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
         }
 {% endif %}
-        if (this.length * {{N}}Array.BYTES_PER_ELEMENT > buf.getByteLength()) {
+        if (this.length as int * {{N}}Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
             throw new RangeError("Range Error: attempt to create {{N}}Array where length * {{N}}Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
         }
         this.byteLength = buf.getByteLength() - byteOffset
@@ -91,7 +91,7 @@ export final class {{N}}Array {
      * @param byteOffset byte offset from begin of the buf
      */
     public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / {{N}}Array.BYTES_PER_ELEMENT)
+        this(buf, byteOffset, buf.getByteLength() / {{N}}Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -111,7 +111,7 @@ export final class {{N}}Array {
      * @param buf data initializer
      */
     public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / {{N}}Array.BYTES_PER_ELEMENT)
+        this(buf, 0, buf.getByteLength() / {{N}}Array.BYTES_PER_ELEMENT as int)
     }
 
     /**
@@ -121,7 +121,7 @@ export final class {{N}}Array {
      */
     public constructor(length: int) {
         this.length = length
-        this.byteLength = length * {{N}}Array.BYTES_PER_ELEMENT
+        this.byteLength = length * {{N}}Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength)
     }
@@ -141,7 +141,7 @@ export final class {{N}}Array {
      * @param other data initializer
      */
     public constructor(other: {{N}}Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength)
+        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
         this.byteLength = other.byteLength
         this.length = other.length
     }
@@ -166,9 +166,9 @@ export final class {{N}}Array {
      */
     public at(index: int): {{T}} {
         if (index < 0) {
-            index = this.length + index
+            index = this.length as int + index
         }
-        let byteIndex = index * {{N}}Array.BYTES_PER_ELEMENT + this.byteOffset
+        let byteIndex = index * {{N}}Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         {%- if T == "float" %}
         {%- set ET = "int" %}
         {%- elif T == "double" %}
@@ -177,8 +177,8 @@ export final class {{N}}Array {
         {%- set ET = T %}
         {%- endif %}
         let res: {{ET}} = 0
-        for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT; ++i) {
-            let byteVal = this.buffer.at(byteIndex + i) as {{ET}}
+        for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
+            let byteVal = this.buffer.at(byteIndex as int + i) as {{ET}}
             {%- if ET != "byte" %}
             byteVal &= 0xff
             {%- endif %}
@@ -220,34 +220,34 @@ export final class {{N}}Array {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        if (insertPos < -this.length) {
+        if (insertPos < -this.length as int) {
             insertPos = 0
         }
-        if (insertPos >= this.length) {
+        if (insertPos >= this.length as int) {
             return
         }
         if (insertPos < 0) {
-            insertPos = this.length + insertPos
+            insertPos = this.length as int + insertPos
         }
 
-        if (startPos < -this.length) {
+        if (startPos < -this.length as int) {
             startPos = 0
         }
-        if (startPos >= this.length) {
+        if (startPos >= this.length as int) {
             return
         }
         if (startPos < 0) {
-            startPos = this.length + startPos
+            startPos = this.length as int + startPos
         }
 
-        if (endPos < -this.length) {
+        if (endPos < -this.length as int) {
             endPos = 0
         }
         if (endPos < 0) {
-            endPos = this.length + endPos
+            endPos = this.length as int + endPos
         }
-        if (endPos > this.length) {
-            endPos = this.length
+        if (endPos > this.length as int) {
+            endPos = this.length as int
         }
         if (endPos < startPos) {
             return
@@ -281,7 +281,7 @@ export final class {{N}}Array {
      * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.length)
+        this.copyWithin(insertPos, startPos, this.length as int)
     }
 
     /**
@@ -301,7 +301,7 @@ export final class {{N}}Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.length)
+        this.copyWithin(insertPos, 0, this.length as int)
     }
 
     {% set TBoxed = T[0].upper() + T[1:] -%}
@@ -309,12 +309,8 @@ export final class {{N}}Array {
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): MapIterator<Int, {{TBoxed}}> {
-        let ret: Entry<Int, {{TBoxed}}>[] = new Entry<Int, {{TBoxed}}>[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = new Entry<Int, {{TBoxed}}>(i, this.at(i));
-        }
-        return new MapIterator<Int, {{TBoxed}}>(ret);
+    /* public */ internal entries(): IterableIterator<Entry<Int, {{TBoxed}}>> {
+        throw new Error("not implemented")
     }
 
     /**
@@ -336,23 +332,23 @@ export final class {{N}}Array {
      * @returns modified {{N}}Array
      */
     public fill(value: {{T}}, start: int, end: int): {{N}}Array {
-        if (start < -this.length) {
+        if (start < -this.length as int) {
             start = 0
         }
         if (start < 0) {
-            start += this.length
+            start += this.length as int
         }
-        if (start >= this.length) {
+        if (start >= this.length as int) {
             return this;
         }
-        if (end < -this.length) {
+        if (end < -this.length as int) {
             end = 0
         }
         if (end < 0) {
-            end += this.length
+            end += this.length as int
         }
-        if (end >= this.length) {
-            end = this.length
+        if (end >= this.length as int) {
+            end = this.length as int
         }
         for (let i = start; i < end; ++i) {
             this.set(i, value)
@@ -379,7 +375,7 @@ export final class {{N}}Array {
      * @returns modified {{N}}Array
      */
     public fill(value: {{T}}, start: int): {{N}}Array {
-        return this.fill(value, start, this.length)
+        return this.fill(value, start, this.length as int)
     }
 
     /**
@@ -390,7 +386,7 @@ export final class {{N}}Array {
      * @returns modified {{N}}Array
      */
     public fill(value: {{T}}): {{N}}Array {
-        return this.fill(value, 0, this.length)
+        return this.fill(value, 0, this.length as int)
     }
 
     /**
@@ -414,11 +410,11 @@ export final class {{N}}Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: {{T}}): void {
-        if (insertPos < 0 || insertPos >= this.length) {
+        if (insertPos < 0 || insertPos >= this.length as int) {
             throw new RangeError("set: insertPos is out-of-bounds")
         }
 
-        let startByte = insertPos * {{N}}Array.BYTES_PER_ELEMENT + this.byteOffset
+        let startByte = insertPos * {{N}}Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         {%- if T == "float" %}
         let bits = Float.bitCastToInt(val);
         {%- elif T == "double" %}
@@ -426,7 +422,7 @@ export final class {{N}}Array {
         {%- else %}
         let bits = val;
         {%- endif %}
-        for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT; ++i) {
+        for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
             let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
             this.buffer.set(startByte + i, byteVal)
         }
@@ -441,13 +437,9 @@ export final class {{N}}Array {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: {{elementCompat}}[], insertPos1: number): void {
-        const insertPos = insertPos1 as int
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: {{T}}[]): size of arr is greater than {{N}}Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.set(insertPos + i, arr[i]{{fromElementCompat}})
+    public set(arr: {{elementCompat}}[], insertPos: number): void {
+        for (let i = 0; i < arr.length as int; ++i) {
+            this.set(insertPos as int + i, arr[i]{{fromElementCompat}})
         }
     }
 
@@ -461,10 +453,7 @@ export final class {{N}}Array {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: {{T}}[], insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.length) {
-            throw new RangeError("set(insertPos: int, arr: {{T}}[]): size of arr is greater than {{N}}Array.length")
-        }
-        for (let i = 0; i < arr.length; ++i) {
+        for (let i = 0; i < arr.length as int; ++i) {
             this.set(insertPos + i, arr[i])
         }
     }
@@ -538,7 +527,7 @@ export final class {{N}}Array {
      * @returns true if e is in {{N}}Array, false otherwise
      */
     public includes(e: {{T}}, fromIndex: int): boolean {
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return true
             }
@@ -593,17 +582,17 @@ export final class {{N}}Array {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(e: {{T}}, fromIndex: int): int {
-        if (fromIndex >= this.length) {
+        if (fromIndex >= this.length as int) {
             return -1
         }
         if (fromIndex < 0) {
-            fromIndex += this.length
+            fromIndex += this.length as int
             // See TypedArray.indexOf JS docs
             if (fromIndex < 0) {
                 fromIndex = 0
             }
         }
-        for (let i = fromIndex; i < this.length; ++i) {
+        for (let i = fromIndex; i < this.length as int; ++i) {
             if (this.at(i) == e) {
                 return i
             }
@@ -644,12 +633,12 @@ export final class {{N}}Array {
      */
     public join(s: string): string {
         let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(s)
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -668,12 +657,13 @@ export final class {{N}}Array {
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -703,11 +693,11 @@ export final class {{N}}Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
     public lastIndexOf(val: {{T}}, fromIndex: int): int {
-        if (fromIndex >= this.length) {
-            fromIndex = this.length - 1
+        if (fromIndex >= this.length as int) {
+            fromIndex = this.length as int - 1
         }
         if (fromIndex < 0) {
-            fromIndex = this.length + fromIndex
+            fromIndex = this.length as int + fromIndex
         }
 
         for (let i = fromIndex; i >= 0; --i) {
@@ -727,7 +717,7 @@ export final class {{N}}Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: {{elementCompat}}): number {
-        return this.lastIndexOf(val{{fromElementCompat}}, this.length - 1)
+        return this.lastIndexOf(val{{fromElementCompat}}, this.length as int - 1)
     }
 {%- endif %}
 
@@ -739,7 +729,7 @@ export final class {{N}}Array {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: {{T}}): int {
-        return this.lastIndexOf(val, this.length - 1)
+        return this.lastIndexOf(val, this.length as int - 1)
     }
 
    /**
@@ -760,8 +750,8 @@ export final class {{N}}Array {
      */
     public reverse(): {{N}}Array {
         let res = new {{N}}Array(this)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(this.length - 1 - i, this.at(i))
+        for (let i = 0; i < this.length as int; ++i) {
+            res.set(this.length as int - 1 - i, this.at(i))
         }
         return res
     }
@@ -793,7 +783,7 @@ export final class {{N}}Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): {{N}}Array {
-        let buf = this.buffer.sliceInternal(begin * {{N}}Array.BYTES_PER_ELEMENT, end * {{N}}Array.BYTES_PER_ELEMENT)
+        let buf = this.buffer.sliceInternal(begin * {{N}}Array.BYTES_PER_ELEMENT as int, end * {{N}}Array.BYTES_PER_ELEMENT as int)
         return new {{N}}Array(buf)
     }
 
@@ -816,7 +806,7 @@ export final class {{N}}Array {
      * @returns a new {{N}}Array with elements of current {{N}}Array[begin, this.length)
      */
     public slice(begin: int): {{N}}Array {
-        return this.slice(begin, this.length)
+        return this.slice(begin, this.length as int)
     }
 
     /**
@@ -865,7 +855,7 @@ export final class {{N}}Array {
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): {{N}}Array {
-        return new {{N}}Array(this.buffer, begin * {{N}}Array.BYTES_PER_ELEMENT, end - begin)
+        return new {{N}}Array(this.buffer, begin * {{N}}Array.BYTES_PER_ELEMENT as int, end - begin)
     }
 
     /**
@@ -887,7 +877,7 @@ export final class {{N}}Array {
      * @returns new {{N}}Array with the same ArrayBuffer
      */
     public subarray(begin: int): {{N}}Array {
-        return this.subarray(begin, this.length)
+        return this.subarray(begin, this.length as int)
     }
 
     /**
@@ -896,7 +886,7 @@ export final class {{N}}Array {
      * @returns new {{N}}Array with the same ArrayBuffer
      */
     public subarray(): {{N}}Array {
-        return this.subarray(0, this.length)
+        return this.subarray(0, this.length as int)
     }
 
     /**
@@ -957,12 +947,12 @@ export final class {{N}}Array {
      */
     public override toString(): string {
         let res = new StringBuilder();
-        for (let i = 0; i < this.length - 1; ++i) {
+        for (let i = 0; i < this.length as int - 1; ++i) {
             res.append(this.at(i))
             res.append(c',')
         }
-        if (this.length > 0) {
-            res.append(this.at(this.length - 1))
+        if (this.length as int > 0) {
+            res.append(this.at(this.length as int - 1))
         }
         return res.toString()
     }
@@ -972,12 +962,13 @@ export final class {{N}}Array {
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<{{TBoxed}}> {
-        const ret = new {{TBoxed}}[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<{{TBoxed}}>(ret);
+    public values(): Iterator<{{TBoxed}}> {
+        throw new Error("not implemented")
+        // const ret = new {{TBoxed}}[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<{{TBoxed}}>(ret);
     }
 
     /**
@@ -1144,8 +1135,8 @@ export final class {{N}}Array {
      * @returns sorted {{N}}Array
      */
     public sort(fn: (a: {{elType}}, b: {{elType}}) => {{idxType}}): {{N}}Array {
-        let arr: {{T}}[] = new {{T}}[this.length]
-        for (let i = 0; i < this.length; ++i) {
+        let arr: {{T}}[] = new {{T}}[this.length as int]
+        for (let i = 0; i < this.length as int; ++i) {
             arr[i] = this.at(i)
         }
         // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
@@ -1153,7 +1144,7 @@ export final class {{N}}Array {
             let mustPrecede: (a: {{T}}, b: {{T}}) => boolean =
                 (a: {{T}}, b: {{T}}): boolean => { return (fn(a, b) <= 0) }
             sort(arr, mustPrecede)
-            for (let i = 0; i < this.length; ++i) {
+            for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
         */
@@ -1169,7 +1160,7 @@ export final class {{N}}Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (fn({{castToEl % 'this.at(i)'}}, i{{castToIdx}}, this)) {
                 return true
             }
@@ -1201,7 +1192,7 @@ export final class {{N}}Array {
      */
     public reduce(fn: (acc: {{elType}}, curVal: {{elType}}, curIndex: {{idxType}}, array: {{N}}Array) => {{elType}}, init: {{elType}}): {{elType}} {
         let acc = init
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             acc = fn(acc, {{castToEl % 'this.at(i)'}}, i{{castToIdx}}, this)
         }
         return acc
@@ -1216,7 +1207,7 @@ export final class {{N}}Array {
      */
     public reduce(fn: (acc: {{elType}}, curVal: {{elType}}, curIndex: {{idxType}}, array: {{N}}Array) => {{elType}}): {{elType}} {
         let acc = {{castToEl % 'this.at(0)'}}
-        for (let i = 1; i < this.length; ++i) {
+        for (let i = 1; i < this.length as int; ++i) {
             acc = fn(acc, {{castToEl % 'this.at(i)'}}, i{{castToIdx}}, this)
         }
         return acc
@@ -1233,7 +1224,7 @@ export final class {{N}}Array {
      */
     public reduceRight(fn: (acc: {{elType}}, curVal: {{elType}}, curIndex: {{idxType}}, array: {{N}}Array) => {{elType}}, init: {{elType}}): {{elType}} {
         let acc = {{castToEl % 'init'}}
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             acc = fn(acc, {{castToEl % 'this.at(i)'}}, i{{castToIdx}}, this)
         }
         return acc
@@ -1247,8 +1238,8 @@ export final class {{N}}Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: {{elType}}, curVal: {{elType}}, curIndex: {{idxType}}, array: {{N}}Array) => {{elType}}): {{elType}} {
-        let acc: {{elType}} = {{castToEl % 'this.at(this.length - 1)'}}
-        for (let i = this.length - 2; i >= 0; --i) {
+        let acc: {{elType}} = {{castToEl % 'this.at(this.length as int - 1)'}}
+        for (let i = this.length as int - 2; i >= 0; --i) {
             acc = fn(acc, {{castToEl % 'this.at(i)'}}, i{{castToIdx}}, this)
         }
         return acc
@@ -1262,9 +1253,9 @@ export final class {{N}}Array {
     * @returns a new {{N}}Array where for each element from current {{N}}Array fn was applied
     */
     public map(fn: (val: {{elType}}, index: {{idxType}}) => {{elType}}): {{N}}Array {
-        let resBuf = new ArrayBuffer(this.length * {{N}}Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(this.length as int * {{N}}Array.BYTES_PER_ELEMENT as int)
         let res = new {{N}}Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             res.set(i, fn({{castToEl % 'this.at(i)'}}, i{{castToIdx}}){{castFromEl}})
         }
         return res
@@ -1278,7 +1269,7 @@ export final class {{N}}Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             if (!fn({{castToEl % 'this.at(i)'}}, i{{castToIdx}}, this)) {
                 return false
             }
@@ -1307,17 +1298,17 @@ export final class {{N}}Array {
      * @returns a new {{N}}Array with elements from current {{N}}Array that satisfy condition fn
      */
     public filter(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{N}}Array {
-        let markers = new boolean[this.length]
+        let markers = new boolean[this.length as int]
         let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             markers[i] = fn({{castToEl % 'this.at(i)'}}, i{{castToIdx}}, this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * {{N}}Array.BYTES_PER_ELEMENT)
+        let resBuf = new ArrayBuffer(resLen * {{N}}Array.BYTES_PER_ELEMENT as int)
         let res = new {{N}}Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
+        for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
                 res.set(j, this.at(i))
                 ++j
@@ -1348,7 +1339,7 @@ export final class {{N}}Array {
      * TODO: return {{T}} | undefined as in JS
      */
     public find(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{T}} {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn({{castToEl % 'val'}}, i{{castToIdx}}, this)) {
                 return val
@@ -1378,7 +1369,7 @@ export final class {{N}}Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{idxType}} {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
             if (fn({{castToEl % 'val'}}, i{{castToIdx}}, this)) {
                 return i{{castToIdx}}
@@ -1408,7 +1399,7 @@ export final class {{N}}Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{T}} {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn({{castToEl % 'val'}}, i{{castToIdx}}, this)) {
                 return val
@@ -1438,7 +1429,7 @@ export final class {{N}}Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{idxType}} {
-        for (let i = this.length - 1; i >= 0; --i) {
+        for (let i = this.length as int - 1; i >= 0; --i) {
             let val = this.at(i)
             if (fn({{castToEl % 'val'}}, i{{castToIdx}}, this)) {
                 return i
@@ -1468,7 +1459,7 @@ export final class {{N}}Array {
      * @returns undefined
      */
     public forEach(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => {{T}}): void {
-        for (let i = 0; i < this.length; ++i) {
+        for (let i = 0; i < this.length as int; ++i) {
             this.set(i, fn({{castToEl % 'this.at(i)'}}, i{{castToIdx}}, this))
         }
         throw new Error("{{N}}Array.forEach: has to return undefined, but returns void for now")
@@ -1505,13 +1496,13 @@ export final class {{N}}Array {
     public readonly buffer: Buffer
 
     /** Byte offset within the underlying ArrayBuffer */
-    public readonly byteOffset: int
+    public readonly byteOffset: number
 
     /** Number of bytes used */
-    public readonly byteLength: int
+    public readonly byteLength: number
 
     /** Number of {{T}} stored in {{N}}Array */
-    public readonly length: int
+    public readonly length: number
 
     /** String \"{{N}}Array\" */
     public readonly name = "{{N}}Array"

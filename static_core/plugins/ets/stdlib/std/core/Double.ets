@@ -47,6 +47,15 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
+     * Constructs a new Double instance with provided initial value
+     *
+     * @param value the initial value
+     */
+    public constructor(value: String) {
+        this.value = Double.parseFloat(value);
+    }
+
+    /**
      * Returns value of this instance as a primitive
      *
      * @returns value of this instance
@@ -65,6 +74,17 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     public static valueOf(value: double): Double {
         // TODO(ivan-tyulyandin): caching is possible
         return new Double(value);
+    }
+
+    /**
+     * Returns boxed representation of the primitive
+     *
+     * @param value value to box
+     *
+     * @returns boxed value
+     */
+    public valueOf(): number {
+        return this.value as number;
     }
 
     /**

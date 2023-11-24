@@ -23,10 +23,12 @@
 #include "plugins/ets/runtime/types/ets_void.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "types/ets_array.h"
+#include "types/ets_box_primitive.h"
 #include "types/ets_class.h"
 #include "types/ets_method.h"
 #include "types/ets_primitives.h"
 #include "types/ets_type.h"
+#include "types/ets_type_comptime_traits.h"
 #include "types/ets_typeapi.h"
 #include "types/ets_typeapi_field.h"
 
@@ -37,10 +39,11 @@ EtsVoid *ValueAPISetFieldObject(EtsObject *obj, EtsLong i, EtsObject *val)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> obj_handle(coroutine, obj->GetCoreType());
+    VMHandle<EtsObject> val_handle(coroutine, val->GetCoreType());
 
     auto type_class = obj_handle.GetPtr()->GetClass();
     auto field_object = type_class->GetFieldByIndex(i);
-    obj_handle.GetPtr()->SetFieldObject(field_object, val);
+    obj_handle.GetPtr()->SetFieldObject(field_object, val_handle.GetPtr());
     return EtsVoid::GetInstance();
 }
 
@@ -113,10 +116,12 @@ EtsVoid *ValueAPISetFieldByNameObject(EtsObject *obj, EtsString *name, EtsObject
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> obj_handle(coroutine, obj->GetCoreType());
+    VMHandle<EtsString> name_handle(coroutine, name->GetCoreType());
+    VMHandle<EtsObject> val_handle(coroutine, val->GetCoreType());
 
     auto type_class = obj_handle.GetPtr()->GetClass();
-    auto field_object = type_class->GetFieldIDByName(name->GetMutf8().c_str());
-    obj_handle.GetPtr()->SetFieldObject(field_object, val);
+    auto field_object = type_class->GetFieldIDByName(name_handle.GetPtr()->GetMutf8().c_str());
+    obj_handle.GetPtr()->SetFieldObject(field_object, val_handle.GetPtr());
     return EtsVoid::GetInstance();
 }
 
@@ -126,9 +131,10 @@ void SetFieldByNameValue(EtsObject *obj, EtsString *name, T val)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> obj_handle(coroutine, obj->GetCoreType());
+    VMHandle<EtsString> name_handle(coroutine, name->GetCoreType());
 
     auto type_class = obj_handle.GetPtr()->GetClass();
-    auto field_object = type_class->GetFieldIDByName(name->GetMutf8().c_str());
+    auto field_object = type_class->GetFieldIDByName(name_handle.GetPtr()->GetMutf8().c_str());
     if (field_object->GetType()->IsBoxedClass()) {
         obj_handle.GetPtr()->SetFieldObject(field_object, EtsBoxPrimitive<T>::Create(coroutine, val));
         return;
@@ -251,13 +257,88 @@ EtsDouble ValueAPIGetFieldDouble(EtsObject *obj, EtsLong i)
     return GetFieldValue<EtsDouble>(obj, i);
 }
 
+EtsObject *ValueAPIGetFieldByNameObject(EtsObject *obj, EtsString *name)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObject> obj_handle(coroutine, obj->GetCoreType());
+
+    auto type_class = obj_handle.GetPtr()->GetClass();
+    auto field_object = type_class->GetFieldIDByName(name->GetMutf8().c_str());
+    return obj_handle.GetPtr()->GetFieldObject(field_object);
+}
+
+template <typename T>
+T GetFieldByNameValue(EtsObject *obj, EtsString *name)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObject> obj_handle(coroutine, obj->GetCoreType());
+
+    auto type_class = obj_handle.GetPtr()->GetClass();
+    auto field_object = type_class->GetFieldIDByName(name->GetMutf8().c_str());
+    if (field_object->GetType()->IsBoxedClass()) {
+        return EtsBoxPrimitive<T>::FromCoreType(obj_handle.GetPtr()->GetFieldObject(field_object))->GetValue();
+    }
+    return obj_handle.GetPtr()->GetFieldPrimitive<T>(field_object);
+}
+
+EtsBoolean ValueAPIGetFieldByNameBoolean(EtsObject *obj, EtsString *name)
+{
+    return GetFieldByNameValue<EtsBoolean>(obj, name);
+}
+
+EtsByte ValueAPIGetFieldByNameByte(EtsObject *obj, EtsString *name)
+{
+    return GetFieldByNameValue<EtsByte>(obj, name);
+}
+
+EtsShort ValueAPIGetFieldByNameShort(EtsObject *obj, EtsString *name)
+{
+    return GetFieldByNameValue<EtsShort>(obj, name);
+}
+
+EtsChar ValueAPIGetFieldByNameChar(EtsObject *obj, EtsString *name)
+{
+    return GetFieldByNameValue<EtsChar>(obj, name);
+}
+
+EtsInt ValueAPIGetFieldByNameInt(EtsObject *obj, EtsString *name)
+{
+    return GetFieldByNameValue<EtsInt>(obj, name);
+}
+
+EtsLong ValueAPIGetFieldByNameLong(EtsObject *obj, EtsString *name)
+{
+    return GetFieldByNameValue<EtsLong>(obj, name);
+}
+
+EtsFloat ValueAPIGetFieldByNameFloat(EtsObject *obj, EtsString *name)
+{
+    return GetFieldByNameValue<EtsFloat>(obj, name);
+}
+
+EtsDouble ValueAPIGetFieldByNameDouble(EtsObject *obj, EtsString *name)
+{
+    return GetFieldByNameValue<EtsDouble>(obj, name);
+}
+
+EtsLong ValueAPIGetArrayLength(EtsObject *obj)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsArray> arr_handle(coroutine, obj->GetCoreType());
+    return arr_handle->GetLength();
+}
+
 EtsVoid *ValueAPISetElementObject(EtsObject *obj, EtsLong i, EtsObject *val)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObjectArray> arr_handle(coroutine, obj->GetCoreType());
+    VMHandle<EtsObject> val_handle(coroutine, val->GetCoreType());
 
-    arr_handle.GetPtr()->Set(i, val);
+    arr_handle.GetPtr()->Set(i, val_handle.GetPtr());
     return EtsVoid::GetInstance();
 }
 
@@ -322,6 +403,70 @@ EtsVoid *ValueAPISetElementDouble(EtsObject *obj, EtsLong i, EtsDouble val)
 {
     SetElement<EtsDoubleArray>(obj, i, val);
     return EtsVoid::GetInstance();
+}
+
+EtsObject *ValueAPIGetElementObject(EtsObject *obj, EtsLong i)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObjectArray> arr_handle(coroutine, obj->GetCoreType());
+
+    return arr_handle.GetPtr()->Get(i);
+}
+
+template <typename P>
+typename P::ValueType GetElement(EtsObject *obj, EtsLong i)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    auto type_class = obj->GetClass();
+    if (!type_class->GetComponentType()->IsBoxedClass()) {
+        VMHandle<P> arr_handle(coroutine, obj->GetCoreType());
+        return arr_handle.GetPtr()->Get(i);
+    }
+    VMHandle<EtsObjectArray> arr_handle(coroutine, obj->GetCoreType());
+    auto value = EtsBoxPrimitive<typename P::ValueType>::FromCoreType(arr_handle.GetPtr()->Get(i));
+    return value->GetValue();
+}
+
+EtsBoolean ValueAPIGetElementBoolean(EtsObject *obj, EtsLong i)
+{
+    return GetElement<EtsBooleanArray>(obj, i);
+}
+
+EtsByte ValueAPIGetElementByte(EtsObject *obj, EtsLong i)
+{
+    return GetElement<EtsByteArray>(obj, i);
+}
+
+EtsShort ValueAPIGetElementShort(EtsObject *obj, EtsLong i)
+{
+    return GetElement<EtsShortArray>(obj, i);
+}
+
+EtsChar ValueAPIGetElementChar(EtsObject *obj, EtsLong i)
+{
+    return GetElement<EtsCharArray>(obj, i);
+}
+
+EtsInt ValueAPIGetElementInt(EtsObject *obj, EtsLong i)
+{
+    return GetElement<EtsIntArray>(obj, i);
+}
+
+EtsLong ValueAPIGetElementLong(EtsObject *obj, EtsLong i)
+{
+    return GetElement<EtsLongArray>(obj, i);
+}
+
+EtsFloat ValueAPIGetElementFloat(EtsObject *obj, EtsLong i)
+{
+    return GetElement<EtsFloatArray>(obj, i);
+}
+
+EtsDouble ValueAPIGetElementDouble(EtsObject *obj, EtsLong i)
+{
+    return GetElement<EtsDoubleArray>(obj, i);
 }
 
 }  // namespace panda::ets::intrinsics

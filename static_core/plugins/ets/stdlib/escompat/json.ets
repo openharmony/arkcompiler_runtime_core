@@ -368,7 +368,7 @@ export class JSON {
         return JSON.checkType(typ, new Array<TypeColor>())
     }
 
-    public static parse<T>(str: String, typ: Type): T | null {
+    public static parse<T>(str: String, typ: Type): NullishType {
         if (!JSON.checkType(typ, new Array<TypeColor>())) {
             throw new Error("Incorrect type: " + typ.toString())
         }
@@ -381,7 +381,7 @@ export class JSON {
         let cVal = Value.of(object) as ClassValue
         let unboxString : (v: JSONString) => String =
             (v: JSONString): String => { return v.value }
-        let fieldArray = jVal.keys.map<String>(unboxString)
+        let fieldArray = jVal.keys_.map<String>(unboxString)
         for (let field_num = 0; field_num < cType.getFieldsNum(); field_num++) {
             let field : Field = cType.getField(field_num)
             let indexInJSON = fieldArray.indexOf(field.getName())
@@ -396,12 +396,12 @@ export class JSON {
     }
 
     private static parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
-        let len = jVal.values.length()
-        let arr = aType.make(len)
+        let len = jVal.values.length
+        let arr = aType.make(len as int)
         let arrVal = Value.of(arr) as ArrayValue
         for (let i = 0; i < len; i++) {
             let elem = JSON.parse(jVal.values.at(i) as JSONValue, aType.getElementType())
-            arrVal.setElementByIndex(i, Value.of(elem))
+            arrVal.setElement(i, Value.of(elem))
         }
         return arr
     }
@@ -551,7 +551,7 @@ export class JSONParser {
     }
 
     private parseKeyValue(res: JSONObject): JSONObject {
-        res.keys.push(this.parse(new JSONValue()) as JSONString)
+        res.keys_.push(this.parse(new JSONValue()) as JSONString)
         this.getNextChar()
         if (this.curChar  != c':') {
             throw new SyntaxError("Expected : \",\" at " + this.getCurPosDescr() + " got \"" + this.curChar + "\"")
@@ -692,7 +692,7 @@ export class JSONParser {
 export class JSONValue extends Object {}
 
 export class JSONObject extends JSONValue {
-    keys: Array<JSONString> = new Array<JSONString>()
+    keys_: Array<JSONString> = new Array<JSONString>()
     values: Array<JSONValue> = new Array<JSONValue>()
     readonly static START_CHAR = c'{'
     readonly static END_CHAR = c'}'
@@ -701,11 +701,11 @@ export class JSONObject extends JSONValue {
 
     public override toString(): String {
         let res = new StringBuilder([JSONObject.START_CHAR])
-        for (let i = 0; i < this.keys.length() - 1; ++i) {
-            res.append("" + this.keys.at(i) + JSONObject.SEPARATOR + this.values.at(i) + JSONObject.DELIMETER)
+        for (let i = 0; i < this.keys_.length - 1; ++i) {
+            res.append("" + this.keys_.at(i) + JSONObject.SEPARATOR + this.values.at(i) + JSONObject.DELIMETER)
         }
-        if (this.keys.length() > 0) {
-            res.append("" + this.keys.at(this.keys.length() - 1) + JSONObject.SEPARATOR + this.values.at(this.keys.length() - 1))
+        if (this.keys_.length > 0) {
+            res.append("" + this.keys_.at(this.keys_.length - 1) + JSONObject.SEPARATOR + this.values.at(this.keys_.length - 1))
         }
         res.append(JSONObject.END_CHAR)
         return res.toString()
@@ -720,11 +720,11 @@ export class JSONArray extends JSONValue {
 
     public override toString(): String {
         let res = new StringBuilder([JSONArray.START_CHAR])
-        for (let i = 0; i < this.values.length() - 1; ++i) {
+        for (let i = 0; i < this.values.length - 1; ++i) {
             res.append("" + this.values.at(i) + JSONArray.SEPARATOR)
         }
-        if (this.values.length() > 0) {
-            res.append("" + this.values.at(this.values.length() - 1))
+        if (this.values.length > 0) {
+            res.append("" + this.values.at(this.values.length - 1))
         }
         res.append(JSONArray.END_CHAR)
         return res.toString()

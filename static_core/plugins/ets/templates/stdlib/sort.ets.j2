@@ -222,7 +222,7 @@ function quickSortImpl{{quickUpTo}}(arr: {{T}}[], startIndex: int, endIndex: int
         if (startIndex > 0 && !{{prec % ('arr[startIndex - 1]', 'arr[startIndex]')}}) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
             // with many occurencies of the smallest element
             startIndex = quickSortSplitLeft(arr, startIndex, endIndex{{fwdArg}}) + 1
             continue
@@ -418,20 +418,19 @@ export function test_sortAllOn(arr: {{T}}[]) {
     {%- for arg in ['', ', test_sortAllOnCmpFwd', ', test_sortAllOnCmpInv'] %}
     // block for comparator `{{arg[3:]}}`
     if (true) {
-        const sorts: test_SortData{{T}}[] = new test_SortData{{T}}[10]
-        let lastSort = 0
+        const sorts = new Array<test_SortData{{T}}>()
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length{{arg}})
-        sorts[lastSort++] = new test_SortData{{T}}("bubble", bubbled)
+        sorts.push(new test_SortData{{T}}("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
         insertionSort(insertion, 0, insertion.length{{arg}})
-        sorts[lastSort++] = new test_SortData{{T}}("insertion", insertion)
+        sorts.push(new test_SortData{{T}}("insertion", insertion))
 
         {%- if T == 'byte' and arg == '' %}
         const cnt = test_sortCopy(arr)
         countSort(cnt, 0, cnt.length)
-        sorts[lastSort++] = new test_SortData{{T}}("cnt()", cnt)
+        sorts.push(new test_SortData{{T}}("cnt()", cnt))
         {%- endif %}
 
         {% if T == 'boolean' %}
@@ -441,33 +440,35 @@ export function test_sortAllOn(arr: {{T}}[]) {
             {%- else %}
         countSortBoolsInv(bcnt, 0, bcnt.length)
             {%- endif %}
-        sorts[lastSort++] = new test_SortData{{T}}("bools cnt()", bcnt)
+        sorts.push(new test_SortData{{T}}("bools cnt()", bcnt))
         {%- else %}
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length{{arg}})
-        sorts[lastSort++] = new test_SortData{{T}}("heap", heaped)
+        sorts.push(new test_SortData{{T}}("heap", heaped))
 
         const quicked = test_sortCopy(arr)
         quickSortImpl3(quicked, 0, quicked.length, quicked.length{{arg}})
-        sorts[lastSort++] = new test_SortData{{T}}("quick", quicked)
+        sorts.push(new test_SortData{{T}}("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
         quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length{{arg}})
-        sorts[lastSort++] = new test_SortData{{T}}("quick with insertion", quickedInsertion)
+        sorts.push(new test_SortData{{T}}("quick with insertion", quickedInsertion))
         {%- endif %}
 
         const just = test_sortCopy(arr)
         sort(just{{arg}})
-        sorts[lastSort++] = new test_SortData{{T}}("sort()", just)
+        sorts.push(new test_SortData{{T}}("sort()", just))
 
-        for (let s = 1; s < lastSort; s++) {
+        let sort0 = sorts.at(0)!
+        for (let s = 1; s < sorts.length; s++) {
+            let sortS = sorts.at(s)!
             for (let i = 0; i < arr.length; i++) {
-                if (sorts[0].arr[i] != sorts[s].arr[i]) {
-                    console.println(sorts[0].name + ': ')
-                    test_printArr(sorts[0].arr, 0, arr.length)
-                    console.println(sorts[s].name + ': ')
-                    test_printArr(sorts[s].arr, 0, arr.length)
-                    throw new Error("sorts {{arg[3:]}} are not equal: " + sorts[0].name + ' ' + sorts[s].name + ' for {{T}}')
+                if (sort0.arr[i] != sortS.arr[i]) {
+                    console.println(sort0.name + ': ')
+                    test_printArr(sort0.arr, 0, arr.length)
+                    console.println(sortS.name + ': ')
+                    test_printArr(sortS.arr, 0, arr.length)
+                    throw new Error("sorts {{arg[3:]}} are not equal: " + sort0.name + ' ' + sortS.name + ' for {{T}}')
                 }
             }
         }

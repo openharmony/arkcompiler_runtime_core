@@ -111,7 +111,7 @@ export class {{N}}Array
     {
         this(buf, 0, buf.byteLength / {{N}}Array.BYTES_PER_ELEMENT)
     }
-    
+
      /**
      * Creates an {{N}}Array with respect to length.
      *
@@ -283,7 +283,8 @@ export class {{N}}Array
     /**
      * Returns an iterator for all entries
      */
-    // public entries(): MapIterator<Int, Object> {
+    // TODO(ivan-tyulyandin): blocked by tuples implentation
+    // public entries(): Iterator<[Int, Object]> {
     //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.length];
     //     for (let i: int = 0; i < this.length; i++) {
     //         ret[i] = new Entry<Int, Object>(i, this.at(i));
@@ -604,12 +605,13 @@ export class {{N}}Array
      *
      * @returns iterator over keys
      */
-    public keys(): ValuesIterator<Int> {
-        let ret: Int[] = new Int[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = i;
-        }
-        return new ValuesIterator<Int>(ret);
+    public keys(): Iterator<Int> {
+        throw new Error("not implemented")
+        // let ret: Int[] = new Int[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = i;
+        // }
+        // return new ValuesIterator<Int>(ret);
     }
 
     /**
@@ -937,12 +939,13 @@ export class {{N}}Array
      *
      * @returns an iterator
      */
-    public values(): ValuesIterator<{{TBoxed}}> {
-        const ret = new {{TBoxed}}[this.length];
-        for (let i: int = 0; i < this.length; i++) {
-            ret[i] = this.at(i);
-        }
-        return new ValuesIterator<{{TBoxed}}>(ret);
+    public values(): Iterator<{{TBoxed}}> {
+        throw new Error("not implemented")
+        // const ret = new {{TBoxed}}[this.length];
+        // for (let i: int = 0; i < this.length; i++) {
+        //     ret[i] = this.at(i);
+        // }
+        // return new ValuesIterator<{{TBoxed}}>(ret);
     }
 
     /**

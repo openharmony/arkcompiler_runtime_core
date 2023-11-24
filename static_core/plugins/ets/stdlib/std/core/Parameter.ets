@@ -45,4 +45,11 @@ export final class Parameter extends Object {
     public override toString(): string {
         return this.getName() + ": " + this.getType().toString()
     }
+
+    public override equals(oth: Object|null): boolean {
+        return oth instanceof Parameter &&
+                this.td == (oth as Parameter).td &&
+                this.name == (oth as Parameter).name &&
+                this.attributes == (oth as Parameter).attributes
+    }
 }

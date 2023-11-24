@@ -166,6 +166,8 @@ private:
 template <class ClassType, EtsClassRoot ETS_CLASS_ROOT>
 class EtsPrimitiveArray : public EtsArray {
 public:
+    using ValueType = ClassType;
+
     static EtsPrimitiveArray *Create(uint32_t length, SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();

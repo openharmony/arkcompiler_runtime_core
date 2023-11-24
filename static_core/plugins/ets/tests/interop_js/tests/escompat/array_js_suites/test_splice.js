@@ -21,22 +21,27 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSSplice = etsMod.getFunction('Array_TestJSSplice');
 
+// TODO(kprokopenko): change to `x.length` when interop support properties
+const etsArrLen = x => x['<get>length'].call(x);
+
 { // Test JS Array<FooClass>
   TestJSSplice(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
 { // Test ETS Array<Object>
   let arr = CreateEtsSample();
+  const EXPECT_2 = 2;
+  const EXPECT_3 = 3;
   arr.push('spliced');
-  ASSERT_EQ(arr.length(), 3);
+  ASSERT_EQ(etsArrLen(arr), EXPECT_3);
   arr.splice(1, 1);
   ASSERT_EQ(arr.at(0), 123);
   ASSERT_EQ(arr.at(1), 'spliced');
-  ASSERT_EQ(arr.length(), 2);
+  ASSERT_EQ(etsArrLen(arr), EXPECT_2);
 
   let arr1 = CreateEtsSample();
   arr1.push('spliced');
-  ASSERT_EQ(arr1.length(), 3);
+  ASSERT_EQ(etsArrLen(arr1), EXPECT_3);
   // TODO(oignatenko) uncomment below after interop will be supported for this method signature
   // arr1.splice(1);
   // ASSERT_EQ(arr1.at(0), 123);

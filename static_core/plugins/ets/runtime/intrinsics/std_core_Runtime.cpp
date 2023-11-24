@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "include/object_header.h"
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
 #include "runtime/handle_scope-inl.h"
@@ -22,6 +23,17 @@ namespace panda::ets::intrinsics {
 uint8_t StdCoreRuntimeEquals(ObjectHeader *header [[maybe_unused]], EtsObject *source, EtsObject *target)
 {
     return (source == target) ? UINT8_C(1) : UINT8_C(0);
+}
+
+EtsInt StdCoreRuntimeGetHashCode([[maybe_unused]] ObjectHeader *header, EtsObject *source)
+{
+    ASSERT(source != nullptr);
+    if (source->IsHashed()) {
+        return source->GetHash();
+    }
+    auto hash = ObjectHeader::GenerateHashCode();
+    source->SetHash(hash);
+    return bit_cast<EtsInt>(hash);
 }
 
 }  // namespace panda::ets::intrinsics

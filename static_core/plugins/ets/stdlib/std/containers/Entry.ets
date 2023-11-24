@@ -15,7 +15,7 @@
 
 package std.containers;
 
-export final class Entry<K, V> {
+export class Entry<K, V> {
     public key: K;
     public value: V;
     constructor(key: K, value: V) {

@@ -25,7 +25,7 @@ jinja2 "${SCRIPT_DIR}/DataView.ets.j2" > "$GENPATH/DataView.ets"
 
 echo "Generating Unsigned arrays..."
 jinja2 "${SCRIPT_DIR}/typedUArray.ets.j2" > "$GENPATH/TypedUArrays.ets"
-echo "Generating Unsigned arrays..."
+echo "Generating Signed arrays..."
 jinja2 "${SCRIPT_DIR}/typedArray.ets.j2" > "$GENPATH/TypedArrays.ets"
 
 echo "Done."

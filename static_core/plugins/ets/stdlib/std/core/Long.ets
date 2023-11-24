@@ -189,6 +189,42 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<I
     }
 
     /**
+     * Converts this object to a string
+     *
+     * @returns result of the conversion
+     */
+    public toString(radix: number): string {
+        if ((radix as int) < 2 || (radix as int) > 36) {
+            throw new RangeError('Radix must be between 2 and 36');
+        }
+        if (this.value == 0) {
+            return "0";
+        }
+        const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+        let val = this.value;
+        let negative: boolean = (val < 0);
+        let digitsNum = (log(abs(val)) / log(radix as int) + 1) as int;
+        if (negative) {
+            ++digitsNum;
+        }
+        let data = new char[digitsNum];
+        let curPlace = digitsNum - 1;
+        while (val != 0) {
+            let remainder = val % (radix as int);
+            if (negative) {
+                remainder = -remainder;
+            }
+            data[curPlace] = chars.charAt(remainder as int); 
+            val /= (radix as int);
+            curPlace -= 1;
+        }
+        if (negative) {
+            data[0] = c'-';
+        }
+        return new String(data);
+    }
+
+    /**
      * Returns a hash code (integer representation) for this instance
      *
      * @returns representation of this instance

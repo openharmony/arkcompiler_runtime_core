@@ -15,101 +15,39 @@
 
 package escompat;
 
-export class IteratorValue<V> {
-    public value: V|null;
-    public done: boolean;
+export class IteratorResult<T> {
+    done: boolean
+    // TODO(ivan-tyulyandin): blocked by undefined implementation
+    value: T | null
 
-    constructor(value: V|null, done: boolean) {
-        this.value = value;
-        this.done = done;
+    constructor() {
+        this.done = true
+        this.value = null
+    }
+
+    constructor(done: boolean, value: T | null) {
+        this.done = done
+        this.value = value
     }
 }
 
-export interface Iterator<V> {
-    next(): IteratorValue<V>;
+export interface Iterator<T> {
+    next(): IteratorResult<T>;
 }
 
-export class ValuesIterator<V> implements Iterator<V> {
-    private values: V[];
-    private pointer: int;
-
-    constructor(values: V[]) {
-        if (values != null && values.length > 0) {
-            this.values = values;
-            this.pointer = 0;
-        } else {
-            this.pointer = -1;
-        }
-    }
-
-    public override next(): IteratorValue<V> {
-        if (this.pointer == -1) {
-            return new IteratorValue<V>(null, true);
-        } else {
-            let value = this.values[this.pointer];
-            this.pointer++;
-            if (this.pointer >= this.values.length) {
-                this.pointer = -1;
-            }
-            return new IteratorValue<V>(value, false);
-        }
-    }
+export interface Iterable<T> {
+    iterator(): Iterator<T>;
 }
 
-export class SetIterator<V> implements Iterator<V> {
-    private values: V[];
-    private pointer: int;
-
-    constructor(values: V[]) {
-        if (values != null && values.length > 0) {
-            this.values = values;
-            this.pointer = 0;
-        } else {
-            this.pointer = -1;
-        }
-    }
-
-    public override next(): IteratorValue<V> {
-        if (this.pointer == -1) {
-            return new IteratorValue<V>(null, true);
-        } else {
-            let value = this.values[this.pointer];
-            this.pointer++;
-
-            if (this.pointer >= this.values.length) {
-                this.pointer = -1;
-            }
-
-            return new IteratorValue<V>(value, false);
-        }
-    }
+export interface IterableIterator<T> extends Iterator<T>, Iterable<T> {
 }
 
-export class MapIterator<K, V> implements Iterator<Entry<K, V>> {
-    private values: Entry<K, V>[];
-    private pointer: int;
-
-    constructor(values: Entry<K, V>[]) {
-        if (values != null && values.length > 0) {
-            this.values = values;
-            this.pointer = 0;
-        } else {
-            this.pointer = -1;
+function iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {
+    while (true) {
+        const v = x.next()
+        if (v.done) {
+            return
         }
-    }
-
-    public override next(): IteratorValue<Entry<K, V>> {
-        if (this.pointer == -1) {
-            return new IteratorValue<Entry<K, V>>(null, true);
-        } else {
-            let value = this.values[this.pointer];
-            this.pointer++;
-
-            if (this.pointer >= this.values.length) {
-                this.pointer = -1;
-            }
-
-            return new IteratorValue<Entry<K, V>>(value, false);
-        }
+        fn(v.value!)
     }
 }

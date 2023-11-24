@@ -67,16 +67,16 @@ function Array_TestJSPop(arr: Array<FooClass>): void {
 }
 
 function Array_TestJSSort(arr: Array<FooClass>): void {
-    let comparator: (a: FooClass, b: FooClass) => int = (a: FooClass, b: FooClass): int => {
-        return a.toString().compareTo(b.toString());
+    let comparator: (a: FooClass, b: FooClass) => number = (a: FooClass, b: FooClass): number => {
+        return a.toString().compareTo(b.toString()) as number;
     }
     arr.sort(comparator);
     assert arr.at(1)!.toString() == "{Foo named zero}";
 }
 
 function Array_TestJSToSorted(arr: Array<FooClass>): void {
-    let comparator: (a: FooClass, b: FooClass) => int = (a: FooClass, b: FooClass): int => {
-        return a.toString().compareTo(b.toString());
+    let comparator: (a: FooClass, b: FooClass) => number = (a: FooClass, b: FooClass): number => {
+        return a.toString().compareTo(b.toString()) as number;
     }
     let toSorted = arr.toSorted(comparator);
     assert toSorted.at(1)!.toString() == "{Foo named zero}";
@@ -131,11 +131,11 @@ function Array_TestJSFilter(arr: Array<FooClass>): void {
 
 function Array_TestJSFilterArray(arr: Array<FooClass>): void {
     let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
-    let filter: FooClass[] = arr.filterArray(fnTrue) as FooClass[];
-    assert arr.at(0) == filter[0];
+    let filter: Array<FooClass> = arr.filter(fnTrue);
+    assert arr.at(0) == filter.at(0);
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
-    let filterFalse = arr.filterArray(fnFalse) as FooClass[];
-    assert arr.at(0) != filterFalse[0];
+    let filterFalse: Array<FooClass> = arr.filter(fnFalse);
+    assert arr.at(0) != filterFalse.at(0);
 }
 
 function Array_TestJSShift(arr: Array<FooClass>): void {
@@ -252,13 +252,9 @@ function Array_TestJSFindLast(arr: Array<FooClass>): void {
 
     let last: FooClass = arr.findLast(fnTrue) as FooClass;
     assert last.toString() == "{Foo named one}";
-    let last_static: FooClass = Array.findLast(fnTrue, arr) as FooClass;
-    assert last_static.toString() == "{Foo named one}";
 
     let last_null: FooClass = arr.findLast(fnFalse) as FooClass;
     assert last_null === null;
-    let last_null_static: FooClass = Array.findLast(fnFalse, arr) as FooClass;
-    assert last_null_static === null;
 }
 
 function Array_TestJSFindIndex(arr: Array<FooClass>): void {
@@ -267,13 +263,9 @@ function Array_TestJSFindIndex(arr: Array<FooClass>): void {
 
     let found: int = arr.findIndex(fnTrue) as int;
     assert found == 0;
-    let found_static: int = Array.findIndex(fnTrue, arr) as int;
-    assert found_static == 0;
 
     let not_found: int = arr.findIndex(fnFalse) as int;
     assert not_found == -1;
-    let not_found_static: int = Array.findIndex(fnFalse, arr) as int;
-    assert not_found_static == -1;
 }
 
 function Array_TestJSFind(arr: Array<FooClass>): void {

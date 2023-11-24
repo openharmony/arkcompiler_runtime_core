@@ -33,74 +33,6 @@ export class TypeAPICreateException extends Exception {
     }
 }
 
-// TODO(kprokopenko): replace with Array<T> when it gets ready
-final class MArray<T> {
-    public constructor() {}
-
-    public push(x: T): void {
-        if (this.len == this.buf.length) {
-            const newB = new T[this.buf.length * 2]
-            for (let i = 0; i < this.buf.length; i++) {
-                newB[i] = this.buf[i]
-            }
-            this.buf = newB
-        }
-        this.buf[this.len++] = x
-    }
-
-    public length(): int {
-        return this.len
-    }
-
-    public at(i: int): T {
-        if (i < 0 || i >= this.len) {
-            throw new Error()
-        }
-        return this.buf[i]
-    }
-
-    public set(i: int, d: T): void {
-        if (i < 0 || i >= this.len) {
-            throw new Error()
-        }
-        this.buf[i] = d
-    }
-
-    public toArray(): T[] {
-        const ret = new T[this.length()]
-        for (let i = 0; i < this.length(); i++) {
-            ret[i] = this.at(i)
-        }
-        return ret
-    }
-
-    len: int = 0
-    buf: T[] = new T[2]
-}
-
-final class MSet<T> {
-    public add(x: T): void {
-        if (!this.has(x)) {
-            this.elems.push(x)
-        }
-    }
-
-    public elements(): T[] {
-        return this.elems.toArray()
-    }
-
-    public has(x: T): boolean {
-        for (let i = 0; i < this.elems.length(); i++) {
-            if (this.elems.at(i) == x) {
-                return true
-            }
-        }
-        return false
-    }
-
-    private elems: MArray<T> = new MArray<T>()
-}
-
 /**
  * Type of function that collects all reachable types for creator context
  */
@@ -224,7 +156,7 @@ final class TypeOrCreator_Creator extends TypeOrCreator {
 final class TypeCreatorCtx {
     internal ctxPtr: long
     /** all objects that were passed to cpp code as their ids (indexes in this `Array`) */
-    private objects: MArray<Object> = new MArray<Object>();
+    private objects: Array<Object> = new Array<Object>();
 
     private static native createCtx(): long
     private static native destroyCtx(ctxPtr: long): void
@@ -297,10 +229,10 @@ final class TypeCreatorCtx {
      * @param first creator with must be created
      */
     public create(first: TypeCreator): void throws {
-        const all = new MSet<TypeCreator>()
-        const visited = new MSet<TypeCreator>()
+        const all = new Set<TypeCreator>()
+        const visited = new Set<TypeCreator>()
 
-        const order = new MArray<TypeCreator>()
+        const order = new Array<TypeCreator>()
 
         // bfs traverser
         const push: CollectTypesCB = (tc: TypeOrCreator): void => {
@@ -324,43 +256,51 @@ final class TypeCreatorCtx {
         let was = true
         while (was) {
             was = false
-            const arr = all.elements()
-            for (let i = 0; i != arr.length; i++) {
-                const el: TypeCreator = arr[i] as TypeCreator
-                if (visited.has(el)) {
-                    continue
+            const asArr = new Array<TypeCreator>()
+
+            const pushToArr: (creator: Object) => void = (creator: Object): void => {
+                asArr.push(creator as TypeCreator)
+            }
+            const arr = all.forEach(Set.__asGeneric<TypeCreator>(pushToArr as Object))
+            for (let i = 0; i < asArr.length; i++) {
+                const el = asArr.$_get(i)
+                if (!visited.has(el)) {
+                    was = true
+                    visited.add(el)
+                    el.collectTypes(push)
                 }
-                was = true
-                visited.add(el)
-                el.collectTypes(push)
             }
         }
 
         // reversing list
-        for (let i = 0; i < order.length() / 2; i++) {
-            const j = order.length() - 1 - i
-            const tmp = order.at(i)
-            order.set(i, order.at(j))
-            order.set(j, tmp)
+        for (let i = 0; i < order.length / 2; i++) {
+            const j = order.length - 1 - i
+            const tmp = order.$_get(i)
+            order.$_set(i, order.$_get(j))
+            order.$_set(j, tmp)
         }
 
         // forward declare all entities
-        for (let i = 0; i < order.length(); i++) {
-            order.at(i).declare(this)
+        for (let i = 0; i < order.length; i++) {
+            order.$_get(i).declare(this)
         }
 
         // defines all entities (i.e. provides bodies)
-        for (let i = 0; i < order.length(); i++) {
-            order.at(i).define(this)
+        for (let i = 0; i < order.length; i++) {
+            order.$_get(i).define(this)
         }
 
         this.checkError()
 
-        this.checkError(TypeCreatorCtx.commit(this.ctxPtr, this.objects.toArray() as Object[]))
+        const objsArray = new Object[this.objects.length as int]
+        for (let i = 0; i < this.objects.length; i++) {
+            objsArray[i] = this.objects.$_get(i)
+        }
+        this.checkError(TypeCreatorCtx.commit(this.ctxPtr, objsArray))
 
         // assignes actual runtime types to all creators
-        for (let i = 0; i < order.length(); i++) {
-            const tc = order.at(i)
+        for (let i = 0; i < order.length; i++) {
+            const tc = order.$_get(i)
             tc.typ = Type.resolve(TypeCreatorCtx.getTypeDescFromPointer(tc.ctxItemPtr))
         }
     }
@@ -371,9 +311,9 @@ final class TypeCreatorCtx {
      * @returns id of saved object that can be passed to runtime intrinsics
      */
     internal registerObject(o: Object): int throws {
-        const r = this.objects.length()
+        const r = this.objects.length
         this.objects.push(o)
-        return r
+        return r as int
     }
 
     /**
@@ -393,9 +333,9 @@ final class TypeCreatorCtx {
 export final class ClassTypeCreator extends TypeCreator {
     private base: TypeOrCreator = TypeOrCreator.from(ObjectType)
     private name: string
-    private ifaces: MArray<TypeOrCreator> = new MArray<TypeOrCreator>()
-    private fields: MArray<FieldCreator> = new MArray<FieldCreator>()
-    private methods: MArray<MethodCreator> = new MArray<MethodCreator>()
+    private ifaces: Array<TypeOrCreator> = new Array<TypeOrCreator>()
+    private fields: Array<FieldCreator> = new Array<FieldCreator>()
+    private methods: Array<MethodCreator> = new Array<MethodCreator>()
     private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.CLASS)
 
     /**
@@ -469,17 +409,17 @@ export final class ClassTypeCreator extends TypeCreator {
 
     internal override collectTypes(collector: CollectTypesCB): void throws {
         collector(this.base)
-        for (let i = 0; i < this.ifaces.length(); i++) {
-            collector(this.ifaces.at(i))
+        for (let i = 0; i < this.ifaces.length; i++) {
+            collector(this.ifaces.$_get(i))
         }
-        for (let i = 0; i < this.fields.length(); i++) {
-            collector(this.fields.at(i).typ)
+        for (let i = 0; i < this.fields.length; i++) {
+            collector(this.fields.$_get(i).typ)
         }
-        for (let i = 0; i < this.methods.length(); i++) {
-            const m = this.methods.at(i)
+        for (let i = 0; i < this.methods.length; i++) {
+            const m = this.methods.$_get(i)
             collector(m.result)
-            for (let i = 0; i < m.params.length(); i++) {
-                collector(m.params.at(i).typ)
+            for (let i = 0; i < m.params.length; i++) {
+                collector(m.params.$_get(i).typ)
             }
         }
     }
@@ -492,15 +432,15 @@ export final class ClassTypeCreator extends TypeCreator {
     internal override define(ctx: TypeCreatorCtx): void throws {
         const classPtr = this.ctxItemPtr
         ctx.checkError(TypeCreatorCtx.classSetBase(classPtr, this.base.getTypeDescriptor()))
-        for (let i = 0; i < this.ifaces.length(); i++) {
-            ctx.checkError(TypeCreatorCtx.classAddIface(classPtr, this.ifaces.at(i).getTypeDescriptor()))
+        for (let i = 0; i < this.ifaces.length; i++) {
+            ctx.checkError(TypeCreatorCtx.classAddIface(classPtr, this.ifaces.$_get(i).getTypeDescriptor()))
         }
-        for (let i = 0; i < this.fields.length(); i++) {
-            const f = this.fields.at(i);
+        for (let i = 0; i < this.fields.length; i++) {
+            const f = this.fields.$_get(i);
             ctx.checkError(TypeCreatorCtx.classAddField(classPtr, f.name, f.typ.getTypeDescriptor(), f.attrs.get(), f.accessMod.get()))
         }
-        for (let i = 0; i < this.methods.length(); i++) {
-            const m = this.methods.at(i)
+        for (let i = 0; i < this.methods.length; i++) {
+            const m = this.methods.$_get(i)
             m.addToCtxItemPtr(ctx, classPtr)
         }
     }
@@ -541,8 +481,8 @@ export final class ClassTypeCreator extends TypeCreator {
  */
 export final class InterfaceTypeCreator extends TypeCreator {
     private name: string
-    private bases: MArray<TypeOrCreator> = new MArray<TypeOrCreator>()
-    private methods: MArray<MethodCreator> = new MArray<MethodCreator>()
+    private bases: Array<TypeOrCreator> = new Array<TypeOrCreator>()
+    private methods: Array<MethodCreator> = new Array<MethodCreator>()
 
     /**
      * @param name name of interface
@@ -615,25 +555,25 @@ export final class InterfaceTypeCreator extends TypeCreator {
     }
 
     internal override collectTypes(collector: CollectTypesCB): void throws {
-        for (let i = 0; i < this.bases.length(); i++) {
-            collector(this.bases.at(i))
+        for (let i = 0; i < this.bases.length; i++) {
+            collector(this.bases.$_get(i))
         }
-        for (let i = 0; i < this.methods.length(); i++) {
-            const m = this.methods.at(i)
+        for (let i = 0; i < this.methods.length; i++) {
+            const m = this.methods.$_get(i)
             collector(m.result)
-            for (let i = 0; i < m.params.length(); i++) {
-                collector(m.params.at(i).typ)
+            for (let i = 0; i < m.params.length; i++) {
+                collector(m.params.$_get(i).typ)
             }
         }
     }
 
     internal override define(ctx: TypeCreatorCtx): void throws {
         const classPtr = this.ctxItemPtr
-        for (let i = 0; i < this.bases.length(); i++) {
-            ctx.checkError(TypeCreatorCtx.interfaceAddBase(classPtr, this.bases.at(i).getTypeDescriptor()))
+        for (let i = 0; i < this.bases.length; i++) {
+            ctx.checkError(TypeCreatorCtx.interfaceAddBase(classPtr, this.bases.$_get(i).getTypeDescriptor()))
         }
-        for (let i = 0; i < this.methods.length(); i++) {
-            const m = this.methods.at(i)
+        for (let i = 0; i < this.methods.length; i++) {
+            const m = this.methods.$_get(i)
             m.addToCtxItemPtr(ctx, classPtr)
         }
     }
@@ -648,7 +588,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
  * Creator for {@link LambdaType}
  */
 export final class LambdaTypeCreator extends TypeCreator {
-    internal params: MArray<ParameterCreator> = new MArray<ParameterCreator>();
+    internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF)
     private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.LAMBDA)
 
@@ -671,7 +611,7 @@ export final class LambdaTypeCreator extends TypeCreator {
     public addParameter(param: ParameterCreator): LambdaTypeCreator throws {
         this.checkNotCreated()
         param.frozen.freeze()
-        if (param.name != null && param.name != '' + this.params.length()) {
+        if (param.name != null && param.name != '' + this.params.length) {
             throw new TypeAPICreateException("can't have such lambda parameter name")
         }
         this.params.push(param)
@@ -735,8 +675,8 @@ export final class LambdaTypeCreator extends TypeCreator {
 
     internal override collectTypes(collector: CollectTypesCB): void throws {
         collector(this.result)
-        for (let i = 0; i < this.params.length(); i++) {
-            collector(this.params.at(i).typ)
+        for (let i = 0; i < this.params.length; i++) {
+            collector(this.params.$_get(i).typ)
         }
     }
 
@@ -744,8 +684,8 @@ export final class LambdaTypeCreator extends TypeCreator {
         assert this.ctxItemPtr == 0
         const ftPtr = TypeCreatorCtx.lambdaTypeCreate(ctx.ctxPtr, this.attrs.get())
         this.ctxItemPtr = ftPtr
-        for (let i = 0; i < this.params.length(); i++) {
-            const par = this.params.at(i)
+        for (let i = 0; i < this.params.length; i++) {
+            const par = this.params.$_get(i)
             ctx.checkError(TypeCreatorCtx.lambdaTypeAddParam(ftPtr, par.typ.getTypeDescriptor(), par.attrs.get()))
         }
         ctx.checkError(TypeCreatorCtx.lambdaTypeAddResult(ftPtr, this.result.getTypeDescriptor()))
@@ -1013,7 +953,7 @@ export final class ParameterCreator {
  */
 export final class MethodCreator {
     internal name: string
-    internal params: MArray<ParameterCreator> = new MArray<ParameterCreator>();
+    internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF)
     internal body: CallableBody | null = null
     internal frozen: FreezableImpl = new FreezableImpl()
@@ -1157,8 +1097,8 @@ export final class MethodCreator {
     internal addToCtxItemPtr(ctx: TypeCreatorCtx, classOrIfacePtr: long): void throws {
         const fptr = ctx.checkCtxItemPtr(TypeCreatorCtx.methodCreate(classOrIfacePtr, this.name, this.attrs.get()))
         ctx.checkError(TypeCreatorCtx.methodAddAccessMod(fptr, this.accessMod.get()))
-        for (let a = 0; a < this.params.length(); a++) {
-            const par = this.params.at(a)
+        for (let a = 0; a < this.params.length; a++) {
+            const par = this.params.$_get(a)
             let name = par.name ?? '' + a;
             ctx.checkError(TypeCreatorCtx.methodAddParam(fptr, par.typ.getTypeDescriptor(), name, par.attrs.get()))
         }

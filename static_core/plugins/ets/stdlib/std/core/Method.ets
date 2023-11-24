@@ -94,4 +94,20 @@ export final class Method extends Object {
             return TypeAPIMethodInvoke(this.td, recv, convertedArgs)
         }
     }
+
+    public getAttributes(): int {
+        return this.attributes
+    }
+
+    public getAccessModifier(): int {
+        return this.accessMod
+    }
+
+    public override equals(oth: NullishType): boolean {
+        return oth instanceof Method &&
+                this.td == (oth as Method).td &&
+                this.name == (oth as Method).name &&
+                this.accessMod == (oth as Method).accessMod &&
+                this.attributes == (oth as Method).attributes
+    }
 }
