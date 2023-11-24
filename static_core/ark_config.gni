@@ -52,13 +52,22 @@ ark_plugin_options_yaml = "$concat_gen_dir/plugin_options.yaml"
 
 isa_gen_dir = get_label_info("$ark_root/isa:isa_combine", "target_gen_dir")
 ark_isa_yaml = "$isa_gen_dir/isa.yaml"
+
+enable_irtoc = true
+enable_codegen = true
 is_llvmaot = false
 if (ark_standalone_build) {
+  enable_irtoc = true
+  enable_codegen = true
   is_llvmaot = true
+} else if (target_cpu == "x64" || target_cpu == "x86_64") {
+  enable_irtoc = false
+  enable_codegen = false
 }
 ark_enable_global_register_variables = true
 enable_bytecode_optimizer = true
 enable_relayout_profile = false
+vixl_with_panda = true
 
 sdk_libc_secshared_dep = ""
 sdk_libc_secshared_config = ""
@@ -85,8 +94,6 @@ is_mob = !is_ohos && !is_linux && !is_mingw && !is_mac &&
 if (is_ohos && is_standard_system) {
   hilog_root = "//base/hiviewdfx/hilog/interfaces/native/innerkits"
 }
-
-vixl_with_panda = true
 
 ## TODO add other arch
 

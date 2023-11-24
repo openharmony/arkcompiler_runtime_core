@@ -257,6 +257,7 @@ if(PANDA_WITH_TOOLCHAIN)
 endif()
 
 if(PANDA_WITH_COMPILER)
+    add_compile_definitions(PANDA_WITH_IRTOC PANDA_WITH_CODEGEN)
     add_subdirectory(cross_values)
     if (PANDA_TARGET_X86 OR PANDA_TARGET_AMD64)
         set(ASMJIT_STATIC TRUE)

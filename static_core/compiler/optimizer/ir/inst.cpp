@@ -742,9 +742,11 @@ bool IntrinsicInst::IsNativeCall() const
     if (IsFastpathIntrinsic(intrinsic_id_)) {
         return false;
     }
+#ifdef PANDA_WITH_IRTOC
     if (IsIrtocIntrinsic(intrinsic_id_)) {
         return intrinsic_id_ == RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY;
     }
+#endif
     auto graph = GetBasicBlock()->GetGraph();
     auto arch = graph->GetArch();
     auto runtime = graph->GetRuntime();
