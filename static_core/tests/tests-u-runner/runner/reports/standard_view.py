@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict
 
 from runner.logger import Log
 from runner.options.options_time_report import TimeReportOptions
@@ -15,7 +15,7 @@ _LOGGER = logging.getLogger("runner.reports.standart_view")
 
 
 class StandardView:
-    def __init__(self, report_root: Path, update_excluded: bool, excluded_lists: Any, summary: Summary) -> None:
+    def __init__(self, report_root: Path, update_excluded: bool, excluded_lists: List[str], summary: Summary) -> None:
         self.__report_root = report_root
         # filename of text report of new failures along with path to log
         self.__test_report_fails = 'failures.txt'
@@ -23,7 +23,7 @@ class StandardView:
         self.__excluded_lists = excluded_lists
         self.__summary = summary
 
-    def display_summary(self, fail_lists: Dict[FailKind, List[Test]]):
+    def display_summary(self, fail_lists: Dict[FailKind, List[Test]]) -> None:
         Log.default(_LOGGER, f"Summary({self.__summary.name}):")
         Log.default(_LOGGER, f"Total:                    \t{self.__summary.total:>5}")
         Log.default(_LOGGER, f"Passed:                   \t{self.__summary.passed:>5}")
@@ -115,11 +115,11 @@ class StandardView:
         write_2_file(time_report_path, time_report)
         Log.all(_LOGGER, f"Time report saved to {time_report_path}")
 
-    def __create_updated(self, tests: List[Test]):
+    def __create_updated(self, tests: List[Test]) -> None:
         name, state = ("updated", "still failed")
         self.__create_file(tests, name, state)
 
-    def __create_passed(self, tests: List[Test]):
+    def __create_passed(self, tests: List[Test]) -> None:
         name, state = ("passed",) * 2
         self.__create_file(tests, name, state)
 

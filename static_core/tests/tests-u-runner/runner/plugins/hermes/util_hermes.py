@@ -34,7 +34,7 @@ class UtilHermes:
         if self.hermes_revision is None:
             Log.exception_and_raise(_LOGGER, f"No {HERMES_REVISION} environment variable set", EnvironmentError)
 
-    def generate(self):
+    def generate(self) -> str:
         stamp_name = f"hermes-{self.hermes_revision}"
         if self.jit and self.jit_preheat_repeats > 1:
             stamp_name += f"-jit-{self.jit_preheat_repeats}"
@@ -52,7 +52,7 @@ class UtilHermes:
             force_download=self.force_download
         )
 
-    def process_copy(self, src_path: str, dst_path: str):
+    def process_copy(self, src_path: str, dst_path: str) -> None:
         Log.all(_LOGGER, "Generating tests")
 
         glob_expression = path.join(src_path, "**/*.js")
@@ -63,7 +63,7 @@ class UtilHermes:
             makedirs(path.dirname(dest_file), exist_ok=True)
             self.create_file(src_file, dest_file)
 
-    def create_file(self, src_file: str, dest_file: str):
+    def create_file(self, src_file: str, dest_file: str) -> None:
         with open(src_file, 'r', encoding="utf-8") as file_pointer:
             input_str = file_pointer.read()
 
@@ -75,7 +75,7 @@ class UtilHermes:
         with open(dest_file, 'w', encoding="utf-8") as output:
             output.write(out_str)
 
-    def run_filecheck(self, test_file, actual_output):
+    def run_filecheck(self, test_file: str, actual_output: str) -> bool:
         with open(test_file, 'r', encoding="utf-8") as file_pointer:
             input_str = file_pointer.read()
         if not re.match(self.check_expr, input_str):

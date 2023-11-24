@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from os import path, makedirs
-from typing import Tuple, Optional, Sequence
+from typing import Tuple, Optional, Sequence, List
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
-from runner.enum_types.params import TestReport, Params
+from runner.enum_types.params import TestEnv, TestReport, Params
 from runner.test_file_based import TestFileBased
 
 
 class TestETS(TestFileBased):
-    def __init__(self, test_env, test_path, flags, test_id):
+    def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
         # If test fails it contains reason (of FailKind enum) of first failed step
         # It's supposed if the first step is failed then no step is executed further
@@ -132,7 +132,7 @@ class TestETS(TestFileBased):
             return return_code != 0
         return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
 
-    def _run_verifier(self, test_abc) -> Tuple[bool, TestReport, Optional[FailKind]]:
+    def _run_verifier(self, test_abc: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         assert path.exists(self.test_env.verifier), f"Verifier binary '{self.test_env.verifier}' is absent or not set"
         config_path = self.test_env.config.verifier.config
         if config_path is None:

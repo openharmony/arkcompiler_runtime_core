@@ -1,20 +1,21 @@
 from os import path, makedirs
-from typing import List
+from typing import List, Dict, Any
 
 from runner.descriptor import Descriptor
 from runner.enum_types.configuration_kind import ConfigurationKind
+from runner.enum_types.params import TestEnv
 from runner.test_file_based import TestFileBased
 
 
 class TestJSTest262(TestFileBased):
-    def __init__(self, test_env, test_path, flags, with_optimizer, test_id):
+    def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], with_optimizer: bool, test_id: str) -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
         self.with_optimizer = with_optimizer
         self.need_exec = True
         self.work_dir = test_env.work_dir
         self.util = self.test_env.util
 
-    def do_run(self):
+    def do_run(self) -> TestFileBased:
         descriptor = Descriptor(self.path)
         desc = self.util.process_descriptor(descriptor)
 
@@ -74,7 +75,7 @@ class TestJSTest262(TestFileBased):
         return self
 
     def es2panda_result_validator(self, actual_output: str, actual_error: str,
-                                  actual_return_code: int, desc, output_path: str) -> bool:
+                                  actual_return_code: int, desc: Dict[str, Any], output_path: str) -> bool:
         passed, self.need_exec = self.util.validate_parse_result(
             actual_return_code,
             actual_error,

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, List, Set, Optional
+from typing import Any, List, Set, Optional, Dict
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
@@ -16,7 +16,7 @@ class TestEnv:
     conf_kind: ConfigurationKind
 
     cmd_prefix: List[str]
-    cmd_env: Any
+    cmd_env: Dict[str, str]
 
     coverage: LlvmCov
 
@@ -55,7 +55,7 @@ class Params:
     fail_kind_timeout: FailKind
     fail_kind_other: FailKind
     flags: List[str]
-    env: Any
+    env: Dict[str, str]
 
 
 @dataclass(frozen=True)

@@ -1,42 +1,33 @@
 import logging
 import subprocess
 from os import path, listdir, getenv, chdir
-from typing import Dict
+from typing import Dict, List, Optional
 
 from runner.logger import Log
 
 _LOGGER = logging.getLogger("runner.plugins_registry")
 
 
-class Singleton(type):
-    _instances: Dict = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-class PluginsRegistry(metaclass=Singleton):
+class PluginsRegistry:
     ENV_PLUGIN_PATH = "PLUGIN_PATH"
     BUILTIN_PLUGINS = "plugins"
     BUILTIN_ROOT = "runner"
 
-    def __init__(self):
-        self.registry = {}
-        self.side_plugins = []
+    def __init__(self) -> None:
+        self.registry: Dict[str, type] = {}
+        self.side_plugins: List[str] = []
         self.load_from_env()
         self.load_builtin_plugins()
 
     @staticmethod
-    def filter_builtins(item_list):
-        return [item for item in item_list if not item.startswith("__")]
+    def filter_builtins(items: List[str]) -> List[str]:
+        return [item for item in items if not item.startswith("__")]
 
     @staticmethod
-    def my_dir(obj):
+    def my_dir(obj: str) -> List[str]:
         return PluginsRegistry.filter_builtins(dir(obj))
 
-    def load_plugin(self, plugin_name: str, plugin_path: str):
+    def load_plugin(self, plugin_name: str, plugin_path: str) -> None:
         runner_class = [
             cls
             for cls in PluginsRegistry.filter_builtins(listdir(plugin_path))
@@ -59,7 +50,7 @@ class PluginsRegistry(metaclass=Singleton):
                 class_obj = getattr(class_module_runner, class_name)
                 self.add(plugin_name, class_obj)
 
-    def load_builtin_plugins(self):
+    def load_builtin_plugins(self) -> None:
         starting_path = path.join(path.dirname(__file__), PluginsRegistry.BUILTIN_PLUGINS)
         plugin_names = PluginsRegistry.filter_builtins(listdir(starting_path))
 
@@ -70,37 +61,36 @@ class PluginsRegistry(metaclass=Singleton):
             else:
                 Log.all(_LOGGER, f"Found extra file '{plugin_path}' at plugins folder")
 
-    def load_from_env(self):
+    def load_from_env(self) -> None:
         builtin_plugins_path = path.join(path.dirname(__file__), PluginsRegistry.BUILTIN_PLUGINS)
         side_plugins = getenv(PluginsRegistry.ENV_PLUGIN_PATH, "").split(path.pathsep)
-        if len(side_plugins) > 0:
-            chdir(builtin_plugins_path)
-            for side_plugin in side_plugins:
-                if path.exists(side_plugin):
-                    cmd = ["ln", "-s", side_plugin]
-                    subprocess.run(cmd, check=True)
-                    self.side_plugins.append(path.join(
-                        path.dirname(__file__),
-                        PluginsRegistry.BUILTIN_PLUGINS,
-                        path.basename(side_plugin)
-                    ))
+        if len(side_plugins) == 0:
+            return
 
-    def add(self, runner_name: str, runner):
+        chdir(builtin_plugins_path)
+        for side_plugin in side_plugins:
+            if not path.exists(side_plugin):
+                continue
+            cmd = ["ln", "-s", side_plugin]
+            subprocess.run(cmd, check=True)
+            self.side_plugins.append(path.join(
+                path.dirname(__file__),
+                PluginsRegistry.BUILTIN_PLUGINS,
+                path.basename(side_plugin)
+            ))
+
+    def add(self, runner_name: str, runner: type) -> None:
         if runner_name not in self.registry:
             self.registry[runner_name] = runner
             Log.all(_LOGGER, f"Registered plugin '{runner_name}' with class '{runner.__name__}'")
         else:
             Log.exception_and_raise(_LOGGER, f"Plugin '{runner_name}' already registered")
 
-    def get_runner(self, name: str):
-        return self.registry.get(name, None)
+    def get_runner(self, name: str) -> Optional[type]:
+        return self.registry.get(name)
 
-    def is_registered(self, name: str) -> bool:
-        return name in self.registry
-
-    def cleanup(self):
-        if len(self.side_plugins) > 0:
-            cmd = ["rm"]
-            for side_plugin in self.side_plugins:
-                cmd.append(side_plugin)
-            subprocess.run(cmd, check=True)
+    def cleanup(self) -> None:
+        if len(self.side_plugins) == 0:
+            return
+        cmd = ["rm"] + self.side_plugins
+        subprocess.run(cmd, check=True)

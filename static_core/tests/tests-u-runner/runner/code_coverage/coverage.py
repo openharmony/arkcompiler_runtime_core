@@ -23,7 +23,7 @@ import logging
 from pathlib import Path
 from os import getenv, path, remove
 from multiprocessing import current_process
-from typing import Optional
+from typing import Optional, List, Any, TextIO, Union
 
 from runner.logger import Log
 from runner.plugins.work_dir import WorkDir
@@ -48,12 +48,12 @@ if LLVM_COV_VERSION is not None:
 
 
 class LinuxCommands:
-    def _popen(self, **kwargs):
+    def _popen(self, **kwargs: Any) -> Any:
         if sys.version_info.major == 3 and sys.version_info.minor >= 6:
             return subprocess.Popen(encoding=sys.stdout.encoding, **kwargs)
         return subprocess.Popen(**kwargs)
 
-    def run_command(self, command, stdout=subprocess.PIPE):
+    def run_command(self, command: List[str], stdout: Union[TextIO, int] = subprocess.PIPE) -> Union[TextIO, int]:
         with self._popen(
                 args=command,
                 stdout=stdout,
@@ -65,42 +65,30 @@ class LinuxCommands:
                 Log.all(_LOGGER, f"Timeout when try execute {command}")
         return stdout
 
-    def do_genhtml(self, args=None):
-        command = ['genhtml']
-        if args:
-            command = command + args
-        stdout = self.run_command(command)
-        return stdout
+    def do_genhtml(self, args: List[str]) -> Union[TextIO, int]:
+        command = ['genhtml'] + args
+        return self.run_command(command)
 
 
 class LlvmCovCommands:
-    def llvm_prof_merge_command(self, args=None):
-        command = [LLVM_PROFDATA_BINARY, 'merge']
-        if args:
-            command = command + args
-        return command
+    def llvm_prof_merge_command(self, args: List[str]) -> List[str]:
+        return [LLVM_PROFDATA_BINARY, 'merge'] + args
 
-    def llvm_cov_export_command(self, args=None):
-        command = [LLVM_COV_PATH_BINARY, 'export']
-        if args:
-            command = command + args
-        return command
+    def llvm_cov_export_command(self, args: List[str]) -> List[str]:
+        return [LLVM_COV_PATH_BINARY, 'export'] + args
 
 
 class LlvmCov:
-    def __init__(self, build_dir, work_dir: WorkDir) -> None:
+    def __init__(self, build_dir: str, work_dir: WorkDir) -> None:
         self.build_dir = build_dir
         self.coverage_dir = work_dir.coverage_dir
         self.llvm_cov_commands = LlvmCovCommands()
         self.linux_commands = LinuxCommands()
 
-    def do_find(self, search_directory, extension):
-        result = []
-        for f_path in Path(search_directory).rglob(extension):
-            result.append(f_path)
-        return result
+    def do_find(self, search_directory: Path, extension: str) -> List[Path]:
+        return list(Path(search_directory).rglob(extension))
 
-    def get_uniq_profraw_profdata_file_paths(self):
+    def get_uniq_profraw_profdata_file_paths(self) -> List[str]:
         pid = current_process().pid
         hash_code = uuid.uuid4()
         file_path = f"{self.coverage_dir.profdata_dir}/{pid}-{hash_code}"
@@ -108,11 +96,11 @@ class LlvmCov:
         profdata_file = os.extsep.join([file_path, 'profdata'])
         return [profraw_file, profdata_file]
 
-    def llvm_profdata_merge(self, args=None):
+    def llvm_profdata_merge(self, args: List[str]) -> None:
         prof_merge_command = self.llvm_cov_commands.llvm_prof_merge_command(args)
         self.linux_commands.run_command(prof_merge_command)
 
-    def merge_and_delete_prowraw_files(self, profraw_file, profdata_file):
+    def merge_and_delete_prowraw_files(self, profraw_file: str, profdata_file: str) -> None:
         file = Path(profraw_file)
         if file.is_file():
             self.llvm_profdata_merge(['--sparse', profraw_file, '-o', profdata_file])
@@ -120,17 +108,17 @@ class LlvmCov:
         else:
             Log.all(_LOGGER, f"File with name {profraw_file} not exist")
 
-    def make_profdata_list_file(self):
+    def make_profdata_list_file(self) -> None:
         results = self.do_find(self.coverage_dir.profdata_dir, '*.profdata')
         with open(self.coverage_dir.profdata_files_list_file, 'a', encoding="utf-8") as the_file:
             for i in results:
                 the_file.write(str(i) + '\n')
 
-    def merge_all_profdata_files(self):
+    def merge_all_profdata_files(self) -> None:
         input_files = f"--input-files={self.coverage_dir.profdata_files_list_file}"
-        self.llvm_profdata_merge(['--sparse', input_files, '-o', self.coverage_dir.profdata_merged_file])
+        self.llvm_profdata_merge(['--sparse', input_files, '-o', str(self.coverage_dir.profdata_merged_file)])
 
-    def llvm_cov_export_to_info_file(self):
+    def llvm_cov_export_to_info_file(self) -> None:
         instr_profile = f"-instr-profile={self.coverage_dir.profdata_merged_file}"
 
         bin_dir = f"{self.build_dir}/bin"
@@ -158,6 +146,6 @@ class LlvmCov:
         with open(self.coverage_dir.info_file, "w", encoding="utf-8") as file_dot_info:
             self.linux_commands.run_command(command, stdout=file_dot_info)
 
-    def genhtml(self):
+    def genhtml(self) -> None:
         output_directory = f"--output-directory={self.coverage_dir.html_report_dir}"
-        self.linux_commands.do_genhtml([output_directory, self.coverage_dir.info_file])
+        self.linux_commands.do_genhtml([output_directory, str(self.coverage_dir.info_file)])

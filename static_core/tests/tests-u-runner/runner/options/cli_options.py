@@ -1,28 +1,27 @@
 import argparse
-from enum import Enum
 from os import path, makedirs
-from typing import TypeVar, Type
+from typing import Type
 
 from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
 from runner.reports.report_format import ReportFormat
-from runner.utils import enum_from_str
+from runner.utils import enum_from_str, EnumT
 
 
-def is_directory(arg) -> str:
+def is_directory(arg: str) -> str:
     if not path.isdir(path.expanduser(arg)):
         raise argparse.ArgumentTypeError(f"The directory {arg} does not exist")
 
     return str(path.abspath(path.expanduser(arg)))
 
 
-def make_dir_if_not_exist(arg) -> str:
+def make_dir_if_not_exist(arg: str) -> str:
     if not path.isdir(path.abspath(arg)):
         makedirs(arg)
 
     return str(path.abspath(arg))
 
 
-def is_file(arg) -> str:
+def is_file(arg: str) -> str:
     if not path.isfile(path.expanduser(arg)):
         raise argparse.ArgumentTypeError(f"The file {arg} does not exist")
 
@@ -41,17 +40,14 @@ def check_timeout(value: str) -> int:
     return check_int(value, "timeout")
 
 
-EnumClass = TypeVar("EnumClass", bound=Enum)
-
-
-def is_enum_value(value: str, enum_class: Type[EnumClass], option_name: str) -> EnumClass:
+def is_enum_value(value: str, enum_class: Type[EnumT], option_name: str) -> EnumT:
     enum_value = enum_from_str(value, enum_class)
     if enum_value is None:
         raise argparse.ArgumentTypeError(f"{value} is an invalid for parameter {option_name}")
     return enum_value
 
 
-def add_test_suite_args(parser: argparse.ArgumentParser):
+def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
     # Test suite options
     parser.add_argument(
         '--test-suite', action='append', dest='test_suites',
@@ -90,14 +86,14 @@ def add_test_suite_args(parser: argparse.ArgumentParser):
         default=None, help='run ets-templates tests')
 
 
-def add_ets_args(parser: argparse.ArgumentParser):
+def add_ets_args(parser: argparse.ArgumentParser) -> None:
     # ETS tests applied options
     parser.add_argument(
         '--force-generate', action='store_true', dest='is_force_generate', default=None,
         help='mandatory generate the ETS test cases from templates')
 
 
-def add_test_group_args(parser: argparse.ArgumentParser):
+def add_test_group_args(parser: argparse.ArgumentParser) -> None:
     # Test groups options
     test_groups = parser.add_argument_group(
         "Test groups",
@@ -128,7 +124,7 @@ def add_test_group_args(parser: argparse.ArgumentParser):
              'By default chapters.yaml file located along with test lists.')
 
 
-def add_config_args(parser: argparse.ArgumentParser):
+def add_config_args(parser: argparse.ArgumentParser) -> None:
     # Configuration
     parser.add_argument(
         '--config', action='store', dest='config',
@@ -141,7 +137,7 @@ def add_config_args(parser: argparse.ArgumentParser):
         help='generate config file with all options')
 
 
-def add_general_args(parser: argparse.ArgumentParser):
+def add_general_args(parser: argparse.ArgumentParser) -> None:
     # General - path options
     parser.add_argument(
         "--build-dir", action="store", dest='build_dir',
@@ -183,7 +179,7 @@ def add_general_args(parser: argparse.ArgumentParser):
         help='launch all binaries in qemu arm')
 
 
-def add_general_other_args(parser: argparse.ArgumentParser):
+def add_general_other_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '--report-format', action='store', dest='report_formats', default=None,
         type=lambda arg: is_enum_value(arg, ReportFormat, "--report-format"),
@@ -215,7 +211,7 @@ def add_general_other_args(parser: argparse.ArgumentParser):
         default=None, help='force download and prepare test suites')
 
 
-def add_es2panda_args(parser: argparse.ArgumentParser):
+def add_es2panda_args(parser: argparse.ArgumentParser) -> None:
     # Es2panda options
     parser.add_argument(
         '--custom-es2panda', action='store', dest='custom_es2panda_path',
@@ -235,7 +231,7 @@ def add_es2panda_args(parser: argparse.ArgumentParser):
         help='path to arktsconfig file')
 
 
-def add_verifier_args(parser: argparse.ArgumentParser):
+def add_verifier_args(parser: argparse.ArgumentParser) -> None:
     # Verifier options
     parser.add_argument(
         '--disable-verifier', action="store_false", default=None,
@@ -250,7 +246,7 @@ def add_verifier_args(parser: argparse.ArgumentParser):
         help='verification config file')
 
 
-def add_ark_aot_quick_args(parser: argparse.ArgumentParser):
+def add_ark_aot_quick_args(parser: argparse.ArgumentParser) -> None:
     # Ark_aot options
     parser.add_argument(
         '--aot', action='store_true', dest='aot', default=None,
@@ -268,7 +264,7 @@ def add_ark_aot_quick_args(parser: argparse.ArgumentParser):
         help='use bytecode quickener')
 
 
-def add_ark_args(parser: argparse.ArgumentParser):
+def add_ark_args(parser: argparse.ArgumentParser) -> None:
     # Ark options
     parser.add_argument(
         '--ark-args', action='append', dest='ark_args', default=None,
@@ -303,7 +299,7 @@ def add_ark_args(parser: argparse.ArgumentParser):
              'Works only with --jit option.')
 
 
-def add_time_report_args(parser: argparse.ArgumentParser):
+def add_time_report_args(parser: argparse.ArgumentParser) -> None:
     # Time report options
     parser.add_argument(
         '--time-report', action='store_true', dest='time_report', default=None,
@@ -313,7 +309,7 @@ def add_time_report_args(parser: argparse.ArgumentParser):
         help='Time edges in the format `1,5,10` where numbers are seconds')
 
 
-def add_test_lists_args(parser: argparse.ArgumentParser):
+def add_test_lists_args(parser: argparse.ArgumentParser) -> None:
     # Test lists options
     parser.add_argument(
         '--filter', '-f', action='store', dest='filter', default=None,
@@ -343,7 +339,7 @@ def add_test_lists_args(parser: argparse.ArgumentParser):
         help='update files with expected results')
 
 
-def add_coverage_args(parser: argparse.ArgumentParser):
+def add_coverage_args(parser: argparse.ArgumentParser) -> None:
     # Coverage settings
     parser.add_argument(
         '--use-llvm-cov', action='store_true', dest='use_llvm_cov', default=None)
@@ -357,7 +353,7 @@ def add_coverage_args(parser: argparse.ArgumentParser):
         help='Stacks files in the specified directory')
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Regression test runner")
 
     add_test_suite_args(parser)

@@ -1,17 +1,18 @@
 from os import path, makedirs
-from typing import List
+from typing import List, Any
 
 from runner.enum_types.configuration_kind import ConfigurationKind
+from runner.enum_types.params import TestEnv
 from runner.test_file_based import TestFileBased
 
 
 class TestJSHermes(TestFileBased):
-    def __init__(self, test_env, test_path, flags, test_id):
+    def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
         self.work_dir = test_env.work_dir
         self.util = self.test_env.util
 
-    def do_run(self):
+    def do_run(self) -> TestFileBased:
         test_abc = str(self.work_dir.intermediate / f"{self.test_id}.abc")
         test_an = str(self.work_dir.intermediate / f"{self.test_id}.an")
         makedirs(path.dirname(test_abc), exist_ok=True)
@@ -62,5 +63,5 @@ class TestJSHermes(TestFileBased):
     def _validate_compiler(return_code: int, output_path: str) -> bool:
         return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
 
-    def ark_validate_result(self, actual_output, _1, return_code):
+    def ark_validate_result(self, actual_output: str, _: Any, return_code: int) -> bool:
         return self.util.run_filecheck(self.path, actual_output) and return_code == 0

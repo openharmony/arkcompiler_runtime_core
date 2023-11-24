@@ -1,17 +1,15 @@
-from dataclasses import dataclass
 from functools import cached_property
 from typing import Dict, Optional
 
 from runner.options.decorator_value import value, _to_int, _to_str, _to_path
 
 
-@dataclass
 class Es2PandaOptions:
     __DEFAULT_TIMEOUT = 60
     __DEFAULT_OPT_LEVEL = 2
 
     def __str__(self) -> str:
-        return _to_str(self, Es2PandaOptions, 1)
+        return _to_str(self, 1)
 
     def to_dict(self) -> Dict[str, object]:
         return {

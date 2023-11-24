@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Sequence
 
 from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
@@ -49,10 +51,10 @@ class Test:
         # Reports if generated. Key is ReportFormat.XXX. Value is a path to the generated report
         self.reports: Dict[ReportFormat, str] = {}
 
-    def log_cmd(self, cmd):
+    def log_cmd(self, cmd: Sequence[str]) -> None:
         self.reproduce += "\n" + ' '.join(cmd)
 
-    def run(self):
+    def run(self) -> Test:
         start = datetime.now()
         Log.all(_LOGGER, f"Start to execute: {self.test_id}")
 
@@ -82,7 +84,7 @@ class Test:
 
         return result
 
-    def do_run(self):
+    def do_run(self) -> Test:
         return self
 
     def status(self) -> TestStatus:

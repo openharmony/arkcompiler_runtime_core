@@ -1,17 +1,15 @@
-from dataclasses import dataclass
 from functools import cached_property
 from typing import Dict, List
 
 from runner.options.decorator_value import value, _to_str, _to_int
 
 
-@dataclass
 class GroupsOptions:
     __DEFAULT_GROUPS = 1
     __DEFAULT_GROUP_NUMBER = 1
 
     def __str__(self) -> str:
-        return _to_str(self, GroupsOptions, 2)
+        return _to_str(self, 2)
 
     def to_dict(self) -> Dict[str, object]:
         return {

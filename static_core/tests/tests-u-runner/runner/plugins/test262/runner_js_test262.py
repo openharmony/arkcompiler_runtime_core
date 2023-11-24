@@ -1,6 +1,7 @@
 import logging
 from os import path
 from pathlib import Path
+from typing import List
 
 from runner.logger import Log
 from runner.options.config import Config
@@ -13,7 +14,7 @@ _LOGGER = logging.getLogger("runner.plugins.test262.runner_js_test262")
 
 
 class RunnerJSTest262(RunnerJS):
-    def __init__(self, config: Config):
+    def __init__(self, config: Config) -> None:
         RunnerJS.__init__(self, config, "test262")
         self.ignored_name_prefix = "test262"
 
@@ -37,7 +38,7 @@ class RunnerJSTest262(RunnerJS):
 
         self.add_directory(self.test_root, "js", [])
 
-    def create_test(self, test_file, flags, is_ignored) -> TestJSTest262:
+    def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestJSTest262:
         with_optimizer = test_file not in self.bco_tests
         test = TestJSTest262(self.test_env, test_file, flags, with_optimizer, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored

@@ -15,7 +15,7 @@ class CoverageDir:
         return root
 
     @property
-    def html_report_dir(self):
+    def html_report_dir(self) -> Path:
         if self.__general.coverage.llvm_cov_html_out_path:
             html_out_path = Path(self.__general.coverage.llvm_cov_html_out_path)
         else:
@@ -24,7 +24,7 @@ class CoverageDir:
         return html_out_path
 
     @cached_property
-    def profdata_dir(self):
+    def profdata_dir(self) -> Path:
         if self.__general.coverage.llvm_profdata_out_path:
             profdata_out_path = Path(self.__general.coverage.llvm_profdata_out_path)
         else:
@@ -33,19 +33,19 @@ class CoverageDir:
         return profdata_out_path
 
     @cached_property
-    def coverage_work_dir(self):
+    def coverage_work_dir(self) -> Path:
         work_dir = self.root / "work_dir"
         work_dir.mkdir(parents=True, exist_ok=True)
         return work_dir
 
     @property
-    def info_file(self):
+    def info_file(self) -> Path:
         return self.coverage_work_dir / "coverage_lcov_format.info"
 
     @property
-    def profdata_files_list_file(self):
+    def profdata_files_list_file(self) -> Path:
         return self.coverage_work_dir / "profdatalist.txt"
 
     @property
-    def profdata_merged_file(self):
+    def profdata_merged_file(self) -> Path:
         return self.coverage_work_dir / "merged.profdata"

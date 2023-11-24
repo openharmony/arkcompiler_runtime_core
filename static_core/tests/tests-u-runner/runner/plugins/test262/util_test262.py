@@ -17,7 +17,7 @@ import logging
 import re
 from glob import glob
 from os import path, getenv, makedirs
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict, Any
 
 from runner.descriptor import Descriptor
 from runner.logger import Log
@@ -46,7 +46,7 @@ class UtilTest262:
         if self.test262_revision is None:
             Log.exception_and_raise(_LOGGER, f"No {TEST262_REVISION} environment variable set", EnvironmentError)
 
-    def generate(self, harness_path):
+    def generate(self, harness_path: str) -> str:
         stamp_name = f"test262-{self.test262_revision}"
         if self.jit and self.jit_preheat_repeats > 1:
             stamp_name += f"-jit-{self.jit_preheat_repeats}"
@@ -64,7 +64,7 @@ class UtilTest262:
             force_download=self.force_download
         )
 
-    def prepare_tests(self, src_path, dest_path, harness_path, test262_path) -> None:
+    def prepare_tests(self, src_path: str, dest_path: str, harness_path: str, test262_path: str) -> None:
         glob_expression = path.join(src_path, "**/*.js")
         files = glob(glob_expression, recursive=True)
         files = [file for file in files if not file.endswith("FIXTURE.js")]
@@ -79,7 +79,7 @@ class UtilTest262:
             makedirs(path.dirname(dest_file), exist_ok=True)
             self.create_file(src_file, dest_file, harness, test262_path)
 
-    def create_file(self, input_file, output_file, harness, test262_dir):
+    def create_file(self, input_file: str, output_file: str, harness: str, test262_dir: str) -> None:
         descriptor = Descriptor(input_file)
         desc = UtilTest262.process_descriptor(descriptor)
 
@@ -105,7 +105,7 @@ class UtilTest262:
             output.write(out_str)
 
     @staticmethod
-    def process_descriptor(descriptor: Descriptor):
+    def process_descriptor(descriptor: Descriptor) -> Dict[str, Any]:
         desc = descriptor.parse_descriptor()
 
         includes = []
@@ -129,7 +129,7 @@ class UtilTest262:
         }
 
     @staticmethod
-    def validate_parse_result(return_code, _, desc, out) -> Tuple[bool, bool]:
+    def validate_parse_result(return_code: int, _: str, desc: Dict[str, Any], out: str) -> Tuple[bool, bool]:
         is_negative = (desc['negative_phase'] == 'parse')
 
         if return_code == 0:  # passed
@@ -143,7 +143,7 @@ class UtilTest262:
 
         return False, False  # abnormal
 
-    def validate_runtime_result(self, return_code, std_err, desc, out) -> bool:
+    def validate_runtime_result(self, return_code: int, std_err: str, desc: Dict[str, Any], out: str) -> bool:
         is_negative = (desc['negative_phase'] == 'runtime') or \
                       (desc['negative_phase'] == 'resolution')
 

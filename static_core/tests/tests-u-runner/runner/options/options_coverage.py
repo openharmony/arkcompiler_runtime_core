@@ -1,14 +1,12 @@
-from dataclasses import dataclass
 from functools import cached_property
 from typing import Dict, Optional
 
 from runner.options.decorator_value import value, _to_bool, _to_str, _to_dir
 
 
-@dataclass
 class CoverageOptions:
     def __str__(self) -> str:
-        return _to_str(self, CoverageOptions, 2)
+        return _to_str(self, 2)
 
     def to_dict(self) -> Dict[str, object]:
         return {

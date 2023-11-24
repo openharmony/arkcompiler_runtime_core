@@ -2,7 +2,7 @@ import json
 import logging
 from os import path
 from pathlib import Path
-from typing import Set
+from typing import Set, List, Any
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.logger import Log
@@ -63,7 +63,7 @@ class RunnerETS(RunnerFileBased):
 
         self.add_directory(self.test_root, "ets", [])
 
-    def create_test(self, test_file, flags, is_ignored) -> TestETS:
+    def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestETS:
         Test = TestEtsCts if "ets_cts" in self.config.test_suites else TestETS
         test = Test(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
@@ -87,7 +87,7 @@ class RunnerETS(RunnerFileBased):
     def default_work_dir_root(self) -> Path:
         return Path("/tmp") / "ets" / self.__ets_suite_name
 
-    def _check_binary_artifacts(self):
+    def _check_binary_artifacts(self) -> None:
         stdlib_path_obj = Path(self.stdlib_path)
         stdlib_src_path_obj = Path(self._get_std_from_arktsconfig())
 
@@ -106,7 +106,7 @@ class RunnerETS(RunnerFileBased):
                 "please set the correct eTS stdlib root!",
                 FileNotFoundError)
 
-    def _get_std_from_arktsconfig(self):
+    def _get_std_from_arktsconfig(self) -> Any:
         with open(self.arktsconfig, encoding="utf-8") as file:
             arkconfig = json.load(file)
             try:

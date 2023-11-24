@@ -1,9 +1,9 @@
 import re
-from typing import Dict, Any, Union
+from typing import Dict, Any
 
 
 class Descriptor:
-    def __init__(self, input_file: str):
+    def __init__(self, input_file: str) -> None:
         self.input_file = input_file
         self.header = re.compile(
             r"/\*---(?P<header>.+)---\*/", re.DOTALL)
@@ -29,7 +29,7 @@ class Descriptor:
 
     def parse_descriptor(self) -> Dict[str, Any]:
         header = self.get_header()
-        result: Dict[str, Union[str, object]] = {}
+        result: Dict[str, Any] = {}
 
         if len(header) == 0:
             return result
@@ -62,5 +62,5 @@ class Descriptor:
 
         return result
 
-    def get_descriptor(self):
+    def get_descriptor(self) -> Dict[str, Any]:
         return self.parse_descriptor()
