@@ -50,7 +50,7 @@ class TestGCOld {
     private static mutatorSum : long = 0;
     private static aexport : int[];
 
-    private static trees : (TreeNode | null)[] | null;
+    private static trees : (TreeNode | null)[];
     private static where : int = 0;
     private static rnd = new Random();
 
@@ -146,7 +146,7 @@ class TestGCOld {
         while (partial > TestGCOld.INSIGNIFICANT) {
             let h : int = TestGCOld.bytesToHeight(partial);
             let newTree : TreeNode | null = TestGCOld.getTree(h);
-            TestGCOld.replaceTree(TestGCOld.trees[TestGCOld.where++], newTree);
+            TestGCOld.replaceTree(TestGCOld.trees[TestGCOld.where++]!, newTree);
             if (TestGCOld.where == TestGCOld.trees.length) TestGCOld.where = 0;
             partial = partial - TestGCOld.getBytesHeight(h);
         }
