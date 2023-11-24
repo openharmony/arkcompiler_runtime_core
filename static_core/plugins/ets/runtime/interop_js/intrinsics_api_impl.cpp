@@ -109,21 +109,21 @@ static EtsString *JSRuntimeGetValueString(JSValue *ets_js_value)
     return res.value();
 }
 
-static EtsObject *JSRuntimeGetValueObject(JSValue *ets_js_value, EtsClass *cls)
+static EtsObject *JSRuntimeGetValueObject(JSValue *ets_js_value, EtsObject *cls_obj)
 {
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+
+    if (!cls_obj->GetClass()->GetRuntimeClass()->IsClassClass()) {
+        ctx->Fatal("GetValueObject parameter is not a ClassClass instance");
+    }
+    auto const cls = reinterpret_cast<EtsClass *>(cls_obj);
+
     if (ets_js_value == nullptr) {
         return nullptr;
     }
 
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-
-    if (cls->GetRuntimeClass() == ctx->GetVoidClass()) {
-        return reinterpret_cast<EtsObject *>(EtsVoid::GetInstance());
-    }
-
     auto env = ctx->GetJSEnv();
-
     NapiScope js_handle_scope(env);
     napi_value js_val = ets_js_value->GetNapiValue(env);
 

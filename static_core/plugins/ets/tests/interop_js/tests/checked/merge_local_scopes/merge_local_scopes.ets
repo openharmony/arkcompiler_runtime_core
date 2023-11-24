@@ -120,8 +120,9 @@ function test_call_hoist_scope_start(): int {
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 2
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 1 # conversion of JSRuntimeGetPropertyJSValue to local, NOTE(aefremov): remove
-//! INST_NOT     "Intrinsic.CompilerConvertLocalToJSValue"
 //! INST_COUNT   "Intrinsic.CompilerConvertLocalToF64", 1
+// # NOTE(aefremov) #14626 Optimize type-specific get/set property intrinsics
+// //! INST_NOT     "Intrinsic.CompilerConvertLocalToJSValue"
 
 function loop_into_scope(): int {
     let list = cons(1, vundefined);

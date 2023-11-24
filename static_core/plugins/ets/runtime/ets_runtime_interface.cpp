@@ -112,6 +112,8 @@ compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallK
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*method);
     auto linker_ctx = static_cast<EtsClassLinkerExtension *>(class_linker->GetExtension(ctx))->GetBootContext();
 
+    ScopedMutatorLock lock;
+
     ASSERT(method->GetArgType(0).IsReference());  // arg0 is always a reference
     ASSERT(method->GetArgType(1).IsReference());  // arg1 is always a reference
     uint32_t const arg_reftype_shift = method->GetReturnType().IsReference() ? 1 : 0;

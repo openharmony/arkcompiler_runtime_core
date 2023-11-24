@@ -95,21 +95,20 @@ panda_ets_interop_js_gtest(ets_interop_js_test__dynamic_object
     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_object/dynamic_object.ets
 )
 
-# NOTE: vpukhov. re-enable #14501
-# panda_ets_interop_js_gtest(ets_interop_js_class_operations
-#     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
-#     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.ets
-# )
-# panda_ets_interop_js_gtest(ets_interop_js_frontend_class_operations
-#     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
-#     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations_frontend.ets
-#     ETS_CONFIG ${ETS_CONFIG}
-# )
-# panda_ets_interop_js_gtest(ets_interop_js_class_operations_decl
-#     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
-#     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations_decl.ets
-#     ETS_CONFIG ${ETS_CONFIG_DECL}
-# )
+panda_ets_interop_js_gtest(ets_interop_js_class_operations
+    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.ets
+)
+panda_ets_interop_js_gtest(ets_interop_js_frontend_class_operations
+    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations_frontend.ets
+    ETS_CONFIG ${ETS_CONFIG}
+)
+panda_ets_interop_js_gtest(ets_interop_js_class_operations_decl
+    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations_decl.ets
+    ETS_CONFIG ${ETS_CONFIG_DECL}
+)
 
 panda_ets_interop_js_gtest(ets_interop_js_strict_equality
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/strict_equality/strict_equality.cpp

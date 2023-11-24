@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_void.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/interop_js/pending_promise_listener.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -528,6 +529,16 @@ JSCONVERT_UNWRAP(ArrayBuffer)
     buf->SetData(current_coro, EtsArray::CreateForPrimitive<EtsByteArray>(EtsClassRoot::BYTE_ARRAY, byte_length));
     memcpy(buf->GetData()->GetData<EtsByte>(), data, byte_length);
     return buf.GetPtr();
+}
+
+JSCONVERT_DEFINE_TYPE(EtsVoid, EtsVoid *)
+JSCONVERT_WRAP(EtsVoid)
+{
+    return GetUndefined(env);
+}
+JSCONVERT_UNWRAP(EtsVoid)
+{
+    return EtsVoid::GetInstance();
 }
 
 #undef JSCONVERT_DEFINE_TYPE

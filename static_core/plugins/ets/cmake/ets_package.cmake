@@ -27,11 +27,13 @@
 #       path/to/arktsconfig.json
 #   )
 function(do_panda_ets_package TARGET)
+    add_custom_target(${TARGET})
+
     # Parse arguments
     cmake_parse_arguments(
         ARG
         ""
-        "OUTPUT_DIRECTORY;ETS_CONFIG"
+        "OUTPUT_DIRECTORY;ETS_CONFIG;VERIFY_SOURCES"
         "ABC_FILE;ETS_SOURCES"
         ${ARGN}
     )
@@ -41,6 +43,10 @@ function(do_panda_ets_package TARGET)
         message(FATAL_ERROR "OUTPUT_DIRECTORY is not set")
     endif()
 
+    if (NOT DEFINED ARG_VERIFY_SOURCES)
+        set(ARG_VERIFY_SOURCES true)
+    endif()
+
     if(NOT DEFINED ARG_ETS_SOURCES AND NOT DEFINED ARG_ABC_FILE OR
        DEFINED ARG_ETS_SOURCES AND DEFINED ARG_ABC_FILE)
         message(FATAL_ERROR "One and only one of ETS_SOURCES or ABC_FILE should be set")
@@ -48,9 +54,13 @@ function(do_panda_ets_package TARGET)
 
     # Set variables
     set(ES2PANDA_ARGUMENTS
-        --opt-level=0
+        --opt-level=2
         --thread=0
         --extension=ets
+    )
+    set(VERIFIER_ARGUMENTS
+        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+        --load-runtimes=ets
     )
 
     if(DEFINED ARG_ETS_CONFIG)
@@ -70,6 +80,14 @@ function(do_panda_ets_package TARGET)
             COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
             DEPENDS etsstdlib ${es2panda_target} ${ARG_ETS_SOURCES}
         )
+        if (ARG_VERIFY_SOURCES)
+            add_custom_command(
+                TARGET ${TARGET}
+                COMMENT "${TARGET}: Verify abc file ${OUTPUT_ABC}"
+                COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:verifier> ${VERIFIER_ARGUMENTS} ${OUTPUT_ABC}
+                DEPENDS verifier etsstdlib ${OUTPUT_ABC}
+            )
+        endif()
     else()
         add_custom_command(
                 OUTPUT ${OUTPUT_ABC}
@@ -99,9 +117,8 @@ function(do_panda_ets_package TARGET)
         COMMAND cp ${OUTPUT_ZIP} ${RELEASE_ZIP}
         DEPENDS ${OUTPUT_ZIP}
     )
-    add_custom_target(${TARGET}
-        DEPENDS ${RELEASE_ZIP}
-    )
+    add_custom_target(${TARGET}-zip DEPENDS ${RELEASE_ZIP})
+    add_dependencies(${TARGET} ${TARGET}-zip)
 endfunction(do_panda_ets_package)
 
 
