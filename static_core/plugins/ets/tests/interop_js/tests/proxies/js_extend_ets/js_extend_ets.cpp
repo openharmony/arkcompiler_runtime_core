@@ -22,7 +22,7 @@ class JSExtendEtsTest : public EtsInteropTest {};
 
 TEST_F(JSExtendEtsTest, js_proxy)
 {
-    ASSERT_EQ(true, RunJsTestSute("js_extend_ets.js"));
+    ASSERT_EQ(true, RunJsTestSuite("js_extend_ets.js"));
 }
 
 }  // namespace panda::ets::interop::js::testing

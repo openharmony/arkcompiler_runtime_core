@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,26 @@
  */
 
 /*---
-desc: 03.08.11 Union types
-name: 03.types/08.reference_types/03.08.11.union_types/union_return_01
+desc: >-
+    17.10 Trailing lambda
 tags: []
 ---*/
-type Margin = number | string
 
-function format_string(): Margin {
-    return "5 px"
+let a: int = 5
+
+function is_active(fn: () => boolean): boolean {
+    return fn()
+}
+
+function with_param(n: int, fn: () => int): void {
+    fn()
 }
 
 function main(): void {
-    let d: Margin = format_string()
-    assert d as string == "5 px"
+    let result = with_param(5) {
+        if (is_active() { return true }) {
+            assert a == 5
+        }
+    }
 }
+

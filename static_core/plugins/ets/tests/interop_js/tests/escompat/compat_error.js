@@ -13,19 +13,23 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const CreateEtsSample = ets_mod.getFunction("Error_CreateEtsSample");
-const TestJSSample = ets_mod.getFunction("Error_TestJSSample");
+const etsMod = getTestModule('escompat_test');
+const CreateEtsSample = etsMod.getFunction('Error_CreateEtsSample');
+const TestJSSample = etsMod.getFunction('Error_TestJSSample');
 
-{   // Test JS Error
-    TestJSSample(new Error("foo"));
+{ // Test JS Error
+  TestJSSample(new Error('foo'));
 }
 
-{   // Test ETS Error
+{ // Test ETS Error
     let v = CreateEtsSample();
-    ASSERT_TRUE(v instanceof Error);
+  ASSERT_TRUE(v instanceof Error);
 
-    ASSERT_EQ(v.message, "bar");
+  ASSERT_EQ(String(v.message), 'bar');
+
+  ASSERT_EQ(v.cause, v);
+
+  ASSERT_TRUE(String(v.stack).includes('CreateEtsSample'));
 }

@@ -22,22 +22,22 @@ class JSExtendEtsTest : public EtsInteropTest {};
 
 TEST_F(JSExtendEtsTest, access_primitives)
 {
-    ASSERT_EQ(true, RunJsTestSute("check_access_primitives.js"));
+    ASSERT_EQ(true, RunJsTestSuite("check_access_primitives.js"));
 }
 
 TEST_F(JSExtendEtsTest, access_references)
 {
-    ASSERT_EQ(true, RunJsTestSute("check_access_references.js"));
+    ASSERT_EQ(true, RunJsTestSuite("check_access_references.js"));
 }
 
 TEST_F(JSExtendEtsTest, proxy_objects)
 {
-    ASSERT_EQ(true, RunJsTestSute("check_proxy_objects.js"));
+    ASSERT_EQ(true, RunJsTestSuite("check_proxy_objects.js"));
 }
 
 TEST_F(JSExtendEtsTest, inheritance)
 {
-    ASSERT_EQ(true, RunJsTestSute("check_inheritance.js"));
+    ASSERT_EQ(true, RunJsTestSuite("check_inheritance.js"));
 }
 
 }  // namespace panda::ets::interop::js::testing

@@ -112,19 +112,8 @@ public:
 
 static void WrapException(ClassLinker *class_linker, ManagedThread *thread)
 {
-    ASSERT(thread->HasPendingException());
-
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*thread->GetException()->ClassAddr<Class>());
-
-    auto *error_class = class_linker->GetExtension(ctx)->GetClass(ctx.GetErrorClassDescriptor(), false);
-    ASSERT(error_class != nullptr);
-
-    auto *cause = thread->GetException();
-    if (cause->IsInstanceOf(error_class)) {
-        return;
-    }
-
-    ThrowException(ctx, thread, ctx.GetExceptionInInitializerErrorDescriptor(), nullptr);
+    ctx.WrapClassInitializerException(class_linker, thread);
 }
 
 static void ThrowNoClassDefFoundError(ManagedThread *thread, const Class *klass)

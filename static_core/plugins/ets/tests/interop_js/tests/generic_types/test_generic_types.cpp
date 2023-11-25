@@ -22,22 +22,22 @@ class GenericTypesTest : public EtsInteropTest {};
 
 TEST_F(GenericTypesTest, check_compat_objects)
 {
-    ASSERT_TRUE(RunJsTestSute("check_compat_objects.js"));
+    ASSERT_TRUE(RunJsTestSuite("check_compat_objects.js"));
 }
 
 TEST_F(GenericTypesTest, check_js_objects)
 {
-    ASSERT_TRUE(RunJsTestSute("check_js_objects.js"));
+    ASSERT_TRUE(RunJsTestSuite("check_js_objects.js"));
 }
 
 TEST_F(GenericTypesTest, check_ets_objects)
 {
-    ASSERT_TRUE(RunJsTestSute("check_ets_objects.js"));
+    ASSERT_TRUE(RunJsTestSuite("check_ets_objects.js"));
 }
 
 TEST_F(GenericTypesTest, check_js_primitives)
 {
-    ASSERT_TRUE(RunJsTestSute("check_js_primitives.js"));
+    ASSERT_TRUE(RunJsTestSuite("check_js_primitives.js"));
 }
 
 }  // namespace panda::ets::interop::js::testing

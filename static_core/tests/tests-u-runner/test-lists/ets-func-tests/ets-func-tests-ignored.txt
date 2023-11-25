@@ -111,6 +111,9 @@ std/containers/BasicSetTest.ets
 ### Union issues
 ### literal types not supported yet
 spec/unions/union02.ets
+### generics + unions not everything supported yet
+spec/unions/union_generics_01.ets
+spec/unions/union_generics_02.ets
 ### Negative tests
 spec/unions/union01.ets
 spec/unions/union_assignment_n_01.ets
@@ -156,7 +159,9 @@ spec/unions/union_param_02.ets
 spec/unions/union_param_05.ets
 spec/unions/union_param_06.ets
 ### Issue 14217
-spec/unions/union_return_01.ets
+spec/unions/union_return_01_01.ets
+spec/unions/union_return_01_02.ets
+spec/unions/union_return_01_03.ets
 spec/unions/union_return_02.ets
 spec/unions/union_return_03.ets
 spec/unions/union_return_04.ets
@@ -175,4 +180,53 @@ spec/unions/union_cast_06.ets
 ### Issue 14441
 spec/unions/union_compare_03.ets
 spec/unions/union_compare_04.ets 
+### Issue 14259
+spec/unions/union_assignment_08.ets
+spec/unions/union_assignment_09.ets
+spec/unions/union_assignment_10.ets
+spec/unions/union_assignment_11.ets
+spec/unions/union_param_10_01.ets
+spec/unions/union_param_10_02.ets
+spec/unions/union_param_10_03.ets
 ### End of Unions
+### Feature: Rest Params
+### Issue 14111
+spec/rest-params/Issue14111.ets
+spec/rest-params/Issue14187.ets
+spec/rest-params/BadTypeError.ets
+### Issue 14111 end
+### End Of Feature: Rest Params
+### undefined functionality is not implemented
+spec/conditional-expression/nullish_expr/expr/undefined-object-expression.ets
+spec/conditional-expression/nullish_expr/loop/undefined-expression-for-loop.ets
+spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-do-while.ets
+spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-while.ets
+### issue 14258
+spec/conditional-expression/string/expr/string-expression-assert.ets
+### issue 14299 (incorrect behavior for tests with boxed type like new Short(0))
+spec/conditional-expression/numeric/expr/numeric-byte-object-zero-expression.ets
+spec/conditional-expression/numeric/expr/numeric-double-object-zero-expression.ets
+spec/conditional-expression/numeric/expr/numeric-float-zero-object-expression.ets
+spec/conditional-expression/numeric/expr/numeric-long-zero-object-expression.ets
+spec/conditional-expression/numeric/expr/numeric-short-zero-object-expression.ets
+### Trailing lambda issues
+### Negative tests
+spec/trailing_lambdas/trailing_only_fn_01_n.ets
+spec/trailing_lambdas/trailing_only_fn_03_n_01.ets
+spec/trailing_lambdas/trailing_only_fn_04_n_01.ets
+spec/trailing_lambdas/trailing_lm_param_n.ets
+### Valid cases but not supported features
+spec/trailing_lambdas/trailing_only_fn_03_01.ets
+spec/trailing_lambdas/trailing_only_fn_03_03.ets
+spec/trailing_lambdas/trailing_only_fn_03_04.ets
+### Issue 14384
+spec/trailing_lambdas/trailing_only_fn_04_01.ets
+### Issue 14387
+spec/trailing_lambdas/trailing_nested_01.ets
+### Issue 14424
+spec/trailing_lambdas/trailing_stmt_05.ets
+spec/trailing_lambdas/trailing_stmt_06.ets
+### Issue 14427
+spec/trailing_lambdas/trailing_stmt_07.ets
+### End of Trailing lambda
+
