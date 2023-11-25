@@ -49,6 +49,7 @@
 #include "optimizer/optimizations/redundant_loop_elimination.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 #include "optimizer/optimizations/scheduler.h"
+#include "optimizer/optimizations/simplify_string_builder.h"
 #include "optimizer/optimizations/try_catch_resolving.h"
 #include "optimizer/optimizations/inline_intrinsics.h"
 #include "optimizer/optimizations/vn.h"
@@ -151,6 +152,7 @@ bool Pipeline::RunOptimizations()
     }
     graph->RunPass<Peepholes>();
     graph->RunPass<BranchElimination>();
+    graph->RunPass<SimplifyStringBuilder>();
     graph->RunPass<Cleanup>();
 
     // The problem with inlining in OSR mode can be found in `bitops-nsieve-bits` benchmark and it is in the

@@ -138,4 +138,16 @@ uint64_t EtsRuntimeInterface::GetFuncPropNameOffset(MethodPtr method_ptr, uint32
     return reinterpret_cast<uint64_t>(str) - reinterpret_cast<uint64_t>(pf->GetBase());
 }
 
+bool EtsRuntimeInterface::IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const
+{
+    return MethodCast(method)->IsConstructor() && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
+           MethodCast(method)->GetProto().GetSignature() == "(Lstd/core/String;)V";
+}
+
+bool EtsRuntimeInterface::IsMethodStringBuilderToString(MethodPtr method) const
+{
+    return GetMethodFullName(method, false) == "std.core.StringBuilder::toString" &&
+           MethodCast(method)->GetProto().GetSignature() == "()Lstd/core/String;";
+}
+
 }  // namespace panda::ets

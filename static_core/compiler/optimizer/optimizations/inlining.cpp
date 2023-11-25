@@ -25,6 +25,7 @@
 #include "optimizer/optimizations/branch_elimination.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
 #include "optimizer/optimizations/peepholes.h"
+#include "optimizer/optimizations/simplify_string_builder.h"
 #include "events/events.h"
 
 namespace panda::compiler {
@@ -569,6 +570,8 @@ bool Inlining::DoInlinePolymorphic(CallInst *call_inst, ArenaVector<RuntimeInter
         new_call_inst->AppendInput(call_inst->GetSaveState());
         new_call_inst->SetInlined(true);
         new_call_inst->SetFlag(inst_flags::NO_DST);
+        // Set NO_DCE flag, since some call instructions might not have one after inlining
+        new_call_inst->SetFlag(inst_flags::NO_DCE);
         call_inlined_block->PrependInst(new_call_inst);
 
         // Create return_inlined_block and inster PHI for non void functions
@@ -954,6 +957,8 @@ void Inlining::ProcessCallReturnInstructions(CallInst *call_inst, BasicBlock *ca
         // flag and create new `ReturnInlined` instruction, hereby codegen can properly handle method frames.
         call_inst->SetInlined(true);
         call_inst->SetFlag(inst_flags::NO_DST);
+        // Set NO_DCE flag, since some call instructions might not have one after inlining
+        call_inst->SetFlag(inst_flags::NO_DCE);
         // Remove call_inst's all inputs except SaveState and NullCheck(if exist)
         // Do not remove function (first) input for dynamic calls
         auto save_state = call_inst->GetSaveState();
@@ -1155,6 +1160,7 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *call_inst, CallI
         graph_inl->RunPass<BranchElimination>();
         graph_inl->RunPass<Cleanup>();
     }
+    graph_inl->RunPass<SimplifyStringBuilder>();
 
     // Don't inline if we reach the limit of instructions and method is big enough.
     auto inlined_insts_count = CalculateInstructionsCount(graph_inl);

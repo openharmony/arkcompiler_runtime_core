@@ -26,7 +26,6 @@ Second, we need to support the transfer of information between optimizations.
 * [IfConversion](../compiler/docs/if_conversion_doc.md)
 * [IfMerging](../compiler/docs/if_merging_doc.md)
 * [Inlining](../compiler/docs/inlining.md)
-* Inlining
 * [LICM](../compiler/docs/licm_doc.md)
 * [Loop peeling](../compiler/docs/loop_peeling.md)
 * [Loop unrolling](../compiler/docs/loop_unrolling.md)
@@ -37,6 +36,7 @@ Second, we need to support the transfer of information between optimizations.
 * [Redundant Loop Elimination](../compiler/docs/redundant_loop_elimination_doc.md)
 * [Register allocator](../compiler/docs/reg_alloc_linear_scan_doc.md)
 * [Scheduler](../compiler/docs/scheduler_doc.md)
+* [String Builder optimizations](../compiler/docs/simplify_sb_doc.md)
 * [Value Numbering](../compiler/docs/vn_doc.md)
 
 ### Analyses

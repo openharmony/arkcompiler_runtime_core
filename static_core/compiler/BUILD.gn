@@ -133,6 +133,7 @@ libarkcompiler_sources = [
   "optimizer/optimizations/regalloc/spill_fills_resolver.cpp",
   "optimizer/optimizations/regalloc/split_resolver.cpp",
   "optimizer/optimizations/scheduler.cpp",
+  "optimizer/optimizations/simplify_string_builder.cpp",
   "optimizer/optimizations/try_catch_resolving.cpp",
   "optimizer/optimizations/vn.cpp",
   "optimizer/pass.cpp",
