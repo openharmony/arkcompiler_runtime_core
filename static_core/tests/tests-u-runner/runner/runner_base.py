@@ -271,30 +271,25 @@ class Runner(ABC):
         includes, excludes = self.__parse_chapters()
         for inc in includes:
             mask = path.join(directory, inc)
-            if path.isfile(mask):
-                test_files.append(mask)
-                continue
-            if not mask.endswith('/*'):
-                mask += '/*'
-            test_files.extend(fnmatch.filter(
-                glob(glob_expression, recursive=True),
-                mask
-            ))
+            test_files.extend(self.__load_tests_by_chapter(mask, glob_expression))
         for exc in excludes:
             mask = path.join(directory, exc)
-            if path.isfile(mask):
-                excluded.append(mask)
-                continue
-            if not mask.endswith('/*'):
-                mask += '/*'
-            excluded.extend(fnmatch.filter(
-                glob(glob_expression, recursive=True),
-                mask
-            ))
+            excluded.extend(self.__load_tests_by_chapter(mask, glob_expression))
         return [
             test for test in test_files
             if self.update_excluded or test not in excluded
         ]
+
+    @staticmethod
+    def __load_tests_by_chapter(mask: str, glob_expression: str) -> List[str]:
+        if "*" not in mask and path.isfile(mask):
+            return [mask]
+        if "*" not in mask:
+            mask += '/*'
+        return list(fnmatch.filter(
+            glob(glob_expression, recursive=True),
+            mask
+        ))
 
     def __parse_chapters(self) -> Tuple[List[str], List[str]]:
         if not self.config.test_lists.groups.chapters:

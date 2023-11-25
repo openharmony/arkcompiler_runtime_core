@@ -1,0 +1,86 @@
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+chapters:
+  - all:
+    - algorithms
+    - escompat
+    - regression
+    - spec
+    - std
+
+  # One folder - one chapter
+  - algorithms-dir:
+    - algorithms
+  - escompat-dir:
+    - escompat
+  - regression-dir:
+    - regression
+  - spec-dir:
+    - spec
+  - std-containers-dir:
+    - std/containers
+  - std-core-dir:
+    - std/core
+  - std-math-dir:
+    - std/math
+  - std-time-dir:
+    - std/time
+  - std-serialization-dir:
+    - std/serialization
+
+  # chapters by several folders
+  - chapter-1-of-4:
+    - 'std/core/BadRadixTest*.ets'
+    - 'std/core/EscapeUnescapeTest*.ets'
+    - 'std/core/EscapeUnescapeURITest*.ets'
+    - 'std/core/GoodRadixTest*.ets'
+    - 'std/core/SortInternalTestBoolean*.ets'
+    - 'std/core/SortInternalTestByte*.ets'
+    - 'std/core/SortInternalTestInt*.ets'
+    - 'std/core/SortInternalTestLong*.ets'
+    - 'std/core/SortInternalTestShort*.ets'
+    - 'std/core/StringAtExceptionTest*.ets'
+    - 'std/core/TypeAssignableFromTest*.ets'
+    - 'std/core/TypeCreateClassTest*.ets'
+    - 'std/core/TypeCreateErasedBodyTest*.ets'
+    - 'std/core/TypeCreateInterfaceTest*.ets'
+    - 'std/core/TypeCreatePrimitiveNameTest*.ets'
+    - 'std/core/TypeCreateVoidTest*.ets'
+    - 'std/core/TypeMethodInvoke*.ets'
+    - 'std/core/TypeMethodInvokeConstructor*.ets'
+    - 'std/core/TypeMethodInvokeVirt*.ets'
+    - 'std/core/TypeMethodResolveConstructor*.ets'
+    - 'std/core/TypeMethodResolveConstructorFew*.ets'
+    - 'std/core/TypeResolve*.ets'
+  - chapter-2-of-4:
+    - 'std/core/std_core_array*.ets'
+    - 'std/core/std_core_array_exception*.ets'
+  - chapter-3-of-4:
+    - 'std/core/std_core_boolean*.ets'
+    - 'std/core/std_core_byte*.ets'
+    - 'std/core/std_core_char*.ets'
+    - 'std/core/std_core_constructor*.ets'
+    - 'std/core/std_core_double*.ets'
+    - 'std/core/std_core_float*.ets'
+    - 'std/core/std_core_int*.ets'
+    - 'std/core/std_core_long*.ets'
+    - 'std/core/std_core_regexp*.ets'
+    - 'std/core/std_core_short*.ets'
+    - 'std/core/std_core_string*.ets'
+    - 'std/core/std_core_stringbuilder*.ets'
+    - 'std/core/std_core_typedarrays*.ets'
+  - chapter-4-of-4:
+    - '*'
+    - exclude:
+      - std/core
