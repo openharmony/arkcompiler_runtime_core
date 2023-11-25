@@ -106,7 +106,6 @@ int main()
         "defectscanaux_tests/unittest/module_info_test.abc", "defectscanaux_tests/unittest/define_info_test.abc",
         "defectscanaux_tests/unittest/callee_info_test.abc", "defectscanaux_tests/unittest/debug_info_test.abc",
         "defectscanaux_tests/unittest/graph_test.abc",
-
     };
 
     std::cout << "===== [libark_defect_scan_aux] Running Unittest =====" << std::endl;
@@ -126,8 +125,8 @@ int main()
         std::string inter_name0 = abc_file->GetInternalNameByExportName("UInput");
         TestHelper::ExpectEqual(inter_name0, "UserInput");
         auto ex_class = abc_file->GetExportClassByExportName("UInput");
-        TestHelper::ExpectEqual(ex_class->GetClassName(), "#2#UserInput");
-        ds_test.CheckClass("#2#UserInput");
+        TestHelper::ExpectEqual(ex_class->GetClassName(), "UserInput");
+        ds_test.CheckClass("UserInput");
         size_t mf_func_count0 = ex_class->GetMemberFunctionCount();
         TestHelper::ExpectEqual(mf_func_count0, 2);
         auto mf_func0_1 = ex_class->GetMemberFunctionByIndex(1);
@@ -136,8 +135,8 @@ int main()
         ds_test.CheckFunction("getText");
         auto par_class = ex_class->GetParentClass();
         TestHelper::ExpectTrue(par_class != nullptr);
-        TestHelper::ExpectEqual(par_class->GetClassName(), "#1#InnerUserInput");
-        ds_test.CheckClass("#1#InnerUserInput");
+        TestHelper::ExpectEqual(par_class->GetClassName(), "InnerUserInput");
+        ds_test.CheckClass("InnerUserInput");
         size_t mf_func_count1 = par_class->GetMemberFunctionCount();
         TestHelper::ExpectEqual(mf_func_count1, 2);
         auto mf_func1_1 = par_class->GetMemberFunctionByIndex(1);
@@ -213,8 +212,8 @@ int main()
         TestHelper::ExpectTrue(f0->GetParentFunction() == nullptr);
         size_t dc_cnt0 = f0->GetDefinedClassCount();
         TestHelper::ExpectEqual(dc_cnt0, 2);
-        TestHelper::ExpectEqual(f0->GetDefinedClassByIndex(0)->GetClassName(), "#1#Bar");
-        TestHelper::ExpectEqual(f0->GetDefinedClassByIndex(1)->GetClassName(), "#6#ExampleClass1");
+        TestHelper::ExpectEqual(f0->GetDefinedClassByIndex(0)->GetClassName(), "Bar");
+        TestHelper::ExpectEqual(f0->GetDefinedClassByIndex(1)->GetClassName(), "ExampleClass1");
         size_t df_cnt0 = f0->GetDefinedFunctionCount();
         TestHelper::ExpectEqual(df_cnt0, 12);
         TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f0, "func1"));
@@ -237,19 +236,20 @@ int main()
         TestHelper::ExpectEqual(f2->GetArgCount(), 3);
         size_t dc_cnt2 = f2->GetDefinedClassCount();
         TestHelper::ExpectEqual(dc_cnt2, 2);
-        TestHelper::ExpectEqual(f2->GetDefinedClassByIndex(0)->GetClassName(), "#2#Bar");
-        TestHelper::ExpectEqual(f2->GetDefinedClassByIndex(1)->GetClassName(), "#3#Bar2");
+        TestHelper::ExpectEqual(f2->GetDefinedClassByIndex(0)->GetClassName(),
+                                "#11247673030038003130#Bar");
+        TestHelper::ExpectEqual(f2->GetDefinedClassByIndex(1)->GetClassName(), "Bar2");
         size_t df_cnt2 = f2->GetDefinedFunctionCount();
         TestHelper::ExpectEqual(df_cnt2, 7);
         TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f2, "baseFoo1"));
         TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f2, "func12"));
-        TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f2, "#4#"));
-        TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f2, "#5#"));
+        TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f2, "a"));
+        TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f2, "symbol"));
         TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f2, "func15"));
 
         // check each defined class
         // #1#Bar
-        auto class0 = ds_test.CheckClass("#1#Bar");
+        auto class0 = ds_test.CheckClass("Bar");
         TestHelper::ExpectTrue(class0->GetParentClass() == nullptr);
         TestHelper::ExpectTrue(class0->GetDefineFunction() == f0);
         size_t mf_count0 = class0->GetMemberFunctionCount();
@@ -259,7 +259,7 @@ int main()
         TestHelper::ExpectTrue(ds_test.ContainMemberFunction(class0, "setName"));
         TestHelper::ExpectTrue(ds_test.ContainMemberFunction(class0, "func9"));
         // #3#Bar2
-        auto class1 = ds_test.CheckClass("#3#Bar2");
+        auto class1 = ds_test.CheckClass("Bar2");
         TestHelper::ExpectTrue(class1->GetParentClass() != nullptr);
         TestHelper::ExpectTrue(class1->GetDefineFunction() == abc_file->GetFunctionByName("func10"));
         size_t mf_count1 = class1->GetMemberFunctionCount();
@@ -268,30 +268,31 @@ int main()
         TestHelper::ExpectTrue(ds_test.ContainMemberFunction(class1, "func12"));
         TestHelper::ExpectTrue(ds_test.ContainMemberFunction(class1, "func15"));
         // #8#ExampleClass2
-        auto class2 = ds_test.CheckClass("#8#ExampleClass2");
-        TestHelper::ExpectTrue(class2->GetParentClass() == abc_file->GetClassByName("#7#ExampleClass1"));
+        auto class2 = ds_test.CheckClass("ExampleClass2");
+        TestHelper::ExpectTrue(class2->GetParentClass() ==
+                               abc_file->GetClassByName("#2505994642537462424#ExampleClass1"));
         TestHelper::ExpectFalse(ds_test.ContainMemberFunction(class2, "func17"));
         TestHelper::ExpectTrue(ds_test.ContainMemberFunction(class2, "func19"));
         // #9#ExtendService
-        auto class3 = ds_test.CheckClass("#9#ExtendService");
+        auto class3 = ds_test.CheckClass("ExtendService");
         TestHelper::ExpectTrue(class3->GetParentClass() == nullptr);
         TestHelper::ExpectEqual(class3->GetParentClassName(), "BaseService");
         TestHelper::ExpectEqual(class3->GetParClassExternalModuleName(), "../base/service");
         TestHelper::ExpectTrue(class3->GetParClassGlobalVarName().empty());
         // #10#ExtendPhoneService
-        auto class4 = ds_test.CheckClass("#10#ExtendPhoneService");
+        auto class4 = ds_test.CheckClass("ExtendPhoneService");
         TestHelper::ExpectTrue(class4->GetParentClass() == nullptr);
         TestHelper::ExpectEqual(class4->GetParentClassName(), "PhoneService");
         TestHelper::ExpectEqual(class4->GetParClassExternalModuleName(), "../mod1");
         TestHelper::ExpectTrue(class4->GetParClassGlobalVarName().empty());
         // #11#ExtendDataSource
-        auto class5 = ds_test.CheckClass("#11#ExtendDataSource");
+        auto class5 = ds_test.CheckClass("ExtendDataSource");
         TestHelper::ExpectTrue(class5->GetParentClass() == nullptr);
         TestHelper::ExpectEqual(class5->GetParentClassName(), "BasicDataSource");
         TestHelper::ExpectTrue(class5->GetParClassExternalModuleName().empty());
         TestHelper::ExpectEqual(class5->GetParClassGlobalVarName(), "globalvar");
         // #12#ExtendDataItem
-        auto class6 = ds_test.CheckClass("#12#ExtendDataItem");
+        auto class6 = ds_test.CheckClass("ExtendDataItem");
         TestHelper::ExpectTrue(class6->GetParentClass() == nullptr);
         TestHelper::ExpectEqual(class6->GetParentClassName(), "DataItem");
         TestHelper::ExpectTrue(class6->GetParClassExternalModuleName().empty());
@@ -358,13 +359,13 @@ int main()
         TestHelper::ExpectFalse(ci1_2->IsCalleeDefinite());
         TestHelper::ExpectEqual(ci1_2->GetFunctionName(), "bind");
         // #2#ColorPoint
-        auto f2 = abc_file->GetFunctionByName("#2#ColorPoint");
+        auto f2 = abc_file->GetFunctionByName("ColorPoint");
         size_t ci_cnt2 = f2->GetCalleeInfoCount();
         TestHelper::ExpectEqual(ci_cnt2, 1);
         auto ci2_0 = f2->GetCalleeInfoByIndex(0);
         TestHelper::ExpectTrue(ci2_0->IsCalleeDefinite());
-        TestHelper::ExpectTrue(ci2_0->GetClass() == abc_file->GetClassByName("#1#Point"));
-        TestHelper::ExpectTrue(ci2_0->GetCallee() == abc_file->GetFunctionByName("#1#Point"));
+        TestHelper::ExpectTrue(ci2_0->GetClass() == abc_file->GetClassByName("Point"));
+        TestHelper::ExpectTrue(ci2_0->GetCallee() == abc_file->GetFunctionByName("Point"));
         // func6
         auto f3 = abc_file->GetFunctionByName("func6");
         size_t ci_cnt3 = f3->GetCalleeInfoCount();
@@ -394,13 +395,13 @@ int main()
         auto ci5_0 = f5->GetCalleeInfoByIndex(0);
         TestHelper::ExpectTrue(ci5_0->IsCalleeDefinite());
         TestHelper::ExpectTrue(ci5_0->GetClass() != nullptr);
-        TestHelper::ExpectEqual(ci5_0->GetClass(), abc_file->GetClassByName("#1#Point"));
+        TestHelper::ExpectEqual(ci5_0->GetClass(), abc_file->GetClassByName("Point"));
         TestHelper::ExpectTrue(ci5_0->GetCallee() != nullptr);
         TestHelper::ExpectEqual(ci5_0->GetCallee(), abc_file->GetFunctionByName("getCoordinateX"));
         auto ci5_1 = f5->GetCalleeInfoByIndex(1);
         TestHelper::ExpectTrue(ci5_1->IsCalleeDefinite());
         TestHelper::ExpectTrue(ci5_1->GetClass() != nullptr);
-        TestHelper::ExpectEqual(ci5_1->GetClass(), abc_file->GetClassByName("#1#Point"));
+        TestHelper::ExpectEqual(ci5_1->GetClass(), abc_file->GetClassByName("Point"));
         TestHelper::ExpectTrue(ci5_1->GetCallee() != nullptr);
         TestHelper::ExpectEqual(ci5_1->GetCallee(), abc_file->GetFunctionByName("setCoordinateX"));
         // callMemberFunc2
@@ -410,7 +411,7 @@ int main()
         auto ci6_0 = f6->GetCalleeInfoByIndex(0);
         TestHelper::ExpectTrue(ci6_0->IsCalleeDefinite());
         TestHelper::ExpectTrue(ci6_0->GetClass() != nullptr);
-        TestHelper::ExpectEqual(ci6_0->GetClass(), abc_file->GetClassByName("#1#Point"));
+        TestHelper::ExpectEqual(ci6_0->GetClass(), abc_file->GetClassByName("Point"));
         TestHelper::ExpectTrue(ci6_0->GetCallee() != nullptr);
         TestHelper::ExpectEqual(ci6_0->GetCallee(), abc_file->GetFunctionByName("plus"));
         auto ci6_1 = f6->GetCalleeInfoByIndex(1);
@@ -451,7 +452,7 @@ int main()
         // callirange
         TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f0, ci0_2->GetCallInst()), 40);
         // ctor of Data
-        auto f1 = abc_file->GetFunctionByName("#2#Data");
+        auto f1 = abc_file->GetFunctionByName("Data");
         TestHelper::ExpectEqual(f1->GetCalleeInfoCount(), 1);
         auto ci1_0 = f1->GetCalleeInfoByIndex(0);
         // supercall
