@@ -157,7 +157,7 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
 
     // Heap objects verifier
 
-    // Add strings from string table because these objects are like a phenix.
+    // Add strings from string table because these objects are like a phoenix.
     // A string object may exist but there are no live references to it (no bit set in the live bitmap).
     // But later code may reuse it by calling StringTable::GetOrInternString so this string
     // get alive. That is why we mark all strings as alive by visiting the string table.
@@ -165,16 +165,22 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
     heap_->GetObjectAllocator().AsObjectAllocator()->IterateOverObjects(collect_objects);
     for (auto object_cache : referent_objects) {
         if (heap_objects.find(object_cache.referent) == heap_objects.end()) {
-            PandaString class_str = "unknown";
+            static constexpr const char *UNKNOWN_CLASS = "unknown class";
+            PandaString ref_class_str = UNKNOWN_CLASS;
+            PandaString obj_class_str = UNKNOWN_CLASS;
             if constexpr (LanguageConfig::LANG_TYPE == LANG_TYPE_STATIC) {
                 auto *cls = object_cache.referent->template ClassAddr<Class>();
                 if (IsAddressInObjectsHeap(cls)) {
-                    class_str = cls->GetName();
+                    ref_class_str = cls->GetName();
+                }
+                cls = object_cache.heap_object->template ClassAddr<Class>();
+                if (IsAddressInObjectsHeap(cls)) {
+                    obj_class_str = cls->GetName();
                 }
             }
-            LOG_HEAP_VERIFIER << "Heap object " << std::hex << object_cache.heap_object
-                              << " references a dead object at " << object_cache.referent << "(" << class_str
-                              << " class)";
+            LOG_HEAP_VERIFIER << "Heap object " << std::hex << object_cache.heap_object << " (" << obj_class_str
+                              << ") references a dead object at " << object_cache.referent << " (" << ref_class_str
+                              << ")";
             ++fails_count;
         }
     }
