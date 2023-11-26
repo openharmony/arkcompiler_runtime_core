@@ -858,6 +858,17 @@ void Runtime::SetPandaPath()
     }
 }
 
+void Runtime::SetThreadClassPointers()
+{
+    ManagedThread *thread = ManagedThread::GetCurrent();
+    class_linker_->InitializeRoots(thread);
+    auto ext = GetClassLinker()->GetExtension(GetLanguageContext(GetRuntimeType()));
+    if (ext != nullptr) {
+        thread->SetStringClassPtr(ext->GetClassRoot(ClassRoot::STRING));
+        thread->SetArrayU16ClassPtr(ext->GetClassRoot(ClassRoot::ARRAY_U16));
+    }
+}
+
 bool Runtime::Initialize()
 {
     trace::ScopedTrace scoped_trace("Runtime::Initialize");
@@ -891,12 +902,7 @@ bool Runtime::Initialize()
         return false;
     }
 
-    ManagedThread *thread = ManagedThread::GetCurrent();
-    class_linker_->InitializeRoots(thread);
-    auto ext = GetClassLinker()->GetExtension(GetLanguageContext(GetRuntimeType()));
-    if (ext != nullptr) {
-        thread->SetStringClassPtr(ext->GetClassRoot(ClassRoot::STRING));
-    }
+    SetThreadClassPointers();
 
     finger_print_ = ConvertToString(options_.GetFingerprint());
 

@@ -371,7 +371,8 @@ protected:
     void *post_wrb_one_object_ {nullptr};
     // keeps IRtoC GC PostWrb impl for storing two objects
     void *post_wrb_two_objects_ {nullptr};
-    void *string_class_ptr_ {nullptr};
+    void *string_class_ptr_ {nullptr};     // ClassRoot::STRING
+    void *array_u16_class_ptr_ {nullptr};  // ClassRoot::ARRAY_U16
     PandaVector<ObjectHeader *> *pre_buff_ {nullptr};
     void *language_extension_data_ {nullptr};
 #ifndef NDEBUG

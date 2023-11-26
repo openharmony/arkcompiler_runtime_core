@@ -675,6 +675,12 @@ public:
         SetFalseResult();
     }
 
+    virtual void EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd([[maybe_unused]] Reg src_addr,
+                                                                [[maybe_unused]] Reg dst_addr)
+    {
+        SetFalseResult();
+    }
+
     virtual void SetCursorOffset([[maybe_unused]] size_t offset) {}
 
     virtual void SaveRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] ssize_t slot,

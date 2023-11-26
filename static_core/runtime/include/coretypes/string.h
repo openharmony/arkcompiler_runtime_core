@@ -75,6 +75,9 @@ public:
 
     PANDA_PUBLIC_API Array *ToCharArray(const LanguageContext &ctx);
 
+    PANDA_PUBLIC_API static Array *GetChars(String *src, uint32_t start, uint32_t utf16_length,
+                                            const LanguageContext &ctx);
+
     bool IsUtf16() const
     {
         return compressed_strings_enabled_ ? ((length_ & STRING_COMPRESSED_BIT) == STRING_UNCOMPRESSED) : true;
@@ -268,6 +271,34 @@ public:
     static bool GetCompressedStringsEnabled()
     {
         return compressed_strings_enabled_;
+    }
+
+    static std::pair<int32_t, int32_t> NormalizeSubStringIndexes(int32_t begin_index, int32_t end_index,
+                                                                 const coretypes::String *str)
+    {
+        auto str_len = str->GetLength();
+        std::pair<int32_t, int32_t> norm_indexes = {begin_index, end_index};
+
+        // If begin_index < 0, then it is assumed to be equal to zero.
+        if (norm_indexes.first < 0) {
+            norm_indexes.first = 0;
+        } else if (static_cast<decltype(str_len)>(norm_indexes.first) > str_len) {
+            // If begin_index > str_len, then it is assumed to be equal to str_len.
+            norm_indexes.first = static_cast<int32_t>(str_len);
+        }
+        // If end_index < 0, then it is assumed to be equal to zero.
+        if (norm_indexes.second < 0) {
+            norm_indexes.second = 0;
+        } else if (static_cast<decltype(str_len)>(norm_indexes.second) > str_len) {
+            // If end_index > str_len, then it is assumed to be equal to str_len.
+            norm_indexes.second = static_cast<int32_t>(str_len);
+        }
+        // If begin_index > end_index, then these are swapped.
+        if (norm_indexes.first > norm_indexes.second) {
+            std::swap(norm_indexes.first, norm_indexes.second);
+        }
+        ASSERT((norm_indexes.second - norm_indexes.first) >= 0);
+        return norm_indexes;
     }
 
     static String *FastSubString(String *src, uint32_t start, uint32_t utf16_length, const LanguageContext &ctx,

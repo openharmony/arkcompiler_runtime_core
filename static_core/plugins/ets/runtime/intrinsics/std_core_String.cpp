@@ -63,6 +63,14 @@ EtsCharArray *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
     return char_array;
 }
 
+EtsString *StdCoreStringSubstring(EtsString *str, ets_int begin, ets_int end)
+{
+    ASSERT(str != nullptr);
+    auto indexes = coretypes::String::NormalizeSubStringIndexes(begin, end, str->GetCoreType());
+    ets_int substr_length = indexes.second - indexes.first;
+    return EtsString::FastSubString(str, static_cast<uint32_t>(indexes.first), static_cast<uint32_t>(substr_length));
+}
+
 uint16_t StdCoreStringCharAt(EtsString *s, int32_t index)
 {
     ASSERT(s != nullptr);

@@ -578,6 +578,9 @@ intrinsics:
         - i32
         - i32
     impl: panda::ets::intrinsics::StdCoreStringGetChars
+    codegen_func: CreateStringGetCharsTlab
+    codegen_arch: [arm64, amd64]
+    set_flags: [can_throw]
     clear_flags: [ ]
 
   - name: StdCoreStringLength
@@ -737,6 +740,20 @@ intrinsics:
       args: [std.core.String, i32]
     impl: panda::ets::intrinsics::StdCoreStringLastIndexOfString
     clear_flags: [require_state, runtime_call]
+
+  - name: StdCoreStringSubstring
+    space: ets
+    class_name: std.core.String
+    method_name: substring
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ i32, i32 ]
+    impl: panda::ets::intrinsics::StdCoreStringSubstring
+    codegen_func: CreateStringSubstringTlab
+    codegen_arch: [arm64, amd64]
+    set_flags: [can_throw]
+    clear_flags: [ ]
 
 ##########################
 # std.core.StringBuilder #

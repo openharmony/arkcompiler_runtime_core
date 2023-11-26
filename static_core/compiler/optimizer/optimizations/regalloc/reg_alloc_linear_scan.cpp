@@ -367,6 +367,7 @@ Register RegAllocLinearScan::GetFreeRegister(const LifeIntervals *current_interv
     });
 
     BlockOverlappedRegisters(current_interval);
+    BlockIndirectCallRegisters(current_interval);
 
     // Select register with max position
     auto it = std::max_element(regs_use_positions_.cbegin(), regs_use_positions_.cend());
@@ -415,6 +416,7 @@ std::pair<Register, LifeNumber> RegAllocLinearScan::GetBlockedRegister(const Lif
     });
 
     BlockOverlappedRegisters(current_interval);
+    BlockIndirectCallRegisters(current_interval);
 
     // Select register with max position
     auto it = std::max_element(regs_use_positions_.cbegin(), regs_use_positions_.cend());
@@ -571,6 +573,33 @@ void RegAllocLinearScan::SplitBeforeUse(LifeIntervals *current_interval, LifeNum
     COMPILER_LOG(DEBUG, REGALLOC) << "Split at " << std::to_string(use_pos - 1);
     auto split = current_interval->SplitAt(use_pos - 1, GetGraph()->GetAllocator());
     AddToQueue<IS_FP>(split);
+}
+
+void RegAllocLinearScan::BlockIndirectCallRegisters(const LifeIntervals *current_interval)
+{
+    if (!current_interval->HasInst()) {
+        return;
+    }
+    auto inst = current_interval->GetInst();
+    for (auto &user : inst->GetUsers()) {
+        auto user_inst = user.GetInst();
+        if (user_inst->IsIndirectCall() && user_inst->GetInput(0).GetInst() == inst) {
+            // CallIndirect is a special case:
+            //  - input[0] is a call address, which may be allocated to any register
+            //  - other inputs are call args, and LocationsBuilder binds them
+            //    to the corresponding target CPU registers.
+            //
+            // Thus input[0] must not be allocated to the registers used to pass arguments.
+            for (size_t i = 1; i < user_inst->GetInputsCount(); ++i) {
+                auto location = user_inst->GetLocation(i);
+                ASSERT(location.IsFixedRegister());
+                auto reg = reg_map_.CodegenToRegallocReg(location.GetValue());
+                regs_use_positions_[reg] = 0;
+            }
+            // LocationBuilder assigns locations the same way for all CallIndirect instructions.
+            break;
+        }
+    }
 }
 
 void RegAllocLinearScan::BlockOverlappedRegisters(const LifeIntervals *current_interval)

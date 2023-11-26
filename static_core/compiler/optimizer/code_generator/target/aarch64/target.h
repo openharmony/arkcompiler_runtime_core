@@ -592,6 +592,7 @@ public:
     void EncodeStackOverflowCheck(ssize_t offset) override;
     void EncodeCrc32Update(Reg dst, Reg crc_reg, Reg val_reg) override;
     void EncodeCompressEightUtf16ToUtf8CharsUsingSimd(Reg src_addr, Reg dst_addr) override;
+    void EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg src_addr, Reg dst_addr) override;
 
     bool CanEncodeBitCount() override
     {

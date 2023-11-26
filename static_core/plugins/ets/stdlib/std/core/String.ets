@@ -541,8 +541,6 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param begin to start substring
      *
-     * @throws StringIndexOutOfBoundsException if begin param is negative or >= length
-     *
      * @returns new String which is a substring of this String
      */
     public substring(begin: number): String {
@@ -554,8 +552,6 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * and ending at the end of this String.
      *
      * @param begin to start substring
-     *
-     * @throws StringIndexOutOfBoundsException if begin param is negative or >= length
      *
      * @returns new String which is a substring of this String
      */
@@ -570,9 +566,6 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param begin to start substring
      * @param end to end before at
      *
-     * @throws StringIndexOutOfBoundsException if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsException if end >= length
-     *
      * @returns new String which is a substring of this String
      */
     public substring(begin: number, end: number): String {
@@ -583,19 +576,19 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * Selects a substring of this String, starting at a specified index
      * and ending at index before another specified index.
      *
+     * If 'begin' < 0, then 'begin' is assumed to be equal to zero.
+     * If 'begin' > this.length(), then 'begin' is assumed to be equal to the this.length().
+     * If 'end' < 0, then 'end' is assumed to be equal to zero.
+     * If 'end' > this.length(), then 'end' is assumed to be equal to this.length().
+     * If 'begin' > 'end', then these are swapped.
+     * If 'begin' == 'end', then an empty string is returned.
+     *
      * @param begin to start substring
      * @param end to end before at
      *
-     * @throws StringIndexOutOfBoundsException if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsException if end >= length
-     *
      * @returns new String which is a substring of this String
      */
-    public substring(begin: int, end: int): String {
-        let substrChars: char[] = this.getChars(begin, end);
-        let substr: String = new String(substrChars);
-        return substr;
-    }
+    public native substring(begin: int, end: int): String;
 
     /**
      * Concatenation of this and another String.

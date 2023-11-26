@@ -167,3 +167,17 @@ intrinsics:
       args: []
   clear_flags: [runtime_call, require_state]
   description: Compresses eight Utf16 chars (16 bytes) to Utf8 chars (8 bytes) using SIMD instructions
+
+- name: CompressSixteenUtf16ToUtf8CharsUsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+      ret: void
+      args: []
+  clear_flags: [runtime_call, require_state]
+  description: Compresses sixteen Utf16 chars (32 bytes) to Utf8 chars (16 bytes) using SIMD instructions
