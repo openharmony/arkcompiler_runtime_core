@@ -23,7 +23,6 @@ group("ark_packages") {
       deps += [
         "$ark_root/compiler:libarktscompiler",
         "$ark_root/compiler/aot:libarkaotmanager",
-        "$ark_root/compiler/optimizer/code_generator:libarkencoder",
         "$ark_root/libpandabase:libarktsbase",
         "$ark_root/libpandafile:libarktsfile",
         "$ark_root/libpandafile/external:libarkfileExt",
@@ -36,6 +35,9 @@ group("ark_packages") {
       ]
       if (!is_ohos) {
         deps += [ "$ark_root/runtime/tooling/inspector:libarkinspector" ]
+      }
+      if (enable_codegen) {
+        deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
       }
 
       # TODO: don't exclude these targets from OHOS build
@@ -53,7 +55,6 @@ group("ark_host_linux_tools_packages") {
       "$ark_root/assembler:arkts_asm(${host_toolchain})",
       "$ark_root/compiler:libarktscompiler(${host_toolchain})",
       "$ark_root/compiler/aot:libarkaotmanager(${host_toolchain})",
-      "$ark_root/compiler/optimizer/code_generator:libarkencoder(${host_toolchain})",
       "$ark_root/libpandabase:libarktsbase(${host_toolchain})",
       "$ark_root/libpandafile:libarktsfile(${host_toolchain})",
       "$ark_root/libpandafile/external:libarkfileExt(${host_toolchain})",
@@ -62,6 +63,9 @@ group("ark_host_linux_tools_packages") {
       "$ark_root/panda:arkts_bin(${host_toolchain})",
       "$ark_root/runtime:libarkruntime(${host_toolchain})",
     ]
+    if (enable_codegen) {
+      deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder(${host_toolchain})" ]
+    }
 
     # TODO: don't exclude these targets from OHOS build
     if (ark_standalone_build) {
@@ -170,10 +174,10 @@ config("ark_config") {
     "$ark_root",
     get_label_info(":create_pipeline(${default_toolchain})", "target_gen_dir"),
   ]
-  defines = [
-    "PANDA_TARGET_MOBILE_WITH_MANAGED_LIBS=1",
-    "PANDA_COMPILER_ENABLE",
-  ]
+  defines = [ "PANDA_TARGET_MOBILE_WITH_MANAGED_LIBS=1" ]
+  if (enable_codegen) {
+    defines += [ "PANDA_COMPILER_ENABLE" ]
+  }
   if (is_emulator) {
     defines += [ "PANDA_TARGET_EMULATOR" ]
   }
@@ -196,6 +200,12 @@ config("ark_config") {
       "PANDA_WITH_BYTECODE_OPTIMIZER",
       "PANDA_WITH_COMPILER",
     ]
+    if (enable_irtoc) {
+      defines += [ "PANDA_WITH_IRTOC" ]
+    }
+    if (enable_codegen) {
+      defines += [ "PANDA_WITH_CODEGEN" ]
+    }
     if (!is_asan) {
       defines += [ "PANDA_USE_FUTEX" ]
     }
@@ -207,6 +217,12 @@ config("ark_config") {
       "_CRTBLD",
       "__LIBMSVCRT__",
     ]
+    if (enable_irtoc) {
+      defines += [ "PANDA_WITH_IRTOC" ]
+    }
+    if (enable_codegen) {
+      defines += [ "PANDA_WITH_CODEGEN" ]
+    }
   } else if (is_mac) {
     defines += [
       "PANDA_TARGET_UNIX",
@@ -216,6 +232,12 @@ config("ark_config") {
 
       # "PANDA_USE_FUTEX",
     ]
+    if (enable_irtoc) {
+      defines += [ "PANDA_WITH_IRTOC" ]
+    }
+    if (enable_codegen) {
+      defines += [ "PANDA_WITH_CODEGEN" ]
+    }
   } else if (is_mob) {
     defines += [
       "PANDA_TARGET_UNIX",
@@ -228,7 +250,14 @@ config("ark_config") {
       # TODO: use PANDA_TARGET_OHOS instead of PANDA_TARGET_UNIX
       "PANDA_TARGET_UNIX",
       "PANDA_USE_FUTEX",
+      "PANDA_WITH_COMPILER",
     ]
+    if (enable_irtoc) {
+      defines += [ "PANDA_WITH_IRTOC" ]
+    }
+    if (enable_codegen) {
+      defines += [ "PANDA_WITH_CODEGEN" ]
+    }
   } else {
     defines += [
       "PANDA_TARGET_UNIX",
