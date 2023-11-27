@@ -29,10 +29,10 @@ EtsInt StdCoreRuntimeGetHashCode([[maybe_unused]] ObjectHeader *header, EtsObjec
 {
     ASSERT(source != nullptr);
     if (source->IsHashed()) {
-        return source->GetHash();
+        return source->GetInteropHash();
     }
     auto hash = ObjectHeader::GenerateHashCode();
-    source->SetHash(hash);
+    source->SetInteropHash(hash);
     return bit_cast<EtsInt>(hash);
 }
 
