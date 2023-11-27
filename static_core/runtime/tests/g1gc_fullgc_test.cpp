@@ -287,7 +287,7 @@ void G1GCFullGCTest::PrepareTest()
     if constexpr (std::is_same<LanguageConfig, panda::PandaAssemblyLanguageConfig>::value) {
         DeleteHandles();
         ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        object_allocator = thread->GetVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+        object_allocator = thread->GetVM()->GetGC()->GetObjectAllocator();
         vm = Runtime::GetCurrent()->GetPandaVM();
         internal_allocator = Runtime::GetCurrent()->GetClassLinker()->GetAllocator();
         gc = vm->GetGC();

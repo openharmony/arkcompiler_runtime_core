@@ -40,7 +40,7 @@ public:
 protected:
     PygoteAllocator *GetPygoteSpaceAllocator()
     {
-        return thread_->GetVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator()->GetPygoteSpaceAllocator();
+        return thread_->GetVM()->GetGC()->GetObjectAllocator()->GetPygoteSpaceAllocator();
     }
 
     Class *GetObjectClass()

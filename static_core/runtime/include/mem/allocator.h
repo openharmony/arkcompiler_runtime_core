@@ -669,7 +669,6 @@ public:
 
     bool IsObjectInYoungSpace([[maybe_unused]] const ObjectHeader *obj) final
     {
-        LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: IsObjectInYoungSpace not applicable";
         return false;
     }
 

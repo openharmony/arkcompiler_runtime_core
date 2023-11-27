@@ -266,7 +266,7 @@ TEST_F(MemStatsTest, BigObject)
     size_t init_heap_bytes = stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT);
     size_t init_heap_objects = stats->GetTotalObjectsAllocated();
     std::string simple_string;
-    auto object_allocator = thread_->GetVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+    auto object_allocator = thread_->GetVM()->GetGC()->GetObjectAllocator();
     size_t alloc_size = object_allocator->GetRegularObjectMaxSize() + 1;
     for (size_t j = 0; j < alloc_size; j++) {
         simple_string.append("x");
@@ -294,7 +294,7 @@ TEST_F(MemStatsTest, HumongousObject)
     size_t init_heap_bytes = stats->GetAllocated(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
     size_t init_heap_objects = stats->GetTotalObjectsAllocated();
     std::string simple_string;
-    auto object_allocator = thread_->GetVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+    auto object_allocator = thread_->GetVM()->GetGC()->GetObjectAllocator();
     size_t alloc_size = object_allocator->GetLargeObjectMaxSize() + 1;
     for (size_t j = 0; j < alloc_size; j++) {
         simple_string.append("x");

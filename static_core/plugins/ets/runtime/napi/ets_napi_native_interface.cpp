@@ -355,8 +355,7 @@ static void *PinRawDataOfPrimitiveArray(EtsEnv *env, ets_array array)
     }
 
     auto core_array = s.ToInternalType(array)->GetCoreType();
-    auto allocator = vm->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
-    allocator->PinObject(core_array);
+    vm->GetHeapManager()->PinObject(core_array);
 
     return core_array->GetData();
 }
@@ -376,7 +375,7 @@ static void UnpinPrimitiveTypeArray(EtsEnv *env, ets_array array)
 
     auto core_array = s.ToInternalType(array)->GetCoreType();
     auto vm = panda_env->GetEtsVM();
-    vm->GetHeapManager()->GetObjectAllocator().AsObjectAllocator()->UnpinObject(core_array);
+    vm->GetHeapManager()->UnpinObject(core_array);
 }
 
 template <typename T>

@@ -52,8 +52,7 @@ void HeapReferenceVerifier<LANG_TYPE>::operator()([[maybe_unused]] ObjectHeader 
             referent = value.GetWeakReferent();
         }
     }
-    auto obj_allocator = heap_->GetObjectAllocator().AsObjectAllocator();
-    if (!obj_allocator->IsLive(referent)) {
+    if (!heap_->IsLiveObject(referent)) {
         LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << object_header
                           << " references a dead object at " << referent;
         ++(*fail_count_);
@@ -67,7 +66,6 @@ void HeapReferenceVerifier<LANG_TYPE>::operator()([[maybe_unused]] ObjectHeader 
 template <LangTypeT LANG_TYPE>
 void HeapReferenceVerifier<LANG_TYPE>::operator()(const GCRoot &root)
 {
-    auto obj_allocator = heap_->GetObjectAllocator().AsObjectAllocator();
     auto referent = root.GetObjectHeader();
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (LANG_TYPE == LANG_TYPE_DYNAMIC) {
@@ -77,7 +75,7 @@ void HeapReferenceVerifier<LANG_TYPE>::operator()(const GCRoot &root)
             referent = value.GetWeakReferent();
         }
     }
-    if (!obj_allocator->IsLive(referent)) {
+    if (!heap_->IsLiveObject(referent)) {
         LOG_HEAP_VERIFIER << "Heap corruption found! Root references a dead object at " << std::hex << referent;
         ++(*fail_count_);
     } else if (referent->IsForwarded()) {
@@ -95,7 +93,7 @@ bool HeapVerifier<LanguageConfig>::IsValidObjectAddress(void *addr) const
 template <class LanguageConfig>
 bool HeapVerifier<LanguageConfig>::IsHeapAddress(void *addr) const
 {
-    return heap_->GetObjectAllocator().AsObjectAllocator()->ContainObject(reinterpret_cast<ObjectHeader *>(addr));
+    return heap_->ContainObject(reinterpret_cast<ObjectHeader *>(addr));
 }
 
 template <class LanguageConfig>
@@ -162,7 +160,7 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
     // But later code may reuse it by calling StringTable::GetOrInternString so this string
     // get alive. That is why we mark all strings as alive by visiting the string table.
     Thread::GetCurrent()->GetVM()->VisitStrings(collect_objects);
-    heap_->GetObjectAllocator().AsObjectAllocator()->IterateOverObjects(collect_objects);
+    heap_->IterateOverObjects(collect_objects);
     for (auto object_cache : referent_objects) {
         if (heap_objects.find(object_cache.referent) == heap_objects.end()) {
             static constexpr const char *UNKNOWN_CLASS = "unknown class";
@@ -280,7 +278,6 @@ void HeapVerifierIntoGC<LanguageConfig>::AddToVerificationInfo(RefsVerificationI
 template <class LanguageConfig>
 void HeapVerifierIntoGC<LanguageConfig>::CollectVerificationInfo(PandaVector<MemRange> &&collectable_mem_ranges)
 {
-    auto *obj_allocator = heap_->GetObjectAllocator().AsObjectAllocator();
     size_t ref_number = 0;
     collectable_mem_ranges_ = std::move(collectable_mem_ranges);
     const std::function<void(ObjectHeader *, ObjectHeader *)> refs_collector =
@@ -299,7 +296,7 @@ void HeapVerifierIntoGC<LanguageConfig>::CollectVerificationInfo(PandaVector<Mem
             ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, refs_collector);
         }
     };
-    obj_allocator->IterateOverObjects(collect_functor);
+    heap_->IterateOverObjects(collect_functor);
 }
 
 template <class LanguageConfig>
@@ -307,7 +304,6 @@ size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&ali
 {
     size_t fails_count = 0U;
     size_t ref_number = 0U;
-    auto *obj_allocator = heap_->GetObjectAllocator().AsObjectAllocator();
     alive_mem_ranges_ = std::move(alive_mem_ranges);
     auto it = permanent_verification_info_.begin();
     for (auto &info : collectable_verification_info_) {
@@ -356,7 +352,7 @@ size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&ali
             ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, same_obj_checker);
         }
     };
-    obj_allocator->IterateOverObjects(traverse_alive_obj);
+    heap_->IterateOverObjects(traverse_alive_obj);
     return fails_count;
 }
 

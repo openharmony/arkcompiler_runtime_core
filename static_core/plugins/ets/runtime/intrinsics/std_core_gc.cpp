@@ -314,8 +314,7 @@ template <class ResArrayType>
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR, ss.str());
         return nullptr;
     }
-    auto *obj_allocator = vm->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
-    obj_allocator->PinObject(array->GetCoreType());
+    vm->GetHeapManager()->PinObject(array->GetCoreType());
 
     return array;
 }
@@ -374,8 +373,7 @@ extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
         PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(static_cast<void *>(obj->GetCoreType()));
 
     if (obj_space_type == SpaceType::SPACE_TYPE_OBJECT && vm->GetGC()->IsGenerational()) {
-        auto *obj_allocator = vm->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
-        if (obj_allocator->IsObjectInYoungSpace(obj->GetCoreType())) {
+        if (vm->GetHeapManager()->IsObjectInYoungSpace(obj->GetCoreType())) {
             const EtsInt young_space = 4;
             return young_space;
         }
@@ -396,14 +394,13 @@ extern "C" EtsVoid *StdGCPinObject(EtsObject *obj)
     }
 
     auto *vm = coroutine->GetVM();
-    auto *obj_allocator = vm->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
     auto *gc = vm->GetGC();
     if (!gc->IsPinningSupported()) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
                           "Object pinning does not support with current gc");
         return EtsVoid::GetInstance();
     }
-    obj_allocator->PinObject(obj->GetCoreType());
+    vm->GetHeapManager()->PinObject(obj->GetCoreType());
     return EtsVoid::GetInstance();
 }
 
@@ -418,7 +415,7 @@ extern "C" void StdGCUnpinObject(EtsObject *obj)
     }
 
     auto *vm = Thread::GetCurrent()->GetVM();
-    vm->GetHeapManager()->GetObjectAllocator().AsObjectAllocator()->UnpinObject(obj->GetCoreType());
+    vm->GetHeapManager()->UnpinObject(obj->GetCoreType());
 }
 
 extern "C" EtsLong StdGCGetObjectAddress(EtsObject *obj)

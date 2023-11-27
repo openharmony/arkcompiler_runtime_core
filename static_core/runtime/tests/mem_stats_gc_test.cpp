@@ -73,7 +73,7 @@ void MemStatsGCTest::MemStatsTest(uint64_t tries, size_t object_size)
         simple_string.append("x");
     }
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto object_allocator = thread_->GetVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+    auto object_allocator = thread_->GetVM()->GetGC()->GetObjectAllocator();
     thread_->GetVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
 
     size_t alloc_size = simple_string.size() + sizeof(coretypes::String);

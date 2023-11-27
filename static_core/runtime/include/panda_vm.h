@@ -191,7 +191,7 @@ public:
     {
         size_t obj_cnt = 0;
         *o_str << "Dumping heap" << std::endl;
-        GetHeapManager()->GetObjectAllocator()->IterateOverObjects([&obj_cnt, &o_str](ObjectHeader *mem) {
+        GetHeapManager()->IterateOverObjects([&obj_cnt, &o_str](ObjectHeader *mem) {
             DumpObject(mem, o_str);
             obj_cnt++;
         });

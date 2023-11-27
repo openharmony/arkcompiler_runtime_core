@@ -212,7 +212,7 @@ void RootManager<LanguageConfig>::UpdateAotStringRoots()
 {
     trace::ScopedTrace scoped_trace(__FUNCTION__);
     LOG(DEBUG, GC) << "=== AOT string slot roots update. BEGIN ===";
-    auto oa = vm_->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+    auto hm = vm_->GetHeapManager();
     Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->UpdateAotStringRoots(
         [](ObjectHeader **root) {
             auto root_value = *root;
@@ -220,7 +220,7 @@ void RootManager<LanguageConfig>::UpdateAotStringRoots()
                 *root = ::panda::mem::GetForwardAddress(root_value);
             }
         },
-        [&oa](const ObjectHeader *root) { return oa->HasYoungSpace() && oa->IsObjectInYoungSpace(root); });
+        [&hm](const ObjectHeader *root) { return hm->IsObjectInYoungSpace(root); });
     LOG(DEBUG, GC) << "=== AOT string slot roots update. END ===";
 }
 

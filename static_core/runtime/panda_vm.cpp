@@ -94,7 +94,7 @@ coretypes::String *PandaVM::GetNonMovableString(const panda_file::File &pf, pand
         return nullptr;
     }
 
-    if (!GetHeapManager()->GetObjectAllocator().AsObjectAllocator()->IsObjectInNonMovableSpace(cached_string)) {
+    if (!GetHeapManager()->IsObjectInNonMovableSpace(cached_string)) {
         return nullptr;
     }
 

@@ -1115,8 +1115,7 @@ TEST_F(G1GCTest, NonMovableClearingDuringConcurrentPhaseTest)
 {
     Runtime *runtime = Runtime::GetCurrent();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto obj_allocator =
-        Runtime::GetCurrent()->GetPandaVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+    auto obj_allocator = Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator();
     ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
@@ -1191,8 +1190,7 @@ TEST_F(G1GCTest, HumongousClearingDuringConcurrentPhaseTest)
 {
     Runtime *runtime = Runtime::GetCurrent();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto obj_allocator =
-        Runtime::GetCurrent()->GetPandaVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+    auto obj_allocator = Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator();
     ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
@@ -1579,8 +1577,8 @@ TEST_F(G1FullGCOOMTest, AllocateBy1Region)
     constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8), DEFAULT_ALIGNMENT_IN_BYTES);
     {
         [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread_);
-        auto *g1_allocator = static_cast<ObjectAllocatorG1<> *>(
-            Runtime::GetCurrent()->GetPandaVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator());
+        auto *g1_allocator =
+            static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
         // Fill tenured space by garbage
         do {
             VMHandle<ObjectHeader> handle(thread_, ObjectAllocator::AllocString(OBJECT_SIZE));
@@ -1607,8 +1605,8 @@ TEST_F(G1FullGCOOMTest, AllocateBy1Region)
 TEST_F(G1FullGCOOMTest, PinUnpinObject)
 {
     constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8), DEFAULT_ALIGNMENT_IN_BYTES);
-    auto *g1_allocator = static_cast<ObjectAllocatorG1<> *>(
-        Runtime::GetCurrent()->GetPandaVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator());
+    auto *g1_allocator =
+        static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
     {
         [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread_);
         // Fill tenured space by garbage
@@ -1656,8 +1654,8 @@ static void PinUnpinTest(SpaceType requested_space_type, size_t object_size = 1_
     auto *thread = MTManagedThread::GetCurrent();
     ASSERT_NE(thread, nullptr);
     thread->ManagedCodeBegin();
-    auto *g1_allocator = static_cast<ObjectAllocatorG1<> *>(
-        Runtime::GetCurrent()->GetPandaVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator());
+    auto *g1_allocator =
+        static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
     {
         [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread);
         constexpr size_t OBJ_ELEMENT_SIZE = 64;

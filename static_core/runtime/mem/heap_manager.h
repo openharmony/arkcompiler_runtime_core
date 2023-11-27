@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "libpandabase/utils/logger.h"
+#include "libpandabase/macros.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -37,6 +38,9 @@ class RuntimeNotificationManager;
 }  //  namespace panda
 
 namespace panda::mem {
+
+// Forward declaration
+class MemoryManager;
 
 class HeapManager {
 public:
@@ -72,8 +76,6 @@ public:
     CodeAllocator *GetCodeAllocator() const;
 
     PANDA_PUBLIC_API InternalAllocatorPtr GetInternalAllocator();
-
-    ObjectAllocatorPtr GetObjectAllocator();
 
     bool UseTLABForAllocations()
     {
@@ -167,6 +169,41 @@ public:
         return mem_stats_;
     }
 
+    ALWAYS_INLINE void IterateOverObjects(const ObjectVisitor &object_visitor)
+    {
+        GetObjectAllocator()->IterateOverObjects(object_visitor);
+    }
+
+    ALWAYS_INLINE void PinObject(ObjectHeader *object)
+    {
+        GetObjectAllocator().AsObjectAllocator()->PinObject(object);
+    }
+
+    ALWAYS_INLINE void UnpinObject(ObjectHeader *object)
+    {
+        GetObjectAllocator().AsObjectAllocator()->UnpinObject(object);
+    }
+
+    ALWAYS_INLINE bool IsObjectInYoungSpace(const ObjectHeader *obj)
+    {
+        return GetObjectAllocator().AsObjectAllocator()->IsObjectInYoungSpace(obj);
+    }
+
+    ALWAYS_INLINE bool IsObjectInNonMovableSpace(const ObjectHeader *obj)
+    {
+        return GetObjectAllocator().AsObjectAllocator()->IsObjectInNonMovableSpace(obj);
+    }
+
+    ALWAYS_INLINE bool IsLiveObject(const ObjectHeader *obj)
+    {
+        return GetObjectAllocator().AsObjectAllocator()->IsLive(obj);
+    }
+
+    ALWAYS_INLINE bool ContainObject(const ObjectHeader *obj)
+    {
+        return GetObjectAllocator().AsObjectAllocator()->ContainObject(obj);
+    }
+
     HeapManager() : target_utilization_(DEFAULT_TARGET_UTILIZATION) {}
 
     ~HeapManager() = default;
@@ -210,6 +247,8 @@ private:
     void *AllocateMemoryForObject(size_t size, Alignment align, ManagedThread *thread,
                                   ObjectAllocatorBase::ObjMemInitPolicy obj_init_type);
 
+    ObjectAllocatorPtr GetObjectAllocator();
+
     static constexpr float DEFAULT_TARGET_UTILIZATION = 0.5;
 
     bool is_initialized_ = false;
@@ -224,6 +263,10 @@ private:
     StackFrameAllocator *GetCurrentStackFrameAllocator();
 
     friend class ::panda::Runtime;
+
+    // Needed to extract object allocator created during HeapManager initialization
+    // to pass it to GC creation method;
+    friend class ::panda::mem::MemoryManager;
 
     /**
      * NOTE : Target ideal heap utilization ratio.
