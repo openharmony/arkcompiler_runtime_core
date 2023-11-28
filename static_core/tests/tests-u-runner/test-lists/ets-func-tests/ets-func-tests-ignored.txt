@@ -374,6 +374,18 @@ spec/undefined-type/issue14602.ets
 spec/undefined-type/issue14610.ets
 ###### End Issue 14610
 ###### EOF Undefined type
+### Feature: Callable classes
+### issue 14539
+spec/callable-classes/type-call-instantiate_7.ets
+### issue 14539
+spec/callable-classes/type-call-both.ets
+spec/callable-classes/type-call-expression-with-param_1.ets
+spec/callable-classes/type-call-instantiate_1.ets
+spec/callable-classes/type-call-instantiate_3.ets
+spec/callable-classes/type-call-instantiate_4.ets
+spec/callable-classes/type-call-instantiate_5.ets
+spec/callable-classes/type-call-none.ets
+### End of Feature: Callable classes
 
 ### Start never issues
 ### Issue 14472
