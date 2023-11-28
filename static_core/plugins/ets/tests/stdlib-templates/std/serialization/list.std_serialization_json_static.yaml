@@ -133,8 +133,8 @@
     method_test_index_data: {test1: {d:  1},
                              test2: {d: -1},
                              test3: {d:  0},
-                             test4: {d: 2.72182 as float},
-                             test5: {d: -2.72182 as float},
+                             test4: {d: 2.72182 as double},
+                             test5: {d: -2.72182 as double},
                             },
     method_expected_data: {test1 : '"1"',
                            test2:  '"-1"',
@@ -298,7 +298,7 @@
                              test2: {d: "[]"},
                              test3: {d: "[32]"}
                             },
-    method_expected_data: {test1: '"[1.1,-1.1,0,-0,2.72182,-2.72182]"',
+    method_expected_data: {test1: '"[1.1,-1.1,0,0,2.72182,-2.72182]"',
                            test2:  '"[]"',
                            test3:  '"[32]"'
                           }
@@ -316,7 +316,7 @@
                              test2: {d: "[]"},
                              test3: {d: "[32]"}
                             },
-    method_expected_data: {test1: '"[1.1,-1.1,0,-0,2.72182,-2.72182]"',
+    method_expected_data: {test1: '"[1.1,-1.1,0,0,2.72182,-2.72182]"',
                            test2:  '"[]"',
                            test3:  '"[32]"'
                           }

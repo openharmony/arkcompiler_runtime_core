@@ -520,28 +520,6 @@ intrinsics:
     impl: panda::ets::intrinsics::StdConsolePrintI64
     clear_flags: [ ]
 
-  - name: StdConsolePrintF32
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: std.core.void
-      args: [ f32 ]
-    impl: panda::ets::intrinsics::StdConsolePrintF32
-    clear_flags: [ ]
-
-  - name: StdConsolePrintF64
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: std.core.void
-      args: [ f64 ]
-    impl: panda::ets::intrinsics::StdConsolePrintF64
-    clear_flags: [ ]
-
   - name: StdConsolePrintln
     space: ets
     class_name: std.core.Console
@@ -833,28 +811,6 @@ intrinsics:
       ret: std.core.String
       args: [ i64 ]
     impl: panda::ets::intrinsics::StdCoreToStringLong
-    clear_flags: [ ]
-
-  - name: StdCoreToStringFloat
-    space: ets
-    class_name: std.core.StringBuilder
-    method_name: toString
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ f32 ]
-    impl: panda::ets::intrinsics::StdCoreToStringFloat
-    clear_flags: [ ]
-
-  - name: StdCoreToStringDouble
-    space: ets
-    class_name: std.core.StringBuilder
-    method_name: toString
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ f64 ]
-    impl: panda::ets::intrinsics::StdCoreToStringDouble
     clear_flags: [ ]
 
   - name: StdCoreSbAppendLong
