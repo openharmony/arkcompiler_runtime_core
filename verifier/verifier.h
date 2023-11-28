@@ -41,6 +41,7 @@ private:
                          size_t idx);
     bool VerifyStringId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
     bool CheckConstantPoolInfo(const panda_file::File::EntityId &method_id);
+    uint32_t GetRegIdxBaseOnRegType(const BytecodeInstruction &bc_ins, size_t reg_type);
 
     std::unique_ptr<const panda_file::File> file_;
     std::vector<panda_file::File::EntityId> method_ids_;

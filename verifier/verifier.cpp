@@ -47,11 +47,27 @@ bool Verifier::Verify()
     return true;
 }
 
+uint32_t Verifier::GetRegIdxBaseOnRegType(const  BytecodeInstruction &bc_ins, size_t reg_type)
+{
+    uint32_t reg_idx = 0;
+
+    if (bc_ins.HasVReg(bc_ins.GetFormat(), reg_type)) {
+        reg_idx = static_cast<uint32_t>(bc_ins.GetVReg(reg_type));
+    }
+
+    return reg_idx;
+}
+
 bool Verifier::VerifyRegisterIndex()
 {
     if (file_ == nullptr) {
         return false;
     }
+
+    const size_t reg_type0 = 0;
+    const size_t reg_type1 = 1;
+    const size_t reg_type2 = 2;
+    const size_t reg_type3 = 3;
 
     GetMethodIds();
     for (const auto &method_id : method_ids_) {
@@ -66,15 +82,28 @@ bool Verifier::VerifyRegisterIndex()
         const auto bc_ins_last = bc_ins.JumpTo(code_data.GetCodeSize());
         ASSERT(arg_nums >= 3);
         while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
-            const uint32_t reg_idx = static_cast<uint32_t>(bc_ins.GetVReg());
-            if (reg_idx >= (reg_nums + arg_nums)) {
+            if (GetRegIdxBaseOnRegType(bc_ins, reg_type0) >= (reg_nums + arg_nums)) {
                 LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
-                                     << bc_ins.GetVReg() << ")" << std::endl;
+                                        << bc_ins.GetVReg(reg_type0) << ")" << std::endl;
+                return false;
+            }
+            if (GetRegIdxBaseOnRegType(bc_ins, reg_type1) >= (reg_nums + arg_nums)) {
+                LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
+                                        << bc_ins.GetVReg(reg_type1) << ")" << std::endl;
+                return false;
+            }
+            if (GetRegIdxBaseOnRegType(bc_ins, reg_type2) >= (reg_nums + arg_nums)) {
+                LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
+                                        << bc_ins.GetVReg(reg_type2) << ")" << std::endl;
+                return false;
+            }
+            if (GetRegIdxBaseOnRegType(bc_ins, reg_type3) >= (reg_nums + arg_nums)) {
+                LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
+                                        << bc_ins.GetVReg(reg_type3) << ")" << std::endl;
                 return false;
             }
             bc_ins = bc_ins.GetNext();
         }
-       
     }
     return true;
 }

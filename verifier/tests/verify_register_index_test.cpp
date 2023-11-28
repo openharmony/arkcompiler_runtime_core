@@ -14,6 +14,7 @@
  */
 
 #include "verifier.h"
+#include "utils.h"
 
 #include <gtest/gtest.h>
 #include <string>
@@ -26,6 +27,7 @@
 #include "method_data_accessor-inl.h"
 
 using namespace testing::ext;
+
 namespace panda::verifier {
 class VerifierRegisterTest : public testing::Test {
 public:
@@ -33,17 +35,6 @@ public:
     static void TearDownTestCase(void) {};
     void SetUp() {};
     void TearDown() {};
-
-    void GenerateModifiedAbc(const std::vector<unsigned char> &buffer, const std::string &filename) {
-        std::ofstream abc_file(filename, std::ios::out | std::ios::binary);
-        if (!abc_file.is_open()) {
-            LOG(ERROR, VERIFIER) << "Failed to open file " << filename;
-            EXPECT_TRUE(abc_file.is_open());
-        }
-
-        abc_file.write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
-        abc_file.close();
-    }
 };
 
 /**
@@ -81,11 +72,11 @@ HWTEST_F(VerifierRegisterTest, verifier_register_002, TestSize.Level1)
         EXPECT_TRUE(base_file.is_open());
     }
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
-    // the known opcode in the abc file
-    const std::vector<uint8_t> op_v8 = {0x60, 0x03};
+    // the known instruction which contains register index in the abc file
+    const std::vector<uint8_t> op_code = {0x60, 0x03};
 
     for (size_t i = 0; i < buffer.size() - 2; i++) {
-        if (buffer[i] == op_v8[0] && buffer[i+1] == op_v8[1]) {
+        if (buffer[i] == op_code[0] && buffer[i+1] == op_code[1]) {
             buffer[i + 1] = static_cast<unsigned char>(new_reg_id);
         }
     }
@@ -99,4 +90,4 @@ HWTEST_F(VerifierRegisterTest, verifier_register_002, TestSize.Level1)
         EXPECT_FALSE(ver.VerifyRegisterIndex());
     }
 }
-}
+} // namespace panda::verifier

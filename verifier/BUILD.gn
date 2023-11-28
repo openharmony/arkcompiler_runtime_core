@@ -32,11 +32,7 @@ arkverifier_configs = [
 ohos_executable("ark_verifier") {
   sources = arkverifier_sources
 
-  deps = [
-    "$ark_root/libpandafile:libarkfile_static",
-    "$ark_root/libziparchive:libarkziparchive_static",
-    sdk_libc_secshared_dep,
-  ]
+  deps = [ "$ark_root/libpandafile:libarkfile_static" ]
 
   configs = arkverifier_configs
 
