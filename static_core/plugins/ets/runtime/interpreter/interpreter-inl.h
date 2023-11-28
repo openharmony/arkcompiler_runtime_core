@@ -552,7 +552,7 @@ private:
         PandaVector<Value> args(num_args);
         FillArgs<FORMAT, IS_RANGE>(args);
 
-        auto *coro = coroutine->GetCoroutineManager()->Launch(evt, method, std::move(args));
+        auto *coro = coroutine->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineAffinity::NONE);
         if (UNLIKELY(coro == nullptr)) {
             // OOM
             promise_handle.GetPtr()->SetEventPtr(nullptr);

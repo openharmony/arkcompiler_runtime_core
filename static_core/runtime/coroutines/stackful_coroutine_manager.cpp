@@ -225,11 +225,11 @@ size_t StackfulCoroutineManager::GetCoroutineCountLimit()
 }
 
 Coroutine *StackfulCoroutineManager::Launch(CompletionEvent *completion_event, Method *entrypoint,
-                                            PandaVector<Value> &&arguments)
+                                            PandaVector<Value> &&arguments, CoroutineAffinity affinity)
 {
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Launch started";
 
-    auto *result = LaunchImpl(completion_event, entrypoint, std::move(arguments));
+    auto *result = LaunchImpl(completion_event, entrypoint, std::move(arguments), affinity);
     if (result == nullptr) {
         ThrowOutOfMemoryError("Launch failed");
     }
@@ -336,8 +336,27 @@ Coroutine *StackfulCoroutineManager::TryGetCoroutineFromPool()
     return co;
 }
 
+StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForCoroutine(CoroutineAffinity affinity)
+{
+    switch (affinity) {
+        case CoroutineAffinity::SAME_WORKER: {
+            return GetCurrentWorker();
+        }
+        case CoroutineAffinity::NONE:
+        default: {
+            // choosing the least loaded worker
+            os::memory::LockHolder lk_workers(workers_lock_);
+            auto w = std::min_element(workers_.begin(), workers_.end(),
+                                      [](const StackfulCoroutineWorker *a, const StackfulCoroutineWorker *b) {
+                                          return a->GetLoadFactor() < b->GetLoadFactor();
+                                      });
+            return *w;
+        }
+    }
+}
+
 Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completion_event, Method *entrypoint,
-                                                PandaVector<Value> &&arguments)
+                                                PandaVector<Value> &&arguments, CoroutineAffinity affinity)
 {
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl begin");
@@ -359,14 +378,9 @@ Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completion_even
     }
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
 
-    {
-        os::memory::LockHolder lk_workers(workers_lock_);
-        auto w = std::min_element(workers_.begin(), workers_.end(),
-                                  [](StackfulCoroutineWorker *a, StackfulCoroutineWorker *b) {
-                                      return a->GetLoadFactor() < b->GetLoadFactor();
-                                  });
-        (*w)->AddRunnableCoroutine(co, IsJsMode());
-    }
+    auto *w = ChooseWorkerForCoroutine(affinity);
+    w->AddRunnableCoroutine(co, IsJsMode());
+
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl end");
 #endif

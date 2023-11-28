@@ -148,7 +148,7 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
 }
 
 Coroutine *ThreadedCoroutineManager::Launch(CompletionEvent *completion_event, Method *entrypoint,
-                                            PandaVector<Value> &&arguments)
+                                            PandaVector<Value> &&arguments, [[maybe_unused]] CoroutineAffinity affinity)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch started";
 

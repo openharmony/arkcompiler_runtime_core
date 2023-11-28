@@ -34,6 +34,17 @@ struct CoroutineManagerConfig {
 };
 
 /**
+ * @brief defines the scheduling policy for a coroutine. Maybe in future we would like to add more types (MAIN_WORKER,
+ * EXACT_WORKER, etc.)
+ */
+enum class CoroutineAffinity {
+    /// no affinity
+    NONE,
+    /// schedule to the parent's worker only
+    SAME_WORKER,
+};
+
+/**
  * @brief The interface of all coroutine manager implementations.
  *
  * Manages (registers, unregisters, enumerates) and schedules coroutines for execution using the worker threads.
@@ -99,8 +110,8 @@ public:
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
      */
-    virtual Coroutine *Launch(CompletionEvent *completion_event, Method *entrypoint,
-                              PandaVector<Value> &&arguments) = 0;
+    virtual Coroutine *Launch(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments,
+                              CoroutineAffinity affinity) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**
