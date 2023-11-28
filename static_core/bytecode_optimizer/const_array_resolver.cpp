@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -321,9 +321,8 @@ bool ConstArrayResolver::FillLiteral(compiler::StoreInst *storeArrayInst, pandas
     auto arrayType =
         pandasm::Type::FromName(irInterface_->GetTypeIdByOffset(newArrayInst->CastToNewArray()->GetTypeId()));
     auto componentType = arrayType.GetComponentType();
-    auto componentTypeName = arrayType.GetComponentName();
 
-    if (pandasm::Type::IsPandaPrimitiveType(componentTypeName)) {
+    if (arrayType.IsArrayContainsPrimTypes()) {
         auto valueInst = GetConstantIfPossible(rawElemInst);
         if (valueInst == std::nullopt) {
             return false;
@@ -331,9 +330,9 @@ bool ConstArrayResolver::FillLiteral(compiler::StoreInst *storeArrayInst, pandas
         return FillPrimitiveLiteral(literal, componentType.GetId(), *valueInst);
     }
 
-    auto stringType =
-        pandasm::Type::FromDescriptor(ark::panda_file::GetStringClassDescriptor(irInterface_->GetSourceLang()));
-    if ((rawElemInst->GetOpcode() == Opcode::LoadString) && (componentTypeName == stringType.GetName())) {
+    auto componentTypeDescriptor = componentType.GetDescriptor();
+    auto stringDescriptor = ark::panda_file::GetStringClassDescriptor(irInterface_->GetSourceLang());
+    if ((rawElemInst->GetOpcode() == Opcode::LoadString) && (componentTypeDescriptor == stringDescriptor)) {
         literal->tag = panda_file::LiteralTag::ARRAY_STRING;
         std::string stringValue = irInterface_->GetStringIdByOffset(rawElemInst->CastToLoadString()->GetTypeId());
         literal->value = stringValue;

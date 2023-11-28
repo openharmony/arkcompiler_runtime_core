@@ -42,6 +42,13 @@ static JSValue *JSRuntimeNewJSValueDouble(double v)
     return JSValue::CreateNumber(coro, ctx, v);
 }
 
+static JSValue *JSRuntimeNewJSValueBoolean(uint8_t v)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    return JSValue::CreateBoolean(coro, ctx, static_cast<bool>(v));
+}
+
 static JSValue *JSRuntimeNewJSValueString(EtsString *v)
 {
     auto coro = EtsCoroutine::GetCurrent();
@@ -653,6 +660,7 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
 const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeFinalizationRegistryCallback,
     JSRuntimeNewJSValueDouble,
+    JSRuntimeNewJSValueBoolean,
     JSRuntimeNewJSValueString,
     JSRuntimeNewJSValueObject,
     JSRuntimeGetValueDouble,
@@ -661,9 +669,11 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeGetValueObject,
     JSValueNamedGetter<JSConvertJSValue>,
     JSValueNamedGetter<JSConvertF64>,
+    JSValueNamedGetter<JSConvertU1>,
     JSValueNamedGetter<JSConvertString>,
     JSValueNamedSetter<JSConvertJSValue>,
     JSValueNamedSetter<JSConvertF64>,
+    JSValueNamedSetter<JSConvertU1>,
     JSValueNamedSetter<JSConvertString>,
     JSValueIndexedGetter<JSConvertJSValue>,
     JSValueIndexedGetter<JSConvertF64>,

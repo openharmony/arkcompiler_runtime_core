@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,9 @@ public:
     {
         return (GetParam() & blockPos) != 0;
     }
+
+    void SingleBlockBuildInitialGraph();
+    Graph *SingleBlockBuildExpectedGraph();
 };
 
 std::string GetTestName(const testing::TestParamInfo<InteropIntrnsicsOptTest::ParamType> &info)
@@ -64,8 +67,7 @@ std::string GetTestName(const testing::TestParamInfo<InteropIntrnsicsOptTest::Pa
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-// Check that two adjacent scopes are merged and
-TEST_F(InteropIntrnsicsOptTest, SingleBlock)
+void InteropIntrnsicsOptTest::SingleBlockBuildInitialGraph()
 {
     GRAPH(GetGraph())
     {
@@ -96,8 +98,11 @@ TEST_F(InteropIntrnsicsOptTest, SingleBlock)
             INST(18U, Opcode::ReturnVoid).v0id();
         }
     }
+}
 
-    Graph *graph = CreateEmptyGraph();
+Graph *InteropIntrnsicsOptTest::SingleBlockBuildExpectedGraph()
+{
+    auto *graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
@@ -122,16 +127,21 @@ TEST_F(InteropIntrnsicsOptTest, SingleBlock)
             INST(18U, Opcode::ReturnVoid).v0id();
         }
     }
+    return graph;
+}
+
+// Check that two adjacent scopes are merged and
+TEST_F(InteropIntrnsicsOptTest, SingleBlock)
+{
+    SingleBlockBuildInitialGraph();
+    Graph *expected = SingleBlockBuildExpectedGraph();
 
     ASSERT_TRUE(GetGraph()->RunPass<InteropIntrinsicOptimization>());
-    GetGraph()->Dump(&std::cerr);
     // DeoptimizeElimination removes SaveState user of ConvertLocalToJSValue
     ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
-    GetGraph()->Dump(&std::cerr);
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
-    GetGraph()->Dump(&std::cerr);
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected));
 }
 
 TEST_F(InteropIntrnsicsOptTest, SingleBlockNotApplied)

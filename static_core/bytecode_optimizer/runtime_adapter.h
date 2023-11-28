@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -213,9 +213,17 @@ public:
         return false;
     }
 
-    bool IsMethodIntrinsic([[maybe_unused]] MethodPtr caller, [[maybe_unused]] MethodId id) const override
+    bool IsMethodIntrinsic([[maybe_unused]] MethodPtr caller, MethodId id) const override
     {
-        return false;
+        return GetIntrinsicId(GetMethodById(caller, id)) != IntrinsicId::INVALID;
+    }
+
+    IntrinsicId GetIntrinsicId([[maybe_unused]] MethodPtr method) const override
+    {
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
+        auto className = GetClassNameFromMethod(method);
+        auto methodName = GetMethodName(method);
+        return GetIntrinsicId(className, methodName, mda);
     }
 
     bool IsMethodStatic(MethodPtr method) const override
@@ -242,16 +250,14 @@ public:
     {
         panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
-        auto stringData = pandaFile_.GetStringData(mda.GetClassId());
-
-        return std::string(reinterpret_cast<const char *>(stringData.data));
+        return mda.GetClassName();
     }
 
     std::string GetClassName(ClassPtr cls) const override
     {
         auto stringData = pandaFile_.GetStringData(ClassCast(cls));
 
-        return std::string(reinterpret_cast<const char *>(stringData.data));
+        return panda_file::ClassDataAccessor::DemangledName(stringData);
     }
 
     std::string GetMethodName(MethodPtr method) const override
@@ -451,6 +457,12 @@ private:
     {
         return panda_file::File::EntityId(reinterpret_cast<uintptr_t>(field));
     }
+
+    static IntrinsicId GetIntrinsicId(std::string_view className, std::string_view methodName,
+                                      panda_file::MethodDataAccessor mda);
+
+    static bool IsEqual(panda_file::MethodDataAccessor mda, std::initializer_list<panda_file::Type::TypeId> shorties,
+                        std::initializer_list<std::string_view> refTypes);
 
     const panda_file::File &pandaFile_;
 };

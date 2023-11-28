@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@ void DoLda64(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoStaObj(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoSta(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoSta64(compiler::Register reg, std::vector<pandasm::Ins> &result);
+void DoSta(compiler::DataType::Type type, compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoLdaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoStaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result);
 
@@ -124,6 +125,7 @@ public:
     static void IfImmNonZero(GraphVisitor *v, Inst *instBase);
     static void IfImm64(GraphVisitor *v, Inst *instBase);
     static void VisitIntrinsic(GraphVisitor *v, Inst *instBase);
+    static void CallHandler(GraphVisitor *visitor, Inst *inst, std::string methodId);
     static void CallHandler(GraphVisitor *visitor, Inst *inst);
     static void VisitStoreObject(GraphVisitor *v, Inst *instBase);
     static void VisitStoreStatic(GraphVisitor *v, Inst *instBase);

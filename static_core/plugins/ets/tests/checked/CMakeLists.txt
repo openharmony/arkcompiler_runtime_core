@@ -75,6 +75,7 @@ function(panda_add_checked_test_ets)
         set(COMMAND_TOKEN "#!")
     endif()
     set(OPTIONS "--load-runtimes=ets" "--run-gc-in-place" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
+    set(ES2PANDA_OPTIONS --thread=0 --extension=ets)
 
     if (PANDA_LLVM_AOT)
         set(WITH_LLVM "--with-llvm")
@@ -97,10 +98,12 @@ function(panda_add_checked_test_ets)
                       COMMAND ${CHECKER} --source ${ARG_FILE}
                                          --panda $<TARGET_FILE:ark>
                                          --paoc $<TARGET_FILE:ark_aot>
+                                         --frontend ${es2panda_bin}
                                          --run-prefix \"${PANDA_RUN_PREFIX}\"
                                          --test-file ${BINARY_FILE}
                                          --panda-options \"${OPTIONS}\"
                                          --paoc-options \"${OPTIONS}\"
+                                         --frontend-options \"${ES2PANDA_OPTIONS}\"
                                          --command-token \"${COMMAND_TOKEN}\"
                                          --arch ${ARCHITECTURE}
                                          ${RELEASE_OPT}
@@ -178,6 +181,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder_oom.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/bounds_analysis_overflow.ets)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_const_array.ets)
 endif()
 
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_array.ets)

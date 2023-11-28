@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -372,14 +372,17 @@ inline uint32_t MethodDataAccessor::GetNumericalAnnotation(uint32_t fieldId)
     });
     return result;
 }
+inline std::string MethodDataAccessor::GetClassName() const
+{
+    return panda_file::ClassDataAccessor::DemangledName(pandaFile_.GetStringData(GetClassId()));
+}
 
 inline std::string MethodDataAccessor::GetFullName() const
 {
     uint32_t strOffset = const_cast<MethodDataAccessor *>(this)->GetNumericalAnnotation(AnnotationField::FUNCTION_NAME);
     if (strOffset != 0) {
-        auto cname = panda_file::ClassDataAccessor(pandaFile_, GetClassId()).DemangledName();
         auto mname = utf::Mutf8AsCString(pandaFile_.GetStringData(panda_file::File::EntityId(strOffset)).data);
-        return cname + "::" + mname;
+        return GetClassName() + "::" + mname;
     }
     return utf::Mutf8AsCString(GetName().data);
 }

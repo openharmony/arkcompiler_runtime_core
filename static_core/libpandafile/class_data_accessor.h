@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,9 +141,9 @@ public:
         return name_.data;
     }
 
-    std::string DemangledName()
+    static std::string DemangledName(panda_file::File::StringData data)
     {
-        const uint8_t *descriptor = GetDescriptor();
+        auto descriptor = data.data;
         switch (*descriptor) {
             case 'V':
                 return "void";
@@ -189,6 +189,11 @@ public:
         name.pop_back();
 
         return name;
+    }
+
+    std::string DemangledName() const
+    {
+        return DemangledName(name_);
     }
 
 private:

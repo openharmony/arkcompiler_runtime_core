@@ -103,16 +103,16 @@ panda_gen(DATA ${CMAKE_CURRENT_LIST_DIR}/transforms/passes/passes.yaml
     TEMPLATES llvm_passes.inl.erb
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
-    REQUIRES ${CMAKE_CURRENT_LIST_DIR}/templates/llvm_pass.rb
+    API ${CMAKE_CURRENT_LIST_DIR}/templates/llvm_pass.rb
     TARGET_NAME llvmbackend_passes_gen
 )
 
 set(OPTIONS_GEN_H ${GENERATED_DIR}/llvm_options_gen.h)
 panda_gen_file(
-        DATAFILE ${CMAKE_CURRENT_LIST_DIR}/llvmbackend.yaml
+        DATA ${CMAKE_CURRENT_LIST_DIR}/llvmbackend.yaml
         TEMPLATE ${PANDA_ROOT}/templates/options/options.h.erb
         OUTPUTFILE ${OPTIONS_GEN_H}
-        REQUIRES ${PANDA_ROOT}/templates/common.rb
+        API ${PANDA_ROOT}/templates/common.rb
 )
 add_custom_target(llvmbackend_options_gen DEPENDS ${OPTIONS_GEN_H})
 
@@ -120,9 +120,8 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
     TEMPLATES intrinsics_gen.inl.erb
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
-    REQUIRES
-        ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
-        ${PANDA_ROOT}/libpandabase/utils.rb
+    API ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
+    REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
     EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
 )
 
@@ -130,9 +129,8 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
     TEMPLATES can_compile_intrinsics_gen.inl.erb
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
-    REQUIRES
-        ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
-        ${PANDA_ROOT}/libpandabase/utils.rb
+    API ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
+    REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
     EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
     TARGET_NAME can_compile_intrinsics_gen_llvmbackend
 )
@@ -141,9 +139,8 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
     TEMPLATES intrinsic_names_gen.inl.erb
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
-    REQUIRES
-        ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
-        ${PANDA_ROOT}/libpandabase/utils.rb
+    API ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
+    REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
     EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
     TARGET_NAME intrinsic_names_gen_llvmbackend
 )
@@ -152,9 +149,8 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
     TEMPLATES intrinsics_llvm_codegen.inl.erb
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
-    REQUIRES
-        ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
-        ${PANDA_ROOT}/libpandabase/utils.rb
+    API ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
+    REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
     EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
     TARGET_NAME intrinsic_llvm_codegen_llvmbackend
 )
@@ -163,7 +159,7 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/entrypoints.yaml
     TEMPLATES entrypoints_gen.inl.erb
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
-    REQUIRES ${CMAKE_CURRENT_LIST_DIR}/templates/entrypoints.rb
+    API ${CMAKE_CURRENT_LIST_DIR}/templates/entrypoints.rb
     EXTRA_DEPENDENCIES entrypoints_yaml_merge
 )
 
@@ -171,17 +167,17 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/entrypoints.yaml
     TEMPLATES entrypoints_llvm_ark_interface_gen.inl.erb
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
-    REQUIRES ${CMAKE_CURRENT_LIST_DIR}/templates/entrypoints.rb
+    API ${CMAKE_CURRENT_LIST_DIR}/templates/entrypoints.rb
     EXTRA_DEPENDENCIES entrypoints_yaml_merge
     TARGET_NAME entrypoints_llvm_ark_interface_gen_llvmbackend
 )
 
 set(LOGGER_COMPONENTS_GEN_H ${GENERATED_DIR}/llvm_logger_components.inc)
 panda_gen_file(
-    DATAFILE ${CMAKE_CURRENT_LIST_DIR}/llvmbackend.yaml
+    DATA ${CMAKE_CURRENT_LIST_DIR}/llvmbackend.yaml
     TEMPLATE ${PANDA_ROOT}/templates/logger_components/logger_components.inc.erb
     OUTPUTFILE ${LOGGER_COMPONENTS_GEN_H}
-    REQUIRES ${PANDA_ROOT}/templates/common.rb
+    API ${PANDA_ROOT}/templates/common.rb
 )
 add_custom_target(llvmbackend_logger_components_gen DEPENDS ${LOGGER_COMPONENTS_GEN_H})
 

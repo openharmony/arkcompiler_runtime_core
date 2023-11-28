@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -247,10 +247,10 @@ add_custom_target(ark_version_gen DEPENDS ${ARK_VERSION_H})
 
 set(EVENTS_GEN_H ${GENERATED_DIR}/events_gen.h)
 panda_gen_file(
-        DATAFILE ${PANDA_ROOT}/libpandabase/events/events.yaml
+        DATA ${PANDA_ROOT}/libpandabase/events/events.yaml
         TEMPLATE ${PANDA_ROOT}/libpandabase/events/events_gen.h.erb
         OUTPUTFILE ${EVENTS_GEN_H}
-        REQUIRES ${PANDA_ROOT}/libpandabase/events/events.rb
+        API ${PANDA_ROOT}/libpandabase/events/events.rb
 )
 add_custom_target(events_gen DEPENDS ${EVENTS_GEN_H})
 add_dependencies(panda_gen_files events_gen)

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,6 +16,7 @@ panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/js_call/js_call
 panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/obj_call/obj_call.ets)
 panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/../class_operations/class_operations_frontend.ets)
 panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/merge_local_scopes/merge_local_scopes.ets)
+panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/peepholes/peepholes.ets)
 
 set(INTEROP_TESTS_GENERATED_DIR "${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_interop_js/generated")
 panda_ets_interop_js_checked_test(FILE ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.ets)

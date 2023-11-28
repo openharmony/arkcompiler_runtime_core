@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -48,10 +48,10 @@ set(SOURCES
 
 set(META_GEN_H ${CMAKE_CURRENT_BINARY_DIR}/meta_gen.h)
 panda_gen_file(
-    DATAFILE ${CMAKE_CURRENT_SOURCE_DIR}/metadata.yaml
+    DATA ${CMAKE_CURRENT_SOURCE_DIR}/metadata.yaml
     TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/meta_gen.cpp.erb
     OUTPUTFILE ${META_GEN_H}
-    REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/asm_metadata.rb
+    API ${CMAKE_CURRENT_SOURCE_DIR}/asm_metadata.rb
 )
 add_custom_target(meta_gen_h DEPENDS ${META_GEN_H})
 add_dependencies(panda_gen_files meta_gen_h)

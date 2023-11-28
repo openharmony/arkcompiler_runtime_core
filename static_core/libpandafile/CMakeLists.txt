@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,7 +42,7 @@ set(DEPENDENCIES ${GENERATOR} ${TEMPLATE} ${DATAFILE})
 set(OUTFILE "${CMAKE_CURRENT_BINARY_DIR}/include/type.h")
 add_custom_command(OUTPUT "${OUTFILE}"
                    COMMENT "Generate type.h"
-                   COMMAND ${PANDA_ROOT}/isa/gen.rb -d ${DATAFILE} -t ${TEMPLATE} -o "${OUTFILE}" -r ${GENERATOR}
+                   COMMAND ${PANDA_ROOT}/isa/gen.rb -d ${DATAFILE} -t ${TEMPLATE} -o "${OUTFILE}" -q ${GENERATOR}
                    DEPENDS ${DEPENDENCIES})
 add_custom_target(type_gen_${PROJECT_NAME} ALL DEPENDS "${OUTFILE}")
 add_dependencies(panda_gen_files type_gen_${PROJECT_NAME})

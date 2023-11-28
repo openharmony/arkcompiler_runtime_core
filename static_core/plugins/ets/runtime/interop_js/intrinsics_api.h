@@ -33,6 +33,7 @@ struct IntrinsicsAPI {
     // NOLINTBEGIN(readability-identifier-naming)
     void (*JSRuntimeFinalizationRegistryCallback)(EtsObject *obj);
     JSValue *(*JSRuntimeNewJSValueDouble)(double v);
+    JSValue *(*JSRuntimeNewJSValueBoolean)(uint8_t v);
     JSValue *(*JSRuntimeNewJSValueString)(EtsString *v);
     JSValue *(*JSRuntimeNewJSValueObject)(EtsObject *v);
     double (*JSRuntimeGetValueDouble)(JSValue *etsJsValue);
@@ -41,9 +42,11 @@ struct IntrinsicsAPI {
     EtsObject *(*JSRuntimeGetValueObject)(JSValue *etsJsValue, EtsObject *cls);
     JSValue *(*JSRuntimeGetPropertyJSValue)(JSValue *etsJsValue, EtsString *etsPropName);
     double (*JSRuntimeGetPropertyDouble)(JSValue *etsJsValue, EtsString *etsPropName);
+    bool (*JSRuntimeGetPropertyBoolean)(JSValue *etsJsValue, EtsString *etsPropName);
     EtsString *(*JSRuntimeGetPropertyString)(JSValue *etsJsValue, EtsString *etsPropName);
     void (*JSRuntimeSetPropertyJSValue)(JSValue *etsJsValue, EtsString *etsPropName, JSValue *value);
     void (*JSRuntimeSetPropertyDouble)(JSValue *etsJsValue, EtsString *etsPropName, double value);
+    void (*JSRuntimeSetPropertyBoolean)(JSValue *etsJsValue, EtsString *etsPropName, bool value);
     void (*JSRuntimeSetPropertyString)(JSValue *etsJsValue, EtsString *etsPropName, EtsString *value);
     JSValue *(*JSRuntimeGetElementJSValue)(JSValue *etsJsValue, int32_t index);
     double (*JSRuntimeGetElementDouble)(JSValue *etsJsValue, int32_t index);

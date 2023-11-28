@@ -137,11 +137,9 @@ if (is_llvmbackend) {
   intrinsics_yaml = "$target_gen_dir/../runtime/intrinsics.yaml"
   ark_gen_file("libllvmbackend_intrinsics_gen_inl") {
     template_file = "$llvmbackend_templates_dir/intrinsics_gen.inl.erb"
-    data_file = "$intrinsics_yaml"
-    requires = [
-      "$llvmbackend_templates_dir/intrinsics.rb",
-      "$ark_root/libpandabase/utils.rb",
-    ]
+    data = [ intrinsics_yaml ]
+    api = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
+    requires = [ "$ark_root/libpandabase/utils.rb" ]
     output_file = "$target_gen_dir/intrinsics_gen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
@@ -149,33 +147,27 @@ if (is_llvmbackend) {
   ark_gen_file("libllvmbackend_can_compile_intrinsics_gen_inl") {
     template_file =
         "$llvmbackend_templates_dir/can_compile_intrinsics_gen.inl.erb"
-    data_file = "$intrinsics_yaml"
-    requires = [
-      "$llvmbackend_templates_dir/intrinsics.rb",
-      "$ark_root/libpandabase/utils.rb",
-    ]
+    data = [ intrinsics_yaml ]
+    api = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
+    requires = [ "$ark_root/libpandabase/utils.rb" ]
     output_file = "$target_gen_dir/can_compile_intrinsics_gen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
 
   ark_gen_file("libllvmbackend_intrinsic_names_gen_inl") {
     template_file = "$llvmbackend_templates_dir/intrinsic_names_gen.inl.erb"
-    data_file = "$intrinsics_yaml"
-    requires = [
-      "$llvmbackend_templates_dir/intrinsics.rb",
-      "$ark_root/libpandabase/utils.rb",
-    ]
+    data = [ intrinsics_yaml ]
+    api = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
+    requires = [ "$ark_root/libpandabase/utils.rb" ]
     output_file = "$target_gen_dir/intrinsic_names_gen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
 
   ark_gen_file("libllvmbackend_intrinsics_llvm_codegen_inl") {
     template_file = "$llvmbackend_templates_dir/intrinsics_llvm_codegen.inl.erb"
-    data_file = "$intrinsics_yaml"
-    requires = [
-      "$llvmbackend_templates_dir/intrinsics.rb",
-      "$ark_root/libpandabase/utils.rb",
-    ]
+    data = [ intrinsics_yaml ]
+    api = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
+    requires = [ "$ark_root/libpandabase/utils.rb" ]
     output_file = "$target_gen_dir/intrinsics_llvm_codegen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
@@ -183,62 +175,62 @@ if (is_llvmbackend) {
   entrypoints_yaml = "$ark_root/runtime/entrypoints/entrypoints.yaml"
   ark_gen_file("libllvmbackend_entrypoints_gen_inl") {
     template_file = "$llvmbackend_templates_dir/entrypoints_gen.inl.erb"
-    data_file = "$entrypoints_yaml"
-    requires = [ "$llvmbackend_templates_dir/entrypoints.rb" ]
+    data = [ entrypoints_yaml ]
+    api = [ "$llvmbackend_templates_dir/entrypoints.rb" ]
     output_file = "$target_gen_dir/entrypoints_gen.inl"
   }
 
   ark_gen_file("libllvmbackend_entrypoints_llvm_ark_interface_gen_inl") {
     template_file =
         "$llvmbackend_templates_dir/entrypoints_llvm_ark_interface_gen.inl.erb"
-    data_file = "$entrypoints_yaml"
-    requires = [ "$llvmbackend_templates_dir/entrypoints.rb" ]
+    data = [ entrypoints_yaml ]
+    api = [ "$llvmbackend_templates_dir/entrypoints.rb" ]
     output_file = "$target_gen_dir/entrypoints_llvm_ark_interface_gen.inl"
   }
 
   ark_gen_file("libllvmbackend_llvm_passes_inl") {
     template_file = "$llvmbackend_templates_dir/llvm_passes.inl.erb"
-    data_file = "$llvmbackend_dir/transforms/passes/passes.yaml"
-    requires = [ "$llvmbackend_templates_dir/llvm_pass.rb" ]
+    data = [ "$llvmbackend_dir/transforms/passes/passes.yaml" ]
+    api = [ "$llvmbackend_templates_dir/llvm_pass.rb" ]
     output_file = "$target_gen_dir/llvm_passes.inl"
   }
 
   ark_gen_file("libllvmbackend_llvm_options_gen_h") {
     template_file = "$ark_root/templates/options/options.h.erb"
-    data_file = "llvmbackend.yaml"
-    requires = [ "$ark_root/templates/common.rb" ]
+    data = [ "llvmbackend.yaml" ]
+    api = [ "$ark_root/templates/common.rb" ]
     output_file = "$target_gen_dir/llvm_options_gen.h"
   }
 
   ark_gen_file("libllvmbackend_llvm_logger_components_inc") {
     template_file =
         "$ark_root/templates/logger_components/logger_components.inc.erb"
-    data_file = "llvmbackend.yaml"
-    requires = [ "$ark_root/templates/common.rb" ]
+    data = [ "llvmbackend.yaml" ]
+    api = [ "$ark_root/templates/common.rb" ]
     output_file = "$target_gen_dir/llvm_logger_components.inc"
   }
 
   ark_gen_file("libllvmbackend_emit_intrinsic_llvm_ir_constructor_gen_inl") {
     extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
     template_file = "templates/emit_intrinsic_llvm_ir_constructor_gen.inl.erb"
-    data_file = "$ark_plugin_options_yaml"
-    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    data = [ ark_plugin_options_yaml ]
+    api = [ "$ark_root/templates/plugin_options.rb" ]
     output_file = "$target_gen_dir/emit_intrinsic_llvm_ir_constructor_gen.inl"
   }
 
   ark_gen_file("libllvmbackend_llvm_ir_constructor_gen_inl") {
     extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
     template_file = "templates/llvm_ir_constructor_gen.inl.erb"
-    data_file = "$ark_plugin_options_yaml"
-    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    data = [ ark_plugin_options_yaml ]
+    api = [ "$ark_root/templates/plugin_options.rb" ]
     output_file = "$target_gen_dir/llvm_ir_constructor_gen.inl"
   }
 
   ark_gen_file("libllvmbackend_llvm_ir_constructor_gen_h_inl") {
     extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
     template_file = "templates/llvm_ir_constructor_gen.h.inl.erb"
-    data_file = "$ark_plugin_options_yaml"
-    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    data = [ ark_plugin_options_yaml ]
+    api = [ "$ark_root/templates/plugin_options.rb" ]
     output_file = "$target_gen_dir/llvm_ir_constructor_gen.h.inl"
   }
 
@@ -246,8 +238,8 @@ if (is_llvmbackend) {
     extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
     template_file =
         "templates/get_intrinsic_id_llvm_ark_interface_gen.h.inl.erb"
-    data_file = "$ark_plugin_options_yaml"
-    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    data = [ ark_plugin_options_yaml ]
+    api = [ "$ark_root/templates/plugin_options.rb" ]
     output_file =
         "$target_gen_dir/get_intrinsic_id_llvm_ark_interface_gen.h.inl"
   }
@@ -255,8 +247,8 @@ if (is_llvmbackend) {
   ark_gen_file("libllvmbackend_get_intrinsic_id_llvm_ark_interface_gen_inl") {
     extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
     template_file = "templates/get_intrinsic_id_llvm_ark_interface_gen.inl.erb"
-    data_file = "$ark_plugin_options_yaml"
-    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    data = [ ark_plugin_options_yaml ]
+    api = [ "$ark_root/templates/plugin_options.rb" ]
     output_file = "$target_gen_dir/get_intrinsic_id_llvm_ark_interface_gen.inl"
   }
 

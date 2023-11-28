@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@ import { cons, car, cdr, vundefined }
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 1 # only conversion of  LoadStatic $dynmodule... left
 //! INST_COUNT   "Intrinsic.CompilerConvertLocalToJSValue", 3 # cannot remove because we return JSValue
 //! INST_NOT     "Intrinsic.CompilerConvertRefTypeToLocal"
+
 
 function call_tree(x: int): JSValue {
     let list = cons(x, -1);
@@ -121,8 +122,7 @@ function test_call_hoist_scope_start(): int {
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 2
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 1 # conversion of JSRuntimeGetPropertyJSValue to local, NOTE(aefremov): remove
 //! INST_COUNT   "Intrinsic.CompilerConvertLocalToF64", 1
-// # NOTE(aefremov) #14626 Optimize type-specific get/set property intrinsics
-// //! INST_NOT     "Intrinsic.CompilerConvertLocalToJSValue"
+//! INST_NOT     "Intrinsic.CompilerConvertLocalToJSValue"
 
 function loop_into_scope(): int {
     let list = cons(1, vundefined);

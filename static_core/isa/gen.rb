@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -78,10 +78,11 @@ optparser = OptionParser.new do |opts|
   opts.banner = 'Usage: gen.rb [options]'
 
   opts.on('-t', '--template FILE', 'Template for file generation (required)')
-  opts.on('-d', '--data FILE', 'Source data in YAML format (required)')
+  opts.on('-d', '--data FILE1,FILE2,...', Array, 'Source data files in YAML format')
+  opts.on('-q', '--api FILE1,FILE2,...', Array, 'Ruby files providing api for data in YAML format')
   opts.on('-o', '--output FILE', 'Output file (default is stdout)')
   opts.on('-a', '--assert FILE', 'Go through assertions on data provided and exit')
-  opts.on('-r', '--require foo,bar,baz', Array, 'List of files to be required for generation')
+  opts.on('-r', '--require foo,bar,baz', Array, 'List of additional Ruby files to be required for generation')
 
   opts.on('-h', '--help', 'Prints this help') do
     puts opts
@@ -91,11 +92,15 @@ end
 optparser.parse!(into: options)
 
 check_option(optparser, options, :data)
-data = YAML.load_file(File.expand_path(options.data))
-data = JSON.parse(data.to_json, object_class: OpenStruct).freeze
-
-options&.require&.each { |r| require File.expand_path(r) } if options.require
-Gen.on_require(data)
+check_option(optparser, options, :api)
+raise "'api' and 'data' must be of equal length" if options.api.length != options.data.length
+options.api.zip(options.data).each do |api_file, data_file|
+  data = YAML.load_file(File.expand_path(data_file))
+  data = JSON.parse(data.to_json, object_class: OpenStruct).freeze
+  require File.expand_path(api_file)
+  Gen.on_require(data)
+end
+options.require&.each { |r| require File.expand_path(r) }
 
 if options.assert
   require options.assert

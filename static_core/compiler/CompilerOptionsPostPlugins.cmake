@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,10 +23,10 @@ add_custom_target(compiler_options_merge DEPENDS ${GEN_COMPILER_OPTIONS_YAML})
 
 set(COMPILER_OPTIONS_GEN_H ${CMAKE_CURRENT_BINARY_DIR}/compiler/generated/compiler_options_gen.h)
 panda_gen_file(
-    DATAFILE ${GEN_COMPILER_OPTIONS_YAML}
+    DATA ${GEN_COMPILER_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/templates/options/options.h.erb
     OUTPUTFILE ${COMPILER_OPTIONS_GEN_H}
-    REQUIRES ${PANDA_ROOT}/templates/common.rb
+    API ${PANDA_ROOT}/templates/common.rb
 )
 add_custom_target(compiler_options DEPENDS ${COMPILER_OPTIONS_GEN_H})
 add_dependencies(panda_gen_files compiler_options)

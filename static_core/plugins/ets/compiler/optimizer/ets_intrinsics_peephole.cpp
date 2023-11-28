@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,7 +166,7 @@ bool TryInsertCallInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr klas
     return true;
 }
 
-bool Peepholes::PeepholeLdObjByName(GraphVisitor *v, IntrinsicInst *intrinsic)
+bool Peepholes::PeepholeLdObjByName([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     auto klassPtr = GetClassPtrForObject(intrinsic);
     if (klassPtr == nullptr) {
@@ -180,17 +180,15 @@ bool Peepholes::PeepholeLdObjByName(GraphVisitor *v, IntrinsicInst *intrinsic)
     ASSERT(rawField != nullptr);
 
     if (TryInsertFieldInst<false>(intrinsic, klassPtr, rawField, fieldId)) {
-        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), intrinsic);
         return true;
     }
     if (TryInsertCallInst<false>(intrinsic, klassPtr, rawField)) {
-        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), intrinsic);
         return true;
     }
     return false;
 }
 
-bool Peepholes::PeepholeStObjByName(GraphVisitor *v, IntrinsicInst *intrinsic)
+bool Peepholes::PeepholeStObjByName([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     auto klassPtr = GetClassPtrForObject(intrinsic);
     if (klassPtr == nullptr) {
@@ -204,14 +202,101 @@ bool Peepholes::PeepholeStObjByName(GraphVisitor *v, IntrinsicInst *intrinsic)
     ASSERT(rawField != nullptr);
 
     if (TryInsertFieldInst<true>(intrinsic, klassPtr, rawField, fieldId)) {
-        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), intrinsic);
         return true;
     }
     if (TryInsertCallInst<true>(intrinsic, klassPtr, rawField)) {
-        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), intrinsic);
         return true;
     }
     return false;
 }
+
+#ifdef PANDA_ETS_INTEROP_JS
+
+bool Peepholes::TryFuseGetPropertyAndCast(IntrinsicInst *intrinsic, RuntimeInterface::IntrinsicId newId)
+{
+    auto input = intrinsic->GetInput(0).GetInst();
+    if (!input->HasSingleUser() || input->GetBasicBlock() != intrinsic->GetBasicBlock()) {
+        return false;
+    }
+    if (!input->IsIntrinsic() || input->CastToIntrinsic()->GetIntrinsicId() !=
+                                     RuntimeInterface::IntrinsicId::INTRINSIC_JS_RUNTIME_GET_PROPERTY_JS_VALUE) {
+        return false;
+    }
+    for (auto inst = input->GetNext(); inst != intrinsic; inst = inst->GetNext()) {
+        ASSERT(inst != nullptr);
+        if (inst->IsNotRemovable()) {
+            return false;
+        }
+    }
+    input->CastToIntrinsic()->SetIntrinsicId(newId);
+    input->SetType(intrinsic->GetType());
+    intrinsic->ReplaceUsers(input);
+    intrinsic->GetBasicBlock()->RemoveInst(intrinsic);
+    intrinsic->SetNext(input->GetNext());  // Fix for InstForwardIterator in Peepholes visitor
+    return true;
+}
+
+bool Peepholes::PeepholeJSRuntimeGetValueString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    return static_cast<Peepholes *>(v)->TryFuseGetPropertyAndCast(
+        intrinsic, RuntimeInterface::IntrinsicId::INTRINSIC_JS_RUNTIME_GET_PROPERTY_STRING);
+}
+
+bool Peepholes::PeepholeJSRuntimeGetValueDouble([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    return static_cast<Peepholes *>(v)->TryFuseGetPropertyAndCast(
+        intrinsic, RuntimeInterface::IntrinsicId::INTRINSIC_JS_RUNTIME_GET_PROPERTY_DOUBLE);
+}
+
+bool Peepholes::PeepholeJSRuntimeGetValueBoolean([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    return static_cast<Peepholes *>(v)->TryFuseGetPropertyAndCast(
+        intrinsic, RuntimeInterface::IntrinsicId::INTRINSIC_JS_RUNTIME_GET_PROPERTY_BOOLEAN);
+}
+
+bool Peepholes::TryFuseCastAndSetProperty(IntrinsicInst *intrinsic, RuntimeInterface::IntrinsicId newId)
+{
+    size_t userCount = 0;
+    constexpr size_t STORE_VALUE_IDX = 2;
+    constexpr auto SET_PROP_ID = RuntimeInterface::IntrinsicId::INTRINSIC_JS_RUNTIME_SET_PROPERTY_JS_VALUE;
+    for (auto &user : intrinsic->GetUsers()) {
+        ++userCount;
+        if (user.GetIndex() != STORE_VALUE_IDX || !user.GetInst()->IsIntrinsic() ||
+            user.GetInst()->CastToIntrinsic()->GetIntrinsicId() != SET_PROP_ID) {
+            return false;
+        }
+    }
+    auto userIt = intrinsic->GetUsers().begin();
+    for (size_t userIdx = 0; userIdx < userCount; ++userIdx) {
+        ASSERT(userIt != intrinsic->GetUsers().end());
+        auto *storeInst = userIt->GetInst();
+        auto newValue = intrinsic->GetInput(0).GetInst();
+        storeInst->CastToIntrinsic()->SetIntrinsicId(newId);
+        storeInst->ReplaceInput(intrinsic, newValue);
+        storeInst->CastToIntrinsic()->SetInputType(STORE_VALUE_IDX, newValue->GetType());
+        userIt = intrinsic->GetUsers().begin();
+    }
+    return true;
+}
+
+bool Peepholes::PeepholeJSRuntimeNewJSValueString(GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    return static_cast<Peepholes *>(v)->TryFuseCastAndSetProperty(
+        intrinsic, RuntimeInterface::IntrinsicId::INTRINSIC_JS_RUNTIME_SET_PROPERTY_STRING);
+}
+
+bool Peepholes::PeepholeJSRuntimeNewJSValueDouble(GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    return static_cast<Peepholes *>(v)->TryFuseCastAndSetProperty(
+        intrinsic, RuntimeInterface::IntrinsicId::INTRINSIC_JS_RUNTIME_SET_PROPERTY_DOUBLE);
+}
+
+bool Peepholes::PeepholeJSRuntimeNewJSValueBoolean(GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    return static_cast<Peepholes *>(v)->TryFuseCastAndSetProperty(
+        intrinsic, RuntimeInterface::IntrinsicId::INTRINSIC_JS_RUNTIME_SET_PROPERTY_BOOLEAN);
+}
+
+#endif
 
 }  // namespace ark::compiler

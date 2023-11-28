@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -766,6 +766,98 @@ void AsmEmitter::MakeStringItems(ItemContainer *items, const Program &program,
     }
 }
 
+template <Value::Type TYPE, typename CType = ValueTypeHelperT<TYPE>>
+static ScalarValue CreateValue(const LiteralArray::Literal &literal)
+{
+    if constexpr (std::is_same_v<CType, ValueTypeHelperT<TYPE>> && std::is_integral_v<CType>) {
+        return ScalarValue::Create<TYPE>(std::get<std::make_unsigned_t<CType>>(literal.value));
+    } else {
+        return ScalarValue::Create<TYPE>(std::get<CType>(literal.value));
+    }
+}
+
+template <Value::Type TYPE, typename... T>
+static ScalarValue CheckAndCreateArrayValue(const LiteralArray::Literal &literal,
+                                            [[maybe_unused]] const Program &program)
+{
+    ASSERT(program.arrayTypes.find(Type(AnnotationElement::TypeToString(TYPE), 1)) != program.arrayTypes.end());
+    return CreateValue<TYPE, T...>(literal);
+}
+
+static ScalarValue MakeLiteralItemArrayValue(const LiteralArray::Literal &literal, const Program &program)
+{
+    switch (literal.tag) {
+        case panda_file::LiteralTag::ARRAY_U1:
+            return CheckAndCreateArrayValue<Value::Type::U1, bool>(literal, program);
+        case panda_file::LiteralTag::ARRAY_U8:
+            return CheckAndCreateArrayValue<Value::Type::U8>(literal, program);
+        case panda_file::LiteralTag::ARRAY_I8:
+            return CheckAndCreateArrayValue<Value::Type::I8>(literal, program);
+        case panda_file::LiteralTag::ARRAY_U16:
+            return CheckAndCreateArrayValue<Value::Type::U16>(literal, program);
+        case panda_file::LiteralTag::ARRAY_I16:
+            return CheckAndCreateArrayValue<Value::Type::I16>(literal, program);
+        case panda_file::LiteralTag::ARRAY_U32:
+            return CheckAndCreateArrayValue<Value::Type::U32>(literal, program);
+        case panda_file::LiteralTag::ARRAY_I32:
+            return CheckAndCreateArrayValue<Value::Type::I32>(literal, program);
+        case panda_file::LiteralTag::ARRAY_U64:
+            return CheckAndCreateArrayValue<Value::Type::U64>(literal, program);
+        case panda_file::LiteralTag::ARRAY_I64:
+            return CheckAndCreateArrayValue<Value::Type::I64>(literal, program);
+        case panda_file::LiteralTag::ARRAY_F32:
+            return CheckAndCreateArrayValue<Value::Type::F32>(literal, program);
+        case panda_file::LiteralTag::ARRAY_F64:
+            return CheckAndCreateArrayValue<Value::Type::F64>(literal, program);
+        case panda_file::LiteralTag::ARRAY_STRING: {
+            [[maybe_unused]] auto stringType =
+                Type::FromDescriptor(ark::panda_file::GetStringClassDescriptor(program.lang));
+            // `arrayTypes` may contain class name both with / and . depending on source language (workaround
+            // for #5776)
+            ASSERT(program.arrayTypes.find(Type(stringType, 1)) != program.arrayTypes.end() ||
+                   program.arrayTypes.find(Type(stringType.GetPandasmName(), 1)) != program.arrayTypes.end());
+            return CreateValue<Value::Type::STRING, std::string>(literal);
+        }
+        default:
+            UNREACHABLE();
+    }
+}
+
+static ScalarValue MakeLiteralItemValue(const LiteralArray::Literal &literal, const Program &program)
+{
+    if (literal.IsArray()) {
+        return MakeLiteralItemArrayValue(literal, program);
+    }
+    switch (literal.tag) {
+        case panda_file::LiteralTag::TAGVALUE:
+        case panda_file::LiteralTag::ACCESSOR:
+        case panda_file::LiteralTag::NULLVALUE:
+            return CreateValue<Value::Type::U8>(literal);
+        case panda_file::LiteralTag::BOOL:
+            return CreateValue<Value::Type::U8, bool>(literal);
+        case panda_file::LiteralTag::METHODAFFILIATE:
+            return CreateValue<Value::Type::U16>(literal);
+        case panda_file::LiteralTag::INTEGER:
+            return CreateValue<Value::Type::I32>(literal);
+        case panda_file::LiteralTag::BIGINT: {
+            return CreateValue<Value::Type::I64>(literal);
+        }
+        case panda_file::LiteralTag::FLOAT:
+            return CreateValue<Value::Type::F32>(literal);
+        case panda_file::LiteralTag::DOUBLE:
+            return CreateValue<Value::Type::F64>(literal);
+        case panda_file::LiteralTag::STRING:
+            return CreateValue<Value::Type::STRING, std::string>(literal);
+        case panda_file::LiteralTag::METHOD:
+        case panda_file::LiteralTag::GENERATORMETHOD:
+        case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
+        case panda_file::LiteralTag::ASYNCMETHOD:
+            return CreateValue<Value::Type::METHOD, std::string>(literal);
+        default:
+            UNREACHABLE();
+    }
+}
+
 /* static */
 void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                                   AsmEmitter::AsmEntityCollections &entities)
@@ -775,133 +867,9 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
         std::vector<panda_file::LiteralItem> literalArray;
 
         for (auto &literal : l.literals) {
-            std::unique_ptr<ScalarValue> value;
-
-            switch (literal.tag) {
-                case panda_file::LiteralTag::ARRAY_U1: {
-                    ASSERT(program.arrayTypes.find(Type("u1", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-                        ScalarValue::Create<Value::Type::U1>(static_cast<bool>(std::get<bool>(literal.value))));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_U8: {
-                    ASSERT(program.arrayTypes.find(Type("u8", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::U8>(std::get<uint8_t>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I8: {
-                    ASSERT(program.arrayTypes.find(Type("i8", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::I8>(std::get<uint8_t>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_U16: {
-                    ASSERT(program.arrayTypes.find(Type("u16", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::U16>(std::get<uint16_t>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I16: {
-                    ASSERT(program.arrayTypes.find(Type("i16", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::I16>(std::get<uint16_t>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_U32: {
-                    ASSERT(program.arrayTypes.find(Type("u32", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::U32>(std::get<uint32_t>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I32: {
-                    ASSERT(program.arrayTypes.find(Type("i32", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::I32>(std::get<uint32_t>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_U64: {
-                    ASSERT(program.arrayTypes.find(Type("u64", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::U64>(std::get<uint64_t>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I64: {
-                    ASSERT(program.arrayTypes.find(Type("i64", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::I64>(std::get<uint64_t>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_F32: {
-                    ASSERT(program.arrayTypes.find(Type("f32", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::F32>(std::get<float>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_F64: {
-                    ASSERT(program.arrayTypes.find(Type("f64", 1)) != program.arrayTypes.end());
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::F64>(std::get<double>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_STRING:
-                    // clang-format off
-                    ASSERT(program.arrayTypes.find(Type(
-                        Type::FromDescriptor(ark::panda_file::GetStringClassDescriptor(program.lang)), 1)) !=
-                        program.arrayTypes.end());
-                    // clang-format on
-                    value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
-                        std::string_view(std::get<std::string>(literal.value))));
-                    break;
-                case panda_file::LiteralTag::TAGVALUE:
-                case panda_file::LiteralTag::ACCESSOR:
-                case panda_file::LiteralTag::NULLVALUE:
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::U8>(static_cast<uint8_t>(std::get<uint8_t>(literal.value))));
-                    break;
-                case panda_file::LiteralTag::BOOL:
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::U8>(static_cast<uint8_t>(std::get<bool>(literal.value))));
-                    break;
-                case panda_file::LiteralTag::METHODAFFILIATE:
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::U16>(std::get<uint16_t>(literal.value)));
-                    break;
-                case panda_file::LiteralTag::INTEGER:
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::I32>(std::get<uint32_t>(literal.value)));
-                    break;
-                case panda_file::LiteralTag::BIGINT: {
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::I64>(std::get<uint64_t>(literal.value)));
-                    break;
-                }
-                case panda_file::LiteralTag::FLOAT:
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::F32>(std::get<float>(literal.value)));
-                    break;
-                case panda_file::LiteralTag::DOUBLE:
-                    value = std::make_unique<ScalarValue>(
-                        ScalarValue::Create<Value::Type::F64>(std::get<double>(literal.value)));
-                    break;
-                case panda_file::LiteralTag::STRING:
-                    value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
-                        std::string_view(std::get<std::string>(literal.value))));
-                    break;
-                case panda_file::LiteralTag::METHOD:
-                case panda_file::LiteralTag::GENERATORMETHOD:
-                case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
-                case panda_file::LiteralTag::ASYNCMETHOD:
-                    value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::METHOD>(
-                        std::string_view(std::get<std::string>(literal.value))));
-                    break;
-                default:
-                    UNREACHABLE();
-            }
-
+            auto value = MakeLiteralItemValue(literal, program);
             // the return pointer of vector element should not be rewrited
-            CreateLiteralItem(items, value.get(), &literalArray, entities.methodItems);
+            CreateLiteralItem(items, &value, &literalArray, entities.methodItems);
         }
 
         literalArrayItem->AddItems(literalArray);

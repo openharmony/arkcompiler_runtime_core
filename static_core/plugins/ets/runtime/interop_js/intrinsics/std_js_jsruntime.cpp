@@ -97,6 +97,9 @@ static const IntrinsicsAPI S_INTRINSICS_API = {
     NotImplementedAdapter,
     NotImplementedAdapter,
     NotImplementedAdapter,
+    NotImplementedAdapter,
+    NotImplementedAdapter,
+    NotImplementedAdapter,
     // clang-format on
 };
 
@@ -121,6 +124,11 @@ EtsVoid *JSRuntimeFinalizationRegistryCallbackIntrinsic(EtsObject *obj)
 JSValue *JSRuntimeNewJSValueDoubleIntrinsic(double v)
 {
     return S_INTRINSICS_API->JSRuntimeNewJSValueDouble(v);
+}
+
+JSValue *JSRuntimeNewJSValueBooleanIntrinsic(uint8_t v)
+{
+    return S_INTRINSICS_API->JSRuntimeNewJSValueBoolean(v);
 }
 
 JSValue *JSRuntimeNewJSValueStringIntrinsic(EtsString *v)
@@ -168,6 +176,11 @@ EtsString *JSRuntimeGetPropertyStringIntrinsic(JSValue *etsJsValue, EtsString *e
     return S_INTRINSICS_API->JSRuntimeGetPropertyString(etsJsValue, etsPropName);
 }
 
+uint8_t JSRuntimeGetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPropName)
+{
+    return static_cast<uint8_t>(S_INTRINSICS_API->JSRuntimeGetPropertyBoolean(etsJsValue, etsPropName));
+}
+
 EtsVoid *JSRuntimeSetPropertyJSValueIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, JSValue *value)
 {
     S_INTRINSICS_API->JSRuntimeSetPropertyJSValue(etsJsValue, etsPropName, value);
@@ -183,6 +196,12 @@ EtsVoid *JSRuntimeSetPropertyDoubleIntrinsic(JSValue *etsJsValue, EtsString *ets
 EtsVoid *JSRuntimeSetPropertyStringIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, EtsString *value)
 {
     S_INTRINSICS_API->JSRuntimeSetPropertyString(etsJsValue, etsPropName, value);
+    return EtsVoid::GetInstance();
+}
+
+EtsVoid *JSRuntimeSetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, uint8_t value)
+{
+    S_INTRINSICS_API->JSRuntimeSetPropertyBoolean(etsJsValue, etsPropName, static_cast<bool>(value));
     return EtsVoid::GetInstance();
 }
 

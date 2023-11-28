@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,9 +13,9 @@
 
 set(INTRINSICS_INL_H ${PANDA_BINARY_ROOT}/runtime/include/intrinsics.inl.h)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/runtime/templates/intrinsics.inl.h.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES plugin_options_merge
     OUTPUTFILE ${INTRINSICS_INL_H}
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,8 +118,7 @@ private:
         } else {
             COMPILER_LOG(DEBUG, PEEPHOLE) << "Peephole is applied for " << GetOpcodeString(inst->GetOpcode());
         }
-        inst->GetBasicBlock()->GetGraph()->GetEventWriter().EventPeephole(GetOpcodeString(inst->GetOpcode()),
-                                                                          inst->GetId(), inst->GetPc());
+        GetGraph()->GetEventWriter().EventPeephole(GetOpcodeString(inst->GetOpcode()), inst->GetId(), inst->GetPc());
         if (g_options.IsCompilerDumpPeepholes()) {
             std::string name(GetPassName());
             name += "_" + std::to_string(applyIndex_);

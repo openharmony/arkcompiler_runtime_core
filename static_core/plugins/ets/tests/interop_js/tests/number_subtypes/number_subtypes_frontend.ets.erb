@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,30 +25,25 @@ import {
 //! METHOD       "jscall_<%= primitive.getName %>"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jscall::invoke/
-//! INST    "Intrinsic.JSRuntimeGetValueDouble"
+//! INST         "Intrinsic.JSRuntimeGetValueDouble"
 
 //! CHECKER      jsnew_getproperty<%= primitive.getName %> JIT
 //! RUN          force_jit: true, entry: "jsnew_getproperty<%= primitive.getName %>", options: "--compiler-regex=ETSGLOBAL::jsnew_getproperty<%= primitive.getName %>"
 //! METHOD       "jsnew_getproperty<%= primitive.getName %>"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST         "Intrinsic.JSRuntimeGetPropertyJSValue"
-//! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
+//! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
+//! INST_NOT     "Intrinsic.JSRuntimeGetValueDouble"
 
 //! CHECKER      jsnew_setproperty<%= primitive.getName %> JIT
 //! RUN          force_jit: true, entry: "jsnew_setproperty<%= primitive.getName %>", options: "--compiler-regex=ETSGLOBAL::jsnew_setproperty<%= primitive.getName %>"
 //! METHOD       "jsnew_setproperty<%= primitive.getName %>"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
-//! # NOTE: enable after fixing #14501
-% # if primitive.getName == 'double'
-//! # INST    "Intrinsic.JSRuntimeSetPropertyDouble"
-% # else
-//! # INST_NOT     "Intrinsic.JSRuntimeSetPropertyDouble"
-//! # INST    /CallStatic.*JSRuntime::setProperty<%= primitive.getName.capitalize %>/
-% # end
-//! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
-//! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
+//! INST_COUNT   "Intrinsic.JSRuntimeSetPropertyDouble", 2
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
+//! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
 
 //! CHECKER      jscall_static_method_<%= primitive.getName %> JIT
 //! RUN          force_jit: true, entry: "jscall_static_method_<%= primitive.getName %>", options: "--compiler-regex=ETSGLOBAL::jscall_static_method_<%= primitive.getName %>"
@@ -56,7 +51,7 @@ import {
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_NOT     /CallStatic.*jscall::invoke/
-//! INST    "Intrinsic.JSRuntimeGetValueDouble"
+//! INST         "Intrinsic.JSRuntimeGetValueDouble"
 
 % end
 

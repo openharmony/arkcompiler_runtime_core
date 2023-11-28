@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,7 +157,7 @@ bool RegAccAlloc::CanUserReadAcc(compiler::Inst *inst, compiler::Inst *user) con
         return false;
     }
 
-    if (user->IsCall()) {
+    if (user->IsCallOrIntrinsic()) {
         return user->GetInputsCount() <= (MAX_NUM_NON_RANGE_ARGS + 1U);  // +1 for SaveState
     }
 
@@ -213,7 +213,7 @@ void RegAccAlloc::SetNeedLda(compiler::Inst *inst, bool need)
     if (!IsAccRead(inst)) {
         return;
     }
-    if (inst->IsCall()) {  // we never need lda for calls
+    if (inst->IsCallOrIntrinsic()) {  // we never need lda for calls
         return;
     }
     compiler::Register reg = need ? compiler::INVALID_REG : compiler::ACC_REG_ID;
@@ -323,7 +323,7 @@ bool RegAccAlloc::RunImpl()
                 continue;
             }
 
-            if (inst->IsCall()) {
+            if (inst->IsCallOrIntrinsic()) {
                 continue;
             }
 

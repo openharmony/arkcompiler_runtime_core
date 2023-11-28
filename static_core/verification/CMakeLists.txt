@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,8 +23,8 @@ set(ABS_INT_TEMPLATES
 foreach(TEMPLATE_NAME ${ABS_INT_TEMPLATES})
     set(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/include/${TEMPLATE_NAME}.h")
     panda_gen_file(
-        DATAFILE "${PANDA_ROOT}/verification/verification.yaml"
-        REQUIRES "${PANDA_ROOT}/verification/verification.rb"
+        DATA "${PANDA_ROOT}/verification/verification.yaml"
+        API "${PANDA_ROOT}/verification/verification.rb"
         TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/gen/templates/${TEMPLATE_NAME}.h.erb"
         OUTPUTFILE ${OUTPUT}
     )
@@ -57,7 +57,7 @@ panda_gen_messages(
 panda_gen(
     TARGET_NAME messages_data_${PROJECT_NAME}
     DATA ${PANDA_ROOT}/verification/messages.yaml
-    REQUIRES ${PANDA_ROOT}/templates/messages.rb
+    API ${PANDA_ROOT}/templates/messages.rb
     SOURCE ${PANDA_ROOT}/verification/gen/templates
     TEMPLATES verifier_messages_data_gen.cpp.erb
 )

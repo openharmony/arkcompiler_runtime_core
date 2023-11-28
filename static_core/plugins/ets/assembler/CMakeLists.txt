@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,10 +18,10 @@ panda_target_include_directories(arkassembler_obj PUBLIC ${EXTENSION_DIR})
 
 set(ETS_META_GEN_H ${PANDA_BINARY_ROOT}/assembler/ets_meta_gen.h)
 panda_gen_file(
-    DATAFILE ${PANDA_ETS_PLUGIN_SOURCE}/assembler/extension/metadata.yaml
+    DATA ${PANDA_ETS_PLUGIN_SOURCE}/assembler/extension/metadata.yaml
     TEMPLATE ${PANDA_ROOT}/assembler/templates/meta_gen.cpp.erb
     OUTPUTFILE ${ETS_META_GEN_H}
-    REQUIRES ${PANDA_ROOT}/assembler/asm_metadata.rb
+    API ${PANDA_ROOT}/assembler/asm_metadata.rb
 )
 add_custom_target(ets_meta_gen_h DEPENDS ${ETS_META_GEN_H})
 add_dependencies(arkassembler_obj ets_meta_gen_h)

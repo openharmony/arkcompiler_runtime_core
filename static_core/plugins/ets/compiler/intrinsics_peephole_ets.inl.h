@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,5 +19,16 @@ static bool PeepholeStringEquals(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeStringSubstring(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeLdObjByName(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeStObjByName(GraphVisitor *v, IntrinsicInst *intrinsic);
+
+#ifdef PANDA_ETS_INTEROP_JS
+bool TryFuseGetPropertyAndCast(IntrinsicInst *intrinsic, RuntimeInterface::IntrinsicId newId);
+static bool PeepholeJSRuntimeGetValueString(GraphVisitor *v, IntrinsicInst *intrinsic);
+static bool PeepholeJSRuntimeGetValueDouble(GraphVisitor *v, IntrinsicInst *intrinsic);
+static bool PeepholeJSRuntimeGetValueBoolean(GraphVisitor *v, IntrinsicInst *intrinsic);
+bool TryFuseCastAndSetProperty(IntrinsicInst *intrinsic, RuntimeInterface::IntrinsicId newId);
+static bool PeepholeJSRuntimeNewJSValueString(GraphVisitor *v, IntrinsicInst *intrinsic);
+static bool PeepholeJSRuntimeNewJSValueDouble(GraphVisitor *v, IntrinsicInst *intrinsic);
+static bool PeepholeJSRuntimeNewJSValueBoolean(GraphVisitor *v, IntrinsicInst *intrinsic);
+#endif
 
 #endif  // PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_PEEPHOLE_ETS_INL_H

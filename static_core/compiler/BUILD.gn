@@ -365,7 +365,7 @@ ark_isa_gen("isa_gen_libarkcompiler") {
 }
 
 ark_gen("libarkcompiler_intrinsics_gen_inl") {
-  data = "$target_gen_dir/../runtime/intrinsics.yaml"
+  data = [ "$target_gen_dir/../runtime/intrinsics.yaml" ]
   template_files = [
     "intrinsics_enum.inl.erb",
     "get_intrinsics.inl.erb",
@@ -385,15 +385,15 @@ ark_gen("libarkcompiler_intrinsics_gen_inl") {
   ]
   sources = "optimizer/templates/intrinsics"
   destination = "$target_gen_dir/generated"
-  requires = [
+  api = [
     "$ark_root/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
-    "$ark_root/libpandabase/utils.rb",
   ]
+  requires = [ "$ark_root/libpandabase/utils.rb" ]
   extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
 }
 
 ark_gen("libarkcompiler_opcodes_h") {
-  data = "$ark_root/compiler/optimizer/ir/instructions.yaml"
+  data = [ "$ark_root/compiler/optimizer/ir/instructions.yaml" ]
   template_files = [
     "opcodes.h.erb",
     "arch_info_gen.h.erb",
@@ -404,168 +404,168 @@ ark_gen("libarkcompiler_opcodes_h") {
   ]
   sources = "optimizer/templates"
   destination = "$target_gen_dir/generated"
-  requires = [ "$ark_root/compiler/optimizer/templates/instructions.rb" ]
+  api = [ "$ark_root/compiler/optimizer/templates/instructions.rb" ]
 }
 
 ark_gen_file("compiler_options_gen_h") {
   template_file = "$ark_root/templates/options/options.h.erb"
-  data_file = "$target_gen_dir/generated/compiler_options.yaml"
-  requires = [ "$ark_root/templates/common.rb" ]
+  data = [ "$target_gen_dir/generated/compiler_options.yaml" ]
+  api = [ "$ark_root/templates/common.rb" ]
   output_file = "$target_gen_dir/generated/compiler_options_gen.h"
   extra_dependencies = [ "$ark_root:merge_compiler_options_yamls" ]
 }
 
 ark_gen_file("cpu_features_gen_inc") {
   template_file = "$ark_root/templates/cpu_features.inc.erb"
-  data_file = "compiler.yaml"
-  requires = [ "$ark_root/templates/common.rb" ]
+  data = [ "compiler.yaml" ]
+  api = [ "$ark_root/templates/common.rb" ]
   output_file = "$target_gen_dir/generated/cpu_features.inc"
 }
 
 ark_gen_file("compiler_events_gen_h") {
   template_file = "$ark_root/templates/events/events.h.erb"
-  data_file = "compiler.yaml"
-  requires = [ "$ark_root/templates/common.rb" ]
+  data = [ "compiler.yaml" ]
+  api = [ "$ark_root/templates/common.rb" ]
   output_file = "$target_gen_dir/generated/compiler_events_gen.h"
 }
 
 ark_gen_file("compiler_logger_components_inc") {
   template_file =
       "$ark_root/templates/logger_components/logger_components.inc.erb"
-  data_file = "compiler.yaml"
-  requires = [ "$ark_root/templates/common.rb" ]
+  data = [ "compiler.yaml" ]
+  api = [ "$ark_root/templates/common.rb" ]
   output_file = "$target_gen_dir/generated/compiler_logger_components.inc"
 }
 ark_gen_file("intrinsics_codegen_ext_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file =
       "optimizer/templates/intrinsics/intrinsics_codegen_ext.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_codegen_ext.inl.h"
 }
 ark_gen_file("intrinsics_inline_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/intrinsics/intrinsics_inline.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_inline.inl.h"
 }
 ark_gen_file("intrinsics_inline_native_method_inl") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file =
       "optimizer/templates/intrinsics/intrinsics_inline_native_method.inl.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_inline_native_method.inl"
 }
 ark_gen_file("intrinsics_peephole_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/intrinsics/intrinsics_peephole.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_peephole.inl.h"
 }
 ark_gen_file("intrinsics_graph_checker_inl") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file =
       "optimizer/templates/intrinsics/intrinsics_graph_checker.inl.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_graph_checker.inl"
 }
 ark_gen_file("intrinsics_ir_build_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/intrinsics/intrinsics_ir_build.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_ir_build.inl.h"
 }
 ark_gen_file("intrinsics_ir_build_static_call_inl") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file =
       "optimizer/templates/intrinsics/intrinsics_ir_build_static_call.inl.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_ir_build_static_call.inl"
 }
 ark_gen_file("intrinsics_ir_build_virtual_call_inl") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file =
       "optimizer/templates/intrinsics/intrinsics_ir_build_virtual_call.inl.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_ir_build_virtual_call.inl"
 }
 ark_gen_file("intrinsics_can_encode_inl") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/intrinsics/intrinsics_can_encode.inl.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_can_encode.inl"
 }
 ark_gen_file("intrinsics_lse_heap_inv_args_inl") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file =
       "optimizer/templates/intrinsics/intrinsics_lse_heap_inv_args.inl.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_lse_heap_inv_args.inl"
 }
 
 ark_gen_file("ir_dyn_base_types_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/ir-dyn-base-types.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/ir-dyn-base-types.h"
 }
 
 ark_gen_file("pipeline_includes_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/pipeline_includes.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/pipeline_includes.h"
 }
 
 ark_gen_file("source_languages_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/source_languages.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/source_languages.h"
 }
 
 ark_gen_file("codegen_language_extensions_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/codegen_language_extensions.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/codegen_language_extensions.h"
 }
 
 ark_gen_file("compiler_interface_extensions_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/compiler_interface_extensions.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/compiler_interface_extensions.inl.h"
 }
 
 ark_gen_file("inst_builder_extensions_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/inst_builder_extensions.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/inst_builder_extensions.inl.h"
 }
 
 ark_gen_file("intrinsics_extensions_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/intrinsics_extensions.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_extensions.inl.h"
 }
 
@@ -573,8 +573,8 @@ if (enable_irtoc) {
   ark_gen_file("irtoc_interface_extensions_inl_h") {
     extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
     template_file = "optimizer/templates/irtoc_interface_extensions.inl.h.erb"
-    data_file = "$ark_plugin_options_yaml"
-    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    data = [ ark_plugin_options_yaml ]
+    api = [ "$ark_root/templates/plugin_options.rb" ]
     output_file = "$target_gen_dir/generated/irtoc_interface_extensions.inl.h"
   }
 
@@ -582,8 +582,8 @@ if (enable_irtoc) {
     extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
     template_file =
         "optimizer/templates/irtoc_interface_extensions_includes.inl.h.erb"
-    data_file = "$ark_plugin_options_yaml"
-    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    data = [ ark_plugin_options_yaml ]
+    api = [ "$ark_root/templates/plugin_options.rb" ]
     output_file =
         "$target_gen_dir/generated/irtoc_interface_extensions_includes.inl.h"
   }

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,12 +33,17 @@ OptionParser.new do |opts|
   opts.on('--paoc=PAOC', 'Path to paoc') do |v|
     options.paoc = v
   end
+  opts.on('--frontend=FRONTEND', 'Path to frontend binary')
   opts.on('--panda-options=OPTIONS', 'Default options for panda run') do |v|
     options.panda_options = v
   end
   opts.on('--paoc-options=OPTIONS', 'Default options for paoc run') do |v|
     options.paoc_options = v
   end
+  opts.on('--frontend-options=OPTIONS', 'Default options for frontend+bco run') do |v|
+    options.frontend_options = v
+  end
+  opts.on('--method=METHOD', 'Method to optimize')
   opts.on('--command-token=STRING', 'String that is recognized as command start') do |v|
     options.command_token = v
   end
@@ -59,7 +64,7 @@ def log
 end
 
 def raise_error(msg)
-  log.error "Test failed: #{@name}"
+  log.error "Test failed: #{$checker_name}"
   log.error msg
   log.error "Command to reproduce: #{$curr_cmd}"
   raise msg
@@ -87,7 +92,7 @@ class SearchScope
     @current_index = 0
   end
 
-  def find_llvm_method(match)
+  def find_method_dump(match)
     @lines = @lines.drop(@current_index)
     @current_index = 0
     find(match)
@@ -194,6 +199,7 @@ class Checker
     aborted_sig = 0
     entry = '_GLOBAL::main'
     env = ''
+    @args = ''
     args.each do |name, value|
       if name == :force_jit and value
         @args << '--compiler-hotness-threshold=0 --no-async-jit=true --compiler-enable-jit=true '
@@ -318,6 +324,51 @@ class Checker
     end
   end
 
+  def RUN_BCO(**args)
+    inputs = @options.test_file
+    output = "#{@cwd}/#{File.basename(@options.test_file, '.*')}.abc"
+    @args = ''
+
+    args.each do |name, value|
+      case name
+      when :options
+        @args << value
+      when :inputs
+        inputs = value
+      when :output
+        output = value
+      when :method
+        @args << "--bco-optimizer --method-regex=#{value}:.*"
+      end
+    end
+
+    clear_data
+    $curr_cmd = "#{@options.frontend} --opt-level=2 --dump-assembly --bco-compiler --compiler-dump \
+            #{@options.frontend_options} #{@args} --output=#{output} #{@options.source}"
+    log.debug "Frontend command: #{$curr_cmd}"
+
+    # See note on exec in RUN_PAOC
+    output, err_output, status = Open3.capture3("exec #{$curr_cmd}", chdir: @cwd.to_s)
+    if status.signaled?
+      if status.termsig != 0
+        puts output
+        log.error "#{@options.frontend} aborted with signal #{status.termsig}, but expected 0"
+        raise_error "Test '#{@name}' failed"
+      end
+    elsif status.exitstatus != 0
+      puts output
+      log.error "#{@options.frontend} returns code #{status.exitstatus}, but expected 0"
+      raise_error "Test '#{@name}' failed"
+    elsif !err_output.empty?
+      log.error "Bytecode optimizer failed, logs:"
+      puts err_output
+      raise_error "Test '#{@name}' failed"
+    end
+    File.open("#{@cwd}/console.out", "w") { |file| file.write(output) }
+    Open3.capture2e("cat #{@cwd}/console.out")
+    FileUtils.touch("#{@cwd}/events.csv")
+  end
+
   def RUN_LLVM(**args)
     raise SkipException unless @options.with_llvm
 
@@ -424,7 +475,14 @@ class Checker
   def LLVM_METHOD(match)
     return if @options.release
 
-    @ir_scope.find_llvm_method(match)
+    @ir_scope.find_method_dump(match)
+  end
+
+  def BC_METHOD(match)
+    return if @options.release
+
+    READ_FILE "console.out"
+    @ir_scope.find_method_dump(/^\.function.*#{match.gsub('.', '-')}/)
   end
 
   module SearchState
@@ -563,6 +621,7 @@ class Checker
 
   def run
     log.info "Running \"#{@name}\""
+    $checker_name = @name
     begin
       self.instance_eval @code
     rescue SkipException
@@ -601,6 +660,7 @@ def read_checks(options)
         check_llvm = nil
         next
       end
+      raise "No space between two checkers: '#{line.strip}'" if line.start_with? checker_start
       if line.include? "RUN_AOT"
         with_aot = true
       end

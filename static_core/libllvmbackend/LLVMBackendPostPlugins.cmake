@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,9 @@ set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/libllvmbackend/generated)
 
 set(LLVM_BACKEND_EMIT_INTRINSIC_GEN ${GENERATED_DIR}/emit_intrinsic_llvm_ir_constructor_gen.inl)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/libllvmbackend/templates/emit_intrinsic_llvm_ir_constructor_gen.inl.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES ${YAML_FILES} plugin_options_merge
     OUTPUTFILE ${LLVM_BACKEND_EMIT_INTRINSIC_GEN}
 )
@@ -29,18 +29,18 @@ add_custom_target(llvmbackend_emit_intrinsic_gen DEPENDS
 
 set(LLVM_BACKEND_ENTRY_GEN ${GENERATED_DIR}/llvm_ir_constructor_gen.inl)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/libllvmbackend/templates/llvm_ir_constructor_gen.inl.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES ${YAML_FILES} plugin_options_merge
     OUTPUTFILE ${LLVM_BACKEND_ENTRY_GEN}
 )
 
 set(LLVM_BACKEND_ENTRY_GEN_H ${GENERATED_DIR}/llvm_ir_constructor_gen.h.inl)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/libllvmbackend/templates/llvm_ir_constructor_gen.h.inl.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES ${YAML_FILES} plugin_options_merge
     OUTPUTFILE ${LLVM_BACKEND_ENTRY_GEN_H}
 )
@@ -53,18 +53,18 @@ add_custom_target(llvmbackend_ir_constructor_gen DEPENDS
 
 set(LLVM_BACKEND_GET_INTRINSIC_ID_GEN_H ${GENERATED_DIR}/get_intrinsic_id_llvm_ark_interface_gen.h.inl)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/libllvmbackend/templates/get_intrinsic_id_llvm_ark_interface_gen.h.inl.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES ${YAML_FILES} plugin_options_merge
     OUTPUTFILE ${LLVM_BACKEND_GET_INTRINSIC_ID_GEN_H}
 )
 
 set(LLVM_BACKEND_GET_INTRINSIC_ID_GEN ${GENERATED_DIR}/get_intrinsic_id_llvm_ark_interface_gen.inl)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/libllvmbackend/templates/get_intrinsic_id_llvm_ark_interface_gen.inl.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES ${YAML_FILES} plugin_options_merge
     OUTPUTFILE ${LLVM_BACKEND_GET_INTRINSIC_ID_GEN}
 )

@@ -97,9 +97,8 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
             intrinsics_peephole.inl.erb
         SOURCE ${COMPILER_TEMPLATES_DIR}/intrinsics
         DESTINATION ${GENERATED_DIR}
-        REQUIRES
-            ${COMPILER_TEMPLATES_DIR}/intrinsics/compiler_intrinsics.rb
-            ${PANDA_ROOT}/libpandabase/utils.rb
+        API ${COMPILER_TEMPLATES_DIR}/intrinsics/compiler_intrinsics.rb
+        REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
         EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
         )
 
@@ -113,33 +112,33 @@ panda_gen(DATA ${CMAKE_CURRENT_LIST_DIR}/optimizer/ir/instructions.yaml
             deoptimize_elimination_call_visitors.inl.erb
         SOURCE ${COMPILER_TEMPLATES_DIR}
         DESTINATION ${GENERATED_DIR}
-        REQUIRES ${COMPILER_TEMPLATES_DIR}/instructions.rb
+        API ${COMPILER_TEMPLATES_DIR}/instructions.rb
         )
 
 set(COMPILER_EVENTS_GEN_H ${GENERATED_DIR}/compiler_events_gen.h)
 panda_gen_file(
-    DATAFILE ${CMAKE_CURRENT_LIST_DIR}/compiler.yaml
+    DATA ${CMAKE_CURRENT_LIST_DIR}/compiler.yaml
     TEMPLATE ${PANDA_ROOT}/templates/events/events.h.erb
     OUTPUTFILE ${COMPILER_EVENTS_GEN_H}
-    REQUIRES ${PANDA_ROOT}/templates/common.rb
+    API ${PANDA_ROOT}/templates/common.rb
 )
 add_custom_target(compiler_events_gen DEPENDS ${COMPILER_EVENTS_GEN_H})
 
 set(COMPILER_LOGGER_COMPONENTS_GEN_H ${GENERATED_DIR}/compiler_logger_components.inc)
 panda_gen_file(
-    DATAFILE ${CMAKE_CURRENT_LIST_DIR}/compiler.yaml
+    DATA ${CMAKE_CURRENT_LIST_DIR}/compiler.yaml
     TEMPLATE ${PANDA_ROOT}/templates/logger_components/logger_components.inc.erb
     OUTPUTFILE ${COMPILER_LOGGER_COMPONENTS_GEN_H}
-    REQUIRES ${PANDA_ROOT}/templates/common.rb
+    API ${PANDA_ROOT}/templates/common.rb
 )
 add_custom_target(compiler_logger_components_gen DEPENDS ${COMPILER_LOGGER_COMPONENTS_GEN_H})
 
 set(CPU_FEATURES_GEN_H ${GENERATED_DIR}/cpu_features.inc)
 panda_gen_file(
-    DATAFILE ${CMAKE_CURRENT_LIST_DIR}/compiler.yaml
+    DATA ${CMAKE_CURRENT_LIST_DIR}/compiler.yaml
     TEMPLATE ${PANDA_ROOT}/templates/cpu_features.inc.erb
     OUTPUTFILE ${CPU_FEATURES_GEN_H}
-    REQUIRES ${PANDA_ROOT}/templates/common.rb
+    API ${PANDA_ROOT}/templates/common.rb
 )
 add_custom_target(cpu_features_gen DEPENDS ${CPU_FEATURES_GEN_H})
 

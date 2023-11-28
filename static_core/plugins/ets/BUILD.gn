@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -55,7 +55,10 @@ group("ark_host_mac_tools_packages") {
 }
 
 config("ark_config") {
-  defines = [ "PANDA_WITH_ETS" ]
+  defines = [
+    "PANDA_WITH_ETS",
+    "PANDA_ETS_INTEROP_JS",
+  ]
 }
 
 # TODO(nsizov): Fix and clean after PR480 is merged
@@ -70,8 +73,8 @@ config("assembler") {
 }
 ark_gen_file("ark_asm_ets_meta_gen_h") {
   template_file = "$ark_root/assembler/templates/meta_gen.cpp.erb"
-  data_file = "$ark_root/plugins/ets/assembler/extension/metadata.yaml"
-  requires = [ "$ark_root/assembler/asm_metadata.rb" ]
+  data = [ "$ark_root/plugins/ets/assembler/extension/metadata.yaml" ]
+  api = [ "$ark_root/assembler/asm_metadata.rb" ]
   output_file = "$target_gen_dir/ets_meta_gen.h"
 }
 

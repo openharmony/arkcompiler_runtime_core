@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,19 +18,21 @@ cmake_minimum_required(VERSION 3.5.2 FATAL_ERROR)
 # with name ${data_name}_gen_${PROJECT_NAME} for ease of declaring dependencies on generated files.
 #
 # Mandatory arguments:
-# * DATA -- data source, YAML file
+# * DATA -- a list of data sources, YAML files
+# * API -- a list of Ruby scripts that provide data-querying API for templates
+#   (Nth script from API should parse Nth YAML file from DATA)
 # * TEMPLATES -- a list of templates to generate files
-# * REQUIRES -- a list of Ruby scripts that provide data-querying API for templates
 #
 # Optional arguments:
 # * SOURCE -- a directory with templates, default is ${PROJECT_SOURCE_DIR}/templates
 # * DESTINATION -- a directory for output files, default is ${PANDA_BINARY_ROOT}
+# * REQUIRES -- if defined, will require additional Ruby files for template generation
 # * EXTRA_DEPENDENCIES -- a list of files that should be considered as dependencies
 # * EXTRA_ARGV -- a list of positional arguments that could be accessed in '.erb' files via ARGV[]
 
 function(panda_gen)
-    set(singlevalues DATA SOURCE DESTINATION TARGET_NAME)
-    set(multivalues TEMPLATES REQUIRES EXTRA_DEPENDENCIES EXTRA_ARGV)
+    set(singlevalues SOURCE DESTINATION TARGET_NAME)
+    set(multivalues DATA API TEMPLATES REQUIRES EXTRA_DEPENDENCIES EXTRA_ARGV)
     cmake_parse_arguments(
         GEN_ARG
         ""
@@ -45,6 +47,10 @@ function(panda_gen)
 
     if (NOT DEFINED GEN_ARG_DATA)
         message(FATAL_ERROR "`DATA` was not passed to `panda_gen` function")
+    endif()
+
+    if (NOT DEFINED GEN_ARG_API)
+        message(FATAL_ERROR "`API` was not passed to `panda_gen` function")
     endif()
 
     if (NOT DEFINED GEN_ARG_SOURCE)
@@ -71,7 +77,8 @@ function(panda_gen)
         set(TARGET ${PROJECT_NAME}_${TARGET})
         set(OUTPUT_FILE "${GEN_ARG_DESTINATION}/${NAME}")
 
-        panda_gen_file(DATAFILE ${GEN_ARG_DATA}
+        panda_gen_file(DATA ${GEN_ARG_DATA}
+            API ${GEN_ARG_API}
             TEMPLATE ${TEMPLATE}
             OUTPUTFILE ${OUTPUT_FILE}
             REQUIRES ${GEN_ARG_REQUIRES}
@@ -108,9 +115,9 @@ function(panda_isa_gen)
     )
     set(ISA_DATA "${CMAKE_BINARY_DIR}/isa/isa.yaml")
     set(ISAPI "${PANDA_ROOT}/isa/isapi.rb")
-    list(INSERT ISA_GEN_ARG_REQUIRES 0 ${ISAPI})
     list(APPEND ISA_GEN_ARG_EXTRA_DEPENDENCIES isa_assert)
     panda_gen(DATA ${ISA_DATA}
+        API ${ISAPI}
         TEMPLATES ${ISA_GEN_ARG_TEMPLATES}
         SOURCE ${ISA_GEN_ARG_SOURCE}
         TARGET_NAME ${ISA_GEN_ARG_TARGET_NAME}
@@ -123,16 +130,20 @@ endfunction()
 # Generate file for a template and YAML data provided.
 #
 # Mandatory arguments:
-# DATAFILE -- YAML data full name
-# TEMPLATE -- template full name
-# OUTPUTFILE -- output file full name
-# REQUIRES -- a list of scripts that provide data-querying API for templates
-# EXTRA_DEPENDENCIES -- a list of files that should be considered as dependencies
-# EXTRA_ARGV -- a list of positional arguments that could be accessed in '.erb' files via ARGV[]
+# * DATA -- a list of data sources, YAML files
+# * API -- a list of Ruby scripts that provide data-querying API for templates
+#   (Nth script from API should parse Nth YAML file from DATA)
+# * TEMPLATE -- template full name
+# * OUTPUTFILE -- output file full name
+#
+# Optional arguments:
+# * REQUIRES -- if defined, will require additional Ruby files for template generation
+# * EXTRA_DEPENDENCIES -- a list of files that should be considered as dependencies
+# * EXTRA_ARGV -- a list of positional arguments that could be accessed in '.erb' files via ARGV[]
 
 function(panda_gen_file)
-    set(singlevalues DATAFILE TEMPLATE OUTPUTFILE)
-    set(multivalues REQUIRES EXTRA_DEPENDENCIES EXTRA_ARGV)
+    set(singlevalues TEMPLATE OUTPUTFILE)
+    set(multivalues DATA API REQUIRES EXTRA_DEPENDENCIES EXTRA_ARGV)
     cmake_parse_arguments(
         ARG
         ""
@@ -140,14 +151,29 @@ function(panda_gen_file)
         "${multivalues}"
         ${ARGN}
     )
+    if (NOT DEFINED ARG_TEMPLATE)
+        message(FATAL_ERROR "`TEMPLATE` was not passed to `panda_gen_file` function")
+    endif()
+    if (NOT DEFINED ARG_DATA)
+        message(FATAL_ERROR "`DATA` was not passed to `panda_gen_file` function")
+    endif()
+    if (NOT DEFINED ARG_API)
+        message(FATAL_ERROR "`API` was not passed to `panda_gen_file` function")
+    endif()
     set(GENERATOR "${PANDA_ROOT}/isa/gen.rb")
-    string(REPLACE ";" "," REQUIRE_STR "${ARG_REQUIRES}")
-    set(DEPENDS_LIST ${GENERATOR} ${ARG_TEMPLATE} ${ARG_DATAFILE})
+    string(REPLACE ";" "," DATA_STR "${ARG_DATA}")
+    string(REPLACE ";" "," API_STR "${ARG_API}")
+    if(DEFINED ARG_REQUIRES)
+        string(REPLACE ";" "," REQUIRE_STR "${ARG_REQUIRES}")
+        set(REQUIRE_OPTION --require ${REQUIRE_STR})
+    endif()
+    set(DEPENDS_LIST ${GENERATOR} ${ARG_TEMPLATE} ${ARG_DATA} ${ARG_API})
+    
 
     add_custom_command(OUTPUT ${ARG_OUTPUTFILE}
         COMMENT "Generate file for ${ARG_TEMPLATE}"
-        COMMAND ${GENERATOR} ${ARG_EXTRA_ARGV} --template ${ARG_TEMPLATE} --data ${ARG_DATAFILE} --output ${ARG_OUTPUTFILE} --require ${REQUIRE_STR}
-        DEPENDS ${DEPENDS_LIST} ${ARG_EXTRA_DEPENDENCIES} ${ARG_REQUIRES}
+        COMMAND ${GENERATOR} ${ARG_EXTRA_ARGV} --template ${ARG_TEMPLATE} --data ${DATA_STR} --api ${API_STR} --output ${ARG_OUTPUTFILE} ${REQUIRE_OPTION}
+        DEPENDS ${DEPENDS_LIST} ${ARG_EXTRA_DEPENDENCIES}
     )
 endfunction()
 
@@ -171,10 +197,10 @@ function(panda_gen_options)
     file(MAKE_DIRECTORY ${GENERATED_DIR})
     set(OPTIONS_H ${GENERATED_DIR}/${GEN_OPTIONS_GENERATED_HEADER})
     panda_gen_file(
-        DATAFILE ${YAML_FILE}
+        DATA ${YAML_FILE}
         TEMPLATE ${PANDA_ROOT}/templates/options/options.h.erb
         OUTPUTFILE ${OPTIONS_H}
-        REQUIRES ${PANDA_ROOT}/templates/common.rb
+        API ${PANDA_ROOT}/templates/common.rb
     )
 
     # Add dependencies for a target
@@ -209,10 +235,10 @@ function(panda_gen_messages)
 
     file(MAKE_DIRECTORY ${GENERATED_DIR})
     panda_gen_file(
-        DATAFILE ${YAML_FILE}
+        DATA ${YAML_FILE}
         TEMPLATE ${PANDA_ROOT}/templates/messages/messages.h.erb
         OUTPUTFILE ${MESSAGES_H}
-        REQUIRES ${PANDA_ROOT}/templates/messages.rb
+        API ${PANDA_ROOT}/templates/messages.rb
     )
 
     # Add dependencies for a target
