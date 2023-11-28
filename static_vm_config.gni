@@ -12,10 +12,5 @@
 # limitations under the License.
 
 import("//build/ohos_var.gni")
-if (is_opensource) {
-  enable_arkplatform = true
-  enable_static_vm = true
-} else {
-  enable_arkplatform = false
-  enable_static_vm = false
-}
+enable_arkplatform = true
+enable_static_vm = true
