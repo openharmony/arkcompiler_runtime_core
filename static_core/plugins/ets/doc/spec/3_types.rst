@@ -18,9 +18,19 @@ Types
 .. meta:
     frontend_status: Partly
 
-|LANG| is a statically typed language, i.e., the type of every declared entity
-and every expression is known at compile time because it is either set
-explicitly by a developer, or inferred implicitly by the compiler.
+This chapter introduces the notion of type that is one of the fundamental
+concepts of |LANG| and other programming languages.
+Type classification as accepted in the language is discussed below---along
+with all aspects of using types in programs written in |LANG|.
+
+Conventionally, the type of an entity is defined as the set of *values* the
+entity can take, and the set of *operators* applicable to the entity of
+a given type.
+
+|LANG| is a statically typed language. It means that the type of every
+declared entity and every expression is known at compile time. The type of
+an entity is either set explicitly by a developer, or inferred implicitly
+by the compiler.
 
 There are two categories of types:
 
@@ -63,33 +73,31 @@ Predefined Types
 
 Predefined types include the following:
 
--  Basic numeric value type: ``number`` 
+-  Basic numeric value type: ``number``
 
--  Additional numeric value types: ``byte``, ``short``, ``int``, ``long``,
-   ``float``, and ``double``
+-  High-performance value types:
 
--  Boolean value type: ``boolean``
+     - Numeric types: ``byte``, ``short``, ``int``, ``long``, ``float``, and ``double``;
 
--  Character value type: ``char``
+     - Character type: ``char``;
 
--  Reference string type: ``string``
-
--  Reference array type: ``[]``
-
--  Reference BigInt type: ``bigint``
-
--  Class types: ``Object``, ``String``, ``Array<T>``, ``never``, and ``void``
+     - Boolean type: ``boolean``;
 
 
-Each predefined value type corresponds to a predefined class type that wraps
-the value type: ``Number``, ``Byte``, ``Short``, ``Int``, ``Long``,
-``Float``, ``Double``, ``Char``, and ``Boolean``.
+-  Reference types: ``object``, ``string``, ``[]`` (``array``), ``bigint``,
+   ``void``, ``never``, and ``undefined``;
 
-The numeric value types, character, and boolean value types are called
-*primitive types*. Primitive type names are reserved; they cannot be used
-for user-defined type names.
+-  Class types: ``Object``, ``String``, ``Array<T>``, and ``BigInt``.
 
-Type ``double`` is an alias to ``number``; type ``Double`` is an alias
+
+Each basic and high-performance value type has a corresponding predefined class
+type that wraps the first value: ``Number``, ``Byte``, ``Short``, ``Int``,
+``Long``, ``Float``, ``Double``, ``Char``, and ``Boolean``.
+
+The predefined value types are called *primitive types*. Primitive type names
+are reserved, and cannot be used for user-defined type names.
+
+Type ``double`` is an alias to ``number``. Type ``Double`` is an alias
 to ``Number``.
 
 .. index::
@@ -155,11 +163,11 @@ The following table summarizes all |LANG| types:
 | Value Types             |     Reference Types     |   Value Types  |  Reference Types |
 | (Primitive Types)       |                         |                |                  |
 +-------------------------+-------------------------+----------------+------------------+
-|  ``number``,            | ``Number``,             | ``enum`` types | class types,     |
-|  ``byte``, ``short``,   | ``Byte``, ``Short``,    |                | interface types, |
-|  ``int``, ``long``,     | ``Int``, ``Long``,      |                | array types,     |
-|  ``float``, ``double``, | ``Float``, ``Double``,  |                | function types,  |
-|  ``char``, ``boolean``  | ``Char``, ``Boolean``,  |                | tuple types,     |
+|  ``number``, ``byte``,  | ``Number``, ``Byte``,   | ``enum`` types | class types,     |
+|  ``short``, ``int``,    | ``Short``, ``Int``,     |                | interface types, |
+|  ``long``, ``float``,   | ``Long``, ``Float``,    |                | array types,     |
+|  ``double``, ``char``,  | ``Double``, ``Char``,   |                | function types,  |
+|  ``boolean``            | ``Boolean``,            |                | tuple types,     |
 |                         | ``Object``, ``object``, |                | union types,     |
 |                         | ``void``, ``null``,     |                | type parameters  |
 |                         | ``String``, ``string``, |                |                  |
@@ -206,8 +214,6 @@ The following can refer to a type in a source code:
    function type
    union type
 
-|
-
 .. code-block:: abnf
 
     type:
@@ -217,10 +223,11 @@ The following can refer to a type in a source code:
         | tupleType
         | functionType
         | unionType
+        | keyofType
         | '(' type ')'
         ;
 
-Example:
+An example of it is provided below:
 
 .. code-block:: typescript
    :linenos:
@@ -244,7 +251,7 @@ has the lowest precedence.
    construct
    precedence
 
-Example:
+An example of it is provided below:
 
 .. code-block:: typescript
    :linenos:
@@ -270,7 +277,7 @@ Example:
     d = null // ok, d is nullable
     d = (): string => { return "hi" } // ok
 
-|
+
 
 .. _Named Types:
 
@@ -502,7 +509,7 @@ Casts between the integer types and ``boolean`` are not possible.
 
 The integer operators cannot indicate an overflow or an underflow.
 
-An integer operator can throw errors (see :ref:`Errors Handling`) as follows:
+An integer operator can throw errors (see :ref:`Error Handling`) as follows:
 
 -  An integer division operator '/' (see :ref:`Division`), and an
    integer remainder operator '%' (see :ref:`Remainder`) throw the
@@ -726,7 +733,7 @@ All numeric operations with a NaN operand result in NaN.
 
 A floating-point operator (the increment '++' operator and decrement '--'
 operator, see :ref:`Additive Expressions`) can throw the *OutOfMemoryError*
-(see :ref:`Errors Handling`) if boxing conversion (see
+(see :ref:`Error Handling`) if boxing conversion (see
 :ref:`Primitive Types Conversions`) is needed but the available
 memory is not sufficient to perform it.
 
@@ -796,7 +803,6 @@ bigint*.
    int
    short
    byte
-   bigint
    string
    BigInt
 
@@ -855,7 +861,7 @@ Character Types and Operations
 ==============================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 +-----------+----------------------------------+--------------------------+
 | Type      | Type's Set of Values             | Corresponding Class Type |
@@ -1099,6 +1105,12 @@ Type ``string`` includes all string literals, e.g., ``'abc'``. The value
 of a string object cannot be changed after it is created, i.e., a string
 object is immutable, and can be shared.
 
+Type ``string`` has dual semantics. If a string is assigned or passed as an
+argument, then it behaves like a refrence type (see :ref:`Reference Types`),
+while all string operations (see :ref:`String Concatenation` and
+:ref:`String Comparison Operators`) treat strings as values (see
+:ref:`Value Types`).
+
 If the result is not a constant expression (see :ref:`Constant Expressions`),
 then the string concatenation operator '+' (see :ref:`String Concatenation`)
 implicitly creates a new string object.
@@ -1123,9 +1135,6 @@ use ``string`` in all cases.
 
 ``never`` Type
 ==============
-
-.. meta:
-    frontend_status: Done
 
 The class ``never`` is a subclass (see :ref:`Subtyping`) of any other class.
 
@@ -1157,31 +1166,54 @@ an error or exception).
 ``void`` Type
 =============
 
-The ``void`` type has a single value; it is typically used as the return
-type if:
+The ``void`` type has no instances (no values). It is typically used as the
+return type if a function or a method returns no value.
 
--  A function returns no value of another type (similarly to type ``Unit``
-   in some other languages); or
--  ``void`` is the type argument that instantiates a generic type where a
-   specific type parameter argument value is irrelevant.
+.. code-block:: typescript
+   :linenos:
+
+    function foo (): void {}
+   
+    class C {
+        bar(): void {}
+    }
+
+A compile-time occurs if:
+
+-  ``void`` is used as type annotation;
+-  An expression of the ``void`` type is used as a value.
+
+.. code-block:: typescript
+   :linenos:
+
+    let x: void // compile-time error - void used as type annotation
+
+    function foo (): void
+    let y = foo()  // void used as a value
+
+
+Type ``void`` can be used as type argument that instantiates a generic type
+where a specific value of type argument is irrelevant. In this case, it
+synonymic to type ``undefined`` (see :ref:`undefined Type`):
+
+.. code-block:: typescript
+   :linenos:
+
+   class A<T>
+   let a = new A<void>() // ok, type parameter is irrelevant
+   let a = new A<undefined>() // ok, the same
+
+   function foo<T>(x: T) {}
+
+   foo<void>(undefined) // ok
+   foo<void>(void) // compile-time error: void is used as value
 
 .. index::
-   error
-   exception
    return type
    type argument
    instantiation
    generic type
    type parameter argument
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo () // short form, which is equivalent to the following
-   function foo (): void // full form
-
-   class A<G>
-   let a = new A<void>() // type parameter is irrelevant
 
 |
 
@@ -1216,7 +1248,7 @@ elements into an array by using the ``[ ]`` operator and index expression.
 Another important operation is the read-only field ``length``. It allows
 knowing the number of elements in the array.
 
-The example of syntax for thebuilt-in array type is below:
+The example of syntax for the built-in array type is presented below:
 
 .. index::
    array element
@@ -1233,14 +1265,21 @@ The family of array types that are parts of the standard library (see
 :ref:`Standard Library`), including all available operations, is described
 in the library documentation. Common to these types is that the ``[ ]``
 operator can be applied to variables of all array types and to their derived
-types.
+types. It is noteworthy that type ``T[]`` and type ``Array<T>`` are as follows:
+
+-  Equivalent if *T* is a reference type; and
+-  Different if *T* is a value type.
 
 .. index::
    array type
    variable
    operator
+   reference type
+   value type
+   derived type
+   standard library
 
-Examples:
+Examples are presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -1250,6 +1289,10 @@ Examples:
     a[1] = 7 /* put 7 as the 2nd element of the array, index of this element is 1 */
     let y = a[4] /* get the last element of array 'a' */
     let count = a.length // get the number of array elements
+
+    let b: Number[] = new Array<Number>
+       /* That is a valid code as type used in the 'b' declaration is identical
+          to the type used in the new expression */
 
 A type alias can set a name for an array type (see :ref:`Type Alias Declaration`):
 
@@ -1346,9 +1389,6 @@ A type alias can set a name for a function type (see :ref:`Type Alias Declaratio
     type BinaryOp = (x: number, y: number) => number
     let op: BinaryOp
 
-Type ``void`` (see :ref:`void Type`) is the implied return type of a
-function type if *ftReturnType* is omitted.
-
 If the function type contains the '``throws``' mark (see
 :ref:`Throwing Functions`), then it is the *throwing function type* .
 
@@ -1396,6 +1436,19 @@ The only value of type ``undefined`` is represented by the keyword
 Using type ``undefined`` as type annotation is not recommended,
 except in nullish types (see :ref:`Nullish Types`).
 
+The ``undefined`` type can be used as the type argument that instantiates a generic type where a
+specific value of the type argument is irrelevant.
+
+.. code-block:: typescript
+   :linenos:
+
+   class A<T> {}
+   let a = new A<undefined>() // ok, type parameter is irrelevant
+   function foo<T>(x: T) {}
+   
+   foo<undefined>(undefined) // ok
+
+
 .. index::
    type undefined
    keyword undefined
@@ -1418,10 +1471,10 @@ Tuple Types
 
 A *tuple* type is a reference type created as a fixed set of other types.
 The value of a tuple type is a group of values of other types that comprise
-the tuple type. Such other types are specifed in the same order as declared
-within the tuple type declarartion. Each tuple element is thus implied to
+the tuple type. Such other types are specified in the same order as declared
+within the tuple type declaration. Each tuple element is thus implied to
 have its own type.
-The operator ``[ ]`` (square brackets) is used to acess elements of a tuple
+The operator ``[ ]`` (square brackets) is used to access elements of a tuple
 in a manner similar to that used to access elements of an array.
 
 The index expression is of *integer* type, and the index of the 1st tuple
@@ -1519,8 +1572,6 @@ A typical example of *union* type usage is shown below:
 Different mechanisms can be used to get values of particular types from a
 *union*. For example:
 
-|
-
 .. code-block:: typescript
    :linenos:
 
@@ -1581,7 +1632,6 @@ union type with the value which does not belong to this union type values
        values of type BMW_ModelCode
     */
 
-|
 
 .. _Union Types Normalization:
 
@@ -1605,6 +1655,7 @@ another:
    normalization
    literal
 
+#. All nested union types are linearized.
 #. Identical types within the union type are replaced for a single type.
 #. Identical literals within the union type are replaced for a single literal.
 #. If at least one type in the union is *Object*, then the entire union type is
@@ -1612,18 +1663,21 @@ another:
 #. If there is at least one numeric type among the numeric union types or
    numeric literals, then all such types or literals are replaced for type
    *number*.
-#. Unless any of the above is true:
+#. If a literal of union type belongs to the values of a type that is part
+   of the union, then the literal is removed.
+#. This step is performed recursively until no mutually compatible types remain
+   (see :ref:`Compatible Types`), or the union type is reduced to a single type:
 
--  If there are two types *T1* and *T2* within the union type, and *T1* is
-   compatible (see :ref:`Compatible Types`) with *T2*, then only *T2* remains
-   in the union type.
--  If *T2* is compatible (see :ref:`Compatible Types`) with *T1*, then *T1*
-   remains in the union type.
--  The last step is performed recursively until no more mutually compatible
-   types remain, or the union type is reduced to a single type.
+   -  If a union type includes two types *T*:sub:`i` and *T*:sub:`j` (i != j),
+      and *T*:sub:`i` is compatible with *T*:sub:`j` (see
+      :ref:`Compatible Types`), then only *T*:sub:`j` remains in the union
+      type, and *T*:sub:`i` is removed.
+   -  If *T*:sub:`j` is compatible with *T*:sub:`i` (see :ref:`Compatible Types`),
+      then *T*:sub:`i` remains in the union type, and *T*:sub:`j` is removed.
 
 .. index::
    union type
+   linearization
    literal non-union type
    normalization
    literal
@@ -1632,25 +1686,26 @@ another:
    compatible type
    type compatibility
 
-As a result of this process, the normalized union type remains.
+A normalized union type is the result of this process.
 
-This operation is highlighted by the examples below:
+This process is presented in the examples below:
 
 .. code-block:: typescript
    :linenos:
 
-    1 | 1 | 1  =>  1
-    number | number => number
-    1 | number | number => number
-    1 | string | number => string | number
-    1 | Object => Object
+    ( T1 | T2) | (T3 | T4) => T1 | T2 | T3 | T4  // Linearization
+    1 | 1 | 1  =>  1                             // Identical values elimination
+    number | number => number                    // Identical types elimination
+    1 | number | number => number                // Number wins
+    int | double | short => number 
+    1 | string | number => string | number       // Union value elimination
+    1 | Object => Object                         // Object wins
     AnyType | Object | AnyType => Object
     class Base {}
     class Derived1 extends Base {}
     class Derived2 extends Base {}   
-    Base | Derived1 => Base
-    Derived1 | Derived2 => Derived1 | Derived2 // No changes!
-    int | double | short => number
+    Base | Derived1 => Base                      // Base wins
+    Derived1 | Derived2 => Derived1 | Derived2   // End of normalization
 
 The |LANG| compiler applies such normalization while processing union types
 and handling the type inference for array literals (see
@@ -1662,6 +1717,48 @@ and handling the type inference for array literals (see
    array literal
    type inference
    array literal
+
+.. _Keyof Types:
+
+Keyof Types
+-----------
+
+A special form of union types are keyof types. Such types are built with help
+of the *keyof* keyword which is applied to the class (see :ref:`Classes`) or
+interface (see :ref:`Interfaces`) type. As a result, the new type is the union
+of names of all members of the class or interface type. 
+
+
+.. code-block:: abnf
+
+    keyofType:
+        'keyof' typeReference
+        ;
+
+It is a compile-time error if *typeReference* is not a class or interface type.
+
+Example below illustrates the semantics of the keyof type.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+       field: number
+       method() {}
+    }
+    type KeysOfA = keyof A // "field" | "method"
+    let a_keys: KeysOfA = "field" // OK
+    a_keys = "any string different from field or method"
+      // Compile-time error: invalid value for the type KeysOfA
+
+if class or interface is empty then its keyof type is equivalent to never type.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {} // Empty class 
+    type KeysOfA = keyof A // never
+
 
 |
 
@@ -1695,7 +1792,7 @@ a *nullable type*.
 A variable declared to have the type *T* \| ``undefined`` can hold values
 of the type *T* and its derived types, or the value ``undefined``.
 
-A :index:`compile-time error` occurs if *T* is not a reference type.
+A nullish type is a reference type (see :ref:`Union Types`).
 A reference which is ``null`` or ``undefined`` is called a *nullish* value.
 
 An operation that is safe with no regard to the presence or absence of
@@ -1733,7 +1830,7 @@ that can potentially violate null safety (e.g., access to a property):
    -  Safe indexing expression (see :ref:``Indexing Expression`` for details);
    -  Safe function call (see :ref:`Function Call Expression` for details);
 
--  Downcasting from *T* \| ``null`` or *T* \| ``undefined`` to *T*:
+-  Converting from *T* \| ``null`` or *T* \| ``undefined`` to *T*:
 
    -  Cast expression (see :ref:`Cast Expressions` for details);
    -  Ensure-not-nullish expression (see :ref:`Ensure-Not-Nullish Expressions`
@@ -1748,7 +1845,7 @@ that can potentially violate null safety (e.g., access to a property):
    field access expression
    indexing expression
    function call
-   downcasting
+   converting
    cast expression
    ensure-not-nullish expression
    nullish-coalescing expression
@@ -1763,8 +1860,7 @@ DynamicObject Type
 ==================
 
 .. meta:
-    frontend_status: Partly
-    todo: now it supports only JSValue, need to add full abstract support
+    frontend_status: None
 
 The interface *DynamicObject* is used to provide seamless interoperability
 with dynamic languages (e.g., Javascript and TypeScript), and
@@ -1818,7 +1914,7 @@ DynamicObject Field Access
 .. meta:
     frontend_status: Partly
     todo: now it supports only JSValue, need to add full abstract support
-
+    
 The field access expression *D.F*, where *D* is of type *DynamicObject*,
 is handled as an access to a property of an underlying object.
 
@@ -1840,7 +1936,8 @@ The wrapper can raise an error if:
 
 - No property with the specified name exists in the underlying object; or
 - The field access is in the right-hand side of the assignment, and the
-  type of the assigned value is not compatible with the type of the property.
+  type of the assigned value is not compatible (see :ref:`Compatible Types`)
+  with the type of the property.
 
 .. index::
    DynamicObject
@@ -1864,7 +1961,7 @@ DynamicObject Method Call
 .. meta:
     frontend_status: Partly
     todo: now it supports only JSValue, need to add full abstract support
-
+    
 The method call expression *D.F()*, where *D* is of type *DynamicObject*,
 is handled as a call of the instance method of an underlying object.
 
@@ -1907,7 +2004,7 @@ DynamicObject Indexing Access
 .. meta:
     frontend_status: Partly
     todo: now it supports only JSValue, need to add full abstract support
-
+    
 The indexing access expression *D[index]*, where *D* is of type *DynamicObject*,
 is handled as an indexing access to an underlying object.
 
@@ -1927,9 +2024,6 @@ TBD
 
 |
 
-    
-|
-
 .. _Default Values for Types:
 
 Default Values for Types
@@ -1943,9 +2037,11 @@ Default Values for Types
 Some types use so-called *default values* for variables without explicit
 initialization (see :ref:`Variable Declarations`), including the following:
 
+.. - All primitive types and ``string`` (see the table below).
+
 - All primitive types (see the table below).
-- All union types that have one nullish (see :ref:`Nullish Types`) value,
-  and use an appropriate nullish value as default (see the table below).
+- All union types that have at least one nullish (see :ref:`Nullish Types`)
+  value, and use an appropriate nullish value as default (see the table below).
 
 .. -  Nullable reference types with the default value ``null`` (see :ref:`Literals`).
 
@@ -1954,6 +2050,8 @@ default values.
 
 A variables of such a type must be initialized explicitly with a value
 before its first use.
+
+.. The default values of primitive types and ``string`` are as follows:
 
 The default values of primitive types are as follows:
 
@@ -1965,6 +2063,8 @@ The default values of primitive types are as follows:
    primitive type
    reference type
    enumeration type
+
+|
 
 +----------------+--------------------+
 |    Data Type   |   Default Value    |
@@ -1988,17 +2088,22 @@ The default values of primitive types are as follows:
 | ``boolean``    | ``false``          |
 +----------------+--------------------+
 
+.. | ``string``     | ``""``             |
+
+.. +----------------+--------------------+
+
+
 The default values of nullish union types are as follows:
 
-+----------------+--------------------+
-|    Data Type   |   Default Value    |
-+================+====================+
-| type|null      | ``null``           |
-+----------------+--------------------+
-| type|undefined | ``undefined``      |
-+----------------+--------------------+
-| null|undefined | no default value!  |
-+----------------+--------------------+
++------------------+--------------------+
+|    Data Type     |   Default Value    |
++==================+====================+
+| type | null      | ``null``           |
++------------------+--------------------+
+| type | undefined | ``undefined``      |
++------------------+--------------------+
+| null | undefined | ``undefined``      |
++------------------+--------------------+
 
 .. code-block:: typescript
    :linenos:

@@ -23,7 +23,8 @@ Function Declarations
 A function declaration introduces a named function by specifying its name,
 parameters, return type, and body.
 
-Below is a simple function with two string parameters, and string return type:
+Below is an example of a simple function with two string parameters and string
+return type:
 
 .. code-block:: typescript
 
@@ -41,7 +42,7 @@ parameter of a function can be a rest parameter (see below).
 Optional Parameters
 -------------------
 
-An optional parameter has the form '``name?: Type``'.
+An optional parameter has the form '``name?: Type``':
 
 .. code-block:: typescript
 
@@ -55,7 +56,7 @@ An optional parameter has the form '``name?: Type``'.
 
 Another form contains an expression that specifies a default value. If the
 corresponding argument to such parameter is omitted in a function call,
-then this parameter's value is default.
+then this parameter's value is default:
 
 .. code-block:: typescript
 
@@ -67,11 +68,11 @@ then this parameter's value is default.
 
 |
 
-The Rest Parameter
-------------------
+Rest Parameter
+--------------
 
 The last parameter of a function can be a rest parameter. As a result,
-functions or methods can take an unlimited number of arguments.
+functions or methods can take an unlimited number of arguments:
 
 .. code-block:: typescript
 
@@ -90,8 +91,8 @@ functions or methods can take an unlimited number of arguments.
 Return Types
 ------------
 
-If the function return type is inferrable from the function body's content,
-then it can be omitted from the function declaration.
+If the function return type is inferable from the function body's content,
+then it can be omitted from the function declaration:
 
 .. code-block:: typescript
 
@@ -140,7 +141,7 @@ If the function is defined as follows:
         return z
     }
 
-then it is called with two arguments of type ``string``:
+---then it is called with two arguments of type ``string``:
 
 .. code-block:: typescript
 
@@ -197,8 +198,8 @@ An arrow function is usually defined inside another function. As an inner
 function, it can access all variables defined in the outer function.
 
 To capture the context, an inner function forms a closure of its environment.
-The closure allows accessing such an inner function from outside its own
-environment.
+The closure allows accessing the inner function from outside its own
+environment:
 
 .. code-block:: typescript
 
@@ -221,7 +222,7 @@ Function Overload Signatures
 Overload signatures can be written to specify that a function can be called
 in different ways. Writing an overload signature means that several functions'
 headers have the same name but different signatures, and are immediately
-followed by a single implementation function.
+followed by a single implementation function:
 
 .. code-block:: typescript
 
@@ -234,7 +235,7 @@ followed by a single implementation function.
     foo()     // ok, 1st signature is used
     foo("aa") // ok, 2nd signature is used
 
-If two overload signatures have identical parameter lists, then an error occurs.
+An error occurs if two overload signatures have identical parameter lists.
 
 |
 

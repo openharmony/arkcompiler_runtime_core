@@ -15,10 +15,10 @@ Classes
 
 |
 
-A class declaration introduces a new type, and defines its fields, methods
+A class declaration introduces a new type and defines its fields, methods,
 and constructors.
 
-In the following example, class ``Person`` is defined, which has fields
+In the following example, the class ``Person`` is defined that has fields
 'name' and 'surname', a constructor, and the method ``fullName``:
 
 .. code-block:: typescript
@@ -59,7 +59,7 @@ Fields
 ------
 
 A field is a variable of some type that is declared directly in a class.
-Classes may have instance fields, static fields, or both.
+Classes can have instance fields, static fields, or both.
 
 |
 
@@ -67,7 +67,7 @@ Instance Fields
 ~~~~~~~~~~~~~~~
 
 Instance fields exist on every instance of a class. Each instance has its own
-set of instance fields.
+set of instance fields:
 
 .. code-block:: typescript
 
@@ -119,30 +119,33 @@ The class name is used to access ``static`` fields:
 Field Initializers
 ~~~~~~~~~~~~~~~~~~
 
-|LANG| requires that all fields are explicitly initialized with some values
-either when the field is declared or in the ``constructor``. This is similar
-to ``strictPropertyInitialization`` mode of the standard |TS|. Such behavior
-is enforced to minimize the number of unexpected runtime errors and achieve
-better performance.
+|LANG| requires all fields to be explicitly initialized with some values
+either when the field is declared, or in the ``constructor``. It is similar
+to the ``strictPropertyInitialization`` mode of the standard |TS|. This
+behavior is enforced to minimize the number of unexpected runtime errors
+and improve performance.
 
-The following code (invalid in |LANG|) is error-prone:
+The following code is error-prone and invalid in |LANG|:
 
 .. code-block:: typescript
 
     class Person {
-	    name: string // The compiler automatically sets to undefined
+        name: string 
+           /* The TS compiler automatically sets to undefined if no
+              strict checks enabled */
+
 
         setName(n:string): void {
             this.name = n
         }
 
-	    getName(): string {
+        getName(): string {
             // Return type "string" hides from the developers the fact
             // that name can be undefined. The most correct would be
             // to write the return type as "string | undefined". By doing so
             // we tell the users of our API about all possible return values.
-		    return this.name
-	    }
+            return this.name
+        }
     }
 
     let jack = new Person()
@@ -150,12 +153,12 @@ The following code (invalid in |LANG|) is error-prone:
     // jack.setName("Jack")
     console.log(jack.getName().length); // runtime exception: name is undefined
 
-Here is how is should look in |LANG|:
+It must look as follows in |LANG|:
 
 .. code-block:: typescript
 
     class Person {
-        name: string = "" // The field always is defined
+        name: string = "" // The field is always is initialized
 
         setName(n:string): void {
             this.name = n
@@ -172,12 +175,13 @@ Here is how is should look in |LANG|:
     // jack.setName("Jack")
     console.log(jack.getName().length); // 0, no runtime error
 
-And here how our code behaves if the field ``name`` can be ``undefined``
+The example below shows how the |LANG| code behaves if the field ``name``
+is ``undefined``:
 
 .. code-block:: typescript
 
     class Person {
-        name ?: string // The field may be undefined, great
+        name ?: string // Default field value is undefined
         // More explicit syntax may also be used:
         // name: string | undefined = undefined
 
@@ -246,10 +250,10 @@ Methods
 
 A method is a function that belongs to a class.
 A class can define instance methods, static methods, or both.
-A ``static`` method belongs to the class itself, and can have access to
-``static`` fields only.
-A ``while`` instance method has access to both ``static`` (class) fields
-and instance fields including the ones  private to its class.
+A ``static`` method belongs to the class itself. It can access
+only the ``static`` fields.
+An instance method can access both ``static`` (class) fields
+and instance fields, including those private to its class.
 
 |
 
@@ -273,7 +277,8 @@ multiplying the height by the width:
         }
     }
 
-For an instance method to be used, it must be called on an instance of the class:
+In order to be used, an instance method must be called on an instance of
+a class:
 
 .. code-block:: typescript
 
@@ -285,13 +290,13 @@ For an instance method to be used, it must be called on an instance of the class
 ``static`` Methods
 ~~~~~~~~~~~~~~~~~~
 
-The keyword ``static`` is used to declare a method as static. The ``static``
-methods belong to the class itself, and have access to the ``static`` fields
-only.
-A ``static`` method defines the common behavior of the class as a whole.
-All instances have access to ``static`` methods.
+The keyword ``static`` is used to declare a method as static. A ``static``
+method belongs to a class itself, and can access only the ``static`` fields.
 
-The class name is used to call a ``static`` method:
+A ``static`` method defines the common behavior of its entire class.
+All instances can access the ``static`` methods.
+
+Class name is used to call a ``static`` method:
 
 .. code-block:: typescript
 
@@ -304,16 +309,41 @@ The class name is used to call a ``static`` method:
 
 |
 
+
+Method Overload Signatures
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Overload signatures can be written to specify that a method can be called
+in different ways. Writing an overload signature means that several method
+headers have the same name but different signatures, and are immediately
+followed by a single implementation method:
+
+.. code-block:: typescript
+
+    class C {
+        foo(): void;            /* 1st signature */
+        foo(x: string): void;   /* 2nd signature */
+        foo(x?: string): void { /* implementation signature */
+            console.log(x)
+        }
+    }
+    let c = new C()
+    c.foo()     // ok, 1st signature is used
+    c.foo("aa") // ok, 2nd signature is used
+
+An error occurs if two overload signatures have the same name and identical
+parameter lists.
+
+|
+
 Inheritance
-~~~~~~~~~~~
+-----------
 
-A class can extend another class.
-The class that is being extended by another class is called '*base class*',
-'parent class', or 'superclass'.
-The class that extends another class is called '*extended class*', 'derived
-class' or 'subclass'.
+A class can extend another class. A class that is being extended by another
+class is called '*superclass*'.
+A class that extends another class is called '*subclass*'.
 
-An extended class can implement several interfaces by using the
+A subclass can implement several interfaces by using the
 following syntax:
 
 .. code-block:: typescript
@@ -322,11 +352,9 @@ following syntax:
         // ...
     }
 
-An extended class inherits fields and methods, but not constructors, from
-the base class, and can add its own fields and methods, as well as override
-methods defined by the base class.
-
-Example:
+A subclass inherits fields and methods, but not constructors,
+from the superclass. It can add its own fields and methods, and override
+methods defined by the superclass. It is illustrated in the example below:
 
 .. code-block:: typescript
 
@@ -344,9 +372,9 @@ Example:
         }
     }
 
-A class containing the ``implements`` clause must implement all methods
+A class containing an ``implements`` clause must implement all methods
 defined in all listed interfaces, except the methods defined by the default
-implementation.
+implementation:
 
 .. code-block:: typescript
 
@@ -365,11 +393,10 @@ implementation.
 Access to Super
 ~~~~~~~~~~~~~~~
 
-The keyword ``super`` can be used to access instance fields, instance methods,
-and constructors of a superclass.
-
-Such access is often used to extend basic functionality of a subclass with the
-required behavior that can be taken from the superclass:
+The keyword ``super`` allows to access instance methods,
+and constructors of a superclass. This access is often used to extend basic
+functionality of a subclass with the required behavior that can be taken from
+the superclass:
 
 .. code-block:: typescript
 
@@ -409,8 +436,8 @@ A subclass can override the implementation of a method defined in its
 superclass.
 An overridden method can be marked with the keyword ``override`` to improve
 readability.
-An overridden method must have the same types of parameters, and same, or
-derived, return type as the original method.
+An overridden method must have the same types of parameters, and the same, or
+derived, return type as the original method:
 
 .. code-block:: typescript
 
@@ -430,39 +457,11 @@ derived, return type as the original method.
 
 |
 
-Method Overload Signatures
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Overload signatures can be written to specify that a method can be called
-in different ways. Writing an overload signature means that several method
-headers have the same name but different signatures, and are immediately
-followed by a single implementation method.
-
-.. code-block:: typescript
-
-    class C {
-        foo(): void;            /* 1st signature */
-        foo(x: string): void;   /* 2nd signature */
-        foo(x?: string): void { /* implementation signature */
-            console.log(x)
-        }
-    }
-    let c = new C()
-    c.foo()     // ok, 1st signature is used
-    c.foo("aa") // ok, 2nd signature is used
-
-If two overload signatures have the same name and identical parameter lists,
-then an error occurs.
-
-|
-
 Constructors
 ------------
 
-A class declaration may contain a constructor that is used to initialize
-object state.
-
-A constructor is defined as follows:
+A class declaration can contain a constructor that is used to initialize
+object state. A constructor is defined as follows:
 
 .. code-block:: typescript
 
@@ -481,16 +480,16 @@ parameter list is created automatically, for example:
     }
     let p = new Point()
 
-In this case, the default constructor fills instance fields with the
-default values of the field types.
+In this case, the default constructor fills default values of field types
+in the instance fields.
 
 |
 
-Constructors in Derived Class
+Constructors in Subclass
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first statement of a constructor body can use the keyword ``super``
-to explicitly call a constructor of the direct superclass.
+to explicitly call a constructor of the direct superclass:
 
 .. code-block:: typescript
 
@@ -517,7 +516,7 @@ Constructor Overload Signatures
 Overload signatures can be written to specify that a constructor can be called
 in different ways. Writing an overload constructor means that several
 constructor headers have the same name but different signatures, and
-immediately followed by a single implementation constructor.
+immediately followed by a single implementation constructor:
 
 .. code-block:: typescript
 
@@ -531,8 +530,8 @@ immediately followed by a single implementation constructor.
     let c1 = new C()      // ok, 1st signature is used
     let c2 = new C("abc") // ok, 2nd signature is used
 
-If two overload signatures have the same name and identical parameter lists,
-then an error occurs.
+An error occurs if two overload signatures have the same name and identical
+parameter lists.
 
 |
 
@@ -609,7 +608,7 @@ and provide initial values to instance fields. It can be used instead of the
 expression ``new`` as it is more convenient in some cases.
 
 A class composite is written as a comma-separated list of name-value pairs
-enclosed in '``{``' and '``}``'.
+enclosed in '``{``' and '``}``':
 
 .. code-block:: typescript
 
@@ -620,9 +619,11 @@ enclosed in '``{``' and '``}``'.
 
     let c: C = {n: 42, s: "foo"}
 
-Due to the static typing of the |LANG|, object literals can be used in a
-context where the class, or interface type of the object literal can be
-inferred as in the example above. Other valid cases are illustrated below:
+Due to the static typing of |LANG|, object literals can be used in a
+context where the class or the interface type of the object literal can be
+inferred as in the example above.
+
+Other valid cases are illustrated below:
 
 .. code-block:: typescript
 
@@ -642,7 +643,7 @@ inferred as in the example above. Other valid cases are illustrated below:
         return {n: 42, s: "foo"} // return type is used
     }
 
-The type of an array element, or of a class field can also be used:
+The type of an array element, or of a class field can also be used as follows:
 
 .. code-block:: typescript
     
@@ -657,10 +658,9 @@ The type of an array element, or of a class field can also be used:
 Object Literals of Record Type
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The generic Record<K, V> type is used to map the properties of a type
-(Key type) to another type (Value type).
-
-A special form of object literal is used to initialize the value of such type:
+Generic type *Record<K, V>* is used to map the properties of a type
+(Key type) to another type (Value type). A special form of object literal
+is used to initialize the value of such a type:
 
 .. code-block:: typescript
 
@@ -671,7 +671,7 @@ A special form of object literal is used to initialize the value of such type:
     
     console.log(map["John"]) // prints 25
 
-The K type can be either string, or number, while V can be any type.
+Type *K* can be either *string* or *number*, while *V* can be any type:
 
 .. code-block:: typescript
 

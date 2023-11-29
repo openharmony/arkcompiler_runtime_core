@@ -20,7 +20,8 @@ Contexts and Conversions
 
 Every expression written in the |LANG| programming language has a type that
 is inferred at compile time. The *target type* of an expression must be
-*compatible* with the types expected in most contexts the expression appears in.
+*compatible* (see :ref:`Compatible Types`) with the types expected in most
+contexts the expression appears in.
 
 There are two ways to improve convenience by facilitating the compatibility
 of an expression with its surrounding context:
@@ -49,22 +50,22 @@ of an expression with its surrounding context:
 A compile-time error occurs if neither produces an appropriate expression type.
 
 The form of an expression, and the kind of its context indicate what rules
-apply to determine whether that expression is non-standalone, and what the
-type and compatibility of that expression are in a particular context. The
-*target type* can influence not only the type of the  expression but, in
+must be applied to determine whether the expression is non-standalone, and
+what the type and compatibility of the expression are in a particular context.
+The *target type* can influence not only the type of the expression but, in
 some cases, also its runtime behavior in order to produce an appropriate
 type of a value.
 
 The rules that determine whether a *target type* allows an implicit
 conversion vary for different kinds of contexts and types of expressions,
-and, in one particular case, of the constant expression value (see
+and, in one particular case, for the constant expression value (see
 :ref:`Constant Expressions`).
 
 The conversion from type *S* to type *T* causes a type *S* expression to
-be treated as a type *T* expression at compile time.
+be handled as a type *T* expression at compile time.
 
-Some cases of conversion can require a runtime action to check the
-conversion validity, or to translate the runtime expression value
+Some cases of conversion can require action at runtime to check the
+validity of conversion, or to translate the runtime expression value
 into a form that is appropriate for the new type *T*.
 
 .. index::
@@ -88,13 +89,13 @@ Kinds of Contexts
 .. meta:
     frontend_status: Partly
 
-Contexts can influence non-standalone expressions, and implicit conversions
+Contexts can influence non-standalone expressions. Implicit conversions
 are possible in various kinds of *conversion contexts*. The following kinds
-of contexts have different rules for non-standalone expression typing, and
+of contexts have different rules for non-standalone expression typing. They
 allow conversions in some, but not all expression types:
 
--  Assignment and call contexts: expression type must be compatible with
-   the type of the target.
+-  Assignment and call contexts: expression type must be compatible
+   (see :ref:`Compatible Types`) with the type of the target.
 
 .. index::
    context
@@ -103,6 +104,8 @@ allow conversions in some, but not all expression types:
    conversion context
    compatible type
    expression typing
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -158,7 +161,7 @@ of types compatibility is given in :ref:`Compatible Types`.
 
 *Call contexts* reuse the rules of *assignment contexts*, and allow
 assigning an argument value of a method, constructor, or function call (see
-:ref:`Explicit Constructor Call`, :ref:`New Expressions` and
+:ref:`Explicit Constructor Call`, :ref:`New Expressions`, and
 :ref:`Method Call Expression`) to a corresponding formal parameter.
 
 .. index::
@@ -176,7 +179,6 @@ assigning an argument value of a method, constructor, or function call (see
    method call
    formal parameter
 
-|
 
 .. _Compatible Types:
 
@@ -187,13 +189,15 @@ Compatible Types
     frontend_status: Done
 
 Type *T1* is compatible with type *T2* if one of the following conversions
-can be successfully applied to type *T1* to receive type *T2* as a result:
+can be successfully applied to type *T1* in order to receive type *T2* as
+a result:
 
 -  Identity conversion (see :ref:`Kinds of Conversion`);
 -  Primitive types conversions (see :ref:`Primitive Types Conversions`);
 -  Reference types conversions (see :ref:`Reference Types Conversions`);
 -  Function types conversions (see :ref:`Function Types Conversions`);
--  Enumeration types conversions -- experimental feature (see :ref:`Enumeration Types Conversions`);
+-  Enumeration types conversions as an experimental feature (see
+   :ref:`Enumeration Types Conversions`).
 
 .. index::
    compatible type
@@ -206,51 +210,60 @@ can be successfully applied to type *T1* to receive type *T2* as a result:
 
 |
 
-.. _Operator Contexts:
+.. _String Operator Contexts:
 
-Operator Contexts
-=================
+String Operator Contexts
+========================
 
 .. meta:
     frontend_status: Done
-    todo: '$$' is an deprecated operator now, it can only be supported with ArkUI plugin, otherwise it will throw exception.
 
 *String context* applies only to a non-*string* operand of the binary ``+``
-operator if the other operand is a *string*. For example:
+operator if the other operand is a *string*. 
+
+*String conversion* for a non-*string* operand is evaluated as follows:
+
+-  The operand of nullish type that has a nullish value is converted as
+   described below:
+
+     - The operand ``null`` is converted to string ``"null"``.
+     - The operand ``undefined`` is converted to string ``"undefined"``
+
+-  Any reference type or enum type is converted by using the *toString()*
+   method call.
+
+-  Any primitive type is converted to the string that represents its value.
+   The result is the same as if the value is boxed (see
+   :ref:`Primitive Types Conversions`). Then the method call *toString()* is
+   performed.
+
+The target type of these contexts is always *string*.
 
 .. code-block:: typescript
    :linenos:
 
-    Operator     :  expresssion1 + expression2
-    Operand types:    string     +  any_type
-    Operand types:  any_type     +  string
+    console.log("" + null) // prints "null"
+    console.log("value is " + 123) // prints "value is 123"
+    console.log("BigInt is " + 123n) // prints "BigInt is 123"
+    console.log(15 + " steps") // prints "15 steps"
+    let x: string | null = null
+    console.log("string is " + x) // prints "string is null"
 
-effectively transforms into the following:
+|
 
-.. code-block:: typescript
-   :linenos:
+.. _Numeric Operator Contexts:
 
-    Operator     :  expresssion1 + expression2
-    Operand types:    string     +  any_type.toString()
-    Operand types:  any_type.toString()  +  string
+Numeric Operator Contexts
+=========================
 
-.. _string-conversion:
+.. meta:
+    frontend_status: Done
 
-*String conversion* can be of the following kinds:
-
--  Any reference type, or enum type can convert directly to the *string* type,
-   which is then performed as the *toString()* method call.
-
--  Any primitive type must convert to a reference value (for boxing see
-   :ref:`Primitive Types Conversions`) before the method call
-   *toString()* is performed.
-
-These contexts always have *string* as the target type.
 
 *Numeric contexts* apply to the operands of an arithmetic operator.
 *Numeric contexts* use combinations of predefined numeric types conversions
 (see :ref:`Primitive Types Conversions`), and ensure that each
-argument expression can convert to the target type *T* while the arithmetic
+argument expression can convert to target type *T* while the arithmetic
 operation for the values of type *T* is being defined.
 
 .. index::
@@ -334,11 +347,11 @@ Kinds of Conversion
 
 .. meta:
    frontend_status: Done
-   todo: Narrowing Reference Conversion - note: Only basic checking availiable, not full support of validation
-   todo: String Conversion - note: Inmplemented in a different but compatible way: spec - toString(), implementation: StringBuilder
+   todo: Narrowing Reference Conversion - note: Only basic checking available, not full support of validation
+   todo: String Conversion - note: Implemented in a different but compatible way: spec - toString(), implementation: StringBuilder
    todo: Forbidden Conversion - note: Not exhaustively tested, should work
 
-The term ‘conversion’ also describes any conversion that is allowed in a
+The term ‘*conversion*’ also describes any conversion that is allowed in a
 particular context (for example, saying that an expression that initializes
 a local variable is subject to ‘assignment conversion’ means that the rules
 for the assignment context define what specific conversion is implicitly
@@ -362,7 +375,7 @@ categories:
 -  Predefined numeric types conversions: all combinations allowed between
    numeric types.
 -  Reference types conversions.
--  String conversions (see :ref:`Operator Contexts`).
+-  String conversions (see :ref:`String Operator Contexts`).
 
 Any other conversions are forbidden.
 
@@ -385,12 +398,12 @@ Primitive Types Conversions
 .. meta:
     frontend_status: Partly
 
-For numeric primitive types *widening conversions* cause no loss of
-information about the overall magnitude of a numeric value (except conversions
-from integer to floating-point types that can lose some least significant bits
-of the value if the IEEE 754 '*round-to-nearest*' mode is used correctly, and
-the resultant floating-point value is properly rounded to the integer value).
-Widening conversions never cause runtime errors.
+*Widening conversions* of primitive numeric types cause no loss of information
+about the overall magnitude of a numeric value. Some least significant bits of
+the value can be lost only in conversions from integer to floating-point types
+if the IEEE 754 '*round-to-nearest*' mode is used correctly, and the resultant
+floating-point value is properly rounded to the integer value.
+*Widening conversions* never cause runtime errors.
 
 .. index::
    widening conversion
@@ -403,55 +416,55 @@ Widening conversions never cause runtime errors.
    round-to-nearest mode
    runtime error
 
-+----------+-----------------------------+
-| From     | To                          |
-+==========+=============================+
-| *byte*   | *short*, *int*, *long*,     |
-|          | *float* or *double*         |
-+----------+-----------------------------+
-| *short*  | *int*, *long*, *float*      |
-|          | or *double*                 |
-+----------+-----------------------------+
-| *char*   | *int*, *long*, *float*      |
-|          | or *double*                 |
-+----------+-----------------------------+
-| *int*    | *long*, *float* or *double* |
-+----------+-----------------------------+
-| *long*   | *float* or *double*         |
-+----------+-----------------------------+
-| *float*  | *double*                    |
-+----------+-----------------------------+
-| *bigint* | *BigInt*                    |
-+----------+-----------------------------+
++----------+------------------------------+
+| From     | To                           |
++==========+==============================+
+| *byte*   | *short*, *int*, *long*,      |
+|          | *float*, or *double*         |
++----------+------------------------------+
+| *short*  | *int*, *long*, *float*,      |
+|          | or *double*                  |
++----------+------------------------------+
+| *char*   | *int*, *long*, *float*,      |
+|          | or *double*                  |
++----------+------------------------------+
+| *int*    | *long*, *float*, or *double* |
++----------+------------------------------+
+| *long*   | *float* or *double*          |
++----------+------------------------------+
+| *float*  | *double*                     |
++----------+------------------------------+
+| *bigint* | *BigInt*                     |
++----------+------------------------------+
 
-For numeric primitive types *narrowing conversions* (performed in compliance
+*Narrowing conversions* of numeric primitive types (performed in compliance
 with IEEE 754 like in other programming languages) can lose information about
-the overall magnitude of a numeric value, potentially resulting in the loss of
-precision and range. Narrowing conversions never cause runtime errors.
+the overall magnitude of a numeric value. It can potentially result in the loss
+of precision and range. *Narrowing conversions* never cause runtime errors.
 
 .. index::
    narrowing conversion
    numeric value
    runtime error
 
-+-----------+-----------------------------+
-| From      | To                          |
-+===========+=============================+
-| *short*   | *byte* or *char*            |
-+-----------+-----------------------------+
-| *char*    | *byte* or *short*           |
-+-----------+-----------------------------+
-| *int*     | *byte*, *short* or *char*   |
-+-----------+-----------------------------+
-| *long*    | *byte*, *short*, *char* or  |
-|           | *int*                       |
-+-----------+-----------------------------+
-| *float*   | *byte*, *short*, *char*,    |
-|           | *int* or *long*             |
-+-----------+-----------------------------+
-| *double*  | *byte*, *short*, *char*,    |
-|           | *int*, *long* or *float*    |
-+-----------+-----------------------------+
++-----------+------------------------------+
+| From      | To                           |
++===========+==============================+
+| *short*   | *byte* or *char*             |
++-----------+------------------------------+
+| *char*    | *byte* or *short*            |
++-----------+------------------------------+
+| *int*     | *byte*, *short*, or *char*   |
++-----------+------------------------------+
+| *long*    | *byte*, *short*, *char*, or  |
+|           | *int*                        |
++-----------+------------------------------+
+| *float*   | *byte*, *short*, *char*,     |
+|           | *int*, or *long*             |
++-----------+------------------------------+
+| *double*  | *byte*, *short*, *char*,     |
+|           | *int*, *long*, or *float*    |
++-----------+------------------------------+
 
 *Widening and narrowing* conversion is converting *byte* to an *int*
 (widening), and the resultant *int* to a *char* (narrowing).
@@ -478,7 +491,7 @@ corresponding reference type.
 For example, a *boxing conversion* converts *p* of value type *t* into
 a reference *r* of class type *T*, i.e., *r.unboxed()* == *p*.
 
-This conversion can result in an *OutOfMemoryError* thrown if the storage
+This conversion can cause an *OutOfMemoryError* thrown if the storage
 available for the creation of a new instance of the wrapper class *T* is
 insufficient.
 
@@ -556,9 +569,9 @@ no special action at runtime, and therefore never causes an error.
     }
 
 The conversion of array types (see :ref:`Array Types`) also works in accordance
-with the widening style of array elements type.
+with the widening style of array elements type. It is illustrated in the example
+below:
 
-See the example below for the illustration of it:
 
 .. index::
    conversion
@@ -576,9 +589,8 @@ See the example below for the illustration of it:
 
 Such an array assignment can lead to a runtime error (*ArrayStoreError*)
 if an object of incorrect type is put into the array. The runtime
-system performs run-time checks to ensure type-safety.
-
-See the example below for the illustration of it:
+system performs run-time checks to ensure type-safety. It is illustrated
+in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -610,9 +622,9 @@ Function Types Conversions
     frontend_status: Partly
 
 A *function types conversion*, i.e., the conversion of one function type
-to another occurs if the following conditions are met:
+to another, occurs if the following conditions are met:
 
-- Parameter types are converted using contravariance;
+- Parameter types are converted using contravariance.
 - Return types are converted using covariance (see :ref:`Compatible Types`).
 
 .. index::
@@ -658,10 +670,10 @@ to another occurs if the following conditions are met:
     let foo2: (p: Derived) => Base = (p: Base): Derived => new Derived() 
      /* OK: contravariant parameter types, and compatible return type */
 
-A throwing function type variable can have a non-throwing function value.
+A *throwing function* type variable can have a *non-throwing function* value.
 
-A compile-time error occurs if a throwing function value is assigned to a
-non-throwing function type variable.
+A compile-time error occurs if a *throwing function* value is assigned to a
+*non-throwing function* type variable.
 
 .. index::
    throwing function
@@ -714,7 +726,7 @@ the superclass or superinterface:
 
 
 The *casting conversion* for numeric types allows getting the desired numeric
-type:
+type as follows:
 
 .. code-block:: typescript
    :linenos:

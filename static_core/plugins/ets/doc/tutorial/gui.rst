@@ -18,7 +18,7 @@ Support for |UIFW|
 This section demonstrates mechanisms that |LANG| provides for
 creating graphical user interface (GUI) programs. The section is based on
 the |UIFW| declarative framework. |UIFW| provides a set of extensions of
-the standard |TS| to declaratively describe the GUI of the applications,
+the standard |TS| to declaratively describe the GUI of applications,
 and the interaction between the GUI components.
 
 |UIFW| Example

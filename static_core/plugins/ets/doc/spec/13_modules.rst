@@ -12,23 +12,23 @@
 
 .. _Modules and Compilation Units:
 
-Compilation Units, Packages and Modules
-#######################################
+Compilation Units, Packages, and Modules
+########################################
 
 .. meta:
     frontend_status: Done
 
 Programs are structured as sequences of elements ready for compilation, i.e.,
 compilation units. Each compilation unit creates its own scope (see
-:ref:`Scopes`), and the compilation unit’s variables, functions, classes,
-interfaces, or other declarations are only accessible within such scope unless
-explicitly exported.
+:ref:`Scopes`). The compilation unit’s variables, functions, classes,
+interfaces, or other declarations are only accessible within such scope if
+not explicitly exported.
 
 A variable, function, class, interface, or other declarations exported from a
 different compilation unit must be imported first.
 
 Compilation units are **separate modules** or **packages**. Packages are
-described in the experimental section (see :ref:`Packages`).
+described in the chapter Experimental Features (see :ref:`Packages`).
 
 .. code-block:: abnf
 
@@ -70,12 +70,12 @@ Separate Modules
 .. meta:
     frontend_status: Done
 
-A *separate module* is a module that has no package header, and consists of
-four optional parts:
+A *separate module* is a module without a package header. It optionally
+consists of the following four parts:
 
 #. Import directives that enable referring imported declarations in a module;
 
-#. Top-level declarations; 
+#. Top-level declarations;
 
 #. Top-level statements; and
 
@@ -89,7 +89,8 @@ four optional parts:
         ;
 
 Every module automatically imports all exported entities from essential kernel
-packages (‘std.core’ and 'escompat') of the standard library (see :ref:`Standard Library`).
+packages (‘std.core’ and 'escompat') of the standard library (see
+:ref:`Standard Library`).
 
 All entities from these packages are accessible as simple names, like the
 *console* variable:
@@ -129,7 +130,7 @@ Compilation Units in Host System
 .. meta:
     frontend_status: Partly
 
-The manner modules and packages are created and stored is determined by a
+Modules and packages are created and stored in a manner that is determined by a
 host system.
 
 The exact way modules and packages are stored in a file system is
@@ -174,11 +175,11 @@ Import Directives
 Import directives import entities exported from other compilation units, and
 provide such entities with bindings in the current module.
 
-Two parts of an import declaration are as follows:
+An import declaration has the following two parts:
 
-#. Import path that determines a compilation unit to import from;
+-  Import path that determines a compilation unit to import from;
 
-#. Import binding that defines what entities, and in what form---qualified
+-  Import binding that defines what entities, and in what form---qualified
    or unqualified---can be used by the imported compilation unit.
 
 .. index::
@@ -207,7 +208,7 @@ Two parts of an import declaration are as follows:
         ;
 
     selectiveBindigns:
-        '{' importBinding ('.' importBinding)* '}'
+        '{' importBinding (',' importBinding)* '}'
         ;
 
     defaultBinding:
@@ -232,12 +233,12 @@ Two parts of an import declaration are as follows:
 
 Each binding adds a declaration or declarations to the scope of a module
 or a package (see :ref:`Scopes`).
-Any added declaration must be distinguishable in the declaration scope (see
+Any declaration added so must be distinguishable in the declaration scope (see
 :ref:`Distinguishable Declarations`). Otherwise, a :index:`compile-time error`
 occurs.
 
-Some import constructions are specific for packages, and are described in the
-Experimental section (see :ref:`Packages`).
+Some import constructions are specific for packages. They are described in the
+chapter Experimental Features (see :ref:`Packages`).
 
 .. index::
    binding
@@ -257,9 +258,9 @@ Bind All with Unqualified Access
 .. meta:
     frontend_status: Partly
 
-Unless an alias is set, the import binding '\*' binds all entities exported
-from the compilation unit defined by the *import path* to the declaration scope
-of the current module as simple names.
+If an alias is not set, then the import binding '\*' binds all entities,
+exported from the compilation unit as defined by the *import path*, to the
+declaration scope of the current module as simple names.
 
 +-------------------------------+--+-------------------------------+
 | Import                        |  |  Usage                        |
@@ -282,7 +283,6 @@ of the current module as simple names.
    simple name
    module
 
-|
 
 .. _Bind All with Qualified Access:
 
@@ -295,8 +295,8 @@ Bind All with Qualified Access
 The import binding '\* as A' binds the single named entity 'A' to the
 declaration scope of the current module.
 
-A qualified name that consists of 'A' and the name of entity '*A.name*'
-are used to access any entity exported from the compilation unit defined
+A qualified name, which consists of 'A' and the name of entity '*A.name*',
+is used to access any entity exported from the compilation unit as defined
 by the *import path*.
 
 +---------------------------------+--+-------------------------------+
@@ -337,7 +337,7 @@ Simple Name Binding
 .. meta:
     frontend_status: Done
 
-There are two cases of the import binding '*qualifiedName*' as follows:
+The import binding '*qualifiedName*' has two cases as follows:
 
 -  A simple name (like *foo*); or
 
@@ -535,7 +535,7 @@ Default Import Binding
 .. meta:
     frontend_status: Partly
 
-Default import binding allows to import a declaration exported from some
+Default import binding allows importing a declaration exported from some
 module as default export. Knowing the actual name of the declaration is not
 required as the new name is given at importing.
 A :index:`compile-time error` occurs if another form of import is used to
@@ -570,9 +570,9 @@ Type Binding
 
 Type import binding allows importing only the type declarations exported from
 some module or package. These declarations can be exported normally, or by
-using the *export type* form. The difference between *import* and 
-*import type* is that the the first form imports all top-level declarations
-which were exported while the second one imports only exported types.
+using the *export type* form. The difference between *import* and
+*import type* is that the first form imports all top-level declarations
+which were exported, and the second imports only exported types.
 
 .. code-block:: typescript
    :linenos:
@@ -611,7 +611,7 @@ how an imported compilation unit must be placed.
 The slash character '/' is used in import paths irrespective of the host system.
 The backslash character is not used in this context.
 
-In most file systems, an import path looks like a file path; *relative* (see
+In most file systems, an import path looks like a file path. *Relative* (see
 below) and *non-relative* import paths have different *resolutions* that map
 the import path to a file path of the host system.
 
@@ -619,13 +619,14 @@ The compiler uses the following rule to define the kind of imported
 compilation units, and the exact placement of the source code:
 
 -  If import path refers to a folder denoted by the last name in the resolved
-   file path, then the compiler imports the package which resides in that
+   file path, then the compiler imports the package which resides in the
    folder. The source code of the package is all the |LANG| source files in
-   that folder.
+   the folder.
 
 -  Otherwise, the compiler imports the module that the import path refers to.
    The source code of the module is the file with the extension provided
-   within the import path, or——if none is so provided——appended by the compiler.
+   within the import path, or---if none is so provided---appended by the
+   compiler.
 
 
 .. index::
@@ -647,7 +648,7 @@ compilation units, and the exact placement of the source code:
    resolving
    filename
 
-A **relative import path** starts with './' or '../' as in the following
+A *relative import path* starts with './' or '../' as in the following
 examples:
 
 .. code-block:: typescript
@@ -657,14 +658,14 @@ examples:
     "../constants/http"
 
 Resolving a *relative import* is relative to the importing file. *Relative
-import* is used for compilation units to maintain their relative location.
+import* is used on compilation units to maintain their relative location.
 
 .. code-block:: typescript
    :linenos:
 
     import * as Utils from "./mytreeutils"
 
-Other import paths are **non-relative** as in the examples below:
+Other import paths are *non-relative* as in the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -676,12 +677,11 @@ Resolving a *non-relative path* depends on the compilation environment. The
 definition of the compiler environment can be particularly provided in a
 configuration file or environment variables.
 
-The *base URL* setting is used to resolve a path that starts with '/';
-*path mapping* is used in all other cases. Resolution details depend on
+The *base URL* setting is used to resolve a path that starts with '/'.
+*Path mapping* is used in all other cases. Resolution details depend on
 the implementation.
 
-For example the compilation configuration file may contain the following lines:
-(file name, placement, and format are implementation-specific)
+For example, the compilation configuration file can contain the following lines:
 
 .. code-block:: typescript
    :linenos:
@@ -691,8 +691,10 @@ For example the compilation configuration file may contain the following lines:
         "std": "/sts/stdlib"
     }
 
-In the example above, '/net/http' is resolved to '/home/project/net/http',
-and 'std/components/treemap' to '/sts/stdlib/components/treemap'.
+In the example above, '*/net/http*' is resolved to '*/home/project/net/http*',
+and '*std/components/treemap*' to '*/sts/stdlib/components/treemap*'.
+
+File name, placement, and format are implementation-specific.
 
 .. index::
    relative import path
@@ -722,8 +724,8 @@ Default Import
     todo: add escompat to spec and default
 
 A compilation unit automatically imports all entities exported from the
-predefined package ‘std.core’. All entities from this package can be accessed
-as simple names.
+predefined package ‘*std.core*’. All entities from this package can be
+accessed as simple names.
 
 .. code-block:: typescript
    :linenos:
@@ -758,9 +760,9 @@ TBD
 
 |
 
-.. _Top-level Declarations:
+.. _Top-Level Declarations:
 
-Top-level Declarations
+Top-Level Declarations
 **********************
 
 .. meta:
@@ -810,7 +812,7 @@ Exported Declarations
     frontend_status: Done
 
 Top-level declarations can use export modifiers to 'export' declared names.
-A declared name is considered *private* if not exported; a name declared
+A declared name is considered *private* if not exported. A name declared
 *private* can be used only inside the compilation unit it is declared in.
 
 .. code-block:: typescript
@@ -823,7 +825,7 @@ A declared name is considered *private* if not exported; a name declared
     }
 
 In addition, only one top-level declaration can be exported by using the default
-export scheme. It allows to not specify the declared name at importing (see
+export scheme. It allows specifying no declared name when importing (see
 :ref:`Default Import Binding` for details). A :index:`compile-time error`
 occurs if more than one top-level declaration is marked as *default*.
 
@@ -855,9 +857,12 @@ Export Directives
     todo: Now all symbols are exported (not only one with export declaration) because of stdlib internal dependencies
     todo: Fix stdlib and test, then restrict exporting everything
 
-The *export directive* allows specifying a selective list of exported
-declarations with optional renaming, or re-exporting declarations from
-other compilation units.
+The *export directive* allows the following:
+
+-  Specifying a selective list of exported declarations with optional
+   renaming; or
+-  Re-exporting declarations from other compilation units.
+
 
 .. code-block:: abnf
 
@@ -879,9 +884,8 @@ other compilation units.
 Selective Export Directive
 ==========================
 
-In addition, each exported declaration can be marked as *exported*
-by explicitly listing the names of exported declarations, with
-optional renaming.
+In addition, each exported declaration can be marked as *exported* by
+explicitly listing the names of exported declarations. Renaming is optional.
 
 .. code-block:: abnf
 
@@ -917,10 +921,13 @@ is not accessible in the modules that import this module.
 Export Type Directive
 =====================
 
-In addition to export which is attached to some declaration a programmer may
-wish to export as a type particular class or interface which was already
-declared or export already declared type under a different name. That can be
-done with help of *export type* directive. Its syntax is presented below.
+In addition to export that is attached to some declaration, a programmer can
+use the *export type* directive in order to do the following:
+
+-  Export as a type a particular class or interface already declared; or
+-  Export an already declared type under a different name.
+
+The appropriate syntax is presented below:
 
 .. code-block:: abnf
 
@@ -928,14 +935,15 @@ done with help of *export type* directive. Its syntax is presented below.
         'export' 'type' selectiveBindigns
         ;
 
-If class or interface was exported with this scheme then its usage is limited
-similar to limitations described in *import type* directive section (see `:ref:Type Binding`).
+If a class or an interface is exported in this manner, then its usage is
+limited similarly to the limitations described for *import type* directives
+(see :ref:`Type Binding`).
 
-It is a compile-time error if a class or interface was already declared as
-exported and then later *export type* is applied for the same class or
-interafce name.
+A compile-time error occurs if a class or interface was already declared as
+exported, but *export type* is later applied to the same class or interface
+name.
 
-Example below shows how this can be used
+The following example is an illustration of how this can be used:
 
 .. code-block:: typescript
    :linenos:
@@ -956,12 +964,12 @@ Re-Export Directive
 ===================
 
 In addition to exporting what is declared in the module, it is possible to
-re-export declarations that are part of export of the other modules. Only
+re-export declarations that are part of other modules' export. Only
 limited re-export possibilities are currently supported.
 
-It is possible to re-export particular declarations, or all declarations
-from a module. When re-exporting, new names can be given, which is similar
-to importing, but the direction of such action is opposite.
+It is possible to re-export a particular declaration or all declarations
+from a module. When re-exporting, new names can be given. This action is
+similar to importing but with the opposite direction.
 
 The appropriate grammar is presented below:
 
@@ -971,8 +979,7 @@ The appropriate grammar is presented below:
         'export' ('*' | selectiveBindigns) 'from' importPath
         ;
 
-
-The examples below illustrate how re-export works in practice:
+The following examples illustrate the re-exporting in practice:
 
 .. code-block:: typescript
    :linenos:
@@ -987,7 +994,7 @@ The examples below illustrate how re-export works in practice:
    re-export declaration
    module
 
-|
+
 
 .. _Top-Level Statements:
 
@@ -1016,7 +1023,7 @@ merge into a single sequence in the textual order:
       /* top-declarations */
       statements_2
 
-The above sequence is equal to the following:
+The sequence above is equal to the following:
 
 .. code-block:: typescript
    :linenos:
@@ -1032,7 +1039,7 @@ The above sequence is equal to the following:
 
 All top-level statements are executed only once before the call to any other
 function, or access to any top-level variable of the separate module.
-This also works when a function of the module is used as *program entry
+This also works if a function of the module is used as *program entry
 point*.
 
 .. code-block:: typescript
@@ -1079,17 +1086,18 @@ Program Entry Point (`main`)
     frontend_status: Done
 
 A program (application) entry point is the top-level ``main`` function. The
-function must have either no parameters, or one parameter of the string ``[]``
-type. Its return type is either ``void``, or ``int``. No overloading is allowed
+function must have either no parameters, or one parameter of string ``[]``
+type. Its return type is either ``void`` or ``int``. No overloading is allowed
 for the entry point function.
 
-The example below illustrates different forms of valid and invalid entry points:
+Different forms of valid and invalid entry points are shown in the example
+below:
 
 .. code-block:: typescript
    :linenos:
 
     function main() {
-      // Option 1: skip the return type - identical to :void
+      // Option 1: a return type is inferred, must be void or int
     }
 
     function main(): void {

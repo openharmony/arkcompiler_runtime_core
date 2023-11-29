@@ -2705,8 +2705,8 @@ are also supported.
 
 .. _R102:
 
-|CB_R| Interface can not extend interfaces with the same method
----------------------------------------------------------------
+|CB_R| Interface cannot extend interfaces with the same method
+--------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-extend-same-prop``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3142,48 +3142,6 @@ statements.
     // Initialization function should be called to execute statements:
     A.init()
 
-.. _R118:
-
-|CB_R| Special import type declarations are not supported
----------------------------------------------------------
-
-|CB_RULE| ``arkts-no-special-imports``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: TypeOnlyImport
-    :fix: Replace with ordinary import
-
-|CB_ERROR|
-
-|LANG| does not have a special notation for importing types.
-Use ordinary import instead.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    // Re-using the same import
-    import { APIResponseType } from "api"
-
-    // Explicitly use import type
-    import type { APIResponseType } from "api"
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    import { APIResponseType } from "api"
-
-|CB_SEE|
-~~~~~~~~
-
-* :ref:`R119`
-* :ref:`R120`
-* :ref:`R121`
-
 .. _R119:
 
 |CB_R| Importing a module for side-effects only is not supported
@@ -3343,56 +3301,6 @@ Use regular ``export`` / ``import`` instead.
 ~~~~~~~~
 
 * :ref:`R121`
-
-.. _R127:
-
-|CB_R| Special ``export type`` declarations are not supported
--------------------------------------------------------------
-
-|CB_RULE| ``arkts-no-special-exports``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: TypeOnlyExport
-    :fix: Replace with ordinary export
-
-|CB_ERROR|
-
-|LANG| does not have a special notation for exporting types through
-``export type ...``. Use ordinary export instead.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    // Explicitly exported class:
-    export class Class1 {
-        // ...
-    }
-
-    // Declared class later exported through export type ...
-    class Class2 {
-        // ...
-    }
-
-    // This is not supported:
-    export type { Class2 }
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    // Explicitly exported class:
-    export class Class1 {
-        // ...
-    }
-
-    // Explicitly exported class:
-    export class Class2 {
-        // ...
-    }
 
 .. _R128:
 
@@ -3711,7 +3619,7 @@ objects with dynamically changed layout are not supported.
     var abc = 100
 
     // Refers to 'abc' from above.
-    globalThis.abc = 200
+    let x = globalThis.abc
 
 |CB_OK|
 ~~~~~~~
@@ -3719,12 +3627,12 @@ objects with dynamically changed layout are not supported.
 .. code-block:: typescript
 
     // file1
-    export let abc : number = 0
+    export let abc : number = 100
 
     // file2
     import * as M from "file1"
 
-    M.abc = 200
+    let x = M.abc
 
 |CB_SEE|
 ~~~~~~~~
@@ -4064,12 +3972,11 @@ The most part of the restricted APIs relates to manipulating objects in a
 dynamic manner, which is not compatible with static typing. The usage of
 the following APIs is prohibited:
 
-Properties and functions of the global object: ``eval``,
-``Infinity``, ``NaN``, ``isFinite``, ``isNaN``, ``parseFloat``, ``parseInt``
+Properties and functions of the global object: ``eval``
 
 ``Object``: ``__proto__``, ``__defineGetter__``, ``__defineSetter__``,
 ``__lookupGetter__``, ``__lookupSetter__``, ``assign``, ``create``,
-``defineProperties``, ``defineProperty``, ``entries``, ``freeze``,
+``defineProperties``, ``defineProperty``, ``freeze``,
 ``fromEntries``, ``getOwnPropertyDescriptor``, ``getOwnPropertyDescriptors``,
 ``getOwnPropertySymbols``, ``getPrototypeOf``,
 ``hasOwnProperty``, ``is``, ``isExtensible``, ``isFrozen``,
@@ -4086,8 +3993,6 @@ Properties and functions of the global object: ``eval``,
 ``handler.getOwnPropertyDescriptor()``, ``handler.getPrototypeOf()``,
 ``handler.has()``, ``handler.isExtensible()``, ``handler.ownKeys()``,
 ``handler.preventExtensions()``, ``handler.set()``, ``handler.setPrototypeOf()``
-
-``ArrayBuffer``: ``isView``
 
 |CB_SEE|
 ~~~~~~~~
@@ -4365,3 +4270,64 @@ in the program.
         s: string = ""
         n: number = 0
     }
+
+.. _R151:
+
+|CB_R| Usage of ``ESObject`` type is restricted
+-----------------------------------------------
+
+|CB_RULE| ``arkts-limited-esobj``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: EsObjectType
+
+|CB_WARNING|
+
+|LANG| does not allow using ``ESObject`` type in some cases. The most part of
+limitations are put in place in order to prevent spread of dynamic objects in
+the static codebase. The only scenario where it is permitted to use ``ESObject``
+as type specifier is in local variable declaration. Initialization of variables
+with ``ESObject`` type is also limited. Such variables can only be initialized
+with values that originate from interop: other ``ESObject`` typed variables,
+any, unknown, variables with anonymous type, etc. It is prohibited to
+initialize ``ESObject`` typed variable with statically typed value. Variable
+of type ``ESObject`` can only be passed to interop calls and assigned to other
+variables of type ``ESObject``.
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    // lib.d.ts
+    declare function foo(): any;
+    declare function bar(a: any): number;
+
+    // main.ets
+    let e0: ESObject = foo(); // CTE - ``ESObject`` typed variable can only be local
+
+    function f() {
+        let e1 = foo(); // CTE - type of e1 is `any`
+        let e2: ESObject = 1; // CTE - can't initialize ESObject with not dynamic values
+        let e3: ESObject = {}; // CTE - can't initialize ESObject with not dynamic values
+        let e4: ESObject = []; // CTE - can't initialize ESObject with not dynamic values
+        let e5: ESObject = ""; // CTE - can't initialize ESObject with not dynamic values
+        e5['prop'] // CTE - can't access dynamic properties of ESObject
+        e5[1] // CTE - can't access dynamic properties of ESObject
+        e5.prop // CTE - can't access dynamic properties of ESObject
+
+        let e6: ESObject = foo(); // OK - explicitly annotated as ESObject
+        let e7 = e6; // OK - initialize ESObject with ESObject
+        bar(e7) // OK - ESObject is passed to interop call
+    }
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R001`
+* :ref:`R002`
+* :ref:`R029`
+* :ref:`R060`
+* :ref:`R066`
+* :ref:`R137`

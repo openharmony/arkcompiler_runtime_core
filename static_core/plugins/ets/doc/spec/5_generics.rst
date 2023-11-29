@@ -20,7 +20,7 @@ Generics
 
 Class, interface, method, constructor, and function are program entities
 that can be generalized in the |LANG| language. Generalization is
-parametrizing an entity by one or several types. A generalized
+parameterizing an entity by one or several types. A generalized
 entity is introduced by a *generic declaration* (also called *generic*
 for brevity).
 
@@ -45,7 +45,7 @@ Types used as generic parameters in a generic are called *type parameters*.
 
 A generic must be instantiated in order to be used.
 *Generic instantiation* is the action that converts a generic into
-a *real* program entity: ordinary class, interface, function, etc.
+a real program entity: ordinary class, interface, function, etc.
 Instantiation can be performed either explicitly or implicitly.
 
 *Explicit* generic instantiation is the language construct that specifies
@@ -70,7 +70,7 @@ In an *implicit* instantiation, type arguments are not specified explicitly.
 They are inferred from the context the generic is referred in.
 Implicit instantiation is possible only for functions and methods.
 
-The result of instantiation is a *real*, non-parametrized program entity:
+The result of instantiation is a *real*, non-parameterized program entity:
 class, interface, method, constructor, or function. Such entity is treated
 exactly as an ordinary class, interface, method, constructor, or function.
 
@@ -83,7 +83,7 @@ functions respectively (see :ref:`Generic Instantiations`).
    instantiation
    type argument
    context
-   non-parametrized entity
+   non-parameterized entity
    method
    class
    interface
@@ -125,8 +125,6 @@ Type parameters can also have default types (see :ref:`Type Parameter Default`).
    default type
    type parameter
 
-|
-
 .. code-block:: abnf
 
     typeParameters:
@@ -142,7 +140,7 @@ Type parameters can also have default types (see :ref:`Type Parameter Default`).
         ;
 
     constraint:
-        'extends' typeReference
+        'extends' typeReference | keyofType
         ;
 
     typeParameterDefault:
@@ -152,7 +150,7 @@ Type parameters can also have default types (see :ref:`Type Parameter Default`).
 A generic class, interface, method, constructor, or function defines a set
 of parameterized classes, interfaces, methods, constructors, or functions
 respectively (see :ref:`Generic Instantiations`). One type argument can only
-define one such set for each possible parametrization of the type parameter
+define one such set for each possible parameterization of the type parameter
 section.
 
 .. index::
@@ -184,8 +182,11 @@ Type Parameter Constraint
 .. meta:
     frontend_status: Partly
     todo: overloading functions with bound, and resolving call for correct overload
-    todo: Checking of bounaries on call site
+    todo: Checking of boundaries on call site
     todo: Further checks on multiple parameter bounds
+    todo: Implement union type support for constraints
+    todo: Adapt spec change: T without constraint doesn't mean "T extends Object|null" anymore.
+
 
 A type parameter can be restricted. In that case, the corresponding type
 argument in the generic instantiation must follow some restrictions, or
@@ -193,9 +194,13 @@ argument in the generic instantiation must follow some restrictions, or
 
 Every type parameter’s constraint follows the keyword ``extends``.
 A constraint is denoted as a single type parameter *T*; if no constraint
-is declared, then the type is assumed to be ``Object | null``.
+is declared, then the type parameter is not compatible with ``Object`` and it 
+has no methods or fields available for use. 
 If the type parameter *T* has the type constraint *S*, then the actual
 type of the generic instantiation must be a subtype of *S*.
+If the type parameter is constrained with the *keyof T*, then valid
+instantiations of this parameter can be the values of the union type created
+from string names of *T* or the union type itself:
 
 .. index::
    type parameter constraint
@@ -206,26 +211,34 @@ type of the generic instantiation must be a subtype of *S*.
    constraint
    subtype
 
-Example:
-
 .. code-block:: typescript
    :linenos:
 
     class Base {}
     class Derived extends Base { }
     class SomeType { }
-    
+
     class G<T extends Base> { }
     
     let x: G<Base>      // correct
     let y: G<Derived>   // also correct
     let z: G<SomeType>  // error: SomeType is not a subtype of Base
 
+    class A {
+      f1: number = 0
+      f2: string = ""
+      f3: boolean = false
+    }
+    class B<T extends keyof A> {}
+    let b1 = new B<'f1'>    // OK
+    let b2 = new B<'f0'>    // Compile-time error as "f0" does not satisfy the constraint 'keyof A'
+    let b3 = new B<keyof A> // OK
+
 A type parameter of a generic can *depend* on some other type parameter
 of the same generic.
 
 If *S* constrains *T*, then the type parameter *T* *directly depends*
-on the type parameter *S*, while *T* directly depends on:
+on the type parameter *S*, while *T* directly depends on the following:
 
 -  *S*; or
 -  A type parameter *U* that depends on *S*.
@@ -252,9 +265,26 @@ section depends on itself.
   
     class G<T, S extends T> {}
     
-    let x: G<Base,Derived>  // correct: the second argument directly
+    let x: G<Base, Derived>  // correct: the second argument directly
                             // depends on the first one
-    let y: G<Base,SomeType> // error: SomeType doesn't depend on Base
+    let y: G<Base, SomeType> // error: SomeType doesn't depend on Base
+
+    class A0<T> {
+       data: T
+       constructor (p: T) { this.data = p }
+       foo () {
+          let o: Object = this.data // error: as type T is not compatible with Object
+          console.log (this.data.toString()) // error: type T has no methods or fields
+       }
+    }
+
+    class A1<T extends Object> extends A0<T> {
+       constructor (p: T) { this.data = p }
+       override foo () {
+          let o: Object = this.data // OK!
+          console.log (this.data.toString()) // OK!
+       }
+    }
 
 |
 
@@ -269,7 +299,7 @@ Generic Instantiations
 As mentioned before, a generic class, interface, or function declaration
 defines a set of corresponding non-generic entities. A generic entity
 must be *instantiated* in order to get a non-generic entity out of it.
-The instantiation is specified by providing a list of *type arguments*
+The explicit instantiation is specified by providing a list of *type arguments*
 that substitute corresponding type parameters of the generic:
 
 .. index::
@@ -302,7 +332,7 @@ parameterized declaration ranging over them.
    constraint
 
 A generic instantiation *G* < *T*:sub:`1`, ``...``, *T*:sub:`n`> is
-*well-formed* if all of the following is true:
+*well-formed* if **all** of the following is true:
 
 -  The generic declaration name is *G*.
 -  The number of type arguments equals that of *G*’s type parameters.
@@ -310,8 +340,8 @@ A generic instantiation *G* < *T*:sub:`1`, ``...``, *T*:sub:`n`> is
 
 A compile-time error occurs if an instantiation is not well-formed.
 
-The generic version is included (unless explicitly excluded) with a class type,
-an interface type, or a function in this specification.
+Unless explicitly stated otherwise in appropriate sections, this specification
+discusses generic versions of class type, interface type, or function.
 
 Any two generic instantiations are considered *provably distinct* if:
 
@@ -410,7 +440,7 @@ then the boxing conversion applies to that type (see
         '<' typeArgumentList '>'
         ;
 
-A compile-time error occurs if type arguments are omitted in a parametrized
+A compile-time error occurs if type arguments are omitted in a parameterized
 function.
 
 .. index::
@@ -423,8 +453,6 @@ function.
    raw type
    parameterized function
    compile-time error
-
-|
 
 .. code-block:: abnf
 
@@ -559,11 +587,8 @@ They allow to construct new types, and extend their functionality.
 Partial Utility Type
 ====================
 
-The type ``Partial<*T*>`` constructs a type with all properties of *T* set to
+The type ``Partial<T>`` constructs a type with all properties of *T* set to
 optional. *T* must be a class or an interface type.
-
-.. index::
-   interface type
 
 .. code-block:: typescript
    :linenos:
@@ -591,6 +616,66 @@ type that is analogous to the type:
         title?: string
         description?: string
     }
+
+|
+
+.. Required Utility Type:
+
+Required Utility Type
+=====================
+
+The type ``Required<T>`` is opposite to ``Partial<T>``. 
+It constructs a type with all properties of *T* set to
+be required (not optional). *T* must be a class or an interface type.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface Issue {
+        title?: string
+        description?: string
+    }
+
+    let c: Required<Issue> = { // CTE: 'description' should be defined
+        title: "aa"
+    }
+    
+
+
+The type defined in the example above, the type ``Required<Issue>`` 
+is transformed to a distinct type that is analogous to the type:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface /*some name*/ {
+        title: string
+        description: string
+    }
+
+|
+
+.. _Readonly Utility Type:
+
+Readonly Utility Type
+=====================
+
+The type ``Readonly<T>`` constructs a type with all properties of *T* set to
+readonly, meaning the properties of the constructed value cannot be reassigned.
+*T* must be a class or an interface type.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface Issue {
+        title: string
+    }
+
+    const myIssue: Readonly<Issue> = {
+        title: "One"
+    };
+ 
+    myIssue.title = "Two" // compile-time error: readonly property
 
 |
 
@@ -633,10 +718,11 @@ There are no restrictions on the type *V*.
 A special form of object literals is supported for instances of *Record*
 types (see :ref:`Object Literal of Record Type`).
 
-Access to ``Record<``*K*``, ``*V*``>`` values is done by the *indexing
+Access to ``Record<K, V>`` values is done by the *indexing
 expression* like *r[index]*, where *r* is an instance of the type ``Record``,
 and *index* is the expression of the type *K*. The result of an indexing
-expression is of type *V*.
+expression is of type *V*, if *K* is a union that contains literal types only
+or *V | undefined*, otherwise. See :ref:`Record Indexing Expression` for more details.
 
 .. index::
    object literal
@@ -659,6 +745,10 @@ expression is of type *V*.
     console.log(x['key2']) // prints 2
     x['key2'] = 8
     console.log(x['key2']) // prints 8
+
+In the example above, *K* is a union of literal types, so the result type 
+of an indexing expression is *V* which is ``number`` in this case.
+
 
 .. raw:: pdf
 

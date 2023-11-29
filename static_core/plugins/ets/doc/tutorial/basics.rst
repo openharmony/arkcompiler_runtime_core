@@ -18,12 +18,12 @@ The Basics
 Declarations
 ------------
 
-Declarations in |LANG| introduce:
+Declarations in |LANG| introduce the following:
 
--  variables,
--  constants,
--  functions, and
--  types.
+-  Variables,
+-  Constants,
+-  Functions, and
+-  Types.
 
 |
 
@@ -31,8 +31,8 @@ Declarations in |LANG| introduce:
 
 Variable Declaration
 ~~~~~~~~~~~~~~~~~~~~
-A declaration starting with the keyword ``let`` introduces a variable which
-can have different values during the program execution.
+A declaration starting with the keyword ``let`` introduces a variable that
+can have different values during the program execution:
 
 .. code-block:: typescript
 
@@ -47,7 +47,7 @@ Constant Declaration
 ~~~~~~~~~~~~~~~~~~~~
 
 A declaration starting with the keyword ``const`` introduces a read-only
-constant that can be assigned only once.
+constant that can be assigned only once:
 
 .. code-block:: typescript
 
@@ -104,22 +104,22 @@ with the decimal base.
 
 Integer literals include the following:
 
-* decimal integers that consist of a sequence of digits. For example:
+* Decimal integers that consist of a sequence of digits. For example:
   ``0``, ``117``, ``-345``;
-* hexadecimal integers that start with 0x (or 0X), and can contain digits
+* Hexadecimal integers that start with 0x (or 0X), and can contain digits
   (0-9) and letters a-f or A-F. For example: ``0x1123``, ``0x00111``,
   ``-0xF1A7``;
-* octal integers that start with 0o (or 0O), and can only contain digits
+* Octal integers that start with 0o (or 0O), and can only contain digits
   (0-7). For example: ``0o777``;
-* binary integers that start with 0b (or 0B), and can only contain the
+* Binary integers that start with 0b (or 0B), and can only contain the
   digits 0 and 1. For example: ``0b11``, ``0b0011``, ``-0b11``.
 
 A floating-point literal includes the following:
 
-* decimal integer, optionally signed (i.e., prefixed with "+" or "-");
-* decimal point (".");
-* fractional part (represented by a string of decimal digits);
-* exponent part that starts with "e" or "E", followed by an optionally
+* Decimal integer, optionally signed (i.e., prefixed with "+" or "-");
+* Decimal point (".");
+* Fractional part (represented by a string of decimal digits);
+* Exponent part that starts with "e" or "E", followed by an optionally
   signed (i.e., prefixed with "+" or "-") integer.
 
 For example:
@@ -175,7 +175,7 @@ A ``string`` literal consists of zero or more characters enclosed in single
 (') or double quotes (").
 
 A special form of string literals are template literals enclosed in backticks
-(`).
+(\`):
 
 .. code-block:: typescript
 
@@ -191,9 +191,9 @@ A special form of string literals are template literals enclosed in backticks
 ``void`` Type
 ~~~~~~~~~~~~~
 
-The ``void`` type is used to specify that a function returns no value.
-This type has the only value that is also ``void``. Being a reference
-type, ``void`` can be used as type argument for generic types.
+Type ``void`` is used to specify that a function returns no value.
+As a reference type, ``void``
+can be used as type argument for generic types:
 
 .. code-block:: typescript
 
@@ -209,9 +209,9 @@ type, ``void`` can be used as type argument for generic types.
 ``Object`` Type
 ~~~~~~~~~~~~~~~
 
-An ``Object`` class type is a base type for all reference types. Any value,
-including the automatically boxed values of primitive types, can be directly
-assigned to variables of the type ``Object``.
+An ``Object`` class type is a base type for all all other classes, interfaces, string, arrays, unions, and function types. Any value,
+including the automatically boxed values of primitive types and enum types, can be directly
+assigned to variables of type ``Object``.
 
 |
 
@@ -220,7 +220,7 @@ assigned to variables of the type ``Object``.
 ``array`` Type
 ~~~~~~~~~~~~~~
 
-An ``array`` is an object comprised of the data types elements assignable to
+An ``array`` is an object comprised of the data type elements assignable to
 the element type specified in the array declaration.
 The value of an ``array`` is set by using *array composite literal* that is
 a list of zero or more expressions enclosed in square brackets ([]).
@@ -241,10 +241,10 @@ The following example creates the ``array`` with three elements:
 ``enum`` Type
 ~~~~~~~~~~~~~
 
-An ``enum`` type is a value type with a defined set of named values called
+Type ``enum`` is a value type with a defined set of named values called
 enum constants.
-In order to be used, an ``enum`` constant must be prefixed with an enum
-``type`` name.
+In order to be used, an ``enum`` constant must be prefixed with an ``enum``
+type name:
 
 .. code-block:: typescript
 
@@ -252,7 +252,7 @@ In order to be used, an ``enum`` constant must be prefixed with an enum
     let c: Color = Color.Red
 
 A constant expression can be used to explicitly set the value of an ``enum``
-constant.
+constant:
 
 .. code-block:: typescript
 
@@ -266,9 +266,9 @@ constant.
 ``union`` Type
 ~~~~~~~~~~~~~~
 
-A ``union`` type is a reference type which is created as a combination
-of other types. Values of a union type can be valid values of all types
-the union is created from.
+Type ``union`` is a reference type created as a combination of other types.
+Values of a ``union`` type can be valid values of all types the union is
+created from:
 
 .. code-block:: typescript
 
@@ -289,9 +289,8 @@ the union is created from.
     animal = 42
     // One may assign the variable of the union type with any valid value
 
-There are different mechanisms to get a value of a particular type from a union.
-
-For example
+There are different mechanisms to get a value of a particular type from a
+union. For example:
 
 .. code-block:: typescript
 
@@ -319,7 +318,7 @@ Type Aliases
 ~~~~~~~~~~~~
 
 Type *aliases* provide names for anonymous types (array, function, object
-literal, or union types), or alternative names for the existing types.
+literal, or union types), or alternative names for the existing types:
 
 .. code-block:: typescript
 
@@ -349,7 +348,7 @@ Compound assignment operators combine an assignment with an operator, where
 
 Compound assignment operators are as follows: '``+=``', '``-=``', '``*=``',
 '``/=``', '``%=``', '``<<=``', '``>>=``', '``>>>=``', '``&=``', '``|=``',
-'``^=``'.
+and '``^=``'.
 
 |
 
@@ -474,7 +473,7 @@ An ``if`` statement looks as follows:
 
 All conditional expressions must be of the type ``boolean``, or other types
 (``string``, ``number``, etc.). For types other than ``boolean``, implicit
-conversion rules apply:
+conversion rules apply as follows:
 
 .. code-block:: typescript
 
@@ -529,8 +528,8 @@ the corresponding statements are executed.
 If there is no match, and the ``switch`` has the default clause, then the
 default statements are executed.
 
-An optional ``break`` statement allows to break out of the ``switch``, and
-continue by executing the statement that follows the ``switch``.
+An optional ``break`` statement allows breaking out of the ``switch`` and
+then executing the statement that follows the ``switch``.
 
 If there is no ``break``, then the next statements in the ``switch`` is
 executed.
@@ -553,9 +552,7 @@ A conditional expression looks as follows:
 
 The condition must be a logical expression. If that logical expression is
 ``true``, then the first expression is used as the result of the ternary
-expression; otherwise, the second expression is used.
-
-Example:
+expression. Otherwise, the second expression is used. For example:
 
 .. code-block:: typescript
 
@@ -587,9 +584,9 @@ When a ``for`` statement is executed, the following process takes place:
    initializes one or more loop counters.
 
 #. The condition is evaluated. If the value of condition is ``true``, or
-   if the conditional expression is omitted, then the statements in the
-   ``for`` body are to be executed. If the value of condition is ``false``,
-   then the ``for`` loop terminates.
+   the conditional expression is omitted, then the statements in the ``for``
+   body are to be executed. If the value of condition is ``false``, then
+   the ``for`` loop terminates.
 
 #. The statements of the ``for`` body are executed.
 
@@ -599,7 +596,7 @@ When a ``for`` statement is executed, the following process takes place:
 #. Go back to step 2.
 
 
-Example:
+It is illustrated in the example below:
 
 .. code-block:: typescript
 
@@ -615,9 +612,8 @@ Example:
 ``for-of`` Statements
 ~~~~~~~~~~~~~~~~~~~~~
 
-A ``for-of`` statement is used to iterate over an array, or string.
-
-A ``for-of`` statement looks as follows:
+A ``for-of`` statement is used to iterate over an array or a string. A
+``for-of`` statement looks as follows:
 
 .. code-block:: typescript
 
@@ -625,7 +621,7 @@ A ``for-of`` statement looks as follows:
         statements 
     }
 
-Example:
+Another example is below:
 
 .. code-block:: typescript
 
@@ -639,19 +635,16 @@ Example:
 ~~~~~~~~~~~~~~~~~~~~
 
 A ``while`` statement has its body statements executed as long as the
-specified condition evaluates to ``true``.
-
-A ``while`` statement looks as follows:
+specified condition evaluates to ``true``. A ``while`` statement looks as
+follows:
 
 .. code-block:: typescript
 
     while (condition) {
         statements
     }
-    
-The condition must be a logical expression.
 
-Example:
+The condition must be a logical expression:
 
 .. code-block:: typescript
 
@@ -670,9 +663,7 @@ Example:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 A ``do-while`` statement is executed repetitively until a specified
-condition evaluates to false.
-
-A ``do-while`` statement looks as follows:
+condition evaluates to false. A ``do-while`` statement looks as follows:
 
 .. code-block:: typescript
 
@@ -680,9 +671,7 @@ A ``do-while`` statement looks as follows:
         statements
     } while (condition)
 
-The condition must be a logical expression.
-
-Example:
+The condition must be a logical expression:
 
 .. code-block:: typescript
 
@@ -698,9 +687,7 @@ Example:
 ``break`` Statements
 ~~~~~~~~~~~~~~~~~~~~
 
-A ``break`` statement is used to terminate any ``loop`` or ``switch`` statement.
-
-Example:
+A ``break`` statement is used to terminate any ``loop`` or ``switch`` statement:
 
 .. code-block:: typescript
 
@@ -713,9 +700,7 @@ Example:
     }
 
 A ``break`` statement with a label identifier transfers control out of the
-enclosing statement to the one which has the same label identifier.
-
-Example:
+enclosing statement to the one that has the same label identifier:
 
 .. code-block:: typescript
 
@@ -736,9 +721,7 @@ Example:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 A ``continue`` statement stops the execution of the current loop iteration,
-and passes control to the next iteration.
-
-Example:
+and passes control to the next iteration:
 
 .. code-block:: typescript
 
@@ -773,7 +756,7 @@ A ``try`` statement is used to catch and handle an exception or an error:
         // handle the situation
     }
 
-The example below shows the ``throw`` and ``try`` statements  used to handle
+The example below shows the ``throw`` and ``try`` statements used to handle
 a zero-division case:
 
 .. code-block:: typescript

@@ -10,10 +10,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Errors Handling:
+.. _Error Handling:
 
-Errors Handling
-###############
+Error Handling
+##############
 
 .. meta:
     frontend_status: Done
@@ -21,16 +21,16 @@ Errors Handling
 |LANG| is designed to provide first-class support in responding to, and
 recovering from different erroneous conditions in a program.
 
-Two kinds of situations can occur to interrupt normal program
+Two kinds of situations can occur and interrupt normal program
 execution:
 
--  Runtime errors, e.g., null pointer dereferencing, array bounds
-   checking, or division by zero;
+-  Runtime errors (e.g., null pointer dereferencing, array bounds
+   checking, or division by zero);
 
--  Operation completion failures; for example, the task of reading
+-  Operation completion failures (e.g., the task of reading
    and processing data from a file on disk can fail if the file does
    not exist on a specified path, read permissions are not available,
-   or else.
+   or else).
 
 
 .. index::
@@ -72,8 +72,8 @@ support only *errors*. |LANG| is based on the presumption that both
 *exceptions* and *errors* must be supported. ‘*Exception*’ and
 ‘*Error*’ as predefined types are discussed below.
 
-Exceptions are described in the Experimental section (see
-:ref:`Exceptions`) herein.
+Exceptions are described in the chapter Experimental Features (see
+:ref:`Exceptions`) of this specification.
 
 .. index::
    exception
@@ -94,9 +94,13 @@ However, a developer can define a new error by using *Error*, or any
 derived class as the base of the new class. An example of the *error*
 handling is provided below:
 
+|
+
 .. index::
    error
    derived class
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -121,12 +125,12 @@ a subclass of *Error*.
 In most cases, *errors* are caused by the Virtual Machine, or by the
 standard libraries.
 
-Although ``throw`` statements (see :ref:`Throw Statements`) allow to throw
-*exceptions* and *errors*, *exceptions* provide a structured way to handle
-a range of unexpected situations in the application code. Throwing *errors*
-in such a context is not recommended.
+``throw`` statements (see :ref:`Throw Statements`) allow throwing both
+*exceptions* and *errors*. Throwing *exceptions* provide a structured way to
+handle a range of unexpected situations in the application code. Throwing
+*errors* in such a context is not recommended.
 
-``try`` statements (see :ref:`Try Statements`) are used to to handle
+``try`` statements (see :ref:`Try Statements`) are used to handle
 *errors* in a manner similar to the handling of *exceptions*.
 
 **Note**: Not every *error* can be recovered.

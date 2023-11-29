@@ -88,8 +88,8 @@ Any expression can be used as a statement.
         expression
         ;
 
-The execution of a statement leads to the execution of the expression,
-and the result of such execution is discarded.
+The execution of a statement leads to the execution of the expression. The
+result of such execution is discarded.
 
 .. index::
    expression statement
@@ -116,13 +116,12 @@ A sequence of statements enclosed in balanced braces forms a *block*.
 
 The execution of a block means that all block statements, except type
 declarations, are executed one by one in the textual order of their
-appearance within the block, unless an exception, an error, or a return
-occurs.
+appearance within the block if no exception, error, or return occurs.
 
-If a block is the body of a *functionDeclaration* or a *classMethodDeclaration*
-which was declared with no return type, or with return type *void*, then the
+If a block is the body of a *functionDeclaration* or a *classMethodDeclaration*,
+which was declared implicitly or explicitly with return type *void*, then the
 block can contain no return statement at all. Such a block is equivalent to a
-block ending in the *return void* statement, and is executed accordingly.
+block ending in the *return* statement, and is executed accordingly.
 
 .. index::
    sequence of statements
@@ -150,7 +149,7 @@ Local declarations define new mutable or immutable variables or
 types within the enclosing context.
 
 *Let* and *const* declarations have the initialization part that
-presumes execution, and actually act as statements.
+presumes execution. They actually act as statements.
 
 .. code-block:: abnf
 
@@ -161,7 +160,7 @@ presumes execution, and actually act as statements.
         ;
 
 The visibility of a local declaration name is determined by the function
-(method), and block scopes rules (see :ref:`Scopes`).
+(method) and block scope rules (see :ref:`Scopes`).
 
 .. index::
    local declaration
@@ -197,9 +196,9 @@ certain conditions.
         ('else' statement2)?
         ;
 
-An expression represents the condition, and if it is successfully evaluated
-as *true*, then *statement1* is executed; otherwise, *statement2* is executed
-(if provided). A compile-time error occurs unless the expression type is
+If an expression, which represents a condition, is successfully evaluated
+as *true*, then *statement1* is executed. Otherwise, *statement2* is executed
+(if provided). A compile-time error occurs if the expression type is not
 *boolean*.
 
 Any ``else`` matches the first ``if`` of an ``if`` statement.
@@ -219,8 +218,8 @@ Any ``else`` matches the first ``if`` of an ``if`` statement.
     if (Cond2) statement1
     else statement2 // Executes only if: Cond1 && !Cond2
 
-A list of statements in braces (see :ref:`Block`) is used to combine the ``else``
-part with the first ``if``:
+A list of statements in braces (see :ref:`Block`) is used to combine the
+``else`` part with the first ``if``:
 
 .. code-block:: typescript
    :linenos:
@@ -242,7 +241,8 @@ part with the first ``if``:
 
 |LANG| has four kinds of loops. Each kind of loops can have an optional label
 which can be used only by ``break`` and ``continue`` statements contained in
-the body of the loop. A label is characterized by the *identifier* as shown below:
+the body of the loop. The label is characterized by an *identifier* as shown
+below:
 
 .. index::
    loop statement
@@ -381,15 +381,11 @@ A compile-time error occurs if the type of an expression is not
 
 .. or class implementing *Iterable*.
 
-The execution of the ``for-of`` loop starts with the evaluation of ``expression``.
-If the evaluation is successful, then the resultant *string* or *array*
-
-.. or class which implements *Iterable*
-
-is used for loop iterations (execution of the ``statement``). On each iteration,
-*forVariable* is set to successive elements of the *array* or *string*.
-
-.. or result of class iterator advancing.
+The execution of a ``for-of`` loop starts with the evaluation of ``expression``.
+If the evaluation is successful, then the resultant *string* or *array* [or
+class which implements *Iterable*] is used for loop iterations (execution of
+the ``statement``). On each iteration, *forVariable* is set to successive
+elements of the *array* or *string* [or result of class iterator advancing].
 
 .. index::
    compile-time error
@@ -405,7 +401,7 @@ is used for loop iterations (execution of the ``statement``). On each iteration,
    string
 
 If *forVariable* has the modifiers ``let`` or ``const``, then a new variable
-is used inside the loop; otherwise, the variable is as declared above.
+is used inside the loop. Otherwise, the variable is as declared above.
 The modifier ``const`` prohibits assignments into *forVariable*,
 while ``let`` allows modifications.
 
@@ -469,9 +465,9 @@ or *switchStatement*.
         ;
 
 A ``break`` statement with the label *identifier* transfers control out of the
-enclosing statement with the same label *identifier*. Such a statement must
-be found within the body of the surrounding function or method; a compile-time
-error occurs otherwise.
+enclosing statement with the same label *identifier*. A compile-time error
+occurs if such a statement is not found within the body of the surrounding
+function or method.
 
 A statement without a label transfers control out of the innermost enclosing
 ``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement.
@@ -517,9 +513,9 @@ exit conditions depend on the kind of the loop.
         ;
 
 A ``continue`` statement with the label *identifier* transfers control out
-of the enclosing loop statement with the same label *identifier*. Such
-a statement must be found within the body of the surrounding function or
-method; a compile-time error occurs otherwise.
+of the enclosing loop statement with the same label *identifier*.
+A compile-time error occurs if such a statement is not found within the body
+of the surrounding function or method.
 
 A compile-time error occurs if no *continueStatement* is found within
 *loopStatment*.
@@ -544,7 +540,7 @@ A compile-time error occurs if no *continueStatement* is found within
     frontend_status: Done
     todo: return voidExpression
 
-A ``return`` statement can have an expression, or none.
+A ``return`` statement can have or not have an expression.
 
 .. code-block:: abnf
 
@@ -552,8 +548,7 @@ A ``return`` statement can have an expression, or none.
         'return' expression?
         ;
 
-A 'return expression' statement can only occur inside a function, a method,
-or a constructor body.
+A '*return expression*' statement can only occur inside a function or a method body.
 
 .. index::
    return statement
@@ -563,18 +558,21 @@ or a constructor body.
    method
    constructor
 
-A ``return`` statement (with no expression) can occur in any place where
-statements are allowed, except top-level statements (see
-:ref:`Top-Level Statements`). This form is also valid for functions or methods
-with the return type ``void`` because it is semantically equivalent to the
-statement ``return void``.
+A ``return`` statement (with no expression) can occur in one of the following
+situations:
 
-A compile-time error occurs if a ``return`` statement occurs in:
+- Inside a class initializer;
+- Inside a constructor body; or
+- Inside a function or a method body with return type ``void``.
+
+A compile-time error occurs if a ``return`` statement is found in:
 
 -  Top-level statements (see :ref:`Top-Level Statements`);
 -  Class initializers (see :ref:`Class Initializer`) and constructors (see
-   :ref:`Constructor Declaration`), and has an expression;
--  A function or a method with a non-``void`` return type, and has no
+   :ref:`Constructor Declaration`), where it has an expression;
+-  A function or a method with return type ``void``, where it has
+   an expression;
+-  A function or a method with a non-``void`` return type, where it has no
    expression.
 
 .. index::
@@ -590,12 +588,12 @@ A compile-time error occurs if a ``return`` statement occurs in:
    constructor declaration
 
 The execution of *returnStatement* leads to the termination of the
-surrounding function or method. The resultant value is the evaluated
-*expression* (if provided), or ``void`` otherwise.
+surrounding function or method. If an *expression* is provided, 
+the resultant value is the evaluated *expression*.
 
 In case of constructors, class initializers, and top-level statements, the
 control leaves the scope of the construction in question, but no result is
-required. Other statements of the surrounding function or method body,
+required. Other statements of the surrounding function, method body,
 class initializer, or top-level statement are not executed.
 
 .. index::
@@ -674,7 +672,7 @@ The switch *expression* type must be of type *char*, *byte*, *short*, *int*,
    Int
    Long
 
-A compile-time error occurs unless all of the following is true:
+A compile-time error occurs if not **all** of the following is true:
 
 -  Every case expression type associated with a ``switch`` statement is
    compatible (see :ref:`Compatible Types`) with the type of the ``switch``
@@ -694,6 +692,8 @@ A compile-time error occurs unless all of the following is true:
    type compatibility
    constant
    null statement
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -749,8 +749,8 @@ determines the equality.
 .. meta:
     frontend_status: Done
 
-A ``throw`` statement causes an exception or an error to be thrown (see
-:ref:`Errors Handling`). It immediately transfers control, and can exit multiple
+A ``throw`` statement causes *exception* or *error* to be thrown (see
+:ref:`Error Handling`). It immediately transfers control, and can exit multiple
 statements, constructors, functions, and method calls until a ``try`` statement
 (see :ref:`Try Statements`) is found that catches the thrown value; if no
 ``try`` statement is found, then *UncatchedExceptionError* is thrown.
@@ -761,13 +761,13 @@ statements, constructors, functions, and method calls until a ``try`` statement
         'throw' expression
         ;
 
-The *expression*’s type must be assignable (see :ref:`Assignment`) to the
+The *expression*’s type must be assignable (see :ref:`Assignment`) to
 type *Exception* or *Error*. A compile-time error occurs otherwise.
 
 This implies that the thrown object is never *null*.
 
-It is necessary to check at compile time that a ``throw`` statement which
-throws an exception is placed in the ``try`` block of a ``try`` statement,
+It is necessary to check at compile time that a ``throw`` statement, which
+throws an exception, is placed in the ``try`` block of a ``try`` statement,
 or in a *throwing function* (see :ref:`Throwing Functions`). Errors can
 be thrown at any place in the code.
 
@@ -799,7 +799,7 @@ be thrown at any place in the code.
     frontend_status: Done
 
 A ``try`` statement runs blocks of code, and provides sets of catch clauses
-to handle different exceptions and errors (see :ref:`Errors Handling`).
+to handle different exceptions and errors (see :ref:`Error Handling`).
 
 .. index::
    try statement
@@ -834,7 +834,7 @@ The |LANG| programming language supports *multiple typed catch clauses* as
 an experimental feature (see :ref:`Try Statements`).
 
 A ``try`` statement must contain either a ``finally`` clause, or at least one
-``catch`` clause; a compile-time error occurs otherwise.
+``catch`` clause. Otherwise, a compile-time error occurs.
 
 If the ``try`` block completes normally, then no action is taken, and no
 ``catch`` clause block is executed.
@@ -870,9 +870,9 @@ A ``catch`` clause consists of two parts:
 -  *Catch identifier* that provides access to the object associated with
    the error thrown; and
 
--  Block of code that is to handle the situation.
+-  Block of code that handles the situation.
 
-The type of a *catch identifier* is *Object*.
+The type of *catch identifier* is *Object*.
 
 .. index::
    catch clause
@@ -888,6 +888,8 @@ For the details of *typed catch clause* see
 
 .. index::
    typed catch clause
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -912,7 +914,7 @@ For the details of *typed catch clause* see
     }
 
 A ``catch`` clause handles all errors at runtime. It returns '*-1*' for
-the ``ZeroDivisor``, and '*0*'  for all other errors.
+the *ZeroDivisor*, and '*0*'  for all other errors.
 
 .. index::
    catch clause
@@ -941,9 +943,13 @@ abruptly.
 
 The ``finally`` block is executed without regard to how (by reaching
 *exception*, *error*, *return*, or *try-catch* end) the program control
-is transferred out. A ``finally`` block is particularly useful to ensure
-proper resource management: any required actions (e.g., flush buffers and
-close file descriptors) can be performed while leaving the ``try-catch``.
+is transferred out.
+
+A ``finally`` block is particularly useful to ensure
+proper resource management.
+
+Any required actions (e.g., flush buffers and close file descriptors)
+can be performed while leaving the ``try-catch``:
 
 .. index::
    finally clause
@@ -992,29 +998,17 @@ close file descriptors) can be performed while leaving the ``try-catch``.
 .. meta:
     frontend_status: Done
 
-#. The ``try`` block, and the entire ``try`` statement completes normally if
-   no ``catch`` block is executed.
-
+#. A ``try`` block and the entire ``try`` statement complete normally if no
+   ``catch`` block is executed.
    The execution of a ``try`` block completes abruptly if an *exception* or
    an *error* is thrown inside the ``try`` block.
-
    ``Catch`` clauses are checked in the textual order of their position in the
    source code.
 
-.. index::
-   try statement
-   execution
-   try block
-   normal completion
-   abrupt completion
-   error
-   catch clause
-   exception
-
-#. The execution of a ``try`` block completes abruptly if an *exception* or
+#. The execution of a ``try`` block completes abruptly if *exception* or
    *error* *x* is thrown inside the ``try`` block.
    If the runtime type of *x* is compatible (see :ref:`Compatible Types`) with
-   an *exception* class of the *exception* parameter (i.e., the ``catch``
+   the *exception* class of the *exception* parameter (i.e., the ``catch``
    clause matches *x*), and the execution of the body of the ``catch`` clause
    completes normally, then the entire ``try`` statement completes normally.
    Otherwise, the ``try`` statement completes abruptly.
@@ -1027,21 +1021,20 @@ close file descriptors) can be performed while leaving the ``try-catch``.
    *UncatchedExceptionError* is thrown.
 
 .. index::
+   try statement
    execution
    try block
-   abrupt completion
    normal completion
-   try block
+   abrupt completion
+   error
+   catch clause
    exception
    runtime
    compatible type
    catch clause
-   exception
    exception parameter
-   try statement
    error
    type compatibility
-   compatible type
    propagation
    surrounding scope
    function
@@ -1060,8 +1053,8 @@ close file descriptors) can be performed while leaving the ``try-catch``.
 .. meta:
     frontend_status: Done
 
-The ``assert`` statements are described in the experimental section (see
-:ref:`Assert Statements Experimental`).
+The ``assert`` statements are described in the chapter Experimental Features
+(see :ref:`Assert Statements Experimental`).
 
 .. index::
    assert statement
