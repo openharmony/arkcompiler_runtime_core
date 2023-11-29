@@ -192,7 +192,9 @@ spec/unions/union_param_10_01.ets
 spec/unions/union_param_10_02.ets
 spec/unions/union_param_10_03.ets
 ### End of Unions
-
+### Koala related issues
+koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
+### End of Koala
 ### Feature: Rest Params
 ### Issue 14111
 spec/rest-params/Issue14111.ets
