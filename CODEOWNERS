@@ -13,3 +13,6 @@
 
 [StaticCore]
 static_core/ @egavrin
+
+[ArkPlatform]
+arkplatform/ @egavrin
