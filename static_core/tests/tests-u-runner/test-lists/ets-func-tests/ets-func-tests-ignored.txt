@@ -624,3 +624,20 @@ spec/functions/overrideModifier_03.ets
 spec/functions/subtypingWithFunctionsRequiresExplicitType_02.ets
 spec/functions/subtypingWithFunctionsRequiresExplicitType_03.ets
 ### End functions issues
+### Built-In Component Two Way Value Synchronization
+### Negative tests
+arkui/dollar_dollar_06.ets
+arkui/dollar_dollar_07.ets
+### Used only with ARKUI plugin
+arkui/dollar_dollar_01.ets
+arkui/dollar_dollar_02.ets
+arkui/dollar_dollar_03.ets
+arkui/dollar_dollar_04.ets
+arkui/dollar_dollar_05.ets
+arkui/dollar_dollar_08.ets
+arkui/dollar_dollar_09.ets
+arkui/dollar_dollar_10.ets
+arkui/dollar_dollar_11.ets
+arkui/dollar_dollar_12.ets
+arkui/dollar_dollar_13.ets
+### End Of Built-In Component Two Way Value Synchronization
