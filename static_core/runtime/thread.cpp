@@ -109,8 +109,8 @@ void Thread::InitCardTableData(mem::GCBarrierSet *barrier)
         case panda::mem::BarrierType::POST_INTERREGION_BARRIER:
             card_table_addr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
             card_table_min_addr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
-            post_wrb_one_object_ = reinterpret_cast<void *>(PostInterRegionBarrierFast1);
-            post_wrb_two_objects_ = reinterpret_cast<void *>(PostInterRegionBarrierFast2);
+            post_wrb_one_object_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkSingleFast);
+            post_wrb_two_objects_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkPairFast);
             break;
         case panda::mem::BarrierType::POST_WRB_NONE:
             post_wrb_one_object_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);

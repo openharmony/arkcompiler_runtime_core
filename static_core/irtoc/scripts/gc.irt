@@ -66,23 +66,11 @@ end
 # - Checks if mem and obj are in different regions
 # - Checks if GC Card for mem is not marked, then marks it
 # - Pushes Card to G1 LockFreeBuffer concurrently, GC consumer thread will fetch the Card
-def PostInterRegionBarrierFast(obj_num, check_null)
-    no_check = check_null ? "" : "NoCheck"
+def PostInterRegionBarrierMarkSingleFast()
+    params = {mem: 'ref_uint', offset: 'word', obj1: 'ref_uint'}
+    mask = RegMask.new($full_regmap, :arg0, :arg1, :tmp0)
 
-    if obj_num == 1
-        params = {mem: 'ref_uint', offset: 'word', obj1: 'ref_uint'}
-        mask = RegMask.new($full_regmap, :arg0, :arg1, :tmp0)
-    elsif obj_num == 2
-        params = {mem: 'ref_uint', offset: 'word', obj1: 'ref_uint', obj2: 'ref_uint'}
-        mask = RegMask.new($full_regmap, :arg0, :arg1, :arg2)
-        if Options.arch == :x86_64
-            mask += :tmp0
-        end
-    else
-        raise "Wrong obj_num #{obj_num}"
-    end
-
-    function("PostInterRegionBarrierFast#{no_check}#{obj_num}".to_sym,
+    function("PostInterRegionBarrierMarkSingleFast".to_sym,
              params: params,
              regmap: $full_regmap,
              regalloc_set: mask,
@@ -92,50 +80,77 @@ def PostInterRegionBarrierFast(obj_num, check_null)
             next
         end
 
-        if obj_num == 1
-            if check_null
-                If(obj1, 0).EQ.Unlikely {
-                    Goto(:Done)
-                }
-            end
+        If(obj1, 0).EQ.Unlikely {
+            Goto(:Done)
+        }
 
-            If(ShrI(Xor(mem, obj1).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).EQ.Unlikely {
-                Goto(:Done)
-            }
-        elsif obj_num == 2
-            if check_null
-                If(obj1, 0).EQ.Unlikely {
-                    Goto(:Check2)
-                }
-            end
+        If(ShrI(Xor(mem, obj1).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).EQ.Likely {
+            Goto(:Done)
+        }
 
-            If(ShrI(Xor(mem, obj1).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).NE {
-                Goto(:PushToBuffer)
-            }
-    
-        Label(:Check2)
-            if check_null
-                If(obj2, 0).EQ.Unlikely {
-                    Goto(:Done)
-                }
-            end
-    
-            If(ShrI(Xor(mem, obj2).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).EQ.Unlikely {
-                Goto(:Done)
-            }
-        end
-
-    Label(:PushToBuffer)
         ref_addr := Add(mem, offset).ref_uint
         LiveOut(ref_addr).DstReg(regmap[:arg0]).ref_uint
-        if obj_num == 1
-            Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).Terminator.void
-        elsif obj_num == 2
-            IfImm(AndI(ref_addr).Imm(Constants::REFERENCE_PAIR_ALIGNMENT_MASK).ref_uint).Imm(0).EQ {
-                Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).Terminator.void
-            }
-            Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_PAIR_UNALIGNED_SLOW).Terminator.void
+        Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).Terminator.void
+
+    Label(:Done)
+        ReturnVoid().void
+    }
+end
+
+# G1 PostWrite barrier for StorePair instruction.
+# Similar to the previous, but:
+# - Checks if the 2nd object's card should be marked;
+# - If not, checks the 1st object, marks it's card if neccessary and exits.
+# - Otherwise, if 1st and 2nd object's cards are the same (i.e.
+# -     2nd store addr isn't aligned on a beggining of a card), marks the card and exits.
+# - Otherwise, marks the 2nd object's card as well as the 1st obj's card.
+def PostInterRegionBarrierMarkPairFast()
+    params = {mem: 'ref_uint', offset: 'word', obj1: 'ref_uint', obj2: 'ref_uint'}
+    mask = RegMask.new($full_regmap, :arg0, :arg1, :arg2)
+    if Options.arch == :x86_64
+        mask += :tmp0
+    end
+
+    function("PostInterRegionBarrierMarkPairFast".to_sym,
+             params: params,
+             regmap: $full_regmap,
+             regalloc_set: mask,
+             mode: [:FastPath]) {
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).Terminator.void
+            next
         end
+
+        
+        ref_addr_obj1 := Add(mem, offset).ref_uint
+        
+        If(obj2, 0).EQ.Unlikely {
+            Goto(:Check1)
+        }
+        ref_addr_obj2 := AddI(ref_addr_obj1.ref_uint).Imm(Constants::REFERENCE_TYPE_SIZE).ref_uint
+
+        If(ShrI(Xor(mem, obj2).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).NE.Unlikely {
+            IfImm(AndI(ref_addr_obj2).Imm(Constants::CARD_ALIGNMENT_MASK).ref_uint).Imm(0).EQ.Unlikely {
+                LiveOut(ref_addr_obj2).DstReg(regmap[:arg0]).ref_uint
+                Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW).Terminator.void
+            }
+            # No need to sub REFERENCE_TYPE_SIZE as the card will be the same:
+            Goto(:Call1)
+        }
+    
+    Label(:Check1)
+        If(obj1, 0).EQ.Unlikely {
+            Goto(:Done)
+        }
+    
+        If(ShrI(Xor(mem, obj1).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).EQ.Likely {
+            Goto(:Done)
+        }
+
+    Label(:Call1)
+        phi := Phi(ref_addr_obj2, ref_addr_obj1).ref_uint
+        LiveOut(phi).DstReg(regmap[:arg0]).ref_uint
+        Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).Terminator.void
 
     Label(:Done)
         ReturnVoid().void
@@ -198,7 +213,7 @@ def PostInterRegionBarrierSlow()
     }
 end
 
-def PostInterRegionBarrierPairUnalignedSlow()
+def PostInterRegionBarrierTwoCardsSlow()
     if Options.arch == :arm64
         mask = RegMask.new($full_regmap, :arg0, :callee0, :callee1, :callee2, :tmp0, :tmp1)
     elsif Options.arch == :x86_64
@@ -207,7 +222,7 @@ def PostInterRegionBarrierPairUnalignedSlow()
         mask = $panda_mask
     end
 
-    function(:PostInterRegionBarrierPairUnalignedSlow,
+    function(:PostInterRegionBarrierTwoCardsSlow,
             params: {mem: 'ref_uint'},
             regmap: $full_regmap,
             regalloc_set: mask,
@@ -219,8 +234,9 @@ def PostInterRegionBarrierPairUnalignedSlow()
 
         min_addr := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_MIN_ADDR_OFFSET).word
         cards := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_ADDR_OFFSET).ptr
+        # `mem` here is a pointer to the 2nd slot of the pair
         push_dirty_card_to_buffer(cards, min_addr, mem)
-        push_dirty_card_to_buffer(cards, min_addr, AddI(mem).Imm(Constants::REFERENCE_TYPE_SIZE).ref_uint)
+        push_dirty_card_to_buffer(cards, min_addr, SubI(mem).Imm(Constants::REFERENCE_TYPE_SIZE).ref_uint)
         ReturnVoid().void
     }
 end
@@ -229,9 +245,8 @@ PostInterGenerationalBarrier(0)
 PostInterGenerationalBarrier(1)
 PostInterGenerationalBarrier(2)
 
-PostInterRegionBarrierFast(1, false)
-PostInterRegionBarrierFast(1, true)
-PostInterRegionBarrierFast(2, true)
+PostInterRegionBarrierMarkSingleFast()
+PostInterRegionBarrierMarkPairFast()
 
 PostInterRegionBarrierSlow()
-PostInterRegionBarrierPairUnalignedSlow()
+PostInterRegionBarrierTwoCardsSlow()

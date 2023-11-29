@@ -1209,8 +1209,8 @@ public:
 
     bool SupportsIrtocBarriers() const
     {
-        return (IsAotMode() || GetMode().IsInterpreter() || GetMode().IsInterpreterEntry()) && !IsDynamicMethod() &&
-               GetArch() != Arch::AARCH32;
+        return (IsJitOrOsrMode() || IsAotMode() || GetMode().IsInterpreter() || GetMode().IsInterpreterEntry()) &&
+               !IsDynamicMethod() && GetArch() != Arch::AARCH32;
     }
 
     void SetMaxInliningDepth(uint32_t depth)

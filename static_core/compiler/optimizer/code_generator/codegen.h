@@ -412,6 +412,8 @@ public:
     // Managed Thread keeps pointer to actual IRtoC GC barriers implementation at run-time.
     void CreateOfflineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2);
     // Creates call to IRtoC PostWrb Entrypoint. Online means JIT compilation -> we know GC type.
+    void CreateOnlineIrtocPostWrbRegionTwoRegs(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object);
+    void CreateOnlineIrtocPostWrbRegionOneReg(Inst *inst, MemRef mem, Reg reg1, bool check_object);
     void CreateOnlineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object);
     template <typename... Args>
     void CallBarrier(RegMask live_regs, VRegMask live_vregs, std::variant<EntrypointId, Reg> entrypoint,

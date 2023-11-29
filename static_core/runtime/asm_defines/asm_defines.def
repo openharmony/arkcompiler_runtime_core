@@ -200,6 +200,8 @@ DEFINE_VALUE(G1_LOCK_BUFFER_DATA_OFFSET, mem::GCG1BarrierSet::G1PostBarrierRingB
 DEFINE_VALUE(G1_LOCK_BUFFER_TAIL_OFFSET, mem::GCG1BarrierSet::G1PostBarrierRingBufferType::GetTailIndexOffset())
 DEFINE_VALUE(G1_LOCK_BUFFER_HEAD_OFFSET, mem::GCG1BarrierSet::G1PostBarrierRingBufferType::GetHeadIndexOffset())
 
+DEFINE_VALUE(CARD_TABLE_CARD_BITS, mem::CardTable::GetCardBits())
+DEFINE_VALUE(CARD_ALIGNMENT_MASK, (1U << mem::CardTable::GetCardBits()) - 1U)
 DEFINE_VALUE(CARD_VALUE_OFFSET, mem::CardTable::Card::GetValueOffset())
 
 DEFINE_VALUE(RUNTIME_MODE_DEFAULT, 0)
