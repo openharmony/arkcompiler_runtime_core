@@ -39,13 +39,13 @@ cases:
 
   - { type: char, val: "c'2'", rt: byte, rv: 1 as byte, op: '|', res: 3 }
   - { type: char, val: "c'2'", rt: short, rv: 1 as short, op: '&', res: 3 }
-  - { type: char, val: "c'2'", rt: char, rv: "c'0'", op: '^', res: 3 }
+  - { type: char, val: "c'2'", rt: char, rv: "c'0'", op: '^', res: 5 }
   - { type: char, val: "c'2'", rt: int, rv: 1, op: '|', res: 3 }
   - { type: char, val: "c'2'", rt: long, rv: 1 as long, op: '&', res: 4 }
 
   - { type: char, val: "c'2'", rt: Byte, rv: new Byte(1 as byte), op: '^', res: 3 }
   - { type: char, val: "c'2'", rt: Short, rv: new Short(1 as short), op: '|', res: 3 }
-  - { type: char, val: "c'2'", rt: Char, rv: new Char(c'0'), op: '&', res: 3 }
+  - { type: char, val: "c'2'", rt: Char, rv: new Char(c'0'), op: '&', res: 5 }
   - { type: char, val: "c'2'", rt: Int, rv: new Int(1), op: '^', res: 3 }
   - { type: char, val: "c'2'", rt: Long, rv: new Long(1 as long), op: '|', res: 4 }
 
