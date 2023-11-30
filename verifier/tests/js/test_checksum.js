@@ -13,7 +13,7 @@
  limitations under the License.
  */
 
-let val = "hello";
+let val = 'hello';
 function setValue() {
   let value = val;
   return value;
