@@ -1012,7 +1012,7 @@ Default and Static Interface Methods
 ************************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 |
 
@@ -1022,7 +1022,7 @@ Default Method Declarations
 ============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 .. code-block:: abnf
 
@@ -1685,7 +1685,7 @@ Rethrowing Functions
 ====================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A *rethrowing function* is a function that accepts a *throwing function* as a
 parameter, and is marked with the keyword ``rethrows``.

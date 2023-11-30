@@ -861,7 +861,7 @@ Character Types and Operations
 ==============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 +-----------+----------------------------------+--------------------------+
 | Type      | Type's Set of Values             | Corresponding Class Type |
@@ -1135,6 +1135,9 @@ use ``string`` in all cases.
 
 ``never`` Type
 ==============
+
+.. meta:
+    frontend_status: Done
 
 The class ``never`` is a subclass (see :ref:`Subtyping`) of any other class.
 
@@ -1860,7 +1863,7 @@ DynamicObject Type
 ==================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
 
 The interface *DynamicObject* is used to provide seamless interoperability
 with dynamic languages (e.g., Javascript and TypeScript), and

@@ -16,7 +16,7 @@ Enumerations
 ############
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 An enumeration type *enum* specifies a distinct type with an associated set
 of named constants that define its possible values:
@@ -99,7 +99,7 @@ Enumeration Integer Values
 **************************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 The integer value of an *enum* constant is set implicitly if an enumeration
 constant specifies no value.

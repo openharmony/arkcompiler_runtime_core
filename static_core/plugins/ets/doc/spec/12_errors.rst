@@ -16,7 +16,7 @@ Error Handling
 ##############
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 |LANG| is designed to provide first-class support in responding to, and
 recovering from different erroneous conditions in a program.

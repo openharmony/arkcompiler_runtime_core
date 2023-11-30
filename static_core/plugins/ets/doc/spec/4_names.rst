@@ -188,8 +188,7 @@ Scopes
 ******
 
 .. meta:
-    frontend_status: Partly
-    todo: there are some TBD in spec
+    frontend_status: Done
 
 The **scope** of a name is the region of program code within which the entity
 declared by that name can be referred to without the qualification of the name.
