@@ -31,9 +31,16 @@ verifier_test_deps = [
 verifier_test_js_files = [
   "test_checksum",
   "test_constant_pool",
+  "test_register_index",
+  "test_constant_pool_content",
+]
+
+verifier_test_ts_files = [
+  "test_literal_array",
 ]
 
 test_js_path = "//arkcompiler/runtime_core/verifier/tests/js/"
+test_ts_path = "//arkcompiler/runtime_core/verifier/tests/ts/"
 
 foreach(file, verifier_test_js_files) {
   es2abc_gen_abc("gen_${file}_abc") {
@@ -48,6 +55,23 @@ foreach(file, verifier_test_js_files) {
   }
 }
 
+foreach(file, verifier_test_ts_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_ts = "${test_ts_path}${file}.ts"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    src_js = rebase_path(test_ts)
+    dst_file = rebase_path(test_abc)
+
+    extra_args = [
+      "--type-extractor",
+    ]
+
+    in_puts = [ test_ts ]
+    out_puts = [ test_abc ]
+  }
+}
+
 host_unittest_action("VerifierTest") {
   module_out_path = module_output_path
 
@@ -55,6 +79,7 @@ host_unittest_action("VerifierTest") {
     "utils.cpp",
     "verify_checksum_test.cpp",
     "verify_constant_pool_tests.cpp",
+    "verify_register_index_test.cpp",
   ]
 
   include_dirs = [ "$ark_root/verifier" ]
@@ -65,6 +90,9 @@ host_unittest_action("VerifierTest") {
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
   foreach(file, verifier_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+  foreach(file, verifier_test_ts_files) {
     deps += [ ":gen_${file}_abc" ]
   }
 }

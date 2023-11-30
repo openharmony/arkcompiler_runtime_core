@@ -39,6 +39,10 @@ bool Verifier::Verify()
     if (!VerifyConstantPool()) {
         return false;
     }
+ 
+    if (!VerifyRegisterIndex()) {
+        return false;
+    }
 
     return true;
 }
@@ -69,8 +73,46 @@ bool Verifier::VerifyConstantPool()
     return true;
 }
 
+bool Verifier::VerifyRegisterIndex()
+{
+    if (file_ == nullptr) {
+        return false;
+    }
+
+    GetMethodIds();
+    for (const auto &method_id : method_ids_) {
+        panda_file::MethodDataAccessor method_accessor {*file_, method_id};
+        if (!method_accessor.GetCodeId().has_value()) {
+            continue;
+        }
+        panda_file::CodeDataAccessor code_data(*file_, method_accessor.GetCodeId().value());
+        const uint32_t reg_nums = code_data.GetNumVregs();
+        const uint32_t arg_nums = code_data.GetNumArgs();
+        const uint32_t max_reg_idx = reg_nums + arg_nums;
+        auto bc_ins = BytecodeInstruction(code_data.GetInstructions());
+        const auto bc_ins_last = bc_ins.JumpTo(code_data.GetCodeSize());
+        ASSERT(arg_nums >= DEFAULT_ARGUMENT_NUMBER);
+        while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
+            const size_t count = GetVRegCount(bc_ins);
+            if (count == 0) { // Skip instructions that do not use registers
+                bc_ins = bc_ins.GetNext();
+                continue;
+            }
+            if (!CheckVRegIdx(bc_ins, count, max_reg_idx)) {
+                return false;
+            }
+            bc_ins = bc_ins.GetNext();
+        }
+    }
+    return true;
+}
+
 void Verifier::GetMethodIds()
 {
+    if (method_ids_.size() != 0) {
+        return;
+    }
+
     auto index_headers = file_->GetIndexHeaders();
     for (const auto &header : index_headers) {
         auto method_index = file_->GetMethodIndex(&header);
@@ -152,6 +194,29 @@ bool Verifier::VerifyStringId(const BytecodeInstruction &bc_ins, const panda_fil
     if (string_data.utf16_length != desc.length()) {
         LOG(ERROR, VERIFIER) << "Invalid string_id. string_id(0x" << std::hex << arg_string_id << ")!";
         return false;
+    }
+    return true;
+}
+
+size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
+{
+    size_t idx = 0; // Represents the idxTH register index in an instruction
+    BytecodeInstruction::Format format = bc_ins.GetFormat();
+    while (bc_ins.HasVReg(format, idx)) {
+        idx++;
+    }
+    return idx;
+}
+
+bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx)
+{
+    for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
+        uint16_t reg_idx = bc_ins.GetVReg(idx);
+        if (reg_idx >= max_reg_idx) {
+            LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
+                                 << reg_idx << ")" << std::endl;
+            return false;
+        }
     }
     return true;
 }
