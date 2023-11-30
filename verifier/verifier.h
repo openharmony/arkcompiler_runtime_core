@@ -28,20 +28,20 @@ public:
     ~Verifier() = default;
 
     bool Verify();
-    bool VerifyRegisterIndex();
     bool VerifyChecksum();
     bool VerifyConstantPool();
+    bool VerifyRegisterIndex();
 
 private:
     void GetMethodIds();
     void GetLiteralIds();
     bool CheckConstantPool();
+    size_t GetVRegCount(const BytecodeInstruction &bc_ins);
     bool VerifyMethodId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
     bool VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id,
                          size_t idx);
     bool VerifyStringId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
     bool CheckConstantPoolInfo(const panda_file::File::EntityId &method_id);
-    uint32_t GetRegIdxBaseOnRegType(const BytecodeInstruction &bc_ins, size_t reg_type);
 
     std::unique_ptr<const panda_file::File> file_;
     std::vector<panda_file::File::EntityId> method_ids_;
