@@ -20,9 +20,10 @@
 #include <cstdlib>
 
 #include "file.h"
-#include "utils/logger.h"
+#include "utils.h"
 
 using namespace testing::ext;
+
 namespace panda::verifier {
 class VerifierTest : public testing::Test {
 public:
@@ -30,11 +31,15 @@ public:
     static void TearDownTestCase(void) {};
     void SetUp() {};
     void TearDown() {};
-    static constexpr uint32_t MAGIC_LEN = 8U;
-    static constexpr uint32_t ABCFILE_OFFSET = 12U;
 };
 
-HWTEST_F(VerifierTest, verifier_test_001, TestSize.Level1)
+/**
+* @tc.name: verifier_checksum_001
+* @tc.desc: Verify the abc file checksum value function.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(VerifierTest, verifier_checksum_001, TestSize.Level1)
 {
     const std::string file_name = GRAPH_TEST_ABC_DIR "test_checksum.abc";
     panda::verifier::Verifier ver {file_name};
@@ -42,74 +47,73 @@ HWTEST_F(VerifierTest, verifier_test_001, TestSize.Level1)
 }
 
 /**
-* @tc.name: verifier_test_001
+* @tc.name: verifier_checksum_002
 * @tc.desc: Verify the modified abc file checksum value function.
 * @tc.type: FUNC
 * @tc.require: file path and name
 */
-HWTEST_F(VerifierTest, verifier_test_002, TestSize.Level1)
+HWTEST_F(VerifierTest, verifier_checksum_002, TestSize.Level1)
 {
-    const std::string file_name = GRAPH_TEST_ABC_DIR "test_checksum.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_checksum.abc";
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {base_file_name};
         EXPECT_TRUE(ver.VerifyChecksum());
     }
-    std::vector<uint8_t> bytes = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x11};
-	
-    constexpr char const *mode = "wbe";
-    FILE *fp = fopen(file_name.c_str(), mode);
-    if (fp == nullptr) {
-        LOG(ERROR, VERIFIER) << file_name << ", open failed";
-    }
-    EXPECT_TRUE(fp != nullptr);
-    fseek(fp, 0, SEEK_SET);
-    fseek(fp, ABCFILE_OFFSET, SEEK_CUR);
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
 
-    auto size = fwrite(bytes.data(), sizeof(decltype(bytes.back())), bytes.size(), fp);
-    fclose(fp);
-    fp = nullptr;
-    EXPECT_TRUE(size == bytes.size());
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    std::vector<uint8_t> new_checksum = {0x01, 0x01, 0x01, 0x01};
+
+    // The 8~11 elements in the buffer of the abc file hold the checksum
+    buffer[8] = new_checksum[0];
+    buffer[9] = new_checksum[1];
+    buffer[10] = new_checksum[2];
+    buffer[11] = new_checksum[3];
+
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_checksum_002.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
 
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {target_file_name};
         EXPECT_FALSE(ver.VerifyChecksum());
     }
 }
 
-
 /**
-* @tc.name: verifier_test_003
-* @tc.desc: Verify the modified checksum bitwidth abc file checksum value function.
+* @tc.name: verifier_checksum_003
+* @tc.desc: Verify the modified abc file content function.
 * @tc.type: FUNC
 * @tc.require: file path and name
 */
-HWTEST_F(VerifierTest, verifier_test_003, TestSize.Level1)
+HWTEST_F(VerifierTest, verifier_checksum_003, TestSize.Level1)
 {
-    const std::string file_name = GRAPH_TEST_ABC_DIR "test_checksum_bit.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_checksum.abc";
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {base_file_name};
         EXPECT_TRUE(ver.VerifyChecksum());
     }
-    std::vector<uint8_t> bytes = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
 
-    FILE *fp = fopen(file_name.c_str(), "wbe");
-    if (fp == nullptr) {
-        LOG(ERROR, VERIFIER) << file_name << ", open failed";
-    }
-    EXPECT_TRUE(fp != nullptr);
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    fseek(fp, 0, SEEK_SET);
-    fseek(fp, MAGIC_LEN, SEEK_CUR);
+    std::vector<uint8_t> new_content = {0x01, 0x01};
 
-    auto size = fwrite(bytes.data(), sizeof(decltype(bytes.back())), bytes.size(), fp);
-    fclose(fp);
-    fp = nullptr;
-    EXPECT_TRUE(size == bytes.size());
+    // The checksum calculation starts with the 12th element
+    buffer[12] = new_content[0];
+    buffer[13] = new_content[1];
+
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_checksum_003.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
 
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {target_file_name};
         EXPECT_FALSE(ver.VerifyChecksum());
     }
 }
 
-};
+}; // namespace panda::verifier

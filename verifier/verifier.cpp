@@ -90,6 +90,7 @@ void Verifier::GetLiteralIds()
 
 bool Verifier::CheckConstantPool()
 {
+    bool check_res = true;
     const auto class_idx = file_->GetClasses();
     for (size_t i = 0; i < class_idx.size(); i++) {
         uint32_t class_id = class_idx[i];
@@ -102,8 +103,11 @@ bool Verifier::CheckConstantPool()
         if (!file_->IsExternal(record_id)) {
             panda_file::ClassDataAccessor class_accessor {*file_, record_id};
             class_accessor.EnumerateMethods([&](panda_file::MethodDataAccessor &method_accessor) -> void {
-                CheckConstantPoolInfo(method_accessor.GetMethodId());
+                check_res &= CheckConstantPoolInfo(method_accessor.GetMethodId());
             });
+        }
+        if (!check_res) {
+            return false;
         }
     }
     return true;
@@ -121,9 +125,10 @@ bool Verifier::VerifyMethodId(const BytecodeInstruction &bc_ins, const panda_fil
     return true;
 }
 
-bool Verifier::VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id)
+bool Verifier::VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id,
+                               size_t idx /* = 0 */)
 {
-    const auto arg_literal_idx = bc_ins.GetId().AsIndex();
+    const auto arg_literal_idx = bc_ins.GetId(idx).AsIndex();
     const auto arg_literal_id = file_->ResolveMethodIndex(method_id, arg_literal_idx);
     const auto literal_id = panda_file::File::EntityId(arg_literal_id).GetOffset();
     auto iter = std::find(literal_ids_.begin(), literal_ids_.end(), literal_id);
@@ -164,16 +169,23 @@ bool Verifier::CheckConstantPoolInfo(const panda_file::File::EntityId &method_id
     const auto bc_ins_last = bc_ins.JumpTo(ins_sz);
 
     while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
-        // fix the scenario when instruction has more than one id, such as defefineclasswithbuffer
+        if (bc_ins.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
+            // the idx of any instruction with a literal id is 0 except defineclasswithbuffer
+            size_t idx = 0;
+            if (bc_ins.GetOpcode() == BytecodeInstruction::Opcode::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 ||
+                bc_ins.GetOpcode() == BytecodeInstruction::Opcode::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8) {
+                idx = 1;
+            }
+            if (!VerifyLiteralId(bc_ins, method_id, idx)) {
+                return false;
+            }
+        }
         if (bc_ins.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
             if (!VerifyMethodId(bc_ins, method_id)) {
                 return false;
             }
-        } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
-            if (!VerifyLiteralId(bc_ins, method_id)) {
-                return false;
-            }
-        } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::STRING_ID)) {
+        }
+        if (bc_ins.HasFlag(BytecodeInstruction::Flags::STRING_ID)) {
             if (!VerifyStringId(bc_ins, method_id)) {
                 return false;
             }

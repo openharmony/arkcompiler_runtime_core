@@ -15,14 +15,15 @@
 
 #include "verifier.h"
 
+#include <cstdlib>
 #include <gtest/gtest.h>
 #include <string>
-#include <cstdlib>
 
 #include "file.h"
-#include "utils/logger.h"
+#include "utils.h"
 
 using namespace testing::ext;
+
 namespace panda::verifier {
 class VerifierConstantPool : public testing::Test {
 public:
@@ -40,7 +41,7 @@ public:
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_001, TestSize.Level1)
 {
-    const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool1.abc";
+    const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     panda::verifier::Verifier ver {file_name};
 
     EXPECT_TRUE(ver.VerifyConstantPool());
@@ -54,35 +55,33 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_001, TestSize.Level1)
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
 {
-    const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool2.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {base_file_name};
         EXPECT_TRUE(ver.VerifyConstantPool());
     }
-    std::vector<uint8_t> string_id = {0x0c, 0x00};
-    
-    uint32_t code_id = 0x02f0; // the code id which contains method id in abc file
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
 
-    // For format in this instruction, the method id needs to be offset by one byte
-    long int method_id = static_cast<long int>(code_id) + 1;
-	
-    constexpr char const *mode = "wbe";
-    FILE *fp = fopen(file_name.c_str(), mode);
-    if (fp == nullptr) {
-        LOG(ERROR, VERIFIER) << "Failed to open file " << file_name;
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    std::vector<uint8_t> new_method_id = {0xff, 0xff};
+    std::vector<uint8_t> method_id = {0x0e, 0x00}; // The known method id in the abc file
+
+    for (size_t i = buffer.size() - 1; i >= 0; --i) {
+        if (buffer[i] == method_id[0] && buffer[i + 1] == method_id[1]) {
+            buffer[i] = static_cast<unsigned char>(new_method_id[0]);
+            buffer[i + 1] = static_cast<unsigned char>(new_method_id[1]);
+            break;
+        }
     }
-    EXPECT_TRUE(fp != nullptr);
 
-    fseek(fp, 0, SEEK_SET);
-    fseek(fp, method_id, SEEK_CUR);
-
-    auto size = fwrite(string_id.data(), sizeof(decltype(string_id.back())), string_id.size(), fp);
-    fclose(fp);
-    fp = nullptr;
-    EXPECT_TRUE(size == string_id.size());
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_002.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
 
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {target_file_name};
         EXPECT_FALSE(ver.VerifyConstantPool());
     }
 }
@@ -95,34 +94,35 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
 {
-    const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool3.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {base_file_name};
         EXPECT_TRUE(ver.VerifyConstantPool());
     }
-    std::vector<uint8_t> string_id = {0x00, 0x01};
-    
-    uint32_t code_id = 0x0306; // the code id which contains literal id in abc file
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
 
-    // For format in this instruction, the literal id needs to be offset by three byte
-    long int literal_id = static_cast<long int>(code_id) + 3;
-	
-    constexpr char const *mode = "wbe";
-    FILE *fp = fopen(file_name.c_str(), mode);
-    if (fp == nullptr) {
-        LOG(ERROR, VERIFIER) << file_name << ",open fail";
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    std::vector<uint8_t> new_literal_id = {0xac, 0xfc};
+    std::vector<uint8_t> literal_id = {0x0f, 0x00}; // The known literal id in the abc file
+
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        if (buffer[i] == literal_id[0] && buffer[i + 1] == literal_id[1]) {
+            buffer[i] = static_cast<unsigned char>(new_literal_id[0]);
+            buffer[i + 1] = static_cast<unsigned char>(new_literal_id[1]);
+            break;
+        }
     }
-    EXPECT_TRUE(fp != nullptr);
-    fseek(fp, 0, SEEK_SET);
-    fseek(fp, literal_id, SEEK_CUR);
 
-    auto size = fwrite(string_id.data(), sizeof(decltype(string_id.back())), string_id.size(), fp);
-    fclose(fp);
-    fp = nullptr;
-    EXPECT_TRUE(size == string_id.size());
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_003.abc";
+
+    GenerateModifiedAbc(buffer, target_file_name);
+    
+    base_file.close();
 
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {target_file_name};
         EXPECT_FALSE(ver.VerifyConstantPool());
     }
 }
@@ -135,34 +135,33 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
 {
-    const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool4.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {base_file_name};
         EXPECT_TRUE(ver.VerifyConstantPool());
     }
-    std::vector<uint8_t> new_string_id = {0x00, 0x01};
-    
-    uint32_t code_id = 0x0322; // the code id which contains string id in abc file
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
 
-    // For format in this instruction, the literal id needs to be offset by three byte
-    long int string_id = static_cast<long int>(code_id) + 3;
-	
-    constexpr char const *mode = "wbe";
-    FILE *fp = fopen(file_name.c_str(), mode);
-    if (fp == nullptr) {
-        LOG(ERROR, VERIFIER) << file_name << ",open fail";
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    std::vector<uint8_t> new_string_id = {0xff, 0x00};
+    std::vector<uint8_t> string_id = {0x0c, 0x00}; // The known string id in the abc file
+
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        if (buffer[i] == string_id[0] && buffer[i + 1] == string_id[1]) {
+            buffer[i] = static_cast<unsigned char>(new_string_id[0]);
+            buffer[i + 1] = static_cast<unsigned char>(new_string_id[1]);
+            break;
+        }
     }
-    EXPECT_TRUE(fp != nullptr);
-    fseek(fp, 0, SEEK_SET);
-    fseek(fp, string_id, SEEK_CUR);
 
-    auto size = fwrite(new_string_id.data(), sizeof(decltype(new_string_id.back())), new_string_id.size(), fp);
-    fclose(fp);
-    fp = nullptr;
-    EXPECT_TRUE(size == new_string_id.size());
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_004.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
 
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {target_file_name};
         EXPECT_FALSE(ver.VerifyConstantPool());
     }
 }
@@ -175,31 +174,28 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_005, TestSize.Level1)
 {
-    const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool5.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {base_file_name};
         EXPECT_TRUE(ver.VerifyConstantPool());
     }
-    std::vector<uint8_t> method_content = {0x00, 0x02};
-    
-    uint32_t method_id = 0x000d;
-	
-    constexpr char const *mode = "wbe";
-    FILE *fp = fopen(file_name.c_str(), mode);
-    if (fp == nullptr) {
-        LOG(ERROR, VERIFIER) << file_name << ",open fail";
-    }
-    EXPECT_TRUE(fp != nullptr);
-    fseek(fp, 0, SEEK_SET);
-    fseek(fp, method_id, SEEK_CUR);
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
 
-    auto size = fwrite(method_content.data(), sizeof(decltype(method_content.back())), method_content.size(), fp);
-    fclose(fp);
-    fp = nullptr;
-    EXPECT_TRUE(size == method_content.size());
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+    
+    std::vector<uint8_t> method_content = {0x02};
+    
+    uint32_t method_id = 0x000e; // The known method id in the abc file
+
+    buffer[method_id] = static_cast<unsigned char>(method_content[0]);
+
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_005.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
 
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {target_file_name};
         EXPECT_FALSE(ver.Verify());
     }
 }
@@ -212,31 +208,28 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_005, TestSize.Level1)
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
 {
-    const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool6.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {base_file_name};
         EXPECT_TRUE(ver.VerifyConstantPool());
     }
-    std::vector<uint8_t> literal_content = {0x00, 0x00};
-    
-    uint32_t literal_id = 0x000f;
-	
-    constexpr char const *mode = "wbe";
-    FILE *fp = fopen(file_name.c_str(), mode);
-    if (fp == nullptr) {
-        LOG(ERROR, VERIFIER) << file_name << ",open fail";
-    }
-    EXPECT_TRUE(fp != nullptr);
-    fseek(fp, 0, SEEK_SET);
-    fseek(fp, literal_id, SEEK_CUR);
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
 
-    auto size = fwrite(literal_content.data(), sizeof(decltype(literal_content.back())), literal_content.size(), fp);
-    fclose(fp);
-    fp = nullptr;
-    EXPECT_TRUE(size == literal_content.size());
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+    
+    std::vector<uint8_t> literal_content = {0xcf};
+    
+    uint32_t literal_id = 0x28b; // The known literal id in the abc file
+
+    buffer[literal_id] = static_cast<unsigned char>(literal_content[0]);
+
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_006.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
 
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {target_file_name};
         EXPECT_FALSE(ver.Verify());
     }
 }
@@ -249,33 +242,30 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
 {
-    const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool7.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {base_file_name};
         EXPECT_TRUE(ver.VerifyConstantPool());
     }
-    std::vector<char> string_content = {'a', 'b'};
-    
-    uint32_t string_id = 0x0c00;
-	
-    constexpr char const *mode = "wbe";
-    FILE *fp = fopen(file_name.c_str(), mode);
-    if (fp == nullptr) {
-        LOG(ERROR, VERIFIER) << file_name << ",open fail";
-    }
-    EXPECT_TRUE(fp != nullptr);
-    fseek(fp, 0, SEEK_SET);
-    fseek(fp, string_id, SEEK_CUR);
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
 
-    auto size = fwrite(string_content.data(), sizeof(decltype(string_content.back())), string_content.size(), fp);
-    fclose(fp);
-    fp = nullptr;
-    EXPECT_TRUE(size == string_content.size());
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+    
+    std::vector<uint8_t> string_content = {0x4a};
+    
+    uint32_t string_id = 0x000c; // The known string id in the abc file
+
+    buffer[string_id] = static_cast<unsigned char>(string_content[0]);
+
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_007.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
 
     {
-        panda::verifier::Verifier ver {file_name};
+        panda::verifier::Verifier ver {target_file_name};
         EXPECT_FALSE(ver.Verify());
     }
 }
 
-};
+}; // namespace panda::verifier

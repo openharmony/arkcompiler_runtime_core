@@ -13,23 +13,17 @@
  limitations under the License.
  */
 
-
-try {
-  a = 1;
-} catch (e) {
-  a;
+let val = 'hello';
+function setValue() {
+  let value = val;
+  return value;
 }
 
-function foo(x) {
-  return x == undefined ? 0 : 1;
-}
-
-function func2(a) {
-  var a = 1;
-  if (a) {
-    return a;
-  }
-  else {
-    a += 1;
+class Student {
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
   }
 }
+
+let arr = [1, 2, 9, 0];
