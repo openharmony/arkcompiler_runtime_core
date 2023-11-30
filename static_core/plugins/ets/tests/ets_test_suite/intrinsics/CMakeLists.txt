@@ -31,6 +31,7 @@ set(intrinsics_tests
     floor
     ceil
     trunc
+    stringbuilder_oom
 )
 
 set(intrinsics_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -43,8 +44,14 @@ foreach(test ${intrinsics_tests})
 
     set(test_in "${intrinsics_tests_in_dir}/${test}.ets")
     set(target ets_test_suite_intrinsics_${test})
+    set(extra_options "")
 
-    run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target})
+    # disable OSR for the tests throwing exceptions
+    if ("${test}" STREQUAL "stringbuilder_oom")
+        set(extra_options RUNTIME_EXTRA_OPTIONS "--compiler-enable-osr=false")
+    endif()
+
+    run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${extra_options})
     add_dependencies(ets_test_suite_intrinsics
         ${target}-ets-jit
         ${target}-ets-int)

@@ -862,7 +862,7 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv]
+    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [i64]
@@ -873,7 +873,7 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv]
+    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [i32]
@@ -884,7 +884,7 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv]
+    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [u16]
@@ -897,7 +897,7 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv]
+    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [u1]
@@ -910,7 +910,7 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv]
+    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [std.core.String]
