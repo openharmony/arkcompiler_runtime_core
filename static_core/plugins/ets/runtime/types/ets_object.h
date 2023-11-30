@@ -197,17 +197,21 @@ public:
         return GetMark().GetState() == MarkWord::STATE_HASHED;
     }
 
-    inline uint32_t GetHash() const
+    inline uint32_t GetInteropHash() const
     {
         ASSERT(IsHashed());
         return GetMark().GetHash();
     }
 
-    inline void SetHash(uint32_t hash)
+    inline void SetInteropHash(uint32_t hash)
     {
-        MarkWord mark = GetMark().DecodeFromHash(hash);
-        ASSERT(mark.GetState() == MarkWord::STATE_HASHED);
-        SetMark(mark);
+        MarkWord old_mark = AtomicGetMark();
+        ASSERT(old_mark.GetState() == panda::MarkWord::STATE_UNLOCKED);
+        MarkWord new_mark = old_mark.DecodeFromHash(hash);
+        ASSERT(new_mark.GetState() == MarkWord::STATE_HASHED);
+        AtomicSetMark(old_mark, new_mark);
+        ASSERT(AtomicGetMark().GetState() == MarkWord::STATE_HASHED);
+        ASSERT(AtomicGetMark().GetHash() == hash);
     }
 
     EtsObject() = delete;

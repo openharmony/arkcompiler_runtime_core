@@ -34,7 +34,7 @@ bool SharedReference::InitETSObject(InteropCtx *ctx, EtsObject *ets_object, napi
         return false;
     }
 
-    ets_object->SetHash(ref_idx);
+    ets_object->SetInteropHash(ref_idx);
     ets_ref_ = ctx->Refstor()->Add(ets_object->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     if (UNLIKELY(ets_ref_ == nullptr)) {
         INTEROP_LOG(ERROR) << "REFERENCE STORAGE OVERFLOW";
@@ -56,7 +56,7 @@ bool SharedReference::InitJSObject(InteropCtx *ctx, EtsObject *ets_object, napi_
     NAPI_CHECK_FATAL(napi_reference_ref(env, js_ref_, nullptr));
 
     LocalObjectHandle<EtsObject> handle(coro, ets_object);  // object may have no strong refs, so create one
-    handle->SetHash(ref_idx);
+    handle->SetInteropHash(ref_idx);
     // NOTE(vpukhov): reuse weakref from finalizationqueue
     ets_ref_ = ctx->Refstor()->Add(ets_object->GetCoreType(), mem::Reference::ObjectType::WEAK);
 
@@ -81,7 +81,7 @@ bool SharedReference::InitHybridObject(InteropCtx *ctx, EtsObject *ets_object, n
     }
     NAPI_CHECK_FATAL(napi_reference_ref(env, js_ref_, nullptr));
 
-    ets_object->SetHash(ref_idx);
+    ets_object->SetInteropHash(ref_idx);
     ets_ref_ = ctx->Refstor()->Add(ets_object->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     if (UNLIKELY(ets_ref_ == nullptr)) {
         INTEROP_LOG(ERROR) << "REFERENCE STORAGE OVERFLOW";
