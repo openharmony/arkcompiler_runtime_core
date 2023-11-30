@@ -54,33 +54,46 @@ panda_add_asm_file(
 
 add_dependencies(tests ets_tests)
 
-function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
-    set(oneValueArgs OPT_LEVEL)
+function(run_deterministic_tests ETS_SRC TARGET)
+    set(oneValueArgs ITER_NUM)
+
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "" ${ARGN})
 
-    if (NOT DEFINED ARG_OPT_LEVEL)
-        set(ARG_OPT_LEVEL 2)
+    if (NOT DEFINED ARG_ITER_NUM)
+        SET(ARG_ITER_NUM 10)
     endif()
 
-    set(ES2PANDA_ARGUMENTS
-        --opt-level=${ARG_OPT_LEVEL}
-        --thread=0
-        --extension=ets
-        --output=${OUTPUT_ABC}
-        ${ETS_SRC}
+    
+    get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
+
+    set(TEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${SRC_FNAME}")
+    file(MAKE_DIRECTORY "${TEST_DIR}")
+    set(DEPENDS_ON "")
+
+    set(FIRST_ABC_APP_TARGET ${TARGET}-${SRC_FNAME}-0-ets-es2panda)
+
+    foreach(i RANGE ${ARG_ITER_NUM})
+        set(APP_FILE_OUTPUT "${TEST_DIR}/${i}.abc")
+        set(ABC_APP_TARGET ${TARGET}-${SRC_FNAME}-${i}-ets-es2panda)
+        list(APPEND all_bin_abc ${APP_FILE_OUTPUT})
+        list(APPEND DEPENDS_ON "${ABC_APP_TARGET}")
+        compile_ets_code(${ETS_SRC} ${APP_FILE_OUTPUT} ${ABC_APP_TARGET})
+
+        set(target_name ${TARGET}_${SRC_FNAME}_${i})
+        list(GET all_bin_abc 0 first)
+        add_custom_target(
+            ${target_name}
+            COMMAND bash -c "diff ${APP_FILE_OUTPUT} ${first}"
+            WORKING_DIRECTORY ${TEST_DIR}
+            DEPENDS ${ABC_APP_TARGET} ${FIRST_ABC_APP_TARGET}
+        )
+        list(APPEND dependencies ${target_name})
+    endforeach()
+    add_custom_target(${TARGET}
+        COMMENT "Running ${ETS_SRC} determenistic compilation test"
+        DEPENDS ${dependencies}
     )
-
-    get_filename_component(OUTPUT_DIR ${OUTPUT_ABC} DIRECTORY)
-    file(MAKE_DIRECTORY ${OUTPUT_DIR})
-
-    add_custom_command(
-        OUTPUT ${OUTPUT_ABC}
-        COMMENT "Running es2panda for ets file: ${ETS_SRC}"
-        COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS}
-        DEPENDS es2panda etsstdlib ${ETS_SRC}
-    )
-
-    add_custom_target(${TARGET} DEPENDS ${OUTPUT_ABC})
+    add_dependencies(ets_tests ${TARGET})
 endfunction()
 
 function(run_ets_code_verifier ETS_SRC WORK_DIR TARGET)
@@ -288,6 +301,14 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     add_dependencies(ets_tests ${TARGET})
 endfunction()
 
+function(run_deterministic_test ETS_SRC WORK_DIR TARGET)
+    # deterministic binary
+    run_deterministic_tests(${ETS_SRC} ${TARGET}-determ)
+    if(TARGET ${TARGET}-determ)
+        add_dependencies(${TARGET} ${TARGET}-determ)
+    endif()
+endfunction()
+
 function(run_int_jit_aot_ets_code ETS_SRC WORK_DIR TARGET)
     set(oneValueArgs OPT_LEVEL)
     set(noValues SKIP_ARM32_COMPILER)
@@ -372,6 +393,11 @@ function(compile_stdlib TARGET_ARCH)
         add_dependencies(ets-compile-stdlib ets-compile-stdlib-osr-${TARGET_ARCH})
     endif()
 endfunction()
+
+run_deterministic_tests(GEN_STD_LIB
+                        ets-stdlib-deterministic
+                        ITER_NUM 3)
+#add_dependencies(ets_tests ets-stdlib-deterministic)
 
 add_custom_target(ets-func-tests-run)
 add_custom_target(ets-func-tests-run-int)

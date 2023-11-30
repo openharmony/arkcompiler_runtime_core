@@ -16,3 +16,4 @@ if (PANDA_TARGET_ARM32)
 endif()
 
 run_int_jit_aot_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/bouncing_pandas.ets ${CMAKE_CURRENT_BINARY_DIR} bouncing_pandas_ets)
+run_deterministic_test(${CMAKE_CURRENT_SOURCE_DIR}/bouncing_pandas.ets ${CMAKE_CURRENT_BINARY_DIR} bouncing_pandas_ets)

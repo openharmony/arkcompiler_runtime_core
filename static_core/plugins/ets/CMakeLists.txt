@@ -20,6 +20,46 @@ include(cmake/import.cmake)
 
 add_custom_target(ets_tests COMMENT "Running ets test suites")
 
+function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
+    set(oneValueArgs OPT_LEVEL)
+    cmake_parse_arguments(ARG "" "${oneValueArgs}" "" ${ARGN})
+
+    if (NOT DEFINED ARG_OPT_LEVEL)
+        set(ARG_OPT_LEVEL 2)
+    endif()
+
+    set(ES2PANDA_ARGUMENTS
+        --opt-level=${ARG_OPT_LEVEL}
+        --thread=0
+        --extension=ets
+        --output=${OUTPUT_ABC}
+    )
+    set(COMPILE_DEPENDENCIES
+        ${es2panda_target}
+    )
+
+    get_filename_component(OUTPUT_DIR ${OUTPUT_ABC} DIRECTORY)
+    file(MAKE_DIRECTORY ${OUTPUT_DIR})
+
+    if ("${ETS_SRC}" STREQUAL "GEN_STD_LIB")
+        list(APPEND ES2PANDA_ARGUMENTS "--gen-stdlib=true")
+    else()
+        list(APPEND ES2PANDA_ARGUMENTS ${ETS_SRC})
+        list(APPEND COMPILE_DEPENDENCIES etsstdlib ${ETS_SRC})
+    endif()
+
+    add_custom_command(
+        OUTPUT ${OUTPUT_ABC}
+        COMMENT "Running es2panda for ets file: ${ETS_SRC}"
+        COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS}
+        DEPENDS ${COMPILE_DEPENDENCIES}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+
+    add_custom_target(${TARGET} DEPENDS ${OUTPUT_ABC})
+endfunction()
+
+
 # NB! ADDING THIS PROPERTY IS ALLOWED ONLY IN SPECIAL CASES. DO NOT COPY-PASTE IT.
 set_target_properties(ets_tests PROPERTIES first-level-tests-dependency TRUE)
 add_dependencies(tests ets_tests)
@@ -52,15 +92,7 @@ add_subdirectory(arkts_header)
 
 # TODO(nsizov): change this logic when ets compiler moved into ets plugin
 if(TARGET es2panda)
-    add_custom_target(etsstdlib)
-    add_dependencies(etsstdlib ${es2panda_target})
-
-    add_custom_command(TARGET etsstdlib
-        COMMAND ${es2panda_bin} --gen-stdlib=true
-        --extension=ets
-        --output=${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc
-        --opt-level=2
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    compile_ets_code(GEN_STD_LIB "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc" etsstdlib)
 
     set_target_properties(etsstdlib PROPERTIES FILE "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc")
     add_dependencies(ark etsstdlib)

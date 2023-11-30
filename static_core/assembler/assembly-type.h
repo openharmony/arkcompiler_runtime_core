@@ -164,6 +164,11 @@ public:
         return name_ == type.name_;
     }
 
+    bool operator<(const Type &type) const
+    {
+        return name_ < type.name_;
+    }
+
     static PANDA_PUBLIC_API Type FromDescriptor(std::string_view descriptor);
 
     static PANDA_PUBLIC_API Type FromName(std::string_view name, bool ignore_primitive = false);
