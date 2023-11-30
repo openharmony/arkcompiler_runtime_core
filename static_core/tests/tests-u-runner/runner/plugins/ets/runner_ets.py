@@ -53,6 +53,8 @@ class RunnerETS(RunnerFileBased):
             "--extension=ets",
             f"--opt-level={self.config.es2panda.opt_level}"
         ])
+        self.test_env.es2panda_args.extend(self.config.es2panda.es2panda_args)
+
         load_runtime_ets = [f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets"]
         self.test_env.runtime_args.extend(load_runtime_ets)
         self.test_env.verifier_args.extend(load_runtime_ets)

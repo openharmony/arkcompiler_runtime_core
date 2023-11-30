@@ -1,0 +1,2 @@
+ETS Warning: Replace asynchronous function with coroutine. [remove_async_tests_2.ets:25:1]
+ETS Warning: Replace asynchronous function with coroutine. [remove_async_tests_2.ets:19:5]

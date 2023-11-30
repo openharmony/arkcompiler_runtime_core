@@ -1,0 +1,1 @@
+ETS Warning: Suggest 'final' modifier for class. [suggest_final_for_classes_2.ets:21:7]

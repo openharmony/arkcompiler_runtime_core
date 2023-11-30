@@ -16,9 +16,9 @@
 #
 
 from functools import cached_property
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
-from runner.options.decorator_value import value, _to_int, _to_str, _to_path
+from runner.options.decorator_value import value, _to_int, _to_str, _to_path, _to_bool
 
 
 class Es2PandaOptions:
@@ -34,6 +34,8 @@ class Es2PandaOptions:
             "opt-level": self.opt_level,
             "custom-path": self.custom_path,
             "arktsconfig": self.arktsconfig,
+            "es2panda-args": self.es2panda_args,
+            "system": self.system
         }
 
     @cached_property
@@ -55,6 +57,16 @@ class Es2PandaOptions:
     @value(yaml_path="es2panda.arktsconfig", cli_name="arktsconfig", cast_to_type=_to_path)
     def arktsconfig(self) -> Optional[str]:
         return None
+
+    @cached_property
+    @value(yaml_path="es2panda.es2panda-args", cli_name="es2panda_args")
+    def es2panda_args(self) -> List[str]:
+        return []
+
+    @cached_property
+    @value(yaml_path="es2panda.system", cli_name="system", cast_to_type=_to_bool)
+    def system(self) -> bool:
+        return False
 
     def get_command_line(self) -> str:
         options = [
