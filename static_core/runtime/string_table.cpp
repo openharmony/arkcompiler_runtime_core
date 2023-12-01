@@ -60,6 +60,7 @@ coretypes::String *StringTable::GetOrInternInternalString(const panda_file::File
 
     coretypes::String *str = table_.GetString(data.data, data.utf16_length, data.is_ascii, ctx);
     if (str != nullptr) {
+        table_.PreBarrierOnGet(str);
         return str;
     }
     return internal_table_.GetOrInternString(pf, id, ctx);
@@ -153,11 +154,23 @@ coretypes::String *StringTable::Table::InternString(coretypes::String *string,
     return string;
 }
 
+void StringTable::Table::PreBarrierOnGet(coretypes::String *str)
+{
+    // Need pre barrier if string exists in string table, because this string can be got from the
+    // string table (like phoenix) and write to a field during concurrent phase and GC does not see it on Remark
+    ASSERT_MANAGED_CODE();
+    auto *pre_wrb = Thread::GetCurrent()->GetPreWrbEntrypoint();
+    if (pre_wrb != nullptr) {
+        reinterpret_cast<mem::ObjRefProcessFunc>(pre_wrb)(str);
+    }
+}
+
 coretypes::String *StringTable::Table::GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length,
                                                          bool can_be_compressed, const LanguageContext &ctx)
 {
     coretypes::String *result = GetString(mutf8_data, utf16_length, can_be_compressed, ctx);
     if (result != nullptr) {
+        PreBarrierOnGet(result);
         return result;
     }
 
@@ -177,6 +190,7 @@ coretypes::String *StringTable::Table::GetOrInternString(const uint16_t *utf16_d
 {
     coretypes::String *result = GetString(utf16_data, utf16_length, ctx);
     if (result != nullptr) {
+        PreBarrierOnGet(result);
         return result;
     }
 
@@ -195,6 +209,7 @@ coretypes::String *StringTable::Table::GetOrInternString(coretypes::String *stri
 {
     coretypes::String *result = GetString(string, ctx);
     if (result != nullptr) {
+        PreBarrierOnGet(result);
         return result;
     }
     result = InternString(string, ctx);
@@ -283,6 +298,16 @@ coretypes::String *StringTable::InternalTable::GetOrInternString(const uint16_t 
         return nullptr;
     }
     result = InternStringNonMovable(result, ctx);
+    return result;
+}
+
+coretypes::String *StringTable::InternalTable::GetOrInternString(coretypes::String *string, const LanguageContext &ctx)
+{
+    coretypes::String *result = GetString(string, ctx);
+    if (result != nullptr) {
+        return result;
+    }
+    result = InternString(string, ctx);
     return result;
 }
 

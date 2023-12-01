@@ -27,13 +27,12 @@
 #include "runtime/mem/heap_verifier.h"
 #include "runtime/mem/gc/g1/g1_pause_tracker.h"
 #include "runtime/mem/gc/g1/g1_analytics.h"
+#include "runtime/mem/gc/g1/update_remset_worker.h"
 
 namespace panda {
 class ManagedThread;
 }  // namespace panda
 namespace panda::mem {
-template <typename T>
-class UpdateRemsetThread;
 
 /// @brief Class for reference informantion collecting for rem-sets in G1 GC
 class RefInfo {
@@ -80,8 +79,8 @@ public:
     void StopGC() override
     {
         GC::StopGC();
-        // GC is using update_remset_thread so we need to stop GC first before we destroy the thread
-        update_remset_thread_->DestroyThread();
+        // GC is using update_remset_worker so we need to stop GC first before we destroy the worker
+        update_remset_worker_->DestroyWorker();
     }
 
     NO_MOVE_SEMANTIC(G1GC);
@@ -116,9 +115,8 @@ public:
 
     void StartGC() override
     {
+        update_remset_worker_->CreateWorker();
         GC::StartGC();
-        InternalAllocatorPtr allocator = this->GetInternalAllocator();
-        update_remset_thread_->CreateThread(allocator);
     }
 
     bool HasRefFromRemset(ObjectHeader *obj)
@@ -156,6 +154,7 @@ protected:
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
+    void CreateUpdateRemsetWorker();
     void ProcessDirtyCards();
     bool HaveGarbageRegions();
 
@@ -418,7 +417,7 @@ private:
     PandaVector<ObjectHeader *> newobj_buffer_ GUARDED_BY(satb_and_newobj_buf_lock_);
     // The lock guards both variables: satb_buff_list_ and newobj_buffer_
     os::memory::Mutex satb_and_newobj_buf_lock_;
-    UpdateRemsetThread<LanguageConfig> *update_remset_thread_ {nullptr};
+    UpdateRemsetWorker<LanguageConfig> *update_remset_worker_ {nullptr};
     GCMarkingStackType concurrent_marking_stack_;
     GCMarkingStackType::MarkedObjects mixed_marked_objects_;
     std::atomic<bool> is_mixed_gc_required_ {false};

@@ -120,7 +120,8 @@ class EtsBenchmarksRunner:
         additional_opts = []
         if self.mode == "aot":
             additional_opts += ["--aot-file", bin_filepath.replace(".abc", ".an")]
-        cmd = self.prefix + [self.ark, f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets", "--compiler-ignore-failures=false", "--limit-standard-alloc=true"] + self.ark_opts + additional_opts + [bin_filepath,  "_GLOBAL::main"]
+        # NOTE(ipetrov, #14164): return limit standard allocation after fix in taskmanager
+        cmd = self.prefix + [self.ark, f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets", "--compiler-ignore-failures=false"] + self.ark_opts + additional_opts + [bin_filepath,  "_GLOBAL::main"]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
         self.dump_stdout(stdout, "ark")

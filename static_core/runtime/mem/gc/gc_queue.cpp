@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#include "mem/gc/gc_queue.h"
+#include "runtime/mem/gc/gc_queue.h"
 
-#include "include/runtime.h"
 #include "libpandabase/utils/time.h"
 #include "runtime/mem/gc/gc.h"
 
 namespace panda::mem {
 
-const int64_t NANOSECONDS_PER_MILLISEC = 1000000;
+constexpr int64_t NANOSECONDS_PER_MILLISEC = 1000000;
 
-PandaUniquePtr<GCTask> GCQueueWithTime::GetTask()
+PandaUniquePtr<GCTask> GCQueueWithTime::GetTask(bool need_wait_task)
 {
     os::memory::LockHolder lock(lock_);
     while (queue_.empty()) {
@@ -31,8 +30,13 @@ PandaUniquePtr<GCTask> GCQueueWithTime::GetTask()
             LOG(DEBUG, GC) << "GetTask() Return INVALID_CAUSE";
             return nullptr;
         }
-        LOG(DEBUG, GC) << "Empty " << queue_name_ << ", waiting...";
-        cond_var_.Wait(&lock_);
+        if (need_wait_task) {
+            LOG(DEBUG, GC) << "Empty " << queue_name_ << ", waiting...";
+            cond_var_.Wait(&lock_);
+        } else {
+            LOG(DEBUG, GC) << "Empty " << queue_name_ << ", return nullptr";
+            return nullptr;
+        }
     }
     GCTask *task = queue_.top().get();
     auto current_time = time::GetCurrentTimeInNanos();
@@ -53,15 +57,18 @@ PandaUniquePtr<GCTask> GCQueueWithTime::GetTask()
 
 bool GCQueueWithTime::AddTask(PandaUniquePtr<GCTask> task)
 {
+    if (task == nullptr) {
+        return false;
+    }
     os::memory::LockHolder lock(lock_);
-    LOG(DEBUG, GC) << "Add task to a " << queue_name_;
     if (!queue_.empty()) {
-        auto last_elem = queue_.top().get();
+        auto *last_elem = queue_.top().get();
         if (last_elem->reason == task->reason) {
             // do not duplicate GC task with the same reason.
             return false;
         }
     }
+    LOG(DEBUG, GC) << "Add task to a " << queue_name_;
     queue_.push(std::move(task));
     cond_var_.Signal();
     return true;

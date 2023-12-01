@@ -450,9 +450,6 @@ bool Runtime::Destroy()
      * */
     instance_->GetPandaVM()->UninitializeThreads();
 
-    if (task_scheduler_ != nullptr) {
-        task_scheduler_->Finalize();
-    }
     /* @sync 2
      * @description After uninitialization of threads all deamon threads should have gone into the termination loop and
      * all other threads should have finished.
@@ -461,6 +458,10 @@ bool Runtime::Destroy()
     // UninitializeThreads may execute managed code which
     // uses barriers
     instance_->GetPandaVM()->StopGC();
+
+    if (task_scheduler_ != nullptr) {
+        task_scheduler_->Finalize();
+    }
 
     if (IsEnabled(options_.GetVerificationMode())) {
         verifier::DestroyService(instance_->verifier_service_, options_.IsVerificationUpdateCache());

@@ -34,6 +34,7 @@ public:
     explicit StringTable(mem::InternalAllocatorPtr allocator) : internal_table_(allocator), table_(allocator) {}
     StringTable() = default;
     virtual ~StringTable() = default;
+
     virtual coretypes::String *GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length,
                                                  const LanguageContext &ctx);
     virtual coretypes::String *GetOrInternString(const uint16_t *utf16_data, uint32_t utf16_length,
@@ -73,11 +74,13 @@ protected:
         Table() = default;
         virtual ~Table() = default;
 
+        void PreBarrierOnGet(coretypes::String *str);
+
         virtual coretypes::String *GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length,
                                                      bool can_be_compressed, const LanguageContext &ctx);
         virtual coretypes::String *GetOrInternString(const uint16_t *utf16_data, uint32_t utf16_length,
                                                      const LanguageContext &ctx);
-        coretypes::String *GetOrInternString(coretypes::String *string, const LanguageContext &ctx);
+        virtual coretypes::String *GetOrInternString(coretypes::String *string, const LanguageContext &ctx);
         virtual void Sweep(const GCObjectVisitor &gc_object_visitor);
 
         bool UpdateMoved();
@@ -116,11 +119,15 @@ protected:
         }
         ~InternalTable() override = default;
 
+        void PreBarrierOnGet(coretypes::String *str) = delete;
+
         coretypes::String *GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length, bool can_be_compressed,
                                              const LanguageContext &ctx) override;
 
         coretypes::String *GetOrInternString(const uint16_t *utf16_data, uint32_t utf16_length,
                                              const LanguageContext &ctx) override;
+
+        coretypes::String *GetOrInternString(coretypes::String *string, const LanguageContext &ctx) override;
 
         coretypes::String *GetOrInternString(const panda_file::File &pf, panda_file::File::EntityId id,
                                              const LanguageContext &ctx);
