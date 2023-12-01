@@ -198,13 +198,11 @@ bool Verifier::VerifyStringId(const BytecodeInstruction &bc_ins, const panda_fil
 size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
 {
     size_t idx = 0; // Represents the idxTH register index in an instruction
-    size_t count = 0;
     BytecodeInstruction::Format format = bc_ins.GetFormat();
     while (bc_ins.HasVReg(format, idx)) {
         idx++;
-        count = idx;
     }
-    return count;
+    return idx;
 }
 
 bool CheckVRegIdx(const BytecodeInstruction &bc_ins, size_t count, uint32_t max_reg_idx)
