@@ -31,6 +31,7 @@ verifier_test_deps = [
 verifier_test_js_files = [
   "test_checksum",
   "test_constant_pool",
+  "test_register_index",
 ]
 
 test_js_path = "//arkcompiler/runtime_core/verifier/tests/js/"
@@ -55,6 +56,7 @@ host_unittest_action("VerifierTest") {
     "utils.cpp",
     "verify_checksum_test.cpp",
     "verify_constant_pool_tests.cpp",
+    "verify_register_index_test.cpp",
   ]
 
   include_dirs = [ "$ark_root/verifier" ]
