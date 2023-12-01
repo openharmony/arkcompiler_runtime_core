@@ -86,14 +86,14 @@ bool Verifier::VerifyRegisterIndex()
             continue;
         }
         panda_file::CodeDataAccessor code_data(*file_, method_accessor.GetCodeId().value());
-        uint32_t reg_nums = code_data.GetNumVregs();
-        uint32_t arg_nums = code_data.GetNumArgs();
-        uint32_t max_reg_idx = reg_nums + arg_nums;
+        const uint32_t reg_nums = code_data.GetNumVregs();
+        const uint32_t arg_nums = code_data.GetNumArgs();
+        const uint32_t max_reg_idx = reg_nums + arg_nums;
         auto bc_ins = BytecodeInstruction(code_data.GetInstructions());
         const auto bc_ins_last = bc_ins.JumpTo(code_data.GetCodeSize());
         ASSERT(arg_nums >= DEFAULT_ARGUMENT_NUMBER);
         while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
-            size_t count = GetVRegCount(bc_ins);
+            const size_t count = GetVRegCount(bc_ins);
             if (count == 0) { // Skip instructions that do not use registers
                 bc_ins = bc_ins.GetNext();
                 continue;
