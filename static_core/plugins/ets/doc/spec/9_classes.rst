@@ -295,8 +295,8 @@ A :index:`compile-time error` occurs if:
 
 -  The ‘extends’ graph has a cycle.
 
--  *typeReference* is an alias of a *primitive*, *enum*, *union*, or
-   *function* type.
+-  *typeReference* refers directly or as an alias of a *primitive*, *enum*,
+   *union*, *interface*, or *function* type.
 
 -  Any of the type arguments of *typeReference* is a wildcard type argument.
 
@@ -706,7 +706,6 @@ There are following kinds of accessibility in |LANG|:
 
 -  *private*,
 -  *internal*,
--  *internal protected*,
 -  *protected*, or
 -  *public*.
 
@@ -717,7 +716,7 @@ specified by the corresponding *access modifiers*:
 
     accessModifier:
         'private'
-        | 'internal' 'protected'?
+        | 'internal'
         | 'protected'
         | 'public'
         ;
@@ -779,8 +778,8 @@ class body of *C*:
 Internal Access Modifier
 ========================
 
-Final methods are described in the chapter Experimental Features (see
-:ref:`Internal Access Modifier Experimental`).
+The modifier ``internal`` is described in the chapter Experimental Features
+(see :ref:`Internal Access Modifier Experimental`).
 
 |
 
@@ -825,10 +824,6 @@ accessed only within the class body of *C* or of a class derived from *C*:
    accessibility
    class body
    declaring class
-
-
-A member or a constructor with both ``internal`` (see above) and ``protected``
-modifier can be accessed as internal or protected.
 
 |
 
@@ -1362,7 +1357,7 @@ implementation body.
 .. code-block:: abnf
 
     methodOverloadSignature:
-        methodModifier* identifier signature ';'
+        methodModifier* identifier signature
         ;
 
 A :index:`compile-time error` occurs if the method implementation is not
@@ -1371,8 +1366,8 @@ present, or does not immediately follow the declaration.
 A call of a method with overload signatures is always a call of the
 implementation method.
 
-The example below has one overload signature parameterless, and the other
-has one parameter:
+The example below has one overload signature parameterless; the other
+two have one parameter each:
 
 .. index::
    method implementation
@@ -1384,35 +1379,30 @@ has one parameter:
    :linenos:
 
     class C {
-        foo(): void;           // 1st signature
-        foo(x: string): void;  // 2nd signature
-        foo(x?: string): void {
+        foo(): void           // 1st signature
+        foo(x: string): void  // 2nd signature
+        foo(x?: string): void // implementation signature
+        {
             console.log(x)
         }
     }
     let c = new C()
-    c.foo()     // ok, 1st signature is used
-    c.foo("aa") // ok, 2nd signature is used
+    c.foo()          // ok, call fits 1st and 3rd signatures
+    c.foo("aa")      // ok, call fits 2nd and 3rd signatures
+    c.foo(undefined) // ok, call fits the 3rd signature
 
 The call ``c.foo()`` is executed as a call of the implementation method with
 the ``undefined`` argument. The call ``c.foo(x)`` is executed as a call of the
 implementation method with an argument.
 
-Common rules for the overloaded signatures are described in
+*Overload signature* compatibility requirements are described in
 :ref:`Overload Signature Compatibility`.
 
-.. A :index:`compile-time error` occurs if the signature of method implementation
-  is not *overload signature-compatible* with each overload signature. It means
-  that a call of each overload signature must be replaceable for the correct
-  call of the implementation method. This can be achieved by using optional
-  parameters (see :ref:`Optional Parameters`) or *least upper bound* types (see
-  :ref:`Least Upper Bound`). See :ref:`Overload Signature Compatibility` for the
-  exact semantic rules.
-
-A compile-time error occurs if not **all** of the following requirements are met:
+In addition, a :index:`compile-time error` occurs if not **all** of the
+following requirements are met:
 
 -  Overload signatures and the implementation method have the same access
-   modifier (``public``, ``private``, or ``protected``).
+   modifier.
 -  All overload signatures and the implementation method are static or
    non-static.
 -  All overload signatures and the implementation method are final or
@@ -1438,7 +1428,6 @@ A compile-time error occurs if not **all** of the following requirements are met
    static implementation method
    non-static implementation method
    least upper bound
-   compile-time error
 
 |
 
@@ -1998,8 +1987,8 @@ Constructor Declaration
 *Constructors* are used to initialize objects that are instances of class.
 
 A *constructor declaration* starts with the keyword ``constructor``, and has no
-name. In any other respect, a constructor declaration is similar to a method
-declaration with no result.
+name. In any other syntactical aspect, a constructor declaration is similar to
+a method declaration with no return type.
 
 .. code-block:: abnf
 
@@ -2007,7 +1996,7 @@ declaration with no result.
         constructorOverloadSignature*
         'constructor' '(' parameterList? ')' throwMark? constructorBody
         ;
-        
+
     throwMark:
         'throws'
         | 'rethrows'
@@ -2114,14 +2103,14 @@ followed by one constructor implementation body.
         accessModifier? 'constructor' signature
         ;
 
-A compile-time error occurs if the constructor implementation is either not
-present or does not immediately follow the declaration.
+A :index:`compile-time error` occurs if the constructor implementation is not
+present, or does not immediately follow the declaration.
 
-A call of a constructor with an overload signature is always a call of the
+A call of a constructor with overload signature is always a call of the
 constructor implementation body.
 
-The example below has one overload signature parameterless, and others that
-have one parameter:
+The example below has one overload signature parameterless, and others have one
+parameter:
 
 .. code-block:: typescript
    :linenos:
@@ -2129,33 +2118,36 @@ have one parameter:
     class C {
         constructor()           // 1st signature
         constructor(x: string)  // 2nd signature
-        constructor(x?: string) // Implementation signature
+        constructor(x?: string) // 3rd - implementation signature
         {
             console.log(x)
         }
     }
-    new C()          // ok, 1st signature is used
-    new C("aa")      // ok, 2nd or 3rd signature is used
-    new C(undefined) // ok, 3rd signature is used
+    new C()          // ok, fits the 1st and 3rd signatures
+    new C("aa")      // ok, fits the 2nd and 3rd signatures
+    new C(undefined) // ok, fits 3rd signature
 
 The new expression (see :ref:`New Expressions`) ``new C()`` leads to a call of
 the constructor implementation with the ``undefined`` argument. The ``new C(x)``
 creates an object calling constructor implementation with 'x' as an argument.
 
-A compile-time error occurs if at least one overload signature is not
-*overload signature-compatible* with the signature of constructor
-implementation.
-It means that a call of each overload signature must be replaceable for the
-correct call of the constructor implementation signature. This can be achieved
-by using optional parameters (see :ref:`Optional Parameters`) or *least upper
-bound* types (see :ref:`Least Upper Bound`). See the exact semantic rules in
+*Overload signature* compatibility requirements are described in
 :ref:`Overload Signature Compatibility`.
 
-A compile-time error occurs if at least two different overload signatures or
-implementation signatures have different *access modifiers*.
+A :index:`compile-time error` occurs if at least two different overload
+signatures or implementation signature have different *access modifiers*.
 
-.. index::
-   compile-time error
+.. code-block:: typescript
+   :linenos:
+
+    class Incorrect {
+        // Constructors have different access modifiers
+        private constructor()             // private 1st signature
+        protected constructor(x: string)  // protected 2nd signature
+        constructor(x?: string)           // public 3rd - implementation signature
+        {}
+    }
+
 
 |
 
@@ -2226,6 +2218,13 @@ that explicit constructor calls are possible, and explicit returning of a value
 (see :ref:`Return Statements`) is prohibited. However, a return statement
 (:ref:`Return Statements`) without an expression can be used in a constructor
 body.
+
+A constructor body must not use fields of a created object before the fields
+are initialized; *this* cannot be passed as an argument until each object
+field receives an initial value. The check can be performed by the compiler
+that reports a compile-time error if a violation is detected. In difficult
+corner cases checks must be performed at runtime. The check raises an exception
+if an attempt to work with a non-initialized object field is detected.
 
 .. index::
    compile-time error

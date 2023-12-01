@@ -353,8 +353,8 @@ The key difference is that *whileStatement* first evaluates and checks the
 .. meta:
     frontend_status: Done
 
-A ``for-of`` loop iterates elements of *array* or *string*
-or an instance of *iterable* class or interface (see :ref:`Iterable Types`).
+A ``for-of`` loop iterates elements of *array* or *string*, or an instance
+of *iterable* class or interface (see :ref:`Iterable Types`).
 
 
 .. index::
@@ -375,13 +375,13 @@ or an instance of *iterable* class or interface (see :ref:`Iterable Types`).
 
 
 A compile-time error occurs if the type of an expression is not
-*array* or *string* or *iterable type*.
+*array*, *string*, or *iterable type*.
 
 The execution of a ``for-of`` loop starts with the evaluation of ``expression``.
-If the evaluation is successful, then the resultant expressin 
-is used for loop iterations (execution of
-the ``statement``). On each iteration, *forVariable* is set to successive
-elements of the *array* or *string* or result of class iterator advancing.
+If the evaluation is successful, then the resultant expression is used for
+loop iterations (execution of the ``statement``). On each iteration,
+*forVariable* is set to successive elements of the *array*, *string*, or
+result of class iterator advancing.
 
 .. index::
    compile-time error
@@ -671,7 +671,7 @@ The switch *expression* type must be of type *char*, *byte*, *short*, *int*,
 A compile-time error occurs if not **all** of the following is true:
 
 -  Every case expression type associated with a ``switch`` statement is
-   compatible (see :ref:`Compatible Types`) with the type of the ``switch``
+   compatible (see :ref:`Type Compatibility`) with the type of the ``switch``
    statement’s expression.
 
 -  In a ``switch`` statement expression of type *enum*, every case expression
@@ -1003,7 +1003,7 @@ can be performed while leaving the ``try-catch``:
 
 #. The execution of a ``try`` block completes abruptly if *exception* or
    *error* *x* is thrown inside the ``try`` block.
-   If the runtime type of *x* is compatible (see :ref:`Compatible Types`) with
+   If the runtime type of *x* is compatible (see :ref:`Type Compatibility`) with
    the *exception* class of the *exception* parameter (i.e., the ``catch``
    clause matches *x*), and the execution of the body of the ``catch`` clause
    completes normally, then the entire ``try`` statement completes normally.

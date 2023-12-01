@@ -18,10 +18,14 @@ Names, Declarations and Scopes
 .. meta:
     frontend_status: Partly
 
-This chapter introduces three mutually-related notions: names,
-declarations, and scopes.
+This chapter introduces the following three mutually-related notions:
 
-Each entity in a |LANG| program---a variable, a constant, a class,
+-  Names,
+-  Declarations, and
+-  Scopes.
+
+
+Each entity in an |LANG| program---a variable, a constant, a class,
 a type, a function, a method, etc.---is introduced via a *declaration*.
 An entity declaration assigns a *name* to the entity declared. The name
 is used to refer to the entity further in the program text.
@@ -57,18 +61,17 @@ Names
 
 A name refers to any declared entity.
 
-*Simple names* consist of a single identifier; *qualified names* consist
+*Simple names* consist of a single identifier. *Qualified names* consist
 of a sequence of identifiers with the '.' tokens as separators.
 
 A qualified name *N.x* (where *N* is a simple or qualified name, and ``x``
 is an identifier) can refer to a *member* of a package, or a reference type
 (see :ref:`Reference Types`). *N* can name the following:
 
--  A package, of which ``x`` is a member.
-
+-  A package, of which ``x`` is a member;
 -  A reference type, or a variable of a reference type (see
-   :ref:`Reference Types`), and then ``x`` names a member (a field or a
-   method) of that type.
+   :ref:`Reference Types`), of which ``x`` names a member (a field or a
+   method).
 
 .. index::
    name
@@ -127,8 +130,7 @@ A :index:`compile-time error` occurs otherwise.
 
 Declarations are *distinguishable* if:
 
--  They have different names;
-
+-  They have different names.
 -  They are distinguishable by signatures (see
    :ref:`Declaration Distinguishable by Signatures`).
 
@@ -154,8 +156,7 @@ The examples below are declarations distinguishable by names:
         static field: number = PI + pi
     }
 
-The examples below are declarations indistinguishable by names.
-Such declarations cause compile-time errors:
+If a declaration is indistinguishable by name, then a compile-time error occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -190,14 +191,14 @@ Scopes
 .. meta:
     frontend_status: Done
 
-The **scope** of a name is the region of program code within which the entity
+The *scope* of a name is the region of program code within which the entity
 declared by that name can be referred to without the qualification of the name.
-In other words, the name is accessible in some context if it can be used in this
+It means that a name is accessible in some context if it can be used in this
 context by its *simple* name.
 
-The nature of usage of a scope depends on the kind of the name.
-A type name is used to declare variables or constants;
-a function name is used to call that function.
+The nature of scope usage depends on the kind of the name. A type name
+is used to declare variables or constants. A function name is used to call
+that function.
 
 .. index::
    scope
@@ -240,15 +241,21 @@ The scope of a name depends on the context the name is declared in:
 
 .. _class-access:
   
--  A name declared inside a class (*class level scope*) is accessible in that
-   class and sometimes, depending on the access modifier, outside the class or
-   by methods of derived classes. Access to such names inside the class is 
-   qualified with *this* or with a class instance expression
-   for the names of instance entities and by the name of
-   the class for the static ones. Outside access is qualified by the
-   expression which value stores a reference to the class instance 
-   for the names of instance entities and by the name of
-   the class for the static ones.
+-  A name declared inside a class (*class level scope*) is accessible in the
+   class and sometimes, depending on the access modifier, outside the class, or
+   by means of a derived class.
+
+   Access to names inside the class is qualified with one of the following:
+
+   -  *this*;
+   -  Class instance expression for the names of instance entities; or
+   -  Name of the class for static entities.
+
+   Outside access is qualified with one of the following:
+
+   -  Expression the value stores;
+   -  Reference to the class instance for the names of instance entities; or
+   -  Name of the class for static entities.
 
 .. index::
    class level scope
@@ -258,12 +265,12 @@ The scope of a name depends on the context the name is declared in:
    modifier
    derived class
    declaration
-   
+
 .. _interface-access:
 
 -  A name declared inside an interface (*interface level scope*) is accessible
    inside and outside that interface (default public).
-   
+
 .. index::
    name
    declaration
@@ -275,9 +282,9 @@ The scope of a name depends on the context the name is declared in:
 
 .. _enum-access:
 
--  *Enum level scope*: as every enumeration defines a type inside a package or
-   module, then its scope is identical to the package or module level scope.
-   All enumeration constants have the same scope as the enumeration itself.
+-  *Enum level scope* is identical to the package or module level scope, as
+   every enumeration defines a type inside a package or module. The scope of
+   all enumeration constants and of the enumeration itself is the same.
 
 .. index::
    name
@@ -312,9 +319,9 @@ The scope of a name depends on the context the name is declared in:
 .. _function-access:
 
 -  The scope of a name declared immediately inside the body of a function
-   (method) declaration is the body of that function declaration (*method*
-   or *function scope*) from the place of declaration and up to the end of
-   the body.
+   (method) declaration is the body of that function declaration from the
+   point of declaration and up to the end of the body (*method* or *function
+   scope*).
 
 .. index::
    scope
@@ -326,7 +333,7 @@ The scope of a name depends on the context the name is declared in:
 .. _block-access:
 
 -  The scope of a name declared inside a statement block is the body of
-   the statement block from the point of declaration and down to the end
+   the statement block from the point of declaration and up to the end
    of the block (*block scope*).
 
 .. index::
@@ -347,11 +354,11 @@ Scopes of two names can overlap (e.g., when statements are nested). If scopes
 of two names overlap, then:
 
 -  The innermost declaration takes precedence; and
--  Access to the outer name is impossible.
+-  Access to the outer name is not possible.
 
 
 Class, interface, and enum members can only be accessed by applying the dot
-operator '.' to an instance; accessing them otherwise is impossible.
+operator '.' to an instance. Accessing them otherwise is not possible.
 
 
 .. index::
@@ -474,8 +481,7 @@ original type nor introduces a new type.
     }
 
 Type aliases can be recursively referenced inside the right-hand side of a
-type alias declaration, see :ref:`Recursive Type Aliases`.
-
+type alias declaration (see :ref:`Recursive Type Aliases`).
 
 .. index::
    anonymous type
@@ -595,7 +601,7 @@ variable is determined as follows:
 
 -  *T* is the type specified in a type annotation (if any) of the declaration.
    If *'?'* is used after the name of the variable, then the type of the
-   variable is *type | undefined.* If the declaration also has an initializer,
+   variable is *type* | *undefined.* If the declaration also has an initializer,
    then the initializer expression must be compatible with *T* (see
    :ref:`Type Compatibility with Initializer`).
 
@@ -631,8 +637,8 @@ The initial value can be identified as follows:
    argument value provided by the caller of the method or function.
 -  Each constructor parameter is initialized to the corresponding
    argument value as provided by:
-   
-   + Class instance creation expression (see :ref:`New Expressions`), or
+
+   + Class instance creation expression (see :ref:`New Expressions`); or
    + Explicit constructor call (see :ref:`Explicit Constructor Call`).
 
 -  An exception parameter is initialized to the thrown object (see
@@ -644,11 +650,11 @@ Otherwise, the variable is not initialized, and a :index:`compile-time error`
 occurs.
 
 If an initializer expression is provided, then additional restrictions apply
-to the content of such expression as described in :ref:`Exceptions and Initialization Expression`.
+to the content of the expression as described in :ref:`Exceptions and Initialization Expression`.
 
-A variable declared as *readonly* must be of type *array*. Its operations must
-have a restriction. The restriction that can be applied to such a variable are
-described in :ref:`Readonly Parameters`.
+If a variable is declared as *readonly*, then its type must be *array*, and
+the restrictions on its operations can be applied to the variable as described
+in :ref:`Readonly Parameters`.
 
 .. code-block:: typescript
    :linenos:
@@ -683,6 +689,7 @@ described in :ref:`Readonly Parameters`.
    initializer expression
    restriction
 
+|
 
 .. _Constant Declarations:
 
@@ -722,7 +729,7 @@ The type *T* of a constant declaration is determined as follows:
 -  If no type annotation is available, then *T* is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
 -  If '*?*' is used after the name of the constant, then the type of the
-   constant is ``T | undefined``, regardless of whether *T* is identified
+   constant is *T* | *undefined*, regardless of whether *T* is identified
    explicitly or via type inference.
 
 .. index::
@@ -762,46 +769,12 @@ Type Compatibility with Initializer
     frontend_status: Done
 
 If a variable or constant declaration contains the type annotation *T* and the
-initializer expression *E*, then the type of *E* must be equal to that of *T*.
-Otherwise, one of the following assertions must be true:
-
-+-----------------------+----------------------------------+---------------------------------------+
-| **T is**              | **E is**                         |  **Assertion**                        |
-+=======================+==================================+=======================================+
-| One of integer types  | integer literal or compile-time  | Value of *E* is in bound of           |
-|                       | constant expression of some      | type *T*                              |
-|                       | integer type                     |                                       |
-+-----------------------+----------------------------------+---------------------------------------+
-| Type *char*           | integer literal                  | Value of *E* is in bounds of type     |
-|                       |                                  | *T*                                   |
-+-----------------------+----------------------------------+---------------------------------------+
-| Float type (*float*   | floating-point literal or        | Value of *E* is in bounds of type     |
-| or *double*)          | compile-time constant expression | *T*. *This conversion can lead to     |
-|                       | of a float type                  | the loss of precision (see            |
-|                       |                                  | “Narrowing Primitive Conversion”).*   |
-+-----------------------+----------------------------------+---------------------------------------+
-| Class type            | of a class type                  | Type of *E* is a derived class of *T* |
-+-----------------------+----------------------------------+---------------------------------------+
-
-An error is thrown if at least one of these conditions is not fulfilled.
+initializer expression *E*, then the type of *E* must be compatible with *T*, 
+see :ref:`Assignment-like Contexts`.
 
 .. index::
-   compile-time error
-   type compatibility
    initializer expression
-   initializer
-   exception
-   integer literal
-   bound
-   conversion
-   type
-   narrowing
-   derived class
-   class type
-   float type
-   constant expression
-   type annotation
-   assertion
+   assignment-like contexts
 
 |
 
@@ -814,12 +787,24 @@ Type Inference from Initializer
     frontend_status: Partly
     todo: spec issue: "If initializer expression is a null literal('null') the compiler error should be reported". Why is it striked out? "let a = null" should be CTE A: spec will be changed, a will have "Object|null tyoe"
 
-The type of a declared entity is one of the following:
+If a declaration does not contain the explicit type annotation, 
+its type if inferred from the initializer according to the following:
 
--  The type of the initializer expression if a variable or constant
-   declaration contains no explicit type annotation.
+-  If the initializer expression is the *null* literal, the type is *Object* \| *null* .
 
--  *Object \| null* if the initializer expression is the *null* literal.
+-  If the intializer expresion is of a union type which consists of 
+   numeric literals only, the type is the smallest numeric type, 
+   so that all numeric literals fit that type.
+
+-  If the intializer expresion is of a union type which consists of 
+   literals where all literals are of the same type *T*, the type is *T*, 
+
+-  The type of the initializer expression, 
+   if the type can be inferred from the expression itself.
+
+A compile-time error occurs 
+if the type of the initializer cannot be inferred from the expression itself,
+see :ref:`Object Literal` for example. 
 
 .. index::
    type
@@ -833,6 +818,19 @@ The type of a declared entity is one of the following:
    null literal
    Object
 
+.. code-block:: typescript
+   :linenos:
+
+    let a = null // type of 'a' is Object | null
+
+    let cond: boolean = /*something*/
+    let b = cond ? 1 : 2 // type of 'b' is int
+    let c = cond ? 3 : 3.14 // type of 'b' is double
+    let d = cond ? "one" : "two" // type of 'c' is string
+    let e = cond ? 1 : "one" // type of 'e' is 1 | "one"
+
+    let f = {name: "aa"} // compile-time error
+
 |
 
 .. _Function Declarations:
@@ -843,8 +841,8 @@ Function Declarations
 .. meta:
     frontend_status: Partly
 
-**Function declarations** specify names, signatures, and bodies when
-introducing **named functions**.
+*Function declarations* specify names, signatures, and bodies when
+introducing *named functions*.
 
 .. code-block:: abnf
 
@@ -861,12 +859,12 @@ introducing **named functions**.
 Function *overload signature* allows calling a function in different ways (see
 :ref:`Function Overload Signatures`).
 
-In a **native function** (see :ref:`Native Functions`), the body is omitted.
+In a *native function* (see :ref:`Native Functions`), the body is omitted.
 
-If a function is declared as **generic** (see :ref:`Generics`), then its type
+If a function is declared as *generic* (see :ref:`Generics`), then its type
 parameters must be specified.
 
-Native functions are described in the chapter Experimental Features (see
+Native functions are described in Experimental Features (see
 :ref:`Native Functions`).
 
 Functions must be declared on the top level (see :ref:`Top-Level Statements`).
@@ -888,6 +886,7 @@ Function expressions must be used to define lambdas (see
    top-level statement
    lambda
 
+|
 
 .. _Signatures:
 
@@ -897,7 +896,7 @@ Signatures
 .. meta:
     frontend_status: Done
 
-A signature defines parameters, and the return type (see :ref:`Return Type`)
+A signature defines parameters and the return type (see :ref:`Return Type`)
 of a function, method, or constructor.
 
 .. code-block:: abnf
@@ -914,8 +913,8 @@ of a function, method, or constructor.
         'throws' | 'rethrows'
         ;
 
-See :ref:`Throwing Functions` for the details of ``throws`` marks, and
-:ref:`Rethrowing Functions` for the details of ``rethrows`` marks.
+See :ref:`Throwing Functions` for the details of '``throws``' marks, and
+:ref:`Rethrowing Functions` for the details of '``rethrows``' marks.
 
 Overloading (see :ref:`Function and Method Overloading`) is supported for
 functions and methods. The signatures of functions and methods are important
@@ -968,8 +967,8 @@ parameter must be explicitly defined.
         ;
 
 
-A parameter type prefixed with *readonly* must have an additional restriction.
-The parameter is described in :ref:`Readonly Parameters`.
+If a parameter type is prefixed with *readonly*, then there are additional
+restrictions on the parameter as described in :ref:`Readonly Parameters`.
 
 The last parameter of a function can be a *rest parameter*
 (see :ref:`Rest Parameter`) or a sequence of *optional parameters*
@@ -1010,11 +1009,14 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
 Readonly Parameters
 ===================
 
-A parameter type prefixed with *readonly* must be of array type *T[]*.
-A compile-time error occurs otherwise. This parameter means that the
-function or method body cannot modify the array content. A compile-time
-error occurs if any operation modifies the array content. The same
-restrictions apply to variables as discussed in :ref:`Variable Declarations`.
+If the parameter type is prefixed with *readonly*, then the type must be of
+array type *T*\[]. Otherwise, a compile-time error occurs.
+
+The meaning of the *readonly* parameter is that the array content cannot be
+modified by a function or a method body. Any operation that modifies the array
+content causes a compile-time error.
+
+The same applies to variables as discussed in :ref:`Variable Declarations`.
 
 .. code-block:: typescript
    :linenos:
@@ -1035,7 +1037,7 @@ Optional Parameters
 .. meta:
     frontend_status: Partly
     todo: support call with placeholders
-    
+
 There are two forms of *optional parameters*:
 
 .. code-block:: abnf
@@ -1075,11 +1077,11 @@ omitted in a function call.
     pair(1) // prints: 1 7
 
 The second form is a short notation for a parameter of a union type
-``T | undefined`` with the default value ``undefined``. It means that
+*T* | *undefined* with the default value *undefined*. It means that
 *identifier '?' ':' type* is equivalent to
 *identifier ':' type | undefined = undefined*.
-If a type is of the value type kind, then (similar to :ref:`Union Types`)
-implicit boxing must be applied as follows:
+If a type is of the value type kind, then implicit boxing must be applied
+(similarly to :ref:`Union Types`) as follows:
 *identifier '?' ':' valueType* is equivalent to
 *identifier ':' referenceTypeForValueType | undefined = undefined*.
 
@@ -1096,8 +1098,6 @@ implicit boxing must be applied as follows:
    function
 
 For example, the following two functions can be used in the same way:
-
-|
 
 .. code-block:: typescript
    :linenos:
@@ -1127,7 +1127,7 @@ Rest Parameter
 
 .. meta:
     frontend_status: Done
-    
+
 A *rest parameter* allows functions or methods to take unbounded numbers
 of arguments.
 
@@ -1148,8 +1148,8 @@ A :index:`compile-time error` occurs if a rest parameter:
 -  Is not the last parameter in a parameter list;
 -  Has a type that is not an array type.
 
-A function that has a rest parameter of type ``T[]`` can accept any
-number of arguments of type ``T``.
+A function that has a rest parameter of type *T*\[] can accept any
+number of arguments of type *T*.
 
 .. index::
    rest parameter
@@ -1176,7 +1176,7 @@ number of arguments of type ``T``.
     sum(1) // returns 1
     sum(1, 2, 3) // returns 6
 
-If an argument of type ``T[]`` is prefixed with the *spread* operator
+If an argument of type *T*\[] is prefixed with the *spread* operator
 '``...``', then only one argument can be accepted.
 
 .. code-block:: typescript
@@ -1207,9 +1207,9 @@ Shadowing Parameters
 .. meta:
     frontend_status: Done
 
-If the name of the parameter is identical to the name of the top-level
+If the name of a parameter is identical to the name of a top-level
 variable accessible within the body of a function or a method with that
-a parameter, then the name of the parameter shadows the name of the
+parameter, then the name of the parameter shadows the name of the
 top-level variable within the body of that function or method.
 
 .. code-block:: typescript
@@ -1261,7 +1261,7 @@ the following conditions:
 -  If there is at least one return statement with an expression, and the
    type of each expression in each return statement is *R*, then the
    return type is *R*.
--  If there are *k* return statements (where *k* is two or more) with
+-  If there are *k* return statements (where *k* is 2 or more) with
    expressions of types (*T*:sub:`1`, ``...``, *T*:sub:`k`), and *R*
    is the *least upper bound* (see :ref:`Least Upper Bound`) of these types,
    then the return type is *R*.
@@ -1273,7 +1273,7 @@ Future compiler implementation are to infer return type in more cases. If
 the particular type inference case is not recognized by the compiler,
 then a corresponding :index:`compile-time error` occurs.
 
-The example below is an illustration of type inference:
+Type inference is presented in the example below:
 
 .. index::
    return type
@@ -1326,8 +1326,7 @@ function body.
 .. code-block:: abnf
 
     functionOverloadSignature:
-      'async'? 'function' identifier
-      typeParameters? signature ';'
+      'async'? 'function' identifier typeParameters? signature
       ;
 
 A :index:`compile-time error` occurs if the function implementation is missing,
@@ -1336,8 +1335,8 @@ or does not immediately follow the declaration.
 A call of a function with overload signatures is always a call of the
 implementation function.
 
-The example below has two overload signatures defined (one is parameterless,
-and the other has a single parameter):
+The example below has overload signatures defined (one is parameterless, and
+the other two have one parameter each):
 
 .. index::
    function overload signature
@@ -1352,29 +1351,24 @@ and the other has a single parameter):
 .. code-block:: typescript
    :linenos:
 
-    function foo(): void; /*1st signature*/
-    function foo(x: string): void; /*2nd signature*/
-    function foo(x?: string): void {
+    function foo(): void           // 1st signature
+    function foo(x: string): void  // 2nd signature
+    function foo(x?: string): void // 3rd - implementation signature
+    {
         console.log(x)
     }
 
-    foo() // ok, 1st signature is used
-    foo("aa") // ok, 2nd signature is used
+    foo()          // ok, call fits 1st and 3rd signatures
+    foo("aa")      // ok, call fits 2nd and 3rd signatures
+    foo(undefined) // ok, call fits the 3rd signature
+
 
 The call of ``foo()`` is executed as a call of the implementation function
-with the ``null`` argument; the call of ``foo(x)`` is executed as a call
+with the ``undefined`` argument. The call of ``foo(x)`` is executed as a call
 of the implementation function with the ``x`` argument.
 
-All rules that apply to overloaded signatures are described in
+The compatibility requirements of *overload signatures* are described in
 :ref:`Overload Signature Compatibility`.
-
-.. A :index:`compile-time error` occurs if the signature of function
-  implementation is not *overload signature-compatible*  with each overload
-  signature. It means that a call of each overload signature must be replaceable
-  for the correct call of the implementation function. That can be achieved by
-  using optional parameters (see :ref:`Optional Parameters`), or *least upper
-  bound* types (see :ref:`Least Upper Bound`). The exact semantic rules can
-  be found in :ref:`Overload Signature Compatibility`.
 
 A :index:`compile-time error` occurs unless all overload signatures are
 either exported or non-exported.

@@ -133,11 +133,6 @@ A single type is LUB for itself.
 In a set (*T*:sub:`1`,..., *T*:sub:`k`) that contains at least two types,
 LUB is determined as follows:
 
-.. index::
-   least upper bound (LUB)
-   common supertype
-   subtype
-   
 -  The set of supertypes *ST*:sub:`i` is determined for each type in the set;
 
 -  The intersection of the *ST*:sub:`i` sets is calculated.
@@ -181,10 +176,15 @@ Signatures *s*:sub:`1` and *s*:sub:`2` are *override-equivalent* only if
 
 A compile-time error occurs if:
 
--  A package declares two functions with override-equivalent signatures.
-
--  A class declares two methods or constructors with override-equivalent
+-  A package declares two or more functions with *override-equivalent*
    signatures.
+
+-  A class declares two or more methods or constructors with
+   *override-equivalent* signatures.
+
+-  An interface declares two or more methods with *override-equivalent*
+   signatures.
+
 
 .. index::
    override-equivalent signature
@@ -203,18 +203,21 @@ A compile-time error occurs if:
 Compatible Signature
 ********************
 
-Signature *S*:sub:`1` with *n* parameters is compatible with signature
+.. meta:
+    frontend_status: None
+
+Signature *S*:sub:`1` with *n* parameters is compatible with the signature
 *S*:sub:`2` with *m* parameters if:
 
 -  *n <= m*; and
--  All *n* parameter types in *S*:sub:`1` are identical to parameters types
-   in the same positions in *S*:sub:`2`; and
+-  All *n* parameter types in *S*:sub:`1` are identical or contravariant to
+   parameters types in the same positions in *S*:sub:`2`; and
 -  All *S*:sub:`2` parameters in positions from *m - n* up to *m* are optional
    (see :ref:`Optional Parameters`).
 
 
 A return type, if available, is present in both signatures, and the return
-type of *S*:sub:`1` is compatible (see :ref:`Compatible Types`) with the
+type of *S*:sub:`1` is compatible (see :ref:`Type Compatibility`) with the
 return type of *S*:sub:`2`.
 
 |
@@ -225,78 +228,77 @@ Overload Signature Compatibility
 ********************************
 
 If several functions, methods, or constructors share the same body
-(implementation) or the same method with no implementation in some interface,
-then all first signatures with no body must *fit* the last signature with
-actual implementation, or without actual implementation for the interface
-method. A compile-time error occurs otherwise.
+(implementation) or the same method with no implementation in an interface,
+then all first signatures without body must *fit* the last signature with or
+without the actual implementation for the interface method. A compile-time
+error occurs otherwise.
 
-Signature *S*:sub:1 with *n* parameters *fits* signature *S*:sub:`2` with *m*
-parameters if:
+Signature *S*:sub:`1` with *n* parameters *fits* signature *S*:sub:`2`
+if:
 
--  *n <= m*; and
--  All *n* parameter types in *S*:sub:`1` are compatible (see
-   :ref:`Compatible Types`) with parameter types in the same positions in
-   *S*:sub:`2`; and
--  All *S*:sub:`2` parameters in positions from *m - n* up to *m* are optional
-   (see :ref:`Optional Parameters`).
+- *S*:sub:`1` has *n* parameters,
+  *S*:sub:`2` has *m* parameters,
+  and:
+  
+   -  *n <= m*; and
+   -  All *n* parameter types in *S*:sub:`1` are compatible (see
+      :ref:`Type Compatibility`) with parameter types that occupy the same
+      positions in *S*:sub:`2`; and
+   -  If *n < m*, then all *S*:sub:`2` parameters in positions from *n + 1*
+      up to *m* are optional (see :ref:`Optional Parameters`).
 
-A return type, if available, is present in both signatures, and the return
-type of *S*:sub:`1` is compatible (see :ref:`Compatible Types`) with the
-return type of *S*:sub:`2`.
-
-All overloaded signatures in functions must be *exported* or *non-exported*.
-All overloaded signatures in methods and constructors must have the same
-access modifier. A compile-time error occurs otherwise.
+- Both *S*:sub:`1` and *S*:sub:`2` have return types, and the return type of
+  *S*:sub:`2` is compatible with the return type of *S*:sub:`1` (see
+  :ref:`Type Compatibility`).
 
 It is illustrated by the example below:
 
 .. code-block:: typescript
    :linenos:
 
-   class Base {}
-   class Derived1 extends Base { }
-   class Derived2 extends Base { }
-   class SomeClass {}
+   class Base { ... }
+   class Derived1 extends Base { ... }
+   class Derived2 extends Base { ... }
+   class SomeClass { ... }
 
-   function foo (p: Derived2): Derived2
-   function foo (p: Derived1): Derived1
-   function foo (p: Derived2): Derived2
-   function foo (p: Derived1): Derived1
-   function foo (p: SomeClass): SomeClass /* Compile-time error as 'SomeClass'
-       is not compatible with 'Base' */
-   function foo (p: number) /* Compile-time error as 'number' is not compatible
-       with 'Base' and implicit return type 'void' also incompatible */ 
-   function foo (p: Base): Derived1
-   function foo (p: Base): Base { return p }
+   interface Base1 { ... }
+   interface Base2 { ... }
+   class Derived3 implements Base1, Base2 { ... }
 
-   let base = new Base
-   let derived1 = new Derived1
-   let derived2 = new Derived2
-
-   let b: Base = foo (base)
-   b = foo(derived1)
-   b = foo(derived2)
-
-   /* Both declarations below lead to compile-time errors
-      as return type of 'foo' is 'Base' */  
-   let d1: Derived1 = foo (base) // Error!
-   let d2: Derived2 = foo (base) // Error!
-
-
-   function bar() // this 'bar()' fits 'bar(?p: number)'
-   function bar(p: number) // this 'bar()' fits 'bar(?p: number)' as well
-   function bar(p?: number) { ... }
-
-   function goo()
-   export function goo() {} // Compile-time error due to different export status
-
-   class A {
-      private constructor ()
-      protected constructor () {} // Compile-time error due to different acess modifiers
-   }
-
+   function foo (p: Derived2): Base1 // signature #1
+   function foo (p: Derived1): Base2 // signature #2
+   function foo (p: Derived2): Base1 // signature #1
+   function foo (p: Derived1): Base2 // signature #2
+   // function foo (p: SomeClass): SomeClass 
+      // Error as 'SomeClass' is not compatible with 'Base'
+   // function foo (p: number) 
+      // Error as 'number' is not compatible with 'Base' and implicit return type 'void' also incompatible with Base
+   function foo (p1: Base, p2?: SomeClass): Derived3 // // signature #3: implementation signature
+       { return p }
 
 |
+
+.. _Type Compatibility:
+
+Type Compatibility
+******************
+
+.. meta:
+    frontend_status: Done
+
+Type *T*:sub:`1` is compatible with type *T*:sub:`2` if 
+
+-  *T*:sub:`1` is the same as *T*:sub:`2`,
+
+-  or, there is an *implicit conversion* (see :ref:`Implicit Conversions`)
+   that allows to convert type type *T*:sub:`1` to type *T*:sub:`2`.
+
+.. index::
+   type compatibility
+   conversion
+
+|
+
 
 .. _Compatibility Features:
 
@@ -322,18 +324,18 @@ Extended Conditional Expressions
     frontend_status: Done
 
 |LANG| provides extended semantics for conditional-and and conditional-or
-expressions for better alignment. It affects the semantics of conditional
-expressions (see :ref:`Conditional Expressions`), ``while`` and ``do``
-statements (see :ref:`While Statements and Do Statements`), ``for``
-statements (see :ref:`For Statements`), and ``if`` statements (see
-:ref:`if Statements`).
+expressions for better alignment with |TS|. It affects the semantics of
+conditional expressions (see :ref:`Conditional Expressions`), ``while`` and
+``do`` statements (see :ref:`While Statements and Do Statements`), ``for``
+statements (see :ref:`For Statements`), ``if`` statements (see
+:ref:`if Statements`), and assignment (see :ref:`Simple Assignment Operator`).
 
 The approach is based on the concept of *truthiness*, which extends the Boolean
-logic to operands and results of non-Boolean types. The value of any valid
-expression of non-void type can be treated as *Truthy* or *Falsy*, depending on
-the kind of the value type.
-
-The details are provided in the table below:
+logic to operands of non-Boolean types, while keeping the result of operation
+(see :ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`,
+:ref:`Logical Complement`) as boolean.
+The value of any valid expression can be treated as true or false,
+depending on the kind of the value type, as descibed in the table below:
 
 .. index::
    extended conditional expression
@@ -351,57 +353,43 @@ The details are provided in the table below:
    falsy
    value type
 
-+------------------+--------------------+--------------------+------------------------+
-| Value type       | When Falsy         | When Truthy        | |LANG| code            |
-+==================+====================+====================+========================+
-| string           | empty string       | non-empty string   | s.length() == 0        |
-+------------------+--------------------+--------------------+------------------------+
-| number           | 0 or NaN           | any other number   | n != 0 && n != NaN     |
-+------------------+--------------------+--------------------+------------------------+
-| enum             | constant is Falsy  | constant is Thruthy| x.getValue()           |
-+------------------+--------------------+--------------------+------------------------+
-| T | null         | == null            | != null            | x != null              |
-+------------------+--------------------+--------------------+------------------------+
-| T | undefined    | == undefined       | != undefined       | x != undefined         |
-+------------------+--------------------+--------------------+------------------------+
-| nonNullishExpr   | never              | always             | true                   |
-+------------------+--------------------+--------------------+------------------------+
-| integer type     | == 0               | != 0               | i != 0                 |
-+------------------+--------------------+--------------------+------------------------+
-| char type        | == 0               | != 0               | c != c'0'              |
-+------------------+--------------------+--------------------+------------------------+
-| float type       | 0 or NaN           | any other number   | f != 0 && f != NaN     |
-+------------------+--------------------+--------------------+------------------------+
++-----------------+-------------------+--------------------+----------------------+
+| Value type      | When *false*      | When *true*        | |LANG| code          |
++=================+===================+====================+======================+
+| string          | empty string      | non-empty string   | s.length == 0        |
++-----------------+-------------------+--------------------+----------------------+
+| boolean         | false             | true               | x                    |
++-----------------+-------------------+--------------------+----------------------+
+| enum            | enum constant     | enum constant      | x.getValue()         |
+|                 | treated as 'false'| treated as 'true'  |                      |
++-----------------+-------------------+--------------------+----------------------+
+| number          | 0 or NaN          | any other number   | n != 0 && n != NaN   |
+| (double/float)  |                   |                    |                      |
++-----------------+-------------------+--------------------+----------------------+
+| any integer type| == 0              | != 0               | i != 0               |
++-----------------+-------------------+--------------------+----------------------+
+| char            | == 0              | != 0               | c != c'0'            |
++-----------------+-------------------+--------------------+----------------------+
+| let T - is any non-nullish type                                                 |
++-----------------+-------------------+--------------------+----------------------+
+| T | null        | == null           | != null            | x != null            |
++-----------------+-------------------+--------------------+----------------------+
+| T | undefined   | == undefined      | != undefined       | x != undefined       |
++-----------------+-------------------+--------------------+----------------------+
+| T | undefined   | == undefined or   | != undefined and   | x != undefined &&    |
+| | null          | == null           | != null            | x != null            |
++-----------------+-------------------+--------------------+----------------------+
+| Boxed primitive | primitive type is | primitive type is  | new Boolean(true) == |
+| type (Boolean,  | false             | true               | true                 |
+| Char, Int ...)  |                   |                    | new Int (0) == 0     |
++-----------------+-------------------+--------------------+----------------------+
+| any other       | never             | always             | new SomeType != null |
+| nonNullish type |                   |                    |                      |
++-----------------+-------------------+--------------------+----------------------+
 
-
-The actual extended semantics of conditional-and and conditional-or expressions
-is described in the following *truth tables* (assuming that 'A' and 'B' are
-any valid expressions):
-
-+---------+----------+
-| A       | !A       |
-+=========+==========+
-| Falsy   | true     |
-+---------+----------+
-| Truthy  | false    |
-+---------+----------+
-
-
-+---------+---------+--------+---------+
-| A       | B       | A && B | A || B  |
-+=========+=========+========+=========+
-| Falsy   | Falsy   | A      | B       |
-+---------+---------+--------+---------+
-| Falsy   | Truthy  | A      | B       |
-+---------+---------+--------+---------+
-| Truthy  | Falsy   | B      | A       |
-+---------+---------+--------+---------+
-| Truthy  | Truthy  | B      | A       |
-+---------+---------+--------+---------+
-
-The example below illustrates the ways this approach works in practice. A
-*nonzero* number is *truthy*, and the loop runs until it becomes *zero*, i.e.,
-*falsy*:
+The example below illustrates the way this approach works in practice. Any
+*nonzero* number is treated as *true*, and the loop runs until it becomes
+*zero*, as it is treated as *false*:
 
 .. code-block:: typescript
    :linenos:

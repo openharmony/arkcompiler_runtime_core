@@ -20,8 +20,7 @@ Experimental Features
 
 This Chapter introduces the |LANG| features that are considered a part of
 the language, but have no counterpart in |TS|, and are therefore not
-recommended to those who need a single source code for Typescript
-and |LANG|.
+recommended to those who need a single source code for |TS| and |LANG|.
 
 Some features introduced in this Chapter are still under discussion. They can
 be removed from the final version of the |LANG| specification. Once a feature
@@ -197,10 +196,15 @@ is still under consideration.
 
 |
 
-.. _Char Literals:
+.. _Character Type and Literals:
 
-Char Literals
-*************
+Character Type and Literals
+***************************
+
+.. _Character Literals:
+
+Character Literals
+==================
 
 .. meta:
     frontend_status: Done
@@ -234,7 +238,7 @@ Examples:
       c'\x7F'
       c'\u0000'
 
-*Char literals* are of type *char*.
+*Character Literals* are of type *char*.
 
 .. index::
    char literal
@@ -242,6 +246,69 @@ Examples:
    escape sequence
    single quote
    type char
+
+|
+
+.. _Character Type and Operations:
+
+Character Type and Operations
+=============================
+
+.. meta:
+    frontend_status: Partly
+
++---------+----------------------------------+--------------------------+
+| Type    | Type's Set of Values             | Corresponding Class Type |
++=========+==================================+==========================+
+| *char*  | Symbols with codes from \U+0000  | *Char*                   |
+|         | to \U+FFFF inclusive, that is,   |                          |
+|         | from 0 to 65,535                 |                          |
++---------+----------------------------------+--------------------------+
+
+|LANG| provides a number of operators to act on character values as discussed
+below.
+
+-  Comparison operators that produce a value of type *boolean*:
+
+   +  Character comparison operators '<', '<=', '>', and '>=' (see :ref:`Numerical Comparison Operators`);
+   +  Character equality operators '==' and '!=' (see :ref:`Value Equality Operators`);
+
+-  Character operators that produce a value of type *char*;
+
+   + Unary plus '+' and minus '-' operators (see :ref:`Unary Plus` and :ref:`Unary Minus`);
+   + Additive operators '+' and '-' (see :ref:`Additive Expressions`);
+   + Increment operator '++' used as prefix (see :ref:`Prefix Increment`) or
+     postfix (see :ref:`Postfix Increment`);
+   + Decrement operator '--' used as prefix (see :ref:`Prefix Decrement`) or
+     postfix (see :ref:`Postfix Decrement`);
+
+-  Conditional operator '?:' (see :ref:`Conditional Expressions`);
+-  The string concatenation operator '+' (see :ref:`String Concatenation`) that,
+   if one operand is ``string`` and the other is ``character``, converts the
+   character operand to a string, and then creates a concatenation of the
+   two strings as a new ``string``.
+
+The class *Char* provides constructors, methods, and constants
+that are parts of the |LANG| standard library (see :ref:`Standard Library`).
+
+.. index::
+   char
+   Char
+   boolean
+   comparison operator
+   equality operator
+   unary operator
+   additive operator
+   increment operator
+   postfix
+   prefix
+   decrement operator
+   conditional operator
+   concatenation operator
+   operand
+   constructor
+   method
+   constant
 
 |
 
@@ -288,10 +355,26 @@ A :index:`compile-time error` occurs if any *dimensionExpression* is a
 constant expression that is evaluated at compile time to a negative integer
 value.
 
+If the type of any *dimensionExpression* is number or other floating-point
+type, and its fractional part is different from 0, then errors occur as
+follows:
+
+- Runtime error, if the situation is identified during program execution; and
+- Compile-time error, if the situation is detected during compilation.
+
+
 .. code-block:: typescript
    :linenos:
 
       let x = new number[-3] // compile-time error
+
+      let y = new number[3.141592653589]  // compile-time error
+
+      foo (3.141592653589)
+      function foo (size: number) {
+         let y = new number[size]  // runtime error
+      }
+
 
 A :index:`compile-time error` occurs if *typeReference* refers to a class
 that does not contain an accessible parameterless constructor, or if
@@ -426,7 +509,7 @@ Type *string* can be used as a type of the index parameter:
        // This notation implies a call: x.$_set ("index string", x)
 
 Functions *$_get* and *$_set* are ordinary functions with compiler-known
-signatures. The functions can be used like any other functions. 
+signatures. The functions can be used like any other function.
 The functions can be abstract or defined in an interface and implemented later.
 The functions can be overridden and provide a dynamic dispatch for the indexing
 expression evaluation (see :ref:`Indexing Expression`). They can be used in
@@ -464,7 +547,7 @@ A compile-time error occurs if these functions are marked as *async*.
     let x: IndexableByNumber<boolean> = new BadClass
     x[666] = true // This will be dispatched at runtime to the overridden
        // version of the $_set method
-    x.$_get ("some string")  // $_get and $_set can be called as ordinary
+    x.$_get (15)  // $_get and $_set can be called as ordinary
        // methods
 
 
@@ -479,14 +562,12 @@ Iterable Types
 .. meta:
     frontend_status: None
 
-If a class or an interface can be made *iterable*, 
-meaning that their instances can be used in for-of statements
-(see :ref:`For-Of Statements`).
+A class or an interface can be made *iterable*, meaning that their instances
+can be used in for-of statements (see :ref:`For-Of Statements`).
 
-A type is *iterable* if it declares a parameterless function 
-with name *$_iterator* and signature *(): ITER*, where *ITER* is 
-a type that implements *Iterator* interface defined 
-in the standard library (see :ref:`Standard Library`).
+A type is *iterable* if it declares a parameterless function with name
+*$_iterator* and signature *(): ITER*, where *ITER* is a type that implements
+*Iterator* interface defined in the standard library (see :ref:`Standard Library`).
 
 The example below defines *iterable* class *C*:
 
@@ -516,29 +597,29 @@ The example below defines *iterable* class *C*:
 
       let c = new C()
       for (let x of c) { 
-	    console.log(x) 
-	  }
+            console.log(x) 
+          }
 
-In the example above class *C* function *$_iterator* returns 
-*CIterator<string>* which implements *Iterator<string>*. 
-If executed, this code prints:
- 	
-	.. code-block::
-	
-		"a"
-		"b"
-		"c"
+In the example above, class *C* function *$_iterator* returns
+*CIterator<string>*, which implements *Iterator<string>*. If executed,
+this code prints out the following:
+
+.. code-block:: typescript
+
+    "a"
+    "b"
+    "c"
 
 
-The function *$_iterator* is an ordinary function with compiler-known signature. 
-The function can be used like any other functions. 
-It can be abstract or defined in an interface and implemented later.
+The function *$_iterator* is an ordinary function with a compiler-known
+signature. The function can be used like any other function. It can be
+abstract or defined in an interface to be implemented later.
 
-A compile-time error occurs if this function is marked as async.
+A compile-time error occurs if this function is marked as *async*.
 
-**Note**: To support the code compatible with |TS| 
-the name of the *$_iterator* function can be written as *[Symbol.iterator]*.
-In this case, the *iterable* class will look as:
+**Note**: To support the code compatible with |TS|, the name of the function
+*$_iterator* can be written as [*Symbol.iterator*]. In this case, the class
+*iterable* looks as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -550,8 +631,8 @@ In this case, the *iterable* class will look as:
         }
       }
 
-The use of *[Symbol.iterator]* name considered deprecated, it can be removed in the future
-versions of the language.
+The use of the name [*Symbol.iterator*] is considered deprecated.
+It can be removed in the future versions of the language.
 
 
 .. _Statements Experimental:
@@ -962,11 +1043,16 @@ Declaration Distinguishable by Signatures
 Declarations with the same name are distinguishable by signatures if:
 
 -  They are functions with the same name, but their signatures are not
-   *override-equivalent* (see :ref:`Function Overloading`).
+   *override-equivalent* (see :ref:`Override-Equivalent Signatures` and 
+   :ref:`Function Overloading`).
 
 -  They are methods with the same name, but their signatures are not
-   *override-equivalent* (see :ref:`Class Method Overloading`, and
-   :ref:`Interface Method Overloading`).
+   *override-equivalent* (see :ref:`Override-Equivalent Signatures`,
+   :ref:`Class Method Overloading`, and :ref:`Interface Method Overloading`).
+
+-  They are constructors of the same class, but their signatures are not
+   *override-equivalent* (see :ref:`Override-Equivalent Signatures` and
+   :ref:`Constructor Overloading`).
 
 .. index::
    signature
@@ -1616,9 +1702,9 @@ Enumeration Types Conversions
 =============================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
-Every *enum* type is compatible (see :ref:`Compatible Types`) with type
+Every *enum* type is compatible (see :ref:`Type Compatibility`) with type
 *Object* (see :ref:`Enumeration SuperType`). Every variable of *enum* type can
 thus be assigned into a variable of type *Object*.
 
@@ -2184,9 +2270,10 @@ The Promise<T> Class
 .. meta:
     frontend_status: Partly
 
-The class  *Promise<T>* represents the values returned by launch expressions.
-The definition of type *Promise<T>* belongs the '*package std.core*'
-of the standard library (see :ref:`Standard Library`).
+The class *Promise<T>* represents the values returned by launch expressions.
+It belongs to the essential kernel packages of the standard library
+(see :ref:`Standard Library`) and thus imported by default and may be used
+without any qualification.
 
 The following methods are used:
 
@@ -2204,7 +2291,7 @@ The following methods are used:
    standard library
    method
 
-.. code-block:: abnf
+.. code-block:: typescript
 
         Promise<U> Promise<T>::then<U>(fullfillCallback :
             function
@@ -2214,7 +2301,7 @@ The following methods are used:
 -  *catch* is the alias for *Promise<T>*.then<U>((value: T) : U => {},
    onRejected).
 
-.. code-block:: abnf
+.. code-block:: typescript
 
         Promise<U> Promise<T>::catch<U>(rejectCallback : (err:
             Object) : Promise<U>)
@@ -2349,9 +2436,8 @@ A :index:`compile-time error` occurs if:
    different identifiers.
 
 A *package module* automatically imports all exported entities from essential
-kernel packages (‘std.core’ and 'escompat') of the standard library (see
-:ref:`Standard Library`). All entities from these packages are accessible
-as simple names.
+kernel packages of the standard library (see :ref:`Standard Library`). All
+entities from these packages are accessible as simple names.
 
 A *package module* can automatically access all top-level entities
 declared in all modules that constitute the package.
@@ -2379,9 +2465,12 @@ Internal Access Modifier
 .. meta:
     frontend_status: Partly
 
-The modifier *internal* indicates that a class member or a constructor is
-accessible within their compilation unit only. A compilation unit that is a
-package can be used in any *package module* (see :ref:`Packages`).
+The modifier *internal* indicates that a class member, a constructor, or
+an interface member is accessible within its compilation unit only.
+If the compilation unit is a package (see :ref:`Packages`), then *internal*
+members can be used in any *package module*. If the compilation unit is a
+separate module (see :ref:`Separate Modules`), then *internal* members can be
+used within this module.
 
 .. index::
    modifier
@@ -2405,14 +2494,10 @@ package can be used in any *package module* (see :ref:`Packages`).
         c.count++ // ok
       }
 
-A member or a constructor with both *internal* and *protected* modifiers (see
-below) can be accessed as *internal* and *protected*.
-
 .. index::
    member
    constructor
    internal modifier
-   protected modifier
    access
 
 |

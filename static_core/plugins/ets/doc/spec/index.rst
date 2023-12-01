@@ -38,5 +38,6 @@
    /18_stdlib
    /19_grammar
    /20_implementation
+   /21_TS_compatibility
    /0_authors
 

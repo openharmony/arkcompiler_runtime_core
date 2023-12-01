@@ -21,7 +21,7 @@ Generics
 Class, interface, method, constructor, and function are program entities
 that can be generalized in the |LANG| language. Generalization is
 parameterizing an entity by one or several types. A generalized
-entity is introduced by a *generic declaration* (also called *generic*
+entity is introduced by a *generic declaration* (called *generic*
 for brevity).
 
 .. index::
@@ -43,13 +43,13 @@ Generic Declarations
 
 Types used as generic parameters in a generic are called *type parameters*.
 
-A generic must be instantiated in order to be used.
-*Generic instantiation* is the action that converts a generic into
-a real program entity: ordinary class, interface, function, etc.
+A *generic* must be instantiated in order to be used. *Generic instantiation*
+is the action that converts a *generic* into a real program entity: ordinary
+class, interface, function, etc.
 Instantiation can be performed either explicitly or implicitly.
 
 *Explicit* generic instantiation is the language construct that specifies
-real types, which substitute type parameters of a generic. Real types
+real types, which substitute type parameters of a *generic*. Real types
 specified in the instantiation are called *type arguments*.
 
 .. index::
@@ -67,11 +67,11 @@ specified in the instantiation are called *type arguments*.
    type argument
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
-They are inferred from the context the generic is referred in.
-Implicit instantiation is possible only for functions and methods.
+They are inferred from the context the generic is referred in. Implicit
+instantiation is possible only for functions and methods.
 
 The result of instantiation is a *real*, non-parameterized program entity:
-class, interface, method, constructor, or function. Such entity is treated
+class, interface, method, constructor, or function. The entity is handled
 exactly as an ordinary class, interface, method, constructor, or function.
 
 Conceptually, a generic class, an interface, a method, a constructor, or a
@@ -101,15 +101,13 @@ Generic Parameters
     frontend_status: Done
 
 A class, an interface, or a function must be parameterized by at least one
-type parameter to be *generic*. The type parameter is declared in the type
-parameter section, and can be used as an ordinary type inside a generic.
+type parameter to be a *generic*. The type parameter is declared in the type
+parameter section. It can be used as an ordinary type inside a *generic*.
 
-Syntactically, the type parameter is an unqualified identifier.
-See :ref:`Scopes` for the scope of type parameters.
-
-Each type parameter has a *constraint* (see :ref:`Type Parameter Constraint`).
-
-Type parameters can also have default types (see :ref:`Type Parameter Default`).
+Syntactically, a type parameter is an unqualified identifier (see :ref:`Scopes`
+for the scope of type parameters). Each type parameter can have a *constraint*
+(see :ref:`Type Parameter Constraint`). A type parameter can have a default
+type (see :ref:`Type Parameter Default`).
 
 .. index::
    generic parameter
@@ -150,7 +148,7 @@ Type parameters can also have default types (see :ref:`Type Parameter Default`).
 A generic class, interface, method, constructor, or function defines a set
 of parameterized classes, interfaces, methods, constructors, or functions
 respectively (see :ref:`Generic Instantiations`). One type argument can only
-define one such set for each possible parameterization of the type parameter
+define one set for each possible parameterization of the type parameter
 section.
 
 .. index::
@@ -188,14 +186,13 @@ Type Parameter Constraint
     todo: Adapt spec change: T without constraint doesn't mean "T extends Object|null" anymore.
 
 
-A type parameter can be restricted. In that case, the corresponding type
-argument in the generic instantiation must follow some restrictions, or
-*constraints*.
+If a type parameter has restrictions, or *constraints*, then the corresponding
+type argument in the generic instantiation must follow them.
 
 Every type parameter’s constraint follows the keyword ``extends``.
-A constraint is denoted as a single type parameter *T*; if no constraint
-is declared, then the type parameter is not compatible with ``Object`` and it 
-has no methods or fields available for use. 
+A constraint is denoted as a single type parameter *T*. If no constraint
+is declared, then the type parameter is not compatible with ``Object``, and
+has no methods or fields available for use.
 If the type parameter *T* has the type constraint *S*, then the actual
 type of the generic instantiation must be a subtype of *S*.
 If the type parameter is constrained with the *keyof T*, then valid
@@ -234,7 +231,7 @@ from string names of *T* or the union type itself:
     let b2 = new B<'f0'>    // Compile-time error as "f0" does not satisfy the constraint 'keyof A'
     let b3 = new B<keyof A> // OK
 
-A type parameter of a generic can *depend* on some other type parameter
+A type parameter of a generic can *depend* on another type parameter
 of the same generic.
 
 If *S* constrains *T*, then the type parameter *T* *directly depends*
@@ -318,10 +315,10 @@ for the generic declaration *G*.
 
 If *C*:sub:`1`, ``...``, *C*:sub:`n` is the constraint for the corresponding
 type parameters *T*:sub:`1`, ``...``, *T*:sub:`n` of a generic declaration,
-then *T*:sub:`i` is a subtype of each constraint type *C*:sub:`i`
-(see :ref:`Subtyping`). All such subtypes of the type listed in the
-corresponding constraint have each type argument *T*:sub:`i` of the
-parameterized declaration ranging over them.
+then *T*:sub:`i` is a subtype of each constraint type *C*:sub:`i` (see
+:ref:`Subtyping`). All subtypes of the type listed in the corresponding
+constraint have each type argument *T*:sub:`i` of the parameterized
+declaration ranging over them.
 
 .. index::
    type argument
@@ -376,9 +373,8 @@ Type Parameter Default
 .. meta:
     frontend_status: Partly
 
-Type parameters of generic types can have defaults, and optional type
-parameters are also supported. This situation allows dropping a type
-argument when a particular type of instantiation is used.
+Type parameters of generic types can have defaults. This situation allows
+dropping a type argument when a particular type of instantiation is used.
 However, a compile-time error occurs if a type parameter without a
 default value follows a type parameter with a default value in the
 declaration of a generic type.
@@ -431,8 +427,8 @@ Type Arguments
 Type arguments can be reference types or wildcards.
 
 If a value type is specified as a type argument in the generic instantiation,
-then the boxing conversion applies to that type (see
-:ref:`Primitive Types Conversions`).
+then the boxing conversion applies to the type (see
+:ref:`Boxing Conversions`).
 
 .. code-block:: abnf
 
@@ -472,11 +468,10 @@ function.
         ;
 
 The variance for type arguments can be specified with wildcards (*use-site
-variance*). It allows specifying the type variance of the corresponding type
-argument, and changing the type variance of an *invariant* type parameter.
+variance*). It allows changing type variance of an *invariant* type parameter.
 
-**NOTE**: This description of use-site variance modifiers is tentative.
-The details are to be specified in the future language versions.
+**Note**: This description of *use-site variance* modifiers is tentative.
+The details are to be specified in the future versions of |LANG|.
 
 The syntax to signify a covariant type argument, or a wildcard with an
 upper bound (*T* is a *typeReference*) is as follows:
@@ -494,16 +489,16 @@ upper bound (*T* is a *typeReference*) is as follows:
 
 -  ``out`` *T*
 
-   This syntax restricts the methods available so that only the methods
-   that do not use *T*, or use *T* in out-position can be accessed.
+   This syntax restricts the methods available, and allows accessing only
+   the methods that do not use *T*, or use *T* in out-position.
 
 The syntax to signify a contravariant type argument, or a wildcard with a
 lower bound (*T* is a *typeReference*) is as follows:
 
 -  ``in`` *T*
 
-   This syntax restricts the methods available so that only the methods
-   that do not use *T*, or use *T* in in-position can be accessed.
+   This syntax restricts the methods available, and allows accessing only
+   the methods that do not use *T*, or use *T* in in-position.
 
 .. index::
    method
@@ -572,8 +567,8 @@ Any two type arguments are considered *provably distinct* if:
 Utility Types
 *************
 
-The |LANG| supports several embedded types, called "utility" types.
-They allow to construct new types, and extend their functionality.
+The |LANG| supports several embedded types, called '*utility*' types.
+They allow constructing new types, and extend their functionality.
 
 .. index::
    embedded type
@@ -587,7 +582,10 @@ They allow to construct new types, and extend their functionality.
 Partial Utility Type
 ====================
 
-The type ``Partial<T>`` constructs a type with all properties of *T* set to
+.. meta:
+    frontend_status: None
+
+The type *Partial<T>* constructs a type with all properties of *T* set to
 optional. *T* must be a class or an interface type.
 
 .. code-block:: typescript
@@ -606,8 +604,8 @@ optional. *T* must be a class or an interface type.
     
     process({title: "aa"}) // description is undefined
 
-In the example above, the type ``Partial<Issue>`` is transformed to a distinct
-type that is analogous to the type:
+In the example above, the type *Partial<Issue>* is transformed to a distinct
+type that is analogous:
 
 .. code-block:: typescript
    :linenos:
@@ -624,7 +622,10 @@ type that is analogous to the type:
 Required Utility Type
 =====================
 
-The type ``Required<T>`` is opposite to ``Partial<T>``. 
+.. meta:
+    frontend_status: None
+
+The type *Required<T>* is opposite to *Partial<T>*.
 It constructs a type with all properties of *T* set to
 be required (not optional). *T* must be a class or an interface type.
 
@@ -642,8 +643,8 @@ be required (not optional). *T* must be a class or an interface type.
     
 
 
-The type defined in the example above, the type ``Required<Issue>`` 
-is transformed to a distinct type that is analogous to the type:
+The type defined in the example above, the type *Required<Issue>*
+is transformed to a distinct type that is analogous:
 
 .. code-block:: typescript
    :linenos:
@@ -660,9 +661,12 @@ is transformed to a distinct type that is analogous to the type:
 Readonly Utility Type
 =====================
 
-The type ``Readonly<T>`` constructs a type with all properties of *T* set to
-readonly, meaning the properties of the constructed value cannot be reassigned.
-*T* must be a class or an interface type.
+.. meta:
+    frontend_status: None
+
+The type *Readonly<T>* constructs a type with all properties of *T* set to
+readonly. It means that the properties of the constructed value cannot be
+reassigned. *T* must be a class or an interface type.
 
 .. code-block:: typescript
    :linenos:
@@ -684,10 +688,13 @@ readonly, meaning the properties of the constructed value cannot be reassigned.
 Record Utility Type
 ===================
 
+.. meta:
+    frontend_status: None
+
 The type *Record<K, V>* constructs a container that maps keys (of type *K*)
 to values (of type *V*).
 
-The type *K* is restricted to ``number`` types, ``string`` types, union types
+The type *K* is restricted to *number* types, *string* types, *union* types
 constructed from these types, and also literals of these types.
 
 A compile-time error occurs if any other type, or literal of any other type
@@ -719,10 +726,11 @@ A special form of object literals is supported for instances of *Record*
 types (see :ref:`Object Literal of Record Type`).
 
 Access to ``Record<K, V>`` values is done by the *indexing
-expression* like *r[index]*, where *r* is an instance of the type ``Record``,
+expression* like *r[index]*, where *r* is an instance of the type *Record*,
 and *index* is the expression of the type *K*. The result of an indexing
 expression is of type *V*, if *K* is a union that contains literal types only
-or *V | undefined*, otherwise. See :ref:`Record Indexing Expression` for more details.
+or *V* | *undefined*, otherwise. See :ref:`Record Indexing Expression` for
+details.
 
 .. index::
    object literal
@@ -746,8 +754,8 @@ or *V | undefined*, otherwise. See :ref:`Record Indexing Expression` for more de
     x['key2'] = 8
     console.log(x['key2']) // prints 8
 
-In the example above, *K* is a union of literal types, so the result type 
-of an indexing expression is *V* which is ``number`` in this case.
+In the example above, *K* is a union of literal types. The result of an
+indexing expression is of type *V*. In this case it is *number*.
 
 
 .. raw:: pdf

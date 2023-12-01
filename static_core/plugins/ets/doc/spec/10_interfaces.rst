@@ -77,7 +77,7 @@ considered to implement the interface.
 
 Interfaces without *interfaceExtendsClause* have class *Object* as their
 supertype (see :ref:`Object Class Type`). It enables assignments on the basis
-of reference types conversions (see :ref:`Reference Types Conversions`).
+of reference types conversions (see :ref:`Widening Reference Conversions`).
 
 .. index::
    variable
@@ -507,28 +507,61 @@ A compile-time error occurs if the body of an interface declares:
 Interface Method Overload Signatures
 ====================================
 
+.. meta:
+    frontend_status: None
+
 |LANG| allows specifying a method that can have several *overload signatures*
 but the same name.
 
 .. code-block:: abnf
 
     interfaceMethodOverloadSignature:
-        identifier signature ';'
+        identifier signature
         ;
 
-Calling a method with *overload signatures* always means calling the method
-header that is textually the last.
+Calling a method with *overload signatures* means that the overload signature
+implemented by the method called is textually the last.
 
-All rules for the overloaded signatures are discussed in
+*Overload signatures* compatibility requirements are discussed in
 :ref:`Overload Signature Compatibility`.
 
-.. A compile-time error occurs if the signature of the last method header is not
-  *overload signature-compatible* with each previous overload signature. It means
-  that a call of each overload signature must be replaceable for the correct call
-  of the last method header. This can be achieved by using optional parameters
-  (see :ref:`Optional Parameters`) or *least upper bound* types (see
-  :ref:`Least Upper Bound`). See :ref:`Overload Signature Compatibility` for
-  the exact semantic rules.
+In the example below, one overload signature is parameterless, and the other
+who have one parameter each:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface C {
+        foo(): void           // 1st signature
+        foo(x: string): void  // 2nd signature
+        foo(x?: string): void // 3rd - implementation signature
+    }
+    function demo (c: C) {
+       c.foo()           // ok, call fits 1st and 3rd signatures
+       c.foo("aa")       // ok, call fits 2nd and 3rd signatures
+       c.foo(undefined)  // ok, call fits the 3rd signature
+    }
+
+If a class implements an interafce that has a method with an overload
+signature, then the class must also provide a method that has an overload
+signature.
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base { ... }
+    class Derived extends Base { ... }
+
+    interface Interface {
+      foo (p: Derived)
+      foo (p: Base)
+    }
+
+    class Class implements Interface {
+      foo (p: Derived)
+      foo (p: Base) { ... }
+    }
+
 
 .. index::
    interface method
@@ -649,7 +682,6 @@ The following kinds of relationships are described in :ref:`Requirements in Over
    of any overridden interface method.
 -  The relationship between the accessibility of an interface method and that
    of any overridden interface method.
-
 
 A compile-time error occurs if a default method is override-equivalent to a
 non-*private* method of the class *Object*. Any class that implements

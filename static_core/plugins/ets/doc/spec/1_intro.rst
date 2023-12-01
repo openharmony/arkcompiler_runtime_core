@@ -34,9 +34,9 @@ programming paradigms, and combines  them safely and consistently.
 
 At the same time, |LANG| does not support features that allow software
 developers writing dangerous, unsafe, or inefficient code. In particular,
-the language uses the strong static typing principle that allows no dynamic
-type changes, as object types are determined by their declarations and checked
-for semantic correctness at compile time.
+the language uses the strong static typing principle. It allows no dynamic
+type changes, as object types are determined by their declarations. Their
+semantic correctness is checked at compile time.
 
 The following major aspects characterize the |LANG| language as a whole:
 
@@ -44,11 +44,16 @@ The following major aspects characterize the |LANG| language as a whole:
 
    The |LANG| language supports conventional class-based, *object-oriented
    approach* to programming (OOP). The major notions of this approach are
-   classes with single inheritance, interfaces as abstractions to be
-   implemented by classes, and virtual functions (class members) with a
-   dynamically dispatched overriding mechanism. Common in many (if not
-   all) modern programming languages, object orientation enables
-   powerful, flexible, safe, clear, and adequate software design.
+   as follows:
+
+   -  Classes with single inheritance,
+   -  Interfaces as abstractions to be implemented by classes, and
+   -  Virtual functions (class members) with a dynamically dispatched
+      overriding mechanism.
+
+
+   Common in many (if not all) modern programming languages, object orientation
+   enables powerful, flexible, safe, clear, and adequate software design.
 
 .. index::
    object
@@ -63,15 +68,17 @@ The following major aspects characterize the |LANG| language as a whole:
 
    The |LANG| language supports the *component programming approach*. It
    presumes that software is designed and implemented as a composition
-   of *compilation units*.
-   A compilation unit is typically represented as a *module* or as a package.
+   of *compilation units*. A compilation unit is typically represented as
+   a *module* or as a package.
+
    A module in |LANG| is a standalone, independently compiled unit that
    combines various programming resources (types, classes, functions, and so
    on). A module can communicate with other modules by exporting all or some
-   of its resources to, or importing from other modules. This feature
-   provides a high level of software development process and software
-   maintainability, supports flexible module reuse and efficient version
-   control.
+   of its resources to, or importing from other modules.
+
+   This feature provides a high level of software development process and
+   software maintainability, supports flexible module reuse and efficient
+   version control.
 
 .. index::
    modularity
@@ -82,10 +89,9 @@ The following major aspects characterize the |LANG| language as a whole:
 -  Genericity
 
    Some program entities in |LANG| can be *type-parameterized*. This means that
-   an entity can represent a very high-level (abstract) concept, and
-   providing more concrete information makes it specialized for a
-   particular use case.
-   
+   an entity can represent a very high-level (abstract) concept. Providing more
+   concrete information makes the entity specialized for a particular use case.
+
    A classical illustration is the notion of a list that represents the
    ‘idea’ of an abstract data structure. This abstract notion can be turned
    into a concrete list by providing additional information (the type of
@@ -120,7 +126,7 @@ The following major aspects characterize the |LANG| language as a whole:
 
 |LANG| is designed as a part of the modern language manifold. To provide an
 efficient and safely executable code, the language takes flexibility and
-power from TypeScript and its predecessor JavaScript, and the static
+power from |TS| and its predecessor JavaScript, and the static
 typing principle from Java and Kotlin.
 
 The overall design keeps the |LANG|’ syntax style similar to that of those
@@ -128,29 +134,30 @@ languages, and some of its important constructs are almost identical to theirs
 on purpose.
 
 In other words, there is a significant *common subset* of features of |LANG|
-on the one hand, and of TypeScript, JavaScript, Java, and Kotlin on the other.
-Consequently, the |LANG|’ style and constructs are no puzzle for the TypeScript
-and Java users who can sense the meaning of most constructs of the new
-language even if not understand them completely.
+on the one hand, and of |TS|, JavaScript, Java, and Kotlin on the other.
+Consequently, the |LANG|’ style and constructs are no puzzle for the |TS| and
+Java users who can sense the meaning of most constructs of the new language
+even if not understand them completely.
 
 This stylistic and semantic similarity permits migrating the applications
-originally written in TypeScript, Java, or Kotlin smoothly to |LANG|.
+originally written in |TS|, Java, or Kotlin smoothly to |LANG|.
 
 Like its predecessors, |LANG| is a relatively high-level language. It means
 that the language provides no access to low-level machine representations.
-As a high-level language, |LANG| supports automatic storage management
-(dynamically created objects are deallocated automatically soon after they
-are no longer available; deallocating them explicitly is not required).
+As a high-level language, |LANG| supports automatic storage management. It
+means that dynamically created objects are deallocated automatically soon
+after they are no longer available, and explicitly deallocating them is not
+required.
 
 |LANG| is not merely a language, but rather a comprehensive software
 development ecosystem that facilitates the creation of software solutions
 in various application domains.
 
-The |LANG| ecosystem includes the language itself along with its compiler,
+The |LANG| ecosystem includes the language  along with its compiler,
 accompanying documents, guidelines, tutorials, the standard library
 (see :ref:`Standard Library`), and a set of additional tools that perform
 automatic or semi-automatic transition from other languages (currently,
-TypeScript and Java) to |LANG|.
+|TS| and Java) to |LANG|.
 
 .. index::
    object
@@ -164,9 +171,9 @@ TypeScript and Java) to |LANG|.
 Lexical and Syntactic Notation
 ******************************
 
-This section introduces the notation (known as *context-free grammar*)
-used in this specification to define the lexical and syntactic
-structure of a program.
+This section introduces the notation nown as *context-free grammar*. It is
+used in this specification to define the lexical and syntactic structure of
+a program.
 
 .. index::
    context-free grammar
@@ -193,11 +200,11 @@ numbers/numeric literals, operator signs, delimiters), special characters
    white space
    comment
 
-The tokens defined by the lexical grammar are terminal symbols of
-the syntactic notation, which defines a set of productions starting from the
-goal symbol *compilationUnit* (see :ref:`Modules and Compilation Units`)---a
-sentence that consists of a single distinguished nonterminal, and
-describes how sequences of tokens can form syntactically correct programs.
+The tokens defined by the lexical grammar are terminal symbols of the syntactic
+notation. The syntactic notation defines a set of productions starting from the
+goal symbol *compilationUnit* (see :ref:`Modules and Compilation Units`). It is
+a sentence that consists of a single distinguished nonterminal, and describes
+how sequences of tokens can form syntactically correct programs.
 
 .. index::
    production
@@ -209,12 +216,14 @@ describes how sequences of tokens can form syntactically correct programs.
    module
    nonterminal
 
-Lexical and syntactic grammars are defined as a range of productions,
-each comprised of an abstract symbol (*nonterminal*) as its left-hand
-side, and a sequence of one or more *nonterminal* and *terminal* symbols
-as its *right-hand side*. Each production includes the ':' character as
-a separator between the left-hand and the right-hand sides, and the ';'
-character as its end marker.
+Lexical and syntactic grammars are defined as a range of productions. Each
+production:
+
+- Is comprised of an abstract symbol (*nonterminal*) as its left-hand side,
+  and a sequence of one or more *nonterminal* and *terminal* symbols as its
+  *right-hand side*.
+- Includes the ':' character as a separator between the left-hand and the
+  right-hand sides, and the ';' character as the end marker.
 
 .. index::
    lexical grammar
@@ -226,9 +235,9 @@ character as its end marker.
    separator
    end marker
 
-Grammars draw the terminal symbols from a fixed width form. Starting from the
-:index:`goal symbol`, grammars specify the language itself, i.e., the set of
-possible sequences of terminal symbols that can result from repeatedly replacing
+Grammars draw terminal symbols from a fixed width form. Starting from the
+goal symbol, grammars specify the language itself, i.e., the set of possible
+sequences of terminal symbols that can result from repeatedly replacing
 any nonterminal in the left-hand-side sequence for a right-hand side of the
 production.
 
@@ -238,7 +247,7 @@ production.
    terminal symbol
 
 Grammars can use the following additional symbols---sometimes called
-metasymbols---in the right-hand side of a grammar production along
+*metasymbols*---in the right-hand side of a grammar production along
 with terminal and nonterminal symbols:
 
 -  Vertical line '\|' to specify alternatives.
@@ -273,9 +282,9 @@ The production below is an example that specifies a list of expressions:
       ;
 
 This production introduces the following structure defined by the
-nonterminal ``expressionList``: the expression list must consist of the
+nonterminal *expressionList*. The expression list must consist of the
 sequence of *expression*\ s separated by the ‘,’ terminal symbol. The
-sequence must have at least one *expression*, and the list is optionally
+sequence must have at least one *expression*. The list is optionally
 terminated by the ‘,’ terminal symbol.
 
 All grammar rules are presented in the Grammar section of this specification.
@@ -321,7 +330,7 @@ as used in other languages, application areas, or industries.
      between the two (*infix* binary operator). A conditional operator with
      three operands is called *ternary*.
 
-     Some operators have special notations; for example, the indexing
+     Some operators have special notations. For example, the indexing
      operator, while formally being a binary operator, has a conventional
      form like a[i].
 
@@ -371,7 +380,7 @@ as used in other languages, application areas, or industries.
      sequence of characters that form a valid token.
 
    punctuator
-     -- token that serves for separating, completing or otherwise organizing
+     -- token that serves for separating, completing, or otherwise organizing
      program elements and parts: commas, semicolons, parentheses, square
      brackets, etc.
 
@@ -503,7 +512,7 @@ as used in other languages, application areas, or industries.
 
    method
      -- ordered 4-tuple consisting of type parameters, argument types,
-     return type, and a *throws*/*rethrows* clause.
+     return type, and a '*throws*'/'*rethrows*' clause.
 
    abstract declaration
      -- ordinary interface method declaration that specifies the method’s name
@@ -515,8 +524,8 @@ as used in other languages, application areas, or industries.
      expression of a non-void type as *Truthy* or *Falsy*, depending on
      the kind of the value type.
 
-   default catch clause
-     -- catch clause that has its exception parameter type omitted, and can
+   default *catch* clause
+     -- *catch* clause that has its exception parameter type omitted, and can
      handle any exception or error that is not handled by a preceding clause.
 
    overloading

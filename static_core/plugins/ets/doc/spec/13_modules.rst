@@ -89,8 +89,7 @@ consists of the following four parts:
         ;
 
 Every module automatically imports all exported entities from essential kernel
-packages (‘std.core’ and 'escompat') of the standard library (see
-:ref:`Standard Library`).
+packages of the standard library (see :ref:`Standard Library`).
 
 All entities from these packages are accessible as simple names, like the
 *console* variable:
@@ -688,11 +687,11 @@ For example, the compilation configuration file can contain the following lines:
 
     "baseUrl": "/home/project",
     "paths": {
-        "std": "/sts/stdlib"
+        "std": "/arkts/stdlib"
     }
 
 In the example above, '*/net/http*' is resolved to '*/home/project/net/http*',
-and '*std/components/treemap*' to '*/sts/stdlib/components/treemap*'.
+and '*std/components/treemap*' to '*/arkts/stdlib/components/treemap*'.
 
 File name, placement, and format are implementation-specific.
 
@@ -723,9 +722,9 @@ Default Import
     todo: fix stdlib and tests, then import only core by default
     todo: add escompat to spec and default
 
-A compilation unit automatically imports all entities exported from the
-predefined package ‘*std.core*’. All entities from this package can be
-accessed as simple names.
+Any compilation unit automatically imports all entities exported from the
+essential kernel packages of the standard library(see :ref:`Standard Library`).
+All entities from this package can be accessed as simple names.
 
 .. code-block:: typescript
    :linenos:
@@ -733,10 +732,10 @@ accessed as simple names.
     function main() {
 
       let myException = new Exception { ... }
-        // class Exception is defined in the 'std.core' package
+        // class 'Exception' is defined in the standard library
 
       console.log("Hello")
-        // 'console' variable is defined in the 'std.core' package
+        // variable 'console' is defined in the standard library too
 
     }
 
@@ -1040,16 +1039,20 @@ The sequence above is equal to the following:
    top-level statement
    sequence
 
-All top-level statements are executed only once before the call to any other
-function, or access to any top-level variable of the separate module.
-This also works if a function of the module is used as *program entry
-point*.
+- If a separate is imported by some other module then semantics of the top-level
+  statements is to initialize the imported module. This means that all top-level
+  statements are executed only once before the call to any other function, or
+  access to any top-level variable of the separate module.
+- If a separate module is used a program then top-level statements are used as a
+  program entry point (see :ref:`Program Entry Point main`). If the separate
+  module has the ``main`` function, it is executed after execution of the
+  top-level statements.
 
 .. code-block:: typescript
    :linenos:
 
       // Source file A
-      {
+      { // Block form
         console.log ("A.top-level statements")
       }
 
@@ -1061,10 +1064,24 @@ point*.
 
 The output will be:
 
-A. Top-level statements;
-B. Main.
+A. Top-level statements
+B. Main
 
-A :index:`compile-time error` occurs if a top-level statement is a return
+.. code-block:: typescript
+   :linenos:
+
+      // One source file
+      console.log ("A.Top-level statements")
+      function main () {
+         console.log ("B.main")
+      }
+
+The output will be:
+
+A. Top-level statements
+B. Main
+
+A :index:`compile-time error` occurs if a top-level statements contain a return
 statement (:ref:`Expression Statements`).
 
 .. index::
@@ -1086,12 +1103,25 @@ Program Entry Point (`main`)
 ****************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
-A program (application) entry point is the top-level ``main`` function. The
-function must have either no parameters, or one parameter of string ``[]``
-type. Its return type is either ``void`` or ``int``. No overloading is allowed
-for the entry point function.
+Separate modules can act as the programs (applications) and there are two kinds
+of program (application) entry points:
+
+- top-level statements  (see :ref:`Top-Level Statements`)
+- top-level ``main`` function (see below)
+
+Thus separate module may have:
+
+- only top-level ``main`` function (it is the entry point)
+- only top-level statements (they are the entry point)
+- both top-level statements and ``main`` function (the same as above + ``main``
+  is called after top-level statements execution is completed)
+
+The top-level ``main`` function must have either no parameters, or one
+parameter of string ``[]`` type, which provides access to the program
+command-line arguments. Its return type is either ``void`` or ``int``.
+No overloading is allowed for the entry point function.
 
 Different forms of valid and invalid entry points are shown in the example
 below:
@@ -1118,6 +1148,10 @@ below:
 
     function main(p: number) { // compile-time error: incorrect main signature
     }
+
+    // Option 4: top-level statement is the entry point
+    console.log ("Hello, world!")
+
 
 .. index::
    top-level function
