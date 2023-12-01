@@ -97,14 +97,7 @@ bool Verifier::VerifyRegisterIndex()
                 bc_ins = bc_ins.GetNext();
                 continue;
             }
-            for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
-                uint16_t reg_idx = bc_ins.GetVReg(idx);
-                if (reg_idx >= (reg_nums + arg_nums)) {
-                    LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
-                                            << reg_idx << ")" << std::endl;
-                    return false;
-                }
-            }
+            CheckVRegIdx(bc_ins, count, max_reg_idx);
             bc_ins = bc_ins.GetNext();
         }
     }
@@ -212,6 +205,19 @@ size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
         count = idx;
     }
     return count;
+}
+
+bool CheckVRegIdx(const BytecodeInstruction &bc_ins, size_t count, uint32_t max_reg_idx)
+{
+    for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
+        uint16_t reg_idx = bc_ins.GetVReg(idx);
+        if (reg_idx >= max_reg_idx) {
+            LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
+                                    << reg_idx << ")" << std::endl;
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Verifier::CheckConstantPoolInfo(const panda_file::File::EntityId &method_id)
