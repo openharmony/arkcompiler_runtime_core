@@ -90,14 +90,16 @@ bool Verifier::VerifyRegisterIndex()
         const auto arg_nums = code_data.GetNumArgs();
         auto bc_ins = BytecodeInstruction(code_data.GetInstructions());
         const auto bc_ins_last = bc_ins.JumpTo(code_data.GetCodeSize());
-        ASSERT(arg_nums >= 3);
+        ASSERT(arg_nums >= DEFAULT_ARGUMENT_NUMBER);
         while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
             size_t count = GetVRegCount(bc_ins);
             if (count == 0) { // Skip instructions that do not use registers
                 bc_ins = bc_ins.GetNext();
                 continue;
             }
-            CheckVRegIdx(bc_ins, count, max_reg_idx);
+            if (!CheckVRegIdx(bc_ins, count, max_reg_idx)) {
+                return false;
+            }
             bc_ins = bc_ins.GetNext();
         }
     }
