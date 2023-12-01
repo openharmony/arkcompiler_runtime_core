@@ -214,7 +214,7 @@ bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t coun
         uint16_t reg_idx = bc_ins.GetVReg(idx);
         if (reg_idx >= max_reg_idx) {
             LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
-                                    << reg_idx << ")" << std::endl;
+                                 << reg_idx << ")" << std::endl;
             return false;
         }
     }
