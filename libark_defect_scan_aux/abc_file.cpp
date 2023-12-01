@@ -953,7 +953,8 @@ std::unique_ptr<Class> AbcFile::ResolveDefineClassWithBufferInst(Function *func,
     panda_file::LiteralDataAccessor lit_array_accessor(*panda_file_, panda_file_->GetLiteralArraysId());
     lit_array_accessor.EnumerateLiteralVals(
         literal_array_id, [&](const panda_file::LiteralDataAccessor::LiteralValue &value, const LiteralTag &tag) {
-            if (tag == LiteralTag::METHOD || tag == LiteralTag::GENERATORMETHOD ||
+            if (tag == LiteralTag::METHOD || tag == panda_file::LiteralTag::GETTER ||
+                tag == panda_file::LiteralTag::SETTER || tag == LiteralTag::GENERATORMETHOD ||
                 tag == LiteralTag::ASYNCGENERATORMETHOD) {
                 auto method_id = EntityId(std::get<uint32_t>(value));
                 std::string member_func_name = GetStringByMethodId(method_id);

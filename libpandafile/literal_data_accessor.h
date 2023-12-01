@@ -56,6 +56,8 @@ enum class LiteralTag : uint8_t {
     LITERALBUFFERINDEX = 0x17,
     LITERALARRAY = 0x18,
     BUILTINTYPEINDEX = 0x19,
+    GETTER = 0x1a,
+    SETTER = 0x1b,
     NULLVALUE = 0xff
 };
 

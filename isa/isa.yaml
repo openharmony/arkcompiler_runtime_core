@@ -107,7 +107,7 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 9.0.0.0
+version: 9.0.0.1
 
 properties:
   - tag: type_id
@@ -248,11 +248,11 @@ verification:
 
 isa_information:
     - description: The last encoding number of various ISA. It should be maintained as long as ISA changes.
-      last_opcode_idx: 0xd7
+      last_opcode_idx: 0xda
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
-      last_callruntime_prefixed_opcode_idx: 0x00
+      last_callruntime_prefixed_opcode_idx: 0x06
 
 prefixes:
   - name: throw
@@ -397,6 +397,21 @@ groups:
         acc: inout:top
         opcode_idx: [0xd7]
         format: [op_imm_8]
+        properties: [ic_slot]
+      - sig: ldprivateproperty imm1, imm2, imm3
+        acc: inout:top
+        opcode_idx: [0xd8]
+        format: [op_imm1_8_imm2_16_imm3_16]
+        properties: [ic_slot]
+      - sig: stprivateproperty imm1, imm2, imm3, v:in:top
+        acc: in:top
+        opcode_idx: [0xd9]
+        format: [op_imm1_8_imm2_16_imm3_16_v_8]
+        properties: [ic_slot]
+      - sig: testin imm1, imm2, imm3
+        acc: inout:top
+        opcode_idx: [0xda]
+        format: [op_imm1_8_imm2_16_imm3_16]
         properties: [ic_slot]
 
   - title: object creaters
@@ -759,6 +774,38 @@ groups:
         acc: in:top
         opcode_idx: [0x00]
         format: [pref_op_none]
+        prefix: callruntime
+      - sig: callruntime.definefieldbyname string_id, v:in:top
+        acc: in:top
+        opcode_idx: [0x01]
+        format: [pref_op_id_16_v_8]
+        prefix: callruntime
+        properties: [string_id]
+      - sig: callruntime.definefieldbyvalue v1:in:top, v2:in:top
+        acc: in:top
+        opcode_idx: [0x02]
+        prefix: callruntime
+        format: [pref_op_v1_8_v2_8]
+      - sig: callruntime.definefieldbyindex imm, v:in:top
+        acc: in:top
+        opcode_idx: [0x03]
+        prefix: callruntime
+        format: [pref_op_imm_32_v_8]
+      - sig: callruntime.topropertykey
+        acc: inout:top
+        opcode_idx: [0x04]
+        format: [pref_op_none]
+        prefix: callruntime
+      - sig: callruntime.createprivateproperty imm, literalarray_id
+        acc: none
+        opcode_idx: [0x05]
+        format: [pref_op_imm_16_id_16]
+        prefix: callruntime
+        properties: [literalarray_id]
+      - sig: callruntime.defineprivateproperty imm1, imm2, v:in:top
+        acc: in:top
+        opcode_idx: [0x06]
+        format: [pref_op_imm1_16_imm2_16_v_8]
         prefix: callruntime
 
   - title: throw instructions

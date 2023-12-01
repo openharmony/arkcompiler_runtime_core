@@ -687,6 +687,8 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                         std::string_view(std::get<std::string>(literal.value_))));
                     break;
                 case panda_file::LiteralTag::METHOD:
+                case panda_file::LiteralTag::GETTER:
+                case panda_file::LiteralTag::SETTER:
                 case panda_file::LiteralTag::GENERATORMETHOD:
                 case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
                     value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::METHOD>(
