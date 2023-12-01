@@ -1084,6 +1084,7 @@ void Disassembler::GetMethodInfo(const panda_file::File::EntityId &method_id, Me
     if (method_accessor.GetCodeId()) {
         ASSERT(debug_info_extractor_ != nullptr);
         method_info->line_number_table = debug_info_extractor_->GetLineNumberTable(method_id);
+        method_info->column_number_table = debug_info_extractor_->GetColumnNumberTable(method_id);
         method_info->local_variable_table = debug_info_extractor_->GetLocalVariableTable(method_id);
 
         // Add information about parameters into the table
@@ -1511,6 +1512,7 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
     if (print_method_info) {
         const MethodInfo &method_info = method_info_it->second;
         SerializeLineNumberTable(method_info.line_number_table, os);
+        SerializeColumnNumberTable(method_info.column_number_table, os);
         SerializeLocalVariableTable(method_info.local_variable_table, method, os);
     }
 
@@ -1602,6 +1604,19 @@ void Disassembler::SerializeLineNumberTable(const panda_file::LineNumberTable &l
     os << "\n#   LINE_NUMBER_TABLE:\n";
     for (const auto &line_info : line_number_table) {
         os << "#\tline " << line_info.line << ": " << line_info.offset << "\n";
+    }
+}
+
+void Disassembler::SerializeColumnNumberTable(const panda_file::ColumnNumberTable &column_number_table,
+                                              std::ostream &os) const
+{
+    if (column_number_table.empty()) {
+        return;
+    }
+
+    os << "\n#   COLUMN_NUMBER_TABLE:\n";
+    for (const auto &column_info : column_number_table) {
+        os << "#\tcolumn " << column_info.column << ": " << column_info.offset << "\n";
     }
 }
 
@@ -1771,6 +1786,17 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
     }
 
     return unknown_external_methods;
+}
+
+std::vector<size_t> Disassembler::GetColumnNumber()
+{
+    std::vector<size_t> columnNumber;
+    for (const auto &method_info : prog_info_.methods_info) {
+        for (const auto &column_number : method_info.second.column_number_table) {
+            columnNumber.push_back(column_number.column);
+        }
+    }
+    return columnNumber;
 }
 
 }  // namespace panda::disasm

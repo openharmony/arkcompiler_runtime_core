@@ -249,9 +249,11 @@ config("ark_config") {
     defines += [
       # TODO: use PANDA_TARGET_OHOS instead of PANDA_TARGET_UNIX
       "PANDA_TARGET_UNIX",
-      "PANDA_USE_FUTEX",
       "PANDA_WITH_COMPILER",
     ]
+    if (!is_asan) {
+      defines += [ "PANDA_USE_FUTEX" ]
+    }
     if (enable_irtoc) {
       defines += [ "PANDA_WITH_IRTOC" ]
     }
@@ -305,10 +307,7 @@ config("ark_config") {
   }
 
   if (is_asan) {
-    cflags_cc += [
-      "-fsanitize=address",
-      "-g",
-    ]
+    cflags_cc += [ "-g" ]
     defines += [ "__SANITIZE_ADDRESS__" ]
     print("ASAN is enabled")
   }

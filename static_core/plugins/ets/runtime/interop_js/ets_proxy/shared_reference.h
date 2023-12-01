@@ -82,7 +82,7 @@ public:
     static uint32_t ExtractMaybeIndex(EtsObject *ets_object)
     {
         ASSERT(HasReference(ets_object));
-        return ets_object->GetHash();
+        return ets_object->GetInteropHash();
     }
 
     using FlagsType = FlagsStart::ValueType;
