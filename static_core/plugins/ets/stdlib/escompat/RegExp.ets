@@ -101,7 +101,7 @@ class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
             let nextIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex, this.regexp.unicode)
             this.regexp.lastIndex = nextIndex
         }
-        return new IteratorResult<RegExpMatchArray>(false, match)
+        return new IteratorResult<RegExpMatchArray>(match!)
     }
 
     override iterator(): IterableIterator<RegExpMatchArray> {
@@ -126,7 +126,7 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
             return new IteratorResult<RegExpMatchArray>()
         }
         this.returned = true
-        return new IteratorResult<RegExpMatchArray>(false, match)
+        return new IteratorResult<RegExpMatchArray>(match!)
     }
 
     override iterator(): IterableIterator<RegExpMatchArray> {

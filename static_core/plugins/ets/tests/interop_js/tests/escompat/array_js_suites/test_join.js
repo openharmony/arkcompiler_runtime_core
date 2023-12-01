@@ -27,7 +27,8 @@ const TestJSJoin = etsMod.getFunction('Array_TestJSJoin');
 
 { // Test ETS Array<Object>
   let arr = CreateEtsSample();
-  arr.join(',');
+  ASSERT_EQ(arr.join(''), '123,foo');
+  ASSERT_EQ(arr.join('='), '123=foo');
   ASSERT_EQ(arr.toString(), '123,foo');
 }
 

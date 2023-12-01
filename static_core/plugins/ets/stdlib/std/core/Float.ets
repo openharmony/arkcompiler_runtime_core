@@ -237,7 +237,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns representation of this instance
      */
-    public override hashCode(): int {
+    public override $_hashCode(): int {
         return this.intValue();
     }
 

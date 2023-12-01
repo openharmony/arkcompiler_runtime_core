@@ -326,6 +326,11 @@ public:
         return voidClass_;
     }
 
+    Class *GetUndefinedClass() const
+    {
+        return undefined_class_;
+    }
+
     Class *GetPromiseClass() const
     {
         return promiseClass_;
@@ -430,6 +435,11 @@ public:
         return etsProxyRefStorage_.get();
     }
 
+    EtsObject *GetUndefinedObject()
+    {
+        return EtsObject::FromCoreType(GetPandaEtsVM()->GetUndefinedObject());
+    }
+
 private:
     explicit InteropCtx(EtsCoroutine *coro, napi_env env);
 
@@ -445,16 +455,17 @@ private:
 
     JSRefConvertCache refconvertCache_;
 
-    Class *jsruntimeClass_ {};
-    Class *jsvalueClass_ {};
-    Class *jserrorClass_ {};
-    Class *objectClass_ {};
-    Class *stringClass_ {};
-    Class *voidClass_ {};
-    Class *promiseClass_ {};
-    Class *errorClass_ {};
-    Class *exceptionClass_ {};
-    Class *typeClass_ {};
+    Class *jsruntime_class_ {};
+    Class *jsvalue_class_ {};
+    Class *jserror_class_ {};
+    Class *object_class_ {};
+    Class *string_class_ {};
+    Class *void_class_ {};
+    Class *undefined_class_ {};
+    Class *promise_class_ {};
+    Class *error_class_ {};
+    Class *exception_class_ {};
+    Class *type_class_ {};
 
     Class *boxIntClass_ {};
     Class *boxLongClass_ {};

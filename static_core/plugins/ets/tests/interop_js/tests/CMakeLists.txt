@@ -27,6 +27,7 @@ file(WRITE ${ETS_CONFIG}
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/test_frontend/test_frontend_package.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/number_subtypes/module.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/strict_equality/strict_equality.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/test_undefined/test_undefined.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_instanceof/dynamic_instanceof.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/scenarios.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
@@ -144,6 +145,12 @@ panda_ets_interop_js_gtest(ets_interop_dynamic_with_lambda
 panda_ets_interop_js_gtest(ets_interop_js_dynamic_enum
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_enum/dynamic_enum.cpp
     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_enum/dynamic_enum.ets
+    ETS_CONFIG ${ETS_CONFIG}
+)
+
+panda_ets_interop_js_gtest(ets_interop_js_test_undefined
+    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_undefined/test_undefined.cpp
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_undefined/test_undefined.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 

@@ -15,19 +15,10 @@
 
 package escompat;
 
-interface ConcatArray<T> extends ArrayLike<T> {
+export interface ConcatArray<T> extends ArrayLike<T> {
+    at(index: number): T | undefined;
 
-    at(index: number): T | null;
+    join(separator: String | undefined): string;
 
-    // join(separator?: string): string;
-    join(separator: string): string;
-    join(): string;
-
-    // slice(start?: number, end?: number): T[];
-    slice(start: number, end: number): Array<T>;
-    slice(start: number): Array<T>;
-    slice(): Array<T>;
-
-    // TODO(ivan-tyulyandin): blocked by internal issue #11979
-    // readonly length: number;
+    slice(start: Number | undefined, end: Number | undefined): Array<T>;
 }

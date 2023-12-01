@@ -52,7 +52,7 @@ function js_sum_wrapper_num_str(a: double, b: String): String {
 function test_undefined(): boolean {
     let v = JSRuntime.getUndefined();
     let r = "undefined:undefined";
-    if (Identity(v) != null) {
+    if (Identity(v) as NullishType !== undefined) {
         return false;
     }
     return r == vstringify(v);

@@ -124,7 +124,7 @@
     verify_test_result_function: compareStringTrivial
   } 
 - {
-    method_name: hashCode,
+    method_name: $_hashCode,
     object_type: Float,
     init_object_data_type: "float[]",
     init_object_type: float,

@@ -14,7 +14,7 @@
  */
 
 {% for arg, fwdArg, prec in [('', '', '(%s < %s)'), (', mustPrecede: (lhs: ' + T + ', rhs: ' + T + ') => boolean', ', mustPrecede', 'mustPrecede(%s, %s)')] %}
-{%- if T == 'Object' and arg == '' %}
+{%- if T == 'NullishType' and arg == '' %}
 {%- continue %}
 {%- elif T == 'boolean' and arg == '' %}
 {%- set prec = '((%s) ? 1 : 0) < ((%s) ? 1 : 0)' %}
@@ -313,7 +313,7 @@ export function sort(arr: {{T}}[], startIndex: int, mustPrecede: (lhs: {{T}}, rh
     sort(arr, startIndex, arr.length, mustPrecede)
 }
 
-{% if T != "Object" -%}
+{% if T != "NullishType" -%}
 
 {%- if T == 'byte' %}
 function countSort(arr: byte[], startIndex: int, endIndex: int): void {

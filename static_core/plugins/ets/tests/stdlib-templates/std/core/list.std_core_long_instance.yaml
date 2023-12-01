@@ -119,7 +119,7 @@
     verify_test_result_function: compareFloatPointValue
   }
 - {
-    method_name: hashCode,
+    method_name: $_hashCode,
     object_type: Long,
     init_object_data_type: "long[]",
     init_object_type: long,

@@ -20,7 +20,7 @@
 
 namespace panda::ets::intrinsics {
 
-uint8_t StdCoreRuntimeEquals(ObjectHeader *header [[maybe_unused]], EtsObject *source, EtsObject *target)
+uint8_t StdCoreRuntimeIsSameReference([[maybe_unused]] ObjectHeader *header, EtsObject *source, EtsObject *target)
 {
     return (source == target) ? UINT8_C(1) : UINT8_C(0);
 }

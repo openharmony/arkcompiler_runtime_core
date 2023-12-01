@@ -99,7 +99,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      *
      * @returns representation of this instance
      */
-    public override hashCode(): int {
+    public override $_hashCode(): int {
         if (this.value) {
             return 1;
         }
@@ -129,7 +129,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns result of the comparison
      */
     public override compareTo(other: Boolean): int {
-        return this.hashCode() - other.hashCode();
+        return this.$_hashCode() - other.$_hashCode();
     }
 
     /**

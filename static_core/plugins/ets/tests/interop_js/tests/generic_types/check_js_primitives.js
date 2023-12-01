@@ -18,8 +18,8 @@ const { check_generic_value } = require("generic_types.test.js");
 // Null
 check_generic_value(null);
 
-// Undefined (ArkTS doesn't support the undefined type)
-ASSERT_THROWS(Error, () => (check_generic_value(undefined)));
+// Undefined
+check_generic_value(undefined);
 
 // Boolean
 check_generic_value(false);

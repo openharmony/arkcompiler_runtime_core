@@ -799,7 +799,7 @@ intrinsics:
   - name: StdCoreStringHashCode
     space: ets
     class_name: std.core.String
-    method_name: hashCode
+    method_name: $_hashCode
     static: false
     signature:
       ret: i32
@@ -1907,15 +1907,15 @@ intrinsics:
 # std.core.Runtime #
 ####################
 
-  - name: StdRuntimeEquals
+  - name: StdCoreRuntimeIsSameReference
     space: ets
     class_name: std.core.Runtime
-    method_name: equals
+    method_name: isSameReference
     static: false
     signature:
       ret: u1
       args: [ std.core.Object, std.core.Object ]
-    impl: panda::ets::intrinsics::StdCoreRuntimeEquals
+    impl: panda::ets::intrinsics::StdCoreRuntimeIsSameReference
     clear_flags: [ ]
 
   - name: StdRuntimeGetHashCode

@@ -28,6 +28,11 @@ export class IteratorResult<T> {
         this.done = done
         this.value = value
     }
+
+    constructor(value: T) {
+        this.done = false
+        this.value = value
+    }
 }
 
 export interface Iterator<T> {

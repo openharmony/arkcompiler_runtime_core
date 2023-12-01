@@ -42,7 +42,7 @@
     verify_test_result_function: comparePrimitiveValue
   }
 - {
-    method_name: hashCode,
+    method_name: $_hashCode,
     object_type: String,
     init_object_data_type: "String[]",
     init_object_type: String,

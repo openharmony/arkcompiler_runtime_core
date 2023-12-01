@@ -298,7 +298,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns representation of this instance
      * @tag arkts
      */
-    public override hashCode(): int {
+    public override $_hashCode(): int {
         return this.intValue();
     }
 
@@ -327,7 +327,11 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      */
     public override equals(other: NullishType): boolean {
         if (other instanceof Double) {
-            return Double.compare(this.value, (other as Double).unboxed());
+            const r = (other as Double).unboxed();
+            if (this.value == r) {
+                return true;
+            }
+            return Double.compare(this.value, r);
         }
         return false;
     }

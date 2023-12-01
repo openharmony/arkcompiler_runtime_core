@@ -416,7 +416,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @returns hashcode value of this String
      */
-    public native override hashCode(): int;
+    public native override $_hashCode(): int;
 
     /**
      * Finds the first occurrence of a character in this String.

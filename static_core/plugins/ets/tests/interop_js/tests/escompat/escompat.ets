@@ -83,7 +83,7 @@ function Array_TestJSToSorted(arr: Array<FooClass>): void {
 }
 
 function Array_TestJSFill(arr: Array<FooClass>): void {
-    arr.fill(arr.at(0)! as FooClass);
+    arr.fill(arr.at(0)! as FooClass, undefined, undefined);
     assert arr.at(1)!.toString() == "{Foo named zero}";
 }
 
@@ -188,12 +188,12 @@ function Array_TestJSCopyWithin(arr: Array<FooClass>): void {
 function Array_TestJSLastIndexOf(arr: Array<FooClass>): void {
     arr.push(arr.at(1) as FooClass);
 
-    assert arr.lastIndexOf(arr.at(1) as FooClass) == 2;
-    assert arr.lastIndexOf(new FooClass("not in array")) == -1;
+    assert arr.lastIndexOf(arr.at(1) as FooClass, 2) == 2;
+    assert arr.lastIndexOf(new FooClass("not in array"), 2) == -1;
 
     // NOTE (oignatenko) uncomment below after interop will be supported for this method signature
-    // assert arr.lastIndexOf(arr.at(1) as FooClass, 1) == 2;
-    // assert arr.lastIndexOf(new FooClass("not in array"), 1) == -1;
+    // assert arr.lastIndexOf(arr.at(1) as FooClass) == 2;
+    // assert arr.lastIndexOf(new FooClass("not in array")) == -1;
 }
 
 function Array_TestJSToReversed(arr: Array<FooClass>): void {

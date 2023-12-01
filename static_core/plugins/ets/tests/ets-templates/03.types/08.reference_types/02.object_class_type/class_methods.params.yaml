@@ -17,5 +17,5 @@ methods:
   - "equals(new String(\"test\"));"
   - "finalize();"
   - "getClass();"
-  - "hashCode();"
+  - "$_hashCode();"
   - "toString();"

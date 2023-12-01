@@ -126,23 +126,23 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     }
 
     /**
-     * hashCode(char) returns a hashcode of the char.
+     * $_hashCode(char) returns a hashcode of the char.
      *
      * @param value the char to be hash coded.
      *
      * @returns the hash code.
      */
-    public static hashCode(value: char): int {
+    public static $_hashCode(value: char): int {
         return value as int;
     }
 
     /**
-     * hashCode() returns a hashcode of the underlying char.
+     * $_hashCode() returns a hashcode of the underlying char.
      *
      * @returns the hash code.
      */
-    public override hashCode(): int {
-        return Char.hashCode(this.value);
+    public override $_hashCode(): int {
+        return Char.$_hashCode(this.value);
     }
 
     public static readonly CHAR_BIT_SIZE = 16;

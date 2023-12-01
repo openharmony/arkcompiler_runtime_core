@@ -37,7 +37,7 @@ export function indexOf(arr: {{T}}[], key: {{T}}, startIndex: int, endIndex: int
     }
 
     for (let i: int = startIndex; i < endIndex; i++) {
-        {% if T != "Object" -%}
+        {% if T != "NullishType" -%}
         if (arr[i] == key) {
             return i;
         }{% else %}

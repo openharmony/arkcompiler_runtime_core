@@ -156,6 +156,11 @@ inline napi_value GetGlobal(napi_env env)
     return jsValueGlobal;
 }
 
+inline bool IsNull(napi_env env, napi_value val)
+{
+    return GetValueType(env, val) == napi_null;
+}
+
 inline bool IsUndefined(napi_env env, napi_value val)
 {
     return GetValueType(env, val) == napi_undefined;

@@ -27,7 +27,7 @@ const TestJSFill = etsMod.getFunction('Array_TestJSFill');
 
 { // Test ETS Array<Object>
   let arr = CreateEtsSample();
-  arr.fill(arr.at(0));
+  arr.fill(arr.at(0), undefined, undefined);
   ASSERT_EQ(arr.at(1), 123);
 }
 

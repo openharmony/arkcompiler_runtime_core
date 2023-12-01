@@ -21,7 +21,7 @@ cases:
   - expr: "let x: Object = new Object() = new Long()"
   - expr: "let x: Object = [1, 2, 3] += 4"
   - expr: "let x: Object = { a: 1, b: 2 } = { c: 3 }"
-  - expr: "(new Object()).hashCode() = 123"
+  - expr: "(new Object()).$_hashCode() = 123"
   - expr: |-
       const x: int = 1
       x = 2

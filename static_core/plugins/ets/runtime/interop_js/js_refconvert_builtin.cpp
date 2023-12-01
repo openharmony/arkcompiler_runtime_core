@@ -179,40 +179,41 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
 
     static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
         {utf::CStringAsMutf8("at"), "I:Lstd/core/Object;"},
+        {utf::CStringAsMutf8("$_get"), "D:Lstd/core/Object;"},
+        {utf::CStringAsMutf8("$_set"), "DLstd/core/Object;:Lstd/core/void;"},
         {utf::CStringAsMutf8("with"), "DLstd/core/Object;:Lescompat/Array;"},
         {utf::CStringAsMutf8("map"), "LFunctionalInterface-std-core-Object-std-core-Object-0;:Lescompat/Array;"},
         {utf::CStringAsMutf8("forEach"), "LFunctionalInterface-std-core-Object-std-core-void-0;:Lstd/core/void;"},
         {utf::CStringAsMutf8("pop"), ":Lstd/core/Object;"},
-        {utf::CStringAsMutf8("fill"), "Lstd/core/Object;:Lescompat/Array;"},
+        {utf::CStringAsMutf8("fill"), "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
         {utf::CStringAsMutf8("flat"), ":Lescompat/Array;"},
-        {utf::CStringAsMutf8("join"), ":Lstd/core/String;"},
+        {utf::CStringAsMutf8("join"), "Lstd/core/Object;:Lstd/core/String;"},
+        // NOTE(kprokopenko) make [Lstd/core/Object;:D when #14756 is fixed
         {utf::CStringAsMutf8("push"), "Lstd/core/Object;:D"},
         {utf::CStringAsMutf8("some"), "LFunctionalInterface-std-core-Object-u1-0;:Z"},
         {utf::CStringAsMutf8("sort"), ":Lescompat/Array;"},
         {utf::CStringAsMutf8("every"), "LFunctionalInterface-std-core-Object-u1-0;:Z"},
         {utf::CStringAsMutf8("shift"), ":Lstd/core/Object;"},
-        {utf::CStringAsMutf8("slice"), "I:Lescompat/Array;"},
+        {utf::CStringAsMutf8("slice"), "Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
         {utf::CStringAsMutf8("<ctor>"), ":V"},
         {utf::CStringAsMutf8("filter"), "LFunctionalInterface-std-core-Object-u1-0;:Lescompat/Array;"},
         {utf::CStringAsMutf8("<get>length"), ":D"},
         {utf::CStringAsMutf8("reduce"),
          "LFunctionalInterface-std-core-Object-std-core-Object-std-core-Object-0;:Lstd/core/Object;"},
-        {utf::CStringAsMutf8("splice"), "II:Lescompat/Array;"},
+        {utf::CStringAsMutf8("splice"), "DLstd/core/Object;[Lstd/core/Object;:Lescompat/Array;"},
         {utf::CStringAsMutf8("findLast"), "LFunctionalInterface-std-core-Object-u1-0;:Lstd/core/Object;"},
         {utf::CStringAsMutf8("toSorted"), ":Lescompat/Array;"},
         {utf::CStringAsMutf8("findIndex"), "LFunctionalInterface-std-core-Object-u1-0;:D"},
         {utf::CStringAsMutf8("toSpliced"), "II:Lescompat/Array;"},
         {utf::CStringAsMutf8("copyWithin"), "II:Lescompat/Array;"},
-        {utf::CStringAsMutf8("removeMany"), "II:[Lstd/core/Object;"},
         {utf::CStringAsMutf8("toReversed"), ":Lescompat/Array;"},
-        {utf::CStringAsMutf8("indexOf"), "Lstd/core/Object;:D"},
-        {utf::CStringAsMutf8("includes"), "Lstd/core/Object;:Z"},
-        {utf::CStringAsMutf8("lastIndexOf"), "Lstd/core/Object;:D"},
+        {utf::CStringAsMutf8("indexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
+        {utf::CStringAsMutf8("includes"), "Lstd/core/Object;Lstd/core/Object;:Z"},
+        {utf::CStringAsMutf8("lastIndexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
         {utf::CStringAsMutf8("reduceRight"),
          "LFunctionalInterface-std-core-Object-std-core-Object-std-core-Object-0;:Lstd/core/Object;"},
         {utf::CStringAsMutf8("find"), "LFunctionalInterface-std-core-Object-u1-0;:Lstd/core/Object;"},
-        {utf::CStringAsMutf8("from"), "[Lstd/core/Object;:Lescompat/Array;"},
-        {utf::CStringAsMutf8("isArray"), "[Lstd/core/Object;:Z"},
+        {utf::CStringAsMutf8("isArray"), "Lstd/core/Object;:Z"},
         {utf::CStringAsMutf8("flatMap"),
          "LFunctionalInterface-std-core-Object-f64-std-core-Object-0;:Lescompat/Array;"},
         {utf::CStringAsMutf8("toLocaleString"), ":Lstd/core/String;"},
@@ -314,7 +315,9 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
             case napi_string:
                 return builtinConvert(helpers::TypeIdentity<JSConvertString>(), ctxx, env, jsValue);
             case napi_object:
-                return mObjectObject(ctx, jsValue);
+                return m_object_object(ctx, js_value);
+            case napi_undefined:
+                return ctx->GetUndefinedObject();
             case napi_symbol:
                 [[fallthrough]];
             case napi_function:
@@ -344,6 +347,7 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ctx->GetPromiseClass());
     RegisterBuiltinRefConvertor<JSConvertArrayBuffer>(cache, ctx->GetArrayBufferClass());
     RegisterBuiltinRefConvertor<JSConvertEtsVoid>(cache, ctx->GetVoidClass());
+    RegisterBuiltinRefConvertor<JSConvertEtsUndefined>(cache, ctx->GetUndefinedClass());
 
     RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, linkerExt->GetBoxBooleanClass());
     RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, linkerExt->GetBoxByteClass());

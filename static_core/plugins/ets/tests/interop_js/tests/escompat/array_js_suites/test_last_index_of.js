@@ -29,12 +29,15 @@ const TestJSLastIndexOf = etsMod.getFunction('Array_TestJSLastIndexOf');
   let arr = CreateEtsSample();
   arr.push('foo');
 
-  ASSERT_EQ(arr.lastIndexOf('foo'), 2);
-  ASSERT_EQ(arr.lastIndexOf('not in array'), -1);
+  const EXPECT_2 = 2;
 
-  // NOTE(oignatenko) uncomment below after interop will be supported for this method signature
-  // ASSERT_EQ(arr.lastIndexOf('foo', 1), 2);
-  // ASSERT_EQ(arr.lastIndexOf('not in array', 1), -1);
+  // TODO(kprokopenko) after #14765 no undefined must be passed
+  ASSERT_EQ(arr.lastIndexOf('foo', undefined), EXPECT_2);
+  ASSERT_EQ(arr.lastIndexOf('not in array', undefined), -1);
+
+  const IDX_2 = 2;
+  ASSERT_EQ(arr.lastIndexOf('foo', IDX_2), EXPECT_2);
+  ASSERT_EQ(arr.lastIndexOf('not in array', IDX_2), -1);
 }
 
 GCJSRuntimeCleanup();

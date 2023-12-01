@@ -48,16 +48,17 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
 
     namespace descriptors = panda_file_items::class_descriptors;
 
-    jsruntimeClass_ = cacheClass(descriptors::JS_RUNTIME);
-    jsvalueClass_ = cacheClass(descriptors::JS_VALUE);
-    jserrorClass_ = cacheClass(descriptors::JS_ERROR);
-    objectClass_ = cacheClass(descriptors::OBJECT);
-    stringClass_ = cacheClass(descriptors::STRING);
-    voidClass_ = cacheClass(descriptors::VOID);
-    promiseClass_ = cacheClass(descriptors::PROMISE);
-    errorClass_ = cacheClass(descriptors::ERROR);
-    exceptionClass_ = cacheClass(descriptors::EXCEPTION);
-    typeClass_ = cacheClass(descriptors::TYPE);
+    jsruntime_class_ = cache_class(descriptors::JS_RUNTIME);
+    jsvalue_class_ = cache_class(descriptors::JS_VALUE);
+    jserror_class_ = cache_class(descriptors::JS_ERROR);
+    object_class_ = cache_class(descriptors::OBJECT);
+    string_class_ = cache_class(descriptors::STRING);
+    void_class_ = cache_class(descriptors::VOID);
+    undefined_class_ = cache_class(descriptors::INTERNAL_UNDEFINED);
+    promise_class_ = cache_class(descriptors::PROMISE);
+    error_class_ = cache_class(descriptors::ERROR);
+    exception_class_ = cache_class(descriptors::EXCEPTION);
+    type_class_ = cache_class(descriptors::TYPE);
 
     boxIntClass_ = cacheClass(descriptors::BOX_INT);
     boxLongClass_ = cacheClass(descriptors::BOX_LONG);
@@ -130,7 +131,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     ASSERT(!coro->HasPendingException());
 
     if (IsNullOrUndefined(ctx->GetJSEnv(), val)) {
-        ctx->ThrowETSError(coro, "interop/js throws null");
+        ctx->ThrowETSError(coro, "interop/js throws undefined/null");
         return;
     }
 

@@ -168,7 +168,7 @@
     verify_test_result_function: compareStringTrivial
   } 
 - {
-    method_name: hashCode,
+    method_name: $_hashCode,
     object_type: Double,
     init_object_data_type: "double[]",
     init_object_type: double,

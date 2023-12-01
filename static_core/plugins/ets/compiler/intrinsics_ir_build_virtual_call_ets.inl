@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-case RuntimeInterface::IntrinsicId::INTRINSIC_STD_RUNTIME_EQUALS: {
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_RUNTIME_IS_SAME_REFERENCE: {
     BuildStdRuntimeEquals(bcInst, accRead);
     break;
 }

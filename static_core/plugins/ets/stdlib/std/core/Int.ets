@@ -202,7 +202,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      *
      * @returns representation of this instance
      */
-    public override hashCode(): int {
+    public override $_hashCode(): int {
         return this.value;
     }
 

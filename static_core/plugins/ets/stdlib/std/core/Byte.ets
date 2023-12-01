@@ -203,7 +203,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      *
      * @returns representation of this instance
      */
-    public override hashCode(): int {
+    public override $_hashCode(): int {
         return this.intValue();
     }
 

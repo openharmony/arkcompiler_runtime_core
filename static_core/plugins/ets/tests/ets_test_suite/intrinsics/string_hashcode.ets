@@ -110,7 +110,7 @@ let hash_collision_d: char[] = [ 1, 31 ];
 
 function main(): int {
     for (let i: int = 0; i < compressable_strings_table.length; i++) {
-        let hashcode: int = compressable_strings_table[i].hashCode();
+        let hashcode: int = compressable_strings_table[i].$_hashCode();
         if (hashcode != compressable_hashcode_table[i]) {
             console.println("Expected hashcode: " + compressable_hashcode_table[i] +
                             ", computed hashcode: " + hashcode +
@@ -121,7 +121,7 @@ function main(): int {
     }
 
     for (let i: int = 0; i < uncompressable_strings_table.length; i++) {
-        let hashcode: int = uncompressable_strings_table[i].hashCode();
+        let hashcode: int = uncompressable_strings_table[i].$_hashCode();
         if (hashcode != uncompressable_hashcode_table[i]) {
             console.println("Expected hashcode: " + uncompressable_hashcode_table[i] +
                             ", computed hashcode: " + hashcode +
@@ -134,28 +134,28 @@ function main(): int {
     // Test hash collisions
     let hc_a: String = new String(hash_collision_a);
     let hc_b: String = new String(hash_collision_b);
-    if (hc_a.hashCode() != 31) {
-      console.println("hc_a hashcode: " + hc_a.hashCode());
+    if (hc_a.$_hashCode() != 31) {
+      console.println("hc_a hashcode: " + hc_a.$_hashCode());
       console.println("FAIL");
       return 3;
     }
-    if (hc_a.hashCode() != hc_b.hashCode()) {
-      console.println("hc_a hashcode: " + hc_a.hashCode());
-      console.println("hc_b hashcode: " + hc_b.hashCode());
+    if (hc_a.$_hashCode() != hc_b.$_hashCode()) {
+      console.println("hc_a hashcode: " + hc_a.$_hashCode());
+      console.println("hc_b hashcode: " + hc_b.$_hashCode());
       console.println("FAIL");
       return 4;
     }
 
     let hc_c: String = new String(hash_collision_c);
     let hc_d: String = new String(hash_collision_d);
-    if (hc_c.hashCode() != 62) {
-      console.println("hc_c hashcode: " + hc_c.hashCode());
+    if (hc_c.$_hashCode() != 62) {
+      console.println("hc_c hashcode: " + hc_c.$_hashCode());
       console.println("FAIL");
       return 5;
     }
-    if (hc_c.hashCode() != hc_d.hashCode()) {
-      console.println("hc_c hashcode: " + hc_c.hashCode());
-      console.println("hc_d hashcode: " + hc_d.hashCode());
+    if (hc_c.$_hashCode() != hc_d.$_hashCode()) {
+      console.println("hc_c hashcode: " + hc_c.$_hashCode());
+      console.println("hc_d hashcode: " + hc_d.$_hashCode());
       console.println("FAIL");
       return 6;
     }

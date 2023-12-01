@@ -26,7 +26,7 @@ TYPES=(
     float
     double
     char
-    Object
+    NullishType
 )
 
 TEMPLATES=(

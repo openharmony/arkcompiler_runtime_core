@@ -202,7 +202,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      *
      * @returns representation of this instance
      */
-    public override hashCode(): int {
+    public override $_hashCode(): int {
         return this.intValue();
     }
 

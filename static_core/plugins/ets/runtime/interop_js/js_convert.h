@@ -82,7 +82,7 @@ struct JSConvertBase {
     static std::optional<cpptype> Unwrap(InteropCtx *ctx, napi_env env, napi_value jsVal)
     {
         if constexpr (IS_REFTYPE) {
-            ASSERT(!IsNullOrUndefined(env, jsVal));
+            ASSERT(!IsNull(env, js_val));
         }
         auto res = Impl::UnwrapImpl(ctx, env, jsVal);
         ASSERT(res.has_value() || InteropCtx::SanityJSExceptionPending() || InteropCtx::SanityETSExceptionPending());
@@ -104,7 +104,8 @@ struct JSConvertBase {
     static std::optional<cpptype> UnwrapWithNullCheck(InteropCtx *ctx, napi_env env, napi_value jsVal)
     {
         if constexpr (IS_REFTYPE) {
-            if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
+            // NOTE(kprokopenko) can't assign undefined to EtsString *, hence fallback into UnwrapImpl
+            if (UNLIKELY(IsNull(env, js_val))) {
                 return nullptr;
             }
         }
@@ -552,6 +553,21 @@ JSCONVERT_WRAP(EtsVoid)
 JSCONVERT_UNWRAP(EtsVoid)
 {
     return EtsVoid::GetInstance();
+}
+
+JSCONVERT_DEFINE_TYPE(EtsUndefined, EtsObject *)
+JSCONVERT_WRAP(EtsUndefined)
+{
+    return GetUndefined(env);
+}
+
+JSCONVERT_UNWRAP(EtsUndefined)
+{
+    if (UNLIKELY(!IsUndefined(env, js_val))) {
+        TypeCheckFailed();
+        return {};
+    }
+    return ctx->GetUndefinedObject();
 }
 
 #undef JSCONVERT_DEFINE_TYPE

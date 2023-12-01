@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,15 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-package escompat;
+exports.etsUndefinedConsume = (x) => x === undefined && x !== null;
+exports.etsUndefinedProduce = () => undefined;
 
-export interface ArrayLike<T> {
-    at(index: number): T | undefined;
-
-    $_get(index: number): T;
-
-    // TODO(ivan-tyulyandin): blocked by internal issue #11979
-    // readonly length: number
-    lengthMakeProp(): number
-}
+exports.etsNullConsume = (x) => x === null && x !== undefined;
+exports.etsNullProduce = () => null;

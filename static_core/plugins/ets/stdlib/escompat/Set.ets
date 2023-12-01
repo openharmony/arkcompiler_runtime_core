@@ -15,8 +15,6 @@
 
 package escompat;
 
-type __HelpSetType = (x: ListNode) => void
-
 export interface ReadonlySet<T> /* TODO(kprokopenko): extends Iterable */ {
     /**
      * Checks if a value is in the Set
@@ -33,7 +31,7 @@ export interface ReadonlySet<T> /* TODO(kprokopenko): extends Iterable */ {
      *
      * @returns number of unique elements in the Set
      */
-    size(): int; // TODO(kprokopenko): must be a property
+    size(): number; // TODO(kprokopenko): must be a property
 
     /**
      * Applies a function over all elements of the Set
@@ -80,7 +78,7 @@ export interface ReadonlySet<T> /* TODO(kprokopenko): extends Iterable */ {
 final class ListNode {
     prev: ListNode = this
     next: ListNode = this
-    val: Object | null = null
+    val: NullishType = null
 }
 
 final class SetIterator<R> implements IterableIterator<R> {
@@ -95,10 +93,10 @@ final class SetIterator<R> implements IterableIterator<R> {
     }
 
     override next(): IteratorResult<R> {
-        if (this.node == this.tail) {
+        if (__runtimeIsSameReference(this.node, this.tail)) {
             return new IteratorResult<R>()
         }
-        const res = new IteratorResult<R>(false, this.mapper(this.node) as R)
+        const res = new IteratorResult<R>(this.mapper(this.node) as R)
         this.node = this.node.next
         return res
     }
@@ -134,8 +132,8 @@ export final class Set<K> implements ReadonlySet<K> {
         })
     }
 
-    private getBucket(v: Object): Array<ListNode> {
-        return this.buckets.at(v.hashCode() % this.buckets.length)!
+    private getBucket(v: NullishType): Array<ListNode> {
+        return this.buckets.at(hashOf(v) % this.buckets.length)!
     }
 
     internal static __asGeneric<T>(x: Object): (x: T) => void {
@@ -169,7 +167,7 @@ export final class Set<K> implements ReadonlySet<K> {
      */
     add(v: K): Set<K> {
         // insert into buckets
-        const buck = this.getBucket(v as Object)
+        const buck = this.getBucket(v as NullishType)
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
@@ -191,14 +189,14 @@ export final class Set<K> implements ReadonlySet<K> {
 
         this.sizeVal += 1
 
-        if (this.size() * 4 > this.buckets.length * 3) {
+        if (this.sizeVal * 4 > this.buckets.length * 3) {
             this.rehash();
         }
 
         return this;
     }
 
-    internal get(v: Object): K | null {
+    internal get(v: NullishType): K | undefined {
         const buck = this.getBucket(v)
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
@@ -207,7 +205,7 @@ export final class Set<K> implements ReadonlySet<K> {
                 return node.val as K
             }
         }
-        return null;
+        return undefined;
     }
 
     /**
@@ -218,7 +216,7 @@ export final class Set<K> implements ReadonlySet<K> {
      * @returns true if the value is in the Set
      */
     override has(v: K): boolean {
-        return this.get(v as Object) != null;
+        return !__runtimeIsSameReference(this.get(v as NullishType) as NullishType, undefined);
     }
 
     /**
@@ -226,7 +224,7 @@ export final class Set<K> implements ReadonlySet<K> {
      *
      * @returns number of unique elements in the Set
      */
-    override size(): int {
+    override size(): number {
         return this.sizeVal;
     }
 

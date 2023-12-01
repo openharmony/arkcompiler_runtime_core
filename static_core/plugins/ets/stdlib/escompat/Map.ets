@@ -21,7 +21,7 @@ export interface ReadonlyMap<K, V> /* TODO(kprokopenko): extends Iterable */ {
      *
      * @returns number of Entries with unique keys in the Map
      */
-    size(): int; // TODO(kprokopenko): must be a property
+    size(): number; // TODO(kprokopenko): must be a property
 
     /**
      * Returns a value assosiated with key if present
@@ -30,7 +30,7 @@ export interface ReadonlyMap<K, V> /* TODO(kprokopenko): extends Iterable */ {
      *
      * @returns value if assosiated with key presents.
      */
-    get(key: K): V | null; // TODO(kprokopenko): undefined
+    get(key: K): V | undefined;
 
     /**
      * Checks if a key is in the Map
@@ -93,13 +93,13 @@ class MapEntry<K, V> extends Entry<K, V> {
 
     override equals(o: NullishType): boolean {
         if (o instanceof MapEntry) {
-            return (this.key as NullishType).equals(((o as MapEntry<K, V>).key) as NullishType)
+            return __runtimeEquals(this.key as NullishType, ((o as MapEntry<K, V>).key) as NullishType)
         }
-        return (this.key as NullishType).equals(o)
+        return __runtimeEquals(this.key as NullishType, o)
     }
 
-    override hashCode(): int {
-        return (this.key as NullishType).hashCode()
+    override $_hashCode(): int {
+        return hashOf(this.key as NullishType)
     }
 }
 
@@ -131,7 +131,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns true if the value is in the Map
      */
     override has(k: K): boolean {
-        return this.s.get(k as Object) != null
+        return !__runtimeIsSameReference(this.s.get(k as NullishType), undefined)
     }
 
     /**
@@ -139,7 +139,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns number of Entries with unique keys in the Map
      */
-    override size(): int {
+    override size(): number {
         return this.s.size()
     }
 
@@ -166,12 +166,12 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns value if assosiated with key presents.
      */
-    override get(k: K): V | null {
-        const r = this.s.get(k as Object)
-        if (r != null) {
+    override get(k: K): V | undefined {
+        const r = this.s.get(k as NullishType)
+        if (!__runtimeIsSameReference(r, undefined)) {
             return r!.value
         }
-        return null
+        return undefined
     }
 
     /**
@@ -184,8 +184,8 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns value if key presents, def otherwise
      */
     get(k: K, def: V): V {
-        const r = this.s.get(k as Object)
-        if (r != null) {
+        const r = this.s.get(k as NullishType)
+        if (!__runtimeIsSameReference(r, undefined)) {
             return r!.value
         }
         return def

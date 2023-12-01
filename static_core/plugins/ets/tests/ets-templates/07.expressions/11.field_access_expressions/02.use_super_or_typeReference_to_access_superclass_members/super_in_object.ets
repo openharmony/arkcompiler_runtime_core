@@ -29,7 +29,7 @@ class Object {
     return "";
   }
 
-  public hashCode(): int {
+  public $_hashCode(): int {
     return runtime.GetHashCode(this);
   }
 

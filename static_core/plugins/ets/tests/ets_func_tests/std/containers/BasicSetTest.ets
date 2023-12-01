@@ -51,7 +51,7 @@ function createSetAddAndCheckHasValue(): int {
 
 function createEmptySet(): int {
     let set: Set<char> = new Set<char>;
-    return set.size();
+    return set.size() as int;
 }
 
 function createSetAndGetValues(): int {

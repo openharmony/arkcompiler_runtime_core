@@ -229,7 +229,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<I
      *
      * @returns representation of this instance
      */
-    public override hashCode(): int {
+    public override $_hashCode(): int {
         return this.intValue();
     }
 

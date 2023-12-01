@@ -21,7 +21,7 @@ function main(): void {
         arr.push(i as number)
     }
     for (let i = 0; i < 30; i++) {
-        assert arr.includes(i as number)
+        assert arr.includes(i as number, undefined)
     }
     assert arr.at(50) == null
     assert arr.length == 30
@@ -32,6 +32,7 @@ function main(): void {
 
     test_reverse()
     test_splice_1()
+    test_unshift()
 }
 
 function test_reverse(): void {
@@ -43,7 +44,7 @@ function test_reverse(): void {
     }
     arr.reverse()
     for (let i = 0; i < 30; i++) {
-        assert arr.indexOf(i as number) == 30 - 1 - i
+        assert arr.indexOf(i as number, undefined) == 30 - 1 - i
     }
 }
 
@@ -54,10 +55,35 @@ function test_splice_1(): void {
     }
     const other = arr.splice(1)
     assert arr.length == 1
-    assert arr.indexOf(0 as number) == 0
+    assert arr.indexOf(0 as number, undefined) == 0
 
     assert other.length == 3
     for (let i = 1; i <= 3; i++) {
-        assert other.indexOf(i as number) == i - 1
+        assert other.indexOf(i as number, undefined) == i - 1
     }
+
+    other.splice(1, undefined, 6, 7, 8);
+    assert other.length == 4
+    assert other.$_get(0) == 1;
+    assert other.$_get(1) == 6;
+    assert other.$_get(2) == 7;
+    assert other.$_get(3) == 8;
+}
+
+function test_unshift(): void {
+    const a = new Array<number>()
+    a.unshift(1, 2, 3)
+    assert a.length == 3
+    a.unshift(4, 5, 6)
+    a.unshift(7, 8, 9)
+    assert a.length == 9
+    assert a.$_get(0) == 7;
+    assert a.$_get(1) == 8;
+    assert a.$_get(2) == 9;
+    assert a.$_get(3) == 4;
+    assert a.$_get(4) == 5;
+    assert a.$_get(5) == 6;
+    assert a.$_get(6) == 1;
+    assert a.$_get(7) == 2;
+    assert a.$_get(8) == 3;
 }

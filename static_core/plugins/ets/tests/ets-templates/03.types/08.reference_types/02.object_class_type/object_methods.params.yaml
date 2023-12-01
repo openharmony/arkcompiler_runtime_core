@@ -14,5 +14,5 @@
 --- # List of inheritance methods from Object class
 methods:
   - "equals(new A());"
-  - "hashCode();"
+  - "$_hashCode();"
   - "toString();"

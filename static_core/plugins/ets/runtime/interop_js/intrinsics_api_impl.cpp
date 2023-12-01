@@ -123,6 +123,14 @@ static EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj
         return nullptr;
     }
 
+    // NOTE(kprokopenko): awful solution, see #14765
+    if (ets_js_value->AsObject() == ctx->GetUndefinedObject()) {
+        if (Class::FromClassObject(cls_obj->GetCoreType()) == ctx->GetVoidClass()) {
+            return reinterpret_cast<EtsObject *>(EtsVoid::GetInstance());
+        }
+        return ets_js_value->AsObject();
+    }
+
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsVal = etsJsValue->GetNapiValue(env);
@@ -537,7 +545,7 @@ JSValue *ConvertFromLocal<JSConvertJSValue>(void *value)
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
 
-    if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
+    if (UNLIKELY(IsNull(env, js_val))) {
         return nullptr;
     }
 
@@ -620,7 +628,8 @@ EtsString *CompilerConvertLocalToString(void *value)
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
 
-    if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
+    // NOTE(kprokopenko): can't assign undefined to EtsString *, see #14765
+    if (UNLIKELY(IsNullOrUndefined(env, js_val))) {
         return nullptr;
     }
 
@@ -644,8 +653,12 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
 
-    if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
+    if (UNLIKELY(IsNull(env, js_val))) {
         return nullptr;
+    }
+
+    if (UNLIKELY(IsUndefined(env, js_val))) {
+        return ctx->GetUndefinedObject();
     }
 
     // start slowpath

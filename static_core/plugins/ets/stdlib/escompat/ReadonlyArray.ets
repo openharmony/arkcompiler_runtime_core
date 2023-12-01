@@ -15,10 +15,7 @@
 
 package escompat;
 
-interface ReadonlyArray<T> extends ConcatArray<T> {
-    // TODO(ivan-tyulyandin): blocked by undefined implementation
-    at(index: number): T | null;
-
+export interface ReadonlyArray<T> extends ConcatArray<T> {
     // concat(...items: (T | ConcatArray<T>)[]): T[];
     // concat(...items: (T | ConcatArray<T>)[]): Array<T>;
     // concat(...items: ConcatArray<T>[]): T[];
@@ -40,8 +37,8 @@ interface ReadonlyArray<T> extends ConcatArray<T> {
     // Typing and previous overload have to cover it
 
     // TODO(ivan-tyulyandin): blocked by undefined implementation
-    find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | null;
-    find(predicate: (value: T, index: number) => boolean): T | null;
+    find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined;
+    find(predicate: (value: T, index: number) => boolean): T | undefined;
     // find<S extends T>(predicate: (value: T, index: number, obj: readonly T[]) => value is S, thisArg?: any): S | undefined;
     // Typing and previous overload have to cover it
 
@@ -65,24 +62,14 @@ interface ReadonlyArray<T> extends ConcatArray<T> {
     forEach(callbackfn: (value: T, index: number) => void): void;
     forEach(callbackfn: (value: T) => void): void;
 
-    // includes(searchElement: T, fromIndex?: number): boolean;
-    includes(searchElement: T, fromIndex: number): boolean;
-    includes(searchElement: T): boolean;
+    includes(searchElement: T, fromIndex: Number | undefined): boolean;
 
-    // indexOf(searchElement: T, fromIndex?: number): number;
-    indexOf(searchElement: T, fromIndex: number): number;
-    indexOf(searchElement: T): number;
-
-    // join(separator?: string): string;
-    join(separator: string): string;
-    join(): string;
+    indexOf(searchElement: T, fromIndex: Number | undefined): number;
 
     // TODO(kprokopenko): blocked by internal issue
     //keys(): IterableIterator<number>;
 
-    // lastIndexOf(searchElement: T, fromIndex?: number): number;
-    lastIndexOf(searchElement: T, fromIndex: number): number;
-    lastIndexOf(searchElement: T): number;
+    lastIndexOf(searchElement: T, fromIndex: Number | undefined): number;
 
     map<U>(callbackfn: (value: T, index: number, array: ReadonlyArray<T>) => U): Array<U>;
     map<U>(callbackfn: (value: T, index: number) => U): Array<U>;
@@ -111,11 +98,6 @@ interface ReadonlyArray<T> extends ConcatArray<T> {
     //reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
     //reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
     //reduceRight<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U;
-
-    // slice(start?: number, end?: number): T[];
-    slice(start: number, end: number): Array<T>;
-    slice(start: number): Array<T>;
-    slice(): Array<T>;
 
     // some(predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any): boolean;
     some(predicate: (value: T, index: number) => boolean): boolean;
