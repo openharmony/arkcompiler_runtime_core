@@ -122,6 +122,9 @@ def add_test_group_args(parser: argparse.ArgumentParser) -> None:
         default=None,
         help='Full name to the file with chapter description. '
              'By default chapters.yaml file located along with test lists.')
+    test_groups.add_argument(
+        '--filter', '-f', action='store', dest='filter', default=None,
+        help='test filter wildcard')
 
 
 def add_config_args(parser: argparse.ArgumentParser) -> None:
@@ -311,9 +314,6 @@ def add_time_report_args(parser: argparse.ArgumentParser) -> None:
 
 def add_test_lists_args(parser: argparse.ArgumentParser) -> None:
     # Test lists options
-    parser.add_argument(
-        '--filter', '-f', action='store', dest='filter', default=None,
-        help='test filter wildcard')
     parser.add_argument(
         '--test-list', dest='test_list', default=None,
         help='run only the tests listed in this file')

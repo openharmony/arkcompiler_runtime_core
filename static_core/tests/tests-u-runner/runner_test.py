@@ -11,18 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-test-suites:
-    - hermes
-general:
-    build: $panda_build
-#    verbose: one of: NONE, SHORT, ALL
-    verbose: NONE
-#    verbose-filter: one of NEW, IGNORED, ALL
-    verbose-filter: NEW
-es2panda:
-    timeout: 30
-    opt-level: 2
-ark:
-    timeout: 180
-    heap-verifier: fail_on_verification:pre:into:post
-    interpreter-type: irtoc
+import unittest
+# pylint: disable=unused-import
+from runner.test.chapters_test import ChapterTest
+# pylint: disable=unused-import
+from runner.test.chapters_neg_test import ChapterNegativeCases
+
+if __name__ == '__main__':
+    unittest.main()

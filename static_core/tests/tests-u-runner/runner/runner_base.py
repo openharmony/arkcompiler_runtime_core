@@ -12,7 +12,7 @@ from typing import List, Set, Tuple, Optional
 
 from tqdm import tqdm
 
-from runner.chapters import parse_chapters
+from runner.chapters import Chapters
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.plugins.ets.test_ets import TestETS
 from runner.logger import Log
@@ -207,7 +207,7 @@ class Runner(ABC):
             if not self.config.test_lists.skip_test_lists:
                 self.load_excluded_tests()
                 self.load_ignored_tests()
-            test_files.extend(self.__load_tests_from_lists(directory, extension))
+            test_files.extend(self.__load_test_files(directory, extension))
 
         self._search_both_excluded_and_ignored_tests()
         self._search_not_used_ignored(test_files)
@@ -228,54 +228,47 @@ class Runner(ABC):
         self.tests.update(valid_tests)
         Log.all(_LOGGER, f"Loaded {len(self.tests)} tests")
 
-    def __load_tests_from_lists(self, directory: str, extension: str) -> List[str]:
+    def __load_test_files(self, directory: str, extension: str) -> List[str]:
+        if self.config.test_lists.filter != "*" and self.config.test_lists.groups.chapters:
+            Log.exception_and_raise(
+                _LOGGER,
+                "Incorrect configuration: specify either filter or chapter options"
+            )
         test_files: List[str] = []
         excluded: List[str] = list(self.excluded_tests)[:]
         glob_expression = path.join(directory, f"**/*.{extension}")
-        includes, excludes = self.__parse_chapters()
-        for inc in includes:
-            mask = path.join(directory, inc)
-            test_files.extend(self.__load_tests_by_chapter(mask, glob_expression))
-        for exc in excludes:
-            mask = path.join(directory, exc)
-            excluded.extend(self.__load_tests_by_chapter(mask, glob_expression))
+        test_files.extend(fnmatch.filter(
+            glob(glob_expression, recursive=True),
+            path.join(directory, self.config.test_lists.filter)
+        ))
+        if self.config.test_lists.groups.chapters:
+            test_files = self.__filter_by_chapters(directory, test_files, extension)
         return [
             test for test in test_files
             if self.update_excluded or test not in excluded
         ]
 
-    @staticmethod
-    def __load_tests_by_chapter(mask: str, glob_expression: str) -> List[str]:
-        if "*" not in mask and path.isfile(mask):
-            return [mask]
-        if "*" not in mask:
-            mask += '/*'
-        return list(fnmatch.filter(
-            glob(glob_expression, recursive=True),
-            mask
-        ))
+    def __filter_by_chapters(self, base_folder: str, files: List[str], extension: str) -> List[str]:
+        test_files: Set[str] = set()
+        chapters: Chapters = self.__parse_chapters()
+        for chapter in self.config.test_lists.groups.chapters:
+            test_files.update(chapters.filter_by_chapter(chapter, base_folder, files, extension))
+        return list(test_files)
 
-    def __parse_chapters(self) -> Tuple[List[str], List[str]]:
-        if not self.config.test_lists.groups.chapters:
-            return [self.config.test_lists.filter], []
+    def __parse_chapters(self) -> Chapters:
+        chapters: Optional[Chapters] = None
         if path.isfile(self.config.test_lists.groups.chapters_file):
-            chapters = parse_chapters(self.config.test_lists.groups.chapters_file)
+            chapters = Chapters(self.config.test_lists.groups.chapters_file)
         else:
             corrected_chapters_file = correct_path(self.list_root, self.config.test_lists.groups.chapters_file)
             if path.isfile(corrected_chapters_file):
-                chapters = parse_chapters(corrected_chapters_file)
+                chapters = Chapters(corrected_chapters_file)
             else:
                 Log.exception_and_raise(
                     _LOGGER,
                     f"Not found either '{self.config.test_lists.groups.chapters_file}' or "
                     f"'{corrected_chapters_file}'", FileNotFoundError)
-        __includes: List[str] = []
-        __excludes: List[str] = []
-        for chapter in self.config.test_lists.groups.chapters:
-            if chapter in chapters:
-                __includes.extend(chapters[chapter].includes)
-                __excludes.extend(chapters[chapter].excludes)
-        return __includes, __excludes
+        return chapters
 
     def _search_both_excluded_and_ignored_tests(self) -> None:
         already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]

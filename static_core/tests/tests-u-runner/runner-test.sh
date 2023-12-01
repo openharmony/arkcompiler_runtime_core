@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,18 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-test-suites:
-    - hermes
-general:
-    build: $panda_build
-#    verbose: one of: NONE, SHORT, ALL
-    verbose: NONE
-#    verbose-filter: one of NEW, IGNORED, ALL
-    verbose-filter: NEW
-es2panda:
-    timeout: 30
-    opt-level: 2
-ark:
-    timeout: 180
-    heap-verifier: fail_on_verification:pre:into:post
-    interpreter-type: irtoc
+if [[ -z $1 ]]; then
+    echo "Usage: $0 <panda source>"
+    echo "    <panda source> path where the panda source are located"
+
+    exit 1
+fi
+
+ROOT_DIR=$(realpath $1)
+shift 1
+
+RUNNER="${ROOT_DIR}/tests/tests-u-runner/runner_test.py"
+
+source ${ROOT_DIR}/scripts/python/venv-utils.sh
+activate_venv
+set +e
+
+python3 -B "${RUNNER}"
+EXIT_CODE=$?
+
+set -e
+deactivate_venv
+
+exit ${EXIT_CODE}
