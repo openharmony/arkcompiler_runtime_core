@@ -48,6 +48,7 @@ private:
     std::vector<panda_file::File::EntityId> method_ids_;
     std::vector<uint32_t> literal_ids_;
 
+    static constexpr size_t DEFAULT_ARGUMENT_NUMBER = 3;
     static constexpr uint32_t FILE_CONTENT_OFFSET = 12U;
 };
 } // namespace panda::verifier
