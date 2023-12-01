@@ -67,6 +67,9 @@ public:
     void AddMethodToTables(const panda_file::File::EntityId &method_id);
     void GetMethod(pandasm::Function *method, const panda_file::File::EntityId &method_id);
     void GetLiteralArray(pandasm::LiteralArray *lit_array, size_t index) const;
+    std::optional<uint32_t> GetMethodAnnotationByName(const std::string &method_name,
+		                                      const std::string &annotation_name);
+    bool ValidateStringOffset(const panda_file::File::EntityId string_id, const std::string &str);
     template <typename T>
     void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
                               const panda_file::LiteralDataAccessor::LiteralValue &value) const;
@@ -86,6 +89,12 @@ private:
     void GetFields(pandasm::Record *record, const panda_file::File::EntityId &record_id);
 
     void GetMethods(const panda_file::File::EntityId &record_id);
+    void GetMethodAnnotations(pandasm::Function &method, const panda_file::File::EntityId &method_id);
+    void CreateAnnotationElement(panda_file::AnnotationDataAccessor &ada, pandasm::Function &method,
+                                 const std::string &ann_name, const std::string &ann_elem_name,
+                                 const std::string &ann_elem_index);
+    void AddAnnotationElement(pandasm::Function &method, const std::string &annotation_name,
+                              const std::string &key, const uint32_t &value);
     void GetParams(pandasm::Function *method, const panda_file::File::EntityId &proto_id) const;
     IdList GetInstructions(pandasm::Function *method, panda_file::File::EntityId method_id,
                            panda_file::File::EntityId code_id) const;
@@ -130,6 +139,7 @@ private:
     void Serialize(const pandasm::Record &record, std::ostream &os, bool print_information = false) const;
     void SerializeFields(const pandasm::Record &record, std::ostream &os, bool print_information) const;
     void Serialize(const pandasm::Function &method, std::ostream &os, bool print_information = false) const;
+    void SerializeMethodAnnotations(const pandasm::Function &method, std::ostream &os) const;
     void SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value,
                           std::ostream &os) const;
     void Serialize(const pandasm::Function::CatchBlock &catch_block, std::ostream &os) const;
@@ -196,6 +206,7 @@ private:
     std::map<std::string, panda_file::File::EntityId> record_name_to_id_;
     std::map<std::string, panda_file::File::EntityId> method_name_to_id_;
     std::map<std::string, std::vector<std::string>> modulearray_table_;
+    mutable std::map<panda_file::File::EntityId, std::string> string_offset_to_name_;
 
     ProgAnnotations prog_ann_;
 
