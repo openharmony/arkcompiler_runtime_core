@@ -14,13 +14,8 @@
  */
 
 #include "verifier.h"
-
 #include "zlib.h"
-
 #include "class_data_accessor-inl.h"
-#include "code_data_accessor-inl.h"
-#include "method_data_accessor-inl.h"
-
 
 namespace panda::verifier {
 
@@ -32,6 +27,8 @@ Verifier::Verifier(const std::string &filename)
 
 bool Verifier::Verify()
 {
+    CollectIdInfos();
+
     if (!VerifyChecksum()) {
         return false;
     }
@@ -39,12 +36,26 @@ bool Verifier::Verify()
     if (!VerifyConstantPool()) {
         return false;
     }
- 
+
     if (!VerifyRegisterIndex()) {
         return false;
     }
 
+    if (!VerifyConstantPoolContent()) {
+        return false;
+    }
+
     return true;
+}
+
+void Verifier::CollectIdInfos()
+{
+    if (file_ == nullptr) {
+        return;
+    }
+    GetMethodIds();
+    GetLiteralIds();
+    CheckConstantPool(verifier::ConstPoolType::COLLECTALLMETHODIDS);
 }
 
 bool Verifier::VerifyChecksum()
@@ -64,9 +75,7 @@ bool Verifier::VerifyConstantPool()
         return false;
     }
 
-    GetMethodIds();
-    GetLiteralIds();
-    if (!CheckConstantPool()) {
+    if (!CheckConstantPool(verifier::ConstPoolType::CONSTPOOLIDX)) {
         return false;
     }
 
@@ -79,7 +88,6 @@ bool Verifier::VerifyRegisterIndex()
         return false;
     }
 
-    GetMethodIds();
     for (const auto &method_id : method_ids_) {
         panda_file::MethodDataAccessor method_accessor {*file_, method_id};
         if (!method_accessor.GetCodeId().has_value()) {
@@ -107,12 +115,28 @@ bool Verifier::VerifyRegisterIndex()
     return true;
 }
 
+bool Verifier::VerifyConstantPoolContent()
+{
+    if (file_ == nullptr) {
+        return false;
+    }
+
+    if (!CheckConstantPool(verifier::ConstPoolType::CONSTPOOLCONTEXT)) {
+        return false;
+    }
+
+    if (!VerifyLiteralArrays()) {
+        return false;
+    }
+
+    return true;
+}
+
 void Verifier::GetMethodIds()
 {
     if (method_ids_.size() != 0) {
         return;
     }
-
     auto index_headers = file_->GetIndexHeaders();
     for (const auto &header : index_headers) {
         auto method_index = file_->GetMethodIndex(&header);
@@ -124,15 +148,20 @@ void Verifier::GetMethodIds()
 
 void Verifier::GetLiteralIds()
 {
+    if (literal_ids_.size() != 0) {
+        return;
+    }
     const auto literal_arrays = file_->GetLiteralArrays();
     for (const auto literal_id : literal_arrays) {
         literal_ids_.emplace_back(literal_id);
     }
 }
 
-bool Verifier::CheckConstantPool()
+bool Verifier::CheckConstantPool(const verifier::ConstPoolType type)
 {
-    bool check_res = true;
+    if (type == verifier::ConstPoolType::COLLECTALLMETHODIDS && all_method_ids_.size() != 0) {
+        return false;
+    }
     const auto class_idx = file_->GetClasses();
     for (size_t i = 0; i < class_idx.size(); i++) {
         uint32_t class_id = class_idx[i];
@@ -144,14 +173,37 @@ bool Verifier::CheckConstantPool()
         const panda_file::File::EntityId record_id {class_id};
         if (!file_->IsExternal(record_id)) {
             panda_file::ClassDataAccessor class_accessor {*file_, record_id};
+            bool valid = true;
             class_accessor.EnumerateMethods([&](panda_file::MethodDataAccessor &method_accessor) -> void {
-                check_res &= CheckConstantPoolInfo(method_accessor.GetMethodId());
+                switch(type) {
+                    case verifier::ConstPoolType::CONSTPOOLIDX: {
+                        if (!CheckConstantPoolIndex(method_accessor.GetMethodId())) {
+                            valid = false;
+                        }
+                        break;
+                    }
+                    case verifier::ConstPoolType::CONSTPOOLCONTEXT: {
+                        if (!CheckConstantPoolMethodContent(method_accessor.GetMethodId())) {
+                            valid = false;
+                        }
+                        break;
+                    }
+                    case verifier::ConstPoolType::COLLECTALLMETHODIDS: {
+                        all_method_ids_.emplace_back(method_accessor.GetMethodId());
+                        break;
+                    }
+                    default: {
+                        LOG(ERROR, VERIFIER) << "instruction with content error!";
+                        break;
+                    }
+                }
             });
-        }
-        if (!check_res) {
-            return false;
+            if (valid == false) {
+                return false;
+            }
         }
     }
+
     return true;
 }
 
@@ -167,6 +219,38 @@ bool Verifier::VerifyMethodId(const BytecodeInstruction &bc_ins, const panda_fil
     return true;
 }
 
+std::optional<int64_t> Verifier::GetFirstImmFromInstruction(const BytecodeInstruction &bc_ins)
+{
+    std::optional<int64_t> first_imm = std::optional<int64_t> {};
+    size_t index = 0;
+    const auto format = bc_ins.GetFormat();
+    if (bc_ins.HasImm(format, index)) {
+        first_imm = bc_ins.GetImm64(index);
+    }
+
+    return first_imm;
+}
+
+std::optional<uint64_t> Verifier::GetSlotNumberFromAnnotation(panda_file::MethodDataAccessor &method_accessor)
+{
+    std::optional<uint64_t> slot_number {};
+    method_accessor.EnumerateAnnotations([&](panda_file::File::EntityId annotation_id) {
+        panda_file::AnnotationDataAccessor ada(*file_, annotation_id);
+        auto *annotation_name = reinterpret_cast<const char *>(file_->GetStringData(ada.GetClassId()).data);
+        if (::strcmp("L_ESSlotNumberAnnotation;", annotation_name) == 0) {
+            uint32_t elem_count = ada.GetCount();
+            for (uint32_t i = 0; i < elem_count; i++) {
+                panda_file::AnnotationDataAccessor::Elem adae = ada.GetElement(i);
+                auto *elem_name = reinterpret_cast<const char *>(file_->GetStringData(adae.GetNameId()).data);
+                if (::strcmp("SlotNumber", elem_name) == 0) {
+                    slot_number = adae.GetScalarValue().GetValue();
+                }
+            }
+        }
+    });
+    return slot_number;
+}
+
 bool Verifier::VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id,
                                size_t idx /* = 0 */)
 {
@@ -178,6 +262,118 @@ bool Verifier::VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_fi
         LOG(ERROR, VERIFIER) << "Verify literal_id failed. literal_id(0x" << std::hex << arg_literal_id << ")!";
         return false;
     }
+    return true;
+}
+
+bool Verifier::VerifyMethodIdInLiteralArray(const uint32_t &id)
+{
+    const auto method_id = panda_file::File::EntityId(id);
+    auto iter = std::find(all_method_ids_.begin(), all_method_ids_.end(), method_id);
+    if (iter == all_method_ids_.end()) {
+        LOG(ERROR, VERIFIER) << "Invalid method id(0x" << id << ") in literal array";
+        return false;
+    }
+    return true;
+}
+
+bool Verifier::VerifyStringIdInLiteralArray(const uint32_t &id)
+{
+    auto string_data = file_->GetStringData(panda_file::File::EntityId(id));
+    auto desc = std::string(utf::Mutf8AsCString(string_data.data));
+    if (string_data.utf16_length != desc.length()) {
+        LOG(ERROR, VERIFIER) << "Invalid string value(0x" << id << ") in literal array";
+        return false;
+    }
+    return true;
+}
+
+bool Verifier::VerifyLiteralIdInLiteralArray(const uint32_t &id)
+{
+    auto iter = std::find(literal_ids_.begin(), literal_ids_.end(), id);
+    if (iter == literal_ids_.end()) {
+        LOG(ERROR, VERIFIER) << "Invalid literal id(0x" << id << ") in literal array";
+        return false;
+    }
+    return true;
+}
+
+bool Verifier::VerifyLiteralArrays()
+{
+    for (const auto &arg_literal_id : literal_ids_) {
+        const auto literal_id = panda_file::File::EntityId(arg_literal_id);
+        auto sp = file_->GetSpanFromId(literal_id);
+        const auto literal_vals_num = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
+        for (size_t i = 0; i < literal_vals_num; i += 2U) { // 2u skip literal item
+            const auto tag = static_cast<panda_file::LiteralTag>(panda_file::helpers::Read<panda_file::TAG_SIZE>(&sp));
+            switch (tag) {
+                case panda_file::LiteralTag::TAGVALUE:
+                case panda_file::LiteralTag::BOOL:
+                case panda_file::LiteralTag::ACCESSOR:
+                case panda_file::LiteralTag::NULLVALUE:
+                case panda_file::LiteralTag::BUILTINTYPEINDEX: {
+                    sp = sp.SubSpan(sizeof(uint8_t)); // run next sp
+                    break;
+                }
+                case panda_file::LiteralTag::METHODAFFILIATE: {
+                    sp = sp.SubSpan(sizeof(uint16_t));
+                    break;
+                }
+                case panda_file::LiteralTag::INTEGER:
+                case panda_file::LiteralTag::FLOAT:
+                case panda_file::LiteralTag::GENERATORMETHOD:
+                case panda_file::LiteralTag::LITERALBUFFERINDEX:
+                case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
+                    sp = sp.SubSpan(sizeof(uint32_t));
+                    break;
+                }
+                case panda_file::LiteralTag::DOUBLE: {
+                    sp = sp.SubSpan(sizeof(uint64_t));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_U1:
+                case panda_file::LiteralTag::ARRAY_U8:
+                case panda_file::LiteralTag::ARRAY_I8:
+                case panda_file::LiteralTag::ARRAY_U16:
+                case panda_file::LiteralTag::ARRAY_I16:
+                case panda_file::LiteralTag::ARRAY_U32:
+                case panda_file::LiteralTag::ARRAY_I32:
+                case panda_file::LiteralTag::ARRAY_U64:
+                case panda_file::LiteralTag::ARRAY_I64:
+                case panda_file::LiteralTag::ARRAY_F32:
+                case panda_file::LiteralTag::ARRAY_F64:
+                case panda_file::LiteralTag::ARRAY_STRING: {
+                    i = literal_vals_num;
+                    break;
+                }
+                case panda_file::LiteralTag::STRING: {
+                    const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
+                    if (!VerifyStringIdInLiteralArray(value)) {
+                        return false;
+                    }
+                    break;
+                }
+                case panda_file::LiteralTag::METHOD: {
+                    const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
+                    if (!VerifyMethodIdInLiteralArray(value)) {
+                        return false;
+                    }
+                    break;
+                }
+                case panda_file::LiteralTag::LITERALARRAY: {
+                    const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
+                    if (!VerifyLiteralIdInLiteralArray(value)) {
+                        return false;
+                    }
+                    break;
+                }
+                default: {
+                    LOG(ERROR, VERIFIER) << "Invalid literal tag";
+                    return false;
+                }
+            }
+        }
+    }
+
     return true;
 }
 
@@ -198,30 +394,178 @@ bool Verifier::VerifyStringId(const BytecodeInstruction &bc_ins, const panda_fil
     return true;
 }
 
-size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
+bool Verifier::IsJumpInstruction(const Opcode &ins_opcode)
 {
-    size_t idx = 0; // Represents the idxTH register index in an instruction
-    BytecodeInstruction::Format format = bc_ins.GetFormat();
-    while (bc_ins.HasVReg(format, idx)) {
-        idx++;
+    bool valid = true;
+
+    switch(ins_opcode){
+        case Opcode::JMP_IMM8:
+        case Opcode::JMP_IMM16:
+        case Opcode::JEQZ_IMM8:
+        case Opcode::JEQZ_IMM16:
+        case Opcode::JNEZ_IMM8:
+        case Opcode::JSTRICTEQZ_IMM8:
+        case Opcode::JNSTRICTEQZ_IMM8:
+        case Opcode::JEQNULL_IMM8:
+        case Opcode::JNENULL_IMM8:
+        case Opcode::JSTRICTEQNULL_IMM8:
+        case Opcode::JNSTRICTEQNULL_IMM8:
+        case Opcode::JEQUNDEFINED_IMM8:
+        case Opcode::JNEUNDEFINED_IMM8:
+        case Opcode::JSTRICTEQUNDEFINED_IMM8:
+        case Opcode::JNSTRICTEQUNDEFINED_IMM8:
+        case Opcode::JEQ_V8_IMM8:
+        case Opcode::JNE_V8_IMM8:
+        case Opcode::JSTRICTEQ_V8_IMM8:
+        case Opcode::JNSTRICTEQ_V8_IMM8:
+        case Opcode::JMP_IMM32:
+        case Opcode::JEQZ_IMM32:
+        case Opcode::JNEZ_IMM16:
+        case Opcode::JNEZ_IMM32:
+        case Opcode::JSTRICTEQZ_IMM16:
+        case Opcode::JNSTRICTEQZ_IMM16:
+        case Opcode::JEQNULL_IMM16:
+        case Opcode::JNENULL_IMM16:
+        case Opcode::JSTRICTEQNULL_IMM16:
+        case Opcode::JNSTRICTEQNULL_IMM16:
+        case Opcode::JEQUNDEFINED_IMM16:
+        case Opcode::JNEUNDEFINED_IMM16:
+        case Opcode::JSTRICTEQUNDEFINED_IMM16:
+        case Opcode::JEQ_V8_IMM16:
+        case Opcode::JNE_V8_IMM16:
+        case Opcode::JSTRICTEQ_V8_IMM16:
+        case Opcode::JNSTRICTEQ_V8_IMM16: {
+            valid = true;
+            break;
+        }
+        default: {
+            valid = false;
+            break;
+        }
     }
-    return idx;
+    return valid;
 }
 
-bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx)
+bool Verifier::VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const BytecodeInstruction &bc_ins_last,
+                                           const BytecodeInstruction &bc_ins_first)
 {
-    for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
-        uint16_t reg_idx = bc_ins.GetVReg(idx);
-        if (reg_idx >= max_reg_idx) {
-            LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
-                                 << reg_idx << ")" << std::endl;
+    // update maximum forward offset
+    const auto bc_ins_forward_size = bc_ins_last.GetAddress() - bc_ins.GetAddress();
+    // update maximum backward offset
+    const auto bc_ins_backward_size = bc_ins.GetAddress() - bc_ins_first.GetAddress();
+    if (!bc_ins.IsPrimaryOpcodeValid()) {
+        LOG(ERROR, VERIFIER) << "Verify primaryOpcode failed!";
+        return false;
+    }
+
+    Opcode ins_opcode = bc_ins.GetOpcode();
+    if(IsJumpInstruction(ins_opcode)) {
+        std::optional<int64_t> immdata = GetFirstImmFromInstruction(bc_ins);
+        if (!immdata.has_value()) {
+            LOG(ERROR, VERIFIER) << "Get immediate data failed!";
             return false;
+        }
+
+        if (immdata.value() > 0) {
+            // immdata -1,excluding instruction location offset
+            if (bc_ins_forward_size - 1 <= immdata.value()) {
+                LOG(ERROR, VERIFIER) << "Jump forward out of boundary";
+                return false;
+            }
+        } else if (immdata.value() < 0) {
+            // immdata -1,excluding instruction location offset
+            if ((bc_ins_backward_size - 1) + immdata.value() < 0) {
+                LOG(ERROR, VERIFIER) << "Jump backward out of boundary";
+                return false;
+            }
         }
     }
     return true;
 }
 
-bool Verifier::CheckConstantPoolInfo(const panda_file::File::EntityId &method_id)
+bool Verifier::GetIcSlotFromInstruction(const BytecodeInstruction &bc_ins, uint32_t &first_slot_index,
+                                           bool &has_slot, bool &is_two_slot)
+{
+    std::optional<uint64_t> first_imm = {};
+    if (bc_ins.HasFlag(BytecodeInstruction::Flags::ONE_SLOT)) {
+        first_imm = GetFirstImmFromInstruction(bc_ins);
+        if (!first_imm.has_value()) {
+            LOG(ERROR, VERIFIER) << "Get first immediate data failed!";
+            return false;
+        }
+        first_slot_index = first_imm.value();
+        is_two_slot = false;
+        has_slot = true;
+    } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::TWO_SLOT)) {
+        first_imm = GetFirstImmFromInstruction(bc_ins);
+        if (!first_imm.has_value()) {
+            LOG(ERROR, VERIFIER) << "Get first immediate data failed!";
+            return false;
+        }
+        first_slot_index = first_imm.value();
+        has_slot = true;
+        is_two_slot = true;
+    }
+
+    return true;
+}
+
+bool Verifier::VerifySlotNumber(panda_file::MethodDataAccessor &method_accessor, const uint32_t &slot_number,
+                                const panda_file::File::EntityId &method_id)
+{
+    const auto ann_slot_number = GetSlotNumberFromAnnotation(method_accessor);
+    if (!ann_slot_number.has_value()) {
+        LOG(ERROR, VERIFIER) << "Fail to get slot number from annotation";
+        return false;
+    }
+    if (slot_number == ann_slot_number.value()) {
+        return true;
+    }
+
+    LOG(ERROR, VERIFIER) << "Slot number has been falsified in method 0x" << method_id;
+    return false;
+}
+
+bool Verifier::CheckConstantPoolMethodContent(const panda_file::File::EntityId &method_id)
+{
+    panda_file::MethodDataAccessor method_accessor(*file_, method_id);
+    ASSERT(method_accessor.GetCodeId().has_value());
+    panda_file::CodeDataAccessor code_accessor(*file_, method_accessor.GetCodeId().value());
+    const auto ins_sz = code_accessor.GetCodeSize();
+    const auto ins_arr = code_accessor.GetInstructions();
+    auto bc_ins = BytecodeInstruction(ins_arr);
+    const auto bc_ins_last = bc_ins.JumpTo(ins_sz);
+    const auto bc_ins_init = bc_ins; // initial PC value
+    uint32_t ins_slot_num = 0;
+    bool has_slot = false;
+    bool is_two_slot = false;
+
+    while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
+        if (!VerifyJumpInstruction(bc_ins, bc_ins_last, bc_ins_init)) {
+            LOG(ERROR, VERIFIER) << "Invalid target position of jump instruction";
+            return false;
+        }
+        if (!GetIcSlotFromInstruction(bc_ins, ins_slot_num, has_slot, is_two_slot)) {
+            LOG(ERROR, VERIFIER) << "Get first slot index failed!";
+            return false;
+        }
+        bc_ins = bc_ins.GetNext();
+    }
+
+    if (has_slot) {
+        if (is_two_slot) {
+            ins_slot_num += 1; // when there are two slots for the last instruction, the slot index increases
+        }
+        ins_slot_num += 1; // slot index starts with zero
+    }
+    if (!VerifySlotNumber(method_accessor, ins_slot_num, method_id)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Verifier::CheckConstantPoolIndex(const panda_file::File::EntityId &method_id)
 {
     panda_file::MethodDataAccessor method_accessor(*file_, method_id);
 
@@ -256,6 +600,29 @@ bool Verifier::CheckConstantPoolInfo(const panda_file::File::EntityId &method_id
             }
         }
         bc_ins = bc_ins.GetNext();
+    }
+    return true;
+}
+
+size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
+{
+    size_t idx = 0; // Represents the idxTH register index in an instruction
+    BytecodeInstruction::Format format = bc_ins.GetFormat();
+    while (bc_ins.HasVReg(format, idx)) {
+        idx++;
+    }
+    return idx;
+}
+
+bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx)
+{
+    for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
+        uint16_t reg_idx = bc_ins.GetVReg(idx);
+        if (reg_idx >= max_reg_idx) {
+            LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
+                                 << reg_idx << ")" << std::endl;
+            return false;
+        }
     }
     return true;
 }
