@@ -19,6 +19,13 @@
 
 namespace panda::mem {
 
+template <MTModeT MT_MODE>
+class AllocConfig<GCType::EPSILON_G1_GC, MT_MODE> {
+public:
+    using ObjectAllocatorType = ObjectAllocatorG1<MT_MODE>;
+    using CodeAllocatorType = CodeAllocator;
+};
+
 template <class LanguageConfig>
 class EpsilonG1GC final : public G1GC<LanguageConfig> {
 public:

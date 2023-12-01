@@ -757,35 +757,6 @@ private:
     std::atomic<bool> is_postpone_enabled_ {false};
 };
 
-// NOTE(dtrubenkov): move configs in more appropriate place
-template <MTModeT MT_MODE>
-class AllocConfig<GCType::STW_GC, MT_MODE> {
-public:
-    using ObjectAllocatorType = ObjectAllocatorNoGen<MT_MODE>;
-    using CodeAllocatorType = CodeAllocator;
-};
-
-template <MTModeT MT_MODE>
-class AllocConfig<GCType::EPSILON_GC, MT_MODE> {
-public:
-    using ObjectAllocatorType = ObjectAllocatorNoGen<MT_MODE>;
-    using CodeAllocatorType = CodeAllocator;
-};
-
-template <MTModeT MT_MODE>
-class AllocConfig<GCType::EPSILON_G1_GC, MT_MODE> {
-public:
-    using ObjectAllocatorType = ObjectAllocatorG1<MT_MODE>;
-    using CodeAllocatorType = CodeAllocator;
-};
-
-template <MTModeT MT_MODE>
-class AllocConfig<GCType::GEN_GC, MT_MODE> {
-public:
-    using ObjectAllocatorType = ObjectAllocatorGen<MT_MODE>;
-    using CodeAllocatorType = CodeAllocator;
-};
-
 /**
  * @brief Create GC with @param gc_type
  * @param gc_type - type of create GC

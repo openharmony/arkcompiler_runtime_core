@@ -21,6 +21,13 @@
 
 namespace panda::mem {
 
+template <MTModeT MT_MODE>
+class AllocConfig<GCType::STW_GC, MT_MODE> {
+public:
+    using ObjectAllocatorType = ObjectAllocatorNoGen<MT_MODE>;
+    using CodeAllocatorType = CodeAllocator;
+};
+
 template <class LanguageConfig>
 class StwGCMarker : public DefaultGCMarker<StwGCMarker<LanguageConfig>, LanguageConfig> {
     using Base = DefaultGCMarker<StwGCMarker<LanguageConfig>, LanguageConfig>;

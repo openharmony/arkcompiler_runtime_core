@@ -28,7 +28,11 @@
 #include "runtime/include/thread_scopes.h"
 #include "runtime/handle_base-inl.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/mem/gc/epsilon/epsilon.h"
+#include "runtime/mem/gc/epsilon-g1/epsilon-g1.h"
+#include "runtime/mem/gc/gen-gc/gen-gc.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
+#include "runtime/mem/gc/stw-gc/stw-gc.h"
 
 namespace panda::mem {
 
