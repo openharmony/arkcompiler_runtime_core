@@ -86,8 +86,9 @@ bool Verifier::VerifyRegisterIndex()
             continue;
         }
         panda_file::CodeDataAccessor code_data(*file_, method_accessor.GetCodeId().value());
-        const auto reg_nums = code_data.GetNumVregs();
-        const auto arg_nums = code_data.GetNumArgs();
+        uint32_t reg_nums = code_data.GetNumVregs();
+        uint32_t arg_nums = code_data.GetNumArgs();
+        uint32_t max_reg_idx = reg_nums + arg_nums;
         auto bc_ins = BytecodeInstruction(code_data.GetInstructions());
         const auto bc_ins_last = bc_ins.JumpTo(code_data.GetCodeSize());
         ASSERT(arg_nums >= DEFAULT_ARGUMENT_NUMBER);
