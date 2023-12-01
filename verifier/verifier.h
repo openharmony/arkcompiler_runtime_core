@@ -37,6 +37,7 @@ private:
     void GetLiteralIds();
     bool CheckConstantPool();
     size_t GetVRegCount(const BytecodeInstruction &bc_ins);
+    bool CheckVRegIdx(const BytecodeInstruction &bc_ins, size_t count, uint32_t max_reg_idx);
     bool VerifyMethodId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
     bool VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id,
                          size_t idx);
