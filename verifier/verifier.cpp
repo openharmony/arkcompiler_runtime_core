@@ -208,7 +208,7 @@ size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
     return idx;
 }
 
-bool CheckVRegIdx(const BytecodeInstruction &bc_ins, size_t count, uint32_t max_reg_idx)
+bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx)
 {
     for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
         uint16_t reg_idx = bc_ins.GetVReg(idx);
