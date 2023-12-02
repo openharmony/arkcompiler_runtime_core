@@ -393,10 +393,10 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    size_t literal_id = 0x3f5; // The known literal_id in the abc file
+    size_t literal_id = 0x578; // The known literal_id in the abc file
 
     // The known literal_id in the literal array of the abc file
-    std::vector<unsigned char> inner_literal_id = {0x8f, 0x04};
+    std::vector<unsigned char> inner_literal_id = {0xe9, 0x04};
     std::vector<unsigned char> new_literal_id = {0xaa, 0xaa};
 
     for (size_t i = literal_id; i < buffer.size(); ++i) {
