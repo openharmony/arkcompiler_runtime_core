@@ -19,7 +19,7 @@ function findMax() {
   let max = 0;
   nums.forEach(i => {
     if (i > max) {
-        max = i;
+      max = i;
     }
   });
   return max;
