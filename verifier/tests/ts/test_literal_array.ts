@@ -14,28 +14,28 @@
  */
 
 class ClassB {
-    bProperty: string;
+  bProperty: string;
 
-    constructor(bProp: string) {
-      this.bProperty = bProp;
-    }
+  constructor(bProp: string) {
+    this.bProperty = bProp;
+  }
 
-    bMethod() {
-      console.log("Method from ClassB");
-    }
+  bMethod() {
+    console.log("Method from ClassB");
+  }
 }
-  
+
 class ClassA {
-    classBInstance: ClassB;
+  classBInstance: ClassB;
 
-    constructor() {
-      this.classBInstance = new ClassB("Some value for ClassB");
-    }
+  constructor() {
+    this.classBInstance = new ClassB("Some value for ClassB");
+  }
 
-    aMethod() {
-      console.log("Method from ClassA");
-      this.classBInstance.bMethod();
-    }
+  aMethod() {
+    console.log("Method from ClassA");
+    this.classBInstance.bMethod();
+  }
 }
 
 const objA = new ClassA();
