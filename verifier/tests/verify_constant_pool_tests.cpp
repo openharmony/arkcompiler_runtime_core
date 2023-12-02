@@ -308,10 +308,14 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
 
     size_t literal_id = 0x2f8; // The known literal_id in the abc file
 
-    size_t tag_offset = 4; // The literal tag offset
+    unsigned char tag = 0x05; // The literal tag of string in the abc file
+    unsigned char new_tag = 0x5c; // a invalid tag
 
-    unsigned char new_tag = 0x50; // a invalid tag
-    buffer[literal_id + tag_offset] = new_tag;
+    for (size_t i = literal_id; i < buffer.size(); ++i) {
+        if (buffer[i] == tag) {
+            buffer[i] = new_tag;
+        }
+    }
 
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_008.abc";
     GenerateModifiedAbc(buffer, target_file_name);
