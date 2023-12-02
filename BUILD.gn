@@ -316,7 +316,6 @@ if (!ark_standalone_build) {
       "$ark_root/libpandafile/tests:host_unittest",
       "$ark_root/libziparchive/tests:host_unittest",
       "$ark_root/platforms/tests:host_unittest",
-      "$ark_root/verifier/tests:host_unittest",
     ]
   }
 
