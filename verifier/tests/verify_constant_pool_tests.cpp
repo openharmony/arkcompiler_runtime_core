@@ -343,8 +343,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_009, TestSize.Level1)
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    std::vector<unsigned char> new_str = {'a','b','c', 'd'};
-    std::vector<unsigned char> str = {'a','g','e'}; // The known string in the literal array
+    std::vector<unsigned char> new_str = {'a', 'b', 'c', 'd'};
+    std::vector<unsigned char> str = {'a', 'g', 'e'}; // The known string in the literal array
     for (size_t i = 0; i < buffer.size(); ++i) {
         if (buffer[i] == str[0] && buffer[i + 1] == str[1] && buffer[i + 2] == str[2]) {
             buffer[i] = new_str[0];
