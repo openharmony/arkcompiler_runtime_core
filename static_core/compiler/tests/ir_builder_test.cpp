@@ -320,7 +320,11 @@ public:
         {
             PARAMETER(0U, 0U);
             INS(0U).SetType(type);
-            CONSTANT(2U, 0U).s64();
+            if constexpr (IS_OBJ) {
+                NULLPTR(2U);
+            } else {
+                CONSTANT(2U, 0U).s64();
+            }
 
             BASIC_BLOCK(2U, 3U, 4U)
             {

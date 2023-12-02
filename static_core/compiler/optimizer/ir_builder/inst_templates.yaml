@@ -111,7 +111,11 @@ templates:
     % if inst.acc_and_operands.size > 2
     inst->SetInput(1, GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()));
     % else
+    %   if inst.mnemonic.include? "obj"
+    inst->SetInput(1, graph_->GetOrCreateNullPtr());
+    %   else
     inst->SetInput(1, FindOrCreateConstant(0));
+    %   end
     % end
     inst->SetInput(0, GetDefinitionAcc());
     auto inst_jump = graph_->CreateInstIfImm(DataType::NO_TYPE, GetPc(instruction->GetAddress()), inst, 0, 
