@@ -31,10 +31,11 @@ namespace panda::verifier {
 
 using Opcode = BytecodeInstruction::Opcode;
 
-enum class ConstPoolType : uint8_t {
-    CONSTPOOLIDX = 0x00,
-    CONSTPOOLCONTEXT = 0x01,
-    COLLECTALLMETHODIDS = 0x02
+enum class ActionType {
+    CHECKCONSTPOOL,
+    CHECKCONSTPOOLIDX,
+    CHECKCONSTPOOLCONTENT,
+    COLLECTMETHODIDS,
 };
 
 class Verifier {
@@ -47,12 +48,14 @@ public:
     bool VerifyChecksum();
     bool VerifyConstantPool();
     bool VerifyRegisterIndex();
+    bool VerifyConstantPoolIndex();
     bool VerifyConstantPoolContent();
 private:
     void GetMethodIds();
     void GetLiteralIds();
-    bool CheckConstantPool(verifier::ConstPoolType type);
+    bool CheckConstantPool(verifier::ActionType type);
     size_t GetVRegCount(const BytecodeInstruction &bc_ins);
+    bool CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id);
     bool VerifyMethodId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
     bool CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx);
     std::optional<int64_t> GetFirstImmFromInstruction(const BytecodeInstruction &bc_ins);
@@ -77,7 +80,6 @@ private:
 
     std::unique_ptr<const panda_file::File> file_;
     std::vector<panda_file::File::EntityId> method_ids_;
-    std::vector<panda_file::File::EntityId> all_method_ids_;
     std::vector<uint32_t> literal_ids_;
     static constexpr size_t DEFAULT_ARGUMENT_NUMBER = 3;
     static constexpr uint32_t FILE_CONTENT_OFFSET = 12U;
