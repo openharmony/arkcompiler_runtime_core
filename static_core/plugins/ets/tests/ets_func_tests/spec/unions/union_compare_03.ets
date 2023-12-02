@@ -26,10 +26,10 @@ class A {}
 function main(): void {
     let a: Margin = 5
     let b: Margin = 6
-    assert a < b
-    assert b > a
+    assert (a as number) < b as number
+    assert b as number > a as number
     
     let c: Margin = 5
-    assert a <= c
-    assert c >= a
+    assert a as number <= c as number
+    assert c as number >= a as number
 }

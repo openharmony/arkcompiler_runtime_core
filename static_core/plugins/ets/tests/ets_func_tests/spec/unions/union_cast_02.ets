@@ -23,6 +23,6 @@ type Margin = number | string
 
 function main(): void {
     let a3: number = 5
-    let b3: Margin = a3 as Margin // should work
+    let b3: Margin = a3 as Margin
     assert b3 == 5
 }

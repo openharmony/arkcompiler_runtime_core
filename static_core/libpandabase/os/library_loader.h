@@ -32,6 +32,17 @@
 namespace panda::os::library_loader {
 class LibraryHandle;
 
+#if PANDA_TARGET_MACOS
+constexpr auto DYNAMIC_LIBRARY_PREFIX = "lib";
+constexpr auto DYNAMIC_LIBRARY_SUFFIX = ".dylib";
+#elif PANDA_TARGET_WINDOWS
+constexpr auto DYNAMIC_LIBRARY_PREFIX = "";
+constexpr auto DYNAMIC_LIBRARY_SUFFIX = ".dll";
+#else
+constexpr auto DYNAMIC_LIBRARY_PREFIX = "lib";
+constexpr auto DYNAMIC_LIBRARY_SUFFIX = ".so";
+#endif
+
 PANDA_PUBLIC_API Expected<LibraryHandle, Error> Load(std::string_view filename);
 
 PANDA_PUBLIC_API Expected<void *, Error> ResolveSymbol(const LibraryHandle &handle, std::string_view name);

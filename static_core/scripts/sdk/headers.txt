@@ -9,3 +9,4 @@ plugins/ecmascript/libpandabase
 runtime
 third_party/utils_native/base/include
 verification/public.h
+tools/es2panda/public/es2panda_lib.h

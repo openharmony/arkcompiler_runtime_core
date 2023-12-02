@@ -87,6 +87,7 @@ build-sdk/sdk/linux_host_tools/lib/libarkfile.so
 build-sdk/sdk/linux_host_tools/lib/libarkruntime.so
 build-sdk/sdk/linux_host_tools/lib/libarkziparchive.so
 build-sdk/sdk/linux_host_tools/lib/libc_secshared.so
+build-sdk/sdk/linux_host_tools/lib/libe2p_test_plugin.so
 build-sdk/sdk/linux_host_tools/lib/libes2panda-lib.so
 build-sdk/sdk/linux_host_tools/lib/libes2panda-public.so
 build-sdk/sdk/linux_host_tools/lib/libhmicui18n.z.so
@@ -106,6 +107,7 @@ build-sdk/sdk/ohos_arm64/include/platforms
 build-sdk/sdk/ohos_arm64/include/plugins
 build-sdk/sdk/ohos_arm64/include/runtime
 build-sdk/sdk/ohos_arm64/include/third_party
+build-sdk/sdk/ohos_arm64/include/tools
 build-sdk/sdk/ohos_arm64/include/verification
 build-sdk/sdk/ohos_arm64/lib
 build-sdk/sdk/ohos_arm64/lib/libarkaotmanager.so
@@ -118,6 +120,7 @@ build-sdk/sdk/ohos_arm64/lib/libarkruntime_static.a
 build-sdk/sdk/ohos_arm64/lib/libarkziparchive.so
 build-sdk/sdk/ohos_arm64/lib/libc_secshared.so
 build-sdk/sdk/ohos_arm64/lib/libdprof.a
+build-sdk/sdk/ohos_arm64/lib/libe2p_test_plugin.so
 build-sdk/sdk/ohos_arm64/lib/libes2panda-lib.so
 build-sdk/sdk/ohos_arm64/lib/libets_interop_js_napi.so
 build-sdk/sdk/ohos_arm64/lib/libhmicui18n.z.so

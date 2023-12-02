@@ -119,6 +119,8 @@ spec/unions/union01.ets
 spec/unions/union_assignment_n_01.ets
 spec/unions/union_assignment_n_02.ets
 spec/unions/union_assignment_n_03.ets
+spec/unions/union_binary_n_01.ets
+spec/unions/union_binary_n_02.ets
 spec/unions/union_cast_n_01.ets
 spec/unions/union_cast_n_02.ets
 spec/unions/union_cast_n_03.ets
@@ -130,8 +132,11 @@ spec/unions/union_compare_n_05.ets
 spec/unions/union_compare_n_06.ets
 spec/unions/union_compare_n_07.ets
 spec/unions/union_compare_n_08.ets
+spec/unions/union_compare_n_09.ets
 spec/unions/union_param_n_01.ets
 spec/unions/union_param_n_02.ets
+spec/unions/union_plus_n_01.ets
+spec/unions/union_plus_n_02.ets
 spec/unions/union_return_n_01.ets
 spec/unions/union_return_n_02.ets
 spec/unions/union_return_n_03.ets
@@ -139,8 +144,6 @@ spec/unions/union_return_n_04.ets
 spec/unions/union_return_n_05.ets
 spec/unions/union_return_n_06.ets
 spec/unions/union_return_n_07.ets
-### Issue 14158
-spec/unions/union_compare_01.ets
 ### Issue 14165
 spec/unions/union_compare_02_01.ets
 spec/unions/union_compare_02_02.ets
@@ -179,7 +182,7 @@ spec/unions/union_cast_05.ets
 spec/unions/union_cast_06.ets
 ### Issue 14441
 spec/unions/union_compare_03.ets
-spec/unions/union_compare_04.ets 
+spec/unions/union_compare_04.ets
 ### Issue 14259
 spec/unions/union_assignment_08.ets
 spec/unions/union_assignment_09.ets
@@ -189,12 +192,18 @@ spec/unions/union_param_10_01.ets
 spec/unions/union_param_10_02.ets
 spec/unions/union_param_10_03.ets
 ### End of Unions
+
 ### Feature: Rest Params
 ### Issue 14111
 spec/rest-params/Issue14111.ets
 spec/rest-params/Issue14187.ets
 spec/rest-params/BadTypeError.ets
 ### Issue 14111 end
+### Issue 14564
+spec/rest-params/RestParamsTest_PassInterfaceArgs.ets
+spec/rest-params/RestParamsTest_PassLambdas_0.ets
+spec/rest-params/RestParamsTest_PassLambdas_1.ets
+### Issue 14564 end
 ### End Of Feature: Rest Params
 ### undefined functionality is not implemented
 spec/conditional-expression/nullish_expr/expr/undefined-object-expression.ets
@@ -229,4 +238,71 @@ spec/trailing_lambdas/trailing_stmt_06.ets
 ### Issue 14427
 spec/trailing_lambdas/trailing_stmt_07.ets
 ### End of Trailing lambda
+### ArkUI struct
+### Issue 14040 -> Annotations not yet implemented
+spec/struct-type/anno/test-builder-func_0.ets
+spec/struct-type/anno/test-builder-func_1.ets
+spec/struct-type/anno/test-struct-builder-param.ets
+spec/struct-type/anno/test-struct-component.ets
+spec/struct-type/anno/test-struct-entry.ets
+spec/struct-type/anno/test-struct-field-consume.ets
+spec/struct-type/anno/test-struct-field-link.ets
+spec/struct-type/anno/test-struct-field-local-storage-link.ets
+spec/struct-type/anno/test-struct-field-local-storage-prop.ets
+spec/struct-type/anno/test-struct-field-prop.ets
+spec/struct-type/anno/test-struct-field-provide.ets
+spec/struct-type/anno/test-struct-field-state.ets
+spec/struct-type/anno/test-struct-field-watch.ets
+spec/struct-type/builder/test-struct-call-conditional-in-build.ets
+spec/struct-type/builder/test-struct-call-function-in-build_2.ets
+spec/struct-type/builder/test-struct-call-function-in-build_3.ets
+spec/struct-type/builder/test-struct-call-function-in-build_0.ets
+spec/struct-type/builder/test-struct-call-function-in-build_1.ets
+spec/struct-type/builder/test-struct-call-loop-in-build_0.ets
+spec/struct-type/builder/test-struct-call-loop-in-build_1.ets
+spec/struct-type/builder/test-struct-call-loop-in-build_2.ets
+spec/struct-type/builder/test-struct-call-new-in-build.ets
+spec/struct-type/builder/test-struct-define-in-build.ets
+spec/struct-type/builder/test-struct-no-build-func.ets
+spec/struct-type/test-struct-define-constructor.ets
+spec/struct-type/test-struct-implements-interface.ets
+spec/struct-type/test-struct-invoke_0.ets
+spec/struct-type/test-struct-invoke_1.ets
+spec/struct-type/test-use-struct-as-name_2.ets
+### EOF Issue 14040
+### Negative tests
+spec/struct-type/test-class-extends-struct.ets
+spec/struct-type/test-struct-extends-class.ets
+spec/struct-type/test-struct-extends-interface.ets
+spec/struct-type/test-struct-no-constructor.ets
+spec/struct-type/test-use-struct-with-not-user-type_0.ets
+spec/struct-type/test-use-struct-with-not-user-type_1.ets
+spec/struct-type/test-use-struct-with-not-user-type_2.ets
+### EOF Negative tests
+### EOF ArkUI struct
 
+### Start string enum
+### Issue 12947
+spec/string_enum/enumCallToStringFromAsyncLambda.ets
+### End string enum
+
+### lambda issues begin
+### Issue 14018
+spec/lambda/callArrayLengthFromLambda.ets
+### Issue 14054
+spec/lambda/callAsyncMethodFromAsyncLambda1.ets
+spec/lambda/callMethodFromAsyncLambda1.ets
+### Issue 14209
+spec/lambda/callAsyncMethodFromAsyncLambda2.ets
+spec/lambda/callMethodFromAsyncLambda2.ets
+### Issue 14131
+spec/lambda/callRegularLambdaWithAsyncOverload.ets
+### Issue 14234
+spec/lambda/resultFromAwait.ets
+spec/lambda/resultFromAwaitResolution.ets
+### Issue 14235
+spec/lambda/compareBooleanWithTrue.ets
+### Negative tests
+spec/lambda/incorrectAsyncLambdaReturnValue.ets
+spec/lambda/incorrectVariableDeclaration.ets
+### lambda issues end

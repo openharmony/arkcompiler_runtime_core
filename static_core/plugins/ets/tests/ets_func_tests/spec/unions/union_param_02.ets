@@ -26,5 +26,5 @@ function format(margin: Margin){
 }
 
 function main(): void {
-    format(5.5) // should work!
+    format(5.5)
 }

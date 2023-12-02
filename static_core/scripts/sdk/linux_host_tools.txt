@@ -13,6 +13,7 @@ lib/libarkfile.so
 lib/libarkruntime.so
 lib/libarkziparchive.so
 lib/libc_secshared.so
+lib/libe2p_test_plugin.so
 lib/libes2panda-lib.so
 lib/libes2panda-public.so
 lib/libhmicui18n.z.so
