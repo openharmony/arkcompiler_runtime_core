@@ -16,32 +16,32 @@
 let nums = [2, 3, 1, 4, 8, 2];
 
 function findMax() {
-    let max = 0;
-    nums.forEach(i => {
-        if (i > max) {
-            max = i;
-        }
-    });
-    return max;
+  let max = 0;
+  nums.forEach(i => {
+    if (i > max) {
+        max = i;
+    }
+  })
+  return max;
 }
 
 class Fruit {
-    constructor(name, color) {
-        this.name = name;
-        this.color = color;
-    }
+  constructor(name, color) {
+    this.name = name;
+    this.color = color;
+  }
 }
 
 let apple = new Fruit('apple', 'red');
 
 let dog = {
-    name: 'lucky',
-    age: 2,
-    color: 'yellow',
+  name: 'lucky',
+  age: 2,
+  color: 'yellow',
 };
 
 for (let i = 0; i < 10; i++) {
-    if (i === 3) {
-        break;
-    }
+  if (i === 3) {
+    break;
+  }
 }
