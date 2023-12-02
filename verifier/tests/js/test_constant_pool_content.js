@@ -21,7 +21,7 @@ function findMax() {
     if (i > max) {
         max = i;
     }
-  })
+  });
   return max;
 }
 
