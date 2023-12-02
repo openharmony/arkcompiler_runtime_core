@@ -200,7 +200,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_005, TestSize.Level1)
         }
     }
 
-    std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_005.abc";
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_005.abc";
     GenerateModifiedAbc(buffer, target_file_name);
     base_file.close();
 
@@ -354,7 +354,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_009, TestSize.Level1)
         }
     }
 
-    std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_009.abc";
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_009.abc";
     GenerateModifiedAbc(buffer, target_file_name);
     base_file.close();
 
@@ -392,7 +392,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
     buffer[literal_id + literal_id_offset] = new_literal_id[0];
     buffer[literal_id + literal_id_offset + 1] = new_literal_id[1];
 
-    std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_010.abc";
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_010.abc";
     GenerateModifiedAbc(buffer, target_file_name);
     base_file.close();
 
@@ -430,7 +430,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_011, TestSize.Level1)
     buffer[literal_id + method_id_offset] = new_method_id[0];
     buffer[literal_id + method_id_offset + 1] = new_method_id[1];
 
-    std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_011.abc";
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_011.abc";
     GenerateModifiedAbc(buffer, target_file_name);
     base_file.close();
 
