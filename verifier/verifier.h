@@ -62,6 +62,7 @@ private:
     bool VerifyMethodIdInLiteralArray(const uint32_t &id);
     bool VerifyStringIdInLiteralArray(const uint32_t &id);
     bool VerifyLiteralIdInLiteralArray(const uint32_t &id);
+    bool VerifySingleLiteralArray(const panda_file::File::EntityId &literal_id);
     bool VerifyLiteralArrays();
     bool VerifyStringId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
     bool IsJumpInstruction(const Opcode &ins_opcode);
