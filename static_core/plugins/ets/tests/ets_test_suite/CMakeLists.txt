@@ -11,6 +11,67 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+function(add_ets_test test_suite)
+    set(prefix ARG)
+    set(noValues SKIP_ARM32_COMPILER)
+    set(singleValues FILE TEST_NAME)
+    set(multiValues OPTIONS MODE)
+    cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
+
+    # Create target to run one test in different modes(e.g. ets_test_suite_coroutines_launch_n_workers)
+    get_filename_component(file_name "${ARG_FILE}" NAME_WE)
+    set(all_modes_tests ${test_suite}_${file_name})
+    if(NOT TARGET ${all_modes_tests})
+        add_custom_target(${all_modes_tests})
+        add_dependencies(${test_suite} ${all_modes_tests})
+    endif()
+
+    set(test_in "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_FILE}")
+    set(test_out_dir "${CMAKE_CURRENT_BINARY_DIR}/${ARG_TEST_NAME}")
+
+    if ("INT" IN_LIST ARG_MODE)
+        set(target ${test_suite}_${ARG_TEST_NAME}-ets-int)
+        run_int_ets_code(${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        add_dependencies(${all_modes_tests} ${target})
+    endif()
+
+    # Compiler doesn't support some instruction in arm32 mode(launch)
+    if (ARG_SKIP_ARM32_COMPILER AND PANDA_TARGET_ARM32)
+        return()
+    endif()
+
+    set(targets)
+    if ("AOT" IN_LIST ARG_MODE)
+        set(target ${test_suite}_${ARG_TEST_NAME}-ets-aot)
+        LIST(APPEND targets ${target})
+        run_aot_ets_code(aot ${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+    endif()
+
+    if ("LLVMAOT" IN_LIST ARG_MODE AND PANDA_LLVMAOT)
+        set(target ${test_suite}_${ARG_TEST_NAME}-ets-llvmaot)
+        LIST(APPEND targets ${target})
+        run_aot_ets_code(llvm ${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+    endif()
+
+    if ("JIT" IN_LIST ARG_MODE)
+        set(target ${test_suite}_${ARG_TEST_NAME}-ets-jit)
+        LIST(APPEND targets ${target})
+        run_jit_ets_code(${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+    endif()
+
+    if ("JITOSR" IN_LIST ARG_MODE AND PANDA_TARGET_ARM64)
+        set(target ${test_suite}_${ARG_TEST_NAME}-ets-jit-osr)
+        LIST(APPEND targets ${target})
+        run_jit_osr_ets_code(${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+    endif()
+
+    foreach(target ${targets})
+        if (TARGET ${target})
+            add_dependencies(${all_modes_tests} ${target})
+        endif()
+    endforeach()
+endfunction()
+
 add_subdirectory(inheritance)
 add_subdirectory(strings)
 add_subdirectory(coroutines)
