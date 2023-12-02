@@ -197,6 +197,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_005, TestSize.Level1)
     for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
         if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
             buffer[i + 1] = new_slot_number;
+            break;
         }
     }
 
@@ -235,6 +236,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
     for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
         if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
             buffer[i] = new_opcode;
+            break;
         }
     }
 
@@ -273,6 +275,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
     for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
         if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
             buffer[i + 1] = new_imm8;
+            break;
         }
     }
 
@@ -314,6 +317,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
     for (size_t i = literal_id; i < buffer.size(); ++i) {
         if (buffer[i] == tag) {
             buffer[i] = new_tag;
+            break;
         }
     }
 
@@ -355,6 +359,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_009, TestSize.Level1)
             buffer[i + 1] = new_str[1];
             buffer[i + 2] = new_str[2];
             buffer[i + 3] = new_str[3];
+            break;
         }
     }
 
@@ -390,11 +395,17 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
 
     size_t literal_id = 0x578; // The known literal_id in the abc file
 
-    size_t literal_id_offset = 10; // The literal id offset
-
+    // The known literal_id in the literal array of the abc file
+    std::vector<unsigned char> inner_literal_id = {0xe9, 0x04};
     std::vector<unsigned char> new_literal_id = {0x30, 0xdd};
-    buffer[literal_id + literal_id_offset] = new_literal_id[0];
-    buffer[literal_id + literal_id_offset + 1] = new_literal_id[1];
+
+    for (size_t i = literal_id; i < buffer.size(); ++i) {
+        if (buffer[i] == inner_literal_id[0] && buffer[i+1] == inner_literal_id[1]) {
+            buffer[i] = new_literal_id[0];
+            buffer[i + 1] = new_literal_id[1];
+            break;
+        }
+    }
 
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_010.abc";
     GenerateModifiedAbc(buffer, target_file_name);
