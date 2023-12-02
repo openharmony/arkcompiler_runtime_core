@@ -513,7 +513,7 @@ bool Verifier::VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const By
 }
 
 bool Verifier::GetIcSlotFromInstruction(const BytecodeInstruction &bc_ins, uint32_t &first_slot_index,
-                                           bool &has_slot, bool &is_two_slot)
+                                        bool &has_slot, bool &is_two_slot)
 {
     std::optional<uint64_t> first_imm = {};
     if (bc_ins.HasFlag(BytecodeInstruction::Flags::ONE_SLOT)) {
