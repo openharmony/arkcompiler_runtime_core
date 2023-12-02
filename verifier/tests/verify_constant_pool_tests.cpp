@@ -43,7 +43,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_001, TestSize.Level1)
 {
     const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     panda::verifier::Verifier ver {file_name};
-
+    ver.CollectIdInfos();
     EXPECT_TRUE(ver.VerifyConstantPool());
 }
 
@@ -58,6 +58,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPool());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -82,6 +83,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPool());
     }
 }
@@ -97,6 +99,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPool());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -123,6 +126,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPool());
     }
 }
@@ -138,6 +142,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPool());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -162,6 +167,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPool());
     }
 }
@@ -177,6 +183,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_005, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -199,6 +206,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_005, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
@@ -214,6 +222,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -235,6 +244,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
@@ -250,6 +260,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -271,6 +282,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
@@ -286,6 +298,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -293,7 +306,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    size_t literal_id = 0x02ea; // The known literal_id in the abc file
+    size_t literal_id = 0x2f8; // The known literal_id in the abc file
 
     size_t tag_offset = 4; // The literal tag offset
 
@@ -306,6 +319,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
@@ -321,6 +335,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_009, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -345,6 +360,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_009, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
@@ -360,6 +376,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_literal_array.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -367,7 +384,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    size_t literal_id = 0x056a; // The known literal_id in the abc file
+    size_t literal_id = 0x578; // The known literal_id in the abc file
 
     size_t literal_id_offset = 10; // The literal id offset
 
@@ -381,6 +398,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
@@ -396,6 +414,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_011, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_literal_array.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
@@ -417,6 +436,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_011, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
