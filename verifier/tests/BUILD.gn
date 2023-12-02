@@ -35,9 +35,7 @@ verifier_test_js_files = [
   "test_constant_pool_content",
 ]
 
-verifier_test_ts_files = [
-  "test_literal_array",
-]
+verifier_test_ts_files = [ "test_literal_array" ]
 
 test_js_path = "//arkcompiler/runtime_core/verifier/tests/js/"
 test_ts_path = "//arkcompiler/runtime_core/verifier/tests/ts/"
@@ -63,9 +61,7 @@ foreach(file, verifier_test_ts_files) {
     src_js = rebase_path(test_ts)
     dst_file = rebase_path(test_abc)
 
-    extra_args = [
-      "--type-extractor",
-    ]
+    extra_args = [ "--type-extractor" ]
 
     in_puts = [ test_ts ]
     out_puts = [ test_abc ]
