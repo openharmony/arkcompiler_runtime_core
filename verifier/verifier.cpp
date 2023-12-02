@@ -173,18 +173,18 @@ bool Verifier::CheckConstantPool(const verifier::ConstPoolType type)
         const panda_file::File::EntityId record_id {class_id};
         if (!file_->IsExternal(record_id)) {
             panda_file::ClassDataAccessor class_accessor {*file_, record_id};
-            bool valid = true;
+            bool check_res = true;
             class_accessor.EnumerateMethods([&](panda_file::MethodDataAccessor &method_accessor) -> void {
                 switch(type) {
                     case verifier::ConstPoolType::CONSTPOOLIDX: {
                         if (!CheckConstantPoolIndex(method_accessor.GetMethodId())) {
-                            valid = false;
+                            check_res &= false;
                         }
                         break;
                     }
                     case verifier::ConstPoolType::CONSTPOOLCONTEXT: {
                         if (!CheckConstantPoolMethodContent(method_accessor.GetMethodId())) {
-                            valid = false;
+                            check_res &= false;
                         }
                         break;
                     }
@@ -193,17 +193,39 @@ bool Verifier::CheckConstantPool(const verifier::ConstPoolType type)
                         break;
                     }
                     default: {
-                        LOG(ERROR, VERIFIER) << "instruction with content error!";
                         break;
                     }
                 }
             });
-            if (valid == false) {
+            if (!check_res) {
                 return false;
             }
         }
     }
 
+    return true;
+}
+
+size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
+{
+    size_t idx = 0; // Represents the idxTH register index in an instruction
+    BytecodeInstruction::Format format = bc_ins.GetFormat();
+    while (bc_ins.HasVReg(format, idx)) {
+        idx++;
+    }
+    return idx;
+}
+
+bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx)
+{
+    for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
+        uint16_t reg_idx = bc_ins.GetVReg(idx);
+        if (reg_idx >= max_reg_idx) {
+            LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
+                                 << reg_idx << ")" << std::endl;
+            return false;
+        }
+    }
     return true;
 }
 
@@ -297,83 +319,90 @@ bool Verifier::VerifyLiteralIdInLiteralArray(const uint32_t &id)
     return true;
 }
 
+bool Verifier::VerifySingleLiteralArray(const panda_file::File::EntityId &literal_id)
+{
+    auto sp = file_->GetSpanFromId(literal_id);
+    const auto literal_vals_num = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
+    for (size_t i = 0; i < literal_vals_num; i += 2U) { // 2u skip literal item
+        const auto tag = static_cast<panda_file::LiteralTag>(panda_file::helpers::Read<panda_file::TAG_SIZE>(&sp));
+        switch (tag) {
+            case panda_file::LiteralTag::TAGVALUE:
+            case panda_file::LiteralTag::BOOL:
+            case panda_file::LiteralTag::ACCESSOR:
+            case panda_file::LiteralTag::NULLVALUE:
+            case panda_file::LiteralTag::BUILTINTYPEINDEX: {
+                sp = sp.SubSpan(sizeof(uint8_t)); // run next sp
+                break;
+            }
+            case panda_file::LiteralTag::METHODAFFILIATE: {
+                sp = sp.SubSpan(sizeof(uint16_t));
+                break;
+            }
+            case panda_file::LiteralTag::INTEGER:
+            case panda_file::LiteralTag::FLOAT:
+            case panda_file::LiteralTag::GENERATORMETHOD:
+            case panda_file::LiteralTag::LITERALBUFFERINDEX:
+            case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
+                sp = sp.SubSpan(sizeof(uint32_t));
+                break;
+            }
+            case panda_file::LiteralTag::DOUBLE: {
+                sp = sp.SubSpan(sizeof(uint64_t));
+                break;
+            }
+            case panda_file::LiteralTag::ARRAY_U1:
+            case panda_file::LiteralTag::ARRAY_U8:
+            case panda_file::LiteralTag::ARRAY_I8:
+            case panda_file::LiteralTag::ARRAY_U16:
+            case panda_file::LiteralTag::ARRAY_I16:
+            case panda_file::LiteralTag::ARRAY_U32:
+            case panda_file::LiteralTag::ARRAY_I32:
+            case panda_file::LiteralTag::ARRAY_U64:
+            case panda_file::LiteralTag::ARRAY_I64:
+            case panda_file::LiteralTag::ARRAY_F32:
+            case panda_file::LiteralTag::ARRAY_F64:
+            case panda_file::LiteralTag::ARRAY_STRING: {
+                i = literal_vals_num;
+                break;
+            }
+            case panda_file::LiteralTag::STRING: {
+                const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
+                if (!VerifyStringIdInLiteralArray(value)) {
+                    return false;
+                }
+                break;
+            }
+            case panda_file::LiteralTag::METHOD: {
+                const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
+                if (!VerifyMethodIdInLiteralArray(value)) {
+                    return false;
+                }
+                break;
+            }
+            case panda_file::LiteralTag::LITERALARRAY: {
+                const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
+                if (!VerifyLiteralIdInLiteralArray(value)) {
+                    return false;
+                }
+                break;
+            }
+            default: {
+                LOG(ERROR, VERIFIER) << "Invalid literal tag";
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 bool Verifier::VerifyLiteralArrays()
 {
     for (const auto &arg_literal_id : literal_ids_) {
         const auto literal_id = panda_file::File::EntityId(arg_literal_id);
-        auto sp = file_->GetSpanFromId(literal_id);
-        const auto literal_vals_num = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
-        for (size_t i = 0; i < literal_vals_num; i += 2U) { // 2u skip literal item
-            const auto tag = static_cast<panda_file::LiteralTag>(panda_file::helpers::Read<panda_file::TAG_SIZE>(&sp));
-            switch (tag) {
-                case panda_file::LiteralTag::TAGVALUE:
-                case panda_file::LiteralTag::BOOL:
-                case panda_file::LiteralTag::ACCESSOR:
-                case panda_file::LiteralTag::NULLVALUE:
-                case panda_file::LiteralTag::BUILTINTYPEINDEX: {
-                    sp = sp.SubSpan(sizeof(uint8_t)); // run next sp
-                    break;
-                }
-                case panda_file::LiteralTag::METHODAFFILIATE: {
-                    sp = sp.SubSpan(sizeof(uint16_t));
-                    break;
-                }
-                case panda_file::LiteralTag::INTEGER:
-                case panda_file::LiteralTag::FLOAT:
-                case panda_file::LiteralTag::GENERATORMETHOD:
-                case panda_file::LiteralTag::LITERALBUFFERINDEX:
-                case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
-                    sp = sp.SubSpan(sizeof(uint32_t));
-                    break;
-                }
-                case panda_file::LiteralTag::DOUBLE: {
-                    sp = sp.SubSpan(sizeof(uint64_t));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_U1:
-                case panda_file::LiteralTag::ARRAY_U8:
-                case panda_file::LiteralTag::ARRAY_I8:
-                case panda_file::LiteralTag::ARRAY_U16:
-                case panda_file::LiteralTag::ARRAY_I16:
-                case panda_file::LiteralTag::ARRAY_U32:
-                case panda_file::LiteralTag::ARRAY_I32:
-                case panda_file::LiteralTag::ARRAY_U64:
-                case panda_file::LiteralTag::ARRAY_I64:
-                case panda_file::LiteralTag::ARRAY_F32:
-                case panda_file::LiteralTag::ARRAY_F64:
-                case panda_file::LiteralTag::ARRAY_STRING: {
-                    i = literal_vals_num;
-                    break;
-                }
-                case panda_file::LiteralTag::STRING: {
-                    const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
-                    if (!VerifyStringIdInLiteralArray(value)) {
-                        return false;
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::METHOD: {
-                    const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
-                    if (!VerifyMethodIdInLiteralArray(value)) {
-                        return false;
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::LITERALARRAY: {
-                    const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
-                    if (!VerifyLiteralIdInLiteralArray(value)) {
-                        return false;
-                    }
-                    break;
-                }
-                default: {
-                    LOG(ERROR, VERIFIER) << "Invalid literal tag";
-                    return false;
-                }
-            }
+        if (!VerifySingleLiteralArray(literal_id)) {
+            return false;
         }
     }
-
     return true;
 }
 
@@ -600,29 +629,6 @@ bool Verifier::CheckConstantPoolIndex(const panda_file::File::EntityId &method_i
             }
         }
         bc_ins = bc_ins.GetNext();
-    }
-    return true;
-}
-
-size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
-{
-    size_t idx = 0; // Represents the idxTH register index in an instruction
-    BytecodeInstruction::Format format = bc_ins.GetFormat();
-    while (bc_ins.HasVReg(format, idx)) {
-        idx++;
-    }
-    return idx;
-}
-
-bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx)
-{
-    for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
-        uint16_t reg_idx = bc_ins.GetVReg(idx);
-        if (reg_idx >= max_reg_idx) {
-            LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
-                                 << reg_idx << ")" << std::endl;
-            return false;
-        }
     }
     return true;
 }
