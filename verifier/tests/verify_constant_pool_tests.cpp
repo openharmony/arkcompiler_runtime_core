@@ -238,7 +238,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
         }
     }
 
-    std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_006.abc";
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_006.abc";
     GenerateModifiedAbc(buffer, target_file_name);
     base_file.close();
 
@@ -276,7 +276,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
         }
     }
 
-    std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_007.abc";
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_007.abc";
     GenerateModifiedAbc(buffer, target_file_name);
     base_file.close();
 
@@ -313,7 +313,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
     unsigned char new_tag = 0x50; // a invalid tag
     buffer[literal_id + tag_offset] = new_tag;
 
-    std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_008.abc";
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_008.abc";
     GenerateModifiedAbc(buffer, target_file_name);
     base_file.close();
 
