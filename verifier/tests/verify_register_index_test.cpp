@@ -47,6 +47,7 @@ HWTEST_F(VerifierRegisterTest, verifier_register_001, TestSize.Level1)
 {
     const std::string file_name = GRAPH_TEST_ABC_DIR "test_register_index.abc";
     panda::verifier::Verifier ver {file_name};
+    ver.CollectIdInfos();
     EXPECT_TRUE(ver.VerifyRegisterIndex());
 }
 
@@ -61,6 +62,7 @@ HWTEST_F(VerifierRegisterTest, verifier_register_002, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_register_index.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyRegisterIndex());
     }
     // the new register index in the abc file
@@ -87,6 +89,7 @@ HWTEST_F(VerifierRegisterTest, verifier_register_002, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {tar_file_name};
+        ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyRegisterIndex());
     }
 }
