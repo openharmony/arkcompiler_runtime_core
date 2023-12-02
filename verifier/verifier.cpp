@@ -170,7 +170,8 @@ void Verifier::GetLiteralIds()
     }
 }
 
-bool Verifier::CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id) {
+bool Verifier::CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id)
+{
     switch (type) {
         case verifier::ActionType::CHECKCONSTPOOL: {
             return CheckConstantPoolIndex(method_id) && CheckConstantPoolMethodContent(method_id);
