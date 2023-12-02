@@ -70,9 +70,9 @@ private:
     bool VerifyStringId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
     bool IsJumpInstruction(const Opcode &ins_opcode);
     bool VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const BytecodeInstruction &bc_ins_last,
-                                     const BytecodeInstruction &bc_ins_first);
+                               const BytecodeInstruction &bc_ins_first);
     bool GetIcSlotFromInstruction(const BytecodeInstruction &bc_ins,uint32_t &first_slot_index, bool &has_slot,
-                                     bool &is_two_slot);
+                                  bool &is_two_slot);
     bool VerifySlotNumber(panda_file::MethodDataAccessor &method_accessor, const uint32_t &slot_number,
                           const panda_file::File::EntityId &method_id);
     bool CheckConstantPoolMethodContent(const panda_file::File::EntityId &method_id);
