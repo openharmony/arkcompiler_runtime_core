@@ -21,7 +21,7 @@ class ClassB {
   }
 
   bMethod() {
-    console.log("Method from ClassB");
+    console.log('Method from ClassB');
   }
 }
 
@@ -29,11 +29,11 @@ class ClassA {
   classBInstance: ClassB;
 
   constructor() {
-    this.classBInstance = new ClassB("Some value for ClassB");
+    this.classBInstance = new ClassB('Some value for ClassB');
   }
 
   aMethod() {
-    console.log("Method from ClassA");
+    console.log('Method from ClassA');
     this.classBInstance.bMethod();
   }
 }
