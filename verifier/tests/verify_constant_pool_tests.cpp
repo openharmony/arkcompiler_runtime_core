@@ -43,8 +43,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_001, TestSize.Level1)
 {
     const std::string file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     panda::verifier::Verifier ver {file_name};
-
-    EXPECT_TRUE(ver.VerifyConstantPool());
+    ver.CollectIdInfos();
+    EXPECT_TRUE(ver.VerifyConstantPoolIndex());
 }
 
 /**
@@ -58,7 +58,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
-        EXPECT_TRUE(ver.VerifyConstantPool());
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolIndex());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
@@ -82,7 +83,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
-        EXPECT_FALSE(ver.VerifyConstantPool());
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
     }
 }
 
@@ -97,7 +99,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
-        EXPECT_TRUE(ver.VerifyConstantPool());
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolIndex());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
@@ -123,7 +126,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
-        EXPECT_FALSE(ver.VerifyConstantPool());
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
     }
 }
 
@@ -138,7 +142,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
-        EXPECT_TRUE(ver.VerifyConstantPool());
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolIndex());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
@@ -162,33 +167,39 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
-        EXPECT_FALSE(ver.VerifyConstantPool());
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
     }
 }
 
 /**
 * @tc.name: verifier_constant_pool_005
-* @tc.desc: Verify the method content of the abc file.
+* @tc.desc: Verify the slot number of the abc file.
 * @tc.type: FUNC
 * @tc.require: file path and name
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_005, TestSize.Level1)
 {
-    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
-        EXPECT_TRUE(ver.VerifyConstantPool());
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
-    
-    std::vector<uint8_t> method_content = {0x02};
-    
-    uint32_t method_id = 0x000e; // The known method id in the abc file
 
-    buffer[method_id] = static_cast<unsigned char>(method_content[0]);
+    unsigned char new_slot_number = 0x13;
+    // The known instruction which contains slot number in the abc file
+    std::vector<unsigned char> opcode_imm8 = {0x1e, 0x11};
+    for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
+        if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
+            buffer[i + 1] = new_slot_number;
+            break;
+        }
+    }
 
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_005.abc";
     GenerateModifiedAbc(buffer, target_file_name);
@@ -196,33 +207,38 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_005, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
-        EXPECT_FALSE(ver.Verify());
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
 
 /**
 * @tc.name: verifier_constant_pool_006
-* @tc.desc: Verify the literal content of the abc file.
+* @tc.desc: Verify the format of the abc file.
 * @tc.type: FUNC
 * @tc.require: file path and name
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
 {
-    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
-        EXPECT_TRUE(ver.VerifyConstantPool());
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
-    
-    std::vector<uint8_t> literal_content = {0xcf};
-    
-    uint32_t literal_id = 0x28b; // The known literal id in the abc file
 
-    buffer[literal_id] = static_cast<unsigned char>(literal_content[0]);
+    unsigned char new_opcode = 0xff;
+    std::vector<unsigned char> opcode_imm8 = {0x4f, 0x17}; // The known instruction in the abc file
+    for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
+        if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
+            buffer[i] = new_opcode;
+            break;
+        }
+    }
 
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_006.abc";
     GenerateModifiedAbc(buffer, target_file_name);
@@ -230,33 +246,38 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
-        EXPECT_FALSE(ver.Verify());
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
 
 /**
 * @tc.name: verifier_constant_pool_007
-* @tc.desc: Verify the string content of the abc file.
+* @tc.desc: Verify the jump instruction of the abc file.
 * @tc.type: FUNC
 * @tc.require: file path and name
 */
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
 {
-    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
     {
         panda::verifier::Verifier ver {base_file_name};
-        EXPECT_TRUE(ver.VerifyConstantPool());
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
-    
-    std::vector<uint8_t> string_content = {0x4a};
-    
-    uint32_t string_id = 0x000c; // The known string id in the abc file
 
-    buffer[string_id] = static_cast<unsigned char>(string_content[0]);
+    unsigned char new_imm8 = 0x4f;
+    std::vector<unsigned char> opcode_imm8 = {0x4f, 0x17}; // The known jump instruction in the abc file
+    for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
+        if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
+            buffer[i + 1] = new_imm8;
+            break;
+        }
+    }
 
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_007.abc";
     GenerateModifiedAbc(buffer, target_file_name);
@@ -264,7 +285,180 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
-        EXPECT_FALSE(ver.Verify());
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolContent());
+    }
+}
+
+/**
+* @tc.name: verifier_constant_pool_008
+* @tc.desc: Verify the literal tag of the abc file.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
+{
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
+    {
+        panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolContent());
+    }
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
+
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    size_t literal_id = 0x2f8; // The known literal_id in the abc file
+
+    unsigned char tag = 0x05; // The literal tag of string in the abc file
+    unsigned char new_tag = 0x5c; // a invalid tag
+
+    for (size_t i = literal_id; i < buffer.size(); ++i) {
+        if (buffer[i] == tag) {
+            buffer[i] = new_tag;
+            break;
+        }
+    }
+
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_008.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
+
+    {
+        panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolContent());
+    }
+}
+
+/**
+* @tc.name: verifier_constant_pool_009
+* @tc.desc: Verify the literal string of the abc file.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(VerifierConstantPool, verifier_constant_pool_009, TestSize.Level1)
+{
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
+    {
+        panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolContent());
+    }
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
+
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    std::vector<unsigned char> new_str = {'a', 'b', 'c', 'd'};
+    std::vector<unsigned char> str = {'a', 'g', 'e'}; // The known string in the literal array
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        if (buffer[i] == str[0] && buffer[i + 1] == str[1] && buffer[i + 2] == str[2]) {
+            buffer[i] = new_str[0];
+            buffer[i + 1] = new_str[1];
+            buffer[i + 2] = new_str[2];
+            buffer[i + 3] = new_str[3];
+            break;
+        }
+    }
+
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_009.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
+
+    {
+        panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolContent());
+    }
+}
+
+/**
+* @tc.name: verifier_constant_pool_010
+* @tc.desc: Verify the literal id in the literal array of the abc file.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
+{
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_literal_array.abc";
+    {
+        panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolContent());
+    }
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
+
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    size_t literal_id = 0x578; // The known literal_id in the abc file
+
+    // The known literal_id in the literal array of the abc file
+    std::vector<unsigned char> inner_literal_id = {0xe9, 0x04};
+    std::vector<unsigned char> new_literal_id = {0xaa, 0xaa};
+
+    for (size_t i = literal_id; i < buffer.size(); ++i) {
+        if (buffer[i] == inner_literal_id[0] && buffer[i+1] == inner_literal_id[1]) {
+            buffer[i] = new_literal_id[0];
+            buffer[i + 1] = new_literal_id[1];
+            break;
+        }
+    }
+
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_010.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
+
+    {
+        panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolContent());
+    }
+}
+
+/**
+* @tc.name: verifier_constant_pool_011
+* @tc.desc: Verify the method id in the literal array of the abc file.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(VerifierConstantPool, verifier_constant_pool_011, TestSize.Level1)
+{
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_literal_array.abc";
+    {
+        panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyConstantPoolContent());
+    }
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file.is_open());
+
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    size_t literal_id = 0x57a; // The known literal_id in the abc file
+
+    // The known method_id in the literal array of the abc file
+    std::vector<unsigned char> method_id = {0xcc, 0x02};
+    std::vector<unsigned char> new_method_id = {0xff, 0xff};
+
+    for (size_t i = literal_id; i < buffer.size(); ++i) {
+        if (buffer[i] == method_id[0] && buffer[i+1] == method_id[1]) {
+            buffer[i] = new_method_id[0];
+            buffer[i + 1] = new_method_id[1];
+            break;
+        }
+    }
+
+    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_011.abc";
+    GenerateModifiedAbc(buffer, target_file_name);
+    base_file.close();
+
+    {
+        panda::verifier::Verifier ver {target_file_name};
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolContent());
     }
 }
 
