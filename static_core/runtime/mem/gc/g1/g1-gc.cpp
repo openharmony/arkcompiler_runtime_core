@@ -686,7 +686,7 @@ template <class LanguageConfig>
 bool G1GC<LanguageConfig>::NeedToRunGC(const panda::GCTask &task)
 {
     return (task.reason == GCTaskCause::YOUNG_GC_CAUSE) || (task.reason == GCTaskCause::OOM_CAUSE) ||
-           (task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE && !this->GetSettings()->G1EnablePauseTimeGoal()) ||
+           (task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) ||
            (task.reason == GCTaskCause::STARTUP_COMPLETE_CAUSE) || (task.reason == GCTaskCause::EXPLICIT_CAUSE) ||
            (task.reason == GCTaskCause::NATIVE_ALLOC_CAUSE) || (task.reason == GCTaskCause::MIXED);
 }
@@ -1441,12 +1441,8 @@ void G1GC<LanguageConfig>::ConcurrentMarking(panda::GCTask &task)
 {
     {
         PauseTimeGoalDelay();
-        // initial mark is always separate pause with pause-time-goal GC trigger
-        auto same_pause = !this->GetSettings()->G1EnablePauseTimeGoal();
         auto scoped_tracker = g1_pause_tracker_.CreateScope();
-        GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats(), nullptr,
-                                              same_pause ? PauseTypeStats::COMMON_PAUSE
-                                                         : PauseTypeStats::INITIAL_MARK_PAUSE);
+        GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
         InitialMark(concurrent_marking_stack_);
     }
 
@@ -2334,6 +2330,16 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurentMarkImpl(GCMarking
         CalcLiveBytesNotAtomicallyMarkPreprocess(object, object_class);
         conc_marker_.MarkInstance(objects_stack, object, object_class);
     }
+}
+
+template <class LanguageConfig>
+bool G1GC<LanguageConfig>::Trigger(PandaUniquePtr<GCTask> task)
+{
+    if (this->GetSettings()->G1EnablePauseTimeGoal() &&
+        g1_pause_tracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros()) > 0) {
+        return false;
+    }
+    return GenerationalGC<LanguageConfig>::Trigger(std::move(task));
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GC);

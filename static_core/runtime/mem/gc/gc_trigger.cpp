@@ -378,7 +378,13 @@ void PauseTimeGoalTrigger::TriggerGcIfNeeded(GC *gc)
         LOG(DEBUG, GC_TRIGGER) << "PauseTimeGoalTrigger triggered";
         ASSERT(gc != nullptr);
         gc->PendingGC();
-        gc->Trigger(MakePandaUnique<GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, time::GetCurrentTimeInNanos()));
+        auto result = gc->Trigger(
+            MakePandaUnique<GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, time::GetCurrentTimeInNanos()));
+        if (!result) {
+            // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+            // on other reads or writes
+            start_concurrent_marking_.store(true, std::memory_order_relaxed);
+        }
     }
 }
 

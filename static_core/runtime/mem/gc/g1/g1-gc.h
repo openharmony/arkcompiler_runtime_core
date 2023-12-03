@@ -139,6 +139,7 @@ public:
     void EndConcurrentScopeRoutine() const override;
 
     void ComputeNewSize() override;
+    bool Trigger(PandaUniquePtr<GCTask> task) override;
 
 protected:
     ALWAYS_INLINE ObjectAllocatorG1<LanguageConfig::MT_MODE> *GetG1ObjectAllocator() const
