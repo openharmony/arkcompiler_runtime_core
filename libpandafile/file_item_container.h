@@ -34,7 +34,7 @@ class ItemDeduper;
 
 class ItemContainer {
 public:
-    ItemContainer();
+    explicit ItemContainer(uint8_t api = 0);
     ~ItemContainer() = default;
     NO_COPY_SEMANTIC(ItemContainer);
     NO_MOVE_SEMANTIC(ItemContainer);
@@ -567,6 +567,7 @@ private:
 
     BaseItem *end_;
     size_t indexed_item_count_ {0};
+    const uint8_t api_{0};
 };
 
 }  // namespace panda::panda_file
