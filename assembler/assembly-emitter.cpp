@@ -687,6 +687,8 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                         std::string_view(std::get<std::string>(literal.value_))));
                     break;
                 case panda_file::LiteralTag::METHOD:
+                case panda_file::LiteralTag::GETTER:
+                case panda_file::LiteralTag::SETTER:
                 case panda_file::LiteralTag::GENERATORMETHOD:
                 case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
                     value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::METHOD>(
@@ -1361,7 +1363,8 @@ static void MakeConcurrentModuleRequestsAnnotation(Program *prog)
     }
 }
 
-bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info)
+bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
+                              uint8_t api)
 {
     ASSERT(!progs.empty());
     for (auto *prog : progs) {
@@ -1371,7 +1374,7 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
         MakeConcurrentModuleRequestsAnnotation(prog);
     }
 
-    auto items = ItemContainer {};
+    auto items = ItemContainer {api};
     auto primitive_types = CreatePrimitiveTypes(&items);
     auto entities = AsmEmitter::AsmEntityCollections {};
     SetLastError("");
@@ -1445,9 +1448,9 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
 
 bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::string, size_t> *stat,
                       PandaFileToPandaAsmMaps *maps, bool debug_info,
-                      panda::panda_file::pgo::ProfileOptimizer *profile_opt)
+                      panda::panda_file::pgo::ProfileOptimizer *profile_opt, uint8_t api)
 {
-    auto items = ItemContainer {};
+    auto items = ItemContainer {api};
     if (!Emit(&items, program, maps, debug_info, profile_opt)) {
         return false;
     }
@@ -1461,19 +1464,20 @@ bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::stri
 
 bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat,
                       PandaFileToPandaAsmMaps *maps, bool debug_info,
-                      panda::panda_file::pgo::ProfileOptimizer *profile_opt)
+                      panda::panda_file::pgo::ProfileOptimizer *profile_opt, uint8_t api)
 {
     auto writer = FileWriter(filename);
     if (!writer) {
         SetLastError("Unable to open" + filename + " for writing");
         return false;
     }
-    return Emit(&writer, program, stat, maps, debug_info, profile_opt);
+    return Emit(&writer, program, stat, maps, debug_info, profile_opt, api);
 }
 
-std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program, PandaFileToPandaAsmMaps *maps)
+std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program, PandaFileToPandaAsmMaps *maps,
+                                                         uint8_t api)
 {
-    auto items = ItemContainer {};
+    auto items = ItemContainer {api};
     if (!Emit(&items, program, maps)) {
         return nullptr;
     }

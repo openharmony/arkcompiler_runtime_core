@@ -271,6 +271,8 @@ void Disassembler::FillLiteralData(pandasm::LiteralArray *lit_array,
             break;
         }
         case panda_file::LiteralTag::METHOD:
+        case panda_file::LiteralTag::GETTER:
+        case panda_file::LiteralTag::SETTER:
         case panda_file::LiteralTag::GENERATORMETHOD: {
             panda_file::MethodDataAccessor mda(*file_, panda_file::File::EntityId(std::get<uint32_t>(value)));
             lit.value_ = StringDataToString(file_->GetStringData(mda.GetNameId()));
@@ -1308,6 +1310,10 @@ std::string Disassembler::LiteralTagToString(const panda_file::LiteralTag &tag) 
             return "string";
         case panda_file::LiteralTag::METHOD:
             return "method";
+        case panda_file::LiteralTag::GETTER:
+            return "getter";
+        case panda_file::LiteralTag::SETTER:
+            return "setter";
         case panda_file::LiteralTag::GENERATORMETHOD:
             return "generator_method";
         case panda_file::LiteralTag::ACCESSOR:
@@ -1436,6 +1442,8 @@ void Disassembler::SerializeLiterals(const pandasm::LiteralArray &lit_array, T &
                 break;
             }
             case panda_file::LiteralTag::METHOD:
+            case panda_file::LiteralTag::GETTER:
+            case panda_file::LiteralTag::SETTER:
             case panda_file::LiteralTag::GENERATORMETHOD: {
                 os << std::get<std::string>(val);
                 break;

@@ -70,6 +70,8 @@ inline void LiteralDataAccessor::EnumerateLiteralVals(File::EntityId id, const C
             }
             case LiteralTag::STRING:
             case LiteralTag::METHOD:
+            case LiteralTag::GETTER:
+            case LiteralTag::SETTER:
             case LiteralTag::GENERATORMETHOD:
             case LiteralTag::LITERALARRAY:
             case LiteralTag::ASYNCGENERATORMETHOD: {

@@ -118,6 +118,8 @@ struct LiteralArray {
                 case panda_file::LiteralTag::ARRAY_STRING:
                 case panda_file::LiteralTag::STRING:
                 case panda_file::LiteralTag::METHOD:
+                case panda_file::LiteralTag::GETTER:
+                case panda_file::LiteralTag::SETTER:
                 case panda_file::LiteralTag::GENERATORMETHOD:
                 case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
                     return true;

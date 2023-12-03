@@ -159,6 +159,8 @@ bool FileReader::CreateLiteralArrayItem(const LiteralDataAccessor::LiteralValue 
             break;
         }
         case panda_file::LiteralTag::METHOD:
+        case panda_file::LiteralTag::GETTER:
+        case panda_file::LiteralTag::SETTER:
         case panda_file::LiteralTag::GENERATORMETHOD:
         case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
             File::EntityId method_id(helpers::Read<sizeof(uint32_t)>(&sp));
