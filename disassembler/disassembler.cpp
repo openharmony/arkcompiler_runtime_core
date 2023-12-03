@@ -22,7 +22,6 @@
 #include "get_language_specific_metadata.inc"
 
 namespace panda::disasm {
-static std::map<panda_file::File::EntityId, std::string> string_offset_to_name_;
 
 void Disassembler::Disassemble(const std::string &filename_in, const bool quiet, const bool skip_strings)
 {
@@ -172,6 +171,7 @@ void Disassembler::AddMethodToTables(const panda_file::File::EntityId &method_id
         return;
     }
 
+    GetMethodAnnotations(new_method, method_id);
     method_name_to_id_.emplace(signature, method_id);
     prog_.function_synonyms[new_method.name].push_back(signature);
     prog_.function_table.emplace(signature, std::move(new_method));
@@ -498,6 +498,110 @@ void Disassembler::GetMethods(const panda_file::File::EntityId &record_id)
     class_accessor.EnumerateMethods([&](panda_file::MethodDataAccessor &method_accessor) -> void {
         AddMethodToTables(method_accessor.GetMethodId());
     });
+}
+
+void Disassembler::GetMethodAnnotations(pandasm::Function &method, const panda_file::File::EntityId &method_id)
+{
+    static const std::string MODULE_REQUEST_ANN_NAME = "L_ESConcurrentModuleRequestsAnnotation";
+    static const std::string SLOT_NUMBER_ANN_NAME = "L_ESSlotNumberAnnotation";
+
+    panda_file::MethodDataAccessor mda(*file_, method_id);
+    mda.EnumerateAnnotations([&](panda_file::File::EntityId annotation_id) {
+        panda_file::AnnotationDataAccessor ada(*file_, annotation_id);
+        auto *annotation_name = reinterpret_cast<const char *>(file_->GetStringData(ada.GetClassId()).data);
+        if (std::strcmp("L_ESConcurrentModuleRequestsAnnotation;", annotation_name) == 0) {
+            CreateAnnotationElement(ada, method, MODULE_REQUEST_ANN_NAME,
+                                    "ConcurrentModuleRequest", "concurrentModuleRequestIdx");
+        } else if (std::strcmp("L_ESSlotNumberAnnotation;", annotation_name) == 0) {
+            CreateAnnotationElement(ada, method, SLOT_NUMBER_ANN_NAME, "SlotNumber", "slotNumberIdx");
+        }
+    });
+}
+
+void Disassembler::CreateAnnotationElement(panda_file::AnnotationDataAccessor &ada, pandasm::Function &method,
+                                           const std::string &ann_name, const std::string &ann_elem_name,
+                                           const std::string &ann_elem_index)
+{
+    if (ann_elem_name.empty() || ann_elem_index.empty()) {
+        return;
+    }
+
+    uint32_t elem_count = ada.GetCount();
+    for (uint32_t i = 0; i < elem_count; i++) {
+        panda_file::AnnotationDataAccessor::Elem adae = ada.GetElement(i);
+        auto *elem_name = reinterpret_cast<const char *>(file_->GetStringData(adae.GetNameId()).data);
+        if (ann_elem_name == elem_name) {
+            uint32_t ann_elem_value = adae.GetScalarValue().GetValue();
+            AddAnnotationElement(method, ann_name, ann_elem_index, ann_elem_value);
+        }
+    }
+}
+
+void Disassembler::AddAnnotationElement(pandasm::Function &method, const std::string &annotation_name,
+                                        const std::string &key, const uint32_t &value)
+{
+    if (annotation_name.empty() || key.empty()) {
+        return;
+    }
+    
+    std::vector<pandasm::AnnotationData> method_annotation = method.metadata->GetAnnotations();
+    const auto ann_iter = std::find_if(method_annotation.begin(), method_annotation.end(),
+                                       [&](pandasm::AnnotationData &ann) -> bool {
+        return ann.GetName() == annotation_name;
+    });
+
+    pandasm::AnnotationElement annotation_element(key,
+        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(value)));
+    const bool is_annotation = ann_iter != method_annotation.end();
+    if (is_annotation) {
+        ann_iter->AddElement(std::move(annotation_element));
+        method.metadata->SetAnnotations(std::move(method_annotation));
+    } else {
+        std::vector<pandasm::AnnotationElement> elements;
+        pandasm::AnnotationData ann_data(annotation_name, elements);
+        ann_data.AddElement(std::move(annotation_element));
+        std::vector<pandasm::AnnotationData> annotations;
+        annotations.push_back(std::move(ann_data));
+        method.metadata->AddAnnotations(annotations);
+    }
+}
+
+std::optional<uint32_t> Disassembler::GetMethodAnnotationByName(const std::string &method_name,
+                                                                const std::string &annotation_name)
+{
+    const auto method_synonyms_iter = prog_.function_synonyms.find(method_name);
+    bool is_signature = method_synonyms_iter != prog_.function_synonyms.end();
+    if (is_signature) {
+        const auto method_iter = prog_.function_table.find(method_synonyms_iter->second.back());
+        bool is_method = method_iter != prog_.function_table.end();
+        const auto annotations = method_iter->second.metadata->GetAnnotations();
+        if (!is_method || annotations.empty()) {
+            return std::nullopt;
+        }
+
+        for (const auto &ann_data : annotations) {
+            if (ann_data.GetName() == annotation_name) {
+                return ann_data.GetElements().back().GetValue()->GetAsScalar()->GetValue<uint32_t>();
+            }
+        }
+    }
+
+    return std::nullopt;
+}
+
+bool Disassembler::ValidateStringOffset(const panda_file::File::EntityId string_id, const std::string &str)
+{
+    if (!string_id.IsValid()) {
+        return false;
+    }
+
+    const auto str_iter = string_offset_to_name_.find(string_id);
+    const bool is_string = str_iter != string_offset_to_name_.end();
+    if (is_string) {
+        return str == str_iter->second;
+    }
+
+    return false;
 }
 
 void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::EntityId &proto_id) const
@@ -1442,8 +1546,37 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
     }
 }
 
+void Disassembler::SerializeMethodAnnotations(const pandasm::Function &method, std::ostream &os) const
+{
+    const auto annotations = method.metadata->GetAnnotations();
+    if (annotations.empty()) {
+        return;
+    }
+
+    for (const auto &ann : annotations) {
+        os << ann.GetName() << ":\n";
+        std::stringstream ss;
+        std::vector<pandasm::AnnotationElement> elements = ann.GetElements();
+        if (elements.empty()) {
+            continue;
+        }
+        uint32_t idx = elements.size() - 1;
+        ss << "\t" << "u32" << " " << elements.back().GetName() << " { ";
+        for (const auto &elem : elements) {
+            ss << "0x" << std::hex << elem.GetValue()->GetAsScalar()->GetValue<uint32_t>();
+            if (idx > 0) {
+                ss << ", ";
+            }
+            --idx;
+        }
+        ss << " }";
+        os << ss.str() << "\n";
+    }
+}
+
 void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, bool print_information) const
 {
+    SerializeMethodAnnotations(method, os);
     os << ".function " << method.return_type.GetPandasmName() << " " << method.name << "(";
 
     if (method.params.size() > 0) {
@@ -1678,7 +1811,7 @@ std::string Disassembler::IDToString(BytecodeInstruction bc_ins, panda_file::Fil
         name << '\"';
         name << str_data;
         name << '\"';
-        string_offset_to_name_.insert(std::make_pair(offset, str_data));
+        string_offset_to_name_.emplace(offset, str_data);
     } else {
         ASSERT(bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::LITERALARRAY_ID));
         pandasm::LiteralArray lit_array;

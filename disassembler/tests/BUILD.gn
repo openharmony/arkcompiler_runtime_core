@@ -28,7 +28,7 @@ disasm_test_deps = [
   "$ark_root/libpandafile:libarkfile_static",
 ]
 
-disasm_test_js_files = [
+disasm_column_test_js_files = [
   "column-number1",
   "column-number2",
   "column-number3",
@@ -36,9 +36,15 @@ disasm_test_js_files = [
   "column-number5",
 ]
 
+disasm_test_js_files = [
+  "slot-number-annotation",
+  "script-string1",
+  "script-string2",
+]
+
 test_js_path = "//arkcompiler/runtime_core/disassembler/tests/js/"
 
-foreach(file, disasm_test_js_files) {
+foreach(file, disasm_column_test_js_files) {
   es2abc_gen_abc("gen_${file}_abc") {
     test_js = "${test_js_path}${file}.js"
     test_abc = "$target_out_dir/${file}.abc"
@@ -53,6 +59,37 @@ foreach(file, disasm_test_js_files) {
   }
 }
 
+disasm_module_test_js_files = [ "module-requests-annotation-import" ]
+module_test_js_path = "//arkcompiler/runtime_core/disassembler/tests/module/"
+
+foreach(file, disasm_module_test_js_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_js = "${module_test_js_path}${file}.js"
+    test_abc = "$target_out_dir/${file}.abc"
+    src_js = rebase_path(test_js)
+
+    dst_file = rebase_path(test_abc)
+    extra_args = [
+      "--module",
+      "--merge-abc",
+    ]
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
+foreach(file, disasm_test_js_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_js = "${test_js_path}${file}.js"
+    test_abc = "$target_out_dir/${file}.abc"
+    src_js = rebase_path(test_js)
+
+    dst_file = rebase_path(test_abc)
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
 disasm_include_dirs = [
   "$ark_root/disassembler",
   "$ark_root/assembler",
@@ -61,7 +98,40 @@ disasm_include_dirs = [
   "$target_gen_dir/../../assembler",
 ]
 
-script_sources = [ "disassember_column_number_test.cpp" ]
+script_sources = [
+  "disassembler_annotations_test.cpp",
+  "disassembler_column_number_test.cpp",
+  "disassembler_string_test.cpp",
+]
+module_sources = [ "disassembler_annotations_test.cpp" ]
+
+host_unittest_action("DisasmModuleTest") {
+  module_out_path = module_output_path
+  sources = module_sources
+  include_dirs = disasm_include_dirs
+  configs = disasm_test_configs
+  deps = disasm_test_deps
+  test_abc_dir = rebase_path(target_out_dir)
+  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+
+  foreach(file, disasm_module_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+}
+
+host_unittest_action("DisasmDebugTest") {
+  module_out_path = module_output_path
+  sources = script_sources
+  include_dirs = disasm_include_dirs
+  configs = disasm_test_configs
+  deps = disasm_test_deps
+  test_abc_dir = rebase_path(target_out_dir)
+  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+
+  foreach(file, disasm_column_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+}
 
 host_unittest_action("DisasmScriptTest") {
   module_out_path = module_output_path
@@ -79,5 +149,9 @@ host_unittest_action("DisasmScriptTest") {
 
 group("host_unittest") {
   testonly = true
-  deps = [ ":DisasmScriptTestAction" ]
+  deps = [
+    ":DisasmDebugTestAction",
+    ":DisasmModuleTestAction",
+    ":DisasmScriptTestAction",
+  ]
 }
