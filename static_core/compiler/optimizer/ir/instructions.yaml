@@ -264,6 +264,14 @@ instructions:
     verification:
       - start_block_instruction
 
+  - opcode: LoadUndefined
+    base: FixedInputsInst0
+    signature: [d-ref]
+    flags: [load]
+    description: Load Undefined object from TLS
+    verification:
+      - start_block_instruction
+
     ##############################################################################
     # Object/array instructions
     #

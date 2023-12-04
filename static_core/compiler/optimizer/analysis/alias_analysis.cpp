@@ -760,6 +760,10 @@ void AliasAnalysis::VisitNullPtr(GraphVisitor *v, Inst *inst)
 {
     static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
 }
+void AliasAnalysis::VisitLoadUndefined(GraphVisitor *v, Inst *inst)
+{
+    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
+}
 void AliasAnalysis::VisitInitObject(GraphVisitor *v, Inst *inst)
 {
     static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));

@@ -897,6 +897,8 @@ protected:
 
     static void VisitNullPtr(GraphVisitor *visitor, Inst *inst);
 
+    static void VisitLoadUndefined(GraphVisitor *visitor, Inst *inst);
+
     static void VisitIf(GraphVisitor *visitor, Inst *inst);
 
     static void VisitIfImm(GraphVisitor *visitor, Inst *inst);

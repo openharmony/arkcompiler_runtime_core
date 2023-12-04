@@ -702,6 +702,7 @@ bool Inst::IsMovableObject() const
         case Opcode::Constant:
         case Opcode::LoadConstantPool:
         case Opcode::LoadRuntimeClass:
+        case Opcode::LoadUndefined:
             // The result of these instructions can't be moved by GC.
             return false;
         case Opcode::LoadObject:

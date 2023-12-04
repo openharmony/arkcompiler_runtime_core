@@ -26,7 +26,4 @@ void BuildLaunch(const BytecodeInstruction *bc_inst, bool is_range, bool acc_rea
 void BuildLdObjByName(const BytecodeInstruction *bc_inst, DataType::Type type);
 void BuildStObjByName(const BytecodeInstruction *bc_inst, DataType::Type type);
 
-template <bool IS_ACC_WRITE>
-void BuildLdundefined(const BytecodeInstruction *bc_inst);
-void BuildIsundefined(const BytecodeInstruction *bc_inst);
 #endif  // PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_ETS_INST_BUILDER_H

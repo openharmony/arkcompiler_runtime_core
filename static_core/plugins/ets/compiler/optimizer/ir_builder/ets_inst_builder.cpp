@@ -181,40 +181,4 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bc_inst, DataType:
     AddInstruction(intrinsic);
 }
 
-template <bool IS_ACC_WRITE>
-void InstBuilder::BuildLdundefined(const BytecodeInstruction *bc_inst)
-{
-    auto const pc = GetPc(bc_inst->GetAddress());
-    auto const intrin_id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LDUNDEFINED;
-
-    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::REFERENCE, pc, intrin_id);
-
-    AddInstruction(intrinsic);
-
-    // NOLINTNEXTLINE(readability-braces-around-statements)
-    if constexpr (IS_ACC_WRITE) {
-        UpdateDefinitionAcc(intrinsic);
-        // NOLINTNEXTLINE(readability-misleading-indentation)
-    } else {
-        UpdateDefinition(bc_inst->GetVReg(0), intrinsic);
-    }
-}
-template void InstBuilder::BuildLdundefined<false>(const BytecodeInstruction *bc_inst);
-template void InstBuilder::BuildLdundefined<true>(const BytecodeInstruction *bc_inst);
-
-void InstBuilder::BuildIsundefined(const BytecodeInstruction *bc_inst)
-{
-    auto const pc = GetPc(bc_inst->GetAddress());
-    auto const intrin_id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LDUNDEFINED;
-
-    auto undef_inst = GetGraph()->CreateInstIntrinsic(DataType::REFERENCE, pc, intrin_id);
-
-    auto cmp_inst = GetGraph()->CreateInstCompare(DataType::BOOL, pc, GetDefinitionAcc(), undef_inst,
-                                                  DataType::REFERENCE, ConditionCode::CC_EQ);
-
-    AddInstruction(undef_inst);
-    AddInstruction(cmp_inst);
-    UpdateDefinitionAcc(cmp_inst);
-}
-
 }  // namespace panda::compiler

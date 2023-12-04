@@ -47,6 +47,13 @@ bool MoveConstants::RunImpl()
         }
     }
 
+    if (GetGraph()->HasUndefinedInst()) {
+        auto undefined = GetGraph()->GetUndefinedInst();
+        if (undefined->HasUsers()) {
+            MoveFromStartBlock(undefined);
+        }
+    }
+
     return moved_constants_counter_ > 0;
 }
 

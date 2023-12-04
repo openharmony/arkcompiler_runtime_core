@@ -571,6 +571,10 @@ public:
     {
         return 0;
     }
+    virtual size_t GetTlsUndefinedObjectOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0;
+    }
     virtual ::panda::mem::BarrierType GetPreType() const
     {
         return ::panda::mem::BarrierType::PRE_WRB_NONE;
