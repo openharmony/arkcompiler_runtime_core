@@ -1466,6 +1466,9 @@ specific value of the type argument is irrelevant.
 Tuple Types
 ===========
 
+.. meta:
+    frontend_status: Done
+
 .. code-block:: abnf
 
     tupleType:
