@@ -2593,3 +2593,7 @@
 # 14793
 13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_function.et
 #end 14793
+
+# es2panda fails: This test shouldn't expect to throw compile time error
+04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_neg_3.ets
+# end of es2panda fails
