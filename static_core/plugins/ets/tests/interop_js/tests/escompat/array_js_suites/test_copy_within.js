@@ -33,7 +33,7 @@ const TestJSCopyWithin = etsMod.getFunction('Array_TestJSCopyWithin');
   ASSERT_EQ(arr.at(2), 123);
 
   ASSERT_EQ(arr.at(1), 'foo');
-  // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+  // NOTE(oignatenko) uncomment below after interop will be supported for this method signature
   // arr.copyWithin(1);
   // ASSERT_EQ(arr.at(1), 123);
 }

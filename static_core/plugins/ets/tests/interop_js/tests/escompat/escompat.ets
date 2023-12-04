@@ -341,3 +341,30 @@ function Error_CreateEtsSample(): Error {
 function Error_CreateEtsSampleWithCause(): Error {
     return new Error("message", "cause");
 }
+
+function ArrayBuffer_TestJSLength(arr: ArrayBuffer): void {
+    assert (arr as Object) instanceof ArrayBuffer;
+    assert arr.byteLength == 32;
+}
+
+function ArrayBuffer_TestJSIsView(arr: ArrayBuffer): void {
+    assert !ArrayBuffer.isView(arr);
+    assert ArrayBuffer.isView(new Int8Array(arr));
+}
+
+function ArrayBuffer_TestJSSlice(arr: ArrayBuffer): void {
+    let sliced = arr.slice(8, 24);
+    assert sliced.byteLength == 16;
+}
+
+function ArrayBuffer_TestJSResize(arr: ArrayBuffer): void {
+    arr.resize(16);
+    let view = new Int8Array(arr);
+    // NOTE (oignatenko) uncomment below after toString won't throw AIOOBE
+    // assert arr.toString() == "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+}
+
+function ArrayBuffer_CreateEtsSample(): ArrayBuffer {
+    return new ArrayBuffer(32);
+}
+

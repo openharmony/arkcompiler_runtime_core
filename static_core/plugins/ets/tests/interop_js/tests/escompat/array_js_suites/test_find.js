@@ -36,7 +36,7 @@ const TestJSFind = etsMod.getFunction('Array_TestJSFind');
 
   // actual test code:
   let found = arr.find(fnTrue);
-  // TODO(oignatenko) uncomment below after interop will work like reference above instead of returning undefined
+  // NOTE(oignatenko) uncomment below after interop will work like reference above instead of returning undefined
   // ASSERT_EQ(found, 123);
 
   let foundNull = arr.find(fnFalse);
