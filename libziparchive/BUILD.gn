@@ -40,7 +40,7 @@ source_set("libarkziparchive_static") {
     sdk_libc_secshared_dep,
   ]
 
-  if (ark_standalone_build || target_os == "ios") {
+  if (ark_standalone_build || is_arkui_x) {
     deps += [ "$ark_third_party_root/zlib:libz" ]
   } else {
     deps += [ "$ark_third_party_root/zlib:shared_libz" ]
