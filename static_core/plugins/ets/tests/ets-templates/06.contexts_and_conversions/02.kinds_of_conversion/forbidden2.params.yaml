@@ -1,0 +1,91 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - { stype: Object, sval: new Int(), dtype: Boolean }
+
+  - defs: |-
+      class A {}
+    stype: Object
+    sval: new A()
+    dtype: Double
+
+  - defs: |-
+      class A {}
+    stype: Object
+    sval: new Object()
+    dtype: A
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+    stype: A
+    sval: new A()
+    dtype: B
+
+  - defs: |-
+      interface I {}
+      class A {}
+      class B extends A implements I {}
+    stype: A
+    sval: new A()
+    dtype: I
+
+  - defs: |-
+      interface I {}
+      class A implements I {}
+      class B implements I {}
+    stype: I
+    sval: new A()
+    dtype: B
+
+  - defs: |-
+      class A {}
+    stype: Object
+    sval: new A[1]
+    dtype: A[][]
+
+  - defs: |-
+      interface I {}
+      interface J {}
+      class A implements I {}
+    stype: I
+    sval: new A()
+    dtype: J
+
+  - defs: |-
+      interface I {}
+      interface J extends I {}
+      interface K extends I {}
+      class B implements J {}
+      class C implements K {}
+    stype: J
+    sval: new B()
+    dtype: K
+
+  - defs: |-
+      type func = (a: int, b: int) => Int;
+      function foo(a: int, b: int): Int {
+        return new Int(a + b);
+      }
+    stype: func
+    sval: foo
+    dtype: Object[]
+
+  - defs: |-
+      type funcA = (a: int) => int;
+      type funcB = (a: int, b: int) => int;
+    stype: funcA[]
+    sval: new funcA[10]
+    dtype: funcB[]

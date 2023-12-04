@@ -1830,6 +1830,64 @@
 03.types/08.reference_types/11.union_types/ut_9.ets
 # end of es2panda fails
 
+# es2panda fails: panda#14391 Cannot cast enum to the same enum type or Object
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/identity.ets
+06.contexts_and_conversions/02.kinds_of_conversion/02.reference_types_conversions/ref_widening_40.ets
+06.contexts_and_conversions/02.kinds_of_conversion/02.reference_types_conversions/ref_widening_42.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14766 Cannot get toString() from array
+06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_8.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14748 Aborts on array literal with function elements
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/identity_call.ets
+# end of es2panda fails
+
+# es2panda fails: panda# Wildcards not yet implemented
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_21.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_23.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_25.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_27.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_5.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_7.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14759 Widening + unboxing conversion for compatible types is not provided
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_1.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_4.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_5.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_6.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_7.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_1.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_10.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_11.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_12.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_4.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_5.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_6.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_7.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_8.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_9.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/conv_4.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/conv_5.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/conv_6.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/conv_7.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14767 undefined is not supported
+06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/str_undefined_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_9.ets
+# end of es2panda fails
+
 # es2panda fails: panda#11752
 13.modules_and_compilation_units/07.top_level_statements/block_declaration_10.ets
 13.modules_and_compilation_units/07.top_level_statements/block_declaration_11.ets
@@ -1851,7 +1909,8 @@
 # end of es2panda fails
 
 # runtime fails: panda#12896
-06.conversions_and_contexts/01.kinds_of_conversion/10.string_conversion/str_null_1.ets
+06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_6.ets
+06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/str_null_1.ets
 # end of runtime fails
 
 # runtime fails
