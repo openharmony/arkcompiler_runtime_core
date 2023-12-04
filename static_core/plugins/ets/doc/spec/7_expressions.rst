@@ -147,7 +147,7 @@ Chaining Operator
 *****************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The term *optional chaining operator* (*'?.'*) is used as it effectively
 covers accesses to object properties or function calls. If the object
@@ -1735,6 +1735,7 @@ Accessing Current Object Fields
 
 .. meta:
     frontend_status: Partly
+    todo: ?. should be obligatory when accessing fields of a nullable object
 
 An object reference used for Field Access must be a non-nullish reference
 type *T*. Otherwise, a compile-time error occurs.
@@ -1830,7 +1831,7 @@ Accessing Superclass Fields
 ===========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A field access expression cannot denote a package, class type, or interface
 type. Otherwise, the meaning of that expression is determined by the same
@@ -2305,6 +2306,9 @@ A compile-time error occurs if:
 
 Step 2: Semantic Correctness Check
 ==================================
+
+.. meta:
+    frontend_status: Done
 
 The single function to call is known at this step. The following semantic
 checks must be performed:
@@ -3966,7 +3970,7 @@ String Comparison Operators <, <=, >, and >=
 ============================================
 
 .. meta:
-    frontend_status: ?
+    frontend_status: None
 
 Results of all string comparisons are defined as follows:
 
@@ -4329,7 +4333,7 @@ Value Equality Operators for String Types
 =========================================
 
 .. meta:
-    frontend_status: ?
+    frontend_status: None
 
 Two strings are equal if they represent the same sequences of characters.
 
@@ -4690,7 +4694,6 @@ Assignment
 .. meta:
     frontend_status: Partly
     todo: nullable field access
-    todo: nullable field access
 
 All *assignment operators* group right-to-left (i.e., :math:`a=b=c` means
 :math:`a=(b=c)`---and thus the value of *c* is assigned to *b*, and then
@@ -4759,7 +4762,7 @@ Simple Assignment Operator
 ==========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A compile-time error occurs if the type of the right-hand operand
 (*expression2*) is not compatible (see :ref:`Compatible Types`) with
@@ -4938,7 +4941,7 @@ Compound Assignment Operators
 =============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A compound assignment expression in the form *E1 op= E2* is equivalent to
 *E1 = ((E1) op (E2)) as T*, where *T* is the type of *E1*, except that *E1*

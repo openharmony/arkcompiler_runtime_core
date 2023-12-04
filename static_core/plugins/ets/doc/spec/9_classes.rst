@@ -342,7 +342,7 @@ Class Implementation Clause
 ===========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The names of interfaces that are direct superinterfaces of a declared
 class are listed in the class declaration of the *implements* clause.
@@ -1085,10 +1085,7 @@ Method Declarations
 *******************
 
 .. meta:
-    frontend_status: Partly
-    todo: spec issue: synchronized isn't specified at all, consequently not supported yet
-    todo: spec issue: native and override are mutually exclusive - shouldn't be and used in stdlib
-    todo: some corner cases needs to be fixed (revealed by CTS tests)
+    frontend_status: Done
 
 *Methods* declare executable code that can be called:
 
@@ -1246,7 +1243,7 @@ Final Methods
 =============
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Final methods are described in the chapter Experimental Features (see
 :ref:`Native Methods Experimental`).
@@ -1259,7 +1256,7 @@ Override Methods
 ================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The keyword ``override`` indicates that an instance method in a superclass is
 overridden by the corresponding instance method from a subclass (see
