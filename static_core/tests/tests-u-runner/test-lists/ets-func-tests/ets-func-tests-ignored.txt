@@ -315,3 +315,18 @@ spec/never_type/useWithLambdaAndUnion.ets
 ### Negative test
 spec/never_type/neverTypeInheritance.ets
 ### End never issues
+
+### Generic issues
+### Issue 14498
+spec/generic/generic_03.ets
+### Issue 13642
+spec/generic/comparableClass.ets
+spec/generic/exportTypeComparator.ets
+### Issue 14510
+spec/generic/generic_02.ets
+### Issue 14542
+spec/generic/usingOutT.ets
+### Negative tests
+spec/generic/wrongUsingInT.ets
+spec/generic/generic_05.ets
+### End of Generic
