@@ -14,13 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: A compile-time error occurs unless the first expression is of the type boolean or Boolean.
+desc: An expression of type 'void' cannot be tested for truthiness
 tags: [compile-only, negative]
 ---*/
 
 function cond(): void {}
 
-function main(): void {
+function main(): int {
   let a = cond() ? 1 : 0;
   return a;
 }

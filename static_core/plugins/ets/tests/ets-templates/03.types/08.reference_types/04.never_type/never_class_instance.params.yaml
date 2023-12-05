@@ -13,5 +13,33 @@
 
 --- # List of types
 types:
-  - Object
-  - never
+    - decl: |-
+          type NT = string | number | never
+      use: |-
+          let x: NT = 42.0
+          assert x as number == 42.0
+          x = "abc"
+          assert x as string == "abc"
+
+    - use: |-
+          let x: (number|never)[] = [1.0, 2.0, 3.0]
+          assert x[2] as number == 3.0
+
+    - use: |-
+          let x: (string|never)[] = ['1', '2', '3']
+          assert x[2] as string == '3'
+
+    - decl: |-
+          class A<T> {}
+      use: |-
+          let x: A<never> = new A<never>()
+          assert x instanceof Object
+
+    - use: |-
+          let x: Record<string, never|null> = { "abc": null }
+
+    - use: |-
+          let x: (never|null|undefined) = null
+          assert x === null
+          x = undefined
+          assert x === undefined

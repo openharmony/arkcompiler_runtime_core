@@ -21,11 +21,11 @@ class A {
     public x: int = 5;
 }
 
-function getX(): Int {
-    let a: A = new A();
+function getX(): int {
+    let a: A|null = new A();
     return a?.x;
 }
 
 function main(): void {
-  assert(getX() ==  5);
+  assert getX() == 5;
 }

@@ -22,20 +22,18 @@ desc: >-
 
 function main(): int {
   {%- for t in case['types'] %}
-  let v_{{t}}: {{t}}? = null;
-  if (v_{{t}} !== null) {
+  let v_{{t}}: {{t}}|null = null;
+  if (v_{{t}} != null) {
       return 1;
   }
 
-  type ArrayOf{{t}} = {{t}}[];
-  let a_{{t}}: ArrayOf{{t}}? = null;
-  if (a_{{t}} !== null) {
+  let a_{{t}}: ({{t}}[])|null = null;
+  if (a_{{t}} != null) {
     return 1;
   }
 
-  type FuncOf{{t}} = ({{t}}): {{t}};
-  let f_{{t}}: FuncOf{{t}}? = null;
-  if (f_{{t}} !== null) {
+  let f_{{t}}: ((p: {{t}}) => {{t}})|null = null;
+  if (f_{{t}} != null) {
     return 1;
   }
 

@@ -19,12 +19,12 @@ assert: A method call with ‘?.’ in objectReference is called a safe method c
 ---*/
 
 class A {
-  public foo(x: int): int { 
-    return x * 2;
-  }
+    public foo(x: int): Int {
+        return x * 2;
+    }
 }
 
 function main(): void {
-  let instance: A|null = null;
-  instance?.foo(3);
+    let instance: A|null = null;
+    assert instance?.foo(3) === undefined;
 }

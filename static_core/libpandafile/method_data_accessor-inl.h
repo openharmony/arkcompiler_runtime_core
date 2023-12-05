@@ -346,6 +346,12 @@ void MethodDataAccessor::EnumerateTypesInProto(Callback cb, bool skip_this)
     }
 }
 
+inline Type MethodDataAccessor::GetReturnType() const
+{
+    panda_file::ProtoDataAccessor pda(GetPandaFile(), GetProtoId());
+    return pda.GetReturnType();
+}
+
 inline uint32_t MethodDataAccessor::GetNumericalAnnotation(uint32_t field_id)
 {
     static constexpr uint32_t NUM_ELEMENT = 3;

@@ -1,0 +1,218 @@
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          interface I {
+              met(): string
+          }
+          class A implements I {
+              override met(): string {
+                  return "A"
+              }
+          }
+          class B extends A {
+              override met(): string {
+                  return "B"
+              }
+          }
+          class C {
+              met(): string {
+                  return "C"
+              }
+          }
+      use: |-
+          // using class type references
+          let a: A = new A()
+          assert a.met() == "A"
+          let b: B = new B()
+          assert b.met() == "B"
+          let c: C = new C()
+          assert c.met() == "C"
+
+    - decl: |-
+          interface I {
+              met(): string
+          }
+          class A implements I {
+              override met(): string {
+                  return "A"
+              }
+          }
+          class B extends A {
+              override met(): string {
+                  return "B"
+              }
+          }
+          class C {
+              met(): string {
+                  return "C"
+              }
+          }
+          type TA = A
+          type TB = B
+          type TC = C
+      use: |-
+          // using type aliases
+          let a: TA = new TA()
+          assert a.met() == "A"
+          let b: TB = new TB()
+          assert b.met() == "B"
+          let c: TC = new TC()
+          assert c.met() == "C"
+
+    - decl: |-
+          interface I {
+              met(): string {
+                  return "I"
+              }
+          }
+          class A implements I {
+              override met(): string {
+                  return "A"
+              }
+          }
+          class B extends A {
+              override met(): string {
+                  return "B" + super.met()
+              }
+          }
+          class C implements I {}
+      use: |-
+          // using super for referring immediate superclass
+          assert new A().met() == "A"
+          assert new B().met() == "BA"
+          assert new C().met() == "I"
+
+    - decl: |-
+          class Base {
+              met(): string {
+                  return "Base"
+              }
+          }
+          class A extends Base {}
+          class B extends A {
+              override met(): string {
+                  return "B" + super.met()
+              }
+          }
+      use: |-
+          // using super for referring 2nd level superclass
+          assert new Base().met() == "Base"
+          assert new A().met() == "Base"
+          assert new B().met() == "BBase"
+
+    - decl: |-
+          interface I {
+              met(): string {
+                  return "I"
+              }
+          }
+          class A implements I {
+              override met(): string {
+                  return "A"
+              }
+          }
+          class B extends A {
+              override met(): string {
+                  return "B" + super.met()
+              }
+          }
+          class C implements I {}
+          function createA(): A {
+              return new A()
+          }
+          function createB(): B {
+              return new B()
+          }
+          function createC(): C {
+              return new C()
+          }
+      use: |-
+          // using class type expression
+          assert createA().met() == "A"
+          assert createB().met() == "BA"
+          assert createC().met() == "I"
+
+    - decl: |-
+          interface I {
+              met(): string {
+                  return "I"
+              }
+              static smet(): string {
+                  return "SI"
+              }
+          }
+          class A implements I {}
+          function getI(): I {
+              return new A()
+          }
+      use: |-
+          // using interface type expression
+          assert getI().met() == "I"
+          assert I.smet() == "SI"
+
+    - decl: |-
+          class X {
+              met(): string {
+                  return "X"
+              }
+          }
+          class Y extends X {}
+          class Z extends Y {}
+          class A<T extends X> {
+              fld: T|null = null
+
+              setFld(p: T) {
+                  this.fld = p
+              }
+
+              m(): string {
+                  return this.fld!.met()
+              }
+          }
+      use: |-
+          // using type parameter constraint
+          let v: A<Z> = new A<Z>()
+          v.setFld(new Z())
+          assert v.m() == "X"
+
+    - decl: |-
+          class X {
+              met(): string {
+                  return "X"
+              }
+          }
+          class Y extends X {
+              override met(): string {
+                  return "Y"
+              }
+          }
+          class Z extends Y {}
+          class A<T extends X> {
+              fld: T|null = null
+
+              setFld(p: T) {
+                  this.fld = p
+              }
+
+              m(): string {
+                  return this.fld!.met()
+              }
+          }
+      use: |-
+          // using type parameter constraint
+          let v: A<Z> = new A<Z>()
+          v.setFld(new Z())
+          assert v.m() == "Y"

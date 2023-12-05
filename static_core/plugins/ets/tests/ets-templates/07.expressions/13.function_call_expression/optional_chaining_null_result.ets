@@ -19,18 +19,18 @@ assert: if ’?.’ is provided and expression is evaluated as null then argumen
 ---*/
 
 class A {
-  public evaluate(value: int): Int {    
+  public evaluate(value: int): Int {
     return new Int(value);
   }
 }
 
-function getX(): Int {
+function getX(): Int|undefined {
   let a: A|null;
-  let res = a?.evaluate(5);
-  
+  let res: Int|undefined = a?.evaluate(5);
+
   return res;
 }
 
 function main(): void {
-  assert getX() == null;
+  assert getX() === undefined;
 }

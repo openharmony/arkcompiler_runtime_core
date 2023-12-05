@@ -19,15 +19,11 @@ assert: A method call expression calls a static or instance method of a class or
 ---*/
 
 interface A {
-  static bar(x: int): int {
-    return x * 2;
-  }
-}
-
-class B implements A {
-
+    static bar(x: int): int {
+        return x * 2;
+    }
 }
 
 function main(): void {
-  assert new B().bar(3) == 6;
+    assert A.bar(3) == 6;
 }
