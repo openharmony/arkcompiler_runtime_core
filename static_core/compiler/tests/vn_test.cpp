@@ -1761,6 +1761,60 @@ TEST_F(VNTest, LoadFromConstantPool)
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, graph1));
 }
+
+TEST_F(VNTest, AddressArithmetic)
+{
+    auto graph = CreateGraphWithDefaultRuntime();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).i32();
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::AddI).ptr().Imm(8U).Inputs(0U);
+            INST(3U, Opcode::Load).i16().Inputs(2U, 1U);
+            INST(4U, Opcode::StoreArray).i16().Inputs(0U, 1U, 3U);
+            INST(5U, Opcode::SafePoint).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::AddI).ptr().Imm(12U).Inputs(0U);
+            INST(7U, Opcode::Load).i16().Inputs(6U, 1U);
+            INST(8U, Opcode::AddI).ptr().Imm(8U).Inputs(0U);  // won't be deleted
+            INST(9U, Opcode::Store).i16().Inputs(8U, 1U, 7U);
+            INST(10U, Opcode::AddI).ptr().Imm(12U).Inputs(0U);  // will be deleted
+            INST(11U, Opcode::Load).i16().Inputs(10U, 1U);
+            INST(12U, Opcode::AddI).ptr().Imm(16U).Inputs(0U);
+            INST(13U, Opcode::Store).i16().Inputs(12U, 1U, 11U);
+            INST(14U, Opcode::Return).ref().Inputs(0U);
+        }
+    }
+    GraphChecker(graph).Check();
+
+    ASSERT_TRUE(graph->RunPass<ValNum>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+
+    auto graph1 = CreateGraphWithDefaultRuntime();
+    GRAPH(graph1)
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).i32();
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::AddI).ptr().Imm(8U).Inputs(0U);
+            INST(3U, Opcode::Load).i16().Inputs(2U, 1U);
+            INST(4U, Opcode::StoreArray).i16().Inputs(0U, 1U, 3U);
+            INST(5U, Opcode::SafePoint).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::AddI).ptr().Imm(12U).Inputs(0U);
+            INST(7U, Opcode::Load).i16().Inputs(6U, 1U);
+            INST(8U, Opcode::AddI).ptr().Imm(8U).Inputs(0U);
+            INST(9U, Opcode::Store).i16().Inputs(8U, 1U, 7U);
+            INST(11U, Opcode::Load).i16().Inputs(6U, 1U);
+            INST(12U, Opcode::AddI).ptr().Imm(16U).Inputs(0U);
+            INST(13U, Opcode::Store).i16().Inputs(12U, 1U, 11U);
+            INST(14U, Opcode::Return).ref().Inputs(0U);
+        }
+    }
+    GraphChecker(graph1).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, graph1));
+}
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace panda::compiler

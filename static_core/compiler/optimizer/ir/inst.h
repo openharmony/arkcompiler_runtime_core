@@ -6519,7 +6519,6 @@ public:
 
     void DumpOpcode(std::ostream * /* unused */) const override;
     bool DumpInputs(std::ostream * /* unused */) const override;
-    void SetVnObject(VnObject *vn_obj) override;
 
     Inst *Clone(const Graph *target_graph) const override
     {

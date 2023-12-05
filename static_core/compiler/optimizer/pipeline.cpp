@@ -235,6 +235,7 @@ bool Pipeline::RunOptimizations()
     // and cause spillfill in reg alloc
     graph->RunPass<MoveConstants>();
     if (graph->RunPass<AdjustRefs>()) {
+        graph->RunPass<ValNum>();
         graph->RunPass<Cleanup>(false);
     }
     graph->RunPass<OptimizeMemoryBarriers>();

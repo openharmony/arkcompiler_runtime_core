@@ -178,13 +178,13 @@ void BinaryImmOperation::SetVnObject(VnObject *vn_obj)
 void BinaryShiftedRegisterOperation::SetVnObject(VnObject *vn_obj)
 {
     vn_obj->Add(GetImm());
-    vn_obj->Add(static_cast<uint64_t>(GetShiftType()));
+    vn_obj->Add(static_cast<uint32_t>(GetShiftType()));
 }
 
 void UnaryShiftedRegisterOperation::SetVnObject(VnObject *vn_obj)
 {
     vn_obj->Add(GetImm());
-    vn_obj->Add(static_cast<uint64_t>(GetShiftType()));
+    vn_obj->Add(static_cast<uint32_t>(GetShiftType()));
 }
 
 void CompareInst::SetVnObject(VnObject *vn_obj)
@@ -193,11 +193,6 @@ void CompareInst::SetVnObject(VnObject *vn_obj)
 }
 
 void SelectInst::SetVnObject(VnObject *vn_obj)
-{
-    vn_obj->Add(static_cast<uint32_t>(GetCc()));
-}
-
-void SelectImmInst::SetVnObject(VnObject *vn_obj)
 {
     vn_obj->Add(static_cast<uint32_t>(GetCc()));
 }
