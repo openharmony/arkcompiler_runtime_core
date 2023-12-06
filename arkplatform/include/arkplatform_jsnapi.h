@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_ARKPLATFORM_JSNAPI_H
+#define PANDA_ARKPLATFORM_JSNAPI_H
+
 #include "ecmascript/napi/include/jsnapi.h"
 #include "ecmascript/napi/include/jsnapi_internals.h"
 
@@ -28,3 +31,5 @@ using panda::JSValueRefInternals;
 using panda::JSTaggedType;
 
 } // namespace arkplatform
+
+#endif // PANDA_ARKPLATFORM_JSNAPI_H
