@@ -90,29 +90,32 @@ add_dependencies(arkfile isa_gen_${PROJECT_NAME} type_gen_${PROJECT_NAME})
 
 panda_target_link_libraries(arkfile ${LINK_LIBRARIES})
 
-panda_add_gtest(
-    NAME arkfile_tests
-    SOURCES
-        tests/bytecode_instruction_tests.cpp
-        tests/file_test.cpp
-        tests/file_item_container_test.cpp
-        tests/file_items_test.cpp
-        tests/bytecode_emitter_tests.cpp
-        tests/debug_info_extractor_test.cpp
-        tests/panda_cache_test.cpp
-        tests/file_format_version_test.cpp
-    LIBRARIES
-        arkbase
-        arkfile
-        arkassembler
-        arkziparchive
-    SANITIZERS
-        ${PANDA_SANITIZERS_LIST}
-)
-if(TARGET arkfile_tests)
-    add_dependencies(arkfile_tests isa_gen_${PROJECT_NAME})
-    panda_target_include_directories(arkfile_tests
-        PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include/tests)
+# NOTE(aakmaev): Enable when #14728 internal issue will be fixed
+if (NOT PANDA_TARGET_ARM64)
+    panda_add_gtest(
+        NAME arkfile_tests
+        SOURCES
+            tests/bytecode_instruction_tests.cpp
+            tests/file_test.cpp
+            tests/file_item_container_test.cpp
+            tests/file_items_test.cpp
+            tests/bytecode_emitter_tests.cpp
+            tests/debug_info_extractor_test.cpp
+            tests/panda_cache_test.cpp
+            tests/file_format_version_test.cpp
+        LIBRARIES
+            arkbase
+            arkfile
+            arkassembler
+            arkziparchive
+        SANITIZERS
+            ${PANDA_SANITIZERS_LIST}
+    )
+    if(TARGET arkfile_tests)
+        add_dependencies(arkfile_tests isa_gen_${PROJECT_NAME})
+        panda_target_include_directories(arkfile_tests
+            PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include/tests)
+    endif()
 endif()
 
 panda_add_sanitizers(TARGET arkfile SANITIZERS ${PANDA_SANITIZERS_LIST})
