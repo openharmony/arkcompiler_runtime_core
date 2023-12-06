@@ -30,6 +30,19 @@ public:
     static void TearDownTestCase(void) {};
     void SetUp() {};
     void TearDown() {};
+
+    bool ValidateString(const std::vector<std::string> &strings,
+                        const std::vector<std::string> &expected_strings)
+    {
+        for (const auto &expected_string : expected_strings) {
+            const auto string_iter = std::find(strings.begin(), strings.end(), expected_string);
+            if (string_iter == strings.end()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 };
 
 /**
@@ -40,13 +53,12 @@ public:
 */
 HWTEST_F(DisassemblerStringTest, disassembler_string_test_001, TestSize.Level1)
 {
-    static const uint32_t STRING_OFFSET = 0xd2;
-    panda::panda_file::File::EntityId STRING_ID(STRING_OFFSET);
-    static const std::string EXPECT_STRING = "test";
+    std::vector<std::string> expected_strings = {"ClassA", "prototype", "str", "test"};
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(ANNOTATION_TEST_FILE_NAME_001, false, false);
-    bool is_exists_string = disasm.ValidateStringOffset(STRING_ID, EXPECT_STRING);
-    EXPECT_TRUE(is_exists_string);
+    std::vector<std::string> strings = disasm.GetStrings();
+    bool has_string = ValidateString(strings, expected_strings);
+    EXPECT_TRUE(has_string);
 }
 
 /**
@@ -57,47 +69,12 @@ HWTEST_F(DisassemblerStringTest, disassembler_string_test_001, TestSize.Level1)
 */
 HWTEST_F(DisassemblerStringTest, disassembler_string_test_002, TestSize.Level1)
 {
-    static const uint32_t STRING_OFFSET = 0xba;
-    panda::panda_file::File::EntityId STRING_ID(STRING_OFFSET);
-    static const std::string EXPECT_STRING = "ClassA";
-    panda::disasm::Disassembler disasm {};
-    disasm.Disassemble(ANNOTATION_TEST_FILE_NAME_001, false, false);
-    bool is_exists_string = disasm.ValidateStringOffset(STRING_ID, EXPECT_STRING);
-    EXPECT_TRUE(is_exists_string);
-}
-
-/**
-* @tc.name: disassembler_string_test_003
-* @tc.desc: get not existed string.
-* @tc.type: FUNC
-* @tc.require: file path and name
-*/
-HWTEST_F(DisassemblerStringTest, disassembler_string_test_003, TestSize.Level1)
-{
-    static const uint32_t STRING_OFFSET = 0xbf;
-    panda::panda_file::File::EntityId STRING_ID(STRING_OFFSET);
-    static const std::string EXPECT_STRING = "Student";
+    std::vector<std::string> expected_strings = {"Student", "name", "prototype", "student_name"};
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(ANNOTATION_TEST_FILE_NAME_002, false, false);
-    bool is_exists_string = disasm.ValidateStringOffset(STRING_ID, EXPECT_STRING);
-    EXPECT_TRUE(is_exists_string);
-}
-
-/**
-* @tc.name: disassembler_string_test_004
-* @tc.desc: get not existed string.
-* @tc.type: FUNC
-* @tc.require: file path and name
-*/
-HWTEST_F(DisassemblerStringTest, disassembler_string_test_004, TestSize.Level1)
-{
-    static const uint32_t STRING_OFFSET = 0xd9;
-    panda::panda_file::File::EntityId STRING_ID(STRING_OFFSET);
-    static const std::string EXPECT_STRING = "student_name";
-    panda::disasm::Disassembler disasm {};
-    disasm.Disassemble(ANNOTATION_TEST_FILE_NAME_002, false, false);
-    bool is_exists_string = disasm.ValidateStringOffset(STRING_ID, EXPECT_STRING);
-    EXPECT_TRUE(is_exists_string);
+    std::vector<std::string> strings = disasm.GetStrings();
+    bool has_string = ValidateString(strings, expected_strings);
+    EXPECT_TRUE(has_string);
 }
 
 };

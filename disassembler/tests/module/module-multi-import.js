@@ -33,6 +33,6 @@ import { g , h as hh } from './module-multi-export.js';
 import './module-multi-export.js';
 
 class ClassA {
-    fun(a, b) { return a + b; }
-    str = 'test';
+  fun(a, b) { return a + b; }
+  str = 'test';
 }

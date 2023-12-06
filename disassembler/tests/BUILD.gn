@@ -59,7 +59,15 @@ foreach(file, disasm_column_test_js_files) {
   }
 }
 
-disasm_module_test_js_files = [ "module-requests-annotation-import" ]
+disasm_module_test_js_files = [
+  "module-requests-annotation-import",
+  "module-regular-import",
+  "module-namespace-import",
+  "module-local-export",
+  "module-indirect-export",
+  "module-start-export",
+]
+
 module_test_js_path = "//arkcompiler/runtime_core/disassembler/tests/module/"
 
 foreach(file, disasm_module_test_js_files) {
@@ -103,7 +111,11 @@ script_sources = [
   "disassembler_column_number_test.cpp",
   "disassembler_string_test.cpp",
 ]
-module_sources = [ "disassembler_annotations_test.cpp" ]
+
+module_sources = [
+  "disassembler_annotations_test.cpp",
+  "disassembler_module_literal_test.cpp",
+]
 
 host_unittest_action("DisasmModuleTest") {
   module_out_path = module_output_path

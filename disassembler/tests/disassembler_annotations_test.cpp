@@ -30,6 +30,17 @@ public:
     static void TearDownTestCase(void) {};
     void SetUp() {};
     void TearDown() {};
+
+    bool ValidateAnnotation(std::optional<std::vector<std::string>> &annotations, const std::string &annotation_name)
+    {
+        std::vector<std::string> ann = annotations.value();
+        const auto ann_iter = std::find(ann.begin(), ann.end(), annotation_name);
+        if (ann_iter != ann.end()) {
+            return true;
+        }
+
+        return false;
+    }
 };
 
 /**
@@ -42,12 +53,12 @@ HWTEST_F(DisassemblerAnnotationTest, disassembler_annotation_test_001, TestSize.
 {
     static const std::string METHOD_NAME = "module-requests-annotation-import.funcD";
     static const std::string ANNOTATION_NAME = "L_ESConcurrentModuleRequestsAnnotation";
-    static const uint32_t EXPECT_REQUEST_INDEX = 0x0;
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(MODULE_REQUEST_FILE_NAME, false, false);
-    std::optional<uint32_t> request_index = disasm.GetMethodAnnotationByName(METHOD_NAME, ANNOTATION_NAME);
-    ASSERT_NE(request_index, std::nullopt);
-    EXPECT_EQ(EXPECT_REQUEST_INDEX, request_index.value());
+    std::optional<std::vector<std::string>> annotations = disasm.GetAnnotationByMethodName(METHOD_NAME);
+    ASSERT_NE(annotations, std::nullopt);
+    bool has_annotation = ValidateAnnotation(annotations, ANNOTATION_NAME);
+    EXPECT_TRUE(has_annotation);
 }
 
 /**
@@ -60,11 +71,11 @@ HWTEST_F(DisassemblerAnnotationTest, disassembler_annotation_test_002, TestSize.
 {
     static const std::string METHOD_NAME = "funcA";
     static const std::string ANNOTATION_NAME = "L_ESSlotNumberAnnotation";
-    static const uint32_t EXPECT_SLOT_NUMBER = 0x3;
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(SLOT_NUMBER_FILE_NAME, false, false);
-    std::optional<uint32_t> slot_number = disasm.GetMethodAnnotationByName(METHOD_NAME, ANNOTATION_NAME);
-    ASSERT_NE(slot_number, std::nullopt);
-    EXPECT_EQ(EXPECT_SLOT_NUMBER, slot_number.value());
+    std::optional<std::vector<std::string>> annotations = disasm.GetAnnotationByMethodName(METHOD_NAME);
+    ASSERT_NE(annotations, std::nullopt);
+    bool has_annotation = ValidateAnnotation(annotations, ANNOTATION_NAME);
+    EXPECT_TRUE(has_annotation);
 }
 };
