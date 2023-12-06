@@ -277,6 +277,11 @@ spec/struct-type/test-use-struct-with-not-user-type_0.ets
 spec/struct-type/test-use-struct-with-not-user-type_1.ets
 spec/struct-type/test-use-struct-with-not-user-type_2.ets
 ### EOF Negative tests
+### Temporary disabled test accroding task I8EM2T
+spec/struct-type/test-struct-no-annotation.ets
+spec/struct-type/test-use-struct-as-name_0.ets
+spec/struct-type/test-use-struct-as-name_1.ets
+### EOF Temporary disabled test accroding task I8EM2T
 ### EOF ArkUI struct
 
 ### Start enum

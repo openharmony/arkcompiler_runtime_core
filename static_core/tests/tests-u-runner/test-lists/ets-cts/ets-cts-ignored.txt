@@ -2615,6 +2615,10 @@
 07.expressions/13.function_call_expression/fcall_8.ets
 # end of es2panda fails
 
+# Disable struct test according I8EM2T
+13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_struct.ets
+# end of Disable struct test according I8EM2T
+
 # es2panda fails: panda:14622 Following function call block is always taken as trailing lambda
 17.experimental_features/10.trailing_lambda/trlambda_func_8.ets
 17.experimental_features/10.trailing_lambda/trlambda_met_8.ets
