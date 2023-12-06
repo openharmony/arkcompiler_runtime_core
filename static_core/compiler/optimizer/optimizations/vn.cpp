@@ -41,13 +41,13 @@ static bool AddClassInst(Inst *inst, VnObject *obj)
         return false;
     }
 
-    obj->Add(static_cast<uint32_t>(Opcode::InitClass));
+    obj->Add(static_cast<VnObject::ObjType>(Opcode::InitClass));
     auto class_inst = static_cast<ClassInst *>(inst);
     auto klass = class_inst->GetClass();
     if (klass == nullptr) {
         obj->Add(class_inst->GetTypeId());
     } else {
-        obj->Add(reinterpret_cast<uint64_t>(klass));
+        obj->Add(reinterpret_cast<VnObject::DoubleObjType>(klass));
     }
     inst->SetVnObject(obj);
     return true;
@@ -59,7 +59,7 @@ static bool AddGlobalVarInst(Inst *inst, VnObject *obj)
         return false;
     }
 
-    obj->Add(static_cast<uint32_t>(Opcode::GetGlobalVarAddress));
+    obj->Add(static_cast<VnObject::ObjType>(Opcode::GetGlobalVarAddress));
     obj->Add(inst->CastToGetGlobalVarAddress()->GetTypeId());
     inst->SetVnObject(obj);
     return true;
@@ -71,8 +71,9 @@ static bool AddSelectImmInst(Inst *inst, VnObject *obj)
         return false;
     }
 
-    obj->Add(static_cast<uint32_t>(Opcode::SelectImm));
-    obj->Add(static_cast<uint16_t>(inst->GetType()), static_cast<uint16_t>(inst->CastToSelectImm()->GetCc()));
+    obj->Add(static_cast<VnObject::ObjType>(Opcode::SelectImm));
+    obj->Add(static_cast<VnObject::HalfObjType>(inst->GetType()),
+             static_cast<VnObject::HalfObjType>(inst->CastToSelectImm()->GetCc()));
 
     for (auto input : inst->GetInputs()) {
         auto input_inst = inst->GetDataFlowInput(input.GetInst());
@@ -114,17 +115,17 @@ static void AddSpecialTraits(Inst *inst, VnObject *obj)
         case Opcode::Intrinsic:
             if (inst->GetFlagsMask() == 0) {
                 /* Add only those intrinsics that have no flags set */
-                obj->Add(static_cast<uint32_t>(inst->CastToIntrinsic()->GetIntrinsicId()));
+                obj->Add(static_cast<VnObject::ObjType>(inst->CastToIntrinsic()->GetIntrinsicId()));
             }
             break;
         case Opcode::CompareAnyType:
-            obj->Add(static_cast<uint32_t>(inst->CastToCompareAnyType()->GetAnyType()));
+            obj->Add(static_cast<VnObject::ObjType>(inst->CastToCompareAnyType()->GetAnyType()));
             break;
         case Opcode::CastAnyTypeValue:
-            obj->Add(static_cast<uint32_t>(inst->CastToCastAnyTypeValue()->GetAnyType()));
+            obj->Add(static_cast<VnObject::ObjType>(inst->CastToCastAnyTypeValue()->GetAnyType()));
             break;
         case Opcode::CastValueToAnyType:
-            obj->Add(static_cast<uint32_t>(inst->CastToCastValueToAnyType()->GetAnyType()));
+            obj->Add(static_cast<VnObject::ObjType>(inst->CastToCastValueToAnyType()->GetAnyType()));
             break;
         default:
             break;
@@ -158,10 +159,10 @@ static bool AddResolver(Inst *inst, VnObject *obj)
         obj->Add(inst->CastToResolveStatic()->GetCallMethodId());
     } else if (inst->GetOpcode() == Opcode::ResolveObjectField) {
         obj->Add(inst->CastToResolveObjectField()->GetTypeId());
-        obj->Add(reinterpret_cast<uint64_t>(inst->CastToResolveObjectField()->GetMethod()));
+        obj->Add(reinterpret_cast<VnObject::DoubleObjType>(inst->CastToResolveObjectField()->GetMethod()));
     } else if (inst->GetOpcode() == Opcode::ResolveObjectFieldStatic) {
         obj->Add(inst->CastToResolveObjectFieldStatic()->GetTypeId());
-        obj->Add(reinterpret_cast<uint64_t>(inst->CastToResolveObjectFieldStatic()->GetMethod()));
+        obj->Add(reinterpret_cast<VnObject::DoubleObjType>(inst->CastToResolveObjectFieldStatic()->GetMethod()));
     } else {
         UNREACHABLE();
     }
@@ -182,8 +183,8 @@ void VnObject::Add(Inst *inst)
         return;
     }
 
-    Add(static_cast<uint32_t>(inst->GetOpcode()));
-    Add(static_cast<uint32_t>(inst->GetType()));
+    Add(static_cast<ObjType>(inst->GetOpcode()));
+    Add(static_cast<ObjType>(inst->GetType()));
 
     AddSpecialTraits(inst, this);
 
@@ -207,28 +208,28 @@ void VnObject::Add(Inst *inst)
     inst->SetVnObject(this);
 }
 
-void VnObject::Add(uint16_t obj1, uint16_t obj2)
+void VnObject::Add(HalfObjType obj1, HalfObjType obj2)
 {
     ASSERT(size_objs_ < MAX_ARRAY_SIZE);
-    static constexpr uint16_t SHIFT16 = 16;
-    uint32_t obj = static_cast<uint32_t>(obj1) << SHIFT16;
-    obj |= static_cast<uint32_t>(obj2);
+    static constexpr HalfObjType SHIFT16 = 16;
+    ObjType obj = static_cast<ObjType>(obj1) << SHIFT16;
+    obj |= static_cast<ObjType>(obj2);
     objs_[size_objs_++] = obj;
 }
 
-void VnObject::Add(uint32_t obj)
+void VnObject::Add(ObjType obj)
 {
     ASSERT(size_objs_ < MAX_ARRAY_SIZE);
     objs_[size_objs_++] = obj;
 }
 
-void VnObject::Add(uint64_t obj)
+void VnObject::Add(DoubleObjType obj)
 {
     ASSERT(size_objs_ < MAX_ARRAY_SIZE);
-    static constexpr uint64_t MASK32 = std::numeric_limits<uint32_t>::max();
-    static constexpr uint64_t SHIFT32 = 32;
-    objs_[size_objs_++] = static_cast<uint32_t>(obj & MASK32);
-    objs_[size_objs_++] = static_cast<uint32_t>(obj >> SHIFT32);
+    static constexpr DoubleObjType MASK32 = std::numeric_limits<uint32_t>::max();
+    static constexpr DoubleObjType SHIFT32 = 32;
+    objs_[size_objs_++] = static_cast<ObjType>(obj & MASK32);
+    objs_[size_objs_++] = static_cast<ObjType>(obj >> SHIFT32);
 }
 
 bool VnObject::Compare(VnObject *obj)
