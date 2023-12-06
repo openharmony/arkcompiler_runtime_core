@@ -84,6 +84,12 @@ public:
         return reinterpret_cast<EtsObjectArray *>(ToInternalType(reinterpret_cast<ets_object>(arr)));
     }
 
+    EtsPromise *ToInternalType(ets_deferred deferred)
+    {
+        RETURN_NULL_IF_NULL(deferred);
+        return reinterpret_cast<EtsPromise *>(ToInternalType(reinterpret_cast<ets_object>(deferred)));
+    }
+
     template <typename T>
     T *Convert(ets_object obj)
     {

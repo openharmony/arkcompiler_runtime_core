@@ -31,10 +31,22 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 
 #define ETS_NAPI_DEBUG_TRACE(env)
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define CHECK_ENV(env)                                                                                      \
+    do {                                                                                                    \
+        ets_env *e = env;                                                                                   \
+        ETS_NAPI_RETURN_IF_EQ(::panda::ets::PandaEtsNapiEnv::ToPandaEtsEnv(e)->HasPendingException(), true, \
+                              ETS_PENDING_EXCEPTION);                                                       \
+        ETS_NAPI_RETURN_IF_EQ(e, nullptr, ETS_INVALID_ARG);                                                 \
+    } while (false)
+
+#define CHECK_ARG(env, arg) ETS_NAPI_RETURN_IF_EQ(arg, nullptr, ETS_INVALID_ARG)
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 namespace panda::ets::napi {
 template <typename T>
@@ -454,7 +466,7 @@ NO_UB_SANITIZE static ets_class FindClass(EtsEnv *env, const char *name)
             return nullptr;
         }
     }
-    ETS_NAPI_RETURN_NULL_IF_NULL(klass);
+    ETS_NAPI_RETURN_IF_EQ(klass, nullptr, nullptr);
     ASSERT_MANAGED_CODE();
     return reinterpret_cast<ets_class>(s.AddLocalRef(reinterpret_cast<EtsObject *>(klass)));
 }
@@ -468,7 +480,7 @@ NO_UB_SANITIZE static ets_class GetSuperclass(EtsEnv *env, ets_class cls)
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     auto base_cls = s.ToInternalType(cls)->GetBase();
-    ETS_NAPI_RETURN_NULL_IF_NULL(base_cls);
+    ETS_NAPI_RETURN_IF_EQ(base_cls, nullptr, nullptr);
     ASSERT_MANAGED_CODE();
     return reinterpret_cast<ets_class>(s.AddLocalRef(reinterpret_cast<EtsObject *>(base_cls)));
 }
@@ -608,7 +620,7 @@ NO_UB_SANITIZE static ets_object PopLocalFrame(EtsEnv *env, ets_object result)
 NO_UB_SANITIZE static ets_object NewGlobalRef(EtsEnv *env, ets_object obj)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_RETURN_NULL_IF_NULL(obj);
+    ETS_NAPI_RETURN_IF_EQ(obj, nullptr, nullptr);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsObject *internal_object = s.ToInternalType(obj);
@@ -618,7 +630,7 @@ NO_UB_SANITIZE static ets_object NewGlobalRef(EtsEnv *env, ets_object obj)
 NO_UB_SANITIZE static void DeleteGlobalRef([[maybe_unused]] EtsEnv *env, ets_object global_ref)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_RETURN_IF_NULL(global_ref);
+    ETS_NAPI_RETURN_VOID_IF_NULL(global_ref);
 
     PandaEtsVM *ets_vm = PandaEtsVM::GetCurrent();
     ets_vm->DeleteGlobalRef(global_ref);
@@ -627,7 +639,7 @@ NO_UB_SANITIZE static void DeleteGlobalRef([[maybe_unused]] EtsEnv *env, ets_obj
 NO_UB_SANITIZE static void DeleteLocalRef(EtsEnv *env, ets_object local_ref)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_RETURN_IF_NULL(local_ref);
+    ETS_NAPI_RETURN_VOID_IF_NULL(local_ref);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     s.DelLocalRef(local_ref);
 }
@@ -646,7 +658,7 @@ NO_UB_SANITIZE static ets_boolean IsSameObject(EtsEnv *env, ets_object ref1, ets
 NO_UB_SANITIZE static ets_object NewLocalRef(EtsEnv *env, ets_object ref)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_RETURN_NULL_IF_NULL(ref);
+    ETS_NAPI_RETURN_IF_EQ(ref, nullptr, nullptr);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsObject *internal_object = s.ToInternalType(ref);
@@ -2611,7 +2623,7 @@ NO_UB_SANITIZE static ets_objectRefType GetObjectRefType(EtsEnv *env, ets_object
 NO_UB_SANITIZE static ets_weak NewWeakGlobalRef(EtsEnv *env, ets_object obj)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_RETURN_NULL_IF_NULL(obj);
+    ETS_NAPI_RETURN_IF_EQ(obj, nullptr, nullptr);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsObject *internal_object = s.ToInternalType(obj);
@@ -2626,10 +2638,63 @@ NO_UB_SANITIZE static ets_weak NewWeakGlobalRef(EtsEnv *env, ets_object obj)
 NO_UB_SANITIZE static void DeleteWeakGlobalRef([[maybe_unused]] EtsEnv *env, ets_weak obj)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_RETURN_IF_NULL(obj);
+    ETS_NAPI_RETURN_VOID_IF_NULL(obj);
 
     PandaEtsVM *ets_vm = PandaEtsVM::GetCurrent();
     ets_vm->DeleteWeakGlobalRef(obj);
+}
+
+NO_UB_SANITIZE static ets_status PromiseCreate(EtsEnv *env, ets_deferred *deferred, ets_object *promise)
+{
+    ETS_NAPI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_ARG(env, deferred);
+    CHECK_ARG(env, promise);
+
+    ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+    EtsPromise *internal_promise = EtsPromise::Create(s.Coroutine());
+    if (UNLIKELY(internal_promise == nullptr)) {
+        return ETS_GENERIC_FAILURE;
+    }
+
+    auto *promise_obj = reinterpret_cast<EtsObject *>(internal_promise);
+    *promise = s.AddLocalRef(promise_obj);
+    *deferred = reinterpret_cast<ets_deferred>(s.AddGlobalRef(promise_obj));
+    return ETS_OKAY;
+}
+
+NO_UB_SANITIZE static ets_status DeferredResolve(EtsEnv *env, ets_deferred deferred, ets_object resolution)
+{
+    ETS_NAPI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_ARG(env, deferred);
+    CHECK_ARG(env, resolution);
+
+    ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+    EtsPromise *promise = s.ToInternalType(deferred);
+    EtsObject *value = s.ToInternalType(resolution);
+    EtsCoroutine *coro = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsCoroutine();
+
+    promise->Resolve(coro, value);
+    DeleteGlobalRef(env, reinterpret_cast<ets_object>(deferred));
+    return ETS_OKAY;
+}
+
+NO_UB_SANITIZE static ets_status DeferredReject(EtsEnv *env, ets_deferred deferred, ets_object rejection)
+{
+    ETS_NAPI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_ARG(env, deferred);
+    CHECK_ARG(env, rejection);
+
+    ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+    EtsPromise *promise = s.ToInternalType(deferred);
+    EtsObject *error = s.ToInternalType(rejection);
+    EtsCoroutine *coro = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsCoroutine();
+
+    promise->Reject(coro, error);
+    DeleteGlobalRef(env, reinterpret_cast<ets_object>(deferred));
+    return ETS_OKAY;
 }
 // NewDirectByteBuffer,
 // GetDirectBufferAddress,
@@ -2860,6 +2925,9 @@ const ETS_NativeInterface NATIVE_INTERFACE = {
     // GetDirectBufferAddress,
     // GetDirectBufferCapacity,
     GetObjectRefType,
+    PromiseCreate,
+    DeferredResolve,
+    DeferredReject,
 };
 // clang-format on
 

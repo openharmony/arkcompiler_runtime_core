@@ -79,32 +79,53 @@
         }                          \
     } while (false)
 
-#define ETS_NAPI_RETURN_IF_NULL(p) \
-    do {                           \
-        if ((p) == nullptr) {      \
-            return;                \
-        }                          \
-    } while (false)
-
-#define ETS_NAPI_RETURN_NULL_IF_NULL(p) \
+#define ETS_NAPI_RETURN_VOID_IF_NULL(p) \
     do {                                \
         if ((p) == nullptr) {           \
-            return nullptr;             \
+            return;                     \
         }                               \
     } while (false)
 
-#define ETS_NAPI_RETURN_NULL_IF_LE(a, b) \
+#define ETS_NAPI_RETURN_IF_EQ(a, b, ret) \
     do {                                 \
-        if ((a) <= (b)) {                \
-            return nullptr;              \
+        if (UNLIKELY((a) == (b))) {      \
+            return ret;                  \
         }                                \
     } while (false)
 
-#define ETS_NAPI_RETURN_FALSE_IF_NULL(a, b) \
-    do {                                    \
-        if ((p) == nullptr) {               \
-            return ETS_FALSE;               \
-        }                                   \
+#define ETS_NAPI_RETURN_IF_NE(a, b, ret) \
+    do {                                 \
+        if (UNLIKELY((a) != (b))) {      \
+            return ret;                  \
+        }                                \
+    } while (false)
+
+#define ETS_NAPI_RETURN_IF_GT(a, b, ret) \
+    do {                                 \
+        if (UNLIKELY((a) > (b))) {       \
+            return ret;                  \
+        }                                \
+    } while (false)
+
+#define ETS_NAPI_RETURN_IF_GE(a, b, ret) \
+    do {                                 \
+        if (UNLIKELY((a) >= (b))) {      \
+            return ret;                  \
+        }                                \
+    } while (false)
+
+#define ETS_NAPI_RETURN_IF_LT(a, b, ret) \
+    do {                                 \
+        if (UNLIKELY((a) < (b))) {       \
+            return ret;                  \
+        }                                \
+    } while (false)
+
+#define ETS_NAPI_RETURN_IF_LE(a, b, ret) \
+    do {                                 \
+        if (UNLIKELY((a) <= (b))) {      \
+            return ret;                  \
+        }                                \
     } while (false)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
