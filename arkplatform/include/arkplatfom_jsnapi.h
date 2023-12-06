@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
-#include <hilog/log.h>
-
-#include "include/arkplatform.h"
-#include "include/arkplatfom_jsnapi.h"
+#include "ecmascript/napi/include/jsnapi.h"
+#include "ecmascript/napi/include/jsnapi_internals.h"
 
 namespace arkplatform {
 
-void ArkPlatform::Create(const std::string &s)
-{
-    constexpr static unsigned int ARK_DOMAIN = 0xD003F00;
-    constexpr static auto TAG = "ArkPlatform";
-    constexpr static OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, ARK_DOMAIN, TAG};
-    OHOS::HiviewDFX::HiLog::Info(LABEL, "%{public}s", "Hello from arkplatform");
-}
+using panda::LocalScope;
+using panda::Local;
+using panda::JSNApi;
+using panda::NumberRef;
+using panda::BooleanRef;
+using panda::JSValueRef;
+using panda::JSValueRefInternals;
+using panda::JSTaggedType;
 
-}  // namespace arkplatform
+} // namespace arkplatform

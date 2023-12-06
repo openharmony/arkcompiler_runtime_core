@@ -22,6 +22,7 @@
         "ram": "",
         "deps": {
             "components": [
+                "ets_runtime",
                 "hilog",
                 "napi"
             ],
