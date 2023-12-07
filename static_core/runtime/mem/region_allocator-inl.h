@@ -154,7 +154,9 @@ void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t align_size
 
         Region *region = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGION_TYPE);
         if (LIKELY(region != nullptr)) {
-            mem = region->template Alloc<false>(align_size);
+            // Here we need memory barrier to make the allocation visible
+            // in all threads before SetCurrentRegion
+            mem = region->template Alloc<IS_ATOMIC>(align_size);
             SetCurrentRegion<IS_ATOMIC, REGION_TYPE>(region);
         }
 
