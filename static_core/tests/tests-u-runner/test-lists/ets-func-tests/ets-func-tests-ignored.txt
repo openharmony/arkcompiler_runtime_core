@@ -281,8 +281,6 @@ spec/enum/issue14636.ets
 ### End enum
 
 ### lambda issues begin
-### Issue 14018
-spec/lambda/callArrayLengthFromLambda.ets
 ### Issue 14054
 spec/lambda/callAsyncMethodFromAsyncLambda1.ets
 spec/lambda/callMethodFromAsyncLambda1.ets
@@ -299,6 +297,12 @@ spec/lambda/compareBooleanWithTrue.ets
 ### Negative tests
 spec/lambda/incorrectAsyncLambdaReturnValue.ets
 spec/lambda/incorrectVariableDeclaration.ets
+### Issue 14599
+spec/lambda/propertyLookupWithTypeAlias_01.ets
+spec/lambda/propertyLookupWithTypeAlias_02.ets
+spec/lambda/propertyLookupWithTypeAlias_03.ets
+### Issue 14634
+spec/lambda/lambdaExpressionWithoutParenthesis.ets
 ### lambda issues end
 ### Undefined type
 spec/undefined-type/define/define-interface-name-as-undefined.ets
@@ -501,6 +505,10 @@ spec/generic/usingOutT.ets
 ### Negative tests
 spec/generic/wrongUsingInT.ets
 spec/generic/generic_05.ets
+### Issue 14656
+spec/generic/genericTypeArgumentWithDefaultParameterValue_04.ets
+spec/generic/genericTypeArgumentWithDefaultParameterValue_05.ets
+spec/generic/genericTypeArgumentWithDefaultParameterValue_06.ets
 ### End of Generic
 ### Import-export issues
 ### Issue 14586
@@ -563,7 +571,15 @@ escompat/ArrayBufferTest2.ets
 
 ### object-literals
 spec/object-literals/issue14680.ets
-### End of object-literals
 ### Issue 14658
 spec/object-literals/issue14687.ets
 ### end Issue 14658
+### End of object-literals
+### Start functions issues
+### Issue 14842
+spec/functions/overrideModifier_01.ets
+spec/functions/overrideModifier_03.ets
+### Issue 14702
+spec/functions/subtypingWithFunctionsRequiresExplicitType_02.ets
+spec/functions/subtypingWithFunctionsRequiresExplicitType_03.ets
+### End functions issues
