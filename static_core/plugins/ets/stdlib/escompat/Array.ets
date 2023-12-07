@@ -16,7 +16,7 @@
 package escompat;
 
 class ArrayKeysIterator implements IterableIterator<number> {
-    // TODO(kprokopenko): must contain array to update keys on update, but blocked by frontend
+    // NOTE(kprokopenko): must contain array to update keys on update, but blocked by frontend
     private parent: int //Array<T>
     private idx: int = 0
 
@@ -96,7 +96,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public constructor(arrayLen: number) {
         this.buffer = new NullishType[arrayLen as int];
-        this.actualLength = arrayLen as int // TODO(kprokopenko): this is incorrect! null-safety
+        this.actualLength = arrayLen as int // NOTE(kprokopenko): this is incorrect! null-safety
     }
 
     private static objEquals<Y>(a: Y | null, b: Y | null): boolean {
@@ -106,7 +106,7 @@ export final class Array<T> implements ReadonlyArray<T> {
         if (b == null) {
             return false
         }
-        // TODO: is a.equals(null) a valid code? in some language it is
+        // NOTE: is a.equals(null) a valid code? in some language it is
         return a.equals(b as Y)
     }
 
@@ -429,7 +429,7 @@ export final class Array<T> implements ReadonlyArray<T> {
         return this.fill(value, 0, this.actualLength);
     }
 
-    // TODO(ivan-tyulyandin): blocked by undefined implementation
+    // NOTE(ivan-tyulyandin): blocked by undefined implementation
     public override find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | null {
         const res = this.findIndex(predicate)
         if (res == -1) {
@@ -1194,7 +1194,7 @@ export final class Array<T> implements ReadonlyArray<T> {
         return res;
     }
 
-    // TODO: can't distinguish `=> number` and `=> int`
+    // NOTE: can't distinguish `=> number` and `=> int`
     /**
      * Reorders elements of `this` using comparator function.
      *
@@ -1202,7 +1202,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @note Mutating method
      *
-     * TODO clarify UTF-16 or UTF-8
+     * NOTE clarify UTF-16 or UTF-8
      */
     public sort(comparator: (a: T, b: T) => number): Array<T> {
         let res = this.copyArray();
@@ -1219,7 +1219,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @note Mutating method
      *
-     * TODO clarify UTF-16 or UTF-8
+     * NOTE clarify UTF-16 or UTF-8
      */
     public sort(): Array<T> {
         return this.sort(Array.defaultComparator)
@@ -1270,7 +1270,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    // TODO(ivan-tyulyandin): investigate, an overloading issue
+    // NOTE(ivan-tyulyandin): investigate, an overloading issue
     // public lastIndexOf(element: T, fromIndex: int): int {
     //     if (this.actualLength == 0) {
     //         return -1;
@@ -1439,7 +1439,7 @@ export final class Array<T> implements ReadonlyArray<T> {
     public override toString(): string {
         let str = new StringBuilder()
         for (let i = 0; i < this.actualLength; i++) {
-            const d: Object | null = this.$_get(i)
+            const d: NullishType = this.$_get(i)
             if (d == null) {
                 str.append("null")
             } else {
@@ -2184,18 +2184,22 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns new length of the Array
      */
-    /* // TODO(mredkin): uncomment when #12735 will be fixed
-     * public unshift(...values: Object[]): int {
-     *     let arr = new Object[values.length + this.actualLength]
-     *     for(let i: int = 0; i < values.length; i++) {
-     *         arr[i] = values[i]
-     *     }
-     *     for(let i: int = values.length; i < values.length + this.actualLength; i++) {
-     *         arr[i] = this.data[i - values.length]
-     *     }
-     *     return values.length + this.actualLength
-     * }
-     */
+    public unshift(...values: T[]): number {
+        let valLen = values.length as int
+        let resLen = valLen + this.actualLength
+        let arr = new NullishType[resLen];
+        for (let i: int = 0; i < valLen; ++i) {
+            arr[i] = values[i]
+        }
+        let curPlace = 0
+        for (let i: int = valLen; i < resLen; ++i) {
+            arr[i] = this.buffer[curPlace];
+            ++curPlace
+        }
+        this.buffer = arr;
+        this.actualLength = resLen
+        return this.actualLength
+    }
 
     /**
      * Copying version of using the bracket notation to change the value of a given index.
@@ -2289,7 +2293,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @return new Array after map and than flat
      */
-    // TODO(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
+    // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
     public flatMap<U>(fn: (v: T, k: number, arr: Array<T>) => U): Array<U> {
         let mapped: Array<U> = this.map<U>(fn)
         return mapped.flat<U>()
@@ -2302,7 +2306,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @return new Array after map and than flat
      */
-     // TODO(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
+     // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
     public flatMap<U>(fn: (v: T, k: number) => U): Array<U> {
         let mapped: Array<U> = this.map<U>(fn)
         return mapped.flat<U>()
@@ -2315,7 +2319,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @return new Array after map and than flat
      */
-    // TODO(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
+    // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
     public flatMap<U>(fn: (v: T) => U): Array<U> {
         let mapped: Array<U> = this.map<U>(fn)
         return mapped.flat<U>()
@@ -2324,7 +2328,7 @@ export final class Array<T> implements ReadonlyArray<T> {
     /**
      * Returns an iterator over all indices
      */
-    public /* override */ keys(): IterableIterator<Number> { // TODO(kprokopenko): must be number, blocked by frontend
+    public /* override */ keys(): IterableIterator<Number> { // NOTE(kprokopenko): must be number, blocked by frontend
         return new ArrayKeysIterator(this.actualLength)
     }
 
@@ -2338,7 +2342,7 @@ export final class Array<T> implements ReadonlyArray<T> {
     /**
      * Returns an array iterator
      */
-    // TODO(ivan-tyulyandin): blocked by tuples implementation
+    // NOTE(ivan-tyulyandin): blocked by tuples implementation
     // public entries(): Iterator<[Int, T]> {
     //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.actualLength];
     //     for (let i: int = 0; i < this.actualLength; i++) {
