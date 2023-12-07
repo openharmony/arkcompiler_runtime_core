@@ -15,9 +15,11 @@
 
 #include "verifier.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <gtest/gtest.h>
 #include <string>
+#include <unordered_map>
 
 #include "file.h"
 #include "utils.h"
@@ -299,26 +301,23 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
 {
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
+    std::vector<uint32_t> literal_ids;
     {
         panda::verifier::Verifier ver {base_file_name};
         ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
+        std::copy(ver.literal_ids_.begin(), ver.literal_ids_.end(), std::back_inserter(literal_ids));
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    size_t literal_id = 0x2f8; // The known literal_id in the abc file
+    unsigned char invalid_tag = 0x5c; // a invalid tag
 
-    unsigned char tag = 0x05; // The literal tag of string in the abc file
-    unsigned char new_tag = 0x5c; // a invalid tag
-
-    for (size_t i = literal_id; i < buffer.size(); ++i) {
-        if (buffer[i] == tag) {
-            buffer[i] = new_tag;
-            break;
-        }
+    for (const auto &literal_id : literal_ids) {
+        size_t tag_off = static_cast<size_t>(literal_id) + sizeof(uint32_t);
+        buffer[tag_off] = invalid_tag;
     }
 
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_008.abc";
@@ -383,29 +382,19 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_009, TestSize.Level1)
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
 {
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_literal_array.abc";
+    std::unordered_map<uint32_t, uint32_t> inner_literal_map;
     {
         panda::verifier::Verifier ver {base_file_name};
         ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
+        inner_literal_map.insert(ver.inner_literal_map_.begin(), ver.inner_literal_map_.end());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    size_t literal_id = 0x578; // The known literal_id in the abc file
-
-    // The known literal_id in the literal array of the abc file
-    std::vector<unsigned char> inner_literal_id = {0xe9, 0x04};
-    std::vector<unsigned char> new_literal_id = {0xaa, 0xaa};
-
-    for (size_t i = literal_id; i < buffer.size(); ++i) {
-        if (buffer[i] == inner_literal_id[0] && buffer[i+1] == inner_literal_id[1]) {
-            buffer[i] = new_literal_id[0];
-            buffer[i + 1] = new_literal_id[1];
-            break;
-        }
-    }
+    ModifyBuffer(inner_literal_map, buffer);
 
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_010.abc";
     GenerateModifiedAbc(buffer, target_file_name);
@@ -427,29 +416,19 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_011, TestSize.Level1)
 {
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_literal_array.abc";
+    std::unordered_map<uint32_t, uint32_t> inner_method_map;
     {
         panda::verifier::Verifier ver {base_file_name};
         ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
+        inner_method_map.insert(ver.inner_method_map_.begin(), ver.inner_method_map_.end());
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    size_t literal_id = 0x57a; // The known literal_id in the abc file
-
-    // The known method_id in the literal array of the abc file
-    std::vector<unsigned char> method_id = {0xcc, 0x02};
-    std::vector<unsigned char> new_method_id = {0xff, 0xff};
-
-    for (size_t i = literal_id; i < buffer.size(); ++i) {
-        if (buffer[i] == method_id[0] && buffer[i+1] == method_id[1]) {
-            buffer[i] = new_method_id[0];
-            buffer[i + 1] = new_method_id[1];
-            break;
-        }
-    }
+    ModifyBuffer(inner_method_map, buffer);
 
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_011.abc";
     GenerateModifiedAbc(buffer, target_file_name);
