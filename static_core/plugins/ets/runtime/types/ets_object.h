@@ -32,7 +32,7 @@ public:
 
     PANDA_PUBLIC_API static EtsObject *Create(EtsClass *klass);
 
-    EtsClass *GetClass() const
+    PANDA_PUBLIC_API EtsClass *GetClass() const
     {
         return EtsClass::FromRuntimeClass(GetCoreType()->ClassAddr<Class>());
     }
@@ -95,7 +95,7 @@ public:
     }
 
     template <bool NEED_READ_BARRIER = true>
-    EtsObject *GetFieldObject(EtsField *field) const
+    PANDA_PUBLIC_API EtsObject *GetFieldObject(EtsField *field) const
     {
         return reinterpret_cast<EtsObject *>(
             GetCoreType()->GetFieldObject<NEED_READ_BARRIER>(*field->GetRuntimeField()));
@@ -180,12 +180,12 @@ public:
         return static_cast<const EtsObject *>(object_header);
     }
 
-    bool IsStringClass()
+    PANDA_PUBLIC_API bool IsStringClass()
     {
         return GetClass()->IsStringClass();
     }
 
-    bool IsArrayClass()
+    PANDA_PUBLIC_API bool IsArrayClass()
     {
         return GetClass()->IsArrayClass();
     }

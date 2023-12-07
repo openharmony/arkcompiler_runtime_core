@@ -59,7 +59,7 @@ public:
         return reinterpret_cast<const char *>(GetRuntimeClass()->GetDescriptor());
     }
 
-    EtsClass *GetBase();
+    PANDA_PUBLIC_API EtsClass *GetBase();
 
     uint32_t GetFieldsNumber();
 
@@ -77,18 +77,18 @@ public:
 
     uint32_t GetFieldIndexByName(const char *name);
 
-    PandaVector<EtsField *> GetFields();
+    PANDA_PUBLIC_API PandaVector<EtsField *> GetFields();
 
     EtsField *GetFieldByIndex(uint32_t i);
 
     EtsField *GetFieldIDByOffset(uint32_t field_offset);
     EtsField *GetFieldByName(EtsString *name);
-    EtsField *GetFieldIDByName(const char *name, const char *sig = nullptr);
+    PANDA_PUBLIC_API EtsField *GetFieldIDByName(const char *name, const char *sig = nullptr);
 
     EtsField *GetOwnFieldByIndex(uint32_t i);
     EtsField *GetDeclaredFieldIDByName(const char *name);
 
-    EtsField *GetStaticFieldIDByName(const char *name, const char *sig = nullptr);
+    PANDA_PUBLIC_API EtsField *GetStaticFieldIDByName(const char *name, const char *sig = nullptr);
     EtsField *GetStaticFieldIDByOffset(uint32_t field_offset);
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name);
@@ -116,7 +116,7 @@ public:
 
     PandaVector<EtsMethod *> GetMethods();
 
-    PandaVector<EtsMethod *> GetConstructors();
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetConstructors();
 
     template <class T>
     T GetStaticFieldPrimitive(EtsField *field)
@@ -148,7 +148,7 @@ public:
         GetRuntimeClass()->SetFieldPrimitive<T, false>(field_offset, value);
     }
 
-    EtsObject *GetStaticFieldObject(EtsField *field);
+    PANDA_PUBLIC_API EtsObject *GetStaticFieldObject(EtsField *field);
     EtsObject *GetStaticFieldObject(int32_t field_offset, bool is_volatile);
 
     void SetStaticFieldObject(EtsField *field, EtsObject *value);
@@ -181,13 +181,13 @@ public:
 
     bool IsAnnotation() const;
     bool IsEnum() const;
-    bool IsStringClass() const;
+    PANDA_PUBLIC_API bool IsStringClass() const;
     bool IsLambdaClass() const;
     bool IsUnionClass() const;
     bool IsUndefined() const;
     bool IsClassClass();
     bool IsInterface() const;
-    bool IsArrayClass() const;
+    PANDA_PUBLIC_API bool IsArrayClass() const;
     bool IsTupleClass() const;
     bool IsBoxedClass() const;
 

@@ -533,7 +533,10 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value js_newtarget, napi_
     EtsClass *instance_class {};
 
     if (LIKELY(not_extensible)) {
+#ifndef PANDA_TARGET_OHOS
+        // In case of OHOS sealed object can't be wrapped, therefore seal it after wrapping
         NAPI_CHECK_FATAL(napi_object_seal(env, js_this));
+#endif  // PANDA_TARGET_OHOS
         instance_class = ets_class_;
     } else {
         if (UNLIKELY(jsproxy_wrapper_ == nullptr)) {
@@ -551,6 +554,10 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value js_newtarget, napi_
     SharedReference *shared_ref;
     if (LIKELY(not_extensible)) {
         shared_ref = ctx->GetSharedRefStorage()->CreateETSObjectRef(ctx, ets_object.GetPtr(), js_this);
+#ifdef PANDA_TARGET_OHOS
+        // In case of OHOS sealed object can't be wrapped, therefore seal it after wrapping
+        NAPI_CHECK_FATAL(napi_object_seal(env, js_this));
+#endif  // PANDA_TARGET_OHOS
     } else {
         shared_ref = ctx->GetSharedRefStorage()->CreateHybridObjectRef(ctx, ets_object.GetPtr(), js_this);
     }
