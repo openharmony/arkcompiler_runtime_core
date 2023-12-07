@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,11 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_target_sources(arkruntime_obj PRIVATE ${PANDA_ROOT}/runtime/tests/intrusive-tests/intrusive_test.cpp)
-
-if(NOT IS_RUNTIME_INTRUSIVE_BUILD)
-    add_custom_target(intrusive_test_run)
-    add_custom_target(intrusive_test)
+if(IS_RUNTIME_INTRUSIVE_BUILD)
+    panda_target_sources(arkruntime_obj PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/sync_api.cpp)
+else()
+    add_gtests(
+        interrupt_release_pages_test
+        interrupt_release_pages_test.cpp
+    )
+    add_dependencies(intrusive_test interrupt_release_pages_test)
+    add_dependencies(intrusive_test_run interrupt_release_pages_test_gtests)
 endif()
-add_subdirectory(clear_interrupted_intrusive_test)
-add_subdirectory(interrupt_release_pages_test)
+

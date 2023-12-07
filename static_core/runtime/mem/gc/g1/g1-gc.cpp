@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -581,7 +581,10 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
             break;
         }
         case GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS: {
-            PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
+            auto wasInterrupted =
+                PoolManager::GetMmapMemPool()->ReleaseFreePagesToOSWithInterruption(releasePagesInterruptFlag_);
+            releasePagesInterruptFlag_ =
+                wasInterrupted ? ReleasePagesStatus::WAS_INTERRUPTED : ReleasePagesStatus::FINISHED;
             break;
         }
         case GCWorkersTaskTypes::TASK_ENQUEUE_REMSET_REFS: {
@@ -654,6 +657,8 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
     LOG_DEBUG_GC << "Footprint before GC: " << this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
     task.UpdateGCCollectionType(GCCollectionType::YOUNG);
 
+    InterruptReleasePagesIfNeeded();
+
     size_t bytesInHeapBeforeMove = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
     {
         ScopedTiming t("G1 GC", *this->GetTiming());
@@ -697,6 +702,8 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
     // Update global and GC memstats based on generational memstats information
     // We will update tenured stats and record allocations, so set 'true' values
     this->UpdateMemStats(bytesInHeapBeforeMove, true, true);
+
+    StartReleasePagesIfNeeded(ReleasePagesStatus::WAS_INTERRUPTED);
 
     LOG_DEBUG_GC << "Footprint after GC: " << this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
     this->SetFullGC(false);
@@ -811,11 +818,9 @@ void G1GC<LanguageConfig>::ReleasePagesInFreePools()
     ScopedTiming releasePages("Release Pages in Free Pools", *this->GetTiming());
     bool useGcWorkers = this->GetSettings()->GCWorkersCount() != 0;
     if (useGcWorkers) {
-        if (!this->GetWorkersTaskPool()->AddTask(GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS)) {
-            PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
-        }
+        StartReleasePagesIfNeeded(ReleasePagesStatus::FINISHED);
     } else {
-        PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
+        PoolManager::GetMmapMemPool()->ReleaseFreePagesToOS();
     }
 }
 
@@ -1796,6 +1801,31 @@ CollectionSet G1GC<LanguageConfig>::GetFullCollectionSet()
         collectionSet.AddRegion(region);
     }
     return collectionSet;
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::InterruptReleasePagesIfNeeded()
+{
+    if (this->GetSettings()->GCWorkersCount() != 0) {
+        auto oldStatus = ReleasePagesStatus::RELEASING_PAGES;
+        if (releasePagesInterruptFlag_.compare_exchange_strong(oldStatus, ReleasePagesStatus::NEED_INTERRUPT)) {
+            /* @sync 1
+             * @description Interrupt release pages
+             */
+        }
+    }
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::StartReleasePagesIfNeeded(ReleasePagesStatus oldStatus)
+{
+    if (releasePagesInterruptFlag_.compare_exchange_strong(oldStatus, ReleasePagesStatus::RELEASING_PAGES)) {
+        ASSERT(this->GetSettings()->GCWorkersCount() != 0);
+        if (!this->GetWorkersTaskPool()->AddTask(GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS)) {
+            PoolManager::GetMmapMemPool()->ReleaseFreePagesToOS();
+            releasePagesInterruptFlag_ = ReleasePagesStatus::FINISHED;
+        }
+    }
 }
 
 template <class LanguageConfig>

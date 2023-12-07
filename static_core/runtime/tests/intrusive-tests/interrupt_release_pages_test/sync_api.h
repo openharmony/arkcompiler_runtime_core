@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RUNTIME_INTRUSIVE_TEST_SUITE_H
-#define RUNTIME_INTRUSIVE_TEST_SUITE_H
+#ifndef INTERRUPT_RELEASE_PAGES_TEST_H
+#define INTERRUPT_RELEASE_PAGES_TEST_H
 
-enum IntrusiveTestsT { CLEAR_INTERRUPTED_INTRUSIVE_TEST = 1, INTERRUPT_RELEASE_PAGES_TEST };
+namespace ark::test {
 
-#include "runtime/tests/intrusive-tests/intrusive_test.h"
+class IntrusiveInterruptReleasePagesTestAPI {
+public:
+    static void SetNeedInterrupt();
+    static void WaitForThreadInterruption();
+    static void NotifyAboutThreadInterruption();
+};
 
-#endif  // RUNTIME_INTRUSIVE_TEST_SUITE_H
+}  // namespace ark::test
+
+#endif  // INTERRUPT_RELEASE_PAGES_TEST_H

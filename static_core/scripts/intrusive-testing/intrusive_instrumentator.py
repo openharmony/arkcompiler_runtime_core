@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -573,6 +573,17 @@ class Instrumentator:
             HEADER_FILE_EXTENSION,
             False,
             frameworkHeaderFileSet)
+
+        # Instrumentator includes all headers from runtime/tests/intrusive-tests directory
+        # in all places where code is needed to be synced (according to bindings.yml).
+        # That is why it includes intrusive_test_option.h file, which contains RuntimeOptions,
+        # so framework cannot be used in libpandabase, compiler and etc, but actually
+        # intrusive_test_option.h is only needed to initialize testsuite (see Runtime::Create)
+        for header in frameworkHeaderFileSet:
+            if "intrusive_test_option.h" in header:
+              frameworkHeaderFileSet.remove(header)
+              break
+
         # go over map elements (from instrumented file to sync points in that file)
         for file in self.__fileToSyncPointSet:
             # find line numbers of synchronization points

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,7 +146,7 @@ void HeapSpace::ClampCurrentMaxHeapSize()
     os::memory::WriteLockHolder lock(heapLock_);
     memSpace_.ClampNewMaxSize(
         AlignUp(memSpace_.GetCurrentSize() + PANDA_DEFAULT_POOL_SIZE, PANDA_POOL_ALIGNMENT_IN_BYTES));
-    PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
+    PoolManager::GetMmapMemPool()->ReleaseFreePagesToOS();
 }
 
 inline Pool HeapSpace::TryAllocPoolBase(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
