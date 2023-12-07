@@ -655,8 +655,7 @@ bool EtsClass::IsUnionClass() const
 
 bool EtsClass::IsUndefined() const
 {
-    // NOTE(petr-shumilov): Not implemented
-    return false;
+    return GetDescriptor() == panda_file_items::class_descriptors::INTERNAL_UNDEFINED;
 }
 
 bool EtsClass::IsInterface() const

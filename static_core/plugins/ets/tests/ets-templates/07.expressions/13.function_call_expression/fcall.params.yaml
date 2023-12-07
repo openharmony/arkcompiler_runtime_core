@@ -16,10 +16,10 @@ cases:
     - decl: |-
           type F = (p: string) => number
           function foo(p: string): number {
-              return p.length()
+              return p.length
           }
       use: |-
-          let f: F = (p: string): number => { return p.length() }
+          let f: F = (p: string): number => { return p.length }
           assert f("abcdef") == foo("ABCDEF")
 
     - decl: |-

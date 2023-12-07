@@ -119,7 +119,7 @@ export class JSON {
      */
     public static stringify(d: String): String {
         let sb = new StringBuilder([c'\"'])
-        let len = d.length()
+        let len = d.getLength()
         for (let i = 0; i < len; ++i) {
             let c = d.charAt(i)
             let escapedCharIndex = lastIndexOf(JSON.ESCAPED_CHARS, c)
@@ -438,7 +438,7 @@ class TypeColor {
         this.typeID = typeID
         this.color = color
     }
-    override equals(oth: Object|null): boolean {
+    override equals(oth: NullishType): boolean {
         return (oth instanceof Object) && (oth as TypeColor).typeID == this.typeID
     }
 }
@@ -483,7 +483,7 @@ export class JSONParser {
     private getNextChar(): boolean {
         do {
             ++this.curPos.index
-            if (this.curPos.index >= this.json.length()) {
+            if (this.curPos.index >= this.json.getLength()) {
                 return false
             }
             this.curChar = this.json.charAt(this.curPos.index)
@@ -748,7 +748,7 @@ export class JSONString extends JSONValue {
         return this.value
     }
 
-    public override equals(to: Object|null): boolean {
+    public override equals(to: NullishType): boolean {
         return (to instanceof JSONString) && this.value == (to as JSONString).value
     }
 }

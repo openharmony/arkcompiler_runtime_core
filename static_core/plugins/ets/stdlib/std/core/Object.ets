@@ -86,8 +86,8 @@ export class Object {
     // "Keys" for the string type is enumeration from 0 to str.length - 1
     if (o instanceof String) {
       let sv = o as string
-      let len = sv.length()
-      let res = new string[len as int]
+      let len = sv.getLength()
+      let res = new string[len]
       for (let i = 0; i < len; i++) {
         // TODO(shumilov-petr): need to apply more effective way for int to String conversion
         res[i] = new Int(i).toString()
@@ -158,7 +158,7 @@ export class Object {
     }
     if (o instanceof String) {
       let sv = o as string
-      let len = sv.length()
+      let len = sv.getLength()
       let res = new Object[len]
       for (let i = 0; i < len; i++) {
         res[i] = new StringBuilder().append(sv.charAt(i)).toString()
@@ -172,7 +172,7 @@ export class Object {
       let len = keys.length
       let res = new Object[len]
       for (let i = 0; i < len; i++) {
-        res[i] = cv.getFieldByName(keys[i]).getData()
+        res[i] = cv.getFieldByName(keys[i]).getData()!
       }
       return res
     } else if (t instanceof ArrayType) {
@@ -180,7 +180,7 @@ export class Object {
       let len = av.getLength()
       let res = new Object[len as int]
       for (let i = 0; i < len; i++) {
-        res[i] = av.getElement(i).getData()
+        res[i] = av.getElement(i).getData()!
       }
       return res
     } else if (t instanceof LambdaType) {
@@ -218,7 +218,7 @@ export class Object {
     }
     if (o instanceof String) {
       let sv = o as string
-      let len = sv.length()
+      let len = sv.getLength()
       let res = new Tuple[len]
       for (let i = 0; i < len; i++) {
         res[i] = new Object[2]
@@ -236,7 +236,7 @@ export class Object {
       for (let i = 0; i < len; i++) {
         res[i] = new Object[2]
         res[i][0] = keys[i]
-        res[i][1] = cv.getFieldByName(keys[i]).getData()
+        res[i][1] = cv.getFieldByName(keys[i]).getData()!
       }
       return res
     } else if (t instanceof ArrayType) {
@@ -246,7 +246,7 @@ export class Object {
       for (let i = 0; i < len; i++) {
         res[i] = new Object[2]
         res[i][0] = new Int(i).toString()
-        res[i][1] = av.getElement(i).getData()
+        res[i][1] = av.getElement(i).getData()!
       }
       return res
     } else if (t instanceof LambdaType) {
@@ -338,7 +338,7 @@ export class Object {
   public hasOwnProperty(index: number): boolean {
     if ((this) instanceof String) {
       let sv = this as String
-      let len = sv.length()
+      let len = sv.getLength()
       let idx = index as long
       return (0 <= idx && idx < len)
     }
@@ -388,4 +388,4 @@ export class Object {
   }
 }
 
-export type NullishType = Object | null
+export type NullishType = Object | null | undefined

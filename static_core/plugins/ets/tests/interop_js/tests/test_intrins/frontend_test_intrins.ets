@@ -92,7 +92,7 @@ function test_string_ops(): boolean {
     if (v1 as String != strv) {
         return false;
     }
-    if (GetProp(strv, "length") as double != strv.length()) {
+    if (GetProp(strv, "length") as double != strv.length) {
         return false;
     }
     if (Identity(Identity(strv)) as String != strv) {

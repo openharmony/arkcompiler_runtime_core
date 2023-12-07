@@ -14,9 +14,13 @@
  */
 
 #include <algorithm>
+#include <cstdint>
 #include <regex>
+#include "include/mem/panda_string.h"
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
+#include "macros.h"
+#include "napi/ets_napi.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/entrypoints/string_index_of.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -27,11 +31,16 @@
 #include "unicode/locid.h"
 #include "unicode/coll.h"
 #include "unicode/unistr.h"
+#include "unicode/normalizer2.h"
+#include "utils/span.h"
+
+using icu::Normalizer2;
 
 namespace panda::ets::intrinsics {
 
-constexpr const wchar_t CHAR0XDFFF = 0xdfff;
-constexpr const wchar_t CHAR0XD800 = 0xd800;
+constexpr const uint32_t CHAR0X1FFC00 = 0x1ffc00;
+constexpr const uint16_t CHAR0XD800 = 0xd800;
+constexpr const uint16_t CHAR0XDC00 = 0xdc00;
 
 EtsCharArray *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
 {
@@ -91,7 +100,7 @@ uint16_t StdCoreStringCharAt(EtsString *s, int32_t index)
     return sp[index];
 }
 
-int32_t StdCoreStringLength(EtsString *s)
+int32_t StdCoreStringGetLength(EtsString *s)
 {
     ASSERT(s != nullptr);
     return s->GetLength();
@@ -134,24 +143,102 @@ EtsString *StdCoreStringMatch(EtsString *this_str, EtsString *reg)
     return EtsString::CreateFromMUtf8(std::sregex_iterator(this_s.begin(), this_s.end(), e)->str().c_str());
 }
 
-EtsString *StdCoreStringNormalize(EtsString *this_str)
+EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
 {
-    PandaVector<uint8_t> buf;
-    auto str = std::string(this_str->ConvertToStringView(&buf));
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
-    str.erase(
-        std::remove_if(str.begin(), str.end(), [](char16_t ch) { return (ch >= CHAR0XD800) && (ch <= CHAR0XDFFF); }),
-        str.end());
-    return EtsString::CreateFromMUtf8(str.c_str());
+    icu::UnicodeString utf16_str;
+    if (str->IsUtf16()) {
+        utf16_str = icu::UnicodeString {str->GetDataUtf16(), static_cast<int32_t>(str->GetUtf16Length())};
+    } else {
+        utf16_str =
+            icu::UnicodeString {utf::Mutf8AsCString(str->GetDataMUtf8()), static_cast<int32_t>(str->GetLength())};
+    }
+
+    UErrorCode error_code = U_ZERO_ERROR;
+    utf16_str = normalizer->normalize(utf16_str, error_code);
+
+    if (UNLIKELY(U_FAILURE(error_code))) {
+        std::string message = "Got error in process of normalization: '" + std::string(u_errorName(error_code)) + "'";
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
+        return nullptr;
+    }
+
+    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(utf16_str.getTerminatedBuffer()),
+                                      utf16_str.length());
+}
+
+EtsString *StdCoreStringNormalizeNFC(EtsString *this_str)
+{
+    UErrorCode error_code = U_ZERO_ERROR;
+    auto normalizer = Normalizer2::getNFCInstance(error_code);
+    if (UNLIKELY(U_FAILURE(error_code))) {
+        std::string message = "Cannot get NFC normalizer: '" + std::string(u_errorName(error_code)) + "'";
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        return nullptr;
+    }
+    return StringNormalize(this_str, normalizer);
+}
+
+EtsString *StdCoreStringNormalizeNFD(EtsString *this_str)
+{
+    UErrorCode error_code = U_ZERO_ERROR;
+    auto normalizer = Normalizer2::getNFDInstance(error_code);
+    if (UNLIKELY(U_FAILURE(error_code))) {
+        std::string message = "Cannot get NFD normalizer: '" + std::string(u_errorName(error_code)) + "'";
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        return nullptr;
+    }
+    return StringNormalize(this_str, normalizer);
+}
+
+EtsString *StdCoreStringNormalizeNFKC(EtsString *this_str)
+{
+    UErrorCode error_code = U_ZERO_ERROR;
+    auto normalizer = Normalizer2::getNFKCInstance(error_code);
+    if (UNLIKELY(U_FAILURE(error_code))) {
+        std::string message = "Cannot get NFKC normalizer: '" + std::string(u_errorName(error_code)) + "'";
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        return nullptr;
+    }
+    return StringNormalize(this_str, normalizer);
+}
+
+EtsString *StdCoreStringNormalizeNFKD(EtsString *this_str)
+{
+    UErrorCode error_code = U_ZERO_ERROR;
+    auto normalizer = Normalizer2::getNFKDInstance(error_code);
+    if (UNLIKELY(U_FAILURE(error_code))) {
+        std::string message = "Cannot get NFKD normalizer: '" + std::string(u_errorName(error_code)) + "'";
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        return nullptr;
+    }
+    return StringNormalize(this_str, normalizer);
 }
 
 uint8_t StdCoreStringIsWellFormed(EtsString *this_str)
 {
-    PandaVector<uint8_t> buf;
-    auto str = std::string(this_str->ConvertToStringView(&buf));
-
-    for (char16_t ch : str) {
-        if ((ch >= CHAR0XD800) && (ch <= CHAR0XDFFF)) {
+    if (!this_str->IsUtf16()) {
+        return UINT8_C(1);
+    }
+    auto length = this_str->GetUtf16Length();
+    auto code_units = Span<uint16_t>(this_str->GetDataUtf16(), length);
+    for (size_t i = 0; i < length; ++i) {
+        uint16_t code_unit = code_units[i];
+        if ((code_unit & CHAR0X1FFC00) == CHAR0XD800) {
+            // Code unit is a leading surrogate
+            if (i == length - 1) {
+                return UINT8_C(0);
+            }
+            // Is not trail surrogate
+            if ((code_units[i + 1] & CHAR0X1FFC00) != CHAR0XDC00) {
+                return UINT8_C(0);
+            }
+            // Skip the paired trailing surrogate
+            ++i;
+            // Is trail surrogate
+        } else if ((code_unit & CHAR0X1FFC00) == CHAR0XDC00) {
             return UINT8_C(0);
         }
     }
@@ -160,28 +247,64 @@ uint8_t StdCoreStringIsWellFormed(EtsString *this_str)
 
 EtsString *StdCoreStringToLocaleLowerCase(EtsString *this_str, EtsString *locale)
 {
-    PandaVector<uint8_t> buf;
-    auto this_s = std::string(this_str->ConvertToStringView(&buf));
-    auto loc = std::string(locale->ConvertToStringView(&buf));
-    std::string new_str;
-    std::stringstream ss;
-    for (auto elem : this_s) {
-        new_str.push_back(std::tolower(elem, std::locale(ss.getloc(), new std::time_put_byname<char>(loc.c_str()))));
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
+    icu::Locale loc;
+    UErrorCode status = U_ZERO_ERROR;
+    if (locale != nullptr) {
+        PandaVector<uint8_t> buf;
+        std::string_view loc_tag = locale->ConvertToStringView(&buf);
+        icu::StringPiece sp {loc_tag.data(), static_cast<int32_t>(loc_tag.size())};
+        loc = icu::Locale::forLanguageTag(sp, status);
+        if (UNLIKELY(U_FAILURE(status))) {
+            std::string message = "Language tag '" + std::string(loc_tag) + "' is invalid or not supported";
+            ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
+            return nullptr;
+        }
     }
-    return EtsString::CreateFromMUtf8(new_str.c_str());
+
+    icu::UnicodeString utf16_str;
+    if (this_str->IsUtf16()) {
+        utf16_str = icu::UnicodeString {this_str->GetDataUtf16(), static_cast<int32_t>(this_str->GetUtf16Length())};
+    } else {
+        utf16_str = icu::UnicodeString {utf::Mutf8AsCString(this_str->GetDataMUtf8()),
+                                        static_cast<int32_t>(this_str->GetLength())};
+    }
+
+    auto res = utf16_str.toLower(loc);
+    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
 }
 
 EtsString *StdCoreStringToLocaleUpperCase(EtsString *this_str, EtsString *locale)
 {
-    PandaVector<uint8_t> buf;
-    auto this_s = std::string(this_str->ConvertToStringView(&buf));
-    auto loc = std::string(locale->ConvertToStringView(&buf));
-    std::string new_str;
-    std::stringstream ss;
-    for (auto elem : this_s) {
-        new_str.push_back(std::toupper(elem, std::locale(ss.getloc(), new std::time_put_byname<char>(loc.c_str()))));
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
+    icu::Locale loc;
+    UErrorCode status = U_ZERO_ERROR;
+    if (locale != nullptr) {
+        PandaVector<uint8_t> buf;
+        std::string_view loc_tag = locale->ConvertToStringView(&buf);
+        icu::StringPiece sp {loc_tag.data(), static_cast<int32_t>(loc_tag.size())};
+        loc = icu::Locale::forLanguageTag(sp, status);
+        if (UNLIKELY(U_FAILURE(status))) {
+            std::string message = "Language tag '" + std::string(loc_tag) + "' is invalid or not supported";
+            ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
+            return nullptr;
+        }
     }
-    return EtsString::CreateFromMUtf8(new_str.c_str());
+
+    icu::UnicodeString utf16_str;
+    if (this_str->IsUtf16()) {
+        utf16_str = icu::UnicodeString {this_str->GetDataUtf16(), static_cast<int32_t>(this_str->GetUtf16Length())};
+    } else {
+        utf16_str = icu::UnicodeString {utf::Mutf8AsCString(this_str->GetDataMUtf8()),
+                                        static_cast<int32_t>(this_str->GetLength())};
+    }
+
+    auto res = utf16_str.toUpper(loc);
+    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
 }
 
 ets_short StdCoreStringLocaleCmp(EtsString *this_str, EtsString *cmp_str, EtsString *locale_str)
@@ -248,6 +371,12 @@ ets_int StdCoreStringLastIndexOfString(EtsString *this_str, EtsString *pattern_s
     ASSERT(this_str != nullptr && pattern_str != nullptr);
     // "abc".lastIndexOf("ab", -10) will return 0
     return this_str->GetCoreType()->LastIndexOf(pattern_str->GetCoreType(), std::max(from_index, 0));
+}
+
+ets_char StdCoreStringCodePointToChar(ets_int code_point)
+{
+    icu::UnicodeString uni_str((UChar32)code_point);
+    return static_cast<ets_char>(uni_str.charAt(0));
 }
 
 }  // namespace panda::ets::intrinsics

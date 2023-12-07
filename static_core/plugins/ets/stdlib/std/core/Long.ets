@@ -214,7 +214,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<I
             if (negative) {
                 remainder = -remainder;
             }
-            data[curPlace] = chars.charAt(remainder as int); 
+            data[curPlace] = chars.charAt(remainder as int);
             val /= (radix as int);
             curPlace -= 1;
         }
@@ -241,7 +241,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<I
      * @returns true if provided object and this instance have same value, false otherwise
      * Returns false if type of provided object is not the same as this type
      */
-    public override equals(other: Object|null): boolean {
+    public override equals(other: NullishType): boolean {
         if (other instanceof Long) {
             return this.value == (other as Long).longValue();
         }

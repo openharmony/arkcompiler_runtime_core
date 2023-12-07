@@ -19,7 +19,7 @@ function newString(): String {
 
 function main(): int {
     let s = newString();
-    if (s.length() != 5) {
+    if (s.length != 5) {
         return 1;
     }
     return 0;

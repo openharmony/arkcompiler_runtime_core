@@ -42,7 +42,7 @@ class BadHash {
         return 0
     }
 
-    override equals(x: Object | null): boolean {
+    override equals(x: NullishType): boolean {
         if (!(x instanceof BadHash)) {
             return false
         }

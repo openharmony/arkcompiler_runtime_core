@@ -15,21 +15,21 @@
 cases:
     - decl: |-
           function foo<T extends Object>(p: T): number {
-              return p.toString().length()
+              return p.toString().length
           }
       use: |-
           assert foo<out>(0.0) == 1  // CTE: wildcard in type arguments
 
     - decl: |-
           function foo<T extends Object>(p: T): number {
-              return p.toString().length()
+              return p.toString().length
           }
       use: |-
           assert foo<out Number>(0.0) == 1  // CTE: wildcard in type arguments
 
     - decl: |-
           function foo<T extends Object>(p: T): number {
-              return p.toString().length()
+              return p.toString().length
           }
       use: |-
           assert foo<in Number>(0.0) == 1  // CTE: wildcard in type arguments

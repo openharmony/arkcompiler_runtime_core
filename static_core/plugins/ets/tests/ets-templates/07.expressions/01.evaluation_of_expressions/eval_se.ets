@@ -26,14 +26,14 @@ let ig: int = 42;
 function foo(p: int, s: String): int {
     sg += s;
     ig = -1;
-    return p - s.length();
+    return p - s.length as int;
 }
 
 class A {
   meth(p: int, s: String): int {
     sg += s;
     ig = 1;
-    return p - s.length();
+    return p - s.length as int;
   }
 }
 
@@ -42,7 +42,7 @@ function main(): int {
     ig = 42;
 
     // assignment side effect
-    let i: int = (sg += "b").length() + (ig = 43);
+    let i: int = (sg += "b").length as int + (ig = 43);
     if (i != 45 || sg != "ab" || ig != 43) return 1;
 
     // increment side effect

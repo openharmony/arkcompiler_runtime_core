@@ -79,7 +79,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns comparison result of underlying primitive chars.
      * Returns false if the argument is not an instance of Char.
      */
-    public override equals(other: Object|null): boolean {
+    public override equals(other: NullishType): boolean {
         if (other instanceof Char) {
             return this.value == (other as Char).unboxed();
         }
@@ -495,7 +495,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     static createFromJSONValue(json: JSONValue): Char {
         if (json instanceof JSONString) {
             let str = (json as JSONString).value
-            if (str.length() == 1) {
+            if (str.getLength() == 1) {
                 return Char.valueOf(str.charAt(0))
             }
         }

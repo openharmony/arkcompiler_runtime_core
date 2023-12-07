@@ -98,4 +98,4 @@ cases:
           assert [null, undefined] instanceof (null|undefined)[]
 
     - use: |-
-          assert [(p: string): number => { return p.length() }] instanceof ((p: string) => number)[]
+          assert [(p: string): number => { return p.length }] instanceof ((p: string) => number)[]

@@ -49,8 +49,8 @@ export final class StringBuilder {
      * @param s string that will be used to initialize the builder
      */
     public constructor (s: String) {
-        let capacity = StringBuilder.newCapacity(16, s.length());
-        this.count = s.length();
+        let capacity = StringBuilder.newCapacity(16, s.getLength());
+        this.count = s.getLength();
         this.value = new char[capacity];
         for (let i = 0; i < this.count; ++i) {
             this.value[i] = s.charAt(i);

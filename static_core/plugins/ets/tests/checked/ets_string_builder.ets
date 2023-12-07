@@ -325,7 +325,7 @@ function toString10(str: String): String {
 function toString11(str: String): String {
     let sb = new StringBuilder(str);
     sb.toString();                              // applied
-    if (str.length() > 0)
+    if (str.getLength() > 0)
         sb.append(1);
     return sb.toString();                       // not applied, due to dominating append()-call
 }

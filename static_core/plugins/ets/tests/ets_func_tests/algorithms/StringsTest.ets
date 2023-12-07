@@ -15,9 +15,9 @@
 
 
 function is_palindrom(text: String): boolean {
-    let halve: int = text.length() / 2;
+    let halve: int = text.length as int / 2;
     for (let i: int = 0; i < halve; i++) {
-        if (text.charAt(i) != text.charAt(text.length() - i - 1)) {
+        if (text.charAt(i) != text.charAt(text.length as int - i - 1)) {
             return false;
         }
     }
@@ -26,7 +26,7 @@ function is_palindrom(text: String): boolean {
 
 function random_string(len: int): String {
     const t = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-    const l = t.length();
+    const l = t.length;
     let sb = new StringBuilder();
     for (let i = 0; i < len; i++) {
         sb.append(t.charAt((random()*l) as int));

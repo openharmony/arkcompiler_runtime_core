@@ -86,7 +86,7 @@ static EtsByte DetermineEtsType(const PandaString &type_desc, const EtsClass *re
         result = static_cast<EtsByte>(EtsTypeAPIKind::LAMBDA);
     } else if (ref_type->IsUnionClass()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
-    } else if (ref_type->IsUndefined()) {  // NOTE(shumilov-petr): think about it
+    } else if (ref_type->IsUndefined()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
     } else if (type_desc == panda::ets::panda_file_items::class_descriptors::VOID) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::VOID);

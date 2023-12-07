@@ -51,8 +51,8 @@ function main(): int {
     let test = new Testee();
     let result: int = 0;
 
-    let l1: StringToInt = (str: String) => { return str.length() }
-    let larr: StringToInt[] = [l1, l1, (str: String) => { return str.length() }];
+    let l1: StringToInt = (str: String) => { return str.length as int }
+    let larr: StringToInt[] = [l1, l1, (str: String) => { return str.length as int }];
     result = test.callLambda(...larr);
     if(result != 15) return 1;
 

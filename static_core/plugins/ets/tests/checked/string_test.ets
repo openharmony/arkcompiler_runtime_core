@@ -24,7 +24,7 @@
 
 function main(): void {
     let str1: String = new String();
-    assert str1.length() == 0: "String is not empty";
+    assert str1.getLength() == 0: "String is not empty";
     assert str1.isEmpty(): "String is not empty";
 
     let chars: char[] = [c'a', c'B', c'C', c'd', c'e', c'g', c'X', c'Y', c'z'];

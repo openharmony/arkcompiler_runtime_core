@@ -262,7 +262,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns true if provided object and this instance have same value, false otherwise
      * Returns false if type of provided object is not the same as this type
      */
-    public override equals(other: Object|null): boolean {
+    public override equals(other: NullishType): boolean {
         if (other instanceof Float) {
             return Float.compare(this.value, (other as Float).unboxed());
         }

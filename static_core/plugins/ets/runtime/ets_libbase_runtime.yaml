@@ -583,15 +583,15 @@ intrinsics:
     set_flags: [can_throw]
     clear_flags: [ ]
 
-  - name: StdCoreStringLength
+  - name: StdCoreStringGetLength
     space: ets
     class_name: std.core.String
-    method_name: length
+    method_name: getLength
     static: false
     signature:
       ret: i32
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringLength
+    impl: panda::ets::intrinsics::StdCoreStringGetLength
     clear_flags: [ ]
 
   - name: StdCoreStringIsEmpty
@@ -653,16 +653,53 @@ intrinsics:
     impl: panda::ets::intrinsics::StdCoreStringSearch
     clear_flags: [ ]
 
-  - name: StdCoreStringNormalize
+  - name: StdCoreStringNormalizeNFC
     space: ets
     class_name: std.core.String
-    method_name: normalize
+    method_name: normalizeNFC
     static: false
     signature:
       ret: std.core.String
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringNormalize
+    impl: panda::ets::intrinsics::StdCoreStringNormalizeNFC
     clear_flags: [ ]
+    set_flags: [can_throw]
+
+  - name: StdCoreStringNormalizeNFD
+    space: ets
+    class_name: std.core.String
+    method_name: normalizeNFD
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringNormalizeNFD
+    clear_flags: [ ]
+    set_flags: [can_throw]
+
+  - name: StdCoreStringNormalizeNFKC
+    space: ets
+    class_name: std.core.String
+    method_name: normalizeNFKC
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringNormalizeNFKC
+    clear_flags: [ ]
+    set_flags: [can_throw]
+
+  - name: StdCoreStringNormalizeNFKD
+    space: ets
+    class_name: std.core.String
+    method_name: normalizeNFKD
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringNormalizeNFKD
+    clear_flags: [ ]
+    set_flags: [can_throw]
 
   - name: StdCoreStringToLocaleLowerCase
     space: ets
@@ -753,6 +790,16 @@ intrinsics:
     codegen_func: CreateStringSubstringTlab
     codegen_arch: [arm64, amd64]
     set_flags: [can_throw]
+
+  - name: StdCoreStringCodePointToChar
+    space: ets
+    class_name: std.core.String
+    method_name: codePointToChar
+    static: true
+    signature:
+      ret: u16
+      args: [ i32 ]
+    impl: panda::ets::intrinsics::StdCoreStringCodePointToChar
     clear_flags: [ ]
 
 ##########################

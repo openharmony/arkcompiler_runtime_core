@@ -214,7 +214,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns true if provided object and this instance have same value, false otherwise
      * Returns false if type of provided object is not the same as this type
      */
-    public override equals(other: Object|null): boolean {
+    public override equals(other: NullishType): boolean {
         if (other instanceof Int) {
             return this.value == (other as Int).intValue();
         }

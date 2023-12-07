@@ -63,7 +63,7 @@ export class RegExpExecResult extends Object {
         this(isCorrect, index as int, input, result)
     }
 
-    public override equals(other: Object|null): boolean {
+    public override equals(other: NullishType): boolean {
         if (!(other instanceof RegExpExecResult)) {
             return false;
         }
@@ -302,7 +302,7 @@ export class RegExp extends Object {
         if (!unicode) {
             return index + 1;
         }
-        let length = s.length();
+        let length = s.getLength();
         if (index + 1 >= length) {
             return index + 1;
         }

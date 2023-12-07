@@ -25,7 +25,7 @@ class jscall {
 
     // Remove after JSValue cast fix: signature type suffixes
 
-    native static void$(top: JSValue, qname: String): void;  
+    native static void$(top: JSValue, qname: String): void;
     native static void$a(top: JSValue, qname: String, v0: JSValue): void;
     native static void$an(top: JSValue, qname: String, a0: JSValue, a1: double): void;
     native static void$n(top: JSValue, qname: String, v0: double): void;
@@ -151,7 +151,7 @@ function test_string_ops(): boolean {
     if (JSRuntime.getValueString(v1) != strv) {
         return false;
     }
-    if (jscall.num$ss(jsvars.m, ".GetProp", strv, "length") != strv.length()) {
+    if (jscall.num$ss(jsvars.m, ".GetProp", strv, "length") != strv.length) {
         return false;
     }
     if (jscall.str$a(jsvars.m, ".Identity", jscall.any$s(jsvars.m, ".Identity", strv)) != strv) {

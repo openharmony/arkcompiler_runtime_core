@@ -26,7 +26,7 @@ function crc32(s: String): int {
     // TODO: unsigned types are not ready yet
     let crc: int = 0xFFFFFFFF;
     let poly: int = 0xEDB88320;
-    for (let i: int = 0; i < s.length(); i++) {
+    for (let i: int = 0; i < s.length; i++) {
         let c: int = s.charAt(i) as int;
         let tmp: int = (crc ^ c) & 0xFF;
         for (let j: int = 0; j < 8; j++) {

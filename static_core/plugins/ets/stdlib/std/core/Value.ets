@@ -225,10 +225,10 @@ export abstract class Value extends Object {
         let t = Type.of(o)
         if (t instanceof NullType) {
             return NullValue.INSTANCE
-        } else if (t instanceof VoidType) {
-            return new VoidValue()
         } else if (t instanceof UndefinedType) {
-            return new UndefinedValue()
+            return UndefinedValue.INSTANCE
+        } else if (t instanceof VoidType) {
+            return VoidValue.INSTANCE
         } else if (t instanceof ClassType) {
             return new ClassValue(t as ClassType, o!)
         } else if (t instanceof ArrayType) {
@@ -286,7 +286,7 @@ export abstract class Value extends Object {
 
     public abstract getType(): Type
 
-    public abstract getData(): Object
+    public abstract getData(): NullishType
 }
 
 export final class ClassValue extends Value {
@@ -297,7 +297,7 @@ export final class ClassValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return this.data
     }
 
@@ -394,11 +394,11 @@ export final class ClassValue extends Value {
         } else if (ft instanceof LongType && val instanceof LongValue) {
             ValueAPISetFieldByNameLong(this.data, name, (val as LongValue).getValueData())
         } else if (ft instanceof StringType && val instanceof StringValue) {
-            ValueAPISetFieldByNameObject(this.data, name, (val as StringValue).getData() as string)
+            ValueAPISetFieldByNameObject(this.data, name, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetFieldByNameObject(this.data, name, (val as ArrayValue).getData())
+            ValueAPISetFieldByNameObject(this.data, name, (val as ArrayValue).getData()!)
         } else if (ft instanceof ClassType && val instanceof ClassValue) {
-            ValueAPISetFieldByNameObject(this.data, name, (val as ClassValue).getData())
+            ValueAPISetFieldByNameObject(this.data, name, (val as ClassValue).getData()!)
         } else {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
@@ -431,11 +431,11 @@ export final class ClassValue extends Value {
         } else if (ft instanceof LongType && val instanceof LongValue) {
             ValueAPISetFieldLong(this.data, i, (val as LongValue).getValueData())
         } else if (ft instanceof StringType && val instanceof StringValue) {
-            ValueAPISetFieldObject(this.data, i, (val as StringValue).getData() as string)
+            ValueAPISetFieldObject(this.data, i, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetFieldObject(this.data, i, (val as ArrayValue).getData())
+            ValueAPISetFieldObject(this.data, i, (val as ArrayValue).getData()!)
         } else if (ft instanceof ClassType && val instanceof ClassValue) {
-            ValueAPISetFieldObject(this.data, i, (val as ClassValue).getData())
+            ValueAPISetFieldObject(this.data, i, (val as ClassValue).getData()!)
         } else {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
@@ -467,7 +467,7 @@ export final class ArrayValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return this.data
     }
 
@@ -528,11 +528,11 @@ export final class ArrayValue extends Value {
         } else if (et instanceof LongType && val instanceof LongValue) {
             ValueAPISetElementLong(this.data, i, (val as LongValue).getValueData())
         } else if (et instanceof StringType && val instanceof StringValue) {
-            ValueAPISetElementObject(this.data, i, (val as StringValue).getData() as string)
+            ValueAPISetElementObject(this.data, i, (val as StringValue).getData()! as string)
         } else if (et instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetElementObject(this.data, i, (val as ArrayValue).getData())
+            ValueAPISetElementObject(this.data, i, (val as ArrayValue).getData()!)
         } else if (et instanceof ClassType && val instanceof ClassValue) {
-            ValueAPISetElementObject(this.data, i, (val as ClassValue).getData())
+            ValueAPISetElementObject(this.data, i, (val as ClassValue).getData()!)
         } else {
             throw new Error("Cannot assign array of type " + et + " with value of type " + vt)
         }
@@ -560,7 +560,7 @@ export final class LambdaValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return this.data
     }
 
@@ -587,7 +587,7 @@ export final class BooleanValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return new Boolean(this.data)
     }
 
@@ -617,7 +617,7 @@ export final class ByteValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return new Byte(this.data)
     }
 
@@ -647,7 +647,7 @@ export final class ShortValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return new Short(this.data)
     }
 
@@ -677,7 +677,7 @@ export final class CharValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return new Char(this.data)
     }
 
@@ -707,7 +707,7 @@ export final class IntValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return new Int(this.data)
     }
 
@@ -737,7 +737,7 @@ export final class FloatValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return new Float(this.data)
     }
 
@@ -767,7 +767,7 @@ export final class DoubleValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return this.data
     }
 
@@ -797,7 +797,7 @@ export final class LongValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return new Long(this.data)
     }
 
@@ -827,7 +827,7 @@ export final class StringValue extends Value {
         return this.typ as Type
     }
 
-    public override getData(): Object {
+    public override getData(): NullishType {
         return this.data
     }
 
@@ -848,50 +848,49 @@ export final class NullValue extends Value {
         return NullType.REF as Type
     }
 
-    public override getData(): Object {
-        return NullValue.INSTANCE
+    public override getData(): NullishType {
+        return null
     }
 
     internal constructor() {}
 
     public override toString(): string {
-        return NullValue.INSTANCE.toString()
+        return NullType.REF.toString()
     }
 }
 
 export final class UndefinedValue extends Value {
-    // TODO(shumilov-petr): replace `new UndefinedValue() into `undefined` when one will be available
     public static readonly INSTANCE = new UndefinedValue()
 
     public override getType(): Type {
         return UndefinedType.REF as Type
     }
 
-    public override getData(): Object {
-        return UndefinedValue.INSTANCE
+    public override getData(): NullishType {
+        return undefined
     }
 
     internal constructor() {}
 
     public override toString(): string {
-        return UndefinedValue.INSTANCE.toString()
+        return UndefinedType.REF.toString()
     }
 }
 
 export final class VoidValue extends Value {
-    public static readonly INSTANCE = Void
+    public static readonly INSTANCE = new VoidValue()
 
     public override getType(): Type {
         return VoidType.REF as Type
     }
 
-    public override getData(): Object {
-        return VoidValue.INSTANCE
+    public override getData(): NullishType {
+        return Void
     }
 
     internal constructor() {}
 
     public override toString(): string {
-        return VoidValue.INSTANCE.toString()
+        return VoidType.REF.toString()
     }
 }

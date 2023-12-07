@@ -27,7 +27,7 @@ final class __internal_undefined {
 
     public override toString(): String { return "undefined"; }
 
-    public override equals(to: Object | null): boolean {
+    public override equals(to: NullishType): boolean {
         throw new Error("Internal error: undefined.equals was called!")
     }
 }
