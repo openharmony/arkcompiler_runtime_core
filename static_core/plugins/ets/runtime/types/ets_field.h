@@ -55,7 +55,7 @@ public:
         return reinterpret_cast<const char *>(GetCoreType()->GetName().data);
     }
 
-    EtsString *GetNameString() const;
+    PANDA_PUBLIC_API EtsString *GetNameString() const;
 
     bool IsPublic() const
     {

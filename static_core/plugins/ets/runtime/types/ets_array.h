@@ -32,7 +32,7 @@ public:
     EtsArray() = delete;
     ~EtsArray() = delete;
 
-    size_t GetLength()
+    PANDA_PUBLIC_API size_t GetLength()
     {
         return GetCoreType()->GetLength();
     }
@@ -144,7 +144,7 @@ public:
         }
     }
 
-    EtsObject *Get(uint32_t index)
+    PANDA_PUBLIC_API EtsObject *Get(uint32_t index)
     {
         return reinterpret_cast<EtsObject *>(
             GetImpl<std::invoke_result_t<decltype(&EtsObject::GetCoreType), EtsObject>>(index));
