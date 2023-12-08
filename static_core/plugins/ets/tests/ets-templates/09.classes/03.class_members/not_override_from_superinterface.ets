@@ -16,7 +16,6 @@ limitations under the License.
 /*---
 desc: class members
 assert: Members inherited from its direct superclass.
-tags: [negative, compile-only]
 ---*/
 
 interface A {
