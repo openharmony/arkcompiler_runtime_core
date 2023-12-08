@@ -40,12 +40,13 @@ import {
 //! METHOD       "jsnew_setproperty<%= primitive.getName %>"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
-% if primitive.getName == 'double'
-//! INST    "Intrinsic.JSRuntimeSetPropertyDouble"
-% else
-//! INST_NOT     "Intrinsic.JSRuntimeSetPropertyDouble"
-//! INST    /CallStatic.*JSRuntime::setProperty<%= primitive.getName.capitalize %>/
-% end
+//! # NOTE: enable after fixing #14501
+% # if primitive.getName == 'double'
+//! # INST    "Intrinsic.JSRuntimeSetPropertyDouble"
+% # else
+//! # INST_NOT     "Intrinsic.JSRuntimeSetPropertyDouble"
+//! # INST    /CallStatic.*JSRuntime::setProperty<%= primitive.getName.capitalize %>/
+% # end
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
 

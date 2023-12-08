@@ -420,7 +420,8 @@ void *CompilerJSCallCheck(void *fn)
     return fn;
 }
 
-void *CompilerJSCallFunction(void *obj, void *fn, uint32_t argc, void *args)
+template <bool USE_RET>
+std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void *fn, uint32_t argc, void *args)
 {
     auto js_this = ToLocal(obj);
     auto js_fn = ToLocal(fn);
@@ -429,12 +430,16 @@ void *CompilerJSCallFunction(void *obj, void *fn, uint32_t argc, void *args)
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
 
-    napi_value js_ret;
+    [[maybe_unused]] napi_value js_ret;
     napi_status js_status;
     {
         ctx->GetInteropFrames().push_back({coro->GetCurrentFrame(), true});
         ScopedNativeCodeThread native_scope(coro);
-        js_status = napi_call_function(env, js_this, js_fn, argc, js_args, &js_ret);
+        if constexpr (USE_RET) {
+            js_status = napi_call_function(env, js_this, js_fn, argc, js_args, &js_ret);
+        } else {
+            js_status = napi_call_function(env, js_this, js_fn, argc, js_args, nullptr);
+        }
 
         ctx->GetInteropFrames().pop_back();
     }
@@ -443,9 +448,13 @@ void *CompilerJSCallFunction(void *obj, void *fn, uint32_t argc, void *args)
         INTEROP_FATAL_IF(js_status != napi_pending_exception);
         ctx->ForwardJSException(coro);
         INTEROP_LOG(DEBUG) << "JSValueJSCall: exit with pending exception";
-        return nullptr;
+        if constexpr (USE_RET) {
+            return nullptr;
+        }
     }
-    return js_ret;
+    if constexpr (USE_RET) {
+        return js_ret;
+    }
 }
 
 void *CompilerJSNewInstance(void *fn, uint32_t argc, void *args)
@@ -688,7 +697,8 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     CompilerGetJSNamedProperty,
     CompilerResolveQualifiedJSCall,
     CompilerJSCallCheck,
-    CompilerJSCallFunction,
+    CompilerJSCallFunction<true>,
+    CompilerJSCallFunction<false>,
     CompilerJSNewInstance,
     CreateLocalScope,
     CompilerDestroyLocalScope,

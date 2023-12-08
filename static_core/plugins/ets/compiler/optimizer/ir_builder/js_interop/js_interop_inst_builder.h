@@ -18,11 +18,14 @@ friend struct IntrinsicBuilder;
 
 template <size_t N>
 IntrinsicInst *BuildInteropIntrinsic(size_t pc, RuntimeInterface::IntrinsicId id, DataType::Type ret_type,
-                                     const std::array<DataType::Type, N> &types, const std::array<Inst *, N> &inputs);
+                                     const std::array<DataType::Type, N> &types,
+                                     const std::array<Inst *, N + 1> &inputs);
 std::pair<Inst *, Inst *> BuildResolveInteropCallIntrinsic(RuntimeInterface::InteropCallKind call_kind, size_t pc,
-                                                           RuntimeInterface::MethodPtr method, Inst *arg0, Inst *arg1);
+                                                           RuntimeInterface::MethodPtr method, Inst *arg0, Inst *arg1,
+                                                           SaveStateInst *save_state);
 void BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::InteropCallKind call_kind, size_t pc,
-                                             RuntimeInterface::MethodPtr method, Inst *js_call);
+                                             RuntimeInterface::MethodPtr method, Inst *js_call,
+                                             SaveStateInst *save_state);
 void BuildInteropCall(const BytecodeInstruction *bc_inst, RuntimeInterface::InteropCallKind call_kind,
                       RuntimeInterface::MethodPtr method, bool is_range, bool acc_read);
 bool TryBuildInteropCall(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);

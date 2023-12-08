@@ -157,6 +157,7 @@ options:
     - bridges-ss
     - pm
     - pea
+    - interop-intrinsic-opt
   description: Set log compiler components
   tags: [debug]
   delimiter: ","
@@ -711,6 +712,24 @@ options:
   type: bool
   default: true
   description: Enable fast ArkTS->JS interop
+  tags: [perf]
+
+- name: compiler-interop-intrinsic-optimization
+  type: bool
+  default: true
+  description: Enable merging local scopes in fast ArkTS->EcmaScript interop
+  tags: [perf]
+
+- name: compiler-interop-scope-object-limit
+  type: uint32_t
+  default: 256
+  description: Object limit for merged local scope in ArkTS->EcmaScript interop
+  tags: [perf]
+
+- name: compiler-interop-try-single-scope
+  type: bool
+  default: false
+  description: Try to create single scope for method in ArkTS->EcmaScript interop whenever possible
   tags: [perf]
 
 events:

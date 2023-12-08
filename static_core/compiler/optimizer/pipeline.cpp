@@ -206,6 +206,7 @@ bool Pipeline::RunOptimizations()
     graph->RunPass<LoopIdioms>();
     graph->RunPass<ChecksElimination>();
     graph->RunPass<LoopUnroll>(OPTIONS.GetCompilerLoopUnrollInstLimit(), OPTIONS.GetCompilerLoopUnrollFactor());
+#include <plugins/optimizations_after_unroll.h>
 
     /* to be removed once generic loop unrolling is implemented */
     ASSERT(graph->IsUnrollComplete());

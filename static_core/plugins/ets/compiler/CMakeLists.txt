@@ -33,7 +33,23 @@ endif()
 if (PANDA_ETS_INTEROP_JS)
   list(APPEND COMPILER_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/compiler/optimizer/ir_builder/js_interop/js_interop_inst_builder.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/compiler/optimizer/optimizations/interop_js/interop_intrinsic_optimization.cpp
   )
+
+  add_merge_plugin(PLUGIN_NAME "create_pipeline_includes.h" INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/plugin_files/plugin_create_pipeline_includes.h")
+  add_merge_plugin(PLUGIN_NAME "optimizations_after_unroll.h" INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/plugin_files/plugin_optimizations_after_unroll.h")
+
+  set(INTEROP_INTRINSIC_KINDS_H ${PANDA_BINARY_ROOT}/plugins/${plugin_name}/compiler/generated/interop_intrinsic_kinds.h)
+  panda_gen_file(
+      DATAFILE ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
+      TEMPLATE ${PANDA_ETS_PLUGIN_SOURCE}/compiler/optimizer/interop_intrinsic_kinds.h.erb
+      REQUIRES ${PANDA_ROOT}/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb
+      EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
+      OUTPUTFILE ${INTEROP_INTRINSIC_KINDS_H}
+  )
+  add_custom_target(interop_intrinsic_kinds DEPENDS ${INTEROP_INTRINSIC_KINDS_H})
+  add_dependencies(panda_gen_files interop_intrinsic_kinds)
+  add_dependencies(arkcompiler interop_intrinsic_kinds)
 endif()
 
 panda_target_sources(arkcompiler PRIVATE ${COMPILER_SOURCES})

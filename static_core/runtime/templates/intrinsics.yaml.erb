@@ -69,4 +69,7 @@
   inline_func: <%= intrinsic.inline_func %>
   inline_need_types: <%= intrinsic.respond_to?(:inline_need_types) && intrinsic.inline_need_types %>
 % end
+% if intrinsic.respond_to?(:interop_intrinsic_kind)
+  interop_intrinsic_kind: <%= intrinsic.interop_intrinsic_kind %>
+% end
 % end

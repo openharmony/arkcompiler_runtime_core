@@ -27,7 +27,7 @@ struct IntrinsicBuilder {
     template <typename... ARGS>
     static IntrinsicInst *Build(InstBuilder *ib, size_t pc, const ARGS &...inputs)
     {
-        static_assert(sizeof...(inputs) == N);
+        static_assert(sizeof...(inputs) == N + 1);
         return ib->BuildInteropIntrinsic<N>(pc, ID, RET_TYPE, {PARAM_TYPES...}, {inputs...});
     }
 };
@@ -54,36 +54,35 @@ using IntrinsicCompilerJSCallCheck = IntrinsicBuilder<RuntimeInterface::Intrinsi
 template <size_t N>
 IntrinsicInst *InstBuilder::BuildInteropIntrinsic(size_t pc, RuntimeInterface::IntrinsicId id, DataType::Type ret_type,
                                                   const std::array<DataType::Type, N> &types,
-                                                  const std::array<Inst *, N> &inputs)
+                                                  const std::array<Inst *, N + 1> &inputs)
 {
     auto save_state = CreateSaveState(Opcode::SaveState, pc);
     AddInstruction(save_state);
     auto intrinsic = GetGraph()->CreateInstIntrinsic(ret_type, pc, id);
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), N + 1);
     for (size_t i = 0; i < N; ++i) {
-        intrinsic->AppendInput(inputs[i]);
-        intrinsic->AddInputType(types[i]);
+        intrinsic->AppendInputAndType(inputs[i], types[i]);
     }
-    intrinsic->AppendInput(save_state);
-    intrinsic->AddInputType(DataType::NO_TYPE);
+    intrinsic->AppendInputAndType(inputs[N], DataType::NO_TYPE);  // SaveState input
     AddInstruction(intrinsic);
     return intrinsic;
 }
 
 std::pair<Inst *, Inst *> InstBuilder::BuildResolveInteropCallIntrinsic(RuntimeInterface::InteropCallKind call_kind,
                                                                         size_t pc, RuntimeInterface::MethodPtr method,
-                                                                        Inst *arg0, Inst *arg1)
+                                                                        Inst *arg0, Inst *arg1,
+                                                                        SaveStateInst *save_state)
 {
     IntrinsicInst *js_this = nullptr;
     IntrinsicInst *js_fn = nullptr;
     if (call_kind == RuntimeInterface::InteropCallKind::CALL_BY_VALUE) {
-        js_fn = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg0);
-        js_this = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg1);
+        js_fn = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg0, save_state);
+        js_this = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg1, save_state);
     } else {
-        auto js_val = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg0);
+        auto js_val = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg0, save_state);
 
         auto str_id = arg1->CastToLoadString()->GetTypeId();
-        js_this = IntrinsicCompilerResolveQualifiedJSCall::Build(this, pc, js_val, arg1);
+        js_this = IntrinsicCompilerResolveQualifiedJSCall::Build(this, pc, js_val, arg1, save_state);
 
         Inst *prop_name = nullptr;
         if (!GetGraph()->IsAotMode()) {
@@ -97,16 +96,17 @@ std::pair<Inst *, Inst *> InstBuilder::BuildResolveInteropCallIntrinsic(RuntimeI
         }
         AddInstruction(prop_name);
 
-        js_fn = IntrinsicCompilerGetJSNamedProperty::Build(this, pc, js_this, prop_name);
+        js_fn = IntrinsicCompilerGetJSNamedProperty::Build(this, pc, js_this, prop_name, save_state);
     }
     return {js_this, js_fn};
 }
 
 void InstBuilder::BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::InteropCallKind call_kind, size_t pc,
-                                                          RuntimeInterface::MethodPtr method, Inst *js_call)
+                                                          RuntimeInterface::MethodPtr method, Inst *js_call,
+                                                          SaveStateInst *save_state)
 {
     if (call_kind == RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
-        auto ret = IntrinsicCompilerConvertLocalToJSValue::Build(this, pc, js_call);
+        auto ret = IntrinsicCompilerConvertLocalToJSValue::Build(this, pc, js_call, save_state);
         UpdateDefinitionAcc(ret);
     } else {
         auto ret_intrinsic_id = GetGraph()->GetRuntime()->GetInfoForInteropCallRetValueConversion(method);
@@ -114,14 +114,15 @@ void InstBuilder::BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::Inte
             Inst *ret = nullptr;
             auto [id, ret_type] = ret_intrinsic_id.value();
             if (id == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_REF_TYPE) {
-                auto save_state = CreateSaveState(Opcode::SaveState, pc);
-                AddInstruction(save_state);
                 auto load_class = BuildLoadClass(GetRuntime()->GetMethodReturnTypeId(method), pc, save_state);
                 AddInstruction(load_class);
+                // LoadClass returns ref, create a new SaveState
+                save_state = CreateSaveState(Opcode::SaveState, pc);
+                AddInstruction(save_state);
                 ret = BuildInteropIntrinsic<2>(pc, id, ret_type, {DataType::REFERENCE, DataType::POINTER},
-                                               {load_class, js_call});
+                                               {load_class, js_call, save_state});
             } else {
-                ret = BuildInteropIntrinsic<1>(pc, id, ret_type, {DataType::POINTER}, {js_call});
+                ret = BuildInteropIntrinsic<1>(pc, id, ret_type, {DataType::POINTER}, {js_call, save_state});
             }
             UpdateDefinitionAcc(ret);
         }
@@ -132,15 +133,17 @@ void InstBuilder::BuildInteropCall(const BytecodeInstruction *bc_inst, RuntimeIn
                                    RuntimeInterface::MethodPtr method, bool is_range, bool acc_read)
 {
     auto pc = GetPc(bc_inst->GetAddress());
+    auto save_state = CreateSaveState(Opcode::SaveState, pc);
+    AddInstruction(save_state);
 
     // Create LOCAL scope
-    IntrinsicCompilerCreateLocalScope::Build(this, pc);
+    IntrinsicCompilerCreateLocalScope::Build(this, pc, save_state);
     // Resolve call target
     auto [js_this, js_fn] =
         BuildResolveInteropCallIntrinsic(call_kind, pc, method, GetArgDefinition(bc_inst, 0, acc_read, is_range),
-                                         GetArgDefinition(bc_inst, 1, acc_read, is_range));
+                                         GetArgDefinition(bc_inst, 1, acc_read, is_range), save_state);
     // js call check
-    auto js_call_check = IntrinsicCompilerJSCallCheck::Build(this, pc, js_fn);
+    auto js_call_check = IntrinsicCompilerJSCallCheck::Build(this, pc, js_fn, save_state);
 
     // js call
     RuntimeInterface::IntrinsicId call_id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_CALL_FUNCTION;
@@ -153,18 +156,13 @@ void InstBuilder::BuildInteropCall(const BytecodeInstruction *bc_inst, RuntimeIn
     GetGraph()->GetRuntime()->GetInfoForInteropCallArgsConversion(method, &intrinsics_ids);
     if (call_kind != RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
         js_call->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsics_ids.size() + 4);
-        js_call->AppendInput(js_this);
-        js_call->AddInputType(DataType::POINTER);
-        js_call->AppendInput(js_call_check);
-        js_call->AddInputType(DataType::POINTER);
-        js_call->AppendInput(GetGraph()->FindOrCreateConstant(intrinsics_ids.size()));
-        js_call->AddInputType(DataType::UINT32);
+        js_call->AppendInputs({{js_this, DataType::POINTER},
+                               {js_call_check, DataType::POINTER},
+                               {GetGraph()->FindOrCreateConstant(intrinsics_ids.size()), DataType::UINT32}});
     } else {
         js_call->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsics_ids.size() + 3);
-        js_call->AppendInput(js_call_check);
-        js_call->AddInputType(DataType::POINTER);
-        js_call->AppendInput(GetGraph()->FindOrCreateConstant(intrinsics_ids.size()));
-        js_call->AddInputType(DataType::UINT32);
+        js_call->AppendInputs({{js_call_check, DataType::POINTER},
+                               {GetGraph()->FindOrCreateConstant(intrinsics_ids.size()), DataType::UINT32}});
     }
 
     // Convert args
@@ -173,25 +171,24 @@ void InstBuilder::BuildInteropCall(const BytecodeInstruction *bc_inst, RuntimeIn
         Inst *arg = nullptr;
         if (type != DataType::NO_TYPE) {
             arg = BuildInteropIntrinsic<1>(pc, intrinsic_id, DataType::POINTER, {type},
-                                           {GetArgDefinition(bc_inst, arg_idx + 2, acc_read, is_range)});
+                                           {GetArgDefinition(bc_inst, arg_idx + 2, acc_read, is_range), save_state});
         } else {
-            arg = BuildInteropIntrinsic<0>(pc, intrinsic_id, DataType::POINTER, {}, {});
+            arg = BuildInteropIntrinsic<0>(pc, intrinsic_id, DataType::POINTER, {}, {save_state});
         }
-        js_call->AppendInput(arg);
-        js_call->AddInputType(DataType::POINTER);
+        js_call->AppendInputAndType(arg, DataType::POINTER);
         arg_idx++;
     }
 
-    auto save_state = CreateSaveState(Opcode::SaveState, pc);
-    AddInstruction(save_state);
-    js_call->AppendInput(save_state);
-    js_call->AddInputType(DataType::NO_TYPE);
+    js_call->AppendInputAndType(save_state, DataType::NO_TYPE);
     AddInstruction(js_call);
 
     // Convert ret value
-    BuildReturnValueConvertInteropIntrinsic(call_kind, pc, method, js_call);
+    BuildReturnValueConvertInteropIntrinsic(call_kind, pc, method, js_call, save_state);
+    // Create new a SaveState because instruction with ref value was built
+    save_state = CreateSaveState(Opcode::SaveState, pc);
+    AddInstruction(save_state);
     // Destroy handle scope
-    IntrinsicCompilerDestroyLocalScope::Build(this, pc);
+    IntrinsicCompilerDestroyLocalScope::Build(this, pc, save_state);
 }
 
 bool InstBuilder::TryBuildInteropCall(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read)

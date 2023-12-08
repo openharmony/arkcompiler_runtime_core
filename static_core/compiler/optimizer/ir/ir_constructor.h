@@ -240,23 +240,24 @@ public:
             }
         } else {
             auto opc = CurrentInst()->GetOpcode();
-            InputTypesMixin *types;
+            using Types = InputTypesMixin<DynamicInputsInst>;
+            Types *types;
             switch (opc) {
                 case Opcode::Intrinsic:
-                    types = static_cast<InputTypesMixin *>(CurrentInst()->CastToIntrinsic());
+                    types = static_cast<Types *>(CurrentInst()->CastToIntrinsic());
                     break;
                 case Opcode::CallIndirect:
-                    types = static_cast<InputTypesMixin *>(CurrentInst()->CastToCallIndirect());
+                    types = static_cast<Types *>(CurrentInst()->CastToCallIndirect());
                     break;
                 case Opcode::Builtin:
-                    types = static_cast<InputTypesMixin *>(CurrentInst()->CastToBuiltin());
+                    types = static_cast<Types *>(CurrentInst()->CastToBuiltin());
                     break;
                 case Opcode::InitObject:
-                    types = static_cast<InputTypesMixin *>(CurrentInst()->CastToInitObject());
+                    types = static_cast<Types *>(CurrentInst()->CastToInitObject());
                     break;
                 default:
                     ASSERT(CurrentInst()->IsCall());
-                    types = static_cast<InputTypesMixin *>(static_cast<CallInst *>(CurrentInst()));
+                    types = static_cast<Types *>(static_cast<CallInst *>(CurrentInst()));
                     break;
             }
 
@@ -277,10 +278,22 @@ public:
     template <typename... Args>
     IrConstructor &InputsAutoType(Args... inputs)
     {
-        ASSERT(CurrentInst()->IsCall() || CurrentInst()->GetOpcode() == Opcode::MultiArray);
-        auto *call_inst = static_cast<CallInst *>(CurrentInst());
-        call_inst->AllocateInputTypes(graph_->GetAllocator(), sizeof...(inputs));
-        ((call_inst->AddInputType(GetInst(inputs).GetType())), ...);
+        using Types = InputTypesMixin<DynamicInputsInst>;
+        Types *types;
+        switch (CurrentInst()->GetOpcode()) {
+            case Opcode::Intrinsic:
+                types = static_cast<Types *>(CurrentInst()->CastToIntrinsic());
+                break;
+            case Opcode::MultiArray:
+                types = static_cast<Types *>(CurrentInst()->CastToMultiArray());
+                break;
+            default:
+                ASSERT(CurrentInst()->IsCall());
+                types = static_cast<Types *>(static_cast<CallInst *>(CurrentInst()));
+                break;
+        }
+        types->AllocateInputTypes(graph_->GetAllocator(), sizeof...(inputs));
+        ((types->AddInputType(GetInst(inputs).GetType())), ...);
         inst_inputs_map_[CurrentInstIndex()].reserve(sizeof...(inputs));
         ((inst_inputs_map_[CurrentInstIndex()].push_back(inputs)), ...);
         return *this;
@@ -927,6 +940,21 @@ public:
         return *this;
     }
 
+    // Useful for parametrized tests
+    IrConstructor &CleanupInputs()
+    {
+        ASSERT(CurrentInst()->IsSaveState());
+        auto &inputs = inst_inputs_map_[CurrentInstIndex()];
+        auto &vregs = save_state_inst_vregs_map_[CurrentInstIndex()];
+        for (int i = inputs.size() - 1; i >= 0; i--) {
+            if (inst_map_.count(inputs[i]) == 0) {
+                inputs.erase(inputs.begin() + i);
+                vregs.erase(vregs.begin() + i);
+            }
+        }
+        return *this;
+    }
+
     IrConstructor &CatchTypeIds(std::vector<uint16_t> &&ids)
     {
         auto inst = CurrentInst();
@@ -1363,6 +1391,7 @@ public:
 
     Inst &GetInst(unsigned index)
     {
+        ASSERT_DO(inst_map_.find(index) != inst_map_.end(), std::cerr << "Inst with Id " << index << " isn't found\n");
         return *inst_map_.at(index);
     }
 

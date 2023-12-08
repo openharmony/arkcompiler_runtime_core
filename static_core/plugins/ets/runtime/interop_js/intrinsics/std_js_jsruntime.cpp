@@ -97,6 +97,7 @@ static const IntrinsicsAPI S_INTRINSICS_API = {
     NotImplementedAdapter,
     NotImplementedAdapter,
     NotImplementedAdapter,
+    NotImplementedAdapter,
     // clang-format on
 };
 
@@ -266,6 +267,11 @@ void *CompilerJSCallCheckIntrinsic(void *fn)
 void *CompilerJSCallFunctionIntrinsic(void *obj, void *fn, uint32_t argc, void *args)
 {
     return S_INTRINSICS_API->CompilerJSCallFunction(obj, fn, argc, args);
+}
+
+void CompilerJSCallVoidFunctionIntrinsic(void *obj, void *fn, uint32_t argc, void *args)
+{
+    S_INTRINSICS_API->CompilerJSCallVoidFunction(obj, fn, argc, args);
 }
 
 void *CompilerJSNewInstanceIntrinsic(void *fn, uint32_t argc, void *args)

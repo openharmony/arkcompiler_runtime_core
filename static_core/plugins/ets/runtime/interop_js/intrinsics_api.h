@@ -61,6 +61,7 @@ struct IntrinsicsAPI {
     void *(*CompilerResolveQualifiedJSCall)(void *val, EtsString *qname_str);
     void *(*CompilerJSCallCheck)(void *fn);
     void *(*CompilerJSCallFunction)(void *obj, void *fn, uint32_t argc, void *args);
+    void (*CompilerJSCallVoidFunction)(void *obj, void *fn, uint32_t argc, void *args);
     void *(*CompilerJSNewInstance)(void *fn, uint32_t argc, void *args);
     void (*CreateLocalScope)();
     void (*CompilerDestroyLocalScope)();

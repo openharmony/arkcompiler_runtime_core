@@ -834,8 +834,7 @@ bool Inlining::DoInlineIntrinsic(CallInst *call_inst, InlineContext *ctx)
 
     auto inputs = call_inst->GetInputs();
     for (size_t i = 0; i < inputs_count; ++i) {
-        inst->AppendInput(inputs[i].GetInst());
-        inst->AddInputType(call_inst->GetInputType(i));
+        inst->AppendInputAndType(inputs[i].GetInst(), call_inst->GetInputType(i));
     }
 
     auto method = ctx->method;
