@@ -15,7 +15,7 @@ limitations under the License.
 
 /*---
 desc: Trailing commas are not allowed in enum constant lists
-tags: [negative, compile-only]
+tags: [compile-only]
 ---*/
 
 enum Color {
