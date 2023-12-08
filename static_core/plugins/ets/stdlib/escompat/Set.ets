@@ -88,7 +88,7 @@ final class SetIterator<R> implements IterableIterator<R> {
     private tail: ListNode
     private mapper: (v: ListNode) => R
 
-    constructor(node: ListNode, tail: ListNode, mapper: (v: ListNode) => Object) {
+    constructor(node: ListNode, tail: ListNode, mapper: (v: ListNode) => R) {
         this.node = node
         this.tail = tail
         this.mapper = mapper
@@ -155,7 +155,7 @@ export final class Set<K> implements ReadonlySet<K> {
         }
         const fn: (v: Object) => void = (v: Object): void => {
             const x = v as ListNode
-            this.getBucket(x.val as K).push(x)
+            this.getBucket(x.val!).push(x)
         };
         // internal issue #13655
         iteratorForEach<ListNode>(iter, Set.__asGeneric<ListNode>(fn as Object))
@@ -169,19 +169,19 @@ export final class Set<K> implements ReadonlySet<K> {
      */
     add(v: K): Set<K> {
         // insert into buckets
-        const buck = this.getBucket(v)
+        const buck = this.getBucket(v as Object)
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val.equals(v)) {
-                node.val = v
+            if (node.val.equals(v as Object)) {
+                node.val = v as Object
                 return this
             }
         }
 
         // not found, add to insertion-ordered list
         const node = new ListNode()
-        node.val = v
+        node.val = v as Object
         const t = this.listRoot
         node.next = t
         node.prev = t.prev
@@ -218,7 +218,7 @@ export final class Set<K> implements ReadonlySet<K> {
      * @returns true if the value is in the Set
      */
     override has(v: K): boolean {
-        return this.get(v) != null;
+        return this.get(v as Object) != null;
     }
 
     /**
@@ -236,7 +236,7 @@ export final class Set<K> implements ReadonlySet<K> {
      * @param v the value to remove
      */
     delete(v: K): boolean {
-        return this.deleteImpl(v)
+        return this.deleteImpl(v as Object)
     }
 
     internal deleteImpl(v: Object): boolean {
@@ -266,7 +266,7 @@ export final class Set<K> implements ReadonlySet<K> {
         this.buckets.push(new Array<ListNode>())
     }
 
-    internal mappedIterator<R>(fn: (n: ListNode) => Object): IterableIterator<R> {
+    internal mappedIterator<R>(fn: (n: ListNode) => R): IterableIterator<R> {
         return new SetIterator<R>(this.listRoot.next, this.listRoot, fn)
     }
 
@@ -284,8 +284,8 @@ export final class Set<K> implements ReadonlySet<K> {
      * @returns an iterable of the values in the set
      */
     /* override */ values(): IterableIterator<K> {
-        return this.mappedIterator<K>((x: ListNode): Object => {
-            return x.val!
+        return this.mappedIterator<K>((x: ListNode): K => {
+            return x.val! as K
         })
     }
 

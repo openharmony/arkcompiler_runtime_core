@@ -28,7 +28,7 @@ export final class Promise<T> {
                 this.resolveImpl(value);
             });
         } catch (error) {
-            this.rejectImpl(error);
+            this.rejectImpl(error as NullableType);
         }
     }
 
@@ -37,10 +37,10 @@ export final class Promise<T> {
             callback((value: T): void => {
                 this.resolveImpl(value);
             }, (error: Object|null): void => {
-                this.rejectImpl(error)
+                this.rejectImpl(error as NullableType)
             });
         } catch (error) {
-            this.rejectImpl(error);
+            this.rejectImpl(error as NullableType);
         }
     }
 
@@ -53,7 +53,7 @@ export final class Promise<T> {
                 if (thisPromise.state == Promise.STATE_RESOLVED) {
                     promise.resolveImpl(onFulfilled());
                 } else {
-                    promise.rejectImpl(thisPromise.value);
+                    promise.rejectImpl(thisPromise.value as NullableType);
                 }
             } catch (error) {
                 promise.rejectImpl(error);
@@ -76,7 +76,7 @@ export final class Promise<T> {
                 if (thisPromise.state == Promise.STATE_RESOLVED) {
                     promise.resolveImpl(onFulfilled(thisPromise.value!));
                 } else {
-                    promise.rejectImpl(thisPromise.value!);
+                    promise.rejectImpl(thisPromise.value! as Object);
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -99,7 +99,7 @@ export final class Promise<T> {
                 if (thisPromise.state == Promise.STATE_RESOLVED) {
                     promise.resolveImpl(onFulfilled(thisPromise.value!));
                 } else {
-                    promise.resolveImpl(onRejected(thisPromise.value!));
+                    promise.rejectImpl(onRejected(thisPromise.value! as Object) as NullableType);
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -120,7 +120,7 @@ export final class Promise<T> {
         let thisPromise = this;
         let fn: () => void = (): void => {
             try {
-                let res: U = onRejected(thisPromise.value);
+                let res: U = onRejected(thisPromise.value as NullableType);
                 promise.resolveImpl(res);
             } catch (e) {
                 promise.rejectImpl(e);
@@ -144,7 +144,7 @@ export final class Promise<T> {
                 if (thisPromise.state == Promise.STATE_RESOLVED) {
                     promise.resolveImpl(thisPromise.value!);
                 } else {
-                    promise.rejectImpl(thisPromise.value!);
+                    promise.rejectImpl(thisPromise.value! as Object);
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -173,7 +173,7 @@ export final class Promise<T> {
 
     static reject<U>(value: U): Promise<U> {
         let p = new Promise<U>();
-        p.rejectImpl(value);
+        p.rejectImpl(value as NullableType);
         return p;
     }
 
@@ -226,7 +226,7 @@ export final class Promise<T> {
     public native awaitResolution(): T;
 
     private native resolveImpl(value: T): void;
-    private native rejectImpl(error: Object|null): void;
+    private native rejectImpl(error: NullableType): void;
     private static native addToJobQueue(job: Object): void;
 
     private static STATE_PENDING = 0;

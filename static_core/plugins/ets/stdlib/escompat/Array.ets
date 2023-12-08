@@ -88,7 +88,7 @@ export final class Array<T> implements ReadonlyArray<T> {
         if (idx < 0 || idx >= this.actualLength) {
             throw new RangeError("Out of bounds")
         }
-        this.buffer[idx] = val
+        this.buffer[idx] = val as Object
     }
 
     /**
@@ -106,8 +106,8 @@ export final class Array<T> implements ReadonlyArray<T> {
         if (b == null) {
             return false
         }
-        // NOTE: is a.equals(null) a valid code? in some language it is
-        return a.equals(b as Y)
+        // TODO: is a.equals(null) a valid code? in some language it is
+        return (a as Object).equals(b as Object)
     }
 
     /**
@@ -545,7 +545,7 @@ export final class Array<T> implements ReadonlyArray<T> {
             if (i != 0) {
             sb.append(sep);
             }
-            sb.append(this.$_get(i).toString());
+            sb.append((this.$_get(i) as Object).toString());
         }
 
         return sb.toString();
@@ -1175,8 +1175,8 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns  Returns one of values -1, 0, 1 (_less_, _equal_, _greater_ respectively).
      */
     private static defaultComparator<T>(a: T, b: T): number {
-        let sa = a.toString();
-        let sb = b.toString();
+        let sa = (a as Object).toString();
+        let sb = (b as Object).toString();
         return sa.compareTo(sb);
     }
 
@@ -1207,7 +1207,7 @@ export final class Array<T> implements ReadonlyArray<T> {
     public sort(comparator: (a: T, b: T) => number): Array<T> {
         let res = this.copyArray();
         this.doSort(res, 0, res.length-1, comparator);
-        this.buffer = res;
+        this.buffer = res as NullishType[];
         this.actualLength = this.buffer.length
         return this;
     }
@@ -1250,7 +1250,7 @@ export final class Array<T> implements ReadonlyArray<T> {
         }
 
         while (k >= 0) {
-            if (this.$_get(k).equals(element)) {
+            if (Array.objEquals<Object>(this.$_get(k) as NullableType, element as NullableType)) {
                 return k;
             }
             k--;
@@ -1423,7 +1423,7 @@ export final class Array<T> implements ReadonlyArray<T> {
         }
 
         for (let i = 0; i < this.actualLength; i++) {
-            if (!Array.objEquals<Object>(this.$_get(i), a.$_get(i))) {
+            if (!Array.objEquals<Object>(this.$_get(i) as NullableType, a.$_get(i) as NullableType)) {
                 return false
             }
         }
@@ -1439,11 +1439,11 @@ export final class Array<T> implements ReadonlyArray<T> {
     public override toString(): string {
         let str = new StringBuilder()
         for (let i = 0; i < this.actualLength; i++) {
-            const d: NullishType = this.$_get(i)
+            const d: NullableType = this.$_get(i) as NullableType
             if (d == null) {
                 str.append("null")
             } else {
-                str.append((d as Object).toString())
+                str.append(d!.toString())
             }
             if(i != this.actualLength - 1) {
                 str.append(c',')
@@ -2189,7 +2189,7 @@ export final class Array<T> implements ReadonlyArray<T> {
         let resLen = valLen + this.actualLength
         let arr = new NullishType[resLen];
         for (let i: int = 0; i < valLen; ++i) {
-            arr[i] = values[i]
+            arr[i] = values[i] as NullishType
         }
         let curPlace = 0
         for (let i: int = valLen; i < resLen; ++i) {
