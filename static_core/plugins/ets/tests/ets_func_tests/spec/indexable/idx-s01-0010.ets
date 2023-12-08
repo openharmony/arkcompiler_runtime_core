@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,26 @@
  */
 
 /*---
-desc: 05 Generics
-name: 05.generics/generic_02
+ desc: 17.3 Indexable Types
+ tags: [compile-only, negative]
+ ---*/
 
----*/
+class Bar {
+    private data : string
+    $_get (index: int) : string {
+        if (index == 0) {
+            return this.data
+        } else {
+            return "";
+        }
+    }
 
-class A {}
-interface B<T1=A> {}
-class C<T2=B> {}
+    constructor(data : string) {
+        this.data = data;
+    }
+}
+
+function main() {
+    let x : Bar = new Bar("to be or not to be");
+    x[0] = "to be, or not to be: that is the question";
+}

@@ -574,6 +574,20 @@ spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
 ### Issue 14675, 14769, 14841
 escompat/ArrayBufferTest2.ets
 ### End of 14675, 14769, 14841
+### issue 14836 begin
+spec/indexable/idx-s01-0010.ets
+spec/indexable/idx-s01-0011.ets
+spec/indexable/idx-s01-0012.ets
+spec/indexable/idx-s01-0013.ets
+spec/indexable/idx-s01-0030.ets
+spec/indexable/idx-s01-0080.ets
+spec/indexable/idx-s02-0000.ets
+spec/indexable/idx-s02-0001.ets
+spec/indexable/idx-s02-0020.ets
+spec/indexable/idx-s02-0030.ets
+spec/indexable/idx-s03-0000.ets
+spec/indexable/idx-s03-0020.ets
+### issue  14836 end
 
 ### object-literals
 spec/object-literals/issue14680.ets

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,32 @@
  */
 
 /*---
-desc: 05 Generics
-name: 05.generics/generic_02
+ desc: 17.3 Indexable Types
+ tags: [compile-only,negative]
+ ---*/
 
----*/
 
-class A {}
-interface B<T1=A> {}
-class C<T2=B> {}
+class Bar {
+    private data : int;
+    private data2: int;
+    private data3: int;
+
+    async $_get (index: int) : int {
+          return this.data;
+    }
+
+    $_set (index: int, value: int)  throws {
+         this.data = value;
+    }
+
+    constructor(data : int, data2: int, data3: int) {
+        this.data = data;
+        this.data2 = data2;
+        this.data3 = data3;
+    }
+}
+
+function main(): int {
+    let x : Bar = new Bar(1,2,3);
+
+}
