@@ -144,7 +144,7 @@ public:
      *
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
-    Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent);
+    Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent, PandaString name);
     void DestroyEntrypointlessCoroutine(Coroutine *co);
 
     /// Destroy a coroutine with an entrypoint

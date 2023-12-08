@@ -52,19 +52,34 @@ void StackfulCoroutineManager::CreateWorkers(uint32_t howMany, Runtime *runtime,
             runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker " + ToPandaString(i));
         workers_.push_back(w);
     }
-    activeWorkersCount_ = howMany;
 
     auto *mainCo = CreateMainCoroutine(runtime, vm);
     mainCo->GetContext<StackfulCoroutineContext>()->SetWorker(wMain);
     Coroutine::SetCurrent(mainCo);
+    activeWorkersCount_ = 1;  // 1 is for MAIN
+
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::CreateWorkers(): waiting for workers startup";
+    while (activeWorkersCount_ < howMany) {
+        // NOTE(konstanting, #I67QXC): need timed wait?..
+        workersCv_.Wait(&workersLock_);
+    }
 }
 
 void StackfulCoroutineManager::OnWorkerShutdown()
 {
     os::memory::LockHolder lock(workersLock_);
     --activeWorkersCount_;
-    workersShutdownCv_.Signal();
+    workersCv_.Signal();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::OnWorkerShutdown(): COMPLETED, workers left = "
+                           << activeWorkersCount_;
+}
+
+void StackfulCoroutineManager::OnWorkerStartup()
+{
+    os::memory::LockHolder lock(workersLock_);
+    ++activeWorkersCount_;
+    workersCv_.Signal();
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::OnWorkerStartup(): COMPLETED, active workers = "
                            << activeWorkersCount_;
 }
 
@@ -85,6 +100,7 @@ bool StackfulCoroutineManager::IsCoroutineSwitchDisabled()
 
 void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
 {
+    // set limits
     coroStackSizeBytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();
     if (coroStackSizeBytes_ != AlignUp(coroStackSizeBytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
         size_t alignmentPages = PANDA_POOL_ALIGNMENT_IN_BYTES / os::mem::GetPageSize();
@@ -95,16 +111,19 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     coroutineCountLimit_ = coroStackAreaSizeBytes / coroStackSizeBytes_;
     jsMode_ = config.emulateJs;
 
-    os::memory::LockHolder lock(workersLock_);
+    // create and activate workers
+    uint32_t targetNumberOfWorkers = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
+                                         ? std::thread::hardware_concurrency()
+                                         : static_cast<uint32_t>(config.workersCount);
     if (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
-        CreateWorkers(std::thread::hardware_concurrency(), runtime, vm);
-        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): setting number of coroutine workers to CPU count = "
-                               << workers_.size();
-    } else {
-        CreateWorkers(static_cast<uint32_t>(config.workersCount), runtime, vm);
-        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): setting number of coroutine workers to "
-                               << workers_.size();
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): AUTO mode selected, will set number of coroutine "
+                                  "workers to number of CPUs = "
+                               << targetNumberOfWorkers;
     }
+    os::memory::LockHolder lock(workersLock_);
+    CreateWorkers(targetNumberOfWorkers, runtime, vm);
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): successfully created and activated " << workers_.size()
+                           << " coroutine workers";
     programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>();
 }
 
@@ -124,11 +143,7 @@ void StackfulCoroutineManager::Finalize()
 void StackfulCoroutineManager::AddToRegistry(Coroutine *co)
 {
     os::memory::LockHolder lock(coroListLock_);
-    auto *mainCo = GetMainThread();
-    if (mainCo != nullptr) {
-        // NOTE(konstanting, #I67QXC): we should get this callback from GC instead of copying from the main thread
-        co->SetPreWrbEntrypoint(mainCo->GetPreWrbEntrypoint());
-    }
+    co->GetVM()->GetGC()->OnThreadCreate(co);
     coroutines_.insert(co);
     coroutineCount_++;
 }
@@ -194,7 +209,7 @@ void StackfulCoroutineManager::CheckProgramCompletion()
     if (coroutineCount_ == 1 + activeWorkerCoros) {  // 1 here is for MAIN
         LOG(DEBUG, COROUTINES)
             << "StackfulCoroutineManager::CheckProgramCompletion(): all coroutines finished execution!";
-        // program_completion_event_ acts as a stackful-friendly cond var
+        // programCompletionEvent_ acts as a stackful-friendly cond var
         programCompletionEvent_->SetHappened();
         UnblockWaiters(programCompletionEvent_);
     } else {
@@ -410,6 +425,7 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
             // NOTE(konstanting, #I67QXC): test for the spurious wakeup
             programCompletionLock_.Lock();
         }
+        ASSERT(coroutineCount_ == (1 + GetActiveWorkersCount()));
     }
 
     // NOTE(konstanting, #I67QXC): correct state transitions for MAIN
@@ -424,7 +440,7 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
         }
         while (activeWorkersCount_ > 1) {  // 1 is for MAIN
             // NOTE(konstanting, #I67QXC): need timed wait?..
-            workersShutdownCv_.Wait(&workersLock_);
+            workersCv_.Wait(&workersLock_);
         }
     }
 
@@ -488,7 +504,7 @@ StackfulCoroutineContext *StackfulCoroutineManager::CreateCoroutineContextImpl(b
 
 Coroutine *StackfulCoroutineManager::CreateNativeCoroutine(Runtime *runtime, PandaVM *vm,
                                                            Coroutine::NativeEntrypointInfo::NativeEntrypointFunc entry,
-                                                           void *param)
+                                                           void *param, PandaString name)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -499,7 +515,7 @@ Coroutine *StackfulCoroutineManager::CreateNativeCoroutine(Runtime *runtime, Pan
         // do not proceed if we cannot create a context for the new coroutine
         return nullptr;
     }
-    auto *co = GetCoroutineFactory()(runtime, vm, "_native_coro_", ctx, Coroutine::NativeEntrypointInfo(entry, param));
+    auto *co = GetCoroutineFactory()(runtime, vm, std::move(name), ctx, Coroutine::NativeEntrypointInfo(entry, param));
     ASSERT(co != nullptr);
 
     // Let's assume that even the "native" coroutine can eventually try to execute some managed code.

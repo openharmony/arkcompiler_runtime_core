@@ -193,22 +193,7 @@ public:
 
     void DumpUnattachedThreads(std::ostream &os);
 
-    void RegisterThread(MTManagedThread *thread)
-    {
-        os::memory::LockHolder lock(threadLock_);
-        auto mainThread = GetMainThread();
-        if (mainThread != nullptr) {
-            thread->SetPreWrbEntrypoint(mainThread->GetPreWrbEntrypoint());
-        }
-        threadsCount_++;
-#ifndef NDEBUG
-        registeredThreadsCount_++;
-#endif  // NDEBUG
-        threads_.emplace_back(thread);
-        for (uint32_t i = suspendNewCount_; i > 0; i--) {
-            thread->SuspendImpl(true);
-        }
-    }
+    void RegisterThread(MTManagedThread *thread);
 
     void IncPendingThreads()
     {

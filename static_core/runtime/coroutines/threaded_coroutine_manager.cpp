@@ -80,11 +80,7 @@ size_t ThreadedCoroutineManager::GetCoroutineCountLimit()
 void ThreadedCoroutineManager::AddToRegistry(Coroutine *co)
 {
     os::memory::LockHolder lock(coroListLock_);
-    auto *mainCo = GetMainThread();
-    if (mainCo != nullptr) {
-        // NOTE(konstanting, #I67QXC): we should get this callback from GC instead of copying from the main thread
-        co->SetPreWrbEntrypoint(mainCo->GetPreWrbEntrypoint());
-    }
+    co->GetVM()->GetGC()->OnThreadCreate(co);
     coroutines_.insert(co);
     coroutineCount_++;
 }

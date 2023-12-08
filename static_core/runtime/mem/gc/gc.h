@@ -352,6 +352,9 @@ public:
     {
     }
 
+    /// Performs the actions that are required upon thread creation (if any)
+    virtual void OnThreadCreate([[maybe_unused]] ManagedThread *thread) {}
+
     void SetCanAddGCTask(bool canAddTask)
     {
         // Atomic with relaxed order reason: data race with can_add_gc_task_ with no synchronization or ordering

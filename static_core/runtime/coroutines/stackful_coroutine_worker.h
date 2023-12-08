@@ -169,6 +169,8 @@ private:
      */
     void EnsureCoroutineSwitchEnabled();
 
+    Runtime *runtime_ = nullptr;
+    PandaVM *vm_ = nullptr;
     StackfulCoroutineManager *coroManager_;
     Coroutine *scheduleLoopCtx_ = nullptr;
     bool active_ GUARDED_BY(runnablesLock_) = true;
