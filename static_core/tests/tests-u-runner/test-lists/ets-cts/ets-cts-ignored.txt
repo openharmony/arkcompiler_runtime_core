@@ -464,6 +464,9 @@
 10.interfaces/06.interface_method_declarations/05.inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_default_methods.ets
 10.interfaces/06.interface_method_declarations/05.inheriting_methods_with_override_equivalent_signatures/override_multiple_default_methods.ets
 10.interfaces/06.interface_method_declarations/02.inheritance_and_overriding/inheritance_static_method.ets
+# #14793
+13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_function.ets
+# end #14793
 13.modules_and_compilation_units/03.import_declarations/import_0.ets
 13.modules_and_compilation_units/03.import_declarations/import_1.ets
 13.modules_and_compilation_units/03.import_declarations/import_2.ets
@@ -1865,6 +1868,7 @@
 07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_9.ets
 07.expressions/05.array_literal/arr_nest_4.ets
 # end of es2panda fails
+
 
 # es2panda fails: panda#12528
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_4.ets

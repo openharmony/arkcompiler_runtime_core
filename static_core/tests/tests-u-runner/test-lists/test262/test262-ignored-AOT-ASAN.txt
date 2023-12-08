@@ -60,6 +60,8 @@ built-ins/RegExp/dotall/with-dotall-unicode.js
 built-ins/RegExp/from-regexp-like-get-ctor-err.js
 # #9965
 built-ins/RegExp/from-regexp-like-get-flags-err.js
+# #9970
+built-ins/RegExp/from-regexp-like-get-source-err.js
 # #10049
 built-ins/Array/prototype/concat/Array.prototype.concat_small-typed-array.js
 
