@@ -209,8 +209,9 @@ can be used as type argument for generic types:
 ``Object`` Type
 ~~~~~~~~~~~~~~~
 
-An ``Object`` class type is a base type for all all other classes, interfaces, string, arrays, unions, and function types. Any value,
-including the automatically boxed values of primitive types and enum types, can be directly
+An ``Object`` class type is a base type for all other classes, interfaces,
+string, arrays, unions, and function types. Any value, including the
+automatically boxed values of primitive types and enum types, can be directly
 assigned to variables of type ``Object``.
 
 |
