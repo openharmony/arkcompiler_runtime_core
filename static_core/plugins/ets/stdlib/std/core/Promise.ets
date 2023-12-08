@@ -178,7 +178,7 @@ export final class Promise<T> {
         }
         let newQueue = new Object[oldLength + 1];
         for (let i = 0; i < oldLength; ++i) {
-            newQueue[i] = queue[i];
+            newQueue[i] = queue?.[i]!;
         }
         newQueue[oldLength] = job;
         return newQueue;

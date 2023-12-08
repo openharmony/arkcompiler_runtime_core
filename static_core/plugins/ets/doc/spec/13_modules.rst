@@ -963,6 +963,9 @@ The following example is an illustration of how this can be used:
 Re-Export Directive
 ===================
 
+.. meta:
+    frontend_status: Partly
+
 In addition to exporting what is declared in the module, it is possible to
 re-export declarations that are part of other modules' export. Only
 limited re-export possibilities are currently supported.

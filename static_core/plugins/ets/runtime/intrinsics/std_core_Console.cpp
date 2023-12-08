@@ -77,16 +77,4 @@ extern "C" EtsVoid *StdConsolePrintI64([[maybe_unused]] ObjectHeader *header, in
     return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintF32([[maybe_unused]] ObjectHeader *header, float v)
-{
-    panda::intrinsics::PrintF32(v);
-    return EtsVoid::GetInstance();
-}
-
-extern "C" EtsVoid *StdConsolePrintF64([[maybe_unused]] ObjectHeader *header, double v)
-{
-    panda::intrinsics::PrintF64(v);
-    return EtsVoid::GetInstance();
-}
-
 }  // namespace panda::ets::intrinsics

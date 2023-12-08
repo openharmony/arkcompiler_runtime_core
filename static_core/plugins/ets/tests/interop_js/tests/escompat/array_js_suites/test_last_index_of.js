@@ -32,7 +32,7 @@ const TestJSLastIndexOf = etsMod.getFunction('Array_TestJSLastIndexOf');
   ASSERT_EQ(arr.lastIndexOf('foo'), 2);
   ASSERT_EQ(arr.lastIndexOf('not in array'), -1);
 
-  // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+  // NOTE(oignatenko) uncomment below after interop will be supported for this method signature
   // ASSERT_EQ(arr.lastIndexOf('foo', 1), 2);
   // ASSERT_EQ(arr.lastIndexOf('not in array', 1), -1);
 }

@@ -12,7 +12,7 @@ from runner.plugins_registry import PluginsRegistry
 from runner.runner_base import Runner
 
 
-def main():
+def main() -> None:
     dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
@@ -33,9 +33,8 @@ def main():
     start = datetime.now()
     for test_suite in config.test_suites:
         plugin = "ets" if test_suite.startswith("ets") else test_suite
-        if registry.is_registered(plugin):
-            runner_class = registry.get_runner(plugin)
-            # noinspection PyCallingNonCallable
+        runner_class = registry.get_runner(plugin)
+        if runner_class is not None:
             runners.append(runner_class(config))
         else:
             Log.exception_and_raise(logger, f"Plugin {plugin} not registered")

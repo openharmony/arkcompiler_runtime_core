@@ -1,3 +1,4 @@
+import argparse
 import logging
 from typing import Optional, List, Union
 
@@ -10,7 +11,7 @@ class CliArgsWrapper:
     _args = None
 
     @staticmethod
-    def setup(args):
+    def setup(args: argparse.Namespace) -> None:
         CliArgsWrapper._args = args
 
     @staticmethod

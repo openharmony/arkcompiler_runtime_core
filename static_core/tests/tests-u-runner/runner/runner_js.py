@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger("runner.runner_js")
 
 
 class RunnerJS(RunnerFileBased):
-    def __init__(self, config: Config, name: str):
+    def __init__(self, config: Config, name: str) -> None:
         RunnerFileBased.__init__(self, config, name)
         ecmastdlib_abc: str = f"{self.build_dir}/pandastdlib/arkstdlib.abc"
         if not path.exists(ecmastdlib_abc):

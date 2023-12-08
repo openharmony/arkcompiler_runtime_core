@@ -99,7 +99,7 @@
     expected_data_item_type: String,
     expected_data_type: "String[]",
     param_list: {"param1": "[E as float, (-E) as float, 0.0 as float]"},
-    expected_test_data: '["2.71828", "-2.71828", "0"]',
+    expected_test_data: '["2.7182817", "-2.7182817", "0"]',
     verify_test_result_function: compareStringTrivial,
   }
 - {
@@ -112,6 +112,6 @@
     expected_data_item_type: String,
     expected_data_type: "String[]",
     param_list: {"param1": "[E, (-E), 0.0]"},
-    expected_test_data: '["2.71828", "-2.71828", "0"]',
+    expected_test_data: '["2.718281828459045", "-2.718281828459045", "0"]',
     verify_test_result_function: compareStringTrivial,
   }

@@ -6,9 +6,9 @@ from abc import abstractmethod, ABC
 from collections import Counter
 from datetime import datetime
 from glob import glob
-from itertools import chain
 from os import path
-from typing import List, Set, Tuple
+from pathlib import Path
+from typing import List, Set, Tuple, Optional
 
 from tqdm import tqdm
 
@@ -38,39 +38,19 @@ def load_list(test_root: str, test_list_path: str) -> List[str]:
     return result
 
 
-def get_test_id(file, start_directory):
-    return path.relpath(file, start_directory)
+def get_test_id(file: str, start_directory: Path) -> str:
+    relpath = Path(file).relative_to(start_directory)
+    return str(relpath)
 
 
-def is_line_a_comment(line):
-    for comment in CONST_COMMENT:
-        if line.startswith(comment):
-            return True
-    return False
-
-
-def is_line_a_test(line):
-    return len(line) and not is_line_a_comment(line)
-
-
-def get_test_and_comment_from_line(line):
+def get_test_and_comment_from_line(line: str) -> Tuple[Optional[str], Optional[str]]:
     line_parts = TEST_COMMENT_EXPR.search(line)
     if line_parts:
         return line_parts["test"], line_parts["comment"]
     return None, None
 
 
-def get_test_from_line(line):
-    test, _ = get_test_and_comment_from_line(line)
-    return test
-
-
-def get_comment_from_line(line):
-    _, comment = get_test_and_comment_from_line(line)
-    return comment
-
-
-def correct_path(root, test_list):
+def correct_path(root: Path, test_list: str) -> str:
     return path.abspath(test_list) if path.exists(test_list) else path.join(root, test_list)
 
 
@@ -78,7 +58,7 @@ _LOGGER = logging.getLogger("runner.runner_base")
 
 
 class Runner(ABC):
-    def __init__(self, config: Config, name: str):
+    def __init__(self, config: Config, name: str) -> None:
         # This file is expected to be located at path:
         # $PANDA_SOURCE/tests/tests-u-runner/runner/runner_base.py
         current_folder_parent = path.dirname(path.dirname(path.abspath(__file__)))
@@ -160,7 +140,7 @@ class Runner(ABC):
 
     @staticmethod
     # pylint: disable=too-many-return-statements
-    def detect_conf(config: Config):
+    def detect_conf(config: Config) -> ConfigurationKind:
         if config.ark_aot.enable:
             is_aot_full = len([
                 arg for arg in config.ark_aot.aot_args
@@ -181,32 +161,30 @@ class Runner(ABC):
 
         return ConfigurationKind.INT
 
-    def load_tests_from_list(self, list_name):
-        list_path = correct_path(self.list_root, list_name)
-        Log.summary(_LOGGER, f"Loading tests from the list {list_path}")
-        assert self.test_root, "TEST_ROOT not set to correct value"
-        return load_list(self.test_root, list_path)
-
-    def load_tests_from_lists(self, lists):
-        return list(chain(*(
-            map(self.load_tests_from_list, lists)
-        )))
+    def load_tests_from_lists(self, lists: List[str]) -> List[str]:
+        tests = []
+        for list_name in lists:
+            list_path = correct_path(self.list_root, list_name)
+            Log.summary(_LOGGER, f"Loading tests from the list {list_path}")
+            assert self.test_root, "TEST_ROOT not set to correct value"
+            tests.extend(load_list(self.test_root, list_path))
+        return tests
 
     # Read excluded_lists and load list of excluded tests
-    def load_excluded_tests(self):
-        excluded_tests_list = self.load_tests_from_lists(self.excluded_lists)
-        self.excluded_tests.update(excluded_tests_list)
+    def load_excluded_tests(self) -> None:
+        excluded_tests = self.load_tests_from_lists(self.excluded_lists)
+        self.excluded_tests.update(excluded_tests)
         self.excluded = len(self.excluded_tests)
-        self._search_duplicates(excluded_tests_list, "excluded")
+        self._search_duplicates(excluded_tests, "excluded")
 
     # Read ignored_lists and load list of ignored tests
-    def load_ignored_tests(self):
-        ignored_tests_list = self.load_tests_from_lists(self.ignored_lists)
-        self.ignored_tests.update(ignored_tests_list)
-        self._search_duplicates(ignored_tests_list, "ignored")
+    def load_ignored_tests(self) -> None:
+        ignored_tests = self.load_tests_from_lists(self.ignored_lists)
+        self.ignored_tests.update(ignored_tests)
+        self._search_duplicates(ignored_tests, "ignored")
 
     @staticmethod
-    def _search_duplicates(original, kind):
+    def _search_duplicates(original: List[str], kind: str) -> None:
         main_counter = Counter(original)
         dupes = [test for test, frequency in main_counter.items() if frequency > 1]
         if len(dupes) > 0:
@@ -216,29 +194,15 @@ class Runner(ABC):
         elif len(original) > 0:
             Log.summary(_LOGGER, f"No duplicates found in {kind} lists.")
 
-    # Read explicit_list and load list of executed tests
-    def load_explicit_tests(self):
-        if self.explicit_list is not None:
-            return self.load_tests_from_list(self.explicit_list)
-
-        return []
-
-    # Load one explicitly specified test what should be executed
-    def load_explicit_test(self):
-        if self.explicit_test is not None:
-            return [correct_path(self.test_root, self.explicit_test)]
-
-        return []
-
     # Browse the directory, search for files with the specified extension
     # and add them as tests
-    def add_directory(self, directory, extension, flags):
+    def add_directory(self, directory: str, extension: str, flags: List[str]) -> None:
         Log.summary(_LOGGER, f"Loading tests from the directory {directory}")
         test_files = []
         if self.explicit_test is not None:
-            test_files.extend(self.load_explicit_test())
+            test_files.extend([correct_path(self.test_root, self.explicit_test)])
         elif self.explicit_list is not None:
-            test_files.extend(self.load_explicit_tests())
+            test_files.extend(self.load_tests_from_lists([self.explicit_list]))
         else:
             if not self.config.test_lists.skip_test_lists:
                 self.load_excluded_tests()
@@ -264,7 +228,7 @@ class Runner(ABC):
         self.tests.update(valid_tests)
         Log.all(_LOGGER, f"Loaded {len(self.tests)} tests")
 
-    def __load_tests_from_lists(self, directory: str, extension: str):
+    def __load_tests_from_lists(self, directory: str, extension: str) -> List[str]:
         test_files: List[str] = []
         excluded: List[str] = list(self.excluded_tests)[:]
         glob_expression = path.join(directory, f"**/*.{extension}")
@@ -313,7 +277,7 @@ class Runner(ABC):
                 __excludes.extend(chapters[chapter].excludes)
         return __includes, __excludes
 
-    def _search_both_excluded_and_ignored_tests(self):
+    def _search_both_excluded_and_ignored_tests(self) -> None:
         already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]
         if not already_excluded:
             return
@@ -323,7 +287,7 @@ class Runner(ABC):
             Log.all(_LOGGER, f"\t{test}")
             self.ignored_tests.remove(test)
 
-    def _search_not_used_ignored(self, found_tests: List[str]):
+    def _search_not_used_ignored(self, found_tests: List[str]) -> None:
         ignored_absent = [test for test in self.ignored_tests if test not in found_tests]
         if ignored_absent:
             Log.summary(_LOGGER, f"Found {len(ignored_absent)} tests in ignored lists but absent on the file system:")
@@ -333,14 +297,14 @@ class Runner(ABC):
             Log.short(_LOGGER, "All ignored tests are found on the file system")
 
     @abstractmethod
-    def create_test(self, test_file, flags, is_ignored) -> Test:
+    def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> Test:
         pass
 
     @staticmethod
-    def run_test(test):
+    def run_test(test: Test) -> Test:
         return test.run()
 
-    def run(self):
+    def run(self) -> None:
         Log.all(_LOGGER, "Start test running")
         with multiprocessing.Pool(processes=self.config.general.processes) as pool:
             results = pool.imap_unordered(self.run_test, self.tests, chunksize=self.config.general.chunksize)
@@ -351,9 +315,9 @@ class Runner(ABC):
             pool.join()
 
     @abstractmethod
-    def summarize(self):
+    def summarize(self) -> int:
         pass
 
     @abstractmethod
-    def create_coverage_html(self):
+    def create_coverage_html(self) -> None:
         pass

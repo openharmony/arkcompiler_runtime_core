@@ -6,19 +6,18 @@ from typing import List, Callable, Tuple, Optional
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
-from runner.enum_types.params import Params, TestReport
+from runner.enum_types.params import TestEnv, Params, TestReport
 from runner.logger import Log
 from runner.options.options_jit import JitOptions
 from runner.test_base import Test
 
 _LOGGER = logging.getLogger("runner.test_file_based")
 
-ResultValidatorLambda = Callable[[str, str, int], bool]
+ResultValidator = Callable[[str, str, int], bool]
 
 
 class TestFileBased(Test):
-
-    def __init__(self, test_env, test_path, flags, test_id):
+    def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         Test.__init__(self, test_env, test_path, flags, test_id)
         # If test fails it contains reason (of FailKind enum) of first failed step
         # It's supposed if the first step is failed then no step is executed further
@@ -41,9 +40,8 @@ class TestFileBased(Test):
         return self.test_env.verifier_args
 
     # pylint: disable=too-many-locals
-    def run_one_step(self, name, params: Params, result_validator: ResultValidatorLambda) -> \
-            Tuple[bool, TestReport, Optional[FailKind]]:
-
+    def run_one_step(self, name: str, params: Params, result_validator: ResultValidator) \
+            -> Tuple[bool, TestReport, Optional[FailKind]]:
         if self.test_env.config.general.coverage.use_llvm_cov:
             params = deepcopy(params)
             profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
@@ -94,7 +92,8 @@ class TestFileBased(Test):
 
         return passed, report, fail_kind
 
-    def run_es2panda(self, flags, test_abc, result_validator: ResultValidatorLambda):
+    def run_es2panda(self, flags: List[str], test_abc: str, result_validator: ResultValidator) \
+            -> Tuple[bool, TestReport, Optional[FailKind]]:
         es2panda_flags = flags[:]
         es2panda_flags.append("--thread=0")
         if len(test_abc) > 0:
@@ -114,7 +113,8 @@ class TestFileBased(Test):
 
         return self.run_one_step("es2panda", params, result_validator)
 
-    def run_runtime(self, test_an, test_abc, result_validator: ResultValidatorLambda):
+    def run_runtime(self, test_an: str, test_abc: str, result_validator: ResultValidator) \
+            -> Tuple[bool, TestReport, Optional[FailKind]]:
         ark_flags = []
         ark_flags.extend(self.ark_extra_options())
         ark_flags.extend(self.runtime_args)
@@ -150,7 +150,8 @@ class TestFileBased(Test):
 
         return self.run_one_step("ark", params, result_validator)
 
-    def run_aot(self, test_an, test_abc, result_validator: ResultValidatorLambda):
+    def run_aot(self, test_an: str, test_abc: str, result_validator: ResultValidator) \
+            -> Tuple[bool, TestReport, Optional[FailKind]]:
         aot_flags = []
         aot_flags.extend(self.test_env.aot_args)
         aot_flags = [flag.strip("'\"") for flag in aot_flags]
@@ -173,7 +174,8 @@ class TestFileBased(Test):
 
         return self.run_one_step("ark_aot", params, result_validator)
 
-    def run_ark_quick(self, flags: List[str], test_abc: str, result_validator: ResultValidatorLambda):
+    def run_ark_quick(self, flags: List[str], test_abc: str, result_validator: ResultValidator) \
+            -> Tuple[bool, TestReport, Optional[FailKind], str]:
         quick_flags = flags[:]
         quick_flags.extend(self.test_env.quick_args)
 
@@ -192,4 +194,4 @@ class TestFileBased(Test):
             fail_kind_other=FailKind.QUICK_OTHER,
         )
 
-        return (*(self.run_one_step("ark_quick", params, result_validator)), dst_abc)
+        return *(self.run_one_step("ark_quick", params, result_validator)), dst_abc

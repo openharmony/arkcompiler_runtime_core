@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from functools import cached_property
 from os import path
 from typing import Dict, Optional
@@ -12,7 +11,6 @@ from runner.reports.report_format import ReportFormat
 
 
 # pylint: disable=too-many-public-methods
-@dataclass
 class GeneralOptions:
     __DEFAULT_PROCESSES = 1
     __DEFAULT_CHUNKSIZE = 32
@@ -25,7 +23,7 @@ class GeneralOptions:
     __DEFAULT_QEMU = QemuKind.NONE
 
     def __str__(self) -> str:
-        return _to_str(self, GeneralOptions, 1)
+        return _to_str(self, 1)
 
     def to_dict(self) -> Dict[str, object]:
         return {

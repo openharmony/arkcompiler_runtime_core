@@ -185,7 +185,9 @@ spec/unions/union_param_10_01.ets
 spec/unions/union_param_10_02.ets
 spec/unions/union_param_10_03.ets
 ### End of Unions
-
+### Koala related issues
+koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
+### End of Koala
 ### Feature: Rest Params
 ### Issue 14111
 spec/rest-params/Issue14111.ets
@@ -306,3 +308,73 @@ spec/never_type/useWithLambdaAndUnion.ets
 ### Negative test
 spec/never_type/neverTypeInheritance.ets
 ### End never issues
+
+### Generic issues
+### Issue 14498
+spec/generic/generic_03.ets
+### Issue 13642
+spec/generic/comparableClass.ets
+spec/generic/exportTypeComparator.ets
+### Issue 14510
+spec/generic/generic_02.ets
+### Issue 14542
+spec/generic/usingOutT.ets
+### Negative tests
+spec/generic/wrongUsingInT.ets
+spec/generic/generic_05.ets
+### End of Generic
+### Import-export issues
+### Issue 14586
+spec/import_export/03.import_directives/06.type_binding/to_export.ets
+spec/import_export/03.import_directives/06.type_binding/type_binding_01.ets
+spec/import_export/03.import_directives/06.type_binding/type_binding_02.ets
+spec/import_export/03.import_directives/06.type_binding/type_binding_03.ets
+spec/import_export/03.import_directives/06.type_binding/type_binding_04.ets
+spec/import_export/07.export_directives/02.export_type_directives/export_type_directive_01.ets
+spec/import_export/07.export_directives/02.export_type_directives/to_export.ets
+### Issue 14587
+spec/import_export/03.import_directives/07.import_path/import_path_01.ets
+spec/import_export/03.import_directives/07.import_path/import_path_02.ets
+spec/import_export/03.import_directives/07.import_path/import_path_03.ets
+### Issue 14589
+spec/import_export/03.import_directives/t_isnt_exported_but_func_takes_t_as_param_exported.ets
+### Issue 14650
+spec/import_export/07.export_directives/03.re-export_directives/re-export_directive_01.ets
+### Issue 14649
+spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files.ets
+### Issue 14647
+spec/import_export/03.import_directives/t_isnt_exported_but_func_takes_t_as_return_value_exported.ets
+spec/import_export/03.import_directives/t_isnt_exported_but_subtype_of_t_exported.ets
+spec/import_export/03.import_directives/t_isnt_exported_but_var_of_t_exported.ets
+spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_01.ets
+spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_02.ets
+spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_03.ets
+spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_04.ets
+spec/import_export/07.export_directives/01.selective_export_directive/selective_export_directive_01.ets
+spec/import_export/07.export_directives/01.selective_export_directive/re-export_directive_02.ets
+spec/import_export/07.export_directives/03.re-export_directives/re-export_directive_02.ets
+### Issue 14658
+spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
+### Issue 14660
+spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
+### Negative tests
+spec/import_export/03.import_directives/import_unexported_class.ets
+spec/import_export/03.import_directives/non_linux_path_separators.ets
+spec/import_export/07.export_directives/02.export_type_directives/to_export_negative.ets
+spec/import_export/03.import_directives/06.type_binding/type_binding_01.ets
+spec/import_export/03.import_directives/06.type_binding/type_binding_02.ets
+spec/import_export/03.import_directives/06.type_binding/type_binding_04.ets
+spec/import_export/07.export_directives/01.selective_export_directive/selective_export_directive_02.ets
+### Not-a-test
+spec/import_export/03.import_directives/to_export.ets
+spec/import_export/03.import_directives/05.default_import_binding_additional/default_to_export.ets
+spec/import_export/03.import_directives/06.type_binding/to_export.ets
+spec/import_export/03.import_directives/07.import_path/to_export.ets
+spec/import_export/06.top-level_declarations/01.exported_declarations/to_export.ets
+spec/import_export/07.export_directives/01.selective_export_directive/to_export.ets
+spec/import_export/07.export_directives/02.export_type_directives/to_export.ets
+spec/import_export/07.export_directives/02.export_type_directives/to_export_negative.ets
+spec/import_export/07.export_directives/03.re-export_directives/re-export_all.ets
+spec/import_export/07.export_directives/03.re-export_directives/re-export_not_all.ets
+spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
+### End of Import-export

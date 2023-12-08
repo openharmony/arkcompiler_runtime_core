@@ -4,7 +4,7 @@ import random
 import shutil
 from enum import Enum
 from os import makedirs, path, remove
-from typing import TypeVar, Callable, Optional, Type, Union, Any, List
+from typing import TypeVar, Callable, Optional, Type, Union, Any, List, Iterator, Tuple
 from pathlib import Path
 from urllib import request
 from urllib.error import URLError
@@ -14,12 +14,14 @@ from runner.logger import Log
 
 _LOGGER = logging.getLogger("runner.utils")
 
+EnumT = TypeVar("EnumT", bound=Enum)
 
-def progress(block_num, block_size, total_size):
+
+def progress(block_num: int, block_size: int, total_size: int) -> None:
     Log.summary(_LOGGER, f"Downloaded block: {block_num} ({block_size}). Total: {total_size}")
 
 
-def download(name, git_url, revision, target_path, show_progress=False):
+def download(name: str, git_url: str, revision: str, target_path: str, show_progress: bool = False) -> None:
     archive_file = path.join(path.sep, 'tmp', f'{name}.zip')
     url_file = f'{git_url}/{revision}.zip'
 
@@ -45,12 +47,12 @@ def download(name, git_url, revision, target_path, show_progress=False):
     remove(archive_file)
 
 
-ProcessCopyLambda = Callable[[str, str], None]
+ProcessCopy = Callable[[str, str], None]
 
 
 def generate(name: str, url: str, revision: str, generated_root: Path, *,
              stamp_name: Optional[str] = None, test_subdir: str = "test", show_progress: bool = False,
-             process_copy: Optional[ProcessCopyLambda] = None, force_download: bool = False):
+             process_copy: Optional[ProcessCopy] = None, force_download: bool = False) -> str:
     Log.summary(_LOGGER, "Prepare test files")
     stamp_name = f'{name}-{revision}' if not stamp_name else stamp_name
     dest_path = path.join(generated_root, stamp_name)
@@ -63,28 +65,16 @@ def generate(name: str, url: str, revision: str, generated_root: Path, *,
     temp_path = path.join(path.sep, 'tmp', name, f'{name}-{revision}')
 
     if force_download or not path.exists(temp_path):
-        download(
-            name,
-            url,
-            revision,
-            temp_path,
-            show_progress
-        )
+        download(name, url, revision, temp_path, show_progress)
 
     if path.exists(dest_path):
         shutil.rmtree(dest_path)
 
     Log.summary(_LOGGER, "Copy and transform test files")
     if process_copy is not None:
-        process_copy(
-            path.join(temp_path, test_subdir),
-            dest_path
-        )
+        process_copy(path.join(temp_path, test_subdir), dest_path)
     else:
-        copy(
-            path.join(temp_path, test_subdir),
-            dest_path
-        )
+        copy(path.join(temp_path, test_subdir), dest_path)
 
     Log.summary(_LOGGER, f"Create stamp file {stamp_file}")
     with open(stamp_file, 'w+', encoding="utf-8") as _:  # Create empty file-marker and close it at once
@@ -93,7 +83,7 @@ def generate(name: str, url: str, revision: str, generated_root: Path, *,
     return dest_path
 
 
-def copy(source_path, dest_path, remove_if_exist: bool = True):
+def copy(source_path: Union[Path, str], dest_path: Union[Path, str], remove_if_exist: bool = True) -> None:
     try:
         if path.exists(dest_path) and remove_if_exist:
             shutil.rmtree(dest_path)
@@ -102,13 +92,13 @@ def copy(source_path, dest_path, remove_if_exist: bool = True):
         Log.exception_and_raise(_LOGGER, str(ex))
 
 
-def read_file(file_path) -> str:
+def read_file(file_path: Union[Path, str]) -> str:
     with open(file_path, "r", encoding='utf8') as f_handle:
         text = f_handle.read()
     return text
 
 
-def write_2_file(file_path, content):
+def write_2_file(file_path: Union[Path, str], content: str) -> None:
     """
     write content to file if file exists it will be truncated. if file does not exist it wil be created
     """
@@ -117,14 +107,11 @@ def write_2_file(file_path, content):
         f_handle.write(content)
 
 
-def purify(line):
+def purify(line: str) -> str:
     return line.strip(" \n").replace(" ", "")
 
 
-EnumClass = TypeVar("EnumClass", bound=Enum)
-
-
-def enum_from_str(item_name: str, enum_cls: Type[EnumClass]) -> Optional[EnumClass]:
+def enum_from_str(item_name: str, enum_cls: Type[EnumT]) -> Optional[EnumT]:
     for enum_value in enum_cls:
         if enum_value.value.lower() == item_name.lower() or str(enum_value).lower() == item_name.lower():
             return enum_cls(enum_value)
@@ -143,12 +130,9 @@ def wrap_with_function(code: str, jit_preheat_repeats: int) -> str:
     """
 
 
-def iterdir(dirpath: str):
-    return ((name, path.join(dirpath, name)) for name in os.listdir(dirpath))
-
-
-def iter_files(dirpath: Union[str, Path], allowed_ext: List[str]):
-    for name, path_value in iterdir(str(dirpath)):
+def iter_files(dirpath: Union[Path, str], allowed_ext: List[str]) -> Iterator[Tuple[str, str]]:
+    dirpath_gen = ((name, path.join(str(dirpath), name)) for name in os.listdir(str(dirpath)))
+    for name, path_value in dirpath_gen:
         if not path.isfile(path_value):
             continue
         _, ext = path.splitext(path_value)
@@ -156,8 +140,8 @@ def iter_files(dirpath: Union[str, Path], allowed_ext: List[str]):
             yield name, path_value
 
 
-def is_type_of(value: Any, str_type: str) -> bool:
-    return str(type(value)).find(str_type) > 0
+def is_type_of(value: Any, type_: str) -> bool:
+    return str(type(value)).find(type_) > 0
 
 
 def get_platform_binary_name(name: str) -> str:

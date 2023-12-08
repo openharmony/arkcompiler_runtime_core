@@ -1,6 +1,7 @@
 import logging
 from os import path
 from pathlib import Path
+from typing import List
 
 from runner.logger import Log
 from runner.options.config import Config
@@ -13,7 +14,7 @@ _LOGGER = logging.getLogger("runner.plugins.hermes.runner_js_hermes")
 
 
 class RunnerJSHermes(RunnerJS):
-    def __init__(self, config: Config):
+    def __init__(self, config: Config) -> None:
         RunnerJS.__init__(self, config, "hermes")
 
         self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
@@ -27,7 +28,7 @@ class RunnerJSHermes(RunnerJS):
         Log.summary(_LOGGER, f"TEST_ROOT reset to {self.test_root}")
         self.add_directory(self.test_root, "js", [])
 
-    def create_test(self, test_file, flags, is_ignored) -> TestJSHermes:
+    def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestJSHermes:
         test = TestJSHermes(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
         return test

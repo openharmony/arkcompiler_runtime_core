@@ -1,6 +1,7 @@
 import logging
 from os import path
 from pathlib import Path
+from typing import List
 
 from runner.logger import Log
 from runner.options.config import Config
@@ -12,7 +13,7 @@ _LOGGER = logging.getLogger("runner.plugins.parser.runner_js_parser")
 
 
 class RunnerJSParser(RunnerJS):
-    def __init__(self, config: Config):
+    def __init__(self, config: Config) -> None:
         super().__init__(config, "parser")
 
         es2panda_test = path.join(config.general.static_core_root, "tools", "es2panda", "test")
@@ -49,11 +50,11 @@ class RunnerJSParser(RunnerJS):
             f"--arktsconfig={self.arktsconfig}"
         ])
 
-    def add_directory(self, directory, extension, flags):
+    def add_directory(self, directory: str, extension: str, flags: List[str]) -> None:
         new_dir = path.join(self.test_root, directory)
         super().add_directory(new_dir, extension, flags)
 
-    def create_test(self, test_file, flags, is_ignored) -> TestJSParser:
+    def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestJSParser:
         test = TestJSParser(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
         return test

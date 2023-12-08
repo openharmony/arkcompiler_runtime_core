@@ -14,5 +14,6 @@
 panda_ets_interop_js_gtest(ets_interop_js_test__escompat
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/escompat.cpp
                 ${CMAKE_CURRENT_SOURCE_DIR}/escompat_error.cpp
+                ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_buffer.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/escompat.ets
 )

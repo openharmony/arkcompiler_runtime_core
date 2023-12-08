@@ -21,7 +21,7 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSSlice = etsMod.getFunction('Array_TestJSSlice');
 
-// TODO(kprokopenko): change to `x.length` when interop support properties
+// NOTE(kprokopenko): change to `x.length` when interop support properties
 const etsArrLen = x => x['<get>length'].call(x);
 
 { // Test JS Array<FooClass>
@@ -33,7 +33,7 @@ const etsArrLen = x => x['<get>length'].call(x);
   let sliced = arr.slice(1);
   ASSERT_EQ(sliced.at(0), 'foo');
   ASSERT_EQ(etsArrLen(sliced), etsArrLen(arr) - 1);
-  // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+  // NOTE(oignatenko) uncomment below after interop will be supported for this method signature
   // let sliced1 = arr.slice(1, 2);
   // ASSERT_EQ(sliced1.at(0), 'foo');
 }

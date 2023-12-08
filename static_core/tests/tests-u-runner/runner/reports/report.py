@@ -1,7 +1,7 @@
 import logging
 from abc import abstractmethod, ABC
 from os import path
-from typing import Dict, Mapping, Type
+from typing import Dict, Mapping, Type, List, Tuple, Any
 
 from runner.enum_types.params import TestReport
 from runner.reports.report_format import ReportFormat
@@ -18,7 +18,7 @@ class ReportGenerator:
         self.__test_id = test_id
         self.__test_env = test_env
 
-    def generate_fail_reports(self, test_result) -> Dict[ReportFormat, str]:
+    def generate_fail_reports(self, test_result: Any) -> Dict[ReportFormat, str]:
         if test_result.passed:
             return {}
 
@@ -61,12 +61,12 @@ STATUS_FAILED_CLASS = "test_status--failed"
 NO_TIME = "not measured"
 
 
-def convert_to_array(output: str):
+def convert_to_array(output: str) -> List[str]:
     return [line.strip() for line in output.split("\n") if len(line.strip()) > 0]
 
 
 class Report(ABC):
-    def __init__(self, test) -> None:
+    def __init__(self, test: Any) -> None:
         self.test = test
 
     @abstractmethod
@@ -77,9 +77,8 @@ class Report(ABC):
 class HtmlReport(Report):
     def make_report(self) -> str:
         actual_report = self.test.report if self.test.report is not None else TestReport("", "", -1)
-        test_expected, test_actual = self.__make_output_diff_html(self.test.expected, actual_report.output)
-        test_expected = "\n".join(test_expected)
-        test_actual = "\n".join(test_actual)
+        expected, actual = self.__make_output_diff_html(self.test.expected, actual_report.output)
+        test_expected, test_actual = "\n".join(expected), "\n".join(actual)
 
         report_path = path.join(path.dirname(path.abspath(__file__)), "report_template.html")
         with open(report_path, "r", encoding="utf-8") as file_pointer:
@@ -109,7 +108,7 @@ class HtmlReport(Report):
 
         return report
 
-    def __make_output_diff_html(self, expected, actual):
+    def __make_output_diff_html(self, expected: str, actual: str) -> Tuple[List[str], List[str]]:
         expected_list = convert_to_array(expected)
         actual_list = convert_to_array(actual)
         result_expected = []
@@ -148,8 +147,8 @@ class HtmlReport(Report):
 class MdReport(Report):
     def make_report(self) -> str:
         actual_report = self.test.report if self.test.report is not None else TestReport("", "", -1)
-        test_result = self.__make_output_diff_md(self.test.expected, actual_report.output)
-        test_result = "\n".join(test_result)
+        result = self.__make_output_diff_md(self.test.expected, actual_report.output)
+        test_result = "\n".join(result)
 
         report_path = path.join(path.dirname(path.abspath(__file__)), "report_template.md")
         with open(report_path, "r", encoding="utf-8") as file_pointer:
@@ -178,7 +177,7 @@ class MdReport(Report):
 
         return report
 
-    def __make_output_diff_md(self, expected, actual):
+    def __make_output_diff_md(self, expected: str, actual: str) -> List[str]:
         expected_list = convert_to_array(expected)
         actual_list = convert_to_array(actual)
         result = []
@@ -203,11 +202,11 @@ class MdReport(Report):
         return result
 
     @staticmethod
-    def __get_md_good_line(expected, actual) -> str:
+    def __get_md_good_line(expected: str, actual: str) -> str:
         return f"| {expected} | {actual} |"
 
     @staticmethod
-    def __get_md_failed_line(expected, actual) -> str:
+    def __get_md_failed_line(expected: str, actual: str) -> str:
         if expected.strip() != "":
             expected = f"**{expected}**"
         if actual.strip() != "":

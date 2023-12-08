@@ -1,6 +1,6 @@
 import logging
 from os import path, makedirs
-from typing import TypeVar, NoReturn, Type, Optional
+from typing import NoReturn, Type, Optional
 
 from runner.enum_types.verbose_format import VerboseKind
 
@@ -12,7 +12,7 @@ class Log:
     _is_init = False
 
     @staticmethod
-    def setup(verbose: VerboseKind, report_root: str):
+    def setup(verbose: VerboseKind, report_root: str) -> logging.Logger:
         logger = logging.getLogger("runner")
 
         log_path = report_root if report_root is not None else \
@@ -48,7 +48,7 @@ class Log:
         return logger
 
     @staticmethod
-    def all(logger, message: str):
+    def all(logger: logging.Logger, message: str) -> None:
         """
         Logs on the level verbose=ALL
         """
@@ -58,7 +58,7 @@ class Log:
             print(message)
 
     @staticmethod
-    def short(logger, message: str):
+    def short(logger: logging.Logger, message: str) -> None:
         """
         Logs on the level verbose=SHORT
         """
@@ -68,7 +68,7 @@ class Log:
             print(message)
 
     @staticmethod
-    def summary(logger, message: str):
+    def summary(logger: logging.Logger, message: str) -> None:
         """
         Logs on the level verbose=SUMMARY (sum)
         """
@@ -78,7 +78,7 @@ class Log:
             print(message)
 
     @staticmethod
-    def default(logger, message: str):
+    def default(logger: logging.Logger, message: str) -> None:
         """
         Logs on the level verbose=None
         """
@@ -87,10 +87,9 @@ class Log:
         else:
             print(message)
 
-    T = TypeVar("T", bound=Exception)
-
     @staticmethod
-    def exception_and_raise(logger, message: str, exception_cls: Optional[Type[T]] = None) -> NoReturn:
+    def exception_and_raise(logger: logging.Logger, message: str,
+                            exception_cls: Optional[Type[Exception]] = None) -> NoReturn:
         """
         Logs and throw the exception
         """

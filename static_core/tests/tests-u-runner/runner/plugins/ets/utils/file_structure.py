@@ -1,10 +1,11 @@
 # This file defines the CTS file structure
 # The entrypoint is the function 'walk_test_subdirs'
+from __future__ import annotations
 
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Union, Optional
+from typing import List, Optional, Iterator
 
 
 @dataclass
@@ -13,14 +14,14 @@ class TestDirectory:
     path: Path
     name: str
 
-    parent: Optional['TestDirectory']
-    subdirs: List['TestDirectory']
+    parent: Optional[TestDirectory]
+    subdirs: List[TestDirectory]
 
     def __init__(self, path: Path,
                  test_id: int = 0,
                  name: str = "",
-                 parent: Optional['TestDirectory'] = None,
-                 subdirs: Optional[List['TestDirectory']] = None) -> None:
+                 parent: Optional[TestDirectory] = None,
+                 subdirs: Optional[List[TestDirectory]] = None) -> None:
 
         self.path = path
 
@@ -34,36 +35,36 @@ class TestDirectory:
         self.subdirs = subdirs if subdirs is not None else []
 
     def full_index(self) -> List[int]:
-        cur: Optional['TestDirectory'] = self
+        cur: Optional[TestDirectory] = self
         result = []
         while cur is not None:
             result.append(cur.test_id)
             cur = cur.parent
         return list(reversed(result))
 
-    def iter_files(self, allowed_ext: Optional[List[str]] = None) -> Iterable[Path]:
+    def iter_files(self, allowed_ext: Optional[List[str]] = None) -> Iterator[Path]:
         for filename in os.listdir(str(self.path)):
             filepath: Path = self.path / filename
             if allowed_ext and filepath.suffix not in allowed_ext:
                 continue
             yield filepath
 
-    def add_subdir(self, test_dir: 'TestDirectory'):
+    def add_subdir(self, test_dir: TestDirectory) -> None:
         test_dir.parent = self
         self.subdirs.append(test_dir)
 
-    def find_subdir_by_name(self, name: str) -> Union['TestDirectory', None]:
+    def find_subdir_by_name(self, name: str) -> Optional[TestDirectory]:
         # decrease complexity
         for sub_dir in self.subdirs:
             if sub_dir.name == name:
                 return sub_dir
         return None
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return len(os.listdir(str(self.path))) == 0
 
 
-def walk_test_subdirs(path: Path, parent=None) -> Iterable[TestDirectory]:
+def walk_test_subdirs(path: Path, parent: Optional[TestDirectory] = None) -> Iterator[TestDirectory]:
     """
     Walks the file system from the CTS root, yielding TestDirectories, in correct order:
     For example, if only directories 1, 1/1, 1/1/1, 1/1/2, 1/2 exist, they will be yielded in that order.
@@ -81,7 +82,7 @@ def walk_test_subdirs(path: Path, parent=None) -> Iterable[TestDirectory]:
             yield subsubdir
 
 
-def build_directory_tree(test_dir: TestDirectory):
+def build_directory_tree(test_dir: TestDirectory) -> None:
     subdirs = []
     for name in os.listdir(str(test_dir.path)):
         if (test_dir.path / name).is_dir():
@@ -93,7 +94,7 @@ def build_directory_tree(test_dir: TestDirectory):
         build_directory_tree(sub_dir)
 
 
-def print_tree(test_dir: TestDirectory):
+def print_tree(test_dir: TestDirectory) -> None:
     for sub_dir in test_dir.subdirs:
         left_space = " " * 2 * len(sub_dir.full_index())
         section_index = str(sub_dir.test_id)

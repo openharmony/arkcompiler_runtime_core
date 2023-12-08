@@ -85,14 +85,20 @@ export final class Console {
      *
      * @param i value to print
      */
-    public native print(i: float): void
+    public print(f: float): void {
+        let boxed: Float = f;
+        this.print(boxed.toString());
+    }
 
     /**
      * Prints a double to the console
      *
      * @param i value to print
      */
-    public native print(i: double): void
+    public print(d: double): void {
+        let boxed: Double = d;
+        this.print(boxed.toString());
+    }
 
     /**
      * Puts newline (\n) to the console

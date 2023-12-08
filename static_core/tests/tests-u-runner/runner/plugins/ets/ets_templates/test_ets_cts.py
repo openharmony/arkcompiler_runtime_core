@@ -3,12 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List, Sequence
 
+from runner.enum_types.params import TestEnv
 from runner.plugins.ets.test_ets import TestETS
 from runner.plugins.ets.ets_templates.test_metadata import get_metadata, TestMetadata
 
 
 class TestEtsCts(TestETS):
-    def __init__(self, test_env, test_path, flags, test_id):
+    def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         TestETS.__init__(self, test_env, test_path, flags, test_id)
         self.metadata: TestMetadata = get_metadata(Path(test_path))
         if self.metadata.package is not None:
@@ -46,7 +47,7 @@ class TestEtsCts(TestETS):
         for file in self.metadata.files:
             path = Path(self.path).parent / Path(file)
             test_id = Path(self.test_id).parent / Path(file)
-            tests.append(self.__class__(self.test_env, str(path), self.flags, test_id))
+            tests.append(self.__class__(self.test_env, str(path), self.flags, str(test_id)))
         return tests
 
     @property
@@ -64,9 +65,9 @@ class TestEtsCts(TestETS):
     def add_boot_panda_files(self, args: List[str]) -> List[str]:
         dep_files_args = []
         for arg in args:
-            name, value = arg.split('=')
-            if name == '--boot-panda-files':
+            if arg.startswith("--boot-panda-files"):
+                name, value = arg.split('=')
                 dep_files_args.append(f'{name}={":".join([value] + [dt.test_abc for dt in self.dependent_files])}')
             else:
-                dep_files_args.append(f'{name}={value}')
+                dep_files_args.append(arg)
         return dep_files_args

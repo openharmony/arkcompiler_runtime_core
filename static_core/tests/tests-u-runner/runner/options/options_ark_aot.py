@@ -1,16 +1,14 @@
-from dataclasses import dataclass
 from functools import cached_property
 from typing import Dict, List
 
 from runner.options.decorator_value import value, _to_bool, _to_int, _to_str
 
 
-@dataclass
 class ArkAotOptions:
     __DEFAULT_TIMEOUT = 600
 
     def __str__(self) -> str:
-        return _to_str(self, ArkAotOptions, 1)
+        return _to_str(self, 1)
 
     def to_dict(self) -> Dict[str, object]:
         return {

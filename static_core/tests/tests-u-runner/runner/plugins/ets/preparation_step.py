@@ -45,7 +45,7 @@ class TestPreparationStep(ABC):
         self.config = config
 
     @property
-    def test_source_path(self):
+    def test_source_path(self) -> Path:
         return self.__test_source_path
 
     @property
@@ -167,7 +167,7 @@ class JitStep(TestPreparationStep):
         return test_path
 
 
-def command_line_parser():
+def command_line_parser() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generator test runner")
     parser.add_argument("-t", "--templates-dir", type=Path, dest='templates_dir',
                         help="Path to a root directory that contains test templates and parameters",
@@ -179,7 +179,7 @@ def command_line_parser():
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     args = command_line_parser()
 
     try:

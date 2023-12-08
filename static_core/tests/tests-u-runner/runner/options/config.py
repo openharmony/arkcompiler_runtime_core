@@ -1,6 +1,6 @@
+import argparse
 import logging
 import re
-from dataclasses import dataclass
 from functools import cached_property
 from typing import Set, Dict
 
@@ -20,14 +20,13 @@ from runner.options.yaml_document import YamlDocument
 _LOGGER = logging.getLogger("runner.options.config")
 
 
-@dataclass
 class Config:
-    def __init__(self, args):
+    def __init__(self, args: argparse.Namespace):
         CliArgsWrapper.setup(args)
-        YamlDocument.setup(args.config)
+        YamlDocument.load(args.config)
 
     def __str__(self) -> str:
-        return _to_str(self, Config, 0)
+        return _to_str(self, 0)
 
     @cached_property
     @value(
@@ -64,7 +63,7 @@ class Config:
             "ets": self.ets.to_dict()
         }
 
-    def generate_config(self):
+    def generate_config(self) -> None:
         if self.general.generate_config is None:
             return
         data = self._to_dict()

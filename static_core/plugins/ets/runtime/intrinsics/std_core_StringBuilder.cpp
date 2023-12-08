@@ -68,20 +68,6 @@ EtsString *StdCoreToStringLong(EtsLong i)
     return EtsString::CreateFromMUtf8(s.c_str());
 }
 
-EtsString *StdCoreToStringFloat(EtsFloat i)
-{
-    std::stringstream ss;
-    ss << i;
-    return EtsString::CreateFromMUtf8(ss.str().c_str());
-}
-
-EtsString *StdCoreToStringDouble(EtsDouble i)
-{
-    std::stringstream ss;
-    ss << i;
-    return EtsString::CreateFromMUtf8(ss.str().c_str());
-}
-
 ObjectHeader *StdCoreStringBuilderBool(ObjectHeader *sb, EtsBoolean v)
 {
     return CoreStringBuilderBool(sb, v);

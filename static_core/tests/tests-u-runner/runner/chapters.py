@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Optional, Dict, Any, Union, List
+from typing import Optional, Dict, Any, Union, List, Sequence
 
 from runner.logger import Log
 from runner.options.yaml_document import YamlDocument
@@ -14,13 +14,13 @@ class Chapter:
 
 
 class IncorrectFileFormatChapterException(Exception):
-    def __init__(self, chapters_name: str):
+    def __init__(self, chapters_name: str) -> None:
         message = f"Incorrect file format: {chapters_name}"
         Exception.__init__(self, message)
 
 
 class CyclicDependencyChapterException(Exception):
-    def __init__(self, item: str):
+    def __init__(self, item: str) -> None:
         message = f"Cyclic dependency: {item}"
         Exception.__init__(self, message)
 
@@ -28,7 +28,7 @@ class CyclicDependencyChapterException(Exception):
 Chapters = Dict[str, Chapter]
 
 
-def __validate_cycles(chapters: Chapters):
+def __validate_cycles(chapters: Chapters) -> None:
     """
     :param chapters: list (dictionary) of chapters, key is a chapter name
     :raise: CyclicDependencyChapterException if a cyclic dependency found
@@ -44,7 +44,7 @@ def __validate_cycles(chapters: Chapters):
 _LOGGER = logging.getLogger("runner.chapters")
 
 
-def __check_cycle(chapter: Chapter, all_chapters: Chapters, seen_chapters: List[str]):
+def __check_cycle(chapter: Chapter, all_chapters: Chapters, seen_chapters: List[str]) -> None:
     """
     Checks if items contains any name from seen
     :param chapter: investigated chapter
@@ -65,12 +65,12 @@ def __check_cycle(chapter: Chapter, all_chapters: Chapters, seen_chapters: List[
 
 def __parse(chapters_file: str) -> Chapters:
     result: Chapters = {}
-    YamlDocument.setup(chapters_file)
+    YamlDocument.load(chapters_file)
     conf = YamlDocument.document()
     yaml_header: Optional[Dict[str, Any]] = conf
     if not yaml_header or not isinstance(yaml_header, dict):
         Log.exception_and_raise(_LOGGER, chapters_file, IncorrectFileFormatChapterException)
-    yaml_chapters: Optional[Dict[str, List[str]]] = yaml_header.get('chapters')
+    yaml_chapters: Optional[List[Dict[str, List[str]]]] = yaml_header.get('chapters')
     if not yaml_chapters or not isinstance(yaml_chapters, list):
         Log.exception_and_raise(_LOGGER, chapters_file, IncorrectFileFormatChapterException)
     for yaml_chapter in yaml_chapters:
@@ -87,7 +87,7 @@ def __parse(chapters_file: str) -> Chapters:
     return result
 
 
-def __parse_item(includes: List[str], excludes: List[str], yaml_item: Union[str, dict]):
+def __parse_item(includes: List[str], excludes: List[str], yaml_item: Union[str, dict]) -> None:
     if isinstance(yaml_item, str):
         includes.append(yaml_item.strip())
     elif isinstance(yaml_item, dict):
@@ -96,7 +96,7 @@ def __parse_item(includes: List[str], excludes: List[str], yaml_item: Union[str,
                 excludes.extend(sub_items)
 
 
-def __parse_chapter(name: str, yaml_items: List[Union[str, Dict[str, str]]], chapters_file: str) -> Chapter:
+def __parse_chapter(name: str, yaml_items: Sequence[Union[str, Dict[str, str]]], chapters_file: str) -> Chapter:
     if not isinstance(yaml_items, list):
         Log.exception_and_raise(_LOGGER, f"Incorrect file format: {chapters_file}", IncorrectFileFormatChapterException)
     includes: List[str] = []

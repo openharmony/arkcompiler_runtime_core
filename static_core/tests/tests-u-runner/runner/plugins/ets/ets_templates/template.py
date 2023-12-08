@@ -38,7 +38,7 @@ class Template:
             self.text = out_content.strip()
 
     @property
-    def is_copyright(self):
+    def is_copyright(self) -> bool:
         return META_COPYRIGHT not in self.text
 
     def render_template(self) -> List[str]:

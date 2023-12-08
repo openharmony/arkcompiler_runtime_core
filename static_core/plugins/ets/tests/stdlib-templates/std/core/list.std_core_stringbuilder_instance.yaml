@@ -134,7 +134,7 @@
     method_return_type: StringBuilder,
     expected_data_type: "String[]",
     expected_data_item_type: String,
-    expected_test_data: '["2.71828", "-2.71828", "abcd2.71828", "abcd-2.71828"]',
+    expected_test_data: '["2.7182817", "-2.7182817", "abcd2.7182817", "abcd-2.7182817"]',
     verify_test_result_function: compareStringBuilderWithString,
   }
 - {
@@ -150,6 +150,6 @@
     method_return_type: StringBuilder,
     expected_data_type: "String[]",
     expected_data_item_type: String,
-    expected_test_data: '["2.71828", "-2.71828", "abcd2.71828", "abcd-2.71828"]',
+    expected_test_data: '["2.718281828459045", "-2.718281828459045", "abcd2.718281828459045", "abcd-2.718281828459045"]',
     verify_test_result_function: compareStringBuilderWithString,
   }

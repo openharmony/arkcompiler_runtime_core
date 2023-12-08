@@ -278,7 +278,10 @@ export final class StringBuilder {
      *
      * @returns result of the conversion
      */
-    public static native toString(i: float): String;
+    public static toString(f: float): String {
+        let boxed: Float = f;
+        return boxed.toString();
+    }
 
     /**
      * Converts the primitive to a string
@@ -287,6 +290,9 @@ export final class StringBuilder {
      *
      * @returns result of the conversion
      */
-    public static native toString(i: double): String;
+    public static toString(d: double): String {
+        let boxed: Double = d;
+        return boxed.toString();
+    }
 
 }

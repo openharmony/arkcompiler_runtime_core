@@ -45,7 +45,7 @@ _LOGGER = logging.getLogger("runner.runner_file_based")
 
 
 class RunnerFileBased(Runner):
-    def __init__(self, config: Config, name):
+    def __init__(self, config: Config, name: str) -> None:
         Runner.__init__(self, config, name)
         self.cmd_env = environ.copy()
 
@@ -134,7 +134,7 @@ class RunnerFileBased(Runner):
         return WorkDir(self.config.general, self.default_work_dir_root)
 
     @staticmethod
-    def _set_path_and_check(*path_parts) -> str:
+    def _set_path_and_check(*path_parts: str) -> str:
         _path = path.join(*path_parts)
         if not path.isfile(_path):
             Log.exception_and_raise(_LOGGER, f"Cannot find binary file: {_path}", FileNotFoundError)
@@ -150,7 +150,7 @@ class RunnerFileBased(Runner):
 
         return []
 
-    def generate_quick_stdlib(self, stdlib_abc):
+    def generate_quick_stdlib(self, stdlib_abc: str) -> str:
         Log.all(_LOGGER, "Generate quick stdlib")
         cmd = self.cmd_prefix + [self.ark_quick]
         cmd.extend(self.quick_args)
@@ -177,14 +177,14 @@ class RunnerFileBased(Runner):
 
         return dst_abc
 
-    def create_coverage_html(self):
+    def create_coverage_html(self) -> None:
         Log.all(_LOGGER, "Create html report for coverage")
         self.coverage.make_profdata_list_file()
         self.coverage.merge_all_profdata_files()
         self.coverage.llvm_cov_export_to_info_file()
         self.coverage.genhtml()
 
-    def summarize(self):
+    def summarize(self) -> int:
         Log.all(_LOGGER, "Processing run statistics")
 
         fail_lists: Dict[FailKind, List[Test]] = {kind: [] for kind in FailKind}
@@ -246,7 +246,7 @@ class RunnerFileBased(Runner):
         return self.failed
 
     def _process_failed(self, test_result: TestFileBased, ignored_still_failed: List[Test],
-                        excluded_still_failed: List[Test], fail_lists: Dict[FailKind, List[Test]]):
+                        excluded_still_failed: List[Test], fail_lists: Dict[FailKind, List[Test]]) -> None:
         if test_result.ignored:
             self.ignored += 1
             ignored_still_failed.append(test_result)
@@ -258,10 +258,12 @@ class RunnerFileBased(Runner):
             assert test_result.fail_kind
             fail_lists[test_result.fail_kind].append(test_result)
 
-    def collect_excluded_test_lists(self, extra_list: Optional[List[str]] = None, test_name: Optional[str] = None):
+    def collect_excluded_test_lists(self, extra_list: Optional[List[str]] = None,
+                                    test_name: Optional[str] = None) -> None:
         self.excluded_lists.extend(self.collect_test_lists("excluded", extra_list, test_name))
 
-    def collect_ignored_test_lists(self, extra_list: Optional[List[str]] = None, test_name: Optional[str] = None):
+    def collect_ignored_test_lists(self, extra_list: Optional[List[str]] = None,
+                                   test_name: Optional[str] = None) -> None:
         self.ignored_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
 
     def collect_test_lists(
