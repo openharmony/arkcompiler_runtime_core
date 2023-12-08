@@ -17,15 +17,14 @@ package escompat;
 
 export class IteratorResult<T> {
     done: boolean
-    // TODO(ivan-tyulyandin): blocked by undefined implementation
-    value: T | null
+    value: T | undefined
 
     constructor() {
         this.done = true
-        this.value = null
+        this.value = undefined
     }
 
-    constructor(done: boolean, value: T | null) {
+    constructor(done: boolean, value: T | undefined) {
         this.done = done
         this.value = value
     }

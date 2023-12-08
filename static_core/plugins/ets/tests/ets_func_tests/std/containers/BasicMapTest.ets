@@ -41,50 +41,66 @@ function main(): int {
     failures += test(createMapAddAndCheckEntriesOrder(), "Check entries order");
     failures += test(createMapAddAndCheckKeysOrder(), "Check keys order");
     return test(failures, "All tests run");
+}
 
+function getIteratorLen<T>(iter: Iterator<T>): int {
+    let size: int = 0
+    while(!iter.next().done)
+        size++
+
+    return size;
 }
 
 function createMapAddAndCheckEntriesOrder(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'c', 1.0);
-    map.put(c'x', 2.0);
-    map.put(c'a', 3.0);
-    let entries: Entry[] = map.entries();
+    map.set(c'c', 1.0);
+    map.set(c'x', 2.0);
+    map.set(c'a', 3.0);
+    let entries = map.entries();
 
-    let result = (entries[0].key == c'a' && entries[2].key == c'x') ? 0 : 1;
-    return result;
+    if (entries.next().value.key == c'c' &&
+        entries.next().value.key == c'x' &&
+        entries.next().value.key == c'a') {
+        return 0;
+    }
+
+    return 1;
 }
 
 function createMapAddAndCheckKeysOrder(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'c', 1.0);
-    map.put(c'x', 2.0);
-    map.put(c'a', 3.0);
-    let keys: Char[] = map.keys();
+    map.set(c'c', 1.0);
+    map.set(c'x', 2.0);
+    map.set(c'a', 3.0);
+    let keys = map.keys();
 
-    let result = (keys[0] == c'a' && keys[2] == c'x') ? 0 : 1;
-    return result;
+    if (keys.next().value == c'c' &&
+        keys.next().value == c'x' &&
+        keys.next().value == c'a') {
+        return 0;
+    }
 
+    return 1;
 }
 
 function createMapAddAndCheckHasKey(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'b', 2.0);
-    map.put(c'c', 3.0);
-    let result = map.hasKey(c'c') ? 0 : 1;
+    map.set(c'a', 1.0);
+    map.set(c'b', 2.0);
+    map.set(c'c', 3.0);
+    let result = map.has(c'c') ? 0 : 1;
     return result;
 }
 
 function createEmptyMap(): int {
     let map: Map<char, double> = new Map<char, double>();
-    return map.length();
+    return map.size();
 }
 
 function createMapAddAndGet(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    let expected: Double = map.get(c'a');
+    map.set(c'a', 1.0);
+    let expected: double = map.get(c'a');
 
     let result = expected == 1.0 ? 0 : 1;
     return result;
@@ -92,7 +108,7 @@ function createMapAddAndGet(): int {
 
 function createMapAndGetMissed(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'b', 1.0);
+    map.set(c'b', 1.0);
     try {
         map.get(c'a');
     } catch(e: Error) {
@@ -104,17 +120,17 @@ function createMapAndGetMissed(): int {
 
 function createMapAddReplaceAndGet(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'a', 5.0);
-    let expected: Double = map.get(c'a');
+    map.set(c'a', 1.0);
+    map.set(c'a', 5.0);
+    let expected: double = map.get(c'a');
     let result = expected == 5.0 ? 0 : 1;
     return result;
 }
 
 function createMapAddReplaceAndGetMissed(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'b', 1.0);
-    map.put(c'b', 5.0);
+    map.set(c'b', 1.0);
+    map.set(c'b', 5.0);
 
     try {
         map.get(c'a');
@@ -126,94 +142,93 @@ function createMapAddReplaceAndGetMissed(): int {
 
 function createMapAndGetKeys(): int {
     let map: Map<char, double> = new Map<char, double>();
-    let keys: Char[] = map.keys();
-
-    return keys.length;
+    let keys = map.keys();
+    let result = map.keys().next().done ? 0 : 1;
+    return result;
 }
 
 function createMapAddAndGetKeys(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'c', 3.0);
-    map.put(c'b', 2.0);
-    let keys: Char[] = map.keys();
+    map.set(c'a', 1.0);
+    map.set(c'c', 3.0);
+    map.set(c'b', 2.0);
+    let keys = map.keys();
 
-    let result = keys.length == 3 ? 0 : 1;
+    let result = getIteratorLen<char>(keys) == 3 ? 0 : 1;
     return result;
 }
 
 function createMapAddRemoveAndGetKeys(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'b', 2.0);
-    map.put(c'c', 3.0);
-    map.remove(c'c');
-    let keys: Char[] = map.keys();
-    let result = keys.length == 2 ? 0 : 1;
+    map.set(c'a', 1.0);
+    map.set(c'b', 2.0);
+    map.set(c'c', 3.0);
+    map.delete(c'c');
+    let keys = map.keys();
+    let result = getIteratorLen<char>(keys) == 2 ? 0 : 1;
     return result;
 }
 
 function createMapAddClearAndGetKeys(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'b', 2.0);
-    map.put(c'c', 3.0);
+    map.set(c'a', 1.0);
+    map.set(c'b', 2.0);
+    map.set(c'c', 3.0);
     map.clear();
-    let keys: Char[] = map.keys();
+    let keys = map.keys();
 
-    return keys.length;
+    return getIteratorLen<char>(keys);
 }
 
 function createMapAndGetEntries(): int {
     let map: Map<char, double> = new Map<char, double>();
-    let entries: Entry[] = map.entries();
-
-    return entries.length;
+    let entries = map.entries();
+    return getIteratorLen<Entry<char, double>>(entries);
 }
 
 function createMapAddAndGetEntries(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'b', 2.0);
-    map.put(c'c', 3.0);
+    map.set(c'a', 1.0);
+    map.set(c'b', 2.0);
+    map.set(c'c', 3.0);
 
-    let entries: Entry[] = map.entries();
+    let entries = map.entries();
 
-    let result = entries.length == 3 ? 0 : 1;
+    let result = getIteratorLen<Entry<char, double>>(entries) == 3 ? 0 : 1;
     return result;
 }
 
 
 function createMapAddRemoveAndGetEntries(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'b', 2.0);
-    map.put(c'c', 3.0);
-    map.remove(c'b');
-    let entries: Entry[] = map.entries();
+    map.set(c'a', 1.0);
+    map.set(c'b', 2.0);
+    map.set(c'c', 3.0);
+    map.delete(c'b');
+    let entries = map.entries();
 
-    let result = entries.length == 2 ? 0 : 1;
+    let result = getIteratorLen<Entry<char, double>>(entries) == 2 ? 0 : 1;
     return result;
 }
 
 function createMapAddClearAndGetEntries(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'b', 2.0);
-    map.put(c'c', 3.0);
+    map.set(c'a', 1.0);
+    map.set(c'b', 2.0);
+    map.set(c'c', 3.0);
     map.clear();
-    let entries: Entry[] = map.entries();
+    let entries = map.entries();
 
-    return entries.length;
+    return getIteratorLen<Entry<char, double>>(entries);
 }
 
 function createMapAddAndRemove(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'b', 2.0);
-    map.put(c'c', 3.0);
-    map.remove(c'c');
-    let result = map.length() == 2 ? 0 : 1;
+    map.set(c'a', 1.0);
+    map.set(c'b', 2.0);
+    map.set(c'c', 3.0);
+    map.delete(c'c');
+    let result = map.size() == 2 ? 0 : 1;
     return result;
 }
 
@@ -227,18 +242,18 @@ function createMapAndGetDefault(): int {
 
 function createMapAddAndClear(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    map.put(c'b', 2.0);
-    map.put(c'c', 3.0);
+    map.set(c'a', 1.0);
+    map.set(c'b', 2.0);
+    map.set(c'c', 3.0);
     map.clear();
 
-    return map.length();
+    return map.size();
 }
 
 function createMapAndAdd(): int {
     let map: Map<char, double> = new Map<char, double>();
-    map.put(c'a', 1.0);
-    let result = map.length() == 1 ? 0 : 1;
+    map.set(c'a', 1.0);
+    let result = map.size() == 1 ? 0 : 1;
     return result;
 }
 

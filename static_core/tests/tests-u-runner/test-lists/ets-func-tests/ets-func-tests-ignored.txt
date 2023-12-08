@@ -90,17 +90,13 @@ std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_short_ar
 regression/12581_box_type_array_Long_array.ets
 ### Issue 12581
 regression/12581_custom_class_Engine_array.ets
-### Issue 12849
+### Issue 12849 begin
 escompat/escompat_Array_single_Test_escompat_Array.ets
 escompat/escompat_Array_Test_escompat_Array.ets
 escompat/escompat_Array_Test_escompat_Array_001.ets
 escompat/escompat_Array_Test_escompat_Array_002.ets
 escompat/escompat_Array_Test_escompat_Array_003.ets
-### Issue 12849
-### Issue 12989
-std/containers/BasicMapTest.ets
-std/containers/BasicSetTest.ets
-### Issue xxx end
+### Issue 12849 end
 
 ### Union issues
 ### literal types not supported yet
