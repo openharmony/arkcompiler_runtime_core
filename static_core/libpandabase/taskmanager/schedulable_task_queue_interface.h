@@ -27,10 +27,14 @@ public:
     NO_MOVE_SEMANTIC(SchedulableTaskQueueInterface);
 
     /**
-     * NewTasksCallback instance should be called after tasks adding. As argument you should input count of added
-     * tasks.
+     * NewTasksCallback instance should be called after tasks adding. It should have next arguments:
+     * 1. property of tasks you added
+     * 2. count of tasks you added
+     * 3. true of queue was empty before last tasks adding, otherwise false
      */
-    using NewTasksCallback = std::function<void(TaskProperties, size_t)>;
+    using NewTasksCallback = std::function<void(TaskProperties, size_t, bool)>;
+
+    using AddTaskToWorkerFunc = std::function<void(Task &&)>;
 
     SchedulableTaskQueueInterface(TaskType task_type, VMType vm_type, uint8_t priority)
         : TaskQueueInterface(task_type, vm_type, priority)
@@ -50,6 +54,15 @@ public:
      * @param mode - execution mode of task that we want to pop.
      */
     [[nodiscard]] virtual std::optional<Task> PopTask(TaskExecutionMode mode) = 0;
+
+    /**
+     * @brief Method pops several tasks to worker.
+     * @param add_task_func - Functor that will be used to add popped tasks to worker
+     * @param size - Count of tasks you want to pop. If it is greater then count of tasks that are stored in queue,
+     * method will not wait and will pop all stored tasks.
+     * @return count of task that was added to worker
+     */
+    size_t virtual PopTasksToWorker(AddTaskToWorkerFunc add_task_func, size_t size) = 0;
 
     /**
      * @brief This method sets the callback. It will be called after adding new task in AddTask method.

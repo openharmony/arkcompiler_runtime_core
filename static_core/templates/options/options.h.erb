@@ -42,6 +42,7 @@ public:
 
     explicit Options(const std::string &exe_path) : exe_dir_(GetExeDir(exe_path)) {}
 
+    // NOLINTBEGIN(readability-function-size)
     void AddOptions(PandArgParser *parser) {
         parser->Add(&version_);
 % Common::options.each do |op|
@@ -50,6 +51,7 @@ public:
         parser->Add(&<%= op.field_name %>);
 % end
     }
+    // NOLINTEND(readability-function-size)
 
     bool IsVersion() const {
         return version_.GetValue();

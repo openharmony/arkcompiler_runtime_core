@@ -15,8 +15,8 @@
 
 #include "libpandabase/taskmanager/task_scheduler.h"
 #include "libpandabase/taskmanager/task_queue.h"
-#include "taskmanager/task.h"
-#include "taskmanager/task_queue_interface.h"
+#include "libpandabase/taskmanager/task.h"
+#include <tuple>
 #include <gtest/gtest.h>
 
 namespace panda::taskmanager {
@@ -24,7 +24,7 @@ namespace panda::taskmanager {
 constexpr size_t DEFAULT_SEED = 123456;
 constexpr size_t TIMEOUT = 1;
 
-class TaskSchedulerTest : public testing::Test {
+class TaskSchedulerTest : public testing::TestWithParam<TaskStatisticsImplType> {
 public:
     static constexpr TaskProperties GC_STATIC_VM_BACKGROUND_PROPERTIES {TaskType::GC, VMType::STATIC_VM,
                                                                         TaskExecutionMode::BACKGROUND};
@@ -109,10 +109,11 @@ private:
     size_t seed_ = 0;
 };
 
-TEST_F(TaskSchedulerTest, TaskQueueCreateAndRegistration)
+TEST_P(TaskSchedulerTest, TaskQueueRegistration)
 {
-    constexpr size_t THREADS_COUNT = 1;
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    constexpr size_t THREADS_COUNT = 4;
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
     TaskQueueInterface *queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     EXPECT_NE(queue, nullptr);
@@ -121,12 +122,13 @@ TEST_F(TaskSchedulerTest, TaskQueueCreateAndRegistration)
     TaskScheduler::Destroy();
 }
 
-TEST_F(TaskSchedulerTest, TaskQueuesFillingFromOwner)
+TEST_P(TaskSchedulerTest, TaskQueuesFillingFromOwner)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 5;
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    constexpr size_t THREADS_COUNT = 4;
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gc_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -159,52 +161,52 @@ TEST_F(TaskSchedulerTest, TaskQueuesFillingFromOwner)
     TaskScheduler::Destroy();
 }
 
-TEST_F(TaskSchedulerTest, ForegroundQueueTest)
+TEST_P(TaskSchedulerTest, ForegroundQueueTest)
 {
     srand(GetSeed());
     // Create TaskScheduler
     constexpr size_t THREADS_COUNT = 1;  // IMPORTANT: only one worker to see effect of using foreground execution mode
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gc_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
-    TaskQueueInterface *jit_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::JIT, VMType::STATIC_VM, QUEUE_PRIORITY);
 
-    // Fill queues with tasks that push their TaskType to global queue.
-    std::queue<TaskType> global_queue;
-    jit_queue->AddTask(Task::Create({TaskType::JIT, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
-                                    [&global_queue]() { global_queue.push(TaskType::JIT); }));
-    jit_queue->AddTask(Task::Create({TaskType::JIT, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
-                                    [&global_queue]() { global_queue.push(TaskType::JIT); }));
+    // Fill queues with tasks that push their TaskExecutionMode to global queue.
+    std::queue<TaskExecutionMode> global_queue;
+    gc_queue->AddTask(Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
+                                   [&global_queue]() { global_queue.push(TaskExecutionMode::BACKGROUND); }));
+    gc_queue->AddTask(Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
+                                   [&global_queue]() { global_queue.push(TaskExecutionMode::BACKGROUND); }));
     gc_queue->AddTask(Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::FOREGROUND},
-                                   [&global_queue]() { global_queue.push(TaskType::GC); }));
-    jit_queue->AddTask(Task::Create({TaskType::JIT, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
-                                    [&global_queue]() { global_queue.push(TaskType::JIT); }));
+                                   [&global_queue]() { global_queue.push(TaskExecutionMode::FOREGROUND); }));
+    gc_queue->AddTask(Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
+                                   [&global_queue]() { global_queue.push(TaskExecutionMode::BACKGROUND); }));
     // Initialize tm workers
     tm->Initialize();
     // Wait that do work
     tm->Finalize();
 
-    ASSERT_EQ(global_queue.front(), TaskType::GC) << "seed:" << GetSeed();
+    ASSERT_EQ(global_queue.front(), TaskExecutionMode::FOREGROUND) << "seed:" << GetSeed();
     global_queue.pop();
-    ASSERT_EQ(global_queue.front(), TaskType::JIT) << "seed:" << GetSeed();
+    ASSERT_EQ(global_queue.front(), TaskExecutionMode::BACKGROUND) << "seed:" << GetSeed();
     global_queue.pop();
-    ASSERT_EQ(global_queue.front(), TaskType::JIT) << "seed:" << GetSeed();
+    ASSERT_EQ(global_queue.front(), TaskExecutionMode::BACKGROUND) << "seed:" << GetSeed();
     global_queue.pop();
-    ASSERT_EQ(global_queue.front(), TaskType::JIT) << "seed:" << GetSeed();
+    ASSERT_EQ(global_queue.front(), TaskExecutionMode::BACKGROUND) << "seed:" << GetSeed();
     global_queue.pop();
     ASSERT_TRUE(global_queue.empty());
     tm->UnregisterAndDestroyTaskQueue<>(gc_queue);
-    tm->UnregisterAndDestroyTaskQueue<>(jit_queue);
     TaskScheduler::Destroy();
 }
 
-TEST_F(TaskSchedulerTest, TaskCreateTask)
+TEST_P(TaskSchedulerTest, TaskCreateTask)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 5;
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    constexpr size_t THREADS_COUNT = 4;
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gc_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -239,12 +241,13 @@ TEST_F(TaskSchedulerTest, TaskCreateTask)
     TaskScheduler::Destroy();
 }
 
-TEST_F(TaskSchedulerTest, MultithreadingUsage)
+TEST_P(TaskSchedulerTest, MultithreadingUsage)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 15;
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    constexpr size_t THREADS_COUNT = 4;
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     // Create 4 thread. Each thread create, register and fill queues
     constexpr size_t PRODUCER_THREADS_COUNT = 3;
     SetTasksSetCount(PRODUCER_THREADS_COUNT);
@@ -278,12 +281,13 @@ TEST_F(TaskSchedulerTest, MultithreadingUsage)
     TaskScheduler::Destroy();
 }
 
-TEST_F(TaskSchedulerTest, TaskSchedulerGetTask)
+TEST_P(TaskSchedulerTest, TaskSchedulerGetTask)
 {
     srand(GetSeed());
     // Create TaskScheduler
     constexpr size_t THREADS_COUNT = 1;  // Worker will not be used in this test
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
     auto queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::queue<TaskType> global_queue;
@@ -306,12 +310,13 @@ TEST_F(TaskSchedulerTest, TaskSchedulerGetTask)
     tm->Destroy();
 }
 
-TEST_F(TaskSchedulerTest, TasksWithMutex)
+TEST_P(TaskSchedulerTest, TasksWithMutex)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 10;
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    constexpr size_t THREADS_COUNT = 4;
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gc_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -343,12 +348,13 @@ TEST_F(TaskSchedulerTest, TasksWithMutex)
     TaskScheduler::Destroy();
 }
 
-TEST_F(TaskSchedulerTest, TaskCreateTaskRecursively)
+TEST_P(TaskSchedulerTest, TaskCreateTaskRecursively)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 5;
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    constexpr size_t THREADS_COUNT = 4;
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
     TaskQueueInterface *gc_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -381,12 +387,13 @@ TEST_F(TaskSchedulerTest, TaskCreateTaskRecursively)
     TaskScheduler::Destroy();
 }
 
-TEST_F(TaskSchedulerTest, TaskSchedulerTaskGetTask)
+TEST_P(TaskSchedulerTest, TaskSchedulerTaskGetTask)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 5;
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    constexpr size_t THREADS_COUNT = 4;
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
     TaskQueueInterface *gc_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -424,12 +431,13 @@ TEST_F(TaskSchedulerTest, TaskSchedulerTaskGetTask)
     TaskScheduler::Destroy();
 }
 
-TEST_F(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
+TEST_P(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 5;
-    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    constexpr size_t THREADS_COUNT = 4;
+    auto task_statistics_type = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, task_statistics_type);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gc_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -473,5 +481,8 @@ TEST_F(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
     tm->UnregisterAndDestroyTaskQueue<>(jit_queue);
     TaskScheduler::Destroy();
 }
+
+INSTANTIATE_TEST_SUITE_P(TaskStatisticsTypeSet, TaskSchedulerTest,
+                         ::testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED));
 
 }  // namespace panda::taskmanager

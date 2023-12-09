@@ -15,19 +15,34 @@
 
 #include "libpandabase/taskmanager/task_scheduler.h"
 #include "libpandabase/utils/logger.h"
+#include "libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.h"
+#include "libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.h"
 
 namespace panda::taskmanager {
 
 TaskScheduler *TaskScheduler::instance_ = nullptr;
 
-TaskScheduler::TaskScheduler(size_t workers_count) : workers_count_(workers_count), gen_(std::random_device()()) {}
+TaskScheduler::TaskScheduler(size_t workers_count, TaskStatisticsImplType task_statistics_type)
+    : workers_count_(workers_count), gen_(std::random_device()())
+{
+    switch (task_statistics_type) {
+        case TaskStatisticsImplType::FINE_GRAINED:
+            task_statistics_ = new FineGrainedTaskStatisticsImpl();
+            break;
+        case TaskStatisticsImplType::SIMPLE:
+            task_statistics_ = new SimpleTaskStatisticsImpl();
+            break;
+        default:
+            UNREACHABLE();
+    }
+}
 
 /* static */
-TaskScheduler *TaskScheduler::Create(size_t threads_count)
+TaskScheduler *TaskScheduler::Create(size_t threads_count, TaskStatisticsImplType task_statistics_type)
 {
     ASSERT(instance_ == nullptr);
     ASSERT(threads_count > 0);
-    instance_ = new TaskScheduler(threads_count);
+    instance_ = new TaskScheduler(threads_count, task_statistics_type);
     return instance_;
 }
 
@@ -47,15 +62,16 @@ void TaskScheduler::Destroy()
 
 TaskQueueId TaskScheduler::RegisterQueue(internal::SchedulableTaskQueueInterface *queue)
 {
-    os::memory::LockHolder lock_holder(task_manager_lock_);
+    os::memory::LockHolder lock_holder(task_scheduler_state_lock_);
     ASSERT(!start_);
     TaskQueueId id(queue->GetTaskType(), queue->GetVMType());
     if (task_queues_.find(id) != task_queues_.end()) {
         return INVALID_TASKQUEUE_ID;
     }
     task_queues_[id] = queue;
-    queue->SetNewTasksCallback(
-        [this](TaskProperties properties, size_t count) { this->IncrementNewTaskCounter(properties, count); });
+    queue->SetNewTasksCallback([this](TaskProperties properties, size_t count, bool was_empty) {
+        this->IncrementCounterOfAddedTasks(properties, count, was_empty);
+    });
     return id;
 }
 
@@ -65,8 +81,9 @@ void TaskScheduler::Initialize()
     start_ = true;
     LOG(DEBUG, RUNTIME) << "TaskScheduler: creates " << workers_count_ << " threads";
     for (size_t i = 0; i < workers_count_; i++) {
-        workers_.push_back(new WorkerThread(
-            [this](const TaskPropertiesCounterMap &counter_map) { this->IncrementFinishedTaskCounter(counter_map); }));
+        workers_.push_back(new WorkerThread([this](const TaskPropertiesCounterMap &counter_map) {
+            this->IncrementCounterOfExecutedTasks(counter_map);
+        }));
     }
 }
 
@@ -74,65 +91,76 @@ bool TaskScheduler::FillWithTasks(WorkerThread *worker, size_t tasks_count)
 {
     ASSERT(start_);
     os::memory::LockHolder worker_lock_holder(workers_lock_);
-    os::memory::LockHolder task_manager_lock_holder(task_manager_lock_);
     LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks";
-
-    for (size_t i = 0; i < tasks_count; i++) {
+    {
+        os::memory::LockHolder task_scheduler_lock_holder(task_scheduler_state_lock_);
         while (AreQueuesEmpty()) {
-            /**
-             * We exit in 2 situations:
-             * - !is_worker_empty : if worker has tasks and queues are empty, worker will not wait.
-             * - finish_ : when TM Finalize, Worker wake up and go finish WorkerLoop.
-             */
-            if (!worker->IsEmpty() || finish_) {
-                LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks: return queue with" << i << "issues";
-                return finish_;
+            /// We exit in situation when finish_ = true .TM Finalize, Worker wake up and go finish WorkerLoop.
+            if (finish_) {
+                LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks: return queue without issues";
+                return true;
             }
-            queues_wait_cond_var_.Wait(&task_manager_lock_);
+            queues_wait_cond_var_.Wait(&task_scheduler_state_lock_);
         }
-        PutTaskInWorker(worker, GetNextTask());
     }
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks: return full queue";
+    os::memory::LockHolder pop_lock_holder(pop_from_task_queues_lock_);
+    SelectNextTasks(tasks_count);
+    PutTasksInWorker(worker);
+    LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks: return queue with tasks";
     return false;
 }
 
-Task TaskScheduler::GetNextTask()
+void TaskScheduler::SelectNextTasks(size_t tasks_count)
 {
-    ASSERT(!AreQueuesEmpty());
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: GetNextTask()";
-
-    auto kinetic_priorities = GetKineticPriorities();
+    LOG(DEBUG, RUNTIME) << "TaskScheduler: SelectNextTasks()";
+    if (AreQueuesEmpty()) {
+        return;
+    }
+    UpdateKineticPriorities();
+    // Now kinetic_priorities_
     size_t kinetic_max = 0;
-    std::tie(kinetic_max, std::ignore) = *kinetic_priorities.rbegin();  // Get key of the last element in map
-
+    std::tie(kinetic_max, std::ignore) = *kinetic_priorities_.rbegin();  // Get key of the last element in map
     std::uniform_int_distribution<size_t> distribution(0U, kinetic_max - 1U);
-    size_t choice = distribution(gen_);  // Get random number in range [0, kinetic_max)
-    internal::SchedulableTaskQueueInterface *queue = nullptr;
-    std::tie(std::ignore, queue) = *kinetic_priorities.upper_bound(choice);  // Get queue of chosen element
 
-    return queue->PopTask().value();
+    for (size_t i = 0; i < tasks_count; i++) {
+        size_t choice = distribution(gen_);  // Get random number in range [0, kinetic_max)
+        internal::SchedulableTaskQueueInterface *queue = nullptr;
+        std::tie(std::ignore, queue) = *kinetic_priorities_.upper_bound(choice);  // Get queue of chosen element
+
+        TaskQueueId id(queue->GetTaskType(), queue->GetVMType());
+        selected_queues_[id]++;
+    }
 }
 
-std::map<size_t, internal::SchedulableTaskQueueInterface *> TaskScheduler::GetKineticPriorities() const
+void TaskScheduler::UpdateKineticPriorities()
 {
     ASSERT(!task_queues_.empty());  // no TaskQueues
     size_t kinetic_sum = 0;
-    std::map<size_t, internal::SchedulableTaskQueueInterface *> kinetic_priorities;
     internal::SchedulableTaskQueueInterface *queue = nullptr;
-    for (auto &traits_queue_pair : task_queues_) {
-        std::tie(std::ignore, queue) = traits_queue_pair;
+    for (const auto &id_queue_pair : task_queues_) {
+        std::tie(std::ignore, queue) = id_queue_pair;
         if (queue->IsEmpty()) {
             continue;
         }
         kinetic_sum += queue->GetPriority();
-        kinetic_priorities[kinetic_sum] = queue;
+        kinetic_priorities_[kinetic_sum] = queue;
     }
-    return kinetic_priorities;
 }
 
-void TaskScheduler::PutTaskInWorker(WorkerThread *worker, Task &&task)
+size_t TaskScheduler::PutTasksInWorker(WorkerThread *worker)
 {
-    worker->AddTask(std::move(task));
+    size_t task_count = 0;
+    for (auto [id, size] : selected_queues_) {
+        if (size == 0) {
+            continue;
+        }
+        auto add_task_func = [worker](Task &&task) { worker->AddTask(std::move(task)); };
+        size_t queue_task_count = task_queues_[id]->PopTasksToWorker(add_task_func, size);
+        task_count += queue_task_count;
+        LOG(DEBUG, RUNTIME) << "PutTasksInWorker: worker have gotten " << queue_task_count << " tasks";
+    }
+    selected_queues_.clear();
+    return task_count;
 }
 
 bool TaskScheduler::AreQueuesEmpty() const
@@ -149,41 +177,47 @@ bool TaskScheduler::AreQueuesEmpty() const
 
 bool TaskScheduler::AreNoMoreTasks() const
 {
-    return new_tasks_count_ == finished_tasks_count_;
-}
-
-std::optional<Task> TaskScheduler::GetTaskFromQueue(TaskQueueId id, TaskExecutionMode mode)
-{
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: GetTaskFromQueue()";
-    os::memory::LockHolder lock_holder(task_manager_lock_);
-    auto task_queues_iterator = task_queues_.find(id);
-    if (task_queues_iterator == task_queues_.end()) {
-        if (finish_) {
-            return std::nullopt;
-        }
-        LOG(FATAL, COMMON) << "Attempt to take a task from a non-existent queue";
-    }
-    internal::SchedulableTaskQueueInterface *queue = nullptr;
-    std::tie(std::ignore, queue) = *task_queues_iterator;
-    if (!queue->HasTaskWithExecutionMode(mode)) {
-        return std::nullopt;
-    }
-    finished_tasks_count_[{queue->GetTaskType(), queue->GetVMType(), mode}]++;
-    return queue->PopTask();
+    return task_statistics_->GetCountOfTaskInSystem() == 0;
 }
 
 std::optional<Task> TaskScheduler::GetTaskFromQueue(TaskProperties properties)
 {
-    TaskQueueId queue_id(properties.GetTaskType(), properties.GetVMType());
-    return GetTaskFromQueue(queue_id, properties.GetTaskExecutionMode());
+    LOG(DEBUG, RUNTIME) << "TaskScheduler: GetTaskFromQueue()";
+    os::memory::LockHolder pop_lock_holder(pop_from_task_queues_lock_);
+    internal::SchedulableTaskQueueInterface *queue = nullptr;
+    {
+        os::memory::LockHolder task_manager_lock_holder(task_scheduler_state_lock_);
+        auto task_queues_iterator = task_queues_.find({properties.GetTaskType(), properties.GetVMType()});
+        if (task_queues_iterator == task_queues_.end()) {
+            if (finish_) {
+                return std::nullopt;
+            }
+            LOG(FATAL, COMMON) << "Attempt to take a task from a non-existent queue";
+        }
+        std::tie(std::ignore, queue) = *task_queues_iterator;
+    }
+    if (!queue->HasTaskWithExecutionMode(properties.GetTaskExecutionMode())) {
+        return std::nullopt;
+    }
+    task_statistics_->IncrementCount(TaskStatus::POPPED, properties, 1);
+    if (task_statistics_->GetCountOfTasksInSystemWithTaskProperties(properties) == 0) {
+        os::memory::LockHolder task_manager_lock_holder(task_scheduler_state_lock_);
+        finish_tasks_cond_var_.SignalAll();
+    }
+    return queue->PopTask();
 }
 
 void TaskScheduler::WaitForFinishAllTasksWithProperties(TaskProperties properties)
 {
-    os::memory::LockHolder lock_holder(task_manager_lock_);
-    while (finished_tasks_count_[properties] != new_tasks_count_[properties]) {
-        finish_tasks_cond_var_.Wait(&task_manager_lock_);
+    os::memory::LockHolder lock_holder(task_scheduler_state_lock_);
+    while (task_statistics_->GetCountOfTasksInSystemWithTaskProperties(properties) != 0) {
+        finish_tasks_cond_var_.Wait(&task_scheduler_state_lock_);
     }
+    LOG(DEBUG, RUNTIME) << "After waiting tasks with properties: " << properties
+                        << " {added: " << task_statistics_->GetCount(TaskStatus::ADDED, properties)
+                        << ", executed: " << task_statistics_->GetCount(TaskStatus::EXECUTED, properties)
+                        << ", popped: " << task_statistics_->GetCount(TaskStatus::POPPED, properties) << "}";
+    task_statistics_->ResetCountersWithTaskProperties(properties);
 }
 
 void TaskScheduler::Finalize()
@@ -191,9 +225,9 @@ void TaskScheduler::Finalize()
     ASSERT(start_);
     {
         // Wait all tasks will be done
-        os::memory::LockHolder lock_holder(task_manager_lock_);
+        os::memory::LockHolder lock_holder(task_scheduler_state_lock_);
         while (!AreNoMoreTasks()) {
-            finish_tasks_cond_var_.Wait(&task_manager_lock_);
+            finish_tasks_cond_var_.Wait(&task_scheduler_state_lock_);
         }
         finish_ = true;
         queues_wait_cond_var_.Signal();
@@ -202,22 +236,27 @@ void TaskScheduler::Finalize()
         worker->Join();
         delete worker;
     }
+    task_statistics_->ResetAllCounters();
     LOG(DEBUG, RUNTIME) << "TaskScheduler: Finalized";
 }
 
-void TaskScheduler::IncrementNewTaskCounter(TaskProperties properties, size_t ivalue)
+void TaskScheduler::IncrementCounterOfAddedTasks(TaskProperties properties, size_t ivalue, bool was_empty)
 {
-    os::memory::LockHolder outside_lock_holder(task_manager_lock_);
-    queues_wait_cond_var_.Signal();
-    new_tasks_count_[properties] += ivalue;
+    task_statistics_->IncrementCount(TaskStatus::ADDED, properties, ivalue);
+    if (was_empty) {
+        os::memory::LockHolder outside_lock_holder(task_scheduler_state_lock_);
+        queues_wait_cond_var_.Signal();
+    }
 }
 
-void TaskScheduler::IncrementFinishedTaskCounter(const TaskPropertiesCounterMap &counter_map)
+void TaskScheduler::IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counter_map)
 {
-    os::memory::LockHolder outside_lock_holder(task_manager_lock_);
-    finish_tasks_cond_var_.Signal();
     for (const auto &[properties, count] : counter_map) {
-        finished_tasks_count_[properties] += count;
+        task_statistics_->IncrementCount(TaskStatus::EXECUTED, properties, count);
+        if (task_statistics_->GetCountOfTasksInSystemWithTaskProperties(properties) == 0) {
+            os::memory::LockHolder outside_lock_holder(task_scheduler_state_lock_);
+            finish_tasks_cond_var_.SignalAll();
+        }
     }
 }
 
@@ -227,6 +266,7 @@ TaskScheduler::~TaskScheduler()
     ASSERT(start_ == finish_);
     // Check if all task queue was deleted
     ASSERT(task_queues_.empty());
+    delete task_statistics_;
     LOG(DEBUG, RUNTIME) << "TaskScheduler: ~TaskScheduler: All threads finished jobs";
 }
 
