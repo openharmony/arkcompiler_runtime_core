@@ -25,6 +25,7 @@
 % codegen_funcs += ['CreateStringBuilderBool', 'CreateStringBuilderChar','CreateStringBuilderString']
 % codegen_funcs += ['CreateStringFromStringTlab', 'CreateStringFromCharArrayTlab']
 % codegen_funcs += ['CreateStringSubstringTlab', 'CreateStringGetCharsTlab']
+% codegen_funcs += ['CreateStringHashCode']
 % codegen_funcs.uniq.each do |codegen_func|
 void <%= codegen_func %>(IntrinsicInst *inst, Reg dst, SRCREGS src);
 % end

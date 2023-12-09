@@ -23,6 +23,7 @@ Codegen Hi-Level implementation
 #include "relocations.h"
 #include "include/compiler_interface.h"
 #include "ir-dyn-base-types.h"
+#include "runtime/include/coretypes/string.h"
 #include "compiler/optimizer/ir/analysis.h"
 #include "compiler/optimizer/ir/locations.h"
 #include "compiler/optimizer/analysis/liveness_analyzer.h"
@@ -4650,6 +4651,27 @@ void Codegen::CreateStringGetCharsTlab([[maybe_unused]] IntrinsicInst *inst, Reg
         CallFastPath(inst, entrypoint_id, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                      klass_imm);
     }
+}
+
+void Codegen::CreateStringHashCode([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto entrypoint = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_HASH_CODE_COMPRESSED
+                                                                 : EntrypointId::STRING_HASH_CODE;
+    auto str_reg = src[FIRST_OPERAND];
+    auto mref = MemRef(str_reg, panda::coretypes::String::GetHashcodeOffset());
+    auto slow_path = CreateSlowPath<SlowPathStringHashCode>(inst, entrypoint);
+    slow_path->SetDstReg(dst);
+    slow_path->SetSrcReg(str_reg);
+    if (dst.GetId() != str_reg.GetId()) {
+        GetEncoder()->EncodeLdr(ConvertRegister(dst.GetId(), DataType::INT32), false, mref);
+        GetEncoder()->EncodeJump(slow_path->GetLabel(), dst, Condition::EQ);
+    } else {
+        ScopedTmpReg hash_reg(GetEncoder(), INT32_TYPE);
+        GetEncoder()->EncodeLdr(hash_reg, false, mref);
+        GetEncoder()->EncodeJump(slow_path->GetLabel(), hash_reg, Condition::EQ);
+        GetEncoder()->EncodeMov(dst, hash_reg);
+    }
+    slow_path->BindBackLabel(GetEncoder());
 }
 
 #include "intrinsics_codegen.inl"

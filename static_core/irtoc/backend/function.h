@@ -267,6 +267,8 @@ private:
     };
     static constexpr std::array AARCH64_SKIPPED_FASTPATHS = {
         "IntfInlineCache",
+        "StringHashCode",  // Plain loop with MAdd seems to slightly outperform unrolled shift/sub produced by llvm
+        "StringHashCodeCompressed",
     };
 #endif
 };

@@ -22,8 +22,14 @@ void SlowPathBase::Generate(Codegen *codegen)
 {
     ASSERT(!generated_);
 
-    SCOPED_DISASM_STR(codegen, std::string("SlowPath for inst ") + std::to_string(GetInst()->GetId()) + ". " +
-                                   GetInst()->GetOpcodeStr());
+#ifndef NDEBUG
+    std::string opcode_str(GetInst()->GetOpcodeStr());
+    if (GetInst()->IsIntrinsic()) {
+        opcode_str += "." + GetIntrinsicName(static_cast<IntrinsicInst *>(GetInst())->GetIntrinsicId());
+    }
+#endif
+    SCOPED_DISASM_STR(codegen,
+                      std::string("SlowPath for inst ") + std::to_string(GetInst()->GetId()) + ". " + opcode_str);
     Encoder *encoder = codegen->GetEncoder();
     ASSERT(encoder->IsValid());
     encoder->BindLabel(GetLabel());
@@ -292,6 +298,13 @@ void SlowPathJsCastDoubleToInt32::GenerateImpl(Codegen *codegen)
         enc->EncodeMov(dst_reg_, ret_reg);
     }
     codegen->LoadCallerRegisters(live_regs, live_vregs, true);
+}
+
+void SlowPathStringHashCode::GenerateImpl(Codegen *codegen)
+{
+    ASSERT(dst_reg_.IsValid());
+    ASSERT(src_reg_.IsValid());
+    codegen->CallFastPath(GetInst(), GetEntrypoint(), dst_reg_, RegMask::GetZeroMask(), src_reg_);
 }
 
 }  // namespace panda::compiler

@@ -414,13 +414,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @returns hashcode value of this String
      */
-    public override hashCode(): int {
-        let hash: int = 0;
-        for (let i: int = 0; i < this.getLength(); i++) {
-            hash = 31 * hash + (this.charAt(i) as int);
-        }
-        return hash;
-    }
+    public native override hashCode(): int;
 
     /**
      * Finds the first occurrence of a character in this String.

@@ -826,7 +826,7 @@ uint32_t String::ComputeHashcode()
             hash = static_cast<uint32_t>(ComputeHashForData(GetDataUtf16(), GetLength()));
         }
     } else {
-        ASSERT(static_cast<size_t>(GetLength()) > (std::numeric_limits<size_t>::max() >> 1U));
+        ASSERT(static_cast<size_t>(GetLength()) < (std::numeric_limits<size_t>::max() >> 1U));
         hash = static_cast<uint32_t>(ComputeHashForData(GetDataUtf16(), GetLength()));
     }
     return hash;
