@@ -16,7 +16,6 @@
 #include <hilog/log.h>
 
 #include "include/arkplatform.h"
-#include "include/arkplatfom_jsnapi.h"
 
 namespace arkplatform {
 

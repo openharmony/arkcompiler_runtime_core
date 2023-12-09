@@ -15,28 +15,14 @@
 
 #include <cmath>
 
-#include "arkplatfom_jsnapi.h"
+#include "arkplatform_jsnapi.h"
+#include "libpandabase/utils/bit_utils.h"
 #include <gtest/gtest.h>
 
 namespace arkplatform {
 namespace test {
 class JSNapiTest :  public ::testing::Test {
 public:
-    template <class S, class R>
-    union Data {
-        S src;
-        R dst;
-    };
-
-    template <class To, class From>
-    inline To BitCast(const From &src) noexcept
-    {
-        static_assert(sizeof(To) == sizeof(From), "size of the types must be equal");
-        // The use of security functions 'memcpy_s' here will have a greater impact on performance
-        Data<From, To> data;
-        data.src = src;
-        return data.dst;
-    }
 
     JSTaggedType ToJSTaggedValue(JSValueRef *obj)
     {
@@ -45,7 +31,7 @@ public:
  
     JSTaggedType ConvertDouble(double val)
     {
-        return BitCast<JSTaggedType>(val) + JSValueRefInternals::DOUBLE_ENCODE_OFFSET;
+        return panda::bit_cast<JSTaggedType>(val) + JSValueRefInternals::DOUBLE_ENCODE_OFFSET;
     }
 
     template<typename T>
@@ -89,6 +75,7 @@ protected:
     panda::ecmascript::EcmaVM *vm_ = nullptr;
 };
 
+// If this test failed, please contact with Chernykh Sergey
 TEST_F(JSNapiTest, ArkplatformJSNApiTest_NumberRef)
 {
     // double
@@ -119,6 +106,7 @@ TEST_F(JSNapiTest, ArkplatformJSNApiTest_NumberRef)
     TestNumberRef(INT64_MAX, ConvertDouble(static_cast<double>(INT64_MAX)));
 }
 
+// If this test failed, please contact with Chernykh Sergey
 TEST_F(JSNapiTest, ArkplatformJSNApiTest_BooleanRef)
 {
     bool input = true;
@@ -134,6 +122,7 @@ TEST_F(JSNapiTest, ArkplatformJSNApiTest_BooleanRef)
     ASSERT_EQ(ToJSTaggedValue(*res), JSValueRefInternals::VALUE_FALSE);
 }
 
+// If this test failed, please contact with Chernykh Sergey
 TEST_F(JSNapiTest, ArkplatformJSNApiTest_NullUndefined)
 {
     LocalScope scope(vm_);
