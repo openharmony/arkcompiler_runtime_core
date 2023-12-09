@@ -629,6 +629,21 @@ public:
     }
     Inst *GetOrCreateNullPtr();
 
+    Inst *GetUndefinedInst() const
+    {
+        return undefined_inst_;
+    }
+    bool HasUndefinedInst() const
+    {
+        return undefined_inst_ != nullptr;
+    }
+    void UnsetUndefinedInst()
+    {
+        ASSERT(HasUndefinedInst());
+        undefined_inst_ = nullptr;
+    }
+    Inst *GetOrCreateUndefinedInst();
+
     /// Find constant in the list, return nullptr if not found
     ConstantInst *FindConstant(DataType::Type type, uint64_t value);
     /// Find constant in the list or create new one and insert at the end
@@ -1269,6 +1284,7 @@ private:
     // first constant instruction in graph !NOTE rewrite it to hash-map
     ConstantInst *first_const_inst_ {nullptr};
     Inst *nullptr_inst_ {nullptr};
+    Inst *undefined_inst_ {nullptr};
     RuntimeInterface *runtime_ {nullptr};
     RuntimeInterface::MethodPtr method_ {nullptr};
 

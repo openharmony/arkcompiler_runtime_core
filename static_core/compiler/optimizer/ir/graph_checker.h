@@ -202,6 +202,7 @@ private:
     static void VisitLoadObject([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitConstant([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitNullPtr([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static void VisitLoadUndefined([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitPhi([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitParameter([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitCompare([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -479,6 +480,11 @@ private:
         return ++null_ptr_inst_counter_;
     }
 
+    int IncrementLoadUndefinedInstCounterAndGet()
+    {
+        return ++load_undefined_inst_counter_;
+    }
+
     void PrintFailedMethodAndPass() const;
     static void PrintFailedMethodAndPassVisitor(GraphVisitor *v);
 
@@ -487,6 +493,7 @@ private:
     ArenaAllocator allocator_ {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
     ArenaAllocator local_allocator_ {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
     int null_ptr_inst_counter_ = 0;
+    int load_undefined_inst_counter_ = 0;
     std::string pass_name_;
 };
 }  // namespace panda::compiler

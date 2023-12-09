@@ -118,6 +118,15 @@ Inst *Graph::GetOrCreateNullPtr()
     return nullptr_inst_;
 }
 
+Inst *Graph::GetOrCreateUndefinedInst()
+{
+    if (undefined_inst_ == nullptr) {
+        undefined_inst_ = CreateInstLoadUndefined(DataType::REFERENCE);
+        GetStartBlock()->AppendInst(undefined_inst_);
+    }
+    return undefined_inst_;
+}
+
 void Graph::RemoveConstFromList(ConstantInst *const_inst)
 {
     if (const_inst == first_const_inst_) {

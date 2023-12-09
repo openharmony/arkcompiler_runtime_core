@@ -151,18 +151,12 @@ static void VisitEtsStObjByName(BytecodeGen *enc, compiler::IntrinsicInst *inst)
     }
 }
 
-static void VisitEtsLdundefined(BytecodeGen *enc, compiler::IntrinsicInst *inst)
+static void VisitLoadUndefined(GraphVisitor *visitor, Inst *inst)
 {
+    auto *enc = static_cast<BytecodeGen *>(visitor);
     if (inst->GetDstReg() == compiler::ACC_REG_ID) {
         enc->result_.emplace_back(pandasm::Create_ETS_LDUNDEFINED());
     } else {
         enc->result_.emplace_back(pandasm::Create_ETS_MOVUNDEFINED(inst->GetDstReg()));
     }
-}
-
-static void VisitEtsIsundefined(BytecodeGen *enc, compiler::IntrinsicInst *inst)
-{
-    DoLdaObj(inst->GetSrcReg(0), enc->result_);
-    enc->result_.emplace_back(pandasm::Create_ETS_ISUNDEFINED());
-    DoSta(inst->GetDstReg(), enc->result_);
 }

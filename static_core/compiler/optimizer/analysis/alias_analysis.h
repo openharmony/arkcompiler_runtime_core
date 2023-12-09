@@ -299,6 +299,7 @@ public:
 
     /// Instructions that definitely are not an alias of anything.
     static void VisitNullPtr(GraphVisitor *v, Inst *inst);
+    static void VisitLoadUndefined(GraphVisitor *v, Inst *inst);
     static void VisitInitObject(GraphVisitor *v, Inst *inst);
     static void VisitNewObject(GraphVisitor *v, Inst *inst);
     static void VisitNewArray(GraphVisitor *v, Inst *inst);

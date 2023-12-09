@@ -478,7 +478,8 @@ void GraphChecker::CheckStartBlock()
         [[maybe_unused]] Opcode opc = inst->GetOpcode();
         ASSERT_DO_EXT(
             opc == Opcode::Constant || opc == Opcode::Parameter || opc == Opcode::SafePoint ||
-                opc == Opcode::SpillFill || opc == Opcode::NullPtr || opc == Opcode::NOP || opc == Opcode::LiveIn,
+                opc == Opcode::SpillFill || opc == Opcode::NullPtr || opc == Opcode::NOP || opc == Opcode::LiveIn ||
+                opc == Opcode::LoadUndefined,
             std::cerr
                 << "Entry block can contain Constant, Parameter, NullPtr, SafePoint, NOP or SpillFill instructions"
                 << *inst << std::endl);
@@ -1703,6 +1704,17 @@ void GraphChecker::VisitNullPtr([[maybe_unused]] GraphVisitor *v, [[maybe_unused
 
     ASSERT_DO_EXT_VISITOR(static_cast<GraphChecker *>(v)->IncrementNullPtrInstCounterAndGet() == 1,
                           (std::cerr << "There should be not more than one NullPtr instruction in graph\n",
+                           inst->GetBasicBlock()->Dump(&std::cerr)));
+}
+
+void GraphChecker::VisitLoadUndefined([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+{
+    ASSERT_DO_EXT_VISITOR(
+        inst->GetType() == DataType::REFERENCE,
+        (std::cerr << "LoadUndefined instruction should have REFERENCE type only\n", inst->Dump(&std::cerr)));
+
+    ASSERT_DO_EXT_VISITOR(static_cast<GraphChecker *>(v)->IncrementLoadUndefinedInstCounterAndGet() == 1,
+                          (std::cerr << "There should be not more than one LoadUndefined instruction in graph\n",
                            inst->GetBasicBlock()->Dump(&std::cerr)));
 }
 

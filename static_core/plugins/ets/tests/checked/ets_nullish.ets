@@ -19,36 +19,34 @@
 //!
 //! METHOD       "ETSGLOBAL::test_undefined"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /Intrinsic.CompilerEtsLdundefined/
+//! INST         /LoadUndefined/
 //!
 //! METHOD       "ETSGLOBAL::test_undefined_dce"
 //! PASS_AFTER   "Codegen"
-//! INST_NOT     /Intrinsic.CompilerEtsLdundefined/
+//! INST_NOT     /LoadUndefined/
 //!  
 //! METHOD       "ETSGLOBAL::test_undefined_cse"
-//! PASS_AFTER   "Codegen"
-//! INST         /Intrinsic.CompilerEtsLdundefined/
-//! INST_COUNT   /Intrinsic.CompilerEtsLdundefined/, 1
+//! PASS_AFTER   "IrBuilder"
+//! INST_COUNT   /LoadUndefined/, 1
 //!
 
 //! CHECKER      Force JIT undefined
 //! RUN          force_jit: true, options: "--compiler-regex='.*test_undefined.*'", entry: "ETSGLOBAL::test_undefined"
 //! METHOD       "ETSGLOBAL::test_undefined"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /Intrinsic.CompilerEtsLdundefined/
+//! INST         /LoadUndefined/
 
 //! CHECKER      Force JIT undefined dce
 //! RUN          force_jit: true, options: "--compiler-regex='.*test_undefined_dce.*'", entry: "ETSGLOBAL::test_undefined_dce"
 //! METHOD       "ETSGLOBAL::test_undefined_dce"
 //! PASS_AFTER   "Codegen"
-//! INST_NOT     /Intrinsic.CompilerEtsLdundefined/
+//! INST_NOT     /LoadUndefined/
 
 //! CHECKER      Force JIT undefined cse
 //! RUN          force_jit: true, options: "--compiler-regex='.*test_undefined_cse.*'", entry: "ETSGLOBAL::test_undefined_cse"
 //! METHOD       "ETSGLOBAL::test_undefined_cse"
-//! PASS_AFTER   "Codegen"
-//! INST         /Intrinsic.CompilerEtsLdundefined/
-//! INST_COUNT   /Intrinsic.CompilerEtsLdundefined/, 1
+//! PASS_AFTER   "IrBuilder"
+//! INST_COUNT   /LoadUndefined/, 1
 
 let glob: Object | null | undefined = null;
 

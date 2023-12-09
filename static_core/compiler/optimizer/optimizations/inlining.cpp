@@ -1426,6 +1426,12 @@ void Inlining::MoveConstants(Graph *graph_inl)
         auto exising_nullptr = GetGraph()->GetOrCreateNullPtr();
         graph_inl->GetNullPtrInst()->ReplaceUsers(exising_nullptr);
     }
+    // Move LoadUndefined instruction
+    if (graph_inl->HasUndefinedInst()) {
+        start_bb->EraseInst(graph_inl->GetUndefinedInst());
+        auto exising_undefined = GetGraph()->GetOrCreateUndefinedInst();
+        graph_inl->GetUndefinedInst()->ReplaceUsers(exising_undefined);
+    }
 }
 
 bool Inlining::ResolveTarget(CallInst *call_inst, InlineContext *ctx)

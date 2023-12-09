@@ -978,6 +978,11 @@ bool ConstFoldingCompareEqualInputs(Inst *inst, Inst *input0, Inst *input1)
     return false;
 }
 
+bool IsUniqueRef(Inst *inst)
+{
+    return inst->IsAllocation() || inst->GetOpcode() == Opcode::NullPtr || inst->GetOpcode() == Opcode::LoadUndefined;
+}
+
 bool ConstFoldingCompare(Inst *inst)
 {
     ASSERT(inst->GetOpcode() == Opcode::Compare);
@@ -1019,8 +1024,7 @@ bool ConstFoldingCompare(Inst *inst)
     }
     if (inst->GetInputType(0) == DataType::REFERENCE) {
         ASSERT(input0 != input1);
-        if ((input0->IsAllocation() || input0->GetOpcode() == Opcode::NullPtr) &&
-            (input1->IsAllocation() || input1->GetOpcode() == Opcode::NullPtr)) {
+        if (IsUniqueRef(input0) && IsUniqueRef(input1)) {
             auto cc = inst->CastToCompare()->GetCc();
             inst->ReplaceUsers(ConstFoldingCompareCreateConst(inst, cc == CC_NE));
             return true;

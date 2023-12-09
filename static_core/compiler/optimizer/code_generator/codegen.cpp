@@ -2649,6 +2649,21 @@ void EncodeVisitor::VisitNullPtr(GraphVisitor *visitor, Inst *inst)
     enc->GetEncoder()->EncodeMov(dst, Imm(0));
 }
 
+void EncodeVisitor::VisitLoadUndefined(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    auto type = inst->GetType();
+    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
+    auto runtime = enc->GetCodegen()->GetGraph()->GetRuntime();
+    auto graph = enc->GetCodegen()->GetGraph();
+    if (graph->IsJitOrOsrMode()) {
+        enc->GetEncoder()->EncodeMov(dst, Imm(runtime->GetUndefinedObject()));
+    } else {
+        auto ref = MemRef(enc->GetCodegen()->ThreadReg(), runtime->GetTlsUndefinedObjectOffset(graph->GetArch()));
+        enc->GetEncoder()->EncodeLdr(dst, false, ref);
+    }
+}
+
 // Next visitors use calling convention
 void Codegen::VisitCallIndirect(CallIndirectInst *inst)
 {

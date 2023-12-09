@@ -24,11 +24,15 @@
     % when "STOBJ"
     BuildStObjByName(instruction, <%= get_type(inst.type(0)) %>);
     % when "LDUNDEFINED"
-    BuildLdundefined<true>(instruction);
+    UpdateDefinitionAcc(graph_->GetOrCreateUndefinedInst());
     % when "MOVUNDEFINED"
-    BuildLdundefined<false>(instruction);
+    UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), graph_->GetOrCreateUndefinedInst());
     % when "ISUNDEFINED"
-    BuildIsundefined(instruction);
+    auto undef_inst = graph_->GetOrCreateUndefinedInst();
+    auto cmp_inst = graph_->CreateInstCompare(DataType::BOOL, GetPc(instruction->GetAddress()), GetDefinitionAcc(),
+                                              undef_inst, DataType::REFERENCE, ConditionCode::CC_EQ);
+    AddInstruction(cmp_inst);
+    UpdateDefinitionAcc(cmp_inst);
     % else
     UNREACHABLE();
     % end
