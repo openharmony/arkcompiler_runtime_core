@@ -243,7 +243,8 @@ The scope of a name depends on the context the name is declared in:
 -  A name declared inside a class (*class level scope*) is accessible in that
    class and sometimes, depending on the access modifier, outside the class or
    by methods of derived classes. Access to such names inside the class is 
-   qualified with *this* for the names of instance entities and by the name of
+   qualified with *this* or with a class instance expression
+   for the names of instance entities and by the name of
    the class for the static ones. Outside access is qualified by the
    expression which value stores a reference to the class instance 
    for the names of instance entities and by the name of
@@ -581,7 +582,7 @@ an initial value:
         ;
 
     variableDeclaration:
-        identifier ('?')? ':' type initializer? 
+        identifier ('?')? ':' ('readonly')? type initializer? 
         | identifier initializer
         ;
 
@@ -644,6 +645,20 @@ occurs.
 
 If an initializer expression is provided, then additional restrictions apply
 to the content of such expression as described in :ref:`Exceptions and Initialization Expression`.
+
+A variable declared as *readonly* must be of type *array*. Its operations must
+have a restriction. The restriction that can be applied to such a variable are
+described in :ref:`Readonly Parameters`.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (p: number[]) {
+       let x: readonly number [] = p
+       x[0] = 666 // Compile-time error
+       console.log (x[0]) // read operation is OK
+    }
+
 
 .. index::
    initial value
@@ -952,21 +967,9 @@ parameter must be explicitly defined.
         '...' parameter
         ;
 
-If the parameter type is prefixed with *readonly*, then the type must be of
-array type *T[]*. Otherwise, a compile-time error occurs. The meaning of the
-parameter is that the function or method body cannot modify the array content.
-An operation that modifies array content causes a compile-time error.
 
-|
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo(array: readonly number[]) {
-        let element = array[0] // OK, one can get array element
-        array[0] = element // Compile-time error, array is readonly
-    }
-
+A parameter type prefixed with *readonly* must have an additional restriction.
+The parameter is described in :ref:`Readonly Parameters`.
 
 The last parameter of a function can be a *rest parameter*
 (see :ref:`Rest Parameter`) or a sequence of *optional parameters*
@@ -999,6 +1002,28 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
    argument
    non-optional parameter
    required parameter
+
+|
+
+.. _Readonly Parameters:
+
+Readonly Parameters
+===================
+
+A parameter type prefixed with *readonly* must be of array type *T[]*.
+A compile-time error occurs otherwise. This parameter means that the
+function or method body cannot modify the array content. A compile-time
+error occurs if any operation modifies the array content. The same
+restrictions apply to variables as discussed in :ref:`Variable Declarations`.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(array: readonly number[]) {
+        let element = array[0] // OK, one can get array element
+        array[0] = element // Compile-time error, array is readonly
+    }
+
 
 |
 
@@ -1294,11 +1319,9 @@ Function Overload Signatures
 .. meta:
     frontend_status: None
 
-The |LANG| language allows specifying a function that can be called in
-different ways by writing *overload signatures*. It means writing several
-function headers that have the same name but different signatures, and are
-followed by one implementation function (see :ref:`Methods Overload Signatures`
-for *method overload signatures*).
+The |LANG| language allows specifying a function that can have several
+*overload signatures* with the same name followed by one implementation
+function body.
 
 .. code-block:: abnf
 
@@ -1342,13 +1365,16 @@ The call of ``foo()`` is executed as a call of the implementation function
 with the ``null`` argument; the call of ``foo(x)`` is executed as a call
 of the implementation function with the ``x`` argument.
 
-A :index:`compile-time error` occurs if the signature of function
-implementation is not *overload signature-compatible*  with each overload
-signature. It means that a call of each overload signature must be replaceable
-for the correct call of the implementation function. That can be achieved by
-using optional parameters (see :ref:`Optional Parameters`), or *least upper
-bound* types (see :ref:`Least Upper Bound`). The exact semantic rules can
-be found in :ref:`Overload Signature Compatibility`.
+All rules that apply to overloaded signatures are described in
+:ref:`Overload Signature Compatibility`.
+
+.. A :index:`compile-time error` occurs if the signature of function
+  implementation is not *overload signature-compatible*  with each overload
+  signature. It means that a call of each overload signature must be replaceable
+  for the correct call of the implementation function. That can be achieved by
+  using optional parameters (see :ref:`Optional Parameters`), or *least upper
+  bound* types (see :ref:`Least Upper Bound`). The exact semantic rules can
+  be found in :ref:`Overload Signature Compatibility`.
 
 A :index:`compile-time error` occurs unless all overload signatures are
 either exported or non-exported.

@@ -190,7 +190,7 @@ values such as ``null`` or ``undefined``, then we are 100% sure that no corner
 cases can occur during the program execution, and the checks like
 ``__internal_tostring`` become redundant. In this particular case,
 the mechanism can be called '*null-safety*', as it guarantees that ``null``
-is not a valid value of the ``string`` type. Whith this feature available,
+is not a valid value of the ``string`` type. With this feature available,
 the code simply would not build:
 
 .. code-block:: typescript

@@ -188,16 +188,17 @@ Compatible Types
 .. meta:
     frontend_status: Done
 
-Type *T1* is compatible with type *T2* if one of the following conversions
-can be successfully applied to type *T1* in order to receive type *T2* as
-a result:
+Type *T*:sub:`1` is compatible with type *T*:sub:`2` if there is a sequence of
+the following conversions (which, if applied step-by-step, allow to convert type
+*T*:sub:`1` to type *T*:sub:`2`):
 
 -  Identity conversion (see :ref:`Kinds of Conversion`);
 -  Primitive types conversions (see :ref:`Primitive Types Conversions`);
 -  Reference types conversions (see :ref:`Reference Types Conversions`);
 -  Function types conversions (see :ref:`Function Types Conversions`);
 -  Enumeration types conversions as an experimental feature (see
-   :ref:`Enumeration Types Conversions`).
+   :ref:`Enumeration Types Conversions`);
+-  Character-string conversions (see :ref:`Character String Conversions`)
 
 .. index::
    compatible type
@@ -531,6 +532,19 @@ The table below illustrates both conversions:
 |*boolean* -> *Boolean*|*Boolean* -> *boolean*|
 +----------------------+----------------------+
 
+**Note**: As stated in :ref:`Compatible Types`, a sequence of conversions
+can be applied to convert one type to another. The conversions below are valid
+combinations of different forms of primitive types conversions:
+
+.. code-block:: typescript
+   :linenos:
+
+    let d: Double = 5 // int -> double -> Double
+    let c: char = 5.0 // double -> int -> char
+    let C: Char = 5 // int -> char -> Char
+    let n: number|undefined = 5 // int -> double -> Double === number
+
+
 |
 
 .. _Reference Types Conversions:
@@ -567,6 +581,21 @@ no special action at runtime, and therefore never causes an error.
        bi = di /* DerivedInterface is a subtype of BaseInterface
            */
     }
+
+The only exception is cast to type *never* that it is forbidden. This cast is
+a compile-time error as it can lead to type-safety violations.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A { a_method() {} }
+    let a = new A
+    let n: never = a as never // compile-time error: no object may be assigned
+    // to a variable of the never type
+
+    class B { b_method() {} }
+    let b: B = n // OK as never is a subtype of any type
+    b.b_method() // this breaks type-safety if as cast to never is allowed  
 
 The conversion of array types (see :ref:`Array Types`) also works in accordance
 with the widening style of array elements type. It is illustrated in the example
@@ -610,6 +639,60 @@ in the example below:
    array type
    widening
    type-safety
+
+|
+
+.. _Character String Conversions:
+
+Character String Conversions
+============================
+
+.. meta:
+    frontend_status: None
+
+To provide better flexibility for programmers, implicit conversions from *char*
+to *string* and vice versa allow to reach this. 
+
+From *char* to *string* conversion: such conversion allows to build a new
+string with the length of new string equal to one and string.charAt (0) returns
+the char being converted.
+
+.. code-block:: typescript
+   :linenos:
+
+    let s: string = c'X' // string is built from the single character literal
+    let c: char = c'x'
+    s = c // string is built from the character type variable
+
+From *string* to *char* conversion: such conversion allows to fill the *char* 
+type variable with the first character of the string which has the length
+greater than zero. If a string has zero length then the character variable
+should be assigned with the Unicode code point which represents an unrepresentable 
+character (U+FFFD).
+
+.. code-block:: typescript
+   :linenos:
+
+    let s: string = 'XYZ'
+    let c: char = s  /* string variable first character is used to fill
+       character variable */
+    c = "Y" // string literal "Y" is converted into character
+    c = "" // c will get the invalid character value
+
+Such conversions allow to compare characters and strings. As an implication
+of the fact that they both have value semantics the string with length one
+may be equal to the character.
+
+.. code-block:: typescript
+   :linenos:
+
+    let s: string = 'X'
+    let c: char = c'X'
+    if (c == s) console.log ("char === string")
+    if (s == c) console.log ("string === char")
+    c = 'x'
+    if (c > s) console.log ('x > X')
+    else  console.log ('X <= x')
 
 |
 

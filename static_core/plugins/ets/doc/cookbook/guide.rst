@@ -39,7 +39,7 @@ The original |TS| code containing the keyword ``var``:
         return x + ten
     }
 
-must be rewritten as follows:
+---must be rewritten as follows:
 
 .. code-block:: typescript
 

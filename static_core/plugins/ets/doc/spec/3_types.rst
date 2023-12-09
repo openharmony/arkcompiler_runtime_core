@@ -436,7 +436,7 @@ Integer Types and Operations
 -  Cast operator (see :ref:`Cast Expressions`) that converts an integer value
    to a value of any specified numeric type;
 -  String concatenation operator '+' (see :ref:`String Concatenation`) that, if
-   a ``string`` operand and an ``integer`` operand are both available, converts
+   one operand is ``string`` and the other is ``integer``, converts
    the integer operand to a ``string`` (the character of a ``char``
    operand, or the decimal form of a ``byte``, ``short``, ``int``, or ``long``
    operand), and then creates a concatenation of two strings as a new ``string``.
@@ -589,6 +589,9 @@ listed below.
      and postfix (see :ref:`Postfix Increment`);
    + Decrement operator '--' used both as prefix (see :ref:`Prefix Decrement`)
      and postfix (see :ref:`Postfix Decrement`);
+
+-  Numerical operators that produce values of type ``int`` or ``long``:
+
    + Signed and unsigned shift operators '<<', '>>', and '>>>' (see :ref:`Shift Expressions`);
    + Bitwise complement operator '~' (see :ref:`Bitwise Complement`);
    + Integer bitwise operators '&', '^', and '\|' (see :ref:`Integer Bitwise Operators`);
@@ -890,7 +893,7 @@ below.
 
 -  Conditional operator '?:' (see :ref:`Conditional Expressions`);
 -  The string concatenation operator '+' (see :ref:`String Concatenation`) that,
-   if a string operand and character operand are available, converts the
+   if one operand is ``string`` and the other is ``character``, converts the
    character operand to a string, and then creates a concatenation of the
    two strings as a new ``string``.
 
@@ -1106,7 +1109,7 @@ of a string object cannot be changed after it is created, i.e., a string
 object is immutable, and can be shared.
 
 Type ``string`` has dual semantics. If a string is assigned or passed as an
-argument, then it behaves like a refrence type (see :ref:`Reference Types`),
+argument, then it behaves like a reference type (see :ref:`Reference Types`),
 while all string operations (see :ref:`String Concatenation` and
 :ref:`String Comparison Operators`) treat strings as values (see
 :ref:`Value Types`).
@@ -1433,6 +1436,9 @@ nullish types (see :ref:`Nullish Types`).
 ``undefined`` Type
 ==================
 
+.. meta:
+    frontend_status: Done
+
 The only value of type ``undefined`` is represented by the keyword
 ``undefined`` (see :ref:`Undefined Literal`).
 
@@ -1666,9 +1672,9 @@ another:
 #. Identical literals within the union type are replaced for a single literal.
 #. If at least one type in the union is *Object*, then the entire union type is
    reduced to *Object* type.
-#. If there is at least one numeric type among the numeric union types or
-   numeric literals, then all such types or literals are replaced for type
-   *number*.
+#. If there is type *never* among union types, then it is removed.
+#. If there is a *number* type among numeric union types or numeric
+   literals, then all such types or literals are replaced for type *number*.
 #. If a literal of union type belongs to the values of a type that is part
    of the union, then the literal is removed.
 #. This step is performed recursively until no mutually compatible types remain

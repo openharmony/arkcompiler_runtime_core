@@ -275,14 +275,14 @@ Currently, |TS| supports structural typing, and |LANG| does not.
 
 It is debatable whether or not structural typing helps to produce code that
 is clearer and more understandable, and both *pro* and *contra* arguments can
-be found. Moreover, structural typing does not harm program performance (at
-least in some cases). Why not support it then?
+be found. Why not just support it then?
 
 The answer is that supporting structural typing is a major feature that needs
 a lot of consideration and careful implementation in language specification,
-compiler and runtime. As safe and efficient implementation requires taking
-other aspects (static typing, restrictions on changing object layout) into
-account, the support to this feature is postponed.
+compiler and runtime. More importantly, in case of |LANG|, which enforces static
+typing (see above), runtime support for structural typing implies performance
+overhead. So, since functionally correct and performant implementation requires
+taking that many aspects into account, the support to this feature is postponed.
 
 The |LANG| team is ready to reconsider based on real-world scenarios and
 feedback. More cases and suggested workarounds can be found in :ref:`Recipes`.

@@ -450,7 +450,7 @@ GUI structs.
 
 *@LocalStorageProp* is a field-level annotation that establishes one-way
 synchronization with a property inside a *LocalStorage*. The synchronization
-of value is uni-directional from the *LocalStorage* to the annotated field.
+of value is unidirectional from the *LocalStorage* to the annotated field.
 
 The annotation *@LocalStorageProp* is applicable only to member fields of GUI
 structs.
@@ -458,7 +458,7 @@ structs.
 .. index::
     field-level annotation
     one-way synchronization
-    uni-directional value
+    unidirectional value
     annotated field
     member field
     GUI struct
