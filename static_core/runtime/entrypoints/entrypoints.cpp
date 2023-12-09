@@ -17,6 +17,7 @@
 
 #include "libpandabase/events/events.h"
 #include "libpandabase/macros.h"
+#include "libpandabase/utils/utils.h"
 #include "compiler/compiler_options.h"
 #include "runtime/deoptimization.h"
 #include "runtime/arch/memory_helpers.h"
@@ -851,14 +852,6 @@ extern "C" Method *GetUnknownCalleeMethodEntrypoint(const Method *caller, size_t
     return method;
 }
 
-extern "C" void SetExceptionEvent([[maybe_unused]] events::ExceptionType type)
-{
-#ifdef PANDA_EVENTS_ENABLED
-    auto stack = StackWalker::Create(ManagedThread::GetCurrent());
-    EVENT_EXCEPTION(std::string(stack.GetMethod()->GetFullName()), stack.GetBytecodePc(), stack.GetNativePc(), type);
-#endif
-}
-
 extern "C" NO_ADDRESS_SANITIZE void ThrowExceptionEntrypoint(ObjectHeader *exception)
 {
     BEGIN_ENTRYPOINT();
@@ -870,7 +863,7 @@ extern "C" NO_ADDRESS_SANITIZE void ThrowExceptionEntrypoint(ObjectHeader *excep
     }
     ManagedThread::GetCurrent()->SetException(exception);
 
-    SetExceptionEvent(events::ExceptionType::THROW);
+    SetExceptionEvent(events::ExceptionType::THROW, ManagedThread::GetCurrent());
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -878,7 +871,7 @@ extern "C" NO_ADDRESS_SANITIZE void ThrowNativeExceptionEntrypoint()
 {
     BEGIN_ENTRYPOINT();
     LOG(DEBUG, INTEROP) << "ThrowNativeExceptionEntrypoint \n";
-    SetExceptionEvent(events::ExceptionType::NATIVE);
+    SetExceptionEvent(events::ExceptionType::NATIVE, ManagedThread::GetCurrent());
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -889,7 +882,6 @@ extern "C" NO_ADDRESS_SANITIZE void ArrayIndexOutOfBoundsExceptionEntrypoint([[m
     LOG(DEBUG, INTEROP) << "ArrayIndexOutOfBoundsExceptionEntrypoint \n";
     ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
     ThrowArrayIndexOutOfBoundsException(idx, length);
-    SetExceptionEvent(events::ExceptionType::BOUND_CHECK);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -900,7 +892,6 @@ extern "C" NO_ADDRESS_SANITIZE void StringIndexOutOfBoundsExceptionEntrypoint([[
     LOG(DEBUG, INTEROP) << "StringIndexOutOfBoundsExceptionEntrypoint \n";
     ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
     ThrowStringIndexOutOfBoundsException(idx, length);
-    SetExceptionEvent(events::ExceptionType::BOUND_CHECK);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -910,7 +901,6 @@ extern "C" NO_ADDRESS_SANITIZE void NullPointerExceptionEntrypoint()
     LOG(DEBUG, INTEROP) << "NullPointerExceptionEntrypoint \n";
     ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
     ThrowNullPointerException();
-    SetExceptionEvent(events::ExceptionType::NULL_CHECK);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -923,7 +913,6 @@ extern "C" NO_ADDRESS_SANITIZE void AbstractMethodErrorEntrypoint(Method *method
     auto stack = StackWalker::Create(thread, UnwindPolicy::SKIP_INLINED);
     ThrowAbstractMethodError(method);
     ASSERT(thread->HasPendingException());
-    SetExceptionEvent(events::ExceptionType::ABSTRACT_METHOD);
     if (stack.IsCFrame()) {
         FindCatchBlockInCFrames(thread, &stack, nullptr);
     }
@@ -935,7 +924,6 @@ extern "C" NO_ADDRESS_SANITIZE void ArithmeticExceptionEntrypoint()
     LOG(DEBUG, INTEROP) << "ArithmeticExceptionEntrypoint \n";
     ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
     ThrowArithmeticException();
-    SetExceptionEvent(events::ExceptionType::ARITHMETIC);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -945,7 +933,6 @@ extern "C" NO_ADDRESS_SANITIZE void NegativeArraySizeExceptionEntrypoint(ssize_t
     LOG(DEBUG, INTEROP) << "NegativeArraySizeExceptionEntrypoint \n";
     ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
     ThrowNegativeArraySizeException(size);
-    SetExceptionEvent(events::ExceptionType::NEGATIVE_SIZE);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -956,7 +943,6 @@ extern "C" NO_ADDRESS_SANITIZE void ClassCastExceptionEntrypoint(Class *instClas
     ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
     ASSERT(srcObj != nullptr);
     ThrowClassCastException(instClass, srcObj->ClassAddr<Class>());
-    SetExceptionEvent(events::ExceptionType::CAST_CHECK);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -1004,7 +990,6 @@ extern "C" NO_ADDRESS_SANITIZE void ThrowInstantiationErrorEntrypoint(Class *kla
     const auto &name = klass->GetName();
     PandaString pname(name.cbegin(), name.cend());
     ThrowInstantiationError(pname);
-    SetExceptionEvent(events::ExceptionType::INSTANTIATION_ERROR);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -1028,7 +1013,7 @@ extern "C" void LockObjectSlowPathEntrypoint(ObjectHeader *obj)
         return;
     }
     LOG(DEBUG, INTEROP) << "ThrowNativeExceptionEntrypoint after LockObject \n";
-    SetExceptionEvent(events::ExceptionType::NATIVE);
+    SetExceptionEvent(events::ExceptionType::NATIVE, ManagedThread::GetCurrent());
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -1046,7 +1031,7 @@ extern "C" void UnlockObjectSlowPathEntrypoint(ObjectHeader *obj)
         return;
     }
     LOG(DEBUG, INTEROP) << "ThrowNativeExceptionEntrypoint after UnlockObject \n";
-    SetExceptionEvent(events::ExceptionType::NATIVE);
+    SetExceptionEvent(events::ExceptionType::NATIVE, ManagedThread::GetCurrent());
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -1059,7 +1044,6 @@ extern "C" NO_ADDRESS_SANITIZE void IncompatibleClassChangeErrorForMethodConflic
     auto stack = StackWalker::Create(thread, UnwindPolicy::SKIP_INLINED);
     ThrowIncompatibleClassChangeErrorForMethodConflict(method);
     ASSERT(thread->HasPendingException());
-    SetExceptionEvent(events::ExceptionType::ICCE_METHOD_CONFLICT);
     if (stack.IsCFrame()) {
         FindCatchBlockInCFrames(thread, &stack, nullptr);
     }
@@ -1694,48 +1678,6 @@ static std::tuple<bool, ObjectHeader *, coretypes::String *> AssureCapacity(Obje
         }                                                                          \
     }
 
-static constexpr auto TPOWER1 = 10U;
-static constexpr auto TPOWER2 = 100;
-static constexpr auto TPOWER3 = 1000;
-static constexpr auto TPOWER4 = 10000;
-
-static uint32_t CountDigits(uint64_t n)
-{
-    uint32_t count = 1;
-    while (true) {
-        if (n < TPOWER1) {
-            return count;
-        }
-        if (n < TPOWER2) {
-            return count + 1;
-        }
-        if (n < TPOWER3) {
-            return count + 2;
-        }
-        if (n < TPOWER4) {
-            return count + 3;
-        }
-        count += 4U;
-        n /= TPOWER4;
-    }
-    return count;
-}
-
-static uint32_t constexpr MAX_BIDIGITS = 100U;
-static constexpr uint32_t BIDIGITS[MAX_BIDIGITS] = {  // NOLINT(modernize-avoid-c-arrays)
-    0x00300030, 0x00310030, 0x00320030, 0x00330030, 0x00340030, 0x00350030, 0x00360030, 0x00370030, 0x00380030,
-    0x00390030, 0x00300031, 0x00310031, 0x00320031, 0x00330031, 0x00340031, 0x00350031, 0x00360031, 0x00370031,
-    0x00380031, 0x00390031, 0x00300032, 0x00310032, 0x00320032, 0x00330032, 0x00340032, 0x00350032, 0x00360032,
-    0x00370032, 0x00380032, 0x00390032, 0x00300033, 0x00310033, 0x00320033, 0x00330033, 0x00340033, 0x00350033,
-    0x00360033, 0x00370033, 0x00380033, 0x00390033, 0x00300034, 0x00310034, 0x00320034, 0x00330034, 0x00340034,
-    0x00350034, 0x00360034, 0x00370034, 0x00380034, 0x00390034, 0x00300035, 0x00310035, 0x00320035, 0x00330035,
-    0x00340035, 0x00350035, 0x00360035, 0x00370035, 0x00380035, 0x00390035, 0x00300036, 0x00310036, 0x00320036,
-    0x00330036, 0x00340036, 0x00350036, 0x00360036, 0x00370036, 0x00380036, 0x00390036, 0x00300037, 0x00310037,
-    0x00320037, 0x00330037, 0x00340037, 0x00350037, 0x00360037, 0x00370037, 0x00380037, 0x00390037, 0x00300038,
-    0x00310038, 0x00320038, 0x00330038, 0x00340038, 0x00350038, 0x00360038, 0x00370038, 0x00380038, 0x00390038,
-    0x00300039, 0x00310039, 0x00320039, 0x00330039, 0x00340039, 0x00350039, 0x00360039, 0x00370039, 0x00380039,
-    0x00390039};
-
 static ObjectHeader *StoreNumber(ObjectHeader *sb, int64_t n)
 {
     auto num = n < 0 ? -static_cast<uint64_t>(n) : n;
@@ -1744,22 +1686,7 @@ static ObjectHeader *StoreNumber(ObjectHeader *sb, int64_t n)
     auto newsize = count + size;
 
     check_capacity_fast(sb, newsize);
-    auto dst = reinterpret_cast<uint32_t *>(GetStorageAddress(sb, newsize));
-
-    while (num >= TPOWER2) {
-        *(--dst) = BIDIGITS[num % TPOWER2];
-        num /= TPOWER2;
-    }
-    if (num < TPOWER1) {
-        auto dst1 = reinterpret_cast<uint16_t *>(dst);
-        *(--dst1) = (num + '0');
-    } else {
-        *(--dst) = BIDIGITS[num];
-    }
-    if (n < 0) {
-        *GetStorageAddress(sb, count) = '-';
-    }
-
+    utf::UInt64ToUtf16Array(num, GetStorageAddress(sb, count), size, n < 0);
     sb->SetFieldPrimitive<uint32_t>(SB_COUNT_OFFSET, newsize);
     return sb;
 }

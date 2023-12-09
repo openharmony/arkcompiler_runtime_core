@@ -33,6 +33,7 @@ set(intrinsics_tests
     ceil
     trunc
     stringbuilder_oom
+    stringbuilder
 )
 
 set(intrinsics_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -62,5 +62,7 @@ inline uint32_t HexValue(uint32_t c)
     return -1;
 }
 
+PANDA_PUBLIC_API uint32_t CountDigits(uint64_t v);
+
 }  // namespace panda
 #endif  // PANDA_LIBPANDABASE_UTILS_UTILS_H

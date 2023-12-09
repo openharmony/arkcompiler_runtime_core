@@ -582,4 +582,57 @@ bool IsUTF16SurrogatePair(const uint16_t lead)
     return lead >= DECODE_LEAD_LOW && lead <= DECODE_LEAD_HIGH;
 }
 
+/**
+ * The table below is to translate integer numbers from [0..99] range to pairs of corresponding utf16 codes.
+ * The pairs are packed into utf::BidigitsCode type.
+ *
+ * Example: 0  -> 0x00300030 ("00")
+ *          1  -> 0x00310030 ("01")
+ *          ...
+ *          99 -> 0x00390039 ("99")
+ */
+using BidigitsCode = uint32_t;
+static constexpr size_t BIDIGITS_CODE_TAB_SIZE = 100U;
+
+static constexpr std::array<BidigitsCode, BIDIGITS_CODE_TAB_SIZE> BIDIGITS_CODE_TAB = {
+    0x00300030, 0x00310030, 0x00320030, 0x00330030, 0x00340030, 0x00350030, 0x00360030, 0x00370030, 0x00380030,
+    0x00390030, 0x00300031, 0x00310031, 0x00320031, 0x00330031, 0x00340031, 0x00350031, 0x00360031, 0x00370031,
+    0x00380031, 0x00390031, 0x00300032, 0x00310032, 0x00320032, 0x00330032, 0x00340032, 0x00350032, 0x00360032,
+    0x00370032, 0x00380032, 0x00390032, 0x00300033, 0x00310033, 0x00320033, 0x00330033, 0x00340033, 0x00350033,
+    0x00360033, 0x00370033, 0x00380033, 0x00390033, 0x00300034, 0x00310034, 0x00320034, 0x00330034, 0x00340034,
+    0x00350034, 0x00360034, 0x00370034, 0x00380034, 0x00390034, 0x00300035, 0x00310035, 0x00320035, 0x00330035,
+    0x00340035, 0x00350035, 0x00360035, 0x00370035, 0x00380035, 0x00390035, 0x00300036, 0x00310036, 0x00320036,
+    0x00330036, 0x00340036, 0x00350036, 0x00360036, 0x00370036, 0x00380036, 0x00390036, 0x00300037, 0x00310037,
+    0x00320037, 0x00330037, 0x00340037, 0x00350037, 0x00360037, 0x00370037, 0x00380037, 0x00390037, 0x00300038,
+    0x00310038, 0x00320038, 0x00330038, 0x00340038, 0x00350038, 0x00360038, 0x00370038, 0x00380038, 0x00390038,
+    0x00300039, 0x00310039, 0x00320039, 0x00330039, 0x00340039, 0x00350039, 0x00360039, 0x00370039, 0x00380039,
+    0x00390039};
+
+void UInt64ToUtf16Array(uint64_t v, uint16_t *outUtf16Buf, uint32_t nDigits, bool negative)
+{
+    ASSERT(outUtf16Buf != nullptr && nDigits != 0);
+
+    constexpr uint64_t POW10_1 = 10U;
+    constexpr uint64_t POW10_2 = 100U;
+
+    Span<uint16_t> outSpan(outUtf16Buf, nDigits);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto *out = reinterpret_cast<uint32_t *>(outUtf16Buf + nDigits);
+    int i = 0;
+    while (v >= POW10_2) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        out[--i] = BIDIGITS_CODE_TAB[v % POW10_2];
+        v /= POW10_2;
+    }
+    if (v >= POW10_1) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        out[--i] = BIDIGITS_CODE_TAB[v];
+    } else {
+        outSpan[negative ? 1U : 0] = v + '0';
+    }
+    if (negative) {
+        outSpan[0] = '-';
+    }
+}
+
 }  // namespace panda::utf

@@ -19,12 +19,11 @@
 function foo(n: int): int { return (n * 17 + 7) % 141;}
 function main(): int {
     let c: char[] = new char[10000];
-    let s: String = new String(c);
     let sb: StringBuilder = new StringBuilder();
     for (let i = 0; i < 10000000; ++i) {
         let n: int = foo(i);
         try {
-            sb.append(s);
+            sb.append(new String(c));
             n += 100;
         } catch (e: OutOfMemoryError) {
             if (n != foo(i)) {
@@ -37,5 +36,6 @@ function main(): int {
             return 1;
         }
     }
+
     return 2;
 }

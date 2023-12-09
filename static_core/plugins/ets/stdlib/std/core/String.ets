@@ -1622,4 +1622,14 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         }
         throw new JSONTypeError("Cannot create String from JSON", json)
     }
+
+    /**
+     * Check if a string is compressed
+     *
+     * @param s string to be checked
+     *
+     * @returns true - if s is compressed, false - otherwise
+     */
+    public native isCompressed(): boolean;
+
 }

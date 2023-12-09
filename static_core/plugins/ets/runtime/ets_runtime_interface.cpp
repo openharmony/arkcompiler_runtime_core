@@ -152,4 +152,9 @@ bool EtsRuntimeInterface::IsMethodStringBuilderToString(MethodPtr method) const
            MethodCast(method)->GetProto().GetSignature() == "()Lstd/core/String;";
 }
 
+bool EtsRuntimeInterface::IsIntrinsicStringBuilderToString(IntrinsicId id) const
+{
+    return id == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_TO_STRING;
+}
+
 }  // namespace panda::ets

@@ -145,6 +145,8 @@ PANDA_PUBLIC_API size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8In, uint16_t
 
 PANDA_PUBLIC_API bool IsUTF16SurrogatePair(uint16_t lead);
 
+PANDA_PUBLIC_API void UInt64ToUtf16Array(uint64_t v, uint16_t *outUtf16Buf, uint32_t nDigits, bool negative);
+
 WEAK_FOR_LTO_END
 
 inline const uint8_t *CStringAsMutf8(const char *str)
