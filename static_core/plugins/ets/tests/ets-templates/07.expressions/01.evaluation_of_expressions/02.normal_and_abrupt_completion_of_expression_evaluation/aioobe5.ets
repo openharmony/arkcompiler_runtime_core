@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -25,7 +25,8 @@ function main(): int {
   let b = 1;
 
   try {
-    let s: String = "S" + (v[0][1] = "B") + (a = 2) + v[1][0] + (b = 2);
+    let ind = 1
+    let s: String = "S" + (v[0][1] = "B") + (a = 2) + v[ind][0] + (b = 2);
     return 1;
   } catch (e: ArrayIndexOutOfBoundsException) {
     if (a != 2 || b != 1) return 1;
