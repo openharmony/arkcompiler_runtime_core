@@ -2,6 +2,7 @@ import fnmatch
 import logging
 import multiprocessing
 import re
+import argparse
 from abc import abstractmethod, ABC
 from collections import Counter
 from datetime import datetime
@@ -14,6 +15,7 @@ from tqdm import tqdm
 
 from runner.chapters import parse_chapters
 from runner.enum_types.configuration_kind import ConfigurationKind
+from runner.options.cli_args_wrapper import CliArgsWrapper
 from runner.plugins.ets.test_ets import TestETS
 from runner.logger import Log
 from runner.options.config import Config
@@ -57,13 +59,22 @@ def correct_path(root: Path, test_list: str) -> str:
 _LOGGER = logging.getLogger("runner.runner_base")
 
 
+# pylint: disable=invalid-name,global-statement
+worker_cli_wrapper_args: Optional[argparse.Namespace] = None
+
+
+def init_worker(shared_args: argparse.Namespace) -> None:
+    global worker_cli_wrapper_args
+    worker_cli_wrapper_args = shared_args
+
+
+def run_test(test: Test) -> Test:
+    CliArgsWrapper.args = worker_cli_wrapper_args
+    return test.run()
+
+
 class Runner(ABC):
     def __init__(self, config: Config, name: str) -> None:
-        # This file is expected to be located at path:
-        # $PANDA_SOURCE/tests/tests-u-runner/runner/runner_base.py
-        current_folder_parent = path.dirname(path.dirname(path.abspath(__file__)))
-        self.static_core_root = path.dirname(path.dirname(current_folder_parent))
-
         # TODO(vpukhov): adjust es2panda path
         default_ets_arktsconfig = path.join(
             config.general.build,
@@ -85,8 +96,8 @@ class Runner(ABC):
         # directory where list files (files with list of ignored, excluded, and other tests) are located
         # it's either set explicitly to the absolute value or
         # the current folder (where this python file is located!) parent
-        self.default_list_root = path.join(self.static_core_root, "tests", "tests-u-runner", "test-lists")
-        self.list_root = config.general.list_root if config.general.list_root is not None else None
+        self.default_list_root = Path(config.general.static_core_root) / 'tests' / 'tests-u-runner' / 'test-lists'
+        self.list_root = config.general.list_root
         if self.list_root is not None:
             Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
@@ -300,14 +311,11 @@ class Runner(ABC):
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> Test:
         pass
 
-    @staticmethod
-    def run_test(test: Test) -> Test:
-        return test.run()
-
     def run(self) -> None:
         Log.all(_LOGGER, "Start test running")
-        with multiprocessing.Pool(processes=self.config.general.processes) as pool:
-            results = pool.imap_unordered(self.run_test, self.tests, chunksize=self.config.general.chunksize)
+        with multiprocessing.Pool(processes=self.config.general.processes,
+                                  initializer=init_worker, initargs=(CliArgsWrapper.args,)) as pool:
+            results = pool.imap_unordered(run_test, self.tests, chunksize=self.config.general.chunksize)
             if self.config.general.show_progress:
                 results = tqdm(results, total=len(self.tests))
             self.results = list(results)

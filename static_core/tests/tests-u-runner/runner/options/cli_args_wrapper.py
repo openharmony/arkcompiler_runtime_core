@@ -8,16 +8,16 @@ _LOGGER = logging.getLogger("runner.options.cli_args_wrapper")
 
 
 class CliArgsWrapper:
-    _args = None
+    args = None
 
     @staticmethod
     def setup(args: argparse.Namespace) -> None:
-        CliArgsWrapper._args = args
+        CliArgsWrapper.args = args
 
     @staticmethod
     def get_by_name(name: str) -> Optional[Union[str, List[str]]]:
-        if name in dir(CliArgsWrapper._args):
-            value = getattr(CliArgsWrapper._args, name)
+        if name in dir(CliArgsWrapper.args):
+            value = getattr(CliArgsWrapper.args, name)
             if value is None:
                 return None
             if isinstance(value, list):
