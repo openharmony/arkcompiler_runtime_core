@@ -455,6 +455,10 @@ spec/nullables/nullable-lambda-default-param_5.ets
 ### End Of Feature: Null safety tests
 
 ### Generic issues
+### Issue 14751
+spec/generic/issue14751.ets
+### Issue 14752
+spec/generic/issue14752.ets
 ### Issue 14498
 spec/generic/generic_03.ets
 ### Issue 13642
