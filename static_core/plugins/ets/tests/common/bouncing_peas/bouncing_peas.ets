@@ -94,6 +94,7 @@ function encodeFPS(input: int): byte[]/*Uint8Array*/ {
 }
 
 class Ball {
+    constructor() {}
     constructor(x: float, y: float, speed: float, radius: float) {
         this.radius = radius;
 
