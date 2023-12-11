@@ -24,10 +24,10 @@ extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));
 #else
 #include "utils/logger.h"
 #include "utils/type_helpers.h"
-#define LOG_MESSAGE(l, m) LOG(l, COMMON) << (m)        // NOLINT(cppcoreguidelines-macro-usage)
-#define FAIL_WITH_MESSAGE(m) LOG_MESSAGE(FATAL, m)     // NOLINT(cppcoreguidelines-macro-usage)
-#define HELPERS_TO_UNSIGNED(m) helpers::ToUnsigned(m)  // NOLINT(cppcoreguidelines-macro-usage)
-namespace panda::os::unix::memory::futex {
+#define LOG_MESSAGE(l, m) LOG(l, COMMON) << (m)               // NOLINT(cppcoreguidelines-macro-usage)
+#define FAIL_WITH_MESSAGE(m) LOG_MESSAGE(FATAL, m)            // NOLINT(cppcoreguidelines-macro-usage)
+#define HELPERS_TO_UNSIGNED(m) panda::helpers::ToUnsigned(m)  // NOLINT(cppcoreguidelines-macro-usage)
+namespace ark::os::unix::memory::futex {
 #endif
 
 // This field is set to false in case of deadlock with daemon threads (only daemon threads
@@ -112,7 +112,7 @@ static void BackOff(uint32_t i)
         }
     } else {
 #ifndef MC_ON
-        thread::Yield();
+        panda::os::thread::Yield();
 #endif
     }
 }
@@ -522,5 +522,5 @@ void SignalCount(struct CondVar *const cond, int32_t to_wake)
 }
 
 #ifndef MC_ON
-}  // namespace panda::os::unix::memory::futex
+}  // namespace ark::os::unix::memory::futex
 #endif

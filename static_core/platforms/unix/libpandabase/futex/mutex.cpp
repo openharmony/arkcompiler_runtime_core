@@ -24,13 +24,13 @@
 
 #include <sched.h>
 
-namespace panda::os::unix::memory::futex {
+namespace ark::os::unix::memory::futex {
 // Avoid repeatedly calling GetCurrentThreadId by storing tid locally
-thread_local thread::ThreadId current_tid {0};
+thread_local panda::os::thread::ThreadId current_tid {0};
 
 void PostFork()
 {
-    current_tid = os::thread::GetCurrentThreadId();
+    current_tid = panda::os::thread::GetCurrentThreadId();
 }
 
 // Spin for small arguments and yield for longer ones.
@@ -44,7 +44,7 @@ static void BackOff(uint32_t i)
             ++x;
         }
     } else {
-        thread::Yield();
+        panda::os::thread::Yield();
     }
 }
 
@@ -97,12 +97,12 @@ void Mutex::Unlock()
     MutexUnlock(&mutex_);
 }
 
-void Mutex::LockForOther(thread::ThreadId thread)
+void Mutex::LockForOther(panda::os::thread::ThreadId thread)
 {
     MutexLockForOther(&mutex_, thread);
 }
 
-void Mutex::UnlockForOther(thread::ThreadId thread)
+void Mutex::UnlockForOther(panda::os::thread::ThreadId thread)
 {
     MutexUnlockForOther(&mutex_, thread);
 }
@@ -132,7 +132,7 @@ RWLock::~RWLock()
 void RWLock::WriteLock()
 {
     if (current_tid == 0) {
-        current_tid = os::thread::GetCurrentThreadId();
+        current_tid = panda::os::thread::GetCurrentThreadId();
     }
     bool done = false;
     while (!done) {
@@ -216,7 +216,7 @@ bool RWLock::TryReadLock()
 bool RWLock::TryWriteLock()
 {
     if (current_tid == 0) {
-        current_tid = os::thread::GetCurrentThreadId();
+        current_tid = panda::os::thread::GetCurrentThreadId();
     }
     bool done = false;
     // Atomic with relaxed order reason: mutex synchronization
@@ -245,7 +245,7 @@ bool RWLock::TryWriteLock()
 void RWLock::WriteUnlock()
 {
     if (current_tid == 0) {
-        current_tid = os::thread::GetCurrentThreadId();
+        current_tid = panda::os::thread::GetCurrentThreadId();
     }
     ASSERT(IsExclusiveHeld(current_tid));
 
@@ -275,4 +275,4 @@ void RWLock::WriteUnlock()
         }
     }
 }
-}  // namespace panda::os::unix::memory::futex
+}  // namespace ark::os::unix::memory::futex

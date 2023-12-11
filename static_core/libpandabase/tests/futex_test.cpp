@@ -18,12 +18,12 @@
 #include "gtest/gtest.h"
 #include "utils/logger.h"
 
-namespace panda {
+namespace ark {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-struct panda::os::unix::memory::futex::fmutex FUTEX;
+struct ark::os::unix::memory::futex::fmutex FUTEX;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-struct panda::os::unix::memory::futex::CondVar CONDVAR;
+struct ark::os::unix::memory::futex::CondVar CONDVAR;
 volatile int GLOBAL;
 
 constexpr std::chrono::duration DELAY = std::chrono::milliseconds(10U);
@@ -212,7 +212,7 @@ TEST(FutexTest, WaitNotifyTest)
     MutexLock(&FUTEX, false);
     GLOBAL++;
     MutexUnlock(&FUTEX);
-    SignalCount(&CONDVAR, panda::os::unix::memory::futex::WAKE_ONE);
+    SignalCount(&CONDVAR, ark::os::unix::memory::futex::WAKE_ONE);
     thr.join();
     GLOBAL++;
     // Check that waiter is correctly finished
@@ -260,7 +260,7 @@ TEST(FutexTest, WakeAllTest)
     MutexLock(&FUTEX, false);
     GLOBAL++;
     MutexUnlock(&FUTEX);
-    SignalCount(&CONDVAR, panda::os::unix::memory::futex::WAKE_ALL);
+    SignalCount(&CONDVAR, ark::os::unix::memory::futex::WAKE_ALL);
 
     thr.join();
     thr2.join();
@@ -272,4 +272,4 @@ TEST(FutexTest, WakeAllTest)
     ASSERT_EQ(GLOBAL, 2U * NUM + 2U);
 }
 
-}  // namespace panda
+}  // namespace ark

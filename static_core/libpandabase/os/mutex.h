@@ -42,10 +42,10 @@ public:
 };
 
 #if defined(PANDA_USE_FUTEX)
-using Mutex = panda::os::unix::memory::futex::Mutex;
-using RecursiveMutex = panda::os::unix::memory::futex::RecursiveMutex;
-using RWLock = panda::os::unix::memory::futex::RWLock;
-using ConditionVariable = panda::os::unix::memory::futex::ConditionVariable;
+using Mutex = ark::os::unix::memory::futex::Mutex;
+using RecursiveMutex = ark::os::unix::memory::futex::RecursiveMutex;
+using RWLock = ark::os::unix::memory::futex::RWLock;
+using ConditionVariable = ark::os::unix::memory::futex::ConditionVariable;
 #else
 class ConditionVariable;
 
