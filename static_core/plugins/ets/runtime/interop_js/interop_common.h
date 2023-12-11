@@ -191,16 +191,15 @@ inline bool NapiThrownGeneric(napi_status rc)
     return rc == napi_generic_failure;
 }
 
-inline napi_status NapiObjectSeal(napi_env env, napi_value js_val)
+inline napi_status NapiObjectSeal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_val)
 {
-    auto status = napi_object_seal(env, js_val);
-#ifdef PANDA_TARGET_OHOS
-    if (status != napi_ok && GetValueType(env, js_val) == napi_function) {
-        INTEROP_LOG(ERROR) << "OHOS NAPI failed to seal napi_function";
-        return napi_ok;
-    }
+// Ark js vm crashes in napi_object_seal.
+// Disable the call temporary
+#ifndef PANDA_TARGET_OHOS
+    return napi_object_seal(env, js_val);
+#else
+    return napi_ok;
 #endif  // PANDA_TARGET_OHOS
-    return status;
 }
 
 inline napi_status NapiCallFunction(napi_env env, napi_value recv, napi_value func, size_t argc, const napi_value *argv,
