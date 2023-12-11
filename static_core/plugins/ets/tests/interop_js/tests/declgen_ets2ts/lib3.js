@@ -15,10 +15,10 @@
 "use strict";
 
 class DynClass {
-    val = 10;
-    GetDynVal() {
-        return 20;
-    }
+  val = 10;
+  GetDynVal() {
+    return 20;
+  }
 }
 
 exports.DynClass = DynClass;

@@ -15,8 +15,8 @@ set(MAIN_TS_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/main.ts)
 set(LIB_1_ETS_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/lib1.ets)
 set(LIB_2_ETS_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/lib2.ets)
 set(LIB_3_JS_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/lib3.js)
-set(LIB_1_DECL_TS_EXPECTED ${CMAKE_CURRENT_SOURCE_DIR}/lib1.expected.ts)
-set(LIB_2_DECL_TS_EXPECTED ${CMAKE_CURRENT_SOURCE_DIR}/lib2.expected.ts)
+set(LIB_1_DECL_TS_EXPECTED ${CMAKE_CURRENT_SOURCE_DIR}/lib1.expected)
+set(LIB_2_DECL_TS_EXPECTED ${CMAKE_CURRENT_SOURCE_DIR}/lib2.expected)
 
 set(MAIN_TS ${CMAKE_CURRENT_BINARY_DIR}/main.ts)
 set(MAIN_JS ${CMAKE_CURRENT_BINARY_DIR}/main.js)
@@ -53,7 +53,7 @@ add_custom_command(
     COMMAND $<TARGET_FILE:es2panda> --output ${LIB_2_ABC} --gen-ts-decl ${LIB_2_DECL_TS} ${LIB_2_ETS_INPUT} --ets-module
     COMMAND $<TARGET_FILE:ark_link> --output ${LIB_LINKED_ABC} -- ${LIB_1_ABC} ${LIB_2_ABC}
     COMMAND cp ${MAIN_TS_INPUT} ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc -m commonjs --strict --outDir ${CMAKE_CURRENT_BINARY_DIR} ${MAIN_TS}
+    COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc --strict --outDir ${CMAKE_CURRENT_BINARY_DIR} ${MAIN_TS}
     DEPENDS es2panda ark_link ${LIB_1_ETS_INPUT} ${LIB_2_ETS_INPUT} ${MAIN_TS_INPUT} ${ARKTSCONFIG}
 )
 add_custom_target(compile_declgen_ets2ts_project
