@@ -16,6 +16,8 @@ std/core/std_core_array_forEach_float_array_func_float.ets
 std/core/std_core_array_forEach_long_array_func_long.ets
 std/core/std_core_array_forEach_short_array_func_short.ets
 ### Issue 11468 end
+### Issue 14724
+std/core/std_core_typedarrays__BigInt64Array.ets
 ### Issue 11474 ###
 ### Issue 11544 begin
 std/math/std_math_tan_double.ets
