@@ -26,7 +26,7 @@ SDK_BUILD_ROOT="$(realpath "$2")"
 PANDA_SDK_BUILD_TYPE="${3:-"$BUILD_TYPE_RELEASE"}"
 
 usage() {
-    echo "$(basename "${BASH_SOURCE[0]}") /path/to/ohos/sdk/native /path/to/panda/sdk/destination build_type:[$BUILD_TYPE_RELEASE,$BUILD_TYPE_FAST_VERIFY,$BUILD_TYPE_DEBUG]"
+    echo "$(basename "${BASH_SOURCE[0]}") path/to/ohos/sdk/native path/to/panda/sdk/destination build_type:[$BUILD_TYPE_RELEASE,$BUILD_TYPE_FAST_VERIFY,$BUILD_TYPE_DEBUG]"
     exit 1
 }
 
@@ -50,15 +50,15 @@ fi
 
 PANDA_SDK_PATH="$SDK_BUILD_ROOT/sdk"
 
-# Arguments: BUILD_DIR, CMAKE_ARGUMENTS, NINJA_TARGETS
+# Arguments: build_dir, cmake_arguments, ninja_targets
 build_panda() {
-    local BUILD_DIR="$1"
-    local CMAKE_ARGUMENTS="$2"
-    local NINJA_TARGETS="$3"
+    local build_dir="$1"
+    local cmake_arguments="$2"
+    local ninja_targets="$3"
 
-    local PRODUCT_BUILD="OFF"
+    local product_build="OFF"
     if [ "$PANDA_SDK_BUILD_TYPE" = "$BUILD_TYPE_RELEASE" ]; then
-        PRODUCT_BUILD="ON"
+        product_build="ON"
     fi
 
     CONCURRENCY=${NPROC_PER_JOB:=$(nproc)}
@@ -66,103 +66,103 @@ build_panda() {
         -GNinja \
         -S$ARK_ROOT \
         -DCMAKE_BUILD_TYPE=$PANDA_SDK_BUILD_TYPE \
-        -DPANDA_PRODUCT_BUILD=$PRODUCT_BUILD \
+        -DPANDA_PRODUCT_BUILD=$product_build \
         -DPANDA_WITH_ECMASCRIPT=ON \
         -DPANDA_WITH_ETS=ON \
         -DPANDA_WITH_JAVA=OFF \
         -DPANDA_WITH_ACCORD=OFF \
         -DPANDA_WITH_CANGJIE=OFF"
 
-    cmake -B"$BUILD_DIR" ${COMMONS_CMAKE_ARGS[@]} $CMAKE_ARGUMENTS
-    ninja -C"$BUILD_DIR" -j${CONCURRENCY} $NINJA_TARGETS
+    cmake -B"$build_dir" ${COMMONS_CMAKE_ARGS[@]} $cmake_arguments
+    ninja -C"$build_dir" -j${CONCURRENCY} $ninja_targets
 }
 
-# Arguments: SRC, DST, FILE_LIST, INCLUDE_PATTERN
+# Arguments: src, dst, file_list, include_pattern
 copy_into_sdk() {
-    local SRC="$1"
-    local DST="$2"
-    local FILE_LIST="$3"
-    local INCLUDE_PATTERN="$4"
-    local EXCLUDE_PATTERN='\(/tests/\|/test/\)'
+    local src="$1"
+    local dst="$2"
+    local file_list="$3"
+    local include_pattern="$4"
+    local exclude_pattern='\(/tests/\|/test/\)'
 
     # Below construction (cd + find + cp --parents) is used to copy
-    # all files listed in FILE_LIST with their relative paths
+    # all files listed in file_list with their relative paths
     # Example: cd /path/to/panda && cp --parents runtime/include/cframe.h /dst
     # Result: /dst/runtime/include/cframe.h
-    mkdir -p "$DST"
-    cd "$SRC"
-    for FILE in $(cat "$FILE_LIST"); do
-        for F in $(find "$FILE" -type f | grep "$INCLUDE_PATTERN" | grep -v "$EXCLUDE_PATTERN"); do
-            cp --parents "$F" "$DST"
+    mkdir -p "$dst"
+    cd "$src"
+    for FILE in $(cat "$file_list"); do
+        for F in $(find "$FILE" -type f | grep "$include_pattern" | grep -v "$exclude_pattern"); do
+            cp --parents "$F" "$dst"
         done
     done
 }
 
 linux_tools() {
     echo "> Building linux tools..."
-    local LINUX_BUILD_DIR="$SDK_BUILD_ROOT/linux_host_tools"
+    local linux_build_dir="$SDK_BUILD_ROOT/linux_host_tools"
     local LINUX_CMAKE_ARGS=" \
         -DPANDA_CROSS_AARCH64_TOOLCHAIN_FILE=cmake/toolchain/cross-ohos-musl-aarch64.cmake \
         -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_WITH_ECMASCRIPT=ON"
-    local LINUX_BUILD_TARGETS="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin"
-    build_panda "$LINUX_BUILD_DIR" "$LINUX_CMAKE_ARGS" "$LINUX_BUILD_TARGETS"
-    copy_into_sdk "$LINUX_BUILD_DIR" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
+    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin"
+    build_panda "$linux_build_dir" "$LINUX_CMAKE_ARGS" "$linux_build_targets"
+    copy_into_sdk "$linux_build_dir" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
 }
 
 windows_tools() {
     echo "> Building windows tools..."
-    local WINDOWS_BUILD_DIR="$SDK_BUILD_ROOT/windows_host_tools"
-    local WINDOWS_CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-clang-14-x86_64-w64-mingw32-static.cmake"
-    local WINDOWS_BUILD_TARGETS="es2panda ark_link"
-    build_panda "$WINDOWS_BUILD_DIR" "$WINDOWS_CMAKE_ARGS" "$WINDOWS_BUILD_TARGETS"
-    copy_into_sdk "$WINDOWS_BUILD_DIR" "$PANDA_SDK_PATH/windows_host_tools" "$SCRIPT_DIR"/windows_host_tools.txt
+    local windows_build_dir="$SDK_BUILD_ROOT/windows_host_tools"
+    local windows_cmake_args="-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-clang-14-x86_64-w64-mingw32-static.cmake"
+    local windows_build_targets="es2panda ark_link"
+    build_panda "$windows_build_dir" "$windows_cmake_args" "$windows_build_targets"
+    copy_into_sdk "$windows_build_dir" "$PANDA_SDK_PATH/windows_host_tools" "$SCRIPT_DIR"/windows_host_tools.txt
 }
 
 ohos() {
     echo "> Building runtime for OHOS ARM64..."
-    local OHOS_BUILD_DIR="$SDK_BUILD_ROOT/ohos_arm64"
-    local TARGET_SDK_DIR="$PANDA_SDK_PATH/ohos_arm64"
+    local ohos_build_dir="$SDK_BUILD_ROOT/ohos_arm64"
+    local taget_sdk_dir="$PANDA_SDK_PATH/ohos_arm64"
     local TARGET_CMAKE_ARGS=" \
         -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-ohos-musl-aarch64.cmake \
         -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_ETS_INTEROP_JS=ON \
         -DPANDA_WITH_ECMASCRIPT=ON"
-    local OHOS_BUILD_TARGETS="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin"
-    build_panda "$OHOS_BUILD_DIR" "$TARGET_CMAKE_ARGS" "$OHOS_BUILD_TARGETS"
-    copy_into_sdk "$OHOS_BUILD_DIR" "$TARGET_SDK_DIR" "$SCRIPT_DIR"/ohos_arm64.txt
+    local ohos_build_targets="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin"
+    build_panda "$ohos_build_dir" "$TARGET_CMAKE_ARGS" "$ohos_build_targets"
+    copy_into_sdk "$ohos_build_dir" "$taget_sdk_dir" "$SCRIPT_DIR"/ohos_arm64.txt
 
     echo "> Copying headers into SDK..."
-    local HEADERS_DST="$TARGET_SDK_DIR"/include
+    local headers_dst="$taget_sdk_dir"/include
     # Source headers
-    copy_into_sdk "$ARK_ROOT" "$HEADERS_DST" "$SCRIPT_DIR"/headers.txt '\(\.h$\|\.inl$\|\.inc$\)'
+    copy_into_sdk "$ARK_ROOT" "$headers_dst" "$SCRIPT_DIR"/headers.txt '\(\.h$\|\.inl$\|\.inc$\)'
     # Generated headers
-    copy_into_sdk "$OHOS_BUILD_DIR" "$HEADERS_DST" "$SCRIPT_DIR"/gen_headers.txt '\(\.h$\|\.inl$\|\.inc$\)'
+    copy_into_sdk "$ohos_build_dir" "$headers_dst" "$SCRIPT_DIR"/gen_headers.txt '\(\.h$\|\.inl$\|\.inc$\)'
     # Copy compiled etsstdlib into Panda SDK
     mkdir -p "$PANDA_SDK_PATH"/ets
-    cp -r "$OHOS_BUILD_DIR"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
+    cp -r "$ohos_build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
 }
 
 ts_linter() {
     echo "> Building tslinter..."
-    local LINTER_ROOT="$ARK_ROOT/tools/es2panda/linter"
-    (cd "$LINTER_ROOT" && npm install)
-    local TGZ="$(ls "$LINTER_ROOT"/bundle/panda-tslinter*tgz)"
+    local linter_root="$ARK_ROOT/tools/es2panda/linter"
+    (cd "$linter_root" && npm install)
+    local tgz="$(ls "$linter_root"/bundle/panda-tslinter*tgz)"
     mkdir -p "$PANDA_SDK_PATH"/tslinter
-    tar -xf "$TGZ" -C "$PANDA_SDK_PATH"/tslinter
+    tar -xf "$tgz" -C "$PANDA_SDK_PATH"/tslinter
     mv "$PANDA_SDK_PATH"/tslinter/package/* "$PANDA_SDK_PATH"/tslinter/
     rm -rf "$PANDA_SDK_PATH"/tslinter/node_modules
     rm -rf "$PANDA_SDK_PATH"/tslinter/package
 
     # Clean up
-    rm "$TGZ"
-    rm "$LINTER_ROOT"/package-lock.json
-    rm -rf "$LINTER_ROOT"/build
-    rm -rf "$LINTER_ROOT"/bundle
-    rm -rf "$LINTER_ROOT"/dist
-    rm -rf "$LINTER_ROOT"/node_modules
+    rm "$tgz"
+    rm "$linter_root"/package-lock.json
+    rm -rf "$linter_root"/build
+    rm -rf "$linter_root"/bundle
+    rm -rf "$linter_root"/dist
+    rm -rf "$linter_root"/node_modules
 }
 
 ets_std_lib() {
@@ -171,7 +171,7 @@ ets_std_lib() {
     cp -r "$ARK_ROOT"/plugins/ets/stdlib "$PANDA_SDK_PATH"/ets
 }
 
-rm -rf "$PANDA_SDK_PATH"
+rm -r -f "$PANDA_SDK_PATH"
 ohos
 linux_tools
 windows_tools

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 if [[ -z $1 ]]; then
     echo "Usage: generate.sh <panda source> <generator options>"
     echo "    <panda source> path where the panda source are located"

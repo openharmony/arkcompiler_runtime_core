@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 # Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 build=$1
 stdlib=$2
 
 if [[ -z "$1" || -z "$2" ]]; then
-  echo "Build ark and es2panda. \n Provide args: ./sunspider_compile.sh /build/path /stdlib/path"
+  echo "Build ark and es2panda. \n Provide args: ./sunspider_compile.sh build/path stdlib/path"
   exit 1
 fi
 

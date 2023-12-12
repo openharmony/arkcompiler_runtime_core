@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
 
-function activate_venv
+function activate_venv()
 {
     if [[ -d ${VENV_DIR} ]]; then
         source ${VENV_DIR}/bin/activate
@@ -22,7 +24,7 @@ function activate_venv
     fi
 }
 
-function deactivate_venv
+function deactivate_venv()
 {
     if [[ -d ${VENV_DIR} && -n ${VIRTUAL_ENV} ]]; then
         deactivate
