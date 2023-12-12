@@ -15,6 +15,8 @@
 # Script for building documentation bundle from Sphinx *.rst documents
 # TODO(igelhaus): Provision sphinx-build in the main bootstrap script.
 
+set -e
+
 SCRIPT_DIR="$(realpath "${0}")"
 SCRIPT_DIR="$(dirname "${SCRIPT_DIR}")"
 BUILD_DIR="${SCRIPT_DIR}/build"
@@ -26,7 +28,7 @@ BUILD_SPEC=no
 BUILD_STDLIB=no
 BUILD_TUTORIAL=no
 
-function print_help
+function print_help()
 {
     local help_message="
 STS documentation builder
@@ -74,7 +76,7 @@ TARGETS
     echo "${help_message}"
 }
 
-function check_ubuntu_version
+function check_ubuntu_version()
 {
     if [[ ! -f /etc/os-release ]]; then
         echo "FATAL: /etc/os-release not found"
@@ -95,7 +97,7 @@ function check_ubuntu_version
     fi
 }
 
-function build_sphinx_document
+function build_sphinx_document()
 {
     # NB! -j is not used intentionally, as rst2pdf.pdfbuilder is reported
     # to be unsafe for parallel writing under some platforms.

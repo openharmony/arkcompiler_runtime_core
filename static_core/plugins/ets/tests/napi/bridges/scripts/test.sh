@@ -14,7 +14,7 @@
 
 set -e
 
-DIR=$(cd `dirname $0` && pwd)
+DIR=$(cd $(dirname $0) && pwd)
 
 if [ $# -ge 3 ]; then 
 

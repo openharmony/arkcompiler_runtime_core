@@ -20,7 +20,7 @@
 set -euo pipefail
 
 # Set args
-REPO_DIR=${1:-`pwd`}
+REPO_DIR=${1:-$(pwd)}
 SCRIPT_DIR=$REPO_DIR/scripts
 
 echo 'Script path: ' $SCRIPT_DIR
