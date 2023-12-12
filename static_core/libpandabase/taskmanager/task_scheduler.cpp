@@ -199,12 +199,16 @@ std::optional<Task> TaskScheduler::GetTaskFromQueue(TaskProperties properties)
     if (!queue->HasTaskWithExecutionMode(properties.GetTaskExecutionMode())) {
         return std::nullopt;
     }
+    // Now we can pop the task from the chosen queue
+    auto task = queue->PopTask();
+    // Only after popping we can notify task statistics that task was POPPED from queue to get it outside. This sequence
+    // ensures that the number of tasks in the system (see TaskStatistics) will be correct.
     task_statistics_->IncrementCount(TaskStatus::POPPED, properties, 1);
     if (task_statistics_->GetCountOfTasksInSystemWithTaskProperties(properties) == 0) {
         os::memory::LockHolder task_manager_lock_holder(task_scheduler_state_lock_);
         finish_tasks_cond_var_.SignalAll();
     }
-    return queue->PopTask();
+    return task;
 }
 
 void TaskScheduler::WaitForFinishAllTasksWithProperties(TaskProperties properties)

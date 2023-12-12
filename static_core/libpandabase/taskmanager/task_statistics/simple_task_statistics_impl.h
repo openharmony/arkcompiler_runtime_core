@@ -43,7 +43,7 @@ public:
     void ResetCountersWithTaskProperties(TaskProperties properties) override;
 
 private:
-    mutable std::unordered_map<TaskStatus, os::memory::Mutex> status_lock_;
+    mutable std::unordered_map<TaskStatus, os::memory::Mutex> per_status_lock_;
     std::unordered_map<TaskStatus, TaskPropertiesCounterMap> task_properties_counter_map_;
 };
 
