@@ -19,10 +19,17 @@ namespace panda::mem {
 
 void GCWorkersTaskPool::IncreaseSolvedTasks()
 {
-    solved_tasks_++;
-    if (solved_tasks_ == sended_tasks_) {
+    // Atomic with seq_cst order reason: solved_tasks_ value synchronization
+    auto solved_tasks_old_value = solved_tasks_.fetch_add(1, std::memory_order_seq_cst);
+    if (solved_tasks_old_value + 1U == sended_tasks_) {
         os::memory::LockHolder lock(all_solved_tasks_cond_var_lock_);
         all_solved_tasks_cond_var_.Signal();
+
+        // Here we use double check to be sure that IncreaseSolvedTasks method will release
+        // all_solved_tasks_cond_var_lock_ before GCWorkersTaskPool deleting in GC::DestroyWorkersTaskPool method
+        if (solved_tasks_old_value + 1U > solved_tasks_snapshot_) {
+            solved_tasks_snapshot_ = solved_tasks_old_value + 1U;
+        }
     }
 }
 
@@ -53,7 +60,9 @@ void GCWorkersTaskPool::WaitUntilTasksEnd()
         this->RunInCurrentThread();
         os::memory::LockHolder lock(all_solved_tasks_cond_var_lock_);
         // If all sended task were solved then break from wait loop
-        if (solved_tasks_ == sended_tasks_) {
+        // Here we use double check to be sure that IncreaseSolvedTasks method will release
+        // all_solved_tasks_cond_var_lock_ before GCWorkersTaskPool deleting in GC::DestroyWorkersTaskPool method
+        if (solved_tasks_ == sended_tasks_ && solved_tasks_ == solved_tasks_snapshot_) {
             break;
         }
         all_solved_tasks_cond_var_.TimedWait(&all_solved_tasks_cond_var_lock_, ALL_GC_TASKS_FINISH_WAIT_TIMEOUT);
