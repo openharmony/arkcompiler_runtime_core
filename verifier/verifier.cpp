@@ -51,7 +51,7 @@ void Verifier::CollectIdInfos()
     }
     GetMethodIds();
     GetLiteralIds();
-    CheckConstantPool(verifier::ActionType::COLLECTMETHODIDS);
+    CheckConstantPool(verifier::ActionType::COLLECTINFOS);
 }
 
 bool Verifier::VerifyChecksum()
@@ -182,8 +182,8 @@ bool Verifier::CheckConstantPoolActions(const verifier::ActionType type, panda_f
         case verifier::ActionType::CHECKCONSTPOOLCONTENT: {
             return CheckConstantPoolMethodContent(method_id);
         }
-        case verifier::ActionType::COLLECTMETHODIDS: {
-            if (!std::binary_search(method_ids_.begin(), method_ids_.end(), method_id)) {
+        case verifier::ActionType::COLLECTINFOS: {
+            if (std::find(method_ids_.begin(), method_ids_.end(), method_id) == method_ids_.end()) {
                 method_ids_.emplace_back(method_id);
             }
             return true;
@@ -191,6 +191,15 @@ bool Verifier::CheckConstantPoolActions(const verifier::ActionType type, panda_f
         default: {
             return true;
         }
+    }
+}
+
+void Verifier::CollectModuleLiteralId(const panda_file::File::EntityId &field_id)
+{
+    panda_file::FieldDataAccessor field_accessor(*file_, field_id);
+    const auto literal_id = field_accessor.GetValue<uint32_t>().value();
+    if (std::find(literal_ids_.begin(), literal_ids_.end(), literal_id) != literal_ids_.end()) {
+        module_literals_.insert(literal_id);
     }
 }
 
@@ -213,6 +222,11 @@ bool Verifier::CheckConstantPool(const verifier::ActionType type)
             });
             if (!check_res) {
                 return false;
+            }
+            if (type == verifier::ActionType::COLLECTINFOS) {
+                class_accessor.EnumerateFields([&](panda_file::FieldDataAccessor &field_accessor) -> void {
+                    CollectModuleLiteralId(field_accessor.GetFieldId());
+                });
             }
         }
     }
@@ -354,6 +368,8 @@ bool Verifier::VerifySingleLiteralArray(const panda_file::File::EntityId &litera
             }
             case panda_file::LiteralTag::INTEGER:
             case panda_file::LiteralTag::FLOAT:
+            case panda_file::LiteralTag::GETTER:
+            case panda_file::LiteralTag::SETTER:
             case panda_file::LiteralTag::GENERATORMETHOD:
             case panda_file::LiteralTag::LITERALBUFFERINDEX:
             case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
@@ -388,6 +404,7 @@ bool Verifier::VerifySingleLiteralArray(const panda_file::File::EntityId &litera
             }
             case panda_file::LiteralTag::METHOD: {
                 const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
+                inner_method_map_.emplace(literal_id.GetOffset(), value);
                 if (!VerifyMethodIdInLiteralArray(value)) {
                     return false;
                 }
@@ -395,6 +412,7 @@ bool Verifier::VerifySingleLiteralArray(const panda_file::File::EntityId &litera
             }
             case panda_file::LiteralTag::LITERALARRAY: {
                 const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
+                inner_literal_map_.emplace(literal_id.GetOffset(), value);
                 if (!VerifyLiteralIdInLiteralArray(value)) {
                     return false;
                 }
@@ -409,11 +427,16 @@ bool Verifier::VerifySingleLiteralArray(const panda_file::File::EntityId &litera
     return true;
 }
 
+bool Verifier::IsModuleLiteralId(const panda_file::File::EntityId &id) const
+{
+    return module_literals_.find(id.GetOffset()) != module_literals_.end();
+}
+
 bool Verifier::VerifyLiteralArrays()
 {
     for (const auto &arg_literal_id : literal_ids_) {
         const auto literal_id = panda_file::File::EntityId(arg_literal_id);
-        if (!VerifySingleLiteralArray(literal_id)) {
+        if (!IsModuleLiteralId(literal_id) && !VerifySingleLiteralArray(literal_id)) {
             return false;
         }
     }

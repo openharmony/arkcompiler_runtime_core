@@ -18,9 +18,12 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 namespace panda::verifier {
     void GenerateModifiedAbc(const std::vector<unsigned char> &buffer, const std::string &filename);
+    void ConvertToLittleEndian(std::vector<unsigned char> &inner_literal_id, const uint32_t &id);
+    void ModifyBuffer(std::unordered_map<uint32_t, uint32_t> &inner_literal_map, std::vector<unsigned char> &buffer);
 } // namespace panda::verifier
 
 #endif

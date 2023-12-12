@@ -17,6 +17,8 @@
 #define VERIFIER_VERIFIER_H
 
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "bytecode_instruction_enum_gen.h"
 #include "bytecode_instruction-inl.h"
@@ -35,7 +37,7 @@ enum class ActionType {
     CHECKCONSTPOOL,
     CHECKCONSTPOOLIDX,
     CHECKCONSTPOOLCONTENT,
-    COLLECTMETHODIDS,
+    COLLECTINFOS,
 };
 
 class Verifier {
@@ -50,9 +52,15 @@ public:
     bool VerifyRegisterIndex();
     bool VerifyConstantPoolIndex();
     bool VerifyConstantPoolContent();
+
+    std::vector<uint32_t> literal_ids_;
+    std::unordered_map<uint32_t, uint32_t> inner_literal_map_;
+    std::unordered_map<uint32_t, uint32_t> inner_method_map_;
+
 private:
     void GetMethodIds();
     void GetLiteralIds();
+    void CollectModuleLiteralId(const panda_file::File::EntityId &field_id);
     bool CheckConstantPool(verifier::ActionType type);
     size_t GetVRegCount(const BytecodeInstruction &bc_ins);
     bool CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id);
@@ -65,6 +73,7 @@ private:
     bool VerifyMethodIdInLiteralArray(const uint32_t &id);
     bool VerifyStringIdInLiteralArray(const uint32_t &id);
     bool VerifyLiteralIdInLiteralArray(const uint32_t &id);
+    bool IsModuleLiteralId(const panda_file::File::EntityId &id) const;
     bool VerifySingleLiteralArray(const panda_file::File::EntityId &literal_id);
     bool VerifyLiteralArrays();
     bool VerifyStringId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
@@ -80,7 +89,7 @@ private:
 
     std::unique_ptr<const panda_file::File> file_;
     std::vector<panda_file::File::EntityId> method_ids_;
-    std::vector<uint32_t> literal_ids_;
+    std::unordered_set<uint32_t> module_literals_;
     static constexpr size_t DEFAULT_ARGUMENT_NUMBER = 3;
     static constexpr uint32_t FILE_CONTENT_OFFSET = 12U;
 };

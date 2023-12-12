@@ -15,6 +15,7 @@
 
 #include "utils.h"
 #include <fstream>
+#include <iomanip>
 #include "utils/logger.h"
 
 namespace panda::verifier {
@@ -29,6 +30,31 @@ void GenerateModifiedAbc(const std::vector<unsigned char> &buffer, const std::st
 
     abc_file.write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
     abc_file.close();
+}
+
+void ConvertToLittleEndian(std::vector<unsigned char> &inner_id, const uint32_t &id)
+{
+    std::vector<unsigned char> bytes;
+    for (int i = 0; i < sizeof(uint32_t); ++i) {
+        unsigned char byte = static_cast<unsigned char>((id >> (i * 8)) & 0xff);
+        inner_id.push_back(byte);
+    }
+}
+
+void ModifyBuffer(std::unordered_map<uint32_t, uint32_t> &literal_map, std::vector<unsigned char> &buffer)
+{
+    for (const auto &literal : literal_map) {
+        size_t literal_id = literal.first;
+        std::vector<unsigned char> inner_id;
+        ConvertToLittleEndian(inner_id, literal.second);
+        for (size_t i = literal_id; i < buffer.size(); ++i) {
+            if (buffer[i] == inner_id[0] && buffer[i+1] == inner_id[1]) {
+                buffer[i] = buffer[i + 1];
+                buffer[i + 1] = buffer[i + 2];
+                break;
+            }
+        }
+    }
 }
 
 } // namespace panda::verifier
