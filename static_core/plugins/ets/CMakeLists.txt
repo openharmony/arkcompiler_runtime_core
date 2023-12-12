@@ -22,7 +22,8 @@ add_custom_target(ets_tests COMMENT "Running ets test suites")
 
 function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
     set(oneValueArgs OPT_LEVEL)
-    cmake_parse_arguments(ARG "" "${oneValueArgs}" "" ${ARGN})
+    set(multiValueArgs COMPILER_EXTRA_OPTIONS)
+    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if (NOT DEFINED ARG_OPT_LEVEL)
         set(ARG_OPT_LEVEL 2)
@@ -33,6 +34,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
         --thread=0
         --extension=ets
         --output=${OUTPUT_ABC}
+        ${ARG_COMPILER_EXTRA_OPTIONS}
     )
     set(COMPILE_DEPENDENCIES
         ${es2panda_target}

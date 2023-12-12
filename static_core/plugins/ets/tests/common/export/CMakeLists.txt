@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(bouncing_peas)
-add_subdirectory(bouncing_pandas)
-add_subdirectory(export)
+if (PANDA_TARGET_ARM32)
+    return()
+endif()
+
+run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/import.ets ${CMAKE_CURRENT_BINARY_DIR} selective_export EXPORT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/selective_export.ets)

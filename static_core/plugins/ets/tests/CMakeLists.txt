@@ -131,7 +131,7 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
         return()
     endif()
 
-    set(oneValueArgs OPT_LEVEL)
+    set(oneValueArgs OPT_LEVEL EXPORT_FILE)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -140,8 +140,16 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
     set(ABC_TARGET ${TARGET}-ets-es2panda)
     compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
 
+    if (DEFINED ARG_EXPORT_FILE)
+        get_filename_component(SRC_EXPORT_FNAME ${ARG_EXPORT_FILE} NAME)
+        set(OUTPUT_EXPORT_ABC ${WORK_DIR}/${SRC_EXPORT_FNAME}-${INTERPRETER_TYPE}.abc)
+        set(ABC_EXPORT_TARGET ${TARGET}-export-ets-es2panda)
+        compile_ets_code(${ARG_EXPORT_FILE} ${OUTPUT_EXPORT_ABC} ${ABC_EXPORT_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL} COMPILER_EXTRA_OPTIONS "--ets-module")
+        set(EXTRA_BOOT_PANDAFILES :${OUTPUT_EXPORT_ABC})
+    endif()
+
     set(RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc${EXTRA_BOOT_PANDAFILES}
         --load-runtimes=ets
         --compiler-enable-jit=false
         --interpreter-type=${INTERPRETER_TYPE}
@@ -153,7 +161,7 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
     add_custom_target(${TARGET}
         COMMENT "Running ark INT(${INTERPRETER_TYPE}) for ets file: ${OUTPUT_ABC}"
         COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS}
-        DEPENDS ark etsstdlib ${ABC_TARGET}
+        DEPENDS ark etsstdlib ${ABC_TARGET} ${ABC_EXPORT_TARGET}
     )
 
     string(FIND "${RUNTIME_ARGUMENTS}" "--gc-type" GC_TYPE_SET)
@@ -162,7 +170,7 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
             COMMENT "Running ark INT(${INTERPRETER_TYPE}) for ets file: ${OUTPUT_ABC}"
             COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc
             COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw
-            DEPENDS ark etsstdlib ${ABC_TARGET}
+            DEPENDS ark etsstdlib ${ABC_TARGET} ${ABC_EXPORT_TARGET}
         )
         add_dependencies(ets_tests ${TARGET}-gc)
     endif()
@@ -171,18 +179,18 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
 endfunction()
 
 function(run_int_ets_code ETS_SRC WORK_DIR TARGET)
-    set(oneValueArgs OPT_LEVEL)
+    set(oneValueArgs OPT_LEVEL EXPORT_FILE)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     add_custom_target(${TARGET})
     add_dependencies(ets_tests ${TARGET})
 
-    run_int_ets_code_impl(cpp ${ETS_SRC} ${WORK_DIR} ${TARGET}-cpp OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
-    run_int_ets_code_impl(irtoc ${ETS_SRC} ${WORK_DIR} ${TARGET}-irtoc OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+    run_int_ets_code_impl(cpp ${ETS_SRC} ${WORK_DIR} ${TARGET}-cpp OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS} EXPORT_FILE ${ARG_EXPORT_FILE})
+    run_int_ets_code_impl(irtoc ${ETS_SRC} ${WORK_DIR} ${TARGET}-irtoc OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS} EXPORT_FILE ${ARG_EXPORT_FILE})
     add_dependencies(${TARGET} ${TARGET}-irtoc ${TARGET}-cpp)
     if (PANDA_LLVM_INTERPRETER)
-        run_int_ets_code_impl(llvm ${ETS_SRC} ${WORK_DIR} ${TARGET}-llvmirtoc OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+        run_int_ets_code_impl(llvm ${ETS_SRC} ${WORK_DIR} ${TARGET}-llvmirtoc OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS} EXPORT_FILE ${ARG_EXPORT_FILE})
         add_dependencies(${TARGET} ${TARGET}-llvmirtoc)
     endif()
 endfunction()
