@@ -31,7 +31,7 @@ class JSValue;
 
 struct IntrinsicsAPI {
     // NOLINTBEGIN(readability-identifier-naming)
-    void (*JSRuntimeFinalizationQueueCallback)(EtsObject *obj);
+    void (*JSRuntimeFinalizationRegistryCallback)(EtsObject *obj);
     JSValue *(*JSRuntimeNewJSValueDouble)(double v);
     JSValue *(*JSRuntimeNewJSValueString)(EtsString *v);
     JSValue *(*JSRuntimeNewJSValueObject)(EtsObject *v);

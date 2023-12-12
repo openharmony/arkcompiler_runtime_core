@@ -19,7 +19,7 @@ package escompat_test
 
 function GCJSRuntimeCleanup(): void {
     try {
-        // trigger FinalizationQueue cleanup
+        // trigger FinalizationRegistry cleanup
         let full_gc_id = GC.startGC(GC.FULL_CAUSE);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {

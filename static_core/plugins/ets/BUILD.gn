@@ -160,7 +160,7 @@ if (with_stdlib) {
       "stdlib/std/core/Double.ets",
       "stdlib/std/core/Exception.ets",
       "stdlib/std/core/Field.ets",
-      "stdlib/std/core/FinalizationQueue.ets",
+      "stdlib/std/core/FinalizationRegistry.ets",
       "stdlib/std/core/Float.ets",
       "stdlib/std/core/GC.ets",
       "stdlib/std/core/Int.ets",

@@ -20,14 +20,14 @@
 namespace ark::ets::intrinsics {
 
 /**
- * The function register FinalizationQueue instance in ETS VM.
- * @param instance - FinalizationQueue class instance needed to register for managing by GC.
+ * The function register FinalizationRegistry instance in ETS VM.
+ * @param instance - FinalizationRegistry class instance needed to register for managing by GC.
  */
-extern "C" EtsVoid *StdFinalizationQueueRegisterInstance(EtsObject *instance)
+extern "C" EtsVoid *StdFinalizationRegistryRegisterInstance(EtsObject *instance)
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
-    static_cast<PandaEtsVM *>(thread->GetVM())->RegisterFinalizationQueueInstance(instance);
+    static_cast<PandaEtsVM *>(thread->GetVM())->RegisterFinalizationRegistryInstance(instance);
     return EtsVoid::GetInstance();
 }
 

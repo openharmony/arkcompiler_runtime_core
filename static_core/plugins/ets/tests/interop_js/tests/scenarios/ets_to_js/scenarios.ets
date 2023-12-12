@@ -93,7 +93,7 @@ function function_arg_type_callable_ets(function_to_call: () => JSValue): JSValu
 
 function GCJSRuntimeCleanup(): void {
     try {
-        // trigger FinalizationQueue cleanup
+        // trigger FinalizationRegistry cleanup
         let full_gc_id = GC.startGC(GC.FULL_CAUSE);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {

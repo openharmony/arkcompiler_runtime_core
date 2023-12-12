@@ -408,7 +408,7 @@ function test_jscall_resolution_throws3(): boolean {
 
 function gc_jsruntime_cleanup(): void {
     try {
-        // trigger FinalizationQueue cleanup
+        // trigger FinalizationRegistry cleanup
         let full_gc_id = GC.startGC(GC.FULL_CAUSE);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {

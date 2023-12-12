@@ -69,19 +69,19 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     RegisterBuiltinJSRefConvertors(this);
 
     {
-        auto method = EtsClass::FromRuntimeClass(jsRuntimeClass_)->GetMethod("createFinalizationQueue");
+        auto method = EtsClass::FromRuntimeClass(jsRuntimeClass_)->GetMethod("createFinalizationRegistry");
         ASSERT(method != nullptr);
         auto res = method->GetPandaMethod()->Invoke(coro, nullptr);
         ASSERT(!coro->HasPendingException());
         auto queue = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
-        jsvalueFqueueRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-        ASSERT(jsvalueFqueueRef_ != nullptr);
+        jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+        ASSERT(jsvalueFregistryRef_ != nullptr);
 
-        jsvalueFqueueRegister_ =
+        jsvalueFregistryRegister_ =
             queue->GetClass()
                 ->GetMethod("register", "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:Lstd/core/void;")
                 ->GetPandaMethod();
-        ASSERT(jsvalueFqueueRegister_ != nullptr);
+        ASSERT(jsvalueFregistryRegister_ != nullptr);
     }
 
     etsProxyRefStorage_ = ets_proxy::SharedReferenceStorage::Create();

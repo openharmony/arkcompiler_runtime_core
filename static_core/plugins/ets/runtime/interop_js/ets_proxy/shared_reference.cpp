@@ -57,12 +57,12 @@ bool SharedReference::InitJSObject(InteropCtx *ctx, EtsObject *etsObject, napi_v
 
     LocalObjectHandle<EtsObject> handle(coro, etsObject);  // object may have no strong refs, so create one
     handle->SetInteropHash(refIdx);
-    // NOTE(vpukhov): reuse weakref from finalizationqueue
+    // NOTE(vpukhov): reuse weakref from finalizationRegistry
     etsRef_ = ctx->Refstor()->Add(etsObject->GetCoreType(), mem::Reference::ObjectType::WEAK);
 
     auto boxLong = EtsBoxPrimitive<EtsLong>::Create(EtsCoroutine::GetCurrent(), ToUintPtr(this));
     if (UNLIKELY(boxLong == nullptr ||
-                 !ctx->PushOntoFinalizationQueue(EtsCoroutine::GetCurrent(), handle.GetPtr(), boxLong))) {
+                 !ctx->PushOntoFinalizationRegistry(EtsCoroutine::GetCurrent(), handle.GetPtr(), boxLong))) {
         NAPI_CHECK_FATAL(napi_delete_reference(env, jsRef_));
         return false;
     }

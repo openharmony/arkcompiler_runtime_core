@@ -113,9 +113,9 @@ PANDA_PUBLIC_API EtsVoid *JSRuntimeIntrinsicsSetIntrinsicsAPI(const IntrinsicsAP
 
 namespace intrinsics {
 
-EtsVoid *JSRuntimeFinalizationQueueCallbackIntrinsic(EtsObject *obj)
+EtsVoid *JSRuntimeFinalizationRegistryCallbackIntrinsic(EtsObject *obj)
 {
-    S_INTRINSICS_API->JSRuntimeFinalizationQueueCallback(obj);
+    S_INTRINSICS_API->JSRuntimeFinalizationRegistryCallback(obj);
     return EtsVoid::GetInstance();
 }
 
