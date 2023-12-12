@@ -16,8 +16,7 @@ Ambient Declarations
 ####################
 
 .. meta:
-    frontend_status: Partly
-    todo: ambient variable, namespace, enum, type alias declarations
+    frontend_status: Done
     
 Ambient declarations are the way to specify entities that are declared
 somewhere else.
@@ -78,7 +77,7 @@ Ambient Variable Declarations
 *****************************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
     
 .. code-block:: abnf
 
@@ -250,7 +249,7 @@ Ambient Namespace Declarations
 ******************************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
     
 .. code-block:: abnf
 
