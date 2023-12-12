@@ -29,6 +29,10 @@ class Graph;
 
 class VnObject {
 public:
+    using HalfObjType = uint16_t;
+    using ObjType = uint32_t;
+    using DoubleObjType = uint64_t;
+
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init,hicpp-member-init)
     explicit VnObject()
     {
@@ -41,20 +45,20 @@ public:
     ~VnObject() = default;
 
     void Add(Inst *inst);
-    void Add(uint16_t obj1, uint16_t obj2);
-    void Add(uint32_t obj);
-    void Add(uint64_t obj);
+    void Add(HalfObjType obj1, HalfObjType obj2);
+    void Add(ObjType obj);
+    void Add(DoubleObjType obj);
     bool Compare(VnObject *obj);
     uint32_t GetSize() const
     {
         return size_objs_;
     }
-    uint64_t GetElement(uint32_t index) const
+    ObjType GetElement(uint32_t index) const
     {
         ASSERT(index < size_objs_);
         return objs_[index];
     }
-    uint32_t *GetArray()
+    ObjType *GetArray()
     {
         return objs_.data();
     }
@@ -63,7 +67,7 @@ private:
     uint8_t size_objs_ {0};
     // opcode, type, 2 inputs, 3 advanced property
     static constexpr uint8_t MAX_ARRAY_SIZE = 7;
-    std::array<uint32_t, MAX_ARRAY_SIZE> objs_;
+    std::array<ObjType, MAX_ARRAY_SIZE> objs_;
 };
 
 struct VnObjEqual {
@@ -76,7 +80,8 @@ struct VnObjEqual {
 struct VnObjHash {
     uint32_t operator()(VnObject *obj) const
     {
-        return GetHash32(reinterpret_cast<const uint8_t *>(obj->GetArray()), obj->GetSize());
+        return GetHash32(reinterpret_cast<const uint8_t *>(obj->GetArray()),
+                         obj->GetSize() * sizeof(VnObject::ObjType));
     }
 };
 
