@@ -831,6 +831,8 @@ groups:
         opcode_idx: [0x00]
         format: [pref_op_none]
         prefix: throw
+        exceptions:
+          - x_throw
       - sig: throw.notexists
         acc: none
         opcode_idx: [0x01]

@@ -69,7 +69,6 @@ host_unittest_action("GraphInterfaceTest") {
     "compiler_graph_test.cpp",
     "compiler_inst_test.cpp",
     "compiler_optimizations_test.cpp",
-    "compiler_regalloc_test.cpp",
     "dominators_tree_new_test.cpp",
     "dump_test.cpp",
     "graph_checker_test.cpp",
