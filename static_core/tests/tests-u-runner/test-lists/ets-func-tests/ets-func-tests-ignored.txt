@@ -543,3 +543,9 @@ spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
 escompat/ArrayBufferTest2.ets
 ### End of 14675, 14769, 14841
 
+### object-literals
+spec/object-literals/issue14680.ets
+### End of object-literals
+### Issue 14658
+spec/object-literals/issue14687.ets
+### end Issue 14658
