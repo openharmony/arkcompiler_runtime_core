@@ -69,8 +69,8 @@ GC::~GC()
     if (gcWorker_ != nullptr) {
         allocator->Delete(gcWorker_);
     }
-    if (gcListenersPtr_ != nullptr) {
-        allocator->Delete(gcListenersPtr_);
+    if (gcListenerManager_ != nullptr) {
+        allocator->Delete(gcListenerManager_);
     }
     if (gcBarrierSet_ != nullptr) {
         allocator->Delete(gcBarrierSet_);
@@ -167,7 +167,7 @@ void GC::Initialize(PandaVM *vm)
     trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
     // GC saved the PandaVM instance, so we get allocator from the PandaVM.
     auto allocator = GetInternalAllocator();
-    gcListenersPtr_ = allocator->template New<PandaVector<GCListener *>>(allocator->Adapter());
+    gcListenerManager_ = allocator->template New<GCListenerManager>();
     clearedReferencesLock_ = allocator->New<os::memory::Mutex>();
     os::memory::LockHolder holder(*clearedReferencesLock_);
     clearedReferences_ = allocator->New<PandaVector<panda::mem::Reference *>>(allocator->Adapter());
@@ -893,40 +893,60 @@ bool GC::IsGenerational() const
     return IsGenerationalGCType(gcType_);
 }
 
-void GC::FireGCStarted(const GCTask &task, size_t bytesInHeapBeforeGc)
+void GC::GCListenerManager::AddListener(GCListener *listener)
 {
-    for (auto listener : *gcListenersPtr_) {
-        if (listener != nullptr) {
-            listener->GCStarted(task, bytesInHeapBeforeGc);
+    os::memory::LockHolder lh(listenerLock_);
+    newListeners_.insert(listener);
+}
+
+void GC::GCListenerManager::RemoveListener(GCListener *listener)
+{
+    os::memory::LockHolder lh(listenerLock_);
+    listenersForRemove_.insert(listener);
+}
+
+void GC::GCListenerManager::NormalizeListenersOnStartGC()
+{
+    os::memory::LockHolder lh(listenerLock_);
+    for (auto *listenerForRemove : listenersForRemove_) {
+        if (newListeners_.find(listenerForRemove) != newListeners_.end()) {
+            newListeners_.erase(listenerForRemove);
+        }
+        auto it = currentListeners_.find(listenerForRemove);
+        if (it != currentListeners_.end()) {
+            LOG(DEBUG, GC) << "Remove listener for GC: " << listenerForRemove;
+            currentListeners_.erase(it);
         }
     }
+    listenersForRemove_.clear();
+    for (auto *newListener : newListeners_) {
+        LOG(DEBUG, GC) << "Add new listener for GC: " << newListener;
+        currentListeners_.insert(newListener);
+    }
+    newListeners_.clear();
+}
+
+void GC::FireGCStarted(const GCTask &task, size_t bytesInHeapBeforeGc)
+{
+    gcListenerManager_->NormalizeListenersOnStartGC();
+    gcListenerManager_->IterateOverListeners(
+        [&](GCListener *listener) { listener->GCStarted(task, bytesInHeapBeforeGc); });
 }
 
 void GC::FireGCFinished(const GCTask &task, size_t bytesInHeapBeforeGc, size_t bytesInHeapAfterGc)
 {
-    for (auto listener : *gcListenersPtr_) {
-        if (listener != nullptr) {
-            listener->GCFinished(task, bytesInHeapBeforeGc, bytesInHeapAfterGc);
-        }
-    }
+    gcListenerManager_->IterateOverListeners(
+        [&](GCListener *listener) { listener->GCFinished(task, bytesInHeapBeforeGc, bytesInHeapAfterGc); });
 }
 
 void GC::FireGCPhaseStarted(GCPhase phase)
 {
-    for (auto listener : *gcListenersPtr_) {
-        if (listener != nullptr) {
-            listener->GCPhaseStarted(phase);
-        }
-    }
+    gcListenerManager_->IterateOverListeners([phase](GCListener *listener) { listener->GCPhaseStarted(phase); });
 }
 
 void GC::FireGCPhaseFinished(GCPhase phase)
 {
-    for (auto listener : *gcListenersPtr_) {
-        if (listener != nullptr) {
-            listener->GCPhaseFinished(phase);
-        }
-    }
+    gcListenerManager_->IterateOverListeners([phase](GCListener *listener) { listener->GCPhaseFinished(phase); });
 }
 
 void GC::OnWaitForIdleFail() {}
