@@ -568,42 +568,48 @@ void Disassembler::AddAnnotationElement(pandasm::Function &method, const std::st
     }
 }
 
-std::optional<uint32_t> Disassembler::GetMethodAnnotationByName(const std::string &method_name,
-                                                                const std::string &annotation_name)
+std::optional<std::vector<std::string>> Disassembler::GetAnnotationByMethodName(const std::string &method_name) const
 {
     const auto method_synonyms_iter = prog_.function_synonyms.find(method_name);
     bool is_signature = method_synonyms_iter != prog_.function_synonyms.end();
-    if (is_signature) {
-        const auto method_iter = prog_.function_table.find(method_synonyms_iter->second.back());
-        bool is_method = method_iter != prog_.function_table.end();
-        const auto annotations = method_iter->second.metadata->GetAnnotations();
-        if (!is_method || annotations.empty()) {
-            return std::nullopt;
-        }
-
-        for (const auto &ann_data : annotations) {
-            if (ann_data.GetName() == annotation_name) {
-                return ann_data.GetElements().back().GetValue()->GetAsScalar()->GetValue<uint32_t>();
-            }
-        }
+    if (!is_signature) {
+        return std::nullopt;
     }
 
-    return std::nullopt;
+    const auto method_iter = prog_.function_table.find(method_synonyms_iter->second.back());
+    bool is_method = method_iter != prog_.function_table.end();
+    const auto annotations = method_iter->second.metadata->GetAnnotations();
+    if (!is_method || annotations.empty()) {
+        return std::nullopt;
+    }
+
+    std::vector<std::string> ann;
+    for (const auto &ann_data : annotations) {
+        ann.emplace_back(ann_data.GetName());
+    }
+    return ann;
 }
 
-bool Disassembler::ValidateStringOffset(const panda_file::File::EntityId string_id, const std::string &str)
+std::vector<std::string> Disassembler::GetStrings() const
 {
-    if (!string_id.IsValid()) {
-        return false;
+    std::vector<std::string> strings;
+    for (auto &str_info : string_offset_to_name_) {
+        strings.emplace_back(str_info.second);
     }
 
-    const auto str_iter = string_offset_to_name_.find(string_id);
-    const bool is_string = str_iter != string_offset_to_name_.end();
-    if (is_string) {
-        return str == str_iter->second;
+    return strings;
+}
+
+std::vector<std::string> Disassembler::GetModuleLiterals() const
+{
+    std::vector<std::string> module_literals;
+    for (auto &module_array : modulearray_table_) {
+        for (auto &module : module_array.second) {
+            module_literals.emplace_back(module);
+        }
     }
 
-    return false;
+    return module_literals;
 }
 
 void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::EntityId &proto_id) const

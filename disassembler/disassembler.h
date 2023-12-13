@@ -67,9 +67,9 @@ public:
     void AddMethodToTables(const panda_file::File::EntityId &method_id);
     void GetMethod(pandasm::Function *method, const panda_file::File::EntityId &method_id);
     void GetLiteralArray(pandasm::LiteralArray *lit_array, size_t index) const;
-    std::optional<uint32_t> GetMethodAnnotationByName(const std::string &method_name,
-		                                      const std::string &annotation_name);
-    bool ValidateStringOffset(const panda_file::File::EntityId string_id, const std::string &str);
+    std::optional<std::vector<std::string>> GetAnnotationByMethodName(const std::string &method_name) const;
+    std::vector<std::string> GetStrings() const;
+    std::vector<std::string> GetModuleLiterals() const;
     template <typename T>
     void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
                               const panda_file::LiteralDataAccessor::LiteralValue &value) const;

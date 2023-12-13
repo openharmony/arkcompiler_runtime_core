@@ -39,9 +39,9 @@ export let h = 9;
 let i = 10;
 let j = 11;
 export class ClassB {
-    fun1(i, j) { return i + j; }
+  fun1(i, j) { return i + j; }
 }
 
 export function FunctionC() {
-    let l = 12;
+  let l = 12;
 }
