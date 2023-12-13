@@ -44,6 +44,7 @@ public:
     bool IsInstLdGlobal() const;
     uint16_t GetArgIndex() const;
     uint32_t GetPc() const;
+    uint32_t GetInstId() const;
     BasicBlock GetBasicBlock() const;
     Graph GetGraph() const;
     std::vector<Inst> GetInputInsts() const;

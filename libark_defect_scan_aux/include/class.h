@@ -34,7 +34,7 @@ struct ParentClassInfo {
 
 class Class final {
 public:
-    Class(std::string_view class_name, const AbcFile *abc_file, const Function *def_func)
+    Class(std::string_view class_name, const AbcFile *abc_file, Function *def_func)
         : class_name_(class_name), abc_file_(abc_file), def_func_(def_func)
     {
     }
@@ -44,7 +44,7 @@ public:
 
     const std::string &GetClassName() const;
     const AbcFile *GetAbcFileInstance() const;
-    const Function *GetDefineFunction() const;
+    Function *GetDefineFunction() const;
     size_t GetMemberFunctionCount() const;
     const Function *GetMemberFunctionByName(std::string_view func_name) const;
     const Function *GetMemberFunctionByIndex(size_t index) const;
@@ -62,7 +62,7 @@ private:
 
     std::string class_name_;
     const AbcFile *abc_file_ {nullptr};
-    const Function *def_func_ {nullptr};
+    Function *def_func_ {nullptr};
     std::vector<const Function *> member_func_list_;
     ParentClassInfo par_class_info_;
 
