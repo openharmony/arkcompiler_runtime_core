@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath7)
     ets_class cls = env_->FindClass("C");
     ASSERT_NE(cls, nullptr);
 
-    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -93,7 +93,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath8)
     ets_class cls = env_->FindClass("C");
     ASSERT_NE(cls, nullptr);
 
-    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -188,7 +188,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath10)
     ets_class cls = env_->FindClass("C");
     ASSERT_NE(cls, nullptr);
 
-    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -240,7 +240,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath11)
     ets_class cls = env_->FindClass("C");
     ASSERT_NE(cls, nullptr);
 
-    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);

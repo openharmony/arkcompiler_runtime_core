@@ -27,7 +27,6 @@
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
-#include "plugins/ets/runtime/types/ets_void.h"
 
 namespace ark::ets::intrinsics {
 
@@ -74,10 +73,9 @@ extern "C" EtsArray *StdCoreStackTraceLines()
     return reinterpret_cast<EtsArray *>(arrayHandle.GetPtr());
 }
 
-extern "C" EtsVoid *StdCorePrintStackTrace()
+extern "C" void StdCorePrintStackTrace()
 {
     ark::PrintStackTrace();
-    return EtsVoid::GetInstance();
 }
 
 static PandaString ResolveLibraryName(const PandaString &name)
@@ -90,13 +88,13 @@ static PandaString ResolveLibraryName(const PandaString &name)
 #endif  // PANDA_TARGET_UNIX
 }
 
-extern "C" EtsVoid *LoadLibrary(ark::ets::EtsString *name)
+extern "C" void LoadLibrary(ark::ets::EtsString *name)
 {
     ASSERT(name->AsObject()->IsStringClass());
 
     if (name->IsUtf16()) {
         LOG(FATAL, RUNTIME) << "UTF-16 native library pathes are not supported";
-        return EtsVoid::GetInstance();
+        return;
     }
 
     auto coroutine = EtsCoroutine::GetCurrent();
@@ -104,7 +102,7 @@ extern "C" EtsVoid *LoadLibrary(ark::ets::EtsString *name)
     if (nameStr.empty()) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::FILE_NOT_FOUND_EXCEPTION,
                           "The native library path is empty");
-        return EtsVoid::GetInstance();
+        return;
     }
 
     ScopedNativeCodeThread snct(coroutine);
@@ -118,17 +116,15 @@ extern "C" EtsVoid *LoadLibrary(ark::ets::EtsString *name)
 
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::EXCEPTION_IN_INITIALIZER_ERROR, ss.str());
     }
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdSystemScheduleCoroutine()
+extern "C" void StdSystemScheduleCoroutine()
 {
     auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
     cm->Schedule();
-    return ets::EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
+extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
 {
     constexpr auto POLICIES_MAPPING =
         std::array {CoroutineSchedulingPolicy::DEFAULT, CoroutineSchedulingPolicy::NON_MAIN_WORKER};
@@ -137,14 +133,11 @@ extern "C" EtsVoid *StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
 
     auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
     cm->SetSchedulingPolicy(newPolicy);
-
-    return ets::EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)
+extern "C" void StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)
 {
     instance->SetValue(v);
-    return ets::EtsVoid::GetInstance();
 }
 
 extern "C" EtsBoolean StdSystemAtomicFlagGet(EtsAtomicFlag *instance)

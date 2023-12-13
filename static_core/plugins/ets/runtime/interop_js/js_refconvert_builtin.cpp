@@ -178,10 +178,10 @@ private:
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
             {utf::CStringAsMutf8("at"), "I:Lstd/core/Object;"},
             {utf::CStringAsMutf8("$_get"), "D:Lstd/core/Object;"},
-            {utf::CStringAsMutf8("$_set"), "DLstd/core/Object;:Lstd/core/void;"},
+            {utf::CStringAsMutf8("$_set"), "DLstd/core/Object;:V"},
             {utf::CStringAsMutf8("with"), "DLstd/core/Object;:Lescompat/Array;"},
             {utf::CStringAsMutf8("map"), "Lstd/core/Function1;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("forEach"), "Lstd/core/Function1;:Lstd/core/void;"},
+            {utf::CStringAsMutf8("forEach"), "Lstd/core/Function1;:V"},
             {utf::CStringAsMutf8("pop"), ":Lstd/core/Object;"},
             {utf::CStringAsMutf8("fill"), "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
             {utf::CStringAsMutf8("flat"), ":Lescompat/Array;"},
@@ -408,7 +408,6 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinRefConvertor<JSConvertString>(cache, ctx->GetStringClass());
     RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ctx->GetPromiseClass());
     RegisterBuiltinRefConvertor<JSConvertArrayBuffer>(cache, ctx->GetArrayBufferClass());
-    RegisterBuiltinRefConvertor<JSConvertEtsVoid>(cache, ctx->GetVoidClass());
     RegisterBuiltinRefConvertor<JSConvertEtsUndefined>(cache, ctx->GetUndefinedClass());
 
     RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, linkerExt->GetBoxBooleanClass());

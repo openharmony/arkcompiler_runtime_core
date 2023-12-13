@@ -17,8 +17,7 @@ private static void loadEtsNapiLibrary();
 .record std.core.String <external>
 .record EtsNapiTests <> {}
 .record std.core.ETSGLOBAL <external>
-.record std.core.void <external>
-.function std.core.void std.core.ETSGLOBAL.loadLibrary(std.core.String a0) <external>
+.function void std.core.ETSGLOBAL.loadLibrary(std.core.String a0) <external>
 .function void EtsNapiTests.printFloat10(f32 a0, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9) <native>
 .function void EtsNapiTests.testFloat() {
     fmovi v0, 1.1

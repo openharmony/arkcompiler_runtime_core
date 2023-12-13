@@ -23,7 +23,6 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_field.h"
-#include "plugins/ets/runtime/types/ets_void.h"
 #include "runtime/regexp/ecmascript/regexp_parser.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/handle_scope-inl.h"

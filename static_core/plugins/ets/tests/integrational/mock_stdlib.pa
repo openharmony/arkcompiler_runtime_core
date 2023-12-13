@@ -16,7 +16,6 @@
 .record std.core.String
 .record std.core.StringBuilder
 .record std.core.Object
-.record std.core.void
 .record std.core.__internal_undefined
 .record escompat.StackOverflowError
 

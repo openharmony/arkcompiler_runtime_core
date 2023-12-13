@@ -15,9 +15,6 @@ coretypes:
 - managed_class: std.core.Object
   mirror_class: ark::ets::EtsObject
 
-- managed_class: std.core.void
-  mirror_class: ark::ets::EtsVoid
-
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
 
@@ -41,7 +38,7 @@ intrinsics:
     method_name: finalizationRegistryCallback
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeFinalizationRegistryCallbackIntrinsic
     clear_flags: [can_throw, heap_inv]
@@ -190,7 +187,7 @@ intrinsics:
     method_name: setPropertyJSValue
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.interop.js.JSValue, std.core.String, std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyJSValueIntrinsic
     clear_flags: [can_throw, heap_inv]
@@ -201,7 +198,7 @@ intrinsics:
     method_name: setPropertyDouble
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.interop.js.JSValue, std.core.String, f64 ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyDoubleIntrinsic
     clear_flags: [can_throw, heap_inv]
@@ -212,7 +209,7 @@ intrinsics:
     method_name: setPropertyString
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.interop.js.JSValue, std.core.String, std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyStringIntrinsic
     clear_flags: [can_throw, heap_inv]

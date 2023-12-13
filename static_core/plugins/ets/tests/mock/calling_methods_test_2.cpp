@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral2)
     ets_object obj = env_->AllocObject(cls);
     ASSERT_NE(obj, nullptr);
 
-    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -89,7 +89,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral3)
     ets_object obj = env_->AllocObject(cls);
     ASSERT_NE(obj, nullptr);
 
-    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -145,7 +145,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral4)
     ets_class aCls = env_->FindClass("A");
     ASSERT_NE(aCls, nullptr);
 
-    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -233,7 +233,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     ets_class aCls = env_->FindClass("A");
     ASSERT_NE(aCls, nullptr);
 
-    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);

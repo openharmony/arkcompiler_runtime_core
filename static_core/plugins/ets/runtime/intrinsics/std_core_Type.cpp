@@ -36,7 +36,6 @@
 #include "types/ets_class.h"
 #include "types/ets_method.h"
 #include "types/ets_primitives.h"
-#include "types/ets_void.h"
 #include "types/ets_type.h"
 #include "types/ets_type_comptime_traits.h"
 #include "types/ets_typeapi.h"
@@ -88,8 +87,6 @@ static EtsByte GetRefTypeKind(const PandaString &td, const EtsClass *refType)
         result = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
     } else if (refType->IsUndefined()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
-    } else if (td == ark::ets::panda_file_items::class_descriptors::VOID) {
-        result = static_cast<EtsByte>(EtsTypeAPIKind::VOID);
     } else {
         result = static_cast<EtsByte>(EtsTypeAPIKind::CLASS);
     }
@@ -313,7 +310,7 @@ EtsObject *TypeAPIGetStaticFieldValue(EtsString *ownerTd, EtsString *name)
     return EtsObject::FromCoreType(ownerType->GetRuntimeClass()->GetFieldObject(*field->GetCoreType()));
 }
 
-EtsVoid *TypeAPISetStaticFieldValue(EtsString *ownerTd, EtsString *name, EtsObject *v)
+void TypeAPISetStaticFieldValue(EtsString *ownerTd, EtsString *name, EtsObject *v)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -345,7 +342,6 @@ EtsVoid *TypeAPISetStaticFieldValue(EtsString *ownerTd, EtsString *name, EtsObje
     } else {
         ownerType->GetRuntimeClass()->SetFieldObject(*field->GetCoreType(), valuePtr.GetPtr()->GetCoreType());
     }
-    return EtsVoid::GetInstance();
 }
 
 EtsLong TypeAPIGetMethodsNum(EtsString *td)

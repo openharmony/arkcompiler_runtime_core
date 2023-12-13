@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,6 @@ typedef ets_int ets_size;
 // Reference Types
 #ifdef __cplusplus
 class __ets_object {};
-class __ets_void : public __ets_object {};
 class __ets_class : public __ets_object {};
 class __ets_string : public __ets_object {};
 class __ets_array : public __ets_object {};
@@ -79,7 +78,6 @@ class __ets_doubleArray : public __ets_array {};
 class __ets_error : public __ets_object {};
 
 typedef __ets_object *ets_object;
-typedef __ets_void *ets_void;
 typedef __ets_class *ets_class;
 typedef __ets_string *ets_string;
 typedef __ets_array *ets_array;

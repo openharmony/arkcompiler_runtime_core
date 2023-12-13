@@ -1934,3 +1934,11 @@
 
 # Failed compilation of Enumeration-Operations
 11.enumerations/03.enumeration_operations/enum_type_methods_valueof.ets
+
+# Null type annotation is allowed now, these test are incorrect
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_3.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_2.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_2.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_3.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args2_neg_3.ets
+# End of tests that are wrong because of null type annotation is allowed now

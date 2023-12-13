@@ -30,7 +30,6 @@
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "plugins/ets/runtime/types/ets_void.h"
 #include "runtime/compiler.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/init_icu.h"
@@ -245,7 +244,6 @@ bool PandaEtsVM::Initialize()
         if (Thread::GetCurrent() != nullptr) {
             ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
             EtsCoroutine::GetCurrent()->SetUndefinedObject(GetUndefinedObject());
-            EtsVoid::Initialize();
         }
     }
 

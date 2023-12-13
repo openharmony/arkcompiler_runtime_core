@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -160,106 +160,88 @@ extern "C" ets_int SkoalaCanvas1nSave([[maybe_unused]] EtsEnv *env, [[maybe_unus
 {
     return 1;
 }
-extern "C" ets_void SkoalaDrawPicture([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                      [[maybe_unused]] ets_long picture /*KNativePointer*/,
-                                      [[maybe_unused]] ets_long data /*KNativePointer*/,
-                                      [[maybe_unused]] ets_object cb /*any*/, [[maybe_unused]] ets_boolean sync)
+extern "C" void SkoalaDrawPicture([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                  [[maybe_unused]] ets_long picture /*KNativePointer*/,
+                                  [[maybe_unused]] ets_long data /*KNativePointer*/,
+                                  [[maybe_unused]] ets_object cb /*any*/, [[maybe_unused]] ets_boolean sync)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaProvidePeerFactory([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                             [[maybe_unused]] ets_long func /*KNativePointer*/,
-                                             [[maybe_unused]] ets_long arg /*KNativePointer*/)
+extern "C" void SkoalaProvidePeerFactory([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                         [[maybe_unused]] ets_long func /*KNativePointer*/,
+                                         [[maybe_unused]] ets_long arg /*KNativePointer*/)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaSetPlatformApi([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                         [[maybe_unused]] ets_object api /*any*/)
+extern "C" void SkoalaSetPlatformApi([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                     [[maybe_unused]] ets_object api /*any*/)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaCanvas1nDrawDrawable([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                               [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                               [[maybe_unused]] ets_long drawablePtr /*KNativePointer*/,
-                                               [[maybe_unused]] ets_long matrixArr /*KFloatPtr*/)
+extern "C" void SkoalaCanvas1nDrawDrawable([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                           [[maybe_unused]] ets_long ptr /*KNativePointer*/,
+                                           [[maybe_unused]] ets_long drawablePtr /*KNativePointer*/,
+                                           [[maybe_unused]] ets_long matrixArr /*KFloatPtr*/)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaCanvas1nRestore([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                          [[maybe_unused]] ets_long ptr /*KNativePointer*/)
+extern "C" void SkoalaCanvas1nRestore([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                      [[maybe_unused]] ets_long ptr /*KNativePointer*/)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaPaint1nSetColor([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                          [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                          [[maybe_unused]] ets_int color)
+extern "C" void SkoalaPaint1nSetColor([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                      [[maybe_unused]] ets_long ptr /*KNativePointer*/, [[maybe_unused]] ets_int color)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaCanvas1nDrawOval([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                           [[maybe_unused]] ets_long canvasPtr /*KNativePointer*/,
-                                           [[maybe_unused]] ets_float left, [[maybe_unused]] ets_float top,
-                                           [[maybe_unused]] ets_float right, [[maybe_unused]] ets_float bottom,
-                                           [[maybe_unused]] ets_long paintPtr /*KNativePointer*/)
+extern "C" void SkoalaCanvas1nDrawOval([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                       [[maybe_unused]] ets_long canvasPtr /*KNativePointer*/,
+                                       [[maybe_unused]] ets_float left, [[maybe_unused]] ets_float top,
+                                       [[maybe_unused]] ets_float right, [[maybe_unused]] ets_float bottom,
+                                       [[maybe_unused]] ets_long paintPtr /*KNativePointer*/)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaParagraphParagraphBuilder1nPushStyle(
-    [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass, [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-    [[maybe_unused]] ets_long textStylePtr /*KNativePointer*/)
+extern "C" void SkoalaParagraphParagraphBuilder1nPushStyle([[maybe_unused]] EtsEnv *env,
+                                                           [[maybe_unused]] ets_class klass,
+                                                           [[maybe_unused]] ets_long ptr /*KNativePointer*/,
+                                                           [[maybe_unused]] ets_long textStylePtr /*KNativePointer*/)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaParagraphParagraphBuilder1nAddText([[maybe_unused]] EtsEnv *env,
-                                                             [[maybe_unused]] ets_class klass,
-                                                             [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                             [[maybe_unused]] ets_long textString /*KStringPtr*/)
+extern "C" void SkoalaParagraphParagraphBuilder1nAddText([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                                         [[maybe_unused]] ets_long ptr /*KNativePointer*/,
+                                                         [[maybe_unused]] ets_long textString /*KStringPtr*/)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaParagraphFontCollection1nSetDefaultFontManager(
+extern "C" void SkoalaParagraphFontCollection1nSetDefaultFontManager(
     [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass, [[maybe_unused]] ets_long ptr /*KNativePointer*/,
     [[maybe_unused]] ets_long fontManagerPtr /*KNativePointer*/,
     [[maybe_unused]] ets_long defaultFamilyNameStr /*KStringPtr*/)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaParagraphParagraph1nLayout([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                     [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                     [[maybe_unused]] ets_float width)
+extern "C" void SkoalaParagraphParagraph1nLayout([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                                 [[maybe_unused]] ets_long ptr /*KNativePointer*/,
+                                                 [[maybe_unused]] ets_float width)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaParagraphParagraph1nPaint([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                    [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                    [[maybe_unused]] ets_long canvasPtr /*KNativePointer*/,
-                                                    [[maybe_unused]] ets_float x, [[maybe_unused]] ets_float y)
+extern "C" void SkoalaParagraphParagraph1nPaint([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                                [[maybe_unused]] ets_long ptr /*KNativePointer*/,
+                                                [[maybe_unused]] ets_long canvasPtr /*KNativePointer*/,
+                                                [[maybe_unused]] ets_float x, [[maybe_unused]] ets_float y)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaParagraphTextStyle1nSetColor([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                       [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                       [[maybe_unused]] ets_int color)
+extern "C" void SkoalaParagraphTextStyle1nSetColor([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                                   [[maybe_unused]] ets_long ptr /*KNativePointer*/,
+                                                   [[maybe_unused]] ets_int color)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaParagraphTextStyle1nSetFontSize([[maybe_unused]] EtsEnv *env,
-                                                          [[maybe_unused]] ets_class klass,
-                                                          [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                          [[maybe_unused]] ets_float size)
+extern "C" void SkoalaParagraphTextStyle1nSetFontSize([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                                      [[maybe_unused]] ets_long ptr /*KNativePointer*/,
+                                                      [[maybe_unused]] ets_float size)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaImplManagedInvokeFinalizer([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                     [[maybe_unused]] ets_long finalizer /*KNativePointer*/,
-                                                     [[maybe_unused]] ets_long obj /*KNativePointer*/)
+extern "C" void SkoalaImplManagedInvokeFinalizer([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                                 [[maybe_unused]] ets_long finalizer /*KNativePointer*/,
+                                                 [[maybe_unused]] ets_long obj /*KNativePointer*/)
 {
-    return ets_void();
 }
-extern "C" ets_void SkoalaEnqueueRun([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                     [[maybe_unused]] ets_long redrawerPeerPtr /*KNativePointer*/)
+extern "C" void SkoalaEnqueueRun([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
+                                 [[maybe_unused]] ets_long redrawerPeerPtr /*KNativePointer*/)
 {
-    return ets_void();
 }
 // NOLINTEND(google-runtime-int)
 

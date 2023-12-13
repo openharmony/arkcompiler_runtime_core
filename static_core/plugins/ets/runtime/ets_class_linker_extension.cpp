@@ -185,9 +185,6 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     InitializeArrayClassRoot(ClassRoot::ARRAY_STRING, ClassRoot::STRING,
                              utf::Mutf8AsCString(langCtx_.GetStringArrayClassDescriptor()));
 
-    if (!CacheClass(&voidClass_, VOID.data())) {
-        return false;
-    }
     if (!CacheClass(&boxBooleanClass_, BOX_BOOLEAN.data())) {
         return false;
     }
@@ -213,6 +210,9 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
         return false;
     }
     if (!CacheClass(&promiseClass_, PROMISE.data())) {
+        return false;
+    }
+    if (!CacheClass(&internalUndefinedClass_, INTERNAL_UNDEFINED.data())) {
         return false;
     }
     if (!CacheClass(&arraybufClass_, ARRAY_BUFFER.data())) {

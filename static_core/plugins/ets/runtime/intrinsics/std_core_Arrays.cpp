@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,8 @@
 namespace ark::ets::intrinsics {
 
 template <typename T>
-static EtsVoid *StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t dstStart, int32_t srcStart,
-                              int32_t srcEnd)
+static void StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t dstStart, int32_t srcStart,
+                          int32_t srcEnd)
 {
     auto srcLen = static_cast<int32_t>(src->GetLength());
     auto dstLen = static_cast<int32_t>(dst->GetLength());
@@ -53,8 +53,6 @@ static EtsVoid *StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int3
         auto *coroutine = EtsCoroutine::GetCurrent();
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION, errmsg);
     }
-
-    return static_cast<EtsVoid *>(nullptr);
 }
 
 extern "C" ObjectHeader *StdCoreAllocGenericArray(ets_int len)
@@ -63,52 +61,52 @@ extern "C" ObjectHeader *StdCoreAllocGenericArray(ets_int len)
     return EtsObjectArray::Create(klass, len)->GetCoreType();
 }
 
-extern "C" EtsVoid *StdCoreBoolCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
-                                      int32_t srcEnd)
+extern "C" void StdCoreBoolCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                  int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint8_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
+    StdCoreCopyTo<uint8_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreCharCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
-                                      int32_t srcEnd)
+extern "C" void StdCoreCharCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                  int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint16_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
+    StdCoreCopyTo<uint16_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreShortCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
-                                       int32_t srcEnd)
+extern "C" void StdCoreShortCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                   int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint16_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
+    StdCoreCopyTo<uint16_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreByteCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
-                                      int32_t srcEnd)
+extern "C" void StdCoreByteCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                  int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint8_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
+    StdCoreCopyTo<uint8_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreIntCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
-                                     int32_t srcEnd)
+extern "C" void StdCoreIntCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                 int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint32_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
+    StdCoreCopyTo<uint32_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreLongCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
-                                      int32_t srcEnd)
+extern "C" void StdCoreLongCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                  int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
+    StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreFloatCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
-                                       int32_t srcEnd)
+extern "C" void StdCoreFloatCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                   int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint32_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
+    StdCoreCopyTo<uint32_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreDoubleCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
-                                        int32_t srcEnd)
+extern "C" void StdCoreDoubleCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                    int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
+    StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
 }  // namespace ark::ets::intrinsics

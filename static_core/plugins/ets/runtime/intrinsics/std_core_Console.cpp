@@ -17,7 +17,6 @@
 #include <string_view>
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "plugins/ets/runtime/types/ets_void.h"
 #include "libpandabase/utils/utf.h"
 
 #include "intrinsics.h"
@@ -30,60 +29,52 @@ constexpr const char *INF_LITERAL = "Infinity";
 constexpr const char *NEGINF_LITERAL = "-Infinity";
 }  // namespace
 
-extern "C" EtsVoid *StdConsolePrintln(ObjectHeader *header [[maybe_unused]])
+extern "C" void StdConsolePrintln(ObjectHeader *header [[maybe_unused]])
 {
     std::cout << std::endl;
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintBool([[maybe_unused]] ObjectHeader *header, uint8_t b)
+extern "C" void StdConsolePrintBool([[maybe_unused]] ObjectHeader *header, uint8_t b)
 {
     if (b != 0U) {
         std::cout << "true";
     } else {
         std::cout << "false";
     }
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintChar([[maybe_unused]] ObjectHeader *header, uint16_t c)
+extern "C" void StdConsolePrintChar([[maybe_unused]] ObjectHeader *header, uint16_t c)
 {
     const utf::Utf8Char utf8Ch = utf::ConvertUtf16ToUtf8(c, 0, false);
     std::cout << std::string_view(reinterpret_cast<const char *>(utf8Ch.ch.data()), utf8Ch.n);
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintString([[maybe_unused]] ObjectHeader *header, EtsString *str)
+extern "C" void StdConsolePrintString([[maybe_unused]] ObjectHeader *header, EtsString *str)
 {
     ark::intrinsics::PrintString(str->GetCoreType());
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintI32([[maybe_unused]] ObjectHeader *header, int32_t v)
+extern "C" void StdConsolePrintI32([[maybe_unused]] ObjectHeader *header, int32_t v)
 {
     ark::intrinsics::PrintI32(v);
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintI16([[maybe_unused]] ObjectHeader *header, int16_t v)
+extern "C" void StdConsolePrintI16([[maybe_unused]] ObjectHeader *header, int16_t v)
 {
     ark::intrinsics::PrintI32(v);
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintI8([[maybe_unused]] ObjectHeader *header, int8_t v)
+extern "C" void StdConsolePrintI8([[maybe_unused]] ObjectHeader *header, int8_t v)
 {
     ark::intrinsics::PrintI32(v);
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintI64([[maybe_unused]] ObjectHeader *header, int64_t v)
+extern "C" void StdConsolePrintI64([[maybe_unused]] ObjectHeader *header, int64_t v)
 {
     ark::intrinsics::PrintI64(v);
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintF32([[maybe_unused]] ObjectHeader *header, float v)
+extern "C" void StdConsolePrintF32([[maybe_unused]] ObjectHeader *header, float v)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coroutine);
@@ -101,10 +92,9 @@ extern "C" EtsVoid *StdConsolePrintF32([[maybe_unused]] ObjectHeader *header, fl
     } else {
         ark::intrinsics::PrintF32(v);
     }
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdConsolePrintF64([[maybe_unused]] ObjectHeader *header, double v)
+extern "C" void StdConsolePrintF64([[maybe_unused]] ObjectHeader *header, double v)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coroutine);
@@ -122,7 +112,6 @@ extern "C" EtsVoid *StdConsolePrintF64([[maybe_unused]] ObjectHeader *header, do
     } else {
         ark::intrinsics::PrintF64(v);
     }
-    return EtsVoid::GetInstance();
 }
 
 }  // namespace ark::ets::intrinsics

@@ -261,7 +261,7 @@ final class TypeCreatorCtx {
             const pushToArr: (creator: Object) => void = (creator: Object): void => {
                 asArr.push(creator as TypeCreator)
             }
-            const arr = all.forEach(Set.__asGeneric<TypeCreator>(pushToArr as Object))
+            all.forEach(Set.__asGeneric<TypeCreator>(pushToArr as Object))
             for (let i = 0; i < asArr.length; i++) {
                 const el = asArr.$_get(i)
                 if (!visited.has(el)) {
@@ -589,7 +589,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
  */
 export final class LambdaTypeCreator extends TypeCreator {
     internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
-    internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF)
+    internal result: TypeOrCreator;
     private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.LAMBDA)
 
     /** default constructor */
@@ -954,7 +954,7 @@ export final class ParameterCreator {
 export final class MethodCreator {
     internal name: string
     internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
-    internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF)
+    internal result: TypeOrCreator;
     internal body: CallableBody | null = null
     internal frozen: FreezableImpl = new FreezableImpl()
     internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.METHOD)

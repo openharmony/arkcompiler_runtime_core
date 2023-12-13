@@ -146,24 +146,6 @@ pandasm::Record &TypeCreatorCtx::AddRefTypeAsExternal(const std::string &name)
     return prog_.recordTable.emplace(objectRec.name, std::move(objectRec)).first->second;
 }
 
-std::string TypeCreatorCtx::GetRefVoidInstanceName()
-{
-    pandasm::Record objectRec {typeapi_create_consts::TYPE_VOID.data(), SourceLanguage::ETS};
-    objectRec.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-    auto &voidRecord = prog_.recordTable.emplace(objectRec.name, std::move(objectRec)).first->second;
-
-    if (voidRecord.fieldList.empty()) {
-        pandasm::Field voidField {panda_file::SourceLang::ETS};
-        voidField.type = pandasm::Type {voidRecord.name, 0, true};
-        voidField.name = typeapi_create_consts::TYPE_VOID_FIELD;
-        voidField.metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
-        voidField.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-        voidRecord.fieldList.emplace_back(std::move(voidField));
-    }
-
-    return voidRecord.name + '.' + voidRecord.fieldList.front().name;
-}
-
 const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(const std::string &primTypeName)
 {
     if (auto found = primitiveTypesCtorDtor_.find(primTypeName); found != primitiveTypesCtorDtor_.end()) {

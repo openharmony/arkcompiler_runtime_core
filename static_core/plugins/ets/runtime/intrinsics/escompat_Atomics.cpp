@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,6 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
 #include "plugins/ets/runtime/types/ets_shared_memory-inl.h"
-#include "plugins/ets/runtime/types/ets_void.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 
 namespace ark::ets::intrinsics {
@@ -42,10 +41,9 @@ extern "C" int8_t SharedMemoryAt(EtsSharedMemory *mem, int32_t index)
     return mem->GetElement(index);
 }
 
-extern "C" EtsVoid *SharedMemorySet(EtsSharedMemory *mem, int32_t index, int8_t value)
+extern "C" void SharedMemorySet(EtsSharedMemory *mem, int32_t index, int8_t value)
 {
     mem->SetElement(index, value);
-    return EtsVoid::GetInstance();
 }
 
 extern "C" int32_t SharedMemoryGetByteLength(EtsSharedMemory *mem)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,7 +125,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral7)
     ets_class cls = env_->FindClass("F");
     ASSERT_NE(cls, nullptr);
 
-    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:Lstd/core/void;");
+    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -173,7 +173,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral8)
     ets_class cls = env_->FindClass("F");
     ASSERT_NE(cls, nullptr);
 
-    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:Lstd/core/void;");
+    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -223,7 +223,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral9)
     ets_class aCls = env_->FindClass("A");
     ASSERT_NE(aCls, nullptr);
 
-    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:Lstd/core/void;");
+    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -315,7 +315,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral11)
     ets_class aCls = env_->FindClass("A");
     ASSERT_NE(aCls, nullptr);
 
-    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:Lstd/core/void;");
+    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -362,7 +362,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral12)
     ets_class cls = env_->FindClass("F");
     ASSERT_NE(cls, nullptr);
 
-    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:Lstd/core/void;");
+    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
@@ -402,7 +402,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral13)
     ets_class cls = env_->FindClass("F");
     ASSERT_NE(cls, nullptr);
 
-    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:Lstd/core/void;");
+    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);

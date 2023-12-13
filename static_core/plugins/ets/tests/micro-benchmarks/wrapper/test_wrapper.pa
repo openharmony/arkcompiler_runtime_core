@@ -15,8 +15,7 @@
 
 .record escompat.Date <external>
 .record std.core.Console <external>
-.record std.core.void <external>
-.function std.core.void std.core.Console.println(std.core.Console a0, f64 a1) <external>
+.function void std.core.Console.println(std.core.Console a0, f64 a1) <external>
 .function f64 escompat.Date.now() <external>
 
 .function void test_loop(A a0, B a1, i32 a2) {

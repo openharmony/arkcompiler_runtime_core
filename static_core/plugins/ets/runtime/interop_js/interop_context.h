@@ -345,11 +345,6 @@ public:
         return stringClass_;
     }
 
-    Class *GetVoidClass() const
-    {
-        return voidClass_;
-    }
-
     Class *GetUndefinedClass() const
     {
         return undefinedClass_;
@@ -515,7 +510,6 @@ private:
     Class *jsErrorClass_ {};
     Class *objectClass_ {};
     Class *stringClass_ {};
-    Class *voidClass_ {};
     Class *undefinedClass_ {};
     Class *promiseClass_ {};
     Class *errorClass_ {};

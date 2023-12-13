@@ -178,9 +178,6 @@ export abstract class Type extends Object {
         switch (kind) {
             case TypeKind.NONE:
                 return null
-            case TypeKind.VOID:
-                return VoidType.REF
-
             case TypeKind.CHAR:
                 return TypeAPIIsValueType(td) ? CharType.VAL : CharType.REF
             case TypeKind.BOOLEAN:
@@ -533,7 +530,7 @@ export abstract class Type extends Object {
             return true
         } else if (other.equals(ObjectType)) {
             let isNullish = (this) instanceof UndefinedType || (this) instanceof NullType
-            return this.isReference() && !isNullish && !((this) instanceof VoidType)
+            return this.isReference() && !isNullish
         }
         return false
     }
@@ -725,85 +722,6 @@ export final class UndefinedType extends Type {
     }
 }
 
-/**
- * Represents void type
- */
-export final class VoidType extends Type {
-    public static readonly REF: VoidType = new VoidType()
-
-    private constructor() {
-        this.td = TypeAPIGetTypeDescriptor(Void)
-    }
-
-    /**
-     * Checks whether type is primitive or composite
-     *
-     * @returns true if type is primitive and false otherwise
-     */
-    public override isPrimitive(): boolean {
-        return true
-    }
-
-    /**
-     * Checks whether type is reference or composite
-     *
-     * @returns true if type is reference and false otherwise
-     */
-    public override isReference(): boolean {
-        return true
-    }
-
-    /**
-     * Checks whether type has name
-     *
-     * @returns true if type has name
-     */
-    public override hasName(): boolean {
-        return true
-    }
-
-    /**
-     * Returns name of type if exists and empty string otherwise
-     *
-     * @returns type name
-     */
-    public override getName(): string {
-        return "void"
-    }
-
-    /**
-     * Returns literal of type if exists
-     *
-     * @returns type literal
-     */
-    public override getLiteral(): string {
-        return "void"
-    }
-
-    /**
-     * Checks for equality this instance with provided object, treated as a VoidType
-     *
-     * @param to object to be checked against
-     *
-     * @returns true if object also has VoidType
-     */
-    public override equals(to: NullishType): boolean {
-        return to instanceof VoidType
-    }
-
-    internal override convertObject(obj: NullishType): NullishType {
-        if (!this.assignableFrom(Type.of(obj))) {
-            throw new Error("invalid conversion")
-        }
-        return Void
-    }
-}
-
-/**
- * Represents char type
- *
- * @note Boxed Char and primitive char both have CharType
- */
 export final class CharType extends Type {
     public static readonly VAL: CharType = new CharType(ValueTypeDesc.CHAR, true)
     public static readonly REF: CharType = new CharType(TypeAPIGetTypeDescriptor(new Char()), false)

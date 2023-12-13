@@ -18,9 +18,6 @@ coretypes:
 - managed_class: std.core.Object
   mirror_class: ark::ets::EtsObject
 
-- managed_class: std.core.void
-  mirror_class: ark::ets::EtsVoid
-
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
 
@@ -542,7 +539,7 @@ intrinsics:
     method_name: print
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::StdConsolePrintString
 
@@ -552,7 +549,7 @@ intrinsics:
     method_name: print
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [ u1 ]
     impl: ark::ets::intrinsics::StdConsolePrintBool
 
@@ -562,7 +559,7 @@ intrinsics:
     method_name: print
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [ i8 ]
     impl: ark::ets::intrinsics::StdConsolePrintI8
 
@@ -572,7 +569,7 @@ intrinsics:
     method_name: print
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [ i16 ]
     impl: ark::ets::intrinsics::StdConsolePrintI16
 
@@ -582,7 +579,7 @@ intrinsics:
     method_name: print
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdConsolePrintChar
 
@@ -592,7 +589,7 @@ intrinsics:
     method_name: print
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdConsolePrintI32
 
@@ -602,7 +599,7 @@ intrinsics:
     method_name: print
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdConsolePrintI64
 
@@ -612,7 +609,7 @@ intrinsics:
     method_name: println
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: []
     impl: ark::ets::intrinsics::StdConsolePrintln
 
@@ -622,7 +619,7 @@ intrinsics:
     method_name: loadLibrary
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::LoadLibrary
 
@@ -1410,7 +1407,7 @@ intrinsics:
     method_name: copyTo
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args:
          - u1\[
          - u1\[
@@ -1428,7 +1425,7 @@ intrinsics:
     method_name: copyTo
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args:
          - u16\[
          - u16\[
@@ -1446,7 +1443,7 @@ intrinsics:
     method_name: copyTo
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args:
          - i8\[
          - i8\[
@@ -1464,7 +1461,7 @@ intrinsics:
     method_name: copyTo
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args:
          - i16\[
          - i16\[
@@ -1482,7 +1479,7 @@ intrinsics:
     method_name: copyTo
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args:
          - i32\[
          - i32\[
@@ -1500,7 +1497,7 @@ intrinsics:
     method_name: copyTo
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args:
          - i64\[
          - i64\[
@@ -1518,7 +1515,7 @@ intrinsics:
     method_name: copyTo
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args:
          - f32\[
          - f32\[
@@ -1536,7 +1533,7 @@ intrinsics:
     method_name: copyTo
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args:
          - f64\[
          - f64\[
@@ -1557,7 +1554,7 @@ intrinsics:
     method_name: printStackTrace
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: []
     impl: ark::ets::intrinsics::StdCorePrintStackTrace
 
@@ -1578,7 +1575,7 @@ intrinsics:
     method_name: exit
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [i32]
     impl: ark::intrinsics::SystemExit
     clear_flags: [require_state, runtime_call, can_throw]
@@ -1602,7 +1599,7 @@ intrinsics:
     method_name: waitForFinishGC
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdGCWaitForFinishGC
 
@@ -1612,7 +1609,7 @@ intrinsics:
     method_name: scheduleGcAfterNthAlloc
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::StdGCScheduleGCAfterNthAlloc
 
@@ -1632,7 +1629,7 @@ intrinsics:
     method_name: postponeGCStart
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: []
     impl: ark::ets::intrinsics::StdGCPostponeGCStart
 
@@ -1642,7 +1639,7 @@ intrinsics:
     method_name: postponeGCEnd
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: []
     impl: ark::ets::intrinsics::StdGCPostponeGCEnd
 
@@ -1752,7 +1749,7 @@ intrinsics:
     method_name: pinObject
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdGCPinObject
 
@@ -1762,7 +1759,7 @@ intrinsics:
     method_name: unpinObject
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdGCUnpinObject
 
@@ -1802,7 +1799,7 @@ intrinsics:
     method_name: registerNativeAllocation
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdGCRegisterNativeAllocation
 
@@ -1812,7 +1809,7 @@ intrinsics:
     method_name: registerNativeFree
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdGCRegisterNativeFree
 
@@ -1825,7 +1822,7 @@ intrinsics:
     method_name: registerInstance
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryRegisterInstance
 
@@ -1838,7 +1835,7 @@ intrinsics:
     method_name: resolveImpl
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [std.core.Object]
     impl: ark::ets::intrinsics::EtsPromiseResolve
 
@@ -1848,7 +1845,7 @@ intrinsics:
     method_name: rejectImpl
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [std.core.Object]
     impl: ark::ets::intrinsics::EtsPromiseReject
 
@@ -1858,7 +1855,7 @@ intrinsics:
     method_name: addToJobQueue
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [std.core.Object]
     impl: ark::ets::intrinsics::EtsPromiseAddToJobQueue
 
@@ -1881,7 +1878,7 @@ intrinsics:
     method_name: Schedule
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: []
     impl: ark::ets::intrinsics::StdSystemScheduleCoroutine
 
@@ -2065,7 +2062,7 @@ intrinsics:
     method_name: setSchedulingPolicy
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [i32]
     impl: ark::ets::intrinsics::StdSystemSetCoroutineSchedulingPolicy
 
@@ -2075,7 +2072,7 @@ intrinsics:
     method_name: set
     static: false
     signature:
-      ret: std.core.void
+      ret: void
       args: [u1]
     impl: ark::ets::intrinsics::StdSystemAtomicFlagSet
 
@@ -2410,7 +2407,7 @@ intrinsics:
     method_name: TypeAPISetStaticFieldValue
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.String, std.core.String, std.core.Object ]
     impl: ark::ets::intrinsics::TypeAPISetStaticFieldValue
 
@@ -2706,7 +2703,7 @@ intrinsics:
     method_name: ValueAPISetFieldObject
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, std.core.Object ]
     impl: ark::ets::intrinsics::ValueAPISetFieldObject
 
@@ -2716,7 +2713,7 @@ intrinsics:
     method_name: ValueAPISetFieldBoolean
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, u1 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldBoolean
 
@@ -2726,7 +2723,7 @@ intrinsics:
     method_name: ValueAPISetFieldByte
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, i8 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByte
 
@@ -2736,7 +2733,7 @@ intrinsics:
     method_name: ValueAPISetFieldChar
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, u16 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldChar
 
@@ -2746,7 +2743,7 @@ intrinsics:
     method_name: ValueAPISetFieldShort
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, i16 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldShort
 
@@ -2756,7 +2753,7 @@ intrinsics:
     method_name: ValueAPISetFieldInt
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, i32 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldInt
 
@@ -2766,7 +2763,7 @@ intrinsics:
     method_name: ValueAPISetFieldLong
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, i64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldLong
 
@@ -2776,7 +2773,7 @@ intrinsics:
     method_name: ValueAPISetFieldFloat
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, f32 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldFloat
 
@@ -2786,7 +2783,7 @@ intrinsics:
     method_name: ValueAPISetFieldDouble
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, f64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldDouble
 
@@ -2798,7 +2795,7 @@ intrinsics:
     method_name: ValueAPISetFieldByNameObject
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, std.core.String, std.core.Object ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameObject
 
@@ -2808,7 +2805,7 @@ intrinsics:
     method_name: ValueAPISetFieldByNameBoolean
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, std.core.String, u1 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameBoolean
 
@@ -2818,7 +2815,7 @@ intrinsics:
     method_name: ValueAPISetFieldByNameByte
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, std.core.String, i8 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameByte
 
@@ -2828,7 +2825,7 @@ intrinsics:
     method_name: ValueAPISetFieldByNameChar
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, std.core.String, u16 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameChar
 
@@ -2838,7 +2835,7 @@ intrinsics:
     method_name: ValueAPISetFieldByNameShort
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, std.core.String, i16 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameShort
 
@@ -2848,7 +2845,7 @@ intrinsics:
     method_name: ValueAPISetFieldByNameInt
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, std.core.String, i32 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameInt
 
@@ -2858,7 +2855,7 @@ intrinsics:
     method_name: ValueAPISetFieldByNameLong
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, std.core.String, i64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameLong
 
@@ -2868,7 +2865,7 @@ intrinsics:
     method_name: ValueAPISetFieldByNameFloat
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, std.core.String, f32 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameFloat
 
@@ -2878,7 +2875,7 @@ intrinsics:
     method_name: ValueAPISetFieldByNameDouble
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, std.core.String, f64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameDouble
 
@@ -2900,7 +2897,7 @@ intrinsics:
     method_name: ValueAPISetElementObject
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, std.core.Object ]
     impl: ark::ets::intrinsics::ValueAPISetElementObject
 
@@ -2910,7 +2907,7 @@ intrinsics:
     method_name: ValueAPISetElementBoolean
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, u1 ]
     impl: ark::ets::intrinsics::ValueAPISetElementBoolean
 
@@ -2920,7 +2917,7 @@ intrinsics:
     method_name: ValueAPISetElementByte
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, i8 ]
     impl: ark::ets::intrinsics::ValueAPISetElementByte
 
@@ -2930,7 +2927,7 @@ intrinsics:
     method_name: ValueAPISetElementChar
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, u16 ]
     impl: ark::ets::intrinsics::ValueAPISetElementChar
 
@@ -2940,7 +2937,7 @@ intrinsics:
     method_name: ValueAPISetElementShort
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, i16 ]
     impl: ark::ets::intrinsics::ValueAPISetElementShort
 
@@ -2950,7 +2947,7 @@ intrinsics:
     method_name: ValueAPISetElementInt
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, i32 ]
     impl: ark::ets::intrinsics::ValueAPISetElementInt
 
@@ -2960,7 +2957,7 @@ intrinsics:
     method_name: ValueAPISetElementLong
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, i64 ]
     impl: ark::ets::intrinsics::ValueAPISetElementLong
 
@@ -2970,7 +2967,7 @@ intrinsics:
     method_name: ValueAPISetElementFloat
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, f32 ]
     impl: ark::ets::intrinsics::ValueAPISetElementFloat
 
@@ -2980,7 +2977,7 @@ intrinsics:
     method_name: ValueAPISetElementDouble
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.core.Object, i64, f64 ]
     impl: ark::ets::intrinsics::ValueAPISetElementDouble
 
@@ -3095,7 +3092,7 @@ intrinsics:
     method_name: destroyCtx
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ i64 ]
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxDestroy
 

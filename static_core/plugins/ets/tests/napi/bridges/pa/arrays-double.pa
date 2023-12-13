@@ -17,8 +17,7 @@ private static void loadEtsNapiLibrary();
 .record EtsNapiTests <> {}
 .record std.core.String <external>
 .record std.core.ETSGLOBAL <external>
-.record std.core.void <external>
-.function std.core.void std.core.ETSGLOBAL.loadLibrary(std.core.String a0) <external>
+.function void std.core.ETSGLOBAL.loadLibrary(std.core.String a0) <external>
 .function void EtsNapiTests.printDoubleArr(f64[] a0) <native>
 .function void EtsNapiTests.testDoubleArr() {
     # Create array: f64[5]

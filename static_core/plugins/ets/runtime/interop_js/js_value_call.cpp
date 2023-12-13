@@ -44,9 +44,6 @@ template <typename FUnwrapVal, typename FClsResolv, typename FStoreRef>
     auto klass = resolveRefCls();
 
     // start fastpath
-    if (klass == ctx->GetVoidClass()) {
-        return unwrapVal(helpers::TypeIdentity<JSConvertEtsVoid>());
-    }
     if (klass == ctx->GetJSValueClass()) {
         return unwrapVal(helpers::TypeIdentity<JSConvertJSValue>());
     }
@@ -161,9 +158,6 @@ template <typename FClsResolv, typename FStore, typename FRead>
 
     ASSERT(resolveRefCls()->IsAssignableFrom(klass));
     // start fastpath
-    if (klass == ctx->GetVoidClass()) {
-        return wrapRef(helpers::TypeIdentity<JSConvertEtsVoid>(), ref);
-    }
     if (klass == ctx->GetJSValueClass()) {
         return wrapRef(helpers::TypeIdentity<JSConvertJSValue>(), ref);
     }
