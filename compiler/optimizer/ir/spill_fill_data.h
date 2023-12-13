@@ -92,7 +92,9 @@ private:
     DataType::Type type_ {DataType::NO_TYPE};
 };
 
+#ifndef IR_FOR_LIBARK_DEFECT_SCAN_AUX
 static_assert(sizeof(SpillFillData) <= sizeof(uint64_t));
+#endif
 
 namespace sf_data {
 

@@ -214,14 +214,20 @@ public:
     std::string ToString(Arch arch);
 
 private:
+#ifdef IR_FOR_LIBARK_DEFECT_SCAN_AUX
+    uint32_t bit_fields_;
+#else
     uint16_t bit_fields_;
+#endif
 
     using KindField = BitField<Kind, 0, MinimumBitsToStore(Kind::LAST)>;
     using ValueField =
         KindField::NextField<uintptr_t, sizeof(bit_fields_) * BITS_PER_BYTE - MinimumBitsToStore(Kind::LAST)>;
 };
 
+#ifndef IR_FOR_LIBARK_DEFECT_SCAN_AUX
 static_assert(sizeof(Location) <= sizeof(uint16_t));
+#endif
 
 class LocationsInfo {
 public:
