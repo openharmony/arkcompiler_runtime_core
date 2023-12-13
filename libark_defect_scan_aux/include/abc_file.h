@@ -54,6 +54,7 @@ public:
 
     bool IsModule() const;
     const std::string &GetAbcFileName() const;
+    const std::vector<std::unique_ptr<Class>> &GetClassList() const;
     size_t GetDefinedFunctionCount() const;
     size_t GetDefinedClassCount() const;
     const Function *GetDefinedFunctionByIndex(size_t index) const;

@@ -38,6 +38,11 @@ size_t Class::GetMemberFunctionCount() const
     return member_func_list_.size();
 }
 
+const std::vector<const Function *> &Class::GetMemberFunctionList() const
+{
+    return member_func_list_;
+}
+
 const Function *Class::GetMemberFunctionByName(std::string_view func_name) const
 {
     for (auto func : member_func_list_) {

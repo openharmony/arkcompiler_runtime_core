@@ -22,6 +22,7 @@
 #include "libpandafile/field_data_accessor-inl.h"
 #include "libpandafile/module_data_accessor-inl.h"
 #include "compiler/optimizer/ir_builder/ir_builder.h"
+#include "bytecode_optimizer/common.h"
 #include "bytecode_optimizer/runtime_adapter.h"
 #include "callee_info.h"
 #include "class.h"
@@ -88,6 +89,11 @@ size_t AbcFile::GetDefinedFunctionCount() const
 size_t AbcFile::GetDefinedClassCount() const
 {
     return def_class_list_.size();
+}
+
+const std::vector<std::unique_ptr<Class>> &AbcFile::GetClassList() const
+{
+    return def_class_list_;
 }
 
 const Function *AbcFile::GetDefinedFunctionByIndex(size_t index) const
@@ -754,6 +760,8 @@ compiler::Graph *AbcFile::GenerateFunctionGraph(const panda_file::MethodDataAcce
 {
     panda::BytecodeOptimizerRuntimeAdapter adapter(mda.GetPandaFile());
     auto method_ptr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
+    compiler::options.SetCompilerUseSafepoint(false);
+    compiler::options.SetCompilerMaxBytecodeSize(bytecodeopt::MAX_BYTECODE_SIZE);
     compiler::Graph *graph = allocator_->New<compiler::Graph>(allocator_.get(), local_allocator_.get(), Arch::NONE,
                                                               method_ptr, &adapter, false, nullptr, true, true);
     if ((graph == nullptr) || !graph->RunPass<compiler::IrBuilder>()) {
