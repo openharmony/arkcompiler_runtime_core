@@ -651,3 +651,26 @@ arkui/dollar_dollar_11.ets
 arkui/dollar_dollar_12.ets
 arkui/dollar_dollar_13.ets
 ### End Of Built-In Component Two Way Value Synchronization
+### Annotations issues
+### Issue 14040 -> Annotations not yet implemented
+spec/annotations/annotation_@Builder.ets
+spec/annotations/annotation_@Builder_2.ets
+spec/annotations/annotation_@Component.ets
+spec/annotations/annotation_@Consume.ets
+spec/annotations/annotation_@Entry.ets
+spec/annotations/annotation_@Link.ets
+spec/annotations/annotation_@Link_2.ets
+spec/annotations/annotation_@LocalStorageLink.ets
+spec/annotations/annotation_@ObjectLink.ets
+spec/annotations/annotation_@Observed.ets
+spec/annotations/annotation_@Prop.ets
+spec/annotations/annotation_@Provide.ets
+spec/annotations/annotation_@State.ets
+spec/annotations/annotation_@State_2.ets
+spec/annotations/annotation_@State_3.ets
+spec/annotations/annotation_@StorageLink.ets
+spec/annotations/annotation_@StorageLink_2.ets
+spec/annotations/annotation_@Watch.ets
+spec/annotations/annotation_@Watch_2.ets
+### End of Issue 14040
+### End of Annotations
