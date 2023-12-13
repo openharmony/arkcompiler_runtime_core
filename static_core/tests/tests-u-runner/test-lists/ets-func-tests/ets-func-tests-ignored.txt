@@ -303,6 +303,111 @@ spec/lambda/compareBooleanWithTrue.ets
 spec/lambda/incorrectAsyncLambdaReturnValue.ets
 spec/lambda/incorrectVariableDeclaration.ets
 ### lambda issues end
+### Undefined type
+spec/undefined-type/define/define-interface-name-as-undefined.ets
+spec/undefined-type/array-and-undefined-union_0.ets
+spec/undefined-type/array-and-undefined-union_1.ets
+spec/undefined-type/array-and-undefined-union_2.ets
+spec/undefined-type/array-and-undefined-union_3.ets
+spec/undefined-type/array-of-class-and-undefined_0.ets
+spec/undefined-type/array-of-class-and-undefined_1.ets
+spec/undefined-type/array-of-class-and-undefined_2.ets
+spec/undefined-type/array-of-class-and-undefined_3.ets
+spec/undefined-type/array-of-class-and-undefined_4.ets
+spec/undefined-type/assign/assign-boolean-to-undefined.ets
+spec/undefined-type/assign/assign-lambda-to-undefined.ets
+spec/undefined-type/assign/assign-literal-to-undefined.ets
+spec/undefined-type/assign/assign-null-to-undefined.ets
+spec/undefined-type/assign/assign-number-to-undefined.ets
+spec/undefined-type/assign/assign-object-to_undefined.ets
+spec/undefined-type/assign/assign-string-to-undefined.ets
+spec/undefined-type/assign/assign-undefined-to-untyped.ets
+spec/undefined-type/define/define-class-extends-undefined.ets
+spec/undefined-type/define/define-class-implements-undefined.ets
+spec/undefined-type/define/define-class-member-as-undefined-in-other-class_0.ets
+spec/undefined-type/define/define-class-member-as-undefined-in-other-class_1.ets
+spec/undefined-type/push/push-literal-to-undefined_0.ets
+spec/undefined-type/push/push-literal-to-undefined_1.ets
+spec/undefined-type/push/push-null-to-undefined.ets
+spec/undefined-type/push/push-number-to-undefined.ets
+spec/undefined-type/push/push-object-to-undefined.ets
+spec/undefined-type/push/push-string-to-undefined.ets
+spec/undefined-type/set/add-literal-to-undefined_0.ets
+spec/undefined-type/set/add-literal-to-undefined_1.ets
+spec/undefined-type/set/add-object-to-undefined.ets
+spec/undefined-type/set/add-string-to-undefined.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_1.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_2.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_3.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_4.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_5.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_6.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_7.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_8.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_9.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_10.ets
+spec/undefined-type/undefined-array-type.ets
+spec/undefined-type/undefined-union-array-type_0.ets
+spec/undefined-type/undefined-union-array-type_1.ets
+###### Issue 14595
+spec/undefined-type/array-push/push-undefined-to-undefined.ets
+spec/undefined-type/assign/assign-undefined-to-undefined_0.ets
+spec/undefined-type/set-add/add-number-to-undefined.ets
+spec/undefined-type/set-add/add-boolean-to-undefined.ets
+spec/undefined-type/array-push/push-number-to-undefined.ets
+spec/undefined-type/set-add/add-undefined-to-undefined.ets
+spec/undefined-type/array-push/push-object-to-undefined.ets
+spec/undefined-type/set-add/add-string-to-undefined.ets
+spec/undefined-type/set-add/add-null-to-undefined.ets
+spec/undefined-type/assign/assign-undefined-to-undefined_1.ets
+spec/undefined-type/set-add/add-object-to-undefined.ets
+spec/undefined-type/array-push/push-string-to-undefined.ets
+spec/undefined-type/array-push/push-null-to-undefined.ets
+spec/undefined-type/set-add/add-literal-to-undefined_1.ets
+spec/undefined-type/array-push/push-lambda-to-undefined.ets
+spec/undefined-type/array-push/push-literal-to-undefined_0.ets
+spec/undefined-type/set-add/add-literal-to-undefined_0.ets
+spec/undefined-type/array-push/push-boolean-to-undefined.ets
+spec/undefined-type/set-add/add-lambda-to-undefined.ets
+spec/undefined-type/array-push/push-literal-to-undefined_1.ets
+spec/undefined-type/undefined-union-array-type_3.ets
+###### End Issue 14495
+spec/undefined-type/undefined-and-array-of-class-and-undefined_0.ets
+spec/undefined-type/define/define-class-member-as-undefined_0.ets
+spec/undefined-type/define/define-class-member-as-undefined-and-assign-0.ets
+spec/undefined-type/define/define-class-member-as-undefined-and-assign-1.ets
+###### Issue 14166
+spec/undefined-type/assign/assign-undefined-to-undefined_1.ets
+spec/undefined-type/assign/assign-undefined-to-untyped_1.ets
+###### End Issue 14166
+###### Issue 14108
+spec/undefined-type/array-of-complex-type.ets
+spec/undefined-type/complex-type.ets
+###### End Issue 14108
+###### Issue 14035
+spec/undefined-type/define/define-class-member-as-question-and-assign.ets
+spec/undefined-type/define/define-class-member-as-question.ets
+###### End Issue 14035
+###### Issue 13874
+spec/undefined-type/array-of-type_0.ets
+spec/undefined-type/array-of-type_1.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_1.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_2.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_3.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_4.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_5.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_6.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_7.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_9.ets
+spec/undefined-type/undefined-and-array-of-class-and-undefined_10.ets
+###### End Issue 13874
+###### Issue 14602
+spec/undefined-type/issue14602.ets
+###### End Issue 14602
+###### Issue 14610
+spec/undefined-type/issue14610.ets
+###### End Issue 14610
+###### EOF Undefined type
 
 ### Start never issues
 ### Issue 14472
