@@ -783,7 +783,7 @@ bool Disassembler::LocateCatchBlock(const BytecodeInstruction &bc_ins, const Byt
     const size_t handler_end_idx = getBytecodeInstructionNumber(bc_ins, handler_end_bc_ins);
 
     const bool handler_begin_offset_in_range = bc_ins_last.GetAddress() > handler_begin_bc_ins.GetAddress();
-    const bool handler_end_offset_in_range = bc_ins_last.GetAddress() > handler_end_bc_ins.GetAddress();
+    const bool handler_end_offset_in_range = bc_ins_last.GetAddress() >= handler_end_bc_ins.GetAddress();
     const bool handler_end_present = catch_block.GetCodeSize() != 0;
     const bool handler_begin_offset_valid = handler_begin_idx != std::numeric_limits<size_t>::max();
     const bool handler_end_offset_valid = handler_end_idx != std::numeric_limits<size_t>::max();
