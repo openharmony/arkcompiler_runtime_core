@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H_
 
+#include "mark_word.h"
 #include "runtime/include/object_header-inl.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -209,9 +210,18 @@ public:
         ASSERT(old_mark.GetState() == panda::MarkWord::STATE_UNLOCKED);
         MarkWord new_mark = old_mark.DecodeFromHash(hash);
         ASSERT(new_mark.GetState() == MarkWord::STATE_HASHED);
-        AtomicSetMark(old_mark, new_mark);
-        ASSERT(AtomicGetMark().GetState() == MarkWord::STATE_HASHED);
-        ASSERT(AtomicGetMark().GetHash() == hash);
+        [[maybe_unused]] bool res = AtomicSetMark(old_mark, new_mark);
+        ASSERT(res);  // NOTE(vpukhov): something went wrong
+    }
+
+    inline void DropInteropHash()
+    {
+        ASSERT_MANAGED_CODE();
+        MarkWord old_mark = AtomicGetMark();
+        ASSERT(old_mark.GetState() == MarkWord::STATE_HASHED);
+        MarkWord new_mark = old_mark.DecodeFromUnlocked();
+        [[maybe_unused]] bool res = AtomicSetMark(old_mark, new_mark);
+        ASSERT(res);  // NOTE(vpukhov): something went wrong
     }
 
     EtsObject() = delete;
