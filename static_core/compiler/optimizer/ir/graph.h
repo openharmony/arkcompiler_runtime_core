@@ -1379,5 +1379,6 @@ void InvalidateBlocksOrderAnalyzes(Graph *graph);
 void MarkLoopExits(const Graph *graph, Marker marker);
 void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rm_pred);
 std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr method);
+size_t GetObjectOffset(const Graph *graph, ObjectType obj_type, RuntimeInterface::FieldPtr field, uint32_t type_id);
 }  // namespace panda::compiler
 #endif  // COMPILER_OPTIMIZER_IR_GRAPH_H
