@@ -28,11 +28,6 @@ scoped_macro(:unpack_length) do |length, compression, length_shift|
     end
 end
 
-macro(:get_entrypoint_offset) do |entrypoint_id|
-  "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::#{entrypoint_id})"
-end
-
-
 def GenerateStringEquals(lang, dynamic, compression)
     suffix = (compression ? "Compressed" : "")
     length_shift = (dynamic ? 2 : 1)

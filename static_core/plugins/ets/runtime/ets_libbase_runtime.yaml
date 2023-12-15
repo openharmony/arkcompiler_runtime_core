@@ -1231,6 +1231,153 @@ intrinsics:
 ############
 # std.core #
 ############
+  - name: StdCoreBoolCopyTo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyTo
+    static: true
+    signature:
+      ret: std.core.void
+      args:
+         - u1\[
+         - u1\[
+         - i32
+         - i32
+         - i32
+    impl: panda::ets::intrinsics::StdCoreBoolCopyTo
+    set_flags: [can_throw, heap_inv]
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateArrayCopyTo
+
+  - name: StdCoreCharCopyTo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyTo
+    static: true
+    signature:
+      ret: std.core.void
+      args:
+         - u16\[
+         - u16\[
+         - i32
+         - i32
+         - i32
+    impl: panda::ets::intrinsics::StdCoreCharCopyTo
+    set_flags: [can_throw, heap_inv]
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateArrayCopyTo
+
+  - name: StdCoreByteCopyTo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyTo
+    static: true
+    signature:
+      ret: std.core.void
+      args:
+         - i8\[
+         - i8\[
+         - i32
+         - i32
+         - i32
+    impl: panda::ets::intrinsics::StdCoreByteCopyTo
+    set_flags: [can_throw, heap_inv]
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateArrayCopyTo
+
+  - name: StdCoreShortCopyTo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyTo
+    static: true
+    signature:
+      ret: std.core.void
+      args:
+         - i16\[
+         - i16\[
+         - i32
+         - i32
+         - i32
+    impl: panda::ets::intrinsics::StdCoreShortCopyTo
+    set_flags: [can_throw, heap_inv]
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateArrayCopyTo
+
+  - name: StdCoreIntCopyTo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyTo
+    static: true
+    signature:
+      ret: std.core.void
+      args:
+         - i32\[
+         - i32\[
+         - i32
+         - i32
+         - i32
+    impl: panda::ets::intrinsics::StdCoreIntCopyTo
+    set_flags: [can_throw, heap_inv]
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateArrayCopyTo
+
+  - name: StdCoreLongCopyTo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyTo
+    static: true
+    signature:
+      ret: std.core.void
+      args:
+         - i64\[
+         - i64\[
+         - i32
+         - i32
+         - i32
+    impl: panda::ets::intrinsics::StdCoreLongCopyTo
+    set_flags: [can_throw, heap_inv]
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateArrayCopyTo
+
+  - name: StdCoreFloatCopyTo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyTo
+    static: true
+    signature:
+      ret: std.core.void
+      args:
+         - f32\[
+         - f32\[
+         - i32
+         - i32
+         - i32
+    impl: panda::ets::intrinsics::StdCoreFloatCopyTo
+    set_flags: [can_throw, heap_inv]
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateArrayCopyTo
+
+  - name: StdCoreDoubleCopyTo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyTo
+    static: true
+    signature:
+      ret: std.core.void
+      args:
+         - f64\[
+         - f64\[
+         - i32
+         - i32
+         - i32
+    impl: panda::ets::intrinsics::StdCoreDoubleCopyTo
+    set_flags: [can_throw, heap_inv]
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateArrayCopyTo
+
+############
+# std.core #
+############
   - name: StdCorePrintStackTrace
     space: ets
     class_name: std.core.ETSGLOBAL
@@ -2378,7 +2525,6 @@ intrinsics:
       args: [ std.core.Object, std.core.String ]
     impl: panda::ets::intrinsics::ValueAPIGetFieldByNameDouble
     clear_flags: [ ]
-
 
   - name: ValueAPISetFieldObject
     space: ets

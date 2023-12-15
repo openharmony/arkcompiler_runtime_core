@@ -42,3 +42,98 @@
   - uint64_t*
   - panda::ObjectHeader*
 
+- name: ArrayCopyTo1bSlowPath
+  entrypoint: StdCoreByteCopyTo
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+      - void
+      - void*
+      - void*
+      - int32_t
+      - int32_t
+      - int32_t
+
+- name: ArrayCopyTo2bSlowPath
+  entrypoint: StdCoreShortCopyTo
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+      - void
+      - void*
+      - void*
+      - int32_t
+      - int32_t
+      - int32_t
+
+- name: ArrayCopyTo4bSlowPath
+  entrypoint: StdCoreIntCopyTo
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+      - void
+      - void*
+      - void*
+      - int32_t
+      - int32_t
+      - int32_t
+
+- name: ArrayCopyTo8bSlowPath
+  entrypoint: StdCoreLongCopyTo
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+      - void
+      - void*
+      - void*
+      - int32_t
+      - int32_t
+      - int32_t
+
+- name: ArrayCopyTo1bOddSaved
+  entrypoint: StdCoreByteCopyTo
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+      - void
+      - void*
+      - void*
+      - int32_t
+      - int32_t
+      - int32_t
+
+- name: ArrayCopyTo2bOddSaved
+  entrypoint: StdCoreShortCopyTo
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+      - void
+      - void*
+      - void*
+      - int32_t
+      - int32_t
+      - int32_t
+
+- name: ArrayCopyTo4bOddSaved
+  entrypoint: StdCoreIntCopyTo
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+      - void
+      - void*
+      - void*
+      - int32_t
+      - int32_t
+      - int32_t
+
+- name: ArrayCopyTo8bOddSaved
+  entrypoint: StdCoreLongCopyTo
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+      - void
+      - void*
+      - void*
+      - int32_t
+      - int32_t
+      - int32_t

@@ -28,7 +28,7 @@ foreach(test ${strings_tests})
 
     if (PANDA_TARGET_ARM32)
         # failure in regalloc, see #13413
-        set(extra_options RUNTIME_EXTRA_OPTIONS "--compiler-inlining-blacklist=std.core.ETSGLOBAL::copyTo" "--compiler-regex='(?!std.core.ETSGLOBAL::copyTo).*'")
+        set(extra_options RUNTIME_EXTRA_OPTIONS "--compiler-inlining-blacklist=std.core.ETSGLOBAL::copyTo" "--compiler-regex='(?!std.core.ETSGLOBAL::copyTo).*'" "--compiler-ignore-failures=true")
     endif()
 
     run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${extra_options})

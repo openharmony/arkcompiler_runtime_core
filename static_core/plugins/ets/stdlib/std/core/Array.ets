@@ -140,23 +140,7 @@ export function fill(arr: boolean[], value: boolean): void {
  * ```
  */
 // TODO(petr-shumilov): make intrinsic
-export function copyTo(src: boolean[], dst: boolean[], dstStart: int, srcStart: int, srcEnd: int): void throws {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: boolean[], dst: boolean[], dstStart: int, srcStart: int, srcEnd: int): void throws;
 
 /**
  * creates a copy of src array with respect to passed indexes.
@@ -1275,23 +1259,7 @@ export function fill(arr: byte[], value: byte): void {
  * ```
  */
 // TODO(petr-shumilov): make intrinsic
-export function copyTo(src: byte[], dst: byte[], dstStart: int, srcStart: int, srcEnd: int): void throws {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: byte[], dst: byte[], dstStart: int, srcStart: int, srcEnd: int): void throws;
 
 /**
  * creates a copy of src array with respect to passed indexes.
@@ -2836,23 +2804,7 @@ export function fill(arr: short[], value: short): void {
  * ```
  */
 // TODO(petr-shumilov): make intrinsic
-export function copyTo(src: short[], dst: short[], dstStart: int, srcStart: int, srcEnd: int): void throws {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: short[], dst: short[], dstStart: int, srcStart: int, srcEnd: int): void throws;
 
 /**
  * creates a copy of src array with respect to passed indexes.
@@ -4379,23 +4331,7 @@ export function fill(arr: int[], value: int): void {
  * ```
  */
 // TODO(petr-shumilov): make intrinsic
-export function copyTo(src: int[], dst: int[], dstStart: int, srcStart: int, srcEnd: int): void throws {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: int[], dst: int[], dstStart: int, srcStart: int, srcEnd: int): void throws;
 
 /**
  * creates a copy of src array with respect to passed indexes.
@@ -5922,23 +5858,7 @@ export function fill(arr: long[], value: long): void {
  * ```
  */
 // TODO(petr-shumilov): make intrinsic
-export function copyTo(src: long[], dst: long[], dstStart: int, srcStart: int, srcEnd: int): void throws {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: long[], dst: long[], dstStart: int, srcStart: int, srcEnd: int): void throws;
 
 /**
  * creates a copy of src array with respect to passed indexes.
@@ -7465,23 +7385,7 @@ export function fill(arr: float[], value: float): void {
  * ```
  */
 // TODO(petr-shumilov): make intrinsic
-export function copyTo(src: float[], dst: float[], dstStart: int, srcStart: int, srcEnd: int): void throws {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: float[], dst: float[], dstStart: int, srcStart: int, srcEnd: int): void throws;
 
 /**
  * creates a copy of src array with respect to passed indexes.
@@ -9008,23 +8912,7 @@ export function fill(arr: double[], value: double): void {
  * ```
  */
 // TODO(petr-shumilov): make intrinsic
-export function copyTo(src: double[], dst: double[], dstStart: int, srcStart: int, srcEnd: int): void throws {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: double[], dst: double[], dstStart: int, srcStart: int, srcEnd: int): void throws;
 
 /**
  * creates a copy of src array with respect to passed indexes.
@@ -10551,23 +10439,7 @@ export function fill(arr: char[], value: char): void {
  * ```
  */
 // TODO(petr-shumilov): make intrinsic
-export function copyTo(src: char[], dst: char[], dstStart: int, srcStart: int, srcEnd: int): void throws {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: char[], dst: char[], dstStart: int, srcStart: int, srcEnd: int): void throws;
 
 /**
  * creates a copy of src array with respect to passed indexes.

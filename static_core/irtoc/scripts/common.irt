@@ -336,3 +336,7 @@ macro(:nullptr) do
   src_type = Options.arch_64_bits? ? 'DataType::INT64' : 'DataType::INT32'
   Bitcast(0).SrcType(src_type).ptr
 end
+
+macro(:get_entrypoint_offset) do |entrypoint_id|
+  "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::#{entrypoint_id})"
+end
