@@ -21,6 +21,7 @@
 #include "mem/code_allocator.h"
 #include "include/method.h"
 #include "utils/arch.h"
+#include "compiler_task_runner.h"
 
 namespace panda::compiler {
 class Graph;
@@ -58,12 +59,18 @@ private:
     std::vector<Entry, typename mem::AllocatorAdapter<Entry>> stats_list_;
 };
 
-bool JITCompileMethod(RuntimeInterface *runtime, Method *method, bool is_osr, CodeAllocator *code_allocator,
-                      ArenaAllocator *allocator, ArenaAllocator *local_allocator,
-                      ArenaAllocator *gdb_debug_info_allocator, JITStats *jit_stats);
-bool CompileInGraph(RuntimeInterface *runtime, Method *method, bool is_osr, ArenaAllocator *allocator,
-                    ArenaAllocator *local_allocator, bool is_dynamic, Arch *arch, const std::string &method_name,
-                    Graph **graph, JITStats *jit_stats = nullptr);
+Arch ChooseArch(Arch arch);
+
+// @tparam RUNNER_MODE=BACKGROUND_MODE means that compilation of method
+// is divided into tasks for TaskManager and occurs in its threads.
+// Otherwise compilation occurs in-place.
+template <TaskRunnerMode RUNNER_MODE>
+void JITCompileMethod(RuntimeInterface *runtime, CodeAllocator *code_allocator,
+                      ArenaAllocator *gdb_debug_info_allocator, JITStats *jit_stats,
+                      CompilerTaskRunner<RUNNER_MODE> task_runner);
+template <TaskRunnerMode RUNNER_MODE>
+void CompileInGraph(RuntimeInterface *runtime, bool is_dynamic, Arch arch, CompilerTaskRunner<RUNNER_MODE> task_runner,
+                    JITStats *jit_stats = nullptr);
 bool CheckMethodInLists(const std::string &method_name);
 }  // namespace panda::compiler
 

@@ -78,6 +78,8 @@ private:
     bool Compile(Class *klass, const panda_file::File &pfile_ref);
 
     bool Compile(Method *method, size_t method_index);
+    bool CompileInGraph(CompilingContext *ctx, std::string method_name, bool is_osr);
+    bool RunOptimizations(CompilingContext *ctx);
     bool CompileJit(CompilingContext *ctx);
     bool CompileOsr(CompilingContext *ctx);
     bool CompileAot(CompilingContext *ctx);

@@ -16,8 +16,10 @@
 #ifndef PANDA_PIPELINE_H
 #define PANDA_PIPELINE_H
 
-#include "macros.h"
 #include <memory>
+
+#include "libpandabase/macros.h"
+#include "compiler/compiler_task_runner.h"
 
 namespace panda::compiler {
 class Graph;
@@ -34,7 +36,6 @@ public:
     NO_COPY_SEMANTIC(Pipeline);
     NO_MOVE_SEMANTIC(Pipeline);
 
-    virtual bool Run();
     virtual bool RunOptimizations();
 
     Graph *GetGraph()
@@ -42,9 +43,15 @@ public:
         return graph_;
     }
 
+    template <TaskRunnerMode RUNNER_MODE>
+    static void Run(CompilerTaskRunner<RUNNER_MODE> task_runner);
+
     static std::unique_ptr<Pipeline> Create(Graph *graph);
 
 private:
+    template <TaskRunnerMode RUNNER_MODE>
+    static void RunRegAllocAndCodeGenPass(CompilerTaskRunner<RUNNER_MODE> task_runner);
+
     Graph *graph_ {nullptr};
 };
 

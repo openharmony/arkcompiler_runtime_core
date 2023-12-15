@@ -23,10 +23,11 @@ namespace panda {
 
 class CompilerProcessor : public ProcessorInterface<CompilerTask, Compiler *> {
 public:
-    explicit CompilerProcessor(Compiler *compiler);
+    explicit CompilerProcessor(Compiler *compiler) : compiler_(compiler) {}
     bool Process(CompilerTask &&task) override;
 
 private:
+    void InPlaceCompileMethod(CompilerTask &&ctx);
     Compiler *compiler_;
 };
 

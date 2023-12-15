@@ -667,6 +667,27 @@ bool Paoc::Compile(Method *method, size_t method_index)
     return ctx.compilation_status;
 }
 
+bool Paoc::CompileInGraph(CompilingContext *ctx, std::string method_name, bool is_osr)
+{
+    compiler::InPlaceCompilerTaskRunner task_runner;
+    auto &task_ctx = task_runner.GetContext();
+    task_ctx.SetMethod(ctx->method);
+    task_ctx.SetOsr(is_osr);
+    task_ctx.SetAllocator(&ctx->allocator);
+    task_ctx.SetLocalAllocator(&ctx->graph_local_allocator);
+    task_ctx.SetMethodName(std::move(method_name));
+    task_runner.AddFinalize(
+        [&graph = ctx->graph](InPlaceCompilerContext &compiler_ctx) { graph = compiler_ctx.GetGraph(); });
+
+    bool success = true;
+    task_runner.AddCallbackOnFail(
+        [&success]([[maybe_unused]] InPlaceCompilerContext &compiler_ctx) { success = false; });
+    auto arch = ChooseArch(Arch::NONE);
+    bool is_dynamic = panda::panda_file::IsDynamicLanguage(ctx->method->GetClass()->GetSourceLang());
+    compiler::CompileInGraph<compiler::INPLACE_MODE>(runtime_, is_dynamic, arch, std::move(task_runner));
+    return success;
+}
+
 /**
  * Compiles a method in JIT mode (i.e. no code generated).
  * @return `false` on error.
@@ -676,10 +697,7 @@ bool Paoc::CompileJit(CompilingContext *ctx)
     ASSERT(ctx != nullptr);
     ASSERT(mode_ == PaocMode::JIT);
     auto name = runtime_->GetMethodFullName(ctx->method, false);
-    auto arch {Arch::NONE};
-    bool is_dynamic = panda::panda_file::IsDynamicLanguage(ctx->method->GetClass()->GetSourceLang());
-    if (!compiler::CompileInGraph(runtime_, ctx->method, false, &ctx->allocator, &ctx->graph_local_allocator,
-                                  is_dynamic, &arch, name, &ctx->graph)) {
+    if (!CompileInGraph(ctx, name, false)) {
         std::string err_msg = "Failed to JIT-compile method: " + name;
         PrintError(err_msg);
         return false;
@@ -696,12 +714,9 @@ bool Paoc::CompileOsr(CompilingContext *ctx)
 {
     ASSERT(ctx != nullptr);
     ASSERT(mode_ == PaocMode::OSR);
-    std::string name;
-    auto arch {Arch::NONE};
-    bool is_dynamic = panda::panda_file::IsDynamicLanguage(ctx->method->GetClass()->GetSourceLang());
-    if (!compiler::CompileInGraph(runtime_, ctx->method, true, &ctx->allocator, &ctx->graph_local_allocator, is_dynamic,
-                                  &arch, name, &ctx->graph)) {
-        std::string err_msg = "Failed to OSR-compile method: " + runtime_->GetMethodFullName(ctx->method, false);
+    auto name = runtime_->GetMethodFullName(ctx->method, false);
+    if (!CompileInGraph(ctx, name, true)) {
+        std::string err_msg = "Failed to OSR-compile method: " + name;
         PrintError(err_msg);
         return false;
     }
@@ -747,6 +762,18 @@ bool Paoc::FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t 
                       compiled_method.GetCode().size(), compiled_method.GetCodeInfo().size(),
                       events::CompilationStatus::COMPILED);
     return true;
+}
+
+bool Paoc::RunOptimizations(CompilingContext *ctx)
+{
+    compiler::InPlaceCompilerTaskRunner task_runner;
+    task_runner.GetContext().SetGraph(ctx->graph);
+    bool success = true;
+    task_runner.AddCallbackOnFail(
+        [&success]([[maybe_unused]] InPlaceCompilerContext &compiler_ctx) { success = false; });
+
+    compiler::RunOptimizations<compiler::INPLACE_MODE>(std::move(task_runner));
+    return success;
 }
 
 /**
@@ -806,7 +833,7 @@ bool Paoc::CompileAot(CompilingContext *ctx)
         LOG_PAOC(INFO) << "LLVM fallback to ARK AOT on method: " << runtime_->GetMethodFullName(ctx->method, false);
     }
 
-    if (!RunOptimizations(ctx->graph)) {
+    if (!RunOptimizations(ctx)) {
         PrintError("RunOptimizations failed!");
         return false;
     }

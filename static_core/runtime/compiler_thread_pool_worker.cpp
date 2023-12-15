@@ -17,6 +17,7 @@
 #include "runtime/compiler_thread_pool_worker.h"
 #include "runtime/compiler_queue_simple.h"
 #include "runtime/compiler_queue_aged_counter_priority.h"
+#include "compiler/inplace_task_runner.h"
 
 namespace panda {
 
@@ -61,17 +62,27 @@ CompilerQueueInterface *CompilerThreadPoolWorker::CreateJITTaskQueue(const std::
     return nullptr;
 }
 
-CompilerProcessor::CompilerProcessor(Compiler *compiler)
-{
-    compiler_ = compiler;
-}
-
 bool CompilerProcessor::Process(CompilerTask &&task)
 {
-    if (task.GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
-        compiler_->CompileMethodLocked(std::move(task));
-    }
+    InPlaceCompileMethod(std::move(task));
     return true;
+}
+
+void CompilerProcessor::InPlaceCompileMethod(CompilerTask &&ctx)
+{
+    compiler::InPlaceCompilerTaskRunner task_runner;
+    auto &compiler_ctx = task_runner.GetContext();
+    compiler_ctx.SetMethod(ctx.GetMethod());
+    compiler_ctx.SetOsr(ctx.IsOsr());
+    compiler_ctx.SetVM(ctx.GetVM());
+
+    // Set current thread to have access to vm during compilation
+    Thread compiler_thread(ctx.GetVM(), Thread::ThreadType::THREAD_TYPE_COMPILER);
+    ScopedCurrentThread sct(&compiler_thread);
+
+    if (compiler_ctx.GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
+        compiler_->CompileMethodLocked<compiler::INPLACE_MODE>(std::move(task_runner));
+    }
 }
 
 }  // namespace panda

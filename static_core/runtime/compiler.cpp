@@ -27,6 +27,8 @@
 #include "runtime/include/thread.h"
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/mem/heap_manager.h"
+#include "compiler/inplace_task_runner.h"
+#include "compiler/background_task_runner.h"
 
 namespace panda {
 
@@ -42,10 +44,9 @@ class ErrorHandler : public ClassLinkerErrorHandler {
     void OnError([[maybe_unused]] ClassLinker::Error error, [[maybe_unused]] const PandaString &message) override {}
 };
 
-bool Compiler::IsCompilationExpired(const CompilerTask &ctx)
+bool Compiler::IsCompilationExpired(Method *method, bool is_osr)
 {
-    return (ctx.IsOsr() && GetOsrCode(ctx.GetMethod()) != nullptr) ||
-           (!ctx.IsOsr() && ctx.GetMethod()->HasCompiledCode());
+    return (is_osr && GetOsrCode(method) != nullptr) || (!is_osr && method->HasCompiledCode());
 }
 
 /// Intrinsics fast paths are supported only for G1 GC.
@@ -824,48 +825,62 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr
     return false;
 }
 
-void Compiler::CompileMethodLocked(const CompilerTask &&ctx)
+template <compiler::TaskRunnerMode RUNNER_MODE>
+void Compiler::CompileMethodLocked(compiler::CompilerTaskRunner<RUNNER_MODE> task_runner)
 {
     os::memory::LockHolder lock(compilation_lock_);
-    StartCompileMethod(std::move(ctx));
+    StartCompileMethod<RUNNER_MODE>(std::move(task_runner));
 }
 
-void Compiler::StartCompileMethod(const CompilerTask &&ctx)
+template <compiler::TaskRunnerMode RUNNER_MODE>
+void Compiler::StartCompileMethod(compiler::CompilerTaskRunner<RUNNER_MODE> task_runner)
 {
     ASSERT(runtime_iface_ != nullptr);
-    auto method = ctx.GetMethod();
+    auto &task_ctx = task_runner.GetContext();
+    auto *method = task_ctx.GetMethod();
 
     method->ResetHotnessCounter();
 
-    if (IsCompilationExpired(ctx)) {
+    if (IsCompilationExpired(method, task_ctx.IsOsr())) {
         ASSERT(!no_async_jit_);
+        compiler::CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), false);
         return;
     }
 
-    PandaVM *vm = ctx.GetVM();
+    mem::MemStatsType *mem_stats = task_ctx.GetVM()->GetMemStats();
 
-    // Set current thread to have access to vm during compilation
-    Thread compiler_thread(vm, Thread::ThreadType::THREAD_TYPE_COMPILER);
-    ScopedCurrentThread sct(&compiler_thread);
+    auto allocator = std::make_unique<panda::ArenaAllocator>(panda::SpaceType::SPACE_TYPE_COMPILER, mem_stats);
+    auto local_allocator =
+        std::make_unique<panda::ArenaAllocator>(panda::SpaceType::SPACE_TYPE_COMPILER, mem_stats, true);
 
-    auto is_osr = ctx.IsOsr();
-    mem::MemStatsType *mem_stats = vm->GetMemStats();
-    panda::ArenaAllocator allocator(panda::SpaceType::SPACE_TYPE_COMPILER, mem_stats);
-    panda::ArenaAllocator graph_local_allocator(panda::SpaceType::SPACE_TYPE_COMPILER, mem_stats, true);
-    if (!compiler::JITCompileMethod(runtime_iface_, method, ctx.IsOsr(), code_allocator_, &allocator,
-                                    &graph_local_allocator, &gdb_debug_info_allocator_, jit_stats_)) {
+    if constexpr (RUNNER_MODE == compiler::BACKGROUND_MODE) {
+        task_ctx.SetAllocator(std::move(allocator));
+        task_ctx.SetLocalAllocator(std::move(local_allocator));
+    } else {
+        task_ctx.SetAllocator(allocator.get());
+        task_ctx.SetLocalAllocator(local_allocator.get());
+    }
+
+    task_runner.AddFinalize([](compiler::CompilerContext<RUNNER_MODE> &compiler_ctx) {
+        auto *compiled_method = compiler_ctx.GetMethod();
+        auto is_compiled = compiler_ctx.GetCompilationStatus();
+        if (is_compiled) {
+            // Check that method was not deoptimized
+            compiled_method->AtomicSetCompilationStatus(Method::COMPILATION, Method::COMPILED);
+            return;
+        }
         // If deoptimization occurred during OSR compilation, the compilation returns false.
         // For the case we need reset compiation status
-        if (is_osr) {
-            method->SetCompilationStatus(Method::NOT_COMPILED);
+        if (compiler_ctx.IsOsr()) {
+            compiled_method->SetCompilationStatus(Method::NOT_COMPILED);
             return;
         }
         // Failure during compilation, should we retry later?
-        method->SetCompilationStatus(Method::FAILED);
-        return;
-    }
-    // Check that method was not deoptimized
-    method->AtomicSetCompilationStatus(Method::COMPILATION, Method::COMPILED);
+        compiled_method->SetCompilationStatus(Method::FAILED);
+    });
+
+    compiler::JITCompileMethod<RUNNER_MODE>(runtime_iface_, code_allocator_, &gdb_debug_info_allocator_, jit_stats_,
+                                            std::move(task_runner));
 }
 
 void Compiler::JoinWorker()
@@ -938,5 +953,14 @@ uint8_t CompileMethodImpl(coretypes::String *full_method_name, panda_file::Sourc
     return (status == Method::COMPILED ? 0 : COMPILATION_FAILED);
 }
 #endif  // PANDA_PRODUCT_BUILD
+
+template void Compiler::CompileMethodLocked<compiler::BACKGROUND_MODE>(
+    compiler::CompilerTaskRunner<compiler::BACKGROUND_MODE>);
+template void Compiler::CompileMethodLocked<compiler::INPLACE_MODE>(
+    compiler::CompilerTaskRunner<compiler::INPLACE_MODE>);
+template void Compiler::StartCompileMethod<compiler::BACKGROUND_MODE>(
+    compiler::CompilerTaskRunner<compiler::BACKGROUND_MODE>);
+template void Compiler::StartCompileMethod<compiler::INPLACE_MODE>(
+    compiler::CompilerTaskRunner<compiler::INPLACE_MODE>);
 
 }  // namespace panda

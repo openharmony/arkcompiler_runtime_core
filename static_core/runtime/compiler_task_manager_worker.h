@@ -62,14 +62,12 @@ public:
     }
 
 private:
-    void AddTaskInTaskManager(CompilerTask &&ctx);
-    void CompileNextMethod() REQUIRES(task_queue_lock_);
+    void BackgroundCompileMethod(CompilerTask &&ctx);
 
     taskmanager::TaskQueueInterface *compiler_task_manager_queue_ {nullptr};
     os::memory::Mutex task_queue_lock_;
     // This queue is used for methods need to be compiled inside TaskScheduler without compilation_lock_.
     PandaDeque<CompilerTask> compiler_task_deque_ GUARDED_BY(task_queue_lock_);
-    os::memory::ConditionVariable compiler_tasks_processed_ GUARDED_BY(task_queue_lock_);
     std::atomic<bool> compiler_worker_joined_ {true};
 };
 

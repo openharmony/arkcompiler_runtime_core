@@ -23,6 +23,8 @@
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer_run.h"
+#include "compiler/inplace_task_runner.h"
+#include "compiler/compiler_task_runner.h"
 
 #include "libpandabase/macros.h"
 #include "gtest/gtest.h"
@@ -83,6 +85,8 @@ public:
 
     void TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t l, uint32_t r, ShiftType shift_type,
                                                uint32_t shift, uint32_t erv);
+
+    void CreateGraphForOverflowTest(Graph *graph, Opcode overflow_opcode);
 
 private:
     VixlExecModule exec_module_;
@@ -668,6 +672,28 @@ void CodegenTest::TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t 
     CheckReturnValue(GetGraph(), erv);
 }
 
+void CodegenTest::CreateGraphForOverflowTest(Graph *graph, Opcode overflow_opcode)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        CONSTANT(2U, 0U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(4U, overflow_opcode).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0U, 1U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(5U, Opcode::Return).b().Inputs(2U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(6U, Opcode::Return).b().Inputs(4U);
+        }
+    }
+}
+
 TEST_F(CodegenTest, Cmp)
 {
     CheckCmp<float>(true);
@@ -1061,28 +1087,19 @@ TEST_F(CodegenTest, AddOverflow)
     RuntimeInterfaceMock runtime;
     graph->SetRuntime(&runtime);
 
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).i32();
-        PARAMETER(1U, 1U).i32();
-        CONSTANT(2U, 0U);
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(4U, Opcode::AddOverflow).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0U, 1U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(5U, Opcode::Return).b().Inputs(2U);
-        }
-        BASIC_BLOCK(4U, -1L)
-        {
-            INST(6U, Opcode::Return).b().Inputs(4U);
-        }
-    }
+    CreateGraphForOverflowTest(graph, Opcode::AddOverflow);
+
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
 
-    EXPECT_TRUE(RunOptimizations(graph));
+    InPlaceCompilerTaskRunner task_runner;
+    task_runner.GetContext().SetGraph(graph);
+    bool success = true;
+    task_runner.AddCallbackOnFail(
+        [&success]([[maybe_unused]] InPlaceCompilerContext &compiler_ctx) { success = false; });
+    RunOptimizations<INPLACE_MODE>(std::move(task_runner));
+    EXPECT_TRUE(success);
+
     auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
     auto code_exit = code_entry + graph->GetCode().Size();
     ASSERT(code_entry != nullptr && code_exit != nullptr);
@@ -1122,28 +1139,19 @@ TEST_F(CodegenTest, SubOverflow)
     RuntimeInterfaceMock runtime;
     graph->SetRuntime(&runtime);
 
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).i32();
-        PARAMETER(1U, 1U).i32();
-        CONSTANT(2U, 0U);
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(4U, Opcode::SubOverflow).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0U, 1U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(5U, Opcode::Return).b().Inputs(2U);
-        }
-        BASIC_BLOCK(4U, -1L)
-        {
-            INST(6U, Opcode::Return).b().Inputs(4U);
-        }
-    }
+    CreateGraphForOverflowTest(graph, Opcode::SubOverflow);
+
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
 
-    EXPECT_TRUE(RunOptimizations(graph));
+    InPlaceCompilerTaskRunner task_runner;
+    task_runner.GetContext().SetGraph(graph);
+    bool success = true;
+    task_runner.AddCallbackOnFail(
+        [&success]([[maybe_unused]] InPlaceCompilerContext &compiler_ctx) { success = false; });
+    RunOptimizations<INPLACE_MODE>(std::move(task_runner));
+    EXPECT_TRUE(success);
+
     auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
     auto code_exit = code_entry + graph->GetCode().Size();
     ASSERT(code_entry != nullptr && code_exit != nullptr);

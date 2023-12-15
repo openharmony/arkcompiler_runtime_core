@@ -16,6 +16,7 @@
 #define PANDA_RUNTIME_COMPILER_H_
 
 #include "compiler/compile_method.h"
+#include "compiler/compiler_task_runner.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "libpandabase/mem/code_allocator.h"
 #include "libpandabase/os/mutex.h"
@@ -33,6 +34,7 @@
 #include "runtime/mem/tlab.h"
 #include "runtime/compiler_thread_pool_worker.h"
 #include "runtime/compiler_task_manager_worker.h"
+#include "runtime/include/thread.h"
 
 #include "runtime/osr.h"
 
@@ -571,6 +573,12 @@ public:
 
     bool IsGcValidForFastPath(SourceLanguage lang) const;
 
+    void SetCurrentThread(Thread *thread) const override
+    {
+        ASSERT(thread != Thread::GetCurrent());
+        Thread::SetCurrent(thread);
+    }
+
 private:
     static compiler::DataType::Type ToCompilerType(panda_file::Type type)
     {
@@ -661,7 +669,7 @@ public:
 
     void JoinWorker() override;
 
-    bool IsCompilationExpired(const CompilerTask &ctx);
+    bool IsCompilationExpired(Method *method, bool is_osr);
 
     ~Compiler() override
     {
@@ -681,10 +689,12 @@ public:
         compiler_worker_->AddTask(std::move(ctx));
     }
 
-    void CompileMethodLocked(const CompilerTask &&ctx);
+    template <compiler::TaskRunnerMode RUNNER_MODE>
+    void CompileMethodLocked(compiler::CompilerTaskRunner<RUNNER_MODE> task_runner);
 
     /// Basic method, which starts compilation. Do not use.
-    void StartCompileMethod(const CompilerTask &&ctx);
+    template <compiler::TaskRunnerMode RUNNER_MODE>
+    void StartCompileMethod(compiler::CompilerTaskRunner<RUNNER_MODE> task_runner);
 
     void ScaleThreadPool(size_t number_of_threads)
     {
@@ -717,6 +727,11 @@ public:
         return no_async_jit_;
     }
 
+    compiler::RuntimeInterface *GetRuntimeInterface()
+    {
+        return runtime_iface_;
+    }
+
 protected:
     mem::InternalAllocatorPtr GetInternalAllocator()
     {
@@ -730,11 +745,6 @@ protected:
             return static_cast<CompilerThreadPoolWorker *>(compiler_worker_)->GetThreadPool();
         }
         return nullptr;
-    }
-
-    compiler::RuntimeInterface *GetRuntimeInterface()
-    {
-        return runtime_iface_;
     }
 
 private:

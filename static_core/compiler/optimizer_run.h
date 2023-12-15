@@ -17,13 +17,24 @@
 #define COMPILER_COMPILER_RUN_H
 
 #include "optimizer/pipeline.h"
+#include "inplace_task_runner.h"
+#include "background_task_runner.h"
+#include "compiler_task_runner.h"
 
 namespace panda::compiler {
 class Graph;
 
-inline bool RunOptimizations(Graph *graph)
+template <TaskRunnerMode RUNNER_MODE>
+inline void RunOptimizations(CompilerTaskRunner<RUNNER_MODE> task_runner)
 {
-    return Pipeline::Create(graph)->Run();
+    auto &task_ctx = task_runner.GetContext();
+    auto pipeline = Pipeline::Create(task_ctx.GetGraph());
+    if constexpr (RUNNER_MODE == BACKGROUND_MODE) {
+        task_ctx.SetPipeline(std::move(pipeline));
+    } else {
+        task_ctx.SetPipeline(pipeline.get());
+    }
+    Pipeline::Run<RUNNER_MODE>(std::move(task_runner));
 }
 
 }  // namespace panda::compiler
