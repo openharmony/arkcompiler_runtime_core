@@ -199,19 +199,44 @@ void CodegenFastPath::IntrinsicSlowPathEntry(IntrinsicInst *inst)
     CreateTailCall(inst, false);
 }
 
+/*
+ * Safe call of the c++ function from the irtoc
+ * */
+void CodegenFastPath::IntrinsicSaveTlabStatsSafe([[maybe_unused]] IntrinsicInst *inst, Reg src1, Reg src2, Reg tmp)
+{
+    ASSERT(!inst->HasUsers());
+    ASSERT(tmp.IsValid());
+    ASSERT(tmp != GetRegfile()->GetZeroReg());
+
+    auto regs = GetCallerRegsMask(GetArch(), false) | GetCalleeRegsMask(GetArch(), false);
+    auto vregs = GetCallerRegsMask(GetArch(), true);
+    GetEncoder()->PushRegisters(regs, vregs);
+
+    FillCallParams(src1, src2);
+
+    auto id = RuntimeInterface::EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE;
+    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), id));
+    GetEncoder()->EncodeLdr(tmp, false, entry);
+    GetEncoder()->MakeCall(tmp);
+
+    GetEncoder()->PopRegisters(regs, vregs);
+}
+
 void CodegenFastPath::IntrinsicSaveRegisters([[maybe_unused]] IntrinsicInst *inst)
 {
     RegMask calleeRegs = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
     // We need to save all caller regs, since caller doesn't care about registers at all (except parameters)
     auto callerRegs = RegMask(GetCallerRegsMask(GetArch(), false));
     auto callerVregs = RegMask(GetCallerRegsMask(GetArch(), true));
-
     for (auto &input : inst->GetInputs()) {
         calleeRegs.reset(input.GetInst()->GetDstReg());
         callerRegs.reset(input.GetInst()->GetDstReg());
     }
     if (GetTarget().SupportLinkReg()) {
         callerRegs.set(GetTarget().GetLinkReg().GetId());
+    }
+    if (!inst->HasUsers()) {
+        callerRegs.set(GetTarget().GetReturnReg(GetPtrRegType()).GetId());
     }
     GetEncoder()->PushRegisters(callerRegs | calleeRegs, callerVregs);
 }
@@ -228,6 +253,9 @@ void CodegenFastPath::IntrinsicRestoreRegisters([[maybe_unused]] IntrinsicInst *
     }
     if (GetTarget().SupportLinkReg()) {
         callerRegs.set(GetTarget().GetLinkReg().GetId());
+    }
+    if (!inst->HasUsers()) {
+        callerRegs.set(GetTarget().GetReturnReg(GetPtrRegType()).GetId());
     }
     GetEncoder()->PopRegisters(callerRegs | calleeRegs, callerVregs);
 }

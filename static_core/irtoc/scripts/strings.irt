@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,3 +30,275 @@ GenerateStringGetCharsTlab(string_compression_enabled=true)
 GenerateStringGetCharsTlab(string_compression_enabled=false)
 GenerateStringHashCode(string_compression_enabled=true)
 GenerateStringHashCode(string_compression_enabled=false)
+
+available_regs = $panda_mask
+function(:StringConcat2Tlab,
+          params: {str1: 'ref', str2: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: available_regs,
+          mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void.Terminator
+      next
+    end
+
+    klass := LoadI(str1).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+    # any of the strings is uncompressed (resulted string is uncompressed)
+    has_uncompressed := AndI(Or(length1, length2).u32).Imm(1).u32
+
+    count1 := ShrI(length1).Imm(1).u32
+    count2 := ShrI(length2).Imm(1).u32
+
+    size := Add(count1, count2).u32
+    data_size := Shl(size, has_uncompressed).u32
+    length := Or(ShlI(size).Imm(1).u32, has_uncompressed).u32
+    new_str := allocate_string_tlab(klass, data_size)
+
+    StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+    src_str_data1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+    # has no uncompressed then everyting is compressed, data is stored as bytes
+    IfImm(has_uncompressed).Imm(0).EQ.b {
+      copy_bytes(src_str_data1, dst_str_data1, count1)
+
+      offset := count1
+
+      src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset).ptr
+      copy_bytes(src_str_data2, dst_str_data2, count2)
+      Goto(:EndCopy)
+    }
+
+    IfImm(AndI(length1).Imm(1).u32).Imm(0).EQ.b {
+      expand_u8_to_u16(src_str_data1, dst_str_data1, count1)
+    } Else {
+      copy_chars(src_str_data1, dst_str_data1, count1)
+    }
+
+    offset := ShlI(count1).Imm(1).u32
+    src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset).ptr
+
+    IfImm(AndI(length2).Imm(1).u32).Imm(0).EQ.b {
+      expand_u8_to_u16(src_str_data2, dst_str_data2, count2)
+    } Else {
+      copy_chars(src_str_data2, dst_str_data2, count2)
+    }
+
+    Label(:EndCopy)
+
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_str).ptr
+
+Label(:SlowPathEntrypoint)
+    id = get_entrypoint_offset("STRING_CONCAT2_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(id).AddImm(id).Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+available_regs = $panda_mask
+function(:StringConcat3Tlab,
+         params: {str1: 'ref', str2: 'ref', str3: 'ref'},
+         regmap: $full_regmap,
+         regalloc_set: available_regs,
+         mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void.Terminator
+      next
+    end
+
+    klass := LoadI(str1).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length3 := LoadI(str3).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+    has_uncompressed := AndI(Or(length3, Or(length1, length2).u32).u32).Imm(1).u32
+
+    count1 := ShrI(length1).Imm(1).u32
+    count2 := ShrI(length2).Imm(1).u32
+    count3 := ShrI(length3).Imm(1).u32
+
+    size := Add(count1, Add(count2, count3).u32).u32
+    data_size := Shl(size, has_uncompressed).u32
+    length := Or(ShlI(size).Imm(1).u32, has_uncompressed).u32
+    new_str := allocate_string_tlab(klass, data_size)
+
+    StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+    src_str_data1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+    offset1 := ShlI(count1).Imm(1).u32
+    offset2 := Add(offset1, ShlI(count2).Imm(1).u32).u32
+
+    # everything is compressed
+    IfImm(has_uncompressed).Imm(0).EQ.b {
+      copy_bytes(src_str_data1, dst_str_data1, count1)
+
+      offset1_ := ShrI(offset1).Imm(1).u32
+
+      src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1_).ptr
+      copy_bytes(src_str_data2, dst_str_data2, count2)
+
+      offset2_ := ShrI(offset2).Imm(1).u32
+
+      src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2_).ptr
+      copy_bytes(src_str_data3, dst_str_data3, count3)
+      Goto(:EndCopy)
+    }
+
+    IfImm(AndI(length1).Imm(1).u32).Imm(0).EQ.b {
+      expand_u8_to_u16(src_str_data1, dst_str_data1, count1)
+    } Else {
+      copy_chars(src_str_data1, dst_str_data1, count1)
+    }
+
+    src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1).ptr
+
+    IfImm(AndI(length2).Imm(1).u32).Imm(0).EQ.b {
+      expand_u8_to_u16(src_str_data2, dst_str_data2, count2)
+    } Else {
+      copy_chars(src_str_data2, dst_str_data2, count2)
+    }
+
+    src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2).ptr
+
+    IfImm(AndI(length3).Imm(1).u32).Imm(0).EQ.b {
+      expand_u8_to_u16(src_str_data3, dst_str_data3, count3)
+    } Else {
+      copy_chars(src_str_data3, dst_str_data3, count3)
+    }
+
+Label(:EndCopy)
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_str).ptr
+
+Label(:SlowPathEntrypoint)
+    id1 = get_entrypoint_offset("STRING_CONCAT3_SLOW_PATH")
+    id2 = get_entrypoint_offset("STRING_CONCAT3_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, str1, str2, str3).AddImm(id1).AddImm(id2).Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+available_regs = $panda_mask
+function(:StringConcat4Tlab,
+         params: {str1: 'ref', str2: 'ref', str3: 'ref', str4: 'ref'},
+         regmap: $full_regmap,
+         regalloc_set: available_regs,
+         mode: [:FastPath]) {
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void.Terminator
+      next
+    end
+
+    klass := LoadI(str1).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length3 := LoadI(str3).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length4 := LoadI(str4).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+    # any of the strings is uncompressed (resulted string is uncompressed)
+    has_uncompressed := Or(length3, Or(length1, length2).u32).u32
+    has_uncompressed := AndI(Or(length4, has_uncompressed).u32).Imm(1).u32
+
+    count1 := ShrI(length1).Imm(1).u32
+    count2 := ShrI(length2).Imm(1).u32
+    count3 := ShrI(length3).Imm(1).u32
+    count4 := ShrI(length4).Imm(1).u32
+
+    size := Add(count1, Add(count2, Add(count3, count4).u32).u32).u32
+    data_size := Shl(size, has_uncompressed).u32
+    length := Or(ShlI(size).Imm(1).u32, has_uncompressed).u32
+    new_str := allocate_string_tlab(klass, data_size)
+
+    StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+    src_str_data1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+    offset1 := ShlI(count1).Imm(1).u32
+    offset2 := Add(offset1, ShlI(count2).Imm(1).u32).u32
+    offset3 := Add(offset2, ShlI(count3).Imm(1).u32).u32
+
+    # has no uncompressed then everything is compressed, data is stored as bytes
+    IfImm(has_uncompressed).Imm(0).EQ.b {
+      copy_bytes(src_str_data1, dst_str_data1, count1)
+
+      offset1_ := ShrI(offset1).Imm(1).u32
+
+      src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1_).ptr
+      copy_bytes(src_str_data2, dst_str_data2, count2)
+
+      offset2_ := ShrI(offset2).Imm(1).u32
+
+      src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2_).ptr
+      copy_bytes(src_str_data3, dst_str_data3, count3)
+
+      offset3_ := ShrI(offset3).Imm(1).u32
+
+      src_str_data4 := AddI(str4).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data4 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset3_).ptr
+      copy_bytes(src_str_data4, dst_str_data4, count4)
+      Goto(:EndCopy)
+    }
+
+    IfImm(AndI(length1).Imm(1).u32).Imm(0).EQ.b {
+      expand_u8_to_u16(src_str_data1, dst_str_data1, count1)
+    } Else {
+      copy_chars(src_str_data1, dst_str_data1, count1)
+    }
+
+    src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1).ptr
+
+    IfImm(AndI(length2).Imm(1).u32).Imm(0).EQ.b {
+      expand_u8_to_u16(src_str_data2, dst_str_data2, count2)
+    } Else {
+      copy_chars(src_str_data2, dst_str_data2, count2)
+    }
+
+    src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2).ptr
+
+    IfImm(AndI(length3).Imm(1).u32).Imm(0).EQ.b {
+      expand_u8_to_u16(src_str_data3, dst_str_data3, count3)
+    } Else {
+      copy_chars(src_str_data3, dst_str_data3, count3)
+    }
+
+    src_str_data4 := AddI(str4).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data4 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset3).ptr
+
+    IfImm(AndI(length4).Imm(1).u32).Imm(0).EQ.b {
+      expand_u8_to_u16(src_str_data4, dst_str_data4, count4)
+    } Else {
+      copy_chars(src_str_data4, dst_str_data4, count4)
+    }
+Label(:EndCopy)
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_str).ptr
+
+Label(:SlowPathEntrypoint)
+    id = get_entrypoint_offset("STRING_CONCAT4_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str1, str2, str3, str4).AddImm(id).AddImm(id).Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}

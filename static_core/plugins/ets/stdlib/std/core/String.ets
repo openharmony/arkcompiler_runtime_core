@@ -586,8 +586,6 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param strings strings to concat with
      *
-     * @throws NullPointerException if strings param is null
-     *
      * @returns new String which is a concatenation of this + strings[0] + ... + strings[string.length - 1]
      */
     public concat(...strings: String[]): String {
@@ -596,14 +594,36 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
             return this
         }
         if (length == 1) {
-            return StringBuilder.concatStrings(this, strings[0])
+            return String.concat2(this, strings[0]);
+        }
+        if (length == 2) {
+            return String.concat3(this, strings[0], strings[1]);
+        }
+        if (length == 3) {
+            return String.concat4(this, strings[0], strings[1], strings[2]);
         }
         let res = new StringBuilder(this);
-        for (let i = 0; i < strings.length; i++) {
+        for (let i = 0; i < length; i++) {
             res = res.append(strings[i])
         }
         return res.toString();
     }
+
+    /**
+     * Concatenation of two, three of four strings
+     *
+     * @param strings strings to concat
+     *
+     * @returns new String is the concatenation of the
+     * arguments passed to the function:
+     *
+     * str1 + str2 - for concat2
+     * str1 + str3 + str3 - for concat3
+     * str1 + str2 + str3 + str4 - for concat4
+     */
+    private static native concat2(str1: String, str2: String): String;
+    private static native concat3(str1: String, str2: String, str3: String): String;
+    private static native concat4(str1: String, str2: String, str3: String, str4: String): String;
 
     /*
      * Creates a String using substitutions

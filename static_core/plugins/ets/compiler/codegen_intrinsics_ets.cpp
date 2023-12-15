@@ -296,4 +296,40 @@ void Codegen::CreateStringBuilderAppendString(IntrinsicInst *inst, Reg dst, SRCR
     enc->BindLabel(labelReturn);
 }
 
+void Codegen::CreateStringConcat([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    if (!GetRuntime()->IsCompressedStringsEnabled()) {
+        GetEncoder()->SetFalseResult();
+        return;
+    }
+    switch (inst->GetIntrinsicId()) {
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT2: {
+            auto str1 = src[FIRST_OPERAND];
+            auto str2 = src[SECOND_OPERAND];
+            CallFastPath(inst, EntrypointId::STRING_CONCAT2_TLAB, dst, {}, str1, str2);
+            break;
+        }
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT3: {
+            auto str1 = src[FIRST_OPERAND];
+            auto str2 = src[SECOND_OPERAND];
+            auto str3 = src[THIRD_OPERAND];
+            CallFastPath(inst, EntrypointId::STRING_CONCAT3_TLAB, dst, {}, str1, str2, str3);
+            break;
+        }
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT4: {
+            auto str1 = src[FIRST_OPERAND];
+            auto str2 = src[SECOND_OPERAND];
+            auto str3 = src[THIRD_OPERAND];
+            auto str4 = src[FOURTH_OPERAND];
+            CallFastPath(inst, EntrypointId::STRING_CONCAT4_TLAB, dst, {}, str1, str2, str3, str4);
+            break;
+        }
+
+        default:
+            UNREACHABLE();
+            break;
+    }
+}
 }  // namespace ark::compiler

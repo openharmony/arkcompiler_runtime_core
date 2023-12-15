@@ -45,6 +45,7 @@
 namespace ark {
 
 using ark::compiler::TraceId;
+using ark::coretypes::String;
 
 #undef LOG_ENTRYPOINTS
 
@@ -1775,4 +1776,54 @@ extern "C" ObjectHeader *CoreStringBuilderString(ObjectHeader *sb, void *s)
     sb->SetFieldPrimitive<uint32_t>(SB_COUNT_OFFSET, newsize);
     return sb;
 }
+
+extern "C" coretypes::String *CoreStringConcat2(coretypes::String *str1, coretypes::String *str2)
+{
+    auto *vm = Runtime::GetCurrent()->GetPandaVM();
+    auto ctx = vm->GetLanguageContext();
+    return coretypes::String::Concat(str1, str2, ctx, vm);
+}
+
+extern "C" coretypes::String *CoreStringConcat3(coretypes::String *str1, coretypes::String *str2,
+                                                coretypes::String *str3)
+{
+    auto *vm = Runtime::GetCurrent()->GetPandaVM();
+    auto ctx = vm->GetLanguageContext();
+    auto thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<String> str3Handle(thread, str3);
+    auto str = coretypes::String::Concat(str1, str2, ctx, vm);
+    if (UNLIKELY(str == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    str = coretypes::String::Concat(str, str3Handle.GetPtr(), ctx, vm);
+    return str;
+}
+
+extern "C" coretypes::String *CoreStringConcat4(coretypes::String *str1, coretypes::String *str2,
+                                                coretypes::String *str3, coretypes::String *str4)
+{
+    auto *vm = Runtime::GetCurrent()->GetPandaVM();
+    auto ctx = vm->GetLanguageContext();
+    auto thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<String> str3Handle(thread, str3);
+    VMHandle<String> str4Handle(thread, str4);
+    auto str = coretypes::String::Concat(str1, str2, ctx, vm);
+    if (UNLIKELY(str == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    str3 = str3Handle.GetPtr();
+    str = coretypes::String::Concat(str, str3, ctx, vm);
+    if (UNLIKELY(str == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    str4 = str4Handle.GetPtr();
+    str = coretypes::String::Concat(str, str4, ctx, vm);
+    return str;
+}
+
 }  // namespace ark

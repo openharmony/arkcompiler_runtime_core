@@ -193,3 +193,18 @@ intrinsics:
       args: []
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
   description: Compresses sixteen Utf16 chars (32 bytes) to Utf8 chars (16 bytes) using SIMD instructions
+
+- name: WriteTlabStatsSafe
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64, arm32, amd64]
+  codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitWriteTlabStatsSafe
+  signature: # the signature is fake
+      ret: void
+      args: []
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: calls WriteTlabStats function from inside the IrToc

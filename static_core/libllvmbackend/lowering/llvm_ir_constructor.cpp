@@ -828,6 +828,14 @@ bool LLVMIrConstructor::EmitStringHashCode(Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitWriteTlabStatsSafe(Inst *inst)
+{
+    auto addr = GetInputValue(inst, 0);
+    auto size = GetInputValue(inst, 1);
+    CreateEntrypointCall(RuntimeInterface::EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE, inst, {addr, size});
+    return true;
+}
+
 llvm::Value *LLVMIrConstructor::GetMappedValue(Inst *inst, DataType::Type type)
 {
     ASSERT(inputMap_.count(inst) == 1);

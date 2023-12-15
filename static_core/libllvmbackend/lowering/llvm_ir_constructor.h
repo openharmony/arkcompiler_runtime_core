@@ -66,6 +66,7 @@ private:
     bool EmitRawBitcastFromLong(Inst *inst);
     bool EmitStringGetCharsTlab(Inst *inst);
     bool EmitStringHashCode(Inst *inst);
+    bool EmitWriteTlabStatsSafe(Inst *inst);
 
 public:
     llvm::Value *GetMappedValue(Inst *inst, DataType::Type type);
