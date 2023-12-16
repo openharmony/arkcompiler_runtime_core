@@ -524,18 +524,7 @@ void AbcFile::ExtractClassAndFunctionInfo(Function *func)
                 auto member_func = ResolveDefineFuncInstCommon(func, inst);
                 BuildFunctionDefineChain(func, member_func);
                 // resolve the class where it's defined
-                Inst def_method_input0 = inst.GetInputInsts()[0];
-                Inst ld_obj_input0 = def_method_input0.GetInputInsts()[0];
-                if ((def_method_input0.GetType() == InstType::LDOBJBYNAME_IMM8_ID16 ||
-                     def_method_input0.GetType() == InstType::LDOBJBYNAME_IMM16_ID16) &&
-                    GetStringByInst(def_method_input0) == PROTOTYPE &&
-                    (ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 ||
-                     ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8)) {
-                    auto clazz = GetClassByNameImpl(GetStringByInst(ld_obj_input0));
-                    if (clazz != nullptr) {
-                        BuildClassAndMemberFuncRelation(clazz, member_func);
-                    }
-                }
+                ResolveDefineMethodInst(member_func, inst);
                 break;
             }
             default:
@@ -1024,6 +1013,23 @@ std::unique_ptr<CalleeInfo> AbcFile::ResolveSuperCallInst(Function *func, const 
     // TODO(wangyantian): deal with situations when above if doesn't hold
     func->AddCalleeInfo(callee_info.get());
     return callee_info;
+}
+
+void AbcFile::ResolveDefineMethodInst(Function *member_func, const Inst &define_method_inst)
+{
+    Inst def_method_input0 = define_method_inst.GetInputInsts()[0];
+    if ((def_method_input0.GetType() == InstType::LDOBJBYNAME_IMM8_ID16 ||
+         def_method_input0.GetType() == InstType::LDOBJBYNAME_IMM16_ID16) &&
+        GetStringByInst(def_method_input0) == PROTOTYPE) {
+        Inst ld_obj_input0 = def_method_input0.GetInputInsts()[0];
+        if (ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 ||
+            ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8) {
+            auto clazz = GetClassByNameImpl(GetStringByInst(ld_obj_input0));
+            if (clazz != nullptr) {
+                BuildClassAndMemberFuncRelation(clazz, member_func);
+            }
+        }
+    }
 }
 
 void AbcFile::HandleMemberFunctionFromClassBuf(const std::string &func_name, Function *def_func, Class *def_class) const
