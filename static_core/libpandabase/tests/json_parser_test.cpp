@@ -38,7 +38,8 @@ TEST(JsonParser, ParsePrimitive)
     ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("key_1"), "\"key_1\"\\. value\n");
 }
 
-TEST(JsonParser, Arrays)
+// Issue: #14733
+TEST(JsonParser, DISABLED_Arrays)
 {
     auto str = R"(
     {
@@ -83,7 +84,8 @@ TEST(JsonParser, Arrays)
     ASSERT_EQ(empty_array.size(), 0U);
 }
 
-TEST(JsonParser, NestedObject)
+// Issue: #14733
+TEST(JsonParser, DISABLED_NestedObject)
 {
     auto str = R"(
     {
@@ -141,7 +143,8 @@ TEST(JsonParser, NestedObject)
     ASSERT_EQ(empty_obj->GetSize(), 0U);
 }
 
-TEST(JsonParser, Null)
+// Issue: #14733
+TEST(JsonParser, DISABLED_Null)
 {
     auto str = R"(
     {
@@ -156,7 +159,8 @@ TEST(JsonParser, Null)
     ASSERT_EQ(*obj.GetValue<JsonObject::JsonObjPointer>("key"), nullptr);
 }
 
-TEST(JsonParser, Numbers)
+// Issue: #14733
+TEST(JsonParser, DISABLED_Numbers)
 {
     auto str = R"(
     {

@@ -30,7 +30,7 @@
 #include <sys/syscall.h>
 #include <linux/futex.h>
 
-namespace panda::os::unix::memory::futex {
+namespace ark::os::unix::memory::futex {
 // We need to update TLS current tid after fork
 PANDA_PUBLIC_API void PostFork();
 
@@ -52,11 +52,11 @@ public:
 
     // Should be used only in monitor. Intended to be used with just created mutexes which aren't in use yet
     // Registers `thread` as mutex's owner and locks it
-    PANDA_PUBLIC_API void LockForOther(thread::ThreadId thread);
+    PANDA_PUBLIC_API void LockForOther(panda::os::thread::ThreadId thread);
 
     // Should be used only in monitor. Intended to be used with just created mutexes which aren't in use yet
     // Unegisters `thread` as mutex's owner and unlocks it
-    PANDA_PUBLIC_API void UnlockForOther(thread::ThreadId thread);
+    PANDA_PUBLIC_API void UnlockForOther(panda::os::thread::ThreadId thread);
 
     static bool DoNotCheckOnTerminationLoop()
     {
@@ -93,7 +93,7 @@ private:
         return futex::GetWaiters(&mutex_);
     }
 
-    bool IsHeld(thread::ThreadId thread)
+    bool IsHeld(panda::os::thread::ThreadId thread)
     {
         return futex::IsHeld(&mutex_, thread);
     }
@@ -108,7 +108,7 @@ private:
         mutex_.recursive_count = count;
     }
 
-    static_assert(std::atomic<thread::ThreadId>::is_always_lock_free);
+    static_assert(std::atomic<panda::os::thread::ThreadId>::is_always_lock_free);
 
     NO_COPY_SEMANTIC(Mutex);
     NO_MOVE_SEMANTIC(Mutex);
@@ -219,15 +219,15 @@ private:
     }
 
     // Exclusive owner.
-    alignas(alignof(uint32_t)) std::atomic<thread::ThreadId> exclusive_owner_ {0};
-    static_assert(std::atomic<thread::ThreadId>::is_always_lock_free);
+    alignas(alignof(uint32_t)) std::atomic<panda::os::thread::ThreadId> exclusive_owner_ {0};
+    static_assert(std::atomic<panda::os::thread::ThreadId>::is_always_lock_free);
 
     bool HasExclusiveHolder()
     {
         // Atomic with relaxed order reason: mutex synchronization
         return exclusive_owner_.load(std::memory_order_relaxed) != 0;
     }
-    bool IsExclusiveHeld(thread::ThreadId thread)
+    bool IsExclusiveHeld(panda::os::thread::ThreadId thread)
     {
         // Atomic with relaxed order reason: mutex synchronization
         return exclusive_owner_.load(std::memory_order_relaxed) == thread;
@@ -303,6 +303,6 @@ private:
 static constexpr size_t ALL_STRUCTURES_SIZE = 16U;
 static_assert(sizeof(ConditionVariable) == ALL_STRUCTURES_SIZE);
 static_assert(sizeof(RWLock) == ALL_STRUCTURES_SIZE);
-}  // namespace panda::os::unix::memory::futex
+}  // namespace ark::os::unix::memory::futex
 
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX__FUTEX_MUTEX_H_
