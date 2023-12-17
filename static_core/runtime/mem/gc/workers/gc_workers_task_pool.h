@@ -92,6 +92,7 @@ private:
     {
         solved_tasks_ = 0U;
         sended_tasks_ = 0U;
+        solved_tasks_snapshot_ = 0U;
     }
 
     GC *gc_ {nullptr};
@@ -103,6 +104,7 @@ private:
      * @see IncreaseSolvedTasks
      */
     os::memory::ConditionVariable all_solved_tasks_cond_var_ GUARDED_BY(all_solved_tasks_cond_var_lock_);
+    std::atomic_size_t solved_tasks_snapshot_ {0U};
     std::atomic_size_t solved_tasks_ {0U};
     std::atomic_size_t sended_tasks_ {0U};
 };
