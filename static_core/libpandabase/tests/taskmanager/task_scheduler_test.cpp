@@ -483,6 +483,7 @@ TEST_P(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
 }
 
 INSTANTIATE_TEST_SUITE_P(TaskStatisticsTypeSet, TaskSchedulerTest,
-                         ::testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED));
+                         ::testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED,
+                                           TaskStatisticsImplType::LOCK_FREE));
 
 }  // namespace panda::taskmanager

@@ -15,6 +15,7 @@
 
 #include "libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.h"
 #include "libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.h"
+#include "libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.h"
 #include <gtest/gtest.h>
 #include <thread>
 
@@ -38,6 +39,8 @@ public:
                 return &simpleTaskStatistics_;
             case TaskStatisticsImplType::FINE_GRAINED:
                 return &fineGrainedTaskStatistics_;
+            case TaskStatisticsImplType::LOCK_FREE:
+                return &lockFreeTaskStatistics_;
             default:
                 UNREACHABLE();
         }
@@ -46,18 +49,17 @@ public:
 private:
     SimpleTaskStatisticsImpl simpleTaskStatistics_;
     FineGrainedTaskStatisticsImpl fineGrainedTaskStatistics_;
+    LockFreeTaskStatisticsImpl lockFreeTaskStatistics_;
 };
 
 TEST_P(TaskStatisticsTest, MultithreadedUsageTest)
 {
     auto *taskStatistics = GetStatistics();
     constexpr size_t COUNT_OF_TASKS = 10'000U;
-    auto addedTaskWorker = [taskStatistics](TaskProperties properties) {
+    auto addedAndExecuteTaskWorker = [taskStatistics](TaskProperties properties) {
         for (size_t i = 0U; i < COUNT_OF_TASKS; i++) {
             taskStatistics->IncrementCount(TaskStatus::ADDED, properties, 1U);
         }
-    };
-    auto executedTaskWorker = [taskStatistics](TaskProperties properties) {
         for (size_t i = 0U; i < COUNT_OF_TASKS; i++) {
             taskStatistics->IncrementCount(TaskStatus::EXECUTED, properties, 1U);
         }
@@ -66,15 +68,10 @@ TEST_P(TaskStatisticsTest, MultithreadedUsageTest)
     constexpr size_t COUNT_OF_THREADS = 10U;
     std::vector<std::thread> threads;
     for (size_t i = 0; i < COUNT_OF_THREADS; i++) {
-        threads.emplace_back(addedTaskWorker, GC_STATIC_VM_BACKGROUND_PROPERTIES);
-        threads.emplace_back(addedTaskWorker, GC_STATIC_VM_FOREGROUND_PROPERTIES);
-        threads.emplace_back(addedTaskWorker, GC_DYNAMIC_VM_BACKGROUND_PROPERTIES);
-        threads.emplace_back(addedTaskWorker, GC_DYNAMIC_VM_FOREGROUND_PROPERTIES);
-
-        threads.emplace_back(executedTaskWorker, GC_STATIC_VM_BACKGROUND_PROPERTIES);
-        threads.emplace_back(executedTaskWorker, GC_STATIC_VM_FOREGROUND_PROPERTIES);
-        threads.emplace_back(executedTaskWorker, GC_DYNAMIC_VM_BACKGROUND_PROPERTIES);
-        threads.emplace_back(executedTaskWorker, GC_DYNAMIC_VM_FOREGROUND_PROPERTIES);
+        threads.emplace_back(addedAndExecuteTaskWorker, GC_STATIC_VM_BACKGROUND_PROPERTIES);
+        threads.emplace_back(addedAndExecuteTaskWorker, GC_STATIC_VM_FOREGROUND_PROPERTIES);
+        threads.emplace_back(addedAndExecuteTaskWorker, GC_DYNAMIC_VM_BACKGROUND_PROPERTIES);
+        threads.emplace_back(addedAndExecuteTaskWorker, GC_DYNAMIC_VM_FOREGROUND_PROPERTIES);
     }
 
     for (auto &thread : threads) {
@@ -89,6 +86,7 @@ TEST_P(TaskStatisticsTest, MultithreadedUsageTest)
 }
 
 INSTANTIATE_TEST_SUITE_P(TaskStatisticsImplSet, TaskStatisticsTest,
-                         testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED));
+                         testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED,
+                                         TaskStatisticsImplType::LOCK_FREE));
 
 }  // namespace panda::taskmanager

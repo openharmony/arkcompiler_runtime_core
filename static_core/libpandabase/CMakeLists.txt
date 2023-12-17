@@ -49,6 +49,7 @@ set(SOURCES
     ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/task_statistics.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.cpp
+    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.cpp
     ${ARKBASE_LTO_SOURCES}
 )
 
