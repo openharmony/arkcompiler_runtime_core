@@ -15,8 +15,12 @@
  
 /*---
  desc: 13.07 Export Directives
- name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.03.re-export_directives/re-export_all
+ name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.02.export_type_directives/import_type_alias_with_qualified_access_defect
  tags: [not-a-test]
  ---*/
 
-export * from "./to_export"
+export type int32 = int
+export type int16 = int
+export type float_n = float
+export type text = string
+export type flag = boolean

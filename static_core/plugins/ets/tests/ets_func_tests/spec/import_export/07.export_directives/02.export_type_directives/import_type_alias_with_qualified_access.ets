@@ -15,8 +15,37 @@
  
 /*---
  desc: 13.07 Export Directives
- name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.03.re-export_directives/re-export_all
- tags: [not-a-test]
+ name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.02.export_type_directives/import_type_alias_with_qualified_access_defect
+ tags: 
  ---*/
 
-export * from "./to_export"
+import * as types from "./to_export_for_import_type_alias_with_qualified_access.ets"
+ 
+function f1(): types.int32 {
+  return 0;
+}
+
+function f2(): types.int16 {
+  return 0;
+}
+
+function f3(): types.float_n {
+  return 0.0;
+}
+
+function f4(): types.text {
+  return "test";
+}
+
+function f5(): types.flag {
+  return true;
+}
+
+function main(): void {
+  assert(f1() == 0)
+  assert(f2() == 0)
+  assert(f3() == 0.0)
+  assert(f4() == "test")
+  assert(f5() == true)
+}
+

@@ -21,3 +21,7 @@
 
 export class A {}
 export class B {}
+
+export function foo(){
+  console.log("inside func foo");
+}

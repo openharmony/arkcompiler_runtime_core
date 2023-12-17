@@ -15,8 +15,15 @@
  
 /*---
  desc: 13.07 Export Directives
- name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.03.re-export_directives/re-export_all
- tags: [not-a-test]
+ name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.01.selective_export_directives/selective_export_directive_03
+ tags: 
  ---*/
 
-export * from "./to_export"
+import {x as xx, y as yy} from "./to_export"
+
+function main(): void {
+  let x1 = xx
+  let y1 = yy
+  assert(x1 == 1)
+  assert(y1 == 2)
+}

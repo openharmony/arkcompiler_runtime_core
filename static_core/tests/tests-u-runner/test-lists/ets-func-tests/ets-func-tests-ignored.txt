@@ -567,10 +567,18 @@ spec/import_export/06.top-level_declarations/01.exported_declarations/exported_d
 spec/import_export/07.export_directives/01.selective_export_directive/selective_export_directive_01.ets
 spec/import_export/07.export_directives/01.selective_export_directive/re-export_directive_02.ets
 spec/import_export/07.export_directives/03.re-export_directives/re-export_directive_02.ets
+spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_04.ets
 ### Issue 14658
 spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 ### Issue 14660
 spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
+### Issue 14343
+spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_03.ets
+spec/import_export/07.export_directives/03.re-export_directives/re_export_all_2.ets
+### Issue 13934
+spec/import_export/07.export_directives/01.selective_export_directive/selective_export_directive_03.ets
+### Issue 14571
+spec/import_export/07.export_directives/02.export_type_directives/import_type_alias_with_qualified_access.ets
 ### Negative tests
 spec/import_export/03.import_directives/import_unexported_class.ets
 spec/import_export/03.import_directives/non_linux_path_separators.ets
@@ -591,6 +599,8 @@ spec/import_export/07.export_directives/02.export_type_directives/to_export_nega
 spec/import_export/07.export_directives/03.re-export_directives/re-export_all.ets
 spec/import_export/07.export_directives/03.re-export_directives/re-export_not_all.ets
 spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
+spec/import_export/07.export_directives/03.re-export_directives/to_export_2.ets
+spec/import_export/07.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
 ### End of Import-export
 ### Issue 14675, 14769, 14841
 escompat/ArrayBufferTest2.ets

@@ -19,5 +19,4 @@
  tags: [not-a-test]
  ---*/
 
-import {A as C} from "./to_export"
-export class С {}
+export {A as C} from "./to_export"

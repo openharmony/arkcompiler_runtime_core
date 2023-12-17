@@ -15,8 +15,11 @@
  
 /*---
  desc: 13.07 Export Directives
- name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.03.re-export_directives/re-export_all
+ name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.03.re-export_directives/to_export_2
  tags: [not-a-test]
  ---*/
 
-export * from "./to_export"
+export class A {}
+export function createA(): A {
+  return new A();
+}

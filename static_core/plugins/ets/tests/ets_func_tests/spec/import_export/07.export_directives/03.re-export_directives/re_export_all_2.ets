@@ -15,8 +15,10 @@
  
 /*---
  desc: 13.07 Export Directives
- name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.03.re-export_directives/re-export_all
- tags: [not-a-test]
+ name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.03.re-export_directives/re-export_all_02
+ tags: 
  ---*/
 
-export * from "./to_export"
+import * as lib from "./to_export_2.ets"
+export type A = lib.A
+export let createA: () => A = lib.createA
