@@ -543,6 +543,9 @@ size_t ObjectAllocatorGen<MT_MODE>::GetLargeObjectMaxSize()
 template <MTModeT MT_MODE>
 bool ObjectAllocatorGen<MT_MODE>::IsObjectInYoungSpace(const ObjectHeader *obj)
 {
+    if (!young_gen_allocator_) {
+        return false;
+    }
     return young_gen_allocator_->GetMemRange().IsAddressInRange(ToUintPtr(obj));
 }
 

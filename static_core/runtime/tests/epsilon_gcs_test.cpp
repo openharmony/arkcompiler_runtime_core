@@ -219,7 +219,7 @@ TEST_F(EpsilonG1GCTest, TestOOM)
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> hs(thread);
-    auto object_allocator_g1 = thread->GetVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+    auto object_allocator_g1 = thread->GetVM()->GetGC()->GetObjectAllocator();
     VMHandle<coretypes::String> obj_string;
     VMHandle<coretypes::String> obj_string_huge;
 

@@ -80,10 +80,9 @@ public:
     Class *CreateClass(const uint8_t *descriptor, size_t vtable_size, size_t imt_size, size_t size) override
     {
         auto vm = thread_->GetVM();
-        auto allocator = vm->GetHeapManager()->GetObjectAllocator();
-        void *ptr = allocator.AsObjectAllocator()->AllocateNonMovable(
-            coretypes::Class::GetSize(size), DEFAULT_ALIGNMENT, nullptr,
-            mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT);
+        auto allocator = vm->GetGC()->GetObjectAllocator();
+        void *ptr = allocator->AllocateNonMovable(coretypes::Class::GetSize(size), DEFAULT_ALIGNMENT, nullptr,
+                                                  mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT);
         auto *res = reinterpret_cast<coretypes::Class *>(ptr);
         res->InitClass(descriptor, vtable_size, imt_size, size);
         vm->GetGC()->InitGCBits(res);

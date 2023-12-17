@@ -491,8 +491,7 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
         // try to replace the counter with string pointer and register the slot as GC root in case of success
         if (counter->compare_exchange_strong(counter_val, static_cast<uint32_t>(reinterpret_cast<uint64_t>(str)),
                                              std::memory_order_release, std::memory_order_relaxed)) {
-            auto allocator = vm->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
-            bool is_young = allocator->HasYoungSpace() && allocator->IsObjectInYoungSpace(str);
+            bool is_young = vm->GetHeapManager()->IsObjectInYoungSpace(str);
             aot_manager->RegisterAotStringRoot(slot, is_young);
             EVENT_AOT_RESOLVE_STRING(ConvertToString(str));
         }
