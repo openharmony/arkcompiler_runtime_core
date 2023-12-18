@@ -67,7 +67,7 @@ class RunnerETS(RunnerFileBased):
         if self.__ets_suite_name == EtsSuites.RUNTIME.value:
             self.default_list_root = path.join(self.static_core_root, "tools", "es2panda", "test", "test-lists")
         test_suite = test_suite_class(self.config, self.work_dir, self.default_list_root)
-        test_suite.process(self.config.ets.force_generate)
+        test_suite.process(self.config.general.generate_only or self.config.ets.force_generate)
         self.test_root, self.list_root = test_suite.test_root, test_suite.list_root
 
         self.explicit_list = correct_path(self.list_root, config.test_lists.explicit_list) \

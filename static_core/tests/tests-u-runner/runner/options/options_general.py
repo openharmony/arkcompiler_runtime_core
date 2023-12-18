@@ -66,14 +66,11 @@ class GeneralOptions:
             "bco": self.bco,
             "qemu": self.qemu.value.upper(),
             "with-js": self.with_js,
+            "generate_only": self.generate_only,
         }
 
     @cached_property
-    @value(
-        yaml_path="general.generate-config",
-        cli_name="generate_config",
-        cast_to_type=_to_path
-    )
+    @value(yaml_path="general.generate-config", cli_name="generate_config", cast_to_type=_to_path)
     def generate_config(self) -> Optional[str]:
         return None
 
@@ -192,13 +189,21 @@ class GeneralOptions:
     def qemu(self) -> QemuKind:
         return GeneralOptions.__DEFAULT_QEMU
 
-    def get_command_line(self) -> str:
+    @property
+    def qemu_cmd_line(self) -> str:
+        qemu = ''
         if self.qemu == QemuKind.ARM64:
-            _qemu = '--arm64-qemu'
+            qemu = '--arm64-qemu'
         elif self.qemu == QemuKind.ARM32:
-            _qemu = '--arm32-qemu'
-        else:
-            _qemu = ''
+            qemu = '--arm32-qemu'
+        return qemu
+
+    @cached_property
+    @value(yaml_path="general.generate-only", cli_name="generate_only", cast_to_type=_to_bool)
+    def generate_only(self) -> bool:
+        return False
+
+    def get_command_line(self) -> str:
         options = [
             f'--generate-config="{self.generate_config}"' if self.generate_config else '',
             f'--processes={self.processes}' if self.processes != GeneralOptions.__DEFAULT_PROCESSES else '',
@@ -225,6 +230,7 @@ class GeneralOptions:
             '--force-download' if self.force_download else '',
             '--no-bco' if not self.bco else '',
             '--no-js' if not self.with_js else '',
-            _qemu
+            '--generate-only' if self.generate_only else '',
+            self.qemu_cmd_line,
         ]
         return ' '.join(options)

@@ -54,6 +54,7 @@ general:
     test-root: null
     verbose: ''
     verbose-filter: NEW
+    generate-only: false
 quick:
     enable: false
 test-lists:
