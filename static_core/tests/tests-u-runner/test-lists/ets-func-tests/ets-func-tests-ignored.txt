@@ -257,10 +257,28 @@ spec/struct-type/test-use-struct-with-not-user-type_2.ets
 ### EOF Negative tests
 ### EOF ArkUI struct
 
-### Start string enum
+### Start enum
+spec/enum/enum_of_type.ets
 ### Issue 12947
-spec/string_enum/enumCallToStringFromAsyncLambda.ets
-### End string enum
+spec/enum/enumCallToStringFromAsyncLambda.ets
+### Issue 14655
+spec/enum/enum_trailing_comma_01.ets
+spec/enum/enum_trailing_comma_02.ets
+spec/enum/enum_trailing_comma_03.ets
+spec/enum/enum_trailing_comma_04.ets
+### Issue 14654
+spec/enum/enum_const_expr_01_01.ets
+spec/enum/enum_const_expr_01_02.ets
+spec/enum/enum_const_expr_01_03.ets
+spec/enum/enum_const_expr_01_04.ets
+spec/enum/enum_const_expr_01_05.ets
+spec/enum/enum_const_expr_02_01.ets
+### Issue 14633
+spec/enum/issue14633.ets
+spec/enum/issue14633_1.ets
+### Issue 14636
+spec/enum/issue14636.ets
+### End enum
 
 ### lambda issues begin
 ### Issue 14018
