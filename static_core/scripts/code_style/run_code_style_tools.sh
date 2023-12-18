@@ -1,4 +1,4 @@
-#!/bin/bash -exu
+#!/bin/bash
 # Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@
 #
 # The only reason of this script's existence is to avoid messing with
 # escaping special chatracters in CMake files.
+
+set -exu
 
 FILE_NAME=${1}
 

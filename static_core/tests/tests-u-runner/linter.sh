@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 if [[ -z $1 ]]; then
     echo "Usage: linter.sh <panda source>"
     echo "    <panda source> path where the panda source are located"
@@ -21,7 +23,7 @@ fi
 ROOT_DIR=$(realpath $1)
 
 
-function save_exit_code {
+function save_exit_code() {
     EXIT_CODE=$(($1 + $2))
 }
 

@@ -23,15 +23,15 @@ BRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo $BRANCH
 
 function repeats() {
-  local COMMAND=$1
+  local command=$1
   for ((i=1; i < 6; i++)); do
-    echo "attempt $i to execute the command \"$COMMAND\""
-    $COMMAND && return 0
+    echo "attempt $i to execute the command \"$command\""
+    $command && return 0
   done
   # checkout to current branch
   if [[ "${BRANCH}" != "master" ]]; then
     git checkout $BRANCH
-    echo "the command \"$COMMAND\" failed, checkout to the source branch \"$BRANCH\""
+    echo "the command \"$command\" failed, checkout to the source branch \"$BRANCH\""
   fi
   return 1
 }
