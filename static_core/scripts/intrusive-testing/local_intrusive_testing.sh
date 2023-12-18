@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+set -e
+
 export BUILD_TOOL=ninja
 export INTRUSIVE_TESTING=true
 export CMAKE_BUILD_TYPE=Debug
@@ -28,7 +31,7 @@ export CMAKE_OPTIONS
 CLEAR_BUILD_DIRS=false
 RUN_ONLY=false
 
-function usage {
+function usage() {
   echo "Usage: $0 [-cr] <path_to_repo> <path_to_build_dir>"
   echo "   -c: clear existing build directory"
   echo "   -r: run tests only (instrumentation should have been already performed)"
@@ -53,12 +56,12 @@ if [[ -n "$TSAN_SUPPRESSIONS" ]]; then
     tsan_options="${tsan_options},suppressions=${TSAN_SUPPRESSIONS}"
 fi
 
-function run_tests {
+function run_tests() {
   echo "Run intrusive tests"
   ${BUILD_TOOL} -k1 -j${NPROC_PER_JOB} ${BUILD_TARGETS}
 }
 
-function clear_dir () {
+function clear_dir() {
   TARGET_DIR=$1
   if [[ -d $TARGET_DIR ]]; then
     if [[ "$CLEAR_BUILD_DIRS" = true ]]; then

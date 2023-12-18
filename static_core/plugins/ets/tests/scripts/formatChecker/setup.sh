@@ -15,8 +15,10 @@
 # limitations under the License.
 #
 
-SCRIPT=`readlink -e $BASH_SOURCE`
-SCRIPT_DIR=`dirname $SCRIPT`
+set -e
+
+SCRIPT=$(readlink -e $BASH_SOURCE)
+SCRIPT_DIR=$(dirname $SCRIPT)
 
 # This script installs all dependencies for formatChecker 
 # by creating a virtualenv
@@ -25,7 +27,7 @@ SCRIPT_DIR=`dirname $SCRIPT`
 function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
 MIN_PYTHON_VERSION="3.8.0"
-CURRENT_PYTHON_VERSION=`python3 -c "import platform; print(platform. python_version())"`
+CURRENT_PYTHON_VERSION=$(python3 -c "import platform; print(platform. python_version())")
 
 if [ $(version $CURRENT_PYTHON_VERSION) -lt $(version $MIN_PYTHON_VERSION) ]; then
     echo "Python version must be greater than $MIN_PYTHON_VERSION"

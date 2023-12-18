@@ -31,8 +31,8 @@ readonly EXT_DECL_ETS="d.sts"
 readonly EXT_DECL_TS="d.ts"
 
 panic() {
-    local MSG="${1-}"
-    echo "${MSG}"
+    local msg="${1-}"
+    echo "${msg}"
     exit 1
 }
 
@@ -44,38 +44,38 @@ assert_path() {
 }
 
 clear_dir() {
-    local DIR="${1?}"
-    rm -rf "${DIR}"
-    mkdir -p "${DIR}"
+    local dir="${1?}"
+    rm -r -f "${dir}"
+    mkdir -p "${dir}"
 }
 
 gen_tests() {
-    local JSVALUE="JSValue"
+    local jsvalue="JSValue"
 
     declare -A TS2ETS=(
-        # ["AsyncFunction"]="${JSVALUE}"
-        # ["Reflect"]="${JSVALUE}"
-        # ["AsyncIterator"]="${JSVALUE}"
-        # ["Proxy"]="${JSVALUE}"
-        # ["TypedArray"]="${JSVALUE}"
+        # ["AsyncFunction"]="${jsvalue}"
+        # ["Reflect"]="${jsvalue}"
+        # ["AsyncIterator"]="${jsvalue}"
+        # ["Proxy"]="${jsvalue}"
+        # ["TypedArray"]="${jsvalue}"
         # ["Array"]="Array"
-        # ["Iterator"]="${JSVALUE}"
+        # ["Iterator"]="${jsvalue}"
         # ["Map"]="Map"
         # ["Set"]="Set"
         # ["WeakMap"]="WeakMap"
         # ["WeakSet"]="WeakSet"
 
         # unsupported types - translated to the JSValue
-        ["Object"]="${JSVALUE}"
-        ["Symbol"]="${JSVALUE}"
-        ["Function"]="${JSVALUE}"
-        ["AsyncGenerator"]="${JSVALUE}"
-        ["AsyncGeneratorFunction"]="${JSVALUE}"
-        ["Generator"]="${JSVALUE}"
-        ["GeneratorFunction"]="${JSVALUE}"
-        ["unknown"]="${JSVALUE}"
-        ["any"]="${JSVALUE}"
-        ["undefined"]="${JSVALUE}"
+        ["Object"]="${jsvalue}"
+        ["Symbol"]="${jsvalue}"
+        ["Function"]="${jsvalue}"
+        ["AsyncGenerator"]="${jsvalue}"
+        ["AsyncGeneratorFunction"]="${jsvalue}"
+        ["Generator"]="${jsvalue}"
+        ["GeneratorFunction"]="${jsvalue}"
+        ["unknown"]="${jsvalue}"
+        ["any"]="${jsvalue}"
+        ["undefined"]="${jsvalue}"
 
         # direct translation
         ["null"]="null"
