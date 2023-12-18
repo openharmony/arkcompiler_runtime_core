@@ -172,6 +172,7 @@ spec/unions/union_param_11_01.ets
 ### End of Unions
 ### Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
+koala-related-benchmarks/arkts-phase1.ets
 ### End of Koala
 ### Feature: Rest Params
 ### Issue 14111
