@@ -13,7 +13,6 @@
 
 --- # List of reserved keywords
 keywords:
-    - 'is'
     - 'typeof'
     - 'var'
     - 'yield'
