@@ -2355,6 +2355,7 @@
 07.expressions/24.equality_expressions/eq_13.ets
 07.expressions/24.equality_expressions/eq_16.ets
 07.expressions/24.equality_expressions/eq_17.ets
+07.expressions/24.equality_expressions/eq_18.ets
 07.expressions/24.equality_expressions/eq_19.ets
 07.expressions/24.equality_expressions/eq_3.ets
 07.expressions/24.equality_expressions/eq_4.ets
