@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -96,6 +96,8 @@ class RunnerETS(RunnerFileBased):
             name = EtsSuites.RUNTIME.value
         elif 'ets_gc_stress' in test_suites:
             name = EtsSuites.GCSTRESS.value
+        elif 'ets_es_checked' in test_suites:
+            name = EtsSuites.ESCHECKED.value
         else:
             Log.exception_and_raise(_LOGGER, f"Unsupported test suite: {self.config.test_suites}")
         return name

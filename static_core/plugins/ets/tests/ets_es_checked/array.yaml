@@ -1,0 +1,127 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+sub:
+  - category: Array
+    self:
+      - Array.of<number>(0, -0.0, 4, 1, 2, -1, Infinity, 11, -Infinity, 1, 21, 111, NaN, -NaN, 0, -0.0)
+    self_type: Array<number>
+    vars:
+      default_inds: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1.1, 5.0, 100.0, -1.1, 2.0, "Infinity", "-Infinity", "NaN", "0x8 as number", "-0o4 as number"]
+      default_search: ["NaN", "-NaN", "Infinity", "-Infinity", 0.0, "-0.0", 100, 1]
+    sub:
+      - method: "concat"
+        ignored: true # generics overriding is flaky
+        params: []
+        rest:
+          - combinationRest "Array.of<number>(1)", "Array.of<number>()", "Array.of<number>(NaN, 10, Infinity)"
+      - method: "at"
+        params:
+          - paramOf(*default_inds)
+      - method: "with"
+        params:
+          - paramOf(*default_inds)
+          - paramOf(1.0, 12.0, "NaN")
+      - method: "fill"
+        params:
+          - paramOf(1.0, 12.0)
+          - paramOf(*default_inds)
+          - paramOf(*default_inds)
+        mandatory: 1
+      - method: "copyWithin"
+        params:
+          - paramOf(*default_inds)
+          - paramOf(*default_inds)
+          - paramOf(*default_inds)
+        mandatory: 2
+      - method: "slice"
+        ret_type: Array<number>
+        params:
+          - paramOf(*default_inds)
+          - paramOf(*default_inds)
+        mandatory: 0
+      - method: "splice"
+        ret_type: Array<number>
+        params:
+          - paramOf(*default_inds)
+          - paramOf(*default_inds)
+        mandatory: 1
+        rest:
+          - emptyRest
+          - combinationRest 31, 34, 45
+      - method: includes
+        params:
+          - paramOf(*default_search)
+          - paramOf(*default_inds)
+        mandatory: 1
+      - method: indexOf
+        params:
+          - paramOf(*default_search)
+          - paramOf(*default_inds)
+        mandatory: 1
+      - method: lastIndexOf
+        params:
+          - paramOf(*default_search)
+          - paramOf(*default_inds)
+        mandatory: 1
+      - method: toString
+        params: []
+      - method: join
+        params:
+           - |
+             paramOf("'---'", "''")
+        mandatory: 0
+      - method: reverse
+      - method: sort
+      - method: toReversed
+      - method: toSorted
+      - method: unshift
+        rest:
+          - emptyRest
+          - combinationRest 0.0, 10, 11
+      - self:
+          - Array.of<number>()
+          - Array.of<number>(1, 2)
+          - Array.of<number>(3, 4, 5)
+        self_type: Array<number>
+        sub:
+          - method: pop
+          - method: shift
+      - self:
+          - Array.of<Object | null | undefined>(null, undefined, "123", "")
+        self_type: Array<Object | null | undefined>
+        sub:
+          - method: includes
+            params:
+              - paramOf("null", "undefined", '""', '"123"', 123, "NaN")
+              - paramOf(0, 1, 2, 3)
+            mandatory: 1
+          - method: indexOf
+            params:
+              - paramOf("null", "undefined", '""', '"123"', "NaN")
+              - paramOf(0, 1, 2, 3)
+            mandatory: 1
+          - method: values
+            ret_type: Iterable<Object | null | undefined>
+          - method: keys
+          - method: entries
+            ignored: true
+            ret_type: Iterable<[number, Object | null | undefined]>
+      - self: null
+        sub:
+          - expr: Array.of<number>(1).length
+          - expr: Array.of<number>().length
+          - method: Array.of<number>
+            rest:
+              - combinationRest "NaN", "10.0", "Infinity"
+            ret_type: Array<number>

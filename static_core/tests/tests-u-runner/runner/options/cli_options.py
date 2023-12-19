@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -100,6 +100,9 @@ def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
     ets_mutex_group.add_argument(
         '--ets-cts', action='store_true', dest='ets_cts',
         default=None, help='run ets-templates tests')
+    ets_mutex_group.add_argument(
+        '--ets-es-checked', action='store_true', dest='ets_es_checked',
+        default=None, help='run es checked templates tests')
 
 
 def add_ets_args(parser: argparse.ArgumentParser) -> None:

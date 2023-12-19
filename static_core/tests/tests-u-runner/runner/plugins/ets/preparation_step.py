@@ -20,6 +20,7 @@ import logging
 import multiprocessing
 import os
 import re
+import subprocess
 import sys
 from abc import ABC, abstractmethod
 from glob import glob
@@ -93,6 +94,39 @@ class FuncTestPreparationStep(TestPreparationStep):
     def __str__(self) -> str:
         return f"Test Generator for '{EtsSuites.FUNC.value}' test suite"
 
+class ESCheckedTestPreparationStep(TestPreparationStep):
+    def transform(self, force_generated: bool) -> List[str]:
+        confs = list(glob(os.path.join(self.test_source_path, "**/*.yaml"), recursive=True))
+        generator_root = Path(self.config.general.static_core_root) / \
+            "tests" / \
+            "tests-u-runner" / \
+            "tools" / \
+            "generate-es-checked"
+        generator_executable = generator_root / "main.rb"
+        res = subprocess.run(
+            [
+                generator_executable,
+                '--out',
+                self.test_gen_path,
+                '--tmp',
+                self.test_gen_path / 'tmp',
+                '--ts-node',
+                f'npx:--prefix:{generator_root}:ts-node:-P:{generator_root / "tsconfig.json"}',
+                *confs
+            ],
+            capture_output=True,
+            encoding=sys.stdout.encoding,
+            check=False,
+        )
+        if res.returncode != 0:
+            Log.default(_LOGGER, 'Failed to run es cross-validator, please, make sure that' \
+                'all required tools are installed (see tests-u-runner/readme.md#ets-es-checked-dependencies)')
+            Log.exception_and_raise(_LOGGER, f"invalid return code {res.returncode}\n" + res.stdout + res.stderr)
+        glob_expression = os.path.join(self.test_gen_path, "**/*.ets")
+        return list(glob(glob_expression, recursive=True))
+
+    def __str__(self) -> str:
+        return f"Test Generator for '{EtsSuites.ESCHECKED.value}' test suite"
 
 class CopyStep(TestPreparationStep):
     def transform(self, force_generated: bool) -> List[str]:
