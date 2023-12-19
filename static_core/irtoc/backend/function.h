@@ -22,9 +22,9 @@
 #include "source_languages.h"
 #include "irtoc_options.h"
 
-#ifdef PANDA_LLVMAOT
+#ifdef PANDA_LLVM_IRTOC
 #include "llvm_compiler_creator.h"
-#include "llvmaot_options.h"
+#include "llvm_options.h"
 #endif
 
 namespace panda::irtoc {
@@ -37,7 +37,11 @@ enum class LLVMCompilationResult {
     USE_ARK_AS_NO_SUFFIX,
 };
 
-#if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL && PANDA_LLVMAOT
+#if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL && PANDA_LLVM_INTERPRETER
+#define LLVM_INTERPRETER_CHECK_REGS_MASK
+#endif
+
+#ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
 struct UsedRegisters {
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     RegMask gpr;
@@ -57,8 +61,8 @@ class Function : public compiler::RelocationHandler {
 public:
     using Result = Expected<int, const char *>;
 
-#ifdef PANDA_LLVMAOT
-    Function() : llvm_aot_compiler_(nullptr) {}
+#ifdef PANDA_LLVM_IRTOC
+    Function() : llvm_compiler_(nullptr) {}
 #else
     Function() = default;
 #endif
@@ -71,8 +75,8 @@ public:
     virtual const char *GetName() const = 0;
 
     Result Compile(Arch arch, ArenaAllocator *allocator, ArenaAllocator *local_allocator);
-
-    LLVMCompilationResult CompileByLLVM(panda::compiler::RuntimeInterface *runtime, ArenaAllocator *allocator);
+    Result RunOptimizations(LLVMCompilationResult &compilation_result);
+    LLVMCompilationResult CompileByLLVM();
 
     auto GetCode() const
     {
@@ -166,7 +170,7 @@ public:
         return GetArch() != Arch::AARCH32 ? args_count_ : 0U;
     }
 
-#ifdef PANDA_LLVMAOT
+#ifdef PANDA_LLVM_IRTOC
     void ReportCompilationStatistic(std::ostream *out);
 
     compiler::GraphMode GetGraphMode()
@@ -175,12 +179,12 @@ public:
         return graph_mode_;
     }
 
-    void SetLLVMCompiler(std::shared_ptr<llvmaot::AotCompilerInterface> compiler)
+    void SetLLVMCompiler(std::shared_ptr<llvmbackend::CompilerInterface> compiler)
     {
-        llvm_aot_compiler_ = std::move(compiler);
+        llvm_compiler_ = std::move(compiler);
     }
 
-#endif  // PANDA_LLVMAOT
+#endif  // PANDA_LLVM_IRTOC
 
     bool IsCompiledByLlvm() const
     {
@@ -198,9 +202,6 @@ public:
     }
 
     void SetCode(Span<uint8_t> code);
-
-    Result RunOptimizations(compiler::RuntimeInterface *runtime, ArenaAllocator *allocator,
-                            LLVMCompilationResult &compilation_result);
 
 protected:
     Arch GetArch() const
@@ -223,13 +224,13 @@ protected:
         lang_ = lang;
     }
 
-#ifdef PANDA_LLVMAOT
+#ifdef PANDA_LLVM_IRTOC
     bool SkippedByLLVM();
 
     std::string_view GraphModeToString();
 
     std::string_view LLVMCompilationResultToString() const;
-#endif  // PANDA_LLVMAOT
+#endif  // PANDA_LLVM_IRTOC
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
@@ -256,24 +257,18 @@ private:
     std::vector<compiler::RelocationInfo> relocation_entries_;
     size_t args_count_ {0U};
     LLVMCompilationResult llvm_compilation_result_ {LLVMCompilationResult::INVALID};
-#ifdef PANDA_LLVMAOT
+#ifdef PANDA_LLVM_IRTOC
     compiler::GraphMode graph_mode_ {std::numeric_limits<uint32_t>::max()};
 
-    std::shared_ptr<compiler::AotCompilerInterface> llvm_aot_compiler_ {nullptr};
-    static constexpr std::array X86_64_SKIPPED_INTERPRETER_HANDLERS = {
+    std::shared_ptr<llvmbackend::CompilerInterface> llvm_compiler_ {nullptr};
+
+#ifdef PANDA_LLVM_INTERPRETER
+    static constexpr std::array SKIPPED_HANDLERS = {
         "ExecuteImplFast",
         "ExecuteImplFastEH",
-    };
-    static constexpr std::array AARCH64_SKIPPED_INTERPRETER_HANDLERS = {
-        "ExecuteImplFast",
-        "ExecuteImplFastEH",
-    };
-    static constexpr std::array AARCH64_SKIPPED_FASTPATHS = {
-        "IntfInlineCache",
-        "StringHashCode",  // Plain loop with MAdd seems to slightly outperform unrolled shift/sub produced by llvm
-        "StringHashCodeCompressed",
     };
 #endif
+#endif  // PANDA_LLVM_IRTOC
 };
 }  // namespace panda::irtoc
 

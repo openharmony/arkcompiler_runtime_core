@@ -1431,6 +1431,7 @@ void AliasAnalysis::VisitDefault([[maybe_unused]] Inst *inst)
         case Opcode::Store:
         case Opcode::StoreI:
         // No need to analyze
+        case Opcode::LiveOut:
         case Opcode::FunctionImmediate:
             return;
         default:

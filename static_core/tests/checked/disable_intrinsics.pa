@@ -32,7 +32,7 @@
 #! RUN          entry: "_GLOBAL::main"
 
 #! CHECKER      Intrinsics is enabled LLVM AOT
-#! RUN_LLVM     options: "--compiler-encode-intrinsics=true --llvmaot-dump-before"
+#! RUN_LLVM     options: "--compiler-encode-intrinsics=true --llvm-dump-before"
 #! READ_FILE    "console.out"
 #! INST         "call i64 @llvm.abs.i64"
 #! INST_NEXT    "call i64 @llvm.smin.i64"
@@ -73,7 +73,7 @@
 #! RUN          entry: "_GLOBAL::main"
 
 #! CHECKER      Intrinsics is disable LLVM AOT
-#! RUN_LLVM     options: "--compiler-encode-intrinsics=false --llvmaot-dump-before"
+#! RUN_LLVM     options: "--compiler-encode-intrinsics=false --llvm-dump-before"
 #! READ_FILE    "console.out"
 #! INST_NOT     "call i64 @llvm.abs.i64"
 #! INST_NEXT_NOT "call i64 @llvm.smin.i64"

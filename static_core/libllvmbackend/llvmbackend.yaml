@@ -1,0 +1,58 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+module:
+  name: llvm
+  namespace: panda::llvmbackend
+  descritpition: LLVM AOT compiler for panda
+
+options:
+  - name: llvm-dump-before
+    type: bool
+    default: false
+    description: Whether generated LLVM module should be dumped before optimization passes are run
+  - name: llvm-dump-after
+    type: bool
+    default: false
+    description: Whether generated LLVM module should be dumped after optimization passes are run
+  - name: llvm-log
+    type: arg_list_t
+    default:
+      - none
+    possible_values:
+      - none
+      - all
+      - infra
+      - stackmaps
+      - entry
+      - ir
+    description: Set log llvm components
+    delimiter: ","
+  - name: llvm-pipeline
+    type: std::string
+    default: ""
+    description: >
+      File with a sequence of llvm's passes, that will be involved into optimization
+      pipeline.
+  - name: llvm-options
+    type: std::string
+    default: ""
+    description: String with command line options that directly passed into llvm.
+  - name: llvm-cpu
+    type: std::string
+    default: "cortex-a55"
+    description: Set target cpu
+  - name: llvm-triple
+    type: std::string
+    default: "aarch64v8.2a-unknown-linux-gnu"
+    description: Set target triple

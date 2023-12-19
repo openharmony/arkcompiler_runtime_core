@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL
-#include "aarch64/disasm-aarch64.h"
-#endif
 #include "compilation.h"
 #include "function.h"
 #include "mem/pool_manager.h"
 #include "elfio/elfio.hpp"
 #include "irtoc_runtime.h"
+#ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
+#include "aarch64/disasm-aarch64.h"
+#endif
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
 #include "dwarf_builder.h"
@@ -28,7 +28,7 @@
 
 namespace panda::irtoc {
 
-#if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL && PANDA_LLVMAOT
+#ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
 class UsedRegistersCollector : public vixl::aarch64::Disassembler {
 public:
     explicit UsedRegistersCollector(panda::ArenaAllocator *allocator) : Disassembler(allocator) {}
@@ -125,7 +125,7 @@ private:
     RegMask reg_mask_;
     VRegMask vreg_mask_;
 };
-#endif  // USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL && PANDA_LLVMAOT
+#endif  // ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
 
 // elfio library missed some elf constants, so lets define it here for a while. We can't include elf.h header because
 // it conflicts with elfio.
@@ -133,7 +133,7 @@ static constexpr size_t EF_ARM_EABI_VER5 = 0x05000000;
 
 void Compilation::CheckUsedRegisters()
 {
-#if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL && PANDA_LLVMAOT
+#ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
     if (used_registers_.gpr.Count() > 0) {
         LOG(INFO, IRTOC) << "LLVM Irtoc compilation: used registers " << used_registers_.gpr;
         used_registers_.gpr &= GetCalleeRegsMask(arch_, false);
@@ -208,11 +208,11 @@ Compilation::Result Compilation::Run()
 
 Compilation::Result Compilation::Compile()
 {
-#ifdef PANDA_LLVMAOT
+#ifdef PANDA_LLVM_IRTOC
     IrtocRuntimeInterface runtime;
     ArenaAllocator allocator(SpaceType::SPACE_TYPE_COMPILER);
-    std::shared_ptr<compiler::IrtocCompilerInterface> llvm_compiler =
-        llvmaot::CreateLLVMIrtocCompiler(&runtime, &allocator, arch_);
+    std::shared_ptr<llvmbackend::IrtocCompilerInterface> llvm_compiler =
+        llvmbackend::CreateLLVMIrtocCompiler(&runtime, &allocator, arch_);
 #endif
 
     for (auto unit : units_) {
@@ -220,7 +220,7 @@ Compilation::Result Compilation::Compile()
             continue;
         }
         LOG(INFO, IRTOC) << "Compile " << unit->GetName();
-#ifdef PANDA_LLVMAOT
+#ifdef PANDA_LLVM_IRTOC
         unit->SetLLVMCompiler(llvm_compiler);
 #endif
         auto result = unit->Compile(arch_, allocator_.get(), local_allocator_.get());
@@ -232,7 +232,7 @@ Compilation::Result Compilation::Compile()
 #endif
     }
 
-#ifdef PANDA_LLVMAOT
+#ifdef PANDA_LLVM_IRTOC
     llvm_compiler->CompileAll();
     ASSERT(!OPTIONS.GetIrtocOutputLlvm().empty());
     llvm_compiler->WriteObjectFile(OPTIONS.GetIrtocOutputLlvm());
@@ -249,7 +249,7 @@ Compilation::Result Compilation::Compile()
         std::cerr << "LLVM total: " << llvm_compiler->GetObjectFileSize() << " bytes" << std::endl;
     }
 
-#if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL
+#ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
     for (auto unit : units_) {
         if (!(unit->GetGraphMode().IsInterpreter() || unit->GetGraphMode().IsInterpreterEntry()) ||
             arch_ != Arch::AARCH64 || unit->GetLLVMCompilationResult() == LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX) {
@@ -258,7 +258,7 @@ Compilation::Result Compilation::Compile()
         used_registers_ |= UsedRegistersCollector::CollectForCode(&allocator, unit->GetCode());
     }
 #endif
-#endif  // PANDA_LLVMAOT
+#endif  // PANDA_LLVM_IRTOC
 
     return 0;
 }

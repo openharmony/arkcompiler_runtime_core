@@ -62,7 +62,7 @@ options:
   - reference_processor
   - interpreter
   - compiler
-  - llvmaot
+  - llvm
   - pandafile
   - memorypool
   - runtime

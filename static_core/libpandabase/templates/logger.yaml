@@ -39,7 +39,7 @@ components:
   - name: interpreter
   - name: fuzzer
   - name: compiler
-  - name: llvmaot
+  - name: llvm
   - name: pandafile
   - name: memorypool
   - name: runtime

@@ -166,7 +166,6 @@ int AotBuilder::PrepareElfBuilder(ElfBuilder<ARCH> &builder, const std::string &
     constexpr size_t STRING_SLOT_SIZE = 2;
     constexpr size_t INLINE_CACHE_SLOT_SIZE = 1;
     constexpr size_t COMMON_SLOT_SIZE = 1;
-    constexpr size_t NO_BRIDGE_INTRINSIC_ENTRY_SLOT_SIZE = 1;
 
     auto code_provider = std::make_unique<CodeDataProvider>(this);
     builder.GetTextSection()->SetDataProvider(std::move(code_provider));
@@ -183,9 +182,7 @@ int AotBuilder::PrepareElfBuilder(ElfBuilder<ARCH> &builder, const std::string &
     auto got_data_size = static_cast<size_t>(RuntimeInterface::IntrinsicId::COUNT) + 1 +
                          CALL_STATIC_SLOT_SIZE * (got_plt_.size() + got_class_.size()) +
                          CALL_VIRTUAL_SLOT_SIZE * got_virt_indexes_.size() + STRING_SLOT_SIZE * got_string_.size() +
-                         INLINE_CACHE_SLOT_SIZE * got_intf_inline_cache_.size() +
-                         COMMON_SLOT_SIZE * got_common_.size() +
-                         NO_BRIDGE_INTRINSIC_ENTRY_SLOT_SIZE * got_direct_intrinsics_.size();
+                         INLINE_CACHE_SLOT_SIZE * got_intf_inline_cache_.size() + COMMON_SLOT_SIZE * got_common_.size();
     // We need to fill the whole segment with aot_got section because it is filled from the end.
     got_data.resize(RoundUp(PointerSize(ARCH) * got_data_size, PAGE_SIZE_BYTES), 0);
 
@@ -235,7 +232,7 @@ template <Arch ARCH>
 void AotBuilder::EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptr_view, size_t got_data_size)
 {
     if (!got_plt_.empty() || !got_virt_indexes_.empty() || !got_class_.empty() || !got_string_.empty() ||
-        !got_intf_inline_cache_.empty() || !got_common_.empty() || !got_direct_intrinsics_.empty()) {
+        !got_intf_inline_cache_.empty() || !got_common_.empty()) {
         ASSERT(PointerSize(ARCH) >= sizeof(uint32_t));
 
         auto ptr_cnt = ptr_view.Size();
@@ -272,14 +269,6 @@ void AotBuilder::EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptr_view, siz
             (void)cache;
             ASSERT(idx < 0);
             ptr_view[ptr_cnt - end + idx] = AotFile::AotSlotType::COMMON_SLOT;
-        }
-        for (auto [intrinsic_id, idx] : got_direct_intrinsics_) {
-            ASSERT(idx < 0);
-            using WordType = typename decltype(ptr_view)::ElementType;
-            constexpr auto IMM_HALF_BITS = BitsNumInValue<WordType>(0) / 2U;
-            auto shifted = static_cast<WordType>(intrinsic_id) << IMM_HALF_BITS;
-            ASSERT(static_cast<WordType>(intrinsic_id) == (shifted >> IMM_HALF_BITS));
-            ptr_view[ptr_cnt - end + idx] = shifted | static_cast<WordType>(AotFile::AotSlotType::DIRECT_EP_SLOT);
         }
     }
 }

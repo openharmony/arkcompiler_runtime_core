@@ -158,27 +158,12 @@ int32_t AotData::GetIntfInlineCacheId(uint64_t cache_idx)
     return slot_id;
 }
 
-int32_t AotData::GetIntrinsicSlot(uint32_t intrinsic_id)
-{
-    ASSERT(got_direct_intrinsics_ != nullptr);
-
-    int32_t slot_id;
-    auto slot = got_direct_intrinsics_->find(intrinsic_id);
-    if (slot != got_direct_intrinsics_->end()) {
-        slot_id = slot->second;
-    } else {
-        slot_id = GetSlotId();
-        got_direct_intrinsics_->insert({intrinsic_id, slot_id});
-    }
-    return slot_id;
-}
-
 int32_t AotData::GetSlotId() const
 {
     constexpr auto IMM_3 = 3;
     constexpr auto IMM_2 = 2;
     return -1 - IMM_3 * (got_plt_->size() + got_class_->size()) -
            IMM_2 * (got_virt_indexes_->size() + got_string_->size()) - got_intf_inline_cache_->size() -
-           got_common_->size() - got_direct_intrinsics_->size();
+           got_common_->size();
 }
 }  // namespace panda::compiler

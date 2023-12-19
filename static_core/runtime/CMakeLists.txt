@@ -345,13 +345,13 @@ add_dependencies(arkruntime_interpreter_impl
 
 add_dependencies(arkcompiler entrypoints_gen entrypoints_compiler_checksum_gen)
 
-if (HOST_TOOLS OR CROSS_VALUES_CONFIG)
+if (HOST_TOOLS)
     # Host tools should take bitcode compiled for target
     SET_SOURCE_FILES_PROPERTIES(${IRTOC_INT_LLVM_INL_MODULE} PROPERTIES
             EXTERNAL_OBJECT true
             GENERATED true)
     add_custom_target(irtoc_int_llvm_inl_module)
-elseif (PANDA_LLVMAOT AND PANDA_LLVMAOT_IR_INLINING)
+elseif (PANDA_LLVM_INTERPRETER AND PANDA_LLVM_INTERPRETER_INLINING)
     set(sources
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/entrypoints/entrypoints.cpp
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/interpreter/runtime_interface.cpp
@@ -361,6 +361,7 @@ elseif (PANDA_LLVMAOT AND PANDA_LLVMAOT_IR_INLINING)
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/runtime.cpp
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/class_linker.cpp
     )
+    set(outputs "")
     panda_add_llvm_bc_lib(TARGET irtoc_int_llvm_inl_module
             SOURCES ${sources}
             INCLUDES $<TARGET_PROPERTY:arkruntime_obj,INCLUDE_DIRECTORIES>
@@ -376,15 +377,18 @@ elseif (PANDA_LLVMAOT AND PANDA_LLVMAOT_IR_INLINING)
             instructions_gen_compiler
             isa_gen_compiler
             runtime_intrinsics_inl
-            OUTPUT ${IRTOC_INT_LLVM_INL_MODULE}
+            OUTPUT_VARIABLE outputs
     )
+    set(IRTOC_INT_LLVM_INL_MODULE "${outputs}")
+    # Create the file with a list of bitcode files
+    file(GENERATE OUTPUT ${IRTOC_INT_LLVM_INL_MODULE_FILES_LIST} CONTENT "${outputs}")
 else()
     add_custom_target(irtoc_int_llvm_inl_module)
 endif()
 
 if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
     set(skip_fastpath_validation FALSE)
-    if (IRTOC_TARGET STREQUAL "arm64" AND PANDA_LLVMAOT)
+    if (IRTOC_TARGET STREQUAL "arm64" AND PANDA_LLVM_INTERPRETER)
         set(skip_fastpath_validation TRUE)
     endif()
     irtoc_compile(TARGET_NAME irtoc_fastpath
@@ -404,9 +408,8 @@ if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
     irtoc_compile(TARGET_NAME irtoc_interpreter
                   INPUT_FILES ${IRTOC_SOURCE_DIR}/scripts/interpreter.irt
                   TARGET_VARIABLE IRTOC_INTERPRETER_OBJ
-                  LLVMAOT_INLINE_MODULE ${IRTOC_INT_LLVM_INL_MODULE}
+                  LLVM_BACKEND_INLINE_MODULE_FILES ${IRTOC_INT_LLVM_INL_MODULE}
                   TARGET_VARIABLE_LLVM IRTOC_INTERPRETER_LLVM_OBJ)
-    add_dependencies(irtoc_interpreter irtoc_int_llvm_inl_module)
     set(irtoc_fastpath_target irtoc_fastpath)
     set(irtoc_interpreter_target irtoc_interpreter)
 else()
@@ -439,8 +442,7 @@ endif()
 
 set(IRTOC_LLVM_OBJECTS "")
 
-if (PANDA_LLVMAOT)
-    list(APPEND IRTOC_LLVM_OBJECTS ${IRTOC_FASTPATH_LLVM_OBJ})
+if (PANDA_LLVM_INTERPRETER)
     list(APPEND IRTOC_LLVM_OBJECTS ${IRTOC_INTERPRETER_LLVM_OBJ})
 endif()
 
