@@ -266,6 +266,7 @@ spec/struct-type/test-struct-implements-interface.ets
 spec/struct-type/test-struct-invoke_0.ets
 spec/struct-type/test-struct-invoke_1.ets
 spec/struct-type/test-use-struct-as-name_2.ets
+spec/struct-type/test-struct-no-annotation.ets
 ### EOF Issue 14040
 ### Negative tests
 spec/struct-type/test-class-extends-struct.ets

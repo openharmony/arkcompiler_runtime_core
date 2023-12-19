@@ -28,7 +28,6 @@ from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.logger import Log
 from runner.options.config import Config
 from runner.plugins.ets.ets_suites import EtsSuites
-from runner.plugins.ets.ets_templates.test_ets_cts import TestEtsCts
 from runner.plugins.ets.ets_test_suite import EtsTestSuite
 from runner.plugins.ets.test_ets import TestETS
 from runner.runner_base import get_test_id, correct_path
@@ -84,8 +83,7 @@ class RunnerETS(RunnerFileBased):
         self.add_directory(self.test_root, "ets", [])
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestETS:
-        Test = TestEtsCts if "ets_cts" in self.config.test_suites else TestETS
-        test = Test(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
+        test = TestETS(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
         return test
 
