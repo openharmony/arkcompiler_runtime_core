@@ -221,7 +221,7 @@ options:
   lang:
     - ets
   type: std::string
-  default: simple
+  default: lock-free
   possible_values:
   - simple
   - fine-grained

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/taskmanager/schedulable_task_queue_interface.h"
+#include "libpandabase/taskmanager/utils/sp_sc_lock_free_queue.h"
 
 namespace ark::taskmanager::internal {
 
@@ -48,7 +49,7 @@ public:
     static PANDA_PUBLIC_API SchedulableTaskQueueInterface *Create(TaskType taskType, VMType vmType, uint8_t priority)
     {
         TaskQueueAllocatorType allocator;
-        auto *mem = allocator.allocate(sizeof(TaskQueue<TaskAllocatorType>));
+        auto *mem = allocator.allocate(1U);
         return new (mem) TaskQueue<TaskAllocatorType>(taskType, vmType, priority);
     }
 
@@ -56,12 +57,12 @@ public:
     {
         TaskQueueAllocatorType allocator;
         std::allocator_traits<TaskQueueAllocatorType>::destroy(allocator, queue);
-        allocator.deallocate(static_cast<TaskQueue<TaskAllocatorType> *>(queue), sizeof(TaskQueue<TaskAllocatorType>));
+        allocator.deallocate(static_cast<TaskQueue<TaskAllocatorType> *>(queue), 1U);
     }
 
     PANDA_PUBLIC_API ~TaskQueue() override
     {
-        WaitForEmpty();
+        ASSERT(AreInternalQueuesEmpty());
     }
 
     /**
@@ -71,23 +72,20 @@ public:
      */
     PANDA_PUBLIC_API size_t AddTask(Task &&task) override
     {
-        ASSERT(task.GetTaskProperties().GetTaskType() == GetTaskType());
-        ASSERT(task.GetTaskProperties().GetVMType() == GetVMType());
-        os::memory::LockHolder pushLockHolder(pushPopLock_);
         auto properties = task.GetTaskProperties();
-        size_t size = 0;
-        {
-            os::memory::LockHolder taskQueueStateLockHolder(taskQueueStateLock_);
-            PushTaskToInternalQueues(std::move(task));
-            pushWaitCondVar_.Signal();
-            size = SumSizeOfInternalQueues();
+        ASSERT(properties.GetTaskType() == GetTaskType());
+        ASSERT(properties.GetVMType() == GetVMType());
+        // Send info about new added task
+        if (LIKELY(newTasksCallback_ != nullptr)) {
+            newTasksCallback_(properties, 1UL);
         }
-        os::memory::LockHolder subscriberLockHolder(subscriberLock_);
-        // Notify subscriber about new task
-        if (newTasksCallback_ != nullptr) {
-            newTasksCallback_(properties, 1UL, size == 1UL);
+        // Push task in one of internal queues based on its TaskExecutionMode
+        PushTaskToInternalQueues(std::move(task));
+        // Signal workers that should execute new task
+        if (signalWorkersCallback_ != nullptr) {
+            signalWorkersCallback_();
         }
-        return size;
+        return Size();
     }
 
     /**
@@ -97,17 +95,7 @@ public:
      */
     [[nodiscard]] std::optional<Task> PopTask() override
     {
-        os::memory::LockHolder popLockHolder(pushPopLock_);
-        while (IsEmpty()) {
-            if (finish_) {
-                return std::nullopt;
-            }
-            pushWaitCondVar_.Wait(&pushPopLock_);
-        }
-        os::memory::LockHolder taskQueueStateLockHolder(taskQueueStateLock_);
-        auto task = PopTaskFromInternalQueues();
-        finishCondVar_.Signal();
-        return std::make_optional(std::move(task));
+        return PopTaskFromInternalQueues();
     }
 
     /**
@@ -119,51 +107,68 @@ public:
      */
     [[nodiscard]] std::optional<Task> PopTask(TaskExecutionMode mode) override
     {
-        os::memory::LockHolder popLockHolder(pushPopLock_);
+        if (UNLIKELY(!HasTaskWithExecutionMode(mode))) {
+            return std::nullopt;
+        }
         auto *queue = &foregroundTaskQueue_;
-        if (mode != TaskExecutionMode::FOREGROUND) {
+        if (UNLIKELY(mode != TaskExecutionMode::FOREGROUND)) {
             queue = &backgroundTaskQueue_;
         }
-        while (!HasTaskWithExecutionMode(mode)) {
-            if (finish_) {
-                return std::nullopt;
-            }
-            pushWaitCondVar_.Wait(&pushPopLock_);
-        }
-        os::memory::LockHolder taskQueueStateLockHolder(taskQueueStateLock_);
-        auto task = PopTaskFromQueue(*queue);
-        finishCondVar_.Signal();
-        return std::make_optional(std::move(task));
+        auto task = queue->Pop();
+        return task;
     }
 
     /**
      * @brief Method pops several tasks to worker.
-     * @param add_task_func - Functor that will be used to add popped tasks to worker
+     * @param addTaskFunc - Functor that will be used to add popped tasks to worker
      * @param size - Count of tasks you want to pop. If it is greater then count of tasks that are stored in queue,
      * method will not wait and will pop all stored tasks.
      * @return count of task that was added to worker
      */
-    size_t PopTasksToWorker(AddTaskToWorkerFunc addTaskFunc, size_t size) override
+    size_t PopTasksToWorker(const AddTaskToWorkerFunc &addTaskFunc, size_t size) override
     {
-        os::memory::LockHolder popLockHolder(pushPopLock_);
-        os::memory::LockHolder taskQueueStateLockHolder(taskQueueStateLock_);
-        size = (SumSizeOfInternalQueues() < size) ? (SumSizeOfInternalQueues()) : (size);
-        for (size_t i = 0; i < size; i++) {
-            addTaskFunc(PopTaskFromInternalQueues());
+        if (UNLIKELY(AreInternalQueuesEmpty())) {
+            return 0;
         }
-        finishCondVar_.Signal();
-        return size;
+        size_t returnSize = 0;
+        for (; !AreInternalQueuesEmpty() && returnSize < size; returnSize++) {
+            addTaskFunc(PopTaskFromInternalQueues().value());
+        }
+        return returnSize;
+    }
+
+    /**
+     * @brief Method pops several tasks to helper thread. Helper thread in TaskScheduler is the thread that uses
+     * HelpWorkersWithTasks method.
+     * @param addTaskFunc - Functor that will be used to add popped tasks to helper
+     * @param size - Count of tasks you want to pop. If it is greater then count of tasks that are stored in queue,
+     * method will not wait and will pop all stored tasks.
+     * @param mode - Execution mode of task you wast to pop
+     * @return count of task that was added to helper
+     */
+    size_t PopTasksToHelperThread(const AddTaskToHelperFunc &addTaskFunc, size_t size, TaskExecutionMode mode) override
+    {
+        if (!HasTaskWithExecutionMode(mode)) {
+            return 0;
+        }
+        auto *queue = &foregroundTaskQueue_;
+        if (mode != TaskExecutionMode::FOREGROUND) {
+            queue = &backgroundTaskQueue_;
+        }
+        size_t returnSize = 0;
+        for (; HasTaskWithExecutionMode(mode) && returnSize < size; returnSize++) {
+            addTaskFunc(queue->Pop().value());
+        }
+        return returnSize;
     }
 
     [[nodiscard]] PANDA_PUBLIC_API bool IsEmpty() const override
     {
-        os::memory::LockHolder lockHolder(taskQueueStateLock_);
         return AreInternalQueuesEmpty();
     }
 
     [[nodiscard]] PANDA_PUBLIC_API size_t Size() const override
     {
-        os::memory::LockHolder lockHolder(taskQueueStateLock_);
         return SumSizeOfInternalQueues();
     }
 
@@ -173,122 +178,87 @@ public:
      */
     [[nodiscard]] PANDA_PUBLIC_API bool HasTaskWithExecutionMode(TaskExecutionMode mode) const override
     {
-        os::memory::LockHolder lockHolder(taskQueueStateLock_);
         if (mode == TaskExecutionMode::FOREGROUND) {
-            return !foregroundTaskQueue_.empty();
+            return !foregroundTaskQueue_.IsEmpty();
         }
-        return !backgroundTaskQueue_.empty();
+        return !backgroundTaskQueue_.IsEmpty();
+    }
+
+    [[nodiscard]] PANDA_PUBLIC_API size_t CountOfTasksWithExecutionMode(TaskExecutionMode mode) const override
+    {
+        if (mode == TaskExecutionMode::FOREGROUND) {
+            return foregroundTaskQueue_.Size();
+        }
+        return backgroundTaskQueue_.Size();
     }
 
     /**
-     * @brief This method saves the @arg callback. It will be called after adding new task in AddTask method.
-     * This method should be used only in TaskScheduler!
-     * @param callback - function that get count of inputted tasks.
+     * @brief This method saves the @arg callback.
+     * @param newTaskCallback - function that get count of inputted tasks and uses in AddTask method.
+     * @param signalWorkersCallback - function that should signal workers to return to work if it's needed
      */
-    void SetNewTasksCallback(NewTasksCallback callback) override
+    void SetCallbacks(NewTasksCallback newTaskCallback, SignalWorkersCallback signalWorkersCallback) override
     {
-        os::memory::LockHolder subscriberLockHolder(subscriberLock_);
-        newTasksCallback_ = std::move(callback);
+        newTasksCallback_ = std::move(newTaskCallback);
+        signalWorkersCallback_ = std::move(signalWorkersCallback);
     }
 
     /// @brief Removes callback function. This method should be used only in TaskScheduler!
-    void UnsetNewTasksCallback() override
+    void UnsetCallbacks() override
     {
-        os::memory::LockHolder lockHolder(subscriberLock_);
         newTasksCallback_ = nullptr;
-    }
-
-    /**
-     * @brief Method waits until internal queue will be empty and finalize using of TaskQueue
-     * After this method PopTask will not wait for new tasks.
-     */
-    void WaitForQueueEmptyAndFinish() override
-    {
-        WaitForEmpty();
+        signalWorkersCallback_ = nullptr;
     }
 
 private:
-    void WaitForEmpty()
-    {
-        {
-            os::memory::LockHolder lockHolder(taskQueueStateLock_);
-            while (!AreInternalQueuesEmpty()) {
-                finishCondVar_.Wait(&taskQueueStateLock_);
-            }
-        }
-        os::memory::LockHolder pushPopLockHolder(pushPopLock_);
-        finish_ = true;
-        pushWaitCondVar_.SignalAll();
-    }
-
-    using InternalTaskQueue = std::queue<Task, std::deque<Task, TaskAllocatorType>>;
+    using InternalTaskQueue = SPSCLockFreeQueue<Task, TaskAllocatorType>;
 
     TaskQueue(TaskType taskType, VMType vmType, uint8_t priority)
-        : SchedulableTaskQueueInterface(taskType, vmType, priority),
-          foregroundTaskQueue_(TaskAllocatorType()),
-          backgroundTaskQueue_(TaskAllocatorType())
+        : SchedulableTaskQueueInterface(taskType, vmType, priority)
     {
     }
 
-    bool AreInternalQueuesEmpty() const REQUIRES(taskQueueStateLock_)
+    bool AreInternalQueuesEmpty() const
     {
-        return foregroundTaskQueue_.empty() && backgroundTaskQueue_.empty();
+        return foregroundTaskQueue_.IsEmpty() && backgroundTaskQueue_.IsEmpty();
     }
 
-    size_t SumSizeOfInternalQueues() const REQUIRES(taskQueueStateLock_)
+    size_t SumSizeOfInternalQueues() const
     {
-        return foregroundTaskQueue_.size() + backgroundTaskQueue_.size();
+        return foregroundTaskQueue_.Size() + backgroundTaskQueue_.Size();
     }
 
-    void PushTaskToInternalQueues(Task &&task) REQUIRES(taskQueueStateLock_)
+    void PushTaskToInternalQueues(Task &&task)
     {
         if (task.GetTaskProperties().GetTaskExecutionMode() == TaskExecutionMode::FOREGROUND) {
-            foregroundTaskQueue_.push(std::move(task));
+            os::memory::LockHolder lockGuard(pushForegroundLock_);
+            foregroundTaskQueue_.Push(std::move(task));
         } else {
-            backgroundTaskQueue_.push(std::move(task));
+            os::memory::LockHolder lockGuard(pushBackgroundLock_);
+            backgroundTaskQueue_.Push(std::move(task));
         }
     }
 
-    Task PopTaskFromInternalQueues() REQUIRES(taskQueueStateLock_)
+    std::optional<Task> PopTaskFromInternalQueues()
     {
-        if (!foregroundTaskQueue_.empty()) {
-            return PopTaskFromQueue(foregroundTaskQueue_);
+        auto task = foregroundTaskQueue_.Pop();
+        if (task.has_value()) {
+            return task;
         }
-        return PopTaskFromQueue(backgroundTaskQueue_);
+        return backgroundTaskQueue_.Pop();
     }
-
-    Task PopTaskFromQueue(InternalTaskQueue &queue) REQUIRES(taskQueueStateLock_)
-    {
-        auto task = std::move(queue.front());
-        queue.pop();
-        return task;
-    }
-
-    /// push_pop_lock_ is used in push and pop operations as first guarder
-    mutable os::memory::Mutex pushPopLock_;
-
-    /// task_queue_state_lock_ is used in case of interaction with internal queues.
-    mutable os::memory::Mutex taskQueueStateLock_;
-
-    os::memory::ConditionVariable pushWaitCondVar_ GUARDED_BY(pushPopLock_);
-    os::memory::ConditionVariable finishCondVar_ GUARDED_BY(taskQueueStateLock_);
 
     /// subscriber_lock_ is used in case of calling new_tasks_callback_
-    os::memory::Mutex subscriberLock_;
-    NewTasksCallback newTasksCallback_ GUARDED_BY(subscriberLock_);
+    NewTasksCallback newTasksCallback_;
+    SignalWorkersCallback signalWorkersCallback_;
 
-    bool finish_ GUARDED_BY(pushPopLock_) {false};
+    /// foreground part of TaskQueue
+    mutable os::memory::Mutex pushForegroundLock_;
+    InternalTaskQueue foregroundTaskQueue_;
 
-    /**
-     * foreground_task_queue_ is queue that contains task with ExecutionMode::FOREGROUND. If method PopTask() is used,
-     * foreground_task_queue_ will be checked first and if it's not empty, Task will be gotten from it.
-     */
-    InternalTaskQueue foregroundTaskQueue_ GUARDED_BY(taskQueueStateLock_);
-    /**
-     * background_task_queue_ is queue that contains task with ExecutionMode::BACKGROUND. If method PopTask() is used,
-     * background_task_queue_ will be popped only if foreground_task_queue_ is empty.
-     */
-    InternalTaskQueue backgroundTaskQueue_ GUARDED_BY(taskQueueStateLock_);
+    /// background part of TaskQueue
+    mutable os::memory::Mutex pushBackgroundLock_;
+    InternalTaskQueue backgroundTaskQueue_;
 };
 
 }  // namespace ark::taskmanager::internal

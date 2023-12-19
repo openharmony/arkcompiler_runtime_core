@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ CompilerTaskManagerWorker::CompilerTaskManagerWorker(mem::InternalAllocatorPtr i
 {
     auto *tm = taskmanager::TaskScheduler::GetTaskScheduler();
     compilerTaskManagerQueue_ = tm->CreateAndRegisterTaskQueue<decltype(internalAllocator_->Adapter())>(
-        taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskQueueInterface::DEFAULT_PRIORITY);
+        taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskQueueInterface::MIN_PRIORITY);
     ASSERT(compilerTaskManagerQueue_ != nullptr);
 }
 

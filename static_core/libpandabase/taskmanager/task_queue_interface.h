@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@
 #include "libpandabase/taskmanager/task.h"
 #include "libpandabase/os/mutex.h"
 #include <atomic>
-#include <cstdint>
 #include <queue>
 
 namespace ark::taskmanager {
 
 class TaskQueueId {
 public:
+    constexpr TaskQueueId() : TaskQueueId(TaskType::UNKNOWN, VMType::UNKNOWN) {}
     constexpr TaskQueueId(TaskType tt, VMType vt)
         : val_(static_cast<uint16_t>(tt) |
                static_cast<uint16_t>(static_cast<uint16_t>(vt) << (BITS_PER_BYTE * sizeof(TaskType))))
@@ -53,11 +53,11 @@ private:
     uint16_t val_;
 };
 
-constexpr TaskQueueId INVALID_TASKQUEUE_ID = TaskQueueId(TaskType::UNKNOWN, VMType::UNKNOWN);
+constexpr TaskQueueId INVALID_TASKQUEUE_ID = TaskQueueId();
 
 /**
- * @brief TaskQueueInteface is an interface of thread-safe queue for tasks. Queues can be registered in TaskScheduler
- * and used to execute tasks on workers. Also, queues can notify other threads when a new task is pushed.
+ * @brief TaskQueueInteface is an interface of push-thread-safe queue for tasks. Queues can be registered in
+ * TaskScheduler and used to execute tasks on workers. Also, queues can notify other threads when a new task is pushed.
  */
 class TaskQueueInterface {
 public:
@@ -92,6 +92,8 @@ public:
      */
     [[nodiscard]] PANDA_PUBLIC_API virtual bool HasTaskWithExecutionMode(TaskExecutionMode mode) const = 0;
 
+    [[nodiscard]] PANDA_PUBLIC_API virtual size_t CountOfTasksWithExecutionMode(TaskExecutionMode mode) const = 0;
+
     uint8_t GetPriority() const
     {
         // Atomic with acquire order reason: data race with priority_ with dependencies on reads after the
@@ -117,12 +119,6 @@ public:
     {
         return vmType_;
     }
-
-    /**
-     * @brief Method waits until internal queue will be empty and finalize using of TaskQueue
-     * After this method TaskQueue will not wait for new tasks.
-     */
-    void virtual WaitForQueueEmptyAndFinish() = 0;
 
 private:
     TaskType taskType_;

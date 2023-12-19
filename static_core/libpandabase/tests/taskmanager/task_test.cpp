@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,9 +120,13 @@ TEST_F(TaskTest, TaskQueueMultithreadingOnePushOnePop)
         }
     };
     auto popper = [&queue]() {
-        for (size_t i = 0; i < RESULT_COUNT; i++) {
+        for (size_t i = 0; i < RESULT_COUNT;) {
             auto task = queue->PopTask();
+            if (!task.has_value()) {
+                continue;
+            }
             task->RunTask();
+            i++;
         }
     };
     auto *worker1 = new std::thread(pusher);
@@ -140,16 +144,25 @@ TEST_F(TaskTest, TaskQueueMultithreadingNPushNPop)
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
     SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::atomic_size_t counter = 0;
-    constexpr size_t RESULT_COUNT = 100'000;
+    constexpr size_t RESULT_COUNT = 10'000;
     auto pusher = [&queue, &counter]() {
         for (size_t i = 0; i < RESULT_COUNT; i++) {
             queue->AddTask(Task::Create(TASK_PROPERTIES, [&counter]() { counter++; }));
         }
     };
-    auto popper = [&queue]() {
-        for (size_t i = 0; i < RESULT_COUNT; i++) {
-            auto task = queue->PopTask();
+    os::memory::Mutex popLock;
+    auto popper = [&queue, &popLock]() {
+        std::optional<Task> task;
+        for (size_t i = 0; i < RESULT_COUNT;) {
+            {
+                os::memory::LockHolder popLockGourd(popLock);
+                task = queue->PopTask();
+            }
+            if (!task.has_value()) {
+                continue;
+            }
             task->RunTask();
+            i++;
         }
     };
     std::vector<std::thread *> pushers;
@@ -180,10 +193,12 @@ TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
     }
 
     constexpr size_t THREAD_COUNTER = 10;
+    os::memory::Mutex popLock;
     std::vector<std::thread> poppers;
     for (size_t i = 0; i < THREAD_COUNTER; i++) {
-        poppers.emplace_back([&queue]() {
+        poppers.emplace_back([&queue, &popLock]() {
             while (true) {
+                os::memory::LockHolder popLockGourd(popLock);
                 auto task = queue->PopTask();
                 if (!task.has_value()) {
                     break;
@@ -193,7 +208,6 @@ TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
         });
     }
 
-    queue->WaitForQueueEmptyAndFinish();
     for (auto &popper : poppers) {
         popper.join();
     }

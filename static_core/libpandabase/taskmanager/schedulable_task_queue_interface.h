@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,11 +30,14 @@ public:
      * NewTasksCallback instance should be called after tasks adding. It should have next arguments:
      * 1. property of tasks you added
      * 2. count of tasks you added
-     * 3. true of queue was empty before last tasks adding, otherwise false
      */
-    using NewTasksCallback = std::function<void(TaskProperties, size_t, bool)>;
+    using NewTasksCallback = std::function<void(TaskProperties, size_t)>;
+    using SignalWorkersCallback = std::function<void()>;
 
     using AddTaskToWorkerFunc = std::function<void(Task &&)>;
+    using AddTaskToHelperFunc = std::function<void(Task &&)>;
+
+    using GetSplittingFactorFunc = std::function<size_t()>;
 
     SchedulableTaskQueueInterface(TaskType taskType, VMType vmType, uint8_t priority)
         : TaskQueueInterface(taskType, vmType, priority)
@@ -57,21 +60,34 @@ public:
 
     /**
      * @brief Method pops several tasks to worker.
-     * @param add_task_func - Functor that will be used to add popped tasks to worker
+     * @param addTaskFunc - Functor that will be used to add popped tasks to worker
      * @param size - Count of tasks you want to pop. If it is greater then count of tasks that are stored in queue,
      * method will not wait and will pop all stored tasks.
      * @return count of task that was added to worker
      */
-    size_t virtual PopTasksToWorker(AddTaskToWorkerFunc addTaskFunc, size_t size) = 0;
+    size_t virtual PopTasksToWorker(const AddTaskToWorkerFunc &addTaskFunc, size_t size) = 0;
 
     /**
-     * @brief This method sets the callback. It will be called after adding new task in AddTask method.
-     * @param callback - function that get count of inputted tasks.
+     * @brief Method pops several tasks to helper thread. Helper thread in TaskScheduler is the thread that uses
+     * HelpWorkersWithTasks method.
+     * @param addTaskFunc - Functor that will be used to add popped tasks to helper
+     * @param size - Count of tasks you want to pop. If it is greater then count of tasks that are stored in queue,
+     * method will not wait and will pop all stored tasks.
+     * @param mode - Execution mode of task you wast to pop
+     * @return count of task that was added to helper
      */
-    void virtual SetNewTasksCallback(NewTasksCallback callback) = 0;
+    size_t virtual PopTasksToHelperThread(const AddTaskToHelperFunc &addTaskFunc, size_t size,
+                                          TaskExecutionMode mode) = 0;
+
+    /**
+     * @brief This method saves the @arg callback.
+     * @param newTaskCallback - function that get count of inputted tasks and uses in AddTask method.
+     * @param signalWorkers - function that should signal workers to return to work if it's needed
+     */
+    void virtual SetCallbacks(NewTasksCallback newTaskCallback, SignalWorkersCallback signalWorkersCallback) = 0;
 
     /// @brief Removes callback function.
-    void virtual UnsetNewTasksCallback() = 0;
+    void virtual UnsetCallbacks() = 0;
 };
 
 }  // namespace ark::taskmanager::internal

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 #include "libpandabase/taskmanager/worker_thread.h"
 #include <vector>
 #include <map>
-#include <random>
 
 namespace ark::taskmanager {
 /**
@@ -35,10 +34,12 @@ public:
     NO_COPY_SEMANTIC(TaskScheduler);
     NO_MOVE_SEMANTIC(TaskScheduler);
 
+    static constexpr uint64_t TASK_WAIT_TIMEOUT = 500U;
+
     /**
      * @brief Creates an instance of TaskScheduler.
-     * @param threads_count - number of worker that will be created be Task Manager
-     * @param task_statistics_type - type of TaskStatistics that will be used in TaskScheduler
+     * @param threadsCount - number of worker that will be created be Task Manager
+     * @param taskStatisticsType - type of TaskStatistics that will be used in TaskScheduler
      */
     PANDA_PUBLIC_API static TaskScheduler *Create(
         size_t threadsCount, TaskStatisticsImplType taskStatisticsType = TaskStatisticsImplType::SIMPLE);
@@ -60,8 +61,8 @@ public:
 
     /**
      * @brief Method allocates, constructs and registers TaskQueue. If it already exists, method returns nullptr.
-     * @param task_type - TaskType of future TaskQueue.
-     * @param vm_type - VMType of future TaskQueue.
+     * @param taskType - TaskType of future TaskQueue.
+     * @param vmType - VMType of future TaskQueue.
      * @param priority - value of priority:
      * TaskQueueInterface::MIN_PRIORITY <= priority <= TaskQueueInterface::MIN_PRIORITY
      * @tparam Allocator - allocator of Task that will be used in internal queues. By default is used
@@ -95,26 +96,45 @@ public:
         TaskQueueId id(queue->GetTaskType(), queue->GetVMType());
         auto *schedulableQueue = taskQueues_[id];
 
-        schedulableQueue->UnsetNewTasksCallback();
+        schedulableQueue->UnsetCallbacks();
         taskQueues_.erase(id);
         internal::TaskQueue<Allocator>::Destroy(schedulableQueue);
     }
 
     /**
-     * @brief Fills @arg worker (local queues) with tasks. It will stop if the size of the queue is equal to @arg
-     * tasks_count.  Method @return bool value that indicates worker end. If it's true, workers should finish after
-     * the execution of tasks.
-     * @param worker - pointer on worker that should be fill will tasks
-     * @param tasks_count - max number of tasks for filling
+     * @brief Fills @arg worker (local queues) with tasks. The number of tasks obtained depends on the max size of the
+     * worker's local queue and the number of workers. The algorithm strives to give the same number of tasks to all
+     * workers. If queues are empty and TaskScheduler is not destroying workers will wait.  If it's true, workers should
+     * finish after the execution of tasks.
+     * @param worker - pointer on worker that should be fill will tasks.
+     * @returns true if Worker should finish loop execution, otherwise returns false
      */
-    bool FillWithTasks(WorkerThread *worker, size_t tasksCount);
+    bool FillWithTasks(WorkerThread *worker);
 
     /**
-     * @brief Method returns Task with specified properties. If there are no tasks with that properties method will
-     * return nullopt.
-     * @param properties - TaskProperties of task we want to get.
+     * @brief Method steal task from worker with the largest number of tasks and push it to gotten worker.
+     * @param worker: pointer to WorkerThread that should be fill with stollen task
      */
-    [[nodiscard]] PANDA_PUBLIC_API std::optional<Task> GetTaskFromQueue(TaskProperties properties);
+    void StealTaskFromOtherWorker(WorkerThread *taskReceiver);
+
+    /// @brief Checks if task queues are empty
+    bool AreQueuesEmpty() const;
+
+    /// @brief Checks if worker local queues are empty
+    bool AreWorkersEmpty() const;
+
+    /**
+     * @brief Method increment counter of finished tasks and signal Finalize waiter
+     * @param counterMap - map from id to count of finished tasks
+     */
+    void IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counterMap);
+
+    /**
+     * @brief Executes tasks with specific properties. It will get them from queue or steal from workers.
+     * @param properties - TaskProperties of tasks needs to help
+     * @returns real count of tasks that was executed
+     */
+    PANDA_PUBLIC_API size_t HelpWorkersWithTasks(TaskProperties properties);
 
     /**
      * @brief Method waits all tasks with specified properties. This method should be used only from Main Thread and
@@ -132,6 +152,22 @@ private:
     explicit TaskScheduler(size_t workersCount, TaskStatisticsImplType taskStatisticsType);
 
     /**
+     * @brief Method get and execute tasks with specified properties. If there are no tasks with that properties method
+     * will return nullopt.
+     * @param properties - TaskProperties of task we want to get.
+     * @returns real count of gotten tasks
+     */
+    size_t GetAndExecuteSetOfTasksFromQueue(TaskProperties properties);
+
+    /**
+     * @brief Method steal and execute one task from one Worker. Method will find worker the largest number of tasks,
+     * steal one from it and execute.
+     * @param properties - TaskProperties of tasks needs to help
+     * @returns 1 if stealing was done successfully
+     */
+    size_t StealAndExecuteOneTaskFromWorkers(TaskProperties properties);
+
+    /**
      * @brief Registers a queue that was created externally. It should be valid until all workers finish, and the
      * queue should have a unique set of TaskType and VMType fields. You can not use this method after Initialize()
      * method
@@ -147,45 +183,29 @@ private:
      */
     [[nodiscard]] std::optional<Task> GetNextTask() REQUIRES(popFromTaskQueuesLock_);
 
-    /**
-     * @brief Method selects queues for getting tasks by updating selected_queues_
-     * @param tasks_count - count of tasks to select.
-     */
-    void SelectNextTasks(size_t tasksCount) REQUIRES(popFromTaskQueuesLock_);
-
-    /**
-     * @brief Method puts tasks to @arg worker. Queue and count of tasks depends on selected_queues_. After
-     * execution of the method selected_queues_ will be empty.
-     * @param worker - pointer on worker that should be fill with tasks
-     * @return count of task that was gotten by worker.
-     */
-    size_t PutTasksInWorker(WorkerThread *worker) REQUIRES(popFromTaskQueuesLock_);
-
-    /**
-     * @brief This method updates map from kinetic sum of non-empty queues to queues pointer
-     * with the same order as they place in task_queues_.
-     */
-    void UpdateKineticPriorities() REQUIRES(popFromTaskQueuesLock_);
-
-    /// @brief Checks if task queues are empty
-    bool AreQueuesEmpty() const;
-
     /// @brief Checks if there are no tasks in queues and workers
     bool AreNoMoreTasks() const;
+
+    /**
+     * @brief Method puts tasks to @arg worker. Queue and count of tasks depends on selectedQueues_. After
+     * execution of the method selectedQueues_ will be empty.
+     * @param worker - pointer on worker that should be fill with tasks
+     * @param selectedQueue - count of selected tasks for all TaskQueueId
+     * @return count of task that was gotten by worker.
+     */
+    size_t PutTasksInWorker(WorkerThread *worker, TaskQueueId selectedQueue);
 
     /**
      * @brief Method increment counter of new tasks and signal worker
      * @param properties - TaskProperties of task from queue that execute the callback
      * @param ivalue - the value by which the counter will be increased
-     * @param was_empty - flage that should be true only, if queue was empty before last AddTask
      */
-    void IncrementCounterOfAddedTasks(TaskProperties properties, size_t ivalue, bool wasEmpty);
+    void IncrementCounterOfAddedTasks(TaskProperties properties, size_t ivalue);
 
-    /**
-     * @brief Method increment counter of finished tasks and signal Finalize waiter
-     * @param counter_map - map from id to count of finished tasks
-     */
-    void IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counterMap);
+    /// @brief Method signals workers if it's needed
+    void SignalWorkers();
+
+    internal::SchedulableTaskQueueInterface *GetQueue(TaskQueueId id) const;
 
     static TaskScheduler *instance_;
 
@@ -194,11 +214,14 @@ private:
     /// Pointers to Worker Threads.
     std::vector<WorkerThread *> workers_;
 
-    /// workers_lock_ is used to synchronize a lot of workers in FillWithTasks method
-    os::memory::Mutex workersLock_;
+    /// Iterator for workers_ to balance stealing
+    size_t workersIterator_ = {0UL};
 
     /// pop_from_task_queues_lock_ is used to guard popping from queues
     os::memory::Mutex popFromTaskQueuesLock_;
+
+    /// Represents count of task that sleeps
+    std::atomic_size_t waitWorkersCount_ {0UL};
 
     /**
      * Map from TaskType and VMType to queue.
@@ -229,24 +252,22 @@ private:
     /// finish_ is true when TaskScheduler finish Workers and TaskQueues
     bool finish_ GUARDED_BY(taskSchedulerStateLock_) {false};
 
-    /// new_tasks_count_ represents count of new tasks
+    /// newTasksCount_ represents count of new tasks
     TaskPropertiesCounterMap newTasksCount_ GUARDED_BY(taskSchedulerStateLock_);
 
+    std::atomic_size_t waitToFinish_ {0UL};
+
+    std::atomic_bool disableHelpers_ {false};
+
     /**
-     * finished_tasks_count_ represents count of finished tasks;
+     * finishedTasksCount_ represents count of finished tasks;
      * Task is finished if:
      * - it was executed by Worker;
      * - it was gotten by main thread;
      */
     TaskPropertiesCounterMap finishedTasksCount_ GUARDED_BY(taskSchedulerStateLock_);
-
-    std::mt19937 gen_;
-
     TaskStatistics *taskStatistics_;
-
-    std::map<TaskQueueId, size_t> selectedQueues_ GUARDED_BY(popFromTaskQueuesLock_);
-
-    std::map<size_t, internal::SchedulableTaskQueueInterface *> kineticPriorities_ GUARDED_BY(popFromTaskQueuesLock_);
+    internal::TaskSelector selector_;
 };
 
 }  // namespace ark::taskmanager

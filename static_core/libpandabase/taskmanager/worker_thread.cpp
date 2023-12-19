@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,36 +18,18 @@
 
 namespace ark::taskmanager {
 
-WorkerThread::WorkerThread(FinishedTasksCallback callback, size_t tasksCount)
-    : finishedTasksCallback_(std::move(callback))
+WorkerThread::WorkerThread(const std::string &name) : scheduler_(TaskScheduler::GetTaskScheduler()), name_(name)
 {
-    thread_ = new std::thread(&WorkerThread::WorkerLoop, this, tasksCount);
-    os::thread::SetThreadName(thread_->native_handle(), "TaskSchedulerWorker");
+    perWorkerPopId_[this] = localQueue_.RegisterConsumer();
+    schedulerPopId_ = localQueue_.RegisterConsumer();
+    thread_ = new std::thread(&WorkerThread::WorkerLoop, this);
+    [[maybe_unused]] auto setNameCore = os::thread::SetThreadName(thread_->native_handle(), name.c_str());
+    ASSERT(setNameCore == 0);
 }
 
 void WorkerThread::AddTask(Task &&task)
 {
-    if (task.GetTaskProperties().GetTaskExecutionMode() == TaskExecutionMode::FOREGROUND) {
-        foregroundQueue_.push(std::move(task));
-    } else {
-        backgroundQueue_.push(std::move(task));
-    }
-    size_++;
-}
-
-Task WorkerThread::PopTask()
-{
-    ASSERT(!IsEmpty());
-    std::queue<Task> *queue = nullptr;
-    if (!foregroundQueue_.empty()) {
-        queue = &foregroundQueue_;
-    } else {
-        queue = &backgroundQueue_;
-    }
-    auto task = std::move(queue->front());
-    queue->pop();
-    size_--;
-    return task;
+    localQueue_.Push(std::move(task));
 }
 
 void WorkerThread::Join()
@@ -57,28 +39,82 @@ void WorkerThread::Join()
 
 bool WorkerThread::IsEmpty() const
 {
-    return size_ == 0;
+    return localQueue_.IsEmpty();
 }
 
-void WorkerThread::WorkerLoop(size_t tasksCount)
+size_t WorkerThread::Size() const
 {
+    return localQueue_.Size();
+}
+
+size_t WorkerThread::CountOfTasksWithProperties(TaskProperties properties) const
+{
+    return localQueue_.CountOfTasksWithProperties(properties);
+}
+
+void WorkerThread::WorkerLoop()
+{
+    WaitForStart();
     while (true) {
-        auto finishCond = TaskScheduler::GetTaskScheduler()->FillWithTasks(this, tasksCount);
-        ExecuteTasks();
-        if (finishCond) {
-            break;
+        ASSERT(finishedTasksCounterMap_.empty());
+        // Worker will steal tasks only if all queues are empty and it's possible to find worker for stealing
+        if (UNLIKELY(scheduler_->AreQueuesEmpty() && !scheduler_->AreWorkersEmpty())) {
+            scheduler_->StealTaskFromOtherWorker(this);
+            if (stolenTask_.IsInvalid()) {
+                continue;
+            }
+            ExecuteStolenTask();
+        } else {  // Else it will try get/wait tasks.
+            auto finishCond = scheduler_->FillWithTasks(this);
+            if (UNLIKELY(finishCond)) {
+                break;
+            }
+            if (UNLIKELY(localQueue_.IsEmpty())) {
+                continue;
+            }
+            ExecuteTasksFromLocalQueue();
         }
-        finishedTasksCallback_(finishedTasksCounterMap_);
+        scheduler_->IncrementCounterOfExecutedTasks(finishedTasksCounterMap_);
         finishedTasksCounterMap_.clear();
     }
 }
 
-void WorkerThread::ExecuteTasks()
+size_t WorkerThread::ExecuteTasksFromLocalQueue()
 {
-    while (!IsEmpty()) {
-        auto task = PopTask();
-        task.RunTask();
-        finishedTasksCounterMap_[task.GetTaskProperties()]++;
+    // Start popping task from local queue and executing them
+    size_t executeTasksCount = 0UL;
+    for (; !localQueue_.IsEmpty(); executeTasksCount++) {
+        auto task = localQueue_.Pop(perWorkerPopId_[this]);
+        // If pop task returned nullopt need to finish execution
+        if (UNLIKELY(!task.has_value())) {
+            break;
+        }
+        task->RunTask();
+        finishedTasksCounterMap_[task->GetTaskProperties()]++;
+    }
+    return executeTasksCount;
+}
+
+void WorkerThread::ExecuteStolenTask()
+{
+    auto prop = stolenTask_.GetTaskProperties();
+    stolenTask_.RunTask();
+    stolenTask_.MakeInvalid();
+    finishedTasksCounterMap_[prop]++;
+}
+
+void WorkerThread::Start()
+{
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(startWaitLock_);
+    start_ = true;
+    startWaitCondVar_.SignalAll();
+}
+
+void WorkerThread::WaitForStart()
+{
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(startWaitLock_);
+    while (!start_) {
+        startWaitCondVar_.Wait(&startWaitLock_);
     }
 }
 
