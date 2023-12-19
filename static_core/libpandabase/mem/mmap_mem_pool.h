@@ -272,7 +272,7 @@ private:
 
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
     void *AllocRawMemImpl(size_t size, SpaceType type);
-    void *AllocRawMemNonObjectImpl(size_t size, SpaceType type);
+    void *AllocRawMemNonObjectImpl(size_t size, SpaceType spaceType);
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
     void *AllocRawMemObjectImpl(size_t size, SpaceType type);
     void FreeRawMemImpl(void *mem, size_t size);

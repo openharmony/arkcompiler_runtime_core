@@ -158,7 +158,7 @@ public:
 
     void Convert(ArenaVector<Reg> *regsUsage, const ArenaVector<bool> *mask, TypeInfo typeInfo);
 
-    Reg ConvertRegister(Register ref, DataType::Type type = DataType::Type::INT64);
+    Reg ConvertRegister(Register r, DataType::Type type = DataType::Type::INT64);
 
     Imm ConvertImmWithExtend(uint64_t imm, DataType::Type type);
 
@@ -851,11 +851,11 @@ protected:
     static void VisitXor(GraphVisitor *visitor, Inst *inst);
 
     // Binary Overflow Operation
-    static void VisitAddOverflow(GraphVisitor *v, Inst *inst);
-    static void VisitAddOverflowCheck(GraphVisitor *v, Inst *inst);
-    static void VisitSubOverflow(GraphVisitor *v, Inst *inst);
-    static void VisitSubOverflowCheck(GraphVisitor *v, Inst *inst);
-    static void VisitNegOverflowAndZeroCheck(GraphVisitor *v, Inst *inst);
+    static void VisitAddOverflow(GraphVisitor *visitor, Inst *inst);
+    static void VisitAddOverflowCheck(GraphVisitor *visitor, Inst *inst);
+    static void VisitSubOverflow(GraphVisitor *visitor, Inst *inst);
+    static void VisitSubOverflowCheck(GraphVisitor *visitor, Inst *inst);
+    static void VisitNegOverflowAndZeroCheck(GraphVisitor *visitor, Inst *inst);
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BinaryImmOperation(opc) static void Visit##opc##I(GraphVisitor *visitor, Inst *inst);

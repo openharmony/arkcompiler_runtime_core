@@ -248,8 +248,8 @@ public:
         hooks_.ConsoleCall(PtThread(thread), type, timestamp, arguments);
     }
 
-    void MethodEntry(ManagedThread *thread, Method *method) override;
-    void MethodExit(ManagedThread *thread, Method *method) override;
+    void MethodEntry(ManagedThread *managedThread, Method *method) override;
+    void MethodExit(ManagedThread *managedThread, Method *method) override;
 
     void ClassLoad(Class *klass) override;
     void ClassPrepare(Class *klass) override;
@@ -443,9 +443,9 @@ private:
     bool RemovePropertyWatch(panda_file::File::EntityId classId, panda_file::File::EntityId fieldId,
                              tooling::PropertyWatch::Type type);
 
-    bool HandleBreakpoint(ManagedThread *thread, Method *method, const PtLocation &location);
-    void HandleNotifyFramePop(ManagedThread *thread, Method *method, bool wasPoppedByException);
-    bool HandleStep(ManagedThread *thread, Method *method, const PtLocation &location);
+    bool HandleBreakpoint(ManagedThread *managedThread, Method *method, const PtLocation &location);
+    void HandleNotifyFramePop(ManagedThread *managedThread, Method *method, bool wasPoppedByException);
+    bool HandleStep(ManagedThread *managedThread, Method *method, const PtLocation &location);
 
     bool HandlePropertyAccess(ManagedThread *thread, Method *method, const PtLocation &location);
     bool HandlePropertyModify(ManagedThread *thread, Method *method, const PtLocation &location);

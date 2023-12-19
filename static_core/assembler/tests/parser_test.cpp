@@ -2345,80 +2345,34 @@ TEST(parsertests, Bad_imm_value)
     }
 }
 
-TEST(parsertests, parse_catch_directive)
+TEST(parsertests, parse_catch_directive_1)
 {
-    {
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    v.push_back(l.TokenizeString(".record Exception {}").first);
+    v.push_back(l.TokenizeString(".catch Exception, try_begin, try_end, catch_begin").first);
+
+    p.Parse(v);
+
+    Error e = p.ShowError();
+
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_INCORRECT_DIRECTIVE_LOCATION);
+    ASSERT_EQ(e.lineNumber, 2);
+    ASSERT_EQ(e.message, ".catch directive is located outside of a function body.");
+}
+
+TEST(parsertests, parse_catch_directive_2)
+{
+    std::vector<std::string> directives {
+        ".catch",        ".catch R",         ".catch R,",         ".catch R, t1",
+        ".catch R, t1,", ".catch R, t1, t2", ".catch R, t1, t2,", ".catch R, t1, t2, c,"};
+
+    for (const auto &s : directives) {
         std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
-
-        v.push_back(l.TokenizeString(".record Exception {}").first);
-        v.push_back(l.TokenizeString(".catch Exception, try_begin, try_end, catch_begin").first);
-
-        p.Parse(v);
-
-        Error e = p.ShowError();
-
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_INCORRECT_DIRECTIVE_LOCATION);
-        ASSERT_EQ(e.lineNumber, 2);
-        ASSERT_EQ(e.message, ".catch directive is located outside of a function body.");
-    }
-
-    {
-        std::vector<std::string> directives {
-            ".catch",        ".catch R",         ".catch R,",         ".catch R, t1",
-            ".catch R, t1,", ".catch R, t1, t2", ".catch R, t1, t2,", ".catch R, t1, t2, c,"};
-
-        for (const auto &s : directives) {
-            std::vector<std::vector<ark::pandasm::Token>> v;
-            Lexer l;
-            Parser p;
-
-            v.push_back(l.TokenizeString(".record Exception {}").first);
-            v.push_back(l.TokenizeString(".function void main() {").first);
-            v.push_back(l.TokenizeString(s).first);
-            v.push_back(l.TokenizeString("}").first);
-
-            p.Parse(v);
-
-            Error e = p.ShowError();
-
-            ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION);
-            ASSERT_EQ(e.lineNumber, 3);
-            ASSERT_EQ(e.pos, 0);
-            ASSERT_EQ(e.message,
-                      "Incorrect catch block declaration. Must be in the format: .catch <exception_record>, "
-                      "<try_begin_label>, <try_end_label>, <catch_begin_label>[, <catch_end_label>]");
-        }
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        std::string s = ".catch $Exception, try_begin, try_end, catch_begin";
-
-        v.push_back(l.TokenizeString(".record $Exception {}").first);
-        v.push_back(l.TokenizeString(".function void main() {").first);
-        v.push_back(l.TokenizeString("try_begin:").first);
-        v.push_back(l.TokenizeString("try_end:").first);
-        v.push_back(l.TokenizeString("catch_begin:").first);
-        v.push_back(l.TokenizeString(s).first);
-        v.push_back(l.TokenizeString("}").first);
-
-        p.Parse(v);
-
-        Error e = p.ShowError();
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        std::string s = ".catch 4Exception, try_begin, try_end, catch_begin";
 
         v.push_back(l.TokenizeString(".record Exception {}").first);
         v.push_back(l.TokenizeString(".function void main() {").first);
@@ -2428,164 +2382,215 @@ TEST(parsertests, parse_catch_directive)
         p.Parse(v);
 
         Error e = p.ShowError();
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_RECORD_NAME);
+
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION);
         ASSERT_EQ(e.lineNumber, 3);
-        ASSERT_EQ(e.pos, s.find('4'));
-        ASSERT_EQ(e.message, "Invalid name of the exception record.");
+        ASSERT_EQ(e.pos, 0);
+        ASSERT_EQ(e.message,
+                  "Incorrect catch block declaration. Must be in the format: .catch <exception_record>, "
+                  "<try_begin_label>, <try_end_label>, <catch_begin_label>[, <catch_end_label>]");
     }
+}
 
-    {
+TEST(parsertests, parse_catch_directive_3)
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    std::string s = ".catch $Exception, try_begin, try_end, catch_begin";
+
+    v.push_back(l.TokenizeString(".record $Exception {}").first);
+    v.push_back(l.TokenizeString(".function void main() {").first);
+    v.push_back(l.TokenizeString("try_begin:").first);
+    v.push_back(l.TokenizeString("try_end:").first);
+    v.push_back(l.TokenizeString("catch_begin:").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
+
+    p.Parse(v);
+
+    Error e = p.ShowError();
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
+}
+
+TEST(parsertests, parse_catch_directive_4)
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    std::string s = ".catch 4Exception, try_begin, try_end, catch_begin";
+
+    v.push_back(l.TokenizeString(".record Exception {}").first);
+    v.push_back(l.TokenizeString(".function void main() {").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
+
+    p.Parse(v);
+
+    Error e = p.ShowError();
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_RECORD_NAME);
+    ASSERT_EQ(e.lineNumber, 3);
+    ASSERT_EQ(e.pos, s.find('4'));
+    ASSERT_EQ(e.message, "Invalid name of the exception record.");
+}
+
+TEST(parsertests, parse_catch_directive_5)
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    std::string s = ".catch Exception-record, try_begin, try_end, catch_begin";
+
+    v.push_back(l.TokenizeString(".record Exception-record {}").first);
+    v.push_back(l.TokenizeString(".function void main() {").first);
+    v.push_back(l.TokenizeString("try_begin:").first);
+    v.push_back(l.TokenizeString("try_end:").first);
+    v.push_back(l.TokenizeString("catch_begin:").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
+
+    p.Parse(v);
+
+    Error e = p.ShowError();
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
+}
+
+TEST(parsertests, parse_catch_directive_6)
+{
+    std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
+
+    for (size_t i = 0; i < labels.size(); i++) {
+        std::string directive = ".catch Exception";
+        for (size_t j = 0; j < labels.size(); j++) {
+            directive += i == j ? " $ " : " , ";
+            directive += labels[j];
+        }
+
         std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
-        std::string s = ".catch Exception-record, try_begin, try_end, catch_begin";
-
-        v.push_back(l.TokenizeString(".record Exception-record {}").first);
+        v.push_back(l.TokenizeString(".record Exception {}").first);
         v.push_back(l.TokenizeString(".function void main() {").first);
-        v.push_back(l.TokenizeString("try_begin:").first);
-        v.push_back(l.TokenizeString("try_end:").first);
-        v.push_back(l.TokenizeString("catch_begin:").first);
-        v.push_back(l.TokenizeString(s).first);
+        v.push_back(l.TokenizeString(directive).first);
         v.push_back(l.TokenizeString("}").first);
 
         p.Parse(v);
 
         Error e = p.ShowError();
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION) << "Test " << directive;
+        ASSERT_EQ(e.lineNumber, 3) << "Test " << directive;
+        ASSERT_EQ(e.pos, directive.find('$')) << "Test " << directive;
+        ASSERT_EQ(e.message, "Expected comma.") << "Test " << directive;
     }
+}
 
-    {
-        std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
-        std::vector<std::string> labelNames {"try block begin", "try block end", "catch block begin"};
+TEST(parsertests, parse_catch_directive_7)
+{
+    std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
 
-        for (size_t i = 0; i < labels.size(); i++) {
-            std::string s = ".catch Exception";
+    for (size_t i = 0; i < labels.size(); i++) {
+        std::stringstream ss;
+        ss << "Test " << labels[i] << " does not exists";
 
-            {
-                std::string directive = s;
-                for (size_t j = 0; j < labels.size(); j++) {
-                    directive += i == j ? " $ " : " , ";
-                    directive += labels[j];
-                }
+        std::vector<std::vector<ark::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
 
-                std::vector<std::vector<ark::pandasm::Token>> v;
-                Lexer l;
-                Parser p;
+        std::string catchTable = ".catch Exception, try_begin, try_end, catch_begin";
 
-                v.push_back(l.TokenizeString(".record Exception {}").first);
-                v.push_back(l.TokenizeString(".function void main() {").first);
-                v.push_back(l.TokenizeString(directive).first);
-                v.push_back(l.TokenizeString("}").first);
-
-                p.Parse(v);
-
-                Error e = p.ShowError();
-                ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION) << "Test " << directive;
-                ASSERT_EQ(e.lineNumber, 3) << "Test " << directive;
-                ASSERT_EQ(e.pos, directive.find('$')) << "Test " << directive;
-                ASSERT_EQ(e.message, "Expected comma.") << "Test " << directive;
-            }
-
-            {
-                std::stringstream ss;
-                ss << "Test " << labels[i] << " does not exists";
-
-                std::vector<std::vector<ark::pandasm::Token>> v;
-                Lexer l;
-                Parser p;
-
-                std::string catchTable = ".catch Exception, try_begin, try_end, catch_begin";
-
-                v.push_back(l.TokenizeString(".record Exception {}").first);
-                v.push_back(l.TokenizeString(".function void main() {").first);
-                for (size_t j = 0; j < labels.size(); j++) {
-                    if (i != j) {
-                        v.push_back(l.TokenizeString(labels[j] + ":").first);
-                    }
-                }
-                v.push_back(l.TokenizeString(catchTable).first);
-                v.push_back(l.TokenizeString("}").first);
-
-                p.Parse(v);
-
-                Error e = p.ShowError();
-
-                ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_LABEL_EXT) << ss.str();
-                ASSERT_EQ(e.pos, catchTable.find(labels[i])) << ss.str();
-                ASSERT_EQ(e.message, "This label does not exist.") << ss.str();
+        v.push_back(l.TokenizeString(".record Exception {}").first);
+        v.push_back(l.TokenizeString(".function void main() {").first);
+        for (size_t j = 0; j < labels.size(); j++) {
+            if (i != j) {
+                v.push_back(l.TokenizeString(labels[j] + ":").first);
             }
         }
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        std::string s = ".catch Exception, try_begin, try_end, catch_begin";
-
-        v.push_back(l.TokenizeString(".record Exception {}").first);
-        v.push_back(l.TokenizeString(".function void main() {").first);
-        v.push_back(l.TokenizeString("try_begin:").first);
-        v.push_back(l.TokenizeString("try_end:").first);
-        v.push_back(l.TokenizeString("catch_begin:").first);
-        v.push_back(l.TokenizeString(s).first);
+        v.push_back(l.TokenizeString(catchTable).first);
         v.push_back(l.TokenizeString("}").first);
 
-        auto res = p.Parse(v);
+        p.Parse(v);
 
         Error e = p.ShowError();
 
-        const auto sigMain = GetFunctionSignatureFromName("main", {});
-
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
-
-        auto &program = res.Value();
-        auto &function = program.functionTable.find(sigMain)->second;
-
-        ASSERT_EQ(function.catchBlocks.size(), 1);
-        ASSERT_EQ(function.catchBlocks[0].exceptionRecord, "Exception");
-        ASSERT_EQ(function.catchBlocks[0].tryBeginLabel, "try_begin");
-        ASSERT_EQ(function.catchBlocks[0].tryEndLabel, "try_end");
-        ASSERT_EQ(function.catchBlocks[0].catchBeginLabel, "catch_begin");
-        ASSERT_EQ(function.catchBlocks[0].catchEndLabel, "catch_begin");
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_LABEL_EXT) << ss.str();
+        ASSERT_EQ(e.pos, catchTable.find(labels[i])) << ss.str();
+        ASSERT_EQ(e.message, "This label does not exist.") << ss.str();
     }
+}
 
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
+TEST(parsertests, parse_catch_directive_8)
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
 
-        std::string s = ".catch Exception, try_begin, try_end, catch_begin, catch_end";
+    std::string s = ".catch Exception, try_begin, try_end, catch_begin";
 
-        v.push_back(l.TokenizeString(".record Exception {}").first);
-        v.push_back(l.TokenizeString(".function void main() {").first);
-        v.push_back(l.TokenizeString("try_begin:").first);
-        v.push_back(l.TokenizeString("try_end:").first);
-        v.push_back(l.TokenizeString("catch_begin:").first);
-        v.push_back(l.TokenizeString("catch_end:").first);
-        v.push_back(l.TokenizeString(s).first);
-        v.push_back(l.TokenizeString("}").first);
+    v.push_back(l.TokenizeString(".record Exception {}").first);
+    v.push_back(l.TokenizeString(".function void main() {").first);
+    v.push_back(l.TokenizeString("try_begin:").first);
+    v.push_back(l.TokenizeString("try_end:").first);
+    v.push_back(l.TokenizeString("catch_begin:").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
 
-        auto res = p.Parse(v);
+    auto res = p.Parse(v);
 
-        Error e = p.ShowError();
+    Error e = p.ShowError();
 
-        const auto sigMain = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
 
-        auto &program = res.Value();
-        auto &function = program.functionTable.find(sigMain)->second;
+    auto &program = res.Value();
+    auto &function = program.functionTable.find(sigMain)->second;
 
-        ASSERT_EQ(function.catchBlocks.size(), 1);
-        ASSERT_EQ(function.catchBlocks[0].exceptionRecord, "Exception");
-        ASSERT_EQ(function.catchBlocks[0].tryBeginLabel, "try_begin");
-        ASSERT_EQ(function.catchBlocks[0].tryEndLabel, "try_end");
-        ASSERT_EQ(function.catchBlocks[0].catchBeginLabel, "catch_begin");
-        ASSERT_EQ(function.catchBlocks[0].catchEndLabel, "catch_end");
-    }
+    ASSERT_EQ(function.catchBlocks.size(), 1);
+    ASSERT_EQ(function.catchBlocks[0].exceptionRecord, "Exception");
+    ASSERT_EQ(function.catchBlocks[0].tryBeginLabel, "try_begin");
+    ASSERT_EQ(function.catchBlocks[0].tryEndLabel, "try_end");
+    ASSERT_EQ(function.catchBlocks[0].catchBeginLabel, "catch_begin");
+    ASSERT_EQ(function.catchBlocks[0].catchEndLabel, "catch_begin");
+}
+
+TEST(parsertests, parse_catch_directive_9)
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    std::string s = ".catch Exception, try_begin, try_end, catch_begin, catch_end";
+
+    v.push_back(l.TokenizeString(".record Exception {}").first);
+    v.push_back(l.TokenizeString(".function void main() {").first);
+    v.push_back(l.TokenizeString("try_begin:").first);
+    v.push_back(l.TokenizeString("try_end:").first);
+    v.push_back(l.TokenizeString("catch_begin:").first);
+    v.push_back(l.TokenizeString("catch_end:").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
+
+    auto res = p.Parse(v);
+
+    Error e = p.ShowError();
+
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
+
+    auto &program = res.Value();
+    auto &function = program.functionTable.find(sigMain)->second;
+
+    ASSERT_EQ(function.catchBlocks.size(), 1);
+    ASSERT_EQ(function.catchBlocks[0].exceptionRecord, "Exception");
+    ASSERT_EQ(function.catchBlocks[0].tryBeginLabel, "try_begin");
+    ASSERT_EQ(function.catchBlocks[0].tryEndLabel, "try_end");
+    ASSERT_EQ(function.catchBlocks[0].catchBeginLabel, "catch_begin");
+    ASSERT_EQ(function.catchBlocks[0].catchEndLabel, "catch_end");
 }
 
 TEST(parsertests, parse_catchall_directive)

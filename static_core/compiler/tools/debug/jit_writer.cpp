@@ -26,7 +26,7 @@ public:
     {
         const size_t codeOffset = CodeInfo::GetCodeOffset(jitDebugWriter_->GetArch());
         CodePrefix prefix;
-        size_t currPos = streamBegin;
+        size_t currPos;
         for (size_t i = 0; i < jitDebugWriter_->methods_.size(); i++) {
             auto &method = jitDebugWriter_->methods_[i];
             auto &methodHeader = jitDebugWriter_->methodHeaders_[i];

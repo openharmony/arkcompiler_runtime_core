@@ -1172,7 +1172,6 @@ extern "C" ETS_EXPORT void ETS_EtsNapiTests_printBoolArr([[maybe_unused]] EtsEnv
 extern "C" ETS_EXPORT void ETS_EtsNapiTests_printStringArr([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class cls,
                                                            [[maybe_unused]] ets_objectArray arr)
 {
-    std::vector<ets_string> vec;
     for (ets_size i = 0; i < env->GetArrayLength(arr); ++i) {
         auto s = static_cast<ets_string>(env->GetObjectArrayElement(arr, i));
         std::string s1 = GetString(env, s);

@@ -158,7 +158,7 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
     }
 
     // 8. parse '.'
-    if (radix == DECIMAL && *p == '.') {
+    if (*p == '.') {
         RETURN_IF_CONVERSION_END(++p, end, (digits > 0) ? (number * std::pow(radix, exponent)) : NAN_VALUE);
         while (ToDigit(*p) < radix) {
             --exponent;
@@ -178,7 +178,7 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
     char exponentSign = '+';
     int additionalExponent = 0;
     constexpr int MAX_EXPONENT = INT32_MAX / 2;
-    if (radix == DECIMAL && (p != end && (*p == 'e' || *p == 'E'))) {
+    if (p != end && (*p == 'e' || *p == 'E')) {
         RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
 
         // 10. parse exponent number

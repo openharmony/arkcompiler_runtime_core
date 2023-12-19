@@ -31,6 +31,37 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
 
+static std::string GetStrWithExceptions()
+{
+    return R"(
+.record A {}
+.record A_exception <external>
+
+.function A A_exception.getMessage(A_exception a0) <external>
+
+.function u1 main() {
+    movi v0, 1
+try_begin:
+    ldai 1
+    return
+try_end:
+    ldai 3
+catch_block1_begin:
+    call.virt A_exception.getMessage, v0
+
+    return
+catch_block1_end:
+    ldai 6
+catch_block2_begin:
+    ldai 7
+    return
+
+.catch A_exception, try_begin, try_end, catch_block1_begin, catch_block1_end
+.catchall try_begin, try_end, catch_block2_begin
+}
+    )";
+}
+
 TEST(LabelTest, test1)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -165,33 +196,7 @@ TEST(LabelTest, test2)
 
 TEST(LabelTest, TestExceptions)
 {
-    auto program = ark::pandasm::Parser().Parse(R"(
-.record A {}
-.record A_exception <external>
-
-.function A A_exception.getMessage(A_exception a0) <external>
-
-.function u1 main() {
-    movi v0, 1
-try_begin:
-    ldai 1
-    return
-try_end:
-    ldai 3
-catch_block1_begin:
-    call.virt A_exception.getMessage, v0
-
-    return
-catch_block1_end:
-    ldai 6
-catch_block2_begin:
-    ldai 7
-    return
-
-.catch A_exception, try_begin, try_end, catch_block1_begin, catch_block1_end
-.catchall try_begin, try_end, catch_block2_begin
-}
-    )");
+    auto program = ark::pandasm::Parser().Parse(GetStrWithExceptions());
     ASSERT(program);
     auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
@@ -201,8 +206,6 @@ catch_block2_begin:
 
     d.Disassemble(pf);
     d.Serialize(ss);
-
-    std::string res = ss.str();
 
     std::string bodyMain = ExtractFuncBody(ss.str(), "main() <static> {\n");
 

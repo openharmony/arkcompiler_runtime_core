@@ -275,7 +275,7 @@ public:
         }
     }
 
-    static constexpr TypeInfo GetScalarTypeBySize(size_t size);
+    static constexpr TypeInfo GetScalarTypeBySize(size_t sizeBits);
 
     void Dump()
     {

@@ -30,7 +30,6 @@ static void *Threadn(void *arg)
 {
     intptr_t index = reinterpret_cast<intptr_t>(arg);
 
-    bool ret;
     MutexLock(&g_x, false);
     MutexLock(&g_x, false);
     g_shared = index;

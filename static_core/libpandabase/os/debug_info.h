@@ -159,7 +159,7 @@ private:
     void TraverseSiblings(CompUnit *cu, Dwarf_Die die);
     void GetFunctionName(Dwarf_Die die, std::string *function);
     void AddFunction(CompUnit *cu, Dwarf_Addr lowPc, Dwarf_Addr highPc, const std::string &function);
-    bool GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context lineCtx, std::string *srcFile, uint32_t *line);
+    bool GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context lineCtx, std::string *outSrcFile, uint32_t *outLine);
     Dwarf_Line GetLastLineWithPc(Dwarf_Addr pc, Span<Dwarf_Line>::ConstIterator it,
                                  Span<Dwarf_Line>::ConstIterator end);
     void GetSrcFileAndLine(Dwarf_Line line, std::string *outSrcFile, uint32_t *outLine);

@@ -46,7 +46,7 @@ std::string EtsCharToString(ets_char data)
 
 std::string_view EtsStringToView(ark::ets::EtsString *s)
 {
-    auto str = std::string_view();
+    std::string_view str;
     if (s->IsUtf16()) {
         str = std::string_view(reinterpret_cast<const char *>(s->GetDataUtf16()), s->GetUtf16Length() - 1);
     } else {
@@ -317,7 +317,7 @@ EtsString *EscompatJSONStringifyObj(EtsObject *d)
     auto cls = dHandle.GetPtr()->GetClass();
     auto typeDesc = cls->GetDescriptor();
 
-    auto resString = std::string();
+    std::string resString;
     if (cls->IsArrayClass()) {
         auto arr = reinterpret_cast<ark::ets::EtsArray *>(dHandle.GetPtr());
         resString = EtsArrayToJSON(reinterpret_cast<ark::ets::EtsArray *>(arr)).Build();

@@ -152,7 +152,7 @@ public:
 private:
 #ifdef TRACK_INTERNAL_ALLOCATIONS
     os::memory::Mutex lock_;
-    MemStatsType *mem_stats_;
+    MemStatsType *memStats_;
     AllocTracker *tracker_ = nullptr;
 #endif  // TRACK_INTERNAL_ALLOCATIONS
     using RunSlotsAllocatorT = RunSlotsAllocator<InternalAllocConfigT>;

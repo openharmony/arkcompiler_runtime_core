@@ -61,7 +61,7 @@ public:
                             const std::optional<RemoteObject> &exception,
                             const std::function<void(const FrameInfoHandler &)> &enumerateFrames);
     void CallDebuggerResumed(PtThread thread);
-    void CallDebuggerScriptParsed(PtThread thread, ScriptId id, std::string_view sourceFile);
+    void CallDebuggerScriptParsed(PtThread thread, ScriptId scriptId, std::string_view sourceFile);
     void CallRuntimeConsoleApiCalled(PtThread thread, ConsoleCallType type, uint64_t timestamp,
                                      const std::vector<RemoteObject> &arguments);
     void CallRuntimeExecutionContextCreated(PtThread thread);

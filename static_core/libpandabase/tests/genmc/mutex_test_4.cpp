@@ -31,7 +31,6 @@ static void *Thread1(void *arg)
 {
     intptr_t index = reinterpret_cast<intptr_t>(arg);
 
-    bool ret;
     MutexLock(&g_x, false);
     MutexLock(&g_y, false);
     g_shared = index;
@@ -46,7 +45,6 @@ static void *Thread2(void *arg)
 {
     intptr_t index = reinterpret_cast<intptr_t>(arg);
 
-    bool ret;
     MutexLock(&g_x, false);
     g_shared = index;
     int r = g_shared;
@@ -59,7 +57,6 @@ static void *Thread3(void *arg)
 {
     intptr_t index = reinterpret_cast<intptr_t>(arg);
 
-    bool ret;
     MutexLock(&g_y, false);
     g_shared = index;
     int r = g_shared;

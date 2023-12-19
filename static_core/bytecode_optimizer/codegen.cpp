@@ -101,11 +101,11 @@ void BytecodeGen::VisitTryBegin(const compiler::BasicBlock *bb)
     });
 }
 
-void BytecodeGen::AddLineAndColumnNumber(const compiler::Inst *inst, size_t i)
+void BytecodeGen::AddLineAndColumnNumber(const compiler::Inst *inst, size_t idx)
 {
-    AddLineNumber(inst, i);
+    AddLineNumber(inst, idx);
     if (GetGraph()->IsDynamicMethod()) {
-        AddColumnNumber(inst, i);
+        AddColumnNumber(inst, idx);
     }
 }
 

@@ -30,8 +30,8 @@
 namespace ark::tooling::test {
 
 TestExtractor::TestExtractor(const panda_file::File *pf)
+    : langExtractor_(MakePandaUnique<panda_file::DebugInfoExtractor>(pf))
 {
-    langExtractor_ = MakePandaUnique<panda_file::DebugInfoExtractor>(pf);
 }
 
 std::pair<EntityId, uint32_t> TestExtractor::GetBreakpointAddress(const SourceLocation &sourceLocation)

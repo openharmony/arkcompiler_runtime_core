@@ -31,7 +31,7 @@ Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *> PandaEtsNapiEnv::Create
 
     // Do not use PandaUniquePtr here as the environment could be accessed from daemon threads after destroy of runtime
     auto etsNapiEnv = std::make_unique<PandaEtsNapiEnv>(coroutine, std::move(referenceStorage));
-    if (!etsNapiEnv) {
+    if (etsNapiEnv.get() == nullptr) {
         return Unexpected("Cannot allocate PandaEtsNapiEnv");
     }
 

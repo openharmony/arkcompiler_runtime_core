@@ -130,6 +130,7 @@ void TaskScheduler::SelectNextTasks(size_t tasksCount)
         internal::SchedulableTaskQueueInterface *queue = nullptr;
         std::tie(std::ignore, queue) = *kineticPriorities_.upper_bound(choice);  // Get queue of chosen element
 
+        ASSERT(queue != nullptr);
         TaskQueueId id(queue->GetTaskType(), queue->GetVMType());
         selectedQueues_[id]++;
     }
@@ -142,6 +143,7 @@ void TaskScheduler::UpdateKineticPriorities()
     internal::SchedulableTaskQueueInterface *queue = nullptr;
     for (const auto &idQueuePair : taskQueues_) {
         std::tie(std::ignore, queue) = idQueuePair;
+        ASSERT(queue != nullptr);
         if (queue->IsEmpty()) {
             continue;
         }
@@ -171,6 +173,7 @@ bool TaskScheduler::AreQueuesEmpty() const
     internal::SchedulableTaskQueueInterface *queue = nullptr;
     for (const auto &traitsQueuePair : taskQueues_) {
         std::tie(std::ignore, queue) = traitsQueuePair;
+        ASSERT(queue != nullptr);
         if (!queue->IsEmpty()) {
             return false;
         }
@@ -199,6 +202,7 @@ std::optional<Task> TaskScheduler::GetTaskFromQueue(TaskProperties properties)
         }
         std::tie(std::ignore, queue) = *taskQueuesIterator;
     }
+    ASSERT(queue != nullptr);
     if (!queue->HasTaskWithExecutionMode(properties.GetTaskExecutionMode())) {
         return std::nullopt;
     }

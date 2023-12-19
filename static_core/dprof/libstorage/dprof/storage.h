@@ -34,7 +34,7 @@ public:
                                                    FeaturesMap &&featuresMap);
     static std::unique_ptr<AppData> CreateByBuffer(const std::vector<uint8_t> &buffer);
 
-    bool ToBuffer(std::vector<uint8_t> &outBuffer) const;
+    bool ToBuffer(std::vector<uint8_t> &buffer) const;
 
     std::string GetName() const
     {

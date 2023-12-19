@@ -534,7 +534,7 @@ void RegExpParser::ParseAlternative(bool isBackward)
 
 int RegExpParser::FindGroupName(const PandaString &name)
 {
-    size_t len = 0;
+    size_t len;
     size_t nameLen = name.size();
     const char *p = reinterpret_cast<char *>(groupNames_.buf_);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -999,7 +999,6 @@ int RegExpParser::ParseAtomEscape(bool isBackward)
             }
             rangeOp.InsertOpCode(&buffer_, g_gRangeD);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
-            break;
         }
         case 'D': {
             // [^0-9]
@@ -1011,7 +1010,6 @@ int RegExpParser::ParseAtomEscape(bool isBackward)
             }
             rangeOp.InsertOpCode(&buffer_, atomRange);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
-            break;
         }
         case 's': {
             // [\f\n\r\t\v]
@@ -1021,7 +1019,6 @@ int RegExpParser::ParseAtomEscape(bool isBackward)
             }
             rangeOp.InsertOpCode(&buffer_, g_gRangeS);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
-            break;
         }
         case 'S': {
             RangeSet atomRange(g_gRangeS);
@@ -1032,7 +1029,6 @@ int RegExpParser::ParseAtomEscape(bool isBackward)
             }
             rangeOp.InsertOpCode(&buffer_, atomRange);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
-            break;
         }
         case 'w': {
             // [A-Za-z0-9]
@@ -1042,7 +1038,6 @@ int RegExpParser::ParseAtomEscape(bool isBackward)
             }
             rangeOp.InsertOpCode(&buffer_, g_gRangeW);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
-            break;
         }
         case 'W': {
             // [^A-Za-z0-9]
@@ -1054,7 +1049,6 @@ int RegExpParser::ParseAtomEscape(bool isBackward)
             }
             rangeOp.InsertOpCode(&buffer_, atomRange);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
-            break;
         }
         // P{UnicodePropertyValueExpression}
         // p{UnicodePropertyValueExpression}
@@ -1356,7 +1350,7 @@ uint32_t RegExpParser::ParseClassAtom(RangeSet *atom)
         }
         default: {
             uint32_t value = c0_;
-            size_t u16Size = 0;
+            size_t u16Size;
             if (c0_ > INT8_MAX) {
                 pc_ -= 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 auto u16Result = utf::ConvertUtf8ToUtf16Pair(pc_, true);

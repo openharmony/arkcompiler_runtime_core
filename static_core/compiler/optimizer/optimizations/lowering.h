@@ -191,8 +191,8 @@ private:
         }
 
     private:
-        std::array<Inst *, MAX_INSTS> insts_;
-        size_t currentIdx_;
+        std::array<Inst *, MAX_INSTS> insts_ {};
+        size_t currentIdx_ = 0;
     };
 
     template <Opcode OPCODE, typename L, typename R, uint64_t FLAGS = Flags::NONE>
