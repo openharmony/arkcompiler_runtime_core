@@ -48,6 +48,10 @@ options:
     type: std::string
     default: ""
     description: String with command line options that directly passed into llvm.
+  - name: llvm-inline-module
+    type: std::string
+    default: ""
+    description: A supplemental LLVM IR bitcode module with additional functions to be inlined
   - name: llvm-cpu
     type: std::string
     default: "cortex-a55"

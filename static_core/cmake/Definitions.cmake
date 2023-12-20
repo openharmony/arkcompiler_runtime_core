@@ -417,7 +417,7 @@ if (NOT PANDA_LLVM_BACKEND)
     endif()
 
     if (PANDA_LLVM_FASTPATH)
-        message(FATAL_ERROR "PANDA_LLVM_FASTPATH is temporarily disabled")
+        message(FATAL_ERROR "PANDA_LLVM_FASTPATH can't be enabled without PANDA_LLVM_BACKEND")
     endif()
 
     if (PANDA_LLVM_AOT)
@@ -432,14 +432,18 @@ endif()
 # NB: LLVM_AOT option now relates only to '--paoc-mode=llvm' and is temporarily disabled
 # One have to enable the option below to get `--interpreter-mode=llvm` working
 if (PANDA_LLVM_BACKEND)
-    # Enabling PANDA_LLVM_BACKEND enables IRTOC Interpreter handlers compilation functions.
+    # Enabling PANDA_LLVM_BACKEND enables IRTOC code compilation functions,
+    # including FastPaths and Interpreter handlers.
+    # Examples:
+    # cmake -DPANDA_LLVM_BACKEND=ON => both FastPaths and Interpreter are ON
+    # cmake -DPANDA_LLVM_BACKEND=ON -DPANDA_LLVM_FASTPATH=OFF => only Interpreter handlers compiled
+    # cmake -DPANDA_LLVM_INTERPRETER=ON => error, please enable the BACKEND option too
+    if (NOT DEFINED PANDA_LLVM_FASTPATH)
+        set(PANDA_LLVM_FASTPATH ON)
+    endif()
     if (NOT DEFINED PANDA_LLVM_INTERPRETER)
         set(PANDA_LLVM_INTERPRETER ON)
     endif()
-
-    # ======= LLVM_FASTPATH functionality is temporarily disabled =========
-    set(PANDA_LLVM_FASTPATH OFF)
-
     # ======= LLVM_AOT functionality is temporarily disabled =========
     set(PANDA_LLVM_AOT OFF)
 

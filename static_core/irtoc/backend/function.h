@@ -29,12 +29,21 @@
 
 namespace panda::irtoc {
 
-enum class LLVMCompilationResult {
+enum class CompilationResult {
     INVALID,
-    LLVM_COMPILED,
-    LLVM_CAN_NOT_COMPILE,
-    USE_ARK_AS_SKIP_LIST,
-    USE_ARK_AS_NO_SUFFIX,
+    // This unit was compiled by Ark's default compiler because it must be compiled by Ark, not by llvm.
+    // It happens for the following reasons:
+    // 1. PANDA_LLVM_BACKEND is disabled
+    // 2. Current function is an interpreter handler for Ark's compiler (no "_LLVM" suffix)
+    // 3. Current function is FastPath, but PANDA_LLVM_FASTPATH is disabled
+    // 4. Irtoc Unit tests are compiled
+    ARK,
+    // Successfully compiled by llvm
+    LLVM,
+    // llvm_compiler->CanCompile had returned false, and we fell back to Ark's default compiler
+    ARK_BECAUSE_FALLBACK,
+    // See SKIPPED_HANDLERS and SKIPPED_FASTPATHS
+    ARK_BECAUSE_SKIP
 };
 
 #if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL && PANDA_LLVM_INTERPRETER
@@ -59,7 +68,7 @@ struct UsedRegisters {
 
 class Function : public compiler::RelocationHandler {
 public:
-    using Result = Expected<int, const char *>;
+    using Result = Expected<CompilationResult, const char *>;
 
 #ifdef PANDA_LLVM_IRTOC
     Function() : llvm_compiler_(nullptr) {}
@@ -75,8 +84,6 @@ public:
     virtual const char *GetName() const = 0;
 
     Result Compile(Arch arch, ArenaAllocator *allocator, ArenaAllocator *local_allocator);
-    Result RunOptimizations(LLVMCompilationResult &compilation_result);
-    LLVMCompilationResult CompileByLLVM();
 
     auto GetCode() const
     {
@@ -173,12 +180,6 @@ public:
 #ifdef PANDA_LLVM_IRTOC
     void ReportCompilationStatistic(std::ostream *out);
 
-    compiler::GraphMode GetGraphMode()
-    {
-        ASSERT_PRINT(GetGraph() != nullptr, "Must invoke 'Compile' method before");
-        return graph_mode_;
-    }
-
     void SetLLVMCompiler(std::shared_ptr<llvmbackend::CompilerInterface> compiler)
     {
         llvm_compiler_ = std::move(compiler);
@@ -188,12 +189,12 @@ public:
 
     bool IsCompiledByLlvm() const
     {
-        return llvm_compilation_result_ == LLVMCompilationResult::LLVM_COMPILED;
+        return compilation_result_ == CompilationResult::LLVM;
     }
 
-    LLVMCompilationResult GetLLVMCompilationResult()
+    CompilationResult GetCompilationResult()
     {
-        return llvm_compilation_result_;
+        return compilation_result_;
     }
 
     size_t GetCodeSize()
@@ -223,6 +224,10 @@ protected:
     {
         lang_ = lang;
     }
+
+    Result RunOptimizations();
+
+    CompilationResult CompileByLLVM();
 
 #ifdef PANDA_LLVM_IRTOC
     bool SkippedByLLVM();
@@ -256,16 +261,20 @@ private:
     std::vector<std::string> source_files_;
     std::vector<compiler::RelocationInfo> relocation_entries_;
     size_t args_count_ {0U};
-    LLVMCompilationResult llvm_compilation_result_ {LLVMCompilationResult::INVALID};
+    CompilationResult compilation_result_ {CompilationResult::INVALID};
 #ifdef PANDA_LLVM_IRTOC
-    compiler::GraphMode graph_mode_ {std::numeric_limits<uint32_t>::max()};
-
     std::shared_ptr<llvmbackend::CompilerInterface> llvm_compiler_ {nullptr};
-
 #ifdef PANDA_LLVM_INTERPRETER
     static constexpr std::array SKIPPED_HANDLERS = {
         "ExecuteImplFast",
         "ExecuteImplFastEH",
+    };
+#endif
+#ifdef PANDA_LLVM_FASTPATH
+    static constexpr std::array SKIPPED_FASTPATHS = {
+        "IntfInlineCache",
+        "StringHashCode",  // NOTE: To investigate if LLVM code is better (no MAdd)
+        "StringHashCodeCompressed",
     };
 #endif
 #endif  // PANDA_LLVM_IRTOC

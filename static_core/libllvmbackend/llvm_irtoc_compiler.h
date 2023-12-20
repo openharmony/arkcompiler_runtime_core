@@ -65,6 +65,8 @@ public:
     CompiledCode GetCompiledCode(std::string_view function_name) override;
 
 private:
+    std::string GetFastPathFeatures() const;
+
     static std::vector<std::string> GetFeaturesForArch(Arch arch);
 
     void InitializeSpecificLLVMOptions(Arch arch);

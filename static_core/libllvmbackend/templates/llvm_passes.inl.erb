@@ -33,7 +33,9 @@ using PipelineElements = llvm::ArrayRef<llvm::PassBuilder::PipelineElement>;
 struct PassParser
 {
 public:
-    explicit PassParser() = default;
+    explicit PassParser(panda::llvmbackend::LLVMArkInterface *ark_interface) : ark_interface_{ark_interface}
+    {
+    }
 
     bool ParseModulePasses(StringRef name, llvm::ModulePassManager &module_pm, const LLVMCompilerOptions &options);
     bool ParseFunctionPasses(StringRef name, llvm::FunctionPassManager &function_pm, const LLVMCompilerOptions &options);
@@ -42,11 +44,45 @@ public:
     void RegisterParserCallbacks(llvm::PassBuilder &builder, const panda::llvmbackend::LLVMCompilerOptions &options)
     {
         builder.registerPipelineParsingCallback(
+        [&](StringRef name, llvm::ModulePassManager &module_pm, PipelineElements /*unused*/) -> bool {
+            return ParseModulePasses(name, module_pm, options);
+        });
+        builder.registerPipelineParsingCallback(
         [&](StringRef name, llvm::FunctionPassManager &function_pm, PipelineElements /*unused*/) -> bool {
             return ParseFunctionPasses(name, function_pm, options);
         });
+        builder.registerPipelineParsingCallback(
+        [&](StringRef name, llvm::CGSCCPassManager &scc_pm, PipelineElements /*unused*/) -> bool {
+            return ParseSCCPasses(name, scc_pm, options);
+        });
     }
+private:
+    panda::llvmbackend::LLVMArkInterface *ark_interface_;
 };
+
+bool PassParser::ParseModulePasses(StringRef name, llvm::ModulePassManager &module_pm, const LLVMCompilerOptions &options)
+{
+    auto &pm = module_pm;
+    namespace pass = <%= PassRegistry::passes_namespace %>;
+
+% PassRegistry::llvm_passes.select{|p| p.type.include? 'module'}.each do |pass|
+    if (name.equals(pass::<%= pass.name %>::ARG_NAME)) {
+        if (pass::<%= pass.name %>::ShouldInsert(&options)) {
+% if pass.setup == 'default'
+            pm.addPass(pass::<%= pass.name %>());
+% else
+            pm.addPass(pass::<%= pass.name %>::Create(ark_interface_, &options));
+% end
+#ifndef NDEBUG
+            pm.addPass(llvm::VerifierPass());
+#endif
+        }
+        return true;
+    }
+% end
+
+    return false;
+}
 
 bool PassParser::ParseFunctionPasses(StringRef name, llvm::FunctionPassManager &function_pm, const LLVMCompilerOptions &options)
 {
@@ -56,10 +92,35 @@ bool PassParser::ParseFunctionPasses(StringRef name, llvm::FunctionPassManager &
 % PassRegistry::llvm_passes.select{|p| p.type.include? 'function'}.each do |pass|
     if (name.equals(pass::<%= pass.name %>::ARG_NAME)) {
         if (pass::<%= pass.name %>::ShouldInsert(&options)) {
+% if pass.setup == 'default'
             pm.addPass(pass::<%= pass.name %>());
+% else
+            pm.addPass(pass::<%= pass.name %>::Create(ark_interface_, &options));
+% end
 #ifndef NDEBUG
             pm.addPass(llvm::VerifierPass());
 #endif
+        }
+        return true;
+    }
+% end
+
+    return false;
+}
+
+bool PassParser::ParseSCCPasses(StringRef name, llvm::CGSCCPassManager &scc_pm, const LLVMCompilerOptions &options)
+{
+    auto &pm = scc_pm;
+    namespace pass = <%= PassRegistry::passes_namespace %>;
+
+% PassRegistry::llvm_passes.select{|p| p.type.include? 'scc'}.each do |pass|
+    if (name.equals(pass::<%= pass.name %>::ARG_NAME)) {
+        if (pass::<%= pass.name %>::ShouldInsert(&options)) {
+% if pass.setup == 'default'
+            pm.addPass(pass::<%= pass.name %>());
+% else
+            pm.addPass(pass::<%= pass.name %>::Create(ark_interface_, &options));
+% end
         }
         return true;
     }

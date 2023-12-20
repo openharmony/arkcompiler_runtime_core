@@ -51,8 +51,15 @@ if (is_llvmbackend) {
     "object_code/created_object_file.cpp",
     "target_machine_builder.cpp",
     "transforms/llvm_optimizer.cpp",
+    "transforms/passes/ark_inlining.cpp",
     "transforms/passes/expand_atomics.cpp",
+    "transforms/passes/inline_ir/cleanup_inline_module.cpp",
+    "transforms/passes/inline_ir/discard_inline_module.cpp",
+    "transforms/passes/inline_ir/inline_ir_utils.cpp",
+    "transforms/passes/inline_ir/mark_always_inline.cpp",
+    "transforms/passes/inline_ir/mark_inline_module.cpp",
     "transforms/passes/inline_ir/patch_return_handler_stack_adjustment.cpp",
+    "transforms/passes/inline_ir/remove_unused_functions.cpp",
     "transforms/runtime_calls.cpp",
   ]
 

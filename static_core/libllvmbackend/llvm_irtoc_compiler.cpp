@@ -67,8 +67,8 @@ LLVMIrtocCompiler::LLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime,
             manager->InsertBefore(&llvm::FEntryInserterID,
                                   panda::llvmbackend::CreatePatchReturnHandlerStackAdjustmentPass(&ark_interface_));
         });
-    optimizer_ =
-        std::make_unique<panda::llvmbackend::LLVMOptimizer>(llvm_compiler_options, mir_compiler_->GetTargetMachine());
+    optimizer_ = std::make_unique<panda::llvmbackend::LLVMOptimizer>(llvm_compiler_options, &ark_interface_,
+                                                                     mir_compiler_->GetTargetMachine());
     InitializeModule();
 
     debug_data_ = std::make_unique<DebugDataBuilder>(module_.get(), filename_);
@@ -82,6 +82,25 @@ std::vector<std::string> LLVMIrtocCompiler::GetFeaturesForArch(Arch arch)
     return {};
 }
 
+static llvm::CallingConv::ID GetFastPathCallingConv(uint32_t num_args)
+{
+    ASSERT(num_args <= 5U);
+    switch (num_args) {
+        case 1U:
+            return llvm::CallingConv::ArkFast1;
+        case 2U:
+            return llvm::CallingConv::ArkFast2;
+        case 3U:
+            return llvm::CallingConv::ArkFast3;
+        case 4U:
+            return llvm::CallingConv::ArkFast4;
+        case 5U:
+            return llvm::CallingConv::ArkFast5;
+        default:
+            UNREACHABLE();
+    }
+}
+
 bool LLVMIrtocCompiler::AddGraph(compiler::Graph *graph)
 {
     ASSERT(graph != nullptr);
@@ -91,8 +110,23 @@ bool LLVMIrtocCompiler::AddGraph(compiler::Graph *graph)
 
     LLVMIrConstructor ctor(graph, module_.get(), GetLLVMContext(), &ark_interface_, debug_data_);
     auto llvm_function = ctor.GetFunc();
-    ASSERT(graph->GetMode().IsInterpreter());
-    llvm_function->setCallingConv(llvm::CallingConv::ArkInt);
+    if (graph->GetMode().IsInterpreter()) {
+        llvm_function->setCallingConv(llvm::CallingConv::ArkInt);
+    } else if (graph->GetMode().IsFastPath()) {
+        // Excluding fake thread and frame arguments
+        uint32_t constexpr FAKE_ARGS_NUM = 2U;
+        ASSERT(llvm_function->arg_size() >= FAKE_ARGS_NUM);
+        if (llvm_function->arg_size() - FAKE_ARGS_NUM == 0) {
+            if (llvm_function->getReturnType()->isVoidTy()) {
+                llvm_function->setCallingConv(llvm::CallingConv::ArkFast0);
+            } else {
+                llvm_function->setCallingConv(llvm::CallingConv::ArkFast1);
+            }
+        } else {
+            llvm_function->setCallingConv(GetFastPathCallingConv(llvm_function->arg_size() - FAKE_ARGS_NUM));
+        }
+        llvm_function->addFnAttr("target-features", GetFastPathFeatures());
+    }
 
     bool built_ir = ctor.BuildIr();
     if (!built_ir) {
@@ -123,6 +157,25 @@ void LLVMIrtocCompiler::CompileAll()
     object_file_ = exit_on_err_(mir_compiler_->CompileModule(*module_));
 }
 
+std::string LLVMIrtocCompiler::GetFastPathFeatures() const
+{
+    std::string features;
+    for (const auto &feature : GetFeaturesForArch(GetArch())) {
+        features.append(feature).append(",");
+    }
+    // FastPath may use FP register. We should be ready for this
+    switch (GetArch()) {
+        case Arch::AARCH64:
+            features.append("+reserve-").append(ark_interface_.GetFramePointerRegister());
+            features.append(",");
+            features.append("+reserve-").append(ark_interface_.GetThreadRegister());
+            break;
+        default:
+            UNREACHABLE();
+    }
+    return features;
+}
+
 void LLVMIrtocCompiler::InitializeSpecificLLVMOptions(Arch arch)
 {
     if (arch == Arch::X86_64) {
@@ -131,14 +184,37 @@ void LLVMIrtocCompiler::InitializeSpecificLLVMOptions(Arch arch)
     if (arch == Arch::AARCH64) {
         SetLLVMOption("aarch64-enable-ptr32", true);
     }
+    SetLLVMOption("inline-remark-attribute", true);
 }
 
 void LLVMIrtocCompiler::InitializeModule()
 {
+    auto module_file = llvmbackend::OPTIONS.GetLlvmInlineModule();
     auto layout = target_machine_->createDataLayout();
-    module_ = std::make_unique<llvm::Module>("irtoc empty module", *GetLLVMContext());
+    if (module_file.empty()) {
+        module_ = std::make_unique<llvm::Module>("irtoc empty module", *GetLLVMContext());
+        module_->setDataLayout(layout);
+        module_->setTargetTriple(GetTripleForArch(GetArch()).getTriple());
+        return;
+    }
+    auto buffer = errorOrToExpected(llvm::MemoryBuffer::getFile(module_file));
+    LLVM_LOG_IF(!buffer, FATAL, INFRA) << "Could not read inline module from file = '" << module_file << "', error: '"
+                                       << toString(buffer.takeError()) << "'";
+
+    auto contents = llvm::getBitcodeFileContents(*buffer.get());
+    LLVM_LOG_IF(!contents, FATAL, INFRA) << "Could get bitcode file contents from file = '" << module_file
+                                         << "', error: '" << toString(contents.takeError()) << "'";
+
+    static constexpr int32_t EXPECTED_MODULES = 1;
+    LLVM_LOG_IF(contents->Mods.size() != EXPECTED_MODULES, FATAL, INFRA)
+        << "Inline module file '" << module_file << "' has unexpected number of modules = " << contents->Mods.size()
+        << ", expected " << EXPECTED_MODULES;
+    auto module = contents->Mods[0].parseModule(*GetLLVMContext());
+    LLVM_LOG_IF(!module, FATAL, INFRA) << "Could not parse inline module from file '" << module_file << "', error: '"
+                                       << toString(buffer.takeError()) << "'";
+    module_ = std::move(*module);
     module_->setDataLayout(layout);
-    module_->setTargetTriple(GetTripleForArch(GetArch()).getTriple());
+    optimizer_->ProcessInlineModule(module_.get());
 }
 
 void LLVMIrtocCompiler::WriteObjectFile(std::string_view output)

@@ -30,8 +30,15 @@ set(SOURCES
         lowering/irtoc_function_utils.cpp
         lowering/llvm_ir_constructor.cpp
         object_code/created_object_file.cpp
+        transforms/passes/ark_inlining.cpp
         transforms/passes/expand_atomics.cpp
+        transforms/passes/inline_ir/cleanup_inline_module.cpp
+        transforms/passes/inline_ir/discard_inline_module.cpp
+        transforms/passes/inline_ir/inline_ir_utils.cpp
+        transforms/passes/inline_ir/mark_always_inline.cpp
+        transforms/passes/inline_ir/mark_inline_module.cpp
         transforms/passes/inline_ir/patch_return_handler_stack_adjustment.cpp
+        transforms/passes/inline_ir/remove_unused_functions.cpp
         transforms/llvm_optimizer.cpp
         transforms/runtime_calls.cpp
         llvm_ark_interface.cpp
