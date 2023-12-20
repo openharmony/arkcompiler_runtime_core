@@ -30,6 +30,8 @@ es2panda:
     timeout: 60
 ets:
     force-generate: false
+    compare-files: false
+    compare-files-iterations: 2
 general:
     bco: true
     with_js: true

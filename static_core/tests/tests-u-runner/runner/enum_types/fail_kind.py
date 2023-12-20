@@ -41,3 +41,5 @@ class FailKind(Enum):
     VERIFIER_FAIL = 13
     VERIFIER_TIMEOUT = 14
     VERIFIER_OTHER = 15
+
+    COMPARE_FAIL = 16

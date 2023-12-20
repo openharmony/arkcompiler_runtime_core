@@ -102,15 +102,19 @@ def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
         default=None, help='run ets-templates tests')
 
 
-def add_generation_args(parser: argparse.ArgumentParser) -> None:
-    # ETS tests applied options
+def add_ets_args(parser: argparse.ArgumentParser) -> None:
     generate_mutex_group = parser.add_mutually_exclusive_group(required=False)
     generate_mutex_group.add_argument(
         '--force-generate', action='store_true', dest='is_force_generate', default=None,
         help='mandatory generate the ETS test cases from templates')
-    generate_mutex_group.add_argument(
-        '--generate-only', action='store_true', dest='generate_only', default=None,
-        help='only generate tests without running')
+    parser.add_argument(
+        '--compare-files', action='store_true', dest='compare_files', default=None,
+        help='only compile into .abc and compare whether abc files are equal')
+    parser.add_argument(
+        '--compare-files-iterations', action='store', dest='compare_files_iterations',
+        type=lambda arg: check_int(arg, "--compare-files-iterations", is_zero_allowed=False),
+        default=None,
+        help='compile into .abc file the specified number of times; works only with the option compare-files')
 
 
 def add_test_group_args(parser: argparse.ArgumentParser) -> None:
@@ -192,6 +196,9 @@ def add_general_args(parser: argparse.ArgumentParser) -> None:
         '--no-run-gc-in-place', action='store_true', dest='run_gc_in_place',
         default=None,
         help='enable --run-gc-in-place mode')
+    parser.add_argument(
+        '--generate-only', action='store_true', dest='generate_only', default=None,
+        help='only generate tests without running')
 
     qemu_group = parser.add_mutually_exclusive_group(required=False)
     qemu_group.add_argument(
@@ -381,7 +388,7 @@ def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Regression test runner")
 
     add_test_suite_args(parser)
-    add_generation_args(parser)
+    add_ets_args(parser)
     add_test_group_args(parser)
     add_config_args(parser)
     add_general_args(parser)
