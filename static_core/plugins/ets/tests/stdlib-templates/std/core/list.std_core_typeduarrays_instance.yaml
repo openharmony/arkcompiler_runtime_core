@@ -1,0 +1,33 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- {
+    objectType: "Uint8Array",
+    primitiveType: "number",
+    primitiveSizeBytes: 1,
+    data: "[0, 18, 37, 72, 121, 180, 221, 255]"
+}
+
+- {
+    objectType: "Uint16Array",
+    primitiveType: "number",
+    primitiveSizeBytes: 2,
+    data: "[0, 10234, 21445, 32760, 43690, 55321, 65504, 65535]"
+}
+
+- {
+    objectType: "Uint32Array",
+    primitiveType: "number",
+    primitiveSizeBytes: 4,
+    data: "[0, 1073741824, 2147483648, 3221225472, 3758096384, 4026531840, 4160749568, 4294967295]"
+}

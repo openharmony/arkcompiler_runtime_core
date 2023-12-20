@@ -18,6 +18,11 @@ std/core/std_core_array_forEach_short_array_func_short.ets
 ### Issue 11468 end
 ### Issue 14724
 std/core/std_core_typedarrays__BigInt64Array.ets
+### Issue I8PRJS begin
+std/core/std_core_typeduarrays__Uint8Array.ets
+std/core/std_core_typeduarrays__Uint16Array.ets
+std/core/std_core_typeduarrays__Uint32Array.ets
+### Issue I8PRJS end
 ### Issue 11474 ###
 ### Issue 11544 begin
 std/math/std_math_tan_double.ets
