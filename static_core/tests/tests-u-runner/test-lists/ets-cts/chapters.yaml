@@ -79,3 +79,7 @@ chapters:
     - 13.modules_and_compilation_units
     - 14.semantic_rules
     - 17.experimental_features
+  - non-specified:
+    - '*'
+    - exclude:
+      - all

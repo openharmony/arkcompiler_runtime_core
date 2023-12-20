@@ -16,6 +16,8 @@ std/core/std_core_array_forEach_float_array_func_float.ets
 std/core/std_core_array_forEach_long_array_func_long.ets
 std/core/std_core_array_forEach_short_array_func_short.ets
 ### Issue 11468 end
+### Issue 14513
+std/core/SortInternalTestLong.ets
 ### Issue 14724
 std/core/std_core_typedarrays__BigInt64Array.ets
 ### Issue 11474 ###
@@ -177,6 +179,8 @@ spec/unions/union_param_11_01.ets
 ### Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 koala-related-benchmarks/arkts-phase1.ets
+# panda#14817
+koala-related-benchmarks/benchmark-lambda-no-lambda-modified.ets
 ### End of Koala
 ### Feature: Rest Params
 ### Issue 14111

@@ -26,8 +26,6 @@ chapters:
     - escompat
   - regression-dir:
     - regression
-  - spec-dir:
-    - spec
   - std-containers-dir:
     - std/containers
   - std-core-dir:
@@ -38,9 +36,24 @@ chapters:
     - std/time
   - std-serialization-dir:
     - std/serialization
-
+  - spec1:
+    - spec/conditional-expression
+    - spec/generic
+    - spec/import_export
+    - spec/lambda
+    - spec/never_type
+    - spec/rest-params
+    - spec/string_enum
+    - spec/struct-type
+    - spec/trailing_lambdas
+    - spec/undefined-type
+  - spec2:
+    - spec
+    - exclude:
+      - spec1
+  
   # chapters by several folders
-  - chapter-1-of-4:
+  - std-core1:
     - 'std/core/BadRadixTest*.ets'
     - 'std/core/EscapeUnescapeTest*.ets'
     - 'std/core/EscapeUnescapeURITest*.ets'
@@ -63,10 +76,10 @@ chapters:
     - 'std/core/TypeMethodResolveConstructor*.ets'
     - 'std/core/TypeMethodResolveConstructorFew*.ets'
     - 'std/core/TypeResolve*.ets'
-  - chapter-2-of-4:
+  - std-core2:
     - 'std/core/std_core_array*.ets'
     - 'std/core/std_core_array_exception*.ets'
-  - chapter-3-of-4:
+  - std-core3:
     - 'std/core/std_core_boolean*.ets'
     - 'std/core/std_core_byte*.ets'
     - 'std/core/std_core_char*.ets'
@@ -80,7 +93,13 @@ chapters:
     - 'std/core/std_core_string*.ets'
     - 'std/core/std_core_stringbuilder*.ets'
     - 'std/core/std_core_typedarrays*.ets'
-  - chapter-4-of-4:
+  - std-core4:
+    - std/core
+    - exclude:
+      - "std-core1"
+      - "std-core2"
+      - "std-core3"
+  - not-specified:
     - '*'
     - exclude:
-      - std/core
+      - all
