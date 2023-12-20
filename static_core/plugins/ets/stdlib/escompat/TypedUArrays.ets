@@ -857,22 +857,21 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             mapfn = (v: number, k: number): number => { return v }
         }
         // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const aType = Type.of(arrayLike) as ClassType
-        const mNum = aType.getMethodsNum()
-        let m: Method
-        let i: long
-        for (i = 0; i < mNum; i++) {
-            m = aType.getMethod(i)
-            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                break
+        const getIteratorMethod = (a: Object): Method => {
+            const aType = Type.of(a) as ClassType
+            const mNum = aType.getMethodsNum()
+            for (let i = 0; i < mNum; i++) {
+                const m = aType.getMethod(i)
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                    return m
+                }
             }
-        }
-        if (i == mNum) {
             throw new Error("failed to get iterator from iterable")
         }
+        let m: Method = getIteratorMethod(arrayLike)
 
         // Calc length of items inside arrayLike, save length into i variable
-        i = 0
+        let i: long
         let iter  = m.invoke(arrayLike, [])! as Iterator<number>
         while (true) {
             const v = iter.next()
@@ -3377,22 +3376,21 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             mapfn = (v: number, k: number): number => { return v }
         }
         // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const aType = Type.of(arrayLike) as ClassType
-        const mNum = aType.getMethodsNum()
-        let m: Method
-        let i: long
-        for (i = 0; i < mNum; i++) {
-            m = aType.getMethod(i)
-            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                break
+        const getIteratorMethod = (a: Object): Method => {
+            const aType = Type.of(a) as ClassType
+            const mNum = aType.getMethodsNum()
+            for (let i = 0; i < mNum; i++) {
+                const m = aType.getMethod(i)
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                    return m
+                }
             }
-        }
-        if (i == mNum) {
             throw new Error("failed to get iterator from iterable")
         }
+        let m: Method = getIteratorMethod(arrayLike)
 
         // Calc length of items inside arrayLike, save length into i variable
-        i = 0
+        let i: long
         let iter  = m.invoke(arrayLike, [])! as Iterator<number>
         while (true) {
             const v = iter.next()
@@ -5898,22 +5896,21 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             mapfn = (v: number, k: number): number => { return v }
         }
         // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const aType = Type.of(arrayLike) as ClassType
-        const mNum = aType.getMethodsNum()
-        let m: Method
-        let i: long
-        for (i = 0; i < mNum; i++) {
-            m = aType.getMethod(i)
-            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                break
+        const getIteratorMethod = (a: Object): Method => {
+            const aType = Type.of(a) as ClassType
+            const mNum = aType.getMethodsNum()
+            for (let i = 0; i < mNum; i++) {
+                const m = aType.getMethod(i)
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                    return m
+                }
             }
-        }
-        if (i == mNum) {
             throw new Error("failed to get iterator from iterable")
         }
+        let m: Method = getIteratorMethod(arrayLike)
 
         // Calc length of items inside arrayLike, save length into i variable
-        i = 0
+        let i: long
         let iter  = m.invoke(arrayLike, [])! as Iterator<number>
         while (true) {
             const v = iter.next()
@@ -8446,22 +8443,21 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             mapfn = (v: number, k: number): number => { return v }
         }
         // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const aType = Type.of(arrayLike) as ClassType
-        const mNum = aType.getMethodsNum()
-        let m: Method
-        let i: long
-        for (i = 0; i < mNum; i++) {
-            m = aType.getMethod(i)
-            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                break
+        const getIteratorMethod = (a: Object): Method => {
+            const aType = Type.of(a) as ClassType
+            const mNum = aType.getMethodsNum()
+            for (let i = 0; i < mNum; i++) {
+                const m = aType.getMethod(i)
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                    return m
+                }
             }
-        }
-        if (i == mNum) {
             throw new Error("failed to get iterator from iterable")
         }
+        let m: Method = getIteratorMethod(arrayLike)
 
         // Calc length of items inside arrayLike, save length into i variable
-        i = 0
+        let i: long
         let iter  = m.invoke(arrayLike, [])! as Iterator<number>
         while (true) {
             const v = iter.next()

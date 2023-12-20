@@ -17,6 +17,7 @@ limitations under the License.
 desc: >-
     Reference types and enumeration types have no default values.
     Variables of such types must be initialized explicitly with a value before the first use of a type.
+tags: [compile-only, negative]
 ---*/
 
 class A {

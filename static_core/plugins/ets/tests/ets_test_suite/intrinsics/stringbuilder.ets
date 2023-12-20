@@ -14,7 +14,7 @@
  */
 
 const emptyString = "";
-let nullString: String;
+let nullString: String = new String(null);
 let chArray: char[] = [c'!', c'@', c'#', c'$', c'%'];
 
 const b1: byte = Byte.MIN_VALUE as byte
@@ -129,7 +129,7 @@ function main(): int {
         // The test try to cover all the cases encoded by Codegen::CreateStringBuilderAppendString.
         const golden5: String = "abcΣΨΩ0123456789 | This is a normal string |  | null | null"
         // Local Null String to test IsNullPtr() branch of CreateStringBuilderAppendString.
-        let nullString5: String;
+        let nullString5: String = new String(null);
         let sb5: StringBuilder = new StringBuilder();
         sb5.append("abcΣΨΩ0123456789").append(" | ")
           .append(getString(StringKind.Normal)).append(" | ")

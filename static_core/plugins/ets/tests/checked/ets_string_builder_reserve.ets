@@ -957,7 +957,7 @@ function chain_reserve35() : String {
 
 function more_types_reserve36() : String {
     const emptyString = "";
-    let nullString: String;
+    let nullString: String = new String(null);
     let chArray: char[] = [c'!', c'@', c'#', c'$', c'%'];
 
     let sb: StringBuilder = new StringBuilder(chArray);
@@ -999,7 +999,7 @@ function nested_loop_reserve37() : string {
 
 function uber_reserve38(cond: boolean) : string
 {
-    let nullString: String;
+    let nullString: String = new String(null);
     let sb = new StringBuilder()
     sb.append(nullString)
     sb.append("-")

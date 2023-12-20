@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,6 +17,7 @@
     result: arr,
     result_nature: array,
     result_type: "boolean[]",
+    init_value: "[]",
     method_signature: { arr: "boolean[]", startIndex: "int", endIndex: "int" },
     method_throws: "true",
     method_signature_desc: {arr: "boolean_array", startIndex: int, endIndex: int},
@@ -61,6 +62,7 @@
     result: arr,
     result_nature: array,
     result_type: "byte[]",
+    init_value: "[]",
     method_signature: { arr: "byte[]", startIndex: "int", endIndex: "int" },
     method_throws: "true",
     method_signature_desc: {arr: "byte_array", startIndex: int, endIndex: int},
@@ -127,6 +129,7 @@
     result: arr,
     result_nature: array,
     result_type: "short[]",
+    init_value: "[]",
     method_signature: { arr: "short[]", startIndex: "int", endIndex: "int" },
     method_throws: "true",
     method_signature_desc: {arr: "short_array", startIndex: int, endIndex: int},
@@ -193,6 +196,7 @@
     result: arr,
     result_nature: array,
     result_type: "int[]",
+    init_value: "[]",
     method_signature: { arr: "int[]", startIndex: "int", endIndex: "int" },
     method_throws: "true",
     method_signature_desc: {arr: "int_array", startIndex: int, endIndex: int},
@@ -259,6 +263,7 @@
     result: arr,
     result_nature: array,
     result_type: "long[]",
+    init_value: "[]",
     method_signature: { arr: "long[]", startIndex: "int", endIndex: "int" },
     method_throws: "true",
     method_signature_desc: {arr: "long_array", startIndex: int, endIndex: int},
@@ -325,6 +330,7 @@
     result: arr,
     result_nature: array,
     result_type: "float[]",
+    init_value: "[]",
     method_signature: { arr: "float[]", startIndex: "int", endIndex: "int" },
     method_throws: "true",
     method_signature_desc: {arr: "float_array", startIndex: int, endIndex: int},
@@ -391,6 +397,7 @@
     result: arr,
     result_nature: array,
     result_type: "double[]",
+    init_value: "[]",
     method_signature: { arr: "double[]", startIndex: "int", endIndex: "int" },
     method_throws: "true",
     method_signature_desc: {arr: "double_array", startIndex: int, endIndex: int},
@@ -457,6 +464,7 @@
     result: arr,
     result_nature: array,
     result_type: "char[]",
+    init_value: "[]",
     method_signature: { arr: "char[]", startIndex: "int", endIndex: "int" },
     method_throws: "true",
     method_signature_desc: {arr: "char_array", startIndex: int, endIndex: int},
