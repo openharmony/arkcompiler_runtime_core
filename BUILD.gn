@@ -292,7 +292,7 @@ if (!ark_standalone_build) {
     testonly = true
     deps = []
     if (host_os == "linux") {
-      deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_unittest(${host_toolchain})" ]
+      deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_demo(${host_toolchain})" ]
     }
   }
 
@@ -314,6 +314,7 @@ if (!ark_standalone_build) {
       "$ark_root/bytecode_optimizer/tests:host_unittest",
       "$ark_root/compiler/tests:host_unittest",
       "$ark_root/disassembler/tests:host_unittest",
+      "$ark_root/libark_defect_scan_aux/tests/unittest:host_unittest",
       "$ark_root/libpandabase/tests:host_unittest",
       "$ark_root/libpandafile/tests:host_unittest",
       "$ark_root/libziparchive/tests:host_unittest",

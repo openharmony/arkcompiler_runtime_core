@@ -113,7 +113,7 @@ const Function *AbcFile::GetExportFunctionByExportName(std::string_view export_f
         return nullptr;
     }
 
-    std::string inter_func_name = GetInternalNameByExportName(export_func_name);
+    std::string inter_func_name = GetLocalNameByExportName(export_func_name);
     for (auto export_func : export_func_list_) {
         const std::string &ex_func_name = export_func->GetFunctionName();
         std::string_view no_hashtag_name = GetNameWithoutHashtag(ex_func_name);
@@ -141,7 +141,7 @@ const Class *AbcFile::GetExportClassByExportName(std::string_view export_class_n
         return nullptr;
     }
 
-    std::string inter_class_name = GetInternalNameByExportName(export_class_name);
+    std::string inter_class_name = GetLocalNameByExportName(export_class_name);
     for (auto export_class : export_class_list_) {
         const std::string &ex_class_name = export_class->GetClassName();
         std::string_view no_hashtag_name = GetNameWithoutHashtag(ex_class_name);
@@ -168,12 +168,12 @@ ssize_t AbcFile::GetLineNumberByInst(const Function *func, const Inst &inst) con
     return -1;
 }
 
-std::string AbcFile::GetInternalNameByExportName(std::string_view export_name) const
+std::string AbcFile::GetLocalNameByExportName(std::string_view export_name) const
 {
     if (!IsModule()) {
         return EMPTY_STR;
     }
-    return module_record_->GetInternalNameByExportName(export_name);
+    return module_record_->GetLocalNameByExportName(export_name);
 }
 
 std::string AbcFile::GetImportNameByExportName(std::string_view export_name) const
@@ -192,20 +192,20 @@ std::string AbcFile::GetModuleNameByExportName(std::string_view export_name) con
     return module_record_->GetModuleNameByExportName(export_name);
 }
 
-std::string AbcFile::GetModuleNameByInternalName(std::string_view local_name) const
+std::string AbcFile::GetModuleNameByLocalName(std::string_view local_name) const
 {
     if (!IsModule()) {
         return EMPTY_STR;
     }
-    return module_record_->GetModuleNameByInternalName(local_name);
+    return module_record_->GetModuleNameByLocalName(local_name);
 }
 
-std::string AbcFile::GetImportNameByInternalName(std::string_view local_name) const
+std::string AbcFile::GetImportNameByLocalName(std::string_view local_name) const
 {
     if (!IsModule()) {
         return EMPTY_STR;
     }
-    return module_record_->GetImportNameByInternalName(local_name);
+    return module_record_->GetImportNameByLocalName(local_name);
 }
 
 std::string_view AbcFile::GetNameWithoutHashtag(std::string_view name) const
@@ -506,7 +506,7 @@ void AbcFile::ExtractDefinedClassAndFunctionInfo()
 
     std::unordered_set<const Function *> processed_func;
     for (auto &def_class : def_class_list_) {
-        Function *def_func = def_class->GetDefineFunction();
+        Function *def_func = def_class->GetDefiningFunction();
         if (def_func != nullptr && processed_func.count(def_func) == 0) {
             ExtractClassInheritInfo(def_func);
             processed_func.insert(def_func);
@@ -578,12 +578,12 @@ void AbcFile::ExtractClassInheritInfo(Function *func) const
             cur_class->SetParentClassName(par_class_name);
         }
         if (ret_type == ResolveType::UNRESOLVED_MODULE) {
-            std::string imp_par_class_name = GetImportNameByInternalName(par_class_name);
+            std::string imp_par_class_name = GetImportNameByLocalName(par_class_name);
             if (!imp_par_class_name.empty()) {
                 cur_class->SetParentClassName(imp_par_class_name);
             }
             std::string inter_name = var_name.empty() ? par_class_name : var_name;
-            std::string module_name = GetModuleNameByInternalName(inter_name);
+            std::string module_name = GetModuleNameByLocalName(inter_name);
             if (!module_name.empty()) {
                 cur_class->SetParClassExternalModuleName(module_name);
             }
@@ -835,7 +835,7 @@ ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
         case InstType::LDEXTERNALMODULEVAR_IMM8:
         case InstType::WIDE_LDEXTERNALMODULEVAR_PREF_IMM16: {
             size_t index = inst.GetImms()[0];
-            const std::string &inter_name = module_record_->GetImportInternalNameByIndex(index);
+            const std::string &inter_name = module_record_->GetImportLocalNameByIndex(index);
             return std::make_tuple(nullptr, inter_name, ResolveType::UNRESOLVED_MODULE);
         }
         case InstType::GETMODULENAMESPACE_IMM8:
@@ -1001,12 +1001,12 @@ std::unique_ptr<CalleeInfo> AbcFile::ResolveCallInstCommon(Function *func, const
             callee_info->SetFunctionName(callee_name);
         }
         if (ret_type == ResolveType::UNRESOLVED_MODULE) {
-            std::string imp_callee_name = GetImportNameByInternalName(callee_name);
+            std::string imp_callee_name = GetImportNameByLocalName(callee_name);
             if (!imp_callee_name.empty()) {
                 callee_info->SetFunctionName(imp_callee_name);
             }
             std::string inter_name = var_name.empty() ? callee_name : var_name;
-            std::string module_name = GetModuleNameByInternalName(inter_name);
+            std::string module_name = GetModuleNameByLocalName(inter_name);
             if (!module_name.empty()) {
                 callee_info->SetExternalModuleName(module_name);
             }

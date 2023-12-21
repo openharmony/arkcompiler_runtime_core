@@ -44,7 +44,7 @@ public:
 
     const std::string &GetClassName() const;
     const AbcFile *GetAbcFileInstance() const;
-    Function *GetDefineFunction() const;
+    Function *GetDefiningFunction() const;
     size_t GetMemberFunctionCount() const;
     const Function *GetMemberFunctionByName(std::string_view func_name) const;
     const Function *GetMemberFunctionByIndex(size_t index) const;

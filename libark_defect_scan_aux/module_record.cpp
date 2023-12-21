@@ -58,7 +58,7 @@ size_t ModuleRecord::GetLocalExportNum() const
     return local_export_num_;
 }
 
-const std::string &ModuleRecord::GetImportInternalNameByIndex(size_t index) const
+const std::string &ModuleRecord::GetImportLocalNameByIndex(size_t index) const
 {
     ASSERT(index < regular_import_num_);
     return import_entries_[index].local_name_;
@@ -80,7 +80,7 @@ const std::string &ModuleRecord::GetExportNameByIndex(size_t index) const
     return export_entries_[index].export_name_;
 }
 
-std::string ModuleRecord::GetInternalNameByExportName(std::string_view export_name) const
+std::string ModuleRecord::GetLocalNameByExportName(std::string_view export_name) const
 {
     for (auto &export_entry : export_entries_) {
         if (export_entry.export_name_ == export_name) {
@@ -110,7 +110,7 @@ std::string ModuleRecord::GetModuleNameByExportName(std::string_view export_name
     return "";
 }
 
-std::string ModuleRecord::GetModuleNameByInternalName(std::string_view local_name) const
+std::string ModuleRecord::GetModuleNameByLocalName(std::string_view local_name) const
 {
     for (auto &import_entry : import_entries_) {
         if (import_entry.local_name_ == local_name) {
@@ -120,7 +120,7 @@ std::string ModuleRecord::GetModuleNameByInternalName(std::string_view local_nam
     return "";
 }
 
-std::string ModuleRecord::GetImportNameByInternalName(std::string_view local_name) const
+std::string ModuleRecord::GetImportNameByLocalName(std::string_view local_name) const
 {
     for (auto &import_entry : import_entries_) {
         if (import_entry.local_name_ == local_name) {
