@@ -28,7 +28,7 @@ const AbcFile *Class::GetAbcFileInstance() const
     return abc_file_;
 }
 
-const Function *Class::GetDefineFunction() const
+Function *Class::GetDefineFunction() const
 {
     return def_func_;
 }

@@ -43,7 +43,7 @@ public:
     const AbcFile *GetAbcFileInstance() const;
     const Graph &GetGraph() const;
     const Class *GetClass() const;
-    const Function *GetParentFunction() const;
+    Function *GetParentFunction() const;
     uint32_t GetArgCount() const;
     size_t GetDefinedClassCount() const;
     size_t GetDefinedFunctionCount() const;
@@ -53,10 +53,11 @@ public:
     const CalleeInfo *GetCalleeInfoByIndex(size_t index) const;
     std::vector<Inst> GetReturnInstList() const;
     const CalleeInfo *GetCalleeInfoByCallInst(const Inst &call_inst) const;
+    uint32_t GetAndUpdateToVisitInputForInst(const Inst &inst);
 
 private:
     panda_file::File::EntityId GetMethodId() const;
-    void SetParentFunction(const Function *parent_func);
+    void SetParentFunction(Function *parent_func);
     void SetClass(const Class *clazz);
     void AddDefinedClass(const Class *def_class);
     void AddDefinedFunction(const Function *def_func);
@@ -70,10 +71,11 @@ private:
     // the class which current function belongs to
     const Class *class_ {nullptr};
     // the function where current function is defined
-    const Function *parent_func_ {nullptr};
+    Function *parent_func_ {nullptr};
     std::vector<const Class *> def_class_list_;
     std::vector<const Function *> def_func_list_;
     std::vector<const CalleeInfo *> callee_info_list_;
+    std::unordered_map<uint32_t, uint32_t> to_visit_inputs_;
 
     friend class AbcFile;
 };

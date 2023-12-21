@@ -39,7 +39,7 @@ const Class *Function::GetClass() const
     return class_;
 }
 
-const Function *Function::GetParentFunction() const
+Function *Function::GetParentFunction() const
 {
     return parent_func_;
 }
@@ -105,12 +105,26 @@ const CalleeInfo *Function::GetCalleeInfoByCallInst(const Inst &call_inst) const
     return nullptr;
 }
 
+uint32_t Function::GetAndUpdateToVisitInputForInst(const Inst &inst)
+{
+    auto inst_input_size = inst.GetInputInsts().size();
+    ASSERT(inst_input_size != 0);
+    uint32_t inst_id = inst.GetInstId();
+    auto iter = to_visit_inputs_.find(inst_id);
+    uint32_t to_visit_input = iter == to_visit_inputs_.end() ? 0 : iter->second;
+    uint32_t next_to_visit_input = to_visit_input + 1;
+    if (next_to_visit_input >= inst_input_size)
+        next_to_visit_input = 0;
+    to_visit_inputs_[inst_id] = next_to_visit_input;
+    return to_visit_input;
+}
+
 panda_file::File::EntityId Function::GetMethodId() const
 {
     return m_id_;
 }
 
-void Function::SetParentFunction(const Function *parent_func)
+void Function::SetParentFunction(Function *parent_func)
 {
     ASSERT(parent_func != nullptr);
     parent_func_ = parent_func;

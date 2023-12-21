@@ -44,7 +44,7 @@ enum class ResolveType {
     UNRESOLVED_GLOBAL_VAR,
     UNRESOLVED_OTHER,
 };
-using FuncInstPair = std::pair<const Function *, Inst>;
+using FuncInstPair = std::pair<Function *, Inst>;
 using ResolveResult = std::tuple<const void *, std::string, ResolveType>;
 
 class AbcFile final {
@@ -97,13 +97,13 @@ private:
     void InitializeAllDefinedFunction();
     void ExtractDefinedClassAndFunctionInfo();
     void ExtractClassAndFunctionInfo(Function *func);
-    void ExtractClassInheritInfo(const Function *func) const;
+    void ExtractClassInheritInfo(Function *func) const;
     void ExtractFunctionCalleeInfo(Function *func);
     void BuildFunctionDefineChain(Function *parent_func, Function *child_func) const;
     void BuildClassAndMemberFuncRelation(Class *clazz, Function *member_func) const;
     void ExtractClassAndFunctionExportList();
     compiler::Graph *GenerateFunctionGraph(const panda_file::MethodDataAccessor &mda, std::string_view func_name);
-    ResolveResult ResolveInstCommon(const Function *func, Inst inst) const;
+    ResolveResult ResolveInstCommon(Function *func, Inst inst) const;
     ResolveResult HandleLdObjByNameInstResolveResult(const Inst &ldobjbyname_inst,
                                                      const ResolveResult &resolve_res) const;
     ResolveResult HandleNewObjInstResolveResultCommon(const ResolveResult &resolve_res) const;

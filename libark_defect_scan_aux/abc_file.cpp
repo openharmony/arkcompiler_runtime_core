@@ -261,7 +261,7 @@ std::string AbcFile::GetStringByInst(const Inst &inst) const
 // TODO(wangyantian): may match multiple stlex inst when considering control flow
 std::optional<FuncInstPair> AbcFile::GetStLexInstByLdLexInst(FuncInstPair func_inst_pair) const
 {
-    const Function *func = func_inst_pair.first;
+    Function *func = func_inst_pair.first;
     const Inst &ld_lex_inst = func_inst_pair.second;
     if (func == nullptr || !ld_lex_inst.IsInstLdLexVar()) {
         return std::nullopt;
@@ -270,11 +270,13 @@ std::optional<FuncInstPair> AbcFile::GetStLexInstByLdLexInst(FuncInstPair func_i
     auto ld_imms = ld_lex_inst.GetImms();
     uint32_t ld_level = ld_imms[0];
     uint32_t ld_slot_id = ld_imms[1];
-    const Function *cur_func = func;
+    Function *cur_func = func;
     uint32_t i = 0;
     while (true) {
         bool has_new_lexenv = false;
         const auto &graph = cur_func->GetGraph();
+        // TODO: Multiple newlexenv instructions and poplexenv instruction are not correctly supported in
+        //  the following code. Future fixes are required.
         graph.VisitAllInstructions([&has_new_lexenv](const Inst &inst) {
             if (inst.GetType() == InstType::NEWLEXENV_IMM8 || inst.GetType() == InstType::WIDE_NEWLEXENV_PREF_IMM16) {
                 has_new_lexenv = true;
@@ -293,13 +295,22 @@ std::optional<FuncInstPair> AbcFile::GetStLexInstByLdLexInst(FuncInstPair func_i
     }
     auto &graph = cur_func->GetGraph();
     Inst st_lex_inst = ld_lex_inst;
-    graph.VisitAllInstructions([ld_slot_id, &st_lex_inst](const Inst &inst) {
+    bool is_same_func = (cur_func == func_inst_pair.first);
+    graph.VisitAllInstructions([is_same_func, ld_lex_inst, ld_slot_id, &st_lex_inst](const Inst &inst) {
         if (inst.IsInstStLexVar()) {
             auto st_imms = inst.GetImms();
             uint32_t st_level = st_imms[0];
             uint32_t st_slot_id = st_imms[1];
             if (st_level == 0 && st_slot_id == ld_slot_id) {
-                st_lex_inst = inst;
+                // Best effort to avoid the case where ld_lex_inst is some input of st_lex_inst
+                // Current heuristics for choosing a valid st_lex_inst (or relationship between conditions):
+                // 1. If no valid st_lex_inst is found (which is necessary to make the search process more sound).
+                // 2. If they are not in the same function.
+                // 3. If they are in the same function, but current st_lex_inst appears before ld_lex_inst (by PC).
+                // More advanced heuristics (e.g. preforming dfs on all inputs of st_lex_inst) should be considered.
+                if (st_lex_inst == ld_lex_inst || !is_same_func || inst.GetPc() < ld_lex_inst.GetPc()) {
+                    st_lex_inst = inst;
+                }
             }
         }
     });
@@ -320,7 +331,7 @@ std::optional<FuncInstPair> AbcFile::GetStGlobalInstByLdGlobalInst(FuncInstPair 
 
     uint32_t ld_str_id = ld_global_inst.GetImms()[0];
     // TODO(wangyantian): only consider that func_main_0 has StGlobal inst for now, what about other cases?
-    const Function *func_main = def_func_list_[0].get();
+    Function *func_main = def_func_list_[0].get();
     auto &graph = func_main->GetGraph();
     Inst st_global_inst = ld_global_inst;
     graph.VisitAllInstructions([ld_str_id, &st_global_inst](const Inst &inst) {
@@ -489,7 +500,7 @@ void AbcFile::ExtractDefinedClassAndFunctionInfo()
 
     std::unordered_set<const Function *> processed_func;
     for (auto &def_class : def_class_list_) {
-        const Function *def_func = def_class->GetDefineFunction();
+        Function *def_func = def_class->GetDefineFunction();
         if (def_func != nullptr && processed_func.count(def_func) == 0) {
             ExtractClassInheritInfo(def_func);
             processed_func.insert(def_func);
@@ -544,7 +555,7 @@ void AbcFile::ExtractClassAndFunctionInfo(Function *func)
     });
 }
 
-void AbcFile::ExtractClassInheritInfo(const Function *func) const
+void AbcFile::ExtractClassInheritInfo(Function *func) const
 {
     auto &graph = func->GetGraph();
     graph.VisitAllInstructions([&](const Inst &inst) {
@@ -762,7 +773,7 @@ compiler::Graph *AbcFile::GenerateFunctionGraph(const panda_file::MethodDataAcce
     return graph;
 }
 
-ResolveResult AbcFile::ResolveInstCommon(const Function *func, Inst inst) const
+ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
 {
     auto type = inst.GetType();
     switch (type) {
@@ -863,9 +874,13 @@ ResolveResult AbcFile::ResolveInstCommon(const Function *func, Inst inst) const
             return ResolveInstCommon(func, stglobal_input0);
         }
         case InstType::OPCODE_PHI: {
-            // TODO(wangyantian): only the first path is considered for now, what about other paths?
-            Inst phi_input0 = inst.GetInputInsts()[0];
-            return ResolveInstCommon(func, phi_input0);
+            // TODO: only the next unvisited path is considered for now, what about other paths?
+            // TODO: when all inputs of the phi instruction contain a path to the phi instruction itself,
+            //  the current solution still causes infinite recursion and stack overflow. However, this case
+            //  should not occur in real-world applications. However, the following part needs to be redesigned
+            //  when encountering such scenarios.
+            auto phi_input_idx = func->GetAndUpdateToVisitInputForInst(inst);
+            return ResolveInstCommon(func, inst.GetInputInsts()[phi_input_idx]);
         }
         // don't deal with the situation that func obj comes from parameter or the output of another call inst
         default: {

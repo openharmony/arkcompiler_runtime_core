@@ -76,6 +76,11 @@ uint32_t Inst::GetPc() const
     return inst_->GetPc();
 }
 
+uint32_t Inst::GetInstId() const
+{
+    return inst_->GetId();
+}
+
 BasicBlock Inst::GetBasicBlock() const
 {
     return BasicBlock(inst_->GetBasicBlock());
