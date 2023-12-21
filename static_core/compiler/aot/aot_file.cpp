@@ -122,6 +122,14 @@ void AotFile::InitializeGot(RuntimeInterface *runtime)
             case AotSlotType::COMMON_SLOT:
                 table[0] = 0;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 break;
+            case AotSlotType::DIRECT_EP_SLOT: {
+                static constexpr unsigned IMM_HALF_BITS = sizeof(decltype(table)) * BITS_PER_BYTE / 2U;
+                auto shifted_intrinsic_id = table[0];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                auto intrinsic_id = shifted_intrinsic_id >> IMM_HALF_BITS;
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                table[0] = runtime->GetIntrinsicDirectAddress(static_cast<RuntimeInterface::IntrinsicId>(intrinsic_id));
+                break;
+            }
             default:
                 UNREACHABLE();
                 break;

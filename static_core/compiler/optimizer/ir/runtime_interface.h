@@ -1107,6 +1107,11 @@ public:
         return 0;
     }
 
+    virtual uintptr_t GetIntrinsicDirectAddress([[maybe_unused]] IntrinsicId unused) const
+    {
+        return 0;
+    }
+
     uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const
     {
         return cross_values::GetManagedThreadEntrypointOffset(arch, panda::EntrypointId(static_cast<uint8_t>(id)));

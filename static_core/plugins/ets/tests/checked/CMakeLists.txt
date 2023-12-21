@@ -76,7 +76,7 @@ function(panda_add_checked_test_ets)
     endif()
     set(OPTIONS "--load-runtimes=ets" "--run-gc-in-place" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
 
-    if (PANDA_LLVM_AOT)
+    if (PANDA_LLVMAOT)
         set(WITH_LLVM "--with-llvm")
     endif()
 

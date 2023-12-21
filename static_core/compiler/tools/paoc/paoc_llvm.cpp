@@ -46,7 +46,7 @@ Paoc::LLVMCompilerStatus PaocLLVM::TryLLVM(CompilingContext *ctx)
 
         // In normal workflow LLVM is not chosen only when monitors are unbalanced
         // In safe mode - LLVM is used only for CanCompile graphs
-        bool use_llvm = llvmbackend::OPTIONS.IsLlvmSafemode() ? can_compile : monitors_correct;
+        bool use_llvm = llvmaot::OPTIONS.IsLlvmaotSafemode() ? can_compile : monitors_correct;
         if (use_llvm) {
             if (AddGraphToLLVM(ctx)) {
                 return LLVMCompilerStatus::COMPILED;
@@ -55,13 +55,13 @@ Paoc::LLVMCompilerStatus PaocLLVM::TryLLVM(CompilingContext *ctx)
             return LLVMCompilerStatus::SKIP;
         }
         ASSERT(!can_compile);
-    } else if (!llvmbackend::OPTIONS.IsLlvmAllowBreakage() || !ShouldIgnoreFailures()) {
+    } else if (!llvmaot::OPTIONS.IsLlvmaotAllowBreakage() || !ShouldIgnoreFailures()) {
         LOG_PAOC(ERROR) << can.Error() << "\n";
         return LLVMCompilerStatus::ERROR;
     }
 
     // Check if fallback allowed
-    if (llvmbackend::OPTIONS.IsLlvmFallback()) {
+    if (llvmaot::OPTIONS.IsLlvmaotFallback()) {
         return LLVMCompilerStatus::FALLBACK;
     }
     return LLVMCompilerStatus::SKIP;
@@ -74,7 +74,7 @@ bool PaocLLVM::EndLLVM()
     if (!ShouldIgnoreFailures() && llvm_aot_compiler_->IsIrFailed()) {
         return false;
     }
-    if (!llvmbackend::OPTIONS.IsLlvmFallback() && !llvm_aot_compiler_->HasCompiledCode()) {
+    if (!llvmaot::OPTIONS.IsLlvmaotFallback() && !llvm_aot_compiler_->HasCompiledCode()) {
         return false;
     }
     return true;
@@ -94,7 +94,7 @@ void PaocLLVM::PrepareLLVM(const panda::Span<const char *> &args)
         output_file = GetPaocOptions()->GetPaocBootOutput();
     }
     llvm_aot_compiler_ =
-        llvmbackend::CreateLLVMAotCompiler(GetRuntime(), GetCodeAllocator(), GetAotBuilder(), cmdline, output_file);
+        llvmaot::CreateLLVMAotCompiler(GetRuntime(), GetCodeAllocator(), GetAotBuilder(), cmdline, output_file);
 }
 
 bool PaocLLVM::AddGraphToLLVM(CompilingContext *ctx)
@@ -103,7 +103,7 @@ bool PaocLLVM::AddGraphToLLVM(CompilingContext *ctx)
         GetAotBuilder()->AddMethodHeader(ctx->method, ctx->index);
         return true;
     }
-    if (!llvmbackend::OPTIONS.IsLlvmAllowBreakage() || !ShouldIgnoreFailures()) {
+    if (!llvmaot::OPTIONS.IsLlvmaotAllowBreakage() || !ShouldIgnoreFailures()) {
         LOG_PAOC(FATAL) << "LLVM function creation was broken!\n";
     }
     return false;
@@ -111,14 +111,14 @@ bool PaocLLVM::AddGraphToLLVM(CompilingContext *ctx)
 
 void PaocLLVM::ValidateExtraOptions()
 {
-    auto llvm_options_err = panda::llvmbackend::OPTIONS.Validate();
+    auto llvmaot_options_err = panda::llvmaot::OPTIONS.Validate();
 #ifdef NDEBUG
-    if (!llvmbackend::OPTIONS.GetLlvmBreakIrRegex().empty()) {
-        LOG_PAOC(FATAL) << "--llvm-break-ir-regex is available only in debug builds";
+    if (!llvmaot::OPTIONS.GetLlvmaotBreakIrRegex().empty()) {
+        LOG_PAOC(FATAL) << "--llvmaot-break-ir-regex is available only in debug builds";
     }
 #endif
-    if (llvm_options_err) {
-        LOG_PAOC(FATAL) << llvm_options_err.value().GetMessage();
+    if (llvmaot_options_err) {
+        LOG_PAOC(FATAL) << llvmaot_options_err.value().GetMessage();
     }
 }
 

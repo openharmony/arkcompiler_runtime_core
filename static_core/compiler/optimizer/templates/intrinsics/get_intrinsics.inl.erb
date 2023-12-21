@@ -166,3 +166,28 @@ uintptr_t PandaRuntimeInterface::GetIntrinsicAddress(bool runtime_call, [[maybe_
         UNREACHABLE();
     }
 }
+
+// NOLINTNEXTLINE(readability-function-size)
+uintptr_t PandaRuntimeInterface::GetIntrinsicDirectAddress(PandaRuntimeInterface::IntrinsicId id) const {
+    switch (id) {
+% Compiler::intrinsics.each do |intrinsic|
+%   next if intrinsic.is_stub
+    case IntrinsicId::<%= intrinsic.entrypoint_name %>:
+%   if !intrinsic.has_impl?
+        return 0;
+%     next
+%   end
+%   if intrinsic.private == true
+#ifndef PANDA_PRODUCT_BUILD
+%   end
+        return reinterpret_cast<uintptr_t>(<%= intrinsic.impl %>);
+%   if intrinsic.private == true
+#else
+        return reinterpret_cast<uintptr_t>(intrinsics::UnknownIntrinsic);
+#endif  // PANDA_PRODUCT_BUILD
+%   end
+% end
+    default:
+        return GetIntrinsicAddress(false, SourceLanguage::INVALID, id);
+    }
+}

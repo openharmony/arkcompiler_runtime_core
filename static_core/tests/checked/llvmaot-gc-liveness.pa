@@ -21,9 +21,9 @@
 
 #! CHECKER      Definition with phi input in the same block
 #! RUN_LLVM     options: "--compiler-regex=_GLOBAL::liveness_0 \
-#!              --llvm-gc-check=true --llvm-dump-after"
+#!              --llvmaot-gc-check=true --llvmaot-dump-after"
 #! READ_FILE    "console.out"
-#! INST         /%v5[0-9]* = phi ptr addrspace\(271\).* \[ %v9[0-9]*.rel.*, .* \]/
+#! INST         /%v5[0-9]* = phi ptr addrspace\(1\).* \[ %v9[0-9]*.rel.*, .* \]/
 .function i32 liveness_0() {
     newobj v0, A
 backedge:
@@ -39,7 +39,7 @@ exit:
 
 #! CHECKER      Do not propagate null value as a phi input
 #! RUN_LLVM     options: "--compiler-regex=_GLOBAL::liveness_1 \
-#!              --llvm-gc-check=true --llvm-dump-after"
+#!              --llvmaot-gc-check=true --llvmaot-dump-after"
 #! READ_FILE    "console.out"
 #! INST_NOT     "(null, null)"
 .function i32 liveness_1() {

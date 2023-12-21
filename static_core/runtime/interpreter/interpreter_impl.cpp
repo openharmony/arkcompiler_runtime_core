@@ -25,7 +25,7 @@
 
 extern "C" void ExecuteImplFast(void *, void *, void *, void *);
 extern "C" void ExecuteImplFastEH(void *, void *, void *, void *);
-#ifdef PANDA_LLVM_INTERPRETER
+#ifdef PANDA_LLVMAOT
 extern "C" void ExecuteImplFast_LLVM(void *, void *, void *, void *);    // NOLINT(readability-identifier-naming)
 extern "C" void ExecuteImplFastEH_LLVM(void *, void *, void *, void *);  // NOLINT(readability-identifier-naming)
 #endif
@@ -52,7 +52,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
             ASSERT(interpreter_type_str == "cpp");
         }
         if (!was_set) {
-#ifndef PANDA_LLVM_INTERPRETER
+#ifndef PANDA_LLVMAOT
             if (interpreter_type == InterpreterType::LLVM) {
                 interpreter_type = InterpreterType::IRTOC;
             }
@@ -83,7 +83,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     }
 #endif
     if (interpreter_type == InterpreterType::LLVM) {
-#ifdef PANDA_LLVM_INTERPRETER
+#ifdef PANDA_LLVMAOT
         LOG(DEBUG, RUNTIME) << "Setting up LLVM Irtoc dispatch table";
         auto dispath_table = SetupLLVMDispatchTableImpl();
         if (jump_to_eh) {

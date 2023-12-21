@@ -101,8 +101,8 @@ def GenerateStringEquals(lang, dynamic, compression)
     Label(:Long)
         unroll := Compare(length, 64).GE.b
         IfImm(unroll).Imm(0).SrcType("DataType::BOOL").NE.b {
-            LiveOut(str1).DstReg(regmap[:arg0]).ref
-            LiveOut(str2).DstReg(regmap[:arg1]).ref
+            LiveOut(Cast(str1).SrcType("DataType::REFERENCE").ptr).DstReg(regmap[:arg0]).ptr
+            LiveOut(Cast(str2).SrcType("DataType::REFERENCE").ptr).DstReg(regmap[:arg1]).ptr
             entrypoint_id = "#{lang.empty? ? '' : lang.upcase + '_'}STRING_EQUALS_UNROLL" + (compression ? "_COMPRESSED" : "");
             entrypoint_offset = get_entrypoint_offset(entrypoint_id)
             Intrinsic(:TAIL_CALL).AddImm(entrypoint_offset).Terminator.v0id

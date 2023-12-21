@@ -138,9 +138,9 @@ if (enable_irtoc) {
       sdk_libc_secshared_dep,
     ]
 
-    if (is_llvmbackend) {
-      configs += [ "$ark_root/libllvmbackend:libllvmbackend_public_config" ]
-      deps += [ "$ark_root/libllvmbackend:libllvmbackend" ]
+    if (is_llvmaot) {
+      configs += [ "$ark_root/libllvmaot:libllvmaot_public_config" ]
+      deps += [ "$ark_root/libllvmaot:libllvmaot" ]
     }
 
     libs = platform_libs
@@ -172,15 +172,15 @@ if (enable_irtoc) {
     ]
     deps = [ ":irtoc(${host_toolchain})" ]
 
-    if (is_llvmbackend) {
+    if (is_llvmaot) {
       outputs += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
       args += [
         "--irtoc-output-llvm",
         rebase_path("$ark_root_gen_dir/generated/irtoc_llvm_lib.o"),
-        "--llvm-inline-module",
-        rebase_path("$root_gen_dir/libllvmbackend/interpreter_inline.bc"),
+        "--llvmaot-inline-module",
+        rebase_path("$root_gen_dir/libllvmaot/interpreter_inline.bc"),
       ]
-      deps += [ "$ark_root/libllvmbackend:irtoc_int_llvm_inl_module" ]
+      deps += [ "$ark_root/libllvmaot:irtoc_int_llvm_inl_module" ]
     }
   }
 }

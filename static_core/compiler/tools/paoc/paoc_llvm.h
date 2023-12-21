@@ -17,7 +17,7 @@
 #define PANDA_PAOC_LLVM_H
 
 #include "llvm_compiler_creator.h"
-#include "llvm_options.h"
+#include "llvmaot_options.h"
 #include "paoc.h"
 
 namespace panda::compiler {
@@ -30,7 +30,7 @@ class PaocLLVM : public Paoc {
 protected:
     void AddExtraOptions(PandArgParser *parser) override
     {
-        panda::llvmbackend::OPTIONS.AddOptions(parser);
+        panda::llvmaot::OPTIONS.AddOptions(parser);
     }
     void ValidateExtraOptions() override;
     void Clear(panda::mem::InternalAllocatorPtr allocator) override;
@@ -46,7 +46,7 @@ private:
     bool AddGraphToLLVM(CompilingContext *ctx);
 
 private:
-    std::unique_ptr<llvmbackend::CompilerInterface> llvm_aot_compiler_ {nullptr};
+    std::unique_ptr<compiler::AotCompilerInterface> llvm_aot_compiler_ {nullptr};
 };
 
 }  // namespace panda::paoc

@@ -25,7 +25,7 @@ if(PANDA_WITH_BENCHMARKS)
 
     if(PANDA_TARGET_ARM64 OR PANDA_TARGET_AMD64)
         list(APPEND INTERPRETER_ARGUMENTS_LIST "irtoc")
-        if (PANDA_LLVM_INTERPRETER)
+        if (PANDA_LLVMAOT)
             list(APPEND INTERPRETER_ARGUMENTS_LIST "llvm")
         endif()
     endif()

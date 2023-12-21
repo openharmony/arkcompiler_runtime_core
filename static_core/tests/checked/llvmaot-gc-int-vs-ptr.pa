@@ -19,11 +19,11 @@
 .function void ext_func(A a0) <external>
 
 #! CHECKER        Check optimized reference in statepoint
-#! RUN_LLVM       options: "--compiler-regex=_GLOBAL::foo_ref --llvm-dump-after"
+#! RUN_LLVM       options: "--compiler-regex=_GLOBAL::foo_ref --llvmaot-dump-after"
 #! READ_FILE      "console.out"
 #! LLVM_METHOD    /define.*\"void _GLOBAL::foo_ref.*\d+\"/
-#! INST           /"gc-live"\(ptr addrspace\(271\) %a0[^,]*, ptr addrspace\(271\) %v4[^,]*\)/
-#! INST_NEXT      /"gc-live"\(ptr addrspace\(271\) %a0[^,]*, ptr addrspace\(271\) %v4[^,]*\)/
+#! INST           /"gc-live"\(ptr addrspace\(1\) %a0[^,]*, ptr addrspace\(1\) %v4[^,]*\)/
+#! INST_NEXT      /"gc-live"\(ptr addrspace\(1\) %a0[^,]*, ptr addrspace\(1\) %v4[^,]*\)/
 #! INST_NEXT_NOT  "gc-live"
 .function void foo_ref(A a0) {
     ldobj.obj a0, A.fref
@@ -35,11 +35,11 @@
 }
 
 #! CHECKER        Check no reference in statepoint
-#! RUN_LLVM       options: "--compiler-regex=_GLOBAL::foo_int --llvm-dump-after"
+#! RUN_LLVM       options: "--compiler-regex=_GLOBAL::foo_int --llvmaot-dump-after"
 #! READ_FILE      "console.out"
 #! LLVM_METHOD    /define.*\"void _GLOBAL::foo_int.*\d+\"/
-#! INST           /"gc-live"\(ptr addrspace\(271\) %a0[^,]*\)/
-#! INST_NEXT      /"gc-live"\(ptr addrspace\(271\) %a0[^,]*\)/
+#! INST           /"gc-live"\(ptr addrspace\(1\) %a0[^,]*\)/
+#! INST_NEXT      /"gc-live"\(ptr addrspace\(1\) %a0[^,]*\)/
 #! INST_NEXT_NOT  "gc-live"
 .function void foo_int(A a0) {
     ldobj a0, A.fint

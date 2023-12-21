@@ -209,25 +209,23 @@ def main
   end
 
   if Options.ir_api == 'ir-constructor'
-    raise 'Provide one --output file to generate intepreter handler IR for stock compiler. Or provide two --output files delimited by \':\' to generate IR for stock compiler (the first file), and llvm compiler (the second file)' unless Options.output_files.size <= 2
+    raise 'Provide two files for generated IR Constructor code' unless Options.output_files.size == 2
     Output.setup Options.output_files[0]
     Output.println(FILE_BEGIN)
     functions.reject(&:enable_builder).each do |function|
       function.emit_ir ""
     end
     Output.println(FILE_END)
-    if Options.output_files.size == 2
-      Output.setup Options.output_files[1]
-      interp_llvm_functions = llvm_functions.reject(&:enable_builder).select do |f|
-        f.mode.include?(:Interpreter) || f.mode.include?(:InterpreterEntry)
+    Output.setup Options.output_files[1]
+    interp_llvm_functions = llvm_functions.reject(&:enable_builder).select do |f|
+      f.mode.include?(:Interpreter) || f.mode.include?(:InterpreterEntry)
+    end
+    unless interp_llvm_functions.empty?
+      Output.println(FILE_BEGIN)
+      interp_llvm_functions.each do |function|
+        function.emit_ir '_LLVM'
       end
-      unless interp_llvm_functions.empty?
-        Output.println(FILE_BEGIN)
-        interp_llvm_functions.each do |function|
-          function.emit_ir '_LLVM'
-        end
-        Output.println(FILE_END)
-      end
+      Output.println(FILE_END)
     end
   elsif Options.ir_api == 'ir-builder'
     builder_functions = functions.select(&:enable_builder)

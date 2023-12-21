@@ -409,58 +409,7 @@ if ((NOT PANDA_TARGET_WINDOWS) AND (NOT PANDA_ENABLE_ADDRESS_SANITIZER) AND (NOT
     panda_set_flag(PANDA_USE_CUSTOM_SIGNAL_STACK)
 endif()
 
-option(PANDA_LLVM_BACKEND "Enable LLVM backend for Ark compiler" OFF)
-
-if (NOT PANDA_LLVM_BACKEND)
-    if (PANDA_LLVM_INTERPRETER)
-        message(FATAL_ERROR "PANDA_LLVM_INTERPRETER can't be enabled without PANDA_LLVM_BACKEND")
-    endif()
-
-    if (PANDA_LLVM_FASTPATH)
-        message(FATAL_ERROR "PANDA_LLVM_FASTPATH is temporarily disabled")
-    endif()
-
-    if (PANDA_LLVM_AOT)
-        message(FATAL_ERROR "PANDA_LLVM_AOT is temporarily disabled")
-    endif()
-endif()
-
-if (NOT (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64))
-    set(PANDA_LLVM_BACKEND false)
-endif()
-
-# NB: LLVM_AOT option now relates only to '--paoc-mode=llvm' and is temporarily disabled
-# One have to enable the option below to get `--interpreter-mode=llvm` working
-if (PANDA_LLVM_BACKEND)
-    # Enabling PANDA_LLVM_BACKEND enables IRTOC Interpreter handlers compilation functions.
-    if (NOT DEFINED PANDA_LLVM_INTERPRETER)
-        set(PANDA_LLVM_INTERPRETER ON)
-    endif()
-
-    # ======= LLVM_FASTPATH functionality is temporarily disabled =========
-    set(PANDA_LLVM_FASTPATH OFF)
-
-    # ======= LLVM_AOT functionality is temporarily disabled =========
-    set(PANDA_LLVM_AOT OFF)
-
-    # Internal flag, merged from irtoc: FASTPATH and INTERPRETER
-    if (PANDA_LLVM_FASTPATH OR PANDA_LLVM_INTERPRETER)
-        panda_set_flag(PANDA_LLVM_IRTOC)
-    endif()
-
-    # PANDA_LLVM_AOT means either:
-    # 1. We're in cross-build, and llvm aot support is requested for the cross-build target.
-    #    For example, host is amd64, and cross target is aarch64, then we'll add llvm aot
-    #    support for the ark_aot compiled for aarch64.
-    # 2. We're in non cross-build, and llvm aot support is requested
-    #
-    # PANDA_LLVM_IRTOC AND NOT CMAKE_CROSS_COMPILING covers two scenarios:
-    # 1. Non cross-build, IRTOC support is requested
-    # 2. Cross-build, IRTOC support is requested but we'll require LLVM only for HOST_TOOLS
-    if (PANDA_LLVM_AOT OR (PANDA_LLVM_IRTOC AND NOT CMAKE_CROSSCOMPILING))
-        panda_set_flag(PANDA_BUILD_LLVM_BACKEND)
-    endif()
-endif()
+option(PANDA_LLVMAOT "Enable LLVM backend for AOT/Irtoc" OFF)
 
 panda_promote_to_definitions(
     PANDA_COMPILER_TARGET_X86
@@ -469,10 +418,7 @@ panda_promote_to_definitions(
     PANDA_COMPILER_TARGET_AARCH64
     PANDA_COMPILER_ENABLE
     PANDA_QEMU_BUILD
-    PANDA_LLVM_BACKEND
-    PANDA_LLVM_FASTPATH
-    PANDA_LLVM_INTERPRETER
-    PANDA_LLVM_AOT
+    PANDA_LLVMAOT
 )
 
 if (PANDA_USE_PREBUILT_TARGETS)
@@ -524,10 +470,7 @@ message(STATUS "PANDA_PGO_OPTIMIZE                     = ${PANDA_PGO_OPTIMIZE}")
 message(STATUS "PANDA_PRODUCT_BUILD                    = ${PANDA_PRODUCT_BUILD}")
 message(STATUS "PANDA_ENABLE_RELAYOUT_PROFILE          = ${PANDA_ENABLE_RELAYOUT_PROFILE}")
 message(STATUS "PANDA_QEMU_BUILD                       = ${PANDA_QEMU_BUILD}")
-message(STATUS "PANDA_LLVM_BACKEND                     = ${PANDA_LLVM_BACKEND}")
-message(STATUS "PANDA_LLVM_INTERPRETER                 = ${PANDA_LLVM_INTERPRETER}")
-message(STATUS "PANDA_LLVM_FASTPATH                    = ${PANDA_LLVM_FASTPATH}")
-message(STATUS "PANDA_LLVM_AOT                         = ${PANDA_LLVM_AOT}")
+message(STATUS "PANDA_LLVMAOT                          = ${PANDA_LLVMAOT}")
 message(STATUS "PANDA_ENABLE_CCACHE                    = ${PANDA_ENABLE_CCACHE}")
 message(STATUS "PANDA_USE_CUSTOM_SIGNAL_STACK          = ${PANDA_USE_CUSTOM_SIGNAL_STACK}")
 message(STATUS "PANDA_USE_PREBUILT_TARGETS             = ${PANDA_USE_PREBUILT_TARGETS}")

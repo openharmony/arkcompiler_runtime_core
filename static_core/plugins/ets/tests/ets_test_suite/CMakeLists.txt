@@ -47,7 +47,7 @@ function(add_ets_test test_suite)
         run_aot_ets_code(aot ${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
     endif()
 
-    if ("LLVMAOT" IN_LIST ARG_MODE AND PANDA_LLVM_AOT)
+    if ("LLVMAOT" IN_LIST ARG_MODE AND PANDA_LLVMAOT)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-llvmaot)
         LIST(APPEND targets ${target})
         run_aot_ets_code(llvm ${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})

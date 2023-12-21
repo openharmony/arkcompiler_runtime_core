@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #! CHECKER      LLVM AOT inlines functions from other split modules
-#! RUN_LLVM     options: "--llvm-methods-per-module=1 --llvm-dump-after"
+#! RUN_LLVM     options: "--llvmaot-methods-per-module=1 --llvmaot-dump-after"
 #! READ_FILE    "console.out"
 #! LLVM_METHOD  /define.*\"i32 _GLOBAL::main.*\d+\"/
 #! RUN          entry: "_GLOBAL::main"

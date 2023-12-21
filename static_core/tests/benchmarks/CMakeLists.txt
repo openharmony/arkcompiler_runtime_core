@@ -32,11 +32,39 @@ define_property(SOURCE
                 PROPERTY panda_benchmark_pool_limit
                 BRIEF_DOCS "Object pool limit for this benchmark"
                 FULL_DOCS "Object pool limit for this benchmark in bytes. Set 0 to use default value")
+define_property(SOURCE
+                PROPERTY panda_benchmark_run_interpreter
+                BRIEF_DOCS "Run this benchmark with interpreter?"
+                FULL_DOCS  "Run this benchmark with interpreter?")
+define_property(SOURCE
+                PROPERTY panda_benchmark_run_irtoc
+                BRIEF_DOCS "Run this benchmark with Irtoc interpreter?"
+                FULL_DOCS  "Run this benchmark with Irtoc interpreter?")
+define_property(SOURCE
+                PROPERTY panda_benchmark_run_enforce_jit_compiler
+                BRIEF_DOCS "Run this benchmark with enforced JIT compiler?"
+                FULL_DOCS  "Run this benchmark with enforced JIT compiler?")
+define_property(SOURCE
+                PROPERTY panda_benchmark_run_gc_type
+                BRIEF_DOCS "Type of GC?"
+                FULL_DOCS  "Type of GC?")
+define_property(SOURCE
+                PROPERTY panda_benchmark_run_aot
+                BRIEF_DOCS "Run with enabled AOT?"
+                FULL_DOCS  "Run with enabled AOT?")
+define_property(SOURCE
+                PROPERTY panda_benchmark_run_default
+                BRIEF_DOCS "Run in default mode?"
+                FULL_DOCS  "Run in default mode?")
+define_property(SOURCE
+                PROPERTY panda_benchmark_run_llvmaot
+                BRIEF_DOCS "Run with enabled LLVMAOT?"
+                FULL_DOCS  "Run with enabled LLVMAOT?")
 
 set(PANDA_BENCHMARKS)
 set(PANDA_BENCHMARKS_DIR "${CMAKE_CURRENT_LIST_DIR}")
 function(panda_add_benchmark
-         name vmb_name stack_limit pool_limit)
+         name vmb_name stack_limit pool_limit interpreter irtoc enforce_jit_compiler gc_type aot default llvmaot)
     # Allow to write something like this: 64 * 1024 * 1024
     math(EXPR stack_limit "${stack_limit}")
     math(EXPR pool_limit "${pool_limit}")
@@ -48,7 +76,13 @@ function(panda_add_benchmark
         panda_benchmark_vmb_name        "${vmb_name}"
         panda_benchmark_stack_limit     "${stack_limit}"
         panda_benchmark_pool_limit      "${pool_limit}"
-    )
+        panda_benchmark_run_interpreter ${interpreter}
+        panda_benchmark_run_irtoc       ${irtoc}
+        panda_benchmark_run_enforce_jit_compiler ${enforce_jit_compiler}
+        panda_benchmark_run_gc_type   ${gc_type}
+        panda_benchmark_run_aot       ${aot}
+        panda_benchmark_run_default   ${default}
+        panda_benchmark_run_llvmaot   ${llvmaot})
 
     list(APPEND PANDA_BENCHMARKS ${file_name})
     set (PANDA_BENCHMARKS ${PANDA_BENCHMARKS} PARENT_SCOPE)
@@ -59,21 +93,34 @@ endfunction()
 # * 2. VMB benchmark name; if empty, not a part of VMB yet
 # * 3. Stack limit
 # * 4. Object pool size
+# * 5. Run with interpreter - without compiler at all?
+# * 6. Run with Irtoc interpreter?
+# * 7. Run with enforced JIT compiler?
+# * 8. Gc type (default - for default gc)
+# * 9. Run in AOT mode?
+# * 10. Run in default mode?
+# * 11. Run in LLVMAOT mode?
 # TODO: Make all benchmarks into VMB
-#                   1.name                     2.vmb_name             3.stack_limit       4.pool_limit
-panda_add_benchmark("3d-morph"                 "Morph3d"              0                   0)
-panda_add_benchmark("access-binary-trees"      "AccessBinaryTrees"    0                   0)
-panda_add_benchmark("access-fannkuch"          "AccessFannkuch"       0                   0)
-panda_add_benchmark("access-nbody"             "AccessNBody"          0                   0)
-panda_add_benchmark("access-nsieve"            "AccessNSieve"         0                   0)
-panda_add_benchmark("bitops-3bit-bits-in-byte" "Bitops3BitBitsInByte" 0                   0)
-panda_add_benchmark("bitops-bits-in-byte"      "BitopsBitsInByte"     0                   0)
-panda_add_benchmark("bitops-bitwise-and"       "BitopsBitwiseAnd"     0                   0)
-panda_add_benchmark("bitops-nsieve-bits"       "BitopsNSieveBits"     0                   0)
-panda_add_benchmark("controlflow-recursive"    "ControlFlowRecursive" "384 * 1024 * 1024" 0)
-panda_add_benchmark("math-cordic"              "MathCordic"           0                   0)
-panda_add_benchmark("math-partial-sums"        "MathPartialSums"      0                   0)
-panda_add_benchmark("math-spectral-norm"       "MathSpectralNorm"     0                   0)
+#                    1.name                     2.vmb_name            3.stack_limit       4.pool_limit        5.interpreter
+#                    |                          |                     |                   |                   |    6.irtoc
+#                    |                          |                     |                   |                   |    |    7.enforce_jit_compiler
+#                    |                          |                     |                   |                   |    |    |    8.gc_type
+#                    |                          |                     |                   |                   |    |    |    |       9.aot
+#                    |                          |                     |                   |                   |    |    |    |       |    10.default
+#                    |                          |                     |                   |                   |    |    |    |       |    |    11.llvmaot
+panda_add_benchmark("3d-morph"                 "Morph3d"              0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("access-binary-trees"      "AccessBinaryTrees"    0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("access-fannkuch"          "AccessFannkuch"       0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("access-nbody"             "AccessNBody"          0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("access-nsieve"            "AccessNSieve"         0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("bitops-3bit-bits-in-byte" "Bitops3BitBitsInByte" 0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("bitops-bits-in-byte"      "BitopsBitsInByte"     0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("bitops-bitwise-and"       "BitopsBitwiseAnd"     0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("bitops-nsieve-bits"       "BitopsNSieveBits"     0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("controlflow-recursive"    "ControlFlowRecursive" "384 * 1024 * 1024" 0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("math-cordic"              "MathCordic"           0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("math-partial-sums"        "MathPartialSums"      0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
+panda_add_benchmark("math-spectral-norm"       "MathSpectralNorm"     0                   0                   TRUE TRUE TRUE default TRUE TRUE TRUE)
 
 add_custom_target(benchmarks-panda-assembly-interpreter
                   COMMENT "Running benchmarks in Panda Assembly in interpreter")
@@ -83,6 +130,8 @@ add_custom_target(benchmarks-panda-assembly-enforce-jit-compiler
                   COMMENT "Running benchmarks in Panda Assembly with enforced JIT")
 add_custom_target(benchmarks-panda-assembly-aot
                   COMMENT "Running benchmarks in Panda Assembly with AOT")
+add_custom_target(benchmarks-panda-assembly-llvmaot
+                  COMMENT "Running benchmarks in Panda Assembly with LLVMAOT")
 add_custom_target(benchmarks-panda-assembly-default
                   COMMENT "Running benchmarks in Panda Assembly")
 
@@ -91,6 +140,7 @@ add_dependencies(benchmarks
     benchmarks-panda-assembly-irtoc
     benchmarks-panda-assembly-enforce-jit-compiler
     benchmarks-panda-assembly-aot
+    benchmarks-panda-assembly-llvmaot
     benchmarks-panda-assembly-default
 )
 
@@ -99,10 +149,14 @@ add_custom_target(benchmarks-panda-assembly-aot-stats
                   COMMENT "Gathering compiler's statistics in benchmarks-AOT")
 
 function(add_benchmark
-         common_target_basename name file stack_limit pool_limit)
+         common_target_basename name file interpreter irtoc enforce_jit_compiler stack_limit pool_limit gc_type aot default llvmaot)
 
     if (stack_limit)
         set(PANDA_RUN_PREFIX prlimit --stack=${stack_limit} ${PANDA_RUN_PREFIX})
+    endif()
+
+    if (NOT "${gc_type}" STREQUAL "default")
+        set(ENABLE_GC_OPTION "--gc-type=${gc_type}")
     endif()
 
     if (pool_limit)
@@ -126,19 +180,21 @@ function(add_benchmark
 
     set(subdir_prefix "benchmarks/${common_target_basename}")
 
-    panda_add_asm_file(TARGET "${name}-interpreter"
-        FILE "${file}"
-        LANGUAGE_CONTEXT "${source_language}"
-        SUBDIR "${subdir_prefix}"
-        ENTRY "${entry_point}"
-        TIMEOUT "${benchmark_timeout}"
-        SKIP_BUILD ${skip_build}
-        DEPENDS ${deps}
-        AOT_MODE FALSE
-        RUNTIME_OPTIONS ${RUNTIME_OPTIONS} "--compiler-enable-jit=false" "--limit-standard-alloc=true" "--interpreter-type=cpp")
-    add_dependencies(${common_target_basename}-interpreter "${name}-interpreter")
+    if (interpreter)
+        panda_add_asm_file(TARGET "${name}-interpreter"
+            FILE "${file}"
+            LANGUAGE_CONTEXT "${source_language}"
+            SUBDIR "${subdir_prefix}"
+            ENTRY "${entry_point}"
+            TIMEOUT "${benchmark_timeout}"
+            SKIP_BUILD ${skip_build}
+            DEPENDS ${deps}
+            AOT_MODE FALSE
+            RUNTIME_OPTIONS ${ENABLE_GC_OPTION} ${RUNTIME_OPTIONS} "--compiler-enable-jit=false" "--limit-standard-alloc=true")
+        add_dependencies(${common_target_basename}-interpreter "${name}-interpreter")
+    endif()
 
-    if (PANDA_TARGET_ARM64 OR PANDA_TARGET_AMD64)
+    if (irtoc AND (PANDA_TARGET_ARM64 OR PANDA_TARGET_AMD64))
         panda_add_asm_file(TARGET "${name}-irtoc"
             FILE "${file}"
             LANGUAGE_CONTEXT "${source_language}"
@@ -150,7 +206,7 @@ function(add_benchmark
             AOT_MODE FALSE
             RUNTIME_OPTIONS ${RUNTIME_OPTIONS} "--gc-type=g1-gc" "--compiler-enable-jit=false" "--limit-standard-alloc=true" "--interpreter-type=irtoc")
         add_dependencies(${common_target_basename}-irtoc "${name}-irtoc")
-        if (PANDA_LLVM_INTERPRETER)
+        if (PANDA_LLVMAOT)
             panda_add_asm_file(TARGET "${name}-llvmirtoc"
                 FILE "${file}"
                 LANGUAGE_CONTEXT "${source_language}"
@@ -172,20 +228,22 @@ function(add_benchmark
 
     if(PANDA_COMPILER_ENABLE)
         list(APPEND deps arkcompiler)
-        panda_add_asm_file(TARGET "${name}-enforce-jit-compiler"
-            FILE "${file}"
-            LANGUAGE_CONTEXT "${source_language}"
-            SUBDIR "${subdir_prefix}"
-            ENTRY "${entry_point}"
-            TIMEOUT "${benchmark_timeout}"
-            SKIP_BUILD ${skip_build}
-            DEPENDS ${deps}
-            AOT_MODE FALSE
-            COMPILER_OPTIONS ${CUR_COMPILER_OPTIONS}
-            RUNTIME_OPTIONS ${RUNTIME_OPTIONS} "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--limit-standard-alloc=true")
-        add_dependencies(${common_target_basename}-enforce-jit-compiler "${name}-enforce-jit-compiler")
+        if (enforce_jit_compiler)
+            panda_add_asm_file(TARGET "${name}-enforce-jit-compiler"
+                FILE "${file}"
+                LANGUAGE_CONTEXT "${source_language}"
+                SUBDIR "${subdir_prefix}"
+                ENTRY "${entry_point}"
+                TIMEOUT "${benchmark_timeout}"
+                SKIP_BUILD ${skip_build}
+                DEPENDS ${deps}
+                AOT_MODE FALSE
+                COMPILER_OPTIONS ${CUR_COMPILER_OPTIONS}
+                RUNTIME_OPTIONS ${ENABLE_GC_OPTION} ${RUNTIME_OPTIONS} "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--limit-standard-alloc=true")
+            add_dependencies(${common_target_basename}-enforce-jit-compiler "${name}-enforce-jit-compiler")
+        endif()
 
-        if (PANDA_TARGET_ARM64 OR PANDA_TARGET_AMD64)
+        if (aot AND (PANDA_TARGET_ARM64 OR PANDA_TARGET_AMD64))
             panda_add_asm_file(TARGET "${name}-aot"
                 FILE "${file}"
                 LANGUAGE_CONTEXT "${source_language}"
@@ -197,11 +255,12 @@ function(add_benchmark
                 AOT_MODE TRUE
                 AOT_STATS TRUE
                 AOT_COMPILER "aot"
-                RUNTIME_OPTIONS ${RUNTIME_OPTIONS} "--compiler-enable-jit=true")
+                AOT_GC_OPTION ${ENABLE_GC_OPTION}
+                RUNTIME_OPTIONS ${ENABLE_GC_OPTION} ${RUNTIME_OPTIONS} "--compiler-enable-jit=true")
             add_dependencies(${common_target_basename}-aot "${name}-aot")
             add_dependencies(${common_target_basename}-aot-stats "${name}-aot-stats")
 
-            if (PANDA_LLVM_AOT)
+            if (PANDA_LLVMAOT AND llvmaot)
                 panda_add_asm_file(TARGET "${name}-llvmaot"
                     FILE "${file}"
                     LANGUAGE_CONTEXT "${source_language}"
@@ -212,35 +271,51 @@ function(add_benchmark
                     DEPENDS ${deps}
                     AOT_MODE TRUE
                     AOT_COMPILER "llvm"
-                    RUNTIME_OPTIONS ${RUNTIME_OPTIONS} "--compiler-enable-jit=true")
-                add_dependencies(${common_target_basename}-aot "${name}-llvmaot")
+                    AOT_GC_OPTION ${ENABLE_GC_OPTION}
+                    RUNTIME_OPTIONS ${ENABLE_GC_OPTION} ${RUNTIME_OPTIONS} "--compiler-enable-jit=true")
+                add_dependencies(${common_target_basename}-llvmaot "${name}-llvmaot")
             endif()
         endif()
 
-        panda_add_asm_file(TARGET "${name}-default"
-            FILE "${file}"
-            LANGUAGE_CONTEXT "${source_language}"
-            SUBDIR "${subdir_prefix}"
-            ENTRY "${entry_point}"
-            TIMEOUT "${benchmark_timeout}"
-            SKIP_BUILD ${skip_build}
-            DEPENDS ${deps}
-            AOT_MODE FALSE
-            COMPILER_OPTIONS ${CUR_COMPILER_OPTIONS}
-            RUNTIME_OPTIONS ${RUNTIME_OPTIONS} "--compiler-enable-jit=true")
-        add_dependencies(${common_target_basename}-default "${name}-default")
+        if (default)
+            panda_add_asm_file(TARGET "${name}-default"
+                FILE "${file}"
+                LANGUAGE_CONTEXT "${source_language}"
+                SUBDIR "${subdir_prefix}"
+                ENTRY "${entry_point}"
+                TIMEOUT "${benchmark_timeout}"
+                SKIP_BUILD ${skip_build}
+                DEPENDS ${deps}
+                AOT_MODE FALSE
+                COMPILER_OPTIONS ${CUR_COMPILER_OPTIONS}
+                RUNTIME_OPTIONS ${ENABLE_GC_OPTION} ${RUNTIME_OPTIONS} "--compiler-enable-jit=true")
+            add_dependencies(${common_target_basename}-default "${name}-default")
+        endif()
     endif()
 endfunction()
 
 foreach(benchmark ${PANDA_BENCHMARKS})
     get_source_file_property(name "${benchmark}" panda_benchmark_name)
+    get_source_file_property(interpreter "${benchmark}" panda_benchmark_run_interpreter)
+    get_source_file_property(irtoc "${benchmark}" panda_benchmark_run_irtoc)
+    get_source_file_property(gc_type "${benchmark}" panda_benchmark_run_gc_type)
+    get_source_file_property(enforce_jit_compiler "${benchmark}" panda_benchmark_run_enforce_jit_compiler)
     get_source_file_property(stack_limit "${benchmark}" panda_benchmark_stack_limit)
     get_source_file_property(pool_limit "${benchmark}" panda_benchmark_pool_limit)
+    get_source_file_property(aot "${benchmark}" panda_benchmark_run_aot)
+    get_source_file_property(default "${benchmark}" panda_benchmark_run_default)
+    get_source_file_property(llvmaot "${benchmark}" panda_benchmark_run_llvmaot)
 
     add_benchmark(benchmarks-panda-assembly "${name}" "${benchmark}"
+        ${interpreter}
+        ${irtoc}
+        ${enforce_jit_compiler}
         ${stack_limit}
         ${pool_limit}
-    )
+        ${gc_type}
+        ${aot}
+        ${default}
+        ${llvmaot})
 endforeach()
 
 # Build-time fix-up for applying most recent changes in Panda Assembly

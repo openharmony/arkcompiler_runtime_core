@@ -185,10 +185,10 @@ config("ark_config") {
   if (is_emulator) {
     defines += [ "PANDA_TARGET_EMULATOR" ]
   }
-  if (is_llvmbackend) {
+  if (is_llvmaot) {
     defines += [
-      "PANDA_LLVM_IRTOC",
-      "PANDA_LLVM_INTERPRETER",
+      "PANDA_LLVMAOT",
+      "PANDA_LLVMAOT_IR_INLINING",
     ]
   }
 

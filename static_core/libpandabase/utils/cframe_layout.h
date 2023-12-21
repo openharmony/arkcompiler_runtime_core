@@ -102,9 +102,14 @@ public:
     static constexpr size_t STACK_START_SLOT = 9;
     static constexpr size_t CALLEE_REGS_START_SLOT = STACK_START_SLOT;
 
-    // NB! Use getter below instead.
-    static constexpr size_t CALLER_REGS_START_SLOT =
-        CALLEE_REGS_START_SLOT + GetCalleeRegsCount(RUNTIME_ARCH, false) + GetCalleeRegsCount(RUNTIME_ARCH, true);
+    // NB! This 4 static constants are for cframe_test and stack_walker_test
+    // Use getters below in other code.
+    static constexpr size_t CALLEE_FP_REGS_START_SLOT =
+        CALLEE_REGS_START_SLOT + GetCalleeRegsCount(RUNTIME_ARCH, false);
+    static constexpr size_t CALLER_REGS_START_SLOT = CALLEE_FP_REGS_START_SLOT + GetCalleeRegsCount(RUNTIME_ARCH, true);
+    static constexpr size_t CALLER_FP_REGS_START_SLOT =
+        CALLER_REGS_START_SLOT + GetCallerRegsCount(RUNTIME_ARCH, false);
+    static constexpr size_t SPILLS_START_SLOT = CALLER_FP_REGS_START_SLOT + GetCallerRegsCount(RUNTIME_ARCH, true);
 
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     constexpr size_t GetCalleeRegsStartSlot() const

@@ -457,7 +457,7 @@ function(add_test_file)
 
     set(gc_types "stw" "gen-gc" "g1-gc")
     if (NOT PANDA_TARGET_ARM32) # Arm32 is not supported in the Irtoc
-        if (PANDA_LLVM_INTERPRETER)
+        if (PANDA_LLVMAOT)
             set(interp_types "cpp" "irtoc" "llvm")
         else()
             set(interp_types "cpp" "irtoc")
@@ -685,7 +685,7 @@ function(add_test_file)
             add_dependencies(${suite} ${target}-aot-cpp)
             add_dependencies(cts-aot-tests ${target}-aot-cpp)
 
-            if (PANDA_LLVM_AOT)
+            if (PANDA_LLVMAOT)
                 foreach (gc_type IN LISTS gc_types)
                     panda_add_test_run(
                         FILE "${ARG_FILE}"
@@ -701,7 +701,7 @@ function(add_test_file)
                         AOT_MODE TRUE
                         AOT_COMPILER "llvm"
                         PRLIMIT_OPTIONS "${ARG_PRLIMIT_OPTIONS}"
-                        LLVMAOT_OPTIONS "${ARG_LLVMAOT_OPTIONS} --llvm-gc-check=true"
+                        LLVMAOT_OPTIONS "${ARG_LLVMAOT_OPTIONS} --llvmaot-gc-check=true"
                         ${RUNTIME_FAIL_TEST}
                     )
                     add_dependencies(${suite} ${target}-llvmaot-${gc_type})
@@ -724,7 +724,7 @@ function(add_test_file)
                     AOT_MODE TRUE
                     AOT_COMPILER "llvm"
                     PRLIMIT_OPTIONS "${ARG_PRLIMIT_OPTIONS}"
-                    LLVMAOT_OPTIONS "${ARG_LLVMAOT_OPTIONS} --compiler-non-optimizing=true --llvm-gc-check=true"
+                    LLVMAOT_OPTIONS "${ARG_LLVMAOT_OPTIONS} --compiler-non-optimizing=true --llvmaot-gc-check=true"
                     ${RUNTIME_FAIL_TEST}
                 )
                 add_dependencies(cts-llvmaot-tests ${target}-llvmaot-noopt-${gc_type})
@@ -1109,8 +1109,8 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsic-f32-05.pa
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/floatcast-test-0.pa" SKIP_VERIFICATION)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-01.pa" SKIP_VERIFICATION)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-02.pa" SKIP_VERIFICATION)
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-03.pa" LLVMAOT_OPTIONS --llvm-dump-after AOT_DEBUG_LOG_MESSAGE "'%common.ret.op = phi i32 \\[ %[0-9]\\+, %black_hole \\], \\[ 1, %bb0_i7..cont...i \\]\\|=r'")
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-04.pa" LLVMAOT_OPTIONS --llvm-dump-after AOT_DEBUG_LOG_MESSAGE "'%common.ret.op = phi i32 \\[ %[0-9]\\+, %black_hole \\], \\[ 0, %bb0_i7..cont...i \\]\\|%v17 = phi i32 \\[ 0, %bb3 \\]'")
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-03.pa" LLVMAOT_OPTIONS --llvmaot-dump-after AOT_DEBUG_LOG_MESSAGE "'%common.ret.op = phi i32 \\[ %[0-9]\\+, %black_hole \\], \\[ 1, %bb0_i7..cont...i \\]\\|=r'")
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-04.pa" LLVMAOT_OPTIONS --llvmaot-dump-after AOT_DEBUG_LOG_MESSAGE "'%common.ret.op = phi i32 \\[ %[0-9]\\+, %black_hole \\], \\[ 0, %bb0_i7..cont...i \\]\\|%v17 = phi i32 \\[ 0, %bb3 \\]'")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/rodatas-01.pa")
 
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/allocate-252-params.pa")

@@ -152,7 +152,7 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
     )
 
     string(FIND "${RUNTIME_ARGUMENTS}" "--gc-type" GC_TYPE_SET)
-    if(NOT PANDA_LLVM_INTERPRETER AND ${GC_TYPE_SET} EQUAL -1)
+    if(NOT PANDA_LLVMAOT AND ${GC_TYPE_SET} EQUAL -1)
         add_custom_target(${TARGET}-gc
             COMMENT "Running ark INT(${INTERPRETER_TYPE}) for ets file: ${OUTPUT_ABC}"
             COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc
@@ -176,7 +176,7 @@ function(run_int_ets_code ETS_SRC WORK_DIR TARGET)
     run_int_ets_code_impl(cpp ${ETS_SRC} ${WORK_DIR} ${TARGET}-cpp OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
     run_int_ets_code_impl(irtoc ${ETS_SRC} ${WORK_DIR} ${TARGET}-irtoc OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
     add_dependencies(${TARGET} ${TARGET}-irtoc ${TARGET}-cpp)
-    if (PANDA_LLVM_INTERPRETER)
+    if (PANDA_LLVMAOT)
         run_int_ets_code_impl(llvm ${ETS_SRC} ${WORK_DIR} ${TARGET}-llvmirtoc OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
         add_dependencies(${TARGET} ${TARGET}-llvmirtoc)
     endif()
@@ -337,7 +337,7 @@ function(run_int_jit_aot_ets_code ETS_SRC WORK_DIR TARGET)
         add_dependencies(${TARGET} ${TARGET}-ets-aot)
     endif()
     # llvm-aot
-    if (PANDA_LLVM_AOT)
+    if (PANDA_LLVMAOT)
         run_aot_ets_code(llvm ${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-llvmaot OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
         if(TARGET ${TARGET}-ets-llvmaot)
             add_dependencies(${TARGET} ${TARGET}-ets-llvmaot)
@@ -376,7 +376,7 @@ function(compile_stdlib TARGET_ARCH)
         DEPENDS ark_aot etsstdlib
     )
     add_dependencies(ets-compile-stdlib ets-compile-stdlib-aot-${TARGET_ARCH} ets-compile-stdlib-jit-${TARGET_ARCH} ets-compile-stdlib-aot-${TARGET_ARCH}-no-inline ets-compile-stdlib-aot-${TARGET_ARCH}-stw)
-    if (PANDA_LLVM_AOT)
+    if (PANDA_LLVMAOT)
         add_custom_target(ets-compile-stdlib-llvm-${TARGET_ARCH}
             COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with llvm"
             COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=llvm -compiler-options="${COMPILER_OPTIONS}" -paoc-output=etsstdlib_llvmaot_${TARGET_ARCH}.an

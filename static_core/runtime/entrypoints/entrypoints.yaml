@@ -30,6 +30,14 @@ entrypoints:
   - void
   - uint64_t
 
+- name: DeoptimizeDirect
+  entrypoint: DeoptimizeEntrypoint
+  bridge: none
+  properties: [no_return]
+  signature:
+  - void
+  - uint64_t
+
 - name: AbstractMethodError
   entrypoint: AbstractMethodErrorEntrypoint
   bridge: entrypoint
@@ -65,6 +73,15 @@ entrypoints:
   - const panda::ObjectHeader*
   - panda::Class *
 
+- name: CheckCastDirect
+  entrypoint: CheckCastEntrypoint
+  bridge: none
+  properties: []
+  signature:
+  - void
+  - const panda::ObjectHeader*
+  - panda::Class *
+
 - name: CheckCastInterface
   entrypoint: CheckCastInterfaceEntrypoint
   bridge: none
@@ -83,6 +100,15 @@ entrypoints:
   - panda::coretypes::Array*
   - panda::ObjectHeader*
 
+- name: CheckStoreArrayReferenceDirect
+  entrypoint: CheckStoreArrayReferenceEntrypoint
+  bridge: none
+  properties: []
+  signature:
+  - void
+  - panda::coretypes::Array*
+  - panda::ObjectHeader*
+
 - name: ArithmeticException
   entrypoint: ArithmeticExceptionEntrypoint
   bridge: entrypoint
@@ -90,9 +116,25 @@ entrypoints:
   signature:
   - void
 
+- name: ArithmeticExceptionDirect
+  entrypoint: ArithmeticExceptionEntrypoint
+  bridge: none
+  properties: [no_return]
+  signature:
+  - void
+
 - name: ArrayIndexOutOfBoundsException
   entrypoint: ArrayIndexOutOfBoundsExceptionEntrypoint
   bridge: entrypoint
+  properties: [no_return]
+  signature:
+  - void
+  - ssize_t
+  - size_t
+
+- name: ArrayIndexOutOfBoundsExceptionDirect
+  entrypoint: ArrayIndexOutOfBoundsExceptionEntrypoint
+  bridge: none
   properties: [no_return]
   signature:
   - void
@@ -108,9 +150,27 @@ entrypoints:
   - ssize_t
   - size_t
 
+- name: StringIndexOutOfBoundsExceptionDirect
+  entrypoint: StringIndexOutOfBoundsExceptionEntrypoint
+  bridge: none
+  properties: [no_return]
+  signature:
+  - void
+  - ssize_t
+  - size_t
+
 - name: ClassCastException
   entrypoint: ClassCastExceptionEntrypoint
   bridge: entrypoint
+  properties: [no_return]
+  signature:
+  - void
+  - panda::Class*
+  - panda::ObjectHeader*
+
+- name: ClassCastExceptionDirect
+  entrypoint: ClassCastExceptionEntrypoint
+  bridge: none
   properties: [no_return]
   signature:
   - void
@@ -125,10 +185,25 @@ entrypoints:
   - void
   - ssize_t
 
+- name: NegativeArraySizeExceptionDirect
+  entrypoint: NegativeArraySizeExceptionEntrypoint
+  bridge: none
+  properties: [no_return]
+  signature:
+  - void
+  - ssize_t
+
 - name: NullPointerException
   entrypoint: NullPointerExceptionEntrypoint
   bridge: entrypoint
   properties: [no_return]
+  signature:
+  - void
+
+- name: NullPointerExceptionDirect
+  properties: [no_return]
+  entrypoint: NullPointerExceptionEntrypoint
+  bridge: none
   signature:
   - void
 
@@ -147,6 +222,21 @@ entrypoints:
   - void
   - panda::ObjectHeader*
 
+- name: ThrowExceptionDirect
+  entrypoint: ThrowExceptionEntrypoint
+  bridge: none
+  properties: [no_return]
+  signature:
+  - void
+  - panda::ObjectHeader*
+
+- name: ThrowNativeExceptionDirect
+  entrypoint: ThrowNativeExceptionEntrypoint
+  bridge: none
+  properties: [no_return]
+  signature:
+  - void
+
 - name: CreateEmptyString
   entrypoint: CreateEmptyStringEntrypoint
   bridge: entrypoint
@@ -154,9 +244,24 @@ entrypoints:
   signature:
   - panda::coretypes::String*
 
+- name: CreateEmptyStringDirect
+  entrypoint: CreateEmptyStringEntrypoint
+  bridge: none
+  properties: []
+  signature:
+  - panda::coretypes::String*
+
 - name: CreateStringFromChars
   entrypoint: CreateStringFromCharsEntrypoint
   bridge: entrypoint
+  properties: []
+  signature:
+  - panda::coretypes::String*
+  - panda::ObjectHeader*
+
+- name: CreateStringFromCharsDirect
+  entrypoint: CreateStringFromCharsEntrypoint
+  bridge: none
   properties: []
   signature:
   - panda::coretypes::String*
@@ -170,9 +275,27 @@ entrypoints:
   - panda::coretypes::String*
   - panda::ObjectHeader*
 
+- name: CreateStringFromStringDirect
+  entrypoint: CreateStringFromStringEntrypoint
+  bridge: none
+  properties: []
+  signature:
+  - panda::coretypes::String*
+  - panda::ObjectHeader*
+
 - name: CreateMultiArray
   entrypoint: CreateMultiArrayEntrypoint
   bridge: entrypoint
+  properties: []
+  signature:
+  - panda::coretypes::Array*
+  - panda::Class*
+  - uint32_t
+  - size_t*
+
+- name: CreateMultiArrayDirect
+  entrypoint: CreateMultiArrayEntrypoint
+  bridge: none
   properties: []
   signature:
   - panda::coretypes::Array*
@@ -189,10 +312,27 @@ entrypoints:
   - const panda::Method*
   - uint32_t
 
+- name: ResolveLiteralArrayDirect
+  properties: []
+  entrypoint: ResolveLiteralArrayEntrypoint
+  bridge: none
+  signature:
+  - panda::coretypes::Array*
+  - const panda::Method*
+  - panda::FileEntityId
+
 - name: CreateObjectByClass
   entrypoint: CreateObjectByClassEntrypoint
   bridge: entrypoint
   properties: []
+  signature:
+  - panda::ObjectHeader*
+  - panda::Class*
+
+- name: CreateObjectByClassDirect
+  properties: []
+  entrypoint: CreateObjectByClassEntrypoint
+  bridge: none
   signature:
   - panda::ObjectHeader*
   - panda::Class*
@@ -217,6 +357,13 @@ entrypoints:
 - name: Safepoint
   entrypoint: SafepointEntrypoint
   bridge: entrypoint
+  properties: []
+  signature:
+  - void
+
+- name: SafepointDirect
+  entrypoint: SafepointEntrypoint
+  bridge: none
   properties: []
   signature:
   - void
@@ -249,10 +396,29 @@ entrypoints:
   - size_t
   - size_t*
 
+- name: GetUnknownCalleeMethodDirect
+  properties: []
+  entrypoint: GetUnknownCalleeMethodEntrypoint
+  bridge: none
+  signature:
+  - panda::Method*
+  - const panda::Method*
+  - size_t
+  - size_t*
+
 - name: GetFieldOffset
   entrypoint: GetFieldOffsetEntrypoint
   bridge: entrypoint
   properties: []
+  signature:
+  - size_t
+  - panda::Method*
+  - uint32_t
+
+- name: GetFieldOffsetDirect
+  properties: []
+  entrypoint: GetFieldOffsetEntrypoint
+  bridge: none
   signature:
   - size_t
   - panda::Method*
@@ -277,10 +443,30 @@ entrypoints:
   - uint32_t
   - panda::ObjectHeader*
 
+- name: UnresolvedStoreStaticBarrieredDirect
+  entrypoint: UnresolvedStoreStaticBarrieredEntrypoint
+  bridge: none
+  properties: []
+  signature:
+  - void
+  - panda::Method*
+  - uint32_t
+  - panda::ObjectHeader*
+
 - name: GetUnknownStaticFieldMemoryAddress
   entrypoint: GetUnknownStaticFieldMemoryAddressEntrypoint
   bridge: entrypoint
   properties: []
+  signature:
+  - uintptr_t
+  - panda::Method*
+  - uint32_t
+  - size_t*
+
+- name: GetUnknownStaticFieldMemoryAddressDirect
+  properties: []
+  entrypoint: GetUnknownStaticFieldMemoryAddressEntrypoint
+  bridge: none
   signature:
   - uintptr_t
   - panda::Method*
@@ -321,6 +507,15 @@ entrypoints:
   - uint8_t
   - panda::ObjectHeader*
   - panda::Class*
+
+- name: IsInstanceDirect
+  properties: []
+  entrypoint: IsInstanceEntrypoint
+  bridge: none
+  signature:
+    - uint8_t
+    - panda::ObjectHeader*
+    - panda::Class*
 
 - name: PostWrbUpdateCardFuncNoBridge
   entrypoint: PostWrbUpdateCardFuncEntrypoint
@@ -367,10 +562,29 @@ entrypoints:
   - const panda::Method*
   - panda::FileEntityId
 
+- name: ResolveStringDirect
+  properties: []
+  entrypoint: ResolveStringEntrypoint
+  bridge: none
+  signature:
+  - panda::coretypes::String*
+  - const panda::Method*
+  - panda::FileEntityId
+
 - name: ResolveStringAot
   entrypoint: ResolveStringAotEntrypoint
   bridge: entrypoint
   properties: []
+  signature:
+  - panda::coretypes::String*
+  - const panda::Method*
+  - panda::FileEntityId
+  - panda::ObjectHeader**
+
+- name: ResolveStringAotDirect
+  properties: []
+  entrypoint: ResolveStringAotEntrypoint
+  bridge: none
   signature:
   - panda::coretypes::String*
   - const panda::Method*
@@ -392,6 +606,17 @@ entrypoints:
   entrypoint: ResolveVirtualCallAotEntrypoint
   bridge: entrypoint
   properties: []
+  signature:
+  - uintptr_t
+  - const panda::Method*
+  - panda::ObjectHeader*
+  - size_t
+  - uintptr_t
+
+- name: ResolveVirtualCallAotDirect
+  properties: []
+  entrypoint: ResolveVirtualCallAotEntrypoint
+  bridge: none
   signature:
   - uintptr_t
   - const panda::Method*
@@ -443,9 +668,25 @@ entrypoints:
   - void
   - panda::ObjectHeader*
 
+- name: LockObjectDirect
+  entrypoint: LockObjectEntrypoint
+  bridge: none
+  properties: []
+  signature:
+  - void
+  - panda::ObjectHeader*
+
 - name: UnlockObject
   entrypoint: UnlockObjectEntrypoint
   bridge: entrypoint
+  properties: []
+  signature:
+  - void
+  - panda::ObjectHeader*
+
+- name: UnlockObjectDirect
+  entrypoint: UnlockObjectEntrypoint
+  bridge: none
   properties: []
   signature:
   - void
@@ -520,6 +761,15 @@ entrypoints:
     - panda::coretypes::Array*
     - panda::Class*
     - size_t
+
+- name: CreateArrayDirect
+  entrypoint: CreateArraySlowPathEntrypoint
+  bridge: none
+  properties: []
+  signature:
+  - panda::coretypes::Array*
+  - panda::Class*
+  - size_t
 
 - name: CreateArraySlowPath
   entrypoint: CreateArraySlowPathEntrypoint
@@ -727,8 +977,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint8_t
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - void*
+    - void*
 
 - name: StringEqualsCompressed
   entrypoint: StringEqualsCompressed
@@ -736,8 +986,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint8_t
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - void*
+    - void*
 
 - name: StringEqualsUnroll
   entrypoint: StringEqualsUnroll
@@ -745,8 +995,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint8_t
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - void*
+    - void*
 
 - name: StringEqualsUnrollCompressed
   entrypoint: StringEqualsUnrollCompressed
@@ -754,16 +1004,16 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint8_t
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - void*
+    - void*
 
 - name: StringBuilderBool
   entrypoint: StringBuilderBool
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - void*
+    - void*
     - uint8_t
 
 - name: StringBuilderChar
@@ -771,8 +1021,8 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - void*
+    - void*
     - uint16_t
 
 - name: StringBuilderString
@@ -780,18 +1030,18 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - void*
+    - void*
+    - void*
 
 - name: StringBuilderStringCompressed
   entrypoint: StringBuilderStringCompressed
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - void*
+    - void*
+    - void*
 
 - name: StringBuilderStringSlowPath
   entrypoint: CoreStringBuilderString
@@ -886,16 +1136,16 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::coretypes::String*  # src string
+    - void*  # resulting string
+    - void*  # src string
 
 - name: CreateStringFromStringTlabCompressed
   entrypoint: CreateStringFromStringTlabCompressed
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::coretypes::String*  # src string
+    - void*  # resulting string
+    - void*  # src string
 
 - name: CreateStringFromStringSlowPath
   entrypoint: CreateStringFromStringEntrypoint
@@ -918,22 +1168,22 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - uint32_t                   # offset
-    - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
-    - void*                      # string class pointer
+    - void*     # resulting string
+    - uint32_t  # offset
+    - uint32_t  # length
+    - void*     # u16 array
+    - void*     # string class pointer
 
 - name: CreateStringFromCharArrayTlabCompressed
   entrypoint: CreateStringFromCharArrayTlabCompressed
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - uint32_t                   # offset
-    - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
-    - void*                      # string class pointer
+    - void*     # resulting string
+    - uint32_t  # offset
+    - uint32_t  # length
+    - void*     # u16 array
+    - void*     # string class pointer
 
 - name: CreateStringFromCharArraySlowPath
   entrypoint: CreateStringFromCharsWithOffsetEntrypoint
@@ -962,20 +1212,20 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
-    - void*                      # string class pointer
+    - void*    # resulting string
+    - uint32_t # length
+    - void*    # u16 array
+    - void*    # string class pointer
 
 - name: CreateStringFromZeroBasedCharArrayTlabCompressed
   entrypoint: CreateStringFromZeroBasedCharArrayTlabCompressed
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*   # resulting string
-    - uint32_t                    # length
-    - panda::ObjectHeader*        # u16 array
-    - void*                       # string class pointer
+    - void*    # resulting string
+    - uint32_t # length
+    - void*    # u16 array
+    - void*    # string class pointer
 
 - name: CreateStringFromZeroBasedCharArraySlowPath
   entrypoint: CreateStringFromCharsZeroOffsetEntrypoint
@@ -1002,20 +1252,20 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
+    - void*     # resulting string
+    - void*     # src string
+    - int32_t   # begin index
+    - int32_t   # end index
 
 - name: SubStringFromStringTlabCompressed
   entrypoint: SubStringFromStringTlabCompressed
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
+    - void*     # resulting string
+    - void*     # src string
+    - int32_t   # begin index
+    - int32_t   # end index
 
 - name: SubStringFromStringSlowPath
   entrypoint: SubStringFromStringEntrypoint
@@ -1042,22 +1292,22 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::Array*   # resulting array of utf16 chars
-    - panda::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
-    - void*                      # Array u16 class pointer
+    - void*                 # resulting array of utf16 chars
+    - void*                 # src string
+    - int32_t               # begin index
+    - int32_t               # end index
+    - panda::ObjectHeader*  # Array u16 class pointer
 
 - name: StringGetCharsTlabCompressed
   entrypoint: StringGetCharsTlabCompressed
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::Array*   # resulting array of utf16 chars
-    - panda::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
-    - void*                      # Array u16 class pointer
+    - void*                 # resulting array of utf16 chars
+    - void*                 # src string
+    - int32_t               # begin index
+    - int32_t               # end index
+    - panda::ObjectHeader*  # Array u16 class pointer
 
 - name: StringGetCharsSlowPath
   entrypoint: StringGetCharsEntrypoint

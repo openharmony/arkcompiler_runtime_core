@@ -30,7 +30,7 @@
 #include "generated/base_options.h"
 
 #include "paoc.h"
-#ifdef PANDA_LLVM_AOT
+#ifdef PANDA_LLVMAOT
 #include "paoc_llvm.h"
 #endif
 
@@ -803,7 +803,7 @@ bool Paoc::CompileAot(CompilingContext *ctx)
         ctx->method->GetPandaFile(), ctx->graph, code_address, aot_builder_->GetIntfInlineCacheIndex(),
         aot_builder_->GetGotPlt(), aot_builder_->GetGotVirtIndexes(), aot_builder_->GetGotClass(),
         aot_builder_->GetGotString(), aot_builder_->GetGotIntfInlineCache(), aot_builder_->GetGotCommon(),
-        slow_path_data_);
+        aot_builder_->GetGotDirectIntrinsicEntrypoints(), slow_path_data_);
 
     aot_data->SetUseCha(paoc_options_->IsPaocUseCha());
     ctx->graph->SetAotData(aot_data);
@@ -972,7 +972,7 @@ void Paoc::BuildClassHashTable(const panda_file::File &pfile_ref)
 
 int main(int argc, const char *argv[])
 {
-#ifdef PANDA_LLVM_AOT
+#ifdef PANDA_LLVMAOT
     panda::paoc::PaocLLVM paoc;
 #else
     panda::paoc::Paoc paoc;

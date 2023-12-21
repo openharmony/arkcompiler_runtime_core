@@ -60,7 +60,8 @@ public:
             std::map<std::pair<const File *, uint32_t>, int32_t> *got_class,
             std::map<std::pair<const File *, uint32_t>, int32_t> *got_string,
             std::map<std::pair<const File *, uint64_t>, int32_t> *got_intf_inline_cache,
-            std::map<std::pair<const File *, uint64_t>, int32_t> *got_common, SharedSlowPathData *slow_path_data)
+            std::map<std::pair<const File *, uint64_t>, int32_t> *got_common,
+            std::map<uint32_t, int32_t> *got_direct_intrinsics, SharedSlowPathData *slow_path_data)
         : pfile_(pfile),
           graph_(graph),
           slow_path_data_(slow_path_data),
@@ -71,7 +72,8 @@ public:
           got_class_(got_class),
           got_string_(got_string),
           got_intf_inline_cache_(got_intf_inline_cache),
-          got_common_(got_common)
+          got_common_(got_common),
+          got_direct_intrinsics_(got_direct_intrinsics)
     {
     }
 
@@ -85,6 +87,7 @@ public:
     intptr_t GetCommonSlotOffset(uint64_t pc, uint32_t id);
     intptr_t GetStringSlotOffset(uint64_t pc, uint32_t string_id);
     uint64_t GetInfInlineCacheSlotOffset(uint64_t pc, uint64_t index);
+    int32_t GetIntrinsicSlot(uint32_t intrinsic_id);
 
     int32_t GetClassSlotId(uint32_t klass_id);
     int32_t GetStringSlotId(uint32_t string_id);
@@ -128,6 +131,7 @@ private:
     std::map<std::pair<const File *, uint32_t>, int32_t> *got_string_;
     std::map<std::pair<const File *, uint64_t>, int32_t> *got_intf_inline_cache_;
     std::map<std::pair<const File *, uint64_t>, int32_t> *got_common_;
+    std::map<uint32_t, int32_t> *got_direct_intrinsics_;
     bool use_cha_ {false};
 };
 }  // namespace panda::compiler

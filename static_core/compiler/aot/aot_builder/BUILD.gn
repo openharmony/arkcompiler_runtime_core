@@ -31,7 +31,7 @@ config("aotbuilder_public_config") {
 ohos_static_library("aotbuilder") {
   sources = [ "aot_builder.cpp" ]
 
-  if (is_llvmbackend) {
+  if (is_llvmaot) {
     sources += [ "llvm_aot_builder.cpp" ]
   }
 

@@ -23,12 +23,14 @@ $ sudo ./scripts/install-deps-ubuntu -i=dev
 
 If you want additionally to install python dependencies for running tests add a parameter `-i=test`:
 
+
 ```
 $ sudo ./scripts/install-deps-ubuntu -i=dev -i=test
 ```
 It creates a virtual environment .venv-panda in your home directory with all required dependencies. 
 Later, tests python scripts can activate this environment. If you already have run with the parameter `-i=test`
 the second time it might be skipped.
+
 
 # Third party
 
@@ -80,36 +82,9 @@ Example:
 $ cmake -DCMAKE_BUILD_TYPE=Release ...
 ```
 
-## Building with LLVM Backend
-
-If you want to build Ark with LLVM Backend you need to build first special modified LLVM 15 binaries.
-  * Clone repository from [gitee.com](https://gitee.com/openharmony/third_party_llvm-project)
-  * Check [README](scripts/llvm/README.md) file about build process
-  * Use build [script](scripts/llvm/build_llvm.sh)
-
-If modified LLVM available in `/opt`, the following two options are necessary
-to build Ark with LLVM Backend functions.
-
-```cmake
-cmake -DPANDA_LLVM_BACKEND=true -DLLVM_TARGET_PATH=/opt/llvm-15-{type}-{arch} ...
-```
-
-The `PANDA_LLVM_BACKEND` effectively enables LLVM Irtoc Interpreter.
-
-LLVM FastPaths compilation and LLVM AOT compiler are temporarily disabled in all builds.
-
-`PANDA_LLVM_INTERPRETER` is `ON` when `PANDA_LLVM_BACKEND` is turned on.
-
-It is recommended to choose `clang` compiler using toolchain files: `-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake`.
-By default GNU compiler `c++` is used, but some features are not available in such `gcc` builds.
-
-## Cross ARM64 build with LLVM Backend
-
-For cross-build, when e.g. `-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-clang-14-qemu-aarch64.cmake` is used, LLVM-path should passed using another option when LLVM Backend is enabled: `-DLLVM_HOST_PATH=/opt/llvm-15-debug-x86_64`.
-
 ## Running tests with QEMU for cross-compiled aarch64/arm builds
 
-Recommended QEMU version for running tests is 6.2.0 (but 5.1+ should be ok, too). By default, it is downloaded and installed during environment bootstrap. Any system-installed package is left intact. If recommended QEMU version is not accessible via $PATH it can be specified during configuration time:
+Recommended QEMU version for running testst is 6.2.0 (but 5.1+ should be ok, too). By default, it is downloaded and installed during environment bootstrap. Any system-installed package is left intact. If recommened QEMU version is not accessible via $PATH it can be specified during configuration time:
 
 ```
 # If QEMU is available as /opt/qemu-6.2.0/bin/qemu-aarch64
@@ -140,11 +115,7 @@ $ cd /path/to/panda/repository
 $ /path/to/gn/repository/out/gn --args=-is_standard_system=true gen out
 $ ninja -C out <target name>
 ```
-To use LLVM Backend add the following arguments:
-```
-$ /path/to/gn/repository/out/gn out is_llvmbackend=true llvm_dir="/opt/llvm-15-{type}-{arch}" ...
-```
-Setting `is_llvmbackend=true` option enables the same scenarios as `-DPANDA_LLVM_BACKEND=true` option in cmake builds
+
 
 ## Further reading
 

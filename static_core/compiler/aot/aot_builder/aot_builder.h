@@ -98,6 +98,11 @@ public:
         return &got_common_;
     }
 
+    auto *GetGotDirectIntrinsicEntrypoints()
+    {
+        return &got_direct_intrinsics_;
+    }
+
     void SetBootAot(bool boot_aot)
     {
         boot_aot_ = boot_aot;
@@ -170,6 +175,7 @@ private:
     std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> got_string_;
     std::map<std::pair<const panda_file::File *, uint64_t>, int32_t> got_intf_inline_cache_;
     std::map<std::pair<const panda_file::File *, uint64_t>, int32_t> got_common_;
+    std::map<uint32_t, int32_t> got_direct_intrinsics_;
     bool boot_aot_ {false};
     bool with_cha_ {true};
     bool generate_symbols_ {false};
