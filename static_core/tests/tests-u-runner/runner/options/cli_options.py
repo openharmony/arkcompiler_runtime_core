@@ -85,32 +85,32 @@ def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
         '--hermes', action='store_true', dest='hermes',
         default=None,
         help='run Hermes tests')
-    action = parser.add_mutually_exclusive_group(required=False)
-    action.add_argument(
+    ets_mutex_group = parser.add_mutually_exclusive_group(required=False)
+    ets_mutex_group.add_argument(
         '--ets-func-tests', action='store_true', dest='ets_func_tests',
         default=None, help='run test against ETS STDLIB TEMPLATES and manual written ETS tests')
-    action.add_argument(
+    ets_mutex_group.add_argument(
         '--ets-runtime', action='store_true', dest='ets_runtime',
         default=None,
         help='run ETS runtime tests')
-    action.add_argument(
-        '--no-js', action='store_false', dest='with_js',
-        default=None,
-        help='disable JS-related tests')
-    action.add_argument(
+    ets_mutex_group.add_argument(
         '--ets-gc-stress', action='store_true', dest='ets_gc_stress',
         default=None,
         help='run ETS GCStress tests')
-    action.add_argument(
+    ets_mutex_group.add_argument(
         '--ets-cts', action='store_true', dest='ets_cts',
         default=None, help='run ets-templates tests')
 
 
-def add_ets_args(parser: argparse.ArgumentParser) -> None:
+def add_generation_args(parser: argparse.ArgumentParser) -> None:
     # ETS tests applied options
-    parser.add_argument(
+    generate_mutex_group = parser.add_mutually_exclusive_group(required=False)
+    generate_mutex_group.add_argument(
         '--force-generate', action='store_true', dest='is_force_generate', default=None,
         help='mandatory generate the ETS test cases from templates')
+    generate_mutex_group.add_argument(
+        '--generate-only', action='store_true', dest='generate_only', default=None,
+        help='only generate tests without running')
 
 
 def add_test_group_args(parser: argparse.ArgumentParser) -> None:
@@ -232,6 +232,10 @@ def add_general_other_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '--force-download', action='store_true', dest='force_download',
         default=None, help='force download and prepare test suites')
+    parser.add_argument(
+        '--no-js', action='store_false', dest='with_js',
+        default=None,
+        help='disable JS-related tests')
 
 
 def add_es2panda_args(parser: argparse.ArgumentParser) -> None:
@@ -377,7 +381,7 @@ def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Regression test runner")
 
     add_test_suite_args(parser)
-    add_ets_args(parser)
+    add_generation_args(parser)
     add_test_group_args(parser)
     add_config_args(parser)
     add_general_args(parser)

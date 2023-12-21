@@ -61,14 +61,16 @@ def main() -> None:
 
     failed_tests = 0
 
-    for runner in runners:
-        Log.all(logger, f"Runner {runner.name} started")
-        runner.run()
-        Log.all(logger, f"Runner {runner.name} finished")
-        failed_tests += runner.summarize()
-        Log.all(logger, f"Runner {runner.name}: {failed_tests} failed tests")
-        if config.general.coverage.use_llvm_cov:
-            runner.create_coverage_html()
+    if not config.general.generate_only:
+        for runner in runners:
+            Log.all(logger, f"Runner {runner.name} started")
+            runner.run()
+            Log.all(logger, f"Runner {runner.name} finished")
+            failed_tests += runner.summarize()
+            Log.all(logger, f"Runner {runner.name}: {failed_tests} failed tests")
+            if config.general.coverage.use_llvm_cov:
+                runner.create_coverage_html()
+
     finish = datetime.now()
     Log.default(logger, f"Runner has been working for {round((finish-start).total_seconds())} sec")
 

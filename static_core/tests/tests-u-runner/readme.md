@@ -149,8 +149,6 @@ All test lists are loaded automatically from the specified `LIST_ROOT` and based
 -   `--filter FILTER`/`test-lists.filter: FILTER` - test filter regexp
 -   `--show-progress`/`general.show-progress: True` - show progress bar during test execution
 -   `--time-report`/`time-report.enable: True` - generates report with grouping tests by execution time.
--   `--force-generate`/`ets.force-generate` - force ETS tests generation from templates. Without this option, 
-if a path `generate-folder` already contains tests they will be reused.
 
 ## Verbose and logging options:
 
@@ -165,6 +163,11 @@ if a path `generate-folder` already contains tests they will be reused.
    - `ignored` - for new failures and tests from ignored test lists including both passed and failed. '
    - `new` - only for new failures. Default value.
    - in config file use `general.verbose-filter` property with the same values.
+
+## Generation options:
+
+-   `--generate-only`/`general.generate-only` - only generate tests without running them. Tests are run as usual without this option.
+-   `--force-generate`/`ets.force-generate` - force ETS tests generation from templates
 
 ## Timeout options:
 
