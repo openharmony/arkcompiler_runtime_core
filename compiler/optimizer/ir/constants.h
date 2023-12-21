@@ -29,9 +29,15 @@ using PcType = uint32_t;
 using LinearNumber = uint32_t;
 
 // Update this when it will be strictly necessary to assign more than 255 registers in bytecode optimizer.
+#ifdef IR_FOR_LIBARK_DEFECT_SCAN_AUX
+using Register = uint16_t;
+using StackSlot = uint16_t;
+using ImmTableSlot = uint16_t;
+#else
 using Register = uint8_t;
 using StackSlot = uint8_t;
 using ImmTableSlot = uint8_t;
+#endif
 constexpr uint32_t MAX_NUM_STACK_SLOTS = std::numeric_limits<StackSlot>::max();
 constexpr uint32_t MAX_NUM_IMM_SLOTS = std::numeric_limits<ImmTableSlot>::max();
 
