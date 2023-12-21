@@ -441,6 +441,9 @@ HWTEST_F(CompilerBasicBlockTest, compiler_basicblock_test_014, TestSize.Level1)
 
         EXPECT_NE(graph, nullptr);
         for (auto bb : graph->GetBlocksRPO()) {
+            if (bb == nullptr) {
+                continue;
+            }
             if (bb->IsTry() && bb->IsLoopValid()) {
                 auto inst = bb->GetLastInst();
                 EXPECT_NE(bb->SplitBlockAfterInstruction(inst, false), nullptr);
@@ -451,6 +454,9 @@ HWTEST_F(CompilerBasicBlockTest, compiler_basicblock_test_014, TestSize.Level1)
         }
 
         for (auto bb : graph->GetVectorBlocks()) {
+            if (bb == nullptr) {
+                continue;
+            }
             for (auto inst : bb->AllInsts()) {
                 if (inst->IsPhi() || bb->IsStartBlock() || bb->IsEndBlock()) {
                     continue;
