@@ -46,14 +46,14 @@ public:
     void SetLocalExportNum(size_t local_export_num);
     size_t GetRegularImportNum() const;
     size_t GetLocalExportNum() const;
-    const std::string &GetImportInternalNameByIndex(size_t index) const;
+    const std::string &GetImportLocalNameByIndex(size_t index) const;
     const std::string &GetImportNamespaceNameByIndex(size_t index) const;
     const std::string &GetExportNameByIndex(size_t index) const;
-    std::string GetInternalNameByExportName(std::string_view export_name) const;
+    std::string GetLocalNameByExportName(std::string_view export_name) const;
     std::string GetImportNameByExportName(std::string_view export_name) const;
     std::string GetModuleNameByExportName(std::string_view export_name) const;
-    std::string GetModuleNameByInternalName(std::string_view local_name) const;
-    std::string GetImportNameByInternalName(std::string_view local_name) const;
+    std::string GetModuleNameByLocalName(std::string_view local_name) const;
+    std::string GetImportNameByLocalName(std::string_view local_name) const;
 
 private:
     std::string module_filename_;

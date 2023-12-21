@@ -44,10 +44,11 @@ public:
 
     const std::string &GetClassName() const;
     const AbcFile *GetAbcFileInstance() const;
-    Function *GetDefineFunction() const;
+    Function *GetDefiningFunction() const;
     size_t GetMemberFunctionCount() const;
     const Function *GetMemberFunctionByName(std::string_view func_name) const;
     const Function *GetMemberFunctionByIndex(size_t index) const;
+    const std::vector<const Function *> &GetMemberFunctionList() const;
     const Class *GetParentClass() const;
     const std::string &GetParentClassName() const;
     const std::string &GetParClassExternalModuleName() const;

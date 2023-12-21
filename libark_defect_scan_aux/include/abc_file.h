@@ -54,6 +54,7 @@ public:
 
     bool IsModule() const;
     const std::string &GetAbcFileName() const;
+    const std::vector<std::unique_ptr<Class>> &GetClassList() const;
     size_t GetDefinedFunctionCount() const;
     size_t GetDefinedClassCount() const;
     const Function *GetDefinedFunctionByIndex(size_t index) const;
@@ -65,13 +66,13 @@ public:
     ssize_t GetLineNumberByInst(const Function *func, const Inst &inst) const;
 
     // used for export stat
-    std::string GetInternalNameByExportName(std::string_view export_name) const;
+    std::string GetLocalNameByExportName(std::string_view export_name) const;
     // used exclusively for indirect export stat
     std::string GetImportNameByExportName(std::string_view export_name) const;
     std::string GetModuleNameByExportName(std::string_view export_name) const;
     // used for import stat
-    std::string GetModuleNameByInternalName(std::string_view internal_name) const;
-    std::string GetImportNameByInternalName(std::string_view internal_name) const;
+    std::string GetModuleNameByLocalName(std::string_view local_name) const;
+    std::string GetImportNameByLocalName(std::string_view local_name) const;
     // return a string without #xx# prefix
     std::string_view GetNameWithoutHashtag(std::string_view name) const;
     std::string GetStringByInst(const Inst &inst) const;
