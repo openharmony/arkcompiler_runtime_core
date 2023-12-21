@@ -112,6 +112,7 @@ private:
     std::unique_ptr<CalleeInfo> ResolveCallInstCommon(Function *func, const Inst &call_inst,
                                                       uint32_t func_obj_idx = 0) const;
     std::unique_ptr<CalleeInfo> ResolveSuperCallInst(Function *func, const Inst &call_inst) const;
+    void ResolveDefineMethodInst(Function *member_func, const Inst &define_method_inst);
     void HandleMemberFunctionFromClassBuf(const std::string &func_name, Function *def_func, Class *def_class) const;
     void AddDefinedClass(std::unique_ptr<Class> &&def_class);
     void AddDefinedFunction(std::unique_ptr<Function> &&def_func);
