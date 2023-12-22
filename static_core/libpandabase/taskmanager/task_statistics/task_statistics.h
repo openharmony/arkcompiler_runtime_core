@@ -38,7 +38,7 @@ enum class TaskStatus : size_t {
     POPPED
 };
 
-constexpr auto ALL_TASK_STATES = std::array {TaskStatus::ADDED, TaskStatus::EXECUTED, TaskStatus::POPPED};
+constexpr auto ALL_TASK_STATUSES = std::array {TaskStatus::ADDED, TaskStatus::EXECUTED, TaskStatus::POPPED};
 
 /**
  * TaskStatistics is a structure that counts the number of tasks that have received a certain

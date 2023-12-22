@@ -20,7 +20,7 @@ namespace panda::taskmanager {
 
 FineGrainedTaskStatisticsImpl::FineGrainedTaskStatisticsImpl()
 {
-    for (const auto &status : ALL_TASK_STATES) {
+    for (const auto &status : ALL_TASK_STATUSES) {
         for (const auto &properties : all_task_properties_) {
             task_properties_counter_map_[status].emplace(properties, 0);
         }
@@ -67,10 +67,10 @@ void FineGrainedTaskStatisticsImpl::ResetCountersWithTaskProperties(TaskProperti
 {
     // Getting locks for every state counter with specified properties
     std::unordered_map<TaskStatus, os::memory::LockHolder<os::memory::Mutex>> lock_holder_map;
-    for (const auto &status : ALL_TASK_STATES) {
+    for (const auto &status : ALL_TASK_STATUSES) {
         lock_holder_map.emplace(status, task_properties_counter_map_[status][properties].GetMutex());
     }
-    for (const auto &status : ALL_TASK_STATES) {
+    for (const auto &status : ALL_TASK_STATUSES) {
         task_properties_counter_map_[status][properties].NoGuardedSetValue(0);
     }
 }
