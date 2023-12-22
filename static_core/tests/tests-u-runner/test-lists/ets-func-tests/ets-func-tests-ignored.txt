@@ -573,6 +573,14 @@ spec/for_of/for_of_11.ets
 spec/for_of/for-of-s01-array-08.ets
 spec/for_of/for-of-s01-array-10.ets
 ### end for of
+### Issue 14376 begin
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-1.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-2.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-3.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-4.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-7.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-8.ets
+### Issue 14376 end
 
 ### Compound assignment
 ### Issue #15198

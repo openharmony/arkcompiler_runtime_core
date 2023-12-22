@@ -20,8 +20,8 @@ tags: []
 
 
 
-function main() : int {
-    let object : Object= new Object();
+function main(): int {
+    let object: Object = new Object();
     let flag : boolean = false;
     if (object || flag) {
         return 0;
