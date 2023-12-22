@@ -26,11 +26,15 @@ flowchart LR;
 
 ## 3.使用方法
 
-### 3.1 自定义代码
+### 3.1 支持平台说明
+
+安全扫描工具当前仅支持在Linux平台上编译和使用，暂不支持Windows/Mac平台。
+
+### 3.2 自定义代码
 
 我们在`runtime_core/libark_defect_scan_aux/tests/unittest/defect_scan_aux_demo.cpp`提供了简单的示例代码，其中指定了`abc`文件路径（例如，`test.abc`），开发者可根据需求修改该示例代码文件，然后编译运行。
 
-### 3.2 编译命令
+### 3.3 编译命令
 
 ```
 ./build.sh --product-name rk3568 --build-target ark_host_linux_defectscanaux_lib --build-target ark_host_linux_defectscanaux_unittest
@@ -38,17 +42,17 @@ flowchart LR;
 
 `out/rk3568/clang_x64/arkcompiler/runtime_core`目录下会生成`libark_defect_scan_aux.so`以及该示例文件对应的可执行程序文件。
 
-### 3.3 如何生成`abc`文件
+### 3.4 如何生成`abc`文件
 
-#### 3.3.1 使用命令行
+#### 3.4.1 使用命令行
 参考《[es2panda使用方式](https://gitee.com/openharmony/arkcompiler_ets_frontend/blob/master/README_zh.md#%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA)》编译js/ts文件生成`abc`文件。
 
-#### 3.3.2 使用DevEco Studio
+#### 3.4.2 使用DevEco Studio
 通过DevEco Studio编译应用，编译成功后，解压应用`hap`包，找到其中的`abc`文件。
 
 **注意：** 当前安全扫描工具仅支持`hap`包中以单文件为单位生成的`abc`文件扫描，不支持一个`hap`包中仅有一个合并多文件字节码信息的`modules.abc`文件扫描。
 
-### 3.4 执行扫描
+### 3.5 执行扫描
 
 将需要扫描的`abc`文件放到示例代码中指定的文件路径后，执行示例代码对应的可执行程序即可。
 
@@ -162,7 +166,7 @@ try {
 } catch (e) {
 }
 ```
-正确的基块结构简化后如下所示，即`Throw 1 Block`的后继为`Catch Block`。
+正确的基块结构简化后如下所示，即`Throw Block`的后继为`Catch Block`。
 ```
 +----------------+       +----------------+
 |   Start Block  | ----> |  Throw Block   |
@@ -179,7 +183,7 @@ try {
                          +----------------+
 ```
 
-但是，当前实现会将`Throw 1 Block`指向当前函数的结束块，导致某些场景下`Catch Block`块没有前驱，简化后的基块结构如下所示：
+但是，当前实现会将`Throw Block`指向当前函数的结束块，导致某些场景下`Catch Block`块没有前驱，简化后的基块结构如下所示：
 ```
 +----------------+       +----------------+
 |   Start Block  | ----> |  Throw Block   | ------
