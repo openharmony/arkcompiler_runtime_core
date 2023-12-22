@@ -16,6 +16,11 @@ if (NOT TARGET es2panda)
     message(WARNING "es2panda not found for ets tests")
 endif()
 
+add_custom_target(ets_gtests)
+add_dependencies(ets_tests ets_gtests)
+
+include(cmake/native_gtest.cmake)
+
 add_panda_assembly(TARGET mock_stdlib SOURCE integrational/mock_stdlib.pa)
 
 function(panda_ets_add_gtest)
@@ -486,9 +491,6 @@ if(NOT (PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER))
     add_subdirectory(micro-benchmarks)
 endif()
 
-add_custom_target(ets_gtests)
-add_dependencies(ets_tests ets_gtests)
-
 function(panda_ets_napi_add_gtest)
     if (CMAKE_CROSSCOMPILING)
         return()
@@ -545,6 +547,7 @@ endfunction()
 add_custom_target(ets_common_gtests)
 add_dependencies(ets_gtests ets_common_gtests)
 add_subdirectory(mock)
+add_subdirectory(native)
 
 if(PANDA_COMPILER_ENABLE)
     add_subdirectory(checked)

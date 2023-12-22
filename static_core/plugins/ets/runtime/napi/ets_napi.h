@@ -115,6 +115,9 @@ typedef ets_array ets_floatArray;
 typedef ets_array ets_doubleArray;
 #endif  // __cplusplus
 
+struct __ets_deferred;
+typedef struct __ets_deferred *ets_deferred;
+
 // Field and Method IDs
 struct __ets_method;
 struct __ets_field;
@@ -151,11 +154,23 @@ typedef enum {
 
 #ifdef __cplusplus
 typedef struct __EtsVM EtsVM;
-typedef struct __EtsEnv EtsEnv;
+typedef struct __EtsEnv ets_env;
 #else
 typedef const struct ETS_InvokeInterface *EtsVM;
-typedef const struct ETS_NativeInterface *EtsEnv;
+typedef const struct ETS_NativeInterface *ets_env;
 #endif
+
+// Deprecated types:
+typedef ets_env EtsEnv;
+
+typedef enum {
+    ETS_OKAY,
+    ETS_INVALID_ARG,
+    ETS_GENERIC_FAILURE,
+    ETS_PENDING_EXCEPTION,
+    ETS_INVALID_VERSION,  // NOTE(v.cherkashin): This status code doesn't match to napi interface.
+                          //                     Should we probably delete this status code?
+} ets_status;
 
 // clang-format off
 // Interface Function Table
@@ -409,6 +424,11 @@ struct ETS_NativeInterface {
     ets_objectRefType (*GetObjectRefType)(EtsEnv *env, ets_object obj);
 
     /* 227 methods */
+
+    // Promise API
+    ets_status (*PromiseCreate)(EtsEnv *env, ets_deferred *deferred, ets_object *promise);
+    ets_status (*DeferredResolve)(EtsEnv *env, ets_deferred deferred, ets_object resolution);
+    ets_status (*DeferredReject)(EtsEnv *env, ets_deferred deferred, ets_object rejection);
 };
 // clang-format on
 
@@ -1490,6 +1510,20 @@ struct __EtsEnv {
     ets_objectRefType GetObjectRefType(ets_object obj)
     {
         return native_interface->GetObjectRefType(this, obj);
+    }
+
+    // Promise
+    ets_status PromiseCreate(ets_deferred *deferred, ets_object *promise)
+    {
+        return native_interface->PromiseCreate(this, deferred, promise);
+    }
+    ets_status DeferredResolve(ets_deferred deferred, ets_object resolution)
+    {
+        return native_interface->DeferredResolve(this, deferred, resolution);
+    }
+    ets_status DeferredReject(ets_deferred deferred, ets_object rejection)
+    {
+        return native_interface->DeferredReject(this, deferred, rejection);
     }
 #endif
 };

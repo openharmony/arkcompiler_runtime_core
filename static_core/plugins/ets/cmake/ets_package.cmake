@@ -104,8 +104,7 @@ function(do_panda_ets_package TARGET)
         COMMENT "Create ${OUTPUT_ZIP}"
         COMMAND rm -rf ${BUILD_DIR}/out
         COMMAND mkdir ${BUILD_DIR}/out
-        COMMAND cd ${BUILD_DIR}/src
-        COMMAND zip -r -0 ${OUTPUT_ZIP} *
+        COMMAND cd ${BUILD_DIR}/src && zip -r -0 ${OUTPUT_ZIP} *
         DEPENDS ${OUTPUT_ABC}
     )
 
@@ -114,6 +113,7 @@ function(do_panda_ets_package TARGET)
     add_custom_command(
         OUTPUT ${RELEASE_ZIP}
         COMMENT "Copy ${OUTPUT_ZIP} to ${RELEASE_ZIP}"
+        COMMAND mkdir -p ${PANDA_BINARY_ROOT}/${ARG_OUTPUT_DIRECTORY}
         COMMAND cp ${OUTPUT_ZIP} ${RELEASE_ZIP}
         DEPENDS ${OUTPUT_ZIP}
     )
