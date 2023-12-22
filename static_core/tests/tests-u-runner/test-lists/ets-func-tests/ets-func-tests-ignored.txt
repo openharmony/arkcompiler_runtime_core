@@ -144,40 +144,6 @@ spec/unions/union_compare_02_01.ets
 spec/unions/union_compare_02_02.ets
 spec/unions/union_compare_02_03.ets
 spec/unions/union_compare_02_04.ets
-### Issue 14188
-spec/unions/union_binary_01.ets
-spec/unions/union_binary_02.ets
-spec/unions/union_binary_03.ets
-spec/unions/union_plus_01.ets
-spec/unions/union_plus_02.ets
-spec/unions/union_plus_03.ets
-### Issue 14191
-spec/unions/union_param_01.ets
-spec/unions/union_param_02.ets
-spec/unions/union_param_05.ets
-spec/unions/union_param_06.ets
-### Issue 14217
-spec/unions/union_return_01_01.ets
-spec/unions/union_return_01_02.ets
-spec/unions/union_return_01_03.ets
-spec/unions/union_return_02.ets
-spec/unions/union_return_03.ets
-spec/unions/union_return_04.ets
-spec/unions/union_return_05.ets
-spec/unions/union_return_06.ets
-### Issue 14439
-spec/unions/union_assignment_01.ets
-spec/unions/union_assignment_02.ets
-spec/unions/union_assignment_04.ets
-spec/unions/union_assignment_07.ets
-spec/unions/union_cast_01.ets
-spec/unions/union_cast_02.ets
-spec/unions/union_cast_03.ets
-spec/unions/union_cast_05.ets
-spec/unions/union_cast_06.ets
-### Issue 14441
-spec/unions/union_compare_03.ets
-spec/unions/union_compare_04.ets
 ### Issue 14259
 spec/unions/union_assignment_08.ets
 spec/unions/union_assignment_09.ets
@@ -408,6 +374,18 @@ spec/undefined-type/issue14602.ets
 spec/undefined-type/issue14610.ets
 ###### End Issue 14610
 ###### EOF Undefined type
+### Feature: Callable classes
+### issue 14539
+spec/callable-classes/type-call-instantiate_7.ets
+### issue 14539
+spec/callable-classes/type-call-both.ets
+spec/callable-classes/type-call-expression-with-param_1.ets
+spec/callable-classes/type-call-instantiate_1.ets
+spec/callable-classes/type-call-instantiate_3.ets
+spec/callable-classes/type-call-instantiate_4.ets
+spec/callable-classes/type-call-instantiate_5.ets
+spec/callable-classes/type-call-none.ets
+### End of Feature: Callable classes
 
 ### Start never issues
 ### Issue 14472
@@ -415,6 +393,65 @@ spec/never_type/useWithLambdaAndUnion.ets
 ### Negative test
 spec/never_type/neverTypeInheritance.ets
 ### End never issues
+### Feature: Null safety tests
+### Issue 14510
+spec/nullables/nullable-function-result_2.ets
+spec/nullables/nullable-method-result_2.ets
+spec/nullables/nullable-method-param_2.ets
+spec/nullables/nullable-function-param_2.ets
+spec/nullables/nullable-member_2.ets
+spec/nullables/nullable-function-default-param_2.ets
+spec/nullables/nullable-function-default-param_5.ets
+spec/nullables/nullable-function-default-param_8.ets
+spec/nullables/nullable-method-default-param_2.ets
+spec/nullables/nullable-method-default-param_5.ets
+spec/nullables/nullable-method-default-param_8.ets
+### End Issue 14510
+### Issue 14495
+spec/nullables/defined-primitive-type-nullable-union_2.ets
+spec/nullables/nullable-method-param_0.ets
+spec/nullables/nullable-method-param_1.ets
+spec/nullables/primitive-nullable-union_0.ets
+spec/nullables/primitive-nullable-union_1.ets
+spec/nullables/primitive-nullable-union_2.ets
+spec/nullables/primitive-nullable-union_3.ets
+spec/nullables/primitive-nullable-union_4.ets
+spec/nullables/nullable-method-default-param_1.ets
+spec/nullables/nullable-method-default-param_4.ets
+spec/nullables/nullable-function-default-param_1.ets
+spec/nullables/nullable-function-default-param_4.ets
+spec/nullables/nullable-function-default-param_6.ets
+spec/nullables/nullable-function-default-param_7.ets
+spec/nullables/nullable-function-param_0.ets
+spec/nullables/nullable-function-param_1.ets
+spec/nullables/nullable-lambda-default-param_1.ets
+spec/nullables/nullable-lambda-default-param_4.ets
+spec/nullables/nullable-lambda-default-param_6.ets
+spec/nullables/nullable-method-default-param_7.ets
+spec/nullables/nullable-function-result_1.ets
+spec/nullables/nullable-lambda-param_0.ets
+spec/nullables/eval-lazy_1.ets
+spec/nullables/nullable-method-result_0.ets
+spec/nullables/nullable-method-result_1.ets
+spec/nullables/nullable-function-result_0.ets
+spec/nullables/issue13991.ets
+spec/nullables/issue14113.ets
+### End Issue 14495
+### Issue 14301
+spec/nullables/defined-primitive-type-nullable-union_0.ets
+spec/nullables/defined-primitive-type-nullable-union_1.ets
+spec/nullables/defined-primitive-type-nullable-union_2.ets
+### End Issue 14301
+### Issue 14583
+spec/nullables/nullable-method-default-param_0.ets
+spec/nullables/nullable-method-default-param_3.ets
+spec/nullables/nullable-method-default-param_6.ets
+### End Issue 14583
+### Issue 14584
+spec/nullables/nullable-lambda-default-param_3.ets
+spec/nullables/nullable-lambda-default-param_5.ets
+### Issue 14584
+### End Of Feature: Null safety tests
 
 ### Generic issues
 ### Issue 14498

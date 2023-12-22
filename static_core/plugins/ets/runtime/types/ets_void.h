@@ -48,6 +48,12 @@ public:
         }
     }
 
+    static EtsVoid *FromEtsObject(EtsObject *obj)
+    {
+        ASSERT(obj->GetClass() == EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetVoidClass());
+        return static_cast<EtsVoid *>(obj);
+    }
+
 private:
     NO_COPY_SEMANTIC(EtsVoid);
     NO_MOVE_SEMANTIC(EtsVoid);

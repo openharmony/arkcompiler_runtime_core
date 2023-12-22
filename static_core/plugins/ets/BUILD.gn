@@ -122,7 +122,15 @@ if (with_stdlib) {
       "}",
     ]
 
+    default_arktsconfig =
+        get_label_info("$ark_es2panda_root/aot:es2panda(${host_toolchain})",
+                       "root_out_dir")
+    default_arktsconfig += "/arkcompiler/ets_frontend"
+
     write_file("$root_gen_dir/tools/es2panda/generated/arktsconfig.json",
+               json_array,
+               "list lines")
+    write_file("$default_arktsconfig/arktsconfig.json",
                json_array,
                "list lines")
     sources = [

@@ -21,7 +21,7 @@ coretypes:
 - managed_class: std.core.String
   mirror_class: panda::ets::EtsString
 
-- managed_class: std.core.Type
+- managed_class: std.core.Class
   mirror_class: panda::ets::EtsClass
 
 - managed_class: std.interop.js.JSValue
@@ -119,7 +119,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
-      args: [ std.interop.js.JSValue, std.core.Type ]
+      args: [ std.interop.js.JSValue, std.core.Object ] # 2nd argument is ClassClass
     impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueObjectIntrinsic
     clear_flags: [ ]
 

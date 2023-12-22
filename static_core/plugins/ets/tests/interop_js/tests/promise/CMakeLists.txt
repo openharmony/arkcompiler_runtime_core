@@ -160,3 +160,21 @@ panda_ets_interop_js_test(ets_interop_js_test_async_string
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
     LAUNCHER_ARGS "testAsyncString" "Panda" 1
 )
+
+panda_ets_interop_js_test(ets_interop_js_test_async_void1
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
+    LAUNCHER_ARGS "testAsyncVoid" "undefined" 1
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_async_void2
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
+    LAUNCHER_ARGS "testAsyncVoidEmpty" "undefined" 1
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_async_void3
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
+    LAUNCHER_ARGS "testAsyncVoidNothing" "undefined" 1
+)

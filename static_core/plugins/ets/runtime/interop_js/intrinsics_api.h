@@ -38,7 +38,7 @@ struct IntrinsicsAPI {
     double (*JSRuntimeGetValueDouble)(JSValue *ets_js_value);
     uint8_t (*JSRuntimeGetValueBoolean)(JSValue *ets_js_value);
     EtsString *(*JSRuntimeGetValueString)(JSValue *ets_js_value);
-    EtsObject *(*JSRuntimeGetValueObject)(JSValue *ets_js_value, EtsClass *cls);
+    EtsObject *(*JSRuntimeGetValueObject)(JSValue *ets_js_value, EtsObject *cls);
     JSValue *(*JSRuntimeGetPropertyJSValue)(JSValue *ets_js_value, EtsString *ets_prop_name);
     double (*JSRuntimeGetPropertyDouble)(JSValue *ets_js_value, EtsString *ets_prop_name);
     EtsString *(*JSRuntimeGetPropertyString)(JSValue *ets_js_value, EtsString *ets_prop_name);

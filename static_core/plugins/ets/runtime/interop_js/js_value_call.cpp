@@ -84,11 +84,10 @@ template <typename FClsResolv, typename FStorePrim, typename FStoreRef>
             }
             auto klass = resolve_ref_cls();
 
-            if (klass == ctx->GetVoidClass()) {
-                // do nothing
-                return true;
-            }
             // start fastpath
+            if (klass == ctx->GetVoidClass()) {
+                return unwrap_val(helpers::TypeIdentity<JSConvertEtsVoid>());
+            }
             if (klass == ctx->GetJSValueClass()) {
                 return unwrap_val(helpers::TypeIdentity<JSConvertJSValue>());
             }
@@ -173,11 +172,10 @@ template <typename FClsResolv, typename FStore, typename FRead>
             auto klass = ref->template ClassAddr<Class>();
 
             ASSERT(resolve_ref_cls()->IsAssignableFrom(klass));
-            if (klass == ctx->GetVoidClass()) {
-                store_res(GetUndefined(env));
-                return true;
-            }
             // start fastpath
+            if (klass == ctx->GetVoidClass()) {
+                return wrap_ref(helpers::TypeIdentity<JSConvertEtsVoid>(), ref);
+            }
             if (klass == ctx->GetJSValueClass()) {
                 return wrap_ref(helpers::TypeIdentity<JSConvertJSValue>(), ref);
             }

@@ -20,9 +20,7 @@ tags: [compile-only]
 ---*/
 
 interface A {
-  m(): int throws {
-    
-  }
+  m(): int throws;
 }
 
 class C implements A {

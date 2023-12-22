@@ -343,6 +343,7 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinRefConvertor<JSConvertString>(cache, ctx->GetStringClass());
     RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ctx->GetPromiseClass());
     RegisterBuiltinRefConvertor<JSConvertArrayBuffer>(cache, ctx->GetArrayBufferClass());
+    RegisterBuiltinRefConvertor<JSConvertEtsVoid>(cache, ctx->GetVoidClass());
 
     RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, linker_ext->GetBoxBooleanClass());
     RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, linker_ext->GetBoxByteClass());

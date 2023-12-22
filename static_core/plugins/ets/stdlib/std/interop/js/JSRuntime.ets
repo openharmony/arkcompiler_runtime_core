@@ -101,8 +101,9 @@ export final class JSRuntime {
     public static getValueString(value: JSValue): String {
         JSRuntime.checkIntrinsicMethod();
     }
-
-    public static getValueObject(value: JSValue, t: Type): Object {
+    
+    // 2nd argument is ClassClass
+    public static getValueObject(value: JSValue, t: Object): Object {
         JSRuntime.checkIntrinsicMethod();
     }
 

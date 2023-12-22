@@ -149,9 +149,8 @@ EtsString *JSRuntimeGetValueStringIntrinsic(JSValue *ets_js_value)
     return S_INTRINSICS_API->JSRuntimeGetValueString(ets_js_value);
 }
 
-EtsObject *JSRuntimeGetValueObjectIntrinsic(JSValue *ets_js_value, EtsClass *cls)
+EtsObject *JSRuntimeGetValueObjectIntrinsic(JSValue *ets_js_value, EtsObject *cls)
 {
-    ASSERT(cls->AsObject()->GetClass()->GetRuntimeClass()->IsClassClass());
     return S_INTRINSICS_API->JSRuntimeGetValueObject(ets_js_value, cls);
 }
 

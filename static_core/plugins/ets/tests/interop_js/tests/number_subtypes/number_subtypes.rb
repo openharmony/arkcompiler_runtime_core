@@ -38,14 +38,9 @@ end
     NumberTypeDescription.new("byte", -128, 127, -128 + 127),
     NumberTypeDescription.new("short", -32768, 32767, -32768 + 32767),
     NumberTypeDescription.new("int", -2147483648, 2147483647, -2147483648 + 2147483647),
-    # Since all numbers in JS are represented as double, min/max long values are not fit to double
+    # double-long precision loss
     # NumberTypeDescription.new("long", -9223372036854775808, 9223372036854775, 0),
     NumberTypeDescription.new("long", -9223372036854775, 9223372036854775, -9223372036854775 + 9223372036854775),
-    # TODO(itrubachev) uncomment tests after unsigned types will be added to es2panda
-    # NumberTypeDescription.new("ubyte", 0, 255, 255),
-    # NumberTypeDescription.new("ushort", 0, 65535, 65535),
-    # NumberTypeDescription.new("uint", 0, 4294967295, 4294967295),
-    # NumberTypeDescription.new("ulong", 0, 18446744073709551615, 18446744073709551615),
     NumberTypeDescription.new("char", 0, 65535, 0 + 65535),
 ]
 

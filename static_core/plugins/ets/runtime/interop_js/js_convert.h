@@ -25,9 +25,11 @@
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_void.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/interop_js/pending_promise_listener.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "types/ets_void.h"
 
 namespace panda::ets::interop::js {
 
@@ -409,6 +411,18 @@ JSCONVERT_UNWRAP(String)
     return EtsString::CreateFromUtf8(value.data(), value.length());
 }
 
+JSCONVERT_DEFINE_TYPE(Void, EtsVoid *)
+JSCONVERT_WRAP(Void)
+{
+    napi_value js_val;
+    NAPI_CHECK_FATAL(napi_get_undefined(env, &js_val));
+    return js_val;
+}
+JSCONVERT_UNWRAP(Void)
+{
+    return EtsVoid::GetInstance();
+}
+
 JSCONVERT_DEFINE_TYPE(JSValue, JSValue *)
 JSCONVERT_WRAP(JSValue)
 {
@@ -528,6 +542,16 @@ JSCONVERT_UNWRAP(ArrayBuffer)
     buf->SetData(current_coro, EtsArray::CreateForPrimitive<EtsByteArray>(EtsClassRoot::BYTE_ARRAY, byte_length));
     memcpy(buf->GetData()->GetData<EtsByte>(), data, byte_length);
     return buf.GetPtr();
+}
+
+JSCONVERT_DEFINE_TYPE(EtsVoid, EtsVoid *)
+JSCONVERT_WRAP(EtsVoid)
+{
+    return GetUndefined(env);
+}
+JSCONVERT_UNWRAP(EtsVoid)
+{
+    return EtsVoid::GetInstance();
 }
 
 #undef JSCONVERT_DEFINE_TYPE
