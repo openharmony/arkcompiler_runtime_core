@@ -21,6 +21,7 @@
 from pathlib import Path
 from typing import List, Set
 import logging
+import re
 
 from runner.logger import Log
 from runner.utils import write_2_file
@@ -82,22 +83,31 @@ class XmlView:
         write_2_file(ignore_list_path, "\n".join(result))
 
     def __get_failed_test_case(self, test_result: Test) -> List[str]:
-        assert isinstance(test_result, TestFileBased)
+        if not isinstance(test_result, TestFileBased) or not test_result.report or test_result.fail_kind is None:
+            return ['<failure>There are no data about the failure</failure>']
+
         result = []
-        if test_result.report:
-            fail_output = self.__remove_special_chars(test_result.report.error)
-            result.append('<failure>')
-            result.append('<![CDATA[')
-            result.append(f"error kind = {test_result.fail_kind}")
-            result.append(fail_output)
-            result.append(f"return_code = {test_result.report.return_code}")
-            result.append(']]>')
-            result.append('</failure>')
-        else:
-            result.append('<failure>There are no data about the failure</failure>')
+        status = f"STATUS: {test_result.fail_kind.name}: "
+        if test_result.report.output:
+            status += str(re.sub(r'\[.*\]', '', test_result.report.output.splitlines()[0]))
+        elif test_result.report.error:
+            status += str(re.sub(r'\[.*\]', '', test_result.report.error.splitlines()[0]))
+
+        result.append('<failure>')
+        result.append('<![CDATA[')
+        result.append(f"error kind = {test_result.fail_kind.name}")
+        result.append(f"To reproduce:{test_result.reproduce}\n")
+        result.append(f"OUT: {test_result.report.output}")
+        result.append(f"ERR: {test_result.report.error}")
+        result.append(f"return_code = {test_result.report.return_code}")
+        result.append(status)
+        result.append(']]>')
+        result.append('</failure>')
+
         return result
 
-    def __remove_special_chars(self, data: str) -> str:
+    @staticmethod
+    def remove_special_chars(data: str) -> str:
         xml_special_chars = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&apos;"}
         for key, val in xml_special_chars.items():
             data = data.replace(key, val)

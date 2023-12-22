@@ -21,8 +21,10 @@
 from __future__ import annotations
 
 from os import path, makedirs
+from pathlib import Path
 from typing import Tuple, Optional, Sequence, List
 
+from runner.plugins.ets.ets_templates.test_metadata import get_metadata, TestMetadata
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.params import TestEnv, TestReport, Params
@@ -32,10 +34,16 @@ from runner.test_file_based import TestFileBased
 class TestETS(TestFileBased):
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
+
+        self.main_entry_point = "ETSGLOBAL::main"
+        self.metadata: TestMetadata = get_metadata(Path(test_path))
+        if self.metadata.package is not None:
+            self.main_entry_point = f"{self.metadata.package}.{self.main_entry_point}"
+
         # If test fails it contains reason (of FailKind enum) of first failed step
         # It's supposed if the first step is failed then no step is executed further
         self.fail_kind = None
-        self.main_entry_point = "ETSGLOBAL::main"
+
         self.bytecode_path = test_env.work_dir.intermediate
         makedirs(self.bytecode_path, exist_ok=True)
         self.test_abc = path.join(self.bytecode_path, f"{self.test_id}.abc")
@@ -44,36 +52,74 @@ class TestETS(TestFileBased):
 
     @property
     def is_negative_runtime(self) -> bool:
-        """
-        :return: True if a test is expected to fail on ark
-        """
-        test_basename = path.basename(self.path)
-        return test_basename.startswith("n.")
+        """ True if a test is expected to fail on ark """
+        negative_runtime_metadata = self.metadata.tags.negative and not self.metadata.tags.compile_only
+        return negative_runtime_metadata or path.basename(self.path).startswith("n.")
 
     @property
     def is_negative_compile(self) -> bool:
-        """
-        :return: True if a test is expected to fail on es2panda
-        """
-        return False
+        """ True if a test is expected to fail on es2panda """
+        return self.metadata.tags.negative and self.metadata.tags.compile_only
 
     @property
     def is_compile_only(self) -> bool:
-        """
-        :return: True if a test should be run only on es2panda
-        """
-        return False
+        """ True if a test should be run only on es2panda """
+        return self.metadata.tags.compile_only
 
     @property
     def is_valid_test(self) -> bool:
-        """
-        :return: True if a test should be run only
-        """
-        return True
+        """ True if a test is valid """
+        return not self.metadata.tags.not_a_test
+
+    def ark_extra_options(self) -> List[str]:
+        return self.metadata.ark_options
+
+    @property
+    def ark_timeout(self) -> int:
+        return self.metadata.timeout if self.metadata.timeout else super().ark_timeout
 
     @property
     def dependent_files(self) -> Sequence[TestETS]:
-        return []
+        if not self.metadata.files:
+            return []
+
+        tests = []
+        for file in self.metadata.files:
+            test_path = Path(self.path).parent / Path(file)
+            current_test_id = Path(self.test_id)
+            test = self.__class__(self.test_env, str(test_path), self.flags, str(current_test_id.parent / Path(file)))
+
+            test_abc_name = f'{current_test_id.stem}_{Path(test.test_abc).name}'
+            test_an_name = f'{current_test_id.stem}_{Path(test.test_an).name}'
+
+            test.test_abc = str(Path(test.test_abc).parent / Path(test_abc_name))
+            test.test_an = str(Path(test.test_abc).parent / Path(test_an_name))
+
+            tests.append(test)
+        return tests
+
+    @property
+    def runtime_args(self) -> List[str]:
+        if not self.dependent_files:
+            return super().runtime_args
+        return self.add_boot_panda_files(super().runtime_args)
+
+    @property
+    def verifier_args(self) -> List[str]:
+        if not self.dependent_files:
+            return super().verifier_args
+        return self.add_boot_panda_files(super().verifier_args)
+
+    def add_boot_panda_files(self, args: List[str]) -> List[str]:
+        dep_files_args = []
+        for arg in args:
+            name = '--boot-panda-files'
+            if name in arg:
+                _, value = arg.split('=')
+                dep_files_args.append(f'{name}={":".join([value] + [dt.test_abc for dt in self.dependent_files])}')
+            else:
+                dep_files_args.append(arg)
+        return dep_files_args
 
     def do_run(self) -> TestETS:
         for test in self.dependent_files:
