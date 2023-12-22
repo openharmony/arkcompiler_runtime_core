@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 - 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ class SupplierImpl implements Supplier {
     }
 }
 
+type SupplierN = Supplier|null;
+
 class SupplierImplForShadow implements Supplier {
     override get(): int {
         return 2;
@@ -44,7 +46,7 @@ class Base {
 class Testee extends Base {
 
 
-    public callShadow(...shadow: Supplier[]): int {
+    public callShadow(...shadow: SupplierN[]): int {
         let sum: int = 0;
         for(let call of shadow) {
             if(call != null) sum += call.get();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 - 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,9 +27,11 @@ class Base {
 
 type StringToInt = (val: String) => int;
 
+type StringToIntN = StringToInt|null;
+
 class Testee extends Base {
 
-    public callLambda(...lValues: StringToInt[]): int {
+    public callLambda(...lValues: StringToIntN[]): int {
         let sum: int = 0;
         for(let call of lValues) {
             if(call != null) sum += call("Hello");
@@ -37,7 +39,7 @@ class Testee extends Base {
         return sum;
     }
 
-    public callLambda(prefix: String, ...lValues: StringToInt[]): int {
+    public callLambda(prefix: String, ...lValues: StringToIntN[]): int {
         let sum: int = 0;
         for(let call of lValues) {
             if(call != null) sum += call(prefix);

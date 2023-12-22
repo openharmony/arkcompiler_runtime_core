@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -23,13 +23,13 @@ desc: |-
     in T
     It restricts available methods so it is only allowed to access methods that do not use T or do use ones with T in in-positions only.
 params: interface arguments, use-site variance
-tags: [compile-only, negative]
+tags:
 ---*/
 
 class X {}
 
 interface I<T> {
-    methIn(t: T)
+    methIn(t: T): void
     methOut(): T
     methInOut(t: T): T
 }

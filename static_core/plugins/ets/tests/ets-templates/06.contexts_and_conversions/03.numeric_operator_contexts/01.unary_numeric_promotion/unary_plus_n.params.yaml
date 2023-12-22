@@ -15,6 +15,4 @@
 cases:
   - { type: boolean, val: 'true' }
   - { type: Boolean, val: new Boolean(true) }
-  - { type: Integral, val: new Int(1) }
-  - { type: Floating, val: new Double(1.000 as double) }
   - { type: String, val: "\"0\"" }

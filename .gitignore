@@ -14,6 +14,7 @@ tags
 .byebug_history
 .cache
 *.swp
+static_core/build
 static_core/plugins/accord
 static_core/plugins/java
 static_core/plugins/cangjie

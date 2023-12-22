@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 - 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,12 +31,14 @@ class SupplierImplForShadow implements Supplier {
     }
 }
 
+type SupplierN = Supplier|null;
+
 class Base {
     public spread(): int {
         return 1;
     }
 
-    public call(...values: Supplier[]): int {
+    public call(...values: SupplierN[]): int {
         let sum: int = 0;
         for(let call of values) {
             if(call != null) sum += call.get();
@@ -53,7 +55,7 @@ class Testee extends Base {
     }
 
 
-    public call(prefix: String, ...values: Supplier[]): int {
+    public call(prefix: String, ...values: SupplierN[]): int {
         let sum: int = 0;
         for(let call of values) {
             if(call != null) sum += call.get();

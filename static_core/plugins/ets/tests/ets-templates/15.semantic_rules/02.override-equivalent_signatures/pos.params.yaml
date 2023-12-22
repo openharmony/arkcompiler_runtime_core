@@ -28,23 +28,23 @@ cases:
       class X {}
       class Y {}
       class Z {}
-      function foo<T extends X, U extends Y, V extends Z>(t: T, u: U, v: V): T { return new X(); } // CTE: not X <: T
+      function foo<T extends X, U extends Y, V extends Z>(t: T, u: U, v: V): T { return new X(); }
       function foo<T extends X, U extends Y>(t: T, u: U, v: Object): T { return new X(); }
       function foo<T extends X>(t: T, u: Object, v: Object): T { return new X(); }
       function foo(t: Object, u: Object, v: Object): Object { return new Object(); }
-    tags: [compile-only, negative]
+    tags: [compile-only]
 
   - decl: |-
       class Z {}
-      function foo<X extends Z>(a: int, b: long, c: double, d: Object): X { return new Z(); } // CTE: not Z <: X
+      function foo<X extends Z>(a: int, b: long, c: double, d: Object): X { return new Z(); }
       function bar<X extends Z>(a: int, b: long, c: double, d: Object): X { return new Z(); }
-    tags: [compile-only, negative]
+    tags: [compile-only]
 
   - decl: |-
       class Z {}
-      function foo<X extends Z>(a: int, b: long, c: double, d: Object): X { return new Z(); } // CTE: not Z <: X
+      function foo<X extends Z>(a: int, b: long, c: double, d: Object): X { return new Z(); }
       function foo<X extends Z>(a: long, b: long, c: double, d: Object): X { return new Z(); }
-    tags: [compile-only, negative]
+    tags: [compile-only]
 
   - decl: |-
       function foo(a: int[]): void {}

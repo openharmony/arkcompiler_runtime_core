@@ -183,9 +183,9 @@ cases:
           assert p[0] == "A"
 
     - use: |-
-          let v: [string]|null = ["A"]
+          let v: [string]|null = ():[string]|null => { let x = ["A"]; return x; }();
           assert v?.[0] == "A"
-          v = null
+          v = ():[string]|null => { return null; }();
           assert v?.[0] === undefined
 
     - use: |-

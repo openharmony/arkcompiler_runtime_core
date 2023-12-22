@@ -564,7 +564,9 @@
 
 # es2panda fails: panda#14391 Cannot cast enum to the same enum type or Object
 06.contexts_and_conversions/04.casting_contexts_and_conversions/identity.ets
+06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_39.ets
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_40.ets
+06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_41.ets
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_42.ets
 # end of es2panda fails
 

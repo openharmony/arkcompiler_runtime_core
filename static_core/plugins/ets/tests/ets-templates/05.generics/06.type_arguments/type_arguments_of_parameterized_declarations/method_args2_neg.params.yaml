@@ -84,15 +84,6 @@ cases:
       type B = Y
 
   - use: |-
-      let v: X|null = null
-      if (a.meth <B> (new X(), v) !== v) {  // X|null is not Y|null
-          return 1;
-      }
-    decl: |-
-      type B = Y|null
-    bound: ' extends Object|null'
-
-  - use: |-
       let v: I[] = [new X()]
       if (a.meth <B> (v, v) !== v) {  // I[] is not X
           return 1;

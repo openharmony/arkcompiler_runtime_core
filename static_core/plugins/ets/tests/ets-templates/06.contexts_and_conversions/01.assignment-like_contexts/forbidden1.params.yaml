@@ -31,6 +31,8 @@ cases:
   - { stype: string, sval: '"1"', dtype: int }
   - { stype: Boolean, sval: new Boolean(), dtype: string }
   - { stype: string, sval: '"true"', dtype: Boolean }
+  - { stype: Object, sval: new Int(), dtype: Boolean }
+
 
   - defs: |-
       class A {}
@@ -109,3 +111,23 @@ cases:
     stype: Box<X>
     sval: new Box<X>()
     dtype: Box<Y>
+
+  - defs: |-
+      class A {}
+    stype: Object
+    sval: new A()
+    dtype: Double
+
+  - defs: |-
+      interface I {}
+      class A implements I {}
+      class B implements I {}
+    stype: I
+    sval: new A()
+    dtype: B
+
+  - defs: |-
+      class A {}
+    stype: Object
+    sval: new A[1]
+    dtype: A[][]

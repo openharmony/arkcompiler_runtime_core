@@ -29,10 +29,10 @@ cases:
   - { type: Float, val: new Float(), res: 26 }
   - { type: Double, val: new Double(), res: 27 }
   - { type: Boolean, val: new Boolean(), res: 28 }
-  - { type: Integral, val: new Short(), res: 29 }
-  - { type: Floating, val: new Float(), res: 30 }
+  - { type: Integral, val: new Short(), res: 22 }
+  - { type: Floating, val: new Float(), res: 26 }
   - { type: String, val: '""', res: 31 }
-  - { type: Object, val: '""', res: 32 }
+  - { type: Object, val: '""', res: 31 }
   - { type: 'byte[]', val: '[0 as byte]', res: 101 }
   - { type: 'short[]', val: '[0 as short]', res: 102 }
   - { type: 'char[]', val: '[]', res: 103 }

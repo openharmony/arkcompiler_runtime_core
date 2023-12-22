@@ -112,9 +112,13 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Creates a new instance of Array
      */
+    public constructor(arrayLen: int) {
+        this.buffer = new NullishType[arrayLen];
+        this.actualLength = arrayLen
+    }
+
     public constructor(arrayLen: number) {
-        this.buffer = new NullishType[arrayLen as int];
-        this.actualLength = arrayLen as int // TODO(kprokopenko): this is incorrect! null-safety
+        this(arrayLen as int);
     }
 
     internal constructor(_tag: FromBuffer, buf: NullishType[]) {

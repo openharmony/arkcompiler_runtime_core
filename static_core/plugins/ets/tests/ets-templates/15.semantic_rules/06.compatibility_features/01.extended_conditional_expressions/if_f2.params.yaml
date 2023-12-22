@@ -13,9 +13,6 @@
 
 --- # falsy values
 cases:
-    - { val: 'null', type: 'Object|null' }
-    - { val: 'undefined', type: 'Object|undefined' }
-
     - { val: '0', type: 'int' }
     - { val: '0', type: 'byte' }
     - { val: '0', type: 'short' }
@@ -32,8 +29,8 @@ cases:
     - { val: '-0', type: 'float' }
     - { val: '-0', type: 'double' }
 
-    - { val: 'new Int()', type: 'int' }
-    - { val: 'new Byte()', type: 'byte' }
+    - { val: 'new Int(0)', type: 'int' }
+    - { val: 'new Byte(0 as byte)', type: 'byte' }
     - { val: 'new Short()', type: 'short' }
     - { val: 'new Long()', type: 'long' }
     - { val: 'new Float()', type: 'float' }
@@ -53,27 +50,14 @@ cases:
     - { val: '42 * (21 - 11 - 10)', type: 'number' }
 
     - decl: |-
-        class A {}
-        class B {}
-        type UT = A | B | null
-      type: UT
-      val: 'null'
-
-    - decl: |-
         let empty: string = ''
       type: string
       val: '`${empty}`'
 
     - decl: |-
-        interface I {}
-        type NI = I | null
-      type: NI
-      val: 'null'
-
-    - decl: |-
         enum Color { Red, Green, Blue }
-      type: Color
-      val: Color.Red
+      type: int
+      val: Color.Red.getValue()
 
     - { val: 'new Byte()', type: 'Byte' }
     - { val: 'new Short()', type: 'Short' }

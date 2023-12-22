@@ -131,3 +131,18 @@ cases:
       } catch (e) {
           return 1;
       }
+
+  - defs: |-
+      class A extends Exception {}
+    use: |-
+      let p: A|null = new A();
+      try {
+          throw p;
+      } catch (e: Error) {
+          return 1;
+      } catch (e: A) {
+          // ok, expected
+          return 0;
+      } catch (e) {
+          return 1;
+      }

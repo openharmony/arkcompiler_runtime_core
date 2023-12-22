@@ -384,7 +384,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         if (fromIndex == undefined) {
             return this.startsWith(prefix, 0)
         }
-        return this.startsWith(prefix, fromIndex!.intValue())
+        return this.startsWith(prefix, fromIndex.intValue())
     }
 
     /**
@@ -487,7 +487,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         if (fromIndex == undefined) {
             return this.indexOf(str, 0)
         }
-        return this.indexOf(str, fromIndex!.intValue())
+        return this.indexOf(str, fromIndex.intValue())
     }
 
     /**
@@ -757,10 +757,10 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         let lim : long
         if (limit == undefined) {
             lim = (1 << 32) - 1
-        } else if ((limit!) == 0) {
+        } else if (limit == 0) {
             return new String[0]
         } else {
-            lim = limit!.unboxed() as long
+            lim = limit.unboxed() as long
         }
         let s = this.getLength()
         if (s == 0) {
@@ -1329,7 +1329,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         if (position == undefined) {
             return this.indexOf(searchString) == -1 ? false : true;
         }
-        return this.indexOf(searchString, position!.intValue()) == -1 ? false : true;
+        return this.indexOf(searchString, position.intValue()) == -1 ? false : true;
     }
 
     /**

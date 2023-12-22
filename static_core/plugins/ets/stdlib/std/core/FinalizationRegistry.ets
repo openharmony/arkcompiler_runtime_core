@@ -117,7 +117,7 @@ export final class FinalizationRegistry {
         let refObject = new WeakRef<Object>(object);
         let refToken: WeakRef<Object> | null = null;
         if (token != null) {
-            refToken = new WeakRef<Object>(token!);
+            refToken = new WeakRef<Object>(token);
         }
         let free_index = this.allocTrimplet();
         // NOTE: GC and thus cleanup function can be triggered here after JIT/AOT optimizations

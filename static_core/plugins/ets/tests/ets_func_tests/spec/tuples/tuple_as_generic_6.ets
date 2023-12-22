@@ -16,7 +16,7 @@
 /*---
 desc: 03.8.10 Tuple Types
 name: tuple_as_generic_6.ets
-tags: [compile-only, negative]
+tags: []
 ---*/
 
 class TupleProvider<X,Y> {
@@ -28,7 +28,7 @@ class TupleProvider<X,Y> {
         this.two = p1;
     }
 
-    public publish(): [X, Y] {
+    public publish(): [Y, X] {
         return [this.two, this.one];  // Values swapped here !!!!
     }
 }
@@ -37,6 +37,8 @@ function main(): int {
 
     let tp: TupleProvider<String, number> = new TupleProvider<String, number>("Hello", 42.0);
     let result = tp.publish();
+    assert(tp.one == result[1])
+    assert(tp.two == result[0])
 
     return 0;
 }

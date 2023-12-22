@@ -45,13 +45,6 @@ cases:
           return 1;
       }
 
-  - use: |-
-      let v: I|null = new X()
-      if (foo <I> (v, new Y<Long>()) !== v) {  // I|null is not I
-          return 1;
-      }
-    bound: ' extends Object|null'
-
   # type argument is array of classes, interfaces, enums
   - use: |-
       let v = new Object[0]

@@ -15,5 +15,3 @@
 cases:
   - { type: long, val: 10, len: 10 }
   - { type: Long, val: new Long(1 as long), len: 1 }
-  - { type: Integral, val: 0, len: 0 }
-  - { type: Floating, val: 0.0, len: 0 }

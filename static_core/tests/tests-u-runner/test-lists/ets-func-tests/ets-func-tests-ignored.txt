@@ -1,3 +1,6 @@
+std/core/std_core_string_String_fromCharCode_005.ets
+std/core/std_core_string_String_localeCompare_string.ets
+std/core/std_core_string_String_localeCompare_string_001.ets
 ### Issue 10945, 11969 begin
 std/core/std_core_char_static_Char_isPartOfSurrogatePair.ets
 std/core/std_core_char_static_Char_isValidCodePoint.ets

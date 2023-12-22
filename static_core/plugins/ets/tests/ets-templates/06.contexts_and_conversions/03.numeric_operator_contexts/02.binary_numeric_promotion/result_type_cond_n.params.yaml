@@ -16,6 +16,4 @@ cases:
   - { type: short, val: 1 as short, rt: boolean, rv: 'true' }
   - { type: char, val: "с'2'", rt: Boolean, rv: new Boolean(true) }
   - { type: int, val: 1, rt: Object, rv: new Object() }
-  - { type: int, val: 1, rt: Integral, rv: new Long(1 as long) }
-  - { type: long, val: 1 as long, rt: Floating, rv: new Double(0) }
   - { type: double, val: 0.1, rt: string, rv: '"0.1"' }

@@ -77,3 +77,7 @@ cases:
     - use: |-
           let v = [1.0, 2.0, 3.0]   // number[] must be inferred from element types
           let t: [number, number, number] = v  // wrong type
+    - use: |-
+          let v: [number, number] = [1.0, 2.0]
+          let t: Object = v
+          let p: [boolean] = t as [boolean]  // wrong cast
