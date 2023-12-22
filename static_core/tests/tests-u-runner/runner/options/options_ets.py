@@ -19,18 +19,22 @@
 # http://www.sphinx-doc.org/en/master/config
 
 from functools import cached_property
-from typing import Dict
+from typing import Dict, Union
 
-from runner.options.decorator_value import value, _to_str, _to_bool
+from runner.options.decorator_value import value, _to_str, _to_bool, _to_int
 
 
 class ETSOptions:
+    __DEFAULT_COMPARE_FILES_ITERATIONS = 2
+
     def __str__(self) -> str:
         return _to_str(self, 1)
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> Dict[str, Union[bool, int]]:
         return {
             "force-generate": self.force_generate,
+            "compare-files": self.compare_files,
+            "compare-files-iterations": self.compare_files_iterations,
         }
 
     @cached_property
@@ -38,5 +42,20 @@ class ETSOptions:
     def force_generate(self) -> bool:
         return False
 
+    @cached_property
+    @value(yaml_path="ets.compare-files", cli_name="compare_files", cast_to_type=_to_bool)
+    def compare_files(self) -> bool:
+        return False
+
+    @cached_property
+    @value(yaml_path="ets.compare-files-iterations", cli_name="compare_files_iterations", cast_to_type=_to_int)
+    def compare_files_iterations(self) -> int:
+        return self.__DEFAULT_COMPARE_FILES_ITERATIONS
+
     def get_command_line(self) -> str:
-        return '--force-generate' if self.force_generate else ''
+        options = [
+            '--force-generate' if self.force_generate else '',
+            '---compare-files' if self.compare_files else '',
+            f'--compare-files-iterations={self.compare_files_iterations}',
+        ]
+        return ' '.join(options)

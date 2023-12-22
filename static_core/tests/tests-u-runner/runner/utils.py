@@ -23,8 +23,10 @@ import os
 import random
 import shutil
 from enum import Enum
+from filecmp import cmp
+from itertools import tee
 from os import makedirs, path, remove
-from typing import TypeVar, Callable, Optional, Type, Union, Any, List, Iterator, Tuple
+from typing import TypeVar, Callable, Optional, Type, Union, Any, List, Iterator, Tuple, Iterable
 from pathlib import Path
 from urllib import request
 from urllib.error import URLError
@@ -180,3 +182,18 @@ def get_group_number(test_id: str, total_groups: int) -> int:
     """
     random.seed(test_id)
     return random.randint(1, total_groups)
+
+
+# from itertools import pairwise when switching to python version >= 3.10
+# pylint: disable=invalid-name
+def pairwise(iterable: Iterable[Path]) -> Iterator[Tuple[Path, Path]]:
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
+def compare_files(files: List[Path]) -> bool:
+    for f1, f2 in pairwise(files):
+        if not cmp(f1, f2):
+            return False
+    return True

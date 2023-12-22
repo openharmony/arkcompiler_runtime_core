@@ -23,6 +23,7 @@ from __future__ import annotations
 from os import path, makedirs
 from pathlib import Path
 from typing import Tuple, Optional, Sequence, List
+from runner.utils import compare_files
 
 from runner.plugins.ets.ets_templates.test_metadata import get_metadata, TestMetadata
 from runner.enum_types.configuration_kind import ConfigurationKind
@@ -121,6 +122,7 @@ class TestETS(TestFileBased):
                 dep_files_args.append(arg)
         return dep_files_args
 
+    # pylint: disable=too-many-return-statements
     def do_run(self) -> TestETS:
         for test in self.dependent_files:
             test.do_run()
@@ -129,10 +131,13 @@ class TestETS(TestFileBased):
             return self
 
         if not self.is_valid_test and self.is_compile_only:
-            self._run_compiler()
+            self._run_compiler(self.test_abc)
             return self
 
-        self.passed, self.report, self.fail_kind = self._run_compiler()
+        if self.test_env.config.ets.compare_files:
+            return self._run_compare_mode()
+        self.passed, self.report, self.fail_kind = self._run_compiler(self.test_abc)
+
         if not self.passed or (self.passed and self.is_compile_only):
             return self
 
@@ -159,6 +164,28 @@ class TestETS(TestFileBased):
             lambda _, _2, rc: self._runtime_result_validator(rc))
         return self
 
+    def _run_compare_mode(self) -> TestETS:
+        files = []
+        iterations = self.test_env.config.ets.compare_files_iterations
+        for i in range(iterations):
+            if i != 0:
+                test_ets = self.bytecode_path / self.test_id
+                stem, suffix_ets = test_ets.stem, test_ets.suffix
+                suffix_abc = ".abc"
+                test_abc = test_ets.parent / Path(f'{stem}_{str(i + 1)}{suffix_ets}{suffix_abc}')
+            else:
+                test_abc = Path(self.test_abc)
+
+            files.append(test_abc)
+            self.passed, self.report, self.fail_kind = self._run_compiler(str(test_abc))
+            if not self.passed:
+                return self
+
+        self.passed = compare_files(files)
+        if not self.passed:
+            self.fail_kind = FailKind.COMPARE_FAIL
+        return self
+
     def _runtime_result_validator(self, return_code: int) -> bool:
         """
         :return: True if test is successful, False if failed
@@ -168,12 +195,12 @@ class TestETS(TestFileBased):
 
         return return_code == 0
 
-    def _run_compiler(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
+    def _run_compiler(self, test_abc: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         es2panda_flags = []
         if not self.is_valid_test:
             es2panda_flags.append('--ets-module')
         es2panda_flags.extend(self.test_env.es2panda_args)
-        es2panda_flags.append(f"--output={self.test_abc}")
+        es2panda_flags.append(f"--output={test_abc}")
         es2panda_flags.append(self.path)
 
         params = Params(
@@ -189,7 +216,7 @@ class TestETS(TestFileBased):
         passed, report, fail_kind = self.run_one_step(
             name="es2panda",
             params=params,
-            result_validator=lambda _, _2, rc: self._validate_compiler(rc, self.test_abc)
+            result_validator=lambda _, _2, rc: self._validate_compiler(rc, test_abc)
         )
         return passed, report, fail_kind
 

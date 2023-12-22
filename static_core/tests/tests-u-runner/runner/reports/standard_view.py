@@ -45,19 +45,19 @@ class StandardView:
 
     def display_summary(self, fail_lists: Dict[FailKind, List[Test]]) -> None:
         Log.default(_LOGGER, f"Summary({self.__summary.name}):")
-        Log.default(_LOGGER, f"Total:                    \t{self.__summary.total:>5}")
-        Log.default(_LOGGER, f"Passed:                   \t{self.__summary.passed:>5}")
-        Log.default(_LOGGER, f"Failed (new failures):    \t{self.__summary.failed:>5}")
+        Log.default(_LOGGER, f"Total:                       \t{self.__summary.total:<5}")
+        Log.default(_LOGGER, f"Passed:                      \t{self.__summary.passed:<5}")
+        Log.default(_LOGGER, f"Failed (new failures):       \t{self.__summary.failed:<5}")
         for kind, fail_list in fail_lists.items():
             if len(fail_list) == 0:
                 continue
-            Log.default(_LOGGER, f"  {kind}:\t{len(fail_list):>5}")
-        Log.default(_LOGGER, f"Ignored, but passed:      \t{self.__summary.ignored_but_passed:>5}")
-        Log.default(_LOGGER, f"Ignored (known failures): \t{self.__summary.ignored:>5}")
+            Log.default(_LOGGER, f"  {kind}:" + ' ' * (29 - len(str(kind))) + f"{len(fail_list):<5}")
+        Log.default(_LOGGER, f"Ignored, but passed:         \t{self.__summary.ignored_but_passed:<5}")
+        Log.default(_LOGGER, f"Ignored (known failures):    \t{self.__summary.ignored:<5}")
         if self.__summary.excluded > 0:
-            Log.default(_LOGGER, f"Excluded through lists:   \t{self.__summary.excluded:>5}")
+            Log.default(_LOGGER, f"Excluded through lists:      \t{self.__summary.excluded:<5}")
         if self.__summary.excluded_after > 0:
-            Log.default(_LOGGER, f"Excluded by other reasons:\t{self.__summary.excluded_after:>5}")
+            Log.default(_LOGGER, f"Excluded by other reasons:   \t{self.__summary.excluded_after:<5}")
 
     @staticmethod
     def summarize_failures(fail_lists: Dict[FailKind, List[Test]]) -> None:
