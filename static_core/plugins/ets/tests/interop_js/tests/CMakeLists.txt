@@ -29,6 +29,7 @@ file(WRITE ${ETS_CONFIG}
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/strict_equality/strict_equality.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_instanceof/dynamic_instanceof.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/scenarios.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/checked/example/strings.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/checked/obj_call/obj_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
@@ -156,3 +157,4 @@ add_subdirectory(proxies)
 add_subdirectory(checked)
 add_subdirectory(perf)
 add_subdirectory(compiler)
+add_subdirectory(scenarios)
