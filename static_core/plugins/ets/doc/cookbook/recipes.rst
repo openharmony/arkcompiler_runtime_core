@@ -3799,23 +3799,23 @@ this rule and their layout cannot be changed in runtime.
 
 .. _R140:
 
-|CB_R| ``Function.apply``, ``Function.bind``, ``Function.call`` are not supported
----------------------------------------------------------------------------------
+|CB_R| ``Function.bind`` is not supported
+-----------------------------------------
 
-|CB_RULE| ``arkts-no-func-apply-bind-call``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|CB_RULE| ``arkts-no-func-bind``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. meta:
-    :keywords: FunctionApplyBindCall
+    :keywords: FunctionBind
 
-|CB_ERROR|
+|CB_WARNING|
 
-|LANG| does not allow using standard library functions ``Function.apply``,
-``Function.bind`` and ``Function.call``. These APIs are needed in the standard
-library to explicitly set ``this`` parameter for the called function.
+|LANG| does not allow using standard library function ``Function.bind``.
+This API is needed in the standard library to explicitly set ``this``
+parameter for the called function.
 In |LANG| the semantics of ``this`` is restricted to the conventional OOP
 style, and the usage of ``this`` in stand-alone functions is prohibited.
-Thus these functions are excessive.
+Thus this function is excessive.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3835,7 +3835,8 @@ Thus these functions are excessive.
     }
 
     // This will log "Mary":
-    console.log(person.fullName.apply(person1))
+    const boundFullName = person.fullName.bind(person1)
+    console.log(boundFullName())
 
 |CB_OK|
 ~~~~~~~
@@ -4331,3 +4332,70 @@ variables of type ``ESObject``.
 * :ref:`R060`
 * :ref:`R066`
 * :ref:`R137`
+
+.. _R152:
+
+|CB_R| ``Function.apply``, ``Function.call`` are not supported
+--------------------------------------------------------------
+
+|CB_RULE| ``arkts-no-func-apply-call``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: FunctionApplyCall
+
+|CB_ERROR|
+
+|LANG| does not allow using standard library functions ``Function.apply``
+and ``Function.call``. These APIs are needed in the standard library to
+explicitly set ``this`` parameter for the called function.
+In |LANG| the semantics of ``this`` is restricted to the conventional OOP
+style, and the usage of ``this`` in stand-alone functions is prohibited.
+Thus these functions are excessive.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    const person = {
+        firstName: "aa",
+
+        fullName: function(): string {
+            return this.firstName
+        }
+    }
+
+    const person1 = {
+        firstName: "Mary"
+    }
+
+    // This will log "Mary":
+    console.log(person.fullName.apply(person1))
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    class Person {
+        firstName : string
+
+        constructor(firstName : string) {
+            this.firstName = firstName
+        }
+        fullName() : string {
+            return this.firstName
+        }
+    }
+
+    let person = new Person("")
+    let person1 = new Person("Mary")
+
+    // This will log "Mary":
+    console.log(person1.fullName())
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R093`
