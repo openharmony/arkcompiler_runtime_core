@@ -182,26 +182,59 @@ SaveStateInst *CopySaveState(Graph *graph, SaveStateInst *inst)
     return copy;
 }
 
+template <typename T>
+bool CanArrayAccessBeImplicit(T *array, RuntimeInterface *runtime)
+{
+    size_t index = array->GetImm();
+    auto arch = array->GetBasicBlock()->GetGraph()->GetArch();
+    size_t offset = runtime->GetArrayDataOffset(arch) + (index << DataType::ShiftByType(array->GetType(), arch));
+    return offset < runtime->GetProtectedMemorySize();
+}
+
 bool IsSuitableForImplicitNullCheck(const Inst *inst)
 {
-    auto is_compressed_enabled = inst->GetBasicBlock()->GetGraph()->GetRuntime()->IsCompressedStringsEnabled();
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    auto runtime = graph->GetRuntime();
+    size_t max_offset = runtime->GetProtectedMemorySize();
     switch (inst->GetOpcode()) {
         case Opcode::LoadArray:
-            return inst->CastToLoadArray()->IsArray() || !is_compressed_enabled;
-        case Opcode::LoadArrayI:
-            return inst->CastToLoadArrayI()->IsArray() || !is_compressed_enabled;
-        case Opcode::LoadObject:
-        case Opcode::StoreObject:
-        case Opcode::LenArray:
         case Opcode::StoreArray:
-        case Opcode::StoreArrayI:
         case Opcode::LoadArrayPair:
-        case Opcode::StoreArrayPair:
-        case Opcode::LoadArrayPairI:
-        case Opcode::StoreArrayPairI:
-            // These instructions access nullptr and produce a signal in place
-            // Note that CallVirtual is not in the list
+        case Opcode::StoreArrayPair: {
+            // we don't know array index, so offset can be more than protected memory
+            return false;
+        }
+        case Opcode::LoadArrayI: {
+            ASSERT(inst->CastToLoadArrayI()->IsArray() || !runtime->IsCompressedStringsEnabled());
+
+            auto inst_load_array_i = inst->CastToLoadArrayI();
+            auto arch = graph->GetArch();
+
+            size_t data_offset =
+                inst_load_array_i->IsArray() ? runtime->GetArrayDataOffset(arch) : runtime->GetStringDataOffset(arch);
+            size_t shift = DataType::ShiftByType(inst->GetType(), arch);
+            size_t offset = data_offset + (inst_load_array_i->GetImm() << shift);
+            return offset < max_offset;
+        }
+        case Opcode::LenArray:
             return true;
+        case Opcode::LoadObject: {
+            auto load_obj = inst->CastToLoadObject();
+            return GetObjectOffset(graph, load_obj->GetObjectType(), load_obj->GetObjField(), load_obj->GetTypeId()) <
+                   max_offset;
+        }
+        case Opcode::StoreObject: {
+            auto store_obj = inst->CastToStoreObject();
+            return GetObjectOffset(graph, store_obj->GetObjectType(), store_obj->GetObjField(),
+                                   store_obj->GetTypeId()) < max_offset;
+        }
+        case Opcode::StoreArrayI:
+            return CanArrayAccessBeImplicit(inst->CastToStoreArrayI(), runtime);
+        case Opcode::LoadArrayPairI:
+            return CanArrayAccessBeImplicit(inst->CastToLoadArrayPairI(), runtime);
+        case Opcode::StoreArrayPairI:
+            return CanArrayAccessBeImplicit(inst->CastToStoreArrayPairI(), runtime);
+
         default:
             return false;
     }

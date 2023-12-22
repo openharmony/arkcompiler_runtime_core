@@ -29,6 +29,7 @@
 #include "utils/arch.h"
 #include "utils/span.h"
 #include "utils/arena_containers.h"
+#include "libpandabase/mem/mem.h"
 
 namespace panda {
 class Thread;
@@ -1088,6 +1089,12 @@ public:
     virtual uint8_t GetReferenceTypeMask() const
     {
         return 0;
+    }
+
+    virtual size_t GetProtectedMemorySize() const
+    {
+        // Conservatively, we believe that one page is protected. There can't be less than one.
+        return PAGE_SIZE;
     }
 
     /// Entrypoints

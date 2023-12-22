@@ -56,6 +56,10 @@
 #! EVENT_NEXT   /ImplicitNullcheck,.*/
 #! EVENT_NEXT   /Exception,.*__noinline__call_stobj_obj.*NULL_CHECK/
 
+#! CHECKER      Sanity check in interpreter
+#! SKIP_IF      @architecture == "arm32"
+#! RUN          options: "--compiler-enable-jit=false --interpreter-type=irtoc", entry: "_GLOBAL::main"
+
 .record panda.String <external>
 .record panda.NullPointerException <external>
 
@@ -232,7 +236,7 @@ catch_block2_begin:
 try_begin:
     newobj v0, A
     lda.obj v0
-    stobj a0, A.data_obj
+    stobj.obj a0, A.data_obj
     ldai 2
     return
 try_end:

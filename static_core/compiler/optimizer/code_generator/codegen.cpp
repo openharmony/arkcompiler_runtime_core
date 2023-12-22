@@ -3308,36 +3308,6 @@ void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)
     }
 }
 
-static size_t GetObjectOffset(Graph *graph, ObjectType obj_type, RuntimeInterface::FieldPtr field, uint32_t type_id)
-{
-    switch (obj_type) {
-        case ObjectType::MEM_DYN_GLOBAL:
-            return graph->GetRuntime()->GetPropertyBoxOffset(graph->GetArch());
-        case ObjectType::MEM_DYN_ELEMENTS:
-            return graph->GetRuntime()->GetElementsOffset(graph->GetArch());
-        case ObjectType::MEM_DYN_PROPS:
-            return graph->GetRuntime()->GetPropertiesOffset(graph->GetArch());
-        case ObjectType::MEM_DYN_PROTO_HOLDER:
-            return graph->GetRuntime()->GetPrototypeHolderOffset(graph->GetArch());
-        case ObjectType::MEM_DYN_PROTO_CELL:
-            return graph->GetRuntime()->GetPrototypeCellOffset(graph->GetArch());
-        case ObjectType::MEM_DYN_CHANGE_FIELD:
-            return graph->GetRuntime()->GetIsChangeFieldOffset(graph->GetArch());
-        case ObjectType::MEM_DYN_ARRAY_LENGTH:
-            return graph->GetRuntime()->GetDynArrayLenthOffset(graph->GetArch());
-        case ObjectType::MEM_DYN_INLINED:
-            return type_id;
-        case ObjectType::MEM_DYN_CLASS:
-            return graph->GetRuntime()->GetObjClassOffset(graph->GetArch());
-        case ObjectType::MEM_DYN_METHOD:
-            return graph->GetRuntime()->GetFunctionTargetOffset(graph->GetArch());
-        case ObjectType::MEM_DYN_HCLASS:
-            return graph->GetRuntime()->GetHClassOffset(graph->GetArch());
-        default:
-            return graph->GetRuntime()->GetFieldOffset(field);
-    }
-}
-
 void EncodeVisitor::VisitLoadObject(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
