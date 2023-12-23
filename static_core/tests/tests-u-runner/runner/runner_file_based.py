@@ -27,7 +27,7 @@ from functools import cached_property
 from glob import glob
 from os import path, environ
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Type
 
 from runner.utils import get_platform_binary_name
 from runner.enum_types.configuration_kind import ConfigurationKind, SanitizerKind
@@ -64,8 +64,56 @@ INDEX_FAILED_TESTS_LIST = "${FailedTestsList}"
 _LOGGER = logging.getLogger("runner.runner_file_based")
 
 
+class PandaBinaries:
+    DISABLE_CHECK_RUNTIME = ['parser']
+
+    def __init__(self, runner_name: str, build_dir: str, config: Config, conf_kind: ConfigurationKind) -> None:
+        self.build_dir = build_dir
+        self.config = config
+        self.conf_kind = conf_kind
+        self.runner_name = runner_name
+
+    @property
+    def es2panda(self) -> str:
+        if self.config.es2panda.custom_path is not None:
+            es2panda = self.__get_binary_path(self.config.es2panda.custom_path)
+        else:
+            es2panda = self.__get_binary_path("es2panda")
+        return es2panda
+
+    @property
+    def runtime(self) -> str:
+        if self.runner_name in self.DISABLE_CHECK_RUNTIME:
+            return ""
+        return self.__get_binary_path('ark')
+
+    @property
+    def verifier(self) -> str:
+        if not self.config.verifier.enable:
+            return ""
+        return self.__get_binary_path("verifier")
+
+    @property
+    def ark_aot(self) -> str:
+        return self.__get_binary_path('ark_aot')
+
+    @property
+    def ark_quick(self) -> str:
+        return ""
+
+    def __get_binary_path(self, binary: str) -> str:
+        return self.check_path(self.build_dir, 'bin', get_platform_binary_name(binary))
+
+    @staticmethod
+    def check_path(*path_parts: str) -> str:
+        path_ = path.join(*path_parts)
+        if not path.isfile(path_):
+            Log.exception_and_raise(_LOGGER, f"Cannot find binary file: {path_}", FileNotFoundError)
+        return str(path_)
+
+
 class RunnerFileBased(Runner):
-    def __init__(self, config: Config, name: str) -> None:
+    def __init__(self, config: Config, name: str, panda_binaries: Type[PandaBinaries] = PandaBinaries) -> None:
         Runner.__init__(self, config, name)
         self.cmd_env = environ.copy()
 
@@ -78,21 +126,11 @@ class RunnerFileBased(Runner):
         self.sanitizer = self.config.test_lists.sanitizer
         self.architecture = self.config.test_lists.architecture
 
-        if self.config.es2panda.custom_path is not None:
-            self.es2panda = self._set_path_and_check(self.config.es2panda.custom_path)
-        else:
-            self.es2panda = self._set_path_and_check(self.build_dir, "bin", get_platform_binary_name("es2panda"))
+        self.binaries = panda_binaries(name, self.build_dir, self.config, self.conf_kind)
 
-        self.verifier = self._set_path_and_check(self.build_dir, "bin", get_platform_binary_name("verifier")) \
-            if self.config.verifier.enable else ""
         self.verifier_args: List[str] = []
-
-        self.runtime = self._set_path_and_check(self.build_dir, 'bin', get_platform_binary_name('ark'))
-
         self.cmd_prefix = self._set_cmd_prefix(config)
-
         self.quick_args: List[str] = []
-        self.ark_quick = ""
 
         self.runtime_args = self.config.ark.ark_args[:]
         self.runtime_args.extend([
@@ -107,7 +145,7 @@ class RunnerFileBased(Runner):
         self.ark_aot: Optional[str] = None
         self.aot_args: List[str] = []
         if self.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
-            self.ark_aot = self._set_path_and_check(self.build_dir, 'bin', get_platform_binary_name('ark_aot'))
+            self.ark_aot = self.binaries.ark_aot
 
             self.aot_args = [
                 f'--gc-type={self.config.general.gc_type}',
@@ -129,18 +167,18 @@ class RunnerFileBased(Runner):
             cmd_prefix=self.cmd_prefix,
             cmd_env=self.cmd_env,
             coverage=self.coverage,
-            es2panda=self.es2panda,
+            es2panda=self.binaries.es2panda,
             es2panda_args=[],
-            runtime=self.runtime,
+            runtime=self.binaries.runtime,
             runtime_args=self.runtime_args,
             ark_aot=self.ark_aot,
             aot_args=self.aot_args,
-            ark_quick=self.ark_quick,
+            ark_quick=self.binaries.ark_quick,
             quick_args=self.quick_args,
             timestamp=int(datetime.timestamp(datetime.now())),
             report_formats={self.config.general.report_format},
             work_dir=self.work_dir,
-            verifier=self.verifier,
+            verifier=self.binaries.verifier,
             verifier_args=self.verifier_args
         )
 
@@ -154,13 +192,6 @@ class RunnerFileBased(Runner):
         return WorkDir(self.config.general, self.default_work_dir_root)
 
     @staticmethod
-    def _set_path_and_check(*path_parts: str) -> str:
-        _path = path.join(*path_parts)
-        if not path.isfile(_path):
-            Log.exception_and_raise(_LOGGER, f"Cannot find binary file: {_path}", FileNotFoundError)
-        return str(_path)
-
-    @staticmethod
     def _set_cmd_prefix(config: Config) -> List[str]:
         if config.general.qemu == QemuKind.ARM64:
             return ["qemu-aarch64", "-L", "/usr/aarch64-linux-gnu/"]
@@ -172,7 +203,7 @@ class RunnerFileBased(Runner):
 
     def generate_quick_stdlib(self, stdlib_abc: str) -> str:
         Log.all(_LOGGER, "Generate quick stdlib")
-        cmd = self.cmd_prefix + [self.ark_quick]
+        cmd = self.cmd_prefix + [self.binaries.ark_quick]
         cmd.extend(self.quick_args)
         src_abc = stdlib_abc
         root, ext = path.splitext(src_abc)

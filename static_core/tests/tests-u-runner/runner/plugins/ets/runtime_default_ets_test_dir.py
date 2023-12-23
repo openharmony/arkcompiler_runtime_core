@@ -36,8 +36,12 @@ class RuntimeDefaultEtsTestDir:
 
     @property
     def es2panda_test(self) -> Path:
-        return self.__static_core_root / "tools" / "es2panda" / "test"
+        return self.__static_core_root.parent.parent / 'ets_frontend' / 'ets2panda' / 'test'
 
     @property
     def runtime_ets(self) -> Path:
         return self.es2panda_test / "runtime" / "ets"
+
+    @property
+    def list_root(self) -> Path:
+        return self.es2panda_test / 'test-lists'

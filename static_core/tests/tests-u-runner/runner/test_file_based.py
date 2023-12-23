@@ -80,12 +80,12 @@ class TestFileBased(Test):
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                env=params.env
+                env=params.env,
+                encoding='utf-8',
+                errors='ignore',
         ) as process:
             try:
-                out, err = process.communicate(timeout=params.timeout)
-                output = out.decode("utf-8", errors="ignore")
-                error = err.decode("utf-8", errors="ignore")
+                output, error = process.communicate(timeout=params.timeout)
                 return_code = process.returncode
                 passed = result_validator(output, error, return_code)
                 fail_kind = params.fail_kind_fail if not passed else None

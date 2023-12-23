@@ -45,7 +45,7 @@ class EtsTestSuite(ABC):
     def __init__(self, config: Config, work_dir: WorkDir, suite_name: str, default_list_root: str) -> None:
         self.__suite_name = suite_name
         self.__work_dir = work_dir
-        self.__default_list_root = Path(default_list_root, self.__suite_name)
+        self.__default_list_root = default_list_root
         self._list_root = config.general.list_root
 
         self.config = config
@@ -72,9 +72,13 @@ class EtsTestSuite(ABC):
     def test_root(self) -> Path:
         return self.__work_dir.gen
 
+    @property
+    def default_list_root_suite_name(self) -> Path:
+        return Path(self.__default_list_root, self.__suite_name)
+
     @cached_property
     def list_root(self) -> Path:
-        return Path(self._list_root) if self._list_root else self.__default_list_root
+        return Path(self._list_root) if self._list_root else self.default_list_root_suite_name
 
     @abstractmethod
     def set_preparation_steps(self) -> None:
@@ -105,6 +109,10 @@ class RuntimeEtsTestSuite(EtsTestSuite):
         super().__init__(config, work_dir, EtsSuites.RUNTIME.value, default_list_root)
         self.__default_test_dir = RuntimeDefaultEtsTestDir(config.general.static_core_root, config.general.test_root)
         self.set_preparation_steps()
+
+    @property
+    def default_list_root_suite_name(self) -> Path:
+        return Path(self.__default_test_dir.list_root, self.name)
 
     def set_preparation_steps(self) -> None:
         self._preparation_steps.append(CopyStep(
