@@ -69,7 +69,7 @@ class FullMd
 
   def render
     @template = File.read(@template_file)
-    ERB.new(@template, nil, '%-').result(binding)
+    ERB.new(@template, trim_mode: '%-').result(binding)
   end
 
   def convert_to_hash(arr)

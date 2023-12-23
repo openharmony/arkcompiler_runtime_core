@@ -49,6 +49,6 @@ class UncoveredMd
 
   def render
     @template = File.read(@template_file)
-    ERB.new(@template, nil, '%-').result(binding)
+    ERB.new(@template, trim_mode: '%-').result(binding)
   end
 end

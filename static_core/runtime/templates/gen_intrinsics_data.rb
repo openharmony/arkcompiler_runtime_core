@@ -38,6 +38,24 @@ def check_option(optparser, options, key)
   exit false
 end
 
+def major_minor_version
+  major, minor, = RUBY_VERSION.split('.').map(&:to_i)
+  [major, minor]
+end
+
+def check_version(min_major, min_minor)
+  major, minor = major_minor_version
+  major > min_major || (major == min_major && minor >= min_minor)
+end
+
+def erb_new(str, trim_mode: nil)
+  if check_version(2, 6)
+    ERB.new(str, trim_mode: trim_mode)
+  else
+    ERB.new(str, nil, trim_mode)
+  end
+end
+
 options = OpenStruct.new
 
 optparser = OptionParser.new do |opts|
@@ -69,7 +87,7 @@ options.datafiles.each do |data|
   data = JSON.parse(data.to_json, object_class: OpenStruct)
   Gen.on_require(data)
 
-  t = ERB.new(template_file, nil, '%-')
+  t = erb_new(template_file, trim_mode: '%-')
   t.filename = options.template
 
   output_file.write(t.result(create_sandbox))
