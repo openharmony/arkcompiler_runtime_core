@@ -16,6 +16,7 @@
 #ifndef DPROF_LIBDPROF_DPROF_PROFILING_DATA_H
 #define DPROF_LIBDPROF_DPROF_PROFILING_DATA_H
 
+#include <cstdint>
 #include <vector>
 #include <string>
 #include <unordered_map>

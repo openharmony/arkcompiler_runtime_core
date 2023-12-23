@@ -227,7 +227,7 @@ static NapiType GeneralMethodCall(EtsEnv *env, ets_object obj, ets_method method
     }
     ASSERT(method != nullptr);
 
-    ArgVector<Value> values = std::move(GetArgValues(&s, method, args, obj));
+    ArgVector<Value> values = GetArgValues(&s, method, args, obj);
     EtsValue res = method->Invoke(&s, const_cast<Value *>(values.data()));
 
     // Now NapiType and EtsValueType are the same, but later it could be changed
