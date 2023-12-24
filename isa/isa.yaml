@@ -255,7 +255,7 @@ isa_information:
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
-      last_callruntime_prefixed_opcode_idx: 0x06
+      last_callruntime_prefixed_opcode_idx: 0x0a
 
 prefixes:
   - name: throw
@@ -818,6 +818,29 @@ groups:
         format: [pref_op_imm_8_v_8]
         prefix: callruntime
         properties: [jit_ic_slot, two_slot]
+      - sig: callruntime.definesendableclass imm1, method_id, literalarray_id, imm2, v:in:top
+        acc: out:top
+        opcode_idx: [0x07]
+        format: [pref_op_imm1_16_id1_16_id2_16_imm2_16_v_8]
+        prefix: callruntime
+        properties: [method_id, ic_slot, one_slot, literalarray_id]
+      - sig: callruntime.newsendablelexenv imm
+        acc: out:top
+        opcode_idx: [0x08]
+        format: [pref_op_imm_16]
+        prefix: callruntime
+      - sig: callruntime.definesendablemethod imm1, method_id, imm2
+        acc: inout:top
+        opcode_idx: [0x09]
+        format: [pref_op_imm1_8_id_16_imm2_8]
+        prefix: callruntime
+        properties: [method_id, ic_slot, one_slot]
+      - sig: callruntime.createsendableprivateproperty imm, literalarray_id
+        acc: none
+        opcode_idx: [0x0a]
+        format: [pref_op_imm_16_id_16]
+        prefix: callruntime
+        properties: [literalarray_id]
 
   - title: throw instructions
     description: throw instructions
