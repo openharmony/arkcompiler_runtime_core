@@ -2643,3 +2643,14 @@
 # es2panda fails: This test shouldn't expect to throw compile time error
 04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_neg_3.ets
 # end of es2panda fails
+
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_1.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_3.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_5.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_7.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_global_0.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_global_1.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_0.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_1.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_2.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_3.ets
