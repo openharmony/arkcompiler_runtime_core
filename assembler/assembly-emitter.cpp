@@ -540,6 +540,13 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Function &fun
             AddDependencyByIndex(method, insn, entities.literalarray_items, 1);
             continue;
         }
+
+        if (insn.opcode == Opcode::CALLRUNTIME_DEFINESENDABLECLASS) {
+            AddDependencyByIndex(method, insn, entities.method_items);
+            AddDependencyByIndex(method, insn, entities.literalarray_items, 1);
+            continue;
+        }
+
         if (insn.HasFlag(InstFlags::METHOD_ID)) {
             AddDependencyByIndex(method, insn, entities.method_items);
             continue;

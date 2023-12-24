@@ -560,11 +560,14 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
         LOG(ERROR, PANDAFILE) << "Unable to open file '" << filename << "' with bytecode version "
                               << VersionToString(file_version);
         if (file_version < minVersion) {
-            LOG(ERROR, PANDAFILE) << "Minimum supported version is " << VersionToString(minVersion)
-                << ". Please try runtime of former version or generate byte code with SDK tools of supported version";
+            LOG(ERROR, PANDAFILE) << "Minimum supported abc file version on the current system image is "
+                << VersionToString(minVersion)
+                << "Please upgrade the sdk tools to generate supported version of abc files \
+                    or execute the abc file on former version of system image";
         } else {
-            LOG(ERROR, PANDAFILE) << "Maximum supported version is " << VersionToString(version)
-                << ". Please upgrade runtime to supported version or generate byte code with former SDK tools";
+            LOG(ERROR, PANDAFILE) << "Maximum supported abc file version on the current system image is "
+                << VersionToString(version)
+                << "Please upgrade the system image or use former version of SDK tools to generate abc files";
         }
         return false;
     }
