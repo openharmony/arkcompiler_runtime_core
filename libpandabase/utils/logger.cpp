@@ -157,7 +157,7 @@ void Logger::Log(Level level, Component component, const std::string &str)
         return;
     }
 
-    os::memory::LockHolder<os::memory::Mutex> lock(mutex);
+    os::memory::LockHolder lock(mutex);
     if (!IsLoggingOn(level, component)) {
         return;
     }
@@ -197,7 +197,7 @@ void Logger::InitializeFileLogging(const std::string &log_file, Level level, Com
         return;
     }
 
-    os::memory::LockHolder<os::memory::Mutex> lock(mutex);
+    os::memory::LockHolder lock(mutex);
 
     if (IsInitialized()) {
         return;
@@ -228,7 +228,7 @@ void Logger::InitializeHiLogging(Level level, ComponentMask component_mask)
     }
 
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex);
+        os::memory::LockHolder lock(mutex);
 
         if (IsInitialized()) {
             return;
@@ -247,7 +247,7 @@ void Logger::InitializeStdLogging(Level level, ComponentMask component_mask)
     }
 
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex);
+        os::memory::LockHolder lock(mutex);
 
         if (IsInitialized()) {
             return;
@@ -265,7 +265,7 @@ void Logger::InitializeDummyLogging(Level level, ComponentMask component_mask)
     }
 
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex);
+        os::memory::LockHolder lock(mutex);
 
         if (IsInitialized()) {
             return;
@@ -285,7 +285,7 @@ void Logger::Destroy()
     Logger *l = nullptr;
 
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex);
+        os::memory::LockHolder lock(mutex);
 
         if (!IsInitialized()) {
             return;
@@ -357,7 +357,7 @@ void HiLogger::LogLineInternal(Level level, Component component, const std::stri
             OHOS::HiviewDFX::HiLog::Fatal(LABEL, "%{public}s", stream_.str().c_str());
             break;
         case Level::WARNING:
-             OHOS::HiviewDFX::HiLog::Warn(LABEL, "%{public}s", stream_.str().c_str());
+            OHOS::HiviewDFX::HiLog::Warn(LABEL, "%{public}s", stream_.str().c_str());
             break;
         default:
             UNREACHABLE();

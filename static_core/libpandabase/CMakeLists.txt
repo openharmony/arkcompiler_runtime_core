@@ -444,6 +444,17 @@ panda_add_gtest(
         ${PANDA_SANITIZERS_LIST}
 )
 
+panda_add_gtest(
+    NO_CORES
+    NAME lock_holder_tests
+    SOURCES
+        tests/lock_holder_test.cpp
+    LIBRARIES
+        arkbase_static
+    SANITIZERS
+        ${PANDA_SANITIZERS_LIST}
+)
+
 if (DEFINED ENV{GENMC_PATH})
     set(GENMC_TESTS
         ${PANDA_ROOT}/libpandabase/tests/genmc/mutex_test_genmc.cpp

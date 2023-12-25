@@ -68,7 +68,7 @@ public:
         // This mutex is needed to be sure that getting / creation of an instance is made atomically
         // (e.g. there won't be two threads that found no instance and tried to create a new one).
         static os::memory::Mutex creationMutex;
-        os::memory::LockHolder<os::memory::Mutex> creationMutexLock(creationMutex);
+        os::memory::LockHolder creationMutexLock(creationMutex);
 
         static std::weak_ptr<LoadableAgent> instance;
 

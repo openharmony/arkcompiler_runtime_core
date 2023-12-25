@@ -28,7 +28,7 @@ os::memory::Mutex CrossingMapSingleton::mutex_;  // NOLINT(fuchsia-statically-co
 bool CrossingMapSingleton::Create()
 {
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
+        os::memory::LockHolder lock(mutex_);
 
         InternalAllocatorPtr allocator {InternalAllocator<>::GetInternalAllocatorFromRuntime()};
         if (instance_ != nullptr) {
@@ -53,7 +53,7 @@ bool CrossingMapSingleton::Destroy()
 {
     CrossingMap *tempInstance;
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
+        os::memory::LockHolder lock(mutex_);
 
         if (instance_ == nullptr) {
             return false;
