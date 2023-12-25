@@ -494,6 +494,7 @@ std::unique_ptr<const File> OpenPandaFile(std::string_view location, std::string
  * Check ptr point valid panda file: magic
  */
 bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename = "");
+void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_version, const std::string_view &filename);
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern const char *ARCHIVE_FILENAME;
