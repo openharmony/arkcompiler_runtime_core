@@ -45,9 +45,9 @@ execution:
 
 This specification uses the terms as follows:
 
--  ‘error’ to denote runtime errors, and
+-  "*error*" to denote runtime errors, and
 
--  ‘exception’ to denote failures.
+-  "*exception*" to denote failures.
 
 
 The difference between these two terms is that *exceptions* are the
@@ -69,8 +69,8 @@ manner than *errors*.
 
 Some modern programming languages support only *exceptions*; others
 support only *errors*. |LANG| is based on the presumption that both
-*exceptions* and *errors* must be supported. ‘*Exception*’ and
-‘*Error*’ as predefined types are discussed below.
+*exceptions* and *errors* must be supported. *Exception* and
+*Error* as predefined types are discussed below.
 
 Exceptions are described in the chapter Experimental Features (see
 :ref:`Exceptions`) of this specification.
@@ -93,8 +93,6 @@ normally not required because error classes for various cases (e.g.,
 However, a developer can define a new error by using *Error*, or any
 derived class as the base of the new class. An example of the *error*
 handling is provided below:
-
-|
 
 .. index::
    error
@@ -125,12 +123,12 @@ a subclass of *Error*.
 In most cases, *errors* are caused by the Virtual Machine, or by the
 standard libraries.
 
-``throw`` statements (see :ref:`Throw Statements`) allow throwing both
+The ``throw`` statements (see :ref:`Throw Statements`) allow throwing both
 *exceptions* and *errors*. Throwing *exceptions* provide a structured way to
 handle a range of unexpected situations in the application code. Throwing
 *errors* in such a context is not recommended.
 
-``try`` statements (see :ref:`Try Statements`) are used to handle
+The ``try`` statements (see :ref:`Try Statements`) are used to handle
 *errors* in a manner similar to the handling of *exceptions*.
 
 **Note**: Not every *error* can be recovered.

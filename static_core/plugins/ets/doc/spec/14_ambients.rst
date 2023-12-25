@@ -19,16 +19,12 @@ Ambient Declarations
     frontend_status: Done
     
 Ambient declarations are the way to specify entities that are declared
-somewhere else.
+somewhere else. Ambient declarations do not introduce new entities---as regular
+declarations do---but instead provide type information for the entities that
+are included in a program by external means. Ambient declarations cannot
+include executable code. As a consequence, they have no initializers.
 
-Ambient declarations do not introduce new entities---as regular declarations
-do---but instead provide type information for the entities that are included
-in a program by external means.
-
-Ambient declarations cannot include executable code. As a consequence, they
-have no initializers.
-
-Ambient functions, methods, and constructors have no body.
+Ambient functions, methods, and constructors have no bodies.
 
 .. index::
    ambient declaration

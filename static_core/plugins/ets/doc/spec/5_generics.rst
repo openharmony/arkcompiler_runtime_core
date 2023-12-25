@@ -147,9 +147,8 @@ type (see :ref:`Type Parameter Default`).
 
 A generic class, interface, method, constructor, or function defines a set
 of parameterized classes, interfaces, methods, constructors, or functions
-respectively (see :ref:`Generic Instantiations`). One type argument can only
-define one set for each possible parameterization of the type parameter
-section.
+respectively (see :ref:`Generic Instantiations`). One type argument can define
+only one set for each possible parameterization of the type parameter section.
 
 .. index::
    generic declaration
@@ -186,15 +185,17 @@ Type Parameter Constraint
     todo: Adapt spec change: T without constraint doesn't mean "T extends Object|null" anymore.
 
 
-If a type parameter has restrictions, or *constraints*, then the corresponding
-type argument in the generic instantiation must follow them.
+If a type parameter has restrictions, or *constraints*, then such constraints
+must be followed by the corresponding type argument in a generic instantiation.
 
-Every type parameter’s constraint follows the keyword ``extends``.
-A constraint is denoted as a single type parameter *T*. If no constraint
-is declared, then the type parameter is not compatible with ``Object``, and
-has no methods or fields available for use.
-If the type parameter *T* has the type constraint *S*, then the actual
-type of the generic instantiation must be a subtype of *S*.
+In every type parameter, a constraint can follow the keyword ``extends``. The
+constraint is denoted as a single type parameter *T*. If no constraint is
+declared, then the type parameter is not compatible with ``Object``, and
+has no methods or fields available for use. Lack of constraint effectively
+means ``extends Object|null|undefined``.
+If type parameter *T* has type constraint *S*, then the actual type of the
+generic instantiation must be a subtype of *S*. If the constraint *S* is a
+non-nullish type (see :ref:`Nullish Types`), then *T* is non-nullish too.
 If the type parameter is constrained with the *keyof T*, then valid
 instantiations of this parameter can be the values of the union type created
 from string names of *T* or the union type itself:
@@ -238,7 +239,7 @@ If *S* constrains *T*, then the type parameter *T* *directly depends*
 on the type parameter *S*, while *T* directly depends on the following:
 
 -  *S*; or
--  A type parameter *U* that depends on *S*.
+-  Type parameter *U* that depends on *S*.
 
 A compile-time error occurs if a type parameter in the type parameter
 section depends on itself.
@@ -548,9 +549,9 @@ Any two type arguments are considered *provably distinct* if:
    nor a wildcard; or
 -  One type argument is a type parameter or a wildcard with an upper bound
    of *S*, the other *T* is not a type parameter and not a wildcard, and
-   neither is a subtype of another (see :ref:`Subtyping`); or
+   neither is a subtype of the other (see :ref:`Subtyping`); or
 -  Each type argument is a type parameter, or wildcard with upper bounds
-   *S* and *T*, and neither is a subtype of another (see :ref:`Subtyping`).
+   *S* and *T*, and neither is a subtype of the other (see :ref:`Subtyping`).
 
 .. index::
    provably distinct type argument
@@ -567,7 +568,7 @@ Any two type arguments are considered *provably distinct* if:
 Utility Types
 *************
 
-The |LANG| supports several embedded types, called '*utility*' types.
+|LANG| supports several embedded types, called '*utility*' types.
 They allow constructing new types, and extend their functionality.
 
 .. index::
@@ -586,7 +587,7 @@ Partial Utility Type
     frontend_status: None
 
 The type *Partial<T>* constructs a type with all properties of *T* set to
-optional. *T* must be a class or an interface type.
+optional. *T* must be a class or an interface type:
 
 .. code-block:: typescript
    :linenos:
@@ -666,7 +667,7 @@ Readonly Utility Type
 
 The type *Readonly<T>* constructs a type with all properties of *T* set to
 readonly. It means that the properties of the constructed value cannot be
-reassigned. *T* must be a class or an interface type.
+reassigned. *T* must be a class or an interface type:
 
 .. code-block:: typescript
    :linenos:
@@ -698,9 +699,7 @@ The type *K* is restricted to *number* types, *string* types, *union* types
 constructed from these types, and also literals of these types.
 
 A compile-time error occurs if any other type, or literal of any other type
-is used in place of this type.
-
-There are no restrictions on the type *V*. 
+is used in place of this type:
 
 .. index::
    record utility type
@@ -721,16 +720,16 @@ There are no restrictions on the type *V*.
     type R4 = Record<"salary" | "bonus", number> // ok
     type R4 = Record<1 | true, number> // compile-time error
 
+There are no restrictions on type *V*. 
 
 A special form of object literals is supported for instances of *Record*
 types (see :ref:`Object Literal of Record Type`).
 
-Access to ``Record<K, V>`` values is done by the *indexing
-expression* like *r[index]*, where *r* is an instance of the type *Record*,
-and *index* is the expression of the type *K*. The result of an indexing
-expression is of type *V*, if *K* is a union that contains literal types only
-or *V* | *undefined*, otherwise. See :ref:`Record Indexing Expression` for
-details.
+Access to ``Record<K, V>`` values is performed by an *indexing expression*
+like *r[index]*, where *r* is an instance of the type *Record*, and *index*
+is the expression of type *K*. The result of an indexing expression is of type
+*V* if *K* is a union that contains literal types only; otherwise, it is of
+type *V* | *undefined*. See :ref:`Record Indexing Expression` for details.
 
 .. index::
    object literal
