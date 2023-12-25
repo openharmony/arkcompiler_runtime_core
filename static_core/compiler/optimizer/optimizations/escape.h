@@ -37,15 +37,51 @@ using InstId = uint32_t;
 using BlockId = uint32_t;
 using StateId = uint32_t;
 using FieldPtr = RuntimeInterface::FieldPtr;
+using ClassPtr = RuntimeInterface::ClassPtr;
 
 class VirtualState;
 class BasicBlockState;
 class PhiState;
 class ScalarReplacement;
 class ZeroInst;
+struct Index;
 
 using StateOwner = std::variant<Inst *, PhiState *, const ZeroInst *>;
 using MaterializationSite = std::variant<Inst *, BasicBlock *>;
+using Field = std::variant<FieldPtr, Index>;
+
+struct Index {
+    ClassPtr klass;  // NOLINT(misc-non-private-member-variables-in-classes)
+    uint64_t index;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+    bool operator==(const Index &other) const
+    {
+        return klass == other.klass && index == other.index;
+    }
+
+    bool operator<(const Index &other) const
+    {
+        return klass < other.klass || (klass == other.klass && index < other.index);
+    }
+};
+
+struct FieldComporator {
+    bool operator()(const Field &field1, const Field &field2) const
+    {
+        return GetUniqVal(field1) < GetUniqVal(field2);
+    }
+
+private:
+    uint64_t GetUniqVal(const Field &field) const
+    {
+        if (std::holds_alternative<FieldPtr>(field)) {
+            return reinterpret_cast<uint64_t>(std::get<FieldPtr>(field));
+        }
+        auto index = std::get<Index>(field);
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        return (reinterpret_cast<uint64_t>(index.klass) << 32U) | index.index;
+    }
+};
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class EscapeAnalysis : public Optimization, public GraphVisitor {
@@ -81,6 +117,10 @@ public:
         return g_options.IsCompilerScalarReplacement();
     }
 
+    static bool IsAllocInst(Inst *inst)
+    {
+        return inst->GetOpcode() == Opcode::NewObject || inst->GetOpcode() == Opcode::NewArray;
+    }
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_VISIT(InstName)                                   \
     static void Visit##InstName(GraphVisitor *v, Inst *inst)     \
@@ -96,11 +136,16 @@ public:
     }
 
     DEFINE_VISIT(NewObject);
+    DEFINE_VISIT(NewArray);
     DEFINE_VISIT(LoadObject);
+    DEFINE_VISIT(LoadArray);
     DEFINE_VISIT(StoreObject);
+    DEFINE_VISIT(StoreArray);
     DEFINE_VISIT(NullCheck);
     DEFINE_VISIT(SaveState);
     DEFINE_VISIT(SafePoint);
+    // NOTE(schernykh): support it
+    // DEFINE_VISIT(SaveStateDeoptimize)
     DEFINE_VISIT(GetInstanceClass);
 
     DEFINE_VISIT_WITH_CALLBACK(Deoptimize, MaterializeDeoptSaveState);
@@ -143,6 +188,7 @@ public:
         VisitSaveStateUser(inst);
         Materialize(inst);
     }
+    void VisitAllocation(Inst *inst);
 
     const ArenaVector<BasicBlock *> &GetBlocksToVisit() const override
     {
@@ -181,7 +227,7 @@ private:
         EscapeAnalysis *parent_;
         ArenaVector<StateOwner> fieldsMergeBuffer_;
         ArenaVector<StateOwner> statesMergeBuffer_;
-        ArenaVector<FieldPtr> allFields_;
+        ArenaVector<Field> allFields_;
         ArenaVector<StateOwner> pendingInsts_;
 
         bool MergeFields(BasicBlock *block, BasicBlockState *blockState, StateId stateToMerge, VirtualState *vstate,
@@ -254,7 +300,7 @@ private:
     // list of instructions with corresponding virtual state values bound
     // to a save state or an allocation site
     ArenaUnorderedMap<MaterializationSite, ArenaMap<Inst *, VirtualState *>> materializationInfo_;
-    ArenaVector<ArenaMap<FieldPtr, PhiState *>> phis_;
+    ArenaVector<ArenaMap<Field, PhiState *, FieldComporator>> phis_;
     ArenaUnorderedMap<Inst *, ArenaBitVector> saveStateInfo_;
     ArenaSet<Inst *> virtualizableAllocations_;
     MergeProcessor mergeProcessor_;
@@ -270,8 +316,12 @@ private:
     void VisitNewObject(Inst *inst);
     void VisitLoadObject(Inst *inst);
     void VisitStoreObject(Inst *inst);
+    void VisitNewArray(Inst *inst);
+    void VisitStoreArray(Inst *inst);
+    void VisitLoadArray(Inst *inst);
     void VisitNullCheck(Inst *inst);
     void VisitSaveState(Inst *inst);
+    void VisitSaveStateDeoptimize(Inst *inst);
     void VisitSafePoint(Inst *inst);
     void VisitGetInstanceClass(Inst *inst);
     void VisitBlockInternal(BasicBlock *block);
@@ -288,15 +338,13 @@ private:
         return IsReference(GetGraph()->GetRuntime()->GetFieldType(field));
     }
 
-    bool HasRefFields(const VirtualState *state) const;
-
     BasicBlockState *GetState(const BasicBlock *block) const
     {
         return blockStates_[block->GetId()];
     }
 
-    std::pair<PhiState *, bool> CreatePhi(BasicBlock *targetBlock, BasicBlockState *blockState, FieldPtr field,
-                                          ArenaVector<StateOwner> &inputs);
+    std::pair<PhiState *, bool> CreatePhi(BasicBlock *targetBlock, BasicBlockState *blockState, Field field,
+                                          ArenaVector<StateOwner> &inputs, VirtualState *vstate);
     VirtualState *CreateVState(Inst *inst);
     VirtualState *CreateVState(Inst *inst, StateId id);
 
@@ -326,12 +374,17 @@ private:
     {
         return GetGraph()->GetLocalAllocator();
     }
+
+    void DumpVStates();
+    void DumpMStates();
+    void DumpAliases();
+    void Dump();
 };
 
 class ScalarReplacement {
 public:
     ScalarReplacement(Graph *graph, ArenaMap<Inst *, StateOwner> &aliases,
-                      ArenaVector<ArenaMap<FieldPtr, PhiState *>> &phis,
+                      ArenaVector<ArenaMap<Field, PhiState *, FieldComporator>> &phis,
                       ArenaUnorderedMap<MaterializationSite, ArenaMap<Inst *, VirtualState *>> &materializationSites,
                       ArenaUnorderedMap<Inst *, ArenaBitVector> &saveStateLiveness)
         : graph_(graph),
@@ -354,7 +407,7 @@ public:
 private:
     Graph *graph_;
     ArenaMap<Inst *, StateOwner> &aliases_;
-    ArenaVector<ArenaMap<FieldPtr, PhiState *>> &phis_;
+    ArenaVector<ArenaMap<Field, PhiState *, FieldComporator>> &phis_;
     ArenaUnorderedMap<MaterializationSite, ArenaMap<Inst *, VirtualState *>> &materializationSites_;
     ArenaUnorderedMap<Inst *, ArenaBitVector> &saveStateLiveness_;
 
@@ -374,8 +427,10 @@ private:
     void ReplaceAliases();
     Inst *ResolveAlias(const StateOwner &alias, const Inst *inst);
     Inst *CreateNewObject(Inst *originalInst, Inst *saveState);
+    Inst *CreateNewArray(Inst *originalInst, Inst *saveState);
     void InitializeObject(Inst *alloc, Inst *instBefore, VirtualState *state);
     void MaterializeObjects();
+    void Materialize(Inst *originalInst, Inst *ssAlloc, Inst *ssInit, VirtualState *state);
     void MaterializeAtNewSaveState(Inst *site, ArenaMap<Inst *, VirtualState *> &state);
     void MaterializeInEmptyBlock(BasicBlock *block, ArenaMap<Inst *, VirtualState *> &state);
     void MaterializeAtExistingSaveState(SaveStateInst *saveState, ArenaMap<Inst *, VirtualState *> &state);

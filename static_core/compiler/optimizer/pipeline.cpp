@@ -230,6 +230,7 @@ bool Pipeline::RunOptimizations()
     }
     graph->RunPass<LoopUnroll>(g_options.GetCompilerLoopUnrollInstLimit(), g_options.GetCompilerLoopUnrollFactor());
     OptimizationsAfterUnroll(graph);
+    graph->RunPass<Peepholes>();
     graph->RunPass<EscapeAnalysis>();
     graph->RunPass<ReserveStringBuilderBuffer>();
 

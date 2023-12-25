@@ -95,6 +95,11 @@ struct RuntimeInterfaceMock : public compiler::RuntimeInterface {
         return fieldTypes_ == nullptr ? DataType::NO_TYPE : (*fieldTypes_)[field];
     }
 
+    DataType::Type GetArrayComponentType(PandaRuntimeInterface::ClassPtr klass) const override
+    {
+        return classTypes_ == nullptr ? DataType::NO_TYPE : (*classTypes_)[klass];
+    }
+
 private:
     static constexpr uintptr_t METHOD = 0xdead;
     static constexpr uintptr_t CALLEE = 0xdeadc;
@@ -105,6 +110,7 @@ private:
     DataType::Type returnType_ {DataType::NO_TYPE};
     ArenaVector<DataType::Type> *argTypes_ {nullptr};
     ArenaUnorderedMap<PandaRuntimeInterface::FieldPtr, DataType::Type> *fieldTypes_ {nullptr};
+    ArenaUnorderedMap<PandaRuntimeInterface::ClassPtr, DataType::Type> *classTypes_ {nullptr};
 
     friend class GraphTest;
     friend class GraphCreator;
@@ -258,6 +264,10 @@ public:
         runtime_.fieldTypes_ =
             graph_->GetAllocator()->New<ArenaUnorderedMap<PandaRuntimeInterface::FieldPtr, DataType::Type>>(
                 graph_->GetAllocator()->Adapter());
+
+        runtime_.classTypes_ =
+            graph_->GetAllocator()->New<ArenaUnorderedMap<PandaRuntimeInterface::ClassPtr, DataType::Type>>(
+                graph_->GetAllocator()->Adapter());
     }
     ~GraphTest() override = default;
 
@@ -296,6 +306,11 @@ public:
     void RegisterFieldType(PandaRuntimeInterface::FieldPtr field, DataType::Type type)
     {
         (*runtime_.fieldTypes_)[field] = type;
+    }
+
+    void RegisterClassType(PandaRuntimeInterface::ClassPtr klass, DataType::Type type)
+    {
+        (*runtime_.classTypes_)[klass] = type;
     }
 
 protected:

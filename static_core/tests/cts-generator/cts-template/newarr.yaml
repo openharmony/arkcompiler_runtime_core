@@ -585,9 +585,11 @@ tests:
         tags: []
         code-template: |
           #
-              movi v0, 0x7FFFFFFF
+              movi v1, 0x7FFFFFFF
           begin:
-              newarr v0, v0, %s
+              newarr v0, v1, %s
+              lda.obj v1
+              starr.64 v0, v1
           end:
               ldai 1 # Should not reach this line
               return

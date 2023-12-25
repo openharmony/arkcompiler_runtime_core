@@ -491,6 +491,7 @@ public:
 
     FieldPtr ResolveField(MethodPtr method, size_t id, bool allowExternal, uint32_t *classId) override;
     compiler::DataType::Type GetFieldType(FieldPtr field) const override;
+    compiler::DataType::Type GetArrayComponentType(ClassPtr klass) const override;
     compiler::DataType::Type GetFieldTypeById(MethodPtr parentMethod, IdType id) const override;
     IdType GetFieldValueTypeId(MethodPtr method, IdType id) const override;
     size_t GetFieldOffset(FieldPtr field) const override;
