@@ -26,6 +26,20 @@ CardTable::CardTable(InternalAllocatorPtr internal_allocator, uintptr_t min_addr
       cards_count_((size / CARD_SIZE) + (size % CARD_SIZE != 0 ? 1 : 0)),
       internal_allocator_(internal_allocator)
 {
+    /**
+     * We use this assumption in compiler's post barriers in case of store pair.
+     *
+     * The idea is to check whether two sequential slots of an object/array being
+     * written to belong to the same card or not.
+     *
+     * The only situation when they belong to different cards is when the second
+     * slot of the store is placed at the beggining of a card.
+     *
+     * This could be checked by `(2nd_store_ptr - min_address) % card_size == 0`
+     * condition, but if `min_address` is aligned at `card_size`, it may be simplified
+     * to `2nd_store_ptr % card_size == 0`.
+     */
+    ASSERT(IsAligned<GetCardSize()>(min_address));
 }
 
 CardTable::~CardTable()

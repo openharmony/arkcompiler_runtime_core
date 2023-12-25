@@ -2008,55 +2008,133 @@ void Codegen::CreateOfflineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg re
     LoadCallerRegisters(param_regs, VRegMask(), false);
 }
 
+void CheckObj(Encoder *enc, Codegen *cg, Reg base, Reg reg1, LabelHolder::LabelId skip_label, bool check_null)
+{
+    if (check_null) {
+        // Fast null check in-place for one register
+        enc->EncodeJump(skip_label, reg1, Condition::EQ);
+    }
+
+    ScopedTmpReg tmp(enc, cg->ConvertDataType(DataType::REFERENCE, cg->GetArch()));
+    auto region_size_bit = GetBarrierOperandValue<uint8_t>(
+        cg->GetRuntime(), panda::mem::BarrierPosition::BARRIER_POSITION_POST, "REGION_SIZE_BITS");
+    enc->EncodeXor(tmp, base, reg1);
+    enc->EncodeShr(tmp, tmp, Imm(region_size_bit));
+    enc->EncodeJump(skip_label, tmp, Condition::EQ);
+}
+
+void WrapOneArg(Encoder *enc, Reg param, Reg base, MemRef mem, size_t additional_offset = 0)
+{
+    if (mem.HasIndex()) {
+        ASSERT(mem.GetScale() == 0 && !mem.HasDisp());
+        enc->EncodeAdd(param, base, mem.GetIndex());
+        if (additional_offset != 0) {
+            enc->EncodeAdd(param, param, Imm(additional_offset));
+        }
+    } else if (mem.HasDisp()) {
+        ASSERT(!mem.HasIndex());
+        enc->EncodeAdd(param, base, Imm(mem.GetDisp() + additional_offset));
+    } else {
+        enc->EncodeAdd(param, base, Imm(additional_offset));
+    }
+}
+
+/**
+ * Post-write barrier for StorePair case.
+ * The code below may mark 0, 1 or 2 cards. The idea is following:
+ *  if (the second object isn't null and is allocated in other from base object's region)
+ *      MarkOneCard(CardOfSecondField(mem))
+ *      if (address of the second field isn't aligned at the size of a card)
+ *          # i.e. each of store address (fields of the base objects) are related to the same card
+ *          goto Done
+ *
+ *  if (the first object isn't null and is allocated in other from base object's region)
+ *      MarkOneCard(CardOfFirstField(mem))
+ *
+ *  label: Done
+ */
+void Codegen::CreateOnlineIrtocPostWrbRegionTwoRegs(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object)
+{
+    auto entrypoint_id {EntrypointId::POST_INTER_REGION_BARRIER_SLOW};
+    auto enc {GetEncoder()};
+    auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, GetArch()))};
+    auto param_reg_0 = enc->GetTarget().GetParamReg(0);
+    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypoint_id));
+    constexpr size_t PARAMS_NUM = 1U;
+    auto param_regs {GetTarget().GetParamRegsMask(PARAMS_NUM) & GetLiveRegisters(inst).first};
+
+    auto lbl_mark_card_and_exit = enc->CreateLabel();
+    auto lbl_check_1_obj = enc->CreateLabel();
+    auto done = enc->CreateLabel();
+
+    CheckObj(enc, this, base, reg2, lbl_check_1_obj, check_object);
+    SaveCallerRegisters(param_regs, VRegMask(), false);
+    WrapOneArg(enc, param_reg_0, base, mem, reg1.GetSize() / BITS_PER_BYTE);
+    {
+        ScopedTmpReg tmp(enc, ConvertDataType(DataType::REFERENCE, GetArch()));
+        enc->EncodeAnd(tmp, param_reg_0, Imm(cross_values::GetCardAlignmentMask(GetArch())));
+        enc->EncodeJump(lbl_mark_card_and_exit, tmp, Condition::NE);
+    }
+
+    enc->MakeCall(entry);
+    LoadCallerRegisters(param_regs, VRegMask(), false);
+
+    enc->BindLabel(lbl_check_1_obj);
+    CheckObj(enc, this, base, reg1, done, check_object);
+    SaveCallerRegisters(param_regs, VRegMask(), false);
+    WrapOneArg(enc, param_reg_0, base, mem);
+    enc->BindLabel(lbl_mark_card_and_exit);
+    enc->MakeCall(entry);
+    LoadCallerRegisters(param_regs, VRegMask(), false);
+    enc->BindLabel(done);
+}
+
+void Codegen::CreateOnlineIrtocPostWrbRegionOneReg(Inst *inst, MemRef mem, Reg reg1, bool check_object)
+{
+    auto entrypoint_id {EntrypointId::POST_INTER_REGION_BARRIER_SLOW};
+    auto enc {GetEncoder()};
+    auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, GetArch()))};
+    auto param_reg_0 = enc->GetTarget().GetParamReg(0);
+    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypoint_id));
+    constexpr size_t PARAMS_NUM = 1;
+    auto param_regs {GetTarget().GetParamRegsMask(PARAMS_NUM) & GetLiveRegisters(inst).first};
+
+    auto skip = enc->CreateLabel();
+
+    CheckObj(enc, this, base, reg1, skip, check_object);
+    SaveCallerRegisters(param_regs, VRegMask(), false);
+    WrapOneArg(enc, param_reg_0, base, mem);
+    enc->MakeCall(entry);
+    LoadCallerRegisters(param_regs, VRegMask(), false);
+    enc->BindLabel(skip);
+}
+
 void Codegen::CreateOnlineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object)
 {
     SCOPED_DISASM_STR(this, "Post Online Irtoc-WRB");
     ASSERT(reg1.IsValid());
 
-    bool fast_check {false};
-    size_t params_num {1U};
-    auto entrypoint_id {EntrypointId::POST_INTER_GENERATIONAL_BARRIER0};
-    if (GetRuntime()->GetPostType() == panda::mem::BarrierType::POST_INTERREGION_BARRIER) {
-        bool has_obj2 {reg2.IsValid() && reg1 != reg2};
-        fast_check = check_object && !has_obj2;
-        params_num = has_obj2 ? 4U : 3U;
-        entrypoint_id = has_obj2 ? EntrypointId::POST_INTER_REGION_BARRIER_FAST2
-                                 : EntrypointId::POST_INTER_REGION_BARRIER_FAST_NO_CHECK1;
-    }
-
     auto enc {GetEncoder()};
-    auto skip {LabelHolder::INVALID_LABEL};
-    if (fast_check) {
-        // Fast null check in-place for one register
-        skip = enc->CreateLabel();
-        enc->EncodeJump(skip, reg1, Condition::EQ);
-    }
 
-    auto param_regs {GetTarget().GetParamRegsMask(params_num) & GetLiveRegisters(inst).first};
-    SaveCallerRegisters(param_regs, VRegMask(), false);
+    bool has_obj2 {reg2.IsValid() && reg1 != reg2};
+    if (GetRuntime()->GetPostType() == panda::mem::BarrierType::POST_INTERREGION_BARRIER) {
+        if (has_obj2) {
+            CreateOnlineIrtocPostWrbRegionTwoRegs(inst, mem, reg1, reg2, check_object);
+        } else {
+            CreateOnlineIrtocPostWrbRegionOneReg(inst, mem, reg1, check_object);
+        }
+    } else {
+        auto entrypoint_id {EntrypointId::POST_INTER_GENERATIONAL_BARRIER0};
+        auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, GetArch()))};
+        constexpr size_t PARAMS_NUM = 1;
+        auto param_regs {GetTarget().GetParamRegsMask(PARAMS_NUM) & GetLiveRegisters(inst).first};
 
-    auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, GetArch()))};
-    switch (params_num) {
-        case 1U:
-            FillCallParams(base);
-            break;
-        case 3U:
-            FillPostWrbCallParams(mem, reg1);
-            break;
-        case 4U:
-            FillPostWrbCallParams(mem, reg1, reg2);
-            break;
-        default:
-            UNREACHABLE();
-    }
-
-    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypoint_id));
-    enc->MakeCall(entry);
-
-    LoadCallerRegisters(param_regs, VRegMask(), false);
-
-    if (fast_check) {
-        enc->BindLabel(skip);
+        SaveCallerRegisters(param_regs, VRegMask(), false);
+        auto param_reg_0 = enc->GetTarget().GetParamReg(0);
+        enc->EncodeMov(param_reg_0, base);
+        MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypoint_id));
+        enc->MakeCall(entry);
+        LoadCallerRegisters(param_regs, VRegMask(), false);
     }
 }
 

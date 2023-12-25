@@ -196,6 +196,7 @@ module Constants
     CARD_CLEAR_VALUE = "mem::CardTable::Card::GetClearValue()"
     CARD_MARKED_VALUE = "mem::CardTable::Card::GetMarkedValue()"
     CARD_DIRTY_VALUE = "mem::CardTable::GetCardDirtyValue()"
+    CARD_ALIGNMENT_MASK = "cross_values::GetCardAlignmentMask(GetArch())"
     POINTER_LOG_SIZE = "cross_values::GetPointerLogSize(GetArch())"
 
     COMPILER_REFERENCE = "compiler::DataType::REFERENCE"
@@ -208,7 +209,7 @@ module Constants
     COMPILER_PTR = "compiler::DataType::POINTER"
 
     POST_INTER_REGION_BARRIER_SLOW = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::POST_INTER_REGION_BARRIER_SLOW)"
-    POST_INTER_REGION_BARRIER_PAIR_UNALIGNED_SLOW = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::POST_INTER_REGION_BARRIER_PAIR_UNALIGNED_SLOW)"
+    POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW)"
 
     STRING_CLASS_SIZE = "sizeof(coretypes::String)"
     STRING_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::String) + TLAB_ALIGNMENT - 1"

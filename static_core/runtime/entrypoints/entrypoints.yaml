@@ -616,8 +616,8 @@ entrypoints:
     - panda::ObjectHeader*
     - panda::ObjectHeader*
 
-- name: PostInterRegionBarrierFast1
-  entrypoint: PostInterRegionBarrierFast1
+- name: PostInterRegionBarrierMarkSingleFast
+  entrypoint: PostInterRegionBarrierMarkSingleFast
   bridge: none
   properties: [irtoc]
   signature:
@@ -626,18 +626,8 @@ entrypoints:
     - size_t
     - panda::ObjectHeader*
 
-- name: PostInterRegionBarrierFastNoCheck1
-  entrypoint: PostInterRegionBarrierFastNoCheck1
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - void
-    - panda::ObjectHeader*
-    - size_t
-    - panda::ObjectHeader*
-
-- name: PostInterRegionBarrierFast2
-  entrypoint: PostInterRegionBarrierFast2
+- name: PostInterRegionBarrierMarkPairFast
+  entrypoint: PostInterRegionBarrierMarkPairFast
   bridge: none
   properties: [irtoc]
   signature:
@@ -655,8 +645,8 @@ entrypoints:
     - void
     - panda::ObjectHeader*
 
-- name: PostInterRegionBarrierPairUnalignedSlow
-  entrypoint: PostInterRegionBarrierPairUnalignedSlow
+- name: PostInterRegionBarrierTwoCardsSlow
+  entrypoint: PostInterRegionBarrierTwoCardsSlow
   bridge: none
   properties: [irtoc]
   signature:
