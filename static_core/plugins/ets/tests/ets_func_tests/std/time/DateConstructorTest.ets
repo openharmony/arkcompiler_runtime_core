@@ -245,7 +245,7 @@ function testDoubleYearMonthDayConstructor(): int {
     for(let i: int = 0; i < id.length; i++) {
         let day: double = md[i] + 1;
         let cd = new Date(id[i], md[i], day);
-        let utc = Date.UTC(id[i], md[i], day);
+        let utc = Date.UTC(id[i], md[i], new Double(day));
         try {
             if(utc != cd.valueOf()) failures++;
         } catch (e) {
@@ -266,7 +266,7 @@ function testDoubleYearMonthDayHoursConstructor(): int {
     for(let i: int = 0; i < id.length; i++) {
         let day: double = md[i] + 1;
         let cd = new Date(id[i], md[i], day, ht[i]);
-        let utc = Date.UTC(id[i], md[i], day, ht[i]);
+        let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]));
         try {
             if(utc != cd.valueOf()) failures++;
         } catch (e) {
@@ -289,7 +289,7 @@ function testDoubleYearMonthDayHoursMinutesConstructor(): int {
 
         let day: double = md[i] + 1;
         let cd = new Date(id[i], md[i], day, ht[i], mh[i]);
-        let utc = Date.UTC(id[i], md[i], day, ht[i], mh[i]);
+        let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]), new Double(mh[i]));
         try {
             if(utc != cd.valueOf()) failures++;
         } catch (e) {
@@ -313,7 +313,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): int {
         let day: double = md[i] + 1;
 
         let cd = new Date(id[i], md[i], day, ht[i], mh[i], mh[i]);
-        let utc = Date.UTC(id[i], md[i], day, ht[i], mh[i], mh[i]);
+        let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]), new Double(mh[i]), new Double(mh[i]));
         try {
             if(utc != cd.valueOf()) failures++;
         } catch (e) {
@@ -338,7 +338,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
         let millis: double = mh[i]*10;
 
         let cd = new Date(id[i], md[i], day, ht[i], mh[i], mh[i], millis);
-        let utc = Date.UTC(id[i], md[i], day, ht[i], mh[i], mh[i], millis);
+        let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]), new Double(mh[i]), new Double(mh[i]), new Double(millis));
         try {
             if(utc != cd.valueOf()) failures++;
         } catch (e) {

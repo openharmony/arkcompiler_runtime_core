@@ -138,7 +138,7 @@ class Drawer {
         const scale : float = 1;
         this.redrawerDataPtr = _skoala_initRedrawer(this.frameWidth, this.frameHeight, scale, this.redrawerPeer, this.frameHandle);
 
-        this.startTime = Date.now();
+        this.startTime = Date.now() as long;
     }
 
     draw(balls: Ball[]): void {
@@ -171,11 +171,11 @@ class Drawer {
 
         // Update FPS
         this.drawCounter++;
-        const currentTime: long = Date.now();
+        const currentTime: long = Date.now() as long;
         if (currentTime - this.startTime >= 1000) {
             this.fps = ((this.drawCounter * 1000) as long / (currentTime - this.startTime) as long) as int;
             this.drawCounter = 0;
-            this.startTime = Date.now();
+            this.startTime = Date.now() as long;
         }
     }
 
