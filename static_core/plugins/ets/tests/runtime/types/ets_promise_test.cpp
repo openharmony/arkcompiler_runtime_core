@@ -71,7 +71,8 @@ public:
                                     {"catchQueue", MEMBER_OFFSET(EtsPromise, catchQueue_)},
                                     {"linkedPromise", MEMBER_OFFSET(EtsPromise, linkedPromise_)},
                                     {"eventPtr", MEMBER_OFFSET(EtsPromise, event_)},
-                                    {"padding0", MEMBER_OFFSET(EtsPromise, padding0_)},
+                                    {"thenQueueSize", MEMBER_OFFSET(EtsPromise, thenQueueSize_)},
+                                    {"catchQueueSize", MEMBER_OFFSET(EtsPromise, catchQueueSize_)},
                                     {"state", MEMBER_OFFSET(EtsPromise, state_)}};
     }
 };

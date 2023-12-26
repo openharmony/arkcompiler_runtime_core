@@ -28,15 +28,14 @@
 
 namespace panda::ets::intrinsics {
 
-static void OnPromiseCompletion(EtsCoroutine *coro, EtsHandle<EtsPromise> &promise, EtsHandle<EtsObjectArray> &queue)
+// length parameter represents the current size of the queue as opposed to its length field which represents its
+// capacity
+static void OnPromiseCompletion(EtsCoroutine *coro, EtsHandle<EtsPromise> &promise, EtsHandle<EtsObjectArray> &queue,
+                                EtsInt length)
 {
-    coretypes::ArraySizeT length = 0;
-    if (queue.GetPtr() != nullptr) {
-        length = queue->GetLength();
-    }
     // Since handle cannot be created for nullptr use 'promise' object as a special marker of empty value
     VMMutableHandle<ObjectHeader> exception(coro, promise.GetPtr());
-    for (coretypes::ArraySizeT i = 0; i < length; ++i) {
+    for (EtsInt i = 0; i < length; ++i) {
         EtsObject *callback = queue->Get(i);
         if (callback != nullptr) {
             queue->Set(i, nullptr);
@@ -67,9 +66,9 @@ EtsVoid *EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
-    EtsHandle<EtsObjectArray> thenQueue(coro, promise->GetThenQueue(coro));
+    EtsHandle<EtsObjectArray> thenQueue(coro, hpromise->GetThenQueue(coro));
     hpromise->Resolve(coro, value);
-    OnPromiseCompletion(coro, hpromise, thenQueue);
+    OnPromiseCompletion(coro, hpromise, thenQueue, hpromise->GetThenQueueSize());
     return EtsVoid::GetInstance();
 }
 
@@ -86,9 +85,9 @@ EtsVoid *EtsPromiseReject(EtsPromise *promise, EtsObject *error)
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
-    EtsHandle<EtsObjectArray> catchQueue(coro, promise->GetCatchQueue(coro));
+    EtsHandle<EtsObjectArray> catchQueue(coro, hpromise->GetCatchQueue(coro));
     hpromise->Reject(coro, error);
-    OnPromiseCompletion(coro, hpromise, catchQueue);
+    OnPromiseCompletion(coro, hpromise, catchQueue, hpromise->GetCatchQueueSize());
     return EtsVoid::GetInstance();
 }
 
