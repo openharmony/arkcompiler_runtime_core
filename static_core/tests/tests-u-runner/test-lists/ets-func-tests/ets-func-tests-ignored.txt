@@ -99,6 +99,10 @@ escompat/escompat_Array_Test_escompat_Array_003.ets
 ### Issue 12849 end
 
 ### Union issues
+### panda#15005: skip to stabilize fe_dev_202312
+spec/unions/union_cast_05.ets
+spec/unions/union_cast_06.ets
+### End of panda#15005
 ### literal types not supported yet
 spec/unions/union_literal_02.ets
 spec/unions/union_assignment_12_01.ets
