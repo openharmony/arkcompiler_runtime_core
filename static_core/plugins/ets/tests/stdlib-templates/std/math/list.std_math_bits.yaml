@@ -13,7 +13,7 @@
 
 - {
     method_name: sign,
-    method_nature: function, 
+    method_nature: function,
     result_type: int,
     method_signature:  {v: "double"},
 
@@ -34,7 +34,7 @@
   }
 - {
     method_name: signbit,
-    method_nature: function, 
+    method_nature: function,
     result_type: boolean,
     method_signature:  {v: "double"},
 
@@ -50,12 +50,12 @@
         test1:  "false",
         test2:  "false",
         test3:  "true",
-        test4:  "false"
+        test4:  "true"
       },
   }
 - {
     method_name: clz32,
-    method_nature: function, 
+    method_nature: function,
     result_type: int,
     method_signature:  {v: "int"},
 
@@ -86,7 +86,7 @@
   }
 - {
     method_name: clz64,
-    method_nature: function, 
+    method_nature: function,
     result_type: int,
     method_signature:  {v: "long"},
 

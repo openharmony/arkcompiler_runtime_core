@@ -13,7 +13,7 @@
 
 - {
     method_name: abs,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature: {v: "double"},
 
@@ -42,7 +42,7 @@
   }
 - {
     method_name: trunc,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -71,7 +71,7 @@
   }
 - {
     method_name: ceil,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -79,7 +79,7 @@
       {
         test1: {v: 0.0,},
         test2: {v: 1.0, },
-        test3: {v: 1.0 + math_const.doubleEpsilon,},
+        test3: {v: 1.0 + doubleEpsilon,},
         test4: {v: PI, },
         test5: {v: -E },
         test6: {v: doubleNaN, },
@@ -100,7 +100,7 @@
   }
 - {
     method_name: floor,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -131,7 +131,7 @@
   }
 - {
     method_name: round,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -164,7 +164,7 @@
   }
 - {
     method_name: mod,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double", u: "double"},
 
@@ -192,7 +192,7 @@
   }
 - {
     method_name: rem,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double", u: "double"},
 
@@ -203,7 +203,7 @@
         test30:  {v:  PI, u: 2.0},
         test40:  {v: -PI, u: 2.0,},
         test50:  {v: doubleNaN, u: doubleNaN},
-        test60:  {v: math_const.doubleInf, u: math_const.doubleInf},
+        test60:  {v: doubleInf, u: doubleInf},
         test70:  {v: doubleNegInf, u: doubleNegInf},
       },
     method_expected_data:
@@ -220,7 +220,7 @@
   }
 - {
     method_name: max,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double", u: "double"},
 
@@ -244,7 +244,7 @@
         test30: -233.0,
         test40: -133.0,
         test50:  777.0 + doubleEpsilon,
-        test60: -777.0, 
+        test60: -777.0,
         test70:  doubleNaN,
         test80:  doubleInf,
         test90:  doubleNegInf,
@@ -252,7 +252,7 @@
   }
 - {
     method_name: max,
-    method_nature: function, 
+    method_nature: function,
     result_type: int,
     method_signature:  {v: "int", u: "int"},
 
@@ -273,7 +273,7 @@
   }
 - {
     method_name: min,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double", u: "double"},
 
@@ -297,7 +297,7 @@
         test30: -233.0,
         test40: -234.0,
         test50:  777.0,
-        test60: -777.0 - doubleEpsilon, 
+        test60: -777.0 - doubleEpsilon,
         test70:  doubleNaN,
         test80:  doubleInf,
         test90:  doubleNegInf,
@@ -305,7 +305,7 @@
   }
 - {
     method_name: imul,
-    method_nature: function, 
+    method_nature: function,
     result_type: int,
     method_signature:  {a: "float", b: "float"},
 
@@ -319,7 +319,7 @@
         test30:  {a: floatNan, b:  1},
         test40:  {a: floatInf, b:  1},
         test50:  {a: floatNegInf, b:  1},
-  
+
       },
     method_expected_data:
       {
@@ -335,7 +335,7 @@
   }
 - {
     method_name: fround,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {doubleVal: "double"},
 
@@ -352,7 +352,7 @@
         test60:  {doubleVal:  doubleNaN},
         test70:  {doubleVal:  doubleInf},
         test80:  {doubleVal:  doubleNegInf},
-  
+
       },
     method_expected_data:
       {
@@ -361,7 +361,7 @@
         test21:  5.05,
         test30: -5.0,
         test31:  5.12345700000000,
-        test32: -5.12345700000000, 
+        test32: -5.12345700000000,
         test40:  0.0,
         test50:  doubleInf,
         test60:  doubleNaN,

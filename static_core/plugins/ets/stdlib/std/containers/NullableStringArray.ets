@@ -76,13 +76,10 @@ export class NullableStringArray {
      *
      * @returns the underlying array
      */
-    public toArray(): NullableString[] {
-        if (this.curSize == this.data.length) {
-            return this.data
-        }
-        let newData = new NullableString[this.curSize]
+    public toArray(): String[] {
+        let newData = new String[this.curSize]
         for (let i = 0; i < this.curSize; ++i) {
-            newData[i] = this.data[i]
+            newData[i] = this.data[i]!
         }
         return newData
     }

@@ -245,7 +245,7 @@ export class BigInt {
         }
 
         // Pad the shorter number with zeroes to make them of equal length
-        let max_len = Math.max(lhs.length(), rhs.length()) as int;
+        let max_len = max(lhs.length(), rhs.length()) as int;
         lhs.addBytes(max_len - lhs.length());
         rhs.addBytes(max_len - rhs.length());
 
@@ -294,7 +294,7 @@ export class BigInt {
         }
 
         // Pad the shorter number with zeroes to make them of equal length
-        let max_len = Math.max(lhs.length(), rhs.length()) as int;
+        let max_len = max(lhs.length(), rhs.length()) as int;
         lhs.addBytes(max_len - lhs.length());
         rhs.addBytes(max_len - rhs.length());
 
@@ -529,7 +529,7 @@ export class BigInt {
         let num1 = this.asBytes();
         let num2 = other.asBytes();
 
-        let min_len = Math.min(num1.size(), num2.size()) as int;
+        let min_len = min(num1.size(), num2.size()) as int;
         let res = result.asBytes();
         res = new Vec();
 
@@ -554,7 +554,7 @@ export class BigInt {
         let num1 = this.asBytes();
         let num2 = other.asBytes();
 
-        let min_len = Math.min(num1.size(), num2.size()) as int;
+        let min_len = min(num1.size(), num2.size()) as int;
         let res = result.asBytes();
         res = new Vec();
 
@@ -579,7 +579,7 @@ export class BigInt {
         let num1 = this.asBytes();
         let num2 = other.asBytes();
 
-        let min_len = Math.min(num1.size(), num2.size()) as int;
+        let min_len = min(num1.size(), num2.size()) as int;
         let res = result.asBytes();
         res = new Vec();
 
@@ -1080,7 +1080,7 @@ export class BigInt {
         let l = lhs;
         let r = rhs;
 
-        let max_len = Math.max(l.size(), r.size()) as int;
+        let max_len = max(l.size(), r.size()) as int;
 
         // Pad the shorter number with zeroes to make them of equal length
         let l_len = max_len - l.size();

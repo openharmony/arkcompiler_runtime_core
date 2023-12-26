@@ -458,7 +458,7 @@ export class RegExp extends Object {
                 captures.pushBack(capN)
             }
             let namedCaptures = /*result.groups*/ undefined;
-            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray() as String[], namedCaptures, replaceValue)
+            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), namedCaptures, replaceValue)
             if (position >= nextSourcePosition) {
                 accumulatedResult += str.substring(nextSourcePosition, position) + replacement
                 nextSourcePosition = position + matchLength
@@ -512,7 +512,7 @@ export class RegExp extends Object {
             if (namedCaptures != undefined) {
                 args.pushBack(namedCaptures as Object)
             }
-            let replacement = replacer(matched, args.toArray() as Object[]);
+            let replacement = replacer(matched, args.toArray());
             if (position >= nextSourcePosition) {
                 accumulatedResult += str.substring(nextSourcePosition, position) + replacement
                 nextSourcePosition = position + matchLength

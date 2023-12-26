@@ -203,6 +203,7 @@ export class Math {
      * Math.𝚌brt(𝚡) = ∛x = the unique y such that y³ = x.
      */
     public static cbrt(x: number): number {
+        if (isNaN(x) || x == Infinity || x == -Infinity) return x;
         return cbrt(x);
     }
 
@@ -257,9 +258,7 @@ export class Math {
      * ```
      */
     public static clz32(value: number): number {
-        let longBits = Double.bitCastToLong(value);
-        let lowBits = (longBits & 0xFFFFFFFF) as int;    
-        return Math.clz32(lowBits) as number;
+        return clz32Double(value);
     }
 
     /**
@@ -375,12 +374,18 @@ export class Math {
      */
     public static hypot(...values: number[]): number {
         let max: number = 0;
+        let hasNaN = false;
+
         for (const value of values) {
-            if (isNaN(value)) {
-                return NaN;
+            if (value == Infinity || value == -Infinity) {
+                return Infinity;
             }
-            max = Math.max(max, Math.abs(value)) as number;
+            if (isNaN(value)) {
+                hasNaN = true;
+            }
+            max = Math.max(max, Math.abs(value));
         }
+        if (hasNaN) return NaN;
         if (max == 0) return 0;
         let sum: number = 0.0;
         for (const value of values) {
@@ -402,9 +407,7 @@ export class Math {
      *
      */
     public static imul(a: number, b: number): number {
-        let a1: Number = a
-        let b1: Number = b
-        return imul(a1.floatValue(), b1.floatValue());
+        return imul(a, b);
     }
 
 
@@ -488,42 +491,18 @@ export class Math {
      *
      * @returns Largest value of `u` and `v`
      */
-    public static max(a: Int, b: Int): number {
-        return max(a.intValue(), b.intValue());
-    }
-
-    /**
-     * Largest value of `u` and `v`
-     *
-     * @param u arbitrary number (of type `Int`)
-     * @param v arbitrary number (of type `Int`)
-     *
-     * @returns Largest value of `u` and `v`
-     */
-
     public static max(...values: number[]): number {
         if (values.length == 0) {
             return -Infinity;
         }
         let max = values[0];
         for (let i = 1; i < values.length; i++) {
+            if (isNaN(values[i])) return NaN;
             if (values[i] > max) {
                 max = values[i];
             }
         }
         return max;
-    }
-
-    /**
-     * Smallest value of `u` and `v`
-     *
-     * @param u arbitrary number (of type `Int`)
-     * @param v arbitrary number (of type `Int`)
-     *
-     * @returns Smallest value of `u` and `v`
-     */
-    public static min(a: Int, b: Int): number {
-        return min(a.intValue(), b.intValue());
     }
 
     /**
@@ -540,6 +519,7 @@ export class Math {
         }
         let min = values[0];
         for (let i = 1; i < values.length; i++) {
+            if (isNaN(values[i])) return NaN;
             if (values[i] < min) {
                 min = values[i];
             }
@@ -696,6 +676,7 @@ export class Math {
      * ```
      */
     public static tanh(x: number): number {
+        if (isNaN(x)) return NaN;
         return tanh(x);
     }
 

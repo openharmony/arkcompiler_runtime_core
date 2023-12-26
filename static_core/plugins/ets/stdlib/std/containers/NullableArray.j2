@@ -76,13 +76,10 @@ export class Nullable{{T}}Array {
      *
      * @returns the underlying array
      */
-    public toArray(): Nullable{{T}}[] {
-        if (this.curSize == this.data.length) {
-            return this.data
-        }
-        let newData = new Nullable{{T}}[this.curSize]
+    public toArray(): {{T}}[] {
+        let newData = new {{T}}[this.curSize]
         for (let i = 0; i < this.curSize; ++i) {
-            newData[i] = this.data[i]
+            newData[i] = this.data[i]!
         }
         return newData
     }

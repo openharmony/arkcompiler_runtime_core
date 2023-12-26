@@ -76,13 +76,10 @@ export class NullableObjectArray {
      *
      * @returns the underlying array
      */
-    public toArray(): NullableObject[] {
-        if (this.curSize == this.data.length) {
-            return this.data
-        }
-        let newData = new NullableObject[this.curSize]
+    public toArray(): Object[] {
+        let newData = new Object[this.curSize]
         for (let i = 0; i < this.curSize; ++i) {
-            newData[i] = this.data[i]
+            newData[i] = this.data[i]!
         }
         return newData
     }

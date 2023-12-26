@@ -152,11 +152,6 @@ function createWithGivenZeroSize(): int {
 
 function createWithGivenSize(): int {
     let arr = new Array<Number>(10);
-    for (let i: number = 0; i < arr.length; ++i) {
-        if(arr.at(i) != null) {
-            return fail;
-        }
-    }
     let result = arr.length == 10 ? success : fail;
     return result;
 }
@@ -215,12 +210,12 @@ function toSplicedArg1(): int {
         arr.push(dd[i]);
     }
     let newArr = arr.toSpliced(1);
-    if ((newArr.at(0) != 0) || (newArr.at(1) != 3) ||
+    if ((newArr.at(0)! != 0) || (newArr.at(1) != 3) ||
         (newArr.at(2) != 4) || (newArr.at(3) != 0) ||
         (newArr.at(4) != 6) || (newArr.length != 5)) {
         return fail;
     }
-    if ((arr.at(0) != 1) || (arr.length != 1)) {
+    if ((arr.at(0)! != 1) || (arr.length != 1)) {
         return fail;
     }
     return success;
@@ -232,11 +227,11 @@ function toSplicedArg2(): int {
         arr.push(dd[i]);
     }
     let newArr = arr.toSpliced(1, 2);
-    if ((newArr.at(0) != 0) || (newArr.at(1) != 3) ||
+    if ((newArr.at(0)! != 0) || (newArr.at(1) != 3) ||
         (newArr.length != 2)) {
         return fail;
     }
-    if ((arr.at(0) != 1) || (arr.at(1) != 4) ||
+    if ((arr.at(0)! != 1) || (arr.at(1) != 4) ||
         (arr.at(2) != 0) || (arr.at(3) != 6) ||
         (arr.length != 4)) {
         return fail;
@@ -864,7 +859,7 @@ function reduceFuncArg4ArrayNumberWithInitialValue(): int {
     for (let i: int = 0; i < d.length; ++i) {
         arr.push(d[i]);
     }
-    initialValue = -arr.at(0);
+    initialValue = -arr.at(0)!;
     res = arr.reduce(__asGenericABindexArrT<Number>(fn), initialValue);
     if (res.valueOf() != 996) { return fail; }
     if (res.valueOf() ==  -1) { return fail; }
@@ -1005,7 +1000,7 @@ function reduceRightFuncArg4ArrayNumberWithInitialValue(): int {
     for (let i: int = 0; i < d.length; ++i) {
         arr.push(d[i]);
     }
-    initialValue = -arr.at(0);
+    initialValue = -arr.at(0)!;
     res = arr.reduce(__asGenericABindexArrT<Number>(fn), initialValue);
     if (res.valueOf() != 996) { return fail; }
     if (res.valueOf() ==  -1) { return fail; }
@@ -1028,7 +1023,7 @@ function reduceRightFuncArg3WithInitialValue(): int {
     for (let i: int = 0; i < d.length; ++i) {
         arr.push(d[i]);
     }
-    initialValue = -arr.at(0);
+    initialValue = -arr.at(0)!;
     res = arr.reduce(__asGenericABindexT<Number>(fn), initialValue);
     if (res.valueOf() != 493) { return fail; }
     if (res.valueOf() ==  -1) { return fail; }
@@ -1048,7 +1043,7 @@ function reduceRightFuncArg2WithInitialValue(): int {
     for (let i: int = 0; i < d.length; ++i) {
         arr.push(d[i]);
     }
-    initialValue = -arr.at(0);
+    initialValue = -arr.at(0)!;
     res = arr.reduce(__asGenericABT<Number>(fn), initialValue);
     if (res.valueOf() != 493) { return fail; }
     return success;
