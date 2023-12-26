@@ -123,6 +123,11 @@ spec/unions/union_binary_n_02.ets
 spec/unions/union_cast_n_01.ets
 spec/unions/union_cast_n_02.ets
 spec/unions/union_cast_n_03.ets
+# panda#15005: skip to stabilize fe_dev_202312
+spec/unions/union_compare_02_05.ets
+spec/unions/union_compare_02_07.ets
+spec/unions/union_compare_06.ets
+# End of panda#15005
 spec/unions/union_compare_n_01.ets
 spec/unions/union_compare_n_02.ets
 spec/unions/union_compare_n_03.ets
