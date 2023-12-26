@@ -178,3 +178,57 @@ panda_ets_interop_js_test(ets_interop_js_test_async_void3
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
     LAUNCHER_ARGS "testAsyncVoidNothing" "undefined" 1
 )
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_all_empty
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseAllEmpty"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_all_resolved
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseAllResolved"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_all_rejected
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseAllRejected"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_allsettled
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseAllSettled"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_any_empty
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseAnyEmpty"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_any_resolved
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseAnyResolved"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_any_rejected
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseAnyRejected"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_race_resolved
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseRaceResolved"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_race_rejected
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseRaceRejected"
+)

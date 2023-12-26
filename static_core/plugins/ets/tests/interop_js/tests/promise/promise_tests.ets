@@ -441,3 +441,178 @@ async function testAsyncString(): Promise<String> {
 async function testAsyncVoid(): Promise<void> { return Void }
 async function testAsyncVoidEmpty(): Promise<void> {}
 async function testAsyncVoidNothing() {}
+
+function testPromiseAllEmpty(): Promise<Object> {
+    globalTest = new Test();
+    let promises: Promise<Object>[] = [];
+    return Promise.all(promises).then<Object>((v: Object): Object|null => {
+        let values: Object[] = v as Object[];
+        if (values == null || values.length != 0) {
+            globalTest.fail();
+        } else {
+            globalTest.success();
+        }
+    });
+}
+
+function testPromiseAllResolved(): Promise<Object> {
+    globalTest = new Test();
+    let p1: Promise<Object> = Promise.resolve<Object>("abc");
+    let p2: Promise<Object> = Promise.resolve<Object>("def");
+    let p3: Promise<Object> = Promise.resolve<Object>("xyz");
+    return Promise.all([
+        p1, p2, p3
+    ]).then<Object>((v: Object): Object|null => {
+        let values: Object[] = v as Object[];
+        if (values == null || values.length != 3) {
+            globalTest.fail();
+        }
+        if (values[0] != "abc") {
+            globalTest.fail();
+        }
+        if (values[1] != "def") {
+            globalTest.fail();
+        }
+        if (values[2] != "xyz") {
+            globalTest.fail();
+        }
+        globalTest.success();
+        return null;
+    });
+}
+
+function testPromiseAllRejected(): Promise<Object> {
+    globalTest = new Test();
+    let p1: Promise<Object> = Promise.resolve<Object>("abc");
+    let p2: Promise<Object> = Promise.reject<Object>("def");
+    let p3: Promise<Object> = Promise.resolve<Object>("xyz");
+    return Promise.all([
+        p1, p2, p3
+    ]).then<Object>((v: Object): Object|null => {
+        globalTest.fail();
+        return null;
+    }, (err: Object|null): Object|null => {
+        if (err != "def") {
+            globalTest.fail();
+        } else {
+            globalTest.success();
+        }
+        return null;
+    });
+}
+
+function testPromiseAllSettled(): Promise<Object> {
+    globalTest = new Test();
+    let p1: Promise<Object> = Promise.resolve<Object>("abc");
+    let p2: Promise<Object> = Promise.reject<Object>("def");
+    let p3: Promise<Object> = Promise.resolve<Object>("xyz");
+    return Promise.allSettled([
+        p1, p2, p3
+    ]).then<Object>((v: Object): Object|null => {
+        let values = v as Object[];
+        if (values == null || values.length != 3) {
+            globalTest.fail();
+        }
+        if (values[0] != "abc") {
+            globalTest.fail();
+        }
+        if (values[1] != "def") {
+            globalTest.fail();
+        }
+        if (values[2] != "xyz") {
+            globalTest.fail();
+        }
+        globalTest.success();
+        return null;
+    }, (err: Object|null): Object|null => {
+        globalTest.fail();
+        return null;
+    });
+}
+
+function testPromiseAnyEmpty(): Promise<Object> {
+    globalTest = new Test();
+    let promises: Promise<Object>[] = [];
+    return Promise.any(promises).then<Object>((v: Object): Object|null => {
+        globalTest.fail();
+    }, (err: Object|null): Object|null => {
+        if (err != null && err instanceof AggregateError) {
+            globalTest.success();
+        } else {
+            globalTest.fail();
+        }
+    });
+}
+
+function testPromiseAnyResolved(): Promise<Object> {
+    globalTest = new Test();
+    let p1: Promise<Object> = Promise.reject<Object>("abc");
+    let p2: Promise<Object> = Promise.reject<Object>("def");
+    let p3: Promise<Object> = Promise.resolve<Object>("xyz");
+    return Promise.any([
+        p1, p2, p3
+    ]).then<Object>((value: Object): Object|null => {
+        if (value != "xyz") {
+            globalTest.fail();
+        }
+        globalTest.success();
+        return null;
+    });
+}
+
+function testPromiseAnyRejected(): Promise<Object> {
+    globalTest = new Test();
+    let p1: Promise<Object> = Promise.reject<Object>("abc");
+    let p2: Promise<Object> = Promise.reject<Object>("def");
+    let p3: Promise<Object> = Promise.reject<Object>("xyz");
+    return Promise.any([
+        p1, p2, p3
+    ]).then<Object>((v: Object): Object|null => {
+        globalTest.fail();
+        return null;
+    }, (err: Object|null): Object|null => {
+        if (err == null || !(err instanceof AggregateError)) { 
+            globalTest.fail();
+        } else {
+            globalTest.success();
+        }
+        return null;
+    });
+}
+
+function testPromiseRaceResolved(): Promise<Object> {
+    globalTest = new Test();
+    let p1: Promise<Object> = Promise.resolve<Object>("abc");
+    let p2: Promise<Object> = Promise.reject<Object>("def");
+    return Promise.race([
+        p1, p2
+    ]).then<Object>((value: Object): Object|null => {
+        if (value != "abc") {
+            globalTest.fail();
+        }
+        globalTest.success();
+        return null;
+    }, (value: Object|null): Object|null => {
+        globalTest.fail();
+        return null;
+    });
+}
+
+function testPromiseRaceRejected(): Promise<Object> {
+    globalTest = new Test();
+    let p1: Promise<Object> = Promise.reject<Object>("abc");
+    let p2: Promise<Object> = Promise.resolve<Object>("def");
+    return Promise.race([
+        p1, p2
+    ]).then<Object>((value: Object): Object|null => {
+        globalTest.fail();
+        return null;
+    }, (value: Object|null): Object|null => {
+        console.println("UDAV: here " + value);
+        if (value != "abc") {
+            globalTest.fail();
+        }
+        globalTest.success();
+        return null;
+    });
+}
