@@ -97,10 +97,12 @@ void SharedReference::FinalizeJSWeak([[maybe_unused]] napi_env env, void *data, 
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
+    ScopedManagedCodeThread scope(coro);
 
     auto ref = reinterpret_cast<SharedReference *>(data);
     ASSERT(ref->ets_ref_ != nullptr);
 
+    ref->GetEtsObject(ctx)->DropInteropHash();
     ctx->Refstor()->Remove(ref->ets_ref_);
     ctx->GetSharedRefStorage()->RemoveReference(ref);
 }
