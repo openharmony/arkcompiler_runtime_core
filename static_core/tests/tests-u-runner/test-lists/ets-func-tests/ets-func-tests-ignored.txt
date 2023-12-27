@@ -199,6 +199,14 @@ spec/conditional-expression/nullish_expr/expr/undefined-object-expression.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-for-loop.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-do-while.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-while.ets
+### Issue 14736 begin
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-1.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-2.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-3.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-4.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-7.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-8.ets
+### Issue 14736 end
 ### issue 14258
 spec/conditional-expression/string/expr/string-expression-assert.ets
 ### issue 14299 (incorrect behavior for tests with boxed type like new Short(0))
@@ -508,6 +516,10 @@ spec/nullables/nullable-lambda-default-param_5.ets
 spec/generic/issue14751.ets
 ### Issue 14752
 spec/generic/issue14752.ets
+### Issue 13438
+spec/generic/issue13438_0.ets
+spec/generic/issue13438_1.ets
+spec/generic/issue14498.ets
 ### Issue 14498
 spec/generic/generic_03.ets
 ### Issue 13642
