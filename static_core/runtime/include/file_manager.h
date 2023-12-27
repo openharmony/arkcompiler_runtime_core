@@ -24,13 +24,13 @@ namespace panda {
 
 class FileManager {
 public:
-    PANDA_PUBLIC_API static bool LoadAbcFile(std::string_view location, panda_file::File::OpenMode open_mode);
+    PANDA_PUBLIC_API static bool LoadAbcFile(std::string_view location, panda_file::File::OpenMode openMode);
 
-    PANDA_PUBLIC_API static bool TryLoadAnFileForLocation(std::string_view panda_file_location);
+    PANDA_PUBLIC_API static bool TryLoadAnFileForLocation(std::string_view pandaFileLocation);
 
-    PANDA_PUBLIC_API static Expected<bool, std::string> LoadAnFile(std::string_view an_location, bool force = false);
+    PANDA_PUBLIC_API static Expected<bool, std::string> LoadAnFile(std::string_view anLocation, bool force = false);
 
-    PANDA_PUBLIC_API static PandaString ResolveAnFilePath(std::string_view abc_path);
+    PANDA_PUBLIC_API static PandaString ResolveAnFilePath(std::string_view abcPath);
 };
 
 }  // namespace panda

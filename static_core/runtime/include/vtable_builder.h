@@ -39,30 +39,30 @@ public:
     static constexpr size_t INVALID_METHOD_IDX = std::numeric_limits<size_t>::max();
     MethodInfo(const panda_file::MethodDataAccessor &mda, size_t index, ClassLinkerContext *ctx)
         : pf_(&mda.GetPandaFile()),
-          class_id_(mda.GetClassId()),
-          access_flags_(mda.GetAccessFlags()),
+          classId_(mda.GetClassId()),
+          accessFlags_(mda.GetAccessFlags()),
           name_(pf_->GetStringData(mda.GetNameId())),
           proto_(*pf_, mda.GetProtoId()),
           ctx_(ctx),
           index_(index),
-          source_lang_(GetSourceLang()),
-          return_type_(mda.GetReturnType())
+          sourceLang_(GetSourceLang()),
+          returnType_(mda.GetReturnType())
     {
     }
 
-    explicit MethodInfo(Method *method, size_t index = 0, bool is_base = false, bool needs_copy = false)
+    explicit MethodInfo(Method *method, size_t index = 0, bool isBase = false, bool needsCopy = false)
         : method_(method),
           pf_(method->GetPandaFile()),
-          class_id_(method->GetClass()->GetFileId()),
-          access_flags_(method->GetAccessFlags()),
+          classId_(method->GetClass()->GetFileId()),
+          accessFlags_(method->GetAccessFlags()),
           name_(method->GetName()),
           proto_(method->GetProtoId()),
           ctx_(method->GetClass()->GetLoadContext()),
           index_(index),
-          needs_copy_(needs_copy),
-          is_base_(is_base),
-          source_lang_(GetSourceLang()),
-          return_type_(method->GetReturnType())
+          needsCopy_(needsCopy),
+          isBase_(isBase),
+          sourceLang_(GetSourceLang()),
+          returnType_(method->GetReturnType())
     {
     }
 
@@ -73,12 +73,12 @@ public:
 
     panda_file::SourceLang GetSourceLang() const
     {
-        return source_lang_;
+        return sourceLang_;
     }
 
     panda_file::Type GetReturnType() const
     {
-        return return_type_;
+        return returnType_;
     }
 
     const panda_file::File::StringData &GetName() const
@@ -88,7 +88,7 @@ public:
 
     const uint8_t *GetClassName() const
     {
-        return method_ != nullptr ? method_->GetClass()->GetDescriptor() : pf_->GetStringData(class_id_).data;
+        return method_ != nullptr ? method_->GetClass()->GetDescriptor() : pf_->GetStringData(classId_).data;
     }
 
     const Method::ProtoId &GetProtoId() const
@@ -108,22 +108,22 @@ public:
 
     bool IsAbstract() const
     {
-        return (access_flags_ & ACC_ABSTRACT) != 0;
+        return (accessFlags_ & ACC_ABSTRACT) != 0;
     }
 
     bool IsPublic() const
     {
-        return (access_flags_ & ACC_PUBLIC) != 0;
+        return (accessFlags_ & ACC_PUBLIC) != 0;
     }
 
     bool IsProtected() const
     {
-        return (access_flags_ & ACC_PROTECTED) != 0;
+        return (accessFlags_ & ACC_PROTECTED) != 0;
     }
 
     bool IsPrivate() const
     {
-        return (access_flags_ & ACC_PRIVATE) != 0;
+        return (accessFlags_ & ACC_PRIVATE) != 0;
     }
 
     bool IsInterfaceMethod() const
@@ -132,18 +132,18 @@ public:
             return method_->GetClass()->IsInterface();
         }
 
-        panda_file::ClassDataAccessor cda(*pf_, class_id_);
+        panda_file::ClassDataAccessor cda(*pf_, classId_);
         return cda.IsInterface();
     }
 
     bool NeedsCopy() const
     {
-        return needs_copy_;
+        return needsCopy_;
     }
 
     bool IsBase() const
     {
-        return is_base_;
+        return isBase_;
     }
 
     ClassLinkerContext *GetLoadContext() const
@@ -169,16 +169,16 @@ public:
 private:
     Method *method_ {nullptr};
     const panda_file::File *pf_;
-    panda_file::File::EntityId class_id_;
-    uint32_t access_flags_;
+    panda_file::File::EntityId classId_;
+    uint32_t accessFlags_;
     panda_file::File::StringData name_;
     Method::ProtoId proto_;
     ClassLinkerContext *ctx_ {nullptr};
     size_t index_ {0};
-    bool needs_copy_ {false};
-    bool is_base_ {false};
-    panda_file::SourceLang source_lang_ {panda_file::SourceLang::INVALID};
-    panda_file::Type return_type_;
+    bool needsCopy_ {false};
+    bool isBase_ {false};
+    panda_file::SourceLang sourceLang_ {panda_file::SourceLang::INVALID};
+    panda_file::Type returnType_;
 };
 
 template <class SearchPred, class OverridePred>
@@ -253,9 +253,9 @@ public:
 
 private:
     struct HashByName {
-        uint32_t operator()(const MethodInfo &method_info) const
+        uint32_t operator()(const MethodInfo &methodInfo) const
         {
-            return GetHash32String(method_info.GetName().data);
+            return GetHash32String(methodInfo.GetName().data);
         }
     };
 
@@ -263,26 +263,26 @@ private:
 };
 
 struct CopiedMethod {
-    CopiedMethod(Method *cp_method, bool cp_default_conflict, bool cp_default_abstract)
-        : method(cp_method), default_conflict(cp_default_conflict), default_abstract(cp_default_abstract)
+    CopiedMethod(Method *cpMethod, bool cpDefaultConflict, bool cpDefaultAbstract)
+        : method(cpMethod), defaultConflict(cpDefaultConflict), defaultAbstract(cpDefaultAbstract)
     {
     }
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     Method *method;
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    bool default_conflict;  // flag indicates whether current methed is judged icce
+    bool defaultConflict;  // flag indicates whether current methed is judged icce
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    bool default_abstract;  // flag indicates whether current methed is judged ame
+    bool defaultAbstract;  // flag indicates whether current methed is judged ame
 };
 
 class VTableBuilder {
 public:
     VTableBuilder() = default;
 
-    virtual void Build(panda_file::ClassDataAccessor *cda, Class *base_class, ITable itable,
+    virtual void Build(panda_file::ClassDataAccessor *cda, Class *baseClass, ITable itable,
                        ClassLinkerContext *ctx) = 0;
 
-    virtual void Build(Span<Method> methods, Class *base_class, ITable itable, bool is_interface) = 0;
+    virtual void Build(Span<Method> methods, Class *baseClass, ITable itable, bool isInterface) = 0;
 
     virtual void UpdateClass(Class *klass) const = 0;
 
@@ -300,15 +300,15 @@ public:
 
 template <class SearchBySignature, class OverridePred>
 class VTableBuilderImpl : public VTableBuilder {
-    void Build(panda_file::ClassDataAccessor *cda, Class *base_class, ITable itable, ClassLinkerContext *ctx) override;
+    void Build(panda_file::ClassDataAccessor *cda, Class *baseClass, ITable itable, ClassLinkerContext *ctx) override;
 
-    void Build(Span<Method> methods, Class *base_class, ITable itable, bool is_interface) override;
+    void Build(Span<Method> methods, Class *baseClass, ITable itable, bool isInterface) override;
 
     void UpdateClass(Class *klass) const override;
 
     size_t GetNumVirtualMethods() const override
     {
-        return num_vmethods_;
+        return numVmethods_;
     }
 
     size_t GetVTableSize() const override
@@ -318,7 +318,7 @@ class VTableBuilderImpl : public VTableBuilder {
 
     const PandaVector<CopiedMethod> &GetCopiedMethods() const override
     {
-        return copied_methods_;
+        return copiedMethods_;
     }
 
 private:
@@ -326,7 +326,7 @@ private:
 
     void BuildForInterface(Span<Method> methods);
 
-    void AddBaseMethods(Class *base_class);
+    void AddBaseMethods(Class *baseClass);
 
     void AddClassMethods(panda_file::ClassDataAccessor *cda, ClassLinkerContext *ctx);
 
@@ -335,9 +335,9 @@ private:
     void AddDefaultInterfaceMethods(ITable itable);
 
     VTable<SearchBySignature, OverridePred> vtable_;
-    size_t num_vmethods_ {0};
-    bool has_default_methods_ {false};
-    PandaVector<CopiedMethod> copied_methods_;
+    size_t numVmethods_ {0};
+    bool hasDefaultMethods_ {false};
+    PandaVector<CopiedMethod> copiedMethods_;
 };
 
 }  // namespace panda

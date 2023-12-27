@@ -42,7 +42,7 @@ public:
     NO_COPY_SEMANTIC(EtsPromise);
     NO_MOVE_SEMANTIC(EtsPromise);
 
-    PANDA_PUBLIC_API static EtsPromise *Create(EtsCoroutine *ets_coroutine = EtsCoroutine::GetCurrent());
+    PANDA_PUBLIC_API static EtsPromise *Create(EtsCoroutine *etsCoroutine = EtsCoroutine::GetCurrent());
 
     static EtsPromise *FromCoreType(ObjectHeader *promise)
     {
@@ -72,19 +72,19 @@ public:
     EtsObjectArray *GetThenQueue(EtsCoroutine *coro)
     {
         return EtsObjectArray::FromCoreType(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, then_queue_)));
+            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, thenQueue_)));
     }
 
     EtsObjectArray *GetCatchQueue(EtsCoroutine *coro)
     {
         return EtsObjectArray::FromCoreType(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, catch_queue_)));
+            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, catchQueue_)));
     }
 
     void ClearQueues(EtsCoroutine *coro)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, then_queue_), nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, catch_queue_), nullptr);
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, thenQueue_), nullptr);
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, catchQueue_), nullptr);
     }
 
     CoroutineEvent *GetEventPtr()
@@ -119,13 +119,13 @@ public:
 
     EtsObject *GetLinkedPromise(EtsCoroutine *coro)
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, linked_promise_));
+        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_));
         return EtsObject::FromCoreType(obj);
     }
 
     void SetLinkedPromise(EtsCoroutine *coro, EtsObject *p)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, linked_promise_), p->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_), p->GetCoreType());
     }
 
     void Resolve(EtsCoroutine *coro, EtsObject *value)
@@ -165,8 +165,8 @@ public:
     {
         auto tid = EtsCoroutine::GetCurrent()->GetCoroutineId();
         ASSERT((tid & MarkWord::LIGHT_LOCK_THREADID_MASK) != 0);
-        auto mw_expected = AtomicGetMark();
-        switch (mw_expected.GetState()) {
+        auto mwExpected = AtomicGetMark();
+        switch (mwExpected.GetState()) {
             case MarkWord::STATE_GC:
                 LOG(FATAL, COROUTINES) << "Cannot lock a GC-collected Promise object!";
                 break;
@@ -174,7 +174,7 @@ public:
             case MarkWord::STATE_HEAVY_LOCKED:
                 // should wait until unlock...
                 // NOTE(konstanting, #I67QXC): check tid and decide what to do in case when locked by current tid
-                mw_expected = mw_expected.DecodeFromUnlocked();
+                mwExpected = mwExpected.DecodeFromUnlocked();
                 break;
             case MarkWord::STATE_HASHED:
                 // NOTE(konstanting, #I67QXC): should save the hash
@@ -185,13 +185,13 @@ public:
             default:
                 break;
         }
-        auto new_mw = mw_expected.DecodeFromLightLock(tid, 0);
+        auto newMw = mwExpected.DecodeFromLightLock(tid, 0);
 #ifndef NDEBUG
         size_t cycles = 0;
 #endif /* NDEBUG */
-        while (!AtomicSetMark<false>(mw_expected, new_mw)) {
-            mw_expected = mw_expected.DecodeFromUnlocked();
-            new_mw = mw_expected.DecodeFromLightLock(tid, 0);
+        while (!AtomicSetMark<false>(mwExpected, newMw)) {
+            mwExpected = mwExpected.DecodeFromUnlocked();
+            newMw = mwExpected.DecodeFromLightLock(tid, 0);
 #ifndef NDEBUG
             ++cycles;
 #endif /* NDEBUG */
@@ -208,20 +208,20 @@ public:
         // NOTE(konstanting, #I67QXC): should load the hash once we support the hashed state in Lock()
         auto mw = AtomicGetMark();
         ASSERT(mw.GetState() == MarkWord::STATE_LIGHT_LOCKED);
-        auto new_mw = mw.DecodeFromUnlocked();
-        while (!AtomicSetMark<false>(mw, new_mw)) {
+        auto newMw = mw.DecodeFromUnlocked();
+        while (!AtomicSetMark<false>(mw, newMw)) {
             ASSERT(mw.GetState() == MarkWord::STATE_LIGHT_LOCKED);
-            new_mw = mw.DecodeFromUnlocked();
+            newMw = mw.DecodeFromUnlocked();
         }
     }
 
 private:
     ObjectPointer<EtsObject> value_;  // the completion value of the Promise
     ObjectPointer<EtsObjectArray>
-        then_queue_;  // the queue of 'then' calbacks which will be called when the Promise gets resolved
+        thenQueue_;  // the queue of 'then' calbacks which will be called when the Promise gets resolved
     ObjectPointer<EtsObjectArray>
-        catch_queue_;  // the queue of 'catch' callback which will be called when the Promise gets rejected
-    ObjectPointer<EtsObject> linked_promise_;  // linked JS promise as JSValue (if exists)
+        catchQueue_;  // the queue of 'catch' callback which will be called when the Promise gets rejected
+    ObjectPointer<EtsObject> linkedPromise_;  // linked JS promise as JSValue (if exists)
     EtsLong event_;
     uint32_t padding0_;
     uint32_t state_;  // the Promise's state

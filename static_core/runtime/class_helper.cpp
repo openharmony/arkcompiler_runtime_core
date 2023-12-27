@@ -30,39 +30,39 @@ const uint8_t *ClassHelper::GetDescriptor(const uint8_t *name, PandaString *stor
 }
 
 /* static */
-const uint8_t *ClassHelper::GetArrayDescriptor(const uint8_t *component_name, size_t rank, PandaString *storage)
+const uint8_t *ClassHelper::GetArrayDescriptor(const uint8_t *componentName, size_t rank, PandaString *storage)
 {
     storage->clear();
     storage->append(rank, '[');
     storage->push_back('L');
-    storage->append(utf::Mutf8AsCString(component_name));
+    storage->append(utf::Mutf8AsCString(componentName));
     storage->push_back(';');
     std::replace(storage->begin(), storage->end(), '.', '/');
     return utf::CStringAsMutf8(storage->c_str());
 }
 
 /* static */
-char ClassHelper::GetPrimitiveTypeDescriptorChar(panda_file::Type::TypeId type_id)
+char ClassHelper::GetPrimitiveTypeDescriptorChar(panda_file::Type::TypeId typeId)
 {
     // static_cast isn't necessary in most implementations but may be by standard
-    return static_cast<char>(*GetPrimitiveTypeDescriptorStr(type_id));
+    return static_cast<char>(*GetPrimitiveTypeDescriptorStr(typeId));
 }
 
 /* static */
-const uint8_t *ClassHelper::GetPrimitiveTypeDescriptorStr(panda_file::Type::TypeId type_id)
+const uint8_t *ClassHelper::GetPrimitiveTypeDescriptorStr(panda_file::Type::TypeId typeId)
 {
-    if (type_id == panda_file::Type::TypeId::REFERENCE) {
+    if (typeId == panda_file::Type::TypeId::REFERENCE) {
         UNREACHABLE();
         return nullptr;
     }
 
-    return utf::CStringAsMutf8(panda_file::Type::GetSignatureByTypeId(panda_file::Type(type_id)));
+    return utf::CStringAsMutf8(panda_file::Type::GetSignatureByTypeId(panda_file::Type(typeId)));
 }
 
 /* static */
-const char *ClassHelper::GetPrimitiveTypeStr(panda_file::Type::TypeId type_id)
+const char *ClassHelper::GetPrimitiveTypeStr(panda_file::Type::TypeId typeId)
 {
-    switch (type_id) {
+    switch (typeId) {
         case panda_file::Type::TypeId::VOID:
             return "void";
         case panda_file::Type::TypeId::U1:

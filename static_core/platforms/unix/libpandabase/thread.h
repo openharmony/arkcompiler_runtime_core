@@ -23,8 +23,8 @@ WEAK_FOR_LTO_START
 namespace panda::os::thread {
 constexpr int LOWEST_PRIORITY = 19;
 
-PANDA_PUBLIC_API int GetPriority(int thread_id);
-PANDA_PUBLIC_API int SetPriority(int thread_id, int prio);
+PANDA_PUBLIC_API int GetPriority(int threadId);
+PANDA_PUBLIC_API int SetPriority(int threadId, int prio);
 }  // namespace panda::os::thread
 
 WEAK_FOR_LTO_END

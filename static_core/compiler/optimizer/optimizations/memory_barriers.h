@@ -27,7 +27,7 @@ namespace panda::compiler {
 class OptimizeMemoryBarriers : public Optimization, public GraphVisitor {
 public:
     explicit OptimizeMemoryBarriers(Graph *graph)
-        : Optimization(graph), barriers_insts_(graph->GetLocalAllocator()->Adapter())
+        : Optimization(graph), barriersInsts_(graph->GetLocalAllocator()->Adapter())
     {
     }
     NO_MOVE_SEMANTIC(OptimizeMemoryBarriers);
@@ -50,7 +50,7 @@ public:
     void ApplyGraph();
     bool IsApplied()
     {
-        return is_applied_;
+        return isApplied_;
     }
 
 private:
@@ -98,8 +98,8 @@ private:
 #include "optimizer/ir/visitor.inc"
 
 private:
-    InstVector barriers_insts_;
-    bool is_applied_ {false};
+    InstVector barriersInsts_;
+    bool isApplied_ {false};
 };
 }  // namespace panda::compiler
 

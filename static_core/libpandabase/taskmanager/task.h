@@ -57,29 +57,29 @@ static_assert(std::is_same<decltype(ALL_TASK_EXECUTION_MODES)::value_type, TaskE
  */
 class TaskProperties {
 public:
-    constexpr TaskProperties(TaskType task_type, VMType vm_type, TaskExecutionMode execution_mode)
-        : task_type_(task_type), vm_type_(vm_type), execution_mode_(execution_mode)
+    constexpr TaskProperties(TaskType taskType, VMType vmType, TaskExecutionMode executionMode)
+        : taskType_(taskType), vmType_(vmType), executionMode_(executionMode)
     {
     }
 
     constexpr TaskType GetTaskType() const
     {
-        return task_type_;
+        return taskType_;
     }
 
     constexpr VMType GetVMType() const
     {
-        return vm_type_;
+        return vmType_;
     }
 
     constexpr TaskExecutionMode GetTaskExecutionMode() const
     {
-        return execution_mode_;
+        return executionMode_;
     }
 
     friend constexpr bool operator==(const TaskProperties &lv, const TaskProperties &rv)
     {
-        return lv.task_type_ == rv.task_type_ && lv.vm_type_ == rv.vm_type_ && lv.execution_mode_ == rv.execution_mode_;
+        return lv.taskType_ == rv.taskType_ && lv.vmType_ == rv.vmType_ && lv.executionMode_ == rv.executionMode_;
     }
 
     class Hash {
@@ -87,16 +87,16 @@ public:
         constexpr Hash() = default;
         constexpr uint32_t operator()(const TaskProperties &properties) const
         {
-            return (static_cast<uint32_t>(properties.task_type_) << (2U * sizeof(uint8_t) * BITS_PER_BYTE)) |
-                   (static_cast<uint32_t>(properties.vm_type_) << (sizeof(uint8_t) * BITS_PER_BYTE)) |
-                   (static_cast<uint32_t>(properties.execution_mode_));
+            return (static_cast<uint32_t>(properties.taskType_) << (2U * sizeof(uint8_t) * BITS_PER_BYTE)) |
+                   (static_cast<uint32_t>(properties.vmType_) << (sizeof(uint8_t) * BITS_PER_BYTE)) |
+                   (static_cast<uint32_t>(properties.executionMode_));
         }
     };
 
 private:
-    TaskType task_type_;
-    VMType vm_type_;
-    TaskExecutionMode execution_mode_;
+    TaskType taskType_;
+    VMType vmType_;
+    TaskExecutionMode executionMode_;
 };
 
 class Task {

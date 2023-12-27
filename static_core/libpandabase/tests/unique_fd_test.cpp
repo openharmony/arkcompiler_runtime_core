@@ -26,118 +26,118 @@ enum TestValue { DEFAULT_VALUE = -1L, STDIN_VALUE, STDOUT_VALUE, STDERR_VALUE };
 struct DuplicateFD {
     // CHECKER_IGNORE_NEXTLINE(AF0005)
     // NOLINTNEXTLINE(android-cloexec-dup)
-    int stdin_value = ::dup(STDIN_VALUE);
+    int stdinValue = ::dup(STDIN_VALUE);
     // CHECKER_IGNORE_NEXTLINE(AF0005)
     // NOLINTNEXTLINE(android-cloexec-dup)
-    int stdout_value = ::dup(STDOUT_VALUE);
+    int stdoutValue = ::dup(STDOUT_VALUE);
     // CHECKER_IGNORE_NEXTLINE(AF0005)
     // NOLINTNEXTLINE(android-cloexec-dup)
-    int stferr_value = ::dup(STDERR_VALUE);
+    int stferrValue = ::dup(STDERR_VALUE);
 };
 
 TEST(UniqueFd, Construct)
 {
-    DuplicateFD dup_df;
-    auto fd_a = UniqueFd();
-    auto fd_b = UniqueFd(dup_df.stdin_value);
-    auto fd_c = UniqueFd(dup_df.stdout_value);
-    auto fd_d = UniqueFd(dup_df.stferr_value);
+    DuplicateFD dupDf;
+    auto fdA = UniqueFd();
+    auto fdB = UniqueFd(dupDf.stdinValue);
+    auto fdC = UniqueFd(dupDf.stdoutValue);
+    auto fdD = UniqueFd(dupDf.stferrValue);
 
-    EXPECT_EQ(fd_a.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_b.Get(), dup_df.stdin_value);
-    EXPECT_EQ(fd_c.Get(), dup_df.stdout_value);
-    EXPECT_EQ(fd_d.Get(), dup_df.stferr_value);
+    EXPECT_EQ(fdA.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdB.Get(), dupDf.stdinValue);
+    EXPECT_EQ(fdC.Get(), dupDf.stdoutValue);
+    EXPECT_EQ(fdD.Get(), dupDf.stferrValue);
 
-    auto fd_e = std::move(fd_a);
-    auto fd_f = std::move(fd_b);
-    auto fd_g = std::move(fd_c);
-    auto fd_h = std::move(fd_d);
+    auto fdE = std::move(fdA);
+    auto fdF = std::move(fdB);
+    auto fdG = std::move(fdC);
+    auto fdH = std::move(fdD);
 
     // NOLINTBEGIN(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
-    EXPECT_EQ(fd_a.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_b.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_c.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_d.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_e.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_f.Get(), dup_df.stdin_value);
-    EXPECT_EQ(fd_g.Get(), dup_df.stdout_value);
-    EXPECT_EQ(fd_h.Get(), dup_df.stferr_value);
+    EXPECT_EQ(fdA.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdB.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdC.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdD.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdE.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdF.Get(), dupDf.stdinValue);
+    EXPECT_EQ(fdG.Get(), dupDf.stdoutValue);
+    EXPECT_EQ(fdH.Get(), dupDf.stferrValue);
 }
 
 TEST(UniqueFd, Equal)
 {
-    DuplicateFD dup_df;
-    auto fd_a = UniqueFd();
-    auto fd_b = UniqueFd(dup_df.stdin_value);
-    auto fd_c = UniqueFd(dup_df.stdout_value);
-    auto fd_d = UniqueFd(dup_df.stferr_value);
+    DuplicateFD dupDf;
+    auto fdA = UniqueFd();
+    auto fdB = UniqueFd(dupDf.stdinValue);
+    auto fdC = UniqueFd(dupDf.stdoutValue);
+    auto fdD = UniqueFd(dupDf.stferrValue);
 
-    auto fd_e = UniqueFd();
-    auto fd_f = UniqueFd();
-    auto fd_g = UniqueFd();
-    auto fd_h = UniqueFd();
-    fd_e = std::move(fd_a);
-    fd_f = std::move(fd_b);
-    fd_g = std::move(fd_c);
-    fd_h = std::move(fd_d);
+    auto fdE = UniqueFd();
+    auto fdF = UniqueFd();
+    auto fdG = UniqueFd();
+    auto fdH = UniqueFd();
+    fdE = std::move(fdA);
+    fdF = std::move(fdB);
+    fdG = std::move(fdC);
+    fdH = std::move(fdD);
 
-    EXPECT_EQ(fd_a.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_b.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_c.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_d.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_e.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_f.Get(), dup_df.stdin_value);
-    EXPECT_EQ(fd_g.Get(), dup_df.stdout_value);
-    EXPECT_EQ(fd_h.Get(), dup_df.stferr_value);
+    EXPECT_EQ(fdA.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdB.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdC.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdD.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdE.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdF.Get(), dupDf.stdinValue);
+    EXPECT_EQ(fdG.Get(), dupDf.stdoutValue);
+    EXPECT_EQ(fdH.Get(), dupDf.stferrValue);
     // NOLINTEND(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
 }
 
 TEST(UniqueFd, Release)
 {
-    DuplicateFD dup_df;
-    auto fd_a = UniqueFd();
-    auto fd_b = UniqueFd(dup_df.stdin_value);
-    auto fd_c = UniqueFd(dup_df.stdout_value);
-    auto fd_d = UniqueFd(dup_df.stferr_value);
+    DuplicateFD dupDf;
+    auto fdA = UniqueFd();
+    auto fdB = UniqueFd(dupDf.stdinValue);
+    auto fdC = UniqueFd(dupDf.stdoutValue);
+    auto fdD = UniqueFd(dupDf.stferrValue);
 
-    auto num_a = fd_a.Release();
-    auto num_b = fd_b.Release();
-    auto num_c = fd_c.Release();
-    auto num_d = fd_d.Release();
+    auto numA = fdA.Release();
+    auto numB = fdB.Release();
+    auto numC = fdC.Release();
+    auto numD = fdD.Release();
 
-    EXPECT_EQ(fd_a.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_b.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_c.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_d.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(num_a, DEFAULT_VALUE);
-    EXPECT_EQ(num_b, dup_df.stdin_value);
-    EXPECT_EQ(num_c, dup_df.stdout_value);
-    EXPECT_EQ(num_d, dup_df.stferr_value);
+    EXPECT_EQ(fdA.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdB.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdC.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdD.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(numA, DEFAULT_VALUE);
+    EXPECT_EQ(numB, dupDf.stdinValue);
+    EXPECT_EQ(numC, dupDf.stdoutValue);
+    EXPECT_EQ(numD, dupDf.stferrValue);
 }
 
 TEST(UniqueFd, Reset)
 {
-    DuplicateFD dup_df;
+    DuplicateFD dupDf;
 
-    auto num_a = DEFAULT_VALUE;
-    auto num_b = dup_df.stdin_value;
-    auto num_c = dup_df.stdout_value;
-    auto num_d = dup_df.stferr_value;
+    auto numA = DEFAULT_VALUE;
+    auto numB = dupDf.stdinValue;
+    auto numC = dupDf.stdoutValue;
+    auto numD = dupDf.stferrValue;
 
-    auto fd_a = UniqueFd();
-    auto fd_b = UniqueFd();
-    auto fd_c = UniqueFd();
-    auto fd_d = UniqueFd();
+    auto fdA = UniqueFd();
+    auto fdB = UniqueFd();
+    auto fdC = UniqueFd();
+    auto fdD = UniqueFd();
 
-    fd_a.Reset(num_a);
-    fd_b.Reset(num_b);
-    fd_c.Reset(num_c);
-    fd_d.Reset(num_d);
+    fdA.Reset(numA);
+    fdB.Reset(numB);
+    fdC.Reset(numC);
+    fdD.Reset(numD);
 
-    EXPECT_EQ(fd_a.Get(), DEFAULT_VALUE);
-    EXPECT_EQ(fd_b.Get(), dup_df.stdin_value);
-    EXPECT_EQ(fd_c.Get(), dup_df.stdout_value);
-    EXPECT_EQ(fd_d.Get(), dup_df.stferr_value);
+    EXPECT_EQ(fdA.Get(), DEFAULT_VALUE);
+    EXPECT_EQ(fdB.Get(), dupDf.stdinValue);
+    EXPECT_EQ(fdC.Get(), dupDf.stdoutValue);
+    EXPECT_EQ(fdD.Get(), dupDf.stferrValue);
 }
 
 }  // namespace panda::os::unique_fd

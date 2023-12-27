@@ -43,12 +43,12 @@ public:
         options_.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options_);
         // For tests we don't limit spaces
-        size_t space_size = options_.GetHeapSizeLimit();
-        spaces_.young_space_.Initialize(space_size, space_size);
-        spaces_.mem_space_.Initialize(space_size, space_size);
+        size_t spaceSize = options_.GetHeapSizeLimit();
+        spaces_.youngSpace_.Initialize(spaceSize, spaceSize);
+        spaces_.memSpace_.Initialize(spaceSize, spaceSize);
         // NOLINTNEXTLINE(readability-magic-numbers)
         spaces_.InitializePercentages(0, 100);
-        spaces_.is_initialized_ = true;
+        spaces_.isInitialized_ = true;
         thread_ = panda::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
         Init();
@@ -57,7 +57,7 @@ public:
     ~RemSetTest() override
     {
         thread_->ManagedCodeEnd();
-        card_table_ = nullptr;
+        cardTable_ = nullptr;
         Runtime::Destroy();
     }
 
@@ -68,16 +68,16 @@ public:
     {
         auto lang = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         ext_ = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang);
-        card_table_ = MakePandaUnique<CardTable>(Runtime::GetCurrent()->GetInternalAllocator(),
-                                                 PoolManager::GetMmapMemPool()->GetMinObjectAddress(),
-                                                 PoolManager::GetMmapMemPool()->GetTotalObjectSize());
-        card_table_->Initialize();
+        cardTable_ = MakePandaUnique<CardTable>(Runtime::GetCurrent()->GetInternalAllocator(),
+                                                PoolManager::GetMmapMemPool()->GetMinObjectAddress(),
+                                                PoolManager::GetMmapMemPool()->GetTotalObjectSize());
+        cardTable_->Initialize();
     }
 
 private:
     panda::MTManagedThread *thread_ {};
     RuntimeOptions options_;
-    PandaUniquePtr<CardTable> card_table_ {nullptr};
+    PandaUniquePtr<CardTable> cardTable_ {nullptr};
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
@@ -88,8 +88,8 @@ protected:
 
 TEST_F(RemSetTest, AddRefTest)
 {
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectRegionAllocator allocator(mem_stats, &spaces_);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectRegionAllocator allocator(memStats, &spaces_);
     auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
     cls->SetObjectSize(allocator.GetMaxRegularObjectSize());
 
@@ -109,21 +109,21 @@ TEST_F(RemSetTest, AddRefTest)
     auto remset1 = region1->GetRemSet();
     remset1->AddRef(obj2, 0);
 
-    PandaVector<void *> test_list;
-    auto visitor = [&test_list](ObjectHeader *obj) { test_list.push_back(obj); };
+    PandaVector<void *> testList;
+    auto visitor = [&testList](ObjectHeader *obj) { testList.push_back(obj); };
     remset1->IterateOverObjects(visitor);
-    ASSERT_EQ(test_list.size(), 1);
-    auto first = test_list.front();
+    ASSERT_EQ(testList.size(), 1);
+    auto first = testList.front();
     ASSERT_EQ(first, obj2);
 
     ext_->FreeClass(cls);
-    delete mem_stats;
+    delete memStats;
 }
 
 TEST_F(RemSetTest, AddRefWithAddrTest)
 {
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectRegionAllocator allocator(mem_stats, &spaces_);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectRegionAllocator allocator(memStats, &spaces_);
     auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
     cls->SetObjectSize(allocator.GetMaxRegularObjectSize());
 
@@ -140,22 +140,22 @@ TEST_F(RemSetTest, AddRefWithAddrTest)
     RemSetWithCommonLock::AddRefWithAddr(obj1, 0, obj2);
     auto remset2 = region2->GetRemSet();
 
-    PandaVector<void *> test_list;
-    auto visitor = [&test_list](void *obj) { test_list.push_back(obj); };
+    PandaVector<void *> testList;
+    auto visitor = [&testList](void *obj) { testList.push_back(obj); };
     remset2->IterateOverObjects(visitor);
-    ASSERT_EQ(1, test_list.size());
+    ASSERT_EQ(1, testList.size());
 
-    auto first = test_list.front();
+    auto first = testList.front();
     ASSERT_EQ(first, obj1);
 
     ext_->FreeClass(cls);
-    delete mem_stats;
+    delete memStats;
 }
 
 TEST_F(RemSetTest, TravelObjectToAddRefTest)
 {
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectRegionAllocator allocator(mem_stats, &spaces_);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectRegionAllocator allocator(memStats, &spaces_);
     auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
     cls->SetObjectSize(allocator.GetMaxRegularObjectSize());
     cls->SetRefFieldsNum(1, false);
@@ -175,22 +175,22 @@ TEST_F(RemSetTest, TravelObjectToAddRefTest)
 
     static_cast<ObjectHeader *>(obj1)->SetFieldObject<false, false>(offset, static_cast<ObjectHeader *>(obj2));
 
-    auto traverse_object_visitor = [](ObjectHeader *from_object, ObjectHeader *object_to_traverse) {
-        RemSetWithCommonLock::AddRefWithAddr(from_object, 0, object_to_traverse);
+    auto traverseObjectVisitor = [](ObjectHeader *fromObject, ObjectHeader *objectToTraverse) {
+        RemSetWithCommonLock::AddRefWithAddr(fromObject, 0, objectToTraverse);
     };
-    GCStaticObjectHelpers::TraverseAllObjects(obj1, traverse_object_visitor);
+    GCStaticObjectHelpers::TraverseAllObjects(obj1, traverseObjectVisitor);
     auto remset2 = region2->GetRemSet();
 
-    PandaVector<void *> test_list;
-    auto visitor = [&test_list](void *obj) { test_list.push_back(obj); };
+    PandaVector<void *> testList;
+    auto visitor = [&testList](void *obj) { testList.push_back(obj); };
     remset2->IterateOverObjects(visitor);
-    ASSERT_EQ(1, test_list.size());
+    ASSERT_EQ(1, testList.size());
 
-    auto first = test_list.front();
+    auto first = testList.front();
     ASSERT_EQ(first, obj1);
 
     ext_->FreeClass(cls);
-    delete mem_stats;
+    delete memStats;
 }
 
 }  // namespace panda::mem::test

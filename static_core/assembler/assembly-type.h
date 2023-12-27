@@ -37,19 +37,19 @@ public:
     DEFAULT_COPY_SEMANTIC(Type);
     ~Type() = default;
 
-    Type(std::string_view component_name, size_t rank, bool ignore_primitive = false)
-        : component_name_(component_name), rank_(rank)
+    Type(std::string_view componentName, size_t rank, bool ignorePrimitive = false)
+        : componentName_(componentName), rank_(rank)
     {
-        name_ = GetName(component_name_, rank_);
-        type_id_ = GetId(name_, ignore_primitive);
+        name_ = GetName(componentName_, rank_);
+        typeId_ = GetId(name_, ignorePrimitive);
     }
 
-    Type(const Type &component_type, size_t rank)
-        : Type(component_type.GetComponentName(), component_type.GetRank() + rank)
+    Type(const Type &componentType, size_t rank)
+        : Type(componentType.GetComponentName(), componentType.GetRank() + rank)
     {
     }
 
-    PANDA_PUBLIC_API std::string GetDescriptor(bool ignore_primitive = false) const;
+    PANDA_PUBLIC_API std::string GetDescriptor(bool ignorePrimitive = false) const;
     PANDA_PUBLIC_API std::string GetName() const
     {
         return name_;
@@ -57,14 +57,14 @@ public:
 
     std::string GetPandasmName() const
     {
-        std::string name_pa {name_};
-        std::replace(name_pa.begin(), name_pa.end(), '/', '.');
-        return name_pa;
+        std::string namePa {name_};
+        std::replace(namePa.begin(), namePa.end(), '/', '.');
+        return namePa;
     }
 
     std::string GetComponentName() const
     {
-        return component_name_;
+        return componentName_;
     }
 
     size_t GetRank() const
@@ -74,23 +74,23 @@ public:
 
     Type GetComponentType() const
     {
-        return Type(component_name_, rank_ > 0 ? rank_ - 1 : 0);
+        return Type(componentName_, rank_ > 0 ? rank_ - 1 : 0);
     }
 
     panda_file::Type::TypeId GetId() const
     {
-        return type_id_;
+        return typeId_;
     }
 
     bool IsArrayContainsPrimTypes() const
     {
-        auto elem = GetId(component_name_);
+        auto elem = GetId(componentName_);
         return elem != panda_file::Type::TypeId::REFERENCE;
     }
 
     bool IsValid() const
     {
-        return !component_name_.empty();
+        return !componentName_.empty();
     }
 
     bool IsArray() const
@@ -100,39 +100,39 @@ public:
 
     bool IsObject() const
     {
-        return type_id_ == panda_file::Type::TypeId::REFERENCE;
+        return typeId_ == panda_file::Type::TypeId::REFERENCE;
     }
 
     bool IsTagged() const
     {
-        return type_id_ == panda_file::Type::TypeId::TAGGED;
+        return typeId_ == panda_file::Type::TypeId::TAGGED;
     }
 
     bool IsIntegral() const
     {
-        return type_id_ == panda_file::Type::TypeId::U1 || type_id_ == panda_file::Type::TypeId::U8 ||
-               type_id_ == panda_file::Type::TypeId::I8 || type_id_ == panda_file::Type::TypeId::U16 ||
-               type_id_ == panda_file::Type::TypeId::I16 || type_id_ == panda_file::Type::TypeId::U32 ||
-               type_id_ == panda_file::Type::TypeId::I32 || type_id_ == panda_file::Type::TypeId::U64 ||
-               type_id_ == panda_file::Type::TypeId::I64;
+        return typeId_ == panda_file::Type::TypeId::U1 || typeId_ == panda_file::Type::TypeId::U8 ||
+               typeId_ == panda_file::Type::TypeId::I8 || typeId_ == panda_file::Type::TypeId::U16 ||
+               typeId_ == panda_file::Type::TypeId::I16 || typeId_ == panda_file::Type::TypeId::U32 ||
+               typeId_ == panda_file::Type::TypeId::I32 || typeId_ == panda_file::Type::TypeId::U64 ||
+               typeId_ == panda_file::Type::TypeId::I64;
     }
 
     bool FitsInto32() const
     {
-        return type_id_ == panda_file::Type::TypeId::U1 || type_id_ == panda_file::Type::TypeId::U8 ||
-               type_id_ == panda_file::Type::TypeId::I8 || type_id_ == panda_file::Type::TypeId::U16 ||
-               type_id_ == panda_file::Type::TypeId::I16 || type_id_ == panda_file::Type::TypeId::U32 ||
-               type_id_ == panda_file::Type::TypeId::I32;
+        return typeId_ == panda_file::Type::TypeId::U1 || typeId_ == panda_file::Type::TypeId::U8 ||
+               typeId_ == panda_file::Type::TypeId::I8 || typeId_ == panda_file::Type::TypeId::U16 ||
+               typeId_ == panda_file::Type::TypeId::I16 || typeId_ == panda_file::Type::TypeId::U32 ||
+               typeId_ == panda_file::Type::TypeId::I32;
     }
 
     bool IsFloat32() const
     {
-        return type_id_ == panda_file::Type::TypeId::F32;
+        return typeId_ == panda_file::Type::TypeId::F32;
     }
 
     bool IsFloat64() const
     {
-        return type_id_ == panda_file::Type::TypeId::F64;
+        return typeId_ == panda_file::Type::TypeId::F64;
     }
 
     bool IsPrim32() const
@@ -152,10 +152,10 @@ public:
 
     bool IsVoid() const
     {
-        return type_id_ == panda_file::Type::TypeId::VOID;
+        return typeId_ == panda_file::Type::TypeId::VOID;
     }
 
-    PANDA_PUBLIC_API static panda_file::Type::TypeId GetId(std::string_view name, bool ignore_primitive = false);
+    PANDA_PUBLIC_API static panda_file::Type::TypeId GetId(std::string_view name, bool ignorePrimitive = false);
 
     PANDA_PUBLIC_API static pandasm::Type FromPrimitiveId(panda_file::Type::TypeId id);
 
@@ -171,18 +171,18 @@ public:
 
     static PANDA_PUBLIC_API Type FromDescriptor(std::string_view descriptor);
 
-    static PANDA_PUBLIC_API Type FromName(std::string_view name, bool ignore_primitive = false);
+    static PANDA_PUBLIC_API Type FromName(std::string_view name, bool ignorePrimitive = false);
 
     static PANDA_PUBLIC_API bool IsPandaPrimitiveType(const std::string &name);
     static bool IsStringType(const std::string &name, panda::panda_file::SourceLang lang);
 
 private:
-    static PANDA_PUBLIC_API std::string GetName(std::string_view component_name, size_t rank);
+    static PANDA_PUBLIC_API std::string GetName(std::string_view componentName, size_t rank);
 
-    std::string component_name_;
+    std::string componentName_;
     size_t rank_ {0};
     std::string name_;
-    panda_file::Type::TypeId type_id_ {panda_file::Type::TypeId::VOID};
+    panda_file::Type::TypeId typeId_ {panda_file::Type::TypeId::VOID};
 };
 
 }  // namespace panda::pandasm

@@ -36,8 +36,8 @@ public:
 
     static Span<CallSiteInlineCache> From(void *mem, PandaVector<uint32_t> vcalls)
     {
-        auto inline_caches = reinterpret_cast<CallSiteInlineCache *>(mem);
-        auto ics = Span<CallSiteInlineCache>(inline_caches, vcalls.size());
+        auto inlineCaches = reinterpret_cast<CallSiteInlineCache *>(mem);
+        auto ics = Span<CallSiteInlineCache>(inlineCaches, vcalls.size());
         for (size_t i = 0; i < vcalls.size(); i++) {
             ics[i].Init(vcalls[i]);
         }
@@ -53,19 +53,19 @@ public:
     void UpdateInlineCaches(Class *cls)
     {
         for (uint32_t i = 0; i < classes_.size();) {
-            auto *class_atomic = reinterpret_cast<std::atomic<Class *> *>(&(classes_[i]));
+            auto *classAtomic = reinterpret_cast<std::atomic<Class *> *>(&(classes_[i]));
             // Atomic with acquire order reason: data race with classes_ with dependecies on reads after the load which
             // should become visible
-            auto stored_class = class_atomic->load(std::memory_order_acquire);
+            auto storedClass = classAtomic->load(std::memory_order_acquire);
             // Check that the call is already megamorphic
-            if (i == 0 && stored_class == reinterpret_cast<Class *>(MEGAMORPHIC_FLAG)) {
+            if (i == 0 && storedClass == reinterpret_cast<Class *>(MEGAMORPHIC_FLAG)) {
                 return;
             }
-            if (stored_class == cls) {
+            if (storedClass == cls) {
                 return;
             }
-            if (stored_class == nullptr) {
-                if (!class_atomic->compare_exchange_weak(stored_class, cls, std::memory_order_acq_rel)) {
+            if (storedClass == nullptr) {
+                if (!classAtomic->compare_exchange_weak(storedClass, cls, std::memory_order_acq_rel)) {
                     continue;
                 }
                 return;
@@ -73,36 +73,36 @@ public:
             i++;
         }
         // Megamorphic call, disable devirtualization for this call site.
-        auto *class_atomic = reinterpret_cast<std::atomic<Class *> *>(&(classes_[0]));
+        auto *classAtomic = reinterpret_cast<std::atomic<Class *> *>(&(classes_[0]));
         // Atomic with release order reason: data race with classes_ with dependecies on writes before the store which
         // should become visible acquire
-        class_atomic->store(reinterpret_cast<Class *>(MEGAMORPHIC_FLAG), std::memory_order_release);
+        classAtomic->store(reinterpret_cast<Class *>(MEGAMORPHIC_FLAG), std::memory_order_release);
     }
 
     auto GetBytecodePc() const
     {
         // Atomic with acquire order reason: data race with bytecode_pc_ with dependecies on reads after the load which
         // should become visible
-        return bytecode_pc_.load(std::memory_order_acquire);
+        return bytecodePc_.load(std::memory_order_acquire);
     }
 
     void SetBytecodePc(uintptr_t pc)
     {
         // Atomic with release order reason: data race with bytecode_pc_ with dependecies on writes before the store
         // which should become visible acquire
-        bytecode_pc_.store(pc, std::memory_order_release);
+        bytecodePc_.store(pc, std::memory_order_release);
     }
 
     std::vector<Class *> GetClassesCopy()
     {
         std::vector<Class *> result;
         for (uint32_t i = 0; i < classes_.size();) {
-            auto *class_atomic = reinterpret_cast<std::atomic<Class *> const *>(&(classes_[i]));
+            auto *classAtomic = reinterpret_cast<std::atomic<Class *> const *>(&(classes_[i]));
             // Atomic with acquire order reason: data race with classes_ with dependecies on reads after the load which
             // should become visible
-            auto stored_class = class_atomic->load(std::memory_order_acquire);
-            if (stored_class != nullptr) {
-                result.push_back(stored_class);
+            auto storedClass = classAtomic->load(std::memory_order_acquire);
+            if (storedClass != nullptr) {
+                result.push_back(storedClass);
             }
             i++;
         }
@@ -111,30 +111,30 @@ public:
 
     size_t GetClassesCount() const
     {
-        size_t classes_count = 0;
+        size_t classesCount = 0;
         for (uint32_t i = 0; i < classes_.size();) {
-            auto *class_atomic = reinterpret_cast<std::atomic<Class *> const *>(&(classes_[i]));
+            auto *classAtomic = reinterpret_cast<std::atomic<Class *> const *>(&(classes_[i]));
             // Atomic with acquire order reason: data race with classes_ with dependecies on reads after the load which
             // should become visible
-            auto stored_class = class_atomic->load(std::memory_order_acquire);
-            if (stored_class != nullptr) {
-                classes_count++;
+            auto storedClass = classAtomic->load(std::memory_order_acquire);
+            if (storedClass != nullptr) {
+                classesCount++;
             }
             i++;
         }
-        return classes_count;
+        return classesCount;
     }
 
     static bool IsMegamorphic(Class *cls)
     {
-        auto *class_atomic = reinterpret_cast<std::atomic<Class *> *>(&cls);
+        auto *classAtomic = reinterpret_cast<std::atomic<Class *> *>(&cls);
         // Atomic with acquire order reason: data race with classes_ with dependecies on reads after the load which
         // should become visible
-        return class_atomic->load(std::memory_order_acquire) == reinterpret_cast<Class *>(MEGAMORPHIC_FLAG);
+        return classAtomic->load(std::memory_order_acquire) == reinterpret_cast<Class *>(MEGAMORPHIC_FLAG);
     }
 
 private:
-    std::atomic_uintptr_t bytecode_pc_;
+    std::atomic_uintptr_t bytecodePc_;
     std::array<Class *, CLASSES_COUNT> classes_ {};
 };
 
@@ -142,8 +142,8 @@ class BranchData {
 public:
     static Span<BranchData> From(void *mem, PandaVector<uint32_t> branches)
     {
-        auto branch_data = reinterpret_cast<BranchData *>(mem);
-        auto span = Span<BranchData>(branch_data, branches.size());
+        auto branchData = reinterpret_cast<BranchData *>(mem);
+        auto span = Span<BranchData>(branchData, branches.size());
         for (size_t i = 0; i < branches.size(); i++) {
             span[i].Init(branches[i]);
         }
@@ -155,9 +155,9 @@ public:
         // Atomic with relaxed order reason: data race with pc_
         pc_.store(pc, std::memory_order_relaxed);
         // Atomic with relaxed order reason: data race with taken_counter_
-        taken_counter_.store(0, std::memory_order_relaxed);
+        takenCounter_.store(0, std::memory_order_relaxed);
         // Atomic with relaxed order reason: data race with not_taken_counter_
-        not_taken_counter_.store(0, std::memory_order_relaxed);
+        notTakenCounter_.store(0, std::memory_order_relaxed);
     }
 
     uintptr_t GetPc() const
@@ -169,39 +169,39 @@ public:
     int64_t GetTakenCounter() const
     {
         // Atomic with relaxed order reason: data race with taken_counter_
-        return taken_counter_.load(std::memory_order_relaxed);
+        return takenCounter_.load(std::memory_order_relaxed);
     }
 
     int64_t GetNotTakenCounter() const
     {
         // Atomic with relaxed order reason: data race with not_taken_counter_
-        return not_taken_counter_.load(std::memory_order_relaxed);
+        return notTakenCounter_.load(std::memory_order_relaxed);
     }
 
     void IncrementTaken()
     {
         // Atomic with relaxed order reason: data race with taken_counter_
-        taken_counter_.fetch_add(1, std::memory_order_relaxed);
+        takenCounter_.fetch_add(1, std::memory_order_relaxed);
     }
 
     void IncrementNotTaken()
     {
         // Atomic with relaxed order reason: data race with not_taken_counter_
-        not_taken_counter_.fetch_add(1, std::memory_order_relaxed);
+        notTakenCounter_.fetch_add(1, std::memory_order_relaxed);
     }
 
 private:
     std::atomic_uintptr_t pc_;
-    std::atomic_llong taken_counter_;
-    std::atomic_llong not_taken_counter_;
+    std::atomic_llong takenCounter_;
+    std::atomic_llong notTakenCounter_;
 };
 
 class ThrowData {
 public:
     static Span<ThrowData> From(void *mem, PandaVector<uint32_t> throws)
     {
-        auto throw_data = reinterpret_cast<ThrowData *>(mem);
-        auto span = Span<ThrowData>(throw_data, throws.size());
+        auto throwData = reinterpret_cast<ThrowData *>(mem);
+        auto span = Span<ThrowData>(throwData, throws.size());
         for (size_t i = 0; i < throws.size(); i++) {
             span[i].Init(throws[i]);
         }
@@ -213,7 +213,7 @@ public:
         // Atomic with relaxed order reason: data race with pc_
         pc_.store(pc, std::memory_order_relaxed);
         // Atomic with relaxed order reason: data race with taken_counter_
-        taken_counter_.store(0, std::memory_order_relaxed);
+        takenCounter_.store(0, std::memory_order_relaxed);
     }
 
     uintptr_t GetPc() const
@@ -225,31 +225,31 @@ public:
     int64_t GetTakenCounter() const
     {
         // Atomic with relaxed order reason: data race with taken_counter_
-        return taken_counter_.load(std::memory_order_relaxed);
+        return takenCounter_.load(std::memory_order_relaxed);
     }
 
     void IncrementTaken()
     {
         // Atomic with relaxed order reason: data race with taken_counter_
-        taken_counter_.fetch_add(1, std::memory_order_relaxed);
+        takenCounter_.fetch_add(1, std::memory_order_relaxed);
     }
 
 private:
     std::atomic_uintptr_t pc_;
-    std::atomic_llong taken_counter_;
+    std::atomic_llong takenCounter_;
 };
 
 class ProfilingData {
 public:
-    explicit ProfilingData(Span<CallSiteInlineCache> inline_caches, Span<BranchData> branch_data,
-                           Span<ThrowData> throw_data)
-        : inline_caches_(inline_caches), branch_data_(branch_data), throw_data_(throw_data)
+    explicit ProfilingData(Span<CallSiteInlineCache> inlineCaches, Span<BranchData> branchData,
+                           Span<ThrowData> throwData)
+        : inlineCaches_(inlineCaches), branchData_(branchData), throwData_(throwData)
     {
     }
 
     Span<CallSiteInlineCache> GetInlineCaches()
     {
-        return inline_caches_;
+        return inlineCaches_;
     }
 
     CallSiteInlineCache *FindInlineCache(uintptr_t pc)
@@ -312,33 +312,33 @@ public:
     }
 
 private:
-    BranchData *FindBranchData(uintptr_t from_pc)
+    BranchData *FindBranchData(uintptr_t fromPc)
     {
-        auto it = std::lower_bound(branch_data_.begin(), branch_data_.end(), from_pc,
+        auto it = std::lower_bound(branchData_.begin(), branchData_.end(), fromPc,
                                    [](const auto &a, uintptr_t counter) { return a.GetPc() < counter; });
-        if (it == branch_data_.end() || it->GetPc() != from_pc) {
+        if (it == branchData_.end() || it->GetPc() != fromPc) {
             return nullptr;
         }
 
         return &*it;
     }
-    ThrowData *FindThrowData(uintptr_t from_pc)
+    ThrowData *FindThrowData(uintptr_t fromPc)
     {
-        if (throw_data_.empty()) {
+        if (throwData_.empty()) {
             return nullptr;
         }
-        auto it = std::lower_bound(throw_data_.begin(), throw_data_.end(), from_pc,
+        auto it = std::lower_bound(throwData_.begin(), throwData_.end(), fromPc,
                                    [](const auto &a, uintptr_t counter) { return a.GetPc() < counter; });
-        if (it == throw_data_.end() || it->GetPc() != from_pc) {
+        if (it == throwData_.end() || it->GetPc() != fromPc) {
             return nullptr;
         }
 
         return &*it;
     }
 
-    Span<CallSiteInlineCache> inline_caches_;
-    Span<BranchData> branch_data_;
-    Span<ThrowData> throw_data_;
+    Span<CallSiteInlineCache> inlineCaches_;
+    Span<BranchData> branchData_;
+    Span<ThrowData> throwData_;
 };
 
 }  // namespace panda

@@ -66,26 +66,26 @@ bool BackendSupport(Arch arch)
     }
 }
 
-Encoder *Encoder::Create([[maybe_unused]] ArenaAllocator *arena_allocator, [[maybe_unused]] Arch arch,
-                         [[maybe_unused]] bool print_asm, [[maybe_unused]] bool js_number_cast)
+Encoder *Encoder::Create([[maybe_unused]] ArenaAllocator *arenaAllocator, [[maybe_unused]] Arch arch,
+                         [[maybe_unused]] bool printAsm, [[maybe_unused]] bool jsNumberCast)
 {
     switch (arch) {
 #ifdef PANDA_COMPILER_TARGET_AARCH32
         case Arch::AARCH32: {
-            aarch32::Aarch32Encoder *enc = arena_allocator->New<aarch32::Aarch32Encoder>(arena_allocator);
-            enc->SetIsJsNumberCast(js_number_cast);
-            if (print_asm) {
-                return arena_allocator->New<aarch32::Aarch32Assembly>(arena_allocator, enc);
+            aarch32::Aarch32Encoder *enc = arenaAllocator->New<aarch32::Aarch32Encoder>(arenaAllocator);
+            enc->SetIsJsNumberCast(jsNumberCast);
+            if (printAsm) {
+                return arenaAllocator->New<aarch32::Aarch32Assembly>(arenaAllocator, enc);
             }
             return enc;
         }
 #endif
 #ifdef PANDA_COMPILER_TARGET_AARCH64
         case Arch::AARCH64: {
-            aarch64::Aarch64Encoder *enc = arena_allocator->New<aarch64::Aarch64Encoder>(arena_allocator);
-            enc->SetIsJsNumberCast(js_number_cast);
-            if (print_asm) {
-                return arena_allocator->New<aarch64::Aarch64Assembly>(arena_allocator, enc);
+            aarch64::Aarch64Encoder *enc = arenaAllocator->New<aarch64::Aarch64Encoder>(arenaAllocator);
+            enc->SetIsJsNumberCast(jsNumberCast);
+            if (printAsm) {
+                return arenaAllocator->New<aarch64::Aarch64Assembly>(arenaAllocator, enc);
             }
             return enc;
         }
@@ -93,10 +93,10 @@ Encoder *Encoder::Create([[maybe_unused]] ArenaAllocator *arena_allocator, [[may
 #ifdef PANDA_COMPILER_TARGET_X86_64
         case Arch::X86_64: {
             amd64::Amd64Encoder *enc =
-                arena_allocator->New<amd64::Amd64Encoder>(arena_allocator, Arch::X86_64, js_number_cast);
-            enc->SetIsJsNumberCast(js_number_cast);
-            if (print_asm) {
-                return arena_allocator->New<amd64::Amd64Assembly>(arena_allocator, enc);
+                arenaAllocator->New<amd64::Amd64Encoder>(arenaAllocator, Arch::X86_64, jsNumberCast);
+            enc->SetIsJsNumberCast(jsNumberCast);
+            if (printAsm) {
+                return arenaAllocator->New<amd64::Amd64Assembly>(arenaAllocator, enc);
             }
             return enc;
         }
@@ -106,24 +106,24 @@ Encoder *Encoder::Create([[maybe_unused]] ArenaAllocator *arena_allocator, [[may
     }
 }
 
-RegistersDescription *RegistersDescription::Create([[maybe_unused]] ArenaAllocator *arena_allocator,
+RegistersDescription *RegistersDescription::Create([[maybe_unused]] ArenaAllocator *arenaAllocator,
                                                    [[maybe_unused]] Arch arch)
 {
     switch (arch) {
 #ifdef PANDA_COMPILER_TARGET_AARCH32
         case Arch::AARCH32: {
-            return arena_allocator->New<aarch32::Aarch32RegisterDescription>(arena_allocator);
+            return arenaAllocator->New<aarch32::Aarch32RegisterDescription>(arenaAllocator);
         }
 #endif
 
 #ifdef PANDA_COMPILER_TARGET_AARCH64
         case Arch::AARCH64: {
-            return arena_allocator->New<aarch64::Aarch64RegisterDescription>(arena_allocator);
+            return arenaAllocator->New<aarch64::Aarch64RegisterDescription>(arenaAllocator);
         }
 #endif
 #ifdef PANDA_COMPILER_TARGET_X86_64
         case Arch::X86_64: {
-            return arena_allocator->New<amd64::Amd64RegisterDescription>(arena_allocator);
+            return arenaAllocator->New<amd64::Amd64RegisterDescription>(arenaAllocator);
         }
 #endif
         default:
@@ -131,45 +131,45 @@ RegistersDescription *RegistersDescription::Create([[maybe_unused]] ArenaAllocat
     }
 }
 
-CallingConvention *CallingConvention::Create([[maybe_unused]] ArenaAllocator *arena_allocator,
+CallingConvention *CallingConvention::Create([[maybe_unused]] ArenaAllocator *arenaAllocator,
                                              [[maybe_unused]] Encoder *enc,
                                              [[maybe_unused]] RegistersDescription *descr, [[maybe_unused]] Arch arch,
-                                             bool is_panda_abi, bool is_osr, bool is_dyn,
-                                             [[maybe_unused]] bool print_asm, bool is_opt_irtoc)
+                                             bool isPandaAbi, bool isOsr, bool isDyn, [[maybe_unused]] bool printAsm,
+                                             bool isOptIrtoc)
 {
-    [[maybe_unused]] auto mode = CallConvMode::Panda(is_panda_abi) | CallConvMode::Osr(is_osr) |
-                                 CallConvMode::DynCall(is_dyn) | CallConvMode::OptIrtoc(is_opt_irtoc);
+    [[maybe_unused]] auto mode = CallConvMode::Panda(isPandaAbi) | CallConvMode::Osr(isOsr) |
+                                 CallConvMode::DynCall(isDyn) | CallConvMode::OptIrtoc(isOptIrtoc);
     switch (arch) {
 #ifdef PANDA_COMPILER_TARGET_AARCH32
         case Arch::AARCH32: {
-            if (print_asm) {
+            if (printAsm) {
                 using PrinterType =
                     PrinterCallingConvention<aarch32::Aarch32CallingConvention, aarch32::Aarch32Assembly>;
-                return arena_allocator->New<PrinterType>(
-                    arena_allocator, reinterpret_cast<aarch32::Aarch32Assembly *>(enc), descr, mode);
+                return arenaAllocator->New<PrinterType>(arenaAllocator,
+                                                        reinterpret_cast<aarch32::Aarch32Assembly *>(enc), descr, mode);
             }
-            return arena_allocator->New<aarch32::Aarch32CallingConvention>(arena_allocator, enc, descr, mode);
+            return arenaAllocator->New<aarch32::Aarch32CallingConvention>(arenaAllocator, enc, descr, mode);
         }
 #endif
 #ifdef PANDA_COMPILER_TARGET_AARCH64
         case Arch::AARCH64: {
-            if (print_asm) {
+            if (printAsm) {
                 using PrinterType =
                     PrinterCallingConvention<aarch64::Aarch64CallingConvention, aarch64::Aarch64Assembly>;
-                return arena_allocator->New<PrinterType>(
-                    arena_allocator, reinterpret_cast<aarch64::Aarch64Assembly *>(enc), descr, mode);
+                return arenaAllocator->New<PrinterType>(arenaAllocator,
+                                                        reinterpret_cast<aarch64::Aarch64Assembly *>(enc), descr, mode);
             }
-            return arena_allocator->New<aarch64::Aarch64CallingConvention>(arena_allocator, enc, descr, mode);
+            return arenaAllocator->New<aarch64::Aarch64CallingConvention>(arenaAllocator, enc, descr, mode);
         }
 #endif
 #ifdef PANDA_COMPILER_TARGET_X86_64
         case Arch::X86_64: {
-            if (print_asm) {
+            if (printAsm) {
                 using PrinterType = PrinterCallingConvention<amd64::Amd64CallingConvention, amd64::Amd64Assembly>;
-                return arena_allocator->New<PrinterType>(arena_allocator, reinterpret_cast<amd64::Amd64Assembly *>(enc),
-                                                         descr, mode);
+                return arenaAllocator->New<PrinterType>(arenaAllocator, reinterpret_cast<amd64::Amd64Assembly *>(enc),
+                                                        descr, mode);
             }
-            return arena_allocator->New<amd64::Amd64CallingConvention>(arena_allocator, enc, descr, mode);
+            return arenaAllocator->New<amd64::Amd64CallingConvention>(arenaAllocator, enc, descr, mode);
         }
 #endif
         default:

@@ -43,8 +43,8 @@ inline MarkWord MarkWord::DecodeFromHashConfigured(uint32_t hash)
 {
     // Clear hash and status bits
     MarkWordSize temp = Value() & (~(HASH_MASK_IN_PLACE | STATUS_MASK_IN_PLACE));
-    MarkWordSize hash_in_place = (static_cast<MarkWordSize>(hash) & HASH_MASK) << HASH_SHIFT;
-    return MarkWord(temp | hash_in_place | (STATUS_HASHED << STATUS_SHIFT));
+    MarkWordSize hashInPlace = (static_cast<MarkWordSize>(hash) & HASH_MASK) << HASH_SHIFT;
+    return MarkWord(temp | hashInPlace | (STATUS_HASHED << STATUS_SHIFT));
 }
 
 template <>

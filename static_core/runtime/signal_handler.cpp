@@ -76,7 +76,7 @@ bool SignalManager::SignalActionHandler(int sig, siginfo_t *info, void *context)
 {
     panda::Logger::Sync();
     if (InOatCode(info, context, true)) {
-        for (const auto &handler : oat_code_handler_) {
+        for (const auto &handler : oatCodeHandler_) {
             if (handler->Action(sig, info, context)) {
                 return true;
             }
@@ -94,7 +94,7 @@ bool SignalManager::SignalActionHandler(int sig, siginfo_t *info, void *context)
 }
 
 bool SignalManager::InOatCode([[maybe_unused]] const siginfo_t *siginfo, [[maybe_unused]] const void *context,
-                              [[maybe_unused]] bool check_bytecode_pc) const
+                              [[maybe_unused]] bool checkBytecodePc) const
 {
     // NOTE(00510180) leak judge GetMethodAndReturnPcAndSp
     return true;
@@ -106,25 +106,25 @@ bool SignalManager::InOtherCode([[maybe_unused]] int sig, [[maybe_unused]] const
     return false;
 }
 
-void SignalManager::AddHandler(SignalHandler *handler, bool oat_code)
+void SignalManager::AddHandler(SignalHandler *handler, bool oatCode)
 {
-    if (oat_code) {
-        oat_code_handler_.push_back(handler);
+    if (oatCode) {
+        oatCodeHandler_.push_back(handler);
     } else {
-        other_handlers_.push_back(handler);
+        otherHandlers_.push_back(handler);
     }
 }
 
 void SignalManager::RemoveHandler(SignalHandler *handler)
 {
-    auto it_oat = std::find(oat_code_handler_.begin(), oat_code_handler_.end(), handler);
-    if (it_oat != oat_code_handler_.end()) {
-        oat_code_handler_.erase(it_oat);
+    auto itOat = std::find(oatCodeHandler_.begin(), oatCodeHandler_.end(), handler);
+    if (itOat != oatCodeHandler_.end()) {
+        oatCodeHandler_.erase(itOat);
         return;
     }
-    auto it_other = std::find(other_handlers_.begin(), other_handlers_.end(), handler);
-    if (it_other != other_handlers_.end()) {
-        other_handlers_.erase(it_other);
+    auto itOther = std::find(otherHandlers_.begin(), otherHandlers_.end(), handler);
+    if (itOther != otherHandlers_.end()) {
+        otherHandlers_.erase(itOther);
         return;
     }
     LOG(FATAL, RUNTIME) << "handler doesn't exist: " << handler;
@@ -132,7 +132,7 @@ void SignalManager::RemoveHandler(SignalHandler *handler)
 
 void SignalManager::InitSignals()
 {
-    if (is_init_) {
+    if (isInit_) {
         return;
     }
 
@@ -147,47 +147,47 @@ void SignalManager::InitSignals()
     ClearSignalHooksHandlersArray();
 
     // if running in phone,Sigchain will work,AddSpecialSignalHandlerFn in sighook will not be used
-    SigchainAction sigchain_action = {
+    SigchainAction sigchainAction = {
         CallSignalActionHandler,
         mask,
         SA_SIGINFO,
     };
-    AddSpecialSignalHandlerFn(SIGSEGV, &sigchain_action);
+    AddSpecialSignalHandlerFn(SIGSEGV, &sigchainAction);
 
-    is_init_ = true;
+    isInit_ = true;
 
-    for (auto tmp : oat_code_handler_) {
+    for (auto tmp : oatCodeHandler_) {
         allocator_->Delete(tmp);
     }
-    oat_code_handler_.clear();
-    for (auto tmp : other_handlers_) {
+    oatCodeHandler_.clear();
+    for (auto tmp : otherHandlers_) {
         allocator_->Delete(tmp);
     }
-    other_handlers_.clear();
+    otherHandlers_.clear();
 }
 
 void SignalManager::GetMethodAndReturnPcAndSp([[maybe_unused]] const siginfo_t *siginfo,
                                               [[maybe_unused]] const void *context,
-                                              [[maybe_unused]] const Method **out_method,
-                                              [[maybe_unused]] const uintptr_t *out_return_pc,
-                                              [[maybe_unused]] const uintptr_t *out_sp)
+                                              [[maybe_unused]] const Method **outMethod,
+                                              [[maybe_unused]] const uintptr_t *outReturnPc,
+                                              [[maybe_unused]] const uintptr_t *outSp)
 {
     // just stub now
 }
 
 void SignalManager::DeleteHandlersArray()
 {
-    if (is_init_) {
-        for (auto tmp : oat_code_handler_) {
+    if (isInit_) {
+        for (auto tmp : oatCodeHandler_) {
             allocator_->Delete(tmp);
         }
-        oat_code_handler_.clear();
-        for (auto tmp : other_handlers_) {
+        oatCodeHandler_.clear();
+        for (auto tmp : otherHandlers_) {
             allocator_->Delete(tmp);
         }
-        other_handlers_.clear();
+        otherHandlers_.clear();
         RemoveSpecialSignalHandlerFn(SIGSEGV, CallSignalActionHandler);
-        is_init_ = false;
+        isInit_ = false;
     }
 }
 
@@ -203,15 +203,15 @@ bool InAllocatedCodeRange(uintptr_t pc)
         return true;
     }
 
-    auto heap_manager = thread->GetVM()->GetHeapManager();
-    if (heap_manager == nullptr) {
+    auto heapManager = thread->GetVM()->GetHeapManager();
+    if (heapManager == nullptr) {
         return false;
     }
-    auto code_allocator = heap_manager->GetCodeAllocator();
-    if (code_allocator == nullptr) {
+    auto codeAllocator = heapManager->GetCodeAllocator();
+    if (codeAllocator == nullptr) {
         return false;
     }
-    return code_allocator->InAllocatedCodeRange(ToVoidPtr(pc));
+    return codeAllocator->InAllocatedCodeRange(ToVoidPtr(pc));
 }
 
 bool IsInvalidPointer(uintptr_t addr)
@@ -236,13 +236,13 @@ static uintptr_t FindCompilerEntrypoint(const uintptr_t *fp)
     // +----------------+
     // | panda::Method* |
     // +----------------+
-    const int compiled_frame_method_offset = BoundaryFrame<FrameKind::COMPILER>::METHOD_OFFSET;
+    const int compiledFrameMethodOffset = BoundaryFrame<FrameKind::COMPILER>::METHOD_OFFSET;
 
     if (IsInvalidPointer(reinterpret_cast<uintptr_t>(fp))) {
         return 0;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    uintptr_t pmethod = fp[compiled_frame_method_offset];
+    uintptr_t pmethod = fp[compiledFrameMethodOffset];
     if (IsInvalidPointer(pmethod)) {
         return 0;
     }
@@ -268,8 +268,8 @@ static uintptr_t FindCompilerEntrypoint(const uintptr_t *fp)
 
 bool DetectSEGVFromCompiledCode(int sig, siginfo_t *siginfo, void *context)
 {
-    SignalContext signal_context(context);
-    uintptr_t pc = signal_context.GetPC();
+    SignalContext signalContext(context);
+    uintptr_t pc = signalContext.GetPC();
     LOG(DEBUG, RUNTIME) << "Handling SIGSEGV signal. PC:" << std::hex << pc;
     if (!InAllocatedCodeRange(pc)) {
         DumpStackTrace(sig, siginfo, context);
@@ -280,11 +280,11 @@ bool DetectSEGVFromCompiledCode(int sig, siginfo_t *siginfo, void *context)
 
 bool DetectSEGVFromHandler(int sig, siginfo_t *siginfo, void *context)
 {
-    SignalContext signal_context(context);
-    uintptr_t pc = signal_context.GetPC();
+    SignalContext signalContext(context);
+    uintptr_t pc = signalContext.GetPC();
     auto func = ToUintPtr(&FindCompilerEntrypoint);
-    const unsigned this_method_size_estimation = 0x1000;  // there is no way to find exact compiled method size
-    if (func < pc && pc < func + this_method_size_estimation) {
+    const unsigned thisMethodSizeEstimation = 0x1000;  // there is no way to find exact compiled method size
+    if (func < pc && pc < func + thisMethodSizeEstimation) {
         // We have got SEGV from the signal handler itself!
         // The links must have led us to wrong memory: FP regsiter -> stack -> method -> compilerEntryPoint
         DumpStackTrace(sig, siginfo, context);
@@ -296,10 +296,10 @@ bool DetectSEGVFromHandler(int sig, siginfo_t *siginfo, void *context)
 bool DetectSEGVFromMemory(int sig, siginfo_t *siginfo, void *context)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    auto mem_fault_location = ToUintPtr(siginfo->si_addr);
-    const uintptr_t max_object_size = 1U << 30U;
+    auto memFaultLocation = ToUintPtr(siginfo->si_addr);
+    const uintptr_t maxObjectSize = 1U << 30U;
     // the expected fault address is nullptr + offset within the object
-    if (mem_fault_location > max_object_size) {
+    if (memFaultLocation > maxObjectSize) {
         DumpStackTrace(sig, siginfo, context);
         return true;
     }
@@ -308,17 +308,17 @@ bool DetectSEGVFromMemory(int sig, siginfo_t *siginfo, void *context)
 
 bool DetectSEGVFromCode(int sig, siginfo_t *siginfo, void *context)
 {
-    SignalContext signal_context(context);
-    uintptr_t pc = signal_context.GetPC();
-    uintptr_t entrypoint = FindCompilerEntrypoint(signal_context.GetFP());
+    SignalContext signalContext(context);
+    uintptr_t pc = signalContext.GetPC();
+    uintptr_t entrypoint = FindCompilerEntrypoint(signalContext.GetFP());
     if (entrypoint == 0) {
         DumpStackTrace(sig, siginfo, context);
         return true;
     }
     compiler::CodeInfo codeinfo(compiler::CodeInfo::GetCodeOriginFromEntryPoint(ToVoidPtr(entrypoint)));
 
-    auto code_size = codeinfo.GetCodeSize();
-    if ((pc < entrypoint) || (pc > entrypoint + code_size)) {
+    auto codeSize = codeinfo.GetCodeSize();
+    if ((pc < entrypoint) || (pc > entrypoint + codeSize)) {
         // we are not in a compiled method
         DumpStackTrace(sig, siginfo, context);
         return true;
@@ -326,26 +326,26 @@ bool DetectSEGVFromCode(int sig, siginfo_t *siginfo, void *context)
     return false;
 }
 
-void UpdateReturnAddress(SignalContext &signal_context, uintptr_t new_address)
+void UpdateReturnAddress(SignalContext &signalContext, uintptr_t newAddress)
 {
 #if (defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_ARM32))
-    signal_context.SetLR(new_address);
+    signalContext.SetLR(newAddress);
 #elif defined(PANDA_TARGET_AMD64)
-    auto *sp = reinterpret_cast<uintptr_t *>(signal_context.GetSP() - sizeof(uintptr_t));
-    *sp = new_address;
-    signal_context.SetSP(reinterpret_cast<uintptr_t>(sp));
+    auto *sp = reinterpret_cast<uintptr_t *>(signalContext.GetSP() - sizeof(uintptr_t));
+    *sp = newAddress;
+    signalContext.SetSP(reinterpret_cast<uintptr_t>(sp));
 #endif
 }
 
 bool DetectSEGVFromNullCheck(int sig, siginfo_t *siginfo, void *context)
 {
-    SignalContext signal_context(context);
-    uintptr_t pc = signal_context.GetPC();
-    uintptr_t entrypoint = FindCompilerEntrypoint(signal_context.GetFP());
+    SignalContext signalContext(context);
+    uintptr_t pc = signalContext.GetPC();
+    uintptr_t entrypoint = FindCompilerEntrypoint(signalContext.GetFP());
     compiler::CodeInfo codeinfo(compiler::CodeInfo::GetCodeOriginFromEntryPoint(ToVoidPtr(entrypoint)));
-    uintptr_t new_pc = 0;
+    uintptr_t newPc = 0;
     for (auto icheck : codeinfo.GetImplicitNullChecksTable()) {
-        uintptr_t null_check_addr = entrypoint + icheck.GetInstNativePc();
+        uintptr_t nullCheckAddr = entrypoint + icheck.GetInstNativePc();
         auto offset = icheck.GetOffset();
         // We inserts information about implicit nullcheck after mem instruction,
         // because encoder can insert emory calculation before the instruction and we don't know real address:
@@ -355,13 +355,13 @@ bool DetectSEGVFromNullCheck(int sig, siginfo_t *siginfo, void *context)
         //    |   | memory inst   |  <--- pc
         //    V   +---------------+  <--- null_check_addr
         //        |               |
-        if (pc < null_check_addr && pc + offset >= null_check_addr) {
-            new_pc = null_check_addr;
+        if (pc < nullCheckAddr && pc + offset >= nullCheckAddr) {
+            newPc = nullCheckAddr;
             break;
         }
     }
 
-    if (new_pc == 0) {
+    if (newPc == 0) {
         LOG(INFO, RUNTIME) << "SEGV can't be handled. No matching entry found in the NullCheck table.\n"
                            << "PC: " << std::hex << pc;
         for (auto icheck : codeinfo.GetImplicitNullChecksTable()) {
@@ -370,11 +370,11 @@ bool DetectSEGVFromNullCheck(int sig, siginfo_t *siginfo, void *context)
         DumpStackTrace(sig, siginfo, context);
         return true;
     }
-    LOG(DEBUG, RUNTIME) << "PC fixup: " << std::hex << new_pc;
+    LOG(DEBUG, RUNTIME) << "PC fixup: " << std::hex << newPc;
 
-    UpdateReturnAddress(signal_context, new_pc);
-    signal_context.SetPC(reinterpret_cast<uintptr_t>(NullPointerExceptionBridge));
-    EVENT_IMPLICIT_NULLCHECK(new_pc);
+    UpdateReturnAddress(signalContext, newPc);
+    signalContext.SetPC(reinterpret_cast<uintptr_t>(NullPointerExceptionBridge));
+    EVENT_IMPLICIT_NULLCHECK(newPc);
 
     return false;
 }
@@ -385,9 +385,9 @@ void SamplerSigSegvHandler([[maybe_unused]] int sig, [[maybe_unused]] siginfo_t 
     auto mthread = ManagedThread::GetCurrent();
     ASSERT(mthread != nullptr);
 
-    int num_to_return = 1;
+    int numToReturn = 1;
     // NOLINTNEXTLINE(cert-err52-cpp)
-    longjmp(mthread->GetPtThreadInfo()->GetSamplingInfo()->GetSigSegvJmpEnv(), num_to_return);
+    longjmp(mthread->GetPtThreadInfo()->GetSamplingInfo()->GetSigSegvJmpEnv(), numToReturn);
 }
 
 bool DetectSEGVFromSamplingProfilerHandler([[maybe_unused]] int sig, [[maybe_unused]] siginfo_t *siginfo,
@@ -397,14 +397,14 @@ bool DetectSEGVFromSamplingProfilerHandler([[maybe_unused]] int sig, [[maybe_unu
     ASSERT(mthread != nullptr);
 
     auto *sampler = Runtime::GetCurrent()->GetTools().GetSamplingProfiler();
-    auto *sampling_info = mthread->GetPtThreadInfo()->GetSamplingInfo();
-    if (sampler == nullptr || sampling_info == nullptr) {
+    auto *samplingInfo = mthread->GetPtThreadInfo()->GetSamplingInfo();
+    if (sampler == nullptr || samplingInfo == nullptr) {
         return false;
     }
 
-    if (sampler->IsSegvHandlerEnable() && sampling_info->IsThreadSampling()) {
-        SignalContext signal_context(context);
-        signal_context.SetPC(reinterpret_cast<uintptr_t>(&SamplerSigSegvHandler));
+    if (sampler->IsSegvHandlerEnable() && samplingInfo->IsThreadSampling()) {
+        SignalContext signalContext(context);
+        signalContext.SetPC(reinterpret_cast<uintptr_t>(&SamplerSigSegvHandler));
         return true;
     }
 
@@ -465,12 +465,12 @@ bool StackOverflowHandler::Action(int sig, [[maybe_unused]] siginfo_t *siginfo, 
     }
     auto *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
-    SignalContext signal_context(context);
-    auto mem_check_location = signal_context.GetSP() - ManagedThread::GetStackOverflowCheckOffset();
+    SignalContext signalContext(context);
+    auto memCheckLocation = signalContext.GetSP() - ManagedThread::GetStackOverflowCheckOffset();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    auto mem_fault_location = ToUintPtr(siginfo->si_addr);
+    auto memFaultLocation = ToUintPtr(siginfo->si_addr);
 
-    if (mem_check_location != mem_fault_location) {
+    if (memCheckLocation != memFaultLocation) {
         return false;
     }
 
@@ -479,17 +479,17 @@ bool StackOverflowHandler::Action(int sig, [[maybe_unused]] siginfo_t *siginfo, 
     // StackOverflow stackmap has zero address
     thread->SetNativePc(0);
     // Set compiler Frame in Thread
-    thread->SetCurrentFrame(reinterpret_cast<Frame *>(signal_context.GetFP()));
+    thread->SetCurrentFrame(reinterpret_cast<Frame *>(signalContext.GetFP()));
 #ifdef PANDA_TARGET_AMD64
-    signal_context.SetPC(reinterpret_cast<uintptr_t>(StackOverflowExceptionEntrypointTrampoline));
+    signalContext.SetPC(reinterpret_cast<uintptr_t>(StackOverflowExceptionEntrypointTrampoline));
 #else
     /* To save/restore callee-saved regs we get into StackOverflowExceptionEntrypoint
      * by means of StackOverflowExceptionBridge.
      * The bridge stores LR to ManagedThread.npc, which is used by StackWalker::CreateCFrame,
      * and it must be 0 in case of StackOverflow.
      */
-    signal_context.SetLR(0);
-    signal_context.SetPC(reinterpret_cast<uintptr_t>(StackOverflowExceptionBridge));
+    signalContext.SetLR(0);
+    signalContext.SetPC(reinterpret_cast<uintptr_t>(StackOverflowExceptionBridge));
 #endif
 
     return true;

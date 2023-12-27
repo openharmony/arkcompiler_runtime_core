@@ -145,14 +145,14 @@ Graph *GraphCreator::GenerateGraph(Inst *inst)
         for (auto param : graph->GetStartBlock()->Insts()) {
             if (param->GetOpcode() == Opcode::Parameter) {
                 param->CastToParameter()->SetLocationData(graph->GetDataForNativeParam(param->GetType()));
-                runtime_.arg_types_->push_back(param->GetType());
+                runtime_.argTypes_->push_back(param->GetType());
             }
         }
     }
     if (inst->GetType() == DataType::NO_TYPE || inst->IsStore()) {
-        runtime_.return_type_ = DataType::VOID;
+        runtime_.returnType_ = DataType::VOID;
     } else {
-        runtime_.return_type_ = inst->GetType();
+        runtime_.returnType_ = inst->GetType();
     }
 #ifndef NDEBUG
     if (graph != nullptr) {
@@ -165,8 +165,8 @@ Graph *GraphCreator::GenerateGraph(Inst *inst)
 
 Graph *GraphCreator::CreateGraph()
 {
-    Graph *graph = allocator_.New<Graph>(&allocator_, &local_allocator_, arch_);
-    runtime_.arg_types_ = allocator_.New<ArenaVector<DataType::Type>>(allocator_.Adapter());
+    Graph *graph = allocator_.New<Graph>(&allocator_, &localAllocator_, arch_);
+    runtime_.argTypes_ = allocator_.New<ArenaVector<DataType::Type>>(allocator_.Adapter());
     graph->SetRuntime(&runtime_);
     graph->SetStackSlotsCount(3U);
     return graph;
@@ -223,19 +223,19 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
             inst->SetInput(1U, index);
         }
         block->AppendInst(inst);
-        auto load_pair_part0 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 0U);
-        auto load_pair_part1 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 1U);
-        block->AppendInst(load_pair_part0);
-        inst = load_pair_part1;
+        auto loadPairPart0 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 0U);
+        auto loadPairPart1 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 1U);
+        block->AppendInst(loadPairPart0);
+        inst = loadPairPart1;
     } else if (opc == Opcode::StoreArrayPairI || opc == Opcode::StoreArrayPair) {
-        int stack_slot = 0;
-        auto array = CreateParamInst(graph, DataType::REFERENCE, stack_slot++);
+        int stackSlot = 0;
+        auto array = CreateParamInst(graph, DataType::REFERENCE, stackSlot++);
         Inst *index = nullptr;
         if (opc == Opcode::StoreArrayPair) {
-            index = CreateParamInst(graph, DataType::INT32, stack_slot++);
+            index = CreateParamInst(graph, DataType::INT32, stackSlot++);
         }
-        auto val1 = CreateParamInst(graph, inst->GetType(), stack_slot++);
-        auto val2 = CreateParamInst(graph, inst->GetType(), stack_slot++);
+        auto val1 = CreateParamInst(graph, inst->GetType(), stackSlot++);
+        auto val2 = CreateParamInst(graph, inst->GetType(), stackSlot++);
         int idx = 0;
         inst->SetInput(idx++, array);
         if (opc == Opcode::StoreArrayPair) {
@@ -245,35 +245,35 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         inst->SetInput(idx++, val2);
     } else if (opc == Opcode::ReturnInlined) {
         ASSERT(n == -1L);
-        auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        block->AppendInst(save_state);
+        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        block->AppendInst(saveState);
 
-        auto call_inst = static_cast<CallInst *>(graph->CreateInstCallStatic());
-        call_inst->SetType(DataType::VOID);
-        call_inst->SetInlined(true);
-        call_inst->SetInputs(&allocator_, {{save_state, DataType::NO_TYPE}});
-        block->AppendInst(call_inst);
+        auto callInst = static_cast<CallInst *>(graph->CreateInstCallStatic());
+        callInst->SetType(DataType::VOID);
+        callInst->SetInlined(true);
+        callInst->SetInputs(&allocator_, {{saveState, DataType::NO_TYPE}});
+        block->AppendInst(callInst);
 
-        inst->SetInput(0U, save_state);
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        inst->SetInput(0U, saveState);
+        SetNumVRegsArgs(0U, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else if (opc == Opcode::CallStatic || opc == Opcode::CallVirtual) {
         ASSERT(n >= 0);
-        auto call_inst = static_cast<CallInst *>(inst);
-        auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        block->PrependInst(save_state);
-        call_inst->AllocateInputTypes(&allocator_, n + 1);
+        auto callInst = static_cast<CallInst *>(inst);
+        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        block->PrependInst(saveState);
+        callInst->AllocateInputTypes(&allocator_, n + 1);
         for (int32_t i = 0; i < n; ++i) {
             auto param = CreateParamInst(graph, type, i);
-            call_inst->AppendInputAndType(param, type);
-            save_state->AppendInput(param);
+            callInst->AppendInputAndType(param, type);
+            saveState->AppendInput(param);
         }
-        for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
-            save_state->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
+        for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+            saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
         }
-        call_inst->AppendInputAndType(save_state, DataType::NO_TYPE);
-        SetNumVRegsArgs(0, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1);
+        callInst->AppendInputAndType(saveState, DataType::NO_TYPE);
+        SetNumVRegsArgs(0, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1);
     } else if (opc == Opcode::LoadArray || opc == Opcode::StoreArray) {
         ASSERT(n == -1L);
         auto param1 = CreateParamInst(graph, DataType::REFERENCE, 0U);  // array
@@ -294,107 +294,107 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         }
     } else if (opc == Opcode::Select) {
         ASSERT(n == -1L);
-        auto cmp_type = inst->CastToSelect()->GetOperandsType();
+        auto cmpType = inst->CastToSelect()->GetOperandsType();
         auto param0 = CreateParamInst(graph, type, 0U);
         auto param1 = CreateParamInst(graph, type, 1U);
-        auto param2 = CreateParamInst(graph, cmp_type, 2U);
-        auto param3 = CreateParamInst(graph, cmp_type, 3U);
+        auto param2 = CreateParamInst(graph, cmpType, 2U);
+        auto param3 = CreateParamInst(graph, cmpType, 3U);
         inst->SetInput(0U, param0);
         inst->SetInput(1U, param1);
         inst->SetInput(2U, param2);
         inst->SetInput(3U, param3);
     } else if (opc == Opcode::SelectImm) {
         ASSERT(n == -1L);
-        auto cmp_type = inst->CastToSelectImm()->GetOperandsType();
+        auto cmpType = inst->CastToSelectImm()->GetOperandsType();
         auto param0 = CreateParamInst(graph, type, 0U);
         auto param1 = CreateParamInst(graph, type, 1U);
-        auto param2 = CreateParamInst(graph, cmp_type, 2U);
+        auto param2 = CreateParamInst(graph, cmpType, 2U);
         inst->SetInput(0U, param0);
         inst->SetInput(1U, param1);
         inst->SetInput(2U, param2);
     } else if (opc == Opcode::StoreStatic) {
         auto param0 = CreateParamInst(graph, type, 0U);
         inst->SetInput(1U, param0);
-        auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        save_state->AppendInput(param0);
-        save_state->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
-        auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, save_state,
-                                                           inst->CastToStoreStatic()->GetTypeId(), nullptr, nullptr);
-        inst->SetInput(0U, init_inst);
-        block->PrependInst(init_inst);
-        block->PrependInst(save_state);
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->AppendInput(param0);
+        saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
+        auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
+                                                          inst->CastToStoreStatic()->GetTypeId(), nullptr, nullptr);
+        inst->SetInput(0U, initInst);
+        block->PrependInst(initInst);
+        block->PrependInst(saveState);
+        SetNumVRegsArgs(0U, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else if (opc == Opcode::LoadStatic) {
-        auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, save_state,
-                                                           inst->CastToLoadStatic()->GetTypeId(), nullptr, nullptr);
-        inst->SetInput(0U, init_inst);
-        block->PrependInst(init_inst);
-        block->PrependInst(save_state);
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
+                                                          inst->CastToLoadStatic()->GetTypeId(), nullptr, nullptr);
+        inst->SetInput(0U, initInst);
+        block->PrependInst(initInst);
+        block->PrependInst(saveState);
+        SetNumVRegsArgs(0U, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else if (opc == Opcode::Monitor) {
         auto param0 = CreateParamInst(graph, DataType::REFERENCE, 0U);
         inst->SetInput(0U, param0);
-        auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        save_state->AppendInput(param0);
-        save_state->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
-        inst->SetInput(1U, save_state);
-        block->PrependInst(save_state);
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->AppendInput(param0);
+        saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
+        inst->SetInput(1U, saveState);
+        block->PrependInst(saveState);
+        SetNumVRegsArgs(0U, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else if (opc == Opcode::LoadType || opc == Opcode::LoadString) {
-        auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        inst->SetInput(0U, save_state);
-        block->PrependInst(save_state);
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        inst->SetInput(0U, saveState);
+        block->PrependInst(saveState);
+        SetNumVRegsArgs(0U, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else if (opc == Opcode::IsInstance) {
         auto param0 = CreateParamInst(graph, DataType::REFERENCE, 0U);
-        auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        save_state->AppendInput(param0);
-        save_state->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
-        auto load_class = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, save_state, 0, nullptr,
-                                                     reinterpret_cast<RuntimeInterface::ClassPtr>(1));
+        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->AppendInput(param0);
+        saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
+        auto loadClass = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, saveState, 0, nullptr,
+                                                    reinterpret_cast<RuntimeInterface::ClassPtr>(1));
         inst->SetInput(0U, param0);
-        inst->SetInput(1U, load_class);
-        inst->SetSaveState(save_state);
-        block->PrependInst(load_class);
-        block->PrependInst(save_state);
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        inst->SetInput(1U, loadClass);
+        inst->SetSaveState(saveState);
+        block->PrependInst(loadClass);
+        block->PrependInst(saveState);
+        SetNumVRegsArgs(0U, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else if (opc == Opcode::NewArray) {
         ASSERT(n == -1L);
-        auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
-        inst->SetInput(NewArrayInst::INDEX_CLASS, init_inst);
+        auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
+        inst->SetInput(NewArrayInst::INDEX_CLASS, initInst);
 
         auto param0 = CreateParamInst(graph, DataType::INT32, 0U);
         inst->SetInput(NewArrayInst::INDEX_SIZE, param0);
-        auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        save_state->AppendInput(param0);
-        save_state->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
+        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->AppendInput(param0);
+        saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
 
-        init_inst->SetTypeId(inst->CastToNewArray()->GetTypeId());
-        init_inst->SetInput(0U, save_state);
+        initInst->SetTypeId(inst->CastToNewArray()->GetTypeId());
+        initInst->SetInput(0U, saveState);
 
-        inst->SetInput(NewArrayInst::INDEX_SAVE_STATE, save_state);
-        block->PrependInst(init_inst);
-        block->PrependInst(save_state);
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        inst->SetInput(NewArrayInst::INDEX_SAVE_STATE, saveState);
+        block->PrependInst(initInst);
+        block->PrependInst(saveState);
+        SetNumVRegsArgs(0U, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else if (opc == Opcode::NewObject) {
         ASSERT(n == -1L);
-        auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, save_state,
-                                                           inst->CastToNewObject()->GetTypeId(), nullptr, nullptr);
-        inst->SetInput(0U, init_inst);
-        inst->SetInput(0U, init_inst);
-        inst->SetInput(1U, save_state);
-        block->PrependInst(init_inst);
-        block->PrependInst(save_state);
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
+                                                          inst->CastToNewObject()->GetTypeId(), nullptr, nullptr);
+        inst->SetInput(0U, initInst);
+        inst->SetInput(0U, initInst);
+        inst->SetInput(1U, saveState);
+        block->PrependInst(initInst);
+        block->PrependInst(saveState);
+        SetNumVRegsArgs(0U, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else {
         ASSERT(n >= 0);
         for (int32_t i = 0; i < n; ++i) {
@@ -422,12 +422,12 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
     }
 
     if (opc == Opcode::SaveState || opc == Opcode::SafePoint) {
-        auto *save_state = static_cast<SaveStateInst *>(inst);
-        for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
-            save_state->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
+        auto *saveState = static_cast<SaveStateInst *>(inst);
+        for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+            saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
         }
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        SetNumVRegsArgs(0U, saveState->GetInputsCount());
+        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     }
     if (inst->GetType() == DataType::REFERENCE) {
         if (inst->GetOpcode() == Opcode::StoreArray) {
@@ -474,23 +474,23 @@ Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
     auto block = graph->GetVectorBlocks()[2U];
     auto param1 = CreateParamInst(graph, type, 0U);
     auto param2 = CreateParamInst(graph, DataType::UINT32, 1U);
-    auto save_state = static_cast<SaveStateInst *>(graph->CreateInstSaveState());
-    save_state->AppendInput(param1);
-    for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
-        save_state->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
+    auto saveState = static_cast<SaveStateInst *>(graph->CreateInstSaveState());
+    saveState->AppendInput(param1);
+    for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+        saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
     }
-    SetNumVRegsArgs(0U, save_state->GetInputsCount());
-    graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
-    block->AppendInst(save_state);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+    block->AppendInst(saveState);
     inst->SetInput(0U, param1);
-    inst->SetSaveState(save_state);
+    inst->SetSaveState(saveState);
     inst->SetType(type);
     if (inst->GetOpcode() == Opcode::CheckCast) {
-        auto load_class = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, nullptr, 0, nullptr,
-                                                     reinterpret_cast<RuntimeInterface::ClassPtr>(1));
-        load_class->SetSaveState(save_state);
-        block->AppendInst(load_class);
-        inst->SetInput(1U, load_class);
+        auto loadClass = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, nullptr, 0, nullptr,
+                                                    reinterpret_cast<RuntimeInterface::ClassPtr>(1));
+        loadClass->SetSaveState(saveState);
+        block->AppendInst(loadClass);
+        inst->SetInput(1U, loadClass);
     }
     block->AppendInst(inst);
 
@@ -498,30 +498,30 @@ Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
     if (inst->GetOpcode() == Opcode::CheckCast) {
         ret = graph->CreateInstReturn(type, INVALID_PC, param1);
     } else {
-        auto new_inst = graph->CreateInst(opcode);
+        auto newInst = graph->CreateInst(opcode);
         if (opcode == Opcode::NewArray || opcode == Opcode::NewObject) {
-            auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
-            init_inst->SetSaveState(save_state);
-            block->AppendInst(init_inst);
+            auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
+            initInst->SetSaveState(saveState);
+            block->AppendInst(initInst);
             if (opcode == Opcode::NewArray) {
-                new_inst->SetInput(NewArrayInst::INDEX_CLASS, init_inst);
-                new_inst->SetInput(NewArrayInst::INDEX_SIZE, inst);
+                newInst->SetInput(NewArrayInst::INDEX_CLASS, initInst);
+                newInst->SetInput(NewArrayInst::INDEX_SIZE, inst);
             } else {
-                new_inst->SetInput(0U, init_inst);
+                newInst->SetInput(0U, initInst);
             }
-            new_inst->SetSaveState(save_state);
+            newInst->SetSaveState(saveState);
             type = DataType::REFERENCE;
         } else if (opcode == Opcode::LoadArray) {
-            new_inst->SetInput(0U, param1);
-            new_inst->SetInput(1U, param2);
+            newInst->SetInput(0U, param1);
+            newInst->SetInput(1U, param2);
             type = DataType::REFERENCE;
         } else {
-            new_inst->SetInput(0U, param1);
-            new_inst->SetInput(1U, inst);
+            newInst->SetInput(0U, param1);
+            newInst->SetInput(1U, inst);
             type = DataType::UINT64;
         }
-        new_inst->SetType(type);
-        block->AppendInst(new_inst);
+        newInst->SetType(type);
+        block->AppendInst(newInst);
 
         ret = graph->CreateInstReturn();
         if (opcode == Opcode::NewArray) {
@@ -529,7 +529,7 @@ Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
             ret->SetInput(0U, param2);
         } else {
             ret->SetType(type);
-            ret->SetInput(0U, new_inst);
+            ret->SetInput(0U, newInst);
         }
     }
     block->AppendInst(ret);
@@ -544,18 +544,18 @@ Graph *GraphCreator::GenerateSSOperation(Inst *inst)
     ASSERT(graph->GetVectorBlocks().size() > 2U);
     auto block = graph->GetVectorBlocks()[2U];
     auto param1 = CreateParamInst(graph, type, 0U);
-    auto save_state = static_cast<SaveStateInst *>(graph->CreateInstSaveState());
-    save_state->AppendInput(param1);
-    for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
-        save_state->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
+    auto saveState = static_cast<SaveStateInst *>(graph->CreateInstSaveState());
+    saveState->AppendInput(param1);
+    for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+        saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
     }
-    SetNumVRegsArgs(0U, save_state->GetInputsCount());
-    graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
-    block->AppendInst(save_state);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+    block->AppendInst(saveState);
     if (!inst->IsOperandsDynamic()) {
-        inst->SetInput(0U, save_state);
+        inst->SetInput(0U, saveState);
     } else {
-        (static_cast<DynamicInputsInst *>(inst))->AppendInput(save_state);
+        (static_cast<DynamicInputsInst *>(inst))->AppendInput(saveState);
     }
     inst->SetType(type);
     block->AppendInst(inst);
@@ -573,39 +573,39 @@ Graph *GraphCreator::GenerateBoundaryCheckOperation(Inst *inst)
     auto param1 = CreateParamInst(graph, DataType::REFERENCE, 0U);
     auto param2 = CreateParamInst(graph, DataType::UINT32, 1U);
 
-    auto save_state = static_cast<SaveStateInst *>(graph->CreateInstSaveState());
-    save_state->AppendInput(param1);
-    save_state->AppendInput(param2);
-    for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
-        save_state->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
+    auto saveState = static_cast<SaveStateInst *>(graph->CreateInstSaveState());
+    saveState->AppendInput(param1);
+    saveState->AppendInput(param2);
+    for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+        saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
     }
-    block->AppendInst(save_state);
+    block->AppendInst(saveState);
 
-    auto len_arr = graph->CreateInstLenArray(DataType::INT32, INVALID_PC, param1);
-    block->AppendInst(len_arr);
-    auto bounds_check = static_cast<FixedInputsInst3 *>(inst);
-    bounds_check->SetInput(0U, len_arr);
-    bounds_check->SetType(DataType::INT32);
+    auto lenArr = graph->CreateInstLenArray(DataType::INT32, INVALID_PC, param1);
+    block->AppendInst(lenArr);
+    auto boundsCheck = static_cast<FixedInputsInst3 *>(inst);
+    boundsCheck->SetInput(0U, lenArr);
+    boundsCheck->SetType(DataType::INT32);
     if (inst->GetOpcode() == Opcode::BoundsCheck) {
-        bounds_check->SetInput(1U, param2);
-        bounds_check->SetInput(2U, save_state);
+        boundsCheck->SetInput(1U, param2);
+        boundsCheck->SetInput(2U, saveState);
     } else {
-        bounds_check->SetInput(1U, save_state);
+        boundsCheck->SetInput(1U, saveState);
     }
-    block->AppendInst(bounds_check);
+    block->AppendInst(boundsCheck);
 
-    Inst *ld_arr = nullptr;
+    Inst *ldArr = nullptr;
     if (inst->GetOpcode() == Opcode::BoundsCheck) {
-        ld_arr = graph->CreateInstLoadArray(DataType::UINT32, INVALID_PC, param1, bounds_check);
+        ldArr = graph->CreateInstLoadArray(DataType::UINT32, INVALID_PC, param1, boundsCheck);
     } else {
-        ld_arr = graph->CreateInstLoadArrayI(DataType::UINT32, INVALID_PC, param1, 1U);
+        ldArr = graph->CreateInstLoadArrayI(DataType::UINT32, INVALID_PC, param1, 1U);
     }
-    block->AppendInst(ld_arr);
+    block->AppendInst(ldArr);
 
-    auto ret = graph->CreateInstReturn(DataType::UINT32, INVALID_PC, ld_arr);
+    auto ret = graph->CreateInstReturn(DataType::UINT32, INVALID_PC, ldArr);
     block->AppendInst(ret);
-    SetNumVRegsArgs(0U, save_state->GetInputsCount());
-    graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     return graph;
 }
 
@@ -617,24 +617,23 @@ Graph *GraphCreator::GenerateMultiArrayOperation(Inst *inst)
     auto param1 = CreateParamInst(graph, DataType::INT32, 0U);
     auto param2 = CreateParamInst(graph, DataType::INT32, 1U);
 
-    auto save_state = graph->CreateInstSaveState();
-    block->AppendInst(save_state);
+    auto saveState = graph->CreateInstSaveState();
+    block->AppendInst(saveState);
 
-    auto init_inst =
-        graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, save_state, 0U, nullptr, nullptr);
-    auto arrays_inst = inst->CastToMultiArray();
-    arrays_inst->SetInputs(&allocator_, {{init_inst, DataType::REFERENCE},
-                                         {param1, DataType::INT32},
-                                         {param2, DataType::INT32},
-                                         {save_state, DataType::NO_TYPE}});
+    auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState, 0U, nullptr, nullptr);
+    auto arraysInst = inst->CastToMultiArray();
+    arraysInst->SetInputs(&allocator_, {{initInst, DataType::REFERENCE},
+                                        {param1, DataType::INT32},
+                                        {param2, DataType::INT32},
+                                        {saveState, DataType::NO_TYPE}});
 
-    block->AppendInst(init_inst);
+    block->AppendInst(initInst);
     block->AppendInst(inst);
-    for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
-        save_state->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
+    for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+        saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
     }
-    SetNumVRegsArgs(0U, save_state->GetInputsCount());
-    graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     return graph;
 }
 
@@ -645,17 +644,17 @@ Graph *GraphCreator::GenerateThrowOperation(Inst *inst)
     auto block = graph->GetVectorBlocks()[2U];
     auto param1 = CreateParamInst(graph, DataType::REFERENCE, 0U);
 
-    auto save_state = graph->CreateInstSaveState();
-    save_state->AppendInput(param1);
-    for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
-        save_state->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
+    auto saveState = graph->CreateInstSaveState();
+    saveState->AppendInput(param1);
+    for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+        saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
     }
-    SetNumVRegsArgs(0U, save_state->GetInputsCount());
-    graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
-    block->AppendInst(save_state);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+    block->AppendInst(saveState);
 
     inst->SetInput(0U, param1);
-    inst->SetInput(1U, save_state);
+    inst->SetInput(1U, saveState);
     block->AppendInst(inst);
     return graph;
 }
@@ -670,8 +669,8 @@ Graph *GraphCreator::GeneratePhiOperation(Inst *inst)
     auto param3 = CreateParamInst(graph, DataType::BOOL, 2U);
     auto add = graph->CreateInstAdd();
     auto sub = graph->CreateInstSub();
-    auto if_inst = graph->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, param3, 0U, DataType::BOOL, CC_NE);
-    graph->GetVectorBlocks()[2U]->AppendInst(if_inst);
+    auto ifInst = graph->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, param3, 0U, DataType::BOOL, CC_NE);
+    graph->GetVectorBlocks()[2U]->AppendInst(ifInst);
     if (inst->GetType() != DataType::REFERENCE) {
         add->SetInput(0U, param1);
         add->SetInput(1U, param2);
@@ -724,18 +723,18 @@ Graph *GraphCreator::CreateGraphWithThreeBasicBlock()
     Graph *graph = CreateGraph();
     auto entry = graph->CreateStartBlock();
     auto exit = graph->CreateEndBlock();
-    auto block_main = graph->CreateEmptyBlock();
-    auto block_true = graph->CreateEmptyBlock();
-    auto block_false = graph->CreateEmptyBlock();
+    auto blockMain = graph->CreateEmptyBlock();
+    auto blockTrue = graph->CreateEmptyBlock();
+    auto blockFalse = graph->CreateEmptyBlock();
     auto ret1 = graph->CreateInstReturnVoid();
     auto ret2 = graph->CreateInstReturnVoid();
-    block_true->AppendInst(ret1);
-    block_false->AppendInst(ret2);
-    entry->AddSucc(block_main);
-    block_main->AddSucc(block_true);
-    block_main->AddSucc(block_false);
-    block_true->AddSucc(exit);
-    block_false->AddSucc(exit);
+    blockTrue->AppendInst(ret1);
+    blockFalse->AppendInst(ret2);
+    entry->AddSucc(blockMain);
+    blockMain->AddSucc(blockTrue);
+    blockMain->AddSucc(blockFalse);
+    blockTrue->AddSucc(exit);
+    blockFalse->AddSucc(exit);
     return graph;
 }
 
@@ -744,17 +743,17 @@ Graph *GraphCreator::CreateGraphWithFourBasicBlock()
     Graph *graph = CreateGraph();
     auto entry = graph->CreateStartBlock();
     auto exit = graph->CreateEndBlock();
-    auto block_main = graph->CreateEmptyBlock();
-    auto block_true = graph->CreateEmptyBlock();
-    auto block_false = graph->CreateEmptyBlock();
-    auto block_phi = graph->CreateEmptyBlock();
+    auto blockMain = graph->CreateEmptyBlock();
+    auto blockTrue = graph->CreateEmptyBlock();
+    auto blockFalse = graph->CreateEmptyBlock();
+    auto blockPhi = graph->CreateEmptyBlock();
 
-    entry->AddSucc(block_main);
-    block_main->AddSucc(block_true);
-    block_main->AddSucc(block_false);
-    block_true->AddSucc(block_phi);
-    block_false->AddSucc(block_phi);
-    block_phi->AddSucc(exit);
+    entry->AddSucc(blockMain);
+    blockMain->AddSucc(blockTrue);
+    blockMain->AddSucc(blockFalse);
+    blockTrue->AddSucc(blockPhi);
+    blockFalse->AddSucc(blockPhi);
+    blockPhi->AddSucc(exit);
     return graph;
 }
 
@@ -766,22 +765,22 @@ ParameterInst *GraphCreator::CreateParamInst(Graph *graph, DataType::Type type, 
 }
 
 template <class T>
-std::vector<Inst *> &InstGenerator::GenerateOperations(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperations(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        auto inst = Inst::New<T>(&allocator_, op_code);
-        inst->SetType(opcode_x_possible_types_[op_code][i]);
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        auto inst = Inst::New<T>(&allocator_, opCode);
+        inst->SetType(opcodeXPossibleTypes_[opCode][i]);
         insts_.push_back(inst);
     }
     return insts_;
 }
 
 template <class T>
-std::vector<Inst *> &InstGenerator::GenerateOperationsImm(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperationsImm(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        auto inst = Inst::New<T>(&allocator_, op_code);
-        auto type = opcode_x_possible_types_[op_code][i];
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        auto inst = Inst::New<T>(&allocator_, opCode);
+        auto type = opcodeXPossibleTypes_[opCode][i];
         inst->SetType(type);
         inst->SetImm(type == DataType::REFERENCE ? 0U : 1U);
         insts_.push_back(inst);
@@ -790,14 +789,14 @@ std::vector<Inst *> &InstGenerator::GenerateOperationsImm(Opcode op_code)
 }
 
 template <class T>
-std::vector<Inst *> &InstGenerator::GenerateOperationsShiftedRegister(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperationsShiftedRegister(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        for (auto &shift_type : opcode_x_possible_shift_types_[op_code]) {
-            auto inst = Inst::New<T>(&allocator_, op_code);
-            auto type = opcode_x_possible_types_[op_code][i];
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        for (auto &shiftType : opcodeXPossibleShiftTypes_[opCode]) {
+            auto inst = Inst::New<T>(&allocator_, opCode);
+            auto type = opcodeXPossibleTypes_[opCode][i];
             inst->SetType(type);
-            inst->SetShiftType(shift_type);
+            inst->SetShiftType(shiftType);
             inst->SetImm(type == DataType::REFERENCE ? 0U : 1U);
             insts_.push_back(inst);
         }
@@ -806,42 +805,42 @@ std::vector<Inst *> &InstGenerator::GenerateOperationsShiftedRegister(Opcode op_
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperations<CallInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperations<CallInst>(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        auto inst = Inst::New<CallInst>(&allocator_, op_code);
-        inst->SetType(opcode_x_possible_types_[op_code][i]);
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        auto inst = Inst::New<CallInst>(&allocator_, opCode);
+        inst->SetType(opcodeXPossibleTypes_[opCode][i]);
         insts_.push_back(inst);
     }
     return insts_;
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperations<CastInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperations<CastInst>(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        auto inst = Inst::New<CastInst>(&allocator_, op_code);
-        inst->SetType(opcode_x_possible_types_[op_code][i]);
-        inst->CastToCast()->SetOperandsType(opcode_x_possible_types_[op_code][i]);
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        auto inst = Inst::New<CastInst>(&allocator_, opCode);
+        inst->SetType(opcodeXPossibleTypes_[opCode][i]);
+        inst->CastToCast()->SetOperandsType(opcodeXPossibleTypes_[opCode][i]);
         insts_.push_back(inst);
     }
     return insts_;
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperations<CompareInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperations<CompareInst>(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        auto type = opcode_x_possible_types_[op_code][i];
-        for (int cc_int = ConditionCode::CC_FIRST; cc_int != ConditionCode::CC_LAST; cc_int++) {
-            auto cc = static_cast<ConditionCode>(cc_int);
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        auto type = opcodeXPossibleTypes_[opCode][i];
+        for (int ccInt = ConditionCode::CC_FIRST; ccInt != ConditionCode::CC_LAST; ccInt++) {
+            auto cc = static_cast<ConditionCode>(ccInt);
             if (type == DataType::REFERENCE && cc != ConditionCode::CC_NE) {
                 continue;
             }
             if (IsFloatType(type) && (cc == ConditionCode::CC_TST_EQ || cc == ConditionCode::CC_TST_NE)) {
                 continue;
             }
-            auto inst = Inst::New<CompareInst>(&allocator_, op_code);
+            auto inst = Inst::New<CompareInst>(&allocator_, opCode);
             inst->SetType(DataType::BOOL);
             inst->SetCc(cc);
             inst->SetOperandsType(type);
@@ -852,15 +851,15 @@ std::vector<Inst *> &InstGenerator::GenerateOperations<CompareInst>(Opcode op_co
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperations<CmpInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperations<CmpInst>(Opcode opCode)
 {
-    auto inst = Inst::New<CmpInst>(&allocator_, op_code);
-    inst->SetType(opcode_x_possible_types_[op_code][0U]);
+    auto inst = Inst::New<CmpInst>(&allocator_, opCode);
+    inst->SetType(opcodeXPossibleTypes_[opCode][0U]);
     inst->SetOperandsType(DataType::FLOAT64);
     inst->SetFcmpg();
     insts_.push_back(inst);
-    inst = Inst::New<CmpInst>(&allocator_, op_code);
-    inst->SetType(opcode_x_possible_types_[op_code][0U]);
+    inst = Inst::New<CmpInst>(&allocator_, opCode);
+    inst->SetType(opcodeXPossibleTypes_[opCode][0U]);
     inst->SetOperandsType(DataType::FLOAT64);
     inst->SetFcmpl();
     insts_.push_back(inst);
@@ -868,16 +867,16 @@ std::vector<Inst *> &InstGenerator::GenerateOperations<CmpInst>(Opcode op_code)
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperations<IfInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperations<IfInst>(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        auto type = opcode_x_possible_types_[op_code][i];
-        for (int cc_int = ConditionCode::CC_FIRST; cc_int != ConditionCode::CC_LAST; cc_int++) {
-            auto cc = static_cast<ConditionCode>(cc_int);
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        auto type = opcodeXPossibleTypes_[opCode][i];
+        for (int ccInt = ConditionCode::CC_FIRST; ccInt != ConditionCode::CC_LAST; ccInt++) {
+            auto cc = static_cast<ConditionCode>(ccInt);
             if (type == DataType::REFERENCE && cc != ConditionCode::CC_NE) {
                 continue;
             }
-            auto inst = Inst::New<IfInst>(&allocator_, op_code);
+            auto inst = Inst::New<IfInst>(&allocator_, opCode);
             inst->SetCc(cc);
             inst->SetOperandsType(type);
             insts_.push_back(inst);
@@ -887,16 +886,16 @@ std::vector<Inst *> &InstGenerator::GenerateOperations<IfInst>(Opcode op_code)
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperationsImm<IfImmInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperationsImm<IfImmInst>(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        auto type = opcode_x_possible_types_[op_code][i];
-        for (int cc_int = ConditionCode::CC_FIRST; cc_int != ConditionCode::CC_LAST; cc_int++) {
-            auto cc = static_cast<ConditionCode>(cc_int);
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        auto type = opcodeXPossibleTypes_[opCode][i];
+        for (int ccInt = ConditionCode::CC_FIRST; ccInt != ConditionCode::CC_LAST; ccInt++) {
+            auto cc = static_cast<ConditionCode>(ccInt);
             if (type == DataType::REFERENCE && cc != ConditionCode::CC_NE && cc != ConditionCode::CC_EQ) {
                 continue;
             }
-            auto inst = Inst::New<IfImmInst>(&allocator_, op_code);
+            auto inst = Inst::New<IfImmInst>(&allocator_, opCode);
             inst->SetCc(cc);
             inst->SetOperandsType(type);
             inst->SetImm(type == DataType::REFERENCE ? 0U : 1U);
@@ -907,22 +906,22 @@ std::vector<Inst *> &InstGenerator::GenerateOperationsImm<IfImmInst>(Opcode op_c
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperations<SelectInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperations<SelectInst>(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        auto cmp_type = opcode_x_possible_types_[op_code][i];
-        for (int cc_int = ConditionCode::CC_FIRST; cc_int != ConditionCode::CC_LAST; cc_int++) {
-            auto cc = static_cast<ConditionCode>(cc_int);
-            if (cmp_type == DataType::REFERENCE && cc != ConditionCode::CC_NE && cc != ConditionCode::CC_EQ) {
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        auto cmpType = opcodeXPossibleTypes_[opCode][i];
+        for (int ccInt = ConditionCode::CC_FIRST; ccInt != ConditionCode::CC_LAST; ccInt++) {
+            auto cc = static_cast<ConditionCode>(ccInt);
+            if (cmpType == DataType::REFERENCE && cc != ConditionCode::CC_NE && cc != ConditionCode::CC_EQ) {
                 continue;
             }
-            for (size_t j = 0; j < opcode_x_possible_types_[op_code].size(); ++j) {
-                auto dst_type = opcode_x_possible_types_[op_code][j];
-                auto inst = Inst::New<SelectInst>(&allocator_, op_code);
-                inst->SetOperandsType(cmp_type);
-                inst->SetType(dst_type);
+            for (size_t j = 0; j < opcodeXPossibleTypes_[opCode].size(); ++j) {
+                auto dstType = opcodeXPossibleTypes_[opCode][j];
+                auto inst = Inst::New<SelectInst>(&allocator_, opCode);
+                inst->SetOperandsType(cmpType);
+                inst->SetType(dstType);
                 inst->SetCc(cc);
-                if (dst_type == DataType::REFERENCE) {
+                if (dstType == DataType::REFERENCE) {
                     inst->SetFlag(inst_flags::NO_CSE);
                     inst->SetFlag(inst_flags::NO_HOIST);
                 }
@@ -934,23 +933,23 @@ std::vector<Inst *> &InstGenerator::GenerateOperations<SelectInst>(Opcode op_cod
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperationsImm<SelectImmInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperationsImm<SelectImmInst>(Opcode opCode)
 {
-    for (size_t i = 0; i < opcode_x_possible_types_[op_code].size(); ++i) {
-        auto cmp_type = opcode_x_possible_types_[op_code][i];
-        for (int cc_int = ConditionCode::CC_FIRST; cc_int != ConditionCode::CC_LAST; cc_int++) {
-            auto cc = static_cast<ConditionCode>(cc_int);
-            if (cmp_type == DataType::REFERENCE && cc != ConditionCode::CC_NE && cc != ConditionCode::CC_EQ) {
+    for (size_t i = 0; i < opcodeXPossibleTypes_[opCode].size(); ++i) {
+        auto cmpType = opcodeXPossibleTypes_[opCode][i];
+        for (int ccInt = ConditionCode::CC_FIRST; ccInt != ConditionCode::CC_LAST; ccInt++) {
+            auto cc = static_cast<ConditionCode>(ccInt);
+            if (cmpType == DataType::REFERENCE && cc != ConditionCode::CC_NE && cc != ConditionCode::CC_EQ) {
                 continue;
             }
-            for (size_t j = 0; j < opcode_x_possible_types_[op_code].size(); ++j) {
-                auto dst_type = opcode_x_possible_types_[op_code][j];
-                auto inst = Inst::New<SelectImmInst>(&allocator_, op_code);
-                inst->SetOperandsType(cmp_type);
-                inst->SetType(dst_type);
+            for (size_t j = 0; j < opcodeXPossibleTypes_[opCode].size(); ++j) {
+                auto dstType = opcodeXPossibleTypes_[opCode][j];
+                auto inst = Inst::New<SelectImmInst>(&allocator_, opCode);
+                inst->SetOperandsType(cmpType);
+                inst->SetType(dstType);
                 inst->SetCc(cc);
-                inst->SetImm(cmp_type == DataType::REFERENCE ? 0U : 1U);
-                if (dst_type == DataType::REFERENCE) {
+                inst->SetImm(cmpType == DataType::REFERENCE ? 0U : 1U);
+                if (dstType == DataType::REFERENCE) {
                     inst->SetFlag(inst_flags::NO_CSE);
                     inst->SetFlag(inst_flags::NO_HOIST);
                 }
@@ -962,40 +961,40 @@ std::vector<Inst *> &InstGenerator::GenerateOperationsImm<SelectImmInst>(Opcode 
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperations<SpillFillInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperations<SpillFillInst>(Opcode opCode)
 {
-    auto inst = Inst::New<SpillFillInst>(&allocator_, op_code);
-    inst->SetType(opcode_x_possible_types_[op_code][0U]);
+    auto inst = Inst::New<SpillFillInst>(&allocator_, opCode);
+    inst->SetType(opcodeXPossibleTypes_[opCode][0U]);
     inst->AddSpill(0U, 2U, DataType::UINT64);
     insts_.push_back(inst);
 
-    inst = Inst::New<SpillFillInst>(&allocator_, op_code);
-    inst->SetType(opcode_x_possible_types_[op_code][0U]);
+    inst = Inst::New<SpillFillInst>(&allocator_, opCode);
+    inst->SetType(opcodeXPossibleTypes_[opCode][0U]);
     inst->AddFill(0U, 2U, DataType::UINT64);
     insts_.push_back(inst);
 
-    inst = Inst::New<SpillFillInst>(&allocator_, op_code);
-    inst->SetType(opcode_x_possible_types_[op_code][0U]);
+    inst = Inst::New<SpillFillInst>(&allocator_, opCode);
+    inst->SetType(opcodeXPossibleTypes_[opCode][0U]);
     inst->AddMove(0U, 2U, DataType::UINT64);
     insts_.push_back(inst);
 
-    inst = Inst::New<SpillFillInst>(&allocator_, op_code);
-    inst->SetType(opcode_x_possible_types_[op_code][0U]);
+    inst = Inst::New<SpillFillInst>(&allocator_, opCode);
+    inst->SetType(opcodeXPossibleTypes_[opCode][0U]);
     inst->AddMemCopy(0U, 2U, DataType::UINT64);
     insts_.push_back(inst);
     return insts_;
 }
 
 template <>
-std::vector<Inst *> &InstGenerator::GenerateOperations<MonitorInst>(Opcode op_code)
+std::vector<Inst *> &InstGenerator::GenerateOperations<MonitorInst>(Opcode opCode)
 {
-    auto inst = Inst::New<MonitorInst>(&allocator_, op_code);
-    inst->SetType(opcode_x_possible_types_[op_code][0U]);
+    auto inst = Inst::New<MonitorInst>(&allocator_, opCode);
+    inst->SetType(opcodeXPossibleTypes_[opCode][0U]);
     inst->SetEntry();
     insts_.push_back(inst);
 
-    inst = Inst::New<MonitorInst>(&allocator_, op_code);
-    inst->SetType(opcode_x_possible_types_[op_code][0U]);
+    inst = Inst::New<MonitorInst>(&allocator_, opCode);
+    inst->SetType(opcodeXPossibleTypes_[opCode][0U]);
     inst->SetExit();
     insts_.push_back(inst);
 
@@ -1004,14 +1003,14 @@ std::vector<Inst *> &InstGenerator::GenerateOperations<MonitorInst>(Opcode op_co
 
 #include "generate_operations_intrinsic_inst.inl"
 
-std::vector<Inst *> &InstGenerator::Generate(Opcode op_code)
+std::vector<Inst *> &InstGenerator::Generate(Opcode opCode)
 {
     insts_.clear();
-    switch (op_code) {
+    switch (opCode) {
         case Opcode::Neg:
         case Opcode::Abs:
         case Opcode::Not:
-            return GenerateOperations<UnaryOperation>(op_code);
+            return GenerateOperations<UnaryOperation>(opCode);
         case Opcode::Add:
         case Opcode::Sub:
         case Opcode::Mul:
@@ -1029,63 +1028,63 @@ std::vector<Inst *> &InstGenerator::Generate(Opcode op_code)
         case Opcode::OrNot:
         case Opcode::XorNot:
         case Opcode::MNeg:
-            return GenerateOperations<BinaryOperation>(op_code);
+            return GenerateOperations<BinaryOperation>(opCode);
         case Opcode::Compare:
-            return GenerateOperations<CompareInst>(op_code);
+            return GenerateOperations<CompareInst>(opCode);
         case Opcode::Constant:
-            return GenerateOperations<ConstantInst>(op_code);
+            return GenerateOperations<ConstantInst>(opCode);
         case Opcode::NewObject:
-            return GenerateOperations<NewObjectInst>(op_code);
+            return GenerateOperations<NewObjectInst>(opCode);
         case Opcode::If:
-            return GenerateOperations<IfInst>(op_code);
+            return GenerateOperations<IfInst>(opCode);
         case Opcode::IfImm:
-            return GenerateOperationsImm<IfImmInst>(op_code);
+            return GenerateOperationsImm<IfImmInst>(opCode);
         case Opcode::IsInstance:
-            return GenerateOperations<IsInstanceInst>(op_code);
+            return GenerateOperations<IsInstanceInst>(opCode);
         case Opcode::LenArray:
-            return GenerateOperations<LengthMethodInst>(op_code);
+            return GenerateOperations<LengthMethodInst>(opCode);
         case Opcode::Return:
         case Opcode::ReturnInlined:
-            return GenerateOperations<FixedInputsInst1>(op_code);
+            return GenerateOperations<FixedInputsInst1>(opCode);
         case Opcode::NewArray:
-            return GenerateOperations<NewArrayInst>(op_code);
+            return GenerateOperations<NewArrayInst>(opCode);
         case Opcode::Cmp:
-            return GenerateOperations<CmpInst>(op_code);
+            return GenerateOperations<CmpInst>(opCode);
         case Opcode::CheckCast:
-            return GenerateOperations<CheckCastInst>(op_code);
+            return GenerateOperations<CheckCastInst>(opCode);
         case Opcode::NullCheck:
         case Opcode::ZeroCheck:
         case Opcode::NegativeCheck:
-            return GenerateOperations<FixedInputsInst2>(op_code);
+            return GenerateOperations<FixedInputsInst2>(opCode);
         case Opcode::Throw:
-            return GenerateOperations<ThrowInst>(op_code);
+            return GenerateOperations<ThrowInst>(opCode);
         case Opcode::BoundsCheck:
         case Opcode::MAdd:
         case Opcode::MSub:
-            return GenerateOperations<FixedInputsInst3>(op_code);
+            return GenerateOperations<FixedInputsInst3>(opCode);
         case Opcode::Parameter:
-            return GenerateOperations<ParameterInst>(op_code);
+            return GenerateOperations<ParameterInst>(opCode);
         case Opcode::LoadArray:
-            return GenerateOperations<LoadInst>(op_code);
+            return GenerateOperations<LoadInst>(opCode);
         case Opcode::StoreArray:
-            return GenerateOperations<StoreInst>(op_code);
+            return GenerateOperations<StoreInst>(opCode);
         case Opcode::LoadArrayI:
-            return GenerateOperationsImm<LoadInstI>(op_code);
+            return GenerateOperationsImm<LoadInstI>(opCode);
         case Opcode::StoreArrayI:
-            return GenerateOperationsImm<StoreInstI>(op_code);
+            return GenerateOperationsImm<StoreInstI>(opCode);
         case Opcode::NullPtr:
         case Opcode::ReturnVoid:
-            return GenerateOperations<FixedInputsInst0>(op_code);
+            return GenerateOperations<FixedInputsInst0>(opCode);
         case Opcode::SaveState:
         case Opcode::SafePoint:
-            return GenerateOperations<SaveStateInst>(op_code);
+            return GenerateOperations<SaveStateInst>(opCode);
         case Opcode::Phi:
-            return GenerateOperations<PhiInst>(op_code);
+            return GenerateOperations<PhiInst>(opCode);
         case Opcode::CallStatic:
         case Opcode::CallVirtual:
-            return GenerateOperations<CallInst>(op_code);
+            return GenerateOperations<CallInst>(opCode);
         case Opcode::Monitor:
-            return GenerateOperations<MonitorInst>(op_code);
+            return GenerateOperations<MonitorInst>(opCode);
         case Opcode::AddI:
         case Opcode::SubI:
         case Opcode::ShlI:
@@ -1094,7 +1093,7 @@ std::vector<Inst *> &InstGenerator::Generate(Opcode op_code)
         case Opcode::AndI:
         case Opcode::OrI:
         case Opcode::XorI:
-            return GenerateOperationsImm<BinaryImmOperation>(op_code);
+            return GenerateOperationsImm<BinaryImmOperation>(opCode);
         case Opcode::AndSR:
         case Opcode::SubSR:
         case Opcode::AddSR:
@@ -1103,47 +1102,47 @@ std::vector<Inst *> &InstGenerator::Generate(Opcode op_code)
         case Opcode::AndNotSR:
         case Opcode::OrNotSR:
         case Opcode::XorNotSR:
-            return GenerateOperationsShiftedRegister<BinaryShiftedRegisterOperation>(op_code);
+            return GenerateOperationsShiftedRegister<BinaryShiftedRegisterOperation>(opCode);
         case Opcode::NegSR:
-            return GenerateOperationsShiftedRegister<UnaryShiftedRegisterOperation>(op_code);
+            return GenerateOperationsShiftedRegister<UnaryShiftedRegisterOperation>(opCode);
         case Opcode::SpillFill:
-            return GenerateOperations<SpillFillInst>(op_code);
+            return GenerateOperations<SpillFillInst>(opCode);
         case Opcode::LoadObject:
-            return GenerateOperations<LoadObjectInst>(op_code);
+            return GenerateOperations<LoadObjectInst>(opCode);
         case Opcode::StoreObject:
-            return GenerateOperations<StoreObjectInst>(op_code);
+            return GenerateOperations<StoreObjectInst>(opCode);
         case Opcode::LoadStatic:
-            return GenerateOperations<LoadStaticInst>(op_code);
+            return GenerateOperations<LoadStaticInst>(opCode);
         case Opcode::StoreStatic:
-            return GenerateOperations<StoreStaticInst>(op_code);
+            return GenerateOperations<StoreStaticInst>(opCode);
         case Opcode::LoadString:
         case Opcode::LoadType:
-            return GenerateOperations<LoadFromPool>(op_code);
+            return GenerateOperations<LoadFromPool>(opCode);
         case Opcode::BoundsCheckI:
-            return GenerateOperationsImm<BoundsCheckInstI>(op_code);
+            return GenerateOperationsImm<BoundsCheckInstI>(opCode);
         case Opcode::ReturnI:
-            return GenerateOperationsImm<ReturnInstI>(op_code);
+            return GenerateOperationsImm<ReturnInstI>(opCode);
         case Opcode::Intrinsic:
-            return GenerateOperations<IntrinsicInst>(op_code);
+            return GenerateOperations<IntrinsicInst>(opCode);
         case Opcode::Select:
-            return GenerateOperations<SelectInst>(op_code);
+            return GenerateOperations<SelectInst>(opCode);
         case Opcode::SelectImm:
-            return GenerateOperationsImm<SelectImmInst>(op_code);
+            return GenerateOperationsImm<SelectImmInst>(opCode);
         case Opcode::LoadArrayPair:
-            return GenerateOperations<LoadArrayPairInst>(op_code);
+            return GenerateOperations<LoadArrayPairInst>(opCode);
         case Opcode::LoadArrayPairI:
-            return GenerateOperationsImm<LoadArrayPairInstI>(op_code);
+            return GenerateOperationsImm<LoadArrayPairInstI>(opCode);
         case Opcode::StoreArrayPair:
-            return GenerateOperations<StoreArrayPairInst>(op_code);
+            return GenerateOperations<StoreArrayPairInst>(opCode);
         case Opcode::StoreArrayPairI:
-            return GenerateOperationsImm<StoreArrayPairInstI>(op_code);
+            return GenerateOperationsImm<StoreArrayPairInstI>(opCode);
         case Opcode::Cast:
-            return GenerateOperations<CastInst>(op_code);
+            return GenerateOperations<CastInst>(opCode);
         case Opcode::Builtin:
             ASSERT_DO(0U, std::cerr << "Unexpected Opcode Builtin\n");
             return insts_;
         default:
-            ASSERT_DO(0U, std::cerr << GetOpcodeString(op_code) << "\n");
+            ASSERT_DO(0U, std::cerr << GetOpcodeString(opCode) << "\n");
             return insts_;
     }
 }
@@ -1152,61 +1151,61 @@ constexpr std::array<const char *, 15U> LABELS = {"NO_TYPE", "REF",     "BOOL", 
                                                   "UINT16",  "INT16",   "UINT32",  "INT32", "UINT64",
                                                   "INT64",   "FLOAT32", "FLOAT64", "ANY",   "VOID"};
 
-void StatisticGenerator::GenerateHTMLPage(const std::string &file_name)
+void StatisticGenerator::GenerateHTMLPage(const std::string &fileName)
 {
-    std::ofstream html_page;
-    html_page.open(file_name);
-    html_page << "<!DOCTYPE html>\n"
-              << "<html>\n"
-              << "<head>\n"
-              << "\t<style>table, th, td {border: 1px solid black; border-collapse: collapse;}</style>\n"
-              << "\t<title>Codegen coverage statistic</title>\n"
-              << "</head>\n"
-              << "<body>\n"
-              << "\t<header><h1>Codegen coverage statistic</h1></header>"
-              << "\t<h3>Legend</h3>"
-              << "\t<table style=\"width:300px%\">\n"
-              << "\t\t<tr><th align=\"left\">Codegen successfully translate IR</th><td align=\"center\""
-              << "bgcolor=\"#00fd00\" width=\"90px\">+</td></tr>\n"
-              << "\t\t<tr><th align=\"left\">Codegen UNsuccessfully translate IR</th><td align=\"center\""
-              << "bgcolor=\"#fd0000\">-</td></tr>\n"
-              << "\t\t<tr><th align=\"left\">IR does't support instruction with this type </th><td></td></tr>\n"
-              << "\t\t<tr><th align=\"left\">Test generator not implement for this opcode</th><td "
-              << "bgcolor=\"#808080\"></td></tr>\n"
-              << "\t</table>\n"
-              << "\t<br>\n"
-              << "\t<h3>Summary information</h3>\n"
-              << "\t<table>\n"
-              << "\t\t<tr><th>Positive tests</th><td>" << positive_inst_number_ << "</td></tr>\n"
-              << "\t\t<tr><th>All generated tests</th><td>" << all_inst_number_ << "</td></tr>\n"
-              << "\t\t<tr><th></th><td>" << positive_inst_number_ * 100.0 / all_inst_number_ << "%</td></tr>\n"
-              << "\t</table>\n"
-              << "\t<br>\n"
-              << "\t<table>"
-              << "\t\t<tr><th align=\"left\">Number of opcodes for which tests were generated</th><td>"
-              << implemented_opcode_number_ << "</td></tr>"
-              << "\t\t<tr><th align=\"left\">Full number of opcodes</th><td>" << all_opcode_number_ << "</td></tr>"
-              << "\t\t<tr><th></th><td>" << implemented_opcode_number_ * 100.0 / all_opcode_number_ << "%</td></tr>"
-              << "\t</table>\n"
-              << "\t<h3>Detailed information</h3>"
-              << "\t\t<table>"
-              << "\t\t<tr><th>Opcode\\Type</th>";
+    std::ofstream htmlPage;
+    htmlPage.open(fileName);
+    htmlPage << "<!DOCTYPE html>\n"
+             << "<html>\n"
+             << "<head>\n"
+             << "\t<style>table, th, td {border: 1px solid black; border-collapse: collapse;}</style>\n"
+             << "\t<title>Codegen coverage statistic</title>\n"
+             << "</head>\n"
+             << "<body>\n"
+             << "\t<header><h1>Codegen coverage statistic</h1></header>"
+             << "\t<h3>Legend</h3>"
+             << "\t<table style=\"width:300px%\">\n"
+             << "\t\t<tr><th align=\"left\">Codegen successfully translate IR</th><td align=\"center\""
+             << "bgcolor=\"#00fd00\" width=\"90px\">+</td></tr>\n"
+             << "\t\t<tr><th align=\"left\">Codegen UNsuccessfully translate IR</th><td align=\"center\""
+             << "bgcolor=\"#fd0000\">-</td></tr>\n"
+             << "\t\t<tr><th align=\"left\">IR does't support instruction with this type </th><td></td></tr>\n"
+             << "\t\t<tr><th align=\"left\">Test generator not implement for this opcode</th><td "
+             << "bgcolor=\"#808080\"></td></tr>\n"
+             << "\t</table>\n"
+             << "\t<br>\n"
+             << "\t<h3>Summary information</h3>\n"
+             << "\t<table>\n"
+             << "\t\t<tr><th>Positive tests</th><td>" << positiveInstNumber_ << "</td></tr>\n"
+             << "\t\t<tr><th>All generated tests</th><td>" << allInstNumber_ << "</td></tr>\n"
+             << "\t\t<tr><th></th><td>" << positiveInstNumber_ * 100.0 / allInstNumber_ << "%</td></tr>\n"
+             << "\t</table>\n"
+             << "\t<br>\n"
+             << "\t<table>"
+             << "\t\t<tr><th align=\"left\">Number of opcodes for which tests were generated</th><td>"
+             << implementedOpcodeNumber_ << "</td></tr>"
+             << "\t\t<tr><th align=\"left\">Full number of opcodes</th><td>" << allOpcodeNumber_ << "</td></tr>"
+             << "\t\t<tr><th></th><td>" << implementedOpcodeNumber_ * 100.0 / allOpcodeNumber_ << "%</td></tr>"
+             << "\t</table>\n"
+             << "\t<h3>Detailed information</h3>"
+             << "\t\t<table>"
+             << "\t\t<tr><th>Opcode\\Type</th>";
     for (auto label : LABELS) {
-        html_page << "<th style=\"width:90px\">" << label << "</th>";
+        htmlPage << "<th style=\"width:90px\">" << label << "</th>";
     }
-    html_page << "<th>%</th>";
-    html_page << "<tr>\n";
+    htmlPage << "<th>%</th>";
+    htmlPage << "<tr>\n";
     for (auto i = 0; i != static_cast<int>(Opcode::NUM_OPCODES); ++i) {
         auto opc = static_cast<Opcode>(i);
         if (opc == Opcode::NOP || opc == Opcode::Intrinsic || opc == Opcode::LoadPairPart) {
             continue;
         }
-        html_page << "\t\t<tr>";
-        html_page << "<th>" << GetOpcodeString(opc) << "</th>";
+        htmlPage << "\t\t<tr>";
+        htmlPage << "<th>" << GetOpcodeString(opc) << "</th>";
         if (statistic_.first.find(opc) != statistic_.first.end()) {
             auto item = statistic_.first[opc];
-            int positiv_count = 0;
-            int negativ_count = 0;
+            int positivCount = 0;
+            int negativCount = 0;
             for (auto &j : item) {
                 std::string flag;
                 std::string color;
@@ -1214,61 +1213,60 @@ void StatisticGenerator::GenerateHTMLPage(const std::string &file_name)
                     case 0U:
                         flag = "-";
                         color = "bgcolor=\"#fd0000\"";
-                        negativ_count++;
+                        negativCount++;
                         break;
                     case 1U:
                         flag = "+";
                         color = "bgcolor=\"#00fd00\"";
-                        positiv_count++;
+                        positivCount++;
                         break;
                     default:
                         break;
                 }
-                html_page << "<td align=\"center\" " << color << ">" << flag << "</td>";
+                htmlPage << "<td align=\"center\" " << color << ">" << flag << "</td>";
             }
-            if (positiv_count + negativ_count != 0U) {
-                html_page << "<td align=\"right\">" << positiv_count * 100.0 / (positiv_count + negativ_count)
-                          << "</td>";
+            if (positivCount + negativCount != 0U) {
+                htmlPage << "<td align=\"right\">" << positivCount * 100.0 / (positivCount + negativCount) << "</td>";
             }
         } else {
             for (auto j = tmplt_.begin(); j != tmplt_.end(); ++j) {
-                html_page << R"(<td align=" center " bgcolor=" #808080"></td>)";
+                htmlPage << R"(<td align=" center " bgcolor=" #808080"></td>)";
             }
-            html_page << "<td align=\"right\">0</td>";
+            htmlPage << "<td align=\"right\">0</td>";
         }
-        html_page << "</tr>\n";
+        htmlPage << "</tr>\n";
     }
-    html_page << "\t</table>\n";
+    htmlPage << "\t</table>\n";
 
-    html_page << "\t<h3>Intrinsics</h3>\n";
-    html_page << "\t<table>\n";
-    html_page << "\t\t<tr><th>IntrinsicId</th><th>Status</th></tr>";
+    htmlPage << "\t<h3>Intrinsics</h3>\n";
+    htmlPage << "\t<table>\n";
+    htmlPage << "\t\t<tr><th>IntrinsicId</th><th>Status</th></tr>";
     for (auto i = 0; i != static_cast<int>(RuntimeInterface::IntrinsicId::COUNT); ++i) {
-        auto intrinsic_id = static_cast<RuntimeInterface::IntrinsicId>(i);
-        auto intrinsic_name = GetIntrinsicName(intrinsic_id);
-        if (intrinsic_name.empty()) {
+        auto intrinsicId = static_cast<RuntimeInterface::IntrinsicId>(i);
+        auto intrinsicName = GetIntrinsicName(intrinsicId);
+        if (intrinsicName.empty()) {
             continue;
         }
-        html_page << "<tr><th>" << intrinsic_name << "</th>";
-        if (statistic_.second.find(intrinsic_id) != statistic_.second.end()) {
+        htmlPage << "<tr><th>" << intrinsicName << "</th>";
+        if (statistic_.second.find(intrinsicId) != statistic_.second.end()) {
             std::string flag;
             std::string color;
-            if (statistic_.second[intrinsic_id]) {
+            if (statistic_.second[intrinsicId]) {
                 flag = "+";
                 color = "bgcolor=\"#00fd00\"";
             } else {
                 flag = "-";
                 color = "bgcolor=\"#fd0000\"";
             }
-            html_page << "<td align=\"center\" " << color << ">" << flag << "</td></tr>";
+            htmlPage << "<td align=\"center\" " << color << ">" << flag << "</td></tr>";
         } else {
-            html_page << R"(<td align=" center " bgcolor=" #808080"></td></tr>)";
+            htmlPage << R"(<td align=" center " bgcolor=" #808080"></td></tr>)";
         }
-        html_page << "\n";
+        htmlPage << "\n";
     }
-    html_page << "</table>\n";
-    html_page << "</body>\n"
-              << "</html>";
-    html_page.close();
+    htmlPage << "</table>\n";
+    htmlPage << "</body>\n"
+             << "</html>";
+    htmlPage.close();
 }
 }  // namespace panda::compiler

@@ -177,14 +177,13 @@ private:
 
 class State : public StateIface<State> {
 public:
-    ALWAYS_INLINE inline State(ManagedThread *thread, const uint8_t *pc, Frame *frame,
-                               const void *const *dispatch_table)
+    ALWAYS_INLINE inline State(ManagedThread *thread, const uint8_t *pc, Frame *frame, const void *const *dispatchTable)
         : StateIface(frame)
     {
         SetInst(BytecodeInstruction(pc));
         SetFrame(frame);
         SetThread(thread);
-        SetDispatchTable(dispatch_table);
+        SetDispatchTable(dispatchTable);
     }
 
     ALWAYS_INLINE inline void UpdateState(const uint8_t *pc, Frame *frame)
@@ -215,7 +214,7 @@ public:
 
     ALWAYS_INLINE inline const void *const *GetDispatchTable() const
     {
-        return dispatch_table_;
+        return dispatchTable_;
     }
 
     ALWAYS_INLINE inline ManagedThread *GetThread() const
@@ -228,9 +227,9 @@ public:
         thread_ = thread;
     }
 
-    void SetDispatchTable(const void *const *dispatch_table)
+    void SetDispatchTable(const void *const *dispatchTable)
     {
-        dispatch_table_ = dispatch_table;
+        dispatchTable_ = dispatchTable;
     }
 
     void SaveState() {}
@@ -241,7 +240,7 @@ private:
     BytecodeInstruction inst_;
     Frame *frame_ {nullptr};
     ManagedThread *thread_ {nullptr};
-    const void *const *dispatch_table_ {nullptr};
+    const void *const *dispatchTable_ {nullptr};
 };
 
 #endif  // PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES

@@ -56,12 +56,12 @@ public:
 
     void SetSupertypeOfArray(Type supertype)
     {
-        supertype_of_array_ = supertype;
+        supertypeOfArray_ = supertype;
     }
 
     Type SupertypeOfArray() const
     {
-        return supertype_of_array_;
+        return supertypeOfArray_;
     }
     Type Object() const
     {
@@ -95,27 +95,27 @@ public:
 
     void ResetTypeSpans()
     {
-        type_spans_.clear();
+        typeSpans_.clear();
     }
 
     Span<Type const> GetTypeSpan(size_t start, size_t sz) const
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return {type_spans_.data() + start, sz};
+        return {typeSpans_.data() + start, sz};
     }
 
     Span<Type> GetNewTypeSpan(size_t sz)
     {
-        size_t start = type_spans_.size();
-        type_spans_.resize(start + sz);
+        size_t start = typeSpans_.size();
+        typeSpans_.resize(start + sz);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return {type_spans_.data() + start, sz};
+        return {typeSpans_.data() + start, sz};
     }
 
     size_t GetSpanIndex(Span<Type> span)
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return span.begin() - type_spans_.data();
+        return span.begin() - typeSpans_.data();
     }
 
     Class const *DescriptorToClass(uint8_t const *descr);
@@ -123,19 +123,19 @@ public:
 private:
     VerifierService *service_;
     plugin::Plugin const *plugin_;
-    LanguageContext lang_ctx_;
-    ClassLinkerContext *linker_ctx_;
+    LanguageContext langCtx_;
+    ClassLinkerContext *linkerCtx_;
 
-    PandaUnorderedMap<Type, Type> normalized_type_of_;
-    PandaUnorderedMap<Method::UniqId, Method const *> method_of_id_;
-    PandaUnorderedMap<Method::UniqId, MethodSignature> signature_of_method_;
-    PandaUnorderedMap<Class const *, PandaUnorderedSet<Type>> supertypes_cache_;
-    PandaUnorderedSet<Class const *> known_classes_;
+    PandaUnorderedMap<Type, Type> normalizedTypeOf_;
+    PandaUnorderedMap<Method::UniqId, Method const *> methodOfId_;
+    PandaUnorderedMap<Method::UniqId, MethodSignature> signatureOfMethod_;
+    PandaUnorderedMap<Class const *, PandaUnorderedSet<Type>> supertypesCache_;
+    PandaUnorderedSet<Class const *> knownClasses_;
 
     // Storage for members of intersection and union types.
-    PandaVector<Type> type_spans_;
+    PandaVector<Type> typeSpans_;
 
-    Type supertype_of_array_;
+    Type supertypeOfArray_;
     Type object_;
     Type class_;
     Type throwable_;

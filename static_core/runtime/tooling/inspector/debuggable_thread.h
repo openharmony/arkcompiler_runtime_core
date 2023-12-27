@@ -27,10 +27,10 @@ class DebuggableThread {
 public:
     DebuggableThread(
         ManagedThread *thread,
-        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&pre_suspend,
-        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&post_suspend,
-        std::function<void()> &&pre_wait_suspension, std::function<void()> &&post_wait_suspension,
-        std::function<void()> &&pre_resume, std::function<void()> &&post_resume);
+        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&preSuspend,
+        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&postSuspend,
+        std::function<void()> &&preWaitSuspension, std::function<void()> &&postWaitSuspension,
+        std::function<void()> &&preResume, std::function<void()> &&postResume);
     ~DebuggableThread() = default;
 
     NO_COPY_SEMANTIC(DebuggableThread);
@@ -101,25 +101,25 @@ public:
 
 private:
     // Suspends a paused thread. Should be called on an application thread
-    void Suspend(ObjectRepository &object_repository, const std::vector<BreakpointId> &hit_breakpoints,
+    void Suspend(ObjectRepository &objectRepository, const std::vector<BreakpointId> &hitBreakpoints,
                  ObjectHeader *exception) REQUIRES(mutex_);
 
     // Marks a paused thread as not suspended. Should be called on the server thread
     void Resume() REQUIRES(mutex_);
 
     ManagedThread *thread_;
-    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> pre_suspend_;
-    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> post_suspend_;
-    std::function<void()> pre_wait_suspension_;
-    std::function<void()> post_wait_suspension_;
-    std::function<void()> pre_resume_;
-    std::function<void()> post_resume_;
+    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> preSuspend_;
+    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> postSuspend_;
+    std::function<void()> preWaitSuspension_;
+    std::function<void()> postWaitSuspension_;
+    std::function<void()> preResume_;
+    std::function<void()> postResume_;
 
     os::memory::Mutex mutex_;
     ThreadState state_ GUARDED_BY(mutex_);
     bool suspended_ GUARDED_BY(mutex_) {false};
     std::optional<std::function<void(ObjectRepository &)>> request_ GUARDED_BY(mutex_);
-    os::memory::ConditionVariable request_done_ GUARDED_BY(mutex_);
+    os::memory::ConditionVariable requestDone_ GUARDED_BY(mutex_);
 };
 }  // namespace panda::tooling::inspector
 

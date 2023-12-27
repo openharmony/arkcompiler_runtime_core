@@ -50,31 +50,31 @@ public:
     };
 
     PandaCache()
-        : method_cache_size_(DEFAULT_METHOD_CACHE_SIZE),
-          field_cache_size_(DEFAULT_FIELD_CACHE_SIZE),
-          class_cache_size_(DEFAULT_CLASS_CACHE_SIZE)
+        : methodCacheSize_(DEFAULT_METHOD_CACHE_SIZE),
+          fieldCacheSize_(DEFAULT_FIELD_CACHE_SIZE),
+          classCacheSize_(DEFAULT_CLASS_CACHE_SIZE)
     {
-        method_cache_.resize(method_cache_size_, MethodCachePair());
-        field_cache_.resize(field_cache_size_, FieldCachePair());
-        class_cache_.resize(class_cache_size_, ClassCachePair());
+        methodCache_.resize(methodCacheSize_, MethodCachePair());
+        fieldCache_.resize(fieldCacheSize_, FieldCachePair());
+        classCache_.resize(classCacheSize_, ClassCachePair());
     }
 
     ~PandaCache() = default;
 
     inline uint32_t GetMethodIndex(File::EntityId id) const
     {
-        return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), method_cache_size_);
+        return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), methodCacheSize_);
     }
 
     inline uint32_t GetFieldIndex(File::EntityId id) const
     {
         // lowest one or two bits is very likely same between different fields
-        return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), field_cache_size_, 2U);
+        return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), fieldCacheSize_, 2U);
     }
 
     inline uint32_t GetClassIndex(File::EntityId id) const
     {
-        return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), class_cache_size_);
+        return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), classCacheSize_);
     }
 
     inline Method *GetMethodFromCache(File::EntityId id) const
@@ -83,10 +83,10 @@ public:
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
         uint32_t index = GetMethodIndex(id);
-        auto *pair_ptr =
-            reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(method_cache_[index])));
+        auto *pairPtr =
+            reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(methodCache_[index])));
         // Atomic with acquire order reason: fixes a data race with method_cache_
-        auto pair = pair_ptr->load(std::memory_order_acquire);
+        auto pair = pairPtr->load(std::memory_order_acquire);
         TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
         if (pair.id == id) {
             return pair.ptr;
@@ -104,11 +104,11 @@ public:
         pair.id = id;
         pair.ptr = method;
         uint32_t index = GetMethodIndex(id);
-        auto *pair_ptr =
-            reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(method_cache_[index])));
+        auto *pairPtr =
+            reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(methodCache_[index])));
         TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
         // Atomic with release order reason: fixes a data race with method_cache_
-        pair_ptr->store(pair, std::memory_order_release);
+        pairPtr->store(pair, std::memory_order_release);
 #endif
     }
 
@@ -118,10 +118,10 @@ public:
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
         uint32_t index = GetFieldIndex(id);
-        auto *pair_ptr =
-            reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(field_cache_[index])));
+        auto *pairPtr =
+            reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(fieldCache_[index])));
         // Atomic with acquire order reason: fixes a data race with field_cache_
-        auto pair = pair_ptr->load(std::memory_order_acquire);
+        auto pair = pairPtr->load(std::memory_order_acquire);
         TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
         if (pair.id == id) {
             return pair.ptr;
@@ -136,14 +136,14 @@ public:
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
         uint32_t index = GetFieldIndex(id);
-        auto *pair_ptr =
-            reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(field_cache_[index])));
+        auto *pairPtr =
+            reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(fieldCache_[index])));
         FieldCachePair pair;
         pair.id = id;
         pair.ptr = field;
         TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
         // Atomic with release order reason: fixes a data race with field_cache_
-        pair_ptr->store(pair, std::memory_order_release);
+        pairPtr->store(pair, std::memory_order_release);
 #endif
     }
 
@@ -153,10 +153,10 @@ public:
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
         uint32_t index = GetClassIndex(id);
-        auto *pair_ptr =
-            reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(class_cache_[index])));
+        auto *pairPtr =
+            reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(classCache_[index])));
         // Atomic with acquire order reason: fixes a data race with class_cache_
-        auto pair = pair_ptr->load(std::memory_order_acquire);
+        auto pair = pairPtr->load(std::memory_order_acquire);
         TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
         if (pair.id == id) {
             return pair.ptr;
@@ -174,33 +174,33 @@ public:
         pair.id = id;
         pair.ptr = clazz;
         uint32_t index = GetClassIndex(id);
-        auto *pair_ptr =
-            reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(class_cache_[index])));
+        auto *pairPtr =
+            reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(classCache_[index])));
         TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
         // Atomic with release order reason: fixes a data race with class_cache_
-        pair_ptr->store(pair, std::memory_order_release);
+        pairPtr->store(pair, std::memory_order_release);
 #endif
     }
 
     inline void Clear()
     {
-        method_cache_.clear();
-        field_cache_.clear();
-        class_cache_.clear();
+        methodCache_.clear();
+        fieldCache_.clear();
+        classCache_.clear();
 
-        method_cache_.resize(method_cache_size_, MethodCachePair());
-        field_cache_.resize(field_cache_size_, FieldCachePair());
-        class_cache_.resize(class_cache_size_, ClassCachePair());
+        methodCache_.resize(methodCacheSize_, MethodCachePair());
+        fieldCache_.resize(fieldCacheSize_, FieldCachePair());
+        classCache_.resize(classCacheSize_, ClassCachePair());
     }
 
     template <class Callback>
     bool EnumerateCachedClasses(const Callback &cb)
     {
-        for (uint32_t i = 0; i < class_cache_size_; i++) {
-            auto *pair_ptr =
-                reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(class_cache_[i])));
+        for (uint32_t i = 0; i < classCacheSize_; i++) {
+            auto *pairPtr =
+                reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(classCache_[i])));
             // Atomic with acquire order reason: fixes a data race with class_cache_
-            auto pair = pair_ptr->load(std::memory_order_acquire);
+            auto pair = pairPtr->load(std::memory_order_acquire);
             TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
             if (pair.ptr != nullptr) {
                 if (!cb(pair.ptr)) {
@@ -219,13 +219,13 @@ private:
     static_assert(panda::helpers::math::IsPowerOfTwo(DEFAULT_METHOD_CACHE_SIZE));
     static_assert(panda::helpers::math::IsPowerOfTwo(DEFAULT_CLASS_CACHE_SIZE));
 
-    const uint32_t method_cache_size_;
-    const uint32_t field_cache_size_;
-    const uint32_t class_cache_size_;
+    const uint32_t methodCacheSize_;
+    const uint32_t fieldCacheSize_;
+    const uint32_t classCacheSize_;
 
-    std::vector<MethodCachePair> method_cache_;
-    std::vector<FieldCachePair> field_cache_;
-    std::vector<ClassCachePair> class_cache_;
+    std::vector<MethodCachePair> methodCache_;
+    std::vector<FieldCachePair> fieldCache_;
+    std::vector<ClassCachePair> classCache_;
 };
 
 }  // namespace panda_file

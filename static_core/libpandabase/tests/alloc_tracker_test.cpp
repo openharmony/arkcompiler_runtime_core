@@ -21,8 +21,8 @@
 namespace panda {
 
 struct Header {
-    uint32_t num_items = 0;
-    uint32_t num_stacktraces = 0;
+    uint32_t numItems = 0;
+    uint32_t numStacktraces = 0;
 };
 
 struct AllocInfo {
@@ -30,12 +30,12 @@ struct AllocInfo {
     uint32_t id = 0;
     uint32_t size = 0;
     uint32_t space = 0;
-    uint32_t stacktrace_id = 0;
+    uint32_t stacktraceId = 0;
 };
 
 struct FreeInfo {
     uint32_t tag = 0;
-    uint32_t alloc_id = 0;
+    uint32_t allocId = 0;
 };
 
 static void SkipString(std::istream &in)
@@ -58,8 +58,8 @@ TEST(DetailAllocTrackerTest, NoAllocs)
     Header hdr;
     out.read(reinterpret_cast<char *>(&hdr), sizeof(hdr));
     ASSERT_FALSE(out.eof());
-    ASSERT_EQ(0U, hdr.num_items);
-    ASSERT_EQ(0U, hdr.num_stacktraces);
+    ASSERT_EQ(0U, hdr.numItems);
+    ASSERT_EQ(0U, hdr.numStacktraces);
 }
 
 TEST(DetailAllocTrackerTest, OneAlloc)
@@ -74,8 +74,8 @@ TEST(DetailAllocTrackerTest, OneAlloc)
     Header hdr;
     out.read(reinterpret_cast<char *>(&hdr), sizeof(hdr));
     ASSERT_FALSE(out.eof());
-    ASSERT_EQ(1U, hdr.num_items);
-    ASSERT_EQ(1U, hdr.num_stacktraces);
+    ASSERT_EQ(1U, hdr.numItems);
+    ASSERT_EQ(1U, hdr.numStacktraces);
 
     // skip stacktrace
     SkipString(out);
@@ -87,7 +87,7 @@ TEST(DetailAllocTrackerTest, OneAlloc)
     ASSERT_EQ(0U, info.id);
     ASSERT_EQ(20U, info.size);
     ASSERT_EQ(static_cast<uint32_t>(SpaceType::SPACE_TYPE_INTERNAL), info.space);
-    ASSERT_EQ(0U, info.stacktrace_id);
+    ASSERT_EQ(0U, info.stacktraceId);
 }
 
 TEST(DetailAllocTrackerTest, AllocAndFree)
@@ -104,8 +104,8 @@ TEST(DetailAllocTrackerTest, AllocAndFree)
     Header hdr;
     out.read(reinterpret_cast<char *>(&hdr), sizeof(hdr));
     ASSERT_FALSE(out.eof());
-    ASSERT_EQ(2U, hdr.num_items);
-    ASSERT_EQ(1U, hdr.num_stacktraces);
+    ASSERT_EQ(2U, hdr.numItems);
+    ASSERT_EQ(1U, hdr.numStacktraces);
 
     // skip stacktrace
     SkipString(out);
@@ -119,9 +119,9 @@ TEST(DetailAllocTrackerTest, AllocAndFree)
     ASSERT_EQ(0U, alloc.id);
     ASSERT_EQ(20U, alloc.size);
     ASSERT_EQ(static_cast<uint32_t>(SpaceType::SPACE_TYPE_INTERNAL), alloc.space);
-    ASSERT_EQ(0U, alloc.stacktrace_id);
+    ASSERT_EQ(0U, alloc.stacktraceId);
     ASSERT_EQ(DetailAllocTracker::FREE_TAG, free.tag);
-    ASSERT_EQ(0U, free.alloc_id);
+    ASSERT_EQ(0U, free.allocId);
 }
 
 TEST(DetailAllocTrackerTest, MultithreadedAlloc)
@@ -133,9 +133,9 @@ TEST(DetailAllocTrackerTest, MultithreadedAlloc)
     std::vector<std::thread> threads;
     for (size_t i = 0; i < NUM_THREADS; ++i) {
         threads.emplace_back(
-            [&tracker](size_t thread_num) {
+            [&tracker](size_t threadNum) {
                 for (size_t iter = 0; iter < NUM_ITERS; ++iter) {
-                    auto addr = reinterpret_cast<void *>(thread_num * NUM_THREADS + iter + 1U);
+                    auto addr = reinterpret_cast<void *>(threadNum * NUM_THREADS + iter + 1U);
                     // NOLINTNEXTLINE(readability-magic-numbers)
                     tracker.TrackAlloc(addr, 10U, SpaceType::SPACE_TYPE_INTERNAL);
                 }
@@ -154,8 +154,8 @@ TEST(DetailAllocTrackerTest, MultithreadedAlloc)
     Header hdr;
     out.read(reinterpret_cast<char *>(&hdr), sizeof(hdr));
     ASSERT_FALSE(out.eof());
-    ASSERT_EQ(NUM_THREADS * NUM_ITERS, hdr.num_items);
-    ASSERT_EQ(1U, hdr.num_stacktraces);
+    ASSERT_EQ(NUM_THREADS * NUM_ITERS, hdr.numItems);
+    ASSERT_EQ(1U, hdr.numStacktraces);
 }
 
 }  // namespace panda

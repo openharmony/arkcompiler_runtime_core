@@ -84,10 +84,10 @@ static Value ConstructValueFromFloatingPoint(double val)
 
 static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method, va_list args, ets_object object)
 {
-    ArgVector<Value> parsed_args;
-    parsed_args.reserve(method->GetNumArgs());
+    ArgVector<Value> parsedArgs;
+    parsedArgs.reserve(method->GetNumArgs());
     if (object != nullptr) {
-        parsed_args.emplace_back(s->ToInternalType(object)->GetCoreType());
+        parsedArgs.emplace_back(s->ToInternalType(object)->GetCoreType());
     }
 
     panda_file::ShortyIterator it(method->GetPandaMethod()->GetShorty());
@@ -99,25 +99,25 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
         switch (type.GetId()) {
             case TypeId::U1:
             case TypeId::U16:
-                parsed_args.emplace_back(va_arg(args, uint32_t));
+                parsedArgs.emplace_back(va_arg(args, uint32_t));
                 break;
             case TypeId::I8:
             case TypeId::I16:
             case TypeId::I32:
-                parsed_args.emplace_back(va_arg(args, int32_t));
+                parsedArgs.emplace_back(va_arg(args, int32_t));
                 break;
             case TypeId::I64:
-                parsed_args.emplace_back(va_arg(args, int64_t));
+                parsedArgs.emplace_back(va_arg(args, int64_t));
                 break;
             case TypeId::F32:
-                parsed_args.push_back(ConstructValueFromFloatingPoint(static_cast<float>(va_arg(args, double))));
+                parsedArgs.push_back(ConstructValueFromFloatingPoint(static_cast<float>(va_arg(args, double))));
                 break;
             case TypeId::F64:
-                parsed_args.push_back(ConstructValueFromFloatingPoint(va_arg(args, double)));
+                parsedArgs.push_back(ConstructValueFromFloatingPoint(va_arg(args, double)));
                 break;
             case TypeId::REFERENCE: {
                 auto param = va_arg(args, ets_object);
-                parsed_args.emplace_back(param != nullptr ? s->ToInternalType(param)->GetCoreType() : nullptr);
+                parsedArgs.emplace_back(param != nullptr ? s->ToInternalType(param)->GetCoreType() : nullptr);
                 break;
             }
             default:
@@ -125,16 +125,16 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
                 break;
         }
     }
-    return parsed_args;
+    return parsedArgs;
 }
 
 static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method, const ets_value *args,
                                      ets_object object)
 {
-    ArgVector<Value> parsed_args;
-    parsed_args.reserve(method->GetNumArgs());
+    ArgVector<Value> parsedArgs;
+    parsedArgs.reserve(method->GetNumArgs());
     if (object != nullptr) {
-        parsed_args.emplace_back(s->ToInternalType(object)->GetCoreType());
+        parsedArgs.emplace_back(s->ToInternalType(object)->GetCoreType());
     }
 
     panda_file::ShortyIterator it(method->GetPandaMethod()->GetShorty());
@@ -146,31 +146,31 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
         ++it;
         switch (type.GetId()) {
             case TypeId::U1:
-                parsed_args.emplace_back(arg->z);
+                parsedArgs.emplace_back(arg->z);
                 break;
             case TypeId::U16:
-                parsed_args.emplace_back(arg->c);
+                parsedArgs.emplace_back(arg->c);
                 break;
             case TypeId::I8:
-                parsed_args.emplace_back(arg->b);
+                parsedArgs.emplace_back(arg->b);
                 break;
             case TypeId::I16:
-                parsed_args.emplace_back(arg->s);
+                parsedArgs.emplace_back(arg->s);
                 break;
             case TypeId::I32:
-                parsed_args.emplace_back(arg->i);
+                parsedArgs.emplace_back(arg->i);
                 break;
             case TypeId::I64:
-                parsed_args.emplace_back(arg->j);
+                parsedArgs.emplace_back(arg->j);
                 break;
             case TypeId::F32:
-                parsed_args.push_back(ConstructValueFromFloatingPoint(arg->f));
+                parsedArgs.push_back(ConstructValueFromFloatingPoint(arg->f));
                 break;
             case TypeId::F64:
-                parsed_args.push_back(ConstructValueFromFloatingPoint(arg->d));
+                parsedArgs.push_back(ConstructValueFromFloatingPoint(arg->d));
                 break;
             case TypeId::REFERENCE: {
-                parsed_args.emplace_back(s->ToInternalType(arg->l)->GetCoreType());
+                parsedArgs.emplace_back(s->ToInternalType(arg->l)->GetCoreType());
                 break;
             }
             default:
@@ -179,32 +179,32 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
         }
         ++arg;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-    return parsed_args;
+    return parsedArgs;
 }
 
-EtsMethod *ToInternalType(ets_method method_id)
+EtsMethod *ToInternalType(ets_method methodId)
 {
-    return reinterpret_cast<EtsMethod *>(method_id);
+    return reinterpret_cast<EtsMethod *>(methodId);
 }
 
-ets_method ToEtsNapiType(EtsMethod *method_id)
+ets_method ToEtsNapiType(EtsMethod *methodId)
 {
-    return reinterpret_cast<ets_method>(method_id);
+    return reinterpret_cast<ets_method>(methodId);
 }
 
-EtsField *ToInternalType(ets_field field_id)
+EtsField *ToInternalType(ets_field fieldId)
 {
-    return reinterpret_cast<EtsField *>(field_id);
+    return reinterpret_cast<EtsField *>(fieldId);
 }
 
-ets_field ToEtsNapiType(EtsField *field_id)
+ets_field ToEtsNapiType(EtsField *fieldId)
 {
-    return reinterpret_cast<ets_field>(field_id);
+    return reinterpret_cast<ets_field>(fieldId);
 }
 
-static EtsMethod *ResolveVirtualMethod(ScopedManagedCodeFix *s, ets_object object, ets_method method_id)
+static EtsMethod *ResolveVirtualMethod(ScopedManagedCodeFix *s, ets_object object, ets_method methodId)
 {
-    EtsMethod *method = ToInternalType(method_id);
+    EtsMethod *method = ToInternalType(methodId);
 
     if (UNLIKELY(method->IsStatic())) {
         LOG(ERROR, ETS_NAPI) << "Called ResolveVirtualMethod of static method, invalid ETS NAPI usage";
@@ -216,14 +216,14 @@ static EtsMethod *ResolveVirtualMethod(ScopedManagedCodeFix *s, ets_object objec
 }
 
 template <bool IS_VIRTUAL, typename NapiType, typename EtsValueType, typename Args>
-static NapiType GeneralMethodCall(EtsEnv *env, ets_object obj, ets_method method_id, Args args)
+static NapiType GeneralMethodCall(EtsEnv *env, ets_object obj, ets_method methodId, Args args)
 {
     EtsMethod *method = nullptr;
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     if constexpr (IS_VIRTUAL) {
-        method = ResolveVirtualMethod(&s, obj, method_id);
+        method = ResolveVirtualMethod(&s, obj, methodId);
     } else {
-        method = ToInternalType(method_id);
+        method = ToInternalType(methodId);
     }
     ASSERT(method != nullptr);
 
@@ -235,9 +235,9 @@ static NapiType GeneralMethodCall(EtsEnv *env, ets_object obj, ets_method method
     return res.GetAs<EtsValueType>();
 }
 
-static void CheckMethodReturnType(ets_method method_id, EtsType type)
+static void CheckMethodReturnType(ets_method methodId, EtsType type)
 {
-    EtsMethod *method = ToInternalType(method_id);
+    EtsMethod *method = ToInternalType(methodId);
     if (method->GetReturnValueType() != type &&
         (type != EtsType::VOID || method->GetReturnValueType() != EtsType::OBJECT)) {
         LOG(FATAL, ETS_NAPI) << "Return type mismatch";
@@ -245,61 +245,61 @@ static void CheckMethodReturnType(ets_method method_id, EtsType type)
 }
 
 template <typename EtsNapiType, typename InternalType>
-static inline EtsNapiType GetPrimitiveTypeField(EtsEnv *env, ets_object obj, ets_field field_id)
+static inline EtsNapiType GetPrimitiveTypeField(EtsEnv *env, ets_object obj, ets_field fieldId)
 {
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(field_id);
+    ETS_NAPI_ABORT_IF_NULL(fieldId);
 
-    EtsField *internal_field_id = ToInternalType(field_id);
+    EtsField *internalFieldId = ToInternalType(fieldId);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *internal_object = s.ToInternalType(obj);
+    EtsObject *internalObject = s.ToInternalType(obj);
 
-    return static_cast<EtsNapiType>(internal_object->GetFieldPrimitive<InternalType>(internal_field_id));
+    return static_cast<EtsNapiType>(internalObject->GetFieldPrimitive<InternalType>(internalFieldId));
 }
 
 template <typename EtsNapiType>
-static inline void SetPrimitiveTypeField(EtsEnv *env, ets_object obj, ets_field field_id, EtsNapiType value)
+static inline void SetPrimitiveTypeField(EtsEnv *env, ets_object obj, ets_field fieldId, EtsNapiType value)
 {
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(field_id);
+    ETS_NAPI_ABORT_IF_NULL(fieldId);
 
-    EtsField *internal_field_id = ToInternalType(field_id);
+    EtsField *internalFieldId = ToInternalType(fieldId);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *internal_object = s.ToInternalType(obj);
+    EtsObject *internalObject = s.ToInternalType(obj);
 
-    internal_object->SetFieldPrimitive(internal_field_id, value);
+    internalObject->SetFieldPrimitive(internalFieldId, value);
 }
 
 template <typename EtsNapiType, typename InternalType>
-static inline EtsNapiType GetPrimitiveTypeStaticField(EtsEnv *env, ets_field field_id)
+static inline EtsNapiType GetPrimitiveTypeStaticField(EtsEnv *env, ets_field fieldId)
 {
-    ETS_NAPI_ABORT_IF_NULL(field_id);
+    ETS_NAPI_ABORT_IF_NULL(fieldId);
 
-    EtsField *internal_field_id = ToInternalType(field_id);
+    EtsField *internalFieldId = ToInternalType(fieldId);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsClass *internal_class = internal_field_id->GetDeclaringClass();
+    EtsClass *internalClass = internalFieldId->GetDeclaringClass();
 
-    return static_cast<EtsNapiType>(internal_class->GetStaticFieldPrimitive<InternalType>(internal_field_id));
+    return static_cast<EtsNapiType>(internalClass->GetStaticFieldPrimitive<InternalType>(internalFieldId));
 }
 
 template <typename EtsNapiType>
-static inline void SetPrimitiveTypeStaticField(EtsEnv *env, ets_field field_id, EtsNapiType value)
+static inline void SetPrimitiveTypeStaticField(EtsEnv *env, ets_field fieldId, EtsNapiType value)
 {
-    ETS_NAPI_ABORT_IF_NULL(field_id);
+    ETS_NAPI_ABORT_IF_NULL(fieldId);
 
-    EtsField *internal_field_id = ToInternalType(field_id);
+    EtsField *internalFieldId = ToInternalType(fieldId);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsClass *internal_class = internal_field_id->GetDeclaringClass();
+    EtsClass *internalClass = internalFieldId->GetDeclaringClass();
 
-    internal_class->SetStaticFieldPrimitive(internal_field_id, value);
+    internalClass->SetStaticFieldPrimitive(internalFieldId, value);
 }
 
-inline PandaString ToClassDescriptor(const char *class_name)
+inline PandaString ToClassDescriptor(const char *className)
 {
-    if (class_name[0] == '[') {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return class_name;
+    if (className[0] == '[') {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return className;
     }
-    return PandaString("L") + class_name + ';';
+    return PandaString("L") + className + ';';
 }
 
 ClassLinkerContext *GetClassLinkerContext(ScopedManagedCodeFix *soa)
@@ -328,10 +328,10 @@ static EtsClass *GetInternalClass(EtsEnv *env, ets_class cls, ScopedManagedCodeF
 
     // Initialize class
     EtsCoroutine *corutine = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsCoroutine();
-    EtsClassLinker *class_linker = corutine->GetPandaVM()->GetClassLinker();
-    bool is_initialized = class_linker->InitializeClass(corutine, klass);
+    EtsClassLinker *classLinker = corutine->GetPandaVM()->GetClassLinker();
+    bool isInitialized = classLinker->InitializeClass(corutine, klass);
 
-    if (!is_initialized) {
+    if (!isInitialized) {
         LOG(ERROR, ETS_NAPI) << "Cannot initialize class: " << klass->GetDescriptor();
         return nullptr;
     }
@@ -357,19 +357,19 @@ static void *PinRawDataOfPrimitiveArray(EtsEnv *env, ets_array array)
 {
     ETS_NAPI_ABORT_IF_NULL(array);
 
-    auto panda_env = PandaEtsNapiEnv::ToPandaEtsEnv(env);
-    ScopedManagedCodeFix s(panda_env);
+    auto pandaEnv = PandaEtsNapiEnv::ToPandaEtsEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
 
-    auto vm = panda_env->GetEtsVM();
+    auto vm = pandaEnv->GetEtsVM();
     if (!vm->GetGC()->IsPinningSupported()) {
         LOG(FATAL, ETS_NAPI) << "Pinning is not supported with " << mem::GCStringFromType(vm->GetGC()->GetType());
         return nullptr;
     }
 
-    auto core_array = s.ToInternalType(array)->GetCoreType();
-    vm->GetHeapManager()->PinObject(core_array);
+    auto coreArray = s.ToInternalType(array)->GetCoreType();
+    vm->GetHeapManager()->PinObject(coreArray);
 
-    return core_array->GetData();
+    return coreArray->GetData();
 }
 
 template <typename T>
@@ -382,12 +382,12 @@ static void UnpinPrimitiveTypeArray(EtsEnv *env, ets_array array)
 {
     ETS_NAPI_ABORT_IF_NULL(array);
 
-    auto panda_env = PandaEtsNapiEnv::ToPandaEtsEnv(env);
-    ScopedManagedCodeFix s(panda_env);
+    auto pandaEnv = PandaEtsNapiEnv::ToPandaEtsEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
 
-    auto core_array = s.ToInternalType(array)->GetCoreType();
-    auto vm = panda_env->GetEtsVM();
-    vm->GetHeapManager()->UnpinObject(core_array);
+    auto coreArray = s.ToInternalType(array)->GetCoreType();
+    auto vm = pandaEnv->GetEtsVM();
+    vm->GetHeapManager()->UnpinObject(coreArray);
 }
 
 template <typename T>
@@ -397,16 +397,16 @@ static void GetPrimitiveTypeArrayRegion(EtsEnv *env, ets_array array, ets_size s
     ETS_NAPI_ABORT_IF(len != 0 && buf == nullptr);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsArray *internal_array = s.ToInternalType(array);
-    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internal_array->GetLength()) {
+    EtsArray *internalArray = s.ToInternalType(array);
+    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internalArray->GetLength()) {
         PandaStringStream ss;
         ss << "Array index out of bounds: start = " << start << ", len = " << len
-           << ", array size = " << internal_array->GetLength();
+           << ", array size = " << internalArray->GetLength();
         s.ThrowNewException(EtsNapiException::ARRAY_INDEX_OUT_OF_BOUNDS, ss.str().c_str());
         return;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    memcpy_s(buf, len * sizeof(T), internal_array->GetData<T>() + start, len * sizeof(T));
+    memcpy_s(buf, len * sizeof(T), internalArray->GetData<T>() + start, len * sizeof(T));
 }
 
 template <typename T>
@@ -416,16 +416,16 @@ static void SetPrimitiveTypeArrayRegion(EtsEnv *env, ets_array array, ets_size s
     ETS_NAPI_ABORT_IF(len != 0 && buf == nullptr);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsArray *internal_array = s.ToInternalType(array);
-    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internal_array->GetLength()) {
+    EtsArray *internalArray = s.ToInternalType(array);
+    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internalArray->GetLength()) {
         PandaStringStream ss;
         ss << "Array index out of bounds: start = " << start << ", len = " << len
-           << ", array size = " << internal_array->GetLength();
+           << ", array size = " << internalArray->GetLength();
         s.ThrowNewException(EtsNapiException::ARRAY_INDEX_OUT_OF_BOUNDS, ss.str().c_str());
         return;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    memcpy_s(internal_array->GetData<std::remove_const_t<T>>() + start, len * sizeof(T), buf, len * sizeof(T));
+    memcpy_s(internalArray->GetData<std::remove_const_t<T>>() + start, len * sizeof(T), buf, len * sizeof(T));
 }
 
 // ETS NAPI implementation
@@ -440,23 +440,23 @@ NO_UB_SANITIZE static ets_class FindClass(EtsEnv *env, const char *name)
 {
     ETS_NAPI_DEBUG_TRACE(env);
 
-    auto ets_env = PandaEtsNapiEnv::ToPandaEtsEnv(env);
-    ScopedManagedCodeFix s(ets_env);
+    auto etsEnv = PandaEtsNapiEnv::ToPandaEtsEnv(env);
+    ScopedManagedCodeFix s(etsEnv);
 
     if (name == nullptr) {
         s.ThrowNewException(EtsNapiException::NO_CLASS_DEF_FOUND, "Null pointer passed as a class name");
         return nullptr;
     }
 
-    PandaString class_descriptor = ToClassDescriptor(name);
-    EtsClassLinker *class_linker = ets_env->GetEtsVM()->GetClassLinker();
-    EtsClass *klass = class_linker->GetClass(class_descriptor.c_str(), true, GetClassLinkerContext(&s));
+    PandaString classDescriptor = ToClassDescriptor(name);
+    EtsClassLinker *classLinker = etsEnv->GetEtsVM()->GetClassLinker();
+    EtsClass *klass = classLinker->GetClass(classDescriptor.c_str(), true, GetClassLinkerContext(&s));
 
-    if (ets_env->HasPendingException()) {
-        EtsThrowable *current_exception = ets_env->GetThrowable();
-        std::string_view exception_string = current_exception->GetClass()->GetDescriptor();
-        if (exception_string == panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION) {
-            ets_env->ClearException();
+    if (etsEnv->HasPendingException()) {
+        EtsThrowable *currentException = etsEnv->GetThrowable();
+        std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
+        if (exceptionString == panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION) {
+            etsEnv->ClearException();
 
             PandaStringStream ss;
             ss << "Class '" << name << "' is not found";
@@ -479,10 +479,10 @@ NO_UB_SANITIZE static ets_class GetSuperclass(EtsEnv *env, ets_class cls)
     ETS_NAPI_ABORT_IF_NULL(cls);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    auto base_cls = s.ToInternalType(cls)->GetBase();
-    ETS_NAPI_RETURN_IF_EQ(base_cls, nullptr, nullptr);
+    auto baseCls = s.ToInternalType(cls)->GetBase();
+    ETS_NAPI_RETURN_IF_EQ(baseCls, nullptr, nullptr);
     ASSERT_MANAGED_CODE();
-    return reinterpret_cast<ets_class>(s.AddLocalRef(reinterpret_cast<EtsObject *>(base_cls)));
+    return reinterpret_cast<ets_class>(s.AddLocalRef(reinterpret_cast<EtsObject *>(baseCls)));
 }
 
 NO_UB_SANITIZE static ets_boolean IsAssignableFrom(EtsEnv *env, ets_class cls1, ets_class cls2)
@@ -524,12 +524,12 @@ NO_UB_SANITIZE static ets_int ThrowErrorNew(EtsEnv *env, ets_class cls, const ch
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(cls);
 
-    PandaEtsNapiEnv *panda_ets_env = PandaEtsNapiEnv::ToPandaEtsEnv(env);
+    PandaEtsNapiEnv *pandaEtsEnv = PandaEtsNapiEnv::ToPandaEtsEnv(env);
 
-    ScopedManagedCodeFix s(panda_ets_env);
-    EtsClass *exception_class = s.ToInternalType(cls);
-    EtsCoroutine *coroutine = panda_ets_env->GetEtsCoroutine();
-    ThrowEtsException(coroutine, exception_class->GetDescriptor(), message);
+    ScopedManagedCodeFix s(pandaEtsEnv);
+    EtsClass *exceptionClass = s.ToInternalType(cls);
+    EtsCoroutine *coroutine = pandaEtsEnv->GetEtsCoroutine();
+    ThrowEtsException(coroutine, exceptionClass->GetDescriptor(), message);
     return ETS_OK;
 }
 
@@ -556,20 +556,20 @@ NO_UB_SANITIZE static void ErrorDescribe(EtsEnv *env)
 
     env->ErrorClear();
 
-    auto error_klass = env->GetObjectClass(error);
-    auto to_string_method = env->Getp_method(error_klass, "toString", ":Lstd/core/String;");
-    auto error_string = env->CallObjectMethod(error, to_string_method);
+    auto errorKlass = env->GetObjectClass(error);
+    auto toStringMethod = env->Getp_method(errorKlass, "toString", ":Lstd/core/String;");
+    auto errorString = env->CallObjectMethod(error, toStringMethod);
 
-    auto console_klass = env->FindClass("std/core/Console");
+    auto consoleKlass = env->FindClass("std/core/Console");
 
-    auto core_global_class = env->FindClass("std/core/ETSGLOBAL");
-    ETS_NAPI_ABORT_IF_NULL(core_global_class);
-    auto console_field = env->GetStaticp_field(core_global_class, "console", "Lstd/core/Console;");
-    ETS_NAPI_ABORT_IF_NULL(console_field);
-    auto console_obj = env->GetStaticObjectField(core_global_class, console_field);
+    auto coreGlobalClass = env->FindClass("std/core/ETSGLOBAL");
+    ETS_NAPI_ABORT_IF_NULL(coreGlobalClass);
+    auto consoleField = env->GetStaticp_field(coreGlobalClass, "console", "Lstd/core/Console;");
+    ETS_NAPI_ABORT_IF_NULL(consoleField);
+    auto consoleObj = env->GetStaticObjectField(coreGlobalClass, consoleField);
 
-    auto println_method = env->Getp_method(console_klass, "println", "Lstd/core/String;:Lstd/core/void;");
-    env->CallVoidMethod(console_obj, println_method, error_string);
+    auto printlnMethod = env->Getp_method(consoleKlass, "println", "Lstd/core/String;:Lstd/core/void;");
+    env->CallVoidMethod(consoleObj, printlnMethod, errorString);
     env->ThrowError(error);
 }
 
@@ -611,10 +611,10 @@ NO_UB_SANITIZE static ets_object PopLocalFrame(EtsEnv *env, ets_object result)
     ETS_NAPI_DEBUG_TRACE(env);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsReference *result_ets_ref = EtsObjectToEtsRef(result);
-    EtsReference *ets_ref =
-        PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsReferenceStorage()->PopLocalEtsFrame(result_ets_ref);
-    return EtsRefToEtsObject(ets_ref);
+    EtsReference *resultEtsRef = EtsObjectToEtsRef(result);
+    EtsReference *etsRef =
+        PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsReferenceStorage()->PopLocalEtsFrame(resultEtsRef);
+    return EtsRefToEtsObject(etsRef);
 }
 
 NO_UB_SANITIZE static ets_object NewGlobalRef(EtsEnv *env, ets_object obj)
@@ -623,25 +623,25 @@ NO_UB_SANITIZE static ets_object NewGlobalRef(EtsEnv *env, ets_object obj)
     ETS_NAPI_RETURN_IF_EQ(obj, nullptr, nullptr);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *internal_object = s.ToInternalType(obj);
-    return s.AddGlobalRef(internal_object);
+    EtsObject *internalObject = s.ToInternalType(obj);
+    return s.AddGlobalRef(internalObject);
 }
 
-NO_UB_SANITIZE static void DeleteGlobalRef([[maybe_unused]] EtsEnv *env, ets_object global_ref)
+NO_UB_SANITIZE static void DeleteGlobalRef([[maybe_unused]] EtsEnv *env, ets_object globalRef)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_RETURN_VOID_IF_NULL(global_ref);
+    ETS_NAPI_RETURN_VOID_IF_NULL(globalRef);
 
-    PandaEtsVM *ets_vm = PandaEtsVM::GetCurrent();
-    ets_vm->DeleteGlobalRef(global_ref);
+    PandaEtsVM *etsVm = PandaEtsVM::GetCurrent();
+    etsVm->DeleteGlobalRef(globalRef);
 }
 
-NO_UB_SANITIZE static void DeleteLocalRef(EtsEnv *env, ets_object local_ref)
+NO_UB_SANITIZE static void DeleteLocalRef(EtsEnv *env, ets_object localRef)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_RETURN_VOID_IF_NULL(local_ref);
+    ETS_NAPI_RETURN_VOID_IF_NULL(localRef);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    s.DelLocalRef(local_ref);
+    s.DelLocalRef(localRef);
 }
 
 NO_UB_SANITIZE static ets_boolean IsSameObject(EtsEnv *env, ets_object ref1, ets_object ref2)
@@ -661,8 +661,8 @@ NO_UB_SANITIZE static ets_object NewLocalRef(EtsEnv *env, ets_object ref)
     ETS_NAPI_RETURN_IF_EQ(ref, nullptr, nullptr);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *internal_object = s.ToInternalType(ref);
-    return s.AddLocalRef(internal_object);
+    EtsObject *internalObject = s.ToInternalType(ref);
+    return s.AddLocalRef(internalObject);
 }
 
 NO_UB_SANITIZE static ets_int EnsureLocalCapacity(EtsEnv *env, ets_int capacity)
@@ -710,618 +710,618 @@ NO_UB_SANITIZE static ets_method Getp_method(EtsEnv *env, ets_class cls, const c
     return ToEtsNapiType(method);
 }
 
-NO_UB_SANITIZE static ets_object CallObjectMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static ets_object CallObjectMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::OBJECT);
-    return GeneralMethodCall<true, ets_object, ets_object>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::OBJECT);
+    return GeneralMethodCall<true, ets_object, ets_object>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_object CallObjectMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_object CallObjectMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_object res = CallObjectMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    ets_object res = CallObjectMethodList(env, obj, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_object CallObjectMethodArray(EtsEnv *env, ets_object obj, ets_method method_id,
+NO_UB_SANITIZE static ets_object CallObjectMethodArray(EtsEnv *env, ets_object obj, ets_method methodId,
                                                        const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::OBJECT);
-    return GeneralMethodCall<true, ets_object, ets_object>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::OBJECT);
+    return GeneralMethodCall<true, ets_object, ets_object>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_boolean CallBooleanMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static ets_boolean CallBooleanMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BOOLEAN);
-    return GeneralMethodCall<true, ets_boolean, EtsBoolean>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BOOLEAN);
+    return GeneralMethodCall<true, ets_boolean, EtsBoolean>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_boolean CallBooleanMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_boolean CallBooleanMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_boolean res = CallBooleanMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    ets_boolean res = CallBooleanMethodList(env, obj, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_boolean CallBooleanMethodArray(EtsEnv *env, ets_object obj, ets_method method_id,
+NO_UB_SANITIZE static ets_boolean CallBooleanMethodArray(EtsEnv *env, ets_object obj, ets_method methodId,
                                                          const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BOOLEAN);
-    return GeneralMethodCall<true, ets_boolean, EtsBoolean>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BOOLEAN);
+    return GeneralMethodCall<true, ets_boolean, EtsBoolean>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_byte CallByteMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static ets_byte CallByteMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BYTE);
-    return GeneralMethodCall<true, ets_byte, EtsByte>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BYTE);
+    return GeneralMethodCall<true, ets_byte, EtsByte>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_byte CallByteMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_byte CallByteMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_byte res = CallByteMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    ets_byte res = CallByteMethodList(env, obj, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_byte CallByteMethodArray(EtsEnv *env, ets_object obj, ets_method method_id,
+NO_UB_SANITIZE static ets_byte CallByteMethodArray(EtsEnv *env, ets_object obj, ets_method methodId,
                                                    const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BYTE);
-    return GeneralMethodCall<true, ets_byte, EtsByte>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BYTE);
+    return GeneralMethodCall<true, ets_byte, EtsByte>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_char CallCharMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static ets_char CallCharMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::CHAR);
-    return GeneralMethodCall<true, ets_char, EtsChar>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::CHAR);
+    return GeneralMethodCall<true, ets_char, EtsChar>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_char CallCharMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_char CallCharMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_char res = CallCharMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    ets_char res = CallCharMethodList(env, obj, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_char CallCharMethodArray(EtsEnv *env, ets_object obj, ets_method method_id,
+NO_UB_SANITIZE static ets_char CallCharMethodArray(EtsEnv *env, ets_object obj, ets_method methodId,
                                                    const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::CHAR);
-    return GeneralMethodCall<true, ets_char, EtsChar>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::CHAR);
+    return GeneralMethodCall<true, ets_char, EtsChar>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_short CallShortMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static ets_short CallShortMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::SHORT);
-    return GeneralMethodCall<true, ets_short, EtsShort>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::SHORT);
+    return GeneralMethodCall<true, ets_short, EtsShort>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_short CallShortMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_short CallShortMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_short res = CallShortMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    ets_short res = CallShortMethodList(env, obj, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_short CallShortMethodArray(EtsEnv *env, ets_object obj, ets_method method_id,
+NO_UB_SANITIZE static ets_short CallShortMethodArray(EtsEnv *env, ets_object obj, ets_method methodId,
                                                      const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::SHORT);
-    return GeneralMethodCall<true, ets_short, EtsShort>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::SHORT);
+    return GeneralMethodCall<true, ets_short, EtsShort>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_int CallIntMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static ets_int CallIntMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::INT);
-    return GeneralMethodCall<true, ets_int, EtsInt>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::INT);
+    return GeneralMethodCall<true, ets_int, EtsInt>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_int CallIntMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_int CallIntMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_int res = CallIntMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    ets_int res = CallIntMethodList(env, obj, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_int CallIntMethodArray(EtsEnv *env, ets_object obj, ets_method method_id,
+NO_UB_SANITIZE static ets_int CallIntMethodArray(EtsEnv *env, ets_object obj, ets_method methodId,
                                                  const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::INT);
-    return GeneralMethodCall<true, ets_int, EtsInt>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::INT);
+    return GeneralMethodCall<true, ets_int, EtsInt>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_long CallLongMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static ets_long CallLongMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::LONG);
-    return GeneralMethodCall<true, ets_long, EtsLong>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::LONG);
+    return GeneralMethodCall<true, ets_long, EtsLong>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_long CallLongMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_long CallLongMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_long res = CallLongMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    ets_long res = CallLongMethodList(env, obj, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_long CallLongMethodArray(EtsEnv *env, ets_object obj, ets_method method_id,
+NO_UB_SANITIZE static ets_long CallLongMethodArray(EtsEnv *env, ets_object obj, ets_method methodId,
                                                    const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::LONG);
-    return GeneralMethodCall<true, ets_long, EtsLong>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::LONG);
+    return GeneralMethodCall<true, ets_long, EtsLong>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_float CallFloatMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static ets_float CallFloatMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::FLOAT);
-    return GeneralMethodCall<true, ets_float, EtsFloat>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::FLOAT);
+    return GeneralMethodCall<true, ets_float, EtsFloat>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_float CallFloatMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_float CallFloatMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_float res = CallFloatMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    ets_float res = CallFloatMethodList(env, obj, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_float CallFloatMethodArray(EtsEnv *env, ets_object obj, ets_method method_id,
+NO_UB_SANITIZE static ets_float CallFloatMethodArray(EtsEnv *env, ets_object obj, ets_method methodId,
                                                      const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::FLOAT);
-    return GeneralMethodCall<true, ets_float, EtsFloat>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::FLOAT);
+    return GeneralMethodCall<true, ets_float, EtsFloat>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_double CallDoubleMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static ets_double CallDoubleMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::DOUBLE);
-    return GeneralMethodCall<true, ets_double, EtsDouble>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::DOUBLE);
+    return GeneralMethodCall<true, ets_double, EtsDouble>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_double CallDoubleMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_double CallDoubleMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_double res = CallDoubleMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    ets_double res = CallDoubleMethodList(env, obj, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_double CallDoubleMethodArray(EtsEnv *env, ets_object obj, ets_method method_id,
+NO_UB_SANITIZE static ets_double CallDoubleMethodArray(EtsEnv *env, ets_object obj, ets_method methodId,
                                                        const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::DOUBLE);
-    return GeneralMethodCall<true, ets_double, EtsDouble>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::DOUBLE);
+    return GeneralMethodCall<true, ets_double, EtsDouble>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static void CallVoidMethodList(EtsEnv *env, ets_object obj, ets_method method_id, va_list args)
+NO_UB_SANITIZE static void CallVoidMethodList(EtsEnv *env, ets_object obj, ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::VOID);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::VOID);
     // Use any primitive type as template parameter and jist ignore the result
-    GeneralMethodCall<true, ets_boolean, EtsBoolean>(env, obj, method_id, args);
+    GeneralMethodCall<true, ets_boolean, EtsBoolean>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static void CallVoidMethod(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+NO_UB_SANITIZE static void CallVoidMethod(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    CallVoidMethodList(env, obj, method_id, args);
+    va_start(args, methodId);
+    CallVoidMethodList(env, obj, methodId, args);
     va_end(args);
 }
 
-NO_UB_SANITIZE static void CallVoidMethodArray(EtsEnv *env, ets_object obj, ets_method method_id, const ets_value *args)
+NO_UB_SANITIZE static void CallVoidMethodArray(EtsEnv *env, ets_object obj, ets_method methodId, const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::VOID);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::VOID);
     // Use any primitive type as template parameter and jist ignore the result
-    GeneralMethodCall<true, ets_boolean, EtsBoolean>(env, obj, method_id, args);
+    GeneralMethodCall<true, ets_boolean, EtsBoolean>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_object CallNonvirtualObjectMethodList(EtsEnv *env, ets_object obj,
-                                                                [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                                [[maybe_unused]] ets_class cls, ets_method methodId,
                                                                 va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::OBJECT);
-    return GeneralMethodCall<false, ets_object, ets_object>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::OBJECT);
+    return GeneralMethodCall<false, ets_object, ets_object>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_object CallNonvirtualObjectMethod(EtsEnv *env, ets_object obj, ets_class cls,
-                                                            ets_method method_id, ...)
+                                                            ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_object res = CallNonvirtualObjectMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    ets_object res = CallNonvirtualObjectMethodList(env, obj, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_object CallNonvirtualObjectMethodArray(EtsEnv *env, ets_object obj,
-                                                                 [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                                 [[maybe_unused]] ets_class cls, ets_method methodId,
                                                                  const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::OBJECT);
-    return GeneralMethodCall<false, ets_object, ets_object>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::OBJECT);
+    return GeneralMethodCall<false, ets_object, ets_object>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_boolean CallNonvirtualBooleanMethodList(EtsEnv *env, ets_object obj,
-                                                                  [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                                  [[maybe_unused]] ets_class cls, ets_method methodId,
                                                                   va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BOOLEAN);
-    return GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BOOLEAN);
+    return GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_boolean CallNonvirtualBooleanMethod(EtsEnv *env, ets_object obj, ets_class cls,
-                                                              ets_method method_id, ...)
+                                                              ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_boolean res = CallNonvirtualBooleanMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    ets_boolean res = CallNonvirtualBooleanMethodList(env, obj, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_boolean CallNonvirtualBooleanMethodArray(EtsEnv *env, ets_object obj,
-                                                                   [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                                   [[maybe_unused]] ets_class cls, ets_method methodId,
                                                                    const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BOOLEAN);
-    return GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BOOLEAN);
+    return GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_byte CallNonvirtualByteMethodList(EtsEnv *env, ets_object obj, [[maybe_unused]] ets_class cls,
-                                                            ets_method method_id, va_list args)
+                                                            ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BYTE);
-    return GeneralMethodCall<false, ets_byte, EtsByte>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BYTE);
+    return GeneralMethodCall<false, ets_byte, EtsByte>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_byte CallNonvirtualByteMethod(EtsEnv *env, ets_object obj, ets_class cls,
-                                                        ets_method method_id, ...)
+NO_UB_SANITIZE static ets_byte CallNonvirtualByteMethod(EtsEnv *env, ets_object obj, ets_class cls, ets_method methodId,
+                                                        ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_byte res = CallNonvirtualByteMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    ets_byte res = CallNonvirtualByteMethodList(env, obj, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_byte CallNonvirtualByteMethodArray(EtsEnv *env, ets_object obj,
-                                                             [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                             [[maybe_unused]] ets_class cls, ets_method methodId,
                                                              const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BYTE);
-    return GeneralMethodCall<false, ets_byte, EtsByte>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BYTE);
+    return GeneralMethodCall<false, ets_byte, EtsByte>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_char CallNonvirtualCharMethodList(EtsEnv *env, ets_object obj, [[maybe_unused]] ets_class cls,
-                                                            ets_method method_id, va_list args)
+                                                            ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::CHAR);
-    return GeneralMethodCall<false, ets_char, EtsChar>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::CHAR);
+    return GeneralMethodCall<false, ets_char, EtsChar>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_char CallNonvirtualCharMethod(EtsEnv *env, ets_object obj, ets_class cls,
-                                                        ets_method method_id, ...)
+NO_UB_SANITIZE static ets_char CallNonvirtualCharMethod(EtsEnv *env, ets_object obj, ets_class cls, ets_method methodId,
+                                                        ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_char res = CallNonvirtualCharMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    ets_char res = CallNonvirtualCharMethodList(env, obj, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_char CallNonvirtualCharMethodArray(EtsEnv *env, ets_object obj,
-                                                             [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                             [[maybe_unused]] ets_class cls, ets_method methodId,
                                                              const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::CHAR);
-    return GeneralMethodCall<false, ets_char, EtsChar>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::CHAR);
+    return GeneralMethodCall<false, ets_char, EtsChar>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_short CallNonvirtualShortMethodList(EtsEnv *env, ets_object obj,
-                                                              [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                              [[maybe_unused]] ets_class cls, ets_method methodId,
                                                               va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::SHORT);
-    return GeneralMethodCall<false, ets_short, EtsShort>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::SHORT);
+    return GeneralMethodCall<false, ets_short, EtsShort>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_short CallNonvirtualShortMethod(EtsEnv *env, ets_object obj, ets_class cls,
-                                                          ets_method method_id, ...)
+                                                          ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_short res = CallNonvirtualShortMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    ets_short res = CallNonvirtualShortMethodList(env, obj, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_short CallNonvirtualShortMethodArray(EtsEnv *env, ets_object obj,
-                                                               [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                               [[maybe_unused]] ets_class cls, ets_method methodId,
                                                                const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::SHORT);
-    return GeneralMethodCall<false, ets_short, EtsShort>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::SHORT);
+    return GeneralMethodCall<false, ets_short, EtsShort>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_int CallNonvirtualIntMethodList(EtsEnv *env, ets_object obj, [[maybe_unused]] ets_class cls,
-                                                          ets_method method_id, va_list args)
+                                                          ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::INT);
-    return GeneralMethodCall<false, ets_int, EtsInt>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::INT);
+    return GeneralMethodCall<false, ets_int, EtsInt>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_int CallNonvirtualIntMethod(EtsEnv *env, ets_object obj, ets_class cls, ets_method method_id,
+NO_UB_SANITIZE static ets_int CallNonvirtualIntMethod(EtsEnv *env, ets_object obj, ets_class cls, ets_method methodId,
                                                       ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_int res = CallNonvirtualIntMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    ets_int res = CallNonvirtualIntMethodList(env, obj, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_int CallNonvirtualIntMethodArray(EtsEnv *env, ets_object obj, [[maybe_unused]] ets_class cls,
-                                                           ets_method method_id, const ets_value *args)
+                                                           ets_method methodId, const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::INT);
-    return GeneralMethodCall<false, ets_int, EtsInt>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::INT);
+    return GeneralMethodCall<false, ets_int, EtsInt>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_long CallNonvirtualLongMethodList(EtsEnv *env, ets_object obj, [[maybe_unused]] ets_class cls,
-                                                            ets_method method_id, va_list args)
+                                                            ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::LONG);
-    return GeneralMethodCall<false, ets_long, EtsLong>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::LONG);
+    return GeneralMethodCall<false, ets_long, EtsLong>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_long CallNonvirtualLongMethod(EtsEnv *env, ets_object obj, ets_class cls,
-                                                        ets_method method_id, ...)
+NO_UB_SANITIZE static ets_long CallNonvirtualLongMethod(EtsEnv *env, ets_object obj, ets_class cls, ets_method methodId,
+                                                        ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_long res = CallNonvirtualLongMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    ets_long res = CallNonvirtualLongMethodList(env, obj, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_long CallNonvirtualLongMethodArray(EtsEnv *env, ets_object obj,
-                                                             [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                             [[maybe_unused]] ets_class cls, ets_method methodId,
                                                              const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::LONG);
-    return GeneralMethodCall<false, ets_long, EtsLong>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::LONG);
+    return GeneralMethodCall<false, ets_long, EtsLong>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_float CallNonvirtualFloatMethodList(EtsEnv *env, ets_object obj,
-                                                              [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                              [[maybe_unused]] ets_class cls, ets_method methodId,
                                                               va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::FLOAT);
-    return GeneralMethodCall<false, ets_float, EtsFloat>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::FLOAT);
+    return GeneralMethodCall<false, ets_float, EtsFloat>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_float CallNonvirtualFloatMethod(EtsEnv *env, ets_object obj, ets_class cls,
-                                                          ets_method method_id, ...)
+                                                          ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_float res = CallNonvirtualFloatMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    ets_float res = CallNonvirtualFloatMethodList(env, obj, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_float CallNonvirtualFloatMethodArray(EtsEnv *env, ets_object obj,
-                                                               [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                               [[maybe_unused]] ets_class cls, ets_method methodId,
                                                                const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::FLOAT);
-    return GeneralMethodCall<false, ets_float, EtsFloat>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::FLOAT);
+    return GeneralMethodCall<false, ets_float, EtsFloat>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_double CallNonvirtualDoubleMethodList(EtsEnv *env, ets_object obj,
-                                                                [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                                [[maybe_unused]] ets_class cls, ets_method methodId,
                                                                 va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::DOUBLE);
-    return GeneralMethodCall<false, ets_double, EtsDouble>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::DOUBLE);
+    return GeneralMethodCall<false, ets_double, EtsDouble>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_double CallNonvirtualDoubleMethod(EtsEnv *env, ets_object obj, ets_class cls,
-                                                            ets_method method_id, ...)
+                                                            ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_double res = CallNonvirtualDoubleMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    ets_double res = CallNonvirtualDoubleMethodList(env, obj, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_double CallNonvirtualDoubleMethodArray(EtsEnv *env, ets_object obj,
-                                                                 [[maybe_unused]] ets_class cls, ets_method method_id,
+                                                                 [[maybe_unused]] ets_class cls, ets_method methodId,
                                                                  const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::DOUBLE);
-    return GeneralMethodCall<false, ets_double, EtsDouble>(env, obj, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::DOUBLE);
+    return GeneralMethodCall<false, ets_double, EtsDouble>(env, obj, methodId, args);
 }
 
 NO_UB_SANITIZE static void CallNonvirtualVoidMethodList(EtsEnv *env, ets_object obj, [[maybe_unused]] ets_class cls,
-                                                        ets_method method_id, va_list args)
+                                                        ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::VOID);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::VOID);
     // Use any primitive type as template parameter and jist ignore the result
-    GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, obj, method_id, args);
+    GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, obj, methodId, args);
 }
 
-NO_UB_SANITIZE static void CallNonvirtualVoidMethod(EtsEnv *env, ets_object obj, ets_class cls, ets_method method_id,
+NO_UB_SANITIZE static void CallNonvirtualVoidMethod(EtsEnv *env, ets_object obj, ets_class cls, ets_method methodId,
                                                     ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    CallNonvirtualVoidMethodList(env, obj, cls, method_id, args);
+    va_start(args, methodId);
+    CallNonvirtualVoidMethodList(env, obj, cls, methodId, args);
     va_end(args);
 }
 
 NO_UB_SANITIZE static void CallNonvirtualVoidMethodArray(EtsEnv *env, ets_object obj, [[maybe_unused]] ets_class cls,
-                                                         ets_method method_id, const ets_value *args)
+                                                         ets_method methodId, const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::VOID);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::VOID);
     // Use any primitive type as template parameter and jist ignore the result
-    GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, obj, method_id, args);
+    GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, obj, methodId, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1333,146 +1333,146 @@ NO_UB_SANITIZE static ets_field Getp_field(EtsEnv *env, ets_class cls, const cha
     ETS_NAPI_ABORT_IF_NULL(sig);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsClass *internal_class = GetInternalClass(env, cls, &s);
-    if (internal_class == nullptr) {
+    EtsClass *internalClass = GetInternalClass(env, cls, &s);
+    if (internalClass == nullptr) {
         return nullptr;
     }
 
-    EtsField *internal_field_id = internal_class->GetFieldIDByName(name, sig);
-    if (internal_field_id == nullptr) {
+    EtsField *internalFieldId = internalClass->GetFieldIDByName(name, sig);
+    if (internalFieldId == nullptr) {
         PandaStringStream ss;
-        ss << "Field " << internal_class->GetRuntimeClass()->GetName() << "::" << name << " sig = " << sig
+        ss << "Field " << internalClass->GetRuntimeClass()->GetName() << "::" << name << " sig = " << sig
            << " is not found";
         s.ThrowNewException(EtsNapiException::NO_SUCH_FIELD, ss.str().c_str());
         return nullptr;
     }
 
-    return ToEtsNapiType(internal_field_id);
+    return ToEtsNapiType(internalFieldId);
 }
 
-NO_UB_SANITIZE static ets_object GetObjectField(EtsEnv *env, ets_object obj, ets_field p_field)
+NO_UB_SANITIZE static ets_object GetObjectField(EtsEnv *env, ets_object obj, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(p_field);
+    ETS_NAPI_ABORT_IF_NULL(pField);
 
-    EtsField *internal_field_id = ToInternalType(p_field);
+    EtsField *internalFieldId = ToInternalType(pField);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *internal_object = s.ToInternalType(obj);
-    EtsObject *ret_obj = internal_object->GetFieldObject(internal_field_id);
-    if (ret_obj == nullptr) {
+    EtsObject *internalObject = s.ToInternalType(obj);
+    EtsObject *retObj = internalObject->GetFieldObject(internalFieldId);
+    if (retObj == nullptr) {
         return nullptr;
     }
-    return reinterpret_cast<ets_object>(s.AddLocalRef(ret_obj));
+    return reinterpret_cast<ets_object>(s.AddLocalRef(retObj));
 }
 
-NO_UB_SANITIZE static ets_boolean GetBooleanField(EtsEnv *env, ets_object obj, ets_field p_field)
+NO_UB_SANITIZE static ets_boolean GetBooleanField(EtsEnv *env, ets_object obj, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeField<ets_boolean, EtsBoolean>(env, obj, p_field);
+    return GetPrimitiveTypeField<ets_boolean, EtsBoolean>(env, obj, pField);
 }
 
-NO_UB_SANITIZE static ets_byte GetByteField(EtsEnv *env, ets_object obj, ets_field p_field)
+NO_UB_SANITIZE static ets_byte GetByteField(EtsEnv *env, ets_object obj, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeField<ets_byte, EtsByte>(env, obj, p_field);
+    return GetPrimitiveTypeField<ets_byte, EtsByte>(env, obj, pField);
 }
 
-NO_UB_SANITIZE static ets_char GetCharField(EtsEnv *env, ets_object obj, ets_field p_field)
+NO_UB_SANITIZE static ets_char GetCharField(EtsEnv *env, ets_object obj, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeField<ets_char, EtsChar>(env, obj, p_field);
+    return GetPrimitiveTypeField<ets_char, EtsChar>(env, obj, pField);
 }
 
-NO_UB_SANITIZE static ets_short GetShortField(EtsEnv *env, ets_object obj, ets_field p_field)
+NO_UB_SANITIZE static ets_short GetShortField(EtsEnv *env, ets_object obj, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeField<ets_short, EtsShort>(env, obj, p_field);
+    return GetPrimitiveTypeField<ets_short, EtsShort>(env, obj, pField);
 }
 
-NO_UB_SANITIZE static ets_int GetIntField(EtsEnv *env, ets_object obj, ets_field p_field)
+NO_UB_SANITIZE static ets_int GetIntField(EtsEnv *env, ets_object obj, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeField<ets_int, EtsInt>(env, obj, p_field);
+    return GetPrimitiveTypeField<ets_int, EtsInt>(env, obj, pField);
 }
 
-NO_UB_SANITIZE static ets_long GetLongField(EtsEnv *env, ets_object obj, ets_field p_field)
+NO_UB_SANITIZE static ets_long GetLongField(EtsEnv *env, ets_object obj, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeField<ets_long, EtsLong>(env, obj, p_field);
+    return GetPrimitiveTypeField<ets_long, EtsLong>(env, obj, pField);
 }
 
-NO_UB_SANITIZE static ets_float GetFloatField(EtsEnv *env, ets_object obj, ets_field p_field)
+NO_UB_SANITIZE static ets_float GetFloatField(EtsEnv *env, ets_object obj, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeField<ets_float, EtsFloat>(env, obj, p_field);
+    return GetPrimitiveTypeField<ets_float, EtsFloat>(env, obj, pField);
 }
 
-NO_UB_SANITIZE static ets_double GetDoubleField(EtsEnv *env, ets_object obj, ets_field p_field)
+NO_UB_SANITIZE static ets_double GetDoubleField(EtsEnv *env, ets_object obj, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeField<ets_double, EtsDouble>(env, obj, p_field);
+    return GetPrimitiveTypeField<ets_double, EtsDouble>(env, obj, pField);
 }
 
-NO_UB_SANITIZE static void SetObjectField(EtsEnv *env, ets_object obj, ets_field p_field, ets_object value)
+NO_UB_SANITIZE static void SetObjectField(EtsEnv *env, ets_object obj, ets_field pField, ets_object value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
-    ETS_NAPI_ABORT_IF_NULL(p_field);
+    ETS_NAPI_ABORT_IF_NULL(pField);
 
-    EtsField *internal_field_id = ToInternalType(p_field);
+    EtsField *internalFieldId = ToInternalType(pField);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *internal_value = s.ToInternalType(value);
+    EtsObject *internalValue = s.ToInternalType(value);
 
-    s.ToInternalType(obj)->SetFieldObject(internal_field_id, internal_value);
+    s.ToInternalType(obj)->SetFieldObject(internalFieldId, internalValue);
 }
 
-NO_UB_SANITIZE static void SetBooleanField(EtsEnv *env, ets_object obj, ets_field p_field, ets_boolean value)
+NO_UB_SANITIZE static void SetBooleanField(EtsEnv *env, ets_object obj, ets_field pField, ets_boolean value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeField(env, obj, p_field, value);
+    SetPrimitiveTypeField(env, obj, pField, value);
 }
 
-NO_UB_SANITIZE static void SetByteField(EtsEnv *env, ets_object obj, ets_field p_field, ets_byte value)
+NO_UB_SANITIZE static void SetByteField(EtsEnv *env, ets_object obj, ets_field pField, ets_byte value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeField(env, obj, p_field, value);
+    SetPrimitiveTypeField(env, obj, pField, value);
 }
 
-NO_UB_SANITIZE static void SetCharField(EtsEnv *env, ets_object obj, ets_field p_field, ets_char value)
+NO_UB_SANITIZE static void SetCharField(EtsEnv *env, ets_object obj, ets_field pField, ets_char value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeField(env, obj, p_field, value);
+    SetPrimitiveTypeField(env, obj, pField, value);
 }
 
-NO_UB_SANITIZE static void SetShortField(EtsEnv *env, ets_object obj, ets_field p_field, ets_short value)
+NO_UB_SANITIZE static void SetShortField(EtsEnv *env, ets_object obj, ets_field pField, ets_short value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeField(env, obj, p_field, value);
+    SetPrimitiveTypeField(env, obj, pField, value);
 }
 
-NO_UB_SANITIZE static void SetIntField(EtsEnv *env, ets_object obj, ets_field p_field, ets_int value)
+NO_UB_SANITIZE static void SetIntField(EtsEnv *env, ets_object obj, ets_field pField, ets_int value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeField(env, obj, p_field, value);
+    SetPrimitiveTypeField(env, obj, pField, value);
 }
 
-NO_UB_SANITIZE static void SetLongField(EtsEnv *env, ets_object obj, ets_field p_field, ets_long value)
+NO_UB_SANITIZE static void SetLongField(EtsEnv *env, ets_object obj, ets_field pField, ets_long value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeField(env, obj, p_field, value);
+    SetPrimitiveTypeField(env, obj, pField, value);
 }
 
-NO_UB_SANITIZE static void SetFloatField(EtsEnv *env, ets_object obj, ets_field p_field, ets_float value)
+NO_UB_SANITIZE static void SetFloatField(EtsEnv *env, ets_object obj, ets_field pField, ets_float value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeField(env, obj, p_field, value);
+    SetPrimitiveTypeField(env, obj, pField, value);
 }
 
-NO_UB_SANITIZE static void SetDoubleField(EtsEnv *env, ets_object obj, ets_field p_field, ets_double value)
+NO_UB_SANITIZE static void SetDoubleField(EtsEnv *env, ets_object obj, ets_field pField, ets_double value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeField(env, obj, p_field, value);
+    SetPrimitiveTypeField(env, obj, pField, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1501,284 +1501,284 @@ NO_UB_SANITIZE static ets_method GetStaticp_method(EtsEnv *env, ets_class cls, c
 }
 
 NO_UB_SANITIZE static ets_object CallStaticObjectMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                            ets_method method_id, va_list args)
+                                                            ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::OBJECT);
-    return GeneralMethodCall<false, ets_object, ets_object>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::OBJECT);
+    return GeneralMethodCall<false, ets_object, ets_object>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_object CallStaticObjectMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_object CallStaticObjectMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_object res = CallStaticObjectMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    ets_object res = CallStaticObjectMethodList(env, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_object CallStaticObjectMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                             ets_method method_id, ets_value *args)
+                                                             ets_method methodId, ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::OBJECT);
-    return GeneralMethodCall<false, ets_object, ets_object>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::OBJECT);
+    return GeneralMethodCall<false, ets_object, ets_object>(env, nullptr, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_boolean CallStaticBooleanMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                              ets_method method_id, va_list args)
+                                                              ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BOOLEAN);
-    return GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BOOLEAN);
+    return GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_boolean CallStaticBooleanMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_boolean CallStaticBooleanMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_boolean res = CallStaticBooleanMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    ets_boolean res = CallStaticBooleanMethodList(env, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_boolean CallStaticBooleanMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                               ets_method method_id, ets_value *args)
+                                                               ets_method methodId, ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BOOLEAN);
-    return GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BOOLEAN);
+    return GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, nullptr, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_byte CallStaticByteMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                        ets_method method_id, va_list args)
+                                                        ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BYTE);
-    return GeneralMethodCall<false, ets_byte, EtsByte>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BYTE);
+    return GeneralMethodCall<false, ets_byte, EtsByte>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_byte CallStaticByteMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_byte CallStaticByteMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_byte res = CallStaticByteMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    ets_byte res = CallStaticByteMethodList(env, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_byte CallStaticByteMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                         ets_method method_id, ets_value *args)
+                                                         ets_method methodId, ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::BYTE);
-    return GeneralMethodCall<false, ets_byte, EtsByte>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::BYTE);
+    return GeneralMethodCall<false, ets_byte, EtsByte>(env, nullptr, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_char CallStaticCharMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                        ets_method method_id, va_list args)
+                                                        ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::CHAR);
-    return GeneralMethodCall<false, ets_char, EtsChar>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::CHAR);
+    return GeneralMethodCall<false, ets_char, EtsChar>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_char CallStaticCharMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_char CallStaticCharMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_char res = CallStaticCharMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    ets_char res = CallStaticCharMethodList(env, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_char CallStaticCharMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                         ets_method method_id, ets_value *args)
+                                                         ets_method methodId, ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::CHAR);
-    return GeneralMethodCall<false, ets_char, EtsChar>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::CHAR);
+    return GeneralMethodCall<false, ets_char, EtsChar>(env, nullptr, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_short CallStaticShortMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                          ets_method method_id, va_list args)
+                                                          ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::SHORT);
-    return GeneralMethodCall<false, ets_short, EtsShort>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::SHORT);
+    return GeneralMethodCall<false, ets_short, EtsShort>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_short CallStaticShortMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_short CallStaticShortMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_short res = CallStaticShortMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    ets_short res = CallStaticShortMethodList(env, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_short CallStaticShortMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                           ets_method method_id, ets_value *args)
+                                                           ets_method methodId, ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::SHORT);
-    return GeneralMethodCall<false, ets_short, EtsShort>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::SHORT);
+    return GeneralMethodCall<false, ets_short, EtsShort>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_int CallStaticIntMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls, ets_method method_id,
+NO_UB_SANITIZE static ets_int CallStaticIntMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls, ets_method methodId,
                                                       va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::INT);
-    return GeneralMethodCall<false, ets_int, EtsInt>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::INT);
+    return GeneralMethodCall<false, ets_int, EtsInt>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_int CallStaticIntMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_int CallStaticIntMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_int res = CallStaticIntMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    ets_int res = CallStaticIntMethodList(env, cls, methodId, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_int CallStaticIntMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                       ets_method method_id, ets_value *args)
+NO_UB_SANITIZE static ets_int CallStaticIntMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls, ets_method methodId,
+                                                       ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::INT);
-    return GeneralMethodCall<false, ets_int, EtsInt>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::INT);
+    return GeneralMethodCall<false, ets_int, EtsInt>(env, nullptr, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_long CallStaticLongMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                        ets_method method_id, va_list args)
+                                                        ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::LONG);
-    return GeneralMethodCall<false, ets_long, EtsLong>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::LONG);
+    return GeneralMethodCall<false, ets_long, EtsLong>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_long CallStaticLongMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_long CallStaticLongMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_long res = CallStaticLongMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    ets_long res = CallStaticLongMethodList(env, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_long CallStaticLongMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                         ets_method method_id, ets_value *args)
+                                                         ets_method methodId, ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::LONG);
-    return GeneralMethodCall<false, ets_long, EtsLong>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::LONG);
+    return GeneralMethodCall<false, ets_long, EtsLong>(env, nullptr, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_float CallStaticFloatMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                          ets_method method_id, va_list args)
+                                                          ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::FLOAT);
-    return GeneralMethodCall<false, ets_float, EtsFloat>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::FLOAT);
+    return GeneralMethodCall<false, ets_float, EtsFloat>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_float CallStaticFloatMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_float CallStaticFloatMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_float res = CallStaticFloatMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    ets_float res = CallStaticFloatMethodList(env, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_float CallStaticFloatMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                           ets_method method_id, ets_value *args)
+                                                           ets_method methodId, ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::FLOAT);
-    return GeneralMethodCall<false, ets_float, EtsFloat>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::FLOAT);
+    return GeneralMethodCall<false, ets_float, EtsFloat>(env, nullptr, methodId, args);
 }
 
 NO_UB_SANITIZE static ets_double CallStaticDoubleMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                            ets_method method_id, va_list args)
+                                                            ets_method methodId, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::DOUBLE);
-    return GeneralMethodCall<false, ets_double, EtsDouble>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::DOUBLE);
+    return GeneralMethodCall<false, ets_double, EtsDouble>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static ets_double CallStaticDoubleMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static ets_double CallStaticDoubleMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    ets_double res = CallStaticDoubleMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    ets_double res = CallStaticDoubleMethodList(env, cls, methodId, args);
     va_end(args);
     return res;
 }
 
 NO_UB_SANITIZE static ets_double CallStaticDoubleMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                             ets_method method_id, ets_value *args)
+                                                             ets_method methodId, ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::DOUBLE);
-    return GeneralMethodCall<false, ets_double, EtsDouble>(env, nullptr, method_id, args);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::DOUBLE);
+    return GeneralMethodCall<false, ets_double, EtsDouble>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static void CallStaticVoidMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls, ets_method method_id,
+NO_UB_SANITIZE static void CallStaticVoidMethodList(EtsEnv *env, [[maybe_unused]] ets_class cls, ets_method methodId,
                                                     va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::VOID);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::VOID);
     // Use any primitive type as template parameter and just ignore the result
-    GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, nullptr, method_id, args);
+    GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, nullptr, methodId, args);
 }
 
-NO_UB_SANITIZE static void CallStaticVoidMethod(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+NO_UB_SANITIZE static void CallStaticVoidMethod(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     va_list args;
-    va_start(args, method_id);
-    CallStaticVoidMethodList(env, cls, method_id, args);
+    va_start(args, methodId);
+    CallStaticVoidMethodList(env, cls, methodId, args);
     va_end(args);
 }
 
-NO_UB_SANITIZE static void CallStaticVoidMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls, ets_method method_id,
+NO_UB_SANITIZE static void CallStaticVoidMethodArray(EtsEnv *env, [[maybe_unused]] ets_class cls, ets_method methodId,
                                                      ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(method_id);
-    CheckMethodReturnType(method_id, EtsType::VOID);
+    ETS_NAPI_ABORT_IF_NULL(methodId);
+    CheckMethodReturnType(methodId, EtsType::VOID);
     // Use any primitive type as template parameter and just ignore the result
-    GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, nullptr, method_id, args);
+    GeneralMethodCall<false, ets_boolean, EtsBoolean>(env, nullptr, methodId, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1790,174 +1790,172 @@ NO_UB_SANITIZE static ets_field GetStaticp_field(EtsEnv *env, ets_class cls, con
     ETS_NAPI_ABORT_IF_NULL(sig);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsClass *internal_class = GetInternalClass(env, cls, &s);
-    if (internal_class == nullptr) {
+    EtsClass *internalClass = GetInternalClass(env, cls, &s);
+    if (internalClass == nullptr) {
         return nullptr;
     }
 
-    EtsField *internal_field_id = internal_class->GetStaticFieldIDByName(name, sig);
-    if (internal_field_id == nullptr) {
+    EtsField *internalFieldId = internalClass->GetStaticFieldIDByName(name, sig);
+    if (internalFieldId == nullptr) {
         PandaStringStream ss;
-        ss << "Static field " << internal_class->GetRuntimeClass()->GetName() << "::" << name << " sig = " << sig
+        ss << "Static field " << internalClass->GetRuntimeClass()->GetName() << "::" << name << " sig = " << sig
            << " is not found";
         s.ThrowNewException(EtsNapiException::NO_SUCH_FIELD, ss.str().c_str());
         return nullptr;
     }
 
-    return ToEtsNapiType(internal_field_id);
+    return ToEtsNapiType(internalFieldId);
 }
 
-NO_UB_SANITIZE static ets_object GetStaticObjectField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls,
-                                                      ets_field p_field)
+NO_UB_SANITIZE static ets_object GetStaticObjectField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls,
+                                                      ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(p_field);
+    ETS_NAPI_ABORT_IF_NULL(pField);
 
-    EtsField *internal_field_id = ToInternalType(p_field);
+    EtsField *internalFieldId = ToInternalType(pField);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsClass *internal_class = internal_field_id->GetDeclaringClass();
-    EtsObject *ret_obj = internal_class->GetStaticFieldObject(internal_field_id);
-    if (ret_obj == nullptr) {
+    EtsClass *internalClass = internalFieldId->GetDeclaringClass();
+    EtsObject *retObj = internalClass->GetStaticFieldObject(internalFieldId);
+    if (retObj == nullptr) {
         return nullptr;
     }
-    return reinterpret_cast<ets_object>(s.AddLocalRef(ret_obj));
+    return reinterpret_cast<ets_object>(s.AddLocalRef(retObj));
 }
 
-NO_UB_SANITIZE static ets_boolean GetStaticBooleanField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls,
-                                                        ets_field p_field)
+NO_UB_SANITIZE static ets_boolean GetStaticBooleanField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls,
+                                                        ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeStaticField<ets_boolean, EtsBoolean>(env, p_field);
+    return GetPrimitiveTypeStaticField<ets_boolean, EtsBoolean>(env, pField);
 }
 
-NO_UB_SANITIZE static ets_byte GetStaticByteField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field)
+NO_UB_SANITIZE static ets_byte GetStaticByteField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeStaticField<ets_byte, EtsByte>(env, p_field);
+    return GetPrimitiveTypeStaticField<ets_byte, EtsByte>(env, pField);
 }
 
-NO_UB_SANITIZE static ets_char GetStaticCharField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field)
+NO_UB_SANITIZE static ets_char GetStaticCharField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeStaticField<ets_char, EtsChar>(env, p_field);
+    return GetPrimitiveTypeStaticField<ets_char, EtsChar>(env, pField);
 }
 
-NO_UB_SANITIZE static ets_short GetStaticShortField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls,
-                                                    ets_field p_field)
+NO_UB_SANITIZE static ets_short GetStaticShortField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeStaticField<ets_short, EtsShort>(env, p_field);
+    return GetPrimitiveTypeStaticField<ets_short, EtsShort>(env, pField);
 }
 
-NO_UB_SANITIZE static ets_int GetStaticIntField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field)
+NO_UB_SANITIZE static ets_int GetStaticIntField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeStaticField<ets_int, EtsInt>(env, p_field);
+    return GetPrimitiveTypeStaticField<ets_int, EtsInt>(env, pField);
 }
 
-NO_UB_SANITIZE static ets_long GetStaticLongField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field)
+NO_UB_SANITIZE static ets_long GetStaticLongField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeStaticField<ets_long, EtsLong>(env, p_field);
+    return GetPrimitiveTypeStaticField<ets_long, EtsLong>(env, pField);
 }
 
-NO_UB_SANITIZE static ets_float GetStaticFloatField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls,
-                                                    ets_field p_field)
+NO_UB_SANITIZE static ets_float GetStaticFloatField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeStaticField<ets_float, EtsFloat>(env, p_field);
+    return GetPrimitiveTypeStaticField<ets_float, EtsFloat>(env, pField);
 }
 
-NO_UB_SANITIZE static ets_double GetStaticDoubleField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls,
-                                                      ets_field p_field)
+NO_UB_SANITIZE static ets_double GetStaticDoubleField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls,
+                                                      ets_field pField)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    return GetPrimitiveTypeStaticField<ets_double, EtsDouble>(env, p_field);
+    return GetPrimitiveTypeStaticField<ets_double, EtsDouble>(env, pField);
 }
 
-NO_UB_SANITIZE static void SetStaticObjectField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field,
+NO_UB_SANITIZE static void SetStaticObjectField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField,
                                                 ets_object value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(p_field);
+    ETS_NAPI_ABORT_IF_NULL(pField);
 
-    EtsField *internal_field_id = ToInternalType(p_field);
+    EtsField *internalFieldId = ToInternalType(pField);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *internal_value = s.ToInternalType(value);
+    EtsObject *internalValue = s.ToInternalType(value);
 
-    internal_field_id->GetDeclaringClass()->SetStaticFieldObject(internal_field_id, internal_value);
+    internalFieldId->GetDeclaringClass()->SetStaticFieldObject(internalFieldId, internalValue);
 }
 
-NO_UB_SANITIZE static void SetStaticBooleanField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field,
+NO_UB_SANITIZE static void SetStaticBooleanField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField,
                                                  ets_boolean value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeStaticField(env, p_field, value);
+    SetPrimitiveTypeStaticField(env, pField, value);
 }
 
-NO_UB_SANITIZE static void SetStaticByteField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field,
+NO_UB_SANITIZE static void SetStaticByteField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField,
                                               ets_byte value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeStaticField(env, p_field, value);
+    SetPrimitiveTypeStaticField(env, pField, value);
 }
 
-NO_UB_SANITIZE static void SetStaticCharField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field,
+NO_UB_SANITIZE static void SetStaticCharField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField,
                                               ets_char value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeStaticField(env, p_field, value);
+    SetPrimitiveTypeStaticField(env, pField, value);
 }
 
-NO_UB_SANITIZE static void SetStaticShortField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field,
+NO_UB_SANITIZE static void SetStaticShortField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField,
                                                ets_short value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeStaticField(env, p_field, value);
+    SetPrimitiveTypeStaticField(env, pField, value);
 }
 
-NO_UB_SANITIZE static void SetStaticIntField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field,
+NO_UB_SANITIZE static void SetStaticIntField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField,
                                              ets_int value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeStaticField(env, p_field, value);
+    SetPrimitiveTypeStaticField(env, pField, value);
 }
 
-NO_UB_SANITIZE static void SetStaticLongField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field,
+NO_UB_SANITIZE static void SetStaticLongField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField,
                                               ets_long value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeStaticField(env, p_field, value);
+    SetPrimitiveTypeStaticField(env, pField, value);
 }
 
-NO_UB_SANITIZE static void SetStaticFloatField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field,
+NO_UB_SANITIZE static void SetStaticFloatField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField,
                                                ets_float value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeStaticField(env, p_field, value);
+    SetPrimitiveTypeStaticField(env, pField, value);
 }
 
-NO_UB_SANITIZE static void SetStaticDoubleField(EtsEnv *env, [[maybe_unused]] ets_class unused_cls, ets_field p_field,
+NO_UB_SANITIZE static void SetStaticDoubleField(EtsEnv *env, [[maybe_unused]] ets_class unusedCls, ets_field pField,
                                                 ets_double value)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    SetPrimitiveTypeStaticField(env, p_field, value);
+    SetPrimitiveTypeStaticField(env, pField, value);
 }
 
-NO_UB_SANITIZE static ets_string NewString(EtsEnv *env, const ets_char *unicode_chars, ets_size len)
+NO_UB_SANITIZE static ets_string NewString(EtsEnv *env, const ets_char *unicodeChars, ets_size len)
 {
     ETS_NAPI_DEBUG_TRACE(env);
-    if (unicode_chars == nullptr) {
+    if (unicodeChars == nullptr) {
         ETS_NAPI_ABORT_IF_NE(len, 0);
     }
     ETS_NAPI_ABORT_IF_LZ(len);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    auto internal_string = EtsString::CreateFromUtf16(unicode_chars, len);
-    if (internal_string == nullptr) {
+    auto internalString = EtsString::CreateFromUtf16(unicodeChars, len);
+    if (internalString == nullptr) {
         return nullptr;
     }
-    return reinterpret_cast<ets_string>(s.AddLocalRef(reinterpret_cast<EtsObject *>(internal_string)));
+    return reinterpret_cast<ets_string>(s.AddLocalRef(reinterpret_cast<EtsObject *>(internalString)));
 }
 
 NO_UB_SANITIZE static ets_size GetStringLength(EtsEnv *env, ets_string string)
@@ -1965,26 +1963,26 @@ NO_UB_SANITIZE static ets_size GetStringLength(EtsEnv *env, ets_string string)
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(string);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    auto internal_string = s.ToInternalType(string);
-    return static_cast<ets_size>(internal_string->GetLength());
+    auto internalString = s.ToInternalType(string);
+    return static_cast<ets_size>(internalString->GetLength());
 }
 
-NO_UB_SANITIZE static const ets_char *GetStringChars(EtsEnv *env, ets_string string, ets_boolean *is_copy)
+NO_UB_SANITIZE static const ets_char *GetStringChars(EtsEnv *env, ets_string string, ets_boolean *isCopy)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(string);
-    if (is_copy != nullptr) {
-        *is_copy = ETS_TRUE;
+    if (isCopy != nullptr) {
+        *isCopy = ETS_TRUE;
     }
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    auto internal_string = s.ToInternalType(string);
-    size_t len = internal_string->GetUtf16Length();
+    auto internalString = s.ToInternalType(string);
+    size_t len = internalString->GetUtf16Length();
     void *buf = EtsAlloc(len * sizeof(uint16_t));
     if (buf == nullptr) {
         LOG(ERROR, ETS_NAPI) << __func__ << ": cannot copy string";
         return nullptr;
     }
-    internal_string->CopyDataUtf16(buf, len);
+    internalString->CopyDataUtf16(buf, len);
     return static_cast<ets_char *>(buf);
 }
 
@@ -2006,12 +2004,12 @@ NO_UB_SANITIZE static ets_string NewStringUTF(EtsEnv *env, const char *bytes)
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     // NOTE(m.morozov): check after mutf8 vs utf8 decision
-    auto internal_string = EtsString::CreateFromMUtf8(bytes);
-    if (internal_string == nullptr) {
+    auto internalString = EtsString::CreateFromMUtf8(bytes);
+    if (internalString == nullptr) {
         s.ThrowNewException(EtsNapiException::OUT_OF_MEMORY, "Could not allocate memory for string");
         return nullptr;
     }
-    return reinterpret_cast<ets_string>(s.AddLocalRef(reinterpret_cast<EtsObject *>(internal_string)));
+    return reinterpret_cast<ets_string>(s.AddLocalRef(reinterpret_cast<EtsObject *>(internalString)));
 }
 
 NO_UB_SANITIZE static ets_size GetStringUTFLength(EtsEnv *env, ets_string string)
@@ -2019,30 +2017,30 @@ NO_UB_SANITIZE static ets_size GetStringUTFLength(EtsEnv *env, ets_string string
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(string);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    auto internal_string = s.ToInternalType(string);
+    auto internalString = s.ToInternalType(string);
     // NOTE(m.morozov): ensure that place for \0 is included
     // NOTE(m.morozov): check after mutf8 vs utf8 decision
-    return internal_string->GetMUtf8Length() - 1;
+    return internalString->GetMUtf8Length() - 1;
 }
 
-NO_UB_SANITIZE static const char *GetStringUTFChars(EtsEnv *env, ets_string string, ets_boolean *is_copy)
+NO_UB_SANITIZE static const char *GetStringUTFChars(EtsEnv *env, ets_string string, ets_boolean *isCopy)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(string);
-    if (is_copy != nullptr) {
-        *is_copy = ETS_TRUE;
+    if (isCopy != nullptr) {
+        *isCopy = ETS_TRUE;
     }
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    auto internal_string = s.ToInternalType(string);
+    auto internalString = s.ToInternalType(string);
     // NOTE(m.morozov): check after mutf8 vs utf8 decision
-    size_t len = internal_string->GetMUtf8Length();
+    size_t len = internalString->GetMUtf8Length();
     void *buf = EtsAlloc(len);
     if (buf == nullptr) {
         LOG(ERROR, ETS_NAPI) << __func__ << ": cannot copy string";
         return nullptr;
     }
     // NOTE(m.morozov): check after mutf8 vs utf8 decision
-    internal_string->CopyDataMUtf8(buf, len, true);
+    internalString->CopyDataMUtf8(buf, len, true);
     return static_cast<char *>(buf);
 }
 
@@ -2059,31 +2057,31 @@ NO_UB_SANITIZE static ets_size GetArrayLength(EtsEnv *env, ets_array array)
     ETS_NAPI_ABORT_IF_NULL(array);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsArray *internal_array = s.ToInternalType(array);
-    return static_cast<ets_size>(internal_array->GetLength());
+    EtsArray *internalArray = s.ToInternalType(array);
+    return static_cast<ets_size>(internalArray->GetLength());
 }
 
 // NOTE(kropacheva): change name after conflicts resolved
-NO_UB_SANITIZE static ets_objectArray NewObjectsArray(EtsEnv *env, ets_size length, ets_class element_class,
-                                                      ets_object initial_element)
+NO_UB_SANITIZE static ets_objectArray NewObjectsArray(EtsEnv *env, ets_size length, ets_class elementClass,
+                                                      ets_object initialElement)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_LZ(length);
-    ETS_NAPI_ABORT_IF_NULL(element_class);
+    ETS_NAPI_ABORT_IF_NULL(elementClass);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsClass *internal_class = s.ToInternalType(element_class);
-    EtsObjectArray *array = EtsObjectArray::Create(internal_class, static_cast<uint32_t>(length));
+    EtsClass *internalClass = s.ToInternalType(elementClass);
+    EtsObjectArray *array = EtsObjectArray::Create(internalClass, static_cast<uint32_t>(length));
     if (array == nullptr) {
         PandaStringStream ss;
-        ss << "Could not allocate array of " << internal_class->GetRuntimeClass()->GetName() << " of " << length
+        ss << "Could not allocate array of " << internalClass->GetRuntimeClass()->GetName() << " of " << length
            << " elements";
         s.ThrowNewException(EtsNapiException::OUT_OF_MEMORY, ss.str().c_str());
         return nullptr;
     }
-    if (initial_element != nullptr) {
+    if (initialElement != nullptr) {
         for (decltype(length) i = 0; i < length; ++i) {
-            array->Set(static_cast<uint32_t>(i), s.ToInternalType(initial_element));
+            array->Set(static_cast<uint32_t>(i), s.ToInternalType(initialElement));
         }
     }
     return reinterpret_cast<ets_objectArray>(s.AddLocalRef(reinterpret_cast<EtsObject *>(array)));
@@ -2095,15 +2093,15 @@ NO_UB_SANITIZE static ets_object GetObjectArrayElement(EtsEnv *env, ets_objectAr
     ETS_NAPI_ABORT_IF_NULL(array);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObjectArray *internal_array = s.ToInternalType(array);
-    if (index < 0 || index >= static_cast<ets_size>(internal_array->GetLength())) {
+    EtsObjectArray *internalArray = s.ToInternalType(array);
+    if (index < 0 || index >= static_cast<ets_size>(internalArray->GetLength())) {
         PandaStringStream ss;
-        ss << "Could not access " << index << " element, array length = " << internal_array->GetLength();
+        ss << "Could not access " << index << " element, array length = " << internalArray->GetLength();
         s.ThrowNewException(EtsNapiException::ARRAY_INDEX_OUT_OF_BOUNDS, ss.str().c_str());
         return nullptr;
     }
 
-    return s.AddLocalRef(internal_array->Get(static_cast<uint32_t>(index)));
+    return s.AddLocalRef(internalArray->Get(static_cast<uint32_t>(index)));
 }
 
 NO_UB_SANITIZE static void SetObjectArrayElement(EtsEnv *env, ets_objectArray array, ets_size index, ets_object value)
@@ -2112,26 +2110,26 @@ NO_UB_SANITIZE static void SetObjectArrayElement(EtsEnv *env, ets_objectArray ar
     ETS_NAPI_ABORT_IF_NULL(array);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObjectArray *internal_array = s.ToInternalType(array);
-    if (index < 0 || index >= static_cast<ets_size>(internal_array->GetLength())) {
+    EtsObjectArray *internalArray = s.ToInternalType(array);
+    if (index < 0 || index >= static_cast<ets_size>(internalArray->GetLength())) {
         PandaStringStream ss;
-        ss << "Could not access " << index << " element, array length = " << internal_array->GetLength();
+        ss << "Could not access " << index << " element, array length = " << internalArray->GetLength();
         s.ThrowNewException(EtsNapiException::ARRAY_INDEX_OUT_OF_BOUNDS, ss.str().c_str());
         return;
     }
-    EtsObject *internal_value = s.ToInternalType(value);
-    if (internal_value != nullptr) {
-        auto *component_class = internal_array->GetClass()->GetComponentType();
-        if (!internal_value->IsInstanceOf(component_class)) {
+    EtsObject *internalValue = s.ToInternalType(value);
+    if (internalValue != nullptr) {
+        auto *componentClass = internalArray->GetClass()->GetComponentType();
+        if (!internalValue->IsInstanceOf(componentClass)) {
             PandaStringStream ss;
-            ss << internal_value->GetClass()->GetRuntimeClass()->GetName();
+            ss << internalValue->GetClass()->GetRuntimeClass()->GetName();
             ss << "cannot be stored in an array of type ";
-            ss << component_class->GetRuntimeClass()->GetName();
+            ss << componentClass->GetRuntimeClass()->GetName();
             s.ThrowNewException(EtsNapiException::ARRAY_STORE, ss.str().c_str());
             return;
         }
     }
-    internal_array->Set(static_cast<uint32_t>(index), internal_value);
+    internalArray->Set(static_cast<uint32_t>(index), internalValue);
 }
 
 NO_UB_SANITIZE static ets_booleanArray NewBooleanArray(EtsEnv *env, ets_size length)
@@ -2391,19 +2389,19 @@ NO_UB_SANITIZE static void SetDoubleArrayRegion(EtsEnv *env, ets_doubleArray arr
 }
 
 NO_UB_SANITIZE static ets_int RegisterNatives(EtsEnv *env, ets_class cls, const EtsNativeMethod *methods,
-                                              ets_int n_methods)
+                                              ets_int nMethods)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(cls);
-    ETS_NAPI_ABORT_IF_LZ(n_methods);
-    if (n_methods == 0) {
+    ETS_NAPI_ABORT_IF_LZ(nMethods);
+    if (nMethods == 0) {
         return ETS_OK;
     }
     ETS_NAPI_ABORT_IF_NULL(methods);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsClass *klass = s.ToInternalType(cls);
-    for (ets_int i = 0; i < n_methods; ++i) {
+    for (ets_int i = 0; i < nMethods; ++i) {
         // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         EtsMethod *method = (methods[i].signature == nullptr ? klass->GetMethod(methods[i].name)
                                                              : klass->GetMethod(methods[i].name, methods[i].signature));
@@ -2460,15 +2458,15 @@ NO_UB_SANITIZE static void GetStringRegion(EtsEnv *env, ets_string str, ets_size
     ETS_NAPI_ABORT_IF_NULL(buf);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsString *internal_string = s.ToInternalType(str);
-    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internal_string->GetUtf16Length()) {
+    EtsString *internalString = s.ToInternalType(str);
+    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internalString->GetUtf16Length()) {
         PandaStringStream ss;
         ss << "String index out of bounds: start = " << start << ", len = " << len
-           << ", string size = " << internal_string->GetUtf16Length();
+           << ", string size = " << internalString->GetUtf16Length();
         s.ThrowNewException(EtsNapiException::STRING_INDEX_OUT_OF_BOUNDS, ss.str().c_str());
         return;
     }
-    internal_string->CopyDataRegionUtf16(buf, start, len, len);
+    internalString->CopyDataRegionUtf16(buf, start, len, len);
 }
 
 NO_UB_SANITIZE static void GetStringUTFRegion(EtsEnv *env, ets_string str, ets_size start, ets_size len, char *buf)
@@ -2478,16 +2476,16 @@ NO_UB_SANITIZE static void GetStringUTFRegion(EtsEnv *env, ets_string str, ets_s
     ETS_NAPI_ABORT_IF_NULL(buf);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsString *internal_string = s.ToInternalType(str);
-    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internal_string->GetUtf16Length()) {
+    EtsString *internalString = s.ToInternalType(str);
+    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internalString->GetUtf16Length()) {
         PandaStringStream ss;
         ss << "String index out of bounds: start = " << start << ", len = " << len
-           << ", string size = " << internal_string->GetUtf16Length();
+           << ", string size = " << internalString->GetUtf16Length();
         s.ThrowNewException(EtsNapiException::STRING_INDEX_OUT_OF_BOUNDS, ss.str().c_str());
         return;
     }
     // NOTE(m.morozov): check after mutf8 vs utf8 decision
-    internal_string->CopyDataRegionMUtf8(buf, start, len, internal_string->GetMUtf8Length());
+    internalString->CopyDataRegionMUtf8(buf, start, len, internalString->GetMUtf8Length());
 }
 
 NO_UB_SANITIZE static ets_object AllocObject(EtsEnv *env, ets_class cls)
@@ -2496,18 +2494,18 @@ NO_UB_SANITIZE static ets_object AllocObject(EtsEnv *env, ets_class cls)
     ETS_NAPI_ABORT_IF_NULL(cls);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsClass *internal_class = GetInternalClass(env, cls, &s);
-    if (internal_class == nullptr) {
+    EtsClass *internalClass = GetInternalClass(env, cls, &s);
+    if (internalClass == nullptr) {
         return nullptr;
     }
 
-    if (internal_class->IsAbstract() || internal_class->IsInterface()) {
+    if (internalClass->IsAbstract() || internalClass->IsInterface()) {
         PandaStringStream ss;
-        ss << "Class " << internal_class->GetRuntimeClass()->GetName() << " is interface or abstract";
+        ss << "Class " << internalClass->GetRuntimeClass()->GetName() << " is interface or abstract";
         s.ThrowNewException(EtsNapiException::INSTANTIATION, ss.str().c_str());
         return nullptr;
     }
-    if (internal_class->GetRuntimeClass()->IsStringClass()) {
+    if (internalClass->GetRuntimeClass()->IsStringClass()) {
         EtsString *str = EtsString::CreateNewEmptyString();
         if (UNLIKELY(str == nullptr)) {
             return nullptr;
@@ -2515,62 +2513,62 @@ NO_UB_SANITIZE static ets_object AllocObject(EtsEnv *env, ets_class cls)
         return s.AddLocalRef(reinterpret_cast<EtsObject *>(str));
     }
 
-    EtsObject *obj = EtsObject::Create(internal_class);
+    EtsObject *obj = EtsObject::Create(internalClass);
     if (UNLIKELY(obj == nullptr)) {
         return nullptr;
     }
     return s.AddLocalRef(reinterpret_cast<EtsObject *>(obj));
 }
 
-NO_UB_SANITIZE static ets_object NewObjectList(EtsEnv *env, ets_class cls, ets_method p_method, va_list args)
+NO_UB_SANITIZE static ets_object NewObjectList(EtsEnv *env, ets_class cls, ets_method pMethod, va_list args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(cls);
-    ETS_NAPI_ABORT_IF_NULL(p_method);
+    ETS_NAPI_ABORT_IF_NULL(pMethod);
 
-    ets_object new_object = AllocObject(env, cls);
-    if (new_object == nullptr) {
+    ets_object newObject = AllocObject(env, cls);
+    if (newObject == nullptr) {
         return nullptr;
     }
-    CallNonvirtualVoidMethodList(env, new_object, cls, p_method, args);
+    CallNonvirtualVoidMethodList(env, newObject, cls, pMethod, args);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     if (PandaEtsNapiEnv::ToPandaEtsEnv(env)->HasPendingException()) {
         return nullptr;
     }
-    return new_object;
+    return newObject;
 }
 
-NO_UB_SANITIZE static ets_object NewObject(EtsEnv *env, ets_class cls, ets_method p_method, ...)
+NO_UB_SANITIZE static ets_object NewObject(EtsEnv *env, ets_class cls, ets_method pMethod, ...)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(cls);
-    ETS_NAPI_ABORT_IF_NULL(p_method);
+    ETS_NAPI_ABORT_IF_NULL(pMethod);
 
     va_list args;
-    va_start(args, p_method);
-    ets_object res = NewObjectList(env, cls, p_method, args);
+    va_start(args, pMethod);
+    ets_object res = NewObjectList(env, cls, pMethod, args);
     va_end(args);
     return res;
 }
 
-NO_UB_SANITIZE static ets_object NewObjectArray(EtsEnv *env, ets_class cls, ets_method p_method, const ets_value *args)
+NO_UB_SANITIZE static ets_object NewObjectArray(EtsEnv *env, ets_class cls, ets_method pMethod, const ets_value *args)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(cls);
-    ETS_NAPI_ABORT_IF_NULL(p_method);
+    ETS_NAPI_ABORT_IF_NULL(pMethod);
 
-    ets_object new_object = AllocObject(env, cls);
-    if (new_object == nullptr) {
+    ets_object newObject = AllocObject(env, cls);
+    if (newObject == nullptr) {
         return nullptr;
     }
-    CallNonvirtualVoidMethodArray(env, new_object, cls, p_method, args);
+    CallNonvirtualVoidMethodArray(env, newObject, cls, pMethod, args);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     if (PandaEtsNapiEnv::ToPandaEtsEnv(env)->HasPendingException()) {
         return nullptr;
     }
-    return new_object;
+    return newObject;
 }
 
 NO_UB_SANITIZE static ets_class GetObjectClass(EtsEnv *env, ets_object obj)
@@ -2578,9 +2576,9 @@ NO_UB_SANITIZE static ets_class GetObjectClass(EtsEnv *env, ets_object obj)
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(obj);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *internal_object = s.ToInternalType(obj);
+    EtsObject *internalObject = s.ToInternalType(obj);
 
-    return reinterpret_cast<ets_class>(s.AddLocalRef(reinterpret_cast<EtsObject *>(internal_object->GetClass())));
+    return reinterpret_cast<ets_class>(s.AddLocalRef(reinterpret_cast<EtsObject *>(internalObject->GetClass())));
 }
 
 NO_UB_SANITIZE static ets_boolean IsInstanceOf(EtsEnv *env, ets_object obj, ets_class cls)
@@ -2592,10 +2590,10 @@ NO_UB_SANITIZE static ets_boolean IsInstanceOf(EtsEnv *env, ets_object obj, ets_
     }
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsClass *internal_class = s.ToInternalType(cls);
-    EtsObject *internal_object = s.ToInternalType(obj);
+    EtsClass *internalClass = s.ToInternalType(cls);
+    EtsObject *internalObject = s.ToInternalType(obj);
 
-    return internal_object->IsInstanceOf(internal_class) ? ETS_TRUE : ETS_FALSE;
+    return internalObject->IsInstanceOf(internalClass) ? ETS_TRUE : ETS_FALSE;
 }
 
 NO_UB_SANITIZE static ets_objectRefType GetObjectRefType(EtsEnv *env, ets_object obj)
@@ -2626,8 +2624,8 @@ NO_UB_SANITIZE static ets_weak NewWeakGlobalRef(EtsEnv *env, ets_object obj)
     ETS_NAPI_RETURN_IF_EQ(obj, nullptr, nullptr);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *internal_object = s.ToInternalType(obj);
-    ets_weak ret = s.AddWeakGlobalRef(internal_object);
+    EtsObject *internalObject = s.ToInternalType(obj);
+    ets_weak ret = s.AddWeakGlobalRef(internalObject);
     if (ret == nullptr) {
         s.ThrowNewException(EtsNapiException::OUT_OF_MEMORY, "Could not allocate object");
         return nullptr;
@@ -2640,8 +2638,8 @@ NO_UB_SANITIZE static void DeleteWeakGlobalRef([[maybe_unused]] EtsEnv *env, ets
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_RETURN_VOID_IF_NULL(obj);
 
-    PandaEtsVM *ets_vm = PandaEtsVM::GetCurrent();
-    ets_vm->DeleteWeakGlobalRef(obj);
+    PandaEtsVM *etsVm = PandaEtsVM::GetCurrent();
+    etsVm->DeleteWeakGlobalRef(obj);
 }
 
 NO_UB_SANITIZE static ets_status PromiseCreate(EtsEnv *env, ets_deferred *deferred, ets_object *promise)
@@ -2652,14 +2650,14 @@ NO_UB_SANITIZE static ets_status PromiseCreate(EtsEnv *env, ets_deferred *deferr
     CHECK_ARG(env, promise);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsPromise *internal_promise = EtsPromise::Create(s.Coroutine());
-    if (UNLIKELY(internal_promise == nullptr)) {
+    EtsPromise *internalPromise = EtsPromise::Create(s.Coroutine());
+    if (UNLIKELY(internalPromise == nullptr)) {
         return ETS_GENERIC_FAILURE;
     }
 
-    auto *promise_obj = reinterpret_cast<EtsObject *>(internal_promise);
-    *promise = s.AddLocalRef(promise_obj);
-    *deferred = reinterpret_cast<ets_deferred>(s.AddGlobalRef(promise_obj));
+    auto *promiseObj = reinterpret_cast<EtsObject *>(internalPromise);
+    *promise = s.AddLocalRef(promiseObj);
+    *deferred = reinterpret_cast<ets_deferred>(s.AddGlobalRef(promiseObj));
     return ETS_OKAY;
 }
 

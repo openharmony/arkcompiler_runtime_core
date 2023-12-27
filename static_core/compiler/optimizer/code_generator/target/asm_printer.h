@@ -136,9 +136,9 @@ public:
         return Encoder::GetResult() && enc_->GetResult();
     }
 
-    void EmitFunctionName(const void *func_name)
+    void EmitFunctionName(const void *funcName)
     {
-        auto *name = reinterpret_cast<const char *>(func_name);
+        auto *name = reinterpret_cast<const char *>(funcName);
         *str_ << ".global " << name << std::endl;
         *str_ << ".type " << name << ", %function" << std::endl;
         *str_ << name << ":" << std::endl;
@@ -276,7 +276,7 @@ public:
 //     * MakeCallByOffset(intptr_t, offset)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ENCODE_INST_ADDITIONAL_ONE_ARG(DEF) DEF(MakeCall, MemRef, entry_point)
+#define ENCODE_INST_ADDITIONAL_ONE_ARG(DEF) DEF(MakeCall, MemRef, entryPoint)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DefOneParamOperation(opc, type, param)              \
@@ -302,7 +302,7 @@ public:
 #undef DefOneParamOperation
 
     // Special cases - call read from
-    void MakeCall(const void *entry_point) override;
+    void MakeCall(const void *entryPoint) override;
 
 private:
     Encoder *enc_;
@@ -340,23 +340,23 @@ public:
     void PostWork()
     {
         printer_->PostWork();
-        size_t end_cursor = printer_->GetCursorOffset();
-        if (end_cursor == cursor_) {
+        size_t endCursor = printer_->GetCursorOffset();
+        if (endCursor == cursor_) {
             return;
         }
-        printer_->Disasm(cursor_, end_cursor);
+        printer_->Disasm(cursor_, endCursor);
     }
 
-    void GeneratePrologue(const FrameInfo &frame_info) override
+    void GeneratePrologue(const FrameInfo &frameInfo) override
     {
         PreWork();
-        T::GeneratePrologue(frame_info);
+        T::GeneratePrologue(frameInfo);
         PostWork();
     }
-    void GenerateEpilogue(const FrameInfo &frame_info, std::function<void()> post_job) override
+    void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override
     {
         PreWork();
-        T::GenerateEpilogue(frame_info, post_job);
+        T::GenerateEpilogue(frameInfo, postJob);
         PostWork();
     }
 
@@ -378,10 +378,10 @@ public:
         return tmp;
     }
     // Calculating information about parameters and save regs_offset registers for special needs
-    ParameterInfo *GetParameterInfo(uint8_t regs_offset) override
+    ParameterInfo *GetParameterInfo(uint8_t regsOffset) override
     {
         PreWork();
-        auto tmp = T::GetParameterInfo(regs_offset);
+        auto tmp = T::GetParameterInfo(regsOffset);
         PostWork();
         return tmp;
     }

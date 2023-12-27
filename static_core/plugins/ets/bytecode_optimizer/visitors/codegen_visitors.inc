@@ -62,38 +62,38 @@ static void CallLaunchHandler(panda::compiler::GraphVisitor *visitor, panda::com
     auto op = inst->GetOpcode();
     ASSERT(op == panda::compiler::Opcode::CallLaunchStatic || op == panda::compiler::Opcode::CallLaunchVirtual);
     auto *enc = static_cast<BytecodeGen *>(visitor);
-    auto call_inst = CastToCallLaunch(inst);
-    auto sf_count = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
+    auto callInst = CastToCallLaunch(inst);
+    auto sfCount = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
     size_t start = 1;
-    auto nargs = sf_count - start;
+    auto nargs = sfCount - start;
     pandasm::Ins ins;
     ins.opcode = ChooseCallLaunchOpcode(op, nargs);
 
-    auto zero_arg = inst->GetInput(0).GetInst();
-    ASSERT(zero_arg->GetOpcode() == Opcode::NewObject);
-    auto newobj_inst = zero_arg->CastToNewObject();
+    auto zeroArg = inst->GetInput(0).GetInst();
+    ASSERT(zeroArg->GetOpcode() == Opcode::NewObject);
+    auto newobjInst = zeroArg->CastToNewObject();
 
     if (nargs > MAX_NUM_NON_RANGE_ARGS) {
 #ifndef NDEBUG
-        auto start_reg = inst->GetSrcReg(start);
-        ASSERT(start_reg <= MAX_8_BIT_REG);
-        for (size_t i = start; i < sf_count; ++i) {
+        auto startReg = inst->GetSrcReg(start);
+        ASSERT(startReg <= MAX_8_BIT_REG);
+        for (size_t i = start; i < sfCount; ++i) {
             auto reg = inst->GetSrcReg(i);
-            ASSERT(reg - start_reg == static_cast<int>(i - start));  // check 'range-ness' of registers
+            ASSERT(reg - startReg == static_cast<int>(i - start));  // check 'range-ness' of registers
         }
 #endif  // !NDEBUG
         ins.regs.emplace_back(inst->GetSrcReg(start));
     } else {
-        for (size_t i = start; i < sf_count; ++i) {
+        for (size_t i = start; i < sfCount; ++i) {
             auto reg = inst->GetSrcReg(i);
             ASSERT(reg < NUM_COMPACTLY_ENCODED_REGS);
             ins.regs.emplace_back(reg);
         }
     }
-    ins.ids.emplace_back(enc->ir_interface_->GetMethodIdByOffset(call_inst->GetCallMethodId()));
+    ins.ids.emplace_back(enc->irInterface_->GetMethodIdByOffset(callInst->GetCallMethodId()));
     enc->result_.emplace_back(ins);
-    if (newobj_inst->GetDstReg() != compiler::ACC_REG_ID) {
-        enc->result_.emplace_back(pandasm::Create_STA_OBJ(newobj_inst->GetDstReg()));
+    if (newobjInst->GetDstReg() != compiler::ACC_REG_ID) {
+        enc->result_.emplace_back(pandasm::Create_STA_OBJ(newobjInst->GetDstReg()));
     }
 }
 
@@ -110,18 +110,18 @@ static void VisitCallLaunchVirtual(GraphVisitor *visitor, Inst *inst)
 static void VisitEtsLdObjByName(BytecodeGen *enc, compiler::IntrinsicInst *inst)
 {
     auto v0 = inst->GetSrcReg(0);
-    auto bc_id0 = enc->ir_interface_->GetFieldIdByOffset(static_cast<uint32_t>(inst->GetImms()[0]));
+    auto bcId0 = enc->irInterface_->GetFieldIdByOffset(static_cast<uint32_t>(inst->GetImms()[0]));
     switch (inst->GetIntrinsicId()) {
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I32:
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F32:
-            enc->result_.emplace_back(pandasm::Create_ETS_LDOBJ_NAME(v0, bc_id0));
+            enc->result_.emplace_back(pandasm::Create_ETS_LDOBJ_NAME(v0, bcId0));
             break;
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I64:
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F64:
-            enc->result_.emplace_back(pandasm::Create_ETS_LDOBJ_NAME_64(v0, bc_id0));
+            enc->result_.emplace_back(pandasm::Create_ETS_LDOBJ_NAME_64(v0, bcId0));
             break;
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_OBJ:
-            enc->result_.emplace_back(pandasm::Create_ETS_LDOBJ_NAME_OBJ(v0, bc_id0));
+            enc->result_.emplace_back(pandasm::Create_ETS_LDOBJ_NAME_OBJ(v0, bcId0));
             break;
         default:
             UNREACHABLE();
@@ -133,18 +133,18 @@ static void VisitEtsStObjByName(BytecodeGen *enc, compiler::IntrinsicInst *inst)
 {
     DoLda(inst->GetSrcReg(1U), enc->result_);
     auto v0 = inst->GetSrcReg(0);
-    auto bc_id0 = enc->ir_interface_->GetFieldIdByOffset(static_cast<uint32_t>(inst->GetImms()[0]));
+    auto bcId0 = enc->irInterface_->GetFieldIdByOffset(static_cast<uint32_t>(inst->GetImms()[0]));
     switch (inst->GetIntrinsicId()) {
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I32:
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F32:
-            enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME(v0, bc_id0));
+            enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME(v0, bcId0));
             break;
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I64:
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F64:
-            enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME_64(v0, bc_id0));
+            enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME_64(v0, bcId0));
             break;
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_OBJ:
-            enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME_OBJ(v0, bc_id0));
+            enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME_OBJ(v0, bcId0));
             break;
         default:
             UNREACHABLE();

@@ -27,16 +27,16 @@ PANDA_PUBLIC_API std::string GetNativeThreadNameForFile(pid_t tid);
 
 class DumpUnattachedThread {
 public:
-    PANDA_PUBLIC_API void AddTid(pid_t tid_thread);
+    PANDA_PUBLIC_API void AddTid(pid_t tidThread);
     PANDA_PUBLIC_API bool InitKernelTidLists();
-    PANDA_PUBLIC_API void Dump(std::ostream &os, bool dump_native_crash, FuncUnwindstack call_unwindstack);
+    PANDA_PUBLIC_API void Dump(std::ostream &os, bool dumpNativeCrash, FuncUnwindstack callUnwindstack);
 
 private:
-    std::set<pid_t> kernel_tid_;
-    std::set<pid_t> thread_manager_tids_;
+    std::set<pid_t> kernelTid_;
+    std::set<pid_t> threadManagerTids_;
 };
 
-PANDA_PUBLIC_API bool ReadOsFile(const std::string &file_name, std::string *result);
+PANDA_PUBLIC_API bool ReadOsFile(const std::string &fileName, std::string *result);
 PANDA_PUBLIC_API bool WriterOsFile(const void *buffer, size_t count, int fd);
 PANDA_PUBLIC_API std::string ChangeJaveStackFormat(const char *descriptor);
 

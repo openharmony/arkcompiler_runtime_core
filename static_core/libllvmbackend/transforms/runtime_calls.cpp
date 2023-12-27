@@ -20,58 +20,58 @@
 
 namespace panda::llvmbackend::runtime_calls {
 
-llvm::Value *GetAddressToTLS(llvm::IRBuilder<> *builder, LLVMArkInterface *ark_interface, uintptr_t tls_offset)
+llvm::Value *GetAddressToTLS(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface, uintptr_t tlsOffset)
 {
-    auto thread_reg_value = GetThreadRegValue(builder, ark_interface);
-    auto thread_reg_ptr = builder->CreateIntToPtr(thread_reg_value, builder->getPtrTy());
-    return builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), thread_reg_ptr, tls_offset);
+    auto threadRegValue = GetThreadRegValue(builder, arkInterface);
+    auto threadRegPtr = builder->CreateIntToPtr(threadRegValue, builder->getPtrTy());
+    return builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), threadRegPtr, tlsOffset);
 }
 
-llvm::Value *LoadTLSValue(llvm::IRBuilder<> *builder, LLVMArkInterface *ark_interface, uintptr_t tls_offset,
+llvm::Value *LoadTLSValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface, uintptr_t tlsOffset,
                           llvm::Type *type)
 {
-    auto addr = GetAddressToTLS(builder, ark_interface, tls_offset);
+    auto addr = GetAddressToTLS(builder, arkInterface, tlsOffset);
     return builder->CreateLoad(type, addr);
 }
 
-llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Value *thread_reg_value,
-                                           LLVMArkInterface *ark_interface, EntrypointId eid,
+llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Value *threadRegValue,
+                                           LLVMArkInterface *arkInterface, EntrypointId eid,
                                            llvm::ArrayRef<llvm::Value *> arguments)
 {
-    auto tls_offset = ark_interface->GetEntrypointTlsOffset(eid);
-    auto [function_proto, function_name] = ark_interface->GetEntrypointCallee(eid);
+    auto tlsOffset = arkInterface->GetEntrypointTlsOffset(eid);
+    auto [function_proto, function_name] = arkInterface->GetEntrypointCallee(eid);
 
-    auto thread_reg_ptr = builder->CreateIntToPtr(thread_reg_value, builder->getPtrTy());
-    auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), thread_reg_ptr, tls_offset);
+    auto threadRegPtr = builder->CreateIntToPtr(threadRegValue, builder->getPtrTy());
+    auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), threadRegPtr, tlsOffset);
     auto callee = builder->CreateLoad(builder->getPtrTy(), addr, function_name + "_addr");
 
-    auto callee_func_ty = llvm::cast<llvm::FunctionType>(function_proto);
-    auto call = builder->CreateCall(callee_func_ty, callee, arguments);
+    auto calleeFuncTy = llvm::cast<llvm::FunctionType>(function_proto);
+    auto call = builder->CreateCall(calleeFuncTy, callee, arguments);
     return call;
 }
 
-llvm::Value *GetThreadRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *ark_interface)
+llvm::Value *GetThreadRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface)
 {
-    assert(!ark_interface->IsIrtocMode());
+    assert(!arkInterface->IsIrtocMode());
     auto func = builder->GetInsertBlock()->getParent();
     auto &ctx = func->getContext();
-    auto reg_md = llvm::MDNode::get(ctx, {llvm::MDString::get(ctx, ark_interface->GetThreadRegister())});
-    auto thread_reg = llvm::MetadataAsValue::get(ctx, reg_md);
-    auto read_reg =
+    auto regMd = llvm::MDNode::get(ctx, {llvm::MDString::get(ctx, arkInterface->GetThreadRegister())});
+    auto threadReg = llvm::MetadataAsValue::get(ctx, regMd);
+    auto readReg =
         llvm::Intrinsic::getDeclaration(func->getParent(), llvm::Intrinsic::read_register, builder->getInt64Ty());
-    return builder->CreateCall(read_reg, {thread_reg});
+    return builder->CreateCall(readReg, {threadReg});
 }
 
-llvm::Value *GetRealFrameRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *ark_interface)
+llvm::Value *GetRealFrameRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface)
 {
-    assert(!ark_interface->IsIrtocMode());
+    assert(!arkInterface->IsIrtocMode());
     auto func = builder->GetInsertBlock()->getParent();
     auto &ctx = func->getContext();
-    auto reg_md = llvm::MDNode::get(ctx, {llvm::MDString::get(ctx, ark_interface->GetFramePointerRegister())});
-    auto frame_reg = llvm::MetadataAsValue::get(ctx, reg_md);
-    auto read_reg =
+    auto regMd = llvm::MDNode::get(ctx, {llvm::MDString::get(ctx, arkInterface->GetFramePointerRegister())});
+    auto frameReg = llvm::MetadataAsValue::get(ctx, regMd);
+    auto readReg =
         llvm::Intrinsic::getDeclaration(func->getParent(), llvm::Intrinsic::read_register, builder->getInt64Ty());
-    return builder->CreateCall(read_reg, {frame_reg});
+    return builder->CreateCall(readReg, {frameReg});
 }
 
 }  // namespace panda::llvmbackend::runtime_calls

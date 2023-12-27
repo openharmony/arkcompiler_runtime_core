@@ -23,8 +23,8 @@ namespace panda {
 
 // clang-tidy cannot detect that we are going to initialize context_ via getcontext()
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-StackfulCoroutineContext::StackfulCoroutineContext(uint8_t *stack, size_t stack_size_bytes)
-    : stack_(stack), stack_size_bytes_(stack_size_bytes)
+StackfulCoroutineContext::StackfulCoroutineContext(uint8_t *stack, size_t stackSizeBytes)
+    : stack_(stack), stackSizeBytes_(stackSizeBytes)
 {
     fibers::GetCurrentContext(&context_);
 }
@@ -33,18 +33,18 @@ void StackfulCoroutineContext::AttachToCoroutine(Coroutine *co)
 {
     CoroutineContext::AttachToCoroutine(co);
     if (co->HasManagedEntrypoint() || co->HasNativeEntrypoint()) {
-        fibers::UpdateContext(&context_, CoroThreadProc, this, stack_, stack_size_bytes_);
+        fibers::UpdateContext(&context_, CoroThreadProc, this, stack_, stackSizeBytes_);
     }
     auto *cm = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
     cm->RegisterCoroutine(co);
     SetStatus(Coroutine::Status::RUNNABLE);
 }
 
-bool StackfulCoroutineContext::RetrieveStackInfo(void *&stack_addr, size_t &stack_size, size_t &guard_size)
+bool StackfulCoroutineContext::RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize)
 {
-    stack_addr = stack_;
-    stack_size = stack_size_bytes_;
-    guard_size = 0;
+    stackAddr = stack_;
+    stackSize = stackSizeBytes_;
+    guardSize = 0;
     return true;
 }
 
@@ -53,13 +53,13 @@ Coroutine::Status StackfulCoroutineContext::GetStatus() const
     return status_;
 }
 
-void StackfulCoroutineContext::SetStatus(Coroutine::Status new_status)
+void StackfulCoroutineContext::SetStatus(Coroutine::Status newStatus)
 {
 #ifndef NDEBUG
     PandaString setter = (Thread::GetCurrent() == nullptr) ? "null" : Coroutine::GetCurrent()->GetName();
-    LOG(DEBUG, COROUTINES) << GetCoroutine()->GetName() << ": " << status_ << " -> " << new_status << " by " << setter;
+    LOG(DEBUG, COROUTINES) << GetCoroutine()->GetName() << ": " << status_ << " -> " << newStatus << " by " << setter;
 #endif
-    status_ = new_status;
+    status_ = newStatus;
 }
 
 void StackfulCoroutineContext::Destroy()
@@ -74,8 +74,8 @@ void StackfulCoroutineContext::Destroy()
 
     co->UpdateStatus(ThreadStatus::TERMINATING);
 
-    auto *thread_manager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
-    if (thread_manager->TerminateCoroutine(co)) {
+    auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
+    if (threadManager->TerminateCoroutine(co)) {
         // detach
         Coroutine::SetCurrent(nullptr);
     }
@@ -112,8 +112,8 @@ void StackfulCoroutineContext::ThreadProcImpl()
     }
     SetStatus(Coroutine::Status::TERMINATING);
 
-    auto *thread_manager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
-    thread_manager->TerminateCoroutine(co);
+    auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
+    threadManager->TerminateCoroutine(co);
 }
 
 bool StackfulCoroutineContext::SwitchTo(StackfulCoroutineContext *target)
@@ -124,9 +124,9 @@ bool StackfulCoroutineContext::SwitchTo(StackfulCoroutineContext *target)
     return true;
 }
 
-void StackfulCoroutineContext::RequestSuspend(bool gets_blocked)
+void StackfulCoroutineContext::RequestSuspend(bool getsBlocked)
 {
-    SetStatus(gets_blocked ? Coroutine::Status::BLOCKED : Coroutine::Status::RUNNABLE);
+    SetStatus(getsBlocked ? Coroutine::Status::BLOCKED : Coroutine::Status::RUNNABLE);
 }
 
 void StackfulCoroutineContext::RequestResume()

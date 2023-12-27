@@ -46,18 +46,18 @@ public:
 
 private:
     bool TrySimplifyConstantPhi(BasicBlock *block);
-    bool TryRemoveConstantPhiIf(BasicBlock *if_block);
+    bool TryRemoveConstantPhiIf(BasicBlock *ifBlock);
     IfImmInst *GetIfImm(BasicBlock *block);
     bool TryMergeEquivalentIfs(BasicBlock *bb);
-    bool TryRemoveConstantPhiIf(IfImmInst *if_imm, PhiInst *phi, uint64_t constant, ConditionCode cc);
-    bool MarkInstBranches(BasicBlock *bb, BasicBlock *true_bb, BasicBlock *false_bb);
-    std::optional<bool> GetUserBranch(Inst *user_inst, BasicBlock *bb, BasicBlock *true_bb, BasicBlock *false_bb);
-    bool IsDominateEdge(BasicBlock *edge_bb, BasicBlock *target_bb);
-    void SplitBlockWithEquivalentIf(BasicBlock *bb, BasicBlock *true_bb, bool inverted_if);
-    void SplitBlockWithConstantPhi(BasicBlock *bb, BasicBlock *true_bb, PhiInst *phi, uint64_t constant,
+    bool TryRemoveConstantPhiIf(IfImmInst *ifImm, PhiInst *phi, uint64_t constant, ConditionCode cc);
+    bool MarkInstBranches(BasicBlock *bb, BasicBlock *trueBb, BasicBlock *falseBb);
+    std::optional<bool> GetUserBranch(Inst *userInst, BasicBlock *bb, BasicBlock *trueBb, BasicBlock *falseBb);
+    bool IsDominateEdge(BasicBlock *edgeBb, BasicBlock *targetBb);
+    void SplitBlockWithEquivalentIf(BasicBlock *bb, BasicBlock *trueBb, bool invertedIf);
+    void SplitBlockWithConstantPhi(BasicBlock *bb, BasicBlock *trueBb, PhiInst *phi, uint64_t constant,
                                    ConditionCode cc);
     BasicBlock *SplitBlock(BasicBlock *bb);
-    void FixDominatorsTree(BasicBlock *true_branch_bb, BasicBlock *false_branch_bb);
+    void FixDominatorsTree(BasicBlock *trueBranchBb, BasicBlock *falseBranchBb);
     void TryJoinSuccessorBlock(BasicBlock *bb);
     void TryUpdateDominator(BasicBlock *bb);
 
@@ -66,8 +66,8 @@ private:
 #endif
 
 private:
-    bool is_applied_ {false};
-    Marker true_branch_marker_ {};
+    bool isApplied_ {false};
+    Marker trueBranchMarker_ {};
 };
 }  // namespace panda::compiler
 

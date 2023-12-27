@@ -25,10 +25,10 @@ namespace panda::mem {
 template <class LanguageConfig>
 UpdateRemsetThread<LanguageConfig>::UpdateRemsetThread(G1GC<LanguageConfig> *gc,
                                                        GCG1BarrierSet::ThreadLocalCardQueues *queue,
-                                                       os::memory::Mutex *queue_lock, size_t region_size,
-                                                       bool update_concurrent, size_t min_concurrent_cards_to_process)
-    : UpdateRemsetWorker<LanguageConfig>(gc, queue, queue_lock, region_size, update_concurrent,
-                                         min_concurrent_cards_to_process)
+                                                       os::memory::Mutex *queueLock, size_t regionSize,
+                                                       bool updateConcurrent, size_t minConcurrentCardsToProcess)
+    : UpdateRemsetWorker<LanguageConfig>(gc, queue, queueLock, regionSize, updateConcurrent,
+                                         minConcurrentCardsToProcess)
 {
 }
 
@@ -39,11 +39,11 @@ template <class LanguageConfig>
 void UpdateRemsetThread<LanguageConfig>::CreateWorkerImpl()
 {
     LOG(DEBUG, GC) << "Start creating UpdateRemsetThread";
-    os::memory::LockHolder lk(this->update_remset_lock_);
-    auto internal_allocator = this->GetGC()->GetInternalAllocator();
-    ASSERT(update_thread_ == nullptr);
-    update_thread_ = internal_allocator->template New<std::thread>(&UpdateRemsetThread::ThreadLoop, this);
-    int res = os::thread::SetThreadName(update_thread_->native_handle(), "UpdateRemset");
+    os::memory::LockHolder lk(this->updateRemsetLock_);
+    auto internalAllocator = this->GetGC()->GetInternalAllocator();
+    ASSERT(updateThread_ == nullptr);
+    updateThread_ = internalAllocator->template New<std::thread>(&UpdateRemsetThread::ThreadLoop, this);
+    int res = os::thread::SetThreadName(updateThread_->native_handle(), "UpdateRemset");
 
     LOG_IF(res != 0, ERROR, RUNTIME) << "Failed to set a name for the UpdateRemset thread";
 }
@@ -53,15 +53,15 @@ void UpdateRemsetThread<LanguageConfig>::DestroyWorkerImpl()
 {
     LOG(DEBUG, GC) << "Starting destroy UpdateRemsetThread";
     {
-        os::memory::LockHolder holder(this->update_remset_lock_);
-        thread_cond_var_.SignalAll();  // wake up updateremset worker & pause method
+        os::memory::LockHolder holder(this->updateRemsetLock_);
+        threadCondVar_.SignalAll();  // wake up updateremset worker & pause method
     }
-    ASSERT(update_thread_ != nullptr);
-    update_thread_->join();
+    ASSERT(updateThread_ != nullptr);
+    updateThread_->join();
     auto allocator = this->GetGC()->GetInternalAllocator();
     ASSERT(allocator != nullptr);
-    allocator->Delete(update_thread_);
-    update_thread_ = nullptr;
+    allocator->Delete(updateThread_);
+    updateThread_ = nullptr;
     LOG(DEBUG, GC) << "UpdateRemsetThread was destroyed";
 }
 
@@ -70,33 +70,33 @@ void UpdateRemsetThread<LanguageConfig>::ThreadLoop()
 {
     LOG(DEBUG, GC) << "Entering UpdateRemsetThread ThreadLoop";
 
-    this->update_remset_lock_.Lock();
+    this->updateRemsetLock_.Lock();
     while (true) {
         // Do one atomic load before checks
-        auto iteration_flag = this->GetFlag();
-        if (iteration_flag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_STOP_WORKER) {
+        auto iterationFlag = this->GetFlag();
+        if (iterationFlag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_STOP_WORKER) {
             LOG(DEBUG, GC) << "exit UpdateRemsetThread loop, because thread was stopped";
             break;
         }
-        if (iteration_flag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD) {
+        if (iterationFlag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD) {
             // UpdateRemsetThread is paused by GC, wait until GC notifies to continue work
-            thread_cond_var_.Wait(&this->update_remset_lock_);
+            threadCondVar_.Wait(&this->updateRemsetLock_);
             continue;
         }
-        if (iteration_flag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_INVALIDATE_REGIONS) {
+        if (iterationFlag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_INVALIDATE_REGIONS) {
             // wait until GC-Thread invalidates regions
-            thread_cond_var_.Wait(&this->update_remset_lock_);
+            threadCondVar_.Wait(&this->updateRemsetLock_);
             continue;
         }
-        ASSERT(!this->paused_by_gc_thread_);
-        ASSERT(iteration_flag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_PROCESS_CARD);
-        auto processed_cards = this->ProcessAllCards();
+        ASSERT(!this->pausedByGcThread_);
+        ASSERT(iterationFlag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_PROCESS_CARD);
+        auto processedCards = this->ProcessAllCards();
 
-        if (processed_cards < this->GetMinConcurrentCardsToProcess()) {
+        if (processedCards < this->GetMinConcurrentCardsToProcess()) {
             Sleep();
         }
     }
-    this->update_remset_lock_.Unlock();
+    this->updateRemsetLock_.Unlock();
     LOG(DEBUG, GC) << "Exiting UpdateRemsetThread ThreadLoop";
 }
 
@@ -104,7 +104,7 @@ template <class LanguageConfig>
 void UpdateRemsetThread<LanguageConfig>::ContinueProcessCards()
 {
     // Signal to continue UpdateRemsetThread
-    thread_cond_var_.Signal();
+    threadCondVar_.Signal();
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(UpdateRemsetThread);

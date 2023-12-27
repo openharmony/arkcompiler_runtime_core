@@ -24,20 +24,20 @@ public:
     EmptyReferenceProcessor() = default;
     ~EmptyReferenceProcessor() override = default;
 
-    bool IsReference([[maybe_unused]] const BaseClass *base_cls, [[maybe_unused]] const ObjectHeader *ref,
+    bool IsReference([[maybe_unused]] const BaseClass *baseCls, [[maybe_unused]] const ObjectHeader *ref,
                      [[maybe_unused]] const ReferenceCheckPredicateT &pred) const override
     {
         return false;
     }
 
-    void HandleReference([[maybe_unused]] GC *gc, [[maybe_unused]] GCMarkingStackType *objects_stack,
-                         [[maybe_unused]] const BaseClass *base_class, [[maybe_unused]] const ObjectHeader *object,
+    void HandleReference([[maybe_unused]] GC *gc, [[maybe_unused]] GCMarkingStackType *objectsStack,
+                         [[maybe_unused]] const BaseClass *baseClass, [[maybe_unused]] const ObjectHeader *object,
                          [[maybe_unused]] const ReferenceProcessPredicateT &pred) override
     {
     }
 
-    void ProcessReferences([[maybe_unused]] bool concurrent, [[maybe_unused]] bool clear_soft_references,
-                           [[maybe_unused]] GCPhase gc_phase,
+    void ProcessReferences([[maybe_unused]] bool concurrent, [[maybe_unused]] bool clearSoftReferences,
+                           [[maybe_unused]] GCPhase gcPhase,
                            [[maybe_unused]] const mem::GC::ReferenceClearPredicateT &pred) override
     {
     }
@@ -47,9 +47,9 @@ public:
         return nullptr;
     }
 
-    void ScheduleForEnqueue([[maybe_unused]] Reference *cleared_references) override {}
+    void ScheduleForEnqueue([[maybe_unused]] Reference *clearedReferences) override {}
 
-    void Enqueue([[maybe_unused]] panda::mem::Reference *cleared_references) override {}
+    void Enqueue([[maybe_unused]] panda::mem::Reference *clearedReferences) override {}
 
     size_t GetReferenceQueueSize() const override
     {

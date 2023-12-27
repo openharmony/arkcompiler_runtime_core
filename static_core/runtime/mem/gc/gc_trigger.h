@@ -54,59 +54,59 @@ public:
 
     std::string_view GetGCTriggerType() const
     {
-        return gc_trigger_type_;
+        return gcTriggerType_;
     }
 
     uint64_t GetDebugStart() const
     {
-        return debug_start_;
+        return debugStart_;
     }
 
     uint32_t GetPercentThreshold() const
     {
-        return percent_threshold_;
+        return percentThreshold_;
     }
 
     uint32_t GetAdaptiveMultiplier() const
     {
-        return adaptive_multiplier_;
+        return adaptiveMultiplier_;
     }
 
     size_t GetMinExtraHeapSize() const
     {
-        return min_extra_heap_size_;
+        return minExtraHeapSize_;
     }
 
     size_t GetMaxExtraHeapSize() const
     {
-        return max_extra_heap_size_;
+        return maxExtraHeapSize_;
     }
 
     uint32_t GetMaxTriggerPercent() const
     {
-        return max_trigger_percent_;
+        return maxTriggerPercent_;
     }
 
     uint32_t GetSkipStartupGcCount() const
     {
-        return skip_startup_gc_count_;
+        return skipStartupGcCount_;
     }
 
     bool IsUseNthAllocTrigger() const
     {
-        return use_nth_alloc_trigger_;
+        return useNthAllocTrigger_;
     }
 
 private:
-    std::string gc_trigger_type_;
-    uint64_t debug_start_;
-    uint32_t percent_threshold_;
-    uint32_t adaptive_multiplier_;
-    size_t min_extra_heap_size_;
-    size_t max_extra_heap_size_;
-    uint32_t max_trigger_percent_;
-    uint32_t skip_startup_gc_count_;
-    bool use_nth_alloc_trigger_;
+    std::string gcTriggerType_;
+    uint64_t debugStart_;
+    uint32_t percentThreshold_;
+    uint32_t adaptiveMultiplier_;
+    size_t minExtraHeapSize_;
+    size_t maxExtraHeapSize_;
+    uint32_t maxTriggerPercent_;
+    uint32_t skipStartupGcCount_;
+    bool useNthAllocTrigger_;
 };
 
 class GCTrigger : public GCListener {
@@ -123,7 +123,7 @@ public:
      */
     virtual void TriggerGcIfNeeded(GC *gc) = 0;
     virtual GCTriggerType GetType() const = 0;
-    virtual void SetMinTargetFootprint([[maybe_unused]] size_t heap_size) {}
+    virtual void SetMinTargetFootprint([[maybe_unused]] size_t heapSize) {}
     virtual void RestoreMinTargetFootprint() {}
 
 private:
@@ -133,10 +133,9 @@ private:
 /// Triggers when heap increased by predefined %
 class GCTriggerHeap : public GCTrigger {
 public:
-    explicit GCTriggerHeap(MemStatsType *mem_stats, HeapSpace *heap_space);
-    explicit GCTriggerHeap(MemStatsType *mem_stats, HeapSpace *heap_space, size_t min_heap_size,
-                           uint8_t percent_threshold, size_t min_extra_size, size_t max_extra_size,
-                           uint32_t skip_gc_times = 0);
+    explicit GCTriggerHeap(MemStatsType *memStats, HeapSpace *heapSpace);
+    explicit GCTriggerHeap(MemStatsType *memStats, HeapSpace *heapSpace, size_t minHeapSize, uint8_t percentThreshold,
+                           size_t minExtraSize, size_t maxExtraSize, uint32_t skipGcTimes = 0);
 
     GCTriggerType GetType() const override
     {
@@ -144,11 +143,11 @@ public:
     }
 
     void TriggerGcIfNeeded(GC *gc) override;
-    void GCStarted(const GCTask &task, size_t heap_size) override;
-    void GCFinished(const GCTask &task, size_t heap_size_before_gc, size_t heap_size) override;
-    void SetMinTargetFootprint(size_t target_size) override;
+    void GCStarted(const GCTask &task, size_t heapSize) override;
+    void GCFinished(const GCTask &task, size_t heapSizeBeforeGc, size_t heapSize) override;
+    void SetMinTargetFootprint(size_t targetSize) override;
     void RestoreMinTargetFootprint() override;
-    void ComputeNewTargetFootprint(const GCTask &task, size_t heap_size_before_gc, size_t heap_size);
+    void ComputeNewTargetFootprint(const GCTask &task, size_t heapSizeBeforeGc, size_t heapSize);
 
     static constexpr uint8_t DEFAULT_PERCENTAGE_THRESHOLD = 20;
 
@@ -159,24 +158,24 @@ protected:
     static constexpr size_t DEFAULT_MIN_EXTRA_HEAP_SIZE = 32;      // For heap-trigger-test
     static constexpr size_t DEFAULT_MAX_EXTRA_HEAP_SIZE = 512_KB;  // For heap-trigger-test
 
-    virtual size_t ComputeTarget(size_t heap_size_before_gc, size_t heap_size);
+    virtual size_t ComputeTarget(size_t heapSizeBeforeGc, size_t heapSize);
 
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    std::atomic<size_t> target_footprint_ {MIN_HEAP_SIZE_FOR_TRIGGER};
+    std::atomic<size_t> targetFootprint_ {MIN_HEAP_SIZE_FOR_TRIGGER};
 
     /**
      * We'll trigger if heap increased by delta, delta = heap_size_after_last_gc * percent_threshold_ %
      * And the constraint on delta is: min_extra_size_ <= delta <= max_extra_size_
      */
-    uint8_t percent_threshold_ {DEFAULT_PERCENTAGE_THRESHOLD};  // NOLINT(misc-non-private-member-variables-in-classes)
-    size_t min_extra_size_ {DEFAULT_MIN_EXTRA_HEAP_SIZE};       // NOLINT(misc-non-private-member-variables-in-classes)
-    size_t max_extra_size_ {DEFAULT_MAX_EXTRA_HEAP_SIZE};       // NOLINT(misc-non-private-member-variables-in-classes)
+    uint8_t percentThreshold_ {DEFAULT_PERCENTAGE_THRESHOLD};  // NOLINT(misc-non-private-member-variables-in-classes)
+    size_t minExtraSize_ {DEFAULT_MIN_EXTRA_HEAP_SIZE};        // NOLINT(misc-non-private-member-variables-in-classes)
+    size_t maxExtraSize_ {DEFAULT_MAX_EXTRA_HEAP_SIZE};        // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
-    HeapSpace *heap_space_ {nullptr};
-    size_t min_target_footprint_ {DEFAULT_MIN_TARGET_FOOTPRINT};
-    MemStatsType *mem_stats_;
-    uint8_t skip_gc_count_ {0};
+    HeapSpace *heapSpace_ {nullptr};
+    size_t minTargetFootprint_ {DEFAULT_MIN_TARGET_FOOTPRINT};
+    MemStatsType *memStats_;
+    uint8_t skipGcCount_ {0};
 
     friend class panda::test::GCTriggerTest;
 };
@@ -184,9 +183,9 @@ private:
 /// Triggers when heap increased by adaptive strategy
 class GCAdaptiveTriggerHeap : public GCTriggerHeap {
 public:
-    GCAdaptiveTriggerHeap(MemStatsType *mem_stats, HeapSpace *heap_space, size_t min_heap_size,
-                          uint8_t percent_threshold, uint32_t adaptive_multiplier, size_t min_extra_size,
-                          size_t max_extra_size, uint32_t skip_gc_times = 0);
+    GCAdaptiveTriggerHeap(MemStatsType *memStats, HeapSpace *heapSpace, size_t minHeapSize, uint8_t percentThreshold,
+                          uint32_t adaptiveMultiplier, size_t minExtraSize, size_t maxExtraSize,
+                          uint32_t skipGcTimes = 0);
     NO_COPY_SEMANTIC(GCAdaptiveTriggerHeap);
     NO_MOVE_SEMANTIC(GCAdaptiveTriggerHeap);
     ~GCAdaptiveTriggerHeap() override = default;
@@ -201,10 +200,10 @@ private:
     // We save last RECENT_THRESHOLDS_COUNT thresholds for detect too often triggering
     static constexpr size_t RECENT_THRESHOLDS_COUNT = 3;
 
-    size_t ComputeTarget(size_t heap_size_before_gc, size_t heap_size) override;
+    size_t ComputeTarget(size_t heapSizeBeforeGc, size_t heapSize) override;
 
-    RingBuffer<size_t, RECENT_THRESHOLDS_COUNT> recent_target_thresholds_;
-    uint32_t adaptive_multiplier_ {DEFAULT_INCREASE_MULTIPLIER};
+    RingBuffer<size_t, RECENT_THRESHOLDS_COUNT> recentTargetThresholds_;
+    uint32_t adaptiveMultiplier_ {DEFAULT_INCREASE_MULTIPLIER};
 
     friend class panda::test::GCTriggerTest;
 };
@@ -212,7 +211,7 @@ private:
 /// Trigger always returns true after given start
 class GCTriggerDebug : public GCTrigger {
 public:
-    explicit GCTriggerDebug(uint64_t debug_start, HeapSpace *heap_space);
+    explicit GCTriggerDebug(uint64_t debugStart, HeapSpace *heapSpace);
 
     GCTriggerType GetType() const override
     {
@@ -220,17 +219,17 @@ public:
     }
 
     void TriggerGcIfNeeded(GC *gc) override;
-    void GCStarted(const GCTask &task, size_t heap_size) override;
-    void GCFinished(const GCTask &task, size_t heap_size_before_gc, size_t heap_size) override;
+    void GCStarted(const GCTask &task, size_t heapSize) override;
+    void GCFinished(const GCTask &task, size_t heapSizeBeforeGc, size_t heapSize) override;
 
 private:
-    HeapSpace *heap_space_ {nullptr};
-    uint64_t debug_start_ = 0;
+    HeapSpace *heapSpace_ {nullptr};
+    uint64_t debugStart_ = 0;
 };
 
 class GCTriggerHeapOccupancy : public GCTrigger {
 public:
-    explicit GCTriggerHeapOccupancy(HeapSpace *heap_space, uint32_t max_trigger_percent);
+    explicit GCTriggerHeapOccupancy(HeapSpace *heapSpace, uint32_t maxTriggerPercent);
 
     GCTriggerType GetType() const override
     {
@@ -239,13 +238,13 @@ public:
 
     void TriggerGcIfNeeded(GC *gc) override;
 
-    void GCStarted(const GCTask &task, [[maybe_unused]] size_t heap_size) override;
-    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
-                    [[maybe_unused]] size_t heap_size) override;
+    void GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize) override;
+    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                    [[maybe_unused]] size_t heapSize) override;
 
 private:
-    HeapSpace *heap_space_ {nullptr};
-    double max_trigger_percent_ = 0.0;
+    HeapSpace *heapSpace_ {nullptr};
+    double maxTriggerPercent_ = 0.0;
 };
 
 class GCNeverTrigger : public GCTrigger {
@@ -257,9 +256,9 @@ public:
 
     void TriggerGcIfNeeded([[maybe_unused]] GC *gc) override {}
 
-    void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size) override {}
-    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
-                    [[maybe_unused]] size_t heap_size) override
+    void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSize) override {}
+    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                    [[maybe_unused]] size_t heapSize) override
     {
     }
 };
@@ -276,14 +275,14 @@ public:
 
     bool IsTriggered() const
     {
-        return is_triggered_;
+        return isTriggered_;
     }
 
     void TriggerGcIfNeeded(GC *gc) override;
     void ScheduleGc(GCTaskCause cause, uint32_t counter);
-    void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size) override {}
-    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
-                    [[maybe_unused]] size_t heap_size) override
+    void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSize) override {}
+    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                    [[maybe_unused]] size_t heapSize) override
     {
     }
 
@@ -294,13 +293,13 @@ private:
     GCTrigger *origin_;
     std::atomic<uint32_t> counter_ = 0;
     GCTaskCause cause_ = GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE;
-    bool is_triggered_ = false;
+    bool isTriggered_ = false;
 };
 
 class PauseTimeGoalTrigger : public GCTrigger {
 public:
-    PauseTimeGoalTrigger(MemStatsType *mem_stats, size_t min_heap_size, uint8_t percent_threshold,
-                         size_t min_extra_size, size_t max_extra_size);
+    PauseTimeGoalTrigger(MemStatsType *memStats, size_t minHeapSize, uint8_t percentThreshold, size_t minExtraSize,
+                         size_t maxExtraSize);
     NO_COPY_SEMANTIC(PauseTimeGoalTrigger);
     NO_MOVE_SEMANTIC(PauseTimeGoalTrigger);
     ~PauseTimeGoalTrigger() override = default;
@@ -310,7 +309,7 @@ public:
         return GCTriggerType::PAUSE_TIME_GOAL_TRIGGER;
     }
 
-    void GCFinished(const GCTask &task, size_t heap_size_before_gc, size_t heap_size) override;
+    void GCFinished(const GCTask &task, size_t heapSizeBeforeGc, size_t heapSize) override;
 
     void TriggerGcIfNeeded(GC *gc) override;
 
@@ -318,20 +317,20 @@ public:
     {
         // Atomic with relaxed order reason: data race with target_footprint_ with no synchronization or ordering
         // constraints imposed on other reads or writes
-        return target_footprint_.load(std::memory_order_relaxed);
+        return targetFootprint_.load(std::memory_order_relaxed);
     }
 
 private:
-    size_t ComputeTarget(size_t heap_size_before_gc, size_t heap_size);
-    MemStatsType *mem_stats_;
-    uint8_t percent_threshold_;
-    size_t min_extra_size_;
-    size_t max_extra_size_;
-    std::atomic<size_t> target_footprint_;
-    std::atomic<bool> start_concurrent_marking_ {false};
+    size_t ComputeTarget(size_t heapSizeBeforeGc, size_t heapSize);
+    MemStatsType *memStats_;
+    uint8_t percentThreshold_;
+    size_t minExtraSize_;
+    size_t maxExtraSize_;
+    std::atomic<size_t> targetFootprint_;
+    std::atomic<bool> startConcurrentMarking_ {false};
 };
 
-GCTrigger *CreateGCTrigger(MemStatsType *mem_stats, HeapSpace *heap_space, const GCTriggerConfig &config,
+GCTrigger *CreateGCTrigger(MemStatsType *memStats, HeapSpace *heapSpace, const GCTriggerConfig &config,
                            InternalAllocatorPtr allocator);
 
 }  // namespace mem

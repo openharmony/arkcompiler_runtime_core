@@ -31,16 +31,16 @@ public:
     void IncAddedCardToQueue(size_t value = 1)
     {
         if (REMSET_THREAD_USE_STATS) {
-            added_cards_to_queue_ += value;
+            addedCardsToQueue_ += value;
         }
     }
 
     void IncProcessedConcurrentCards(const PandaUnorderedSet<CardTable::CardPtr> &cards)
     {
         if (REMSET_THREAD_USE_STATS) {
-            processed_concurrent_cards_ += cards.size();
+            processedConcurrentCards_ += cards.size();
             for (const auto &card : cards) {
-                unique_cards_.insert(card);
+                uniqueCards_.insert(card);
             }
         }
     }
@@ -48,43 +48,43 @@ public:
     void IncProcessedAtSTWCards(const PandaUnorderedSet<CardTable::CardPtr> &cards)
     {
         if (REMSET_THREAD_USE_STATS) {
-            processed_at_stw_cards_ += cards.size();
+            processedAtStwCards_ += cards.size();
             for (const auto &card : cards) {
-                unique_cards_.insert(card);
+                uniqueCards_.insert(card);
             }
         }
     }
 
     void Reset()
     {
-        added_cards_to_queue_ = processed_concurrent_cards_ = processed_at_stw_cards_ = 0;
-        unique_cards_.clear();
+        addedCardsToQueue_ = processedConcurrentCards_ = processedAtStwCards_ = 0;
+        uniqueCards_.clear();
     }
 
     void PrintStats() const
     {
         if (REMSET_THREAD_USE_STATS) {
             LOG(DEBUG, GC) << "remset thread stats: "
-                           << "added_cards_to_queue: " << added_cards_to_queue_
-                           << " processed_concurrent_cards: " << processed_concurrent_cards_
-                           << " processed_at_stw_cards: " << processed_at_stw_cards_
-                           << " uniq_cards_processed: " << unique_cards_.size();
+                           << "added_cards_to_queue: " << addedCardsToQueue_
+                           << " processed_concurrent_cards: " << processedConcurrentCards_
+                           << " processed_at_stw_cards: " << processedAtStwCards_
+                           << " uniq_cards_processed: " << uniqueCards_.size();
         }
     }
 
 private:
-    std::atomic<size_t> added_cards_to_queue_ {0};
-    std::atomic<size_t> processed_concurrent_cards_ {0};
-    std::atomic<size_t> processed_at_stw_cards_ {0};
-    PandaUnorderedSet<CardTable::CardPtr> unique_cards_;
+    std::atomic<size_t> addedCardsToQueue_ {0};
+    std::atomic<size_t> processedConcurrentCards_ {0};
+    std::atomic<size_t> processedAtStwCards_ {0};
+    PandaUnorderedSet<CardTable::CardPtr> uniqueCards_;
 };
 
 template <class LanguageConfig>
 class UpdateRemsetThread final : public UpdateRemsetWorker<LanguageConfig> {
 public:
     explicit UpdateRemsetThread(G1GC<LanguageConfig> *gc, GCG1BarrierSet::ThreadLocalCardQueues *queue,
-                                os::memory::Mutex *queue_lock, size_t region_size, bool update_concurrent,
-                                size_t min_concurrent_cards_to_process);
+                                os::memory::Mutex *queueLock, size_t regionSize, bool updateConcurrent,
+                                size_t minConcurrentCardsToProcess);
     ~UpdateRemsetThread() final;
     NO_COPY_SEMANTIC(UpdateRemsetThread);
     NO_MOVE_SEMANTIC(UpdateRemsetThread);
@@ -92,19 +92,19 @@ public:
 private:
     void CreateWorkerImpl() final;
     void DestroyWorkerImpl() final;
-    void ContinueProcessCards() REQUIRES(this->update_remset_lock_) final;
+    void ContinueProcessCards() REQUIRES(this->updateRemsetLock_) final;
 
     void ThreadLoop();
 
-    void Sleep() REQUIRES(this->update_remset_lock_)
+    void Sleep() REQUIRES(this->updateRemsetLock_)
     {
         static constexpr uint64_t SLEEP_MS = 1;
-        thread_cond_var_.TimedWait(&this->update_remset_lock_, SLEEP_MS);
+        threadCondVar_.TimedWait(&this->updateRemsetLock_, SLEEP_MS);
     }
 
     /* Thread specific variables */
-    std::thread *update_thread_ {nullptr};
-    os::memory::ConditionVariable thread_cond_var_ GUARDED_BY(this->update_remset_lock_);
+    std::thread *updateThread_ {nullptr};
+    os::memory::ConditionVariable threadCondVar_ GUARDED_BY(this->updateRemsetLock_);
     RemsetThreadStats stats_;
 };
 

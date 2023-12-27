@@ -38,12 +38,12 @@ public:
 
     // NOLINTBEGIN(readability-magic-numbers)
     template <bool IS_APPLIED>
-    void SimpleTest(int32_t index, int32_t array_len)
+    void SimpleTest(int32_t index, int32_t arrayLen)
     {
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            CONSTANT(0U, array_len);
+            CONSTANT(0U, arrayLen);
             CONSTANT(1U, index);
             BASIC_BLOCK(2U, 1U)
             {
@@ -60,7 +60,7 @@ public:
         if constexpr (IS_APPLIED) {
             GRAPH(graph2)
             {
-                CONSTANT(0U, array_len);
+                CONSTANT(0U, arrayLen);
                 CONSTANT(1U, index);
                 BASIC_BLOCK(2U, 1U)
                 {
@@ -75,7 +75,7 @@ public:
         } else {
             GRAPH(graph2)
             {
-                CONSTANT(0U, array_len);
+                CONSTANT(0U, arrayLen);
                 CONSTANT(1U, index);
                 BASIC_BLOCK(2U, 1U)
                 {
@@ -92,12 +92,12 @@ public:
     enum AppliedType { NOT_APPLIED, REMOVED, REPLACED };
 
     template <AppliedType APPLIED_TYPE>
-    void ArithmeticTest(int32_t index, int32_t array_len, Opcode opc, int32_t val)
+    void ArithmeticTest(int32_t index, int32_t arrayLen, Opcode opc, int32_t val)
     {
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            CONSTANT(0U, array_len);
+            CONSTANT(0U, arrayLen);
             CONSTANT(1U, index);
             CONSTANT(2U, val);
             BASIC_BLOCK(2U, 1U)
@@ -117,7 +117,7 @@ public:
         if constexpr (APPLIED_TYPE == AppliedType::REMOVED) {
             GRAPH(graph2)
             {
-                CONSTANT(0U, array_len);
+                CONSTANT(0U, arrayLen);
                 CONSTANT(1U, index);
                 CONSTANT(2U, val);
                 BASIC_BLOCK(2U, 1U)
@@ -135,7 +135,7 @@ public:
         } else if constexpr (APPLIED_TYPE == AppliedType::REPLACED) {
             GRAPH(graph2)
             {
-                CONSTANT(0U, array_len);
+                CONSTANT(0U, arrayLen);
                 CONSTANT(1U, index);
                 CONSTANT(2U, val);
                 BASIC_BLOCK(2U, 1U)
@@ -155,12 +155,12 @@ public:
     }
 
     template <bool IS_APPLIED>
-    void ModTest(int32_t array_len, int32_t mod)
+    void ModTest(int32_t arrayLen, int32_t mod)
     {
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            CONSTANT(0U, array_len);
+            CONSTANT(0U, arrayLen);
             CONSTANT(1U, mod);
             CONSTANT(12U, 0U);
             PARAMETER(2U, 0U).s32();
@@ -188,7 +188,7 @@ public:
         if constexpr (IS_APPLIED) {
             GRAPH(graph2)
             {
-                CONSTANT(0U, array_len);
+                CONSTANT(0U, arrayLen);
                 CONSTANT(1U, mod);
                 CONSTANT(12U, 0U);
                 PARAMETER(2U, 0U).s32();
@@ -220,15 +220,15 @@ public:
     }
 
     template <bool IS_APPLIED>
-    void PhiTest(int32_t index, int32_t len_array, int32_t mod)
+    void PhiTest(int32_t index, int32_t lenArray, int32_t mod)
     {
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
             PARAMETER(0U, 0U).b();
             PARAMETER(1U, 1U).s32();
-            CONSTANT(2U, len_array);  // len array
-            CONSTANT(3U, index);      // index 2
+            CONSTANT(2U, lenArray);  // len array
+            CONSTANT(3U, index);     // index 2
             CONSTANT(12U, mod);
             BASIC_BLOCK(2U, 3U, 4U)
             {
@@ -257,7 +257,7 @@ public:
             {
                 PARAMETER(0U, 0U).b();
                 PARAMETER(1U, 1U).s32();  // index 1
-                CONSTANT(2U, len_array);  // len array
+                CONSTANT(2U, lenArray);   // len array
                 CONSTANT(3U, index);      // index 2
                 CONSTANT(12U, mod);
                 BASIC_BLOCK(2U, 3U, 4U)
@@ -285,8 +285,8 @@ public:
             {
                 PARAMETER(0U, 0U).b();
                 PARAMETER(1U, 1U).s32();
-                CONSTANT(2U, len_array);  // len array
-                CONSTANT(3U, index);      // index 2
+                CONSTANT(2U, lenArray);  // len array
+                CONSTANT(3U, index);     // index 2
                 CONSTANT(12U, mod);
                 BASIC_BLOCK(2U, 3U, 4U)
                 {

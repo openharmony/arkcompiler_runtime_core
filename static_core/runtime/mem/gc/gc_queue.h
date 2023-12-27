@@ -31,7 +31,7 @@ public:
     GCQueueInterface() = default;
     virtual ~GCQueueInterface() = default;
 
-    virtual PandaUniquePtr<GCTask> GetTask(bool need_wait_task) = 0;
+    virtual PandaUniquePtr<GCTask> GetTask(bool needWaitTask) = 0;
 
     virtual bool AddTask(PandaUniquePtr<GCTask> task) = 0;
 
@@ -50,7 +50,7 @@ class GCQueueWithTime : public GCQueueInterface {
 public:
     explicit GCQueueWithTime(GC *gc) : gc_(gc) {}
 
-    PandaUniquePtr<GCTask> GetTask(bool need_wait_task) override;
+    PandaUniquePtr<GCTask> GetTask(bool needWaitTask) override;
 
     bool AddTask(PandaUniquePtr<GCTask> task) override;
 
@@ -63,13 +63,13 @@ public:
     void Signal() override
     {
         os::memory::LockHolder lock(lock_);
-        cond_var_.Signal();
+        condVar_.Signal();
     }
 
     bool WaitForGCTask() override
     {
         os::memory::LockHolder lock(lock_);
-        return cond_var_.TimedWait(&lock_, GC_WAIT_TIMEOUT);
+        return condVar_.TimedWait(&lock_, GC_WAIT_TIMEOUT);
     }
 
 private:
@@ -85,8 +85,8 @@ private:
     mutable os::memory::Mutex lock_;
     PandaPriorityQueue<PandaUniquePtr<GCTask>, PandaVector<PandaUniquePtr<GCTask>>, CompareByTime> queue_
         GUARDED_BY(lock_);
-    os::memory::ConditionVariable cond_var_;
-    const char *queue_name_ = "GC queue ordered by time";
+    os::memory::ConditionVariable condVar_;
+    const char *queueName_ = "GC queue ordered by time";
 };
 
 }  // namespace panda::mem

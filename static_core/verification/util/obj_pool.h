@@ -31,8 +31,7 @@ public:
     class Accessor {
     public:
         Accessor() : idx_ {0}, pool_ {nullptr}, prev_ {nullptr}, next_ {nullptr} {}
-        Accessor(std::size_t index, ObjPool *obj_pool)
-            : idx_ {index}, pool_ {obj_pool}, prev_ {nullptr}, next_ {nullptr}
+        Accessor(std::size_t index, ObjPool *objPool) : idx_ {index}, pool_ {objPool}, prev_ {nullptr}, next_ {nullptr}
         {
             Insert();
         }

@@ -43,16 +43,16 @@ public:
     NO_COPY_SEMANTIC(G1AnalyticsTest);
     NO_MOVE_SEMANTIC(G1AnalyticsTest);
 
-    CollectionSet CreateCollectionSet(size_t eden_length, size_t old_length = 0)
+    CollectionSet CreateCollectionSet(size_t edenLength, size_t oldLength = 0)
     {
-        ASSERT(eden_length + old_length < ALL_REGIONS_NUM);
+        ASSERT(edenLength + oldLength < ALL_REGIONS_NUM);
         PandaVector<Region *> vector;
         auto it = regions_.begin();
-        for (size_t i = 0; i < eden_length; ++it, ++i) {
+        for (size_t i = 0; i < edenLength; ++it, ++i) {
             vector.push_back(&*it);
         }
         auto cs = CollectionSet(vector);
-        for (size_t i = 0; i < old_length; ++it, ++i) {
+        for (size_t i = 0; i < oldLength; ++it, ++i) {
             auto &region = *it;
             region.AddFlag(RegionFlag::IS_OLD);
             cs.AddRegion(&region);
@@ -71,13 +71,13 @@ TEST_F(G1AnalyticsTest, UndefinedBehaviorTest)
     G1Analytics analytics(now - 20'000'000);
     ASSERT_EQ(0, analytics.PredictYoungCollectionTimeInMicros(16));
 
-    auto collection_set = CreateCollectionSet(16);
+    auto collectionSet = CreateCollectionSet(16);
     analytics.ReportCollectionStart(now);
     analytics.ReportMarkingStart(now + 1'000'000);
     analytics.ReportMarkingEnd(now + 2'000'000);
     analytics.ReportEvacuationStart(now + 3'000'000);
     analytics.ReportEvacuationEnd(now + 6'000'000);
-    analytics.ReportCollectionEnd(now + 10'000'000, collection_set);
+    analytics.ReportCollectionEnd(now + 10'000'000, collectionSet);
 
     ASSERT_EQ(0, analytics.PredictYoungCollectionTimeInMicros(16));
 }
@@ -88,7 +88,7 @@ TEST_F(G1AnalyticsTest, AllPromotedUndefinedBehaviorTest)
     G1Analytics analytics(now - 20'000'000);
     ASSERT_EQ(0, analytics.PredictYoungCollectionTimeInMicros(16));
 
-    auto collection_set = CreateCollectionSet(16);
+    auto collectionSet = CreateCollectionSet(16);
     analytics.ReportCollectionStart(now);
     analytics.ReportMarkingStart(now + 1'000'000);
     analytics.ReportMarkingEnd(now + 2'000'000);
@@ -97,7 +97,7 @@ TEST_F(G1AnalyticsTest, AllPromotedUndefinedBehaviorTest)
     for (int i = 0; i < 16; i++) {
         analytics.ReportPromotedRegion();
     }
-    analytics.ReportCollectionEnd(now + 10'000'000, collection_set);
+    analytics.ReportCollectionEnd(now + 10'000'000, collectionSet);
 
     ASSERT_EQ(800, analytics.PredictYoungCollectionTimeInMicros(16));
 
@@ -109,7 +109,7 @@ TEST_F(G1AnalyticsTest, AllPromotedUndefinedBehaviorTest)
     analytics.ReportMarkingEnd(now + 2'000'000);
     analytics.ReportEvacuationStart(now + 3'000'000);
     analytics.ReportEvacuationEnd(now + 6'000'000);
-    analytics.ReportCollectionEnd(now + 10'000'000, collection_set);
+    analytics.ReportCollectionEnd(now + 10'000'000, collectionSet);
 
     ASSERT_EQ(833, analytics.PredictYoungCollectionTimeInMicros(16));
 }
@@ -119,7 +119,7 @@ TEST_F(G1AnalyticsTest, PredictionTest)
     uint64_t now = 1686312829587000000;
     G1Analytics analytics(now - 20'000'000);
 
-    auto collection_set = CreateCollectionSet(16);
+    auto collectionSet = CreateCollectionSet(16);
     analytics.ReportCollectionStart(now);
     analytics.ReportScanRemsetStart(now + 500'000);
     analytics.ReportScanRemsetEnd(now + 900'000);
@@ -131,7 +131,7 @@ TEST_F(G1AnalyticsTest, PredictionTest)
     analytics.ReportLiveObjects(32000);
     analytics.ReportUpdateRefsStart(now + 6'000'000);
     analytics.ReportUpdateRefsEnd(now + 7'000'000);
-    analytics.ReportCollectionEnd(now + 10'000'000, collection_set);
+    analytics.ReportCollectionEnd(now + 10'000'000, collectionSet);
 
     ASSERT_EQ(5'000, analytics.EstimatePredictionErrorInMicros());
     ASSERT_EQ(5'400, analytics.PredictYoungCollectionTimeInMicros(16));
@@ -139,7 +139,7 @@ TEST_F(G1AnalyticsTest, PredictionTest)
 
     now += 20'000'000;
 
-    collection_set = CreateCollectionSet(10);
+    collectionSet = CreateCollectionSet(10);
     analytics.ReportCollectionStart(now);
     analytics.ReportScanRemsetStart(now + 500'000);
     analytics.ReportScanRemsetEnd(now + 900'000);
@@ -153,7 +153,7 @@ TEST_F(G1AnalyticsTest, PredictionTest)
     analytics.ReportLiveObjects(30000);
     analytics.ReportUpdateRefsStart(now + 6'000'000);
     analytics.ReportUpdateRefsEnd(now + 7'500'000);
-    analytics.ReportCollectionEnd(now + 10'000'000, collection_set);
+    analytics.ReportCollectionEnd(now + 10'000'000, collectionSet);
 
     ASSERT_EQ(5'005, analytics.EstimatePredictionErrorInMicros());
     ASSERT_EQ(5'069, analytics.PredictYoungCollectionTimeInMicros(10));
@@ -161,7 +161,7 @@ TEST_F(G1AnalyticsTest, PredictionTest)
 
     now += 20'000'000;
 
-    collection_set = CreateCollectionSet(14, 10);
+    collectionSet = CreateCollectionSet(14, 10);
     analytics.ReportCollectionStart(now);
     analytics.ReportScanRemsetStart(now + 500'000);
     analytics.ReportScanRemsetEnd(now + 900'000);
@@ -174,7 +174,7 @@ TEST_F(G1AnalyticsTest, PredictionTest)
     analytics.ReportLiveObjects(33000);
     analytics.ReportUpdateRefsStart(now + 7'000'000);
     analytics.ReportUpdateRefsEnd(now + 8'500'000);
-    analytics.ReportCollectionEnd(now + 11'000'000, collection_set);
+    analytics.ReportCollectionEnd(now + 11'000'000, collectionSet);
 
     ASSERT_EQ(5'005, analytics.EstimatePredictionErrorInMicros());
     ASSERT_EQ(6'526, analytics.PredictYoungCollectionTimeInMicros(14));

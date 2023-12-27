@@ -24,32 +24,32 @@
 
 namespace panda::coretypes {
 
-static Array *AllocateArray(panda::BaseClass *array_class, size_t elem_size, ArraySizeT length,
-                            panda::SpaceType space_type, const PandaVM *vm = Thread::GetCurrent()->GetVM())
+static Array *AllocateArray(panda::BaseClass *arrayClass, size_t elemSize, ArraySizeT length,
+                            panda::SpaceType spaceType, const PandaVM *vm = Thread::GetCurrent()->GetVM())
 {
-    size_t size = Array::ComputeSize(elem_size, length);
+    size_t size = Array::ComputeSize(elemSize, length);
 
     if (UNLIKELY(size == 0)) {
-        LOG(ERROR, RUNTIME) << "Illegal array size: element size: " << elem_size << " array length: " << length;
+        LOG(ERROR, RUNTIME) << "Illegal array size: element size: " << elemSize << " array length: " << length;
         ThrowOutOfMemoryError("OOM when allocating array");
         return nullptr;
     }
-    if (LIKELY(space_type == panda::SpaceType::SPACE_TYPE_OBJECT)) {
+    if (LIKELY(spaceType == panda::SpaceType::SPACE_TYPE_OBJECT)) {
         return static_cast<coretypes::Array *>(
-            vm->GetHeapManager()->AllocateObject(array_class, size, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent()));
+            vm->GetHeapManager()->AllocateObject(arrayClass, size, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent()));
     }
-    if (space_type == panda::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT) {
+    if (spaceType == panda::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT) {
         return static_cast<coretypes::Array *>(vm->GetHeapManager()->AllocateNonMovableObject(
-            array_class, size, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent()));
+            arrayClass, size, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent()));
     }
     UNREACHABLE();
 }
 
 /* static */
-Array *Array::Create(panda::Class *array_class, const uint8_t *data, ArraySizeT length, panda::SpaceType space_type)
+Array *Array::Create(panda::Class *arrayClass, const uint8_t *data, ArraySizeT length, panda::SpaceType spaceType)
 {
-    size_t elem_size = array_class->GetComponentSize();
-    auto *array = AllocateArray(array_class, elem_size, length, space_type);
+    size_t elemSize = arrayClass->GetComponentSize();
+    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType);
     if (UNLIKELY(array == nullptr)) {
         LOG(ERROR, RUNTIME) << "Failed to allocate array.";
         return nullptr;
@@ -58,7 +58,7 @@ Array *Array::Create(panda::Class *array_class, const uint8_t *data, ArraySizeT 
     // length == 0 is guaranteed by AllocateArray
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     array->SetLength(length);
-    memcpy_s(array->GetData(), array->GetLength() * elem_size, data, length * elem_size);
+    memcpy_s(array->GetData(), array->GetLength() * elemSize, data, length * elemSize);
     TSAN_ANNOTATE_IGNORE_WRITES_END();
     // Witout full memory barrier it is possible that architectures with weak memory order can try fetching array
     // legth before it's set
@@ -67,10 +67,10 @@ Array *Array::Create(panda::Class *array_class, const uint8_t *data, ArraySizeT 
 }
 
 /* static */
-Array *Array::Create(panda::Class *array_class, ArraySizeT length, panda::SpaceType space_type)
+Array *Array::Create(panda::Class *arrayClass, ArraySizeT length, panda::SpaceType spaceType)
 {
-    size_t elem_size = array_class->GetComponentSize();
-    auto *array = AllocateArray(array_class, elem_size, length, space_type);
+    size_t elemSize = arrayClass->GetComponentSize();
+    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType);
     if (array == nullptr) {
         return nullptr;
     }
@@ -85,11 +85,11 @@ Array *Array::Create(panda::Class *array_class, ArraySizeT length, panda::SpaceT
 }
 
 /* static */
-Array *Array::Create(DynClass *dynarrayclass, ArraySizeT length, panda::SpaceType space_type)
+Array *Array::Create(DynClass *dynarrayclass, ArraySizeT length, panda::SpaceType spaceType)
 {
-    size_t elem_size = coretypes::TaggedValue::TaggedTypeSize();
-    HClass *array_class = dynarrayclass->GetHClass();
-    auto *array = AllocateArray(array_class, elem_size, length, space_type);
+    size_t elemSize = coretypes::TaggedValue::TaggedTypeSize();
+    HClass *arrayClass = dynarrayclass->GetHClass();
+    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType);
     if (array == nullptr) {
         return nullptr;
     }
@@ -104,18 +104,18 @@ Array *Array::Create(DynClass *dynarrayclass, ArraySizeT length, panda::SpaceTyp
 }
 
 /* static */
-Array *Array::CreateTagged(const PandaVM *vm, panda::BaseClass *array_class, ArraySizeT length,
-                           panda::SpaceType space_type, TaggedValue init_value)
+Array *Array::CreateTagged(const PandaVM *vm, panda::BaseClass *arrayClass, ArraySizeT length,
+                           panda::SpaceType spaceType, TaggedValue initValue)
 {
-    size_t elem_size = coretypes::TaggedValue::TaggedTypeSize();
-    auto *array = AllocateArray(array_class, elem_size, length, space_type, vm);
+    size_t elemSize = coretypes::TaggedValue::TaggedTypeSize();
+    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType, vm);
     if (array == nullptr) {
         return nullptr;
     }
     // Order is matters here: GC can read data before it copied if we set length first.
     // length == 0 is guaranteed by AllocateArray
     for (ArraySizeT i = 0; i < length; i++) {
-        array->Set<TaggedType, false, true>(i, init_value.GetRawData());
+        array->Set<TaggedType, false, true>(i, initValue.GetRawData());
     }
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     array->SetLength(length);

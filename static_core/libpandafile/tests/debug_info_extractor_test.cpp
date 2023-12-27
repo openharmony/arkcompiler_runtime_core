@@ -41,78 +41,77 @@ static const char SOURCE_FILE[] = "asm.pa";
 
 void PreparePandaFile(ItemContainer *container)
 {
-    ClassItem *class_item = container->GetOrCreateClassItem("A");
-    class_item->SetAccessFlags(ACC_PUBLIC);
+    ClassItem *classItem = container->GetOrCreateClassItem("A");
+    classItem->SetAccessFlags(ACC_PUBLIC);
 
-    StringItem *method_name = container->GetOrCreateStringItem("foo");
+    StringItem *methodName = container->GetOrCreateStringItem("foo");
 
-    PrimitiveTypeItem *ret_type = container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    PrimitiveTypeItem *retType = container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params;
     params.emplace_back(container->GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
-    ProtoItem *proto_item = container->GetOrCreateProtoItem(ret_type, params);
-    MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
+    ProtoItem *protoItem = container->GetOrCreateProtoItem(retType, params);
+    MethodItem *methodItem = classItem->AddMethod(methodName, protoItem, ACC_PUBLIC | ACC_STATIC, params);
 
     std::vector<uint8_t> instructions {1, 2, 3, 4};
-    auto *code_item = container->CreateItem<CodeItem>(4, 1, instructions);
+    auto *codeItem = container->CreateItem<CodeItem>(4, 1, instructions);
 
-    method_item->SetCode(code_item);
+    methodItem->SetCode(codeItem);
 
-    StringItem *source_file_item = container->GetOrCreateStringItem(SOURCE_FILE);
-    StringItem *param_string_item = container->GetOrCreateStringItem("arg0");
-    StringItem *local_variable_name_0 = container->GetOrCreateStringItem("local_0");
-    StringItem *local_variable_name_1 = container->GetOrCreateStringItem("local_1");
-    StringItem *local_variable_name_2 = container->GetOrCreateStringItem("local_2");
-    StringItem *local_variable_type_i32 = container->GetOrCreateStringItem("I");
-    StringItem *local_variable_sig_type_i32 = container->GetOrCreateStringItem("type_i32");
+    StringItem *sourceFileItem = container->GetOrCreateStringItem(SOURCE_FILE);
+    StringItem *paramStringItem = container->GetOrCreateStringItem("arg0");
+    StringItem *localVariableName0 = container->GetOrCreateStringItem("local_0");
+    StringItem *localVariableName1 = container->GetOrCreateStringItem("local_1");
+    StringItem *localVariableName2 = container->GetOrCreateStringItem("local_2");
+    StringItem *localVariableTypeI32 = container->GetOrCreateStringItem("I");
+    StringItem *localVariableSigTypeI32 = container->GetOrCreateStringItem("type_i32");
 
-    LineNumberProgramItem *line_number_program_item = container->CreateLineNumberProgramItem();
-    auto *debug_info_item = container->CreateItem<DebugInfoItem>(line_number_program_item);
-    method_item->SetDebugInfo(debug_info_item);
+    LineNumberProgramItem *lineNumberProgramItem = container->CreateLineNumberProgramItem();
+    auto *debugInfoItem = container->CreateItem<DebugInfoItem>(lineNumberProgramItem);
+    methodItem->SetDebugInfo(debugInfoItem);
 
     // Add static method with ref arg
 
-    StringItem *method_name_bar = container->GetOrCreateStringItem("bar");
+    StringItem *methodNameBar = container->GetOrCreateStringItem("bar");
 
-    PrimitiveTypeItem *ret_type_bar = container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
-    std::vector<MethodParamItem> params_bar;
-    params_bar.emplace_back(container->GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
-    params_bar.emplace_back(container->GetOrCreateClassItem("RefArg"));
-    ProtoItem *proto_item_bar = container->GetOrCreateProtoItem(ret_type_bar, params_bar);
-    MethodItem *method_item_bar =
-        class_item->AddMethod(method_name_bar, proto_item_bar, ACC_PUBLIC | ACC_STATIC, params_bar);
+    PrimitiveTypeItem *retTypeBar = container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> paramsBar;
+    paramsBar.emplace_back(container->GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
+    paramsBar.emplace_back(container->GetOrCreateClassItem("RefArg"));
+    ProtoItem *protoItemBar = container->GetOrCreateProtoItem(retTypeBar, paramsBar);
+    MethodItem *methodItemBar = classItem->AddMethod(methodNameBar, protoItemBar, ACC_PUBLIC | ACC_STATIC, paramsBar);
 
-    auto *code_item_bar = container->CreateItem<CodeItem>(0, 2, instructions);
+    auto *codeItemBar = container->CreateItem<CodeItem>(0, 2, instructions);
 
-    method_item_bar->SetCode(code_item_bar);
+    methodItemBar->SetCode(codeItemBar);
 
-    StringItem *param_string_item_bar1 = container->GetOrCreateStringItem("arg0");
-    StringItem *param_string_item_bar2 = container->GetOrCreateStringItem("arg1");
+    StringItem *paramStringItemBar1 = container->GetOrCreateStringItem("arg0");
+    StringItem *paramStringItemBar2 = container->GetOrCreateStringItem("arg1");
 
-    LineNumberProgramItem *line_number_program_item_bar = container->CreateLineNumberProgramItem();
-    auto *debug_info_item_bar = container->CreateItem<DebugInfoItem>(line_number_program_item_bar);
-    method_item_bar->SetDebugInfo(debug_info_item_bar);
+    LineNumberProgramItem *lineNumberProgramItemBar = container->CreateLineNumberProgramItem();
+    auto *debugInfoItemBar = container->CreateItem<DebugInfoItem>(lineNumberProgramItemBar);
+    methodItemBar->SetDebugInfo(debugInfoItemBar);
 
     // Add non static method with ref arg
 
-    StringItem *method_name_baz = container->GetOrCreateStringItem("baz");
+    StringItem *methodNameBaz = container->GetOrCreateStringItem("baz");
 
-    PrimitiveTypeItem *ret_type_baz = container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
-    std::vector<MethodParamItem> params_baz;
-    params_baz.emplace_back(container->GetOrCreateClassItem("RefArg"));
-    params_baz.emplace_back(container->GetOrCreatePrimitiveTypeItem(Type::TypeId::U1));
-    ProtoItem *proto_item_baz = container->GetOrCreateProtoItem(ret_type_baz, params_baz);
-    MethodItem *method_item_baz = class_item->AddMethod(method_name_baz, proto_item_baz, ACC_PUBLIC, params_baz);
+    PrimitiveTypeItem *retTypeBaz = container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> paramsBaz;
+    paramsBaz.emplace_back(container->GetOrCreateClassItem("RefArg"));
+    paramsBaz.emplace_back(container->GetOrCreatePrimitiveTypeItem(Type::TypeId::U1));
+    ProtoItem *protoItemBaz = container->GetOrCreateProtoItem(retTypeBaz, paramsBaz);
+    MethodItem *methodItemBaz = classItem->AddMethod(methodNameBaz, protoItemBaz, ACC_PUBLIC, paramsBaz);
 
-    auto *code_item_baz = container->CreateItem<CodeItem>(0, 2, instructions);
+    auto *codeItemBaz = container->CreateItem<CodeItem>(0, 2, instructions);
 
-    method_item_baz->SetCode(code_item_baz);
+    methodItemBaz->SetCode(codeItemBaz);
 
-    StringItem *param_string_item_baz1 = container->GetOrCreateStringItem("arg0");
-    StringItem *param_string_item_baz2 = container->GetOrCreateStringItem("arg1");
+    StringItem *paramStringItemBaz1 = container->GetOrCreateStringItem("arg0");
+    StringItem *paramStringItemBaz2 = container->GetOrCreateStringItem("arg1");
 
-    LineNumberProgramItem *line_number_program_item_baz = container->CreateLineNumberProgramItem();
-    auto *debug_info_item_baz = container->CreateItem<DebugInfoItem>(line_number_program_item_baz);
-    method_item_baz->SetDebugInfo(debug_info_item_baz);
+    LineNumberProgramItem *lineNumberProgramItemBaz = container->CreateLineNumberProgramItem();
+    auto *debugInfoItemBaz = container->CreateItem<DebugInfoItem>(lineNumberProgramItemBaz);
+    methodItemBaz->SetDebugInfo(debugInfoItemBaz);
 
     // Add debug info for the following source file;
 
@@ -139,73 +138,73 @@ void PreparePandaFile(ItemContainer *container)
     container->ComputeLayout();
 
     // foo line number program
-    auto *constant_pool = debug_info_item->GetConstantPool();
+    auto *constantPool = debugInfoItem->GetConstantPool();
     // Line 3
-    debug_info_item->SetLineNumber(3);
-    line_number_program_item->EmitSetFile(constant_pool, source_file_item);
-    line_number_program_item->EmitAdvancePc(constant_pool, 1);
-    line_number_program_item->EmitAdvanceLine(constant_pool, 1);
-    line_number_program_item->EmitSpecialOpcode(0, 0);
-    line_number_program_item->EmitColumn(constant_pool, 0, 7);
+    debugInfoItem->SetLineNumber(3);
+    lineNumberProgramItem->EmitSetFile(constantPool, sourceFileItem);
+    lineNumberProgramItem->EmitAdvancePc(constantPool, 1);
+    lineNumberProgramItem->EmitAdvanceLine(constantPool, 1);
+    lineNumberProgramItem->EmitSpecialOpcode(0, 0);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 7);
     // Line 4
-    line_number_program_item->EmitStartLocal(constant_pool, 1, local_variable_name_0, local_variable_type_i32);
-    line_number_program_item->EmitSpecialOpcode(1, 1);
-    line_number_program_item->EmitColumn(constant_pool, 0, 8);
+    lineNumberProgramItem->EmitStartLocal(constantPool, 1, localVariableName0, localVariableTypeI32);
+    lineNumberProgramItem->EmitSpecialOpcode(1, 1);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 8);
     // Line 5
-    line_number_program_item->EmitSpecialOpcode(1, 1);
+    lineNumberProgramItem->EmitSpecialOpcode(1, 1);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    line_number_program_item->EmitColumn(constant_pool, 0, 9);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 9);
     // Line 6
-    line_number_program_item->EmitStartLocalExtended(constant_pool, 2, local_variable_name_1, local_variable_type_i32,
-                                                     local_variable_sig_type_i32);
-    line_number_program_item->EmitEndLocal(1);
-    line_number_program_item->EmitSpecialOpcode(1, 2);
+    lineNumberProgramItem->EmitStartLocalExtended(constantPool, 2, localVariableName1, localVariableTypeI32,
+                                                  localVariableSigTypeI32);
+    lineNumberProgramItem->EmitEndLocal(1);
+    lineNumberProgramItem->EmitSpecialOpcode(1, 2);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    line_number_program_item->EmitColumn(constant_pool, 0, 10);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 10);
     // Line 8
-    line_number_program_item->EmitStartLocal(constant_pool, 3, local_variable_name_2, local_variable_type_i32);
-    line_number_program_item->EmitAdvanceLine(constant_pool, 2);
-    line_number_program_item->EmitSpecialOpcode(0, 0);
+    lineNumberProgramItem->EmitStartLocal(constantPool, 3, localVariableName2, localVariableTypeI32);
+    lineNumberProgramItem->EmitAdvanceLine(constantPool, 2);
+    lineNumberProgramItem->EmitSpecialOpcode(0, 0);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    line_number_program_item->EmitColumn(constant_pool, 0, 11);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 11);
     // Line 10
-    line_number_program_item->EmitEnd();
+    lineNumberProgramItem->EmitEnd();
 
-    debug_info_item->AddParameter(param_string_item);
+    debugInfoItem->AddParameter(paramStringItem);
 
-    method_item->SetDebugInfo(debug_info_item);
+    methodItem->SetDebugInfo(debugInfoItem);
 
     // bar line number program
-    auto *constant_pool_bar = debug_info_item_bar->GetConstantPool();
+    auto *constantPoolBar = debugInfoItemBar->GetConstantPool();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    debug_info_item_bar->SetLineNumber(13);
-    line_number_program_item_bar->EmitSetFile(constant_pool_bar, source_file_item);
-    line_number_program_item_bar->EmitAdvancePc(constant_pool_bar, 1);
-    line_number_program_item_bar->EmitAdvanceLine(constant_pool_bar, 1);
-    line_number_program_item_bar->EmitSpecialOpcode(0, 0);
-    line_number_program_item_bar->EmitColumn(constant_pool_bar, 0, 5);
-    line_number_program_item_bar->EmitEnd();
+    debugInfoItemBar->SetLineNumber(13);
+    lineNumberProgramItemBar->EmitSetFile(constantPoolBar, sourceFileItem);
+    lineNumberProgramItemBar->EmitAdvancePc(constantPoolBar, 1);
+    lineNumberProgramItemBar->EmitAdvanceLine(constantPoolBar, 1);
+    lineNumberProgramItemBar->EmitSpecialOpcode(0, 0);
+    lineNumberProgramItemBar->EmitColumn(constantPoolBar, 0, 5);
+    lineNumberProgramItemBar->EmitEnd();
 
-    debug_info_item_bar->AddParameter(param_string_item_bar1);
-    debug_info_item_bar->AddParameter(param_string_item_bar2);
+    debugInfoItemBar->AddParameter(paramStringItemBar1);
+    debugInfoItemBar->AddParameter(paramStringItemBar2);
 
-    method_item_bar->SetDebugInfo(debug_info_item_bar);
+    methodItemBar->SetDebugInfo(debugInfoItemBar);
 
     // baz line number program
-    auto *constant_pool_baz = debug_info_item_baz->GetConstantPool();
+    auto *constantPoolBaz = debugInfoItemBaz->GetConstantPool();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    debug_info_item_baz->SetLineNumber(15);
-    line_number_program_item_baz->EmitSetFile(constant_pool_baz, source_file_item);
-    line_number_program_item_baz->EmitAdvancePc(constant_pool_baz, 1);
-    line_number_program_item_baz->EmitAdvanceLine(constant_pool_baz, 1);
-    line_number_program_item_baz->EmitSpecialOpcode(0, 0);
-    line_number_program_item_baz->EmitColumn(constant_pool_baz, 0, 6);
-    line_number_program_item_baz->EmitEnd();
+    debugInfoItemBaz->SetLineNumber(15);
+    lineNumberProgramItemBaz->EmitSetFile(constantPoolBaz, sourceFileItem);
+    lineNumberProgramItemBaz->EmitAdvancePc(constantPoolBaz, 1);
+    lineNumberProgramItemBaz->EmitAdvanceLine(constantPoolBaz, 1);
+    lineNumberProgramItemBaz->EmitSpecialOpcode(0, 0);
+    lineNumberProgramItemBaz->EmitColumn(constantPoolBaz, 0, 6);
+    lineNumberProgramItemBaz->EmitEnd();
 
-    debug_info_item_baz->AddParameter(param_string_item_baz1);
-    debug_info_item_baz->AddParameter(param_string_item_baz2);
+    debugInfoItemBaz->AddParameter(paramStringItemBaz1);
+    debugInfoItemBaz->AddParameter(paramStringItemBaz2);
 
-    method_item_baz->SetDebugInfo(debug_info_item_baz);
+    methodItemBaz->SetDebugInfo(debugInfoItemBaz);
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
@@ -246,10 +245,10 @@ static std::optional<uint32_t> GetOffsetByTableLineNumberWrapper(const panda_fil
 }
 
 static std::pair<File::EntityId, uint32_t> GetBreakpointAddressWrapper(const DebugInfoExtractor &extractor,
-                                                                       const SourcePairLocation &source_location)
+                                                                       const SourcePairLocation &sourceLocation)
 {
-    auto pos = source_location.path.find_last_of("/\\");
-    auto name = source_location.path;
+    auto pos = sourceLocation.path.find_last_of("/\\");
+    auto name = sourceLocation.path;
 
     if (pos != std::string::npos) {
         name = name.substr(pos + 1);
@@ -257,13 +256,13 @@ static std::pair<File::EntityId, uint32_t> GetBreakpointAddressWrapper(const Deb
 
     std::vector<panda_file::File::EntityId> methods = extractor.GetMethodIdList();
     for (const auto &method : methods) {
-        if (extractor.GetSourceFile(method) == source_location.path || extractor.GetSourceFile(method) == name) {
-            const panda_file::LineNumberTable &line_table = extractor.GetLineNumberTable(method);
-            if (line_table.empty()) {
+        if (extractor.GetSourceFile(method) == sourceLocation.path || extractor.GetSourceFile(method) == name) {
+            const panda_file::LineNumberTable &lineTable = extractor.GetLineNumberTable(method);
+            if (lineTable.empty()) {
                 continue;
             }
 
-            std::optional<size_t> offset = GetOffsetByTableLineNumberWrapper(line_table, source_location.line);
+            std::optional<size_t> offset = GetOffsetByTableLineNumberWrapper(lineTable, sourceLocation.line);
             if (offset == std::nullopt) {
                 continue;
             }
@@ -274,33 +273,33 @@ static std::pair<File::EntityId, uint32_t> GetBreakpointAddressWrapper(const Deb
 }
 
 static std::vector<panda_file::LocalVariableInfo> GetLocalVariableInfoWrapper(const DebugInfoExtractor &extractor,
-                                                                              File::EntityId method_id, size_t offset)
+                                                                              File::EntityId methodId, size_t offset)
 {
-    std::vector<panda_file::LocalVariableInfo> variables = extractor.GetLocalVariableTable(method_id);
+    std::vector<panda_file::LocalVariableInfo> variables = extractor.GetLocalVariableTable(methodId);
     std::vector<panda_file::LocalVariableInfo> result;
 
     for (const auto &variable : variables) {
-        if (variable.start_offset <= offset && offset <= variable.end_offset) {
+        if (variable.startOffset <= offset && offset <= variable.endOffset) {
             result.push_back(variable);
         }
     }
     return result;
 }
 
-static SourcePairLocation GetSourcePairLocationWrapper(const DebugInfoExtractor &extractor, File::EntityId method_id,
-                                                       uint32_t bytecode_offset)
+static SourcePairLocation GetSourcePairLocationWrapper(const DebugInfoExtractor &extractor, File::EntityId methodId,
+                                                       uint32_t bytecodeOffset)
 {
-    const panda_file::LineNumberTable &line_table = extractor.GetLineNumberTable(method_id);
-    if (line_table.empty()) {
+    const panda_file::LineNumberTable &lineTable = extractor.GetLineNumberTable(methodId);
+    if (lineTable.empty()) {
         return SourcePairLocation();
     }
 
-    std::optional<size_t> line = GetLineNumberByTableOffsetWrapper(line_table, bytecode_offset);
+    std::optional<size_t> line = GetLineNumberByTableOffsetWrapper(lineTable, bytecodeOffset);
     if (line == std::nullopt) {
         return SourcePairLocation();
     }
 
-    return SourcePairLocation {extractor.GetSourceFile(method_id), line.value()};
+    return SourcePairLocation {extractor.GetSourceFile(methodId), line.value()};
 }
 
 static std::unique_ptr<const File> GetPandaFile(std::vector<uint8_t> &data)
@@ -319,36 +318,36 @@ public:
         MemoryWriter writer;
         ASSERT_TRUE(container.Write(&writer));
 
-        file_data_ = writer.GetData();
-        u_file_ = GetPandaFile(file_data_);
+        fileData_ = writer.GetData();
+        uFile_ = GetPandaFile(fileData_);
     }
 
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-    static std::unique_ptr<const panda_file::File> u_file_;
+    static std::unique_ptr<const panda_file::File> uFile_;
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-    static std::vector<uint8_t> file_data_;
+    static std::vector<uint8_t> fileData_;
 };
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-std::unique_ptr<const panda_file::File> ExtractorTest::u_file_ {nullptr};
+std::unique_ptr<const panda_file::File> ExtractorTest::uFile_ {nullptr};
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-std::vector<uint8_t> ExtractorTest::file_data_;
+std::vector<uint8_t> ExtractorTest::fileData_;
 
 TEST_F(ExtractorTest, DebugInfoTest)
 {
-    const panda_file::File *pf = u_file_.get();
+    const panda_file::File *pf = uFile_.get();
     ASSERT_TRUE(pf != nullptr);
     DebugInfoExtractor extractor(pf);
 
-    auto breakpoint1_address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
-    ASSERT_FALSE(breakpoint1_address.first.IsValid());
+    auto breakpoint1Address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
+    ASSERT_FALSE(breakpoint1Address.first.IsValid());
     auto [method_id, bytecode_offset] = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 6});
     ASSERT_TRUE(method_id.IsValid());
     ASSERT_EQ(bytecode_offset, 3U);
 
-    auto source_location = GetSourcePairLocationWrapper(extractor, method_id, 2);
-    ASSERT_EQ(source_location.path, SOURCE_FILE);
-    ASSERT_EQ(source_location.line, 5U);
+    auto sourceLocation = GetSourcePairLocationWrapper(extractor, method_id, 2);
+    ASSERT_EQ(sourceLocation.path, SOURCE_FILE);
+    ASSERT_EQ(sourceLocation.line, 5U);
 
     auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 4);
     EXPECT_EQ(vars.size(), 2);
@@ -360,47 +359,47 @@ TEST_F(ExtractorTest, DebugInfoTest)
 
 TEST_F(ExtractorTest, DebugInfoTestStaticWithRefArg)
 {
-    const panda_file::File *pf = u_file_.get();
+    const panda_file::File *pf = uFile_.get();
     ASSERT_TRUE(pf != nullptr);
     DebugInfoExtractor extractor(pf);
 
-    auto breakpoint1_address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
-    ASSERT_FALSE(breakpoint1_address.first.IsValid());
+    auto breakpoint1Address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
+    ASSERT_FALSE(breakpoint1Address.first.IsValid());
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto method_id = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 14}).first;
-    ASSERT_TRUE(method_id.IsValid());
+    auto methodId = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 14}).first;
+    ASSERT_TRUE(methodId.IsValid());
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 14);
+    auto vars = GetLocalVariableInfoWrapper(extractor, methodId, 14);
     EXPECT_EQ(vars.size(), 0);
 }
 
 TEST_F(ExtractorTest, DebugInfoTestNonStaticWithRefArg)
 {
-    const panda_file::File *pf = u_file_.get();
+    const panda_file::File *pf = uFile_.get();
     ASSERT_TRUE(pf != nullptr);
     DebugInfoExtractor extractor(pf);
 
-    auto breakpoint1_address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
-    ASSERT_FALSE(breakpoint1_address.first.IsValid());
+    auto breakpoint1Address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
+    ASSERT_FALSE(breakpoint1Address.first.IsValid());
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto method_id = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 16}).first;
-    ASSERT_TRUE(method_id.IsValid());
+    auto methodId = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 16}).first;
+    ASSERT_TRUE(methodId.IsValid());
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 16);
+    auto vars = GetLocalVariableInfoWrapper(extractor, methodId, 16);
     EXPECT_EQ(vars.size(), 0);
 }
 
 TEST_F(ExtractorTest, DebugInfoTestColumnNumber)
 {
-    const panda_file::File *pf = u_file_.get();
+    const panda_file::File *pf = uFile_.get();
     ASSERT_TRUE(pf != nullptr);
     DebugInfoExtractor extractor(pf);
 
     auto methods = extractor.GetMethodIdList();
-    for (auto const &method_id : methods) {
-        auto &cnt = extractor.GetColumnNumberTable(method_id);
+    for (auto const &methodId : methods) {
+        auto &cnt = extractor.GetColumnNumberTable(methodId);
 
         ASSERT(!cnt.empty());
         if (cnt[0].column == 5 || cnt[0].column == 6) {

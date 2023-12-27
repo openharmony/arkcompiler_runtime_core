@@ -26,12 +26,12 @@ class RuntimeOptions;
 namespace panda::mem {
 
 enum class NativeGcTriggerType { INVALID_NATIVE_GC_TRIGGER, NO_NATIVE_GC_TRIGGER, SIMPLE_STRATEGY };
-inline NativeGcTriggerType NativeGcTriggerTypeFromString(std::string_view native_gc_trigger_type_str)
+inline NativeGcTriggerType NativeGcTriggerTypeFromString(std::string_view nativeGcTriggerTypeStr)
 {
-    if (native_gc_trigger_type_str == "no-native-gc-trigger") {
+    if (nativeGcTriggerTypeStr == "no-native-gc-trigger") {
         return NativeGcTriggerType::NO_NATIVE_GC_TRIGGER;
     }
-    if (native_gc_trigger_type_str == "simple-strategy") {
+    if (nativeGcTriggerTypeStr == "simple-strategy") {
         return NativeGcTriggerType::SIMPLE_STRATEGY;
     }
     return NativeGcTriggerType::INVALID_NATIVE_GC_TRIGGER;
@@ -178,80 +178,80 @@ public:
 private:
     // clang-tidy complains about excessive padding
     /// Garbage rate threshold of a tenured region to be included into a mixed collection
-    double g1_region_garbage_rate_threshold_ = 0;
+    double g1RegionGarbageRateThreshold_ = 0;
     /**
      * Minimum percentage of not used bytes in tenured region to
      * collect it on full even if we have no garbage inside
      */
-    double g1_full_gc_region_fragmentation_rate_ = 0;
+    double g1FullGcRegionFragmentationRate_ = 0;
     /**
      * Limit the creation rate of tasks during marking in nanoseconds.
      * If average task creation is less than this value - it increases the stack size limit twice to create tasks less
      * frequently.
      */
-    size_t gc_marking_stack_new_tasks_frequency_ = 0;
+    size_t gcMarkingStackNewTasksFrequency_ = 0;
     /// Max stack size for marking in main thread, if it exceeds we will send a new task to workers, 0 means unlimited.
-    size_t gc_root_marking_stack_max_size_ = 0;
+    size_t gcRootMarkingStackMaxSize_ = 0;
     /// Max stack size for marking in a gc worker, if it exceeds we will send a new task to workers, 0 means unlimited.
-    size_t gc_workers_marking_stack_max_size_ = 0;
+    size_t gcWorkersMarkingStackMaxSize_ = 0;
     /// If not zero and gc supports workers, create a gc workers and try to use them
-    size_t gc_workers_count_ = 0;
+    size_t gcWorkersCount_ = 0;
     /// Size of young-space
-    uint64_t young_space_size_ = 0;
-    size_t g1_min_concurrent_cards_to_process_ = 0;
+    uint64_t youngSpaceSize_ = 0;
+    size_t g1MinConcurrentCardsToProcess_ = 0;
     /// Type of native trigger
-    NativeGcTriggerType native_gc_trigger_type_ = {NativeGcTriggerType::INVALID_NATIVE_GC_TRIGGER};
+    NativeGcTriggerType nativeGcTriggerType_ = {NativeGcTriggerType::INVALID_NATIVE_GC_TRIGGER};
     /// Runs full collection one of N times in GC thread
-    uint32_t full_gc_bombing_frequency_ = 0;
+    uint32_t fullGcBombingFrequency_ = 0;
     /// Specify a max number of tenured regions which can be collected at mixed collection in G1GC.
-    uint32_t g1_number_of_tenured_regions_at_mixed_collection_ = 0;
+    uint32_t g1NumberOfTenuredRegionsAtMixedCollection_ = 0;
     /// Minimum percentage of alive bytes in young region to promote it into tenured without moving for G1GC
-    uint32_t g1_promotion_region_alive_rate_ = 0;
-    uint32_t g1_max_gc_pause_ms_ = 0;
-    uint32_t g1_gc_pause_interval_ms_ = 0;
+    uint32_t g1PromotionRegionAliveRate_ = 0;
+    uint32_t g1MaxGcPauseMs_ = 0;
+    uint32_t g1GcPauseIntervalMs_ = 0;
     /// If true then enable tracing
-    bool is_gc_enable_tracing_ = false;
+    bool isGcEnableTracing_ = false;
     /// Dump heap at the beginning and the end of GC
-    bool is_dump_heap_ = false;
+    bool isDumpHeap_ = false;
     /// True if concurrency enabled
-    bool is_concurrency_enabled_ = true;
+    bool isConcurrencyEnabled_ = true;
     /// True if explicit GC should be running in concurrent
-    bool is_explicit_concurrent_gc_enabled_ = true;
+    bool isExplicitConcurrentGcEnabled_ = true;
     /// True if GC should be running in place
-    bool run_gc_in_place_ = false;
+    bool runGcInPlace_ = false;
     /// Use FastHeapVerifier if true
-    bool enable_fast_heap_verifier_ = true;
+    bool enableFastHeapVerifier_ = true;
     /// True if heap verification before GC enabled
-    bool pre_gc_heap_verification_ = false;
+    bool preGcHeapVerification_ = false;
     /// True if heap verification during GC enabled
-    bool into_gc_heap_verification_ = false;
+    bool intoGcHeapVerification_ = false;
     /// True if heap verification after GC enabled
-    bool post_gc_heap_verification_ = false;
+    bool postGcHeapVerification_ = false;
     /// True if heap verification before G1-GC concurrent phase enabled
-    bool before_g1_concurrent_heap_verification_ = false;
+    bool beforeG1ConcurrentHeapVerification_ = false;
     /// If true then fail execution if heap verifier found heap corruption
-    bool fail_on_heap_verification_ = false;
+    bool failOnHeapVerification_ = false;
     /// If true then run gc every savepoint
-    bool run_gc_every_safepoint_ = false;
-    bool manage_gc_threads_affinity_ = true;
-    bool use_weak_cpu_for_gc_concurrent_ = false;
+    bool runGcEverySafepoint_ = false;
+    bool manageGcThreadsAffinity_ = true;
+    bool useWeakCpuForGcConcurrent_ = false;
     /// if true then thread pool is used, false - task manager is used
-    bool use_thread_pool_for_gc_workers_ = true;
+    bool useThreadPoolForGcWorkers_ = true;
     /// If we need to track removing objects during the G1GC collection or not
-    bool g1_track_freed_objects_ = false;
+    bool g1TrackFreedObjects_ = false;
     /// True if print INFO log to get more detailed information in GC
-    bool log_detailed_gc_info_enabled_ = false;
+    bool logDetailedGcInfoEnabled_ = false;
     /// True if print INFO log to get more detailed compaction/promotion information per region in GC
-    bool log_detailed_gc_compaction_info_enabled_ = false;
+    bool logDetailedGcCompactionInfoEnabled_ = false;
     /// True if we want to do marking phase in multithreading mode
-    bool parallel_marking_enabled_ = false;
+    bool parallelMarkingEnabled_ = false;
     /// True if we want to do compacting phase in multithreading mode
-    bool parallel_compacting_enabled_ = false;
+    bool parallelCompactingEnabled_ = false;
     /// True if we want to do ref updating phase in multithreading mode
-    bool parallel_ref_updating_enabled_ = false;
+    bool parallelRefUpdatingEnabled_ = false;
     /// True if G1 should updates remsets concurrently
-    bool g1_enable_concurrent_update_remset_ = false;
-    bool g1_enable_pause_time_goal_ {false};
+    bool g1EnableConcurrentUpdateRemset_ = false;
+    bool g1EnablePauseTimeGoal_ {false};
 };
 
 }  // namespace panda::mem

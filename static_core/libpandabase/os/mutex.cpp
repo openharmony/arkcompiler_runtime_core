@@ -40,9 +40,9 @@ ALWAYS_INLINE inline void FatalIfError(const char *f, int rc)
     }
 }
 
-Mutex::Mutex(bool is_init) : mutex_()
+Mutex::Mutex(bool isInit) : mutex_()
 {
-    if (is_init) {
+    if (isInit) {
         Init(nullptr);
     }
 }

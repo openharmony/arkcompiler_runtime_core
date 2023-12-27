@@ -87,7 +87,7 @@ public:
     void SetUpHelperFunctions(const std::string &language)
     {
         Runtime *runtime = Runtime::GetCurrent();
-        ClassLinker *class_linker = runtime->GetClassLinker();
+        ClassLinker *classLinker = runtime->GetClassLinker();
 
         std::string source = ".language " + language + "\n" + R"(
             .record TestUtils {}
@@ -98,46 +98,46 @@ public:
         auto res = p.Parse(source);
         ASSERT_TRUE(res.HasValue());
         std::unique_ptr<const panda_file::File> pf = pandasm::AsmEmitter::Emit(res.Value());
-        class_linker->AddPandaFile(std::move(pf));
+        classLinker->AddPandaFile(std::move(pf));
 
         auto descriptor = std::make_unique<PandaString>();
-        std::optional<panda::panda_file::SourceLang> lang_local = panda_file::LanguageFromString(language);
-        if (!lang_local) {
+        std::optional<panda::panda_file::SourceLang> langLocal = panda_file::LanguageFromString(language);
+        if (!langLocal) {
             UNREACHABLE();
         }
-        auto *extension = class_linker->GetExtension(lang_local.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
+        auto *extension = classLinker->GetExtension(langLocal.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
         Class *klass =
             extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("TestUtils"), descriptor.get()));
 
-        Method *cmp_dyn = klass->GetDirectMethod(utf::CStringAsMutf8("cmpDyn"));
-        ASSERT_NE(cmp_dyn, nullptr);
-        cmp_dyn->SetCompiledEntryPoint(reinterpret_cast<const void *>(CmpDynImpl));
+        Method *cmpDyn = klass->GetDirectMethod(utf::CStringAsMutf8("cmpDyn"));
+        ASSERT_NE(cmpDyn, nullptr);
+        cmpDyn->SetCompiledEntryPoint(reinterpret_cast<const void *>(CmpDynImpl));
 
         Method *ldundefined = klass->GetDirectMethod(utf::CStringAsMutf8("ldundefined"));
         ASSERT_NE(ldundefined, nullptr);
         ldundefined->SetCompiledEntryPoint(reinterpret_cast<const void *>(LdUndefinedImpl));
     }
 
-    Method *MakeNoArgsMethod(TypeId ret_type, int64_t ret)
+    Method *MakeNoArgsMethod(TypeId retType, int64_t ret)
     {
         Runtime *runtime = Runtime::GetCurrent();
-        ClassLinker *class_linker = runtime->GetClassLinker();
+        ClassLinker *classLinker = runtime->GetClassLinker();
         LanguageContext ctx = runtime->GetLanguageContext(lang_);
 
         std::ostringstream out;
         out << ".language " << ctx << '\n';
-        if (ret_type == TypeId::REFERENCE) {
+        if (retType == TypeId::REFERENCE) {
             // 'operator <<' for TypeId::REFERENCE returns 'reference'. So create a class to handle this situation.
             out << ".record reference {}\n";
         }
-        out << ".function " << panda_file::Type(ret_type) << " main() {\n";
-        if (TypeId::F32 <= ret_type && ret_type <= TypeId::F64) {
+        out << ".function " << panda_file::Type(retType) << " main() {\n";
+        if (TypeId::F32 <= retType && retType <= TypeId::F64) {
             out << "fldai.64 " << bit_cast<double>(ret) << '\n';
             out << "return.64\n";
-        } else if (TypeId::I64 <= ret_type && ret_type <= TypeId::U64) {
+        } else if (TypeId::I64 <= retType && retType <= TypeId::U64) {
             out << "ldai.64 " << ret << '\n';
             out << "return.64\n";
-        } else if (ret_type == TypeId::REFERENCE) {
+        } else if (retType == TypeId::REFERENCE) {
             out << "lda.null\n";
             out << "return.obj\n";
         } else {
@@ -150,10 +150,10 @@ public:
         auto res = p.Parse(out.str());
         // ASSERT_TRUE(res.HasValue());
         std::unique_ptr<const panda_file::File> pf = pandasm::AsmEmitter::Emit(res.Value());
-        class_linker->AddPandaFile(std::move(pf));
+        classLinker->AddPandaFile(std::move(pf));
 
         auto descriptor = std::make_unique<PandaString>();
-        auto *extension = class_linker->GetExtension(ctx);
+        auto *extension = classLinker->GetExtension(ctx);
         Class *klass =
             extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), descriptor.get()));
 
@@ -163,70 +163,70 @@ public:
     }
 
     Method *MakeCheckArgsMethod(const std::initializer_list<TypeId> &shorty, const std::initializer_list<int64_t> args,
-                                bool is_instance = false)
+                                bool isInstance = false)
     {
         Runtime *runtime = Runtime::GetCurrent();
-        ClassLinker *class_linker = runtime->GetClassLinker();
+        ClassLinker *classLinker = runtime->GetClassLinker();
         LanguageContext ctx = runtime->GetLanguageContext(lang_);
 
         std::ostringstream out;
         std::ostringstream signature;
         std::ostringstream body;
-        uint32_t arg_num = 0;
+        uint32_t argNum = 0;
 
-        if (is_instance) {
+        if (isInstance) {
             signature << "Test a0";
             body << "lda.null\n";
             body << "jne.obj a0, fail\n";
-            ++arg_num;
+            ++argNum;
         }
-        auto shorty_it = shorty.begin();
-        TypeId ret_type = *shorty_it++;
-        auto args_it = args.begin();
-        while (shorty_it != shorty.end()) {
-            if (args_it == args.end()) {
+        auto shortyIt = shorty.begin();
+        TypeId retType = *shortyIt++;
+        auto argsIt = args.begin();
+        while (shortyIt != shorty.end()) {
+            if (argsIt == args.end()) {
                 // only dynamic methods could be called with less arguments than declared
-                ASSERT(*shorty_it == TypeId::TAGGED);
+                ASSERT(*shortyIt == TypeId::TAGGED);
             }
-            if (arg_num > 0) {
+            if (argNum > 0) {
                 signature << ", ";
             }
-            if ((TypeId::F32 <= *shorty_it && *shorty_it <= TypeId::U64) || *shorty_it == TypeId::REFERENCE ||
-                *shorty_it == TypeId::TAGGED) {
-                signature << panda_file::Type(*shorty_it) << " a" << arg_num;
-                if (TypeId::F32 <= *shorty_it && *shorty_it <= TypeId::F64) {
-                    body << "fldai.64 " << bit_cast<double>(*args_it) << '\n';
-                    body << "fcmpg.64 a" << arg_num << '\n';
+            if ((TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::U64) || *shortyIt == TypeId::REFERENCE ||
+                *shortyIt == TypeId::TAGGED) {
+                signature << panda_file::Type(*shortyIt) << " a" << argNum;
+                if (TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::F64) {
+                    body << "fldai.64 " << bit_cast<double>(*argsIt) << '\n';
+                    body << "fcmpg.64 a" << argNum << '\n';
                     body << "jnez fail\n";
-                } else if (TypeId::I64 <= *shorty_it && *shorty_it <= TypeId::U64) {
-                    body << "ldai.64 " << *args_it << '\n';
-                    body << "cmp.64 a" << arg_num << '\n';
+                } else if (TypeId::I64 <= *shortyIt && *shortyIt <= TypeId::U64) {
+                    body << "ldai.64 " << *argsIt << '\n';
+                    body << "cmp.64 a" << argNum << '\n';
                     body << "jnez fail\n";
-                } else if (*shorty_it == TypeId::TAGGED) {
-                    if (args_it == args.end()) {
+                } else if (*shortyIt == TypeId::TAGGED) {
+                    if (argsIt == args.end()) {
                         body << "call.short TestUtils.ldundefined\n";
                     } else {
-                        body << "ldai.dyn " << *args_it << '\n';
+                        body << "ldai.dyn " << *argsIt << '\n';
                     }
                     body << "sta.dyn v0\n";
-                    body << "call.short TestUtils.cmpDyn, v0, a" << arg_num << '\n';
+                    body << "call.short TestUtils.cmpDyn, v0, a" << argNum << '\n';
                     body << "jnez fail\n";
                 } else {
                     body << "lda.null\n";
-                    body << "jne.obj a" << arg_num << ", fail\n";
+                    body << "jne.obj a" << argNum << ", fail\n";
                 }
             } else {
-                signature << "i32 a" << arg_num;
-                body << "ldai " << *args_it << '\n';
-                body << "jne a" << arg_num << ", fail\n";
+                signature << "i32 a" << argNum;
+                body << "ldai " << *argsIt << '\n';
+                body << "jne a" << argNum << ", fail\n";
             }
-            ++shorty_it;
-            if (args_it != args.end()) {
-                ++args_it;
+            ++shortyIt;
+            if (argsIt != args.end()) {
+                ++argsIt;
             }
-            ++arg_num;
+            ++argNum;
         }
-        if (ret_type == TypeId::TAGGED) {
+        if (retType == TypeId::TAGGED) {
             body << "ldai.dyn 1\n";
             body << "return.dyn\n";
             body << "fail:\n";
@@ -246,7 +246,7 @@ public:
         out << ".function any TestUtils.ldundefined() <external>\n";
         out << ".record reference {}\n";
         out << ".record Test {}\n";
-        out << ".function " << panda_file::Type(ret_type) << " Test.main(" << signature.str() << ") {\n";
+        out << ".function " << panda_file::Type(retType) << " Test.main(" << signature.str() << ") {\n";
         out << body.str();
         out << "}";
 
@@ -254,10 +254,10 @@ public:
         auto res = p.Parse(out.str());
         // ASSERT_TRUE(res.HasValue());
         std::unique_ptr<const panda_file::File> pf = pandasm::AsmEmitter::Emit(res.Value());
-        class_linker->AddPandaFile(std::move(pf));
+        classLinker->AddPandaFile(std::move(pf));
 
         auto descriptor = std::make_unique<PandaString>();
-        auto *extension = class_linker->GetExtension(ctx);
+        auto *extension = classLinker->GetExtension(ctx);
         Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("Test"), descriptor.get()));
 
         Method *main = klass->GetDirectMethod(utf::CStringAsMutf8("main"));

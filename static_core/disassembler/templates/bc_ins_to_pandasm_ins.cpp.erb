@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,13 @@
 namespace panda::disasm {
 
 // NOLINTNEXTLINE(readability-function-size)
-pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
-                                                                   panda_file::File::EntityId method_id) const {
+pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstruction bcIns,
+                                                                   panda_file::File::EntityId methodId) const {
     pandasm::Ins ins{};
 
-    ins.opcode = BytecodeOpcodeToPandasmOpcode(bc_ins.GetOpcode());
+    ins.opcode = BytecodeOpcodeToPandasmOpcode(bcIns.GetOpcode());
 
-    const BytecodeInstruction::Format format = bc_ins.GetFormat();
+    const BytecodeInstruction::Format format = bcIns.GetFormat();
 
     switch (format) {
 % insns_uniq_sort_fmts.each do |i| # Panda::formats.each do |fmt|
@@ -36,21 +36,21 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
 %   i.operands.each do |operand|
 %      if (operand.name == :imm)
 %         if (operand.type != "i64")
-        ins.imms.emplace_back(static_cast<int64_t>(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>()));
+        ins.imms.emplace_back(static_cast<int64_t>(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>()));
 %         else
-        ins.imms.emplace_back(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>());
+        ins.imms.emplace_back(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>());
 %         end
 %         imm_count += 1
 %
 %      elsif (operand.name == :v)
-        ins.regs.emplace_back(bc_ins.GetVReg(<%=reg_count%>));
+        ins.regs.emplace_back(bcIns.GetVReg(<%=reg_count%>));
 %         reg_count += 1
 %      elsif (i.operands.count(&:id?) != 0)
-        ins.ids.emplace_back(IDToString(bc_ins, method_id));
+        ins.ids.emplace_back(IDToString(bcIns, methodId));
 %      end   
 %   end
 %   if i.profiled?
-        ins.profile_id = bc_ins.GetProfileId();
+        ins.profileId = bcIns.GetProfileId();
 %   end
         break;
 % end
@@ -60,14 +60,14 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
 
     if (ins.IsCall()) {
         // clearing excessive arguments if there are any
-        // if format has ID in it - recieve it. else instruction is indirect call and id = method_id
+        // if format has ID in it - recieve it. else instruction is indirect call and id = methodId
         panda_file::File::EntityId id;
 
-        if (bc_ins.HasId(format, 0)) {
-            auto idx = bc_ins.GetId().AsIndex();
-            id = file_->ResolveMethodIndex(method_id, idx);
+        if (bcIns.HasId(format, 0)) {
+            auto idx = bcIns.GetId().AsIndex();
+            id = file_->ResolveMethodIndex(methodId, idx);
         } else {
-            id = method_id;
+            id = methodId;
         }
         
         panda_file::MethodDataAccessor mda(*file_, id);
@@ -75,26 +75,26 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
 
         int overhead;
 
-        const bool is_initobj = ins.opcode == pandasm::Opcode::INITOBJ_SHORT ||
+        const bool isInitobj = ins.opcode == pandasm::Opcode::INITOBJ_SHORT ||
                                 ins.opcode == pandasm::Opcode::INITOBJ_RANGE || ins.opcode == pandasm::Opcode::INITOBJ;
 
-        const bool is_acc = ins.opcode == pandasm::Opcode::CALL_ACC_SHORT || ins.opcode == pandasm::Opcode::CALL_ACC ||
+        const bool isAcc = ins.opcode == pandasm::Opcode::CALL_ACC_SHORT || ins.opcode == pandasm::Opcode::CALL_ACC ||
                             ins.opcode == pandasm::Opcode::CALL_VIRT_ACC_SHORT ||
                             ins.opcode == pandasm::Opcode::CALL_VIRT_ACC;
 
-        if (mda.IsStatic() || is_initobj) {
+        if (mda.IsStatic() || isInitobj) {
             overhead = ins.regs.size() - pda.GetNumArgs();
         } else {
             overhead = ins.regs.size() - pda.GetNumArgs() - 1;
         }
         // call.acc recieves fixed amount of registers
-        if (is_acc) {
+        if (isAcc) {
             return ins;
         }
         if (overhead < 0 || overhead > static_cast<int>(ins.regs.size())) {
             LOG(ERROR, DISASSEMBLER)
-                << "> error encountered in code of " << std::dec << method_id.GetOffset() << " ("
-                << "0x" << std::hex << method_id.GetOffset() << ") while disassembling call <" << ins.ToString("")
+                << "> error encountered in code of " << std::dec << methodId.GetOffset() << " ("
+                << "0x" << std::hex << methodId.GetOffset() << ") while disassembling call <" << ins.ToString("")
                 << ">. Invalid method id given or corrupted: calculated overhead (difference "
                    "between amount of registers specified by instruction format and amount of function's arguments) "
                    "exceeds number of registers specified in ISA or is lesser than 0!";

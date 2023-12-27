@@ -32,25 +32,25 @@ class JsonObjectBuilder;
 namespace panda::tooling::inspector {
 class Location {
 public:
-    Location(ScriptId script_id, size_t line_number) : script_id_(script_id), line_number_(line_number) {}
+    Location(ScriptId scriptId, size_t lineNumber) : scriptId_(scriptId), lineNumber_(lineNumber) {}
 
-    static Expected<Location, std::string> FromJsonProperty(const JsonObject &object, const char *property_name);
+    static Expected<Location, std::string> FromJsonProperty(const JsonObject &object, const char *propertyName);
 
     ScriptId GetScriptId() const
     {
-        return script_id_;
+        return scriptId_;
     }
 
     size_t GetLineNumber() const
     {
-        return line_number_;
+        return lineNumber_;
     }
 
     std::function<void(JsonObjectBuilder &)> ToJson() const;
 
 private:
-    ScriptId script_id_;
-    size_t line_number_;
+    ScriptId scriptId_;
+    size_t lineNumber_;
 };
 }  // namespace panda::tooling::inspector
 

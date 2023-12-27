@@ -45,8 +45,8 @@ public:
 
     void SetCodeInfo(Span<const uint8_t> data)
     {
-        code_info_.reserve(data.size());
-        std::copy(data.begin(), data.end(), std::back_inserter(code_info_));
+        codeInfo_.reserve(data.size());
+        std::copy(data.begin(), data.end(), std::back_inserter(codeInfo_));
     }
 
     Method *GetMethod()
@@ -66,13 +66,13 @@ public:
 
     Span<const uint8_t> GetCodeInfo() const
     {
-        return Span(code_info_);
+        return Span(codeInfo_);
     }
 
     size_t GetOverallSize() const
     {
         return RoundUp(CodePrefix::STRUCT_SIZE, GetCodeAlignment(arch_)) + RoundUp(code_.size(), CodeInfo::ALIGNMENT) +
-               RoundUp(code_info_.size(), CodeInfo::SIZE_ALIGNMENT);
+               RoundUp(codeInfo_.size(), CodeInfo::SIZE_ALIGNMENT);
     }
 
     size_t GetIndex() const
@@ -83,17 +83,17 @@ public:
 #ifdef PANDA_COMPILER_DEBUG_INFO
     CfiInfo &GetCfiInfo()
     {
-        return cfi_info_;
+        return cfiInfo_;
     }
 
     const CfiInfo &GetCfiInfo() const
     {
-        return cfi_info_;
+        return cfiInfo_;
     }
 
-    void SetCfiInfo(const CfiInfo &cfi_info)
+    void SetCfiInfo(const CfiInfo &cfiInfo)
     {
-        cfi_info_ = cfi_info;
+        cfiInfo_ = cfiInfo;
     }
 #endif
 
@@ -102,9 +102,9 @@ private:
     Method *method_ {nullptr};
     size_t index_ {0};
     std::vector<uint8_t> code_;
-    std::vector<uint8_t> code_info_;
+    std::vector<uint8_t> codeInfo_;
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    CfiInfo cfi_info_;
+    CfiInfo cfiInfo_;
 #endif
 };
 }  // namespace panda::compiler

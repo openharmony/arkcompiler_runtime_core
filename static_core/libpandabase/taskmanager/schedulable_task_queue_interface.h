@@ -36,8 +36,8 @@ public:
 
     using AddTaskToWorkerFunc = std::function<void(Task &&)>;
 
-    SchedulableTaskQueueInterface(TaskType task_type, VMType vm_type, uint8_t priority)
-        : TaskQueueInterface(task_type, vm_type, priority)
+    SchedulableTaskQueueInterface(TaskType taskType, VMType vmType, uint8_t priority)
+        : TaskQueueInterface(taskType, vmType, priority)
     {
     }
     ~SchedulableTaskQueueInterface() override = default;
@@ -62,7 +62,7 @@ public:
      * method will not wait and will pop all stored tasks.
      * @return count of task that was added to worker
      */
-    size_t virtual PopTasksToWorker(AddTaskToWorkerFunc add_task_func, size_t size) = 0;
+    size_t virtual PopTasksToWorker(AddTaskToWorkerFunc addTaskFunc, size_t size) = 0;
 
     /**
      * @brief This method sets the callback. It will be called after adding new task in AddTask method.

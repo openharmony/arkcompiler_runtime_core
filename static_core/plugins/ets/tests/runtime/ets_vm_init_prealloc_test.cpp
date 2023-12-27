@@ -66,18 +66,18 @@ public:
 TEST_F(EtsVMInitPreallocTest, PreallocatedOOMObjectTest)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
-    auto ets_vm = coroutine->GetPandaVM();
-    auto oom_obj = ets_vm->GetOOMErrorObject();
+    auto etsVm = coroutine->GetPandaVM();
+    auto oomObj = etsVm->GetOOMErrorObject();
 
-    ASSERT_NE(oom_obj, nullptr);
+    ASSERT_NE(oomObj, nullptr);
 
-    auto oom_class = oom_obj->ClassAddr<panda::Class>();
-    ASSERT_NE(oom_class->GetDescriptor(), nullptr);
+    auto oomClass = oomObj->ClassAddr<panda::Class>();
+    ASSERT_NE(oomClass->GetDescriptor(), nullptr);
 
     auto ctx = coroutine->GetLanguageContext();
-    auto descriptor_got = utf::Mutf8AsCString(oom_class->GetDescriptor());
-    auto descriptor_exp = utf::Mutf8AsCString(ctx.GetOutOfMemoryErrorClassDescriptor());
-    ASSERT_STREQ(descriptor_got, descriptor_exp);
+    auto descriptorGot = utf::Mutf8AsCString(oomClass->GetDescriptor());
+    auto descriptorExp = utf::Mutf8AsCString(ctx.GetOutOfMemoryErrorClassDescriptor());
+    ASSERT_STREQ(descriptorGot, descriptorExp);
 }
 
 }  // namespace panda::ets::test

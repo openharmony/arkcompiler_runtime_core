@@ -25,67 +25,67 @@
 namespace panda {
 
 template <>
-inline void ManagedThread::PushHandleScope<coretypes::TaggedType>(HandleScope<coretypes::TaggedType> *handle_scope)
+inline void ManagedThread::PushHandleScope<coretypes::TaggedType>(HandleScope<coretypes::TaggedType> *handleScope)
 {
-    tagged_handle_scopes_.push_back(handle_scope);
+    taggedHandleScopes_.push_back(handleScope);
 }
 
 template <>
 inline HandleScope<coretypes::TaggedType> *ManagedThread::PopHandleScope<coretypes::TaggedType>()
 {
-    HandleScope<coretypes::TaggedType> *scope = tagged_handle_scopes_.back();
-    tagged_handle_scopes_.pop_back();
+    HandleScope<coretypes::TaggedType> *scope = taggedHandleScopes_.back();
+    taggedHandleScopes_.pop_back();
     return scope;
 }
 
 template <>
 inline HandleScope<coretypes::TaggedType> *ManagedThread::GetTopScope<coretypes::TaggedType>() const
 {
-    if (tagged_handle_scopes_.empty()) {
+    if (taggedHandleScopes_.empty()) {
         return nullptr;
     }
-    return tagged_handle_scopes_.back();
+    return taggedHandleScopes_.back();
 }
 
 template <>
 inline HandleStorage<coretypes::TaggedType> *ManagedThread::GetHandleStorage<coretypes::TaggedType>() const
 {
-    return tagged_handle_storage_;
+    return taggedHandleStorage_;
 }
 
 template <>
 inline GlobalHandleStorage<coretypes::TaggedType> *ManagedThread::GetGlobalHandleStorage<coretypes::TaggedType>() const
 {
-    return tagged_global_handle_storage_;
+    return taggedGlobalHandleStorage_;
 }
 
 template <>
-inline void ManagedThread::PushHandleScope<ObjectHeader *>(HandleScope<ObjectHeader *> *handle_scope)
+inline void ManagedThread::PushHandleScope<ObjectHeader *>(HandleScope<ObjectHeader *> *handleScope)
 {
-    object_header_handle_scopes_.push_back(handle_scope);
+    objectHeaderHandleScopes_.push_back(handleScope);
 }
 
 template <>
 inline HandleScope<ObjectHeader *> *ManagedThread::PopHandleScope<ObjectHeader *>()
 {
-    HandleScope<ObjectHeader *> *scope = object_header_handle_scopes_.back();
-    object_header_handle_scopes_.pop_back();
+    HandleScope<ObjectHeader *> *scope = objectHeaderHandleScopes_.back();
+    objectHeaderHandleScopes_.pop_back();
     return scope;
 }
 
 template <>
 inline HandleScope<ObjectHeader *> *ManagedThread::GetTopScope<ObjectHeader *>() const
 {
-    if (object_header_handle_scopes_.empty()) {
+    if (objectHeaderHandleScopes_.empty()) {
         return nullptr;
     }
-    return object_header_handle_scopes_.back();
+    return objectHeaderHandleScopes_.back();
 }
 
 template <>
 inline HandleStorage<ObjectHeader *> *ManagedThread::GetHandleStorage<ObjectHeader *>() const
 {
-    return object_header_handle_storage_;
+    return objectHeaderHandleStorage_;
 }
 
 template <bool CHECK_NATIVE_STACK, bool CHECK_IFRAME_STACK>
@@ -111,14 +111,14 @@ ALWAYS_INLINE inline int32_t MTManagedThread::GetMonitorCount()
 {
     // Atomic with relaxed order reason: data race with monitor_count_ with no synchronization or ordering constraints
     // imposed on other reads or writes
-    return monitor_count_.load(std::memory_order_relaxed);
+    return monitorCount_.load(std::memory_order_relaxed);
 }
 
 ALWAYS_INLINE inline void MTManagedThread::AddMonitor(Monitor *monitor)
 {
     // Atomic with relaxed order reason: data race with monitor_count_ with no synchronization or ordering constraints
     // imposed on other reads or writes
-    monitor_count_.fetch_add(1, std::memory_order_relaxed);
+    monitorCount_.fetch_add(1, std::memory_order_relaxed);
     LOG(DEBUG, RUNTIME) << "Adding monitor " << monitor->GetId();
 }
 
@@ -126,7 +126,7 @@ ALWAYS_INLINE inline void MTManagedThread::RemoveMonitor(Monitor *monitor)
 {
     // Atomic with relaxed order reason: data race with monitor_count_ with no synchronization or ordering constraints
     // imposed on other reads or writes
-    monitor_count_.fetch_sub(1, std::memory_order_relaxed);
+    monitorCount_.fetch_sub(1, std::memory_order_relaxed);
     LOG(DEBUG, RUNTIME) << "Removing monitor " << monitor->GetId();
 }
 

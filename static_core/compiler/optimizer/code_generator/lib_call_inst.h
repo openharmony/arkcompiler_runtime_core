@@ -40,11 +40,11 @@ inline bool HasLibCall(Inst *inst, Arch arch)
                 return type == DataType::INT64 || type == DataType::UINT64;
             }
             if (opcode == Opcode::Cast) {
-                auto src_type = inst->GetInputType(0);
+                auto srcType = inst->GetInputType(0);
                 if (DataType::IsFloatType(type)) {
-                    return src_type == DataType::INT64 || src_type == DataType::UINT64;
+                    return srcType == DataType::INT64 || srcType == DataType::UINT64;
                 }
-                if (DataType::IsFloatType(src_type)) {
+                if (DataType::IsFloatType(srcType)) {
                     return type == DataType::INT64 || type == DataType::UINT64;
                 }
             }

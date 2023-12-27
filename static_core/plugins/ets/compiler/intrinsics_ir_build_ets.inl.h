@@ -13,5 +13,5 @@
  * limitations under the License.
  */
 
-void BuildIsFiniteIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-void BuildStdRuntimeEquals(const BytecodeInstruction *bc_inst, bool acc_read);
+void BuildIsFiniteIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool accRead);

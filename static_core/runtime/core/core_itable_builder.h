@@ -22,16 +22,16 @@ namespace panda {
 
 class CoreITableBuilder : public ITableBuilder {
 public:
-    void Build([[maybe_unused]] ClassLinker *class_linker, [[maybe_unused]] Class *base,
-               [[maybe_unused]] Span<Class *> class_interfaces, [[maybe_unused]] bool is_interface) override
+    void Build([[maybe_unused]] ClassLinker *classLinker, [[maybe_unused]] Class *base,
+               [[maybe_unused]] Span<Class *> classInterfaces, [[maybe_unused]] bool isInterface) override
     {
         if (base == nullptr) {  // for panda.Object
             return;
         }
         ASSERT(!base->IsPrimitive());
         ASSERT(base->GetITable().Size() == 0);
-        ASSERT(class_interfaces.Empty());
-        ASSERT(!is_interface);
+        ASSERT(classInterfaces.Empty());
+        ASSERT(!isInterface);
     }
 
     void Resolve([[maybe_unused]] Class *klass) override {};

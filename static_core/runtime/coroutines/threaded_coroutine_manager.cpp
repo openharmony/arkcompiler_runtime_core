@@ -27,12 +27,12 @@ namespace panda {
 
 void ThreadedCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
 {
-    if (config.emulate_js) {
+    if (config.emulateJs) {
         LOG(FATAL, COROUTINES) << "ThreadedCoroutineManager(): JS emulation is not supported!";
         UNREACHABLE();
     }
-    if (config.workers_count > 0) {
-        SetWorkersCount(static_cast<uint32_t>(config.workers_count));
+    if (config.workersCount > 0) {
+        SetWorkersCount(static_cast<uint32_t>(config.workersCount));
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager(): setting number of coroutine workers to "
                                << GetWorkersCount();
     } else {
@@ -41,21 +41,21 @@ void ThreadedCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
                                << GetWorkersCount();
     }
 
-    auto *main_co = CreateMainCoroutine(runtime, vm);
-    Coroutine::SetCurrent(main_co);
+    auto *mainCo = CreateMainCoroutine(runtime, vm);
+    Coroutine::SetCurrent(mainCo);
 }
 
 uint32_t ThreadedCoroutineManager::GetWorkersCount() const
 {
-    return workers_count_;
+    return workersCount_;
 }
 
 void ThreadedCoroutineManager::SetWorkersCount(uint32_t n)
 {
-    workers_count_ = n;
+    workersCount_ = n;
 }
 
-CoroutineContext *ThreadedCoroutineManager::CreateCoroutineContext([[maybe_unused]] bool coro_has_entrypoint)
+CoroutineContext *ThreadedCoroutineManager::CreateCoroutineContext([[maybe_unused]] bool coroHasEntrypoint)
 {
     auto alloc = Runtime::GetCurrent()->GetInternalAllocator();
     return alloc->New<ThreadedCoroutineContext>();
@@ -69,7 +69,7 @@ void ThreadedCoroutineManager::DeleteCoroutineContext(CoroutineContext *ctx)
 
 size_t ThreadedCoroutineManager::GetCoroutineCount()
 {
-    return coroutine_count_;
+    return coroutineCount_;
 }
 
 size_t ThreadedCoroutineManager::GetCoroutineCountLimit()
@@ -79,20 +79,20 @@ size_t ThreadedCoroutineManager::GetCoroutineCountLimit()
 
 void ThreadedCoroutineManager::AddToRegistry(Coroutine *co)
 {
-    os::memory::LockHolder lock(coro_list_lock_);
-    auto *main_co = GetMainThread();
-    if (main_co != nullptr) {
+    os::memory::LockHolder lock(coroListLock_);
+    auto *mainCo = GetMainThread();
+    if (mainCo != nullptr) {
         // NOTE(konstanting, #I67QXC): we should get this callback from GC instead of copying from the main thread
-        co->SetPreWrbEntrypoint(main_co->GetPreWrbEntrypoint());
+        co->SetPreWrbEntrypoint(mainCo->GetPreWrbEntrypoint());
     }
     coroutines_.insert(co);
-    coroutine_count_++;
+    coroutineCount_++;
 }
 
 void ThreadedCoroutineManager::RemoveFromRegistry(Coroutine *co)
 {
     coroutines_.erase(co);
-    coroutine_count_--;
+    coroutineCount_--;
 }
 
 void ThreadedCoroutineManager::DeleteCoroutineInstance(Coroutine *co)
@@ -113,19 +113,19 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
     co->NativeCodeEnd();
     co->UpdateStatus(ThreadStatus::TERMINATING);
 
-    os::memory::LockHolder l(coro_switch_lock_);
+    os::memory::LockHolder l(coroSwitchLock_);
     if (co->HasManagedEntrypoint()) {
         // entrypointless coros should be destroyed manually
         UnblockWaiters(co->GetCompletionEvent());
         if (RunnableCoroutinesExist()) {
             ScheduleNextCoroutine();
         } else {
-            --running_coros_count_;
+            --runningCorosCount_;
         }
     }
 
     {
-        os::memory::LockHolder l_list(coro_list_lock_);
+        os::memory::LockHolder lList(coroListLock_);
         RemoveFromRegistry(co);
         // DestroyInternalResources() must be called in one critical section with
         // RemoveFromRegistry (under core_list_lock_). This function transfers cards from coro's post_barrier buffer to
@@ -142,17 +142,17 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
     }
 
     DeleteCoroutineInstance(co);
-    cv_await_all_.Signal();
+    cvAwaitAll_.Signal();
     return true;
     // NOTE(konstanting): issue debug notifications to runtime
 }
 
-Coroutine *ThreadedCoroutineManager::Launch(CompletionEvent *completion_event, Method *entrypoint,
+Coroutine *ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
                                             PandaVector<Value> &&arguments, [[maybe_unused]] CoroutineAffinity affinity)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch started";
 
-    auto *result = LaunchImpl(completion_event, entrypoint, std::move(arguments));
+    auto *result = LaunchImpl(completionEvent, entrypoint, std::move(arguments));
     if (result == nullptr) {
         ThrowOutOfMemoryError("Launch failed");
     }
@@ -163,7 +163,7 @@ Coroutine *ThreadedCoroutineManager::Launch(CompletionEvent *completion_event, M
 
 bool ThreadedCoroutineManager::RegisterWaiter(Coroutine *waiter, CoroutineEvent *awaitee)
 {
-    os::memory::LockHolder l(waiters_lock_);
+    os::memory::LockHolder l(waitersLock_);
     if (awaitee->Happened()) {
         awaitee->Unlock();
         return false;
@@ -181,14 +181,14 @@ void ThreadedCoroutineManager::Await(CoroutineEvent *awaitee)
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Await started";
 
     auto *waiter = Coroutine::GetCurrent();
-    auto *waiter_ctx = waiter->GetContext<ThreadedCoroutineContext>();
+    auto *waiterCtx = waiter->GetContext<ThreadedCoroutineContext>();
 
     ScopedNativeCodeThread n(waiter);
-    coro_switch_lock_.Lock();
+    coroSwitchLock_.Lock();
 
     if (!RegisterWaiter(waiter, awaitee)) {
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Await finished (no await happened)";
-        coro_switch_lock_.Unlock();
+        coroSwitchLock_.Unlock();
         return;
     }
 
@@ -196,8 +196,8 @@ void ThreadedCoroutineManager::Await(CoroutineEvent *awaitee)
     if (RunnableCoroutinesExist()) {
         ScheduleNextCoroutine();
     }
-    coro_switch_lock_.Unlock();
-    waiter_ctx->WaitUntilResumed();
+    coroSwitchLock_.Unlock();
+    waiterCtx->WaitUntilResumed();
 
     // NB: at this point the awaitee is already deleted
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Await finished";
@@ -205,11 +205,11 @@ void ThreadedCoroutineManager::Await(CoroutineEvent *awaitee)
 
 void ThreadedCoroutineManager::UnblockWaiters(CoroutineEvent *blocker)
 {
-    os::memory::LockHolder l(waiters_lock_);
+    os::memory::LockHolder l(waitersLock_);
     ASSERT(blocker != nullptr);
 #ifndef NDEBUG
     {
-        os::memory::LockHolder lk_blocker(*blocker);
+        os::memory::LockHolder lkBlocker(*blocker);
         ASSERT(blocker->Happened());
     }
 #endif
@@ -229,12 +229,12 @@ void ThreadedCoroutineManager::Schedule()
     ScheduleImpl();
 }
 
-bool ThreadedCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int inc_mask,
-                                                    unsigned int xor_mask) const
+bool ThreadedCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
+                                                    unsigned int xorMask) const
 {
-    os::memory::LockHolder lock(coro_list_lock_);
+    os::memory::LockHolder lock(coroListLock_);
     for (auto *t : coroutines_) {
-        if (!ApplyCallbackToThread(cb, t, inc_mask, xor_mask)) {
+        if (!ApplyCallbackToThread(cb, t, incMask, xorMask)) {
             return false;
         }
     }
@@ -243,7 +243,7 @@ bool ThreadedCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callbac
 
 void ThreadedCoroutineManager::SuspendAllThreads()
 {
-    os::memory::LockHolder l_list(coro_list_lock_);
+    os::memory::LockHolder lList(coroListLock_);
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::SuspendAllThreads started";
     for (auto *t : coroutines_) {
         t->SuspendImpl(true);
@@ -253,7 +253,7 @@ void ThreadedCoroutineManager::SuspendAllThreads()
 
 void ThreadedCoroutineManager::ResumeAllThreads()
 {
-    os::memory::LockHolder lock(coro_list_lock_);
+    os::memory::LockHolder lock(coroListLock_);
     for (auto *t : coroutines_) {
         t->ResumeImpl(true);
     }
@@ -275,7 +275,7 @@ void ThreadedCoroutineManager::WaitForDeregistration()
 void ThreadedCoroutineManager::PrintRunnableQueue(const PandaString &requester)
 {
     LOG(DEBUG, COROUTINES) << "[" << requester << "] ";
-    for (auto *co : runnables_queue_) {
+    for (auto *co : runnablesQueue_) {
         LOG(DEBUG, COROUTINES) << co->GetName() << " <";
     }
     LOG(DEBUG, COROUTINES) << "X";
@@ -284,71 +284,71 @@ void ThreadedCoroutineManager::PrintRunnableQueue(const PandaString &requester)
 
 void ThreadedCoroutineManager::PushToRunnableQueue(Coroutine *co)
 {
-    runnables_queue_.push_back(co);
+    runnablesQueue_.push_back(co);
 }
 
 bool ThreadedCoroutineManager::RunnableCoroutinesExist()
 {
-    return !runnables_queue_.empty();
+    return !runnablesQueue_.empty();
 }
 
 Coroutine *ThreadedCoroutineManager::PopFromRunnableQueue()
 {
-    auto *co = runnables_queue_.front();
-    runnables_queue_.pop_front();
+    auto *co = runnablesQueue_.front();
+    runnablesQueue_.pop_front();
     return co;
 }
 
 void ThreadedCoroutineManager::ScheduleNextCoroutine()
 {
-    Coroutine *next_coroutine = PopFromRunnableQueue();
-    next_coroutine->RequestResume();
+    Coroutine *nextCoroutine = PopFromRunnableQueue();
+    nextCoroutine->RequestResume();
 }
 
 void ThreadedCoroutineManager::ScheduleImpl()
 {
-    auto *current_co = Coroutine::GetCurrent();
-    auto *current_ctx = current_co->GetContext<ThreadedCoroutineContext>();
-    ScopedNativeCodeThread n(current_co);
+    auto *currentCo = Coroutine::GetCurrent();
+    auto *currentCtx = currentCo->GetContext<ThreadedCoroutineContext>();
+    ScopedNativeCodeThread n(currentCo);
 
-    coro_switch_lock_.Lock();
+    coroSwitchLock_.Lock();
     if (RunnableCoroutinesExist()) {
-        current_co->RequestSuspend(false);
-        PushToRunnableQueue(current_co);
+        currentCo->RequestSuspend(false);
+        PushToRunnableQueue(currentCo);
         ScheduleNextCoroutine();
 
-        coro_switch_lock_.Unlock();
-        current_ctx->WaitUntilResumed();
+        coroSwitchLock_.Unlock();
+        currentCtx->WaitUntilResumed();
     } else {
-        coro_switch_lock_.Unlock();
+        coroSwitchLock_.Unlock();
     }
 }
 
-Coroutine *ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completion_event, Method *entrypoint,
-                                                PandaVector<Value> &&arguments, bool start_suspended)
+Coroutine *ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
+                                                PandaVector<Value> &&arguments, bool startSuspended)
 {
-    os::memory::LockHolder l(coro_switch_lock_);
+    os::memory::LockHolder l(coroSwitchLock_);
 #ifndef NDEBUG
     PrintRunnableQueue("LaunchImpl begin");
 #endif
-    auto coro_name = entrypoint->GetFullName();
-    Coroutine *co = CreateCoroutineInstance(completion_event, entrypoint, std::move(arguments), std::move(coro_name));
+    auto coroName = entrypoint->GetFullName();
+    Coroutine *co = CreateCoroutineInstance(completionEvent, entrypoint, std::move(arguments), std::move(coroName));
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchImpl: failed to create a coroutine!";
         return co;
     }
     auto *ctx = co->GetContext<ThreadedCoroutineContext>();
-    if (start_suspended) {
+    if (startSuspended) {
         ctx->WaitUntilInitialized();
-        if (running_coros_count_ >= GetWorkersCount()) {
+        if (runningCorosCount_ >= GetWorkersCount()) {
             PushToRunnableQueue(co);
         } else {
-            ++running_coros_count_;
+            ++runningCorosCount_;
             ctx->RequestResume();
         }
     } else {
-        ++running_coros_count_;
+        ++runningCorosCount_;
     }
 #ifndef NDEBUG
     PrintRunnableQueue("LaunchImpl end");
@@ -362,19 +362,19 @@ void ThreadedCoroutineManager::MainCoroutineCompleted()
     auto *ctx = Coroutine::GetCurrent()->GetContext<ThreadedCoroutineContext>();
     //  firstly yield
     {
-        os::memory::LockHolder l(coro_switch_lock_);
+        os::memory::LockHolder l(coroSwitchLock_);
         ctx->MainThreadFinished();
         if (RunnableCoroutinesExist()) {
             ScheduleNextCoroutine();
         }
     }
     // then start awaiting for other coroutines to complete
-    os::memory::LockHolder lk(cv_mutex_);
+    os::memory::LockHolder lk(cvMutex_);
     ctx->EnterAwaitLoop();
-    while (coroutine_count_ > 1) {  // main coro runs till VM shutdown
-        cv_await_all_.Wait(&cv_mutex_);
+    while (coroutineCount_ > 1) {  // main coro runs till VM shutdown
+        cvAwaitAll_.Wait(&cvMutex_);
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::MainCoroutineCompleted(): await_all(): still "
-                               << coroutine_count_ << " coroutines exist...";
+                               << coroutineCount_ << " coroutines exist...";
     }
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::MainCoroutineCompleted(): await_all() done";
 }

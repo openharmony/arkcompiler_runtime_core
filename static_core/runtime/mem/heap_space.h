@@ -82,7 +82,7 @@ public:
      * @param max_free_percentage maximum possible percentage of free memory in this heap space, use for heap reducing
      * computation
      */
-    void Initialize(size_t initial_size, size_t max_size, uint32_t min_free_percentage, uint32_t max_free_percentage);
+    void Initialize(size_t initialSize, size_t maxSize, uint32_t minFreePercentage, uint32_t maxFreePercentage);
 
     /// @brief Compute new size of heap space
     virtual void ComputeNewSize();
@@ -91,32 +91,32 @@ public:
     virtual size_t GetHeapSize() const;
 
     /// @brief Try to allocate pool via PoolManager
-    [[nodiscard]] virtual Pool TryAllocPool(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                            void *allocator_ptr);
+    [[nodiscard]] virtual Pool TryAllocPool(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                            void *allocatorPtr);
 
     /// @brief Try to allocate arena via PoolManager
-    [[nodiscard]] virtual Arena *TryAllocArena(size_t arena_size, SpaceType space_type, AllocatorType allocator_type,
-                                               void *allocator_ptr);
+    [[nodiscard]] virtual Arena *TryAllocArena(size_t arenaSize, SpaceType spaceType, AllocatorType allocatorType,
+                                               void *allocatorPtr);
 
     /// @brief Free pool via PoolManager
-    void FreePool(void *pool_mem, size_t pool_size, bool release_pages = true);
+    void FreePool(void *poolMem, size_t poolSize, bool releasePages = true);
 
     /// @brief Free arena via PoolManager
     void FreeArena(Arena *arena);
 
     double GetMinFreePercentage() const
     {
-        return min_free_percentage_;
+        return minFreePercentage_;
     }
 
     double GetMaxFreePercentage() const
     {
-        return max_free_percentage_;
+        return maxFreePercentage_;
     }
 
     void SetIsWorkGC(bool value)
     {
-        is_work_gc_ = value;
+        isWorkGc_ = value;
     }
 
     /// Clamp current maximum heap size as maximum possible heap size
@@ -130,37 +130,37 @@ protected:
         DEFAULT_NOEXCEPT_MOVE_SEMANTIC(ObjectMemorySpace);
         ~ObjectMemorySpace() = default;
 
-        void Initialize(size_t initial_size, size_t max_size);
+        void Initialize(size_t initialSize, size_t maxSize);
 
         size_t GetCurrentSize() const
         {
-            return current_size_;
+            return currentSize_;
         }
 
         size_t GetMaxSize() const
         {
-            return max_size_;
+            return maxSize_;
         }
 
         size_t GetMinSize() const
         {
-            return min_size_;
+            return minSize_;
         }
 
-        void ClampNewMaxSize(size_t new_max_size);
+        void ClampNewMaxSize(size_t newMaxSize);
 
         size_t GetCurrentNonOccupiedSize() const
         {
-            return max_size_ - current_size_;
+            return maxSize_ - currentSize_;
         }
 
         void UseFullSpace()
         {
-            current_size_ = max_size_;
+            currentSize_ = maxSize_;
         }
 
         /// @brief Compute new size of heap space
-        void ComputeNewSize(size_t free_bytes, double min_free_percentage, double max_free_percentage);
+        void ComputeNewSize(size_t freeBytes, double minFreePercentage, double maxFreePercentage);
 
         /**
          * @brief Increase current heap space
@@ -176,28 +176,27 @@ protected:
 
         // If we have too big pool for allocation then after space increasing we can have not memory for this pool,
         // so we save pool size and increase heap space to allocate such pool
-        size_t saved_pool_size {0};  // NOLINT(misc-non-private-member-variables-in-classes)
+        size_t savedPoolSize {0};  // NOLINT(misc-non-private-member-variables-in-classes)
 
     private:
         // min_size_ <= current_size_ <= max_size_
-        size_t current_size_ {0};
-        size_t min_size_ {0};
-        size_t max_size_ {0};
+        size_t currentSize_ {0};
+        size_t minSize_ {0};
+        size_t maxSize_ {0};
     };
 
     // For avoid zero division
     static constexpr uint32_t MAX_FREE_PERCENTAGE = 99;
 
-    void InitializePercentages(uint32_t min_free_percentage, uint32_t max_free_percentage);
+    void InitializePercentages(uint32_t minFreePercentage, uint32_t maxFreePercentage);
 
-    [[nodiscard]] Pool TryAllocPoolBase(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                        void *allocator_ptr, size_t current_free_bytes_in_space,
-                                        ObjectMemorySpace *mem_space,
-                                        OSPagesAllocPolicy alloc_policy = OSPagesAllocPolicy::NO_POLICY);
+    [[nodiscard]] Pool TryAllocPoolBase(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                        void *allocatorPtr, size_t currentFreeBytesInSpace, ObjectMemorySpace *memSpace,
+                                        OSPagesAllocPolicy allocPolicy = OSPagesAllocPolicy::NO_POLICY);
 
-    [[nodiscard]] Arena *TryAllocArenaBase(size_t arena_size, SpaceType space_type, AllocatorType allocator_type,
-                                           void *allocator_ptr, size_t current_free_bytes_in_space,
-                                           ObjectMemorySpace *mem_space);
+    [[nodiscard]] Arena *TryAllocArenaBase(size_t arenaSize, SpaceType spaceType, AllocatorType allocatorType,
+                                           void *allocatorPtr, size_t currentFreeBytesInSpace,
+                                           ObjectMemorySpace *memSpace);
 
     /**
      * @brief Check that we can to allocate requested size into target space
@@ -209,29 +208,29 @@ protected:
      * @return std::optional value. If result has value then it contains bytes count for heap increasing (need during
      * GC, for example), else need to trigger GC
      */
-    std::optional<size_t> WillAlloc(size_t pool_size, size_t current_free_bytes_in_space,
-                                    const ObjectMemorySpace *mem_space) const;
+    std::optional<size_t> WillAlloc(size_t poolSize, size_t currentFreeBytesInSpace,
+                                    const ObjectMemorySpace *memSpace) const;
 
     /// @return current maximum size of this heap space
     size_t GetCurrentSize() const;
 
     /// @return free bytes count for current heap space size
-    size_t GetCurrentFreeBytes(size_t bytes_not_in_this_space = 0) const;
+    size_t GetCurrentFreeBytes(size_t bytesNotInThisSpace = 0) const;
 
     inline bool IsWorkGC() const
     {
-        return is_work_gc_;
+        return isWorkGc_;
     }
 
-    mutable os::memory::RWLock heap_lock_;  // NOLINT(misc-non-private-member-variables-in-classes)
-    ObjectMemorySpace mem_space_;           // NOLINT(misc-non-private-member-variables-in-classes)
-    bool is_initialized_ {false};           // NOLINT(misc-non-private-member-variables-in-classes)
+    mutable os::memory::RWLock heapLock_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    ObjectMemorySpace memSpace_;           // NOLINT(misc-non-private-member-variables-in-classes)
+    bool isInitialized_ {false};           // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
     // if GC wants allocate memory, but we have not needed memory for this then we increase current heap space
-    bool is_work_gc_ {false};
-    double min_free_percentage_ {0};
-    double max_free_percentage_ {0};
+    bool isWorkGc_ {false};
+    double minFreePercentage_ {0};
+    double maxFreePercentage_ {0};
 
     friend class panda::mem::test::RegionGarbageChoosingTest;
     template <typename ObjectAllocator, bool REGULAR_SPACE>
@@ -297,14 +296,14 @@ public:
     NO_MOVE_SEMANTIC(GenerationalSpaces);
     ~GenerationalSpaces() override = default;
 
-    void Initialize(size_t initial_young_size, bool was_set_initial_young_size, size_t max_young_size,
-                    bool was_set_max_young_size, size_t initial_total_size, size_t max_total_size,
-                    uint32_t min_free_percentage, uint32_t max_free_percentage);
+    void Initialize(size_t initialYoungSize, bool wasSetInitialYoungSize, size_t maxYoungSize, bool wasSetMaxYoungSize,
+                    size_t initialTotalSize, size_t maxTotalSize, uint32_t minFreePercentage,
+                    uint32_t maxFreePercentage);
 
     /// @brief Compute new sizes for young and tenured spaces
     void ComputeNewSize() override;
 
-    void UpdateSize(size_t desired_young_size);
+    void UpdateSize(size_t desiredYoungSize);
 
     size_t GetHeapSize() const override;
 
@@ -318,7 +317,7 @@ public:
      * @param is_young young or tenured space
      * @param chunk_size memory size for allocating in space
      */
-    bool CanAllocInSpace(bool is_young, size_t chunk_size) const;
+    bool CanAllocInSpace(bool isYoung, size_t chunkSize) const;
 
     size_t GetCurrentYoungSize() const;
 
@@ -327,51 +326,51 @@ public:
     void UseFullYoungSpace();
 
     /// @brief Allocate alone young pool (use for Gen-GC) with maximum possible size of young space
-    [[nodiscard]] Pool AllocAlonePoolForYoung(SpaceType space_type, AllocatorType allocator_type, void *allocator_ptr);
+    [[nodiscard]] Pool AllocAlonePoolForYoung(SpaceType spaceType, AllocatorType allocatorType, void *allocatorPtr);
 
     /**
      * @brief Try allocate pool for young space (use for G1-GC).
      * If free size in young space less requested pool size then pool can be allocate only during GC work
      */
-    [[nodiscard]] Pool TryAllocPoolForYoung(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                            void *allocator_ptr);
+    [[nodiscard]] Pool TryAllocPoolForYoung(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                            void *allocatorPtr);
 
     /**
      * @brief Try allocate pool for tenured space (use for generational-based GC).
      * If free size in tenured space less requested pool size then pool can be allocate only during GC work
      */
-    [[nodiscard]] Pool TryAllocPoolForTenured(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                              void *allocator_ptr,
-                                              OSPagesAllocPolicy alloc_policy = OSPagesAllocPolicy::NO_POLICY);
+    [[nodiscard]] Pool TryAllocPoolForTenured(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                              void *allocatorPtr,
+                                              OSPagesAllocPolicy allocPolicy = OSPagesAllocPolicy::NO_POLICY);
 
-    [[nodiscard]] Pool TryAllocPool(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                    void *allocator_ptr) final;
+    [[nodiscard]] Pool TryAllocPool(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                    void *allocatorPtr) final;
 
-    [[nodiscard]] Arena *TryAllocArenaForTenured(size_t arena_size, SpaceType space_type, AllocatorType allocator_type,
-                                                 void *allocator_ptr);
+    [[nodiscard]] Arena *TryAllocArenaForTenured(size_t arenaSize, SpaceType spaceType, AllocatorType allocatorType,
+                                                 void *allocatorPtr);
 
-    [[nodiscard]] Arena *TryAllocArena(size_t arena_size, SpaceType space_type, AllocatorType allocator_type,
-                                       void *allocator_ptr) final;
+    [[nodiscard]] Arena *TryAllocArena(size_t arenaSize, SpaceType spaceType, AllocatorType allocatorType,
+                                       void *allocatorPtr) final;
 
     /// @brief Allocate pool shared usage between young and tenured spaces (use for regions in G1-GC).
-    [[nodiscard]] Pool AllocSharedPool(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                       void *allocator_ptr);
+    [[nodiscard]] Pool AllocSharedPool(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                       void *allocatorPtr);
 
-    void IncreaseYoungOccupiedInSharedPool(size_t chunk_size);
+    void IncreaseYoungOccupiedInSharedPool(size_t chunkSize);
 
-    void IncreaseTenuredOccupiedInSharedPool(size_t chunk_size);
+    void IncreaseTenuredOccupiedInSharedPool(size_t chunkSize);
 
-    void ReduceYoungOccupiedInSharedPool(size_t chunk_size);
+    void ReduceYoungOccupiedInSharedPool(size_t chunkSize);
 
-    void ReduceTenuredOccupiedInSharedPool(size_t chunk_size);
+    void ReduceTenuredOccupiedInSharedPool(size_t chunkSize);
 
-    void FreeSharedPool(void *pool_mem, size_t pool_size);
+    void FreeSharedPool(void *poolMem, size_t poolSize);
 
-    void FreeYoungPool(void *pool_mem, size_t pool_size, bool release_pages = true);
+    void FreeYoungPool(void *poolMem, size_t poolSize, bool releasePages = true);
 
-    void PromoteYoungPool(size_t pool_size);
+    void PromoteYoungPool(size_t poolSize);
 
-    void FreeTenuredPool(void *pool_mem, size_t pool_size, bool release_pages = true);
+    void FreeTenuredPool(void *poolMem, size_t poolSize, bool releasePages = true);
 
     size_t GetCurrentFreeTenuredSize() const;
 
@@ -379,19 +378,19 @@ public:
 
 private:
     void ComputeNewYoung();
-    void UpdateYoungSize(size_t desired_young_size);
+    void UpdateYoungSize(size_t desiredYoungSize);
     void ComputeNewTenured();
 
     size_t GetCurrentFreeTenuredSizeUnsafe() const;
     size_t GetCurrentFreeYoungSizeUnsafe() const;
 
-    ObjectMemorySpace young_space_;
-    size_t young_size_in_separate_pools_ {0};
+    ObjectMemorySpace youngSpace_;
+    size_t youngSizeInSeparatePools_ {0};
 
     // These use for allocate shared (for young and tenured) pools and allocate blocks from them
-    size_t shared_pools_size_ {0};
-    size_t young_size_in_shared_pools_ {0};
-    size_t tenured_size_in_shared_pools_ {0};
+    size_t sharedPoolsSize_ {0};
+    size_t youngSizeInSharedPools_ {0};
+    size_t tenuredSizeInSharedPools_ {0};
 
     friend class panda::mem::test::HeapSpaceTest;
     friend class panda::mem::test::MemStatsGenGCTest;

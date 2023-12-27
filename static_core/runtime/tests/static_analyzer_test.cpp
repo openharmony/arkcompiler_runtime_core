@@ -44,10 +44,10 @@ public:
         options.SetLoadRuntimes({"core"});
         options.SetGcType("epsilon");
         options.SetGcTriggerType("debug-never");
-        auto exec_path = panda::os::file::File::GetExecutablePath();
-        std::string panda_std_lib =
-            exec_path.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "pandastdlib.bin";
-        options.SetBootPandaFiles({panda_std_lib});
+        auto execPath = panda::os::file::File::GetExecutablePath();
+        std::string pandaStdLib =
+            execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "pandastdlib.bin";
+        options.SetBootPandaFiles({pandaStdLib});
 
         Runtime::Create(options);
     }
@@ -72,10 +72,10 @@ public:
     {
         Runtime *runtime = Runtime::GetCurrent();
         LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT;
+        SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT;
         auto *klass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
         ScopedManagedCodeThread s(MTManagedThread::GetCurrent());
-        return coretypes::Array::Create(klass, length, space_type);
+        return coretypes::Array::Create(klass, length, spaceType);
     }
 };
 
@@ -91,12 +91,12 @@ TEST_F(StaticAnalyzerTest, TestArray)
 
     size_t count = 0;
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    auto handler = [array, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool is_volatile) {
+    auto handler = [array, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool isVolatile) {
         ++count;
         EXPECT_EQ(array, obj);
         EXPECT_EQ(expected, ref);
         EXPECT_EQ(ref, ObjectAccessor::GetObject<true>(obj, offset));
-        EXPECT_FALSE(is_volatile);
+        EXPECT_FALSE(isVolatile);
         return true;
     };
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)

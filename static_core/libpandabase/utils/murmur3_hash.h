@@ -41,13 +41,13 @@ public:
     {
         return GetHash32WithSeedImpl(key, len, SEED_VALUE);
     }
-    static uint32_t GetHash32StringImpl(const uint8_t *mutf8_string)
+    static uint32_t GetHash32StringImpl(const uint8_t *mutf8String)
     {
-        return MurmurHash3String(mutf8_string, SEED_VALUE);
+        return MurmurHash3String(mutf8String, SEED_VALUE);
     }
-    static uint32_t GetHash32StringWithSeedImpl(const uint8_t *mutf8_string, uint32_t seed)
+    static uint32_t GetHash32StringWithSeedImpl(const uint8_t *mutf8String, uint32_t seed)
     {
-        return MurmurHash3String(mutf8_string, seed);
+        return MurmurHash3String(mutf8String, seed);
     }
 
 private:
@@ -117,8 +117,8 @@ private:
         uint32_t k1 = 0;
         for (size_t i = len & 3U; i > 0; i--) {
             // Get ((uint8_t*)tail)[i - 1]:
-            uintptr_t block_pointer = tail + sizeof(uint8_t) * (i - 1);
-            uint8_t block = *reinterpret_cast<uint8_t *>(block_pointer);
+            uintptr_t blockPointer = tail + sizeof(uint8_t) * (i - 1);
+            uint8_t block = *reinterpret_cast<uint8_t *>(blockPointer);
             uint32_t temp = static_cast<uint32_t>(block) << (TAIL_SHIFT * (i - 1U));
             k1 ^= temp;
             if (i == 1) {
@@ -135,28 +135,28 @@ private:
         return hash;
     }
 
-    static uint32_t MurmurHash3String(const uint8_t *mutf8_string, uint32_t seed)
+    static uint32_t MurmurHash3String(const uint8_t *mutf8String, uint32_t seed)
     {
         // We start hashing from the seed
         uint32_t hash = seed;
         // We should still compute length of the string, we will need it later
-        size_t mutf8_length = 0;
+        size_t mutf8Length = 0;
         // Do the main part:
         // Iterate for each 32bits
-        auto blocks = reinterpret_cast<uintptr_t>(mutf8_string);
+        auto blocks = reinterpret_cast<uintptr_t>(mutf8String);
         std::array<uint8_t, BLOCK_SIZE> memblock = {'\0', '\0', '\0', '\0'};
-        size_t tail_len = 0;
+        size_t tailLen = 0;
         while (true) {
-            tail_len = 0;
+            tailLen = 0;
             for (unsigned char &i : memblock) {
                 i = *reinterpret_cast<uint8_t *>(blocks);
                 blocks += sizeof(uint8_t);
                 if (i == '\0') {
                     break;
                 }
-                tail_len++;
+                tailLen++;
             }
-            if (tail_len != BLOCK_SIZE) {
+            if (tailLen != BLOCK_SIZE) {
                 // We couldn't read four 8bytes value
                 break;
             }
@@ -170,14 +170,14 @@ private:
             hash ^= k1;
             hash = Rotl(hash, MAIN_SECOND_SHIFT);
             hash = hash * MAIN_MULTIPLICATOR + MAIN_CONSTANT;
-            mutf8_length += BLOCK_SIZE;
+            mutf8Length += BLOCK_SIZE;
         }
 
         // Proceed the tail:
 
-        mutf8_length += tail_len;
+        mutf8Length += tailLen;
         uint32_t k1 = 0;
-        for (size_t i = tail_len; i > 0; i--) {
+        for (size_t i = tailLen; i > 0; i--) {
             uint8_t block = memblock[i - 1U];
             uint32_t temp = static_cast<uint32_t>(block) << (TAIL_SHIFT * (i - 1U));
             k1 ^= temp;
@@ -189,7 +189,7 @@ private:
         }
 
         // Finalize the result
-        hash ^= mutf8_length;
+        hash ^= mutf8Length;
         hash = Finalize(hash);
 
         return hash;

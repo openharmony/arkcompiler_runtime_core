@@ -56,11 +56,11 @@ public:
         Span<const uint8_t> offsets_;
     };
 
-    ParamAnnotationsDataAccessor(const File &panda_file, File::EntityId id) : panda_file_(panda_file), id_(id)
+    ParamAnnotationsDataAccessor(const File &pandaFile, File::EntityId id) : pandaFile_(pandaFile), id_(id)
     {
-        auto sp = panda_file_.GetSpanFromId(id);
+        auto sp = pandaFile_.GetSpanFromId(id);
         count_ = helpers::Read<COUNT_SIZE>(&sp);
-        annotations_array_ = sp;
+        annotationsArray_ = sp;
     }
 
     ~ParamAnnotationsDataAccessor() = default;
@@ -71,7 +71,7 @@ public:
     template <class Callback>
     void EnumerateAnnotationArrays(const Callback &cb)
     {
-        auto sp = annotations_array_;
+        auto sp = annotationsArray_;
         size_t size = COUNT_SIZE;
 
         for (size_t i = 0; i < count_; i++) {
@@ -89,7 +89,7 @@ public:
     {
         ASSERT(index < count_);
 
-        auto sp = annotations_array_;
+        auto sp = annotationsArray_;
         for (uint32_t i = 0; i < count_; i++) {
             auto count = helpers::Read<COUNT_SIZE>(&sp);
             if (i == index) {
@@ -127,11 +127,11 @@ private:
         EnumerateAnnotationArrays([](const AnnotationArray & /* unused */) {});
     }
 
-    const File &panda_file_;
+    const File &pandaFile_;
     File::EntityId id_;
 
     uint32_t count_;
-    Span<const uint8_t> annotations_array_ {nullptr, nullptr};
+    Span<const uint8_t> annotationsArray_ {nullptr, nullptr};
 
     size_t size_ {0};
 };

@@ -47,8 +47,8 @@ inline std::tuple<T, size_t, bool> DecodeUnsigned(const uint8_t *data)
         result |= static_cast<T>(byte) << shift;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if ((data[i] & EXTENSION_BIT) == 0) {
-            bool is_full = MinimumBitsToStore(byte) <= (BITWIDTH - shift);
-            return {result, i + 1, is_full};
+            bool isFull = MinimumBitsToStore(byte) <= (BITWIDTH - shift);
+            return {result, i + 1, isFull};
         }
     }
 
@@ -114,16 +114,16 @@ inline std::tuple<T, size_t, bool> DecodeSigned(const uint8_t *data)
         if ((byte & EXTENSION_BIT) == 0) {
             shift = BITWIDTH - shift;
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
-            auto signed_extended = static_cast<int8_t>(static_cast<int8_t>(byte << 1) >> 1);
+            auto signedExtended = static_cast<int8_t>(static_cast<int8_t>(byte << 1) >> 1);
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
-            uint8_t masked = (signed_extended ^ (signed_extended >> PAYLOAD_WIDTH)) | 1;
-            bool is_full = MinimumBitsToStore(masked) <= shift;
+            uint8_t masked = (signedExtended ^ (signedExtended >> PAYLOAD_WIDTH)) | 1;
+            bool isFull = MinimumBitsToStore(masked) <= shift;
             if (shift > PAYLOAD_WIDTH) {
                 shift -= PAYLOAD_WIDTH;
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
                 result = static_cast<T>(result << shift) >> shift;
             }
-            return {result, i + 1, is_full};
+            return {result, i + 1, isFull};
         }
     }
 

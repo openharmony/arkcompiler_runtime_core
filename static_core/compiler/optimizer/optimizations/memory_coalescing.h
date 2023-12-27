@@ -30,13 +30,13 @@ public:
         Inst *second;
     };
 
-    explicit MemoryCoalescing(Graph *graph, bool aligned = true) : Optimization(graph), aligned_only_(aligned) {}
+    explicit MemoryCoalescing(Graph *graph, bool aligned = true) : Optimization(graph), alignedOnly_(aligned) {}
 
     bool RunImpl() override;
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerMemoryCoalescing();
+        return g_options.IsCompilerMemoryCoalescing();
     }
 
     const char *GetPassName() const override
@@ -57,7 +57,7 @@ public:
             case DataType::ANY:
                 return true;
             case DataType::REFERENCE:
-                return OPTIONS.IsCompilerMemoryCoalescingObjects();
+                return g_options.IsCompilerMemoryCoalescingObjects();
             default:
                 return false;
         }
@@ -69,15 +69,15 @@ public:
 
 private:
     void ReplacePairs(ArenaVector<CoalescedPair> const &pairs);
-    void ReplacePair(Inst *first, Inst *second, Inst *insert_after);
+    void ReplacePair(Inst *first, Inst *second, Inst *insertAfter);
 
-    Inst *ReplaceLoadArray(Inst *first, Inst *second, Inst *insert_after);
-    Inst *ReplaceLoadArrayI(Inst *first, Inst *second, Inst *insert_after);
-    Inst *ReplaceStoreArray(Inst *first, Inst *second, Inst *insert_after);
-    Inst *ReplaceStoreArrayI(Inst *first, Inst *second, Inst *insert_after);
+    Inst *ReplaceLoadArray(Inst *first, Inst *second, Inst *insertAfter);
+    Inst *ReplaceLoadArrayI(Inst *first, Inst *second, Inst *insertAfter);
+    Inst *ReplaceStoreArray(Inst *first, Inst *second, Inst *insertAfter);
+    Inst *ReplaceStoreArrayI(Inst *first, Inst *second, Inst *insertAfter);
 
 private:
-    bool aligned_only_;
+    bool alignedOnly_;
 };
 }  // namespace panda::compiler
 

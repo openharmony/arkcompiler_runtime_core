@@ -46,7 +46,7 @@ void DoStaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result);
 class BytecodeGen : public compiler::Optimization, public compiler::GraphVisitor {
 public:
     explicit BytecodeGen(compiler::Graph *graph, pandasm::Function *function, const BytecodeOptIrInterface *iface)
-        : compiler::Optimization(graph), function_(function), ir_interface_(iface)
+        : compiler::Optimization(graph), function_(function), irInterface_(iface)
     {
     }
     ~BytecodeGen() override = default;
@@ -63,10 +63,10 @@ public:
         return res_;
     }
 
-    void Reserve(size_t res_size = 0)
+    void Reserve(size_t resSize = 0)
     {
-        if (res_size > 0) {
-            result_.reserve(res_size);
+        if (resSize > 0) {
+            result_.reserve(resSize);
         }
     }
 
@@ -94,7 +94,7 @@ public:
     {
         pandasm::Ins l;
         l.label = label;
-        l.set_label = true;
+        l.setLabel = true;
         result_.emplace_back(l);
     }
 
@@ -117,24 +117,24 @@ public:
     static void VisitInitObject(GraphVisitor *visitor, Inst *inst);
     static void VisitCatchPhi(GraphVisitor *visitor, Inst *inst);
 
-    static void VisitIf(GraphVisitor *v, Inst *inst_base);
-    static void VisitIfImm(GraphVisitor *v, Inst *inst_base);
-    static void VisitCast(GraphVisitor *v, Inst *inst_base);
-    static void IfImmZero(GraphVisitor *v, Inst *inst_base);
-    static void IfImmNonZero(GraphVisitor *v, Inst *inst_base);
-    static void IfImm64(GraphVisitor *v, Inst *inst_base);
-    static void VisitIntrinsic(GraphVisitor *v, Inst *inst_base);
+    static void VisitIf(GraphVisitor *v, Inst *instBase);
+    static void VisitIfImm(GraphVisitor *v, Inst *instBase);
+    static void VisitCast(GraphVisitor *v, Inst *instBase);
+    static void IfImmZero(GraphVisitor *v, Inst *instBase);
+    static void IfImmNonZero(GraphVisitor *v, Inst *instBase);
+    static void IfImm64(GraphVisitor *v, Inst *instBase);
+    static void VisitIntrinsic(GraphVisitor *v, Inst *instBase);
     static void CallHandler(GraphVisitor *visitor, Inst *inst);
-    static void VisitStoreObject(GraphVisitor *v, Inst *inst_base);
-    static void VisitStoreStatic(GraphVisitor *v, Inst *inst_base);
-    static void VisitLoadObject(GraphVisitor *v, Inst *inst_base);
-    static void VisitLoadStatic(GraphVisitor *v, Inst *inst_base);
-    static void VisitLoadString(GraphVisitor *v, Inst *inst_base);
-    static void VisitReturn(GraphVisitor *v, Inst *inst_base);
+    static void VisitStoreObject(GraphVisitor *v, Inst *instBase);
+    static void VisitStoreStatic(GraphVisitor *v, Inst *instBase);
+    static void VisitLoadObject(GraphVisitor *v, Inst *instBase);
+    static void VisitLoadStatic(GraphVisitor *v, Inst *instBase);
+    static void VisitLoadString(GraphVisitor *v, Inst *instBase);
+    static void VisitReturn(GraphVisitor *v, Inst *instBase);
 
-    static void VisitCastValueToAnyType(GraphVisitor *v, Inst *inst_base);
+    static void VisitCastValueToAnyType(GraphVisitor *v, Inst *instBase);
 
-    static void VisitEcma(GraphVisitor *v, Inst *inst_base);
+    static void VisitEcma(GraphVisitor *v, Inst *instBase);
     static void IfEcma(GraphVisitor *v, compiler::IfInst *inst);
 
 #include "generated/codegen_visitors.inc"
@@ -151,16 +151,16 @@ public:
 #include "compiler/optimizer/ir/visitor.inc"
 
 private:
-    void AppendCatchBlock(uint32_t type_id, const compiler::BasicBlock *try_begin, const compiler::BasicBlock *try_end,
-                          const compiler::BasicBlock *catch_begin, const compiler::BasicBlock *catch_end = nullptr);
+    void AppendCatchBlock(uint32_t typeId, const compiler::BasicBlock *tryBegin, const compiler::BasicBlock *tryEnd,
+                          const compiler::BasicBlock *catchBegin, const compiler::BasicBlock *catchEnd = nullptr);
     void VisitTryBegin(const compiler::BasicBlock *bb);
 
 private:
     pandasm::Function *function_;
-    const BytecodeOptIrInterface *ir_interface_;
+    const BytecodeOptIrInterface *irInterface_;
 
     std::vector<pandasm::Ins> res_;
-    std::vector<pandasm::Function::CatchBlock> catch_blocks_;
+    std::vector<pandasm::Function::CatchBlock> catchBlocks_;
 
     bool success_ {true};
     std::vector<pandasm::Ins> result_;

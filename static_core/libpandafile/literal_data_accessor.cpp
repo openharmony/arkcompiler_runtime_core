@@ -17,11 +17,11 @@
 
 namespace panda::panda_file {
 
-LiteralDataAccessor::LiteralDataAccessor(const File &panda_file, File::EntityId literal_data_id)
-    : panda_file_(panda_file), literal_data_id_(literal_data_id)
+LiteralDataAccessor::LiteralDataAccessor(const File &pandaFile, File::EntityId literalDataId)
+    : pandaFile_(pandaFile), literalDataId_(literalDataId)
 {
-    literal_num_ = panda_file_.GetHeader()->num_literalarrays;
-    literal_data_sp_ = panda_file_.GetSpanFromId(literal_data_id_);
+    literalNum_ = pandaFile_.GetHeader()->numLiteralarrays;
+    literalDataSp_ = pandaFile_.GetSpanFromId(literalDataId_);
 }
 
 }  // namespace panda::panda_file

@@ -52,7 +52,7 @@ void ObjectTypeCheckElimination::VisitCheckCast(GraphVisitor *visitor, Inst *ins
 
 void ObjectTypeCheckElimination::ReplaceCheckMustThrowByUnconditionalDeoptimize()
 {
-    for (auto &inst : checks_must_throw_) {
+    for (auto &inst : checksMustThrow_) {
         auto block = inst->GetBasicBlock();
         if (block != nullptr) {
             COMPILER_LOG(DEBUG, CHECKS_ELIM)
@@ -78,28 +78,28 @@ bool ObjectTypeCheckElimination::TryEliminateIsInstance(Inst *inst)
     auto ref = inst->GetDataFlowInput(0);
     // Null isn't instance of any class.
     if (ref->GetOpcode() == Opcode::NullPtr) {
-        auto new_cnst = graph->FindOrCreateConstant(0);
-        inst->ReplaceUsers(new_cnst);
+        auto newCnst = graph->FindOrCreateConstant(0);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
-    auto is_instance = inst->CastToIsInstance();
-    if (!graph->IsBytecodeOptimizer() && IsMember(ref, is_instance->GetTypeId(), is_instance)) {
+    auto isInstance = inst->CastToIsInstance();
+    if (!graph->IsBytecodeOptimizer() && IsMember(ref, isInstance->GetTypeId(), isInstance)) {
         if (BoundsAnalysis::IsInstNotNull(ref, block)) {
-            auto new_cnst = graph->FindOrCreateConstant(true);
-            inst->ReplaceUsers(new_cnst);
+            auto newCnst = graph->FindOrCreateConstant(true);
+            inst->ReplaceUsers(newCnst);
             return true;
         }
     }
-    auto tgt_klass = graph->GetRuntime()->GetClass(is_instance->GetMethod(), is_instance->GetTypeId());
+    auto tgtKlass = graph->GetRuntime()->GetClass(isInstance->GetMethod(), isInstance->GetTypeId());
     // If we can't resolve klass in runtime we must throw exception, so we check NullPtr after
     // But we can't change the IsInstance to Deoptimize, because we can resolve after compilation
-    if (tgt_klass == nullptr) {
+    if (tgtKlass == nullptr) {
         return false;
     }
-    auto ref_info = ref->GetObjectTypeInfo();
-    if (ref_info) {
-        auto ref_klass = ref_info.GetClass();
-        bool result = graph->GetRuntime()->IsAssignableFrom(tgt_klass, ref_klass);
+    auto refInfo = ref->GetObjectTypeInfo();
+    if (refInfo) {
+        auto refKlass = refInfo.GetClass();
+        bool result = graph->GetRuntime()->IsAssignableFrom(tgtKlass, refKlass);
         // If ref can be null, IsInstance cannot be changed to true
         if (result) {
             if (graph->IsBytecodeOptimizer()) {
@@ -111,11 +111,11 @@ bool ObjectTypeCheckElimination::TryEliminateIsInstance(Inst *inst)
             }
         }
         // If class of ref can be subclass of ref_klass, IsInstance cannot be changed to false
-        if (!result && !ref_info.IsExact()) {
+        if (!result && !refInfo.IsExact()) {
             return false;
         }
-        auto new_cnst = graph->FindOrCreateConstant(result);
-        inst->ReplaceUsers(new_cnst);
+        auto newCnst = graph->FindOrCreateConstant(result);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -133,24 +133,24 @@ ObjectTypeCheckElimination::CheckCastEliminateType ObjectTypeCheckElimination::T
         block->ReplaceInst(inst, block->GetGraph()->CreateInstNOP());
         return CheckCastEliminateType::REDUNDANT;
     }
-    auto check_cast = inst->CastToCheckCast();
-    auto tgt_klass = graph->GetRuntime()->GetClass(check_cast->GetMethod(), check_cast->GetTypeId());
-    auto ref_info = ref->GetObjectTypeInfo();
+    auto checkCast = inst->CastToCheckCast();
+    auto tgtKlass = graph->GetRuntime()->GetClass(checkCast->GetMethod(), checkCast->GetTypeId());
+    auto refInfo = ref->GetObjectTypeInfo();
     // If we can't resolve klass in runtime we must throw exception, so we check NullPtr after
     // But we can't change the CheckCast to Deoptimize, because we can resolve after compilation
-    if (tgt_klass != nullptr && ref_info) {
-        auto ref_klass = ref_info.GetClass();
-        bool result = graph->GetRuntime()->IsAssignableFrom(tgt_klass, ref_klass);
+    if (tgtKlass != nullptr && refInfo) {
+        auto refKlass = refInfo.GetClass();
+        bool result = graph->GetRuntime()->IsAssignableFrom(tgtKlass, refKlass);
         if (result) {
             inst->RemoveInputs();
             block->ReplaceInst(inst, block->GetGraph()->CreateInstNOP());
             return CheckCastEliminateType::REDUNDANT;
         }
-        if (BoundsAnalysis::IsInstNotNull(ref, block) && ref_info.IsExact()) {
+        if (BoundsAnalysis::IsInstNotNull(ref, block) && refInfo.IsExact()) {
             return CheckCastEliminateType::MUST_THROW;
         }
     }
-    if (IsMember(ref, check_cast->GetTypeId(), inst)) {
+    if (IsMember(ref, checkCast->GetTypeId(), inst)) {
         inst->RemoveInputs();
         block->ReplaceInst(inst, block->GetGraph()->CreateInstNOP());
         return CheckCastEliminateType::REDUNDANT;
@@ -159,23 +159,23 @@ ObjectTypeCheckElimination::CheckCastEliminateType ObjectTypeCheckElimination::T
 }
 
 // returns true if data flow input of inst is always member of class type_id when ref_user is executed
-bool ObjectTypeCheckElimination::IsMember(Inst *inst, uint32_t type_id, Inst *ref_user)
+bool ObjectTypeCheckElimination::IsMember(Inst *inst, uint32_t typeId, Inst *refUser)
 {
     for (auto &user : inst->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (user_inst == ref_user || !user_inst->IsDominate(ref_user)) {
+        auto userInst = user.GetInst();
+        if (userInst == refUser || !userInst->IsDominate(refUser)) {
             continue;
         }
         bool success = false;
-        switch (user_inst->GetOpcode()) {
+        switch (userInst->GetOpcode()) {
             case Opcode::CheckCast:
-                success = (user_inst->CastToCheckCast()->GetTypeId() == type_id);
+                success = (userInst->CastToCheckCast()->GetTypeId() == typeId);
                 break;
             case Opcode::IsInstance:
-                success = IsSuccessfulIsInstance(user_inst->CastToIsInstance(), type_id, ref_user);
+                success = IsSuccessfulIsInstance(userInst->CastToIsInstance(), typeId, refUser);
                 break;
             case Opcode::NullCheck:
-                success = IsMember(user_inst, type_id, ref_user);
+                success = IsMember(userInst, typeId, refUser);
             default:
                 break;
         }
@@ -187,19 +187,19 @@ bool ObjectTypeCheckElimination::IsMember(Inst *inst, uint32_t type_id, Inst *re
 }
 
 // returns true if is_instance has given type_id and evaluates to true at ref_user
-bool ObjectTypeCheckElimination::IsSuccessfulIsInstance(IsInstanceInst *is_instance, uint32_t type_id, Inst *ref_user)
+bool ObjectTypeCheckElimination::IsSuccessfulIsInstance(IsInstanceInst *isInstance, uint32_t typeId, Inst *refUser)
 {
-    ASSERT(is_instance->GetDataFlowInput(0) == ref_user->GetDataFlowInput(0));
-    if (is_instance->GetTypeId() != type_id) {
+    ASSERT(isInstance->GetDataFlowInput(0) == refUser->GetDataFlowInput(0));
+    if (isInstance->GetTypeId() != typeId) {
         return false;
     }
-    for (auto &user : is_instance->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (user_inst->GetOpcode() != Opcode::IfImm) {
+    for (auto &user : isInstance->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (userInst->GetOpcode() != Opcode::IfImm) {
             continue;
         }
-        auto true_block = user_inst->CastToIfImm()->GetEdgeIfInputTrue();
-        if (true_block->GetPredsBlocks().size() == 1 && true_block->IsDominate(ref_user->GetBasicBlock())) {
+        auto trueBlock = userInst->CastToIfImm()->GetEdgeIfInputTrue();
+        if (trueBlock->GetPredsBlocks().size() == 1 && trueBlock->IsDominate(refUser->GetBasicBlock())) {
             return true;
         }
     }

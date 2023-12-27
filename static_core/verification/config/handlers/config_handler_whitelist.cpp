@@ -86,7 +86,7 @@ void RegisterConfigHandlerWhitelist(Config *dcfg)
                     } else {
                         LOG(DEBUG, VERIFIER) << "Added to whitelist config '" << s.name << "' methods named " << c;
                     }
-                    config->debug_cfg.AddWhitelistMethodConfig(kind, c);
+                    config->debugCfg.AddWhitelistMethodConfig(kind, c);
                 }
             }
         }

@@ -41,9 +41,9 @@ class PandaCache;
  * used to quickly find class by its descriptor.
  */
 struct EntityPairHeader {
-    uint32_t descriptor_hash;
-    uint32_t entity_id_offset;
-    uint32_t next_pos;
+    uint32_t descriptorHash;
+    uint32_t entityIdOffset;
+    uint32_t nextPos;
 };
 
 class File {
@@ -59,39 +59,39 @@ public:
         std::array<uint8_t, MAGIC_SIZE> magic;
         uint32_t checksum;
         std::array<uint8_t, VERSION_SIZE> version;
-        uint32_t file_size;
-        uint32_t foreign_off;
-        uint32_t foreign_size;
-        uint32_t quickened_flag;
-        uint32_t num_classes;
-        uint32_t class_idx_off;
-        uint32_t num_lnps;
-        uint32_t lnp_idx_off;
-        uint32_t num_literalarrays;
-        uint32_t literalarray_idx_off;
-        uint32_t num_indexes;
-        uint32_t index_section_off;
+        uint32_t fileSize;
+        uint32_t foreignOff;
+        uint32_t foreignSize;
+        uint32_t quickenedFlag;
+        uint32_t numClasses;
+        uint32_t classIdxOff;
+        uint32_t numLnps;
+        uint32_t lnpIdxOff;
+        uint32_t numLiteralarrays;
+        uint32_t literalarrayIdxOff;
+        uint32_t numIndexes;
+        uint32_t indexSectionOff;
     };
 
     struct RegionHeader {
         uint32_t start;
         uint32_t end;
-        uint32_t class_idx_size;
-        uint32_t class_idx_off;
-        uint32_t method_idx_size;
-        uint32_t method_idx_off;
-        uint32_t field_idx_size;
-        uint32_t field_idx_off;
-        uint32_t proto_idx_size;
-        uint32_t proto_idx_off;
+        uint32_t classIdxSize;
+        uint32_t classIdxOff;
+        uint32_t methodIdxSize;
+        uint32_t methodIdxOff;
+        uint32_t fieldIdxSize;
+        uint32_t fieldIdxOff;
+        uint32_t protoIdxSize;
+        uint32_t protoIdxOff;
     };
 
     struct StringData {
-        StringData(uint32_t len, const uint8_t *d) : utf16_length(len), is_ascii(false), data(d) {}
+        StringData(uint32_t len, const uint8_t *d) : utf16Length(len), isAscii(false), data(d) {}
         StringData() = default;
-        uint32_t utf16_length;  // NOLINT(misc-non-private-member-variables-in-classes)
-        bool is_ascii;          // NOLINT(misc-non-private-member-variables-in-classes)
-        const uint8_t *data;    // NOLINT(misc-non-private-member-variables-in-classes)
+        uint32_t utf16Length;  // NOLINT(misc-non-private-member-variables-in-classes)
+        bool isAscii;          // NOLINT(misc-non-private-member-variables-in-classes)
+        const uint8_t *data;   // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
     // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
@@ -142,9 +142,9 @@ public:
     StringData GetStringData(EntityId id) const;
     EntityId GetLiteralArraysId() const;
 
-    EntityId GetClassId(const uint8_t *mutf8_name) const;
+    EntityId GetClassId(const uint8_t *mutf8Name) const;
 
-    EntityId GetClassIdFromClassHashTable(const uint8_t *mutf8_name) const;
+    EntityId GetClassIdFromClassHashTable(const uint8_t *mutf8Name) const;
 
     const Header *GetHeader() const
     {
@@ -164,9 +164,9 @@ public:
     bool IsExternal(EntityId id) const
     {
         const Header *header = GetHeader();
-        uint32_t foreign_begin = header->foreign_off;
-        uint32_t foreign_end = foreign_begin + header->foreign_size;
-        return id.GetOffset() >= foreign_begin && id.GetOffset() < foreign_end;
+        uint32_t foreignBegin = header->foreignOff;
+        uint32_t foreignEnd = foreignBegin + header->foreignSize;
+        return id.GetOffset() >= foreignBegin && id.GetOffset() < foreignEnd;
     }
 
     EntityId GetIdFromPointer(const uint8_t *ptr) const
@@ -177,32 +177,32 @@ public:
     Span<const uint8_t> GetSpanFromId(EntityId id) const
     {
         const Header *header = GetHeader();
-        Span file(GetBase(), header->file_size);
+        Span file(GetBase(), header->fileSize);
         return file.Last(file.size() - id.GetOffset());
     }
 
     Span<const uint32_t> GetClasses() const
     {
         const Header *header = GetHeader();
-        Span file(GetBase(), header->file_size);
-        Span class_idx_data = file.SubSpan(header->class_idx_off, header->num_classes * sizeof(uint32_t));
-        return Span(reinterpret_cast<const uint32_t *>(class_idx_data.data()), header->num_classes);
+        Span file(GetBase(), header->fileSize);
+        Span classIdxData = file.SubSpan(header->classIdxOff, header->numClasses * sizeof(uint32_t));
+        return Span(reinterpret_cast<const uint32_t *>(classIdxData.data()), header->numClasses);
     }
 
     Span<const uint32_t> GetLiteralArrays() const
     {
         const Header *header = GetHeader();
-        Span file(GetBase(), header->file_size);
-        Span litarr_idx_data = file.SubSpan(header->literalarray_idx_off, header->num_literalarrays * sizeof(uint32_t));
-        return Span(reinterpret_cast<const uint32_t *>(litarr_idx_data.data()), header->num_literalarrays);
+        Span file(GetBase(), header->fileSize);
+        Span litarrIdxData = file.SubSpan(header->literalarrayIdxOff, header->numLiteralarrays * sizeof(uint32_t));
+        return Span(reinterpret_cast<const uint32_t *>(litarrIdxData.data()), header->numLiteralarrays);
     }
 
     Span<const RegionHeader> GetRegionHeaders() const
     {
         const Header *header = GetHeader();
-        Span file(GetBase(), header->file_size);
-        auto sp = file.SubSpan(header->index_section_off, header->num_indexes * sizeof(RegionHeader));
-        return Span(reinterpret_cast<const RegionHeader *>(sp.data()), header->num_indexes);
+        Span file(GetBase(), header->fileSize);
+        auto sp = file.SubSpan(header->indexSectionOff, header->numIndexes * sizeof(RegionHeader));
+        return Span(reinterpret_cast<const RegionHeader *>(sp.data()), header->numIndexes);
     }
 
     const RegionHeader *GetRegionHeader(EntityId id) const
@@ -217,76 +217,76 @@ public:
         return nullptr;
     }
 
-    Span<const EntityId> GetClassIndex(const RegionHeader *region_header) const
+    Span<const EntityId> GetClassIndex(const RegionHeader *regionHeader) const
     {
         auto *header = GetHeader();
-        Span file(GetBase(), header->file_size);
-        ASSERT(region_header != nullptr);
-        auto sp = file.SubSpan(region_header->class_idx_off, region_header->class_idx_size * EntityId::GetSize());
-        return Span(reinterpret_cast<const EntityId *>(sp.data()), region_header->class_idx_size);
+        Span file(GetBase(), header->fileSize);
+        ASSERT(regionHeader != nullptr);
+        auto sp = file.SubSpan(regionHeader->classIdxOff, regionHeader->classIdxSize * EntityId::GetSize());
+        return Span(reinterpret_cast<const EntityId *>(sp.data()), regionHeader->classIdxSize);
     }
 
     Span<const EntityId> GetClassIndex(EntityId id) const
     {
-        auto *region_header = GetRegionHeader(id);
-        ASSERT(region_header != nullptr);
-        return GetClassIndex(region_header);
+        auto *regionHeader = GetRegionHeader(id);
+        ASSERT(regionHeader != nullptr);
+        return GetClassIndex(regionHeader);
     }
 
-    Span<const EntityId> GetMethodIndex(const RegionHeader *region_header) const
+    Span<const EntityId> GetMethodIndex(const RegionHeader *regionHeader) const
     {
         auto *header = GetHeader();
-        Span file(GetBase(), header->file_size);
-        ASSERT(region_header != nullptr);
-        auto sp = file.SubSpan(region_header->method_idx_off, region_header->method_idx_size * EntityId::GetSize());
-        return Span(reinterpret_cast<const EntityId *>(sp.data()), region_header->method_idx_size);
+        Span file(GetBase(), header->fileSize);
+        ASSERT(regionHeader != nullptr);
+        auto sp = file.SubSpan(regionHeader->methodIdxOff, regionHeader->methodIdxSize * EntityId::GetSize());
+        return Span(reinterpret_cast<const EntityId *>(sp.data()), regionHeader->methodIdxSize);
     }
 
     Span<const EntityId> GetMethodIndex(EntityId id) const
     {
-        auto *region_header = GetRegionHeader(id);
-        ASSERT(region_header != nullptr);
-        return GetMethodIndex(region_header);
+        auto *regionHeader = GetRegionHeader(id);
+        ASSERT(regionHeader != nullptr);
+        return GetMethodIndex(regionHeader);
     }
 
-    Span<const EntityId> GetFieldIndex(const RegionHeader *region_header) const
+    Span<const EntityId> GetFieldIndex(const RegionHeader *regionHeader) const
     {
         auto *header = GetHeader();
-        Span file(GetBase(), header->file_size);
-        ASSERT(region_header != nullptr);
-        auto sp = file.SubSpan(region_header->field_idx_off, region_header->field_idx_size * EntityId::GetSize());
-        return Span(reinterpret_cast<const EntityId *>(sp.data()), region_header->field_idx_size);
+        Span file(GetBase(), header->fileSize);
+        ASSERT(regionHeader != nullptr);
+        auto sp = file.SubSpan(regionHeader->fieldIdxOff, regionHeader->fieldIdxSize * EntityId::GetSize());
+        return Span(reinterpret_cast<const EntityId *>(sp.data()), regionHeader->fieldIdxSize);
     }
 
     Span<const EntityId> GetFieldIndex(EntityId id) const
     {
-        auto *region_header = GetRegionHeader(id);
-        ASSERT(region_header != nullptr);
-        return GetFieldIndex(region_header);
+        auto *regionHeader = GetRegionHeader(id);
+        ASSERT(regionHeader != nullptr);
+        return GetFieldIndex(regionHeader);
     }
 
-    Span<const EntityId> GetProtoIndex(const RegionHeader *region_header) const
+    Span<const EntityId> GetProtoIndex(const RegionHeader *regionHeader) const
     {
         auto *header = GetHeader();
-        Span file(GetBase(), header->file_size);
-        ASSERT(region_header != nullptr);
-        auto sp = file.SubSpan(region_header->proto_idx_off, region_header->proto_idx_size * EntityId::GetSize());
-        return Span(reinterpret_cast<const EntityId *>(sp.data()), region_header->proto_idx_size);
+        Span file(GetBase(), header->fileSize);
+        ASSERT(regionHeader != nullptr);
+        auto sp = file.SubSpan(regionHeader->protoIdxOff, regionHeader->protoIdxSize * EntityId::GetSize());
+        return Span(reinterpret_cast<const EntityId *>(sp.data()), regionHeader->protoIdxSize);
     }
 
     Span<const EntityId> GetProtoIndex(EntityId id) const
     {
-        auto *region_header = GetRegionHeader(id);
-        ASSERT(region_header != nullptr);
-        return GetProtoIndex(region_header);
+        auto *regionHeader = GetRegionHeader(id);
+        ASSERT(regionHeader != nullptr);
+        return GetProtoIndex(regionHeader);
     }
 
     Span<const EntityId> GetLineNumberProgramIndex() const
     {
         const Header *header = GetHeader();
-        Span file(GetBase(), header->file_size);
-        Span lnp_idx_data = file.SubSpan(header->lnp_idx_off, header->num_lnps * EntityId::GetSize());
-        return Span(reinterpret_cast<const EntityId *>(lnp_idx_data.data()), header->num_lnps);
+        Span file(GetBase(), header->fileSize);
+        Span lnpIdxData = file.SubSpan(header->lnpIdxOff, header->numLnps * EntityId::GetSize());
+        return Span(reinterpret_cast<const EntityId *>(lnpIdxData.data()), header->numLnps);
     }
 
     EntityId ResolveClassIndex(EntityId id, Index idx) const
@@ -326,23 +326,23 @@ public:
 
     PandaCache *GetPandaCache() const
     {
-        return panda_cache_.get();
+        return pandaCache_.get();
     }
 
     uint32_t GetFilenameHash() const
     {
-        return filename_hash_;
+        return filenameHash_;
     }
 
     // note: intentionally returns uint64_t instead of the field type due to usage
     uint64_t GetUniqId() const
     {
-        return uniq_id_;
+        return uniqId_;
     }
 
     const std::string &GetFullFileName() const
     {
-        return full_filename_;
+        return fullFilename_;
     }
 
     static constexpr uint32_t GetFileBaseOffset()
@@ -352,32 +352,32 @@ public:
 
     Span<const panda::panda_file::EntityPairHeader> GetClassHashTable() const
     {
-        return class_hash_table_;
+        return classHashTable_;
     }
 
     std::string GetPaddedChecksum() const
     {
-        std::stringstream padded_checksum;
+        std::stringstream paddedChecksum;
         // Length of hexed maximum unit32_t value of checksum (0xFFFFFFFF) is equal to 8
         constexpr size_t CHECKSUM_LENGTH = 8;
-        padded_checksum << std::setfill('0') << std::setw(CHECKSUM_LENGTH) << std::hex << GetHeader()->checksum;
-        return padded_checksum.str();
+        paddedChecksum << std::setfill('0') << std::setw(CHECKSUM_LENGTH) << std::hex << GetHeader()->checksum;
+        return paddedChecksum.str();
     }
 
     static uint32_t CalcFilenameHash(const std::string &filename);
 
-    static std::unique_ptr<const File> Open(std::string_view filename, OpenMode open_mode = READ_ONLY);
+    static std::unique_ptr<const File> Open(std::string_view filename, OpenMode openMode = READ_ONLY);
 
     static std::unique_ptr<const File> OpenFromMemory(os::mem::ConstBytePtr &&ptr);
 
     static std::unique_ptr<const File> OpenFromMemory(os::mem::ConstBytePtr &&ptr, std::string_view filename);
 
     static std::unique_ptr<const File> OpenUncompressedArchive(int fd, const std::string_view &filename, size_t size,
-                                                               uint32_t offset, OpenMode open_mode = READ_ONLY);
+                                                               uint32_t offset, OpenMode openMode = READ_ONLY);
 
-    void SetClassHashTable(panda::Span<const panda::panda_file::EntityPairHeader> class_hash_table) const
+    void SetClassHashTable(panda::Span<const panda::panda_file::EntityPairHeader> classHashTable) const
     {
-        class_hash_table_ = class_hash_table;
+        classHashTable_ = classHashTable;
     }
 
     ~File();
@@ -390,43 +390,43 @@ private:
 
     os::mem::ConstBytePtr base_;
     const std::string filename_;
-    const uint32_t filename_hash_;
-    const std::string full_filename_;
-    std::unique_ptr<PandaCache> panda_cache_;
-    const uint32_t uniq_id_;
-    mutable panda::Span<const panda::panda_file::EntityPairHeader> class_hash_table_;
+    const uint32_t filenameHash_;
+    const std::string fullFilename_;
+    std::unique_ptr<PandaCache> pandaCache_;
+    const uint32_t uniqId_;
+    mutable panda::Span<const panda::panda_file::EntityPairHeader> classHashTable_;
 };
 
 static_assert(File::GetFileBaseOffset() == 0);
 
-inline bool operator==(const File::StringData &string_data1, const File::StringData &string_data2)
+inline bool operator==(const File::StringData &stringData1, const File::StringData &stringData2)
 {
-    if (string_data1.utf16_length != string_data2.utf16_length) {
+    if (stringData1.utf16Length != stringData2.utf16Length) {
         return false;
     }
 
-    return utf::IsEqual(string_data1.data, string_data2.data);
+    return utf::IsEqual(stringData1.data, stringData2.data);
 }
 
-inline bool operator!=(const File::StringData &string_data1, const File::StringData &string_data2)
+inline bool operator!=(const File::StringData &stringData1, const File::StringData &stringData2)
 {
-    return !(string_data1 == string_data2);
+    return !(stringData1 == stringData2);
 }
 
-inline bool operator<(const File::StringData &string_data1, const File::StringData &string_data2)
+inline bool operator<(const File::StringData &stringData1, const File::StringData &stringData2)
 {
-    if (string_data1.utf16_length == string_data2.utf16_length) {
-        return utf::CompareMUtf8ToMUtf8(string_data1.data, string_data2.data) < 0;
+    if (stringData1.utf16Length == stringData2.utf16Length) {
+        return utf::CompareMUtf8ToMUtf8(stringData1.data, stringData2.data) < 0;
     }
 
-    return string_data1.utf16_length < string_data2.utf16_length;
+    return stringData1.utf16Length < stringData2.utf16Length;
 }
 
 /*
  * OpenPandaFileOrZip from location which specicify the name.
  */
 std::unique_ptr<const File> OpenPandaFileOrZip(std::string_view location,
-                                               panda_file::File::OpenMode open_mode = panda_file::File::READ_ONLY);
+                                               panda_file::File::OpenMode openMode = panda_file::File::READ_ONLY);
 
 /*
  * OpenPandaFileFromMemory from file buffer.
@@ -436,8 +436,8 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
 /*
  * OpenPandaFile from location which specicify the name.
  */
-std::unique_ptr<const File> OpenPandaFile(std::string_view location, std::string_view archive_filename = "",
-                                          panda_file::File::OpenMode open_mode = panda_file::File::READ_ONLY);
+std::unique_ptr<const File> OpenPandaFile(std::string_view location, std::string_view archiveFilename = "",
+                                          panda_file::File::OpenMode openMode = panda_file::File::READ_ONLY);
 
 /*
  * Check ptr point valid panda file: magic

@@ -32,8 +32,8 @@ class StackMap;
 
 class CodeItem {
 public:
-    CodeItem(size_t position, size_t cursor_offset, size_t depth)
-        : position_(position), cursor_offset_(cursor_offset), depth_(depth)
+    CodeItem(size_t position, size_t cursorOffset, size_t depth)
+        : position_(position), cursorOffset_(cursorOffset), depth_(depth)
     {
     }
     size_t GetPosition() const
@@ -42,7 +42,7 @@ public:
     }
     size_t GetCursorOffset() const
     {
-        return cursor_offset_;
+        return cursorOffset_;
     }
     size_t GetDepth() const
     {
@@ -51,7 +51,7 @@ public:
 
 private:
     size_t position_ {0};
-    size_t cursor_offset_ {0};
+    size_t cursorOffset_ {0};
     size_t depth_ {0};
 };
 
@@ -99,11 +99,11 @@ public:
     }
     bool IsEnabled() const
     {
-        return is_enabled_;
+        return isEnabled_;
     }
     bool IsCodeEnabled() const
     {
-        return is_code_enabled_;
+        return isCodeEnabled_;
     }
     std::vector<DisassemblyItem> &GetItems()
     {
@@ -115,9 +115,9 @@ public:
     void PrintCodeStatistics(const Codegen *codegen);
     void PrintStackMap(const Codegen *codegen);
 
-    void AddCode(size_t position, size_t cursor_offset, size_t depth)
+    void AddCode(size_t position, size_t cursorOffset, size_t depth)
     {
-        CodeItem item(position, cursor_offset, depth);
+        CodeItem item(position, cursorOffset, depth);
         items_.emplace_back(item);
     }
 
@@ -131,8 +131,8 @@ private:
     std::unique_ptr<std::ostream, StreamDeleterType> stream_;
     uint32_t depth_ {0};
     uint32_t position_ {0};
-    bool is_enabled_ {false};
-    bool is_code_enabled_ {false};
+    bool isEnabled_ {false};
+    bool isCodeEnabled_ {false};
     std::vector<DisassemblyItem> items_;
 
     friend class ScopedDisasmPrinter;

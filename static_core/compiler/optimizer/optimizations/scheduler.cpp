@@ -64,12 +64,12 @@ void Scheduler::AddDep(uint32_t *prio, Inst *from, Inst *to, uint32_t latency, I
     // Do not add cross-barrier depenedencies into deps_
     if (barrier == nullptr || old_[to] > old_[barrier]) {
         if (deps_.at(from).count(to) == 1) {
-            uint32_t old_latency = deps_.at(from).at(to);
-            if (old_latency >= latency) {
+            uint32_t oldLatency = deps_.at(from).at(to);
+            if (oldLatency >= latency) {
                 return;
             }
         } else {
-            num_deps_[to]++;
+            numDeps_[to]++;
         }
         deps_.at(from)[to] = latency;
     }
@@ -78,22 +78,22 @@ void Scheduler::AddDep(uint32_t *prio, Inst *from, Inst *to, uint32_t latency, I
 // Calculate priority and dependencies
 bool Scheduler::BuildAllDeps(BasicBlock *bb)
 {
-    auto marker_holder = MarkerHolder(GetGraph());
-    auto mrk = marker_holder.GetMarker();
+    auto markerHolder = MarkerHolder(GetGraph());
+    auto mrk = markerHolder.GetMarker();
 
     oprev_ = 0;
-    num_barriers_ = 0;
-    max_prio_ = 0;
+    numBarriers_ = 0;
+    maxPrio_ = 0;
 
     static constexpr uint32_t TOO_LONG_BB = 64;
-    uint32_t num_inst = 0;
-    uint32_t num_between = 0;
-    uint32_t num_special = 0;
-    Inst *last_barrier = nullptr;
+    uint32_t numInst = 0;
+    uint32_t numBetween = 0;
+    uint32_t numSpecial = 0;
+    Inst *lastBarrier = nullptr;
     for (auto inst : bb->InstsSafeReverse()) {
-        ProcessInst(inst, mrk, &num_inst, &num_between, &num_special, &last_barrier);
+        ProcessInst(inst, mrk, &numInst, &numBetween, &numSpecial, &lastBarrier);
 
-        if (num_special > TOO_LONG_BB || num_between > TOO_LONG_BB) {
+        if (numSpecial > TOO_LONG_BB || numBetween > TOO_LONG_BB) {
             COMPILER_LOG(DEBUG, SCHEDULER) << "Block " << bb->GetId() << " seems too big for scheduling, skipping";
             Cleanup();
             return false;
@@ -103,69 +103,69 @@ bool Scheduler::BuildAllDeps(BasicBlock *bb)
 }
 
 // One instruction deps
-void Scheduler::ProcessInst(Inst *inst, Marker mrk, uint32_t *num_inst, uint32_t *num_between, uint32_t *num_special,
-                            Inst **last_barrier)
+void Scheduler::ProcessInst(Inst *inst, Marker mrk, uint32_t *numInst, uint32_t *numBetween, uint32_t *numSpecial,
+                            Inst **lastBarrier)
 {
     uint32_t prio = 0;
-    uint32_t inst_latency = inst->Latency();
+    uint32_t instLatency = inst->Latency();
     bool barrier = inst->IsBarrier();
 
-    (*num_between)++;
-    old_.insert({inst, (*num_inst)++});
+    (*numBetween)++;
+    old_.insert({inst, (*numInst)++});
     ocycle_.insert({inst, ++oprev_});
-    num_deps_.insert({inst, 0U});
+    numDeps_.insert({inst, 0U});
     deps_.emplace(inst, GetGraph()->GetLocalAllocator()->Adapter());
 
     // Dependency to the barrier
-    if (*last_barrier != nullptr) {
-        AddDep(&prio, inst, *last_barrier, 1U, *last_barrier);
+    if (*lastBarrier != nullptr) {
+        AddDep(&prio, inst, *lastBarrier, 1U, *lastBarrier);
     }
 
     // Dependency from barrier
     if (barrier) {
-        Inst *old_last_barrier = *last_barrier;
-        *last_barrier = inst;
-        num_barriers_++;
-        *num_between = 0;
-        for (auto user = inst->GetNext(); user != old_last_barrier; user = user->GetNext()) {
-            AddDep(&prio, inst, user, 1U, *last_barrier);
+        Inst *oldLastBarrier = *lastBarrier;
+        *lastBarrier = inst;
+        numBarriers_++;
+        *numBetween = 0;
+        for (auto user = inst->GetNext(); user != oldLastBarrier; user = user->GetNext()) {
+            AddDep(&prio, inst, user, 1U, *lastBarrier);
         }
     }
 
     // Users
-    for (auto &user_item : inst->GetUsers()) {
-        auto user = user_item.GetInst();
+    for (auto &userItem : inst->GetUsers()) {
+        auto user = userItem.GetInst();
         if (user->IsMarked(mrk)) {
-            AddDep(&prio, inst, user, inst_latency, *last_barrier);
+            AddDep(&prio, inst, user, instLatency, *lastBarrier);
         }
     }
 
     if (inst->IsMovableObject()) {
         // We take all SaveState, that has RuntimeCall users, under this reference instruction and create dependence
         // between SaveState and this instruction. See also GraphChecker::CheckSaveStatesWithRuntimeCallUsers.
-        for (auto &ss : ss_with_runtime_call_) {
-            AddDep(&prio, inst, ss, 1U, *last_barrier);
+        for (auto &ss : ssWithRuntimeCall_) {
+            AddDep(&prio, inst, ss, 1U, *lastBarrier);
         }
     }
 
     if (inst->IsMemory() || inst->IsRefSpecial()) {
-        ProcessMemory(inst, &prio, *last_barrier);
-        (*num_special)++;
+        ProcessMemory(inst, &prio, *lastBarrier);
+        (*numSpecial)++;
     }
 
     if (inst->CanThrow() || inst->IsRuntimeCall() || inst->IsSaveState()) {
-        ProcessSpecial(inst, &prio, *last_barrier);
-        (*num_special)++;
+        ProcessSpecial(inst, &prio, *lastBarrier);
+        (*numSpecial)++;
     }
 
     inst->SetMarker(mrk);
     prio_.insert({inst, prio});
-    max_prio_ = std::max(max_prio_, prio);
+    maxPrio_ = std::max(maxPrio_, prio);
     oprev_ = ocycle_[inst];
 }
 
 // Memory
-void Scheduler::ProcessMemory(Inst *inst, uint32_t *prio, Inst *last_barrier)
+void Scheduler::ProcessMemory(Inst *inst, uint32_t *prio, Inst *lastBarrier)
 {
     if (inst->IsRefSpecial()) {
         loads_.push_back(inst);
@@ -173,17 +173,17 @@ void Scheduler::ProcessMemory(Inst *inst, uint32_t *prio, Inst *last_barrier)
     }
     for (auto mem : stores_) {
         if (GetGraph()->CheckInstAlias(inst, mem) != AliasType::NO_ALIAS) {
-            AddDep(prio, inst, mem, 1U, last_barrier);
+            AddDep(prio, inst, mem, 1U, lastBarrier);
         }
     }
     if (inst->IsStore()) {
         for (auto mem : loads_) {
             if (mem->IsLoad() && GetGraph()->CheckInstAlias(inst, mem) != AliasType::NO_ALIAS) {
-                AddDep(prio, inst, mem, 1U, last_barrier);
+                AddDep(prio, inst, mem, 1U, lastBarrier);
             }
         }
         for (auto ct : special_) {
-            AddDep(prio, inst, ct, 1U, last_barrier);
+            AddDep(prio, inst, ct, 1U, lastBarrier);
         }
         stores_.push_back(inst);
     } else {  // means inst->IsLoad()
@@ -191,7 +191,7 @@ void Scheduler::ProcessMemory(Inst *inst, uint32_t *prio, Inst *last_barrier)
     }
 }
 
-void Scheduler::ProcessSpecialBoundsCheckI(Inst *inst, uint32_t *prio, Inst *last_barrier)
+void Scheduler::ProcessSpecialBoundsCheckI(Inst *inst, uint32_t *prio, Inst *lastBarrier)
 {
     auto value = inst->CastToBoundsCheckI()->GetImm();
     // Remove loads with same immediate. No easy way to check arrays are same.
@@ -199,31 +199,31 @@ void Scheduler::ProcessSpecialBoundsCheckI(Inst *inst, uint32_t *prio, Inst *las
         if (load->GetOpcode() == Opcode::LoadArrayPairI) {
             auto imm = load->CastToLoadArrayPairI()->GetImm();
             if (imm == value || imm + 1 == value) {
-                AddDep(prio, inst, load, 1U, last_barrier);
+                AddDep(prio, inst, load, 1U, lastBarrier);
             }
         } else if (load->GetOpcode() == Opcode::LoadArrayI && load->CastToLoadArrayI()->GetImm() == value) {
-            AddDep(prio, inst, load, 1U, last_barrier);
+            AddDep(prio, inst, load, 1U, lastBarrier);
         }
     }
 }
 
 // CanThrow or SaveState can't be rearranged, and stores can't be moved over them
-void Scheduler::ProcessSpecial(Inst *inst, uint32_t *prio, Inst *last_barrier)
+void Scheduler::ProcessSpecial(Inst *inst, uint32_t *prio, Inst *lastBarrier)
 {
     for (auto mem : stores_) {
-        AddDep(prio, inst, mem, 1U, last_barrier);
+        AddDep(prio, inst, mem, 1U, lastBarrier);
     }
     for (auto ct : special_) {
-        AddDep(prio, inst, ct, 1U, last_barrier);
+        AddDep(prio, inst, ct, 1U, lastBarrier);
     }
 
     if (inst->IsSaveState() && inst != inst->GetBasicBlock()->GetFirstInst()) {
         // SaveStates that have RuntimeCall users are being added into a vector to create dependencies from preceding
         // reference instructions
         for (auto &user : inst->GetUsers()) {
-            auto user_inst = user.GetInst();
-            if (user_inst->IsRuntimeCall()) {
-                ss_with_runtime_call_.push_back(inst);
+            auto userInst = user.GetInst();
+            if (userInst->IsRuntimeCall()) {
+                ssWithRuntimeCall_.push_back(inst);
                 break;
             }
         }
@@ -233,13 +233,13 @@ void Scheduler::ProcessSpecial(Inst *inst, uint32_t *prio, Inst *last_barrier)
     if (inst->IsRuntimeCall()) {
         for (auto mem : loads_) {
             if (mem->GetType() == DataType::REFERENCE || mem->GetType() == DataType::ANY) {
-                AddDep(prio, inst, mem, 1U, last_barrier);
+                AddDep(prio, inst, mem, 1U, lastBarrier);
             }
         }
     }
     // We have to "restore" BoundsCheckI -> LoadArrayI dependency
     if (inst->GetOpcode() == Opcode::BoundsCheckI) {
-        ProcessSpecialBoundsCheckI(inst, prio, last_barrier);
+        ProcessSpecialBoundsCheckI(inst, prio, lastBarrier);
     }
     special_.push_back(inst);
 }
@@ -255,11 +255,11 @@ bool Scheduler::ScheduleBasicBlock(BasicBlock *bb)
 
     // Schedule intervals between barriers
     uint32_t cycle = 0;
-    uint32_t num_inst = 0;
+    uint32_t numInst = 0;
     Inst *first = nullptr;
     for (auto inst = bb->GetFirstInst(); inst != nullptr; inst = inst->GetNext()) {
         bool barrier = inst->IsBarrier();
-        num_inst++;
+        numInst++;
         inst->ClearMarkers();
         if (first == nullptr) {
             first = inst;
@@ -268,13 +268,13 @@ bool Scheduler::ScheduleBasicBlock(BasicBlock *bb)
             Inst *last = nullptr;
             if (barrier) {
                 last = inst->GetPrev();
-                num_inst--;
+                numInst--;
             } else {
                 last = inst;
             }
-            if (num_inst > 1) {
+            if (numInst > 1) {
                 cycle += ScheduleInstsBetweenBarriers(first, last);
-            } else if (num_inst == 1) {
+            } else if (numInst == 1) {
                 ASSERT(first->GetOpcode() != Opcode::LoadPairPart);
                 sched_.push_back(first);
                 cycle++;
@@ -284,7 +284,7 @@ bool Scheduler::ScheduleBasicBlock(BasicBlock *bb)
                 sched_.push_back(inst);
                 cycle++;
             }
-            num_inst = 0;
+            numInst = 0;
             first = nullptr;
         }
     }
@@ -295,15 +295,15 @@ bool Scheduler::FinalizeBB(BasicBlock *bb, uint32_t cycle)
 {
     // Rearrange instructions in basic block according to schedule
     bool result = false;
-    bool has_prev = false;
+    bool hasPrev = false;
     uint32_t prev;
     for (auto inst : sched_) {
         auto cur = old_[inst];
-        if (has_prev && prev - 1 != cur) {
+        if (hasPrev && prev - 1 != cur) {
             result = true;
         }
         prev = cur;
-        has_prev = true;
+        hasPrev = true;
 
         bb->EraseInst(inst);
         bb->AppendInst(inst);
@@ -311,9 +311,9 @@ bool Scheduler::FinalizeBB(BasicBlock *bb, uint32_t cycle)
 
     if (result) {
         COMPILER_LOG(DEBUG, SCHEDULER) << "Stats for block " << bb->GetId() << ": old cycles = " << oprev_
-                                       << ", num barriers = " << num_barriers_ << ", critical path = " << max_prio_
+                                       << ", num barriers = " << numBarriers_ << ", critical path = " << maxPrio_
                                        << ", scheduled = " << cycle;
-        GetGraph()->GetEventWriter().EventScheduler(bb->GetId(), bb->GetGuestPc(), oprev_, num_barriers_, max_prio_,
+        GetGraph()->GetEventWriter().EventScheduler(bb->GetId(), bb->GetGuestPc(), oprev_, numBarriers_, maxPrio_,
                                                     cycle);
     }
 
@@ -329,10 +329,10 @@ void Scheduler::Cleanup()
     special_.clear();
     old_.clear();
     ocycle_.clear();
-    num_deps_.clear();
+    numDeps_.clear();
     prio_.clear();
     deps_.clear();
-    ss_with_runtime_call_.clear();
+    ssWithRuntimeCall_.clear();
 }
 
 // Rearranges instructions between [first..last] inclusive, none of them are barriers.
@@ -341,33 +341,33 @@ uint32_t Scheduler::ScheduleInstsBetweenBarriers(Inst *first, Inst *last)
     COMPILER_LOG(DEBUG, SCHEDULER) << "SchedBetween " << first->GetId() << " and " << last->GetId();
 
     // Compare function for 'waiting' queue
-    auto cmp_asap = [this](Inst *left, Inst *right) {
+    auto cmpAsap = [this](Inst *left, Inst *right) {
         return asap_[left] > asap_[right] || (asap_[left] == asap_[right] && old_[left] < old_[right]);
     };
     // Queue of instructions, which dependencies are scheduled already, but they are still not finished yet
-    SchedulerPriorityQueue waiting(cmp_asap, GetGraph()->GetLocalAllocator()->Adapter());
+    SchedulerPriorityQueue waiting(cmpAsap, GetGraph()->GetLocalAllocator()->Adapter());
 
     // Compare function for 'ready' queue
-    auto cmp_prio = [this](Inst *left, Inst *right) {
+    auto cmpPrio = [this](Inst *left, Inst *right) {
         return prio_[left] < prio_[right] || (prio_[left] == prio_[right] && old_[left] < old_[right]);
     };
     // Queue of ready instructions
-    SchedulerPriorityQueue ready(cmp_prio, GetGraph()->GetLocalAllocator()->Adapter());
+    SchedulerPriorityQueue ready(cmpPrio, GetGraph()->GetLocalAllocator()->Adapter());
 
     // Initialization, add leafs into 'waiting' queue
-    uint32_t num_inst = 0;
+    uint32_t numInst = 0;
     for (auto inst = first; inst != last->GetNext(); inst = inst->GetNext()) {
         asap_.insert({inst, 1U});
-        if (num_deps_[inst] == 0) {
+        if (numDeps_[inst] == 0) {
             COMPILER_LOG(DEBUG, SCHEDULER) << "Queue wait add " << inst->GetId();
             waiting.push(inst);
         }
-        num_inst++;
+        numInst++;
     }
 
     // Scheduling
     uint32_t cycle = 1;
-    while (num_inst > 0) {
+    while (numInst > 0) {
         if (ready.empty()) {
             ASSERT(!waiting.empty());
             uint32_t nearest = asap_[waiting.top()];
@@ -391,7 +391,7 @@ uint32_t Scheduler::ScheduleInstsBetweenBarriers(Inst *first, Inst *last)
         ASSERT(!ready.empty());
 
         // Schedule top 'ready' instruction (together with glued, when necessary)
-        num_inst -= SchedWithGlued(ready.top(), &waiting, cycle++);
+        numInst -= SchedWithGlued(ready.top(), &waiting, cycle++);
         ready.pop();
     }
 
@@ -404,17 +404,17 @@ uint32_t Scheduler::SchedWithGlued(Inst *inst, SchedulerPriorityQueue *waiting, 
 {
     uint32_t amount = 0;
     // Compare function for 'now' queue
-    auto cmp_old = [this](Inst *left, Inst *right) { return old_[left] < old_[right]; };
+    auto cmpOld = [this](Inst *left, Inst *right) { return old_[left] < old_[right]; };
     // Queue of instructions to schedule at current cycle
-    SchedulerPriorityQueue now(cmp_old, GetGraph()->GetLocalAllocator()->Adapter());
+    SchedulerPriorityQueue now(cmpOld, GetGraph()->GetLocalAllocator()->Adapter());
     // Add inst into 'now'
     ASSERT(now.empty());
     now.push(inst);
 
     // Add glued instructions into 'now'
     if (inst->GetOpcode() == Opcode::LoadArrayPair || inst->GetOpcode() == Opcode::LoadArrayPairI) {
-        for (auto &user_item : inst->GetUsers()) {
-            auto user = user_item.GetInst();
+        for (auto &userItem : inst->GetUsers()) {
+            auto user = userItem.GetInst();
             ASSERT(user->GetOpcode() == Opcode::LoadPairPart);
             now.push(user);
         }
@@ -437,13 +437,13 @@ uint32_t Scheduler::SchedWithGlued(Inst *inst, SchedulerPriorityQueue *waiting, 
             asap_[pair.first] = asap;
 
             // Adjust num_deps
-            uint32_t num_deps = num_deps_[pair.first];
-            ASSERT(num_deps > 0);
-            num_deps--;
-            num_deps_[pair.first] = num_deps;
+            uint32_t numDeps = numDeps_[pair.first];
+            ASSERT(numDeps > 0);
+            numDeps--;
+            numDeps_[pair.first] = numDeps;
 
             // Glued instructions scheduled immediately, so they should not go into queue
-            if (num_deps == 0 && pair.first->GetOpcode() != Opcode::LoadPairPart) {
+            if (numDeps == 0 && pair.first->GetOpcode() != Opcode::LoadPairPart) {
                 COMPILER_LOG(DEBUG, SCHEDULER) << "Queue wait add " << pair.first->GetId();
                 waiting->push(pair.first);
             }

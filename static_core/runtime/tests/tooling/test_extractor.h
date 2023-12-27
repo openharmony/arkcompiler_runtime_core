@@ -47,14 +47,14 @@ public:
 
     virtual ~TestExtractor() = default;
 
-    std::pair<EntityId, uint32_t> GetBreakpointAddress(const SourceLocation &source_location);
+    std::pair<EntityId, uint32_t> GetBreakpointAddress(const SourceLocation &sourceLocation);
 
-    PandaList<PtStepRange> GetStepRanges(EntityId method_id, uint32_t current_offset);
+    PandaList<PtStepRange> GetStepRanges(EntityId methodId, uint32_t currentOffset);
 
-    virtual std::vector<panda_file::LocalVariableInfo> GetLocalVariableInfo(EntityId method_id, size_t offset);
-    const std::vector<panda_file::DebugInfoExtractor::ParamInfo> &GetParameterInfo(EntityId method_id);
+    virtual std::vector<panda_file::LocalVariableInfo> GetLocalVariableInfo(EntityId methodId, size_t offset);
+    const std::vector<panda_file::DebugInfoExtractor::ParamInfo> &GetParameterInfo(EntityId methodId);
 
-    SourceLocation GetSourceLocation(EntityId method_id, uint32_t bytecode_offset);
+    SourceLocation GetSourceLocation(EntityId methodId, uint32_t bytecodeOffset);
 
     static std::optional<size_t> GetLineNumberByTableOffset(const panda_file::LineNumberTable &table, uint32_t offset);
     static std::optional<uint32_t> GetOffsetByTableLineNumber(const panda_file::LineNumberTable &table, size_t line);
@@ -64,7 +64,7 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    PandaUniquePtr<panda_file::DebugInfoExtractor> lang_extractor_;
+    PandaUniquePtr<panda_file::DebugInfoExtractor> langExtractor_;
 };
 
 class TestExtractorFactory {

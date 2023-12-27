@@ -21,15 +21,15 @@
 namespace panda::mem {
 class G1Predictor {
 public:
-    explicit G1Predictor(double confidence_factor) : confidence_factor_(confidence_factor) {}
+    explicit G1Predictor(double confidenceFactor) : confidenceFactor_(confidenceFactor) {}
 
     double Predict(const panda::Sequence &seq) const
     {
-        return seq.GetMean() + confidence_factor_ * seq.GetStdDev();
+        return seq.GetMean() + confidenceFactor_ * seq.GetStdDev();
     }
 
 private:
-    double confidence_factor_;
+    double confidenceFactor_;
 };
 }  // namespace panda::mem
 #endif

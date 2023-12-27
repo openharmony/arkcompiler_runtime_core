@@ -20,24 +20,24 @@
 
 namespace panda {
 
-Rendezvous::Rendezvous(PandaVM *panda_vm) : mutator_lock_(panda_vm->GetMutatorLock()) {}
+Rendezvous::Rendezvous(PandaVM *pandaVm) : mutatorLock_(pandaVm->GetMutatorLock()) {}
 
 void Rendezvous::SafepointBegin()
 {
-    ASSERT(!mutator_lock_->HasLock());
+    ASSERT(!mutatorLock_->HasLock());
     LOG(DEBUG, GC) << "Rendezvous: SafepointBegin";
     // Suspend all threads
     Thread::GetCurrent()->GetVM()->GetThreadManager()->SuspendAllThreads();
     // Acquire write MutatorLock
-    mutator_lock_->WriteLock();
+    mutatorLock_->WriteLock();
 }
 
 void Rendezvous::SafepointEnd()
 {
-    ASSERT(mutator_lock_->HasLock());
+    ASSERT(mutatorLock_->HasLock());
     LOG(DEBUG, GC) << "Rendezvous: SafepointEnd";
     // Release write MutatorLock
-    mutator_lock_->Unlock();
+    mutatorLock_->Unlock();
     // Resume all threads
     Thread::GetCurrent()->GetVM()->GetThreadManager()->ResumeAllThreads();
     LOG(DEBUG, GC) << "Rendezvous: SafepointEnd exit";

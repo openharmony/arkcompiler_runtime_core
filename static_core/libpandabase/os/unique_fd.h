@@ -38,17 +38,17 @@ public:
         Reset(fd);
     }
 
-    UniqueFd(const UniqueFd &other_fd) = delete;
-    UniqueFd &operator=(const UniqueFd &other_fd) = delete;
+    UniqueFd(const UniqueFd &otherFd) = delete;
+    UniqueFd &operator=(const UniqueFd &otherFd) = delete;
 
-    UniqueFd(UniqueFd &&other_fd) noexcept
+    UniqueFd(UniqueFd &&otherFd) noexcept
     {
-        Reset(other_fd.Release());
+        Reset(otherFd.Release());
     }
 
-    UniqueFd &operator=(UniqueFd &&other_fd) noexcept
+    UniqueFd &operator=(UniqueFd &&otherFd) noexcept
     {
-        Reset(other_fd.Release());
+        Reset(otherFd.Release());
         return *this;
     }
 
@@ -64,13 +64,13 @@ public:
         return fd;
     }
 
-    void Reset(int new_fd = -1)
+    void Reset(int newFd = -1)
     {
         if (fd_ != -1) {
-            ASSERT(new_fd != fd_);
+            ASSERT(newFd != fd_);
             DefaultCloser(fd_);
         }
-        fd_ = new_fd;
+        fd_ = newFd;
     }
 
     int Get() const noexcept

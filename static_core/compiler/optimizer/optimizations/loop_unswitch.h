@@ -22,11 +22,8 @@
 namespace panda::compiler {
 class LoopUnswitch : public LoopTransform<LoopExitPoint::LOOP_EXIT_BACKEDGE> {
 public:
-    explicit LoopUnswitch(Graph *graph, uint32_t max_level, uint32_t max_insns)
-        : LoopTransform(graph),
-          loops_(graph->GetLocalAllocator()->Adapter()),
-          max_level_(max_level),
-          max_insns_(max_insns)
+    explicit LoopUnswitch(Graph *graph, uint32_t maxLevel, uint32_t maxInsns)
+        : LoopTransform(graph), loops_(graph->GetLocalAllocator()->Adapter()), maxLevel_(maxLevel), maxInsns_(maxInsns)
     {
     }
     bool RunImpl() override;
@@ -38,7 +35,7 @@ public:
     void InvalidateAnalyses() override;
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerLoopUnswitch();
+        return g_options.IsCompilerLoopUnswitch();
     }
 
 private:
@@ -46,9 +43,9 @@ private:
     bool IsHoistable(Inst *inst, Loop *loop);
     bool AllInputsConst(Inst *inst);
     ArenaQueue<Loop *> loops_;
-    const uint32_t max_level_ {0};
-    const uint32_t max_insns_ {0};
-    bool is_applied_ {false};
+    const uint32_t maxLevel_ {0};
+    const uint32_t maxInsns_ {0};
+    bool isApplied_ {false};
 };
 }  // namespace panda::compiler
 

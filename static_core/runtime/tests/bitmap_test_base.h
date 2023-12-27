@@ -31,8 +31,8 @@ using BitmapWordType = panda::mem::Bitmap::BitmapWordType;
 class BitmapVerify {
 public:
     using BitmapType = MemBitmap<DEFAULT_ALIGNMENT_IN_BYTES>;
-    BitmapVerify(BitmapType *bitmap_arg, void *begin_arg, void *end_arg)
-        : bitmap_(bitmap_arg), begin_(begin_arg), end_(end_arg)
+    BitmapVerify(BitmapType *bitmapArg, void *beginArg, void *endArg)
+        : bitmap_(bitmapArg), begin_(beginArg), end_(endArg)
     {
     }
 
@@ -60,8 +60,8 @@ static inline size_t FnRounddown(size_t val, size_t alignment)
 template <size_t K_ALIGNMENT, typename TestFn>
 static void RunTest(TestFn &&fn)
 {
-    auto heap_begin = BitmapTest::HEAP_STARTING_ADDRESS;
-    const size_t heap_capacity = 16_MB;
+    auto heapBegin = BitmapTest::HEAP_STARTING_ADDRESS;
+    const size_t heapCapacity = 16_MB;
 
 #ifdef PANDA_NIGHTLY_TEST_ON
     // NOLINTNEXTLINE(cert-msc51-cpp)
@@ -74,39 +74,39 @@ static void RunTest(TestFn &&fn)
     constexpr int TEST_REPEAT = 1;
     for (int i = 0; i < TEST_REPEAT; ++i) {
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        auto bm_ptr = std::make_unique<BitmapWordType[]>((heap_capacity >> Bitmap::LOG_BITSPERWORD) / K_ALIGNMENT);
-        MemBitmap<K_ALIGNMENT> bm(ToVoidPtr(heap_begin), heap_capacity, bm_ptr.get());
+        auto bmPtr = std::make_unique<BitmapWordType[]>((heapCapacity >> Bitmap::LOG_BITSPERWORD) / K_ALIGNMENT);
+        MemBitmap<K_ALIGNMENT> bm(ToVoidPtr(heapBegin), heapCapacity, bmPtr.get());
 
         constexpr int NUM_BITS_TO_MODIFY = 1000;
         for (int j = 0; j < NUM_BITS_TO_MODIFY; ++j) {
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            size_t offset = FnRounddown(std::rand() % heap_capacity, K_ALIGNMENT);
+            size_t offset = FnRounddown(std::rand() % heapCapacity, K_ALIGNMENT);
             // NOLINTNEXTLINE(cert-msc50-cpp)
             bool set = std::rand() % 2 == 1;
 
             if (set) {
-                bm.Set(ToVoidPtr(heap_begin + offset));
+                bm.Set(ToVoidPtr(heapBegin + offset));
             } else {
-                bm.Clear(ToVoidPtr(heap_begin + offset));
+                bm.Clear(ToVoidPtr(heapBegin + offset));
             }
         }
 
         constexpr int NUM_TEST_RANGES = 50;
         for (int j = 0; j < NUM_TEST_RANGES; ++j) {
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            const size_t offset = FnRounddown(std::rand() % heap_capacity, K_ALIGNMENT);
-            const size_t remain = heap_capacity - offset;
+            const size_t offset = FnRounddown(std::rand() % heapCapacity, K_ALIGNMENT);
+            const size_t remain = heapCapacity - offset;
             // NOLINTNEXTLINE(cert-msc50-cpp)
             const size_t end = offset + FnRounddown(std::rand() % (remain + 1), K_ALIGNMENT);
 
             size_t manual = 0;
             for (ObjectPointerType k = offset; k < end; k += K_ALIGNMENT) {
-                if (bm.Test(ToVoidPtr(heap_begin + k))) {
+                if (bm.Test(ToVoidPtr(heapBegin + k))) {
                     manual++;
                 }
             }
 
-            fn(&bm, heap_begin + offset, heap_begin + end, manual);
+            fn(&bm, heapBegin + offset, heapBegin + end, manual);
         }
     }
 }
@@ -114,46 +114,46 @@ static void RunTest(TestFn &&fn)
 template <size_t K_ALIGNMENT>
 static void RunTestCount()
 {
-    auto count_test_fn = [](MemBitmap<K_ALIGNMENT> *bitmap, ObjectPointerType begin, ObjectPointerType end,
-                            size_t manual_count) {
+    auto countTestFn = [](MemBitmap<K_ALIGNMENT> *bitmap, ObjectPointerType begin, ObjectPointerType end,
+                          size_t manualCount) {
         size_t count = 0;
-        auto count_fn = [&count, begin, end]([[maybe_unused]] void *obj) {
+        auto countFn = [&count, begin, end]([[maybe_unused]] void *obj) {
             auto p = ToObjPtr(obj);
             if (p >= begin && p < end) {
                 count++;
             }
         };
-        bitmap->IterateOverMarkedChunkInRange(ToVoidPtr(begin), ToVoidPtr(end), count_fn);
-        EXPECT_EQ(count, manual_count);
+        bitmap->IterateOverMarkedChunkInRange(ToVoidPtr(begin), ToVoidPtr(end), countFn);
+        EXPECT_EQ(count, manualCount);
     };
-    RunTest<K_ALIGNMENT>(count_test_fn);
+    RunTest<K_ALIGNMENT>(countTestFn);
 }
 
 template <size_t K_ALIGNMENT>
 void RunTestOrder()
 {
-    auto order_test_fn = [](MemBitmap<K_ALIGNMENT> *bitmap, ObjectPointerType begin, ObjectPointerType end,
-                            size_t manual_count) {
-        void *last_ptr = nullptr;
-        auto order_check = [&last_ptr](void *obj) {
-            EXPECT_LT(last_ptr, obj);
-            last_ptr = obj;
+    auto orderTestFn = [](MemBitmap<K_ALIGNMENT> *bitmap, ObjectPointerType begin, ObjectPointerType end,
+                          size_t manualCount) {
+        void *lastPtr = nullptr;
+        auto orderCheck = [&lastPtr](void *obj) {
+            EXPECT_LT(lastPtr, obj);
+            lastPtr = obj;
         };
 
         // Test complete walk.
-        bitmap->IterateOverChunks(order_check);
-        if (manual_count > 0) {
-            EXPECT_NE(nullptr, last_ptr);
+        bitmap->IterateOverChunks(orderCheck);
+        if (manualCount > 0) {
+            EXPECT_NE(nullptr, lastPtr);
         }
 
         // Test range.
-        last_ptr = nullptr;
-        bitmap->IterateOverMarkedChunkInRange(ToVoidPtr(begin), ToVoidPtr(end), order_check);
-        if (manual_count > 0) {
-            EXPECT_NE(nullptr, last_ptr);
+        lastPtr = nullptr;
+        bitmap->IterateOverMarkedChunkInRange(ToVoidPtr(begin), ToVoidPtr(end), orderCheck);
+        if (manualCount > 0) {
+            EXPECT_NE(nullptr, lastPtr);
         }
     };
-    RunTest<K_ALIGNMENT>(order_test_fn);
+    RunTest<K_ALIGNMENT>(orderTestFn);
 }
 
 TEST_F(BitmapTest, AtomicClearSetTest)
@@ -161,8 +161,8 @@ TEST_F(BitmapTest, AtomicClearSetTest)
     void *object = ToVoidPtr(HEAP_STARTING_ADDRESS);
     const size_t sz = 1_MB;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    auto bm_ptr = std::make_unique<BitmapWordType[]>(sz >> MemBitmap<>::LOG_BITSPERWORD);
-    MemBitmap<> bm(ToVoidPtr(HEAP_STARTING_ADDRESS), sz, bm_ptr.get());
+    auto bmPtr = std::make_unique<BitmapWordType[]>(sz >> MemBitmap<>::LOG_BITSPERWORD);
+    MemBitmap<> bm(ToVoidPtr(HEAP_STARTING_ADDRESS), sz, bmPtr.get());
 
     // Set bit
     ASSERT_TRUE(bm.Test(object) == bm.AtomicTestAndSet(object));

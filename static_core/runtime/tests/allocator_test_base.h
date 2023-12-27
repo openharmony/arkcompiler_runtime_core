@@ -52,14 +52,14 @@ public:
 protected:
     static constexpr size_t BYTE_ARRAY_SIZE = 1000;
 
-    unsigned int seed_;                                   // NOLINT(misc-non-private-member-variables-in-classes)
-    std::array<uint8_t, BYTE_ARRAY_SIZE> byte_array_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+    unsigned int seed_;                                  // NOLINT(misc-non-private-member-variables-in-classes)
+    std::array<uint8_t, BYTE_ARRAY_SIZE> byteArray_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
 
     /// Byte array initialization of random bytes
     void InitByteArray()
     {
         for (size_t i = 0; i < BYTE_ARRAY_SIZE; ++i) {
-            byte_array_[i] = RandFromRange(0, std::numeric_limits<uint8_t>::max());
+            byteArray_[i] = RandFromRange(0, std::numeric_limits<uint8_t>::max());
         }
     }
 
@@ -88,14 +88,14 @@ protected:
      * @param max_value - maximum size_t value in range
      * @return random size_t value [min_value, max_value]
      */
-    size_t RandFromRange(size_t min_value, size_t max_value)
+    size_t RandFromRange(size_t minValue, size_t maxValue)
     {
         // rand() is not thread-safe method.
         // So do it under the lock
-        static os::memory::Mutex rand_lock;
-        os::memory::LockHolder lock(rand_lock);
+        static os::memory::Mutex randLock;
+        os::memory::LockHolder lock(randLock);
         // NOLINTNEXTLINE(cert-msc50-cpp)
-        return min_value + rand() % (max_value - min_value + 1);
+        return minValue + rand() % (maxValue - minValue + 1);
     }
 
     /**
@@ -118,23 +118,23 @@ protected:
      */
     size_t SetBytesFromByteArray(void *mem, size_t size)
     {
-        size_t start_index = RandFromRange(0, BYTE_ARRAY_SIZE - 1);
+        size_t startIndex = RandFromRange(0, BYTE_ARRAY_SIZE - 1);
         size_t copied = 0;
-        size_t first_copy_size = std::min(size, BYTE_ARRAY_SIZE - start_index);
+        size_t firstCopySize = std::min(size, BYTE_ARRAY_SIZE - startIndex);
         // Set head of memory
-        memcpy_s(mem, first_copy_size, &byte_array_[start_index], first_copy_size);
-        size -= first_copy_size;
-        copied += first_copy_size;
+        memcpy_s(mem, firstCopySize, &byteArray_[startIndex], firstCopySize);
+        size -= firstCopySize;
+        copied += firstCopySize;
         // Set middle part of memory
         while (size > BYTE_ARRAY_SIZE) {
-            memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), BYTE_ARRAY_SIZE, byte_array_.data(), BYTE_ARRAY_SIZE);
+            memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), BYTE_ARRAY_SIZE, byteArray_.data(), BYTE_ARRAY_SIZE);
             size -= BYTE_ARRAY_SIZE;
             copied += BYTE_ARRAY_SIZE;
         }
         // Set tail of memory
-        memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), size, byte_array_.data(), size);
+        memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), size, byteArray_.data(), size);
 
-        return start_index;
+        return startIndex;
     }
 
     /**
@@ -144,26 +144,26 @@ protected:
      * @param start_index_in_byte_array - start index in byte array for comaration with memory
      * @return boolean value: true if bytes are equal and fasle if not equal
      */
-    bool CompareBytesWithByteArray(void *mem, size_t size, size_t start_index_in_byte_array)
+    bool CompareBytesWithByteArray(void *mem, size_t size, size_t startIndexInByteArray)
     {
         size_t compared = 0;
-        size_t first_compare_size = std::min(size, BYTE_ARRAY_SIZE - start_index_in_byte_array);
+        size_t firstCompareSize = std::min(size, BYTE_ARRAY_SIZE - startIndexInByteArray);
         // Compare head of memory
-        if (memcmp(mem, &byte_array_[start_index_in_byte_array], first_compare_size) != 0) {
+        if (memcmp(mem, &byteArray_[startIndexInByteArray], firstCompareSize) != 0) {
             return false;
         }
-        compared += first_compare_size;
-        size -= first_compare_size;
+        compared += firstCompareSize;
+        size -= firstCompareSize;
         // Compare middle part of memory
         while (size >= BYTE_ARRAY_SIZE) {
-            if (memcmp(ToVoidPtr(ToUintPtr(mem) + compared), byte_array_.data(), BYTE_ARRAY_SIZE) != 0) {
+            if (memcmp(ToVoidPtr(ToUintPtr(mem) + compared), byteArray_.data(), BYTE_ARRAY_SIZE) != 0) {
                 return false;
             }
             size -= BYTE_ARRAY_SIZE;
             compared += BYTE_ARRAY_SIZE;
         }
         // Compare tail of memory
-        return memcmp(ToVoidPtr(ToUintPtr(mem) + compared), byte_array_.data(), size) == 0;
+        return memcmp(ToVoidPtr(ToUintPtr(mem) + compared), byteArray_.data(), size) == 0;
     }
 
     /**
@@ -178,7 +178,7 @@ protected:
      * Allocate all possible sizes from [MIN_ALLOC_SIZE, MAX_ALLOC_SIZE] with ALIGNMENT alignment
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment ALIGNMENT, class... AllocatorArgs>
-    void OneAlignedAllocFreeTest(size_t pools_count, AllocatorArgs &&...allocator_args);
+    void OneAlignedAllocFreeTest(size_t poolsCount, AllocatorArgs &&...allocatorArgs);
 
     /**
      * @brief Allocate with all alignment
@@ -193,7 +193,7 @@ protected:
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE = LOG_ALIGN_MIN,
               Alignment LOG_ALIGN_MAX_VALUE = LOG_ALIGN_MAX>
-    void AlignedAllocFreeTest(size_t pools_count = 1);
+    void AlignedAllocFreeTest(size_t poolsCount = 1);
 
     /**
      * @brief Simple test for allocate and free
@@ -203,7 +203,7 @@ protected:
      *
      * Allocate elements with random values setting, check and free memory
      */
-    void AllocateAndFree(size_t alloc_size, size_t elements_count, size_t pools_count = 1);
+    void AllocateAndFree(size_t allocSize, size_t elementsCount, size_t poolsCount = 1);
 
     /**
      * @brief Simple test for checking iteration over free pools method.
@@ -215,7 +215,7 @@ protected:
      * and allocate smth again.
      */
     template <size_t POOLS_COUNT = 5>
-    void VisitAndRemoveFreePools(size_t alloc_size);
+    void VisitAndRemoveFreePools(size_t allocSize);
 
     /**
      * @brief Allocate with different sizes and free in random order
@@ -229,7 +229,7 @@ protected:
      * order too
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, class... AllocatorArgs>
-    void AllocateFreeDifferentSizesTest(size_t elements_count, size_t pools_count, AllocatorArgs &&...allocator_args);
+    void AllocateFreeDifferentSizesTest(size_t elementsCount, size_t poolsCount, AllocatorArgs &&...allocatorArgs);
 
     /**
      * @brief Try to allocate too big object, must not allocate memory
@@ -245,7 +245,7 @@ protected:
      *
      * Allocate too many elements, so must not allocate all objects
      */
-    void AllocateTooMuchTest(size_t alloc_size, size_t elements_count);
+    void AllocateTooMuchTest(size_t allocSize, size_t elementsCount);
 
     /**
      * @brief Use allocator in std::vector
@@ -254,7 +254,7 @@ protected:
      * Check working of adapter of this allocator on example std::vector
      */
     // NOLINTNEXTLINE(readability-magic-numbers)
-    void AllocateVectorTest(size_t elements_count = 32);
+    void AllocateVectorTest(size_t elementsCount = 32);
 
     /**
      * @brief Allocate and reuse
@@ -265,7 +265,7 @@ protected:
      * Allocate and free memory and later reuse. Checking for two start addresses
      */
     template <class ElementType = uint64_t>
-    void AllocateReuseTest(size_t alignment_mask, size_t elements_count = 100);  // NOLINT(readability-magic-numbers)
+    void AllocateReuseTest(size_t alignmentMask, size_t elementsCount = 100);  // NOLINT(readability-magic-numbers)
 
     /**
      * @brief Allocate and free objects, collect via allocator method
@@ -283,7 +283,7 @@ protected:
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE = LOG_ALIGN_MIN,
               Alignment LOG_ALIGN_MAX_VALUE = LOG_ALIGN_MAX, size_t ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR = 0>
-    void ObjectCollectionTest(size_t free_granularity = 4, size_t pools_count = 2);
+    void ObjectCollectionTest(size_t freeGranularity = 4, size_t poolsCount = 2);
 
     /**
      * @brief Allocate and free objects, collect via allocator method
@@ -301,7 +301,7 @@ protected:
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE = LOG_ALIGN_MIN,
               Alignment LOG_ALIGN_MAX_VALUE = LOG_ALIGN_MAX, size_t ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR = 0>
-    void ObjectIteratorTest(size_t free_granularity = 4, size_t pools_count = 2);
+    void ObjectIteratorTest(size_t freeGranularity = 4, size_t poolsCount = 2);
 
     /**
      * @brief Allocate and free objects, iterate via allocator method iterating in range
@@ -320,7 +320,7 @@ protected:
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE = LOG_ALIGN_MIN,
               Alignment LOG_ALIGN_MAX_VALUE = LOG_ALIGN_MAX, size_t ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR = 0>
-    void ObjectIteratorInRangeTest(size_t range_iteration_size, size_t free_granularity = 4, size_t pools_count = 2);
+    void ObjectIteratorInRangeTest(size_t rangeIterationSize, size_t freeGranularity = 4, size_t poolsCount = 2);
 
     /**
      * @brief Address sanitizer test for allocator
@@ -332,7 +332,7 @@ protected:
      */
     // NOLINTNEXTLINE(readability-magic-numbers)
     template <size_t ELEMENTS_COUNT = 100>
-    void AsanTest(size_t free_granularity = 3, size_t pools_count = 1);  // NOLINT(readability-magic-numbers)
+    void AsanTest(size_t freeGranularity = 3, size_t poolsCount = 1);  // NOLINT(readability-magic-numbers)
 
     /**
      * @brief Test to allocated by this allocator
@@ -358,7 +358,7 @@ protected:
      * @param max_elements_count - maximum elements which will be allocated during test for each thread
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
-    void MtAllocTest(Allocator *allocator, size_t min_elements_count, size_t max_elements_count);
+    void MtAllocTest(Allocator *allocator, size_t minElementsCount, size_t maxElementsCount);
 
     /**
      * @brief Simultaneously allocate/free objects in different threads
@@ -370,7 +370,7 @@ protected:
      * @param free_granularity - granularity for objects free before total free
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
-    void MtAllocFreeTest(size_t min_elements_count, size_t max_elements_count, size_t free_granularity = 4);
+    void MtAllocFreeTest(size_t minElementsCount, size_t maxElementsCount, size_t freeGranularity = 4);
 
     /**
      * @brief Simultaneously allocate objects and iterate over objects (in range too) in different threads
@@ -382,7 +382,7 @@ protected:
      * @param range_iteration_size - size of a iteration range during test. Must be a power of two
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
-    void MtAllocIterateTest(size_t min_elements_count, size_t max_elements_count, size_t range_iteration_size);
+    void MtAllocIterateTest(size_t minElementsCount, size_t maxElementsCount, size_t rangeIterationSize);
 
     /**
      * @brief Simultaneously allocate and collect objects in different threads
@@ -394,7 +394,7 @@ protected:
      * @param max_thread_with_collect - maximum threads which will call collect simultaneously
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
-    void MtAllocCollectTest(size_t min_elements_count, size_t max_elements_count, size_t max_thread_with_collect = 1);
+    void MtAllocCollectTest(size_t minElementsCount, size_t maxElementsCount, size_t maxThreadWithCollect = 1);
 
 private:
     /**
@@ -412,50 +412,50 @@ private:
      */
     template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE,
               Alignment LOG_ALIGN_MAX_VALUE, size_t ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>
-    void ObjectIteratingSetUp(size_t free_granularity, size_t pools_count, Allocator &allocator, size_t &elements_count,
-                              std::vector<void *> &allocated_elements, std::unordered_set<size_t> &used_indexes);
+    void ObjectIteratingSetUp(size_t freeGranularity, size_t poolsCount, Allocator &allocator, size_t &elementsCount,
+                              std::vector<void *> &allocatedElements, std::unordered_set<size_t> &usedIndexes);
 
     /**
      * @brief Prepare Allocator for the MT work. Allocate and free everything except one element
      * It will generate a common allocator state before specific tests.
      */
-    void MTTestPrologue(Allocator &allocator, size_t alloc_size);
+    void MTTestPrologue(Allocator &allocator, size_t allocSize);
 
-    static void MtAllocRun(AllocatorTest<Allocator> *allocator_test_instance, Allocator *allocator,
-                           std::atomic<size_t> *num_finished, size_t min_alloc_size, size_t max_alloc_size,
-                           size_t min_elements_count, size_t max_elements_count);
+    static void MtAllocRun(AllocatorTest<Allocator> *allocatorTestInstance, Allocator *allocator,
+                           std::atomic<size_t> *numFinished, size_t minAllocSize, size_t maxAllocSize,
+                           size_t minElementsCount, size_t maxElementsCount);
 
-    static void MtAllocFreeRun(AllocatorTest<Allocator> *allocator_test_instance, Allocator *allocator,
-                               std::atomic<size_t> *num_finished, size_t free_granularity, size_t min_alloc_size,
-                               size_t max_alloc_size, size_t min_elements_count, size_t max_elements_count);
+    static void MtAllocFreeRun(AllocatorTest<Allocator> *allocatorTestInstance, Allocator *allocator,
+                               std::atomic<size_t> *numFinished, size_t freeGranularity, size_t minAllocSize,
+                               size_t maxAllocSize, size_t minElementsCount, size_t maxElementsCount);
 
-    static void MtAllocIterateRun(AllocatorTest<Allocator> *allocator_test_instance, Allocator *allocator,
-                                  std::atomic<size_t> *num_finished, size_t range_iteration_size, size_t min_alloc_size,
-                                  size_t max_alloc_size, size_t min_elements_count, size_t max_elements_count);
+    static void MtAllocIterateRun(AllocatorTest<Allocator> *allocatorTestInstance, Allocator *allocator,
+                                  std::atomic<size_t> *numFinished, size_t rangeIterationSize, size_t minAllocSize,
+                                  size_t maxAllocSize, size_t minElementsCount, size_t maxElementsCount);
 
-    static void MtAllocCollectRun(AllocatorTest<Allocator> *allocator_test_instance, Allocator *allocator,
-                                  std::atomic<size_t> *num_finished, size_t min_alloc_size, size_t max_alloc_size,
-                                  size_t min_elements_count, size_t max_elements_count,
-                                  uint32_t max_thread_with_collect, std::atomic<uint32_t> *thread_with_collect);
+    static void MtAllocCollectRun(AllocatorTest<Allocator> *allocatorTestInstance, Allocator *allocator,
+                                  std::atomic<size_t> *numFinished, size_t minAllocSize, size_t maxAllocSize,
+                                  size_t minElementsCount, size_t maxElementsCount, uint32_t maxThreadWithCollect,
+                                  std::atomic<uint32_t> *threadWithCollect);
 
-    static std::unordered_set<void *> objects_set_;
+    static std::unordered_set<void *> objectsSet_;
 
-    static void VisitAndPutInSet(void *obj_mem)
+    static void VisitAndPutInSet(void *objMem)
     {
-        objects_set_.insert(obj_mem);
+        objectsSet_.insert(objMem);
     }
 
-    static ObjectStatus ReturnDeadAndPutInSet(ObjectHeader *obj_mem)
+    static ObjectStatus ReturnDeadAndPutInSet(ObjectHeader *objMem)
     {
-        objects_set_.insert(obj_mem);
+        objectsSet_.insert(objMem);
         return ObjectStatus::DEAD_OBJECT;
     }
 
-    static bool EraseFromSet(void *obj_mem)
+    static bool EraseFromSet(void *objMem)
     {
-        auto it = objects_set_.find(obj_mem);
-        if (it != objects_set_.end()) {
-            objects_set_.erase(it);
+        auto it = objectsSet_.find(objMem);
+        if (it != objectsSet_.end()) {
+            objectsSet_.erase(it);
             return true;
         }
         return false;
@@ -463,27 +463,27 @@ private:
 
     static bool IsEmptySet() noexcept
     {
-        return objects_set_.empty();
+        return objectsSet_.empty();
     }
 };
 
 // NOLINTBEGIN(fuchsia-statically-constructed-objects)
 template <class Allocator>
-std::unordered_set<void *> AllocatorTest<Allocator>::objects_set_;
+std::unordered_set<void *> AllocatorTest<Allocator>::objectsSet_;
 // NOLINTEND(fuchsia-statically-constructed-objects)
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment ALIGNMENT, class... AllocatorArgs>
-inline void AllocatorTest<Allocator>::OneAlignedAllocFreeTest(size_t pools_count, AllocatorArgs &&...allocator_args)
+inline void AllocatorTest<Allocator>::OneAlignedAllocFreeTest(size_t poolsCount, AllocatorArgs &&...allocatorArgs)
 {
     static constexpr size_t ALLOCATIONS_COUNT = MAX_ALLOC_SIZE - MIN_ALLOC_SIZE + 1;
 
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats, std::forward<AllocatorArgs>(allocator_args)...);
-    for (size_t i = 0; i < pools_count; ++i) {
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats, std::forward<AllocatorArgs>(allocatorArgs)...);
+    for (size_t i = 0; i < poolsCount; ++i) {
         AddMemoryPoolToAllocator(allocator);
     }
-    std::array<std::pair<void *, size_t>, ALLOCATIONS_COUNT> allocated_elements;
+    std::array<std::pair<void *, size_t>, ALLOCATIONS_COUNT> allocatedElements;
 
     // Allocations
     for (size_t size = MIN_ALLOC_SIZE; size <= MAX_ALLOC_SIZE; ++size) {
@@ -492,32 +492,32 @@ inline void AllocatorTest<Allocator>::OneAlignedAllocFreeTest(size_t pools_count
                                     << " log alignment, seed: " << seed_;
         ASSERT_EQ(reinterpret_cast<uintptr_t>(mem) & (GetAlignmentInBytes(Alignment(ALIGNMENT)) - 1), 0UL)
             << size << " bytes, " << static_cast<size_t>(ALIGNMENT) << " log alignment, seed: " << seed_;
-        allocated_elements[size - MIN_ALLOC_SIZE] = {mem, SetBytesFromByteArray(mem, size)};
+        allocatedElements[size - MIN_ALLOC_SIZE] = {mem, SetBytesFromByteArray(mem, size)};
     }
     // Check and Free
     for (size_t size = MIN_ALLOC_SIZE; size <= MAX_ALLOC_SIZE; size++) {
         size_t k = size - MIN_ALLOC_SIZE;
-        ASSERT_TRUE(CompareBytesWithByteArray(allocated_elements[k].first, size, allocated_elements[k].second))
-            << "address: " << std::hex << allocated_elements[k].first << ", size: " << size
+        ASSERT_TRUE(CompareBytesWithByteArray(allocatedElements[k].first, size, allocatedElements[k].second))
+            << "address: " << std::hex << allocatedElements[k].first << ", size: " << size
             << ", alignment: " << static_cast<size_t>(ALIGNMENT) << ", seed: " << seed_;
-        allocator.Free(allocated_elements[k].first);
+        allocator.Free(allocatedElements[k].first);
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE, Alignment LOG_ALIGN_MAX_VALUE>
-inline void AllocatorTest<Allocator>::AlignedAllocFreeTest(size_t pools_count)
+inline void AllocatorTest<Allocator>::AlignedAllocFreeTest(size_t poolsCount)
 {
     static_assert(MIN_ALLOC_SIZE <= MAX_ALLOC_SIZE);
     static_assert(LOG_ALIGN_MIN_VALUE <= LOG_ALIGN_MAX_VALUE);
     static constexpr size_t ALLOCATIONS_COUNT =
         (MAX_ALLOC_SIZE - MIN_ALLOC_SIZE + 1) * (LOG_ALIGN_MAX_VALUE - LOG_ALIGN_MIN_VALUE + 1);
 
-    std::array<std::pair<void *, size_t>, ALLOCATIONS_COUNT> allocated_elements;
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
-    for (size_t i = 0; i < pools_count; i++) {
+    std::array<std::pair<void *, size_t>, ALLOCATIONS_COUNT> allocatedElements;
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
+    for (size_t i = 0; i < poolsCount; i++) {
         AddMemoryPoolToAllocator(allocator);
     }
 
@@ -530,456 +530,455 @@ inline void AllocatorTest<Allocator>::AlignedAllocFreeTest(size_t pools_count)
                                         << " log alignment, seed: " << seed_;
             ASSERT_EQ(reinterpret_cast<uintptr_t>(mem) & (GetAlignmentInBytes(Alignment(align)) - 1), 0UL)
                 << size << " bytes, " << align << " log alignment, seed: " << seed_;
-            allocated_elements[k] = {mem, SetBytesFromByteArray(mem, size)};
+            allocatedElements[k] = {mem, SetBytesFromByteArray(mem, size)};
         }
     }
     // Check and free
     k = 0;
     for (size_t size = MIN_ALLOC_SIZE; size <= MAX_ALLOC_SIZE; ++size) {
         for (size_t align = LOG_ALIGN_MIN_VALUE; align <= LOG_ALIGN_MAX_VALUE; ++align, ++k) {
-            ASSERT_TRUE(CompareBytesWithByteArray(allocated_elements[k].first, size, allocated_elements[k].second))
-                << "address: " << std::hex << allocated_elements[k].first << ", size: " << size
+            ASSERT_TRUE(CompareBytesWithByteArray(allocatedElements[k].first, size, allocatedElements[k].second))
+                << "address: " << std::hex << allocatedElements[k].first << ", size: " << size
                 << ", alignment: " << align << ", seed: " << seed_;
-            allocator.Free(allocated_elements[k].first);
+            allocator.Free(allocatedElements[k].first);
         }
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 template <class Allocator>
-inline void AllocatorTest<Allocator>::AllocateAndFree(size_t alloc_size, size_t elements_count, size_t pools_count)
+inline void AllocatorTest<Allocator>::AllocateAndFree(size_t allocSize, size_t elementsCount, size_t poolsCount)
 {
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
-    for (size_t i = 0; i < pools_count; i++) {
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
+    for (size_t i = 0; i < poolsCount; i++) {
         AddMemoryPoolToAllocator(allocator);
     }
-    std::vector<std::pair<void *, size_t>> allocated_elements(elements_count);
+    std::vector<std::pair<void *, size_t>> allocatedElements(elementsCount);
 
     // Allocations
-    for (size_t i = 0; i < elements_count; ++i) {
-        void *mem = allocator.Alloc(alloc_size);
-        ASSERT_TRUE(mem != nullptr) << "Didn't allocate " << alloc_size << " bytes in " << i
+    for (size_t i = 0; i < elementsCount; ++i) {
+        void *mem = allocator.Alloc(allocSize);
+        ASSERT_TRUE(mem != nullptr) << "Didn't allocate " << allocSize << " bytes in " << i
                                     << " iteration, seed: " << seed_;
-        size_t index = SetBytesFromByteArray(mem, alloc_size);
-        allocated_elements[i] = {mem, index};
+        size_t index = SetBytesFromByteArray(mem, allocSize);
+        allocatedElements[i] = {mem, index};
     }
     // Free
-    for (auto &element : allocated_elements) {
-        ASSERT_TRUE(CompareBytesWithByteArray(element.first, alloc_size, element.second))
-            << "address: " << std::hex << element.first << ", size: " << alloc_size << ", seed: " << seed_;
+    for (auto &element : allocatedElements) {
+        ASSERT_TRUE(CompareBytesWithByteArray(element.first, allocSize, element.second))
+            << "address: " << std::hex << element.first << ", size: " << allocSize << ", seed: " << seed_;
         allocator.Free(element.first);
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 template <class Allocator>
 template <size_t POOLS_COUNT>
-inline void AllocatorTest<Allocator>::VisitAndRemoveFreePools(size_t alloc_size)
+inline void AllocatorTest<Allocator>::VisitAndRemoveFreePools(size_t allocSize)
 {
     static constexpr size_t POOLS_TO_FREE = 3;
     static_assert(POOLS_COUNT > POOLS_TO_FREE);
-    std::array<std::vector<void *>, POOLS_COUNT> allocated_elements;
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
+    std::array<std::vector<void *>, POOLS_COUNT> allocatedElements;
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
 
     for (size_t i = 0; i < POOLS_COUNT; i++) {
         AddMemoryPoolToAllocator(allocator);
         while (true) {
-            void *mem = allocator.Alloc(alloc_size);
+            void *mem = allocator.Alloc(allocSize);
             if (mem == nullptr) {
                 break;
             }
-            allocated_elements[i].push_back(mem);
+            allocatedElements[i].push_back(mem);
         }
     }
-    std::array<size_t, POOLS_TO_FREE> freed_pools_indexes = {0, POOLS_COUNT / 2, POOLS_COUNT - 1};
+    std::array<size_t, POOLS_TO_FREE> freedPoolsIndexes = {0, POOLS_COUNT / 2, POOLS_COUNT - 1};
     // free all elements in pools
-    for (auto i : freed_pools_indexes) {
-        for (auto j : allocated_elements[i]) {
+    for (auto i : freedPoolsIndexes) {
+        for (auto j : allocatedElements[i]) {
             allocator.Free(j);
         }
-        allocated_elements[i].clear();
+        allocatedElements[i].clear();
     }
-    size_t freed_pools = 0;
-    allocator.VisitAndRemoveFreePools([&](void *mem, size_t size) {
+    size_t freedPools = 0;
+    allocator.VisitAndRemoveFreePools([&freedPools](void *mem, size_t size) {
         (void)mem;
         (void)size;
-        freed_pools++;
+        freedPools++;
     });
-    ASSERT_TRUE(freed_pools == POOLS_TO_FREE) << ", seed: " << seed_;
-    ASSERT_TRUE(allocator.Alloc(alloc_size) == nullptr) << ", seed: " << seed_;
+    ASSERT_TRUE(freedPools == POOLS_TO_FREE) << ", seed: " << seed_;
+    ASSERT_TRUE(allocator.Alloc(allocSize) == nullptr) << ", seed: " << seed_;
     // allocate again
-    for (auto i : freed_pools_indexes) {
+    for (auto i : freedPoolsIndexes) {
         AddMemoryPoolToAllocator(allocator);
         while (true) {
-            void *mem = allocator.Alloc(alloc_size);
+            void *mem = allocator.Alloc(allocSize);
             if (mem == nullptr) {
                 break;
             }
-            allocated_elements[i].push_back(mem);
+            allocatedElements[i].push_back(mem);
         }
     }
     // free everything:
     for (size_t i = 0; i < POOLS_COUNT; i++) {
-        for (auto j : allocated_elements[i]) {
+        for (auto j : allocatedElements[i]) {
             allocator.Free(j);
         }
-        allocated_elements[i].clear();
+        allocatedElements[i].clear();
     }
-    freed_pools = 0;
-    allocator.VisitAndRemoveFreePools([&](void *mem, size_t size) {
+    freedPools = 0;
+    allocator.VisitAndRemoveFreePools([&freedPools](void *mem, size_t size) {
         (void)mem;
         (void)size;
-        freed_pools++;
+        freedPools++;
     });
-    delete mem_stats;
-    ASSERT_TRUE(freed_pools == POOLS_COUNT) << ", seed: " << seed_;
+    delete memStats;
+    ASSERT_TRUE(freedPools == POOLS_COUNT) << ", seed: " << seed_;
 }
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, class... AllocatorArgs>
-inline void AllocatorTest<Allocator>::AllocateFreeDifferentSizesTest(size_t elements_count, size_t pools_count,
-                                                                     AllocatorArgs &&...allocator_args)
+inline void AllocatorTest<Allocator>::AllocateFreeDifferentSizesTest(size_t elementsCount, size_t poolsCount,
+                                                                     AllocatorArgs &&...allocatorArgs)
 {
-    std::unordered_set<size_t> used_indexes;
+    std::unordered_set<size_t> usedIndexes;
     // {memory, size, start_index_in_byte_array}
-    std::vector<std::tuple<void *, size_t, size_t>> allocated_elements(elements_count);
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats, std::forward<AllocatorArgs>(allocator_args)...);
-    for (size_t i = 0; i < pools_count; i++) {
+    std::vector<std::tuple<void *, size_t, size_t>> allocatedElements(elementsCount);
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats, std::forward<AllocatorArgs>(allocatorArgs)...);
+    for (size_t i = 0; i < poolsCount; i++) {
         AddMemoryPoolToAllocator(allocator);
     }
 
-    size_t full_size_allocated = 0;
-    for (size_t i = 0; i < elements_count; ++i) {
+    size_t fullSizeAllocated = 0;
+    for (size_t i = 0; i < elementsCount; ++i) {
         size_t size = RandFromRange(MIN_ALLOC_SIZE, MAX_ALLOC_SIZE);
         // Allocation
         void *mem = allocator.Alloc(size);
-        ASSERT_TRUE(mem != nullptr) << "Didn't allocate " << size << " bytes, full allocated: " << full_size_allocated
+        ASSERT_TRUE(mem != nullptr) << "Didn't allocate " << size << " bytes, full allocated: " << fullSizeAllocated
                                     << ", seed: " << seed_;
-        full_size_allocated += size;
+        fullSizeAllocated += size;
         // Write random bytes
-        allocated_elements[i] = {mem, size, SetBytesFromByteArray(mem, size)};
-        used_indexes.insert(i);
+        allocatedElements[i] = {mem, size, SetBytesFromByteArray(mem, size)};
+        usedIndexes.insert(i);
     }
     // Compare and free
-    while (!used_indexes.empty()) {
-        size_t i = RandFromRange(0, elements_count - 1);
-        auto it = used_indexes.find(i);
-        if (it != used_indexes.end()) {
-            used_indexes.erase(it);
+    while (!usedIndexes.empty()) {
+        size_t i = RandFromRange(0, elementsCount - 1);
+        auto it = usedIndexes.find(i);
+        if (it != usedIndexes.end()) {
+            usedIndexes.erase(it);
         } else {
-            i = *used_indexes.begin();
-            used_indexes.erase(used_indexes.begin());
+            i = *usedIndexes.begin();
+            usedIndexes.erase(usedIndexes.begin());
         }
         // Compare
-        ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(allocated_elements[i]), std::get<1>(allocated_elements[i]),
-                                              std::get<2>(allocated_elements[i])))
-            << "Address: " << std::hex << std::get<0>(allocated_elements[i])
-            << ", size: " << std::get<1>(allocated_elements[i])
-            << ", start index in byte array: " << std::get<2>(allocated_elements[i]) << ", seed: " << seed_;
-        allocator.Free(std::get<0>(allocated_elements[i]));
+        ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]),
+                                              std::get<2>(allocatedElements[i])))
+            << "Address: " << std::hex << std::get<0>(allocatedElements[i])
+            << ", size: " << std::get<1>(allocatedElements[i])
+            << ", start index in byte array: " << std::get<2>(allocatedElements[i]) << ", seed: " << seed_;
+        allocator.Free(std::get<0>(allocatedElements[i]));
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 template <class Allocator>
 template <size_t MAX_ALLOC_SIZE>
 inline void AllocatorTest<Allocator>::AllocateTooBigObjectTest()
 {
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
     AddMemoryPoolToAllocator(allocator);
 
     // NOLINTNEXTLINE(cert-msc50-cpp)
-    size_t size_obj = MAX_ALLOC_SIZE + 1 + static_cast<size_t>(rand());
-    void *mem = allocator.Alloc(size_obj);
-    ASSERT_TRUE(mem == nullptr) << "Allocate too big object with " << size_obj << " size at address " << std::hex
-                                << mem;
-    delete mem_stats;
+    size_t sizeObj = MAX_ALLOC_SIZE + 1 + static_cast<size_t>(rand());
+    void *mem = allocator.Alloc(sizeObj);
+    ASSERT_TRUE(mem == nullptr) << "Allocate too big object with " << sizeObj << " size at address " << std::hex << mem;
+    delete memStats;
 }
 
 template <class Allocator>
-inline void AllocatorTest<Allocator>::AllocateTooMuchTest(size_t alloc_size, size_t elements_count)
+inline void AllocatorTest<Allocator>::AllocateTooMuchTest(size_t allocSize, size_t elementsCount)
 {
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
     AddMemoryPoolToAllocatorProtected(allocator);
 
-    bool is_not_all = false;
-    for (size_t i = 0; i < elements_count; i++) {
-        void *mem = allocator.Alloc(alloc_size);
+    bool isNotAll = false;
+    for (size_t i = 0; i < elementsCount; i++) {
+        void *mem = allocator.Alloc(allocSize);
         if (mem == nullptr) {
-            is_not_all = true;
+            isNotAll = true;
             break;
         }
-        SetBytesFromByteArray(mem, alloc_size);
+        SetBytesFromByteArray(mem, allocSize);
     }
-    ASSERT_TRUE(is_not_all) << "elements count: " << elements_count << ", element size: " << alloc_size
-                            << ", seed: " << seed_;
-    delete mem_stats;
+    ASSERT_TRUE(isNotAll) << "elements count: " << elementsCount << ", element size: " << allocSize
+                          << ", seed: " << seed_;
+    delete memStats;
 }
 
 template <class Allocator>
-inline void AllocatorTest<Allocator>::AllocateVectorTest(size_t elements_count)
+inline void AllocatorTest<Allocator>::AllocateVectorTest(size_t elementsCount)
 {
     using ElementType = size_t;
     static constexpr size_t MAGIC_CONST = 3;
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
     AddMemoryPoolToAllocatorProtected(allocator);
     using AdapterType = typename decltype(allocator.Adapter())::template Rebind<ElementType>::other;
     std::vector<ElementType, AdapterType> vec(allocator.Adapter());
 
-    for (size_t i = 0; i < elements_count; i++) {
+    for (size_t i = 0; i < elementsCount; i++) {
         vec.push_back(i * MAGIC_CONST);
     }
-    for (size_t i = 0; i < elements_count; i++) {
+    for (size_t i = 0; i < elementsCount; i++) {
         ASSERT_EQ(vec[i], i * MAGIC_CONST) << "iteration: " << i;
     }
 
     vec.clear();
 
-    for (size_t i = 0; i < elements_count; i++) {
+    for (size_t i = 0; i < elementsCount; i++) {
         vec.push_back(i * (MAGIC_CONST + 1));
     }
-    for (size_t i = 0; i < elements_count; i++) {
+    for (size_t i = 0; i < elementsCount; i++) {
         ASSERT_EQ(vec[i], i * (MAGIC_CONST + 1)) << "iteration: " << i;
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 template <class Allocator>
 template <class ElementType>
-inline void AllocatorTest<Allocator>::AllocateReuseTest(size_t alignment_mask, size_t elements_count)
+inline void AllocatorTest<Allocator>::AllocateReuseTest(size_t alignmentMask, size_t elementsCount)
 {
     static constexpr size_t SIZE_1 = sizeof(ElementType);
     static constexpr size_t SIZE_2 = SIZE_1 * 3;
 
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
     AddMemoryPoolToAllocator(allocator);
-    std::vector<std::pair<void *, size_t>> allocated_elements(elements_count);
+    std::vector<std::pair<void *, size_t>> allocatedElements(elementsCount);
 
     // First allocations
-    for (size_t i = 0; i < elements_count; ++i) {
+    for (size_t i = 0; i < elementsCount; ++i) {
         void *mem = allocator.Alloc(SIZE_1);
         ASSERT_TRUE(mem != nullptr) << "Didn't allocate " << SIZE_1 << " bytes in " << i << " iteration";
         size_t index = SetBytesFromByteArray(mem, SIZE_1);
-        allocated_elements[i] = {mem, index};
+        allocatedElements[i] = {mem, index};
     }
-    auto first_allocated_mem = reinterpret_cast<uintptr_t>(allocated_elements[0].first);
+    auto firstAllocatedMem = reinterpret_cast<uintptr_t>(allocatedElements[0].first);
     // Free
-    for (size_t i = 0; i < elements_count; i++) {
-        ASSERT_TRUE(CompareBytesWithByteArray(allocated_elements[i].first, SIZE_1, allocated_elements[i].second))
-            << "address: " << std::hex << allocated_elements[i].first << ", size: " << SIZE_1 << ", seed: " << seed_;
-        allocator.Free(allocated_elements[i].first);
+    for (size_t i = 0; i < elementsCount; i++) {
+        ASSERT_TRUE(CompareBytesWithByteArray(allocatedElements[i].first, SIZE_1, allocatedElements[i].second))
+            << "address: " << std::hex << allocatedElements[i].first << ", size: " << SIZE_1 << ", seed: " << seed_;
+        allocator.Free(allocatedElements[i].first);
     }
     // Second allocations
-    for (size_t i = 0; i < elements_count; ++i) {
+    for (size_t i = 0; i < elementsCount; ++i) {
         void *mem = allocator.Alloc(SIZE_2);
         ASSERT_TRUE(mem != nullptr) << "Didn't allocate " << SIZE_2 << " bytes in " << i << " iteration";
         size_t index = SetBytesFromByteArray(mem, SIZE_2);
-        allocated_elements[i] = {mem, index};
+        allocatedElements[i] = {mem, index};
     }
-    auto second_allocated_mem = reinterpret_cast<uintptr_t>(allocated_elements[0].first);
+    auto secondAllocatedMem = reinterpret_cast<uintptr_t>(allocatedElements[0].first);
     // Free
-    for (size_t i = 0; i < elements_count; i++) {
-        ASSERT_TRUE(CompareBytesWithByteArray(allocated_elements[i].first, SIZE_2, allocated_elements[i].second))
-            << "address: " << std::hex << allocated_elements[i].first << ", size: " << SIZE_2 << ", seed: " << seed_;
-        allocator.Free(allocated_elements[i].first);
+    for (size_t i = 0; i < elementsCount; i++) {
+        ASSERT_TRUE(CompareBytesWithByteArray(allocatedElements[i].first, SIZE_2, allocatedElements[i].second))
+            << "address: " << std::hex << allocatedElements[i].first << ", size: " << SIZE_2 << ", seed: " << seed_;
+        allocator.Free(allocatedElements[i].first);
     }
-    delete mem_stats;
-    ASSERT_EQ(first_allocated_mem & ~alignment_mask, second_allocated_mem & ~alignment_mask)
-        << "first address = " << std::hex << first_allocated_mem << ", second address = " << std::hex
-        << second_allocated_mem << std::endl
-        << "alignment mask: " << alignment_mask << ", seed: " << seed_;
+    delete memStats;
+    ASSERT_EQ(firstAllocatedMem & ~alignmentMask, secondAllocatedMem & ~alignmentMask)
+        << "first address = " << std::hex << firstAllocatedMem << ", second address = " << std::hex
+        << secondAllocatedMem << std::endl
+        << "alignment mask: " << alignmentMask << ", seed: " << seed_;
 }
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE, Alignment LOG_ALIGN_MAX_VALUE,
           size_t ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>
-inline void AllocatorTest<Allocator>::ObjectIteratingSetUp(size_t free_granularity, size_t pools_count,
-                                                           Allocator &allocator, size_t &elements_count,
-                                                           std::vector<void *> &allocated_elements,
-                                                           std::unordered_set<size_t> &used_indexes)
+inline void AllocatorTest<Allocator>::ObjectIteratingSetUp(size_t freeGranularity, size_t poolsCount,
+                                                           Allocator &allocator, size_t &elementsCount,
+                                                           std::vector<void *> &allocatedElements,
+                                                           std::unordered_set<size_t> &usedIndexes)
 {
     AddMemoryPoolToAllocator(allocator);
-    size_t allocated_pools = 1;
-    auto do_allocations = [pools_count]([[maybe_unused]] size_t allocated_pools_count,
-                                        [[maybe_unused]] size_t count) -> bool {
+    size_t allocatedPools = 1;
+    auto doAllocations = [poolsCount]([[maybe_unused]] size_t allocatedPoolsCount,
+                                      [[maybe_unused]] size_t count) -> bool {
         if constexpr (ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR == 0) {
-            return allocated_pools_count < pools_count;
+            return allocatedPoolsCount < poolsCount;
         } else {
-            (void)pools_count;
+            (void)poolsCount;
             return count < ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR;
         }
     };
 
     // Allocations
-    while (do_allocations(allocated_pools, elements_count)) {
+    while (doAllocations(allocatedPools, elementsCount)) {
         size_t size = RandFromRange(MIN_ALLOC_SIZE, MAX_ALLOC_SIZE);
         size_t align = RandFromRange(LOG_ALIGN_MIN_VALUE, LOG_ALIGN_MAX_VALUE);
         void *mem = allocator.Alloc(size, Alignment(align));
         if constexpr (ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR == 0) {
             if (mem == nullptr) {
                 AddMemoryPoolToAllocator(allocator);
-                allocated_pools++;
+                allocatedPools++;
                 mem = allocator.Alloc(size);
             }
         }
-        ASSERT_TRUE(mem != nullptr) << "Didn't allocate " << size << " bytes in " << elements_count
+        ASSERT_TRUE(mem != nullptr) << "Didn't allocate " << size << " bytes in " << elementsCount
                                     << " iteration, seed : " << seed_;
-        allocated_elements.push_back(mem);
-        used_indexes.insert(elements_count++);
+        allocatedElements.push_back(mem);
+        usedIndexes.insert(elementsCount++);
     }
     // Free some elements
-    for (size_t i = 0; i < elements_count; i += free_granularity) {
-        size_t index = RandFromRange(0, elements_count - 1);
-        auto it = used_indexes.find(index);
-        if (it == used_indexes.end()) {
-            it = used_indexes.begin();
+    for (size_t i = 0; i < elementsCount; i += freeGranularity) {
+        size_t index = RandFromRange(0, elementsCount - 1);
+        auto it = usedIndexes.find(index);
+        if (it == usedIndexes.end()) {
+            it = usedIndexes.begin();
             index = *it;
         }
-        allocator.Free(allocated_elements[index]);
-        used_indexes.erase(it);
+        allocator.Free(allocatedElements[index]);
+        usedIndexes.erase(it);
     }
 }
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE, Alignment LOG_ALIGN_MAX_VALUE,
           size_t ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>
-inline void AllocatorTest<Allocator>::ObjectCollectionTest(size_t free_granularity, size_t pools_count)
+inline void AllocatorTest<Allocator>::ObjectCollectionTest(size_t freeGranularity, size_t poolsCount)
 {
-    size_t elements_count = 0;
-    std::vector<void *> allocated_elements;
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
-    std::unordered_set<size_t> used_indexes;
+    size_t elementsCount = 0;
+    std::vector<void *> allocatedElements;
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
+    std::unordered_set<size_t> usedIndexes;
     ObjectIteratingSetUp<MIN_ALLOC_SIZE, MAX_ALLOC_SIZE, LOG_ALIGN_MIN_VALUE, LOG_ALIGN_MAX_VALUE,
-                         ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>(free_granularity, pools_count, allocator,
-                                                                elements_count, allocated_elements, used_indexes);
+                         ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>(freeGranularity, poolsCount, allocator, elementsCount,
+                                                                allocatedElements, usedIndexes);
 
     // Collect all objects into unordered_set via allocator's method
     allocator.Collect(&AllocatorTest<Allocator>::ReturnDeadAndPutInSet);
     // Check in unordered_set
-    for (size_t i = 0; i < elements_count; i++) {
-        auto it = used_indexes.find(i);
-        if (it != used_indexes.end()) {
-            void *mem = allocated_elements[i];
+    for (size_t i = 0; i < elementsCount; i++) {
+        auto it = usedIndexes.find(i);
+        if (it != usedIndexes.end()) {
+            void *mem = allocatedElements[i];
             ASSERT_TRUE(EraseFromSet(mem))
                 << "Object at address " << std::hex << mem << " isn't in collected objects, seed: " << seed_;
         }
     }
 
-    delete mem_stats;
+    delete memStats;
     ASSERT_TRUE(IsEmptySet()) << "seed: " << seed_;
 }
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE, Alignment LOG_ALIGN_MAX_VALUE,
           size_t ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>
-inline void AllocatorTest<Allocator>::ObjectIteratorTest(size_t free_granularity, size_t pools_count)
+inline void AllocatorTest<Allocator>::ObjectIteratorTest(size_t freeGranularity, size_t poolsCount)
 {
-    size_t elements_count = 0;
-    std::vector<void *> allocated_elements;
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
-    std::unordered_set<size_t> used_indexes;
+    size_t elementsCount = 0;
+    std::vector<void *> allocatedElements;
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
+    std::unordered_set<size_t> usedIndexes;
     ObjectIteratingSetUp<MIN_ALLOC_SIZE, MAX_ALLOC_SIZE, LOG_ALIGN_MIN_VALUE, LOG_ALIGN_MAX_VALUE,
-                         ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>(free_granularity, pools_count, allocator,
-                                                                elements_count, allocated_elements, used_indexes);
+                         ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>(freeGranularity, poolsCount, allocator, elementsCount,
+                                                                allocatedElements, usedIndexes);
 
     // Collect all objects into unordered_set via allocator's method
     allocator.IterateOverObjects(&AllocatorTest<Allocator>::VisitAndPutInSet);
     // Free all and check in unordered_set
-    for (size_t i = 0; i < elements_count; i++) {
-        auto it = used_indexes.find(i);
-        if (it != used_indexes.end()) {
-            void *mem = allocated_elements[i];
+    for (size_t i = 0; i < elementsCount; i++) {
+        auto it = usedIndexes.find(i);
+        if (it != usedIndexes.end()) {
+            void *mem = allocatedElements[i];
             allocator.Free(mem);
             ASSERT_TRUE(EraseFromSet(mem))
                 << "Object at address " << std::hex << mem << " isn't in collected objects, seed: " << seed_;
         }
     }
 
-    delete mem_stats;
+    delete memStats;
     ASSERT_TRUE(IsEmptySet()) << "seed: " << seed_;
 }
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment LOG_ALIGN_MIN_VALUE, Alignment LOG_ALIGN_MAX_VALUE,
           size_t ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>
-inline void AllocatorTest<Allocator>::ObjectIteratorInRangeTest(size_t range_iteration_size, size_t free_granularity,
-                                                                size_t pools_count)
+inline void AllocatorTest<Allocator>::ObjectIteratorInRangeTest(size_t rangeIterationSize, size_t freeGranularity,
+                                                                size_t poolsCount)
 {
-    ASSERT((range_iteration_size & (range_iteration_size - 1U)) == 0U);
-    size_t elements_count = 0;
-    std::vector<void *> allocated_elements;
-    std::unordered_set<size_t> used_indexes;
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
+    ASSERT((rangeIterationSize & (rangeIterationSize - 1U)) == 0U);
+    size_t elementsCount = 0;
+    std::vector<void *> allocatedElements;
+    std::unordered_set<size_t> usedIndexes;
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
     ObjectIteratingSetUp<MIN_ALLOC_SIZE, MAX_ALLOC_SIZE, LOG_ALIGN_MIN_VALUE, LOG_ALIGN_MAX_VALUE,
-                         ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>(free_granularity, pools_count, allocator,
-                                                                elements_count, allocated_elements, used_indexes);
+                         ELEMENTS_COUNT_FOR_NOT_POOL_ALLOCATOR>(freeGranularity, poolsCount, allocator, elementsCount,
+                                                                allocatedElements, usedIndexes);
 
-    void *min_obj_pointer = *std::min_element(allocated_elements.begin(), allocated_elements.end());
-    void *max_obj_pointer = *std::max_element(allocated_elements.begin(), allocated_elements.end());
+    void *minObjPointer = *std::min_element(allocatedElements.begin(), allocatedElements.end());
+    void *maxObjPointer = *std::max_element(allocatedElements.begin(), allocatedElements.end());
     // Collect all objects into unordered_set via allocator's method
-    uintptr_t cur_pointer = ToUintPtr(min_obj_pointer);
-    cur_pointer = cur_pointer & (~(range_iteration_size - 1));
-    while (cur_pointer <= ToUintPtr(max_obj_pointer)) {
-        allocator.IterateOverObjectsInRange(&AllocatorTest<Allocator>::VisitAndPutInSet, ToVoidPtr(cur_pointer),
-                                            ToVoidPtr(cur_pointer + range_iteration_size - 1U));
-        cur_pointer = cur_pointer + range_iteration_size;
+    uintptr_t curPointer = ToUintPtr(minObjPointer);
+    curPointer = curPointer & (~(rangeIterationSize - 1));
+    while (curPointer <= ToUintPtr(maxObjPointer)) {
+        allocator.IterateOverObjectsInRange(&AllocatorTest<Allocator>::VisitAndPutInSet, ToVoidPtr(curPointer),
+                                            ToVoidPtr(curPointer + rangeIterationSize - 1U));
+        curPointer = curPointer + rangeIterationSize;
     }
 
     // Free all and check in unordered_set
-    for (size_t i = 0; i < elements_count; i++) {
-        auto it = used_indexes.find(i);
-        if (it != used_indexes.end()) {
-            void *mem = allocated_elements[i];
+    for (size_t i = 0; i < elementsCount; i++) {
+        auto it = usedIndexes.find(i);
+        if (it != usedIndexes.end()) {
+            void *mem = allocatedElements[i];
             allocator.Free(mem);
             ASSERT_TRUE(EraseFromSet(mem))
                 << "Object at address " << std::hex << mem << " isn't in collected objects, seed: " << seed_;
         }
     }
-    delete mem_stats;
+    delete memStats;
     ASSERT_TRUE(IsEmptySet()) << "seed: " << seed_;
 }
 
 template <class Allocator>
 template <size_t ELEMENTS_COUNT>
-inline void AllocatorTest<Allocator>::AsanTest(size_t free_granularity, size_t pools_count)
+inline void AllocatorTest<Allocator>::AsanTest(size_t freeGranularity, size_t poolsCount)
 {
     using ElementType = uint64_t;
     static constexpr size_t ALLOC_SIZE = sizeof(ElementType);
     static constexpr size_t ALLOCATIONS_COUNT = ELEMENTS_COUNT;
 
-    if (free_granularity == 0) {
-        free_granularity = 1;
+    if (freeGranularity == 0) {
+        freeGranularity = 1;
     }
 
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
-    for (size_t i = 0; i < pools_count; i++) {
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
+    for (size_t i = 0; i < poolsCount; i++) {
         AddMemoryPoolToAllocatorProtected(allocator);
     }
-    std::array<void *, ALLOCATIONS_COUNT> allocated_elements {};
+    std::array<void *, ALLOCATIONS_COUNT> allocatedElements {};
     // Allocations
     for (size_t i = 0; i < ALLOCATIONS_COUNT; ++i) {
         void *mem = allocator.Alloc(ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr) << "Didn't allocate " << ALLOC_SIZE << " bytes on " << i << " iteration";
-        allocated_elements[i] = mem;
+        allocatedElements[i] = mem;
     }
     // Free some elements
-    for (size_t i = 0; i < ALLOCATIONS_COUNT; i += free_granularity) {
-        allocator.Free(allocated_elements[i]);
+    for (size_t i = 0; i < ALLOCATIONS_COUNT; i += freeGranularity) {
+        allocator.Free(allocatedElements[i]);
     }
     // Asan check
     for (size_t i = 0; i < ALLOCATIONS_COUNT; ++i) {
-        if (i % free_granularity == 0) {
+        if (i % freeGranularity == 0) {
 #ifdef PANDA_ASAN_ON
             EXPECT_DEATH(DeathWriteUint64(allocated_elements[i]), "")
                 << "Write " << sizeof(ElementType) << " bytes at address " << std::hex << allocated_elements[i];
@@ -987,17 +986,17 @@ inline void AllocatorTest<Allocator>::AsanTest(size_t free_granularity, size_t p
             continue;
 #endif  // PANDA_ASAN_ON
         } else {
-            allocator.Free(allocated_elements[i]);
+            allocator.Free(allocatedElements[i]);
         }
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 template <class Allocator>
 inline void AllocatorTest<Allocator>::AllocatedByThisAllocatorTest()
 {
-    mem::MemStatsType mem_stats;
-    Allocator allocator(&mem_stats);
+    mem::MemStatsType memStats;
+    Allocator allocator(&memStats);
     AllocatedByThisAllocatorTest(allocator);
 }
 
@@ -1006,222 +1005,218 @@ inline void AllocatorTest<Allocator>::AllocatedByThisAllocatorTest(Allocator &al
 {
     static constexpr size_t ALLOC_SIZE = sizeof(uint64_t);
     AddMemoryPoolToAllocatorProtected(allocator);
-    void *allocated_by_this = allocator.Alloc(ALLOC_SIZE);
+    void *allocatedByThis = allocator.Alloc(ALLOC_SIZE);
     // NOLINTNEXTLINE(cppcoreguidelines-no-malloc)
-    std::unique_ptr<void, void (*)(void *)> allocated_by_malloc(std::malloc(ALLOC_SIZE), free);
-    std::array<uint8_t, ALLOC_SIZE> allocated_on_stack {};
-    void *allocated_by_malloc_addr = allocated_by_malloc.get();
+    std::unique_ptr<void, void (*)(void *)> allocatedByMalloc(std::malloc(ALLOC_SIZE), free);
+    std::array<uint8_t, ALLOC_SIZE> allocatedOnStack {};
+    void *allocatedByMallocAddr = allocatedByMalloc.get();
 
-    ASSERT_TRUE(AllocatedByThisAllocator(allocator, allocated_by_this)) << "address: " << std::hex << allocated_by_this;
-    ASSERT_FALSE(AllocatedByThisAllocator(allocator, allocated_by_malloc_addr))
-        << "address: " << allocated_by_malloc_addr;
-    ASSERT_FALSE(AllocatedByThisAllocator(allocator, static_cast<void *>(allocated_on_stack.data())))
-        << "address on stack: " << std::hex << static_cast<void *>(allocated_on_stack.data());
+    ASSERT_TRUE(AllocatedByThisAllocator(allocator, allocatedByThis)) << "address: " << std::hex << allocatedByThis;
+    ASSERT_FALSE(AllocatedByThisAllocator(allocator, allocatedByMallocAddr)) << "address: " << allocatedByMallocAddr;
+    ASSERT_FALSE(AllocatedByThisAllocator(allocator, static_cast<void *>(allocatedOnStack.data())))
+        << "address on stack: " << std::hex << static_cast<void *>(allocatedOnStack.data());
 
-    allocator.Free(allocated_by_this);
-    allocated_by_malloc.reset();
+    allocator.Free(allocatedByThis);
+    allocatedByMalloc.reset();
 
     // NOLINTNEXTLINE(clang-analyzer-unix.Malloc)
-    ASSERT_FALSE(AllocatedByThisAllocator(allocator, allocated_by_malloc_addr))
-        << "after free, address: " << allocated_by_malloc_addr;
+    ASSERT_FALSE(AllocatedByThisAllocator(allocator, allocatedByMallocAddr))
+        << "after free, address: " << allocatedByMallocAddr;
 }
 
 template <class Allocator>
-void AllocatorTest<Allocator>::MtAllocRun(AllocatorTest<Allocator> *allocator_test_instance, Allocator *allocator,
-                                          std::atomic<size_t> *num_finished, size_t min_alloc_size,
-                                          size_t max_alloc_size, size_t min_elements_count, size_t max_elements_count)
+void AllocatorTest<Allocator>::MtAllocRun(AllocatorTest<Allocator> *allocatorTestInstance, Allocator *allocator,
+                                          std::atomic<size_t> *numFinished, size_t minAllocSize, size_t maxAllocSize,
+                                          size_t minElementsCount, size_t maxElementsCount)
 {
-    size_t elements_count = allocator_test_instance->RandFromRange(min_elements_count, max_elements_count);
-    std::unordered_set<size_t> used_indexes;
+    size_t elementsCount = allocatorTestInstance->RandFromRange(minElementsCount, maxElementsCount);
+    std::unordered_set<size_t> usedIndexes;
     // {memory, size, start_index_in_byte_array}
-    std::vector<std::tuple<void *, size_t, size_t>> allocated_elements(elements_count);
+    std::vector<std::tuple<void *, size_t, size_t>> allocatedElements(elementsCount);
 
-    for (size_t i = 0; i < elements_count; ++i) {
-        size_t size = allocator_test_instance->RandFromRange(min_alloc_size, max_alloc_size);
+    for (size_t i = 0; i < elementsCount; ++i) {
+        size_t size = allocatorTestInstance->RandFromRange(minAllocSize, maxAllocSize);
         // Allocation
         void *mem = allocator->Alloc(size);
         // Do while because other threads can use the whole pool before we try to allocate smth in it
         while (mem == nullptr) {
-            allocator_test_instance->AddMemoryPoolToAllocator(*allocator);
+            allocatorTestInstance->AddMemoryPoolToAllocator(*allocator);
             mem = allocator->Alloc(size);
         }
         ASSERT_TRUE(mem != nullptr);
         // Write random bytes
-        allocated_elements[i] = {mem, size, allocator_test_instance->SetBytesFromByteArray(mem, size)};
-        used_indexes.insert(i);
+        allocatedElements[i] = {mem, size, allocatorTestInstance->SetBytesFromByteArray(mem, size)};
+        usedIndexes.insert(i);
     }
 
     // Compare
-    while (!used_indexes.empty()) {
-        size_t i = allocator_test_instance->RandFromRange(0, elements_count - 1);
-        auto it = used_indexes.find(i);
-        if (it != used_indexes.end()) {
-            used_indexes.erase(it);
+    while (!usedIndexes.empty()) {
+        size_t i = allocatorTestInstance->RandFromRange(0, elementsCount - 1);
+        auto it = usedIndexes.find(i);
+        if (it != usedIndexes.end()) {
+            usedIndexes.erase(it);
         } else {
-            i = *used_indexes.begin();
-            used_indexes.erase(used_indexes.begin());
+            i = *usedIndexes.begin();
+            usedIndexes.erase(usedIndexes.begin());
         }
-        ASSERT_TRUE(allocator_test_instance->AllocatedByThisAllocator(*allocator, std::get<0>(allocated_elements[i])));
-        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(
-            std::get<0>(allocated_elements[i]), std::get<1>(allocated_elements[i]), std::get<2>(allocated_elements[i])))
-            << "Address: " << std::hex << std::get<0>(allocated_elements[i])
-            << ", size: " << std::get<1>(allocated_elements[i])
-            << ", start index in byte array: " << std::get<2>(allocated_elements[i])
-            << ", seed: " << allocator_test_instance->seed_;
+        ASSERT_TRUE(allocatorTestInstance->AllocatedByThisAllocator(*allocator, std::get<0>(allocatedElements[i])));
+        ASSERT_TRUE(allocatorTestInstance->CompareBytesWithByteArray(
+            std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]), std::get<2>(allocatedElements[i])))
+            << "Address: " << std::hex << std::get<0>(allocatedElements[i])
+            << ", size: " << std::get<1>(allocatedElements[i])
+            << ", start index in byte array: " << std::get<2>(allocatedElements[i])
+            << ", seed: " << allocatorTestInstance->seed_;
     }
     // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
-    num_finished->fetch_add(1, std::memory_order_seq_cst);
+    numFinished->fetch_add(1, std::memory_order_seq_cst);
 }
 
 template <class Allocator>
-void AllocatorTest<Allocator>::MtAllocFreeRun(AllocatorTest<Allocator> *allocator_test_instance, Allocator *allocator,
-                                              std::atomic<size_t> *num_finished, size_t free_granularity,
-                                              size_t min_alloc_size, size_t max_alloc_size, size_t min_elements_count,
-                                              size_t max_elements_count)
+void AllocatorTest<Allocator>::MtAllocFreeRun(AllocatorTest<Allocator> *allocatorTestInstance, Allocator *allocator,
+                                              std::atomic<size_t> *numFinished, size_t freeGranularity,
+                                              size_t minAllocSize, size_t maxAllocSize, size_t minElementsCount,
+                                              size_t maxElementsCount)
 {
-    size_t elements_count = allocator_test_instance->RandFromRange(min_elements_count, max_elements_count);
-    std::unordered_set<size_t> used_indexes;
+    size_t elementsCount = allocatorTestInstance->RandFromRange(minElementsCount, maxElementsCount);
+    std::unordered_set<size_t> usedIndexes;
     // {memory, size, start_index_in_byte_array}
-    std::vector<std::tuple<void *, size_t, size_t>> allocated_elements(elements_count);
+    std::vector<std::tuple<void *, size_t, size_t>> allocatedElements(elementsCount);
 
-    for (size_t i = 0; i < elements_count; ++i) {
-        size_t size = allocator_test_instance->RandFromRange(min_alloc_size, max_alloc_size);
+    for (size_t i = 0; i < elementsCount; ++i) {
+        size_t size = allocatorTestInstance->RandFromRange(minAllocSize, maxAllocSize);
         // Allocation
         void *mem = allocator->Alloc(size);
         // Do while because other threads can use the whole pool before we try to allocate smth in it
         while (mem == nullptr) {
-            allocator_test_instance->AddMemoryPoolToAllocator(*allocator);
+            allocatorTestInstance->AddMemoryPoolToAllocator(*allocator);
             mem = allocator->Alloc(size);
         }
         ASSERT_TRUE(mem != nullptr);
         // Write random bytes
-        allocated_elements[i] = {mem, size, allocator_test_instance->SetBytesFromByteArray(mem, size)};
-        used_indexes.insert(i);
+        allocatedElements[i] = {mem, size, allocatorTestInstance->SetBytesFromByteArray(mem, size)};
+        usedIndexes.insert(i);
     }
 
     // Free some elements
-    for (size_t i = 0; i < elements_count; i += free_granularity) {
-        size_t index = allocator_test_instance->RandFromRange(0, elements_count - 1);
-        auto it = used_indexes.find(index);
-        if (it != used_indexes.end()) {
-            used_indexes.erase(it);
+    for (size_t i = 0; i < elementsCount; i += freeGranularity) {
+        size_t index = allocatorTestInstance->RandFromRange(0, elementsCount - 1);
+        auto it = usedIndexes.find(index);
+        if (it != usedIndexes.end()) {
+            usedIndexes.erase(it);
         } else {
-            index = *used_indexes.begin();
-            used_indexes.erase(used_indexes.begin());
+            index = *usedIndexes.begin();
+            usedIndexes.erase(usedIndexes.begin());
         }
-        ASSERT_TRUE(
-            allocator_test_instance->AllocatedByThisAllocator(*allocator, std::get<0>(allocated_elements[index])));
+        ASSERT_TRUE(allocatorTestInstance->AllocatedByThisAllocator(*allocator, std::get<0>(allocatedElements[index])));
         // Compare
-        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(std::get<0>(allocated_elements[index]),
-                                                                       std::get<1>(allocated_elements[index]),
-                                                                       std::get<2>(allocated_elements[index])))
-            << "Address: " << std::hex << std::get<0>(allocated_elements[index])
-            << ", size: " << std::get<1>(allocated_elements[index])
-            << ", start index in byte array: " << std::get<2>(allocated_elements[index])
-            << ", seed: " << allocator_test_instance->seed_;
-        allocator->Free(std::get<0>(allocated_elements[index]));
+        ASSERT_TRUE(allocatorTestInstance->CompareBytesWithByteArray(std::get<0>(allocatedElements[index]),
+                                                                     std::get<1>(allocatedElements[index]),
+                                                                     std::get<2>(allocatedElements[index])))
+            << "Address: " << std::hex << std::get<0>(allocatedElements[index])
+            << ", size: " << std::get<1>(allocatedElements[index])
+            << ", start index in byte array: " << std::get<2>(allocatedElements[index])
+            << ", seed: " << allocatorTestInstance->seed_;
+        allocator->Free(std::get<0>(allocatedElements[index]));
     }
 
     // Compare and free
-    while (!used_indexes.empty()) {
-        size_t i = allocator_test_instance->RandFromRange(0, elements_count - 1);
-        auto it = used_indexes.find(i);
-        if (it != used_indexes.end()) {
-            used_indexes.erase(it);
+    while (!usedIndexes.empty()) {
+        size_t i = allocatorTestInstance->RandFromRange(0, elementsCount - 1);
+        auto it = usedIndexes.find(i);
+        if (it != usedIndexes.end()) {
+            usedIndexes.erase(it);
         } else {
-            i = *used_indexes.begin();
-            used_indexes.erase(used_indexes.begin());
+            i = *usedIndexes.begin();
+            usedIndexes.erase(usedIndexes.begin());
         }
         // Compare
-        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(
-            std::get<0>(allocated_elements[i]), std::get<1>(allocated_elements[i]), std::get<2>(allocated_elements[i])))
-            << "Address: " << std::hex << std::get<0>(allocated_elements[i])
-            << ", size: " << std::get<1>(allocated_elements[i])
-            << ", start index in byte array: " << std::get<2>(allocated_elements[i])
-            << ", seed: " << allocator_test_instance->seed_;
-        allocator->Free(std::get<0>(allocated_elements[i]));
+        ASSERT_TRUE(allocatorTestInstance->CompareBytesWithByteArray(
+            std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]), std::get<2>(allocatedElements[i])))
+            << "Address: " << std::hex << std::get<0>(allocatedElements[i])
+            << ", size: " << std::get<1>(allocatedElements[i])
+            << ", start index in byte array: " << std::get<2>(allocatedElements[i])
+            << ", seed: " << allocatorTestInstance->seed_;
+        allocator->Free(std::get<0>(allocatedElements[i]));
     }
     // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
-    num_finished->fetch_add(1, std::memory_order_seq_cst);
+    numFinished->fetch_add(1, std::memory_order_seq_cst);
 }
 
 template <class Allocator>
-void AllocatorTest<Allocator>::MtAllocIterateRun(AllocatorTest<Allocator> *allocator_test_instance,
-                                                 Allocator *allocator, std::atomic<size_t> *num_finished,
-                                                 size_t range_iteration_size, size_t min_alloc_size,
-                                                 size_t max_alloc_size, size_t min_elements_count,
-                                                 size_t max_elements_count)
+void AllocatorTest<Allocator>::MtAllocIterateRun(AllocatorTest<Allocator> *allocatorTestInstance, Allocator *allocator,
+                                                 std::atomic<size_t> *numFinished, size_t rangeIterationSize,
+                                                 size_t minAllocSize, size_t maxAllocSize, size_t minElementsCount,
+                                                 size_t maxElementsCount)
 {
     static constexpr size_t ITERATION_IN_RANGE_COUNT = 100;
-    size_t elements_count = allocator_test_instance->RandFromRange(min_elements_count, max_elements_count);
+    size_t elementsCount = allocatorTestInstance->RandFromRange(minElementsCount, maxElementsCount);
     // {memory, size, start_index_in_byte_array}
-    std::vector<std::tuple<void *, size_t, size_t>> allocated_elements(elements_count);
+    std::vector<std::tuple<void *, size_t, size_t>> allocatedElements(elementsCount);
 
     // Iterate over all object
     allocator->IterateOverObjects([&](void *mem) { (void)mem; });
 
     // Allocate objects
-    for (size_t i = 0; i < elements_count; ++i) {
-        size_t size = allocator_test_instance->RandFromRange(min_alloc_size, max_alloc_size);
+    for (size_t i = 0; i < elementsCount; ++i) {
+        size_t size = allocatorTestInstance->RandFromRange(minAllocSize, maxAllocSize);
         // Allocation
         void *mem = allocator->Alloc(size);
         // Do while because other threads can use the whole pool before we try to allocate smth in it
         while (mem == nullptr) {
-            allocator_test_instance->AddMemoryPoolToAllocator(*allocator);
+            allocatorTestInstance->AddMemoryPoolToAllocator(*allocator);
             mem = allocator->Alloc(size);
         }
         ASSERT_TRUE(mem != nullptr);
         // Write random bytes
-        allocated_elements[i] = {mem, size, allocator_test_instance->SetBytesFromByteArray(mem, size)};
+        allocatedElements[i] = {mem, size, allocatorTestInstance->SetBytesFromByteArray(mem, size)};
     }
 
     // Iterate over all object
     allocator->IterateOverObjects([&](void *mem) { (void)mem; });
 
-    size_t iterated_over_objects = 0;
+    size_t iteratedOverObjects = 0;
     // Compare values inside the objects
-    for (size_t i = 0; i < elements_count; ++i) {
+    for (size_t i = 0; i < elementsCount; ++i) {
         // do a lot of iterate over range calls to check possible races
-        if (iterated_over_objects < ITERATION_IN_RANGE_COUNT) {
-            void *left_border = ToVoidPtr(ToUintPtr(std::get<0>(allocated_elements[i])) & ~(range_iteration_size - 1U));
-            void *right_border = ToVoidPtr(ToUintPtr(left_border) + range_iteration_size - 1U);
-            allocator->IterateOverObjectsInRange([&](void *mem) { (void)mem; }, left_border, right_border);
-            iterated_over_objects++;
+        if (iteratedOverObjects < ITERATION_IN_RANGE_COUNT) {
+            void *leftBorder = ToVoidPtr(ToUintPtr(std::get<0>(allocatedElements[i])) & ~(rangeIterationSize - 1U));
+            void *rightBorder = ToVoidPtr(ToUintPtr(leftBorder) + rangeIterationSize - 1U);
+            allocator->IterateOverObjectsInRange([&](void *mem) { (void)mem; }, leftBorder, rightBorder);
+            iteratedOverObjects++;
         }
-        ASSERT_TRUE(allocator_test_instance->AllocatedByThisAllocator(*allocator, std::get<0>(allocated_elements[i])));
+        ASSERT_TRUE(allocatorTestInstance->AllocatedByThisAllocator(*allocator, std::get<0>(allocatedElements[i])));
         // Compare
-        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(
-            std::get<0>(allocated_elements[i]), std::get<1>(allocated_elements[i]), std::get<2>(allocated_elements[i])))
-            << "Address: " << std::hex << std::get<0>(allocated_elements[i])
-            << ", size: " << std::get<1>(allocated_elements[i])
-            << ", start index in byte array: " << std::get<2>(allocated_elements[i])
-            << ", seed: " << allocator_test_instance->seed_;
+        ASSERT_TRUE(allocatorTestInstance->CompareBytesWithByteArray(
+            std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]), std::get<2>(allocatedElements[i])))
+            << "Address: " << std::hex << std::get<0>(allocatedElements[i])
+            << ", size: " << std::get<1>(allocatedElements[i])
+            << ", start index in byte array: " << std::get<2>(allocatedElements[i])
+            << ", seed: " << allocatorTestInstance->seed_;
     }
     // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
-    num_finished->fetch_add(1, std::memory_order_seq_cst);
+    numFinished->fetch_add(1, std::memory_order_seq_cst);
 }
 
 template <class Allocator>
-void AllocatorTest<Allocator>::MtAllocCollectRun(AllocatorTest<Allocator> *allocator_test_instance,
-                                                 Allocator *allocator, std::atomic<size_t> *num_finished,
-                                                 size_t min_alloc_size, size_t max_alloc_size,
-                                                 size_t min_elements_count, size_t max_elements_count,
-                                                 uint32_t max_thread_with_collect,
-                                                 std::atomic<uint32_t> *thread_with_collect)
+void AllocatorTest<Allocator>::MtAllocCollectRun(AllocatorTest<Allocator> *allocatorTestInstance, Allocator *allocator,
+                                                 std::atomic<size_t> *numFinished, size_t minAllocSize,
+                                                 size_t maxAllocSize, size_t minElementsCount, size_t maxElementsCount,
+                                                 uint32_t maxThreadWithCollect,
+                                                 std::atomic<uint32_t> *threadWithCollect)
 {
-    size_t elements_count = allocator_test_instance->RandFromRange(min_elements_count, max_elements_count);
+    size_t elementsCount = allocatorTestInstance->RandFromRange(minElementsCount, maxElementsCount);
 
     // Allocate objects
-    for (size_t i = 0; i < elements_count; ++i) {
-        size_t size = allocator_test_instance->RandFromRange(min_alloc_size, max_alloc_size);
+    for (size_t i = 0; i < elementsCount; ++i) {
+        size_t size = allocatorTestInstance->RandFromRange(minAllocSize, maxAllocSize);
         // Allocation
         void *mem = allocator->Alloc(size);
         // Do while because other threads can use the whole pool before we try to allocate smth in it
         while (mem == nullptr) {
-            allocator_test_instance->AddMemoryPoolToAllocator(*allocator);
+            allocatorTestInstance->AddMemoryPoolToAllocator(*allocator);
             mem = allocator->Alloc(size);
         }
         ASSERT_TRUE(mem != nullptr);
@@ -1232,36 +1227,36 @@ void AllocatorTest<Allocator>::MtAllocCollectRun(AllocatorTest<Allocator> *alloc
     // Collect objects
     // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
-    if (thread_with_collect->fetch_add(1U, std::memory_order_seq_cst) < max_thread_with_collect) {
+    if (threadWithCollect->fetch_add(1U, std::memory_order_seq_cst) < maxThreadWithCollect) {
         allocator->Collect([&](ObjectHeader *object) {
-            ObjectStatus object_status =
+            ObjectStatus objectStatus =
                 object->IsMarkedForGC() ? ObjectStatus::DEAD_OBJECT : ObjectStatus::ALIVE_OBJECT;
-            return object_status;
+            return objectStatus;
         });
     }
     // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
-    num_finished->fetch_add(1, std::memory_order_seq_cst);
+    numFinished->fetch_add(1, std::memory_order_seq_cst);
 }
 
 template <class Allocator>
-void AllocatorTest<Allocator>::MTTestPrologue(Allocator &allocator, size_t alloc_size)
+void AllocatorTest<Allocator>::MTTestPrologue(Allocator &allocator, size_t allocSize)
 {
     // Allocator preparing:
-    std::vector<void *> allocated_elements;
+    std::vector<void *> allocatedElements;
     AddMemoryPoolToAllocator(allocator);
     // Allocate objects
     while (true) {
         // Allocation
-        void *mem = allocator.Alloc(alloc_size);
+        void *mem = allocator.Alloc(allocSize);
         if (mem == nullptr) {
             break;
         }
-        allocated_elements.push_back(mem);
+        allocatedElements.push_back(mem);
     }
     // Free everything except one element:
-    for (size_t i = 1; i < allocated_elements.size(); ++i) {
-        allocator.Free(allocated_elements[i]);
+    for (size_t i = 1; i < allocatedElements.size(); ++i) {
+        allocator.Free(allocatedElements[i]);
     }
 
     allocator.VisitAndRemoveFreePools([&](void *mem, size_t size) {
@@ -1272,24 +1267,24 @@ void AllocatorTest<Allocator>::MTTestPrologue(Allocator &allocator, size_t alloc
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
-inline void AllocatorTest<Allocator>::MtAllocTest(Allocator *allocator, size_t min_elements_count,
-                                                  size_t max_elements_count)
+inline void AllocatorTest<Allocator>::MtAllocTest(Allocator *allocator, size_t minElementsCount,
+                                                  size_t maxElementsCount)
 {
 #if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
     // We have an issue with QEMU during MT tests. Issue 2852
     static_assert(THREADS_COUNT == 1);
 #endif
-    std::atomic<size_t> num_finished = 0;
+    std::atomic<size_t> numFinished = 0;
     for (size_t i = 0; i < THREADS_COUNT; i++) {
-        auto tid = os::thread::ThreadStart(&MtAllocRun, this, allocator, &num_finished, MIN_ALLOC_SIZE, MAX_ALLOC_SIZE,
-                                           min_elements_count, max_elements_count);
+        auto tid = os::thread::ThreadStart(&MtAllocRun, this, allocator, &numFinished, MIN_ALLOC_SIZE, MAX_ALLOC_SIZE,
+                                           minElementsCount, maxElementsCount);
         os::thread::ThreadDetach(tid);
     }
 
     while (true) {
         // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent
         // order where threads observe all modifications in the same order
-        if (num_finished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
+        if (numFinished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
             break;
         }
         os::thread::Yield();
@@ -1298,65 +1293,65 @@ inline void AllocatorTest<Allocator>::MtAllocTest(Allocator *allocator, size_t m
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
-inline void AllocatorTest<Allocator>::MtAllocFreeTest(size_t min_elements_count, size_t max_elements_count,
-                                                      size_t free_granularity)
+inline void AllocatorTest<Allocator>::MtAllocFreeTest(size_t minElementsCount, size_t maxElementsCount,
+                                                      size_t freeGranularity)
 {
 #if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
     // We have an issue with QEMU during MT tests. Issue 2852
     static_assert(THREADS_COUNT == 1);
 #endif
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
-    std::atomic<size_t> num_finished = 0;
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
+    std::atomic<size_t> numFinished = 0;
 
     // Prepare an allocator
     MTTestPrologue(allocator, RandFromRange(MIN_ALLOC_SIZE, MAX_ALLOC_SIZE));
 
     for (size_t i = 0; i < THREADS_COUNT; i++) {
-        (void)free_granularity;
-        auto tid = os::thread::ThreadStart(&MtAllocFreeRun, this, &allocator, &num_finished, free_granularity,
-                                           MIN_ALLOC_SIZE, MAX_ALLOC_SIZE, min_elements_count, max_elements_count);
+        (void)freeGranularity;
+        auto tid = os::thread::ThreadStart(&MtAllocFreeRun, this, &allocator, &numFinished, freeGranularity,
+                                           MIN_ALLOC_SIZE, MAX_ALLOC_SIZE, minElementsCount, maxElementsCount);
         os::thread::ThreadDetach(tid);
     }
 
     while (true) {
         // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent
         // order where threads observe all modifications in the same order
-        if (num_finished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
+        if (numFinished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
             break;
         }
         os::thread::Yield();
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
-inline void AllocatorTest<Allocator>::MtAllocIterateTest(size_t min_elements_count, size_t max_elements_count,
-                                                         size_t range_iteration_size)
+inline void AllocatorTest<Allocator>::MtAllocIterateTest(size_t minElementsCount, size_t maxElementsCount,
+                                                         size_t rangeIterationSize)
 {
 #if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
     // We have an issue with QEMU during MT tests. Issue 2852
     static_assert(THREADS_COUNT == 1);
 #endif
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
-    std::atomic<size_t> num_finished = 0;
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
+    std::atomic<size_t> numFinished = 0;
 
     // Prepare an allocator
     MTTestPrologue(allocator, RandFromRange(MIN_ALLOC_SIZE, MAX_ALLOC_SIZE));
 
     for (size_t i = 0; i < THREADS_COUNT; i++) {
-        (void)range_iteration_size;
-        auto tid = os::thread::ThreadStart(&MtAllocIterateRun, this, &allocator, &num_finished, range_iteration_size,
-                                           MIN_ALLOC_SIZE, MAX_ALLOC_SIZE, min_elements_count, max_elements_count);
+        (void)rangeIterationSize;
+        auto tid = os::thread::ThreadStart(&MtAllocIterateRun, this, &allocator, &numFinished, rangeIterationSize,
+                                           MIN_ALLOC_SIZE, MAX_ALLOC_SIZE, minElementsCount, maxElementsCount);
         os::thread::ThreadDetach(tid);
     }
 
     while (true) {
         // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent
         // order where threads observe all modifications in the same order
-        if (num_finished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
+        if (numFinished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
             break;
         }
         os::thread::Yield();
@@ -1367,37 +1362,37 @@ inline void AllocatorTest<Allocator>::MtAllocIterateTest(size_t min_elements_cou
         (void)object;
         return ObjectStatus::DEAD_OBJECT;
     });
-    delete mem_stats;
+    delete memStats;
 }
 
 template <class Allocator>
 template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, size_t THREADS_COUNT>
-inline void AllocatorTest<Allocator>::MtAllocCollectTest(size_t min_elements_count, size_t max_elements_count,
-                                                         size_t max_thread_with_collect)
+inline void AllocatorTest<Allocator>::MtAllocCollectTest(size_t minElementsCount, size_t maxElementsCount,
+                                                         size_t maxThreadWithCollect)
 {
 #if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
     // We have an issue with QEMU during MT tests. Issue 2852
     static_assert(THREADS_COUNT == 1);
 #endif
-    auto *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
-    std::atomic<size_t> num_finished = 0;
-    std::atomic<uint32_t> thread_with_collect {0U};
+    auto *memStats = new mem::MemStatsType();
+    Allocator allocator(memStats);
+    std::atomic<size_t> numFinished = 0;
+    std::atomic<uint32_t> threadWithCollect {0U};
 
     // Prepare an allocator
     MTTestPrologue(allocator, RandFromRange(MIN_ALLOC_SIZE, MAX_ALLOC_SIZE));
 
     for (size_t i = 0; i < THREADS_COUNT; i++) {
-        auto tid = os::thread::ThreadStart(&MtAllocCollectRun, this, &allocator, &num_finished, MIN_ALLOC_SIZE,
-                                           MAX_ALLOC_SIZE, min_elements_count, max_elements_count,
-                                           max_thread_with_collect, &thread_with_collect);
+        auto tid =
+            os::thread::ThreadStart(&MtAllocCollectRun, this, &allocator, &numFinished, MIN_ALLOC_SIZE, MAX_ALLOC_SIZE,
+                                    minElementsCount, maxElementsCount, maxThreadWithCollect, &threadWithCollect);
         os::thread::ThreadDetach(tid);
     }
 
     while (true) {
         // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent
         // order where threads observe all modifications in the same order
-        if (num_finished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
+        if (numFinished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
             break;
         }
         os::thread::Yield();
@@ -1408,7 +1403,7 @@ inline void AllocatorTest<Allocator>::MtAllocCollectTest(size_t min_elements_cou
         (void)object;
         return ObjectStatus::DEAD_OBJECT;
     });
-    delete mem_stats;
+    delete memStats;
 }
 
 }  // namespace panda::mem

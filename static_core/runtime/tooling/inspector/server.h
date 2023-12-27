@@ -32,7 +32,7 @@ public:
     virtual void OnOpen(std::function<void()> &&handler) = 0;
     virtual void OnFail(std::function<void()> &&handler) = 0;
 
-    virtual void Call(const std::string &session_id, const char *method,
+    virtual void Call(const std::string &sessionId, const char *method,
                       std::function<void(JsonObjectBuilder &)> &&params) = 0;
 
     void Call(const char *method, std::function<void(JsonObjectBuilder &)> &&params)
@@ -40,9 +40,9 @@ public:
         Call({}, method, std::move(params));
     }
 
-    void Call(const std::string &session_id, const char *method)
+    void Call(const std::string &sessionId, const char *method)
     {
-        Call(session_id, method, [](JsonObjectBuilder & /* builder */) {});
+        Call(sessionId, method, [](JsonObjectBuilder & /* builder */) {});
     }
 
     void Call(const char *method)
@@ -50,7 +50,7 @@ public:
         Call({}, method, [](JsonObjectBuilder & /* builder */) {});
     }
 
-    virtual void OnCall(const char *method, std::function<void(const std::string &session_id, JsonObjectBuilder &result,
+    virtual void OnCall(const char *method, std::function<void(const std::string &sessionId, JsonObjectBuilder &result,
                                                                const JsonObject &params)> &&handler) = 0;
 };
 }  // namespace panda::tooling::inspector

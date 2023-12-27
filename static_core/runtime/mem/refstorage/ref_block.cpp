@@ -19,13 +19,13 @@ namespace panda::mem {
 RefBlock::RefBlock(RefBlock *prev)
 {
     slots_ = START_VALUE;
-    prev_block_ = prev;
+    prevBlock_ = prev;
 }
 
 void RefBlock::Reset(RefBlock *prev)
 {
     slots_ = START_VALUE;
-    prev_block_ = prev;
+    prevBlock_ = prev;
 }
 
 Reference *RefBlock::AddRef(const ObjectHeader *object, Reference::ObjectType type)
@@ -43,15 +43,15 @@ void RefBlock::Remove(const Reference *ref)
     ASSERT(!IsEmpty());
     ref = Reference::GetRefWithoutType(ref);
 
-    auto ref_ptr = ToUintPtr(ref);
-    auto block_ptr = ToUintPtr(this);
-    auto index = (ref_ptr - block_ptr) / sizeof(ObjectPointer<ObjectHeader>);
+    auto refPtr = ToUintPtr(ref);
+    auto blockPtr = ToUintPtr(this);
+    auto index = (refPtr - blockPtr) / sizeof(ObjectPointer<ObjectHeader>);
     ASSERT(IsBusyIndex(index));
     slots_ |= static_cast<uint64_t>(1U) << index;
     ASAN_POISON_MEMORY_REGION(refs_[index], sizeof(refs_[index]));
 }
 
-void RefBlock::VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType root_type)
+void RefBlock::VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType)
 {
     for (auto *block : *this) {
         if (block->IsEmpty()) {
@@ -59,11 +59,11 @@ void RefBlock::VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType 
         }
         for (size_t index = 0; index < REFS_IN_BLOCK; index++) {
             if (block->IsBusyIndex(index)) {
-                auto object_pointer = block->refs_[index];
-                auto *obj = object_pointer.ReinterpretCast<ObjectHeader *>();
+                auto objectPointer = block->refs_[index];
+                auto *obj = objectPointer.ReinterpretCast<ObjectHeader *>();
                 ASSERT(obj->ClassAddr<BaseClass>() != nullptr);
                 LOG(DEBUG, GC) << " Found root from ref-storage: " << mem::GetDebugInfoAboutObject(obj);
-                gc_root_visitor({root_type, obj});
+                gcRootVisitor({rootType, obj});
             }
         }
     }
@@ -80,8 +80,8 @@ void RefBlock::UpdateMovedRefs()
                 continue;
             }
 
-            auto object_pointer = block->refs_[index];
-            auto *object = object_pointer.ReinterpretCast<ObjectHeader *>();
+            auto objectPointer = block->refs_[index];
+            auto *object = objectPointer.ReinterpretCast<ObjectHeader *>();
             auto obj = reinterpret_cast<ObjectHeader *>(object);
 
             if (!obj->IsForwarded()) {
@@ -89,8 +89,8 @@ void RefBlock::UpdateMovedRefs()
             }
 
             LOG(DEBUG, GC) << " Update pointer for obj: " << mem::GetDebugInfoAboutObject(obj);
-            ObjectHeader *forward_address = GetForwardAddress(obj);
-            block->refs_[index] = reinterpret_cast<ObjectHeader *>(forward_address);
+            ObjectHeader *forwardAddress = GetForwardAddress(obj);
+            block->refs_[index] = reinterpret_cast<ObjectHeader *>(forwardAddress);
         }
     }
 }
@@ -105,8 +105,8 @@ PandaVector<Reference *> RefBlock::GetAllReferencesInFrame()
         }
         for (size_t index = 0; index < REFS_IN_BLOCK; index++) {
             if (block->IsBusyIndex(index)) {
-                auto *current_ref = reinterpret_cast<Reference *>(&block->refs_[index]);
-                refs.push_back(current_ref);
+                auto *currentRef = reinterpret_cast<Reference *>(&block->refs_[index]);
+                refs.push_back(currentRef);
             }
         }
     }

@@ -32,7 +32,7 @@ public:
     bool RunImpl() override;
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerAdjustRefs();
+        return g_options.IsCompilerAdjustRefs();
     }
 
     const char *GetPassName() const override
@@ -42,21 +42,21 @@ public:
 
 private:
     void ProcessArrayUses();
-    void WalkChainDown(BasicBlock *bb, Inst *start_from, Inst *head);
+    void WalkChainDown(BasicBlock *bb, Inst *startFrom, Inst *head);
     void ProcessChain(Inst *head);
     void ProcessIndex(Inst *mem);
     void InsertMem(Inst *org, Inst *base, Inst *index, uint8_t scale);
-    Inst *InsertPointerArithmetic(Inst *input, uint64_t imm, Inst *insert_before, uint32_t pc, bool is_add);
+    Inst *InsertPointerArithmetic(Inst *input, uint64_t imm, Inst *insertBefore, uint32_t pc, bool isAdd);
 
     void GetHeads();
 
     InstVector defs_;
     InstVector workset_;
     InstVector heads_;
-    InstVector insts_to_replace_;
-    Marker block_entered_ {};
-    Marker block_processed_ {};
-    Marker workset_marker_ {};
+    InstVector instsToReplace_;
+    Marker blockEntered_ {};
+    Marker blockProcessed_ {};
+    Marker worksetMarker_ {};
     Loop *loop_ = {nullptr};
     bool added_ = {false};
 };

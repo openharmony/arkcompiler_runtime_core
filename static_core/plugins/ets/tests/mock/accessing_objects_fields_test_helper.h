@@ -25,8 +25,7 @@ namespace panda::ets::test {
 class AccessingObjectsFieldsTestBase : public MockEtsNapiTestBaseClass {
 protected:
     AccessingObjectsFieldsTestBase() = default;
-    explicit AccessingObjectsFieldsTestBase(const char *test_bin_file_name)
-        : MockEtsNapiTestBaseClass(test_bin_file_name) {};
+    explicit AccessingObjectsFieldsTestBase(const char *testBinFileName) : MockEtsNapiTestBaseClass(testBinFileName) {};
 };
 
 }  // namespace panda::ets::test

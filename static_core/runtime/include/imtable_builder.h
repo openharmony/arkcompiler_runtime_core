@@ -30,22 +30,22 @@ public:
 
     void Build(const panda_file::ClassDataAccessor *cda, ITable itable);
 
-    void Build(ITable itable, bool is_interface);
+    void Build(ITable itable, bool isInterface);
 
     void UpdateClass(Class *klass);
 
-    bool AddMethod(panda::Span<panda::Method *> imtable, uint32_t imtable_size, uint32_t id, Method *method);
+    bool AddMethod(panda::Span<panda::Method *> imtable, uint32_t imtableSize, uint32_t id, Method *method);
 
     void DumpIMTable(Class *klass);
 
     size_t GetIMTSize() const
     {
-        return imt_size_;
+        return imtSize_;
     }
 
     void SetIMTSize(size_t size)
     {
-        imt_size_ = size;
+        imtSize_ = size;
     }
 
     IMTableBuilder() = default;
@@ -55,7 +55,7 @@ public:
     NO_MOVE_SEMANTIC(IMTableBuilder);
 
 private:
-    size_t imt_size_ = 0;
+    size_t imtSize_ = 0;
 };
 
 }  // namespace panda

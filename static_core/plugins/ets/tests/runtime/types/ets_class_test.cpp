@@ -79,16 +79,16 @@ TEST_F(EtsClassTest, GetBase)
             .record C <ets.extends = B> {}
         )";
 
-        EtsClass *klass_a = GetTestClass(source, "LA;");
-        EtsClass *klass_b = GetTestClass(source, "LB;");
-        EtsClass *klass_c = GetTestClass(source, "LC;");
-        ASSERT_NE(klass_a, nullptr);
-        ASSERT_NE(klass_b, nullptr);
-        ASSERT_NE(klass_c, nullptr);
+        EtsClass *klassA = GetTestClass(source, "LA;");
+        EtsClass *klassB = GetTestClass(source, "LB;");
+        EtsClass *klassC = GetTestClass(source, "LC;");
+        ASSERT_NE(klassA, nullptr);
+        ASSERT_NE(klassB, nullptr);
+        ASSERT_NE(klassC, nullptr);
 
-        ASSERT_EQ(klass_c->GetBase(), klass_b);
-        ASSERT_EQ(klass_b->GetBase(), klass_a);
-        ASSERT_STREQ(klass_a->GetBase()->GetDescriptor(), "Lstd/core/Object;");
+        ASSERT_EQ(klassC->GetBase(), klassB);
+        ASSERT_EQ(klassB->GetBase(), klassA);
+        ASSERT_STREQ(klassA->GetBase()->GetDescriptor(), "Lstd/core/Object;");
     }
     {
         const char *source = R"(
@@ -96,11 +96,11 @@ TEST_F(EtsClassTest, GetBase)
             .record ITest <ets.abstract, ets.interface>{}
         )";
 
-        EtsClass *klass_itest = GetTestClass(source, "LITest;");
+        EtsClass *klassItest = GetTestClass(source, "LITest;");
 
-        ASSERT_NE(klass_itest, nullptr);
-        ASSERT_TRUE(klass_itest->IsInterface());
-        ASSERT_EQ(klass_itest->GetBase(), nullptr);
+        ASSERT_NE(klassItest, nullptr);
+        ASSERT_TRUE(klassItest->IsInterface());
+        ASSERT_EQ(klassItest->GetBase(), nullptr);
     }
 }
 
@@ -187,15 +187,15 @@ TEST_F(EtsClassTest, GetFieldIDByName)
     ASSERT_EQ(klass->GetFieldIDByName("y", "Z"), nullptr);
     ASSERT_NE(klass->GetFieldIDByName("y", "I"), nullptr);
 
-    EtsField *field_x = klass->GetFieldIDByName("x");
-    EtsField *field_y = klass->GetFieldIDByName("y");
-    ASSERT_NE(field_x, nullptr);
-    ASSERT_NE(field_y, nullptr);
-    ASSERT_FALSE(field_x->IsStatic());
-    ASSERT_FALSE(field_y->IsStatic());
+    EtsField *fieldX = klass->GetFieldIDByName("x");
+    EtsField *fieldY = klass->GetFieldIDByName("y");
+    ASSERT_NE(fieldX, nullptr);
+    ASSERT_NE(fieldY, nullptr);
+    ASSERT_FALSE(fieldX->IsStatic());
+    ASSERT_FALSE(fieldY->IsStatic());
 
-    ASSERT_EQ(field_x, klass->GetFieldIDByOffset(field_x->GetOffset()));
-    ASSERT_EQ(field_y, klass->GetFieldIDByOffset(field_y->GetOffset()));
+    ASSERT_EQ(fieldX, klass->GetFieldIDByOffset(fieldX->GetOffset()));
+    ASSERT_EQ(fieldY, klass->GetFieldIDByOffset(fieldY->GetOffset()));
 }
 
 TEST_F(EtsClassTest, GetStaticFieldIDByName)
@@ -217,15 +217,15 @@ TEST_F(EtsClassTest, GetStaticFieldIDByName)
     ASSERT_EQ(klass->GetStaticFieldIDByName("y", "Z"), nullptr);
     ASSERT_NE(klass->GetStaticFieldIDByName("y", "I"), nullptr);
 
-    EtsField *field_x = klass->GetStaticFieldIDByName("x");
-    EtsField *field_y = klass->GetStaticFieldIDByName("y");
-    ASSERT_NE(field_x, nullptr);
-    ASSERT_NE(field_y, nullptr);
-    ASSERT_TRUE(field_x->IsStatic());
-    ASSERT_TRUE(field_y->IsStatic());
+    EtsField *fieldX = klass->GetStaticFieldIDByName("x");
+    EtsField *fieldY = klass->GetStaticFieldIDByName("y");
+    ASSERT_NE(fieldX, nullptr);
+    ASSERT_NE(fieldY, nullptr);
+    ASSERT_TRUE(fieldX->IsStatic());
+    ASSERT_TRUE(fieldY->IsStatic());
 
-    ASSERT_EQ(field_x, klass->GetStaticFieldIDByOffset(field_x->GetOffset()));
-    ASSERT_EQ(field_y, klass->GetStaticFieldIDByOffset(field_y->GetOffset()));
+    ASSERT_EQ(fieldX, klass->GetStaticFieldIDByOffset(fieldX->GetOffset()));
+    ASSERT_EQ(fieldY, klass->GetStaticFieldIDByOffset(fieldY->GetOffset()));
 }
 
 TEST_F(EtsClassTest, SetAndGetStaticFieldPrimitive)
@@ -241,19 +241,19 @@ TEST_F(EtsClassTest, SetAndGetStaticFieldPrimitive)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT_NE(klass, nullptr);
 
-    EtsField *field_x = klass->GetStaticFieldIDByName("x");
-    EtsField *field_y = klass->GetStaticFieldIDByName("y");
-    ASSERT_NE(field_x, nullptr);
-    ASSERT_NE(field_y, nullptr);
+    EtsField *fieldX = klass->GetStaticFieldIDByName("x");
+    EtsField *fieldY = klass->GetStaticFieldIDByName("y");
+    ASSERT_NE(fieldX, nullptr);
+    ASSERT_NE(fieldY, nullptr);
 
-    int32_t nmb_1 = 53;
-    float nmb_2 = 123.90;
+    int32_t nmb1 = 53;
+    float nmb2 = 123.90;
 
-    klass->SetStaticFieldPrimitive<int32_t>(field_x, nmb_1);
-    klass->SetStaticFieldPrimitive<float>(field_y, nmb_2);
+    klass->SetStaticFieldPrimitive<int32_t>(fieldX, nmb1);
+    klass->SetStaticFieldPrimitive<float>(fieldY, nmb2);
 
-    ASSERT_EQ(klass->GetStaticFieldPrimitive<int32_t>(field_x), nmb_1);
-    ASSERT_EQ(klass->GetStaticFieldPrimitive<float>(field_y), nmb_2);
+    ASSERT_EQ(klass->GetStaticFieldPrimitive<int32_t>(fieldX), nmb1);
+    ASSERT_EQ(klass->GetStaticFieldPrimitive<float>(fieldY), nmb2);
 }
 
 TEST_F(EtsClassTest, SetAndGetStaticFieldPrimitiveByOffset)
@@ -269,17 +269,17 @@ TEST_F(EtsClassTest, SetAndGetStaticFieldPrimitiveByOffset)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT_NE(klass, nullptr);
 
-    std::size_t field_x_offset = klass->GetStaticFieldIDByName("x")->GetOffset();
-    std::size_t field_y_offset = klass->GetStaticFieldIDByName("y")->GetOffset();
+    std::size_t fieldXOffset = klass->GetStaticFieldIDByName("x")->GetOffset();
+    std::size_t fieldYOffset = klass->GetStaticFieldIDByName("y")->GetOffset();
 
-    int32_t nmb_1 = 53;
-    float nmb_2 = 123.90;
+    int32_t nmb1 = 53;
+    float nmb2 = 123.90;
 
-    klass->SetStaticFieldPrimitive<int32_t>(field_x_offset, false, nmb_1);
-    klass->SetStaticFieldPrimitive<float>(field_y_offset, false, nmb_2);
+    klass->SetStaticFieldPrimitive<int32_t>(fieldXOffset, false, nmb1);
+    klass->SetStaticFieldPrimitive<float>(fieldYOffset, false, nmb2);
 
-    ASSERT_EQ(klass->GetStaticFieldPrimitive<int32_t>(field_x_offset, false), nmb_1);
-    ASSERT_EQ(klass->GetStaticFieldPrimitive<float>(field_y_offset, false), nmb_2);
+    ASSERT_EQ(klass->GetStaticFieldPrimitive<int32_t>(fieldXOffset, false), nmb1);
+    ASSERT_EQ(klass->GetStaticFieldPrimitive<float>(fieldYOffset, false), nmb2);
 }
 
 TEST_F(EtsClassTest, SetAndGetFieldObject)
@@ -293,30 +293,30 @@ TEST_F(EtsClassTest, SetAndGetFieldObject)
         }
     )";
 
-    EtsClass *bar_klass = GetTestClass(source, "LBar;");
-    EtsClass *foo_klass = GetTestClass(source, "LFoo;");
-    ASSERT_NE(bar_klass, nullptr);
-    ASSERT_NE(foo_klass, nullptr);
+    EtsClass *barKlass = GetTestClass(source, "LBar;");
+    EtsClass *fooKlass = GetTestClass(source, "LFoo;");
+    ASSERT_NE(barKlass, nullptr);
+    ASSERT_NE(fooKlass, nullptr);
 
-    EtsObject *foo_obj1 = EtsObject::Create(foo_klass);
-    EtsObject *foo_obj2 = EtsObject::Create(foo_klass);
-    ASSERT_NE(foo_obj1, nullptr);
-    ASSERT_NE(foo_obj2, nullptr);
+    EtsObject *fooObj1 = EtsObject::Create(fooKlass);
+    EtsObject *fooObj2 = EtsObject::Create(fooKlass);
+    ASSERT_NE(fooObj1, nullptr);
+    ASSERT_NE(fooObj2, nullptr);
 
-    EtsField *field_x = bar_klass->GetStaticFieldIDByName("x");
-    EtsField *field_y = bar_klass->GetStaticFieldIDByName("y");
-    ASSERT_NE(field_x, nullptr);
-    ASSERT_NE(field_y, nullptr);
+    EtsField *fieldX = barKlass->GetStaticFieldIDByName("x");
+    EtsField *fieldY = barKlass->GetStaticFieldIDByName("y");
+    ASSERT_NE(fieldX, nullptr);
+    ASSERT_NE(fieldY, nullptr);
 
-    bar_klass->SetStaticFieldObject(field_x, foo_obj1);
-    bar_klass->SetStaticFieldObject(field_y, foo_obj2);
-    ASSERT_EQ(bar_klass->GetStaticFieldObject(field_x), foo_obj1);
-    ASSERT_EQ(bar_klass->GetStaticFieldObject(field_y), foo_obj2);
+    barKlass->SetStaticFieldObject(fieldX, fooObj1);
+    barKlass->SetStaticFieldObject(fieldY, fooObj2);
+    ASSERT_EQ(barKlass->GetStaticFieldObject(fieldX), fooObj1);
+    ASSERT_EQ(barKlass->GetStaticFieldObject(fieldY), fooObj2);
 
-    bar_klass->SetStaticFieldObject(field_x, foo_obj2);
-    bar_klass->SetStaticFieldObject(field_y, foo_obj1);
-    ASSERT_EQ(bar_klass->GetStaticFieldObject(field_x), foo_obj2);
-    ASSERT_EQ(bar_klass->GetStaticFieldObject(field_y), foo_obj1);
+    barKlass->SetStaticFieldObject(fieldX, fooObj2);
+    barKlass->SetStaticFieldObject(fieldY, fooObj1);
+    ASSERT_EQ(barKlass->GetStaticFieldObject(fieldX), fooObj2);
+    ASSERT_EQ(barKlass->GetStaticFieldObject(fieldY), fooObj1);
 }
 
 TEST_F(EtsClassTest, SetAndGetFieldObjectByOffset)
@@ -330,30 +330,30 @@ TEST_F(EtsClassTest, SetAndGetFieldObjectByOffset)
         }
     )";
 
-    EtsClass *bar_klass = GetTestClass(source, "LBar;");
-    EtsClass *foo_klass = GetTestClass(source, "LFoo;");
-    ASSERT_NE(bar_klass, nullptr);
-    ASSERT_NE(foo_klass, nullptr);
+    EtsClass *barKlass = GetTestClass(source, "LBar;");
+    EtsClass *fooKlass = GetTestClass(source, "LFoo;");
+    ASSERT_NE(barKlass, nullptr);
+    ASSERT_NE(fooKlass, nullptr);
 
-    EtsObject *foo_obj1 = EtsObject::Create(foo_klass);
-    EtsObject *foo_obj2 = EtsObject::Create(foo_klass);
-    ASSERT_NE(foo_obj1, nullptr);
-    ASSERT_NE(foo_obj2, nullptr);
+    EtsObject *fooObj1 = EtsObject::Create(fooKlass);
+    EtsObject *fooObj2 = EtsObject::Create(fooKlass);
+    ASSERT_NE(fooObj1, nullptr);
+    ASSERT_NE(fooObj2, nullptr);
 
-    EtsField *field_x = bar_klass->GetStaticFieldIDByName("x");
-    EtsField *field_y = bar_klass->GetStaticFieldIDByName("y");
-    ASSERT_NE(field_x, nullptr);
-    ASSERT_NE(field_y, nullptr);
+    EtsField *fieldX = barKlass->GetStaticFieldIDByName("x");
+    EtsField *fieldY = barKlass->GetStaticFieldIDByName("y");
+    ASSERT_NE(fieldX, nullptr);
+    ASSERT_NE(fieldY, nullptr);
 
-    bar_klass->SetStaticFieldObject(field_x->GetOffset(), false, foo_obj1);
-    bar_klass->SetStaticFieldObject(field_y->GetOffset(), false, foo_obj2);
-    ASSERT_EQ(bar_klass->GetStaticFieldObject(field_x->GetOffset(), false), foo_obj1);
-    ASSERT_EQ(bar_klass->GetStaticFieldObject(field_y->GetOffset(), false), foo_obj2);
+    barKlass->SetStaticFieldObject(fieldX->GetOffset(), false, fooObj1);
+    barKlass->SetStaticFieldObject(fieldY->GetOffset(), false, fooObj2);
+    ASSERT_EQ(barKlass->GetStaticFieldObject(fieldX->GetOffset(), false), fooObj1);
+    ASSERT_EQ(barKlass->GetStaticFieldObject(fieldY->GetOffset(), false), fooObj2);
 
-    bar_klass->SetStaticFieldObject(field_x, foo_obj2);
-    bar_klass->SetStaticFieldObject(field_y, foo_obj1);
-    ASSERT_EQ(bar_klass->GetStaticFieldObject(field_x), foo_obj2);
-    ASSERT_EQ(bar_klass->GetStaticFieldObject(field_y), foo_obj1);
+    barKlass->SetStaticFieldObject(fieldX, fooObj2);
+    barKlass->SetStaticFieldObject(fieldY, fooObj1);
+    ASSERT_EQ(barKlass->GetStaticFieldObject(fieldX), fooObj2);
+    ASSERT_EQ(barKlass->GetStaticFieldObject(fieldY), fooObj1);
 }
 
 TEST_F(EtsClassTest, GetDirectMethod)
@@ -372,22 +372,22 @@ TEST_F(EtsClassTest, GetDirectMethod)
         }
     )";
 
-    EtsClass *klass_a = GetTestClass(source, "LA;");
-    EtsClass *klass_b = GetTestClass(source, "LB;");
-    ASSERT_NE(klass_a, nullptr);
-    ASSERT_NE(klass_b, nullptr);
+    EtsClass *klassA = GetTestClass(source, "LA;");
+    EtsClass *klassB = GetTestClass(source, "LB;");
+    ASSERT_NE(klassA, nullptr);
+    ASSERT_NE(klassB, nullptr);
 
-    EtsMethod *method_foo1 = klass_a->GetDirectMethod("foo1", ":V");
-    ASSERT_NE(method_foo1, nullptr);
-    ASSERT_TRUE(!strcmp(method_foo1->GetName(), "foo1"));
+    EtsMethod *methodFoo1 = klassA->GetDirectMethod("foo1", ":V");
+    ASSERT_NE(methodFoo1, nullptr);
+    ASSERT_TRUE(!strcmp(methodFoo1->GetName(), "foo1"));
 
-    EtsMethod *method_foo2 = klass_b->GetDirectMethod("foo2", "IIFDF:LTestObject;");
-    ASSERT_NE(method_foo2, nullptr);
-    ASSERT_TRUE(!strcmp(method_foo2->GetName(), "foo2"));
+    EtsMethod *methodFoo2 = klassB->GetDirectMethod("foo2", "IIFDF:LTestObject;");
+    ASSERT_NE(methodFoo2, nullptr);
+    ASSERT_TRUE(!strcmp(methodFoo2->GetName(), "foo2"));
 
     // GetDirectMethod can't find method from base class
-    EtsMethod *method_foo1_from_klass_b = klass_b->GetDirectMethod("foo1", ":V");
-    ASSERT_EQ(method_foo1_from_klass_b, nullptr);
+    EtsMethod *methodFoo1FromKlassB = klassB->GetDirectMethod("foo1", ":V");
+    ASSERT_EQ(methodFoo1FromKlassB, nullptr);
 }
 
 TEST_F(EtsClassTest, GetMethod)
@@ -406,34 +406,34 @@ TEST_F(EtsClassTest, GetMethod)
         }
     )";
 
-    EtsClass *klass_a = GetTestClass(source, "LA;");
-    EtsClass *klass_b = GetTestClass(source, "LB;");
-    ASSERT_NE(klass_a, nullptr);
-    ASSERT_NE(klass_b, nullptr);
+    EtsClass *klassA = GetTestClass(source, "LA;");
+    EtsClass *klassB = GetTestClass(source, "LB;");
+    ASSERT_NE(klassA, nullptr);
+    ASSERT_NE(klassB, nullptr);
 
-    EtsMethod *method_foo1 = klass_a->GetMethod("foo1", ":V");
-    ASSERT_NE(method_foo1, nullptr);
-    ASSERT_TRUE(!strcmp(method_foo1->GetName(), "foo1"));
+    EtsMethod *methodFoo1 = klassA->GetMethod("foo1", ":V");
+    ASSERT_NE(methodFoo1, nullptr);
+    ASSERT_TRUE(!strcmp(methodFoo1->GetName(), "foo1"));
 
-    EtsMethod *method_foo2 = klass_b->GetMethod("foo2", "IIFDF:LTestObject;");
-    ASSERT_NE(method_foo2, nullptr);
-    ASSERT_TRUE(!strcmp(method_foo2->GetName(), "foo2"));
+    EtsMethod *methodFoo2 = klassB->GetMethod("foo2", "IIFDF:LTestObject;");
+    ASSERT_NE(methodFoo2, nullptr);
+    ASSERT_TRUE(!strcmp(methodFoo2->GetName(), "foo2"));
 
     // GetMethod can find method from base class
-    EtsMethod *method_foo1_from_klass_b = klass_b->GetMethod("foo1");
-    ASSERT_NE(method_foo1_from_klass_b, nullptr);
-    ASSERT_TRUE(!strcmp(method_foo1_from_klass_b->GetName(), "foo1"));
+    EtsMethod *methodFoo1FromKlassB = klassB->GetMethod("foo1");
+    ASSERT_NE(methodFoo1FromKlassB, nullptr);
+    ASSERT_TRUE(!strcmp(methodFoo1FromKlassB->GetName(), "foo1"));
 }
 
-static void TestGetPrimitiveClass(const char *primitive_name)
+static void TestGetPrimitiveClass(const char *primitiveName)
 {
-    EtsString *input_name = EtsString::CreateFromMUtf8(primitive_name);
-    ASSERT_NE(input_name, nullptr);
+    EtsString *inputName = EtsString::CreateFromMUtf8(primitiveName);
+    ASSERT_NE(inputName, nullptr);
 
-    auto *klass = EtsClass::GetPrimitiveClass(input_name);
+    auto *klass = EtsClass::GetPrimitiveClass(inputName);
     ASSERT_NE(klass, nullptr);
 
-    ASSERT_TRUE(input_name->StringsAreEqual(klass->GetName()->AsObject()));
+    ASSERT_TRUE(inputName->StringsAreEqual(klass->GetName()->AsObject()));
 }
 
 TEST_F(EtsClassTest, GetPrimitiveClass)
@@ -493,18 +493,18 @@ TEST_F(EtsClassTest, CompareAndSetName)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT_NE(klass, nullptr);
 
-    EtsString *old_name = EtsString::CreateFromMUtf8("TestOldName");
-    EtsString *new_name = EtsString::CreateFromMUtf8("TestNewName");
-    ASSERT_NE(old_name, nullptr);
-    ASSERT_NE(new_name, nullptr);
+    EtsString *oldName = EtsString::CreateFromMUtf8("TestOldName");
+    EtsString *newName = EtsString::CreateFromMUtf8("TestNewName");
+    ASSERT_NE(oldName, nullptr);
+    ASSERT_NE(newName, nullptr);
 
-    klass->SetName(old_name);
+    klass->SetName(oldName);
 
-    ASSERT_TRUE(klass->CompareAndSetName(old_name, new_name));
-    ASSERT_TRUE(klass->GetName()->StringsAreEqual(new_name->AsObject()));
+    ASSERT_TRUE(klass->CompareAndSetName(oldName, newName));
+    ASSERT_TRUE(klass->GetName()->StringsAreEqual(newName->AsObject()));
 
-    ASSERT_TRUE(klass->CompareAndSetName(new_name, old_name));
-    ASSERT_TRUE(klass->GetName()->StringsAreEqual(old_name->AsObject()));
+    ASSERT_TRUE(klass->CompareAndSetName(newName, oldName));
+    ASSERT_TRUE(klass->GetName()->StringsAreEqual(oldName->AsObject()));
 }
 
 TEST_F(EtsClassTest, IsInSamePackage)
@@ -525,26 +525,26 @@ TEST_F(EtsClassTest, IsInSamePackage)
         EtsClass *klass = GetTestClass(source, "LTest;");
         ASSERT_NE(klass, nullptr);
 
-        EtsArray *array_1 = EtsObjectArray::Create(klass, 1000);
-        EtsArray *array_2 = EtsFloatArray::Create(1000);
-        ASSERT_NE(array_1, nullptr);
-        ASSERT_NE(array_2, nullptr);
+        EtsArray *array1 = EtsObjectArray::Create(klass, 1000);
+        EtsArray *array2 = EtsFloatArray::Create(1000);
+        ASSERT_NE(array1, nullptr);
+        ASSERT_NE(array2, nullptr);
 
-        EtsClass *klass_1 = array_1->GetClass();
-        EtsClass *klass_2 = array_2->GetClass();
-        ASSERT_NE(klass_1, nullptr);
-        ASSERT_NE(klass_2, nullptr);
+        EtsClass *klass1 = array1->GetClass();
+        EtsClass *klass2 = array2->GetClass();
+        ASSERT_NE(klass1, nullptr);
+        ASSERT_NE(klass2, nullptr);
 
-        ASSERT_TRUE(klass_1->IsInSamePackage(klass_2));
+        ASSERT_TRUE(klass1->IsInSamePackage(klass2));
     }
     {
-        EtsArray *array_1 = EtsFloatArray::Create(1000);
-        EtsArray *array_2 = EtsIntArray::Create(1000);
-        ASSERT_NE(array_1, nullptr);
-        ASSERT_NE(array_2, nullptr);
+        EtsArray *array1 = EtsFloatArray::Create(1000);
+        EtsArray *array2 = EtsIntArray::Create(1000);
+        ASSERT_NE(array1, nullptr);
+        ASSERT_NE(array2, nullptr);
 
-        EtsClass *klass1 = array_1->GetClass();
-        EtsClass *klass2 = array_2->GetClass();
+        EtsClass *klass1 = array1->GetClass();
+        EtsClass *klass2 = array2->GetClass();
         ASSERT_NE(klass1, nullptr);
         ASSERT_NE(klass2, nullptr);
 
@@ -558,22 +558,22 @@ TEST_F(EtsClassTest, IsInSamePackage)
             .record Fake.A {}
         )";
 
-        EtsClass *klass_test_a = GetTestClass(source, "LTest/A;");
-        EtsClass *klass_test_b = GetTestClass(source, "LTest/B;");
-        EtsClass *klass_fake_a = GetTestClass(source, "LFake/A;");
-        ASSERT_NE(klass_test_a, nullptr);
-        ASSERT_NE(klass_test_b, nullptr);
-        ASSERT_NE(klass_fake_a, nullptr);
+        EtsClass *klassTestA = GetTestClass(source, "LTest/A;");
+        EtsClass *klassTestB = GetTestClass(source, "LTest/B;");
+        EtsClass *klassFakeA = GetTestClass(source, "LFake/A;");
+        ASSERT_NE(klassTestA, nullptr);
+        ASSERT_NE(klassTestB, nullptr);
+        ASSERT_NE(klassFakeA, nullptr);
 
-        ASSERT_TRUE(klass_test_a->IsInSamePackage(klass_test_a));
-        ASSERT_TRUE(klass_test_b->IsInSamePackage(klass_test_b));
-        ASSERT_TRUE(klass_fake_a->IsInSamePackage(klass_fake_a));
+        ASSERT_TRUE(klassTestA->IsInSamePackage(klassTestA));
+        ASSERT_TRUE(klassTestB->IsInSamePackage(klassTestB));
+        ASSERT_TRUE(klassFakeA->IsInSamePackage(klassFakeA));
 
-        ASSERT_TRUE(klass_test_a->IsInSamePackage(klass_test_b));
-        ASSERT_TRUE(klass_test_b->IsInSamePackage(klass_test_a));
+        ASSERT_TRUE(klassTestA->IsInSamePackage(klassTestB));
+        ASSERT_TRUE(klassTestB->IsInSamePackage(klassTestA));
 
-        ASSERT_FALSE(klass_test_a->IsInSamePackage(klass_fake_a));
-        ASSERT_FALSE(klass_fake_a->IsInSamePackage(klass_test_a));
+        ASSERT_FALSE(klassTestA->IsInSamePackage(klassFakeA));
+        ASSERT_FALSE(klassFakeA->IsInSamePackage(klassTestA));
     }
     {
         const char *source = R"(
@@ -582,13 +582,13 @@ TEST_F(EtsClassTest, IsInSamePackage)
             .record A.B {}
         )";
 
-        EtsClass *klass_abc = GetTestClass(source, "LA/B/C;");
-        EtsClass *klass_ab = GetTestClass(source, "LA/B;");
-        ASSERT_NE(klass_abc, nullptr);
-        ASSERT_NE(klass_ab, nullptr);
+        EtsClass *klassAbc = GetTestClass(source, "LA/B/C;");
+        EtsClass *klassAb = GetTestClass(source, "LA/B;");
+        ASSERT_NE(klassAbc, nullptr);
+        ASSERT_NE(klassAb, nullptr);
 
-        ASSERT_FALSE(klass_abc->IsInSamePackage(klass_ab));
-        ASSERT_FALSE(klass_ab->IsInSamePackage(klass_abc));
+        ASSERT_FALSE(klassAbc->IsInSamePackage(klassAb));
+        ASSERT_FALSE(klassAb->IsInSamePackage(klassAbc));
     }
 }
 
@@ -601,13 +601,13 @@ TEST_F(EtsClassTest, SetAndGetSuperClass)
     )";
 
     EtsClass *klass = GetTestClass(sources, "LA;");
-    EtsClass *super_klass = GetTestClass(sources, "LB;");
+    EtsClass *superKlass = GetTestClass(sources, "LB;");
     ASSERT_NE(klass, nullptr);
-    ASSERT_NE(super_klass, nullptr);
+    ASSERT_NE(superKlass, nullptr);
 
     ASSERT_EQ(klass->GetSuperClass(), nullptr);
-    klass->SetSuperClass(super_klass);
-    ASSERT_EQ(klass->GetSuperClass(), super_klass);
+    klass->SetSuperClass(superKlass);
+    ASSERT_EQ(klass->GetSuperClass(), superKlass);
 }
 
 TEST_F(EtsClassTest, IsSubClass)
@@ -617,15 +617,15 @@ TEST_F(EtsClassTest, IsSubClass)
         .record A {}
         .record B <ets.extends = A> {}
     )";
-    EtsClass *klass_a = GetTestClass(source, "LA;");
-    EtsClass *klass_b = GetTestClass(source, "LB;");
-    ASSERT_NE(klass_a, nullptr);
-    ASSERT_NE(klass_b, nullptr);
+    EtsClass *klassA = GetTestClass(source, "LA;");
+    EtsClass *klassB = GetTestClass(source, "LB;");
+    ASSERT_NE(klassA, nullptr);
+    ASSERT_NE(klassB, nullptr);
 
-    ASSERT_TRUE(klass_b->IsSubClass(klass_a));
+    ASSERT_TRUE(klassB->IsSubClass(klassA));
 
-    ASSERT_TRUE(klass_a->IsSubClass(klass_a));
-    ASSERT_TRUE(klass_b->IsSubClass(klass_b));
+    ASSERT_TRUE(klassA->IsSubClass(klassA));
+    ASSERT_TRUE(klassB->IsSubClass(klassB));
 }
 
 TEST_F(EtsClassTest, SetAndGetFlags)
@@ -660,24 +660,24 @@ TEST_F(EtsClassTest, SetAndGetComponentType)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT_NE(klass, nullptr);
 
-    uint32_t array_length = 100;
-    auto *array_1 = EtsObjectArray::Create(klass, array_length);
-    auto *array_2 = EtsObjectArray::Create(klass, array_length);
+    uint32_t arrayLength = 100;
+    auto *array1 = EtsObjectArray::Create(klass, arrayLength);
+    auto *array2 = EtsObjectArray::Create(klass, arrayLength);
 
-    ASSERT_NE(array_1, nullptr);
-    ASSERT_NE(array_2, nullptr);
-    ASSERT_EQ(array_1->GetClass()->GetComponentType(), array_2->GetClass()->GetComponentType());
+    ASSERT_NE(array1, nullptr);
+    ASSERT_NE(array2, nullptr);
+    ASSERT_EQ(array1->GetClass()->GetComponentType(), array2->GetClass()->GetComponentType());
 
     source = R"(
         .language eTS
         .record TestObject {}
     )";
 
-    EtsClass *component_type = GetTestClass(source, "LTestObject;");
-    ASSERT_NE(component_type, nullptr);
+    EtsClass *componentType = GetTestClass(source, "LTestObject;");
+    ASSERT_NE(componentType, nullptr);
 
-    klass->SetComponentType(component_type);
-    ASSERT_EQ(klass->GetComponentType(), component_type);
+    klass->SetComponentType(componentType);
+    ASSERT_EQ(klass->GetComponentType(), componentType);
 
     klass->SetComponentType(nullptr);
     ASSERT_EQ(klass->GetComponentType(), nullptr);
@@ -698,9 +698,9 @@ TEST_F(EtsClassTest, EnumerateMethods)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT_NE(klass, nullptr);
 
-    std::size_t methods_vector_size = 5;
-    std::vector<EtsMethod *> methods(methods_vector_size);
-    std::vector<EtsMethod *> enumerate_methods(methods_vector_size);
+    std::size_t methodsVectorSize = 5;
+    std::vector<EtsMethod *> methods(methodsVectorSize);
+    std::vector<EtsMethod *> enumerateMethods(methodsVectorSize);
 
     methods.push_back(klass->GetMethod("foo1"));
     methods.push_back(klass->GetMethod("foo2"));
@@ -708,13 +708,13 @@ TEST_F(EtsClassTest, EnumerateMethods)
     methods.push_back(klass->GetMethod("foo4"));
     methods.push_back(klass->GetMethod("foo5"));
 
-    klass->EnumerateMethods([&](EtsMethod *method) {
-        enumerate_methods.push_back(method);
-        return enumerate_methods.size() == methods_vector_size;
+    klass->EnumerateMethods([&enumerateMethods, &methodsVectorSize](EtsMethod *method) {
+        enumerateMethods.push_back(method);
+        return enumerateMethods.size() == methodsVectorSize;
     });
 
-    for (std::size_t i = 0; i < methods_vector_size; ++i) {
-        ASSERT_EQ(methods[i], enumerate_methods[i]);
+    for (std::size_t i = 0; i < methodsVectorSize; ++i) {
+        ASSERT_EQ(methods[i], enumerateMethods[i]);
     }
 }
 
@@ -733,9 +733,9 @@ TEST_F(EtsClassTest, EnumerateInterfaces)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT_NE(klass, nullptr);
 
-    std::size_t interface_vector_size = 5;
-    std::vector<EtsClass *> interfaces(interface_vector_size);
-    std::vector<EtsClass *> enumerate_interfaces(interface_vector_size);
+    std::size_t interfaceVectorSize = 5;
+    std::vector<EtsClass *> interfaces(interfaceVectorSize);
+    std::vector<EtsClass *> enumerateInterfaces(interfaceVectorSize);
 
     interfaces.push_back(GetTestClass(source, "LA;"));
     interfaces.push_back(GetTestClass(source, "LB;"));
@@ -743,13 +743,13 @@ TEST_F(EtsClassTest, EnumerateInterfaces)
     interfaces.push_back(GetTestClass(source, "LD;"));
     interfaces.push_back(GetTestClass(source, "LE;"));
 
-    klass->EnumerateInterfaces([&](EtsClass *interface) {
-        enumerate_interfaces.push_back(interface);
-        return enumerate_interfaces.size() == interface_vector_size;
+    klass->EnumerateInterfaces([&enumerateInterfaces, &interfaceVectorSize](EtsClass *interface) {
+        enumerateInterfaces.push_back(interface);
+        return enumerateInterfaces.size() == interfaceVectorSize;
     });
 
-    for (std::size_t i = 0; i < interface_vector_size; ++i) {
-        ASSERT_EQ(interfaces[i], enumerate_interfaces[i]);
+    for (std::size_t i = 0; i < interfaceVectorSize; ++i) {
+        ASSERT_EQ(interfaces[i], enumerateInterfaces[i]);
     }
 }
 

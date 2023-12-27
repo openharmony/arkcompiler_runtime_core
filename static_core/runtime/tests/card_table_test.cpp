@@ -32,8 +32,8 @@ namespace panda::mem::test {
 class CardTableTest : public testing::Test {
 private:
     std::mt19937 gen_;
-    std::uniform_int_distribution<uintptr_t> addr_dis_;
-    std::uniform_int_distribution<size_t> card_index_dis_;
+    std::uniform_int_distribution<uintptr_t> addrDis_;
+    std::uniform_int_distribution<size_t> cardIndexDis_;
 
 protected:
     //    static constexpr size_t kHeapSize = 0xffffffff;
@@ -59,17 +59,17 @@ protected:
         thread_ = panda::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
 
-        internal_allocator_ = thread_->GetVM()->GetHeapManager()->GetInternalAllocator();
-        addr_dis_ = std::uniform_int_distribution<uintptr_t>(0, GetPoolSize() - 1);
+        internalAllocator_ = thread_->GetVM()->GetHeapManager()->GetInternalAllocator();
+        addrDis_ = std::uniform_int_distribution<uintptr_t>(0, GetPoolSize() - 1);
         ASSERT(GetPoolSize() % CardTable::GetCardSize() == 0);
-        card_index_dis_ = std::uniform_int_distribution<size_t>(0, GetPoolSize() / CardTable::GetCardSize() - 1);
-        card_table_ = std::make_unique<CardTable>(internal_allocator_, GetMinAddress(), GetPoolSize());
-        card_table_->Initialize();
+        cardIndexDis_ = std::uniform_int_distribution<size_t>(0, GetPoolSize() / CardTable::GetCardSize() - 1);
+        cardTable_ = std::make_unique<CardTable>(internalAllocator_, GetMinAddress(), GetPoolSize());
+        cardTable_->Initialize();
     }
 
     ~CardTableTest() override
     {
-        card_table_.reset(nullptr);
+        cardTable_.reset(nullptr);
         thread_->ManagedCodeEnd();
         Runtime::Destroy();
     }
@@ -84,8 +84,8 @@ protected:
 
     void TearDown() override
     {
-        const ::testing::TestInfo *const test_info = ::testing::UnitTest::GetInstance()->current_test_info();
-        if (test_info->result()->Failed()) {
+        const ::testing::TestInfo *const testInfo = ::testing::UnitTest::GetInstance()->current_test_info();
+        if (testInfo->result()->Failed()) {
             std::cout << "CartTableTest seed = " << seed_ << std::endl;
         }
     }
@@ -103,12 +103,12 @@ protected:
 
     uintptr_t GetRandomAddress()
     {
-        return PoolManager::GetMmapMemPool()->GetMinObjectAddress() + addr_dis_(gen_) % GetPoolSize();
+        return PoolManager::GetMmapMemPool()->GetMinObjectAddress() + addrDis_(gen_) % GetPoolSize();
     }
 
     size_t GetRandomCardIndex()
     {
-        return card_index_dis_(gen_) % GetPoolSize();
+        return cardIndexDis_(gen_) % GetPoolSize();
     }
 
     // generate address at the begining of the card
@@ -118,33 +118,33 @@ protected:
     }
 
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    std::unique_ptr<CardTable> card_table_;
+    std::unique_ptr<CardTable> cardTable_;
 
 private:
-    InternalAllocatorPtr internal_allocator_;
+    InternalAllocatorPtr internalAllocator_;
     unsigned int seed_ {};
     panda::MTManagedThread *thread_ {};
 };
 
 TEST_F(CardTableTest, MarkTest)
 {
-    size_t marked_cnt = 0;
+    size_t markedCnt = 0;
 
     for (size_t i = 0; i < K_ALLOC_COUNT; i++) {
         uintptr_t addr;
         addr = GetRandomAddress();
-        if (!card_table_->IsMarked(addr)) {
-            ++marked_cnt;
-            card_table_->MarkCard(addr);
+        if (!cardTable_->IsMarked(addr)) {
+            ++markedCnt;
+            cardTable_->MarkCard(addr);
         }
     }
 
-    for (auto card : *card_table_) {
+    for (auto card : *cardTable_) {
         if (card->IsMarked()) {
-            marked_cnt--;
+            markedCnt--;
         }
     }
-    ASSERT_EQ(marked_cnt, 0);
+    ASSERT_EQ(markedCnt, 0);
 }
 
 TEST_F(CardTableTest, MarkAndClearAllTest)
@@ -152,122 +152,122 @@ TEST_F(CardTableTest, MarkAndClearAllTest)
     // std::set<uintptr_t> addrSet;
 
     size_t cnt = 0;
-    for (auto card : *card_table_) {
+    for (auto card : *cardTable_) {
         card->Mark();
         cnt++;
     }
-    ASSERT_EQ(cnt, card_table_->GetCardsCount());
+    ASSERT_EQ(cnt, cardTable_->GetCardsCount());
 
-    size_t cnt_cleared = 0;
-    for (auto card : *card_table_) {
+    size_t cntCleared = 0;
+    for (auto card : *cardTable_) {
         card->Clear();
-        cnt_cleared++;
+        cntCleared++;
     }
-    ASSERT_EQ(cnt_cleared, card_table_->GetCardsCount());
+    ASSERT_EQ(cntCleared, cardTable_->GetCardsCount());
 }
 
 TEST_F(CardTableTest, ClearTest)
 {
-    std::set<uintptr_t> addr_set;
+    std::set<uintptr_t> addrSet;
 
     // Mark some cards not more than once
-    while (addr_set.size() <= K_ALLOC_COUNT) {
+    while (addrSet.size() <= K_ALLOC_COUNT) {
         uintptr_t addr;
         addr = GetRandomCardAddress();
-        if (!addr_set.insert(addr).second) {
+        if (!addrSet.insert(addr).second) {
             continue;
         }
-        card_table_->MarkCard(addr);
+        cardTable_->MarkCard(addr);
     }
 
-    size_t cleared_cnt = 0;
+    size_t clearedCnt = 0;
     // clear all marked and count them
-    for (auto card : *card_table_) {
+    for (auto card : *cardTable_) {
         if (card->IsMarked()) {
             card->Clear();
-            cleared_cnt++;
+            clearedCnt++;
         }
     }
 
-    ASSERT_EQ(addr_set.size(), cleared_cnt);
+    ASSERT_EQ(addrSet.size(), clearedCnt);
     // check that there are no marked
-    for (auto card : *card_table_) {
+    for (auto card : *cardTable_) {
         ASSERT_EQ(card->IsMarked(), false);
     }
 }
 
 TEST_F(CardTableTest, ClearAllTest)
 {
-    std::set<uintptr_t> addr_set;
+    std::set<uintptr_t> addrSet;
 
     // Mark some cards not more than once
-    while (addr_set.size() < K_ALLOC_COUNT) {
+    while (addrSet.size() < K_ALLOC_COUNT) {
         uintptr_t addr;
         addr = GetRandomCardAddress();
-        if (!addr_set.insert(addr).second) {
+        if (!addrSet.insert(addr).second) {
             continue;
         }
-        card_table_->MarkCard(addr);
+        cardTable_->MarkCard(addr);
     }
 
-    card_table_->ClearAll();
-    for (auto card : *card_table_) {
+    cardTable_->ClearAll();
+    for (auto card : *cardTable_) {
         ASSERT_EQ(card->IsMarked(), false);
     }
 }
 
 TEST_F(CardTableTest, double_initialization)
 {
-    EXPECT_DEATH(card_table_->Initialize(), ".*");
+    EXPECT_DEATH(cardTable_->Initialize(), ".*");
 }
 
 TEST_F(CardTableTest, corner_cases)
 {
     // Mark 1st byte in the heap
-    ASSERT_EQ((*card_table_->begin())->IsMarked(), false);
-    card_table_->MarkCard(GetMinAddress());
-    ASSERT_EQ((*card_table_->begin())->IsMarked(), true);
+    ASSERT_EQ((*cardTable_->begin())->IsMarked(), false);
+    cardTable_->MarkCard(GetMinAddress());
+    ASSERT_EQ((*cardTable_->begin())->IsMarked(), true);
     // Mark last byte in the heap
     uintptr_t last = GetMinAddress() + GetPoolSize() - 1;
-    ASSERT_EQ(card_table_->IsMarked(last), false);
-    card_table_->MarkCard(last);
-    ASSERT_EQ(card_table_->IsMarked(last), true);
+    ASSERT_EQ(cardTable_->IsMarked(last), false);
+    cardTable_->MarkCard(last);
+    ASSERT_EQ(cardTable_->IsMarked(last), true);
     // Mark last byte of second card
-    uintptr_t second_last = GetMinAddress() + 2 * card_table_->GetCardSize() - 1;
-    ASSERT_EQ(card_table_->IsMarked(second_last), false);
-    card_table_->MarkCard(second_last);
-    ASSERT_EQ(((*card_table_->begin()) + 1)->IsMarked(), true);
+    uintptr_t secondLast = GetMinAddress() + 2 * cardTable_->GetCardSize() - 1;
+    ASSERT_EQ(cardTable_->IsMarked(secondLast), false);
+    cardTable_->MarkCard(secondLast);
+    ASSERT_EQ(((*cardTable_->begin()) + 1)->IsMarked(), true);
 }
 
 TEST_F(CardTableTest, VisitMarked)
 {
-    size_t marked_cnt = 0;
+    size_t markedCnt = 0;
 
-    while (marked_cnt < K_ALLOC_COUNT) {
+    while (markedCnt < K_ALLOC_COUNT) {
         uintptr_t addr;
         addr = GetRandomAddress();
-        if (!card_table_->IsMarked(addr)) {
-            ++marked_cnt;
-            card_table_->MarkCard(addr);
+        if (!cardTable_->IsMarked(addr)) {
+            ++markedCnt;
+            cardTable_->MarkCard(addr);
         }
     }
 
-    PandaVector<MemRange> mem_ranges;
-    card_table_->VisitMarked([&mem_ranges](MemRange mem_range) { mem_ranges.emplace_back(mem_range); },
-                             CardTableProcessedFlag::VISIT_MARKED);
+    PandaVector<MemRange> memRanges;
+    cardTable_->VisitMarked([&memRanges](MemRange memRange) { memRanges.emplace_back(memRange); },
+                            CardTableProcessedFlag::VISIT_MARKED);
 
     // Got ranges one by one
-    PandaVector<MemRange> expected_ranges;
-    for (auto card : *card_table_) {
+    PandaVector<MemRange> expectedRanges;
+    for (auto card : *cardTable_) {
         if (card->IsMarked()) {
-            expected_ranges.emplace_back(card_table_->GetMemoryRange(card));
+            expectedRanges.emplace_back(cardTable_->GetMemoryRange(card));
         }
     }
 
-    ASSERT_EQ(expected_ranges.size(), mem_ranges.size());
-    for (size_t i = 0; i < expected_ranges.size(); i++) {
-        ASSERT(mem_ranges[i].GetStartAddress() == expected_ranges[i].GetStartAddress());
-        ASSERT(mem_ranges[i].GetEndAddress() == expected_ranges[i].GetEndAddress());
+    ASSERT_EQ(expectedRanges.size(), memRanges.size());
+    for (size_t i = 0; i < expectedRanges.size(); i++) {
+        ASSERT(memRanges[i].GetStartAddress() == expectedRanges[i].GetStartAddress());
+        ASSERT(memRanges[i].GetEndAddress() == expectedRanges[i].GetEndAddress());
     }
 }
 

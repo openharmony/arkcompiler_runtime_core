@@ -47,17 +47,17 @@ public:
 
     ~MemStats() override = default;
 
-    void RecordAllocateObject(size_t size, SpaceType type_mem);
+    void RecordAllocateObject(size_t size, SpaceType typeMem);
 
-    void RecordAllocateObjects(size_t total_object_num, size_t total_object_size, SpaceType type_mem);
+    void RecordAllocateObjects(size_t totalObjectNum, size_t totalObjectSize, SpaceType typeMem);
 
-    void RecordYoungMovedObjects(size_t young_object_num, size_t size, SpaceType type_mem);
+    void RecordYoungMovedObjects(size_t youngObjectNum, size_t size, SpaceType typeMem);
 
-    void RecordTenuredMovedObjects(size_t tenured_object_num, size_t size, SpaceType type_mem);
+    void RecordTenuredMovedObjects(size_t tenuredObjectNum, size_t size, SpaceType typeMem);
 
-    void RecordFreeObject(size_t object_size, SpaceType type_mem);
+    void RecordFreeObject(size_t objectSize, SpaceType typeMem);
 
-    void RecordFreeObjects(size_t total_object_num, size_t total_object_size, SpaceType type_mem);
+    void RecordFreeObjects(size_t totalObjectNum, size_t totalObjectSize, SpaceType typeMem);
 
     /// Number of allocated objects for all time
     [[nodiscard]] uint64_t GetTotalObjectsAllocated() const;
@@ -91,20 +91,20 @@ public:
 
     void ClearLastYoungObjectsMovedBytes()
     {
-        last_young_objects_moved_bytes_ = 0;
+        lastYoungObjectsMovedBytes_ = 0;
     }
 
     PandaString GetStatistics();
 
 private:
-    std::atomic_uint64_t last_young_objects_moved_bytes_ = 0;
+    std::atomic_uint64_t lastYoungObjectsMovedBytes_ = 0;
 
     // make groups of different parts of the VM (JIT, interpreter, etc)
-    std::atomic_uint64_t objects_allocated_ = 0;
-    std::atomic_uint64_t objects_freed_ = 0;
+    std::atomic_uint64_t objectsAllocated_ = 0;
+    std::atomic_uint64_t objectsFreed_ = 0;
 
-    std::atomic_uint64_t humongous_objects_allocated_ = 0;
-    std::atomic_uint64_t humongous_objects_freed_ = 0;
+    std::atomic_uint64_t humongousObjectsAllocated_ = 0;
+    std::atomic_uint64_t humongousObjectsFreed_ = 0;
 };
 
 }  // namespace panda::mem

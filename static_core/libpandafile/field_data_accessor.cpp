@@ -20,34 +20,34 @@
 
 namespace panda::panda_file {
 
-FieldDataAccessor::FieldDataAccessor(const File &panda_file, File::EntityId field_id)
-    : panda_file_(panda_file), field_id_(field_id)
+FieldDataAccessor::FieldDataAccessor(const File &pandaFile, File::EntityId fieldId)
+    : pandaFile_(pandaFile), fieldId_(fieldId)
 {
-    auto sp = panda_file_.GetSpanFromId(field_id_);
+    auto sp = pandaFile_.GetSpanFromId(fieldId_);
 
-    auto class_idx = helpers::Read<IDX_SIZE>(&sp);
-    auto type_idx = helpers::Read<IDX_SIZE>(&sp);
+    auto classIdx = helpers::Read<IDX_SIZE>(&sp);
+    auto typeIdx = helpers::Read<IDX_SIZE>(&sp);
 
-    class_off_ = panda_file.ResolveClassIndex(field_id, class_idx).GetOffset();
-    type_off_ = panda_file.ResolveClassIndex(field_id, type_idx).GetOffset();
+    classOff_ = pandaFile.ResolveClassIndex(fieldId, classIdx).GetOffset();
+    typeOff_ = pandaFile.ResolveClassIndex(fieldId, typeIdx).GetOffset();
 
-    name_off_ = helpers::Read<ID_SIZE>(&sp);
+    nameOff_ = helpers::Read<ID_SIZE>(&sp);
 
-    is_external_ = panda_file_.IsExternal(field_id_);
+    isExternal_ = pandaFile_.IsExternal(fieldId_);
 
-    if (!is_external_) {
-        access_flags_ = helpers::ReadULeb128(&sp);
-        tagged_values_sp_ = sp;
+    if (!isExternal_) {
+        accessFlags_ = helpers::ReadULeb128(&sp);
+        taggedValuesSp_ = sp;
         size_ = 0;
     } else {
-        access_flags_ = 0;
-        size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - field_id_.GetOffset();
+        accessFlags_ = 0;
+        size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - fieldId_.GetOffset();
     }
 }
 
 std::optional<FieldDataAccessor::FieldValue> FieldDataAccessor::GetValueInternal()
 {
-    auto sp = tagged_values_sp_;
+    auto sp = taggedValuesSp_;
     auto tag = static_cast<FieldTag>(sp[0]);
     FieldValue value;
 
@@ -66,8 +66,8 @@ std::optional<FieldDataAccessor::FieldValue> FieldDataAccessor::GetValueInternal
             case Type(Type::TypeId::U64).GetFieldEncoding():
             case Type(Type::TypeId::F64).GetFieldEncoding(): {
                 auto offset = static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&sp));
-                auto value_sp = panda_file_.GetSpanFromId(File::EntityId(offset));
-                value = static_cast<uint64_t>(helpers::Read<sizeof(uint64_t)>(value_sp));
+                auto valueSp = pandaFile_.GetSpanFromId(File::EntityId(offset));
+                value = static_cast<uint64_t>(helpers::Read<sizeof(uint64_t)>(valueSp));
                 break;
             }
             default: {
@@ -77,7 +77,7 @@ std::optional<FieldDataAccessor::FieldValue> FieldDataAccessor::GetValueInternal
         }
     }
 
-    runtime_annotations_sp_ = sp;
+    runtimeAnnotationsSp_ = sp;
 
     if (tag == FieldTag::INT_VALUE || tag == FieldTag::VALUE) {
         return value;

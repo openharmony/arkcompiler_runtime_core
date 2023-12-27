@@ -70,7 +70,7 @@ private:
 
     uintptr_t GetNodeAddress(uint32_t index) const;
 
-    uint32_t last_index_ {0};
+    uint32_t lastIndex_ {0};
     PandaVector<std::array<T, NODE_BLOCK_SIZE> *> nodes_;
     InternalAllocatorPtr allocator_ {nullptr};
     friend class ManagedThread;

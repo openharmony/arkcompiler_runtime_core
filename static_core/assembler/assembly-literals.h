@@ -178,8 +178,8 @@ struct LiteralArray {
     std::vector<panda::pandasm::LiteralArray::Literal>
         literals;  // NOLINT(misc-non-private-member-variables-in-classes)
 
-    explicit LiteralArray(std::vector<panda::pandasm::LiteralArray::Literal> literals_vec)
-        : literals(std::move(literals_vec))
+    explicit LiteralArray(std::vector<panda::pandasm::LiteralArray::Literal> literalsVec)
+        : literals(std::move(literalsVec))
     {
     }
     explicit LiteralArray() = default;

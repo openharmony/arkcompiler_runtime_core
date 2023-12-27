@@ -20,20 +20,20 @@
 
 namespace panda {
 
-CompilerTaskManagerWorker::CompilerTaskManagerWorker(mem::InternalAllocatorPtr internal_allocator, Compiler *compiler)
-    : CompilerWorker(internal_allocator, compiler)
+CompilerTaskManagerWorker::CompilerTaskManagerWorker(mem::InternalAllocatorPtr internalAllocator, Compiler *compiler)
+    : CompilerWorker(internalAllocator, compiler)
 {
     auto *tm = taskmanager::TaskScheduler::GetTaskScheduler();
-    compiler_task_manager_queue_ = tm->CreateAndRegisterTaskQueue<decltype(internal_allocator_->Adapter())>(
+    compilerTaskManagerQueue_ = tm->CreateAndRegisterTaskQueue<decltype(internalAllocator_->Adapter())>(
         taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskQueueInterface::DEFAULT_PRIORITY);
-    ASSERT(compiler_task_manager_queue_ != nullptr);
+    ASSERT(compilerTaskManagerQueue_ != nullptr);
 }
 
 void CompilerTaskManagerWorker::JoinWorker()
 {
     {
-        os::memory::LockHolder lock(task_queue_lock_);
-        compiler_worker_joined_ = true;
+        os::memory::LockHolder lock(taskQueueLock_);
+        compilerWorkerJoined_ = true;
     }
     taskmanager::TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(JIT_TASK_PROPERTIES);
 }
@@ -41,15 +41,15 @@ void CompilerTaskManagerWorker::JoinWorker()
 void CompilerTaskManagerWorker::AddTask(CompilerTask &&task)
 {
     {
-        os::memory::LockHolder lock(task_queue_lock_);
-        if (compiler_worker_joined_) {
+        os::memory::LockHolder lock(taskQueueLock_);
+        if (compilerWorkerJoined_) {
             return;
         }
-        if (compiler_task_deque_.empty()) {
-            CompilerTask empty_task;
-            compiler_task_deque_.emplace_back(std::move(empty_task));
+        if (compilerTaskDeque_.empty()) {
+            CompilerTask emptyTask;
+            compilerTaskDeque_.emplace_back(std::move(emptyTask));
         } else {
-            compiler_task_deque_.emplace_back(std::move(task));
+            compilerTaskDeque_.emplace_back(std::move(task));
             return;
         }
     }
@@ -59,46 +59,46 @@ void CompilerTaskManagerWorker::AddTask(CompilerTask &&task)
 
 void CompilerTaskManagerWorker::BackgroundCompileMethod(CompilerTask &&ctx)
 {
-    auto thread_deleter = [this](Thread *thread) { internal_allocator_->Delete(thread); };
-    compiler::BackgroundCompilerContext::CompilerThread compiler_thread(
-        internal_allocator_->New<Thread>(ctx.GetVM(), Thread::ThreadType::THREAD_TYPE_COMPILER),
-        std::move(thread_deleter));
+    auto threadDeleter = [this](Thread *thread) { internalAllocator_->Delete(thread); };
+    compiler::BackgroundCompilerContext::CompilerThread compilerThread(
+        internalAllocator_->New<Thread>(ctx.GetVM(), Thread::ThreadType::THREAD_TYPE_COMPILER),
+        std::move(threadDeleter));
 
-    auto task_deleter = [this](CompilerTask *task) { internal_allocator_->Delete(task); };
-    compiler::BackgroundCompilerContext::CompilerTask compiler_task(
-        internal_allocator_->New<CompilerTask>(std::move(ctx)), std::move(task_deleter));
+    auto taskDeleter = [this](CompilerTask *task) { internalAllocator_->Delete(task); };
+    compiler::BackgroundCompilerContext::CompilerTask compilerTask(
+        internalAllocator_->New<CompilerTask>(std::move(ctx)), std::move(taskDeleter));
 
-    compiler::BackgroundCompilerTaskRunner task_runner(compiler_task_manager_queue_, compiler_thread.get(),
-                                                       compiler_->GetRuntimeInterface());
-    auto &compiler_ctx = task_runner.GetContext();
-    compiler_ctx.SetCompilerThread(std::move(compiler_thread));
-    compiler_ctx.SetCompilerTask(std::move(compiler_task));
+    compiler::BackgroundCompilerTaskRunner taskRunner(compilerTaskManagerQueue_, compilerThread.get(),
+                                                      compiler_->GetRuntimeInterface());
+    auto &compilerCtx = taskRunner.GetContext();
+    compilerCtx.SetCompilerThread(std::move(compilerThread));
+    compilerCtx.SetCompilerTask(std::move(compilerTask));
 
     // Callback to compile next method from compiler_task_deque_
-    task_runner.AddFinalize([this]([[maybe_unused]] compiler::BackgroundCompilerContext &task_context) {
-        CompilerTask next_task;
+    taskRunner.AddFinalize([this]([[maybe_unused]] compiler::BackgroundCompilerContext &taskContext) {
+        CompilerTask nextTask;
         {
-            os::memory::LockHolder lock(task_queue_lock_);
-            ASSERT(!compiler_task_deque_.empty());
+            os::memory::LockHolder lock(taskQueueLock_);
+            ASSERT(!compilerTaskDeque_.empty());
             // compilation of current task is complete
-            compiler_task_deque_.pop_front();
-            if (compiler_task_deque_.empty()) {
+            compilerTaskDeque_.pop_front();
+            if (compilerTaskDeque_.empty()) {
                 return;
             }
             // now queue has empty task which will be popped at the end of compilation
-            next_task = std::move(compiler_task_deque_.front());
+            nextTask = std::move(compilerTaskDeque_.front());
         }
-        BackgroundCompileMethod(std::move(next_task));
+        BackgroundCompileMethod(std::move(nextTask));
     });
 
-    auto background_task = [this](compiler::BackgroundCompilerTaskRunner runner) {
+    auto backgroundTask = [this](compiler::BackgroundCompilerTaskRunner runner) {
         if (runner.GetContext().GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
             compiler_->StartCompileMethod<compiler::BACKGROUND_MODE>(std::move(runner));
             return;
         }
         compiler::BackgroundCompilerTaskRunner::EndTask(std::move(runner), false);
     };
-    compiler::BackgroundCompilerTaskRunner::StartTask(std::move(task_runner), std::move(background_task));
+    compiler::BackgroundCompilerTaskRunner::StartTask(std::move(taskRunner), std::move(backgroundTask));
 }
 
 }  // namespace panda

@@ -27,9 +27,9 @@ inline HandleScope<T>::HandleScope(ManagedThread *thread) : thread_(thread)
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
-    HandleScope<T> *top_scope = thread->GetTopScope<T>();
-    if (top_scope != nullptr) {
-        begin_index_ = top_scope->GetBeginIndex() + top_scope->GetHandleCount();
+    HandleScope<T> *topScope = thread->GetTopScope<T>();
+    if (topScope != nullptr) {
+        beginIndex_ = topScope->GetBeginIndex() + topScope->GetHandleCount();
     }
     thread->PushHandleScope<T>(this);
 }
@@ -40,10 +40,10 @@ inline HandleScope<T>::HandleScope(ManagedThread *thread, T value) : thread_(thr
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
-    HandleScope<T> *top_scope = thread->GetTopScope<T>();
-    ASSERT(top_scope != nullptr);
-    top_scope->NewHandle(value);
-    begin_index_ = top_scope->GetBeginIndex() + top_scope->GetHandleCount();
+    HandleScope<T> *topScope = thread->GetTopScope<T>();
+    ASSERT(topScope != nullptr);
+    topScope->NewHandle(value);
+    beginIndex_ = topScope->GetBeginIndex() + topScope->GetHandleCount();
     thread->PushHandleScope<T>(this);
 }
 
@@ -54,7 +54,7 @@ inline HandleScope<T>::~HandleScope()
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
     thread_->PopHandleScope<T>();
-    thread_->GetHandleStorage<T>()->FreeHandles(begin_index_);
+    thread_->GetHandleStorage<T>()->FreeHandles(beginIndex_);
 }
 
 template <typename T>
@@ -66,7 +66,7 @@ inline ManagedThread *HandleScope<T>::GetThread() const
 template <typename T>
 inline EscapeHandleScope<T>::EscapeHandleScope(ManagedThread *thread)
     : HandleScope<T>(thread, 0),
-      escape_handle_(thread->GetHandleStorage<T>()->GetNodeAddress(thread->GetTopScope<T>()->GetBeginIndex() - 1))
+      escapeHandle_(thread->GetHandleStorage<T>()->GetNodeAddress(thread->GetTopScope<T>()->GetBeginIndex() - 1))
 {
 }
 }  // namespace panda

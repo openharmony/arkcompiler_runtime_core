@@ -63,27 +63,27 @@ TEST_F(VerifierTest, Tagged_index_in_container)
     using TagType2 = TagForInt<int, 5, 10>;
     using TI = TaggedIndex<TagType1, TagType2, size_t>;
     TI tagind1 {};
-    std::unordered_set<TI> i_set {};
+    std::unordered_set<TI> iSet {};
     tagind1.SetTag<0>(Tag::TAG1);
     tagind1.SetTag<1>(7);
     tagind1.SetInt(8);
-    i_set.insert(tagind1);
+    iSet.insert(tagind1);
     tagind1.SetTag<0>(Tag::TAG2);
     // NOLINTNEXTLINE(readability-magic-numbers)
     tagind1.SetTag<1>(9);
     tagind1.SetInt(3);
-    i_set.insert(tagind1);
+    iSet.insert(tagind1);
     tagind1.SetTag<0>(Tag::TAG1);
     tagind1.SetTag<1>(7);
     tagind1.SetInt(8);
-    EXPECT_EQ(i_set.count(tagind1), 1);
+    EXPECT_EQ(iSet.count(tagind1), 1);
     tagind1.SetTag<0>(Tag::TAG2);
     // NOLINTNEXTLINE(readability-magic-numbers)
     tagind1.SetTag<1>(9);
     tagind1.SetInt(3);
-    EXPECT_EQ(i_set.count(tagind1), 1);
+    EXPECT_EQ(iSet.count(tagind1), 1);
     tagind1.SetInt(4);
-    EXPECT_EQ(i_set.count(tagind1), 0);
+    EXPECT_EQ(iSet.count(tagind1), 0);
 }
 
 }  // namespace panda::verifier::test

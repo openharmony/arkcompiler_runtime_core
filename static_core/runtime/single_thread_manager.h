@@ -31,25 +31,25 @@ public:
 
     void SuspendAllThreads() override
     {
-        ManagedThread *main_thread = GetMainThread();
-        if (Thread::GetCurrent() != main_thread) {
-            main_thread->SuspendImpl(true);
+        ManagedThread *mainThread = GetMainThread();
+        if (Thread::GetCurrent() != mainThread) {
+            mainThread->SuspendImpl(true);
         }
     }
 
     void ResumeAllThreads() override
     {
-        ManagedThread *main_thread = GetMainThread();
-        if (Thread::GetCurrent() != main_thread) {
-            main_thread->ResumeImpl(true);
+        ManagedThread *mainThread = GetMainThread();
+        if (Thread::GetCurrent() != mainThread) {
+            mainThread->ResumeImpl(true);
         }
     }
 
     bool IsRunningThreadExist() override
     {
-        ManagedThread *main_thread = GetMainThread();
-        if (Thread::GetCurrent() != main_thread) {
-            if (main_thread->GetStatus() == ThreadStatus::RUNNING) {
+        ManagedThread *mainThread = GetMainThread();
+        if (Thread::GetCurrent() != mainThread) {
+            if (mainThread->GetStatus() == ThreadStatus::RUNNING) {
                 return true;
             }
         }
@@ -57,8 +57,8 @@ public:
     }
 
 protected:
-    bool EnumerateThreadsImpl(const Callback &cb, [[maybe_unused]] unsigned int inc_mask,
-                              [[maybe_unused]] unsigned int xor_mask) const override
+    bool EnumerateThreadsImpl(const Callback &cb, [[maybe_unused]] unsigned int incMask,
+                              [[maybe_unused]] unsigned int xorMask) const override
     {
         return cb(GetMainThread());
     }

@@ -57,32 +57,32 @@ TEST_F(PandaSmartPointersTest, MakePandaUniqueTest)
 
     static constexpr int POINTER_VALUE = 5;
 
-    auto uniq_ptr = MakePandaUnique<int>(POINTER_VALUE);
-    ASSERT_NE(uniq_ptr.get(), nullptr);
+    auto uniqPtr = MakePandaUnique<int>(POINTER_VALUE);
+    ASSERT_NE(uniqPtr.get(), nullptr);
 
-    int res = ReturnValueFromUniqPtr(std::move(uniq_ptr));
+    int res = ReturnValueFromUniqPtr(std::move(uniqPtr));
     ASSERT_EQ(res, 5);
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move)
-    ASSERT_EQ(uniq_ptr.get(), nullptr);
+    ASSERT_EQ(uniqPtr.get(), nullptr);
 
     // Unbounded array type
 
     static constexpr size_t SIZE = 3;
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    auto uniq_ptr_2 = MakePandaUnique<int[]>(SIZE);
-    ASSERT_NE(uniq_ptr_2.get(), nullptr);
+    auto uniqPtr2 = MakePandaUnique<int[]>(SIZE);
+    ASSERT_NE(uniqPtr2.get(), nullptr);
 
     for (size_t i = 0; i < SIZE; ++i) {
-        uniq_ptr_2[i] = i;
+        uniqPtr2[i] = i;
     }
 
-    auto uniq_ptr_3 = std::move(uniq_ptr_2);
+    auto uniqPtr3 = std::move(uniqPtr2);
     for (size_t i = 0; i < SIZE; ++i) {
-        ASSERT_EQ(uniq_ptr_3[i], i);
+        ASSERT_EQ(uniqPtr3[i], i);
     }
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move)
-    ASSERT_EQ(uniq_ptr_2.get(), nullptr);
+    ASSERT_EQ(uniqPtr2.get(), nullptr);
 }
 
 }  // namespace panda::mem::test

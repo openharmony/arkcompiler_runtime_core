@@ -22,21 +22,21 @@
 namespace panda::compiler {
 class TryCatchResolvingTest : public AsmTest {  // NOLINT(fuchsia-multiple-inheritance)
 public:
-    TryCatchResolvingTest() : default_compiler_non_optimizing_(OPTIONS.IsCompilerNonOptimizing())
+    TryCatchResolvingTest() : defaultCompilerNonOptimizing_(g_options.IsCompilerNonOptimizing())
     {
-        OPTIONS.SetCompilerNonOptimizing(false);
+        g_options.SetCompilerNonOptimizing(false);
     }
 
     ~TryCatchResolvingTest() override
     {
-        OPTIONS.SetCompilerNonOptimizing(default_compiler_non_optimizing_);
+        g_options.SetCompilerNonOptimizing(defaultCompilerNonOptimizing_);
     }
 
     NO_COPY_SEMANTIC(TryCatchResolvingTest);
     NO_MOVE_SEMANTIC(TryCatchResolvingTest);
 
 private:
-    bool default_compiler_non_optimizing_;
+    bool defaultCompilerNonOptimizing_;
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -71,8 +71,8 @@ catch_block2_begin:
     graph->RunPass<TryCatchResolving>();
     graph->RunPass<Cleanup>();
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         BASIC_BLOCK(2U, 3U)
         {
@@ -86,7 +86,7 @@ catch_block2_begin:
             INST(9U, Opcode::Throw).Inputs(7U, 8U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
@@ -128,8 +128,8 @@ TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
     graph->RunPass<TryCatchResolving>();
     graph->RunPass<Cleanup>();
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -140,7 +140,7 @@ TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
             INST(11U, Opcode::Throw).Inputs(9U, 10U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(TryCatchResolvingTest, EmptyTryCatches)
@@ -188,8 +188,8 @@ TEST_F(TryCatchResolvingTest, EmptyTryCatches)
     GraphChecker(graph).Check();
 
     graph->RunPass<TryCatchResolving>();
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         CONSTANT(8U, 10U).i32();
         BASIC_BLOCK(8U, -1L)
@@ -200,9 +200,9 @@ TEST_F(TryCatchResolvingTest, EmptyTryCatches)
             INST(16U, Opcode::ReturnVoid);
         }
     }
-    GraphChecker(expected_graph).Check();
+    GraphChecker(expectedGraph).Check();
 
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 // NOLINTEND(readability-magic-numbers)

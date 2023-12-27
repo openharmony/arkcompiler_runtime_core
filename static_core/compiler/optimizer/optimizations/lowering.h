@@ -34,7 +34,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerLowering();
+        return g_options.IsCompilerLowering();
     }
 
     const char *GetPassName() const override
@@ -109,23 +109,23 @@ private:
         // other operands.
         bool HaveCommonType() const
         {
-            auto non_const_type = DataType::LAST;
+            auto nonConstType = DataType::LAST;
             for (size_t i = 0; i < MAX_OPERANDS; i++) {
                 if (operands_[i]->GetOpcode() != Opcode::Constant) {
-                    non_const_type = GetCommonType(operands_[i]->GetType());
+                    nonConstType = GetCommonType(operands_[i]->GetType());
                     break;
                 }
             }
             // all operands are constants
-            if (non_const_type == DataType::LAST) {
-                non_const_type = operands_[0]->GetType();
+            if (nonConstType == DataType::LAST) {
+                nonConstType = operands_[0]->GetType();
             }
             for (size_t i = 0; i < MAX_OPERANDS; i++) {
                 if (operands_[i]->GetOpcode() == Opcode::Constant) {
-                    if (GetCommonType(operands_[i]->GetType()) != GetCommonType(non_const_type)) {
+                    if (GetCommonType(operands_[i]->GetType()) != GetCommonType(nonConstType)) {
                         return false;
                     }
-                } else if (non_const_type != GetCommonType(operands_[i]->GetType())) {
+                } else if (nonConstType != GetCommonType(operands_[i]->GetType())) {
                     return false;
                 }
             }
@@ -141,43 +141,43 @@ private:
     public:
         void Add(Inst *inst)
         {
-            ASSERT(current_idx_ < MAX_INSTS);
-            insts_[current_idx_++] = inst;
+            ASSERT(currentIdx_ < MAX_INSTS);
+            insts_[currentIdx_++] = inst;
         }
 
         size_t GetCurrentIndex() const
         {
-            return current_idx_;
+            return currentIdx_;
         }
 
         void SetCurrentIndex(size_t idx)
         {
             ASSERT(idx < MAX_INSTS);
-            current_idx_ = idx;
+            currentIdx_ = idx;
         }
 
         // Returns true if all non-constant operands have exactly the same type and all
         // constant arguments have the same common type (obtained using GetCommonType) as all other operands.
         bool HaveSameType() const
         {
-            ASSERT(current_idx_ == MAX_INSTS);
-            auto non_const_type = DataType::LAST;
+            ASSERT(currentIdx_ == MAX_INSTS);
+            auto nonConstType = DataType::LAST;
             for (size_t i = 0; i < MAX_INSTS; i++) {
                 if (insts_[i]->GetOpcode() != Opcode::Constant) {
-                    non_const_type = insts_[i]->GetType();
+                    nonConstType = insts_[i]->GetType();
                     break;
                 }
             }
             // all operands are constants
-            if (non_const_type == DataType::LAST) {
-                non_const_type = insts_[0]->GetType();
+            if (nonConstType == DataType::LAST) {
+                nonConstType = insts_[0]->GetType();
             }
             for (size_t i = 0; i < MAX_INSTS; i++) {
                 if (insts_[i]->GetOpcode() == Opcode::Constant) {
-                    if (GetCommonType(insts_[i]->GetType()) != GetCommonType(non_const_type)) {
+                    if (GetCommonType(insts_[i]->GetType()) != GetCommonType(nonConstType)) {
                         return false;
                     }
-                } else if (non_const_type != insts_[i]->GetType()) {
+                } else if (nonConstType != insts_[i]->GetType()) {
                     return false;
                 }
             }
@@ -186,13 +186,13 @@ private:
 
         InstructionsCapture &ResetIndex()
         {
-            current_idx_ = 0;
+            currentIdx_ = 0;
             return *this;
         }
 
     private:
         std::array<Inst *, MAX_INSTS> insts_;
-        size_t current_idx_;
+        size_t currentIdx_;
     };
 
     template <Opcode OPCODE, typename L, typename R, uint64_t FLAGS = Flags::NONE>
@@ -254,11 +254,11 @@ private:
         template <size_t MAX_OPERANDS, size_t MAX_INSTS>
         static bool Capture(Inst *inst, OperandsCapture<MAX_OPERANDS> &args, InstructionsCapture<MAX_INSTS> &insts)
         {
-            size_t inst_idx = insts.GetCurrentIndex();
+            size_t instIdx = insts.GetCurrentIndex();
             if (T::Capture(inst, args, insts)) {
                 return true;
             }
-            insts.SetCurrentIndex(inst_idx);
+            insts.SetCurrentIndex(instIdx);
             return AnyOf<Args...>::Capture(inst, args, insts);
         }
     };
@@ -351,23 +351,23 @@ private:
 
 #include "optimizer/ir/visitor.inc"
 
-    static void InsertInstruction(Inst *inst, Inst *new_inst)
+    static void InsertInstruction(Inst *inst, Inst *newInst)
     {
-        inst->InsertBefore(new_inst);
-        inst->ReplaceUsers(new_inst);
-        new_inst->GetBasicBlock()->GetGraph()->GetEventWriter().EventLowering(GetOpcodeString(inst->GetOpcode()),
-                                                                              inst->GetId(), inst->GetPc());
+        inst->InsertBefore(newInst);
+        inst->ReplaceUsers(newInst);
+        newInst->GetBasicBlock()->GetGraph()->GetEventWriter().EventLowering(GetOpcodeString(inst->GetOpcode()),
+                                                                             inst->GetId(), inst->GetPc());
         COMPILER_LOG(DEBUG, LOWERING) << "Lowering is applied for " << GetOpcodeString(inst->GetOpcode());
     }
 
     template <size_t MAX_OPERANDS>
-    static void SetInputsAndInsertInstruction(OperandsCapture<MAX_OPERANDS> &operands, Inst *inst, Inst *new_inst);
+    static void SetInputsAndInsertInstruction(OperandsCapture<MAX_OPERANDS> &operands, Inst *inst, Inst *newInst);
 
     static constexpr Opcode GetInstructionWithShiftedOperand(Opcode opcode);
     static constexpr Opcode GetInstructionWithInvertedOperand(Opcode opcode);
     static ShiftType GetShiftTypeByOpcode(Opcode opcode);
     static Inst *GetCheckInstAndGetConstInput(Inst *inst);
-    static ShiftOpcode ConvertOpcode(Opcode new_opcode);
+    static ShiftOpcode ConvertOpcode(Opcode newOpcode);
 
     static void LowerMemInstScale(Inst *inst);
     static void LowerShift(Inst *inst);
@@ -380,29 +380,29 @@ private:
     static void LowerLogicWithInvertedOperand(Inst *inst);
     static bool LowerCastValueToAnyTypeWithConst(Inst *inst);
     template <typename T, size_t MAX_OPERANDS>
-    static Inst *LowerOperationWithShiftedOperand(Inst *inst, OperandsCapture<MAX_OPERANDS> &operands, Inst *shift_inst,
-                                                  Opcode new_opcode);
+    static Inst *LowerOperationWithShiftedOperand(Inst *inst, OperandsCapture<MAX_OPERANDS> &operands, Inst *shiftInst,
+                                                  Opcode newOpcode);
     template <Opcode OPCODE, bool IS_COMMUTATIVE = true>
     static Inst *LowerBinaryOperationWithShiftedOperand(Inst *inst);
     template <Opcode OPCODE>
     static void LowerUnaryOperationWithShiftedOperand(Inst *inst);
     static Inst *LowerLogic(Inst *inst);
     template <typename LowLevelType>
-    static void LowerConstArrayIndex(Inst *inst, Opcode low_level_opcode);
-    static void LowerStateInst(SaveStateInst *save_state);
+    static void LowerConstArrayIndex(Inst *inst, Opcode lowLevelOpcode);
+    static void LowerStateInst(SaveStateInst *saveState);
     static void LowerReturnInst(FixedInputsInst1 *ret);
     // We'd like to swap only to make second operand immediate
     static bool BetterToSwapCompareInputs(Inst *cmp);
     // Optimize order of input arguments for decreasing using accumulator (Bytecodeoptimizer only).
-    static void OptimizeIfInput(compiler::Inst *if_inst);
+    static void OptimizeIfInput(compiler::Inst *ifInst);
     static void JoinFcmpInst(IfImmInst *inst, CmpInst *input);
     void LowerIf(IfImmInst *inst);
-    static void InPlaceLowerIfImm(IfImmInst *inst, Inst *input, Inst *cst, ConditionCode cc, DataType::Type input_type);
-    static void LowerIfImmToIf(IfImmInst *inst, Inst *input, ConditionCode cc, DataType::Type input_type);
+    static void InPlaceLowerIfImm(IfImmInst *inst, Inst *input, Inst *cst, ConditionCode cc, DataType::Type inputType);
+    static void LowerIfImmToIf(IfImmInst *inst, Inst *input, ConditionCode cc, DataType::Type inputType);
     static void LowerToDeoptimizeCompare(Inst *inst);
     static bool TryReplaceModPowerOfTwo(GraphVisitor *v, Inst *inst);
-    static void ReplaceSignedModPowerOfTwo(GraphVisitor *v, Inst *inst, uint64_t abs_value);
-    static void ReplaceUnsignedModPowerOfTwo(GraphVisitor *v, Inst *inst, uint64_t abs_value);
+    static void ReplaceSignedModPowerOfTwo(GraphVisitor *v, Inst *inst, uint64_t absValue);
+    static void ReplaceUnsignedModPowerOfTwo(GraphVisitor *v, Inst *inst, uint64_t absValue);
 
 private:
     SaveStateBridgesBuilder ssb_;

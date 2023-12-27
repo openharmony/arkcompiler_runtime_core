@@ -62,9 +62,9 @@ static inline int64_t GetVRegValue(VRegRef reg)
  * This function supposed to be called from the deoptimization code. It aims to call interpreter for given frame from
  * specific pc. Note, that it releases input interpreter's frame at the exit.
  */
-extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, Frame *frame, Frame *last_frame)
+extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, Frame *frame, Frame *lastFrame)
 {
-    bool prev_frame_kind = thread->IsCurrentFrameCompiled();
+    bool prevFrameKind = thread->IsCurrentFrameCompiled();
     thread->SetCurrentFrame(frame);
     thread->SetCurrentFrameIsCompiled(false);
     LOG(DEBUG, INTEROP) << "InvokeInterpreter for method: " << frame->GetMethod()->GetFullName();
@@ -79,22 +79,22 @@ extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, F
         res = GetVRegValue(acc.AsVRegRef());
     }
 
-    auto prev_frame = frame->GetPrevFrame();
-    thread->SetCurrentFrame(prev_frame);
+    auto prevFrame = frame->GetPrevFrame();
+    thread->SetCurrentFrame(prevFrame);
     FreeFrame(frame);
 
     // We need to execute(find catch block) in all inlined methods. For this we use number of inlined method
     // Else we can execute previus interpreter frames and we will FreeFrames in incorrect order
-    while (prev_frame != nullptr && last_frame != frame) {
-        ASSERT(!StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(prev_frame));
-        frame = prev_frame;
+    while (prevFrame != nullptr && lastFrame != frame) {
+        ASSERT(!StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(prevFrame));
+        frame = prevFrame;
         LOG(DEBUG, INTEROP) << "InvokeInterpreter for method: " << frame->GetMethod()->GetFullName();
-        prev_frame = frame->GetPrevFrame();
+        prevFrame = frame->GetPrevFrame();
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         pc = frame->GetMethod()->GetInstructions() + frame->GetBytecodeOffset();
         if (!thread->HasPendingException()) {
-            auto bc_inst = BytecodeInstruction(pc);
-            auto opcode = bc_inst.GetOpcode();
+            auto bcInst = BytecodeInstruction(pc);
+            auto opcode = bcInst.GetOpcode();
             // Compiler splites InitObj to NewObject + CallStatic
             // if we have an deoptimization occurred in the CallStatic, we must not copy acc from CallStatic,
             // because acc contain result of the NewObject
@@ -103,7 +103,7 @@ extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, F
                 opcode != BytecodeInstruction::Opcode::INITOBJ_RANGE_V8_ID16) {
                 frame->GetAcc() = acc;
             }
-            pc = bc_inst.GetNext().GetAddress();
+            pc = bcInst.GetNext().GetAddress();
         } else {
             frame->GetAcc() = acc;
         }
@@ -116,10 +116,10 @@ extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, F
             res = GetVRegValue(acc.AsVRegRef());
         }
 
-        thread->SetCurrentFrame(prev_frame);
+        thread->SetCurrentFrame(prevFrame);
         FreeFrame(frame);
     }
-    thread->SetCurrentFrameIsCompiled(prev_frame_kind);
+    thread->SetCurrentFrameIsCompiled(prevFrameKind);
 
     return res;
 }

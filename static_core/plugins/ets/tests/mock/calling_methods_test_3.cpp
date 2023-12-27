@@ -21,11 +21,11 @@
 
 namespace panda::ets::test {
 
-static const char *TEST_BIN_FILE_NAME = "CallingMethodsTest.abc";
+static const char *g_testBinFileName = "CallingMethodsTest.abc";
 
 class CallingMethodsTestGeneral : public CallingMethodsTestBase {
 public:
-    CallingMethodsTestGeneral() : CallingMethodsTestBase(TEST_BIN_FILE_NAME) {}
+    CallingMethodsTestGeneral() : CallingMethodsTestBase(g_testBinFileName) {}
 };
 
 class MethodsTest : public CallingMethodsTestGeneral {};
@@ -119,168 +119,165 @@ TEST_F(MethodsTest, CallMethodsTestGeneral3)
     ets_class cls = env_->FindClass("F");
     ASSERT_NE(cls, nullptr);
 
-    ets_method void_id = env_->GetStaticp_method(cls, "void_method", "I:Lstd/core/void;");
-    ASSERT_NE(void_id, nullptr);
-    ets_method object_id = env_->GetStaticp_method(cls, "object_method", ":LA;");
-    ASSERT_NE(object_id, nullptr);
-    ets_method boolean_id = env_->GetStaticp_method(cls, "boolean_method", "Z:Z");
-    ASSERT_NE(boolean_id, nullptr);
-    ets_method byte_id = env_->GetStaticp_method(cls, "byte_method", "B:B");
-    ASSERT_NE(byte_id, nullptr);
-    ets_method char_id = env_->GetStaticp_method(cls, "char_method", "C:C");
-    ASSERT_NE(char_id, nullptr);
-    ets_method short_id = env_->GetStaticp_method(cls, "short_method", "S:S");
-    ASSERT_NE(short_id, nullptr);
-    ets_method int_id = env_->GetStaticp_method(cls, "int_method", ":I");
-    ASSERT_NE(int_id, nullptr);
-    ets_method long_id = env_->GetStaticp_method(cls, "long_method", "J:J");
-    ASSERT_NE(long_id, nullptr);
-    ets_method float_id = env_->GetStaticp_method(cls, "float_method", "F:F");
-    ASSERT_NE(float_id, nullptr);
-    ets_method double_id = env_->GetStaticp_method(cls, "double_method", "D:D");
-    ASSERT_NE(double_id, nullptr);
+    ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:Lstd/core/void;");
+    ASSERT_NE(voidId, nullptr);
+    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
+    ASSERT_NE(objectId, nullptr);
+    ets_method booleanId = env_->GetStaticp_method(cls, "boolean_method", "Z:Z");
+    ASSERT_NE(booleanId, nullptr);
+    ets_method byteId = env_->GetStaticp_method(cls, "byte_method", "B:B");
+    ASSERT_NE(byteId, nullptr);
+    ets_method charId = env_->GetStaticp_method(cls, "char_method", "C:C");
+    ASSERT_NE(charId, nullptr);
+    ets_method shortId = env_->GetStaticp_method(cls, "short_method", "S:S");
+    ASSERT_NE(shortId, nullptr);
+    ets_method intId = env_->GetStaticp_method(cls, "int_method", ":I");
+    ASSERT_NE(intId, nullptr);
+    ets_method longId = env_->GetStaticp_method(cls, "long_method", "J:J");
+    ASSERT_NE(longId, nullptr);
+    ets_method floatId = env_->GetStaticp_method(cls, "float_method", "F:F");
+    ASSERT_NE(floatId, nullptr);
+    ets_method doubleId = env_->GetStaticp_method(cls, "double_method", "D:D");
+    ASSERT_NE(doubleId, nullptr);
 
-    ets_method void_id_no_sig = env_->GetStaticp_method(cls, "void_method", nullptr);
-    ASSERT_EQ(void_id, void_id_no_sig);
-    ets_method object_id_no_sig = env_->GetStaticp_method(cls, "object_method", nullptr);
-    ASSERT_EQ(object_id, object_id_no_sig);
-    ets_method boolean_id_no_sig = env_->GetStaticp_method(cls, "boolean_method", nullptr);
-    ASSERT_EQ(boolean_id, boolean_id_no_sig);
-    ets_method byte_id_no_sig = env_->GetStaticp_method(cls, "byte_method", nullptr);
-    ASSERT_EQ(byte_id, byte_id_no_sig);
-    ets_method char_id_no_sig = env_->GetStaticp_method(cls, "char_method", nullptr);
-    ASSERT_EQ(char_id, char_id_no_sig);
-    ets_method short_id_no_sig = env_->GetStaticp_method(cls, "short_method", nullptr);
-    ASSERT_EQ(short_id, short_id_no_sig);
-    ets_method int_id_no_sig = env_->GetStaticp_method(cls, "int_method", nullptr);
-    ASSERT_EQ(int_id, int_id_no_sig);
-    ets_method long_id_no_sig = env_->GetStaticp_method(cls, "long_method", nullptr);
-    ASSERT_EQ(long_id, long_id_no_sig);
-    ets_method float_id_no_sig = env_->GetStaticp_method(cls, "float_method", nullptr);
-    ASSERT_EQ(float_id, float_id_no_sig);
-    ets_method double_id_no_sig = env_->GetStaticp_method(cls, "double_method", nullptr);
-    ASSERT_EQ(double_id, double_id_no_sig);
+    ets_method voidIdNoSig = env_->GetStaticp_method(cls, "void_method", nullptr);
+    ASSERT_EQ(voidId, voidIdNoSig);
+    ets_method objectIdNoSig = env_->GetStaticp_method(cls, "object_method", nullptr);
+    ASSERT_EQ(objectId, objectIdNoSig);
+    ets_method booleanIdNoSig = env_->GetStaticp_method(cls, "boolean_method", nullptr);
+    ASSERT_EQ(booleanId, booleanIdNoSig);
+    ets_method byteIdNoSig = env_->GetStaticp_method(cls, "byte_method", nullptr);
+    ASSERT_EQ(byteId, byteIdNoSig);
+    ets_method charIdNoSig = env_->GetStaticp_method(cls, "char_method", nullptr);
+    ASSERT_EQ(charId, charIdNoSig);
+    ets_method shortIdNoSig = env_->GetStaticp_method(cls, "short_method", nullptr);
+    ASSERT_EQ(shortId, shortIdNoSig);
+    ets_method intIdNoSig = env_->GetStaticp_method(cls, "int_method", nullptr);
+    ASSERT_EQ(intId, intIdNoSig);
+    ets_method longIdNoSig = env_->GetStaticp_method(cls, "long_method", nullptr);
+    ASSERT_EQ(longId, longIdNoSig);
+    ets_method floatIdNoSig = env_->GetStaticp_method(cls, "float_method", nullptr);
+    ASSERT_EQ(floatId, floatIdNoSig);
+    ets_method doubleIdNoSig = env_->GetStaticp_method(cls, "double_method", nullptr);
+    ASSERT_EQ(doubleId, doubleIdNoSig);
 
     // CallStatic<type>Method part
-    env_->CallStaticVoidMethod(cls, void_id, static_cast<ets_int>(42));
+    env_->CallStaticVoidMethod(cls, voidId, static_cast<ets_int>(42));
 
-    ets_class a_cls = env_->FindClass("A");
-    ASSERT_NE(a_cls, nullptr);
-    ets_object a_obj = env_->CallStaticObjectMethod(cls, object_id);
-    ASSERT_NE(a_obj, nullptr);
-    EXPECT_EQ(env_->IsInstanceOf(a_obj, a_cls), ETS_TRUE);
+    ets_class aCls = env_->FindClass("A");
+    ASSERT_NE(aCls, nullptr);
+    ets_object aObj = env_->CallStaticObjectMethod(cls, objectId);
+    ASSERT_NE(aObj, nullptr);
+    EXPECT_EQ(env_->IsInstanceOf(aObj, aCls), ETS_TRUE);
 
-    EXPECT_EQ(env_->CallStaticBooleanMethod(cls, boolean_id, static_cast<ets_boolean>(1)), static_cast<ets_boolean>(0));
-    EXPECT_EQ(env_->CallStaticByteMethod(cls, byte_id, static_cast<ets_byte>(1)), static_cast<ets_byte>(0));
-    EXPECT_EQ(env_->CallStaticCharMethod(cls, char_id, static_cast<ets_char>(1)), static_cast<ets_char>(0));
-    EXPECT_EQ(env_->CallStaticShortMethod(cls, short_id, static_cast<ets_short>(1)), static_cast<ets_short>(0));
-    EXPECT_EQ(env_->CallStaticIntMethod(cls, int_id), static_cast<ets_int>(0));
-    EXPECT_EQ(env_->CallStaticLongMethod(cls, long_id, static_cast<ets_long>(1)), static_cast<ets_long>(0));
-    EXPECT_FLOAT_EQ(env_->CallStaticFloatMethod(cls, float_id, static_cast<ets_float>(1.0F)),
+    EXPECT_EQ(env_->CallStaticBooleanMethod(cls, booleanId, static_cast<ets_boolean>(1)), static_cast<ets_boolean>(0));
+    EXPECT_EQ(env_->CallStaticByteMethod(cls, byteId, static_cast<ets_byte>(1)), static_cast<ets_byte>(0));
+    EXPECT_EQ(env_->CallStaticCharMethod(cls, charId, static_cast<ets_char>(1)), static_cast<ets_char>(0));
+    EXPECT_EQ(env_->CallStaticShortMethod(cls, shortId, static_cast<ets_short>(1)), static_cast<ets_short>(0));
+    EXPECT_EQ(env_->CallStaticIntMethod(cls, intId), static_cast<ets_int>(0));
+    EXPECT_EQ(env_->CallStaticLongMethod(cls, longId, static_cast<ets_long>(1)), static_cast<ets_long>(0));
+    EXPECT_FLOAT_EQ(env_->CallStaticFloatMethod(cls, floatId, static_cast<ets_float>(1.0F)),
                     static_cast<ets_float>(0.0F));
-    EXPECT_DOUBLE_EQ(env_->CallStaticDoubleMethod(cls, double_id, static_cast<ets_double>(1.0)),
+    EXPECT_DOUBLE_EQ(env_->CallStaticDoubleMethod(cls, doubleId, static_cast<ets_double>(1.0)),
                      static_cast<ets_double>(0.0));
 
     // CallStatic<Type>MethodArray part
     ets_value tmp;
     tmp.i = static_cast<ets_int>(42);
-    std::vector<ets_value> void_args = {tmp};
-    env_->CallStaticVoidMethodArray(cls, void_id, void_args.data());
+    std::vector<ets_value> voidArgs = {tmp};
+    env_->CallStaticVoidMethodArray(cls, voidId, voidArgs.data());
 
-    ets_object a_obj_from_array_func = env_->CallObjectMethodArray(cls, object_id, nullptr);
-    ASSERT_NE(a_obj_from_array_func, nullptr);
-    EXPECT_EQ(env_->IsInstanceOf(a_obj_from_array_func, a_cls), ETS_TRUE);
+    ets_object aObjFromArrayFunc = env_->CallObjectMethodArray(cls, objectId, nullptr);
+    ASSERT_NE(aObjFromArrayFunc, nullptr);
+    EXPECT_EQ(env_->IsInstanceOf(aObjFromArrayFunc, aCls), ETS_TRUE);
 
     tmp.z = static_cast<ets_boolean>(1);
-    std::vector<ets_value> boolean_args = {tmp};
-    EXPECT_EQ(env_->CallStaticBooleanMethodArray(cls, boolean_id, boolean_args.data()), static_cast<ets_boolean>(0));
+    std::vector<ets_value> booleanArgs = {tmp};
+    EXPECT_EQ(env_->CallStaticBooleanMethodArray(cls, booleanId, booleanArgs.data()), static_cast<ets_boolean>(0));
 
     tmp.b = static_cast<ets_byte>(1);
-    std::vector<ets_value> byte_args = {tmp};
-    EXPECT_EQ(env_->CallStaticByteMethodArray(cls, byte_id, byte_args.data()), static_cast<ets_byte>(0));
+    std::vector<ets_value> byteArgs = {tmp};
+    EXPECT_EQ(env_->CallStaticByteMethodArray(cls, byteId, byteArgs.data()), static_cast<ets_byte>(0));
 
     tmp.c = static_cast<ets_char>(1);
-    std::vector<ets_value> char_args = {tmp};
-    EXPECT_EQ(env_->CallStaticCharMethodArray(cls, char_id, char_args.data()), static_cast<ets_char>(0));
+    std::vector<ets_value> charArgs = {tmp};
+    EXPECT_EQ(env_->CallStaticCharMethodArray(cls, charId, charArgs.data()), static_cast<ets_char>(0));
 
     tmp.s = static_cast<ets_short>(1);
-    std::vector<ets_value> short_args = {tmp};
-    EXPECT_EQ(env_->CallStaticShortMethodArray(cls, short_id, short_args.data()), static_cast<ets_short>(0));
+    std::vector<ets_value> shortArgs = {tmp};
+    EXPECT_EQ(env_->CallStaticShortMethodArray(cls, shortId, shortArgs.data()), static_cast<ets_short>(0));
 
-    EXPECT_EQ(env_->CallStaticIntMethodArray(cls, int_id, nullptr), static_cast<ets_int>(0));
+    EXPECT_EQ(env_->CallStaticIntMethodArray(cls, intId, nullptr), static_cast<ets_int>(0));
 
     tmp.j = static_cast<ets_long>(1);
-    std::vector<ets_value> long_args = {tmp};
-    EXPECT_EQ(env_->CallStaticLongMethodArray(cls, long_id, long_args.data()), static_cast<ets_long>(0));
+    std::vector<ets_value> longArgs = {tmp};
+    EXPECT_EQ(env_->CallStaticLongMethodArray(cls, longId, longArgs.data()), static_cast<ets_long>(0));
 
     tmp.j = static_cast<ets_float>(1.0F);
-    std::vector<ets_value> float_args = {tmp};
-    EXPECT_FLOAT_EQ(env_->CallStaticFloatMethodArray(cls, float_id, float_args.data()), static_cast<ets_float>(0.0F));
+    std::vector<ets_value> floatArgs = {tmp};
+    EXPECT_FLOAT_EQ(env_->CallStaticFloatMethodArray(cls, floatId, floatArgs.data()), static_cast<ets_float>(0.0F));
 
     tmp.j = static_cast<ets_double>(1.0);
-    std::vector<ets_value> double_args = {tmp};
-    EXPECT_DOUBLE_EQ(env_->CallStaticDoubleMethodArray(cls, double_id, double_args.data()),
-                     static_cast<ets_double>(0.0));
+    std::vector<ets_value> doubleArgs = {tmp};
+    EXPECT_DOUBLE_EQ(env_->CallStaticDoubleMethodArray(cls, doubleId, doubleArgs.data()), static_cast<ets_double>(0.0));
 
     // CallStatic<type>MethodList part
-    CallStaticVoidMethodListHelper(env_, cls, void_id, static_cast<ets_int>(42), static_cast<ets_int>(121));
+    CallStaticVoidMethodListHelper(env_, cls, voidId, static_cast<ets_int>(42), static_cast<ets_int>(121));
 
-    ets_object a_obj_from_list_func = CallObjectMethodListHelper(env_, cls, object_id);
-    ASSERT_NE(a_obj_from_list_func, nullptr);
-    EXPECT_EQ(env_->IsInstanceOf(a_obj_from_list_func, a_cls), ETS_TRUE);
+    ets_object aObjFromListFunc = CallObjectMethodListHelper(env_, cls, objectId);
+    ASSERT_NE(aObjFromListFunc, nullptr);
+    EXPECT_EQ(env_->IsInstanceOf(aObjFromListFunc, aCls), ETS_TRUE);
 
-    EXPECT_EQ(CallStaticBooleanMethodListHelper(env_, cls, boolean_id, static_cast<ets_boolean>(1)),
+    EXPECT_EQ(CallStaticBooleanMethodListHelper(env_, cls, booleanId, static_cast<ets_boolean>(1)),
               static_cast<ets_boolean>(0));
-    EXPECT_EQ(CallStaticByteMethodListHelper(env_, cls, byte_id, static_cast<ets_byte>(1)), static_cast<ets_byte>(0));
-    EXPECT_EQ(CallStaticCharMethodListHelper(env_, cls, char_id, static_cast<ets_char>(1)), static_cast<ets_char>(0));
-    EXPECT_EQ(CallStaticShortMethodListHelper(env_, cls, short_id, static_cast<ets_short>(1)),
+    EXPECT_EQ(CallStaticByteMethodListHelper(env_, cls, byteId, static_cast<ets_byte>(1)), static_cast<ets_byte>(0));
+    EXPECT_EQ(CallStaticCharMethodListHelper(env_, cls, charId, static_cast<ets_char>(1)), static_cast<ets_char>(0));
+    EXPECT_EQ(CallStaticShortMethodListHelper(env_, cls, shortId, static_cast<ets_short>(1)),
               static_cast<ets_short>(0));
-    EXPECT_EQ(CallStaticIntMethodListHelper(env_, cls, int_id), static_cast<ets_int>(0));
-    EXPECT_EQ(CallStaticLongMethodListHelper(env_, cls, long_id, static_cast<ets_long>(1)), static_cast<ets_long>(0));
-    EXPECT_FLOAT_EQ(CallStaticFloatMethodListHelper(env_, cls, float_id, static_cast<ets_float>(1.0F)),
+    EXPECT_EQ(CallStaticIntMethodListHelper(env_, cls, intId), static_cast<ets_int>(0));
+    EXPECT_EQ(CallStaticLongMethodListHelper(env_, cls, longId, static_cast<ets_long>(1)), static_cast<ets_long>(0));
+    EXPECT_FLOAT_EQ(CallStaticFloatMethodListHelper(env_, cls, floatId, static_cast<ets_float>(1.0F)),
                     static_cast<ets_float>(0.0F));
-    EXPECT_DOUBLE_EQ(CallStaticDoubleMethodListHelper(env_, cls, double_id, static_cast<ets_double>(1.0)),
+    EXPECT_DOUBLE_EQ(CallStaticDoubleMethodListHelper(env_, cls, doubleId, static_cast<ets_double>(1.0)),
                      static_cast<ets_double>(0.0));
 
     // Check null class argument
-    EXPECT_EQ(env_->CallStaticBooleanMethod(nullptr, boolean_id, static_cast<ets_boolean>(1)),
+    EXPECT_EQ(env_->CallStaticBooleanMethod(nullptr, booleanId, static_cast<ets_boolean>(1)),
               static_cast<ets_boolean>(0));
-    EXPECT_EQ(env_->CallStaticByteMethod(nullptr, byte_id, static_cast<ets_byte>(1)), static_cast<ets_byte>(0));
-    EXPECT_EQ(env_->CallStaticCharMethod(nullptr, char_id, static_cast<ets_char>(1)), static_cast<ets_char>(0));
-    EXPECT_EQ(env_->CallStaticShortMethod(nullptr, short_id, static_cast<ets_short>(1)), static_cast<ets_short>(0));
-    EXPECT_EQ(env_->CallStaticIntMethod(nullptr, int_id), static_cast<ets_int>(0));
-    EXPECT_EQ(env_->CallStaticLongMethod(nullptr, long_id, static_cast<ets_long>(1)), static_cast<ets_long>(0));
-    EXPECT_FLOAT_EQ(env_->CallStaticFloatMethod(nullptr, float_id, static_cast<ets_float>(1.0F)),
+    EXPECT_EQ(env_->CallStaticByteMethod(nullptr, byteId, static_cast<ets_byte>(1)), static_cast<ets_byte>(0));
+    EXPECT_EQ(env_->CallStaticCharMethod(nullptr, charId, static_cast<ets_char>(1)), static_cast<ets_char>(0));
+    EXPECT_EQ(env_->CallStaticShortMethod(nullptr, shortId, static_cast<ets_short>(1)), static_cast<ets_short>(0));
+    EXPECT_EQ(env_->CallStaticIntMethod(nullptr, intId), static_cast<ets_int>(0));
+    EXPECT_EQ(env_->CallStaticLongMethod(nullptr, longId, static_cast<ets_long>(1)), static_cast<ets_long>(0));
+    EXPECT_FLOAT_EQ(env_->CallStaticFloatMethod(nullptr, floatId, static_cast<ets_float>(1.0F)),
                     static_cast<ets_float>(0.0F));
-    EXPECT_DOUBLE_EQ(env_->CallStaticDoubleMethod(nullptr, double_id, static_cast<ets_double>(1.0)),
+    EXPECT_DOUBLE_EQ(env_->CallStaticDoubleMethod(nullptr, doubleId, static_cast<ets_double>(1.0)),
                      static_cast<ets_double>(0.0));
 
-    EXPECT_EQ(env_->CallStaticBooleanMethodArray(nullptr, boolean_id, boolean_args.data()),
-              static_cast<ets_boolean>(0));
-    EXPECT_EQ(env_->CallStaticByteMethodArray(nullptr, byte_id, byte_args.data()), static_cast<ets_byte>(0));
-    EXPECT_EQ(env_->CallStaticCharMethodArray(nullptr, char_id, char_args.data()), static_cast<ets_char>(0));
-    EXPECT_EQ(env_->CallStaticShortMethodArray(nullptr, short_id, short_args.data()), static_cast<ets_short>(0));
-    EXPECT_EQ(env_->CallStaticIntMethodArray(nullptr, int_id, nullptr), static_cast<ets_int>(0));
-    EXPECT_EQ(env_->CallStaticLongMethodArray(nullptr, long_id, long_args.data()), static_cast<ets_long>(0));
-    EXPECT_FLOAT_EQ(env_->CallStaticFloatMethodArray(nullptr, float_id, float_args.data()),
-                    static_cast<ets_float>(0.0F));
-    EXPECT_DOUBLE_EQ(env_->CallStaticDoubleMethodArray(nullptr, double_id, double_args.data()),
+    EXPECT_EQ(env_->CallStaticBooleanMethodArray(nullptr, booleanId, booleanArgs.data()), static_cast<ets_boolean>(0));
+    EXPECT_EQ(env_->CallStaticByteMethodArray(nullptr, byteId, byteArgs.data()), static_cast<ets_byte>(0));
+    EXPECT_EQ(env_->CallStaticCharMethodArray(nullptr, charId, charArgs.data()), static_cast<ets_char>(0));
+    EXPECT_EQ(env_->CallStaticShortMethodArray(nullptr, shortId, shortArgs.data()), static_cast<ets_short>(0));
+    EXPECT_EQ(env_->CallStaticIntMethodArray(nullptr, intId, nullptr), static_cast<ets_int>(0));
+    EXPECT_EQ(env_->CallStaticLongMethodArray(nullptr, longId, longArgs.data()), static_cast<ets_long>(0));
+    EXPECT_FLOAT_EQ(env_->CallStaticFloatMethodArray(nullptr, floatId, floatArgs.data()), static_cast<ets_float>(0.0F));
+    EXPECT_DOUBLE_EQ(env_->CallStaticDoubleMethodArray(nullptr, doubleId, doubleArgs.data()),
                      static_cast<ets_double>(0.0));
 
-    EXPECT_EQ(CallStaticBooleanMethodListHelper(env_, nullptr, boolean_id, static_cast<ets_boolean>(1)),
+    EXPECT_EQ(CallStaticBooleanMethodListHelper(env_, nullptr, booleanId, static_cast<ets_boolean>(1)),
               static_cast<ets_boolean>(0));
-    EXPECT_EQ(CallStaticByteMethodListHelper(env_, nullptr, byte_id, static_cast<ets_byte>(1)),
+    EXPECT_EQ(CallStaticByteMethodListHelper(env_, nullptr, byteId, static_cast<ets_byte>(1)),
               static_cast<ets_byte>(0));
-    EXPECT_EQ(CallStaticCharMethodListHelper(env_, nullptr, char_id, static_cast<ets_char>(1)),
+    EXPECT_EQ(CallStaticCharMethodListHelper(env_, nullptr, charId, static_cast<ets_char>(1)),
               static_cast<ets_char>(0));
-    EXPECT_EQ(CallStaticShortMethodListHelper(env_, nullptr, short_id, static_cast<ets_short>(1)),
+    EXPECT_EQ(CallStaticShortMethodListHelper(env_, nullptr, shortId, static_cast<ets_short>(1)),
               static_cast<ets_short>(0));
-    EXPECT_EQ(CallStaticIntMethodListHelper(env_, nullptr, int_id), static_cast<ets_int>(0));
-    EXPECT_EQ(CallStaticLongMethodListHelper(env_, nullptr, long_id, static_cast<ets_long>(1)),
+    EXPECT_EQ(CallStaticIntMethodListHelper(env_, nullptr, intId), static_cast<ets_int>(0));
+    EXPECT_EQ(CallStaticLongMethodListHelper(env_, nullptr, longId, static_cast<ets_long>(1)),
               static_cast<ets_long>(0));
-    EXPECT_FLOAT_EQ(CallStaticFloatMethodListHelper(env_, nullptr, float_id, static_cast<ets_float>(1.0F)),
+    EXPECT_FLOAT_EQ(CallStaticFloatMethodListHelper(env_, nullptr, floatId, static_cast<ets_float>(1.0F)),
                     static_cast<ets_float>(0.0F));
-    EXPECT_DOUBLE_EQ(CallStaticDoubleMethodListHelper(env_, nullptr, double_id, static_cast<ets_double>(1.0)),
+    EXPECT_DOUBLE_EQ(CallStaticDoubleMethodListHelper(env_, nullptr, doubleId, static_cast<ets_double>(1.0)),
                      static_cast<ets_double>(0.0));
 }
 

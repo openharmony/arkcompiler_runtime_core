@@ -28,8 +28,8 @@ namespace panda::compiler {
 
 class VisualizerPrinter {
 public:
-    VisualizerPrinter(const Graph *graph, std::ostream *output, const char *pass_name)
-        : graph_(graph), output_(output), pass_name_(pass_name)
+    VisualizerPrinter(const Graph *graph, std::ostream *output, const char *passName)
+        : graph_(graph), output_(output), passName_(passName)
     {
     }
 
@@ -61,7 +61,7 @@ private:
 private:
     const Graph *graph_;
     std::ostream *output_;
-    const char *pass_name_;
+    const char *passName_;
     uint32_t offset_ {0};
 };
 }  // namespace panda::compiler

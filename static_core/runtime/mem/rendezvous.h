@@ -35,24 +35,24 @@ class PandaVM;
  */
 class Rendezvous {
 public:
-    explicit Rendezvous(PandaVM *panda_vm);
+    explicit Rendezvous(PandaVM *pandaVm);
     virtual ~Rendezvous() = default;
 
     // Wait until all threads release Mutator lock and acquires it for write;
-    virtual void SafepointBegin() ACQUIRE(*mutator_lock_);
+    virtual void SafepointBegin() ACQUIRE(*mutatorLock_);
     // Ends safepoint (wakes up waiting threads, releases Mutator lock);
-    virtual void SafepointEnd() RELEASE(*mutator_lock_);
+    virtual void SafepointEnd() RELEASE(*mutatorLock_);
 
     MutatorLock *GetMutatorLock()
     {
-        return mutator_lock_;
+        return mutatorLock_;
     }
 
 private:
     NO_MOVE_SEMANTIC(Rendezvous);
     NO_COPY_SEMANTIC(Rendezvous);
 
-    MutatorLock *mutator_lock_;
+    MutatorLock *mutatorLock_;
 };
 
 class ScopedSuspendAllThreads {

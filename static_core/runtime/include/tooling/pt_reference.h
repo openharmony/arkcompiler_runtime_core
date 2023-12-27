@@ -21,13 +21,13 @@ class PtReference {};
 class PtGlobalReference : public PtReference {
 public:
     static PtGlobalReference *Create(PtReference *ref);
-    static void Remove(PtGlobalReference *global_ref);
+    static void Remove(PtGlobalReference *globalRef);
 };
 
 class PtLocalReference : public PtReference {
 public:
     static PtLocalReference *Create(PtReference *ref);
-    static void Remove(PtLocalReference *local_ref);
+    static void Remove(PtLocalReference *localRef);
 };
 }  // namespace panda::tooling
 

@@ -84,31 +84,31 @@ using PredefinedAnalyses =
 
 class PassManager {
 public:
-    PassManager(Graph *graph, PassManager *parent_pm);
+    PassManager(Graph *graph, PassManager *parentPm);
 
     ArenaAllocator *GetAllocator();
     ArenaAllocator *GetLocalAllocator();
 
-    bool RunPass(Pass *pass, size_t local_mem_size_before_pass);
+    bool RunPass(Pass *pass, size_t localMemSizeBeforePass);
 
     template <typename T, typename... Args>
     bool RunPass(Args... args)
     {
-        auto local_mem_size_before = GetLocalAllocator()->GetAllocatedSize();
+        auto localMemSizeBefore = GetLocalAllocator()->GetAllocatedSize();
         bool res = false;
         // NOLINTNEXTLINE(readability-braces-around-statements)
         if constexpr (details::PredefinedAnalyses::HasType<T>()) {
             static_assert(sizeof...(Args) == 0);
-            res = RunPass(analyses_[details::PredefinedAnalyses::ID<T>], local_mem_size_before);
+            res = RunPass(analyses_[details::PredefinedAnalyses::ID<T>], localMemSizeBefore);
             // NOLINTNEXTLINE(readability-misleading-indentation)
         } else {
             T pass(graph_, std::forward<Args>(args)...);
-            res = RunPass(&pass, local_mem_size_before);
+            res = RunPass(&pass, localMemSizeBefore);
         }
         if (!IsCheckMode()) {
-            if (OPTIONS.IsCompilerResetLocalAllocator()) {
+            if (g_options.IsCompilerResetLocalAllocator()) {
                 ASSERT(GetLocalAllocator() != GetAllocator());
-                GetLocalAllocator()->Resize(local_mem_size_before);
+                GetLocalAllocator()->Resize(localMemSizeBefore);
             }
         }
         return res;
@@ -120,12 +120,12 @@ public:
         static_assert(std::is_base_of_v<Analysis, std::decay_t<T>>);
         return *static_cast<T *>(analyses_[details::PredefinedAnalyses::ID<T>]);
     }
-    std::string GetFileName(const char *pass_name = nullptr, const std::string &suffix = ".cfg");
-    void DumpGraph(const char *pass_name);
-    void DumpLifeIntervals(const char *pass_name);
+    std::string GetFileName(const char *passName = nullptr, const std::string &suffix = ".cfg");
+    void DumpGraph(const char *passName);
+    void DumpLifeIntervals(const char *passName);
     void InitialDumpVisualizerGraph();
-    void DumpVisualizerGraph(const char *pass_name);
-    void RunPassChecker(Pass *pass, bool result, bool is_codegen);
+    void DumpVisualizerGraph(const char *passName);
+    void RunPassChecker(Pass *pass, bool result, bool isCodegen);
 
     Graph *GetGraph()
     {
@@ -141,24 +141,24 @@ public:
 
     void SetCheckMode(bool v)
     {
-        check_mode_ = v;
+        checkMode_ = v;
     }
 
     bool IsCheckMode() const
     {
-        return check_mode_;
+        return checkMode_;
     }
 
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     size_t GetExecutionCounter() const
     {
-        return execution_counter_;
+        return executionCounter_;
     }
 
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     void StartExecution()
     {
-        execution_counter_++;
+        executionCounter_++;
     }
 
 private:
@@ -167,12 +167,12 @@ private:
     const ArenaVector<Analysis *> analyses_;
 
     PassManagerStatistics *stats_ {nullptr};
-    inline static size_t execution_counter_ {0};
+    inline static size_t executionCounter_ {0};
 
     // Whether passes are run by checker.
-    bool check_mode_ {false};
+    bool checkMode_ {false};
 
-    bool first_execution_ {true};
+    bool firstExecution_ {true};
 };
 }  // namespace panda::compiler
 

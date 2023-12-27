@@ -30,13 +30,13 @@ public:
         }
     }
 
-    void CheckImmediateDominatorsIdSet(int id_dom, std::vector<int> &&bb_ids)
+    void CheckImmediateDominatorsIdSet(int idDom, std::vector<int> &&bbIds)
     {
-        std::set<BasicBlock *> bb_set;
-        for (auto id : bb_ids) {
-            bb_set.insert(&BB(id));
+        std::set<BasicBlock *> bbSet;
+        for (auto id : bbIds) {
+            bbSet.insert(&BB(id));
         }
-        CheckImmediateDominators(&BB(id_dom), std::move(bb_set));
+        CheckImmediateDominators(&BB(idDom), std::move(bbSet));
     }
 
     template <const bool CONDITION>
@@ -146,13 +146,13 @@ TEST_F(DomTreeTest, GraphNoCycles)
 
     // Check if DomTree is not valid after adding new block
     auto g = GetGraph()->CreateEmptyBlock();
-    auto return_void = GetGraph()->CreateInstReturnVoid();
-    g->AppendInst(return_void);
+    auto returnVoid = GetGraph()->CreateInstReturnVoid();
+    g->AppendInst(returnVoid);
     auto cmp =
         GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0U), &INS(1U), DataType::Type::INT64, CC_NE);
     c->AppendInst(cmp);
-    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0U, DataType::BOOL, CC_NE);
-    c->AppendInst(if_inst);
+    auto ifInst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0U, DataType::BOOL, CC_NE);
+    c->AppendInst(ifInst);
     c->AddSucc(g);
     g->AddSucc(exit);
     GetGraph()->GetRootLoop()->AppendBlock(g);

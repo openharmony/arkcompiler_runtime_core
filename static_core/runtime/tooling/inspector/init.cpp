@@ -24,38 +24,38 @@ class DebugInterface;
 }  // namespace panda::tooling
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static panda::Runtime::DebugSessionHandle G_DEBUG_SESSION;
+static panda::Runtime::DebugSessionHandle g_gDebugSession;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static panda::tooling::inspector::AsioServer G_SERVER;
+static panda::tooling::inspector::AsioServer g_gServer;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static std::optional<panda::tooling::inspector::Inspector> G_INSPECTOR;
+static std::optional<panda::tooling::inspector::Inspector> g_gInspector;
 
-extern "C" int StartDebugger(uint32_t port, bool break_on_start)
+extern "C" int StartDebugger(uint32_t port, bool breakOnStart)
 {
-    if (G_INSPECTOR) {
+    if (g_gInspector) {
         LOG(ERROR, DEBUGGER) << "Debugger has already been started";
         return 1;
     }
 
-    if (!G_SERVER.Start(port)) {
+    if (!g_gServer.Start(port)) {
         return 1;
     }
 
-    G_DEBUG_SESSION = panda::Runtime::GetCurrent()->StartDebugSession();
-    G_INSPECTOR.emplace(G_SERVER, G_DEBUG_SESSION->GetDebugger(), break_on_start);
+    g_gDebugSession = panda::Runtime::GetCurrent()->StartDebugSession();
+    g_gInspector.emplace(g_gServer, g_gDebugSession->GetDebugger(), breakOnStart);
     return 0;
 }
 
 extern "C" int StopDebugger()
 {
-    if (!G_INSPECTOR) {
+    if (!g_gInspector) {
         LOG(ERROR, DEBUGGER) << "Debugger has not been started";
         return 1;
     }
 
-    G_INSPECTOR.reset();
-    G_DEBUG_SESSION.reset();
-    return static_cast<int>(!G_SERVER.Stop());
+    g_gInspector.reset();
+    g_gDebugSession.reset();
+    return static_cast<int>(!g_gServer.Stop());
 }

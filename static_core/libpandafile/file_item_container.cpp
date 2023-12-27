@@ -29,23 +29,23 @@ public:
     {
         static_assert(std::is_base_of_v<BaseItem, T>);
 
-        if (auto iter = already_deduped_items_.find(item); iter != already_deduped_items_.end()) {
+        if (auto iter = alreadyDedupedItems_.find(item); iter != alreadyDedupedItems_.end()) {
             ASSERT(item->GetItemType() == iter->second->GetItemType());
             return static_cast<T *>(iter->second);
         }
 
-        ItemData item_data(item);
-        auto it = items_.find(item_data);
+        ItemData itemData(item);
+        auto it = items_.find(itemData);
         if (it == items_.cend()) {
-            items_.insert(item_data);
+            items_.insert(itemData);
             return item;
         }
 
-        auto result_item = it->GetItem();
-        ASSERT(item->GetItemType() == result_item->GetItemType());
-        auto result = static_cast<T *>(result_item);
+        auto resultItem = it->GetItem();
+        ASSERT(item->GetItemType() == resultItem->GetItemType());
+        auto result = static_cast<T *>(resultItem);
         if (item != result) {
-            already_deduped_items_.emplace(item, result);
+            alreadyDedupedItems_.emplace(item, result);
             if constexpr (!std::is_same_v<T, LineNumberProgramItem>) {
                 item->SetNeedsEmit(false);
             }
@@ -115,10 +115,10 @@ private:
             return hash_;
         }
 
-        bool operator==(const ItemData &item_data) const noexcept
+        bool operator==(const ItemData &itemData) const noexcept
         {
             ASSERT(IsInitialized());
-            return data_ == item_data.data_;
+            return data_ == itemData.data_;
         }
 
     private:
@@ -145,24 +145,24 @@ private:
     };
 
     struct ItemHash {
-        size_t operator()(const ItemData &item_data) const noexcept
+        size_t operator()(const ItemData &itemData) const noexcept
         {
-            return item_data.GetHash();
+            return itemData.GetHash();
         }
     };
 
     std::unordered_set<ItemData, ItemHash> items_;
-    std::unordered_map<BaseItem *, BaseItem *> already_deduped_items_;
+    std::unordered_map<BaseItem *, BaseItem *> alreadyDedupedItems_;
 };
 
 // NOTE(nsizov): make method for items deletion
 template <class T, class C, class I, class P, class E, class... Args>
-static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool is_foreign, Args &&...args)
+static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool isForeign, Args &&...args)
 {
     auto it = map.find(key);
     if (it != map.cend()) {
         auto *item = it->second;
-        if (item->IsForeign() == is_foreign) {
+        if (item->IsForeign() == isForeign) {
             return static_cast<T *>(item);
         }
 
@@ -180,67 +180,67 @@ static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool is_fore
 
 ItemContainer::ItemContainer()
 {
-    items_end_ = items_.insert(items_.end(), std::make_unique<EndItem>());
-    annotation_items_end_ = items_.insert(items_.end(), std::make_unique<EndItem>());
-    code_items_end_ = items_.insert(items_.end(), std::make_unique<EndItem>());
-    debug_items_end_ = items_.insert(items_.end(), std::make_unique<EndItem>());
-    end_ = debug_items_end_->get();
+    itemsEnd_ = items_.insert(items_.end(), std::make_unique<EndItem>());
+    annotationItemsEnd_ = items_.insert(items_.end(), std::make_unique<EndItem>());
+    codeItemsEnd_ = items_.insert(items_.end(), std::make_unique<EndItem>());
+    debugItemsEnd_ = items_.insert(items_.end(), std::make_unique<EndItem>());
+    end_ = debugItemsEnd_->get();
 }
 
 ClassItem *ItemContainer::GetOrCreateClassItem(const std::string &str)
 {
-    return GetOrInsert<ClassItem>(class_map_, items_, items_end_, str, false, str);
+    return GetOrInsert<ClassItem>(classMap_, items_, itemsEnd_, str, false, str);
 }
 
 ForeignClassItem *ItemContainer::GetOrCreateForeignClassItem(const std::string &str)
 {
-    return GetOrInsert<ForeignClassItem>(class_map_, foreign_items_, foreign_items_.end(), str, true, str);
+    return GetOrInsert<ForeignClassItem>(classMap_, foreignItems_, foreignItems_.end(), str, true, str);
 }
 
 StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
 {
-    auto it = class_map_.find(str);
-    if (it != class_map_.cend()) {
+    auto it = classMap_.find(str);
+    if (it != classMap_.cend()) {
         return it->second->GetNameItem();
     }
 
-    return GetOrInsert<StringItem>(string_map_, items_, items_end_, str, false, str);
+    return GetOrInsert<StringItem>(stringMap_, items_, itemsEnd_, str, false, str);
 }
 
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
 {
-    return GetOrInsert<LiteralArrayItem>(literalarray_map_, items_, items_end_, id, false);
+    return GetOrInsert<LiteralArrayItem>(literalarrayMap_, items_, itemsEnd_, id, false);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateIntegerValueItem(uint32_t v)
 {
-    return GetOrInsert<ScalarValueItem>(int_value_map_, items_, items_end_, v, false, v);
+    return GetOrInsert<ScalarValueItem>(intValueMap_, items_, itemsEnd_, v, false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateLongValueItem(uint64_t v)
 {
-    return GetOrInsert<ScalarValueItem>(long_value_map_, items_, items_end_, v, false, v);
+    return GetOrInsert<ScalarValueItem>(longValueMap_, items_, itemsEnd_, v, false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateFloatValueItem(float v)
 {
-    return GetOrInsert<ScalarValueItem>(float_value_map_, items_, items_end_, bit_cast<uint32_t>(v), false, v);
+    return GetOrInsert<ScalarValueItem>(floatValueMap_, items_, itemsEnd_, bit_cast<uint32_t>(v), false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateDoubleValueItem(double v)
 {
-    return GetOrInsert<ScalarValueItem>(double_value_map_, items_, items_end_, bit_cast<uint64_t>(v), false, v);
+    return GetOrInsert<ScalarValueItem>(doubleValueMap_, items_, itemsEnd_, bit_cast<uint64_t>(v), false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateIdValueItem(BaseItem *v)
 {
-    return GetOrInsert<ScalarValueItem>(id_value_map_, items_, items_end_, v, false, v);
+    return GetOrInsert<ScalarValueItem>(idValueMap_, items_, itemsEnd_, v, false, v);
 }
 
-ProtoItem *ItemContainer::GetOrCreateProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params)
+ProtoItem *ItemContainer::GetOrCreateProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params)
 {
-    ProtoKey key(ret_type, params);
-    return GetOrInsert<ProtoItem>(proto_map_, items_, items_end_, key, false, ret_type, params);
+    ProtoKey key(retType, params);
+    return GetOrInsert<ProtoItem>(protoMap_, items_, itemsEnd_, key, false, retType, params);
 }
 
 PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type type)
@@ -250,60 +250,60 @@ PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type type)
 
 PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type::TypeId type)
 {
-    return GetOrInsert<PrimitiveTypeItem>(primitive_type_map_, items_, items_end_, type, false, type);
+    return GetOrInsert<PrimitiveTypeItem>(primitiveTypeMap_, items_, itemsEnd_, type, false, type);
 }
 
 LineNumberProgramItem *ItemContainer::CreateLineNumberProgramItem()
 {
-    auto it = items_.insert(debug_items_end_, std::make_unique<LineNumberProgramItem>());
+    auto it = items_.insert(debugItemsEnd_, std::make_unique<LineNumberProgramItem>());
     auto *item = static_cast<LineNumberProgramItem *>(it->get());
-    [[maybe_unused]] auto res = line_number_program_index_item_.Add(item);
+    [[maybe_unused]] auto res = lineNumberProgramIndexItem_.Add(item);
     ASSERT(res);
     return item;
 }
 
 void ItemContainer::IncRefLineNumberProgramItem(LineNumberProgramItem *it)
 {
-    line_number_program_index_item_.IncRefCount(it);
+    lineNumberProgramIndexItem_.IncRefCount(it);
 }
 
 void ItemContainer::DeduplicateLineNumberProgram(DebugInfoItem *item, ItemDeduper *deduper)
 {
-    auto *line_number_program = item->GetLineNumberProgram();
-    auto *deduplicated = deduper->Deduplicate(line_number_program);
-    if (deduplicated != line_number_program) {
+    auto *lineNumberProgram = item->GetLineNumberProgram();
+    auto *deduplicated = deduper->Deduplicate(lineNumberProgram);
+    if (deduplicated != lineNumberProgram) {
         item->SetLineNumberProgram(deduplicated);
-        line_number_program_index_item_.IncRefCount(deduplicated);
-        line_number_program_index_item_.DecRefCount(line_number_program);
+        lineNumberProgramIndexItem_.IncRefCount(deduplicated);
+        lineNumberProgramIndexItem_.DecRefCount(lineNumberProgram);
     }
 }
 
-void ItemContainer::DeduplicateDebugInfo(MethodItem *method, ItemDeduper *debug_info_deduper,
-                                         ItemDeduper *line_number_program_deduper)
+void ItemContainer::DeduplicateDebugInfo(MethodItem *method, ItemDeduper *debugInfoDeduper,
+                                         ItemDeduper *lineNumberProgramDeduper)
 {
-    auto *debug_item = method->GetDebugInfo();
-    if (debug_item == nullptr) {
+    auto *debugItem = method->GetDebugInfo();
+    if (debugItem == nullptr) {
         return;
     }
 
-    DeduplicateLineNumberProgram(debug_item, line_number_program_deduper);
+    DeduplicateLineNumberProgram(debugItem, lineNumberProgramDeduper);
 
-    auto *deduplicated = debug_info_deduper->Deduplicate(debug_item);
-    if (deduplicated != debug_item) {
+    auto *deduplicated = debugInfoDeduper->Deduplicate(debugItem);
+    if (deduplicated != debugItem) {
         method->SetDebugInfo(deduplicated);
-        line_number_program_index_item_.DecRefCount(debug_item->GetLineNumberProgram());
+        lineNumberProgramIndexItem_.DecRefCount(debugItem->GetLineNumberProgram());
     }
 }
 
-static void DeduplicateCode(MethodItem *method, ItemDeduper *code_deduper)
+static void DeduplicateCode(MethodItem *method, ItemDeduper *codeDeduper)
 {
-    auto *code_item = method->GetCode();
-    if (code_item == nullptr) {
+    auto *codeItem = method->GetCode();
+    if (codeItem == nullptr) {
         return;
     }
 
-    auto *deduplicated = code_deduper->Deduplicate(code_item);
-    if (deduplicated != code_item) {
+    auto *deduplicated = codeDeduper->Deduplicate(codeItem);
+    if (deduplicated != codeItem) {
         method->SetCode(deduplicated);
         deduplicated->AddMethod(method);  // we need it for Profile-Guided optimization
     }
@@ -311,32 +311,31 @@ static void DeduplicateCode(MethodItem *method, ItemDeduper *code_deduper)
 
 void ItemContainer::DeduplicateCodeAndDebugInfo()
 {
-    ItemDeduper line_number_program_deduper;
-    ItemDeduper debug_deduper;
-    ItemDeduper code_deduper;
+    ItemDeduper lineNumberProgramDeduper;
+    ItemDeduper debugDeduper;
+    ItemDeduper codeDeduper;
 
-    for (auto &p : class_map_) {
+    for (auto &p : classMap_) {
         auto *item = p.second;
         if (item->IsForeign()) {
             continue;
         }
 
-        auto *class_item = static_cast<ClassItem *>(item);
+        auto *classItem = static_cast<ClassItem *>(item);
 
-        class_item->VisitMethods(
-            [this, &debug_deduper, &line_number_program_deduper, &code_deduper](BaseItem *param_item) {
-                auto *method_item = static_cast<MethodItem *>(param_item);
-                DeduplicateDebugInfo(method_item, &debug_deduper, &line_number_program_deduper);
-                DeduplicateCode(method_item, &code_deduper);
-                return true;
-            });
+        classItem->VisitMethods([this, &debugDeduper, &lineNumberProgramDeduper, &codeDeduper](BaseItem *paramItem) {
+            auto *methodItem = static_cast<MethodItem *>(paramItem);
+            DeduplicateDebugInfo(methodItem, &debugDeduper, &lineNumberProgramDeduper);
+            DeduplicateCode(methodItem, &codeDeduper);
+            return true;
+        });
     }
 }
 
-static void DeduplicateAnnotationValue(AnnotationItem *annotation_item, ItemDeduper *deduper)
+static void DeduplicateAnnotationValue(AnnotationItem *annotationItem, ItemDeduper *deduper)
 {
-    auto *elems = annotation_item->GetElements();
-    const auto &tags = annotation_item->GetTags();
+    auto *elems = annotationItem->GetElements();
+    const auto &tags = annotationItem->GetTags();
 
     for (size_t i = 0; i < elems->size(); i++) {
         auto tag = tags[i];
@@ -374,12 +373,12 @@ static void DeduplicateAnnotationValue(AnnotationItem *annotation_item, ItemDedu
     }
 }
 
-static void DeduplicateAnnotations(std::vector<AnnotationItem *> *items, ItemDeduper *annotation_deduper,
-                                   ItemDeduper *value_deduper)
+static void DeduplicateAnnotations(std::vector<AnnotationItem *> *items, ItemDeduper *annotationDeduper,
+                                   ItemDeduper *valueDeduper)
 {
     for (auto &item : *items) {
-        DeduplicateAnnotationValue(item, value_deduper);
-        auto *deduplicated = annotation_deduper->Deduplicate(item);
+        DeduplicateAnnotationValue(item, valueDeduper);
+        auto *deduplicated = annotationDeduper->Deduplicate(item);
         if (deduplicated != item) {
             item = deduplicated;
         }
@@ -388,50 +387,47 @@ static void DeduplicateAnnotations(std::vector<AnnotationItem *> *items, ItemDed
 
 void ItemContainer::DeduplicateAnnotations()
 {
-    ItemDeduper value_deduper;
-    ItemDeduper annotation_deduper;
+    ItemDeduper valueDeduper;
+    ItemDeduper annotationDeduper;
 
-    for (auto &p : class_map_) {
+    for (auto &p : classMap_) {
         auto *item = p.second;
         if (item->IsForeign()) {
             continue;
         }
 
-        auto *class_item = static_cast<ClassItem *>(item);
+        auto *classItem = static_cast<ClassItem *>(item);
 
-        panda_file::DeduplicateAnnotations(class_item->GetRuntimeAnnotations(), &annotation_deduper, &value_deduper);
-        panda_file::DeduplicateAnnotations(class_item->GetAnnotations(), &annotation_deduper, &value_deduper);
-        panda_file::DeduplicateAnnotations(class_item->GetRuntimeTypeAnnotations(), &annotation_deduper,
-                                           &value_deduper);
-        panda_file::DeduplicateAnnotations(class_item->GetTypeAnnotations(), &annotation_deduper, &value_deduper);
+        panda_file::DeduplicateAnnotations(classItem->GetRuntimeAnnotations(), &annotationDeduper, &valueDeduper);
+        panda_file::DeduplicateAnnotations(classItem->GetAnnotations(), &annotationDeduper, &valueDeduper);
+        panda_file::DeduplicateAnnotations(classItem->GetRuntimeTypeAnnotations(), &annotationDeduper, &valueDeduper);
+        panda_file::DeduplicateAnnotations(classItem->GetTypeAnnotations(), &annotationDeduper, &valueDeduper);
 
-        class_item->VisitMethods([&annotation_deduper, &value_deduper](BaseItem *param_item) {
-            auto *method_item = static_cast<MethodItem *>(param_item);
-            panda_file::DeduplicateAnnotations(method_item->GetRuntimeAnnotations(), &annotation_deduper,
-                                               &value_deduper);
-            panda_file::DeduplicateAnnotations(method_item->GetAnnotations(), &annotation_deduper, &value_deduper);
-            panda_file::DeduplicateAnnotations(method_item->GetRuntimeTypeAnnotations(), &annotation_deduper,
-                                               &value_deduper);
-            panda_file::DeduplicateAnnotations(method_item->GetTypeAnnotations(), &annotation_deduper, &value_deduper);
+        classItem->VisitMethods([&annotationDeduper, &valueDeduper](BaseItem *paramItem) {
+            auto *methodItem = static_cast<MethodItem *>(paramItem);
+            panda_file::DeduplicateAnnotations(methodItem->GetRuntimeAnnotations(), &annotationDeduper, &valueDeduper);
+            panda_file::DeduplicateAnnotations(methodItem->GetAnnotations(), &annotationDeduper, &valueDeduper);
+            panda_file::DeduplicateAnnotations(methodItem->GetRuntimeTypeAnnotations(), &annotationDeduper,
+                                               &valueDeduper);
+            panda_file::DeduplicateAnnotations(methodItem->GetTypeAnnotations(), &annotationDeduper, &valueDeduper);
             return true;
         });
 
-        class_item->VisitFields([&annotation_deduper, &value_deduper](BaseItem *param_item) {
-            auto *field_item = static_cast<FieldItem *>(param_item);
-            panda_file::DeduplicateAnnotations(field_item->GetRuntimeAnnotations(), &annotation_deduper,
-                                               &value_deduper);
-            panda_file::DeduplicateAnnotations(field_item->GetAnnotations(), &annotation_deduper, &value_deduper);
-            panda_file::DeduplicateAnnotations(field_item->GetRuntimeTypeAnnotations(), &annotation_deduper,
-                                               &value_deduper);
-            panda_file::DeduplicateAnnotations(field_item->GetTypeAnnotations(), &annotation_deduper, &value_deduper);
+        classItem->VisitFields([&annotationDeduper, &valueDeduper](BaseItem *paramItem) {
+            auto *fieldItem = static_cast<FieldItem *>(paramItem);
+            panda_file::DeduplicateAnnotations(fieldItem->GetRuntimeAnnotations(), &annotationDeduper, &valueDeduper);
+            panda_file::DeduplicateAnnotations(fieldItem->GetAnnotations(), &annotationDeduper, &valueDeduper);
+            panda_file::DeduplicateAnnotations(fieldItem->GetRuntimeTypeAnnotations(), &annotationDeduper,
+                                               &valueDeduper);
+            panda_file::DeduplicateAnnotations(fieldItem->GetTypeAnnotations(), &annotationDeduper, &valueDeduper);
             return true;
         });
     }
 }
 
-void ItemContainer::DeduplicateItems(bool compute_layout)
+void ItemContainer::DeduplicateItems(bool computeLayout)
 {
-    if (compute_layout) {
+    if (computeLayout) {
         ComputeLayout();
     }
     DeduplicateCodeAndDebugInfo();
@@ -440,10 +436,10 @@ void ItemContainer::DeduplicateItems(bool compute_layout)
 
 uint32_t ItemContainer::ComputeLayout()
 {
-    uint32_t num_classes = class_map_.size();
-    uint32_t num_literalarrays = literalarray_map_.size();
-    uint32_t class_idx_offset = sizeof(File::Header);
-    uint32_t cur_offset = class_idx_offset + (num_classes + num_literalarrays) * ID_SIZE;
+    uint32_t numClasses = classMap_.size();
+    uint32_t numLiteralarrays = literalarrayMap_.size();
+    uint32_t classIdxOffset = sizeof(File::Header);
+    uint32_t curOffset = classIdxOffset + (numClasses + numLiteralarrays) * ID_SIZE;
 
     UpdateOrderIndexes();
     UpdateLiteralIndexes();
@@ -451,15 +447,15 @@ uint32_t ItemContainer::ComputeLayout()
     RebuildRegionSection();
     RebuildLineNumberProgramIndex();
 
-    region_section_item_.SetOffset(cur_offset);
-    region_section_item_.ComputeLayout();
-    cur_offset += region_section_item_.GetSize();
+    regionSectionItem_.SetOffset(curOffset);
+    regionSectionItem_.ComputeLayout();
+    curOffset += regionSectionItem_.GetSize();
 
-    for (auto &item : foreign_items_) {
-        cur_offset = RoundUp(cur_offset, item->Alignment());
-        item->SetOffset(cur_offset);
+    for (auto &item : foreignItems_) {
+        curOffset = RoundUp(curOffset, item->Alignment());
+        item->SetOffset(curOffset);
         item->ComputeLayout();
-        cur_offset += item->GetSize();
+        curOffset += item->GetSize();
     }
 
     for (auto &item : items_) {
@@ -467,34 +463,34 @@ uint32_t ItemContainer::ComputeLayout()
             continue;
         }
 
-        cur_offset = RoundUp(cur_offset, item->Alignment());
-        item->SetOffset(cur_offset);
+        curOffset = RoundUp(curOffset, item->Alignment());
+        item->SetOffset(curOffset);
         item->ComputeLayout();
-        cur_offset += item->GetSize();
+        curOffset += item->GetSize();
     }
 
     // Line number program should be last because it's size is known only after deduplication
-    cur_offset = RoundUp(cur_offset, line_number_program_index_item_.Alignment());
-    line_number_program_index_item_.SetOffset(cur_offset);
-    line_number_program_index_item_.ComputeLayout();
-    cur_offset += line_number_program_index_item_.GetSize();
+    curOffset = RoundUp(curOffset, lineNumberProgramIndexItem_.Alignment());
+    lineNumberProgramIndexItem_.SetOffset(curOffset);
+    lineNumberProgramIndexItem_.ComputeLayout();
+    curOffset += lineNumberProgramIndexItem_.GetSize();
 
-    end_->SetOffset(cur_offset);
+    end_->SetOffset(curOffset);
 
-    return cur_offset;
+    return curOffset;
 }
 
 void ItemContainer::RebuildLineNumberProgramIndex()
 {
-    line_number_program_index_item_.Reset();
-    line_number_program_index_item_.UpdateItems(nullptr, nullptr);
+    lineNumberProgramIndexItem_.Reset();
+    lineNumberProgramIndexItem_.UpdateItems(nullptr, nullptr);
 }
 
 void ItemContainer::RebuildRegionSection()
 {
-    region_section_item_.Reset();
+    regionSectionItem_.Reset();
 
-    for (auto &item : foreign_items_) {
+    for (auto &item : foreignItems_) {
         ProcessIndexDependecies(item.get());
     }
 
@@ -506,21 +502,21 @@ void ItemContainer::RebuildRegionSection()
         ProcessIndexDependecies(item.get());
     }
 
-    if (!region_section_item_.IsEmpty()) {
-        region_section_item_.GetCurrentHeader()->SetEnd(end_);
+    if (!regionSectionItem_.IsEmpty()) {
+        regionSectionItem_.GetCurrentHeader()->SetEnd(end_);
     }
 
-    region_section_item_.UpdateItems();
+    regionSectionItem_.UpdateItems();
 }
 
 void ItemContainer::UpdateOrderIndexes()
 {
     size_t idx = 0;
 
-    for (auto &item : foreign_items_) {
+    for (auto &item : foreignItems_) {
         item->SetOrderIndex(idx++);
-        item->Visit([&idx](BaseItem *param_item) {
-            param_item->SetOrderIndex(idx++);
+        item->Visit([&idx](BaseItem *paramItem) {
+            paramItem->SetOrderIndex(idx++);
             return true;
         });
     }
@@ -531,8 +527,8 @@ void ItemContainer::UpdateOrderIndexes()
         }
 
         item->SetOrderIndex(idx++);
-        item->Visit([&idx](BaseItem *param_item) {
-            param_item->SetOrderIndex(idx++);
+        item->Visit([&idx](BaseItem *paramItem) {
+            paramItem->SetOrderIndex(idx++);
             return true;
         });
     }
@@ -544,47 +540,47 @@ void ItemContainer::UpdateLiteralIndexes()
 {
     size_t idx = 0;
 
-    for (auto &it : literalarray_map_) {
+    for (auto &it : literalarrayMap_) {
         it.second->SetIndex(idx++);
     }
 }
 
-void ItemContainer::ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profile_opt)
+void ItemContainer::ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
-    profile_opt->ProfileGuidedRelayout(items_);
+    profileOpt->ProfileGuidedRelayout(items_);
 }
 
 void ItemContainer::ProcessIndexDependecies(BaseItem *item)
 {
     auto deps = item->GetIndexDependencies();
 
-    item->Visit([&deps](BaseItem *param_item) {
-        const auto &item_deps = param_item->GetIndexDependencies();
-        deps.insert(deps.end(), item_deps.cbegin(), item_deps.cend());
+    item->Visit([&deps](BaseItem *paramItem) {
+        const auto &itemDeps = paramItem->GetIndexDependencies();
+        deps.insert(deps.end(), itemDeps.cbegin(), itemDeps.cend());
         return true;
     });
 
-    if (region_section_item_.IsEmpty()) {
-        region_section_item_.AddHeader();
-        region_section_item_.GetCurrentHeader()->SetStart(item);
+    if (regionSectionItem_.IsEmpty()) {
+        regionSectionItem_.AddHeader();
+        regionSectionItem_.GetCurrentHeader()->SetStart(item);
     }
 
-    if (region_section_item_.GetCurrentHeader()->Add(deps)) {
+    if (regionSectionItem_.GetCurrentHeader()->Add(deps)) {
         return;
     }
 
-    region_section_item_.GetCurrentHeader()->SetEnd(item);
-    region_section_item_.AddHeader();
-    region_section_item_.GetCurrentHeader()->SetStart(item);
+    regionSectionItem_.GetCurrentHeader()->SetEnd(item);
+    regionSectionItem_.AddHeader();
+    regionSectionItem_.GetCurrentHeader()->SetStart(item);
 
-    if (!region_section_item_.GetCurrentHeader()->Add(deps)) {
+    if (!regionSectionItem_.GetCurrentHeader()->Add(deps)) {
         LOG(FATAL, PANDAFILE) << "Cannot add " << deps.size() << " items to index";
     }
 }
 
 bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
 {
-    if (!writer->Write<uint32_t>(class_map_.size())) {
+    if (!writer->Write<uint32_t>(classMap_.size())) {
         return false;
     }
 
@@ -592,34 +588,34 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
-    if (!writer->Write<uint32_t>(line_number_program_index_item_.GetNumItems())) {
+    if (!writer->Write<uint32_t>(lineNumberProgramIndexItem_.GetNumItems())) {
         return false;
     }
 
-    if (!writer->Write<uint32_t>(line_number_program_index_item_.GetOffset())) {
+    if (!writer->Write<uint32_t>(lineNumberProgramIndexItem_.GetOffset())) {
         return false;
     }
 
-    if (!writer->Write<uint32_t>(literalarray_map_.size())) {
+    if (!writer->Write<uint32_t>(literalarrayMap_.size())) {
         return false;
     }
 
-    uint32_t literalarray_idx_offset = sizeof(File::Header) + class_map_.size() * ID_SIZE;
-    if (!writer->Write<uint32_t>(literalarray_idx_offset)) {
+    uint32_t literalarrayIdxOffset = sizeof(File::Header) + classMap_.size() * ID_SIZE;
+    if (!writer->Write<uint32_t>(literalarrayIdxOffset)) {
         return false;
     }
 
-    if (!writer->Write<uint32_t>(region_section_item_.GetNumHeaders())) {
+    if (!writer->Write<uint32_t>(regionSectionItem_.GetNumHeaders())) {
         return false;
     }
 
-    size_t index_section_off = literalarray_idx_offset + literalarray_map_.size() * ID_SIZE;
-    return writer->Write<uint32_t>(index_section_off);
+    size_t indexSectionOff = literalarrayIdxOffset + literalarrayMap_.size() * ID_SIZE;
+    return writer->Write<uint32_t>(indexSectionOff);
 }
 
-bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksum_offset)
+bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksumOffset)
 {
-    uint32_t file_size = ComputeLayout();
+    uint32_t fileSize = ComputeLayout();
 
     std::vector<uint8_t> magic;
     magic.assign(File::MAGIC.cbegin(), File::MAGIC.cend());
@@ -627,54 +623,54 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksum_offset)
         return false;
     }
 
-    *checksum_offset = static_cast<ssize_t>(writer->GetOffset());
+    *checksumOffset = static_cast<ssize_t>(writer->GetOffset());
     uint32_t checksum = 0;
     if (!writer->Write(checksum)) {
         return false;
     }
     writer->CountChecksum(true);
 
-    std::vector<uint8_t> version_vec(std::begin(VERSION), std::end(VERSION));
-    if (!writer->WriteBytes(version_vec)) {
+    std::vector<uint8_t> versionVec(std::begin(VERSION), std::end(VERSION));
+    if (!writer->WriteBytes(versionVec)) {
         return false;
     }
 
-    if (!writer->Write(file_size)) {
+    if (!writer->Write(fileSize)) {
         return false;
     }
 
-    uint32_t foreign_offset = GetForeignOffset();
-    if (!writer->Write(foreign_offset)) {
+    uint32_t foreignOffset = GetForeignOffset();
+    if (!writer->Write(foreignOffset)) {
         return false;
     }
 
-    uint32_t foreign_size = GetForeignSize();
-    if (!writer->Write(foreign_size)) {
+    uint32_t foreignSize = GetForeignSize();
+    if (!writer->Write(foreignSize)) {
         return false;
     }
 
-    if (!writer->Write<uint32_t>(static_cast<uint32_t>(is_quickened_))) {
+    if (!writer->Write<uint32_t>(static_cast<uint32_t>(isQuickened_))) {
         return false;
     }
 
     return WriteHeaderIndexInfo(writer);
 }
 
-bool ItemContainer::Write(Writer *writer, bool deduplicate_items, bool compute_layout)
+bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLayout)
 {
-    if (deduplicate_items) {
-        DeduplicateItems(compute_layout);
+    if (deduplicateItems) {
+        DeduplicateItems(computeLayout);
     }
 
-    ssize_t checksum_offset = -1;
-    if (!WriteHeader(writer, &checksum_offset)) {
+    ssize_t checksumOffset = -1;
+    if (!WriteHeader(writer, &checksumOffset)) {
         return false;
     }
-    ASSERT(checksum_offset != -1);
+    ASSERT(checksumOffset != -1);
 
     // Write class idx
 
-    for (auto &entry : class_map_) {
+    for (auto &entry : classMap_) {
         if (!writer->Write(entry.second->GetOffset())) {
             return false;
         }
@@ -682,7 +678,7 @@ bool ItemContainer::Write(Writer *writer, bool deduplicate_items, bool compute_l
 
     // Write literalArray idx
 
-    for (auto &entry : literalarray_map_) {
+    for (auto &entry : literalarrayMap_) {
         if (!writer->Write(entry.second->GetOffset())) {
             return false;
         }
@@ -690,11 +686,11 @@ bool ItemContainer::Write(Writer *writer, bool deduplicate_items, bool compute_l
 
     // Write index section
 
-    if (!region_section_item_.Write(writer)) {
+    if (!regionSectionItem_.Write(writer)) {
         return false;
     }
 
-    for (auto &item : foreign_items_) {
+    for (auto &item : foreignItems_) {
         if (!writer->Align(item->Alignment())) {
             return false;
         }
@@ -718,18 +714,18 @@ bool ItemContainer::Write(Writer *writer, bool deduplicate_items, bool compute_l
         }
     }
 
-    if (!writer->Align(line_number_program_index_item_.Alignment())) {
+    if (!writer->Align(lineNumberProgramIndexItem_.Alignment())) {
         return false;
     }
 
     // Write line number program idx
 
-    if (!line_number_program_index_item_.Write(writer)) {
+    if (!lineNumberProgramIndexItem_.Write(writer)) {
         return false;
     }
 
     writer->CountChecksum(false);
-    writer->WriteChecksum(checksum_offset);
+    writer->WriteChecksum(checksumOffset);
 
     return true;
 }
@@ -742,14 +738,14 @@ std::map<std::string, size_t> ItemContainer::GetStat()
     ComputeLayout();
 
     stat["header_item"] = sizeof(File::Header);
-    stat["class_idx_item"] = class_map_.size() * ID_SIZE;
-    stat["line_number_program_idx_item"] = line_number_program_index_item_.GetNumItems() * ID_SIZE;
-    stat["literalarray_idx"] = literalarray_map_.size() * ID_SIZE;
+    stat["class_idx_item"] = classMap_.size() * ID_SIZE;
+    stat["line_number_program_idx_item"] = lineNumberProgramIndexItem_.GetNumItems() * ID_SIZE;
+    stat["literalarray_idx"] = literalarrayMap_.size() * ID_SIZE;
 
-    stat["region_section_item"] = region_section_item_.GetSize();
+    stat["region_section_item"] = regionSectionItem_.GetSize();
     stat["foreign_item"] = GetForeignSize();
 
-    size_t num_ins = 0;
+    size_t numIns = 0;
     size_t codesize = 0;
     for (auto &item : items_) {
         if (!item->NeedsEmit()) {
@@ -765,11 +761,11 @@ std::map<std::string, size_t> ItemContainer::GetStat()
             stat[name] = size;
         }
         if (name == "code_item") {
-            num_ins += static_cast<CodeItem *>(item.get())->GetNumInstructions();
+            numIns += static_cast<CodeItem *>(item.get())->GetNumInstructions();
             codesize += static_cast<CodeItem *>(item.get())->GetCodeSize();
         }
     }
-    stat["instructions_number"] = num_ins;
+    stat["instructions_number"] = numIns;
     stat["codesize"] = codesize;
 
     return stat;
@@ -779,12 +775,12 @@ void ItemContainer::DumpItemsStat(std::ostream &os) const
 {
     struct Stat {
         size_t n;
-        size_t total_size;
+        size_t totalSize;
     };
 
     std::map<std::string, Stat> stat;
 
-    auto collect_stat = [&stat](auto &items) {
+    auto collectStat = [&stat](auto &items) {
         for (auto &item : items) {
             if (!item->NeedsEmit()) {
                 continue;
@@ -795,40 +791,40 @@ void ItemContainer::DumpItemsStat(std::ostream &os) const
             auto it = stat.find(name);
             if (it != stat.cend()) {
                 stat[name].n += 1;
-                stat[name].total_size += size;
+                stat[name].totalSize += size;
             } else if (size != 0) {
                 stat[name] = {1, size};
             }
         }
     };
 
-    collect_stat(foreign_items_);
-    collect_stat(items_);
+    collectStat(foreignItems_);
+    collectStat(items_);
 
     for (auto &[name, elem] : stat) {
         os << name << ":" << std::endl;
         os << "    n          = " << elem.n << std::endl;
-        os << "    total size = " << elem.total_size << std::endl;
+        os << "    total size = " << elem.totalSize << std::endl;
     }
 }
 
 size_t ItemContainer::GetForeignOffset() const
 {
-    if (foreign_items_.empty()) {
+    if (foreignItems_.empty()) {
         return 0;
     }
 
-    return foreign_items_.front()->GetOffset();
+    return foreignItems_.front()->GetOffset();
 }
 
 size_t ItemContainer::GetForeignSize() const
 {
-    if (foreign_items_.empty()) {
+    if (foreignItems_.empty()) {
         return 0;
     }
 
-    size_t begin = foreign_items_.front()->GetOffset();
-    size_t end = foreign_items_.back()->GetOffset() + foreign_items_.back()->GetSize();
+    size_t begin = foreignItems_.front()->GetOffset();
+    size_t end = foreignItems_.back()->GetOffset() + foreignItems_.back()->GetSize();
 
     return end - begin;
 }
@@ -849,13 +845,13 @@ bool ItemContainer::RegionHeaderItem::Write(Writer *writer)
         return false;
     }
 
-    for (auto *index_item : indexes_) {
-        if (!writer->Write<uint32_t>(index_item->GetNumItems())) {
+    for (auto *indexItem : indexes_) {
+        if (!writer->Write<uint32_t>(indexItem->GetNumItems())) {
             return false;
         }
 
-        ASSERT(index_item->GetOffset() != 0);
-        if (!writer->Write<uint32_t>(index_item->GetOffset())) {
+        ASSERT(indexItem->GetOffset() != 0);
+        if (!writer->Write<uint32_t>(indexItem->GetOffset())) {
             return false;
         }
     }
@@ -865,24 +861,24 @@ bool ItemContainer::RegionHeaderItem::Write(Writer *writer)
 
 bool ItemContainer::RegionHeaderItem::Add(const std::list<IndexedItem *> &items)
 {
-    std::list<IndexedItem *> added_items;
+    std::list<IndexedItem *> addedItems;
 
     for (auto *item : items) {
         auto type = item->GetIndexType();
         ASSERT(type != IndexType::NONE);
 
-        auto *index_item = GetIndexByType(type);
+        auto *indexItem = GetIndexByType(type);
 
-        if (index_item->Has(item)) {
+        if (indexItem->Has(item)) {
             continue;
         }
 
-        if (!index_item->Add(item)) {
-            Remove(added_items);
+        if (!indexItem->Add(item)) {
+            Remove(addedItems);
             return false;
         }
 
-        added_items.push_back(item);
+        addedItems.push_back(item);
     }
 
     return true;
@@ -894,8 +890,8 @@ void ItemContainer::RegionHeaderItem::Remove(const std::list<IndexedItem *> &ite
         auto type = item->GetIndexType();
         ASSERT(type != IndexType::NONE);
 
-        auto *index_item = GetIndexByType(type);
-        index_item->Remove(item);
+        auto *indexItem = GetIndexByType(type);
+        indexItem->Remove(item);
     }
 }
 
@@ -935,9 +931,9 @@ ItemTypes ItemContainer::IndexItem::GetItemType() const
 bool ItemContainer::IndexItem::Add(IndexedItem *item)
 {
     auto size = index_.size();
-    ASSERT(size <= max_index_);
+    ASSERT(size <= maxIndex_);
 
-    if (size == max_index_) {
+    if (size == maxIndex_) {
         return false;
     }
 
@@ -949,20 +945,20 @@ bool ItemContainer::IndexItem::Add(IndexedItem *item)
 
 void ItemContainer::RegionSectionItem::AddHeader()
 {
-    std::vector<IndexItem *> index_items;
+    std::vector<IndexItem *> indexItems;
     for (size_t i = 0; i < INDEX_COUNT_16; i++) {
         auto type = static_cast<IndexType>(i);
         indexes_.emplace_back(type, MAX_INDEX_16);
-        index_items.push_back(&indexes_.back());
+        indexItems.push_back(&indexes_.back());
     }
-    headers_.emplace_back(index_items);
+    headers_.emplace_back(indexItems);
 }
 
 size_t ItemContainer::RegionSectionItem::CalculateSize() const
 {
     size_t size = headers_.size() * sizeof(File::RegionHeader);
-    for (auto &index_item : indexes_) {
-        size += index_item.GetSize();
+    for (auto &indexItem : indexes_) {
+        size += indexItem.GetSize();
     }
     return size;
 }
@@ -1003,20 +999,20 @@ bool ItemContainer::RegionSectionItem::Write(Writer *writer)
     return true;
 }
 
-ItemContainer::ProtoKey::ProtoKey(TypeItem *ret_type, const std::vector<MethodParamItem> &params)
+ItemContainer::ProtoKey::ProtoKey(TypeItem *retType, const std::vector<MethodParamItem> &params)
 {
-    Add(ret_type);
+    Add(retType);
     for (const auto &param : params) {
         Add(param.GetType());
     }
-    size_t shorty_hash = std::hash<std::string>()(shorty_);
-    size_t ret_type_hash = std::hash<TypeItem *>()(ret_type);
+    size_t shortyHash = std::hash<std::string>()(shorty_);
+    size_t retTypeHash = std::hash<TypeItem *>()(retType);
     // combine hashes of shorty and ref_types
-    hash_ = panda::MergeHashes(shorty_hash, ret_type_hash);
+    hash_ = panda::MergeHashes(shortyHash, retTypeHash);
     // combine hashes of all param types
     for (const auto &item : params) {
-        size_t param_type_hash = std::hash<TypeItem *>()(item.GetType());
-        hash_ = panda::MergeHashes(hash_, param_type_hash);
+        size_t paramTypeHash = std::hash<TypeItem *>()(item.GetType());
+        hash_ = panda::MergeHashes(hash_, paramTypeHash);
     }
 }
 
@@ -1025,7 +1021,7 @@ void ItemContainer::ProtoKey::Add(TypeItem *item)
     auto type = item->GetType();
     shorty_.append(Type::GetSignatureByTypeId(type));
     if (type.IsReference()) {
-        ref_types_.push_back(item);
+        refTypes_.push_back(item);
     }
 }
 

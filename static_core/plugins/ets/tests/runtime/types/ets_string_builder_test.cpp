@@ -70,11 +70,11 @@ private:
 
 TEST_F(EtsStringBuilderTest, CharToString)
 {
-    EtsChar ets_ch = L'٩';
-    EtsString *char_to_string = intrinsics::StdCoreToStringChar(ets_ch);
+    EtsChar etsCh = L'٩';
+    EtsString *charToString = intrinsics::StdCoreToStringChar(etsCh);
 
-    ASSERT_TRUE(char_to_string->GetLength() == 1);
-    ASSERT_TRUE(char_to_string->GetDataUtf16()[0] == ets_ch);
+    ASSERT_TRUE(charToString->GetLength() == 1);
+    ASSERT_TRUE(charToString->GetDataUtf16()[0] == etsCh);
 }
 
 }  // namespace panda::ets::test

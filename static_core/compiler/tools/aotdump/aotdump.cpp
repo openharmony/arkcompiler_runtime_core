@@ -60,19 +60,19 @@ public:
         if (!type.IsReference()) {
             out_ << type;
         } else {
-            out_ << ClassHelper::GetName(pda_.GetPandaFile().GetStringData(pda_.GetReferenceType(ref_idx_++)).data);
+            out_ << ClassHelper::GetName(pda_.GetPandaFile().GetStringData(pda_.GetReferenceType(refIdx_++)).data);
         }
     }
 
 private:
     panda_file::ProtoDataAccessor &pda_;
     std::ostream &out_;
-    uint32_t ref_idx_ {0};
+    uint32_t refIdx_ {0};
 };
 
 class PandaFileHelper {
 public:
-    explicit PandaFileHelper(const char *file_name) : file_(panda_file::OpenPandaFile(file_name)) {}
+    explicit PandaFileHelper(const char *fileName) : file_(panda_file::OpenPandaFile(fileName)) {}
     NO_COPY_SEMANTIC(PandaFileHelper);
     NO_MOVE_SEMANTIC(PandaFileHelper);
     ~PandaFileHelper() = default;
@@ -82,31 +82,31 @@ public:
         if (!file_) {
             return "-";
         }
-        auto file_id = panda_file::File::EntityId(id);
-        panda_file::MethodDataAccessor mda(*file_, file_id);
-        panda_file::ProtoDataAccessor pda(*file_, panda_file::MethodDataAccessor::GetProtoId(*file_, file_id));
+        auto fileId = panda_file::File::EntityId(id);
+        panda_file::MethodDataAccessor mda(*file_, fileId);
+        panda_file::ProtoDataAccessor pda(*file_, panda_file::MethodDataAccessor::GetProtoId(*file_, fileId));
         std::ostringstream ss;
-        TypePrinter type_printer(pda, ss);
+        TypePrinter typePrinter(pda, ss);
 
-        type_printer.Dump(pda.GetReturnType());
+        typePrinter.Dump(pda.GetReturnType());
         ss << ' ';
 
-        auto class_name = ClassHelper::GetName(file_->GetStringData(mda.GetClassId()).data);
-        ss << class_name << "::" << file_->GetStringData(mda.GetNameId()).data;
+        auto className = ClassHelper::GetName(file_->GetStringData(mda.GetClassId()).data);
+        ss << className << "::" << file_->GetStringData(mda.GetNameId()).data;
 
         ss << '(';
-        bool first_arg = true;
+        bool firstArg = true;
         // inject class name as the first argument of non static method for consitency with panda::Method::GetFullName
         if (!mda.IsStatic()) {
-            first_arg = false;
-            ss << class_name;
+            firstArg = false;
+            ss << className;
         }
-        for (uint32_t arg_idx = 0; arg_idx < pda.GetNumArgs(); ++arg_idx) {
-            if (!first_arg) {
+        for (uint32_t argIdx = 0; argIdx < pda.GetNumArgs(); ++argIdx) {
+            if (!firstArg) {
                 ss << ", ";
             }
-            first_arg = false;
-            type_printer.Dump(pda.GetArgType(arg_idx));
+            firstArg = false;
+            typePrinter.Dump(pda.GetArgType(argIdx));
         }
         ss << ')';
         return ss.str();
@@ -133,75 +133,75 @@ public:
 
     int Run(int argc, const char *argv[])  // NOLINT(modernize-avoid-c-arrays)
     {
-        panda::PandArgParser pa_parser;
-        PandArg<std::string> input_file {"input_file", "", "Input file path"};
-        pa_parser.EnableTail();
-        pa_parser.PushBackTail(&input_file);
-        std::array<char, NAME_MAX> tmpfile_buf {"/tmp/fixed_aot_XXXXXX"};
+        panda::PandArgParser paParser;
+        PandArg<std::string> inputFile {"input_file", "", "Input file path"};
+        paParser.EnableTail();
+        paParser.PushBackTail(&inputFile);
+        std::array<char, NAME_MAX> tmpfileBuf {"/tmp/fixed_aot_XXXXXX"};
         // Remove temporary file at the function exit
-        auto finalizer = [](const char *file_name) {
-            if (file_name != nullptr) {
-                remove(file_name);
+        auto finalizer = [](const char *fileName) {
+            if (fileName != nullptr) {
+                remove(fileName);
             }
         };
-        std::unique_ptr<const char, decltype(finalizer)> temp_file_remover(nullptr, finalizer);
+        std::unique_ptr<const char, decltype(finalizer)> tempFileRemover(nullptr, finalizer);
 
         panda::Span<const char *> sp(argv, argc);
         panda::aoutdump::Options options(sp[0]);
-        options.AddOptions(&pa_parser);
-        if (!pa_parser.Parse(argc, argv)) {
-            std::cerr << "Parse options failed: " << pa_parser.GetErrorString() << std::endl;
+        options.AddOptions(&paParser);
+        if (!paParser.Parse(argc, argv)) {
+            std::cerr << "Parse options failed: " << paParser.GetErrorString() << std::endl;
             return -1;
         }
-        if (input_file.GetValue().empty()) {
+        if (inputFile.GetValue().empty()) {
             std::cerr << "Please specify input file\n";
             return -1;
         }
-        Expected<std::unique_ptr<AotFile>, std::string> aot_res;
+        Expected<std::unique_ptr<AotFile>, std::string> aotRes;
         // Fix elf header for cross platform files. Cross opening is available only in X86_64 arch.
         if (RUNTIME_ARCH == Arch::X86_64) {
-            if (!FixElfHeader(tmpfile_buf, input_file)) {
+            if (!FixElfHeader(tmpfileBuf, inputFile)) {
                 return -1;
             }
-            temp_file_remover.reset(tmpfile_buf.data());
-            aot_res = AotFile::Open(tmpfile_buf.data(), 0, true);
+            tempFileRemover.reset(tmpfileBuf.data());
+            aotRes = AotFile::Open(tmpfileBuf.data(), 0, true);
         } else {
-            aot_res = AotFile::Open(input_file.GetValue(), 0, true);
+            aotRes = AotFile::Open(inputFile.GetValue(), 0, true);
         }
-        if (!aot_res) {
-            std::cerr << "Open AOT file failed: " << aot_res.Error() << std::endl;
+        if (!aotRes) {
+            std::cerr << "Open AOT file failed: " << aotRes.Error() << std::endl;
             return -1;
         }
 
-        DumpAll(std::move(aot_res.Value()), options);
+        DumpAll(std::move(aotRes.Value()), options);
         return 0;
     }
 
-    void DumpAll(std::unique_ptr<AotFile> aot_file, panda::aoutdump::Options options)
+    void DumpAll(std::unique_ptr<AotFile> aotFile, panda::aoutdump::Options options)
     {
-        std::ostream *output_stream;
-        std::ofstream out_fstream;
+        std::ostream *outputStream;
+        std::ofstream outFstream;
         if (options.WasSetOutputFile()) {
-            out_fstream.open(options.GetOutputFile());
-            output_stream = &out_fstream;
+            outFstream.open(options.GetOutputFile());
+            outputStream = &outFstream;
         } else {
-            output_stream = &std::cerr;
+            outputStream = &std::cerr;
         }
-        auto &stream = *output_stream;
-        DumpHeader(stream, aot_file);
-        DumpFiles(stream, aot_file, options);
+        auto &stream = *outputStream;
+        DumpHeader(stream, aotFile);
+        DumpFiles(stream, aotFile, options);
     }
 
-    bool FixElfHeader(std::array<char, NAME_MAX> &tmpfile_buf, PandArg<std::string> &input_file)
+    bool FixElfHeader(std::array<char, NAME_MAX> &tmpfileBuf, PandArg<std::string> &inputFile)
     {
-        int fd = mkstemp(tmpfile_buf.data());
+        int fd = mkstemp(tmpfileBuf.data());
         if (fd == -1) {
             std::cerr << "Failed to open temporary file\n";
             return false;
         }
         close(fd);
-        std::ofstream ostm(tmpfile_buf.data(), std::ios::binary);
-        std::ifstream istm(input_file.GetValue(), std::ios::binary);
+        std::ofstream ostm(tmpfileBuf.data(), std::ios::binary);
+        std::ifstream istm(inputFile.GetValue(), std::ios::binary);
         if (!ostm.is_open() || !istm.is_open()) {
             std::cerr << "Cannot open tmpfile or input file\n";
             return false;
@@ -213,27 +213,27 @@ public:
         return true;
     }
 
-    void DumpHeader(std::ostream &stream, std::unique_ptr<panda::compiler::AotFile> &aot_file)
+    void DumpHeader(std::ostream &stream, std::unique_ptr<panda::compiler::AotFile> &aotFile)
     {
-        auto aot_header = aot_file->GetAotHeader();
+        auto aotHeader = aotFile->GetAotHeader();
         stream << "header:" << std::endl;
-        stream << "  magic: " << aot_header->magic.data() << std::endl;
-        stream << "  version: " << aot_header->version.data() << std::endl;
-        stream << "  filename: " << aot_file->GetFileName() << std::endl;
-        stream << "  cmdline: " << aot_file->GetCommandLine() << std::endl;
-        stream << "  checksum: " << aot_header->checksum << std::endl;
-        stream << "  env checksum: " << aot_header->environment_checksum << std::endl;
-        stream << "  arch: " << GetArchString(static_cast<Arch>(aot_header->arch)) << std::endl;
-        stream << "  gc_type: " << mem::GCStringFromType(static_cast<mem::GCType>(aot_header->gc_type)) << std::endl;
-        stream << "  files_count: " << aot_header->files_count << std::endl;
-        stream << "  files_offset: " << aot_header->files_offset << std::endl;
-        stream << "  classes_offset: " << aot_header->classes_offset << std::endl;
-        stream << "  methods_offset: " << aot_header->methods_offset << std::endl;
-        stream << "  bitmap_offset: " << aot_header->bitmap_offset << std::endl;
-        stream << "  strtab_offset: " << aot_header->strtab_offset << std::endl;
+        stream << "  magic: " << aotHeader->magic.data() << std::endl;
+        stream << "  version: " << aotHeader->version.data() << std::endl;
+        stream << "  filename: " << aotFile->GetFileName() << std::endl;
+        stream << "  cmdline: " << aotFile->GetCommandLine() << std::endl;
+        stream << "  checksum: " << aotHeader->checksum << std::endl;
+        stream << "  env checksum: " << aotHeader->environmentChecksum << std::endl;
+        stream << "  arch: " << GetArchString(static_cast<Arch>(aotHeader->arch)) << std::endl;
+        stream << "  gc_type: " << mem::GCStringFromType(static_cast<mem::GCType>(aotHeader->gcType)) << std::endl;
+        stream << "  files_count: " << aotHeader->filesCount << std::endl;
+        stream << "  files_offset: " << aotHeader->filesOffset << std::endl;
+        stream << "  classes_offset: " << aotHeader->classesOffset << std::endl;
+        stream << "  methods_offset: " << aotHeader->methodsOffset << std::endl;
+        stream << "  bitmap_offset: " << aotHeader->bitmapOffset << std::endl;
+        stream << "  strtab_offset: " << aotHeader->strtabOffset << std::endl;
     }
 
-    void DumpClassHashTable(std::ostream &stream, panda::compiler::AotPandaFile &aot_panda_file, PandaFileHelper &pfile)
+    void DumpClassHashTable(std::ostream &stream, panda::compiler::AotPandaFile &aotPandaFile, PandaFileHelper &pfile)
     {
         stream << "  class_hash_table:" << std::endl;
         constexpr int ALIGN_SIZE = 32;
@@ -241,16 +241,16 @@ public:
                << std::setw(ALIGN_SIZE) << "next_pos";
         stream << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << "entity_id_offset" << std::left
                << std::setfill(' ') << std::setw(ALIGN_SIZE) << "descriptor" << std::endl;
-        auto class_hash_table = aot_panda_file.GetClassHashTable();
-        auto hash_table_size = class_hash_table.size();
-        for (size_t i = 0; i < hash_table_size; i++) {
-            auto entity_pair = class_hash_table[i];
-            if (entity_pair.descriptor_hash != 0) {
-                auto descriptor = pfile.GetClassName(entity_pair.entity_id_offset);
+        auto classHashTable = aotPandaFile.GetClassHashTable();
+        auto hashTableSize = classHashTable.size();
+        for (size_t i = 0; i < hashTableSize; i++) {
+            auto entityPair = classHashTable[i];
+            if (entityPair.descriptorHash != 0) {
+                auto descriptor = pfile.GetClassName(entityPair.entityIdOffset);
                 stream << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << (i + 1);
-                stream << std::left << std::setfill(' ') << std::dec << std::setw(ALIGN_SIZE) << entity_pair.next_pos;
+                stream << std::left << std::setfill(' ') << std::dec << std::setw(ALIGN_SIZE) << entityPair.nextPos;
                 stream << std::left << std::setfill(' ') << std::dec << std::setw(ALIGN_SIZE)
-                       << entity_pair.entity_id_offset;
+                       << entityPair.entityIdOffset;
                 stream << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << descriptor << std::endl;
             } else {
                 stream << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << (i + 1) << std::endl;
@@ -258,59 +258,59 @@ public:
         }
     }
 
-    void DumpFiles(std::ostream &stream, std::unique_ptr<panda::compiler::AotFile> &aot_file,
+    void DumpFiles(std::ostream &stream, std::unique_ptr<panda::compiler::AotFile> &aotFile,
                    panda::aoutdump::Options &options)
     {
         stream << "files:" << std::endl;
-        for (decltype(auto) file_header : aot_file->FileHeaders()) {
-            AotPandaFile aot_panda_file(aot_file.get(), &file_header);
-            auto file_name = aot_file->GetString(file_header.file_name_str);
-            PandaFileHelper pfile(file_name);
-            stream << "- name: " << file_name << std::endl;
+        for (decltype(auto) fileHeader : aotFile->FileHeaders()) {
+            AotPandaFile aotPandaFile(aotFile.get(), &fileHeader);
+            auto fileName = aotFile->GetString(fileHeader.fileNameStr);
+            PandaFileHelper pfile(fileName);
+            stream << "- name: " << fileName << std::endl;
             stream << "  classes:\n";
-            for (decltype(auto) class_header : aot_panda_file.GetClassHeaders()) {
-                AotClass klass(aot_file.get(), &class_header);
-                stream << "  - class_id: " << class_header.class_id << std::endl;
-                stream << "    name: " << pfile.GetClassName(class_header.class_id) << std::endl;
-                auto methods_bitmap = klass.GetBitmap();
-                BitMemoryRegion rgn(methods_bitmap.data(), methods_bitmap.size());
+            for (decltype(auto) classHeader : aotPandaFile.GetClassHeaders()) {
+                AotClass klass(aotFile.get(), &classHeader);
+                stream << "  - class_id: " << classHeader.classId << std::endl;
+                stream << "    name: " << pfile.GetClassName(classHeader.classId) << std::endl;
+                auto methodsBitmap = klass.GetBitmap();
+                BitMemoryRegion rgn(methodsBitmap.data(), methodsBitmap.size());
                 stream << "    methods_bitmap: " << rgn << std::endl;
                 stream << "    methods:\n";
-                for (decltype(auto) method_header : klass.GetMethodHeaders()) {
-                    auto method_name = pfile.GetMethodName(method_header.method_id);
-                    if (options.WasSetMethodRegex() && !method_name.empty()) {
+                for (decltype(auto) methodHeader : klass.GetMethodHeaders()) {
+                    auto methodName = pfile.GetMethodName(methodHeader.methodId);
+                    if (options.WasSetMethodRegex() && !methodName.empty()) {
                         static std::regex rgx(options.GetMethodRegex());
-                        if (!std::regex_match(method_name, rgx)) {
+                        if (!std::regex_match(methodName, rgx)) {
                             continue;
                         }
                     }
-                    stream << "    - id: " << std::dec << method_header.method_id << std::endl;
-                    stream << "      name: " << method_name << std::endl;
-                    stream << "      code_offset: 0x" << std::hex << method_header.code_offset << std::dec << std::endl;
-                    stream << "      code_size: " << method_header.code_size << std::endl;
-                    auto code_info = aot_panda_file.GetMethodCodeInfo(&method_header);
+                    stream << "    - id: " << std::dec << methodHeader.methodId << std::endl;
+                    stream << "      name: " << methodName << std::endl;
+                    stream << "      code_offset: 0x" << std::hex << methodHeader.codeOffset << std::dec << std::endl;
+                    stream << "      code_size: " << methodHeader.codeSize << std::endl;
+                    auto codeInfo = aotPandaFile.GetMethodCodeInfo(&methodHeader);
                     if (options.GetShowCode() == "disasm") {
                         stream << "      code: |\n";
-                        PrintCode("        ", *aot_file, code_info, stream, pfile);
+                        PrintCode("        ", *aotFile, codeInfo, stream, pfile);
                     }
                 }
             }
-            DumpClassHashTable(stream, aot_panda_file, pfile);
+            DumpClassHashTable(stream, aotPandaFile, pfile);
         }
     }
 
-    void PrintCode(const char *prefix, const AotFile &aot_file, const CodeInfo &code_info, std::ostream &stream,
+    void PrintCode(const char *prefix, const AotFile &aotFile, const CodeInfo &codeInfo, std::ostream &stream,
                    const PandaFileHelper &pfile) const
     {
-        Arch arch = static_cast<Arch>(aot_file.GetAotHeader()->arch);
+        Arch arch = static_cast<Arch>(aotFile.GetAotHeader()->arch);
         switch (arch) {
 #ifdef PANDA_COMPILER_TARGET_AARCH64
             case Arch::AARCH64:
-                return PrintCodeArm64(prefix, code_info, stream, pfile);
+                return PrintCodeArm64(prefix, codeInfo, stream, pfile);
 #endif  // PANDA_COMPILER_TARGET_AARCH64
 #ifdef PANDA_COMPILER_TARGET_X86_64
             case Arch::X86_64:
-                return PrintCodeX8664(prefix, code_info, stream, pfile);
+                return PrintCodeX8664(prefix, codeInfo, stream, pfile);
 #endif  // PANDA_COMPILER_TARGET_X86_64
             default:
                 stream << prefix << "Unsupported target arch: " << GetArchString(arch) << std::endl;
@@ -319,26 +319,26 @@ public:
     }
 
 #ifdef PANDA_COMPILER_TARGET_AARCH64
-    void PrintCodeArm64(const char *prefix, const CodeInfo &code_info, std::ostream &stream,
+    void PrintCodeArm64(const char *prefix, const CodeInfo &codeInfo, std::ostream &stream,
                         const PandaFileHelper &pfile) const
     {
-        Span<const uint8_t> code = code_info.GetCodeSpan();
+        Span<const uint8_t> code = codeInfo.GetCodeSpan();
 
         Decoder decoder(allocator_);
         Disassembler disasm(allocator_);
         decoder.AppendVisitor(&disasm);
-        auto start_instr = reinterpret_cast<const Instruction *>(code.data());
-        auto end_instr = reinterpret_cast<const Instruction *>(code.end());
+        auto startInstr = reinterpret_cast<const Instruction *>(code.data());
+        auto endInstr = reinterpret_cast<const Instruction *>(code.end());
         uint32_t pc = 0;
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (auto instr = start_instr; instr < end_instr; instr += vixl::aarch64::kInstructionSize) {
-            auto stackmap = code_info.FindStackMapForNativePc(pc, Arch::AARCH64);
+        for (auto instr = startInstr; instr < endInstr; instr += vixl::aarch64::kInstructionSize) {
+            auto stackmap = codeInfo.FindStackMapForNativePc(pc, Arch::AARCH64);
             if (stackmap.IsValid()) {
-                PrintStackmap(stream, prefix, code_info, stackmap, Arch::AARCH64, pfile);
+                PrintStackmap(stream, prefix, codeInfo, stackmap, Arch::AARCH64, pfile);
             }
             decoder.Decode(instr);
-            stream << prefix << std::hex << std::setw(8U) << std::setfill('0') << instr - start_instr << ": "
+            stream << prefix << std::hex << std::setw(8U) << std::setfill('0') << instr - startInstr << ": "
                    << disasm.GetOutput() << std::endl;
             pc += vixl::aarch64::kInstructionSize;
         }
@@ -346,12 +346,12 @@ public:
     }
 #endif  // PANDA_COMPILER_TARGET_AARCH64
 #ifdef PANDA_COMPILER_TARGET_X86_64
-    void PrintCodeX8664(const char *prefix, const CodeInfo &code_info, std::ostream &stream,
+    void PrintCodeX8664(const char *prefix, const CodeInfo &codeInfo, std::ostream &stream,
                         const PandaFileHelper &pfile) const
     {
-        Span<const uint8_t> code = code_info.GetCodeSpan();
+        Span<const uint8_t> code = codeInfo.GetCodeSpan();
         constexpr size_t LENGTH = ZYDIS_MAX_INSTRUCTION_LENGTH;  // 15 bytes is max inst length in amd64
-        size_t code_size = code.size();
+        size_t codeSize = code.size();
 
         // Initialize decoder context
         ZydisDecoder decoder;
@@ -365,11 +365,11 @@ public:
             LOG(FATAL, AOT) << "ZydisFormatterInit failed";
         }
 
-        for (size_t pos = 0; pos < code_size;) {
+        for (size_t pos = 0; pos < codeSize;) {
             ZydisDecodedInstruction instruction;
             constexpr auto BUF_SIZE = 256;
             std::array<char, BUF_SIZE> buffer;  // NOLINT(cppcoreguidelines-pro-type-member-init)
-            auto len = std::min(LENGTH, code_size - pos);
+            auto len = std::min(LENGTH, codeSize - pos);
             if (!ZYAN_SUCCESS(ZydisDecoderDecodeBuffer(&decoder, &code[pos], len, &instruction))) {
                 LOG(FATAL, AOT) << "ZydisDecoderDecodeBuffer failed";
             }
@@ -377,9 +377,9 @@ public:
                                                               uintptr_t(&code[pos])))) {
                 LOG(FATAL, AOT) << "ZydisFormatterFormatInstruction failed";
             }
-            auto stackmap = code_info.FindStackMapForNativePc(pos, Arch::X86_64);
+            auto stackmap = codeInfo.FindStackMapForNativePc(pos, Arch::X86_64);
             if (stackmap.IsValid()) {
-                PrintStackmap(stream, prefix, code_info, stackmap, Arch::X86_64, pfile);
+                PrintStackmap(stream, prefix, codeInfo, stackmap, Arch::X86_64, pfile);
             }
             stream << prefix << std::hex << std::setw(8U) << std::setfill('0') << pos << ": " << buffer.data()
                    << std::endl;
@@ -388,18 +388,18 @@ public:
     }
 #endif  // PANDA_COMPILER_TARGET_X86_64
 
-    void PrintStackmap(std::ostream &stream, const char *prefix, const CodeInfo &code_info, const StackMap &stackmap,
+    void PrintStackmap(std::ostream &stream, const char *prefix, const CodeInfo &codeInfo, const StackMap &stackmap,
                        Arch arch, const PandaFileHelper &pfile) const
     {
         stream << prefix << "          ";
-        code_info.Dump(stream, stackmap, arch);
+        codeInfo.Dump(stream, stackmap, arch);
         stream << std::endl;
         if (stackmap.HasInlineInfoIndex()) {
-            for (auto ii : const_cast<CodeInfo &>(code_info).GetInlineInfos(stackmap)) {
+            for (auto ii : const_cast<CodeInfo &>(codeInfo).GetInlineInfos(stackmap)) {
                 stream << prefix << "          ";
-                code_info.DumpInlineInfo(stream, stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
+                codeInfo.DumpInlineInfo(stream, stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
                 auto id =
-                    const_cast<CodeInfo &>(code_info).GetMethod(stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
+                    const_cast<CodeInfo &>(codeInfo).GetMethod(stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
                 stream << ", method: " << pfile.GetMethodName(std::get<uint32_t>(id));
                 stream << std::endl;
             }

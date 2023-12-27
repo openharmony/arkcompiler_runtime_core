@@ -19,7 +19,7 @@
 
 namespace panda::trace::internal {
 
-int G_TRACE_MARKER_FD = -1;
+int g_traceMarkerFd = -1;
 
 bool DoInit()
 {

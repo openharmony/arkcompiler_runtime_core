@@ -43,12 +43,12 @@ public:
 
     ArenaVector<BasicBlock *> &GetBlocks()
     {
-        return linear_blocks_;
+        return linearBlocks_;
     }
 
     const ArenaVector<BasicBlock *> &GetBlocks() const
     {
-        return linear_blocks_;
+        return linearBlocks_;
     }
 
     NO_MOVE_SEMANTIC(LinearOrder);
@@ -56,8 +56,8 @@ public:
     ~LinearOrder() override = default;
 
 private:
-    void HandlePrevInstruction(BasicBlock *block, BasicBlock *prev_block);
-    void HandleIfBlock(BasicBlock *if_true_block, BasicBlock *next_block);
+    void HandlePrevInstruction(BasicBlock *block, BasicBlock *prevBlock);
+    void HandleIfBlock(BasicBlock *ifTrueBlock, BasicBlock *nextBlock);
     template <class T>
     void MakeLinearOrder(const T &blocks);
 
@@ -67,19 +67,19 @@ private:
     BasicBlock *LeastLikelySuccessorByPreference(const BasicBlock *block);
     // mark pre exit blocks without Retrurn and ReturnVoid instructions
     void MarkSideExitsBlocks();
-    int64_t GetBranchCounter(const BasicBlock *block, bool true_succ);
+    int64_t GetBranchCounter(const BasicBlock *block, bool trueSucc);
     bool IsConditionChainCounter(const BasicBlock *block);
-    int64_t GetConditionChainCounter(const BasicBlock *block, bool true_succ);
+    int64_t GetConditionChainCounter(const BasicBlock *block, bool trueSucc);
     int64_t GetConditionChainTrueSuccessorCounter(const BasicBlock *block);
     int64_t GetConditionChainFalseSuccessorCounter(const BasicBlock *block);
     // similar to DFS but move least frequent branch to the end
     template <bool DEFER_LEAST_FREQUENT>
-    void DFSAndDeferLeastFrequentBranches(BasicBlock *block, size_t *blocks_count);
+    void DFSAndDeferLeastFrequentBranches(BasicBlock *block, size_t *blocksCount);
     Marker marker_ {UNDEF_MARKER};
-    Marker blocks_marker_ {UNDEF_MARKER};
-    ArenaVector<BasicBlock *> linear_blocks_;
-    ArenaList<BasicBlock *> rpo_blocks_;
-    ArenaVector<BasicBlock *> reordered_blocks_;
+    Marker blocksMarker_ {UNDEF_MARKER};
+    ArenaVector<BasicBlock *> linearBlocks_;
+    ArenaList<BasicBlock *> rpoBlocks_;
+    ArenaVector<BasicBlock *> reorderedBlocks_;
 };
 }  // namespace panda::compiler
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_LINEAR_ORDER_H

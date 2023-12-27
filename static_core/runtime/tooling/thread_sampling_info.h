@@ -31,25 +31,25 @@ public:
 
     bool IsThreadSampling() const
     {
-        return is_thread_sampling_;
+        return isThreadSampling_;
     }
 
-    void SetThreadSampling(bool thread_sampling)
+    void SetThreadSampling(bool threadSampling)
     {
-        is_thread_sampling_ = thread_sampling;
+        isThreadSampling_ = threadSampling;
     }
 
     jmp_buf &GetSigSegvJmpEnv()
     {
-        return sigsegv_jmp_env_;
+        return sigsegvJmpEnv_;
     }
 
 private:
-    bool is_thread_sampling_ {false};
+    bool isThreadSampling_ {false};
 
     // Environment that saved by setjmp in SIGPROF handler in Sampler
     // Used for longjmp in case of SIGSEGV during thread sampling
-    jmp_buf sigsegv_jmp_env_ {};
+    jmp_buf sigsegvJmpEnv_ {};
 };
 
 }  // namespace panda::tooling::sampler

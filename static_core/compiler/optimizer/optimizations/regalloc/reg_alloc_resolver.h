@@ -27,7 +27,7 @@ public:
     explicit RegAllocResolver(Graph *graph)
         : graph_(graph),
           liveness_(&graph->GetAnalysis<LivenessAnalyzer>()),
-          input_locations_(graph->GetLocalAllocator()->Adapter())
+          inputLocations_(graph->GetLocalAllocator()->Adapter())
     {
     }
     NO_MOVE_SEMANTIC(RegAllocResolver);
@@ -53,33 +53,33 @@ private:
 
     void AddCatchPhiMoves(Inst *inst);
 
-    Inst *SqueezeCatchPhiInputs(CatchPhiInst *catch_phi);
+    Inst *SqueezeCatchPhiInputs(CatchPhiInst *catchPhi);
 
     bool CanStoreToAccumulator(const Inst *inst) const
     {
         return graph_->IsBytecodeOptimizer() && inst->GetDstReg() == ACC_REG_ID;
     }
-    bool CanReadFromAccumulator(const Inst *inst, size_t input_number) const
+    bool CanReadFromAccumulator(const Inst *inst, size_t inputNumber) const
     {
-        return graph_->IsBytecodeOptimizer() && inst->GetSrcReg(input_number) == ACC_REG_ID;
+        return graph_->IsBytecodeOptimizer() && inst->GetSrcReg(inputNumber) == ACC_REG_ID;
     }
 
-    void PropagateCallerMasks(SaveStateInst *save_state);
+    void PropagateCallerMasks(SaveStateInst *saveState);
 
-    void FillSaveStateRootsMask(SaveStateInst *save_state, Inst *user, SaveStateInst *target_ss);
+    void FillSaveStateRootsMask(SaveStateInst *saveState, Inst *user, SaveStateInst *targetSs);
 
-    void AddMoveToFixedLocation(Inst *inst, Location input_location, size_t input_num);
+    void AddMoveToFixedLocation(Inst *inst, Location inputLocation, size_t inputNum);
 
-    static inline void AddLocationToRoots(Location location, SaveStateInst *save_state, const Graph *graph)
+    static inline void AddLocationToRoots(Location location, SaveStateInst *saveState, const Graph *graph)
     {
         if (location.IsFixedRegister()) {
-            save_state->GetRootsRegsMask().set(location.GetValue());
+            saveState->GetRootsRegsMask().set(location.GetValue());
         } else if (location.IsStack()) {
-            save_state->GetRootsStackMask()->SetBit(location.GetValue());
+            saveState->GetRootsStackMask()->SetBit(location.GetValue());
         } else {
             ASSERT(location.IsStackParameter());
-            auto slot_offset = graph->GetStackSlotsCount();
-            save_state->GetRootsStackMask()->SetBit(location.GetValue() + slot_offset);
+            auto slotOffset = graph->GetStackSlotsCount();
+            saveState->GetRootsStackMask()->SetBit(location.GetValue() + slotOffset);
         }
     }
 
@@ -91,7 +91,7 @@ private:
 private:
     Graph *graph_;
     LivenessAnalyzer *liveness_;
-    ArenaVector<Location> input_locations_;
+    ArenaVector<Location> inputLocations_;
 };
 
 }  // namespace panda::compiler

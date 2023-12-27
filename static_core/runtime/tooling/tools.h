@@ -31,7 +31,7 @@ public:
 
     void CreateSamplingProfiler();
     sampler::Sampler *GetSamplingProfiler();
-    bool StartSamplingProfiler(const std::string &aspt_filename, uint32_t interval);
+    bool StartSamplingProfiler(const std::string &asptFilename, uint32_t interval);
     void StopSamplingProfiler();
 
 private:

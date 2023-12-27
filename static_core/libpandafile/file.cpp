@@ -51,9 +51,9 @@ const std::array<uint8_t, File::MAGIC_SIZE> File::MAGIC {'P', 'A', 'N', 'D', 'A'
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
 const char *ANONMAPNAME_PERFIX = "panda-";
 
-os::file::Mode GetMode(panda_file::File::OpenMode open_mode)
+os::file::Mode GetMode(panda_file::File::OpenMode openMode)
 {
-    switch (open_mode) {
+    switch (openMode) {
         case File::READ_ONLY: {
             return os::file::Mode::READONLY;
         }
@@ -91,37 +91,37 @@ public:
 
     static AnonMemSet &GetInstance()
     {
-        static AnonMemSet anon_mem_set;
-        return anon_mem_set;
+        static AnonMemSet anonMemSet;
+        return anonMemSet;
     }
 
-    InsertResult Insert(const std::string &file_name, const std::string &anon_mem_name)
+    InsertResult Insert(const std::string &fileName, const std::string &anonMemName)
     {
-        return mem_name_set_.emplace(file_name, anon_mem_name).first;
+        return memNameSet_.emplace(fileName, anonMemName).first;
     }
 
-    void Remove(const std::string &file_name)
+    void Remove(const std::string &fileName)
     {
-        auto it = mem_name_set_.find(file_name);
-        if (it != mem_name_set_.end()) {
-            mem_name_set_.erase(it);
+        auto it = memNameSet_.find(fileName);
+        if (it != memNameSet_.end()) {
+            memNameSet_.erase(it);
         }
     }
 
 private:
-    MemNameSet mem_name_set_;
+    MemNameSet memNameSet_;
 };
 
-std::unique_ptr<const File> OpenPandaFileOrZip(std::string_view location, panda_file::File::OpenMode open_mode)
+std::unique_ptr<const File> OpenPandaFileOrZip(std::string_view location, panda_file::File::OpenMode openMode)
 {
-    std::string_view archive_filename = ARCHIVE_FILENAME;
-    std::size_t archive_split_index = location.find(ARCHIVE_SPLIT);
-    if (archive_split_index != std::string::npos) {
-        archive_filename = location.substr(archive_split_index + 2);  // 2 - archive split size
-        location = location.substr(0, archive_split_index);
+    std::string_view archiveFilename = ARCHIVE_FILENAME;
+    std::size_t archiveSplitIndex = location.find(ARCHIVE_SPLIT);
+    if (archiveSplitIndex != std::string::npos) {
+        archiveFilename = location.substr(archiveSplitIndex + 2);  // 2 - archive split size
+        location = location.substr(0, archiveSplitIndex);
     }
 
-    return OpenPandaFile(location, archive_filename, open_mode);
+    return OpenPandaFile(location, archiveFilename, openMode);
 }
 
 // NOLINTNEXTLINE(google-runtime-references)
@@ -135,29 +135,29 @@ void OpenPandaFileFromZipErrorHandler(ZipArchiveHandle &handle)
 }
 
 std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandle &handle, std::string_view location,
-                                                                 EntryFileStat &entry, std::string_view archive_name)
+                                                                 EntryFileStat &entry, std::string_view archiveName)
 {
-    uint32_t uncompressed_length = entry.GetUncompressedSize();
-    if (uncompressed_length == 0) {
+    uint32_t uncompressedLength = entry.GetUncompressedSize();
+    if (uncompressedLength == 0) {
         CloseCurrentFile(handle);
         OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Panda file has zero length!";
         return nullptr;
     }
 
-    size_t size_to_mmap = AlignUp(uncompressed_length, panda::os::mem::GetPageSize());
-    void *mem = os::mem::MapRWAnonymousRaw(size_to_mmap, false);
+    size_t sizeToMmap = AlignUp(uncompressedLength, panda::os::mem::GetPageSize());
+    void *mem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
     if (mem == nullptr) {
         CloseCurrentFile(handle);
         OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Can't mmap anonymous!";
         return nullptr;
     }
-    os::mem::BytePtr ptr(reinterpret_cast<std::byte *>(mem), size_to_mmap, os::mem::MmapDeleter);
+    os::mem::BytePtr ptr(reinterpret_cast<std::byte *>(mem), sizeToMmap, os::mem::MmapDeleter);
     std::stringstream ss;
-    ss << ANONMAPNAME_PERFIX << archive_name << " extracted in memory from " << location;
+    ss << ANONMAPNAME_PERFIX << archiveName << " extracted in memory from " << location;
     auto it = AnonMemSet::GetInstance().Insert(std::string(location), ss.str());
-    auto ret = os::mem::TagAnonymousMemory(reinterpret_cast<void *>(ptr.Get()), size_to_mmap, it->second.c_str());
+    auto ret = os::mem::TagAnonymousMemory(reinterpret_cast<void *>(ptr.Get()), sizeToMmap, it->second.c_str());
     if (ret.has_value()) {
         CloseCurrentFile(handle);
         OpenPandaFileFromZipErrorHandler(handle);
@@ -165,39 +165,39 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
         return nullptr;
     }
 
-    auto extract_error = ExtractToMemory(handle, reinterpret_cast<uint8_t *>(ptr.Get()), size_to_mmap);
-    if (extract_error != 0) {
+    auto extractError = ExtractToMemory(handle, reinterpret_cast<uint8_t *>(ptr.Get()), sizeToMmap);
+    if (extractError != 0) {
         CloseCurrentFile(handle);
         OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Can't extract!";
         return nullptr;
     }
 
-    os::mem::ConstBytePtr const_ptr = ptr.ToConst();
-    return panda_file::File::OpenFromMemory(std::move(const_ptr), location);
+    os::mem::ConstBytePtr constPtr = ptr.ToConst();
+    return panda_file::File::OpenFromMemory(std::move(constPtr), location);
 }
 
 // NOLINTNEXTLINE(google-runtime-references)
 std::unique_ptr<const panda_file::File> HandleArchive(ZipArchiveHandle &handle, FILE *fp, std::string_view location,
-                                                      EntryFileStat &entry, std::string_view archive_filename,
-                                                      panda_file::File::OpenMode open_mode)
+                                                      EntryFileStat &entry, std::string_view archiveFilename,
+                                                      panda_file::File::OpenMode openMode)
 {
     std::unique_ptr<const panda_file::File> file;
     // compressed or not 4 aligned, use anonymous memory
     if (entry.IsCompressed() || (entry.GetOffset() & 0x3U) != 0) {
-        file = OpenPandaFileFromZipFile(handle, location, entry, archive_filename);
+        file = OpenPandaFileFromZipFile(handle, location, entry, archiveFilename);
     } else {
         LOG(INFO, PANDAFILE) << "Pandafile is uncompressed and 4 bytes aligned";
         file = panda_file::File::OpenUncompressedArchive(fileno(fp), location, entry.GetUncompressedSize(),
-                                                         entry.GetOffset(), open_mode);
+                                                         entry.GetOffset(), openMode);
     }
     return file;
 }
 
-std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location, std::string_view archive_filename,
-                                                      panda_file::File::OpenMode open_mode)
+std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location, std::string_view archiveFilename,
+                                                      panda_file::File::OpenMode openMode)
 {
-    trace::ScopedTrace scoped_trace("Open panda file " + std::string(location));
+    trace::ScopedTrace scopedTrace("Open panda file " + std::string(location));
     uint32_t magic;
 
 #ifdef PANDA_TARGET_WINDOWS
@@ -222,20 +222,20 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
     if (IsZipMagic(magic)) {
         // Open Zipfile and do the extraction.
         ZipArchiveHandle zipfile = nullptr;
-        auto open_error = OpenArchiveFile(zipfile, fp);
-        if (open_error != ZIPARCHIVE_OK) {
+        auto openError = OpenArchiveFile(zipfile, fp);
+        if (openError != ZIPARCHIVE_OK) {
             LOG(ERROR, PANDAFILE) << "Can't open archive " << location;
             return nullptr;
         }
-        bool try_default = archive_filename.empty();
-        if (!try_default) {
-            if (LocateFile(zipfile, archive_filename.data()) != ZIPARCHIVE_OK) {
-                LOG(INFO, PANDAFILE) << "Can't find entry with name '" << archive_filename << "', will try "
+        bool tryDefault = archiveFilename.empty();
+        if (!tryDefault) {
+            if (LocateFile(zipfile, archiveFilename.data()) != ZIPARCHIVE_OK) {
+                LOG(INFO, PANDAFILE) << "Can't find entry with name '" << archiveFilename << "', will try "
                                      << ARCHIVE_FILENAME;
-                try_default = true;
+                tryDefault = true;
             }
         }
-        if (try_default) {
+        if (tryDefault) {
             if (LocateFile(zipfile, ARCHIVE_FILENAME) != ZIPARCHIVE_OK) {
                 OpenPandaFileFromZipErrorHandler(zipfile);
                 LOG(ERROR, PANDAFILE) << "Can't find entry with " << ARCHIVE_FILENAME;
@@ -253,8 +253,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         // check that file is not empty, otherwise crash at CloseArchiveFile
         if (entry.GetUncompressedSize() == 0) {
             OpenPandaFileFromZipErrorHandler(zipfile);
-            LOG(ERROR, PANDAFILE) << "Invalid panda file '" << (try_default ? ARCHIVE_FILENAME : archive_filename)
-                                  << "'";
+            LOG(ERROR, PANDAFILE) << "Invalid panda file '" << (tryDefault ? ARCHIVE_FILENAME : archiveFilename) << "'";
             return nullptr;
         }
         if (OpenCurrentFile(zipfile) != ZIPARCHIVE_OK) {
@@ -264,14 +263,14 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
             return nullptr;
         }
         GetCurrentFileOffset(zipfile, &entry);
-        file = HandleArchive(zipfile, fp, location, entry, archive_filename, open_mode);
+        file = HandleArchive(zipfile, fp, location, entry, archiveFilename, openMode);
         CloseCurrentFile(zipfile);
         if (panda::CloseArchiveFile(zipfile) != 0) {
             LOG(ERROR, PANDAFILE) << "CloseArchive failed!";
             return nullptr;
         }
     } else {
-        file = panda_file::File::Open(location, open_mode);
+        file = panda_file::File::Open(location, openMode);
     }
     fclose(fp);
     return file;
@@ -279,17 +278,17 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
 
 std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t size)
 {
-    size_t size_to_mmap = AlignUp(size, panda::os::mem::GetPageSize());
-    void *mem = os::mem::MapRWAnonymousRaw(size_to_mmap, false);
+    size_t sizeToMmap = AlignUp(size, panda::os::mem::GetPageSize());
+    void *mem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
     if (mem == nullptr) {
         return nullptr;
     }
 
-    if (memcpy_s(mem, size_to_mmap, buffer, size) != 0) {
+    if (memcpy_s(mem, sizeToMmap, buffer, size) != 0) {
         PLOG(ERROR, PANDAFILE) << "Failed to copy buffer into mem'";
     }
 
-    os::mem::ConstBytePtr ptr(reinterpret_cast<std::byte *>(mem), size_to_mmap, os::mem::MmapDeleter);
+    os::mem::ConstBytePtr ptr(reinterpret_cast<std::byte *>(mem), sizeToMmap, os::mem::MmapDeleter);
     if (ptr.Get() == nullptr) {
         PLOG(ERROR, PANDAFILE) << "Failed to open panda file from memory'";
         return nullptr;
@@ -400,10 +399,10 @@ private:
 File::File(std::string filename, os::mem::ConstBytePtr &&base)
     : base_(std::forward<os::mem::ConstBytePtr>(base)),
       filename_(std::move(filename)),
-      filename_hash_(CalcFilenameHash(filename_)),
-      full_filename_(os::GetAbsolutePath(filename_)),
-      panda_cache_(std::make_unique<PandaCache>()),
-      uniq_id_(MergeHashes(filename_hash_, GetHash32(reinterpret_cast<const uint8_t *>(GetHeader()), sizeof(Header))))
+      filenameHash_(CalcFilenameHash(filename_)),
+      fullFilename_(os::GetAbsolutePath(filename_)),
+      pandaCache_(std::make_unique<PandaCache>()),
+      uniqId_(MergeHashes(filenameHash_, GetHash32(reinterpret_cast<const uint8_t *>(GetHeader()), sizeof(Header))))
 {
 }
 
@@ -452,10 +451,10 @@ inline bool operator>(const std::array<uint8_t, File::VERSION_SIZE> &lhs,
 }
 
 /* static */
-std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode open_mode)
+std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode openMode)
 {
-    trace::ScopedTrace scoped_trace("Open panda file " + std::string(filename));
-    os::file::Mode mode = GetMode(open_mode);
+    trace::ScopedTrace scopedTrace("Open panda file " + std::string(filename));
+    os::file::Mode mode = GetMode(openMode);
     os::file::File file = os::file::Open(filename, mode);
 
     if (!file.IsValid()) {
@@ -463,7 +462,7 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode open_
         return nullptr;
     }
 
-    os::file::FileHolder fh_holder(file);
+    os::file::FileHolder fhHolder(file);
 
     auto res = file.GetFileSize();
 
@@ -479,7 +478,7 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode open_
         return nullptr;
     }
 
-    os::mem::ConstBytePtr ptr = os::mem::MapFile(file, GetProt(open_mode), os::mem::MMAP_FLAG_PRIVATE, size).ToConst();
+    os::mem::ConstBytePtr ptr = os::mem::MapFile(file, GetProt(openMode), os::mem::MMAP_FLAG_PRIVATE, size).ToConst();
     if (ptr.Get() == nullptr) {
         PLOG(ERROR, PANDAFILE) << "Failed to map panda file '" << filename << "'";
         return nullptr;
@@ -493,9 +492,9 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode open_
 }
 
 std::unique_ptr<const File> File::OpenUncompressedArchive(int fd, const std::string_view &filename, size_t size,
-                                                          uint32_t offset, OpenMode open_mode)
+                                                          uint32_t offset, OpenMode openMode)
 {
-    trace::ScopedTrace scoped_trace("Open panda file " + std::string(filename));
+    trace::ScopedTrace scopedTrace("Open panda file " + std::string(filename));
     auto file = os::file::File(fd);
     if (!file.IsValid()) {
         PLOG(ERROR, PANDAFILE) << "OpenUncompressedArchive: Failed to open panda file '" << filename << "'";
@@ -509,7 +508,7 @@ std::unique_ptr<const File> File::OpenUncompressedArchive(int fd, const std::str
     LOG(DEBUG, PANDAFILE) << " size=" << size << " offset=" << offset << " " << filename;
 
     os::mem::ConstBytePtr ptr =
-        os::mem::MapFile(file, GetProt(open_mode), os::mem::MMAP_FLAG_PRIVATE, size, offset).ToConst();
+        os::mem::MapFile(file, GetProt(openMode), os::mem::MMAP_FLAG_PRIVATE, size, offset).ToConst();
     if (ptr.Get() == nullptr) {
         PLOG(ERROR, PANDAFILE) << "Failed to map panda file '" << filename << "'";
         return nullptr;
@@ -533,12 +532,12 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
         return false;
     }
 
-    auto file_version = header->version;
+    auto fileVersion = header->version;
 
-    if (file_version < MIN_VERSION || file_version > VERSION) {
+    if (fileVersion < MIN_VERSION || fileVersion > VERSION) {
         LOG(ERROR, PANDAFILE) << "Unable to open file '" << filename << "' with bytecode version "
-                              << VersionToString(file_version);
-        if (file_version < MIN_VERSION) {
+                              << VersionToString(fileVersion);
+        if (fileVersion < MIN_VERSION) {
             LOG(ERROR, PANDAFILE) << "Minimum supported version is " << VersionToString(MIN_VERSION);
         } else {
             LOG(ERROR, PANDAFILE) << "Maximum supported version is " << VersionToString(VERSION);
@@ -562,7 +561,7 @@ std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr)
 /* static */
 std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr, std::string_view filename)
 {
-    trace::ScopedTrace scoped_trace("Open panda file from RAM " + std::string(filename));
+    trace::ScopedTrace scopedTrace("Open panda file from RAM " + std::string(filename));
 
     if (!CheckHeader(ptr, filename)) {
         return nullptr;
@@ -571,24 +570,24 @@ std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr, st
     return std::unique_ptr<File>(new File(filename.data(), std::forward<os::mem::ConstBytePtr>(ptr)));
 }
 
-File::EntityId File::GetClassId(const uint8_t *mutf8_name) const
+File::EntityId File::GetClassId(const uint8_t *mutf8Name) const
 {
-    auto class_hash_table = GetClassHashTable();
+    auto classHashTable = GetClassHashTable();
 
-    if (!class_hash_table.empty()) {
-        return GetClassIdFromClassHashTable(mutf8_name);
+    if (!classHashTable.empty()) {
+        return GetClassIdFromClassHashTable(mutf8Name);
     }
 
-    auto class_idx = GetClasses();
+    auto classIdx = GetClasses();
 
-    auto it = std::lower_bound(ClassIdxIterator::Begin(*this, class_idx), ClassIdxIterator::End(*this, class_idx),
-                               mutf8_name, utf::Mutf8Less());
+    auto it = std::lower_bound(ClassIdxIterator::Begin(*this, classIdx), ClassIdxIterator::End(*this, classIdx),
+                               mutf8Name, utf::Mutf8Less());
 
     if (!it.IsValid()) {
         return EntityId();
     }
 
-    if (utf::CompareMUtf8ToMUtf8(mutf8_name, *it) == 0) {
+    if (utf::CompareMUtf8ToMUtf8(mutf8Name, *it) == 0) {
         return EntityId(it.GetId());
     }
 
@@ -603,32 +602,32 @@ uint32_t File::CalcFilenameHash(const std::string &filename)
 File::EntityId File::GetLiteralArraysId() const
 {
     const Header *header = GetHeader();
-    return EntityId(header->literalarray_idx_off);
+    return EntityId(header->literalarrayIdxOff);
 }
 
-File::EntityId File::GetClassIdFromClassHashTable(const uint8_t *mutf8_name) const
+File::EntityId File::GetClassIdFromClassHashTable(const uint8_t *mutf8Name) const
 {
-    auto class_hash_table = GetClassHashTable();
-    auto hash = GetHash32String(mutf8_name);
-    auto pos = hash & (class_hash_table.size() - 1);
-    auto entity_pair = &class_hash_table[pos];
+    auto classHashTable = GetClassHashTable();
+    auto hash = GetHash32String(mutf8Name);
+    auto pos = hash & (classHashTable.size() - 1);
+    auto entityPair = &classHashTable[pos];
 
-    if (entity_pair->descriptor_hash % class_hash_table.size() != pos) {
+    if (entityPair->descriptorHash % classHashTable.size() != pos) {
         return File::EntityId();
     }
 
     while (true) {
-        if (hash == entity_pair->descriptor_hash) {
-            auto entity_id = File::EntityId(entity_pair->entity_id_offset);
-            auto descriptor = GetStringData(entity_id).data;
-            if (entity_id.IsValid() && utf::CompareMUtf8ToMUtf8(descriptor, mutf8_name) == 0) {
-                return entity_id;
+        if (hash == entityPair->descriptorHash) {
+            auto entityId = File::EntityId(entityPair->entityIdOffset);
+            auto descriptor = GetStringData(entityId).data;
+            if (entityId.IsValid() && utf::CompareMUtf8ToMUtf8(descriptor, mutf8Name) == 0) {
+                return entityId;
             }
         }
-        if (entity_pair->next_pos == 0) {
+        if (entityPair->nextPos == 0) {
             break;
         }
-        entity_pair = &class_hash_table[entity_pair->next_pos - 1];
+        entityPair = &classHashTable[entityPair->nextPos - 1];
     }
 
     return File::EntityId();

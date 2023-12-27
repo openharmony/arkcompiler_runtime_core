@@ -36,7 +36,7 @@ public:
     }
 
     template <class T>
-    void CmpTest(T l, T r, int64_t result, DataType::Type src_type, bool fcmpg = false)
+    void CmpTest(T l, T r, int64_t result, DataType::Type srcType, bool fcmpg = false)
     {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
@@ -45,11 +45,11 @@ public:
             CONSTANT(1U, r);
             BASIC_BLOCK(2U, 1U)
             {
-                INST(2U, Opcode::Cmp).s32().SrcType(src_type).Inputs(0U, 1U);
+                INST(2U, Opcode::Cmp).s32().SrcType(srcType).Inputs(0U, 1U);
                 INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
-        if (DataType::IsFloatType(src_type)) {
+        if (DataType::IsFloatType(srcType)) {
             INS(2U).CastToCmp()->SetFcmpg(fcmpg);
             ASSERT_EQ(INS(2U).CastToCmp()->IsFcmpg(), fcmpg);
         }
@@ -62,7 +62,7 @@ public:
     }
 
     template <class From, class To>
-    void CastTest(From src, To dst, DataType::Type dst_type)
+    void CastTest(From src, To dst, DataType::Type dstType)
     {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
@@ -71,33 +71,33 @@ public:
             BASIC_BLOCK(2U, 1U)
             {
                 INST(1U, Opcode::Cast).SrcType(INS(0U).GetType()).Inputs(0U);
-                INS(1U).SetType(dst_type);
+                INS(1U).SetType(dstType);
                 INST(2U, Opcode::Return).Inputs(1U);
-                INS(2U).SetType(dst_type);
+                INS(2U).SetType(dstType);
             }
         }
         ASSERT_EQ(ConstFoldingCast(&INS(1U)), true);
         GraphChecker(graph).Check();
 
         ConstantInst *inst = nullptr;
-        if (DataType::GetCommonType(dst_type) == DataType::INT64) {
+        if (DataType::GetCommonType(dstType) == DataType::INT64) {
             inst = graph->FindConstant(DataType::INT64, dst);
-        } else if (dst_type == DataType::FLOAT32) {
+        } else if (dstType == DataType::FLOAT32) {
             inst = graph->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(dst));
-        } else if (dst_type == DataType::FLOAT64) {
+        } else if (dstType == DataType::FLOAT64) {
             inst = graph->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(dst));
         }
         ASSERT(inst != nullptr);
         ASSERT_EQ(INS(2U).GetInput(0U).GetInst(), inst);
     }
 
-    void CheckCompareEqualInputs(DataType::Type param_type, ConditionCode cc, std::optional<uint64_t> result)
+    void CheckCompareEqualInputs(DataType::Type paramType, ConditionCode cc, std::optional<uint64_t> result)
     {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
             PARAMETER(0U, 0U);
-            INS(0U).SetType(param_type);
+            INS(0U).SetType(paramType);
             BASIC_BLOCK(2U, 1U)
             {
                 INST(1U, Opcode::Compare).b().CC(cc).Inputs(0U, 0U);
@@ -2400,8 +2400,8 @@ TEST_F(ConstFoldingTest, CompareZeroWithNullPtr)
         }
         ASSERT_TRUE(ConstFoldingCompare(&INS(2U)));
         ASSERT_TRUE(graph->RunPass<Cleanup>());
-        auto exp_graph = CreateEmptyGraph();
-        GRAPH(exp_graph)
+        auto expGraph = CreateEmptyGraph();
+        GRAPH(expGraph)
         {
             CONSTANT(0U, (cc == CC_EQ ? 1U : 0U));
             BASIC_BLOCK(2U, 1U)
@@ -2409,7 +2409,7 @@ TEST_F(ConstFoldingTest, CompareZeroWithNullPtr)
                 INST(3U, Opcode::Return).b().Inputs(0U);
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, exp_graph));
+        ASSERT_TRUE(GraphComparator().Compare(graph, expGraph));
     }
 }
 
@@ -2495,8 +2495,8 @@ TEST_F(ConstFoldingTest, CompareTstNeTest1)
 
 TEST_F(ConstFoldingTest, CompareEqualInputsTest)
 {
-    for (int cc_int = CC_LT; cc_int <= CC_AE; ++cc_int) {
-        auto cc = static_cast<ConditionCode>(cc_int);
+    for (int ccInt = CC_LT; ccInt <= CC_AE; ++ccInt) {
+        auto cc = static_cast<ConditionCode>(ccInt);
         for (auto type : {DataType::INT32, DataType::INT64, DataType::FLOAT64}) {
             std::optional<bool> result;
             switch (cc) {
@@ -2862,30 +2862,30 @@ TEST_F(ConstFoldingTest, Constant32ShrBigOffsetTest)
 
 TEST_F(ConstFoldingTest, CastTest)
 {
-    uint8_t src_u8 = 0xff;
-    CastTest(src_u8, static_cast<int8_t>(src_u8), DataType::INT8);
-    CastTest(src_u8, static_cast<int16_t>(src_u8), DataType::INT16);
-    CastTest(src_u8, static_cast<uint16_t>(src_u8), DataType::UINT16);
+    uint8_t srcU8 = 0xff;
+    CastTest(srcU8, static_cast<int8_t>(srcU8), DataType::INT8);
+    CastTest(srcU8, static_cast<int16_t>(srcU8), DataType::INT16);
+    CastTest(srcU8, static_cast<uint16_t>(srcU8), DataType::UINT16);
 
-    int8_t src_i8 = -1;
-    CastTest(src_i8, static_cast<float>(src_i8), DataType::FLOAT32);
+    int8_t srcI8 = -1;
+    CastTest(srcI8, static_cast<float>(srcI8), DataType::FLOAT32);
 
-    uint16_t src_u16 = 0xffff;
-    CastTest(src_u16, static_cast<int8_t>(src_u16), DataType::INT8);
-    CastTest(src_u16, static_cast<double>(src_u16), DataType::FLOAT64);
-    CastTest(src_u16, src_u16, DataType::UINT16);
+    uint16_t srcU16 = 0xffff;
+    CastTest(srcU16, static_cast<int8_t>(srcU16), DataType::INT8);
+    CastTest(srcU16, static_cast<double>(srcU16), DataType::FLOAT64);
+    CastTest(srcU16, srcU16, DataType::UINT16);
 
-    int64_t src_i64 = -1;
-    CastTest(src_i64, static_cast<uint8_t>(src_i64), DataType::UINT8);
+    int64_t srcI64 = -1;
+    CastTest(srcI64, static_cast<uint8_t>(srcI64), DataType::UINT8);
 
-    int32_t src_i32 = -1;
-    CastTest(src_i32, static_cast<int8_t>(src_i32), DataType::INT8);
+    int32_t srcI32 = -1;
+    CastTest(srcI32, static_cast<int8_t>(srcI32), DataType::INT8);
 
-    float src_f = 0.25;
-    CastTest(src_f, src_f, DataType::FLOAT32);
+    float srcF = 0.25;
+    CastTest(srcF, srcF, DataType::FLOAT32);
 
-    double src_d = 0.25;
-    CastTest(src_d, src_d, DataType::FLOAT64);
+    double srcD = 0.25;
+    CastTest(srcD, srcD, DataType::FLOAT64);
 
     CastTest(FLT_MAX, static_cast<double>(FLT_MAX), DataType::FLOAT64);
     CastTest(FLT_MIN, static_cast<double>(FLT_MIN), DataType::FLOAT64);

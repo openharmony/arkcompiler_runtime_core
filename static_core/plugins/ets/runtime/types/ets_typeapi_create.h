@@ -92,7 +92,7 @@ public:
      * Lazily declares primitive reference wrapper
      * @returns pair of constructor and unwrapper
      */
-    const std::pair<std::string, std::string> &DeclarePrimitive(const std::string &prim_type_name);
+    const std::pair<std::string, std::string> &DeclarePrimitive(const std::string &primTypeName);
 
     void AddError(std::string_view err)
     {
@@ -109,14 +109,14 @@ public:
 
 private:
     pandasm::Program prog_;
-    pandasm::Record ctx_data_record_ {"", panda_file::SourceLang::ETS};
-    std::string ctx_data_record_name_ {};
-    pandasm::Function ctx_data_record_cctor_ {"", panda_file::SourceLang::ETS};
-    std::map<std::string, std::pair<std::string, std::string>> primitive_types_ctor_dtor_;
+    pandasm::Record ctxDataRecord_ {"", panda_file::SourceLang::ETS};
+    std::string ctxDataRecordName_ {};
+    pandasm::Function ctxDataRecordCctor_ {"", panda_file::SourceLang::ETS};
+    std::map<std::string, std::pair<std::string, std::string>> primitiveTypesCtorDtor_;
     std::vector<std::shared_ptr<void>> datas_;
     std::string error_;
 
-    coretypes::Array *init_arr_object_ {};
+    coretypes::Array *initArrObject_ {};
 };
 
 enum class TypeCreatorKind {
@@ -212,7 +212,7 @@ public:
     const std::string &GetFunctionName() const
     {
         ASSERT(finished_);
-        return fn_name_;
+        return fnName_;
     }
 
     void AddParameter(pandasm::Type param);
@@ -223,9 +223,9 @@ public:
 
 private:
     std::string name_ = "FunctionalInterface";
-    std::string fn_name_ = "invoke";
+    std::string fnName_ = "invoke";
     pandasm::Record rec_ {name_, SourceLanguage::ETS};
-    pandasm::Function fn_ {fn_name_, SourceLanguage::ETS};
+    pandasm::Function fn_ {fnName_, SourceLanguage::ETS};
     bool finished_ = false;
 };
 

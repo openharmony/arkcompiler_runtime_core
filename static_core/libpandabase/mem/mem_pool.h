@@ -75,7 +75,7 @@ template <class MemPoolImplT>
 class MemPool {
 public:
     virtual ~MemPool() = default;
-    explicit MemPool(std::string pool_name) : name_(std::move(pool_name)) {}
+    explicit MemPool(std::string poolName) : name_(std::move(poolName)) {}
     DEFAULT_NOEXCEPT_MOVE_SEMANTIC(MemPool);
     DEFAULT_COPY_SEMANTIC(MemPool);
 
@@ -92,17 +92,17 @@ public:
     // NOTE(aemelenko): We must always define allocator_addr for AllocArena
     // because we set up arena at the first bytes of the pool
     template <class ArenaT = Arena, OSPagesAllocPolicy OS_ALLOC_POLICY = OSPagesAllocPolicy::NO_POLICY>
-    inline ArenaT *AllocArena(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                              const void *allocator_addr = nullptr)
+    inline ArenaT *AllocArena(size_t size, SpaceType spaceType, AllocatorType allocatorType,
+                              const void *allocatorAddr = nullptr)
     {
-        auto *allocated_arena = static_cast<MemPoolImplT *>(this)->template AllocArenaImpl<ArenaT, OS_ALLOC_POLICY>(
-            size, space_type, allocator_type, allocator_addr);
+        auto *allocatedArena = static_cast<MemPoolImplT *>(this)->template AllocArenaImpl<ArenaT, OS_ALLOC_POLICY>(
+            size, spaceType, allocatorType, allocatorAddr);
         if constexpr (IS_ZERO_CHECK_ENABLED && OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY) {
-            if (allocated_arena != nullptr) {
-                CheckZeroedMemory(allocated_arena->GetMem(), allocated_arena->GetSize());
+            if (allocatedArena != nullptr) {
+                CheckZeroedMemory(allocatedArena->GetMem(), allocatedArena->GetSize());
             }
         }
-        return allocated_arena;
+        return allocatedArena;
     }
 
     /**
@@ -128,17 +128,16 @@ public:
      * @return pool info with the size and a pointer
      */
     template <OSPagesAllocPolicy OS_ALLOC_POLICY = OSPagesAllocPolicy::NO_POLICY>
-    Pool AllocPool(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                   const void *allocator_addr = nullptr)
+    Pool AllocPool(size_t size, SpaceType spaceType, AllocatorType allocatorType, const void *allocatorAddr = nullptr)
     {
-        Pool allocated_pool = static_cast<MemPoolImplT *>(this)->template AllocPoolImpl<OS_ALLOC_POLICY>(
-            size, space_type, allocator_type, allocator_addr);
+        Pool allocatedPool = static_cast<MemPoolImplT *>(this)->template AllocPoolImpl<OS_ALLOC_POLICY>(
+            size, spaceType, allocatorType, allocatorAddr);
         if constexpr (IS_ZERO_CHECK_ENABLED && OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY) {
-            if (allocated_pool.GetMem() != nullptr) {
-                CheckZeroedMemory(allocated_pool.GetMem(), allocated_pool.GetSize());
+            if (allocatedPool.GetMem() != nullptr) {
+                CheckZeroedMemory(allocatedPool.GetMem(), allocatedPool.GetSize());
             }
         }
-        return allocated_pool;
+        return allocatedPool;
     }
 
     /**
@@ -194,22 +193,22 @@ private:
     {
         // Check that the memory is zeroed:
         [[maybe_unused]] auto iterator64 = static_cast<uint64_t *>(mem);
-        size_t it64_end = size / sizeof(uint64_t);
-        [[maybe_unused]] uintptr_t end_memory = ToUintPtr(mem) + size;
+        size_t it64End = size / sizeof(uint64_t);
+        [[maybe_unused]] uintptr_t endMemory = ToUintPtr(mem) + size;
         // check by 64 byte
-        for (size_t i = 0; i < it64_end; i++) {
+        for (size_t i = 0; i < it64End; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            ASSERT(ToUintPtr(&iterator64[i]) < end_memory);
+            ASSERT(ToUintPtr(&iterator64[i]) < endMemory);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             ASSERT(iterator64[i] == 0);
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        [[maybe_unused]] auto iterator8 = reinterpret_cast<uint8_t *>(&iterator64[it64_end]);
-        size_t it8_end = size % sizeof(uint64_t);
+        [[maybe_unused]] auto iterator8 = reinterpret_cast<uint8_t *>(&iterator64[it64End]);
+        size_t it8End = size % sizeof(uint64_t);
         // check by byte
-        for (size_t i = 0; i < it8_end; i++) {
+        for (size_t i = 0; i < it8End; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            ASSERT(ToUintPtr(&iterator8[i]) < end_memory);
+            ASSERT(ToUintPtr(&iterator8[i]) < endMemory);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             ASSERT(iterator8[i] == 0);
         }

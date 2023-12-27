@@ -44,8 +44,8 @@ class ElfBuilder;
 class JitDebugWriter : public ElfWriter {
 public:
     // NOLINTNEXTLINE(modernize-pass-by-value)
-    JitDebugWriter(Arch arch, RuntimeInterface *runtime, CodeAllocator *code_allocator, const std::string &method_name)
-        : code_allocator_(code_allocator), method_name_(method_name)
+    JitDebugWriter(Arch arch, RuntimeInterface *runtime, CodeAllocator *codeAllocator, const std::string &methodName)
+        : codeAllocator_(codeAllocator), methodName_(methodName)
     {
         SetArch(arch);
         SetRuntime(runtime);
@@ -76,9 +76,9 @@ private:
 private:
     Span<uint8_t> elf_;
     Span<uint8_t> code_;
-    CodeAllocator *code_allocator_ {nullptr};
+    CodeAllocator *codeAllocator_ {nullptr};
 
-    const std::string &method_name_;
+    const std::string &methodName_;
     friend class CodeDataProvider;
     friend class JitCodeDataProvider;
 };
@@ -94,18 +94,18 @@ typedef enum { JIT_NOACTION = 0, JIT_REGISTER_FN, JIT_UNREGISTER_FN } JitActions
 // NOLINTNEXTLINE(modernize-use-using)
 typedef struct jit_code_entry JitCodeEntry;
 struct jit_code_entry {
-    jit_code_entry *next_entry;
-    jit_code_entry *prev_entry;
-    const char *symfile_addr;
-    uint64_t symfile_size;
+    jit_code_entry *nextEntry;
+    jit_code_entry *prevEntry;
+    const char *symfileAddr;
+    uint64_t symfileSize;
 };
 
 // NOLINTNEXTLINE(modernize-use-using, readability-identifier-naming)
 typedef struct jit_descriptor {
     uint32_t version;
-    uint32_t action_flag;
-    jit_code_entry *relevant_entry;
-    jit_code_entry *first_entry;
+    uint32_t actionFlag;
+    jit_code_entry *relevantEntry;
+    jit_code_entry *firstEntry;
 } jit_descriptor;  // NOLINT(readability-identifier-naming)
 }
 

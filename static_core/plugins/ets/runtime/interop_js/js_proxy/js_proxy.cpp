@@ -24,64 +24,64 @@ extern "C" void JSProxyCallBridge(Method *method, ...);
 
 // Create JSProxy class descriptor that will respond to IsProxyClass
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-static std::unique_ptr<uint8_t[]> MakeProxyDescriptor(const uint8_t *descriptor_p)
+static std::unique_ptr<uint8_t[]> MakeProxyDescriptor(const uint8_t *descriptorP)
 {
-    Span<const uint8_t> descriptor(descriptor_p, utf::Mutf8Size(descriptor_p));
+    Span<const uint8_t> descriptor(descriptorP, utf::Mutf8Size(descriptorP));
 
     ASSERT(descriptor.size() > 2);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     ASSERT(descriptor[0] == 'L');
     ASSERT(descriptor[descriptor.size() - 1] == ';');
 
-    size_t proxy_descriptor_size = descriptor.size() + 3;  // + $$\0
+    size_t proxyDescriptorSize = descriptor.size() + 3;  // + $$\0
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    auto proxy_descriptor_data = std::make_unique<uint8_t[]>(proxy_descriptor_size);
-    Span<uint8_t> proxy_descriptor(proxy_descriptor_data.get(), proxy_descriptor_size);
+    auto proxyDescriptorData = std::make_unique<uint8_t[]>(proxyDescriptorSize);
+    Span<uint8_t> proxyDescriptor(proxyDescriptorData.get(), proxyDescriptorSize);
 
-    proxy_descriptor[0] = 'L';
-    proxy_descriptor[1] = '$';
-    memcpy(&proxy_descriptor[2], &descriptor[1], descriptor.size() - 2);
-    proxy_descriptor[proxy_descriptor.size() - 3] = '$';
-    proxy_descriptor[proxy_descriptor.size() - 2] = ';';
-    proxy_descriptor[proxy_descriptor.size() - 1] = '\0';
+    proxyDescriptor[0] = 'L';
+    proxyDescriptor[1] = '$';
+    memcpy(&proxyDescriptor[2], &descriptor[1], descriptor.size() - 2);
+    proxyDescriptor[proxyDescriptor.size() - 3] = '$';
+    proxyDescriptor[proxyDescriptor.size() - 2] = ';';
+    proxyDescriptor[proxyDescriptor.size() - 1] = '\0';
 
-    return proxy_descriptor_data;
+    return proxyDescriptorData;
 }
 
 /*static*/
-std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *ets_class, Span<Method *> proxy_methods)
+std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> proxyMethods)
 {
-    Class *cls = ets_class->GetRuntimeClass();
+    Class *cls = etsClass->GetRuntimeClass();
     ASSERT(!IsProxyClass(cls));
 
-    auto methods_buffer = new uint8_t[proxy_methods.size() * sizeof(Method)];
-    Span<Method> impl_methods {reinterpret_cast<Method *>(methods_buffer), proxy_methods.size()};
+    auto methodsBuffer = new uint8_t[proxyMethods.size() * sizeof(Method)];
+    Span<Method> implMethods {reinterpret_cast<Method *>(methodsBuffer), proxyMethods.size()};
 
-    for (size_t i = 0; i < proxy_methods.size(); ++i) {
-        auto *m = proxy_methods[i];
-        auto new_method = new (&impl_methods[i]) Method(m);
-        new_method->SetCompiledEntryPoint(reinterpret_cast<void *>(JSProxyCallBridge));
+    for (size_t i = 0; i < proxyMethods.size(); ++i) {
+        auto *m = proxyMethods[i];
+        auto newMethod = new (&implMethods[i]) Method(m);
+        newMethod->SetCompiledEntryPoint(reinterpret_cast<void *>(JSProxyCallBridge));
     }
 
     auto descriptor = MakeProxyDescriptor(cls->GetDescriptor());
-    uint32_t access_flags = cls->GetAccessFlags();
+    uint32_t accessFlags = cls->GetAccessFlags();
     Span<Field> fields {};
-    Class *base_class = cls;
+    Class *baseClass = cls;
     Span<Class *> interfaces {};
     ClassLinkerContext *context = cls->GetLoadContext();
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    Class *proxy_cls =
-        class_linker->BuildClass(descriptor.get(), true, access_flags, {impl_methods.data(), impl_methods.size()},
-                                 fields, base_class, interfaces, context, false);
-    proxy_cls->SetState(Class::State::INITIALIZING);
-    proxy_cls->SetState(Class::State::INITIALIZED);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    Class *proxyCls =
+        classLinker->BuildClass(descriptor.get(), true, accessFlags, {implMethods.data(), implMethods.size()}, fields,
+                                baseClass, interfaces, context, false);
+    proxyCls->SetState(Class::State::INITIALIZING);
+    proxyCls->SetState(Class::State::INITIALIZED);
 
-    ASSERT(IsProxyClass(proxy_cls));
+    ASSERT(IsProxyClass(proxyCls));
 
-    auto js_proxy = std::unique_ptr<JSProxy>(new JSProxy(EtsClass::FromRuntimeClass(proxy_cls)));
-    js_proxy->proxy_methods_.reset(reinterpret_cast<Method *>(methods_buffer));
-    return js_proxy;
+    auto jsProxy = std::unique_ptr<JSProxy>(new JSProxy(EtsClass::FromRuntimeClass(proxyCls)));
+    jsProxy->proxyMethods_.reset(reinterpret_cast<Method *>(methodsBuffer));
+    return jsProxy;
 }
 
 }  // namespace panda::ets::interop::js::js_proxy

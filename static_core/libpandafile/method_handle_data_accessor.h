@@ -24,7 +24,7 @@ namespace panda::panda_file {
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class MethodHandleDataAccessor {
 public:
-    MethodHandleDataAccessor(const File &panda_file, File::EntityId method_handle_id);
+    MethodHandleDataAccessor(const File &pandaFile, File::EntityId methodHandleId);
 
     ~MethodHandleDataAccessor() = default;
 
@@ -40,12 +40,12 @@ public:
 
     const File &GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     File::EntityId GetMethodHandleId() const
     {
-        return method_handle_id_;
+        return methodHandleId_;
     }
 
     File::EntityId GetEntityId() const
@@ -54,8 +54,8 @@ public:
     }
 
 private:
-    const File &panda_file_;
-    File::EntityId method_handle_id_;
+    const File &pandaFile_;
+    File::EntityId methodHandleId_;
 
     MethodHandleType type_;
     uint32_t offset_;

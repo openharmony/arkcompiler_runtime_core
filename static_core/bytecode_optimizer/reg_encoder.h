@@ -130,10 +130,10 @@ public:
     static void VisitCallVirtual(GraphVisitor *v, Inst *inst);
     static void VisitInitObject(GraphVisitor *v, Inst *inst);
     static void VisitIntrinsic(GraphVisitor *v, Inst *inst);
-    static void VisitLoadObject(GraphVisitor *v, Inst *inst_base);
-    static void VisitLoadStatic(GraphVisitor *v, Inst *inst_base);
-    static void VisitStoreObject(GraphVisitor *v, Inst *inst_base);
-    static void VisitStoreStatic(GraphVisitor *v, Inst *inst_base);
+    static void VisitLoadObject(GraphVisitor *v, Inst *instBase);
+    static void VisitLoadStatic(GraphVisitor *v, Inst *instBase);
+    static void VisitStoreObject(GraphVisitor *v, Inst *instBase);
+    static void VisitStoreStatic(GraphVisitor *v, Inst *instBase);
     static void VisitLoadString([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitReturn([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
 
@@ -155,7 +155,7 @@ public:
 private:
     void CalculateNumNeededTemps();
     void CalculateNumNeededTempsForInst(compiler::Inst *inst);
-    void RenumberRegs(compiler::Register min_reg, compiler::Register delta);
+    void RenumberRegs(compiler::Register minReg, compiler::Register delta);
     bool RenumberArgRegs();
     void InsertSpills();
     void InsertSpillsForInst(compiler::Inst *inst);
@@ -166,29 +166,29 @@ private:
     {
         auto adapter = GetGraph()->GetRuntime();
         auto method = GetGraph()->GetMethod();
-        auto num_args = adapter->GetMethodTotalArgumentsCount(method);
-        ASSERT(num_args <= compiler::VIRTUAL_FRAME_SIZE);
-        return num_args;
+        auto numArgs = adapter->GetMethodTotalArgumentsCount(method);
+        ASSERT(numArgs <= compiler::VIRTUAL_FRAME_SIZE);
+        return numArgs;
     }
 
     compiler::Register GetNumLocalsFromGraph() const
     {
-        auto num_locals = GetGraph()->GetStackSlotsCount();
-        ASSERT(num_locals <= compiler::VIRTUAL_FRAME_SIZE);
-        return num_locals;
+        auto numLocals = GetGraph()->GetStackSlotsCount();
+        ASSERT(numLocals <= compiler::VIRTUAL_FRAME_SIZE);
+        return numLocals;
     }
 
     compiler::Register GetNumRegs() const
     {
-        auto num_regs = GetNumLocalsFromGraph() + GetNumArgsFromGraph();
-        ASSERT(num_regs <= compiler::VIRTUAL_FRAME_SIZE);
-        return num_regs;
+        auto numRegs = GetNumLocalsFromGraph() + GetNumArgsFromGraph();
+        ASSERT(numRegs <= compiler::VIRTUAL_FRAME_SIZE);
+        return numRegs;
     }
 
-    void SaveNumLocalsToGraph(uint32_t num_locals) const
+    void SaveNumLocalsToGraph(uint32_t numLocals) const
     {
-        ASSERT(num_locals <= compiler::VIRTUAL_FRAME_SIZE);
-        GetGraph()->SetStackSlotsCount(num_locals);
+        ASSERT(numLocals <= compiler::VIRTUAL_FRAME_SIZE);
+        GetGraph()->SetStackSlotsCount(numLocals);
     }
 
     bool GetStatus() const
@@ -203,11 +203,11 @@ private:
     }
 
 private:
-    compiler::Register num_temps_ {0};
+    compiler::Register numTemps_ {0};
     RegEncoderState state_ {RegEncoderState::IDLE};
-    compiler::Register num_max_range_input_ {0};
-    compiler::Register range_temps_start_ {0};
-    compiler::Register num_changed_width_ {0};
+    compiler::Register numMaxRangeInput_ {0};
+    compiler::Register rangeTempsStart_ {0};
+    compiler::Register numChangedWidth_ {0};
 
     bool success_ {true};
 };

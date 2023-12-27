@@ -75,24 +75,24 @@ public:
 
     llvm::Function *GetFunctionByMethodPtr(MethodPtr method) const;
 
-    void PutFunction(MethodPtr method_ptr, llvm::Function *function);
+    void PutFunction(MethodPtr methodPtr, llvm::Function *function);
 
     const char *GetIntrinsicRuntimeFunctionName(IntrinsicId id) const;
 
     const char *GetEntrypointRuntimeFunctionName(EntrypointId id) const;
 
-    llvm::StringRef GetRuntimeFunctionName(LLVMArkInterface::RuntimeCallType call_type, IntrinsicId id);
+    llvm::StringRef GetRuntimeFunctionName(LLVMArkInterface::RuntimeCallType callType, IntrinsicId id);
     llvm::FunctionType *GetRuntimeFunctionType(llvm::StringRef name) const;
     llvm::FunctionType *GetOrCreateRuntimeFunctionType(llvm::LLVMContext &ctx, llvm::Module *module,
-                                                       LLVMArkInterface::RuntimeCallType call_type, IntrinsicId id);
+                                                       LLVMArkInterface::RuntimeCallType callType, IntrinsicId id);
 
-    void RememberFunctionOrigin(const llvm::Function *function, MethodPtr method_ptr);
+    void RememberFunctionOrigin(const llvm::Function *function, MethodPtr methodPtr);
 
-    std::string GetUniqMethodName(MethodPtr method_ptr) const;
+    std::string GetUniqMethodName(MethodPtr methodPtr) const;
 
     std::string GetUniqMethodName(const Method *method) const;
 
-    static std::string GetUniqueBasicBlockName(const std::string &bb_name, const std::string &unique_suffix);
+    static std::string GetUniqueBasicBlockName(const std::string &bbName, const std::string &uniqueSuffix);
 
     uint32_t GetManagedThreadPostWrbOneObjectOffset() const;
 
@@ -103,7 +103,7 @@ public:
         return triple_.getArch() == llvm::Triple::ArchType::aarch64;
     }
 
-    void AppendIrtocReturnHandler(llvm::StringRef return_handler);
+    void AppendIrtocReturnHandler(llvm::StringRef returnHandler);
 
     bool IsIrtocReturnHandler(const llvm::Function &function) const;
 
@@ -128,12 +128,12 @@ private:
 
     panda::compiler::RuntimeInterface *runtime_;
     llvm::Triple triple_;
-    llvm::StringMap<llvm::FunctionType *> runtime_function_types_;
+    llvm::StringMap<llvm::FunctionType *> runtimeFunctionTypes_;
 
-    llvm::ValueMap<const llvm::Function *, const panda_file::File *> function_origins_;
+    llvm::ValueMap<const llvm::Function *, const panda_file::File *> functionOrigins_;
     llvm::DenseMap<MethodPtr, llvm::Function *> functions_;
-    llvm::DenseMap<llvm::Function *, uint8_t> source_languages_;
-    std::vector<llvm::StringRef> irtoc_return_handlers_;
+    llvm::DenseMap<llvm::Function *, uint8_t> sourceLanguages_;
+    std::vector<llvm::StringRef> irtocReturnHandlers_;
 };
 }  // namespace panda::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_ARK_INTERFACE_H

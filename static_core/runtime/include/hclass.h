@@ -87,7 +87,7 @@ public:
     void MarkFieldAsNative(size_t offset)
     {
         ASSERT(offset <= MaxNativeFieldOffset());
-        native_fields_ |= FieldOffsetToMask(offset);
+        nativeFields_ |= FieldOffsetToMask(offset);
     }
 
     bool IsNativeField(size_t offset) const
@@ -96,17 +96,17 @@ public:
             return false;
         }
 
-        return (native_fields_ & FieldOffsetToMask(offset)) != 0;
+        return (nativeFields_ & FieldOffsetToMask(offset)) != 0;
     }
 
     uint32_t GetNativeFieldMask() const
     {
-        return native_fields_;
+        return nativeFields_;
     }
 
     void SetNativeFieldMask(uint32_t mask)
     {
-        native_fields_ = mask;
+        nativeFields_ = mask;
     }
 
     static constexpr uint32_t FieldOffsetToMask(size_t offset)
@@ -140,13 +140,13 @@ protected:
 private:
     static size_t MaxNativeFieldOffset()
     {
-        size_t max_index = std::numeric_limits<decltype(native_fields_)>::digits - 1;
-        return ObjectHeader::ObjectHeaderSize() + max_index * TaggedValue::TaggedTypeSize();
+        size_t maxIndex = std::numeric_limits<decltype(nativeFields_)>::digits - 1;
+        return ObjectHeader::ObjectHeaderSize() + maxIndex * TaggedValue::TaggedTypeSize();
     }
 
     friend class coretypes::DynClass;
 
-    uint32_t native_fields_ {0};
+    uint32_t nativeFields_ {0};
 
     // Data for language extension flags
     // NOTE(maksenov): maybe merge this with BaseClass flags

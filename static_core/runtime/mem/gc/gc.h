@@ -118,9 +118,9 @@ public:
     NO_COPY_SEMANTIC(GCListener);
     DEFAULT_MOVE_SEMANTIC(GCListener);
     virtual ~GCListener() = default;
-    virtual void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size) {}
-    virtual void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
-                            [[maybe_unused]] size_t heap_size)
+    virtual void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSize) {}
+    virtual void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                            [[maybe_unused]] size_t heapSize)
     {
     }
     virtual void GCPhaseStarted([[maybe_unused]] GCPhase phase) {}
@@ -145,11 +145,11 @@ public:
     }
 
     static constexpr void EmptyMarkPreprocess([[maybe_unused]] const ObjectHeader *ref,
-                                              [[maybe_unused]] BaseClass *base_klass)
+                                              [[maybe_unused]] BaseClass *baseKlass)
     {
     }
 
-    explicit GC(ObjectAllocatorBase *object_allocator, const GCSettings &settings);
+    explicit GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
     NO_COPY_SEMANTIC(GC);
     NO_MOVE_SEMANTIC(GC);
     virtual ~GC() = 0;
@@ -197,14 +197,14 @@ public:
      * Initialize GC bits on object creation.
      * Required only for GCs with switched bits
      */
-    virtual void InitGCBits(panda::ObjectHeader *obj_header) = 0;
+    virtual void InitGCBits(panda::ObjectHeader *objHeader) = 0;
 
     /// Initialize GC bits on object creation for the TLAB allocation.
-    virtual void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *obj_header) = 0;
+    virtual void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *objHeader) = 0;
 
     bool IsTLABsSupported() const
     {
-        return tlabs_supported_;
+        return tlabsSupported_;
     }
 
     /// @return true if GC supports object pinning (will not move pinned object), false otherwise
@@ -228,32 +228,32 @@ public:
 
     PandaString DumpStatistics()
     {
-        return instance_stats_.GetDump(gc_type_);
+        return instanceStats_.GetDump(gcType_);
     }
 
     void AddListener(GCListener *listener)
     {
-        ASSERT(gc_listeners_ptr_ != nullptr);
-        gc_listeners_ptr_->push_back(listener);
+        ASSERT(gcListenersPtr_ != nullptr);
+        gcListenersPtr_->push_back(listener);
     }
 
     void RemoveListener(GCListener *listener)
     {
-        ASSERT(gc_listeners_ptr_ != nullptr);
-        auto it = std::find(gc_listeners_ptr_->begin(), gc_listeners_ptr_->end(), listener);
+        ASSERT(gcListenersPtr_ != nullptr);
+        auto it = std::find(gcListenersPtr_->begin(), gcListenersPtr_->end(), listener);
         *it = nullptr;
     }
 
     GCBarrierSet *GetBarrierSet()
     {
-        ASSERT(gc_barrier_set_ != nullptr);
-        return gc_barrier_set_;
+        ASSERT(gcBarrierSet_ != nullptr);
+        return gcBarrierSet_;
     }
 
     GCWorkersTaskPool *GetWorkersTaskPool() const
     {
-        ASSERT(workers_task_pool_ != nullptr);
-        return workers_task_pool_;
+        ASSERT(workersTaskPool_ != nullptr);
+        return workersTaskPool_;
     }
 
     // Additional NativeGC
@@ -276,12 +276,12 @@ public:
 
     inline bool IsLogDetailedGcInfoEnabled() const
     {
-        return gc_settings_.LogDetailedGCInfoEnabled();
+        return gcSettings_.LogDetailedGCInfoEnabled();
     }
 
     inline bool IsLogDetailedGcCompactionInfoEnabled() const
     {
-        return gc_settings_.LogDetailedGCCompactionInfoEnabled();
+        return gcSettings_.LogDetailedGCCompactionInfoEnabled();
     }
 
     inline GCPhase GetGCPhase() const
@@ -292,21 +292,21 @@ public:
     inline GCTaskCause GetLastGCCause() const
     {
         // Atomic with acquire order reason: data race with another threads which can update the variable
-        return last_cause_.load(std::memory_order_acquire);
+        return lastCause_.load(std::memory_order_acquire);
     }
 
     inline bool IsGCRunning()
     {
         // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent
         // order where threads observe all modifications in the same order
-        return gc_running_.load(std::memory_order_seq_cst);
+        return gcRunning_.load(std::memory_order_seq_cst);
     }
 
     void PreStartup();
 
     InternalAllocatorPtr GetInternalAllocator() const
     {
-        return internal_allocator_;
+        return internalAllocator_;
     }
 
     /**
@@ -316,13 +316,13 @@ public:
     void EnqueueReferences();
 
     /// Process all references which GC found in marking phase.
-    void ProcessReferences(GCPhase gc_phase, const GCTask &task, const ReferenceClearPredicateT &pred);
+    void ProcessReferences(GCPhase gcPhase, const GCTask &task, const ReferenceClearPredicateT &pred);
 
     size_t GetNativeBytesRegistered()
     {
         // Atomic with relaxed order reason: data race with native_bytes_registered_ with no synchronization or ordering
         // constraints imposed on other reads or writes
-        return native_bytes_registered_.load(std::memory_order_relaxed);
+        return nativeBytesRegistered_.load(std::memory_order_relaxed);
     }
 
     virtual void SetPandaVM(PandaVM *vm);
@@ -334,7 +334,7 @@ public:
 
     taskmanager::TaskQueueInterface *GetWorkersTaskQueue() const
     {
-        return gc_workers_task_queue_;
+        return gcWorkersTaskQueue_;
     }
 
     virtual void PreZygoteFork();
@@ -348,25 +348,25 @@ public:
      * (=BuffersKeepingFlag::DELETE) pre and post barrier buffers upon OnThreadTerminate() completion
      */
     virtual void OnThreadTerminate([[maybe_unused]] ManagedThread *thread,
-                                   [[maybe_unused]] mem::BuffersKeepingFlag keep_buffers)
+                                   [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers)
     {
     }
 
-    void SetCanAddGCTask(bool can_add_task)
+    void SetCanAddGCTask(bool canAddTask)
     {
         // Atomic with relaxed order reason: data race with can_add_gc_task_ with no synchronization or ordering
         // constraints imposed on other reads or writes
-        can_add_gc_task_.store(can_add_task, std::memory_order_relaxed);
+        canAddGcTask_.store(canAddTask, std::memory_order_relaxed);
     }
 
     GCExtensionData *GetExtensionData() const
     {
-        return extension_data_;
+        return extensionData_;
     }
 
     void SetExtensionData(GCExtensionData *data)
     {
-        extension_data_ = data;
+        extensionData_ = data;
     }
 
     virtual void PostForkCallback() {}
@@ -383,17 +383,17 @@ public:
     }
 
     /// Called from GCWorker thread to assign thread specific data
-    virtual bool InitWorker(void **worker_data)
+    virtual bool InitWorker(void **workerData)
     {
-        *worker_data = nullptr;
+        *workerData = nullptr;
         return true;
     }
 
     /// Called from GCWorker thread to destroy thread specific data
-    virtual void DestroyWorker([[maybe_unused]] void *worker_data) {}
+    virtual void DestroyWorker([[maybe_unused]] void *workerData) {}
 
     /// Process a task sent to GC workers thread.
-    virtual void WorkerTaskProcessing([[maybe_unused]] GCWorkersTask *task, [[maybe_unused]] void *worker_data)
+    virtual void WorkerTaskProcessing([[maybe_unused]] GCWorkersTask *task, [[maybe_unused]] void *workerData)
     {
         LOG(FATAL, GC) << "Unimplemented method";
     }
@@ -406,12 +406,12 @@ public:
     /// Return true of ref is an instance of reference or it's ancestor, false otherwise
     bool IsReference(const BaseClass *cls, const ObjectHeader *ref, const ReferenceCheckPredicateT &pred);
 
-    void ProcessReference(GCMarkingStackType *objects_stack, const BaseClass *cls, const ObjectHeader *ref,
+    void ProcessReference(GCMarkingStackType *objectsStack, const BaseClass *cls, const ObjectHeader *ref,
                           const ReferenceProcessPredicateT &pred);
 
     ALWAYS_INLINE ObjectAllocatorBase *GetObjectAllocator() const
     {
-        return object_allocator_;
+        return objectAllocator_;
     }
 
     // called if we fail change state from idle to running
@@ -432,49 +432,49 @@ public:
      * @param object_header
      * @return true if object old state is not marked
      */
-    virtual bool MarkObjectIfNotMarked(ObjectHeader *object_header);
+    virtual bool MarkObjectIfNotMarked(ObjectHeader *objectHeader);
 
     /**
      * Mark object.
      * Note: for some GCs it is not necessary set GC bit to 1.
      * @param object_header
      */
-    virtual void MarkObject(ObjectHeader *object_header) = 0;
+    virtual void MarkObject(ObjectHeader *objectHeader) = 0;
 
     /**
      * Add reference for later processing in marking phase
      * @param object - object from which we start to mark
      */
-    void AddReference(ObjectHeader *from_object, ObjectHeader *object);
+    void AddReference(ObjectHeader *fromObject, ObjectHeader *object);
 
-    inline void SetGCPhase(GCPhase gc_phase)
+    inline void SetGCPhase(GCPhase gcPhase)
     {
-        phase_ = gc_phase;
+        phase_ = gcPhase;
     }
 
     size_t GetCounter() const
     {
-        return gc_counter_;
+        return gcCounter_;
     }
 
     virtual void PostponeGCStart()
     {
         ASSERT(IsPostponeGCSupported());
-        is_postpone_enabled_ = true;
+        isPostponeEnabled_ = true;
     }
 
     virtual void PostponeGCEnd()
     {
         ASSERT(IsPostponeGCSupported());
         ASSERT(IsPostponeEnabled());
-        is_postpone_enabled_ = false;
+        isPostponeEnabled_ = false;
     }
 
     virtual bool IsPostponeGCSupported() const = 0;
 
     bool IsPostponeEnabled()
     {
-        return is_postpone_enabled_;
+        return isPostponeEnabled_;
     }
 
     virtual void ComputeNewSize()
@@ -485,7 +485,7 @@ public:
     /// @return GC specific settings based on runtime options and GC type
     const GCSettings *GetSettings() const
     {
-        return &gc_settings_;
+        return &gcSettings_;
     }
 
 protected:
@@ -498,7 +498,7 @@ protected:
      * The task may be discarded if the GC already executing a task with
      * the same reason. The task may be discarded by other reasons (for example, task is invalid).
      */
-    bool AddGCTask(bool is_managed, PandaUniquePtr<GCTask> task);
+    bool AddGCTask(bool isManaged, PandaUniquePtr<GCTask> task);
 
     virtual void InitializeImpl() = 0;
     virtual void PreRunPhasesImpl() = 0;
@@ -507,13 +507,13 @@ protected:
 
     inline bool IsTracingEnabled() const
     {
-        return gc_settings_.IsGcEnableTracing();
+        return gcSettings_.IsGcEnableTracing();
     }
 
-    inline void BeginTracePoint(const PandaString &trace_point_name) const
+    inline void BeginTracePoint(const PandaString &tracePointName) const
     {
         if (IsTracingEnabled()) {
-            trace::BeginTracePoint(trace_point_name.c_str());
+            trace::BeginTracePoint(tracePointName.c_str());
         }
     }
 
@@ -524,11 +524,11 @@ protected:
         }
     }
 
-    virtual void VisitRoots(const GCRootVisitor &gc_root_visitor, VisitGCRootFlags flags) = 0;
-    virtual void VisitClassRoots(const GCRootVisitor &gc_root_visitor) = 0;
-    virtual void VisitCardTableRoots(CardTable *card_table, const GCRootVisitor &gc_root_visitor,
-                                     const MemRangeChecker &range_checker, const ObjectChecker &range_object_checker,
-                                     const ObjectChecker &from_object_checker, uint32_t processed_flag) = 0;
+    virtual void VisitRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) = 0;
+    virtual void VisitClassRoots(const GCRootVisitor &gcRootVisitor) = 0;
+    virtual void VisitCardTableRoots(CardTable *cardTable, const GCRootVisitor &gcRootVisitor,
+                                     const MemRangeChecker &rangeChecker, const ObjectChecker &rangeObjectChecker,
+                                     const ObjectChecker &fromObjectChecker, uint32_t processedFlag) = 0;
 
     inline bool CASGCPhase(GCPhase expected, GCPhase set)
     {
@@ -537,23 +537,23 @@ protected:
 
     GCInstanceStats *GetStats()
     {
-        return &instance_stats_;
+        return &instanceStats_;
     }
 
-    inline void SetType(GCType gc_type)
+    inline void SetType(GCType gcType)
     {
-        gc_type_ = gc_type;
+        gcType_ = gcType;
     }
 
     inline void SetTLABsSupported()
     {
-        tlabs_supported_ = true;
+        tlabsSupported_ = true;
     }
 
-    void SetGCBarrierSet(GCBarrierSet *barrier_set)
+    void SetGCBarrierSet(GCBarrierSet *barrierSet)
     {
-        ASSERT(gc_barrier_set_ == nullptr);
-        gc_barrier_set_ = barrier_set;
+        ASSERT(gcBarrierSet_ == nullptr);
+        gcBarrierSet_ = barrierSet;
     }
 
     /**
@@ -566,7 +566,7 @@ protected:
     void DestroyWorkersTaskPool();
 
     /// Mark all references which we added by AddReference method
-    virtual void MarkReferences(GCMarkingStackType *references, GCPhase gc_phase) = 0;
+    virtual void MarkReferences(GCMarkingStackType *references, GCPhase gcPhase) = 0;
 
     virtual void UpdateRefsToMovedObjectsInPygoteSpace() = 0;
     /// Update all refs to moved objects
@@ -580,7 +580,7 @@ protected:
 
     void UpdateRefsInVRegs(ManagedThread *thread);
 
-    const ObjectHeader *PopObjectFromStack(GCMarkingStackType *objects_stack);
+    const ObjectHeader *PopObjectFromStack(GCMarkingStackType *objectsStack);
 
     Timing *GetTiming()
     {
@@ -596,27 +596,27 @@ protected:
     // it's possible if we make 2 GCs for one safepoint
     // max length of this vector - is 2
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    PandaVector<panda::mem::Reference *> *cleared_references_ GUARDED_BY(cleared_references_lock_) {nullptr};
+    PandaVector<panda::mem::Reference *> *clearedReferences_ GUARDED_BY(clearedReferencesLock_) {nullptr};
 
-    os::memory::Mutex *cleared_references_lock_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
+    os::memory::Mutex *clearedReferencesLock_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
 
-    std::atomic<size_t> gc_counter_ {0};  // NOLINT(misc-non-private-member-variables-in-classes)
+    std::atomic<size_t> gcCounter_ {0};  // NOLINT(misc-non-private-member-variables-in-classes)
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    std::atomic<GCTaskCause> last_cause_ {GCTaskCause::INVALID_CAUSE};
+    std::atomic<GCTaskCause> lastCause_ {GCTaskCause::INVALID_CAUSE};
 
     bool IsExplicitFull(const panda::GCTask &task) const
     {
-        return (task.reason == GCTaskCause::EXPLICIT_CAUSE) && !gc_settings_.IsExplicitConcurrentGcEnabled();
+        return (task.reason == GCTaskCause::EXPLICIT_CAUSE) && !gcSettings_.IsExplicitConcurrentGcEnabled();
     }
 
     const ReferenceProcessor *GetReferenceProcessor() const
     {
-        return reference_processor_;
+        return referenceProcessor_;
     }
 
     bool IsWorkerThreadsExist() const
     {
-        return gc_settings_.GCWorkersCount() != 0;
+        return gcSettings_.GCWorkersCount() != 0;
     }
 
     void EnableWorkerThreads();
@@ -625,13 +625,13 @@ protected:
     /// @return true if GC can work in concurrent mode
     bool IsConcurrencyAllowed() const
     {
-        return gc_settings_.IsConcurrencyEnabled();
+        return gcSettings_.IsConcurrencyEnabled();
     }
 
     Logger::Buffer GetLogPrefix() const;
 
-    void FireGCStarted(const GCTask &task, size_t bytes_in_heap_before_gc);
-    void FireGCFinished(const GCTask &task, size_t bytes_in_heap_before_gc, size_t bytes_in_heap_after_gc);
+    void FireGCStarted(const GCTask &task, size_t bytesInHeapBeforeGc);
+    void FireGCFinished(const GCTask &task, size_t bytesInHeapBeforeGc, size_t bytesInHeapAfterGc);
     void FireGCPhaseStarted(GCPhase phase);
     void FireGCPhaseFinished(GCPhase phase);
 
@@ -657,13 +657,13 @@ protected:
     Timing timing_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
     PandaVector<std::pair<PandaString, uint64_t>>
-        footprint_list_;  // NOLINT(misc-non-private-member-variables-in-classes)
+        footprintList_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
     virtual size_t VerifyHeap() = 0;
 
 private:
     /// Reset GC Threads on saved or weak cores
-    void ResetCpuAffinity(bool before_concurrent);
+    void ResetCpuAffinity(bool beforeConcurrent);
 
     /**
      * Check whether run GC after waiting for mutator threads. Tasks for GC can pass from several mutator threads, so
@@ -676,7 +676,7 @@ private:
      *
      * @return true if need to run GC with current task after waiting for mutator threads or false otherwise
      */
-    bool NeedRunGCAfterWaiting(size_t counter_before_waiting, const GCTask &task) const;
+    bool NeedRunGCAfterWaiting(size_t counterBeforeWaiting, const GCTask &task) const;
 
     /**
      * @brief Create GC worker if needed and set gc status to running (gc_running_ variable)
@@ -699,37 +699,37 @@ private:
     NativeGcTriggerType GetNativeGcTriggerType();
 
     volatile std::atomic<GCPhase> phase_ {GCPhase::GC_PHASE_IDLE};
-    GCType gc_type_ {GCType::INVALID_GC};
-    GCSettings gc_settings_;
-    PandaVector<GCListener *> *gc_listeners_ptr_ {nullptr};
-    GCBarrierSet *gc_barrier_set_ {nullptr};
-    ObjectAllocatorBase *object_allocator_ {nullptr};
-    InternalAllocatorPtr internal_allocator_ {nullptr};
-    GCInstanceStats instance_stats_;
-    os::CpuSet affinity_before_gc_ {};
+    GCType gcType_ {GCType::INVALID_GC};
+    GCSettings gcSettings_;
+    PandaVector<GCListener *> *gcListenersPtr_ {nullptr};
+    GCBarrierSet *gcBarrierSet_ {nullptr};
+    ObjectAllocatorBase *objectAllocator_ {nullptr};
+    InternalAllocatorPtr internalAllocator_ {nullptr};
+    GCInstanceStats instanceStats_;
+    os::CpuSet affinityBeforeGc_ {};
 
     // Additional NativeGC
-    std::atomic<size_t> native_bytes_registered_ = 0;
-    std::atomic<size_t> native_objects_notified_ = 0;
+    std::atomic<size_t> nativeBytesRegistered_ = 0;
+    std::atomic<size_t> nativeObjectsNotified_ = 0;
 
-    ReferenceProcessor *reference_processor_ {nullptr};
-    std::atomic_bool allow_soft_reference_processing_ = false;
+    ReferenceProcessor *referenceProcessor_ {nullptr};
+    std::atomic_bool allowSoftReferenceProcessing_ = false;
 
     // NOTE(ipetrov): choose suitable priority
     static constexpr size_t GC_TASK_QUEUE_PRIORITY = 6U;
-    taskmanager::TaskQueueInterface *gc_workers_task_queue_ = nullptr;
+    taskmanager::TaskQueueInterface *gcWorkersTaskQueue_ = nullptr;
 
     /* GC worker specific variables */
-    GCWorker *gc_worker_ = nullptr;
-    std::atomic_bool gc_running_ = false;
-    std::atomic<bool> can_add_gc_task_ = true;
+    GCWorker *gcWorker_ = nullptr;
+    std::atomic_bool gcRunning_ = false;
+    std::atomic<bool> canAddGcTask_ = true;
 
-    bool tlabs_supported_ = false;
+    bool tlabsSupported_ = false;
 
     // Additional data for extensions
-    GCExtensionData *extension_data_ {nullptr};
+    GCExtensionData *extensionData_ {nullptr};
 
-    GCWorkersTaskPool *workers_task_pool_ {nullptr};
+    GCWorkersTaskPool *workersTaskPool_ {nullptr};
     class PostForkGCTask;
 
     friend class ecmascript::EcmaReferenceProcessor;
@@ -753,8 +753,8 @@ private:
     friend class ConcurrentScope;
 
     PandaVM *vm_ {nullptr};
-    std::atomic<bool> is_full_gc_ {false};
-    std::atomic<bool> is_postpone_enabled_ {false};
+    std::atomic<bool> isFullGc_ {false};
+    std::atomic<bool> isPostponeEnabled_ {false};
 };
 
 /**
@@ -763,12 +763,12 @@ private:
  * @return pointer to created GC on success, nullptr on failure
  */
 template <class LanguageConfig>
-GC *CreateGC(GCType gc_type, ObjectAllocatorBase *object_allocator, const GCSettings &settings);
+GC *CreateGC(GCType gcType, ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
 
 /// Enable concurrent mode. Should be used only from STW code.
 class ConcurrentScope final {
 public:
-    explicit ConcurrentScope(GC *gc, bool auto_start = true);
+    explicit ConcurrentScope(GC *gc, bool autoStart = true);
     NO_COPY_SEMANTIC(ConcurrentScope);
     NO_MOVE_SEMANTIC(ConcurrentScope);
     ~ConcurrentScope();

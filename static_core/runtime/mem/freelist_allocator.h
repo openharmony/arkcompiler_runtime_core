@@ -82,7 +82,7 @@ class InternalAllocator;
 template <typename AllocConfigT, typename LockConfigT = FreeListAllocatorLockConfig::CommonLock>
 class FreeListAllocator {
 public:
-    explicit FreeListAllocator(MemStatsType *mem_stats, SpaceType type_allocation = SpaceType::SPACE_TYPE_OBJECT);
+    explicit FreeListAllocator(MemStatsType *memStats, SpaceType typeAllocation = SpaceType::SPACE_TYPE_OBJECT);
     ~FreeListAllocator();
     NO_COPY_SEMANTIC(FreeListAllocator);
     NO_MOVE_SEMANTIC(FreeListAllocator);
@@ -96,14 +96,14 @@ public:
     }
 
     template <typename T>
-    [[nodiscard]] T *AllocArray(size_t arr_length);
+    [[nodiscard]] T *AllocArray(size_t arrLength);
 
     template <bool NEED_LOCK = true>
     [[nodiscard]] void *Alloc(size_t size, Alignment align = FREELIST_DEFAULT_ALIGNMENT);
 
     void Free(void *mem);
 
-    void Collect(const GCObjectVisitor &death_checker_fn);
+    void Collect(const GCObjectVisitor &deathCheckerFn);
 
     bool AddMemoryPool(void *mem, size_t size);
 
@@ -113,7 +113,7 @@ public:
      * @param object_visitor - function pointer or functor
      */
     template <typename ObjectVisitor>
-    void IterateOverObjects(const ObjectVisitor &object_visitor);
+    void IterateOverObjects(const ObjectVisitor &objectVisitor);
 
     /**
      * @brief Iterates over all memory pools used by this allocator
@@ -124,7 +124,7 @@ public:
      * @param mem_visitor - function pointer or functor
      */
     template <typename MemVisitor>
-    void VisitAndRemoveAllPools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveAllPools(const MemVisitor &memVisitor);
 
     /**
      * @brief Visit memory pools that can be returned to the system in this allocator
@@ -133,7 +133,7 @@ public:
      * @param mem_visitor - function pointer or functor
      */
     template <typename MemVisitor>
-    void VisitAndRemoveFreePools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveFreePools(const MemVisitor &memVisitor);
 
     /**
      * @brief Iterates over objects in the range inclusively.
@@ -143,7 +143,7 @@ public:
      * @param right_border - a pointer to the last byte of the range
      */
     template <typename MemVisitor>
-    void IterateOverObjectsInRange(const MemVisitor &mem_visitor, void *left_border, void *right_border);
+    void IterateOverObjectsInRange(const MemVisitor &memVisitor, void *leftBorder, void *rightBorder);
 
     FreeListAllocatorAdapter<void, AllocConfigT, LockConfigT> Adapter();
 
@@ -249,7 +249,7 @@ private:
 
     class SegregatedList {
     public:
-        void AddMemoryBlock(FreeListHeader *freelist_header);
+        void AddMemoryBlock(FreeListHeader *freelistHeader);
         FreeListHeader *FindMemoryBlock(size_t size);
         void ReleaseFreeMemoryBlocks();
 
@@ -268,13 +268,13 @@ private:
         FreeListHeader *GetFirstBlock(size_t index)
         {
             ASSERT(index < SEGREGATED_LIST_SIZE);
-            return free_memory_blocks_[index].GetNextFree();
+            return freeMemoryBlocks_[index].GetNextFree();
         }
 
-        void SetFirstBlock(size_t index, FreeListHeader *new_head)
+        void SetFirstBlock(size_t index, FreeListHeader *newHead)
         {
             ASSERT(index < SEGREGATED_LIST_SIZE);
-            free_memory_blocks_[index].SetNextFree(new_head);
+            freeMemoryBlocks_[index].SetNextFree(newHead);
         }
 
         FreeListHeader *FindTheMostSuitableBlockInOrderedList(size_t index, size_t size);
@@ -283,7 +283,7 @@ private:
         // from (FREELIST_ALLOCATOR_MIN_SIZE + SEGREGATED_LIST_FREE_BLOCK_RANGE * (N))
         // to   (FREELIST_ALLOCATOR_MIN_SIZE + SEGREGATED_LIST_FREE_BLOCK_RANGE * (N + 1)) (not inclusive)
         // where N is the element number in this array.
-        std::array<FreeListHeader, SEGREGATED_LIST_SIZE> free_memory_blocks_;
+        std::array<FreeListHeader, SEGREGATED_LIST_SIZE> freeMemoryBlocks_;
     };
 
     MemoryBlockHeader *GetFreeListMemoryHeader(void *mem);
@@ -293,43 +293,43 @@ private:
     bool AllocatedByFreeListAllocatorUnsafe(void *mem);
 
     // Try to coalesce a memory block with the next and previous blocks.
-    FreeListHeader *TryToCoalescing(MemoryBlockHeader *memory_header);
+    FreeListHeader *TryToCoalescing(MemoryBlockHeader *memoryHeader);
 
     // Coalesce two neighboring memory blocks into one.
-    void CoalesceMemoryBlocks(MemoryBlockHeader *first_block, MemoryBlockHeader *second_block);
+    void CoalesceMemoryBlocks(MemoryBlockHeader *firstBlock, MemoryBlockHeader *secondBlock);
 
     /**
      * @brief Divide memory_block into two - the first with first_block_size.
      * @param memory_block - a pointer to the divided block, first_block_size - size of the first part
      * @return the second memory block header
      */
-    MemoryBlockHeader *SplitMemoryBlocks(MemoryBlockHeader *memory_block, size_t first_block_size);
+    MemoryBlockHeader *SplitMemoryBlocks(MemoryBlockHeader *memoryBlock, size_t firstBlockSize);
 
-    void AddToSegregatedList(FreeListHeader *free_list_element);
+    void AddToSegregatedList(FreeListHeader *freeListElement);
 
     MemoryBlockHeader *GetFromSegregatedList(size_t size, Alignment align);
 
-    bool CanCreateNewBlockFromRemainder(MemoryBlockHeader *memory, size_t alloc_size)
+    bool CanCreateNewBlockFromRemainder(MemoryBlockHeader *memory, size_t allocSize)
     {
         // NOTE(aemelenko): Maybe add some more complex solution for this check
-        return (memory->GetSize() - alloc_size) >= (FREELIST_ALLOCATOR_MIN_SIZE + sizeof(FreeListHeader));
+        return (memory->GetSize() - allocSize) >= (FREELIST_ALLOCATOR_MIN_SIZE + sizeof(FreeListHeader));
     }
 
     void FreeUnsafe(void *mem);
 
-    SegregatedList segregated_list_;
+    SegregatedList segregatedList_;
 
     // Links to head and tail of the memory pool headers
-    MemoryPoolHeader *mempool_head_ {nullptr};
-    MemoryPoolHeader *mempool_tail_ {nullptr};
-    SpaceType type_allocation_;
+    MemoryPoolHeader *mempoolHead_ {nullptr};
+    MemoryPoolHeader *mempoolTail_ {nullptr};
+    SpaceType typeAllocation_;
 
     // RW lock which allows only one thread to change smth inside allocator
     // NOTE: The MT support expects that we can't iterate
     // and free (i.e. collect for an object scenario) simultaneously
-    LockConfigT alloc_free_lock_;
+    LockConfigT allocFreeLock_;
 
-    MemStatsType *mem_stats_;
+    MemStatsType *memStats_;
 
     friend class FreeListAllocatorTest;
     template <InternalAllocatorConfig CONFIG>

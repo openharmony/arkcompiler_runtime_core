@@ -29,9 +29,9 @@ using panda::verifier::config::Section;
 
 bool ProcessConfigSection(Config *cfg, const Section &section, const panda::PandaString &path = "")
 {
-    auto &section_handlers = cfg->debug_cfg.section_handlers;
-    if (section_handlers.count(path) > 0) {
-        return section_handlers.at(path)(cfg, section);
+    auto &sectionHandlers = cfg->debugCfg.sectionHandlers;
+    if (sectionHandlers.count(path) > 0) {
+        return sectionHandlers.at(path)(cfg, section);
     }
     for (const auto &s : section.sections) {
         if (!ProcessConfigSection(cfg, s, path + "." + s.name)) {
@@ -47,8 +47,8 @@ namespace panda::verifier::config {
 
 void RegisterConfigHandler(Config *cfg, const PandaString &path, callable<bool(Config *, const Section &)> handler)
 {
-    auto &section_handlers = cfg->debug_cfg.section_handlers;
-    section_handlers[path] = handler;
+    auto &sectionHandlers = cfg->debugCfg.sectionHandlers;
+    sectionHandlers[path] = handler;
 }
 
 bool ProcessConfig(Config *cfg, const Section &section)

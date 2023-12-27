@@ -78,21 +78,21 @@ public:
         auto res = p.Parse(source);
         auto &prog = res.Value();
         const std::string name = pandasm::GetFunctionSignatureFromName("foo", {});
-        ASSERT_NE(prog.function_table.find(name), prog.function_table.end());
-        auto &ins_vec = prog.function_table.find(name)->second.ins;
-        const int ins_num = ins_vec.size();
-        ASSERT_EQ(lines.size(), ins_num);
+        ASSERT_NE(prog.functionTable.find(name), prog.functionTable.end());
+        auto &insVec = prog.functionTable.find(name)->second.ins;
+        const int insNum = insVec.size();
+        ASSERT_EQ(lines.size(), insNum);
 
-        for (int i = 0; i < ins_num; i++) {
-            ins_vec[i].ins_debug.SetLineNumber(lines[i]);
+        for (int i = 0; i < insNum; i++) {
+            insVec[i].insDebug.SetLineNumber(lines[i]);
         }
 
         auto pf = pandasm::AsmEmitter::Emit(res.Value());
         ASSERT_NE(pf, nullptr);
 
-        ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        class_linker->AddPandaFile(std::move(pf));
-        auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        classLinker->AddPandaFile(std::move(pf));
+        auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
         PandaString descriptor;
 
@@ -102,7 +102,7 @@ public:
         Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("foo"));
         ASSERT_NE(method, nullptr);
 
-        for (int i = 0; i < ins_num; i++) {
+        for (int i = 0; i < insNum; i++) {
             ASSERT_EQ(method->GetLineNumFromBytecodeOffset(offsets[i]), lines[i]) << "do not match on i = " << i;
         }
     }
@@ -159,31 +159,31 @@ TEST_F(MethodTest, Invoke)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
     PandaString descriptor;
 
     Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
-    g_method->SetCompiledEntryPoint(reinterpret_cast<const void *>(EntryPoint));
+    gMethod->SetCompiledEntryPoint(reinterpret_cast<const void *>(EntryPoint));
 
-    EXPECT_EQ(f_method->GetHotnessCounter(),
+    EXPECT_EQ(fMethod->GetHotnessCounter(),
               Runtime::GetCurrent()->IsJitEnabled() ? 1500U : std::numeric_limits<int16_t>::max());
 
-    auto frame_deleter = [](Frame *frame) { FreeFrame(frame); };
-    std::unique_ptr<Frame, decltype(frame_deleter)> frame(CreateFrame(0, main_method, nullptr), frame_deleter);
+    auto frameDeleter = [](Frame *frame) { FreeFrame(frame); };
+    std::unique_ptr<Frame, decltype(frameDeleter)> frame(CreateFrame(0, mainMethod, nullptr), frameDeleter);
 
     ManagedThread *thread = ManagedThread::GetCurrent();
     thread->SetCurrentFrame(frame.get());
@@ -191,19 +191,19 @@ TEST_F(MethodTest, Invoke)
     // Invoke f calls interpreter
 
     std::vector<Value> args;
-    Value v = f_method->Invoke(ManagedThread::GetCurrent(), args.data());
+    Value v = fMethod->Invoke(ManagedThread::GetCurrent(), args.data());
     EXPECT_EQ(v.GetAs<int64_t>(), 0);
-    EXPECT_EQ(f_method->GetHotnessCounter(),
+    EXPECT_EQ(fMethod->GetHotnessCounter(),
               Runtime::GetCurrent()->IsJitEnabled() ? 1499U : std::numeric_limits<int16_t>::max() - 1);
     EXPECT_EQ(ManagedThread::GetCurrent(), thread);
 
     // Invoke f called compiled code
 
-    f_method->SetCompiledEntryPoint(reinterpret_cast<const void *>(EntryPoint));
+    fMethod->SetCompiledEntryPoint(reinterpret_cast<const void *>(EntryPoint));
 
-    v = f_method->Invoke(ManagedThread::GetCurrent(), args.data());
+    v = fMethod->Invoke(ManagedThread::GetCurrent(), args.data());
     EXPECT_EQ(v.GetAs<int64_t>(), 0);
-    EXPECT_EQ(f_method->GetHotnessCounter(),
+    EXPECT_EQ(fMethod->GetHotnessCounter(),
               Runtime::GetCurrent()->IsJitEnabled() ? 1498U : std::numeric_limits<int16_t>::max() - 2);
     EXPECT_EQ(ManagedThread::GetCurrent(), thread);
 }
@@ -224,9 +224,9 @@ TEST_F(MethodTest, VirtualMethod)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
     PandaString descriptor;
 
@@ -261,9 +261,9 @@ TEST_F(MethodTest, GetLineNumFromBytecodeOffset1)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
     PandaString descriptor;
 
@@ -342,7 +342,7 @@ TEST_F(MethodTest, GetLineNumFromBytecodeOffset10)
 
     auto res = p.Parse(source);
     auto &prog = res.Value();
-    auto &function = prog.function_table.at(pandasm::GetFunctionSignatureFromName("foo", {}));
+    auto &function = prog.functionTable.at(pandasm::GetFunctionSignatureFromName("foo", {}));
 
     pandasm::debuginfo::LocalVariable lv;
     lv.name = "a";
@@ -351,20 +351,20 @@ TEST_F(MethodTest, GetLineNumFromBytecodeOffset10)
     lv.start = 0;
     lv.length = 5;
 
-    function.local_variable_debug.push_back(lv);
+    function.localVariableDebug.push_back(lv);
 
     lv.name = "b";
     lv.start = 5;
     lv.length = 10;
 
-    function.local_variable_debug.push_back(lv);
+    function.localVariableDebug.push_back(lv);
 
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
     PandaString descriptor;
 
@@ -400,14 +400,14 @@ TEST_F(MethodTest, GetClassSourceFile)
         }
     )";
 
-    std::string source_filename = "source.pa";
-    auto res = p.Parse(source, source_filename);
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-    class_linker->AddPandaFile(std::move(pf));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
@@ -430,7 +430,7 @@ TEST_F(MethodTest, GetClassSourceFile)
         ASSERT_NE(method, nullptr);
 
         auto result = method->GetClassSourceFile();
-        ASSERT_TRUE(utf::IsEqual(result.data, utf::CStringAsMutf8(source_filename.data())));
+        ASSERT_TRUE(utf::IsEqual(result.data, utf::CStringAsMutf8(sourceFilename.data())));
     }
 }
 
@@ -440,13 +440,13 @@ static int32_t StackTraceEntryPoint(Method * /* unused */)
 
     struct StackTraceData {
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-        std::string func_name;
+        std::string funcName;
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-        int32_t line_num;
+        int32_t lineNum;
 
         bool operator==(const StackTraceData &st) const
         {
-            return func_name == st.func_name && line_num == st.line_num;
+            return funcName == st.funcName && lineNum == st.lineNum;
         }
     };
 
@@ -455,10 +455,10 @@ static int32_t StackTraceEntryPoint(Method * /* unused */)
     std::vector<StackTraceData> trace;
     for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
         auto pc = stack.GetBytecodePc();
-        auto *method_from_frame = stack.GetMethod();
-        auto line_num = method_from_frame->GetLineNumFromBytecodeOffset(pc);
-        std::string func_name(utf::Mutf8AsCString(method_from_frame->GetName().data));
-        trace.push_back({func_name, line_num});
+        auto *methodFromFrame = stack.GetMethod();
+        auto lineNum = methodFromFrame->GetLineNumFromBytecodeOffset(pc);
+        std::string funcName(utf::Mutf8AsCString(methodFromFrame->GetName().data));
+        trace.push_back({funcName, lineNum});
     }
 
     if (trace == expected) {
@@ -525,28 +525,28 @@ TEST_F(MethodTest, StackTrace)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr) << pandasm::AsmEmitter::GetLastError();
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
     PandaString descriptor;
 
     Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f4_method = klass->GetDirectMethod(utf::CStringAsMutf8("f4"));
-    ASSERT_NE(f4_method, nullptr);
+    Method *f4Method = klass->GetDirectMethod(utf::CStringAsMutf8("f4"));
+    ASSERT_NE(f4Method, nullptr);
 
-    f4_method->SetCompiledEntryPoint(reinterpret_cast<const void *>(StackTraceEntryPoint));
+    f4Method->SetCompiledEntryPoint(reinterpret_cast<const void *>(StackTraceEntryPoint));
 
     ManagedThread *thread = ManagedThread::GetCurrent();
     thread->SetCurrentFrame(nullptr);
 
     std::vector<Value> args;
-    Value v = main_method->Invoke(thread, args.data());
+    Value v = mainMethod->Invoke(thread, args.data());
     EXPECT_EQ(v.GetAs<int32_t>(), 0);
 }
 
@@ -574,9 +574,9 @@ TEST_F(MethodTest, GetFullName)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     PandaString descriptor;
 
     Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &descriptor));

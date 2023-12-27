@@ -54,27 +54,27 @@ public:
         ProcessVars();
     }
 
-    bool HandleAdvanceLine(int32_t line_diff) const
+    bool HandleAdvanceLine(int32_t lineDiff) const
     {
-        state_->AdvanceLine(line_diff);
+        state_->AdvanceLine(lineDiff);
         return true;
     }
 
-    bool HandleAdvancePc(uint32_t pc_diff) const
+    bool HandleAdvancePc(uint32_t pcDiff) const
     {
-        state_->AdvancePc(pc_diff);
+        state_->AdvancePc(pcDiff);
         return true;
     }
 
-    bool HandleSetFile(uint32_t source_file_id) const
+    bool HandleSetFile(uint32_t sourceFileId) const
     {
-        state_->SetFile(source_file_id);
+        state_->SetFile(sourceFileId);
         return true;
     }
 
-    bool HandleSetSourceCode(uint32_t source_code_id) const
+    bool HandleSetSourceCode(uint32_t sourceCodeId) const
     {
-        state_->SetSourceCode(source_code_id);
+        state_->SetSourceCode(sourceCodeId);
         return true;
     }
 
@@ -88,29 +88,29 @@ public:
         return true;
     }
 
-    bool HandleStartLocal(int32_t reg_number, uint32_t name_id, uint32_t type_id)
+    bool HandleStartLocal(int32_t regNumber, uint32_t nameId, uint32_t typeId)
     {
-        const char *name = GetStringFromConstantPool(state_->GetPandaFile(), name_id);
-        const char *type = GetStringFromConstantPool(state_->GetPandaFile(), type_id);
-        lvt_.push_back({name, type, type, reg_number, state_->GetAddress(), 0});
+        const char *name = GetStringFromConstantPool(state_->GetPandaFile(), nameId);
+        const char *type = GetStringFromConstantPool(state_->GetPandaFile(), typeId);
+        lvt_.push_back({name, type, type, regNumber, state_->GetAddress(), 0});
         return true;
     }
 
-    bool HandleStartLocalExtended(int32_t reg_number, uint32_t name_id, uint32_t type_id, uint32_t type_signature_id)
+    bool HandleStartLocalExtended(int32_t regNumber, uint32_t nameId, uint32_t typeId, uint32_t typeSignatureId)
     {
-        const char *name = GetStringFromConstantPool(state_->GetPandaFile(), name_id);
-        const char *type = GetStringFromConstantPool(state_->GetPandaFile(), type_id);
-        const char *type_sign = GetStringFromConstantPool(state_->GetPandaFile(), type_signature_id);
-        lvt_.push_back({name, type, type_sign, reg_number, state_->GetAddress(), 0});
+        const char *name = GetStringFromConstantPool(state_->GetPandaFile(), nameId);
+        const char *type = GetStringFromConstantPool(state_->GetPandaFile(), typeId);
+        const char *typeSign = GetStringFromConstantPool(state_->GetPandaFile(), typeSignatureId);
+        lvt_.push_back({name, type, typeSign, regNumber, state_->GetAddress(), 0});
         return true;
     }
 
-    bool HandleEndLocal(int32_t reg_number)
+    bool HandleEndLocal(int32_t regNumber)
     {
         bool found = false;
         for (auto it = lvt_.rbegin(); it != lvt_.rend(); ++it) {
-            if (it->reg_number == reg_number) {
-                it->end_offset = state_->GetAddress();
+            if (it->regNumber == regNumber) {
+                it->endOffset = state_->GetAddress();
                 found = true;
                 break;
             }
@@ -121,17 +121,17 @@ public:
         return true;
     }
 
-    bool HandleSetColumn(int32_t column_number)
+    bool HandleSetColumn(int32_t columnNumber)
     {
-        state_->SetColumn(column_number);
+        state_->SetColumn(columnNumber);
         cnt_.push_back({state_->GetAddress(), state_->GetColumn()});
         return true;
     }
 
-    bool HandleSpecialOpcode(uint32_t pc_offset, int32_t line_offset)
+    bool HandleSpecialOpcode(uint32_t pcOffset, int32_t lineOffset)
     {
-        state_->AdvancePc(pc_offset);
-        state_->AdvanceLine(line_offset);
+        state_->AdvancePc(pcOffset);
+        state_->AdvanceLine(lineOffset);
         lnt_.push_back({state_->GetAddress(), state_->GetLine()});
         return true;
     }
@@ -167,8 +167,8 @@ private:
     void ProcessVars()
     {
         for (auto &var : lvt_) {
-            if (var.end_offset == 0) {
-                var.end_offset = state_->GetAddress();
+            if (var.endOffset == 0) {
+                var.endOffset = state_->GetAddress();
             }
         }
     }
@@ -181,131 +181,131 @@ private:
 
 void DebugInfoExtractor::Extract(const File *pf)
 {
-    const auto &panda_file = *pf;
+    const auto &pandaFile = *pf;
     auto classes = pf->GetClasses();
     for (size_t i = 0; i < classes.Size(); i++) {
         File::EntityId id(classes[i]);
-        if (panda_file.IsExternal(id)) {
+        if (pandaFile.IsExternal(id)) {
             continue;
         }
 
-        ClassDataAccessor cda(panda_file, id);
+        ClassDataAccessor cda(pandaFile, id);
 
-        auto source_file_id = cda.GetSourceFileId();
+        auto sourceFileId = cda.GetSourceFileId();
 
-        cda.EnumerateMethods([&](MethodDataAccessor &mda) {
-            auto debug_info_id = mda.GetDebugInfoId();
+        cda.EnumerateMethods([this, &pandaFile, &pf, &sourceFileId, &cda](MethodDataAccessor &mda) {
+            auto debugInfoId = mda.GetDebugInfoId();
 
-            if (!debug_info_id) {
+            if (!debugInfoId) {
                 return;
             }
 
-            DebugInfoDataAccessor dda(panda_file, debug_info_id.value());
-            ProtoDataAccessor pda(panda_file, mda.GetProtoId());
+            DebugInfoDataAccessor dda(pandaFile, debugInfoId.value());
+            ProtoDataAccessor pda(pandaFile, mda.GetProtoId());
 
-            std::vector<ParamInfo> param_info;
+            std::vector<ParamInfo> paramInfo;
 
             size_t idx = 0;
-            size_t idx_ref = pda.GetReturnType().IsReference() ? 1 : 0;
-            bool first_param = true;
-            const char *class_name = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
-            dda.EnumerateParameters([&](File::EntityId &param_id) {
+            size_t idxRef = pda.GetReturnType().IsReference() ? 1 : 0;
+            bool firstParam = true;
+            const char *className = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
+            dda.EnumerateParameters([&](File::EntityId &paramId) {
                 ParamInfo info;
-                if (param_id.IsValid()) {
-                    info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
-                    if (first_param && !mda.IsStatic()) {
-                        info.signature = class_name;
+                if (paramId.IsValid()) {
+                    info.name = utf::Mutf8AsCString(pf->GetStringData(paramId).data);
+                    if (firstParam && !mda.IsStatic()) {
+                        info.signature = className;
                     } else {
-                        Type param_type = pda.GetArgType(idx++);
-                        if (param_type.IsPrimitive()) {
-                            info.signature = Type::GetSignatureByTypeId(param_type);
+                        Type paramType = pda.GetArgType(idx++);
+                        if (paramType.IsPrimitive()) {
+                            info.signature = Type::GetSignatureByTypeId(paramType);
                         } else {
-                            auto ref_type = pda.GetReferenceType(idx_ref++);
-                            info.signature = utf::Mutf8AsCString(pf->GetStringData(ref_type).data);
+                            auto refType = pda.GetReferenceType(idxRef++);
+                            info.signature = utf::Mutf8AsCString(pf->GetStringData(refType).data);
                         }
                     }
                 }
-                first_param = false;
-                param_info.emplace_back(info);
+                firstParam = false;
+                paramInfo.emplace_back(info);
             });
 
             const uint8_t *program = dda.GetLineNumberProgram();
 
-            LineProgramState state(panda_file, source_file_id.value_or(File::EntityId(0)), dda.GetLineStart(),
+            LineProgramState state(pandaFile, sourceFileId.value_or(File::EntityId(0)), dda.GetLineStart(),
                                    dda.GetConstantPool());
 
             LineNumberProgramHandler handler(&state);
-            LineNumberProgramProcessor<LineNumberProgramHandler> program_processor(program, &handler);
-            program_processor.Process();
+            LineNumberProgramProcessor<LineNumberProgramHandler> programProcessor(program, &handler);
+            programProcessor.Process();
 
-            File::EntityId method_id = mda.GetMethodId();
-            const char *source_file = utf::Mutf8AsCString(handler.GetFile());
-            const char *source_code = utf::Mutf8AsCString(handler.GetSourceCode());
-            methods_.emplace(method_id, MethodDebugInfo {source_file, source_code, method_id,
-                                                         handler.GetLineNumberTable(), handler.GetLocalVariableTable(),
-                                                         std::move(param_info), handler.GetColumnNumberTable()});
+            File::EntityId methodId = mda.GetMethodId();
+            const char *sourceFile = utf::Mutf8AsCString(handler.GetFile());
+            const char *sourceCode = utf::Mutf8AsCString(handler.GetSourceCode());
+            methods_.emplace(methodId, MethodDebugInfo {sourceFile, sourceCode, methodId, handler.GetLineNumberTable(),
+                                                        handler.GetLocalVariableTable(), std::move(paramInfo),
+                                                        handler.GetColumnNumberTable()});
         });
     }
 }
 
-const LineNumberTable &DebugInfoExtractor::GetLineNumberTable(File::EntityId method_id) const
+const LineNumberTable &DebugInfoExtractor::GetLineNumberTable(File::EntityId methodId) const
 {
-    auto it = methods_.find(method_id);
+    auto it = methods_.find(methodId);
     if (it != methods_.end()) {
-        return it->second.line_number_table;
+        return it->second.lineNumberTable;
     }
 
     static const LineNumberTable EMPTY_LINE_TABLE {};  // NOLINT(fuchsia-statically-constructed-objects)
     return EMPTY_LINE_TABLE;
 }
 
-const ColumnNumberTable &DebugInfoExtractor::GetColumnNumberTable(File::EntityId method_id) const
+const ColumnNumberTable &DebugInfoExtractor::GetColumnNumberTable(File::EntityId methodId) const
 {
-    auto it = methods_.find(method_id);
+    auto it = methods_.find(methodId);
     if (it != methods_.end()) {
-        return it->second.column_number_table;
+        return it->second.columnNumberTable;
     }
 
     static const ColumnNumberTable EMPTY_COLUMN_TABLE {};  // NOLINT(fuchsia-statically-constructed-objects)
     return EMPTY_COLUMN_TABLE;
 }
 
-const LocalVariableTable &DebugInfoExtractor::GetLocalVariableTable(File::EntityId method_id) const
+const LocalVariableTable &DebugInfoExtractor::GetLocalVariableTable(File::EntityId methodId) const
 {
-    auto it = methods_.find(method_id);
+    auto it = methods_.find(methodId);
     if (it != methods_.end()) {
-        return it->second.local_variable_table;
+        return it->second.localVariableTable;
     }
 
     static const LocalVariableTable EMPTY_VARIABLE_TABLE {};  // NOLINT(fuchsia-statically-constructed-objects)
     return EMPTY_VARIABLE_TABLE;
 }
 
-const std::vector<DebugInfoExtractor::ParamInfo> &DebugInfoExtractor::GetParameterInfo(File::EntityId method_id) const
+const std::vector<DebugInfoExtractor::ParamInfo> &DebugInfoExtractor::GetParameterInfo(File::EntityId methodId) const
 {
-    auto it = methods_.find(method_id);
+    auto it = methods_.find(methodId);
     if (it != methods_.end()) {
-        return it->second.param_info;
+        return it->second.paramInfo;
     }
 
     static const std::vector<ParamInfo> EMPTY_PARAM_INFO {};  // NOLINT(fuchsia-statically-constructed-objects)
     return EMPTY_PARAM_INFO;
 }
 
-const char *DebugInfoExtractor::GetSourceFile(File::EntityId method_id) const
+const char *DebugInfoExtractor::GetSourceFile(File::EntityId methodId) const
 {
-    auto it = methods_.find(method_id);
+    auto it = methods_.find(methodId);
     if (it != methods_.end()) {
-        return it->second.source_file.c_str();
+        return it->second.sourceFile.c_str();
     }
     return "";
 }
 
-const char *DebugInfoExtractor::GetSourceCode(File::EntityId method_id) const
+const char *DebugInfoExtractor::GetSourceCode(File::EntityId methodId) const
 {
-    auto it = methods_.find(method_id);
+    auto it = methods_.find(methodId);
     if (it != methods_.end()) {
-        return it->second.source_code.c_str();
+        return it->second.sourceCode.c_str();
     }
     return "";
 }

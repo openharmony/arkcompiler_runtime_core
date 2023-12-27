@@ -33,94 +33,94 @@ public:
         STRING_DATA_END = FUNCTION_NAME
     };
 
-    MethodDataAccessor(const File &panda_file, File::EntityId method_id);
+    MethodDataAccessor(const File &pandaFile, File::EntityId methodId);
 
     ~MethodDataAccessor() = default;
 
     // quick way to get name id
-    static File::EntityId GetNameId(const File &panda_file, File::EntityId method_id);
+    static File::EntityId GetNameId(const File &pandaFile, File::EntityId methodId);
 
     // quick way to get method name
-    static panda_file::File::StringData GetName(const File &panda_file, File::EntityId method_id);
+    static panda_file::File::StringData GetName(const File &pandaFile, File::EntityId methodId);
 
     std::string GetFullName() const;
 
     // quick way to get proto id
-    static File::EntityId GetProtoId(const File &panda_file, File::EntityId method_id);
+    static File::EntityId GetProtoId(const File &pandaFile, File::EntityId methodId);
 
     // quick way to get class id
-    static File::EntityId GetClassId(const File &panda_file, File::EntityId method_id);
+    static File::EntityId GetClassId(const File &pandaFile, File::EntityId methodId);
 
     bool IsExternal() const
     {
-        return is_external_;
+        return isExternal_;
     }
 
     bool IsStatic() const
     {
-        return (access_flags_ & ACC_STATIC) != 0;
+        return (accessFlags_ & ACC_STATIC) != 0;
     }
 
     bool IsAbstract() const
     {
-        return (access_flags_ & ACC_ABSTRACT) != 0;
+        return (accessFlags_ & ACC_ABSTRACT) != 0;
     }
 
     bool IsNative() const
     {
-        return (access_flags_ & ACC_NATIVE) != 0;
+        return (accessFlags_ & ACC_NATIVE) != 0;
     }
 
     bool IsPublic() const
     {
-        return (access_flags_ & ACC_PUBLIC) != 0;
+        return (accessFlags_ & ACC_PUBLIC) != 0;
     }
 
     bool IsPrivate() const
     {
-        return (access_flags_ & ACC_PRIVATE) != 0;
+        return (accessFlags_ & ACC_PRIVATE) != 0;
     }
 
     bool IsProtected() const
     {
-        return (access_flags_ & ACC_PROTECTED) != 0;
+        return (accessFlags_ & ACC_PROTECTED) != 0;
     }
 
     bool IsFinal() const
     {
-        return (access_flags_ & ACC_FINAL) != 0;
+        return (accessFlags_ & ACC_FINAL) != 0;
     }
 
     bool IsSynthetic() const
     {
-        return (access_flags_ & ACC_SYNTHETIC) != 0;
+        return (accessFlags_ & ACC_SYNTHETIC) != 0;
     }
 
     File::EntityId GetClassId() const
     {
-        return File::EntityId(class_off_);
+        return File::EntityId(classOff_);
     }
 
     File::Index GetClassIdx() const
     {
-        return class_idx_;
+        return classIdx_;
     }
 
     File::EntityId GetNameId() const
     {
-        return File::EntityId(name_off_);
+        return File::EntityId(nameOff_);
     };
 
     panda_file::File::StringData GetName() const;
 
     File::EntityId GetProtoId() const
     {
-        return File::EntityId(proto_off_);
+        return File::EntityId(protoOff_);
     }
 
     uint32_t GetAccessFlags() const
     {
-        return access_flags_;
+        return accessFlags_;
     }
 
     std::optional<File::EntityId> GetCodeId();
@@ -131,7 +131,7 @@ public:
     void EnumerateRuntimeAnnotations(Callback cb);
 
     template <typename Callback>
-    void EnumerateTypesInProto(Callback cb, bool skip_this = false);
+    void EnumerateTypesInProto(Callback cb, bool skipThis = false);
 
     Type GetReturnType() const;
 
@@ -169,12 +169,12 @@ public:
 
     const File &GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     File::EntityId GetMethodId() const
     {
-        return method_id_;
+        return methodId_;
     }
 
     uint32_t GetAnnotationsNumber();
@@ -182,7 +182,7 @@ public:
     uint32_t GetTypeAnnotationsNumber();
     uint32_t GetRuntimeTypeAnnotationsNumber();
 
-    uint32_t GetNumericalAnnotation(uint32_t field_id);
+    uint32_t GetNumericalAnnotation(uint32_t fieldId);
 
 private:
     void SkipCode();
@@ -203,28 +203,28 @@ private:
 
     void SkipRuntimeTypeAnnotation();
 
-    const File &panda_file_;
-    File::EntityId method_id_;
+    const File &pandaFile_;
+    File::EntityId methodId_;
 
-    bool is_external_;
+    bool isExternal_;
 
-    uint16_t class_idx_;
-    uint16_t proto_idx_;
-    uint32_t class_off_;
-    uint32_t proto_off_;
-    uint32_t name_off_;
-    uint32_t access_flags_;
+    uint16_t classIdx_;
+    uint16_t protoIdx_;
+    uint32_t classOff_;
+    uint32_t protoOff_;
+    uint32_t nameOff_;
+    uint32_t accessFlags_;
 
-    Span<const uint8_t> tagged_values_sp_ {nullptr, nullptr};
-    Span<const uint8_t> source_lang_sp_ {nullptr, nullptr};
-    Span<const uint8_t> runtime_annotations_sp_ {nullptr, nullptr};
-    Span<const uint8_t> runtime_param_annotation_sp_ {nullptr, nullptr};
-    Span<const uint8_t> debug_sp_ {nullptr, nullptr};
-    Span<const uint8_t> annotations_sp_ {nullptr, nullptr};
-    Span<const uint8_t> param_annotation_sp_ {nullptr, nullptr};
-    Span<const uint8_t> type_annotation_sp_ {nullptr, nullptr};
-    Span<const uint8_t> runtime_type_annotation_sp_ {nullptr, nullptr};
-    Span<const uint8_t> profile_info_sp_ {nullptr, nullptr};
+    Span<const uint8_t> taggedValuesSp_ {nullptr, nullptr};
+    Span<const uint8_t> sourceLangSp_ {nullptr, nullptr};
+    Span<const uint8_t> runtimeAnnotationsSp_ {nullptr, nullptr};
+    Span<const uint8_t> runtimeParamAnnotationSp_ {nullptr, nullptr};
+    Span<const uint8_t> debugSp_ {nullptr, nullptr};
+    Span<const uint8_t> annotationsSp_ {nullptr, nullptr};
+    Span<const uint8_t> paramAnnotationSp_ {nullptr, nullptr};
+    Span<const uint8_t> typeAnnotationSp_ {nullptr, nullptr};
+    Span<const uint8_t> runtimeTypeAnnotationSp_ {nullptr, nullptr};
+    Span<const uint8_t> profileInfoSp_ {nullptr, nullptr};
 
     size_t size_;
 };

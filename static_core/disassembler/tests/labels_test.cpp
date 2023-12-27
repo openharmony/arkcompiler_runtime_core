@@ -58,11 +58,11 @@ TEST(LabelTest, test1)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    std::string body_g = ExtractFuncBody(ss.str(), "u1 g() <static> {\n");
-    std::string body_gg = ExtractFuncBody(ss.str(), "u1 gg() <static> {\n");
+    std::string bodyG = ExtractFuncBody(ss.str(), "u1 g() <static> {\n");
+    std::string bodyGg = ExtractFuncBody(ss.str(), "u1 gg() <static> {\n");
 
-    EXPECT_EQ(body_g, "jump_label_0:\n\tjmp jump_label_0\n\treturn\n");
-    EXPECT_EQ(body_gg, "\tjmp jump_label_0\njump_label_0:\n\treturn\n");
+    EXPECT_EQ(bodyG, "jump_label_0:\n\tjmp jump_label_0\n\treturn\n");
+    EXPECT_EQ(bodyGg, "\tjmp jump_label_0\njump_label_0:\n\treturn\n");
 }
 
 TEST(LabelTest, test2)
@@ -108,10 +108,10 @@ TEST(LabelTest, test2)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    std::string body_g = ExtractFuncBody(ss.str(), "g() <static> {\n");
+    std::string bodyG = ExtractFuncBody(ss.str(), "g() <static> {\n");
 
     std::string line;
-    std::stringstream g {body_g};
+    std::stringstream g {bodyG};
 
     std::getline(g, line);
     EXPECT_EQ("jump_label_0:", line);
@@ -204,10 +204,10 @@ catch_block2_begin:
 
     std::string res = ss.str();
 
-    std::string body_main = ExtractFuncBody(ss.str(), "main() <static> {\n");
+    std::string bodyMain = ExtractFuncBody(ss.str(), "main() <static> {\n");
 
     std::string line;
-    std::stringstream main {body_main};
+    std::stringstream main {bodyMain};
     std::getline(main, line);
     EXPECT_EQ("\tmovi v0, 0x1", line);
     std::getline(main, line);

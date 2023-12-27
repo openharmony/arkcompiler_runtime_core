@@ -205,8 +205,8 @@ bool IrBuilderInliningAnalysis::IsSuitableForInline(const BytecodeInstruction* i
     // NOLINTNEXTLINE(bugprone-branch-clone)
     case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>:
 %   if runtime_insts.any? { |x| x.match?(inst.mnemonic) }
-        has_runtime_calls_ = true;
-        return !OPTIONS.IsCompilerInlineSimpleOnly();
+        hasRuntimeCalls_ = true;
+        return !g_options.IsCompilerInlineSimpleOnly();
 %   else
         return true;
 %   end

@@ -47,35 +47,35 @@ void RemoteObject::GeneratePreview(const std::vector<PropertyDescriptor> &proper
         }
 
         const auto &value = property.GetValue().value_;
-        std::optional<std::string> value_preview;
+        std::optional<std::string> valuePreview;
 
         if (std::holds_alternative<std::nullptr_t>(value)) {
-            value_preview.emplace("null");
+            valuePreview.emplace("null");
         } else if (auto boolean = std::get_if<bool>(&value)) {
-            value_preview.emplace(*boolean ? "true" : "false");
+            valuePreview.emplace(*boolean ? "true" : "false");
         } else if (auto number = std::get_if<NumberT>(&value)) {
             if (auto integer = std::get_if<int32_t>(number)) {
-                value_preview.emplace(std::to_string(*integer));
-            } else if (auto floating_point = std::get_if<double>(number)) {
-                value_preview.emplace(Format("%g", *floating_point));  // NOLINT(cppcoreguidelines-pro-type-vararg)
+                valuePreview.emplace(std::to_string(*integer));
+            } else if (auto floatingPoint = std::get_if<double>(number)) {
+                valuePreview.emplace(Format("%g", *floatingPoint));  // NOLINT(cppcoreguidelines-pro-type-vararg)
             } else {
                 UNREACHABLE();
             }
         } else if (auto bigint = std::get_if<BigIntT>(&value)) {
-            value_preview.emplace(GetDescription(*bigint));
+            valuePreview.emplace(GetDescription(*bigint));
         } else if (auto string = std::get_if<std::string>(&value)) {
-            value_preview.emplace(*string);
+            valuePreview.emplace(*string);
         } else if (auto symbol = std::get_if<SymbolT>(&value)) {
-            value_preview.emplace(symbol->description);
+            valuePreview.emplace(symbol->description);
         } else if (auto object = std::get_if<ObjectT>(&value)) {
-            value_preview.emplace(GetDescription(*object));
+            valuePreview.emplace(GetDescription(*object));
         } else if (auto array = std::get_if<ArrayT>(&value)) {
-            value_preview.emplace(GetDescription(*array));
+            valuePreview.emplace(GetDescription(*array));
         } else if (auto function = std::get_if<FunctionT>(&value)) {
-            value_preview.emplace(function->name);
+            valuePreview.emplace(function->name);
         }
 
-        preview_.push_back(PreviewProperty {property.GetName(), property.GetValue().GetType(), std::move(value_preview),
+        preview_.push_back(PreviewProperty {property.GetName(), property.GetValue().GetType(), std::move(valuePreview),
                                             property.IsEntry()});
     }
 }
@@ -105,12 +105,12 @@ std::string RemoteObject::GetDescription(const RemoteObject::BigIntT &bigint)
 
 std::string RemoteObject::GetDescription(const RemoteObject::ObjectT &object)
 {
-    return object.description.value_or(object.class_name);
+    return object.description.value_or(object.className);
 }
 
 std::string RemoteObject::GetDescription(const RemoteObject::ArrayT &array)
 {
-    return array.class_name + "(" + std::to_string(array.length) + ")";
+    return array.className + "(" + std::to_string(array.length) + ")";
 }
 
 std::string RemoteObject::GetDescription(const RemoteObject::FunctionT &function)
@@ -119,11 +119,11 @@ std::string RemoteObject::GetDescription(const RemoteObject::FunctionT &function
 
     desc << "function " << function.name << "(";
 
-    for (auto arg_idx = 0U; arg_idx < function.length; ++arg_idx) {
-        if (arg_idx != 0) {
+    for (auto argIdx = 0U; argIdx < function.length; ++argIdx) {
+        if (argIdx != 0) {
             desc << ", ";
         }
-        desc << static_cast<char>('a' + arg_idx);
+        desc << static_cast<char>('a' + argIdx);
     }
 
     desc << ") { [not available] }";
@@ -134,13 +134,13 @@ std::string RemoteObject::GetDescription(const RemoteObject::FunctionT &function
 std::optional<RemoteObjectId> RemoteObject::GetObjectId() const
 {
     if (auto object = std::get_if<ObjectT>(&value_)) {
-        return object->object_id;
+        return object->objectId;
     }
     if (auto array = std::get_if<ArrayT>(&value_)) {
-        return array->object_id;
+        return array->objectId;
     }
     if (auto function = std::get_if<FunctionT>(&value_)) {
-        return function->object_id;
+        return function->objectId;
     }
     return {};
 }
@@ -185,29 +185,29 @@ std::function<void(JsonObjectBuilder &)> RemoteObject::PreviewToJson() const
 {
     std::function<void(JsonArrayBuilder &)> properties = [](auto &) {};
     std::function<void(JsonArrayBuilder &)> entries = [](auto &) {};
-    bool has_entries = false;
+    bool hasEntries = false;
 
-    for (auto &preview_property : preview_) {
-        auto property = preview_property.type.ToJson();
+    for (auto &previewProperty : preview_) {
+        auto property = previewProperty.type.ToJson();
 
-        if (preview_property.is_entry) {
+        if (previewProperty.isEntry) {
             auto value = property;
 
-            if (preview_property.value) {
-                AddProperty(value, "description", *preview_property.value);
+            if (previewProperty.value) {
+                AddProperty(value, "description", *previewProperty.value);
             }
 
             std::function<void(JsonObjectBuilder &)> entry = [](auto &) {};
             AddProperty(entry, "value", std::move(value));
 
             AddElement(entries, std::move(entry));
-            has_entries = true;
+            hasEntries = true;
         }
 
-        AddProperty(property, "name", preview_property.name);
+        AddProperty(property, "name", previewProperty.name);
 
-        if (preview_property.value) {
-            AddProperty(property, "value", *preview_property.value);
+        if (previewProperty.value) {
+            AddProperty(property, "value", *previewProperty.value);
         }
 
         AddElement(properties, std::move(property));
@@ -218,7 +218,7 @@ std::function<void(JsonObjectBuilder &)> RemoteObject::PreviewToJson() const
     AddProperty(result, "overflow", false);
     AddProperty(result, "properties", std::move(properties));
 
-    if (has_entries) {
+    if (hasEntries) {
         AddProperty(result, "entries", std::move(entries));
     }
 
@@ -236,8 +236,8 @@ std::function<void(JsonObjectBuilder &)> RemoteObject::ToJson() const
     } else if (auto number = std::get_if<NumberT>(&value_)) {
         if (auto integer = std::get_if<int32_t>(number)) {
             AddProperty(result, "value", *integer);
-        } else if (auto floating_point = std::get_if<double>(number)) {
-            AddProperty(result, "value", *floating_point);
+        } else if (auto floatingPoint = std::get_if<double>(number)) {
+            AddProperty(result, "value", *floatingPoint);
         } else {
             UNREACHABLE();
         }
@@ -248,18 +248,18 @@ std::function<void(JsonObjectBuilder &)> RemoteObject::ToJson() const
     } else if (auto symbol = std::get_if<SymbolT>(&value_)) {
         AddProperty(result, "description", symbol->description);
     } else if (auto object = std::get_if<ObjectT>(&value_)) {
-        AddProperty(result, "className", object->class_name);
+        AddProperty(result, "className", object->className);
         AddProperty(result, "description", GetDescription(*object));
     } else if (auto array = std::get_if<ArrayT>(&value_)) {
-        AddProperty(result, "className", array->class_name);
+        AddProperty(result, "className", array->className);
         AddProperty(result, "description", GetDescription(*array));
     } else if (auto function = std::get_if<FunctionT>(&value_)) {
-        AddProperty(result, "className", function->class_name);
+        AddProperty(result, "className", function->className);
         AddProperty(result, "description", GetDescription(*function));
     }
 
-    if (auto object_id = GetObjectId()) {
-        AddProperty(result, "objectId", std::to_string(*object_id));
+    if (auto objectId = GetObjectId()) {
+        AddProperty(result, "objectId", std::to_string(*objectId));
     }
 
     if (!preview_.empty()) {

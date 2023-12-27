@@ -50,7 +50,7 @@ public:
 
     const Inst *GetLenArray()
     {
-        return len_array_;
+        return lenArray_;
     }
     int64_t GetLeft() const;
 
@@ -133,15 +133,15 @@ public:
 
     bool operator==(const BoundsRange &rhs) const
     {
-        return left_ == rhs.left_ && right_ == rhs.right_ && len_array_ == rhs.len_array_;
+        return left_ == rhs.left_ && right_ == rhs.right_ && lenArray_ == rhs.lenArray_;
     }
 
     void Dump(std::ostream &out = std::cerr) const
     {
         out << "Range = [" << left_ << ", ";
         out << right_ << "]";
-        if (len_array_ != nullptr) {
-            out << ", len_array = " << len_array_->GetId();
+        if (lenArray_ != nullptr) {
+            out << ", len_array = " << lenArray_->GetId();
         }
         out << "\n";
     }
@@ -149,12 +149,12 @@ public:
 private:
     int64_t left_ = MIN_RANGE_VALUE;
     int64_t right_ = MAX_RANGE_VALUE;
-    const Inst *len_array_ {nullptr};
+    const Inst *lenArray_ {nullptr};
 };
 
 class BoundsRangeInfo {
 public:
-    explicit BoundsRangeInfo(ArenaAllocator *aa) : aa_(*aa), bounds_range_info_(aa->Adapter()) {}
+    explicit BoundsRangeInfo(ArenaAllocator *aa) : aa_(*aa), boundsRangeInfo_(aa->Adapter()) {}
     NO_COPY_SEMANTIC(BoundsRangeInfo);
     NO_MOVE_SEMANTIC(BoundsRangeInfo);
     ~BoundsRangeInfo() = default;
@@ -165,12 +165,12 @@ public:
 
     void Clear()
     {
-        bounds_range_info_.clear();
+        boundsRangeInfo_.clear();
     }
 
 private:
     ArenaAllocator &aa_;
-    ArenaDoubleUnorderedMap<const BasicBlock *, const Inst *, BoundsRange> bounds_range_info_;
+    ArenaDoubleUnorderedMap<const BasicBlock *, const Inst *, BoundsRange> boundsRangeInfo_;
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
@@ -192,12 +192,12 @@ public:
 
     BoundsRangeInfo *GetBoundsRangeInfo()
     {
-        return &bounds_range_info_;
+        return &boundsRangeInfo_;
     }
 
     const BoundsRangeInfo *GetBoundsRangeInfo() const
     {
-        return &bounds_range_info_;
+        return &boundsRangeInfo_;
     }
 
     static bool IsInstNotNull(const Inst *inst, BasicBlock *block);
@@ -223,20 +223,20 @@ public:
 #include "optimizer/ir/visitor.inc"
 private:
     static bool ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri);
-    static bool CheckTriangleCase(const BasicBlock *block, const BasicBlock *tgt_block);
-    static void ProcessNullCheck(GraphVisitor *v, const Inst *check_inst, const Inst *ref_input);
+    static bool CheckTriangleCase(const BasicBlock *block, const BasicBlock *tgtBlock);
+    static void ProcessNullCheck(GraphVisitor *v, const Inst *checkInst, const Inst *refInput);
 
-    static BoundsRange UpdateLenArray(BoundsRange range, const Inst *len_array, const Inst *upper);
-    static void CalcNewBoundsRangeForIsInstanceInput(GraphVisitor *v, IsInstanceInst *is_instance, IfImmInst *if_imm);
+    static BoundsRange UpdateLenArray(BoundsRange range, const Inst *lenArray, const Inst *upper);
+    static void CalcNewBoundsRangeForIsInstanceInput(GraphVisitor *v, IsInstanceInst *isInstance, IfImmInst *ifImm);
     static void CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *block, ConditionCode cc, Inst *left,
-                                             Inst *right, BasicBlock *tgt_block);
+                                             Inst *right, BasicBlock *tgtBlock);
     template <Opcode OPC>
     static void CalcNewBoundsRangeUnary(GraphVisitor *v, const Inst *inst);
     template <Opcode OPC>
     static void CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst);
 
 private:
-    BoundsRangeInfo bounds_range_info_;
+    BoundsRangeInfo boundsRangeInfo_;
 };
 }  // namespace panda::compiler
 

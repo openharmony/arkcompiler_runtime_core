@@ -32,9 +32,9 @@
 
 namespace panda::ets::intrinsics {
 
-extern "C" EtsSharedMemory *SharedMemoryCreate(int32_t byte_length)
+extern "C" EtsSharedMemory *SharedMemoryCreate(int32_t byteLength)
 {
-    return EtsSharedMemory::Create(byte_length);
+    return EtsSharedMemory::Create(byteLength);
 }
 
 extern "C" int8_t SharedMemoryAt(EtsSharedMemory *mem, int32_t index)
@@ -55,33 +55,33 @@ extern "C" int32_t SharedMemoryGetByteLength(EtsSharedMemory *mem)
 
 extern "C" int8_t SharedMemoryAddI8(EtsSharedMemory *mem, int32_t index, int8_t value)
 {
-    auto add = [value](int8_t old_value) { return old_value + value; };
+    auto add = [value](int8_t oldValue) { return oldValue + value; };
     auto result = mem->ReadModifyWriteI8(index, add);
     return result.first;
 }
 
 extern "C" int8_t SharedMemoryAndI8(EtsSharedMemory *mem, int32_t index, int8_t value)
 {
-    auto bitwise_and = [value](int8_t old_value) {
-        return static_cast<int8_t>(bit_cast<uint8_t>(old_value) & bit_cast<uint8_t>(value));
+    auto bitwiseAnd = [value](int8_t oldValue) {
+        return static_cast<int8_t>(bit_cast<uint8_t>(oldValue) & bit_cast<uint8_t>(value));
     };
-    auto result = mem->ReadModifyWriteI8(index, bitwise_and);
+    auto result = mem->ReadModifyWriteI8(index, bitwiseAnd);
     return result.first;
 }
 
-extern "C" int8_t SharedMemoryCompareExchangeI8(EtsSharedMemory *mem, int32_t index, int8_t expected_value,
-                                                int8_t replacement_value)
+extern "C" int8_t SharedMemoryCompareExchangeI8(EtsSharedMemory *mem, int32_t index, int8_t expectedValue,
+                                                int8_t replacementValue)
 {
-    auto compare_exchange = [expected_value, replacement_value](int8_t old_value) {
-        return old_value == expected_value ? replacement_value : old_value;
+    auto compareExchange = [expectedValue, replacementValue](int8_t oldValue) {
+        return oldValue == expectedValue ? replacementValue : oldValue;
     };
-    auto result = mem->ReadModifyWriteI8(index, compare_exchange);
+    auto result = mem->ReadModifyWriteI8(index, compareExchange);
     return result.first;
 }
 
 extern "C" int8_t SharedMemoryExchangeI8(EtsSharedMemory *mem, int32_t index, int8_t value)
 {
-    auto exchange = [value]([[maybe_unused]] int8_t old_value) { return value; };
+    auto exchange = [value]([[maybe_unused]] int8_t oldValue) { return value; };
     auto result = mem->ReadModifyWriteI8(index, exchange);
     return result.first;
 }
@@ -95,92 +95,90 @@ extern "C" int8_t SharedMemoryLoadI8(EtsSharedMemory *mem, int32_t index)
 
 extern "C" int8_t SharedMemoryOrI8(EtsSharedMemory *mem, int32_t index, int8_t value)
 {
-    auto or_bitwise = [value](int8_t old_value) {
-        return static_cast<int8_t>(bit_cast<uint8_t>(old_value) | bit_cast<uint8_t>(value));
+    auto orBitwise = [value](int8_t oldValue) {
+        return static_cast<int8_t>(bit_cast<uint8_t>(oldValue) | bit_cast<uint8_t>(value));
     };
-    auto result = mem->ReadModifyWriteI8(index, or_bitwise);
+    auto result = mem->ReadModifyWriteI8(index, orBitwise);
     return result.first;
 }
 
 extern "C" int8_t SharedMemoryStoreI8(EtsSharedMemory *mem, int32_t index, int8_t value)
 {
-    auto store = [value]([[maybe_unused]] int8_t old_value) { return value; };
+    auto store = [value]([[maybe_unused]] int8_t oldValue) { return value; };
     auto result = mem->ReadModifyWriteI8(index, store);
     return result.second;
 }
 
 extern "C" int8_t SharedMemorySubI8(EtsSharedMemory *mem, int32_t index, int8_t value)
 {
-    auto add = [value](int8_t old_value) { return old_value - value; };
+    auto add = [value](int8_t oldValue) { return oldValue - value; };
     auto result = mem->ReadModifyWriteI8(index, add);
     return result.first;
 }
 
 extern "C" int8_t SharedMemoryXorI8(EtsSharedMemory *mem, int32_t index, int8_t value)
 {
-    auto xor_bitwise = [value](int8_t old_value) {
-        return static_cast<int8_t>(bit_cast<uint8_t>(old_value) ^ bit_cast<uint8_t>(value));
+    auto xorBitwise = [value](int8_t oldValue) {
+        return static_cast<int8_t>(bit_cast<uint8_t>(oldValue) ^ bit_cast<uint8_t>(value));
     };
-    auto result = mem->ReadModifyWriteI8(index, xor_bitwise);
+    auto result = mem->ReadModifyWriteI8(index, xorBitwise);
     return result.first;
 }
 
 std::string PrintWaiters(EtsSharedMemory &mem)
 {
     std::stringstream stream;
-    auto cur_waiter = mem.GetHeadWaiter();
-    while (cur_waiter != nullptr) {
-        stream << reinterpret_cast<size_t>(cur_waiter) << " -> ";
-        cur_waiter = cur_waiter->GetNext();
+    auto curWaiter = mem.GetHeadWaiter();
+    while (curWaiter != nullptr) {
+        stream << reinterpret_cast<size_t>(curWaiter) << " -> ";
+        curWaiter = curWaiter->GetNext();
     }
     return stream.str();
 }
 
-extern "C" int32_t SharedMemoryWaitI32(EtsSharedMemory *mem, int32_t byte_offset, int32_t expected_value)
+extern "C" int32_t SharedMemoryWaitI32(EtsSharedMemory *mem, int32_t byteOffset, int32_t expectedValue)
 {
-    auto result = mem->WaitI32(byte_offset, expected_value, std::nullopt);
+    auto result = mem->WaitI32(byteOffset, expectedValue, std::nullopt);
     return static_cast<int32_t>(result);
 }
 
-extern "C" int32_t SharedMemoryWaitI64(EtsSharedMemory *mem, int32_t byte_offset, int64_t expected_value)
+extern "C" int32_t SharedMemoryWaitI64(EtsSharedMemory *mem, int32_t byteOffset, int64_t expectedValue)
 {
-    auto result = mem->WaitI64(byte_offset, expected_value, std::nullopt);
+    auto result = mem->WaitI64(byteOffset, expectedValue, std::nullopt);
     return static_cast<int32_t>(result);
 }
 
-extern "C" int32_t SharedMemoryTimedWaitI32(EtsSharedMemory *mem, int32_t byte_offset, int32_t expected_value,
-                                            int64_t ms)
+extern "C" int32_t SharedMemoryTimedWaitI32(EtsSharedMemory *mem, int32_t byteOffset, int32_t expectedValue, int64_t ms)
 {
     ASSERT(ms >= 0);
-    auto u_ms = static_cast<uint64_t>(ms);
-    auto result = mem->WaitI32(byte_offset, expected_value, std::optional(u_ms));
+    auto uMs = static_cast<uint64_t>(ms);
+    auto result = mem->WaitI32(byteOffset, expectedValue, std::optional(uMs));
     return static_cast<int32_t>(result);
 }
 
-extern "C" int32_t SharedMemoryTimedWaitI64(EtsSharedMemory *mem, int32_t byte_offset, int64_t expected_value,
-                                            int64_t ms)
+extern "C" int32_t SharedMemoryTimedWaitI64(EtsSharedMemory *mem, int32_t byteOffset, int64_t expectedValue, int64_t ms)
 {
-    auto *current_coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(current_coro);
-    EtsHandle<EtsSharedMemory> hmem(current_coro, mem);
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    EtsHandle<EtsSharedMemory> hmem(currentCoro, mem);
 
     ASSERT(ms >= 0);
-    auto u_ms = static_cast<uint64_t>(ms);
-    ScopedNativeCodeThread n(current_coro);
+    auto uMs = static_cast<uint64_t>(ms);
+    ScopedNativeCodeThread n(currentCoro);
 
-    auto result = hmem->WaitI64(byte_offset, expected_value, std::optional(u_ms));
+    auto result = hmem->WaitI64(byteOffset, expectedValue, std::optional(uMs));
     return static_cast<int32_t>(result);
 }
 
-extern "C" int32_t SharedMemoryNotify(EtsSharedMemory *mem, int32_t byte_offset)
+extern "C" int32_t SharedMemoryNotify(EtsSharedMemory *mem, int32_t byteOffset)
 {
-    return mem->NotifyI32(byte_offset, std::nullopt);
+    return mem->NotifyI32(byteOffset, std::nullopt);
 }
 
-extern "C" int32_t SharedMemoryBoundedNotify(EtsSharedMemory *mem, int32_t byte_offset, int32_t count)
+extern "C" int32_t SharedMemoryBoundedNotify(EtsSharedMemory *mem, int32_t byteOffset, int32_t count)
 {
     ASSERT(count >= 0);
-    return mem->NotifyI32(byte_offset, std::optional(count));
+    return mem->NotifyI32(byteOffset, std::optional(count));
 }
 
 }  // namespace panda::ets::intrinsics

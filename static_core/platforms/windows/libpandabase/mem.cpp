@@ -14,6 +14,7 @@
  */
 
 #include "os/mem.h"
+#include "macros.h"
 #include "utils/type_helpers.h"
 #include "utils/asan_interface.h"
 #include "utils/logger.h"
@@ -53,7 +54,7 @@ static DWORD mem_protection_flags_for_page(const int prot)
     return flags;
 }
 
-static DWORD mem_protection_flags_for_file(const int prot, const uint32_t map_flags)
+static DWORD mem_protection_flags_for_file(const int prot, const uint32_t mapFlags)
 {
     DWORD flags = 0;
     if (prot == MMAP_PROT_NONE) {
@@ -65,7 +66,7 @@ static DWORD mem_protection_flags_for_file(const int prot, const uint32_t map_fl
      * or FILE_MAP_WRITE. Or else it will be converted to PAGE_READONLY or PAGE_READWRITE, and make
      * the changes synced back to the original file.
      */
-    if ((map_flags & MMAP_FLAG_PRIVATE) != 0) {
+    if ((mapFlags & MMAP_FLAG_PRIVATE) != 0) {
         return FILE_MAP_COPY;
     }
 
@@ -116,11 +117,11 @@ void *mmap([[maybe_unused]] void *addr, size_t len, uint32_t prot, int flags, in
         return MAP_FAILED;
     }
 
-    const auto prot_page = mem_protection_flags_for_page(prot);
-    const off_t max_size = off + static_cast<off_t>(len);
-    const auto max_size_low = mem_select_lower_bound(max_size);
-    const auto max_size_high = mem_select_upper_bound(max_size);
-    HANDLE fm = CreateFileMapping(h, nullptr, prot_page, max_size_high, max_size_low, nullptr);
+    const auto protPage = mem_protection_flags_for_page(prot);
+    const off_t maxSize = off + static_cast<off_t>(len);
+    const auto maxSizeLow = mem_select_lower_bound(maxSize);
+    const auto maxSizeHigh = mem_select_upper_bound(maxSize);
+    HANDLE fm = CreateFileMapping(h, nullptr, protPage, maxSizeHigh, maxSizeLow, nullptr);
     if (fm == nullptr) {
         errno = mem_errno(GetLastError(), EPERM);
         return MAP_FAILED;
@@ -156,12 +157,12 @@ void MmapDeleter(std::byte *ptr, size_t size) noexcept
     }
 }
 
-BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, size_t file_offset, void *hint)
+BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, size_t fileOffset, void *hint)
 {
-    size_t map_offset = RoundDown(file_offset, GetPageSize());
-    size_t offset = file_offset - map_offset;
-    size_t map_size = size + offset;
-    void *result = mmap(hint, map_size, prot, flags, file.GetFd(), map_offset);
+    size_t mapOffset = RoundDown(fileOffset, GetPageSize());
+    size_t offset = fileOffset - mapOffset;
+    size_t mapSize = size + offset;
+    void *result = mmap(hint, mapSize, prot, flags, file.GetFd(), mapOffset);
     if (result == MAP_FAILED) {
         return BytePtr(nullptr, 0, MmapDeleter);
     }
@@ -223,25 +224,31 @@ uint32_t GetPageSize()
 static size_t GetCacheLineSizeFromOs()
 {
     // NOLINTNEXTLINE(google-runtime-int)
-    size_t line_size = 0;
-    DWORD buffer_size = 0;
+    size_t lineSize = 0;
+    DWORD bufferSize = 0;
     DWORD i = 0;
     SYSTEM_LOGICAL_PROCESSOR_INFORMATION *buffer = 0;
 
-    GetLogicalProcessorInformation(0, &buffer_size);
-    buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION *)malloc(buffer_size);
-    GetLogicalProcessorInformation(&buffer[0], &buffer_size);
+    GetLogicalProcessorInformation(0, &bufferSize);
+    /* if (bufferSize == 0) {
+        // malloc behavior for zero bytes is implementation defined
+        // So, check it here
+        LOG_IF(lineSize == 0, FATAL, RUNTIME) << "Can't get cache line size from OS";
+        UNREACHABLE();
+    } */
+    buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION *)malloc(bufferSize);
+    GetLogicalProcessorInformation(&buffer[0], &bufferSize);
 
-    for (i = 0; i != buffer_size / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION); ++i) {
+    for (i = 0; i != bufferSize / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION); ++i) {
         if (buffer[i].Relationship == RelationCache && buffer[i].Cache.Level == 1) {
-            line_size = buffer[i].Cache.LineSize;
+            lineSize = buffer[i].Cache.LineSize;
             break;
         }
     }
-    LOG_IF(line_size == 0, FATAL, RUNTIME) << "Can't get cache line size from OS";
+    LOG_IF(lineSize == 0, FATAL, RUNTIME) << "Can't get cache line size from OS";
 
     free(buffer);
-    return line_size;
+    return lineSize;
 }
 
 size_t GetCacheLineSize()
@@ -251,7 +258,7 @@ size_t GetCacheLineSize()
     return sz;
 }
 
-void *MapRWAnonymousRaw(size_t size, bool force_poison)
+void *MapRWAnonymousRaw(size_t size, bool forcePoison)
 {
     ASSERT(size % GetPageSize() == 0);
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
@@ -260,7 +267,7 @@ void *MapRWAnonymousRaw(size_t size, bool force_poison)
     if (UNLIKELY(result == MAP_FAILED)) {
         result = nullptr;
     }
-    if ((result != nullptr) && force_poison) {
+    if ((result != nullptr) && forcePoison) {
         ASAN_POISON_MEMORY_REGION(result, size);
     }
 
@@ -275,31 +282,32 @@ std::optional<Error> PartiallyUnmapRaw([[maybe_unused]] void *mem, [[maybe_unuse
     return {};
 }
 
-void *MapRWAnonymousWithAlignmentRaw(size_t size, size_t aligment_in_bytes, bool force_poison)
+void *MapRWAnonymousWithAlignmentRaw(size_t size, size_t aligmentInBytes, bool forcePoison)
 {
-    ASSERT(aligment_in_bytes % GetPageSize() == 0);
+    ASSERT(aligmentInBytes != 0);
+    ASSERT(aligmentInBytes % GetPageSize() == 0);
     if (size == 0) {
         return nullptr;
     }
-    void *result = MapRWAnonymousRaw(size + aligment_in_bytes, force_poison);
+    void *result = MapRWAnonymousRaw(size + aligmentInBytes, forcePoison);
     if (result == nullptr) {
         return result;
     }
-    auto allocated_mem = reinterpret_cast<uintptr_t>(result);
-    uintptr_t aligned_mem = (allocated_mem & ~(aligment_in_bytes - 1U)) +
-                            ((allocated_mem % aligment_in_bytes) != 0U ? aligment_in_bytes : 0U);
-    ASSERT(aligned_mem >= allocated_mem);
-    size_t unused_in_start = aligned_mem - allocated_mem;
-    ASSERT(unused_in_start <= aligment_in_bytes);
-    size_t unused_in_end = aligment_in_bytes - unused_in_start;
-    if (unused_in_start != 0) {
-        PartiallyUnmapRaw(result, unused_in_start);
+    auto allocatedMem = reinterpret_cast<uintptr_t>(result);
+    uintptr_t alignedMem =
+        (allocatedMem & ~(aligmentInBytes - 1U)) + ((allocatedMem % aligmentInBytes) != 0U ? aligmentInBytes : 0U);
+    ASSERT(alignedMem >= allocatedMem);
+    size_t unusedInStart = alignedMem - allocatedMem;
+    ASSERT(unusedInStart <= aligmentInBytes);
+    size_t unusedInEnd = aligmentInBytes - unusedInStart;
+    if (unusedInStart != 0) {
+        PartiallyUnmapRaw(result, unusedInStart);
     }
-    if (unused_in_end != 0) {
-        auto end_part = reinterpret_cast<void *>(aligned_mem + size);
-        PartiallyUnmapRaw(end_part, unused_in_end);
+    if (unusedInEnd != 0) {
+        auto end_part = reinterpret_cast<void *>(alignedMem + size);
+        PartiallyUnmapRaw(end_part, unusedInEnd);
     }
-    return reinterpret_cast<void *>(aligned_mem);
+    return reinterpret_cast<void *>(alignedMem);
 }
 
 uintptr_t AlignDownToPageSize(uintptr_t addr)
@@ -311,13 +319,13 @@ uintptr_t AlignDownToPageSize(uintptr_t addr)
     return addr;
 }
 
-void *AlignedAlloc(size_t alignment_in_bytes, size_t size)
+void *AlignedAlloc(size_t alignmentInBytes, size_t size)
 {
-    size_t aligned_size = (size + alignment_in_bytes - 1) & ~(alignment_in_bytes - 1);
+    size_t alignedSize = (size + alignmentInBytes - 1) & ~(alignmentInBytes - 1);
     // aligned_alloc is not supported on MingW. instead we need to call _aligned_malloc.
-    auto ret = _aligned_malloc(aligned_size, alignment_in_bytes);
+    auto ret = _aligned_malloc(alignedSize, alignmentInBytes);
     // _aligned_malloc returns aligned pointer so just add assertion, no need to do runtime checks
-    ASSERT(reinterpret_cast<uintptr_t>(ret) == (reinterpret_cast<uintptr_t>(ret) & ~(alignment_in_bytes - 1)));
+    ASSERT(reinterpret_cast<uintptr_t>(ret) == (reinterpret_cast<uintptr_t>(ret) & ~(alignmentInBytes - 1)));
     return ret;
 }
 

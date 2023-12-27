@@ -175,23 +175,23 @@ void Compilation::CheckUsedRegisters()
 
 Compilation::Result Compilation::Run()
 {
-    if (compiler::OPTIONS.WasSetCompilerRegex()) {
-        methods_regex_ = compiler::OPTIONS.GetCompilerRegex();
+    if (compiler::g_options.WasSetCompilerRegex()) {
+        methodsRegex_ = compiler::g_options.GetCompilerRegex();
     }
 
     PoolManager::Initialize(PoolType::MALLOC);
 
     allocator_ = std::make_unique<ArenaAllocator>(SpaceType::SPACE_TYPE_COMPILER);
-    local_allocator_ = std::make_unique<ArenaAllocator>(SpaceType::SPACE_TYPE_COMPILER);
+    localAllocator_ = std::make_unique<ArenaAllocator>(SpaceType::SPACE_TYPE_COMPILER);
 
-    if (RUNTIME_ARCH == Arch::X86_64 && compiler::OPTIONS.WasSetCompilerCrossArch()) {
-        arch_ = GetArchFromString(compiler::OPTIONS.GetCompilerCrossArch());
+    if (RUNTIME_ARCH == Arch::X86_64 && compiler::g_options.WasSetCompilerCrossArch()) {
+        arch_ = GetArchFromString(compiler::g_options.GetCompilerCrossArch());
         if (arch_ == Arch::NONE) {
-            LOG(FATAL, IRTOC) << "FATAL: unknown arch: " << compiler::OPTIONS.GetCompilerCrossArch();
+            LOG(FATAL, IRTOC) << "FATAL: unknown arch: " << compiler::g_options.GetCompilerCrossArch();
         }
-        compiler::OPTIONS.AdjustCpuFeatures(arch_ != RUNTIME_ARCH);
+        compiler::g_options.AdjustCpuFeatures(arch_ != RUNTIME_ARCH);
     } else {
-        compiler::OPTIONS.AdjustCpuFeatures(false);
+        compiler::g_options.AdjustCpuFeatures(false);
     }
 
     LOG(INFO, IRTOC) << "Start Irtoc compilation for " << GetArchString(arch_) << "...";
@@ -204,7 +204,7 @@ Compilation::Result Compilation::Run()
         LOG(FATAL, IRTOC) << "Irtoc compilation failed: " << result.Error();
     }
 
-    if (result = MakeElf(OPTIONS.GetIrtocOutput()); !result) {
+    if (result = MakeElf(g_options.GetIrtocOutput()); !result) {
         return result;
     }
 
@@ -213,7 +213,7 @@ Compilation::Result Compilation::Run()
     }
 
     allocator_.reset();
-    local_allocator_.reset();
+    localAllocator_.reset();
 
     PoolManager::Finalize();
 
@@ -225,42 +225,42 @@ Compilation::Result Compilation::Compile()
 #ifdef PANDA_LLVM_IRTOC
     IrtocRuntimeInterface runtime;
     ArenaAllocator allocator(SpaceType::SPACE_TYPE_COMPILER);
-    std::shared_ptr<llvmbackend::IrtocCompilerInterface> llvm_compiler =
+    std::shared_ptr<llvmbackend::IrtocCompilerInterface> llvmCompiler =
         llvmbackend::CreateLLVMIrtocCompiler(&runtime, &allocator, arch_);
 #endif
 
     for (auto unit : units_) {
-        if (compiler::OPTIONS.WasSetCompilerRegex() && !std::regex_match(unit->GetName(), methods_regex_)) {
+        if (compiler::g_options.WasSetCompilerRegex() && !std::regex_match(unit->GetName(), methodsRegex_)) {
             continue;
         }
         LOG(INFO, IRTOC) << "Compile " << unit->GetName();
 #ifdef PANDA_LLVM_IRTOC
-        unit->SetLLVMCompiler(llvm_compiler);
+        unit->SetLLVMCompiler(llvmCompiler);
 #endif
-        auto result = unit->Compile(arch_, allocator_.get(), local_allocator_.get());
+        auto result = unit->Compile(arch_, allocator_.get(), localAllocator_.get());
         if (!result) {
             return Unexpected {result.Error()};
         }
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        has_debug_info_ |= unit->GetGraph()->IsLineDebugInfoEnabled();
+        hasDebugInfo_ |= unit->GetGraph()->IsLineDebugInfoEnabled();
 #endif
     }
 
 #ifdef PANDA_LLVM_IRTOC
-    llvm_compiler->CompileAll();
-    ASSERT(!OPTIONS.GetIrtocOutputLlvm().empty());
-    llvm_compiler->WriteObjectFile(OPTIONS.GetIrtocOutputLlvm());
+    llvmCompiler->CompileAll();
+    ASSERT(!g_options.GetIrtocOutputLlvm().empty());
+    llvmCompiler->WriteObjectFile(g_options.GetIrtocOutputLlvm());
 
     for (auto unit : units_) {
         if (unit->IsCompiledByLlvm()) {
-            auto code = llvm_compiler->GetCompiledCode(unit->GetName());
+            auto code = llvmCompiler->GetCompiledCode(unit->GetName());
             Span<uint8_t> span = {const_cast<uint8_t *>(code.code), code.size};
             unit->SetCode(span);
         }
         unit->ReportCompilationStatistic(&std::cerr);
     }
-    if (OPTIONS.GetIrtocLlvmStats() != "none" && !llvm_compiler->IsEmpty()) {
-        std::cerr << "LLVM total: " << llvm_compiler->GetObjectFileSize() << " bytes" << std::endl;
+    if (g_options.GetIrtocLlvmStats() != "none" && !llvmCompiler->IsEmpty()) {
+        std::cerr << "LLVM total: " << llvmCompiler->GetObjectFileSize() << " bytes" << std::endl;
     }
 
 #ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
@@ -290,68 +290,69 @@ static size_t GetElfArch(Arch arch)
 // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 Compilation::Result Compilation::MakeElf(std::string_view output)
 {
-    ELFIO::elfio elf_writer;
-    elf_writer.create(Is64BitsArch(arch_) ? ELFIO::ELFCLASS64 : ELFIO::ELFCLASS32, ELFIO::ELFDATA2LSB);
-    elf_writer.set_type(ELFIO::ET_REL);
+    ELFIO::elfio elfWriter;
+    elfWriter.create(Is64BitsArch(arch_) ? ELFIO::ELFCLASS64 : ELFIO::ELFCLASS32, ELFIO::ELFDATA2LSB);
+    elfWriter.set_type(ELFIO::ET_REL);
     if (arch_ == Arch::AARCH32) {
-        elf_writer.set_flags(EF_ARM_EABI_VER5);
+        elfWriter.set_flags(EF_ARM_EABI_VER5);
     }
-    elf_writer.set_os_abi(ELFIO::ELFOSABI_NONE);
-    elf_writer.set_machine(GetElfArch(arch_));
+    elfWriter.set_os_abi(ELFIO::ELFOSABI_NONE);
+    elfWriter.set_machine(GetElfArch(arch_));
 
-    ELFIO::section *str_sec = elf_writer.sections.add(".strtab");
-    str_sec->set_type(ELFIO::SHT_STRTAB);
-    str_sec->set_addr_align(0x1);
+    ELFIO::section *strSec = elfWriter.sections.add(".strtab");
+    strSec->set_type(ELFIO::SHT_STRTAB);
+    strSec->set_addr_align(0x1);
 
-    ELFIO::string_section_accessor str_writer(str_sec);
+    ELFIO::string_section_accessor strWriter(strSec);
 
     static constexpr size_t FIRST_GLOBAL_SYMBOL_INDEX = 2;
     static constexpr size_t SYMTAB_ADDR_ALIGN = 8;
 
-    ELFIO::section *sym_sec = elf_writer.sections.add(".symtab");
-    sym_sec->set_type(ELFIO::SHT_SYMTAB);
-    sym_sec->set_info(FIRST_GLOBAL_SYMBOL_INDEX);
-    sym_sec->set_link(str_sec->get_index());
-    sym_sec->set_addr_align(SYMTAB_ADDR_ALIGN);
-    sym_sec->set_entry_size(elf_writer.get_default_entry_size(ELFIO::SHT_SYMTAB));
+    ELFIO::section *symSec = elfWriter.sections.add(".symtab");
+    symSec->set_type(ELFIO::SHT_SYMTAB);
+    symSec->set_info(FIRST_GLOBAL_SYMBOL_INDEX);
+    symSec->set_link(strSec->get_index());
+    symSec->set_addr_align(SYMTAB_ADDR_ALIGN);
+    symSec->set_entry_size(elfWriter.get_default_entry_size(ELFIO::SHT_SYMTAB));
 
-    ELFIO::symbol_section_accessor symbol_writer(elf_writer, sym_sec);
+    ELFIO::symbol_section_accessor symbolWriter(elfWriter, symSec);
 
-    symbol_writer.add_symbol(str_writer, "irtoc.cpp", 0, 0, ELFIO::STB_LOCAL, ELFIO::STT_FILE, 0, ELFIO::SHN_ABS);
+    symbolWriter.add_symbol(strWriter, "irtoc.cpp", 0, 0, ELFIO::STB_LOCAL, ELFIO::STT_FILE, 0, ELFIO::SHN_ABS);
 
-    ELFIO::section *text_sec = elf_writer.sections.add(".text");
-    text_sec->set_type(ELFIO::SHT_PROGBITS);
+    ELFIO::section *textSec = elfWriter.sections.add(".text");
+    textSec->set_type(ELFIO::SHT_PROGBITS);
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    text_sec->set_flags(ELFIO::SHF_ALLOC | ELFIO::SHF_EXECINSTR);
-    text_sec->set_addr_align(GetCodeAlignment(arch_));
+    textSec->set_flags(ELFIO::SHF_ALLOC | ELFIO::SHF_EXECINSTR);
+    textSec->set_addr_align(GetCodeAlignment(arch_));
 
-    ELFIO::section *rel_sec = elf_writer.sections.add(".rela.text");
-    rel_sec->set_type(ELFIO::SHT_RELA);
-    rel_sec->set_info(text_sec->get_index());
-    rel_sec->set_link(sym_sec->get_index());
-    rel_sec->set_addr_align(4U);  // CODECHECK-NOLINT(C_RULE_ID_MAGICNUMBER)
-    rel_sec->set_entry_size(elf_writer.get_default_entry_size(ELFIO::SHT_RELA));
-    ELFIO::relocation_section_accessor rel_writer(elf_writer, rel_sec);
+    ELFIO::section *relSec = elfWriter.sections.add(".rela.text");
+    relSec->set_type(ELFIO::SHT_RELA);
+    relSec->set_info(textSec->get_index());
+    relSec->set_link(symSec->get_index());
+    relSec->set_addr_align(4U);  // CODECHECK-NOLINT(C_RULE_ID_MAGICNUMBER)
+    relSec->set_entry_size(elfWriter.get_default_entry_size(ELFIO::SHT_RELA));
+    ELFIO::relocation_section_accessor relWriter(elfWriter, relSec);
 
     /* Use symbols map to avoid saving the same symbols multiple times */
-    std::unordered_map<std::string, uint32_t> symbols_map;
-    auto add_symbol = [&symbols_map, &symbol_writer, &str_writer](const char *name) {
-        if (auto it = symbols_map.find(name); it != symbols_map.end()) {
+    std::unordered_map<std::string, uint32_t> symbolsMap;
+    auto addSymbol = [&symbolsMap, &symbolWriter, &strWriter](const char *name) {
+        if (auto it = symbolsMap.find(name); it != symbolsMap.end()) {
             return it->second;
         }
-        uint32_t index = symbol_writer.add_symbol(str_writer, name, 0, 0, ELFIO::STB_GLOBAL, ELFIO::STT_NOTYPE, 0, 0);
-        symbols_map.insert({name, index});
+        uint32_t index = symbolWriter.add_symbol(strWriter, name, 0, 0, ELFIO::STB_GLOBAL, ELFIO::STT_NOTYPE, 0, 0);
+        symbolsMap.insert({name, index});
         return index;
     };
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    auto dwarf_builder {has_debug_info_ ? std::make_optional<DwarfBuilder>(arch_, &elf_writer) : std::nullopt};
+    auto dwarfBuilder {hasDebugInfo_ ? std::make_optional<DwarfBuilder>(arch_, &elfWriter) : std::nullopt};
 #endif
 
     static constexpr size_t MAX_CODE_ALIGNMENT = 64;
     static constexpr std::array<uint8_t, MAX_CODE_ALIGNMENT> PADDING_DATA {0};
     CHECK_LE(GetCodeAlignment(GetArch()), MAX_CODE_ALIGNMENT);
 
-    uint32_t code_alignment = GetCodeAlignment(GetArch());
+    uint32_t codeAlignment = GetCodeAlignment(GetArch());
+    ASSERT(codeAlignment != 0);
     size_t offset = 0;
     for (auto unit : units_) {
         if (unit->IsCompiledByLlvm()) {
@@ -360,42 +361,42 @@ Compilation::Result Compilation::MakeElf(std::string_view output)
         auto code = unit->GetCode();
 
         // Align function
-        if (auto padding = offset % code_alignment; padding != 0) {
-            text_sec->append_data(reinterpret_cast<const char *>(PADDING_DATA.data()), padding);
+        if (auto padding = offset % codeAlignment; padding != 0) {
+            textSec->append_data(reinterpret_cast<const char *>(PADDING_DATA.data()), padding);
             offset += padding;
         }
-        auto symbol = symbol_writer.add_symbol(str_writer, unit->GetName(), offset, code.size(), ELFIO::STB_GLOBAL,
-                                               ELFIO::STT_FUNC, 0, text_sec->get_index());
+        auto symbol = symbolWriter.add_symbol(strWriter, unit->GetName(), offset, code.size(), ELFIO::STB_GLOBAL,
+                                              ELFIO::STT_FUNC, 0, textSec->get_index());
         (void)symbol;
-        text_sec->append_data(reinterpret_cast<const char *>(code.data()), code.size());
+        textSec->append_data(reinterpret_cast<const char *>(code.data()), code.size());
         for (auto &rel : unit->GetRelocations()) {
-            size_t rel_offset = offset + rel.offset;
-            auto sindex = add_symbol(unit->GetExternalFunction(rel.data));
+            size_t relOffset = offset + rel.offset;
+            auto sindex = addSymbol(unit->GetExternalFunction(rel.data));
             if (Is64BitsArch(arch_)) {
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                rel_writer.add_entry(rel_offset, static_cast<ELFIO::Elf_Xword>(ELF64_R_INFO(sindex, rel.type)),
-                                     rel.addend);
+                relWriter.add_entry(relOffset, static_cast<ELFIO::Elf_Xword>(ELF64_R_INFO(sindex, rel.type)),
+                                    rel.addend);
             } else {
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                rel_writer.add_entry(rel_offset, static_cast<ELFIO::Elf_Xword>(ELF32_R_INFO(sindex, rel.type)),
-                                     rel.addend);
+                relWriter.add_entry(relOffset, static_cast<ELFIO::Elf_Xword>(ELF32_R_INFO(sindex, rel.type)),
+                                    rel.addend);
             }
         }
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        ASSERT(!unit->GetGraph()->IsLineDebugInfoEnabled() || dwarf_builder);
-        if (dwarf_builder && !dwarf_builder->BuildGraph(unit, offset, symbol)) {
+        ASSERT(!unit->GetGraph()->IsLineDebugInfoEnabled() || dwarfBuilder);
+        if (dwarfBuilder && !dwarfBuilder->BuildGraph(unit, offset, symbol)) {
             return Unexpected("DwarfBuilder::BuildGraph failed!");
         }
 #endif
         offset += code.size();
     }
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    if (dwarf_builder && !dwarf_builder->Finalize(offset)) {
+    if (dwarfBuilder && !dwarfBuilder->Finalize(offset)) {
         return Unexpected("DwarfBuilder::Finalize failed!");
     }
 #endif
 
-    elf_writer.save(output.data());
+    elfWriter.save(output.data());
 
     return 0;
 }

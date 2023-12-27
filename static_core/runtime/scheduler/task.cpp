@@ -37,7 +37,7 @@ Task *Task::Create(PandaVM *vm, ObjectHeader *obj)
 
 void Task::Initialize()
 {
-    trace::ScopedTrace scoped_trace2("ThreadManager::RegisterThread");
+    trace::ScopedTrace scopedTrace2("ThreadManager::RegisterThread");
     // NOTE(xuliang): RegisterThread
 }
 
@@ -47,22 +47,22 @@ void Task::Destroy()
     // NOTE(xuliang): should be done in UnregisterExitedThread.
     GetVM()->GetGC()->OnThreadTerminate(this, mem::BuffersKeepingFlag::DELETE);
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    auto wt = worker_thread_;
+    auto wt = workerThread_;
     allocator->Delete(this);
     Thread::SetCurrent(wt);
 }
 
 void Task::SwitchFromWorkerThread()
 {
-    worker_thread_ = WorkerThread::GetCurrent();
-    worker_thread_->SetTask(this);
+    workerThread_ = WorkerThread::GetCurrent();
+    workerThread_->SetTask(this);
     Thread::SetCurrent(this);
 }
 
 void Task::SuspendCurrent()
 {
     auto task = Task::GetCurrent();
-    auto wt = task->worker_thread_;
+    auto wt = task->workerThread_;
     ASSERT(wt != nullptr);
     Thread::SetCurrent(wt);
     wt->SetTask(nullptr);
@@ -71,7 +71,7 @@ void Task::SuspendCurrent()
 void Task::EndCurrent()
 {
     auto task = Task::GetCurrent();
-    auto wt = task->worker_thread_;
+    auto wt = task->workerThread_;
     ASSERT(wt != nullptr);
     task->Destroy();
     Thread::SetCurrent(wt);

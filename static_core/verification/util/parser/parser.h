@@ -169,13 +169,13 @@ struct BaseParser : public verifier::callable<bool(Context &, Iter &, Iter)> {
                 return false;
             }
             bool result = p(c, start, end);
-            auto new_saved = saved;
+            auto newSaved = saved;
             if (!result) {
-                f(Action::CANCEL, c, new_saved, start, end);
+                f(Action::CANCEL, c, newSaved, start, end);
                 start = saved;
                 return false;
             }
-            if (!f(Action::PARSED, c, new_saved, start, end)) {
+            if (!f(Action::PARSED, c, newSaved, start, end)) {
                 start = saved;
                 return false;
             }
@@ -196,13 +196,13 @@ struct BaseParser : public verifier::callable<bool(Context &, Iter &, Iter)> {
                 return false;
             }
             bool result = p(c, start, end);
-            auto new_saved = saved;
+            auto newSaved = saved;
             if (!result) {
-                f(Action::CANCEL, c, new_saved, start);
+                f(Action::CANCEL, c, newSaved, start);
                 start = saved;
                 return false;
             }
-            if (!f(Action::PARSED, c, new_saved, start)) {
+            if (!f(Action::PARSED, c, newSaved, start)) {
                 start = saved;
                 return false;
             }
@@ -222,13 +222,13 @@ struct BaseParser : public verifier::callable<bool(Context &, Iter &, Iter)> {
                 return false;
             }
             bool result = p(c, start, end);
-            auto new_saved = saved;
+            auto newSaved = saved;
             if (!result) {
-                f(Action::CANCEL, c, new_saved);
+                f(Action::CANCEL, c, newSaved);
                 start = saved;
                 return false;
             }
-            if (!f(Action::PARSED, c, new_saved)) {
+            if (!f(Action::PARSED, c, newSaved)) {
                 start = saved;
                 return false;
             }

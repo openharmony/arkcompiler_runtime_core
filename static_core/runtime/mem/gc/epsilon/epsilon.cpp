@@ -21,8 +21,8 @@
 
 namespace panda::mem {
 template <class LanguageConfig>
-EpsilonGC<LanguageConfig>::EpsilonGC(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
-    : GCLang<LanguageConfig>(object_allocator, settings)
+EpsilonGC<LanguageConfig>::EpsilonGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
+    : GCLang<LanguageConfig>(objectAllocator, settings)
 {
     this->SetType(GCType::EPSILON_GC);
 }
@@ -31,9 +31,9 @@ template <class LanguageConfig>
 void EpsilonGC<LanguageConfig>::InitializeImpl()
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
-    auto barrier_set = allocator->New<GCDummyBarrierSet>(allocator);
-    ASSERT(barrier_set != nullptr);
-    this->SetGCBarrierSet(barrier_set);
+    auto barrierSet = allocator->New<GCDummyBarrierSet>(allocator);
+    ASSERT(barrierSet != nullptr);
+    this->SetGCBarrierSet(barrierSet);
     LOG(DEBUG, GC) << "Epsilon GC initialized...";
 }
 
@@ -41,7 +41,7 @@ template <class LanguageConfig>
 void EpsilonGC<LanguageConfig>::RunPhasesImpl([[maybe_unused]] GCTask &task)
 {
     LOG(DEBUG, GC) << "Epsilon GC RunPhases...";
-    GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats());
+    GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
 }
 
 // NOLINTNEXTLINE(misc-unused-parameters)
@@ -52,12 +52,12 @@ bool EpsilonGC<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 }
 
 template <class LanguageConfig>
-void EpsilonGC<LanguageConfig>::InitGCBits([[maybe_unused]] panda::ObjectHeader *obj_header)
+void EpsilonGC<LanguageConfig>::InitGCBits([[maybe_unused]] panda::ObjectHeader *objHeader)
 {
 }
 
 template <class LanguageConfig>
-void EpsilonGC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] panda::ObjectHeader *obj_header)
+void EpsilonGC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] panda::ObjectHeader *objHeader)
 {
     LOG(FATAL, GC) << "TLABs are not supported by this GC";
 }
@@ -88,7 +88,7 @@ bool EpsilonGC<LanguageConfig>::IsMarked(const ObjectHeader *object) const
 
 template <class LanguageConfig>
 void EpsilonGC<LanguageConfig>::MarkReferences([[maybe_unused]] GCMarkingStackType *references,
-                                               [[maybe_unused]] GCPhase gc_phase)
+                                               [[maybe_unused]] GCPhase gcPhase)
 {
 }
 

@@ -26,11 +26,11 @@ public:
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     LockFreeQueue()
     {
-        std::atomic<Node *> dummy_node = new Node(std::make_unique<FileInfo>(), nullptr);
+        std::atomic<Node *> dummyNode = new Node(std::make_unique<FileInfo>(), nullptr);
         // Atomic with relaxed order reason: there is no data race
-        head_.store(dummy_node, std::memory_order_relaxed);
+        head_.store(dummyNode, std::memory_order_relaxed);
         // Atomic with relaxed order reason: there is no data race
-        tail_.store(dummy_node, std::memory_order_relaxed);
+        tail_.store(dummyNode, std::memory_order_relaxed);
         size_ = 0;
     }
 

@@ -26,7 +26,7 @@ namespace panda::ets::test {
 class MockEtsNapiTestBaseClass : public testing::Test {
 protected:
     MockEtsNapiTestBaseClass() = default;
-    explicit MockEtsNapiTestBaseClass(const char *file_name) : test_bin_file_name_(file_name) {};
+    explicit MockEtsNapiTestBaseClass(const char *fileName) : testBinFileName_(fileName) {};
 
     static void SetUpTestCase()
     {
@@ -38,22 +38,22 @@ protected:
 
     void SetUp() override
     {
-        std::vector<EtsVMOption> options_vector;
+        std::vector<EtsVMOption> optionsVector;
 
-        options_vector = {{EtsOptionType::EtsGcType, "epsilon"},
-                          {EtsOptionType::EtsNoJit, nullptr},
-                          {EtsOptionType::EtsBootFile, std::getenv("PANDA_STD_LIB")}};
+        optionsVector = {{EtsOptionType::EtsGcType, "epsilon"},
+                         {EtsOptionType::EtsNoJit, nullptr},
+                         {EtsOptionType::EtsBootFile, std::getenv("PANDA_STD_LIB")}};
 
-        if (test_bin_file_name_ != nullptr) {
-            options_vector.push_back({EtsOptionType::EtsBootFile, test_bin_file_name_});
+        if (testBinFileName_ != nullptr) {
+            optionsVector.push_back({EtsOptionType::EtsBootFile, testBinFileName_});
         }
 
-        EtsVMInitArgs vm_args;
-        vm_args.version = ETS_NAPI_VERSION_1_0;
-        vm_args.options = options_vector.data();
-        vm_args.nOptions = static_cast<ets_int>(options_vector.size());
+        EtsVMInitArgs vmArgs;
+        vmArgs.version = ETS_NAPI_VERSION_1_0;
+        vmArgs.options = optionsVector.data();
+        vmArgs.nOptions = static_cast<ets_int>(optionsVector.size());
 
-        ASSERT_TRUE(ETS_CreateVM(&vm_, &env_, &vm_args) == ETS_OK) << "Cannot create ETS VM";
+        ASSERT_TRUE(ETS_CreateVM(&vm_, &env_, &vmArgs) == ETS_OK) << "Cannot create ETS VM";
     }
 
     void TearDown() override
@@ -62,7 +62,7 @@ protected:
     }
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    const char *test_bin_file_name_ {nullptr};
+    const char *testBinFileName_ {nullptr};
     EtsEnv *env_ {nullptr};
     EtsVM *vm_ {nullptr};
     // NOLINTEND(misc-non-private-member-variables-in-classes)

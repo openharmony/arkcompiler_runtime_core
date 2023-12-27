@@ -37,15 +37,15 @@ public:
         FreeLoadedClasses();
     }
 
-    bool InitializeArrayClass(Class *array_class, Class *component_class) override
+    bool InitializeArrayClass(Class *arrayClass, Class *componentClass) override
     {
-        auto *object_class = GetClassRoot(ClassRoot::OBJECT);
-        array_class->SetBase(object_class);
-        array_class->SetComponentType(component_class);
+        auto *objectClass = GetClassRoot(ClassRoot::OBJECT);
+        arrayClass->SetBase(objectClass);
+        arrayClass->SetComponentType(componentClass);
         return true;
     }
 
-    void InitializePrimitiveClass([[maybe_unused]] Class *primitive_class) override {}
+    void InitializePrimitiveClass([[maybe_unused]] Class *primitiveClass) override {}
 
     size_t GetClassVTableSize([[maybe_unused]] ClassRoot root) override
     {
@@ -77,14 +77,14 @@ public:
         return GetClassSize(ClassRoot::OBJECT);
     }
 
-    Class *CreateClass(const uint8_t *descriptor, size_t vtable_size, size_t imt_size, size_t size) override
+    Class *CreateClass(const uint8_t *descriptor, size_t vtableSize, size_t imtSize, size_t size) override
     {
         auto vm = thread_->GetVM();
         auto allocator = vm->GetGC()->GetObjectAllocator();
         void *ptr = allocator->AllocateNonMovable(coretypes::Class::GetSize(size), DEFAULT_ALIGNMENT, nullptr,
                                                   mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT);
         auto *res = reinterpret_cast<coretypes::Class *>(ptr);
-        res->InitClass(descriptor, vtable_size, imt_size, size);
+        res->InitClass(descriptor, vtableSize, imtSize, size);
         vm->GetGC()->InitGCBits(res);
         res->SetClass(GetClassRoot(ClassRoot::CLASS));
         auto *klass = res->GetRuntimeClass();
@@ -120,7 +120,7 @@ public:
     }
 
 private:
-    bool InitializeImpl(bool compressed_string_enabled) override;
+    bool InitializeImpl(bool compressedStringEnabled) override;
 
     ManagedThread *thread_;
 };

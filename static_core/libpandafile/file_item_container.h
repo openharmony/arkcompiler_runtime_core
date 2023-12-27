@@ -68,7 +68,7 @@ public:
         return GetOrCreateClassItem(std::string(GetGlobalClassName()));
     }
 
-    ProtoItem *GetOrCreateProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params);
+    ProtoItem *GetOrCreateProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params);
 
     PrimitiveTypeItem *GetOrCreatePrimitiveTypeItem(Type type);
 
@@ -80,12 +80,12 @@ public:
 
     void SetQuickened()
     {
-        is_quickened_ = true;
+        isQuickened_ = true;
     }
 
     bool IsQuickened() const
     {
-        return is_quickened_;
+        return isQuickened_;
     }
 
     template <class T, class... Args>
@@ -107,7 +107,7 @@ public:
         auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
         auto ret = ptr.get();
         if (ptr->IsForeign()) {
-            foreign_items_.emplace_back(std::move(ptr));
+            foreignItems_.emplace_back(std::move(ptr));
         } else {
             items_.insert(GetInsertPosition<T>(), std::move(ptr));
         }
@@ -116,7 +116,7 @@ public:
 
     uint32_t ComputeLayout();
 
-    bool Write(Writer *writer, bool deduplicate_items = true, bool compute_layout = true);
+    bool Write(Writer *writer, bool deduplicateItems = true, bool computeLayout = true);
 
     std::map<std::string, size_t> GetStat();
 
@@ -124,52 +124,52 @@ public:
 
     std::unordered_map<std::string, StringItem *> *GetStringMap()
     {
-        return &string_map_;
+        return &stringMap_;
     }
 
     LiteralArrayItem *GetLiteralArrayItem(const std::string &key)
     {
-        return literalarray_map_.at(key);
+        return literalarrayMap_.at(key);
     }
 
     std::map<std::string, BaseClassItem *> *GetClassMap()
     {
-        return &class_map_;
+        return &classMap_;
     }
 
     std::unordered_map<uint32_t, ValueItem *> *GetIntValueMap()
     {
-        return &int_value_map_;
+        return &intValueMap_;
     }
 
     std::unordered_map<uint64_t, ValueItem *> *GetLongValueMap()
     {
-        return &long_value_map_;
+        return &longValueMap_;
     }
 
     std::unordered_map<uint32_t, ValueItem *> *GetFloatValueMap()
     {
-        return &float_value_map_;
+        return &floatValueMap_;
     }
 
     std::unordered_map<uint64_t, ValueItem *> *GetDoubleValueMap()
     {
-        return &double_value_map_;
+        return &doubleValueMap_;
     }
 
     std::unordered_map<BaseItem *, ValueItem *> *GetScalarValueMap()
     {
-        return &id_value_map_;
+        return &idValueMap_;
     }
 
-    ProtoItem *GetProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params)
+    ProtoItem *GetProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params)
     {
-        return proto_map_.at(ProtoKey {ret_type, params});
+        return protoMap_.at(ProtoKey {retType, params});
     }
 
     std::unordered_map<Type::TypeId, PrimitiveTypeItem *> *GetPrimitiveTypeMap()
     {
-        return &primitive_type_map_;
+        return &primitiveTypeMap_;
     }
 
     const std::list<std::unique_ptr<BaseItem>> &GetItems() const
@@ -179,7 +179,7 @@ public:
 
     const std::vector<std::unique_ptr<BaseItem>> &GetForeignItems()
     {
-        return foreign_items_;
+        return foreignItems_;
     }
 
     BaseItem *GetEndItem()
@@ -187,9 +187,9 @@ public:
         return end_;
     }
 
-    void ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profile_opt);
+    void ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profileOpt);
 
-    void DeduplicateItems(bool compute_layout = true);
+    void DeduplicateItems(bool computeLayout = true);
 
     void DeduplicateCodeAndDebugInfo();
 
@@ -197,31 +197,30 @@ public:
 
     void DeduplicateLineNumberProgram(DebugInfoItem *item, ItemDeduper *deduper);
 
-    void DeduplicateDebugInfo(MethodItem *method, ItemDeduper *debug_info_deduper,
-                              ItemDeduper *line_number_program_deduper);
+    void DeduplicateDebugInfo(MethodItem *method, ItemDeduper *debugInfoDeduper, ItemDeduper *lineNumberProgramDeduper);
 
 private:
     template <class T>
     auto GetInsertPosition()
     {
         if (std::is_same_v<T, CodeItem>) {
-            return code_items_end_;
+            return codeItemsEnd_;
         }
 
         if (std::is_same_v<T, DebugInfoItem>) {
-            return debug_items_end_;
+            return debugItemsEnd_;
         }
 
         if (std::is_same_v<T, AnnotationItem> || std::is_base_of_v<ValueItem, T>) {
-            return annotation_items_end_;
+            return annotationItemsEnd_;
         }
 
-        return items_end_;
+        return itemsEnd_;
     }
 
     class IndexItem : public BaseItem {
     public:
-        IndexItem(IndexType type, size_t max_index) : type_(type), max_index_(max_index)
+        IndexItem(IndexType type, size_t maxIndex) : type_(type), maxIndex_(maxIndex)
         {
             ASSERT(type_ != IndexType::NONE);
         }
@@ -283,25 +282,25 @@ private:
         struct Comparator {
             bool operator()(IndexedItem *item1, IndexedItem *item2) const noexcept
             {
-                auto index_type = item1->GetIndexType();
+                auto indexType = item1->GetIndexType();
 
-                if (index_type == IndexType::CLASS) {
-                    auto type_item1 = static_cast<TypeItem *>(item1);
-                    auto type_item2 = static_cast<TypeItem *>(item2);
-                    auto type_id1 = static_cast<size_t>(type_item1->GetType().GetId());
-                    auto type_id2 = static_cast<size_t>(type_item2->GetType().GetId());
+                if (indexType == IndexType::CLASS) {
+                    auto typeItem1 = static_cast<TypeItem *>(item1);
+                    auto typeItem2 = static_cast<TypeItem *>(item2);
+                    auto typeId1 = static_cast<size_t>(typeItem1->GetType().GetId());
+                    auto typeId2 = static_cast<size_t>(typeItem2->GetType().GetId());
 
-                    if (type_id1 != type_id2) {
-                        return type_id1 < type_id2;
+                    if (typeId1 != typeId2) {
+                        return typeId1 < typeId2;
                     }
                 }
 
-                if (index_type == IndexType::LINE_NUMBER_PROG) {
-                    auto ref_count1 = item1->GetRefCount();
-                    auto ref_count2 = item2->GetRefCount();
+                if (indexType == IndexType::LINE_NUMBER_PROG) {
+                    auto refCount1 = item1->GetRefCount();
+                    auto refCount2 = item2->GetRefCount();
 
-                    if (ref_count1 != ref_count2) {
-                        return ref_count1 > ref_count2;
+                    if (refCount1 != refCount2) {
+                        return refCount1 > refCount2;
                     }
                 }
 
@@ -310,7 +309,7 @@ private:
         };
 
         IndexType type_;
-        size_t max_index_;
+        size_t maxIndex_;
         std::set<IndexedItem *, Comparator> index_;
     };
 
@@ -467,7 +466,7 @@ private:
 
     class ProtoKey {
     public:
-        ProtoKey(TypeItem *ret_type, const std::vector<MethodParamItem> &params);
+        ProtoKey(TypeItem *retType, const std::vector<MethodParamItem> &params);
 
         ~ProtoKey() = default;
 
@@ -481,7 +480,7 @@ private:
 
         bool operator==(const ProtoKey &key) const
         {
-            return shorty_ == key.shorty_ && ref_types_ == key.ref_types_;
+            return shorty_ == key.shorty_ && refTypes_ == key.refTypes_;
         }
 
     private:
@@ -489,7 +488,7 @@ private:
 
         size_t hash_;
         std::string shorty_;
-        std::vector<TypeItem *> ref_types_;
+        std::vector<TypeItem *> refTypes_;
     };
 
     struct ProtoKeyHash {
@@ -534,7 +533,7 @@ private:
         }
     };
 
-    bool WriteHeader(Writer *writer, ssize_t *checksum_offset);
+    bool WriteHeader(Writer *writer, ssize_t *checksumOffset);
 
     bool WriteHeaderIndexInfo(Writer *writer);
 
@@ -552,38 +551,38 @@ private:
 
     size_t GetForeignSize() const;
 
-    std::unordered_map<std::string, StringItem *> string_map_;
-    std::map<std::string, LiteralArrayItem *, LiteralArrayCompare> literalarray_map_;
+    std::unordered_map<std::string, StringItem *> stringMap_;
+    std::map<std::string, LiteralArrayItem *, LiteralArrayCompare> literalarrayMap_;
 
-    std::map<std::string, BaseClassItem *> class_map_;
+    std::map<std::string, BaseClassItem *> classMap_;
 
-    std::unordered_map<uint32_t, ValueItem *> int_value_map_;
-    std::unordered_map<uint64_t, ValueItem *> long_value_map_;
+    std::unordered_map<uint32_t, ValueItem *> intValueMap_;
+    std::unordered_map<uint64_t, ValueItem *> longValueMap_;
     // NB! For f32 and f64 value maps we use integral keys
     // (in fact, bit patterns of corresponding values) to
     // workaround 0.0 == -0.0 semantics.
-    std::unordered_map<uint32_t, ValueItem *> float_value_map_;
-    std::unordered_map<uint64_t, ValueItem *> double_value_map_;
-    std::unordered_map<BaseItem *, ValueItem *> id_value_map_;
-    std::unordered_map<ProtoKey, ProtoItem *, ProtoKeyHash> proto_map_;
-    std::unordered_map<Type::TypeId, PrimitiveTypeItem *> primitive_type_map_;
+    std::unordered_map<uint32_t, ValueItem *> floatValueMap_;
+    std::unordered_map<uint64_t, ValueItem *> doubleValueMap_;
+    std::unordered_map<BaseItem *, ValueItem *> idValueMap_;
+    std::unordered_map<ProtoKey, ProtoItem *, ProtoKeyHash> protoMap_;
+    std::unordered_map<Type::TypeId, PrimitiveTypeItem *> primitiveTypeMap_;
 
     std::list<std::unique_ptr<BaseItem>> items_;
 
-    std::vector<std::unique_ptr<BaseItem>> foreign_items_;
+    std::vector<std::unique_ptr<BaseItem>> foreignItems_;
 
-    RegionSectionItem region_section_item_;
+    RegionSectionItem regionSectionItem_;
 
-    LineNumberProgramIndexItem line_number_program_index_item_;
+    LineNumberProgramIndexItem lineNumberProgramIndexItem_;
 
-    std::list<std::unique_ptr<BaseItem>>::iterator items_end_;
-    std::list<std::unique_ptr<BaseItem>>::iterator annotation_items_end_;
-    std::list<std::unique_ptr<BaseItem>>::iterator code_items_end_;
-    std::list<std::unique_ptr<BaseItem>>::iterator debug_items_end_;
+    std::list<std::unique_ptr<BaseItem>>::iterator itemsEnd_;
+    std::list<std::unique_ptr<BaseItem>>::iterator annotationItemsEnd_;
+    std::list<std::unique_ptr<BaseItem>>::iterator codeItemsEnd_;
+    std::list<std::unique_ptr<BaseItem>>::iterator debugItemsEnd_;
 
     BaseItem *end_;
 
-    bool is_quickened_ = false;
+    bool isQuickened_ = false;
 };
 
 }  // namespace panda::panda_file

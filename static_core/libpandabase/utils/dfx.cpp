@@ -17,7 +17,7 @@
 #include "logger.h"
 
 namespace panda {
-DfxController *DfxController::dfx_controller_ = nullptr;
+DfxController *DfxController::dfxController_ = nullptr;
 os::memory::Mutex DfxController::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
 
 /* static */
@@ -29,35 +29,35 @@ void DfxController::SetDefaultOption()
         switch (option) {
 #ifdef PANDA_TARGET_UNIX
             case DfxOptionHandler::COMPILER_NULLCHECK:
-                dfx_controller_->option_map_[DfxOptionHandler::COMPILER_NULLCHECK] = 1;
+                dfxController_->optionMap_[DfxOptionHandler::COMPILER_NULLCHECK] = 1;
                 break;
             case DfxOptionHandler::REFERENCE_DUMP:
-                dfx_controller_->option_map_[DfxOptionHandler::REFERENCE_DUMP] = 1;
+                dfxController_->optionMap_[DfxOptionHandler::REFERENCE_DUMP] = 1;
                 break;
             case DfxOptionHandler::SIGNAL_CATCHER:
-                dfx_controller_->option_map_[DfxOptionHandler::SIGNAL_CATCHER] = 1;
+                dfxController_->optionMap_[DfxOptionHandler::SIGNAL_CATCHER] = 1;
                 break;
             case DfxOptionHandler::SIGNAL_HANDLER:
-                dfx_controller_->option_map_[DfxOptionHandler::SIGNAL_HANDLER] = 1;
+                dfxController_->optionMap_[DfxOptionHandler::SIGNAL_HANDLER] = 1;
                 break;
             case DfxOptionHandler::ARK_SIGQUIT:
-                dfx_controller_->option_map_[DfxOptionHandler::ARK_SIGQUIT] = 1;
+                dfxController_->optionMap_[DfxOptionHandler::ARK_SIGQUIT] = 1;
                 break;
             case DfxOptionHandler::ARK_SIGUSR1:
-                dfx_controller_->option_map_[DfxOptionHandler::ARK_SIGUSR1] = 1;
+                dfxController_->optionMap_[DfxOptionHandler::ARK_SIGUSR1] = 1;
                 break;
             case DfxOptionHandler::ARK_SIGUSR2:
-                dfx_controller_->option_map_[DfxOptionHandler::ARK_SIGUSR2] = 1;
+                dfxController_->optionMap_[DfxOptionHandler::ARK_SIGUSR2] = 1;
                 break;
             case DfxOptionHandler::MOBILE_LOG:
-                dfx_controller_->option_map_[DfxOptionHandler::MOBILE_LOG] = 1;
+                dfxController_->optionMap_[DfxOptionHandler::MOBILE_LOG] = 1;
                 break;
             case DfxOptionHandler::HUNG_UPDATE:
-                dfx_controller_->option_map_[DfxOptionHandler::HUNG_UPDATE] = 0;
+                dfxController_->optionMap_[DfxOptionHandler::HUNG_UPDATE] = 0;
                 break;
 #endif
             case DfxOptionHandler::DFXLOG:
-                dfx_controller_->option_map_[DfxOptionHandler::DFXLOG] = 0;
+                dfxController_->optionMap_[DfxOptionHandler::DFXLOG] = 0;
                 break;
             default:
                 break;
@@ -68,24 +68,24 @@ void DfxController::SetDefaultOption()
 /* static */
 void DfxController::ResetOptionValueFromString(const std::string &s)
 {
-    size_t last_pos = s.find_first_not_of(';', 0);
-    size_t pos = s.find(';', last_pos);
-    while (last_pos != std::string::npos) {
-        std::string arg = s.substr(last_pos, pos - last_pos);
-        last_pos = s.find_first_not_of(';', pos);
-        pos = s.find(';', last_pos);
-        std::string option_str = arg.substr(0, arg.find(':'));
+    size_t lastPos = s.find_first_not_of(';', 0);
+    size_t pos = s.find(';', lastPos);
+    while (lastPos != std::string::npos) {
+        std::string arg = s.substr(lastPos, pos - lastPos);
+        lastPos = s.find_first_not_of(';', pos);
+        pos = s.find(';', lastPos);
+        std::string optionStr = arg.substr(0, arg.find(':'));
         uint8_t value = static_cast<uint8_t>(std::stoi(arg.substr(arg.find(':') + 1)));
-        auto dfx_option = DfxOptionHandler::DfxOptionFromString(option_str);
-        if (dfx_option != DfxOptionHandler::END_FLAG) {
-            DfxController::SetOptionValue(dfx_option, value);
+        auto dfxOption = DfxOptionHandler::DfxOptionFromString(optionStr);
+        if (dfxOption != DfxOptionHandler::END_FLAG) {
+            DfxController::SetOptionValue(dfxOption, value);
 #ifdef PANDA_TARGET_UNIX
-            if (dfx_option == DfxOptionHandler::MOBILE_LOG) {
+            if (dfxOption == DfxOptionHandler::MOBILE_LOG) {
                 Logger::SetMobileLogOpenFlag(value != 0);
             }
 #endif
         } else {
-            LOG(ERROR, DFX) << "Unknown Option " << option_str;
+            LOG(ERROR, DFX) << "Unknown Option " << optionStr;
         }
     }
 }
@@ -94,26 +94,26 @@ void DfxController::ResetOptionValueFromString(const std::string &s)
 void DfxController::PrintDfxOptionValues()
 {
     ASSERT(IsInitialized());
-    for (auto &iter : dfx_controller_->option_map_) {
+    for (auto &iter : dfxController_->optionMap_) {
         LOG(ERROR, DFX) << "DFX option: " << DfxOptionHandler::StringFromDfxOption(iter.first)
                         << ", option values: " << std::to_string(iter.second);
     }
 }
 
 /* static */
-void DfxController::Initialize(std::map<DfxOptionHandler::DfxOption, uint8_t> option_map)
+void DfxController::Initialize(std::map<DfxOptionHandler::DfxOption, uint8_t> optionMap)
 {
     if (IsInitialized()) {
-        dfx_controller_->SetDefaultOption();
+        dfxController_->SetDefaultOption();
         return;
     }
     {
         os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
         if (IsInitialized()) {
-            dfx_controller_->SetDefaultOption();
+            dfxController_->SetDefaultOption();
             return;
         }
-        dfx_controller_ = new DfxController(std::move(option_map));
+        dfxController_ = new DfxController(std::move(optionMap));
     }
 }
 
@@ -121,56 +121,56 @@ void DfxController::Initialize(std::map<DfxOptionHandler::DfxOption, uint8_t> op
 void DfxController::Initialize()
 {
     if (IsInitialized()) {
-        dfx_controller_->SetDefaultOption();
+        dfxController_->SetDefaultOption();
         return;
     }
     {
         os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
         if (IsInitialized()) {
-            dfx_controller_->SetDefaultOption();
+            dfxController_->SetDefaultOption();
             return;
         }
-        std::map<DfxOptionHandler::DfxOption, uint8_t> option_map;
+        std::map<DfxOptionHandler::DfxOption, uint8_t> optionMap;
         for (auto option = DfxOptionHandler::DfxOption(0); option < DfxOptionHandler::END_FLAG;
              option = DfxOptionHandler::DfxOption(option + 1)) {
             switch (option) {
 #ifdef PANDA_TARGET_UNIX
                 case DfxOptionHandler::COMPILER_NULLCHECK:
-                    option_map[DfxOptionHandler::COMPILER_NULLCHECK] = 1;
+                    optionMap[DfxOptionHandler::COMPILER_NULLCHECK] = 1;
                     break;
                 case DfxOptionHandler::REFERENCE_DUMP:
-                    option_map[DfxOptionHandler::REFERENCE_DUMP] = 1;
+                    optionMap[DfxOptionHandler::REFERENCE_DUMP] = 1;
                     break;
                 case DfxOptionHandler::SIGNAL_CATCHER:
-                    option_map[DfxOptionHandler::SIGNAL_CATCHER] = 1;
+                    optionMap[DfxOptionHandler::SIGNAL_CATCHER] = 1;
                     break;
                 case DfxOptionHandler::SIGNAL_HANDLER:
-                    option_map[DfxOptionHandler::SIGNAL_HANDLER] = 1;
+                    optionMap[DfxOptionHandler::SIGNAL_HANDLER] = 1;
                     break;
                 case DfxOptionHandler::ARK_SIGQUIT:
-                    option_map[DfxOptionHandler::ARK_SIGQUIT] = 1;
+                    optionMap[DfxOptionHandler::ARK_SIGQUIT] = 1;
                     break;
                 case DfxOptionHandler::ARK_SIGUSR1:
-                    option_map[DfxOptionHandler::ARK_SIGUSR1] = 1;
+                    optionMap[DfxOptionHandler::ARK_SIGUSR1] = 1;
                     break;
                 case DfxOptionHandler::ARK_SIGUSR2:
-                    option_map[DfxOptionHandler::ARK_SIGUSR2] = 1;
+                    optionMap[DfxOptionHandler::ARK_SIGUSR2] = 1;
                     break;
                 case DfxOptionHandler::MOBILE_LOG:
-                    option_map[DfxOptionHandler::MOBILE_LOG] = 1;
+                    optionMap[DfxOptionHandler::MOBILE_LOG] = 1;
                     break;
                 case DfxOptionHandler::HUNG_UPDATE:
-                    option_map[DfxOptionHandler::HUNG_UPDATE] = 0;
+                    optionMap[DfxOptionHandler::HUNG_UPDATE] = 0;
                     break;
 #endif
                 case DfxOptionHandler::DFXLOG:
-                    option_map[DfxOptionHandler::DFXLOG] = 0;
+                    optionMap[DfxOptionHandler::DFXLOG] = 0;
                     break;
                 default:
                     break;
             }
         }
-        dfx_controller_ = new DfxController(std::move(option_map));
+        dfxController_ = new DfxController(std::move(optionMap));
     }
 }
 
@@ -186,8 +186,8 @@ void DfxController::Destroy()
         if (!IsInitialized()) {
             return;
         }
-        d = dfx_controller_;
-        dfx_controller_ = nullptr;
+        d = dfxController_;
+        dfxController_ = nullptr;
     }
     delete d;
 }

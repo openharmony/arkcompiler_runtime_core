@@ -29,27 +29,27 @@ void Codegen::CreateMathRoundAway([[maybe_unused]] IntrinsicInst *inst, Reg dst,
 
 void Codegen::CreateArrayCopyTo(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
 {
-    auto entrypoint_id = EntrypointId::INVALID;
+    auto entrypointId = EntrypointId::INVALID;
 
     switch (inst->GetIntrinsicId()) {
         case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_BOOL_COPY_TO:
         case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_BYTE_COPY_TO:
-            entrypoint_id = EntrypointId::ARRAY_COPY_TO_1B;
+            entrypointId = EntrypointId::ARRAY_COPY_TO_1B;
             break;
 
         case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_CHAR_COPY_TO:
         case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SHORT_COPY_TO:
-            entrypoint_id = EntrypointId::ARRAY_COPY_TO_2B;
+            entrypointId = EntrypointId::ARRAY_COPY_TO_2B;
             break;
 
         case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_INT_COPY_TO:
         case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_FLOAT_COPY_TO:
-            entrypoint_id = EntrypointId::ARRAY_COPY_TO_4B;
+            entrypointId = EntrypointId::ARRAY_COPY_TO_4B;
             break;
 
         case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_LONG_COPY_TO:
         case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_DOUBLE_COPY_TO:
-            entrypoint_id = EntrypointId::ARRAY_COPY_TO_8B;
+            entrypointId = EntrypointId::ARRAY_COPY_TO_8B;
             break;
 
         default:
@@ -57,14 +57,14 @@ void Codegen::CreateArrayCopyTo(IntrinsicInst *inst, [[maybe_unused]] Reg dst, S
             break;
     }
 
-    ASSERT(entrypoint_id != EntrypointId::COUNT);
+    ASSERT(entrypointId != EntrypointId::COUNT);
 
-    auto src_obj = src[FIRST_OPERAND];
-    auto dst_obj = src[SECOND_OPERAND];
-    auto dst_start = src[THIRD_OPERAND];
-    auto src_start = src[FOURTH_OPERAND];
-    auto src_end = src[FIFTH_OPERAND];
-    CallFastPath(inst, entrypoint_id, INVALID_REGISTER, RegMask::GetZeroMask(), src_obj, dst_obj, dst_start, src_start,
-                 src_end);
+    auto srcObj = src[FIRST_OPERAND];
+    auto dstObj = src[SECOND_OPERAND];
+    auto dstStart = src[THIRD_OPERAND];
+    auto srcStart = src[FOURTH_OPERAND];
+    auto srcEnd = src[FIFTH_OPERAND];
+    CallFastPath(inst, entrypointId, INVALID_REGISTER, RegMask::GetZeroMask(), srcObj, dstObj, dstStart, srcStart,
+                 srcEnd);
 }
 }  // namespace panda::compiler

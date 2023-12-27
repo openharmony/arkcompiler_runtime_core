@@ -50,46 +50,46 @@ Result Link(const Config &conf, const std::string &output, const std::vector<std
 
     using Clock = std::chrono::high_resolution_clock;
 
-    auto t_start = Clock::now();
+    auto tStart = Clock::now();
 
     ctx.Read(input);  // concurrent
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto t_read = Clock::now();
+    auto tRead = Clock::now();
 
     ctx.Merge();  // sync
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto t_merge = Clock::now();
+    auto tMerge = Clock::now();
 
     ctx.Parse();  // could be semi concurrent
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto t_parse = Clock::now();
+    auto tParse = Clock::now();
 
     ctx.ComputeLayout();  // sync
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto t_layout = Clock::now();
+    auto tLayout = Clock::now();
 
     ctx.Patch();  // concurrent
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto t_patch = Clock::now();
+    auto tPatch = Clock::now();
 
     ctx.Write(output);  // sync
 
-    auto t_end = std::chrono::high_resolution_clock::now();
+    auto tEnd = std::chrono::high_resolution_clock::now();
 
     auto res = ctx.GetResult();
 
@@ -97,13 +97,13 @@ Result Link(const Config &conf, const std::string &output, const std::vector<std
         return std::chrono::duration_cast<std::chrono::microseconds>(e - s).count();
     };
 
-    res.stats.elapsed.read = delta(t_start, t_read);
-    res.stats.elapsed.merge = delta(t_read, t_merge);
-    res.stats.elapsed.parse = delta(t_merge, t_parse);
-    res.stats.elapsed.layout = delta(t_parse, t_layout);
-    res.stats.elapsed.patch = delta(t_layout, t_patch);
-    res.stats.elapsed.write = delta(t_patch, t_end);
-    res.stats.elapsed.total = delta(t_start, t_end);
+    res.stats.elapsed.read = delta(tStart, tRead);
+    res.stats.elapsed.merge = delta(tRead, tMerge);
+    res.stats.elapsed.parse = delta(tMerge, tParse);
+    res.stats.elapsed.layout = delta(tParse, tLayout);
+    res.stats.elapsed.patch = delta(tLayout, tPatch);
+    res.stats.elapsed.write = delta(tPatch, tEnd);
+    res.stats.elapsed.total = delta(tStart, tEnd);
 
     return res;
 }
@@ -113,7 +113,7 @@ std::ostream &operator<<(std::ostream &o, const Result::Stats &s)
     o << "total: ";
     PrintTime(o, s.elapsed.total);
     o << "\n";
-    auto print_time_hist = [&](std::string_view name, const uint64_t t) {
+    auto printTimeHist = [&](std::string_view name, const uint64_t t) {
         constexpr size_t MAX_NAME_SIZE = 10;
         o << std::left << std::setw(MAX_NAME_SIZE) << name << std::internal;
 
@@ -129,18 +129,18 @@ std::ostream &operator<<(std::ostream &o, const Result::Stats &s)
         PrintTime(o, t);
         o << "\n";
     };
-    print_time_hist("read", s.elapsed.read);
-    print_time_hist("merge", s.elapsed.merge);
-    print_time_hist("parse", s.elapsed.parse);
-    print_time_hist("layout", s.elapsed.layout);
-    print_time_hist("patch", s.elapsed.patch);
-    print_time_hist("write", s.elapsed.write);
+    printTimeHist("read", s.elapsed.read);
+    printTimeHist("merge", s.elapsed.merge);
+    printTimeHist("parse", s.elapsed.parse);
+    printTimeHist("layout", s.elapsed.layout);
+    printTimeHist("patch", s.elapsed.patch);
+    printTimeHist("write", s.elapsed.write);
 
-    o << "items: " << s.items_count << "\n";
-    o << "classes: " << s.class_count << "\n";
+    o << "items: " << s.itemsCount << "\n";
+    o << "classes: " << s.classCount << "\n";
 
-    o << "code items: " << s.code_count << "\n";
-    o << "debug data: " << s.debug_count << "\n";
+    o << "code items: " << s.codeCount << "\n";
+    o << "debug data: " << s.debugCount << "\n";
 
     return o;
 }

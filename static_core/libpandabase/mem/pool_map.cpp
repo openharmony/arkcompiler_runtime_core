@@ -17,40 +17,40 @@
 
 namespace panda {
 
-void PoolMap::AddPoolToMap(const void *pool_addr, size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                           const void *allocator_addr)
+void PoolMap::AddPoolToMap(const void *poolAddr, size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                           const void *allocatorAddr)
 {
-    ASSERT((ToUintPtr(pool_addr) & POOL_MAP_GRANULARITY_MASK) == 0);
-    ASSERT((pool_size & POOL_MAP_GRANULARITY_MASK) == 0);
-    ASSERT(allocator_addr != nullptr);
-    MapNumType first_map_num = AddrToMapNum(pool_addr);
-    MapNumType last_map_num = AddrToMapNum(ToVoidPtr(ToUintPtr(pool_addr) + pool_size - 1U));
-    pool_map_[first_map_num].Initialize(first_map_num, space_type, allocator_type, allocator_addr);
-    for (MapNumType i = first_map_num + 1U; i <= last_map_num; i++) {
-        pool_map_[i].Initialize(first_map_num, space_type, allocator_type, allocator_addr);
+    ASSERT((ToUintPtr(poolAddr) & POOL_MAP_GRANULARITY_MASK) == 0);
+    ASSERT((poolSize & POOL_MAP_GRANULARITY_MASK) == 0);
+    ASSERT(allocatorAddr != nullptr);
+    MapNumType firstMapNum = AddrToMapNum(poolAddr);
+    MapNumType lastMapNum = AddrToMapNum(ToVoidPtr(ToUintPtr(poolAddr) + poolSize - 1U));
+    poolMap_[firstMapNum].Initialize(firstMapNum, spaceType, allocatorType, allocatorAddr);
+    for (MapNumType i = firstMapNum + 1U; i <= lastMapNum; i++) {
+        poolMap_[i].Initialize(firstMapNum, spaceType, allocatorType, allocatorAddr);
     }
 }
 
-void PoolMap::RemovePoolFromMap(const void *pool_addr, size_t pool_size)
+void PoolMap::RemovePoolFromMap(const void *poolAddr, size_t poolSize)
 {
-    ASSERT((ToUintPtr(pool_addr) & POOL_MAP_GRANULARITY_MASK) == 0);
-    ASSERT((pool_size & POOL_MAP_GRANULARITY_MASK) == 0);
-    MapNumType first_map_num = AddrToMapNum(pool_addr);
-    MapNumType last_map_num = AddrToMapNum(ToVoidPtr(ToUintPtr(pool_addr) + pool_size - 1U));
-    for (MapNumType i = first_map_num; i <= last_map_num; i++) {
-        pool_map_[i].Destroy();
+    ASSERT((ToUintPtr(poolAddr) & POOL_MAP_GRANULARITY_MASK) == 0);
+    ASSERT((poolSize & POOL_MAP_GRANULARITY_MASK) == 0);
+    MapNumType firstMapNum = AddrToMapNum(poolAddr);
+    MapNumType lastMapNum = AddrToMapNum(ToVoidPtr(ToUintPtr(poolAddr) + poolSize - 1U));
+    for (MapNumType i = firstMapNum; i <= lastMapNum; i++) {
+        poolMap_[i].Destroy();
     }
 }
 
 AllocatorInfo PoolMap::GetAllocatorInfo(const void *addr) const
 {
-    MapNumType map_num = AddrToMapNum(addr);
-    AllocatorType allocator_type = pool_map_[map_num].GetAllocatorType();
-    const void *allocator_addr = pool_map_[map_num].GetAllocatorAddr();
+    MapNumType mapNum = AddrToMapNum(addr);
+    AllocatorType allocatorType = poolMap_[mapNum].GetAllocatorType();
+    const void *allocatorAddr = poolMap_[mapNum].GetAllocatorAddr();
     // We can't get allocator info for not properly initialized pools
-    ASSERT(allocator_type != AllocatorType::UNDEFINED);
-    ASSERT(allocator_addr != nullptr);
-    return AllocatorInfo(allocator_type, allocator_addr);
+    ASSERT(allocatorType != AllocatorType::UNDEFINED);
+    ASSERT(allocatorAddr != nullptr);
+    return AllocatorInfo(allocatorType, allocatorAddr);
 }
 
 SpaceType PoolMap::GetSpaceType(const void *addr) const
@@ -58,22 +58,22 @@ SpaceType PoolMap::GetSpaceType(const void *addr) const
     if (ToUintPtr(addr) > (POOL_MAP_COVERAGE - 1U)) {
         return SpaceType::SPACE_TYPE_UNDEFINED;
     }
-    MapNumType map_num = AddrToMapNum(addr);
-    SpaceType space_type = pool_map_[map_num].GetSpaceType();
+    MapNumType mapNum = AddrToMapNum(addr);
+    SpaceType spaceType = poolMap_[mapNum].GetSpaceType();
     // We can't get space type for not properly initialized pools
-    ASSERT(space_type != SpaceType::SPACE_TYPE_UNDEFINED);
-    return space_type;
+    ASSERT(spaceType != SpaceType::SPACE_TYPE_UNDEFINED);
+    return spaceType;
 }
 
 void *PoolMap::GetFirstByteOfPoolForAddr(const void *addr) const
 {
-    MapNumType segment_first_map_num = pool_map_[AddrToMapNum(addr)].GetSegmentFirstMapNum();
-    return MapNumToAddr(segment_first_map_num);
+    MapNumType segmentFirstMapNum = poolMap_[AddrToMapNum(addr)].GetSegmentFirstMapNum();
+    return MapNumToAddr(segmentFirstMapNum);
 }
 
 bool PoolMap::IsEmpty() const
 {
-    for (auto i : pool_map_) {
+    for (auto i : poolMap_) {
         if (!i.IsEmpty()) {
             return false;
         }

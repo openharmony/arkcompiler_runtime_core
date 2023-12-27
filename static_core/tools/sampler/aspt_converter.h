@@ -57,27 +57,27 @@ public:
 
     bool DumpResolvedTracesAsCSV(const char *filename);
 
-    bool RunWithOptions(const Options &cli_options);
+    bool RunWithOptions(const Options &cliOptions);
 
     bool RunDumpModulesMode(const std::string &outname);
 
     bool RunDumpTracesInCsvMode(const std::string &outname);
 
-    static DumpType GetDumpTypeFromOptions(const Options &cli_options);
+    static DumpType GetDumpTypeFromOptions(const Options &cliOptions);
 
 private:
     SampleReader reader_;
 
     std::vector<FileInfo> modules_;
 
-    ModuleMap modules_map_;
-    MethodMap methods_map_;
-    StackTraceMap stack_traces_;
+    ModuleMap modulesMap_;
+    MethodMap methodsMap_;
+    StackTraceMap stackTraces_;
 
-    DumpType dump_type_ {DumpType::THREAD_SEPARATION_BY_TID};
-    bool build_cold_graph_ {false};
+    DumpType dumpType_ {DumpType::THREAD_SEPARATION_BY_TID};
+    bool buildColdGraph_ {false};
 
-    std::optional<SubstituteModules> substitute_directories_;
+    std::optional<SubstituteModules> substituteDirectories_;
 };
 
 }  // namespace panda::tooling::sampler

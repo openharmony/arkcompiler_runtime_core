@@ -25,11 +25,11 @@ class ShortyIterator {
 public:
     ShortyIterator() = default;
 
-    explicit ShortyIterator(const uint16_t *shorty_ptr) : shorty_ptr_(shorty_ptr)
+    explicit ShortyIterator(const uint16_t *shortyPtr) : shortyPtr_(shortyPtr)
     {
-        shorty_ = *shorty_ptr_++;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        shorty_ = *shortyPtr_++;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         element_ = shorty_ & ELEMENT_MASK;
-        elem_idx_ = 0;
+        elemIdx_ = 0;
         ASSERT(element_ != 0);
     }
 
@@ -45,7 +45,7 @@ public:
 
     bool operator==(const ShortyIterator &it) const
     {
-        return shorty_ptr_ == it.shorty_ptr_ && elem_idx_ == it.elem_idx_;
+        return shortyPtr_ == it.shortyPtr_ && elemIdx_ == it.elemIdx_;
     }
 
     bool operator!=(const ShortyIterator &it) const
@@ -78,10 +78,10 @@ public:
     {
         ASSERT(element_ != 0);
 
-        ++elem_idx_;
-        if (elem_idx_ == NUM_ELEMENTS_PER_16BIT) {
-            shorty_ = *shorty_ptr_++;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            elem_idx_ = 0;
+        ++elemIdx_;
+        if (elemIdx_ == NUM_ELEMENTS_PER_16BIT) {
+            shorty_ = *shortyPtr_++;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            elemIdx_ = 0;
         } else {
             shorty_ >>= NUM_BITS_PER_ELEMENT;
         }
@@ -93,10 +93,10 @@ private:
     static constexpr uint32_t NUM_BITS_PER_ELEMENT = 4;
     static constexpr uint32_t ELEMENT_MASK = 0xF;
 
-    const uint16_t *shorty_ptr_ {nullptr};
+    const uint16_t *shortyPtr_ {nullptr};
     uint16_t shorty_ {0};
     uint16_t element_ {0};
-    uint16_t elem_idx_ {0};
+    uint16_t elemIdx_ {0};
 };
 
 }  // namespace panda::panda_file

@@ -20,9 +20,9 @@ namespace panda::verifier {
 
 bool AbsIntInstructionHandler::IsRegDefined(int reg)
 {
-    bool is_defined = ExecCtx().CurrentRegContext().IsRegDefined(reg);
+    bool isDefined = ExecCtx().CurrentRegContext().IsRegDefined(reg);
 #ifndef NDEBUG
-    if (!is_defined) {
+    if (!isDefined) {
         if (!ExecCtx().CurrentRegContext().WasConflictOnReg(reg)) {
             SHOW_MSG(UndefinedRegister)
             LOG_VERIFIER_UNDEFINED_REGISTER(RegisterName(reg, true));
@@ -34,74 +34,74 @@ bool AbsIntInstructionHandler::IsRegDefined(int reg)
         }
     }
 #endif
-    return is_defined;
+    return isDefined;
 }
 
-bool AbsIntInstructionHandler::CheckRegType(int reg, Type tgt_type)
+bool AbsIntInstructionHandler::CheckRegType(int reg, Type tgtType)
 {
     if (!IsRegDefined(reg)) {
         return false;
     }
     auto type = GetRegType(reg);
 
-    if (CheckType(type, tgt_type)) {
+    if (CheckType(type, tgtType)) {
         return true;
     }
 
     SHOW_MSG(BadRegisterType)
-    LOG_VERIFIER_BAD_REGISTER_TYPE(RegisterName(reg, true), ToString(type), ToString(tgt_type));
+    LOG_VERIFIER_BAD_REGISTER_TYPE(RegisterName(reg, true), ToString(type), ToString(tgtType));
     END_SHOW_MSG();
     return false;
 }
 
-const AbstractTypedValue &AbsIntInstructionHandler::GetReg(int reg_idx)
+const AbstractTypedValue &AbsIntInstructionHandler::GetReg(int regIdx)
 {
-    return context_.ExecCtx().CurrentRegContext()[reg_idx];
+    return context_.ExecCtx().CurrentRegContext()[regIdx];
 }
 
-Type AbsIntInstructionHandler::GetRegType(int reg_idx)
+Type AbsIntInstructionHandler::GetRegType(int regIdx)
 {
-    return GetReg(reg_idx).GetAbstractType();
+    return GetReg(regIdx).GetAbstractType();
 }
 
-void AbsIntInstructionHandler::SetReg(int reg_idx, const AbstractTypedValue &val)
+void AbsIntInstructionHandler::SetReg(int regIdx, const AbstractTypedValue &val)
 {
     if (job_->Options().ShowRegChanges()) {
-        PandaString prev_atv_image {"<none>"};
-        if (ExecCtx().CurrentRegContext().IsRegDefined(reg_idx)) {
-            prev_atv_image = ToString(&GetReg(reg_idx));
+        PandaString prevAtvImage {"<none>"};
+        if (ExecCtx().CurrentRegContext().IsRegDefined(regIdx)) {
+            prevAtvImage = ToString(&GetReg(regIdx));
         }
-        auto new_atv_image = ToString(&val);
-        LOG_VERIFIER_DEBUG_REGISTER_CHANGED(RegisterName(reg_idx), prev_atv_image, new_atv_image);
+        auto newAtvImage = ToString(&val);
+        LOG_VERIFIER_DEBUG_REGISTER_CHANGED(RegisterName(regIdx), prevAtvImage, newAtvImage);
     }
     // RegContext extends flexibly for any number of registers, though on AbsInt instruction
     // handling stage it is not a time to add a new register! The regsiter set (vregs and aregs)
     // is normally initialized on PrepareVerificationContext.
-    if (!context_.ExecCtx().CurrentRegContext().IsValid(reg_idx)) {
+    if (!context_.ExecCtx().CurrentRegContext().IsValid(regIdx)) {
         auto const *method = job_->JobMethod();
-        auto num_vregs = method->GetNumVregs();
-        auto num_aregs = GetTypeSystem()->GetMethodSignature(method)->args.size();
-        if (reg_idx > (int)(num_vregs + num_aregs)) {
-            LOG_VERIFIER_UNDEFINED_REGISTER(RegisterName(reg_idx, true));
+        auto numVregs = method->GetNumVregs();
+        auto numAregs = GetTypeSystem()->GetMethodSignature(method)->args.size();
+        if (regIdx > (int)(numVregs + numAregs)) {
+            LOG_VERIFIER_UNDEFINED_REGISTER(RegisterName(regIdx, true));
             SET_STATUS_FOR_MSG(UndefinedRegister, ERROR);
         }
     }
-    context_.ExecCtx().CurrentRegContext()[reg_idx] = val;
+    context_.ExecCtx().CurrentRegContext()[regIdx] = val;
 }
 
-void AbsIntInstructionHandler::SetReg(int reg_idx, Type type)
+void AbsIntInstructionHandler::SetReg(int regIdx, Type type)
 {
-    SetReg(reg_idx, MkVal(type));
+    SetReg(regIdx, MkVal(type));
 }
 
-void AbsIntInstructionHandler::SetRegAndOthersOfSameOrigin(int reg_idx, const AbstractTypedValue &val)
+void AbsIntInstructionHandler::SetRegAndOthersOfSameOrigin(int regIdx, const AbstractTypedValue &val)
 {
-    context_.ExecCtx().CurrentRegContext().ChangeValuesOfSameOrigin(reg_idx, val);
+    context_.ExecCtx().CurrentRegContext().ChangeValuesOfSameOrigin(regIdx, val);
 }
 
-void AbsIntInstructionHandler::SetRegAndOthersOfSameOrigin(int reg_idx, Type type)
+void AbsIntInstructionHandler::SetRegAndOthersOfSameOrigin(int regIdx, Type type)
 {
-    SetRegAndOthersOfSameOrigin(reg_idx, MkVal(type));
+    SetRegAndOthersOfSameOrigin(regIdx, MkVal(type));
 }
 
 const AbstractTypedValue &AbsIntInstructionHandler::GetAcc()
@@ -162,21 +162,21 @@ void AbsIntInstructionHandler::DumpRegs(const RegContext &ctx)
 void AbsIntInstructionHandler::Sync()
 {
     auto addr = inst_.GetAddress();
-    ExecContext &exec_ctx = ExecCtx();
+    ExecContext &execCtx = ExecCtx();
     // NOTE(vdyadov): add verification options to show current context and contexts diff in case of incompatibility
 #ifndef NDEBUG
-    exec_ctx.StoreCurrentRegContextForAddr(
-        addr, [this, print_hdr = true](int reg_idx, const auto &src, const auto &dst) mutable {
-            if (print_hdr) {
+    execCtx.StoreCurrentRegContextForAddr(
+        addr, [this, printHdr = true](int regIdx, const auto &src, const auto &dst) mutable {
+            if (printHdr) {
                 LOG_VERIFIER_REGISTER_CONFLICT_HEADER();
-                print_hdr = false;
+                printHdr = false;
             }
-            LOG_VERIFIER_REGISTER_CONFLICT(RegisterName(reg_idx), ToString(src.GetAbstractType()),
+            LOG_VERIFIER_REGISTER_CONFLICT(RegisterName(regIdx), ToString(src.GetAbstractType()),
                                            ToString(dst.GetAbstractType()));
             return true;
         });
 #else
-    exec_ctx.StoreCurrentRegContextForAddr(addr);
+    execCtx.StoreCurrentRegContextForAddr(addr);
 #endif
 }
 

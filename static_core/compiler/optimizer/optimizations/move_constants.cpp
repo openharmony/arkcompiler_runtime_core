@@ -22,8 +22,8 @@ namespace panda::compiler {
 
 MoveConstants::MoveConstants(Graph *graph)
     : Optimization {graph},
-      user_dominators_cache_ {graph->GetLocalAllocator()->Adapter()},
-      user_dominating_blocks_ {graph->GetLocalAllocator()->Adapter()}
+      userDominatorsCache_ {graph->GetLocalAllocator()->Adapter()},
+      userDominatingBlocks_ {graph->GetLocalAllocator()->Adapter()}
 {
 }
 
@@ -31,19 +31,19 @@ static Inst *SingleBlockNoPhiDominatingUser(Inst *inst);
 
 bool MoveConstants::RunImpl()
 {
-    for (auto const_inst = GetGraph()->GetFirstConstInst(); const_inst != nullptr;) {
+    for (auto constInst = GetGraph()->GetFirstConstInst(); constInst != nullptr;) {
         // save next const because it can be lost while move
-        auto next_const = const_inst->GetNextConst();
-        if (const_inst->HasUsers()) {
-            MoveFromStartBlock(const_inst);
+        auto nextConst = constInst->GetNextConst();
+        if (constInst->HasUsers()) {
+            MoveFromStartBlock(constInst);
         }
-        const_inst = next_const;
+        constInst = nextConst;
     }
 
     if (GetGraph()->HasNullPtrInst()) {
-        auto null_ptr = GetGraph()->GetNullPtrInst();
-        if (null_ptr->HasUsers()) {
-            MoveFromStartBlock(null_ptr);
+        auto nullPtr = GetGraph()->GetNullPtrInst();
+        if (nullPtr->HasUsers()) {
+            MoveFromStartBlock(nullPtr);
         }
     }
 
@@ -54,7 +54,7 @@ bool MoveConstants::RunImpl()
         }
     }
 
-    return moved_constants_counter_ > 0;
+    return movedConstantsCounter_ > 0;
 }
 
 bool IsBlockSuitable(const BasicBlock *bb)
@@ -66,63 +66,63 @@ void MoveConstants::MoveFromStartBlock(Inst *inst)
 {
     auto graph = GetGraph();
 
-    BasicBlock *target_bb = nullptr;
-    auto user_inst = SingleBlockNoPhiDominatingUser(inst);
-    if (user_inst != nullptr) {
-        target_bb = user_inst->GetBasicBlock();
-        if (IsBlockSuitable(target_bb)) {
+    BasicBlock *targetBb = nullptr;
+    auto userInst = SingleBlockNoPhiDominatingUser(inst);
+    if (userInst != nullptr) {
+        targetBb = userInst->GetBasicBlock();
+        if (IsBlockSuitable(targetBb)) {
             graph->GetStartBlock()->EraseInst(inst);
-            target_bb->InsertBefore(inst, user_inst);
-            moved_constants_counter_++;
+            targetBb->InsertBefore(inst, userInst);
+            movedConstantsCounter_++;
             return;
         }
     } else {
         GetUsersDominatingBlocks(inst);
-        target_bb = FindCommonDominator();
-        ASSERT(target_bb);
+        targetBb = FindCommonDominator();
+        ASSERT(targetBb);
     }
 
-    while (!IsBlockSuitable(target_bb)) {
-        target_bb = target_bb->GetDominator();
+    while (!IsBlockSuitable(targetBb)) {
+        targetBb = targetBb->GetDominator();
     }
 
-    if (target_bb != graph->GetStartBlock()) {
+    if (targetBb != graph->GetStartBlock()) {
         graph->GetStartBlock()->EraseInst(inst);
-        target_bb->PrependInst(inst);
-        moved_constants_counter_++;
+        targetBb->PrependInst(inst);
+        movedConstantsCounter_++;
     }
 }
 
 static Inst *SingleBlockNoPhiDominatingUser(Inst *inst)
 {
-    Inst *first_inst {};
+    Inst *firstInst {};
     for (auto &user : inst->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (user_inst->IsPhi() || user_inst->IsCatchPhi()) {
+        auto userInst = user.GetInst();
+        if (userInst->IsPhi() || userInst->IsCatchPhi()) {
             return nullptr;
         }
-        if (first_inst == nullptr) {
-            first_inst = user_inst;
+        if (firstInst == nullptr) {
+            firstInst = userInst;
             continue;
         }
-        if (first_inst->GetBasicBlock() != user_inst->GetBasicBlock()) {
+        if (firstInst->GetBasicBlock() != userInst->GetBasicBlock()) {
             return nullptr;
         }
-        if (user_inst->IsDominate(first_inst)) {
-            first_inst = user_inst;
+        if (userInst->IsDominate(firstInst)) {
+            firstInst = userInst;
         }
     }
-    return first_inst;
+    return firstInst;
 }
 
 void MoveConstants::GetUsersDominatingBlocks(const Inst *inst)
 {
     ASSERT(inst->HasUsers());
 
-    user_dominating_blocks_.clear();
+    userDominatingBlocks_.clear();
 
     for (auto &user : inst->GetUsers()) {
-        user_dominating_blocks_.emplace_back(GetDominators(user));
+        userDominatingBlocks_.emplace_back(GetDominators(user));
     }
 }
 
@@ -134,55 +134,55 @@ const ArenaVector<BasicBlock *> *MoveConstants::GetDominators(const User &user)
         inst = inst->CastToCatchPhi()->GetThrowableInst(user.GetIndex());
     }
     auto id = inst->GetId();
-    auto cached_dominators = user_dominators_cache_.find(id);
-    if (cached_dominators != user_dominators_cache_.end()) {
-        return &cached_dominators->second;
+    auto cachedDominators = userDominatorsCache_.find(id);
+    if (cachedDominators != userDominatorsCache_.end()) {
+        return &cachedDominators->second;
     }
 
     ArenaVector<BasicBlock *> dominators(GetGraph()->GetLocalAllocator()->Adapter());
 
     // method does not mutate user but returns non const basic blocks
-    auto first_dominator = const_cast<BasicBlock *>(inst->GetBasicBlock());
+    auto firstDominator = const_cast<BasicBlock *>(inst->GetBasicBlock());
     if (inst->IsPhi()) {
         // block where phi-input is located should dominate predecessor block corresponding to this input
-        first_dominator = first_dominator->GetDominator();
+        firstDominator = firstDominator->GetDominator();
     }
-    for (auto blk = first_dominator; blk != nullptr; blk = blk->GetDominator()) {
+    for (auto blk = firstDominator; blk != nullptr; blk = blk->GetDominator()) {
         dominators.push_back(blk);
     }
 
-    auto result = user_dominators_cache_.emplace(id, dominators);
+    auto result = userDominatorsCache_.emplace(id, dominators);
     return &result.first->second;
 }
 
 BasicBlock *MoveConstants::FindCommonDominator()
 {
-    ASSERT(!user_dominating_blocks_.empty());
+    ASSERT(!userDominatingBlocks_.empty());
 
-    BasicBlock *common_dominator {};
+    BasicBlock *commonDominator {};
 
     for (size_t i = 0;; ++i) {
-        BasicBlock *common_dominator_candidate {};
+        BasicBlock *commonDominatorCandidate {};
 
-        for (auto blocks : user_dominating_blocks_) {
+        for (auto blocks : userDominatingBlocks_) {
             if (i >= blocks->size()) {
-                return common_dominator;
+                return commonDominator;
             }
 
             auto blk = (*blocks)[blocks->size() - i - 1];
-            if (common_dominator_candidate == nullptr) {
-                common_dominator_candidate = blk;
+            if (commonDominatorCandidate == nullptr) {
+                commonDominatorCandidate = blk;
                 continue;
             }
-            if (common_dominator_candidate != blk) {
-                return common_dominator;
+            if (commonDominatorCandidate != blk) {
+                return commonDominator;
             }
         }
 
-        common_dominator = common_dominator_candidate;
+        commonDominator = commonDominatorCandidate;
     }
 
-    return common_dominator;
+    return commonDominator;
 }
 
 }  // namespace panda::compiler

@@ -21,27 +21,27 @@
 namespace panda::ets::intrinsics {
 
 template <typename T>
-static EtsVoid *StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t dst_start, int32_t src_start,
-                              int32_t src_end)
+static EtsVoid *StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t dstStart, int32_t srcStart,
+                              int32_t srcEnd)
 {
-    auto src_len = static_cast<int32_t>(src->GetLength());
-    auto dst_len = static_cast<int32_t>(dst->GetLength());
+    auto srcLen = static_cast<int32_t>(src->GetLength());
+    auto dstLen = static_cast<int32_t>(dst->GetLength());
     const char *errmsg = nullptr;
 
-    if (src_start < 0 || src_start > src_end || src_end > src_len) {
+    if (srcStart < 0 || srcStart > srcEnd || srcEnd > srcLen) {
         errmsg = "copyTo: src bounds verification failed";
-    } else if (dst_start < 0 || dst_start > dst_len) {
+    } else if (dstStart < 0 || dstStart > dstLen) {
         errmsg = "copyTo: dst bounds verification failed";
-    } else if ((src_end - src_start) > (dst_len - dst_start)) {
+    } else if ((srcEnd - srcStart) > (dstLen - dstStart)) {
         errmsg = "copyTo: Destination array doesn't have enough space";
     }
 
     if (errmsg == nullptr) {
-        auto src_addr = ToVoidPtr(ToUintPtr(src->GetData()) + src_start * sizeof(T));
-        auto dst_addr = ToVoidPtr(ToUintPtr(dst->GetData()) + dst_start * sizeof(T));
-        auto size = static_cast<size_t>((src_end - src_start) * sizeof(T));
+        auto srcAddr = ToVoidPtr(ToUintPtr(src->GetData()) + srcStart * sizeof(T));
+        auto dstAddr = ToVoidPtr(ToUintPtr(dst->GetData()) + dstStart * sizeof(T));
+        auto size = static_cast<size_t>((srcEnd - srcStart) * sizeof(T));
         if (size != 0) {  // cannot be less than zero at this point
-            if (memmove_s(dst_addr, size, src_addr, size) != EOK) {
+            if (memmove_s(dstAddr, size, srcAddr, size) != EOK) {
                 errmsg = "copyTo: copying data failed";
             }
         }
@@ -55,52 +55,52 @@ static EtsVoid *StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int3
     return static_cast<EtsVoid *>(nullptr);
 }
 
-extern "C" EtsVoid *StdCoreBoolCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dst_start, int32_t src_start,
-                                      int32_t src_end)
+extern "C" EtsVoid *StdCoreBoolCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                      int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint8_t>(src->GetCoreType(), dst->GetCoreType(), dst_start, src_start, src_end);
+    return StdCoreCopyTo<uint8_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreCharCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dst_start, int32_t src_start,
-                                      int32_t src_end)
+extern "C" EtsVoid *StdCoreCharCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                      int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint16_t>(src->GetCoreType(), dst->GetCoreType(), dst_start, src_start, src_end);
+    return StdCoreCopyTo<uint16_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreShortCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dst_start, int32_t src_start,
-                                       int32_t src_end)
+extern "C" EtsVoid *StdCoreShortCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                       int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint16_t>(src->GetCoreType(), dst->GetCoreType(), dst_start, src_start, src_end);
+    return StdCoreCopyTo<uint16_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreByteCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dst_start, int32_t src_start,
-                                      int32_t src_end)
+extern "C" EtsVoid *StdCoreByteCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                      int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint8_t>(src->GetCoreType(), dst->GetCoreType(), dst_start, src_start, src_end);
+    return StdCoreCopyTo<uint8_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreIntCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dst_start, int32_t src_start,
-                                     int32_t src_end)
+extern "C" EtsVoid *StdCoreIntCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                     int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint32_t>(src->GetCoreType(), dst->GetCoreType(), dst_start, src_start, src_end);
+    return StdCoreCopyTo<uint32_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreLongCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dst_start, int32_t src_start,
-                                      int32_t src_end)
+extern "C" EtsVoid *StdCoreLongCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                      int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dst_start, src_start, src_end);
+    return StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreFloatCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dst_start, int32_t src_start,
-                                       int32_t src_end)
+extern "C" EtsVoid *StdCoreFloatCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                       int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint32_t>(src->GetCoreType(), dst->GetCoreType(), dst_start, src_start, src_end);
+    return StdCoreCopyTo<uint32_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-extern "C" EtsVoid *StdCoreDoubleCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dst_start, int32_t src_start,
-                                        int32_t src_end)
+extern "C" EtsVoid *StdCoreDoubleCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                        int32_t srcEnd)
 {
-    return StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dst_start, src_start, src_end);
+    return StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
 }  // namespace panda::ets::intrinsics

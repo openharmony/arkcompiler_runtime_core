@@ -27,18 +27,18 @@ namespace panda::mem {
 #define LOG_BUMP_ALLOCATOR(level) LOG(level, ALLOC) << "BumpPointerAllocator: "
 
 template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
-BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::BumpPointerAllocator(Pool pool, SpaceType type_allocation,
-                                                                                 MemStatsType *mem_stats,
-                                                                                 size_t tlabs_max_count)
+BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::BumpPointerAllocator(Pool pool, SpaceType typeAllocation,
+                                                                                 MemStatsType *memStats,
+                                                                                 size_t tlabsMaxCount)
     : arena_(pool.GetSize(), pool.GetMem()),
-      tlab_manager_(tlabs_max_count),
-      type_allocation_(type_allocation),
-      mem_stats_(mem_stats)
+      tlabManager_(tlabsMaxCount),
+      typeAllocation_(typeAllocation),
+      memStats_(memStats)
 {
     LOG_BUMP_ALLOCATOR(DEBUG) << "Initializing of BumpPointerAllocator";
     AllocConfigT::InitializeCrossingMapForMemory(pool.GetMem(), arena_.GetSize());
     LOG_BUMP_ALLOCATOR(DEBUG) << "Initializing of BumpPointerAllocator finished";
-    ASSERT(USE_TLABS ? tlabs_max_count > 0 : tlabs_max_count == 0);
+    ASSERT(USE_TLABS ? tlabsMaxCount > 0 : tlabsMaxCount == 0);
 }
 
 template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
@@ -58,7 +58,7 @@ void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::Reset()
     }
     arena_.Reset();
     if constexpr (USE_TLABS) {
-        tlab_manager_.Reset();
+        tlabManager_.Reset();
     }
 }
 
@@ -78,7 +78,7 @@ void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::ExpandMemory(vo
 template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
 void *BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::Alloc(size_t size, Alignment alignment)
 {
-    os::memory::LockHolder lock(allocator_lock_);
+    os::memory::LockHolder lock(allocatorLock_);
     LOG_BUMP_ALLOCATOR(DEBUG) << "Try to allocate " << std::dec << size << " bytes of memory";
     ASSERT(alignment == DEFAULT_ALIGNMENT);
     // We need to align up it here to write correct used memory size inside MemStats.
@@ -92,8 +92,8 @@ void *BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::Alloc(size_t s
         // NOLINTNEXTLINE(readability-misleading-indentation)
     } else {
         // We must take TLABs occupied memory into account.
-        ASSERT(arena_.GetFreeSize() >= tlab_manager_.GetTLABsOccupiedSize());
-        if (arena_.GetFreeSize() - tlab_manager_.GetTLABsOccupiedSize() >= size) {
+        ASSERT(arena_.GetFreeSize() >= tlabManager_.GetTLABsOccupiedSize());
+        if (arena_.GetFreeSize() - tlabManager_.GetTLABsOccupiedSize() >= size) {
             mem = arena_.Alloc(size, alignment);
         }
     }
@@ -101,7 +101,7 @@ void *BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::Alloc(size_t s
         LOG_BUMP_ALLOCATOR(DEBUG) << "Couldn't allocate memory";
         return nullptr;
     }
-    AllocConfigT::OnAlloc(size, type_allocation_, mem_stats_);
+    AllocConfigT::OnAlloc(size, typeAllocation_, memStats_);
     AllocConfigT::AddToCrossingMap(mem, size);
     AllocConfigT::MemoryInit(mem);
     return mem;
@@ -110,7 +110,7 @@ void *BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::Alloc(size_t s
 template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
 TLAB *BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::CreateNewTLAB(size_t size)
 {
-    os::memory::LockHolder lock(allocator_lock_);
+    os::memory::LockHolder lock(allocatorLock_);
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (!USE_TLABS) {
         UNREACHABLE();
@@ -118,17 +118,17 @@ TLAB *BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::CreateNewTLAB(
     LOG_BUMP_ALLOCATOR(DEBUG) << "Try to create a TLAB with size " << std::dec << size;
     ASSERT(size == AlignUp(size, DEFAULT_ALIGNMENT_IN_BYTES));
     TLAB *tlab = nullptr;
-    ASSERT(arena_.GetFreeSize() >= tlab_manager_.GetTLABsOccupiedSize());
-    if (arena_.GetFreeSize() - tlab_manager_.GetTLABsOccupiedSize() >= size) {
-        tlab = tlab_manager_.GetUnusedTLABInstance();
+    ASSERT(arena_.GetFreeSize() >= tlabManager_.GetTLABsOccupiedSize());
+    if (arena_.GetFreeSize() - tlabManager_.GetTLABsOccupiedSize() >= size) {
+        tlab = tlabManager_.GetUnusedTLABInstance();
         if (tlab != nullptr) {
-            tlab_manager_.IncreaseTLABsOccupiedSize(size);
-            uintptr_t end_of_arena = ToUintPtr(arena_.GetArenaEnd());
-            ASSERT(end_of_arena >= tlab_manager_.GetTLABsOccupiedSize());
-            void *tlab_buffer_start = ToVoidPtr(end_of_arena - tlab_manager_.GetTLABsOccupiedSize());
-            tlab->Fill(tlab_buffer_start, size);
+            tlabManager_.IncreaseTLABsOccupiedSize(size);
+            uintptr_t endOfArena = ToUintPtr(arena_.GetArenaEnd());
+            ASSERT(endOfArena >= tlabManager_.GetTLABsOccupiedSize());
+            void *tlabBufferStart = ToVoidPtr(endOfArena - tlabManager_.GetTLABsOccupiedSize());
+            tlab->Fill(tlabBufferStart, size);
             LOG_BUMP_ALLOCATOR(DEBUG) << "Created new TLAB with size " << std::dec << size << " at addr " << std::hex
-                                      << tlab_buffer_start;
+                                      << tlabBufferStart;
         } else {
             LOG_BUMP_ALLOCATOR(DEBUG) << "Reached the limit of TLABs inside the allocator";
         }
@@ -139,41 +139,41 @@ TLAB *BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::CreateNewTLAB(
 }
 
 template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
-void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::VisitAndRemoveAllPools(const MemVisitor &mem_visitor)
+void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::VisitAndRemoveAllPools(const MemVisitor &memVisitor)
 {
-    os::memory::LockHolder lock(allocator_lock_);
+    os::memory::LockHolder lock(allocatorLock_);
     AllocConfigT::RemoveCrossingMapForMemory(arena_.GetMem(), arena_.GetSize());
-    mem_visitor(arena_.GetMem(), arena_.GetSize());
+    memVisitor(arena_.GetMem(), arena_.GetSize());
 }
 
 template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
-void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::VisitAndRemoveFreePools(const MemVisitor &mem_visitor)
+void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::VisitAndRemoveFreePools(const MemVisitor &memVisitor)
 {
-    (void)mem_visitor;
-    os::memory::LockHolder lock(allocator_lock_);
+    (void)memVisitor;
+    os::memory::LockHolder lock(allocatorLock_);
     // We should do nothing here
 }
 
 template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
 void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::IterateOverObjects(
-    const std::function<void(ObjectHeader *object_header)> &object_visitor)
+    const std::function<void(ObjectHeader *objectHeader)> &objectVisitor)
 {
-    os::memory::LockHolder lock(allocator_lock_);
+    os::memory::LockHolder lock(allocatorLock_);
     LOG_BUMP_ALLOCATOR(DEBUG) << "Iteration over objects started";
-    void *cur_ptr = arena_.GetAllocatedStart();
-    void *end_ptr = arena_.GetAllocatedEnd();
-    while (cur_ptr < end_ptr) {
-        auto object_header = static_cast<ObjectHeader *>(cur_ptr);
-        size_t object_size = GetObjectSize(cur_ptr);
-        object_visitor(object_header);
-        cur_ptr = ToVoidPtr(AlignUp(ToUintPtr(cur_ptr) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
+    void *curPtr = arena_.GetAllocatedStart();
+    void *endPtr = arena_.GetAllocatedEnd();
+    while (curPtr < endPtr) {
+        auto objectHeader = static_cast<ObjectHeader *>(curPtr);
+        size_t objectSize = GetObjectSize(curPtr);
+        objectVisitor(objectHeader);
+        curPtr = ToVoidPtr(AlignUp(ToUintPtr(curPtr) + objectSize, DEFAULT_ALIGNMENT_IN_BYTES));
     }
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (USE_TLABS) {
         LOG_BUMP_ALLOCATOR(DEBUG) << "Iterate over TLABs";
         // Iterate over objects in TLABs:
-        tlab_manager_.IterateOverTLABs([&](TLAB *tlab) {
-            tlab->IterateOverObjects(object_visitor);
+        tlabManager_.IterateOverTLABs([&objectVisitor](TLAB *tlab) {
+            tlab->IterateOverObjects(objectVisitor);
             return true;
         });
         LOG_BUMP_ALLOCATOR(DEBUG) << "Iterate over TLABs finished";
@@ -183,63 +183,62 @@ void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::IterateOverObje
 
 template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
 template <typename MemVisitor>
-void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::IterateOverObjectsInRange(
-    const MemVisitor &mem_visitor, void *left_border, void *right_border)
+void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::IterateOverObjectsInRange(const MemVisitor &memVisitor,
+                                                                                           void *leftBorder,
+                                                                                           void *rightBorder)
 {
-    ASSERT(ToUintPtr(right_border) >= ToUintPtr(left_border));
+    ASSERT(ToUintPtr(rightBorder) >= ToUintPtr(leftBorder));
     // NOTE(ipetrov): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
-    ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
-           (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
-    ASSERT((ToUintPtr(right_border) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))) ==
-           (ToUintPtr(left_border) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))));
+    ASSERT(ToUintPtr(rightBorder) - ToUintPtr(leftBorder) == (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
+    ASSERT((ToUintPtr(rightBorder) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))) ==
+           (ToUintPtr(leftBorder) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))));
 
-    os::memory::LockHolder lock(allocator_lock_);
-    LOG_BUMP_ALLOCATOR(DEBUG) << "IterateOverObjectsInRange for range [" << std::hex << left_border << ", "
-                              << right_border << "]";
-    MemRange input_mem_range(ToUintPtr(left_border), ToUintPtr(right_border));
-    MemRange arena_occupied_mem_range(0U, 0U);
+    os::memory::LockHolder lock(allocatorLock_);
+    LOG_BUMP_ALLOCATOR(DEBUG) << "IterateOverObjectsInRange for range [" << std::hex << leftBorder << ", "
+                              << rightBorder << "]";
+    MemRange inputMemRange(ToUintPtr(leftBorder), ToUintPtr(rightBorder));
+    MemRange arenaOccupiedMemRange(0U, 0U);
     if (arena_.GetOccupiedSize() > 0) {
-        arena_occupied_mem_range =
+        arenaOccupiedMemRange =
             MemRange(ToUintPtr(arena_.GetAllocatedStart()), ToUintPtr(arena_.GetAllocatedEnd()) - 1);
     }
     // In this case, we iterate over objects in intersection of memory range of occupied memory via arena_.Alloc()
     // and memory range of input range
-    if (arena_occupied_mem_range.IsIntersect(input_mem_range)) {
-        void *start_ptr =
-            ToVoidPtr(std::max(input_mem_range.GetStartAddress(), arena_occupied_mem_range.GetStartAddress()));
-        void *end_ptr = ToVoidPtr(std::min(input_mem_range.GetEndAddress(), arena_occupied_mem_range.GetEndAddress()));
+    if (arenaOccupiedMemRange.IsIntersect(inputMemRange)) {
+        void *startPtr = ToVoidPtr(std::max(inputMemRange.GetStartAddress(), arenaOccupiedMemRange.GetStartAddress()));
+        void *endPtr = ToVoidPtr(std::min(inputMemRange.GetEndAddress(), arenaOccupiedMemRange.GetEndAddress()));
 
-        void *obj_addr = AllocConfigT::FindFirstObjInCrossingMap(start_ptr, end_ptr);
-        if (obj_addr != nullptr) {
-            ASSERT(arena_occupied_mem_range.GetStartAddress() <= ToUintPtr(obj_addr) &&
-                   ToUintPtr(obj_addr) <= arena_occupied_mem_range.GetEndAddress());
-            void *current_ptr = obj_addr;
-            while (current_ptr < end_ptr) {
-                auto *object_header = static_cast<ObjectHeader *>(current_ptr);
-                size_t object_size = GetObjectSize(current_ptr);
-                mem_visitor(object_header);
-                current_ptr = ToVoidPtr(AlignUp(ToUintPtr(current_ptr) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
+        void *objAddr = AllocConfigT::FindFirstObjInCrossingMap(startPtr, endPtr);
+        if (objAddr != nullptr) {
+            ASSERT(arenaOccupiedMemRange.GetStartAddress() <= ToUintPtr(objAddr) &&
+                   ToUintPtr(objAddr) <= arenaOccupiedMemRange.GetEndAddress());
+            void *currentPtr = objAddr;
+            while (currentPtr < endPtr) {
+                auto *objectHeader = static_cast<ObjectHeader *>(currentPtr);
+                size_t objectSize = GetObjectSize(currentPtr);
+                memVisitor(objectHeader);
+                currentPtr = ToVoidPtr(AlignUp(ToUintPtr(currentPtr) + objectSize, DEFAULT_ALIGNMENT_IN_BYTES));
             }
         }
     }
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (USE_TLABS) {
         // If we didn't allocate any TLAB then we don't need iterate by TLABs
-        if (tlab_manager_.GetTLABsOccupiedSize() == 0) {
+        if (tlabManager_.GetTLABsOccupiedSize() == 0) {
             return;
         }
-        uintptr_t end_of_arena = ToUintPtr(arena_.GetArenaEnd());
-        uintptr_t start_tlab = end_of_arena - tlab_manager_.GetTLABsOccupiedSize();
-        MemRange tlabs_mem_range(start_tlab, end_of_arena - 1);
+        uintptr_t endOfArena = ToUintPtr(arena_.GetArenaEnd());
+        uintptr_t startTlab = endOfArena - tlabManager_.GetTLABsOccupiedSize();
+        MemRange tlabsMemRange(startTlab, endOfArena - 1);
         // In this case, we iterate over objects in intersection of memory range of TLABs
         // and memory range of input range
-        if (tlabs_mem_range.IsIntersect(input_mem_range)) {
-            void *start_ptr = ToVoidPtr(std::max(input_mem_range.GetStartAddress(), tlabs_mem_range.GetStartAddress()));
-            void *end_ptr = ToVoidPtr(std::min(input_mem_range.GetEndAddress(), tlabs_mem_range.GetEndAddress()));
-            tlab_manager_.IterateOverTLABs(
-                [&mem_visitor, mem_range = MemRange(ToUintPtr(start_ptr), ToUintPtr(end_ptr))](TLAB *tlab) -> bool {
-                    tlab->IterateOverObjectsInRange(mem_visitor, mem_range);
+        if (tlabsMemRange.IsIntersect(inputMemRange)) {
+            void *startPtr = ToVoidPtr(std::max(inputMemRange.GetStartAddress(), tlabsMemRange.GetStartAddress()));
+            void *endPtr = ToVoidPtr(std::min(inputMemRange.GetEndAddress(), tlabsMemRange.GetEndAddress()));
+            tlabManager_.IterateOverTLABs(
+                [&memVisitor, memRange = MemRange(ToUintPtr(startPtr), ToUintPtr(endPtr))](TLAB *tlab) -> bool {
+                    tlab->IterateOverObjectsInRange(memVisitor, memRange);
                     return true;
                 });
         }
@@ -255,12 +254,12 @@ MemRange BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::GetMemRange
 template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
 template <typename ObjectMoveVisitorT>
 void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::CollectAndMove(
-    const GCObjectVisitor &death_checker, const ObjectMoveVisitorT &object_move_visitor)
+    const GCObjectVisitor &deathChecker, const ObjectMoveVisitorT &objectMoveVisitor)
 {
-    IterateOverObjects([&](ObjectHeader *object_header) {
+    IterateOverObjects([&](ObjectHeader *objectHeader) {
         // We are interested only in moving alive objects, after that we cleanup arena
-        if (death_checker(object_header) == ObjectStatus::ALIVE_OBJECT) {
-            object_move_visitor(object_header);
+        if (deathChecker(objectHeader) == ObjectStatus::ALIVE_OBJECT) {
+            objectMoveVisitor(objectHeader);
         }
     });
 }
@@ -272,7 +271,7 @@ bool BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::ContainObject(c
     result = arena_.InArena(const_cast<ObjectHeader *>(obj));
     if ((USE_TLABS) && (!result)) {
         // Check TLABs
-        tlab_manager_.IterateOverTLABs([&](TLAB *tlab) {
+        tlabManager_.IterateOverTLABs([&](TLAB *tlab) {
             result = tlab->ContainObject(obj);
             return !result;
         });
@@ -284,25 +283,25 @@ template <typename AllocConfigT, typename LockConfigT, bool USE_TLABS>
 bool BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::IsLive(const ObjectHeader *obj)
 {
     ASSERT(ContainObject(obj));
-    void *obj_mem = static_cast<void *>(const_cast<ObjectHeader *>(obj));
-    if (arena_.InArena(obj_mem)) {
-        void *current_obj = AllocConfigT::FindFirstObjInCrossingMap(obj_mem, obj_mem);
-        if (UNLIKELY(current_obj == nullptr)) {
+    void *objMem = static_cast<void *>(const_cast<ObjectHeader *>(obj));
+    if (arena_.InArena(objMem)) {
+        void *currentObj = AllocConfigT::FindFirstObjInCrossingMap(objMem, objMem);
+        if (UNLIKELY(currentObj == nullptr)) {
             return false;
         }
-        while (current_obj < obj_mem) {
-            size_t object_size = GetObjectSize(current_obj);
-            current_obj = ToVoidPtr(AlignUp(ToUintPtr(current_obj) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
+        while (currentObj < objMem) {
+            size_t objectSize = GetObjectSize(currentObj);
+            currentObj = ToVoidPtr(AlignUp(ToUintPtr(currentObj) + objectSize, DEFAULT_ALIGNMENT_IN_BYTES));
         }
-        return current_obj == obj_mem;
+        return currentObj == objMem;
     }
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (USE_TLABS) {
         bool result = false;
-        tlab_manager_.IterateOverTLABs([&](TLAB *tlab) {
+        tlabManager_.IterateOverTLABs([&](TLAB *tlab) {
             if (tlab->ContainObject(obj)) {
-                tlab->IterateOverObjects([&](ObjectHeader *object_header) {
-                    if (object_header == obj) {
+                tlab->IterateOverObjects([&](ObjectHeader *objectHeader) {
+                    if (objectHeader == obj) {
                         result = true;
                     }
                 });

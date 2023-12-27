@@ -26,85 +26,85 @@
 
 namespace panda::llvmbackend::gc_barriers {
 
-void EmitPreWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, bool is_volatile_mem, llvm::BasicBlock *out_bb,
-                LLVMArkInterface *ark_interface, llvm::Value *thread_reg_value)
+void EmitPreWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, bool isVolatileMem, llvm::BasicBlock *outBb,
+                LLVMArkInterface *arkInterface, llvm::Value *threadRegValue)
 {
     auto func = builder->GetInsertBlock()->getParent();
     auto module = func->getParent();
     auto &ctx = module->getContext();
-    auto initial_bb = builder->GetInsertBlock();
+    auto initialBb = builder->GetInsertBlock();
 
-    auto create_uniq_basic_block_name = [&initial_bb](const std::string &suffix) {
-        return panda::llvmbackend::LLVMArkInterface::GetUniqueBasicBlockName(initial_bb->getName().str(), suffix);
+    auto createUniqBasicBlockName = [&initialBb](const std::string &suffix) {
+        return panda::llvmbackend::LLVMArkInterface::GetUniqueBasicBlockName(initialBb->getName().str(), suffix);
     };
-    auto create_basic_block = [&ctx, &initial_bb, &create_uniq_basic_block_name](const std::string &suffix) {
-        auto name = create_uniq_basic_block_name(suffix);
-        auto func_ibb = initial_bb->getParent();
-        return llvm::BasicBlock::Create(ctx, name, func_ibb);
+    auto createBasicBlock = [&ctx, &initialBb, &createUniqBasicBlockName](const std::string &suffix) {
+        auto name = createUniqBasicBlockName(suffix);
+        auto funcIbb = initialBb->getParent();
+        return llvm::BasicBlock::Create(ctx, name, funcIbb);
     };
 
-    auto load_value_bb = create_basic_block("pre_wrb_load_value");
-    auto call_runtime_bb = create_basic_block("pre_wrb_call_runtime");
-    auto thread_struct_ptr = builder->CreateIntToPtr(thread_reg_value, builder->getPtrTy());
-    auto entrypoint_offset = ark_interface->GetTlsPreWrbEntrypointOffset();
-    auto entrypoint_ptr =
-        builder->CreateConstInBoundsGEP1_32(builder->getInt8Ty(), thread_struct_ptr, entrypoint_offset);
+    auto loadValueBb = createBasicBlock("pre_wrb_load_value");
+    auto callRuntimeBb = createBasicBlock("pre_wrb_call_runtime");
+    auto threadStructPtr = builder->CreateIntToPtr(threadRegValue, builder->getPtrTy());
+    auto entrypointOffset = arkInterface->GetTlsPreWrbEntrypointOffset();
+    auto entrypointPtr =
+        builder->CreateConstInBoundsGEP1_32(builder->getInt8Ty(), threadStructPtr, entrypointOffset);
 
     // Check if entrypoint is null
     auto entrypoint =
-        builder->CreateLoad(builder->getPtrTy(), entrypoint_ptr, "__panda_entrypoint_PreWrbFuncNoBridge_addr");
-    auto has_entrypoint = builder->CreateIsNotNull(entrypoint);
-    builder->CreateCondBr(has_entrypoint, load_value_bb, out_bb);
+        builder->CreateLoad(builder->getPtrTy(), entrypointPtr, "__panda_entrypoint_PreWrbFuncNoBridge_addr");
+    auto hasEntrypoint = builder->CreateIsNotNull(entrypoint);
+    builder->CreateCondBr(hasEntrypoint, loadValueBb, outBb);
 
     // Load old value
-    builder->SetInsertPoint(load_value_bb);
+    builder->SetInsertPoint(loadValueBb);
 
     // See LLVMEntry::EmitLoad
     auto load = builder->CreateLoad(builder->getPtrTy(LLVMArkInterface::GC_ADDR_SPACE), mem);
-    if (is_volatile_mem) {
+    if (isVolatileMem) {
         auto alignment = module->getDataLayout().getPrefTypeAlignment(load->getType());
         load->setOrdering(LLVMArkInterface::VOLATILE_ORDER);
         load->setAlignment(llvm::Align(alignment));
     }
-    auto object_is_null = builder->CreateIsNotNull(load);
-    builder->CreateCondBr(object_is_null, call_runtime_bb, out_bb);
+    auto objectIsNull = builder->CreateIsNotNull(load);
+    builder->CreateCondBr(objectIsNull, callRuntimeBb, outBb);
 
     // Call Runtime
-    builder->SetInsertPoint(call_runtime_bb);
+    builder->SetInsertPoint(callRuntimeBb);
     static constexpr auto VAR_ARGS = true;
-    auto function_type =
+    auto functionType =
         llvm::FunctionType::get(builder->getVoidTy(), {builder->getPtrTy(LLVMArkInterface::GC_ADDR_SPACE)}, !VAR_ARGS);
-    builder->CreateCall(function_type, entrypoint, {load});
-    builder->CreateBr(out_bb);
+    builder->CreateCall(functionType, entrypoint, {load});
+    builder->CreateBr(outBb);
 
-    builder->SetInsertPoint(out_bb);
+    builder->SetInsertPoint(outBb);
 }
 
 void EmitPostWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, llvm::Value *offset, llvm::Value *value,
-                 LLVMArkInterface *ark_interface, llvm::Value *thread_reg_value, llvm::Value *frame_reg_value)
+                 LLVMArkInterface *arkInterface, llvm::Value *threadRegValue, llvm::Value *frameRegValue)
 {
-    auto tls_offset = ark_interface->GetManagedThreadPostWrbOneObjectOffset();
+    auto tlsOffset = arkInterface->GetManagedThreadPostWrbOneObjectOffset();
 
-    auto gc_ptr_ty = builder->getPtrTy(LLVMArkInterface::GC_ADDR_SPACE);
-    auto ptr_ty = builder->getPtrTy();
-    auto int32_ty = builder->getInt32Ty();
-    auto thread_reg_ptr = builder->CreateIntToPtr(thread_reg_value, ptr_ty);
-    auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), thread_reg_ptr, tls_offset);
-    auto callee = builder->CreateLoad(ptr_ty, addr, "post_wrb_one_object_addr");
+    auto gcPtrTy = builder->getPtrTy(LLVMArkInterface::GC_ADDR_SPACE);
+    auto ptrTy = builder->getPtrTy();
+    auto int32Ty = builder->getInt32Ty();
+    auto threadRegPtr = builder->CreateIntToPtr(threadRegValue, ptrTy);
+    auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), threadRegPtr, tlsOffset);
+    auto callee = builder->CreateLoad(ptrTy, addr, "post_wrb_one_object_addr");
 
-    if (ark_interface->IsArm64()) {
+    if (arkInterface->IsArm64()) {
         // Arm64 Irtoc, 4 params (add thread)
-        auto func_ty = llvm::FunctionType::get(builder->getVoidTy(), {gc_ptr_ty, int32_ty, gc_ptr_ty, ptr_ty}, false);
-        auto call = builder->CreateCall(func_ty, callee, {mem, offset, value, thread_reg_ptr});
+        auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {gcPtrTy, int32Ty, gcPtrTy, ptrTy}, false);
+        auto call = builder->CreateCall(funcTy, callee, {mem, offset, value, threadRegPtr});
         call->setCallingConv(llvm::CallingConv::ArkFast3);
         return;
     }
     // X86_64 Irtoc, 5 params (add thread, fp)
-    ASSERT(frame_reg_value != nullptr);
-    auto func_ty =
-        llvm::FunctionType::get(builder->getVoidTy(), {gc_ptr_ty, int32_ty, gc_ptr_ty, ptr_ty, ptr_ty}, false);
-    auto frame_reg_ptr = builder->CreateIntToPtr(frame_reg_value, ptr_ty);
-    auto call = builder->CreateCall(func_ty, callee, {mem, offset, value, thread_reg_ptr, frame_reg_ptr});
+    ASSERT(frameRegValue != nullptr);
+    auto funcTy =
+        llvm::FunctionType::get(builder->getVoidTy(), {gcPtrTy, int32Ty, gcPtrTy, ptrTy, ptrTy}, false);
+    auto frameRegPtr = builder->CreateIntToPtr(frameRegValue, ptrTy);
+    auto call = builder->CreateCall(funcTy, callee, {mem, offset, value, threadRegPtr, frameRegPtr});
     call->setCallingConv(llvm::CallingConv::ArkFast3);
 }
 

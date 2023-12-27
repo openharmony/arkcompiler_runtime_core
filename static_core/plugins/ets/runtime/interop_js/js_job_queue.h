@@ -28,7 +28,7 @@ public:
     void CreateLink(EtsObject *source, EtsObject *target) override;
 
 private:
-    void CreatePromiseLink(JSValue *js_promise, EtsPromise *ets_promise);
+    void CreatePromiseLink(JSValue *jsPromise, EtsPromise *etsPromise);
 };
 }  // namespace panda::ets::interop::js
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_JS_INTEROP_JOB_QUEUE_H_

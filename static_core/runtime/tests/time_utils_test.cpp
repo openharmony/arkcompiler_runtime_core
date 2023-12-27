@@ -66,13 +66,13 @@ TEST_F(TimeTest, TimerTest)
     }
     ASSERT_GT(duration, 0);
 
-    uint64_t last_duration = duration;
+    uint64_t lastDuration = duration;
     {
         Timer timer(&duration);
         // NOLINTNEXTLINE(readability-magic-numbers)
         std::this_thread::sleep_for(std::chrono::nanoseconds(10));
     }
-    ASSERT_GT(duration, last_duration);
+    ASSERT_GT(duration, lastDuration);
 
     {
         Timer timer(&duration, true);

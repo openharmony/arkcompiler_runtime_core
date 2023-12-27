@@ -17,67 +17,67 @@
 
 namespace panda::compiler {
 
-bool Codegen::LaunchCallCodegen(CallInst *call_inst)
+bool Codegen::LaunchCallCodegen(CallInst *callInst)
 {
     SCOPED_DISASM_STR(this, "Create Launch Call");
 
-    auto dst_reg = ConvertRegister(call_inst->GetDstReg(), call_inst->GetType());
+    auto dstReg = ConvertRegister(callInst->GetDstReg(), callInst->GetType());
 
-    Reg param_0 = GetTarget().GetParamReg(0);
+    Reg param0 = GetTarget().GetParamReg(0);
     ScopedTmpRegLazy tmp(GetEncoder());
 
-    RegMask live_regs {GetLiveRegisters(call_inst).first};
-    if (live_regs.Test(param_0.GetId())) {
+    RegMask liveRegs {GetLiveRegisters(callInst).first};
+    if (liveRegs.Test(param0.GetId())) {
         tmp.Acquire();
-        param_0 = tmp;
+        param0 = tmp;
     }
 
-    Reg obj_reg;
-    Reg this_reg;
-    if (call_inst->GetOpcode() == Opcode::CallResolvedLaunchStatic ||
-        call_inst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
-        auto location = call_inst->GetLocation(0);
+    Reg objReg;
+    Reg thisReg;
+    if (callInst->GetOpcode() == Opcode::CallResolvedLaunchStatic ||
+        callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
+        auto location = callInst->GetLocation(0);
         ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
 
-        param_0 = ConvertRegister(location.GetValue(), DataType::POINTER);
-        auto location1 = call_inst->GetLocation(1);
+        param0 = ConvertRegister(location.GetValue(), DataType::POINTER);
+        auto location1 = callInst->GetLocation(1);
         ASSERT(location1.IsFixedRegister() && location1.IsRegisterValid());
 
-        obj_reg = ConvertRegister(location1.GetValue(), DataType::REFERENCE);
-        if (call_inst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
-            this_reg = ConvertRegister(call_inst->GetLocation(2).GetValue(), DataType::REFERENCE);
+        objReg = ConvertRegister(location1.GetValue(), DataType::REFERENCE);
+        if (callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
+            thisReg = ConvertRegister(callInst->GetLocation(2).GetValue(), DataType::REFERENCE);
         }
     } else {
-        auto location = call_inst->GetLocation(0);
+        auto location = callInst->GetLocation(0);
         ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
 
-        obj_reg = ConvertRegister(location.GetValue(), DataType::REFERENCE);
+        objReg = ConvertRegister(location.GetValue(), DataType::REFERENCE);
 
-        auto method = call_inst->GetCallMethod();
-        if (call_inst->GetOpcode() == Opcode::CallLaunchStatic) {
+        auto method = callInst->GetCallMethod();
+        if (callInst->GetOpcode() == Opcode::CallLaunchStatic) {
             ASSERT(!GetGraph()->IsAotMode());
-            GetEncoder()->EncodeMov(param_0, Imm(reinterpret_cast<size_t>(method)));
+            GetEncoder()->EncodeMov(param0, Imm(reinterpret_cast<size_t>(method)));
         } else {
-            ASSERT(call_inst->GetOpcode() == Opcode::CallLaunchVirtual);
-            this_reg = ConvertRegister(call_inst->GetLocation(1).GetValue(), DataType::REFERENCE);
-            LoadClassFromObject(param_0, this_reg);
+            ASSERT(callInst->GetOpcode() == Opcode::CallLaunchVirtual);
+            thisReg = ConvertRegister(callInst->GetLocation(1).GetValue(), DataType::REFERENCE);
+            LoadClassFromObject(param0, thisReg);
             // Get index
-            auto vtable_index = GetRuntime()->GetVTableIndex(method);
+            auto vtableIndex = GetRuntime()->GetVTableIndex(method);
             // Load from VTable, address = klass + ((index << shift) + vtable_offset)
-            auto total_offset = GetRuntime()->GetVTableOffset(GetArch()) + (vtable_index << GetVtableShift());
+            auto totalOffset = GetRuntime()->GetVTableOffset(GetArch()) + (vtableIndex << GetVtableShift());
             // Class ref was loaded to method_reg
-            GetEncoder()->EncodeLdr(param_0, false, MemRef(param_0, total_offset));
+            GetEncoder()->EncodeLdr(param0, false, MemRef(param0, totalOffset));
         }
     }
 
-    if (call_inst->IsStaticLaunchCall()) {
-        CallRuntime(call_inst, EntrypointId::CREATE_LAUNCH_STATIC_COROUTINE, dst_reg, RegMask::GetZeroMask(), param_0,
-                    obj_reg, SpReg());
+    if (callInst->IsStaticLaunchCall()) {
+        CallRuntime(callInst, EntrypointId::CREATE_LAUNCH_STATIC_COROUTINE, dstReg, RegMask::GetZeroMask(), param0,
+                    objReg, SpReg());
     } else {
-        CallRuntime(call_inst, EntrypointId::CREATE_LAUNCH_VIRTUAL_COROUTINE, dst_reg, RegMask::GetZeroMask(), param_0,
-                    obj_reg, SpReg(), this_reg);
+        CallRuntime(callInst, EntrypointId::CREATE_LAUNCH_VIRTUAL_COROUTINE, dstReg, RegMask::GetZeroMask(), param0,
+                    objReg, SpReg(), thisReg);
     }
-    if (call_inst->GetFlag(inst_flags::MEM_BARRIER)) {
+    if (callInst->GetFlag(inst_flags::MEM_BARRIER)) {
         GetEncoder()->EncodeMemoryBarrier(memory_order::RELEASE);
     }
     return true;

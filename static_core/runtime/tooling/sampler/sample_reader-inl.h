@@ -45,98 +45,97 @@ namespace panda::tooling::sampler {
 inline SampleReader::SampleReader(const char *filename)
 {
     {
-        std::ifstream bin_file(filename, std::ios::binary | std::ios::ate);
-        if (!bin_file) {
+        std::ifstream binFile(filename, std::ios::binary | std::ios::ate);
+        if (!binFile) {
             LOG(FATAL, PROFILER) << "Unable to open file \"" << filename << "\"";
             UNREACHABLE();
         }
-        std::streamsize buffer_size = bin_file.tellg();
-        bin_file.seekg(0, std::ios::beg);
+        std::streamsize bufferSize = binFile.tellg();
+        binFile.seekg(0, std::ios::beg);
 
-        buffer_.resize(buffer_size);
+        buffer_.resize(bufferSize);
 
-        if (!bin_file.read(buffer_.data(), buffer_size)) {
+        if (!binFile.read(buffer_.data(), bufferSize)) {
             LOG(FATAL, PROFILER) << "Unable to read sampler trace file";
             UNREACHABLE();
         }
-        bin_file.close();
+        binFile.close();
     }
 
-    size_t buffer_counter = 0;
-    while (buffer_counter < buffer_.size()) {
-        if (ReadUintptrTBitMisaligned(&buffer_[buffer_counter]) == StreamWriter::MODULE_INDICATOR_VALUE) {
+    size_t bufferCounter = 0;
+    while (bufferCounter < buffer_.size()) {
+        if (ReadUintptrTBitMisaligned(&buffer_[bufferCounter]) == StreamWriter::MODULE_INDICATOR_VALUE) {
             // This entry is panda file
-            size_t pf_name_size = ReadUintptrTBitMisaligned(&buffer_[buffer_counter + PANDA_FILE_NAME_SIZE_OFFSET]);
-            size_t next_module_ptr_offset = PANDA_FILE_NAME_OFFSET + pf_name_size * sizeof(char);
+            size_t pfNameSize = ReadUintptrTBitMisaligned(&buffer_[bufferCounter + PANDA_FILE_NAME_SIZE_OFFSET]);
+            size_t nextModulePtrOffset = PANDA_FILE_NAME_OFFSET + pfNameSize * sizeof(char);
 
-            if (buffer_counter + next_module_ptr_offset > buffer_.size()) {
+            if (bufferCounter + nextModulePtrOffset > buffer_.size()) {
                 LOG(ERROR, PROFILER) << "ark sampling profiler drop last module, because of invalid trace file";
                 return;
             }
 
-            module_row_ptrs_.push_back(&buffer_[buffer_counter]);
-            buffer_counter += next_module_ptr_offset;
+            moduleRowPtrs_.push_back(&buffer_[bufferCounter]);
+            bufferCounter += nextModulePtrOffset;
             continue;
         }
 
         // buffer_counter now is entry of a sample, stack size lies after thread_id
-        size_t stack_size = ReadUintptrTBitMisaligned(&buffer_[buffer_counter + SAMPLE_STACK_SIZE_OFFSET]);
-        if (stack_size > SampleInfo::StackInfo::MAX_STACK_DEPTH) {
+        size_t stackSize = ReadUintptrTBitMisaligned(&buffer_[bufferCounter + SAMPLE_STACK_SIZE_OFFSET]);
+        if (stackSize > SampleInfo::StackInfo::MAX_STACK_DEPTH) {
             LOG(FATAL, PROFILER) << "ark sampling profiler trace file is invalid, stack_size > MAX_STACK_DEPTH";
             UNREACHABLE();
         }
 
-        size_t next_sample_ptr_offset = SAMPLE_STACK_OFFSET + stack_size * sizeof(SampleInfo::ManagedStackFrameId);
-        if (buffer_counter + next_sample_ptr_offset > buffer_.size()) {
+        size_t nextSamplePtrOffset = SAMPLE_STACK_OFFSET + stackSize * sizeof(SampleInfo::ManagedStackFrameId);
+        if (bufferCounter + nextSamplePtrOffset > buffer_.size()) {
             LOG(ERROR, PROFILER) << "ark sampling profiler drop last samples, because of invalid trace file";
             return;
         }
 
-        sample_row_ptrs_.push_back(&buffer_[buffer_counter]);
-        buffer_counter += next_sample_ptr_offset;
+        sampleRowPtrs_.push_back(&buffer_[bufferCounter]);
+        bufferCounter += nextSamplePtrOffset;
     }
 
-    if (buffer_counter != buffer_.size()) {
+    if (bufferCounter != buffer_.size()) {
         LOG(ERROR, PROFILER) << "ark sampling profiler trace file is invalid";
     }
 }
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-inline bool SampleReader::GetNextSample(SampleInfo *sample_out)
+inline bool SampleReader::GetNextSample(SampleInfo *sampleOut)
 {
-    if (sample_row_ptrs_.size() <= sample_row_counter_) {
+    if (sampleRowPtrs_.size() <= sampleRowCounter_) {
         return false;
     }
-    const char *current_sample_ptr = sample_row_ptrs_[sample_row_counter_];
-    sample_out->thread_info.thread_id = ReadUint32TBitMisaligned(&current_sample_ptr[SAMPLE_THREAD_ID_OFFSET]);
-    sample_out->thread_info.thread_status = static_cast<SampleInfo::ThreadStatus>(
-        ReadUint32TBitMisaligned(&current_sample_ptr[SAMPLE_THREAD_STATUS_OFFSET]));
-    sample_out->stack_info.managed_stack_size =
-        ReadUintptrTBitMisaligned(&current_sample_ptr[SAMPLE_STACK_SIZE_OFFSET]);
+    const char *currentSamplePtr = sampleRowPtrs_[sampleRowCounter_];
+    sampleOut->threadInfo.threadId = ReadUint32TBitMisaligned(&currentSamplePtr[SAMPLE_THREAD_ID_OFFSET]);
+    sampleOut->threadInfo.threadStatus =
+        static_cast<SampleInfo::ThreadStatus>(ReadUint32TBitMisaligned(&currentSamplePtr[SAMPLE_THREAD_STATUS_OFFSET]));
+    sampleOut->stackInfo.managedStackSize = ReadUintptrTBitMisaligned(&currentSamplePtr[SAMPLE_STACK_SIZE_OFFSET]);
 
-    ASSERT(sample_out->stack_info.managed_stack_size <= SampleInfo::StackInfo::MAX_STACK_DEPTH);
-    memcpy(sample_out->stack_info.managed_stack.data(), current_sample_ptr + SAMPLE_STACK_OFFSET,
-           sample_out->stack_info.managed_stack_size * sizeof(SampleInfo::ManagedStackFrameId));
-    ++sample_row_counter_;
+    ASSERT(sampleOut->stackInfo.managedStackSize <= SampleInfo::StackInfo::MAX_STACK_DEPTH);
+    memcpy(sampleOut->stackInfo.managedStack.data(), currentSamplePtr + SAMPLE_STACK_OFFSET,
+           sampleOut->stackInfo.managedStackSize * sizeof(SampleInfo::ManagedStackFrameId));
+    ++sampleRowCounter_;
     return true;
 }
 
-inline bool SampleReader::GetNextModule(FileInfo *module_out)
+inline bool SampleReader::GetNextModule(FileInfo *moduleOut)
 {
-    if (module_row_ptrs_.size() <= module_row_counter_) {
+    if (moduleRowPtrs_.size() <= moduleRowCounter_) {
         return false;
     }
 
-    module_out->pathname.clear();
+    moduleOut->pathname.clear();
 
-    const char *current_module_ptr = module_row_ptrs_[module_row_counter_];
-    module_out->ptr = ReadUintptrTBitMisaligned(&current_module_ptr[PANDA_FILE_POINTER_OFFSET]);
-    module_out->checksum = ReadUint32TBitMisaligned(&current_module_ptr[PANDA_FILE_CHECKSUM_OFFSET]);
-    size_t str_size = ReadUintptrTBitMisaligned(&current_module_ptr[PANDA_FILE_NAME_SIZE_OFFSET]);
-    const char *str_ptr = &current_module_ptr[PANDA_FILE_NAME_OFFSET];
-    module_out->pathname = std::string(str_ptr, str_size);
+    const char *currentModulePtr = moduleRowPtrs_[moduleRowCounter_];
+    moduleOut->ptr = ReadUintptrTBitMisaligned(&currentModulePtr[PANDA_FILE_POINTER_OFFSET]);
+    moduleOut->checksum = ReadUint32TBitMisaligned(&currentModulePtr[PANDA_FILE_CHECKSUM_OFFSET]);
+    size_t strSize = ReadUintptrTBitMisaligned(&currentModulePtr[PANDA_FILE_NAME_SIZE_OFFSET]);
+    const char *strPtr = &currentModulePtr[PANDA_FILE_NAME_OFFSET];
+    moduleOut->pathname = std::string(strPtr, strSize);
 
-    ++module_row_counter_;
+    ++moduleRowCounter_;
     return true;
 }
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)

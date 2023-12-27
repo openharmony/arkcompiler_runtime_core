@@ -20,29 +20,29 @@
 #include <string_view>
 
 namespace panda::tooling::inspector {
-std::pair<ScriptId, bool> SourceManager::GetScriptId(PtThread thread, std::string_view file_name)
+std::pair<ScriptId, bool> SourceManager::GetScriptId(PtThread thread, std::string_view fileName)
 {
     os::memory::LockHolder lock(mutex_);
 
-    auto p = file_name_to_id_.emplace(std::string(file_name), file_name_to_id_.size());
+    auto p = fileNameToId_.emplace(std::string(fileName), fileNameToId_.size());
     ScriptId id(p.first->second);
 
-    bool is_new_for_thread = known_sources_[thread].insert(id).second;
+    bool isNewForThread = knownSources_[thread].insert(id).second;
 
     if (p.second) {
         std::string_view name {p.first->first};
-        id_to_file_name_.emplace(id, name);
+        idToFileName_.emplace(id, name);
     }
 
-    return {id, is_new_for_thread};
+    return {id, isNewForThread};
 }
 
 std::string_view SourceManager::GetSourceFileName(ScriptId id) const
 {
     os::memory::LockHolder lock(mutex_);
 
-    auto it = id_to_file_name_.find(id);
-    if (it != id_to_file_name_.end()) {
+    auto it = idToFileName_.find(id);
+    if (it != idToFileName_.end()) {
         return it->second;
     }
 
@@ -54,6 +54,6 @@ std::string_view SourceManager::GetSourceFileName(ScriptId id) const
 void SourceManager::RemoveThread(PtThread thread)
 {
     os::memory::LockHolder lock(mutex_);
-    known_sources_.erase(thread);
+    knownSources_.erase(thread);
 }
 }  // namespace panda::tooling::inspector

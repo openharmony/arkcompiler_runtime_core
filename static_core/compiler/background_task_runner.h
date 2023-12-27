@@ -45,14 +45,14 @@ public:
     using CompilerTask = std::unique_ptr<panda::CompilerTask, std::function<void(panda::CompilerTask *)>>;
     using CompilerThread = std::unique_ptr<panda::Thread, std::function<void(panda::Thread *)>>;
 
-    void SetCompilerTask(CompilerTask compiler_task)
+    void SetCompilerTask(CompilerTask compilerTask)
     {
-        compiler_task_ = std::move(compiler_task);
+        compilerTask_ = std::move(compilerTask);
     }
 
-    void SetCompilerThread(CompilerThread compiler_thread)
+    void SetCompilerThread(CompilerThread compilerThread)
     {
-        compiler_thread_ = std::move(compiler_thread);
+        compilerThread_ = std::move(compilerThread);
     }
 
     void SetAllocator(std::unique_ptr<ArenaAllocator> allocator)
@@ -60,14 +60,14 @@ public:
         allocator_ = std::move(allocator);
     }
 
-    void SetLocalAllocator(std::unique_ptr<ArenaAllocator> local_allocator)
+    void SetLocalAllocator(std::unique_ptr<ArenaAllocator> localAllocator)
     {
-        local_allocator_ = std::move(local_allocator);
+        localAllocator_ = std::move(localAllocator);
     }
 
-    void SetMethodName(std::string method_name)
+    void SetMethodName(std::string methodName)
     {
-        method_name_ = std::move(method_name);
+        methodName_ = std::move(methodName);
     }
 
     void SetGraph(Graph *graph)
@@ -80,24 +80,24 @@ public:
         pipeline_ = std::move(pipeline);
     }
 
-    void SetCompilationStatus(bool compilation_status)
+    void SetCompilationStatus(bool compilationStatus)
     {
-        compilation_status_ = compilation_status;
+        compilationStatus_ = compilationStatus;
     }
 
     Method *GetMethod() const
     {
-        return compiler_task_->GetMethod();
+        return compilerTask_->GetMethod();
     }
 
     bool IsOsr() const
     {
-        return compiler_task_->IsOsr();
+        return compilerTask_->IsOsr();
     }
 
     PandaVM *GetVM() const
     {
-        return compiler_task_->GetVM();
+        return compilerTask_->GetVM();
     }
 
     ArenaAllocator *GetAllocator() const
@@ -107,12 +107,12 @@ public:
 
     ArenaAllocator *GetLocalAllocator() const
     {
-        return local_allocator_.get();
+        return localAllocator_.get();
     }
 
     const std::string &GetMethodName() const
     {
-        return method_name_;
+        return methodName_;
     }
 
     Graph *GetGraph() const
@@ -127,19 +127,19 @@ public:
 
     bool GetCompilationStatus() const
     {
-        return compilation_status_;
+        return compilationStatus_;
     }
 
 private:
-    CompilerTask compiler_task_;
-    CompilerThread compiler_thread_;
+    CompilerTask compilerTask_;
+    CompilerThread compilerThread_;
     std::unique_ptr<ArenaAllocator> allocator_;
-    std::unique_ptr<ArenaAllocator> local_allocator_;
-    std::string method_name_;
+    std::unique_ptr<ArenaAllocator> localAllocator_;
+    std::string methodName_;
     Graph *graph_ {nullptr};
     std::unique_ptr<Pipeline> pipeline_;
     // Used only in JIT Compilation
-    bool compilation_status_ {false};
+    bool compilationStatus_ {false};
 };
 
 namespace copy_hooks {
@@ -196,15 +196,15 @@ public:
     static constexpr taskmanager::TaskProperties TASK_PROPERTIES = {
         taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::BACKGROUND};
 
-    BackgroundCompilerTaskRunner(taskmanager::TaskQueueInterface *compiler_queue, Thread *compiler_thread,
-                                 RuntimeInterface *runtime_iface)
-        : compiler_queue_(compiler_queue), compiler_thread_(compiler_thread), runtime_iface_(runtime_iface)
+    BackgroundCompilerTaskRunner(taskmanager::TaskQueueInterface *compilerQueue, Thread *compilerThread,
+                                 RuntimeInterface *runtimeIface)
+        : compilerQueue_(compilerQueue), compilerThread_(compilerThread), runtimeIface_(runtimeIface)
     {
     }
 
     BackgroundCompilerContext &GetContext() override
     {
-        return task_ctx_;
+        return taskCtx_;
     }
 
     /**
@@ -212,25 +212,25 @@ public:
      * @param task_runner - Current TaskRunner containing context and callbacks
      * @param task_func - task which will be executed with @param task_runner
      */
-    static void StartTask(BackgroundCompilerTaskRunner task_runner, TaskRunner::TaskFunc task_func)
+    static void StartTask(BackgroundCompilerTaskRunner taskRunner, TaskRunner::TaskFunc taskFunc)
     {
-        auto *compiler_queue = task_runner.compiler_queue_;
-        auto callback = [next_task = std::move(task_func), next_runner = std::move(task_runner)]() mutable {
-            auto *runtime_iface = next_runner.runtime_iface_;
-            runtime_iface->SetCurrentThread(next_runner.compiler_thread_);
-            next_task(std::move(next_runner));
-            runtime_iface->SetCurrentThread(nullptr);
+        auto *compilerQueue = taskRunner.compilerQueue_;
+        auto callback = [nextTask = std::move(taskFunc), nextRunner = std::move(taskRunner)]() mutable {
+            auto *runtimeIface = nextRunner.runtimeIface_;
+            runtimeIface->SetCurrentThread(nextRunner.compilerThread_);
+            nextTask(std::move(nextRunner));
+            runtimeIface->SetCurrentThread(nullptr);
         };
         // We use MakeFakeCopyable becuase std::function can't wrap a lambda that has captured non-copyable object
         auto task = taskmanager::Task::Create(TASK_PROPERTIES, copy_hooks::MakeFakeCopyable(std::move(callback)));
-        compiler_queue->AddTask(std::move(task));
+        compilerQueue->AddTask(std::move(task));
     }
 
 private:
-    taskmanager::TaskQueueInterface *compiler_queue_ {nullptr};
-    Thread *compiler_thread_ {nullptr};
-    RuntimeInterface *runtime_iface_;
-    BackgroundCompilerContext task_ctx_;
+    taskmanager::TaskQueueInterface *compilerQueue_ {nullptr};
+    Thread *compilerThread_ {nullptr};
+    RuntimeInterface *runtimeIface_;
+    BackgroundCompilerContext taskCtx_;
 };
 
 }  // namespace panda::compiler

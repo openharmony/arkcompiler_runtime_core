@@ -21,111 +21,111 @@
 #include "optimizer/ir/graph_cloner.h"
 
 namespace panda::compiler {
-GraphCloner::GraphCloner(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *local_allocator)
+GraphCloner::GraphCloner(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *localAllocator)
     : graph_(graph),
       allocator_(allocator),
-      local_allocator_(local_allocator),
-      clone_blocks_(allocator->Adapter()),
-      clone_instructions_(allocator->Adapter())
+      localAllocator_(localAllocator),
+      cloneBlocks_(allocator->Adapter()),
+      cloneInstructions_(allocator->Adapter())
 {
 }
 
 /// Clone the whole graph
 Graph *GraphCloner::CloneGraph()
 {
-    auto new_graph =
-        allocator_->New<Graph>(allocator_, local_allocator_, GetGraph()->GetArch(), GetGraph()->GetMethod(),
+    auto newGraph =
+        allocator_->New<Graph>(allocator_, localAllocator_, GetGraph()->GetArch(), GetGraph()->GetMethod(),
                                GetGraph()->GetRuntime(), GetGraph()->GetParentGraph(), GetGraph()->GetMode());
-    new_graph->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
-    new_graph->SetAotData(GetGraph()->GetAotData());
-    CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, false>(GetGraph()->GetVectorBlocks(), new_graph);
+    newGraph->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
+    newGraph->SetAotData(GetGraph()->GetAotData());
+    CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, false>(GetGraph()->GetVectorBlocks(), newGraph);
     BuildControlFlow();
     BuildDataFlow();
-    new_graph->GetPassManager()->SetCheckMode(GetGraph()->GetPassManager()->IsCheckMode());
+    newGraph->GetPassManager()->SetCheckMode(GetGraph()->GetPassManager()->IsCheckMode());
     // Clone all flags
-    new_graph->SetBitFields(GetGraph()->GetBitFields());
-    new_graph->InitUsedRegs<DataType::INT64>(GetGraph()->GetUsedRegs<DataType::INT64>());
-    new_graph->InitUsedRegs<DataType::FLOAT64>(GetGraph()->GetUsedRegs<DataType::FLOAT64>());
+    newGraph->SetBitFields(GetGraph()->GetBitFields());
+    newGraph->InitUsedRegs<DataType::INT64>(GetGraph()->GetUsedRegs<DataType::INT64>());
+    newGraph->InitUsedRegs<DataType::FLOAT64>(GetGraph()->GetUsedRegs<DataType::FLOAT64>());
 #ifndef NDEBUG
-    CloneAnalyses(new_graph);
+    CloneAnalyses(newGraph);
 #endif
-    return new_graph;
+    return newGraph;
 }
 
-void GraphCloner::CloneAnalyses(Graph *new_graph)
+void GraphCloner::CloneAnalyses(Graph *newGraph)
 {
     // Clone dominators if analysis is valid to check dom-tree
-    ASSERT(!new_graph->IsAnalysisValid<DominatorsTree>());
+    ASSERT(!newGraph->IsAnalysisValid<DominatorsTree>());
     if (GetGraph()->IsAnalysisValid<DominatorsTree>()) {
-        new_graph->GetAnalysis<DominatorsTree>().SetValid(true);
+        newGraph->GetAnalysis<DominatorsTree>().SetValid(true);
         for (auto block : GetGraph()->GetBlocksRPO()) {
             auto clone = GetClone(block);
             if (block->GetDominator() != nullptr) {
-                auto clone_dom = GetClone(block->GetDominator());
-                clone->SetDominator(clone_dom);
+                auto cloneDom = GetClone(block->GetDominator());
+                clone->SetDominator(cloneDom);
             }
-            for (auto dom_blocks : block->GetDominatedBlocks()) {
-                clone->AddDominatedBlock(GetClone(dom_blocks));
+            for (auto domBlocks : block->GetDominatedBlocks()) {
+                clone->AddDominatedBlock(GetClone(domBlocks));
             }
         }
     }
 
     // Clone loops if analysis is valid to check loop-tree
-    ASSERT(!new_graph->IsAnalysisValid<LoopAnalyzer>());
+    ASSERT(!newGraph->IsAnalysisValid<LoopAnalyzer>());
     if (GetGraph()->IsAnalysisValid<LoopAnalyzer>()) {
-        auto &cloned_la = new_graph->GetAnalysis<LoopAnalyzer>();
-        cloned_la.SetValid(true);
-        cloned_la.CreateRootLoop();
-        CopyLoop(GetGraph()->GetRootLoop(), new_graph->GetRootLoop());
-        new_graph->SetHasIrreducibleLoop(GetGraph()->HasIrreducibleLoop());
-        new_graph->SetHasInfiniteLoop(GetGraph()->HasInfiniteLoop());
+        auto &clonedLa = newGraph->GetAnalysis<LoopAnalyzer>();
+        clonedLa.SetValid(true);
+        clonedLa.CreateRootLoop();
+        CopyLoop(GetGraph()->GetRootLoop(), newGraph->GetRootLoop());
+        newGraph->SetHasIrreducibleLoop(GetGraph()->HasIrreducibleLoop());
+        newGraph->SetHasInfiniteLoop(GetGraph()->HasInfiniteLoop());
     }
 
-    ASSERT(!new_graph->IsAnalysisValid<LinearOrder>());
+    ASSERT(!newGraph->IsAnalysisValid<LinearOrder>());
     if (GetGraph()->IsAnalysisValid<LinearOrder>()) {
-        new_graph->GetAnalysis<LinearOrder>().SetValid(true);
-        CloneLinearOrder(new_graph);
+        newGraph->GetAnalysis<LinearOrder>().SetValid(true);
+        CloneLinearOrder(newGraph);
     }
 }
 
-void GraphCloner::CopyLoop(Loop *loop, Loop *cloned_loop)
+void GraphCloner::CopyLoop(Loop *loop, Loop *clonedLoop)
 {
     if (!loop->IsRoot() && !loop->IsIrreducible() && !loop->IsTryCatchLoop()) {
-        ASSERT(GetClone(loop->GetHeader()) == cloned_loop->GetHeader());
-        cloned_loop->SetPreHeader(GetClone(loop->GetPreHeader()));
+        ASSERT(GetClone(loop->GetHeader()) == clonedLoop->GetHeader());
+        clonedLoop->SetPreHeader(GetClone(loop->GetPreHeader()));
     }
     for (auto block : loop->GetBlocks()) {
         if (block->IsLoopHeader()) {
             continue;
         }
-        cloned_loop->AppendBlock(GetClone(block));
+        clonedLoop->AppendBlock(GetClone(block));
     }
 
-    for (auto back_edge : loop->GetBackEdges()) {
-        cloned_loop->AppendBackEdge(GetClone(back_edge));
+    for (auto backEdge : loop->GetBackEdges()) {
+        clonedLoop->AppendBackEdge(GetClone(backEdge));
     }
-    cloned_loop->SetIsIrreducible(loop->IsIrreducible());
-    cloned_loop->SetIsInfinite(loop->IsInfinite());
+    clonedLoop->SetIsIrreducible(loop->IsIrreducible());
+    clonedLoop->SetIsInfinite(loop->IsInfinite());
 
     // clone inner loops
-    for (const auto &inner_loop : loop->GetInnerLoops()) {
-        auto cloned_header = GetClone(inner_loop->GetHeader());
-        auto &cloned_la = cloned_header->GetGraph()->GetAnalysis<LoopAnalyzer>();
-        auto cloned_inner_loop = cloned_la.CreateNewLoop(cloned_header);
-        cloned_inner_loop->SetOuterLoop(cloned_loop);
-        cloned_loop->AppendInnerLoop(cloned_inner_loop);
-        CopyLoop(inner_loop, cloned_inner_loop);
+    for (const auto &innerLoop : loop->GetInnerLoops()) {
+        auto clonedHeader = GetClone(innerLoop->GetHeader());
+        auto &clonedLa = clonedHeader->GetGraph()->GetAnalysis<LoopAnalyzer>();
+        auto clonedInnerLoop = clonedLa.CreateNewLoop(clonedHeader);
+        clonedInnerLoop->SetOuterLoop(clonedLoop);
+        clonedLoop->AppendInnerLoop(clonedInnerLoop);
+        CopyLoop(innerLoop, clonedInnerLoop);
     }
 }
 
-void GraphCloner::CloneLinearOrder([[maybe_unused]] Graph *new_graph)
+void GraphCloner::CloneLinearOrder([[maybe_unused]] Graph *newGraph)
 {
-    ASSERT(new_graph != nullptr);
+    ASSERT(newGraph != nullptr);
     ASSERT(GetGraph()->IsAnalysisValid<LinearOrder>());
-    auto &clone_linear_blocks = new_graph->GetAnalysis<LinearOrder>().GetBlocks();
-    clone_linear_blocks.reserve(GetGraph()->GetBlocksLinearOrder().size());
+    auto &cloneLinearBlocks = newGraph->GetAnalysis<LinearOrder>().GetBlocks();
+    cloneLinearBlocks.reserve(GetGraph()->GetBlocksLinearOrder().size());
     for (auto block : GetGraph()->GetBlocksLinearOrder()) {
-        clone_linear_blocks.push_back(GetClone(block));
+        cloneLinearBlocks.push_back(GetClone(block));
     }
 }
 
@@ -148,7 +148,7 @@ void GraphCloner::BuildDataFlow()
         if (block == nullptr) {
             continue;
         }
-        auto block_clone = GetClone(block);
+        auto blockClone = GetClone(block);
         for (const auto &inst : block->Insts()) {
             SetCloneInputs<false>(inst);
             GetClone(inst)->SetId(inst->GetId());
@@ -156,15 +156,15 @@ void GraphCloner::BuildDataFlow()
         }
         for (const auto &inst : block->PhiInsts()) {
             auto phi = inst->CastToPhi();
-            auto inst_clone = GetClone(inst);
-            inst_clone->SetId(inst->GetId());
-            for (const auto &clone_pred_block : block_clone->GetPredsBlocks()) {
-                auto it = std::find(clone_blocks_.begin(), clone_blocks_.end(), clone_pred_block);
-                ASSERT(it != clone_blocks_.end());
-                size_t index = std::distance(clone_blocks_.begin(), it);
+            auto instClone = GetClone(inst);
+            instClone->SetId(inst->GetId());
+            for (const auto &clonePredBlock : blockClone->GetPredsBlocks()) {
+                auto it = std::find(cloneBlocks_.begin(), cloneBlocks_.end(), clonePredBlock);
+                ASSERT(it != cloneBlocks_.end());
+                size_t index = std::distance(cloneBlocks_.begin(), it);
                 ASSERT(GetGraph()->GetVectorBlocks().size() > index);
-                auto pred_block = GetGraph()->GetVectorBlocks()[index];
-                inst_clone->AppendInput(GetClone(phi->GetPhiInput(pred_block)));
+                auto predBlock = GetGraph()->GetVectorBlocks()[index];
+                instClone->AppendInput(GetClone(phi->GetPhiInput(predBlock)));
             }
         }
     }
@@ -173,28 +173,28 @@ void GraphCloner::BuildDataFlow()
 /*
  * Create resolver-block - common successor for all loop side-exits
  */
-BasicBlock *GraphCloner::CreateResolverBlock(Loop *loop, BasicBlock *back_edge)
+BasicBlock *GraphCloner::CreateResolverBlock(Loop *loop, BasicBlock *backEdge)
 {
-    auto outside_succ = GetLoopOutsideSuccessor(loop);
-    auto resolver = back_edge->InsertNewBlockToSuccEdge(outside_succ);
-    back_edge->GetLoop()->GetOuterLoop()->AppendBlock(resolver);
+    auto outsideSucc = GetLoopOutsideSuccessor(loop);
+    auto resolver = backEdge->InsertNewBlockToSuccEdge(outsideSucc);
+    backEdge->GetLoop()->GetOuterLoop()->AppendBlock(resolver);
     // Populate resolver-block with phis for each instruction which has outside-loop user
     for (auto block : loop->GetBlocks()) {
         for (auto inst : block->AllInsts()) {
-            Inst *phi_resolver = nullptr;
-            auto user_it = inst->GetUsers().begin();
-            while (user_it != inst->GetUsers().end()) {
-                auto user = user_it->GetInst();
-                auto input_idx = user_it->GetIndex();
-                ++user_it;
+            Inst *phiResolver = nullptr;
+            auto userIt = inst->GetUsers().begin();
+            while (userIt != inst->GetUsers().end()) {
+                auto user = userIt->GetInst();
+                auto inputIdx = userIt->GetIndex();
+                ++userIt;
                 ASSERT(user->GetBasicBlock() != nullptr);
                 if (user->GetBasicBlock()->GetLoop() != loop) {
-                    if (phi_resolver == nullptr) {
-                        phi_resolver = GetGraph()->CreateInstPhi(inst->GetType(), inst->GetPc());
-                        phi_resolver->AppendInput(inst);
-                        resolver->AppendPhi(phi_resolver);
+                    if (phiResolver == nullptr) {
+                        phiResolver = GetGraph()->CreateInstPhi(inst->GetType(), inst->GetPc());
+                        phiResolver->AppendInput(inst);
+                        resolver->AppendPhi(phiResolver);
                     }
-                    user->SetInput(input_idx, phi_resolver);
+                    user->SetInput(inputIdx, phiResolver);
                 }
             }
         }
@@ -205,35 +205,35 @@ BasicBlock *GraphCloner::CreateResolverBlock(Loop *loop, BasicBlock *back_edge)
 /*
  * Split back-edge for cloning without side exits - in order not to clone `Compare` and `IfImm` instructions
  */
-BasicBlock *GraphCloner::SplitBackEdge(LoopUnrollData *unroll_data, Loop *loop, BasicBlock *back_edge)
+BasicBlock *GraphCloner::SplitBackEdge(LoopUnrollData *unrollData, Loop *loop, BasicBlock *backEdge)
 {
-    auto ifimm = back_edge->GetLastInst();
+    auto ifimm = backEdge->GetLastInst();
     ASSERT(ifimm->GetOpcode() == Opcode::IfImm);
     auto compare = ifimm->GetInput(0).GetInst();
     ASSERT(compare->GetOpcode() == Opcode::Compare);
     // If there are intructions between `Compare` and `IfImm`, clone `Compare` and insert before `IfImm`
     if (ifimm->GetPrev() != compare || !compare->HasSingleUser()) {
-        auto new_cmp = compare->Clone(compare->GetBasicBlock()->GetGraph());
-        new_cmp->SetInput(0, compare->GetInput(0).GetInst());
-        new_cmp->SetInput(1, compare->GetInput(1).GetInst());
-        ifimm->InsertBefore(new_cmp);
-        ifimm->SetInput(0, new_cmp);
-        compare = new_cmp;
+        auto newCmp = compare->Clone(compare->GetBasicBlock()->GetGraph());
+        newCmp->SetInput(0, compare->GetInput(0).GetInst());
+        newCmp->SetInput(1, compare->GetInput(1).GetInst());
+        ifimm->InsertBefore(newCmp);
+        ifimm->SetInput(0, newCmp);
+        compare = newCmp;
     }
     if (compare->GetPrev() != nullptr) {
-        auto back_edge_split = back_edge->SplitBlockAfterInstruction(compare->GetPrev(), true);
-        loop->ReplaceBackEdge(back_edge, back_edge_split);
-        back_edge = back_edge_split;
+        auto backEdgeSplit = backEdge->SplitBlockAfterInstruction(compare->GetPrev(), true);
+        loop->ReplaceBackEdge(backEdge, backEdgeSplit);
+        backEdge = backEdgeSplit;
     } else {
-        ASSERT(back_edge->GetPredsBlocks().size() == 1);
-        auto it = std::find(unroll_data->blocks->begin(), unroll_data->blocks->end(), back_edge);
-        ASSERT(it != unroll_data->blocks->end());
-        unroll_data->blocks->erase(it);
-        unroll_data->exit_block = back_edge->GetPredBlockByIndex(0);
+        ASSERT(backEdge->GetPredsBlocks().size() == 1);
+        auto it = std::find(unrollData->blocks->begin(), unrollData->blocks->end(), backEdge);
+        ASSERT(it != unrollData->blocks->end());
+        unrollData->blocks->erase(it);
+        unrollData->exitBlock = backEdge->GetPredBlockByIndex(0);
     }
     [[maybe_unused]] static constexpr auto BACK_EDGE_INST_COUNT = 2;
-    ASSERT(std::distance(back_edge->AllInsts().begin(), back_edge->AllInsts().end()) == BACK_EDGE_INST_COUNT);
-    return back_edge;
+    ASSERT(std::distance(backEdge->AllInsts().begin(), backEdge->AllInsts().end()) == BACK_EDGE_INST_COUNT);
+    return backEdge;
 }
 
 /**
@@ -245,56 +245,56 @@ BasicBlock *GraphCloner::SplitBackEdge(LoopUnrollData *unroll_data, Loop *loop, 
  *  - If loop is cloing with side-exits create common successor for them;
  *  - Otherwise split back-edge to cut `Compare` and `IfImm` instructions and not clone them;
  */
-GraphCloner::LoopUnrollData *GraphCloner::PrepareLoopToUnroll(Loop *loop, bool clone_side_exits)
+GraphCloner::LoopUnrollData *GraphCloner::PrepareLoopToUnroll(Loop *loop, bool cloneSideExits)
 {
     ASSERT(loop != nullptr);
     // Populate `LoopUnrollData`
     auto allocator = loop->GetHeader()->GetGraph()->GetLocalAllocator();
-    auto unroll_data = allocator->New<LoopUnrollData>();
-    unroll_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
-    unroll_data->blocks->resize(loop->GetBlocks().size());
-    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unroll_data->blocks->begin());
+    auto unrollData = allocator->New<LoopUnrollData>();
+    unrollData->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+    unrollData->blocks->resize(loop->GetBlocks().size());
+    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unrollData->blocks->begin());
     // Split loop-header
     ASSERT(loop->GetBackEdges().size() == 1U);
-    auto back_edge = loop->GetBackEdges()[0];
-    ASSERT(back_edge != nullptr);
-    auto header_block = loop->GetHeader();
-    ASSERT(!header_block->IsEmpty());
-    if (header_block->HasPhi()) {
-        auto last_phi = header_block->GetFirstInst()->GetPrev();
-        ASSERT(last_phi != nullptr && last_phi->IsPhi());
-        auto header_split = header_block->SplitBlockAfterInstruction(last_phi, true);
-        ASSERT(loop->GetBlocks().front() == header_block);
-        unroll_data->blocks->at(0) = header_split;
+    auto backEdge = loop->GetBackEdges()[0];
+    ASSERT(backEdge != nullptr);
+    auto headerBlock = loop->GetHeader();
+    ASSERT(!headerBlock->IsEmpty());
+    if (headerBlock->HasPhi()) {
+        auto lastPhi = headerBlock->GetFirstInst()->GetPrev();
+        ASSERT(lastPhi != nullptr && lastPhi->IsPhi());
+        auto headerSplit = headerBlock->SplitBlockAfterInstruction(lastPhi, true);
+        ASSERT(loop->GetBlocks().front() == headerBlock);
+        unrollData->blocks->at(0) = headerSplit;
 
-        if (back_edge == header_block) {
-            loop->ReplaceBackEdge(header_block, header_split);
-            back_edge = header_split;
+        if (backEdge == headerBlock) {
+            loop->ReplaceBackEdge(headerBlock, headerSplit);
+            backEdge = headerSplit;
         }
     }
-    unroll_data->exit_block = back_edge;
-    if (clone_side_exits) {
-        unroll_data->outer = CreateResolverBlock(loop, back_edge);
+    unrollData->exitBlock = backEdge;
+    if (cloneSideExits) {
+        unrollData->outer = CreateResolverBlock(loop, backEdge);
     } else {
-        back_edge = SplitBackEdge(unroll_data, loop, back_edge);
+        backEdge = SplitBackEdge(unrollData, loop, backEdge);
     }
     // Save replaceable phi inputs
 
-    unroll_data->phi_update_inputs = allocator->New<InstVector>(allocator->Adapter());
-    for (auto phi : header_block->PhiInsts()) {
-        unroll_data->phi_update_inputs->push_back(phi->CastToPhi()->GetPhiInput(back_edge));
+    unrollData->phiUpdateInputs = allocator->New<InstVector>(allocator->Adapter());
+    for (auto phi : headerBlock->PhiInsts()) {
+        unrollData->phiUpdateInputs->push_back(phi->CastToPhi()->GetPhiInput(backEdge));
     }
-    unroll_data->header = header_block;
-    unroll_data->backedge = back_edge;
-    return unroll_data;
+    unrollData->header = headerBlock;
+    unrollData->backedge = backEdge;
+    return unrollData;
 }
 
 /// Update data-flow after unrolling without side-exits
-void GraphCloner::UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unroll_data)
+void GraphCloner::UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unrollData)
 {
-    auto loop = unroll_data->header->GetLoop();
+    auto loop = unrollData->header->GetLoop();
     // Update outloop users: replace inputs located in the original loop by theirs clones
-    auto compare = unroll_data->backedge->GetLastInst()->GetPrev();
+    auto compare = unrollData->backedge->GetLastInst()->GetPrev();
     ASSERT(compare->GetOpcode() == Opcode::Compare);
     for (size_t i = 0; i < compare->GetInputsCount(); i++) {
         auto input = compare->GetInput(i).GetInst();
@@ -303,16 +303,16 @@ void GraphCloner::UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unroll
         }
     }
     // update outloop users
-    for (auto block : *unroll_data->blocks) {
+    for (auto block : *unrollData->blocks) {
         for (auto inst : block->AllInsts()) {
-            auto user_it = inst->GetUsers().begin();
-            while (user_it != inst->GetUsers().end()) {
-                auto user = user_it->GetInst();
-                auto input_idx = user_it->GetIndex();
-                ++user_it;
+            auto userIt = inst->GetUsers().begin();
+            while (userIt != inst->GetUsers().end()) {
+                auto user = userIt->GetInst();
+                auto inputIdx = userIt->GetIndex();
+                ++userIt;
                 ASSERT(user->GetBasicBlock() != nullptr);
                 if (user->GetBasicBlock()->GetLoop() != loop) {
-                    user->SetInput(input_idx, GetClone(inst));
+                    user->SetInput(inputIdx, GetClone(inst));
                 }
             }
         }
@@ -320,12 +320,12 @@ void GraphCloner::UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unroll
 
     // All header-phi's outloop users are placed in the outer_bb after cloning the original loop
     // So it's enough to to iterate outer_bb's phis and repalce header-phi by its backedge input
-    auto outer_idx = 1U - unroll_data->backedge->GetSuccBlockIndex(unroll_data->header);
-    auto outer_bb = unroll_data->backedge->GetSuccessor(outer_idx);
-    for (auto outer_phi : outer_bb->PhiInsts()) {
-        auto header_phi = outer_phi->CastToPhi()->GetPhiInput(unroll_data->backedge);
-        if (header_phi->IsPhi() && header_phi->GetBasicBlock() == unroll_data->header) {
-            outer_phi->ReplaceInput(header_phi, header_phi->CastToPhi()->GetPhiInput(unroll_data->backedge));
+    auto outerIdx = 1U - unrollData->backedge->GetSuccBlockIndex(unrollData->header);
+    auto outerBb = unrollData->backedge->GetSuccessor(outerIdx);
+    for (auto outerPhi : outerBb->PhiInsts()) {
+        auto headerPhi = outerPhi->CastToPhi()->GetPhiInput(unrollData->backedge);
+        if (headerPhi->IsPhi() && headerPhi->GetBasicBlock() == unrollData->header) {
+            outerPhi->ReplaceInput(headerPhi, headerPhi->CastToPhi()->GetPhiInput(unrollData->backedge));
         }
     }
 }
@@ -385,44 +385,44 @@ void GraphCloner::UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unroll
  *                              v
  *                           [outer]-----> ...
  */
-void GraphCloner::BuildLoopUnrollControlFlow(LoopUnrollData *unroll_data)
+void GraphCloner::BuildLoopUnrollControlFlow(LoopUnrollData *unrollData)
 {
-    auto front_block = unroll_data->blocks->front();
-    auto loop = front_block->GetLoop();
+    auto frontBlock = unrollData->blocks->front();
+    auto loop = frontBlock->GetLoop();
 
     // Copy 'blocks' control-flow to the 'clones'
-    for (auto block : *unroll_data->blocks) {
+    for (auto block : *unrollData->blocks) {
         ASSERT(block->GetLoop() == loop);
         loop->AppendBlock(GetClone(block));
 
-        if (block != front_block) {
+        if (block != frontBlock) {
             CloneEdges<CloneEdgeType::EDGE_PRED>(block);
         }
-        if (block != unroll_data->exit_block) {
+        if (block != unrollData->exitBlock) {
             CloneEdges<CloneEdgeType::EDGE_SUCC>(block);
         }
     }
 
-    auto front_clone = GetClone(front_block);
-    auto exit_clone = GetClone(unroll_data->exit_block);
-    if (unroll_data->outer == nullptr) {
-        ASSERT(unroll_data->backedge->GetPredsBlocks().size() == 1);
-        auto last_block = unroll_data->backedge->GetPredsBlocks()[0];
-        last_block->ReplaceSucc(unroll_data->backedge, front_clone);
-        unroll_data->backedge->ReplacePred(last_block, exit_clone);
+    auto frontClone = GetClone(frontBlock);
+    auto exitClone = GetClone(unrollData->exitBlock);
+    if (unrollData->outer == nullptr) {
+        ASSERT(unrollData->backedge->GetPredsBlocks().size() == 1);
+        auto lastBlock = unrollData->backedge->GetPredsBlocks()[0];
+        lastBlock->ReplaceSucc(unrollData->backedge, frontClone);
+        unrollData->backedge->ReplacePred(lastBlock, exitClone);
     } else {
-        ASSERT(!unroll_data->outer->GetPredsBlocks().empty());
-        auto last_block = unroll_data->outer->GetPredsBlocks().back();
-        last_block->ReplaceSucc(unroll_data->header, front_clone);
-        unroll_data->header->ReplacePred(last_block, exit_clone);
+        ASSERT(!unrollData->outer->GetPredsBlocks().empty());
+        auto lastBlock = unrollData->outer->GetPredsBlocks().back();
+        lastBlock->ReplaceSucc(unrollData->header, frontClone);
+        unrollData->header->ReplacePred(lastBlock, exitClone);
 
-        exit_clone->AddSucc(unroll_data->outer);
-        if (exit_clone->GetSuccBlockIndex(unroll_data->outer) != last_block->GetSuccBlockIndex(unroll_data->outer)) {
-            exit_clone->SwapTrueFalseSuccessors();
+        exitClone->AddSucc(unrollData->outer);
+        if (exitClone->GetSuccBlockIndex(unrollData->outer) != lastBlock->GetSuccBlockIndex(unrollData->outer)) {
+            exitClone->SwapTrueFalseSuccessors();
         }
-        auto new_backedge = GetClone(unroll_data->exit_block);
-        loop->ReplaceBackEdge(unroll_data->backedge, new_backedge);
-        unroll_data->backedge = new_backedge;
+        auto newBackedge = GetClone(unrollData->exitBlock);
+        loop->ReplaceBackEdge(unrollData->backedge, newBackedge);
+        unrollData->backedge = newBackedge;
     }
 }
 
@@ -430,24 +430,24 @@ void GraphCloner::BuildLoopUnrollControlFlow(LoopUnrollData *unroll_data)
  * Construct dataflow for the cloned instructions
  * if input of the original instruction is front-block phi - insert replaceable input of this phi
  */
-void GraphCloner::BuildLoopUnrollDataFlow(LoopUnrollData *unroll_data)
+void GraphCloner::BuildLoopUnrollDataFlow(LoopUnrollData *unrollData)
 {
-    for (auto block : *unroll_data->blocks) {
+    for (auto block : *unrollData->blocks) {
         for (auto inst : block->AllInsts()) {
-            if (inst->IsMarked(clone_marker_)) {
-                SetCloneInputs<true>(inst, unroll_data->backedge);
+            if (inst->IsMarked(cloneMarker_)) {
+                SetCloneInputs<true>(inst, unrollData->backedge);
                 UpdateCaller(inst);
             }
         }
     }
 
     // Append input to the phi-resolver from outer block, it holds all instructions which have outside loop users
-    auto loop = unroll_data->blocks->front()->GetLoop();
-    if (unroll_data->outer != nullptr) {
-        for (auto phi : unroll_data->outer->PhiInsts()) {
+    auto loop = unrollData->blocks->front()->GetLoop();
+    if (unrollData->outer != nullptr) {
+        for (auto phi : unrollData->outer->PhiInsts()) {
             auto inst = phi->GetInput(0).GetInst();
             if (IsInstLoopHeaderPhi(inst, loop)) {
-                auto update = inst->CastToPhi()->GetPhiInput(unroll_data->backedge);
+                auto update = inst->CastToPhi()->GetPhiInput(unrollData->backedge);
                 phi->AppendInput(update);
             } else {
                 phi->AppendInput(GetClone(inst));
@@ -456,98 +456,98 @@ void GraphCloner::BuildLoopUnrollDataFlow(LoopUnrollData *unroll_data)
     }
 
     // NOTE (a.popov) use temp container after if would be possible to reset local allocator
-    if (unroll_data->phi_replaced_inputs == nullptr) {
-        unroll_data->phi_replaced_inputs = allocator_->New<PhiInputsMap>(allocator_->Adapter());
+    if (unrollData->phiReplacedInputs == nullptr) {
+        unrollData->phiReplacedInputs = allocator_->New<PhiInputsMap>(allocator_->Adapter());
     } else {
-        unroll_data->phi_replaced_inputs->clear();
+        unrollData->phiReplacedInputs->clear();
     }
 
     // Set new update inputs for header phis
-    size_t phi_count = 0;
+    size_t phiCount = 0;
     for (auto phi : loop->GetHeader()->PhiInsts()) {
-        auto input = unroll_data->phi_update_inputs->at(phi_count);
+        auto input = unrollData->phiUpdateInputs->at(phiCount);
         if (HasClone(input)) {
             input = GetClone(input);
         } else if (input->IsPhi() && input->GetBasicBlock()->GetLoop() == loop) {
             if (phi->IsDominate(input)) {
-                input = input->CastToPhi()->GetPhiInput(unroll_data->backedge);
+                input = input->CastToPhi()->GetPhiInput(unrollData->backedge);
             } else {
                 // phi should be visited and its input should be added to the map
-                ASSERT(unroll_data->phi_replaced_inputs->count(input) == 1);
-                input = unroll_data->phi_replaced_inputs->at(input);
+                ASSERT(unrollData->phiReplacedInputs->count(input) == 1);
+                input = unrollData->phiReplacedInputs->at(input);
             }
         }
 
-        auto phi_update_input_idx = phi->CastToPhi()->GetPredBlockIndex(unroll_data->backedge);
-        unroll_data->phi_replaced_inputs->emplace(phi, phi->GetInput(phi_update_input_idx).GetInst());
-        phi->SetInput(phi_update_input_idx, input);
-        phi_count++;
+        auto phiUpdateInputIdx = phi->CastToPhi()->GetPredBlockIndex(unrollData->backedge);
+        unrollData->phiReplacedInputs->emplace(phi, phi->GetInput(phiUpdateInputIdx).GetInst());
+        phi->SetInput(phiUpdateInputIdx, input);
+        phiCount++;
     }
 }
 
-void GraphCloner::RemoveLoopBackEdge(const LoopUnrollData *unroll_data)
+void GraphCloner::RemoveLoopBackEdge(const LoopUnrollData *unrollData)
 {
-    auto last_block = unroll_data->backedge;
-    ASSERT(unroll_data->outer == nullptr || last_block == unroll_data->outer->GetPredsBlocks().back());
+    auto lastBlock = unrollData->backedge;
+    ASSERT(unrollData->outer == nullptr || lastBlock == unrollData->outer->GetPredsBlocks().back());
 
     // Erase control-flow instruction
-    auto ifimm = last_block->GetLastInst();
+    auto ifimm = lastBlock->GetLastInst();
     ASSERT(ifimm->GetOpcode() == Opcode::IfImm);
-    last_block->RemoveInst(ifimm);
+    lastBlock->RemoveInst(ifimm);
     // Remove back-edge
-    auto header = unroll_data->header;
+    auto header = unrollData->header;
     // Clear header block, it should only contain phi
     ASSERT(header->GetFirstInst() == nullptr);
     for (auto phi : header->PhiInstsSafe()) {
-        auto remaining_inst = phi->CastToPhi()->GetPhiInput(header->GetLoop()->GetPreHeader());
-        phi->ReplaceUsers(remaining_inst);
+        auto remainingInst = phi->CastToPhi()->GetPhiInput(header->GetLoop()->GetPreHeader());
+        phi->ReplaceUsers(remainingInst);
         header->RemoveInst(phi);
     }
 
-    last_block->RemoveSucc(header);
-    header->RemovePred(last_block);
+    lastBlock->RemoveSucc(header);
+    header->RemovePred(lastBlock);
 
     // Clear outer phis if it has single predecessor
-    if (unroll_data->outer != nullptr && unroll_data->outer->GetPredsBlocks().size() == 1U) {
-        for (auto phi : unroll_data->outer->PhiInstsSafe()) {
-            auto remaining_inst = phi->GetInput(0).GetInst();
-            phi->ReplaceUsers(remaining_inst);
-            unroll_data->outer->RemoveInst(phi);
+    if (unrollData->outer != nullptr && unrollData->outer->GetPredsBlocks().size() == 1U) {
+        for (auto phi : unrollData->outer->PhiInstsSafe()) {
+            auto remainingInst = phi->GetInput(0).GetInst();
+            phi->ReplaceUsers(remainingInst);
+            unrollData->outer->RemoveInst(phi);
         }
     }
 }
 
-void GraphCloner::RemoveLoopPreHeader(const LoopUnrollData *unroll_data)
+void GraphCloner::RemoveLoopPreHeader(const LoopUnrollData *unrollData)
 {
-    ASSERT(unroll_data->header->GetPredsBlocks().size() == 1);
+    ASSERT(unrollData->header->GetPredsBlocks().size() == 1);
     // Loop::GetPreHeader may be invalid here
-    auto pre_header = unroll_data->header->GetPredBlockByIndex(0);
-    auto ifimm = pre_header->GetLastInst();
+    auto preHeader = unrollData->header->GetPredBlockByIndex(0);
+    auto ifimm = preHeader->GetLastInst();
     ASSERT(ifimm->GetOpcode() == Opcode::IfImm);
-    pre_header->RemoveInst(ifimm);
+    preHeader->RemoveInst(ifimm);
 
     // Loop header should be removed from backedge successors before call to this function
-    ASSERT(unroll_data->backedge->GetSuccsBlocks().size() == 1);
-    auto removed_succ = unroll_data->backedge->GetSuccessor(0);
+    ASSERT(unrollData->backedge->GetSuccsBlocks().size() == 1);
+    auto removedSucc = unrollData->backedge->GetSuccessor(0);
 
-    for (auto phi : removed_succ->PhiInstsSafe()) {
-        if (removed_succ->GetPredsBlocks().size() == 2) {
-            auto remaining_inst = phi->CastToPhi()->GetPhiInput(unroll_data->backedge);
-            phi->ReplaceUsers(remaining_inst);
-            removed_succ->RemoveInst(phi);
+    for (auto phi : removedSucc->PhiInstsSafe()) {
+        if (removedSucc->GetPredsBlocks().size() == 2) {
+            auto remainingInst = phi->CastToPhi()->GetPhiInput(unrollData->backedge);
+            phi->ReplaceUsers(remainingInst);
+            removedSucc->RemoveInst(phi);
         } else {
-            phi->RemoveInput(phi->CastToPhi()->GetPredBlockIndex(pre_header));
+            phi->RemoveInput(phi->CastToPhi()->GetPredBlockIndex(preHeader));
         }
     }
 
-    pre_header->RemoveSucc(removed_succ);
-    removed_succ->RemovePred(pre_header);
+    preHeader->RemoveSucc(removedSucc);
+    removedSucc->RemovePred(preHeader);
 }
 
 void GraphCloner::BuildClonedLoopHeaderDataFlow(const BasicBlock &block, BasicBlock *resolver, BasicBlock *clone)
 {
     for (auto inst : block.Insts()) {
-        if (inst->IsMarked(clone_marker_)) {
+        if (inst->IsMarked(cloneMarker_)) {
             SetCloneInputs<true>(inst, clone);
             UpdateUsersForClonedLoopHeader(inst, resolver);
             UpdateCaller(inst);
@@ -555,22 +555,22 @@ void GraphCloner::BuildClonedLoopHeaderDataFlow(const BasicBlock &block, BasicBl
     }
     for (auto phi : block.PhiInsts()) {
         ASSERT(phi->GetInputsCount() == 2U);
-        auto preloop_input = phi->CastToPhi()->GetPhiInput(clone);
+        auto preloopInput = phi->CastToPhi()->GetPhiInput(clone);
         // Create phi instruction in the `resolver` block with two inputs: current phi and phi's preloop_input
-        auto resolver_phi = GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
-        for (auto user_it = phi->GetUsers().begin(); user_it != phi->GetUsers().end();) {
-            auto user = user_it->GetInst();
-            auto input_index = user_it->GetIndex();
-            ++user_it;
+        auto resolverPhi = GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
+        for (auto userIt = phi->GetUsers().begin(); userIt != phi->GetUsers().end();) {
+            auto user = userIt->GetInst();
+            auto inputIndex = userIt->GetIndex();
+            ++userIt;
             ASSERT(user->GetBasicBlock() != nullptr);
             if (user->GetBasicBlock()->GetLoop() != block.GetLoop()) {
-                user->SetInput(input_index, resolver_phi);
+                user->SetInput(inputIndex, resolverPhi);
             }
         }
-        if (resolver_phi->HasUsers()) {
-            resolver_phi->AppendInput(phi);
-            resolver_phi->AppendInput(preloop_input);
-            resolver->AppendPhi(resolver_phi);
+        if (resolverPhi->HasUsers()) {
+            resolverPhi->AppendInput(phi);
+            resolverPhi->AppendInput(preloopInput);
+            resolver->AppendPhi(resolverPhi);
         }
     }
 }
@@ -602,45 +602,45 @@ void GraphCloner::BuildClonedLoopHeaderDataFlow(const BasicBlock &block, BasicBl
  *                            v
  *                          [outer]
  */
-BasicBlock *GraphCloner::CloneLoopHeader(BasicBlock *block, BasicBlock *outer, BasicBlock *replaceable_pred)
+BasicBlock *GraphCloner::CloneLoopHeader(BasicBlock *block, BasicBlock *outer, BasicBlock *replaceablePred)
 {
     ASSERT(GetGraph()->IsAnalysisValid<DominatorsTree>());
-    ASSERT(clone_marker_ == UNDEF_MARKER);
-    auto marker_holder = MarkerHolder(GetGraph());
-    clone_marker_ = marker_holder.GetMarker();
-    clone_instructions_.clear();
-    size_t inst_count = 0;
+    ASSERT(cloneMarker_ == UNDEF_MARKER);
+    auto markerHolder = MarkerHolder(GetGraph());
+    cloneMarker_ = markerHolder.GetMarker();
+    cloneInstructions_.clear();
+    size_t instCount = 0;
     // Build control-flow
     auto resolver = block->InsertNewBlockToSuccEdge(outer);
     outer->GetLoop()->AppendBlock(resolver);
     if (outer->GetLoop()->HasBackEdge(block)) {
         outer->GetLoop()->ReplaceBackEdge(block, resolver);
     }
-    auto clone_block = replaceable_pred->InsertNewBlockToSuccEdge(block);
-    ASSERT(block->GetLoop()->GetPreHeader() == replaceable_pred);
-    block->GetLoop()->SetPreHeader(clone_block);
-    replaceable_pred->GetLoop()->AppendBlock(clone_block);
-    clone_block->AddSucc(resolver);
+    auto cloneBlock = replaceablePred->InsertNewBlockToSuccEdge(block);
+    ASSERT(block->GetLoop()->GetPreHeader() == replaceablePred);
+    block->GetLoop()->SetPreHeader(cloneBlock);
+    replaceablePred->GetLoop()->AppendBlock(cloneBlock);
+    cloneBlock->AddSucc(resolver);
     // Check the order of true-false successors
-    if (clone_block->GetSuccBlockIndex(resolver) != block->GetSuccBlockIndex(resolver)) {
-        clone_block->SwapTrueFalseSuccessors();
+    if (cloneBlock->GetSuccBlockIndex(resolver) != block->GetSuccBlockIndex(resolver)) {
+        cloneBlock->SwapTrueFalseSuccessors();
     }
     // Fix Dominators info
-    auto &dom_tree = GetGraph()->GetAnalysis<DominatorsTree>();
-    dom_tree.SetValid(true);
-    ASSERT(block->GetDominator() == replaceable_pred);
-    replaceable_pred->RemoveDominatedBlock(block);
-    dom_tree.SetDomPair(clone_block, block);
-    dom_tree.SetDomPair(replaceable_pred, clone_block);
-    dom_tree.SetDomPair(clone_block, resolver);
+    auto &domTree = GetGraph()->GetAnalysis<DominatorsTree>();
+    domTree.SetValid(true);
+    ASSERT(block->GetDominator() == replaceablePred);
+    replaceablePred->RemoveDominatedBlock(block);
+    domTree.SetDomPair(cloneBlock, block);
+    domTree.SetDomPair(replaceablePred, cloneBlock);
+    domTree.SetDomPair(cloneBlock, resolver);
     if (outer->GetDominator() == block) {
         block->RemoveDominatedBlock(outer);
-        dom_tree.SetDomPair(resolver, outer);
+        domTree.SetDomPair(resolver, outer);
     }
-    CloneInstructions<InstCloneType::CLONE_INSTS, true>(block, clone_block, &inst_count);
-    BuildClonedLoopHeaderDataFlow(*block, resolver, clone_block);
-    clone_block->SetAllFields(block->GetAllFields());
-    return clone_block;
+    CloneInstructions<InstCloneType::CLONE_INSTS, true>(block, cloneBlock, &instCount);
+    BuildClonedLoopHeaderDataFlow(*block, resolver, cloneBlock);
+    cloneBlock->SetAllFields(block->GetAllFields());
+    return cloneBlock;
 }
 
 /**
@@ -651,58 +651,58 @@ BasicBlock *GraphCloner::CloneLoopHeader(BasicBlock *block, BasicBlock *outer, B
  * - `phi_in` is appended to the `inst` basic block
  * - `phi_in\phi_out` have `inst` and its clone as inputs
  */
-void GraphCloner::UpdateUsersForClonedLoopHeader(Inst *inst, BasicBlock *outer_block)
+void GraphCloner::UpdateUsersForClonedLoopHeader(Inst *inst, BasicBlock *outerBlock)
 {
     if (!inst->HasUsers()) {
         return;
     }
-    auto inst_block = inst->GetBasicBlock();
+    auto instBlock = inst->GetBasicBlock();
     auto clone = GetClone(inst);
-    auto clone_block = clone->GetBasicBlock();
-    ASSERT(clone_block != nullptr);
+    auto cloneBlock = clone->GetBasicBlock();
+    ASSERT(cloneBlock != nullptr);
     // phi for inside users
-    auto phi_in = GetGraph()->CreateInstPhi(inst->GetType(), inst->GetPc());
+    auto phiIn = GetGraph()->CreateInstPhi(inst->GetType(), inst->GetPc());
     // phi for outside users
-    auto phi_out = GetGraph()->CreateInstPhi(inst->GetType(), inst->GetPc());
-    auto user_it = inst->GetUsers().begin();
-    while (user_it != inst->GetUsers().end()) {
-        auto user = user_it->GetInst();
-        auto input_idx = user_it->GetIndex();
-        ++user_it;
+    auto phiOut = GetGraph()->CreateInstPhi(inst->GetType(), inst->GetPc());
+    auto userIt = inst->GetUsers().begin();
+    while (userIt != inst->GetUsers().end()) {
+        auto user = userIt->GetInst();
+        auto inputIdx = userIt->GetIndex();
+        ++userIt;
         ASSERT(user->GetBasicBlock() != nullptr);
-        if (user->GetBasicBlock()->GetLoop() == inst_block->GetLoop()) {
+        if (user->GetBasicBlock()->GetLoop() == instBlock->GetLoop()) {
             // user inside loop
             // skip users that will be moved to the loop-exit block
             if (user->GetBasicBlock()->IsLoopHeader() && !user->IsPhi()) {
                 continue;
             }
-            ASSERT(user->GetBasicBlock() != inst_block || user->IsPhi());
-            user->SetInput(input_idx, phi_in);
+            ASSERT(user->GetBasicBlock() != instBlock || user->IsPhi());
+            user->SetInput(inputIdx, phiIn);
         } else {
             // user outside loop
-            user->SetInput(input_idx, phi_out);
+            user->SetInput(inputIdx, phiOut);
         }
     }
 
-    if (phi_in->HasUsers()) {
-        auto clone_index {inst_block->GetPredBlockIndex(clone_block)};
-        phi_in->AppendInput(clone);
-        phi_in->AppendInput(inst);
-        phi_in->CastToPhi()->SetPhiInputBbNum(0, clone_index);
-        phi_in->CastToPhi()->SetPhiInputBbNum(1, 1 - clone_index);
+    if (phiIn->HasUsers()) {
+        auto cloneIndex {instBlock->GetPredBlockIndex(cloneBlock)};
+        phiIn->AppendInput(clone);
+        phiIn->AppendInput(inst);
+        phiIn->CastToPhi()->SetPhiInputBbNum(0, cloneIndex);
+        phiIn->CastToPhi()->SetPhiInputBbNum(1, 1 - cloneIndex);
 
-        auto first_phi = inst_block->GetFirstPhi();
-        if (first_phi == nullptr) {
-            inst_block->AppendPhi(phi_in);
+        auto firstPhi = instBlock->GetFirstPhi();
+        if (firstPhi == nullptr) {
+            instBlock->AppendPhi(phiIn);
         } else {
-            inst_block->InsertBefore(phi_in, first_phi);
+            instBlock->InsertBefore(phiIn, firstPhi);
         }
     }
 
-    if (phi_out->HasUsers()) {
-        phi_out->AppendInput(inst);
-        phi_out->AppendInput(clone);
-        outer_block->AppendPhi(phi_out);
+    if (phiOut->HasUsers()) {
+        phiOut->AppendInput(inst);
+        phiOut->AppendInput(clone);
+        outerBlock->AppendPhi(phiOut);
     }
 }
 
@@ -740,68 +740,68 @@ Loop *GraphCloner::CloneLoop(Loop *loop)
     ASSERT(loop != nullptr && !loop->IsRoot());
     ASSERT_PRINT(IsLoopSingleBackEdgeExitPoint(loop), "Cloning blocks doesn't have single entry/exit point");
     ASSERT(loop->GetPreHeader() != nullptr);
-    ASSERT(clone_marker_ == UNDEF_MARKER);
+    ASSERT(cloneMarker_ == UNDEF_MARKER);
 
-    auto marker_holder = MarkerHolder(GetGraph());
-    clone_marker_ = marker_holder.GetMarker();
-    auto unroll_data = PrepareLoopToClone(loop);
+    auto markerHolder = MarkerHolder(GetGraph());
+    cloneMarker_ = markerHolder.GetMarker();
+    auto unrollData = PrepareLoopToClone(loop);
 
-    CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, true>(*unroll_data->blocks, GetGraph());
-    BuildLoopCloneControlFlow(unroll_data);
-    BuildLoopCloneDataFlow(unroll_data);
-    MakeLoopCloneInfo(unroll_data);
+    CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, true>(*unrollData->blocks, GetGraph());
+    BuildLoopCloneControlFlow(unrollData);
+    BuildLoopCloneDataFlow(unrollData);
+    MakeLoopCloneInfo(unrollData);
     GetGraph()->RunPass<DominatorsTree>();
 
-    auto clone_loop = GetClone(loop->GetHeader())->GetLoop();
-    ASSERT(clone_loop != loop && clone_loop->GetOuterLoop() == loop->GetOuterLoop());
+    auto cloneLoop = GetClone(loop->GetHeader())->GetLoop();
+    ASSERT(cloneLoop != loop && cloneLoop->GetOuterLoop() == loop->GetOuterLoop());
     COMPILER_LOG(DEBUG, GRAPH_CLONER) << "Loop " << loop->GetId() << " is copied";
-    COMPILER_LOG(DEBUG, GRAPH_CLONER) << "Created new loop, id = " << clone_loop->GetId();
-    return clone_loop;
+    COMPILER_LOG(DEBUG, GRAPH_CLONER) << "Created new loop, id = " << cloneLoop->GetId();
+    return cloneLoop;
 }
 
-BasicBlock *GraphCloner::CreateNewOutsideSucc(BasicBlock *outside_succ, BasicBlock *back_edge, BasicBlock *pre_header)
+BasicBlock *GraphCloner::CreateNewOutsideSucc(BasicBlock *outsideSucc, BasicBlock *backEdge, BasicBlock *preHeader)
 {
-    auto back_edge_idx = outside_succ->GetPredBlockIndex(back_edge);
-    auto pre_header_idx = outside_succ->GetPredBlockIndex(pre_header);
-    auto rm_idx_max = std::max(back_edge_idx, pre_header_idx);
-    auto rm_idx_min = std::min(back_edge_idx, pre_header_idx);
-    auto new_outside_succ = GetGraph()->CreateEmptyBlock();
-    outside_succ->GetLoop()->AppendBlock(new_outside_succ);
-    back_edge->ReplaceSucc(outside_succ, new_outside_succ);
-    pre_header->ReplaceSucc(outside_succ, new_outside_succ);
-    new_outside_succ->AddSucc(outside_succ);
-    for (auto phi : outside_succ->PhiInsts()) {
-        auto new_phi = GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
-        new_phi->AppendInput(phi->CastToPhi()->GetPhiInput(back_edge));
-        new_phi->AppendInput(phi->CastToPhi()->GetPhiInput(pre_header));
-        phi->AppendInput(new_phi);
-        auto phi_back_edge_idx {phi->CastToPhi()->GetPredBlockIndex(back_edge)};
-        auto phi_pre_header_idx {phi->CastToPhi()->GetPredBlockIndex(pre_header)};
-        phi->RemoveInput(rm_idx_max == back_edge_idx ? phi_back_edge_idx : phi_pre_header_idx);
-        phi->RemoveInput(rm_idx_min == pre_header_idx ? phi_pre_header_idx : phi_back_edge_idx);
-        new_outside_succ->AppendPhi(new_phi);
+    auto backEdgeIdx = outsideSucc->GetPredBlockIndex(backEdge);
+    auto preHeaderIdx = outsideSucc->GetPredBlockIndex(preHeader);
+    auto rmIdxMax = std::max(backEdgeIdx, preHeaderIdx);
+    auto rmIdxMin = std::min(backEdgeIdx, preHeaderIdx);
+    auto newOutsideSucc = GetGraph()->CreateEmptyBlock();
+    outsideSucc->GetLoop()->AppendBlock(newOutsideSucc);
+    backEdge->ReplaceSucc(outsideSucc, newOutsideSucc);
+    preHeader->ReplaceSucc(outsideSucc, newOutsideSucc);
+    newOutsideSucc->AddSucc(outsideSucc);
+    for (auto phi : outsideSucc->PhiInsts()) {
+        auto newPhi = GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
+        newPhi->AppendInput(phi->CastToPhi()->GetPhiInput(backEdge));
+        newPhi->AppendInput(phi->CastToPhi()->GetPhiInput(preHeader));
+        phi->AppendInput(newPhi);
+        auto phiBackEdgeIdx {phi->CastToPhi()->GetPredBlockIndex(backEdge)};
+        auto phiPreHeaderIdx {phi->CastToPhi()->GetPredBlockIndex(preHeader)};
+        phi->RemoveInput(rmIdxMax == backEdgeIdx ? phiBackEdgeIdx : phiPreHeaderIdx);
+        phi->RemoveInput(rmIdxMin == preHeaderIdx ? phiPreHeaderIdx : phiBackEdgeIdx);
+        newOutsideSucc->AppendPhi(newPhi);
     }
-    outside_succ->RemovePred(rm_idx_max);
-    outside_succ->RemovePred(rm_idx_min);
+    outsideSucc->RemovePred(rmIdxMax);
+    outsideSucc->RemovePred(rmIdxMin);
 
-    COMPILER_LOG(DEBUG, GRAPH_CLONER) << "New loop outside block created: " << new_outside_succ->GetId();
-    return new_outside_succ;
+    COMPILER_LOG(DEBUG, GRAPH_CLONER) << "New loop outside block created: " << newOutsideSucc->GetId();
+    return newOutsideSucc;
 }
 
-GraphCloner::LoopClonerData *GraphCloner::PopulateLoopClonerData(Loop *loop, BasicBlock *pre_header,
-                                                                 BasicBlock *outside_succ)
+GraphCloner::LoopClonerData *GraphCloner::PopulateLoopClonerData(Loop *loop, BasicBlock *preHeader,
+                                                                 BasicBlock *outsideSucc)
 {
     auto allocator = GetGraph()->GetLocalAllocator();
-    auto unroll_data = allocator->New<LoopClonerData>();
-    unroll_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
-    unroll_data->blocks->resize(loop->GetBlocks().size() + 1);
-    unroll_data->blocks->at(0) = pre_header;
-    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unroll_data->blocks->begin() + 1);
-    unroll_data->blocks->push_back(outside_succ);
-    unroll_data->outer = outside_succ;
-    unroll_data->header = loop->GetHeader();
-    unroll_data->pre_header = loop->GetPreHeader();
-    return unroll_data;
+    auto unrollData = allocator->New<LoopClonerData>();
+    unrollData->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+    unrollData->blocks->resize(loop->GetBlocks().size() + 1);
+    unrollData->blocks->at(0) = preHeader;
+    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unrollData->blocks->begin() + 1);
+    unrollData->blocks->push_back(outsideSucc);
+    unrollData->outer = outsideSucc;
+    unrollData->header = loop->GetHeader();
+    unrollData->preHeader = loop->GetPreHeader();
+    return unrollData;
 }
 
 /**
@@ -812,185 +812,185 @@ GraphCloner::LoopClonerData *GraphCloner::PopulateLoopClonerData(Loop *loop, Bas
 GraphCloner::LoopClonerData *GraphCloner::PrepareLoopToClone(Loop *loop)
 {
     ASSERT(loop != nullptr);
-    auto pre_header = loop->GetPreHeader();
-    auto ifimm = pre_header->GetLastInst();
+    auto preHeader = loop->GetPreHeader();
+    auto ifimm = preHeader->GetLastInst();
     ASSERT(ifimm != nullptr && ifimm->GetOpcode() == Opcode::IfImm);
     auto compare = ifimm->GetInput(0).GetInst();
     ASSERT(compare->GetOpcode() == Opcode::Compare);
     if (ifimm->GetPrev() != compare || !compare->HasSingleUser()) {
-        auto new_cmp = compare->Clone(compare->GetBasicBlock()->GetGraph());
-        new_cmp->SetInput(0, compare->GetInput(0).GetInst());
-        new_cmp->SetInput(1, compare->GetInput(1).GetInst());
-        ifimm->InsertBefore(new_cmp);
-        ifimm->SetInput(0, new_cmp);
-        compare = new_cmp;
+        auto newCmp = compare->Clone(compare->GetBasicBlock()->GetGraph());
+        newCmp->SetInput(0, compare->GetInput(0).GetInst());
+        newCmp->SetInput(1, compare->GetInput(1).GetInst());
+        ifimm->InsertBefore(newCmp);
+        ifimm->SetInput(0, newCmp);
+        compare = newCmp;
     }
     if (compare->GetPrev() != nullptr) {
-        auto new_pre_header = pre_header->SplitBlockAfterInstruction(compare->GetPrev(), true);
-        loop->SetPreHeader(new_pre_header);
-        pre_header = new_pre_header;
+        auto newPreHeader = preHeader->SplitBlockAfterInstruction(compare->GetPrev(), true);
+        loop->SetPreHeader(newPreHeader);
+        preHeader = newPreHeader;
     }
     [[maybe_unused]] static constexpr auto PRE_HEADER_INST_COUNT = 2;
-    ASSERT(std::distance(pre_header->AllInsts().begin(), pre_header->AllInsts().end()) == PRE_HEADER_INST_COUNT);
+    ASSERT(std::distance(preHeader->AllInsts().begin(), preHeader->AllInsts().end()) == PRE_HEADER_INST_COUNT);
     // If `outside_succ` has more than 2 predecessors, create a new one
     // with loop header and back-edge predecessors only and insert it before `outside_succ`
-    auto outside_succ = GetLoopOutsideSuccessor(loop);
+    auto outsideSucc = GetLoopOutsideSuccessor(loop);
     constexpr auto PREDS_NUM = 2;
-    if (outside_succ->GetPredsBlocks().size() > PREDS_NUM) {
-        auto back_edge = loop->GetBackEdges()[0];
-        outside_succ = CreateNewOutsideSucc(outside_succ, back_edge, pre_header);
+    if (outsideSucc->GetPredsBlocks().size() > PREDS_NUM) {
+        auto backEdge = loop->GetBackEdges()[0];
+        outsideSucc = CreateNewOutsideSucc(outsideSucc, backEdge, preHeader);
     }
     // Split outside succ after last phi
     // create empty block before outside succ if outside succ don't contain phi insts
-    if (outside_succ->HasPhi() && outside_succ->GetFirstInst() != nullptr) {
-        auto last_phi = outside_succ->GetFirstInst()->GetPrev();
-        auto block = outside_succ->SplitBlockAfterInstruction(last_phi, true);
+    if (outsideSucc->HasPhi() && outsideSucc->GetFirstInst() != nullptr) {
+        auto lastPhi = outsideSucc->GetFirstInst()->GetPrev();
+        auto block = outsideSucc->SplitBlockAfterInstruction(lastPhi, true);
         // if `outside_succ` is pre-header replace it by `block`
-        for (auto in_loop : loop->GetOuterLoop()->GetInnerLoops()) {
-            if (in_loop->GetPreHeader() == outside_succ) {
-                in_loop->SetPreHeader(block);
+        for (auto inLoop : loop->GetOuterLoop()->GetInnerLoops()) {
+            if (inLoop->GetPreHeader() == outsideSucc) {
+                inLoop->SetPreHeader(block);
             }
         }
-    } else if (outside_succ->GetFirstInst() != nullptr) {
-        auto block = outside_succ->InsertEmptyBlockBefore();
-        outside_succ->GetLoop()->AppendBlock(block);
-        outside_succ = block;
+    } else if (outsideSucc->GetFirstInst() != nullptr) {
+        auto block = outsideSucc->InsertEmptyBlockBefore();
+        outsideSucc->GetLoop()->AppendBlock(block);
+        outsideSucc = block;
     }
     // Populate `LoopClonerData`
-    return PopulateLoopClonerData(loop, pre_header, outside_succ);
+    return PopulateLoopClonerData(loop, preHeader, outsideSucc);
 }
 
 /// Create new loop, populate it with cloned blocks and build conrlow-flow
-void GraphCloner::BuildLoopCloneControlFlow(LoopClonerData *unroll_data)
+void GraphCloner::BuildLoopCloneControlFlow(LoopClonerData *unrollData)
 {
-    ASSERT(unroll_data != nullptr);
-    auto outer_clone = GetClone(unroll_data->outer);
-    auto pre_header_clone = GetClone(unroll_data->pre_header);
+    ASSERT(unrollData != nullptr);
+    auto outerClone = GetClone(unrollData->outer);
+    auto preHeaderClone = GetClone(unrollData->preHeader);
 
-    while (!unroll_data->outer->GetSuccsBlocks().empty()) {
-        auto succ = unroll_data->outer->GetSuccsBlocks().front();
-        succ->ReplacePred(unroll_data->outer, outer_clone);
-        unroll_data->outer->RemoveSucc(succ);
+    while (!unrollData->outer->GetSuccsBlocks().empty()) {
+        auto succ = unrollData->outer->GetSuccsBlocks().front();
+        succ->ReplacePred(unrollData->outer, outerClone);
+        unrollData->outer->RemoveSucc(succ);
     }
-    unroll_data->outer->AddSucc(pre_header_clone);
+    unrollData->outer->AddSucc(preHeaderClone);
 
-    for (auto &block : *unroll_data->blocks) {
-        if (block != unroll_data->pre_header) {
+    for (auto &block : *unrollData->blocks) {
+        if (block != unrollData->preHeader) {
             CloneEdges<CloneEdgeType::EDGE_PRED>(block);
         }
-        if (block != unroll_data->outer) {
+        if (block != unrollData->outer) {
             CloneEdges<CloneEdgeType::EDGE_SUCC>(block);
         }
     }
-    ASSERT(unroll_data->outer->GetPredBlockIndex(unroll_data->pre_header) ==
-           outer_clone->GetPredBlockIndex(pre_header_clone));
-    ASSERT(unroll_data->header->GetPredBlockIndex(unroll_data->pre_header) ==
-           GetClone(unroll_data->header)->GetPredBlockIndex(pre_header_clone));
+    ASSERT(unrollData->outer->GetPredBlockIndex(unrollData->preHeader) ==
+           outerClone->GetPredBlockIndex(preHeaderClone));
+    ASSERT(unrollData->header->GetPredBlockIndex(unrollData->preHeader) ==
+           GetClone(unrollData->header)->GetPredBlockIndex(preHeaderClone));
 }
 
 /// Insert cloned loop into loop-tree and populated with cloned blocks
-void GraphCloner::MakeLoopCloneInfo(LoopClonerData *unroll_data)
+void GraphCloner::MakeLoopCloneInfo(LoopClonerData *unrollData)
 {
-    ASSERT(unroll_data != nullptr);
+    ASSERT(unrollData != nullptr);
     // Update loop tree
-    auto loop = unroll_data->header->GetLoop();
-    auto header_clone = GetClone(loop->GetHeader());
-    auto clone_loop = GetGraph()->GetAnalysis<LoopAnalyzer>().CreateNewLoop(header_clone);
-    auto outer_loop = loop->GetOuterLoop();
-    outer_loop->AppendInnerLoop(clone_loop);
-    clone_loop->SetOuterLoop(outer_loop);
+    auto loop = unrollData->header->GetLoop();
+    auto headerClone = GetClone(loop->GetHeader());
+    auto cloneLoop = GetGraph()->GetAnalysis<LoopAnalyzer>().CreateNewLoop(headerClone);
+    auto outerLoop = loop->GetOuterLoop();
+    outerLoop->AppendInnerLoop(cloneLoop);
+    cloneLoop->SetOuterLoop(outerLoop);
 
     // Populate cloned loop
-    auto pre_loop_clone = GetClone(unroll_data->pre_header);
-    auto outside_succ_clone = GetClone(unroll_data->outer);
-    clone_loop->SetPreHeader(pre_loop_clone);
-    outer_loop->AppendBlock(pre_loop_clone);
-    outer_loop->AppendBlock(outside_succ_clone);
+    auto preLoopClone = GetClone(unrollData->preHeader);
+    auto outsideSuccClone = GetClone(unrollData->outer);
+    cloneLoop->SetPreHeader(preLoopClone);
+    outerLoop->AppendBlock(preLoopClone);
+    outerLoop->AppendBlock(outsideSuccClone);
     for (auto &block : loop->GetBlocks()) {
         if (!block->IsLoopHeader()) {
-            clone_loop->AppendBlock(GetClone(block));
+            cloneLoop->AppendBlock(GetClone(block));
         }
     }
-    for (auto back_edge : loop->GetBackEdges()) {
-        clone_loop->AppendBackEdge(GetClone(back_edge));
+    for (auto backEdge : loop->GetBackEdges()) {
+        cloneLoop->AppendBackEdge(GetClone(backEdge));
     }
 }
 
 /// Find or create phi in the outside_succ block with the same inputs as `check_phi`
-Inst *GetPhiResolver(Inst *check_phi, BasicBlock *outside_succ, BasicBlock *pre_header)
+Inst *GetPhiResolver(Inst *checkPhi, BasicBlock *outsideSucc, BasicBlock *preHeader)
 {
     [[maybe_unused]] constexpr auto MAX_PREDS_NUM = 2;
-    ASSERT(outside_succ->GetPredsBlocks().size() == MAX_PREDS_NUM);
-    ASSERT(check_phi->GetBasicBlock()->IsLoopHeader());
-    auto init_idx = check_phi->CastToPhi()->GetPredBlockIndex(pre_header);
-    auto init_input = check_phi->GetInput(init_idx).GetInst();
-    auto update_input = check_phi->GetInput(1 - init_idx).GetInst();
+    ASSERT(outsideSucc->GetPredsBlocks().size() == MAX_PREDS_NUM);
+    ASSERT(checkPhi->GetBasicBlock()->IsLoopHeader());
+    auto initIdx = checkPhi->CastToPhi()->GetPredBlockIndex(preHeader);
+    auto initInput = checkPhi->GetInput(initIdx).GetInst();
+    auto updateInput = checkPhi->GetInput(1 - initIdx).GetInst();
 
-    for (auto phi : outside_succ->PhiInsts()) {
-        auto idx {phi->CastToPhi()->GetPredBlockIndex(pre_header)};
-        if (phi->GetInput(idx).GetInst() == init_input && phi->GetInput(1 - idx).GetInst() == update_input) {
+    for (auto phi : outsideSucc->PhiInsts()) {
+        auto idx {phi->CastToPhi()->GetPredBlockIndex(preHeader)};
+        if (phi->GetInput(idx).GetInst() == initInput && phi->GetInput(1 - idx).GetInst() == updateInput) {
             return phi;
         }
     }
 
-    auto phi_resolver = outside_succ->GetGraph()->CreateInstPhi(check_phi->GetType(), check_phi->GetPc());
-    auto out_init_idx = outside_succ->GetPredBlockIndex(pre_header);
-    phi_resolver->AppendInput(init_input);
-    phi_resolver->AppendInput(update_input);
-    phi_resolver->SetPhiInputBbNum(0, out_init_idx);
-    phi_resolver->SetPhiInputBbNum(1, 1 - out_init_idx);
+    auto phiResolver = outsideSucc->GetGraph()->CreateInstPhi(checkPhi->GetType(), checkPhi->GetPc());
+    auto outInitIdx = outsideSucc->GetPredBlockIndex(preHeader);
+    phiResolver->AppendInput(initInput);
+    phiResolver->AppendInput(updateInput);
+    phiResolver->SetPhiInputBbNum(0, outInitIdx);
+    phiResolver->SetPhiInputBbNum(1, 1 - outInitIdx);
 
-    outside_succ->AppendPhi(phi_resolver);
-    return phi_resolver;
+    outsideSucc->AppendPhi(phiResolver);
+    return phiResolver;
 }
 
 /// Build data-flow for cloned instructions
-void GraphCloner::BuildLoopCloneDataFlow(LoopClonerData *unroll_data)
+void GraphCloner::BuildLoopCloneDataFlow(LoopClonerData *unrollData)
 {
-    ASSERT(unroll_data != nullptr);
-    for (const auto &block : *unroll_data->blocks) {
+    ASSERT(unrollData != nullptr);
+    for (const auto &block : *unrollData->blocks) {
         for (const auto &inst : block->AllInsts()) {
             if (inst->GetOpcode() == Opcode::NOP) {
                 continue;
             }
-            if (inst->IsMarked(clone_marker_)) {
+            if (inst->IsMarked(cloneMarker_)) {
                 SetCloneInputs<false>(inst);
                 UpdateCaller(inst);
             }
         }
     }
 
-    auto pre_loop_clone = GetClone(unroll_data->pre_header);
-    for (auto phi : unroll_data->outer->PhiInsts()) {
-        auto phi_clone = GetClone(phi);
-        phi->ReplaceUsers(phi_clone);
-        auto idx = phi_clone->CastToPhi()->GetPredBlockIndex(pre_loop_clone);
-        phi_clone->SetInput(idx, phi);
+    auto preLoopClone = GetClone(unrollData->preHeader);
+    for (auto phi : unrollData->outer->PhiInsts()) {
+        auto phiClone = GetClone(phi);
+        phi->ReplaceUsers(phiClone);
+        auto idx = phiClone->CastToPhi()->GetPredBlockIndex(preLoopClone);
+        phiClone->SetInput(idx, phi);
     }
 
-    auto compare = pre_loop_clone->GetFirstInst();
-    auto exit_block = unroll_data->outer->GetPredBlockByIndex(0);
-    if (exit_block == unroll_data->pre_header) {
-        exit_block = unroll_data->outer->GetPredBlockByIndex(1);
+    auto compare = preLoopClone->GetFirstInst();
+    auto exitBlock = unrollData->outer->GetPredBlockByIndex(0);
+    if (exitBlock == unrollData->preHeader) {
+        exitBlock = unrollData->outer->GetPredBlockByIndex(1);
     } else {
-        ASSERT(unroll_data->outer->GetPredBlockByIndex(1) == unroll_data->pre_header);
+        ASSERT(unrollData->outer->GetPredBlockByIndex(1) == unrollData->preHeader);
     }
-    auto back_edge_compare = exit_block->GetLastInst()->GetInput(0).GetInst();
+    auto backEdgeCompare = exitBlock->GetLastInst()->GetInput(0).GetInst();
     ASSERT(compare->GetOpcode() == Opcode::Compare);
-    ASSERT(back_edge_compare->GetOpcode() == Opcode::Compare);
-    for (auto phi : unroll_data->header->PhiInsts()) {
-        auto init_idx = phi->CastToPhi()->GetPredBlockIndex(unroll_data->pre_header);
-        ASSERT(GetClone(phi)->CastToPhi()->GetPredBlockIndex(pre_loop_clone) == init_idx);
+    ASSERT(backEdgeCompare->GetOpcode() == Opcode::Compare);
+    for (auto phi : unrollData->header->PhiInsts()) {
+        auto initIdx = phi->CastToPhi()->GetPredBlockIndex(unrollData->preHeader);
+        ASSERT(GetClone(phi)->CastToPhi()->GetPredBlockIndex(preLoopClone) == initIdx);
 
-        auto init = phi->GetInput(init_idx).GetInst();
-        auto update = phi->GetInput(1 - init_idx).GetInst();
-        auto resolver_phi = GetPhiResolver(phi, unroll_data->outer, unroll_data->pre_header);
-        auto clone_phi = GetClone(phi);
-        ASSERT(clone_phi->GetInput(init_idx).GetInst() == init);
-        clone_phi->SetInput(init_idx, resolver_phi);
+        auto init = phi->GetInput(initIdx).GetInst();
+        auto update = phi->GetInput(1 - initIdx).GetInst();
+        auto resolverPhi = GetPhiResolver(phi, unrollData->outer, unrollData->preHeader);
+        auto clonePhi = GetClone(phi);
+        ASSERT(clonePhi->GetInput(initIdx).GetInst() == init);
+        clonePhi->SetInput(initIdx, resolverPhi);
         for (size_t i = 0; i < compare->GetInputsCount(); i++) {
-            if (compare->GetInput(i).GetInst() == init && back_edge_compare->GetInput(i).GetInst() == update) {
-                compare->SetInput(i, resolver_phi);
+            if (compare->GetInput(i).GetInst() == init && backEdgeCompare->GetInput(i).GetInst() == update) {
+                compare->SetInput(i, resolverPhi);
                 break;
             }
         }
@@ -1002,22 +1002,22 @@ void GraphCloner::UpdateCaller(Inst *inst)
     if (inst->IsSaveState()) {
         auto caller = static_cast<SaveStateInst *>(inst)->GetCallerInst();
         if (caller != nullptr && caller->IsInlined() && HasClone(caller)) {
-            auto ss_clone = GetClone(inst);
-            auto caller_clone = GetClone(caller);
-            static_cast<SaveStateInst *>(ss_clone)->SetCallerInst(static_cast<CallInst *>(caller_clone));
+            auto ssClone = GetClone(inst);
+            auto callerClone = GetClone(caller);
+            static_cast<SaveStateInst *>(ssClone)->SetCallerInst(static_cast<CallInst *>(callerClone));
         }
     }
 }
 
-bool GraphCloner::IsLoopClonable(Loop *loop, size_t inst_limit)
+bool GraphCloner::IsLoopClonable(Loop *loop, size_t instLimit)
 {
     // NOTE(schernykh) : implement case when we have inner loops
     if (!loop->GetOuterLoop()->IsRoot() || !loop->GetInnerLoops().empty() || !IsLoopSingleBackEdgeExitPoint(loop)) {
         return false;
     }
 
-    auto pre_header = loop->GetPreHeader();
-    auto ifimm = pre_header->GetLastInst();
+    auto preHeader = loop->GetPreHeader();
+    auto ifimm = preHeader->GetLastInst();
     ASSERT(ifimm->GetOpcode() == Opcode::IfImm);
     auto compare = ifimm->GetInput(0).GetInst();
     ASSERT(compare->GetOpcode() == Opcode::Compare);
@@ -1028,16 +1028,16 @@ bool GraphCloner::IsLoopClonable(Loop *loop, size_t inst_limit)
 
     // Count instructions for copy
     // in pre header copied compare + ifimm inst
-    uint32_t inst_count = 1;
+    uint32_t instCount = 1;
     for (const auto &block : loop->GetBlocks()) {
-        inst_count += std::distance(block->AllInsts().begin(), block->AllInsts().end());
-        if (inst_count > inst_limit) {
+        instCount += std::distance(block->AllInsts().begin(), block->AllInsts().end());
+        if (instCount > instLimit) {
             return false;
         }
     }
     for ([[maybe_unused]] auto phi : GetLoopOutsideSuccessor(loop)->PhiInsts()) {
-        inst_count++;
+        instCount++;
     }
-    return (inst_count <= inst_limit);
+    return (instCount <= instLimit);
 }
 }  // namespace panda::compiler

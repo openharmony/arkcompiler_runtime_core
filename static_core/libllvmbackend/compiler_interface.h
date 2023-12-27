@@ -53,7 +53,7 @@ struct IrtocCompilerInterface : public CompilerInterface {
     ~IrtocCompilerInterface() override = default;
 
     virtual void WriteObjectFile(std::string_view output) = 0;
-    virtual CompiledCode GetCompiledCode(std::string_view function_name) = 0;
+    virtual CompiledCode GetCompiledCode(std::string_view functionName) = 0;
     virtual size_t GetObjectFileSize() = 0;
     virtual bool IsEmpty() = 0;
 

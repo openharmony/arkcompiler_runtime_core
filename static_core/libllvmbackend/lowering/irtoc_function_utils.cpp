@@ -44,12 +44,12 @@ constexpr std::array PTR_IGN_IRTOC_FUNC = {"ResolveStringByIdEntrypoint"sv,
                                            "InitializeFrame"sv};
 
 namespace panda::llvmbackend::irtoc_function_utils {
-bool IsNoAliasIrtocFunction(const std::string &external_name)
+bool IsNoAliasIrtocFunction(const std::string &externalName)
 {
-    return std::find(NOALIAS_IRTOC_FUNC.begin(), NOALIAS_IRTOC_FUNC.end(), external_name) != NOALIAS_IRTOC_FUNC.end();
+    return std::find(NOALIAS_IRTOC_FUNC.begin(), NOALIAS_IRTOC_FUNC.end(), externalName) != NOALIAS_IRTOC_FUNC.end();
 }
-bool IsPtrIgnIrtocFunction(const std::string &external_name)
+bool IsPtrIgnIrtocFunction(const std::string &externalName)
 {
-    return std::find(PTR_IGN_IRTOC_FUNC.begin(), PTR_IGN_IRTOC_FUNC.end(), external_name) != PTR_IGN_IRTOC_FUNC.end();
+    return std::find(PTR_IGN_IRTOC_FUNC.begin(), PTR_IGN_IRTOC_FUNC.end(), externalName) != PTR_IGN_IRTOC_FUNC.end();
 }
 }  // namespace panda::llvmbackend::irtoc_function_utils

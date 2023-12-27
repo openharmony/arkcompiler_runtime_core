@@ -62,8 +62,8 @@ TEST_F(IfMergingTest, SameIfs)
         ASSERT_TRUE(graph->RunPass<IfMerging>());
         ASSERT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_expected = CreateEmptyGraph();
-        GRAPH(graph_expected)
+        auto graphExpected = CreateEmptyGraph();
+        GRAPH(graphExpected)
         {
             PARAMETER(0U, 0U).u64();
             CONSTANT(1U, 0U);
@@ -87,7 +87,7 @@ TEST_F(IfMergingTest, SameIfs)
                 INST(11U, Opcode::Return).u64().Inputs(10U);
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
     }
 }
 
@@ -302,8 +302,8 @@ TEST_F(IfMergingTest, SameIfsLoopBackEdge)
         ASSERT_TRUE(graph->RunPass<IfMerging>());
         ASSERT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_expected = CreateEmptyGraph();
-        GRAPH(graph_expected)
+        auto graphExpected = CreateEmptyGraph();
+        GRAPH(graphExpected)
         {
             PARAMETER(0U, 0U).u64();
             CONSTANT(1U, 0U);
@@ -320,7 +320,7 @@ TEST_F(IfMergingTest, SameIfsLoopBackEdge)
                 INST(9U, Opcode::Return).u64().Inputs(inverse ? 0U : 1U);
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
     }
 }
 
@@ -1124,8 +1124,8 @@ TEST_F(IfMergingTest, ConstantPhiLoopBackEdge)
         ASSERT_TRUE(graph->RunPass<IfMerging>());
         ASSERT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_expected = CreateEmptyGraph();
-        GRAPH(graph_expected)
+        auto graphExpected = CreateEmptyGraph();
+        GRAPH(graphExpected)
         {
             PARAMETER(0U, 0U).u64();
             CONSTANT(1U, 0U);
@@ -1145,7 +1145,7 @@ TEST_F(IfMergingTest, ConstantPhiLoopBackEdge)
                 INST(11U, Opcode::Return).u64().Inputs(inverse ? 1U : 2U);
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
     }
 }
 
@@ -1354,15 +1354,15 @@ TEST_F(IfMergingTest, ConstantPhiRemoveEmptyLoop)
         ASSERT_TRUE(graph->RunPass<IfMerging>());
         ASSERT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_expected = CreateEmptyGraph();
-        GRAPH(graph_expected)
+        auto graphExpected = CreateEmptyGraph();
+        GRAPH(graphExpected)
         {
             BASIC_BLOCK(2U, -1L)
             {
                 INST(7U, Opcode::ReturnVoid).v0id();
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
     }
 }
 

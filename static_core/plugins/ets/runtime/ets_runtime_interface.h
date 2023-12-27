@@ -34,17 +34,17 @@ public:
         return panda::cross_values::GetEtsCoroutineUndefinedObjectOffset(arch);
     }
     uint64_t GetUndefinedObject() const override;
-    InteropCallKind GetInteropCallKind(MethodPtr method_ptr) const override;
-    char *GetFuncPropName(MethodPtr method_ptr, uint32_t str_id) const override;
-    uint64_t GetFuncPropNameOffset(MethodPtr method_ptr, uint32_t str_id) const override;
+    InteropCallKind GetInteropCallKind(MethodPtr methodPtr) const override;
+    char *GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const override;
+    uint64_t GetFuncPropNameOffset(MethodPtr methodPtr, uint32_t strId) const override;
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override;
     bool IsMethodStringBuilderToString(MethodPtr method) const override;
 
-    FieldPtr ResolveLookUpField(FieldPtr raw_field, ClassPtr klass) override;
-    MethodPtr ResolveLookUpCall(FieldPtr raw_field, ClassPtr klass, bool is_setter) override;
+    FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
+    MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;
 
     template <panda_file::Type::TypeId FIELD_TYPE>
-    compiler::RuntimeInterface::MethodPtr GetLookUpCall(FieldPtr raw_field, ClassPtr klass, bool is_setter);
+    compiler::RuntimeInterface::MethodPtr GetLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter);
 
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/runtime/interop_js/ets_interop_runtime_interface-inl.h"

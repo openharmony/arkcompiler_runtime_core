@@ -39,18 +39,18 @@ static AllocTracker *CreateAllocTracker()
 #endif  // TRACK_INTERNAL_ALLOCATIONS
 
 template <InternalAllocatorConfig CONFIG>
-Allocator *InternalAllocator<CONFIG>::allocator_from_runtime_ = nullptr;
+Allocator *InternalAllocator<CONFIG>::allocatorFromRuntime_ = nullptr;
 
 template <InternalAllocatorConfig CONFIG>
-InternalAllocator<CONFIG>::InternalAllocator(MemStatsType *mem_stats)
+InternalAllocator<CONFIG>::InternalAllocator(MemStatsType *memStats)
 {
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (CONFIG == InternalAllocatorConfig::PANDA_ALLOCATORS) {
-        runslots_allocator_ = new RunSlotsAllocatorT(mem_stats, SpaceType::SPACE_TYPE_INTERNAL);
-        freelist_allocator_ = new FreeListAllocatorT(mem_stats, SpaceType::SPACE_TYPE_INTERNAL);
-        humongous_allocator_ = new HumongousObjAllocatorT(mem_stats, SpaceType::SPACE_TYPE_INTERNAL);
+        runslotsAllocator_ = new RunSlotsAllocatorT(memStats, SpaceType::SPACE_TYPE_INTERNAL);
+        freelistAllocator_ = new FreeListAllocatorT(memStats, SpaceType::SPACE_TYPE_INTERNAL);
+        humongousAllocator_ = new HumongousObjAllocatorT(memStats, SpaceType::SPACE_TYPE_INTERNAL);
     } else {  // NOLINT(readability-misleading-indentation
-        malloc_allocator_ = new MallocProxyAllocatorT(mem_stats, SpaceType::SPACE_TYPE_INTERNAL);
+        mallocAllocator_ = new MallocProxyAllocatorT(memStats, SpaceType::SPACE_TYPE_INTERNAL);
     }
 
 #if defined(TRACK_INTERNAL_ALLOCATIONS)
@@ -77,7 +77,7 @@ template <AllocScope ALLOC_SCOPE_T>
     if constexpr (CONFIG == InternalAllocatorConfig::PANDA_ALLOCATORS) {
         res = AllocViaPandaAllocators<ALLOC_SCOPE_T>(size, align);
     } else {  // NOLINT(readability-misleading-indentation
-        res = malloc_allocator_->Alloc(size, align);
+        res = mallocAllocator_->Alloc(size, align);
     }
     if (res == nullptr) {
         return nullptr;
@@ -109,7 +109,7 @@ void InternalAllocator<CONFIG>::Free(void *ptr)
     if constexpr (CONFIG == InternalAllocatorConfig::PANDA_ALLOCATORS) {
         FreeViaPandaAllocators(ptr);
     } else {  // NOLINT(readability-misleading-indentation
-        malloc_allocator_->Free(ptr);
+        mallocAllocator_->Free(ptr);
     }
 }
 
@@ -128,35 +128,35 @@ InternalAllocator<CONFIG>::~InternalAllocator()
     LOG_INTERNAL_ALLOCATOR(DEBUG) << "Destroying InternalAllocator";
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (CONFIG == InternalAllocatorConfig::PANDA_ALLOCATORS) {
-        delete runslots_allocator_;
-        delete freelist_allocator_;
-        delete humongous_allocator_;
+        delete runslotsAllocator_;
+        delete freelistAllocator_;
+        delete humongousAllocator_;
     } else {  // NOLINT(readability-misleading-indentation
-        delete malloc_allocator_;
+        delete mallocAllocator_;
     }
     LOG_INTERNAL_ALLOCATOR(DEBUG) << "Destroying InternalAllocator finished";
 }
 
 template <class AllocatorT>
-void *AllocInRunSlots(AllocatorT *runslots_allocator, size_t size, Alignment align, size_t pool_size)
+void *AllocInRunSlots(AllocatorT *runslotsAllocator, size_t size, Alignment align, size_t poolSize)
 {
-    void *res = runslots_allocator->Alloc(size, align);
+    void *res = runslotsAllocator->Alloc(size, align);
     if (res == nullptr) {
         // Get rid of extra pool adding to the allocator
-        static os::memory::Mutex pool_lock;
-        os::memory::LockHolder lock(pool_lock);
+        static os::memory::Mutex poolLock;
+        os::memory::LockHolder lock(poolLock);
         while (true) {
-            res = runslots_allocator->Alloc(size, align);
+            res = runslotsAllocator->Alloc(size, align);
             if (res != nullptr) {
                 break;
             }
             LOG_INTERNAL_ALLOCATOR(DEBUG) << "RunSlotsAllocator didn't allocate memory, try to add new pool";
-            auto pool = PoolManager::GetMmapMemPool()->AllocPool(pool_size, SpaceType::SPACE_TYPE_INTERNAL,
-                                                                 AllocatorType::RUNSLOTS_ALLOCATOR, runslots_allocator);
+            auto pool = PoolManager::GetMmapMemPool()->AllocPool(poolSize, SpaceType::SPACE_TYPE_INTERNAL,
+                                                                 AllocatorType::RUNSLOTS_ALLOCATOR, runslotsAllocator);
             if (UNLIKELY(pool.GetMem() == nullptr)) {
                 return nullptr;
             }
-            runslots_allocator->AddMemoryPool(pool.GetMem(), pool.GetSize());
+            runslotsAllocator->AddMemoryPool(pool.GetMem(), pool.GetSize());
             LOG_INTERNAL_ALLOCATOR(DEBUG) << "RunSlotsAllocator try to allocate memory again after pool adding";
         }
     }
@@ -168,13 +168,13 @@ template <AllocScope ALLOC_SCOPE_T>
 void *InternalAllocator<CONFIG>::AllocViaPandaAllocators(size_t size, Alignment align)
 {
     void *res = nullptr;
-    size_t aligned_size = AlignUp(size, GetAlignmentInBytes(align));
+    size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
     static_assert(RunSlotsAllocatorT::GetMaxSize() == LocalSmallObjectAllocator::GetMaxSize());
-    if (LIKELY(aligned_size <= RunSlotsAllocatorT::GetMaxSize())) {
+    if (LIKELY(alignedSize <= RunSlotsAllocatorT::GetMaxSize())) {
         // NOLINTNEXTLINE(readability-braces-around-statements)
         if constexpr (ALLOC_SCOPE_T == AllocScope::GLOBAL) {
             LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use RunSlotsAllocator";
-            res = AllocInRunSlots(runslots_allocator_, size, align, RunSlotsAllocatorT::GetMinPoolSize());
+            res = AllocInRunSlots(runslotsAllocator_, size, align, RunSlotsAllocatorT::GetMinPoolSize());
             if (res == nullptr) {
                 return nullptr;
             }
@@ -188,49 +188,48 @@ void *InternalAllocator<CONFIG>::AllocViaPandaAllocators(size_t size, Alignment 
                 return nullptr;
             }
         }
-    } else if (aligned_size <= FreeListAllocatorT::GetMaxSize()) {
+    } else if (alignedSize <= FreeListAllocatorT::GetMaxSize()) {
         LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use FreeListAllocator";
-        res = freelist_allocator_->Alloc(size, align);
+        res = freelistAllocator_->Alloc(size, align);
         if (res == nullptr) {
             // Get rid of extra pool adding to the allocator
-            static os::memory::Mutex pool_lock;
-            os::memory::LockHolder lock(pool_lock);
+            static os::memory::Mutex poolLock;
+            os::memory::LockHolder lock(poolLock);
             while (true) {
-                res = freelist_allocator_->Alloc(size, align);
+                res = freelistAllocator_->Alloc(size, align);
                 if (res != nullptr) {
                     break;
                 }
                 LOG_INTERNAL_ALLOCATOR(DEBUG) << "FreeListAllocator didn't allocate memory, try to add new pool";
-                size_t pool_size = FreeListAllocatorT::GetMinPoolSize();
+                size_t poolSize = FreeListAllocatorT::GetMinPoolSize();
                 auto pool = PoolManager::GetMmapMemPool()->AllocPool(
-                    pool_size, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::FREELIST_ALLOCATOR, freelist_allocator_);
+                    poolSize, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::FREELIST_ALLOCATOR, freelistAllocator_);
                 if (UNLIKELY(pool.GetMem() == nullptr)) {
                     return nullptr;
                 }
-                freelist_allocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
+                freelistAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
             }
         }
     } else {
         LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use HumongousObjAllocator";
-        res = humongous_allocator_->Alloc(size, align);
+        res = humongousAllocator_->Alloc(size, align);
         if (res == nullptr) {
             // Get rid of extra pool adding to the allocator
-            static os::memory::Mutex pool_lock;
-            os::memory::LockHolder lock(pool_lock);
+            static os::memory::Mutex poolLock;
+            os::memory::LockHolder lock(poolLock);
             while (true) {
-                res = humongous_allocator_->Alloc(size, align);
+                res = humongousAllocator_->Alloc(size, align);
                 if (res != nullptr) {
                     break;
                 }
                 LOG_INTERNAL_ALLOCATOR(DEBUG) << "HumongousObjAllocator didn't allocate memory, try to add new pool";
-                size_t pool_size = HumongousObjAllocatorT::GetMinPoolSize(size);
-                auto pool =
-                    PoolManager::GetMmapMemPool()->AllocPool(pool_size, SpaceType::SPACE_TYPE_INTERNAL,
-                                                             AllocatorType::HUMONGOUS_ALLOCATOR, humongous_allocator_);
+                size_t poolSize = HumongousObjAllocatorT::GetMinPoolSize(size);
+                auto pool = PoolManager::GetMmapMemPool()->AllocPool(
+                    poolSize, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::HUMONGOUS_ALLOCATOR, humongousAllocator_);
                 if (UNLIKELY(pool.GetMem() == nullptr)) {
                     return nullptr;
                 }
-                humongous_allocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
+                humongousAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
             }
         }
     }
@@ -240,34 +239,34 @@ void *InternalAllocator<CONFIG>::AllocViaPandaAllocators(size_t size, Alignment 
 template <InternalAllocatorConfig CONFIG>
 void InternalAllocator<CONFIG>::FreeViaPandaAllocators(void *ptr)
 {
-    AllocatorType alloc_type = PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetType();
-    switch (alloc_type) {
+    AllocatorType allocType = PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetType();
+    switch (allocType) {
         case AllocatorType::RUNSLOTS_ALLOCATOR:
             if (PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetAllocatorHeaderAddr() ==
-                runslots_allocator_) {
+                runslotsAllocator_) {
                 LOG_INTERNAL_ALLOCATOR(DEBUG) << "free via RunSlotsAllocator";
-                runslots_allocator_->Free(ptr);
+                runslotsAllocator_->Free(ptr);
             } else {
                 LOG_INTERNAL_ALLOCATOR(DEBUG) << "free via thread-local RunSlotsAllocator";
                 // It is a thread-local internal allocator instance
-                LocalSmallObjectAllocator *local_allocator =
+                LocalSmallObjectAllocator *localAllocator =
                     panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
                 ASSERT(PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetAllocatorHeaderAddr() ==
-                       local_allocator);
-                local_allocator->Free(ptr);
+                       localAllocator);
+                localAllocator->Free(ptr);
             }
             break;
         case AllocatorType::FREELIST_ALLOCATOR:
             LOG_INTERNAL_ALLOCATOR(DEBUG) << "free via FreeListAllocator";
             ASSERT(PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetAllocatorHeaderAddr() ==
-                   freelist_allocator_);
-            freelist_allocator_->Free(ptr);
+                   freelistAllocator_);
+            freelistAllocator_->Free(ptr);
             break;
         case AllocatorType::HUMONGOUS_ALLOCATOR:
             LOG_INTERNAL_ALLOCATOR(DEBUG) << "free via HumongousObjAllocator";
             ASSERT(PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetAllocatorHeaderAddr() ==
-                   humongous_allocator_);
-            humongous_allocator_->Free(ptr);
+                   humongousAllocator_);
+            humongousAllocator_->Free(ptr);
             break;
         default:
             UNREACHABLE();
@@ -283,11 +282,11 @@ typename InternalAllocator<CONFIG>::LocalSmallObjectAllocator *InternalAllocator
     (void)allocator;
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (CONFIG == InternalAllocatorConfig::PANDA_ALLOCATORS) {
-        auto local_allocator =
+        auto localAllocator =
             allocator->New<LocalSmallObjectAllocator>(allocator->GetMemStats(), SpaceType::SPACE_TYPE_INTERNAL);
-        LOG_INTERNAL_ALLOCATOR(DEBUG) << "Set up local internal allocator at addr " << local_allocator
+        LOG_INTERNAL_ALLOCATOR(DEBUG) << "Set up local internal allocator at addr " << localAllocator
                                       << " for the thread " << panda::Thread::GetCurrent();
-        return local_allocator;
+        return localAllocator;
     }
     return nullptr;
 }
@@ -295,26 +294,26 @@ typename InternalAllocator<CONFIG>::LocalSmallObjectAllocator *InternalAllocator
 /* static */
 template <InternalAllocatorConfig CONFIG>
 void InternalAllocator<CONFIG>::FinalizeLocalInternalAllocator(
-    InternalAllocator::LocalSmallObjectAllocator *local_allocator, Allocator *allocator)
+    InternalAllocator::LocalSmallObjectAllocator *localAllocator, Allocator *allocator)
 {
-    (void)local_allocator;
+    (void)localAllocator;
     (void)allocator;
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (CONFIG == InternalAllocatorConfig::PANDA_ALLOCATORS) {
-        local_allocator->VisitAndRemoveAllPools(
+        localAllocator->VisitAndRemoveAllPools(
             [](void *mem, [[maybe_unused]] size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
-        allocator->Delete(local_allocator);
+        allocator->Delete(localAllocator);
     }
 }
 
 /* static */
 template <InternalAllocatorConfig CONFIG>
-void InternalAllocator<CONFIG>::RemoveFreePoolsForLocalInternalAllocator(LocalSmallObjectAllocator *local_allocator)
+void InternalAllocator<CONFIG>::RemoveFreePoolsForLocalInternalAllocator(LocalSmallObjectAllocator *localAllocator)
 {
-    (void)local_allocator;
+    (void)localAllocator;
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (CONFIG == InternalAllocatorConfig::PANDA_ALLOCATORS) {
-        local_allocator->VisitAndRemoveFreePools(
+        localAllocator->VisitAndRemoveFreePools(
             [](void *mem, [[maybe_unused]] size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
     }
 }
@@ -322,20 +321,20 @@ void InternalAllocator<CONFIG>::RemoveFreePoolsForLocalInternalAllocator(LocalSm
 template <InternalAllocatorConfig CONFIG>
 void InternalAllocator<CONFIG>::InitInternalAllocatorFromRuntime(Allocator *allocator)
 {
-    ASSERT(allocator_from_runtime_ == nullptr);
-    allocator_from_runtime_ = allocator;
+    ASSERT(allocatorFromRuntime_ == nullptr);
+    allocatorFromRuntime_ = allocator;
 }
 
 template <InternalAllocatorConfig CONFIG>
 Allocator *InternalAllocator<CONFIG>::GetInternalAllocatorFromRuntime()
 {
-    return allocator_from_runtime_;
+    return allocatorFromRuntime_;
 }
 
 template <InternalAllocatorConfig CONFIG>
 void InternalAllocator<CONFIG>::ClearInternalAllocatorFromRuntime()
 {
-    allocator_from_runtime_ = nullptr;
+    allocatorFromRuntime_ = nullptr;
 }
 
 template class InternalAllocator<InternalAllocatorConfig::PANDA_ALLOCATORS>;

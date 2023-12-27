@@ -64,18 +64,18 @@ const panda_file::File *ArkHotreloadBase::ReadAndOwnPandaFileFromFile(const char
 
     std::unique_ptr<const panda_file::File> pf = panda_file::OpenPandaFile(location);
     const panda_file::File *ptr = pf.get();
-    panda_files_.push_back(std::move(pf));
+    pandaFiles_.push_back(std::move(pf));
     return ptr;
 }
 
-const panda_file::File *ArkHotreloadBase::ReadAndOwnPandaFileFromMemory(const void *buffer, size_t buff_size)
+const panda_file::File *ArkHotreloadBase::ReadAndOwnPandaFileFromMemory(const void *buffer, size_t buffSize)
 {
     ASSERT_MANAGED_CODE();
     ASSERT(thread_ == ManagedThread::GetCurrent());
 
-    std::unique_ptr<const panda_file::File> pf = panda_file::OpenPandaFileFromMemory(buffer, buff_size);
+    std::unique_ptr<const panda_file::File> pf = panda_file::OpenPandaFileFromMemory(buffer, buffSize);
     auto ptr = pf.get();
-    panda_files_.push_back(std::move(pf));
+    pandaFiles_.push_back(std::move(pf));
     return ptr;
 }
 
@@ -89,12 +89,12 @@ Error ArkHotreloadBase::ProcessHotreload()
         return err;
     }
 
-    for (auto &h_cls : classes_) {
-        auto changes_type = RecognizeHotreloadType(&h_cls);
-        if (changes_type == Type::STRUCTURAL) {
-            LOG(ERROR, HOTRELOAD) << "Class " << h_cls.class_name_
+    for (auto &hCls : classes_) {
+        auto changesType = RecognizeHotreloadType(&hCls);
+        if (changesType == Type::STRUCTURAL) {
+            LOG(ERROR, HOTRELOAD) << "Class " << hCls.className_
                                   << " has structural changes. Structural changes is unsafe for hotreload.";
-            return GetHotreloadErrorByFlag(h_cls.f_changes);
+            return GetHotreloadErrorByFlag(hCls.fChanges);
         }
     }
 
@@ -119,15 +119,15 @@ Error ArkHotreloadBase::ProcessHotreload()
             thread->GetInterpreterCache()->Clear();
             return true;
         });
-        for (auto &h_cls : classes_) {
-            ReloadClassNormal(&h_cls);
+        for (auto &hCls : classes_) {
+            ReloadClassNormal(&hCls);
         }
 
-        auto class_linker = Runtime::GetCurrent()->GetClassLinker();
+        auto classLinker = Runtime::GetCurrent()->GetClassLinker();
         // Updating VTable should be before adding obsolete classes for performance reason
-        UpdateVtablesInRuntimeClasses(class_linker);
-        AddLoadedPandaFilesToRuntime(class_linker);
-        AddObsoleteClassesToRuntime(class_linker);
+        UpdateVtablesInRuntimeClasses(classLinker);
+        AddLoadedPandaFilesToRuntime(classLinker);
+        AddObsoleteClassesToRuntime(classLinker);
 
         LangSpecificHotreloadPart();
     }
@@ -152,10 +152,10 @@ ArkHotreloadBase::~ArkHotreloadBase()
     ASSERT_NATIVE_CODE();
     ASSERT(thread_ == ManagedThread::GetCurrent());
 
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
-    for (auto &h_cls : classes_) {
-        if (h_cls.tmp_class != nullptr) {
-            class_linker->FreeClass(h_cls.tmp_class);
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    for (auto &hCls : classes_) {
+        if (hCls.tmpClass != nullptr) {
+            classLinker->FreeClass(hCls.tmpClass);
         }
     }
 }
@@ -174,10 +174,10 @@ Error ArkHotreloadBase::ValidateClassesHotreloadPossibility()
         return err;
     }
 
-    for (const auto &h_cls : classes_) {
-        Error return_err = ValidateClassForHotreload(h_cls);
-        if (return_err != Error::NONE) {
-            return return_err;
+    for (const auto &hCls : classes_) {
+        Error returnErr = ValidateClassForHotreload(hCls);
+        if (returnErr != Error::NONE) {
+            return returnErr;
         }
     }
 
@@ -192,12 +192,12 @@ std::optional<uint32_t> GetLockOwnerThreadId(Class *cls)
     return {};
 }
 
-Error ArkHotreloadBase::ValidateClassForHotreload(const ClassContainment &h_cls)
+Error ArkHotreloadBase::ValidateClassForHotreload(const ClassContainment &hCls)
 {
-    Class *clazz = h_cls.tmp_class;
-    Class *runtime_class = h_cls.loaded_class;
+    Class *clazz = hCls.tmpClass;
+    Class *runtimeClass = hCls.loadedClass;
     if (clazz == nullptr) {
-        LOG(ERROR, HOTRELOAD) << "Class " << h_cls.class_name_ << " are failed to be initialized";
+        LOG(ERROR, HOTRELOAD) << "Class " << hCls.className_ << " are failed to be initialized";
         return Error::INTERNAL;
     }
 
@@ -206,43 +206,43 @@ Error ArkHotreloadBase::ValidateClassForHotreload(const ClassContainment &h_cls)
      * In case class have a lock holded by the same thread it will lead to deadlock
      * In case class is not initialized we should initialize it before hotreloading
      */
-    if (!runtime_class->IsInitialized()) {
-        if (GetLockOwnerThreadId(runtime_class) == thread_->GetId()) {
-            LOG(ERROR, HOTRELOAD) << "Class lock " << h_cls.class_name_ << " are already owned by this thread.";
+    if (!runtimeClass->IsInitialized()) {
+        if (GetLockOwnerThreadId(runtimeClass) == thread_->GetId()) {
+            LOG(ERROR, HOTRELOAD) << "Class lock " << hCls.className_ << " are already owned by this thread.";
             return Error::INTERNAL;
         }
-        auto class_linker = Runtime::GetCurrent()->GetClassLinker();
-        if (!class_linker->InitializeClass(thread_, runtime_class)) {
-            LOG(ERROR, HOTRELOAD) << "Class " << h_cls.class_name_ << " cannot be initialized in runtime.";
+        auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+        if (!classLinker->InitializeClass(thread_, runtimeClass)) {
+            LOG(ERROR, HOTRELOAD) << "Class " << hCls.className_ << " cannot be initialized in runtime.";
             return Error::INTERNAL;
         }
     }
 
     if (clazz->IsInterface()) {
-        LOG(ERROR, HOTRELOAD) << "Class " << h_cls.class_name_ << " is an interface class. Cannot modify.";
+        LOG(ERROR, HOTRELOAD) << "Class " << hCls.className_ << " is an interface class. Cannot modify.";
         return Error::CLASS_UNMODIFIABLE;
     }
     if (clazz->IsProxy()) {
-        LOG(ERROR, HOTRELOAD) << "Class " << h_cls.class_name_ << " is a proxy class. Cannot modify.";
+        LOG(ERROR, HOTRELOAD) << "Class " << hCls.className_ << " is a proxy class. Cannot modify.";
         return Error::CLASS_UNMODIFIABLE;
     }
     if (clazz->IsArrayClass()) {
-        LOG(ERROR, HOTRELOAD) << "Class " << h_cls.class_name_ << " is an array class. Cannot modify.";
+        LOG(ERROR, HOTRELOAD) << "Class " << hCls.className_ << " is an array class. Cannot modify.";
         return Error::CLASS_UNMODIFIABLE;
     }
     if (clazz->IsStringClass()) {
-        LOG(ERROR, HOTRELOAD) << "Class " << h_cls.class_name_ << " is a string class. Cannot modify.";
+        LOG(ERROR, HOTRELOAD) << "Class " << hCls.className_ << " is a string class. Cannot modify.";
         return Error::CLASS_UNMODIFIABLE;
     }
     if (clazz->IsPrimitive()) {
-        LOG(ERROR, HOTRELOAD) << "Class " << h_cls.class_name_ << " is a primitive class. Cannot modify.";
+        LOG(ERROR, HOTRELOAD) << "Class " << hCls.className_ << " is a primitive class. Cannot modify.";
         return Error::CLASS_UNMODIFIABLE;
     }
 
     return Error::NONE;
 }
 
-Type ArkHotreloadBase::RecognizeHotreloadType(ClassContainment *h_cls)
+Type ArkHotreloadBase::RecognizeHotreloadType(ClassContainment *hCls)
 {
     /*
      * Checking for the changes:
@@ -256,117 +256,117 @@ Type ArkHotreloadBase::RecognizeHotreloadType(ClassContainment *h_cls)
      * In case there are any of changes above Type is Structural
      * Otherwise it's normal changes
      */
-    if (InheritanceChangesCheck(h_cls) == Type::STRUCTURAL) {
+    if (InheritanceChangesCheck(hCls) == Type::STRUCTURAL) {
         return Type::STRUCTURAL;
     }
-    if (FlagsChangesCheck(h_cls) == Type::STRUCTURAL) {
+    if (FlagsChangesCheck(hCls) == Type::STRUCTURAL) {
         return Type::STRUCTURAL;
     }
-    if (FieldChangesCheck(h_cls) == Type::STRUCTURAL) {
+    if (FieldChangesCheck(hCls) == Type::STRUCTURAL) {
         return Type::STRUCTURAL;
     }
-    if (MethodChangesCheck(h_cls) == Type::STRUCTURAL) {
+    if (MethodChangesCheck(hCls) == Type::STRUCTURAL) {
         return Type::STRUCTURAL;
     }
 
     return Type::NORMAL;
 }
 
-Type ArkHotreloadBase::InheritanceChangesCheck(ClassContainment *h_cls)
+Type ArkHotreloadBase::InheritanceChangesCheck(ClassContainment *hCls)
 {
-    Class *tmp_class = h_cls->tmp_class;
-    Class *runtime_class = h_cls->loaded_class;
-    if (tmp_class->GetBase() != runtime_class->GetBase()) {
-        h_cls->f_changes |= ChangesFlags::F_INHERITANCE;
+    Class *tmpClass = hCls->tmpClass;
+    Class *runtimeClass = hCls->loadedClass;
+    if (tmpClass->GetBase() != runtimeClass->GetBase()) {
+        hCls->fChanges |= ChangesFlags::F_INHERITANCE;
         return Type::STRUCTURAL;
     }
 
-    auto new_ifaces = tmp_class->GetInterfaces();
-    auto old_ifaces = runtime_class->GetInterfaces();
-    if (new_ifaces.size() != old_ifaces.size()) {
-        h_cls->f_changes |= ChangesFlags::F_INTERFACES;
+    auto newIfaces = tmpClass->GetInterfaces();
+    auto oldIfaces = runtimeClass->GetInterfaces();
+    if (newIfaces.size() != oldIfaces.size()) {
+        hCls->fChanges |= ChangesFlags::F_INTERFACES;
         return Type::STRUCTURAL;
     }
 
     PandaUnorderedSet<Class *> ifaces;
-    for (auto iface : old_ifaces) {
+    for (auto iface : oldIfaces) {
         ifaces.insert(iface);
     }
-    for (auto iface : new_ifaces) {
+    for (auto iface : newIfaces) {
         if (ifaces.find(iface) == ifaces.end()) {
-            h_cls->f_changes |= ChangesFlags::F_INTERFACES;
+            hCls->fChanges |= ChangesFlags::F_INTERFACES;
             return Type::STRUCTURAL;
         }
         ifaces.erase(iface);
     }
     if (!ifaces.empty()) {
-        h_cls->f_changes |= ChangesFlags::F_INTERFACES;
+        hCls->fChanges |= ChangesFlags::F_INTERFACES;
         return Type::STRUCTURAL;
     }
 
     return Type::NORMAL;
 }
 
-Type ArkHotreloadBase::FlagsChangesCheck(ClassContainment *h_cls)
+Type ArkHotreloadBase::FlagsChangesCheck(ClassContainment *hCls)
 {
-    Class *tmp_class = h_cls->tmp_class;
-    Class *runtime_class = h_cls->loaded_class;
+    Class *tmpClass = hCls->tmpClass;
+    Class *runtimeClass = hCls->loadedClass;
 
     // NOTE(m.strizhak) research that maybe there are flags that can be changed keeping normal type
-    if (tmp_class->GetFlags() != runtime_class->GetFlags()) {
-        h_cls->f_changes |= ChangesFlags::F_ACCESS_FLAGS;
+    if (tmpClass->GetFlags() != runtimeClass->GetFlags()) {
+        hCls->fChanges |= ChangesFlags::F_ACCESS_FLAGS;
         return Type::STRUCTURAL;
     }
 
-    if (tmp_class->GetAccessFlags() != runtime_class->GetAccessFlags()) {
-        h_cls->f_changes |= ChangesFlags::F_ACCESS_FLAGS;
+    if (tmpClass->GetAccessFlags() != runtimeClass->GetAccessFlags()) {
+        hCls->fChanges |= ChangesFlags::F_ACCESS_FLAGS;
         return Type::STRUCTURAL;
     }
 
     return Type::NORMAL;
 }
 
-Type ArkHotreloadBase::FieldChangesCheck(ClassContainment *h_cls)
+Type ArkHotreloadBase::FieldChangesCheck(ClassContainment *hCls)
 {
-    Class *tmp_class = h_cls->tmp_class;
-    Class *runtime_class = h_cls->loaded_class;
+    Class *tmpClass = hCls->tmpClass;
+    Class *runtimeClass = hCls->loadedClass;
 
-    auto old_fields = runtime_class->GetFields();
-    auto new_fields = tmp_class->GetFields();
-    if (new_fields.size() != old_fields.size()) {
-        h_cls->f_changes |= ChangesFlags::F_FIELDS_AMOUNT;
+    auto oldFields = runtimeClass->GetFields();
+    auto newFields = tmpClass->GetFields();
+    if (newFields.size() != oldFields.size()) {
+        hCls->fChanges |= ChangesFlags::F_FIELDS_AMOUNT;
         return Type::STRUCTURAL;
     }
 
-    FieldIdTable field_id_table;
-    PandaUnorderedMap<PandaString, Field *> fields_table;
-    for (auto &old_field : old_fields) {
-        PandaString field_name(utf::Mutf8AsCString(old_field.GetName().data));
-        fields_table.insert({field_name, &old_field});
+    FieldIdTable fieldIdTable;
+    PandaUnorderedMap<PandaString, Field *> fieldsTable;
+    for (auto &oldField : oldFields) {
+        PandaString fieldName(utf::Mutf8AsCString(oldField.GetName().data));
+        fieldsTable.insert({fieldName, &oldField});
     }
 
-    for (auto &new_field : new_fields) {
-        PandaString field_name(utf::Mutf8AsCString(new_field.GetName().data));
-        auto old_it = fields_table.find(field_name);
-        if (old_it == fields_table.end()) {
-            h_cls->f_changes |= ChangesFlags::F_FIELDS_AMOUNT;
+    for (auto &newField : newFields) {
+        PandaString fieldName(utf::Mutf8AsCString(newField.GetName().data));
+        auto oldIt = fieldsTable.find(fieldName);
+        if (oldIt == fieldsTable.end()) {
+            hCls->fChanges |= ChangesFlags::F_FIELDS_AMOUNT;
             return Type::STRUCTURAL;
         }
 
-        if (old_it->second->GetAccessFlags() != new_field.GetAccessFlags() ||
-            old_it->second->GetTypeId() != new_field.GetTypeId()) {
-            h_cls->f_changes |= ChangesFlags::F_FIELDS_TYPE;
+        if (oldIt->second->GetAccessFlags() != newField.GetAccessFlags() ||
+            oldIt->second->GetTypeId() != newField.GetTypeId()) {
+            hCls->fChanges |= ChangesFlags::F_FIELDS_TYPE;
             return Type::STRUCTURAL;
         }
 
-        field_id_table[fields_table[field_name]->GetFileId()] = new_field.GetFileId();
-        fields_table.erase(field_name);
+        fieldIdTable[fieldsTable[fieldName]->GetFileId()] = newField.GetFileId();
+        fieldsTable.erase(fieldName);
     }
 
-    fields_tables_[runtime_class] = std::move(field_id_table);
+    fieldsTables_[runtimeClass] = std::move(fieldIdTable);
 
-    if (!fields_table.empty()) {
-        h_cls->f_changes |= ChangesFlags::F_FIELDS_AMOUNT;
+    if (!fieldsTable.empty()) {
+        hCls->fChanges |= ChangesFlags::F_FIELDS_AMOUNT;
         return Type::STRUCTURAL;
     }
 
@@ -378,51 +378,51 @@ static inline uint32_t GetFileAccessFlags(const Method &method)
     return method.GetAccessFlags() & ACC_FILE_MASK;
 }
 
-Type ArkHotreloadBase::MethodChangesCheck(ClassContainment *h_cls)
+Type ArkHotreloadBase::MethodChangesCheck(ClassContainment *hCls)
 {
-    Class *tmp_class = h_cls->tmp_class;
-    Class *runtime_class = h_cls->loaded_class;
+    Class *tmpClass = hCls->tmpClass;
+    Class *runtimeClass = hCls->loadedClass;
 
-    auto old_methods = runtime_class->GetMethods();
-    auto new_methods = tmp_class->GetMethods();
+    auto oldMethods = runtimeClass->GetMethods();
+    auto newMethods = tmpClass->GetMethods();
 
-    if (new_methods.size() > old_methods.size() ||
-        tmp_class->GetNumVirtualMethods() > runtime_class->GetNumVirtualMethods()) {
-        h_cls->f_changes |= ChangesFlags::F_METHOD_ADDED;
+    if (newMethods.size() > oldMethods.size() ||
+        tmpClass->GetNumVirtualMethods() > runtimeClass->GetNumVirtualMethods()) {
+        hCls->fChanges |= ChangesFlags::F_METHOD_ADDED;
         return Type::STRUCTURAL;
     }
 
-    if (new_methods.size() < old_methods.size() ||
-        tmp_class->GetNumVirtualMethods() < runtime_class->GetNumVirtualMethods()) {
-        h_cls->f_changes |= ChangesFlags::F_METHOD_DELETED;
+    if (newMethods.size() < oldMethods.size() ||
+        tmpClass->GetNumVirtualMethods() < runtimeClass->GetNumVirtualMethods()) {
+        hCls->fChanges |= ChangesFlags::F_METHOD_DELETED;
         return Type::STRUCTURAL;
     }
 
-    for (auto &new_method : new_methods) {
-        bool is_name_found = false;
-        bool is_exact_found = false;
-        for (auto &old_method : old_methods) {
-            PandaString old_name = utf::Mutf8AsCString(old_method.GetName().data);
-            PandaString new_name = utf::Mutf8AsCString(new_method.GetName().data);
-            if (old_name == new_name) {
-                is_name_found = true;
-                if (old_method.GetProto() == new_method.GetProto() &&
-                    GetFileAccessFlags(old_method) == GetFileAccessFlags(new_method)) {
-                    methods_table_[&old_method] = &new_method;
-                    is_exact_found = true;
+    for (auto &newMethod : newMethods) {
+        bool isNameFound = false;
+        bool isExactFound = false;
+        for (auto &oldMethod : oldMethods) {
+            PandaString oldName = utf::Mutf8AsCString(oldMethod.GetName().data);
+            PandaString newName = utf::Mutf8AsCString(newMethod.GetName().data);
+            if (oldName == newName) {
+                isNameFound = true;
+                if (oldMethod.GetProto() == newMethod.GetProto() &&
+                    GetFileAccessFlags(oldMethod) == GetFileAccessFlags(newMethod)) {
+                    methodsTable_[&oldMethod] = &newMethod;
+                    isExactFound = true;
                     break;
                 }
             }
         }
 
-        if (is_name_found) {
-            if (is_exact_found) {
+        if (isNameFound) {
+            if (isExactFound) {
                 continue;
             }
-            h_cls->f_changes |= ChangesFlags::F_METHOD_SIGN;
+            hCls->fChanges |= ChangesFlags::F_METHOD_SIGN;
             return Type::STRUCTURAL;
         }
-        h_cls->f_changes |= ChangesFlags::F_METHOD_ADDED;
+        hCls->fChanges |= ChangesFlags::F_METHOD_ADDED;
         return Type::STRUCTURAL;
     }
     return Type::NORMAL;
@@ -481,83 +481,83 @@ static void UpdateClassPtrInFields(Span<Field> fields, Class *cls)
     }
 }
 
-static void UpdatePandaFileInClass(Class *runtime_class, const panda_file::File *pf)
+static void UpdatePandaFileInClass(Class *runtimeClass, const panda_file::File *pf)
 {
-    const uint8_t *descriptor = runtime_class->GetDescriptor();
-    panda_file::File::EntityId class_id = pf->GetClassId(descriptor);
-    runtime_class->SetPandaFile(pf);
-    runtime_class->SetFileId(class_id);
-    runtime_class->SetClassIndex(pf->GetClassIndex(class_id));
-    runtime_class->SetMethodIndex(pf->GetMethodIndex(class_id));
-    runtime_class->SetFieldIndex(pf->GetFieldIndex(class_id));
+    const uint8_t *descriptor = runtimeClass->GetDescriptor();
+    panda_file::File::EntityId classId = pf->GetClassId(descriptor);
+    runtimeClass->SetPandaFile(pf);
+    runtimeClass->SetFileId(classId);
+    runtimeClass->SetClassIndex(pf->GetClassIndex(classId));
+    runtimeClass->SetMethodIndex(pf->GetMethodIndex(classId));
+    runtimeClass->SetFieldIndex(pf->GetFieldIndex(classId));
 }
 
 /*
  * Obsolete methods should be saved by temporary class 'cause it might be continue executing
  * Updating class pointers in methods to keep it consistent with class and panda file
  */
-static void UpdateMethods(Class *runtime_class, Class *tmp_class)
+static void UpdateMethods(Class *runtimeClass, Class *tmpClass)
 {
-    auto new_methods = tmp_class->GetMethodsWithCopied();
-    auto old_methods = runtime_class->GetMethodsWithCopied();
-    uint32_t num_vmethods = tmp_class->GetNumVirtualMethods();
-    uint32_t num_cmethods = tmp_class->GetNumCopiedMethods();
-    uint32_t num_smethods = new_methods.size() - num_vmethods - num_cmethods;
-    UpdateClassPtrInMethods(new_methods, runtime_class);
-    UpdateClassPtrInMethods(old_methods, tmp_class);
-    runtime_class->SetMethods(new_methods, num_vmethods, num_smethods);
-    tmp_class->SetMethods(old_methods, num_vmethods, num_smethods);
+    auto newMethods = tmpClass->GetMethodsWithCopied();
+    auto oldMethods = runtimeClass->GetMethodsWithCopied();
+    uint32_t numVmethods = tmpClass->GetNumVirtualMethods();
+    uint32_t numCmethods = tmpClass->GetNumCopiedMethods();
+    uint32_t numSmethods = newMethods.size() - numVmethods - numCmethods;
+    UpdateClassPtrInMethods(newMethods, runtimeClass);
+    UpdateClassPtrInMethods(oldMethods, tmpClass);
+    runtimeClass->SetMethods(newMethods, numVmethods, numSmethods);
+    tmpClass->SetMethods(oldMethods, numVmethods, numSmethods);
 }
 
 /*
  * Obsolete fields should be saved by temporary class 'cause it might be used by obselete methods
  * Updating class pointers in fields to keep it consistent with class and panda file
  */
-static void UpdateFields(Class *runtime_class, Class *tmp_class)
+static void UpdateFields(Class *runtimeClass, Class *tmpClass)
 {
-    auto new_fields = tmp_class->GetFields();
-    auto old_fields = runtime_class->GetFields();
-    uint32_t num_sfields = tmp_class->GetNumStaticFields();
-    UpdateClassPtrInFields(new_fields, runtime_class);
-    UpdateClassPtrInFields(old_fields, tmp_class);
-    runtime_class->SetFields(new_fields, num_sfields);
-    tmp_class->SetFields(old_fields, num_sfields);
+    auto newFields = tmpClass->GetFields();
+    auto oldFields = runtimeClass->GetFields();
+    uint32_t numSfields = tmpClass->GetNumStaticFields();
+    UpdateClassPtrInFields(newFields, runtimeClass);
+    UpdateClassPtrInFields(oldFields, tmpClass);
+    runtimeClass->SetFields(newFields, numSfields);
+    tmpClass->SetFields(oldFields, numSfields);
 }
 
-static void UpdateIfaces(Class *runtime_class, Class *tmp_class)
+static void UpdateIfaces(Class *runtimeClass, Class *tmpClass)
 {
-    auto new_ifaces = tmp_class->GetInterfaces();
-    auto old_ifaces = runtime_class->GetInterfaces();
-    runtime_class->SetInterfaces(new_ifaces);
-    tmp_class->SetInterfaces(old_ifaces);
+    auto newIfaces = tmpClass->GetInterfaces();
+    auto oldIfaces = runtimeClass->GetInterfaces();
+    runtimeClass->SetInterfaces(newIfaces);
+    tmpClass->SetInterfaces(oldIfaces);
 }
 
 /*
  * Tables is being copied to runtime class to be possible to resolve virtual calls
  * No need to copy tables to temporary class 'cause new virtual calls should be resolved from runtime class
  */
-static void UpdateTables(Class *runtime_class, Class *tmp_class)
+static void UpdateTables(Class *runtimeClass, Class *tmpClass)
 {
-    ASSERT(tmp_class->GetIMTSize() == runtime_class->GetIMTSize());
-    ASSERT(tmp_class->GetVTableSize() == runtime_class->GetVTableSize());
-    ITable old_itable = runtime_class->GetITable();
-    Span<Method *> old_vtable = runtime_class->GetVTable();
-    Span<Method *> new_vtable = tmp_class->GetVTable();
-    Span<Method *> old_imt = runtime_class->GetIMT();
-    Span<Method *> new_imt = tmp_class->GetIMT();
-    runtime_class->SetITable(tmp_class->GetITable());
-    tmp_class->SetITable(old_itable);
-    if (!old_vtable.empty() && memcpy_s(old_vtable.begin(), old_vtable.size() * sizeof(void *), new_vtable.begin(),
-                                        old_vtable.size() * sizeof(void *)) != EOK) {
+    ASSERT(tmpClass->GetIMTSize() == runtimeClass->GetIMTSize());
+    ASSERT(tmpClass->GetVTableSize() == runtimeClass->GetVTableSize());
+    ITable oldItable = runtimeClass->GetITable();
+    Span<Method *> oldVtable = runtimeClass->GetVTable();
+    Span<Method *> newVtable = tmpClass->GetVTable();
+    Span<Method *> oldImt = runtimeClass->GetIMT();
+    Span<Method *> newImt = tmpClass->GetIMT();
+    runtimeClass->SetITable(tmpClass->GetITable());
+    tmpClass->SetITable(oldItable);
+    if (!oldVtable.empty() && memcpy_s(oldVtable.begin(), oldVtable.size() * sizeof(void *), newVtable.begin(),
+                                       oldVtable.size() * sizeof(void *)) != EOK) {
         LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
     }
-    if (!old_imt.empty() && memcpy_s(old_imt.begin(), old_imt.size() * sizeof(void *), new_imt.begin(),
-                                     old_imt.size() * sizeof(void *)) != EOK) {
+    if (!oldImt.empty() && memcpy_s(oldImt.begin(), oldImt.size() * sizeof(void *), newImt.begin(),
+                                    oldImt.size() * sizeof(void *)) != EOK) {
         LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
     }
 }
 
-void ArkHotreloadBase::ReloadClassNormal(const ClassContainment *h_cls)
+void ArkHotreloadBase::ReloadClassNormal(const ClassContainment *hCls)
 {
     ASSERT(thread_->GetVM()->GetThreadManager() != nullptr);
     ASSERT(!thread_->GetVM()->GetThreadManager()->IsRunningThreadExist());
@@ -575,65 +575,65 @@ void ArkHotreloadBase::ReloadClassNormal(const ClassContainment *h_cls)
      * Then adding obsolete classes to special area in class linker
      * to be able to continue executing obsolete methods after hotreloading
      */
-    Class *tmp_class = h_cls->tmp_class;
-    Class *runtime_class = h_cls->loaded_class;
+    Class *tmpClass = hCls->tmpClass;
+    Class *runtimeClass = hCls->loadedClass;
 
     // Locking class
     HandleScope<ObjectHeader *> scope(thread_);
-    VMHandle<ObjectHeader> managed_class_obj_handle(thread_, runtime_class->GetManagedObject());
-    ::panda::ObjectLock lock(managed_class_obj_handle.GetPtr());
-    const panda_file::File *new_pf = h_cls->pf;
-    const panda_file::File *old_pf = runtime_class->GetPandaFile();
+    VMHandle<ObjectHeader> managedClassObjHandle(thread_, runtimeClass->GetManagedObject());
+    ::panda::ObjectLock lock(managedClassObjHandle.GetPtr());
+    const panda_file::File *newPf = hCls->pf;
+    const panda_file::File *oldPf = runtimeClass->GetPandaFile();
 
-    old_pf->GetPandaCache()->Clear();
+    oldPf->GetPandaCache()->Clear();
 
-    reloaded_classes_.insert(runtime_class);
-    UpdatePandaFileInClass(tmp_class, old_pf);
-    UpdatePandaFileInClass(runtime_class, new_pf);
-    UpdateMethods(runtime_class, tmp_class);
-    UpdateFields(runtime_class, tmp_class);
-    UpdateIfaces(runtime_class, tmp_class);
-    UpdateTables(runtime_class, tmp_class);
+    reloadedClasses_.insert(runtimeClass);
+    UpdatePandaFileInClass(tmpClass, oldPf);
+    UpdatePandaFileInClass(runtimeClass, newPf);
+    UpdateMethods(runtimeClass, tmpClass);
+    UpdateFields(runtimeClass, tmpClass);
+    UpdateIfaces(runtimeClass, tmpClass);
+    UpdateTables(runtimeClass, tmpClass);
 
-    ASSERT(VerifyClassConsistency(runtime_class));
-    ASSERT(VerifyClassConsistency(tmp_class));
+    ASSERT(VerifyClassConsistency(runtimeClass));
+    ASSERT(VerifyClassConsistency(tmpClass));
 }
 
-void ArkHotreloadBase::UpdateVtablesInRuntimeClasses(ClassLinker *class_linker)
+void ArkHotreloadBase::UpdateVtablesInRuntimeClasses(ClassLinker *classLinker)
 {
     ASSERT(thread_->GetVM()->GetThreadManager() != nullptr);
     ASSERT(!thread_->GetVM()->GetThreadManager()->IsRunningThreadExist());
 
-    auto update_vtable = [this](Class *cls) {
+    auto updateVtable = [this](Class *cls) {
         auto vtable = cls->GetVTable();
 
-        if (reloaded_classes_.find(cls) != reloaded_classes_.end()) {
+        if (reloadedClasses_.find(cls) != reloadedClasses_.end()) {
             // This table is already actual
             return true;
         }
 
-        for (auto &method_ptr : vtable) {
-            if (methods_table_.find(method_ptr) != methods_table_.end()) {
-                method_ptr = methods_table_[method_ptr];
+        for (auto &methodPtr : vtable) {
+            if (methodsTable_.find(methodPtr) != methodsTable_.end()) {
+                methodPtr = methodsTable_[methodPtr];
             }
         }
         return true;
     };
-    class_linker->GetExtension(lang_)->EnumerateClasses(update_vtable);
+    classLinker->GetExtension(lang_)->EnumerateClasses(updateVtable);
 }
 
-void ArkHotreloadBase::AddLoadedPandaFilesToRuntime(ClassLinker *class_linker)
+void ArkHotreloadBase::AddLoadedPandaFilesToRuntime(ClassLinker *classLinker)
 {
     ASSERT(thread_->GetVM()->GetThreadManager() != nullptr);
     ASSERT(!thread_->GetVM()->GetThreadManager()->IsRunningThreadExist());
 
-    for (auto &ptr_pf : panda_files_) {
-        class_linker->AddPandaFile(std::move(ptr_pf));
+    for (auto &ptrPf : pandaFiles_) {
+        classLinker->AddPandaFile(std::move(ptrPf));
     }
-    panda_files_.clear();
+    pandaFiles_.clear();
 }
 
-void ArkHotreloadBase::AddObsoleteClassesToRuntime(ClassLinker *class_linker)
+void ArkHotreloadBase::AddObsoleteClassesToRuntime(ClassLinker *classLinker)
 {
     ASSERT(thread_->GetVM()->GetThreadManager() != nullptr);
     ASSERT(!thread_->GetVM()->GetThreadManager()->IsRunningThreadExist());
@@ -642,14 +642,14 @@ void ArkHotreloadBase::AddObsoleteClassesToRuntime(ClassLinker *class_linker)
      * Sending all classes in one vector to avoid holding lock for every single class
      * It should be faster because all threads are still stopped
      */
-    PandaVector<Class *> obsolete_classes;
-    for (const auto &h_cls : classes_) {
-        if (h_cls.tmp_class != nullptr) {
-            ASSERT(h_cls.tmp_class->GetSourceLang() == lang_);
-            obsolete_classes.push_back(h_cls.tmp_class);
+    PandaVector<Class *> obsoleteClasses;
+    for (const auto &hCls : classes_) {
+        if (hCls.tmpClass != nullptr) {
+            ASSERT(hCls.tmpClass->GetSourceLang() == lang_);
+            obsoleteClasses.push_back(hCls.tmpClass);
         }
     }
-    class_linker->GetExtension(lang_)->AddObsoleteClass(obsolete_classes);
+    classLinker->GetExtension(lang_)->AddObsoleteClass(obsoleteClasses);
     classes_.clear();
 }
 

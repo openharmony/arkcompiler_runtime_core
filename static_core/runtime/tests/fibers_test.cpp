@@ -29,16 +29,16 @@ class FibersTest : public testing::Test {
 public:
     size_t GetEntryExecCounter()
     {
-        return entry_exec_counter_;
+        return entryExecCounter_;
     }
 
     void IncEntryExecCounter()
     {
-        ++entry_exec_counter_;
+        ++entryExecCounter_;
     }
 
 private:
-    size_t entry_exec_counter_ = 0;
+    size_t entryExecCounter_ = 0;
 };
 
 /// A fiber instance: provides stack, registers the EP
@@ -96,46 +96,46 @@ private:
 };
 
 /// Regular fiber EP: switches to parent fiber on return
-extern "C" void Entry(void *current_fiber)
+extern "C" void Entry(void *currentFiber)
 {
-    ASSERT_TRUE(current_fiber != nullptr);
-    auto *f_cur = reinterpret_cast<Fiber *>(current_fiber);
-    ASSERT_EQ(f_cur->GetMagic(), Fiber::MAGIC);
+    ASSERT_TRUE(currentFiber != nullptr);
+    auto *fCur = reinterpret_cast<Fiber *>(currentFiber);
+    ASSERT_EQ(fCur->GetMagic(), Fiber::MAGIC);
     // increment the EP execution counter
-    f_cur->RegisterEntryExecution();
+    fCur->RegisterEntryExecution();
     // EOT: switch to parent (otherwise fibers lib will call abort())
-    ASSERT_TRUE(f_cur->GetParent() != nullptr);
-    fibers::SwitchContext(f_cur->GetContextPtr(), f_cur->GetParent()->GetContextPtr());
+    ASSERT_TRUE(fCur->GetParent() != nullptr);
+    fibers::SwitchContext(fCur->GetContextPtr(), fCur->GetParent()->GetContextPtr());
 }
 
 /// Empty fiber EP: checks what happens on a simple return from a fiber
-extern "C" void EmptyEntry([[maybe_unused]] void *current_fiber)
+extern "C" void EmptyEntry([[maybe_unused]] void *currentFiber)
 {
     // NOLINTNEXTLINE(readability-redundant-control-flow)
     return;
 }
 
 /// The EP that switches back to parent in a loop
-extern "C" void LoopedSwitchEntry(void *current_fiber)
+extern "C" void LoopedSwitchEntry(void *currentFiber)
 {
-    ASSERT_TRUE(current_fiber != nullptr);
-    auto *f_cur = reinterpret_cast<Fiber *>(current_fiber);
-    ASSERT_EQ(f_cur->GetMagic(), Fiber::MAGIC);
+    ASSERT_TRUE(currentFiber != nullptr);
+    auto *fCur = reinterpret_cast<Fiber *>(currentFiber);
+    ASSERT_EQ(fCur->GetMagic(), Fiber::MAGIC);
 
     // some non-optimized counters...
-    volatile size_t counter_int = 0;
-    volatile double counter_dbl = 0;
+    volatile size_t counterInt = 0;
+    volatile double counterDbl = 0;
     while (true) {
         // ...and their modification...
-        ++counter_int;
-        counter_dbl = static_cast<double>(counter_int);
+        ++counterInt;
+        counterDbl = static_cast<double>(counterInt);
 
-        f_cur->RegisterEntryExecution();
-        ASSERT_TRUE(f_cur->GetParent() != nullptr);
-        fibers::SwitchContext(f_cur->GetContextPtr(), f_cur->GetParent()->GetContextPtr());
+        fCur->RegisterEntryExecution();
+        ASSERT_TRUE(fCur->GetParent() != nullptr);
+        fibers::SwitchContext(fCur->GetContextPtr(), fCur->GetParent()->GetContextPtr());
 
         // ...and the check for the counters to stay correct after the switch
-        ASSERT_DOUBLE_EQ(counter_dbl, static_cast<double>(counter_int));
+        ASSERT_DOUBLE_EQ(counterDbl, static_cast<double>(counterInt));
     }
 }
 
@@ -144,9 +144,9 @@ extern "C" void LoopedSwitchEntry(void *current_fiber)
 /// Create fiber, switch to it, execute till its end, switch back
 TEST_F(FibersTest, SwitchExecuteSwitchBack)
 {
-    Fiber f_init(*this);
-    Fiber f1(*this, &f_init, Entry);
-    fibers::SwitchContext(f_init.GetContextPtr(), f1.GetContextPtr());
+    Fiber fInit(*this);
+    Fiber f1(*this, &fInit, Entry);
+    fibers::SwitchContext(fInit.GetContextPtr(), f1.GetContextPtr());
 
     ASSERT_EQ(GetEntryExecCounter(), 1);
 }
@@ -157,11 +157,11 @@ TEST_F(FibersTest, SwitchExecuteSwitchBack)
  */
 TEST_F(FibersTest, ChainSwitch)
 {
-    Fiber f_init(*this);
-    Fiber f1(*this, &f_init, Entry);
+    Fiber fInit(*this);
+    Fiber f1(*this, &fInit, Entry);
     Fiber f2(*this, &f1, Entry);
     Fiber f3(*this, &f2, Entry);
-    fibers::SwitchContext(f_init.GetContextPtr(), f3.GetContextPtr());
+    fibers::SwitchContext(fInit.GetContextPtr(), f3.GetContextPtr());
 
     ASSERT_EQ(GetEntryExecCounter(), 3);
 }
@@ -171,15 +171,15 @@ TEST_F(FibersTest, LoopedSwitch)
 {
     constexpr size_t SWITCHES = 10;
 
-    Fiber f_init(*this);
-    Fiber f_target(*this, &f_init, LoopedSwitchEntry);
+    Fiber fInit(*this);
+    Fiber fTarget(*this, &fInit, LoopedSwitchEntry);
 
     // some unoptimized counters
-    volatile size_t counter_int = 0;
-    volatile double counter_dbl = 0;
+    volatile size_t counterInt = 0;
+    volatile double counterDbl = 0;
     for (size_t i = 0; i < SWITCHES; ++i) {
-        counter_int = i;
-        counter_dbl = static_cast<double>(i);
+        counterInt = i;
+        counterDbl = static_cast<double>(i);
 
         // do something with the context before the next switch
         double n1 = 0;
@@ -187,15 +187,15 @@ TEST_F(FibersTest, LoopedSwitch)
         // NOLINTNEXTLINE(cert-err34-c, cppcoreguidelines-pro-type-vararg)
         sscanf("1.23 4.56", "%lf %lf", &n1, &n2);
 
-        fibers::SwitchContext(f_init.GetContextPtr(), f_target.GetContextPtr());
+        fibers::SwitchContext(fInit.GetContextPtr(), fTarget.GetContextPtr());
 
         // check that no corruption occurred
         ASSERT_DOUBLE_EQ(n1, 1.23);
         ASSERT_DOUBLE_EQ(n2, 4.56);
 
         // counters should not be corrupted after a switch
-        ASSERT_EQ(counter_int, i);
-        ASSERT_DOUBLE_EQ(counter_dbl, static_cast<double>(i));
+        ASSERT_EQ(counterInt, i);
+        ASSERT_DOUBLE_EQ(counterDbl, static_cast<double>(i));
     }
 
     ASSERT_EQ(GetEntryExecCounter(), SWITCHES);
@@ -212,10 +212,10 @@ TEST_F(FibersDeathTest, AbortOnFiberReturn)
 #if defined(PANDA_TARGET_ARM32) && defined(PANDA_QEMU_BUILD)
     testing::FLAGS_gtest_death_test_style = "fast";
 #endif
-    Fiber f_init(*this);
-    Fiber f_aborts(*this, nullptr, EmptyEntry);
-    EXPECT_EXIT(fibers::SwitchContext(f_init.GetContextPtr(), f_aborts.GetContextPtr()),
-                testing::KilledBySignal(SIGABRT), ".*");
+    Fiber fInit(*this);
+    Fiber fAborts(*this, nullptr, EmptyEntry);
+    EXPECT_EXIT(fibers::SwitchContext(fInit.GetContextPtr(), fAborts.GetContextPtr()), testing::KilledBySignal(SIGABRT),
+                ".*");
 }
 
 }  // namespace panda::fibers::test

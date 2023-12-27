@@ -25,13 +25,13 @@ WEAK_FOR_LTO_START
 namespace panda::time {
 
 /// Return current time in milliseconds
-PANDA_PUBLIC_API uint64_t GetCurrentTimeInMillis(bool need_system = false);
+PANDA_PUBLIC_API uint64_t GetCurrentTimeInMillis(bool needSystem = false);
 
 /// Return current time in microseconds
-PANDA_PUBLIC_API uint64_t GetCurrentTimeInMicros(bool need_system = false);
+PANDA_PUBLIC_API uint64_t GetCurrentTimeInMicros(bool needSystem = false);
 
 /// Return current time in nanoseconds
-PANDA_PUBLIC_API uint64_t GetCurrentTimeInNanos(bool need_system = false);
+PANDA_PUBLIC_API uint64_t GetCurrentTimeInNanos(bool needSystem = false);
 
 }  // namespace panda::time
 

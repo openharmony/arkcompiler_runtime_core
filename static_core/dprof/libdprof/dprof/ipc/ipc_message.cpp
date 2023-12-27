@@ -20,8 +20,8 @@
 namespace panda::dprof::ipc {
 bool SendMessage(int fd, const Message &message)
 {
-    Message::Id message_id = message.GetId();
-    if (!SendAll(fd, &message_id, sizeof(message_id))) {
+    Message::Id messageId = message.GetId();
+    if (!SendAll(fd, &messageId, sizeof(messageId))) {
         PLOG(ERROR, DPROF) << "Cannot send message id";
         return false;
     }
@@ -44,8 +44,8 @@ int RecvMessage(int fd, Message &message)
 {
     constexpr int DEFAULT_TIMEOUT = 500; /* 0.5 sec */
 
-    Message::Id message_id;
-    int ret = RecvTimeout(fd, &message_id, sizeof(message_id), DEFAULT_TIMEOUT);
+    Message::Id messageId;
+    int ret = RecvTimeout(fd, &messageId, sizeof(messageId), DEFAULT_TIMEOUT);
     if (ret == 0) {
         // socket was closed
         return 0;
@@ -74,7 +74,7 @@ int RecvMessage(int fd, Message &message)
         }
     }
 
-    message = Message(message_id, std::move(data));
+    message = Message(messageId, std::move(data));
     return 1;
 }
 }  // namespace panda::dprof::ipc

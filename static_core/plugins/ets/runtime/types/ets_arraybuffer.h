@@ -54,19 +54,19 @@ public:
         return EtsObject::FromCoreType(this);
     }
 
-    static EtsArrayBuffer *FromEtsObject(EtsObject *ets_obj)
+    static EtsArrayBuffer *FromEtsObject(EtsObject *etsObj)
     {
-        return reinterpret_cast<EtsArrayBuffer *>(ets_obj);
+        return reinterpret_cast<EtsArrayBuffer *>(etsObj);
     }
 
     EtsInt GetByteLength() const
     {
-        return byte_length_;
+        return byteLength_;
     }
 
     void SetByteLength(EtsInt length)
     {
-        byte_length_ = length;
+        byteLength_ = length;
     }
 
     EtsByteArray *GetData()
@@ -81,7 +81,7 @@ public:
 
 private:
     ObjectPointer<EtsByteArray> data_;
-    EtsInt byte_length_;
+    EtsInt byteLength_;
 
     friend class test::EtsArrayBufferMembers;
 };

@@ -59,10 +59,10 @@ bool DiscardInlineModule::DiscardIfNecessary(llvm::GlobalObject *object)
     return false;
 }
 
-bool DiscardInlineModule::ShouldKeep(const llvm::GlobalValue &global_value) const
+bool DiscardInlineModule::ShouldKeep(const llvm::GlobalValue &globalValue) const
 {
     // Example: static function, constant global variable
-    return global_value.hasLocalLinkage()
+    return globalValue.hasLocalLinkage()
            /**
             * Examples:
             *
@@ -77,7 +77,7 @@ bool DiscardInlineModule::ShouldKeep(const llvm::GlobalValue &global_value) cons
             * We keep such functions because multiple definitions are allowed for them.
             * The linker will choose appropriate
             */
-           || global_value.hasLinkOnceLinkage();
+           || globalValue.hasLinkOnceLinkage();
 }
 
 }  // namespace panda::llvmbackend::passes

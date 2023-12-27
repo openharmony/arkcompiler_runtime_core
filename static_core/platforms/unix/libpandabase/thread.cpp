@@ -57,27 +57,27 @@ int GetPid()
     return getpid();
 }
 
-int SetPriority(int thread_id, int prio)
+int SetPriority(int threadId, int prio)
 {
     // The priority can be set within range [-20, 19]
     ASSERT(prio <= 19);   // 19: the lowest priority
     ASSERT(prio >= -20);  // -20: the highest priority
     // The return value is 0 if the function succeeds, and -1 if it fails.
-    return setpriority(PRIO_PROCESS, thread_id, prio);
+    return setpriority(PRIO_PROCESS, threadId, prio);
 }
 
-int GetPriority(int thread_id)
+int GetPriority(int threadId)
 {
-    return getpriority(PRIO_PROCESS, thread_id);
+    return getpriority(PRIO_PROCESS, threadId);
 }
 
-int SetThreadName(NativeHandleType pthread_handle, const char *name)
+int SetThreadName(NativeHandleType pthreadHandle, const char *name)
 {
-    ASSERT(pthread_handle != 0);
+    ASSERT(pthreadHandle != 0);
 #if defined(PANDA_TARGET_MACOS)
     return pthread_setname_np(name);
 #else
-    return pthread_setname_np(pthread_handle, name);
+    return pthread_setname_np(pthreadHandle, name);
 #endif
 }
 
@@ -101,9 +101,9 @@ void NativeSleepUS(std::chrono::microseconds us)
     std::this_thread::sleep_for(us);
 }
 
-void ThreadDetach(NativeHandleType pthread_handle)
+void ThreadDetach(NativeHandleType pthreadHandle)
 {
-    pthread_detach(pthread_handle);
+    pthread_detach(pthreadHandle);
 }
 
 void ThreadExit(void *ret)
@@ -111,25 +111,25 @@ void ThreadExit(void *ret)
     pthread_exit(ret);
 }
 
-void ThreadJoin(NativeHandleType pthread_handle, void **ret)
+void ThreadJoin(NativeHandleType pthreadHandle, void **ret)
 {
-    pthread_join(pthread_handle, ret);
+    pthread_join(pthreadHandle, ret);
 }
 
-void ThreadSendSignal(NativeHandleType pthread_handle, int sig)
+void ThreadSendSignal(NativeHandleType pthreadHandle, int sig)
 {
-    LOG_IF(pthread_kill(pthread_handle, sig) != 0, FATAL, COMMON) << "pthread_kill failed";
+    LOG_IF(pthread_kill(pthreadHandle, sig) != 0, FATAL, COMMON) << "pthread_kill failed";
 }
 
-int ThreadGetStackInfo(NativeHandleType thread, void **stack_addr, size_t *stack_size, size_t *guard_size)
+int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackSize, size_t *guardSize)
 {
     pthread_attr_t attr;
     int s = pthread_attr_init(&attr);
 #ifndef PANDA_TARGET_MACOS
     s += pthread_getattr_np(thread, &attr);
     if (s == 0) {
-        s += pthread_attr_getguardsize(&attr, guard_size);
-        s += pthread_attr_getstack(&attr, stack_addr, stack_size);
+        s += pthread_attr_getguardsize(&attr, guardSize);
+        s += pthread_attr_getstack(&attr, stackAddr, stackSize);
 #if defined(PANDA_TARGET_OHOS) && !defined(NDEBUG)
         if (getpid() == gettid()) {
             /**
@@ -141,19 +141,19 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stack_addr, size_t *stack
             struct rlimit lim;
             s += getrlimit(RLIMIT_STACK, &lim);
             if (s == 0) {
-                uintptr_t stack_hi_addr = ToUintPtr(*stack_addr) + *stack_size;
-                size_t stack_size_limit = lim.rlim_cur;
+                uintptr_t stackHiAddr = ToUintPtr(*stackAddr) + *stackSize;
+                size_t stackSizeLimit = lim.rlim_cur;
                 // for some reason pthread interfaces subtract 1 page from size regardless of guard size
-                uintptr_t stack_lo_addr = stack_hi_addr - stack_size_limit + panda::os::mem::GetPageSize();
-                *stack_size = stack_size_limit;
-                *stack_addr = ToVoidPtr(stack_lo_addr);
+                uintptr_t stackLoAddr = stackHiAddr - stackSizeLimit + panda::os::mem::GetPageSize();
+                *stackSize = stackSizeLimit;
+                *stackAddr = ToVoidPtr(stackLoAddr);
             }
         }
 #endif /* defined(PANDA_TARGET_OHOS) && !defined(NDEBUG) */
     }
 #else  /* PANDA_TARGET_MACOS */
-    s += pthread_attr_getguardsize(&attr, guard_size);
-    s += pthread_attr_getstack(&attr, stack_addr, stack_size);
+    s += pthread_attr_getguardsize(&attr, guardSize);
+    s += pthread_attr_getstack(&attr, stackAddr, stackSize);
 #endif /* PANDA_TARGET_MACOS */
     s += pthread_attr_destroy(&attr);
     return s;

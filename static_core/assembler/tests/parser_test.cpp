@@ -31,11 +31,11 @@ TEST(parsertests, test1)
     v.push_back(l.TokenizeString("mov v1, v2}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 1) << "1 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[1], 2) << "2 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].regs[0], 1) << "1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].regs[1], 2) << "2 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -48,11 +48,11 @@ TEST(parsertests, test2)
     v.push_back(l.TokenizeString("label:}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].label, "label") << "label expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].set_label, true) << "true expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::INVALID) << "NONE expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].label, "label") << "label expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].setLabel, true) << "true expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::INVALID) << "NONE expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -87,10 +87,10 @@ TEST(parsertests, test5)
     v.push_back(l.TokenizeString("addi 1}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::ADDI) << "IMM expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(1))) << "1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::ADDI) << "IMM expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(1))) << "1 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -103,10 +103,10 @@ TEST(parsertests, test6)
     v.push_back(l.TokenizeString("addi 12345}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::ADDI) << "IMM expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(12345))) << "12345 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::ADDI) << "IMM expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(12345))) << "12345 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -142,13 +142,13 @@ TEST(parsertests, test9)
     v.push_back(l.TokenizeString("movi v10, 1001}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::LDA) << "V expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 1) << "1 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].opcode, Opcode::MOVI) << "V_IMM expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].regs[0], 10) << "10 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].imms[0], Ins::IType(int64_t(1001))) << "1001 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::LDA) << "V expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].regs[0], 1) << "1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[1].opcode, Opcode::MOVI) << "V_IMM expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[1].regs[0], 10) << "10 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[1].imms[0], Ins::IType(int64_t(1001))) << "1001 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -162,13 +162,13 @@ TEST(parsertests, test10)
     v.push_back(l.TokenizeString(".function u1 nain(){}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
-    const auto sig_nain = GetFunctionSignatureFromName("nain", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    const auto sigNain = GetFunctionSignatureFromName("nain", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::CALL_SHORT) << "V_V_ID expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].ids[0], sig_nain) << "nain expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 1) << "1 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[1], 2) << "2 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::CALL_SHORT) << "V_V_ID expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].ids[0], sigNain) << "nain expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].regs[0], 1) << "1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].regs[1], 2) << "2 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -181,9 +181,9 @@ TEST(parsertests, test11)
     v.push_back(l.TokenizeString("i64tof64}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::I64TOF64) << "NONE expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::I64TOF64) << "NONE expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -207,10 +207,10 @@ TEST(parsertests, test13)
     v.push_back(l.TokenizeString("l123: jmp l123}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::JMP) << "ID expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].ids[0], "l123") << "l123 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::JMP) << "ID expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].ids[0], "l123") << "l123 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE";
 }
 
@@ -245,10 +245,10 @@ TEST(parsertests, test17)
     v.push_back(l.TokenizeString("ldarr.8 v120}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::LDARR_8) << "V expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 120) << "120 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::LDARR_8) << "V expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].regs[0], 120) << "120 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -261,9 +261,9 @@ TEST(parsertests, test18)
     v.push_back(l.TokenizeString("return}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::RETURN) << "NONE expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::RETURN) << "NONE expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -309,11 +309,11 @@ TEST(parsertests, test22)
     v.push_back(l.TokenizeString("ashr2.64 v12}").first);
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::ASHR2_64) << "V expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::ASHR2_64) << "V expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 12) << "12 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].regs[0], 12) << "12 expected";
 }
 
 TEST(parsertests, test23)
@@ -337,57 +337,57 @@ TEST(parsertests, test23)
 
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
     std::vector<Function::Parameter> params;
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"u1", 0}, language);
     params.emplace_back(Type {"f32", 0}, language);
-    const auto sig_m123 = GetFunctionSignatureFromName("m123", params);
+    const auto sigM123 = GetFunctionSignatureFromName("m123", params);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).name, sig_main);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).name, sig_m123);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).GetParamsNum(), 0U);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).GetParamsNum(), 2U);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).params[0].type.GetId(), panda::panda_file::Type::TypeId::U1);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).params[1].type.GetId(), panda::panda_file::Type::TypeId::F32);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).return_type.GetId(), panda::panda_file::Type::TypeId::U8);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).return_type.GetId(), panda::panda_file::Type::TypeId::F64);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).label_table.at("label1").file_location->line_number, 2U);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).label_table.at("label1").file_location->is_defined, true);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).label_table.at("label2").file_location->line_number, 3U);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).label_table.at("label2").file_location->is_defined, true);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).label_table.at("la1").file_location->line_number, 11U);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).label_table.at("la1").file_location->is_defined, true);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::INVALID);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].label, "label1");
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].opcode, Opcode::JLE);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].regs[0], 0);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].ids[0], "label2");
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2].opcode, Opcode::MOVI);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2].regs[0], 15);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2].imms[0], Ins::IType(int64_t(26)));
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2].set_label, false);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].regs[0], 0);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].regs[1], 1);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].label, "label2");
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].set_label, true);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].opcode, Opcode::CALL);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].regs[0], 2);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].regs[1], 6);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].regs[2], 3);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].regs[3], 4);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].ids[0], sig_m123);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[0].opcode, Opcode::LDA);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[0].regs[0], 10);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[1].opcode, Opcode::STA);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[1].regs[0], 11);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[2].opcode, Opcode::INVALID);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[2].label, "la1");
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[2].set_label, true);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[3].opcode, Opcode::JLE);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[3].regs[0], 12);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[3].ids[0], "la1");
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).name, sigMain);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).name, sigM123);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).GetParamsNum(), 0U);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).GetParamsNum(), 2U);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).params[0].type.GetId(), panda::panda_file::Type::TypeId::U1);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).params[1].type.GetId(), panda::panda_file::Type::TypeId::F32);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).returnType.GetId(), panda::panda_file::Type::TypeId::U8);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).returnType.GetId(), panda::panda_file::Type::TypeId::F64);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).labelTable.at("label1").fileLocation->lineNumber, 2U);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).labelTable.at("label1").fileLocation->isDefined, true);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).labelTable.at("label2").fileLocation->lineNumber, 3U);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).labelTable.at("label2").fileLocation->isDefined, true);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).labelTable.at("la1").fileLocation->lineNumber, 11U);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).labelTable.at("la1").fileLocation->isDefined, true);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].opcode, Opcode::INVALID);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].label, "label1");
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[1].opcode, Opcode::JLE);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[1].regs[0], 0);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[1].ids[0], "label2");
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[2].opcode, Opcode::MOVI);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[2].regs[0], 15);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[2].imms[0], Ins::IType(int64_t(26)));
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[2].setLabel, false);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[3].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[3].regs[0], 0);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[3].regs[1], 1);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[3].label, "label2");
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[3].setLabel, true);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[4].opcode, Opcode::CALL);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[4].regs[0], 2);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[4].regs[1], 6);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[4].regs[2], 3);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[4].regs[3], 4);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[4].ids[0], sigM123);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[0].opcode, Opcode::LDA);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[0].regs[0], 10);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[1].opcode, Opcode::STA);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[1].regs[0], 11);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[2].opcode, Opcode::INVALID);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[2].label, "la1");
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[2].setLabel, true);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[3].opcode, Opcode::JLE);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[3].regs[0], 12);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).ins[3].ids[0], "la1");
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -417,23 +417,23 @@ TEST(parsertests, test24_functions)
 
     auto item = p.Parse(v);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
-    const auto sig_niam = GetFunctionSignatureFromName("niam", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    const auto sigNiam = GetFunctionSignatureFromName("niam", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).return_type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(256))) << "256 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].imms[0], Ins::IType(int64_t(4294967295)))
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).returnType.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(256))) << "256 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[1].imms[0], Ins::IType(int64_t(4294967295)))
         << "4294967295 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2].imms[0], Ins::IType(int64_t(15))) << "15 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].imms[0], Ins::IType(1000.0)) << "1000.0 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].imms[0], Ins::IType(int64_t(59796))) << "59796 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[5].imms[0], Ins::IType(1.1)) << "1.1 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[7].imms[0], Ins::IType(.1)) << ".1 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[8].imms[0], Ins::IType(int64_t(0))) << "0 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[9].imms[0], Ins::IType(0.1)) << "0.1 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[10].imms[0], Ins::IType(00.1)) << "00.1 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[11].imms[0], Ins::IType(00.)) << "00. expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_niam).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[2].imms[0], Ins::IType(int64_t(15))) << "15 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[3].imms[0], Ins::IType(1000.0)) << "1000.0 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[4].imms[0], Ins::IType(int64_t(59796))) << "59796 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[5].imms[0], Ins::IType(1.1)) << "1.1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[7].imms[0], Ins::IType(.1)) << ".1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[8].imms[0], Ins::IType(int64_t(0))) << "0 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[9].imms[0], Ins::IType(0.1)) << "0.1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[10].imms[0], Ins::IType(00.1)) << "00.1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[11].imms[0], Ins::IType(00.)) << "00. expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 }
 
 TEST(parsertests, test25_record_alone)
@@ -447,13 +447,13 @@ TEST(parsertests, test25_record_alone)
     v.push_back(l.TokenizeString("i32 asm3").first);
     v.push_back(l.TokenizeString("}").first);
     auto item = p.Parse(v);
-    ASSERT_EQ(item.Value().record_table.at("Asm").name, "Asm");
-    ASSERT_EQ(item.Value().record_table.at("Asm").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("Asm").field_list[1].name, "asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().record_table.at("Asm").field_list[2].name, "asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm").name, "Asm");
+    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[1].name, "asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[2].name, "asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
 }
 
 TEST(parsertests, test26_records)
@@ -483,31 +483,31 @@ TEST(parsertests, test26_records)
 
     auto item = p.Parse(v);
 
-    ASSERT_EQ(item.Value().record_table.at("Asm1").name, "Asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[1].name, "asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[2].name, "asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
-    ASSERT_EQ(item.Value().record_table.at("Asm2").name, "Asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[1].name, "asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[2].name, "asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
-    ASSERT_EQ(item.Value().record_table.at("Asm3").name, "Asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[1].name, "asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[2].name, "asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
-    ASSERT_EQ(item.Value().record_table.at("Asm4").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm4").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I32);
-    ASSERT_EQ(item.Value().record_table.at("Asm5").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm5").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").name, "Asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].name, "asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].name, "asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").name, "Asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].name, "asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].name, "asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").name, "Asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].name, "asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].name, "asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm4").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm4").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm5").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm5").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I32);
 }
 
 TEST(parsertests, test27_record_and_function)
@@ -527,16 +527,16 @@ TEST(parsertests, test27_record_and_function)
 
     auto item = p.Parse(v);
 
-    const auto sig_niam = GetFunctionSignatureFromName("niam", {});
+    const auto sigNiam = GetFunctionSignatureFromName("niam", {});
 
-    ASSERT_EQ(item.Value().record_table.at("Asm1").name, "Asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[1].name, "asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[2].name, "asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
-    ASSERT_EQ(item.Value().function_table.at(sig_niam).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").name, "Asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].name, "asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].name, "asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 }
 
 TEST(parsertests, test28_records_and_functions)
@@ -577,39 +577,39 @@ TEST(parsertests, test28_records_and_functions)
 
     auto item = p.Parse(v);
 
-    const auto sig_niam1 = GetFunctionSignatureFromName("niam1", {});
-    const auto sig_niam2 = GetFunctionSignatureFromName("niam2", {});
-    const auto sig_niam3 = GetFunctionSignatureFromName("niam3", {});
+    const auto sigNiam1 = GetFunctionSignatureFromName("niam1", {});
+    const auto sigNiam2 = GetFunctionSignatureFromName("niam2", {});
+    const auto sigNiam3 = GetFunctionSignatureFromName("niam3", {});
 
-    ASSERT_EQ(item.Value().record_table.at("Asm1").name, "Asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[1].name, "asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[2].name, "asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").name, "Asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].name, "asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].name, "asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_niam1).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam1).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 
-    ASSERT_EQ(item.Value().record_table.at("Asm2").name, "Asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[1].name, "asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[2].name, "asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").name, "Asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].name, "asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].name, "asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_niam2).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam2).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 
-    ASSERT_EQ(item.Value().record_table.at("Asm3").name, "Asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[0].name, "asm1");
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[1].name, "asm2");
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[2].name, "asm3");
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").name, "Asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].name, "asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].name, "asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].name, "asm3");
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_niam3).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam3).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 }
 
 TEST(parsertests, test29_instructions_def_lines)
@@ -638,17 +638,17 @@ TEST(parsertests, test29_instructions_def_lines)
 
     auto item = p.Parse(v);
 
-    const auto sig_niam1 = GetFunctionSignatureFromName("niam1", {});
-    const auto sig_niam2 = GetFunctionSignatureFromName("niam2", {});
-    const auto sig_niam3 = GetFunctionSignatureFromName("niam3", {});
-    const auto sig_niam4 = GetFunctionSignatureFromName("niam4", {});
-    const auto sig_niam5 = GetFunctionSignatureFromName("niam5", {});
+    const auto sigNiam1 = GetFunctionSignatureFromName("niam1", {});
+    const auto sigNiam2 = GetFunctionSignatureFromName("niam2", {});
+    const auto sigNiam3 = GetFunctionSignatureFromName("niam3", {});
+    const auto sigNiam4 = GetFunctionSignatureFromName("niam4", {});
+    const auto sigNiam5 = GetFunctionSignatureFromName("niam5", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_niam1).ins[0].ins_debug.line_number, 2U) << "2 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_niam2).ins[0].ins_debug.line_number, 5U) << "5 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_niam3).ins[0].ins_debug.line_number, 9U) << "9 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_niam4).ins[0].ins_debug.line_number, 11U) << "11 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_niam5).ins[0].ins_debug.line_number, 12U) << "12 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam1).ins[0].insDebug.lineNumber, 2U) << "2 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam2).ins[0].insDebug.lineNumber, 5U) << "5 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam3).ins[0].insDebug.lineNumber, 9U) << "9 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam4).ins[0].insDebug.lineNumber, 11U) << "11 expected";
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam5).ins[0].insDebug.lineNumber, 12U) << "12 expected";
 }
 
 TEST(parsertests, test30_fields_def_lines)
@@ -682,21 +682,21 @@ TEST(parsertests, test30_fields_def_lines)
 
     auto item = p.Parse(v);
 
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[0].line_of_def, 2U);
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[1].line_of_def, 3U);
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[2].line_of_def, 4U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].lineOfDef, 2U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].lineOfDef, 3U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].lineOfDef, 4U);
 
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[0].line_of_def, 7U);
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[1].line_of_def, 8U);
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[2].line_of_def, 9U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].lineOfDef, 7U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].lineOfDef, 8U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].lineOfDef, 9U);
 
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[0].line_of_def, 12U);
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[1].line_of_def, 13U);
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[2].line_of_def, 14U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].lineOfDef, 12U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].lineOfDef, 13U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].lineOfDef, 14U);
 
-    ASSERT_EQ(item.Value().record_table.at("Asm4").field_list[0].line_of_def, 16U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm4").fieldList[0].lineOfDef, 16U);
 
-    ASSERT_EQ(item.Value().record_table.at("Asm5").field_list[0].line_of_def, 17U);
+    ASSERT_EQ(item.Value().recordTable.at("Asm5").fieldList[0].lineOfDef, 17U);
 }
 
 TEST(parsertests, test31_own_types)
@@ -723,13 +723,13 @@ TEST(parsertests, test31_own_types)
 
     auto item = p.Parse(v);
 
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[0].type.GetName(), "Asm");
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().record_table.at("Asm1").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetName(), "Asm");
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
 
-    ASSERT_EQ(item.Value().record_table.at("Asm2").field_list[0].type.GetName(), "Asm1");
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].type.GetName(), "Asm1");
 
-    ASSERT_EQ(item.Value().record_table.at("Asm3").field_list[0].type.GetName(), "Asm2");
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].type.GetName(), "Asm2");
 }
 
 TEST(parsertests, test32_names)
@@ -759,19 +759,19 @@ TEST(parsertests, test33_params_number)
 
     auto item = p.Parse(v);
 
-    const auto sig_niam1 = GetFunctionSignatureFromName("niam1", {});
+    const auto sigNiam1 = GetFunctionSignatureFromName("niam1", {});
     std::vector<Function::Parameter> params;
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"u1", 0}, language);
     params.emplace_back(Type {"i64", 0}, language);
     params.emplace_back(Type {"i32", 0}, language);
-    const auto sig_niam2 = GetFunctionSignatureFromName("niam2", params);
+    const auto sigNiam2 = GetFunctionSignatureFromName("niam2", params);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_niam1).GetParamsNum(), 0U);
-    ASSERT_EQ(item.Value().function_table.at(sig_niam1).value_of_first_param + 1, 0);
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam1).GetParamsNum(), 0U);
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam1).valueOfFirstParam + 1, 0);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_niam2).GetParamsNum(), 3U);
-    ASSERT_EQ(item.Value().function_table.at(sig_niam2).value_of_first_param + 1, 4);
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam2).GetParamsNum(), 3U);
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam2).valueOfFirstParam + 1, 4);
 }
 
 TEST(parsertests, test34_vregs_number)
@@ -790,17 +790,17 @@ TEST(parsertests, test34_vregs_number)
 
     auto item = p.Parse(v);
 
-    const auto sig_niam1 = GetFunctionSignatureFromName("niam1", {});
+    const auto sigNiam1 = GetFunctionSignatureFromName("niam1", {});
     std::vector<Function::Parameter> params;
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"u1", 0}, language);
     params.emplace_back(Type {"i64", 0}, language);
     params.emplace_back(Type {"i32", 0}, language);
-    const auto sig_niam2 = GetFunctionSignatureFromName("niam2", params);
+    const auto sigNiam2 = GetFunctionSignatureFromName("niam2", params);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_niam1).regs_num, 0U);
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam1).regsNum, 0U);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_niam2).regs_num, 6U);
+    ASSERT_EQ(item.Value().functionTable.at(sigNiam2).regsNum, 6U);
 }
 
 TEST(parsertests, test35_functions_bracket)
@@ -853,44 +853,44 @@ TEST(parsertests, test35_functions_bracket)
     std::vector<Function::Parameter> params;
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"i64", 0}, language);
-    const auto sig_nain1 = GetFunctionSignatureFromName("nain1", params);
-    const auto sig_nain2 = GetFunctionSignatureFromName("nain2", params);
-    const auto sig_nain3 = GetFunctionSignatureFromName("nain3", params);
-    const auto sig_nain4 = GetFunctionSignatureFromName("nain4", params);
-    const auto sig_nain5 = GetFunctionSignatureFromName("nain5", params);
-    const auto sig_nain6 = GetFunctionSignatureFromName("nain6", params);
-    const auto sig_nain7 = GetFunctionSignatureFromName("nain7", params);
-    const auto sig_nain8 = GetFunctionSignatureFromName("nain8", params);
-    const auto sig_nain9 = GetFunctionSignatureFromName("nain9", params);
-    const auto sig_nain10 = GetFunctionSignatureFromName("nain10", params);
-    const auto sig_nain11 = GetFunctionSignatureFromName("nain11", params);
-    const auto sig_nain12 = GetFunctionSignatureFromName("nain12", params);
+    const auto sigNain1 = GetFunctionSignatureFromName("nain1", params);
+    const auto sigNain2 = GetFunctionSignatureFromName("nain2", params);
+    const auto sigNain3 = GetFunctionSignatureFromName("nain3", params);
+    const auto sigNain4 = GetFunctionSignatureFromName("nain4", params);
+    const auto sigNain5 = GetFunctionSignatureFromName("nain5", params);
+    const auto sigNain6 = GetFunctionSignatureFromName("nain6", params);
+    const auto sigNain7 = GetFunctionSignatureFromName("nain7", params);
+    const auto sigNain8 = GetFunctionSignatureFromName("nain8", params);
+    const auto sigNain9 = GetFunctionSignatureFromName("nain9", params);
+    const auto sigNain10 = GetFunctionSignatureFromName("nain10", params);
+    const auto sigNain11 = GetFunctionSignatureFromName("nain11", params);
+    const auto sigNain12 = GetFunctionSignatureFromName("nain12", params);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_nain1).name, sig_nain1);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain12).name, sig_nain12);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain3).name, sig_nain3);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain2).name, sig_nain2);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain4).name, sig_nain4);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain5).name, sig_nain5);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain6).name, sig_nain6);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain7).name, sig_nain7);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain8).name, sig_nain8);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain9).name, sig_nain9);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain10).name, sig_nain10);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain11).name, sig_nain11);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain1).name, sigNain1);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain12).name, sigNain12);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain3).name, sigNain3);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain2).name, sigNain2);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain4).name, sigNain4);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain5).name, sigNain5);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain6).name, sigNain6);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain7).name, sigNain7);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain8).name, sigNain8);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain9).name, sigNain9);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain10).name, sigNain10);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain11).name, sigNain11);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_nain1).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain2).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain3).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain4).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain5).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain6).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain7).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain8).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain9).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain10).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain11).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain12).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain1).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain2).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain3).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain4).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain5).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain6).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain7).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain8).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain9).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain10).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain11).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().functionTable.at(sigNain12).ins[0].opcode, Opcode::MOV);
 }
 
 TEST(parsertests, test36_records_bracket)
@@ -924,13 +924,13 @@ TEST(parsertests, test36_records_bracket)
 
     auto item = p.Parse(v);
 
-    ASSERT_EQ(item.Value().record_table.at("rec1").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("rec2").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("rec3").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("rec4").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("rec5").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("rec6").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().record_table.at("rec7").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec1").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec2").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec3").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec4").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec5").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec6").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec7").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
 }
 
 TEST(parsertests, test37_operand_type_print)
@@ -952,14 +952,14 @@ TEST(parsertests, test37_operand_type_print)
     std::vector<Function::Parameter> params;
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"i64", 0}, language);
-    const auto sig_nain1 = GetFunctionSignatureFromName("nain1", params);
+    const auto sigNain1 = GetFunctionSignatureFromName("nain1", params);
 
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[0].opcode), "reg_reg");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[1].opcode), "reg_imm");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[2].opcode), "label");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[3].opcode), "reg");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[4].opcode), "none");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[5].opcode), "call_reg_reg");
+    ASSERT_EQ(OperandTypePrint(item.Value().functionTable.at(sigNain1).ins[0].opcode), "reg_reg");
+    ASSERT_EQ(OperandTypePrint(item.Value().functionTable.at(sigNain1).ins[1].opcode), "reg_imm");
+    ASSERT_EQ(OperandTypePrint(item.Value().functionTable.at(sigNain1).ins[2].opcode), "label");
+    ASSERT_EQ(OperandTypePrint(item.Value().functionTable.at(sigNain1).ins[3].opcode), "reg");
+    ASSERT_EQ(OperandTypePrint(item.Value().functionTable.at(sigNain1).ins[4].opcode), "none");
+    ASSERT_EQ(OperandTypePrint(item.Value().functionTable.at(sigNain1).ins[5].opcode), "call_reg_reg");
 }
 
 TEST(parsertests, test38_record_invalid_field)
@@ -980,7 +980,7 @@ TEST(parsertests, test38_record_invalid_field)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_FIELD_MISSING_NAME);
-        ASSERT_EQ(e.line_number, 2U);
+        ASSERT_EQ(e.lineNumber, 2U);
         ASSERT_EQ(e.pos, f.length());
         ASSERT_EQ(e.message, "Expected field name.");
     }
@@ -1001,7 +1001,7 @@ TEST(parsertests, test38_record_invalid_field)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_METADATA_BOUND);
-        ASSERT_EQ(e.line_number, 2U);
+        ASSERT_EQ(e.lineNumber, 2U);
         ASSERT_EQ(e.pos, f.length());
         ASSERT_EQ(e.message, "Expected '>'.");
     }
@@ -1025,7 +1025,7 @@ TEST(parsertests, test39_parse_operand_string)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_OPERAND);
-        ASSERT_EQ(e.line_number, 2U);
+        ASSERT_EQ(e.lineNumber, 2U);
         ASSERT_EQ(e.pos, op.find(' ') + 1);
         ASSERT_EQ(e.message, "Expected string literal");
     }
@@ -1046,7 +1046,7 @@ TEST(parsertests, test39_parse_operand_string)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_OPERAND);
-        ASSERT_EQ(e.line_number, 2U);
+        ASSERT_EQ(e.lineNumber, 2U);
         ASSERT_EQ(e.pos, op.find(' ') + 1);
         ASSERT_EQ(e.message, "Expected string literal");
     }
@@ -1089,7 +1089,7 @@ TEST(parsertests, test40_parse_operand_string_escape_seq)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_STRING_UNKNOWN_ESCAPE_SEQUENCE);
-        ASSERT_EQ(e.line_number, 2U);
+        ASSERT_EQ(e.lineNumber, 2U);
         ASSERT_EQ(e.pos, op.find('\\'));
         ASSERT_EQ(e.message, "Unknown escape sequence");
     }
@@ -1135,7 +1135,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_STRING_INVALID_HEX_ESCAPE_SEQUENCE);
-        ASSERT_EQ(e.line_number, 2U);
+        ASSERT_EQ(e.lineNumber, 2U);
         ASSERT_EQ(e.pos, op.find('\\'));
         ASSERT_EQ(e.message, "Invalid \\x escape sequence");
     }
@@ -1156,7 +1156,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_STRING_INVALID_HEX_ESCAPE_SEQUENCE);
-        ASSERT_EQ(e.line_number, 2U);
+        ASSERT_EQ(e.lineNumber, 2U);
         ASSERT_EQ(e.pos, op.find('\\'));
         ASSERT_EQ(e.message, "Invalid \\x escape sequence");
     }
@@ -1177,7 +1177,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_STRING_INVALID_HEX_ESCAPE_SEQUENCE);
-        ASSERT_EQ(e.line_number, 2U);
+        ASSERT_EQ(e.lineNumber, 2U);
         ASSERT_EQ(e.pos, op.find('\\'));
         ASSERT_EQ(e.message, "Invalid \\x escape sequence");
     }
@@ -1198,7 +1198,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_STRING_INVALID_HEX_ESCAPE_SEQUENCE);
-        ASSERT_EQ(e.line_number, 2U);
+        ASSERT_EQ(e.lineNumber, 2U);
         ASSERT_EQ(e.pos, op.find('\\'));
         ASSERT_EQ(e.message, "Invalid \\x escape sequence");
     }
@@ -1258,13 +1258,13 @@ TEST(parsertests, test43_call_short)
 
         auto item = p.Parse(v);
 
-        const auto sig_f = GetFunctionSignatureFromName("f", {});
+        const auto sigF = GetFunctionSignatureFromName("f", {});
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {};
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].regs, regs);
     }
 
     {
@@ -1278,13 +1278,13 @@ TEST(parsertests, test43_call_short)
 
         auto item = p.Parse(v);
 
-        const auto sig_f = GetFunctionSignatureFromName("f", {});
+        const auto sigF = GetFunctionSignatureFromName("f", {});
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {0};
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].regs, regs);
     }
 
     {
@@ -1298,13 +1298,13 @@ TEST(parsertests, test43_call_short)
 
         auto item = p.Parse(v);
 
-        const auto sig_f = GetFunctionSignatureFromName("f", {});
+        const auto sigF = GetFunctionSignatureFromName("f", {});
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {0, 1};
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].regs, regs);
     }
 
     {
@@ -1351,13 +1351,13 @@ TEST(parsertests, test44_call)
 
         auto item = p.Parse(v);
 
-        const auto sig_f = GetFunctionSignatureFromName("f", {});
+        const auto sigF = GetFunctionSignatureFromName("f", {});
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {};
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].regs, regs);
     }
 
     {
@@ -1371,13 +1371,13 @@ TEST(parsertests, test44_call)
 
         auto item = p.Parse(v);
 
-        const auto sig_f = GetFunctionSignatureFromName("f", {});
+        const auto sigF = GetFunctionSignatureFromName("f", {});
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {0};
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].regs, regs);
     }
 
     {
@@ -1391,13 +1391,13 @@ TEST(parsertests, test44_call)
 
         auto item = p.Parse(v);
 
-        const auto sig_f = GetFunctionSignatureFromName("f", {});
+        const auto sigF = GetFunctionSignatureFromName("f", {});
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {0, 1};
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].regs, regs);
     }
 
     {
@@ -1411,13 +1411,13 @@ TEST(parsertests, test44_call)
 
         auto item = p.Parse(v);
 
-        const auto sig_f = GetFunctionSignatureFromName("f", {});
+        const auto sigF = GetFunctionSignatureFromName("f", {});
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {0, 1, 2};
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].regs, regs);
     }
 
     {
@@ -1431,13 +1431,13 @@ TEST(parsertests, test44_call)
 
         auto item = p.Parse(v);
 
-        const auto sig_f = GetFunctionSignatureFromName("f", {});
+        const auto sigF = GetFunctionSignatureFromName("f", {});
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {0, 1, 2, 3};
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].regs, regs);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].regs, regs);
     }
 
     {
@@ -1819,32 +1819,32 @@ TEST(parsertests, array_type)
         std::vector<Function::Parameter> params;
         panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
         params.emplace_back(Type {"i8", 1}, language);
-        const auto sig_f = GetFunctionSignatureFromName("f", params);
+        const auto sigF = GetFunctionSignatureFromName("f", params);
 
         ASSERT_TRUE(item.HasValue());
 
-        ASSERT_EQ(item.Value().record_table.at("R").field_list.size(), 1U);
-        ASSERT_TRUE(item.Value().record_table.at("R").field_list[0].type.IsArray());
-        ASSERT_TRUE(item.Value().record_table.at("R").field_list[0].type.IsObject());
-        ASSERT_EQ(item.Value().record_table.at("R").field_list[0].type.GetName(), "R[][]");
-        ASSERT_EQ(item.Value().record_table.at("R").field_list[0].type.GetComponentName(), "R");
-        ASSERT_EQ(item.Value().record_table.at("R").field_list[0].type.GetDescriptor(), "[[LR;");
+        ASSERT_EQ(item.Value().recordTable.at("R").fieldList.size(), 1U);
+        ASSERT_TRUE(item.Value().recordTable.at("R").fieldList[0].type.IsArray());
+        ASSERT_TRUE(item.Value().recordTable.at("R").fieldList[0].type.IsObject());
+        ASSERT_EQ(item.Value().recordTable.at("R").fieldList[0].type.GetName(), "R[][]");
+        ASSERT_EQ(item.Value().recordTable.at("R").fieldList[0].type.GetComponentName(), "R");
+        ASSERT_EQ(item.Value().recordTable.at("R").fieldList[0].type.GetDescriptor(), "[[LR;");
 
-        ASSERT_TRUE(item.Value().function_table.at(sig_f).return_type.IsArray());
-        ASSERT_TRUE(item.Value().function_table.at(sig_f).return_type.IsObject());
-        ASSERT_EQ(item.Value().function_table.at(sig_f).return_type.GetName(), "R[]");
-        ASSERT_EQ(item.Value().function_table.at(sig_f).return_type.GetComponentName(), "R");
-        ASSERT_EQ(item.Value().function_table.at(sig_f).return_type.GetDescriptor(), "[LR;");
+        ASSERT_TRUE(item.Value().functionTable.at(sigF).returnType.IsArray());
+        ASSERT_TRUE(item.Value().functionTable.at(sigF).returnType.IsObject());
+        ASSERT_EQ(item.Value().functionTable.at(sigF).returnType.GetName(), "R[]");
+        ASSERT_EQ(item.Value().functionTable.at(sigF).returnType.GetComponentName(), "R");
+        ASSERT_EQ(item.Value().functionTable.at(sigF).returnType.GetDescriptor(), "[LR;");
 
-        ASSERT_EQ(item.Value().function_table.at(sig_f).params.size(), 1U);
-        ASSERT_TRUE(item.Value().function_table.at(sig_f).params[0].type.IsArray());
-        ASSERT_TRUE(item.Value().function_table.at(sig_f).params[0].type.IsObject());
-        ASSERT_EQ(item.Value().function_table.at(sig_f).params[0].type.GetName(), "i8[]");
-        ASSERT_EQ(item.Value().function_table.at(sig_f).params[0].type.GetComponentName(), "i8");
-        ASSERT_EQ(item.Value().function_table.at(sig_f).params[0].type.GetDescriptor(), "[B");
+        ASSERT_EQ(item.Value().functionTable.at(sigF).params.size(), 1U);
+        ASSERT_TRUE(item.Value().functionTable.at(sigF).params[0].type.IsArray());
+        ASSERT_TRUE(item.Value().functionTable.at(sigF).params[0].type.IsObject());
+        ASSERT_EQ(item.Value().functionTable.at(sigF).params[0].type.GetName(), "i8[]");
+        ASSERT_EQ(item.Value().functionTable.at(sigF).params[0].type.GetComponentName(), "i8");
+        ASSERT_EQ(item.Value().functionTable.at(sigF).params[0].type.GetDescriptor(), "[B");
 
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].ids.size(), 1U);
-        ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].ids[0], "i32[][]");
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].ids.size(), 1U);
+        ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].ids[0], "i32[][]");
     }
 
     {
@@ -1963,7 +1963,7 @@ TEST(parsertests, parse_undefined_record_field)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_RECORD);
-        ASSERT_EQ(e.line_number, 3);
+        ASSERT_EQ(e.lineNumber, 3);
         ASSERT_EQ(e.pos, 27);
         ASSERT_EQ(e.message, "This record does not exist.");
     }
@@ -2005,7 +2005,7 @@ TEST(parsertests, parse_undefined_record_field)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_RECORD);
-        ASSERT_EQ(e.line_number, 3);
+        ASSERT_EQ(e.lineNumber, 3);
         ASSERT_EQ(e.pos, 26);
         ASSERT_EQ(e.message, "This record does not exist.");
     }
@@ -2028,7 +2028,7 @@ TEST(parsertests, parse_undefined_record_field)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_FIELD);
-        ASSERT_EQ(e.line_number, 3);
+        ASSERT_EQ(e.lineNumber, 3);
         ASSERT_EQ(e.pos, 34);
         ASSERT_EQ(e.message, "This field does not exist.");
     }
@@ -2093,7 +2093,7 @@ TEST(parsertests, parse_undefined_record_field)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_FIELD);
-        ASSERT_EQ(e.line_number, 5);
+        ASSERT_EQ(e.lineNumber, 5);
         ASSERT_EQ(e.pos, 57);
         ASSERT_EQ(e.message, "This field does not exist.");
     }
@@ -2136,7 +2136,7 @@ TEST(parsertests, parse_undefined_record_field)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_RECORD);
-        ASSERT_EQ(e.line_number, 3);
+        ASSERT_EQ(e.lineNumber, 3);
         ASSERT_EQ(e.pos, 44);
         ASSERT_EQ(e.message, "This record does not exist.");
     }
@@ -2219,12 +2219,12 @@ TEST(parsertests, Num_vregs)
         std::vector<Function::Parameter> params;
         panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
         params.emplace_back(Type {"u1", 0}, language);
-        const auto sig_main = GetFunctionSignatureFromName("main", params);
+        const auto sigMain = GetFunctionSignatureFromName("main", params);
 
-        auto it_func = program.function_table.find(sig_main);
+        auto itFunc = program.functionTable.find(sigMain);
 
-        ASSERT_TRUE(it_func != program.function_table.end());
-        ASSERT_EQ(it_func->second.regs_num, 2);
+        ASSERT_TRUE(itFunc != program.functionTable.end());
+        ASSERT_EQ(itFunc->second.regsNum, 2);
     }
 
     {
@@ -2249,13 +2249,13 @@ TEST(parsertests, Num_vregs)
         std::vector<Function::Parameter> params;
         panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
         params.emplace_back(Type {"u1", 0}, language);
-        const auto sig_main = GetFunctionSignatureFromName("main", params);
+        const auto sigMain = GetFunctionSignatureFromName("main", params);
 
         auto &program = res.Value();
-        auto it_func = program.function_table.find(sig_main);
+        auto itFunc = program.functionTable.find(sigMain);
 
-        ASSERT_TRUE(it_func != program.function_table.end());
-        ASSERT_EQ(it_func->second.regs_num, 2);
+        ASSERT_TRUE(itFunc != program.functionTable.end());
+        ASSERT_EQ(itFunc->second.regsNum, 2);
     }
 
     {
@@ -2276,13 +2276,13 @@ TEST(parsertests, Num_vregs)
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
 
-        const auto sig_main = GetFunctionSignatureFromName("main", {});
+        const auto sigMain = GetFunctionSignatureFromName("main", {});
 
         auto &program = res.Value();
-        auto it_func = program.function_table.find(sig_main);
+        auto itFunc = program.functionTable.find(sigMain);
 
-        ASSERT_TRUE(it_func != program.function_table.end());
-        ASSERT_EQ(it_func->second.regs_num, 1);
+        ASSERT_TRUE(itFunc != program.functionTable.end());
+        ASSERT_EQ(itFunc->second.regsNum, 1);
     }
 
     {
@@ -2307,13 +2307,13 @@ TEST(parsertests, Num_vregs)
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
 
-        const auto sig_main = GetFunctionSignatureFromName("main", {});
+        const auto sigMain = GetFunctionSignatureFromName("main", {});
 
         auto &program = res.Value();
-        auto it_func = program.function_table.find(sig_main);
+        auto itFunc = program.functionTable.find(sigMain);
 
-        ASSERT_TRUE(it_func != program.function_table.end());
-        ASSERT_EQ(it_func->second.regs_num, 5);
+        ASSERT_TRUE(itFunc != program.functionTable.end());
+        ASSERT_EQ(itFunc->second.regsNum, 5);
     }
 }
 
@@ -2360,7 +2360,7 @@ TEST(parsertests, parse_catch_directive)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_INCORRECT_DIRECTIVE_LOCATION);
-        ASSERT_EQ(e.line_number, 2);
+        ASSERT_EQ(e.lineNumber, 2);
         ASSERT_EQ(e.message, ".catch directive is located outside of a function body.");
     }
 
@@ -2384,7 +2384,7 @@ TEST(parsertests, parse_catch_directive)
             Error e = p.ShowError();
 
             ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION);
-            ASSERT_EQ(e.line_number, 3);
+            ASSERT_EQ(e.lineNumber, 3);
             ASSERT_EQ(e.pos, 0);
             ASSERT_EQ(e.message,
                       "Incorrect catch block declaration. Must be in the format: .catch <exception_record>, "
@@ -2429,7 +2429,7 @@ TEST(parsertests, parse_catch_directive)
 
         Error e = p.ShowError();
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_RECORD_NAME);
-        ASSERT_EQ(e.line_number, 3);
+        ASSERT_EQ(e.lineNumber, 3);
         ASSERT_EQ(e.pos, s.find('4'));
         ASSERT_EQ(e.message, "Invalid name of the exception record.");
     }
@@ -2457,7 +2457,7 @@ TEST(parsertests, parse_catch_directive)
 
     {
         std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
-        std::vector<std::string> label_names {"try block begin", "try block end", "catch block begin"};
+        std::vector<std::string> labelNames {"try block begin", "try block end", "catch block begin"};
 
         for (size_t i = 0; i < labels.size(); i++) {
             std::string s = ".catch Exception";
@@ -2482,7 +2482,7 @@ TEST(parsertests, parse_catch_directive)
 
                 Error e = p.ShowError();
                 ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION) << "Test " << directive;
-                ASSERT_EQ(e.line_number, 3) << "Test " << directive;
+                ASSERT_EQ(e.lineNumber, 3) << "Test " << directive;
                 ASSERT_EQ(e.pos, directive.find('$')) << "Test " << directive;
                 ASSERT_EQ(e.message, "Expected comma.") << "Test " << directive;
             }
@@ -2495,7 +2495,7 @@ TEST(parsertests, parse_catch_directive)
                 Lexer l;
                 Parser p;
 
-                std::string catch_table = ".catch Exception, try_begin, try_end, catch_begin";
+                std::string catchTable = ".catch Exception, try_begin, try_end, catch_begin";
 
                 v.push_back(l.TokenizeString(".record Exception {}").first);
                 v.push_back(l.TokenizeString(".function void main() {").first);
@@ -2504,7 +2504,7 @@ TEST(parsertests, parse_catch_directive)
                         v.push_back(l.TokenizeString(labels[j] + ":").first);
                     }
                 }
-                v.push_back(l.TokenizeString(catch_table).first);
+                v.push_back(l.TokenizeString(catchTable).first);
                 v.push_back(l.TokenizeString("}").first);
 
                 p.Parse(v);
@@ -2512,7 +2512,7 @@ TEST(parsertests, parse_catch_directive)
                 Error e = p.ShowError();
 
                 ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_LABEL_EXT) << ss.str();
-                ASSERT_EQ(e.pos, catch_table.find(labels[i])) << ss.str();
+                ASSERT_EQ(e.pos, catchTable.find(labels[i])) << ss.str();
                 ASSERT_EQ(e.message, "This label does not exist.") << ss.str();
             }
         }
@@ -2537,19 +2537,19 @@ TEST(parsertests, parse_catch_directive)
 
         Error e = p.ShowError();
 
-        const auto sig_main = GetFunctionSignatureFromName("main", {});
+        const auto sigMain = GetFunctionSignatureFromName("main", {});
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
 
         auto &program = res.Value();
-        auto &function = program.function_table.find(sig_main)->second;
+        auto &function = program.functionTable.find(sigMain)->second;
 
-        ASSERT_EQ(function.catch_blocks.size(), 1);
-        ASSERT_EQ(function.catch_blocks[0].exception_record, "Exception");
-        ASSERT_EQ(function.catch_blocks[0].try_begin_label, "try_begin");
-        ASSERT_EQ(function.catch_blocks[0].try_end_label, "try_end");
-        ASSERT_EQ(function.catch_blocks[0].catch_begin_label, "catch_begin");
-        ASSERT_EQ(function.catch_blocks[0].catch_end_label, "catch_begin");
+        ASSERT_EQ(function.catchBlocks.size(), 1);
+        ASSERT_EQ(function.catchBlocks[0].exceptionRecord, "Exception");
+        ASSERT_EQ(function.catchBlocks[0].tryBeginLabel, "try_begin");
+        ASSERT_EQ(function.catchBlocks[0].tryEndLabel, "try_end");
+        ASSERT_EQ(function.catchBlocks[0].catchBeginLabel, "catch_begin");
+        ASSERT_EQ(function.catchBlocks[0].catchEndLabel, "catch_begin");
     }
 
     {
@@ -2572,19 +2572,19 @@ TEST(parsertests, parse_catch_directive)
 
         Error e = p.ShowError();
 
-        const auto sig_main = GetFunctionSignatureFromName("main", {});
+        const auto sigMain = GetFunctionSignatureFromName("main", {});
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
 
         auto &program = res.Value();
-        auto &function = program.function_table.find(sig_main)->second;
+        auto &function = program.functionTable.find(sigMain)->second;
 
-        ASSERT_EQ(function.catch_blocks.size(), 1);
-        ASSERT_EQ(function.catch_blocks[0].exception_record, "Exception");
-        ASSERT_EQ(function.catch_blocks[0].try_begin_label, "try_begin");
-        ASSERT_EQ(function.catch_blocks[0].try_end_label, "try_end");
-        ASSERT_EQ(function.catch_blocks[0].catch_begin_label, "catch_begin");
-        ASSERT_EQ(function.catch_blocks[0].catch_end_label, "catch_end");
+        ASSERT_EQ(function.catchBlocks.size(), 1);
+        ASSERT_EQ(function.catchBlocks[0].exceptionRecord, "Exception");
+        ASSERT_EQ(function.catchBlocks[0].tryBeginLabel, "try_begin");
+        ASSERT_EQ(function.catchBlocks[0].tryEndLabel, "try_end");
+        ASSERT_EQ(function.catchBlocks[0].catchBeginLabel, "catch_begin");
+        ASSERT_EQ(function.catchBlocks[0].catchEndLabel, "catch_end");
     }
 }
 
@@ -2602,7 +2602,7 @@ TEST(parsertests, parse_catchall_directive)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_INCORRECT_DIRECTIVE_LOCATION);
-        ASSERT_EQ(e.line_number, 1);
+        ASSERT_EQ(e.lineNumber, 1);
         ASSERT_EQ(e.message, ".catchall directive is located outside of a function body.");
     }
 
@@ -2624,7 +2624,7 @@ TEST(parsertests, parse_catchall_directive)
             Error e = p.ShowError();
 
             ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION);
-            ASSERT_EQ(e.line_number, 2);
+            ASSERT_EQ(e.lineNumber, 2);
             ASSERT_EQ(e.pos, 0);
             ASSERT_EQ(e.message,
                       "Incorrect catch block declaration. Must be in the format: .catchall <try_begin_label>, "
@@ -2634,7 +2634,7 @@ TEST(parsertests, parse_catchall_directive)
 
     {
         std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
-        std::vector<std::string> label_names {"try block begin", "try block end", "catch block begin"};
+        std::vector<std::string> labelNames {"try block begin", "try block end", "catch block begin"};
 
         for (size_t i = 0; i < labels.size(); i++) {
             std::string s = ".catchall ";
@@ -2661,7 +2661,7 @@ TEST(parsertests, parse_catchall_directive)
                 Error e = p.ShowError();
 
                 ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION) << "Test " << directive;
-                ASSERT_EQ(e.line_number, 2) << "Test " << directive;
+                ASSERT_EQ(e.lineNumber, 2) << "Test " << directive;
                 ASSERT_EQ(e.pos, directive.find('$')) << "Test " << directive;
                 ASSERT_EQ(e.message, "Expected comma.") << "Test " << directive;
             }
@@ -2715,9 +2715,9 @@ TEST(parsertests, parse_catchall_directive)
 
                 Error e = p.ShowError();
                 ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_LABEL) << "Test " << directive;
-                ASSERT_EQ(e.line_number, 2) << "Test " << directive;
+                ASSERT_EQ(e.lineNumber, 2) << "Test " << directive;
                 ASSERT_EQ(e.pos, directive.find('1')) << "Test " << directive;
-                ASSERT_EQ(e.message, std::string("Invalid name of the ") + label_names[i] + " label.")
+                ASSERT_EQ(e.message, std::string("Invalid name of the ") + labelNames[i] + " label.")
                     << "Test " << directive;
             }
 
@@ -2729,7 +2729,7 @@ TEST(parsertests, parse_catchall_directive)
                 Lexer l;
                 Parser p;
 
-                std::string catch_table = ".catchall try_begin, try_end, catch_begin";
+                std::string catchTable = ".catchall try_begin, try_end, catch_begin";
 
                 v.push_back(l.TokenizeString(".function void main() {").first);
                 for (size_t j = 0; j < labels.size(); j++) {
@@ -2737,7 +2737,7 @@ TEST(parsertests, parse_catchall_directive)
                         v.push_back(l.TokenizeString(labels[j] + ":").first);
                     }
                 }
-                v.push_back(l.TokenizeString(catch_table).first);
+                v.push_back(l.TokenizeString(catchTable).first);
                 v.push_back(l.TokenizeString("}").first);
 
                 p.Parse(v);
@@ -2745,7 +2745,7 @@ TEST(parsertests, parse_catchall_directive)
                 Error e = p.ShowError();
 
                 ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_LABEL_EXT) << ss.str();
-                ASSERT_EQ(e.pos, catch_table.find(labels[i])) << ss.str();
+                ASSERT_EQ(e.pos, catchTable.find(labels[i])) << ss.str();
                 ASSERT_EQ(e.message, "This label does not exist.") << ss.str();
             }
         }
@@ -2769,24 +2769,24 @@ TEST(parsertests, parse_catchall_directive)
 
         Error e = p.ShowError();
 
-        const auto sig_main = GetFunctionSignatureFromName("main", {});
+        const auto sigMain = GetFunctionSignatureFromName("main", {});
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
 
         auto &program = res.Value();
-        auto &function = program.function_table.find(sig_main)->second;
+        auto &function = program.functionTable.find(sigMain)->second;
 
-        ASSERT_EQ(function.catch_blocks.size(), 1);
-        ASSERT_EQ(function.catch_blocks[0].exception_record, "");
-        ASSERT_EQ(function.catch_blocks[0].try_begin_label, "try_begin");
-        ASSERT_EQ(function.catch_blocks[0].try_end_label, "try_end");
-        ASSERT_EQ(function.catch_blocks[0].catch_begin_label, "catch_begin");
+        ASSERT_EQ(function.catchBlocks.size(), 1);
+        ASSERT_EQ(function.catchBlocks[0].exceptionRecord, "");
+        ASSERT_EQ(function.catchBlocks[0].tryBeginLabel, "try_begin");
+        ASSERT_EQ(function.catchBlocks[0].tryEndLabel, "try_end");
+        ASSERT_EQ(function.catchBlocks[0].catchBeginLabel, "catch_begin");
     }
 }
 
 TEST(parsertests, parse_numbers)
 {
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
 
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -2795,7 +2795,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("movi v0, 12345}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(12345)))
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(12345)))
             << "12345 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
@@ -2807,7 +2807,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("movi v0, 0xFEFfe}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(0xFEFfe)))
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(0xFEFfe)))
             << "0xFEFfe expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
@@ -2819,7 +2819,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("movi v0, 01237}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(01237)))
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(01237)))
             << "01237 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
@@ -2831,7 +2831,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("movi v0, 0b10101}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(0b10101)))
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(0b10101)))
             << "0b10101 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
@@ -2843,7 +2843,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("movi v0, -12345}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(-12345)))
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-12345)))
             << "-12345 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
@@ -2855,7 +2855,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("movi v0, -0xFEFfe}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(-0xFEFfe)))
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-0xFEFfe)))
             << "12345 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
@@ -2867,7 +2867,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("movi v0, -01237}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(-01237)))
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-01237)))
             << "12345 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
@@ -2879,7 +2879,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("movi v0, -0b10101}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(-0b10101)))
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-0b10101)))
             << "-0b10101 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
@@ -2891,7 +2891,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1.0}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1.0)) << "1.0 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0)) << "1.0 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -2902,7 +2902,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1.}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1.)) << "1. expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.)) << "1. expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -2913,7 +2913,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, .1}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(.1)) << ".0 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(.1)) << ".0 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -2924,7 +2924,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1e10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1e10)) << "1e10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1e10)) << "1e10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -2935,7 +2935,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1e+10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1e+10)) << "1e+10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1e+10)) << "1e+10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -2946,7 +2946,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1e-10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1e-10)) << "1e-10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1e-10)) << "1e-10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -2957,7 +2957,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1.0e10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1.0e10)) << "1.0e10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0e10)) << "1.0e10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -2968,7 +2968,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1.0e+10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1.0e+10)) << "1.0e+10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0e+10)) << "1.0e+10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -2979,7 +2979,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1.0e-10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1.0e-10)) << "12345 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0e-10)) << "12345 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -2990,7 +2990,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1.e10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1.e10)) << "1.e10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.e10)) << "1.e10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3001,7 +3001,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1.e+10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1.e+10)) << "1.e+10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.e+10)) << "1.e+10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3012,7 +3012,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, 1.e-10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(1.e-10)) << "12345 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.e-10)) << "12345 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3023,7 +3023,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1.0}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1.0)) << "-1.0 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0)) << "-1.0 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3034,7 +3034,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1.}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1.)) << "-1. expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.)) << "-1. expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3045,7 +3045,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -.1}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-.1)) << "-.0 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-.1)) << "-.0 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3056,7 +3056,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1e10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1e10)) << "-1e10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1e10)) << "-1e10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3067,7 +3067,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1e+10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1e+10)) << "-1e+10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1e+10)) << "-1e+10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3078,7 +3078,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1e-10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1e-10)) << "-1e-10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1e-10)) << "-1e-10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3089,7 +3089,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1.0e10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1.0e10)) << "-1.0e10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0e10)) << "-1.0e10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3100,7 +3100,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1.0e+10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1.0e+10)) << "-1.0e+10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0e+10)) << "-1.0e+10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3111,7 +3111,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1.0e-10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1.0e-10)) << "-1.0e-10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0e-10)) << "-1.0e-10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3122,7 +3122,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1.e10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1.e10)) << "-1.e10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.e10)) << "-1.e10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3133,7 +3133,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1.e+10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1.e+10)) << "-1.e+10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.e+10)) << "-1.e+10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 
@@ -3144,7 +3144,7 @@ TEST(parsertests, parse_numbers)
         v.push_back(l.TokenizeString(".function u8 main(){").first);
         v.push_back(l.TokenizeString("fmovi.64 v0, -1.e-10}").first);
         auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(-1.e-10)) << "-1.e-10 expected";
+        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.e-10)) << "-1.e-10 expected";
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     }
 }
@@ -3167,7 +3167,7 @@ TEST(parsertests, field_value)
         Error e = p.ShowError();
 
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_METADATA_INVALID_VALUE);
-        ASSERT_EQ(e.line_number, 2);
+        ASSERT_EQ(e.lineNumber, 2);
         ASSERT_EQ(e.pos, s.find('A'));
         ASSERT_EQ(e.message, "Excepted integer literal");
     }
@@ -3190,8 +3190,8 @@ TEST(parsertests, field_value)
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE) << e.message;
 
         auto &program = res.Value();
-        auto &record = program.record_table.find("A")->second;
-        auto &field = record.field_list[0];
+        auto &record = program.recordTable.find("A")->second;
+        auto &field = record.fieldList[0];
 
         ASSERT_EQ(field.metadata->GetFieldType().GetName(), "i32");
         ASSERT_TRUE(field.metadata->GetValue());
@@ -3217,8 +3217,8 @@ TEST(parsertests, field_value)
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE) << e.message;
 
         auto &program = res.Value();
-        auto &record = program.record_table.find("A")->second;
-        auto &field = record.field_list[0];
+        auto &record = program.recordTable.find("A")->second;
+        auto &field = record.fieldList[0];
 
         ASSERT_EQ(field.metadata->GetFieldType().GetName(), "panda.String");
         ASSERT_TRUE(field.metadata->GetValue());
@@ -3244,8 +3244,8 @@ TEST(parsertests, field_value)
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE) << e.message;
 
         auto &program = res.Value();
-        auto &record = program.record_table.find("A")->second;
-        auto &field = record.field_list[0];
+        auto &record = program.recordTable.find("A")->second;
+        auto &field = record.fieldList[0];
 
         ASSERT_EQ(field.metadata->GetFieldType().GetName(), "panda.String");
         ASSERT_FALSE(field.metadata->GetValue());
@@ -3608,81 +3608,75 @@ TEST(parsertests, test_array_integer_def)
     auto item = p.Parse(v);
 
     auto counter = 0;
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::BOOL));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag, panda::panda_file::LiteralTag::BOOL);
-    ASSERT_EQ(std::get<bool>(item.Value().literalarray_table.at("array").literals[counter++].value), true);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::BOOL);
+    ASSERT_EQ(std::get<bool>(item.Value().literalarrayTable.at("array").literals[counter++].value), true);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals[counter++].value), 2);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value), 2);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(
-        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals[counter++].value)),
+        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value)),
         -30);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals[counter++].value), 400);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value), 400);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(
-        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals[counter++].value)),
+        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value)),
         -5000);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals[counter++].value), 60000);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value), 60000);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(
-        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals[counter++].value)),
+        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value)),
         -700000);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::BIGINT));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag, panda::panda_file::LiteralTag::BIGINT);
-    ASSERT_EQ(std::get<uint64_t>(item.Value().literalarray_table.at("array").literals[counter++].value), 8000000);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::BIGINT);
+    ASSERT_EQ(std::get<uint64_t>(item.Value().literalarrayTable.at("array").literals[counter++].value), 8000000);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::BIGINT));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag, panda::panda_file::LiteralTag::BIGINT);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::BIGINT);
     ASSERT_EQ(
-        static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array").literals[counter++].value)),
+        static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarrayTable.at("array").literals[counter++].value)),
         -90000000);
 }
 
@@ -3698,20 +3692,19 @@ TEST(parsertests, test_array_float_def)
     auto item = p.Parse(v);
 
     int counter = 0;
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::FLOAT));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag, panda::panda_file::LiteralTag::FLOAT);
-    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array").literals[counter++].value), -123.4, 0.01F);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::FLOAT);
+    ASSERT_NEAR(std::get<float>(item.Value().literalarrayTable.at("array").literals[counter++].value), -123.4, 0.01F);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::DOUBLE));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag, panda::panda_file::LiteralTag::DOUBLE);
-    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array").literals[counter++].value), -1234.5,
-                0.01F);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::DOUBLE);
+    ASSERT_NEAR(std::get<double>(item.Value().literalarrayTable.at("array").literals[counter++].value), -1234.5, 0.01F);
 }
 
 TEST(parsertests, test_array_string_def)
@@ -3728,46 +3721,46 @@ TEST(parsertests, test_array_string_def)
     auto item = p.Parse(v);
 
     auto counter = 0;
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::STRING));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag, panda::panda_file::LiteralTag::STRING);
-    ASSERT_EQ(std::get<std::string>(item.Value().literalarray_table.at("array").literals[counter++].value), "a");
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::STRING);
+    ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[counter++].value), "a");
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::STRING));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag, panda::panda_file::LiteralTag::STRING);
-    ASSERT_EQ(std::get<std::string>(item.Value().literalarray_table.at("array").literals[counter++].value), "ab");
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::STRING);
+    ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[counter++].value), "ab");
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[counter++].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::STRING));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[counter].tag, panda::panda_file::LiteralTag::STRING);
-    ASSERT_EQ(std::get<std::string>(item.Value().literalarray_table.at("array").literals[counter++].value), "abc");
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::STRING);
+    ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[counter++].value), "abc");
 
     // string intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_static").literals[0].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[0].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_static").literals[0].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_static").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_STRING));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_static").literals[1].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[1].tag,
               panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_static").literals[1].value), 3);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_static").literals[1].value), 3);
 
     // string array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_static").literals[2].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[2].tag,
               panda::panda_file::LiteralTag::ARRAY_STRING);
-    ASSERT_EQ(std::get<std::string>(item.Value().literalarray_table.at("array_static").literals[2].value), "a");
-    ASSERT_EQ(item.Value().literalarray_table.at("array_static").literals[3].tag,
+    ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array_static").literals[2].value), "a");
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[3].tag,
               panda::panda_file::LiteralTag::ARRAY_STRING);
-    ASSERT_EQ(std::get<std::string>(item.Value().literalarray_table.at("array_static").literals[3].value), "ab");
-    ASSERT_EQ(item.Value().literalarray_table.at("array_static").literals[4].tag,
+    ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array_static").literals[3].value), "ab");
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[4].tag,
               panda::panda_file::LiteralTag::ARRAY_STRING);
-    ASSERT_EQ(std::get<std::string>(item.Value().literalarray_table.at("array_static").literals[4].value), "abc");
+    ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array_static").literals[4].value), "abc");
 }
 
 TEST(parsertests, test_array_static_bool_def)
@@ -3778,17 +3771,17 @@ TEST(parsertests, test_array_static_bool_def)
     v.push_back(l.TokenizeString(".array array u1 3 { 1 0 1 }").first);
     auto item = p.Parse(v);
 
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[0].value),
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U1));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals[1].value), 3);
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_U1);
-    ASSERT_EQ(std::get<bool>(item.Value().literalarray_table.at("array").literals[2].value), true);
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_U1);
-    ASSERT_EQ(std::get<bool>(item.Value().literalarray_table.at("array").literals[3].value), false);
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_U1);
-    ASSERT_EQ(std::get<bool>(item.Value().literalarray_table.at("array").literals[4].value), true);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[1].value), 3);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_U1);
+    ASSERT_EQ(std::get<bool>(item.Value().literalarrayTable.at("array").literals[2].value), true);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_U1);
+    ASSERT_EQ(std::get<bool>(item.Value().literalarrayTable.at("array").literals[3].value), false);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_U1);
+    ASSERT_EQ(std::get<bool>(item.Value().literalarrayTable.at("array").literals[4].value), true);
 }
 
 TEST(parsertests, test_array_static_integer_def)
@@ -3807,180 +3800,171 @@ TEST(parsertests, test_array_static_integer_def)
     auto item = p.Parse(v);
 
     // unsigned byte intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_byte").literals[0].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[0].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals[0].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U8));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_byte").literals[1].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[1].tag,
               panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals[1].value), 3);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[1].value), 3);
 
     // unsigned byte array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_byte").literals[2].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[2].tag,
               panda::panda_file::LiteralTag::ARRAY_U8);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals[2].value), 1);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_byte").literals[3].tag,
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[2].value), 1);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[3].tag,
               panda::panda_file::LiteralTag::ARRAY_U8);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals[3].value), 2);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_byte").literals[4].tag,
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[3].value), 2);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[4].tag,
               panda::panda_file::LiteralTag::ARRAY_U8);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals[4].value), 3);
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[4].value), 3);
 
     // byte intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_byte").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_byte").literals[0].value),
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_byte").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I8));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_byte").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_byte").literals[1].value), 3);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_byte").literals[1].value), 3);
 
     // byte array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_byte").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_I8);
-    ASSERT_EQ(
-        static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarray_table.at("array_byte").literals[2].value)), -1);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_byte").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_I8);
-    ASSERT_EQ(
-        static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarray_table.at("array_byte").literals[3].value)), 2);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_byte").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_I8);
-    ASSERT_EQ(
-        static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarray_table.at("array_byte").literals[4].value)), -3);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_I8);
+    ASSERT_EQ(static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarrayTable.at("array_byte").literals[2].value)),
+              -1);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_I8);
+    ASSERT_EQ(static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarrayTable.at("array_byte").literals[3].value)),
+              2);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_I8);
+    ASSERT_EQ(static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarrayTable.at("array_byte").literals[4].value)),
+              -3);
 
     // unsigned short intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_short").literals[0].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[0].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_short").literals[0].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U16));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_short").literals[1].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[1].tag,
               panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_short").literals[1].value), 3);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[1].value), 3);
 
     // unsigned short array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_short").literals[2].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[2].tag,
               panda::panda_file::LiteralTag::ARRAY_U16);
-    ASSERT_EQ(std::get<uint16_t>(item.Value().literalarray_table.at("array_unsigned_short").literals[2].value), 100);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_short").literals[3].tag,
+    ASSERT_EQ(std::get<uint16_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[2].value), 100);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[3].tag,
               panda::panda_file::LiteralTag::ARRAY_U16);
-    ASSERT_EQ(std::get<uint16_t>(item.Value().literalarray_table.at("array_unsigned_short").literals[3].value), 200);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_short").literals[4].tag,
+    ASSERT_EQ(std::get<uint16_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[3].value), 200);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[4].tag,
               panda::panda_file::LiteralTag::ARRAY_U16);
-    ASSERT_EQ(std::get<uint16_t>(item.Value().literalarray_table.at("array_unsigned_short").literals[4].value), 300);
+    ASSERT_EQ(std::get<uint16_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[4].value), 300);
 
     // short intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_short").literals[0].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[0].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_short").literals[0].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_short").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I16));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_short").literals[1].tag,
-              panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_short").literals[1].value), 3);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_short").literals[1].value), 3);
 
     // short array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_short").literals[2].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[2].tag,
               panda::panda_file::LiteralTag::ARRAY_I16);
     ASSERT_EQ(
-        static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarray_table.at("array_short").literals[2].value)),
+        static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarrayTable.at("array_short").literals[2].value)),
         100);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_short").literals[3].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[3].tag,
               panda::panda_file::LiteralTag::ARRAY_I16);
     ASSERT_EQ(
-        static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarray_table.at("array_short").literals[3].value)),
+        static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarrayTable.at("array_short").literals[3].value)),
         -200);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_short").literals[4].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[4].tag,
               panda::panda_file::LiteralTag::ARRAY_I16);
     ASSERT_EQ(
-        static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarray_table.at("array_short").literals[4].value)),
+        static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarrayTable.at("array_short").literals[4].value)),
         300);
 
     // unsigned int intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_int").literals[0].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[0].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_int").literals[0].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U32));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_int").literals[1].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[1].tag,
               panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals[1].value), 3);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[1].value), 3);
 
     // unsigned int array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_int").literals[2].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[2].tag,
               panda::panda_file::LiteralTag::ARRAY_U32);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals[2].value), 1000);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_int").literals[3].tag,
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[2].value), 1000);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[3].tag,
               panda::panda_file::LiteralTag::ARRAY_U32);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals[3].value), 2000);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_int").literals[4].tag,
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[3].value), 2000);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[4].tag,
               panda::panda_file::LiteralTag::ARRAY_U32);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals[4].value), 3000);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[4].value), 3000);
 
     // int intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_int").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_int").literals[0].value),
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_int").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I32));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_int").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_int").literals[1].value), 3);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_int").literals[1].value), 3);
 
     // int array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_int").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_I32);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_I32);
     ASSERT_EQ(
-        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array_int").literals[2].value)),
+        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array_int").literals[2].value)),
         -1000);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_int").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_I32);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_I32);
     ASSERT_EQ(
-        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array_int").literals[3].value)),
+        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array_int").literals[3].value)),
         2000);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_int").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_I32);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_I32);
     ASSERT_EQ(
-        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array_int").literals[4].value)),
+        static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array_int").literals[4].value)),
         -3000);
 
     // unsigned long intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals[0].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[0].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_long").literals[0].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U64));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals[1].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[1].tag,
               panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_long").literals[1].value), 3);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[1].value), 3);
 
     // unsigned long array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals[2].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[2].tag,
               panda::panda_file::LiteralTag::ARRAY_U64);
-    ASSERT_EQ(std::get<uint64_t>(item.Value().literalarray_table.at("array_unsigned_long").literals[2].value), 10000);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals[3].tag,
+    ASSERT_EQ(std::get<uint64_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[2].value), 10000);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[3].tag,
               panda::panda_file::LiteralTag::ARRAY_U64);
-    ASSERT_EQ(std::get<uint64_t>(item.Value().literalarray_table.at("array_unsigned_long").literals[3].value), 20000);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals[4].tag,
+    ASSERT_EQ(std::get<uint64_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[3].value), 20000);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[4].tag,
               panda::panda_file::LiteralTag::ARRAY_U64);
-    ASSERT_EQ(std::get<uint64_t>(item.Value().literalarray_table.at("array_unsigned_long").literals[4].value), 30000);
+    ASSERT_EQ(std::get<uint64_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[4].value), 30000);
 
     // long intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_long").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_long").literals[0].value),
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_long").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I64));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_long").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_long").literals[1].value), 3);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_long").literals[1].value), 3);
 
     // long array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_long").literals[2].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[2].tag,
               panda::panda_file::LiteralTag::ARRAY_I64);
     ASSERT_EQ(
-        static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array_long").literals[2].value)),
+        static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarrayTable.at("array_long").literals[2].value)),
         10000);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_long").literals[3].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[3].tag,
               panda::panda_file::LiteralTag::ARRAY_I64);
     ASSERT_EQ(
-        static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array_long").literals[3].value)),
+        static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarrayTable.at("array_long").literals[3].value)),
         -20000);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_long").literals[4].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[4].tag,
               panda::panda_file::LiteralTag::ARRAY_I64);
     ASSERT_EQ(
-        static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array_long").literals[4].value)),
+        static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarrayTable.at("array_long").literals[4].value)),
         30000);
 }
 
@@ -3994,44 +3978,43 @@ TEST(parsertests, test_array_static_float_def)
     auto item = p.Parse(v);
 
     // float intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_float").literals[0].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[0].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_float").literals[0].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_float").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_F32));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_float").literals[1].tag,
-              panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_float").literals[1].value), 3);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_float").literals[1].value), 3);
 
     // float array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_float").literals[2].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[2].tag,
               panda::panda_file::LiteralTag::ARRAY_F32);
-    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array_float").literals[2].value), 12.3, 0.01F);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_float").literals[3].tag,
+    ASSERT_NEAR(std::get<float>(item.Value().literalarrayTable.at("array_float").literals[2].value), 12.3, 0.01F);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[3].tag,
               panda::panda_file::LiteralTag::ARRAY_F32);
-    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array_float").literals[3].value), -12.34, 0.001F);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_float").literals[4].tag,
+    ASSERT_NEAR(std::get<float>(item.Value().literalarrayTable.at("array_float").literals[3].value), -12.34, 0.001F);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[4].tag,
               panda::panda_file::LiteralTag::ARRAY_F32);
-    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array_float").literals[4].value), 12.345, 0.0001F);
+    ASSERT_NEAR(std::get<float>(item.Value().literalarrayTable.at("array_float").literals[4].value), 12.345, 0.0001F);
 
     // double intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array_double").literals[0].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[0].tag,
               panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_double").literals[0].value),
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_double").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_F64));
-    ASSERT_EQ(item.Value().literalarray_table.at("array_double").literals[1].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[1].tag,
               panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_double").literals[1].value), 3);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_double").literals[1].value), 3);
 
     // double array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array_double").literals[2].tag,
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[2].tag,
               panda::panda_file::LiteralTag::ARRAY_F64);
-    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array_double").literals[2].value), -120.3, 0.01F);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_double").literals[3].tag,
+    ASSERT_NEAR(std::get<double>(item.Value().literalarrayTable.at("array_double").literals[2].value), -120.3, 0.01F);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[3].tag,
               panda::panda_file::LiteralTag::ARRAY_F64);
-    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array_double").literals[3].value), 120.34, 0.001F);
-    ASSERT_EQ(item.Value().literalarray_table.at("array_double").literals[4].tag,
+    ASSERT_NEAR(std::get<double>(item.Value().literalarrayTable.at("array_double").literals[3].value), 120.34, 0.001F);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[4].tag,
               panda::panda_file::LiteralTag::ARRAY_F64);
-    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array_double").literals[4].value), -120.345,
+    ASSERT_NEAR(std::get<double>(item.Value().literalarrayTable.at("array_double").literals[4].value), -120.345,
                 0.0001F);
 }
 
@@ -4044,19 +4027,19 @@ TEST(parsertests, test_array_static_string_def)
     auto item = p.Parse(v);
 
     // string intro literals
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
-    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals[0].value),
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[0].value),
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_STRING));
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
-    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals[1].value), 3);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+    ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[1].value), 3);
 
     // string array elements
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_STRING);
-    ASSERT_EQ(std::get<std::string>(item.Value().literalarray_table.at("array").literals[2].value), "a");
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_STRING);
-    ASSERT_EQ(std::get<std::string>(item.Value().literalarray_table.at("array").literals[3].value), "ab");
-    ASSERT_EQ(item.Value().literalarray_table.at("array").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_STRING);
-    ASSERT_EQ(std::get<std::string>(item.Value().literalarray_table.at("array").literals[4].value), "abc");
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_STRING);
+    ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[2].value), "a");
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_STRING);
+    ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[3].value), "ab");
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_STRING);
+    ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[4].value), "abc");
 }
 
 TEST(parsertests, test_array_string_use)
@@ -4082,13 +4065,13 @@ TEST(parsertests, test_array_string_use)
 
     auto item = p.Parse(v);
 
-    const auto sig_f = GetFunctionSignatureFromName("f", {});
+    const auto sigF = GetFunctionSignatureFromName("f", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].opcode, Opcode::LDA_CONST);
-    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].ids[0], "array");
+    ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].opcode, Opcode::LDA_CONST);
+    ASSERT_EQ(item.Value().functionTable.at(sigF).ins[0].ids[0], "array");
 
-    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].opcode, Opcode::LDA_CONST);
-    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].ids[0], "array_static");
+    ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].opcode, Opcode::LDA_CONST);
+    ASSERT_EQ(item.Value().functionTable.at(sigF).ins[1].ids[0], "array_static");
 }
 
 TEST(parsertests, test_function_overloading_1)
@@ -4108,11 +4091,11 @@ TEST(parsertests, test_function_overloading_1)
     std::vector<Function::Parameter> params;
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"i8", 0}, language);
-    const auto sig_f = GetFunctionSignatureFromName("f", {});
-    const auto sig_fi8 = GetFunctionSignatureFromName("f", params);
+    const auto sigF = GetFunctionSignatureFromName("f", {});
+    const auto sigFi8 = GetFunctionSignatureFromName("f", params);
 
-    ASSERT_TRUE(program.function_table.find(sig_f) != program.function_table.end());
-    ASSERT_TRUE(program.function_table.find(sig_fi8) != program.function_table.end());
+    ASSERT_TRUE(program.functionTable.find(sigF) != program.functionTable.end());
+    ASSERT_TRUE(program.functionTable.find(sigFi8) != program.functionTable.end());
 }
 
 TEST(parsertests, test_function_overloading_2)
@@ -4182,12 +4165,12 @@ TEST(parsertests, test_function_overloading_5)
     std::vector<Function::Parameter> params;
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"u1", 0}, language);
-    const auto sig_f = GetFunctionSignatureFromName("f", {});
-    const auto sig_main = GetFunctionSignatureFromName("main", params);
+    const auto sigF = GetFunctionSignatureFromName("f", {});
+    const auto sigMain = GetFunctionSignatureFromName("main", params);
 
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[1].ids[0], sig_f);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[0].ids[0], sig_f);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[1].ids[0], sigF);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[0].ids[0], sigF);
 }
 
 TEST(parsertests, test_function_overloading_6)
@@ -4258,18 +4241,18 @@ TEST(parsertests, test_function_overloading_9)
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
-    std::vector<Function::Parameter> params_main;
-    params_main.emplace_back(Type {"u1", 0}, language);
-    std::vector<Function::Parameter> params_f;
-    params_f.emplace_back(Type {"i8", 0}, language);
-    const auto sig_f = GetFunctionSignatureFromName("f", params_f);
-    const auto sig_main = GetFunctionSignatureFromName("main", params_main);
+    std::vector<Function::Parameter> paramsMain;
+    paramsMain.emplace_back(Type {"u1", 0}, language);
+    std::vector<Function::Parameter> paramsF;
+    paramsF.emplace_back(Type {"i8", 0}, language);
+    const auto sigF = GetFunctionSignatureFromName("f", paramsF);
+    const auto sigMain = GetFunctionSignatureFromName("main", paramsMain);
 
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[1].ids[0], sig_f);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[1].regs[0], 1);  //  v0, [v1], a0
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[0].ids[0], sig_f);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[0].regs[0], 2);  //  v0,  v1, [a0]
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[1].ids[0], sigF);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[1].regs[0], 1);  //  v0, [v1], a0
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[0].ids[0], sigF);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[0].regs[0], 2);  //  v0,  v1, [a0]
 }
 
 TEST(parsertests, test_function_overloading_10)
@@ -4350,43 +4333,43 @@ TEST(parsertests, test_function_overloading_13)
     auto &program = res.Value();
 
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
-    std::vector<Function::Parameter> params_main;
-    params_main.emplace_back(Type {"u1", 0}, language);
-    std::vector<Function::Parameter> params_fi8;
-    params_fi8.emplace_back(Type {"i8", 0}, language);
-    std::vector<Function::Parameter> params_fu8;
-    params_fu8.emplace_back(Type {"u8", 0}, language);
-    std::vector<Function::Parameter> params_fi8u8;
-    params_fi8u8.emplace_back(Type {"i8", 0}, language);
-    params_fi8u8.emplace_back(Type {"u8", 0}, language);
-    const auto sig_f = GetFunctionSignatureFromName("f", {});
-    const auto sig_fi8 = GetFunctionSignatureFromName("f", params_fi8);
-    const auto sig_fu8 = GetFunctionSignatureFromName("f", params_fu8);
-    const auto sig_fi8u8 = GetFunctionSignatureFromName("f", params_fi8u8);
-    const auto sig_main = GetFunctionSignatureFromName("main", params_main);
+    std::vector<Function::Parameter> paramsMain;
+    paramsMain.emplace_back(Type {"u1", 0}, language);
+    std::vector<Function::Parameter> paramsFi8;
+    paramsFi8.emplace_back(Type {"i8", 0}, language);
+    std::vector<Function::Parameter> paramsFu8;
+    paramsFu8.emplace_back(Type {"u8", 0}, language);
+    std::vector<Function::Parameter> paramsFi8u8;
+    paramsFi8u8.emplace_back(Type {"i8", 0}, language);
+    paramsFi8u8.emplace_back(Type {"u8", 0}, language);
+    const auto sigF = GetFunctionSignatureFromName("f", {});
+    const auto sigFi8 = GetFunctionSignatureFromName("f", paramsFi8);
+    const auto sigFu8 = GetFunctionSignatureFromName("f", paramsFu8);
+    const auto sigFi8u8 = GetFunctionSignatureFromName("f", paramsFi8u8);
+    const auto sigMain = GetFunctionSignatureFromName("main", paramsMain);
 
-    ASSERT_TRUE(program.function_table.find(sig_main) != program.function_table.end());
-    ASSERT_TRUE(program.function_table.find(sig_f) != program.function_table.end());
-    ASSERT_TRUE(program.function_table.find(sig_fi8) != program.function_table.end());
-    ASSERT_TRUE(program.function_table.find(sig_fu8) != program.function_table.end());
-    ASSERT_TRUE(program.function_table.find(sig_fi8u8) != program.function_table.end());
+    ASSERT_TRUE(program.functionTable.find(sigMain) != program.functionTable.end());
+    ASSERT_TRUE(program.functionTable.find(sigF) != program.functionTable.end());
+    ASSERT_TRUE(program.functionTable.find(sigFi8) != program.functionTable.end());
+    ASSERT_TRUE(program.functionTable.find(sigFu8) != program.functionTable.end());
+    ASSERT_TRUE(program.functionTable.find(sigFi8u8) != program.functionTable.end());
 
     // f:(i8)
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[0].ids[0], sig_fi8);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[0].regs[0], 5);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[0].ids[0], sigFi8);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[0].regs[0], 5);
 
     // f:()
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[1].ids[0], sig_f);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[1].regs[0], 1);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[1].ids[0], sigF);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[1].regs[0], 1);
 
     // f:(u8)
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[2].ids[0], sig_fu8);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[2].regs[0], 2);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[2].ids[0], sigFu8);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[2].regs[0], 2);
 
     // f:(i8u8)
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[3].ids[0], sig_fi8u8);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[3].regs[0], 3);
-    ASSERT_EQ(res.Value().function_table.at(sig_main).ins[3].regs[1], 4);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[3].ids[0], sigFi8u8);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[3].regs[0], 3);
+    ASSERT_EQ(res.Value().functionTable.at(sigMain).ins[3].regs[1], 4);
 }
 
 TEST(parsertests, test_function_doesnt_exist)
@@ -4501,7 +4484,7 @@ TEST(parsertests, test_accessors)
 
         auto err = p.ShowError();
         ASSERT_EQ(err.err, Error::ErrorType::ERR_BAD_METADATA_MISSING_VALUE);
-        ASSERT_EQ(err.line_number, 3);
+        ASSERT_EQ(err.lineNumber, 3);
         ASSERT_EQ(err.message, "Attribute 'access.field' must have a value");
     }
     {
@@ -4514,7 +4497,7 @@ TEST(parsertests, test_accessors)
 
         auto err = p.ShowError();
         ASSERT_EQ(err.err, Error::ErrorType::ERR_BAD_METADATA_INVALID_VALUE);
-        ASSERT_EQ(err.line_number, 2);
+        ASSERT_EQ(err.lineNumber, 2);
         ASSERT_EQ(err.message,
                   "Attribute 'access.function' have incorrect value 'internal'. Should be one of [\"public\", "
                   "\"protected\", \"private\"]");
@@ -4546,7 +4529,7 @@ TEST(parsertests, test_extends)
 
         auto err = p.ShowError();
         ASSERT_EQ(err.err, Error::ErrorType::ERR_BAD_METADATA_MISSING_VALUE);
-        ASSERT_EQ(err.line_number, 3);
+        ASSERT_EQ(err.lineNumber, 3);
         ASSERT_EQ(err.message, "Attribute 'extends' must have a value");
     }
 }

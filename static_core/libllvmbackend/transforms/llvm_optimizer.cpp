@@ -47,12 +47,12 @@
 namespace {
 
 template <typename PassManagerT, typename PassT>
-void AddPassIf(PassManagerT &pass_manager, PassT &&pass, bool need_insert = true)
+void AddPassIf(PassManagerT &passManager, PassT &&pass, bool needInsert = true)
 {
-    if (!need_insert) {
+    if (!needInsert) {
         return;
     }
-    pass_manager.addPass(std::forward<PassT>(pass));
+    passManager.addPass(std::forward<PassT>(pass));
 #ifndef NDEBUG
     // VerifierPass can be insterted only in ModulePassManager or FunctionPassManager
     constexpr auto IS_MODULE_PM = std::is_same_v<llvm::ModulePassManager, PassManagerT>;
@@ -60,7 +60,7 @@ void AddPassIf(PassManagerT &pass_manager, PassT &&pass, bool need_insert = true
     // Disable checks due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
     // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
     if constexpr (IS_MODULE_PM || IS_FUNCTION_PM) {  // NOLINT(bugprone-suspicious-semicolon)
-        pass_manager.addPass(llvm::VerifierPass());
+        passManager.addPass(llvm::VerifierPass());
     }
 #endif
 }
@@ -71,28 +71,28 @@ std::string PreprocessPipelineFile(const std::string &filename)
     if (!file.is_open()) {
         llvm::report_fatal_error(llvm::Twine("Cant open pipeline file: `") + filename + "`", false);
     }
-    std::string raw_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    std::string rawData((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
     // Remove comments
-    size_t insert_pos = 0;
-    size_t copy_pos = 0;
+    size_t insertPos = 0;
+    size_t copyPos = 0;
     constexpr auto COMMENT_SYMBOL = '#';
     constexpr auto ENDLINE_SYMBOL = '\n';
-    while (copy_pos < raw_data.size()) {
-        while (copy_pos < raw_data.size() && raw_data[copy_pos] != COMMENT_SYMBOL) {
-            raw_data[insert_pos++] = raw_data[copy_pos++];
+    while (copyPos < rawData.size()) {
+        while (copyPos < rawData.size() && rawData[copyPos] != COMMENT_SYMBOL) {
+            rawData[insertPos++] = rawData[copyPos++];
         }
-        while (copy_pos < raw_data.size() && raw_data[copy_pos] != ENDLINE_SYMBOL) {
-            copy_pos++;
+        while (copyPos < rawData.size() && rawData[copyPos] != ENDLINE_SYMBOL) {
+            copyPos++;
         }
     }
-    raw_data.resize(insert_pos);
+    rawData.resize(insertPos);
 
     // Remove space symbols
     auto predicate = [](char sym) { return std::isspace(sym); };
-    raw_data.erase(std::remove_if(raw_data.begin(), raw_data.end(), predicate), raw_data.end());
+    rawData.erase(std::remove_if(rawData.begin(), rawData.end(), predicate), rawData.end());
 
-    return raw_data;
+    return rawData;
 }
 
 #include <pipeline_irtoc_gen.inc>
@@ -115,41 +115,41 @@ std::string GetOptimizationPipeline(const std::string &filename)
 
 namespace panda::llvmbackend {
 
-LLVMOptimizer::LLVMOptimizer(panda::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *ark_interface,
-                             std::shared_ptr<llvm::TargetMachine> target_machine)
-    : options_(std::move(options)), ark_interface_(ark_interface), target_machine_(std::move(target_machine))
+LLVMOptimizer::LLVMOptimizer(panda::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *arkInterface,
+                             std::shared_ptr<llvm::TargetMachine> targetMachine)
+    : options_(std::move(options)), arkInterface_(arkInterface), targetMachine_(std::move(targetMachine))
 {
 }
 
-void LLVMOptimizer::ProcessInlineModule(llvm::Module *inline_module) const
+void LLVMOptimizer::ProcessInlineModule(llvm::Module *inlineModule) const
 {
     namespace pass = panda::llvmbackend::passes;
-    llvm::ModulePassManager module_pm;
-    llvm::LoopAnalysisManager loop_am;
-    llvm::FunctionAnalysisManager function_am;
-    llvm::CGSCCAnalysisManager cgscc_am;
-    llvm::ModuleAnalysisManager module_am;
+    llvm::ModulePassManager modulePm;
+    llvm::LoopAnalysisManager loopAm;
+    llvm::FunctionAnalysisManager functionAm;
+    llvm::CGSCCAnalysisManager cgsccAm;
+    llvm::ModuleAnalysisManager moduleAm;
 
-    llvm::PassBuilder pass_builder(target_machine_.get());
-    pass_builder.registerModuleAnalyses(module_am);
-    pass_builder.registerCGSCCAnalyses(cgscc_am);
-    pass_builder.registerFunctionAnalyses(function_am);
-    pass_builder.registerLoopAnalyses(loop_am);
-    pass_builder.crossRegisterProxies(loop_am, function_am, cgscc_am, module_am);
+    llvm::PassBuilder passBuilder(targetMachine_.get());
+    passBuilder.registerModuleAnalyses(moduleAm);
+    passBuilder.registerCGSCCAnalyses(cgsccAm);
+    passBuilder.registerFunctionAnalyses(functionAm);
+    passBuilder.registerLoopAnalyses(loopAm);
+    passBuilder.crossRegisterProxies(loopAm, functionAm, cgsccAm, moduleAm);
 
-    AddPassIf(module_pm, llvm::CanonicalizeAliasesPass(), true);
-    AddPassIf(module_pm, llvm::NameAnonGlobalPass(), true);
-    AddPassIf(module_pm, pass::MarkInlineModule(), true);
-    AddPassIf(module_pm, pass::CleanupInlineModule(), true);
+    AddPassIf(modulePm, llvm::CanonicalizeAliasesPass(), true);
+    AddPassIf(modulePm, llvm::NameAnonGlobalPass(), true);
+    AddPassIf(modulePm, pass::MarkInlineModule(), true);
+    AddPassIf(modulePm, pass::CleanupInlineModule(), true);
 
-    module_pm.run(*inline_module, module_am);
+    modulePm.run(*inlineModule, moduleAm);
 }
 
 void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
 {
-    ASSERT(ark_interface_ != nullptr);
+    ASSERT(arkInterface_ != nullptr);
 
-    if (options_.dump_module_before_optimizations) {
+    if (options_.dumpModuleBeforeOptimizations) {
         llvm::errs() << "; =========================================\n";
         llvm::errs() << "; LLVM IR module BEFORE LLVM optimizations:\n";
         llvm::errs() << "; =========================================\n";
@@ -158,7 +158,7 @@ void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
 
     DoOptimizeModule(module);
 
-    if (options_.dump_module_after_optimizations) {
+    if (options_.dumpModuleAfterOptimizations) {
         llvm::errs() << "; =========================================\n";
         llvm::errs() << "; LLVM IR module AFTER LLVM optimizations: \n";
         llvm::errs() << "; =========================================\n";
@@ -169,44 +169,44 @@ void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
 void LLVMOptimizer::DoOptimizeModule(llvm::Module *module) const
 {
     // Create the analysis managers.
-    llvm::LoopAnalysisManager loop_am;
-    llvm::FunctionAnalysisManager function_am;
-    llvm::CGSCCAnalysisManager cgscc_am;
-    llvm::ModuleAnalysisManager module_am;
+    llvm::LoopAnalysisManager loopAm;
+    llvm::FunctionAnalysisManager functionAm;
+    llvm::CGSCCAnalysisManager cgsccAm;
+    llvm::ModuleAnalysisManager moduleAm;
 
     llvm::StandardInstrumentations instrumentation(false);
-    llvm::PassInstrumentationCallbacks pass_instrumentation;
-    instrumentation.registerCallbacks(pass_instrumentation);
-    panda::libllvmbackend::RegisterPasses(pass_instrumentation);
+    llvm::PassInstrumentationCallbacks passInstrumentation;
+    instrumentation.registerCallbacks(passInstrumentation);
+    panda::libllvmbackend::RegisterPasses(passInstrumentation);
 
-    llvm::PassBuilder pass_builder(target_machine_.get(), llvm::PipelineTuningOptions(), llvm::None,
-                                   &pass_instrumentation);
+    llvm::PassBuilder passBuilder(targetMachine_.get(), llvm::PipelineTuningOptions(), llvm::None,
+                                  &passInstrumentation);
 
     // Register the AA manager first so that our version is the one used.
-    function_am.registerPass([&] { return pass_builder.buildDefaultAAPipeline(); });
+    functionAm.registerPass([&passBuilder] { return passBuilder.buildDefaultAAPipeline(); });
     // Register the target library analysis directly.
-    function_am.registerPass(
-        [&] { return llvm::TargetLibraryAnalysis(llvm::TargetLibraryInfoImpl(target_machine_->getTargetTriple())); });
+    functionAm.registerPass(
+        [&] { return llvm::TargetLibraryAnalysis(llvm::TargetLibraryInfoImpl(targetMachine_->getTargetTriple())); });
     // Register all the basic analyses with the managers.
-    pass_builder.registerModuleAnalyses(module_am);
-    pass_builder.registerCGSCCAnalyses(cgscc_am);
-    pass_builder.registerFunctionAnalyses(function_am);
-    pass_builder.registerLoopAnalyses(loop_am);
-    pass_builder.crossRegisterProxies(loop_am, function_am, cgscc_am, module_am);
+    passBuilder.registerModuleAnalyses(moduleAm);
+    passBuilder.registerCGSCCAnalyses(cgsccAm);
+    passBuilder.registerFunctionAnalyses(functionAm);
+    passBuilder.registerLoopAnalyses(loopAm);
+    passBuilder.crossRegisterProxies(loopAm, functionAm, cgsccAm, moduleAm);
 
-    panda::libllvmbackend::PassParser pass_parser(ark_interface_);
-    pass_parser.RegisterParserCallbacks(pass_builder, options_);
+    panda::libllvmbackend::PassParser passParser(arkInterface_);
+    passParser.RegisterParserCallbacks(passBuilder, options_);
 
-    llvm::ModulePassManager module_pm;
+    llvm::ModulePassManager modulePm;
     if (options_.optimize) {
-        cantFail(pass_builder.parsePassPipeline(module_pm, GetOptimizationPipeline(options_.pipeline_file)));
+        cantFail(passBuilder.parsePassPipeline(modulePm, GetOptimizationPipeline(options_.pipelineFile)));
     } else {
         namespace pass = panda::llvmbackend::passes;
-        llvm::FunctionPassManager function_pm;
-        AddPassIf(function_pm, pass::ExpandAtomics());
-        module_pm.addPass(createModuleToFunctionPassAdaptor(std::move(function_pm)));
+        llvm::FunctionPassManager functionPm;
+        AddPassIf(functionPm, pass::ExpandAtomics());
+        modulePm.addPass(createModuleToFunctionPassAdaptor(std::move(functionPm)));
     }
-    module_pm.run(*module, module_am);
+    modulePm.run(*module, moduleAm);
 }
 
 }  // namespace panda::llvmbackend

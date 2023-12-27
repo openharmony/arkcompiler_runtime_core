@@ -49,9 +49,9 @@ class EtsClass {
 public:
     // We shouldn't init header_ here - because it has been memset(0) in object allocation,
     // otherwise it may cause data race while visiting object's class concurrently in gc.
-    void InitClass(const uint8_t *descriptor, uint32_t vtable_size, uint32_t imt_size, uint32_t klass_size)
+    void InitClass(const uint8_t *descriptor, uint32_t vtableSize, uint32_t imtSize, uint32_t klassSize)
     {
-        new (&klass_) panda::Class(descriptor, panda_file::SourceLang::ETS, vtable_size, imt_size, klass_size);
+        new (&klass_) panda::Class(descriptor, panda_file::SourceLang::ETS, vtableSize, imtSize, klassSize);
     }
 
     const char *GetDescriptor() const
@@ -81,7 +81,7 @@ public:
 
     EtsField *GetFieldByIndex(uint32_t i);
 
-    EtsField *GetFieldIDByOffset(uint32_t field_offset);
+    EtsField *GetFieldIDByOffset(uint32_t fieldOffset);
     EtsField *GetFieldByName(EtsString *name);
     PANDA_PUBLIC_API EtsField *GetFieldIDByName(const char *name, const char *sig = nullptr);
 
@@ -89,7 +89,7 @@ public:
     EtsField *GetDeclaredFieldIDByName(const char *name);
 
     PANDA_PUBLIC_API EtsField *GetStaticFieldIDByName(const char *name, const char *sig = nullptr);
-    EtsField *GetStaticFieldIDByOffset(uint32_t field_offset);
+    EtsField *GetStaticFieldIDByOffset(uint32_t fieldOffset);
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name);
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature);
@@ -125,12 +125,12 @@ public:
     }
 
     template <class T>
-    T GetStaticFieldPrimitive(int32_t field_offset, bool is_volatile)
+    T GetStaticFieldPrimitive(int32_t fieldOffset, bool isVolatile)
     {
-        if (is_volatile) {
-            return GetRuntimeClass()->GetFieldPrimitive<T, true>(field_offset);
+        if (isVolatile) {
+            return GetRuntimeClass()->GetFieldPrimitive<T, true>(fieldOffset);
         }
-        return GetRuntimeClass()->GetFieldPrimitive<T, false>(field_offset);
+        return GetRuntimeClass()->GetFieldPrimitive<T, false>(fieldOffset);
     }
 
     template <class T>
@@ -140,19 +140,19 @@ public:
     }
 
     template <class T>
-    void SetStaticFieldPrimitive(int32_t field_offset, bool is_volatile, T value)
+    void SetStaticFieldPrimitive(int32_t fieldOffset, bool isVolatile, T value)
     {
-        if (is_volatile) {
-            GetRuntimeClass()->SetFieldPrimitive<T, true>(field_offset, value);
+        if (isVolatile) {
+            GetRuntimeClass()->SetFieldPrimitive<T, true>(fieldOffset, value);
         }
-        GetRuntimeClass()->SetFieldPrimitive<T, false>(field_offset, value);
+        GetRuntimeClass()->SetFieldPrimitive<T, false>(fieldOffset, value);
     }
 
     PANDA_PUBLIC_API EtsObject *GetStaticFieldObject(EtsField *field);
-    EtsObject *GetStaticFieldObject(int32_t field_offset, bool is_volatile);
+    EtsObject *GetStaticFieldObject(int32_t fieldOffset, bool isVolatile);
 
     void SetStaticFieldObject(EtsField *field, EtsObject *value);
-    void SetStaticFieldObject(int32_t field_offset, bool is_volatile, EtsObject *value);
+    void SetStaticFieldObject(int32_t fieldOffset, bool isVolatile, EtsObject *value);
 
     bool IsEtsObject()
     {
@@ -191,7 +191,7 @@ public:
     bool IsTupleClass() const;
     bool IsBoxedClass() const;
 
-    static bool IsInSamePackage(std::string_view class_name1, std::string_view class_name2);
+    static bool IsInSamePackage(std::string_view className1, std::string_view className2);
 
     bool IsInSamePackage(EtsClass *that);
 
@@ -243,8 +243,8 @@ public:
     template <class Callback>
     void EnumerateDirectInterfaces(const Callback &callback)
     {
-        for (Class *runtime_interface : GetRuntimeClass()->GetInterfaces()) {
-            EtsClass *interface = EtsClass::FromRuntimeClass(runtime_interface);
+        for (Class *runtimeInterface : GetRuntimeClass()->GetInterfaces()) {
+            EtsClass *interface = EtsClass::FromRuntimeClass(runtimeInterface);
             bool finished = callback(interface);
             if (finished) {
                 break;
@@ -270,13 +270,13 @@ public:
     template <class Callback>
     void EnumerateBaseClasses(const Callback &callback)
     {
-        PandaVector<EtsClass *> inher_chain;
-        auto cur_class = this;
-        while (cur_class != nullptr) {
-            inher_chain.push_back(cur_class);
-            cur_class = cur_class->GetBase();
+        PandaVector<EtsClass *> inherChain;
+        auto curClass = this;
+        while (curClass != nullptr) {
+            inherChain.push_back(curClass);
+            curClass = curClass->GetBase();
         }
-        for (auto i = inher_chain.rbegin(); i != inher_chain.rend(); i++) {
+        for (auto i = inherChain.rbegin(); i != inherChain.rend(); i++) {
             bool finished = callback(*i);
             if (finished) {
                 break;
@@ -316,9 +316,9 @@ public:
 
     EtsType GetEtsType();
 
-    static size_t GetSize(uint32_t klass_size)
+    static size_t GetSize(uint32_t klassSize)
     {
-        return GetRuntimeClassOffset() + klass_size;
+        return GetRuntimeClassOffset() + klassSize;
     }
 
     static constexpr size_t GetRuntimeClassOffset()
@@ -337,11 +337,11 @@ public:
         return reinterpret_cast<EtsClass *>(reinterpret_cast<uintptr_t>(cls) - GetRuntimeClassOffset());
     }
 
-    static EtsClass *GetPrimitiveClass(EtsString *primitive_name);
+    static EtsClass *GetPrimitiveClass(EtsString *primitiveName);
 
-    void Initialize(EtsArray *if_table, EtsClass *super_class, uint16_t access_flags, bool is_primitive_type);
+    void Initialize(EtsArray *ifTable, EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType);
 
-    void SetComponentType(EtsClass *component_type);
+    void SetComponentType(EtsClass *componentType);
 
     EtsClass *GetComponentType() const;
 
@@ -349,15 +349,14 @@ public:
 
     void SetName(EtsString *name);
 
-    bool CompareAndSetName(EtsString *old_name, EtsString *new_name);
+    bool CompareAndSetName(EtsString *oldName, EtsString *newName);
 
     EtsString *GetName();
     static EtsString *CreateEtsClassName([[maybe_unused]] const char *descriptor);
 
-    void SetSuperClass(EtsClass *super_class)
+    void SetSuperClass(EtsClass *superClass)
     {
-        ObjectHeader *obj =
-            super_class != nullptr ? reinterpret_cast<ObjectHeader *>(super_class->AsObject()) : nullptr;
+        ObjectHeader *obj = superClass != nullptr ? reinterpret_cast<ObjectHeader *>(superClass->AsObject()) : nullptr;
         GetObjectHeader()->SetFieldObject(GetSuperClassOffset(), obj);
     }
 
@@ -401,7 +400,7 @@ public:
 
     static constexpr size_t GetIfTableOffset()
     {
-        return MEMBER_OFFSET(EtsClass, if_table_);
+        return MEMBER_OFFSET(EtsClass, ifTable_);
     }
 
     static constexpr size_t GetNameOffset()
@@ -411,7 +410,7 @@ public:
 
     static constexpr size_t GetSuperClassOffset()
     {
-        return MEMBER_OFFSET(EtsClass, super_class_);
+        return MEMBER_OFFSET(EtsClass, superClass_);
     }
 
     static constexpr size_t GetFlagsOffset()
@@ -448,9 +447,9 @@ private:
     panda::ObjectHeader header_;  // EtsObject
 
     // ets.Class fields BEGIN
-    FIELD_UNUSED ObjectPointer<EtsArray> if_table_;     // Class[]
-    FIELD_UNUSED ObjectPointer<EtsString> name_;        // String
-    FIELD_UNUSED ObjectPointer<EtsClass> super_class_;  // Class<? super T>
+    FIELD_UNUSED ObjectPointer<EtsArray> ifTable_;     // Class[]
+    FIELD_UNUSED ObjectPointer<EtsString> name_;       // String
+    FIELD_UNUSED ObjectPointer<EtsClass> superClass_;  // Class<? super T>
 
     FIELD_UNUSED uint32_t flags_;
     // ets.Class fields END

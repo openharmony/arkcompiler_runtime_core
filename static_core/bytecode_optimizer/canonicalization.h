@@ -42,7 +42,7 @@ public:
     }
     bool IsEnable() const override
     {
-        return OPTIONS.IsCanonicalization();
+        return g_options.IsCanonicalization();
     }
 
     bool GetStatus() const

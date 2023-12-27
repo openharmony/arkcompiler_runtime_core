@@ -60,7 +60,7 @@ constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
 
 class GCWorkersTask : public TaskInterface {
 public:
-    explicit GCWorkersTask(GCWorkersTaskTypes type = GCWorkersTaskTypes::TASK_EMPTY) : task_type_(type)
+    explicit GCWorkersTask(GCWorkersTaskTypes type = GCWorkersTaskTypes::TASK_EMPTY) : taskType_(type)
     {
         ASSERT(type == GCWorkersTaskTypes::TASK_EMPTY || type == GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS);
     }
@@ -71,7 +71,7 @@ public:
 
     bool IsEmpty() const
     {
-        return task_type_ == GCWorkersTaskTypes::TASK_EMPTY;
+        return taskType_ == GCWorkersTaskTypes::TASK_EMPTY;
     }
 
     template <class GCWorkersTaskT>
@@ -85,17 +85,16 @@ public:
 
     GCWorkersTaskTypes GetType() const
     {
-        return task_type_;
+        return taskType_;
     }
 
 private:
-    GCWorkersTaskTypes task_type_;
+    GCWorkersTaskTypes taskType_;
 
 protected:
     using StorageType = void *;
 
-    GCWorkersTask(GCWorkersTaskTypes type, StorageType task_storage_data)
-        : task_type_(type), storage_(task_storage_data)
+    GCWorkersTask(GCWorkersTaskTypes type, StorageType taskStorageData) : taskType_(type), storage_(taskStorageData)
     {
         ASSERT(storage_ != nullptr);
     }
@@ -106,7 +105,7 @@ protected:
 class GCMarkWorkersTask : public GCWorkersTask {
 public:
     using StackType = GCMarkingStackType;
-    GCMarkWorkersTask(GCWorkersTaskTypes type, StackType *marking_stack) : GCWorkersTask(type, marking_stack)
+    GCMarkWorkersTask(GCWorkersTaskTypes type, StackType *markingStack) : GCWorkersTask(type, markingStack)
     {
         ASSERT(type == GCWorkersTaskTypes::TASK_MARKING || type == GCWorkersTaskTypes::TASK_REMARK ||
                type == GCWorkersTaskTypes::TASK_FULL_MARK);
@@ -127,8 +126,8 @@ class GCRegionCompactWorkersTask : public GCWorkersTask {
 public:
     using RegionDataType = std::pair<Region *, ObjectVisitor>;
 
-    explicit GCRegionCompactWorkersTask(RegionDataType *region_data)
-        : GCWorkersTask(GCWorkersTaskTypes::TASK_REGION_COMPACTING, region_data)
+    explicit GCRegionCompactWorkersTask(RegionDataType *regionData)
+        : GCWorkersTask(GCWorkersTaskTypes::TASK_REGION_COMPACTING, regionData)
     {
     }
     DEFAULT_COPY_SEMANTIC(GCRegionCompactWorkersTask);
@@ -149,8 +148,8 @@ public:
     // We need this to evenly split moved objects vector to ranges for gc workers
     static constexpr int RANGE_SIZE = 4096;
 
-    explicit GCUpdateRefsWorkersTask(MovedObjectsRange *moved_objects)
-        : GCWorkersTask(GCWorkersTaskTypes::TASK_ENQUEUE_REMSET_REFS, moved_objects)
+    explicit GCUpdateRefsWorkersTask(MovedObjectsRange *movedObjects)
+        : GCWorkersTask(GCWorkersTaskTypes::TASK_ENQUEUE_REMSET_REFS, movedObjects)
     {
     }
     DEFAULT_COPY_SEMANTIC(GCUpdateRefsWorkersTask);

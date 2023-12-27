@@ -41,7 +41,7 @@ public:
      * @param task_statistics_type - type of TaskStatistics that will be used in TaskScheduler
      */
     PANDA_PUBLIC_API static TaskScheduler *Create(
-        size_t threads_count, TaskStatisticsImplType task_statistics_type = TaskStatisticsImplType::SIMPLE);
+        size_t threadsCount, TaskStatisticsImplType taskStatisticsType = TaskStatisticsImplType::SIMPLE);
 
     /**
      * @brief Returns the pointer to TaskScheduler. If you use it before the Create or after Destroy methods, it
@@ -69,9 +69,9 @@ public:
      */
     template <class Allocator = std::allocator<Task>>
     PANDA_PUBLIC_API TaskQueueInterface *CreateAndRegisterTaskQueue(
-        TaskType task_type, VMType vm_type, uint8_t priority = TaskQueueInterface::DEFAULT_PRIORITY)
+        TaskType taskType, VMType vmType, uint8_t priority = TaskQueueInterface::DEFAULT_PRIORITY)
     {
-        auto *queue = internal::TaskQueue<Allocator>::Create(task_type, vm_type, priority);
+        auto *queue = internal::TaskQueue<Allocator>::Create(taskType, vmType, priority);
         if (UNLIKELY(queue == nullptr)) {
             return nullptr;
         }
@@ -93,11 +93,11 @@ public:
     PANDA_PUBLIC_API void UnregisterAndDestroyTaskQueue(TaskQueueInterface *queue)
     {
         TaskQueueId id(queue->GetTaskType(), queue->GetVMType());
-        auto *schedulable_queue = task_queues_[id];
+        auto *schedulableQueue = taskQueues_[id];
 
-        schedulable_queue->UnsetNewTasksCallback();
-        task_queues_.erase(id);
-        internal::TaskQueue<Allocator>::Destroy(schedulable_queue);
+        schedulableQueue->UnsetNewTasksCallback();
+        taskQueues_.erase(id);
+        internal::TaskQueue<Allocator>::Destroy(schedulableQueue);
     }
 
     /**
@@ -107,7 +107,7 @@ public:
      * @param worker - pointer on worker that should be fill will tasks
      * @param tasks_count - max number of tasks for filling
      */
-    bool FillWithTasks(WorkerThread *worker, size_t tasks_count);
+    bool FillWithTasks(WorkerThread *worker, size_t tasksCount);
 
     /**
      * @brief Method returns Task with specified properties. If there are no tasks with that properties method will
@@ -129,7 +129,7 @@ public:
     PANDA_PUBLIC_API ~TaskScheduler();
 
 private:
-    explicit TaskScheduler(size_t workers_count, TaskStatisticsImplType task_statistics_type);
+    explicit TaskScheduler(size_t workersCount, TaskStatisticsImplType taskStatisticsType);
 
     /**
      * @brief Registers a queue that was created externally. It should be valid until all workers finish, and the
@@ -145,13 +145,13 @@ private:
      * @brief Method pops one task from internal queues based on priorities.
      * @return if queue are empty, returns nullopt, otherwise returns task.
      */
-    [[nodiscard]] std::optional<Task> GetNextTask() REQUIRES(pop_from_task_queues_lock_);
+    [[nodiscard]] std::optional<Task> GetNextTask() REQUIRES(popFromTaskQueuesLock_);
 
     /**
      * @brief Method selects queues for getting tasks by updating selected_queues_
      * @param tasks_count - count of tasks to select.
      */
-    void SelectNextTasks(size_t tasks_count) REQUIRES(pop_from_task_queues_lock_);
+    void SelectNextTasks(size_t tasksCount) REQUIRES(popFromTaskQueuesLock_);
 
     /**
      * @brief Method puts tasks to @arg worker. Queue and count of tasks depends on selected_queues_. After
@@ -159,13 +159,13 @@ private:
      * @param worker - pointer on worker that should be fill with tasks
      * @return count of task that was gotten by worker.
      */
-    size_t PutTasksInWorker(WorkerThread *worker) REQUIRES(pop_from_task_queues_lock_);
+    size_t PutTasksInWorker(WorkerThread *worker) REQUIRES(popFromTaskQueuesLock_);
 
     /**
      * @brief This method updates map from kinetic sum of non-empty queues to queues pointer
      * with the same order as they place in task_queues_.
      */
-    void UpdateKineticPriorities() REQUIRES(pop_from_task_queues_lock_);
+    void UpdateKineticPriorities() REQUIRES(popFromTaskQueuesLock_);
 
     /// @brief Checks if task queues are empty
     bool AreQueuesEmpty() const;
@@ -179,26 +179,26 @@ private:
      * @param ivalue - the value by which the counter will be increased
      * @param was_empty - flage that should be true only, if queue was empty before last AddTask
      */
-    void IncrementCounterOfAddedTasks(TaskProperties properties, size_t ivalue, bool was_empty);
+    void IncrementCounterOfAddedTasks(TaskProperties properties, size_t ivalue, bool wasEmpty);
 
     /**
      * @brief Method increment counter of finished tasks and signal Finalize waiter
      * @param counter_map - map from id to count of finished tasks
      */
-    void IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counter_map);
+    void IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counterMap);
 
     static TaskScheduler *instance_;
 
-    size_t workers_count_;
+    size_t workersCount_;
 
     /// Pointers to Worker Threads.
     std::vector<WorkerThread *> workers_;
 
     /// workers_lock_ is used to synchronize a lot of workers in FillWithTasks method
-    os::memory::Mutex workers_lock_;
+    os::memory::Mutex workersLock_;
 
     /// pop_from_task_queues_lock_ is used to guard popping from queues
-    os::memory::Mutex pop_from_task_queues_lock_;
+    os::memory::Mutex popFromTaskQueuesLock_;
 
     /**
      * Map from TaskType and VMType to queue.
@@ -206,31 +206,31 @@ private:
      * Since we can change the map only before creating the workers, we do not need to synchronize access after
      * Initialize method
      */
-    std::map<TaskQueueId, internal::SchedulableTaskQueueInterface *> task_queues_;
+    std::map<TaskQueueId, internal::SchedulableTaskQueueInterface *> taskQueues_;
 
     /// task_scheduler_state_lock_ is used to check state of task
-    os::memory::RecursiveMutex task_scheduler_state_lock_;
+    os::memory::RecursiveMutex taskSchedulerStateLock_;
 
     /**
      * queues_wait_cond_var_ is used when all registered queues are empty to wait until one of them will have a
      * task
      */
-    os::memory::ConditionVariable queues_wait_cond_var_ GUARDED_BY(task_scheduler_state_lock_);
+    os::memory::ConditionVariable queuesWaitCondVar_ GUARDED_BY(taskSchedulerStateLock_);
 
     /**
      * This cond var uses to wait for all tasks will be done.
      * It is used in Finalize() method.
      */
-    os::memory::ConditionVariable finish_tasks_cond_var_ GUARDED_BY(task_scheduler_state_lock_);
+    os::memory::ConditionVariable finishTasksCondVar_ GUARDED_BY(taskSchedulerStateLock_);
 
     /// start_ is true if we used Initialize method
     std::atomic_bool start_ {false};
 
     /// finish_ is true when TaskScheduler finish Workers and TaskQueues
-    bool finish_ GUARDED_BY(task_scheduler_state_lock_) {false};
+    bool finish_ GUARDED_BY(taskSchedulerStateLock_) {false};
 
     /// new_tasks_count_ represents count of new tasks
-    TaskPropertiesCounterMap new_tasks_count_ GUARDED_BY(task_scheduler_state_lock_);
+    TaskPropertiesCounterMap newTasksCount_ GUARDED_BY(taskSchedulerStateLock_);
 
     /**
      * finished_tasks_count_ represents count of finished tasks;
@@ -238,16 +238,15 @@ private:
      * - it was executed by Worker;
      * - it was gotten by main thread;
      */
-    TaskPropertiesCounterMap finished_tasks_count_ GUARDED_BY(task_scheduler_state_lock_);
+    TaskPropertiesCounterMap finishedTasksCount_ GUARDED_BY(taskSchedulerStateLock_);
 
     std::mt19937 gen_;
 
-    TaskStatistics *task_statistics_;
+    TaskStatistics *taskStatistics_;
 
-    std::map<TaskQueueId, size_t> selected_queues_ GUARDED_BY(pop_from_task_queues_lock_);
+    std::map<TaskQueueId, size_t> selectedQueues_ GUARDED_BY(popFromTaskQueuesLock_);
 
-    std::map<size_t, internal::SchedulableTaskQueueInterface *> kinetic_priorities_
-        GUARDED_BY(pop_from_task_queues_lock_);
+    std::map<size_t, internal::SchedulableTaskQueueInterface *> kineticPriorities_ GUARDED_BY(popFromTaskQueuesLock_);
 };
 
 }  // namespace panda::taskmanager

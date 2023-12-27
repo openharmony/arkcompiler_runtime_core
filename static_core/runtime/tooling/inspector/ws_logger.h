@@ -28,8 +28,7 @@ class WsLogger {
     using Level = websocketpp::log::level;
 
 public:
-    WsLogger(Level static_channels, ChannelType channel_type)
-        : channel_type_(channel_type), static_channels_(static_channels)
+    WsLogger(Level staticChannels, ChannelType channelType) : channelType_(channelType), staticChannels_(staticChannels)
     {
     }
 
@@ -38,12 +37,12 @@ public:
     // NOLINTNEXTLINE(readability-identifier-naming)
     bool static_test(Level channel) const
     {
-        return (channel & static_channels_) == channel;
+        return (channel & staticChannels_) == channel;
     }
     // NOLINTNEXTLINE(readability-identifier-naming)
     bool dynamic_test(Level channel) const
     {
-        return (channel & dynamic_channels_) == channel;
+        return (channel & dynamicChannels_) == channel;
     }
     // NOLINTNEXTLINE(readability-identifier-naming)
     void write(Level channel, const std::string &string) const;
@@ -52,9 +51,9 @@ private:
     // NOLINTNEXTLINE(readability-identifier-naming)
     Logger::Level channel_log_level(Level channel) const;
 
-    const ChannelType channel_type_;
-    const Level static_channels_;
-    Level dynamic_channels_ {0};
+    const ChannelType channelType_;
+    const Level staticChannels_;
+    Level dynamicChannels_ {0};
 };
 }  // namespace panda::tooling::inspector
 

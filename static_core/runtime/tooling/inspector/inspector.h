@@ -47,7 +47,7 @@ class Server;
 
 class Inspector : public PtHooks {
 public:
-    Inspector(Server &server, DebugInterface &debugger, bool break_on_start);
+    Inspector(Server &server, DebugInterface &debugger, bool breakOnStart);
     ~Inspector() override;
 
     NO_COPY_SEMANTIC(Inspector);
@@ -56,10 +56,10 @@ public:
     void ConsoleCall(PtThread thread, ConsoleCallType type, uint64_t timestamp,
                      const PandaVector<TypedValue> &arguments) override;
     void Exception(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *exception,
-                   Method *catch_method, const PtLocation &catch_location) override;
-    void FramePop(PtThread thread, Method *method, bool was_popped_by_exception) override;
+                   Method *catchMethod, const PtLocation &catchLocation) override;
+    void FramePop(PtThread thread, Method *method, bool wasPoppedByException) override;
     void MethodEntry(PtThread thread, Method *method) override;
-    void LoadModule(std::string_view file_name) override;
+    void LoadModule(std::string_view fileName) override;
     void SingleStep(PtThread thread, Method *method, const PtLocation &location) override;
     void ThreadStart(PtThread thread) override;
     void ThreadEnd(PtThread thread) override;
@@ -73,37 +73,37 @@ private:
     void Continue(PtThread thread);
 
     void SetBreakpointsActive(PtThread thread, bool active);
-    std::set<size_t> GetPossibleBreakpoints(std::string_view source_file, size_t start_line, size_t end_line,
-                                            bool restrict_to_function);
+    std::set<size_t> GetPossibleBreakpoints(std::string_view sourceFile, size_t startLine, size_t endLine,
+                                            bool restrictToFunction);
     std::optional<BreakpointId> SetBreakpoint(PtThread thread,
-                                              const std::function<bool(std::string_view)> &source_files_filter,
-                                              size_t line_number, std::set<std::string_view> &source_files);
-    void RemoveBreakpoint(PtThread thread, BreakpointId breakpoint_id);
+                                              const std::function<bool(std::string_view)> &sourceFilesFilter,
+                                              size_t lineNumber, std::set<std::string_view> &sourceFiles);
+    void RemoveBreakpoint(PtThread thread, BreakpointId breakpointId);
 
     void SetPauseOnExceptions(PtThread thread, PauseOnExceptionsState state);
 
     void StepInto(PtThread thread);
     void StepOver(PtThread thread);
     void StepOut(PtThread thread);
-    void ContinueToLocation(PtThread thread, std::string_view source_file, size_t line_number);
+    void ContinueToLocation(PtThread thread, std::string_view sourceFile, size_t lineNumber);
 
-    void RestartFrame(PtThread thread, FrameId frame_id);
+    void RestartFrame(PtThread thread, FrameId frameId);
 
-    std::vector<PropertyDescriptor> GetProperties(PtThread thread, RemoteObjectId object_id, bool generate_preview);
-    std::string GetSourceCode(std::string_view source_file);
+    std::vector<PropertyDescriptor> GetProperties(PtThread thread, RemoteObjectId objectId, bool generatePreview);
+    std::string GetSourceCode(std::string_view sourceFile);
 
 private:
-    bool break_on_start_;
+    bool breakOnStart_;
 
-    os::memory::RWLock debugger_events_lock_;
+    os::memory::RWLock debuggerEventsLock_;
     bool connecting_ {false};  // Should be accessed only from the server thread
 
-    InspectorServer inspector_server_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    InspectorServer inspectorServer_;  // NOLINT(misc-non-private-member-variables-in-classes)
     DebugInterface &debugger_;
-    DebugInfoCache debug_info_cache_;
+    DebugInfoCache debugInfoCache_;
     std::map<PtThread, DebuggableThread> threads_;
 
-    std::thread server_thread_;
+    std::thread serverThread_;
 };
 }  // namespace inspector
 }  // namespace panda::tooling

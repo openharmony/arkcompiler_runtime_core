@@ -36,7 +36,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerLoopIdioms();
+        return g_options.IsCompilerLoopIdioms();
     }
 
     const char *GetPassName() const override
@@ -53,9 +53,9 @@ private:
     bool TransformLoop(Loop *loop) override;
     bool TryTransformArrayInitIdiom(Loop *loop);
     Inst *CreateArrayInitIntrinsic(StoreInst *store, CountableLoopInfo *info);
-    bool ReplaceArrayInitLoop(Loop *loop, CountableLoopInfo *loop_info, StoreInst *store, bool always_jump);
+    bool ReplaceArrayInitLoop(Loop *loop, CountableLoopInfo *loopInfo, StoreInst *store, bool alwaysJump);
 
-    bool is_applied_ {false};
+    bool isApplied_ {false};
 };
 
 }  // namespace panda::compiler

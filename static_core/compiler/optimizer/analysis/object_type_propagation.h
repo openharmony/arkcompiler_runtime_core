@@ -24,7 +24,7 @@ namespace panda::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ObjectTypePropagation final : public Analysis, public GraphVisitor {
 public:
-    explicit ObjectTypePropagation(Graph *graph) : Analysis(graph), visited_phis_(graph->GetLocalAllocator()->Adapter())
+    explicit ObjectTypePropagation(Graph *graph) : Analysis(graph), visitedPhis_(graph->GetLocalAllocator()->Adapter())
     {
     }
     NO_MOVE_SEMANTIC(ObjectTypePropagation);
@@ -62,7 +62,7 @@ private:
     ObjectTypeInfo GetPhiTypeInfo(Inst *inst);
 
 private:
-    InstVector visited_phis_;
+    InstVector visitedPhis_;
     Marker visited_ {UNDEF_MARKER};
 };
 }  // namespace panda::compiler

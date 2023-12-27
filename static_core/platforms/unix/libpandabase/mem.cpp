@@ -38,13 +38,13 @@ void MmapDeleter(std::byte *ptr, size_t size) noexcept
     }
 }
 
-BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, size_t file_offset, void *hint)
+BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, size_t fileOffset, void *hint)
 {
-    size_t map_offset = RoundDown(file_offset, GetPageSize());
-    size_t offset = file_offset - map_offset;
-    size_t map_size = size + offset;
-    void *result = mmap(hint, map_size, static_cast<int>(prot), static_cast<int>(flags), file.GetFd(),
-                        static_cast<int>(map_offset));
+    size_t mapOffset = RoundDown(fileOffset, GetPageSize());
+    size_t offset = fileOffset - mapOffset;
+    size_t mapSize = size + offset;
+    void *result =
+        mmap(hint, mapSize, static_cast<int>(prot), static_cast<int>(flags), file.GetFd(), static_cast<int>(mapOffset));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     if (result == MAP_FAILED) {
         return BytePtr(nullptr, 0, MmapDeleter);
@@ -100,25 +100,25 @@ std::optional<Error> MakeMemProtected(void *mem, size_t size)
 
 uintptr_t AlignDownToPageSize(uintptr_t addr)
 {
-    const auto sys_page_size = static_cast<size_t>(sysconf(_SC_PAGESIZE));
-    addr &= ~(sys_page_size - 1);
+    const auto sysPageSize = static_cast<size_t>(sysconf(_SC_PAGESIZE));
+    addr &= ~(sysPageSize - 1);
     return addr;
 }
 
-void *AlignedAlloc(size_t alignment_in_bytes, size_t size)
+void *AlignedAlloc(size_t alignmentInBytes, size_t size)
 {
-    size_t aligned_size = (size + alignment_in_bytes - 1) & ~(alignment_in_bytes - 1);
+    size_t alignedSize = (size + alignmentInBytes - 1) & ~(alignmentInBytes - 1);
 #if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_MACOS
     void *ret = nullptr;
-    int r = posix_memalign(reinterpret_cast<void **>(&ret), alignment_in_bytes, aligned_size);
+    int r = posix_memalign(reinterpret_cast<void **>(&ret), alignmentInBytes, alignedSize);
     if (r != 0) {
         std::cerr << "posix_memalign failed, code: " << r << std::endl;
         ASSERT(0);
     }
 #else
-    auto ret = aligned_alloc(alignment_in_bytes, aligned_size);
+    auto ret = aligned_alloc(alignmentInBytes, alignedSize);
 #endif
-    ASSERT(reinterpret_cast<uintptr_t>(ret) == (reinterpret_cast<uintptr_t>(ret) & ~(alignment_in_bytes - 1)));
+    ASSERT(reinterpret_cast<uintptr_t>(ret) == (reinterpret_cast<uintptr_t>(ret) & ~(alignmentInBytes - 1)));
     return ret;
 }
 
@@ -162,7 +162,7 @@ size_t GetCacheLineSize()
     return sz;
 }
 
-void *MapRWAnonymousRaw(size_t size, bool force_poison)
+void *MapRWAnonymousRaw(size_t size, bool forcePoison)
 {
     ASSERT(size % GetPageSize() == 0);
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
@@ -170,7 +170,7 @@ void *MapRWAnonymousRaw(size_t size, bool force_poison)
     if (result == MAP_FAILED) {
         result = nullptr;
     }
-    if ((result != nullptr) && force_poison) {
+    if ((result != nullptr) && forcePoison) {
         ASAN_POISON_MEMORY_REGION(result, size);
     }
 
@@ -183,74 +183,74 @@ std::optional<Error> PartiallyUnmapRaw(void *mem, size_t size)
     return UnmapRaw(mem, size);
 }
 
-void *MapRWAnonymousWithAlignmentRaw(size_t size, size_t aligment_in_bytes, bool force_poison)
+void *MapRWAnonymousWithAlignmentRaw(size_t size, size_t aligmentInBytes, bool forcePoison)
 {
-    ASSERT(aligment_in_bytes % GetPageSize() == 0);
+    ASSERT(aligmentInBytes % GetPageSize() == 0);
     if (size == 0) {
         return nullptr;
     }
-    void *result = MapRWAnonymousRaw(size + aligment_in_bytes, force_poison);
+    void *result = MapRWAnonymousRaw(size + aligmentInBytes, forcePoison);
     if (result == nullptr) {
         return result;
     }
-    auto allocated_mem = reinterpret_cast<uintptr_t>(result);
-    uintptr_t aligned_mem = (allocated_mem & ~(aligment_in_bytes - 1U)) +
-                            ((allocated_mem % aligment_in_bytes) != 0U ? aligment_in_bytes : 0U);
-    ASSERT(aligned_mem >= allocated_mem);
-    size_t unused_in_start = aligned_mem - allocated_mem;
-    ASSERT(unused_in_start <= aligment_in_bytes);
-    size_t unused_in_end = aligment_in_bytes - unused_in_start;
-    if (unused_in_start != 0) {
-        PartiallyUnmapRaw(result, unused_in_start);
+    auto allocatedMem = reinterpret_cast<uintptr_t>(result);
+    uintptr_t alignedMem =
+        (allocatedMem & ~(aligmentInBytes - 1U)) + ((allocatedMem % aligmentInBytes) != 0U ? aligmentInBytes : 0U);
+    ASSERT(alignedMem >= allocatedMem);
+    size_t unusedInStart = alignedMem - allocatedMem;
+    ASSERT(unusedInStart <= aligmentInBytes);
+    size_t unusedInEnd = aligmentInBytes - unusedInStart;
+    if (unusedInStart != 0) {
+        PartiallyUnmapRaw(result, unusedInStart);
     }
-    if (unused_in_end != 0) {
-        auto end_part = reinterpret_cast<void *>(aligned_mem + size);
-        PartiallyUnmapRaw(end_part, unused_in_end);
+    if (unusedInEnd != 0) {
+        auto end_part = reinterpret_cast<void *>(alignedMem + size);
+        PartiallyUnmapRaw(end_part, unusedInEnd);
     }
-    return reinterpret_cast<void *>(aligned_mem);
+    return reinterpret_cast<void *>(alignedMem);
 }
 
-void *MapRWAnonymousInFirst4GB(void *min_mem, size_t size, [[maybe_unused]] size_t iterative_step)
+void *MapRWAnonymousInFirst4GB(void *minMem, size_t size, [[maybe_unused]] size_t iterativeStep)
 {
-    ASSERT(ToUintPtr(min_mem) % GetPageSize() == 0);
+    ASSERT(ToUintPtr(minMem) % GetPageSize() == 0);
     ASSERT(size % GetPageSize() == 0);
-    ASSERT(iterative_step % GetPageSize() == 0);
+    ASSERT(iterativeStep % GetPageSize() == 0);
 #ifdef PANDA_TARGET_32
-    void *result_addr = mmap(min_mem, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (result_addr == MAP_FAILED) {
+    void *resultAddr = mmap(minMem, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (resultAddr == MAP_FAILED) {
         return nullptr;
     }
 #else
-    if (ToUintPtr(min_mem) >= HIGH_BOUND_32BIT_ADDRESS) {
+    if (ToUintPtr(minMem) >= HIGH_BOUND_32BIT_ADDRESS) {
         return nullptr;
     }
-    if (ToUintPtr(min_mem) + size > HIGH_BOUND_32BIT_ADDRESS) {
+    if (ToUintPtr(minMem) + size > HIGH_BOUND_32BIT_ADDRESS) {
         return nullptr;
     }
-    uintptr_t requested_addr = ToUintPtr(min_mem);
-    for (; requested_addr + size <= HIGH_BOUND_32BIT_ADDRESS; requested_addr += iterative_step) {
+    uintptr_t requestedAddr = ToUintPtr(minMem);
+    for (; requestedAddr + size <= HIGH_BOUND_32BIT_ADDRESS; requestedAddr += iterativeStep) {
         void *mmap_addr =
-            mmap(ToVoidPtr(requested_addr), size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+            mmap(ToVoidPtr(requestedAddr), size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (mmap_addr == MAP_FAILED) {
             continue;
         }
-        if (mmap_addr == ToVoidPtr(requested_addr)) {
+        if (mmap_addr == ToVoidPtr(requestedAddr)) {
             break;
         }
         if (munmap(mmap_addr, size) != 0) {
             return nullptr;
         }
     }
-    if (requested_addr + size > HIGH_BOUND_32BIT_ADDRESS) {
+    if (requestedAddr + size > HIGH_BOUND_32BIT_ADDRESS) {
         return nullptr;
     }
-    void *result_addr = ToVoidPtr(requested_addr);
+    void *resultAddr = ToVoidPtr(requestedAddr);
 #endif  // PANDA_TARGET_64
-    ASAN_POISON_MEMORY_REGION(result_addr, size);
-    return result_addr;
+    ASAN_POISON_MEMORY_REGION(resultAddr, size);
+    return resultAddr;
 }
 
-void *MapRWAnonymousFixedRaw(void *mem, size_t size, bool force_poison)
+void *MapRWAnonymousFixedRaw(void *mem, size_t size, bool forcePoison)
 {
 #if defined(PANDA_ASAN_ON) || defined(PANDA_TSAN_ON) || defined(USE_THREAD_SANITIZER)
     // If this assert fails, please decrease the size of the memory for you program
@@ -268,7 +268,7 @@ void *MapRWAnonymousFixedRaw(void *mem, size_t size, bool force_poison)
     if (result == MAP_FAILED) {
         result = nullptr;
     }
-    if ((result != nullptr) && force_poison) {
+    if ((result != nullptr) && forcePoison) {
         // If you have such an error here:
         // ==4120==AddressSanitizer CHECK failed:
         // ../../../../src/libsanitizer/asan/asan_mapping.h:303 "((AddrIsInMem(p))) != (0)" (0x0, 0x0)
@@ -324,9 +324,9 @@ std::optional<Error> TagAnonymousMemory([[maybe_unused]] const void *mem, [[mayb
 
 size_t GetNativeBytesFromMallinfo()
 {
-    size_t mallinfo_bytes;
+    size_t mallinfoBytes;
 #if defined(PANDA_ASAN_ON) || defined(PANDA_TSAN_ON)
-    mallinfo_bytes = DEFAULT_NATIVE_BYTES_FROM_MALLINFO;
+    mallinfoBytes = DEFAULT_NATIVE_BYTES_FROM_MALLINFO;
     LOG(INFO, RUNTIME) << "Get native bytes from mallinfo with ASAN or TSAN. Return default value";
 #else
 #if defined(__GLIBC__) || defined(PANDA_TARGET_MOBILE)
@@ -336,30 +336,30 @@ size_t GetNativeBytesFromMallinfo()
     // non-small allocations
 #if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 33
     struct mallinfo2 info = mallinfo2();
-    mallinfo_bytes = info.uordblks;
+    mallinfoBytes = info.uordblks;
 #else
     struct mallinfo info = mallinfo();
-    mallinfo_bytes = static_cast<unsigned int>(info.uordblks);
+    mallinfoBytes = static_cast<unsigned int>(info.uordblks);
 #endif  // __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 33
 
 #if defined(__GLIBC__)
 
     // For GLIBC, hblkhd is total size of space which is allocated by mmap called by malloc for non-small allocations
 #if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 33
-    mallinfo_bytes += info.hblkhd;
+    mallinfoBytes += info.hblkhd;
 #else
-    mallinfo_bytes += static_cast<unsigned int>(info.hblkhd);
+    mallinfoBytes += static_cast<unsigned int>(info.hblkhd);
 #endif  // __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 33
 
 #endif  // __GLIBC__
 #else
-    mallinfo_bytes = DEFAULT_NATIVE_BYTES_FROM_MALLINFO;
+    mallinfoBytes = DEFAULT_NATIVE_BYTES_FROM_MALLINFO;
     LOG(INFO, RUNTIME) << "Get native bytes from mallinfo without GLIBC or mobile libc. Return default value";
 #endif  // __GLIBC__ || PANDA_TARGET_MOBILE
 #endif  // PANDA_ASAN_ON || PANDA_TSAN_ON
     // For ASAN or TSAN, return default value. For GLIBC, return uordblks + hblkhd. For mobile libc, return uordblks.
     // For other, return default value.
-    return mallinfo_bytes;
+    return mallinfoBytes;
 }
 
 }  // namespace panda::os::mem

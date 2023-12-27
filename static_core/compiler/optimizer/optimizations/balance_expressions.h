@@ -46,7 +46,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerBalanceExpressions();
+        return g_options.IsCompilerBalanceExpressions();
     }
 
     void Dump(std::ostream *out) const;
@@ -57,15 +57,15 @@ private:
     void ProcessBB(BasicBlock *bb);
     bool SuitableInst(Inst *inst);
 
-    Inst *ProccesExpressionChain(Inst *last_operator);
+    Inst *ProccesExpressionChain(Inst *lastOperator);
     void AnalyzeInputsRec(Inst *inst);
     void TryExtendChainRec(Inst *inst);
 
     bool NeedsOptimization();
-    Inst *OptimizeExpression(Inst *inst_after_expr);
+    Inst *OptimizeExpression(Inst *instAfterExpr);
     template <bool IS_FIRST_CALL>
-    Inst *AllocateSourcesRec(size_t first_idx, size_t last_idx);
-    Inst *GetOperand(size_t first_idx, size_t last_idx);
+    Inst *AllocateSourcesRec(size_t firstIdx, size_t lastIdx);
+    Inst *GetOperand(size_t firstIdx, size_t lastIdx);
     Inst *GenerateElementalOperator(Inst *lhs, Inst *rhs);
     void Reset();
     void Dump();
@@ -88,7 +88,7 @@ private:
     }
     void SetIsApplied(bool value)
     {
-        is_applied_ = value;
+        isApplied_ = value;
     }
 
     // Calculates the lowest integral power of two that is greater than `val`
@@ -101,21 +101,21 @@ private:
             return 1;
         }
 
-        size_t highest_bit_idx = 0;
-        T val_copy = val;
-        while (val_copy != 0) {
-            val_copy = val_copy >> 1U;
-            highest_bit_idx++;
+        size_t highestBitIdx = 0;
+        T valCopy = val;
+        while (valCopy != 0) {
+            valCopy = valCopy >> 1U;
+            highestBitIdx++;
         }
 
         T res = 1U;
-        ASSERT(highest_bit_idx >= 1);
-        if ((val << (std::numeric_limits<T>::digits - highest_bit_idx + 1)) == 0) {
+        ASSERT(highestBitIdx >= 1);
+        if ((val << (std::numeric_limits<T>::digits - highestBitIdx + 1)) == 0) {
             // (highest_bit_idx >= 1) as soon as (val > 1)
             // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-            return res << (highest_bit_idx - 1);
+            return res << (highestBitIdx - 1);
         }
-        return res << (highest_bit_idx);
+        return res << (highestBitIdx);
     }
 
     // If x is not 0 or 1, calculates the largest integral power of two that is less than `val`
@@ -128,31 +128,31 @@ private:
             return 0;
         }
 
-        size_t highest_bit_idx = 0;
-        T val_copy = val;
-        while (val_copy != 0) {
-            val_copy = val_copy >> 1U;
-            highest_bit_idx++;
+        size_t highestBitIdx = 0;
+        T valCopy = val;
+        while (valCopy != 0) {
+            valCopy = valCopy >> 1U;
+            highestBitIdx++;
         }
         T res = 1U;
-        ASSERT(highest_bit_idx >= 2U);
-        if ((val << (std::numeric_limits<T>::digits - highest_bit_idx + 1)) == 0) {
+        ASSERT(highestBitIdx >= 2U);
+        if ((val << (std::numeric_limits<T>::digits - highestBitIdx + 1)) == 0) {
             // (highest_bit_idx >= 2) as soon as (val > 1)
             // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-            return res << (highest_bit_idx - 2U);
+            return res << (highestBitIdx - 2U);
         }
         // (highest_bit_idx >= 2) as soon as (val > 1)
         // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-        return res << (highest_bit_idx - 1);
+        return res << (highestBitIdx - 1);
     }
 
 private:
     Opcode opcode_ {Opcode::INVALID};
-    Marker processed_inst_mrk_ = UNDEF_MARKER;
+    Marker processedInstMrk_ = UNDEF_MARKER;
 
     // i.e. critical path
-    size_t expr_cur_depth_ {0};
-    size_t expr_max_depth_ {0};
+    size_t exprCurDepth_ {0};
+    size_t exprMaxDepth_ {0};
 
     BasicBlock *bb_ {nullptr};
 
@@ -161,9 +161,9 @@ private:
 
     // Expression's operators:
     InstVector operators_;
-    size_t operators_alloc_idx_ = 0;
+    size_t operatorsAllocIdx_ = 0;
 
-    bool is_applied_ {false};
+    bool isApplied_ {false};
 };
 
 inline std::ostream &operator<<(std::ostream &os, const BalanceExpressions &expr)

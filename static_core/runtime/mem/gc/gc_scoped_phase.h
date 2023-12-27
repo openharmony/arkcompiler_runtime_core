@@ -29,7 +29,7 @@ class GC;
 
 class GCScopedPhase {
 public:
-    GCScopedPhase(GC *gc, GCPhase new_phase);
+    GCScopedPhase(GC *gc, GCPhase newPhase);
     NO_COPY_SEMANTIC(GCScopedPhase);
     NO_MOVE_SEMANTIC(GCScopedPhase);
 
@@ -93,7 +93,7 @@ public:
 
 private:
     GCPhase phase_;
-    GCPhase old_phase_;
+    GCPhase oldPhase_;
     GC *gc_;
 
     PandaString GetGCName();

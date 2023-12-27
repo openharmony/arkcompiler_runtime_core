@@ -25,17 +25,17 @@ namespace panda::test {
 class CodegenRunnerTest : public testing::Test {
 public:
     CodegenRunnerTest()
-        : default_compiler_non_optimizing_(compiler::OPTIONS.IsCompilerNonOptimizing()),
-          default_compiler_inlining_(compiler::OPTIONS.IsCompilerInlining()),
-          default_compiler_regalloc_mask_(compiler::OPTIONS.GetCompilerRegallocRegMask())
+        : defaultCompilerNonOptimizing_(compiler::g_options.IsCompilerNonOptimizing()),
+          defaultCompilerInlining_(compiler::g_options.IsCompilerInlining()),
+          defaultCompilerRegallocMask_(compiler::g_options.GetCompilerRegallocRegMask())
     {
     }
 
     ~CodegenRunnerTest() override
     {
-        compiler::OPTIONS.SetCompilerNonOptimizing(default_compiler_non_optimizing_);
-        compiler::OPTIONS.SetCompilerInlining(default_compiler_inlining_);
-        compiler::OPTIONS.SetCompilerRegallocRegMask(default_compiler_regalloc_mask_);
+        compiler::g_options.SetCompilerNonOptimizing(defaultCompilerNonOptimizing_);
+        compiler::g_options.SetCompilerInlining(defaultCompilerInlining_);
+        compiler::g_options.SetCompilerRegallocRegMask(defaultCompilerRegallocMask_);
     }
 
     NO_COPY_SEMANTIC(CodegenRunnerTest);
@@ -52,9 +52,9 @@ public:
     }
 
 private:
-    bool default_compiler_non_optimizing_;
-    bool default_compiler_inlining_;
-    uint64_t default_compiler_regalloc_mask_;
+    bool defaultCompilerNonOptimizing_;
+    bool defaultCompilerInlining_;
+    uint64_t defaultCompilerRegallocMask_;
 };
 
 static constexpr auto CODEGEN_OBJECT_PARAMS_SOURCE = R"(
@@ -341,7 +341,7 @@ NO_OPTIMIZE int Callback([[maybe_unused]] uintptr_t lr, [[maybe_unused]] uintptr
 TEST_F(CodegenRunnerTest, ObjectParams)
 {
     // hi-part is 1 - to do not rewrite fp, lr in arm64
-    std::array<uint64_t, 4U> reg_masks {
+    std::array<uint64_t, 4U> regMasks {
         0U, 0xFFFFFFFFFFFFFFF0U, 0xFFFFFFFFF0FFF000U, 0xFFFFFFFFFFFFDFD6U,
         // NOTE (igorban): enable next variants:
         // 0xFFFFFFFFFF000FFF,
@@ -350,8 +350,8 @@ TEST_F(CodegenRunnerTest, ObjectParams)
         // 0xFFFFFFFFFFFFF00F,
     };
 
-    for (auto &hook_on : {false, true}) {
-        for (auto &mask : reg_masks) {
+    for (auto &hookOn : {false, true}) {
+        for (auto &mask : regMasks) {
             panda::test::PandaRunner runner;
             runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
             runner.GetCompilerOptions().SetCompilerInlining(false);
@@ -360,7 +360,7 @@ TEST_F(CodegenRunnerTest, ObjectParams)
             runner.GetRuntimeOptions().SetShouldInitializeIntrinsics(false);
             runner.GetCompilerOptions().SetCompilerRegallocRegMask(mask);
 
-            if (hook_on) {
+            if (hookOn) {
                 runner.SetHook(Callback);
             }
 

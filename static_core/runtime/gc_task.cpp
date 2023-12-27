@@ -19,7 +19,7 @@
 
 namespace panda {
 
-std::atomic<uint32_t> GCTask::next_id_ = 1;
+std::atomic<uint32_t> GCTask::nextId_ = 1;
 
 void GCTask::Run(mem::GC &gc)
 {
@@ -32,13 +32,13 @@ void GCTask::Release(mem::InternalAllocatorPtr allocator)
     allocator->Delete(this);
 }
 
-void GCTask::UpdateGCCollectionType(GCCollectionType gc_collection_type)
+void GCTask::UpdateGCCollectionType(GCCollectionType gcCollectionType)
 {
-    ASSERT(gc_collection_type != GCCollectionType::NONE);
-    if (gc_collection_type <= collection_type) {
+    ASSERT(gcCollectionType != GCCollectionType::NONE);
+    if (gcCollectionType <= collectionType) {
         return;
     }
-    collection_type = gc_collection_type;
+    collectionType = gcCollectionType;
 }
 
 std::ostream &operator<<(std::ostream &os, const GCTaskCause &cause)
@@ -78,9 +78,9 @@ std::ostream &operator<<(std::ostream &os, const GCTaskCause &cause)
     return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const GCCollectionType &collection_type)
+std::ostream &operator<<(std::ostream &os, const GCCollectionType &collectionType)
 {
-    switch (collection_type) {
+    switch (collectionType) {
         case GCCollectionType::NONE:
             os << "NONE";
             break;

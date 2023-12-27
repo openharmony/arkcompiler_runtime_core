@@ -29,8 +29,8 @@ namespace panda::tooling {
 
 class InspectorExtension {
 public:
-    using PropertyHandler = std::function<void(const std::string &name, TypedValue value, bool is_array_element,
-                                               bool is_final, bool is_accessor)>;
+    using PropertyHandler = std::function<void(const std::string &name, TypedValue value, bool isArrayElement,
+                                               bool isFinal, bool isAccessor)>;
 
     InspectorExtension() = default;
     virtual ~InspectorExtension() = default;

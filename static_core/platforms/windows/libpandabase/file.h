@@ -109,10 +109,10 @@ public:
 
     static Expected<std::string, Error> GetExecutablePath();
 
-    static Expected<std::string, Error> GetAbsolutePath(std::string_view relative_path)
+    static Expected<std::string, Error> GetAbsolutePath(std::string_view relativePath)
     {
         std::array<char, _MAX_PATH> buffer = {0};
-        auto fp = _fullpath(buffer.data(), relative_path.data(), buffer.size() - 1);
+        auto fp = _fullpath(buffer.data(), relativePath.data(), buffer.size() - 1);
 
         if (fp == nullptr) {
             return Unexpected(Error(errno));
@@ -170,9 +170,9 @@ public:
         return _lseek(fd_, 0L, SEEK_END) == 0;
     }
 
-    static void GetEndLine(std::ostream &os, const std::size_t number_of_end_lines = 1)
+    static void GetEndLine(std::ostream &os, const std::size_t numberOfEndLines = 1)
     {
-        for (std::size_t i = 0; i < number_of_end_lines; i++) {
+        for (std::size_t i = 0; i < numberOfEndLines; i++) {
             os << std::endl;
         }
     }

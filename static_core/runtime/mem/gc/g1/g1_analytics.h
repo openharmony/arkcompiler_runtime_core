@@ -26,7 +26,7 @@ public:
     explicit G1Analytics(uint64_t now);
 
     void ReportCollectionStart(uint64_t time);
-    void ReportCollectionEnd(uint64_t end_time, const CollectionSet &collection_set);
+    void ReportCollectionEnd(uint64_t endTime, const CollectionSet &collectionSet);
 
     void ReportEvacuatedBytes(size_t bytes);
     void ReportScanRemsetStart(uint64_t time);
@@ -41,42 +41,42 @@ public:
     void ReportLiveObjects(size_t num);
 
     double PredictAllocationRate() const;
-    int64_t PredictYoungCollectionTimeInMicros(size_t eden_length) const;
+    int64_t PredictYoungCollectionTimeInMicros(size_t edenLength) const;
     int64_t EstimatePredictionErrorInMicros() const;
-    int64_t PredictOldCollectionTimeInMicros(size_t live_bytes, size_t live_objects) const;
+    int64_t PredictOldCollectionTimeInMicros(size_t liveBytes, size_t liveObjects) const;
     int64_t PredictOldCollectionTimeInMicros(Region *region) const;
 
 private:
-    double PredictPromotedRegions(size_t eden_length) const;
-    size_t EstimatePromotionTimeInMicros(size_t promoted_regions) const;
+    double PredictPromotedRegions(size_t edenLength) const;
+    size_t EstimatePromotionTimeInMicros(size_t promotedRegions) const;
 
     static constexpr uint64_t DEFAULT_PROMOTION_COST = 50;
-    const uint64_t promotion_cost_ {DEFAULT_PROMOTION_COST};
-    uint64_t previous_young_collection_end_;
-    uint64_t current_young_collection_start_ {0};
-    uint64_t scan_remset_start_ {0};
-    uint64_t scan_remset_end_ {0};
-    uint64_t marking_start_ {0};
-    uint64_t marking_end_ {0};
-    uint64_t evacuation_start_ {0};
-    uint64_t evacuation_end_ {0};
-    uint64_t update_refs_start_ {0};
-    uint64_t update_refs_end_ {0};
-    panda::Sequence allocation_rate_seq_;
-    panda::Sequence copied_bytes_seq_;
-    panda::Sequence copying_bytes_rate_seq_;
-    panda::Sequence scan_remset_time_seq_;
-    panda::Sequence live_objecst_seq_;
-    panda::Sequence marking_rate_seq_;
-    panda::Sequence update_refs_time_seq_;
-    panda::Sequence promotion_seq_;
-    panda::Sequence prediction_error_seq_;
-    panda::Sequence live_objects_seq_;
+    const uint64_t promotionCost_ {DEFAULT_PROMOTION_COST};
+    uint64_t previousYoungCollectionEnd_;
+    uint64_t currentYoungCollectionStart_ {0};
+    uint64_t scanRemsetStart_ {0};
+    uint64_t scanRemsetEnd_ {0};
+    uint64_t markingStart_ {0};
+    uint64_t markingEnd_ {0};
+    uint64_t evacuationStart_ {0};
+    uint64_t evacuationEnd_ {0};
+    uint64_t updateRefsStart_ {0};
+    uint64_t updateRefsEnd_ {0};
+    panda::Sequence allocationRateSeq_;
+    panda::Sequence copiedBytesSeq_;
+    panda::Sequence copyingBytesRateSeq_;
+    panda::Sequence scanRemsetTimeSeq_;
+    panda::Sequence liveObjecstSeq_;
+    panda::Sequence markingRateSeq_;
+    panda::Sequence updateRefsTimeSeq_;
+    panda::Sequence promotionSeq_;
+    panda::Sequence predictionErrorSeq_;
+    panda::Sequence liveObjectsSeq_;
     static constexpr double DEFAULT_CONFIDENCE_FACTOR = 0.5;
     G1Predictor predictor_ {DEFAULT_CONFIDENCE_FACTOR};
-    std::atomic<size_t> copied_bytes_ {0};
-    std::atomic<size_t> promoted_regions_ {0};
-    std::atomic<size_t> live_objects_ {0};
+    std::atomic<size_t> copiedBytes_ {0};
+    std::atomic<size_t> promotedRegions_ {0};
+    std::atomic<size_t> liveObjects_ {0};
 };
 }  // namespace panda::mem
 #endif

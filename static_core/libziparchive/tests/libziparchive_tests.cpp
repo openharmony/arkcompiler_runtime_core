@@ -41,8 +41,8 @@ namespace panda::test {
 constexpr size_t MAX_BUFFER_SIZE = 2048;
 constexpr size_t MAX_DIR_SIZE = 64;
 
-static void GenerateZipfile(const char *data, const char *archivename, int n, char *buf, char *archive_filename, int &i,
-                            int &ret, std::vector<uint8_t> &pf_data, int level = Z_BEST_COMPRESSION)
+static void GenerateZipfile(const char *data, const char *archivename, int n, char *buf, char *archiveFilename, int &i,
+                            int &ret, std::vector<uint8_t> &pfData, int level = Z_BEST_COMPRESSION)
 {
     // Delete the test archive, so it doesn't keep growing as we run this test
     remove(archivename);
@@ -57,11 +57,10 @@ static void GenerateZipfile(const char *data, const char *archivename, int n, ch
     // Append a bunch of text files to the test archive
     for (i = (n - 1); i >= 0; --i) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        (void)sprintf_s(archive_filename, MAX_DIR_SIZE, "%u.txt", i);
+        (void)sprintf_s(archiveFilename, MAX_DIR_SIZE, "%u.txt", i);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         (void)sprintf_s(buf, MAX_BUFFER_SIZE, "%u %s %u", (n - 1) - i, data, i);
-        ret =
-            CreateOrAddFileIntoZip(archivename, archive_filename, buf, strlen(buf) + 1, APPEND_STATUS_ADDINZIP, level);
+        ret = CreateOrAddFileIntoZip(archivename, archiveFilename, buf, strlen(buf) + 1, APPEND_STATUS_ADDINZIP, level);
         if (ret != 0) {
             ASSERT_EQ(1, 0) << "CreateOrAddFileIntoZip for " << i << ".txt failed!";
             return;
@@ -79,8 +78,8 @@ static void GenerateZipfile(const char *data, const char *archivename, int n, ch
     }
 
     // Add a pandafile into zip for testing
-    ret = CreateOrAddFileIntoZip(archivename, "classes.abc", pf_data.data(), pf_data.size(), APPEND_STATUS_ADDINZIP,
-                                 level);
+    ret =
+        CreateOrAddFileIntoZip(archivename, "classes.abc", pfData.data(), pfData.size(), APPEND_STATUS_ADDINZIP, level);
     if (ret != 0) {
         ASSERT_EQ(1, 0) << "CreateOrAddFileIntoZip for classes.abc failed!";
         return;
@@ -123,7 +122,7 @@ static void UnzipFileCheckDirectory(const char *archivename, char *filename, int
 
     GetCurrentFileOffset(zipfile, &entry);
 
-    uint32_t uncompressed_length = entry.GetUncompressedSize();
+    uint32_t uncompressedLength = entry.GetUncompressedSize();
 
     ASSERT_GT(entry.GetOffset(), 0);
     if (level == Z_NO_COMPRESSION) {
@@ -132,7 +131,7 @@ static void UnzipFileCheckDirectory(const char *archivename, char *filename, int
         ASSERT_TRUE(entry.IsCompressed());
     }
 
-    GTEST_COUT << "Filename: " << filename << ", Uncompressed size: " << uncompressed_length
+    GTEST_COUT << "Filename: " << filename << ", Uncompressed size: " << uncompressedLength
                << "Compressed size: " << entry.GetCompressedSize() << "Compressed(): " << entry.IsCompressed()
                << "entry offset: " << entry.GetOffset() << "\n";
 
@@ -181,8 +180,8 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
 
         GetCurrentFileOffset(zipfile, &entry);
 
-        uint32_t uncompressed_length = entry.GetUncompressedSize();
-        if (uncompressed_length == 0) {
+        uint32_t uncompressedLength = entry.GetUncompressedSize();
+        if (uncompressedLength == 0) {
             CloseCurrentFile(zipfile);
             CloseArchiveFile(zipfile);
             fclose(myfile);
@@ -190,27 +189,27 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
             return;
         }
         ASSERT_GT(entry.GetOffset(), 0);
-        ASSERT_EQ(uncompressed_length, strlen(buf) + 1);
+        ASSERT_EQ(uncompressedLength, strlen(buf) + 1);
         if (level == Z_NO_COMPRESSION) {
-            ASSERT_EQ(uncompressed_length, entry.GetCompressedSize());
+            ASSERT_EQ(uncompressedLength, entry.GetCompressedSize());
             ASSERT_FALSE(entry.IsCompressed());
         } else {
-            ASSERT_GE(uncompressed_length, entry.GetCompressedSize());
+            ASSERT_GE(uncompressedLength, entry.GetCompressedSize());
             ASSERT_TRUE(entry.IsCompressed());
         }
 
-        GTEST_COUT << "Filename: " << filename << ", Uncompressed size: " << uncompressed_length
+        GTEST_COUT << "Filename: " << filename << ", Uncompressed size: " << uncompressedLength
                    << "Compressed size: " << entry.GetCompressedSize() << "Compressed(): " << entry.IsCompressed()
                    << "entry offset: " << entry.GetOffset() << "\n";
 
         {
             // Extract to mem buffer accroding to entry info.
-            uint32_t page_size = os::mem::GetPageSize();
-            uint32_t min_pages = uncompressed_length / page_size;
-            uint32_t size_to_mmap =
-                uncompressed_length % page_size == 0 ? min_pages * page_size : (min_pages + 1) * page_size;
+            uint32_t pageSize = os::mem::GetPageSize();
+            ASSERT(pageSize != 0);
+            uint32_t minPages = uncompressedLength / pageSize;
+            uint32_t sizeToMmap = uncompressedLength % pageSize == 0 ? minPages * pageSize : (minPages + 1) * pageSize;
             // we will use mem in memcmp, so donnot poision it!
-            void *mem = os::mem::MapRWAnonymousRaw(size_to_mmap, false);
+            void *mem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
             if (mem == nullptr) {
                 CloseCurrentFile(zipfile);
                 CloseArchiveFile(zipfile);
@@ -219,9 +218,9 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
                 return;
             }
 
-            ret = ExtractToMemory(zipfile, reinterpret_cast<uint8_t *>(mem), size_to_mmap);
+            ret = ExtractToMemory(zipfile, reinterpret_cast<uint8_t *>(mem), sizeToMmap);
             if (ret != 0) {
-                os::mem::UnmapRaw(mem, size_to_mmap);
+                os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchiveFile(zipfile);
                 fclose(myfile);
@@ -231,17 +230,17 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
 
             // Make sure the extraction really succeeded.
             size_t dlen = strlen(buf);
-            if (uncompressed_length != (dlen + 1)) {
-                os::mem::UnmapRaw(mem, size_to_mmap);
+            if (uncompressedLength != (dlen + 1)) {
+                os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchive(zipfile);
-                ASSERT_EQ(1, 0) << "ExtractToMemory() failed!, uncompressed_length is " << uncompressed_length - 1
+                ASSERT_EQ(1, 0) << "ExtractToMemory() failed!, uncompressed_length is " << uncompressedLength - 1
                                 << ", original strlen is " << dlen;
                 return;
             }
 
             if (memcmp(mem, buf, dlen) != 0) {
-                os::mem::UnmapRaw(mem, size_to_mmap);
+                os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchive(zipfile);
                 ASSERT_EQ(1, 0) << "ExtractToMemory() memcmp failed!";
@@ -249,8 +248,8 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
             }
 
             GTEST_COUT << "Successfully extracted file " << filename << " from " << archivename << ", size is "
-                       << uncompressed_length << "\n";
-            os::mem::UnmapRaw(mem, size_to_mmap);
+                       << uncompressedLength << "\n";
+            os::mem::UnmapRaw(mem, sizeToMmap);
         }
 
         CloseCurrentFile(zipfile);
@@ -259,7 +258,7 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
     }
 }
 
-static void UnzipFileCheckPandaFile(const char *archivename, char *filename, std::vector<uint8_t> &pf_data, int &ret,
+static void UnzipFileCheckPandaFile(const char *archivename, char *filename, std::vector<uint8_t> &pfData, int &ret,
                                     int level = Z_BEST_COMPRESSION)
 {
     {
@@ -294,8 +293,8 @@ static void UnzipFileCheckPandaFile(const char *archivename, char *filename, std
 
         GetCurrentFileOffset(zipfile, &entry);
 
-        uint32_t uncompressed_length = entry.GetUncompressedSize();
-        if (uncompressed_length == 0) {
+        uint32_t uncompressedLength = entry.GetUncompressedSize();
+        if (uncompressedLength == 0) {
             CloseCurrentFile(zipfile);
             CloseArchiveFile(zipfile);
             fclose(myfile);
@@ -303,27 +302,27 @@ static void UnzipFileCheckPandaFile(const char *archivename, char *filename, std
             return;
         }
         ASSERT_GT(entry.GetOffset(), 0);
-        ASSERT_EQ(uncompressed_length, pf_data.size());
+        ASSERT_EQ(uncompressedLength, pfData.size());
         if (level == Z_NO_COMPRESSION) {
-            ASSERT_EQ(uncompressed_length, entry.GetCompressedSize());
+            ASSERT_EQ(uncompressedLength, entry.GetCompressedSize());
             ASSERT_FALSE(entry.IsCompressed());
         } else {
-            ASSERT_GE(uncompressed_length, entry.GetCompressedSize());
+            ASSERT_GE(uncompressedLength, entry.GetCompressedSize());
             ASSERT_TRUE(entry.IsCompressed());
         }
 
-        GTEST_COUT << "Filename: " << filename << ", Uncompressed size: " << uncompressed_length
+        GTEST_COUT << "Filename: " << filename << ", Uncompressed size: " << uncompressedLength
                    << "Compressed size: " << entry.GetCompressedSize() << "Compressed(): " << entry.IsCompressed()
                    << "entry offset: " << entry.GetOffset() << "\n";
 
         {
             // Extract to mem buffer accroding to entry info.
-            uint32_t page_size = os::mem::GetPageSize();
-            uint32_t min_pages = uncompressed_length / page_size;
-            uint32_t size_to_mmap =
-                uncompressed_length % page_size == 0 ? min_pages * page_size : (min_pages + 1) * page_size;
+            uint32_t pageSize = os::mem::GetPageSize();
+            ASSERT(pageSize != 0);
+            uint32_t minPages = uncompressedLength / pageSize;
+            uint32_t sizeToMmap = uncompressedLength % pageSize == 0 ? minPages * pageSize : (minPages + 1) * pageSize;
             // we will use mem in memcmp, so donnot poision it!
-            void *mem = os::mem::MapRWAnonymousRaw(size_to_mmap, false);
+            void *mem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
             if (mem == nullptr) {
                 CloseCurrentFile(zipfile);
                 CloseArchiveFile(zipfile);
@@ -332,9 +331,9 @@ static void UnzipFileCheckPandaFile(const char *archivename, char *filename, std
                 return;
             }
 
-            ret = ExtractToMemory(zipfile, reinterpret_cast<uint8_t *>(mem), size_to_mmap);
+            ret = ExtractToMemory(zipfile, reinterpret_cast<uint8_t *>(mem), sizeToMmap);
             if (ret != 0) {
-                os::mem::UnmapRaw(mem, size_to_mmap);
+                os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchiveFile(zipfile);
                 fclose(myfile);
@@ -343,18 +342,18 @@ static void UnzipFileCheckPandaFile(const char *archivename, char *filename, std
             }
 
             // Make sure the extraction really succeeded.
-            if (uncompressed_length != pf_data.size()) {
-                os::mem::UnmapRaw(mem, size_to_mmap);
+            if (uncompressedLength != pfData.size()) {
+                os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchiveFile(zipfile);
                 fclose(myfile);
-                ASSERT_EQ(1, 0) << "ExtractToMemory() failed!, uncompressed_length is " << uncompressed_length
-                                << ", original pf_data size is " << pf_data.size() << "\n";
+                ASSERT_EQ(1, 0) << "ExtractToMemory() failed!, uncompressed_length is " << uncompressedLength
+                                << ", original pf_data size is " << pfData.size() << "\n";
                 return;
             }
 
-            if (memcmp(mem, pf_data.data(), pf_data.size()) != 0) {
-                os::mem::UnmapRaw(mem, size_to_mmap);
+            if (memcmp(mem, pfData.data(), pfData.size()) != 0) {
+                os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchiveFile(zipfile);
                 fclose(myfile);
@@ -363,9 +362,9 @@ static void UnzipFileCheckPandaFile(const char *archivename, char *filename, std
             }
 
             GTEST_COUT << "Successfully extracted file " << filename << " from " << archivename << ", size is "
-                       << uncompressed_length << "\n";
+                       << uncompressedLength << "\n";
 
-            os::mem::UnmapRaw(mem, size_to_mmap);
+            os::mem::UnmapRaw(mem, sizeToMmap);
         }
         CloseCurrentFile(zipfile);
         CloseArchiveFile(zipfile);
@@ -414,8 +413,8 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
 
         GetCurrentFileOffset(zipfile, &entry);
 
-        uint32_t uncompressed_length = entry.GetUncompressedSize();
-        if (uncompressed_length == 0) {
+        uint32_t uncompressedLength = entry.GetUncompressedSize();
+        if (uncompressedLength == 0) {
             CloseCurrentFile(zipfile);
             CloseArchiveFile(zipfile);
             fclose(myfile);
@@ -423,26 +422,26 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
             return;
         }
         ASSERT_GT(entry.GetOffset(), 0);
-        ASSERT_EQ(uncompressed_length, strlen(buf) + 1);
+        ASSERT_EQ(uncompressedLength, strlen(buf) + 1);
         if (level == Z_NO_COMPRESSION) {
-            ASSERT_EQ(uncompressed_length, entry.GetCompressedSize());
+            ASSERT_EQ(uncompressedLength, entry.GetCompressedSize());
             ASSERT_FALSE(entry.IsCompressed());
         } else {
-            ASSERT_GE(uncompressed_length, entry.GetCompressedSize());
+            ASSERT_GE(uncompressedLength, entry.GetCompressedSize());
             ASSERT_TRUE(entry.IsCompressed());
         }
-        GTEST_COUT << "Filename: " << filename << ", Uncompressed size: " << uncompressed_length
+        GTEST_COUT << "Filename: " << filename << ", Uncompressed size: " << uncompressedLength
                    << "Compressed size: " << entry.GetCompressedSize() << "Compressed(): " << entry.IsCompressed()
                    << "entry offset: " << entry.GetOffset() << "\n";
 
         {
             // Extract to mem buffer accroding to entry info.
-            uint32_t page_size = os::mem::GetPageSize();
-            uint32_t min_pages = uncompressed_length / page_size;
-            uint32_t size_to_mmap =
-                uncompressed_length % page_size == 0 ? min_pages * page_size : (min_pages + 1) * page_size;
+            uint32_t pageSize = os::mem::GetPageSize();
+            ASSERT(pageSize != 0);
+            uint32_t minPages = uncompressedLength / pageSize;
+            uint32_t sizeToMmap = uncompressedLength % pageSize == 0 ? minPages * pageSize : (minPages + 1) * pageSize;
             // we will use mem in memcmp, so donnot poision it!
-            void *mem = os::mem::MapRWAnonymousRaw(size_to_mmap, false);
+            void *mem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
             if (mem == nullptr) {
                 CloseCurrentFile(zipfile);
                 CloseArchiveFile(zipfile);
@@ -451,9 +450,9 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
                 return;
             }
 
-            ret = ExtractToMemory(zipfile, reinterpret_cast<uint8_t *>(mem), size_to_mmap);
+            ret = ExtractToMemory(zipfile, reinterpret_cast<uint8_t *>(mem), sizeToMmap);
             if (ret != 0) {
-                os::mem::UnmapRaw(mem, size_to_mmap);
+                os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchiveFile(zipfile);
                 fclose(myfile);
@@ -463,17 +462,17 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
 
             // Make sure the extraction really succeeded.
             size_t dlen = strlen(buf);
-            if (uncompressed_length != (dlen + 1)) {
-                os::mem::UnmapRaw(mem, size_to_mmap);
+            if (uncompressedLength != (dlen + 1)) {
+                os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchive(zipfile);
-                ASSERT_EQ(1, 0) << "ExtractToMemory() failed!, uncompressed_length is " << uncompressed_length - 1
+                ASSERT_EQ(1, 0) << "ExtractToMemory() failed!, uncompressed_length is " << uncompressedLength - 1
                                 << ", original strlen is " << dlen;
                 return;
             }
 
             if (memcmp(mem, buf, dlen) != 0) {
-                os::mem::UnmapRaw(mem, size_to_mmap);
+                os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchive(zipfile);
                 ASSERT_EQ(1, 0) << "ExtractToMemory() memcmp failed!";
@@ -481,9 +480,9 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
             }
 
             GTEST_COUT << "Successfully extracted file " << filename << " from " << archivename << ", size is "
-                       << uncompressed_length << "\n";
+                       << uncompressedLength << "\n";
 
-            os::mem::UnmapRaw(mem, size_to_mmap);
+            os::mem::UnmapRaw(mem, sizeToMmap);
         }
 
         CloseCurrentFile(zipfile);
@@ -506,22 +505,22 @@ TEST(LIBZIPARCHIVE, ZipFile)
     /*
      * creating an empty pandafile
      */
-    std::vector<uint8_t> pf_data {};
+    std::vector<uint8_t> pfData {};
     {
         pandasm::Parser p;
 
         auto source = R"()";
 
-        std::string src_filename = "src.pa";
-        auto res = p.Parse(source, src_filename);
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
         ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
 
         auto pf = pandasm::AsmEmitter::Emit(res.Value());
         ASSERT_NE(pf, nullptr);
 
-        const auto header_ptr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        pf_data.assign(header_ptr, header_ptr + sizeof(panda_file::File::Header));
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
     }
 
     static const char *archivename = "__LIBZIPARCHIVE__ZipFile__.zip";
@@ -529,11 +528,11 @@ TEST(LIBZIPARCHIVE, ZipFile)
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char buf[MAX_BUFFER_SIZE];
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    char archive_filename[MAX_DIR_SIZE];
+    char archiveFilename[MAX_DIR_SIZE];
     int i = 0;
     int ret = 0;
 
-    GenerateZipfile(data, archivename, n, buf, archive_filename, i, ret, pf_data);
+    GenerateZipfile(data, archivename, n, buf, archiveFilename, i, ret, pfData);
 
     // Quick Check
     ZipArchiveHandle zipfile = nullptr;
@@ -548,15 +547,15 @@ TEST(LIBZIPARCHIVE, ZipFile)
         return;
     }
     for (i = 0; i < (int)gi.GetNumberOfEntry(); ++i) {
-        EntryFileStat file_stat {};
-        if (GetCurrentFileInfo(zipfile, &file_stat) != 0) {
+        EntryFileStat fileStat {};
+        if (GetCurrentFileInfo(zipfile, &fileStat) != 0) {
             CloseArchive(zipfile);
             ASSERT_EQ(1, 0) << "GetCurrentFileInfo error. Current index i = " << i;
             return;
         }
-        GTEST_COUT << "Index:  " << i << ", Uncompressed size: " << file_stat.GetUncompressedSize()
-                   << "Compressed size: " << file_stat.GetCompressedSize()
-                   << "Compressed(): " << file_stat.IsCompressed() << "entry offset: " << file_stat.GetOffset() << "\n";
+        GTEST_COUT << "Index:  " << i << ", Uncompressed size: " << fileStat.GetUncompressedSize()
+                   << "Compressed size: " << fileStat.GetCompressedSize() << "Compressed(): " << fileStat.IsCompressed()
+                   << "entry offset: " << fileStat.GetOffset() << "\n";
         if ((i + 1) < (int)gi.GetNumberOfEntry()) {
             if (GoToNextFile(zipfile) != 0) {
                 CloseArchive(zipfile);
@@ -585,22 +584,22 @@ TEST(LIBZIPARCHIVE, UnZipFile)
     /*
      * creating an empty pandafile
      */
-    std::vector<uint8_t> pf_data {};
+    std::vector<uint8_t> pfData {};
     {
         pandasm::Parser p;
 
         auto source = R"()";
 
-        std::string src_filename = "src.pa";
-        auto res = p.Parse(source, src_filename);
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
         ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
 
         auto pf = pandasm::AsmEmitter::Emit(res.Value());
         ASSERT_NE(pf, nullptr);
 
-        const auto header_ptr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        pf_data.assign(header_ptr, header_ptr + sizeof(panda_file::File::Header));
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
     }
 
     // The zip filename
@@ -609,13 +608,13 @@ TEST(LIBZIPARCHIVE, UnZipFile)
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char buf[MAX_BUFFER_SIZE];
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    char archive_filename[MAX_DIR_SIZE];
+    char archiveFilename[MAX_DIR_SIZE];
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char filename[MAX_DIR_SIZE];
     int i = 0;
     int ret = 0;
 
-    GenerateZipfile(data, archivename, n, buf, archive_filename, i, ret, pf_data);
+    GenerateZipfile(data, archivename, n, buf, archiveFilename, i, ret, pfData);
 
     UnzipFileCheckDirectory(archivename, filename);
 
@@ -625,7 +624,7 @@ TEST(LIBZIPARCHIVE, UnZipFile)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     sprintf_s(filename, MAX_DIR_SIZE, "classes.abc");
-    UnzipFileCheckPandaFile(archivename, filename, pf_data, ret);
+    UnzipFileCheckPandaFile(archivename, filename, pfData, ret);
 
     remove(archivename);
     GTEST_COUT << "Success.\n";
@@ -645,22 +644,22 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedFile)
     /*
      * creating an empty pandafile
      */
-    std::vector<uint8_t> pf_data {};
+    std::vector<uint8_t> pfData {};
     {
         pandasm::Parser p;
 
         auto source = R"()";
 
-        std::string src_filename = "src.pa";
-        auto res = p.Parse(source, src_filename);
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
         ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
 
         auto pf = pandasm::AsmEmitter::Emit(res.Value());
         ASSERT_NE(pf, nullptr);
 
-        const auto header_ptr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        pf_data.assign(header_ptr, header_ptr + sizeof(panda_file::File::Header));
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
     }
 
     // The zip filename
@@ -669,13 +668,13 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedFile)
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char buf[MAX_BUFFER_SIZE];
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    char archive_filename[MAX_DIR_SIZE];
+    char archiveFilename[MAX_DIR_SIZE];
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char filename[MAX_DIR_SIZE];
     int i = 0;
     int ret = 0;
 
-    GenerateZipfile(data, archivename, n, buf, archive_filename, i, ret, pf_data, Z_NO_COMPRESSION);
+    GenerateZipfile(data, archivename, n, buf, archiveFilename, i, ret, pfData, Z_NO_COMPRESSION);
 
     UnzipFileCheckDirectory(archivename, filename, Z_NO_COMPRESSION);
 
@@ -685,7 +684,7 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedFile)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     (void)sprintf_s(filename, MAX_DIR_SIZE, "classes.abc");
-    UnzipFileCheckPandaFile(archivename, filename, pf_data, ret, Z_NO_COMPRESSION);
+    UnzipFileCheckPandaFile(archivename, filename, pfData, ret, Z_NO_COMPRESSION);
 
     remove(archivename);
     GTEST_COUT << "Success.\n";
@@ -696,22 +695,22 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedPandaFile)
     /*
      * creating an empty pandafile
      */
-    std::vector<uint8_t> pf_data {};
+    std::vector<uint8_t> pfData {};
     {
         pandasm::Parser p;
 
         auto source = R"()";
 
-        std::string src_filename = "src.pa";
-        auto res = p.Parse(source, src_filename);
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
         ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
 
         auto pf = pandasm::AsmEmitter::Emit(res.Value());
         ASSERT_NE(pf, nullptr);
 
-        const auto header_ptr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        pf_data.assign(header_ptr, header_ptr + sizeof(panda_file::File::Header));
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
     }
 
     // The zip filename
@@ -724,13 +723,13 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedPandaFile)
     remove(archivename);
 
     // Add pandafile into zip for testing
-    ret = CreateOrAddFileIntoZip(archivename, "class.abc", pf_data.data(), pf_data.size(), APPEND_STATUS_CREATE,
+    ret = CreateOrAddFileIntoZip(archivename, "class.abc", pfData.data(), pfData.size(), APPEND_STATUS_CREATE,
                                  Z_NO_COMPRESSION);
     if (ret != 0) {
         ASSERT_EQ(1, 0) << "CreateOrAddFileIntoZip failed!";
         return;
     }
-    ret = CreateOrAddFileIntoZip(archivename, "classes.abc", pf_data.data(), pf_data.size(), APPEND_STATUS_ADDINZIP,
+    ret = CreateOrAddFileIntoZip(archivename, "classes.abc", pfData.data(), pfData.size(), APPEND_STATUS_ADDINZIP,
                                  Z_NO_COMPRESSION);
     if (ret != 0) {
         ASSERT_EQ(1, 0) << "CreateOrAddFileIntoZip failed!";
@@ -739,10 +738,10 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedPandaFile)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     sprintf_s(filename, MAX_DIR_SIZE, "class.abc");
-    UnzipFileCheckPandaFile(archivename, filename, pf_data, ret, Z_NO_COMPRESSION);
+    UnzipFileCheckPandaFile(archivename, filename, pfData, ret, Z_NO_COMPRESSION);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     sprintf_s(filename, MAX_DIR_SIZE, "classes.abc");
-    UnzipFileCheckPandaFile(archivename, filename, pf_data, ret, Z_NO_COMPRESSION);
+    UnzipFileCheckPandaFile(archivename, filename, pfData, ret, Z_NO_COMPRESSION);
 
     remove(archivename);
     GTEST_COUT << "Success.\n";

@@ -21,64 +21,64 @@
 
 namespace panda::ets::test {
 
-static const char *TEST_BIN_FILE_NAME = "RegisterNativeAllocationTest.abc";
+static const char *g_testBinFileName = "RegisterNativeAllocationTest.abc";
 
 class CallingMethodsTestGeneral : public CallingMethodsTestBase {
 public:
-    CallingMethodsTestGeneral() : CallingMethodsTestBase(TEST_BIN_FILE_NAME) {}
+    CallingMethodsTestGeneral() : CallingMethodsTestBase(g_testBinFileName) {}
 };
 
 class RegisterNativeAllocationTest : public CallingMethodsTestGeneral {
     void SetUp() override
     {
-        std::vector<EtsVMOption> options_vector;
+        std::vector<EtsVMOption> optionsVector;
 
-        options_vector = {{EtsOptionType::EtsGcType, "g1-gc"},
-                          {EtsOptionType::EtsRunGcInPlace, nullptr},
-                          {EtsOptionType::EtsNoJit, nullptr},
-                          {EtsOptionType::EtsBootFile, std::getenv("PANDA_STD_LIB")}};
+        optionsVector = {{EtsOptionType::EtsGcType, "g1-gc"},
+                         {EtsOptionType::EtsRunGcInPlace, nullptr},
+                         {EtsOptionType::EtsNoJit, nullptr},
+                         {EtsOptionType::EtsBootFile, std::getenv("PANDA_STD_LIB")}};
 
-        if (test_bin_file_name_ != nullptr) {
-            options_vector.push_back({EtsOptionType::EtsBootFile, test_bin_file_name_});
+        if (testBinFileName_ != nullptr) {
+            optionsVector.push_back({EtsOptionType::EtsBootFile, testBinFileName_});
         }
 
-        EtsVMInitArgs vm_args;
-        vm_args.version = ETS_NAPI_VERSION_1_0;
-        vm_args.options = options_vector.data();
-        vm_args.nOptions = static_cast<ets_int>(options_vector.size());
+        EtsVMInitArgs vmArgs;
+        vmArgs.version = ETS_NAPI_VERSION_1_0;
+        vmArgs.options = optionsVector.data();
+        vmArgs.nOptions = static_cast<ets_int>(optionsVector.size());
 
-        ASSERT_TRUE(ETS_CreateVM(&vm_, &env_, &vm_args) == ETS_OK) << "Cannot create ETS VM";
+        ASSERT_TRUE(ETS_CreateVM(&vm_, &env_, &vmArgs) == ETS_OK) << "Cannot create ETS VM";
     }
 };
 
 TEST_F(RegisterNativeAllocationTest, testNativeAllocation)
 {
-    mem::MemStatsType *mem_stats = Thread::GetCurrent()->GetVM()->GetMemStats();
+    mem::MemStatsType *memStats = Thread::GetCurrent()->GetVM()->GetMemStats();
 
-    ets_class test_class = env_->FindClass("NativeAllocationTest");
-    ASSERT_NE(test_class, nullptr);
+    ets_class testClass = env_->FindClass("NativeAllocationTest");
+    ASSERT_NE(testClass, nullptr);
 
-    ets_method alloc_method = env_->GetStaticp_method(test_class, "allocate_object", ":I");
-    ASSERT_NE(alloc_method, nullptr);
-    ASSERT_EQ(env_->CallStaticIntMethod(test_class, alloc_method), 0);
+    ets_method allocMethod = env_->GetStaticp_method(testClass, "allocate_object", ":I");
+    ASSERT_NE(allocMethod, nullptr);
+    ASSERT_EQ(env_->CallStaticIntMethod(testClass, allocMethod), 0);
 
-    size_t heap_freed_before_method;
+    size_t heapFreedBeforeMethod;
     {
         panda::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
-        heap_freed_before_method = mem_stats->GetFreedHeap();
+        heapFreedBeforeMethod = memStats->GetFreedHeap();
     }
 
-    ets_method main_method = env_->GetStaticp_method(test_class, "main_method", ":I");
-    ASSERT_NE(main_method, nullptr);
-    ASSERT_EQ(env_->CallStaticIntMethod(test_class, main_method), 0);
+    ets_method mainMethod = env_->GetStaticp_method(testClass, "main_method", ":I");
+    ASSERT_NE(mainMethod, nullptr);
+    ASSERT_EQ(env_->CallStaticIntMethod(testClass, mainMethod), 0);
 
-    size_t heap_freed_after_method;
+    size_t heapFreedAfterMethod;
     {
         panda::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
-        heap_freed_after_method = mem_stats->GetFreedHeap();
+        heapFreedAfterMethod = memStats->GetFreedHeap();
     }
 
-    ASSERT_GT(heap_freed_after_method, heap_freed_before_method);
+    ASSERT_GT(heapFreedAfterMethod, heapFreedBeforeMethod);
 }
 
 }  // namespace panda::ets::test

@@ -286,11 +286,11 @@ TEST_F(LiveRegistersTest, IntervalWithLifetimeHole)
     auto &lr = graph->GetAnalysis<LiveRegisters>();
     lr.VisitIntervalsWithLiveRegisters<false>(&INS(7), [graph](const auto &li) {
         auto rd = graph->GetRegisters();
-        auto caller_mask =
+        auto callerMask =
             DataType::IsFloatType(li->GetType()) ? rd->GetCallerSavedVRegMask() : rd->GetCallerSavedRegMask();
-        ASSERT_FALSE(caller_mask.Test(li->GetReg())) << "There should be no live caller-saved registers at call, but "
-                                                        "a register for following instruction is alive: "
-                                                     << *(li->GetInst());
+        ASSERT_FALSE(callerMask.Test(li->GetReg())) << "There should be no live caller-saved registers at call, but "
+                                                       "a register for following instruction is alive: "
+                                                    << *(li->GetInst());
     });
 }
 // NOLINTEND(readability-magic-numbers)

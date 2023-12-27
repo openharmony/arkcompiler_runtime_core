@@ -124,9 +124,9 @@ public:
     /*
      * Update 'value' to current bit range [START_BIT : START_BIT+END_BIT] and return it
      */
-    static constexpr uint64_t Update(uint64_t old_value, T value)
+    static constexpr uint64_t Update(uint64_t oldValue, T value)
     {
-        return (old_value & ~Mask()) | Encode(value);
+        return (oldValue & ~Mask()) | Encode(value);
     }
 
     /*

@@ -37,20 +37,20 @@ class InstBuilder {
     VREGS_ENV_TYPE_DEFS(ENV_IDX)
 #undef ENV_IDX
 public:
-    InstBuilder(Graph *graph, RuntimeInterface::MethodPtr method, CallInst *caller_inst, uint32_t inlining_depth)
+    InstBuilder(Graph *graph, RuntimeInterface::MethodPtr method, CallInst *callerInst, uint32_t inliningDepth)
         : graph_(graph),
           runtime_(graph->GetRuntime()),
           defs_(graph->GetLocalAllocator()->Adapter()),
           method_(method),
-          vregs_and_args_count_(graph->GetRuntime()->GetMethodRegistersCount(method) +
-                                graph->GetRuntime()->GetMethodTotalArgumentsCount(method)),
-          instructions_buf_(GetGraph()->GetRuntime()->GetMethodCode(GetGraph()->GetMethod())),
-          caller_inst_(caller_inst),
-          inlining_depth_(inlining_depth),
-          class_id_ {runtime_->GetClassIdForMethod(method_)}
+          vregsAndArgsCount_(graph->GetRuntime()->GetMethodRegistersCount(method) +
+                             graph->GetRuntime()->GetMethodTotalArgumentsCount(method)),
+          instructionsBuf_(GetGraph()->GetRuntime()->GetMethodCode(GetGraph()->GetMethod())),
+          callerInst_(callerInst),
+          inliningDepth_(inliningDepth),
+          classId_ {runtime_->GetClassIdForMethod(method_)}
     {
-        no_type_marker_ = GetGraph()->NewMarker();
-        visited_block_marker_ = GetGraph()->NewMarker();
+        noTypeMarker_ = GetGraph()->NewMarker();
+        visitedBlockMarker_ = GetGraph()->NewMarker();
 
         defs_.resize(graph_->GetVectorBlocks().size(), InstVector(graph->GetLocalAllocator()->Adapter()));
         for (auto &v : defs_) {
@@ -60,15 +60,15 @@ public:
         for (auto bb : graph->GetBlocksRPO()) {
             if (bb->IsCatchBegin()) {
                 for (size_t vreg = 0; vreg < GetVRegsCount(); vreg++) {
-                    auto catch_phi = GetGraph()->CreateInstCatchPhi(DataType::NO_TYPE, bb->GetGuestPc());
-                    catch_phi->SetMarker(GetNoTypeMarker());
-                    bb->AppendInst(catch_phi);
+                    auto catchPhi = GetGraph()->CreateInstCatchPhi(DataType::NO_TYPE, bb->GetGuestPc());
+                    catchPhi->SetMarker(GetNoTypeMarker());
+                    bb->AppendInst(catchPhi);
                     COMPILER_LOG(DEBUG, IR_BUILDER)
-                        << "Creat catchphi " << catch_phi->GetId() << " for bb(" << bb->GetId() << ")";
-                    if (vreg == vregs_and_args_count_) {
-                        catch_phi->SetIsAcc();
-                    } else if (vreg > vregs_and_args_count_) {
-                        catch_phi->SetType(DataType::ANY);
+                        << "Creat catchphi " << catchPhi->GetId() << " for bb(" << bb->GetId() << ")";
+                    if (vreg == vregsAndArgsCount_) {
+                        catchPhi->SetIsAcc();
+                    } else if (vreg > vregsAndArgsCount_) {
+                        catchPhi->SetType(DataType::ANY);
                     }
                 }
             }
@@ -79,8 +79,8 @@ public:
     NO_MOVE_SEMANTIC(InstBuilder);
     ~InstBuilder()
     {
-        GetGraph()->EraseMarker(no_type_marker_);
-        GetGraph()->EraseMarker(visited_block_marker_);
+        GetGraph()->EraseMarker(noTypeMarker_);
+        GetGraph()->EraseMarker(visitedBlockMarker_);
     }
 
     /**
@@ -91,18 +91,18 @@ public:
 
     void InitEnv(BasicBlock *bb)
     {
-        auto this_func = GetGraph()->FindParameter(0);
-        auto cp = GetGraph()->CreateInstLoadConstantPool(DataType::ANY, INVALID_PC, this_func);
+        auto thisFunc = GetGraph()->FindParameter(0);
+        auto cp = GetGraph()->CreateInstLoadConstantPool(DataType::ANY, INVALID_PC, thisFunc);
         bb->AppendInst(cp);
 
-        auto lex_env = GetGraph()->CreateInstLoadLexicalEnv(DataType::ANY, INVALID_PC, this_func);
-        bb->AppendInst(lex_env);
+        auto lexEnv = GetGraph()->CreateInstLoadLexicalEnv(DataType::ANY, INVALID_PC, thisFunc);
+        bb->AppendInst(lexEnv);
 
-        defs_[bb->GetId()][vregs_and_args_count_ + 1 + THIS_FUNC_IDX] = this_func;
-        defs_[bb->GetId()][vregs_and_args_count_ + 1 + CONST_POOL_IDX] = cp;
-        defs_[bb->GetId()][vregs_and_args_count_ + 1 + LEX_ENV_IDX] = lex_env;
-        COMPILER_LOG(DEBUG, IR_BUILDER) << "Init environment this_func = " << this_func->GetId()
-                                        << ", const_pool = " << cp->GetId() << ", lex_env = " << lex_env->GetId();
+        defs_[bb->GetId()][vregsAndArgsCount_ + 1 + THIS_FUNC_IDX] = thisFunc;
+        defs_[bb->GetId()][vregsAndArgsCount_ + 1 + CONST_POOL_IDX] = cp;
+        defs_[bb->GetId()][vregsAndArgsCount_ + 1 + LEX_ENV_IDX] = lexEnv;
+        COMPILER_LOG(DEBUG, IR_BUILDER) << "Init environment this_func = " << thisFunc->GetId()
+                                        << ", const_pool = " << cp->GetId() << ", lex_env = " << lexEnv->GetId();
     }
 
     bool IsFailed() const
@@ -116,29 +116,29 @@ public:
     void SetCurrentBlock(BasicBlock *bb)
     {
         if (GetGraph()->IsDynamicMethod() && !GetGraph()->IsBytecodeOptimizer() &&
-            current_bb_ != GetGraph()->GetStartBlock() && current_defs_ != nullptr) {
-            ASSERT((*current_defs_)[vregs_and_args_count_ + 1 + THIS_FUNC_IDX] != nullptr);
-            ASSERT((*current_defs_)[vregs_and_args_count_ + 1 + CONST_POOL_IDX] != nullptr);
-            ASSERT((*current_defs_)[vregs_and_args_count_ + 1 + LEX_ENV_IDX] != nullptr);
+            currentBb_ != GetGraph()->GetStartBlock() && currentDefs_ != nullptr) {
+            ASSERT((*currentDefs_)[vregsAndArgsCount_ + 1 + THIS_FUNC_IDX] != nullptr);
+            ASSERT((*currentDefs_)[vregsAndArgsCount_ + 1 + CONST_POOL_IDX] != nullptr);
+            ASSERT((*currentDefs_)[vregsAndArgsCount_ + 1 + LEX_ENV_IDX] != nullptr);
         }
-        current_bb_ = bb;
-        current_defs_ = &defs_[bb->GetId()];
+        currentBb_ = bb;
+        currentDefs_ = &defs_[bb->GetId()];
     }
 
     BasicBlock *GetCurrentBlock() const
     {
-        return current_bb_;
+        return currentBb_;
     }
 
-    void Prepare(bool is_inlined_graph);
+    void Prepare(bool isInlinedGraph);
 
     void FixInstructions();
     void ResolveConstants();
-    void SplitConstant(ConstantInst *const_inst);
+    void SplitConstant(ConstantInst *constInst);
 
-    static void RemoveNotDominateInputs(SaveStateInst *save_state);
+    static void RemoveNotDominateInputs(SaveStateInst *saveState);
 
-    size_t GetPc(const uint8_t *inst_ptr) const;
+    size_t GetPc(const uint8_t *instPtr) const;
 
     auto CreateSafePoint(BasicBlock *bb)
     {
@@ -160,16 +160,16 @@ public:
 
     const auto &GetCurrentDefs()
     {
-        ASSERT(current_defs_ != nullptr);
-        return *current_defs_;
+        ASSERT(currentDefs_ != nullptr);
+        return *currentDefs_;
     }
 
-    void AddCatchPhiInputs(const ArenaUnorderedSet<BasicBlock *> &catch_handlers, const InstVector &defs,
-                           Inst *throwable_inst);
+    void AddCatchPhiInputs(const ArenaUnorderedSet<BasicBlock *> &catchHandlers, const InstVector &defs,
+                           Inst *throwableInst);
 
     SaveStateInst *CreateSaveState(Opcode opc, size_t pc);
 
-    static void SetParamSpillFill(Graph *graph, ParameterInst *param_inst, size_t num_args, size_t i,
+    static void SetParamSpillFill(Graph *graph, ParameterInst *paramInst, size_t numArgs, size_t i,
                                   DataType::Type type);
 
 private:
@@ -180,14 +180,14 @@ private:
 
     size_t GetVRegsCount() const
     {
-        return vregs_and_args_count_ + 1 + GetGraph()->GetEnvCount();
+        return vregsAndArgsCount_ + 1 + GetGraph()->GetEnvCount();
     }
 
     template <typename T>
     void AddInstruction(T inst)
     {
-        ASSERT(current_bb_);
-        current_bb_->AppendInst(inst);
+        ASSERT(currentBb_);
+        currentBb_->AppendInst(inst);
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
         if (inst->GetPc() != INVALID_PC) {
@@ -206,13 +206,13 @@ private:
 
     void UpdateDefinition(size_t vreg, Inst *inst)
     {
-        ASSERT(vreg < current_defs_->size());
+        ASSERT(vreg < currentDefs_->size());
         COMPILER_LOG(DEBUG, IR_BUILDER) << "update def for r" << vreg << " from "
-                                        << ((*current_defs_)[vreg] != nullptr
-                                                ? std::to_string((*current_defs_)[vreg]->GetId())
+                                        << ((*currentDefs_)[vreg] != nullptr
+                                                ? std::to_string((*currentDefs_)[vreg]->GetId())
                                                 : "null")
                                         << " to " << inst->GetId();
-        (*current_defs_)[vreg] = inst;
+        (*currentDefs_)[vreg] = inst;
     }
 
     void UpdateDefinitionAcc(Inst *inst)
@@ -221,53 +221,53 @@ private:
             COMPILER_LOG(DEBUG, IR_BUILDER) << "reset accumulator definition";
         } else {
             COMPILER_LOG(DEBUG, IR_BUILDER) << "update accumulator from "
-                                            << ((*current_defs_)[vregs_and_args_count_] != nullptr
-                                                    ? std::to_string((*current_defs_)[vregs_and_args_count_]->GetId())
+                                            << ((*currentDefs_)[vregsAndArgsCount_] != nullptr
+                                                    ? std::to_string((*currentDefs_)[vregsAndArgsCount_]->GetId())
                                                     : "null")
                                             << " to " << inst->GetId();
         }
-        (*current_defs_)[vregs_and_args_count_] = inst;
+        (*currentDefs_)[vregsAndArgsCount_] = inst;
     }
 
     void UpdateDefinitionLexEnv(Inst *inst)
     {
         ASSERT(inst != nullptr);
-        ASSERT((*current_defs_)[vregs_and_args_count_ + 1 + LEX_ENV_IDX] != nullptr);
+        ASSERT((*currentDefs_)[vregsAndArgsCount_ + 1 + LEX_ENV_IDX] != nullptr);
         COMPILER_LOG(DEBUG, IR_BUILDER) << "update lexical environment from "
                                         << std::to_string(
-                                               (*current_defs_)[vregs_and_args_count_ + 1 + LEX_ENV_IDX]->GetId())
+                                               (*currentDefs_)[vregsAndArgsCount_ + 1 + LEX_ENV_IDX]->GetId())
                                         << " to " << inst->GetId();
-        (*current_defs_)[vregs_and_args_count_ + 1 + LEX_ENV_IDX] = inst;
+        (*currentDefs_)[vregsAndArgsCount_ + 1 + LEX_ENV_IDX] = inst;
     }
 
     Inst *GetDefinition(size_t vreg)
     {
-        ASSERT(vreg < current_defs_->size());
-        ASSERT((*current_defs_)[vreg] != nullptr);
+        ASSERT(vreg < currentDefs_->size());
+        ASSERT((*currentDefs_)[vreg] != nullptr);
 
-        if (vreg >= current_defs_->size() || (*current_defs_)[vreg] == nullptr) {
+        if (vreg >= currentDefs_->size() || (*currentDefs_)[vreg] == nullptr) {
             failed_ = true;
             COMPILER_LOG(ERROR, IR_BUILDER) << "GetDefinition failed for verg " << vreg;
             return nullptr;
         }
-        return (*current_defs_)[vreg];
+        return (*currentDefs_)[vreg];
     }
 
     Inst *GetDefinitionAcc()
     {
-        auto *acc_inst = (*current_defs_)[vregs_and_args_count_];
-        ASSERT(acc_inst != nullptr);
+        auto *accInst = (*currentDefs_)[vregsAndArgsCount_];
+        ASSERT(accInst != nullptr);
 
-        if (acc_inst == nullptr) {
+        if (accInst == nullptr) {
             failed_ = true;
             COMPILER_LOG(ERROR, IR_BUILDER) << "GetDefinitionAcc failed";
         }
-        return acc_inst;
+        return accInst;
     }
 
-    Inst *GetEnvDefinition(uint8_t env_idx)
+    Inst *GetEnvDefinition(uint8_t envIdx)
     {
-        auto *inst = (*current_defs_)[vregs_and_args_count_ + 1 + env_idx];
+        auto *inst = (*currentDefs_)[vregsAndArgsCount_ + 1 + envIdx];
         ASSERT(inst != nullptr);
 
         if (inst == nullptr) {
@@ -328,111 +328,110 @@ private:
         VIRT_CALL   // side_exit = true,  move_to_side_exit = false
     };
 
-    ClassInst *CreateLoadAndInitClassGeneric(uint32_t class_id, size_t pc);
+    ClassInst *CreateLoadAndInitClassGeneric(uint32_t classId, size_t pc);
 
-    Inst *CreateCast(Inst *input, DataType::Type type, DataType::Type operands_type, size_t pc)
+    Inst *CreateCast(Inst *input, DataType::Type type, DataType::Type operandsType, size_t pc)
     {
-        auto cast = GetGraph()->CreateInstCast(type, pc, input, operands_type);
+        auto cast = GetGraph()->CreateInstCast(type, pc, input, operandsType);
         if (!input->HasType()) {
-            input->SetType(operands_type);
+            input->SetType(operandsType);
         }
         return cast;
     }
 
-    NewObjectInst *CreateNewObjectInst(size_t pc, uint32_t type_id, SaveStateInst *save_state, Inst *init_class)
+    NewObjectInst *CreateNewObjectInst(size_t pc, uint32_t typeId, SaveStateInst *saveState, Inst *initClass)
     {
-        auto new_obj =
-            graph_->CreateInstNewObject(DataType::REFERENCE, pc, init_class, save_state, type_id, graph_->GetMethod());
-        return new_obj;
+        auto newObj =
+            graph_->CreateInstNewObject(DataType::REFERENCE, pc, initClass, saveState, typeId, graph_->GetMethod());
+        return newObj;
     }
 
     template <Opcode OPCODE>
-    void BuildCall(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read, Inst *additional_input = nullptr);
+    void BuildCall(const BytecodeInstruction *bcInst, bool isRange, bool accRead, Inst *additionalInput = nullptr);
     template <Opcode OPCODE>
-    CallInst *BuildCallInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc, Inst **resolver,
-                            uint32_t class_id);
+    CallInst *BuildCallInst(RuntimeInterface::MethodPtr method, uint32_t methodId, size_t pc, Inst **resolver,
+                            uint32_t classId);
     template <Opcode OPCODE>
-    CallInst *BuildCallStaticInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc, Inst **resolver,
-                                  [[maybe_unused]] uint32_t class_id);
+    CallInst *BuildCallStaticInst(RuntimeInterface::MethodPtr method, uint32_t methodId, size_t pc, Inst **resolver,
+                                  [[maybe_unused]] uint32_t classId);
     template <Opcode OPCODE>
-    CallInst *BuildCallVirtualInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc, Inst **resolver);
-    void BuildInitClassInstForCallStatic(RuntimeInterface::MethodPtr method, uint32_t class_id, size_t pc,
-                                         Inst *save_state);
+    CallInst *BuildCallVirtualInst(RuntimeInterface::MethodPtr method, uint32_t methodId, size_t pc, Inst **resolver);
+    void BuildInitClassInstForCallStatic(RuntimeInterface::MethodPtr method, uint32_t classId, size_t pc,
+                                         Inst *saveState);
     template <typename T>
-    void SetCallArgs(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read, Inst *resolver, T *call,
-                     Inst *null_check, SaveStateInst *save_state, bool has_implicit_arg, uint32_t method_id,
-                     Inst *additional_input = nullptr);
-    Inst *GetArgDefinition(const BytecodeInstruction *bc_inst, size_t idx, bool acc_read, bool is_range = false);
-    Inst *GetArgDefinitionRange(const BytecodeInstruction *bc_inst, size_t idx);
+    void SetCallArgs(const BytecodeInstruction *bcInst, bool isRange, bool accRead, Inst *resolver, T *call,
+                     Inst *nullCheck, SaveStateInst *saveState, bool hasImplicitArg, uint32_t methodId,
+                     Inst *additionalInput = nullptr);
+    Inst *GetArgDefinition(const BytecodeInstruction *bcInst, size_t idx, bool accRead, bool isRange = false);
+    Inst *GetArgDefinitionRange(const BytecodeInstruction *bcInst, size_t idx);
     template <bool IS_VIRTUAL>
-    void AddArgNullcheckIfNeeded(RuntimeInterface::IntrinsicId intrinsic, Inst *inst, Inst *save_state, size_t bc_addr);
-    void BuildMonitor(const BytecodeInstruction *bc_inst, Inst *def, bool is_enter);
-    Inst *BuildFloatInst(const BytecodeInstruction *bc_inst);
-    void BuildIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildDefaultIntrinsic(bool is_virtual, const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildStaticCallIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildAbsIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
+    void AddArgNullcheckIfNeeded(RuntimeInterface::IntrinsicId intrinsic, Inst *inst, Inst *saveState, size_t bcAddr);
+    void BuildMonitor(const BytecodeInstruction *bcInst, Inst *def, bool isEnter);
+    Inst *BuildFloatInst(const BytecodeInstruction *bcInst);
+    void BuildIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
+    void BuildDefaultIntrinsic(bool isVirtual, const BytecodeInstruction *bcInst, bool isRange, bool accRead);
+    void BuildStaticCallIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
+    void BuildAbsIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
     template <Opcode OPCODE>
-    void BuildBinaryOperationIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildSqrtIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildIsNanIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildStringLengthIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildStringIsEmptyIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildCharIsUpperCaseIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildCharToUpperCaseIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildCharIsLowerCaseIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildCharToLowerCaseIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildMonitorIntrinsic(const BytecodeInstruction *bc_inst, bool is_enter, bool acc_read);
-    void BuildDefaultStaticIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildDefaultVirtualCallIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildVirtualCallIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildThrow(const BytecodeInstruction *bc_inst);
-    void BuildLenArray(const BytecodeInstruction *bc_inst);
-    void BuildNewArray(const BytecodeInstruction *bc_inst);
-    void BuildNewObject(const BytecodeInstruction *bc_inst);
-    void BuildLoadConstArray(const BytecodeInstruction *bc_inst);
-    void BuildLoadConstStringArray(const BytecodeInstruction *bc_inst);
+    void BuildBinaryOperationIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+    void BuildSqrtIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+    void BuildIsNanIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+    void BuildStringLengthIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+    void BuildStringIsEmptyIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+    void BuildCharIsUpperCaseIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+    void BuildCharToUpperCaseIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+    void BuildCharIsLowerCaseIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+    void BuildCharToLowerCaseIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+    void BuildMonitorIntrinsic(const BytecodeInstruction *bcInst, bool isEnter, bool accRead);
+    void BuildDefaultStaticIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
+    void BuildDefaultVirtualCallIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
+    void BuildVirtualCallIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
+    void BuildThrow(const BytecodeInstruction *bcInst);
+    void BuildLenArray(const BytecodeInstruction *bcInst);
+    void BuildNewArray(const BytecodeInstruction *bcInst);
+    void BuildNewObject(const BytecodeInstruction *bcInst);
+    void BuildLoadConstArray(const BytecodeInstruction *bcInst);
+    void BuildLoadConstStringArray(const BytecodeInstruction *bcInst);
     template <typename T>
-    void BuildUnfoldLoadConstArray(const BytecodeInstruction *bc_inst, DataType::Type type,
-                                   const pandasm::LiteralArray &lit_array);
+    void BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, DataType::Type type,
+                                   const pandasm::LiteralArray &litArray);
     template <typename T>
-    void BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bc_inst, DataType::Type type,
-                                         const pandasm::LiteralArray &lit_array, NewArrayInst *array_inst);
-    void BuildInitString(const BytecodeInstruction *bc_inst);
-    void BuildInitObject(const BytecodeInstruction *bc_inst, bool is_range);
-    CallInst *BuildCallStaticForInitObject(const BytecodeInstruction *bc_inst, uint32_t method_id, Inst **resolver);
-    void BuildMultiDimensionalArrayObject(const BytecodeInstruction *bc_inst, bool is_range);
-    void BuildInitObjectMultiDimensionalArray(const BytecodeInstruction *bc_inst, bool is_range);
+    void BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bcInst, DataType::Type type,
+                                         const pandasm::LiteralArray &litArray, NewArrayInst *arrayInst);
+    void BuildInitString(const BytecodeInstruction *bcInst);
+    void BuildInitObject(const BytecodeInstruction *bcInst, bool isRange);
+    CallInst *BuildCallStaticForInitObject(const BytecodeInstruction *bcInst, uint32_t methodId, Inst **resolver);
+    void BuildMultiDimensionalArrayObject(const BytecodeInstruction *bcInst, bool isRange);
+    void BuildInitObjectMultiDimensionalArray(const BytecodeInstruction *bcInst, bool isRange);
     template <bool IS_ACC_WRITE>
-    void BuildLoadObject(const BytecodeInstruction *bc_inst, DataType::Type type);
+    void BuildLoadObject(const BytecodeInstruction *bcInst, DataType::Type type);
     template <bool IS_ACC_READ>
-    void BuildStoreObject(const BytecodeInstruction *bc_inst, DataType::Type type);
-    Inst *BuildStoreObjectInst(const BytecodeInstruction *bc_inst, DataType::Type type,
-                               RuntimeInterface::FieldPtr field, size_t field_id, Inst **resolve_inst);
-    void BuildLoadStatic(const BytecodeInstruction *bc_inst, DataType::Type type);
-    Inst *BuildLoadStaticInst(const BytecodeInstruction *bc_inst, DataType::Type type, size_t type_id,
-                              Inst *save_state);
-    void BuildStoreStatic(const BytecodeInstruction *bc_inst, DataType::Type type);
-    Inst *BuildStoreStaticInst(const BytecodeInstruction *bc_inst, DataType::Type type, size_t type_id,
-                               Inst *store_input, Inst *save_state);
-    void BuildCheckCast(const BytecodeInstruction *bc_inst);
-    void BuildIsInstance(const BytecodeInstruction *bc_inst);
-    Inst *BuildLoadClass(RuntimeInterface::IdType type_id, size_t pc, Inst *save_state);
-    void BuildLoadArray(const BytecodeInstruction *bc_inst, DataType::Type type);
-    void BuildStoreArray(const BytecodeInstruction *bc_inst, DataType::Type type);
+    void BuildStoreObject(const BytecodeInstruction *bcInst, DataType::Type type);
+    Inst *BuildStoreObjectInst(const BytecodeInstruction *bcInst, DataType::Type type, RuntimeInterface::FieldPtr field,
+                               size_t fieldId, Inst **resolveInst);
+    void BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::Type type);
+    Inst *BuildLoadStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, size_t typeId, Inst *saveState);
+    void BuildStoreStatic(const BytecodeInstruction *bcInst, DataType::Type type);
+    Inst *BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, size_t typeId, Inst *storeInput,
+                               Inst *saveState);
+    void BuildCheckCast(const BytecodeInstruction *bcInst);
+    void BuildIsInstance(const BytecodeInstruction *bcInst);
+    Inst *BuildLoadClass(RuntimeInterface::IdType typeId, size_t pc, Inst *saveState);
+    void BuildLoadArray(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildStoreArray(const BytecodeInstruction *bcInst, DataType::Type type);
     template <bool CREATE_REF_CHECK>
-    void BuildStoreArrayInst(const BytecodeInstruction *bc_inst, DataType::Type type, Inst *array_ref, Inst *index,
+    void BuildStoreArrayInst(const BytecodeInstruction *bcInst, DataType::Type type, Inst *arrayRef, Inst *index,
                              Inst *value);
-    void BuildChecksBeforeArray(size_t pc, Inst *array_ref, Inst **ss, Inst **nc, Inst **al, Inst **bc,
-                                bool with_nullcheck = true);
+    void BuildChecksBeforeArray(size_t pc, Inst *arrayRef, Inst **ss, Inst **nc, Inst **al, Inst **bc,
+                                bool withNullcheck = true);
     template <Opcode OPCODE>
-    void BuildLoadFromPool(const BytecodeInstruction *bc_inst);
-    void BuildCastToAnyString(const BytecodeInstruction *bc_inst);
-    void BuildCastToAnyNumber(const BytecodeInstruction *bc_inst);
-    Inst *BuildAnyTypeCheckInst(size_t bc_addr, Inst *input, Inst *save_state,
-                                AnyBaseType type = AnyBaseType::UNDEFINED_TYPE, bool type_was_profiled = false,
-                                profiling::AnyInputType allowed_input_type = {});
-    bool TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
+    void BuildLoadFromPool(const BytecodeInstruction *bcInst);
+    void BuildCastToAnyString(const BytecodeInstruction *bcInst);
+    void BuildCastToAnyNumber(const BytecodeInstruction *bcInst);
+    Inst *BuildAnyTypeCheckInst(size_t bcAddr, Inst *input, Inst *saveState,
+                                AnyBaseType type = AnyBaseType::UNDEFINED_TYPE, bool typeWasProfiled = false,
+                                profiling::AnyInputType allowedInputType = {});
+    bool TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 #include "inst_builder_extensions.inl.h"
 
     Graph *GetGraph()
@@ -462,23 +461,23 @@ private:
 
     auto GetClassId() const
     {
-        return class_id_;
+        return classId_;
     }
 
     Marker GetNoTypeMarker() const
     {
-        return no_type_marker_;
+        return noTypeMarker_;
     }
 
     Marker GetVisitedBlockMarker() const
     {
-        return visited_block_marker_;
+        return visitedBlockMarker_;
     }
 
     bool ForceUnresolved() const
     {
 #ifndef NDEBUG
-        return OPTIONS.IsCompilerForceUnresolved() && !graph_->IsBytecodeOptimizer();
+        return g_options.IsCompilerForceUnresolved() && !graph_->IsBytecodeOptimizer();
 #else
         return false;
 #endif
@@ -503,8 +502,8 @@ private:
     size_t GetCurrentMethodArgumentsCount() const;
 
 #ifndef PANDA_ETS_INTEROP_JS
-    bool TryBuildInteropCall([[maybe_unused]] const BytecodeInstruction *bc_inst, [[maybe_unused]] bool is_range,
-                             [[maybe_unused]] bool acc_read)
+    bool TryBuildInteropCall([[maybe_unused]] const BytecodeInstruction *bcInst, [[maybe_unused]] bool isRange,
+                             [[maybe_unused]] bool accRead)
     {
         return false;
     }
@@ -516,14 +515,14 @@ private:
 
     Graph *graph_ {nullptr};
     RuntimeInterface *runtime_ {nullptr};
-    BasicBlock *current_bb_ {nullptr};
+    BasicBlock *currentBb_ {nullptr};
 
-    RuntimeInterface::MethodProfile method_profile_ {};
+    RuntimeInterface::MethodProfile methodProfile_ {};
 
     // Definitions vector of currently processed basic block
-    InstVector *current_defs_ {nullptr};
+    InstVector *currentDefs_ {nullptr};
     // Result of LoadFromConstantPool which will be added to SaveState inputs
-    Inst *additional_def_ {nullptr};
+    Inst *additionalDef_ {nullptr};
     // Contains definitions of the virtual registers in all basic blocks
     ArenaVector<InstVector> defs_;
 
@@ -531,17 +530,17 @@ private:
     // Set to true if builder failed to build IR
     bool failed_ {false};
     // Number of virtual registers and method arguments
-    const size_t vregs_and_args_count_;
+    const size_t vregsAndArgsCount_;
     // Marker for instructions with undefined type in the building phase
-    Marker no_type_marker_;
-    Marker visited_block_marker_;
+    Marker noTypeMarker_;
+    Marker visitedBlockMarker_;
 
     // Pointer to start position of bytecode instructions buffer
-    const uint8_t *instructions_buf_ {nullptr};
+    const uint8_t *instructionsBuf_ {nullptr};
 
-    CallInst *caller_inst_ {nullptr};
-    uint32_t inlining_depth_ {0};
-    size_t class_id_;
+    CallInst *callerInst_ {nullptr};
+    uint32_t inliningDepth_ {0};
+    size_t classId_;
 #include "intrinsics_ir_build.inl.h"
 };
 }  // namespace panda::compiler

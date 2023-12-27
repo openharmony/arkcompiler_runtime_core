@@ -23,16 +23,16 @@ namespace panda::tooling::inspector::test {
 template <typename T>
 static JsonObject ToJson(const T &object)
 {
-    JsonObjectBuilder json_builder;
-    object.ToJson()(json_builder);
-    return JsonObject(std::move(json_builder).Build());
+    JsonObjectBuilder jsonBuilder;
+    object.ToJson()(jsonBuilder);
+    return JsonObject(std::move(jsonBuilder).Build());
 }
 
 static JsonObject ToObject(std::function<void(JsonObjectBuilder &)> &&params)
 {
-    JsonObjectBuilder json_builder;
-    params(json_builder);
-    return JsonObject(std::move(json_builder).Build());
+    JsonObjectBuilder jsonBuilder;
+    params(jsonBuilder);
+    return JsonObject(std::move(jsonBuilder).Build());
 }
 
 }  // namespace panda::tooling::inspector::test

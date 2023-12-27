@@ -23,20 +23,20 @@ void SlowPathBase::Generate(Codegen *codegen)
     ASSERT(!generated_);
 
 #ifndef NDEBUG
-    std::string opcode_str(GetInst()->GetOpcodeStr());
+    std::string opcodeStr(GetInst()->GetOpcodeStr());
     if (GetInst()->IsIntrinsic()) {
-        opcode_str += "." + GetIntrinsicName(static_cast<IntrinsicInst *>(GetInst())->GetIntrinsicId());
+        opcodeStr += "." + GetIntrinsicName(static_cast<IntrinsicInst *>(GetInst())->GetIntrinsicId());
     }
 #endif
     SCOPED_DISASM_STR(codegen,
-                      std::string("SlowPath for inst ") + std::to_string(GetInst()->GetId()) + ". " + opcode_str);
+                      std::string("SlowPath for inst ") + std::to_string(GetInst()->GetId()) + ". " + opcodeStr);
     Encoder *encoder = codegen->GetEncoder();
     ASSERT(encoder->IsValid());
     encoder->BindLabel(GetLabel());
 
     GenerateImpl(codegen);
 
-    if (encoder->IsLabelValid(label_back_)) {
+    if (encoder->IsLabelValid(labelBack_)) {
         codegen->GetEncoder()->EncodeJump(GetBackLabel());
     }
 #ifndef NDEBUG
@@ -47,15 +47,15 @@ void SlowPathBase::Generate(Codegen *codegen)
 // ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION, STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION
 bool SlowPathEntrypoint::GenerateThrowOutOfBoundsException(Codegen *codegen)
 {
-    auto len_reg = codegen->ConvertRegister(GetInst()->GetSrcReg(0), GetInst()->GetInputType(0));
+    auto lenReg = codegen->ConvertRegister(GetInst()->GetSrcReg(0), GetInst()->GetInputType(0));
     if (GetInst()->GetOpcode() == Opcode::BoundsCheckI) {
-        ScopedTmpReg index_reg(codegen->GetEncoder());
-        codegen->GetEncoder()->EncodeMov(index_reg, Imm(GetInst()->CastToBoundsCheckI()->GetImm()));
-        codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), index_reg, len_reg);
+        ScopedTmpReg indexReg(codegen->GetEncoder());
+        codegen->GetEncoder()->EncodeMov(indexReg, Imm(GetInst()->CastToBoundsCheckI()->GetImm()));
+        codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), indexReg, lenReg);
     } else {
         ASSERT(GetInst()->GetOpcode() == Opcode::BoundsCheck);
-        auto index_reg = codegen->ConvertRegister(GetInst()->GetSrcReg(1), GetInst()->GetInputType(1));
-        codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), index_reg, len_reg);
+        auto indexReg = codegen->ConvertRegister(GetInst()->GetSrcReg(1), GetInst()->GetInputType(1));
+        codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), indexReg, lenReg);
     }
     return true;
 }
@@ -66,10 +66,10 @@ bool SlowPathEntrypoint::GenerateInitializeClass(Codegen *codegen)
     auto inst = GetInst();
     if (GetInst()->GetDstReg() != INVALID_REG) {
         ASSERT(inst->GetOpcode() == Opcode::LoadAndInitClass);
-        Reg klass_reg {codegen->ConvertRegister(GetInst()->GetDstReg(), DataType::REFERENCE)};
-        RegMask preserved_regs;
-        codegen->GetEncoder()->SetRegister(&preserved_regs, nullptr, klass_reg);
-        codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, preserved_regs, klass_reg);
+        Reg klassReg {codegen->ConvertRegister(GetInst()->GetDstReg(), DataType::REFERENCE)};
+        RegMask preservedRegs;
+        codegen->GetEncoder()->SetRegister(&preservedRegs, nullptr, klassReg);
+        codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, preservedRegs, klassReg);
     } else {
         ASSERT(inst->GetOpcode() == Opcode::InitClass);
         ASSERT(!codegen->GetGraph()->IsAotMode());
@@ -174,7 +174,7 @@ void SlowPathEntrypoint::GenerateImpl(Codegen *codegen)
 void SlowPathDeoptimize::GenerateImpl(Codegen *codegen)
 {
     uintptr_t value =
-        helpers::ToUnderlying(deoptimize_type_) | (GetInst()->GetId() << MinimumBitsToStore(DeoptimizeType::COUNT));
+        helpers::ToUnderlying(deoptimizeType_) | (GetInst()->GetId() << MinimumBitsToStore(DeoptimizeType::COUNT));
     codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), TypedImm(value));
 }
 
@@ -191,45 +191,45 @@ void SlowPathImplicitNullCheck::GenerateImpl(Codegen *codegen)
 
 void SlowPathShared::GenerateImpl(Codegen *codegen)
 {
-    ASSERT(tmp_reg_ != INVALID_REGISTER);
-    [[maybe_unused]] ScopedTmpReg tmp_reg(codegen->GetEncoder(), tmp_reg_);
-    ASSERT(tmp_reg.GetReg().GetId() == tmp_reg_.GetId());
+    ASSERT(tmpReg_ != INVALID_REGISTER);
+    [[maybe_unused]] ScopedTmpReg tmpReg(codegen->GetEncoder(), tmpReg_);
+    ASSERT(tmpReg.GetReg().GetId() == tmpReg_.GetId());
     auto graph = codegen->GetGraph();
     ASSERT(graph->IsAotMode());
-    auto aot_data = graph->GetAotData();
-    aot_data->SetSharedSlowPathOffset(GetEntrypoint(), codegen->GetEncoder()->GetCursorOffset());
+    auto aotData = graph->GetAotData();
+    aotData->SetSharedSlowPathOffset(GetEntrypoint(), codegen->GetEncoder()->GetCursorOffset());
     MemRef entry(codegen->ThreadReg(), graph->GetRuntime()->GetEntrypointTlsOffset(graph->GetArch(), GetEntrypoint()));
-    ScopedTmpReg tmp1_reg(codegen->GetEncoder());
-    codegen->GetEncoder()->EncodeLdr(tmp1_reg, false, entry);
-    codegen->GetEncoder()->EncodeJump(tmp1_reg);
+    ScopedTmpReg tmp1Reg(codegen->GetEncoder());
+    codegen->GetEncoder()->EncodeLdr(tmp1Reg, false, entry);
+    codegen->GetEncoder()->EncodeJump(tmp1Reg);
 }
 
 void SlowPathResolveStringAot::GenerateImpl(Codegen *codegen)
 {
-    ScopedTmpRegU64 tmp_addr_reg(codegen->GetEncoder());
+    ScopedTmpRegU64 tmpAddrReg(codegen->GetEncoder());
     // Slot address was loaded into temporary register before we jumped into slow path, but it is already released
     // because temporary registers are scoped. Try to allocate a new one and check that it is the same register
     // as was allocated in codegen. If it is a different register then copy the slot address into it.
-    if (tmp_addr_reg.GetReg() != addr_reg_) {
-        codegen->GetEncoder()->EncodeMov(tmp_addr_reg, addr_reg_);
+    if (tmpAddrReg.GetReg() != addrReg_) {
+        codegen->GetEncoder()->EncodeMov(tmpAddrReg, addrReg_);
     }
-    codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), dst_reg_, TypedImm(string_id_), tmp_addr_reg);
+    codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), dstReg_, TypedImm(stringId_), tmpAddrReg);
 }
 
 void SlowPathRefCheck::GenerateImpl(Codegen *codegen)
 {
-    ASSERT(array_reg_ != INVALID_REGISTER);
-    ASSERT(ref_reg_ != INVALID_REGISTER);
-    codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), array_reg_, ref_reg_);
+    ASSERT(arrayReg_ != INVALID_REGISTER);
+    ASSERT(refReg_ != INVALID_REGISTER);
+    codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), arrayReg_, refReg_);
 }
 
 void SlowPathAbstract::GenerateImpl(Codegen *codegen)
 {
     SCOPED_DISASM_STR(codegen, std::string("SlowPath for Abstract method ") + std::to_string(GetInst()->GetId()));
-    ASSERT(method_reg_ != INVALID_REGISTER);
-    ScopedTmpReg method_reg(codegen->GetEncoder(), method_reg_);
-    ASSERT(method_reg.GetReg().GetId() == method_reg_.GetId());
-    codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), method_reg.GetReg());
+    ASSERT(methodReg_ != INVALID_REGISTER);
+    ScopedTmpReg methodReg(codegen->GetEncoder(), methodReg_);
+    ASSERT(methodReg.GetReg().GetId() == methodReg_.GetId());
+    codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), methodReg.GetReg());
 }
 
 void SlowPathCheckCast::GenerateImpl(Codegen *codegen)
@@ -238,7 +238,7 @@ void SlowPathCheckCast::GenerateImpl(Codegen *codegen)
     auto inst = GetInst();
     auto src = codegen->ConvertRegister(inst->GetSrcReg(0), inst->GetInputType(0));
 
-    codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), class_reg_, src);
+    codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), classReg_, src);
 }
 
 void SlowPathUnresolved::GenerateImpl(Codegen *codegen)
@@ -246,65 +246,65 @@ void SlowPathUnresolved::GenerateImpl(Codegen *codegen)
     SlowPathEntrypoint::GenerateImpl(codegen);
 
     ASSERT(method_ != nullptr);
-    ASSERT(type_id_ != 0);
-    ASSERT(slot_addr_ != 0);
-    auto type_imm = TypedImm(type_id_);
+    ASSERT(typeId_ != 0);
+    ASSERT(slotAddr_ != 0);
+    auto typeImm = TypedImm(typeId_);
     auto arch = codegen->GetGraph()->GetArch();
     // On 32-bit architecture slot address requires additional down_cast,
     // similar to `method` address processing in `CallRuntimeWithMethod`
-    auto slot_imm = Is64BitsArch(arch) ? TypedImm(slot_addr_) : TypedImm(down_cast<uint32_t>(slot_addr_));
+    auto slotImm = Is64BitsArch(arch) ? TypedImm(slotAddr_) : TypedImm(down_cast<uint32_t>(slotAddr_));
 
-    ScopedTmpReg value_reg(codegen->GetEncoder());
+    ScopedTmpReg valueReg(codegen->GetEncoder());
     if (GetInst()->GetOpcode() == Opcode::ResolveVirtual) {
-        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), value_reg, arg_reg_, type_imm, slot_imm);
+        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, argReg_, typeImm, slotImm);
     } else if (GetEntrypoint() == EntrypointId::GET_UNKNOWN_CALLEE_METHOD ||
                GetEntrypoint() == EntrypointId::GET_UNKNOWN_STATIC_FIELD_MEMORY_ADDRESS) {
-        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), value_reg, type_imm, slot_imm);
+        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, typeImm, slotImm);
     } else {
-        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), value_reg, type_imm);
+        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, typeImm);
 
-        ScopedTmpReg addr_reg(codegen->GetEncoder());
-        codegen->GetEncoder()->EncodeMov(addr_reg, Imm(slot_addr_));
-        codegen->GetEncoder()->EncodeStr(value_reg, MemRef(addr_reg));
+        ScopedTmpReg addrReg(codegen->GetEncoder());
+        codegen->GetEncoder()->EncodeMov(addrReg, Imm(slotAddr_));
+        codegen->GetEncoder()->EncodeStr(valueReg, MemRef(addrReg));
     }
 
-    if (dst_reg_.IsValid()) {
-        codegen->GetEncoder()->EncodeMov(dst_reg_, value_reg);
+    if (dstReg_.IsValid()) {
+        codegen->GetEncoder()->EncodeMov(dstReg_, valueReg);
     }
 }
 
 void SlowPathJsCastDoubleToInt32::GenerateImpl(Codegen *codegen)
 {
-    ASSERT(dst_reg_.IsValid());
-    ASSERT(src_reg_.IsValid());
+    ASSERT(dstReg_.IsValid());
+    ASSERT(srcReg_.IsValid());
 
     auto enc {codegen->GetEncoder()};
     if (codegen->GetGraph()->GetMode().SupportManagedCode()) {
         ScopedTmpRegU64 tmp(enc);
-        enc->EncodeMov(tmp, src_reg_);
-        codegen->CallRuntime(GetInst(), EntrypointId::JS_CAST_DOUBLE_TO_INT32, dst_reg_, RegMask::GetZeroMask(), tmp);
+        enc->EncodeMov(tmp, srcReg_);
+        codegen->CallRuntime(GetInst(), EntrypointId::JS_CAST_DOUBLE_TO_INT32, dstReg_, RegMask::GetZeroMask(), tmp);
         return;
     }
 
     auto [live_regs, live_vregs] {codegen->GetLiveRegisters<true>(GetInst())};
-    live_regs.Reset(dst_reg_.GetId());
+    live_regs.Reset(dstReg_.GetId());
 
     codegen->SaveCallerRegisters(live_regs, live_vregs, true);
-    codegen->FillCallParams(src_reg_);
+    codegen->FillCallParams(srcReg_);
     codegen->EmitCallRuntimeCode(nullptr, EntrypointId::JS_CAST_DOUBLE_TO_INT32_NO_BRIDGE);
 
-    auto ret_reg {codegen->GetTarget().GetReturnReg(dst_reg_.GetType())};
-    if (dst_reg_.GetId() != ret_reg.GetId()) {
-        enc->EncodeMov(dst_reg_, ret_reg);
+    auto retReg {codegen->GetTarget().GetReturnReg(dstReg_.GetType())};
+    if (dstReg_.GetId() != retReg.GetId()) {
+        enc->EncodeMov(dstReg_, retReg);
     }
     codegen->LoadCallerRegisters(live_regs, live_vregs, true);
 }
 
 void SlowPathStringHashCode::GenerateImpl(Codegen *codegen)
 {
-    ASSERT(dst_reg_.IsValid());
-    ASSERT(src_reg_.IsValid());
-    codegen->CallFastPath(GetInst(), GetEntrypoint(), dst_reg_, RegMask::GetZeroMask(), src_reg_);
+    ASSERT(dstReg_.IsValid());
+    ASSERT(srcReg_.IsValid());
+    codegen->CallFastPath(GetInst(), GetEntrypoint(), dstReg_, RegMask::GetZeroMask(), srcReg_);
 }
 
 }  // namespace panda::compiler

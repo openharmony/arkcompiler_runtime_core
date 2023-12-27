@@ -24,7 +24,7 @@ template <typename S, typename T>
 struct StructField {
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     size_t offset;
-    explicit StructField(size_t p_offst) : offset {p_offst} {}
+    explicit StructField(size_t pOffst) : offset {pOffst} {}
     T &Of(S &s) const
     {
         return *reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(&s) + offset);

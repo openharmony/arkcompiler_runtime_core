@@ -96,7 +96,7 @@ void Canonicalization::VisitCommutative(Inst *inst)
 {
     ASSERT(inst->IsCommutative());
     ASSERT(inst->GetInputsCount() == 2U);  // 2 is COMMUTATIVE_INPUT_COUNT
-    if (OPTIONS.GetOptLevel() > 1) {
+    if (g_options.GetOptLevel() > 1) {
         result_ = TrySwapReverseInput(inst);
     }
     result_ = TrySwapConstantInput(inst) || result_;
@@ -118,12 +118,12 @@ bool AllowSwap(const compiler::Inst *inst)
     return false;
 }
 
-void Canonicalization::VisitCompare([[maybe_unused]] GraphVisitor *v, Inst *inst_base)
+void Canonicalization::VisitCompare([[maybe_unused]] GraphVisitor *v, Inst *instBase)
 {
-    auto inst = inst_base->CastToCompare();
+    auto inst = instBase->CastToCompare();
     if (AllowSwap(inst) && SwapInputsIfNecessary(inst, IsDominateReverseInputs(inst))) {
-        auto revert_cc = SwapOperandsConditionCode(inst->GetCc());
-        inst->SetCc(revert_cc);
+        auto revertCc = SwapOperandsConditionCode(inst->GetCc());
+        inst->SetCc(revertCc);
     }
 }
 

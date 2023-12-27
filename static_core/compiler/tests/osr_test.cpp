@@ -25,19 +25,19 @@ namespace panda::test {
 class OsrTest : public testing::Test {
 public:
     OsrTest()
-        : default_compiler_non_optimizing_(compiler::OPTIONS.IsCompilerNonOptimizing()),
-          default_compiler_inlining_(compiler::OPTIONS.IsCompilerInlining()),
-          default_compiler_inlining_blacklist_(compiler::OPTIONS.GetCompilerInliningBlacklist()),
-          default_compiler_regex_(compiler::OPTIONS.GetCompilerRegex())
+        : defaultCompilerNonOptimizing_(compiler::g_options.IsCompilerNonOptimizing()),
+          defaultCompilerInlining_(compiler::g_options.IsCompilerInlining()),
+          defaultCompilerInliningBlacklist_(compiler::g_options.GetCompilerInliningBlacklist()),
+          defaultCompilerRegex_(compiler::g_options.GetCompilerRegex())
     {
     }
 
     ~OsrTest() override
     {
-        compiler::OPTIONS.SetCompilerNonOptimizing(default_compiler_non_optimizing_);
-        compiler::OPTIONS.SetCompilerInlining(default_compiler_inlining_);
-        compiler::OPTIONS.SetCompilerInliningBlacklist(default_compiler_inlining_blacklist_);
-        compiler::OPTIONS.SetCompilerRegex(default_compiler_regex_);
+        compiler::g_options.SetCompilerNonOptimizing(defaultCompilerNonOptimizing_);
+        compiler::g_options.SetCompilerInlining(defaultCompilerInlining_);
+        compiler::g_options.SetCompilerInliningBlacklist(defaultCompilerInliningBlacklist_);
+        compiler::g_options.SetCompilerRegex(defaultCompilerRegex_);
     }
 
     NO_COPY_SEMANTIC(OsrTest);
@@ -57,10 +57,10 @@ protected:
     static constexpr size_t HOTNESS_THRESHOLD = 4U;
 
 private:
-    bool default_compiler_non_optimizing_;
-    bool default_compiler_inlining_;
-    arg_list_t default_compiler_inlining_blacklist_;
-    std::string default_compiler_regex_;
+    bool defaultCompilerNonOptimizing_;
+    bool defaultCompilerInlining_;
+    arg_list_t defaultCompilerInliningBlacklist_;
+    std::string defaultCompilerRegex_;
 };
 
 struct ScopeEvents {
@@ -103,12 +103,12 @@ TEST_F(OsrTest, OsrInTopFrameNonOptimizing)
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
 
     runner.Run(OSR_IN_TOP_FRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1U);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1U);
 }
 
 TEST_F(OsrTest, OsrInTopFrameOptimizing)
@@ -118,12 +118,12 @@ TEST_F(OsrTest, OsrInTopFrameOptimizing)
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
     runner.GetCompilerOptions().SetCompilerNonOptimizing(false);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
 
     runner.Run(OSR_IN_TOP_FRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1U);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1U);
 }
 
 static constexpr auto OSR_AFTER_IFRAME_SOURCE = R"(
@@ -156,11 +156,11 @@ TEST_F(OsrTest, OsrAfterIFrameNonOptimizing)
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(OSR_AFTER_IFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1U);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1U);
 }
 
 TEST_F(OsrTest, OsrAfterIFrameOptimizing)
@@ -170,11 +170,11 @@ TEST_F(OsrTest, OsrAfterIFrameOptimizing)
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
     runner.GetCompilerOptions().SetCompilerNonOptimizing(false);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(OSR_AFTER_IFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1U);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1U);
 }
 
 static constexpr auto OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID = R"(
@@ -207,11 +207,11 @@ TEST_F(OsrTest, OsrAfterIFrameRestoreAccAfterVoid)
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID, static_cast<ssize_t>(0U));
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1U);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1U);
 }
 
 static constexpr auto OSR_AFTER_CFRAME_SOURCE = R"(
@@ -263,13 +263,13 @@ TEST_F(OsrTest, OsrAfterCFrameNonOptimizing)
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(OSR_AFTER_CFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1U);
-    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::AFTER_CFRAME);
-    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1U);
+    ASSERT_EQ(osrEvents[0U]->kind, events::OsrEntryKind::AFTER_CFRAME);
+    ASSERT_EQ(osrEvents[0U]->result, events::OsrEntryResult::SUCCESS);
 }
 
 TEST_F(OsrTest, OsrAfterCFrameOptimizing)
@@ -280,13 +280,13 @@ TEST_F(OsrTest, OsrAfterCFrameOptimizing)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(false);
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(OSR_AFTER_CFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1U);
-    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::AFTER_CFRAME);
-    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1U);
+    ASSERT_EQ(osrEvents[0U]->kind, events::OsrEntryKind::AFTER_CFRAME);
+    ASSERT_EQ(osrEvents[0U]->result, events::OsrEntryResult::SUCCESS);
 }
 
 TEST_F(OsrTest, OsrAfterCFrameOptimizingWithInlining)
@@ -298,16 +298,16 @@ TEST_F(OsrTest, OsrAfterCFrameOptimizingWithInlining)
     runner.GetCompilerOptions().SetCompilerInlining(true);
     runner.GetCompilerOptions().SetCompilerInliningBlacklist({"_GLOBAL::f2"});
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(OSR_AFTER_CFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
     auto found = events->Find<events::EventsMemory::InlineEvent>(
         [](const auto &event) { return event.caller == "_GLOBAL::main" && event.callee == "_GLOBAL::f1"; });
     ASSERT_TRUE(found);
-    ASSERT_EQ(osr_events.size(), 1U);
-    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::AFTER_CFRAME);
-    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
+    ASSERT_EQ(osrEvents.size(), 1U);
+    ASSERT_EQ(osrEvents[0U]->kind, events::OsrEntryKind::AFTER_CFRAME);
+    ASSERT_EQ(osrEvents[0U]->result, events::OsrEntryResult::SUCCESS);
 }
 
 TEST_F(OsrTest, MainOsrCatchThrow)
@@ -347,16 +347,16 @@ TEST_F(OsrTest, MainOsrCatchThrow)
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1U);
-    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::TOP_FRAME);
-    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
-    auto deopt_events = events->Select<events::EventsMemory::DeoptimizationEvent>();
-    ASSERT_EQ(deopt_events.size(), 1U);
-    ASSERT_EQ(deopt_events[0U]->after, events::DeoptimizationAfter::TOP);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1U);
+    ASSERT_EQ(osrEvents[0U]->kind, events::OsrEntryKind::TOP_FRAME);
+    ASSERT_EQ(osrEvents[0U]->result, events::OsrEntryResult::SUCCESS);
+    auto deoptEvents = events->Select<events::EventsMemory::DeoptimizationEvent>();
+    ASSERT_EQ(deoptEvents.size(), 1U);
+    ASSERT_EQ(deoptEvents[0U]->after, events::DeoptimizationAfter::TOP);
 }
 
 static constexpr auto MAIN_OSR_CATCH_F1_THROW_SOURCE = R"(
@@ -403,16 +403,16 @@ TEST_F(OsrTest, MainOsrCatchF1Throw)
     runner.GetCompilerOptions().SetCompilerInlining(false);
     runner.GetCompilerOptions().SetCompilerRegex("(?!_GLOBAL::f1).*");
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(MAIN_OSR_CATCH_F1_THROW_SOURCE, 123);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::TOP_FRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
-    auto deopt_events = events->Select<events::EventsMemory::DeoptimizationEvent>();
-    ASSERT_EQ(deopt_events.size(), 1);
-    ASSERT_EQ(deopt_events[0]->after, events::DeoptimizationAfter::TOP);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1);
+    ASSERT_EQ(osrEvents[0]->kind, events::OsrEntryKind::TOP_FRAME);
+    ASSERT_EQ(osrEvents[0]->result, events::OsrEntryResult::SUCCESS);
+    auto deoptEvents = events->Select<events::EventsMemory::DeoptimizationEvent>();
+    ASSERT_EQ(deoptEvents.size(), 1);
+    ASSERT_EQ(deoptEvents[0]->after, events::DeoptimizationAfter::TOP);
 }
 
 TEST_F(OsrTest, MainOsrCatchF1ThrowCompiled)
@@ -424,16 +424,16 @@ TEST_F(OsrTest, MainOsrCatchF1ThrowCompiled)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(false);
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(MAIN_OSR_CATCH_F1_THROW_SOURCE, 123);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::TOP_FRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
-    auto exception_events = events->Select<events::EventsMemory::ExceptionEvent>();
-    ASSERT_EQ(exception_events.size(), 1);
-    ASSERT_EQ(exception_events[0]->type, events::ExceptionType::BOUND_CHECK);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1);
+    ASSERT_EQ(osrEvents[0]->kind, events::OsrEntryKind::TOP_FRAME);
+    ASSERT_EQ(osrEvents[0]->result, events::OsrEntryResult::SUCCESS);
+    auto exceptionEvents = events->Select<events::EventsMemory::ExceptionEvent>();
+    ASSERT_EQ(exceptionEvents.size(), 1);
+    ASSERT_EQ(exceptionEvents[0]->type, events::ExceptionType::BOUND_CHECK);
 }
 
 static constexpr auto MAIN_CATCH_F1_OSR_THROW_SOURCE = R"(
@@ -478,16 +478,16 @@ TEST_F(OsrTest, MainCatchF1OsrThrow)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(false);
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(MAIN_CATCH_F1_OSR_THROW_SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1U);
-    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::AFTER_IFRAME);
-    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
-    auto exception_events = events->Select<events::EventsMemory::ExceptionEvent>();
-    ASSERT_EQ(exception_events.size(), 1U);
-    ASSERT_EQ(exception_events[0U]->type, events::ExceptionType::BOUND_CHECK);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1U);
+    ASSERT_EQ(osrEvents[0U]->kind, events::OsrEntryKind::AFTER_IFRAME);
+    ASSERT_EQ(osrEvents[0U]->result, events::OsrEntryResult::SUCCESS);
+    auto exceptionEvents = events->Select<events::EventsMemory::ExceptionEvent>();
+    ASSERT_EQ(exceptionEvents.size(), 1U);
+    ASSERT_EQ(exceptionEvents[0U]->type, events::ExceptionType::BOUND_CHECK);
 }
 
 static constexpr auto MAIN_CATCH_F1_OSR_F2_THROW_SOURCE = R"(
@@ -539,18 +539,18 @@ TEST_F(OsrTest, MainCatchF1OsrF2Throw)
     runner.GetCompilerOptions().SetCompilerInlining(false);
     runner.GetCompilerOptions().SetCompilerRegex("(?!_GLOBAL::f2).*");
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(MAIN_CATCH_F1_OSR_F2_THROW_SOURCE, 123);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::AFTER_IFRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
-    auto deopt_events = events->Select<events::EventsMemory::DeoptimizationEvent>();
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1);
+    ASSERT_EQ(osrEvents[0]->kind, events::OsrEntryKind::AFTER_IFRAME);
+    ASSERT_EQ(osrEvents[0]->result, events::OsrEntryResult::SUCCESS);
+    auto deoptEvents = events->Select<events::EventsMemory::DeoptimizationEvent>();
     // Since f1 hasn't catch handler, it shouldn't be deoptimized
-    ASSERT_EQ(deopt_events.size(), 0);
-    auto exception_events = events->Select<events::EventsMemory::ExceptionEvent>();
-    ASSERT_EQ(exception_events.size(), 0);
+    ASSERT_EQ(deoptEvents.size(), 0);
+    auto exceptionEvents = events->Select<events::EventsMemory::ExceptionEvent>();
+    ASSERT_EQ(exceptionEvents.size(), 0);
 }
 
 TEST_F(OsrTest, MainCatchF1OsrF2ThrowCompiled)
@@ -562,16 +562,16 @@ TEST_F(OsrTest, MainCatchF1OsrF2ThrowCompiled)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(false);
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(MAIN_CATCH_F1_OSR_F2_THROW_SOURCE, 123);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::AFTER_IFRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
-    auto exception_events = events->Select<events::EventsMemory::ExceptionEvent>();
-    ASSERT_EQ(exception_events.size(), 1);
-    ASSERT_EQ(exception_events[0]->type, events::ExceptionType::BOUND_CHECK);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1);
+    ASSERT_EQ(osrEvents[0]->kind, events::OsrEntryKind::AFTER_IFRAME);
+    ASSERT_EQ(osrEvents[0]->result, events::OsrEntryResult::SUCCESS);
+    auto exceptionEvents = events->Select<events::EventsMemory::ExceptionEvent>();
+    ASSERT_EQ(exceptionEvents.size(), 1);
+    ASSERT_EQ(exceptionEvents[0]->type, events::ExceptionType::BOUND_CHECK);
 }
 
 static constexpr auto MAIN_F1_OSR_CATCH_F2_THROW_SOURCE = R"(
@@ -624,18 +624,18 @@ TEST_F(OsrTest, MainF1OsrCatchF2Throw)
     runner.GetCompilerOptions().SetCompilerInlining(false);
     runner.GetCompilerOptions().SetCompilerRegex("(?!_GLOBAL::f2).*");
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(MAIN_F1_OSR_CATCH_F2_THROW_SOURCE, 123);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->method_name, "_GLOBAL::f1");
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::AFTER_IFRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
-    auto deopt_events = events->Select<events::EventsMemory::DeoptimizationEvent>();
-    ASSERT_EQ(deopt_events.size(), 1);
-    ASSERT_EQ(deopt_events[0]->method_name, "_GLOBAL::f1");
-    ASSERT_EQ(deopt_events[0]->after, events::DeoptimizationAfter::IFRAME);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1);
+    ASSERT_EQ(osrEvents[0]->methodName, "_GLOBAL::f1");
+    ASSERT_EQ(osrEvents[0]->kind, events::OsrEntryKind::AFTER_IFRAME);
+    ASSERT_EQ(osrEvents[0]->result, events::OsrEntryResult::SUCCESS);
+    auto deoptEvents = events->Select<events::EventsMemory::DeoptimizationEvent>();
+    ASSERT_EQ(deoptEvents.size(), 1);
+    ASSERT_EQ(deoptEvents[0]->methodName, "_GLOBAL::f1");
+    ASSERT_EQ(deoptEvents[0]->after, events::DeoptimizationAfter::IFRAME);
 }
 
 TEST_F(OsrTest, MainF1OsrCatchF2ThrowCompiled)
@@ -647,19 +647,19 @@ TEST_F(OsrTest, MainF1OsrCatchF2ThrowCompiled)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(false);
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
     runner.Run(MAIN_F1_OSR_CATCH_F2_THROW_SOURCE, 123);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->method_name, "_GLOBAL::f1");
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::AFTER_IFRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
-    auto deopt_events = events->Select<events::EventsMemory::DeoptimizationEvent>();
-    auto exception_events = events->Select<events::EventsMemory::ExceptionEvent>();
-    ASSERT_EQ(exception_events.size(), 1);
-    ASSERT_EQ(exception_events[0]->method_name, "_GLOBAL::f2");
-    ASSERT_EQ(exception_events[0]->type, events::ExceptionType::BOUND_CHECK);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1);
+    ASSERT_EQ(osrEvents[0]->methodName, "_GLOBAL::f1");
+    ASSERT_EQ(osrEvents[0]->kind, events::OsrEntryKind::AFTER_IFRAME);
+    ASSERT_EQ(osrEvents[0]->result, events::OsrEntryResult::SUCCESS);
+    auto deoptEvents = events->Select<events::EventsMemory::DeoptimizationEvent>();
+    auto exceptionEvents = events->Select<events::EventsMemory::ExceptionEvent>();
+    ASSERT_EQ(exceptionEvents.size(), 1);
+    ASSERT_EQ(exceptionEvents[0]->methodName, "_GLOBAL::f2");
+    ASSERT_EQ(exceptionEvents[0]->type, events::ExceptionType::BOUND_CHECK);
 }
 
 #if !defined(USE_ADDRESS_SANITIZER) && defined(PANDA_TARGET_AMD64)
@@ -681,22 +681,22 @@ TEST_F(OsrTest, BoundTest)
 
     std::stringstream text("");
 
-    uint64_t insts_per_byte = 32;
-    uint64_t max_bits_in_inst = GetInstructionSizeBits(RUNTIME_ARCH);
-    uint64_t inst_count = runner.GetCompilerOptions().GetCompilerMaxGenCodeSize() / (insts_per_byte * max_bits_in_inst);
+    uint64_t instsPerByte = 32;
+    uint64_t maxBitsInInst = GetInstructionSizeBits(RUNTIME_ARCH);
+    uint64_t instCount = runner.GetCompilerOptions().GetCompilerMaxGenCodeSize() / (instsPerByte * maxBitsInInst);
 
-    for (uint64_t i = 0; i < inst_count; ++i) {
+    for (uint64_t i = 0; i < instCount; ++i) {
         text << "       addi 1\n";
     }
 
-    std::string bound_test = std::string(start) + std::string(text.str()) + std::string(end);
+    std::string boundTest = std::string(start) + std::string(text.str()) + std::string(end);
 
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
 
-    runner.Run(bound_test, 123);
+    runner.Run(boundTest, 123);
     auto events = Events::CastTo<Events::MEMORY>();
-    auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
+    auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
+    ASSERT_EQ(osrEvents.size(), 1);
 }
 #endif
 // NOLINTEND(readability-magic-numbers)

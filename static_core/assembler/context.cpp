@@ -23,7 +23,7 @@ void Context::Make(const std::vector<panda::pandasm::Token> &t)
 {
     err = {};
 
-    ins_number = 0;
+    insNumber = 0;
 
     tokens = t;
 
@@ -31,8 +31,8 @@ void Context::Make(const std::vector<panda::pandasm::Token> &t)
 
     end = false;
 
-    token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),
-                             tokens[number - 1].bound_right - tokens[number - 1].bound_left);
+    token = std::string_view(&*(tokens[number - 1].wholeLine.begin() + tokens[number - 1].boundLeft),
+                             tokens[number - 1].boundRight - tokens[number - 1].boundLeft);
 
     id = this->tokens[number - 1].type;
 }
@@ -71,9 +71,9 @@ bool Context::ValidateRegisterName(char c, size_t n) const
     return false;
 }
 
-bool Context::ValidateParameterName(size_t number_of_params_already_is) const
+bool Context::ValidateParameterName(size_t numberOfParamsAlreadyIs) const
 {
-    if (number_of_params_already_is >= MAX_DWORD) {
+    if (numberOfParamsAlreadyIs >= MAX_DWORD) {
         return false;
     }
 
@@ -82,7 +82,7 @@ bool Context::ValidateParameterName(size_t number_of_params_already_is) const
 
         p.remove_prefix(1);
 
-        if (ToNumber(p) == number_of_params_already_is) {
+        if (ToNumber(p) == numberOfParamsAlreadyIs) {
             return true;
         }
     }
@@ -131,20 +131,20 @@ bool Context::NextMask()
 // NOLINTNEXTLINE(cert-dcl21-cpp)
 Token::Type Context::operator++(int)
 {
-    Token::Type last_id = id;
+    Token::Type lastId = id;
 
     if (this->tokens.size() > number) {
         ++number;
 
         id = this->tokens[number - 1].type;
 
-        token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),
-                                 tokens[number - 1].bound_right - tokens[number - 1].bound_left);
+        token = std::string_view(&*(tokens[number - 1].wholeLine.begin() + tokens[number - 1].boundLeft),
+                                 tokens[number - 1].boundRight - tokens[number - 1].boundLeft);
     } else {
         end = true;
     }
 
-    return last_id;
+    return lastId;
 }
 
 Token::Type Context::operator++()
@@ -154,8 +154,8 @@ Token::Type Context::operator++()
 
         id = this->tokens[number - 1].type;
 
-        token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),
-                                 tokens[number - 1].bound_right - tokens[number - 1].bound_left);
+        token = std::string_view(&*(tokens[number - 1].wholeLine.begin() + tokens[number - 1].boundLeft),
+                                 tokens[number - 1].boundRight - tokens[number - 1].boundLeft);
     } else {
         end = true;
     }
@@ -166,7 +166,7 @@ Token::Type Context::operator++()
 // NOLINTNEXTLINE(cert-dcl21-cpp)
 Token::Type Context::operator--(int)
 {
-    Token::Type last_id = id;
+    Token::Type lastId = id;
 
     if (number > 1) {
         end = false;
@@ -175,13 +175,13 @@ Token::Type Context::operator--(int)
 
         id = this->tokens[number - 1].type;
 
-        token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),
-                                 tokens[number - 1].bound_right - tokens[number - 1].bound_left);
+        token = std::string_view(&*(tokens[number - 1].wholeLine.begin() + tokens[number - 1].boundLeft),
+                                 tokens[number - 1].boundRight - tokens[number - 1].boundLeft);
     } else {
         end = false;
     }
 
-    return last_id;
+    return lastId;
 }
 
 Token::Type Context::operator--()
@@ -193,8 +193,8 @@ Token::Type Context::operator--()
 
         id = this->tokens[number - 1].type;
 
-        token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),
-                                 tokens[number - 1].bound_right - tokens[number - 1].bound_left);
+        token = std::string_view(&*(tokens[number - 1].wholeLine.begin() + tokens[number - 1].boundLeft),
+                                 tokens[number - 1].boundRight - tokens[number - 1].boundLeft);
     } else {
         end = false;
     }

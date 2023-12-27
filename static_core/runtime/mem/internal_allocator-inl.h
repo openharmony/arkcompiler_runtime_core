@@ -61,9 +61,9 @@ std::enable_if_t<is_unbounded_array_v<T>, std::remove_extent_t<T> *> InternalAll
     void *p = Alloc(SIZE_BEFORE_DATA_OFFSET + sizeof(ElementType) * size, GetAlignment<T>());
     *static_cast<size_t *>(p) = size;
     ElementType *data = ToNativePtr<ElementType>(ToUintPtr(p) + SIZE_BEFORE_DATA_OFFSET);
-    ElementType *current_element = data;
-    for (size_t i = 0; i < size; ++i, ++current_element) {
-        new (current_element) ElementType();
+    ElementType *currentElement = data;
+    for (size_t i = 0; i < size; ++i, ++currentElement) {
+        new (currentElement) ElementType();
     }
     return data;
 }
@@ -95,25 +95,25 @@ void InternalAllocator<CONFIG>::DeleteArray(T *data)
 
 template <InternalAllocatorConfig CONFIG>
 template <typename MemVisitor>
-void InternalAllocator<CONFIG>::VisitAndRemoveAllPools(MemVisitor mem_visitor)
+void InternalAllocator<CONFIG>::VisitAndRemoveAllPools(MemVisitor memVisitor)
 {
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (CONFIG == InternalAllocatorConfig::PANDA_ALLOCATORS) {
-        runslots_allocator_->VisitAndRemoveAllPools(mem_visitor);
-        freelist_allocator_->VisitAndRemoveAllPools(mem_visitor);
-        humongous_allocator_->VisitAndRemoveAllPools(mem_visitor);
+        runslotsAllocator_->VisitAndRemoveAllPools(memVisitor);
+        freelistAllocator_->VisitAndRemoveAllPools(memVisitor);
+        humongousAllocator_->VisitAndRemoveAllPools(memVisitor);
     }
 }
 
 template <InternalAllocatorConfig CONFIG>
 template <typename MemVisitor>
-void InternalAllocator<CONFIG>::VisitAndRemoveFreePools(MemVisitor mem_visitor)
+void InternalAllocator<CONFIG>::VisitAndRemoveFreePools(MemVisitor memVisitor)
 {
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (CONFIG == InternalAllocatorConfig::PANDA_ALLOCATORS) {
-        runslots_allocator_->VisitAndRemoveFreePools(mem_visitor);
-        freelist_allocator_->VisitAndRemoveFreePools(mem_visitor);
-        humongous_allocator_->VisitAndRemoveFreePools(mem_visitor);
+        runslotsAllocator_->VisitAndRemoveFreePools(memVisitor);
+        freelistAllocator_->VisitAndRemoveFreePools(memVisitor);
+        humongousAllocator_->VisitAndRemoveFreePools(memVisitor);
     }
 }
 

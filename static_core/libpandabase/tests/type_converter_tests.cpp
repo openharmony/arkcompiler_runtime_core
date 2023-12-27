@@ -33,19 +33,19 @@ TEST(TimeTest, RandomTimeConverterTest)
 {
     // NOLINTNEXTLINE(cert-msc51-cpp)
     std::mt19937 gen;
-    std::uniform_int_distribution<time_t> distrib_nanos_right(0U, 1e3 - 1L);
-    std::uniform_int_distribution<time_t> distrib_nanos_left(1U, 23U);
+    std::uniform_int_distribution<time_t> distribNanosRight(0U, 1e3 - 1L);
+    std::uniform_int_distribution<time_t> distribNanosLeft(1U, 23U);
     for (size_t i = 0; i < ITERATION; i++) {
-        uint64_t left_part_time = distrib_nanos_left(gen);
-        uint64_t right_part_time = distrib_nanos_right(gen);
-        ASSERT_NE(TimeConverter(left_part_time), ValueUnit(left_part_time, "ns"));
-        ASSERT_NE(TimeConverter(right_part_time), ValueUnit(right_part_time, "ns"));
+        uint64_t leftPartTime = distribNanosLeft(gen);
+        uint64_t rightPartTime = distribNanosRight(gen);
+        ASSERT_NE(TimeConverter(leftPartTime), ValueUnit(leftPartTime, "ns"));
+        ASSERT_NE(TimeConverter(rightPartTime), ValueUnit(rightPartTime, "ns"));
 
-        ASSERT_EQ(TimeConverter(left_part_time), ValueUnit(static_cast<double>(left_part_time), "ns"));
-        ASSERT_EQ(TimeConverter(right_part_time), ValueUnit(static_cast<double>(right_part_time), "ns"));
+        ASSERT_EQ(TimeConverter(leftPartTime), ValueUnit(static_cast<double>(leftPartTime), "ns"));
+        ASSERT_EQ(TimeConverter(rightPartTime), ValueUnit(static_cast<double>(rightPartTime), "ns"));
 
-        double expected = left_part_time + right_part_time * 1e-3;
-        uint64_t nanos = left_part_time * 1e3 + right_part_time;
+        double expected = leftPartTime + rightPartTime * 1e-3;
+        uint64_t nanos = leftPartTime * 1e3 + rightPartTime;
         ASSERT_EQ(TimeConverter(nanos), ValueUnit(expected, "us"));
         ASSERT_EQ(TimeConverter(nanos * 1e3), ValueUnit(expected, "ms"));
         ASSERT_EQ(TimeConverter(nanos * 1e6), ValueUnit(expected, "s"));
@@ -69,18 +69,18 @@ TEST(MemoryTest, RandomMemoryConverterTest)
 {
     // NOLINTNEXTLINE(cert-msc51-cpp)
     std::mt19937 gen;
-    std::uniform_int_distribution<uint64_t> distrib_bytes(1U, 1023U);
+    std::uniform_int_distribution<uint64_t> distribBytes(1U, 1023U);
     for (size_t i = 0; i < ITERATION; i++) {
-        uint64_t left_part_bytes = distrib_bytes(gen);
-        uint64_t right_part_bytes = distrib_bytes(gen);
-        ASSERT_NE(MemoryConverter(left_part_bytes), ValueUnit(left_part_bytes, "B"));
-        ASSERT_NE(MemoryConverter(right_part_bytes), ValueUnit(right_part_bytes, "B"));
+        uint64_t leftPartBytes = distribBytes(gen);
+        uint64_t rightPartBytes = distribBytes(gen);
+        ASSERT_NE(MemoryConverter(leftPartBytes), ValueUnit(leftPartBytes, "B"));
+        ASSERT_NE(MemoryConverter(rightPartBytes), ValueUnit(rightPartBytes, "B"));
 
-        ASSERT_EQ(MemoryConverter(left_part_bytes), ValueUnit(static_cast<double>(left_part_bytes), "B"));
-        ASSERT_EQ(MemoryConverter(right_part_bytes), ValueUnit(static_cast<double>(right_part_bytes), "B"));
+        ASSERT_EQ(MemoryConverter(leftPartBytes), ValueUnit(static_cast<double>(leftPartBytes), "B"));
+        ASSERT_EQ(MemoryConverter(rightPartBytes), ValueUnit(static_cast<double>(rightPartBytes), "B"));
 
-        double expected = left_part_bytes + right_part_bytes * 1e-3;
-        uint64_t bytes = left_part_bytes * 1024U + right_part_bytes;
+        double expected = leftPartBytes + rightPartBytes * 1e-3;
+        uint64_t bytes = leftPartBytes * 1024U + rightPartBytes;
         ASSERT_EQ(MemoryConverter(bytes), ValueUnit(expected, "KB"));
         ASSERT_EQ(MemoryConverter(bytes * (1UL << 10U)), ValueUnit(expected, "MB"));
         ASSERT_EQ(MemoryConverter(bytes * (1UL << 20U)), ValueUnit(expected, "GB"));

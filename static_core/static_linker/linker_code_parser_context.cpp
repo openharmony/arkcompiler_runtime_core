@@ -35,11 +35,10 @@ public:
         return cont_->GetOrCreateStringItem(s);
     }
 
-    panda_file::BaseClassItem *GetType([[maybe_unused]] panda_file::File::EntityId type_id,
-                                       const std::string &type_name)
+    panda_file::BaseClassItem *GetType([[maybe_unused]] panda_file::File::EntityId typeId, const std::string &typeName)
     {
         auto *cm = cont_->GetClassMap();
-        auto iter = cm->find(type_name);
+        auto iter = cm->find(typeName);
         ASSERT(iter != cm->end());
         return iter->second;
     }
@@ -60,8 +59,8 @@ public:
         return nullptr;
     }
 
-    panda_file::BaseClassItem *GetType([[maybe_unused]] panda_file::File::EntityId type_id,
-                                       [[maybe_unused]] const std::string &type_name)
+    panda_file::BaseClassItem *GetType([[maybe_unused]] panda_file::File::EntityId typeId,
+                                       [[maybe_unused]] const std::string &typeName)
     {
         return nullptr;
     }
@@ -78,12 +77,12 @@ void CodePatcher::Add(Change c)
 
 void CodePatcher::Devour(CodePatcher &&p)
 {
-    const auto old_size = changes_.size();
+    const auto oldSize = changes_.size();
     changes_.insert(changes_.end(), std::move_iterator(p.changes_.begin()), std::move_iterator(p.changes_.end()));
-    const auto new_size = changes_.size();
+    const auto newSize = changes_.size();
     p.changes_.clear();
 
-    ranges_.emplace_back(old_size, new_size);
+    ranges_.emplace_back(oldSize, newSize);
 }
 
 void CodePatcher::AddRange(std::pair<size_t, size_t> range)
@@ -93,33 +92,33 @@ void CodePatcher::AddRange(std::pair<size_t, size_t> range)
 
 void CodePatcher::ApplyLiteralArrayChange(LiteralArrayChange &lc, Context *ctx)
 {
-    auto id = ctx->literal_array_id_++;
+    auto id = ctx->literalArrayId_++;
     lc.it = ctx->GetContainer().GetOrCreateLiteralArrayItem(std::to_string(id));
 
-    auto &old_its = lc.old->GetItems();
-    auto new_its = std::vector<panda_file::LiteralItem>();
-    new_its.reserve(old_its.size());
+    auto &oldIts = lc.old->GetItems();
+    auto newIts = std::vector<panda_file::LiteralItem>();
+    newIts.reserve(oldIts.size());
 
-    for (const auto &i : old_its) {
+    for (const auto &i : oldIts) {
         using LIT = panda_file::LiteralItem::Type;
         switch (i.GetType()) {
             case LIT::B1:
             case LIT::B2:
             case LIT::B4:
             case LIT::B8:
-                new_its.emplace_back(i);
+                newIts.emplace_back(i);
                 break;
             case LIT::STRING: {
                 auto str = ctx->StringFromOld(i.GetValue<panda_file::StringItem *>());
-                new_its.emplace_back(str);
+                newIts.emplace_back(str);
                 break;
             }
             case LIT::METHOD: {
                 auto meth = i.GetValue<panda_file::MethodItem *>();
-                auto iter = ctx->known_items_.find(meth);
-                ASSERT(iter != ctx->known_items_.end());
+                auto iter = ctx->knownItems_.find(meth);
+                ASSERT(iter != ctx->knownItems_.end());
                 ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::METHOD_ITEM);
-                new_its.emplace_back(static_cast<panda_file::MethodItem *>(iter->second));
+                newIts.emplace_back(static_cast<panda_file::MethodItem *>(iter->second));
                 break;
             }
             default:
@@ -127,7 +126,7 @@ void CodePatcher::ApplyLiteralArrayChange(LiteralArrayChange &lc, Context *ctx)
         }
     }
 
-    lc.it->AddItems(new_its);
+    lc.it->AddItems(newIts);
 }
 
 void CodePatcher::ApplyDeps(Context *ctx)
@@ -188,50 +187,50 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
     using Flags = panda::BytecodeInst<panda::BytecodeInstMode::FAST>::Flags;
     using EntityId = panda_file::File::EntityId;
 
-    const auto my_id = EntityId(data->omi->GetOffset());
-    auto *items = data->file_reader->GetItems();
+    const auto myId = EntityId(data->omi->GetOffset());
+    auto *items = data->fileReader->GetItems();
 
     if (data->code != nullptr) {
         auto inst = BytecodeInstruction(data->code->data());
         size_t offset = 0;
         const auto limit = data->code->size();
 
-        auto file_ptr = data->file_reader->GetFilePtr();
+        auto filePtr = data->fileReader->GetFilePtr();
 
         using Resolver = EntityId (panda_file::File::*)(EntityId id, panda_file::File::Index idx) const;
 
-        auto make_with_id = [&](Resolver resolve) {
+        auto makeWithId = [&](Resolver resolve) {
             auto idx = inst.GetId().AsIndex();
-            auto old_id = (file_ptr->*resolve)(my_id, idx);
-            auto iter = items->find(old_id);
+            auto oldId = (filePtr->*resolve)(myId, idx);
+            auto iter = items->find(oldId);
             ASSERT(iter != items->end());
-            auto as_indexed = static_cast<panda_file::IndexedItem *>(iter->second);
-            auto found = known_items_.find(as_indexed);
-            ASSERT(found != known_items_.end());
+            auto asIndexed = static_cast<panda_file::IndexedItem *>(iter->second);
+            auto found = knownItems_.find(asIndexed);
+            ASSERT(found != knownItems_.end());
             p.Add(CodePatcher::IndexedChange {inst, data->nmi, static_cast<panda_file::IndexedItem *>(found->second)});
         };
 
         while (offset < limit) {
             if (inst.HasFlag(Flags::TYPE_ID)) {
-                make_with_id(&panda_file::File::ResolveClassIndex);
+                makeWithId(&panda_file::File::ResolveClassIndex);
                 // inst.UpdateId()
             } else if (inst.HasFlag(Flags::METHOD_ID)) {
-                make_with_id(&panda_file::File::ResolveMethodIndex);
+                makeWithId(&panda_file::File::ResolveMethodIndex);
             } else if (inst.HasFlag(Flags::FIELD_ID)) {
-                make_with_id(&panda_file::File::ResolveFieldIndex);
+                makeWithId(&panda_file::File::ResolveFieldIndex);
             } else if (inst.HasFlag(Flags::STRING_ID)) {
-                BytecodeId b_id = inst.GetId();
-                auto old_id = b_id.AsFileId();
+                BytecodeId bId = inst.GetId();
+                auto oldId = bId.AsFileId();
 
-                auto s_data = file_ptr->GetStringData(old_id);
-                auto item_str = std::string(utf::Mutf8AsCString(s_data.data));
-                p.Add(CodePatcher::StringChange {inst, std::move(item_str)});
+                auto sData = filePtr->GetStringData(oldId);
+                auto itemStr = std::string(utf::Mutf8AsCString(sData.data));
+                p.Add(CodePatcher::StringChange {inst, std::move(itemStr)});
             } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
-                BytecodeId b_id = inst.GetId();
-                auto old_idx = b_id.AsRawValue();
-                auto arrs = file_ptr->GetLiteralArrays();
-                ASSERT(old_idx < arrs.size());
-                auto off = arrs[old_idx];
+                BytecodeId bId = inst.GetId();
+                auto oldIdx = bId.AsRawValue();
+                auto arrs = filePtr->GetLiteralArrays();
+                ASSERT(oldIdx < arrs.size());
+                auto off = arrs[oldIdx];
                 auto iter = items->find(EntityId(off));
                 ASSERT(iter != items->end());
                 ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::LITERAL_ARRAY_ITEM);
@@ -244,18 +243,18 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
         }
     }
 
-    if (auto *dbg = data->omi->GetDebugInfo(); data->patch_lnp && dbg != nullptr) {
-        auto file = data->file_reader->GetFilePtr();
+    if (auto *dbg = data->omi->GetDebugInfo(); data->patchLnp && dbg != nullptr) {
+        auto file = data->fileReader->GetFilePtr();
         auto scrapper = LinkerDebugInfoScrapper(file, &p);
         auto off = data->omi->GetDebugInfo()->GetOffset();
         ASSERT(off != 0);
-        auto e_id = panda_file::File::EntityId(off);
-        scrapper.Scrap(e_id);
+        auto eId = panda_file::File::EntityId(off);
+        scrapper.Scrap(eId);
 
-        auto new_dbg = data->nmi->GetDebugInfo();
-        p.Add([file, this, new_dbg, e_id]() {
+        auto newDbg = data->nmi->GetDebugInfo();
+        p.Add([file, this, newDbg, eId]() {
             auto updater = LinkerDebugInfoUpdater(file, &cont_);
-            updater.Emit(new_dbg, e_id);
+            updater.Emit(newDbg, eId);
         });
     }
 }

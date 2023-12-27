@@ -35,7 +35,7 @@ public:
     explicit GlobalHandleStorage(InternalAllocatorPtr allocator) : allocator_(allocator)
     {
         ASSERT(allocator_ != nullptr);
-        global_nodes_ = allocator_->New<PandaVector<std::array<Node, GLOBAL_BLOCK_SIZE> *>>(allocator_->Adapter());
+        globalNodes_ = allocator_->New<PandaVector<std::array<Node, GLOBAL_BLOCK_SIZE> *>>(allocator_->Adapter());
     };
     ~GlobalHandleStorage();
 
@@ -82,7 +82,7 @@ public:
 
     inline PandaVector<std::array<Node, GLOBAL_BLOCK_SIZE> *> *GetNodes() const
     {
-        return global_nodes_;
+        return globalNodes_;
     }
 
     inline int32_t GetCount() const
@@ -112,15 +112,15 @@ private:
 
     inline void FreeGlobalNodes()
     {
-        for (auto block : *global_nodes_) {
+        for (auto block : *globalNodes_) {
             allocator_->Delete(block);
         }
     }
 
-    PandaVector<std::array<Node, GLOBAL_BLOCK_SIZE> *> *global_nodes_ {nullptr};
+    PandaVector<std::array<Node, GLOBAL_BLOCK_SIZE> *> *globalNodes_ {nullptr};
     InternalAllocatorPtr allocator_;
     int32_t count_ {GLOBAL_BLOCK_SIZE};
-    Node *free_list_ {nullptr};
+    Node *freeList_ {nullptr};
 
     friend class ManagedThread;
 };

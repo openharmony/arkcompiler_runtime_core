@@ -23,8 +23,8 @@
 namespace panda::tooling::inspector {
 void EndpointBase::OnCall(const char *method, EndpointBase::MethodHandler &&handler)
 {
-    os::memory::LockHolder lock(method_handlers_mutex_);
-    method_handlers_[method] = std::move(handler);
+    os::memory::LockHolder lock(methodHandlersMutex_);
+    methodHandlers_[method] = std::move(handler);
 }
 
 void EndpointBase::HandleMessage(const std::string &message)
@@ -37,20 +37,20 @@ void EndpointBase::HandleMessage(const std::string &message)
 
     LOG(DEBUG, DEBUGGER) << "Received " << message;
 
-    auto session_id = request.GetValue<JsonObject::StringT>("sessionId");
+    auto sessionId = request.GetValue<JsonObject::StringT>("sessionId");
     auto id = request.GetValue<JsonObject::NumT>("id");
     auto method = request.GetValue<JsonObject::StringT>("method");
     auto result = request.GetValue<JsonObject::JsonObjPointer>("result");
 
     if (method != nullptr && result == nullptr) {
-        os::memory::LockHolder lock(method_handlers_mutex_);
+        os::memory::LockHolder lock(methodHandlersMutex_);
 
-        if (auto handler = method_handlers_.find(*method); handler != method_handlers_.end()) {
+        if (auto handler = methodHandlers_.find(*method); handler != methodHandlers_.end()) {
             auto *params = request.GetValue<JsonObject::JsonObjPointer>("params");
 
             JsonObject empty;
 
-            handler->second(session_id != nullptr ? *session_id : std::string(),
+            handler->second(sessionId != nullptr ? *sessionId : std::string(),
                             id != nullptr ? std::make_optional(*id) : std::nullopt,
                             params != nullptr ? **params : empty);
         } else {
@@ -62,7 +62,7 @@ void EndpointBase::HandleMessage(const std::string &message)
             return;
         }
 
-        if (auto handler = result_handlers_.extract(*id)) {
+        if (auto handler = resultHandlers_.extract(*id)) {
             handler.mapped()(**result);
         }
     } else {

@@ -28,7 +28,7 @@ bool LoopUnroll::RunImpl()
     RunLoopsVisitor();
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << GetPassName() << " complete";
     GetGraph()->SetUnrollComplete();
-    return is_applied_;
+    return isApplied_;
 }
 
 void LoopUnroll::InvalidateAnalyses()
@@ -40,155 +40,155 @@ void LoopUnroll::InvalidateAnalyses()
 }
 
 template <typename T>
-bool ConditionOverFlowImpl(const CountableLoopInfo &loop_info, uint32_t unroll_factor)
+bool ConditionOverFlowImpl(const CountableLoopInfo &loopInfo, uint32_t unrollFactor)
 {
-    auto imm_value = (static_cast<uint64_t>(unroll_factor) - 1) * loop_info.const_step;
-    auto test_value = static_cast<T>(loop_info.test->CastToConstant()->GetIntValue());
-    auto type_min = std::numeric_limits<T>::min();
-    auto type_max = std::numeric_limits<T>::max();
-    if (imm_value > static_cast<uint64_t>(type_max)) {
+    auto immValue = (static_cast<uint64_t>(unrollFactor) - 1) * loopInfo.constStep;
+    auto testValue = static_cast<T>(loopInfo.test->CastToConstant()->GetIntValue());
+    auto typeMin = std::numeric_limits<T>::min();
+    auto typeMax = std::numeric_limits<T>::max();
+    if (immValue > static_cast<uint64_t>(typeMax)) {
         return true;
     }
-    if (loop_info.is_inc) {
+    if (loopInfo.isInc) {
         // condition will be updated: test_value - imm_value
         // so if (test_value - imm_value) < type_min, it's overflow
-        return (type_min + static_cast<T>(imm_value)) > test_value;
+        return (typeMin + static_cast<T>(immValue)) > testValue;
     }
     // condition will be updated: test_value + imm_value
     // so if (test_value + imm_value) > type_max, it's overflow
-    return (type_max - static_cast<T>(imm_value)) < test_value;
+    return (typeMax - static_cast<T>(immValue)) < testValue;
 }
 
 /// NOTE(a.popov) Create pre-header compare if it doesn't exist
 
-bool ConditionOverFlow(const CountableLoopInfo &loop_info, uint32_t unroll_factor)
+bool ConditionOverFlow(const CountableLoopInfo &loopInfo, uint32_t unrollFactor)
 {
-    auto type = loop_info.index->GetType();
+    auto type = loopInfo.index->GetType();
     ASSERT(DataType::GetCommonType(type) == DataType::INT64);
-    auto update_opcode = loop_info.update->GetOpcode();
-    if (update_opcode == Opcode::AddOverflowCheck || update_opcode == Opcode::SubOverflowCheck) {
+    auto updateOpcode = loopInfo.update->GetOpcode();
+    if (updateOpcode == Opcode::AddOverflowCheck || updateOpcode == Opcode::SubOverflowCheck) {
         return true;
     }
-    if (!loop_info.test->IsConst()) {
+    if (!loopInfo.test->IsConst()) {
         return false;
     }
 
     switch (type) {
         case DataType::INT32:
-            return ConditionOverFlowImpl<int32_t>(loop_info, unroll_factor);
+            return ConditionOverFlowImpl<int32_t>(loopInfo, unrollFactor);
         case DataType::UINT32:
-            return ConditionOverFlowImpl<uint32_t>(loop_info, unroll_factor);
+            return ConditionOverFlowImpl<uint32_t>(loopInfo, unrollFactor);
         case DataType::INT64:
-            return ConditionOverFlowImpl<int64_t>(loop_info, unroll_factor);
+            return ConditionOverFlowImpl<int64_t>(loopInfo, unrollFactor);
         case DataType::UINT64:
-            return ConditionOverFlowImpl<uint64_t>(loop_info, unroll_factor);
+            return ConditionOverFlowImpl<uint64_t>(loopInfo, unrollFactor);
         default:
             return true;
     }
 }
 
-void LoopUnroll::TransformLoopImpl(Loop *loop, std::optional<uint64_t> opt_iterations, bool no_side_exits,
-                                   uint32_t unroll_factor, std::optional<CountableLoopInfo> loop_info)
+void LoopUnroll::TransformLoopImpl(Loop *loop, std::optional<uint64_t> optIterations, bool noSideExits,
+                                   uint32_t unrollFactor, std::optional<CountableLoopInfo> loopInfo)
 {
-    auto graph_cloner = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator());
-    if (opt_iterations && no_side_exits) {
+    auto graphCloner = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator());
+    if (optIterations && noSideExits) {
         // GCC gives false positive here
 #if !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
-        auto iterations = *opt_iterations;
-        auto remaining_iters = iterations % unroll_factor;
+        auto iterations = *optIterations;
+        ASSERT(unrollFactor != 0);
+        auto remainingIters = iterations % unrollFactor;
 #if !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
-        Loop *clone_loop = remaining_iters == 0 ? nullptr : graph_cloner.CloneLoop(loop);
+        Loop *cloneLoop = remainingIters == 0 ? nullptr : graphCloner.CloneLoop(loop);
         // Unroll loop without side-exits and fix compare in the pre-header and back-edge
-        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_WITHOUT_SIDE_EXITS>(loop, unroll_factor);
-        FixCompareInst(loop_info.value(), loop->GetHeader(), unroll_factor);
+        graphCloner.UnrollLoopBody<UnrollType::UNROLL_WITHOUT_SIDE_EXITS>(loop, unrollFactor);
+        FixCompareInst(loopInfo.value(), loop->GetHeader(), unrollFactor);
         // Unroll loop without side-exits for remaining iterations
-        if (remaining_iters != 0) {
-            graph_cloner.UnrollLoopBody<UnrollType::UNROLL_CONSTANT_ITERATIONS>(clone_loop, remaining_iters);
+        if (remainingIters != 0) {
+            graphCloner.UnrollLoopBody<UnrollType::UNROLL_CONSTANT_ITERATIONS>(cloneLoop, remainingIters);
         }
         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
             << "Unrolled without side-exits the loop with constant number of iterations (" << iterations
             << "). Loop id = " << loop->GetId();
-    } else if (no_side_exits) {
-        auto clone_loop = graph_cloner.CloneLoop(loop);
+    } else if (noSideExits) {
+        auto cloneLoop = graphCloner.CloneLoop(loop);
         // Unroll loop without side-exits and fix compare in the pre-header and back-edge
-        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_WITHOUT_SIDE_EXITS>(loop, unroll_factor);
-        FixCompareInst(loop_info.value(), loop->GetHeader(), unroll_factor);
+        graphCloner.UnrollLoopBody<UnrollType::UNROLL_WITHOUT_SIDE_EXITS>(loop, unrollFactor);
+        FixCompareInst(loopInfo.value(), loop->GetHeader(), unrollFactor);
         // Unroll loop with side-exits for remaining iterations
-        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_POST_INCREMENT>(clone_loop, unroll_factor - 1);
+        graphCloner.UnrollLoopBody<UnrollType::UNROLL_POST_INCREMENT>(cloneLoop, unrollFactor - 1);
         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-            << "Unrolled without side-exits the loop with unroll factor = " << unroll_factor
+            << "Unrolled without side-exits the loop with unroll factor = " << unrollFactor
             << ". Loop id = " << loop->GetId();
-    } else if (OPTIONS.IsCompilerUnrollWithSideExits()) {
-        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_WITH_SIDE_EXITS>(loop, unroll_factor);
-        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-            << "Unrolled with side-exits the loop with unroll factor = " << unroll_factor
-            << ". Loop id = " << loop->GetId();
+    } else if (g_options.IsCompilerUnrollWithSideExits()) {
+        graphCloner.UnrollLoopBody<UnrollType::UNROLL_WITH_SIDE_EXITS>(loop, unrollFactor);
+        COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Unrolled with side-exits the loop with unroll factor = " << unrollFactor
+                                            << ". Loop id = " << loop->GetId();
     }
 }
 
 bool LoopUnroll::TransformLoop(Loop *loop)
 {
-    auto unroll_params = GetUnrollParams(loop);
-    if (!OPTIONS.IsCompilerUnrollLoopWithCalls() && unroll_params.has_call) {
+    auto unrollParams = GetUnrollParams(loop);
+    if (!g_options.IsCompilerUnrollLoopWithCalls() && unrollParams.hasCall) {
         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
             << "Loop isn't unrolled since it contains calls. Loop id = " << loop->GetId();
         return false;
     }
 
-    auto graph_cloner = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator());
-    uint32_t unroll_factor = std::min(unroll_params.unroll_factor, unroll_factor_);
-    auto loop_parser = CountableLoopParser(*loop);
-    auto loop_info = loop_parser.Parse();
-    std::optional<uint64_t> opt_iterations {};
-    auto no_branching = false;
-    if (loop_info.has_value()) {
-        opt_iterations = CountableLoopParser::GetLoopIterations(*loop_info);
-        if (opt_iterations == 0) {
-            opt_iterations.reset();
+    auto graphCloner = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator());
+    uint32_t unrollFactor = std::min(unrollParams.unrollFactor, unrollFactor_);
+    auto loopParser = CountableLoopParser(*loop);
+    auto loopInfo = loopParser.Parse();
+    std::optional<uint64_t> optIterations {};
+    auto noBranching = false;
+    if (loopInfo.has_value()) {
+        optIterations = CountableLoopParser::GetLoopIterations(*loopInfo);
+        if (optIterations == 0) {
+            optIterations.reset();
         }
-        if (opt_iterations.has_value()) {
+        if (optIterations.has_value()) {
             // Increase instruction limit for unroll without branching
             // <= unroll_factor * 2 because unroll without side exits would create unroll_factor * 2 - 1 copies of loop
-            no_branching = unroll_params.cloneable_insts <= inst_limit_ &&
-                           (*opt_iterations <= unroll_factor * 2 || *opt_iterations <= unroll_factor_) &&
-                           CountableLoopParser::HasPreHeaderCompare(loop, *loop_info);
+            noBranching = unrollParams.cloneableInsts <= instLimit_ &&
+                          (*optIterations <= unrollFactor * 2 || *optIterations <= unrollFactor_) &&
+                          CountableLoopParser::HasPreHeaderCompare(loop, *loopInfo);
         }
     }
 
-    if (no_branching) {
-        auto iterations = *opt_iterations;
-        graph_cloner.UnrollLoopBody<UnrollType::UNROLL_CONSTANT_ITERATIONS>(loop, iterations);
+    if (noBranching) {
+        auto iterations = *optIterations;
+        graphCloner.UnrollLoopBody<UnrollType::UNROLL_CONSTANT_ITERATIONS>(loop, iterations);
         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
             << "Unrolled without branching the loop with constant number of iterations (" << iterations
             << "). Loop id = " << loop->GetId();
-        is_applied_ = true;
+        isApplied_ = true;
         GetGraph()->GetEventWriter().EventLoopUnroll(loop->GetId(), loop->GetHeader()->GetGuestPc(), iterations,
-                                                     unroll_params.cloneable_insts, "without branching");
+                                                     unrollParams.cloneableInsts, "without branching");
         return true;
     }
 
-    if (unroll_factor <= 1) {
+    if (unrollFactor <= 1) {
         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-            << "Loop isn't unrolled due to unroll factor = " << unroll_factor << ". Loop id = " << loop->GetId();
+            << "Loop isn't unrolled due to unroll factor = " << unrollFactor << ". Loop id = " << loop->GetId();
         return false;
     }
 
-    auto no_side_exits = false;
-    if (loop_info.has_value()) {
-        no_side_exits =
-            !ConditionOverFlow(*loop_info, unroll_factor) && CountableLoopParser::HasPreHeaderCompare(loop, *loop_info);
+    auto noSideExits = false;
+    if (loopInfo.has_value()) {
+        noSideExits =
+            !ConditionOverFlow(*loopInfo, unrollFactor) && CountableLoopParser::HasPreHeaderCompare(loop, *loopInfo);
     }
 
-    TransformLoopImpl(loop, opt_iterations, no_side_exits, unroll_factor, loop_info);
-    is_applied_ = true;
-    GetGraph()->GetEventWriter().EventLoopUnroll(loop->GetId(), loop->GetHeader()->GetGuestPc(), unroll_factor,
-                                                 unroll_params.cloneable_insts,
-                                                 no_side_exits ? "without side exits" : "with side exits");
+    TransformLoopImpl(loop, optIterations, noSideExits, unrollFactor, loopInfo);
+    isApplied_ = true;
+    GetGraph()->GetEventWriter().EventLoopUnroll(loop->GetId(), loop->GetHeader()->GetGuestPc(), unrollFactor,
+                                                 unrollParams.cloneableInsts,
+                                                 noSideExits ? "without side exits" : "with side exits");
     return true;
 }
 
@@ -199,27 +199,27 @@ bool LoopUnroll::TransformLoop(Loop *loop)
  */
 LoopUnroll::UnrollParams LoopUnroll::GetUnrollParams(Loop *loop)
 {
-    uint32_t base_inst_count = 0;
-    uint32_t not_cloneable_count = 0;
-    bool has_call = false;
+    uint32_t baseInstCount = 0;
+    uint32_t notCloneableCount = 0;
+    bool hasCall = false;
     for (auto block : loop->GetBlocks()) {
         for (auto inst : block->AllInsts()) {
-            base_inst_count++;
+            baseInstCount++;
             if ((block->IsLoopHeader() && inst->IsPhi()) || inst->GetOpcode() == Opcode::SafePoint) {
-                not_cloneable_count++;
+                notCloneableCount++;
             }
-            has_call |= inst->IsCall() && !static_cast<CallInst *>(inst)->IsInlined();
+            hasCall |= inst->IsCall() && !static_cast<CallInst *>(inst)->IsInlined();
         }
     }
 
-    UnrollParams params = {1, (base_inst_count - not_cloneable_count), has_call};
-    if (base_inst_count >= inst_limit_) {
+    UnrollParams params = {1, (baseInstCount - notCloneableCount), hasCall};
+    if (baseInstCount >= instLimit_) {
         return params;
     }
-    uint32_t can_be_cloned_count = inst_limit_ - base_inst_count;
-    params.unroll_factor = unroll_factor_;
-    if (params.cloneable_insts > 0) {
-        params.unroll_factor = (can_be_cloned_count / params.cloneable_insts) + 1;
+    uint32_t canBeClonedCount = instLimit_ - baseInstCount;
+    params.unrollFactor = unrollFactor_;
+    if (params.cloneableInsts > 0) {
+        params.unrollFactor = (canBeClonedCount / params.cloneableInsts) + 1;
     }
     return params;
 }
@@ -228,62 +228,62 @@ LoopUnroll::UnrollParams LoopUnroll::GetUnrollParams(Loop *loop)
  * @return - `if_imm`'s compare input when `if_imm` its single user,
  * otherwise create a new one Compare for this `if_imm` and return it
  */
-Inst *GetOrCreateIfImmUniqueCompare(Inst *if_imm)
+Inst *GetOrCreateIfImmUniqueCompare(Inst *ifImm)
 {
-    ASSERT(if_imm->GetOpcode() == Opcode::IfImm);
-    auto compare = if_imm->GetInput(0).GetInst();
+    ASSERT(ifImm->GetOpcode() == Opcode::IfImm);
+    auto compare = ifImm->GetInput(0).GetInst();
     ASSERT(compare->GetOpcode() == Opcode::Compare);
     if (compare->HasSingleUser()) {
         return compare;
     }
-    auto new_cmp = compare->Clone(compare->GetBasicBlock()->GetGraph());
-    new_cmp->SetInput(0, compare->GetInput(0).GetInst());
-    new_cmp->SetInput(1, compare->GetInput(1).GetInst());
-    if_imm->InsertBefore(new_cmp);
-    if_imm->SetInput(0, new_cmp);
-    return new_cmp;
+    auto newCmp = compare->Clone(compare->GetBasicBlock()->GetGraph());
+    newCmp->SetInput(0, compare->GetInput(0).GetInst());
+    newCmp->SetInput(1, compare->GetInput(1).GetInst());
+    ifImm->InsertBefore(newCmp);
+    ifImm->SetInput(0, newCmp);
+    return newCmp;
 }
 
 /// Normalize control-flow to the form: `if condition is true goto loop_header`
-void NormalizeControlFlow(BasicBlock *edge, const BasicBlock *loop_header)
+void NormalizeControlFlow(BasicBlock *edge, const BasicBlock *loopHeader)
 {
-    auto if_imm = edge->GetLastInst()->CastToIfImm();
-    ASSERT(if_imm->GetImm() == 0);
-    if (if_imm->GetCc() == CC_EQ) {
-        if_imm->SetCc(CC_NE);
+    auto ifImm = edge->GetLastInst()->CastToIfImm();
+    ASSERT(ifImm->GetImm() == 0);
+    if (ifImm->GetCc() == CC_EQ) {
+        ifImm->SetCc(CC_NE);
         edge->SwapTrueFalseSuccessors<true>();
     }
-    auto cmp = if_imm->GetInput(0).GetInst()->CastToCompare();
+    auto cmp = ifImm->GetInput(0).GetInst()->CastToCompare();
     if (!cmp->HasSingleUser()) {
-        auto new_cmp = cmp->Clone(edge->GetGraph());
-        if_imm->InsertBefore(new_cmp);
-        if_imm->SetInput(0, new_cmp);
-        cmp = new_cmp->CastToCompare();
+        auto newCmp = cmp->Clone(edge->GetGraph());
+        ifImm->InsertBefore(newCmp);
+        ifImm->SetInput(0, newCmp);
+        cmp = newCmp->CastToCompare();
     }
-    if (edge->GetFalseSuccessor() == loop_header) {
-        auto inversed_cc = GetInverseConditionCode(cmp->GetCc());
-        cmp->SetCc(inversed_cc);
+    if (edge->GetFalseSuccessor() == loopHeader) {
+        auto inversedCc = GetInverseConditionCode(cmp->GetCc());
+        cmp->SetCc(inversedCc);
         edge->SwapTrueFalseSuccessors<true>();
     }
 }
 
-Inst *LoopUnroll::CreateNewTestInst(const CountableLoopInfo &loop_info, Inst *const_inst, Inst *pre_header_cmp)
+Inst *LoopUnroll::CreateNewTestInst(const CountableLoopInfo &loopInfo, Inst *constInst, Inst *preHeaderCmp)
 {
     Inst *test = nullptr;
-    if (loop_info.is_inc) {
-        test = GetGraph()->CreateInstSub(pre_header_cmp->CastToCompare()->GetOperandsType(), pre_header_cmp->GetPc(),
-                                         loop_info.test, const_inst);
+    if (loopInfo.isInc) {
+        test = GetGraph()->CreateInstSub(preHeaderCmp->CastToCompare()->GetOperandsType(), preHeaderCmp->GetPc(),
+                                         loopInfo.test, constInst);
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        test->SetCurrentMethod(pre_header_cmp->GetCurrentMethod());
+        test->SetCurrentMethod(preHeaderCmp->GetCurrentMethod());
 #endif
     } else {
-        test = GetGraph()->CreateInstAdd(pre_header_cmp->CastToCompare()->GetOperandsType(), pre_header_cmp->GetPc(),
-                                         loop_info.test, const_inst);
+        test = GetGraph()->CreateInstAdd(preHeaderCmp->CastToCompare()->GetOperandsType(), preHeaderCmp->GetPc(),
+                                         loopInfo.test, constInst);
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        test->SetCurrentMethod(pre_header_cmp->GetCurrentMethod());
+        test->SetCurrentMethod(preHeaderCmp->GetCurrentMethod());
 #endif
     }
-    pre_header_cmp->InsertBefore(test);
+    preHeaderCmp->InsertBefore(test);
     return test;
 }
 
@@ -297,58 +297,57 @@ Inst *LoopUnroll::CreateNewTestInst(const CountableLoopInfo &loop_info, Inst *co
  * And replace condition code if it is `CC_NE`.
  * We use Constant + Sub/Add because low-level instructions (SubI/AddI) may appear only after Lowering pass.
  */
-void LoopUnroll::FixCompareInst(const CountableLoopInfo &loop_info, BasicBlock *header, uint32_t unroll_factor)
+void LoopUnroll::FixCompareInst(const CountableLoopInfo &loopInfo, BasicBlock *header, uint32_t unrollFactor)
 {
-    auto pre_header = header->GetLoop()->GetPreHeader();
-    auto back_edge = loop_info.if_imm->GetBasicBlock();
-    ASSERT(!pre_header->IsEmpty() && pre_header->GetLastInst()->GetOpcode() == Opcode::IfImm);
-    auto pre_header_if = pre_header->GetLastInst()->CastToIfImm();
-    auto pre_header_cmp = GetOrCreateIfImmUniqueCompare(pre_header_if);
-    auto back_edge_cmp = GetOrCreateIfImmUniqueCompare(loop_info.if_imm);
-    NormalizeControlFlow(pre_header, header);
-    NormalizeControlFlow(back_edge, header);
+    auto preHeader = header->GetLoop()->GetPreHeader();
+    auto backEdge = loopInfo.ifImm->GetBasicBlock();
+    ASSERT(!preHeader->IsEmpty() && preHeader->GetLastInst()->GetOpcode() == Opcode::IfImm);
+    auto preHeaderIf = preHeader->GetLastInst()->CastToIfImm();
+    auto preHeaderCmp = GetOrCreateIfImmUniqueCompare(preHeaderIf);
+    auto backEdgeCmp = GetOrCreateIfImmUniqueCompare(loopInfo.ifImm);
+    NormalizeControlFlow(preHeader, header);
+    NormalizeControlFlow(backEdge, header);
     // Create Sub/Add + Const instructions and replace Compare's test inst input
-    auto imm_value = (static_cast<uint64_t>(unroll_factor) - 1) * loop_info.const_step;
-    auto new_test = CreateNewTestInst(loop_info, GetGraph()->FindOrCreateConstant(imm_value), pre_header_cmp);
-    auto test_input_idx = 1;
-    if (back_edge_cmp->GetInput(0) == loop_info.test) {
-        test_input_idx = 0;
+    auto immValue = (static_cast<uint64_t>(unrollFactor) - 1) * loopInfo.constStep;
+    auto newTest = CreateNewTestInst(loopInfo, GetGraph()->FindOrCreateConstant(immValue), preHeaderCmp);
+    auto testInputIdx = 1;
+    if (backEdgeCmp->GetInput(0) == loopInfo.test) {
+        testInputIdx = 0;
     } else {
-        ASSERT(back_edge_cmp->GetInput(1) == loop_info.test);
+        ASSERT(backEdgeCmp->GetInput(1) == loopInfo.test);
     }
-    ASSERT(pre_header_cmp->GetInput(test_input_idx).GetInst() == loop_info.test);
-    pre_header_cmp->SetInput(test_input_idx, new_test);
-    back_edge_cmp->SetInput(test_input_idx, new_test);
+    ASSERT(preHeaderCmp->GetInput(testInputIdx).GetInst() == loopInfo.test);
+    preHeaderCmp->SetInput(testInputIdx, newTest);
+    backEdgeCmp->SetInput(testInputIdx, newTest);
     // Replace CC_NE ConditionCode
-    if (loop_info.normalized_cc == CC_NE) {
-        auto cc = loop_info.is_inc ? CC_LT : CC_GT;
-        if (test_input_idx == 0) {
+    if (loopInfo.normalizedCc == CC_NE) {
+        auto cc = loopInfo.isInc ? CC_LT : CC_GT;
+        if (testInputIdx == 0) {
             cc = SwapOperandsConditionCode(cc);
         }
-        pre_header_cmp->CastToCompare()->SetCc(cc);
-        back_edge_cmp->CastToCompare()->SetCc(cc);
+        preHeaderCmp->CastToCompare()->SetCc(cc);
+        backEdgeCmp->CastToCompare()->SetCc(cc);
     }
     // for not constant test-instruction we need to insert `overflow-check`:
     // `test - imm_value` should be less than `test` (incerement loop-index case)
     // `test + imm_value` should be greater than `test` (decrement loop-index case)
     // If overflow-check is failed goto after-loop
-    if (!loop_info.test->IsConst()) {
-        auto cc = loop_info.is_inc ? CC_LT : CC_GT;
+    if (!loopInfo.test->IsConst()) {
+        auto cc = loopInfo.isInc ? CC_LT : CC_GT;
         // Create overflow_compare
-        auto overflow_compare = GetGraph()->CreateInstCompare(compiler::DataType::BOOL, pre_header_cmp->GetPc(),
-                                                              new_test, loop_info.test, loop_info.test->GetType(), cc);
+        auto overflowCompare = GetGraph()->CreateInstCompare(compiler::DataType::BOOL, preHeaderCmp->GetPc(), newTest,
+                                                             loopInfo.test, loopInfo.test->GetType(), cc);
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        overflow_compare->SetCurrentMethod(pre_header_cmp->GetCurrentMethod());
+        overflowCompare->SetCurrentMethod(preHeaderCmp->GetCurrentMethod());
 #endif
         // Create (pre_header_compare AND overflow_compare) inst
-        auto and_inst =
-            GetGraph()->CreateInstAnd(DataType::BOOL, pre_header_cmp->GetPc(), pre_header_cmp, overflow_compare);
+        auto andInst = GetGraph()->CreateInstAnd(DataType::BOOL, preHeaderCmp->GetPc(), preHeaderCmp, overflowCompare);
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        and_inst->SetCurrentMethod(pre_header_cmp->GetCurrentMethod());
+        andInst->SetCurrentMethod(preHeaderCmp->GetCurrentMethod());
 #endif
-        pre_header_if->SetInput(0, and_inst);
-        pre_header_if->InsertBefore(and_inst);
-        and_inst->InsertBefore(overflow_compare);
+        preHeaderIf->SetInput(0, andInst);
+        preHeaderIf->InsertBefore(andInst);
+        andInst->InsertBefore(overflowCompare);
     }
 }
 }  // namespace panda::compiler

@@ -33,7 +33,7 @@ public:
         }
         for (auto it1 = graph1->GetBlocksRPO().begin(), it2 = graph2->GetBlocksRPO().begin();
              it1 != graph1->GetBlocksRPO().end(); it1++, it2++) {
-            auto it = bb_map_.insert({*it1, *it2});
+            auto it = bbMap_.insert({*it1, *it2});
             if (!it.second) {
                 return false;
             }
@@ -56,7 +56,7 @@ public:
             block2->Dump(&std::cerr);
             return false;
         }
-        auto inst_cmp = [this](auto inst1, auto inst2) {
+        auto instCmp = [this](auto inst1, auto inst2) {
             assert(inst2 != nullptr);
             bool t = Compare(inst1, inst2);
             if (!t) {
@@ -67,45 +67,45 @@ public:
             return t;
         };
         return std::equal(block1->AllInsts().begin(), block1->AllInsts().end(), block2->AllInsts().begin(),
-                          block2->AllInsts().end(), inst_cmp);
+                          block2->AllInsts().end(), instCmp);
     }
 
     bool InstInitialCompare(Inst *inst1, Inst *inst2)
     {
         if (inst1->GetOpcode() != inst2->GetOpcode() || inst1->GetType() != inst2->GetType() ||
             inst1->GetInputsCount() != inst2->GetInputsCount()) {
-            inst_compare_map_.erase(inst1);
+            instCompareMap_.erase(inst1);
             return false;
         }
         if (inst1->GetFlagsMask() != inst2->GetFlagsMask()) {
-            inst_compare_map_.erase(inst1);
+            instCompareMap_.erase(inst1);
             return false;
         }
         if (inst1->GetOpcode() != Opcode::Phi) {
-            auto inst1_begin = inst1->GetInputs().begin();
-            auto inst1_end = inst1->GetInputs().end();
-            auto inst2_begin = inst2->GetInputs().begin();
-            auto eq_lambda = [this](Input input1, Input input2) { return Compare(input1.GetInst(), input2.GetInst()); };
-            if (!std::equal(inst1_begin, inst1_end, inst2_begin, eq_lambda)) {
-                inst_compare_map_.erase(inst1);
+            auto inst1Begin = inst1->GetInputs().begin();
+            auto inst1End = inst1->GetInputs().end();
+            auto inst2Begin = inst2->GetInputs().begin();
+            auto eqLambda = [this](Input input1, Input input2) { return Compare(input1.GetInst(), input2.GetInst()); };
+            if (!std::equal(inst1Begin, inst1End, inst2Begin, eqLambda)) {
+                instCompareMap_.erase(inst1);
                 return false;
             }
         } else {
             if (inst1->GetInputsCount() != inst2->GetInputsCount()) {
-                inst_compare_map_.erase(inst1);
+                instCompareMap_.erase(inst1);
                 return false;
             }
             for (size_t index1 = 0; index1 < inst1->GetInputsCount(); index1++) {
                 auto input1 = inst1->GetInput(index1).GetInst();
                 auto bb1 = inst1->CastToPhi()->GetPhiInputBb(index1);
-                if (bb_map_.count(bb1) == 0) {
-                    inst_compare_map_.erase(inst1);
+                if (bbMap_.count(bb1) == 0) {
+                    instCompareMap_.erase(inst1);
                     return false;
                 }
-                auto bb2 = bb_map_.at(bb1);
+                auto bb2 = bbMap_.at(bb1);
                 auto input2 = inst2->CastToPhi()->GetPhiInput(bb2);
                 if (!Compare(input1, input2)) {
-                    inst_compare_map_.erase(inst1);
+                    instCompareMap_.erase(inst1);
                     return false;
                 }
             }
@@ -118,7 +118,7 @@ public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage
 #define CHECK(Opc, Getter)                                                                               \
     if (inst1->GetOpcode() == Opcode::Opc && inst1->CAST(Opc)->Getter() != inst2->CAST(Opc)->Getter()) { \
-        inst_compare_map_.erase(inst1);                                                                  \
+        instCompareMap_.erase(inst1);                                                                    \
         return false;                                                                                    \
     }
 
@@ -233,34 +233,34 @@ public:
 
     bool InstSaveStateCompare(Inst *inst1, Inst *inst2)
     {
-        auto *sv_st1 = static_cast<SaveStateInst *>(inst1);
-        auto *sv_st2 = static_cast<SaveStateInst *>(inst2);
-        if (sv_st1->GetImmediatesCount() != sv_st2->GetImmediatesCount()) {
-            inst_compare_map_.erase(inst1);
+        auto *svSt1 = static_cast<SaveStateInst *>(inst1);
+        auto *svSt2 = static_cast<SaveStateInst *>(inst2);
+        if (svSt1->GetImmediatesCount() != svSt2->GetImmediatesCount()) {
+            instCompareMap_.erase(inst1);
             return false;
         }
 
         std::vector<VirtualRegister::ValueType> regs1;
         std::vector<VirtualRegister::ValueType> regs2;
-        regs1.reserve(sv_st1->GetInputsCount());
-        regs2.reserve(sv_st2->GetInputsCount());
-        for (size_t i {0}; i < sv_st1->GetInputsCount(); ++i) {
-            regs1.emplace_back(sv_st1->GetVirtualRegister(i).Value());
-            regs2.emplace_back(sv_st2->GetVirtualRegister(i).Value());
+        regs1.reserve(svSt1->GetInputsCount());
+        regs2.reserve(svSt2->GetInputsCount());
+        for (size_t i {0}; i < svSt1->GetInputsCount(); ++i) {
+            regs1.emplace_back(svSt1->GetVirtualRegister(i).Value());
+            regs2.emplace_back(svSt2->GetVirtualRegister(i).Value());
         }
         std::sort(regs1.begin(), regs1.end());
         std::sort(regs2.begin(), regs2.end());
         if (regs1 != regs2) {
-            inst_compare_map_.erase(inst1);
+            instCompareMap_.erase(inst1);
             return false;
         }
-        if (sv_st1->GetImmediatesCount() != 0) {
-            auto eq_lambda = [](SaveStateImm i1, SaveStateImm i2) {
-                return i1.value == i2.value && i1.vreg == i2.vreg && i1.vreg_type == i2.vreg_type && i1.type == i2.type;
+        if (svSt1->GetImmediatesCount() != 0) {
+            auto eqLambda = [](SaveStateImm i1, SaveStateImm i2) {
+                return i1.value == i2.value && i1.vreg == i2.vreg && i1.vregType == i2.vregType && i1.type == i2.type;
             };
-            if (!std::equal(sv_st1->GetImmediates()->begin(), sv_st1->GetImmediates()->end(),
-                            sv_st2->GetImmediates()->begin(), eq_lambda)) {
-                inst_compare_map_.erase(inst1);
+            if (!std::equal(svSt1->GetImmediates()->begin(), svSt1->GetImmediates()->end(),
+                            svSt2->GetImmediates()->begin(), eqLambda)) {
+                instCompareMap_.erase(inst1);
                 return false;
             }
         }
@@ -269,11 +269,11 @@ public:
 
     bool Compare(Inst *inst1, Inst *inst2)
     {
-        if (auto it = inst_compare_map_.insert({inst1, inst2}); !it.second) {
+        if (auto it = instCompareMap_.insert({inst1, inst2}); !it.second) {
             if (inst2 == it.first->second) {
                 return true;
             }
-            inst_compare_map_.erase(inst1);
+            instCompareMap_.erase(inst1);
             return false;
         }
 
@@ -303,7 +303,7 @@ public:
                     break;
             }
             if (!same) {
-                inst_compare_map_.erase(inst1);
+                instCompareMap_.erase(inst1);
                 return false;
             }
         }
@@ -311,13 +311,13 @@ public:
             auto cmp1 = static_cast<CmpInst *>(inst1);
             auto cmp2 = static_cast<CmpInst *>(inst2);
             if (cmp1->IsFcmpg() != cmp2->IsFcmpg()) {
-                inst_compare_map_.erase(inst1);
+                instCompareMap_.erase(inst1);
                 return false;
             }
         }
         for (size_t i = 0; i < inst2->GetInputsCount(); i++) {
             if (inst1->GetInputType(i) != inst2->GetInputType(i)) {
-                inst_compare_map_.erase(inst1);
+                instCompareMap_.erase(inst1);
                 return false;
             }
         }
@@ -328,8 +328,8 @@ public:
     }
 
 private:
-    std::unordered_map<Inst *, Inst *> inst_compare_map_;
-    std::unordered_map<BasicBlock *, BasicBlock *> bb_map_;
+    std::unordered_map<Inst *, Inst *> instCompareMap_;
+    std::unordered_map<BasicBlock *, BasicBlock *> bbMap_;
 };
 }  // namespace panda::compiler
 

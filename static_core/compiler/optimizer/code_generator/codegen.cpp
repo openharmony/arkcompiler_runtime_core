@@ -38,13 +38,13 @@ class OsrEntryStub {
     void FixIntervals(Codegen *codegen, Encoder *encoder)
     {
         auto &la = codegen->GetGraph()->GetAnalysis<LivenessAnalyzer>();
-        la.EnumerateLiveIntervalsForInst(save_state_, [this, codegen, encoder](const auto &li) {
+        la.EnumerateLiveIntervalsForInst(saveState_, [this, codegen, encoder](const auto &li) {
             auto inst = li->GetInst();
             auto location = li->GetLocation();
             // Skip live registers that are already in the input list of the OsrSaveState
-            const auto &ss_inputs = save_state_->GetInputs();
-            if (std::find_if(ss_inputs.begin(), ss_inputs.end(),
-                             [inst](auto &input) { return input.GetInst() == inst; }) != ss_inputs.end()) {
+            const auto &ssInputs = saveState_->GetInputs();
+            if (std::find_if(ssInputs.begin(), ssInputs.end(),
+                             [inst](auto &input) { return input.GetInst() == inst; }) != ssInputs.end()) {
                 return;
             }
             // Only constants allowed
@@ -99,8 +99,7 @@ class OsrEntryStub {
     }
 
 public:
-    OsrEntryStub(Codegen *codegen, SaveStateInst *inst)
-        : label_(codegen->GetEncoder()->CreateLabel()), save_state_(inst)
+    OsrEntryStub(Codegen *codegen, SaveStateInst *inst) : label_(codegen->GetEncoder()->CreateLabel()), saveState_(inst)
     {
     }
 
@@ -113,7 +112,7 @@ public:
         auto encoder = codegen->GetEncoder();
         auto lr = codegen->GetTarget().GetLinkReg();
         auto fl = codegen->GetFrameLayout();
-        codegen->CreateStackMap(save_state_->CastToSaveStateOsr());
+        codegen->CreateStackMap(saveState_->CastToSaveStateOsr());
         ssize_t slot = CFrameLayout::LOCALS_START_SLOT + CFrameLayout::GetLocalsCount() - 1;
         encoder->EncodeStp(
             codegen->FpReg(), lr,
@@ -126,7 +125,7 @@ public:
 
     SaveStateInst *GetInst()
     {
-        return save_state_;
+        return saveState_;
     }
 
     auto &GetLabel()
@@ -136,33 +135,33 @@ public:
 
 private:
     LabelHolder::LabelId label_;
-    SaveStateInst *save_state_ {nullptr};
+    SaveStateInst *saveState_ {nullptr};
 };
 
 Codegen::Codegen(Graph *graph)
     : Optimization(graph),
       allocator_(graph->GetAllocator()),
-      local_allocator_(graph->GetLocalAllocator()),
-      code_builder_(allocator_->New<CodeInfoBuilder>(graph->GetArch(), allocator_)),
-      slow_paths_(graph->GetLocalAllocator()->Adapter()),
-      slow_paths_map_(graph->GetLocalAllocator()->Adapter()),
+      localAllocator_(graph->GetLocalAllocator()),
+      codeBuilder_(allocator_->New<CodeInfoBuilder>(graph->GetArch(), allocator_)),
+      slowPaths_(graph->GetLocalAllocator()->Adapter()),
+      slowPathsMap_(graph->GetLocalAllocator()->Adapter()),
       frame_layout_(CFrameLayout(graph->GetArch(), graph->GetStackSlotsCount())),
-      osr_entries_(graph->GetLocalAllocator()->Adapter()),
-      vreg_indices_(GetAllocator()->Adapter()),
+      osrEntries_(graph->GetLocalAllocator()->Adapter()),
+      vregIndices_(GetAllocator()->Adapter()),
       runtime_(graph->GetRuntime()),
       target_(graph->GetArch()),
-      live_outs_(graph->GetLocalAllocator()->Adapter()),
+      liveOuts_(graph->GetLocalAllocator()->Adapter()),
       disasm_(this),
-      spill_fills_resolver_(graph)
+      spillFillsResolver_(graph)
 {
-    graph->SetCodeBuilder(code_builder_);
+    graph->SetCodeBuilder(codeBuilder_);
     regfile_ = graph->GetRegisters();
     if (regfile_ != nullptr) {
         ASSERT(regfile_->IsValid());
-        ArenaVector<Reg> regs_usage(allocator_->Adapter());
-        Convert(&regs_usage, graph->GetUsedRegs<DataType::INT64>(), INT64_TYPE);
-        Convert(&regs_usage, graph->GetUsedRegs<DataType::FLOAT64>(), FLOAT64_TYPE);
-        regfile_->SetUsedRegs(regs_usage);
+        ArenaVector<Reg> regsUsage(allocator_->Adapter());
+        Convert(&regsUsage, graph->GetUsedRegs<DataType::INT64>(), INT64_TYPE);
+        Convert(&regsUsage, graph->GetUsedRegs<DataType::FLOAT64>(), FLOAT64_TYPE);
+        regfile_->SetUsedRegs(regsUsage);
 #ifndef NDEBUG
         COMPILER_LOG(DEBUG, CODEGEN) << "Regalloc used registers scalar " << graph->GetUsedRegs<DataType::INT64>();
         COMPILER_LOG(DEBUG, CODEGEN) << "Regalloc used registers vector " << graph->GetUsedRegs<DataType::FLOAT64>();
@@ -187,7 +186,7 @@ Codegen::Codegen(Graph *graph)
     auto method = graph->GetMethod();
     // workaround for test
     if (method != nullptr) {
-        method_id_ = graph->GetRuntime()->GetMethodId(method);
+        methodId_ = graph->GetRuntime()->GetMethodId(method);
     }
     GetDisasm()->Init();
     GetDisasm()->SetEncoder(GetEncoder());
@@ -233,18 +232,18 @@ void Codegen::CreateFrameInfo()
     SetFrameInfo(frame);
 }
 
-void Codegen::FillOnlyParameters(RegMask *live_regs, uint32_t num_params, bool is_fastpath) const
+void Codegen::FillOnlyParameters(RegMask *liveRegs, uint32_t numParams, bool isFastpath) const
 {
-    ASSERT(num_params <= 6U);
-    if (GetArch() == Arch::AARCH64 && !is_fastpath) {
-        num_params = AlignUp(num_params, 2U);
+    ASSERT(numParams <= 6U);
+    if (GetArch() == Arch::AARCH64 && !isFastpath) {
+        numParams = AlignUp(numParams, 2U);
     }
-    *live_regs &= GetTarget().GetParamRegsMask(num_params);
+    *liveRegs &= GetTarget().GetParamRegsMask(numParams);
 }
 
-void Codegen::Convert(ArenaVector<Reg> *regs_usage, const ArenaVector<bool> *mask, TypeInfo type_info)
+void Codegen::Convert(ArenaVector<Reg> *regsUsage, const ArenaVector<bool> *mask, TypeInfo typeInfo)
 {
-    ASSERT(regs_usage != nullptr);
+    ASSERT(regsUsage != nullptr);
     // There are no used registers
     if (mask == nullptr) {
         return;
@@ -252,7 +251,7 @@ void Codegen::Convert(ArenaVector<Reg> *regs_usage, const ArenaVector<bool> *mas
     ASSERT(mask->size() == MAX_NUM_REGS);
     for (uint32_t i = 0; i < MAX_NUM_REGS; ++i) {
         if ((*mask)[i]) {
-            regs_usage->emplace_back(i, type_info);
+            regsUsage->emplace_back(i, typeInfo);
         }
     }
 }
@@ -310,15 +309,15 @@ void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst
 bool Codegen::BeginMethod()
 {
     // Do not try to encode too large graph
-    auto inst_size = GetGraph()->GetCurrentInstructionId();
-    auto insts_per_byte = GetEncoder()->MaxArchInstPerEncoded();
-    auto max_bits_in_inst = GetInstructionSizeBits(GetArch());
-    inst_size += slow_paths_.size() * INST_IN_SLOW_PATH;
-    if ((inst_size * insts_per_byte * max_bits_in_inst) > OPTIONS.GetCompilerMaxGenCodeSize()) {
+    auto instSize = GetGraph()->GetCurrentInstructionId();
+    auto instsPerByte = GetEncoder()->MaxArchInstPerEncoded();
+    auto maxBitsInInst = GetInstructionSizeBits(GetArch());
+    instSize += slowPaths_.size() * INST_IN_SLOW_PATH;
+    if ((instSize * instsPerByte * maxBitsInInst) > g_options.GetCompilerMaxGenCodeSize()) {
         return false;
     }
     // After this - encoder aborted, if allocated too much size.
-    GetEncoder()->SetMaxAllocatedBytes(OPTIONS.GetCompilerMaxGenCodeSize());
+    GetEncoder()->SetMaxAllocatedBytes(g_options.GetCompilerMaxGenCodeSize());
 
     if (GetGraph()->IsAotMode()) {
         GetEncoder()->SetCodeOffset(GetGraph()->GetAotData()->GetCodeOffset() + CodeInfo::GetCodeOffset(GetArch()));
@@ -326,8 +325,8 @@ bool Codegen::BeginMethod()
         GetEncoder()->SetCodeOffset(0);
     }
 
-    code_builder_->BeginMethod(GetFrameLayout().GetFrameSize<CFrameLayout::OffsetUnit::BYTES>(),
-                               GetGraph()->GetVRegsCount() + GetGraph()->GetEnvCount());
+    codeBuilder_->BeginMethod(GetFrameLayout().GetFrameSize<CFrameLayout::OffsetUnit::BYTES>(),
+                              GetGraph()->GetVRegsCount() + GetGraph()->GetEnvCount());
 
     GetEncoder()->BindLabel(GetLabelEntry());
     SetStartCodeOffset(GetEncoder()->GetCursorOffset());
@@ -341,7 +340,7 @@ void Codegen::GeneratePrologue()
 {
     SCOPED_DISASM_STR(this, "Method Prologue");
 
-    GetCallingConvention()->GeneratePrologue(*frame_info_);
+    GetCallingConvention()->GeneratePrologue(*frameInfo_);
 
     if (!GetGraph()->GetMode().IsNative()) {
         GetEncoder()->EncodeSti(1, 1, MemRef(ThreadReg(), GetRuntime()->GetTlsFrameKindOffset(GetArch())));
@@ -387,7 +386,7 @@ void Codegen::GenerateEpilogue()
         }
     });
 #else
-    GetCallingConvention()->GenerateEpilogue(*frame_info_, []() {});
+    GetCallingConvention()->GenerateEpilogue(*frameInfo_, []() {});
 #endif
 }
 
@@ -404,9 +403,9 @@ bool Codegen::VisitGraph()
             SCOPED_DISASM_INST(this, inst);
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
-            auto debug_info = inst->GetDebugInfo();
-            if (GetGraph()->IsLineDebugInfoEnabled() && debug_info != nullptr) {
-                debug_info->SetOffset(GetEncoder()->GetCursorOffset());
+            auto debugInfo = inst->GetDebugInfo();
+            if (GetGraph()->IsLineDebugInfoEnabled() && debugInfo != nullptr) {
+                debugInfo->SetOffset(GetEncoder()->GetCursorOffset());
             }
 #endif
             visitor.VisitInstruction(inst);
@@ -426,10 +425,10 @@ bool Codegen::VisitGraph()
         }
     }
 
-    auto insts_per_byte = GetEncoder()->MaxArchInstPerEncoded();
-    auto max_bits_in_inst = GetInstructionSizeBits(GetArch());
-    auto inst_size = GetGraph()->GetCurrentInstructionId() + slow_paths_.size() * INST_IN_SLOW_PATH;
-    if ((inst_size * insts_per_byte * max_bits_in_inst) > OPTIONS.GetCompilerMaxGenCodeSize()) {
+    auto instsPerByte = GetEncoder()->MaxArchInstPerEncoded();
+    auto maxBitsInInst = GetInstructionSizeBits(GetArch());
+    auto instSize = GetGraph()->GetCurrentInstructionId() + slowPaths_.size() * INST_IN_SLOW_PATH;
+    if ((instSize * instsPerByte * maxBitsInInst) > g_options.GetCompilerMaxGenCodeSize()) {
         return false;
     }
 
@@ -441,36 +440,36 @@ bool Codegen::VisitGraph()
 
 void Codegen::EmitJump(const BasicBlock *bb)
 {
-    BasicBlock *suc_bb = nullptr;
+    BasicBlock *sucBb = nullptr;
 
     if (bb->GetLastInst() == nullptr) {
         ASSERT(bb->IsEmpty());
-        suc_bb = bb->GetSuccsBlocks()[0];
+        sucBb = bb->GetSuccsBlocks()[0];
     } else {
         switch (bb->GetLastInst()->GetOpcode()) {
             case Opcode::If:
             case Opcode::IfImm:
                 ASSERT(bb->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
-                suc_bb = bb->GetFalseSuccessor();
+                sucBb = bb->GetFalseSuccessor();
                 break;
             default:
-                suc_bb = bb->GetSuccsBlocks()[0];
+                sucBb = bb->GetSuccsBlocks()[0];
                 break;
         }
     }
     SCOPED_DISASM_STR(this, std::string("Jump from  BB_") + std::to_string(bb->GetId()) + " to BB_" +
-                                std::to_string(suc_bb->GetId()));
+                                std::to_string(sucBb->GetId()));
 
-    auto label = suc_bb->GetId();
+    auto label = sucBb->GetId();
     GetEncoder()->EncodeJump(label);
 }
 
 void Codegen::EndMethod()
 {
-    for (auto &osr_stub : osr_entries_) {
+    for (auto &osrStub : osrEntries_) {
         SCOPED_DISASM_STR(this,
-                          std::string("Osr stub for OsrStateStump ") + std::to_string(osr_stub->GetInst()->GetId()));
-        osr_stub->Generate(this);
+                          std::string("Osr stub for OsrStateStump ") + std::to_string(osrStub->GetInst()->GetId()));
+        osrStub->Generate(this);
     }
 
     GetEncoder()->Finalize();
@@ -480,35 +479,35 @@ void Codegen::EndMethod()
 // encodes the code info and sets it to the graph.
 bool Codegen::CopyToCodeCache()
 {
-    auto code_entry = reinterpret_cast<void *>(GetEncoder()->GetLabelAddress(GetLabelEntry()));
-    auto code_size = GetEncoder()->GetCursorOffset();
-    bool save_all_callee_registers = !GetGraph()->GetMethodProperties().GetCompactPrologueAllowed();
+    auto codeEntry = reinterpret_cast<void *>(GetEncoder()->GetLabelAddress(GetLabelEntry()));
+    auto codeSize = GetEncoder()->GetCursorOffset();
+    bool saveAllCalleeRegisters = !GetGraph()->GetMethodProperties().GetCompactPrologueAllowed();
 
-    auto code = reinterpret_cast<uint8_t *>(GetAllocator()->Alloc(code_size));
+    auto code = reinterpret_cast<uint8_t *>(GetAllocator()->Alloc(codeSize));
     if (code == nullptr) {
         return false;
     }
-    memcpy_s(code, code_size, code_entry, code_size);
-    GetGraph()->SetCode(EncodeDataType(code, code_size));
+    memcpy_s(code, codeSize, codeEntry, codeSize);
+    GetGraph()->SetCode(EncodeDataType(code, codeSize));
 
-    RegMask callee_regs;
-    VRegMask callee_vregs;
-    GetRegfile()->FillUsedCalleeSavedRegisters(&callee_regs, &callee_vregs, save_all_callee_registers);
+    RegMask calleeRegs;
+    VRegMask calleeVregs;
+    GetRegfile()->FillUsedCalleeSavedRegisters(&calleeRegs, &calleeVregs, saveAllCalleeRegisters);
     constexpr size_t MAX_NUM_REGISTERS = 32;
     static_assert(MAX_NUM_REGS <= MAX_NUM_REGISTERS && MAX_NUM_VREGS <= MAX_NUM_REGISTERS);
-    code_builder_->SetSavedCalleeRegsMask(static_cast<uint32_t>(callee_regs.to_ulong()),
-                                          static_cast<uint32_t>(callee_vregs.to_ulong()));
+    codeBuilder_->SetSavedCalleeRegsMask(static_cast<uint32_t>(calleeRegs.to_ulong()),
+                                         static_cast<uint32_t>(calleeVregs.to_ulong()));
 
-    ArenaVector<uint8_t> code_info_data(GetGraph()->GetAllocator()->Adapter());
-    code_builder_->Encode(&code_info_data);
-    GetGraph()->SetCodeInfo(Span(code_info_data));
+    ArenaVector<uint8_t> codeInfoData(GetGraph()->GetAllocator()->Adapter());
+    codeBuilder_->Encode(&codeInfoData);
+    GetGraph()->SetCodeInfo(Span(codeInfoData));
 
     return true;
 }
 
 void Codegen::IssueDisasm()
 {
-    if (GetGraph()->GetMode().SupportManagedCode() && OPTIONS.IsCompilerDisasmDumpCodeInfo()) {
+    if (GetGraph()->GetMode().SupportManagedCode() && g_options.IsCompilerDisasmDumpCodeInfo()) {
         GetDisasm()->PrintCodeInfo(this);
     }
     GetDisasm()->PrintCodeStatistics(this);
@@ -518,9 +517,9 @@ void Codegen::IssueDisasm()
             auto &code = std::get<CodeItem>(item);
             for (size_t pc = code.GetPosition(); pc < code.GetCursorOffset();) {
                 stream << GetDisasm()->GetIndent(code.GetDepth());
-                auto new_pc = GetEncoder()->DisasmInstr(stream, pc, 0);
+                auto newPc = GetEncoder()->DisasmInstr(stream, pc, 0);
                 stream << "\n";
-                pc = new_pc;
+                pc = newPc;
             }
         } else if (std::holds_alternative<std::string>(item)) {
             stream << (std::get<std::string>(item));
@@ -534,11 +533,11 @@ bool Codegen::RunImpl()
 
     auto encoder = GetEncoder();
     encoder->GetLabels()->CreateLabels(GetGraph()->GetVectorBlocks().size());
-    label_entry_ = encoder->CreateLabel();
-    label_exit_ = encoder->CreateLabel();
+    labelEntry_ = encoder->CreateLabel();
+    labelExit_ = encoder->CreateLabel();
 
 #ifndef NDEBUG
-    if (OPTIONS.IsCompilerNonOptimizing()) {
+    if (g_options.IsCompilerNonOptimizing()) {
         // In case of non-optimizing compiler lowering pass is not run but low-level instructions may
         // also appear on codegen so, to satisfy GraphChecker, the flag should be raised.
         GetGraph()->SetLowLevelInstructionsEnabled();
@@ -550,13 +549,13 @@ bool Codegen::RunImpl()
     }
 
     if (GetCallingConvention()->IsDynCallMode()) {
-        auto num_expected_args = GetRuntime()->GetMethodTotalArgumentsCount(GetGraph()->GetMethod());
-        if (num_expected_args > GetRuntime()->GetDynamicNumFixedArgs()) {
-            CallConvDynInfo dyn_info(num_expected_args,
-                                     GetRuntime()->GetEntrypointTlsOffset(
-                                         GetArch(), RuntimeInterface::EntrypointId::EXPAND_COMPILED_CODE_ARGS_DYN));
-            GetCallingConvention()->SetDynInfo(dyn_info);
-            frame_info_->SetSaveFrameAndLinkRegs(true);
+        auto numExpectedArgs = GetRuntime()->GetMethodTotalArgumentsCount(GetGraph()->GetMethod());
+        if (numExpectedArgs > GetRuntime()->GetDynamicNumFixedArgs()) {
+            CallConvDynInfo dynInfo(numExpectedArgs,
+                                    GetRuntime()->GetEntrypointTlsOffset(
+                                        GetArch(), RuntimeInterface::EntrypointId::EXPAND_COMPILED_CODE_ARGS_DYN));
+            GetCallingConvention()->SetDynInfo(dynInfo);
+            frameInfo_->SetSaveFrameAndLinkRegs(true);
         } else {
             GetCallingConvention()->SetDynInfo(CallConvDynInfo());
         }
@@ -567,11 +566,11 @@ bool Codegen::RunImpl()
     }
 
     // Remove registers from the temp registers, if they are in the regalloc mask, i.e. available for regalloc.
-    auto used_regs = ~GetGraph()->GetArchUsedRegs();
-    auto forbidden_temps = used_regs & GetTarget().GetTempRegsMask();
-    if (forbidden_temps.Any()) {
-        for (size_t i = forbidden_temps.GetMinRegister(); i <= forbidden_temps.GetMaxRegister(); i++) {
-            if (forbidden_temps[i] && encoder->IsScratchRegisterReleased(Reg(i, INT64_TYPE))) {
+    auto usedRegs = ~GetGraph()->GetArchUsedRegs();
+    auto forbiddenTemps = usedRegs & GetTarget().GetTempRegsMask();
+    if (forbiddenTemps.Any()) {
+        for (size_t i = forbiddenTemps.GetMinRegister(); i <= forbiddenTemps.GetMaxRegister(); i++) {
+            if (forbiddenTemps[i] && encoder->IsScratchRegisterReleased(Reg(i, INT64_TYPE))) {
                 encoder->AcquireScratchRegister(Reg(i, INT64_TYPE));
             }
         }
@@ -594,18 +593,18 @@ void Codegen::Initialize()
         }
     }
 
-    bool has_calls = false;
+    bool hasCalls = false;
 
     for (auto bb : GetGraph()->GetBlocksLinearOrder()) {
         // Calls may be in the middle of method
         for (auto inst : bb->Insts()) {
             // For throw instruction need jump2runtime same way
             if (inst->IsCall() || inst->GetOpcode() == Opcode::Throw) {
-                has_calls = true;
+                hasCalls = true;
                 break;
             }
         }
-        if (has_calls) {
+        if (hasCalls) {
             break;
         }
     }
@@ -618,7 +617,7 @@ void Codegen::Initialize()
      * Arch specific CallingConvention::GenerateProlog() relies on reg usage information
      * prepared in the Codegen constructor (before Initialize() is called).
      */
-    auto fill_mask = [](RegMask *mask, auto *vector) {
+    auto fillMask = [](RegMask *mask, auto *vector) {
         if (vector == nullptr) {
             return;
         }
@@ -630,18 +629,18 @@ void Codegen::Initialize()
             }
         }
     };
-    fill_mask(&used_regs_, GetGraph()->GetUsedRegs<DataType::INT64>());
-    fill_mask(&used_vregs_, GetGraph()->GetUsedRegs<DataType::FLOAT64>());
-    used_vregs_ &= GetTarget().GetAvailableVRegsMask();
-    used_regs_ &= GetTarget().GetAvailableRegsMask();
-    used_regs_ &= ~GetGraph()->GetArchUsedRegs();
-    used_vregs_ &= ~GetGraph()->GetArchUsedVRegs();
+    fillMask(&usedRegs_, GetGraph()->GetUsedRegs<DataType::INT64>());
+    fillMask(&usedVregs_, GetGraph()->GetUsedRegs<DataType::FLOAT64>());
+    usedVregs_ &= GetTarget().GetAvailableVRegsMask();
+    usedRegs_ &= GetTarget().GetAvailableRegsMask();
+    usedRegs_ &= ~GetGraph()->GetArchUsedRegs();
+    usedVregs_ &= ~GetGraph()->GetArchUsedVRegs();
 
     /* Remove used registers from Encoder's scratch registers */
-    RegMask used_temps = used_regs_ & GetTarget().GetTempRegsMask();
-    if (used_temps.any()) {
-        for (size_t i = 0; i < used_temps.size(); i++) {
-            if (used_temps[i]) {
+    RegMask usedTemps = usedRegs_ & GetTarget().GetTempRegsMask();
+    if (usedTemps.any()) {
+        for (size_t i = 0; i < usedTemps.size(); i++) {
+            if (usedTemps[i]) {
                 GetEncoder()->AcquireScratchRegister(Reg(i, INT64_TYPE));
             }
         }
@@ -804,110 +803,110 @@ Condition Codegen::ConvertCcOverflow(ConditionCode cc)
 
 void Codegen::EmitSlowPaths()
 {
-    for (auto slow_path : slow_paths_) {
-        slow_path->Generate(this);
+    for (auto slowPath : slowPaths_) {
+        slowPath->Generate(this);
     }
 }
 
 void Codegen::CreateStackMap(Inst *inst, Inst *user)
 {
-    SaveStateInst *save_state = nullptr;
+    SaveStateInst *saveState = nullptr;
     if (inst->IsSaveState()) {
-        save_state = static_cast<SaveStateInst *>(inst);
+        saveState = static_cast<SaveStateInst *>(inst);
     } else {
-        save_state = inst->GetSaveState();
+        saveState = inst->GetSaveState();
     }
-    ASSERT(save_state != nullptr);
+    ASSERT(saveState != nullptr);
 
-    bool require_vreg_map = inst->RequireRegMap();
-    uint32_t outer_bpc = inst->GetPc();
-    for (auto call_inst = save_state->GetCallerInst(); call_inst != nullptr;
-         call_inst = call_inst->GetSaveState()->GetCallerInst()) {
-        outer_bpc = call_inst->GetPc();
+    bool requireVregMap = inst->RequireRegMap();
+    uint32_t outerBpc = inst->GetPc();
+    for (auto callInst = saveState->GetCallerInst(); callInst != nullptr;
+         callInst = callInst->GetSaveState()->GetCallerInst()) {
+        outerBpc = callInst->GetPc();
     }
-    code_builder_->BeginStackMap(outer_bpc, GetEncoder()->GetCursorOffset(), save_state->GetRootsStackMask(),
-                                 save_state->GetRootsRegsMask().to_ulong(), require_vreg_map,
-                                 save_state->GetOpcode() == Opcode::SaveStateOsr);
+    codeBuilder_->BeginStackMap(outerBpc, GetEncoder()->GetCursorOffset(), saveState->GetRootsStackMask(),
+                                saveState->GetRootsRegsMask().to_ulong(), requireVregMap,
+                                saveState->GetOpcode() == Opcode::SaveStateOsr);
     if (user == nullptr) {
         user = inst;
-        if (inst == save_state && inst->HasUsers()) {
+        if (inst == saveState && inst->HasUsers()) {
             auto users = inst->GetUsers();
             auto it = std::find_if(users.begin(), users.end(),
                                    [](auto &u) { return u.GetInst()->GetOpcode() != Opcode::ReturnInlined; });
             user = it->GetInst();
         }
     }
-    CreateStackMapRec(save_state, require_vreg_map, user);
+    CreateStackMapRec(saveState, requireVregMap, user);
 
-    code_builder_->EndStackMap();
+    codeBuilder_->EndStackMap();
     if (GetDisasm()->IsEnabled()) {
         GetDisasm()->PrintStackMap(this);
     }
 }
 
-void Codegen::CreateStackMapRec(SaveStateInst *save_state, bool require_vreg_map, Inst *target_site)
+void Codegen::CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, Inst *targetSite)
 {
-    bool has_inline_info = save_state->GetCallerInst() != nullptr;
-    size_t vregs_count = 0;
-    if (require_vreg_map) {
+    bool hasInlineInfo = saveState->GetCallerInst() != nullptr;
+    size_t vregsCount = 0;
+    if (requireVregMap) {
         auto runtime = GetRuntime();
-        if (auto caller = save_state->GetCallerInst()) {
-            vregs_count = runtime->GetMethodRegistersCount(caller->GetCallMethod()) +
-                          runtime->GetMethodArgumentsCount(caller->GetCallMethod());
+        if (auto caller = saveState->GetCallerInst()) {
+            vregsCount = runtime->GetMethodRegistersCount(caller->GetCallMethod()) +
+                         runtime->GetMethodArgumentsCount(caller->GetCallMethod());
         } else {
-            vregs_count = runtime->GetMethodRegistersCount(save_state->GetMethod()) +
-                          runtime->GetMethodArgumentsCount(save_state->GetMethod());
+            vregsCount = runtime->GetMethodRegistersCount(saveState->GetMethod()) +
+                         runtime->GetMethodArgumentsCount(saveState->GetMethod());
         }
         ASSERT(!GetGraph()->IsBytecodeOptimizer());
         // 1 for acc, number of env regs for dynamic method
-        vregs_count += 1U + GetGraph()->GetEnvCount();
+        vregsCount += 1U + GetGraph()->GetEnvCount();
 #ifndef NDEBUG
-        ASSERT_PRINT(!save_state->GetInputsWereDeleted(), "Some vregs were deleted from the save state");
+        ASSERT_PRINT(!saveState->GetInputsWereDeleted(), "Some vregs were deleted from the save state");
 #endif
     }
 
-    if (auto call_inst = save_state->GetCallerInst()) {
-        CreateStackMapRec(call_inst->GetSaveState(), require_vreg_map, target_site);
-        auto method = GetGraph()->IsAotMode() ? nullptr : call_inst->GetCallMethod();
-        code_builder_->BeginInlineInfo(method, GetRuntime()->GetMethodId(call_inst->GetCallMethod()),
-                                       save_state->GetPc(), vregs_count);
+    if (auto callInst = saveState->GetCallerInst()) {
+        CreateStackMapRec(callInst->GetSaveState(), requireVregMap, targetSite);
+        auto method = GetGraph()->IsAotMode() ? nullptr : callInst->GetCallMethod();
+        codeBuilder_->BeginInlineInfo(method, GetRuntime()->GetMethodId(callInst->GetCallMethod()), saveState->GetPc(),
+                                      vregsCount);
     }
 
-    if (require_vreg_map) {
-        CreateVRegMap(save_state, vregs_count, target_site);
+    if (requireVregMap) {
+        CreateVRegMap(saveState, vregsCount, targetSite);
     }
 
-    if (has_inline_info) {
-        code_builder_->EndInlineInfo();
+    if (hasInlineInfo) {
+        codeBuilder_->EndInlineInfo();
     }
 }
 
-void Codegen::CreateVRegMap(SaveStateInst *save_state, size_t vregs_count, Inst *target_site)
+void Codegen::CreateVRegMap(SaveStateInst *saveState, size_t vregsCount, Inst *targetSite)
 {
-    vreg_indices_.clear();
-    vreg_indices_.resize(vregs_count, {-1, -1});
-    FillVregIndices(save_state);
+    vregIndices_.clear();
+    vregIndices_.resize(vregsCount, {-1, -1});
+    FillVregIndices(saveState);
 
     ASSERT(GetGraph()->IsAnalysisValid<LivenessAnalyzer>());
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    auto target_life_number = la.GetInstLifeIntervals(target_site)->GetBegin();
+    auto targetLifeNumber = la.GetInstLifeIntervals(targetSite)->GetBegin();
 
-    for (auto &input_index : vreg_indices_) {
-        if (input_index.first == -1 && input_index.second == -1) {
-            code_builder_->AddVReg(VRegInfo());
+    for (auto &inputIndex : vregIndices_) {
+        if (inputIndex.first == -1 && inputIndex.second == -1) {
+            codeBuilder_->AddVReg(VRegInfo());
             continue;
         }
-        if (input_index.second != -1) {
-            auto imm = save_state->GetImmediate(input_index.second);
-            code_builder_->AddConstant(imm.value, IrTypeToMetainfoType(imm.type), imm.vreg_type);
+        if (inputIndex.second != -1) {
+            auto imm = saveState->GetImmediate(inputIndex.second);
+            codeBuilder_->AddConstant(imm.value, IrTypeToMetainfoType(imm.type), imm.vregType);
             continue;
         }
-        ASSERT(input_index.first != -1);
-        auto vreg = save_state->GetVirtualRegister(input_index.first);
-        auto input_inst = save_state->GetDataFlowInput(input_index.first);
-        auto interval = la.GetInstLifeIntervals(input_inst)->FindSiblingAt(target_life_number);
+        ASSERT(inputIndex.first != -1);
+        auto vreg = saveState->GetVirtualRegister(inputIndex.first);
+        auto inputInst = saveState->GetDataFlowInput(inputIndex.first);
+        auto interval = la.GetInstLifeIntervals(inputInst)->FindSiblingAt(targetLifeNumber);
         ASSERT(interval != nullptr);
-        CreateVreg(interval->GetLocation(), input_inst, vreg);
+        CreateVreg(interval->GetLocation(), inputInst, vreg);
     }
 }
 
@@ -921,9 +920,9 @@ void Codegen::CreateVreg(const Location &location, Inst *inst, const VirtualRegi
         }
         case LocationType::STACK_PARAMETER: {
             auto slot = location.GetValue();
-            code_builder_->AddVReg(VRegInfo(GetFrameLayout().GetStackArgsStartSlot() - slot - CFrameSlots::Start(),
-                                            VRegInfo::Location::SLOT, IrTypeToMetainfoType(inst->GetType()),
-                                            vreg.GetVRegType()));
+            codeBuilder_->AddVReg(VRegInfo(GetFrameLayout().GetStackArgsStartSlot() - slot - CFrameSlots::Start(),
+                                           VRegInfo::Location::SLOT, IrTypeToMetainfoType(inst->GetType()),
+                                           vreg.GetVRegType()));
             break;
         }
         case LocationType::STACK: {
@@ -931,8 +930,8 @@ void Codegen::CreateVreg(const Location &location, Inst *inst, const VirtualRegi
             if (!Is64BitsArch(GetArch())) {
                 slot = ((location.GetValue() << 1U) + 1);
             }
-            code_builder_->AddVReg(VRegInfo(GetFrameLayout().GetFirstSpillSlot() + slot, VRegInfo::Location::SLOT,
-                                            IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType()));
+            codeBuilder_->AddVReg(VRegInfo(GetFrameLayout().GetFirstSpillSlot() + slot, VRegInfo::Location::SLOT,
+                                           IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType()));
             break;
         }
         case LocationType::IMMEDIATE: {
@@ -942,8 +941,8 @@ void Codegen::CreateVreg(const Location &location, Inst *inst, const VirtualRegi
             if (GetGraph()->IsDynamicMethod() && type == DataType::INT64) {
                 type = DataType::INT32;
             }
-            code_builder_->AddConstant(inst->CastToConstant()->GetRawValue(), IrTypeToMetainfoType(type),
-                                       vreg.GetVRegType());
+            codeBuilder_->AddConstant(inst->CastToConstant()->GetRawValue(), IrTypeToMetainfoType(type),
+                                      vreg.GetVRegType());
             break;
         }
         default:
@@ -952,58 +951,58 @@ void Codegen::CreateVreg(const Location &location, Inst *inst, const VirtualRegi
     }
 }
 
-void Codegen::FillVregIndices(SaveStateInst *save_state)
+void Codegen::FillVregIndices(SaveStateInst *saveState)
 {
-    for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
-        size_t vreg_index = save_state->GetVirtualRegister(i).Value();
-        if (vreg_index == VirtualRegister::BRIDGE) {
+    for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+        size_t vregIndex = saveState->GetVirtualRegister(i).Value();
+        if (vregIndex == VirtualRegister::BRIDGE) {
             continue;
         }
-        ASSERT(vreg_index < vreg_indices_.size());
-        vreg_indices_[vreg_index].first = i;
+        ASSERT(vregIndex < vregIndices_.size());
+        vregIndices_[vregIndex].first = i;
     }
-    for (size_t i = 0; i < save_state->GetImmediatesCount(); i++) {
-        auto vreg_imm = save_state->GetImmediate(i);
-        if (vreg_imm.vreg == VirtualRegister::BRIDGE) {
+    for (size_t i = 0; i < saveState->GetImmediatesCount(); i++) {
+        auto vregImm = saveState->GetImmediate(i);
+        if (vregImm.vreg == VirtualRegister::BRIDGE) {
             continue;
         }
-        ASSERT(vreg_imm.vreg < vreg_indices_.size());
-        ASSERT(vreg_indices_[vreg_imm.vreg].first == -1);
-        vreg_indices_[vreg_imm.vreg].second = i;
+        ASSERT(vregImm.vreg < vregIndices_.size());
+        ASSERT(vregIndices_[vregImm.vreg].first == -1);
+        vregIndices_[vregImm.vreg].second = i;
     }
 }
 
 void Codegen::CreateVRegForRegister(const Location &location, Inst *inst, const VirtualRegister &vreg)
 {
-    bool is_osr = GetGraph()->IsOsrMode();
-    bool is_fp = (location.GetKind() == LocationType::FP_REGISTER);
-    auto reg_num = location.GetValue();
-    auto reg = Reg(reg_num, is_fp ? FLOAT64_TYPE : INT64_TYPE);
-    if (!is_osr && GetRegfile()->GetZeroReg() == reg) {
-        code_builder_->AddConstant(0, IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType());
-    } else if (is_osr || GetRegfile()->IsCalleeRegister(reg)) {
-        if (is_fp) {
+    bool isOsr = GetGraph()->IsOsrMode();
+    bool isFp = (location.GetKind() == LocationType::FP_REGISTER);
+    auto regNum = location.GetValue();
+    auto reg = Reg(regNum, isFp ? FLOAT64_TYPE : INT64_TYPE);
+    if (!isOsr && GetRegfile()->GetZeroReg() == reg) {
+        codeBuilder_->AddConstant(0, IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType());
+    } else if (isOsr || GetRegfile()->IsCalleeRegister(reg)) {
+        if (isFp) {
             ASSERT(inst->GetType() != DataType::REFERENCE);
-            ASSERT(is_osr || reg_num >= GetFirstCalleeReg(GetArch(), true));
-            code_builder_->AddVReg(VRegInfo(reg_num, VRegInfo::Location::FP_REGISTER,
-                                            IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType()));
+            ASSERT(isOsr || regNum >= GetFirstCalleeReg(GetArch(), true));
+            codeBuilder_->AddVReg(VRegInfo(regNum, VRegInfo::Location::FP_REGISTER,
+                                           IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType()));
         } else {
-            ASSERT(is_osr || reg_num >= GetFirstCalleeReg(GetArch(), false));
-            code_builder_->AddVReg(VRegInfo(reg_num, VRegInfo::Location::REGISTER,
-                                            IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType()));
+            ASSERT(isOsr || regNum >= GetFirstCalleeReg(GetArch(), false));
+            codeBuilder_->AddVReg(VRegInfo(regNum, VRegInfo::Location::REGISTER, IrTypeToMetainfoType(inst->GetType()),
+                                           vreg.GetVRegType()));
         }
     } else {
-        ASSERT(reg_num >= GetFirstCallerReg(GetArch(), is_fp));
-        auto last_slot = GetFrameLayout().GetCallerLastSlot(is_fp);
-        reg_num -= GetFirstCallerReg(GetArch(), is_fp);
-        code_builder_->AddVReg(VRegInfo(last_slot - reg_num, VRegInfo::Location::SLOT,
-                                        IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType()));
+        ASSERT(regNum >= GetFirstCallerReg(GetArch(), isFp));
+        auto lastSlot = GetFrameLayout().GetCallerLastSlot(isFp);
+        regNum -= GetFirstCallerReg(GetArch(), isFp);
+        codeBuilder_->AddVReg(VRegInfo(lastSlot - regNum, VRegInfo::Location::SLOT,
+                                       IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType()));
     }
 }
 
-void Codegen::CreateOsrEntry(SaveStateInst *save_state)
+void Codegen::CreateOsrEntry(SaveStateInst *saveState)
 {
-    auto &stub = osr_entries_.emplace_back(GetAllocator()->New<OsrEntryStub>(this, save_state));
+    auto &stub = osrEntries_.emplace_back(GetAllocator()->New<OsrEntryStub>(this, saveState));
     GetEncoder()->BindLabel(stub->GetLabel());
 }
 
@@ -1014,8 +1013,8 @@ void Codegen::CallIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId id)
     // We store adresses of intrinsics in aot file in AOT mode.
     ASSERT(GetGraph()->SupportManagedCode());
     if (GetGraph()->IsAotMode()) {
-        auto aot_data = GetGraph()->GetAotData();
-        intptr_t offset = aot_data->GetEntrypointOffset(GetEncoder()->GetCursorOffset(), static_cast<int32_t>(id));
+        auto aotData = GetGraph()->GetAotData();
+        intptr_t offset = aotData->GetEntrypointOffset(GetEncoder()->GetCursorOffset(), static_cast<int32_t>(id));
         GetEncoder()->MakeCallAot(offset);
     } else {
         GetEncoder()->MakeCall(reinterpret_cast<const void *>(GetRuntime()->GetIntrinsicAddress(
@@ -1036,10 +1035,10 @@ bool Codegen::EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> en
         encoder->MakeCall(entry);
     }
 
-    SaveStateInst *save_state =
+    SaveStateInst *saveState =
         (inst == nullptr || inst->IsSaveState()) ? static_cast<SaveStateInst *>(inst) : inst->GetSaveState();
     // StackMap should follow the call as the bridge function expects retaddr points to the stackmap
-    if (save_state != nullptr) {
+    if (saveState != nullptr) {
         CreateStackMap(inst);
     }
 
@@ -1050,14 +1049,14 @@ bool Codegen::EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> en
         }
         return false;
     }
-    ASSERT(save_state == nullptr || inst->IsRuntimeCall());
+    ASSERT(saveState == nullptr || inst->IsRuntimeCall());
 
     return true;
 }
 
-void Codegen::SaveRegistersForImplicitRuntime(Inst *inst, RegMask *params_mask, RegMask *mask)
+void Codegen::SaveRegistersForImplicitRuntime(Inst *inst, RegMask *paramsMask, RegMask *mask)
 {
-    auto &roots_mask = inst->GetSaveState()->GetRootsRegsMask();
+    auto &rootsMask = inst->GetSaveState()->GetRootsRegsMask();
     for (auto i = 0U; i < inst->GetInputsCount(); i++) {
         auto input = inst->GetDataFlowInput(i);
         if (!input->IsMovableObject()) {
@@ -1068,32 +1067,32 @@ void Codegen::SaveRegistersForImplicitRuntime(Inst *inst, RegMask *params_mask, 
             auto val = location.GetValue();
             auto reg = Reg(val, INT64_TYPE);
             GetEncoder()->SetRegister(mask, nullptr, reg, true);
-            if (DataType::IsReference(inst->GetInputType(i)) && !roots_mask.test(val)) {
-                params_mask->set(val);
-                roots_mask.set(val);
+            if (DataType::IsReference(inst->GetInputType(i)) && !rootsMask.test(val)) {
+                paramsMask->set(val);
+                rootsMask.set(val);
             }
         }
     }
 }
 
-void Codegen::CreateCheckForTLABWithConstSize([[maybe_unused]] Inst *inst, Reg reg_tlab_start, Reg reg_tlab_size,
+void Codegen::CreateCheckForTLABWithConstSize([[maybe_unused]] Inst *inst, Reg regTlabStart, Reg regTlabSize,
                                               size_t size, LabelHolder::LabelId label)
 {
     SCOPED_DISASM_STR(this, "CreateCheckForTLABWithConstSize");
     auto encoder = GetEncoder();
     if (encoder->CanEncodeImmAddSubCmp(size, WORD_SIZE, false)) {
-        encoder->EncodeJump(label, reg_tlab_size, Imm(size), Condition::LO);
+        encoder->EncodeJump(label, regTlabSize, Imm(size), Condition::LO);
         // Change pointer to start free memory
-        encoder->EncodeAdd(reg_tlab_size, reg_tlab_start, Imm(size));
+        encoder->EncodeAdd(regTlabSize, regTlabStart, Imm(size));
     } else {
-        ScopedTmpReg size_reg(encoder);
-        encoder->EncodeMov(size_reg, Imm(size));
-        encoder->EncodeJump(label, reg_tlab_size, size_reg, Condition::LO);
-        encoder->EncodeAdd(reg_tlab_size, reg_tlab_start, size_reg);
+        ScopedTmpReg sizeReg(encoder);
+        encoder->EncodeMov(sizeReg, Imm(size));
+        encoder->EncodeJump(label, regTlabSize, sizeReg, Condition::LO);
+        encoder->EncodeAdd(regTlabSize, regTlabStart, sizeReg);
     }
 }
 
-void Codegen::CreateDebugRuntimeCallsForNewObject(Inst *inst, [[maybe_unused]] Reg reg_tlab_start, size_t alloc_size,
+void Codegen::CreateDebugRuntimeCallsForNewObject(Inst *inst, [[maybe_unused]] Reg regTlabStart, size_t allocSize,
                                                   RegMask preserved)
 {
 #if defined(PANDA_ASAN_ON) || defined(PANDA_TSAN_ON)
@@ -1101,208 +1100,208 @@ void Codegen::CreateDebugRuntimeCallsForNewObject(Inst *inst, [[maybe_unused]] R
                 TypedImm(alloc_size));
 #endif
     if (GetRuntime()->IsTrackTlabAlloc()) {
-        CallRuntime(inst, EntrypointId::WRITE_TLAB_STATS, INVALID_REGISTER, preserved, reg_tlab_start,
-                    TypedImm(alloc_size));
+        CallRuntime(inst, EntrypointId::WRITE_TLAB_STATS, INVALID_REGISTER, preserved, regTlabStart,
+                    TypedImm(allocSize));
     }
 }
 
-void Codegen::CreateNewObjCall(NewObjectInst *new_obj)
+void Codegen::CreateNewObjCall(NewObjectInst *newObj)
 {
-    auto dst = ConvertRegister(new_obj->GetDstReg(), new_obj->GetType());
-    auto src = ConvertRegister(new_obj->GetSrcReg(0), new_obj->GetInputType(0));
-    auto init_class = new_obj->GetInput(0).GetInst();
-    auto src_class = ConvertRegister(new_obj->GetSrcReg(0), DataType::POINTER);
+    auto dst = ConvertRegister(newObj->GetDstReg(), newObj->GetType());
+    auto src = ConvertRegister(newObj->GetSrcReg(0), newObj->GetInputType(0));
+    auto initClass = newObj->GetInput(0).GetInst();
+    auto srcClass = ConvertRegister(newObj->GetSrcReg(0), DataType::POINTER);
     auto runtime = GetRuntime();
 
-    auto max_tlab_size = runtime->GetTLABMaxSize();
-    if (max_tlab_size == 0 ||
-        (init_class->GetOpcode() != Opcode::LoadAndInitClass && init_class->GetOpcode() != Opcode::LoadImmediate)) {
-        CallRuntime(new_obj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
+    auto maxTlabSize = runtime->GetTLABMaxSize();
+    if (maxTlabSize == 0 ||
+        (initClass->GetOpcode() != Opcode::LoadAndInitClass && initClass->GetOpcode() != Opcode::LoadImmediate)) {
+        CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
     RuntimeInterface::ClassPtr klass;
-    if (init_class->GetOpcode() == Opcode::LoadAndInitClass) {
-        klass = init_class->CastToLoadAndInitClass()->GetClass();
+    if (initClass->GetOpcode() == Opcode::LoadAndInitClass) {
+        klass = initClass->CastToLoadAndInitClass()->GetClass();
     } else {
-        ASSERT(init_class->GetOpcode() == Opcode::LoadImmediate);
-        klass = init_class->CastToLoadImmediate()->GetClass();
+        ASSERT(initClass->GetOpcode() == Opcode::LoadImmediate);
+        klass = initClass->CastToLoadImmediate()->GetClass();
     }
     if (klass == nullptr || !runtime->CanUseTlabForClass(klass)) {
-        CallRuntime(new_obj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
+        CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
-    auto class_size = runtime->GetClassSize(klass);
+    auto classSize = runtime->GetClassSize(klass);
     auto alignment = runtime->GetTLABAlignment();
 
-    class_size = (class_size & ~(alignment - 1U)) + ((class_size % alignment) != 0U ? alignment : 0U);
-    if (class_size > max_tlab_size) {
-        CallRuntime(new_obj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
+    classSize = (classSize & ~(alignment - 1U)) + ((classSize % alignment) != 0U ? alignment : 0U);
+    if (classSize > maxTlabSize) {
+        CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
-    CallFastPath(new_obj, EntrypointId::ALLOCATE_OBJECT_TLAB, dst, RegMask::GetZeroMask(), src_class,
-                 TypedImm(class_size));
+    CallFastPath(newObj, EntrypointId::ALLOCATE_OBJECT_TLAB, dst, RegMask::GetZeroMask(), srcClass,
+                 TypedImm(classSize));
 }
 
-void Codegen::CreateNewObjCallOld(NewObjectInst *new_obj)
+void Codegen::CreateNewObjCallOld(NewObjectInst *newObj)
 {
-    auto dst = ConvertRegister(new_obj->GetDstReg(), new_obj->GetType());
-    auto src = ConvertRegister(new_obj->GetSrcReg(0), new_obj->GetInputType(0));
-    auto init_class = new_obj->GetInput(0).GetInst();
+    auto dst = ConvertRegister(newObj->GetDstReg(), newObj->GetType());
+    auto src = ConvertRegister(newObj->GetSrcReg(0), newObj->GetInputType(0));
+    auto initClass = newObj->GetInput(0).GetInst();
     auto runtime = GetRuntime();
-    auto max_tlab_size = runtime->GetTLABMaxSize();
+    auto maxTlabSize = runtime->GetTLABMaxSize();
     auto encoder = GetEncoder();
 
-    if (max_tlab_size == 0 ||
-        (init_class->GetOpcode() != Opcode::LoadAndInitClass && init_class->GetOpcode() != Opcode::LoadImmediate)) {
-        CallRuntime(new_obj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
+    if (maxTlabSize == 0 ||
+        (initClass->GetOpcode() != Opcode::LoadAndInitClass && initClass->GetOpcode() != Opcode::LoadImmediate)) {
+        CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
     RuntimeInterface::ClassPtr klass;
-    if (init_class->GetOpcode() == Opcode::LoadAndInitClass) {
-        klass = init_class->CastToLoadAndInitClass()->GetClass();
+    if (initClass->GetOpcode() == Opcode::LoadAndInitClass) {
+        klass = initClass->CastToLoadAndInitClass()->GetClass();
     } else {
-        ASSERT(init_class->GetOpcode() == Opcode::LoadImmediate);
-        klass = init_class->CastToLoadImmediate()->GetClass();
+        ASSERT(initClass->GetOpcode() == Opcode::LoadImmediate);
+        klass = initClass->CastToLoadImmediate()->GetClass();
     }
     if (klass == nullptr || !runtime->CanUseTlabForClass(klass)) {
-        CallRuntime(new_obj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
+        CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
-    auto class_size = runtime->GetClassSize(klass);
+    auto classSize = runtime->GetClassSize(klass);
     auto alignment = runtime->GetTLABAlignment();
 
-    class_size = (class_size & ~(alignment - 1U)) + ((class_size % alignment) != 0U ? alignment : 0U);
-    if (class_size > max_tlab_size) {
-        CallRuntime(new_obj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
+    classSize = (classSize & ~(alignment - 1U)) + ((classSize % alignment) != 0U ? alignment : 0U);
+    if (classSize > maxTlabSize) {
+        CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
-    ScopedLiveTmpReg reg_tlab_start(encoder);
-    ScopedLiveTmpReg reg_tlab_size(encoder);
+    ScopedLiveTmpReg regTlabStart(encoder);
+    ScopedLiveTmpReg regTlabSize(encoder);
 
-    auto slow_path = CreateSlowPath<SlowPathEntrypoint>(new_obj, EntrypointId::CREATE_OBJECT_BY_CLASS);
-    CreateLoadTLABInformation(reg_tlab_start, reg_tlab_size);
-    CreateCheckForTLABWithConstSize(new_obj, reg_tlab_start, reg_tlab_size, class_size, slow_path->GetLabel());
+    auto slowPath = CreateSlowPath<SlowPathEntrypoint>(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS);
+    CreateLoadTLABInformation(regTlabStart, regTlabSize);
+    CreateCheckForTLABWithConstSize(newObj, regTlabStart, regTlabSize, classSize, slowPath->GetLabel());
 
-    RegMask preserved_regs;
-    encoder->SetRegister(&preserved_regs, nullptr, src);
-    CreateDebugRuntimeCallsForNewObject(new_obj, reg_tlab_start, reinterpret_cast<size_t>(class_size), preserved_regs);
+    RegMask preservedRegs;
+    encoder->SetRegister(&preservedRegs, nullptr, src);
+    CreateDebugRuntimeCallsForNewObject(newObj, regTlabStart, reinterpret_cast<size_t>(classSize), preservedRegs);
 
-    ScopedTmpReg tlab_reg(encoder);
+    ScopedTmpReg tlabReg(encoder);
     // Load pointer to tlab
-    encoder->EncodeLdr(tlab_reg, false, MemRef(ThreadReg(), runtime->GetCurrentTLABOffset(GetArch())));
+    encoder->EncodeLdr(tlabReg, false, MemRef(ThreadReg(), runtime->GetCurrentTLABOffset(GetArch())));
 
     // Store pointer to the class
-    encoder->EncodeStr(src, MemRef(reg_tlab_start, runtime->GetObjClassOffset(GetArch())));
-    encoder->EncodeMov(dst, reg_tlab_start);
-    reg_tlab_start.Release();
+    encoder->EncodeStr(src, MemRef(regTlabStart, runtime->GetObjClassOffset(GetArch())));
+    encoder->EncodeMov(dst, regTlabStart);
+    regTlabStart.Release();
     // Store new pointer to start free memory in TLAB
-    encoder->EncodeStrRelease(reg_tlab_size, MemRef(tlab_reg, runtime->GetTLABFreePointerOffset(GetArch())));
-    slow_path->BindBackLabel(encoder);
+    encoder->EncodeStrRelease(regTlabSize, MemRef(tlabReg, runtime->GetTLABFreePointerOffset(GetArch())));
+    slowPath->BindBackLabel(encoder);
 }
 
-void Codegen::LoadClassFromObject(Reg class_reg, Reg obj_reg)
+void Codegen::LoadClassFromObject(Reg classReg, Reg objReg)
 {
-    Reg reg = ConvertRegister(class_reg.GetId(), DataType::REFERENCE);
-    GetEncoder()->EncodeLdr(reg, false, MemRef(obj_reg, GetRuntime()->GetObjClassOffset(GetArch())));
+    Reg reg = ConvertRegister(classReg.GetId(), DataType::REFERENCE);
+    GetEncoder()->EncodeLdr(reg, false, MemRef(objReg, GetRuntime()->GetObjClassOffset(GetArch())));
 }
 
-void Codegen::CreateMultiArrayCall(CallInst *call_inst)
+void Codegen::CreateMultiArrayCall(CallInst *callInst)
 {
     SCOPED_DISASM_STR(this, "Create Call for MultiArray");
 
-    auto dst_reg = ConvertRegister(call_inst->GetDstReg(), call_inst->GetType());
-    auto num_args = call_inst->GetInputsCount() - 2U;  // first is class, last is save_state
+    auto dstReg = ConvertRegister(callInst->GetDstReg(), callInst->GetType());
+    auto numArgs = callInst->GetInputsCount() - 2U;  // first is class, last is save_state
 
-    ScopedTmpReg class_reg(GetEncoder());
-    auto class_type = ConvertDataType(DataType::REFERENCE, GetArch());
-    Reg class_orig = class_reg.GetReg().As(class_type);
-    auto location = call_inst->GetLocation(0);
+    ScopedTmpReg classReg(GetEncoder());
+    auto classType = ConvertDataType(DataType::REFERENCE, GetArch());
+    Reg classOrig = classReg.GetReg().As(classType);
+    auto location = callInst->GetLocation(0);
     ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
 
-    GetEncoder()->EncodeMov(class_orig, ConvertRegister(location.GetValue(), DataType::INT32));
-    CallRuntime(call_inst, EntrypointId::CREATE_MULTI_ARRAY, dst_reg, RegMask::GetZeroMask(), class_reg,
-                TypedImm(num_args), SpReg());
-    if (call_inst->GetFlag(inst_flags::MEM_BARRIER)) {
+    GetEncoder()->EncodeMov(classOrig, ConvertRegister(location.GetValue(), DataType::INT32));
+    CallRuntime(callInst, EntrypointId::CREATE_MULTI_ARRAY, dstReg, RegMask::GetZeroMask(), classReg, TypedImm(numArgs),
+                SpReg());
+    if (callInst->GetFlag(inst_flags::MEM_BARRIER)) {
         GetEncoder()->EncodeMemoryBarrier(memory_order::RELEASE);
     }
 }
 
-void Codegen::CreateJumpToClassResolverPltShared(Inst *inst, Reg tmp_reg, RuntimeInterface::EntrypointId id)
+void Codegen::CreateJumpToClassResolverPltShared(Inst *inst, Reg tmpReg, RuntimeInterface::EntrypointId id)
 {
     auto encoder = GetEncoder();
     auto graph = GetGraph();
-    auto aot_data = graph->GetAotData();
-    auto offset = aot_data->GetSharedSlowPathOffset(id, encoder->GetCursorOffset());
+    auto aotData = graph->GetAotData();
+    auto offset = aotData->GetSharedSlowPathOffset(id, encoder->GetCursorOffset());
     if (offset == 0 || !encoder->CanMakeCallByOffset(offset)) {
-        SlowPathShared *slow_path;
-        auto search = slow_paths_map_.find(id);
-        if (search != slow_paths_map_.end()) {
-            slow_path = search->second;
-            ASSERT(slow_path->GetTmpReg().GetId() == tmp_reg.GetId());
+        SlowPathShared *slowPath;
+        auto search = slowPathsMap_.find(id);
+        if (search != slowPathsMap_.end()) {
+            slowPath = search->second;
+            ASSERT(slowPath->GetTmpReg().GetId() == tmpReg.GetId());
         } else {
-            slow_path = CreateSlowPath<SlowPathShared>(inst, id);
-            slow_path->SetTmpReg(tmp_reg);
-            slow_paths_map_[id] = slow_path;
+            slowPath = CreateSlowPath<SlowPathShared>(inst, id);
+            slowPath->SetTmpReg(tmpReg);
+            slowPathsMap_[id] = slowPath;
         }
-        encoder->MakeCall(slow_path->GetLabel());
+        encoder->MakeCall(slowPath->GetLabel());
     } else {
         encoder->MakeCallByOffset(offset);
     }
     CreateStackMap(inst);
 }
 
-void Codegen::CreateLoadClassFromPLT(Inst *inst, Reg tmp_reg, Reg dst, size_t class_id)
+void Codegen::CreateLoadClassFromPLT(Inst *inst, Reg tmpReg, Reg dst, size_t classId)
 {
     auto encoder = GetEncoder();
     auto graph = GetGraph();
-    auto aot_data = graph->GetAotData();
-    intptr_t offset = aot_data->GetClassSlotOffset(encoder->GetCursorOffset(), class_id, false);
+    auto aotData = graph->GetAotData();
+    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, false);
     auto label = encoder->CreateLabel();
-    ASSERT(tmp_reg.GetId() != dst.GetId());
+    ASSERT(tmpReg.GetId() != dst.GetId());
     ASSERT(inst->IsRuntimeCall());
-    encoder->MakeLoadAotTableAddr(offset, tmp_reg, dst);
+    encoder->MakeLoadAotTableAddr(offset, tmpReg, dst);
     encoder->EncodeJump(label, dst, Condition::NE);
 
     // PLT Class Resolver has special calling convention:
     // First encoder temporary (tmp_reg) works as parameter and return value
-    CHECK_EQ(tmp_reg.GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
+    CHECK_EQ(tmpReg.GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
 
-    CreateJumpToClassResolverPltShared(inst, tmp_reg, EntrypointId::CLASS_RESOLVER);
+    CreateJumpToClassResolverPltShared(inst, tmpReg, EntrypointId::CLASS_RESOLVER);
 
-    encoder->EncodeMov(dst, tmp_reg);
+    encoder->EncodeMov(dst, tmpReg);
     encoder->BindLabel(label);
 }
 
-void Codegen::CreateLoadTLABInformation(Reg reg_tlab_start, Reg reg_tlab_size)
+void Codegen::CreateLoadTLABInformation(Reg regTlabStart, Reg regTlabSize)
 {
     SCOPED_DISASM_STR(this, "LoadTLABInformation");
     auto runtime = GetRuntime();
     // Load pointer to tlab
-    GetEncoder()->EncodeLdr(reg_tlab_size, false, MemRef(ThreadReg(), runtime->GetCurrentTLABOffset(GetArch())));
+    GetEncoder()->EncodeLdr(regTlabSize, false, MemRef(ThreadReg(), runtime->GetCurrentTLABOffset(GetArch())));
     // Load pointer to start free memory in TLAB
-    GetEncoder()->EncodeLdr(reg_tlab_start, false, MemRef(reg_tlab_size, runtime->GetTLABFreePointerOffset(GetArch())));
+    GetEncoder()->EncodeLdr(regTlabStart, false, MemRef(regTlabSize, runtime->GetTLABFreePointerOffset(GetArch())));
     // Load pointer to end free memory in TLAB
-    GetEncoder()->EncodeLdr(reg_tlab_size, false, MemRef(reg_tlab_size, runtime->GetTLABEndPointerOffset(GetArch())));
+    GetEncoder()->EncodeLdr(regTlabSize, false, MemRef(regTlabSize, runtime->GetTLABEndPointerOffset(GetArch())));
     // Calculate size of the free memory
-    GetEncoder()->EncodeSub(reg_tlab_size, reg_tlab_size, reg_tlab_start);
+    GetEncoder()->EncodeSub(regTlabSize, regTlabSize, regTlabStart);
 }
 
 // The function alignment up the value from alignment_reg using tmp_reg.
-void Codegen::CreateAlignmentValue(Reg alignment_reg, Reg tmp_reg, size_t alignment)
+void Codegen::CreateAlignmentValue(Reg alignmentReg, Reg tmpReg, size_t alignment)
 {
-    auto and_val = ~(alignment - 1U);
+    auto andVal = ~(alignment - 1U);
     // zeroed lower bits
-    GetEncoder()->EncodeAnd(tmp_reg, alignment_reg, Imm(and_val));
-    GetEncoder()->EncodeSub(alignment_reg, alignment_reg, tmp_reg);
+    GetEncoder()->EncodeAnd(tmpReg, alignmentReg, Imm(andVal));
+    GetEncoder()->EncodeSub(alignmentReg, alignmentReg, tmpReg);
 
-    auto end_label = GetEncoder()->CreateLabel();
+    auto endLabel = GetEncoder()->CreateLabel();
 
     // if zeroed value is different, add alignment
-    GetEncoder()->EncodeJump(end_label, alignment_reg, Condition::EQ);
-    GetEncoder()->EncodeAdd(tmp_reg, tmp_reg, Imm(alignment));
+    GetEncoder()->EncodeJump(endLabel, alignmentReg, Condition::EQ);
+    GetEncoder()->EncodeAdd(tmpReg, tmpReg, Imm(alignment));
 
-    GetEncoder()->BindLabel(end_label);
-    GetEncoder()->EncodeMov(alignment_reg, tmp_reg);
+    GetEncoder()->BindLabel(endLabel);
+    GetEncoder()->EncodeMov(alignmentReg, tmpReg);
 }
 
 inline Reg GetObjectReg(Codegen *codegen, Inst *inst)
@@ -1310,9 +1309,9 @@ inline Reg GetObjectReg(Codegen *codegen, Inst *inst)
     ASSERT(inst->IsCall() || inst->GetOpcode() == Opcode::ResolveVirtual);
     auto location = inst->GetLocation(0);
     ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
-    auto obj_reg = codegen->ConvertRegister(location.GetValue(), inst->GetInputType(0));
-    ASSERT(obj_reg != INVALID_REGISTER);
-    return obj_reg;
+    auto objReg = codegen->ConvertRegister(location.GetValue(), inst->GetInputType(0));
+    ASSERT(objReg != INVALID_REGISTER);
+    return objReg;
 }
 
 void Codegen::CreateCallIntrinsic(IntrinsicInst *inst)
@@ -1331,22 +1330,22 @@ void Codegen::CreateCallIntrinsic(IntrinsicInst *inst)
         EncodeImms(inst->GetImms(), (inst->HasIdInput() || inst->IsMethodFirstInput()));
     }
 
-    size_t explicit_args;
-    if (IsStackRangeIntrinsic(inst->GetIntrinsicId(), &explicit_args)) {
-        auto param_info = GetCallingConvention()->GetParameterInfo(explicit_args);
-        auto range_ptr_reg =
-            ConvertRegister(param_info->GetNextLocation(DataType::POINTER).GetRegister(), DataType::POINTER);
-        if (inst->GetInputsCount() > explicit_args + (inst->RequireState() ? 1U : 0U)) {
-            auto range_sp_offs = GetStackOffset(inst->GetLocation(explicit_args));
-            GetEncoder()->EncodeAdd(range_ptr_reg, GetTarget().GetStackReg(), Imm(range_sp_offs));
+    size_t explicitArgs;
+    if (IsStackRangeIntrinsic(inst->GetIntrinsicId(), &explicitArgs)) {
+        auto paramInfo = GetCallingConvention()->GetParameterInfo(explicitArgs);
+        auto rangePtrReg =
+            ConvertRegister(paramInfo->GetNextLocation(DataType::POINTER).GetRegister(), DataType::POINTER);
+        if (inst->GetInputsCount() > explicitArgs + (inst->RequireState() ? 1U : 0U)) {
+            auto rangeSpOffs = GetStackOffset(inst->GetLocation(explicitArgs));
+            GetEncoder()->EncodeAdd(rangePtrReg, GetTarget().GetStackReg(), Imm(rangeSpOffs));
         }
     }
     if (inst->IsMethodFirstInput()) {
-        Reg param_0 = GetTarget().GetParamReg(0);
+        Reg param0 = GetTarget().GetParamReg(0);
         if (GetGraph()->IsAotMode()) {
-            LoadMethod(param_0);
+            LoadMethod(param0);
         } else {
-            GetEncoder()->EncodeMov(param_0, Imm(reinterpret_cast<uintptr_t>(inst->GetMethod())));
+            GetEncoder()->EncodeMov(param0, Imm(reinterpret_cast<uintptr_t>(inst->GetMethod())));
         }
     }
     CallIntrinsic(inst, inst->GetIntrinsicId());
@@ -1358,22 +1357,22 @@ void Codegen::CreateCallIntrinsic(IntrinsicInst *inst)
 
     if (inst->GetType() != DataType::VOID) {
         auto arch = GetArch();
-        auto return_type = inst->GetType();
-        auto dst_reg = ConvertRegister(inst->GetDstReg(), inst->GetType());
-        auto return_reg = GetTarget().GetReturnReg(dst_reg.GetType());
+        auto returnType = inst->GetType();
+        auto dstReg = ConvertRegister(inst->GetDstReg(), inst->GetType());
+        auto returnReg = GetTarget().GetReturnReg(dstReg.GetType());
         // We must:
         //  sign extended INT8 and INT16 to INT32
         //  zero extended UINT8 and UINT16 to UINT32
-        if (DataType::ShiftByType(return_type, arch) < DataType::ShiftByType(DataType::INT32, arch)) {
-            bool is_signed = DataType::IsTypeSigned(return_type);
-            GetEncoder()->EncodeCast(dst_reg, is_signed, Reg(return_reg.GetId(), INT32_TYPE), is_signed);
+        if (DataType::ShiftByType(returnType, arch) < DataType::ShiftByType(DataType::INT32, arch)) {
+            bool isSigned = DataType::IsTypeSigned(returnType);
+            GetEncoder()->EncodeCast(dstReg, isSigned, Reg(returnReg.GetId(), INT32_TYPE), isSigned);
         } else {
-            GetEncoder()->EncodeMov(dst_reg, return_reg);
+            GetEncoder()->EncodeMov(dstReg, returnReg);
         }
     }
 }
 
-void Codegen::IntfInlineCachePass(ResolveVirtualInst *resolver, Reg method_reg, Reg tmp_reg, Reg obj_reg)
+void Codegen::IntfInlineCachePass(ResolveVirtualInst *resolver, Reg methodReg, Reg tmpReg, Reg objReg)
 {
     // Cache structure:（offset addr)/(class addr) 32bit/32bit
     // -----------------------------------------------
@@ -1392,33 +1391,31 @@ void Codegen::IntfInlineCachePass(ResolveVirtualInst *resolver, Reg method_reg, 
     // return to (.text)
     // call method
     // -----------------------------------------------
-    auto aot_data = GetGraph()->GetAotData();
-    uint64_t intf_inline_cache_index = aot_data->GetIntfInlineCacheIndex();
+    auto aotData = GetGraph()->GetAotData();
+    uint64_t intfInlineCacheIndex = aotData->GetIntfInlineCacheIndex();
     // NOTE(liyiming): do LoadMethod in irtoc to reduce use tmp reg
-    if (obj_reg.GetId() != tmp_reg.GetId()) {
-        auto reg_tmp_64 = tmp_reg.As(INT64_TYPE);
-        uint64_t offset =
-            aot_data->GetInfInlineCacheSlotOffset(GetEncoder()->GetCursorOffset(), intf_inline_cache_index);
-        GetEncoder()->MakeLoadAotTableAddr(offset, reg_tmp_64, INVALID_REGISTER);
-        LoadMethod(method_reg);
-        CallFastPath(resolver, EntrypointId::INTF_INLINE_CACHE, method_reg, {}, method_reg, obj_reg,
-                     TypedImm(resolver->GetCallMethodId()), reg_tmp_64);
+    if (objReg.GetId() != tmpReg.GetId()) {
+        auto regTmp64 = tmpReg.As(INT64_TYPE);
+        uint64_t offset = aotData->GetInfInlineCacheSlotOffset(GetEncoder()->GetCursorOffset(), intfInlineCacheIndex);
+        GetEncoder()->MakeLoadAotTableAddr(offset, regTmp64, INVALID_REGISTER);
+        LoadMethod(methodReg);
+        CallFastPath(resolver, EntrypointId::INTF_INLINE_CACHE, methodReg, {}, methodReg, objReg,
+                     TypedImm(resolver->GetCallMethodId()), regTmp64);
     } else {
         // we don't have tmp reg here, so use x3 directly
-        Reg reg_3 = Reg(3U, INT64_TYPE);
+        Reg reg3 = Reg(3U, INT64_TYPE);
         ScopedTmpRegF64 vtmp(GetEncoder());
-        GetEncoder()->EncodeMov(vtmp, reg_3);
-        uint64_t offset =
-            aot_data->GetInfInlineCacheSlotOffset(GetEncoder()->GetCursorOffset(), intf_inline_cache_index);
-        GetEncoder()->MakeLoadAotTableAddr(offset, reg_3, INVALID_REGISTER);
-        LoadMethod(method_reg);
-        CallFastPath(resolver, EntrypointId::INTF_INLINE_CACHE, method_reg, {}, method_reg, obj_reg,
-                     TypedImm(resolver->GetCallMethodId()), reg_3);
-        GetEncoder()->EncodeMov(reg_3, vtmp);
+        GetEncoder()->EncodeMov(vtmp, reg3);
+        uint64_t offset = aotData->GetInfInlineCacheSlotOffset(GetEncoder()->GetCursorOffset(), intfInlineCacheIndex);
+        GetEncoder()->MakeLoadAotTableAddr(offset, reg3, INVALID_REGISTER);
+        LoadMethod(methodReg);
+        CallFastPath(resolver, EntrypointId::INTF_INLINE_CACHE, methodReg, {}, methodReg, objReg,
+                     TypedImm(resolver->GetCallMethodId()), reg3);
+        GetEncoder()->EncodeMov(reg3, vtmp);
     }
 
-    intf_inline_cache_index++;
-    aot_data->SetIntfInlineCacheIndex(intf_inline_cache_index);
+    intfInlineCacheIndex++;
+    aotData->SetIntfInlineCacheIndex(intfInlineCacheIndex);
 }
 
 /**
@@ -1461,110 +1458,110 @@ template <typename T>
 RuntimeInterface::MethodPtr Codegen::GetCallerOfUnresolvedMethod(T *resolver)
 {
     ASSERT(resolver->GetCallMethod() == nullptr);
-    auto save_state = resolver->GetSaveState();
-    ASSERT(save_state != nullptr);
-    auto caller = save_state->GetCallerInst();
+    auto saveState = resolver->GetSaveState();
+    ASSERT(saveState != nullptr);
+    auto caller = saveState->GetCallerInst();
     auto method = (caller == nullptr ? GetGraph()->GetMethod() : caller->GetCallMethod());
     ASSERT(method != nullptr);
     return method;
 }
 
-void Codegen::EmitResolveUnknownVirtual(ResolveVirtualInst *resolver, Reg method_reg)
+void Codegen::EmitResolveUnknownVirtual(ResolveVirtualInst *resolver, Reg methodReg)
 {
     SCOPED_DISASM_STR(this, "Create runtime call to resolve an unknown virtual method");
     ASSERT(resolver->GetOpcode() == Opcode::ResolveVirtual);
     auto method = GetCallerOfUnresolvedMethod(resolver);
-    ScopedTmpReg tmp_reg(GetEncoder(), ConvertDataType(DataType::REFERENCE, GetArch()));
-    Reg obj_reg = GetObjectReg(this, resolver);
+    ScopedTmpReg tmpReg(GetEncoder(), ConvertDataType(DataType::REFERENCE, GetArch()));
+    Reg objReg = GetObjectReg(this, resolver);
     if (GetGraph()->IsAotMode()) {
-        LoadMethod(method_reg);
-        CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL_AOT, method_reg, {}, method_reg, obj_reg,
+        LoadMethod(methodReg);
+        CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL_AOT, methodReg, {}, methodReg, objReg,
                     TypedImm(resolver->GetCallMethodId()), TypedImm(0));
     } else {
         auto runtime = GetRuntime();
         auto utypes = runtime->GetUnresolvedTypes();
         auto skind = UnresolvedTypesInterface::SlotKind::VIRTUAL_METHOD;
         // Try to load vtable index
-        auto method_slot_addr = utypes->GetTableSlot(method, resolver->GetCallMethodId(), skind);
-        GetEncoder()->EncodeMov(method_reg, Imm(method_slot_addr));
-        GetEncoder()->EncodeLdr(method_reg, false, MemRef(method_reg));
+        auto methodSlotAddr = utypes->GetTableSlot(method, resolver->GetCallMethodId(), skind);
+        GetEncoder()->EncodeMov(methodReg, Imm(methodSlotAddr));
+        GetEncoder()->EncodeLdr(methodReg, false, MemRef(methodReg));
         // 0 means the virtual call is uninitialized or it is an interface call
         auto entrypoint = EntrypointId::RESOLVE_UNKNOWN_VIRTUAL_CALL;
-        auto slow_path = CreateSlowPath<SlowPathUnresolved>(resolver, entrypoint);
-        slow_path->SetUnresolvedType(method, resolver->GetCallMethodId());
-        slow_path->SetDstReg(method_reg);
-        slow_path->SetArgReg(obj_reg);
-        slow_path->SetSlotAddr(method_slot_addr);
-        GetEncoder()->EncodeJump(slow_path->GetLabel(), method_reg, Condition::EQ);
+        auto slowPath = CreateSlowPath<SlowPathUnresolved>(resolver, entrypoint);
+        slowPath->SetUnresolvedType(method, resolver->GetCallMethodId());
+        slowPath->SetDstReg(methodReg);
+        slowPath->SetArgReg(objReg);
+        slowPath->SetSlotAddr(methodSlotAddr);
+        GetEncoder()->EncodeJump(slowPath->GetLabel(), methodReg, Condition::EQ);
         // Load klass into tmp_reg
-        LoadClassFromObject(tmp_reg, obj_reg);
+        LoadClassFromObject(tmpReg, objReg);
         // Load from VTable, address = (klass + (index << shift)) + vtable_offset
-        auto tmp_reg_64 = Reg(tmp_reg.GetReg().GetId(), INT64_TYPE);
-        GetEncoder()->EncodeAdd(tmp_reg_64, tmp_reg, Shift(method_reg, GetVtableShift()));
-        GetEncoder()->EncodeLdr(method_reg, false,
-                                MemRef(tmp_reg_64, runtime->GetVTableOffset(GetArch()) - (1U << GetVtableShift())));
-        slow_path->BindBackLabel(GetEncoder());
+        auto tmpReg64 = Reg(tmpReg.GetReg().GetId(), INT64_TYPE);
+        GetEncoder()->EncodeAdd(tmpReg64, tmpReg, Shift(methodReg, GetVtableShift()));
+        GetEncoder()->EncodeLdr(methodReg, false,
+                                MemRef(tmpReg64, runtime->GetVTableOffset(GetArch()) - (1U << GetVtableShift())));
+        slowPath->BindBackLabel(GetEncoder());
     }
 }
 
-void Codegen::EmitResolveVirtualAot(ResolveVirtualInst *resolver, Reg method_reg)
+void Codegen::EmitResolveVirtualAot(ResolveVirtualInst *resolver, Reg methodReg)
 {
     SCOPED_DISASM_STR(this, "AOT ResolveVirtual using PLT-GOT");
     ASSERT(resolver->IsRuntimeCall());
-    ScopedTmpReg tmp_reg(GetEncoder(), ConvertDataType(DataType::REFERENCE, GetArch()));
-    auto method_reg_64 = Reg(method_reg.GetId(), INT64_TYPE);
-    auto tmp_reg_64 = Reg(tmp_reg.GetReg().GetId(), INT64_TYPE);
-    auto aot_data = GetGraph()->GetAotData();
-    intptr_t offset = aot_data->GetVirtIndexSlotOffset(GetEncoder()->GetCursorOffset(), resolver->GetCallMethodId());
-    GetEncoder()->MakeLoadAotTableAddr(offset, tmp_reg_64, method_reg_64);
+    ScopedTmpReg tmpReg(GetEncoder(), ConvertDataType(DataType::REFERENCE, GetArch()));
+    auto methodReg64 = Reg(methodReg.GetId(), INT64_TYPE);
+    auto tmpReg64 = Reg(tmpReg.GetReg().GetId(), INT64_TYPE);
+    auto aotData = GetGraph()->GetAotData();
+    intptr_t offset = aotData->GetVirtIndexSlotOffset(GetEncoder()->GetCursorOffset(), resolver->GetCallMethodId());
+    GetEncoder()->MakeLoadAotTableAddr(offset, tmpReg64, methodReg64);
     auto label = GetEncoder()->CreateLabel();
-    GetEncoder()->EncodeJump(label, method_reg, Condition::NE);
-    GetEncoder()->EncodeMov(method_reg_64, tmp_reg_64);
+    GetEncoder()->EncodeJump(label, methodReg, Condition::NE);
+    GetEncoder()->EncodeMov(methodReg64, tmpReg64);
     // PLT CallVirtual Resolver has a very special calling convention:
     //   First encoder temporary (method_reg) works as a parameter and return value
-    CHECK_EQ(method_reg_64.GetId(), GetTarget().GetTempRegsMask().GetMinRegister());
+    CHECK_EQ(methodReg64.GetId(), GetTarget().GetTempRegsMask().GetMinRegister());
     MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), EntrypointId::CALL_VIRTUAL_RESOLVER));
     GetEncoder()->MakeCall(entry);
     // Need a stackmap to build correct boundary frame
     CreateStackMap(resolver);
     GetEncoder()->BindLabel(label);
     // Load class into method_reg
-    Reg obj_reg = GetObjectReg(this, resolver);
-    LoadClassFromObject(tmp_reg, obj_reg);
+    Reg objReg = GetObjectReg(this, resolver);
+    LoadClassFromObject(tmpReg, objReg);
     // Load from VTable, address = (klass + (index << shift)) + vtable_offset
-    GetEncoder()->EncodeAdd(method_reg, tmp_reg_64, Shift(method_reg, GetVtableShift()));
-    GetEncoder()->EncodeLdr(method_reg, false,
-                            MemRef(method_reg, GetRuntime()->GetVTableOffset(GetArch()) - (1U << GetVtableShift())));
+    GetEncoder()->EncodeAdd(methodReg, tmpReg64, Shift(methodReg, GetVtableShift()));
+    GetEncoder()->EncodeLdr(methodReg, false,
+                            MemRef(methodReg, GetRuntime()->GetVTableOffset(GetArch()) - (1U << GetVtableShift())));
 }
 
 void Codegen::EmitResolveVirtual(ResolveVirtualInst *resolver)
 {
-    auto method_reg = ConvertRegister(resolver->GetDstReg(), resolver->GetType());
-    auto object_reg = ConvertRegister(resolver->GetSrcReg(0), DataType::REFERENCE);
-    ScopedTmpReg tmp_method_reg(GetEncoder());
+    auto methodReg = ConvertRegister(resolver->GetDstReg(), resolver->GetType());
+    auto objectReg = ConvertRegister(resolver->GetSrcReg(0), DataType::REFERENCE);
+    ScopedTmpReg tmpMethodReg(GetEncoder());
     if (resolver->GetCallMethod() == nullptr) {
-        EmitResolveUnknownVirtual(resolver, tmp_method_reg);
-        GetEncoder()->EncodeMov(method_reg, tmp_method_reg);
+        EmitResolveUnknownVirtual(resolver, tmpMethodReg);
+        GetEncoder()->EncodeMov(methodReg, tmpMethodReg);
     } else if (GetRuntime()->IsInterfaceMethod(resolver->GetCallMethod())) {
         SCOPED_DISASM_STR(this, "Create runtime call to resolve a known virtual call");
         if (GetGraph()->IsAotMode()) {
             if (GetArch() == Arch::AARCH64) {
-                ScopedTmpReg tmp_reg(GetEncoder(), ConvertDataType(DataType::REFERENCE, GetArch()));
-                IntfInlineCachePass(resolver, tmp_method_reg, tmp_reg, object_reg);
+                ScopedTmpReg tmpReg(GetEncoder(), ConvertDataType(DataType::REFERENCE, GetArch()));
+                IntfInlineCachePass(resolver, tmpMethodReg, tmpReg, objectReg);
             } else {
-                LoadMethod(tmp_method_reg);
-                CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL_AOT, tmp_method_reg, {}, tmp_method_reg,
-                            object_reg, TypedImm(resolver->GetCallMethodId()), TypedImm(0));
+                LoadMethod(tmpMethodReg);
+                CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL_AOT, tmpMethodReg, {}, tmpMethodReg, objectReg,
+                            TypedImm(resolver->GetCallMethodId()), TypedImm(0));
             }
         } else {
-            CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL, tmp_method_reg, {},
-                        TypedImm(reinterpret_cast<size_t>(resolver->GetCallMethod())), object_reg);
+            CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL, tmpMethodReg, {},
+                        TypedImm(reinterpret_cast<size_t>(resolver->GetCallMethod())), objectReg);
         }
-        GetEncoder()->EncodeMov(method_reg, tmp_method_reg);
+        GetEncoder()->EncodeMov(methodReg, tmpMethodReg);
     } else if (GetGraph()->IsAotNoChaMode()) {
         // ResolveVirtualAot requires method_reg to be the first tmp register.
-        EmitResolveVirtualAot(resolver, tmp_method_reg);
-        GetEncoder()->EncodeMov(method_reg, tmp_method_reg);
+        EmitResolveVirtualAot(resolver, tmpMethodReg);
+        GetEncoder()->EncodeMov(methodReg, tmpMethodReg);
     } else {
         UNREACHABLE();
     }
@@ -1587,11 +1584,11 @@ void Codegen::EmitCallResolvedVirtual(CallInst *call)
     ASSERT(!HasLiveCallerSavedRegs(call));
     ASSERT(call->GetCallMethod() == nullptr || GetGraph()->GetRuntime()->IsInterfaceMethod(call->GetCallMethod()) ||
            GetGraph()->IsAotNoChaMode());
-    Reg method_reg = ConvertRegister(call->GetSrcReg(0), DataType::POINTER);
-    Reg param_0 = GetTarget().GetParamReg(0);
+    Reg methodReg = ConvertRegister(call->GetSrcReg(0), DataType::POINTER);
+    Reg param0 = GetTarget().GetParamReg(0);
     // Set method
-    GetEncoder()->EncodeMov(param_0, method_reg);
-    GetEncoder()->MakeCall(MemRef(param_0, GetRuntime()->GetCompiledEntryPointOffset(GetArch())));
+    GetEncoder()->EncodeMov(param0, methodReg);
+    GetEncoder()->MakeCall(MemRef(param0, GetRuntime()->GetCompiledEntryPointOffset(GetArch())));
     FinalizeCall(call);
 }
 
@@ -1613,17 +1610,17 @@ void Codegen::EmitCallVirtual(CallInst *call)
     auto method = call->GetCallMethod();
     ASSERT(!HasLiveCallerSavedRegs(call));
     ASSERT(!call->IsUnresolved() && !runtime->IsInterfaceMethod(method) && !GetGraph()->IsAotNoChaMode());
-    Reg method_reg = GetTarget().GetParamReg(0);
-    ASSERT(!RegisterKeepCallArgument(call, method_reg));
-    LoadClassFromObject(method_reg, GetObjectReg(this, call));
+    Reg methodReg = GetTarget().GetParamReg(0);
+    ASSERT(!RegisterKeepCallArgument(call, methodReg));
+    LoadClassFromObject(methodReg, GetObjectReg(this, call));
     // Get index
-    auto vtable_index = runtime->GetVTableIndex(method);
+    auto vtableIndex = runtime->GetVTableIndex(method);
     // Load from VTable, address = klass + ((index << shift) + vtable_offset)
-    auto total_offset = runtime->GetVTableOffset(GetArch()) + (vtable_index << GetVtableShift());
+    auto totalOffset = runtime->GetVTableOffset(GetArch()) + (vtableIndex << GetVtableShift());
     // Class ref was loaded to method_reg
-    GetEncoder()->EncodeLdr(method_reg, false, MemRef(method_reg, total_offset));
+    GetEncoder()->EncodeLdr(methodReg, false, MemRef(methodReg, totalOffset));
     // Set method
-    GetEncoder()->MakeCall(MemRef(method_reg, runtime->GetCompiledEntryPointOffset(GetArch())));
+    GetEncoder()->MakeCall(MemRef(methodReg, runtime->GetCompiledEntryPointOffset(GetArch())));
     FinalizeCall(call);
 }
 
@@ -1636,8 +1633,8 @@ void Codegen::EmitCallVirtual(CallInst *call)
                 return false;
             }
         } else {
-            auto imm_type = std::get<TypedImm>(param).GetType();
-            if (imm_type.GetSize() > WORD_SIZE) {
+            auto immType = std::get<TypedImm>(param).GetType();
+            if (immType.GetSize() > WORD_SIZE) {
                 return false;
             }
         }
@@ -1647,10 +1644,10 @@ void Codegen::EmitCallVirtual(CallInst *call)
 
 void Codegen::EmitResolveStatic(ResolveStaticInst *resolver)
 {
-    auto method_reg = ConvertRegister(resolver->GetDstReg(), resolver->GetType());
+    auto methodReg = ConvertRegister(resolver->GetDstReg(), resolver->GetType());
     if (GetGraph()->IsAotMode()) {
-        LoadMethod(method_reg);
-        CallRuntime(resolver, EntrypointId::GET_UNKNOWN_CALLEE_METHOD, method_reg, RegMask::GetZeroMask(), method_reg,
+        LoadMethod(methodReg);
+        CallRuntime(resolver, EntrypointId::GET_UNKNOWN_CALLEE_METHOD, methodReg, RegMask::GetZeroMask(), methodReg,
                     TypedImm(resolver->GetCallMethodId()), TypedImm(0));
         return;
     }
@@ -1658,25 +1655,25 @@ void Codegen::EmitResolveStatic(ResolveStaticInst *resolver)
     ScopedTmpReg tmp(GetEncoder());
     auto utypes = GetRuntime()->GetUnresolvedTypes();
     auto skind = UnresolvedTypesInterface::SlotKind::METHOD;
-    auto method_addr = utypes->GetTableSlot(method, resolver->GetCallMethodId(), skind);
-    GetEncoder()->EncodeMov(tmp.GetReg(), Imm(method_addr));
+    auto methodAddr = utypes->GetTableSlot(method, resolver->GetCallMethodId(), skind);
+    GetEncoder()->EncodeMov(tmp.GetReg(), Imm(methodAddr));
     GetEncoder()->EncodeLdr(tmp.GetReg(), false, MemRef(tmp.GetReg()));
-    auto slow_path = CreateSlowPath<SlowPathUnresolved>(resolver, EntrypointId::GET_UNKNOWN_CALLEE_METHOD);
-    slow_path->SetUnresolvedType(method, resolver->GetCallMethodId());
-    slow_path->SetDstReg(tmp.GetReg());
-    slow_path->SetSlotAddr(method_addr);
-    GetEncoder()->EncodeJump(slow_path->GetLabel(), tmp.GetReg(), Condition::EQ);
-    slow_path->BindBackLabel(GetEncoder());
-    GetEncoder()->EncodeMov(method_reg, tmp.GetReg());
+    auto slowPath = CreateSlowPath<SlowPathUnresolved>(resolver, EntrypointId::GET_UNKNOWN_CALLEE_METHOD);
+    slowPath->SetUnresolvedType(method, resolver->GetCallMethodId());
+    slowPath->SetDstReg(tmp.GetReg());
+    slowPath->SetSlotAddr(methodAddr);
+    GetEncoder()->EncodeJump(slowPath->GetLabel(), tmp.GetReg(), Condition::EQ);
+    slowPath->BindBackLabel(GetEncoder());
+    GetEncoder()->EncodeMov(methodReg, tmp.GetReg());
 }
 
 void Codegen::EmitCallResolvedStatic(CallInst *call)
 {
     ASSERT(call->GetOpcode() == Opcode::CallResolvedStatic && call->GetCallMethod() == nullptr);
-    Reg method_reg = ConvertRegister(call->GetSrcReg(0), DataType::POINTER);
-    Reg param_0 = GetTarget().GetParamReg(0);
-    GetEncoder()->EncodeMov(param_0, method_reg);
-    GetEncoder()->MakeCall(MemRef(param_0, GetRuntime()->GetCompiledEntryPointOffset(GetArch())));
+    Reg methodReg = ConvertRegister(call->GetSrcReg(0), DataType::POINTER);
+    Reg param0 = GetTarget().GetParamReg(0);
+    GetEncoder()->EncodeMov(param0, methodReg);
+    GetEncoder()->MakeCall(MemRef(param0, GetRuntime()->GetCompiledEntryPointOffset(GetArch())));
     FinalizeCall(call);
 }
 
@@ -1696,26 +1693,26 @@ void Codegen::EmitCallStatic(CallInst *call)
     SCOPED_DISASM_STR(this, "Create a call to static");
     ASSERT(!HasLiveCallerSavedRegs(call));
     // Now MakeCallByOffset is not supported in Arch32Encoder (support ADR instruction)
-    Reg param_0 = GetTarget().GetParamReg(0);
+    Reg param0 = GetTarget().GetParamReg(0);
     if (call->GetCallMethod() == GetGraph()->GetMethod() && GetArch() != Arch::AARCH32 && !GetGraph()->IsOsrMode() &&
         !GetGraph()->GetMethodProperties().GetHasDeopt()) {
         if (GetGraph()->IsAotMode()) {
-            LoadMethod(param_0);
+            LoadMethod(param0);
         } else {
-            GetEncoder()->EncodeMov(param_0, Imm(reinterpret_cast<size_t>(GetGraph()->GetMethod())));
+            GetEncoder()->EncodeMov(param0, Imm(reinterpret_cast<size_t>(GetGraph()->GetMethod())));
         }
         GetEncoder()->MakeCallByOffset(GetStartCodeOffset() - GetEncoder()->GetCursorOffset());
     } else {
         if (GetGraph()->IsAotMode()) {
-            auto aot_data = GetGraph()->GetAotData();
-            intptr_t offset = aot_data->GetPltSlotOffset(GetEncoder()->GetCursorOffset(), call->GetCallMethodId());
+            auto aotData = GetGraph()->GetAotData();
+            intptr_t offset = aotData->GetPltSlotOffset(GetEncoder()->GetCursorOffset(), call->GetCallMethodId());
             // PLT CallStatic Resolver transparently uses param_0 (Method) register
-            GetEncoder()->MakeLoadAotTable(offset, param_0);
+            GetEncoder()->MakeLoadAotTable(offset, param0);
         } else {  // usual JIT case
             auto method = call->GetCallMethod();
-            GetEncoder()->EncodeMov(param_0, Imm(reinterpret_cast<size_t>(method)));
+            GetEncoder()->EncodeMov(param0, Imm(reinterpret_cast<size_t>(method)));
         }
-        GetEncoder()->MakeCall(MemRef(param_0, GetRuntime()->GetCompiledEntryPointOffset(GetArch())));
+        GetEncoder()->MakeCall(MemRef(param0, GetRuntime()->GetCompiledEntryPointOffset(GetArch())));
     }
     FinalizeCall(call);
 }
@@ -1736,24 +1733,24 @@ void Codegen::EmitCallDynamic(CallInst *call)
     RuntimeInterface *runtime = GetRuntime();
     Encoder *encoder = GetEncoder();
 
-    auto dst_reg = ConvertRegister(call->GetDstReg(), call->GetType());
-    Reg method_param_reg = GetTarget().GetParamReg(CallConvDynInfo::REG_METHOD).As(GetPtrRegType());
-    Reg num_args_param_reg = GetTarget().GetParamReg(CallConvDynInfo::REG_NUM_ARGS);
-    auto param_func_obj_loc = Location::MakeStackArgument(CallConvDynInfo::SLOT_CALLEE);
+    auto dstReg = ConvertRegister(call->GetDstReg(), call->GetType());
+    Reg methodParamReg = GetTarget().GetParamReg(CallConvDynInfo::REG_METHOD).As(GetPtrRegType());
+    Reg numArgsParamReg = GetTarget().GetParamReg(CallConvDynInfo::REG_NUM_ARGS);
+    auto paramFuncObjLoc = Location::MakeStackArgument(CallConvDynInfo::SLOT_CALLEE);
 
     ASSERT(!HasLiveCallerSavedRegs(call));
 
     // Load method from callee object
     static_assert(coretypes::TaggedValue::TAG_OBJECT == 0);
-    encoder->EncodeLdr(method_param_reg, false, MemRef(SpReg(), GetStackOffset(param_func_obj_loc)));
-    encoder->EncodeLdr(method_param_reg, false, MemRef(method_param_reg, runtime->GetFunctionTargetOffset(GetArch())));
+    encoder->EncodeLdr(methodParamReg, false, MemRef(SpReg(), GetStackOffset(paramFuncObjLoc)));
+    encoder->EncodeLdr(methodParamReg, false, MemRef(methodParamReg, runtime->GetFunctionTargetOffset(GetArch())));
 
     ASSERT(call->GetInputsCount() > 1);
-    auto num_args = static_cast<uint32_t>(call->GetInputsCount() - 1);  // '-1' means 1 for spill fill input
-    encoder->EncodeMov(num_args_param_reg, Imm(num_args));
+    auto numArgs = static_cast<uint32_t>(call->GetInputsCount() - 1);  // '-1' means 1 for spill fill input
+    encoder->EncodeMov(numArgsParamReg, Imm(numArgs));
 
-    size_t entry_point_offset = runtime->GetCompiledEntryPointOffset(GetArch());
-    encoder->MakeCall(MemRef(method_param_reg, entry_point_offset));
+    size_t entryPointOffset = runtime->GetCompiledEntryPointOffset(GetArch());
+    encoder->MakeCall(MemRef(methodParamReg, entryPointOffset));
 
     CreateStackMap(call);
     // Dynamic callee may have moved sp if there was insufficient num_actual_args
@@ -1761,9 +1758,9 @@ void Codegen::EmitCallDynamic(CallInst *call)
         SpReg(), FpReg(),
         Imm(GetFrameLayout().GetOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>(0)));
 
-    if (dst_reg.IsValid()) {
-        Reg ret_reg = GetTarget().GetReturnReg(dst_reg.GetType());
-        encoder->EncodeMov(dst_reg, ret_reg);
+    if (dstReg.IsValid()) {
+        Reg retReg = GetTarget().GetReturnReg(dstReg.GetType());
+        encoder->EncodeMov(dstReg, retReg);
     }
 }
 
@@ -1771,21 +1768,21 @@ void Codegen::FinalizeCall(CallInst *call)
 {
     ASSERT(!call->IsDynamicCall());
     CreateStackMap(call);
-    auto return_type = call->GetType();
-    auto dst_reg = ConvertRegister(call->GetDstReg(), return_type);
+    auto returnType = call->GetType();
+    auto dstReg = ConvertRegister(call->GetDstReg(), returnType);
     // Restore frame pointer in the TLS
     GetEncoder()->EncodeStr(FpReg(), MemRef(ThreadReg(), GetRuntime()->GetTlsFrameOffset(GetArch())));
     // Sign/Zero extend return_reg if necessary
-    if (dst_reg.IsValid()) {
+    if (dstReg.IsValid()) {
         auto arch = GetArch();
-        auto return_reg = GetTarget().GetReturnReg(dst_reg.GetType());
+        auto returnReg = GetTarget().GetReturnReg(dstReg.GetType());
         //  INT8  and INT16  must be sign extended to INT32
         //  UINT8 and UINT16 must be zero extended to UINT32
-        if (DataType::ShiftByType(return_type, arch) < DataType::ShiftByType(DataType::INT32, arch)) {
-            bool is_signed = DataType::IsTypeSigned(return_type);
-            GetEncoder()->EncodeCast(dst_reg, is_signed, Reg(return_reg.GetId(), INT32_TYPE), is_signed);
+        if (DataType::ShiftByType(returnType, arch) < DataType::ShiftByType(DataType::INT32, arch)) {
+            bool isSigned = DataType::IsTypeSigned(returnType);
+            GetEncoder()->EncodeCast(dstReg, isSigned, Reg(returnReg.GetId(), INT32_TYPE), isSigned);
         } else {
-            GetEncoder()->EncodeMov(dst_reg, return_reg);
+            GetEncoder()->EncodeMov(dstReg, returnReg);
         }
     }
 }
@@ -1798,116 +1795,116 @@ static T GetBarrierOperandValue(RuntimeInterface *runtime, panda::mem::BarrierPo
 }
 
 template <bool IS_CLASS>
-void Codegen::CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved, bool store_pair)
+void Codegen::CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved, bool storePair)
 {
     auto runtime = GetRuntime();
     auto *enc = GetEncoder();
 
     SCOPED_DISASM_STR(this, "Pre WRB");
-    ScopedTmpReg entrypoint_reg(enc, enc->IsLrAsTempRegEnabledAndReleased());
-    GetEncoder()->EncodeLdr(entrypoint_reg, false,
+    ScopedTmpReg entrypointReg(enc, enc->IsLrAsTempRegEnabledAndReleased());
+    GetEncoder()->EncodeLdr(entrypointReg, false,
                             MemRef(ThreadReg(), runtime->GetTlsPreWrbEntrypointOffset(GetArch())));
 
     // Check entrypoint address
     auto label = GetEncoder()->CreateLabel();
-    enc->EncodeJump(label, entrypoint_reg, Condition::EQ);
-    auto ref_type =
+    enc->EncodeJump(label, entrypointReg, Condition::EQ);
+    auto refType =
         inst->GetType() == DataType::REFERENCE ? DataType::GetIntTypeForReference(enc->GetArch()) : DataType::INT64;
-    ScopedTmpReg tmp_ref(enc, ConvertDataType(ref_type, GetArch()));
-    auto prev_offset = enc->GetCursorOffset();
+    ScopedTmpReg tmpRef(enc, ConvertDataType(refType, GetArch()));
+    auto prevOffset = enc->GetCursorOffset();
     // Load old value
     if (IsVolatileMemInst(inst)) {
-        enc->EncodeLdrAcquire(tmp_ref, false, mem);
+        enc->EncodeLdrAcquire(tmpRef, false, mem);
     } else {
-        enc->EncodeLdr(tmp_ref, false, mem);
+        enc->EncodeLdr(tmpRef, false, mem);
     }
-    TryInsertImplicitNullCheck(inst, prev_offset);
+    TryInsertImplicitNullCheck(inst, prevOffset);
     if constexpr (IS_CLASS) {
-        enc->EncodeLdr(tmp_ref, false, MemRef(tmp_ref, runtime->GetManagedClassOffset(GetArch())));
+        enc->EncodeLdr(tmpRef, false, MemRef(tmpRef, runtime->GetManagedClassOffset(GetArch())));
     } else {
-        CheckObject(tmp_ref, label);
+        CheckObject(tmpRef, label);
     }
     auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
     live_regs |= preserved;
-    CallBarrier(live_regs, live_vregs, entrypoint_reg.GetReg(), tmp_ref);
+    CallBarrier(live_regs, live_vregs, entrypointReg.GetReg(), tmpRef);
 
-    if (store_pair) {
+    if (storePair) {
         // store pair doesn't support index and scalar
         ASSERT(!mem.HasIndex() && !mem.HasScale());
         // calculate offset for second store
-        auto second_offset = 1U << DataType::ShiftByType(DataType::REFERENCE, enc->GetArch());
+        auto secondOffset = 1U << DataType::ShiftByType(DataType::REFERENCE, enc->GetArch());
         if (mem.HasDisp()) {
-            second_offset += mem.GetDisp();
+            secondOffset += mem.GetDisp();
         }
         // Load old value
         if (IsVolatileMemInst(inst)) {
-            enc->EncodeLdrAcquire(tmp_ref, false, MemRef(mem.GetBase(), second_offset));
+            enc->EncodeLdrAcquire(tmpRef, false, MemRef(mem.GetBase(), secondOffset));
         } else {
-            enc->EncodeLdr(tmp_ref, false, MemRef(mem.GetBase(), second_offset));
+            enc->EncodeLdr(tmpRef, false, MemRef(mem.GetBase(), secondOffset));
         }
-        CheckObject(tmp_ref, label);
-        CallBarrier(live_regs, live_vregs, entrypoint_reg.GetReg(), tmp_ref);
+        CheckObject(tmpRef, label);
+        CallBarrier(live_regs, live_vregs, entrypointReg.GetReg(), tmpRef);
     }
     enc->BindLabel(label);
 }
 
-void Codegen::EncodePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object)
+void Codegen::EncodePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject)
 {
-    auto ref_type {TypeInfo::FromDataType(DataType::REFERENCE, GetArch())};
+    auto refType {TypeInfo::FromDataType(DataType::REFERENCE, GetArch())};
     ASSERT(reg1.IsValid());
-    reg1 = reg1.As(ref_type);
+    reg1 = reg1.As(refType);
     if (reg2.IsValid()) {
-        reg2 = reg2.As(ref_type);
+        reg2 = reg2.As(refType);
     }
 
     if (GetGraph()->SupportsIrtocBarriers()) {
         if (GetGraph()->IsOfflineCompilationMode()) {
             CreateOfflineIrtocPostWrb(inst, mem, reg1, reg2);
         } else {
-            CreateOnlineIrtocPostWrb(inst, mem, reg1, reg2, check_object);
+            CreateOnlineIrtocPostWrb(inst, mem, reg1, reg2, checkObject);
         }
         return;
     }
 
-    auto barrier_type {GetRuntime()->GetPostType()};
-    ASSERT(barrier_type == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
-           barrier_type == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
+    auto barrierType {GetRuntime()->GetPostType()};
+    ASSERT(barrierType == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+           barrierType == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
 
-    if (barrier_type == panda::mem::BarrierType::POST_INTERREGION_BARRIER) {
-        CreatePostInterRegionBarrier(inst, mem, reg1, reg2, check_object);
+    if (barrierType == panda::mem::BarrierType::POST_INTERREGION_BARRIER) {
+        CreatePostInterRegionBarrier(inst, mem, reg1, reg2, checkObject);
     } else {
-        auto base {mem.GetBase().As(ref_type)};
+        auto base {mem.GetBase().As(refType)};
         CreatePostInterGenerationalBarrier(base);
     }
 }
 
 void Codegen::CreatePostWRBForDynamic(Inst *inst, MemRef mem, Reg reg1, Reg reg2)
 {
-    int store_index;
+    int storeIndex;
     if (reg2 == INVALID_REGISTER) {
         if (inst->GetOpcode() == Opcode::StoreObject || inst->GetOpcode() == Opcode::StoreI ||
             inst->GetOpcode() == Opcode::StoreArrayI) {
-            store_index = 1;
+            storeIndex = 1;
         } else {
             ASSERT(inst->GetOpcode() == Opcode::StoreArray || inst->GetOpcode() == Opcode::Store);
-            store_index = 2;
+            storeIndex = 2;
         }
-        if (StoreValueCanBeObject(inst->GetDataFlowInput(store_index))) {
+        if (StoreValueCanBeObject(inst->GetDataFlowInput(storeIndex))) {
             EncodePostWRB(inst, mem, reg1, reg2, true);
         }
     } else {
         if (inst->GetOpcode() == Opcode::StoreArrayPairI) {
-            store_index = 1;
+            storeIndex = 1;
         } else {
             ASSERT(inst->GetOpcode() == Opcode::StoreArrayPair);
-            store_index = 2;
+            storeIndex = 2;
         }
-        bool first_is_object = StoreValueCanBeObject(inst->GetDataFlowInput(store_index));
-        bool second_is_object = StoreValueCanBeObject(inst->GetDataFlowInput(store_index + 1));
-        if (first_is_object || second_is_object) {
-            if (first_is_object && !second_is_object) {
+        bool firstIsObject = StoreValueCanBeObject(inst->GetDataFlowInput(storeIndex));
+        bool secondIsObject = StoreValueCanBeObject(inst->GetDataFlowInput(storeIndex + 1));
+        if (firstIsObject || secondIsObject) {
+            if (firstIsObject && !secondIsObject) {
                 reg2 = INVALID_REGISTER;
-            } else if (!first_is_object && second_is_object) {
+            } else if (!firstIsObject && secondIsObject) {
                 reg1 = reg2;
                 reg2 = INVALID_REGISTER;
             }
@@ -1921,12 +1918,12 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2)
     ASSERT(reg1 != INVALID_REGISTER);
 
     if (!GetGraph()->SupportsIrtocBarriers() || !GetGraph()->IsOfflineCompilationMode()) {
-        auto barrier_type = GetRuntime()->GetPostType();
-        if (barrier_type == panda::mem::BarrierType::POST_WRB_NONE) {
+        auto barrierType = GetRuntime()->GetPostType();
+        if (barrierType == panda::mem::BarrierType::POST_WRB_NONE) {
             return;
         }
-        ASSERT(barrier_type == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
-               barrier_type == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
+        ASSERT(barrierType == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+               barrierType == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
     }
 
     // For dynamic methods, another check
@@ -1934,33 +1931,33 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2)
         CreatePostWRBForDynamic(inst, mem, reg1, reg2);
         return;
     }
-    Inst *second_value;
-    Inst *val = InstStoredValue(inst, &second_value);
-    ASSERT(second_value == nullptr || reg2 != INVALID_REGISTER);
+    Inst *secondValue;
+    Inst *val = InstStoredValue(inst, &secondValue);
+    ASSERT(secondValue == nullptr || reg2 != INVALID_REGISTER);
     if (val->GetOpcode() == Opcode::NullPtr) {
         // We can don't encode Post barrier for nullptr
-        if (second_value == nullptr || second_value->GetOpcode() == Opcode::NullPtr) {
+        if (secondValue == nullptr || secondValue->GetOpcode() == Opcode::NullPtr) {
             return;
         }
         // CallPostWRB only for second reg
-        EncodePostWRB(inst, mem, reg2, INVALID_REGISTER, !IsInstNotNull(second_value));
+        EncodePostWRB(inst, mem, reg2, INVALID_REGISTER, !IsInstNotNull(secondValue));
         return;
     }
     // Create PostWRB only for first value
-    if (second_value != nullptr && second_value->GetOpcode() == Opcode::NullPtr) {
+    if (secondValue != nullptr && secondValue->GetOpcode() == Opcode::NullPtr) {
         reg2 = INVALID_REGISTER;
     }
-    bool check_object = true;
+    bool checkObject = true;
     if (reg2 == INVALID_REGISTER) {
         if (IsInstNotNull(val)) {
-            check_object = false;
+            checkObject = false;
         }
     } else {
-        if (IsInstNotNull(val) && IsInstNotNull(second_value)) {
-            check_object = false;
+        if (IsInstNotNull(val) && IsInstNotNull(secondValue)) {
+            checkObject = false;
         }
     }
-    EncodePostWRB(inst, mem, reg1, reg2, check_object);
+    EncodePostWRB(inst, mem, reg1, reg2, checkObject);
 }
 
 void Codegen::CheckObject(Reg reg, LabelHolder::LabelId label)
@@ -1973,12 +1970,12 @@ void Codegen::CheckObject(Reg reg, LabelHolder::LabelId label)
     if (graph->IsDynamicMethod()) {
         ASSERT(reg.IsScalar());
         reg = reg.As(INT64_TYPE);
-        auto tag_mask = graph->GetRuntime()->GetTaggedTagMask();
+        auto tagMask = graph->GetRuntime()->GetTaggedTagMask();
         // Check that the value is object(not int and not double)
-        enc->EncodeJumpTest(label, reg, Imm(tag_mask), Condition::TST_NE);
-        auto special_mask = graph->GetRuntime()->GetTaggedSpecialMask();
+        enc->EncodeJumpTest(label, reg, Imm(tagMask), Condition::TST_NE);
+        auto specialMask = graph->GetRuntime()->GetTaggedSpecialMask();
         // Check that the value is not special value
-        enc->EncodeJumpTest(label, reg, Imm(~special_mask), Condition::TST_EQ);
+        enc->EncodeJumpTest(label, reg, Imm(~specialMask), Condition::TST_EQ);
     } else {
         enc->EncodeJump(label, reg, Condition::EQ);
     }
@@ -1988,54 +1985,54 @@ void Codegen::CreateOfflineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg re
 {
     ASSERT(reg1.IsValid());
 
-    bool has_obj2 {reg2.IsValid() && reg1 != reg2};
+    bool hasObj2 {reg2.IsValid() && reg1 != reg2};
 
-    auto param_regs {GetTarget().GetParamRegsMask(has_obj2 ? 4U : 3U) & GetLiveRegisters(inst).first};
-    SaveCallerRegisters(param_regs, VRegMask(), false);
+    auto paramRegs {GetTarget().GetParamRegsMask(hasObj2 ? 4U : 3U) & GetLiveRegisters(inst).first};
+    SaveCallerRegisters(paramRegs, VRegMask(), false);
 
-    if (has_obj2) {
+    if (hasObj2) {
         FillPostWrbCallParams(mem, reg1, reg2);
     } else {
         FillPostWrbCallParams(mem, reg1);
     }
 
     // load function pointer from tls field
-    auto offset {has_obj2 ? cross_values::GetManagedThreadPostWrbTwoObjectsOffset(GetArch())
-                          : cross_values::GetManagedThreadPostWrbOneObjectOffset(GetArch())};
+    auto offset {hasObj2 ? cross_values::GetManagedThreadPostWrbTwoObjectsOffset(GetArch())
+                         : cross_values::GetManagedThreadPostWrbOneObjectOffset(GetArch())};
     MemRef entry(ThreadReg(), offset);
     GetEncoder()->MakeCall(entry);
 
-    LoadCallerRegisters(param_regs, VRegMask(), false);
+    LoadCallerRegisters(paramRegs, VRegMask(), false);
 }
 
-void CheckObj(Encoder *enc, Codegen *cg, Reg base, Reg reg1, LabelHolder::LabelId skip_label, bool check_null)
+void CheckObj(Encoder *enc, Codegen *cg, Reg base, Reg reg1, LabelHolder::LabelId skipLabel, bool checkNull)
 {
-    if (check_null) {
+    if (checkNull) {
         // Fast null check in-place for one register
-        enc->EncodeJump(skip_label, reg1, Condition::EQ);
+        enc->EncodeJump(skipLabel, reg1, Condition::EQ);
     }
 
     ScopedTmpReg tmp(enc, cg->ConvertDataType(DataType::REFERENCE, cg->GetArch()));
-    auto region_size_bit = GetBarrierOperandValue<uint8_t>(
+    auto regionSizeBit = GetBarrierOperandValue<uint8_t>(
         cg->GetRuntime(), panda::mem::BarrierPosition::BARRIER_POSITION_POST, "REGION_SIZE_BITS");
     enc->EncodeXor(tmp, base, reg1);
-    enc->EncodeShr(tmp, tmp, Imm(region_size_bit));
-    enc->EncodeJump(skip_label, tmp, Condition::EQ);
+    enc->EncodeShr(tmp, tmp, Imm(regionSizeBit));
+    enc->EncodeJump(skipLabel, tmp, Condition::EQ);
 }
 
-void WrapOneArg(Encoder *enc, Reg param, Reg base, MemRef mem, size_t additional_offset = 0)
+void WrapOneArg(Encoder *enc, Reg param, Reg base, MemRef mem, size_t additionalOffset = 0)
 {
     if (mem.HasIndex()) {
         ASSERT(mem.GetScale() == 0 && !mem.HasDisp());
         enc->EncodeAdd(param, base, mem.GetIndex());
-        if (additional_offset != 0) {
-            enc->EncodeAdd(param, param, Imm(additional_offset));
+        if (additionalOffset != 0) {
+            enc->EncodeAdd(param, param, Imm(additionalOffset));
         }
     } else if (mem.HasDisp()) {
         ASSERT(!mem.HasIndex());
-        enc->EncodeAdd(param, base, Imm(mem.GetDisp() + additional_offset));
+        enc->EncodeAdd(param, base, Imm(mem.GetDisp() + additionalOffset));
     } else {
-        enc->EncodeAdd(param, base, Imm(additional_offset));
+        enc->EncodeAdd(param, base, Imm(additionalOffset));
     }
 }
 
@@ -2053,92 +2050,92 @@ void WrapOneArg(Encoder *enc, Reg param, Reg base, MemRef mem, size_t additional
  *
  *  label: Done
  */
-void Codegen::CreateOnlineIrtocPostWrbRegionTwoRegs(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object)
+void Codegen::CreateOnlineIrtocPostWrbRegionTwoRegs(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject)
 {
-    auto entrypoint_id {EntrypointId::POST_INTER_REGION_BARRIER_SLOW};
+    auto entrypointId {EntrypointId::POST_INTER_REGION_BARRIER_SLOW};
     auto enc {GetEncoder()};
     auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, GetArch()))};
-    auto param_reg_0 = enc->GetTarget().GetParamReg(0);
-    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypoint_id));
+    auto paramReg0 = enc->GetTarget().GetParamReg(0);
+    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypointId));
     constexpr size_t PARAMS_NUM = 1U;
-    auto param_regs {GetTarget().GetParamRegsMask(PARAMS_NUM) & GetLiveRegisters(inst).first};
+    auto paramRegs {GetTarget().GetParamRegsMask(PARAMS_NUM) & GetLiveRegisters(inst).first};
 
-    auto lbl_mark_card_and_exit = enc->CreateLabel();
-    auto lbl_check_1_obj = enc->CreateLabel();
+    auto lblMarkCardAndExit = enc->CreateLabel();
+    auto lblCheck1Obj = enc->CreateLabel();
     auto done = enc->CreateLabel();
 
-    CheckObj(enc, this, base, reg2, lbl_check_1_obj, check_object);
-    SaveCallerRegisters(param_regs, VRegMask(), false);
-    WrapOneArg(enc, param_reg_0, base, mem, reg1.GetSize() / BITS_PER_BYTE);
+    CheckObj(enc, this, base, reg2, lblCheck1Obj, checkObject);
+    SaveCallerRegisters(paramRegs, VRegMask(), false);
+    WrapOneArg(enc, paramReg0, base, mem, reg1.GetSize() / BITS_PER_BYTE);
     {
         ScopedTmpReg tmp(enc, ConvertDataType(DataType::REFERENCE, GetArch()));
-        enc->EncodeAnd(tmp, param_reg_0, Imm(cross_values::GetCardAlignmentMask(GetArch())));
-        enc->EncodeJump(lbl_mark_card_and_exit, tmp, Condition::NE);
+        enc->EncodeAnd(tmp, paramReg0, Imm(cross_values::GetCardAlignmentMask(GetArch())));
+        enc->EncodeJump(lblMarkCardAndExit, tmp, Condition::NE);
     }
 
     enc->MakeCall(entry);
-    LoadCallerRegisters(param_regs, VRegMask(), false);
+    LoadCallerRegisters(paramRegs, VRegMask(), false);
 
-    enc->BindLabel(lbl_check_1_obj);
-    CheckObj(enc, this, base, reg1, done, check_object);
-    SaveCallerRegisters(param_regs, VRegMask(), false);
-    WrapOneArg(enc, param_reg_0, base, mem);
-    enc->BindLabel(lbl_mark_card_and_exit);
+    enc->BindLabel(lblCheck1Obj);
+    CheckObj(enc, this, base, reg1, done, checkObject);
+    SaveCallerRegisters(paramRegs, VRegMask(), false);
+    WrapOneArg(enc, paramReg0, base, mem);
+    enc->BindLabel(lblMarkCardAndExit);
     enc->MakeCall(entry);
-    LoadCallerRegisters(param_regs, VRegMask(), false);
+    LoadCallerRegisters(paramRegs, VRegMask(), false);
     enc->BindLabel(done);
 }
 
-void Codegen::CreateOnlineIrtocPostWrbRegionOneReg(Inst *inst, MemRef mem, Reg reg1, bool check_object)
+void Codegen::CreateOnlineIrtocPostWrbRegionOneReg(Inst *inst, MemRef mem, Reg reg1, bool checkObject)
 {
-    auto entrypoint_id {EntrypointId::POST_INTER_REGION_BARRIER_SLOW};
+    auto entrypointId {EntrypointId::POST_INTER_REGION_BARRIER_SLOW};
     auto enc {GetEncoder()};
     auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, GetArch()))};
-    auto param_reg_0 = enc->GetTarget().GetParamReg(0);
-    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypoint_id));
+    auto paramReg0 = enc->GetTarget().GetParamReg(0);
+    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypointId));
     constexpr size_t PARAMS_NUM = 1;
-    auto param_regs {GetTarget().GetParamRegsMask(PARAMS_NUM) & GetLiveRegisters(inst).first};
+    auto paramRegs {GetTarget().GetParamRegsMask(PARAMS_NUM) & GetLiveRegisters(inst).first};
 
     auto skip = enc->CreateLabel();
 
-    CheckObj(enc, this, base, reg1, skip, check_object);
-    SaveCallerRegisters(param_regs, VRegMask(), false);
-    WrapOneArg(enc, param_reg_0, base, mem);
+    CheckObj(enc, this, base, reg1, skip, checkObject);
+    SaveCallerRegisters(paramRegs, VRegMask(), false);
+    WrapOneArg(enc, paramReg0, base, mem);
     enc->MakeCall(entry);
-    LoadCallerRegisters(param_regs, VRegMask(), false);
+    LoadCallerRegisters(paramRegs, VRegMask(), false);
     enc->BindLabel(skip);
 }
 
-void Codegen::CreateOnlineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object)
+void Codegen::CreateOnlineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject)
 {
     SCOPED_DISASM_STR(this, "Post Online Irtoc-WRB");
     ASSERT(reg1.IsValid());
 
     auto enc {GetEncoder()};
 
-    bool has_obj2 {reg2.IsValid() && reg1 != reg2};
+    bool hasObj2 {reg2.IsValid() && reg1 != reg2};
     if (GetRuntime()->GetPostType() == panda::mem::BarrierType::POST_INTERREGION_BARRIER) {
-        if (has_obj2) {
-            CreateOnlineIrtocPostWrbRegionTwoRegs(inst, mem, reg1, reg2, check_object);
+        if (hasObj2) {
+            CreateOnlineIrtocPostWrbRegionTwoRegs(inst, mem, reg1, reg2, checkObject);
         } else {
-            CreateOnlineIrtocPostWrbRegionOneReg(inst, mem, reg1, check_object);
+            CreateOnlineIrtocPostWrbRegionOneReg(inst, mem, reg1, checkObject);
         }
     } else {
-        auto entrypoint_id {EntrypointId::POST_INTER_GENERATIONAL_BARRIER0};
+        auto entrypointId {EntrypointId::POST_INTER_GENERATIONAL_BARRIER0};
         auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, GetArch()))};
         constexpr size_t PARAMS_NUM = 1;
-        auto param_regs {GetTarget().GetParamRegsMask(PARAMS_NUM) & GetLiveRegisters(inst).first};
+        auto paramRegs {GetTarget().GetParamRegsMask(PARAMS_NUM) & GetLiveRegisters(inst).first};
 
-        SaveCallerRegisters(param_regs, VRegMask(), false);
-        auto param_reg_0 = enc->GetTarget().GetParamReg(0);
-        enc->EncodeMov(param_reg_0, base);
-        MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypoint_id));
+        SaveCallerRegisters(paramRegs, VRegMask(), false);
+        auto paramReg0 = enc->GetTarget().GetParamReg(0);
+        enc->EncodeMov(paramReg0, base);
+        MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), entrypointId));
         enc->MakeCall(entry);
-        LoadCallerRegisters(param_regs, VRegMask(), false);
+        LoadCallerRegisters(paramRegs, VRegMask(), false);
     }
 }
 
-void Codegen::CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object)
+void Codegen::CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject)
 {
     SCOPED_DISASM_STR(this, "Post IR-WRB");
     auto *enc = GetEncoder();
@@ -2147,18 +2144,18 @@ void Codegen::CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg
 
     auto label = GetEncoder()->CreateLabel();
 
-    if (check_object) {
+    if (checkObject) {
         CheckObject(reg1, label);
     }
 
-    auto region_size_bit = GetBarrierOperandValue<uint8_t>(
+    auto regionSizeBit = GetBarrierOperandValue<uint8_t>(
         GetRuntime(), panda::mem::BarrierPosition::BARRIER_POSITION_POST, "REGION_SIZE_BITS");
 
     auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, GetArch()))};
     ScopedTmpReg tmp(enc, ConvertDataType(DataType::REFERENCE, GetArch()));
     // Compare first store value with mem
     enc->EncodeXor(tmp, base, reg1);
-    enc->EncodeShr(tmp, tmp, Imm(region_size_bit));
+    enc->EncodeShr(tmp, tmp, Imm(regionSizeBit));
 
     enc->EncodeJump(label, tmp, Condition::EQ);
     auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
@@ -2178,13 +2175,13 @@ void Codegen::CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg
 
     if (reg2.IsValid() && reg1 != reg2) {
         auto label1 = GetEncoder()->CreateLabel();
-        if (check_object) {
+        if (checkObject) {
             CheckObject(reg2, label1);
         }
 
         // Compare second store value with mem
         enc->EncodeXor(tmp, base, reg2);
-        enc->EncodeShr(tmp, tmp, Imm(region_size_bit));
+        enc->EncodeShr(tmp, tmp, Imm(regionSizeBit));
         enc->EncodeJump(label1, tmp, Condition::EQ);
 
         enc->EncodeAdd(tmp, base, Imm(reg1.GetSize() / BITS_PER_BYTE));
@@ -2200,23 +2197,23 @@ void Codegen::CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg
     }
 }
 
-void Codegen::CalculateCardIndex(Reg base_reg, ScopedTmpReg *tmp, ScopedTmpReg *tmp1)
+void Codegen::CalculateCardIndex(Reg baseReg, ScopedTmpReg *tmp, ScopedTmpReg *tmp1)
 {
-    auto tmp_type = tmp->GetReg().GetType();
-    auto tmp1_type = tmp1->GetReg().GetType();
+    auto tmpType = tmp->GetReg().GetType();
+    auto tmp1Type = tmp1->GetReg().GetType();
     auto *enc = GetEncoder();
-    auto card_bits =
+    auto cardBits =
         GetBarrierOperandValue<uint8_t>(GetRuntime(), panda::mem::BarrierPosition::BARRIER_POSITION_POST, "CARD_BITS");
 
-    ASSERT(base_reg != INVALID_REGISTER);
-    if (base_reg.GetSize() < Reg(*tmp).GetSize()) {
-        tmp->ChangeType(base_reg.GetType());
-        tmp1->ChangeType(base_reg.GetType());
+    ASSERT(baseReg != INVALID_REGISTER);
+    if (baseReg.GetSize() < Reg(*tmp).GetSize()) {
+        tmp->ChangeType(baseReg.GetType());
+        tmp1->ChangeType(baseReg.GetType());
     }
-    enc->EncodeSub(*tmp, base_reg, *tmp);
-    enc->EncodeShr(*tmp, *tmp, Imm(card_bits));
-    tmp->ChangeType(tmp_type);
-    tmp1->ChangeType(tmp1_type);
+    enc->EncodeSub(*tmp, baseReg, *tmp);
+    enc->EncodeShr(*tmp, *tmp, Imm(cardBits));
+    tmp->ChangeType(tmpType);
+    tmp1->ChangeType(tmp1Type);
 }
 
 void Codegen::CreatePostInterGenerationalBarrier(Reg base)
@@ -2231,9 +2228,9 @@ void Codegen::CreatePostInterGenerationalBarrier(Reg base)
     if (GetGraph()->IsOfflineCompilationMode()) {
         GetEncoder()->EncodeLdr(tmp, false, MemRef(ThreadReg(), runtime->GetTlsCardTableMinAddrOffset(GetArch())));
     } else {
-        auto min_address = reinterpret_cast<uintptr_t>(
+        auto minAddress = reinterpret_cast<uintptr_t>(
             GetBarrierOperandValue<void *>(runtime, panda::mem::BarrierPosition::BARRIER_POSITION_POST, "MIN_ADDR"));
-        enc->EncodeMov(tmp, Imm(min_address));
+        enc->EncodeMov(tmp, Imm(minAddress));
     }
     // * card_index = (AddressOf(obj.field) - min_addr) >> CARD_BITS   // shift right
     CalculateCardIndex(base, &tmp, &tmp1);
@@ -2242,19 +2239,19 @@ void Codegen::CreatePostInterGenerationalBarrier(Reg base)
         GetEncoder()->EncodeLdr(tmp1.GetReg().As(INT64_TYPE), false,
                                 MemRef(ThreadReg(), runtime->GetTlsCardTableAddrOffset(GetArch())));
     } else {
-        auto card_table_addr = reinterpret_cast<uintptr_t>(GetBarrierOperandValue<uint8_t *>(
+        auto cardTableAddr = reinterpret_cast<uintptr_t>(GetBarrierOperandValue<uint8_t *>(
             runtime, panda::mem::BarrierPosition::BARRIER_POSITION_POST, "CARD_TABLE_ADDR"));
-        enc->EncodeMov(tmp1, Imm(card_table_addr));
+        enc->EncodeMov(tmp1, Imm(cardTableAddr));
     }
     // * card_addr = card_table_addr + card_index
     enc->EncodeAdd(tmp, tmp1, tmp);
     // * store card_addr <- DIRTY_VAL
-    auto dirty_val =
+    auto dirtyVal =
         GetBarrierOperandValue<uint8_t>(runtime, panda::mem::BarrierPosition::BARRIER_POSITION_POST, "DIRTY_VAL");
 
-    auto tmp1_b = ConvertRegister(tmp1.GetReg().GetId(), DataType::INT8);
-    enc->EncodeMov(tmp1_b, Imm(dirty_val));
-    enc->EncodeStr(tmp1_b, MemRef(tmp));
+    auto tmp1B = ConvertRegister(tmp1.GetReg().GetId(), DataType::INT8);
+    enc->EncodeMov(tmp1B, Imm(dirtyVal));
+    enc->EncodeStr(tmp1B, MemRef(tmp));
 }
 
 bool Codegen::HasLiveCallerSavedRegs(Inst *inst)
@@ -2265,57 +2262,57 @@ bool Codegen::HasLiveCallerSavedRegs(Inst *inst)
     return live_regs.Any() || live_fp_regs.Any();
 }
 
-void Codegen::SaveCallerRegisters(RegMask live_regs, VRegMask live_vregs, bool adjust_regs)
+void Codegen::SaveCallerRegisters(RegMask liveRegs, VRegMask liveVregs, bool adjustRegs)
 {
     SCOPED_DISASM_STR(this, "Save caller saved regs");
     auto base = GetFrameInfo()->GetCallersRelativeFp() ? GetTarget().GetFrameReg() : GetTarget().GetStackReg();
-    live_regs &= ~GetEncoder()->GetAvailableScratchRegisters();
-    live_vregs &= ~GetEncoder()->GetAvailableScratchFpRegisters();
-    if (adjust_regs) {
-        live_regs &= GetRegfile()->GetCallerSavedRegMask();
-        live_vregs &= GetRegfile()->GetCallerSavedVRegMask();
+    liveRegs &= ~GetEncoder()->GetAvailableScratchRegisters();
+    liveVregs &= ~GetEncoder()->GetAvailableScratchFpRegisters();
+    if (adjustRegs) {
+        liveRegs &= GetRegfile()->GetCallerSavedRegMask();
+        liveVregs &= GetRegfile()->GetCallerSavedVRegMask();
     } else {
-        live_regs &= GetCallerRegsMask(GetArch(), false);
-        live_vregs &= GetCallerRegsMask(GetArch(), true);
+        liveRegs &= GetCallerRegsMask(GetArch(), false);
+        liveVregs &= GetCallerRegsMask(GetArch(), true);
     }
     if (GetFrameInfo()->GetPushCallers()) {
-        GetEncoder()->PushRegisters(live_regs, live_vregs);
+        GetEncoder()->PushRegisters(liveRegs, liveVregs);
     } else {
-        GetEncoder()->SaveRegisters(live_regs, false, GetFrameInfo()->GetCallersOffset(), base,
+        GetEncoder()->SaveRegisters(liveRegs, false, GetFrameInfo()->GetCallersOffset(), base,
                                     GetCallerRegsMask(GetArch(), false));
-        GetEncoder()->SaveRegisters(live_vregs, true, GetFrameInfo()->GetFpCallersOffset(), base,
+        GetEncoder()->SaveRegisters(liveVregs, true, GetFrameInfo()->GetFpCallersOffset(), base,
                                     GetFrameInfo()->GetPositionedCallers() ? GetCallerRegsMask(GetArch(), true)
                                                                            : RegMask());
     }
 }
 
-void Codegen::LoadCallerRegisters(RegMask live_regs, VRegMask live_vregs, bool adjust_regs)
+void Codegen::LoadCallerRegisters(RegMask liveRegs, VRegMask liveVregs, bool adjustRegs)
 {
     SCOPED_DISASM_STR(this, "Restore caller saved regs");
     auto base = GetFrameInfo()->GetCallersRelativeFp() ? GetTarget().GetFrameReg() : GetTarget().GetStackReg();
-    live_regs &= ~GetEncoder()->GetAvailableScratchRegisters();
-    live_vregs &= ~GetEncoder()->GetAvailableScratchFpRegisters();
-    if (adjust_regs) {
-        live_regs &= GetRegfile()->GetCallerSavedRegMask();
-        live_vregs &= GetRegfile()->GetCallerSavedVRegMask();
+    liveRegs &= ~GetEncoder()->GetAvailableScratchRegisters();
+    liveVregs &= ~GetEncoder()->GetAvailableScratchFpRegisters();
+    if (adjustRegs) {
+        liveRegs &= GetRegfile()->GetCallerSavedRegMask();
+        liveVregs &= GetRegfile()->GetCallerSavedVRegMask();
     } else {
-        live_regs &= GetCallerRegsMask(GetArch(), false);
-        live_vregs &= GetCallerRegsMask(GetArch(), true);
+        liveRegs &= GetCallerRegsMask(GetArch(), false);
+        liveVregs &= GetCallerRegsMask(GetArch(), true);
     }
     if (GetFrameInfo()->GetPushCallers()) {
-        GetEncoder()->PopRegisters(live_regs, live_vregs);
+        GetEncoder()->PopRegisters(liveRegs, liveVregs);
     } else {
-        GetEncoder()->LoadRegisters(live_regs, false, GetFrameInfo()->GetCallersOffset(), base,
+        GetEncoder()->LoadRegisters(liveRegs, false, GetFrameInfo()->GetCallersOffset(), base,
                                     GetCallerRegsMask(GetArch(), false));
-        GetEncoder()->LoadRegisters(live_vregs, true, GetFrameInfo()->GetFpCallersOffset(), base,
+        GetEncoder()->LoadRegisters(liveVregs, true, GetFrameInfo()->GetFpCallersOffset(), base,
                                     GetCallerRegsMask(GetArch(), true));
     }
 }
 
-bool Codegen::RegisterKeepCallArgument(CallInst *call_inst, Reg reg)
+bool Codegen::RegisterKeepCallArgument(CallInst *callInst, Reg reg)
 {
-    for (auto i = 0U; i < call_inst->GetInputsCount(); i++) {
-        auto location = call_inst->GetLocation(i);
+    for (auto i = 0U; i < callInst->GetInputsCount(); i++) {
+        auto location = callInst->GetLocation(i);
         if (location.IsRegister() && location.GetValue() == reg.GetId()) {
             return true;
         }
@@ -2328,26 +2325,26 @@ void Codegen::LoadMethod(Reg dst)
     ASSERT((CFrameMethod::GetOffsetFromSpInBytes(GetFrameLayout()) -
             (GetFrameLayout().GetMethodOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>())) ==
            0);
-    auto sp_offset = CFrameMethod::GetOffsetFromSpInBytes(GetFrameLayout());
-    auto mem = MemRef(SpReg(), sp_offset);
+    auto spOffset = CFrameMethod::GetOffsetFromSpInBytes(GetFrameLayout());
+    auto mem = MemRef(SpReg(), spOffset);
     GetEncoder()->EncodeLdr(dst, false, mem);
 }
 
 void Codegen::StoreFreeSlot(Reg src)
 {
     ASSERT(src.GetSize() <= (GetFrameLayout().GetSlotSize() << 3U));
-    auto sp_offset =
+    auto spOffset =
         GetFrameLayout().GetFreeSlotOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>();
-    auto mem = MemRef(SpReg(), sp_offset);
+    auto mem = MemRef(SpReg(), spOffset);
     GetEncoder()->EncodeStr(src, mem);
 }
 
 void Codegen::LoadFreeSlot(Reg dst)
 {
     ASSERT(dst.GetSize() <= (GetFrameLayout().GetSlotSize() << 3U));
-    auto sp_offset =
+    auto spOffset =
         GetFrameLayout().GetFreeSlotOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>();
-    auto mem = MemRef(SpReg(), sp_offset);
+    auto mem = MemRef(SpReg(), spOffset);
     GetEncoder()->EncodeLdr(dst, false, mem);
 }
 
@@ -2361,29 +2358,29 @@ void Codegen::CreateReturn(const Inst *inst)
     }
 }
 
-void Codegen::EncodeDynamicCast(Inst *inst, Reg dst, bool dst_signed, Reg src)
+void Codegen::EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src)
 {
     CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
     CHECK_GE(dst.GetSize(), BITS_PER_UINT32);
 
-    bool is_dst64 {dst.GetSize() == BITS_PER_UINT64};
+    bool isDst64 {dst.GetSize() == BITS_PER_UINT64};
     dst = dst.As(INT32_TYPE);
 
     auto enc {GetEncoder()};
-    if (OPTIONS.IsCpuFeatureEnabled(CpuFeature::JSCVT)) {
+    if (g_options.IsCpuFeatureEnabled(CpuFeature::JSCVT)) {
         // no slow path intended
         enc->EncodeFastPathDynamicCast(dst, src, LabelHolder::INVALID_LABEL);
     } else {
-        auto slow_path {CreateSlowPath<SlowPathJsCastDoubleToInt32>(inst)};
-        slow_path->SetDstReg(dst);
-        slow_path->SetSrcReg(src);
+        auto slowPath {CreateSlowPath<SlowPathJsCastDoubleToInt32>(inst)};
+        slowPath->SetDstReg(dst);
+        slowPath->SetSrcReg(src);
 
-        enc->EncodeFastPathDynamicCast(dst, src, slow_path->GetLabel());
-        slow_path->BindBackLabel(enc);
+        enc->EncodeFastPathDynamicCast(dst, src, slowPath->GetLabel());
+        slowPath->BindBackLabel(enc);
     }
 
-    if (is_dst64) {
-        enc->EncodeCast(dst.As(INT64_TYPE), dst_signed, dst, dst_signed);
+    if (isDst64) {
+        enc->EncodeCast(dst.As(INT64_TYPE), dstSigned, dst, dstSigned);
     }
 }
 
@@ -2513,15 +2510,15 @@ void EncodeVisitor::VisitMod(GraphVisitor *visitor, Inst *inst)
         enc->GetCodegen()->FillCallParams(src0, src1);
         enc->GetCodegen()->CallIntrinsic(inst, entry);
 
-        auto ret_val = enc->GetCodegen()->GetTarget().GetReturnFpReg();
-        if (ret_val.GetType().IsFloat()) {
+        auto retVal = enc->GetCodegen()->GetTarget().GetReturnFpReg();
+        if (retVal.GetType().IsFloat()) {
             // ret_val is FLOAT64 for Arm64, AMD64 and ARM32 HardFP, but dst can be FLOAT32
             // so we convert ret_val to FLOAT32
-            enc->GetEncoder()->EncodeMov(dst, Reg(ret_val.GetId(), dst.GetType()));
+            enc->GetEncoder()->EncodeMov(dst, Reg(retVal.GetId(), dst.GetType()));
         } else {
             // case for ARM32 SoftFP
             enc->GetEncoder()->EncodeMov(dst,
-                                         Reg(ret_val.GetId(), dst.GetSize() == WORD_SIZE ? INT32_TYPE : INT64_TYPE));
+                                         Reg(retVal.GetId(), dst.GetSize() == WORD_SIZE ? INT32_TYPE : INT64_TYPE));
         }
 
         enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);
@@ -2622,36 +2619,36 @@ void EncodeVisitor::VisitNegSR(GraphVisitor *visitor, Inst *inst)
     auto enc = static_cast<EncodeVisitor *>(visitor);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
-    auto imm_shift_inst = static_cast<UnaryShiftedRegisterOperation *>(inst);
-    enc->GetEncoder()->EncodeNeg(dst, Shift(src, imm_shift_inst->GetShiftType(), imm_shift_inst->GetImm()));
+    auto immShiftInst = static_cast<UnaryShiftedRegisterOperation *>(inst);
+    enc->GetEncoder()->EncodeNeg(dst, Shift(src, immShiftInst->GetShiftType(), immShiftInst->GetImm()));
 }
 
 void EncodeVisitor::VisitCast(GraphVisitor *visitor, Inst *inst)
 {
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto src_type = inst->GetInputType(0);
-    auto dst_type = inst->GetType();
+    auto srcType = inst->GetInputType(0);
+    auto dstType = inst->GetType();
 
-    ASSERT(dst_type != DataType::ANY);
+    ASSERT(dstType != DataType::ANY);
 
-    bool src_signed = IsTypeSigned(src_type);
-    bool dst_signed = IsTypeSigned(dst_type);
+    bool srcSigned = IsTypeSigned(srcType);
+    bool dstSigned = IsTypeSigned(dstType);
 
-    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), src_type);
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), dst_type);
-    if (dst_type == DataType::BOOL) {
+    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), srcType);
+    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), dstType);
+    if (dstType == DataType::BOOL) {
         enc->GetEncoder()->EncodeCastToBool(dst, src);
         return;
     }
 
     if (inst->CastToCast()->IsDynamicCast()) {
-        enc->GetCodegen()->EncodeDynamicCast(inst, dst, dst_signed, src);
+        enc->GetCodegen()->EncodeDynamicCast(inst, dst, dstSigned, src);
         return;
     }
 
     auto arch = enc->GetCodegen()->GetArch();
     if (!Codegen::InstEncodedWithLibCall(inst, arch)) {
-        enc->GetEncoder()->EncodeCast(dst, dst_signed, src, src_signed);
+        enc->GetEncoder()->EncodeCast(dst, dstSigned, src, srcSigned);
         return;
     }
     ASSERT(arch == Arch::AARCH32);
@@ -2663,7 +2660,7 @@ void EncodeVisitor::VisitCast(GraphVisitor *visitor, Inst *inst)
     auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
     enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);
     enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
-    enc->GetEncoder()->EncodeCast(dst, dst_signed, src, src_signed);
+    enc->GetEncoder()->EncodeCast(dst, dstSigned, src, srcSigned);
     enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
 }
 
@@ -2671,10 +2668,10 @@ void EncodeVisitor::VisitBitcast(GraphVisitor *visitor, Inst *inst)
 {
     auto enc = static_cast<EncodeVisitor *>(visitor);
     auto codegen = enc->GetCodegen();
-    auto src_type = inst->GetInputType(0);
-    auto dst_type = inst->GetType();
-    auto dst = codegen->ConvertRegister(inst->GetDstReg(), dst_type);
-    auto src = codegen->ConvertRegister(inst->GetSrcReg(0), src_type);
+    auto srcType = inst->GetInputType(0);
+    auto dstType = inst->GetType();
+    auto dst = codegen->ConvertRegister(inst->GetDstReg(), dstType);
+    auto src = codegen->ConvertRegister(inst->GetSrcReg(0), srcType);
     enc->GetEncoder()->EncodeMov(dst, src);
 }
 
@@ -2691,7 +2688,7 @@ void EncodeVisitor::VisitConstant(GraphVisitor *visitor, Inst *inst)
         ASSERT(enc->GetRegfile()->GetZeroReg() != INVALID_REGISTER);
         return;
     }
-    auto *const_inst = inst->CastToConstant();
+    auto *constInst = inst->CastToConstant();
     auto type = inst->GetType();
     if (enc->cg_->GetGraph()->IsDynamicMethod() && type == DataType::INT64) {
         type = DataType::INT32;
@@ -2701,16 +2698,16 @@ void EncodeVisitor::VisitConstant(GraphVisitor *visitor, Inst *inst)
 #ifndef NDEBUG
     switch (type) {
         case DataType::FLOAT32:
-            enc->GetEncoder()->EncodeMov(dst, Imm(const_inst->GetFloatValue()));
+            enc->GetEncoder()->EncodeMov(dst, Imm(constInst->GetFloatValue()));
             break;
         case DataType::FLOAT64:
-            enc->GetEncoder()->EncodeMov(dst, Imm(const_inst->GetDoubleValue()));
+            enc->GetEncoder()->EncodeMov(dst, Imm(constInst->GetDoubleValue()));
             break;
         default:
-            enc->GetEncoder()->EncodeMov(dst, Imm(const_inst->GetRawValue()));
+            enc->GetEncoder()->EncodeMov(dst, Imm(constInst->GetRawValue()));
     }
 #else
-    enc->GetEncoder()->EncodeMov(dst, Imm(const_inst->GetRawValue()));
+    enc->GetEncoder()->EncodeMov(dst, Imm(constInst->GetRawValue()));
 #endif
 }
 
@@ -2767,9 +2764,9 @@ void Codegen::VisitCall(CallInst *inst)
     GetGraph()->GetRelocationHandler()->AddRelocation(relocation);
 
     if (inst->HasUsers()) {
-        auto dst_reg = ConvertRegister(inst->GetDstReg(), inst->GetType());
-        ASSERT(dst_reg.IsValid());
-        GetEncoder()->EncodeMov(dst_reg, GetTarget().GetReturnReg(dst_reg.GetType()));
+        auto dstReg = ConvertRegister(inst->GetDstReg(), inst->GetType());
+        ASSERT(dstReg.IsValid());
+        GetEncoder()->EncodeMov(dstReg, GetTarget().GetReturnReg(dstReg.GetType()));
     }
 }
 
@@ -2803,8 +2800,8 @@ void EncodeVisitor::VisitCmp(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
 
-    auto cmp_inst = inst->CastToCmp();
-    auto type = cmp_inst->GetOperandsType();
+    auto cmpInst = inst->CastToCmp();
+    auto type = cmpInst->GetOperandsType();
 
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
@@ -2813,7 +2810,7 @@ void EncodeVisitor::VisitCmp(GraphVisitor *visitor, Inst *inst)
     Condition cc;
     if (DataType::IsFloatType(type)) {
         // check whether MI is fully correct here
-        cc = cmp_inst->IsFcmpg() ? (Condition::MI) : (Condition::LT);
+        cc = cmpInst->IsFcmpg() ? (Condition::MI) : (Condition::LT);
     } else if (IsTypeSigned(type)) {
         cc = Condition::LT;
     } else {
@@ -2846,15 +2843,15 @@ void EncodeVisitor::VisitReturnI(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto codegen = enc->GetCodegen();
     auto rzero = enc->GetRegfile()->GetZeroReg();
-    int64_t imm_val = inst->CastToReturnI()->GetImm();
-    Imm imm = codegen->ConvertImmWithExtend(imm_val, inst->GetType());
+    int64_t immVal = inst->CastToReturnI()->GetImm();
+    Imm imm = codegen->ConvertImmWithExtend(immVal, inst->GetType());
 
-    auto return_reg = codegen->GetTarget().GetReturnReg(codegen->ConvertDataType(inst->GetType(), codegen->GetArch()));
+    auto returnReg = codegen->GetTarget().GetReturnReg(codegen->ConvertDataType(inst->GetType(), codegen->GetArch()));
 
-    if (imm_val == 0 && codegen->GetTarget().SupportZeroReg() && !DataType::IsFloatType(inst->GetType())) {
-        enc->GetEncoder()->EncodeMov(return_reg, rzero);
+    if (immVal == 0 && codegen->GetTarget().SupportZeroReg() && !DataType::IsFloatType(inst->GetType())) {
+        enc->GetEncoder()->EncodeMov(returnReg, rzero);
     } else {
-        enc->GetEncoder()->EncodeMov(return_reg, imm);
+        enc->GetEncoder()->EncodeMov(returnReg, imm);
     }
 
     enc->GetCodegen()->CreateReturn(inst);
@@ -2883,10 +2880,10 @@ void EncodeVisitor::VisitReturnInlined(GraphVisitor *visitor, Inst *inst)
 
 #if defined(EVENT_METHOD_EXIT_ENABLED) && EVENT_METHOD_EXIT_ENABLED != 0
     if (!enc->cg_->GetGraph()->IsAotMode()) {
-        auto call_inst = GetCallInstFromReturnInlined(inst->CastToReturnInlined());
-        ASSERT(call_inst != nullptr);
+        auto callInst = GetCallInstFromReturnInlined(inst->CastToReturnInlined());
+        ASSERT(callInst != nullptr);
         static_cast<EncodeVisitor *>(visitor)->GetCodegen()->InsertTrace(
-            {Imm(static_cast<size_t>(TraceId::METHOD_EXIT)), Imm(reinterpret_cast<size_t>(call_inst->GetCallMethod())),
+            {Imm(static_cast<size_t>(TraceId::METHOD_EXIT)), Imm(reinterpret_cast<size_t>(callInst->GetCallMethod())),
              Imm(static_cast<size_t>(events::MethodExitKind::INLINED))});
     }
 #endif
@@ -2897,10 +2894,10 @@ void EncodeVisitor::VisitLoadConstArray(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto method = inst->CastToLoadConstArray()->GetMethod();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    auto array_type = inst->CastToLoadConstArray()->GetTypeId();
+    auto arrayType = inst->CastToLoadConstArray()->GetTypeId();
 
     enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_LITERAL_ARRAY, dst,
-                                             TypedImm(array_type));
+                                             TypedImm(arrayType));
 }
 
 void EncodeVisitor::VisitFillConstArray(GraphVisitor *visitor, Inst *inst)
@@ -2910,53 +2907,53 @@ void EncodeVisitor::VisitFillConstArray(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
-    auto array_type = inst->CastToFillConstArray()->GetTypeId();
+    auto arrayType = inst->CastToFillConstArray()->GetTypeId();
     auto arch = enc->cg_->GetGraph()->GetArch();
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
     auto method = inst->CastToFillConstArray()->GetMethod();
     auto offset = runtime->GetArrayDataOffset(enc->GetCodegen()->GetArch());
-    auto array_size = inst->CastToFillConstArray()->GetImm() << DataType::ShiftByType(type, arch);
+    auto arraySize = inst->CastToFillConstArray()->GetImm() << DataType::ShiftByType(type, arch);
 
-    auto array_reg = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(arch));
-    encoder->EncodeAdd(array_reg, src, Imm(offset));
+    auto arrayReg = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(arch));
+    encoder->EncodeAdd(arrayReg, src, Imm(offset));
 
-    ASSERT(array_size != 0);
+    ASSERT(arraySize != 0);
 
     if (enc->cg_->GetGraph()->IsAotMode()) {
-        auto arr_offset = runtime->GetOffsetToConstArrayData(method, array_type);
-        auto pf_offset = runtime->GetPandaFileOffset(arch);
-        ScopedTmpReg method_reg(encoder);
-        enc->GetCodegen()->LoadMethod(method_reg);
+        auto arrOffset = runtime->GetOffsetToConstArrayData(method, arrayType);
+        auto pfOffset = runtime->GetPandaFileOffset(arch);
+        ScopedTmpReg methodReg(encoder);
+        enc->GetCodegen()->LoadMethod(methodReg);
         // load pointer to panda file
-        encoder->EncodeLdr(method_reg, false, MemRef(method_reg, pf_offset));
+        encoder->EncodeLdr(methodReg, false, MemRef(methodReg, pfOffset));
         // load pointer to binary file
-        encoder->EncodeLdr(method_reg, false, MemRef(method_reg, runtime->GetBinaryFileBaseOffset(enc->GetArch())));
+        encoder->EncodeLdr(methodReg, false, MemRef(methodReg, runtime->GetBinaryFileBaseOffset(enc->GetArch())));
         // Get pointer to array data
-        encoder->EncodeAdd(method_reg, method_reg, Imm(arr_offset));
+        encoder->EncodeAdd(methodReg, methodReg, Imm(arrOffset));
         // call memcpy
         RuntimeInterface::IntrinsicId entry = RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY;
         auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
         enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
 
-        enc->GetCodegen()->FillCallParams(array_reg, method_reg, TypedImm(array_size));
+        enc->GetCodegen()->FillCallParams(arrayReg, methodReg, TypedImm(arraySize));
         enc->GetCodegen()->CallIntrinsic(inst, entry);
         enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
     } else {
-        auto data = runtime->GetPointerToConstArrayData(method, array_type);
+        auto data = runtime->GetPointerToConstArrayData(method, arrayType);
         // call memcpy
         RuntimeInterface::IntrinsicId entry = RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY;
         auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
         enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
 
-        enc->GetCodegen()->FillCallParams(array_reg, TypedImm(data), TypedImm(array_size));
+        enc->GetCodegen()->FillCallParams(arrayReg, TypedImm(data), TypedImm(arraySize));
         enc->GetCodegen()->CallIntrinsic(inst, entry);
         enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
     }
 }
 
-static void GetEntryPointId(uint64_t element_size, RuntimeInterface::EntrypointId &eid)
+static void GetEntryPointId(uint64_t elementSize, RuntimeInterface::EntrypointId &eid)
 {
-    switch (element_size) {
+    switch (elementSize) {
         case sizeof(uint8_t):
             eid = RuntimeInterface::EntrypointId::ALLOCATE_ARRAY_TLAB8;
             break;
@@ -2978,33 +2975,33 @@ void Codegen::VisitNewArray(Inst *inst)
 {
     auto method = inst->CastToNewArray()->GetMethod();
     auto dst = ConvertRegister(inst->GetDstReg(), inst->GetType());
-    auto src_class = ConvertRegister(inst->GetSrcReg(NewArrayInst::INDEX_CLASS), DataType::POINTER);
-    auto src_size = ConvertRegister(inst->GetSrcReg(NewArrayInst::INDEX_SIZE), DataType::Type::INT32);
-    auto array_type = inst->CastToNewArray()->GetTypeId();
+    auto srcClass = ConvertRegister(inst->GetSrcReg(NewArrayInst::INDEX_CLASS), DataType::POINTER);
+    auto srcSize = ConvertRegister(inst->GetSrcReg(NewArrayInst::INDEX_SIZE), DataType::Type::INT32);
+    auto arrayType = inst->CastToNewArray()->GetTypeId();
     auto runtime = GetGraph()->GetRuntime();
     auto encoder = GetEncoder();
 
-    auto max_tlab_size = runtime->GetTLABMaxSize();
+    auto maxTlabSize = runtime->GetTLABMaxSize();
     // NOTE(msherstennikov): support NewArray fast path for arm32
-    if (max_tlab_size == 0 || GetArch() == Arch::AARCH32) {
-        CallRuntime(inst, EntrypointId::CREATE_ARRAY, dst, RegMask::GetZeroMask(), src_class, src_size);
+    if (maxTlabSize == 0 || GetArch() == Arch::AARCH32) {
+        CallRuntime(inst, EntrypointId::CREATE_ARRAY, dst, RegMask::GetZeroMask(), srcClass, srcSize);
         if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
             encoder->EncodeMemoryBarrier(memory_order::RELEASE);
         }
         return;
     }
 
-    auto len_inst = inst->GetDataFlowInput(0);
-    auto class_array_size = runtime->GetClassArraySize(GetArch());
-    uint64_t array_size = 0;
-    uint64_t element_size = runtime->GetArrayElementSize(method, array_type);
+    auto lenInst = inst->GetDataFlowInput(0);
+    auto classArraySize = runtime->GetClassArraySize(GetArch());
+    uint64_t arraySize = 0;
+    uint64_t elementSize = runtime->GetArrayElementSize(method, arrayType);
     uint64_t alignment = runtime->GetTLABAlignment();
-    if (len_inst->GetOpcode() == Opcode::Constant) {
-        ASSERT(len_inst->GetType() == DataType::INT64);
-        array_size = len_inst->CastToConstant()->GetIntValue() * element_size + class_array_size;
-        array_size = (array_size & ~(alignment - 1U)) + ((array_size % alignment) != 0U ? alignment : 0U);
-        if (array_size > max_tlab_size) {
-            CallRuntime(inst, EntrypointId::CREATE_ARRAY, dst, RegMask::GetZeroMask(), src_class, src_size);
+    if (lenInst->GetOpcode() == Opcode::Constant) {
+        ASSERT(lenInst->GetType() == DataType::INT64);
+        arraySize = lenInst->CastToConstant()->GetIntValue() * elementSize + classArraySize;
+        arraySize = (arraySize & ~(alignment - 1U)) + ((arraySize % alignment) != 0U ? alignment : 0U);
+        if (arraySize > maxTlabSize) {
+            CallRuntime(inst, EntrypointId::CREATE_ARRAY, dst, RegMask::GetZeroMask(), srcClass, srcSize);
             if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
                 encoder->EncodeMemoryBarrier(memory_order::RELEASE);
             }
@@ -3013,8 +3010,8 @@ void Codegen::VisitNewArray(Inst *inst)
     }
 
     EntrypointId eid;
-    GetEntryPointId(element_size, eid);
-    CallFastPath(inst, eid, dst, RegMask::GetZeroMask(), src_class, src_size);
+    GetEntryPointId(elementSize, eid);
+    CallFastPath(inst, eid, dst, RegMask::GetZeroMask(), srcClass, srcSize);
     if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
         encoder->EncodeMemoryBarrier(memory_order::RELEASE);
     }
@@ -3034,15 +3031,15 @@ void EncodeVisitor::VisitParameter(GraphVisitor *visitor, Inst *inst)
     */
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto codegen = enc->GetCodegen();
-    auto param_inst = inst->CastToParameter();
-    auto sf = param_inst->GetLocationData();
+    auto paramInst = inst->CastToParameter();
+    auto sf = paramInst->GetLocationData();
     if (sf.GetSrc() == sf.GetDst()) {
         return;
     }
 
-    auto tmp_sf = codegen->GetGraph()->CreateInstSpillFill();
-    tmp_sf->AddSpillFill(sf);
-    SpillFillEncoder(codegen, tmp_sf).EncodeSpillFill();
+    auto tmpSf = codegen->GetGraph()->CreateInstSpillFill();
+    tmpSf->AddSpillFill(sf);
+    SpillFillEncoder(codegen, tmpSf).EncodeSpillFill();
 }
 
 void EncodeVisitor::VisitStoreArray(GraphVisitor *visitor, Inst *inst)
@@ -3051,17 +3048,17 @@ void EncodeVisitor::VisitStoreArray(GraphVisitor *visitor, Inst *inst)
     auto array = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
     auto index = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);
     constexpr int64_t IMM_2 = 2;
-    auto stored_value = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), inst->GetType());
+    auto storedValue = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), inst->GetType());
     int32_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch());
     int32_t scale = DataType::ShiftByType(inst->GetType(), enc->GetCodegen()->GetArch());
 
-    auto mem_ref = [enc, inst, array, index, offset, scale]() {
+    auto memRef = [enc, inst, array, index, offset, scale]() {
         if (inst->CastToStoreArray()->GetNeedBarrier()) {
-            auto tmp_offset =
+            auto tmpOffset =
                 enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(enc->GetArch()));
-            enc->GetEncoder()->EncodeShl(tmp_offset, index, Imm(scale));
-            enc->GetEncoder()->EncodeAdd(tmp_offset, tmp_offset, Imm(offset));
-            return MemRef(array, tmp_offset, 0);
+            enc->GetEncoder()->EncodeShl(tmpOffset, index, Imm(scale));
+            enc->GetEncoder()->EncodeAdd(tmpOffset, tmpOffset, Imm(offset));
+            return MemRef(array, tmpOffset, 0);
         }
 
         auto tmp = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::REFERENCE);
@@ -3069,15 +3066,15 @@ void EncodeVisitor::VisitStoreArray(GraphVisitor *visitor, Inst *inst)
         return MemRef(tmp, index, scale);
     };
 
-    auto mem = mem_ref();
+    auto mem = memRef();
     if (inst->CastToStoreArray()->GetNeedBarrier()) {
-        enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(array.GetId(), stored_value.GetId()));
+        enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(array.GetId(), storedValue.GetId()));
     }
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
-    enc->GetEncoder()->EncodeStr(stored_value, mem);
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
+    enc->GetEncoder()->EncodeStr(storedValue, mem);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
     if (inst->CastToStoreArray()->GetNeedBarrier()) {
-        enc->GetCodegen()->CreatePostWRB(inst, mem, stored_value, INVALID_REGISTER);
+        enc->GetCodegen()->CreatePostWRB(inst, mem, storedValue, INVALID_REGISTER);
     }
 }
 
@@ -3104,10 +3101,10 @@ void EncodeVisitor::VisitSaveStateOsr(GraphVisitor *visitor, Inst *inst)
 
 void EncodeVisitor::VisitLoadArray(GraphVisitor *visitor, Inst *inst)
 {
-    auto inst_load_array = inst->CastToLoadArray();
+    auto instLoadArray = inst->CastToLoadArray();
     auto enc = static_cast<EncodeVisitor *>(visitor);
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
-    ASSERT(inst_load_array->IsArray() || !runtime->IsCompressedStringsEnabled());
+    ASSERT(instLoadArray->IsArray() || !runtime->IsCompressedStringsEnabled());
     if (static_cast<LoadInst *>(inst)->GetNeedBarrier()) {
         // Consider inserting barriers for GC
     }
@@ -3115,18 +3112,18 @@ void EncodeVisitor::VisitLoadArray(GraphVisitor *visitor, Inst *inst)
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // array
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);      // index
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                   // load value
-    int32_t offset = inst_load_array->IsArray() ? runtime->GetArrayDataOffset(enc->GetCodegen()->GetArch())
-                                                : runtime->GetStringDataOffset(enc->GetArch());
+    int32_t offset = instLoadArray->IsArray() ? runtime->GetArrayDataOffset(enc->GetCodegen()->GetArch())
+                                              : runtime->GetStringDataOffset(enc->GetArch());
     auto encoder = enc->GetEncoder();
     auto arch = encoder->GetArch();
     int32_t shift = DataType::ShiftByType(type, arch);
-    ScopedTmpReg scoped_tmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
-    auto tmp = scoped_tmp.GetReg();
+    ScopedTmpReg scopedTmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
+    auto tmp = scopedTmp.GetReg();
     encoder->EncodeAdd(tmp, src0, Imm(offset));
     auto mem = MemRef(tmp, src1, shift);
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
     encoder->EncodeLdr(dst, IsTypeSigned(type), mem);
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
 void EncodeVisitor::VisitLoadCompressedStringChar(GraphVisitor *visitor, Inst *inst)
@@ -3142,8 +3139,8 @@ void EncodeVisitor::VisitLoadCompressedStringChar(GraphVisitor *visitor, Inst *i
     auto encoder = enc->GetEncoder();
     auto arch = encoder->GetArch();
     int32_t shift = DataType::ShiftByType(type, arch);
-    ScopedTmpReg scoped_tmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
-    auto tmp = scoped_tmp.GetReg();
+    ScopedTmpReg scopedTmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
+    auto tmp = scopedTmp.GetReg();
 
     ASSERT(encoder->CanEncodeCompressedStringCharAt());
     auto mask = runtime->GetStringCompressionMask();
@@ -3160,15 +3157,15 @@ void EncodeVisitor::VisitLenArray(GraphVisitor *visitor, Inst *inst)
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // array
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                   // len array
 
-    auto len_array_inst = inst->CastToLenArray();
+    auto lenArrayInst = inst->CastToLenArray();
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
-    int64_t offset = len_array_inst->IsArray() ? runtime->GetArrayLengthOffset(enc->GetCodegen()->GetArch())
-                                               : runtime->GetStringLengthOffset(enc->GetArch());
+    int64_t offset = lenArrayInst->IsArray() ? runtime->GetArrayLengthOffset(enc->GetCodegen()->GetArch())
+                                             : runtime->GetStringLengthOffset(enc->GetArch());
     auto mem = MemRef(src0, offset);
 
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
     enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
 void EncodeVisitor::VisitBuiltin([[maybe_unused]] GraphVisitor *visitor, [[maybe_unused]] Inst *inst)
@@ -3189,10 +3186,10 @@ void EncodeVisitor::VisitNullCheck(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitBoundsCheck(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto len_type = inst->GetInputType(0);
-    auto len = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), len_type);
-    auto index_type = inst->GetInputType(1);
-    auto index = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), index_type);
+    auto lenType = inst->GetInputType(0);
+    auto len = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), lenType);
+    auto indexType = inst->GetInputType(1);
+    auto index = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), indexType);
     [[maybe_unused]] constexpr int64_t IMM_2 = 2;
     ASSERT(inst->GetInput(IMM_2).GetInst()->GetOpcode() == Opcode::SaveState ||
            inst->GetInput(IMM_2).GetInst()->GetOpcode() == Opcode::SaveStateDeoptimize);
@@ -3214,42 +3211,42 @@ void EncodeVisitor::VisitRefTypeCheck(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
-    auto array_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
-    auto ref_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
+    auto arrayReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
+    auto refReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
     [[maybe_unused]] constexpr int64_t IMM_2 = 2;
     ASSERT(inst->GetInput(IMM_2).GetInst()->GetOpcode() == Opcode::SaveState);
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
 
-    auto slow_path =
+    auto slowPath =
         enc->GetCodegen()->CreateSlowPath<SlowPathRefCheck>(inst, EntrypointId::CHECK_STORE_ARRAY_REFERENCE);
 
-    slow_path->SetRegs(array_reg, ref_reg);
-    slow_path->CreateBackLabel(encoder);
+    slowPath->SetRegs(arrayReg, refReg);
+    slowPath->CreateBackLabel(encoder);
 
     // We don't check if stored object is nullptr
-    encoder->EncodeJump(slow_path->GetBackLabel(), ref_reg, Condition::EQ);
+    encoder->EncodeJump(slowPath->GetBackLabel(), refReg, Condition::EQ);
 
-    ScopedTmpReg tmp_reg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, enc->GetCodegen()->GetArch()));
-    ScopedTmpReg tmp_reg1(encoder, Codegen::ConvertDataType(DataType::REFERENCE, enc->GetCodegen()->GetArch()));
+    ScopedTmpReg tmpReg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, enc->GetCodegen()->GetArch()));
+    ScopedTmpReg tmpReg1(encoder, Codegen::ConvertDataType(DataType::REFERENCE, enc->GetCodegen()->GetArch()));
 
     // Get Class from array
-    enc->GetCodegen()->LoadClassFromObject(tmp_reg, array_reg);
+    enc->GetCodegen()->LoadClassFromObject(tmpReg, arrayReg);
 
     // Get element type Class from array class
-    encoder->EncodeLdr(tmp_reg, false, MemRef(tmp_reg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
+    encoder->EncodeLdr(tmpReg, false, MemRef(tmpReg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
 
     // Get Class from stored object
-    enc->GetCodegen()->LoadClassFromObject(tmp_reg1, ref_reg);
+    enc->GetCodegen()->LoadClassFromObject(tmpReg1, refReg);
 
     // If the object's and array element's types match we do not check further
-    encoder->EncodeJump(slow_path->GetBackLabel(), tmp_reg, tmp_reg1, Condition::EQ);
+    encoder->EncodeJump(slowPath->GetBackLabel(), tmpReg, tmpReg1, Condition::EQ);
 
     // If the array's element class is not Object (baseclass == null)
     // we call CheckStoreArrayReference, otherwise we fall through
-    encoder->EncodeLdr(tmp_reg1, false, MemRef(tmp_reg, runtime->GetClassBaseOffset(enc->GetArch())));
-    encoder->EncodeJump(slow_path->GetLabel(), tmp_reg1, Condition::NE);
+    encoder->EncodeLdr(tmpReg1, false, MemRef(tmpReg, runtime->GetClassBaseOffset(enc->GetArch())));
+    encoder->EncodeJump(slowPath->GetLabel(), tmpReg1, Condition::NE);
 
-    slow_path->BindBackLabel(encoder);
+    slowPath->BindBackLabel(encoder);
 }
 
 void EncodeVisitor::VisitZeroCheck(GraphVisitor *visitor, Inst *inst)
@@ -3269,8 +3266,8 @@ void EncodeVisitor::VisitNegativeCheck(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitNotPositiveCheck(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto src_type = inst->GetInputType(0);
-    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), src_type);
+    auto srcType = inst->GetInputType(0);
+    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), srcType);
     ASSERT(inst->GetInput(1).GetInst()->GetOpcode() == Opcode::SaveState ||
            inst->GetInput(1).GetInst()->GetOpcode() == Opcode::SaveStateDeoptimize);
 
@@ -3283,14 +3280,14 @@ void EncodeVisitor::VisitNotPositiveCheck(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitDeoptimizeIf(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto src_type = inst->GetInput(0).GetInst()->GetType();
-    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), src_type);
+    auto srcType = inst->GetInput(0).GetInst()->GetType();
+    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), srcType);
 
-    auto slow_path =
+    auto slowPath =
         enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, inst->CastToDeoptimizeIf()->GetDeoptimizeType());
 
     // create jump to slow path if src is true
-    enc->GetEncoder()->EncodeJump(slow_path->GetLabel(), src, Condition::NE);
+    enc->GetEncoder()->EncodeJump(slowPath->GetLabel(), src, Condition::NE);
 }
 
 void EncodeVisitor::VisitDeoptimizeCompare(GraphVisitor *visitor, Inst *inst)
@@ -3300,9 +3297,9 @@ void EncodeVisitor::VisitDeoptimizeCompare(GraphVisitor *visitor, Inst *inst)
     ASSERT(deopt->GetOperandsType() != DataType::NO_TYPE);
     auto src0 = enc->GetCodegen()->ConvertRegister(deopt->GetSrcReg(0), deopt->GetOperandsType());
     auto src1 = enc->GetCodegen()->ConvertRegister(deopt->GetSrcReg(1), deopt->GetOperandsType());
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(
         inst, inst->CastToDeoptimizeCompare()->GetDeoptimizeType());
-    enc->GetEncoder()->EncodeJump(slow_path->GetLabel(), src0, src1, enc->GetCodegen()->ConvertCc(deopt->GetCc()));
+    enc->GetEncoder()->EncodeJump(slowPath->GetLabel(), src0, src1, enc->GetCodegen()->ConvertCc(deopt->GetCc()));
 }
 
 void EncodeVisitor::VisitDeoptimizeCompareImm(GraphVisitor *visitor, Inst *inst)
@@ -3313,7 +3310,7 @@ void EncodeVisitor::VisitDeoptimizeCompareImm(GraphVisitor *visitor, Inst *inst)
     ASSERT(deopt->GetOperandsType() != DataType::NO_TYPE);
     auto cc = deopt->GetCc();
     auto src0 = enc->GetCodegen()->ConvertRegister(deopt->GetSrcReg(0), deopt->GetOperandsType());
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(
         inst, inst->CastToDeoptimizeCompareImm()->GetDeoptimizeType());
 
     if (deopt->GetImm() == 0) {
@@ -3321,27 +3318,27 @@ void EncodeVisitor::VisitDeoptimizeCompareImm(GraphVisitor *visitor, Inst *inst)
         DataType::Type type = deopt->GetInput(0).GetInst()->GetType();
         ASSERT(!IsFloatType(type));
         if (IsTypeSigned(type) && (cc == ConditionCode::CC_LT || cc == ConditionCode::CC_GE)) {
-            auto sign_bit = GetTypeSize(type, arch) - 1;
+            auto signBit = GetTypeSize(type, arch) - 1;
             if (cc == ConditionCode::CC_LT) {
                 // x < 0
-                encoder->EncodeBitTestAndBranch(slow_path->GetLabel(), src0, sign_bit, true);
+                encoder->EncodeBitTestAndBranch(slowPath->GetLabel(), src0, signBit, true);
                 return;
             }
             if (cc == ConditionCode::CC_GE) {
                 // x >= 0
-                encoder->EncodeBitTestAndBranch(slow_path->GetLabel(), src0, sign_bit, false);
+                encoder->EncodeBitTestAndBranch(slowPath->GetLabel(), src0, signBit, false);
                 return;
             }
         }
         if (enc->GetCodegen()->GetTarget().SupportZeroReg()) {
             auto zreg = enc->GetRegfile()->GetZeroReg();
-            encoder->EncodeJump(slow_path->GetLabel(), src0, zreg, enc->GetCodegen()->ConvertCc(cc));
+            encoder->EncodeJump(slowPath->GetLabel(), src0, zreg, enc->GetCodegen()->ConvertCc(cc));
         } else {
-            encoder->EncodeJump(slow_path->GetLabel(), src0, Imm(0), enc->GetCodegen()->ConvertCc(cc));
+            encoder->EncodeJump(slowPath->GetLabel(), src0, Imm(0), enc->GetCodegen()->ConvertCc(cc));
         }
         return;
     }
-    encoder->EncodeJump(slow_path->GetLabel(), src0, Imm(deopt->GetImm()), enc->GetCodegen()->ConvertCc(cc));
+    encoder->EncodeJump(slowPath->GetLabel(), src0, Imm(deopt->GetImm()), enc->GetCodegen()->ConvertCc(cc));
 }
 
 void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)
@@ -3349,66 +3346,64 @@ void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto method = inst->CastToLoadString()->GetMethod();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    auto string_type = inst->CastToLoadString()->GetTypeId();
+    auto stringType = inst->CastToLoadString()->GetTypeId();
     auto graph = enc->cg_->GetGraph();
     auto encoder = enc->GetEncoder();
     ASSERT(inst->IsRuntimeCall());
 
     // Static constructor invoked only once, so there is no sense in replacing regular
     // ResolveString runtime call with optimized version that will only slow down constructor's execution.
-    auto is_cctor = graph->GetRuntime()->IsMethodStaticConstructor(method);
-    ObjectPointerType string_ptr {0};
+    auto isCctor = graph->GetRuntime()->IsMethodStaticConstructor(method);
+    ObjectPointerType stringPtr {0};
 
-    if (graph->IsAotMode() && OPTIONS.IsCompilerAotLoadStringPlt() && !is_cctor) {
-        auto aot_data = graph->GetAotData();
-        intptr_t slot_offset = aot_data->GetStringSlotOffset(encoder->GetCursorOffset(), string_type);
-        ScopedTmpRegU64 addr_reg(encoder);
-        ScopedTmpRegU64 tmp_dst(encoder);
-        encoder->MakeLoadAotTableAddr(slot_offset, addr_reg, tmp_dst);
+    if (graph->IsAotMode() && g_options.IsCompilerAotLoadStringPlt() && !isCctor) {
+        auto aotData = graph->GetAotData();
+        intptr_t slotOffset = aotData->GetStringSlotOffset(encoder->GetCursorOffset(), stringType);
+        ScopedTmpRegU64 addrReg(encoder);
+        ScopedTmpRegU64 tmpDst(encoder);
+        encoder->MakeLoadAotTableAddr(slotOffset, addrReg, tmpDst);
 
-        auto slow_path =
+        auto slowPath =
             enc->GetCodegen()->CreateSlowPath<SlowPathResolveStringAot>(inst, EntrypointId::RESOLVE_STRING_AOT);
-        slow_path->SetDstReg(dst);
-        slow_path->SetAddrReg(addr_reg);
-        slow_path->SetStringId(string_type);
-        slow_path->SetMethod(method);
-        encoder->EncodeJump(slow_path->GetLabel(), tmp_dst, Imm(RuntimeInterface::RESOLVE_STRING_AOT_COUNTER_LIMIT),
+        slowPath->SetDstReg(dst);
+        slowPath->SetAddrReg(addrReg);
+        slowPath->SetStringId(stringType);
+        slowPath->SetMethod(method);
+        encoder->EncodeJump(slowPath->GetLabel(), tmpDst, Imm(RuntimeInterface::RESOLVE_STRING_AOT_COUNTER_LIMIT),
                             Condition::LT);
-        encoder->EncodeMov(dst, Reg(tmp_dst.GetReg().GetId(), dst.GetType()));
-        slow_path->BindBackLabel(encoder);
-    } else if (!graph->IsAotMode() &&
-               (string_ptr = graph->GetRuntime()->GetNonMovableString(method, string_type)) != 0) {
-        encoder->EncodeMov(dst, Imm(string_ptr));
-        EVENT_JIT_USE_RESOLVED_STRING(graph->GetRuntime()->GetMethodName(method), string_type);
+        encoder->EncodeMov(dst, Reg(tmpDst.GetReg().GetId(), dst.GetType()));
+        slowPath->BindBackLabel(encoder);
+    } else if (!graph->IsAotMode() && (stringPtr = graph->GetRuntime()->GetNonMovableString(method, stringType)) != 0) {
+        encoder->EncodeMov(dst, Imm(stringPtr));
+        EVENT_JIT_USE_RESOLVED_STRING(graph->GetRuntime()->GetMethodName(method), stringType);
     } else {
-        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_STRING, dst,
-                                                 TypedImm(string_type));
+        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_STRING, dst, TypedImm(stringType));
     }
 }
 
 void EncodeVisitor::VisitLoadObject(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto load_obj = inst->CastToLoadObject();
-    if (load_obj->GetNeedBarrier()) {
+    auto loadObj = inst->CastToLoadObject();
+    if (loadObj->GetNeedBarrier()) {
         // Consider inserting barriers for GC
     }
     auto type = inst->GetType();
-    auto type_input = inst->GetInput(0).GetInst()->GetType();
-    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type_input);  // obj
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);         // load value
+    auto typeInput = inst->GetInput(0).GetInst()->GetType();
+    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), typeInput);  // obj
+    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);        // load value
 
     auto graph = enc->cg_->GetGraph();
-    auto field = load_obj->GetObjField();
-    size_t offset = GetObjectOffset(graph, load_obj->GetObjectType(), field, load_obj->GetTypeId());
+    auto field = loadObj->GetObjField();
+    size_t offset = GetObjectOffset(graph, loadObj->GetObjectType(), field, loadObj->GetTypeId());
     auto mem = MemRef(src, offset);
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
-    if (load_obj->GetVolatile()) {
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
+    if (loadObj->GetVolatile()) {
         enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
     } else {
         enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
     }
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
 void EncodeVisitor::VisitResolveObjectField(GraphVisitor *visitor, Inst *inst)
@@ -3421,24 +3416,24 @@ void EncodeVisitor::VisitResolveObjectField(GraphVisitor *visitor, Inst *inst)
     }
     auto type = inst->GetType();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto type_id = resolver->GetTypeId();
+    auto typeId = resolver->GetTypeId();
     auto method = resolver->GetMethod();
     if (graph->IsAotMode()) {
-        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::GET_FIELD_OFFSET, dst, TypedImm(type_id));
+        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::GET_FIELD_OFFSET, dst, TypedImm(typeId));
     } else {
         auto skind = UnresolvedTypesInterface::SlotKind::FIELD;
-        auto field_offset_addr = graph->GetRuntime()->GetUnresolvedTypes()->GetTableSlot(method, type_id, skind);
-        ScopedTmpReg tmp_reg(enc->GetEncoder());
+        auto fieldOffsetAddr = graph->GetRuntime()->GetUnresolvedTypes()->GetTableSlot(method, typeId, skind);
+        ScopedTmpReg tmpReg(enc->GetEncoder());
         // load field offset and if it's 0 then call runtime EntrypointId::GET_FIELD_OFFSET
-        enc->GetEncoder()->EncodeMov(tmp_reg, Imm(field_offset_addr));
-        enc->GetEncoder()->EncodeLdr(tmp_reg, false, MemRef(tmp_reg));
-        auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathUnresolved>(inst, EntrypointId::GET_FIELD_OFFSET);
-        slow_path->SetUnresolvedType(method, type_id);
-        slow_path->SetDstReg(tmp_reg);
-        slow_path->SetSlotAddr(field_offset_addr);
-        enc->GetEncoder()->EncodeJump(slow_path->GetLabel(), tmp_reg, Condition::EQ);
-        slow_path->BindBackLabel(enc->GetEncoder());
-        enc->GetEncoder()->EncodeMov(dst, tmp_reg);
+        enc->GetEncoder()->EncodeMov(tmpReg, Imm(fieldOffsetAddr));
+        enc->GetEncoder()->EncodeLdr(tmpReg, false, MemRef(tmpReg));
+        auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathUnresolved>(inst, EntrypointId::GET_FIELD_OFFSET);
+        slowPath->SetUnresolvedType(method, typeId);
+        slowPath->SetDstReg(tmpReg);
+        slowPath->SetSlotAddr(fieldOffsetAddr);
+        enc->GetEncoder()->EncodeJump(slowPath->GetLabel(), tmpReg, Condition::EQ);
+        slowPath->BindBackLabel(enc->GetEncoder());
+        enc->GetEncoder()->EncodeMov(dst, tmpReg);
     }
 }
 
@@ -3453,24 +3448,24 @@ void EncodeVisitor::VisitLoadResolvedObjectField([[maybe_unused]] GraphVisitor *
     auto obj = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // obj
     auto ofs = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::UINT32);     // field offset
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                  // load value
-    ScopedTmpReg tmp_reg(enc->GetEncoder());
-    enc->GetEncoder()->EncodeAdd(tmp_reg, obj, ofs);
-    enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(tmp_reg));
+    ScopedTmpReg tmpReg(enc->GetEncoder());
+    enc->GetEncoder()->EncodeAdd(tmpReg, obj, ofs);
+    enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(tmpReg));
 }
 
 void EncodeVisitor::VisitLoad(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto load_by_offset = inst->CastToLoad();
+    auto loadByOffset = inst->CastToLoad();
 
     auto type = inst->GetType();
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0U), DataType::POINTER);  // pointer
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1U), DataType::UINT32);   // offset
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                  // load value
 
-    auto mem = MemRef(src0, src1, load_by_offset->GetScale());
+    auto mem = MemRef(src0, src1, loadByOffset->GetScale());
 
-    if (load_by_offset->GetVolatile()) {
+    if (loadByOffset->GetVolatile()) {
         enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
     } else {
         enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
@@ -3480,33 +3475,33 @@ void EncodeVisitor::VisitLoad(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitLoadI(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto load_by_offset = inst->CastToLoadI();
+    auto loadByOffset = inst->CastToLoadI();
 
     auto type = inst->GetType();
     auto base = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0U), DataType::POINTER);  // pointer
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                  // load value
 
-    if (load_by_offset->GetVolatile()) {
-        enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(base, load_by_offset->GetImm()));
+    if (loadByOffset->GetVolatile()) {
+        enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(base, loadByOffset->GetImm()));
     } else {
-        enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), MemRef(base, load_by_offset->GetImm()));
+        enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), MemRef(base, loadByOffset->GetImm()));
     }
 }
 
 void EncodeVisitor::VisitStoreI(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto store_inst = inst->CastToStoreI();
+    auto storeInst = inst->CastToStoreI();
 
     auto base = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0U), DataType::POINTER);
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1U), inst->GetType());
 
-    auto mem = MemRef(base, store_inst->GetImm());
+    auto mem = MemRef(base, storeInst->GetImm());
     if (inst->CastToStoreI()->GetNeedBarrier()) {
         enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(base.GetId(), src.GetId()));
     }
 
-    if (store_inst->GetVolatile()) {
+    if (storeInst->GetVolatile()) {
         enc->GetEncoder()->EncodeStrRelease(src, mem);
     } else {
         enc->GetEncoder()->EncodeStr(src, mem);
@@ -3520,14 +3515,14 @@ void EncodeVisitor::VisitStoreI(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitStoreObject(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto store_obj = inst->CastToStoreObject();
+    auto storeObj = inst->CastToStoreObject();
     auto codegen = enc->GetCodegen();
     auto src0 = codegen->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // obj
     auto src1 = codegen->ConvertRegister(inst->GetSrcReg(1), inst->GetType());      // store value
 
     auto graph = enc->cg_->GetGraph();
-    auto field = store_obj->GetObjField();
-    size_t offset = GetObjectOffset(graph, store_obj->GetObjectType(), field, store_obj->GetTypeId());
+    auto field = storeObj->GetObjField();
+    size_t offset = GetObjectOffset(graph, storeObj->GetObjectType(), field, storeObj->GetTypeId());
     if (!enc->GetCodegen()->OffsetFitReferenceTypeSize(offset)) {
         // such code should not be executed
         enc->GetEncoder()->EncodeAbort();
@@ -3536,22 +3531,22 @@ void EncodeVisitor::VisitStoreObject(GraphVisitor *visitor, Inst *inst)
     auto mem = MemRef(src0, offset);
     auto encoder = enc->GetEncoder();
     if (inst->CastToStoreObject()->GetNeedBarrier()) {
-        if (store_obj->GetObjectType() == ObjectType::MEM_DYN_CLASS) {
+        if (storeObj->GetObjectType() == ObjectType::MEM_DYN_CLASS) {
             codegen->CreatePreWRB<true>(inst, mem, MakeMask(src0.GetId(), src1.GetId()));
         } else {
             codegen->CreatePreWRB(inst, mem, MakeMask(src0.GetId(), src1.GetId()));
         }
     }
-    auto prev_offset = encoder->GetCursorOffset();
-    if (store_obj->GetVolatile()) {
+    auto prevOffset = encoder->GetCursorOffset();
+    if (storeObj->GetVolatile()) {
         encoder->EncodeStrRelease(src1, mem);
     } else {
         encoder->EncodeStr(src1, mem);
     }
-    codegen->TryInsertImplicitNullCheck(inst, prev_offset);
+    codegen->TryInsertImplicitNullCheck(inst, prevOffset);
     if (inst->CastToStoreObject()->GetNeedBarrier()) {
         ScopedTmpRegLazy tmp(encoder);
-        if (store_obj->GetObjectType() == ObjectType::MEM_DYN_CLASS) {
+        if (storeObj->GetObjectType() == ObjectType::MEM_DYN_CLASS) {
             tmp.AcquireIfInvalid();
             encoder->EncodeLdr(tmp, false, MemRef(src1, graph->GetRuntime()->GetManagedClassOffset(graph->GetArch())));
             src1 = tmp;
@@ -3581,18 +3576,18 @@ void EncodeVisitor::VisitStoreResolvedObjectField(GraphVisitor *visitor, Inst *i
 void EncodeVisitor::VisitStore(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto store_by_offset = inst->CastToStore();
+    auto storeByOffset = inst->CastToStore();
     auto type = inst->GetType();
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0U), DataType::POINTER);  // pointer
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1U), DataType::UINT32);   // offset
     auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(2U), type);               // store value
 
-    auto mem = MemRef(src0, src1, store_by_offset->GetScale());
+    auto mem = MemRef(src0, src1, storeByOffset->GetScale());
     if (inst->CastToStore()->GetNeedBarrier()) {
         enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(src0.GetId(), src2.GetId()));
     }
 
-    if (store_by_offset->GetVolatile()) {
+    if (storeByOffset->GetVolatile()) {
         enc->GetEncoder()->EncodeStrRelease(src2, mem);
     } else {
         enc->GetEncoder()->EncodeStr(src2, mem);
@@ -3608,44 +3603,42 @@ void EncodeVisitor::VisitInitClass(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto runtime = graph->GetRuntime();
-    auto class_id = inst->CastToInitClass()->GetTypeId();
+    auto classId = inst->CastToInitClass()->GetTypeId();
     auto encoder = enc->GetEncoder();
     ASSERT(inst->IsRuntimeCall());
 
     if (graph->IsAotMode()) {
-        ScopedTmpReg tmp_reg(encoder);
-        ScopedTmpReg class_reg(encoder);
+        ScopedTmpReg tmpReg(encoder);
+        ScopedTmpReg classReg(encoder);
 
-        auto aot_data = graph->GetAotData();
-        intptr_t offset = aot_data->GetClassSlotOffset(encoder->GetCursorOffset(), class_id, true);
-        encoder->MakeLoadAotTableAddr(offset, tmp_reg, class_reg);
+        auto aotData = graph->GetAotData();
+        intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
+        encoder->MakeLoadAotTableAddr(offset, tmpReg, classReg);
 
         auto label = encoder->CreateLabel();
-        encoder->EncodeJump(label, class_reg, Condition::NE);
+        encoder->EncodeJump(label, classReg, Condition::NE);
 
         // PLT Class Init Resolver has special calling convention:
         // First encoder temporary (tmp_reg) works as parameter and return value (which is unnecessary here)
-        CHECK_EQ(tmp_reg.GetReg().GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
-        enc->GetCodegen()->CreateJumpToClassResolverPltShared(inst, tmp_reg.GetReg(),
-                                                              EntrypointId::CLASS_INIT_RESOLVER);
+        CHECK_EQ(tmpReg.GetReg().GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
+        enc->GetCodegen()->CreateJumpToClassResolverPltShared(inst, tmpReg.GetReg(), EntrypointId::CLASS_INIT_RESOLVER);
         encoder->BindLabel(label);
     } else {  // JIT mode
         auto klass = reinterpret_cast<uintptr_t>(inst->CastToInitClass()->GetClass());
         ASSERT(klass != 0);
         if (!runtime->IsClassInitialized(klass)) {
-            auto slow_path =
-                enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::INITIALIZE_CLASS);
+            auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::INITIALIZE_CLASS);
 
-            auto state_offset = runtime->GetClassStateOffset(enc->GetArch());
-            int64_t init_value = runtime->GetClassInitializedValue();
-            ScopedTmpReg tmp_reg(encoder);
-            encoder->EncodeMov(tmp_reg, Imm(klass + state_offset));
-            auto tmp_i8 = enc->GetCodegen()->ConvertRegister(tmp_reg.GetReg().GetId(), DataType::INT8);
-            encoder->EncodeLdr(tmp_i8, false, MemRef(tmp_reg));
+            auto stateOffset = runtime->GetClassStateOffset(enc->GetArch());
+            int64_t initValue = runtime->GetClassInitializedValue();
+            ScopedTmpReg tmpReg(encoder);
+            encoder->EncodeMov(tmpReg, Imm(klass + stateOffset));
+            auto tmpI8 = enc->GetCodegen()->ConvertRegister(tmpReg.GetReg().GetId(), DataType::INT8);
+            encoder->EncodeLdr(tmpI8, false, MemRef(tmpReg));
 
-            encoder->EncodeJump(slow_path->GetLabel(), tmp_i8, Imm(init_value), Condition::NE);
+            encoder->EncodeJump(slowPath->GetLabel(), tmpI8, Imm(initValue), Condition::NE);
 
-            slow_path->BindBackLabel(encoder);
+            slowPath->BindBackLabel(encoder);
         }
     }
 }
@@ -3654,25 +3647,25 @@ void EncodeVisitor::VisitLoadClass(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
-    auto load_class = inst->CastToLoadClass();
+    auto loadClass = inst->CastToLoadClass();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto graph = enc->cg_->GetGraph();
-    auto type_id = load_class->GetTypeId();
+    auto typeId = loadClass->GetTypeId();
     ASSERT(inst->IsRuntimeCall());
 
     if (graph->IsAotMode()) {
-        auto method_class_id = graph->GetRuntime()->GetClassIdForMethod(graph->GetMethod());
-        if (method_class_id == type_id) {
-            auto dst_ptr = dst.As(Codegen::ConvertDataType(DataType::POINTER, graph->GetArch()));
-            enc->GetCodegen()->LoadMethod(dst_ptr);
-            auto mem = MemRef(dst_ptr, graph->GetRuntime()->GetClassOffset(graph->GetArch()));
+        auto methodClassId = graph->GetRuntime()->GetClassIdForMethod(graph->GetMethod());
+        if (methodClassId == typeId) {
+            auto dstPtr = dst.As(Codegen::ConvertDataType(DataType::POINTER, graph->GetArch()));
+            enc->GetCodegen()->LoadMethod(dstPtr);
+            auto mem = MemRef(dstPtr, graph->GetRuntime()->GetClassOffset(graph->GetArch()));
             encoder->EncodeLdr(dst.As(Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch())), false, mem);
             return;
         }
-        ScopedTmpReg tmp_reg(encoder);
-        enc->GetCodegen()->CreateLoadClassFromPLT(inst, tmp_reg, dst, type_id);
+        ScopedTmpReg tmpReg(encoder);
+        enc->GetCodegen()->CreateLoadClassFromPLT(inst, tmpReg, dst, typeId);
     } else {  // JIT mode
-        auto klass = load_class->GetClass();
+        auto klass = loadClass->GetClass();
         if (klass == nullptr) {
             FillLoadClassUnresolved(visitor, inst);
         } else {
@@ -3685,23 +3678,23 @@ void EncodeVisitor::FillLoadClassUnresolved(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
-    auto load_class = inst->CastToLoadClass();
+    auto loadClass = inst->CastToLoadClass();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto graph = enc->cg_->GetGraph();
-    auto type_id = load_class->GetTypeId();
-    auto method = load_class->GetMethod();
+    auto typeId = loadClass->GetTypeId();
+    auto method = loadClass->GetMethod();
     auto utypes = graph->GetRuntime()->GetUnresolvedTypes();
-    auto klass_addr = utypes->GetTableSlot(method, type_id, UnresolvedTypesInterface::SlotKind::CLASS);
-    Reg dst_ptr(dst.GetId(), enc->GetCodegen()->GetPtrRegType());
-    encoder->EncodeMov(dst_ptr, Imm(klass_addr));
-    encoder->EncodeLdr(dst, false, MemRef(dst_ptr));
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathUnresolved>(inst, EntrypointId::RESOLVE_CLASS);
-    slow_path->SetUnresolvedType(method, type_id);
-    slow_path->SetDstReg(dst);
-    slow_path->SetSlotAddr(klass_addr);
+    auto klassAddr = utypes->GetTableSlot(method, typeId, UnresolvedTypesInterface::SlotKind::CLASS);
+    Reg dstPtr(dst.GetId(), enc->GetCodegen()->GetPtrRegType());
+    encoder->EncodeMov(dstPtr, Imm(klassAddr));
+    encoder->EncodeLdr(dst, false, MemRef(dstPtr));
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathUnresolved>(inst, EntrypointId::RESOLVE_CLASS);
+    slowPath->SetUnresolvedType(method, typeId);
+    slowPath->SetDstReg(dst);
+    slowPath->SetSlotAddr(klassAddr);
 
-    encoder->EncodeJump(slow_path->GetLabel(), dst, Condition::EQ);
-    slow_path->BindBackLabel(encoder);
+    encoder->EncodeJump(slowPath->GetLabel(), dst, Condition::EQ);
+    slowPath->BindBackLabel(encoder);
 }
 
 void EncodeVisitor::VisitGetGlobalVarAddress(GraphVisitor *visitor, Inst *inst)
@@ -3713,25 +3706,25 @@ void EncodeVisitor::VisitGetGlobalVarAddress(GraphVisitor *visitor, Inst *inst)
     auto encoder = enc->GetEncoder();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());  // load value
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::ANY);
-    auto entrypoint_id = runtime->GetGlobalVarEntrypointId();
+    auto entrypointId = runtime->GetGlobalVarEntrypointId();
     ASSERT(inst->IsRuntimeCall());
     if (graph->IsAotMode()) {
         ScopedTmpReg addr(encoder);
-        auto aot_data = graph->GetAotData();
-        Reg const_pool = src;
-        ScopedTmpRegLazy tmp_reg(encoder);
+        auto aotData = graph->GetAotData();
+        Reg constPool = src;
+        ScopedTmpRegLazy tmpReg(encoder);
         if (dst.GetId() == src.GetId()) {
-            tmp_reg.AcquireIfInvalid();
-            const_pool = tmp_reg.GetReg().As(src.GetType());
-            encoder->EncodeMov(const_pool, src);
+            tmpReg.AcquireIfInvalid();
+            constPool = tmpReg.GetReg().As(src.GetType());
+            encoder->EncodeMov(constPool, src);
         }
-        intptr_t offset = aot_data->GetCommonSlotOffset(encoder->GetCursorOffset(), id);
+        intptr_t offset = aotData->GetCommonSlotOffset(encoder->GetCursorOffset(), id);
         encoder->MakeLoadAotTableAddr(offset, addr, dst);
 
         auto label = encoder->CreateLabel();
         encoder->EncodeJump(label, dst, Condition::NE);
 
-        enc->GetCodegen()->CallRuntime(inst, entrypoint_id, dst, RegMask::GetZeroMask(), const_pool, TypedImm(id));
+        enc->GetCodegen()->CallRuntime(inst, entrypointId, dst, RegMask::GetZeroMask(), constPool, TypedImm(id));
         encoder->EncodeStr(dst, MemRef(addr));
         encoder->BindLabel(label);
     } else {
@@ -3740,7 +3733,7 @@ void EncodeVisitor::VisitGetGlobalVarAddress(GraphVisitor *visitor, Inst *inst)
             address = runtime->GetGlobalVarAddress(graph->GetMethod(), id);
         }
         if (address == 0) {
-            enc->GetCodegen()->CallRuntime(inst, entrypoint_id, dst, RegMask::GetZeroMask(), src, TypedImm(id));
+            enc->GetCodegen()->CallRuntime(inst, entrypointId, dst, RegMask::GetZeroMask(), src, TypedImm(id));
         } else {
             encoder->EncodeMov(dst, Imm(address));
         }
@@ -3752,9 +3745,9 @@ void EncodeVisitor::VisitLoadRuntimeClass(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto codegen = enc->GetCodegen();
     auto dst = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());  // load value
-    size_t class_addr_offset = codegen->GetGraph()->GetRuntime()->GetTlsPromiseClassPointerOffset(codegen->GetArch());
+    size_t classAddrOffset = codegen->GetGraph()->GetRuntime()->GetTlsPromiseClassPointerOffset(codegen->GetArch());
 
-    auto mem = MemRef(codegen->ThreadReg(), class_addr_offset);
+    auto mem = MemRef(codegen->ThreadReg(), classAddrOffset);
     enc->GetEncoder()->EncodeLdr(dst, false, mem);
 }
 
@@ -3763,37 +3756,36 @@ void EncodeVisitor::VisitLoadAndInitClass(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto runtime = graph->GetRuntime();
-    auto class_id = inst->CastToLoadAndInitClass()->GetTypeId();
+    auto classId = inst->CastToLoadAndInitClass()->GetTypeId();
     auto encoder = enc->GetEncoder();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());  // load value
     ASSERT(inst->IsRuntimeCall());
 
     if (graph->IsAotMode()) {
-        auto method_class_id = runtime->GetClassIdForMethod(graph->GetMethod());
-        if (method_class_id == class_id) {
-            auto dst_ptr = dst.As(Codegen::ConvertDataType(DataType::POINTER, graph->GetArch()));
-            enc->GetCodegen()->LoadMethod(dst_ptr);
-            auto mem = MemRef(dst_ptr, graph->GetRuntime()->GetClassOffset(graph->GetArch()));
+        auto methodClassId = runtime->GetClassIdForMethod(graph->GetMethod());
+        if (methodClassId == classId) {
+            auto dstPtr = dst.As(Codegen::ConvertDataType(DataType::POINTER, graph->GetArch()));
+            enc->GetCodegen()->LoadMethod(dstPtr);
+            auto mem = MemRef(dstPtr, graph->GetRuntime()->GetClassOffset(graph->GetArch()));
             encoder->EncodeLdr(dst.As(Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch())), false, mem);
             return;
         }
 
-        ScopedTmpReg tmp_reg(encoder);
+        ScopedTmpReg tmpReg(encoder);
 
-        auto aot_data = graph->GetAotData();
-        intptr_t offset = aot_data->GetClassSlotOffset(encoder->GetCursorOffset(), class_id, true);
-        encoder->MakeLoadAotTableAddr(offset, tmp_reg, dst);
+        auto aotData = graph->GetAotData();
+        intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
+        encoder->MakeLoadAotTableAddr(offset, tmpReg, dst);
 
         auto label = encoder->CreateLabel();
         encoder->EncodeJump(label, dst, Condition::NE);
 
         // PLT Class Init Resolver has special calling convention:
         // First encoder temporary (tmp_reg) works as parameter and return value
-        CHECK_EQ(tmp_reg.GetReg().GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
-        enc->GetCodegen()->CreateJumpToClassResolverPltShared(inst, tmp_reg.GetReg(),
-                                                              EntrypointId::CLASS_INIT_RESOLVER);
+        CHECK_EQ(tmpReg.GetReg().GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
+        enc->GetCodegen()->CreateJumpToClassResolverPltShared(inst, tmpReg.GetReg(), EntrypointId::CLASS_INIT_RESOLVER);
 
-        encoder->EncodeMov(dst, tmp_reg);
+        encoder->EncodeMov(dst, tmpReg);
         encoder->BindLabel(label);
     } else {  // JIT mode
         auto klass = reinterpret_cast<uintptr_t>(inst->CastToLoadAndInitClass()->GetClass());
@@ -3803,22 +3795,22 @@ void EncodeVisitor::VisitLoadAndInitClass(GraphVisitor *visitor, Inst *inst)
             return;
         }
 
-        auto method_class = runtime->GetClass(graph->GetMethod());
-        if (method_class == inst->CastToLoadAndInitClass()->GetClass()) {
+        auto methodClass = runtime->GetClass(graph->GetMethod());
+        if (methodClass == inst->CastToLoadAndInitClass()->GetClass()) {
             return;
         }
 
-        auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::INITIALIZE_CLASS);
+        auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::INITIALIZE_CLASS);
 
-        auto state_offset = runtime->GetClassStateOffset(enc->GetArch());
-        int64_t init_value = runtime->GetClassInitializedValue();
+        auto stateOffset = runtime->GetClassStateOffset(enc->GetArch());
+        int64_t initValue = runtime->GetClassInitializedValue();
 
-        ScopedTmpReg state_reg(encoder, INT8_TYPE);
-        encoder->EncodeLdr(state_reg, false, MemRef(dst, state_offset));
+        ScopedTmpReg stateReg(encoder, INT8_TYPE);
+        encoder->EncodeLdr(stateReg, false, MemRef(dst, stateOffset));
 
-        encoder->EncodeJump(slow_path->GetLabel(), state_reg, Imm(init_value), Condition::NE);
+        encoder->EncodeJump(slowPath->GetLabel(), stateReg, Imm(initValue), Condition::NE);
 
-        slow_path->BindBackLabel(encoder);
+        slowPath->BindBackLabel(encoder);
     }
 }
 
@@ -3826,53 +3818,52 @@ void EncodeVisitor::VisitUnresolvedLoadAndInitClass(GraphVisitor *visitor, Inst 
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
-    auto class_id = inst->CastToUnresolvedLoadAndInitClass()->GetTypeId();
+    auto classId = inst->CastToUnresolvedLoadAndInitClass()->GetTypeId();
     auto encoder = enc->GetEncoder();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());  // load value
     ASSERT(inst->IsRuntimeCall());
 
     if (graph->IsAotMode()) {
-        ScopedTmpReg tmp_reg(encoder);
+        ScopedTmpReg tmpReg(encoder);
 
-        auto aot_data = graph->GetAotData();
-        intptr_t offset = aot_data->GetClassSlotOffset(encoder->GetCursorOffset(), class_id, true);
-        encoder->MakeLoadAotTableAddr(offset, tmp_reg, dst);
+        auto aotData = graph->GetAotData();
+        intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
+        encoder->MakeLoadAotTableAddr(offset, tmpReg, dst);
 
         auto label = encoder->CreateLabel();
         encoder->EncodeJump(label, dst, Condition::NE);
 
         // PLT Class Init Resolver has special calling convention:
         // First encoder temporary (tmp_reg) works as parameter and return value
-        CHECK_EQ(tmp_reg.GetReg().GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
-        enc->GetCodegen()->CreateJumpToClassResolverPltShared(inst, tmp_reg.GetReg(),
-                                                              EntrypointId::CLASS_INIT_RESOLVER);
+        CHECK_EQ(tmpReg.GetReg().GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
+        enc->GetCodegen()->CreateJumpToClassResolverPltShared(inst, tmpReg.GetReg(), EntrypointId::CLASS_INIT_RESOLVER);
 
-        encoder->EncodeMov(dst, tmp_reg);
+        encoder->EncodeMov(dst, tmpReg);
         encoder->BindLabel(label);
     } else {  // JIT mode
         auto method = inst->CastToUnresolvedLoadAndInitClass()->GetMethod();
         auto utypes = graph->GetRuntime()->GetUnresolvedTypes();
-        auto klass_addr = utypes->GetTableSlot(method, class_id, UnresolvedTypesInterface::SlotKind::CLASS);
-        Reg dst_ptr(dst.GetId(), enc->GetCodegen()->GetPtrRegType());
-        encoder->EncodeMov(dst_ptr, Imm(klass_addr));
-        encoder->EncodeLdr(dst, false, MemRef(dst_ptr));
+        auto klassAddr = utypes->GetTableSlot(method, classId, UnresolvedTypesInterface::SlotKind::CLASS);
+        Reg dstPtr(dst.GetId(), enc->GetCodegen()->GetPtrRegType());
+        encoder->EncodeMov(dstPtr, Imm(klassAddr));
+        encoder->EncodeLdr(dst, false, MemRef(dstPtr));
 
-        auto slow_path =
+        auto slowPath =
             enc->GetCodegen()->CreateSlowPath<SlowPathUnresolved>(inst, EntrypointId::INITIALIZE_CLASS_BY_ID);
-        slow_path->SetUnresolvedType(method, class_id);
-        slow_path->SetDstReg(dst);
-        slow_path->SetSlotAddr(klass_addr);
+        slowPath->SetUnresolvedType(method, classId);
+        slowPath->SetDstReg(dst);
+        slowPath->SetSlotAddr(klassAddr);
 
-        encoder->EncodeJump(slow_path->GetLabel(), dst, Condition::EQ);
-        slow_path->BindBackLabel(encoder);
+        encoder->EncodeJump(slowPath->GetLabel(), dst, Condition::EQ);
+        slowPath->BindBackLabel(encoder);
     }
 }
 
 void EncodeVisitor::VisitLoadStatic(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto load_static = inst->CastToLoadStatic();
-    if (load_static->GetNeedBarrier()) {
+    auto loadStatic = inst->CastToLoadStatic();
+    if (loadStatic->GetNeedBarrier()) {
         // Consider inserting barriers for GC
     }
     auto type = inst->GetType();
@@ -3880,10 +3871,10 @@ void EncodeVisitor::VisitLoadStatic(GraphVisitor *visitor, Inst *inst)
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // class
 
     auto graph = enc->cg_->GetGraph();
-    auto field = load_static->GetObjField();
+    auto field = loadStatic->GetObjField();
     auto offset = graph->GetRuntime()->GetFieldOffset(field);
     auto mem = MemRef(src0, offset);
-    if (load_static->GetVolatile()) {
+    if (loadStatic->GetVolatile()) {
         enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
     } else {
         enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
@@ -3897,25 +3888,25 @@ void EncodeVisitor::VisitResolveObjectFieldStatic(GraphVisitor *visitor, Inst *i
     auto resolver = inst->CastToResolveObjectFieldStatic();
     ASSERT(resolver->GetType() == DataType::REFERENCE);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    auto type_id = resolver->GetTypeId();
+    auto typeId = resolver->GetTypeId();
     auto method = resolver->GetMethod();
     EntrypointId entrypoint = EntrypointId::GET_UNKNOWN_STATIC_FIELD_MEMORY_ADDRESS;  // REFERENCE
-    UnresolvedTypesInterface::SlotKind slot_kind = UnresolvedTypesInterface::SlotKind::FIELD;
+    UnresolvedTypesInterface::SlotKind slotKind = UnresolvedTypesInterface::SlotKind::FIELD;
 
     if (graph->IsAotMode()) {
-        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, entrypoint, dst, TypedImm(type_id), TypedImm(0));
+        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, entrypoint, dst, TypedImm(typeId), TypedImm(0));
     } else {
-        ScopedTmpReg tmp_reg(enc->GetEncoder());
-        auto field_addr = graph->GetRuntime()->GetUnresolvedTypes()->GetTableSlot(method, type_id, slot_kind);
-        enc->GetEncoder()->EncodeMov(tmp_reg, Imm(field_addr));
-        enc->GetEncoder()->EncodeLdr(tmp_reg, false, MemRef(tmp_reg));
-        auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathUnresolved>(inst, entrypoint);
-        slow_path->SetUnresolvedType(method, type_id);
-        slow_path->SetDstReg(tmp_reg);
-        slow_path->SetSlotAddr(field_addr);
-        enc->GetEncoder()->EncodeJump(slow_path->GetLabel(), tmp_reg, Condition::EQ);
-        slow_path->BindBackLabel(enc->GetEncoder());
-        enc->GetEncoder()->EncodeMov(dst, tmp_reg);
+        ScopedTmpReg tmpReg(enc->GetEncoder());
+        auto fieldAddr = graph->GetRuntime()->GetUnresolvedTypes()->GetTableSlot(method, typeId, slotKind);
+        enc->GetEncoder()->EncodeMov(tmpReg, Imm(fieldAddr));
+        enc->GetEncoder()->EncodeLdr(tmpReg, false, MemRef(tmpReg));
+        auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathUnresolved>(inst, entrypoint);
+        slowPath->SetUnresolvedType(method, typeId);
+        slowPath->SetDstReg(tmpReg);
+        slowPath->SetSlotAddr(fieldAddr);
+        enc->GetEncoder()->EncodeJump(slowPath->GetLabel(), tmpReg, Condition::EQ);
+        slowPath->BindBackLabel(enc->GetEncoder());
+        enc->GetEncoder()->EncodeMov(dst, tmpReg);
     }
 }
 
@@ -3927,39 +3918,39 @@ void EncodeVisitor::VisitLoadResolvedObjectFieldStatic(GraphVisitor *visitor, In
         // Insert barriers for GC
     }
     auto type = inst->GetType();
-    auto field_addr = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
+    auto fieldAddr = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
     // Unknown load, assume it can be volatile
-    enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(field_addr));
+    enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(fieldAddr));
 }
 
 void EncodeVisitor::VisitStoreStatic(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto store_static = inst->CastToStoreStatic();
+    auto storeStatic = inst->CastToStoreStatic();
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // class
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), inst->GetType());      // store value
 
     auto graph = enc->cg_->GetGraph();
     auto runtime = graph->GetRuntime();
-    auto field = store_static->GetObjField();
+    auto field = storeStatic->GetObjField();
     auto offset = runtime->GetFieldOffset(field);
     auto mem = MemRef(src0, offset);
 
     if (inst->CastToStoreStatic()->GetNeedBarrier()) {
         enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(src1.GetId()));
     }
-    if (store_static->GetVolatile()) {
+    if (storeStatic->GetVolatile()) {
         enc->GetEncoder()->EncodeStrRelease(src1, mem);
     } else {
         enc->GetEncoder()->EncodeStr(src1, mem);
     }
     if (inst->CastToStoreStatic()->GetNeedBarrier()) {
         auto arch = enc->GetEncoder()->GetArch();
-        auto tmp_reg = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(arch));
-        enc->GetEncoder()->EncodeLdr(tmp_reg, false, MemRef(src0, runtime->GetManagedClassOffset(enc->GetArch())));
-        auto class_header_mem = MemRef(tmp_reg);
-        enc->GetCodegen()->CreatePostWRB(inst, class_header_mem, src1, INVALID_REGISTER);
+        auto tmpReg = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(arch));
+        enc->GetEncoder()->EncodeLdr(tmpReg, false, MemRef(src0, runtime->GetManagedClassOffset(enc->GetArch())));
+        auto classHeaderMem = MemRef(tmpReg);
+        enc->GetCodegen()->CreatePostWRB(inst, classHeaderMem, src1, INVALID_REGISTER);
     }
 }
 
@@ -3980,15 +3971,15 @@ void EncodeVisitor::VisitStoreObjectDynamic(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitUnresolvedStoreStatic(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto store_static = inst->CastToUnresolvedStoreStatic();
-    ASSERT(store_static->GetType() == DataType::REFERENCE);
-    ASSERT(store_static->GetNeedBarrier());
-    auto type_id = store_static->GetTypeId();
-    auto value = enc->GetCodegen()->ConvertRegister(store_static->GetSrcReg(0), store_static->GetType());
+    auto storeStatic = inst->CastToUnresolvedStoreStatic();
+    ASSERT(storeStatic->GetType() == DataType::REFERENCE);
+    ASSERT(storeStatic->GetNeedBarrier());
+    auto typeId = storeStatic->GetTypeId();
+    auto value = enc->GetCodegen()->ConvertRegister(storeStatic->GetSrcReg(0), storeStatic->GetType());
     auto entrypoint = RuntimeInterface::EntrypointId::UNRESOLVED_STORE_STATIC_BARRIERED;
-    auto method = store_static->GetMethod();
+    auto method = storeStatic->GetMethod();
     ASSERT(method != nullptr);
-    enc->GetCodegen()->CallRuntimeWithMethod(store_static, method, entrypoint, Reg(), TypedImm(type_id), value);
+    enc->GetCodegen()->CallRuntimeWithMethod(storeStatic, method, entrypoint, Reg(), TypedImm(typeId), value);
 }
 
 void EncodeVisitor::VisitStoreResolvedObjectFieldStatic(GraphVisitor *visitor, Inst *inst)
@@ -4022,36 +4013,36 @@ void EncodeVisitor::VisitUnresolvedLoadType(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
     auto codegen = enc->GetCodegen();
-    auto load_type = inst->CastToUnresolvedLoadType();
-    if (load_type->GetNeedBarrier()) {
+    auto loadType = inst->CastToUnresolvedLoadType();
+    if (loadType->GetNeedBarrier()) {
         // Consider inserting barriers for GC
     }
     auto dst = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto graph = enc->cg_->GetGraph();
-    auto type_id = load_type->GetTypeId();
+    auto typeId = loadType->GetTypeId();
 
     auto runtime = graph->GetRuntime();
-    auto method = load_type->GetMethod();
+    auto method = loadType->GetMethod();
 
     if (graph->IsAotMode()) {
-        ScopedTmpReg tmp_reg(encoder);
+        ScopedTmpReg tmpReg(encoder);
         // Load pointer to klass from PLT
-        codegen->CreateLoadClassFromPLT(inst, tmp_reg, dst, type_id);
+        codegen->CreateLoadClassFromPLT(inst, tmpReg, dst, typeId);
         // Finally load Object
         encoder->EncodeLdr(dst, false, MemRef(dst, runtime->GetManagedClassOffset(enc->GetArch())));
     } else {
         auto utypes = runtime->GetUnresolvedTypes();
-        auto cls_addr = utypes->GetTableSlot(method, type_id, UnresolvedTypesInterface::SlotKind::MANAGED_CLASS);
-        Reg dst_ptr(dst.GetId(), codegen->GetPtrRegType());
-        encoder->EncodeMov(dst_ptr, Imm(cls_addr));
-        encoder->EncodeLdr(dst, false, MemRef(dst_ptr));
+        auto clsAddr = utypes->GetTableSlot(method, typeId, UnresolvedTypesInterface::SlotKind::MANAGED_CLASS);
+        Reg dstPtr(dst.GetId(), codegen->GetPtrRegType());
+        encoder->EncodeMov(dstPtr, Imm(clsAddr));
+        encoder->EncodeLdr(dst, false, MemRef(dstPtr));
 
-        auto slow_path = codegen->CreateSlowPath<SlowPathUnresolved>(inst, EntrypointId::RESOLVE_CLASS_OBJECT);
-        slow_path->SetUnresolvedType(method, type_id);
-        slow_path->SetDstReg(dst);
-        slow_path->SetSlotAddr(cls_addr);
-        encoder->EncodeJump(slow_path->GetLabel(), dst, Condition::EQ);
-        slow_path->BindBackLabel(encoder);
+        auto slowPath = codegen->CreateSlowPath<SlowPathUnresolved>(inst, EntrypointId::RESOLVE_CLASS_OBJECT);
+        slowPath->SetUnresolvedType(method, typeId);
+        slowPath->SetDstReg(dst);
+        slowPath->SetSlotAddr(clsAddr);
+        encoder->EncodeJump(slowPath->GetLabel(), dst, Condition::EQ);
+        slowPath->BindBackLabel(encoder);
     }
 }
 
@@ -4059,35 +4050,35 @@ void EncodeVisitor::VisitLoadType(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
-    auto load_type = inst->CastToLoadType();
-    if (load_type->GetNeedBarrier()) {
+    auto loadType = inst->CastToLoadType();
+    if (loadType->GetNeedBarrier()) {
         // Consider inserting barriers for GC
     }
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto graph = enc->cg_->GetGraph();
-    auto type_id = load_type->GetTypeId();
+    auto typeId = loadType->GetTypeId();
 
     auto runtime = graph->GetRuntime();
-    auto method = load_type->GetMethod();
+    auto method = loadType->GetMethod();
 
     if (graph->IsAotMode()) {
-        auto method_class_id = runtime->GetClassIdForMethod(graph->GetMethod());
-        if (method_class_id == type_id) {
-            auto dst_ptr = dst.As(Codegen::ConvertDataType(DataType::POINTER, graph->GetArch()));
-            enc->GetCodegen()->LoadMethod(dst_ptr);
-            auto mem = MemRef(dst_ptr, graph->GetRuntime()->GetClassOffset(graph->GetArch()));
+        auto methodClassId = runtime->GetClassIdForMethod(graph->GetMethod());
+        if (methodClassId == typeId) {
+            auto dstPtr = dst.As(Codegen::ConvertDataType(DataType::POINTER, graph->GetArch()));
+            enc->GetCodegen()->LoadMethod(dstPtr);
+            auto mem = MemRef(dstPtr, graph->GetRuntime()->GetClassOffset(graph->GetArch()));
             encoder->EncodeLdr(dst.As(Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch())), false, mem);
         } else {
-            ScopedTmpReg tmp_reg(encoder);
+            ScopedTmpReg tmpReg(encoder);
             // Load pointer to klass from PLT
-            enc->GetCodegen()->CreateLoadClassFromPLT(inst, tmp_reg, dst, type_id);
+            enc->GetCodegen()->CreateLoadClassFromPLT(inst, tmpReg, dst, typeId);
         }
         // Finally load ManagedClass object
         encoder->EncodeLdr(dst, false, MemRef(dst, runtime->GetManagedClassOffset(enc->GetArch())));
     } else {  // JIT mode
-        auto klass = reinterpret_cast<uintptr_t>(runtime->ResolveType(method, type_id));
-        auto managed_klass = runtime->GetManagedType(klass);
-        encoder->EncodeMov(dst, Imm(managed_klass));
+        auto klass = reinterpret_cast<uintptr_t>(runtime->ResolveType(method, typeId));
+        auto managedKlass = runtime->GetManagedType(klass);
+        encoder->EncodeMov(dst, Imm(managedKlass));
     }
 }
 
@@ -4096,30 +4087,30 @@ void EncodeVisitor::FillUnresolvedClass(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto encoder = enc->GetEncoder();
-    auto class_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::CHECK_CAST);
-    encoder->EncodeJump(slow_path->GetLabel(), class_reg, Condition::EQ);
-    slow_path->CreateBackLabel(encoder);
+    auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::CHECK_CAST);
+    encoder->EncodeJump(slowPath->GetLabel(), classReg, Condition::EQ);
+    slowPath->CreateBackLabel(encoder);
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // obj
-    encoder->EncodeJump(slow_path->GetBackLabel(), src, Condition::EQ);
-    ScopedTmpReg tmp_reg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
-    enc->GetCodegen()->LoadClassFromObject(tmp_reg, src);
-    encoder->EncodeJump(slow_path->GetLabel(), tmp_reg, class_reg, Condition::NE);
-    slow_path->BindBackLabel(encoder);
+    encoder->EncodeJump(slowPath->GetBackLabel(), src, Condition::EQ);
+    ScopedTmpReg tmpReg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
+    enc->GetCodegen()->LoadClassFromObject(tmpReg, src);
+    encoder->EncodeJump(slowPath->GetLabel(), tmpReg, classReg, Condition::NE);
+    slowPath->BindBackLabel(encoder);
 }
 
-void EncodeVisitor::FillObjectClass(GraphVisitor *visitor, Reg tmp_reg, LabelHolder::LabelId throw_label)
+void EncodeVisitor::FillObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto runtime = graph->GetRuntime();
     auto encoder = enc->GetEncoder();
 
-    Reg type_reg(tmp_reg.GetId(), INT8_TYPE);
+    Reg typeReg(tmpReg.GetId(), INT8_TYPE);
     // Load type class
-    encoder->EncodeLdr(type_reg, false, MemRef(tmp_reg, runtime->GetClassTypeOffset(enc->GetArch())));
+    encoder->EncodeLdr(typeReg, false, MemRef(tmpReg, runtime->GetClassTypeOffset(enc->GetArch())));
     // Jump to EH if type not reference
-    encoder->EncodeJump(throw_label, type_reg, Imm(runtime->GetReferenceTypeMask()), Condition::NE);
+    encoder->EncodeJump(throwLabel, typeReg, Imm(runtime->GetReferenceTypeMask()), Condition::NE);
 }
 
 /* The CheckCast class should be a subclass of input class:
@@ -4136,61 +4127,61 @@ void EncodeVisitor::FillObjectClass(GraphVisitor *visitor, Reg tmp_reg, LabelHol
     }
 */
 
-void EncodeVisitor::FillOtherClass(GraphVisitor *visitor, Inst *inst, Reg tmp_reg, LabelHolder::LabelId throw_label)
+void EncodeVisitor::FillOtherClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId throwLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto encoder = enc->GetEncoder();
-    auto loop_label = encoder->CreateLabel();
+    auto loopLabel = encoder->CreateLabel();
 
     // First compare `current == klass` we make before switch
-    encoder->BindLabel(loop_label);
+    encoder->BindLabel(loopLabel);
     // Load base klass
-    encoder->EncodeLdr(tmp_reg, false, MemRef(tmp_reg, graph->GetRuntime()->GetClassBaseOffset(enc->GetArch())));
-    encoder->EncodeJump(throw_label, tmp_reg, Condition::EQ);
-    auto class_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
-    encoder->EncodeJump(loop_label, tmp_reg, class_reg, Condition::NE);
+    encoder->EncodeLdr(tmpReg, false, MemRef(tmpReg, graph->GetRuntime()->GetClassBaseOffset(enc->GetArch())));
+    encoder->EncodeJump(throwLabel, tmpReg, Condition::EQ);
+    auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
+    encoder->EncodeJump(loopLabel, tmpReg, classReg, Condition::NE);
 }
 
-void EncodeVisitor::FillArrayObjectClass(GraphVisitor *visitor, Reg tmp_reg, LabelHolder::LabelId throw_label)
+void EncodeVisitor::FillArrayObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto runtime = graph->GetRuntime();
     auto encoder = enc->GetEncoder();
 
-    Reg type_reg(tmp_reg.GetId(), INT8_TYPE);
+    Reg typeReg(tmpReg.GetId(), INT8_TYPE);
     // Load Component class
-    encoder->EncodeLdr(tmp_reg, false, MemRef(tmp_reg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
+    encoder->EncodeLdr(tmpReg, false, MemRef(tmpReg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
     // Jump to EH if src is not array class
-    encoder->EncodeJump(throw_label, tmp_reg, Condition::EQ);
+    encoder->EncodeJump(throwLabel, tmpReg, Condition::EQ);
     // Load type of the component class
-    encoder->EncodeLdr(type_reg, false, MemRef(tmp_reg, runtime->GetClassTypeOffset(enc->GetArch())));
+    encoder->EncodeLdr(typeReg, false, MemRef(tmpReg, runtime->GetClassTypeOffset(enc->GetArch())));
     // Jump to EH if type not reference
-    encoder->EncodeJump(throw_label, type_reg, Imm(runtime->GetReferenceTypeMask()), Condition::NE);
+    encoder->EncodeJump(throwLabel, typeReg, Imm(runtime->GetReferenceTypeMask()), Condition::NE);
 }
 
-void EncodeVisitor::FillArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmp_reg, LabelHolder::LabelId throw_label)
+void EncodeVisitor::FillArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId throwLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto runtime = graph->GetRuntime();
     auto encoder = enc->GetEncoder();
 
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::CHECK_CAST);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::CHECK_CAST);
 
     // Load Component type of Input
-    encoder->EncodeLdr(tmp_reg, false, MemRef(tmp_reg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
+    encoder->EncodeLdr(tmpReg, false, MemRef(tmpReg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
     // Check that src is array class
-    encoder->EncodeJump(throw_label, tmp_reg, Condition::EQ);
+    encoder->EncodeJump(throwLabel, tmpReg, Condition::EQ);
     // Load Component type of the instance
-    auto class_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
-    ScopedTmpReg tmp_reg1(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
-    encoder->EncodeLdr(tmp_reg1, false, MemRef(class_reg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
+    auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
+    ScopedTmpReg tmpReg1(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
+    encoder->EncodeLdr(tmpReg1, false, MemRef(classReg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
     // Compare component types
-    encoder->EncodeJump(slow_path->GetLabel(), tmp_reg, tmp_reg1, Condition::NE);
+    encoder->EncodeJump(slowPath->GetLabel(), tmpReg, tmpReg1, Condition::NE);
 
-    slow_path->BindBackLabel(encoder);
+    slowPath->BindBackLabel(encoder);
 }
 
 void EncodeVisitor::FillInterfaceClass(GraphVisitor *visitor, Inst *inst)
@@ -4199,18 +4190,18 @@ void EncodeVisitor::FillInterfaceClass(GraphVisitor *visitor, Inst *inst)
     auto encoder = enc->GetEncoder();
     auto codegen = enc->GetCodegen();
     if (codegen->GetArch() == Arch::AARCH32) {
-        auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::CHECK_CAST);
-        encoder->EncodeJump(slow_path->GetLabel());
-        slow_path->BindBackLabel(encoder);
+        auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::CHECK_CAST);
+        encoder->EncodeJump(slowPath->GetLabel());
+        slowPath->BindBackLabel(encoder);
     } else {
         codegen->CreateCheckCastInterfaceCall(inst);
     }
 }
 
-void EncodeVisitor::FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, LabelHolder::LabelId end_label,
-                                  compiler::ClassType klass_type)
+void EncodeVisitor::FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, LabelHolder::LabelId endLabel,
+                                  compiler::ClassType klassType)
 {
-    if (klass_type == ClassType::INTERFACE_CLASS) {
+    if (klassType == ClassType::INTERFACE_CLASS) {
         FillInterfaceClass(visitor, inst);
         return;
     }
@@ -4219,39 +4210,39 @@ void EncodeVisitor::FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, La
     auto encoder = enc->GetEncoder();
     // class_reg - CheckCast class
     // tmp_reg - input class
-    auto class_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
-    ScopedTmpReg tmp_reg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
-    enc->GetCodegen()->LoadClassFromObject(tmp_reg, src);
+    auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
+    ScopedTmpReg tmpReg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
+    enc->GetCodegen()->LoadClassFromObject(tmpReg, src);
     // There is no exception if the classes are equal
-    encoder->EncodeJump(end_label, class_reg, tmp_reg, Condition::EQ);
+    encoder->EncodeJump(endLabel, classReg, tmpReg, Condition::EQ);
 
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathCheckCast>(inst, EntrypointId::CLASS_CAST_EXCEPTION);
-    slow_path->SetClassReg(class_reg);
-    auto throw_label = slow_path->GetLabel();
-    switch (klass_type) {
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathCheckCast>(inst, EntrypointId::CLASS_CAST_EXCEPTION);
+    slowPath->SetClassReg(classReg);
+    auto throwLabel = slowPath->GetLabel();
+    switch (klassType) {
         // The input class should be not primitive type
         case ClassType::OBJECT_CLASS: {
-            FillObjectClass(visitor, tmp_reg, throw_label);
+            FillObjectClass(visitor, tmpReg, throwLabel);
             break;
         }
         case ClassType::OTHER_CLASS: {
-            FillOtherClass(visitor, inst, tmp_reg, throw_label);
+            FillOtherClass(visitor, inst, tmpReg, throwLabel);
             break;
         }
         // The input class should be array class and component type should be not primitive type
         case ClassType::ARRAY_OBJECT_CLASS: {
-            FillArrayObjectClass(visitor, tmp_reg, throw_label);
+            FillArrayObjectClass(visitor, tmpReg, throwLabel);
             break;
         }
         // Check that components types are equals, else call slow path
         case ClassType::ARRAY_CLASS: {
-            FillArrayClass(visitor, inst, tmp_reg, throw_label);
+            FillArrayClass(visitor, inst, tmpReg, throwLabel);
             break;
         }
         case ClassType::FINAL_CLASS: {
             EVENT_CODEGEN_SIMPLIFICATION(events::CodegenSimplificationInst::CHECKCAST,
                                          events::CodegenSimplificationReason::FINAL_CLASS);
-            encoder->EncodeJump(throw_label);
+            encoder->EncodeJump(throwLabel);
             break;
         }
         default: {
@@ -4264,30 +4255,30 @@ void EncodeVisitor::VisitCheckCast(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto method = inst->CastToCheckCast()->GetMethod();
-    auto type_id = inst->CastToCheckCast()->GetTypeId();
+    auto typeId = inst->CastToCheckCast()->GetTypeId();
     auto encoder = enc->GetEncoder();
 
-    auto klass_type = inst->CastToCheckCast()->GetClassType();
-    if (klass_type == ClassType::UNRESOLVED_CLASS) {
+    auto klassType = inst->CastToCheckCast()->GetClassType();
+    if (klassType == ClassType::UNRESOLVED_CLASS) {
         FillUnresolvedClass(visitor, inst);
         return;
     }
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // obj
-    auto end_label = encoder->CreateLabel();
+    auto endLabel = encoder->CreateLabel();
 
     if (inst->CastToCheckCast()->GetOmitNullCheck()) {
         EVENT_CODEGEN_SIMPLIFICATION(events::CodegenSimplificationInst::CHECKCAST,
                                      events::CodegenSimplificationReason::SKIP_NULLCHECK);
     } else {
         // Compare with nullptr
-        encoder->EncodeJump(end_label, src, Condition::EQ);
+        encoder->EncodeJump(endLabel, src, Condition::EQ);
     }
 
-    [[maybe_unused]] auto klass = enc->cg_->GetGraph()->GetRuntime()->GetClass(method, type_id);
+    [[maybe_unused]] auto klass = enc->cg_->GetGraph()->GetRuntime()->GetClass(method, typeId);
     ASSERT(klass != nullptr);
 
-    FillCheckCast(visitor, inst, src, end_label, klass_type);
-    encoder->BindLabel(end_label);
+    FillCheckCast(visitor, inst, src, endLabel, klassType);
+    encoder->BindLabel(endLabel);
 }
 
 void EncodeVisitor::FillIsInstanceUnresolved(GraphVisitor *visitor, Inst *inst)
@@ -4296,33 +4287,33 @@ void EncodeVisitor::FillIsInstanceUnresolved(GraphVisitor *visitor, Inst *inst)
     auto graph = enc->cg_->GetGraph();
     auto encoder = enc->GetEncoder();
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // obj
-    auto class_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
+    auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
 
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::IS_INSTANCE);
-    encoder->EncodeJump(slow_path->GetLabel(), class_reg, Condition::EQ);
-    slow_path->CreateBackLabel(encoder);
-    auto end_label = slow_path->GetBackLabel();
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::IS_INSTANCE);
+    encoder->EncodeJump(slowPath->GetLabel(), classReg, Condition::EQ);
+    slowPath->CreateBackLabel(encoder);
+    auto endLabel = slowPath->GetBackLabel();
 
     // Compare with nullptr
-    auto next_label = encoder->CreateLabel();
-    encoder->EncodeJump(next_label, src, Condition::NE);
+    auto nextLabel = encoder->CreateLabel();
+    encoder->EncodeJump(nextLabel, src, Condition::NE);
     encoder->EncodeMov(dst, Imm(0));
-    encoder->EncodeJump(end_label);
-    encoder->BindLabel(next_label);
+    encoder->EncodeJump(endLabel);
+    encoder->BindLabel(nextLabel);
 
     // Get instance class
-    ScopedTmpReg tmp_reg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
-    enc->GetCodegen()->LoadClassFromObject(tmp_reg, src);
+    ScopedTmpReg tmpReg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
+    enc->GetCodegen()->LoadClassFromObject(tmpReg, src);
 
     // Sets true if the classes are equal
-    encoder->EncodeJump(slow_path->GetLabel(), tmp_reg, class_reg, Condition::NE);
+    encoder->EncodeJump(slowPath->GetLabel(), tmpReg, classReg, Condition::NE);
     encoder->EncodeMov(dst, Imm(1));
 
-    slow_path->BindBackLabel(encoder);
+    slowPath->BindBackLabel(encoder);
 }
 
-void EncodeVisitor::FillIsInstanceCaseObject(GraphVisitor *visitor, Inst *inst, Reg tmp_reg)
+void EncodeVisitor::FillIsInstanceCaseObject(GraphVisitor *visitor, Inst *inst, Reg tmpReg)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
@@ -4330,12 +4321,12 @@ void EncodeVisitor::FillIsInstanceCaseObject(GraphVisitor *visitor, Inst *inst, 
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
 
     // ClassType::OBJECT_CLASS
-    Reg type_reg(tmp_reg.GetId(), INT8_TYPE);
+    Reg typeReg(tmpReg.GetId(), INT8_TYPE);
     // Load type class
-    encoder->EncodeLdr(type_reg, false, MemRef(tmp_reg, runtime->GetClassTypeOffset(enc->GetArch())));
-    ScopedTmpReg type_mask_reg(encoder, INT8_TYPE);
-    encoder->EncodeMov(type_mask_reg, Imm(runtime->GetReferenceTypeMask()));
-    encoder->EncodeCompare(dst, type_mask_reg, type_reg, Condition::EQ);
+    encoder->EncodeLdr(typeReg, false, MemRef(tmpReg, runtime->GetClassTypeOffset(enc->GetArch())));
+    ScopedTmpReg typeMaskReg(encoder, INT8_TYPE);
+    encoder->EncodeMov(typeMaskReg, Imm(runtime->GetReferenceTypeMask()));
+    encoder->EncodeCompare(dst, typeMaskReg, typeReg, Condition::EQ);
 }
 
 /* Sets true if IsInstance class is a subclass of input class:
@@ -4352,38 +4343,38 @@ void EncodeVisitor::FillIsInstanceCaseObject(GraphVisitor *visitor, Inst *inst, 
     }
 */
 
-void EncodeVisitor::FillIsInstanceCaseOther(GraphVisitor *visitor, Inst *inst, Reg tmp_reg,
-                                            LabelHolder::LabelId end_label)
+void EncodeVisitor::FillIsInstanceCaseOther(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
+                                            LabelHolder::LabelId endLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    auto class_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
+    auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
 
     // ClassType::OTHER_CLASS
-    auto loop_label = encoder->CreateLabel();
-    auto false_label = encoder->CreateLabel();
+    auto loopLabel = encoder->CreateLabel();
+    auto falseLabel = encoder->CreateLabel();
 
     // First compare `current == klass` we make before switch
-    encoder->BindLabel(loop_label);
+    encoder->BindLabel(loopLabel);
     // Load base klass
-    encoder->EncodeLdr(tmp_reg, false, MemRef(tmp_reg, runtime->GetClassBaseOffset(enc->GetArch())));
-    encoder->EncodeJump(false_label, tmp_reg, Condition::EQ);
-    encoder->EncodeJump(loop_label, tmp_reg, class_reg, Condition::NE);
+    encoder->EncodeLdr(tmpReg, false, MemRef(tmpReg, runtime->GetClassBaseOffset(enc->GetArch())));
+    encoder->EncodeJump(falseLabel, tmpReg, Condition::EQ);
+    encoder->EncodeJump(loopLabel, tmpReg, classReg, Condition::NE);
 
     // Set true result and jump to exit
     encoder->EncodeMov(dst, Imm(1));
-    encoder->EncodeJump(end_label);
+    encoder->EncodeJump(endLabel);
 
     // Set false result and jump to exit
-    encoder->BindLabel(false_label);
+    encoder->BindLabel(falseLabel);
     encoder->EncodeMov(dst, Imm(0));
 }
 
 // Sets true if the Input class is array class and component type is not primitive type
-void EncodeVisitor::FillIsInstanceCaseArrayObject(GraphVisitor *visitor, Inst *inst, Reg tmp_reg,
-                                                  LabelHolder::LabelId end_label)
+void EncodeVisitor::FillIsInstanceCaseArrayObject(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
+                                                  LabelHolder::LabelId endLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
@@ -4392,22 +4383,22 @@ void EncodeVisitor::FillIsInstanceCaseArrayObject(GraphVisitor *visitor, Inst *i
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
 
     // ClassType::ARRAY_OBJECT_CLASS
-    Reg dst_ref(dst.GetId(), Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
-    Reg type_reg(tmp_reg.GetId(), INT8_TYPE);
+    Reg dstRef(dst.GetId(), Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
+    Reg typeReg(tmpReg.GetId(), INT8_TYPE);
     // Load Component class
-    encoder->EncodeLdr(dst_ref, false, MemRef(tmp_reg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
+    encoder->EncodeLdr(dstRef, false, MemRef(tmpReg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
     // Check that src is array class
-    encoder->EncodeJump(end_label, dst_ref, Condition::EQ);
+    encoder->EncodeJump(endLabel, dstRef, Condition::EQ);
     // Load type of the component class
-    encoder->EncodeLdr(type_reg, false, MemRef(dst_ref, runtime->GetClassTypeOffset(enc->GetArch())));
-    ScopedTmpReg type_mask_reg(encoder, INT8_TYPE);
-    encoder->EncodeMov(type_mask_reg, Imm(runtime->GetReferenceTypeMask()));
-    encoder->EncodeCompare(dst, type_mask_reg, type_reg, Condition::EQ);
+    encoder->EncodeLdr(typeReg, false, MemRef(dstRef, runtime->GetClassTypeOffset(enc->GetArch())));
+    ScopedTmpReg typeMaskReg(encoder, INT8_TYPE);
+    encoder->EncodeMov(typeMaskReg, Imm(runtime->GetReferenceTypeMask()));
+    encoder->EncodeCompare(dst, typeMaskReg, typeReg, Condition::EQ);
 }
 
 // Check that components types are equals, else call slow path
-void EncodeVisitor::FillIsInstanceCaseArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmp_reg,
-                                                 LabelHolder::LabelId end_label)
+void EncodeVisitor::FillIsInstanceCaseArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
+                                                 LabelHolder::LabelId endLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
@@ -4416,25 +4407,25 @@ void EncodeVisitor::FillIsInstanceCaseArrayClass(GraphVisitor *visitor, Inst *in
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
 
     // ClassType::ARRAY_CLASS
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::IS_INSTANCE);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::IS_INSTANCE);
 
-    auto next_label_1 = encoder->CreateLabel();
+    auto nextLabel1 = encoder->CreateLabel();
     // Load Component type of Input
-    encoder->EncodeLdr(tmp_reg, false, MemRef(tmp_reg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
+    encoder->EncodeLdr(tmpReg, false, MemRef(tmpReg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
     // Check that src is array class
-    encoder->EncodeJump(next_label_1, tmp_reg, Condition::NE);
+    encoder->EncodeJump(nextLabel1, tmpReg, Condition::NE);
     encoder->EncodeMov(dst, Imm(0));
-    encoder->EncodeJump(end_label);
-    encoder->BindLabel(next_label_1);
+    encoder->EncodeJump(endLabel);
+    encoder->BindLabel(nextLabel1);
     // Load Component type of the instance
-    auto class_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
-    ScopedTmpReg tmp_reg1(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
-    encoder->EncodeLdr(tmp_reg1, false, MemRef(class_reg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
+    auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
+    ScopedTmpReg tmpReg1(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
+    encoder->EncodeLdr(tmpReg1, false, MemRef(classReg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
     // Compare component types
-    encoder->EncodeJump(slow_path->GetLabel(), tmp_reg, tmp_reg1, Condition::NE);
+    encoder->EncodeJump(slowPath->GetLabel(), tmpReg, tmpReg1, Condition::NE);
     encoder->EncodeMov(dst, Imm(1));
 
-    slow_path->BindBackLabel(encoder);
+    slowPath->BindBackLabel(encoder);
 }
 
 void EncodeVisitor::FillIsInstanceCaseInterface(GraphVisitor *visitor, Inst *inst)
@@ -4442,14 +4433,14 @@ void EncodeVisitor::FillIsInstanceCaseInterface(GraphVisitor *visitor, Inst *ins
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
     // ClassType::INTERFACE_CLASS
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::IS_INSTANCE);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::IS_INSTANCE);
 
-    encoder->EncodeJump(slow_path->GetLabel());
+    encoder->EncodeJump(slowPath->GetLabel());
 
-    slow_path->BindBackLabel(encoder);
+    slowPath->BindBackLabel(encoder);
 }
 
-void EncodeVisitor::FillIsInstance(GraphVisitor *visitor, Inst *inst, Reg tmp_reg, LabelHolder::LabelId end_label)
+void EncodeVisitor::FillIsInstance(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId endLabel)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
@@ -4461,28 +4452,28 @@ void EncodeVisitor::FillIsInstance(GraphVisitor *visitor, Inst *inst, Reg tmp_re
                                      events::CodegenSimplificationReason::SKIP_NULLCHECK);
     } else {
         // Compare with nullptr
-        auto next_label = encoder->CreateLabel();
-        encoder->EncodeJump(next_label, src, Condition::NE);
+        auto nextLabel = encoder->CreateLabel();
+        encoder->EncodeJump(nextLabel, src, Condition::NE);
         encoder->EncodeMov(dst, Imm(0));
-        encoder->EncodeJump(end_label);
-        encoder->BindLabel(next_label);
+        encoder->EncodeJump(endLabel);
+        encoder->BindLabel(nextLabel);
     }
 
-    auto class_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
-    enc->GetCodegen()->LoadClassFromObject(tmp_reg, src);
+    auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
+    enc->GetCodegen()->LoadClassFromObject(tmpReg, src);
 
     // Sets true if the classes are equals
     if (inst->CastToIsInstance()->GetClassType() == ClassType::FINAL_CLASS) {
-        encoder->EncodeCompare(dst, class_reg, tmp_reg, Condition::EQ);
-    } else if (dst.GetId() != src.GetId() && dst.GetId() != class_reg.GetId()) {
-        encoder->EncodeCompare(dst, class_reg, tmp_reg, Condition::EQ);
-        encoder->EncodeJump(end_label, dst, Condition::NE);
+        encoder->EncodeCompare(dst, classReg, tmpReg, Condition::EQ);
+    } else if (dst.GetId() != src.GetId() && dst.GetId() != classReg.GetId()) {
+        encoder->EncodeCompare(dst, classReg, tmpReg, Condition::EQ);
+        encoder->EncodeJump(endLabel, dst, Condition::NE);
     } else {
-        auto next_label_1 = encoder->CreateLabel();
-        encoder->EncodeJump(next_label_1, class_reg, tmp_reg, Condition::NE);
+        auto nextLabel1 = encoder->CreateLabel();
+        encoder->EncodeJump(nextLabel1, classReg, tmpReg, Condition::NE);
         encoder->EncodeMov(dst, Imm(1));
-        encoder->EncodeJump(end_label);
-        encoder->BindLabel(next_label_1);
+        encoder->EncodeJump(endLabel);
+        encoder->BindLabel(nextLabel1);
     }
 }
 
@@ -4491,34 +4482,34 @@ void EncodeVisitor::VisitIsInstance(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto encoder = enc->GetEncoder();
-    auto klass_type = inst->CastToIsInstance()->GetClassType();
-    if (klass_type == ClassType::UNRESOLVED_CLASS) {
+    auto klassType = inst->CastToIsInstance()->GetClassType();
+    if (klassType == ClassType::UNRESOLVED_CLASS) {
         FillIsInstanceUnresolved(visitor, inst);
         return;
     }
     // tmp_reg - input class
-    ScopedTmpReg tmp_reg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
-    auto end_label = encoder->CreateLabel();
+    ScopedTmpReg tmpReg(encoder, Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch()));
+    auto endLabel = encoder->CreateLabel();
 
-    FillIsInstance(visitor, inst, tmp_reg, end_label);
-    switch (klass_type) {
+    FillIsInstance(visitor, inst, tmpReg, endLabel);
+    switch (klassType) {
         // Sets true if the Input class is not primitive type
         case ClassType::OBJECT_CLASS: {
-            FillIsInstanceCaseObject(visitor, inst, tmp_reg);
+            FillIsInstanceCaseObject(visitor, inst, tmpReg);
             break;
         }
         case ClassType::OTHER_CLASS: {
-            FillIsInstanceCaseOther(visitor, inst, tmp_reg, end_label);
+            FillIsInstanceCaseOther(visitor, inst, tmpReg, endLabel);
             break;
         }
         // Sets true if the Input class is array class and component type is not primitive type
         case ClassType::ARRAY_OBJECT_CLASS: {
-            FillIsInstanceCaseArrayObject(visitor, inst, tmp_reg, end_label);
+            FillIsInstanceCaseArrayObject(visitor, inst, tmpReg, endLabel);
             break;
         }
         // Check that components types are equals, else call slow path
         case ClassType::ARRAY_CLASS: {
-            FillIsInstanceCaseArrayClass(visitor, inst, tmp_reg, end_label);
+            FillIsInstanceCaseArrayClass(visitor, inst, tmpReg, endLabel);
             break;
         }
         case ClassType::INTERFACE_CLASS: {
@@ -4534,7 +4525,7 @@ void EncodeVisitor::VisitIsInstance(GraphVisitor *visitor, Inst *inst)
             UNREACHABLE();
         }
     }
-    encoder->BindLabel(end_label);
+    encoder->BindLabel(endLabel);
 }
 
 void Codegen::CreateMonitorCall(MonitorInst *inst)
@@ -4569,7 +4560,7 @@ void EncodeVisitor::VisitMonitor(GraphVisitor *visitor, Inst *inst)
     }
 }
 
-void Codegen::TryInsertImplicitNullCheck(Inst *inst, size_t prev_offset)
+void Codegen::TryInsertImplicitNullCheck(Inst *inst, size_t prevOffset)
 {
     if (!IsSuitableForImplicitNullCheck(inst)) {
         return;
@@ -4580,9 +4571,9 @@ void Codegen::TryInsertImplicitNullCheck(Inst *inst, size_t prev_offset)
 
     auto nullcheck = inst->GetInput(0).GetInst();
     ASSERT(nullcheck->GetOpcode() == Opcode::NullCheck && nullcheck->CastToNullCheck()->IsImplicit());
-    auto curr_offset = GetEncoder()->GetCursorOffset();
-    ASSERT(curr_offset > prev_offset);
-    GetCodeBuilder()->AddImplicitNullCheck(curr_offset, curr_offset - prev_offset);
+    auto currOffset = GetEncoder()->GetCursorOffset();
+    ASSERT(currOffset > prevOffset);
+    GetCodeBuilder()->AddImplicitNullCheck(currOffset, currOffset - prevOffset);
     CreateStackMap(nullcheck, inst);
 }
 
@@ -4603,9 +4594,9 @@ void Codegen::CreateFloatIsSafeInteger([[maybe_unused]] IntrinsicInst *inst, Reg
 
 void Codegen::CreateStringEquals([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    auto entrypoint_id = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_EQUALS_COMPRESSED
-                                                                    : EntrypointId::STRING_EQUALS;
-    CallFastPath(inst, entrypoint_id, dst, {}, src[0], src[1U]);
+    auto entrypointId = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_EQUALS_COMPRESSED
+                                                                   : EntrypointId::STRING_EQUALS;
+    CallFastPath(inst, entrypointId, dst, {}, src[0], src[1U]);
 }
 
 void Codegen::CreateMathCeil([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
@@ -4635,32 +4626,32 @@ void Codegen::CreateStringBuilderBool(IntrinsicInst *inst, [[maybe_unused]] Reg 
 
 void Codegen::CreateStringBuilderString(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
 {
-    auto entrypoint_id = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_BUILDER_STRING_COMPRESSED
-                                                                    : EntrypointId::STRING_BUILDER_STRING;
+    auto entrypointId = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_BUILDER_STRING_COMPRESSED
+                                                                   : EntrypointId::STRING_BUILDER_STRING;
 
-    CallFastPath(inst, entrypoint_id, dst, RegMask::GetZeroMask(), src[0], src[1U]);
+    CallFastPath(inst, entrypointId, dst, RegMask::GetZeroMask(), src[0], src[1U]);
 }
 
 void Codegen::CallFastCreateStringFromCharArrayTlab(Inst *inst, Reg dst, Reg offset, Reg count, Reg array,
                                                     std::variant<Reg, TypedImm> klass)
 {
     if (GetRegfile()->GetZeroReg().GetId() == offset.GetId()) {
-        auto entry_id = GetRuntime()->IsCompressedStringsEnabled()
-                            ? EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB_COMPRESSED
-                            : EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB;
+        auto entryId = GetRuntime()->IsCompressedStringsEnabled()
+                           ? EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB_COMPRESSED
+                           : EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB;
         if (std::holds_alternative<TypedImm>(klass)) {
-            CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), count, array, std::get<TypedImm>(klass));
+            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), count, array, std::get<TypedImm>(klass));
         } else {
-            CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), count, array, std::get<Reg>(klass));
+            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), count, array, std::get<Reg>(klass));
         }
     } else {
-        auto entry_id = GetRuntime()->IsCompressedStringsEnabled()
-                            ? EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB_COMPRESSED
-                            : EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB;
+        auto entryId = GetRuntime()->IsCompressedStringsEnabled()
+                           ? EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB_COMPRESSED
+                           : EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB;
         if (std::holds_alternative<TypedImm>(klass)) {
-            CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), offset, count, array, std::get<TypedImm>(klass));
+            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), offset, count, array, std::get<TypedImm>(klass));
         } else {
-            CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), offset, count, array, std::get<Reg>(klass));
+            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), offset, count, array, std::get<Reg>(klass));
         }
     }
 }
@@ -4672,47 +4663,47 @@ void Codegen::CreateStringFromCharArrayTlab(IntrinsicInst *inst, Reg dst, SRCREG
     auto count = src[SECOND_OPERAND];
     auto array = src[THIRD_OPERAND];
     if (GetGraph()->IsAotMode()) {
-        ScopedTmpReg klass_reg(GetEncoder());
-        GetEncoder()->EncodeLdr(klass_reg, false,
+        ScopedTmpReg klassReg(GetEncoder());
+        GetEncoder()->EncodeLdr(klassReg, false,
                                 MemRef(ThreadReg(), runtime->GetStringClassPointerTlsOffset(GetArch())));
-        CallFastCreateStringFromCharArrayTlab(inst, dst, offset, count, array, klass_reg);
+        CallFastCreateStringFromCharArrayTlab(inst, dst, offset, count, array, klassReg);
     } else {
-        auto klass_imm = TypedImm(reinterpret_cast<uintptr_t>(runtime->GetStringClass(GetGraph()->GetMethod())));
-        CallFastCreateStringFromCharArrayTlab(inst, dst, offset, count, array, klass_imm);
+        auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(runtime->GetStringClass(GetGraph()->GetMethod())));
+        CallFastCreateStringFromCharArrayTlab(inst, dst, offset, count, array, klassImm);
     }
 }
 
 void Codegen::CreateStringFromStringTlab(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    auto entry_id = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::CREATE_STRING_FROM_STRING_TLAB_COMPRESSED
-                                                               : EntrypointId::CREATE_STRING_FROM_STRING_TLAB;
-    auto src_str = src[FIRST_OPERAND];
-    CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), src_str);
+    auto entryId = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::CREATE_STRING_FROM_STRING_TLAB_COMPRESSED
+                                                              : EntrypointId::CREATE_STRING_FROM_STRING_TLAB;
+    auto srcStr = src[FIRST_OPERAND];
+    CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), srcStr);
 }
 
 void Codegen::CreateStringSubstringTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    auto entrypoint_id = GetRuntime()->IsCompressedStringsEnabled()
-                             ? EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED
-                             : EntrypointId::SUB_STRING_FROM_STRING_TLAB;
-    CallFastPath(inst, entrypoint_id, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
+    auto entrypointId = GetRuntime()->IsCompressedStringsEnabled()
+                            ? EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED
+                            : EntrypointId::SUB_STRING_FROM_STRING_TLAB;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
 }
 
 void Codegen::CreateStringGetCharsTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    auto entrypoint_id = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_GET_CHARS_TLAB_COMPRESSED
-                                                                    : EntrypointId::STRING_GET_CHARS_TLAB;
+    auto entrypointId = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_GET_CHARS_TLAB_COMPRESSED
+                                                                   : EntrypointId::STRING_GET_CHARS_TLAB;
     auto runtime = GetGraph()->GetRuntime();
     if (GetGraph()->IsAotMode()) {
-        ScopedTmpReg klass_reg(GetEncoder());
-        GetEncoder()->EncodeLdr(klass_reg, false,
+        ScopedTmpReg klassReg(GetEncoder());
+        GetEncoder()->EncodeLdr(klassReg, false,
                                 MemRef(ThreadReg(), runtime->GetArrayU16ClassPointerTlsOffset(GetArch())));
-        CallFastPath(inst, entrypoint_id, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
-                     klass_reg);
+        CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                     klassReg);
     } else {
-        auto klass_imm = TypedImm(reinterpret_cast<uintptr_t>(runtime->GetArrayU16Class(GetGraph()->GetMethod())));
-        CallFastPath(inst, entrypoint_id, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
-                     klass_imm);
+        auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(runtime->GetArrayU16Class(GetGraph()->GetMethod())));
+        CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                     klassImm);
     }
 }
 
@@ -4720,21 +4711,21 @@ void Codegen::CreateStringHashCode([[maybe_unused]] IntrinsicInst *inst, Reg dst
 {
     auto entrypoint = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_HASH_CODE_COMPRESSED
                                                                  : EntrypointId::STRING_HASH_CODE;
-    auto str_reg = src[FIRST_OPERAND];
-    auto mref = MemRef(str_reg, panda::coretypes::String::GetHashcodeOffset());
-    auto slow_path = CreateSlowPath<SlowPathStringHashCode>(inst, entrypoint);
-    slow_path->SetDstReg(dst);
-    slow_path->SetSrcReg(str_reg);
-    if (dst.GetId() != str_reg.GetId()) {
+    auto strReg = src[FIRST_OPERAND];
+    auto mref = MemRef(strReg, panda::coretypes::String::GetHashcodeOffset());
+    auto slowPath = CreateSlowPath<SlowPathStringHashCode>(inst, entrypoint);
+    slowPath->SetDstReg(dst);
+    slowPath->SetSrcReg(strReg);
+    if (dst.GetId() != strReg.GetId()) {
         GetEncoder()->EncodeLdr(ConvertRegister(dst.GetId(), DataType::INT32), false, mref);
-        GetEncoder()->EncodeJump(slow_path->GetLabel(), dst, Condition::EQ);
+        GetEncoder()->EncodeJump(slowPath->GetLabel(), dst, Condition::EQ);
     } else {
-        ScopedTmpReg hash_reg(GetEncoder(), INT32_TYPE);
-        GetEncoder()->EncodeLdr(hash_reg, false, mref);
-        GetEncoder()->EncodeJump(slow_path->GetLabel(), hash_reg, Condition::EQ);
-        GetEncoder()->EncodeMov(dst, hash_reg);
+        ScopedTmpReg hashReg(GetEncoder(), INT32_TYPE);
+        GetEncoder()->EncodeLdr(hashReg, false, mref);
+        GetEncoder()->EncodeJump(slowPath->GetLabel(), hashReg, Condition::EQ);
+        GetEncoder()->EncodeMov(dst, hashReg);
     }
-    slow_path->BindBackLabel(GetEncoder());
+    slowPath->BindBackLabel(GetEncoder());
 }
 
 #include "intrinsics_codegen.inl"
@@ -4777,7 +4768,7 @@ void EncodeVisitor::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitBoundsCheckI(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto len_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), inst->GetInputType(0));
+    auto lenReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), inst->GetInputType(0));
 
     ASSERT(inst->GetInput(1).GetInst()->GetOpcode() == Opcode::SaveState ||
            inst->GetInput(1).GetInst()->GetOpcode() == Opcode::SaveStateDeoptimize);
@@ -4793,18 +4784,18 @@ void EncodeVisitor::VisitBoundsCheckI(GraphVisitor *visitor, Inst *inst)
 
     auto value = inst->CastToBoundsCheckI()->GetImm();
     if (enc->GetEncoder()->CanEncodeImmAddSubCmp(value, WORD_SIZE, false)) {
-        enc->GetEncoder()->EncodeJump(label, len_reg, Imm(value), Condition::LS);
+        enc->GetEncoder()->EncodeJump(label, lenReg, Imm(value), Condition::LS);
     } else {
-        ScopedTmpReg tmp(enc->GetEncoder(), len_reg.GetType());
+        ScopedTmpReg tmp(enc->GetEncoder(), lenReg.GetType());
         enc->GetEncoder()->EncodeMov(tmp, Imm(value));
-        enc->GetEncoder()->EncodeJump(label, len_reg, tmp, Condition::LS);
+        enc->GetEncoder()->EncodeJump(label, lenReg, tmp, Condition::LS);
     }
 }
 
 void EncodeVisitor::VisitStoreArrayI(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto array_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
+    auto arrayReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
     auto type = inst->GetType();
     auto value = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);
 
@@ -4816,13 +4807,13 @@ void EncodeVisitor::VisitStoreArrayI(GraphVisitor *visitor, Inst *inst)
         enc->GetEncoder()->EncodeAbort();
         return;
     }
-    auto mem = MemRef(array_reg, offset);
+    auto mem = MemRef(arrayReg, offset);
     if (inst->CastToStoreArrayI()->GetNeedBarrier()) {
-        enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(array_reg.GetId(), value.GetId()));
+        enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(arrayReg.GetId(), value.GetId()));
     }
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
     enc->GetEncoder()->EncodeStr(value, mem);
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
     if (inst->CastToStoreArrayI()->GetNeedBarrier()) {
         enc->GetCodegen()->CreatePostWRB(inst, mem, value, INVALID_REGISTER);
     }
@@ -4831,27 +4822,27 @@ void EncodeVisitor::VisitStoreArrayI(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitLoadArrayI(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto inst_load_array_i = inst->CastToLoadArrayI();
+    auto instLoadArrayI = inst->CastToLoadArrayI();
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
-    ASSERT(inst_load_array_i->IsArray() || !runtime->IsCompressedStringsEnabled());
-    if (inst_load_array_i->GetNeedBarrier()) {
+    ASSERT(instLoadArrayI->IsArray() || !runtime->IsCompressedStringsEnabled());
+    if (instLoadArrayI->GetNeedBarrier()) {
         // Consider inserting barriers for GC
     }
-    auto array_reg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0));
-    uint32_t index = inst_load_array_i->GetImm();
+    auto arrayReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0));
+    uint32_t index = instLoadArrayI->GetImm();
     auto type = inst->GetType();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    int64_t data_offset = inst_load_array_i->IsArray() ? runtime->GetArrayDataOffset(enc->GetArch())
-                                                       : runtime->GetStringDataOffset(enc->GetArch());
+    int64_t dataOffset = instLoadArrayI->IsArray() ? runtime->GetArrayDataOffset(enc->GetArch())
+                                                   : runtime->GetStringDataOffset(enc->GetArch());
     uint32_t shift = DataType::ShiftByType(type, enc->GetArch());
-    int64_t offset = data_offset + (index << shift);
-    auto mem = MemRef(array_reg, offset);
+    int64_t offset = dataOffset + (index << shift);
+    auto mem = MemRef(arrayReg, offset);
     auto encoder = enc->GetEncoder();
     auto arch = enc->GetArch();
-    ScopedTmpReg scoped_tmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
+    ScopedTmpReg scopedTmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
     encoder->EncodeLdr(dst, IsTypeSigned(type), mem);
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
 void EncodeVisitor::VisitLoadCompressedStringCharI(GraphVisitor *visitor, Inst *inst)
@@ -4880,8 +4871,8 @@ void EncodeVisitor::VisitMultiArray(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto codegen = enc->GetCodegen();
 
-    auto array_inst = inst->CastToMultiArray();
-    codegen->CreateMultiArrayCall(array_inst);
+    auto arrayInst = inst->CastToMultiArray();
+    codegen->CreateMultiArrayCall(arrayInst);
     if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
         enc->GetEncoder()->EncodeMemoryBarrier(memory_order::RELEASE);
     }
@@ -4897,40 +4888,40 @@ void EncodeVisitor::VisitInitEmptyString(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitInitString(GraphVisitor *visitor, Inst *inst)
 {
     auto cg = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
-    auto init_str = inst->CastToInitString();
+    auto initStr = inst->CastToInitString();
 
-    auto dst = cg->ConvertRegister(init_str->GetDstReg(), init_str->GetType());
-    auto ctor_arg = cg->ConvertRegister(init_str->GetSrcReg(0), init_str->GetInputType(0));
+    auto dst = cg->ConvertRegister(initStr->GetDstReg(), initStr->GetType());
+    auto ctorArg = cg->ConvertRegister(initStr->GetSrcReg(0), initStr->GetInputType(0));
 
     if (cg->GetArch() == Arch::AARCH32) {
-        auto entry_id =
-            init_str->IsFromString() ? EntrypointId::CREATE_STRING_FROM_STRING : EntrypointId::CREATE_STRING_FROM_CHARS;
-        cg->CallRuntime(init_str, entry_id, dst, RegMask::GetZeroMask(), ctor_arg);
+        auto entryId =
+            initStr->IsFromString() ? EntrypointId::CREATE_STRING_FROM_STRING : EntrypointId::CREATE_STRING_FROM_CHARS;
+        cg->CallRuntime(initStr, entryId, dst, RegMask::GetZeroMask(), ctorArg);
         return;
     }
 
-    if (init_str->IsFromString()) {
-        auto entry_id = cg->GetRuntime()->IsCompressedStringsEnabled()
-                            ? compiler::RuntimeInterface::EntrypointId::CREATE_STRING_FROM_STRING_TLAB_COMPRESSED
-                            : compiler::RuntimeInterface::EntrypointId::CREATE_STRING_FROM_STRING_TLAB;
-        cg->CallFastPath(init_str, entry_id, dst, RegMask::GetZeroMask(), ctor_arg);
+    if (initStr->IsFromString()) {
+        auto entryId = cg->GetRuntime()->IsCompressedStringsEnabled()
+                           ? compiler::RuntimeInterface::EntrypointId::CREATE_STRING_FROM_STRING_TLAB_COMPRESSED
+                           : compiler::RuntimeInterface::EntrypointId::CREATE_STRING_FROM_STRING_TLAB;
+        cg->CallFastPath(initStr, entryId, dst, RegMask::GetZeroMask(), ctorArg);
     } else {
         auto enc = cg->GetEncoder();
         auto runtime = cg->GetGraph()->GetRuntime();
-        auto mem = MemRef(ctor_arg, static_cast<int64_t>(runtime->GetArrayLengthOffset(cg->GetArch())));
-        ScopedTmpReg length_reg(enc);
-        enc->EncodeLdr(length_reg, IsTypeSigned(init_str->GetType()), mem);
+        auto mem = MemRef(ctorArg, static_cast<int64_t>(runtime->GetArrayLengthOffset(cg->GetArch())));
+        ScopedTmpReg lengthReg(enc);
+        enc->EncodeLdr(lengthReg, IsTypeSigned(initStr->GetType()), mem);
         if (cg->GetGraph()->IsAotMode()) {
-            auto klass_offs = runtime->GetStringClassPointerTlsOffset(cg->GetArch());
-            ScopedTmpReg klass_reg(enc);
-            enc->EncodeLdr(klass_reg, false, MemRef(cg->ThreadReg(), klass_offs));
-            cg->CallFastCreateStringFromCharArrayTlab(init_str, dst, cg->GetRegfile()->GetZeroReg(), length_reg,
-                                                      ctor_arg, klass_reg);
+            auto klassOffs = runtime->GetStringClassPointerTlsOffset(cg->GetArch());
+            ScopedTmpReg klassReg(enc);
+            enc->EncodeLdr(klassReg, false, MemRef(cg->ThreadReg(), klassOffs));
+            cg->CallFastCreateStringFromCharArrayTlab(initStr, dst, cg->GetRegfile()->GetZeroReg(), lengthReg, ctorArg,
+                                                      klassReg);
         } else {
-            auto klass_ptr = runtime->GetStringClass(cg->GetGraph()->GetMethod());
-            auto klass_imm = TypedImm(reinterpret_cast<uintptr_t>(klass_ptr));
-            cg->CallFastCreateStringFromCharArrayTlab(init_str, dst, cg->GetRegfile()->GetZeroReg(), length_reg,
-                                                      ctor_arg, klass_imm);
+            auto klassPtr = runtime->GetStringClass(cg->GetGraph()->GetMethod());
+            auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(klassPtr));
+            cg->CallFastCreateStringFromCharArrayTlab(initStr, dst, cg->GetRegfile()->GetZeroReg(), lengthReg, ctorArg,
+                                                      klassImm);
         }
     }
 }
@@ -5028,34 +5019,34 @@ void EncodeVisitor::VisitSafePoint(GraphVisitor *visitor, Inst *inst)
     auto codegen = enc->GetCodegen();
     auto graph = codegen->GetGraph();
     auto encoder = enc->GetEncoder();
-    int64_t flag_addr_offset = graph->GetRuntime()->GetFlagAddrOffset(codegen->GetArch());
+    int64_t flagAddrOffset = graph->GetRuntime()->GetFlagAddrOffset(codegen->GetArch());
     ScopedTmpRegU16 tmp(encoder);
 
     // TMP <= Flag
-    auto mem = MemRef(codegen->ThreadReg(), flag_addr_offset);
+    auto mem = MemRef(codegen->ThreadReg(), flagAddrOffset);
     encoder->EncodeLdr(tmp, false, mem);
 
     // check value and jump to call GC
-    auto slow_path = codegen->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::SAFEPOINT);
+    auto slowPath = codegen->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::SAFEPOINT);
 
-    encoder->EncodeJump(slow_path->GetLabel(), tmp, Condition::NE);
+    encoder->EncodeJump(slowPath->GetLabel(), tmp, Condition::NE);
 
-    slow_path->BindBackLabel(encoder);
+    slowPath->BindBackLabel(encoder);
 }
 
 void EncodeVisitor::VisitSelect(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst_type = inst->GetType();
-    auto cmp_type = inst->CastToSelect()->GetOperandsType();
+    auto dstType = inst->GetType();
+    auto cmpType = inst->CastToSelect()->GetOperandsType();
 
     constexpr int32_t IMM_2 = 2;
     constexpr int32_t IMM_3 = 3;
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), dst_type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), dst_type);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), dst_type);
-    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmp_type);
-    auto src3 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_3), cmp_type);
+    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), dstType);
+    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), dstType);
+    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), dstType);
+    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmpType);
+    auto src3 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_3), cmpType);
     auto cc = enc->GetCodegen()->ConvertCc(inst->CastToSelect()->GetCc());
     if (IsTestCc(cc)) {
         enc->GetEncoder()->EncodeSelectTest(dst, src0, src1, src2, src3, cc);
@@ -5067,14 +5058,14 @@ void EncodeVisitor::VisitSelect(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitSelectImm(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst_type = inst->GetType();
-    auto cmp_type = inst->CastToSelectImm()->GetOperandsType();
+    auto dstType = inst->GetType();
+    auto cmpType = inst->CastToSelectImm()->GetOperandsType();
 
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), dst_type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), dst_type);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), dst_type);
+    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), dstType);
+    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), dstType);
+    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), dstType);
     constexpr int32_t IMM_2 = 2;
-    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmp_type);
+    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmpType);
     auto imm = Imm(inst->CastToSelectImm()->GetImm());
     auto cc = enc->GetCodegen()->ConvertCc(inst->CastToSelectImm()->GetCc());
     if (IsTestCc(cc)) {
@@ -5140,11 +5131,11 @@ void EncodeVisitor::VisitAddOverflowCheck(GraphVisitor *visitor, Inst *inst)
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(0).GetInst()->GetType()));
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(1).GetInst()->GetType()));
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto src0 = Reg(inst->GetSrcReg(0), INT32_TYPE);
     auto src1 = Reg(inst->GetSrcReg(1), INT32_TYPE);
-    enc->GetEncoder()->EncodeAddOverflow(slow_path->GetLabel(), dst, src0, src1, Condition::VS);
+    enc->GetEncoder()->EncodeAddOverflow(slowPath->GetLabel(), dst, src0, src1, Condition::VS);
 }
 
 void EncodeVisitor::VisitSubOverflow(GraphVisitor *visitor, Inst *inst)
@@ -5167,21 +5158,21 @@ void EncodeVisitor::VisitSubOverflowCheck(GraphVisitor *visitor, Inst *inst)
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(0).GetInst()->GetType()));
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(1).GetInst()->GetType()));
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto src0 = Reg(inst->GetSrcReg(0), INT32_TYPE);
     auto src1 = Reg(inst->GetSrcReg(1), INT32_TYPE);
-    enc->GetEncoder()->EncodeSubOverflow(slow_path->GetLabel(), dst, src0, src1, Condition::VS);
+    enc->GetEncoder()->EncodeSubOverflow(slowPath->GetLabel(), dst, src0, src1, Condition::VS);
 }
 
 void EncodeVisitor::VisitNegOverflowAndZeroCheck(GraphVisitor *visitor, Inst *inst)
 {
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(0).GetInst()->GetType()));
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto slow_path = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto src = Reg(inst->GetSrcReg(0), INT32_TYPE);
-    enc->GetEncoder()->EncodeNegOverflowAndZero(slow_path->GetLabel(), dst, src);
+    enc->GetEncoder()->EncodeNegOverflowAndZero(slowPath->GetLabel(), dst, src);
 }
 
 void EncodeVisitor::VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst)
@@ -5201,9 +5192,9 @@ void EncodeVisitor::VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst)
     int32_t scale = DataType::ShiftByType(type, enc->GetCodegen()->GetArch());
     enc->GetEncoder()->EncodeAdd(tmp, src0, Shift(src1, scale));
     auto mem = MemRef(tmp, offset);
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
     enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
 void EncodeVisitor::VisitLoadArrayPairI(GraphVisitor *visitor, Inst *inst)
@@ -5221,9 +5212,9 @@ void EncodeVisitor::VisitLoadArrayPairI(GraphVisitor *visitor, Inst *inst)
                      (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     auto mem = MemRef(src0, offset);
 
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
     enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
 /**
@@ -5251,15 +5242,15 @@ void EncodeVisitor::VisitStoreArrayPair(GraphVisitor *visitor, Inst *inst)
     if (inst->CastToStoreArrayPair()->GetNeedBarrier()) {
         enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(src0.GetId(), src2.GetId(), src3.GetId()), true);
     }
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
     enc->GetEncoder()->EncodeStp(src2, src3, mem);
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 
     if (inst->CastToStoreArrayPair()->GetNeedBarrier()) {
-        auto tmp_offset = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(enc->GetArch()));
-        enc->GetEncoder()->EncodeShl(tmp_offset, src1, Imm(scale));
-        enc->GetEncoder()->EncodeAdd(tmp_offset, tmp_offset, Imm(offset));
-        auto mem1 = MemRef(src0, tmp_offset, 0);
+        auto tmpOffset = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(enc->GetArch()));
+        enc->GetEncoder()->EncodeShl(tmpOffset, src1, Imm(scale));
+        enc->GetEncoder()->EncodeAdd(tmpOffset, tmpOffset, Imm(offset));
+        auto mem1 = MemRef(src0, tmpOffset, 0);
         enc->GetCodegen()->CreatePostWRB(inst, mem1, src2, src3);
     }
 }
@@ -5285,9 +5276,9 @@ void EncodeVisitor::VisitStoreArrayPairI(GraphVisitor *visitor, Inst *inst)
     if (inst->CastToStoreArrayPairI()->GetNeedBarrier()) {
         enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(src0.GetId(), src1.GetId(), src2.GetId()), true);
     }
-    auto prev_offset = enc->GetEncoder()->GetCursorOffset();
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
     enc->GetEncoder()->EncodeStp(src1, src2, mem);
-    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prev_offset);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
     if (inst->CastToStoreArrayPairI()->GetNeedBarrier()) {
         enc->GetCodegen()->CreatePostWRB(inst, mem, src1, src2);
     }
@@ -5303,8 +5294,8 @@ void EncodeVisitor::VisitNOP([[maybe_unused]] GraphVisitor *visitor, [[maybe_unu
 void EncodeVisitor::VisitThrow(GraphVisitor *visitor, [[maybe_unused]] Inst *inst)
 {
     auto codegen = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
-    SlowPathCheck slow_path(codegen->GetEncoder()->CreateLabel(), inst, EntrypointId::THROW_EXCEPTION);
-    slow_path.Generate(codegen);
+    SlowPathCheck slowPath(codegen->GetEncoder()->CreateLabel(), inst, EntrypointId::THROW_EXCEPTION);
+    slowPath.Generate(codegen);
 }
 
 void EncodeVisitor::VisitDeoptimize(GraphVisitor *visitor, Inst *inst)
@@ -5312,9 +5303,9 @@ void EncodeVisitor::VisitDeoptimize(GraphVisitor *visitor, Inst *inst)
     auto codegen = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
     ASSERT(inst->GetSaveState() != nullptr);
 
-    SlowPathDeoptimize slow_path(codegen->GetEncoder()->CreateLabel(), inst,
-                                 inst->CastToDeoptimize()->GetDeoptimizeType());
-    slow_path.Generate(codegen);
+    SlowPathDeoptimize slowPath(codegen->GetEncoder()->CreateLabel(), inst,
+                                inst->CastToDeoptimize()->GetDeoptimizeType());
+    slowPath.Generate(codegen);
 }
 
 void EncodeVisitor::VisitIsMustDeoptimize(GraphVisitor *visitor, Inst *inst)
@@ -5332,27 +5323,27 @@ void EncodeVisitor::VisitGetInstanceClass(GraphVisitor *visitor, Inst *inst)
 {
     auto *codegen = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
     auto dst = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    auto obj_reg = codegen->ConvertRegister(inst->GetSrcReg(0), inst->GetType());
-    ASSERT(obj_reg.IsValid());
-    codegen->LoadClassFromObject(dst, obj_reg);
+    auto objReg = codegen->ConvertRegister(inst->GetSrcReg(0), inst->GetType());
+    ASSERT(objReg.IsValid());
+    codegen->LoadClassFromObject(dst, objReg);
 }
 
 void EncodeVisitor::VisitLoadImmediate(GraphVisitor *visitor, Inst *inst)
 {
     auto codegen = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
     auto dst = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    auto load_imm = inst->CastToLoadImmediate();
-    if (load_imm->GetObjectType() != LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET) {
-        codegen->GetEncoder()->EncodeMov(dst, Imm(reinterpret_cast<uintptr_t>(load_imm->GetObject())));
+    auto loadImm = inst->CastToLoadImmediate();
+    if (loadImm->GetObjectType() != LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET) {
+        codegen->GetEncoder()->EncodeMov(dst, Imm(reinterpret_cast<uintptr_t>(loadImm->GetObject())));
     } else {
         auto runtime = codegen->GetGraph()->GetRuntime();
-        auto pf_offset = runtime->GetPandaFileOffset(codegen->GetGraph()->GetArch());
+        auto pfOffset = runtime->GetPandaFileOffset(codegen->GetGraph()->GetArch());
         codegen->LoadMethod(dst);
         // load pointer to panda file
-        codegen->GetEncoder()->EncodeLdr(dst, false, MemRef(dst, pf_offset));
+        codegen->GetEncoder()->EncodeLdr(dst, false, MemRef(dst, pfOffset));
         codegen->GetEncoder()->EncodeLdr(dst, false, MemRef(dst, cross_values::GetFileBaseOffset(codegen->GetArch())));
         // add pointer to pf with offset to str
-        codegen->GetEncoder()->EncodeAdd(dst, dst, Imm(load_imm->GetPandaFileOffset()));
+        codegen->GetEncoder()->EncodeAdd(dst, dst, Imm(loadImm->GetPandaFileOffset()));
     }
 }
 
@@ -5370,9 +5361,9 @@ void EncodeVisitor::VisitLoadObjFromConst(GraphVisitor *visitor, Inst *inst)
     auto *codegen = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
     auto dst = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());
 
-    Reg dst_pointer(dst.As(TypeInfo::FromDataType(DataType::POINTER, codegen->GetArch())));
-    codegen->GetEncoder()->EncodeMov(dst_pointer, Imm(inst->CastToLoadObjFromConst()->GetObjPtr()));
-    codegen->GetEncoder()->EncodeLdr(dst, false, MemRef(dst_pointer, 0U));
+    Reg dstPointer(dst.As(TypeInfo::FromDataType(DataType::POINTER, codegen->GetArch())));
+    codegen->GetEncoder()->EncodeMov(dstPointer, Imm(inst->CastToLoadObjFromConst()->GetObjPtr()));
+    codegen->GetEncoder()->EncodeLdr(dst, false, MemRef(dstPointer, 0U));
 }
 
 void EncodeVisitor::VisitRegDef([[maybe_unused]] GraphVisitor *visitor, [[maybe_unused]] Inst *inst) {}
@@ -5386,15 +5377,15 @@ void EncodeVisitor::VisitLiveOut([[maybe_unused]] GraphVisitor *visitor, [[maybe
 
     codegen->AddLiveOut(inst->GetBasicBlock(), inst->GetDstReg());
 
-    auto dst_reg = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    if (codegen->GetTarget().GetTempRegsMask().Test(dst_reg.GetId()) &&
-        enc->GetEncoder()->IsScratchRegisterReleased(dst_reg)) {
-        enc->GetEncoder()->AcquireScratchRegister(dst_reg);
+    auto dstReg = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());
+    if (codegen->GetTarget().GetTempRegsMask().Test(dstReg.GetId()) &&
+        enc->GetEncoder()->IsScratchRegisterReleased(dstReg)) {
+        enc->GetEncoder()->AcquireScratchRegister(dstReg);
     }
 
     if (inst->GetLocation(0) != inst->GetDstLocation()) {
         auto *src = inst->GetInput(0).GetInst();
-        enc->GetEncoder()->EncodeMov(dst_reg, codegen->ConvertRegister(inst->GetSrcReg(0), src->GetType()));
+        enc->GetEncoder()->EncodeMov(dstReg, codegen->ConvertRegister(inst->GetSrcReg(0), src->GetType()));
     }
 }
 
@@ -5477,18 +5468,18 @@ void EncodeVisitor::VisitCastValueToAnyType(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitAnyTypeCheck(GraphVisitor *visitor, Inst *inst)
 {
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto *check_inst = inst->CastToAnyTypeCheck();
+    auto *checkInst = inst->CastToAnyTypeCheck();
 
-    if (check_inst->GetInputType(0) != DataType::Type::ANY) {
+    if (checkInst->GetInputType(0) != DataType::Type::ANY) {
         enc->GetEncoder()->EncodeAbort();
         UNREACHABLE();
     }
     // Empty check
-    if (check_inst->GetAnyType() == AnyBaseType::UNDEFINED_TYPE) {
+    if (checkInst->GetAnyType() == AnyBaseType::UNDEFINED_TYPE) {
         return;
     }
 
-    if (TryAnyTypeCheckPluginGen(check_inst, enc)) {
+    if (TryAnyTypeCheckPluginGen(checkInst, enc)) {
         return;
     }
     UNREACHABLE();
@@ -5497,14 +5488,14 @@ void EncodeVisitor::VisitAnyTypeCheck(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitHclassCheck(GraphVisitor *visitor, Inst *inst)
 {
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto *check_inst = inst->CastToHclassCheck();
+    auto *checkInst = inst->CastToHclassCheck();
 
-    if (check_inst->GetInputType(0) != DataType::Type::REFERENCE) {
+    if (checkInst->GetInputType(0) != DataType::Type::REFERENCE) {
         enc->GetEncoder()->EncodeAbort();
         UNREACHABLE();
     }
 
-    if (TryHclassCheckPluginGen(check_inst, enc)) {
+    if (TryHclassCheckPluginGen(checkInst, enc)) {
         return;
     }
     UNREACHABLE();
@@ -5513,14 +5504,14 @@ void EncodeVisitor::VisitHclassCheck(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitObjByIndexCheck(GraphVisitor *visitor, Inst *inst)
 {
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    const auto *check_inst = inst->CastToObjByIndexCheck();
+    const auto *checkInst = inst->CastToObjByIndexCheck();
 
-    if (check_inst->GetInputType(0) != DataType::Type::ANY) {
+    if (checkInst->GetInputType(0) != DataType::Type::ANY) {
         enc->GetEncoder()->EncodeAbort();
         UNREACHABLE();
     }
     auto id = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::ANY_TYPE_CHECK)->GetLabel();
-    if (TryObjByIndexCheckPluginGen(check_inst, enc, id)) {
+    if (TryObjByIndexCheckPluginGen(checkInst, enc, id)) {
         return;
     }
     UNREACHABLE();
@@ -5577,24 +5568,24 @@ bool Codegen::InstEncodedWithLibCall(const Inst *inst, Arch arch)
     ASSERT(inst != nullptr);
     Opcode op = inst->GetOpcode();
     if (op == Opcode::Mod) {
-        auto dst_type = inst->GetType();
+        auto dstType = inst->GetType();
         if (arch == Arch::AARCH64 || arch == Arch::X86_64) {
-            return dst_type == DataType::FLOAT32 || dst_type == DataType::FLOAT64;
+            return dstType == DataType::FLOAT32 || dstType == DataType::FLOAT64;
         }
         return arch == Arch::AARCH32;
     }
     if (op == Opcode::Div && arch == Arch::AARCH32) {
-        auto dst_type = inst->GetType();
-        return dst_type == DataType::INT64 || dst_type == DataType::UINT64;
+        auto dstType = inst->GetType();
+        return dstType == DataType::INT64 || dstType == DataType::UINT64;
     }
     if (op == Opcode::Cast && arch == Arch::AARCH32) {
-        auto dst_type = inst->GetType();
-        auto src_type = inst->GetInputType(0);
-        if (dst_type == DataType::FLOAT32 || dst_type == DataType::FLOAT64) {
-            return src_type == DataType::INT64 || src_type == DataType::UINT64;
+        auto dstType = inst->GetType();
+        auto srcType = inst->GetInputType(0);
+        if (dstType == DataType::FLOAT32 || dstType == DataType::FLOAT64) {
+            return srcType == DataType::INT64 || srcType == DataType::UINT64;
         }
-        if (src_type == DataType::FLOAT32 || src_type == DataType::FLOAT64) {
-            return dst_type == DataType::INT64 || dst_type == DataType::UINT64;
+        if (srcType == DataType::FLOAT32 || srcType == DataType::FLOAT64) {
+            return dstType == DataType::INT64 || dstType == DataType::UINT64;
         }
         return false;
     }

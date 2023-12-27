@@ -17,5 +17,5 @@
 
 namespace panda::llvmbackend {
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-Options OPTIONS("");
+Options g_options("");
 }  // namespace panda::llvmbackend

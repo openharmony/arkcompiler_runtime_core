@@ -120,16 +120,16 @@ static inline vixl::aarch64::Register VixlReg(Reg reg)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
-        size_t reg_size = reg.GetSize();
-        if (reg_size < WORD_SIZE) {
-            reg_size = WORD_SIZE;
+        size_t regSize = reg.GetSize();
+        if (regSize < WORD_SIZE) {
+            regSize = WORD_SIZE;
         }
-        if (reg_size > DOUBLE_WORD_SIZE) {
-            reg_size = DOUBLE_WORD_SIZE;
+        if (regSize > DOUBLE_WORD_SIZE) {
+            regSize = DOUBLE_WORD_SIZE;
         }
-        auto vixl_reg = vixl::aarch64::Register(reg.GetId(), reg_size);
-        ASSERT(vixl_reg.IsValid());
-        return vixl_reg;
+        auto vixlReg = vixl::aarch64::Register(reg.GetId(), regSize);
+        ASSERT(vixlReg.IsValid());
+        return vixlReg;
     }
     if (reg.GetId() == vixl::aarch64::sp.GetCode()) {
         return vixl::aarch64::sp;
@@ -144,9 +144,9 @@ static inline vixl::aarch64::Register VixlReg(Reg reg, const uint8_t size)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
-        auto vixl_reg = vixl::aarch64::Register(reg.GetId(), (size < WORD_SIZE ? WORD_SIZE : size));
-        ASSERT(vixl_reg.IsValid());
-        return vixl_reg;
+        auto vixlReg = vixl::aarch64::Register(reg.GetId(), (size < WORD_SIZE ? WORD_SIZE : size));
+        ASSERT(vixlReg.IsValid());
+        return vixlReg;
     }
     if (reg.GetId() == vixl::aarch64::sp.GetCode()) {
         return vixl::aarch64::sp;
@@ -162,9 +162,9 @@ static inline vixl::aarch64::Register VixlRegU(Reg reg)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
-        auto vixl_reg = vixl::aarch64::Register(reg.GetId() + 1, DOUBLE_WORD_SIZE);
-        ASSERT(vixl_reg.IsValid());
-        return vixl_reg;
+        auto vixlReg = vixl::aarch64::Register(reg.GetId() + 1, DOUBLE_WORD_SIZE);
+        ASSERT(vixlReg.IsValid());
+        return vixlReg;
     }
 
     // Invalid register type
@@ -175,9 +175,9 @@ static inline vixl::aarch64::Register VixlRegU(Reg reg)
 static inline vixl::aarch64::VRegister VixlVReg(Reg reg)
 {
     ASSERT(reg.IsValid());
-    auto vixl_vreg = vixl::aarch64::VRegister(reg.GetId(), reg.GetSize());
-    ASSERT(vixl_vreg.IsValid());
-    return vixl_vreg;
+    auto vixlVreg = vixl::aarch64::VRegister(reg.GetId(), reg.GetSize());
+    ASSERT(vixlVreg.IsValid());
+    return vixlVreg;
 }
 
 static inline vixl::aarch64::Operand VixlShift(Shift shift)
@@ -186,14 +186,14 @@ static inline vixl::aarch64::Operand VixlShift(Shift shift)
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
         ASSERT(reg.IsScalar());
-        size_t reg_size = reg.GetSize();
-        if (reg_size < WORD_SIZE) {
-            reg_size = WORD_SIZE;
+        size_t regSize = reg.GetSize();
+        if (regSize < WORD_SIZE) {
+            regSize = WORD_SIZE;
         }
-        auto vixl_reg = vixl::aarch64::Register(reg.GetId(), reg_size);
-        ASSERT(vixl_reg.IsValid());
+        auto vixlReg = vixl::aarch64::Register(reg.GetId(), regSize);
+        ASSERT(vixlReg.IsValid());
 
-        return vixl::aarch64::Operand(vixl_reg, Convert(shift.GetType()), shift.GetScale());
+        return vixl::aarch64::Operand(vixlReg, Convert(shift.GetType()), shift.GetScale());
     }
 
     // Invalid register type
@@ -213,34 +213,34 @@ static inline vixl::aarch64::Operand VixlImm(Imm imm)
 static inline vixl::aarch64::MemOperand ConvertMem(MemRef mem)
 {
     bool base = mem.HasBase() && (mem.GetBase().GetId() != vixl::aarch64::xzr.GetCode());
-    bool has_index = mem.HasIndex();
+    bool hasIndex = mem.HasIndex();
     bool shift = mem.HasScale();
     bool offset = mem.HasDisp();
-    auto base_reg = Reg(mem.GetBase().GetId(), INT64_TYPE);
-    if (base && !has_index && !shift) {
+    auto baseReg = Reg(mem.GetBase().GetId(), INT64_TYPE);
+    if (base && !hasIndex && !shift) {
         // Memory address = x_reg(base) + imm(offset)
         if (mem.GetDisp() != 0) {
             auto disp = mem.GetDisp();
-            return vixl::aarch64::MemOperand(VixlReg(base_reg), VixlImm(disp));
+            return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlImm(disp));
         }
         // Memory address = x_reg(base)
         return vixl::aarch64::MemOperand(VixlReg(mem.GetBase(), DOUBLE_WORD_SIZE));
     }
-    if (base && has_index && !offset) {
+    if (base && hasIndex && !offset) {
         auto scale = mem.GetScale();
-        auto index_reg = mem.GetIndex();
+        auto indexReg = mem.GetIndex();
         // Memory address = x_reg(base) + (SXTW(w_reg(index)) << scale)
-        if (index_reg.GetSize() == WORD_SIZE) {
+        if (indexReg.GetSize() == WORD_SIZE) {
             // Sign-extend and shift w-register in offset-position (signed because index always has signed type)
-            return vixl::aarch64::MemOperand(VixlReg(base_reg), VixlReg(index_reg), vixl::aarch64::Extend::SXTW, scale);
+            return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlReg(indexReg), vixl::aarch64::Extend::SXTW, scale);
         }
         // Memory address = x_reg(base) + (x_reg(index) << scale)
         if (scale != 0) {
-            ASSERT(index_reg.GetSize() == DOUBLE_WORD_SIZE);
-            return vixl::aarch64::MemOperand(VixlReg(base_reg), VixlReg(index_reg), vixl::aarch64::LSL, scale);
+            ASSERT(indexReg.GetSize() == DOUBLE_WORD_SIZE);
+            return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlReg(indexReg), vixl::aarch64::LSL, scale);
         }
         // Memory address = x_reg(base) + x_reg(index)
-        return vixl::aarch64::MemOperand(VixlReg(base_reg), VixlReg(index_reg));
+        return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlReg(indexReg));
     }
     // Wrong memRef
     // Return invalid memory operand
@@ -264,19 +264,19 @@ public:
 
     RegMask GetCallerSavedRegMask() const override
     {
-        return RegMask(caller_saved_.GetList());
+        return RegMask(callerSaved_.GetList());
     }
 
     VRegMask GetCallerSavedVRegMask() const override
     {
-        return VRegMask(caller_savedv_.GetList());
+        return VRegMask(callerSavedv_.GetList());
     }
 
     bool IsCalleeRegister(Reg reg) override
     {
-        bool is_fp = reg.IsFloat();
-        return reg.GetId() >= GetFirstCalleeReg(Arch::AARCH64, is_fp) &&
-               reg.GetId() <= GetLastCalleeReg(Arch::AARCH64, is_fp);
+        bool isFp = reg.IsFloat();
+        return reg.GetId() >= GetFirstCalleeReg(Arch::AARCH64, isFp) &&
+               reg.GetId() <= GetLastCalleeReg(Arch::AARCH64, isFp);
     }
 
     Reg GetZeroReg() const override
@@ -301,12 +301,12 @@ public:
 
     RegMask GetDefaultRegMask() const override
     {
-        RegMask reg_mask = compiler::arch_info::arm64::TEMP_REGS;
-        reg_mask.set(Target(Arch::AARCH64).GetZeroReg().GetId());
-        reg_mask.set(GetThreadReg(Arch::AARCH64));
-        reg_mask.set(vixl::aarch64::x29.GetCode());
-        reg_mask.set(vixl::aarch64::lr.GetCode());
-        return reg_mask;
+        RegMask regMask = compiler::arch_info::arm64::TEMP_REGS;
+        regMask.set(Target(Arch::AARCH64).GetZeroReg().GetId());
+        regMask.set(GetThreadReg(Arch::AARCH64));
+        regMask.set(vixl::aarch64::x29.GetCode());
+        regMask.set(vixl::aarch64::lr.GetCode());
+        return regMask;
     }
 
     VRegMask GetVRegMask() override
@@ -333,48 +333,48 @@ public:
         return true;
     }
 
-    bool IsRegUsed(ArenaVector<Reg> vec_reg, Reg reg) override;
+    bool IsRegUsed(ArenaVector<Reg> vecReg, Reg reg) override;
 
 public:
     // Special implementation-specific getters
     vixl::aarch64::CPURegList GetCalleeSavedR()
     {
-        return callee_saved_;
+        return calleeSaved_;
     }
     vixl::aarch64::CPURegList GetCalleeSavedV()
     {
-        return callee_savedv_;
+        return calleeSavedv_;
     }
     vixl::aarch64::CPURegList GetCallerSavedR()
     {
-        return caller_saved_;
+        return callerSaved_;
     }
     vixl::aarch64::CPURegList GetCallerSavedV()
     {
-        return caller_savedv_;
+        return callerSavedv_;
     }
-    uint8_t GetAlignmentVreg(bool is_callee)
+    uint8_t GetAlignmentVreg(bool isCallee)
     {
-        auto allignment_vreg = is_callee ? allignment_vreg_callee_ : allignment_vreg_caller_;
+        auto allignmentVreg = isCallee ? allignmentVregCallee_ : allignmentVregCaller_;
         // !NOTE Ishin Pavel fix if allignment_vreg == UNDEF_VREG
-        ASSERT(allignment_vreg != UNDEF_VREG);
+        ASSERT(allignmentVreg != UNDEF_VREG);
 
-        return allignment_vreg;
+        return allignmentVreg;
     }
 
 private:
-    ArenaVector<Reg> used_regs_;
+    ArenaVector<Reg> usedRegs_;
 
-    vixl::aarch64::CPURegList callee_saved_ {vixl::aarch64::kCalleeSaved};
-    vixl::aarch64::CPURegList caller_saved_ {vixl::aarch64::kCallerSaved};
+    vixl::aarch64::CPURegList calleeSaved_ {vixl::aarch64::kCalleeSaved};
+    vixl::aarch64::CPURegList callerSaved_ {vixl::aarch64::kCallerSaved};
 
-    vixl::aarch64::CPURegList callee_savedv_ {vixl::aarch64::kCalleeSavedV};
-    vixl::aarch64::CPURegList caller_savedv_ {vixl::aarch64::kCallerSavedV};
+    vixl::aarch64::CPURegList calleeSavedv_ {vixl::aarch64::kCalleeSavedV};
+    vixl::aarch64::CPURegList callerSavedv_ {vixl::aarch64::kCallerSavedV};
 
     static inline constexpr const uint8_t UNDEF_VREG = std::numeric_limits<uint8_t>::max();
     // The number of register in Push/Pop list must be even. The regisers are used for alignment vetor register lists
-    uint8_t allignment_vreg_callee_ {UNDEF_VREG};
-    uint8_t allignment_vreg_caller_ {UNDEF_VREG};
+    uint8_t allignmentVregCallee_ {UNDEF_VREG};
+    uint8_t allignmentVregCaller_ {UNDEF_VREG};
 };  // Aarch64RegisterDescription
 
 class Aarch64Encoder;
@@ -449,7 +449,7 @@ public:
         return panda::compiler::Target(Arch::AARCH64);
     }
 
-    void LoadPcRelative(Reg reg, intptr_t offset, Reg reg_addr = INVALID_REGISTER);
+    void LoadPcRelative(Reg reg, intptr_t offset, Reg regAddr = INVALID_REGISTER);
 
     void SetMaxAllocatedBytes(size_t size) override
     {
@@ -492,23 +492,23 @@ public:
     void EncodeXorNot(Reg dst, Reg src0, Shift src1) override;
     void EncodeNeg(Reg dst, Shift src) override;
 
-    void EncodeCast(Reg dst, bool dst_signed, Reg src, bool src_signed) override;
+    void EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned) override;
     void EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::LabelId slow) override;
     void EncodeCastToBool(Reg dst, Reg src) override;
 
-    void EncodeMin(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
-    void EncodeDiv(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
-    void EncodeMod(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
-    void EncodeMax(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
+    void EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
 
     void EncodeAddOverflow(compiler::LabelHolder::LabelId id, Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeSubOverflow(compiler::LabelHolder::LabelId id, Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeNegOverflowAndZero(compiler::LabelHolder::LabelId id, Reg dst, Reg src) override;
 
-    void EncodeLdr(Reg dst, bool dst_signed, MemRef mem) override;
-    void EncodeLdrAcquire(Reg dst, bool dst_signed, MemRef mem) override;
-    void EncodeLdrAcquireInvalid(Reg dst, bool dst_signed, MemRef mem);
-    void EncodeLdrAcquireScalar(Reg dst, bool dst_signed, MemRef mem);
+    void EncodeLdr(Reg dst, bool dstSigned, MemRef mem) override;
+    void EncodeLdrAcquire(Reg dst, bool dstSigned, MemRef mem) override;
+    void EncodeLdrAcquireInvalid(Reg dst, bool dstSigned, MemRef mem);
+    void EncodeLdrAcquireScalar(Reg dst, bool dstSigned, MemRef mem);
 
     void EncodeMov(Reg dst, Imm src) override;
     void EncodeStr(Reg src, MemRef mem) override;
@@ -519,14 +519,14 @@ public:
 
     // zerod high part: [reg.size, 64)
     void EncodeStrz(Reg src, MemRef mem) override;
-    void EncodeSti(int64_t src, uint8_t src_size_bytes, MemRef mem) override;
+    void EncodeSti(int64_t src, uint8_t srcSizeBytes, MemRef mem) override;
     void EncodeSti(double src, MemRef mem) override;
     void EncodeSti(float src, MemRef mem) override;
     // size must be 8, 16,32 or 64
-    void EncodeMemCopy(MemRef mem_from, MemRef mem_to, size_t size) override;
+    void EncodeMemCopy(MemRef memFrom, MemRef memTo, size_t size) override;
     // size must be 8, 16,32 or 64
     // zerod high part: [reg.size, 64)
-    void EncodeMemCopyz(MemRef mem_from, MemRef mem_to, size_t size) override;
+    void EncodeMemCopyz(MemRef memFrom, MemRef memTo, size_t size) override;
 
     void EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc) override;
 
@@ -538,7 +538,7 @@ public:
     void EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3, Condition cc) override;
     void EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, Condition cc) override;
 
-    void EncodeLdp(Reg dst0, Reg dst1, bool dst_signed, MemRef mem) override;
+    void EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem) override;
 
     void EncodeStp(Reg src0, Reg src1, MemRef mem) override;
 
@@ -568,18 +568,18 @@ public:
 
     void EncodeReverseBytes(Reg dst, Reg src) override;
     void EncodeReverseBits(Reg dst, Reg src) override;
-    void EncodeRotate(Reg dst, Reg src1, Reg src2, bool is_ror) override;
+    void EncodeRotate(Reg dst, Reg src1, Reg src2, bool isRor) override;
     void EncodeSignum(Reg dst, Reg src) override;
-    void EncodeCompressedStringCharAt(Reg dst, Reg str, Reg idx, Reg length, Reg tmp, size_t data_offset,
+    void EncodeCompressedStringCharAt(Reg dst, Reg str, Reg idx, Reg length, Reg tmp, size_t dataOffset,
                                       uint32_t shift) override;
-    void EncodeCompressedStringCharAtI(Reg dst, Reg str, Reg length, size_t data_offset, uint32_t index,
+    void EncodeCompressedStringCharAtI(Reg dst, Reg str, Reg length, size_t dataOffset, uint32_t index,
                                        uint32_t shift) override;
 
     void EncodeFpToBits(Reg dst, Reg src) override;
     void EncodeMoveBitsRaw(Reg dst, Reg src) override;
     void EncodeGetTypeSize(Reg size, Reg type) override;
 
-    bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signed_compare) override;
+    bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signedCompare) override;
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
     bool CanEncodeScale(uint64_t imm, uint32_t size) override;
     bool CanEncodeFloatSelect() override;
@@ -590,9 +590,9 @@ public:
     void EncodeMemoryBarrier(memory_order::Order order) override;
 
     void EncodeStackOverflowCheck(ssize_t offset) override;
-    void EncodeCrc32Update(Reg dst, Reg crc_reg, Reg val_reg) override;
-    void EncodeCompressEightUtf16ToUtf8CharsUsingSimd(Reg src_addr, Reg dst_addr) override;
-    void EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg src_addr, Reg dst_addr) override;
+    void EncodeCrc32Update(Reg dst, Reg crcReg, Reg valReg) override;
+    void EncodeCompressEightUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr) override;
+    void EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr) override;
 
     bool CanEncodeBitCount() override
     {
@@ -633,7 +633,7 @@ public:
     {
         return true;
     }
-    bool CanEncodeShiftedOperand(ShiftOpcode opcode, ShiftType shift_type) override;
+    bool CanEncodeShiftedOperand(ShiftOpcode opcode, ShiftType shiftType) override;
 
     size_t GetCursorOffset() const override
     {
@@ -674,7 +674,7 @@ public:
         return INT64_TYPE;
     };
 
-    size_t DisasmInstr(std::ostream &stream, size_t pc, ssize_t code_offset) const override;
+    size_t DisasmInstr(std::ostream &stream, size_t pc, ssize_t codeOffset) const override;
 
     void *BufferData() const override
     {
@@ -692,8 +692,8 @@ public:
 
     void MakeCall(compiler::RelocationInfo *relocation) override;
     void MakeCall(LabelHolder::LabelId id) override;
-    void MakeCall(const void *entry_point) override;
-    void MakeCall(MemRef entry_point) override;
+    void MakeCall(const void *entryPoint) override;
+    void MakeCall(MemRef entryPoint) override;
     void MakeCall(Reg reg) override;
 
     void MakeCallAot(intptr_t offset) override;
@@ -725,34 +725,34 @@ public:
 
     void EncodeJump(RelocationInfo *relocation) override;
 
-    void EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bit_pos, bool bit_value) override;
+    void EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bitPos, bool bitValue) override;
 
     void EncodeAbort() override;
 
     void EncodeReturn() override;
 
-    void MakeLibCall(Reg dst, Reg src0, Reg src1, const void *entry_point);
+    void MakeLibCall(Reg dst, Reg src0, Reg src1, const void *entryPoint);
 
-    void SaveRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp) override
+    void SaveRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override
     {
-        LoadStoreRegisters<true>(registers, slot, start_reg, is_fp);
+        LoadStoreRegisters<true>(registers, slot, startReg, isFp);
     }
-    void LoadRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp) override
+    void LoadRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override
     {
-        LoadStoreRegisters<false>(registers, slot, start_reg, is_fp);
-    }
-
-    void SaveRegisters(RegMask registers, bool is_fp, ssize_t slot, Reg base, RegMask mask) override
-    {
-        LoadStoreRegisters<true>(registers, is_fp, slot, base, mask);
-    }
-    void LoadRegisters(RegMask registers, bool is_fp, ssize_t slot, Reg base, RegMask mask) override
-    {
-        LoadStoreRegisters<false>(registers, is_fp, slot, base, mask);
+        LoadStoreRegisters<false>(registers, slot, startReg, isFp);
     }
 
-    void PushRegisters(RegMask registers, bool is_fp) override;
-    void PopRegisters(RegMask registers, bool is_fp) override;
+    void SaveRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override
+    {
+        LoadStoreRegisters<true>(registers, isFp, slot, base, mask);
+    }
+    void LoadRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override
+    {
+        LoadStoreRegisters<false>(registers, isFp, slot, base, mask);
+    }
+
+    void PushRegisters(RegMask registers, bool isFp) override;
+    void PopRegisters(RegMask registers, bool isFp) override;
 
     vixl::aarch64::MacroAssembler *GetMasm() const
     {
@@ -775,33 +775,33 @@ public:
 
 private:
     template <bool IS_STORE>
-    void LoadStoreRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp);
+    void LoadStoreRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp);
 
     template <bool IS_STORE>
-    void LoadStoreRegistersLoop(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp,
-                                const vixl::aarch64::Register &base_reg);
+    void LoadStoreRegistersLoop(RegMask registers, ssize_t slot, size_t startReg, bool isFp,
+                                const vixl::aarch64::Register &baseReg);
 
     template <bool IS_STORE>
-    void LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
+    void LoadStoreRegisters(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask);
 
     template <bool IS_STORE>
-    void LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
+    void LoadStoreRegistersMainLoop(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask);
 
-    void EncodeCastFloat(Reg dst, bool dst_signed, Reg src, bool src_signed);
+    void EncodeCastFloat(Reg dst, bool dstSigned, Reg src, bool srcSigned);
     // This function not used, but it is working and can be used.
     // Unlike "EncodeCastFloat", it implements castes float32/64 to int8/16.
-    void EncodeCastFloatWithSmallDst(Reg dst, bool dst_signed, Reg src, bool src_signed);
+    void EncodeCastFloatWithSmallDst(Reg dst, bool dstSigned, Reg src, bool srcSigned);
 
-    void EncodeCastScalar(Reg dst, bool dst_signed, Reg src, bool src_signed);
+    void EncodeCastScalar(Reg dst, bool dstSigned, Reg src, bool srcSigned);
 
     void EncodeCastSigned(Reg dst, Reg src);
     void EncodeCastUnsigned(Reg dst, Reg src);
 
-    void EncodeCastCheckNaN(Reg dst, Reg src, LabelHolder::LabelId exit_id);
+    void EncodeCastCheckNaN(Reg dst, Reg src, LabelHolder::LabelId exitId);
 
     void EncodeFMod(Reg dst, Reg src0, Reg src1);
-    void HandleChar(int32_t ch, const vixl::aarch64::Register &tmp, vixl::aarch64::Label *label_not_found,
-                    vixl::aarch64::Label *label_uncompressed_string);
+    void HandleChar(int32_t ch, const vixl::aarch64::Register &tmp, vixl::aarch64::Label *labelNotFound,
+                    vixl::aarch64::Label *labelUncompressedString);
 
     void EncodeCmpFracWithDelta(Reg src);
 
@@ -812,7 +812,7 @@ private:
     mutable std::optional<vixl::aarch64::Decoder> decoder_;
     mutable std::optional<vixl::aarch64::Disassembler> disasm_;
 #endif
-    bool lr_acquired_ {false};
+    bool lrAcquired_ {false};
 };  // Aarch64Encoder
 
 class Aarch64ParameterInfo : public ParameterInfo {
@@ -838,23 +838,23 @@ public:
         return true;
     }
 
-    void GeneratePrologue(const FrameInfo &frame_info) override;
-    void GenerateEpilogue(const FrameInfo &frame_info, std::function<void()> post_job) override;
-    void GenerateNativePrologue(const FrameInfo &frame_info) override;
-    void GenerateNativeEpilogue(const FrameInfo &frame_info, std::function<void()> post_job) override;
+    void GeneratePrologue(const FrameInfo &frameInfo) override;
+    void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
+    void GenerateNativePrologue(const FrameInfo &frameInfo) override;
+    void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
 
     void *GetCodeEntry() override;
     uint32_t GetCodeSize() override;
 
-    Reg InitFlagsReg(bool has_float_regs);
+    Reg InitFlagsReg(bool hasFloatRegs);
 
     // Pushes regs and returns number of regs(from boths vectos)
-    size_t PushRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs, bool is_callee);
+    size_t PushRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs, bool isCallee);
     // Pops regs and returns number of regs(from boths vectos)
-    size_t PopRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs, bool is_callee);
+    size_t PopRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs, bool isCallee);
 
     // Calculating information about parameters and save regs_offset registers for special needs
-    ParameterInfo *GetParameterInfo(uint8_t regs_offset) override;
+    ParameterInfo *GetParameterInfo(uint8_t regsOffset) override;
 
     vixl::aarch64::MacroAssembler *GetMasm()
     {

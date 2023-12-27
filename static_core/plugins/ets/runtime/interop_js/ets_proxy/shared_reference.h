@@ -41,48 +41,48 @@ public:
     static constexpr size_t MAX_MARK_BITS = MarkWord::MarkWordRepresentation::HASH_SIZE;
 
     // Actual state of shared object is contained in ETS
-    bool InitETSObject(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object, uint32_t ref_idx);
+    bool InitETSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx);
 
     // Actual state of shared object is contained in JS
-    bool InitJSObject(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object, uint32_t ref_idx);
+    bool InitJSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx);
 
     // State of object is shared between ETS and JS
-    bool InitHybridObject(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object, uint32_t ref_idx);
+    bool InitHybridObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx);
 
     using InitFn = decltype(&SharedReference::InitHybridObject);
 
     EtsObject *GetEtsObject(InteropCtx *ctx) const
     {
         ASSERT_MANAGED_CODE();
-        ASSERT(ets_ref_ != nullptr);
-        return EtsObject::FromCoreType(RefstorFromInteropCtx(ctx)->Get(ets_ref_));
+        ASSERT(etsRef_ != nullptr);
+        return EtsObject::FromCoreType(RefstorFromInteropCtx(ctx)->Get(etsRef_));
     }
 
     napi_value GetJsObject(napi_env env) const
     {
-        napi_value js_value;
-        NAPI_CHECK_FATAL(napi_get_reference_value(env, js_ref_, &js_value));
-        return js_value;
+        napi_value jsValue;
+        NAPI_CHECK_FATAL(napi_get_reference_value(env, jsRef_, &jsValue));
+        return jsValue;
     }
 
-    static void *ExtractMaybeReference(napi_env env, napi_value js_object)
+    static void *ExtractMaybeReference(napi_env env, napi_value jsObject)
     {
         void *data;
-        if (UNLIKELY(napi_unwrap(env, js_object, &data) != napi_ok)) {
+        if (UNLIKELY(napi_unwrap(env, jsObject, &data) != napi_ok)) {
             return nullptr;
         }
         return data;
     }
 
-    static bool HasReference(EtsObject *ets_object)
+    static bool HasReference(EtsObject *etsObject)
     {
-        return ets_object->IsHashed();
+        return etsObject->IsHashed();
     }
 
-    static uint32_t ExtractMaybeIndex(EtsObject *ets_object)
+    static uint32_t ExtractMaybeIndex(EtsObject *etsObject)
     {
-        ASSERT(HasReference(ets_object));
-        return ets_object->GetInteropHash();
+        ASSERT(HasReference(etsObject));
+        return etsObject->GetInteropHash();
     }
 
     using FlagsType = FlagsStart::ValueType;
@@ -119,8 +119,8 @@ private:
      *                  js_proxy:  {proxy,          instance}
      *      extensible  js_proxy:  {extender-proxy, proxy-base}
      */
-    mem::Reference *ets_ref_ {};
-    napi_ref js_ref_ {};
+    mem::Reference *etsRef_ {};
+    napi_ref jsRef_ {};
 
     FlagsType flags_ {};
 };

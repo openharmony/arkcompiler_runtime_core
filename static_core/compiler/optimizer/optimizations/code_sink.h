@@ -34,7 +34,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerCodeSink();
+        return g_options.IsCompilerCodeSink();
     }
 
     const char *GetPassName() const override
@@ -50,7 +50,7 @@ private:
     bool IsAcceptableTarget(Inst *inst, BasicBlock *candidate);
 
 private:
-    bool is_applied_ {false};
+    bool isApplied_ {false};
 };
 }  // namespace panda::compiler
 

@@ -37,31 +37,31 @@ public:
     {
         return config_.count(name) > 0;
     }
-    const MethodOptions &operator[](const PandaString &method_name) const
+    const MethodOptions &operator[](const PandaString &methodName) const
     {
-        for (const auto &g : method_groups_) {
+        for (const auto &g : methodGroups_) {
             const auto &regex = g.first;
-            if (std::regex_match(method_name, regex)) {
+            if (std::regex_match(methodName, regex)) {
                 return g.second;
             }
         }
         return GetOptions("default");
     }
-    bool AddOptionsForGroup(const PandaString &group_regex, const PandaString &options_name)
+    bool AddOptionsForGroup(const PandaString &groupRegex, const PandaString &optionsName)
     {
-        if (!IsOptionsPresent(options_name)) {
+        if (!IsOptionsPresent(optionsName)) {
             return false;
         }
-        method_groups_.emplace_back(
-            std::regex {group_regex, std::regex_constants::basic | std::regex_constants::optimize |
-                                         std::regex_constants::nosubs | std::regex_constants::icase},
-            GetOptions(options_name));
+        methodGroups_.emplace_back(
+            std::regex {groupRegex, std::regex_constants::basic | std::regex_constants::optimize |
+                                        std::regex_constants::nosubs | std::regex_constants::icase},
+            GetOptions(optionsName));
         return true;
     }
 
 private:
     PandaUnorderedMap<PandaString, MethodOptions> config_;
-    PandaVector<std::pair<std::regex, const MethodOptions &>> method_groups_;
+    PandaVector<std::pair<std::regex, const MethodOptions &>> methodGroups_;
 };
 
 }  // namespace panda::verifier

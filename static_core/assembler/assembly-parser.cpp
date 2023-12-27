@@ -31,13 +31,13 @@ namespace panda::pandasm {
 bool Parser::ParseRecordFields()
 {
     if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
-        curr_record_->body_location.begin = GetCurrentPosition(false);
+        currRecord_->bodyLocation.begin = GetCurrentPosition(false);
         open_ = true;
 
         ++context_;
     }
 
-    curr_record_->body_presence = true;
+    currRecord_->bodyPresence = true;
 
     if (!open_) {
         context_.err = GetError("Expected keyword.", Error::ErrorType::ERR_BAD_KEYWORD);
@@ -49,7 +49,7 @@ bool Parser::ParseRecordFields()
     }
 
     if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
-        curr_record_->body_location.end = GetCurrentPosition(true);
+        currRecord_->bodyLocation.end = GetCurrentPosition(true);
         ++context_;
 
         open_ = false;
@@ -57,19 +57,19 @@ bool Parser::ParseRecordFields()
         return true;
     }
 
-    curr_record_->field_list.emplace_back(program_.lang);
-    curr_fld_ = &(curr_record_->field_list[curr_record_->field_list.size() - 1]);
-    curr_fld_->line_of_def = line_stric_;
-    context_.ins_number = curr_record_->field_list.size();
+    currRecord_->fieldList.emplace_back(program_.lang);
+    currFld_ = &(currRecord_->fieldList[currRecord_->fieldList.size() - 1]);
+    currFld_->lineOfDef = lineStric_;
+    context_.insNumber = currRecord_->fieldList.size();
 
-    LOG(DEBUG, ASSEMBLER) << "parse line " << line_stric_ << " as field (.field name)";
+    LOG(DEBUG, ASSEMBLER) << "parse line " << lineStric_ << " as field (.field name)";
     if (!ParseRecordField()) {
         if (context_.err.err != Error::ErrorType::ERR_NONE) {
             return false;
         }
 
         if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
-            curr_record_->body_location.end = GetCurrentPosition(true);
+            currRecord_->bodyLocation.end = GetCurrentPosition(true);
             ++context_;
             open_ = false;
         } else {
@@ -84,24 +84,24 @@ bool Parser::ParseRecordFields()
 bool Parser::ParseFieldName()
 {
     if (PrefixedValidName()) {
-        std::string field_name = std::string(context_.GiveToken().data(), context_.GiveToken().length());
+        std::string fieldName = std::string(context_.GiveToken().data(), context_.GiveToken().length());
 
-        auto match_names = [&field_name](const pandasm::Field &f) { return field_name == f.name; };
-        const auto iter = std::find_if(curr_record_->field_list.begin(), curr_record_->field_list.end(), match_names);
-        if (iter != curr_record_->field_list.end()) {
-            if (iter->is_defined) {
+        auto matchNames = [&fieldName](const pandasm::Field &f) { return fieldName == f.name; };
+        const auto iter = std::find_if(currRecord_->fieldList.begin(), currRecord_->fieldList.end(), matchNames);
+        if (iter != currRecord_->fieldList.end()) {
+            if (iter->isDefined) {
                 context_.err =
                     GetError("Repeating field names in the same record.", Error::ErrorType::ERR_REPEATING_FIELD_NAME);
 
                 return false;
             }
 
-            curr_record_->field_list.erase(iter);
+            currRecord_->fieldList.erase(iter);
         }
 
-        curr_fld_ = &(curr_record_->field_list[curr_record_->field_list.size() - 1]);
+        currFld_ = &(currRecord_->fieldList[currRecord_->fieldList.size() - 1]);
 
-        curr_fld_->name = field_name;
+        currFld_->name = fieldName;
 
         ++context_;
 
@@ -117,7 +117,7 @@ bool Parser::ParseType(Type *type)
 {
     ASSERT(TypeValidName());
 
-    std::string component_name(context_.GiveToken());
+    std::string componentName(context_.GiveToken());
     size_t rank = 0;
 
     ++context_;
@@ -132,10 +132,10 @@ bool Parser::ParseType(Type *type)
         ++rank;
     }
 
-    *type = Type(component_name, rank);
+    *type = Type(componentName, rank);
 
     if (type->IsArray()) {
-        program_.array_types.insert(*type);
+        program_.arrayTypes.insert(*type);
     }
 
     return true;
@@ -143,21 +143,21 @@ bool Parser::ParseType(Type *type)
 
 bool Parser::ParseFieldType()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching field type value (line " << line_stric_
-                          << "): " << context_.tokens[context_.number - 1].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started searching field type value (line " << lineStric_
+                          << "): " << context_.tokens[context_.number - 1].wholeLine;
 
     if (!TypeValidName()) {
         context_.err = GetError("Not a correct type.", Error::ErrorType::ERR_BAD_FIELD_VALUE_TYPE);
         return false;
     }
 
-    if (!ParseType(&curr_fld_->type)) {
+    if (!ParseType(&currFld_->type)) {
         return false;
     }
 
-    curr_fld_->metadata->SetFieldType(curr_fld_->type);
+    currFld_->metadata->SetFieldType(currFld_->type);
 
-    LOG(DEBUG, ASSEMBLER) << "field type found (line " << line_stric_ << "): " << context_.GiveToken();
+    LOG(DEBUG, ASSEMBLER) << "field type found (line " << lineStric_ << "): " << context_.GiveToken();
 
     return true;
 }
@@ -178,13 +178,13 @@ bool Parser::ParseRecordField()
     }
 
     if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
-        curr_record_->body_location.end = GetCurrentPosition(true);
+        currRecord_->bodyLocation.end = GetCurrentPosition(true);
         ++context_;
         open_ = false;
         return true;
     }
 
-    metadata_ = curr_fld_->metadata.get();
+    metadata_ = currFld_->metadata.get();
     ParseMetaDef();
 
     return context_.Mask();
@@ -192,7 +192,7 @@ bool Parser::ParseRecordField()
 
 bool Parser::IsConstArray()
 {
-    return is_const_array_;
+    return isConstArray_;
 }
 
 bool Parser::ArrayElementsValidNumber()
@@ -201,13 +201,13 @@ bool Parser::ArrayElementsValidNumber()
         return true;
     }
 
-    ASSERT(curr_array_->literals.size() > 1);
+    ASSERT(currArray_->literals.size() > 1);
 
-    auto init_size = std::get<uint32_t>(curr_array_->literals[1].value);
-    if (init_size < 1) {
+    auto initSize = std::get<uint32_t>(currArray_->literals[1].value);
+    if (initSize < 1) {
         return false;
     }
-    if (curr_array_->literals.size() != init_size + INTRO_CONST_ARRAY_LITERALS_NUMBER) {
+    if (currArray_->literals.size() != initSize + INTRO_CONST_ARRAY_LITERALS_NUMBER) {
         return false;
     }
 
@@ -216,10 +216,10 @@ bool Parser::ArrayElementsValidNumber()
 
 void Parser::ParseAsArray(const std::vector<Token> &tokens)
 {
-    LOG(DEBUG, ASSEMBLER) << "started parsing of array (line " << line_stric_ << "): " << tokens[0].whole_line;
-    func_def_ = false;
-    record_def_ = false;
-    array_def_ = true;
+    LOG(DEBUG, ASSEMBLER) << "started parsing of array (line " << lineStric_ << "): " << tokens[0].wholeLine;
+    funcDef_ = false;
+    recordDef_ = false;
+    arrayDef_ = true;
 
     if (!open_) {
         ++context_;
@@ -233,23 +233,23 @@ void Parser::ParseAsArray(const std::vector<Token> &tokens)
         if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
             ++context_;
 
-            LOG(DEBUG, ASSEMBLER) << "array body is open, line " << line_stric_ << ": " << tokens[0].whole_line;
+            LOG(DEBUG, ASSEMBLER) << "array body is open, line " << lineStric_ << ": " << tokens[0].wholeLine;
 
             open_ = true;
         }
 
-        uint32_t iter_number = 1;
+        uint32_t iterNumber = 1;
         if (IsConstArray()) {
-            iter_number = std::get<uint32_t>(curr_array_->literals[1].value);
+            iterNumber = std::get<uint32_t>(currArray_->literals[1].value);
         }
 
-        if (iter_number < 1) {
+        if (iterNumber < 1) {
             context_.err =
                 GetError("Сonstant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
             return;
         }
 
-        for (uint32_t i = 0; i < iter_number; i++) {
+        for (uint32_t i = 0; i < iterNumber; i++) {
             if (open_ && !context_.Mask() && *context_ != Token::Type::DEL_BRACE_R) {
                 ParseArrayElements();
             } else {
@@ -263,7 +263,7 @@ void Parser::ParseAsArray(const std::vector<Token> &tokens)
                     GetError("Constant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
                 return;
             }
-            LOG(DEBUG, ASSEMBLER) << "array body is closed, line " << line_stric_ << ": " << tokens[0].whole_line;
+            LOG(DEBUG, ASSEMBLER) << "array body is closed, line " << lineStric_ << ": " << tokens[0].wholeLine;
 
             ++context_;
 
@@ -302,10 +302,10 @@ bool Parser::ParseArrayElements()
         return true;
     }
 
-    curr_array_->literals.emplace_back();
-    curr_array_elem_ = &(curr_array_->literals[curr_array_->literals.size() - 1]);
+    currArray_->literals.emplace_back();
+    currArrayElem_ = &(currArray_->literals[currArray_->literals.size() - 1]);
 
-    LOG(DEBUG, ASSEMBLER) << "parse line " << line_stric_ << " as array elem (.array_elem value)";
+    LOG(DEBUG, ASSEMBLER) << "parse line " << lineStric_ << " as array elem (.array_elem value)";
     if (!ParseArrayElement()) {
         if (context_.err.err != Error::ErrorType::ERR_NONE) {
             return false;
@@ -333,20 +333,20 @@ bool Parser::ParseArrayElements()
 bool Parser::ParseArrayElement()
 {
     if (IsConstArray()) {
-        curr_array_elem_->tag = static_cast<panda_file::LiteralTag>(std::get<uint8_t>(curr_array_->literals[0].value));
+        currArrayElem_->tag = static_cast<panda_file::LiteralTag>(std::get<uint8_t>(currArray_->literals[0].value));
     } else {
         if (!ParseArrayElementType()) {
             return false;
         }
 
-        auto val_tag = curr_array_elem_->tag;
+        auto valTag = currArrayElem_->tag;
 
-        curr_array_elem_->value = static_cast<uint8_t>(curr_array_elem_->tag);
-        curr_array_elem_->tag = panda_file::LiteralTag::TAGVALUE;
+        currArrayElem_->value = static_cast<uint8_t>(currArrayElem_->tag);
+        currArrayElem_->tag = panda_file::LiteralTag::TAGVALUE;
 
-        curr_array_->literals.emplace_back();
-        curr_array_elem_ = &(curr_array_->literals[curr_array_->literals.size() - 1]);
-        curr_array_elem_->tag = val_tag;
+        currArray_->literals.emplace_back();
+        currArrayElem_ = &(currArray_->literals[currArray_->literals.size() - 1]);
+        currArrayElem_->tag = valTag;
     }
 
     if (context_.Mask()) {
@@ -376,8 +376,8 @@ bool Parser::ParseArrayElement()
 
 bool Parser::ParseArrayElementType()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching array element type value (line " << line_stric_
-                          << "): " << context_.tokens[context_.number - 1].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started searching array element type value (line " << lineStric_
+                          << "): " << context_.tokens[context_.number - 1].wholeLine;
 
     if (!TypeValidName()) {
         context_.err = GetError("Not a correct type.", Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_TYPE);
@@ -390,35 +390,35 @@ bool Parser::ParseArrayElementType()
     }
 
     // workaround until #5776 is done
-    auto type_name = type.GetName();
-    std::replace(type_name.begin(), type_name.end(), '.', '/');
-    auto type_with_slash = Type(type_name, 0);
+    auto typeName = type.GetName();
+    std::replace(typeName.begin(), typeName.end(), '.', '/');
+    auto typeWithSlash = Type(typeName, 0);
 
     if (panda::pandasm::Type::IsPandaPrimitiveType(type.GetName())) {
         if (IsConstArray()) {
-            curr_array_elem_->tag = panda::pandasm::LiteralArray::GetArrayTagFromComponentType(type.GetId());
+            currArrayElem_->tag = panda::pandasm::LiteralArray::GetArrayTagFromComponentType(type.GetId());
         } else {
-            curr_array_elem_->tag = panda::pandasm::LiteralArray::GetLiteralTagFromComponentType(type.GetId());
+            currArrayElem_->tag = panda::pandasm::LiteralArray::GetLiteralTagFromComponentType(type.GetId());
         }
 
-        if (program_.array_types.find(type) == program_.array_types.end()) {
-            program_.array_types.emplace(type, 1);
+        if (program_.arrayTypes.find(type) == program_.arrayTypes.end()) {
+            program_.arrayTypes.emplace(type, 1);
         }
-    } else if (panda::pandasm::Type::IsStringType(type_with_slash.GetName(), program_.lang)) {
+    } else if (panda::pandasm::Type::IsStringType(typeWithSlash.GetName(), program_.lang)) {
         if (IsConstArray()) {
-            curr_array_elem_->tag = panda_file::LiteralTag::ARRAY_STRING;
+            currArrayElem_->tag = panda_file::LiteralTag::ARRAY_STRING;
         } else {
-            curr_array_elem_->tag = panda_file::LiteralTag::STRING;
+            currArrayElem_->tag = panda_file::LiteralTag::STRING;
         }
 
-        if (program_.array_types.find(type_with_slash) == program_.array_types.end()) {
-            program_.array_types.emplace(type_with_slash, 1);
+        if (program_.arrayTypes.find(typeWithSlash) == program_.arrayTypes.end()) {
+            program_.arrayTypes.emplace(typeWithSlash, 1);
         }
     } else {
         return false;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "array element type found (line " << line_stric_ << "): " << context_.GiveToken();
+    LOG(DEBUG, ASSEMBLER) << "array element type found (line " << lineStric_ << "): " << context_.GiveToken();
 
     return true;
 }
@@ -431,20 +431,20 @@ bool Parser::ParseArrayElementValueInteger()
             GetError("Invalid value of array integer element.", Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_INTEGER);
         return false;
     }
-    if (curr_array_elem_->IsBoolValue()) {
-        curr_array_elem_->value = static_cast<bool>(n);
+    if (currArrayElem_->IsBoolValue()) {
+        currArrayElem_->value = static_cast<bool>(n);
     }
-    if (curr_array_elem_->IsByteValue()) {
-        curr_array_elem_->value = static_cast<uint8_t>(n);
+    if (currArrayElem_->IsByteValue()) {
+        currArrayElem_->value = static_cast<uint8_t>(n);
     }
-    if (curr_array_elem_->IsShortValue()) {
-        curr_array_elem_->value = static_cast<uint16_t>(n);
+    if (currArrayElem_->IsShortValue()) {
+        currArrayElem_->value = static_cast<uint16_t>(n);
     }
-    if (curr_array_elem_->IsIntegerValue()) {
-        curr_array_elem_->value = static_cast<uint32_t>(n);
+    if (currArrayElem_->IsIntegerValue()) {
+        currArrayElem_->value = static_cast<uint32_t>(n);
     }
-    if (curr_array_elem_->IsLongValue()) {
-        curr_array_elem_->value = static_cast<uint64_t>(n);
+    if (currArrayElem_->IsLongValue()) {
+        currArrayElem_->value = static_cast<uint64_t>(n);
     }
     return true;
 }
@@ -452,16 +452,16 @@ bool Parser::ParseArrayElementValueInteger()
 bool Parser::ParseArrayElementValueFloat()
 {
     double n;
-    if (!ParseFloat(&n, !curr_array_elem_->IsFloatValue())) {
+    if (!ParseFloat(&n, !currArrayElem_->IsFloatValue())) {
         context_.err =
             GetError("Invalid value of array float element.", Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_FLOAT);
         return false;
     }
-    if (curr_array_elem_->IsFloatValue()) {
-        curr_array_elem_->value = static_cast<float>(n);
+    if (currArrayElem_->IsFloatValue()) {
+        currArrayElem_->value = static_cast<float>(n);
 
     } else {
-        curr_array_elem_->value = static_cast<double>(n);
+        currArrayElem_->value = static_cast<double>(n);
     }
     return true;
 }
@@ -478,24 +478,24 @@ bool Parser::ParseArrayElementValueString()
             GetError("Invalid value of array string element.", Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_STRING);
         return false;
     }
-    curr_array_elem_->value = res.value();
+    currArrayElem_->value = res.value();
     return true;
 }
 
 bool Parser::ParseArrayElementValue()
 {
-    if (curr_array_elem_->IsBoolValue() || curr_array_elem_->IsByteValue() || curr_array_elem_->IsShortValue() ||
-        curr_array_elem_->IsIntegerValue() || curr_array_elem_->IsLongValue()) {
+    if (currArrayElem_->IsBoolValue() || currArrayElem_->IsByteValue() || currArrayElem_->IsShortValue() ||
+        currArrayElem_->IsIntegerValue() || currArrayElem_->IsLongValue()) {
         if (!ParseArrayElementValueInteger()) {
             return false;
         }
     }
-    if (curr_array_elem_->IsFloatValue() || curr_array_elem_->IsDoubleValue()) {
+    if (currArrayElem_->IsFloatValue() || currArrayElem_->IsDoubleValue()) {
         if (!ParseArrayElementValueFloat()) {
             return false;
         }
     }
-    if (curr_array_elem_->IsStringValue()) {
+    if (currArrayElem_->IsStringValue()) {
         if (!ParseArrayElementValueString()) {
             return false;
         }
@@ -510,11 +510,11 @@ bool Parser::ParseFunctionCode()
 {
     if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
         open_ = true;
-        curr_func_->body_location.begin = GetCurrentPosition(false);
+        currFunc_->bodyLocation.begin = GetCurrentPosition(false);
         ++context_;
     }
 
-    curr_func_->body_presence = true;
+    currFunc_->bodyPresence = true;
 
     if (!open_) {
         context_.err = GetError("Expected keyword.", Error::ErrorType::ERR_BAD_KEYWORD);
@@ -526,21 +526,21 @@ bool Parser::ParseFunctionCode()
     }
 
     if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
-        curr_func_->body_location.end = GetCurrentPosition(true);
+        currFunc_->bodyLocation.end = GetCurrentPosition(true);
         ++context_;
         open_ = false;
         return true;
     }
 
-    curr_ins_ = &curr_func_->ins.emplace_back();
+    currIns_ = &currFunc_->ins.emplace_back();
 
-    LOG(DEBUG, ASSEMBLER) << "parse line " << line_stric_
+    LOG(DEBUG, ASSEMBLER) << "parse line " << lineStric_
                           << " as instruction ([label:] operation [operand,] [# comment])";
 
     ParseFunctionInstruction();
 
     if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
-        curr_func_->body_location.end = GetCurrentPosition(true);
+        currFunc_->bodyLocation.end = GetCurrentPosition(true);
         ++context_;
         open_ = false;
     }
@@ -550,10 +550,10 @@ bool Parser::ParseFunctionCode()
 
 void Parser::ParseAsRecord(const std::vector<Token> &tokens)
 {
-    LOG(DEBUG, ASSEMBLER) << "started parsing of record (line " << line_stric_ << "): " << tokens[0].whole_line;
-    func_def_ = false;
-    record_def_ = true;
-    array_def_ = false;
+    LOG(DEBUG, ASSEMBLER) << "started parsing of record (line " << lineStric_ << "): " << tokens[0].wholeLine;
+    funcDef_ = false;
+    recordDef_ = true;
+    arrayDef_ = false;
 
     if (!open_) {
         ++context_;
@@ -564,13 +564,13 @@ void Parser::ParseAsRecord(const std::vector<Token> &tokens)
     }
 
     if (ParseRecordFullSign()) {
-        metadata_ = curr_record_->metadata.get();
+        metadata_ = currRecord_->metadata.get();
         if (ParseMetaDef()) {
             if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
-                curr_record_->body_location.begin = GetCurrentPosition(false);
+                currRecord_->bodyLocation.begin = GetCurrentPosition(false);
                 ++context_;
 
-                LOG(DEBUG, ASSEMBLER) << "record body is open, line " << line_stric_ << ": " << tokens[0].whole_line;
+                LOG(DEBUG, ASSEMBLER) << "record body is open, line " << lineStric_ << ": " << tokens[0].wholeLine;
 
                 open_ = true;
             }
@@ -578,13 +578,13 @@ void Parser::ParseAsRecord(const std::vector<Token> &tokens)
             if (open_ && !context_.Mask() && *context_ != Token::Type::DEL_BRACE_R) {
                 ParseRecordFields();
             } else if (open_) {
-                curr_record_->body_presence = true;
+                currRecord_->bodyPresence = true;
             }
 
             if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
-                LOG(DEBUG, ASSEMBLER) << "record body is closed, line " << line_stric_ << ": " << tokens[0].whole_line;
+                LOG(DEBUG, ASSEMBLER) << "record body is closed, line " << lineStric_ << ": " << tokens[0].wholeLine;
 
-                curr_record_->body_location.end = GetCurrentPosition(true);
+                currRecord_->bodyLocation.end = GetCurrentPosition(true);
                 ++context_;
 
                 open_ = false;
@@ -595,10 +595,10 @@ void Parser::ParseAsRecord(const std::vector<Token> &tokens)
 
 void Parser::ParseAsFunction(const std::vector<Token> &tokens)
 {
-    LOG(DEBUG, ASSEMBLER) << "started parsing of function (line " << line_stric_ << "): " << tokens[0].whole_line;
-    record_def_ = false;
-    func_def_ = true;
-    array_def_ = false;
+    LOG(DEBUG, ASSEMBLER) << "started parsing of function (line " << lineStric_ << "): " << tokens[0].wholeLine;
+    recordDef_ = false;
+    funcDef_ = true;
+    arrayDef_ = false;
 
     if (!open_) {
         ++context_;
@@ -609,13 +609,13 @@ void Parser::ParseAsFunction(const std::vector<Token> &tokens)
     }
 
     if (ParseFunctionFullSign()) {
-        metadata_ = curr_func_->metadata.get();
+        metadata_ = currFunc_->metadata.get();
         if (ParseMetaDef()) {
             if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
-                curr_func_->body_location.begin = GetCurrentPosition(false);
+                currFunc_->bodyLocation.begin = GetCurrentPosition(false);
                 ++context_;
 
-                LOG(DEBUG, ASSEMBLER) << "function body is open, line " << line_stric_ << ": " << tokens[0].whole_line;
+                LOG(DEBUG, ASSEMBLER) << "function body is open, line " << lineStric_ << ": " << tokens[0].wholeLine;
 
                 open_ = true;
             }
@@ -623,14 +623,13 @@ void Parser::ParseAsFunction(const std::vector<Token> &tokens)
             if (open_ && !context_.Mask() && *context_ != Token::Type::DEL_BRACE_R) {
                 ParseFunctionCode();
             } else if (open_) {
-                curr_func_->body_presence = true;
+                currFunc_->bodyPresence = true;
             }
 
             if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
-                LOG(DEBUG, ASSEMBLER) << "function body is closed, line " << line_stric_ << ": "
-                                      << tokens[0].whole_line;
+                LOG(DEBUG, ASSEMBLER) << "function body is closed, line " << lineStric_ << ": " << tokens[0].wholeLine;
 
-                curr_func_->body_location.end = GetCurrentPosition(true);
+                currFunc_->bodyLocation.end = GetCurrentPosition(true);
                 ++context_;
                 open_ = false;
             }
@@ -640,7 +639,7 @@ void Parser::ParseAsFunction(const std::vector<Token> &tokens)
 
 void Parser::ParseAsUnionField(const std::vector<Token> &tokens)
 {
-    LOG(DEBUG, ASSEMBLER) << "started parsing of union field (line " << line_stric_ << "): " << tokens[0].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started parsing of union field (line " << lineStric_ << "): " << tokens[0].wholeLine;
 
     if (!open_) {
         ++context_;
@@ -650,13 +649,13 @@ void Parser::ParseAsUnionField(const std::vector<Token> &tokens)
         return;
     }
 
-    auto dummy_record = program_.record_table.find(panda_file::GetDummyClassName());
-    if (dummy_record == program_.record_table.end()) {
+    auto dummyRecord = program_.recordTable.find(panda_file::GetDummyClassName());
+    if (dummyRecord == program_.recordTable.end()) {
         SetRecordInformation(panda_file::GetDummyClassName());
     }
-    curr_record_->field_list.emplace_back(program_.lang);
-    curr_fld_ = &(curr_record_->field_list[curr_record_->field_list.size() - 1]);
-    curr_fld_->line_of_def = line_stric_;
+    currRecord_->fieldList.emplace_back(program_.lang);
+    currFld_ = &(currRecord_->fieldList[currRecord_->fieldList.size() - 1]);
+    currFld_->lineOfDef = lineStric_;
     ParseRecordField();
 }
 
@@ -668,14 +667,14 @@ void Parser::ParseAsBraceRight(const std::vector<Token> &tokens)
         return;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "body is closed (line " << line_stric_ << "): " << tokens[0].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "body is closed (line " << lineStric_ << "): " << tokens[0].wholeLine;
 
     open_ = false;
-    if (func_def_) {
-        curr_func_->body_location.end = GetCurrentPosition(true);
-    } else if (record_def_) {
-        curr_record_->body_location.end = GetCurrentPosition(true);
-    } else if (array_def_) {
+    if (funcDef_) {
+        currFunc_->bodyLocation.end = GetCurrentPosition(true);
+    } else if (recordDef_) {
+        currRecord_->bodyLocation.end = GetCurrentPosition(true);
+    } else if (arrayDef_) {
         if (!ArrayElementsValidNumber()) {
             context_.err =
                 GetError("Constant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
@@ -693,33 +692,32 @@ void Parser::ParseResetFunctionLabelsAndParams()
         return;
     }
 
-    for (const auto &f : program_.function_table) {
-        for (const auto &k : f.second.label_table) {
-            if (!k.second.file_location->is_defined) {
-                context_.err = Error("This label does not exist.", line_stric_, Error::ErrorType::ERR_BAD_LABEL_EXT, "",
-                                     k.second.file_location->bound_left, k.second.file_location->bound_right,
-                                     k.second.file_location->whole_line);
+    for (const auto &f : program_.functionTable) {
+        for (const auto &k : f.second.labelTable) {
+            if (!k.second.fileLocation->isDefined) {
+                context_.err = Error("This label does not exist.", lineStric_, Error::ErrorType::ERR_BAD_LABEL_EXT, "",
+                                     k.second.fileLocation->boundLeft, k.second.fileLocation->boundRight,
+                                     k.second.fileLocation->wholeLine);
                 SetError();
             }
         }
     }
 
-    for (const auto &t : context_.function_arguments_lists) {
-        curr_func_ = &(program_.function_table.at(t.first));
-        curr_func_->regs_num = static_cast<size_t>(curr_func_->value_of_first_param + 1);
+    for (const auto &t : context_.functionArgumentsLists) {
+        currFunc_ = &(program_.functionTable.at(t.first));
+        currFunc_->regsNum = static_cast<size_t>(currFunc_->valueOfFirstParam + 1);
 
         for (const auto &v : t.second) {
-            if (!curr_func_->ins.empty() && curr_func_->ins.size() >= v.first &&
-                !curr_func_->ins[v.first - 1].regs.empty()) {
-                curr_func_->ins[v.first - 1].regs[v.second] +=
-                    static_cast<uint16_t>(curr_func_->value_of_first_param + 1);
+            if (!currFunc_->ins.empty() && currFunc_->ins.size() >= v.first &&
+                !currFunc_->ins[v.first - 1].regs.empty()) {
+                currFunc_->ins[v.first - 1].regs[v.second] += static_cast<uint16_t>(currFunc_->valueOfFirstParam + 1);
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                size_t max_reg_number = (1 << curr_func_->ins[v.first - 1].MaxRegEncodingWidth());
-                if (curr_func_->ins[v.first - 1].regs[v.second] >= max_reg_number) {
-                    const auto &debug = curr_func_->ins[v.first - 1].ins_debug;
+                size_t maxRegNumber = (1 << currFunc_->ins[v.first - 1].MaxRegEncodingWidth());
+                if (currFunc_->ins[v.first - 1].regs[v.second] >= maxRegNumber) {
+                    const auto &debug = currFunc_->ins[v.first - 1].insDebug;
                     context_.err =
-                        Error("Register width mismatch.", debug.line_number, Error::ErrorType::ERR_BAD_NAME_REG, "",
-                              debug.bound_left, debug.bound_right, debug.whole_line);
+                        Error("Register width mismatch.", debug.lineNumber, Error::ErrorType::ERR_BAD_NAME_REG, "",
+                              debug.boundLeft, debug.boundRight, debug.wholeLine);
                     SetError();
                     break;
                 }
@@ -730,17 +728,17 @@ void Parser::ParseResetFunctionLabelsAndParams()
 
 void Parser::ParseResetFunctionTable()
 {
-    for (auto &k : program_.function_table) {
-        if (!k.second.file_location->is_defined) {
-            context_.err = Error("This function does not exist.", k.second.file_location->line_number,
-                                 Error::ErrorType::ERR_BAD_ID_FUNCTION, "", k.second.file_location->bound_left,
-                                 k.second.file_location->bound_right, k.second.file_location->whole_line);
+    for (auto &k : program_.functionTable) {
+        if (!k.second.fileLocation->isDefined) {
+            context_.err = Error("This function does not exist.", k.second.fileLocation->lineNumber,
+                                 Error::ErrorType::ERR_BAD_ID_FUNCTION, "", k.second.fileLocation->boundLeft,
+                                 k.second.fileLocation->boundRight, k.second.fileLocation->wholeLine);
             SetError();
-        } else if (k.second.HasImplementation() != k.second.body_presence) {
+        } else if (k.second.HasImplementation() != k.second.bodyPresence) {
             context_.err = Error("Inconsistency of the definition of the function and its metadata.",
-                                 k.second.file_location->line_number, Error::ErrorType::ERR_BAD_DEFINITION_FUNCTION, "",
-                                 k.second.file_location->bound_left, k.second.file_location->bound_right,
-                                 k.second.file_location->whole_line);
+                                 k.second.fileLocation->lineNumber, Error::ErrorType::ERR_BAD_DEFINITION_FUNCTION, "",
+                                 k.second.fileLocation->boundLeft, k.second.fileLocation->boundRight,
+                                 k.second.fileLocation->wholeLine);
             SetError();
         } else {
             for (auto &insn : k.second.ins) {
@@ -749,38 +747,38 @@ void Parser::ParseResetFunctionTable()
                     continue;
                 }
 
-                bool is_initobj = insn.opcode == Opcode::INITOBJ || insn.opcode == Opcode::INITOBJ_SHORT ||
-                                  insn.opcode == Opcode::INITOBJ_RANGE;
-                size_t diff = is_initobj ? 0 : 1;
-                auto func_name = insn.ids[0];
+                bool isInitobj = insn.opcode == Opcode::INITOBJ || insn.opcode == Opcode::INITOBJ_SHORT ||
+                                 insn.opcode == Opcode::INITOBJ_RANGE;
+                size_t diff = isInitobj ? 0 : 1;
+                auto funcName = insn.ids[0];
 
-                if (!IsSignatureOrMangled(func_name)) {
-                    const auto it_synonym = program_.function_synonyms.find(func_name);
-                    if (it_synonym == program_.function_synonyms.end()) {
+                if (!IsSignatureOrMangled(funcName)) {
+                    const auto itSynonym = program_.functionSynonyms.find(funcName);
+                    if (itSynonym == program_.functionSynonyms.end()) {
                         continue;
                     }
 
-                    if (it_synonym->second.size() > 1) {
-                        const auto &debug = insn.ins_debug;
-                        context_.err = Error("Unable to resolve ambiguous function call", debug.line_number,
-                                             Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.bound_left,
-                                             debug.bound_right, debug.whole_line);
+                    if (itSynonym->second.size() > 1) {
+                        const auto &debug = insn.insDebug;
+                        context_.err = Error("Unable to resolve ambiguous function call", debug.lineNumber,
+                                             Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.boundLeft,
+                                             debug.boundRight, debug.wholeLine);
                         SetError();
                         break;
                     }
 
-                    insn.ids[0] = program_.function_synonyms.at(func_name)[0];
+                    insn.ids[0] = program_.functionSynonyms.at(funcName)[0];
                 }
 
-                if (insn.OperandListLength() - diff < program_.function_table.at(insn.ids[0]).GetParamsNum()) {
+                if (insn.OperandListLength() - diff < program_.functionTable.at(insn.ids[0]).GetParamsNum()) {
                     if (insn.IsCallRange() && (static_cast<int>(insn.regs.size()) - static_cast<int>(diff) >= 0)) {
                         continue;
                     }
 
-                    const auto &debug = insn.ins_debug;
-                    context_.err = Error("Function argument mismatch.", debug.line_number,
-                                         Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", debug.bound_left,
-                                         debug.bound_right, debug.whole_line);
+                    const auto &debug = insn.insDebug;
+                    context_.err = Error("Function argument mismatch.", debug.lineNumber,
+                                         Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", debug.boundLeft,
+                                         debug.boundRight, debug.wholeLine);
                     SetError();
                 }
             }
@@ -790,24 +788,24 @@ void Parser::ParseResetFunctionTable()
 
 void Parser::ParseResetRecordTable()
 {
-    for (const auto &k : program_.record_table) {
-        if (!k.second.file_location->is_defined) {
-            context_.err = Error("This record does not exist.", k.second.file_location->line_number,
-                                 Error::ErrorType::ERR_BAD_ID_RECORD, "", k.second.file_location->bound_left,
-                                 k.second.file_location->bound_right, k.second.file_location->whole_line);
+    for (const auto &k : program_.recordTable) {
+        if (!k.second.fileLocation->isDefined) {
+            context_.err = Error("This record does not exist.", k.second.fileLocation->lineNumber,
+                                 Error::ErrorType::ERR_BAD_ID_RECORD, "", k.second.fileLocation->boundLeft,
+                                 k.second.fileLocation->boundRight, k.second.fileLocation->wholeLine);
             SetError();
         } else {
-            for (const auto &fld : k.second.field_list) {
+            for (const auto &fld : k.second.fieldList) {
                 if (!k.second.HasImplementation() && !fld.metadata->IsForeign()) {
-                    context_.err = Error("External record may have only external fields", fld.line_of_def,
-                                         Error::ErrorType::ERR_BAD_FIELD_METADATA, "", fld.bound_left, fld.bound_right,
-                                         fld.whole_line);
+                    context_.err = Error("External record may have only external fields", fld.lineOfDef,
+                                         Error::ErrorType::ERR_BAD_FIELD_METADATA, "", fld.boundLeft, fld.boundRight,
+                                         fld.wholeLine);
                     SetError();
                 }
-                if (!fld.is_defined) {
+                if (!fld.isDefined) {
                     context_.err =
-                        Error("This field does not exist.", fld.line_of_def, Error::ErrorType::ERR_BAD_ID_FIELD, "",
-                              fld.bound_left, fld.bound_right, fld.whole_line);
+                        Error("This field does not exist.", fld.lineOfDef, Error::ErrorType::ERR_BAD_ID_FIELD, "",
+                              fld.boundLeft, fld.boundRight, fld.wholeLine);
                     SetError();
                 }
             }
@@ -857,57 +855,57 @@ void Parser::ParseAsLanguageDirective()
     program_.lang = res.value();
 }
 
-Function::CatchBlock Parser::PrepareCatchBlock(bool is_catchall, size_t size, size_t catchall_tokens_num,
-                                               size_t catch_tokens_num)
+Function::CatchBlock Parser::PrepareCatchBlock(bool isCatchall, size_t size, size_t catchallTokensNum,
+                                               size_t catchTokensNum)
 {
     constexpr size_t TRY_BEGIN = 0;
     constexpr size_t TRY_END = 1;
     constexpr size_t CATCH_BEGIN = 2;
     constexpr size_t CATCH_END = 3;
 
-    Function::CatchBlock catch_block;
-    catch_block.whole_line = context_.tokens[0].whole_line;
-    std::vector<std::string> label_names {"try block begin", "try block end", "catch block begin"};
+    Function::CatchBlock catchBlock;
+    catchBlock.wholeLine = context_.tokens[0].wholeLine;
+    std::vector<std::string> labelNames {"try block begin", "try block end", "catch block begin"};
     std::vector<std::string> labels;
-    bool full_catch_block = (is_catchall && size == catchall_tokens_num) || (!is_catchall && size == catch_tokens_num);
-    if (full_catch_block) {
-        label_names.emplace_back("catch block end");
+    bool fullCatchBlock = (isCatchall && size == catchallTokensNum) || (!isCatchall && size == catchTokensNum);
+    if (fullCatchBlock) {
+        labelNames.emplace_back("catch block end");
     }
-    if (!is_catchall) {
-        catch_block.exception_record = context_.GiveToken();
+    if (!isCatchall) {
+        catchBlock.exceptionRecord = context_.GiveToken();
         ++context_;
     }
 
-    bool skip_comma = is_catchall;
-    for (const auto &label_name : label_names) {
-        if (!skip_comma) {
+    bool skipComma = isCatchall;
+    for (const auto &labelName : labelNames) {
+        if (!skipComma) {
             if (*context_ != Token::Type::DEL_COMMA) {
                 context_.err = GetError("Expected comma.", Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION);
-                return catch_block;
+                return catchBlock;
             }
             ++context_;
         }
-        skip_comma = false;
+        skipComma = false;
         if (!LabelValidName()) {
             context_.err =
-                GetError(std::string("Invalid name of the ") + label_name + " label.", Error::ErrorType::ERR_BAD_LABEL);
-            return catch_block;
+                GetError(std::string("Invalid name of the ") + labelName + " label.", Error::ErrorType::ERR_BAD_LABEL);
+            return catchBlock;
         }
         labels.emplace_back(context_.GiveToken());
-        AddObjectInTable(false, *label_table_);
+        AddObjectInTable(false, *labelTable_);
         ++context_;
     }
 
     ASSERT(context_.Mask());
-    catch_block.try_begin_label = labels[TRY_BEGIN];
-    catch_block.try_end_label = labels[TRY_END];
-    catch_block.catch_begin_label = labels[CATCH_BEGIN];
-    if (full_catch_block) {
-        catch_block.catch_end_label = labels[CATCH_END];
+    catchBlock.tryBeginLabel = labels[TRY_BEGIN];
+    catchBlock.tryEndLabel = labels[TRY_END];
+    catchBlock.catchBeginLabel = labels[CATCH_BEGIN];
+    if (fullCatchBlock) {
+        catchBlock.catchEndLabel = labels[CATCH_END];
     } else {
-        catch_block.catch_end_label = labels[CATCH_BEGIN];
+        catchBlock.catchEndLabel = labels[CATCH_BEGIN];
     }
-    return catch_block;
+    return catchBlock;
 }
 
 void Parser::ParseAsCatchDirective()
@@ -919,9 +917,9 @@ void Parser::ParseAsCatchDirective()
     constexpr size_t CATCH_FULL_DIRECTIVE_TOKENS_NUM = 10;
     constexpr size_t CATCHALL_FULL_DIRECTIVE_TOKENS_NUM = 8;
 
-    bool is_catchall = *context_ == Token::Type::ID_CATCHALL;
+    bool isCatchall = *context_ == Token::Type::ID_CATCHALL;
     size_t size = context_.tokens.size();
-    if (is_catchall && size != CATCHALL_DIRECTIVE_TOKENS_NUM && size != CATCHALL_FULL_DIRECTIVE_TOKENS_NUM) {
+    if (isCatchall && size != CATCHALL_DIRECTIVE_TOKENS_NUM && size != CATCHALL_FULL_DIRECTIVE_TOKENS_NUM) {
         context_.err = GetError(
             "Incorrect catch block declaration. Must be in the format: .catchall <try_begin_label>, <try_end_label>, "
             "<catch_begin_label>[, <catch_end_label>]",
@@ -929,7 +927,7 @@ void Parser::ParseAsCatchDirective()
         return;
     }
 
-    if (!is_catchall && size != CATCH_DIRECTIVE_TOKENS_NUM && size != CATCH_FULL_DIRECTIVE_TOKENS_NUM) {
+    if (!isCatchall && size != CATCH_DIRECTIVE_TOKENS_NUM && size != CATCH_FULL_DIRECTIVE_TOKENS_NUM) {
         context_.err = GetError(
             "Incorrect catch block declaration. Must be in the format: .catch <exception_record>, <try_begin_label>, "
             "<try_end_label>, <catch_begin_label>[, <catch_end_label>]",
@@ -939,54 +937,54 @@ void Parser::ParseAsCatchDirective()
 
     ++context_;
 
-    if (!is_catchall && !RecordValidName()) {
+    if (!isCatchall && !RecordValidName()) {
         context_.err = GetError("Invalid name of the exception record.", Error::ErrorType::ERR_BAD_RECORD_NAME);
         return;
     }
 
-    Function::CatchBlock catch_block =
-        PrepareCatchBlock(is_catchall, size, CATCHALL_FULL_DIRECTIVE_TOKENS_NUM, CATCH_FULL_DIRECTIVE_TOKENS_NUM);
+    Function::CatchBlock catchBlock =
+        PrepareCatchBlock(isCatchall, size, CATCHALL_FULL_DIRECTIVE_TOKENS_NUM, CATCH_FULL_DIRECTIVE_TOKENS_NUM);
 
-    curr_func_->catch_blocks.push_back(catch_block);
+    currFunc_->catchBlocks.push_back(catchBlock);
 }
 
 void Parser::ParseAsCatchall(const std::vector<Token> &tokens)
 {
-    std::string directive_name = *context_ == Token::Type::ID_CATCH ? ".catch" : ".catchall";
-    if (!func_def_) {
-        context_.err = GetError(directive_name + " directive is located outside of a function body.",
+    std::string directiveName = *context_ == Token::Type::ID_CATCH ? ".catch" : ".catchall";
+    if (!funcDef_) {
+        context_.err = GetError(directiveName + " directive is located outside of a function body.",
                                 Error::ErrorType::ERR_INCORRECT_DIRECTIVE_LOCATION);
         return;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "started parsing of " << directive_name << " directive (line " << line_stric_
-                          << "): " << tokens[0].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started parsing of " << directiveName << " directive (line " << lineStric_
+                          << "): " << tokens[0].wholeLine;
 
     ParseAsCatchDirective();
 }
 
-void Parser::ParseAsLanguage(const std::vector<Token> &tokens, bool &is_lang_parsed, bool &is_first_statement)
+void Parser::ParseAsLanguage(const std::vector<Token> &tokens, bool &isLangParsed, bool &isFirstStatement)
 {
-    if (is_lang_parsed) {
+    if (isLangParsed) {
         context_.err = GetError("Multiple .language directives", Error::ErrorType::ERR_MULTIPLE_DIRECTIVES);
         return;
     }
 
-    if (!is_first_statement) {
+    if (!isFirstStatement) {
         context_.err = GetError(".language directive must be specified before any other declarations",
                                 Error::ErrorType::ERR_INCORRECT_DIRECTIVE_LOCATION);
         return;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "started parsing of .language directive (line " << line_stric_
-                          << "): " << tokens[0].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started parsing of .language directive (line " << lineStric_
+                          << "): " << tokens[0].wholeLine;
 
     ParseAsLanguageDirective();
 
-    is_lang_parsed = true;
+    isLangParsed = true;
 }
 
-bool Parser::ParseAfterLine(bool &is_first_statement)
+bool Parser::ParseAfterLine(bool &isFirstStatement)
 {
     SetError();
 
@@ -999,22 +997,22 @@ bool Parser::ParseAfterLine(bool &is_first_statement)
         return false;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "parsing of line " << line_stric_ << " is successful";
+    LOG(DEBUG, ASSEMBLER) << "parsing of line " << lineStric_ << " is successful";
 
     SetError();
 
-    is_first_statement = false;
+    isFirstStatement = false;
 
     return true;
 }
 
-Expected<Program, Error> Parser::ParseAfterMainLoop(const std::string &file_name)
+Expected<Program, Error> Parser::ParseAfterMainLoop(const std::string &fileName)
 {
     ParseResetFunctionLabelsAndParams();
 
     if (open_ && err_.err == Error::ErrorType::ERR_NONE) {
-        context_.err = Error("Code area is not closed.", curr_func_->file_location->line_number,
-                             Error::ErrorType::ERR_BAD_CLOSE, "", 0, curr_func_->name.size(), curr_func_->name);
+        context_.err = Error("Code area is not closed.", currFunc_->fileLocation->lineNumber,
+                             Error::ErrorType::ERR_BAD_CLOSE, "", 0, currFunc_->name.size(), currFunc_->name);
         SetError();
     }
 
@@ -1024,34 +1022,34 @@ Expected<Program, Error> Parser::ParseAfterMainLoop(const std::string &file_name
         return Unexpected(err_);
     }
 
-    for (auto &func : program_.function_table) {
+    for (auto &func : program_.functionTable) {
         if (func.second.metadata->HasImplementation()) {
-            func.second.source_file = file_name;
+            func.second.sourceFile = fileName;
         }
     }
 
-    for (auto &rec : program_.record_table) {
+    for (auto &rec : program_.recordTable) {
         if (rec.second.HasImplementation()) {
-            rec.second.source_file = file_name;
+            rec.second.sourceFile = fileName;
         }
     }
 
     return std::move(program_);
 }
 
-Expected<Program, Error> Parser::Parse(TokenSet &vectors_tokens, const std::string &file_name)
+Expected<Program, Error> Parser::Parse(TokenSet &vectorsTokens, const std::string &fileName)
 {
-    bool is_lang_parsed = false;
-    bool is_first_statement = true;
+    bool isLangParsed = false;
+    bool isFirstStatement = true;
 
-    for (const auto &tokens : vectors_tokens) {
-        ++line_stric_;
+    for (const auto &tokens : vectorsTokens) {
+        ++lineStric_;
 
         if (tokens.empty()) {
             continue;
         }
 
-        LOG(DEBUG, ASSEMBLER) << "started parsing of line " << line_stric_ << ": " << tokens[0].whole_line;
+        LOG(DEBUG, ASSEMBLER) << "started parsing of line " << lineStric_ << ": " << tokens[0].wholeLine;
 
         context_.Make(tokens);
 
@@ -1062,7 +1060,7 @@ Expected<Program, Error> Parser::Parse(TokenSet &vectors_tokens, const std::stri
                 break;
             }
             case Token::Type::ID_LANG: {
-                ParseAsLanguage(tokens, is_lang_parsed, is_first_statement);
+                ParseAsLanguage(tokens, isLangParsed, isFirstStatement);
                 break;
             }
             case Token::Type::ID_REC: {
@@ -1086,24 +1084,24 @@ Expected<Program, Error> Parser::Parse(TokenSet &vectors_tokens, const std::stri
                 break;
             }
             default: {
-                if (func_def_) {
+                if (funcDef_) {
                     ParseFunctionCode();
-                } else if (record_def_) {
+                } else if (recordDef_) {
                     ParseRecordFields();
-                } else if (array_def_) {
+                } else if (arrayDef_) {
                     ParseArrayElements();
                 }
             }
         }
-        if (!ParseAfterLine(is_first_statement)) {
+        if (!ParseAfterLine(isFirstStatement)) {
             break;
         }
     }
 
-    return ParseAfterMainLoop(file_name);
+    return ParseAfterMainLoop(fileName);
 }
 
-Expected<Program, Error> Parser::Parse(const std::string &source, const std::string &file_name)
+Expected<Program, Error> Parser::Parse(const std::string &source, const std::string &fileName)
 {
     auto ss = std::stringstream(source);
     std::string line;
@@ -1120,7 +1118,7 @@ Expected<Program, Error> Parser::Parse(const std::string &source, const std::str
         v.push_back(tokens);
     }
 
-    return Parse(v, file_name);
+    return Parse(v, fileName);
 }
 
 void Parser::SetError()
@@ -1134,8 +1132,8 @@ bool Parser::RegValidName()
         return false;
     }
 
-    if (curr_func_->GetParamsNum() > 0) {
-        return context_.ValidateRegisterName('v') || context_.ValidateRegisterName('a', curr_func_->GetParamsNum() - 1);
+    if (currFunc_->GetParamsNum() > 0) {
+        return context_.ValidateRegisterName('v') || context_.ValidateRegisterName('a', currFunc_->GetParamsNum() - 1);
     }
 
     return context_.ValidateRegisterName('v');
@@ -1143,7 +1141,7 @@ bool Parser::RegValidName()
 
 bool Parser::ParamValidName()
 {
-    return context_.ValidateParameterName(curr_func_->GetParamsNum());
+    return context_.ValidateParameterName(currFunc_->GetParamsNum());
 }
 
 bool IsAlphaNumeric(char c)
@@ -1156,7 +1154,7 @@ bool IsNonDigit(char c)
     return std::isalpha(c) != 0 || c == '_' || c == '$';
 }
 
-bool Parser::PrefixedValidName(bool allow_brackets)
+bool Parser::PrefixedValidName(bool allowBrackets)
 {
     auto s = context_.GiveToken();
     if (!IsNonDigit(s[0])) {
@@ -1172,10 +1170,10 @@ bool Parser::PrefixedValidName(bool allow_brackets)
                 return false;
             }
         } else {
-            if (!allow_brackets && !IsAlphaNumeric(s[i]) && s[i] != '-') {
+            if (!allowBrackets && !IsAlphaNumeric(s[i]) && s[i] != '-') {
                 return false;
             }
-            if (allow_brackets && !(IsAlphaNumeric(s[i]) || s[i] == ']' || s[i] == '[') && s[i] != '-') {
+            if (allowBrackets && !(IsAlphaNumeric(s[i]) || s[i] == ']' || s[i] == '[') && s[i] != '-') {
                 return false;
             }
         }
@@ -1221,25 +1219,25 @@ bool Parser::LabelValidName()
 
 bool Parser::ParseLabel()
 {
-    LOG(DEBUG, ASSEMBLER) << "label search started (line " << line_stric_ << "): " << context_.tokens[0].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "label search started (line " << lineStric_ << "): " << context_.tokens[0].wholeLine;
 
     context_++;
 
     if (*context_ == Token::Type::DEL_COLON) {
         context_--;
         if (LabelValidName()) {
-            if (AddObjectInTable(true, *label_table_)) {
-                curr_ins_->set_label = true;
-                curr_ins_->label = context_.GiveToken();
+            if (AddObjectInTable(true, *labelTable_)) {
+                currIns_->setLabel = true;
+                currIns_->label = context_.GiveToken();
 
-                LOG(DEBUG, ASSEMBLER) << "label detected (line " << line_stric_ << "): " << context_.GiveToken();
+                LOG(DEBUG, ASSEMBLER) << "label detected (line " << lineStric_ << "): " << context_.GiveToken();
 
                 context_++;
                 context_++;
                 return !context_.Mask();
             }
 
-            LOG(DEBUG, ASSEMBLER) << "label is detected (line " << line_stric_ << "): " << context_.GiveToken()
+            LOG(DEBUG, ASSEMBLER) << "label is detected (line " << lineStric_ << "): " << context_.GiveToken()
                                   << ", but this label already exists";
 
             context_.err = GetError("This label already exists.", Error::ErrorType::ERR_BAD_LABEL_EXT);
@@ -1247,7 +1245,7 @@ bool Parser::ParseLabel()
         } else {
             LOG(DEBUG, ASSEMBLER) << "label with non-standard character is detected, attempt to create a label is "
                                      "supposed, but this cannot be any label name (line "
-                                  << line_stric_ << "): " << context_.GiveToken();
+                                  << lineStric_ << "): " << context_.GiveToken();
 
             context_.err = GetError(
                 "Invalid name of label. Label contains only characters: '_', '0' - '9', 'a' - 'z', 'A' - 'Z'; and "
@@ -1260,7 +1258,7 @@ bool Parser::ParseLabel()
 
     context_--;
 
-    LOG(DEBUG, ASSEMBLER) << "label is not detected (line " << line_stric_ << ")";
+    LOG(DEBUG, ASSEMBLER) << "label is not detected (line " << lineStric_ << ")";
 
     return true;
 }
@@ -1275,7 +1273,7 @@ static Opcode TokenToOpcode(Token::Type id)
 bool Parser::ParseOperation()
 {
     if (context_.Mask()) {
-        LOG(DEBUG, ASSEMBLER) << "no more tokens (line " << line_stric_ << "): " << context_.tokens[0].whole_line;
+        LOG(DEBUG, ASSEMBLER) << "no more tokens (line " << lineStric_ << "): " << context_.tokens[0].wholeLine;
 
         return false;
     }
@@ -1284,22 +1282,22 @@ bool Parser::ParseOperation()
         return false;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "operaion search started (line " << line_stric_ << "): " << context_.tokens[0].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "operaion search started (line " << lineStric_ << "): " << context_.tokens[0].wholeLine;
 
     if (*context_ > Token::Type::OPERATION && *context_ < Token::Type::KEYWORD) {
         SetOperationInformation();
 
         context_.UpSignOperation();
-        curr_ins_->opcode = TokenToOpcode(context_.id);
+        currIns_->opcode = TokenToOpcode(context_.id);
 
-        LOG(DEBUG, ASSEMBLER) << "operatiuon is detected (line " << line_stric_ << "): " << context_.GiveToken()
-                              << " (operand type: " << OperandTypePrint(curr_ins_->opcode) << ")";
+        LOG(DEBUG, ASSEMBLER) << "operatiuon is detected (line " << lineStric_ << "): " << context_.GiveToken()
+                              << " (operand type: " << OperandTypePrint(currIns_->opcode) << ")";
 
         context_++;
         return true;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "founded " << context_.GiveToken() << ", it is not an operation (line " << line_stric_
+    LOG(DEBUG, ASSEMBLER) << "founded " << context_.GiveToken() << ", it is not an operation (line " << lineStric_
                           << ")";
 
     context_.err = GetError("Invalid operation.", Error::ErrorType::ERR_BAD_OPERATION_NAME);
@@ -1322,15 +1320,15 @@ bool Parser::ParseOperandVreg()
     if (p[0] == 'v') {
         p.remove_prefix(1);
         auto number = static_cast<int64_t>(ToNumber(p));
-        if (number > *(context_.max_value_of_reg)) {
-            *(context_.max_value_of_reg) = number;
+        if (number > *(context_.maxValueOfReg)) {
+            *(context_.maxValueOfReg) = number;
         }
 
-        curr_ins_->regs.push_back(static_cast<uint16_t>(number));
+        currIns_->regs.push_back(static_cast<uint16_t>(number));
     } else if (p[0] == 'a') {
         p.remove_prefix(1);
-        curr_ins_->regs.push_back(static_cast<uint16_t>(ToNumber(p)));
-        context_.function_arguments_list->emplace_back(context_.ins_number, curr_ins_->regs.size() - 1);
+        currIns_->regs.push_back(static_cast<uint16_t>(ToNumber(p)));
+        context_.functionArgumentsList->emplace_back(context_.insNumber, currIns_->regs.size() - 1);
     }
 
     ++context_;
@@ -1349,40 +1347,40 @@ bool Parser::ParseOperandCall()
     }
 
     const auto p = std::string(context_.GiveToken().data(), context_.GiveToken().length());
-    curr_ins_->ids.emplace_back(p);
+    currIns_->ids.emplace_back(p);
 
-    AddObjectInTable(false, program_.function_table);
+    AddObjectInTable(false, program_.functionTable);
 
     ++context_;
 
-    std::string func_signature {};
+    std::string funcSignature {};
 
-    if (!ParseOperandSignature(&func_signature)) {
+    if (!ParseOperandSignature(&funcSignature)) {
         return false;
     }
 
-    if (func_signature.empty()) {
-        const auto it_synonym = program_.function_synonyms.find(curr_ins_->ids.back());
-        if (it_synonym == program_.function_synonyms.end()) {
+    if (funcSignature.empty()) {
+        const auto itSynonym = program_.functionSynonyms.find(currIns_->ids.back());
+        if (itSynonym == program_.functionSynonyms.end()) {
             return true;
         }
 
-        if (it_synonym->second.size() > 1) {
+        if (itSynonym->second.size() > 1) {
             context_.err = GetError("Unable to resolve ambiguous function call",
                                     Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES);
             return false;
         }
 
-        program_.function_table.erase(p);
+        program_.functionTable.erase(p);
     } else {
-        curr_ins_->ids.back() += func_signature;
+        currIns_->ids.back() += funcSignature;
 
-        if (program_.function_table.find(curr_ins_->ids.back()) == program_.function_table.end()) {
-            auto node_handle = program_.function_table.extract(p);
-            node_handle.key() = curr_ins_->ids.back();
-            program_.function_table.insert(std::move(node_handle));
+        if (program_.functionTable.find(currIns_->ids.back()) == program_.functionTable.end()) {
+            auto nodeHandle = program_.functionTable.extract(p);
+            nodeHandle.key() = currIns_->ids.back();
+            program_.functionTable.insert(std::move(nodeHandle));
         } else {
-            program_.function_table.erase(p);
+            program_.functionTable.erase(p);
         }
     }
 
@@ -1628,7 +1626,7 @@ bool Parser::ParseOperandString()
         return false;
     }
 
-    curr_ins_->ids.push_back(res.value());
+    currIns_->ids.push_back(res.value());
 
     ++context_;
 
@@ -1683,7 +1681,7 @@ bool Parser::ParseInteger(int64_t *value)
     return true;
 }
 
-bool Parser::ParseFloat(double *value, bool is_64bit)
+bool Parser::ParseFloat(double *value, bool is64bit)
 {
     if (context_.err.err != Error::ErrorType::ERR_NONE) {
         return false;
@@ -1703,7 +1701,7 @@ bool Parser::ParseFloat(double *value, bool is_64bit)
         return false;
     }
 
-    *value = FloatNumber(p, is_64bit);
+    *value = FloatNumber(p, is64bit);
     if (errno == ERANGE) {
         context_.err =
             GetError("Too large immediate (length is more than 64 bit).", Error::ErrorType::ERR_BAD_FLOAT_WIDTH);
@@ -1720,19 +1718,19 @@ bool Parser::ParseOperandInteger()
         return false;
     }
 
-    curr_ins_->imms.emplace_back(n);
+    currIns_->imms.emplace_back(n);
     ++context_;
     return true;
 }
 
-bool Parser::ParseOperandFloat(bool is_64bit)
+bool Parser::ParseOperandFloat(bool is64bit)
 {
     double n;
-    if (!ParseFloat(&n, is_64bit)) {
+    if (!ParseFloat(&n, is64bit)) {
         return false;
     }
 
-    curr_ins_->imms.emplace_back(n);
+    currIns_->imms.emplace_back(n);
     ++context_;
     return true;
 }
@@ -1749,8 +1747,8 @@ bool Parser::ParseOperandLabel()
     }
 
     std::string_view p = context_.GiveToken();
-    curr_ins_->ids.emplace_back(p.data(), p.length());
-    AddObjectInTable(false, *label_table_);
+    currIns_->ids.emplace_back(p.data(), p.length());
+    AddObjectInTable(false, *labelTable_);
 
     ++context_;
 
@@ -1773,15 +1771,15 @@ bool Parser::ParseOperandId()
     }
 
     std::string_view p = context_.GiveToken();
-    curr_ins_->ids.emplace_back(p.data(), p.length());
-    AddObjectInTable(false, *label_table_);
+    currIns_->ids.emplace_back(p.data(), p.length());
+    AddObjectInTable(false, *labelTable_);
 
     ++context_;
 
     return true;
 }
 
-bool Parser::ParseOperandType(Type::VerificationType ver_type)
+bool Parser::ParseOperandType(Type::VerificationType verType)
 {
     if (context_.err.err != Error::ErrorType::ERR_NONE) {
         return false;
@@ -1801,30 +1799,30 @@ bool Parser::ParseOperandType(Type::VerificationType ver_type)
         return false;
     }
 
-    bool is_object = context_.GiveToken() != "]";
+    bool isObject = context_.GiveToken() != "]";
 
-    if (is_object) {
-        AddObjectInTable(false, program_.record_table);
+    if (isObject) {
+        AddObjectInTable(false, program_.recordTable);
 
-        if (ver_type == Type::VerificationType::TYPE_ID_ARRAY) {
+        if (verType == Type::VerificationType::TYPE_ID_ARRAY) {
             GetWarning("Unexpected type_id recieved! Expected array, but object given",
                        Error::ErrorType::WAR_UNEXPECTED_TYPE_ID);
         }
     } else {
         if (!type.IsArrayContainsPrimTypes() &&
-            program_.record_table.find(type.GetComponentName()) == program_.record_table.end()) {
-            std::string component_name = type.GetComponentName();
-            context_.token = component_name;
-            AddObjectInTable(false, program_.record_table);
+            program_.recordTable.find(type.GetComponentName()) == program_.recordTable.end()) {
+            std::string componentName = type.GetComponentName();
+            context_.token = componentName;
+            AddObjectInTable(false, program_.recordTable);
         }
 
-        if (ver_type == Type::VerificationType::TYPE_ID_OBJECT) {
+        if (verType == Type::VerificationType::TYPE_ID_OBJECT) {
             GetWarning("Unexpected type_id recieved! Expected object, but array given",
                        Error::ErrorType::WAR_UNEXPECTED_TYPE_ID);
         }
     }
 
-    curr_ins_->ids.push_back(type.GetName());
+    currIns_->ids.push_back(type.GetName());
 
     return true;
 }
@@ -1844,13 +1842,13 @@ bool Parser::ParseOperandLiteralArray()
     }
 
     std::string_view p = context_.GiveToken();
-    auto array_id = std::string(p.data(), p.length());
-    if (program_.literalarray_table.find(array_id) == program_.literalarray_table.end()) {
+    auto arrayId = std::string(p.data(), p.length());
+    if (program_.literalarrayTable.find(arrayId) == program_.literalarrayTable.end()) {
         context_.err = GetError("No array was found for this array id", Error::ErrorType::ERR_BAD_ID_ARRAY);
         return false;
     }
 
-    curr_ins_->ids.emplace_back(p.data(), p.length());
+    currIns_->ids.emplace_back(p.data(), p.length());
 
     ++context_;
 
@@ -1873,41 +1871,41 @@ bool Parser::ParseOperandField()
     }
 
     std::string_view p = context_.GiveToken();
-    std::string record_full_name = std::string(p);
+    std::string recordFullName = std::string(p);
     // Some names of records in pandastdlib starts with 'panda.', therefore,
     // the record name is before the second dot, and the field name is after the second dot
-    auto pos_point = record_full_name.find_last_of('.');
-    std::string record_name;
-    std::string field_name;
-    if (pos_point == std::string::npos) {
-        record_name = panda_file::GetDummyClassName();
-        field_name = record_full_name;
+    auto posPoint = recordFullName.find_last_of('.');
+    std::string recordName;
+    std::string fieldName;
+    if (posPoint == std::string::npos) {
+        recordName = panda_file::GetDummyClassName();
+        fieldName = recordFullName;
     } else {
-        record_name = record_full_name.substr(0, pos_point);
-        field_name = record_full_name.substr(pos_point + 1);
+        recordName = recordFullName.substr(0, posPoint);
+        fieldName = recordFullName.substr(posPoint + 1);
     }
 
-    auto it_record = program_.record_table.find(record_name);
-    if (it_record == program_.record_table.end()) {
-        context_.token = record_name;
-        AddObjectInTable(false, program_.record_table);
-        it_record = program_.record_table.find(record_name);
+    auto itRecord = program_.recordTable.find(recordName);
+    if (itRecord == program_.recordTable.end()) {
+        context_.token = recordName;
+        AddObjectInTable(false, program_.recordTable);
+        itRecord = program_.recordTable.find(recordName);
     }
-    auto it_field = std::find_if(it_record->second.field_list.begin(), it_record->second.field_list.end(),
-                                 [&field_name](pandasm::Field &field) { return field_name == field.name; });
+    auto itField = std::find_if(itRecord->second.fieldList.begin(), itRecord->second.fieldList.end(),
+                                [&fieldName](pandasm::Field &field) { return fieldName == field.name; });
 
-    if (!field_name.empty() && it_field == it_record->second.field_list.end()) {
-        it_record->second.field_list.emplace_back(program_.lang);
-        auto &field = it_record->second.field_list.back();
-        field.name = field_name;
-        field.line_of_def = line_stric_;
-        field.whole_line = context_.tokens[context_.number - 1].whole_line;
-        field.bound_left = context_.tokens[context_.number - 1].bound_left + record_name.length() + 1;
-        field.bound_right = context_.tokens[context_.number - 1].bound_right;
-        field.is_defined = false;
+    if (!fieldName.empty() && itField == itRecord->second.fieldList.end()) {
+        itRecord->second.fieldList.emplace_back(program_.lang);
+        auto &field = itRecord->second.fieldList.back();
+        field.name = fieldName;
+        field.lineOfDef = lineStric_;
+        field.wholeLine = context_.tokens[context_.number - 1].wholeLine;
+        field.boundLeft = context_.tokens[context_.number - 1].boundLeft + recordName.length() + 1;
+        field.boundRight = context_.tokens[context_.number - 1].boundRight;
+        field.isDefined = false;
     }
 
-    curr_ins_->ids.emplace_back(p.data(), p.length());
+    currIns_->ids.emplace_back(p.data(), p.length());
 
     ++context_;
 
@@ -1966,17 +1964,17 @@ bool Parser::ParseFunctionFullSign()
 
 bool Parser::UpdateFunctionName()
 {
-    auto signature = GetFunctionSignatureFromName(curr_func_->name, curr_func_->params);
-    auto iter = program_.function_table.find(signature);
-    if (iter == program_.function_table.end() || !iter->second.file_location->is_defined) {
-        program_.function_synonyms[curr_func_->name].push_back(signature);
-        program_.function_table.erase(signature);
-        auto node_handle = program_.function_table.extract(curr_func_->name);
-        node_handle.key() = signature;
-        program_.function_table.insert(std::move(node_handle));
-        curr_func_->name = signature;
-        context_.max_value_of_reg = &(curr_func_->value_of_first_param);
-        context_.function_arguments_list = &(context_.function_arguments_lists[curr_func_->name]);
+    auto signature = GetFunctionSignatureFromName(currFunc_->name, currFunc_->params);
+    auto iter = program_.functionTable.find(signature);
+    if (iter == program_.functionTable.end() || !iter->second.fileLocation->isDefined) {
+        program_.functionSynonyms[currFunc_->name].push_back(signature);
+        program_.functionTable.erase(signature);
+        auto nodeHandle = program_.functionTable.extract(currFunc_->name);
+        nodeHandle.key() = signature;
+        program_.functionTable.insert(std::move(nodeHandle));
+        currFunc_->name = signature;
+        context_.maxValueOfReg = &(currFunc_->valueOfFirstParam);
+        context_.functionArgumentsList = &(context_.functionArgumentsLists[currFunc_->name]);
 
         return true;
     }
@@ -1993,31 +1991,31 @@ bool Parser::ParseArrayFullSign()
     }
 
     if (*context_ == Token::Type::DEL_BRACE_L) {
-        is_const_array_ = false;
+        isConstArray_ = false;
         return true;
     }
 
-    is_const_array_ = true;
+    isConstArray_ = true;
 
-    curr_array_->literals.emplace_back();
-    curr_array_elem_ = &(curr_array_->literals[curr_array_->literals.size() - 1]);
+    currArray_->literals.emplace_back();
+    currArrayElem_ = &(currArray_->literals[currArray_->literals.size() - 1]);
 
     if (!ParseArrayElementType()) {
         context_.err = GetError("Invalid array type for static array.", Error::ErrorType::ERR_BAD_ARRAY_TYPE);
         return false;
     }
 
-    curr_array_elem_->value = static_cast<uint8_t>(curr_array_elem_->tag);
-    curr_array_elem_->tag = panda_file::LiteralTag::TAGVALUE;
+    currArrayElem_->value = static_cast<uint8_t>(currArrayElem_->tag);
+    currArrayElem_->tag = panda_file::LiteralTag::TAGVALUE;
 
     if (*context_ == Token::Type::DEL_BRACE_L) {
         context_.err = GetError("No array size for static array.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
         return false;
     }
 
-    curr_array_->literals.emplace_back();
-    curr_array_elem_ = &(curr_array_->literals[curr_array_->literals.size() - 1]);
-    curr_array_elem_->tag = panda_file::LiteralTag::INTEGER;
+    currArray_->literals.emplace_back();
+    currArrayElem_ = &(currArray_->literals[currArray_->literals.size() - 1]);
+    currArrayElem_->tag = panda_file::LiteralTag::INTEGER;
 
     if (!ParseArrayElementValueInteger()) {
         context_.err =
@@ -2032,8 +2030,8 @@ bool Parser::ParseArrayFullSign()
 
 bool Parser::ParseRecordName()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching for record name (line " << line_stric_
-                          << "): " << context_.tokens[context_.number - 1].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started searching for record name (line " << lineStric_
+                          << "): " << context_.tokens[context_.number - 1].wholeLine;
 
     if (!RecordValidName()) {
         if (*context_ == Token::Type::DEL_BRACKET_L) {
@@ -2044,7 +2042,7 @@ bool Parser::ParseRecordName()
         return false;
     }
 
-    auto record_name = std::string(context_.GiveToken());
+    auto recordName = std::string(context_.GiveToken());
     context_++;
     if (*context_ == Token::Type::DEL_SQUARE_BRACKET_L) {
         auto dim = ParseMultiArrayHallmark();
@@ -2052,38 +2050,38 @@ bool Parser::ParseRecordName()
             return false;
         }
         for (uint8_t i = 0; i < dim; i++) {
-            record_name += "[]";
+            recordName += "[]";
         }
     }
     if (!context_.Mask()) {
         context_--;
     }
 
-    auto iter = program_.record_table.find(record_name);
-    if (iter == program_.record_table.end() || !iter->second.file_location->is_defined) {
-        SetRecordInformation(record_name);
+    auto iter = program_.recordTable.find(recordName);
+    if (iter == program_.recordTable.end() || !iter->second.fileLocation->isDefined) {
+        SetRecordInformation(recordName);
     } else {
         context_.err = GetError("This record already exists.", Error::ErrorType::ERR_BAD_ID_RECORD);
         return false;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "record name found (line " << line_stric_ << "): " << context_.GiveToken();
+    LOG(DEBUG, ASSEMBLER) << "record name found (line " << lineStric_ << "): " << context_.GiveToken();
 
     ++context_;
 
     return true;
 }
 
-void Parser::SetRecordInformation(const std::string &record_name)
+void Parser::SetRecordInformation(const std::string &recordName)
 {
-    AddObjectInTable(true, program_.record_table, record_name);
-    curr_record_ = &(program_.record_table.at(record_name));
+    AddObjectInTable(true, program_.recordTable, recordName);
+    currRecord_ = &(program_.recordTable.at(recordName));
 }
 
 bool Parser::ParseFunctionName()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching for function name (line " << line_stric_
-                          << "): " << context_.tokens[context_.number - 1].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started searching for function name (line " << lineStric_
+                          << "): " << context_.tokens[context_.number - 1].wholeLine;
 
     if (!FunctionValidName()) {
         if (*context_ == Token::Type::DEL_BRACKET_L) {
@@ -2100,7 +2098,7 @@ bool Parser::ParseFunctionName()
         return false;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "function name found (line " << line_stric_ << "): " << context_.GiveToken();
+    LOG(DEBUG, ASSEMBLER) << "function name found (line " << lineStric_ << "): " << context_.GiveToken();
 
     ++context_;
 
@@ -2119,21 +2117,21 @@ void Parser::SetFunctionInformation()
         }
         if (context_.GiveToken() == ".ctor") {
             p += ".ctor";
-            AddObjectInTable(true, program_.function_table, p);
+            AddObjectInTable(true, program_.functionTable, p);
         }
     } else {
         context_--;
-        AddObjectInTable(true, program_.function_table);
+        AddObjectInTable(true, program_.functionTable);
     }
-    curr_func_ = &(program_.function_table.at(p));
-    label_table_ = &(curr_func_->label_table);
-    curr_func_->return_type = context_.curr_func_return_type;
+    currFunc_ = &(program_.functionTable.at(p));
+    labelTable_ = &(currFunc_->labelTable);
+    currFunc_->returnType = context_.currFuncReturnType;
 }
 
 bool Parser::ParseArrayName()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching for array name (line " << line_stric_
-                          << "): " << context_.tokens[context_.number - 1].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started searching for array name (line " << lineStric_
+                          << "): " << context_.tokens[context_.number - 1].wholeLine;
 
     if (!ArrayValidName()) {
         if (*context_ == Token::Type::DEL_BRACKET_L) {
@@ -2145,15 +2143,15 @@ bool Parser::ParseArrayName()
     }
 
     auto iter =
-        program_.literalarray_table.find(std::string(context_.GiveToken().data(), context_.GiveToken().length()));
-    if (iter == program_.literalarray_table.end()) {
+        program_.literalarrayTable.find(std::string(context_.GiveToken().data(), context_.GiveToken().length()));
+    if (iter == program_.literalarrayTable.end()) {
         SetArrayInformation();
     } else {
         context_.err = GetError("This array already exists.", Error::ErrorType::ERR_BAD_ID_ARRAY);
         return false;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "array id found (line " << line_stric_ << "): " << context_.GiveToken();
+    LOG(DEBUG, ASSEMBLER) << "array id found (line " << lineStric_ << "): " << context_.GiveToken();
 
     ++context_;
 
@@ -2162,27 +2160,27 @@ bool Parser::ParseArrayName()
 
 void Parser::SetArrayInformation()
 {
-    program_.literalarray_table.try_emplace(std::string(context_.GiveToken().data(), context_.GiveToken().length()),
-                                            panda::pandasm::LiteralArray());
+    program_.literalarrayTable.try_emplace(std::string(context_.GiveToken().data(), context_.GiveToken().length()),
+                                           panda::pandasm::LiteralArray());
 
-    curr_array_ =
-        &(program_.literalarray_table.at(std::string(context_.GiveToken().data(), context_.GiveToken().length())));
+    currArray_ =
+        &(program_.literalarrayTable.at(std::string(context_.GiveToken().data(), context_.GiveToken().length())));
 }
 
 void Parser::SetOperationInformation()
 {
-    context_.ins_number = curr_func_->ins.size();
-    auto &curr_debug = curr_func_->ins.back().ins_debug;
-    curr_debug.line_number = line_stric_;
-    curr_debug.whole_line = context_.tokens[context_.number - 1].whole_line;
-    curr_debug.bound_left = context_.tokens[context_.number - 1].bound_left;
-    curr_debug.bound_right = context_.tokens[context_.number - 1].bound_right;
+    context_.insNumber = currFunc_->ins.size();
+    auto &currDebug = currFunc_->ins.back().insDebug;
+    currDebug.lineNumber = lineStric_;
+    currDebug.wholeLine = context_.tokens[context_.number - 1].wholeLine;
+    currDebug.boundLeft = context_.tokens[context_.number - 1].boundLeft;
+    currDebug.boundRight = context_.tokens[context_.number - 1].boundRight;
 }
 
 bool Parser::ParseFunctionReturn()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching for return function value (line " << line_stric_
-                          << "): " << context_.tokens[context_.number - 1].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started searching for return function value (line " << lineStric_
+                          << "): " << context_.tokens[context_.number - 1].wholeLine;
 
     if (!TypeValidName()) {
         if (*context_ == Token::Type::DEL_BRACKET_L) {
@@ -2193,11 +2191,11 @@ bool Parser::ParseFunctionReturn()
         return false;
     }
 
-    if (!ParseType(&context_.curr_func_return_type)) {
+    if (!ParseType(&context_.currFuncReturnType)) {
         return false;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "return type found (line " << line_stric_ << "): " << context_.GiveToken();
+    LOG(DEBUG, ASSEMBLER) << "return type found (line " << lineStric_ << "): " << context_.GiveToken();
 
     return true;
 }
@@ -2251,7 +2249,7 @@ bool Parser::ParseFunctionArg()
         return false;
     }
 
-    curr_func_->params.push_back(std::move(parameter));
+    currFunc_->params.push_back(std::move(parameter));
 
     return true;
 }
@@ -2274,8 +2272,8 @@ bool Parser::ParseFunctionArgComma(bool &comma)
 
 bool Parser::ParseFunctionArgs()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching for function parameters (line " << line_stric_
-                          << "): " << context_.tokens[context_.number - 1].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started searching for function parameters (line " << lineStric_
+                          << "): " << context_.tokens[context_.number - 1].wholeLine;
 
     bool comma = false;
 
@@ -2297,15 +2295,15 @@ bool Parser::ParseFunctionArgs()
         }
     }
 
-    LOG(DEBUG, ASSEMBLER) << "parameters found (line " << line_stric_ << "): ";
+    LOG(DEBUG, ASSEMBLER) << "parameters found (line " << lineStric_ << "): ";
 
     return true;
 }
 
 bool Parser::ParseMetaDef()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching for meta information (line " << line_stric_
-                          << "): " << context_.tokens[context_.number - 1].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "started searching for meta information (line " << lineStric_
+                          << "): " << context_.tokens[context_.number - 1].wholeLine;
 
     bool flag = false;
 
@@ -2328,7 +2326,7 @@ bool Parser::ParseMetaDef()
         return false;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "searching for meta information (line " << line_stric_ << ") is successful";
+    LOG(DEBUG, ASSEMBLER) << "searching for meta information (line " << lineStric_ << ") is successful";
 
     if (flag && context_.err.err == Error::ErrorType::ERR_NONE) {
         ++context_;
@@ -2337,7 +2335,7 @@ bool Parser::ParseMetaDef()
     return true;
 }
 
-void Parser::SetMetadataContextError(const Metadata::Error &err, bool has_value)
+void Parser::SetMetadataContextError(const Metadata::Error &err, bool hasValue)
 {
     constexpr int64_t NO_VALUE_OFF = -1;
     constexpr int64_t SPECIAL_OFF = -2;
@@ -2346,7 +2344,7 @@ void Parser::SetMetadataContextError(const Metadata::Error &err, bool has_value)
     switch (err.GetType()) {
         case Metadata::Error::Type::UNKNOWN_ATTRIBUTE: {
             context_.err = GetError(err.GetMessage(), Error::ErrorType::ERR_BAD_METADATA_UNKNOWN_ATTRIBUTE, 0,
-                                    has_value ? STANDARD_OFF : NO_VALUE_OFF);
+                                    hasValue ? STANDARD_OFF : NO_VALUE_OFF);
             break;
         }
         case Metadata::Error::Type::MISSING_ATTRIBUTE: {
@@ -2359,7 +2357,7 @@ void Parser::SetMetadataContextError(const Metadata::Error &err, bool has_value)
         }
         case Metadata::Error::Type::UNEXPECTED_ATTRIBUTE: {
             context_.err = GetError(err.GetMessage(), Error::ErrorType::ERR_BAD_METADATA_UNEXPECTED_ATTRIBUTE, 0,
-                                    has_value ? STANDARD_OFF : NO_VALUE_OFF);
+                                    hasValue ? STANDARD_OFF : NO_VALUE_OFF);
             break;
         }
         case Metadata::Error::Type::UNEXPECTED_VALUE: {
@@ -2373,7 +2371,7 @@ void Parser::SetMetadataContextError(const Metadata::Error &err, bool has_value)
         }
         case Metadata::Error::Type::MULTIPLE_ATTRIBUTE: {
             context_.err = GetError(err.GetMessage(), Error::ErrorType::ERR_BAD_METADATA_MULTIPLE_ATTRIBUTE, 0,
-                                    has_value ? STANDARD_OFF : NO_VALUE_OFF);
+                                    hasValue ? STANDARD_OFF : NO_VALUE_OFF);
             break;
         }
         default: {
@@ -2419,7 +2417,7 @@ bool Parser::MeetExpMetaList(bool eq)
     return true;
 }
 
-bool Parser::BuildMetaListAttr(bool &eq, std::string &attribute_name, std::string &attribute_value)
+bool Parser::BuildMetaListAttr(bool &eq, std::string &attributeName, std::string &attributeValue)
 {
     if (eq && *context_ == Token::Type::ID_STRING) {
         auto res = ParseStringLiteral();
@@ -2427,10 +2425,10 @@ bool Parser::BuildMetaListAttr(bool &eq, std::string &attribute_name, std::strin
             return false;
         }
 
-        attribute_value = res.value();
+        attributeValue = res.value();
     } else if (eq) {
         std::string sign {};
-        attribute_value = context_.GiveToken();
+        attributeValue = context_.GiveToken();
         ++context_;
 
         if (!ParseOperandSignature(&sign)) {
@@ -2438,9 +2436,9 @@ bool Parser::BuildMetaListAttr(bool &eq, std::string &attribute_name, std::strin
         }
 
         --context_;
-        attribute_value += sign;
+        attributeValue += sign;
     } else {
-        attribute_name = context_.GiveToken();
+        attributeName = context_.GiveToken();
     }
 
     ++context_;
@@ -2459,18 +2457,18 @@ bool Parser::BuildMetaListAttr(bool &eq, std::string &attribute_name, std::strin
         eq = true;
     } else {
         std::optional<Metadata::Error> res;
-        bool has_value = eq;
-        if (has_value) {
-            res = metadata_->SetAttributeValue(attribute_name, attribute_value);
+        bool hasValue = eq;
+        if (hasValue) {
+            res = metadata_->SetAttributeValue(attributeName, attributeValue);
         } else {
-            res = metadata_->SetAttribute(attribute_name);
+            res = metadata_->SetAttribute(attributeName);
         }
 
         eq = false;
 
         if (res) {
             auto err = res.value();
-            SetMetadataContextError(err, has_value);
+            SetMetadataContextError(err, hasValue);
             return false;
         }
     }
@@ -2488,8 +2486,8 @@ bool Parser::ParseMetaList(bool flag)
     bool comma = false;
     bool eq = false;
 
-    std::string attribute_name;
-    std::string attribute_value;
+    std::string attributeName;
+    std::string attributeValue;
 
     while (true) {
         if (context_.Mask()) {
@@ -2510,7 +2508,7 @@ bool Parser::ParseMetaList(bool flag)
             return false;
         }
 
-        if (!BuildMetaListAttr(eq, attribute_name, attribute_value)) {
+        if (!BuildMetaListAttr(eq, attributeName, attributeValue)) {
             return false;
         }
     }
@@ -2545,10 +2543,10 @@ bool Parser::ParseFunctionInstruction()
     return context_.Mask();
 }
 
-static std::string GetFuncNameWithoutArgs(const std::string &full_name)
+static std::string GetFuncNameWithoutArgs(const std::string &fullName)
 {
-    auto pos = full_name.find(':');
-    return full_name.substr(0, pos);
+    auto pos = fullName.find(':');
+    return fullName.substr(0, pos);
 }
 
 bool Parser::ParseOperandInitobj()
@@ -2586,16 +2584,16 @@ bool Parser::ParseOperandInitobj()
 
     if (context_.GiveToken() == ".ctor") {
         cid += ".ctor";
-        curr_ins_->ids.emplace_back(cid);
-        bool find_func_in_table = false;
-        for (const auto &func : program_.function_table) {
+        currIns_->ids.emplace_back(cid);
+        bool findFuncInTable = false;
+        for (const auto &func : program_.functionTable) {
             if (GetFuncNameWithoutArgs(func.first) == cid) {
-                find_func_in_table = true;
+                findFuncInTable = true;
                 break;
             }
         }
-        if (!find_func_in_table) {
-            AddObjectInTable(false, program_.function_table, cid);
+        if (!findFuncInTable) {
+            AddObjectInTable(false, program_.functionTable, cid);
         }
         context_++;
         return true;

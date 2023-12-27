@@ -34,18 +34,18 @@ struct RuntimeInterfaceMock : public compiler::RuntimeInterface {
     // Only one exact CALLEE may exist in fake runtime
     MethodPtr GetMethodById(MethodPtr /* unused */, MethodId id) const override
     {
-        saved_callee_id_ = id;
+        savedCalleeId_ = id;
         return reinterpret_cast<MethodPtr>(CALLEE);
     }
 
     MethodId GetMethodId(MethodPtr method) const override
     {
-        return (reinterpret_cast<uintptr_t>(method) == CALLEE) ? saved_callee_id_ : 0;
+        return (reinterpret_cast<uintptr_t>(method) == CALLEE) ? savedCalleeId_ : 0;
     }
 
     uint64_t GetUniqMethodId(MethodPtr method) const override
     {
-        return (reinterpret_cast<uintptr_t>(method) == CALLEE) ? saved_callee_id_ : 0;
+        return (reinterpret_cast<uintptr_t>(method) == CALLEE) ? savedCalleeId_ : 0;
     }
 
     BinaryFilePtr GetBinaryFileForMethod(MethodPtr /* unused */) const override
@@ -56,55 +56,55 @@ struct RuntimeInterfaceMock : public compiler::RuntimeInterface {
 
     DataType::Type GetMethodReturnType(MethodPtr /* unused */) const override
     {
-        return return_type_;
+        return returnType_;
     }
 
     DataType::Type GetMethodReturnType(MethodPtr /* unused */, MethodId /* unused */) const override
     {
-        return return_type_;
+        return returnType_;
     }
 
     DataType::Type GetMethodTotalArgumentType(MethodPtr /* unused */, size_t index) const override
     {
-        if (arg_types_ == nullptr || index >= arg_types_->size()) {
+        if (argTypes_ == nullptr || index >= argTypes_->size()) {
             return DataType::NO_TYPE;
         }
-        return arg_types_->at(index);
+        return argTypes_->at(index);
     }
 
     size_t GetMethodTotalArgumentsCount(MethodPtr /* unused */) const override
     {
-        if (arg_types_ == nullptr) {
-            return args_count_;
+        if (argTypes_ == nullptr) {
+            return argsCount_;
         }
-        return arg_types_->size();
+        return argTypes_->size();
     }
 
     size_t GetMethodArgumentsCount(MethodPtr /* unused */) const override
     {
-        return args_count_;
+        return argsCount_;
     }
 
     size_t GetMethodRegistersCount(MethodPtr /* unused */) const override
     {
-        return vregs_count_;
+        return vregsCount_;
     }
 
     DataType::Type GetFieldType(PandaRuntimeInterface::FieldPtr field) const override
     {
-        return field_types_ == nullptr ? DataType::NO_TYPE : (*field_types_)[field];
+        return fieldTypes_ == nullptr ? DataType::NO_TYPE : (*fieldTypes_)[field];
     }
 
 private:
     static constexpr uintptr_t METHOD = 0xdead;
     static constexpr uintptr_t CALLEE = 0xdeadc;
 
-    size_t args_count_ {0};
-    size_t vregs_count_ {0};
-    mutable unsigned saved_callee_id_ {0};
-    DataType::Type return_type_ {DataType::NO_TYPE};
-    ArenaVector<DataType::Type> *arg_types_ {nullptr};
-    ArenaUnorderedMap<PandaRuntimeInterface::FieldPtr, DataType::Type> *field_types_ {nullptr};
+    size_t argsCount_ {0};
+    size_t vregsCount_ {0};
+    mutable unsigned savedCalleeId_ {0};
+    DataType::Type returnType_ {DataType::NO_TYPE};
+    ArenaVector<DataType::Type> *argTypes_ {nullptr};
+    ArenaUnorderedMap<PandaRuntimeInterface::FieldPtr, DataType::Type> *fieldTypes_ {nullptr};
 
     friend class GraphTest;
     friend class GraphCreator;
@@ -123,8 +123,8 @@ public:
 #endif
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
-        object_allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_OBJECT);
-        local_allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
+        objectAllocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_OBJECT);
+        localAllocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
         builder_ = new IrConstructor();
     }
     ~CommonTest() override;
@@ -139,12 +139,12 @@ public:
 
     ArenaAllocator *GetObjectAllocator() const
     {
-        return object_allocator_;
+        return objectAllocator_;
     }
 
     ArenaAllocator *GetLocalAllocator() const
     {
-        return local_allocator_;
+        return localAllocator_;
     }
 
     Arch GetArch() const
@@ -152,9 +152,9 @@ public:
         return arch_;
     }
 
-    Graph *CreateEmptyGraph(bool is_osr = false) const
+    Graph *CreateEmptyGraph(bool isOsr = false) const
     {
-        return GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), arch_, is_osr);
+        return GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), arch_, isOsr);
     }
 
     Graph *CreateEmptyGraph(Arch arch) const
@@ -162,9 +162,9 @@ public:
         return GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), arch, false);
     }
 
-    Graph *CreateGraphStartEndBlocks(bool is_dynamic = false) const
+    Graph *CreateGraphStartEndBlocks(bool isDynamic = false) const
     {
-        auto graph = GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), arch_, is_dynamic, false);
+        auto graph = GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), arch_, isDynamic, false);
         graph->CreateStartBlock();
         graph->CreateEndBlock();
         return graph;
@@ -216,17 +216,17 @@ public:
 
     bool CheckUsers(Inst &inst, std::initializer_list<int> list) const
     {
-        std::unordered_map<int, size_t> users_map;
+        std::unordered_map<int, size_t> usersMap;
         for (auto l : list) {
-            ++users_map[l];
+            ++usersMap[l];
         }
         for (auto &user : inst.GetUsers()) {
             EXPECT_EQ(user.GetInst()->GetInput(user.GetIndex()).GetInst(), &inst);
-            if (users_map[user.GetInst()->GetId()]-- == 0) {
+            if (usersMap[user.GetInst()->GetId()]-- == 0) {
                 return false;
             }
         }
-        auto rest = std::accumulate(users_map.begin(), users_map.end(), 0, [](int a, auto &x) { return a + x.second; });
+        auto rest = std::accumulate(usersMap.begin(), usersMap.end(), 0, [](int a, auto &x) { return a + x.second; });
         EXPECT_EQ(rest, 0);
         return rest == 0;
     }
@@ -236,8 +236,8 @@ protected:
 
 private:
     ArenaAllocator *allocator_;
-    ArenaAllocator *object_allocator_;
-    ArenaAllocator *local_allocator_;
+    ArenaAllocator *objectAllocator_;
+    ArenaAllocator *localAllocator_;
 #ifdef PANDA_TARGET_ARM32
     Arch arch_ {Arch::AARCH32};
 #else
@@ -250,7 +250,7 @@ public:
     GraphTest() : graph_(CreateEmptyGraph())
     {
         graph_->SetRuntime(&runtime_);
-        runtime_.field_types_ =
+        runtime_.fieldTypes_ =
             graph_->GetAllocator()->New<ArenaUnorderedMap<PandaRuntimeInterface::FieldPtr, DataType::Type>>(
                 graph_->GetAllocator()->Adapter());
     }
@@ -278,19 +278,19 @@ public:
 
     void SetNumVirtRegs(size_t num)
     {
-        runtime_.vregs_count_ = num;
-        graph_->SetVRegsCount(std::max(graph_->GetVRegsCount(), runtime_.vregs_count_ + runtime_.args_count_ + 1));
+        runtime_.vregsCount_ = num;
+        graph_->SetVRegsCount(std::max(graph_->GetVRegsCount(), runtime_.vregsCount_ + runtime_.argsCount_ + 1));
     }
 
     void SetNumArgs(size_t num)
     {
-        runtime_.args_count_ = num;
-        graph_->SetVRegsCount(std::max(graph_->GetVRegsCount(), runtime_.vregs_count_ + runtime_.args_count_ + 1));
+        runtime_.argsCount_ = num;
+        graph_->SetVRegsCount(std::max(graph_->GetVRegsCount(), runtime_.vregsCount_ + runtime_.argsCount_ + 1));
     }
 
     void RegisterFieldType(PandaRuntimeInterface::FieldPtr field, DataType::Type type)
     {
-        (*runtime_.field_types_)[field] = type;
+        (*runtime_.fieldTypes_)[field] = type;
     }
 
 protected:
@@ -369,7 +369,7 @@ public:
 
     ArenaAllocator *GetLocalAllocator()
     {
-        return local_allocator_;
+        return localAllocator_;
     }
 
     virtual Graph *GetGraph()
@@ -390,7 +390,7 @@ public:
 
     const char *GetExecPath() const
     {
-        return exec_path_;
+        return execPath_;
     }
 
     static RuntimeInterface *GetDefaultRuntime();
@@ -401,17 +401,17 @@ protected:
 private:
     Graph *graph_ {nullptr};
     ArenaAllocator *allocator_ {nullptr};
-    ArenaAllocator *local_allocator_ {nullptr};
-    static inline const char *exec_path_ {nullptr};
+    ArenaAllocator *localAllocator_ {nullptr};
+    static inline const char *execPath_ {nullptr};
     Arch arch_ {RUNTIME_ARCH};
 };
 
 // NOLINTNEXTLINE(fuchsia-multia-inheritance,cppcoreguidelines-special-member-functions)
 class AsmTest : public PandaRuntimeTest {
 public:
-    std::unique_ptr<const panda_file::File> ParseToFile(const char *source, const char *file_name = "test.pb");
-    bool Parse(const char *source, const char *file_name = "test.pb");
-    Graph *BuildGraph(const char *method_name, Graph *graph = nullptr);
+    std::unique_ptr<const panda_file::File> ParseToFile(const char *source, const char *fileName = "test.pb");
+    bool Parse(const char *source, const char *fileName = "test.pb");
+    Graph *BuildGraph(const char *methodName, Graph *graph = nullptr);
     void CleanUp(Graph *graph);
 
     AsmTest() = default;
@@ -420,7 +420,7 @@ public:
     NO_COPY_SEMANTIC(AsmTest);
 
     template <bool WITH_CLEANUP = false>
-    bool ParseToGraph(const char *source, const char *method_name, Graph *graph = nullptr)
+    bool ParseToGraph(const char *source, const char *methodName, Graph *graph = nullptr)
     {
         if (!Parse(source)) {
             return false;
@@ -428,7 +428,7 @@ public:
         if (graph == nullptr) {
             graph = GetGraph();
         }
-        if (BuildGraph(method_name, graph) == nullptr) {
+        if (BuildGraph(methodName, graph) == nullptr) {
             return false;
         }
         if constexpr (WITH_CLEANUP) {
@@ -439,11 +439,11 @@ public:
 };
 
 struct TmpFile {
-    explicit TmpFile(const char *file_name) : file_name_(file_name) {}
+    explicit TmpFile(const char *fileName) : fileName_(fileName) {}
     ~TmpFile()
     {
-        ASSERT(file_name_ != nullptr);
-        remove(file_name_);
+        ASSERT(fileName_ != nullptr);
+        remove(fileName_);
     }
 
     NO_MOVE_SEMANTIC(TmpFile);
@@ -451,11 +451,11 @@ struct TmpFile {
 
     const char *GetFileName() const
     {
-        return file_name_;
+        return fileName_;
     }
 
 private:
-    const char *file_name_ {nullptr};
+    const char *fileName_ {nullptr};
 };
 }  // namespace panda::compiler
 

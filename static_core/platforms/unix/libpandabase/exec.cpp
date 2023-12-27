@@ -38,8 +38,8 @@ Expected<int, Error> Exec(Span<const char *> args)
         return Unexpected(Error(errno));
     }
     int status = -1;
-    pid_t res_pid = PANDA_FAILURE_RETRY(waitpid(pid, &status, 0));
-    if (res_pid != pid) {
+    pid_t resPid = PANDA_FAILURE_RETRY(waitpid(pid, &status, 0));
+    if (resPid != pid) {
         return Unexpected(Error(errno));
     }
     if (WIFEXITED(status)) {         // NOLINT(hicpp-signed-bitwise)

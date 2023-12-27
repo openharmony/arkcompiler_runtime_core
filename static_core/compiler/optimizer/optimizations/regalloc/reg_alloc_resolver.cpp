@@ -49,32 +49,32 @@ void RegAllocResolver::Resolve()
 
 void RegAllocResolver::AddCatchPhiMoves(Inst *inst)
 {
-    auto spill_fill_inst = GetGraph()->CreateInstSpillFill(SpillFillType::INPUT_FILL);
+    auto spillFillInst = GetGraph()->CreateInstSpillFill(SpillFillType::INPUT_FILL);
     auto handlers = GetGraph()->GetThrowableInstHandlers(inst);
 
-    for (auto catch_handler : handlers) {
-        for (auto catch_inst : catch_handler->AllInsts()) {
-            if (!catch_inst->IsCatchPhi() || catch_inst->CastToCatchPhi()->IsAcc()) {
+    for (auto catchHandler : handlers) {
+        for (auto catchInst : catchHandler->AllInsts()) {
+            if (!catchInst->IsCatchPhi() || catchInst->CastToCatchPhi()->IsAcc()) {
                 continue;
             }
-            auto catch_phi = catch_inst->CastToCatchPhi();
-            const auto &throwable_insts = catch_phi->GetThrowableInsts();
-            auto it = std::find(throwable_insts->begin(), throwable_insts->end(), inst);
-            if (it == throwable_insts->end()) {
+            auto catchPhi = catchInst->CastToCatchPhi();
+            const auto &throwableInsts = catchPhi->GetThrowableInsts();
+            auto it = std::find(throwableInsts->begin(), throwableInsts->end(), inst);
+            if (it == throwableInsts->end()) {
                 continue;
             }
-            int index = std::distance(throwable_insts->begin(), it);
-            auto catch_input = catch_phi->GetDataFlowInput(index);
-            auto input_interval = liveness_->GetInstLifeIntervals(catch_input);
-            ASSERT(input_interval->GetSibling() == nullptr);
-            auto catch_phi_interval = liveness_->GetInstLifeIntervals(catch_phi);
-            if (input_interval->GetLocation() != catch_phi_interval->GetLocation()) {
-                ConnectIntervals(spill_fill_inst, input_interval, catch_phi_interval);
+            int index = std::distance(throwableInsts->begin(), it);
+            auto catchInput = catchPhi->GetDataFlowInput(index);
+            auto inputInterval = liveness_->GetInstLifeIntervals(catchInput);
+            ASSERT(inputInterval->GetSibling() == nullptr);
+            auto catchPhiInterval = liveness_->GetInstLifeIntervals(catchPhi);
+            if (inputInterval->GetLocation() != catchPhiInterval->GetLocation()) {
+                ConnectIntervals(spillFillInst, inputInterval, catchPhiInterval);
             }
         }
     }
-    if (!spill_fill_inst->GetSpillFills().empty()) {
-        inst->InsertBefore(spill_fill_inst);
+    if (!spillFillInst->GetSpillFills().empty()) {
+        inst->InsertBefore(spillFillInst);
     }
 }
 
@@ -84,38 +84,38 @@ void RegAllocResolver::ResolveInputs(Inst *inst)
         return;
     }
     // Life-position before instruction to analyze intervals, that were splitted directly before it
-    auto ins_ln = liveness_->GetInstLifeIntervals(inst)->GetBegin();
-    auto pre_ins_ln = ins_ln - 1U;
+    auto insLn = liveness_->GetInstLifeIntervals(inst)->GetBegin();
+    auto preInsLn = insLn - 1U;
 
-    input_locations_.clear();
+    inputLocations_.clear();
     for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
-        auto input_interval = liveness_->GetInstLifeIntervals(inst->GetDataFlowInput(i));
-        input_locations_.push_back(input_interval->FindSiblingAt(ins_ln)->GetLocation());
+        auto inputInterval = liveness_->GetInstLifeIntervals(inst->GetDataFlowInput(i));
+        inputLocations_.push_back(inputInterval->FindSiblingAt(insLn)->GetLocation());
     }
 
     for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
         auto location = inst->GetLocation(i);
-        auto input_interval = liveness_->GetInstLifeIntervals(inst->GetDataFlowInput(i));
+        auto inputInterval = liveness_->GetInstLifeIntervals(inst->GetDataFlowInput(i));
 
-        if (CanReadFromAccumulator(inst, i) || input_interval->NoDest() || location.IsInvalid()) {
+        if (CanReadFromAccumulator(inst, i) || inputInterval->NoDest() || location.IsInvalid()) {
             continue;
         }
 
         // Interval with fixed register can be splitted before `inst`: we don't need any extra moves in that case,
         // since fixed register can't be overwrite
-        auto sibling = input_interval->FindSiblingAt(pre_ins_ln);
+        auto sibling = inputInterval->FindSiblingAt(preInsLn);
         ASSERT(sibling != nullptr);
         if (location.IsFixedRegister() && sibling->GetLocation() == location) {
-            auto it = std::find(input_locations_.begin(), input_locations_.end(), location);
+            auto it = std::find(inputLocations_.begin(), inputLocations_.end(), location);
             // If some other instruction reside in the location then we can't reuse a split ending
             // before the inst as a corresponding location will be overridden
-            if (it == input_locations_.end() || static_cast<size_t>(it - input_locations_.begin()) == i) {
+            if (it == inputLocations_.end() || static_cast<size_t>(it - inputLocations_.begin()) == i) {
                 continue;
             }
         }
 
         // Otherwise use sibling covering `inst`
-        if (sibling->GetEnd() == pre_ins_ln) {
+        if (sibling->GetEnd() == preInsLn) {
             sibling = sibling->GetSibling();
         }
 
@@ -136,30 +136,30 @@ void RegAllocResolver::ResolveInputs(Inst *inst)
         auto interval = liveness_->GetTmpRegInterval(inst);
         ASSERT(interval != nullptr);
         ASSERT(interval->HasReg());
-        auto reg_location = Location::MakeRegister(interval->GetReg(), interval->GetType());
-        inst->SetTmpLocation(reg_location);
-        GetGraph()->SetRegUsage(reg_location);
+        auto regLocation = Location::MakeRegister(interval->GetReg(), interval->GetType());
+        inst->SetTmpLocation(regLocation);
+        GetGraph()->SetRegUsage(regLocation);
     }
 }
 
-void RegAllocResolver::AddMoveToFixedLocation(Inst *inst, Location input_location, size_t input_num)
+void RegAllocResolver::AddMoveToFixedLocation(Inst *inst, Location inputLocation, size_t inputNum)
 {
     // Create or get existing SpillFillInst
-    SpillFillInst *sf_inst {};
+    SpillFillInst *sfInst {};
     if (inst->GetPrev() != nullptr && inst->GetPrev()->IsSpillFill()) {
-        sf_inst = inst->GetPrev()->CastToSpillFill();
+        sfInst = inst->GetPrev()->CastToSpillFill();
     } else {
-        sf_inst = GetGraph()->CreateInstSpillFill(SpillFillType::INPUT_FILL);
-        inst->InsertBefore(sf_inst);
+        sfInst = GetGraph()->CreateInstSpillFill(SpillFillType::INPUT_FILL);
+        inst->InsertBefore(sfInst);
     }
 
     // Add move from input to fixed location
-    auto type = ConvertRegType(GetGraph(), inst->GetInputType(input_num));
-    auto fixed_location = inst->GetLocation(input_num);
-    if (fixed_location.IsFixedRegister()) {
-        GetGraph()->SetRegUsage(fixed_location.GetValue(), type);
+    auto type = ConvertRegType(GetGraph(), inst->GetInputType(inputNum));
+    auto fixedLocation = inst->GetLocation(inputNum);
+    if (fixedLocation.IsFixedRegister()) {
+        GetGraph()->SetRegUsage(fixedLocation.GetValue(), type);
     }
-    sf_inst->AddSpillFill(input_location, fixed_location, type);
+    sfInst->AddSpillFill(inputLocation, fixedLocation, type);
 }
 
 Inst *GetFirstUserOrInst(Inst *inst)
@@ -188,19 +188,19 @@ Inst *GetExplicitUser(Inst *inst)
         return inst->GetUsers().Front().GetInst();
     }
 
-    Inst *user_inst {nullptr};
+    Inst *userInst {nullptr};
     for (auto &user : inst->GetUsers()) {
-        auto curr_inst = user.GetInst();
-        if (!IsSuitableForImplicitNullCheck(curr_inst)) {
+        auto currInst = user.GetInst();
+        if (!IsSuitableForImplicitNullCheck(currInst)) {
             continue;
         }
-        if (curr_inst->GetInput(0) != inst) {
+        if (currInst->GetInput(0) != inst) {
             continue;
         }
-        if (!curr_inst->CanThrow()) {
+        if (!currInst->CanThrow()) {
             continue;
         }
-        user_inst = curr_inst;
+        userInst = currInst;
         break;
     }
 #ifndef NDEBUG
@@ -208,57 +208,57 @@ Inst *GetExplicitUser(Inst *inst)
         if (user.GetInst()->IsPhi()) {
             continue;
         }
-        ASSERT(user_inst != nullptr && user_inst->IsDominate(user.GetInst()));
+        ASSERT(userInst != nullptr && userInst->IsDominate(user.GetInst()));
     }
 #endif
-    return user_inst;
+    return userInst;
 }
 
-void RegAllocResolver::PropagateCallerMasks(SaveStateInst *save_state)
+void RegAllocResolver::PropagateCallerMasks(SaveStateInst *saveState)
 {
-    save_state->CreateRootsStackMask(GetGraph()->GetAllocator());
-    auto user = GetExplicitUser(GetFirstUserOrInst(save_state));
+    saveState->CreateRootsStackMask(GetGraph()->GetAllocator());
+    auto user = GetExplicitUser(GetFirstUserOrInst(saveState));
     // Get location of save state inputs at the save state user (note that at this point
     // all inputs will have the same location at all users (excluding ReturnInlined that should be skipped)).
-    FillSaveStateRootsMask(save_state, user, save_state);
-    for (auto caller_inst = save_state->GetCallerInst(); caller_inst != nullptr;
-         caller_inst = caller_inst->GetSaveState()->GetCallerInst()) {
-        auto caller_ss = caller_inst->GetSaveState();
-        FillSaveStateRootsMask(caller_ss, user, save_state);
+    FillSaveStateRootsMask(saveState, user, saveState);
+    for (auto callerInst = saveState->GetCallerInst(); callerInst != nullptr;
+         callerInst = callerInst->GetSaveState()->GetCallerInst()) {
+        auto callerSs = callerInst->GetSaveState();
+        FillSaveStateRootsMask(callerSs, user, saveState);
     }
 }
 
-void RegAllocResolver::FillSaveStateRootsMask(SaveStateInst *save_state, Inst *user, SaveStateInst *target_ss)
+void RegAllocResolver::FillSaveStateRootsMask(SaveStateInst *saveState, Inst *user, SaveStateInst *targetSs)
 {
-    auto dst_ln = liveness_->GetInstLifeIntervals(user)->GetBegin();
+    auto dstLn = liveness_->GetInstLifeIntervals(user)->GetBegin();
 
-    for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
-        auto input_inst = save_state->GetDataFlowInput(i);
-        if (!input_inst->IsMovableObject()) {
+    for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+        auto inputInst = saveState->GetDataFlowInput(i);
+        if (!inputInst->IsMovableObject()) {
             continue;
         }
-        auto input_interval = liveness_->GetInstLifeIntervals(input_inst);
-        auto sibling = input_interval->FindSiblingAt(dst_ln);
+        auto inputInterval = liveness_->GetInstLifeIntervals(inputInst);
+        auto sibling = inputInterval->FindSiblingAt(dstLn);
         ASSERT(sibling != nullptr);
-        bool is_split_cover;
+        bool isSplitCover;
         if (user->IsPropagateLiveness()) {
-            is_split_cover = sibling->SplitCover<true>(dst_ln);
+            isSplitCover = sibling->SplitCover<true>(dstLn);
         } else {
-            is_split_cover = sibling->SplitCover(dst_ln);
+            isSplitCover = sibling->SplitCover(dstLn);
         }
-        if (!is_split_cover) {
+        if (!isSplitCover) {
             continue;
         }
-        AddLocationToRoots(sibling->GetLocation(), target_ss, GetGraph());
+        AddLocationToRoots(sibling->GetLocation(), targetSs, GetGraph());
 #ifndef NDEBUG
-        for (auto &test_user : target_ss->GetUsers()) {
-            if (test_user.GetInst()->GetOpcode() == Opcode::ReturnInlined ||
-                test_user.GetInst()->GetId() == user->GetId()) {
+        for (auto &testUser : targetSs->GetUsers()) {
+            if (testUser.GetInst()->GetOpcode() == Opcode::ReturnInlined ||
+                testUser.GetInst()->GetId() == user->GetId()) {
                 continue;
             }
-            auto explicit_test_user = GetExplicitUser(test_user.GetInst());
-            auto udst_ln = liveness_->GetInstLifeIntervals(explicit_test_user)->GetBegin();
-            ASSERT(sibling->GetLocation() == input_interval->FindSiblingAt(udst_ln)->GetLocation());
+            auto explicitTestUser = GetExplicitUser(testUser.GetInst());
+            auto udstLn = liveness_->GetInstLifeIntervals(explicitTestUser)->GetBegin();
+            ASSERT(sibling->GetLocation() == inputInterval->FindSiblingAt(udstLn)->GetLocation());
         }
 #endif
     }
@@ -275,18 +275,18 @@ bool HasSameLocation(LifeIntervals *interval, LifeNumber pos1, LifeNumber pos2)
            sibling1->GetLocation() == sibling2->GetLocation();
 }
 
-bool SaveStateCopyRequired(Inst *inst, User *curr_user, User *prev_user, const LivenessAnalyzer *la)
+bool SaveStateCopyRequired(Inst *inst, User *currUser, User *prevUser, const LivenessAnalyzer *la)
 {
     ASSERT(inst->IsSaveState());
-    auto curr_user_ln = la->GetInstLifeIntervals(GetExplicitUser(curr_user->GetInst()))->GetBegin();
-    auto prev_user_ln = la->GetInstLifeIntervals(GetExplicitUser(prev_user->GetInst()))->GetBegin();
-    bool need_copy = false;
+    auto currUserLn = la->GetInstLifeIntervals(GetExplicitUser(currUser->GetInst()))->GetBegin();
+    auto prevUserLn = la->GetInstLifeIntervals(GetExplicitUser(prevUser->GetInst()))->GetBegin();
+    bool needCopy = false;
     // If current save state is part of inlined method then we have to check location for all
     // parent save states.
-    for (auto ss = static_cast<SaveStateInst *>(inst); ss != nullptr && !need_copy;) {
-        for (size_t input_idx = 0; input_idx < ss->GetInputsCount() && !need_copy; input_idx++) {
-            auto input_interval = la->GetInstLifeIntervals(ss->GetDataFlowInput(input_idx));
-            need_copy = !HasSameLocation(input_interval, curr_user_ln, prev_user_ln);
+    for (auto ss = static_cast<SaveStateInst *>(inst); ss != nullptr && !needCopy;) {
+        for (size_t inputIdx = 0; inputIdx < ss->GetInputsCount() && !needCopy; inputIdx++) {
+            auto inputInterval = la->GetInstLifeIntervals(ss->GetDataFlowInput(inputIdx));
+            needCopy = !HasSameLocation(inputInterval, currUserLn, prevUserLn);
         }
         auto caller = ss->GetCallerInst();
         if (caller == nullptr) {
@@ -295,7 +295,7 @@ bool SaveStateCopyRequired(Inst *inst, User *curr_user, User *prev_user, const L
             ss = caller->GetSaveState();
         }
     }
-    return need_copy;
+    return needCopy;
 }
 }  // namespace
 
@@ -306,43 +306,43 @@ void RegAllocResolver::ResolveSaveState(Inst *inst)
     }
     ASSERT(inst->IsSaveState());
 
-    bool handled_all_users = inst->HasSingleUser() || !inst->HasUsers();
-    while (!handled_all_users) {
-        size_t copy_users = 0;
-        auto user_it = inst->GetUsers().begin();
-        User *prev_user = &*user_it;
-        ++user_it;
-        bool need_copy = false;
+    bool handledAllUsers = inst->HasSingleUser() || !inst->HasUsers();
+    while (!handledAllUsers) {
+        size_t copyUsers = 0;
+        auto userIt = inst->GetUsers().begin();
+        User *prevUser = &*userIt;
+        ++userIt;
+        bool needCopy = false;
 
         // Find first user having different location for some of the save state inputs and use SaveState's
         // copy for all preceding users.
-        for (; user_it != inst->GetUsers().end() && !need_copy; ++user_it, copy_users++) {
-            auto &curr_user = *user_it;
+        for (; userIt != inst->GetUsers().end() && !needCopy; ++userIt, copyUsers++) {
+            auto &currUser = *userIt;
             // ReturnInline's SaveState is required only for SaveState's inputs life range propagation,
             // so it does not actually matter which interval will be actually used.
-            if (prev_user->GetInst()->GetOpcode() == Opcode::ReturnInlined) {
-                prev_user = &*user_it;
+            if (prevUser->GetInst()->GetOpcode() == Opcode::ReturnInlined) {
+                prevUser = &*userIt;
                 continue;
             }
-            if (curr_user.GetInst()->GetOpcode() == Opcode::ReturnInlined) {
+            if (currUser.GetInst()->GetOpcode() == Opcode::ReturnInlined) {
                 continue;
             }
-            need_copy = SaveStateCopyRequired(inst, &curr_user, prev_user, liveness_);
-            prev_user = &*user_it;
+            needCopy = SaveStateCopyRequired(inst, &currUser, prevUser, liveness_);
+            prevUser = &*userIt;
         }
-        if (need_copy) {
+        if (needCopy) {
             auto copy = CopySaveState(GetGraph(), static_cast<SaveStateInst *>(inst));
             // Replace original SaveState with the copy for first N users (N = `copy_users` ).
-            while (copy_users > 0) {
-                auto user_inst = inst->GetUsers().Front().GetInst();
-                user_inst->ReplaceInput(inst, copy);
-                copy_users--;
+            while (copyUsers > 0) {
+                auto userInst = inst->GetUsers().Front().GetInst();
+                userInst->ReplaceInput(inst, copy);
+                copyUsers--;
             }
             inst->GetBasicBlock()->InsertAfter(copy, inst);
             PropagateCallerMasks(copy);
-            handled_all_users = inst->HasSingleUser();
+            handledAllUsers = inst->HasSingleUser();
         } else {
-            handled_all_users = !(user_it != inst->GetUsers().end());
+            handledAllUsers = !(userIt != inst->GetUsers().end());
         }
     }
     // At this point inst either has single user or all its inputs have the same location at all users.
@@ -367,26 +367,26 @@ void RegAllocResolver::ResolveOutput(Inst *inst)
         return;
     }
 
-    auto inst_interval = liveness_->GetInstLifeIntervals(inst);
-    if (inst_interval->NoDest()) {
+    auto instInterval = liveness_->GetInstLifeIntervals(inst);
+    if (instInterval->NoDest()) {
         inst->SetDstReg(INVALID_REG);
         return;
     }
 
     if (inst->GetOpcode() == Opcode::Parameter) {
-        inst->CastToParameter()->GetLocationData().SetDst(inst_interval->GetLocation());
+        inst->CastToParameter()->GetLocationData().SetDst(instInterval->GetLocation());
     }
     // Process multi-output inst
-    size_t dst_mum = inst->GetSrcRegIndex();
+    size_t dstMum = inst->GetSrcRegIndex();
     if (IsPseudoUserOfMultiOutput(inst)) {
         inst = inst->GetInput(0).GetInst();
     }
     // Wrtie dst
-    auto reg_type = inst_interval->GetType();
-    if (inst_interval->HasReg()) {
-        auto reg = inst_interval->GetReg();
-        inst->SetDstReg(dst_mum, reg);
-        GetGraph()->SetRegUsage(reg, reg_type);
+    auto regType = instInterval->GetType();
+    if (instInterval->HasReg()) {
+        auto reg = instInterval->GetReg();
+        inst->SetDstReg(dstMum, reg);
+        GetGraph()->SetRegUsage(reg, regType);
     } else {
         ASSERT(inst->IsConst() || inst->IsPhi() || inst->IsParameter());
     }
@@ -410,9 +410,9 @@ bool RegAllocResolver::ResolveCatchPhis()
             if (inst->GetInputs().Empty()) {
                 return false;
             }
-            auto new_catch_phi = SqueezeCatchPhiInputs(inst->CastToCatchPhi());
-            if (new_catch_phi != nullptr) {
-                inst->ReplaceUsers(new_catch_phi);
+            auto newCatchPhi = SqueezeCatchPhiInputs(inst->CastToCatchPhi());
+            if (newCatchPhi != nullptr) {
+                inst->ReplaceUsers(newCatchPhi);
                 block->RemoveInst(inst);
             }
         }
@@ -429,40 +429,40 @@ bool RegAllocResolver::ResolveCatchPhis()
  *
  * Return nullptr if inputs count was not reduced.
  */
-Inst *RegAllocResolver::SqueezeCatchPhiInputs(CatchPhiInst *catch_phi)
+Inst *RegAllocResolver::SqueezeCatchPhiInputs(CatchPhiInst *catchPhi)
 {
-    bool inputs_are_identical = true;
-    auto first_input = catch_phi->GetInput(0).GetInst();
-    for (size_t i = 1; i < catch_phi->GetInputsCount(); ++i) {
-        if (catch_phi->GetInput(i).GetInst() != first_input) {
-            inputs_are_identical = false;
+    bool inputsAreIdentical = true;
+    auto firstInput = catchPhi->GetInput(0).GetInst();
+    for (size_t i = 1; i < catchPhi->GetInputsCount(); ++i) {
+        if (catchPhi->GetInput(i).GetInst() != firstInput) {
+            inputsAreIdentical = false;
             break;
         }
     }
-    if (inputs_are_identical) {
-        return first_input;
+    if (inputsAreIdentical) {
+        return firstInput;
     }
 
     // Create a new one and fill it with the necessary inputs
-    auto new_catch_phi = GetGraph()->CreateInstCatchPhi(catch_phi->GetType(), catch_phi->GetPc());
-    ASSERT(catch_phi->GetBasicBlock()->GetFirstInst()->IsCatchPhi());
-    catch_phi->GetBasicBlock()->PrependInst(new_catch_phi);
-    for (size_t i = 0; i < catch_phi->GetInputsCount(); i++) {
-        auto input_inst = catch_phi->GetInput(i).GetInst();
-        auto current_throwable_inst = catch_phi->GetThrowableInst(i);
-        ASSERT(GetGraph()->IsInstThrowable(current_throwable_inst));
+    auto newCatchPhi = GetGraph()->CreateInstCatchPhi(catchPhi->GetType(), catchPhi->GetPc());
+    ASSERT(catchPhi->GetBasicBlock()->GetFirstInst()->IsCatchPhi());
+    catchPhi->GetBasicBlock()->PrependInst(newCatchPhi);
+    for (size_t i = 0; i < catchPhi->GetInputsCount(); i++) {
+        auto inputInst = catchPhi->GetInput(i).GetInst();
+        auto currentThrowableInst = catchPhi->GetThrowableInst(i);
+        ASSERT(GetGraph()->IsInstThrowable(currentThrowableInst));
         bool skip = false;
-        for (size_t j = 0; j < new_catch_phi->GetInputsCount(); j++) {
-            auto saved_inst = new_catch_phi->GetInput(j).GetInst();
-            if (saved_inst != input_inst) {
+        for (size_t j = 0; j < newCatchPhi->GetInputsCount(); j++) {
+            auto savedInst = newCatchPhi->GetInput(j).GetInst();
+            if (savedInst != inputInst) {
                 continue;
             }
-            auto saved_throwable_inst = new_catch_phi->GetThrowableInst(j);
-            if (saved_throwable_inst->IsDominate(current_throwable_inst)) {
+            auto savedThrowableInst = newCatchPhi->GetThrowableInst(j);
+            if (savedThrowableInst->IsDominate(currentThrowableInst)) {
                 skip = true;
             }
-            if (current_throwable_inst->IsDominate(saved_throwable_inst)) {
-                new_catch_phi->ReplaceThrowableInst(saved_throwable_inst, current_throwable_inst);
+            if (currentThrowableInst->IsDominate(savedThrowableInst)) {
+                newCatchPhi->ReplaceThrowableInst(savedThrowableInst, currentThrowableInst);
                 skip = true;
             }
             if (skip) {
@@ -470,15 +470,15 @@ Inst *RegAllocResolver::SqueezeCatchPhiInputs(CatchPhiInst *catch_phi)
             }
         }
         if (!skip) {
-            new_catch_phi->AppendInput(input_inst);
-            new_catch_phi->AppendThrowableInst(current_throwable_inst);
+            newCatchPhi->AppendInput(inputInst);
+            newCatchPhi->AppendThrowableInst(currentThrowableInst);
         }
     }
-    if (new_catch_phi->GetInputsCount() == catch_phi->GetInputsCount()) {
-        new_catch_phi->GetBasicBlock()->RemoveInst(new_catch_phi);
+    if (newCatchPhi->GetInputsCount() == catchPhi->GetInputsCount()) {
+        newCatchPhi->GetBasicBlock()->RemoveInst(newCatchPhi);
         return nullptr;
     }
-    return new_catch_phi;
+    return newCatchPhi;
 }
 
 }  // namespace panda::compiler

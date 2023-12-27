@@ -21,116 +21,116 @@
 
 namespace panda::mem {
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_DYNAMIC>::HandleObject(GCMarkingStackType *objects_stack, const ObjectHeader *object,
-                                                       const BaseClass *base_cls)
+void GCMarker<Marker, LANG_TYPE_DYNAMIC>::HandleObject(GCMarkingStackType *objectsStack, const ObjectHeader *object,
+                                                       const BaseClass *baseCls)
 {
-    ASSERT(base_cls->IsDynamicClass());
-    auto *cls = static_cast<const HClass *>(base_cls);
+    ASSERT(baseCls->IsDynamicClass());
+    auto *cls = static_cast<const HClass *>(baseCls);
     // Handle dyn_class
-    ObjectHeader *dyn_class = cls->GetManagedObject();
-    if (AsMarker()->MarkIfNotMarked(dyn_class)) {
-        objects_stack->PushToStack(object, dyn_class);
+    ObjectHeader *dynClass = cls->GetManagedObject();
+    if (AsMarker()->MarkIfNotMarked(dynClass)) {
+        objectsStack->PushToStack(object, dynClass);
     }
     // mark object data
-    uint32_t obj_body_size = cls->GetObjectSize() - ObjectHeader::ObjectHeaderSize();
-    ASSERT(obj_body_size % TaggedValue::TaggedTypeSize() == 0);
-    uint32_t num_of_fields = obj_body_size / TaggedValue::TaggedTypeSize();
-    size_t start_addr = reinterpret_cast<uintptr_t>(object) + ObjectHeader::ObjectHeaderSize();
-    for (uint32_t i = 0; i < num_of_fields; i++) {
-        uint32_t field_offset = i * TaggedValue::TaggedTypeSize();
-        if (cls->IsNativeField(ObjectHeader::ObjectHeaderSize() + field_offset)) {
+    uint32_t objBodySize = cls->GetObjectSize() - ObjectHeader::ObjectHeaderSize();
+    ASSERT(objBodySize % TaggedValue::TaggedTypeSize() == 0);
+    uint32_t numOfFields = objBodySize / TaggedValue::TaggedTypeSize();
+    size_t startAddr = reinterpret_cast<uintptr_t>(object) + ObjectHeader::ObjectHeaderSize();
+    for (uint32_t i = 0; i < numOfFields; i++) {
+        uint32_t fieldOffset = i * TaggedValue::TaggedTypeSize();
+        if (cls->IsNativeField(ObjectHeader::ObjectHeaderSize() + fieldOffset)) {
             continue;
         }
-        auto *field_addr = reinterpret_cast<std::atomic<TaggedType> *>(start_addr + field_offset);
+        auto *fieldAddr = reinterpret_cast<std::atomic<TaggedType> *>(startAddr + fieldOffset);
         // Atomic with relaxed order reason: to correct read the value
-        TaggedValue tagged_value(field_addr->load(std::memory_order_relaxed));
-        if (!tagged_value.IsHeapObject()) {
+        TaggedValue taggedValue(fieldAddr->load(std::memory_order_relaxed));
+        if (!taggedValue.IsHeapObject()) {
             continue;
         }
 
-        ObjectHeader *object_header = tagged_value.GetHeapObject();
-        if (AsMarker()->MarkIfNotMarked(object_header)) {
-            objects_stack->PushToStack(object, object_header);
+        ObjectHeader *objectHeader = taggedValue.GetHeapObject();
+        if (AsMarker()->MarkIfNotMarked(objectHeader)) {
+            objectsStack->PushToStack(object, objectHeader);
         }
     }
 }
 
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_DYNAMIC>::HandleClass(GCMarkingStackType *objects_stack, const coretypes::DynClass *cls)
+void GCMarker<Marker, LANG_TYPE_DYNAMIC>::HandleClass(GCMarkingStackType *objectsStack, const coretypes::DynClass *cls)
 {
     // mark Hclass Data & Prototype
     HClass *klass = const_cast<coretypes::DynClass *>(cls)->GetHClass();
     // klass_size is sizeof DynClass include JSHClass, which is saved in root DynClass.
-    size_t klass_size = cls->ClassAddr<HClass>()->GetObjectSize();
+    size_t klassSize = cls->ClassAddr<HClass>()->GetObjectSize();
 
-    uintptr_t start_addr = reinterpret_cast<uintptr_t>(klass) + sizeof(HClass);
-    size_t body_size = klass_size - sizeof(coretypes::DynClass) - sizeof(HClass);
-    size_t num_of_fields = body_size / TaggedValue::TaggedTypeSize();
-    for (size_t i = 0; i < num_of_fields; i++) {
-        auto *addr = reinterpret_cast<std::atomic<TaggedType> *>(start_addr + i * TaggedValue::TaggedTypeSize());
+    uintptr_t startAddr = reinterpret_cast<uintptr_t>(klass) + sizeof(HClass);
+    size_t bodySize = klassSize - sizeof(coretypes::DynClass) - sizeof(HClass);
+    size_t numOfFields = bodySize / TaggedValue::TaggedTypeSize();
+    for (size_t i = 0; i < numOfFields; i++) {
+        auto *addr = reinterpret_cast<std::atomic<TaggedType> *>(startAddr + i * TaggedValue::TaggedTypeSize());
         // Atomic with relaxed order reason: to correct read the value
-        coretypes::TaggedValue tagged_value(addr->load(std::memory_order_relaxed));
-        if (!tagged_value.IsHeapObject()) {
+        coretypes::TaggedValue taggedValue(addr->load(std::memory_order_relaxed));
+        if (!taggedValue.IsHeapObject()) {
             continue;
         }
-        ObjectHeader *object_header = tagged_value.GetHeapObject();
-        if (AsMarker()->MarkIfNotMarked(object_header)) {
-            objects_stack->PushToStack(cls, object_header);
+        ObjectHeader *objectHeader = taggedValue.GetHeapObject();
+        if (AsMarker()->MarkIfNotMarked(objectHeader)) {
+            objectsStack->PushToStack(cls, objectHeader);
         }
     }
 }
 
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_DYNAMIC>::HandleArrayClass(GCMarkingStackType *objects_stack,
-                                                           const coretypes::Array *array_object,
+void GCMarker<Marker, LANG_TYPE_DYNAMIC>::HandleArrayClass(GCMarkingStackType *objectsStack,
+                                                           const coretypes::Array *arrayObject,
                                                            [[maybe_unused]] const BaseClass *cls)
 {
-    LOG(DEBUG, GC) << "Dyn Array object: " << GetDebugInfoAboutObject(array_object);
-    ArraySizeT array_length = array_object->GetLength();
+    LOG(DEBUG, GC) << "Dyn Array object: " << GetDebugInfoAboutObject(arrayObject);
+    ArraySizeT arrayLength = arrayObject->GetLength();
     ASSERT(cls->IsDynamicClass());
-    for (coretypes::ArraySizeT i = 0; i < array_length; i++) {
-        TaggedValue array_element(array_object->Get<TaggedType, true, true>(i));
-        if (!array_element.IsHeapObject()) {
+    for (coretypes::ArraySizeT i = 0; i < arrayLength; i++) {
+        TaggedValue arrayElement(arrayObject->Get<TaggedType, true, true>(i));
+        if (!arrayElement.IsHeapObject()) {
             continue;
         }
-        ObjectHeader *element_object = array_element.GetHeapObject();
-        if (AsMarker()->MarkIfNotMarked(element_object)) {
-            objects_stack->PushToStack(array_object, element_object);
+        ObjectHeader *elementObject = arrayElement.GetHeapObject();
+        if (AsMarker()->MarkIfNotMarked(elementObject)) {
+            objectsStack->PushToStack(arrayObject, elementObject);
         }
     }
 }
 
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_DYNAMIC>::MarkInstance(GCMarkingStackType *objects_stack, const ObjectHeader *object,
-                                                       const BaseClass *base_cls,
-                                                       const ReferenceCheckPredicateT &ref_pred)
+void GCMarker<Marker, LANG_TYPE_DYNAMIC>::MarkInstance(GCMarkingStackType *objectsStack, const ObjectHeader *object,
+                                                       const BaseClass *baseCls,
+                                                       const ReferenceCheckPredicateT &refPred)
 {
-    ASSERT(base_cls->IsDynamicClass());
-    if (GetGC()->IsReference(nullptr, object, ref_pred)) {
-        GetGC()->ProcessReference(objects_stack, nullptr, object, GC::EmptyReferenceProcessPredicate);
+    ASSERT(baseCls->IsDynamicClass());
+    if (GetGC()->IsReference(nullptr, object, refPred)) {
+        GetGC()->ProcessReference(objectsStack, nullptr, object, GC::EmptyReferenceProcessPredicate);
         return;
     }
-    MarkInstance(objects_stack, object, base_cls);
+    MarkInstance(objectsStack, object, baseCls);
 }
 
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_DYNAMIC>::MarkInstance(GCMarkingStackType *objects_stack, const ObjectHeader *object,
-                                                       const BaseClass *base_cls)
+void GCMarker<Marker, LANG_TYPE_DYNAMIC>::MarkInstance(GCMarkingStackType *objectsStack, const ObjectHeader *object,
+                                                       const BaseClass *baseCls)
 {
-    ASSERT(base_cls->IsDynamicClass());
-    auto *cls = static_cast<const HClass *>(base_cls);
+    ASSERT(baseCls->IsDynamicClass());
+    auto *cls = static_cast<const HClass *>(baseCls);
     // push to stack after marked, so just return here.
     if (cls->IsNativePointer() || cls->IsString()) {
         return;
     }
     if (cls->IsHClass()) {
-        auto dyn_class = static_cast<const panda::coretypes::DynClass *>(object);
-        HandleClass(objects_stack, dyn_class);
+        auto dynClass = static_cast<const panda::coretypes::DynClass *>(object);
+        HandleClass(objectsStack, dynClass);
     } else if (cls->IsArray()) {
-        auto *array_object = static_cast<const panda::coretypes::Array *>(object);
-        HandleArrayClass(objects_stack, array_object, cls);
+        auto *arrayObject = static_cast<const panda::coretypes::Array *>(object);
+        HandleArrayClass(objectsStack, arrayObject, cls);
     } else {
-        HandleObject(objects_stack, object, cls);
+        HandleObject(objectsStack, object, cls);
     }
 }
 }  // namespace panda::mem

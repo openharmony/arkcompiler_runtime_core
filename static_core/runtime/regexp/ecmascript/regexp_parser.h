@@ -72,45 +72,45 @@ public:
     }
 
     PANDA_PUBLIC_API void Parse();
-    void ParseDisjunction(bool is_backward);
-    void ParseAlternative(bool is_backward);
-    bool ParseAssertionCapture(int *capture_index, bool is_backward);
-    void ParseQuantifier(size_t atom_bc_start, int capture_start, int capture_end);
+    void ParseDisjunction(bool isBackward);
+    void ParseAlternative(bool isBackward);
+    bool ParseAssertionCapture(int *captureIndex, bool isBackward);
+    void ParseQuantifier(size_t atomBcStart, int captureStart, int captureEnd);
     int ParseDecimalDigits();
-    int ParseAtomEscape(bool is_backward);
+    int ParseAtomEscape(bool isBackward);
     int ParseCharacterEscape();
     bool ParseGroupSpecifier(const uint8_t **pp, PandaString &name);
-    int ParseCaptureCount(const char *group_name);
+    int ParseCaptureCount(const char *groupName);
     bool ParseClassRanges(RangeSet *result);
     void ParseNonemptyClassRangesNoDash(DynChunk *buffer);
     uint32_t ParseClassAtom(RangeSet *atom);
     int ParseClassEscape(RangeSet *atom);
-    void ParseError(const char *error_message);
-    void ParseUnicodePropertyValueCharacters(bool *is_value);
+    void ParseError(const char *errorMessage);
+    void ParseUnicodePropertyValueCharacters(bool *isValue);
     int FindGroupName(const PandaString &name);
     uint32_t ParseOctalLiteral();
     bool ParseHexEscape(int length, uint32_t *value);
-    bool ParseUnlimitedLengthHexNumber(uint32_t max_value, uint32_t *value);
+    bool ParseUnlimitedLengthHexNumber(uint32_t maxValue, uint32_t *value);
     bool ParseUnicodeEscape(uint32_t *value);
     bool ParserIntervalQuantifier(int *pmin, int *pmax);
     bool HasNamedCaptures();
-    int ParseEscape(const uint8_t **pp, int is_utf16);
+    int ParseEscape(const uint8_t **pp, int isUtf16);
     int RecountCaptures();
     int IsIdentFirst(uint32_t c);
 
     inline PandaVector<PandaString> GetGroupNames() const
     {
-        return new_group_names_;
+        return newGroupNames_;
     }
 
     inline size_t GetGroupNamesSize() const
     {
-        return group_names_.size_;
+        return groupNames_.size_;
     }
 
     inline bool IsError() const
     {
-        return is_error_;
+        return isError_;
     }
 
     inline uint8_t *GetOriginBuffer() const
@@ -125,8 +125,8 @@ public:
 
     inline PandaString GetErrorMsg() const
     {
-        if (is_error_) {
-            return PandaString(error_msg_);
+        if (isError_) {
+            return PandaString(errorMsg_);
         }
         return PandaString("");
     }
@@ -161,14 +161,14 @@ public:
         return (flags_ & FLAG_STICKY) != 0;
     }
 
-    inline static int Canonicalize(int c, bool is_unicode)
+    inline static int Canonicalize(int c, bool isUnicode)
     {
         if (c < TMP_BUF_SIZE) {  // NOLINTNEXTLINE(readability-magic-numbers)
             if (c >= 'a' && c <= 'z') {
                 c = c - 'a' + 'A';
             }
         } else {
-            if (is_unicode) {
+            if (isUnicode) {
                 c = u_toupper(static_cast<UChar32>(c));
             }
         }
@@ -184,7 +184,7 @@ private:
         pc_ = nullptr;
         end_ = nullptr;
         c0_ = KEY_EOF;
-        is_error_ = false;
+        isError_ = false;
     }
 
     void Advance()
@@ -216,7 +216,7 @@ private:
 
     void SetIsError()
     {
-        is_error_ = true;
+        isError_ = true;
     }
 
     void PrintF(const char *fmt, ...);
@@ -225,15 +225,15 @@ private:
     uint8_t *end_ {nullptr};
     uint32_t flags_ {0};
     uint32_t c0_ {KEY_EOF};
-    int capture_count_ {0};
-    int stack_count_ {0};
-    bool is_error_ {false};
-    char error_msg_[TMP_BUF_SIZE] = {0};  // NOLINT(modernize-avoid-c-arrays)
-    int has_named_captures_ = -1;
-    int total_capture_count_ = -1;
+    int captureCount_ {0};
+    int stackCount_ {0};
+    bool isError_ {false};
+    char errorMsg_[TMP_BUF_SIZE] = {0};  // NOLINT(modernize-avoid-c-arrays)
+    int hasNamedCaptures_ = -1;
+    int totalCaptureCount_ = -1;
     DynChunk buffer_ {};
-    DynChunk group_names_ {};
-    PandaVector<PandaString> new_group_names_ {};
+    DynChunk groupNames_ {};
+    PandaVector<PandaString> newGroupNames_ {};
 };
 }  // namespace panda
 #endif  // CORE_REGEXP_PARSER_H

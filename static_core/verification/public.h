@@ -30,7 +30,7 @@ namespace panda::verifier {
 using Config = struct Config;  // NOLINT(bugprone-forward-declaration-namespace)
 
 Config *NewConfig();
-bool LoadConfigFile(Config *config, std::string_view config_file_name);
+bool LoadConfigFile(Config *config, std::string_view configFileName);
 void DestroyConfig(Config *config);
 
 bool IsEnabled(Config const *config);
@@ -39,8 +39,8 @@ bool IsOnlyVerify(Config const *config);
 using Service = struct Service;
 
 Service *CreateService(Config const *config, panda::mem::InternalAllocatorPtr allocator, ClassLinker *linker,
-                       std::string const &cache_file_name);
-void DestroyService(Service *service, bool update_cache_file);
+                       std::string const &cacheFileName);
+void DestroyService(Service *service, bool updateCacheFile);
 
 Config const *GetServiceConfig(Service const *service);
 

@@ -27,7 +27,7 @@ namespace panda::llvmbackend::passes {
 ExpandAtomics::ExpandAtomics() = default;
 
 llvm::PreservedAnalyses ExpandAtomics::run(llvm::Function &function,
-                                           [[maybe_unused]] llvm::FunctionAnalysisManager &analysis_manager)
+                                           [[maybe_unused]] llvm::FunctionAnalysisManager &analysisManager)
 {
     bool changed = false;
 
@@ -36,9 +36,9 @@ llvm::PreservedAnalyses ExpandAtomics::run(llvm::Function &function,
     }
 
     // Cast 32-bit pointers to 0 address space to support atomic operations on X86
-    for (auto &basic_block : function) {
+    for (auto &basicBlock : function) {
         llvm::SmallVector<llvm::Instruction *> instructions;
-        for (auto &instruction : basic_block) {
+        for (auto &instruction : basicBlock) {
             if (instruction.isAtomic()) {
                 instructions.push_back(&instruction);
             }
@@ -53,36 +53,36 @@ llvm::PreservedAnalyses ExpandAtomics::run(llvm::Function &function,
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
 
-bool ExpandAtomics::InsertAddrSpaceCast(llvm::Instruction *atomic_instruction)
+bool ExpandAtomics::InsertAddrSpaceCast(llvm::Instruction *atomicInstruction)
 {
-    assert(atomic_instruction->isAtomic());
-    if (llvm::isa<llvm::FenceInst>(atomic_instruction)) {
+    assert(atomicInstruction->isAtomic());
+    if (llvm::isa<llvm::FenceInst>(atomicInstruction)) {
         // Fences do not have pointer operands
         return false;
     }
-    unsigned pointer_index = 0;
-    if (llvm::isa<llvm::StoreInst>(atomic_instruction)) {
-        pointer_index = 1U;
+    unsigned pointerIndex = 0;
+    if (llvm::isa<llvm::StoreInst>(atomicInstruction)) {
+        pointerIndex = 1U;
     }
-    auto pointer = atomic_instruction->getOperand(pointer_index);
+    auto pointer = atomicInstruction->getOperand(pointerIndex);
     assert(pointer->getType()->isPointerTy());
     if (pointer->getType()->getPointerAddressSpace() != LLVMArkInterface::GC_ADDR_SPACE) {
         return false;
     }
 
     LLVM_DEBUG(llvm::dbgs() << "Inserting addrspacecast for '");
-    LLVM_DEBUG(atomic_instruction->print(llvm::dbgs()));
+    LLVM_DEBUG(atomicInstruction->print(llvm::dbgs()));
     LLVM_DEBUG(llvm::dbgs() << "'\n");
 
     auto cast = llvm::CastInst::Create(llvm::CastInst::AddrSpaceCast, pointer,
-                                       llvm::PointerType::get(atomic_instruction->getContext(), 0));
-    cast->insertBefore(atomic_instruction);
-    atomic_instruction->setOperand(pointer_index, cast);
+                                       llvm::PointerType::get(atomicInstruction->getContext(), 0));
+    cast->insertBefore(atomicInstruction);
+    atomicInstruction->setOperand(pointerIndex, cast);
 
     LLVM_DEBUG(llvm::dbgs() << "Result: cast = '");
     LLVM_DEBUG(cast->print(llvm::dbgs()));
     LLVM_DEBUG(llvm::dbgs() << "', atomic_instruction = '");
-    LLVM_DEBUG(atomic_instruction->print(llvm::dbgs()));
+    LLVM_DEBUG(atomicInstruction->print(llvm::dbgs()));
     LLVM_DEBUG(llvm::dbgs() << "'\n");
     return true;
 }

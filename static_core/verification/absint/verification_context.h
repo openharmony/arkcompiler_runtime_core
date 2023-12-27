@@ -38,11 +38,11 @@ class VerificationContext {
 public:
     using Var = Variables::Var;
 
-    VerificationContext(TypeSystem *type_system, Job const *job, Type method_class_type)
-        : types_ {type_system},
+    VerificationContext(TypeSystem *typeSystem, Job const *job, Type methodClassType)
+        : types_ {typeSystem},
           job_ {job},
-          method_class_type_ {method_class_type},
-          exec_ctx_ {CflowInfo().GetAddrStart(), CflowInfo().GetAddrEnd(), type_system},
+          methodClassType_ {methodClassType},
+          execCtx_ {CflowInfo().GetAddrStart(), CflowInfo().GetAddrEnd(), typeSystem},
           plugin_ {plugin::GetLanguagePlugin(job->JobMethod()->GetClass()->GetSourceLang())}
     {
         Method const *method = job->JobMethod();
@@ -57,14 +57,13 @@ public:
                 ExecCtx().SetCheckPoint(pc);
             }
         }
-        method->EnumerateCatchBlocks([&](uint8_t const *try_start, uint8_t const *try_end,
-                                         panda_file::CodeDataAccessor::CatchBlock const &catch_block) {
-            auto catch_start =
-                reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(method->GetInstructions()) +
-                                                  static_cast<uintptr_t>(catch_block.GetHandlerPc()));
-            ExecCtx().SetCheckPoint(try_start);
-            ExecCtx().SetCheckPoint(try_end);
-            ExecCtx().SetCheckPoint(catch_start);
+        method->EnumerateCatchBlocks([&](uint8_t const *tryStart, uint8_t const *tryEnd,
+                                         panda_file::CodeDataAccessor::CatchBlock const &catchBlock) {
+            auto catchStart = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(method->GetInstructions()) +
+                                                                static_cast<uintptr_t>(catchBlock.GetHandlerPc()));
+            ExecCtx().SetCheckPoint(tryStart);
+            ExecCtx().SetCheckPoint(tryEnd);
+            ExecCtx().SetCheckPoint(catchStart);
             return true;
         });
     }
@@ -90,17 +89,17 @@ public:
 
     Type GetMethodClass() const
     {
-        return method_class_type_;
+        return methodClassType_;
     }
 
     ExecContext &ExecCtx()
     {
-        return exec_ctx_;
+        return execCtx_;
     }
 
     const ExecContext &ExecCtx() const
     {
-        return exec_ctx_;
+        return execCtx_;
     }
 
     TypeSystem *GetTypeSystem()
@@ -115,12 +114,12 @@ public:
 
     Type ReturnType() const
     {
-        return return_type_;
+        return returnType_;
     }
 
     void SetReturnType(Type const *type)
     {
-        return_type_ = *type;
+        returnType_ = *type;
     }
 
     plugin::Plugin const *GetPlugin()
@@ -131,9 +130,9 @@ public:
 private:
     TypeSystem *types_;
     Job const *job_;
-    Type return_type_;
-    Type method_class_type_;
-    ExecContext exec_ctx_;
+    Type returnType_;
+    Type methodClassType_;
+    ExecContext execCtx_;
     plugin::Plugin const *plugin_;
 };
 }  // namespace panda::verifier

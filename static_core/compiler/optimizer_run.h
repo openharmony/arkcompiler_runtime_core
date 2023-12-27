@@ -25,16 +25,16 @@ namespace panda::compiler {
 class Graph;
 
 template <TaskRunnerMode RUNNER_MODE>
-inline void RunOptimizations(CompilerTaskRunner<RUNNER_MODE> task_runner)
+inline void RunOptimizations(CompilerTaskRunner<RUNNER_MODE> taskRunner)
 {
-    auto &task_ctx = task_runner.GetContext();
-    auto pipeline = Pipeline::Create(task_ctx.GetGraph());
+    auto &taskCtx = taskRunner.GetContext();
+    auto pipeline = Pipeline::Create(taskCtx.GetGraph());
     if constexpr (RUNNER_MODE == BACKGROUND_MODE) {
-        task_ctx.SetPipeline(std::move(pipeline));
+        taskCtx.SetPipeline(std::move(pipeline));
     } else {
-        task_ctx.SetPipeline(pipeline.get());
+        taskCtx.SetPipeline(pipeline.get());
     }
-    Pipeline::Run<RUNNER_MODE>(std::move(task_runner));
+    Pipeline::Run<RUNNER_MODE>(std::move(taskRunner));
 }
 
 }  // namespace panda::compiler

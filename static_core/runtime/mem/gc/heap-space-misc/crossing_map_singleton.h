@@ -41,20 +41,19 @@ public:
         return instance_;
     }
 
-    static void AddObject(void *obj_addr, size_t obj_size);
-    static void RemoveObject(void *obj_addr, size_t obj_size, void *next_obj_addr, void *prev_obj_addr,
-                             size_t prev_obj_size);
-    static void *FindFirstObject(void *start_addr, void *end_addr);
+    static void AddObject(void *objAddr, size_t objSize);
+    static void RemoveObject(void *objAddr, size_t objSize, void *nextObjAddr, void *prevObjAddr, size_t prevObjSize);
+    static void *FindFirstObject(void *startAddr, void *endAddr);
 
-    static void InitializeCrossingMapForMemory(void *start_addr, size_t size);
-    static void RemoveCrossingMapForMemory(void *start_addr, size_t size);
+    static void InitializeCrossingMapForMemory(void *startAddr, size_t size);
+    static void RemoveCrossingMapForMemory(void *startAddr, size_t size);
 
     static bool Destroy();
 
     static size_t GetCrossingMapGranularity();
 
     // NOTE(dtrubenkov): move it to the more proper place
-    static void MarkCardsAsYoung(const MemRange &mem_range);
+    static void MarkCardsAsYoung(const MemRange &memRange);
 
 private:
     static CrossingMap *instance_;

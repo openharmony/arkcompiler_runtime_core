@@ -28,10 +28,10 @@ public:
     NO_COPY_SEMANTIC(TryCatchResolving);
     ~TryCatchResolving() override
     {
-        try_blocks_.clear();
-        throw_insts_.clear();
-        catch_blocks_.clear();
-        phi_insts_.clear();
+        tryBlocks_.clear();
+        throwInsts_.clear();
+        catchBlocks_.clear();
+        phiInsts_.clear();
         cphi2phi_.clear();
         catch2cphis_.clear();
     }
@@ -47,20 +47,20 @@ public:
 private:
     void CollectCandidates();
     BasicBlock *FindCatchBeginBlock(BasicBlock *bb);
-    void VisitTryInst(TryInst *try_inst);
+    void VisitTryInst(TryInst *tryInst);
     void ConnectThrowCatch();
-    void ConnectThrowCatchImpl(BasicBlock *catch_block, BasicBlock *throw_block, uint32_t catch_pc, Inst *new_obj,
+    void ConnectThrowCatchImpl(BasicBlock *catchBlock, BasicBlock *throwBlock, uint32_t catchPc, Inst *newObj,
                                Inst *thr0w);
-    void DeleteTryCatchEdges(BasicBlock *try_begin, BasicBlock *try_end);
-    void RemoveCatchPhis(BasicBlock *cphis_block, BasicBlock *catch_block, Inst *throw_inst, Inst *phi_inst);
-    void RemoveCatchPhisImpl(CatchPhiInst *catch_phi, BasicBlock *catch_block, Inst *throw_inst);
+    void DeleteTryCatchEdges(BasicBlock *tryBegin, BasicBlock *tryEnd);
+    void RemoveCatchPhis(BasicBlock *cphisBlock, BasicBlock *catchBlock, Inst *throwInst, Inst *phiInst);
+    void RemoveCatchPhisImpl(CatchPhiInst *catchPhi, BasicBlock *catchBlock, Inst *throwInst);
 
 private:
     Marker marker_ {UNDEF_MARKER};
-    ArenaVector<BasicBlock *> try_blocks_;
-    ArenaVector<Inst *> throw_insts_;
-    ArenaMap<uint32_t, BasicBlock *> catch_blocks_;
-    ArenaMap<uint32_t, PhiInst *> phi_insts_;
+    ArenaVector<BasicBlock *> tryBlocks_;
+    ArenaVector<Inst *> throwInsts_;
+    ArenaMap<uint32_t, BasicBlock *> catchBlocks_;
+    ArenaMap<uint32_t, PhiInst *> phiInsts_;
     ArenaMap<CatchPhiInst *, PhiInst *> cphi2phi_;
     ArenaMap<BasicBlock *, BasicBlock *> catch2cphis_;
 };

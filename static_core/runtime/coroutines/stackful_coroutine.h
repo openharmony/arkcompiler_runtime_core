@@ -38,7 +38,7 @@ public:
      * target architecture, then the initial stack pointer of the coroutine will be set to
      * (stack + stack_size_bytes)
      */
-    explicit StackfulCoroutineContext(uint8_t *stack, size_t stack_size_bytes);
+    explicit StackfulCoroutineContext(uint8_t *stack, size_t stackSizeBytes);
     ~StackfulCoroutineContext() override = default;
 
     /**
@@ -55,13 +55,13 @@ public:
 
     void CleanUp() override;
 
-    bool RetrieveStackInfo(void *&stack_addr, size_t &stack_size, size_t &guard_size) override;
+    bool RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize) override;
 
     /**
      * Suspends the execution context, sets its status to either Status::RUNNABLE or Status::BLOCKED, depending on the
      * suspend reason.
      */
-    void RequestSuspend(bool gets_blocked) override;
+    void RequestSuspend(bool getsBlocked) override;
     /// Resumes the suspended context, sets status to RUNNING.
     void RequestResume() override;
     /// Unblock the coroutine and set its status to Status::RUNNABLE
@@ -92,7 +92,7 @@ public:
     bool ExecuteOnThisContext(L *lambda, StackfulCoroutineContext *requester)
     {
         ASSERT(requester != nullptr);
-        return rpc_call_context_.Execute(lambda, &requester->context_, &context_);
+        return rpcCallContext_.Execute(lambda, &requester->context_, &context_);
     }
 
     /// assign this coroutine to a worker thread
@@ -108,7 +108,7 @@ public:
     }
 
 protected:
-    void SetStatus(Coroutine::Status new_status) override;
+    void SetStatus(Coroutine::Status newStatus) override;
 
 private:
     void ThreadProcImpl();
@@ -122,18 +122,18 @@ private:
         NO_MOVE_SEMANTIC(RemoteCall);
 
         template <class L>
-        bool Execute(L *lambda, fibers::FiberContext *requester_context_ptr, fibers::FiberContext *host_context_ptr)
+        bool Execute(L *lambda, fibers::FiberContext *requesterContextPtr, fibers::FiberContext *hostContextPtr)
         {
             ASSERT(Coroutine::GetCurrent()->GetVM()->GetThreadManager()->GetMainThread() !=
                    ManagedThread::GetCurrent());
 
-            call_in_progress_ = true;
-            requester_context_ptr_ = requester_context_ptr;
+            callInProgress_ = true;
+            requesterContextPtr_ = requesterContextPtr;
             lambda_ = lambda;
 
-            fibers::CopyContext(&guest_context_, host_context_ptr);
-            fibers::UpdateContextKeepStack(&guest_context_, RemoteCall::Proxy<L>, this);
-            fibers::SwitchContext(requester_context_ptr_, &guest_context_);
+            fibers::CopyContext(&guestContext_, hostContextPtr);
+            fibers::UpdateContextKeepStack(&guestContext_, RemoteCall::Proxy<L>, this);
+            fibers::SwitchContext(requesterContextPtr_, &guestContext_);
 
             return true;
         }
@@ -146,23 +146,23 @@ private:
         template <class L>
         static void Proxy(void *ctx)
         {
-            auto *this_instance = static_cast<RemoteCall *>(ctx);
-            ASSERT(this_instance->call_in_progress_);
+            auto *thisInstance = static_cast<RemoteCall *>(ctx);
+            ASSERT(thisInstance->callInProgress_);
 
-            (*static_cast<L *>(this_instance->lambda_))();
+            (*static_cast<L *>(thisInstance->lambda_))();
 
-            this_instance->call_in_progress_ = false;
-            fibers::SwitchContext(&this_instance->guest_context_, this_instance->requester_context_ptr_);
+            thisInstance->callInProgress_ = false;
+            fibers::SwitchContext(&thisInstance->guestContext_, thisInstance->requesterContextPtr_);
         }
 
-        bool call_in_progress_ = false;
-        fibers::FiberContext *requester_context_ptr_ = nullptr;
-        fibers::FiberContext guest_context_;
+        bool callInProgress_ = false;
+        fibers::FiberContext *requesterContextPtr_ = nullptr;
+        fibers::FiberContext guestContext_;
         void *lambda_ = nullptr;
-    } rpc_call_context_;
+    } rpcCallContext_;
 
     uint8_t *stack_ = nullptr;
-    size_t stack_size_bytes_ = 0;
+    size_t stackSizeBytes_ = 0;
     fibers::FiberContext context_;
     Coroutine::Status status_ {Coroutine::Status::CREATED};
     StackfulCoroutineWorker *worker_ = nullptr;

@@ -42,11 +42,11 @@ TEST_F(EtsInteropJsJSValue, jsvalue2double)
     constexpr double TEST_VALUE = 53.23;
 
     // Create napi_value from double
-    napi_value js_value;
-    ASSERT_EQ(napi_ok, napi_create_double(GetJsEnv(), TEST_VALUE, &js_value));
+    napi_value jsValue;
+    ASSERT_EQ(napi_ok, napi_create_double(GetJsEnv(), TEST_VALUE, &jsValue));
 
     // Call ets method
-    auto ret = CallEtsMethod<double>("jsvalue2double", js_value);
+    auto ret = CallEtsMethod<double>("jsvalue2double", jsValue);
 
     // Check result
     ASSERT_EQ(ret, TEST_VALUE);
@@ -61,14 +61,14 @@ TEST_F(EtsInteropJsJSValue, get_property_from_jsvalue)
     //  {
     //      .prop = 67.78
     //  }
-    napi_value js_obj;
-    napi_value js_value;
-    ASSERT_EQ(napi_ok, napi_create_object(env, &js_obj));
-    ASSERT_EQ(napi_ok, napi_create_double(env, TEST_VALUE, &js_value));
-    ASSERT_EQ(napi_ok, napi_set_named_property(env, js_obj, "prop", js_value));
+    napi_value jsObj;
+    napi_value jsValue;
+    ASSERT_EQ(napi_ok, napi_create_object(env, &jsObj));
+    ASSERT_EQ(napi_ok, napi_create_double(env, TEST_VALUE, &jsValue));
+    ASSERT_EQ(napi_ok, napi_set_named_property(env, jsObj, "prop", jsValue));
 
     // Call ets method
-    auto ret = CallEtsMethod<double>("get_property_from_jsvalue", js_obj);
+    auto ret = CallEtsMethod<double>("get_property_from_jsvalue", jsObj);
 
     // Check result
     ASSERT_EQ(ret, TEST_VALUE);
@@ -85,17 +85,17 @@ TEST_F(EtsInteropJsJSValue, get_property_from_jsvalue2)
     //          .prop_2 = 674.6
     //      }
     //  }
-    napi_value js_obj {};
-    napi_value js_prop_1 {};
-    napi_value js_prop_2 {};
-    ASSERT_EQ(napi_ok, napi_create_object(env, &js_obj));
-    ASSERT_EQ(napi_ok, napi_create_object(env, &js_prop_1));
-    ASSERT_EQ(napi_ok, napi_create_double(env, TEST_VALUE, &js_prop_2));
-    ASSERT_EQ(napi_ok, napi_set_named_property(env, js_obj, "prop_1", js_prop_1));
-    ASSERT_EQ(napi_ok, napi_set_named_property(env, js_prop_1, "prop_2", js_prop_2));
+    napi_value jsObj {};
+    napi_value jsProp1 {};
+    napi_value jsProp2 {};
+    ASSERT_EQ(napi_ok, napi_create_object(env, &jsObj));
+    ASSERT_EQ(napi_ok, napi_create_object(env, &jsProp1));
+    ASSERT_EQ(napi_ok, napi_create_double(env, TEST_VALUE, &jsProp2));
+    ASSERT_EQ(napi_ok, napi_set_named_property(env, jsObj, "prop_1", jsProp1));
+    ASSERT_EQ(napi_ok, napi_set_named_property(env, jsProp1, "prop_2", jsProp2));
 
     // Call ets method
-    auto ret = CallEtsMethod<double>("get_property_from_jsvalue2", js_obj);
+    auto ret = CallEtsMethod<double>("get_property_from_jsvalue2", jsObj);
 
     // Check result
     ASSERT_EQ(ret, TEST_VALUE);
@@ -109,21 +109,21 @@ TEST_F(EtsInteropJsJSValue, set_property_to_jsvalue)
     // Create js object:
     //  {
     //  }
-    napi_value js_obj {};
-    ASSERT_EQ(napi_ok, napi_create_object(env, &js_obj));
+    napi_value jsObj {};
+    ASSERT_EQ(napi_ok, napi_create_object(env, &jsObj));
 
     // Call ets method
-    auto ret = CallEtsMethod<napi_value>("set_property_to_jsvalue", js_obj, TEST_VALUE);
+    auto ret = CallEtsMethod<napi_value>("set_property_to_jsvalue", jsObj, TEST_VALUE);
     ASSERT_TRUE(ret.has_value());
 
     // Return js object:
     //  {
     //      .prop = 54.064
     //  }
-    napi_value js_prop {};
+    napi_value jsProp {};
     double val {};
-    ASSERT_EQ(napi_ok, napi_get_named_property(env, js_obj, "prop", &js_prop));
-    ASSERT_EQ(napi_ok, napi_get_value_double(env, js_prop, &val));
+    ASSERT_EQ(napi_ok, napi_get_named_property(env, jsObj, "prop", &jsProp));
+    ASSERT_EQ(napi_ok, napi_get_value_double(env, jsProp, &val));
 
     // Check result
     ASSERT_EQ(val, TEST_VALUE);

@@ -33,20 +33,20 @@ bool InlinePrepare::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *
     return options->inlining;
 }
 
-InlinePrepare InlinePrepare::Create([[maybe_unused]] LLVMArkInterface *ark_interface,
+InlinePrepare InlinePrepare::Create([[maybe_unused]] LLVMArkInterface *arkInterface,
                                     const panda::llvmbackend::LLVMCompilerOptions *options)
 {
     static constexpr int INLINING_THRESHOLD = 500;
-    auto inline_params = llvm::getInlineParams(INLINING_THRESHOLD);
-    inline_params.AllowRecursiveCall = options->recursive_inlining;
-    return InlinePrepare(inline_params);
+    auto inlineParams = llvm::getInlineParams(INLINING_THRESHOLD);
+    inlineParams.AllowRecursiveCall = options->recursiveInlining;
+    return InlinePrepare(inlineParams);
 }
 
-llvm::PreservedAnalyses InlinePrepare::run(llvm::Module &module, llvm::ModuleAnalysisManager &module_am)
+llvm::PreservedAnalyses InlinePrepare::run(llvm::Module &module, llvm::ModuleAnalysisManager &moduleAm)
 {
-    auto &advisor_result = module_am.getResult<llvm::InlineAdvisorAnalysis>(module);
-    if (!advisor_result.tryCreate(
-            inline_params_, llvm::InliningAdvisorMode::Default, {},
+    auto &advisorResult = moduleAm.getResult<llvm::InlineAdvisorAnalysis>(module);
+    if (!advisorResult.tryCreate(
+            inlineParams_, llvm::InliningAdvisorMode::Default, {},
             llvm::InlineContext {llvm::ThinOrFullLTOPhase::None, llvm::InlinePass::ModuleInliner})) {
         module.getContext().emitError("Could not setup Inlining Advisor for the requested mode and/or options");
     }
@@ -55,29 +55,29 @@ llvm::PreservedAnalyses InlinePrepare::run(llvm::Module &module, llvm::ModuleAna
 
 bool IrtocInlineChecker::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
 {
-    return options->do_irtoc_inline;
+    return options->doIrtocInline;
 }
 
-void IrtocInlineChecker::CheckShouldInline(llvm::CallBase *call_base)
+void IrtocInlineChecker::CheckShouldInline(llvm::CallBase *callBase)
 {
     using llvm::StringRef;
-    if (!call_base->hasFnAttr(llvm::Attribute::AlwaysInline)) {
+    if (!callBase->hasFnAttr(llvm::Attribute::AlwaysInline)) {
         return;
     }
-    auto caller = call_base->getCaller();
-    auto callee = call_base->getCalledFunction();
+    auto caller = callBase->getCaller();
+    auto callee = callBase->getCalledFunction();
     std::string msg = "Unknown reason";
-    if (call_base->hasFnAttr("inline-remark")) {
-        msg = call_base->getFnAttr("inline-remark").getValueAsString();
+    if (callBase->hasFnAttr("inline-remark")) {
+        msg = callBase->getFnAttr("inline-remark").getValueAsString();
     }
 
-    auto dem_caller_name = llvm::demangle(std::string(caller->getName()));
+    auto demCallerName = llvm::demangle(std::string(caller->getName()));
     if (callee == nullptr) {
         llvm::report_fatal_error(llvm::Twine("Can't inline with alwaysinline attr  'nullptr") + "' into '" +
-                                 dem_caller_name + " due to " + msg + "'");
+                                 demCallerName + " due to " + msg + "'");
         return;
     }
-    auto dem_callee_name = llvm::demangle(std::string(callee->getName()));
+    auto demCalleeName = llvm::demangle(std::string(callee->getName()));
 #ifdef __SANITIZE_THREAD__
     // The functions from EXCLUSIONS are come from panda runtime (array-inl.h and class.h)
     // These function are recursive (Thay are optimized by tail recursive in normal way
@@ -91,8 +91,8 @@ void IrtocInlineChecker::CheckShouldInline(llvm::CallBase *call_base)
                                  dem_caller_name + "' due to '" + msg + "'");
     }
 #else
-    llvm::report_fatal_error(llvm::Twine("Can't inline with alwaysinline attr '") + dem_callee_name + "' into '" +
-                             dem_caller_name + "' due to '" + msg + "'");
+    llvm::report_fatal_error(llvm::Twine("Can't inline with alwaysinline attr '") + demCalleeName + "' into '" +
+                             demCallerName + "' due to '" + msg + "'");
 #endif
 }
 
@@ -107,15 +107,15 @@ llvm::PreservedAnalyses IrtocInlineChecker::run(llvm::LazyCallGraph::SCC &compon
         }
 
         for (llvm::Instruction &inst : llvm::instructions(func)) {
-            auto *call_base = llvm::dyn_cast<llvm::CallBase>(&inst);
-            if (call_base == nullptr || llvm::isa<llvm::IntrinsicInst>(&inst)) {
+            auto *callBase = llvm::dyn_cast<llvm::CallBase>(&inst);
+            if (callBase == nullptr || llvm::isa<llvm::IntrinsicInst>(&inst)) {
                 continue;
             }
-            llvm::Function *callee = call_base->getCalledFunction();
+            llvm::Function *callee = callBase->getCalledFunction();
             if (callee == nullptr || callee->isDeclaration()) {
                 continue;
             }
-            CheckShouldInline(call_base);
+            CheckShouldInline(callBase);
         }
     }
 

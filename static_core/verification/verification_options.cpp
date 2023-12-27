@@ -28,17 +28,17 @@ namespace panda::verifier {
 
 void VerificationOptions::Initialize()
 {
-    debug.method_options = new (mem::AllocatorAdapter<MethodOptionsConfig>().allocate(1)) MethodOptionsConfig {};
-    ASSERT(debug.method_options != nullptr);
+    debug.methodOptions = new (mem::AllocatorAdapter<MethodOptionsConfig>().allocate(1)) MethodOptionsConfig {};
+    ASSERT(debug.methodOptions != nullptr);
 }
 
 void VerificationOptions::Destroy()
 {
-    if (debug.method_options != nullptr) {
-        debug.method_options->~MethodOptionsConfig();
-        mem::AllocatorAdapter<MethodOptionsConfig>().deallocate(debug.method_options, 1);
+    if (debug.methodOptions != nullptr) {
+        debug.methodOptions->~MethodOptionsConfig();
+        mem::AllocatorAdapter<MethodOptionsConfig>().deallocate(debug.methodOptions, 1);
     }
-    debug.method_options = nullptr;
+    debug.methodOptions = nullptr;
 }
 
 }  // namespace panda::verifier

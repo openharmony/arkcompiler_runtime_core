@@ -53,9 +53,9 @@ static void Write(const std::string &str, std::ostream &out)
 static size_t CalcHash(const std::vector<uintptr_t> &st)
 {
     size_t hash = 0;
-    std::hash<uintptr_t> addr_hash;
+    std::hash<uintptr_t> addrHash;
     for (uintptr_t addr : st) {
-        hash |= addr_hash(addr);
+        hash |= addrHash(addr);
     }
     return hash;
 }
@@ -81,21 +81,21 @@ void DetailAllocTracker::TrackAlloc(void *addr, size_t size, SpaceType space)
     if (addr == nullptr) {
         return;
     }
-    Stacktrace stacktrace = SkipStacktrace(++alloc_counter_) ? Stacktrace() : GetStacktrace();
+    Stacktrace stacktrace = SkipStacktrace(++allocCounter_) ? Stacktrace() : GetStacktrace();
     os::memory::LockHolder lock(mutex_);
 
-    uint32_t stacktrace_id = stacktraces_.size();
+    uint32_t stacktraceId = stacktraces_.size();
     if (stacktrace.size() > NUM_SKIP_FRAMES) {
         stacktraces_.emplace_back(stacktrace.begin() + NUM_SKIP_FRAMES, stacktrace.end());
     } else {
         stacktraces_.emplace_back(stacktrace);
     }
-    if (cur_arena_.size() < sizeof(AllocInfo)) {
+    if (curArena_.size() < sizeof(AllocInfo)) {
         AllocArena();
     }
-    auto info = new (cur_arena_.data()) AllocInfo(cur_id_++, size, static_cast<uint32_t>(space), stacktrace_id);
-    cur_arena_ = cur_arena_.SubSpan(sizeof(AllocInfo));
-    cur_allocs_.insert({addr, info});
+    auto info = new (curArena_.data()) AllocInfo(curId_++, size, static_cast<uint32_t>(space), stacktraceId);
+    curArena_ = curArena_.SubSpan(sizeof(AllocInfo));
+    curAllocs_.insert({addr, info});
 }
 
 void DetailAllocTracker::TrackFree(void *addr)
@@ -104,24 +104,24 @@ void DetailAllocTracker::TrackFree(void *addr)
         return;
     }
     os::memory::LockHolder lock(mutex_);
-    auto it = cur_allocs_.find(addr);
-    ASSERT(it != cur_allocs_.end());
+    auto it = curAllocs_.find(addr);
+    ASSERT(it != curAllocs_.end());
     AllocInfo *alloc = it->second;
-    cur_allocs_.erase(it);
-    if (cur_arena_.size() < sizeof(FreeInfo)) {
+    curAllocs_.erase(it);
+    if (curArena_.size() < sizeof(FreeInfo)) {
         AllocArena();
     }
-    new (cur_arena_.data()) FreeInfo(alloc->GetId());
-    cur_arena_ = cur_arena_.SubSpan(sizeof(FreeInfo));
+    new (curArena_.data()) FreeInfo(alloc->GetId());
+    curArena_ = curArena_.SubSpan(sizeof(FreeInfo));
 }
 
 void DetailAllocTracker::AllocArena()
 {
-    if (cur_arena_.size() >= ENTRY_HDR_SIZE) {
-        *reinterpret_cast<uint32_t *>(cur_arena_.data()) = 0;
+    if (curArena_.size() >= ENTRY_HDR_SIZE) {
+        *reinterpret_cast<uint32_t *>(curArena_.data()) = 0;
     }
     arenas_.emplace_back(new uint8_t[ARENA_SIZE]);
-    cur_arena_ = Span<uint8_t>(arenas_.back().get(), arenas_.back().get() + ARENA_SIZE);
+    curArena_ = Span<uint8_t>(arenas_.back().get(), arenas_.back().get() + ARENA_SIZE);
 }
 
 void DetailAllocTracker::Dump()
@@ -145,15 +145,15 @@ void DetailAllocTracker::Dump(std::ostream &out)
     Write(0, out);  // number of items, will be updated later
     Write(0, out);  // number of stacktraces, will be updated later
 
-    std::map<uint32_t, uint32_t> id_map;
-    uint32_t num_stacks = WriteStacks(out, &id_map);
+    std::map<uint32_t, uint32_t> idMap;
+    uint32_t numStacks = WriteStacks(out, &idMap);
 
     // Write end marker to the current arena
-    if (cur_arena_.size() >= ENTRY_HDR_SIZE) {
+    if (curArena_.size() >= ENTRY_HDR_SIZE) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        *reinterpret_cast<uint32_t *>(cur_arena_.data()) = 0;
+        *reinterpret_cast<uint32_t *>(curArena_.data()) = 0;
     }
-    uint32_t num_items = 0;
+    uint32_t numItems = 0;
     for (auto &arena : arenas_) {
         uint8_t *ptr = arena.get();
         size_t pos = 0;
@@ -168,7 +168,7 @@ void DetailAllocTracker::Dump(std::ostream &out)
                 Write(alloc->GetId(), out);
                 Write(alloc->GetSize(), out);
                 Write(alloc->GetSpace(), out);
-                Write(id_map[alloc->GetStacktraceId()], out);
+                Write(idMap[alloc->GetStacktraceId()], out);
                 pos += sizeof(AllocInfo);
             } else if (tag == FREE_TAG) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -179,13 +179,13 @@ void DetailAllocTracker::Dump(std::ostream &out)
             } else {
                 UNREACHABLE();
             }
-            ++num_items;
+            ++numItems;
         }
     }
 
     out.seekp(0);
-    Write(num_items, out);
-    Write(num_stacks, out);
+    Write(numItems, out);
+    Write(numStacks, out);
 }
 
 void DetailAllocTracker::DumpMemLeaks(std::ostream &out)
@@ -194,12 +194,12 @@ void DetailAllocTracker::DumpMemLeaks(std::ostream &out)
 
     os::memory::LockHolder lock(mutex_);
     size_t num = 0;
-    out << "found " << cur_allocs_.size() << " leaks\n";
-    for (auto &entry : cur_allocs_) {
+    out << "found " << curAllocs_.size() << " leaks\n";
+    for (auto &entry : curAllocs_) {
         out << "Allocation of " << entry.second->GetSize() << " is allocated at\n";
-        uint32_t stacktrace_id = entry.second->GetStacktraceId();
+        uint32_t stacktraceId = entry.second->GetStacktraceId();
         auto it = stacktraces_.begin();
-        std::advance(it, stacktrace_id);
+        std::advance(it, stacktraceId);
         PrintStack(*it, out);
         if (++num > MAX_ENTRIES_TO_REPORT) {
             break;
@@ -207,7 +207,7 @@ void DetailAllocTracker::DumpMemLeaks(std::ostream &out)
     }
 }
 
-uint32_t DetailAllocTracker::WriteStacks(std::ostream &out, std::map<uint32_t, uint32_t> *id_map)
+uint32_t DetailAllocTracker::WriteStacks(std::ostream &out, std::map<uint32_t, uint32_t> *idMap)
 {
     class Key {
     public:
@@ -240,25 +240,25 @@ uint32_t DetailAllocTracker::WriteStacks(std::ostream &out, std::map<uint32_t, u
         }
     };
 
-    std::unordered_map<Key, uint32_t, KeyHash> alloc_stacks;
-    uint32_t stacktrace_id = 0;
-    uint32_t deduplicated_id = 0;
+    std::unordered_map<Key, uint32_t, KeyHash> allocStacks;
+    uint32_t stacktraceId = 0;
+    uint32_t deduplicatedId = 0;
     for (Stacktrace &stacktrace : stacktraces_) {
         Key akey(&stacktrace);
-        auto res = alloc_stacks.insert({akey, deduplicated_id});
+        auto res = allocStacks.insert({akey, deduplicatedId});
         if (res.second) {
             std::stringstream str;
             PrintStack(stacktrace, str);
             Write(str.str(), out);
-            id_map->insert({stacktrace_id, deduplicated_id});
-            ++deduplicated_id;
+            idMap->insert({stacktraceId, deduplicatedId});
+            ++deduplicatedId;
         } else {
             uint32_t id = res.first->second;
-            id_map->insert({stacktrace_id, id});
+            idMap->insert({stacktraceId, id});
         }
-        ++stacktrace_id;
+        ++stacktraceId;
     }
-    return deduplicated_id;
+    return deduplicatedId;
 }
 
 }  // namespace panda

@@ -30,8 +30,8 @@ inline bool NeedSafePointAfterIntrinsic(RuntimeInterface::IntrinsicId intrinsic)
 #ifndef ONLY_NEEDSAFEPOINT
 template <bool IS_VIRTUAL>
 void InstBuilder::AddArgNullcheckIfNeeded([[maybe_unused]] RuntimeInterface::IntrinsicId intrinsic,
-                                          [[maybe_unused]] Inst *inst, [[maybe_unused]] Inst *save_state,
-                                          [[maybe_unused]] size_t bc_addr)
+                                          [[maybe_unused]] Inst *inst, [[maybe_unused]] Inst *saveState,
+                                          [[maybe_unused]] size_t bcAddr)
 {
 % if Compiler::intrinsics.any? {|intrinsic| !intrinsic.need_nullcheck.empty?}
     constexpr int ARG_OFFSET = IS_VIRTUAL ? 1 : 0;
@@ -42,9 +42,9 @@ void InstBuilder::AddArgNullcheckIfNeeded([[maybe_unused]] RuntimeInterface::Int
     case panda::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
 % intrinsic.need_nullcheck.each do |arg_num|
         {
-            auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr, inst->GetInput(ARG_OFFSET + <%= arg_num %>).GetInst(), save_state);
-            inst->SetInput(ARG_OFFSET + <%= arg_num %>, null_check);
-            AddInstruction(null_check);
+            auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, bcAddr, inst->GetInput(ARG_OFFSET + <%= arg_num %>).GetInst(), saveState);
+            inst->SetInput(ARG_OFFSET + <%= arg_num %>, nullCheck);
+            AddInstruction(nullCheck);
         }
 % end
         break;
@@ -74,20 +74,20 @@ inline bool IsVirtual([[maybe_unused]] RuntimeInterface::IntrinsicId intrinsic)
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildVirtualCallIntrinsic([[maybe_unused]] const BytecodeInstruction *bc_inst,
-                                            [[maybe_unused]] bool is_range, [[maybe_unused]] bool acc_read)
+void InstBuilder::BuildVirtualCallIntrinsic([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                            [[maybe_unused]] bool isRange, [[maybe_unused]] bool accRead)
 {
 % if Compiler::ext_intrinsic_spaces.any?
-    auto method_index = bc_inst->GetId(0).AsIndex();
-    auto method_id = GetRuntime()->ResolveMethodIndex(GetMethod(), method_index);
-    auto method = GetRuntime()->GetMethodById(GetMethod(), method_id);
-    auto intrinsic_id = GetRuntime()->GetIntrinsicId(method);
+    auto methodIndex = bcInst->GetId(0).AsIndex();
+    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
+    auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
+    auto intrinsicId = GetRuntime()->GetIntrinsicId(method);
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
-    switch (intrinsic_id) {
+    switch (intrinsicId) {
 #include "intrinsics_ir_build_virtual_call.inl"
         default: {
 % end
-            return BuildDefaultVirtualCallIntrinsic(bc_inst, is_range, acc_read);  // not supported case
+            return BuildDefaultVirtualCallIntrinsic(bcInst, isRange, accRead);  // not supported case
 % if Compiler::ext_intrinsic_spaces.any?
         }
     }

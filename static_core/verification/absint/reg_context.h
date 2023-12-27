@@ -48,25 +48,25 @@ public:
     bool UnionWith(RegContext const *rhs, TypeSystem *tsys)
     {
         bool updated = false;
-        auto lhs_it = regs_.begin();
-        auto rhs_it = rhs->regs_.begin();
-        while (lhs_it != regs_.end() && rhs_it != rhs->regs_.end()) {
-            if (!(*lhs_it).IsNone() && !(*rhs_it).IsNone()) {
-                auto before = *lhs_it;
-                auto result = AtvJoin(&*lhs_it, &*rhs_it, tsys);
+        auto lhsIt = regs_.begin();
+        auto rhsIt = rhs->regs_.begin();
+        while (lhsIt != regs_.end() && rhsIt != rhs->regs_.end()) {
+            if (!(*lhsIt).IsNone() && !(*rhsIt).IsNone()) {
+                auto before = *lhsIt;
+                auto result = AtvJoin(&*lhsIt, &*rhsIt, tsys);
                 updated |= (result.GetAbstractType() != before.GetAbstractType());
-                *lhs_it = result;
+                *lhsIt = result;
             } else {
-                updated |= !(*lhs_it).IsNone();
-                *lhs_it = AbstractTypedValue {};
+                updated |= !(*lhsIt).IsNone();
+                *lhsIt = AbstractTypedValue {};
             }
-            ++lhs_it;
-            ++rhs_it;
+            ++lhsIt;
+            ++rhsIt;
         }
-        while (lhs_it != regs_.end()) {
+        while (lhsIt != regs_.end()) {
             updated = true;
-            *lhs_it = AbstractTypedValue {};
-            ++lhs_it;
+            *lhsIt = AbstractTypedValue {};
+            ++lhsIt;
         }
         return updated;
     }
@@ -76,13 +76,13 @@ public:
             regs_[idx] = atv;
             return;
         }
-        auto old_atv = regs_[idx];
-        if (old_atv.IsNone()) {
+        auto oldAtv = regs_[idx];
+        if (oldAtv.IsNone()) {
             regs_[idx] = atv;
             return;
         }
-        const auto &old_origin = old_atv.GetOrigin();
-        if (!old_origin.IsValid()) {
+        const auto &oldOrigin = oldAtv.GetOrigin();
+        if (!oldOrigin.IsValid()) {
             regs_[idx] = atv;
             return;
         }
@@ -90,7 +90,7 @@ public:
         while (it != regs_.end()) {
             if (!(*it).IsNone()) {
                 const auto &origin = (*it).GetOrigin();
-                if (origin.IsValid() && origin == old_origin) {
+                if (origin.IsValid() && origin == oldOrigin) {
                     *it = atv;
                 }
             }
@@ -176,48 +176,48 @@ public:
     }
     bool WasConflictOnReg(int num) const
     {
-        return conflicting_regs_.count(num) > 0;
+        return conflictingRegs_.count(num) > 0;
     }
     void Clear()
     {
         regs_.clear();
-        conflicting_regs_.clear();
+        conflictingRegs_.clear();
     }
     void RemoveInconsistentRegs()
     {
         EnumerateAllRegs([this](int num, auto &atv) {
             if (!atv.IsConsistent()) {
-                conflicting_regs_.insert(num);
+                conflictingRegs_.insert(num);
                 atv = AbstractTypedValue {};
             } else {
-                conflicting_regs_.erase(num);
+                conflictingRegs_.erase(num);
             }
             return true;
         });
     }
     PandaString DumpRegs(TypeSystem const *tsys) const
     {
-        PandaString log_string {};
+        PandaString logString {};
         bool comma = false;
-        EnumerateAllRegs([&comma, &log_string, &tsys](int num, const auto &abs_type_val) {
+        EnumerateAllRegs([&comma, &logString, &tsys](int num, const auto &absTypeVal) {
             PandaString result {num == -1 ? "acc" : "v" + NumToStr(num)};
             result += " : ";
-            result += abs_type_val.ToString(tsys);
+            result += absTypeVal.ToString(tsys);
             if (comma) {
-                log_string += ", ";
+                logString += ", ";
             }
-            log_string += result;
+            logString += result;
             comma = true;
             return true;
         });
-        return log_string;
+        return logString;
     }
 
 private:
     ShiftedVector<1, AbstractTypedValue> regs_;
 
     // NOTE(vdyadov): After introducing sparse bit-vectors, change ConflictingRegs_ type.
-    PandaUnorderedSet<int> conflicting_regs_;
+    PandaUnorderedSet<int> conflictingRegs_;
 
     friend RegContext RcUnion(RegContext const *lhs, RegContext const *rhs, TypeSystem * /* tsys */);
 };
@@ -225,16 +225,16 @@ private:
 inline RegContext RcUnion(RegContext const *lhs, RegContext const *rhs, TypeSystem *tsys)
 {
     RegContext result(std::max(lhs->regs_.size(), rhs->regs_.size()));
-    auto result_it = result.regs_.begin();
-    auto lhs_it = lhs->regs_.begin();
-    auto rhs_it = rhs->regs_.begin();
-    while (lhs_it != lhs->regs_.end() && rhs_it != rhs->regs_.end()) {
-        if (!(*lhs_it).IsNone() && !(*rhs_it).IsNone()) {
-            *result_it = AtvJoin(&*lhs_it, &*rhs_it, tsys);
+    auto resultIt = result.regs_.begin();
+    auto lhsIt = lhs->regs_.begin();
+    auto rhsIt = rhs->regs_.begin();
+    while (lhsIt != lhs->regs_.end() && rhsIt != rhs->regs_.end()) {
+        if (!(*lhsIt).IsNone() && !(*rhsIt).IsNone()) {
+            *resultIt = AtvJoin(&*lhsIt, &*rhsIt, tsys);
         }
-        ++lhs_it;
-        ++rhs_it;
-        ++result_it;
+        ++lhsIt;
+        ++rhsIt;
+        ++resultIt;
     }
     return result;
 }

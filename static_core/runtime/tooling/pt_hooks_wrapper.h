@@ -34,138 +34,138 @@ public:
         hooks_.store(hooks, std::memory_order_release);
     }
 
-    void EnableGlobalHook(PtHookType hook_type)
+    void EnableGlobalHook(PtHookType hookType)
     {
-        global_hook_type_info_.Enable(hook_type);
+        globalHookTypeInfo_.Enable(hookType);
     }
 
-    void DisableGlobalHook(PtHookType hook_type)
+    void DisableGlobalHook(PtHookType hookType)
     {
-        global_hook_type_info_.Disable(hook_type);
+        globalHookTypeInfo_.Disable(hookType);
     }
 
     void EnableAllGlobalHook()
     {
-        global_hook_type_info_.EnableAll();
+        globalHookTypeInfo_.EnableAll();
     }
 
     void DisableAllGlobalHook()
     {
-        global_hook_type_info_.DisableAll();
+        globalHookTypeInfo_.DisableAll();
     }
 
     // Wrappers for hooks
     void Breakpoint(PtThread thread, Method *method, const PtLocation &location) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_BREAKPOINT)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_BREAKPOINT)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->Breakpoint(thread, method, location);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->Breakpoint(thread, method, location);
     }
 
-    void LoadModule(std::string_view panda_file) override
+    void LoadModule(std::string_view pandaFile) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_LOAD_MODULE)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_LOAD_MODULE)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->LoadModule(panda_file);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->LoadModule(pandaFile);
     }
 
     void Paused(PauseReason reason) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_PAUSED)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_PAUSED)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->Paused(reason);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->Paused(reason);
     }
 
-    void Exception(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *exception_object,
-                   Method *catch_method, const PtLocation &catch_location) override
+    void Exception(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *exceptionObject,
+                   Method *catchMethod, const PtLocation &catchLocation) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXCEPTION)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXCEPTION)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->Exception(thread, method, location, exception_object, catch_method, catch_location);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->Exception(thread, method, location, exceptionObject, catchMethod, catchLocation);
     }
 
     void ExceptionCatch(PtThread thread, Method *method, const PtLocation &location,
-                        ObjectHeader *exception_object) override
+                        ObjectHeader *exceptionObject) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXCEPTION_CATCH)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXCEPTION_CATCH)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ExceptionCatch(thread, method, location, exception_object);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ExceptionCatch(thread, method, location, exceptionObject);
     }
 
     void PropertyAccess(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *object,
                         PtProperty property) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_PROPERTY_ACCESS)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_PROPERTY_ACCESS)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->PropertyAccess(thread, method, location, object, property);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->PropertyAccess(thread, method, location, object, property);
     }
 
     void PropertyModification(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *object,
-                              PtProperty property, VRegValue new_value) override
+                              PtProperty property, VRegValue newValue) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_PROPERTY_MODIFICATION)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_PROPERTY_MODIFICATION)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->PropertyModification(thread, method, location, object, property, new_value);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->PropertyModification(thread, method, location, object, property, newValue);
     }
 
     void ConsoleCall(PtThread thread, ConsoleCallType type, uint64_t timestamp,
                      const PandaVector<TypedValue> &arguments) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_CONSOLE_CALL)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_CONSOLE_CALL)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ConsoleCall(thread, type, timestamp, arguments);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ConsoleCall(thread, type, timestamp, arguments);
     }
 
-    void FramePop(PtThread thread, Method *method, bool was_popped_by_exception) override
+    void FramePop(PtThread thread, Method *method, bool wasPoppedByException) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_FRAME_POP)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_FRAME_POP)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->FramePop(thread, method, was_popped_by_exception);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->FramePop(thread, method, wasPoppedByException);
     }
 
     void GarbageCollectionFinish() override
@@ -173,14 +173,14 @@ public:
         // NOTE(dtrubenkov): Add an assertion when 2125 issue is resolved
         // ASSERT(ManagedThread::GetCurrent() == nullptr)
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !GlobalHookIsEnabled(PtHookType::PT_HOOK_TYPE_GARBAGE_COLLECTION_FINISH)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !GlobalHookIsEnabled(PtHookType::PT_HOOK_TYPE_GARBAGE_COLLECTION_FINISH)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
         // Called in an unmanaged thread
-        loaded_hooks->GarbageCollectionFinish();
+        loadedHooks->GarbageCollectionFinish();
     }
 
     void GarbageCollectionStart() override
@@ -188,265 +188,265 @@ public:
         // NOTE(dtrubenkov): Add an assertion when 2125 issue is resolved
         // ASSERT(ManagedThread::GetCurrent() == nullptr)
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !GlobalHookIsEnabled(PtHookType::PT_HOOK_TYPE_GARBAGE_COLLECTION_START)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !GlobalHookIsEnabled(PtHookType::PT_HOOK_TYPE_GARBAGE_COLLECTION_START)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
         // Called in an unmanaged thread
-        loaded_hooks->GarbageCollectionStart();
+        loadedHooks->GarbageCollectionStart();
     }
 
     void MethodEntry(PtThread thread, Method *method) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_METHOD_ENTRY)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_METHOD_ENTRY)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->MethodEntry(thread, method);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->MethodEntry(thread, method);
     }
 
-    void MethodExit(PtThread thread, Method *method, bool was_popped_by_exception, VRegValue return_value) override
+    void MethodExit(PtThread thread, Method *method, bool wasPoppedByException, VRegValue returnValue) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_METHOD_EXIT)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_METHOD_EXIT)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->MethodExit(thread, method, was_popped_by_exception, return_value);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->MethodExit(thread, method, wasPoppedByException, returnValue);
     }
 
     void SingleStep(PtThread thread, Method *method, const PtLocation &location) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_SINGLE_STEP)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_SINGLE_STEP)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->SingleStep(thread, method, location);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->SingleStep(thread, method, location);
     }
 
     void ThreadStart(PtThread thread) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_THREAD_START)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_THREAD_START)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ThreadStart(thread);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ThreadStart(thread);
     }
 
     void ThreadEnd(PtThread thread) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_THREAD_END)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_THREAD_END)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ThreadEnd(thread);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ThreadEnd(thread);
     }
 
     void VmStart() override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_VM_START)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_VM_START)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->VmStart();
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->VmStart();
     }
 
     void VmInitialization(PtThread thread) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_VM_INITIALIZATION)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_VM_INITIALIZATION)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->VmInitialization(thread);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->VmInitialization(thread);
     }
 
     void VmDeath() override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_VM_DEATH)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_VM_DEATH)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
 #ifndef NDEBUG
         // Atomic with release order reason: data race with vmdeath_did_not_happen_
-        vmdeath_did_not_happen_.store(false, std::memory_order_release);
+        vmdeathDidNotHappen_.store(false, std::memory_order_release);
 #endif
-        loaded_hooks->VmDeath();
+        loadedHooks->VmDeath();
         SetHooks(nullptr);
     }
 
-    void ExceptionRevoked(ExceptionWrapper reason, ExceptionID exception_id) override
+    void ExceptionRevoked(ExceptionWrapper reason, ExceptionID exceptionId) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXCEPTION_REVOKED)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXCEPTION_REVOKED)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ExceptionRevoked(reason, exception_id);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ExceptionRevoked(reason, exceptionId);
     }
 
     void ExecutionContextCreated(ExecutionContextWrapper context) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXECUTION_CONTEXT_CREATEED)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXECUTION_CONTEXT_CREATEED)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ExecutionContextCreated(context);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ExecutionContextCreated(context);
     }
 
     void ExecutionContextDestroyed(ExecutionContextWrapper context) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXECUTION_CONTEXT_DESTROYED)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXECUTION_CONTEXT_DESTROYED)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ExecutionContextDestroyed(context);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ExecutionContextDestroyed(context);
     }
 
     void ExecutionContextsCleared() override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXECUTION_CONTEXTS_CLEARED)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_EXECUTION_CONTEXTS_CLEARED)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ExecutionContextsCleared();
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ExecutionContextsCleared();
     }
 
     void InspectRequested(PtObject object, PtObject hints) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_INSPECT_REQUESTED)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_INSPECT_REQUESTED)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->InspectRequested(object, hints);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->InspectRequested(object, hints);
     }
 
     void ClassLoad(PtThread thread, BaseClass *klass) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_CLASS_LOAD)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_CLASS_LOAD)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ClassLoad(thread, klass);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ClassLoad(thread, klass);
     }
 
     void ClassPrepare(PtThread thread, BaseClass *klass) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_CLASS_PREPARE)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_CLASS_PREPARE)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ClassPrepare(thread, klass);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ClassPrepare(thread, klass);
     }
 
     void MonitorWait(PtThread thread, ObjectHeader *object, int64_t timeout) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_MONITOR_WAIT)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_MONITOR_WAIT)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->MonitorWait(thread, object, timeout);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->MonitorWait(thread, object, timeout);
     }
 
-    void MonitorWaited(PtThread thread, ObjectHeader *object, bool timed_out) override
+    void MonitorWaited(PtThread thread, ObjectHeader *object, bool timedOut) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_MONITOR_WAITED)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_MONITOR_WAITED)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->MonitorWaited(thread, object, timed_out);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->MonitorWaited(thread, object, timedOut);
     }
 
     void MonitorContendedEnter(PtThread thread, ObjectHeader *object) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_MONITOR_CONTENDED_ENTER)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_MONITOR_CONTENDED_ENTER)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->MonitorContendedEnter(thread, object);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->MonitorContendedEnter(thread, object);
     }
 
     void MonitorContendedEntered(PtThread thread, ObjectHeader *object) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_MONITOR_CONTENDED_ENTERED)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_MONITOR_CONTENDED_ENTERED)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->MonitorContendedEntered(thread, object);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->MonitorContendedEntered(thread, object);
     }
 
     void ObjectAlloc(BaseClass *klass, ObjectHeader *object, PtThread thread, size_t size) override
     {
         // Atomic with acquire order reason: data race with hooks_
-        auto *loaded_hooks = hooks_.load(std::memory_order_acquire);
-        if (loaded_hooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_OBJECT_ALLOC)) {
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_OBJECT_ALLOC)) {
             return;
         }
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeath_did_not_happen_.load(std::memory_order_acquire));
-        loaded_hooks->ObjectAlloc(klass, object, thread, size);
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->ObjectAlloc(klass, object, thread, size);
     }
 
 private:
     bool GlobalHookIsEnabled(PtHookType type) const
     {
-        return global_hook_type_info_.IsEnabled(type);
+        return globalHookTypeInfo_.IsEnabled(type);
     }
 
     bool HookIsEnabled(PtHookType type) const
@@ -455,19 +455,19 @@ private:
             return true;
         }
 
-        ManagedThread *managed_thread = ManagedThread::GetCurrent();
-        ASSERT(managed_thread != nullptr);
+        ManagedThread *managedThread = ManagedThread::GetCurrent();
+        ASSERT(managedThread != nullptr);
 
         // Check local value
-        return managed_thread->GetPtThreadInfo()->GetHookTypeInfo().IsEnabled(type);
+        return managedThread->GetPtThreadInfo()->GetHookTypeInfo().IsEnabled(type);
     }
 
     std::atomic<PtHooks *> hooks_ {nullptr};
 
-    PtHookTypeInfo global_hook_type_info_ {true};
+    PtHookTypeInfo globalHookTypeInfo_ {true};
 
 #ifndef NDEBUG
-    std::atomic_bool vmdeath_did_not_happen_ {true};
+    std::atomic_bool vmdeathDidNotHappen_ {true};
 #endif
 };
 }  // namespace panda::tooling

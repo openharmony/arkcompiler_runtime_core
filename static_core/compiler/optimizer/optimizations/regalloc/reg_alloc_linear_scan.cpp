@@ -51,24 +51,24 @@ static void AddInterval(LifeIntervals *interval, InstructionsIntervals *dest)
 /// Use graph's registers masks and `MAX_NUM_STACK_SLOTS` stack slots
 RegAllocLinearScan::RegAllocLinearScan(Graph *graph)
     : RegAllocBase(graph),
-      working_intervals_(graph->GetLocalAllocator()),
-      regs_use_positions_(graph->GetLocalAllocator()->Adapter()),
-      general_intervals_(graph->GetLocalAllocator()),
-      vector_intervals_(graph->GetLocalAllocator()),
-      reg_map_(graph->GetLocalAllocator()),
-      remat_constants_(!graph->IsBytecodeOptimizer() && OPTIONS.IsCompilerRematConst())
+      workingIntervals_(graph->GetLocalAllocator()),
+      regsUsePositions_(graph->GetLocalAllocator()->Adapter()),
+      generalIntervals_(graph->GetLocalAllocator()),
+      vectorIntervals_(graph->GetLocalAllocator()),
+      regMap_(graph->GetLocalAllocator()),
+      rematConstants_(!graph->IsBytecodeOptimizer() && g_options.IsCompilerRematConst())
 {
 }
 
 /// Use dynamic general registers mask (without vector regs) and zero stack slots
 RegAllocLinearScan::RegAllocLinearScan(Graph *graph, [[maybe_unused]] EmptyRegMask mask)
     : RegAllocBase(graph, VIRTUAL_FRAME_SIZE),
-      working_intervals_(graph->GetLocalAllocator()),
-      regs_use_positions_(graph->GetLocalAllocator()->Adapter()),
-      general_intervals_(graph->GetLocalAllocator()),
-      vector_intervals_(graph->GetLocalAllocator()),
-      reg_map_(graph->GetLocalAllocator()),
-      remat_constants_(!graph->IsBytecodeOptimizer() && OPTIONS.IsCompilerRematConst())
+      workingIntervals_(graph->GetLocalAllocator()),
+      regsUsePositions_(graph->GetLocalAllocator()->Adapter()),
+      generalIntervals_(graph->GetLocalAllocator()),
+      vectorIntervals_(graph->GetLocalAllocator()),
+      regMap_(graph->GetLocalAllocator()),
+      rematConstants_(!graph->IsBytecodeOptimizer() && g_options.IsCompilerRematConst())
 {
 }
 
@@ -89,8 +89,8 @@ void RegAllocLinearScan::InitIntervals()
 
 void RegAllocLinearScan::PrepareInterval(LifeIntervals *interval)
 {
-    bool is_fp = DataType::IsFloatType(interval->GetType());
-    auto &intervals = is_fp ? GetIntervals<true>() : GetIntervals<false>();
+    bool isFp = DataType::IsFloatType(interval->GetType());
+    auto &intervals = isFp ? GetIntervals<true>() : GetIntervals<false>();
 
     if (interval->IsPhysical()) {
         ASSERT(intervals.fixed.size() > interval->GetReg());
@@ -119,8 +119,8 @@ void RegAllocLinearScan::PrepareInterval(LifeIntervals *interval)
 template <bool IS_FP>
 void RegAllocLinearScan::AssignLocations()
 {
-    auto &regular_intervals = GetIntervals<IS_FP>().regular;
-    if (regular_intervals.empty()) {
+    auto &regularIntervals = GetIntervals<IS_FP>().regular;
+    if (regularIntervals.empty()) {
         return;
     }
 
@@ -129,16 +129,16 @@ void RegAllocLinearScan::AssignLocations()
         GetGraph()->SetHasFloatRegs();
     }
 
-    working_intervals_.Clear();
+    workingIntervals_.Clear();
     auto arch = GetGraph()->GetArch();
     size_t priority = arch != Arch::NONE ? GetFirstCalleeReg(arch, IS_FP) : 0;
-    reg_map_.SetMask(GetLocationMask<IS_FP>(), priority);
-    regs_use_positions_.resize(reg_map_.GetAvailableRegsCount());
+    regMap_.SetMask(GetLocationMask<IS_FP>(), priority);
+    regsUsePositions_.resize(regMap_.GetAvailableRegsCount());
 
     AddFixedIntervalsToWorkingIntervals<IS_FP>();
     PreprocessPreassignedIntervals<IS_FP>();
-    while (!regular_intervals.empty() && success_) {
-        ExpireIntervals<IS_FP>(regular_intervals.front()->GetBegin());
+    while (!regularIntervals.empty() && success_) {
+        ExpireIntervals<IS_FP>(regularIntervals.front()->GetBegin());
         WalkIntervals<IS_FP>();
     }
     RemapRegistersIntervals();
@@ -151,39 +151,39 @@ void RegAllocLinearScan::PreprocessPreassignedIntervals()
         if (!interval->IsPreassigned() || interval->IsSplitSibling() || interval->GetReg() == ACC_REG_ID) {
             continue;
         }
-        interval->SetPreassignedReg(reg_map_.CodegenToRegallocReg(interval->GetReg()));
+        interval->SetPreassignedReg(regMap_.CodegenToRegallocReg(interval->GetReg()));
         COMPILER_LOG(DEBUG, REGALLOC) << "Preassigned interval " << interval->template ToString<true>();
     }
 }
 
 /// Free registers from expired intervals
 template <bool IS_FP>
-void RegAllocLinearScan::ExpireIntervals(LifeNumber current_position)
+void RegAllocLinearScan::ExpireIntervals(LifeNumber currentPosition)
 {
-    IterateIntervalsWithErasion(working_intervals_.active, [this, current_position](const auto &interval) {
-        if (!interval->HasReg() || interval->GetEnd() <= current_position) {
-            working_intervals_.handled.push_back(interval);
+    IterateIntervalsWithErasion(workingIntervals_.active, [this, currentPosition](const auto &interval) {
+        if (!interval->HasReg() || interval->GetEnd() <= currentPosition) {
+            workingIntervals_.handled.push_back(interval);
             return true;
         }
-        if (!interval->SplitCover(current_position)) {
-            AddInterval(interval, &working_intervals_.inactive);
-            return true;
-        }
-        return false;
-    });
-    IterateIntervalsWithErasion(working_intervals_.inactive, [this, current_position](const auto &interval) {
-        if (!interval->HasReg() || interval->GetEnd() <= current_position) {
-            working_intervals_.handled.push_back(interval);
-            return true;
-        }
-        if (interval->SplitCover(current_position)) {
-            AddInterval(interval, &working_intervals_.active);
+        if (!interval->SplitCover(currentPosition)) {
+            AddInterval(interval, &workingIntervals_.inactive);
             return true;
         }
         return false;
     });
-    IterateIntervalsWithErasion(working_intervals_.stack, [this, current_position](const auto &interval) {
-        if (interval->GetEnd() <= current_position) {
+    IterateIntervalsWithErasion(workingIntervals_.inactive, [this, currentPosition](const auto &interval) {
+        if (!interval->HasReg() || interval->GetEnd() <= currentPosition) {
+            workingIntervals_.handled.push_back(interval);
+            return true;
+        }
+        if (interval->SplitCover(currentPosition)) {
+            AddInterval(interval, &workingIntervals_.active);
+            return true;
+        }
+        return false;
+    });
+    IterateIntervalsWithErasion(workingIntervals_.stack, [this, currentPosition](const auto &interval) {
+        if (interval->GetEnd() <= currentPosition) {
             GetStackMask().Reset(interval->GetLocation().GetValue());
             return true;
         }
@@ -195,84 +195,84 @@ void RegAllocLinearScan::ExpireIntervals(LifeNumber current_position)
 template <bool IS_FP>
 void RegAllocLinearScan::WalkIntervals()
 {
-    auto current_interval = GetIntervals<IS_FP>().regular.front();
+    auto currentInterval = GetIntervals<IS_FP>().regular.front();
     GetIntervals<IS_FP>().regular.pop_front();
     COMPILER_LOG(DEBUG, REGALLOC) << "----------------";
-    COMPILER_LOG(DEBUG, REGALLOC) << "Process interval " << current_interval->template ToString<true>();
+    COMPILER_LOG(DEBUG, REGALLOC) << "Process interval " << currentInterval->template ToString<true>();
 
     // Parameter that was passed in the stack slot: split its interval before first use
-    if (current_interval->GetLocation().IsStackParameter()) {
-        ASSERT(current_interval->GetInst()->IsParameter());
+    if (currentInterval->GetLocation().IsStackParameter()) {
+        ASSERT(currentInterval->GetInst()->IsParameter());
         COMPILER_LOG(DEBUG, REGALLOC) << "Interval was defined in the stack parameter slot";
-        auto next_use = current_interval->GetNextUsage(current_interval->GetBegin() + 1U);
-        SplitBeforeUse<IS_FP>(current_interval, next_use);
+        auto nextUse = currentInterval->GetNextUsage(currentInterval->GetBegin() + 1U);
+        SplitBeforeUse<IS_FP>(currentInterval, nextUse);
         return;
     }
 
-    if (!current_interval->HasReg()) {
-        if (TryToAssignRegister<IS_FP>(current_interval)) {
+    if (!currentInterval->HasReg()) {
+        if (TryToAssignRegister<IS_FP>(currentInterval)) {
             COMPILER_LOG(DEBUG, REGALLOC)
-                << current_interval->GetLocation().ToString(GetGraph()->GetArch()) << " was assigned to the interval "
-                << current_interval->template ToString<true>();
+                << currentInterval->GetLocation().ToString(GetGraph()->GetArch()) << " was assigned to the interval "
+                << currentInterval->template ToString<true>();
         } else {
             COMPILER_LOG(ERROR, REGALLOC) << "There are no available registers";
             success_ = false;
             return;
         }
     } else {
-        ASSERT(current_interval->IsPreassigned());
+        ASSERT(currentInterval->IsPreassigned());
         COMPILER_LOG(DEBUG, REGALLOC) << "Interval has preassigned "
-                                      << current_interval->GetLocation().ToString(GetGraph()->GetArch());
-        if (!IsIntervalRegFree(current_interval, current_interval->GetReg())) {
-            SplitAndSpill<IS_FP>(&working_intervals_.active, current_interval);
-            SplitAndSpill<IS_FP>(&working_intervals_.inactive, current_interval);
+                                      << currentInterval->GetLocation().ToString(GetGraph()->GetArch());
+        if (!IsIntervalRegFree(currentInterval, currentInterval->GetReg())) {
+            SplitAndSpill<IS_FP>(&workingIntervals_.active, currentInterval);
+            SplitAndSpill<IS_FP>(&workingIntervals_.inactive, currentInterval);
         }
     }
-    HandleFixedIntervalIntersection<IS_FP>(current_interval);
-    AddInterval(current_interval, &working_intervals_.active);
+    HandleFixedIntervalIntersection<IS_FP>(currentInterval);
+    AddInterval(currentInterval, &workingIntervals_.active);
 }
 
 template <bool IS_FP>
-bool RegAllocLinearScan::TryToAssignRegister(LifeIntervals *current_interval)
+bool RegAllocLinearScan::TryToAssignRegister(LifeIntervals *currentInterval)
 {
-    auto reg = GetSuitableRegister(current_interval);
+    auto reg = GetSuitableRegister(currentInterval);
     if (reg != INVALID_REG) {
-        current_interval->SetReg(reg);
+        currentInterval->SetReg(reg);
         return true;
     }
 
     // Try to assign blocked register
-    auto [blocked_reg, next_blocked_use] = GetBlockedRegister(current_interval);
-    auto next_use = current_interval->GetNextUsage(current_interval->GetBegin());
+    auto [blocked_reg, next_blocked_use] = GetBlockedRegister(currentInterval);
+    auto nextUse = currentInterval->GetNextUsage(currentInterval->GetBegin());
 
     // Spill current interval if its first use later than use of blocked register
-    if (blocked_reg != INVALID_REG && next_blocked_use < next_use && !IsNonSpillableConstInterval(current_interval)) {
-        SplitBeforeUse<IS_FP>(current_interval, next_use);
-        AssignStackSlot(current_interval);
+    if (blocked_reg != INVALID_REG && next_blocked_use < nextUse && !IsNonSpillableConstInterval(currentInterval)) {
+        SplitBeforeUse<IS_FP>(currentInterval, nextUse);
+        AssignStackSlot(currentInterval);
         return true;
     }
 
     // Blocked register that will be used in the next position mustn't be reassigned
-    if (blocked_reg == INVALID_REG || next_blocked_use < current_interval->GetBegin() + LIFE_NUMBER_GAP) {
+    if (blocked_reg == INVALID_REG || next_blocked_use < currentInterval->GetBegin() + LIFE_NUMBER_GAP) {
         return false;
     }
 
-    current_interval->SetReg(blocked_reg);
-    SplitAndSpill<IS_FP>(&working_intervals_.active, current_interval);
-    SplitAndSpill<IS_FP>(&working_intervals_.inactive, current_interval);
+    currentInterval->SetReg(blocked_reg);
+    SplitAndSpill<IS_FP>(&workingIntervals_.active, currentInterval);
+    SplitAndSpill<IS_FP>(&workingIntervals_.inactive, currentInterval);
     return true;
 }
 
 template <bool IS_FP>
-void RegAllocLinearScan::SplitAndSpill(const InstructionsIntervals *intervals, const LifeIntervals *current_interval)
+void RegAllocLinearScan::SplitAndSpill(const InstructionsIntervals *intervals, const LifeIntervals *currentInterval)
 {
     for (auto interval : *intervals) {
-        if (interval->GetReg() != current_interval->GetReg() ||
-            interval->GetFirstIntersectionWith(current_interval) == INVALID_LIFE_NUMBER) {
+        if (interval->GetReg() != currentInterval->GetReg() ||
+            interval->GetFirstIntersectionWith(currentInterval) == INVALID_LIFE_NUMBER) {
             continue;
         }
         COMPILER_LOG(DEBUG, REGALLOC) << "Found active interval: " << interval->template ToString<true>();
-        SplitActiveInterval<IS_FP>(interval, current_interval->GetBegin());
+        SplitActiveInterval<IS_FP>(interval, currentInterval->GetBegin());
     }
 }
 
@@ -285,25 +285,25 @@ void RegAllocLinearScan::SplitAndSpill(const InstructionsIntervals *intervals, c
  * 'split_next' - added to the queue for future assignment;
  */
 template <bool IS_FP>
-void RegAllocLinearScan::SplitActiveInterval(LifeIntervals *interval, LifeNumber split_pos)
+void RegAllocLinearScan::SplitActiveInterval(LifeIntervals *interval, LifeNumber splitPos)
 {
-    BeforeConstantIntervalSpill(interval, split_pos);
-    auto prev_use_pos = interval->GetPrevUsage(split_pos);
-    auto next_use_pos = interval->GetNextUsage(split_pos + 1U);
-    COMPILER_LOG(DEBUG, REGALLOC) << "Prev use position: " << std::to_string(prev_use_pos)
-                                  << ", Next use position: " << std::to_string(next_use_pos);
+    BeforeConstantIntervalSpill(interval, splitPos);
+    auto prevUsePos = interval->GetPrevUsage(splitPos);
+    auto nextUsePos = interval->GetNextUsage(splitPos + 1U);
+    COMPILER_LOG(DEBUG, REGALLOC) << "Prev use position: " << std::to_string(prevUsePos)
+                                  << ", Next use position: " << std::to_string(nextUsePos);
     auto split = interval;
-    if (prev_use_pos == INVALID_LIFE_NUMBER) {
+    if (prevUsePos == INVALID_LIFE_NUMBER) {
         COMPILER_LOG(DEBUG, REGALLOC) << "Spill the whole interval " << interval->template ToString<true>();
         interval->ClearLocation();
     } else {
-        auto split_position = (split_pos % 2U == 1) ? split_pos : split_pos - 1;
+        auto splitPosition = (splitPos % 2U == 1) ? splitPos : splitPos - 1;
         COMPILER_LOG(DEBUG, REGALLOC) << "Split interval " << interval->template ToString<true>() << " at position "
-                                      << static_cast<int>(split_position);
+                                      << static_cast<int>(splitPosition);
 
-        split = interval->SplitAt(split_position, GetGraph()->GetAllocator());
+        split = interval->SplitAt(splitPosition, GetGraph()->GetAllocator());
     }
-    SplitBeforeUse<IS_FP>(split, next_use_pos);
+    SplitBeforeUse<IS_FP>(split, nextUsePos);
     AssignStackSlot(split);
 }
 
@@ -314,35 +314,35 @@ void RegAllocLinearScan::AddToQueue(LifeIntervals *interval)
     AddInterval(interval, &GetIntervals<IS_FP>().regular);
 }
 
-Register RegAllocLinearScan::GetSuitableRegister(const LifeIntervals *current_interval)
+Register RegAllocLinearScan::GetSuitableRegister(const LifeIntervals *currentInterval)
 {
-    if (!current_interval->HasInst()) {
-        return GetFreeRegister(current_interval);
+    if (!currentInterval->HasInst()) {
+        return GetFreeRegister(currentInterval);
     }
     // First of all, try to assign register using hint
-    auto &use_table = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetUseTable();
-    auto hint_reg = use_table.GetNextUseOnFixedLocation(current_interval->GetInst(), current_interval->GetBegin());
-    if (hint_reg != INVALID_REG) {
-        auto reg = reg_map_.CodegenToRegallocReg(hint_reg);
-        if (reg_map_.IsRegAvailable(reg, GetGraph()->GetArch()) && IsIntervalRegFree(current_interval, reg)) {
+    auto &useTable = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetUseTable();
+    auto hintReg = useTable.GetNextUseOnFixedLocation(currentInterval->GetInst(), currentInterval->GetBegin());
+    if (hintReg != INVALID_REG) {
+        auto reg = regMap_.CodegenToRegallocReg(hintReg);
+        if (regMap_.IsRegAvailable(reg, GetGraph()->GetArch()) && IsIntervalRegFree(currentInterval, reg)) {
             COMPILER_LOG(DEBUG, REGALLOC) << "Hint-register is available";
             return reg;
         }
     }
     // If hint doesn't exist or hint-register not available, try to assign any free register
-    return GetFreeRegister(current_interval);
+    return GetFreeRegister(currentInterval);
 }
 
-Register RegAllocLinearScan::GetFreeRegister(const LifeIntervals *current_interval)
+Register RegAllocLinearScan::GetFreeRegister(const LifeIntervals *currentInterval)
 {
-    std::fill(regs_use_positions_.begin(), regs_use_positions_.end(), MAX_LIFE_NUMBER);
+    std::fill(regsUsePositions_.begin(), regsUsePositions_.end(), MAX_LIFE_NUMBER);
 
-    auto set_fixed_usage = [this, &current_interval](const auto &interval, LifeNumber intersection) {
+    auto setFixedUsage = [this, &currentInterval](const auto &interval, LifeNumber intersection) {
         // If intersection is equal to the current_interval's begin
         // than it means that current_interval is a call and fixed interval's range was
         // created for it.
         // Do not disable fixed register for a call.
-        if (intersection == current_interval->GetBegin()) {
+        if (intersection == currentInterval->GetBegin()) {
             LiveRange range;
             [[maybe_unused]] bool succ = interval->FindRangeCoveringPosition(intersection, &range);
             ASSERT(succ);
@@ -350,47 +350,47 @@ Register RegAllocLinearScan::GetFreeRegister(const LifeIntervals *current_interv
                 return;
             }
         }
-        ASSERT(regs_use_positions_.size() > interval->GetReg());
-        regs_use_positions_[interval->GetReg()] = intersection;
+        ASSERT(regsUsePositions_.size() > interval->GetReg());
+        regsUsePositions_[interval->GetReg()] = intersection;
     };
-    auto set_inactive_usage = [this](const auto &interval, LifeNumber intersection) {
-        ASSERT(regs_use_positions_.size() > interval->GetReg());
-        auto &reg_use = regs_use_positions_[interval->GetReg()];
-        reg_use = std::min<size_t>(intersection, reg_use);
+    auto setInactiveUsage = [this](const auto &interval, LifeNumber intersection) {
+        ASSERT(regsUsePositions_.size() > interval->GetReg());
+        auto &regUse = regsUsePositions_[interval->GetReg()];
+        regUse = std::min<size_t>(intersection, regUse);
     };
 
-    EnumerateIntersectedIntervals(working_intervals_.fixed, current_interval, set_fixed_usage);
-    EnumerateIntersectedIntervals(working_intervals_.inactive, current_interval, set_inactive_usage);
-    EnumerateIntervals(working_intervals_.active, [this](const auto &interval) {
-        ASSERT(regs_use_positions_.size() > interval->GetReg());
-        regs_use_positions_[interval->GetReg()] = 0;
+    EnumerateIntersectedIntervals(workingIntervals_.fixed, currentInterval, setFixedUsage);
+    EnumerateIntersectedIntervals(workingIntervals_.inactive, currentInterval, setInactiveUsage);
+    EnumerateIntervals(workingIntervals_.active, [this](const auto &interval) {
+        ASSERT(regsUsePositions_.size() > interval->GetReg());
+        regsUsePositions_[interval->GetReg()] = 0;
     });
 
-    BlockOverlappedRegisters(current_interval);
-    BlockIndirectCallRegisters(current_interval);
+    BlockOverlappedRegisters(currentInterval);
+    BlockIndirectCallRegisters(currentInterval);
 
     // Select register with max position
-    auto it = std::max_element(regs_use_positions_.cbegin(), regs_use_positions_.cend());
+    auto it = std::max_element(regsUsePositions_.cbegin(), regsUsePositions_.cend());
     // Register is free if it's available for the whole interval
-    return (*it >= current_interval->GetEnd()) ? std::distance(regs_use_positions_.cbegin(), it) : INVALID_REG;
+    return (*it >= currentInterval->GetEnd()) ? std::distance(regsUsePositions_.cbegin(), it) : INVALID_REG;
 }
 
 // Return blocked register and its next use position
-std::pair<Register, LifeNumber> RegAllocLinearScan::GetBlockedRegister(const LifeIntervals *current_interval)
+std::pair<Register, LifeNumber> RegAllocLinearScan::GetBlockedRegister(const LifeIntervals *currentInterval)
 {
     // Using blocked registers is impossible in the `BytecodeOptimizer` mode
     if (GetGraph()->IsBytecodeOptimizer()) {
         return {INVALID_REG, INVALID_LIFE_NUMBER};
     }
 
-    std::fill(regs_use_positions_.begin(), regs_use_positions_.end(), MAX_LIFE_NUMBER);
+    std::fill(regsUsePositions_.begin(), regsUsePositions_.end(), MAX_LIFE_NUMBER);
 
-    auto set_fixed_usage = [this, current_interval](const auto &interval, LifeNumber intersection) {
+    auto setFixedUsage = [this, currentInterval](const auto &interval, LifeNumber intersection) {
         // If intersection is equal to the current_interval's begin
         // than it means that current_interval is a call and fixed interval's range was
         // created for it.
         // Do not disable fixed register for a call.
-        if (intersection == current_interval->GetBegin()) {
+        if (intersection == currentInterval->GetBegin()) {
             LiveRange range;
             [[maybe_unused]] bool succ = interval->FindRangeCoveringPosition(intersection, &range);
             ASSERT(succ);
@@ -398,51 +398,51 @@ std::pair<Register, LifeNumber> RegAllocLinearScan::GetBlockedRegister(const Lif
                 return;
             }
         }
-        ASSERT(regs_use_positions_.size() > interval->GetReg());
-        regs_use_positions_[interval->GetReg()] = intersection;
+        ASSERT(regsUsePositions_.size() > interval->GetReg());
+        regsUsePositions_[interval->GetReg()] = intersection;
     };
-    auto set_inactive_usage = [this](const auto &interval, LifeNumber intersection) {
-        ASSERT(regs_use_positions_.size() > interval->GetReg());
-        auto &reg_use = regs_use_positions_[interval->GetReg()];
-        reg_use = std::min<size_t>(interval->GetNextUsage(intersection), reg_use);
+    auto setInactiveUsage = [this](const auto &interval, LifeNumber intersection) {
+        ASSERT(regsUsePositions_.size() > interval->GetReg());
+        auto &regUse = regsUsePositions_[interval->GetReg()];
+        regUse = std::min<size_t>(interval->GetNextUsage(intersection), regUse);
     };
 
-    EnumerateIntersectedIntervals(working_intervals_.fixed, current_interval, set_fixed_usage);
-    EnumerateIntersectedIntervals(working_intervals_.inactive, current_interval, set_inactive_usage);
-    EnumerateIntervals(working_intervals_.active, [this, &current_interval](const auto &interval) {
-        ASSERT(regs_use_positions_.size() > interval->GetReg());
-        auto &reg_use = regs_use_positions_[interval->GetReg()];
-        reg_use = std::min<size_t>(interval->GetNextUsage(current_interval->GetBegin()), reg_use);
+    EnumerateIntersectedIntervals(workingIntervals_.fixed, currentInterval, setFixedUsage);
+    EnumerateIntersectedIntervals(workingIntervals_.inactive, currentInterval, setInactiveUsage);
+    EnumerateIntervals(workingIntervals_.active, [this, &currentInterval](const auto &interval) {
+        ASSERT(regsUsePositions_.size() > interval->GetReg());
+        auto &regUse = regsUsePositions_[interval->GetReg()];
+        regUse = std::min<size_t>(interval->GetNextUsage(currentInterval->GetBegin()), regUse);
     });
 
-    BlockOverlappedRegisters(current_interval);
-    BlockIndirectCallRegisters(current_interval);
+    BlockOverlappedRegisters(currentInterval);
+    BlockIndirectCallRegisters(currentInterval);
 
     // Select register with max position
-    auto it = std::max_element(regs_use_positions_.cbegin(), regs_use_positions_.cend());
-    auto reg = std::distance(regs_use_positions_.cbegin(), it);
+    auto it = std::max_element(regsUsePositions_.cbegin(), regsUsePositions_.cend());
+    auto reg = std::distance(regsUsePositions_.cbegin(), it);
     COMPILER_LOG(DEBUG, REGALLOC) << "Selected blocked r" << static_cast<int>(reg) << " with use next use position "
                                   << *it;
-    return {reg, regs_use_positions_[reg]};
+    return {reg, regsUsePositions_[reg]};
 }
 
-bool RegAllocLinearScan::IsIntervalRegFree(const LifeIntervals *current_interval, Register reg) const
+bool RegAllocLinearScan::IsIntervalRegFree(const LifeIntervals *currentInterval, Register reg) const
 {
-    for (auto interval : working_intervals_.fixed) {
+    for (auto interval : workingIntervals_.fixed) {
         if (interval == nullptr || interval->GetReg() != reg) {
             continue;
         }
-        if (interval->GetFirstIntersectionWith(current_interval) < current_interval->GetBegin() + LIFE_NUMBER_GAP) {
+        if (interval->GetFirstIntersectionWith(currentInterval) < currentInterval->GetBegin() + LIFE_NUMBER_GAP) {
             return false;
         }
     }
 
-    for (auto interval : working_intervals_.inactive) {
-        if (interval->GetReg() == reg && interval->GetFirstIntersectionWith(current_interval) != INVALID_LIFE_NUMBER) {
+    for (auto interval : workingIntervals_.inactive) {
+        if (interval->GetReg() == reg && interval->GetFirstIntersectionWith(currentInterval) != INVALID_LIFE_NUMBER) {
             return false;
         }
     }
-    for (auto interval : working_intervals_.active) {
+    for (auto interval : workingIntervals_.active) {
         if (interval->GetReg() == reg) {
             return false;
         }
@@ -454,10 +454,10 @@ void RegAllocLinearScan::AssignStackSlot(LifeIntervals *interval)
 {
     ASSERT(!interval->GetLocation().IsStack());
     ASSERT(interval->HasInst());
-    if (remat_constants_ && interval->GetInst()->IsConst()) {
-        auto imm_slot = GetGraph()->AddSpilledConstant(interval->GetInst()->CastToConstant());
-        if (imm_slot != INVALID_IMM_TABLE_SLOT) {
-            interval->SetLocation(Location::MakeConstant(imm_slot));
+    if (rematConstants_ && interval->GetInst()->IsConst()) {
+        auto immSlot = GetGraph()->AddSpilledConstant(interval->GetInst()->CastToConstant());
+        if (immSlot != INVALID_IMM_TABLE_SLOT) {
+            interval->SetLocation(Location::MakeConstant(immSlot));
             COMPILER_LOG(DEBUG, REGALLOC) << interval->GetLocation().ToString(GetGraph()->GetArch())
                                           << " was assigned to the interval " << interval->template ToString<true>();
             return;
@@ -469,7 +469,7 @@ void RegAllocLinearScan::AssignStackSlot(LifeIntervals *interval)
         interval->SetLocation(Location::MakeStackSlot(slot));
         COMPILER_LOG(DEBUG, REGALLOC) << interval->GetLocation().ToString(GetGraph()->GetArch())
                                       << " was assigned to the interval " << interval->template ToString<true>();
-        working_intervals_.stack.push_back(interval);
+        workingIntervals_.stack.push_back(interval);
     } else {
         COMPILER_LOG(ERROR, REGALLOC) << "There are no available stack slots";
         success_ = false;
@@ -480,22 +480,22 @@ void RegAllocLinearScan::RemapRegallocReg(LifeIntervals *interval)
 {
     if (interval->HasReg()) {
         auto reg = interval->GetReg();
-        interval->SetReg(reg_map_.RegallocToCodegenReg(reg));
+        interval->SetReg(regMap_.RegallocToCodegenReg(reg));
     }
 }
 
 void RegAllocLinearScan::RemapRegistersIntervals()
 {
-    for (auto interval : working_intervals_.handled) {
+    for (auto interval : workingIntervals_.handled) {
         RemapRegallocReg(interval);
     }
-    for (auto interval : working_intervals_.active) {
+    for (auto interval : workingIntervals_.active) {
         RemapRegallocReg(interval);
     }
-    for (auto interval : working_intervals_.inactive) {
+    for (auto interval : workingIntervals_.inactive) {
         RemapRegallocReg(interval);
     }
-    for (auto interval : working_intervals_.fixed) {
+    for (auto interval : workingIntervals_.fixed) {
         if (interval != nullptr) {
             RemapRegallocReg(interval);
         }
@@ -505,96 +505,96 @@ void RegAllocLinearScan::RemapRegistersIntervals()
 template <bool IS_FP>
 void RegAllocLinearScan::AddFixedIntervalsToWorkingIntervals()
 {
-    working_intervals_.fixed.resize(GetLocationMask<IS_FP>().GetSize());
+    workingIntervals_.fixed.resize(GetLocationMask<IS_FP>().GetSize());
     // remap registers for fixed intervals and add it to working intervals
-    for (auto fixed_interval : GetIntervals<IS_FP>().fixed) {
-        if (fixed_interval == nullptr) {
+    for (auto fixedInterval : GetIntervals<IS_FP>().fixed) {
+        if (fixedInterval == nullptr) {
             continue;
         }
-        auto reg = reg_map_.CodegenToRegallocReg(fixed_interval->GetReg());
-        fixed_interval->SetReg(reg);
-        working_intervals_.fixed[reg] = fixed_interval;
-        COMPILER_LOG(DEBUG, REGALLOC) << "Fixed interval for r" << static_cast<int>(fixed_interval->GetReg()) << ": "
-                                      << fixed_interval->template ToString<true>();
+        auto reg = regMap_.CodegenToRegallocReg(fixedInterval->GetReg());
+        fixedInterval->SetReg(reg);
+        workingIntervals_.fixed[reg] = fixedInterval;
+        COMPILER_LOG(DEBUG, REGALLOC) << "Fixed interval for r" << static_cast<int>(fixedInterval->GetReg()) << ": "
+                                      << fixedInterval->template ToString<true>();
     }
 }
 
 template <bool IS_FP>
-void RegAllocLinearScan::HandleFixedIntervalIntersection(LifeIntervals *current_interval)
+void RegAllocLinearScan::HandleFixedIntervalIntersection(LifeIntervals *currentInterval)
 {
-    if (!current_interval->HasReg()) {
+    if (!currentInterval->HasReg()) {
         return;
     }
-    auto reg = current_interval->GetReg();
-    if (reg >= working_intervals_.fixed.size() || working_intervals_.fixed[reg] == nullptr) {
+    auto reg = currentInterval->GetReg();
+    if (reg >= workingIntervals_.fixed.size() || workingIntervals_.fixed[reg] == nullptr) {
         return;
     }
-    auto fixed_interval = working_intervals_.fixed[reg];
-    auto intersection = current_interval->GetFirstIntersectionWith(fixed_interval);
-    if (intersection == current_interval->GetBegin()) {
+    auto fixedInterval = workingIntervals_.fixed[reg];
+    auto intersection = currentInterval->GetFirstIntersectionWith(fixedInterval);
+    if (intersection == currentInterval->GetBegin()) {
         // Current interval can intersect fixed interval at the beginning of its live range
         // only if it's a call and fixed interval's range was created for it.
         // Try to find first intersection excluding the range blocking registers during a call.
-        intersection = current_interval->GetFirstIntersectionWith(fixed_interval, intersection + 1U);
+        intersection = currentInterval->GetFirstIntersectionWith(fixedInterval, intersection + 1U);
     }
     if (intersection == INVALID_LIFE_NUMBER) {
         return;
     }
     COMPILER_LOG(DEBUG, REGALLOC) << "Intersection with fixed interval at: " << std::to_string(intersection);
 
-    auto &use_table = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetUseTable();
-    if (use_table.HasUseOnFixedLocation(current_interval->GetInst(), intersection)) {
+    auto &useTable = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetUseTable();
+    if (useTable.HasUseOnFixedLocation(currentInterval->GetInst(), intersection)) {
         // Instruction is used at intersection position: split before that use
-        SplitBeforeUse<IS_FP>(current_interval, intersection);
+        SplitBeforeUse<IS_FP>(currentInterval, intersection);
         return;
     }
 
-    BeforeConstantIntervalSpill(current_interval, intersection);
-    auto last_use_before = current_interval->GetLastUsageBefore(intersection);
-    if (last_use_before != INVALID_LIFE_NUMBER) {
+    BeforeConstantIntervalSpill(currentInterval, intersection);
+    auto lastUseBefore = currentInterval->GetLastUsageBefore(intersection);
+    if (lastUseBefore != INVALID_LIFE_NUMBER) {
         // Split after the last use before intersection
-        SplitBeforeUse<IS_FP>(current_interval, last_use_before + LIFE_NUMBER_GAP);
+        SplitBeforeUse<IS_FP>(currentInterval, lastUseBefore + LIFE_NUMBER_GAP);
         return;
     }
 
     // There is no use before intersection, split after intersection add splitted-interval to the queue
-    auto next_use = current_interval->GetNextUsage(intersection);
-    current_interval->ClearLocation();
-    SplitBeforeUse<IS_FP>(current_interval, next_use);
-    AssignStackSlot(current_interval);
+    auto nextUse = currentInterval->GetNextUsage(intersection);
+    currentInterval->ClearLocation();
+    SplitBeforeUse<IS_FP>(currentInterval, nextUse);
+    AssignStackSlot(currentInterval);
 }
 
 template <bool IS_FP>
-void RegAllocLinearScan::SplitBeforeUse(LifeIntervals *current_interval, LifeNumber use_pos)
+void RegAllocLinearScan::SplitBeforeUse(LifeIntervals *currentInterval, LifeNumber usePos)
 {
-    if (use_pos == INVALID_LIFE_NUMBER) {
+    if (usePos == INVALID_LIFE_NUMBER) {
         return;
     }
-    COMPILER_LOG(DEBUG, REGALLOC) << "Split at " << std::to_string(use_pos - 1);
-    auto split = current_interval->SplitAt(use_pos - 1, GetGraph()->GetAllocator());
+    COMPILER_LOG(DEBUG, REGALLOC) << "Split at " << std::to_string(usePos - 1);
+    auto split = currentInterval->SplitAt(usePos - 1, GetGraph()->GetAllocator());
     AddToQueue<IS_FP>(split);
 }
 
-void RegAllocLinearScan::BlockIndirectCallRegisters(const LifeIntervals *current_interval)
+void RegAllocLinearScan::BlockIndirectCallRegisters(const LifeIntervals *currentInterval)
 {
-    if (!current_interval->HasInst()) {
+    if (!currentInterval->HasInst()) {
         return;
     }
-    auto inst = current_interval->GetInst();
+    auto inst = currentInterval->GetInst();
     for (auto &user : inst->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (user_inst->IsIndirectCall() && user_inst->GetInput(0).GetInst() == inst) {
+        auto userInst = user.GetInst();
+        if (userInst->IsIndirectCall() && userInst->GetInput(0).GetInst() == inst) {
             // CallIndirect is a special case:
             //  - input[0] is a call address, which may be allocated to any register
             //  - other inputs are call args, and LocationsBuilder binds them
             //    to the corresponding target CPU registers.
             //
             // Thus input[0] must not be allocated to the registers used to pass arguments.
-            for (size_t i = 1; i < user_inst->GetInputsCount(); ++i) {
-                auto location = user_inst->GetLocation(i);
+            for (size_t i = 1; i < userInst->GetInputsCount(); ++i) {
+                auto location = userInst->GetLocation(i);
                 ASSERT(location.IsFixedRegister());
-                auto reg = reg_map_.CodegenToRegallocReg(location.GetValue());
-                regs_use_positions_[reg] = 0;
+                auto reg = regMap_.CodegenToRegallocReg(location.GetValue());
+                regsUsePositions_[reg] = 0;
             }
             // LocationBuilder assigns locations the same way for all CallIndirect instructions.
             break;
@@ -602,18 +602,18 @@ void RegAllocLinearScan::BlockIndirectCallRegisters(const LifeIntervals *current
     }
 }
 
-void RegAllocLinearScan::BlockOverlappedRegisters(const LifeIntervals *current_interval)
+void RegAllocLinearScan::BlockOverlappedRegisters(const LifeIntervals *currentInterval)
 {
-    if (!current_interval->HasInst()) {
+    if (!currentInterval->HasInst()) {
         // current_interval - is additional life interval for an instruction required temp, block fixed registers of
         // that instruction
         auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-        la.EnumerateFixedLocationsOverlappingTemp(current_interval, [this](Location location) {
+        la.EnumerateFixedLocationsOverlappingTemp(currentInterval, [this](Location location) {
             ASSERT(location.IsFixedRegister());
-            auto reg = reg_map_.CodegenToRegallocReg(location.GetValue());
-            if (reg_map_.IsRegAvailable(reg, GetGraph()->GetArch())) {
-                ASSERT(regs_use_positions_.size() > reg);
-                regs_use_positions_[reg] = 0;
+            auto reg = regMap_.CodegenToRegallocReg(location.GetValue());
+            if (regMap_.IsRegAvailable(reg, GetGraph()->GetArch())) {
+                ASSERT(regsUsePositions_.size() > reg);
+                regsUsePositions_[reg] = 0;
             }
         });
     }
@@ -626,7 +626,7 @@ bool RegAllocLinearScan::IsNonSpillableConstInterval(LifeIntervals *interval)
         return false;
     }
     auto inst = interval->GetInst();
-    return inst != nullptr && inst->IsConst() && remat_constants_ &&
+    return inst != nullptr && inst->IsConst() && rematConstants_ &&
            inst->CastToConstant()->GetImmTableSlot() == INVALID_IMM_TABLE_SLOT &&
            !GetGraph()->HasAvailableConstantSpillSlots();
 }
@@ -638,12 +638,12 @@ bool RegAllocLinearScan::IsNonSpillableConstInterval(LifeIntervals *interval)
  * immediate slots then the whole interval will be spilled (which is incorrect) unless we add a use
  * position at the beginning and thus force split creation right after it.
  */
-void RegAllocLinearScan::BeforeConstantIntervalSpill(LifeIntervals *interval, LifeNumber split_pos)
+void RegAllocLinearScan::BeforeConstantIntervalSpill(LifeIntervals *interval, LifeNumber splitPos)
 {
     if (!IsNonSpillableConstInterval(interval)) {
         return;
     }
-    if (interval->GetPrevUsage(split_pos) != INVALID_LIFE_NUMBER) {
+    if (interval->GetPrevUsage(splitPos) != INVALID_LIFE_NUMBER) {
         return;
     }
     interval->PrependUsePosition(interval->GetBegin());

@@ -43,9 +43,9 @@ public:
 
     ~EtsClassLinkerExtension() override;
 
-    bool InitializeArrayClass(Class *array_class, Class *component_class) override;
+    bool InitializeArrayClass(Class *arrayClass, Class *componentClass) override;
 
-    void InitializePrimitiveClass(Class *primitive_class) override;
+    void InitializePrimitiveClass(Class *primitiveClass) override;
 
     size_t GetClassVTableSize(ClassRoot root) override;
 
@@ -59,7 +59,7 @@ public:
 
     size_t GetArrayClassSize() override;
 
-    Class *CreateClass(const uint8_t *descriptor, size_t vtable_size, size_t imt_size, size_t size) override;
+    Class *CreateClass(const uint8_t *descriptor, size_t vtableSize, size_t imtSize, size_t size) override;
 
     void FreeClass(Class *klass) override;
 
@@ -74,7 +74,7 @@ public:
 
     ClassLinkerErrorHandler *GetErrorHandler() override
     {
-        return &error_handler_;
+        return &errorHandler_;
     };
 
     Class *FromClassObject(panda::ObjectHeader *obj) override;
@@ -82,82 +82,82 @@ public:
 
     Class *GetObjectClass()
     {
-        return object_class_;
+        return objectClass_;
     }
 
     Class *GetPromiseClass()
     {
-        return promise_class_;
+        return promiseClass_;
     }
 
     Class *GetArrayBufferClass()
     {
-        return arraybuf_class_;
+        return arraybufClass_;
     }
 
     Class *GetSharedMemoryClass()
     {
-        return shared_memory_class_;
+        return sharedMemoryClass_;
     }
 
     Class *GetTypeAPIFieldClass()
     {
-        return typeapi_field_class_;
+        return typeapiFieldClass_;
     }
 
     Class *GetTypeAPIMethodClass()
     {
-        return typeapi_method_class_;
+        return typeapiMethodClass_;
     }
 
     Class *GetTypeAPIParameterClass()
     {
-        return typeapi_parameter_class_;
+        return typeapiParameterClass_;
     }
 
     Class *GetVoidClass()
     {
-        return void_class_;
+        return voidClass_;
     }
 
     Class *GetBoxBooleanClass()
     {
-        return box_boolean_class_;
+        return boxBooleanClass_;
     }
 
     Class *GetBoxByteClass()
     {
-        return box_byte_class_;
+        return boxByteClass_;
     }
 
     Class *GetBoxCharClass()
     {
-        return box_char_class_;
+        return boxCharClass_;
     }
 
     Class *GetBoxShortClass()
     {
-        return box_short_class_;
+        return boxShortClass_;
     }
 
     Class *GetBoxIntClass()
     {
-        return box_int_class_;
+        return boxIntClass_;
     }
 
     Class *GetBoxLongClass()
     {
-        return box_long_class_;
+        return boxLongClass_;
     }
 
     Class *GetBoxFloatClass()
     {
-        return box_float_class_;
+        return boxFloatClass_;
     }
 
     Class *GetBoxDoubleClass()
     {
-        return box_double_class_;
+        return boxDoubleClass_;
     }
 
     static EtsClassLinkerExtension *FromCoreType(ClassLinkerExtension *ext)
@@ -168,56 +168,56 @@ public:
 
     LanguageContext GetLanguageContext() const
     {
-        return lang_ctx_;
+        return langCtx_;
     }
 
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);
 
 private:
-    bool InitializeImpl(bool compressed_string_enabled) override;
+    bool InitializeImpl(bool compressedStringEnabled) override;
 
-    Class *InitializeClass(ObjectHeader *object_header, const uint8_t *descriptor, size_t vtable_size, size_t imt_size,
+    Class *InitializeClass(ObjectHeader *objectHeader, const uint8_t *descriptor, size_t vtableSize, size_t imtSize,
                            size_t size);
 
     Class *CreateClassRoot(const uint8_t *descriptor, ClassRoot root);
 
-    bool CacheClass(Class **class_for_cache, const char *descriptor);
+    bool CacheClass(Class **classForCache, const char *descriptor);
 
     class ErrorHandler : public ClassLinkerErrorHandler {
     public:
         void OnError(ClassLinker::Error error, const PandaString &message) override;
     };
 
-    ErrorHandler error_handler_;
-    LanguageContext lang_ctx_ {nullptr};
-    mem::HeapManager *heap_manager_ {nullptr};
+    ErrorHandler errorHandler_;
+    LanguageContext langCtx_ {nullptr};
+    mem::HeapManager *heapManager_ {nullptr};
 
     // void class
-    Class *void_class_ = nullptr;
+    Class *voidClass_ = nullptr;
 
     // Box classes
-    Class *box_boolean_class_ = nullptr;
-    Class *box_byte_class_ = nullptr;
-    Class *box_char_class_ = nullptr;
-    Class *box_short_class_ = nullptr;
-    Class *box_int_class_ = nullptr;
-    Class *box_long_class_ = nullptr;
-    Class *box_float_class_ = nullptr;
-    Class *box_double_class_ = nullptr;
+    Class *boxBooleanClass_ = nullptr;
+    Class *boxByteClass_ = nullptr;
+    Class *boxCharClass_ = nullptr;
+    Class *boxShortClass_ = nullptr;
+    Class *boxIntClass_ = nullptr;
+    Class *boxLongClass_ = nullptr;
+    Class *boxFloatClass_ = nullptr;
+    Class *boxDoubleClass_ = nullptr;
 
     // Cached classes
-    Class *object_class_ = nullptr;
-    Class *promise_class_ = nullptr;
-    Class *arraybuf_class_ = nullptr;
+    Class *objectClass_ = nullptr;
+    Class *promiseClass_ = nullptr;
+    Class *arraybufClass_ = nullptr;
 
     // Cached type API classes
-    Class *typeapi_field_class_ = nullptr;
-    Class *typeapi_method_class_ = nullptr;
-    Class *typeapi_parameter_class_ = nullptr;
+    Class *typeapiFieldClass_ = nullptr;
+    Class *typeapiMethodClass_ = nullptr;
+    Class *typeapiParameterClass_ = nullptr;
 
     // Escompat classes
-    Class *shared_memory_class_ = nullptr;
+    Class *sharedMemoryClass_ = nullptr;
 };
 
 }  // namespace panda::ets

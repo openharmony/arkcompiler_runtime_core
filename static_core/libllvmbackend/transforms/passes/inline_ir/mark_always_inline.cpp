@@ -40,7 +40,7 @@ namespace panda::llvmbackend::passes {
 
 bool MarkAlwaysInline::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
 {
-    return options->do_irtoc_inline;
+    return options->doIrtocInline;
 }
 
 llvm::PreservedAnalyses MarkAlwaysInline::run(llvm::Function &function, llvm::FunctionAnalysisManager & /*AM*/)
@@ -56,18 +56,18 @@ llvm::PreservedAnalyses MarkAlwaysInline::run(llvm::Function &function, llvm::Fu
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
 
-bool MarkAlwaysInline::InlineCallTree(Function *function, int32_t level, int32_t max_level)
+bool MarkAlwaysInline::InlineCallTree(Function *function, int32_t level, int32_t maxLevel)
 {
     ASSERT(function != nullptr);
 
-    if (level == max_level) {
+    if (level == maxLevel) {
         return false;
     }
-    ASSERT(level < max_level);
+    ASSERT(level < maxLevel);
 
     bool changed = false;
-    for (auto &basic_block : *function) {
-        for (auto &instruction : basic_block) {
+    for (auto &basicBlock : *function) {
+        for (auto &instruction : basicBlock) {
             auto call = dyn_cast<CallInst>(&instruction);
             if (call == nullptr) {
                 continue;
@@ -75,22 +75,22 @@ bool MarkAlwaysInline::InlineCallTree(Function *function, int32_t level, int32_t
             if (call->hasFnAttr(Attribute::AlwaysInline) || call->hasFnAttr(Attribute::NoInline)) {
                 continue;
             }
-            auto called_function = call->getCalledFunction();
+            auto calledFunction = call->getCalledFunction();
             static constexpr std::array EXCLUSIONS = {
                 // Because:
                 // 1. Called in all interpreter handlers
                 // 2. ~x5 compilation time increase
                 StringRef("DebugPrintEntrypoint"),  //
             };
-            if (called_function == nullptr || called_function->isDeclaration() ||
-                std::find(EXCLUSIONS.cbegin(), EXCLUSIONS.cend(), called_function->getName()) != EXCLUSIONS.cend()) {
+            if (calledFunction == nullptr || calledFunction->isDeclaration() ||
+                std::find(EXCLUSIONS.cbegin(), EXCLUSIONS.cend(), calledFunction->getName()) != EXCLUSIONS.cend()) {
                 continue;
             }
             call->addAttributeAtIndex(AttributeList::FunctionIndex, Attribute::AlwaysInline);
             changed = true;
             LLVM_DEBUG(llvm::dbgs() << "Set AlwaysInline to a call. Caller = '" << call->getFunction()->getName()
                                     << "', callee = '" << call->getCalledFunction()->getName() << "'\n");
-            InlineCallTree(call->getCalledFunction(), level + 1, max_level);
+            InlineCallTree(call->getCalledFunction(), level + 1, maxLevel);
         }
     }
     return changed;

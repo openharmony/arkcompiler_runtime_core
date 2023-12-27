@@ -91,9 +91,9 @@ public:
         return object_;
     }
 
-    inline void SetObject(ObjectHeader *obj_new)
+    inline void SetObject(ObjectHeader *objNew)
     {
-        object_ = obj_new;
+        object_ = objNew;
     }
 
     inline void *GetStack() const
@@ -101,9 +101,9 @@ public:
         return stack_;
     }
 
-    inline void SetStack(void *stack_new)
+    inline void SetStack(void *stackNew)
     {
-        stack_ = stack_new;
+        stack_ = stackNew;
     }
 
     static constexpr uint32_t GetMonitorOffset()
@@ -150,8 +150,8 @@ public:
     {
         ExtendIfNeeded();
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto *raw_mem = &storage_[size_];
-        auto *datum = new (raw_mem) LockedObjectInfo(std::forward<Args>(args)...);
+        auto *rawMem = &storage_[size_];
+        auto *datum = new (rawMem) LockedObjectInfo(std::forward<Args>(args)...);
         size_++;
         return *datum;
     }
@@ -203,14 +203,14 @@ private:
         if (size_ < capacity_) {
             return;
         }
-        uint32_t new_capacity = capacity_ * 3U / 2U;  // expand by 1.5
-        LockedObjectInfo *new_storage = allocator_.allocate(new_capacity);
-        ASSERT(new_storage != nullptr);
+        uint32_t newCapacity = capacity_ * 3U / 2U;  // expand by 1.5
+        LockedObjectInfo *newStorage = allocator_.allocate(newCapacity);
+        ASSERT(newStorage != nullptr);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        std::copy(storage_, storage_ + size_, new_storage);
+        std::copy(storage_, storage_ + size_, newStorage);
         allocator_.deallocate(storage_, capacity_);
-        storage_ = new_storage;
-        capacity_ = new_capacity;
+        storage_ = newStorage;
+        capacity_ = newCapacity;
     }
 
     template <typename T, size_t ALIGNMENT = sizeof(T)>
@@ -260,7 +260,7 @@ public:
         THREAD_TYPE_WORKER_THREAD,
     };
 
-    Thread(PandaVM *vm, ThreadType thread_type);
+    Thread(PandaVM *vm, ThreadType threadType);
     virtual ~Thread();
     NO_COPY_SEMANTIC(Thread);
     NO_MOVE_SEMANTIC(Thread);
@@ -284,44 +284,44 @@ public:
 
     MutatorLock *GetMutatorLock()
     {
-        return mutator_lock_;
+        return mutatorLock_;
     }
 
     const MutatorLock *GetMutatorLock() const
     {
-        return mutator_lock_;
+        return mutatorLock_;
     }
 
     void *GetPreWrbEntrypoint() const
     {
         // Atomic with relaxed order reason: only atomicity and modification order consistency needed
-        return pre_wrb_entrypoint_.load(std::memory_order_relaxed);
+        return preWrbEntrypoint_.load(std::memory_order_relaxed);
     }
 
     void SetPreWrbEntrypoint(void *entry)
     {
-        pre_wrb_entrypoint_ = entry;
+        preWrbEntrypoint_ = entry;
     }
 
     ThreadType GetThreadType() const
     {
-        return thread_type_;
+        return threadType_;
     }
 
     ALWAYS_INLINE mem::GCBarrierSet *GetBarrierSet() const
     {
-        return barrier_set_;
+        return barrierSet_;
     }
 
 #ifndef NDEBUG
     MutatorLock::MutatorLockState GetLockState() const
     {
-        return lock_state_;
+        return lockState_;
     }
 
     void SetLockState(MutatorLock::MutatorLockState state)
     {
-        lock_state_ = state;
+        lockState_ = state;
     }
 #endif
 
@@ -343,54 +343,54 @@ protected:
         struct __attribute__((packed)) {
             volatile uint16_t flags;
             volatile enum ThreadStatus status;
-        } as_struct;
-        volatile uint32_t as_int;
-        uint32_t as_nonvolatile_int;
-        std::atomic_uint32_t as_atomic;
+        } asStruct;
+        volatile uint32_t asInt;
+        uint32_t asNonvolatileInt;
+        std::atomic_uint32_t asAtomic;
 
         NO_COPY_SEMANTIC(FlagsAndThreadStatus);
         NO_MOVE_SEMANTIC(FlagsAndThreadStatus);
     };
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    bool is_compiled_frame_ {false};
+    bool isCompiledFrame_ {false};
     FlagsAndThreadStatus fts_ {};
-    ThreadId internal_id_ {0};
+    ThreadId internalId_ {0};
 
     EntrypointsTable entrypoints_ {};
     void *object_ {nullptr};
     Frame *frame_ {nullptr};
     ObjectHeader *exception_ {nullptr};
-    uintptr_t native_pc_ {};
+    uintptr_t nativePc_ {};
     mem::TLAB *tlab_ {nullptr};
-    void *card_table_addr_ {nullptr};
-    void *card_table_min_addr_ {nullptr};
-    std::atomic<void *> pre_wrb_entrypoint_ {nullptr};  // if NOT nullptr, stores pointer to PreWrbFunc and indicates we
-                                                        // are currently in concurrent marking phase
+    void *cardTableAddr_ {nullptr};
+    void *cardTableMinAddr_ {nullptr};
+    std::atomic<void *> preWrbEntrypoint_ {nullptr};  // if NOT nullptr, stores pointer to PreWrbFunc and indicates we
+                                                      // are currently in concurrent marking phase
     // keeps IRtoC GC PostWrb impl for storing one object
-    void *post_wrb_one_object_ {nullptr};
+    void *postWrbOneObject_ {nullptr};
     // keeps IRtoC GC PostWrb impl for storing two objects
-    void *post_wrb_two_objects_ {nullptr};
-    void *string_class_ptr_ {nullptr};     // ClassRoot::STRING
-    void *array_u16_class_ptr_ {nullptr};  // ClassRoot::ARRAY_U16
-    PandaVector<ObjectHeader *> *pre_buff_ {nullptr};
-    void *language_extension_data_ {nullptr};
+    void *postWrbTwoObjects_ {nullptr};
+    void *stringClassPtr_ {nullptr};    // ClassRoot::STRING
+    void *arrayU16ClassPtr_ {nullptr};  // ClassRoot::ARRAY_U16
+    PandaVector<ObjectHeader *> *preBuff_ {nullptr};
+    void *languageExtensionData_ {nullptr};
 #ifndef NDEBUG
-    uintptr_t runtime_call_enabled_ {1};
+    uintptr_t runtimeCallEnabled_ {1};
 #endif
-    PANDA_PUBLIC_API static ThreadFlag initial_thread_flag_;
+    PANDA_PUBLIC_API static ThreadFlag initialThreadFlag_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
     PandaVM *vm_ {nullptr};
-    ThreadType thread_type_ {ThreadType::THREAD_TYPE_NONE};
-    mem::GCBarrierSet *barrier_set_ {nullptr};
-    MutatorLock *mutator_lock_;
+    ThreadType threadType_ {ThreadType::THREAD_TYPE_NONE};
+    mem::GCBarrierSet *barrierSet_ {nullptr};
+    MutatorLock *mutatorLock_;
 #ifndef NDEBUG
-    MutatorLock::MutatorLockState lock_state_ = MutatorLock::UNLOCKED;
+    MutatorLock::MutatorLockState lockState_ = MutatorLock::UNLOCKED;
 #endif
 #ifndef PANDA_TARGET_WINDOWS
-    stack_t signal_stack_ {};
+    stack_t signalStack_ {};
 #endif
 };
 

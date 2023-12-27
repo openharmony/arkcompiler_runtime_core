@@ -185,19 +185,19 @@ inline Type GetIntTypeForReference([[maybe_unused]] Arch arch)
     }
 }
 
-constexpr inline Type GetIntTypeBySize(size_t size_in_bytes, bool is_signed = false)
+constexpr inline Type GetIntTypeBySize(size_t sizeInBytes, bool isSigned = false)
 {
-    if (size_in_bytes <= sizeof(uint8_t)) {
-        return is_signed ? INT8 : UINT8;
+    if (sizeInBytes <= sizeof(uint8_t)) {
+        return isSigned ? INT8 : UINT8;
     }
-    if (size_in_bytes <= sizeof(uint16_t)) {
-        return is_signed ? INT16 : UINT16;
+    if (sizeInBytes <= sizeof(uint16_t)) {
+        return isSigned ? INT16 : UINT16;
     }
-    if (size_in_bytes <= sizeof(uint32_t)) {
-        return is_signed ? INT32 : UINT32;
+    if (sizeInBytes <= sizeof(uint32_t)) {
+        return isSigned ? INT32 : UINT32;
     }
-    if (size_in_bytes <= sizeof(uint64_t)) {
-        return is_signed ? INT64 : UINT64;
+    if (sizeInBytes <= sizeof(uint64_t)) {
+        return isSigned ? INT64 : UINT64;
     }
     UNREACHABLE_CONSTEXPR();
     return NO_TYPE;

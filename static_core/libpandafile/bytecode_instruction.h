@@ -151,21 +151,21 @@ protected:
     bool IsLast(size_t size) const
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const uint8_t *ptr_next = pc_ + size;
-        return ptr_next >= to_;
+        const uint8_t *ptrNext = pc_ + size;
+        return ptrNext >= to_;
     }
 
     NO_UB_SANITIZE const uint8_t *GetPointer(int32_t offset, size_t size) const
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const uint8_t *ptr_from = pc_ + offset;
+        const uint8_t *ptrFrom = pc_ + offset;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const uint8_t *ptr_to = ptr_from + size;
-        if (from_ == nullptr || ptr_from < from_ || ptr_to > to_) {
+        const uint8_t *ptrTo = ptrFrom + size;
+        if (from_ == nullptr || ptrFrom < from_ || ptrTo > to_) {
             valid_ = false;
             return from_;
         }
-        return ptr_from;
+        return ptrFrom;
     }
 
     const uint8_t *GetAddress() const
@@ -254,7 +254,7 @@ public:
     template <typename EnumT = BytecodeInst<MODE>::Opcode>
     BytecodeId GetId(size_t idx = 0) const;
 
-    void UpdateId(BytecodeId new_id, uint32_t idx = 0);
+    void UpdateId(BytecodeId newId, uint32_t idx = 0);
 
     template <typename EnumT = BytecodeInst<MODE>::Opcode>
     uint16_t GetVReg(size_t idx = 0) const;

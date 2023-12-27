@@ -76,14 +76,14 @@ bool IfConversion::TryTriangle(BasicBlock *bb)
         return false;
     }
 
-    uint32_t inst_count = 0;
-    uint32_t phi_count = 0;
+    uint32_t instCount = 0;
+    uint32_t phiCount = 0;
     auto limit = GetIfcLimit(bb);
-    if (IsConvertable(tbb, &inst_count) && IsPhisAllowed(fbb, tbb, bb, &phi_count)) {
+    if (IsConvertable(tbb, &instCount) && IsPhisAllowed(fbb, tbb, bb, &phiCount)) {
         COMPILER_LOG(DEBUG, IFCONVERSION)
-            << "Triangle pattern was found in Block #" << bb->GetId() << " with " << inst_count
-            << " convertible instruction(s) and " << phi_count << " Phi(s) to process";
-        if (inst_count <= limit && phi_count <= limit) {
+            << "Triangle pattern was found in Block #" << bb->GetId() << " with " << instCount
+            << " convertible instruction(s) and " << phiCount << " Phi(s) to process";
+        if (instCount <= limit && phiCount <= limit) {
             // Joining tbb into bb
             bb->JoinBlocksUsingSelect(tbb, nullptr, swapped);
 
@@ -109,15 +109,15 @@ bool IfConversion::TryTriangle(BasicBlock *bb)
 uint32_t IfConversion::GetIfcLimit(BasicBlock *bb)
 {
     ASSERT(bb->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
-    auto true_counter = GetGraph()->GetBranchCounter(bb, true);
-    auto false_counter = GetGraph()->GetBranchCounter(bb, false);
-    if (true_counter == 0 && false_counter == 0) {
+    auto trueCounter = GetGraph()->GetBranchCounter(bb, true);
+    auto falseCounter = GetGraph()->GetBranchCounter(bb, false);
+    if (trueCounter == 0 && falseCounter == 0) {
         return limit_;
     }
-    auto min_counter = std::min(true_counter, false_counter);
+    auto minCounter = std::min(trueCounter, falseCounter);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto percent = (min_counter * 100) / (true_counter + false_counter);
-    if (percent < OPTIONS.GetCompilerIfConversionIncraseLimitThreshold()) {
+    auto percent = (minCounter * 100) / (trueCounter + falseCounter);
+    if (percent < g_options.GetCompilerIfConversionIncraseLimitThreshold()) {
         return limit_;
     }
     // The limit is increased by 4 times for branch with a large number of mispredicts
@@ -159,15 +159,15 @@ bool IfConversion::TryDiamond(BasicBlock *bb)
         return false;
     }
 
-    uint32_t tbb_inst = 0;
-    uint32_t fbb_inst = 0;
-    uint32_t phi_count = 0;
+    uint32_t tbbInst = 0;
+    uint32_t fbbInst = 0;
+    uint32_t phiCount = 0;
     auto limit = GetIfcLimit(bb);
-    if (IsConvertable(tbb, &tbb_inst) && IsConvertable(fbb, &fbb_inst) && IsPhisAllowed(jbb, tbb, fbb, &phi_count)) {
+    if (IsConvertable(tbb, &tbbInst) && IsConvertable(fbb, &fbbInst) && IsPhisAllowed(jbb, tbb, fbb, &phiCount)) {
         COMPILER_LOG(DEBUG, IFCONVERSION)
-            << "Diamond pattern was found in Block #" << bb->GetId() << " with " << (tbb_inst + fbb_inst)
-            << " convertible instruction(s) and " << phi_count << " Phi(s) to process";
-        if (tbb_inst + fbb_inst <= limit && phi_count <= limit) {
+            << "Diamond pattern was found in Block #" << bb->GetId() << " with " << (tbbInst + fbbInst)
+            << " convertible instruction(s) and " << phiCount << " Phi(s) to process";
+        if (tbbInst + fbbInst <= limit && phiCount <= limit) {
             // Joining tbb into bb
             bb->JoinBlocksUsingSelect(tbb, fbb, false);
 
@@ -193,7 +193,7 @@ bool IfConversion::TryDiamond(BasicBlock *bb)
 
 bool IfConversion::LoopInvariantPreventConversion(BasicBlock *bb)
 {
-    if (!OPTIONS.IsCompilerLicmConditions()) {
+    if (!g_options.IsCompilerLicmConditions()) {
         // Need to investigate may be it is always better to avoid IfConv for loop invariant condition
         return false;
     }
@@ -204,8 +204,8 @@ bool IfConversion::LoopInvariantPreventConversion(BasicBlock *bb)
     if (loop->IsRoot()) {
         return false;
     }
-    auto last_inst = bb->GetLastInst();
-    for (auto &input : last_inst->GetInputs()) {
+    auto lastInst = bb->GetLastInst();
+    for (auto &input : lastInst->GetInputs()) {
         if (input.GetInst()->GetBasicBlock()->GetLoop() == loop) {
             return false;
         }
@@ -213,7 +213,7 @@ bool IfConversion::LoopInvariantPreventConversion(BasicBlock *bb)
     return true;
 }
 
-bool IfConversion::IsConvertable(BasicBlock *bb, uint32_t *inst_count)
+bool IfConversion::IsConvertable(BasicBlock *bb, uint32_t *instCount)
 {
     uint32_t total = 0;
     for (auto inst : bb->AllInsts()) {
@@ -223,11 +223,11 @@ bool IfConversion::IsConvertable(BasicBlock *bb, uint32_t *inst_count)
         }
         total += static_cast<uint32_t>(inst->HasUsers());
     }
-    *inst_count = total;
+    *instCount = total;
     return true;
 }
 
-bool IfConversion::IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *pred2, uint32_t *phi_count)
+bool IfConversion::IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *pred2, uint32_t *phiCount)
 {
     uint32_t total = 0;
 
@@ -248,7 +248,7 @@ bool IfConversion::IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *
         }
 
         // Select can be supported for float operands on the specific architectures (arm64 now)
-        if (DataType::IsFloatType(phi->GetType()) && !can_encode_float_select_) {
+        if (DataType::IsFloatType(phi->GetType()) && !canEncodeFloatSelect_) {
             return false;
         }
 
@@ -263,20 +263,20 @@ bool IfConversion::IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *
         // One more Select
         total++;
     }
-    *phi_count = total;
+    *phiCount = total;
     return true;
 }
 
 bool IfConversion::IsConditionChainPhi(Inst *phi)
 {
-    if (!OPTIONS.IsCompilerLicmConditions()) {
+    if (!g_options.IsCompilerLicmConditions()) {
         return false;
     }
 
     auto loop = phi->GetBasicBlock()->GetLoop();
     for (auto &user : phi->GetUsers()) {
-        auto user_bb = user.GetInst()->GetBasicBlock();
-        if (!user_bb->GetLoop()->IsInside(loop)) {
+        auto userBb = user.GetInst()->GetBasicBlock();
+        if (!userBb->GetLoop()->IsInside(loop)) {
             return false;
         }
     }

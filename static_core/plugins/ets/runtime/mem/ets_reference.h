@@ -53,9 +53,9 @@ public:
         return GetReference()->IsWeak();
     }
 
-    static mem::Reference *CastToReference(EtsReference *ets_ref)
+    static mem::Reference *CastToReference(EtsReference *etsRef)
     {
-        return reinterpret_cast<mem::Reference *>(ets_ref);
+        return reinterpret_cast<mem::Reference *>(etsRef);
     }
 
     static EtsReference *CastFromReference(mem::Reference *ref)
@@ -95,9 +95,9 @@ private:
 
 class EtsReferenceStorage final : private mem::ReferenceStorage {
 public:
-    EtsReferenceStorage(mem::GlobalObjectStorage *global_storage, mem::InternalAllocatorPtr allocator,
-                        bool ref_check_validate)
-        : mem::ReferenceStorage(global_storage, allocator, ref_check_validate)
+    EtsReferenceStorage(mem::GlobalObjectStorage *globalStorage, mem::InternalAllocatorPtr allocator,
+                        bool refCheckValidate)
+        : mem::ReferenceStorage(globalStorage, allocator, refCheckValidate)
     {
     }
     ~EtsReferenceStorage() = default;
@@ -111,25 +111,25 @@ public:
         return EtsReference::CastFromReference(ref);
     }
 
-    EtsReference *NewEtsRef(EtsObject *obj, EtsReference::EtsObjectType obj_type)
+    EtsReference *NewEtsRef(EtsObject *obj, EtsReference::EtsObjectType objType)
     {
-        mem::Reference *ref = NewRef(obj->GetCoreType(), obj_type);
+        mem::Reference *ref = NewRef(obj->GetCoreType(), objType);
         return EtsReference::CastFromReference(ref);
     }
 
-    void RemoveEtsRef(EtsReference *ets_ref)
+    void RemoveEtsRef(EtsReference *etsRef)
     {
-        RemoveRef(EtsReference::CastToReference(ets_ref));
+        RemoveRef(EtsReference::CastToReference(etsRef));
     }
 
-    [[nodiscard]] EtsObject *GetEtsObject(EtsReference *ets_ref)
+    [[nodiscard]] EtsObject *GetEtsObject(EtsReference *etsRef)
     {
-        return EtsObject::FromCoreType(GetObject(EtsReference::CastToReference(ets_ref)));
+        return EtsObject::FromCoreType(GetObject(EtsReference::CastToReference(etsRef)));
     }
 
-    [[nodiscard]] bool IsValidEtsRef(EtsReference *ets_ref)
+    [[nodiscard]] bool IsValidEtsRef(EtsReference *etsRef)
     {
-        return IsValidRef(EtsReference::CastToReference(ets_ref));
+        return IsValidRef(EtsReference::CastToReference(etsRef));
     }
 
     bool PushLocalEtsFrame(uint32_t capacity)

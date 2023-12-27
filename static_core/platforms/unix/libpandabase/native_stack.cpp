@@ -96,12 +96,12 @@ void DumpKernelStack(std::ostream &os, pid_t tid, const char *tag, bool count)
 
 void DumpUnattachedThread::AddTid(pid_t tid_thread)
 {
-    thread_manager_tids_.insert(tid_thread);
+    threadManagerTids_.insert(tid_thread);
 }
 
 bool DumpUnattachedThread::InitKernelTidLists()
 {
-    kernel_tid_.clear();
+    kernelTid_.clear();
     DIR *task = opendir("/proc/self/task");
 
     if (task == nullptr) {
@@ -112,22 +112,22 @@ bool DumpUnattachedThread::InitKernelTidLists()
         char *dir_end = nullptr;
         auto tid = static_cast<pid_t>(strtol(dir->d_name, &dir_end, FIND_TID));
         if (*dir_end == 0) {
-            kernel_tid_.insert(tid);
+            kernelTid_.insert(tid);
         }
     }
     closedir(task);
     return true;
 }
 
-void DumpUnattachedThread::Dump(std::ostream &os, bool dump_native_crash, FuncUnwindstack call_unwindstack)
+void DumpUnattachedThread::Dump(std::ostream &os, bool dumpNativeCrash, FuncUnwindstack callUnwindstack)
 {
-    std::set<pid_t> dump_tid;
-    set_difference(kernel_tid_.begin(), kernel_tid_.end(), thread_manager_tids_.begin(), thread_manager_tids_.end(),
-                   inserter(dump_tid, dump_tid.begin()));
+    std::set<pid_t> dumpTid;
+    set_difference(kernelTid_.begin(), kernelTid_.end(), threadManagerTids_.begin(), threadManagerTids_.end(),
+                   inserter(dumpTid, dumpTid.begin()));
     std::set<int>::iterator tid;
-    for (tid = dump_tid.begin(); tid != dump_tid.end(); ++tid) {
+    for (tid = dumpTid.begin(); tid != dumpTid.end(); ++tid) {
         // thread_manager tid may have wrong,check again
-        if (kernel_tid_.count(*tid) == 0) {
+        if (kernelTid_.count(*tid) == 0) {
             continue;
         }
         int priority = thread::GetPriority(*tid);
@@ -135,16 +135,16 @@ void DumpUnattachedThread::Dump(std::ostream &os, bool dump_native_crash, FuncUn
         os << "  | sysTid=" << *tid << " nice=" << priority << "\n";
         DumpKernelStack(os, *tid, "  kernel: ", false);
 
-        if (dump_native_crash && (call_unwindstack != nullptr)) {
-            call_unwindstack(*tid, os, STACK_TYPE);
+        if (dumpNativeCrash && (callUnwindstack != nullptr)) {
+            callUnwindstack(*tid, os, STACK_TYPE);
         }
         os << "\n";
     }
 }
 
-bool ReadOsFile(const std::string &file_name, std::string *result)
+bool ReadOsFile(const std::string &fileName, std::string *result)
 {
-    panda::os::unix::file::File cmdfile = panda::os::file::Open(file_name, panda::os::file::Mode::READONLY);
+    panda::os::unix::file::File cmdfile = panda::os::file::Open(fileName, panda::os::file::Mode::READONLY);
     panda::os::file::FileHolder fholder(cmdfile);
     constexpr size_t BUFF_SIZE = 8_KB;
     std::vector<char> buffer(BUFF_SIZE);
@@ -188,40 +188,40 @@ std::string ChangeJaveStackFormat(const char *descriptor)
         return java_name;
     }
 
-    const char *primitive_name = "";
+    const char *primitiveName = "";
     switch (descriptor[0]) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         case 'Z':
-            primitive_name = "boolean";
+            primitiveName = "boolean";
             break;
         case 'B':
-            primitive_name = "byte";
+            primitiveName = "byte";
             break;
         case 'C':
-            primitive_name = "char";
+            primitiveName = "char";
             break;
         case 'S':
-            primitive_name = "short";
+            primitiveName = "short";
             break;
         case 'I':
-            primitive_name = "int";
+            primitiveName = "int";
             break;
         case 'J':
-            primitive_name = "long";
+            primitiveName = "long";
             break;
         case 'F':
-            primitive_name = "float";
+            primitiveName = "float";
             break;
         case 'D':
-            primitive_name = "double";
+            primitiveName = "double";
             break;
         case 'V':
-            primitive_name = "void";
+            primitiveName = "void";
             break;
         default:
             break;
     }
 
-    return primitive_name;
+    return primitiveName;
 }
 
 }  // namespace panda::os::unix::native_stack

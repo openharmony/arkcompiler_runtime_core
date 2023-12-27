@@ -37,63 +37,63 @@ std::string TypeCreatorCtx::AddInitField(uint32_t id, const pandasm::Type &type)
 {
     ASSERT(!type.IsPrimitive());
     auto &rec = GetTypeAPICtxDataRecord();
-    auto filed_id_for_ins = rec.name;
+    auto filedIdForIns = rec.name;
     pandasm::Field fld {SourceLanguage::ETS};
     fld.name = "f";
     fld.name += std::to_string(id);
-    filed_id_for_ins += ".";
-    filed_id_for_ins += fld.name;
+    filedIdForIns += ".";
+    filedIdForIns += fld.name;
 
     fld.type = type;
     fld.metadata->SetAttribute(typeapi_create_consts::ATTR_FINAL);
     fld.metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
-    rec.field_list.emplace_back(std::move(fld));
+    rec.fieldList.emplace_back(std::move(fld));
 
-    ctx_data_record_cctor_.AddInstruction(pandasm::Create_LDAI(id));
-    ctx_data_record_cctor_.AddInstruction(pandasm::Create_LDARR_OBJ(TYPEAPI_CTX_DATA_CCTOR_ARR_REG));
-    ctx_data_record_cctor_.AddInstruction(pandasm::Create_CHECKCAST(type.GetPandasmName()));
-    ctx_data_record_cctor_.AddInstruction(pandasm::Create_STSTATIC_OBJ(filed_id_for_ins));
+    ctxDataRecordCctor_.AddInstruction(pandasm::Create_LDAI(id));
+    ctxDataRecordCctor_.AddInstruction(pandasm::Create_LDARR_OBJ(TYPEAPI_CTX_DATA_CCTOR_ARR_REG));
+    ctxDataRecordCctor_.AddInstruction(pandasm::Create_CHECKCAST(type.GetPandasmName()));
+    ctxDataRecordCctor_.AddInstruction(pandasm::Create_STSTATIC_OBJ(filedIdForIns));
 
-    return filed_id_for_ins;
+    return filedIdForIns;
 }
 
 void TypeCreatorCtx::FlushTypeAPICtxDataRecordsToProgram()
 {
-    if (ctx_data_record_.name.empty()) {
+    if (ctxDataRecord_.name.empty()) {
         return;
     }
 
-    ctx_data_record_cctor_.AddInstruction(pandasm::Create_RETURN_VOID());
+    ctxDataRecordCctor_.AddInstruction(pandasm::Create_RETURN_VOID());
 
-    auto name = ctx_data_record_.name;
-    prog_.record_table.emplace(std::move(name), std::move(ctx_data_record_));
-    name = ctx_data_record_cctor_.name;
-    prog_.function_table.emplace(std::move(name), std::move(ctx_data_record_cctor_));
+    auto name = ctxDataRecord_.name;
+    prog_.recordTable.emplace(std::move(name), std::move(ctxDataRecord_));
+    name = ctxDataRecordCctor_.name;
+    prog_.functionTable.emplace(std::move(name), std::move(ctxDataRecordCctor_));
 }
 
 void TypeCreatorCtx::SaveObjects(EtsCoroutine *coro, VMHandle<EtsArray> &objects)
 {
-    auto array_klass = coro->GetPandaVM()->GetClassLinker()->GetClass(
+    auto arrayKlass = coro->GetPandaVM()->GetClassLinker()->GetClass(
         pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1, true}.GetDescriptor(true).c_str());
-    auto arr = coretypes::Array::Create(array_klass->GetRuntimeClass(), 1, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    auto arr = coretypes::Array::Create(arrayKlass->GetRuntimeClass(), 1, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     arr->Set<ObjectHeader *>(0, objects.GetPtr()->GetCoreType());
-    init_arr_object_ = arr;
-    objects = VMHandle<EtsArray>(coro, init_arr_object_);
+    initArrObject_ = arr;
+    objects = VMHandle<EtsArray>(coro, initArrObject_);
 }
 
 EtsArray *TypeCreatorCtx::GetObjects([[maybe_unused]] EtsCoroutine *coro)
 {
     // NOTE: this code is possible because that array is allocated as non-movable!
     // and is stored in vmhandle => can't be moved or deallcoated
-    return reinterpret_cast<EtsArray *>(init_arr_object_->Get<ObjectHeader *>(0));
+    return reinterpret_cast<EtsArray *>(initArrObject_->Get<ObjectHeader *>(0));
 }
 
 void TypeCreatorCtx::InitializeCtxDataRecord(EtsCoroutine *coro)
 {
-    if (ctx_data_record_name_.empty()) {
+    if (ctxDataRecordName_.empty()) {
         return;
     }
-    auto name = pandasm::Type(ctx_data_record_name_, 0).GetDescriptor();
+    auto name = pandasm::Type(ctxDataRecordName_, 0).GetDescriptor();
     auto klass = coro->GetPandaVM()->GetClassLinker()->GetClass(name.c_str());
     ASSERT(!klass->IsInitialized());
     auto linker = Runtime::GetCurrent()->GetClassLinker();
@@ -104,128 +104,128 @@ void TypeCreatorCtx::InitializeCtxDataRecord(EtsCoroutine *coro)
 
 pandasm::Record &TypeCreatorCtx::GetTypeAPICtxDataRecord()
 {
-    if (!ctx_data_record_.name.empty()) {
-        return ctx_data_record_;
+    if (!ctxDataRecord_.name.empty()) {
+        return ctxDataRecord_;
     }
-    static std::atomic_uint ctx_data_next_name {};
-    ctx_data_record_name_ = typeapi_create_consts::CREATOR_CTX_DATA_PREFIX;
-    ctx_data_record_name_ += std::to_string(ctx_data_next_name++);
-    ctx_data_record_.name = ctx_data_record_name_;
+    static std::atomic_uint ctxDataNextName {};
+    ctxDataRecordName_ = typeapi_create_consts::CREATOR_CTX_DATA_PREFIX;
+    ctxDataRecordName_ += std::to_string(ctxDataNextName++);
+    ctxDataRecord_.name = ctxDataRecordName_;
 
     AddRefTypeAsExternal(std::string {typeapi_create_consts::TYPE_OBJECT});
     AddRefTypeAsExternal(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1}.GetName());
 
-    ctx_data_record_cctor_.name = ctx_data_record_.name;
-    ctx_data_record_cctor_.name += '.';
-    ctx_data_record_cctor_.name += panda_file::GetCctorName(SourceLanguage::ETS);
-    ctx_data_record_cctor_.metadata->SetAttribute(typeapi_create_consts::ATTR_CCTOR);
-    ctx_data_record_cctor_.metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
-    ctx_data_record_cctor_.regs_num = 1;
-    ctx_data_record_cctor_.AddInstruction(pandasm::Create_MOVI_64(0, reinterpret_cast<EtsLong>(this)));
-    ctx_data_record_cctor_.AddInstruction(
+    ctxDataRecordCctor_.name = ctxDataRecord_.name;
+    ctxDataRecordCctor_.name += '.';
+    ctxDataRecordCctor_.name += panda_file::GetCctorName(SourceLanguage::ETS);
+    ctxDataRecordCctor_.metadata->SetAttribute(typeapi_create_consts::ATTR_CCTOR);
+    ctxDataRecordCctor_.metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
+    ctxDataRecordCctor_.regsNum = 1;
+    ctxDataRecordCctor_.AddInstruction(pandasm::Create_MOVI_64(0, reinterpret_cast<EtsLong>(this)));
+    ctxDataRecordCctor_.AddInstruction(
         pandasm::Create_CALL_SHORT(0, 0, std::string {typeapi_create_consts::FUNCTION_GET_OBJECTS_FOR_CCTOR}));
-    ctx_data_record_cctor_.AddInstruction(pandasm::Create_STA_OBJ(TYPEAPI_CTX_DATA_CCTOR_ARR_REG));
+    ctxDataRecordCctor_.AddInstruction(pandasm::Create_STA_OBJ(TYPEAPI_CTX_DATA_CCTOR_ARR_REG));
 
     AddRefTypeAsExternal(std::string {typeapi_create_consts::TYPE_TYPE_CREATOR_CTX});
-    pandasm::Function get_objects_array {std::string {typeapi_create_consts::FUNCTION_GET_OBJECTS_FOR_CCTOR},
-                                         SourceLanguage::ETS};
-    get_objects_array.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-    get_objects_array.return_type = pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1};
-    get_objects_array.params.emplace_back(
+    pandasm::Function getObjectsArray {std::string {typeapi_create_consts::FUNCTION_GET_OBJECTS_FOR_CCTOR},
+                                       SourceLanguage::ETS};
+    getObjectsArray.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+    getObjectsArray.returnType = pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1};
+    getObjectsArray.params.emplace_back(
         pandasm::Type::FromPrimitiveId(ConvertEtsTypeToPandaType(EtsType::LONG).GetId()), SourceLanguage::ETS);
-    auto get_objects_array_name = get_objects_array.name;
-    prog_.function_table.emplace(std::move(get_objects_array_name), std::move(get_objects_array));
+    auto getObjectsArrayName = getObjectsArray.name;
+    prog_.functionTable.emplace(std::move(getObjectsArrayName), std::move(getObjectsArray));
 
-    return ctx_data_record_;
+    return ctxDataRecord_;
 }
 
 pandasm::Record &TypeCreatorCtx::AddRefTypeAsExternal(const std::string &name)
 {
-    pandasm::Record object_rec {name, SourceLanguage::ETS};
-    object_rec.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-    return prog_.record_table.emplace(object_rec.name, std::move(object_rec)).first->second;
+    pandasm::Record objectRec {name, SourceLanguage::ETS};
+    objectRec.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+    return prog_.recordTable.emplace(objectRec.name, std::move(objectRec)).first->second;
 }
 
 std::string TypeCreatorCtx::GetRefVoidInstanceName()
 {
-    pandasm::Record object_rec {typeapi_create_consts::TYPE_VOID.data(), SourceLanguage::ETS};
-    object_rec.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-    auto &void_record = prog_.record_table.emplace(object_rec.name, std::move(object_rec)).first->second;
+    pandasm::Record objectRec {typeapi_create_consts::TYPE_VOID.data(), SourceLanguage::ETS};
+    objectRec.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+    auto &voidRecord = prog_.recordTable.emplace(objectRec.name, std::move(objectRec)).first->second;
 
-    if (void_record.field_list.empty()) {
-        pandasm::Field void_field {panda_file::SourceLang::ETS};
-        void_field.type = pandasm::Type {void_record.name, 0, true};
-        void_field.name = typeapi_create_consts::TYPE_VOID_FIELD;
-        void_field.metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
-        void_field.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-        void_record.field_list.emplace_back(std::move(void_field));
+    if (voidRecord.fieldList.empty()) {
+        pandasm::Field voidField {panda_file::SourceLang::ETS};
+        voidField.type = pandasm::Type {voidRecord.name, 0, true};
+        voidField.name = typeapi_create_consts::TYPE_VOID_FIELD;
+        voidField.metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
+        voidField.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+        voidRecord.fieldList.emplace_back(std::move(voidField));
     }
 
-    return void_record.name + '.' + void_record.field_list.front().name;
+    return voidRecord.name + '.' + voidRecord.fieldList.front().name;
 }
 
-const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(const std::string &prim_type_name)
+const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(const std::string &primTypeName)
 {
-    if (auto found = primitive_types_ctor_dtor_.find(prim_type_name); found != primitive_types_ctor_dtor_.end()) {
+    if (auto found = primitiveTypesCtorDtor_.find(primTypeName); found != primitiveTypesCtorDtor_.end()) {
         return found->second;
     }
 
-    auto prim_type = pandasm::Type {prim_type_name, 0};
+    auto primType = pandasm::Type {primTypeName, 0};
 
-    std::string object_type_name {typeapi_create_consts::TYPE_BOXED_PREFIX};
-    if (prim_type_name == "u1") {
-        object_type_name += "Boolean";
-    } else if (prim_type_name == "i8") {
-        object_type_name += "Byte";
-    } else if (prim_type_name == "i16") {
-        object_type_name += "Short";
-    } else if (prim_type_name == "i32") {
-        object_type_name += "Int";
-    } else if (prim_type_name == "i64") {
-        object_type_name += "Long";
-    } else if (prim_type_name == "u16") {
-        object_type_name += "Char";
+    std::string objectTypeName {typeapi_create_consts::TYPE_BOXED_PREFIX};
+    if (primTypeName == "u1") {
+        objectTypeName += "Boolean";
+    } else if (primTypeName == "i8") {
+        objectTypeName += "Byte";
+    } else if (primTypeName == "i16") {
+        objectTypeName += "Short";
+    } else if (primTypeName == "i32") {
+        objectTypeName += "Int";
+    } else if (primTypeName == "i64") {
+        objectTypeName += "Long";
+    } else if (primTypeName == "u16") {
+        objectTypeName += "Char";
     } else {
         UNREACHABLE();
     }
-    AddRefTypeAsExternal(object_type_name);
-    auto object_type = pandasm::Type {object_type_name, 0};
+    AddRefTypeAsExternal(objectTypeName);
+    auto objectType = pandasm::Type {objectTypeName, 0};
 
-    PandasmMethodCreator ctor {object_type_name + "." + panda_file::GetCtorName(SourceLanguage::ETS), this};
-    ctor.AddParameter(object_type);
-    ctor.AddParameter(prim_type);
+    PandasmMethodCreator ctor {objectTypeName + "." + panda_file::GetCtorName(SourceLanguage::ETS), this};
+    ctor.AddParameter(objectType);
+    ctor.AddParameter(primType);
     ctor.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
     ctor.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_CTOR);
     ctor.Create();
 
-    PandasmMethodCreator unboxed {object_type_name + ".unboxed", this};
-    unboxed.AddParameter(object_type);
-    unboxed.AddResult(prim_type);
+    PandasmMethodCreator unboxed {objectTypeName + ".unboxed", this};
+    unboxed.AddParameter(objectType);
+    unboxed.AddResult(primType);
     unboxed.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
     unboxed.Create();
 
-    return primitive_types_ctor_dtor_
-        .emplace(prim_type_name, std::make_pair(ctor.GetFunctionName(), unboxed.GetFunctionName()))
+    return primitiveTypesCtorDtor_
+        .emplace(primTypeName, std::make_pair(ctor.GetFunctionName(), unboxed.GetFunctionName()))
         .first->second;
 }
 
 void LambdaTypeCreator::AddParameter(pandasm::Type param)
 {
     ASSERT(!param.IsVoid());
-    auto param_name = param.GetName();
+    auto paramName = param.GetName();
     fn_.params.emplace_back(std::move(param), SourceLanguage::ETS);
     name_ += '-';
-    std::replace(param_name.begin(), param_name.end(), '.', '-');
-    name_ += param_name;
+    std::replace(paramName.begin(), paramName.end(), '.', '-');
+    name_ += paramName;
 }
 
 void LambdaTypeCreator::AddResult(const pandasm::Type &type)
 {
-    fn_.return_type = type;
+    fn_.returnType = type;
     name_ += '-';
-    auto append_name = type.GetName();
-    std::replace(append_name.begin(), append_name.end(), '.', '-');
-    name_ += append_name;
+    auto appendName = type.GetName();
+    std::replace(appendName.begin(), appendName.end(), '.', '-');
+    name_ += appendName;
 }
 
 void LambdaTypeCreator::Create()
@@ -238,14 +238,14 @@ void LambdaTypeCreator::Create()
     name_ += "-0";
 
     rec_.name = name_;
-    fn_name_ = fn_.name = name_ + ".invoke";
+    fnName_ = fn_.name = name_ + ".invoke";
     fn_.params.insert(fn_.params.begin(), pandasm::Function::Parameter(pandasm::Type(name_, 0), SourceLanguage::ETS));
     for (const auto &attr : typeapi_create_consts::ATTR_ABSTRACT_METHOD) {
         fn_.metadata->SetAttribute(attr);
     }
     fn_.metadata->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS, typeapi_create_consts::ATTR_ACCESS_VAL_PUBLIC);
-    GetCtx()->Program().record_table.emplace(name_, std::move(rec_));
-    GetCtx()->Program().function_table.emplace(fn_name_, std::move(fn_));
+    GetCtx()->Program().recordTable.emplace(name_, std::move(rec_));
+    GetCtx()->Program().functionTable.emplace(fnName_, std::move(fn_));
 }
 
 void PandasmMethodCreator::AddParameter(pandasm::Type param)
@@ -258,10 +258,10 @@ void PandasmMethodCreator::AddParameter(pandasm::Type param)
 void PandasmMethodCreator::AddResult(pandasm::Type type)
 {
     if (fn_.metadata->IsCtor()) {
-        fn_.return_type = pandasm::Type {"void", 0};
+        fn_.returnType = pandasm::Type {"void", 0};
         return;
     }
-    fn_.return_type = std::move(type);
+    fn_.returnType = std::move(type);
 }
 
 void PandasmMethodCreator::Create()
@@ -269,7 +269,7 @@ void PandasmMethodCreator::Create()
     ASSERT(!finished_);
     finished_ = true;
     fn_.name = name_;
-    auto ok = ctx_->Program().function_table.emplace(name_, std::move(fn_)).second;
+    auto ok = ctx_->Program().functionTable.emplace(name_, std::move(fn_)).second;
     if (!ok) {
         ctx_->AddError("duplicate function " + name_);
     }

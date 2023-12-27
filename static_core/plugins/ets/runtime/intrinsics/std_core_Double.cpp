@@ -38,29 +38,29 @@ EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
     icu::Locale loc;
     UErrorCode status = U_ZERO_ERROR;
     PandaVector<uint8_t> buf;
-    std::string_view loc_tag = locale->ConvertToStringView(&buf);
-    icu::StringPiece sp {loc_tag.data(), static_cast<int32_t>(loc_tag.size())};
+    std::string_view locTag = locale->ConvertToStringView(&buf);
+    icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
     loc = icu::Locale::forLanguageTag(sp, status);
 
     if (UNLIKELY(U_FAILURE(status))) {
-        std::string message = "Language tag '" + std::string(loc_tag) + "' is invalid or not supported";
+        std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
 
-    double obj_value = helpers::GetStdDoubleArgument(obj);
+    double objValue = helpers::GetStdDoubleArgument(obj);
 
-    icu::number::LocalizedNumberFormatter loc_num_fmt = icu::number::NumberFormatter::withLocale(loc);
-    icu::number::FormattedNumber fmt_num = loc_num_fmt.formatDouble(obj_value, status);
+    icu::number::LocalizedNumberFormatter locNumFmt = icu::number::NumberFormatter::withLocale(loc);
+    icu::number::FormattedNumber fmtNum = locNumFmt.formatDouble(objValue, status);
 
     if (UNLIKELY(U_FAILURE(status))) {
-        std::string message = "Unable to convert " + std::to_string(obj_value) + " to locale " + std::string(loc_tag);
+        std::string message = "Unable to convert " + std::to_string(objValue) + " to locale " + std::string(locTag);
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RUNTIME_EXCEPTION, message);
         return nullptr;
     }
 
-    icu::UnicodeString uni_str = fmt_num.toString(status);
-    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(uni_str.getBuffer()), uni_str.length());
+    icu::UnicodeString uniStr = fmtNum.toString(status);
+    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(uniStr.getBuffer()), uniStr.length());
 }
 
 double StdCoreDoubleParseFloat(EtsString *s)
@@ -95,10 +95,10 @@ double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
 
 EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
 {
-    double obj_value = helpers::GetStdDoubleArgument(obj);
+    double objValue = helpers::GetStdDoubleArgument(obj);
 
     // If x is NaN, return the String "NaN".
-    if (std::isnan(obj_value)) {
+    if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
     }
     // If x < 0, then
@@ -106,34 +106,34 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
     //    b. Let x = –x.
     // If x = +infinity, then
     //    a. Return the concatenation of the Strings s and "Infinity".
-    if (!std::isfinite(obj_value)) {
-        if (obj_value < 0) {
+    if (!std::isfinite(objValue)) {
+        if (objValue < 0) {
             return EtsString::CreateFromMUtf8("-Infinity");
         }
         return EtsString::CreateFromMUtf8("Infinity");
     }
 
     // truncate the arg val
-    double digit_abs = std::isnan(d) ? 0 : d;
-    digit_abs = std::abs((digit_abs >= 0) ? std::floor(digit_abs) : std::ceil(digit_abs));
+    double digitAbs = std::isnan(d) ? 0 : d;
+    digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
 
     // Check range
-    if (UNLIKELY(digit_abs > helpers::MAX_FRACTION || digit_abs < helpers::MIN_FRACTION)) {
+    if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),
                           panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION,
                           "toExponential argument must be between 0 and 100");
         return nullptr;
     }
 
-    return helpers::DoubleToExponential(obj_value, static_cast<int>(digit_abs));
+    return helpers::DoubleToExponential(objValue, static_cast<int>(digitAbs));
 }
 
 EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
 {
-    double obj_value = helpers::GetStdDoubleArgument(obj);
+    double objValue = helpers::GetStdDoubleArgument(obj);
 
     // If x is NaN, return the String "NaN".
-    if (std::isnan(obj_value)) {
+    if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
     }
     // If x < 0, then
@@ -141,34 +141,34 @@ EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
     //    b. Let x = –x.
     // If x = +infinity, then
     //    a. Return the concatenation of the Strings s and "Infinity".
-    if (!std::isfinite(obj_value)) {
-        if (obj_value < 0) {
+    if (!std::isfinite(objValue)) {
+        if (objValue < 0) {
             return EtsString::CreateFromMUtf8("-Infinity");
         }
         return EtsString::CreateFromMUtf8("Infinity");
     }
 
     // truncate the arg val
-    double digit_abs = std::isnan(d) ? 0 : d;
-    digit_abs = std::abs((digit_abs >= 0) ? std::floor(digit_abs) : std::ceil(digit_abs));
+    double digitAbs = std::isnan(d) ? 0 : d;
+    digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
 
     // Check range
-    if (UNLIKELY(digit_abs > helpers::MAX_FRACTION || digit_abs < helpers::MIN_FRACTION + 1)) {
+    if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION + 1)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),
                           panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION,
                           "toPrecision argument must be between 1 and 100");
         return nullptr;
     }
 
-    return helpers::DoubleToPrecision(obj_value, static_cast<int>(digit_abs));
+    return helpers::DoubleToPrecision(objValue, static_cast<int>(digitAbs));
 }
 
 EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
 {
-    double obj_value = helpers::GetStdDoubleArgument(obj);
+    double objValue = helpers::GetStdDoubleArgument(obj);
 
     // If x is NaN, return the String "NaN".
-    if (std::isnan(obj_value)) {
+    if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
     }
     // If x < 0, then
@@ -176,26 +176,26 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
     //    b. Let x = –x.
     // If x = +infinity, then
     //    a. Return the concatenation of the Strings s and "Infinity".
-    if (!std::isfinite(obj_value)) {
-        if (obj_value < 0) {
+    if (!std::isfinite(objValue)) {
+        if (objValue < 0) {
             return EtsString::CreateFromMUtf8("-Infinity");
         }
         return EtsString::CreateFromMUtf8("Infinity");
     }
 
     // truncate the arg val
-    double digit_abs = std::isnan(d) ? 0 : d;
-    digit_abs = std::abs((digit_abs >= 0) ? std::floor(digit_abs) : std::ceil(digit_abs));
+    double digitAbs = std::isnan(d) ? 0 : d;
+    digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
 
     // Check range
-    if (UNLIKELY(digit_abs > helpers::MAX_FRACTION || digit_abs < helpers::MIN_FRACTION)) {
+    if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),
                           panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION,
                           "toFixed argument must be between 0 and 100");
         return nullptr;
     }
 
-    return helpers::DoubleToFixed(obj_value, static_cast<int>(digit_abs));
+    return helpers::DoubleToFixed(objValue, static_cast<int>(digitAbs));
 }
 
 extern "C" EtsBoolean StdCoreDoubleIsNan(double v)

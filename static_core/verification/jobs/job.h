@@ -34,11 +34,11 @@ class Job {
 public:
     Job(Service *service, Method const *method, const MethodOptions &options)
         : service_ {service},
-          class_linker_ {service->class_linker},
+          classLinker_ {service->classLinker},
           method_ {method},
           lang_ {method->GetClass()->GetSourceLang()},
-          lang_context_ {plugins::GetLanguageContextBase(method_->GetClass()->GetSourceLang())},
-          class_linker_ctx_ {class_linker_->GetExtension(lang_context_)->GetBootContext()},
+          langContext_ {plugins::GetLanguageContextBase(method_->GetClass()->GetSourceLang())},
+          classLinkerCtx_ {classLinker_->GetExtension(langContext_)->GetBootContext()},
           options_ {options},
           plugin_ {plugin::GetLanguagePlugin(lang_)}
     {
@@ -90,7 +90,7 @@ public:
 
     const CflowMethodInfo &JobMethodCflow() const
     {
-        return *cflow_info_;
+        return *cflowInfo_;
     }
 
     const plugin::Plugin *JobPlugin() const
@@ -135,13 +135,13 @@ public:
 
 private:
     Service *service_;
-    ClassLinker *class_linker_;
+    ClassLinker *classLinker_;
     Method const *method_;
     panda_file::SourceLang lang_;
-    LanguageContext lang_context_;
-    ClassLinkerContext *class_linker_ctx_;
+    LanguageContext langContext_;
+    ClassLinkerContext *classLinkerCtx_;
     const MethodOptions &options_;
-    PandaUniquePtr<CflowMethodInfo> cflow_info_;
+    PandaUniquePtr<CflowMethodInfo> cflowInfo_;
 
     plugin::Plugin const *const plugin_;
 

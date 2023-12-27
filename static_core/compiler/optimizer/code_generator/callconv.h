@@ -46,41 +46,41 @@ public:
 
     void Reset()
     {
-        current_scalar_number_ = 0;
-        current_vector_number_ = 0;
-        current_stack_offset_ = 0;
+        currentScalarNumber_ = 0;
+        currentVectorNumber_ = 0;
+        currentStackOffset_ = 0;
     }
 
     NO_COPY_SEMANTIC(ParameterInfo);
     NO_MOVE_SEMANTIC(ParameterInfo);
 
 protected:
-    uint32_t current_scalar_number_ {0};  // NOLINT(misc-non-private-member-variables-in-classes)
-    uint32_t current_vector_number_ {0};  // NOLINT(misc-non-private-member-variables-in-classes)
-    uint8_t current_stack_offset_ {0};    // NOLINT(misc-non-private-member-variables-in-classes)
+    uint32_t currentScalarNumber_ {0};  // NOLINT(misc-non-private-member-variables-in-classes)
+    uint32_t currentVectorNumber_ {0};  // NOLINT(misc-non-private-member-variables-in-classes)
+    uint8_t currentStackOffset_ {0};    // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
 struct CfiOffsets {
-    size_t push_fplr {0};
-    size_t set_fp {0};
-    size_t push_callees {0};
-    size_t pop_callees {0};
-    size_t pop_fplr {0};
+    size_t pushFplr {0};
+    size_t setFp {0};
+    size_t pushCallees {0};
+    size_t popCallees {0};
+    size_t popFplr {0};
 };
 
 struct CfiInfo {
     CfiOffsets offsets;
-    RegMask callee_regs;
-    VRegMask callee_vregs;
+    RegMask calleeRegs;
+    VRegMask calleeVregs;
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SET_CFI_OFFSET(field, value) GetCfiInfo().offsets.field = value
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define SET_CFI_CALLEE_REGS(value) GetCfiInfo().callee_regs = value
+#define SET_CFI_CALLEE_REGS(value) GetCfiInfo().calleeRegs = value
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define SET_CFI_CALLEE_VREGS(value) GetCfiInfo().callee_vregs = value
+#define SET_CFI_CALLEE_VREGS(value) GetCfiInfo().calleeVregs = value
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SET_CFI_OFFSET(field, value)
@@ -176,32 +176,30 @@ public:
 
     explicit CallConvDynInfo() = default;
 
-    explicit CallConvDynInfo(uint32_t num_expected_args, uintptr_t expand_entrypoint_tls_offset)
-        : expand_entrypoint_tls_offset_(expand_entrypoint_tls_offset),
-          num_expected_args_(num_expected_args),
-          check_required_(true)
+    explicit CallConvDynInfo(uint32_t numExpectedArgs, uintptr_t expandEntrypointTlsOffset)
+        : expandEntrypointTlsOffset_(expandEntrypointTlsOffset), numExpectedArgs_(numExpectedArgs), checkRequired_(true)
     {
     }
 
     auto GetExpandEntrypointTlsOffset()
     {
-        return expand_entrypoint_tls_offset_;
+        return expandEntrypointTlsOffset_;
     }
 
     auto GetNumExpectedArgs()
     {
-        return num_expected_args_;
+        return numExpectedArgs_;
     }
 
     auto IsCheckRequired()
     {
-        return check_required_;
+        return checkRequired_;
     }
 
 private:
-    uintptr_t expand_entrypoint_tls_offset_ {0};
-    uint32_t num_expected_args_ {0};
-    bool check_required_ {false};
+    uintptr_t expandEntrypointTlsOffset_ {0};
+    uint32_t numExpectedArgs_ {0};
+    bool checkRequired_ {false};
 };
 
 /// CallConv - just holds information about calling convention in current architecture.
@@ -218,9 +216,9 @@ public:
     };
 
     // Implemented in target.cpp
-    static CallingConvention *Create(ArenaAllocator *arena_allocator, Encoder *enc, RegistersDescription *descr,
-                                     Arch arch, bool is_panda_abi = false, bool is_osr = false, bool is_dyn = false,
-                                     bool print_asm = false, bool is_opt_irtoc = false);
+    static CallingConvention *Create(ArenaAllocator *arenaAllocator, Encoder *enc, RegistersDescription *descr,
+                                     Arch arch, bool isPandaAbi = false, bool isOsr = false, bool isDyn = false,
+                                     bool printAsm = false, bool isOptIrtoc = false);
 
 public:
     CallingConvention(ArenaAllocator *allocator, Encoder *enc, RegistersDescription *descr, CallConvMode mode)
@@ -253,14 +251,14 @@ public:
         return false;
     }
 
-    void SetDynInfo(CallConvDynInfo dyn_info)
+    void SetDynInfo(CallConvDynInfo dynInfo)
     {
-        dyn_info_ = dyn_info;
+        dynInfo_ = dynInfo;
     }
 
     CallConvDynInfo &GetDynInfo()
     {
-        return dyn_info_;
+        return dynInfo_;
     }
 
     CallConvMode GetMode() const
@@ -286,12 +284,12 @@ public:
 #ifdef PANDA_COMPILER_DEBUG_INFO
     CfiInfo &GetCfiInfo()
     {
-        return cfi_info_;
+        return cfiInfo_;
     }
 
     const CfiInfo &GetCfiInfo() const
     {
-        return cfi_info_;
+        return cfiInfo_;
     }
     static constexpr bool ProvideCFI()
     {
@@ -305,18 +303,18 @@ public:
 #endif
 
     // Prologue/Epilogue interfaces
-    virtual void GeneratePrologue(const FrameInfo &frame_info) = 0;
-    virtual void GenerateEpilogue(const FrameInfo &frame_info, std::function<void()> post_job) = 0;
+    virtual void GeneratePrologue(const FrameInfo &frameInfo) = 0;
+    virtual void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) = 0;
 
-    virtual void GenerateNativePrologue(const FrameInfo &frame_info) = 0;
-    virtual void GenerateNativeEpilogue(const FrameInfo &frame_info, std::function<void()> post_job) = 0;
+    virtual void GenerateNativePrologue(const FrameInfo &frameInfo) = 0;
+    virtual void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) = 0;
 
     // Code generation completion interfaces
     virtual void *GetCodeEntry() = 0;
     virtual uint32_t GetCodeSize() = 0;
 
     // Calculating information about parameters and save regs_offset registers for special needs
-    virtual ParameterInfo *GetParameterInfo(uint8_t regs_offset) = 0;
+    virtual ParameterInfo *GetParameterInfo(uint8_t regsOffset) = 0;
 
     NO_COPY_SEMANTIC(CallingConvention);
     NO_MOVE_SEMANTIC(CallingConvention);
@@ -327,9 +325,9 @@ private:
     Encoder *encoder_ {nullptr};
     RegistersDescription *regfile_ {nullptr};
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    CfiInfo cfi_info_;
+    CfiInfo cfiInfo_;
 #endif
-    CallConvDynInfo dyn_info_ {};
+    CallConvDynInfo dynInfo_ {};
     CallConvMode mode_ {0};
 };
 }  // namespace panda::compiler

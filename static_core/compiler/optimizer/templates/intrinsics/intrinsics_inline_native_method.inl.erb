@@ -18,6 +18,6 @@
 % Common::plugins.each do |plugin_lang, plugin_opts|
 %   next unless plugin_opts["inlinable_native"]
 case SourceLanguage::<%= plugin_lang %>: {
-    return TryInlineNativeMethodGen<%= plugin_lang %>(call_inst);
+    return TryInlineNativeMethodGen<%= plugin_lang %>(callInst);
 }
 % end

@@ -72,8 +72,7 @@ extern "C" int SwitchContext(FiberContext *from, const FiberContext *to);
  * at least stack_size_bytes bytes. Allocation and deallocation of this buffer is the caller's responsibility.
  * @param stack_size_bytes minimal size of the stack provided
  */
-extern "C" int UpdateContext(FiberContext *ctx, FiberEntry func, void *argument, uint8_t *stack,
-                             size_t stack_size_bytes);
+extern "C" int UpdateContext(FiberContext *ctx, FiberEntry func, void *argument, uint8_t *stack, size_t stackSizeBytes);
 
 /**
  * @brief Updates the previously saved context with a new entry point, keeping the original stack.

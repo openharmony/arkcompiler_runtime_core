@@ -23,11 +23,11 @@ class LLVMArkInterface;
 }  // namespace panda::llvmbackend
 
 namespace panda::llvmbackend::gc_barriers {
-void EmitPreWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, bool is_volatile_mem, llvm::BasicBlock *out_bb,
-                LLVMArkInterface *ark_interface, llvm::Value *thread_reg_value);
+void EmitPreWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, bool isVolatileMem, llvm::BasicBlock *outBb,
+                LLVMArkInterface *arkInterface, llvm::Value *threadRegValue);
 
 void EmitPostWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, llvm::Value *offset, llvm::Value *value,
-                 LLVMArkInterface *ark_interface, llvm::Value *thread_reg_value, llvm::Value *frame_reg_value);
+                 LLVMArkInterface *arkInterface, llvm::Value *threadRegValue, llvm::Value *frameRegValue);
 }  // namespace panda::llvmbackend::gc_barriers
 
 #endif  // LIBLLVMBACKEND_LOWERING_GC_BARRIERS_H

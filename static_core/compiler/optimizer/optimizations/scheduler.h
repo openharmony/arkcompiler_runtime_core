@@ -28,10 +28,10 @@ public:
           loads_(graph->GetLocalAllocator()->Adapter()),
           stores_(graph->GetLocalAllocator()->Adapter()),
           special_(graph->GetLocalAllocator()->Adapter()),
-          ss_with_runtime_call_(graph->GetLocalAllocator()->Adapter()),
+          ssWithRuntimeCall_(graph->GetLocalAllocator()->Adapter()),
           old_(graph->GetLocalAllocator()->Adapter()),
           ocycle_(graph->GetLocalAllocator()->Adapter()),
-          num_deps_(graph->GetLocalAllocator()->Adapter()),
+          numDeps_(graph->GetLocalAllocator()->Adapter()),
           asap_(graph->GetLocalAllocator()->Adapter()),
           prio_(graph->GetLocalAllocator()->Adapter()),
           deps_(graph->GetLocalAllocator()->Adapter())
@@ -46,7 +46,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerScheduling();
+        return g_options.IsCompilerScheduling();
     }
 
     const char *GetPassName() const override
@@ -59,12 +59,12 @@ private:
     bool ScheduleBasicBlock(BasicBlock *bb);
     bool BuildAllDeps(BasicBlock *bb);
 
-    void ProcessInst(Inst *inst, Marker mrk, uint32_t *num_inst, uint32_t *num_between, uint32_t *num_special,
-                     Inst **last_barrier);
-    void ProcessMemory(Inst *inst, uint32_t *prio, Inst *last_barrier);
-    void ProcessSpecial(Inst *inst, uint32_t *prio, Inst *last_barrier);
-    void ProcessSpecialBoundsCheckI(Inst *inst, uint32_t *prio, Inst *last_barrier);
-    void ProcessRefInst(Inst *inst, uint32_t *prio, Inst *last_barrier);
+    void ProcessInst(Inst *inst, Marker mrk, uint32_t *numInst, uint32_t *numBetween, uint32_t *numSpecial,
+                     Inst **lastBarrier);
+    void ProcessMemory(Inst *inst, uint32_t *prio, Inst *lastBarrier);
+    void ProcessSpecial(Inst *inst, uint32_t *prio, Inst *lastBarrier);
+    void ProcessSpecialBoundsCheckI(Inst *inst, uint32_t *prio, Inst *lastBarrier);
+    void ProcessRefInst(Inst *inst, uint32_t *prio, Inst *lastBarrier);
 
     bool FinalizeBB(BasicBlock *bb, uint32_t cycle);
     void Cleanup();
@@ -75,17 +75,17 @@ private:
     uint32_t SchedWithGlued(Inst *inst, SchedulerPriorityQueue *waiting, uint32_t cycle);
 
     uint32_t oprev_ {0};
-    uint32_t num_barriers_ {0};
-    uint32_t max_prio_ {0};
+    uint32_t numBarriers_ {0};
+    uint32_t maxPrio_ {0};
 
     InstVector sched_;
     InstVector loads_;
     InstVector stores_;
     InstVector special_;
-    InstVector ss_with_runtime_call_;
+    InstVector ssWithRuntimeCall_;
     ArenaUnorderedMap<Inst *, uint32_t> old_;
     ArenaUnorderedMap<Inst *, uint32_t> ocycle_;
-    ArenaUnorderedMap<Inst *, uint32_t> num_deps_;
+    ArenaUnorderedMap<Inst *, uint32_t> numDeps_;
     ArenaUnorderedMap<Inst *, uint32_t> asap_;
     ArenaUnorderedMap<Inst *, uint32_t> prio_;
     ArenaUnorderedMap<Inst *, ArenaUnorderedMap<Inst *, uint32_t>> deps_;

@@ -20,7 +20,7 @@ namespace panda::ets::interop::js {
 
 struct IntrinsicsAPI;
 
-void JSRuntimeIntrinsicsSetIntrinsicsAPI(const IntrinsicsAPI *intrinsics_api);
+void JSRuntimeIntrinsicsSetIntrinsicsAPI(const IntrinsicsAPI *intrinsicsApi);
 
 }  // namespace panda::ets::interop::js
 

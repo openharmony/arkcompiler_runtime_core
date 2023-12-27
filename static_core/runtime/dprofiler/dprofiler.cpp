@@ -62,10 +62,10 @@ static uint64_t GetHash()
     return std::chrono::time_point_cast<std::chrono::nanoseconds>(t).time_since_epoch().count();
 }
 
-DProfiler::DProfiler(std::string_view app_name, Runtime *runtime)
+DProfiler::DProfiler(std::string_view appName, Runtime *runtime)
     : runtime_(runtime),
-      profiling_data_(
-          MakePandaUnique<dprof::ProfilingData>(app_name.data(), GetHash(), os::thread::GetCurrentThreadId())),
+      profilingData_(
+          MakePandaUnique<dprof::ProfilingData>(appName.data(), GetHash(), os::thread::GetCurrentThreadId())),
       listener_(MakePandaUnique<DProfilerListener>(this))
 {
     runtime_->GetNotificationManager()->AddListener(listener_.get(), RuntimeNotificationManager::Event::VM_EVENTS);
@@ -75,7 +75,7 @@ void DProfiler::AddClass(const Class *klass)
 {
     for (const auto &method : klass->GetMethods()) {
         if (method.GetHotnessCounter() != 0) {
-            if (!hot_methods_.insert(&method).second) {
+            if (!hotMethods_.insert(&method).second) {
                 LOG(ERROR, DPROF) << "Method already exsists: " << GetFullName(&method);
             }
         }
@@ -84,23 +84,23 @@ void DProfiler::AddClass(const Class *klass)
 
 void DProfiler::Dump()
 {
-    PandaUnorderedMap<PandaString, uint32_t> method_info_map;
-    for (const Method *method : hot_methods_) {
-        auto ret = method_info_map.emplace(std::make_pair(GetFullName(method), method->GetHotnessCounter()));
+    PandaUnorderedMap<PandaString, uint32_t> methodInfoMap;
+    for (const Method *method : hotMethods_) {
+        auto ret = methodInfoMap.emplace(std::make_pair(GetFullName(method), method->GetHotnessCounter()));
         if (!ret.second) {
             LOG(ERROR, DPROF) << "Method already exists: " << ret.first->first;
         }
     }
 
     std::vector<uint8_t> buffer;
-    auto ret = serializer::TypeToBuffer(method_info_map, buffer);
+    auto ret = serializer::TypeToBuffer(methodInfoMap, buffer);
     if (!ret) {
         LOG(ERROR, DPROF) << "Cannot serialize method_info_map. Error: " << ret.Error();
         return;
     }
 
-    profiling_data_->SetFeatureDate("hotness_counters.v1", std::move(buffer));
-    profiling_data_->DumpAndResetFeatures();
+    profilingData_->SetFeatureDate("hotness_counters.v1", std::move(buffer));
+    profilingData_->DumpAndResetFeatures();
 }
 
 }  // namespace panda

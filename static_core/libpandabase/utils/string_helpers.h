@@ -37,18 +37,18 @@ inline std::string Vformat(const char *fmt, va_list args)
     std::string result;
     result.resize(SIZE);
 
-    bool is_truncated = true;
-    while (is_truncated) {
-        va_list copy_args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(copy_args, args);
-        int r = vsnprintf_truncated_s(result.data(), result.size() + 1, fmt, copy_args);
-        va_end(copy_args);
+    bool isTruncated = true;
+    while (isTruncated) {
+        va_list copyArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+        va_copy(copyArgs, args);
+        int r = vsnprintf_truncated_s(result.data(), result.size() + 1, fmt, copyArgs);
+        va_end(copyArgs);
 
         if (r < 0) {
             return "";
         }
 
-        is_truncated = static_cast<size_t>(r) == result.size();
+        isTruncated = static_cast<size_t>(r) == result.size();
         result.resize(result.size() * 2U);
     }
 

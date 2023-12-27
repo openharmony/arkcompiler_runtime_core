@@ -73,8 +73,8 @@ public:
 
 class PANDA_PUBLIC_API UnresolvedTypesWrapper : public UnresolvedTypesInterface {
 public:
-    bool AddTableSlot(RuntimeInterface::MethodPtr method, uint32_t type_id, SlotKind kind) override;
-    uintptr_t GetTableSlot(RuntimeInterface::MethodPtr method, uint32_t type_id, SlotKind kind) const override;
+    bool AddTableSlot(RuntimeInterface::MethodPtr method, uint32_t typeId, SlotKind kind) override;
+    uintptr_t GetTableSlot(RuntimeInterface::MethodPtr method, uint32_t typeId, SlotKind kind) const override;
 
 private:
     PandaMap<RuntimeInterface::MethodPtr, PandaMap<std::pair<uint32_t, SlotKind>, uintptr_t>> slots_;
@@ -94,12 +94,12 @@ public:
 
     compiler::InlineCachesInterface *GetInlineCaches() override
     {
-        return &inline_caches_;
+        return &inlineCaches_;
     }
 
     compiler::UnresolvedTypesInterface *GetUnresolvedTypes() override
     {
-        return &unresolved_types_;
+        return &unresolvedTypes_;
     }
 
     unsigned GetReturnReasonOk() const override
@@ -128,15 +128,15 @@ public:
         return const_cast<panda_file::File *>(MethodCast(method)->GetPandaFile());
     }
 
-    MethodId ResolveMethodIndex(MethodPtr parent_method, MethodIndex index) const override;
+    MethodId ResolveMethodIndex(MethodPtr parentMethod, MethodIndex index) const override;
 
-    FieldId ResolveFieldIndex(MethodPtr parent_method, FieldIndex index) const override;
+    FieldId ResolveFieldIndex(MethodPtr parentMethod, FieldIndex index) const override;
 
-    IdType ResolveTypeIndex(MethodPtr parent_method, TypeIndex index) const override;
+    IdType ResolveTypeIndex(MethodPtr parentMethod, TypeIndex index) const override;
 
     /**********************************************************************************/
     /// Method information
-    MethodPtr GetMethodById(MethodPtr parent_method, MethodId id) const override;
+    MethodPtr GetMethodById(MethodPtr parentMethod, MethodId id) const override;
 
     MethodId GetMethodId(MethodPtr method) const override;
 
@@ -167,11 +167,11 @@ public:
 
     bool IsMemoryBarrierRequired(MethodPtr method) const override;
 
-    compiler::DataType::Type GetMethodReturnType(MethodPtr parent_method, MethodId id) const override;
+    compiler::DataType::Type GetMethodReturnType(MethodPtr parentMethod, MethodId id) const override;
 
-    compiler::DataType::Type GetMethodArgumentType(MethodPtr parent_method, MethodId id, size_t index) const override;
+    compiler::DataType::Type GetMethodArgumentType(MethodPtr parentMethod, MethodId id, size_t index) const override;
 
-    size_t GetMethodArgumentsCount(MethodPtr parent_method, MethodId id) const override;
+    size_t GetMethodArgumentsCount(MethodPtr parentMethod, MethodId id) const override;
     size_t GetMethodArgumentsCount(MethodPtr method) const override
     {
         return MethodCast(method)->GetNumArgs();
@@ -232,10 +232,10 @@ public:
         return MethodCast(method)->GetVTableIndex();
     }
 
-    size_t GetClassIdForField(MethodPtr method, size_t field_id) const override
+    size_t GetClassIdForField(MethodPtr method, size_t fieldId) const override
     {
         auto fda =
-            panda_file::FieldDataAccessor(*MethodCast(method)->GetPandaFile(), panda_file::File::EntityId(field_id));
+            panda_file::FieldDataAccessor(*MethodCast(method)->GetPandaFile(), panda_file::File::EntityId(fieldId));
         return fda.GetClassId().GetOffset();
     }
 
@@ -252,15 +252,15 @@ public:
         return mda.GetClassId().GetOffset();
     }
 
-    size_t GetClassIdForMethod(MethodPtr parent_method, size_t method_id) const override
+    size_t GetClassIdForMethod(MethodPtr parentMethod, size_t methodId) const override
     {
-        auto mda = panda_file::MethodDataAccessor(*MethodCast(parent_method)->GetPandaFile(),
-                                                  panda_file::File::EntityId(method_id));
+        auto mda = panda_file::MethodDataAccessor(*MethodCast(parentMethod)->GetPandaFile(),
+                                                  panda_file::File::EntityId(methodId));
         return mda.GetClassId().GetOffset();
     }
 
     bool HasNativeException(MethodPtr method) const override;
-    bool IsMethodExternal(MethodPtr parent_method, MethodPtr callee_method) const override;
+    bool IsMethodExternal(MethodPtr parentMethod, MethodPtr calleeMethod) const override;
 
     bool IsMethodIntrinsic(MethodPtr method) const override
     {
@@ -272,24 +272,24 @@ public:
         return MethodCast(method)->IsAbstract();
     }
 
-    bool IsMethodIntrinsic(MethodPtr parent_method, MethodId id) const override;
+    bool IsMethodIntrinsic(MethodPtr parentMethod, MethodId id) const override;
 
     bool IsMethodFinal(MethodPtr method) const override
     {
         return MethodCast(method)->IsFinal();
     }
 
-    bool IsMethodStatic(MethodPtr parent_method, MethodId id) const override;
+    bool IsMethodStatic(MethodPtr parentMethod, MethodId id) const override;
     bool IsMethodStatic(MethodPtr method) const override;
 
     bool IsMethodCanBeInlined(MethodPtr method) const override
     {
-        auto method_ptr = MethodCast(method);
+        auto methodPtr = MethodCast(method);
         if (Runtime::GetCurrent()->GetOptions().GetVerificationMode() == VerificationMode::ON_THE_FLY &&
-            method_ptr->GetVerificationStage() != Method::VerificationStage::VERIFIED_OK) {
+            methodPtr->GetVerificationStage() != Method::VerificationStage::VERIFIED_OK) {
             return false;
         }
-        return !(method_ptr->IsIntrinsic() || method_ptr->IsNative() || method_ptr->IsAbstract());
+        return !(methodPtr->IsIntrinsic() || methodPtr->IsNative() || methodPtr->IsAbstract());
     }
 
     bool IsMethodStaticConstructor([[maybe_unused]] MethodPtr method) const override;
@@ -341,9 +341,9 @@ public:
         return MethodCast(method)->GetThrowTakenCounter(pc);
     }
 
-    std::string GetMethodFullName(MethodPtr method, bool with_signature) const override
+    std::string GetMethodFullName(MethodPtr method, bool withSignature) const override
     {
-        return std::string(MethodCast(method)->GetFullName(with_signature));
+        return std::string(MethodCast(method)->GetFullName(withSignature));
     }
 
     ClassPtr GetClass(MethodPtr method) const override
@@ -356,7 +356,7 @@ public:
 
     panda::pandasm::LiteralArray GetLiteralArray(MethodPtr method, LiteralArrayId id) const override;
 
-    bool IsInterfaceMethod(MethodPtr parent_method, MethodId id) const override;
+    bool IsInterfaceMethod(MethodPtr parentMethod, MethodId id) const override;
 
     bool IsInterfaceMethod(MethodPtr method) const override;
 
@@ -380,8 +380,8 @@ public:
 
     ::panda::mem::BarrierType GetPostType() const override;
 
-    ::panda::mem::BarrierOperand GetBarrierOperand(::panda::mem::BarrierPosition barrier_position,
-                                                   std::string_view operand_name) const override;
+    ::panda::mem::BarrierOperand GetBarrierOperand(::panda::mem::BarrierPosition barrierPosition,
+                                                   std::string_view operandName) const override;
 
     /**********************************************************************************/
     /// Array information
@@ -425,7 +425,7 @@ public:
     ClassPtr GetClass(MethodPtr method, IdType id) const override;
 
     compiler::ClassType GetClassType(MethodPtr method, IdType id) const override;
-    compiler::ClassType GetClassType(ClassPtr klass_ptr) const override;
+    compiler::ClassType GetClassType(ClassPtr klassPtr) const override;
 
     bool IsArrayClass(MethodPtr method, IdType id) const override;
 
@@ -438,7 +438,7 @@ public:
 
     ClassPtr GetArrayElementClass(ClassPtr cls) const override;
 
-    bool CheckStoreArray(ClassPtr array_cls, ClassPtr str_cls) const override;
+    bool CheckStoreArray(ClassPtr arrayCls, ClassPtr strCls) const override;
 
     bool IsAssignableFrom(ClassPtr cls1, ClassPtr cls2) const override;
 
@@ -460,9 +460,9 @@ public:
         return MarkWord::MarkWordRepresentation::HASH_MASK;
     }
 
-    compiler::StringCtorType GetStringCtorType(MethodPtr ctor_method) const override
+    compiler::StringCtorType GetStringCtorType(MethodPtr ctorMethod) const override
     {
-        return (std::strcmp(utf::Mutf8AsCString(MethodCast(ctor_method)->GetRefArgType(1).data), "[C") == 0)
+        return (std::strcmp(utf::Mutf8AsCString(MethodCast(ctorMethod)->GetRefArgType(1).data), "[C") == 0)
                    ? compiler::StringCtorType::CHAR_ARRAY
                    : compiler::StringCtorType::STRING;
     }
@@ -489,9 +489,9 @@ public:
     /**********************************************************************************/
     /// Field information
 
-    FieldPtr ResolveField(MethodPtr method, size_t id, bool allow_external, uint32_t *class_id) override;
+    FieldPtr ResolveField(MethodPtr method, size_t id, bool allowExternal, uint32_t *classId) override;
     compiler::DataType::Type GetFieldType(FieldPtr field) const override;
-    compiler::DataType::Type GetFieldTypeById(MethodPtr parent_method, IdType id) const override;
+    compiler::DataType::Type GetFieldTypeById(MethodPtr parentMethod, IdType id) const override;
     IdType GetFieldValueTypeId(MethodPtr method, IdType id) const override;
     size_t GetFieldOffset(FieldPtr field) const override;
     FieldPtr GetFieldByOffset(size_t offset) const override;
@@ -543,7 +543,7 @@ public:
 
     /**********************************************************************************/
     /// Entrypoints
-    uintptr_t GetIntrinsicAddress(bool runtime_call, SourceLanguage lang, IntrinsicId id) const override;
+    uintptr_t GetIntrinsicAddress(bool runtimeCall, SourceLanguage lang, IntrinsicId id) const override;
 
     /**********************************************************************************/
     /// Dynamic object information
@@ -617,34 +617,34 @@ private:
 
 private:
     ClassHierarchyAnalysisWrapper cha_;
-    InlineCachesWrapper inline_caches_;
-    UnresolvedTypesWrapper unresolved_types_;
+    InlineCachesWrapper inlineCaches_;
+    UnresolvedTypesWrapper unresolvedTypes_;
 };
 
 class Compiler : public CompilerInterface {
 public:
-    explicit Compiler(CodeAllocator *code_allocator, mem::InternalAllocatorPtr internal_allocator,
-                      const RuntimeOptions &options, mem::MemStatsType *mem_stats,
-                      compiler::RuntimeInterface *runtime_iface)
-        : code_allocator_(code_allocator),
-          internal_allocator_(internal_allocator),
-          gdb_debug_info_allocator_(panda::SpaceType::SPACE_TYPE_COMPILER, mem_stats),
-          runtime_iface_(runtime_iface)
+    explicit Compiler(CodeAllocator *codeAllocator, mem::InternalAllocatorPtr internalAllocator,
+                      const RuntimeOptions &options, mem::MemStatsType *memStats,
+                      compiler::RuntimeInterface *runtimeIface)
+        : codeAllocator_(codeAllocator),
+          internalAllocator_(internalAllocator),
+          gdbDebugInfoAllocator_(panda::SpaceType::SPACE_TYPE_COMPILER, memStats),
+          runtimeIface_(runtimeIface)
     {
-        no_async_jit_ = options.IsNoAsyncJit();
+        noAsyncJit_ = options.IsNoAsyncJit();
         if (options.IsArkAot()) {
             return;
         }
 
-        if ((Runtime::GetTaskScheduler() == nullptr) || no_async_jit_) {
-            compiler_worker_ =
-                internal_allocator_->New<CompilerThreadPoolWorker>(internal_allocator_, this, no_async_jit_, options);
+        if ((Runtime::GetTaskScheduler() == nullptr) || noAsyncJit_) {
+            compilerWorker_ =
+                internalAllocator_->New<CompilerThreadPoolWorker>(internalAllocator_, this, noAsyncJit_, options);
         } else {
-            compiler_worker_ = internal_allocator_->New<CompilerTaskManagerWorker>(internal_allocator_, this);
+            compilerWorker_ = internalAllocator_->New<CompilerTaskManagerWorker>(internalAllocator_, this);
         }
         InitializeWorker();
-        if (compiler::OPTIONS.WasSetCompilerDumpJitStatsCsv()) {
-            jit_stats_ = internal_allocator_->New<compiler::JITStats>(internal_allocator_);
+        if (compiler::g_options.WasSetCompilerDumpJitStatsCsv()) {
+            jitStats_ = internalAllocator_->New<compiler::JITStats>(internalAllocator_);
         }
     }
 
@@ -660,87 +660,87 @@ public:
 
     void FinalizeWorker() override
     {
-        if (compiler_worker_ != nullptr) {
-            compiler_worker_->FinalizeWorker();
+        if (compilerWorker_ != nullptr) {
+            compilerWorker_->FinalizeWorker();
         }
     }
 
     void JoinWorker() override;
 
-    bool IsCompilationExpired(Method *method, bool is_osr);
+    bool IsCompilationExpired(Method *method, bool isOsr);
 
     ~Compiler() override
     {
         // We need to join thread first if runtime initialization fails and Destroy is not called
         FinalizeWorker();
-        if (compiler_worker_ != nullptr) {
-            internal_allocator_->Delete(compiler_worker_);
-            compiler_worker_ = nullptr;
+        if (compilerWorker_ != nullptr) {
+            internalAllocator_->Delete(compilerWorker_);
+            compilerWorker_ = nullptr;
         }
-        internal_allocator_->Delete(jit_stats_);
+        internalAllocator_->Delete(jitStats_);
     }
 
-    bool CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr, TaggedValue func) override;
+    bool CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr, TaggedValue func) override;
 
     virtual void AddTask(CompilerTask &&ctx, [[maybe_unused]] TaggedValue func)
     {
-        compiler_worker_->AddTask(std::move(ctx));
+        compilerWorker_->AddTask(std::move(ctx));
     }
 
     template <compiler::TaskRunnerMode RUNNER_MODE>
-    void CompileMethodLocked(compiler::CompilerTaskRunner<RUNNER_MODE> task_runner);
+    void CompileMethodLocked(compiler::CompilerTaskRunner<RUNNER_MODE> taskRunner);
 
     /// Basic method, which starts compilation. Do not use.
     template <compiler::TaskRunnerMode RUNNER_MODE>
-    void StartCompileMethod(compiler::CompilerTaskRunner<RUNNER_MODE> task_runner);
+    void StartCompileMethod(compiler::CompilerTaskRunner<RUNNER_MODE> taskRunner);
 
-    void ScaleThreadPool(size_t number_of_threads)
+    void ScaleThreadPool(size_t numberOfThreads)
     {
         // Required for testing
-        GetThreadPool()->Scale(number_of_threads);
+        GetThreadPool()->Scale(numberOfThreads);
     }
 
     void *GetOsrCode(const Method *method) override
     {
-        return osr_code_map_.Get(method);
+        return osrCodeMap_.Get(method);
     }
 
     void SetOsrCode(const Method *method, void *ptr) override
     {
-        osr_code_map_.Set(method, ptr);
+        osrCodeMap_.Set(method, ptr);
     }
 
     void RemoveOsrCode(const Method *method) override
     {
-        osr_code_map_.Remove(method);
+        osrCodeMap_.Remove(method);
     }
 
     void SetNoAsyncJit(bool v) override
     {
-        no_async_jit_ = v;
+        noAsyncJit_ = v;
     }
 
     bool IsNoAsyncJit() override
     {
-        return no_async_jit_;
+        return noAsyncJit_;
     }
 
     compiler::RuntimeInterface *GetRuntimeInterface()
     {
-        return runtime_iface_;
+        return runtimeIface_;
     }
 
 protected:
     mem::InternalAllocatorPtr GetInternalAllocator()
     {
-        return internal_allocator_;
+        return internalAllocator_;
     }
 
     ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *GetThreadPool()
     {
-        ASSERT(Runtime::GetTaskScheduler() == nullptr || no_async_jit_);
-        if (compiler_worker_ != nullptr) {
-            return static_cast<CompilerThreadPoolWorker *>(compiler_worker_)->GetThreadPool();
+        ASSERT(Runtime::GetTaskScheduler() == nullptr || noAsyncJit_);
+        if (compilerWorker_ != nullptr) {
+            return static_cast<CompilerThreadPoolWorker *>(compilerWorker_)->GetThreadPool();
         }
         return nullptr;
     }
@@ -748,28 +748,28 @@ protected:
 private:
     void InitializeWorker()
     {
-        if (compiler_worker_ != nullptr) {
-            compiler_worker_->InitializeWorker();
+        if (compilerWorker_ != nullptr) {
+            compilerWorker_->InitializeWorker();
         }
     }
 
-    CodeAllocator *code_allocator_;
-    OsrCodeMap osr_code_map_;
-    mem::InternalAllocatorPtr internal_allocator_;
+    CodeAllocator *codeAllocator_;
+    OsrCodeMap osrCodeMap_;
+    mem::InternalAllocatorPtr internalAllocator_;
     // This allocator is used for GDB debug structures in context of JIT unwind info.
-    ArenaAllocator gdb_debug_info_allocator_;
-    compiler::RuntimeInterface *runtime_iface_;
+    ArenaAllocator gdbDebugInfoAllocator_;
+    compiler::RuntimeInterface *runtimeIface_;
     // The lock is used for compiler thread synchronization
-    os::memory::Mutex compilation_lock_;
-    bool no_async_jit_;
-    CompilerWorker *compiler_worker_ {nullptr};
-    compiler::JITStats *jit_stats_ {nullptr};
+    os::memory::Mutex compilationLock_;
+    bool noAsyncJit_;
+    CompilerWorker *compilerWorker_ {nullptr};
+    compiler::JITStats *jitStats_ {nullptr};
     NO_COPY_SEMANTIC(Compiler);
     NO_MOVE_SEMANTIC(Compiler);
 };
 
 #ifndef PANDA_PRODUCT_BUILD
-uint8_t CompileMethodImpl(coretypes::String *full_method_name, panda_file::SourceLang source_lang);
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceLang sourceLang);
 #endif
 
 }  // namespace panda

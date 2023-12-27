@@ -60,36 +60,36 @@ protected:
 #endif
             gen_ = std::mt19937(seed_);
 
-            thread_id_range_ = MarkWordDistribution(0, MAX_THREAD_ID);
-            lock_count_range_ = MarkWordDistribution(0, MAX_LOCK_COUNT);
-            monitor_id_range_ = MarkWordDistribution(0, MAX_MONITOR_ID);
-            hash_range_ = MarkWordDistribution(0, MAX_HASH);
-            forwarding_address_range_ = MarkWordDistribution(0, MAX_FORWARDING_ADDRESS);
+            threadIdRange_ = MarkWordDistribution(0, MAX_THREAD_ID);
+            lockCountRange_ = MarkWordDistribution(0, MAX_LOCK_COUNT);
+            monitorIdRange_ = MarkWordDistribution(0, MAX_MONITOR_ID);
+            hashRange_ = MarkWordDistribution(0, MAX_HASH);
+            forwardingAddressRange_ = MarkWordDistribution(0, MAX_FORWARDING_ADDRESS);
         }
 
         ManagedThread::ThreadId GetThreadId()
         {
-            return thread_id_range_(gen_);
+            return threadIdRange_(gen_);
         }
 
         uint32_t GetLockCount()
         {
-            return lock_count_range_(gen_);
+            return lockCountRange_(gen_);
         }
 
         Monitor::MonitorId GetMonitorId()
         {
-            return monitor_id_range_(gen_);
+            return monitorIdRange_(gen_);
         }
 
         uint32_t GetHash()
         {
-            return hash_range_(gen_);
+            return hashRange_(gen_);
         }
 
         MarkWord::MarkWordSize GetForwardingAddress()
         {
-            return forwarding_address_range_(gen_) & MarkWord::MarkWordRepresentation::FORWARDING_ADDRESS_MASK_IN_PLACE;
+            return forwardingAddressRange_(gen_) & MarkWord::MarkWordRepresentation::FORWARDING_ADDRESS_MASK_IN_PLACE;
         }
 
         uint32_t GetSeed()
@@ -100,11 +100,11 @@ protected:
     private:
         uint32_t seed_;
         std::mt19937 gen_;
-        MarkWordDistribution thread_id_range_;
-        MarkWordDistribution lock_count_range_;
-        MarkWordDistribution monitor_id_range_;
-        MarkWordDistribution hash_range_;
-        MarkWordDistribution forwarding_address_range_;
+        MarkWordDistribution threadIdRange_;
+        MarkWordDistribution lockCountRange_;
+        MarkWordDistribution monitorIdRange_;
+        MarkWordDistribution hashRange_;
+        MarkWordDistribution forwardingAddressRange_;
     };
 
     class MaxTestValuesGetter {
@@ -144,68 +144,67 @@ protected:
     template <class Getter>
     class MarkWordWrapper {
     public:
-        explicit MarkWordWrapper(bool is_marked_for_gc = false, bool is_read_barrier_set = false)
+        explicit MarkWordWrapper(bool isMarkedForGc = false, bool isReadBarrierSet = false)
         {
-            if (is_marked_for_gc) {
+            if (isMarkedForGc) {
                 mw_ = mw_.SetMarkedForGC();
             }
-            if (is_read_barrier_set) {
+            if (isReadBarrierSet) {
                 mw_ = mw_.SetReadBarrier();
             }
         };
 
-        void CheckUnlocked(bool is_marked_for_gc = false, bool is_read_barrier_set = false)
+        void CheckUnlocked(bool isMarkedForGc = false, bool isReadBarrierSet = false)
         {
-            ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_UNLOCKED) << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.IsMarkedForGC(), is_marked_for_gc) << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.IsReadBarrierSet(), is_read_barrier_set) << " seed = " << param_getter_.GetSeed();
+            ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_UNLOCKED) << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.IsMarkedForGC(), isMarkedForGc) << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.IsReadBarrierSet(), isReadBarrierSet) << " seed = " << paramGetter_.GetSeed();
         }
 
-        void CheckLightweightLock(const ManagedThread::ThreadId t_id, const uint32_t lock_count, bool is_marked_for_gc,
-                                  bool is_read_barrier_set = false)
+        void CheckLightweightLock(const ManagedThread::ThreadId tId, const uint32_t lockCount, bool isMarkedForGc,
+                                  bool isReadBarrierSet = false)
         {
             ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_LIGHT_LOCKED)
-                << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.GetThreadId(), t_id) << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.GetLockCount(), lock_count) << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.IsMarkedForGC(), is_marked_for_gc) << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.IsReadBarrierSet(), is_read_barrier_set) << " seed = " << param_getter_.GetSeed();
+                << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.GetThreadId(), tId) << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.GetLockCount(), lockCount) << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.IsMarkedForGC(), isMarkedForGc) << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.IsReadBarrierSet(), isReadBarrierSet) << " seed = " << paramGetter_.GetSeed();
         }
 
-        void CheckHeavyweightLock(const Monitor::MonitorId m_id, bool is_marked_for_gc,
-                                  bool is_read_barrier_set = false)
+        void CheckHeavyweightLock(const Monitor::MonitorId mId, bool isMarkedForGc, bool isReadBarrierSet = false)
         {
             ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_HEAVY_LOCKED)
-                << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.GetMonitorId(), m_id) << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.IsMarkedForGC(), is_marked_for_gc) << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.IsReadBarrierSet(), is_read_barrier_set) << " seed = " << param_getter_.GetSeed();
+                << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.GetMonitorId(), mId) << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.IsMarkedForGC(), isMarkedForGc) << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.IsReadBarrierSet(), isReadBarrierSet) << " seed = " << paramGetter_.GetSeed();
         }
 
-        void CheckHashed(uint32_t hash, bool is_marked_for_gc, bool is_read_barrier_set = false)
+        void CheckHashed(uint32_t hash, bool isMarkedForGc, bool isReadBarrierSet = false)
         {
             if (mw_.CONFIG_IS_HASH_IN_OBJ_HEADER) {
-                ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_HASHED) << " seed = " << param_getter_.GetSeed();
-                ASSERT_EQ(mw_.GetHash(), hash) << " seed = " << param_getter_.GetSeed();
-                ASSERT_EQ(mw_.IsMarkedForGC(), is_marked_for_gc) << " seed = " << param_getter_.GetSeed();
-                ASSERT_EQ(mw_.IsReadBarrierSet(), is_read_barrier_set) << " seed = " << param_getter_.GetSeed();
+                ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_HASHED) << " seed = " << paramGetter_.GetSeed();
+                ASSERT_EQ(mw_.GetHash(), hash) << " seed = " << paramGetter_.GetSeed();
+                ASSERT_EQ(mw_.IsMarkedForGC(), isMarkedForGc) << " seed = " << paramGetter_.GetSeed();
+                ASSERT_EQ(mw_.IsReadBarrierSet(), isReadBarrierSet) << " seed = " << paramGetter_.GetSeed();
             }
         }
 
-        void CheckGC(MarkWord::MarkWordSize forwarding_address)
+        void CheckGC(MarkWord::MarkWordSize forwardingAddress)
         {
-            ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_GC) << " seed = " << param_getter_.GetSeed();
-            ASSERT_EQ(mw_.GetForwardingAddress(), forwarding_address) << " seed = " << param_getter_.GetSeed();
+            ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_GC) << " seed = " << paramGetter_.GetSeed();
+            ASSERT_EQ(mw_.GetForwardingAddress(), forwardingAddress) << " seed = " << paramGetter_.GetSeed();
         }
 
-        void DecodeLightLock(ManagedThread::ThreadId t_id, uint32_t l_count)
+        void DecodeLightLock(ManagedThread::ThreadId tId, uint32_t lCount)
         {
-            mw_ = mw_.DecodeFromLightLock(t_id, l_count);
+            mw_ = mw_.DecodeFromLightLock(tId, lCount);
         }
 
-        void DecodeHeavyLock(Monitor::MonitorId m_id)
+        void DecodeHeavyLock(Monitor::MonitorId mId)
         {
-            mw_ = mw_.DecodeFromMonitor(m_id);
+            mw_ = mw_.DecodeFromMonitor(mId);
         }
 
         void DecodeHash(uint32_t hash)
@@ -213,38 +212,38 @@ protected:
             mw_ = mw_.DecodeFromHash(hash);
         }
 
-        void DecodeForwardingAddress(MarkWord::MarkWordSize f_address)
+        void DecodeForwardingAddress(MarkWord::MarkWordSize fAddress)
         {
-            mw_ = mw_.DecodeFromForwardingAddress(f_address);
+            mw_ = mw_.DecodeFromForwardingAddress(fAddress);
         }
 
-        void DecodeAndCheckLightLock(bool is_marked_for_gc = false, bool is_read_barrier_set = false)
+        void DecodeAndCheckLightLock(bool isMarkedForGc = false, bool isReadBarrierSet = false)
         {
-            auto t_id = param_getter_.GetThreadId();
-            auto l_count = param_getter_.GetLockCount();
-            DecodeLightLock(t_id, l_count);
-            CheckLightweightLock(t_id, l_count, is_marked_for_gc, is_read_barrier_set);
+            auto tId = paramGetter_.GetThreadId();
+            auto lCount = paramGetter_.GetLockCount();
+            DecodeLightLock(tId, lCount);
+            CheckLightweightLock(tId, lCount, isMarkedForGc, isReadBarrierSet);
         }
 
-        void DecodeAndCheckHeavyLock(bool is_marked_for_gc = false, bool is_read_barrier_set = false)
+        void DecodeAndCheckHeavyLock(bool isMarkedForGc = false, bool isReadBarrierSet = false)
         {
-            auto m_id = param_getter_.GetMonitorId();
-            DecodeHeavyLock(m_id);
-            CheckHeavyweightLock(m_id, is_marked_for_gc, is_read_barrier_set);
+            auto mId = paramGetter_.GetMonitorId();
+            DecodeHeavyLock(mId);
+            CheckHeavyweightLock(mId, isMarkedForGc, isReadBarrierSet);
         }
 
-        void DecodeAndCheckHashed(bool is_marked_for_gc = false, bool is_read_barrier_set = false)
+        void DecodeAndCheckHashed(bool isMarkedForGc = false, bool isReadBarrierSet = false)
         {
-            auto hash = param_getter_.GetHash();
+            auto hash = paramGetter_.GetHash();
             DecodeHash(hash);
-            CheckHashed(hash, is_marked_for_gc, is_read_barrier_set);
+            CheckHashed(hash, isMarkedForGc, isReadBarrierSet);
         }
 
         void DecodeAndCheckGC()
         {
-            auto f_address = param_getter_.GetForwardingAddress();
-            DecodeForwardingAddress(f_address);
-            CheckGC(f_address);
+            auto fAddress = paramGetter_.GetForwardingAddress();
+            DecodeForwardingAddress(fAddress);
+            CheckGC(fAddress);
         }
 
         void SetMarkedForGC()
@@ -259,17 +258,17 @@ protected:
 
     private:
         MarkWord mw_;
-        Getter param_getter_;
+        Getter paramGetter_;
     };
 
     template <class Getter>
-    void CheckMakeHashed(bool is_marked_for_gc, bool is_read_barrier_set);
+    void CheckMakeHashed(bool isMarkedForGc, bool isReadBarrierSet);
 
     template <class Getter>
-    void CheckMakeLightweightLock(bool is_marked_for_gc, bool is_read_barrier_set);
+    void CheckMakeLightweightLock(bool isMarkedForGc, bool isReadBarrierSet);
 
     template <class Getter>
-    void CheckMakeHeavyweightLock(bool is_marked_for_gc, bool is_read_barrier_set);
+    void CheckMakeHeavyweightLock(bool isMarkedForGc, bool isReadBarrierSet);
 
     template <class Getter>
     void CheckMakeGC();
@@ -282,22 +281,22 @@ protected:
 };
 
 template <class Getter>
-void MarkWordTest::CheckMakeHashed(bool is_marked_for_gc, bool is_read_barrier_set)
+void MarkWordTest::CheckMakeHashed(bool isMarkedForGc, bool isReadBarrierSet)
 {
     // nothing, gc = markedForGC, rb = readBarrierSet, state = unlocked
-    MarkWordWrapper<Getter> wrapper(is_marked_for_gc, is_read_barrier_set);
+    MarkWordWrapper<Getter> wrapper(isMarkedForGc, isReadBarrierSet);
 
     // check new hash
-    wrapper.DecodeAndCheckHashed(is_marked_for_gc, is_read_barrier_set);
-    wrapper.DecodeAndCheckHashed(is_marked_for_gc, is_read_barrier_set);
+    wrapper.DecodeAndCheckHashed(isMarkedForGc, isReadBarrierSet);
+    wrapper.DecodeAndCheckHashed(isMarkedForGc, isReadBarrierSet);
 
     // check after lightweight lock
-    wrapper.DecodeAndCheckLightLock(is_marked_for_gc, is_read_barrier_set);
-    wrapper.DecodeAndCheckHashed(is_marked_for_gc, is_read_barrier_set);
+    wrapper.DecodeAndCheckLightLock(isMarkedForGc, isReadBarrierSet);
+    wrapper.DecodeAndCheckHashed(isMarkedForGc, isReadBarrierSet);
 
     // check after heavyweight lock
-    wrapper.DecodeAndCheckHeavyLock(is_marked_for_gc, is_read_barrier_set);
-    wrapper.DecodeAndCheckHashed(is_marked_for_gc, is_read_barrier_set);
+    wrapper.DecodeAndCheckHeavyLock(isMarkedForGc, isReadBarrierSet);
+    wrapper.DecodeAndCheckHashed(isMarkedForGc, isReadBarrierSet);
 }
 
 TEST_F(MarkWordTest, CreateHashedWithRandValues)
@@ -317,22 +316,22 @@ TEST_F(MarkWordTest, CreateHashedWithMaxValues)
 }
 
 template <class Getter>
-void MarkWordTest::CheckMakeLightweightLock(bool is_marked_for_gc, bool is_read_barrier_set)
+void MarkWordTest::CheckMakeLightweightLock(bool isMarkedForGc, bool isReadBarrierSet)
 {
     // nothing, gc = markedForGC, rb = readBarrierSet, state = unlocked
-    MarkWordWrapper<Getter> wrapper(is_marked_for_gc, is_read_barrier_set);
+    MarkWordWrapper<Getter> wrapper(isMarkedForGc, isReadBarrierSet);
 
     // check new lightweight lock
-    wrapper.DecodeAndCheckLightLock(is_marked_for_gc, is_read_barrier_set);
-    wrapper.DecodeAndCheckLightLock(is_marked_for_gc, is_read_barrier_set);
+    wrapper.DecodeAndCheckLightLock(isMarkedForGc, isReadBarrierSet);
+    wrapper.DecodeAndCheckLightLock(isMarkedForGc, isReadBarrierSet);
 
     // check after hash
-    wrapper.DecodeAndCheckHashed(is_marked_for_gc, is_read_barrier_set);
-    wrapper.DecodeAndCheckLightLock(is_marked_for_gc, is_read_barrier_set);
+    wrapper.DecodeAndCheckHashed(isMarkedForGc, isReadBarrierSet);
+    wrapper.DecodeAndCheckLightLock(isMarkedForGc, isReadBarrierSet);
 
     // check after heavyweight lock
-    wrapper.DecodeAndCheckHeavyLock(is_marked_for_gc, is_read_barrier_set);
-    wrapper.DecodeAndCheckLightLock(is_marked_for_gc, is_read_barrier_set);
+    wrapper.DecodeAndCheckHeavyLock(isMarkedForGc, isReadBarrierSet);
+    wrapper.DecodeAndCheckLightLock(isMarkedForGc, isReadBarrierSet);
 }
 
 TEST_F(MarkWordTest, CreateLightweightLockWithRandValues)
@@ -352,22 +351,22 @@ TEST_F(MarkWordTest, CreateLightweightLockWithMaxValues)
 }
 
 template <class Getter>
-void MarkWordTest::CheckMakeHeavyweightLock(bool is_marked_for_gc, bool is_read_barrier_set)
+void MarkWordTest::CheckMakeHeavyweightLock(bool isMarkedForGc, bool isReadBarrierSet)
 {
     // nothing, gc = markedForGC, rb = readBarrierSet, state = unlocked
-    MarkWordWrapper<Getter> wrapper(is_marked_for_gc, is_read_barrier_set);
+    MarkWordWrapper<Getter> wrapper(isMarkedForGc, isReadBarrierSet);
 
     // check new heavyweight lock
-    wrapper.DecodeAndCheckHeavyLock(is_marked_for_gc, is_read_barrier_set);
-    wrapper.DecodeAndCheckHeavyLock(is_marked_for_gc, is_read_barrier_set);
+    wrapper.DecodeAndCheckHeavyLock(isMarkedForGc, isReadBarrierSet);
+    wrapper.DecodeAndCheckHeavyLock(isMarkedForGc, isReadBarrierSet);
 
     // check after hash
-    wrapper.DecodeAndCheckHashed(is_marked_for_gc, is_read_barrier_set);
-    wrapper.DecodeAndCheckHeavyLock(is_marked_for_gc, is_read_barrier_set);
+    wrapper.DecodeAndCheckHashed(isMarkedForGc, isReadBarrierSet);
+    wrapper.DecodeAndCheckHeavyLock(isMarkedForGc, isReadBarrierSet);
 
     // check after lightweight lock
-    wrapper.DecodeAndCheckLightLock(is_marked_for_gc, is_read_barrier_set);
-    wrapper.DecodeAndCheckHeavyLock(is_marked_for_gc, is_read_barrier_set);
+    wrapper.DecodeAndCheckLightLock(isMarkedForGc, isReadBarrierSet);
+    wrapper.DecodeAndCheckHeavyLock(isMarkedForGc, isReadBarrierSet);
 }
 
 TEST_F(MarkWordTest, CreateHeavyweightLockWithRandValues)
@@ -431,7 +430,7 @@ TEST_F(MarkWordTest, CreateGCWithMaxValues)
 template <class Getter>
 void MarkWordTest::CheckMarkingWithGC()
 {
-    Getter param_getter;
+    Getter paramGetter;
 
     // with unlocked
     {
@@ -444,28 +443,28 @@ void MarkWordTest::CheckMarkingWithGC()
     // with lightweight locked
     {
         MarkWordWrapper<Getter> wrapper;
-        auto t_id = param_getter.GetThreadId();
-        auto l_count = param_getter.GetLockCount();
-        wrapper.DecodeLightLock(t_id, l_count);
+        auto tId = paramGetter.GetThreadId();
+        auto lCount = paramGetter.GetLockCount();
+        wrapper.DecodeLightLock(tId, lCount);
 
         wrapper.SetMarkedForGC();
-        wrapper.CheckLightweightLock(t_id, l_count, true);
+        wrapper.CheckLightweightLock(tId, lCount, true);
     }
 
     // with heavyweight locked
     {
         MarkWordWrapper<Getter> wrapper;
-        auto m_id = param_getter.GetMonitorId();
-        wrapper.DecodeHeavyLock(m_id);
+        auto mId = paramGetter.GetMonitorId();
+        wrapper.DecodeHeavyLock(mId);
 
         wrapper.SetMarkedForGC();
-        wrapper.CheckHeavyweightLock(m_id, true);
+        wrapper.CheckHeavyweightLock(mId, true);
     }
 
     // with hashed
     {
         MarkWordWrapper<Getter> wrapper;
-        auto hash = param_getter.GetHash();
+        auto hash = paramGetter.GetHash();
         wrapper.DecodeHash(hash);
 
         wrapper.SetMarkedForGC();
@@ -486,7 +485,7 @@ TEST_F(MarkWordTest, MarkWithGCWithMaxValues)
 template <class Getter>
 void MarkWordTest::CheckReadBarrierSet()
 {
-    Getter param_getter;
+    Getter paramGetter;
 
     // with unlocked
     {
@@ -499,28 +498,28 @@ void MarkWordTest::CheckReadBarrierSet()
     // with lightweight locked
     {
         MarkWordWrapper<Getter> wrapper;
-        auto t_id = param_getter.GetThreadId();
-        auto l_count = param_getter.GetLockCount();
-        wrapper.DecodeLightLock(t_id, l_count);
+        auto tId = paramGetter.GetThreadId();
+        auto lCount = paramGetter.GetLockCount();
+        wrapper.DecodeLightLock(tId, lCount);
 
         wrapper.SetReadBarrier();
-        wrapper.CheckLightweightLock(t_id, l_count, false, true);
+        wrapper.CheckLightweightLock(tId, lCount, false, true);
     }
 
     // with heavyweight locked
     {
         MarkWordWrapper<Getter> wrapper;
-        auto m_id = param_getter.GetMonitorId();
-        wrapper.DecodeHeavyLock(m_id);
+        auto mId = paramGetter.GetMonitorId();
+        wrapper.DecodeHeavyLock(mId);
 
         wrapper.SetReadBarrier();
-        wrapper.CheckHeavyweightLock(m_id, false, true);
+        wrapper.CheckHeavyweightLock(mId, false, true);
     }
 
     // with hashed
     {
         MarkWordWrapper<Getter> wrapper;
-        auto hash = param_getter.GetHash();
+        auto hash = paramGetter.GetHash();
         wrapper.DecodeHash(hash);
 
         wrapper.SetReadBarrier();

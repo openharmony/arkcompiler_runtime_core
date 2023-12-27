@@ -35,10 +35,10 @@ class AotTest : public AsmTest {
 public:
     AotTest()
     {
-        std::string exe_path = GetExecPath();
-        auto pos = exe_path.rfind('/');
-        paoc_path_ = exe_path.substr(0U, pos) + "/../bin/ark_aot";
-        aotdump_path_ = exe_path.substr(0U, pos) + "/../bin/ark_aotdump";
+        std::string exePath = GetExecPath();
+        auto pos = exePath.rfind('/');
+        paocPath_ = exePath.substr(0U, pos) + "/../bin/ark_aot";
+        aotdumpPath_ = exePath.substr(0U, pos) + "/../bin/ark_aotdump";
     }
 
     ~AotTest() override = default;
@@ -48,23 +48,23 @@ public:
 
     const char *GetPaocFile() const
     {
-        return paoc_path_.c_str();
+        return paocPath_.c_str();
     }
 
     const char *GetAotdumpFile() const
     {
-        return aotdump_path_.c_str();
+        return aotdumpPath_.c_str();
     }
 
     std::string GetPaocDirectory() const
     {
-        auto pos = paoc_path_.rfind('/');
-        return paoc_path_.substr(0U, pos);
+        auto pos = paocPath_.rfind('/');
+        return paocPath_.substr(0U, pos);
     }
 
     const char *GetArchAsArgString() const
     {
-        switch (target_arch_) {
+        switch (targetArch_) {
             case Arch::AARCH32:
                 return "arm";
             case Arch::AARCH64:
@@ -78,20 +78,20 @@ public:
         }
     }
 
-    void RunAotdump(const std::string &aot_filename)
+    void RunAotdump(const std::string &aotFilename)
     {
         TmpFile tmpfile("aotdump.tmp");
 
         auto res = os::exec::Exec(GetAotdumpFile(), "--show-code=disasm", "--output-file", tmpfile.GetFileName(),
-                                  aot_filename.c_str());
+                                  aotFilename.c_str());
         ASSERT_TRUE(res) << "aotdump failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U) << "aotdump return error code: " << res.Value();
     }
 
 private:
-    Arch target_arch_ = Arch::AARCH64;
-    std::string paoc_path_;
-    std::string aotdump_path_;
+    Arch targetArch_ = Arch::AARCH64;
+    std::string paocPath_;
+    std::string aotdumpPath_;
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -102,10 +102,10 @@ TEST_F(AotTest, PaocBootPandaFiles)
     if (RUNTIME_ARCH != Arch::X86_64) {
         return;
     }
-    TmpFile panda_fname("test.pf");
-    TmpFile aot_fname("./test.an");
+    TmpFile pandaFname("test.pf");
+    TmpFile aotFname("./test.an");
     static const std::string LOCATION = "/data/local/tmp";
-    static const std::string PANDA_FILE_PATH = LOCATION + "/" + panda_fname.GetFileName();
+    static const std::string PANDA_FILE_PATH = LOCATION + "/" + pandaFname.GetFileName();
 
     auto source = R"(
         .function void dummy() {
@@ -117,18 +117,18 @@ TEST_F(AotTest, PaocBootPandaFiles)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
     }
 
     // Correct path to arkstdlib.abc
     {
-        auto pandastdlib_path = GetPaocDirectory() + "/../pandastdlib/arkstdlib.abc";
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--paoc-output",
-                                  aot_fname.GetFileName(), "--paoc-location", LOCATION.c_str(), "--compiler-cross-arch",
-                                  GetArchAsArgString(), "--boot-panda-files", pandastdlib_path.c_str());
+        auto pandastdlibPath = GetPaocDirectory() + "/../pandastdlib/arkstdlib.abc";
+        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                                  aotFname.GetFileName(), "--paoc-location", LOCATION.c_str(), "--compiler-cross-arch",
+                                  GetArchAsArgString(), "--boot-panda-files", pandastdlibPath.c_str());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U) << "Aot compiler failed with code " << res.Value();
-        RunAotdump(aot_fname.GetFileName());
+        RunAotdump(aotFname.GetFileName());
     }
 }
 
@@ -138,10 +138,10 @@ TEST_F(AotTest, PaocLocation)
     if (RUNTIME_ARCH != Arch::X86_64) {
         return;
     }
-    TmpFile panda_fname("test.pf");
-    TmpFile aot_fname("./test.an");
+    TmpFile pandaFname("test.pf");
+    TmpFile aotFname("./test.an");
     static const std::string LOCATION = "/data/local/tmp";
-    static const std::string PANDA_FILE_PATH = LOCATION + "/" + panda_fname.GetFileName();
+    static const std::string PANDA_FILE_PATH = LOCATION + "/" + pandaFname.GetFileName();
 
     auto source = R"(
         .function u32 add(u64 a0, u64 a1) {
@@ -154,29 +154,28 @@ TEST_F(AotTest, PaocLocation)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
     }
 
     {
-        auto pandastdlib_path = GetPaocDirectory() + "/../pandastdlib/arkstdlib.abc";
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--paoc-output",
-                                  aot_fname.GetFileName(), "--paoc-location", LOCATION.c_str(),
+        auto pandastdlibPath = GetPaocDirectory() + "/../pandastdlib/arkstdlib.abc";
+        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                                  aotFname.GetFileName(), "--paoc-location", LOCATION.c_str(),
                                   "--compiler-cross-arch=x86_64", "--gc-type=epsilon", "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U) << "Aot compiler failed with code " << res.Value();
     }
 
-    AotManager aot_manager;
+    AotManager aotManager;
     {
-        auto res =
-            aot_manager.AddFile(aot_fname.GetFileName(), nullptr, static_cast<uint32_t>(mem::GCType::EPSILON_GC));
+        auto res = aotManager.AddFile(aotFname.GetFileName(), nullptr, static_cast<uint32_t>(mem::GCType::EPSILON_GC));
         ASSERT_TRUE(res) << res.Error();
     }
 
-    auto aot_file = aot_manager.GetFile(aot_fname.GetFileName());
-    ASSERT_TRUE(aot_file);
-    ASSERT_EQ(aot_file->GetFilesCount(), 1U);
-    ASSERT_TRUE(aot_file->FindPandaFile(PANDA_FILE_PATH));
+    auto aotFile = aotManager.GetFile(aotFname.GetFileName());
+    ASSERT_TRUE(aotFile);
+    ASSERT_EQ(aotFile->GetFilesCount(), 1U);
+    ASSERT_TRUE(aotFile->FindPandaFile(PANDA_FILE_PATH));
 }
 #endif  // PANDA_COMPILER_TARGET_AARCH64
 
@@ -189,25 +188,25 @@ TEST_F(AotTest, BuildAndLoad)
     uint32_t tid = os::thread::GetCurrentThreadId();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::string tmpfile = helpers::string::Format("/tmp/tmpfile_%04x.pn", tid);
-    const char *tmpfile_pn = tmpfile.c_str();
+    const char *tmpfilePn = tmpfile.c_str();
     static constexpr const char *TMPFILE_PF = "test.pf";
     static constexpr const char *CMDLINE = "cmdline";
     static constexpr uint32_t METHOD1_ID = 42;
     static constexpr uint32_t METHOD2_ID = 43;
-    const std::string class_name("Foo");
-    std::string method_name(class_name + "::method");
-    std::array<uint8_t, 4U> x86_add = {
+    const std::string className("Foo");
+    std::string methodName(className + "::method");
+    std::array<uint8_t, 4U> x86Add = {
         0x8dU, 0x04U, 0x37U,  // lea    eax,[rdi+rdi*1]
         0xc3U                 // ret
     };
 
-    AotBuilder aot_builder;
-    aot_builder.SetArch(RUNTIME_ARCH);
-    aot_builder.SetGcType(static_cast<uint32_t>(mem::GCType::STW_GC));
+    AotBuilder aotBuilder;
+    aotBuilder.SetArch(RUNTIME_ARCH);
+    aotBuilder.SetGcType(static_cast<uint32_t>(mem::GCType::STW_GC));
     RuntimeInterfaceMock iruntime;
-    aot_builder.SetRuntime(&iruntime);
+    aotBuilder.SetRuntime(&iruntime);
 
-    aot_builder.StartFile(TMPFILE_PF, 0x12345678U);
+    aotBuilder.StartFile(TMPFILE_PF, 0x12345678U);
 
     auto thread = MTManagedThread::GetCurrent();
     if (thread != nullptr) {
@@ -215,56 +214,56 @@ TEST_F(AotTest, BuildAndLoad)
     }
     auto runtime = Runtime::GetCurrent();
     auto etx = runtime->GetClassLinker()->GetExtension(runtime->GetLanguageContext(runtime->GetRuntimeType()));
-    auto klass = etx->CreateClass(reinterpret_cast<const uint8_t *>(class_name.data()), 0, 0,
+    auto klass = etx->CreateClass(reinterpret_cast<const uint8_t *>(className.data()), 0, 0,
                                   AlignUp(sizeof(Class), OBJECT_POINTER_SIZE));
     if (thread != nullptr) {
         thread->ManagedCodeEnd();
     }
 
     klass->SetFileId(panda_file::File::EntityId(13U));
-    aot_builder.StartClass(*klass);
+    aotBuilder.StartClass(*klass);
 
     Method method1(klass, nullptr, File::EntityId(METHOD1_ID), File::EntityId(), 0U, 1U, nullptr);
     {
-        CodeInfoBuilder code_builder(RUNTIME_ARCH, GetAllocator());
+        CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
         ArenaVector<uint8_t> data(GetAllocator()->Adapter());
-        code_builder.Encode(&data);
-        CompiledMethod compiled_method1(RUNTIME_ARCH, &method1, 0U);
-        compiled_method1.SetCode(Span(reinterpret_cast<const uint8_t *>(method_name.data()), method_name.size() + 1U));
-        compiled_method1.SetCodeInfo(Span(data).ToConst());
-        aot_builder.AddMethod(compiled_method1);
+        codeBuilder.Encode(&data);
+        CompiledMethod compiledMethod1(RUNTIME_ARCH, &method1, 0U);
+        compiledMethod1.SetCode(Span(reinterpret_cast<const uint8_t *>(methodName.data()), methodName.size() + 1U));
+        compiledMethod1.SetCodeInfo(Span(data).ToConst());
+        aotBuilder.AddMethod(compiledMethod1);
     }
 
     Method method2(klass, nullptr, File::EntityId(METHOD2_ID), File::EntityId(), 0U, 1U, nullptr);
     {
-        CodeInfoBuilder code_builder(RUNTIME_ARCH, GetAllocator());
+        CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
         ArenaVector<uint8_t> data(GetAllocator()->Adapter());
-        code_builder.Encode(&data);
-        CompiledMethod compiled_method2(RUNTIME_ARCH, &method2, 1U);
-        compiled_method2.SetCode(Span(reinterpret_cast<const uint8_t *>(x86_add.data()), x86_add.size()));
-        compiled_method2.SetCodeInfo(Span(data).ToConst());
-        aot_builder.AddMethod(compiled_method2);
+        codeBuilder.Encode(&data);
+        CompiledMethod compiledMethod2(RUNTIME_ARCH, &method2, 1U);
+        compiledMethod2.SetCode(Span(reinterpret_cast<const uint8_t *>(x86Add.data()), x86Add.size()));
+        compiledMethod2.SetCodeInfo(Span(data).ToConst());
+        aotBuilder.AddMethod(compiledMethod2);
     }
 
-    aot_builder.EndClass();
-    uint32_t hash = GetHash32String(reinterpret_cast<const uint8_t *>(class_name.data()));
-    aot_builder.InsertEntityPairHeader(hash, 13U);
-    aot_builder.InsertClassHashTableSize(1U);
-    aot_builder.EndFile();
+    aotBuilder.EndClass();
+    uint32_t hash = GetHash32String(reinterpret_cast<const uint8_t *>(className.data()));
+    aotBuilder.InsertEntityPairHeader(hash, 13U);
+    aotBuilder.InsertClassHashTableSize(1U);
+    aotBuilder.EndFile();
 
-    aot_builder.Write(CMDLINE, tmpfile_pn);
+    aotBuilder.Write(CMDLINE, tmpfilePn);
 
-    AotManager aot_manager;
-    auto res = aot_manager.AddFile(tmpfile_pn, nullptr, static_cast<uint32_t>(mem::GCType::STW_GC));
+    AotManager aotManager;
+    auto res = aotManager.AddFile(tmpfilePn, nullptr, static_cast<uint32_t>(mem::GCType::STW_GC));
     ASSERT_TRUE(res) << res.Error();
 
-    auto aot_file = aot_manager.GetFile(tmpfile_pn);
-    ASSERT_TRUE(aot_file);
-    ASSERT_TRUE(strcmp(CMDLINE, aot_file->GetCommandLine()) == 0U);
-    ASSERT_TRUE(strcmp(tmpfile_pn, aot_file->GetFileName()) == 0U);
-    ASSERT_EQ(aot_file->GetFilesCount(), 1U);
+    auto aotFile = aotManager.GetFile(tmpfilePn);
+    ASSERT_TRUE(aotFile);
+    ASSERT_TRUE(strcmp(CMDLINE, aotFile->GetCommandLine()) == 0U);
+    ASSERT_TRUE(strcmp(tmpfilePn, aotFile->GetFileName()) == 0U);
+    ASSERT_EQ(aotFile->GetFilesCount(), 1U);
 
-    auto pfile = aot_manager.FindPandaFile(TMPFILE_PF);
+    auto pfile = aotManager.FindPandaFile(TMPFILE_PF);
     ASSERT_NE(pfile, nullptr);
     auto cls = pfile->GetClass(13U);
     ASSERT_TRUE(cls.IsValid());
@@ -272,16 +271,16 @@ TEST_F(AotTest, BuildAndLoad)
     {
         auto code = cls.FindMethodCodeEntry(0U);
         ASSERT_FALSE(code == nullptr);
-        ASSERT_EQ(method_name, reinterpret_cast<const char *>(code));
+        ASSERT_EQ(methodName, reinterpret_cast<const char *>(code));
     }
 
     {
         auto code = cls.FindMethodCodeEntry(1U);
         ASSERT_FALSE(code == nullptr);
-        ASSERT_EQ(std::memcmp(x86_add.data(), code, x86_add.size()), 0U);
+        ASSERT_EQ(std::memcmp(x86Add.data(), code, x86Add.size()), 0U);
 #ifdef PANDA_TARGET_AMD64
-        auto func_add = reinterpret_cast<int (*)(int, int)>(const_cast<void *>(code));
-        ASSERT_EQ(func_add(2U, 3U), 5U);
+        auto funcAdd = reinterpret_cast<int (*)(int, int)>(const_cast<void *>(code));
+        ASSERT_EQ(funcAdd(2U, 3U), 5U);
 #endif
     }
 }
@@ -296,11 +295,11 @@ TEST_F(AotTest, PaocSpecifyMethods)
     if (RUNTIME_ARCH != Arch::X86_64) {
         return;
     }
-    TmpFile panda_fname("test.pf");
-    TmpFile paoc_output_name("events-out.csv");
+    TmpFile pandaFname("test.pf");
+    TmpFile paocOutputName("events-out.csv");
 
     static const std::string LOCATION = "/data/local/tmp";
-    static const std::string PANDA_FILE_PATH = LOCATION + "/" + panda_fname.GetFileName();
+    static const std::string PANDA_FILE_PATH = LOCATION + "/" + pandaFname.GetFileName();
 
     auto source = R"(
         .record A {}
@@ -336,18 +335,18 @@ TEST_F(AotTest, PaocSpecifyMethods)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
     }
 
     {
         // paoc will try compiling all the methods from the panda-file that matches `--compiler-regex`
         auto res =
-            os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--compiler-regex", "B::f1",
-                           "--paoc-mode=jit", "--events-output=csv", "--events-file", paoc_output_name.GetFileName());
+            os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--compiler-regex", "B::f1",
+                           "--paoc-mode=jit", "--events-output=csv", "--events-file", paocOutputName.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
 
-        std::ifstream infile(paoc_output_name.GetFileName());
+        std::ifstream infile(paocOutputName.GetFileName());
         std::regex rgx("Compilation,B::f1.*,COMPILED");
         for (std::string line; std::getline(infile, line);) {
             if (line.rfind("Compilation", 0U) == 0U) {
@@ -363,9 +362,9 @@ TEST_F(AotTest, PaocMultipleFiles)
         GTEST_SKIP();
     }
 
-    TmpFile aot_fname("./test.an");
-    TmpFile panda_fname1("test1.pf");
-    TmpFile panda_fname2("test2.pf");
+    TmpFile aotFname("./test.an");
+    TmpFile pandaFname1("test1.pf");
+    TmpFile pandaFname2("test2.pf");
 
     {
         auto source = R"(
@@ -378,7 +377,7 @@ TEST_F(AotTest, PaocMultipleFiles)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname1.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname1.GetFileName(), res.Value()));
     }
 
     {
@@ -395,29 +394,28 @@ TEST_F(AotTest, PaocMultipleFiles)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname2.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname2.GetFileName(), res.Value()));
     }
 
     {
-        std::stringstream panda_files;
-        panda_files << panda_fname1.GetFileName() << ',' << panda_fname2.GetFileName();
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_files.str().c_str(), "--paoc-output",
-                                  aot_fname.GetFileName(), "--gc-type=epsilon", "--paoc-use-cha=false");
+        std::stringstream pandaFiles;
+        pandaFiles << pandaFname1.GetFileName() << ',' << pandaFname2.GetFileName();
+        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFiles.str().c_str(), "--paoc-output",
+                                  aotFname.GetFileName(), "--gc-type=epsilon", "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
     }
 
     {
-        AotManager aot_manager;
-        auto res =
-            aot_manager.AddFile(aot_fname.GetFileName(), nullptr, static_cast<uint32_t>(mem::GCType::EPSILON_GC));
+        AotManager aotManager;
+        auto res = aotManager.AddFile(aotFname.GetFileName(), nullptr, static_cast<uint32_t>(mem::GCType::EPSILON_GC));
         ASSERT_TRUE(res) << res.Error();
 
-        auto aot_file = aot_manager.GetFile(aot_fname.GetFileName());
-        ASSERT_TRUE(aot_file);
-        ASSERT_EQ(aot_file->GetFilesCount(), 2U);
+        auto aotFile = aotManager.GetFile(aotFname.GetFileName());
+        ASSERT_TRUE(aotFile);
+        ASSERT_EQ(aotFile->GetFilesCount(), 2U);
     }
-    RunAotdump(aot_fname.GetFileName());
+    RunAotdump(aotFname.GetFileName());
 }
 
 TEST_F(AotTest, PaocGcType)
@@ -426,8 +424,8 @@ TEST_F(AotTest, PaocGcType)
         GTEST_SKIP();
     }
 
-    TmpFile aot_fname("./test.pn");
-    TmpFile panda_fname("test.pf");
+    TmpFile aotFname("./test.pn");
+    TmpFile pandaFname("test.pf");
 
     {
         auto source = R"(
@@ -440,36 +438,35 @@ TEST_F(AotTest, PaocGcType)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
     }
 
     {
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--paoc-output",
-                                  aot_fname.GetFileName(), "--gc-type=epsilon", "--paoc-use-cha=false");
+        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                                  aotFname.GetFileName(), "--gc-type=epsilon", "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
     }
 
     {
         // Wrong gc-type
-        AotManager aot_manager;
-        auto res = aot_manager.AddFile(aot_fname.GetFileName(), nullptr, static_cast<uint32_t>(mem::GCType::STW_GC));
+        AotManager aotManager;
+        auto res = aotManager.AddFile(aotFname.GetFileName(), nullptr, static_cast<uint32_t>(mem::GCType::STW_GC));
         ASSERT_FALSE(res) << res.Error();
-        std::string expected_string = "Wrong AotHeader gc-type: epsilon vs stw";
-        ASSERT_NE(res.Error().find(expected_string), std::string::npos);
+        std::string expectedString = "Wrong AotHeader gc-type: epsilon vs stw";
+        ASSERT_NE(res.Error().find(expectedString), std::string::npos);
     }
 
     {
-        AotManager aot_manager;
-        auto res =
-            aot_manager.AddFile(aot_fname.GetFileName(), nullptr, static_cast<uint32_t>(mem::GCType::EPSILON_GC));
+        AotManager aotManager;
+        auto res = aotManager.AddFile(aotFname.GetFileName(), nullptr, static_cast<uint32_t>(mem::GCType::EPSILON_GC));
         ASSERT_TRUE(res) << res.Error();
 
-        auto aot_file = aot_manager.GetFile(aot_fname.GetFileName());
-        ASSERT_TRUE(aot_file);
-        ASSERT_EQ(aot_file->GetFilesCount(), 1U);
+        auto aotFile = aotManager.GetFile(aotFname.GetFileName());
+        ASSERT_TRUE(aotFile);
+        ASSERT_EQ(aotFile->GetFilesCount(), 1U);
     }
-    RunAotdump(aot_fname.GetFileName());
+    RunAotdump(aotFname.GetFileName());
 }
 
 TEST_F(AotTest, FileManagerLoadAbc)
@@ -478,8 +475,8 @@ TEST_F(AotTest, FileManagerLoadAbc)
         GTEST_SKIP();
     }
 
-    TmpFile aot_fname("./test.an");
-    TmpFile panda_fname("./test.pf");
+    TmpFile aotFname("./test.an");
+    TmpFile pandaFname("./test.pf");
 
     {
         auto source = R"(
@@ -492,36 +489,36 @@ TEST_F(AotTest, FileManagerLoadAbc)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
     }
 
     {
         auto runtime = Runtime::GetCurrent();
-        auto gc_type = Runtime::GetGCType(runtime->GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
-        auto gc_type_name = "--gc-type=epsilon";
-        if (gc_type == mem::GCType::STW_GC) {
-            gc_type_name = "--gc-type=stw";
-        } else if (gc_type == mem::GCType::GEN_GC) {
-            gc_type_name = "--gc-type=gen-gc";
+        auto gcType = Runtime::GetGCType(runtime->GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
+        auto gcTypeName = "--gc-type=epsilon";
+        if (gcType == mem::GCType::STW_GC) {
+            gcTypeName = "--gc-type=stw";
+        } else if (gcType == mem::GCType::GEN_GC) {
+            gcTypeName = "--gc-type=gen-gc";
         } else {
-            ASSERT_TRUE(gc_type == mem::GCType::EPSILON_GC || gc_type == mem::GCType::EPSILON_G1_GC)
+            ASSERT_TRUE(gcType == mem::GCType::EPSILON_GC || gcType == mem::GCType::EPSILON_G1_GC)
                 << "Invalid GC type\n";
         }
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--paoc-output",
-                                  aot_fname.GetFileName(), gc_type_name, "--paoc-use-cha=false");
+        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                                  aotFname.GetFileName(), gcTypeName, "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
     }
 
     {
-        auto res = FileManager::LoadAbcFile(panda_fname.GetFileName(), panda_file::File::READ_ONLY);
+        auto res = FileManager::LoadAbcFile(pandaFname.GetFileName(), panda_file::File::READ_ONLY);
         ASSERT_TRUE(res);
-        auto aot_manager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
-        auto aot_file = aot_manager->GetFile(aot_fname.GetFileName());
-        ASSERT_TRUE(aot_file);
-        ASSERT_EQ(aot_file->GetFilesCount(), 1U);
+        auto aotManager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
+        auto aotFile = aotManager->GetFile(aotFname.GetFileName());
+        ASSERT_TRUE(aotFile);
+        ASSERT_EQ(aotFile->GetFilesCount(), 1U);
     }
-    RunAotdump(aot_fname.GetFileName());
+    RunAotdump(aotFname.GetFileName());
 }
 
 TEST_F(AotTest, FileManagerLoadAn)
@@ -533,84 +530,84 @@ TEST_F(AotTest, FileManagerLoadAn)
     uint32_t tid = os::thread::GetCurrentThreadId();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::string tmpfile = helpers::string::Format("test.an", tid);
-    const char *tmpfile_pn = tmpfile.c_str();
+    const char *tmpfilePn = tmpfile.c_str();
     static constexpr const char *TMPFILE_PF = "test.pf";
     static constexpr const char *CMDLINE = "cmdline";
     static constexpr uint32_t METHOD1_ID = 42;
     static constexpr uint32_t METHOD2_ID = 43;
-    const std::string class_name("Foo");
-    std::string method_name(class_name + "::method");
-    std::array<uint8_t, 4U> x86_add = {
+    const std::string className("Foo");
+    std::string methodName(className + "::method");
+    std::array<uint8_t, 4U> x86Add = {
         0x8dU, 0x04U, 0x37U,  // lea    eax,[rdi+rdi*1]
         0xc3U                 // ret
     };
 
-    AotBuilder aot_builder;
-    aot_builder.SetArch(RUNTIME_ARCH);
+    AotBuilder aotBuilder;
+    aotBuilder.SetArch(RUNTIME_ARCH);
     RuntimeInterfaceMock iruntime;
-    aot_builder.SetRuntime(&iruntime);
+    aotBuilder.SetRuntime(&iruntime);
     auto runtime = Runtime::GetCurrent();
-    auto gc_type = Runtime::GetGCType(runtime->GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
-    aot_builder.SetGcType(static_cast<uint32_t>(gc_type));
+    auto gcType = Runtime::GetGCType(runtime->GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
+    aotBuilder.SetGcType(static_cast<uint32_t>(gcType));
 
-    aot_builder.StartFile(TMPFILE_PF, 0x12345678U);
+    aotBuilder.StartFile(TMPFILE_PF, 0x12345678U);
 
     auto thread = MTManagedThread::GetCurrent();
     if (thread != nullptr) {
         thread->ManagedCodeBegin();
     }
     auto etx = runtime->GetClassLinker()->GetExtension(runtime->GetLanguageContext(runtime->GetRuntimeType()));
-    auto klass = etx->CreateClass(reinterpret_cast<const uint8_t *>(class_name.data()), 0, 0,
+    auto klass = etx->CreateClass(reinterpret_cast<const uint8_t *>(className.data()), 0, 0,
                                   AlignUp(sizeof(Class), OBJECT_POINTER_SIZE));
     if (thread != nullptr) {
         thread->ManagedCodeEnd();
     }
 
     klass->SetFileId(panda_file::File::EntityId(13U));
-    aot_builder.StartClass(*klass);
+    aotBuilder.StartClass(*klass);
 
     Method method1(klass, nullptr, File::EntityId(METHOD1_ID), File::EntityId(), 0U, 1U, nullptr);
     {
-        CodeInfoBuilder code_builder(RUNTIME_ARCH, GetAllocator());
+        CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
         ArenaVector<uint8_t> data(GetAllocator()->Adapter());
-        code_builder.Encode(&data);
-        CompiledMethod compiled_method1(RUNTIME_ARCH, &method1, 0U);
-        compiled_method1.SetCode(Span(reinterpret_cast<const uint8_t *>(method_name.data()), method_name.size() + 1U));
-        compiled_method1.SetCodeInfo(Span(data).ToConst());
-        aot_builder.AddMethod(compiled_method1);
+        codeBuilder.Encode(&data);
+        CompiledMethod compiledMethod1(RUNTIME_ARCH, &method1, 0U);
+        compiledMethod1.SetCode(Span(reinterpret_cast<const uint8_t *>(methodName.data()), methodName.size() + 1U));
+        compiledMethod1.SetCodeInfo(Span(data).ToConst());
+        aotBuilder.AddMethod(compiledMethod1);
     }
 
     Method method2(klass, nullptr, File::EntityId(METHOD2_ID), File::EntityId(), 0U, 1U, nullptr);
     {
-        CodeInfoBuilder code_builder(RUNTIME_ARCH, GetAllocator());
+        CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
         ArenaVector<uint8_t> data(GetAllocator()->Adapter());
-        code_builder.Encode(&data);
-        CompiledMethod compiled_method2(RUNTIME_ARCH, &method2, 1U);
-        compiled_method2.SetCode(Span(reinterpret_cast<const uint8_t *>(x86_add.data()), x86_add.size()));
-        compiled_method2.SetCodeInfo(Span(data).ToConst());
-        aot_builder.AddMethod(compiled_method2);
+        codeBuilder.Encode(&data);
+        CompiledMethod compiledMethod2(RUNTIME_ARCH, &method2, 1U);
+        compiledMethod2.SetCode(Span(reinterpret_cast<const uint8_t *>(x86Add.data()), x86Add.size()));
+        compiledMethod2.SetCodeInfo(Span(data).ToConst());
+        aotBuilder.AddMethod(compiledMethod2);
     }
 
-    aot_builder.EndClass();
-    uint32_t hash = GetHash32String(reinterpret_cast<const uint8_t *>(class_name.data()));
-    aot_builder.InsertEntityPairHeader(hash, 13U);
-    aot_builder.InsertClassHashTableSize(1U);
-    aot_builder.EndFile();
+    aotBuilder.EndClass();
+    uint32_t hash = GetHash32String(reinterpret_cast<const uint8_t *>(className.data()));
+    aotBuilder.InsertEntityPairHeader(hash, 13U);
+    aotBuilder.InsertClassHashTableSize(1U);
+    aotBuilder.EndFile();
 
-    aot_builder.Write(CMDLINE, tmpfile_pn);
+    aotBuilder.Write(CMDLINE, tmpfilePn);
     {
-        auto res = FileManager::LoadAnFile(tmpfile_pn);
+        auto res = FileManager::LoadAnFile(tmpfilePn);
         ASSERT_TRUE(res) << "Fail to load an file";
     }
 
-    auto aot_manager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
-    auto aot_file = aot_manager->GetFile(tmpfile_pn);
-    ASSERT_TRUE(aot_file);
-    ASSERT_TRUE(strcmp(CMDLINE, aot_file->GetCommandLine()) == 0U);
-    ASSERT_TRUE(strcmp(tmpfile_pn, aot_file->GetFileName()) == 0U);
-    ASSERT_EQ(aot_file->GetFilesCount(), 1U);
+    auto aotManager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
+    auto aotFile = aotManager->GetFile(tmpfilePn);
+    ASSERT_TRUE(aotFile);
+    ASSERT_TRUE(strcmp(CMDLINE, aotFile->GetCommandLine()) == 0U);
+    ASSERT_TRUE(strcmp(tmpfilePn, aotFile->GetFileName()) == 0U);
+    ASSERT_EQ(aotFile->GetFilesCount(), 1U);
 
-    auto pfile = aot_manager->FindPandaFile(TMPFILE_PF);
+    auto pfile = aotManager->FindPandaFile(TMPFILE_PF);
     ASSERT_NE(pfile, nullptr);
     auto cls = pfile->GetClass(13U);
     ASSERT_TRUE(cls.IsValid());
@@ -618,16 +615,16 @@ TEST_F(AotTest, FileManagerLoadAn)
     {
         auto code = cls.FindMethodCodeEntry(0U);
         ASSERT_FALSE(code == nullptr);
-        ASSERT_EQ(method_name, reinterpret_cast<const char *>(code));
+        ASSERT_EQ(methodName, reinterpret_cast<const char *>(code));
     }
 
     {
         auto code = cls.FindMethodCodeEntry(1U);
         ASSERT_FALSE(code == nullptr);
-        ASSERT_EQ(std::memcmp(x86_add.data(), code, x86_add.size()), 0U);
+        ASSERT_EQ(std::memcmp(x86Add.data(), code, x86Add.size()), 0U);
 #ifdef PANDA_TARGET_AMD64
-        auto func_add = reinterpret_cast<int (*)(int, int)>(const_cast<void *>(code));
-        ASSERT_EQ(func_add(2U, 3U), 5U);
+        auto funcAdd = reinterpret_cast<int (*)(int, int)>(const_cast<void *>(code));
+        ASSERT_EQ(funcAdd(2U, 3U), 5U);
 #endif
     }
 }
@@ -639,8 +636,8 @@ TEST_F(AotTest, PaocClusters)
         return;
     }
 
-    TmpFile paoc_clusters("clusters.json");
-    std::ofstream(paoc_clusters.GetFileName()) <<
+    TmpFile paocClusters("clusters.json");
+    std::ofstream(paocClusters.GetFileName()) <<
         R"(
     {
         "clusters_map" :
@@ -672,7 +669,7 @@ TEST_F(AotTest, PaocClusters)
     }
     )";
 
-    TmpFile panda_fname("test.pf");
+    TmpFile pandaFname("test.pf");
     auto source = R"(
         .record A {}
         .record B {}
@@ -725,40 +722,40 @@ TEST_F(AotTest, PaocClusters)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
     }
 
     {
-        TmpFile compiler_events("events.csv");
+        TmpFile compilerEvents("events.csv");
         auto res =
-            os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--paoc-clusters",
-                           paoc_clusters.GetFileName(), "--compiler-loop-unroll-factor=7",
-                           "--compiler-enable-events=true", "--compiler-events-path", compiler_events.GetFileName());
+            os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-clusters",
+                           paocClusters.GetFileName(), "--compiler-loop-unroll-factor=7",
+                           "--compiler-enable-events=true", "--compiler-events-path", compilerEvents.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
 
-        bool first_found = false;
-        bool second_found = false;
-        std::ifstream events_file(compiler_events.GetFileName());
+        bool firstFound = false;
+        bool secondFound = false;
+        std::ifstream eventsFile(compilerEvents.GetFileName());
 
-        std::regex rgx_unroll_applied_cluster("A::count,loop-unroll,.*,unroll_factor:42,.*");
-        std::regex rgx_unroll_restored_default("B::count,loop-unroll,.*,unroll_factor:7,.*");
+        std::regex rgxUnrollAppliedCluster("A::count,loop-unroll,.*,unroll_factor:42,.*");
+        std::regex rgxUnrollRestoredDefault("B::count,loop-unroll,.*,unroll_factor:7,.*");
 
-        for (std::string line; std::getline(events_file, line);) {
+        for (std::string line; std::getline(eventsFile, line);) {
             if (line.rfind("loop-unroll") != std::string::npos) {
-                if (!first_found) {
+                if (!firstFound) {
                     // Check that the cluster is applied:
-                    ASSERT_TRUE(std::regex_match(line, rgx_unroll_applied_cluster));
-                    first_found = true;
+                    ASSERT_TRUE(std::regex_match(line, rgxUnrollAppliedCluster));
+                    firstFound = true;
                     continue;
                 }
-                ASSERT_FALSE(second_found);
+                ASSERT_FALSE(secondFound);
                 // Check that the option is restored:
-                ASSERT_TRUE(std::regex_match(line, rgx_unroll_restored_default));
-                second_found = true;
+                ASSERT_TRUE(std::regex_match(line, rgxUnrollRestoredDefault));
+                secondFound = true;
             }
         }
-        ASSERT_TRUE(first_found && second_found);
+        ASSERT_TRUE(firstFound && secondFound);
     }
 }
 
@@ -772,10 +769,10 @@ TEST_F(AotTest, PandaFiles)
         GTEST_SKIP();
     }
 
-    TmpFile aot_fname("./test.an");
-    TmpFile panda_fname1("test1.pf");
-    TmpFile panda_fname2("test2.pf");
-    TmpFile paoc_output_name("events-out.csv");
+    TmpFile aotFname("./test.an");
+    TmpFile pandaFname1("test1.pf");
+    TmpFile pandaFname2("test2.pf");
+    TmpFile paocOutputName("events-out.csv");
 
     {
         auto source = R"(
@@ -789,7 +786,7 @@ TEST_F(AotTest, PandaFiles)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname1.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname1.GetFileName(), res.Value()));
     }
 
     {
@@ -806,26 +803,26 @@ TEST_F(AotTest, PandaFiles)
         pandasm::Parser parser;
         auto res = parser.Parse(source);
         ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(panda_fname2.GetFileName(), res.Value()));
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname2.GetFileName(), res.Value()));
     }
 
     {
-        std::stringstream panda_files;
-        panda_files << panda_fname1.GetFileName() << ',' << panda_fname2.GetFileName();
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname2.GetFileName(), "--panda-files",
-                                  panda_fname1.GetFileName(), "--events-output=csv", "--events-file",
-                                  paoc_output_name.GetFileName());
+        std::stringstream pandaFiles;
+        pandaFiles << pandaFname1.GetFileName() << ',' << pandaFname2.GetFileName();
+        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname2.GetFileName(), "--panda-files",
+                                  pandaFname1.GetFileName(), "--events-output=csv", "--events-file",
+                                  paocOutputName.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
 
-        std::ifstream infile(paoc_output_name.GetFileName());
+        std::ifstream infile(paocOutputName.GetFileName());
         // Inlining attempt proofs that Z::zoo was available to inline
         std::regex rgx("Inline,.*Z::zoo.*");
-        bool inline_attempt = false;
+        bool inlineAttempt = false;
         for (std::string line; std::getline(infile, line);) {
-            inline_attempt |= std::regex_match(line, rgx);
+            inlineAttempt |= std::regex_match(line, rgx);
         }
-        ASSERT_TRUE(inline_attempt);
+        ASSERT_TRUE(inlineAttempt);
     }
 }
 // NOLINTEND(readability-magic-numbers)

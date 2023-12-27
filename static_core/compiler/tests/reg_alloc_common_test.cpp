@@ -33,21 +33,21 @@ public:
         if (graph->GetCallingConvention() == nullptr) {
             return;
         }
-        auto graph_ls = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
-        auto rals = RegAllocLinearScan(graph_ls);
+        auto graphLs = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
+        auto rals = RegAllocLinearScan(graphLs);
         rals.SetRegMask(mask);
         ASSERT_TRUE(rals.Run());
-        checker(graph_ls);
+        checker(graphLs);
 
         // RegAllocGraphColoring is not supported for AARCH32
         if (GetGraph()->GetArch() == Arch::AARCH32) {
             return;
         }
-        auto graph_gc = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
-        auto ragc = RegAllocGraphColoring(graph_gc);
+        auto graphGc = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
+        auto ragc = RegAllocGraphColoring(graphGc);
         ragc.SetRegMask(mask);
         ASSERT_TRUE(ragc.Run());
-        checker(graph_gc);
+        checker(graphGc);
     }
 
 protected:
@@ -122,20 +122,20 @@ void RegAllocCommonTest::TestParametersLocations() const
         }
     }
 
-    RunRegAllocatorsAndCheck(graph, [type = REG_TYPE](Graph *check_graph) {
-        auto arch = check_graph->GetArch();
-        unsigned slot_inc = Is64Bits(type, arch) && !Is64BitsArch(arch) ? 2U : 1U;
+    RunRegAllocatorsAndCheck(graph, [type = REG_TYPE](Graph *checkGraph) {
+        auto arch = checkGraph->GetArch();
+        unsigned slotInc = Is64Bits(type, arch) && !Is64BitsArch(arch) ? 2U : 1U;
 
-        unsigned params_on_registers = 0;
-        if (Arch::AARCH64 == check_graph->GetArch()) {
+        unsigned paramsOnRegisters = 0;
+        if (Arch::AARCH64 == checkGraph->GetArch()) {
             /**
              * Test case for Arch::AARCH64:
              *
              * - Parameters [arg0 - arg6] are placed in the registers [r1-r7]
              * - All other Parameters are placed in stack slots [slot0 - ...]
              */
-            params_on_registers = 7;
-        } else if (Arch::AARCH32 == check_graph->GetArch()) {
+            paramsOnRegisters = 7;
+        } else if (Arch::AARCH32 == checkGraph->GetArch()) {
             /**
              * Test case for Arch::AARCH32:
              * - ref-Parameter (arg0) is placed in the r1 register
@@ -143,28 +143,28 @@ void RegAllocCommonTest::TestParametersLocations() const
              * - If arg1, arg2 are 32-bit Parameters, they are placed in the [r2-r3] registers
              * - All other Parameters are placed in stack slots [slot0 - ...]
              */
-            params_on_registers = (type == DataType::UINT64) ? 2U : 3U;
+            paramsOnRegisters = (type == DataType::UINT64) ? 2U : 3U;
         }
 
-        std::map<Location, Inst *> assigned_locations;
+        std::map<Location, Inst *> assignedLocations;
         unsigned index = 0;
-        unsigned arg_slot = 0;
-        for (auto param_inst : check_graph->GetParameters()) {
+        unsigned argSlot = 0;
+        for (auto paramInst : checkGraph->GetParameters()) {
             // Check intial locations
-            auto src_location = param_inst->CastToParameter()->GetLocationData().GetSrc();
-            if (index < params_on_registers) {
-                EXPECT_EQ(src_location.GetKind(), LocationType::REGISTER);
-                EXPECT_EQ(src_location.GetValue(), index + 1U);
+            auto srcLocation = paramInst->CastToParameter()->GetLocationData().GetSrc();
+            if (index < paramsOnRegisters) {
+                EXPECT_EQ(srcLocation.GetKind(), LocationType::REGISTER);
+                EXPECT_EQ(srcLocation.GetValue(), index + 1U);
             } else {
-                EXPECT_EQ(src_location.GetKind(), LocationType::STACK_PARAMETER);
-                EXPECT_EQ(src_location.GetValue(), arg_slot);
-                arg_slot += slot_inc;
+                EXPECT_EQ(srcLocation.GetKind(), LocationType::STACK_PARAMETER);
+                EXPECT_EQ(srcLocation.GetValue(), argSlot);
+                argSlot += slotInc;
             }
 
             // Check that assigned locations do not overlap
-            auto dst_location = param_inst->CastToParameter()->GetLocationData().GetDst();
-            EXPECT_EQ(assigned_locations.count(dst_location), 0U);
-            assigned_locations.insert({dst_location, param_inst});
+            auto dstLocation = paramInst->CastToParameter()->GetLocationData().GetDst();
+            EXPECT_EQ(assignedLocations.count(dstLocation), 0U);
+            assignedLocations.insert({dstLocation, paramInst});
 
             index++;
         }
@@ -201,8 +201,8 @@ TEST_F(RegAllocCommonTest, LocationsNoSplits)
     }
 
     // Check that there are no spill-fills in the graph
-    RunRegAllocatorsAndCheck(graph, [](Graph *check_graph) {
-        for (auto bb : check_graph->GetBlocksRPO()) {
+    RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph) {
+        for (auto bb : checkGraph->GetBlocksRPO()) {
             for (auto inst : bb->AllInsts()) {
                 EXPECT_FALSE(inst->IsSpillFill());
                 if (inst->NoDest()) {
@@ -235,21 +235,21 @@ TEST_F(RegAllocCommonTest, ImplicitNullCheckStackMap)
     }
     INS(7U).CastToNullCheck()->SetImplicit(true);
 
-    RunRegAllocatorsAndCheck(graph, [](Graph *check_graph) {
-        auto bb = check_graph->GetStartBlock()->GetSuccessor(0U);
+    RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph) {
+        auto bb = checkGraph->GetStartBlock()->GetSuccessor(0U);
         // Find null_check
-        Inst *null_check = nullptr;
+        Inst *nullCheck = nullptr;
         for (auto inst : bb->AllInsts()) {
             if (inst->IsNullCheck()) {
-                null_check = inst;
+                nullCheck = inst;
                 break;
             }
         }
-        ASSERT(null_check != nullptr);
-        auto save_state = null_check->GetSaveState();
+        ASSERT(nullCheck != nullptr);
+        auto saveState = nullCheck->GetSaveState();
         // Check that save_state's inputs are added to the roots
-        auto roots = save_state->GetRootsRegsMask();
-        for (auto input : save_state->GetInputs()) {
+        auto roots = saveState->GetRootsRegsMask();
+        for (auto input : saveState->GetInputs()) {
             auto reg = input.GetInst()->GetDstReg();
             EXPECT_NE(reg, INVALID_REG);
             EXPECT_TRUE(roots.test(reg));
@@ -279,10 +279,10 @@ TEST_F(RegAllocCommonTest, DynMethodNargsParamReserve)
         }
     }
 
-    RunRegAllocatorsAndCheck(graph, [](Graph *check_graph) {
-        auto reg = Target(check_graph->GetArch()).GetParamRegId(1U);
+    RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph) {
+        auto reg = Target(checkGraph->GetArch()).GetParamRegId(1U);
 
-        for (auto inst : check_graph->GetStartBlock()->Insts()) {
+        for (auto inst : checkGraph->GetStartBlock()->Insts()) {
             if (inst->IsSpillFill()) {
                 auto sfs = inst->CastToSpillFill()->GetSpillFills();
                 auto it = std::find_if(sfs.cbegin(), sfs.cend(), [reg](auto sf) {
@@ -311,22 +311,22 @@ TEST_F(RegAllocCommonTest, TempRegisters)
         }
     }
 
-    RunRegAllocatorsAndCheck(graph, RegMask {0xFFFFFFE1}, [](Graph *check_graph) {
-        auto bb = check_graph->GetStartBlock()->GetSuccessor(0U);
-        Inst *call_inst = nullptr;
+    RunRegAllocatorsAndCheck(graph, RegMask {0xFFFFFFE1}, [](Graph *checkGraph) {
+        auto bb = checkGraph->GetStartBlock()->GetSuccessor(0U);
+        Inst *callInst = nullptr;
         for (auto inst : bb->Insts()) {
             if (inst->IsCall()) {
-                call_inst = inst;
+                callInst = inst;
                 break;
             }
         }
-        ASSERT_TRUE(call_inst != nullptr);
-        auto tmp_location = call_inst->GetTmpLocation();
-        EXPECT_TRUE(tmp_location.IsFixedRegister());
+        ASSERT_TRUE(callInst != nullptr);
+        auto tmpLocation = callInst->GetTmpLocation();
+        EXPECT_TRUE(tmpLocation.IsFixedRegister());
 
         // Check that temp register doesn't overlay input registers
-        for (size_t i = 0; i < call_inst->GetInputsCount(); i++) {
-            EXPECT_NE(tmp_location, call_inst->GetLocation(i));
+        for (size_t i = 0; i < callInst->GetInputsCount(); i++) {
+            EXPECT_NE(tmpLocation, callInst->GetLocation(i));
         }
     });
 }

@@ -53,9 +53,9 @@ DEATH_TEST_P(PendingEtsExceptionTest, MovingGcException)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    const std::string main_func = "ETSGLOBAL::main";
-    const std::string file_name = "pending_exception_gc_test.abc";
-    EXPECT_EXIT(Runtime::GetCurrent()->ExecutePandaFile(file_name.c_str(), main_func.c_str(), {}),
+    const std::string mainFunc = "ETSGLOBAL::main";
+    const std::string fileName = "pending_exception_gc_test.abc";
+    EXPECT_EXIT(Runtime::GetCurrent()->ExecutePandaFile(fileName.c_str(), mainFunc.c_str(), {}),
                 testing::ExitedWithCode(1), "");
 }
 

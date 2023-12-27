@@ -28,9 +28,9 @@ class PhiResolver {
 public:
     explicit PhiResolver(Graph *graph)
         : graph_(graph),
-          real_inputs_(graph->GetLocalAllocator()->Adapter()),
-          phi_users_(graph->GetLocalAllocator()->Adapter()),
-          real_users_(graph->GetLocalAllocator()->Adapter())
+          realInputs_(graph->GetLocalAllocator()->Adapter()),
+          phiUsers_(graph->GetLocalAllocator()->Adapter()),
+          realUsers_(graph->GetLocalAllocator()->Adapter())
     {
     }
 
@@ -40,8 +40,8 @@ public:
 
     void Run()
     {
-        MarkerHolder marker_holder {graph_};
-        has_real_user_marker_ = marker_holder.GetMarker();
+        MarkerHolder markerHolder {graph_};
+        hasRealUserMarker_ = markerHolder.GetMarker();
         for (auto bb : graph_->GetBlocksRPO()) {
             for (auto inst : bb->AllInstsSafe()) {
                 if (!inst->IsPhi() && !inst->IsCatchPhi()) {
@@ -67,7 +67,7 @@ public:
                     continue;
                 }
 
-                if (!inst->IsMarked(has_real_user_marker_)) {
+                if (!inst->IsMarked(hasRealUserMarker_)) {
                     // inst has only SaveState users
                     RemovePhiInst(inst);
                 } else if (!inst->HasType()) {
@@ -83,9 +83,9 @@ public:
 private:
     void CleanUp()
     {
-        phi_users_.clear();
-        real_users_.clear();
-        has_save_state_inst_only_ = true;
+        phiUsers_.clear();
+        realUsers_.clear();
+        hasSaveStateInstOnly_ = true;
         marker_ = graph_->NewMarker();
     }
     static void SetTypeByInputs(Inst *inst)
@@ -95,9 +95,9 @@ private:
             return;
         }
         for (auto input : inst->GetInputs()) {
-            auto input_type = input.GetInst()->GetType();
-            if (input_type != DataType::NO_TYPE) {
-                inst->SetType(input_type);
+            auto inputType = input.GetInst()->GetType();
+            if (inputType != DataType::NO_TYPE) {
+                inst->SetType(inputType);
                 break;
             }
         }
@@ -109,14 +109,14 @@ private:
                 continue;
             }
             if (user.GetInst()->IsPhi() || user.GetInst()->IsCatchPhi()) {
-                phi_users_.push_back(user.GetInst());
+                phiUsers_.push_back(user.GetInst());
                 FindUsersRec(user.GetInst());
             } else {
                 if (!user.GetInst()->IsSaveState()) {
-                    has_save_state_inst_only_ = false;
+                    hasSaveStateInstOnly_ = false;
                     break;
                 }
-                real_users_.push_back(user.GetInst());
+                realUsers_.push_back(user.GetInst());
             }
         }
     }
@@ -127,143 +127,143 @@ private:
         // We can't set real type if there aren't inputs from Phi/CathPhi
         // We add the Phi/CathPhi in the list and return false from CheckPhiInputs
         if (inst->GetInputs().Empty()) {
-            real_inputs_.push_back(inst);
+            realInputs_.push_back(inst);
             return;
         }
         for (auto &input : inst->GetInputs()) {
-            auto input_inst = input.GetInst();
-            if (input_inst->SetMarker(marker_)) {
+            auto inputInst = input.GetInst();
+            if (inputInst->SetMarker(marker_)) {
                 continue;
             }
-            if (input_inst->IsPhi() || input_inst->IsCatchPhi()) {
-                if (input_inst->GetType() != DataType::NO_TYPE) {
-                    real_inputs_.push_back(input_inst);
+            if (inputInst->IsPhi() || inputInst->IsCatchPhi()) {
+                if (inputInst->GetType() != DataType::NO_TYPE) {
+                    realInputs_.push_back(inputInst);
                     continue;
                 }
-                FindInputsRec(input_inst);
+                FindInputsRec(inputInst);
             } else {
-                real_inputs_.push_back(input_inst);
+                realInputs_.push_back(inputInst);
             }
         }
     }
 
-    bool CheckPhiRealInputs(Inst *phi_inst)
+    bool CheckPhiRealInputs(Inst *phiInst)
     {
         DataType::Type type = DataType::NO_TYPE;
-        real_inputs_.clear();
+        realInputs_.clear();
         marker_ = graph_->NewMarker();
-        phi_inst->SetMarker(marker_);
-        FindInputsRec(phi_inst);
+        phiInst->SetMarker(marker_);
+        FindInputsRec(phiInst);
         graph_->EraseMarker(marker_);
 
-        bool has_constant_input = false;
-        for (auto input_inst : real_inputs_) {
-            auto input_type = input_inst->GetType();
-            if (input_type == DataType::NO_TYPE) {
+        bool hasConstantInput = false;
+        for (auto inputInst : realInputs_) {
+            auto inputType = inputInst->GetType();
+            if (inputType == DataType::NO_TYPE) {
                 return false;
             }
-            if (input_inst->IsConst() && input_type == DataType::INT64) {
+            if (inputInst->IsConst() && inputType == DataType::INT64) {
                 if (type != DataType::NO_TYPE && DataType::GetCommonType(type) != DataType::INT64) {
                     return false;
                 }
-                has_constant_input = true;
+                hasConstantInput = true;
                 continue;
             }
             if (type == DataType::NO_TYPE) {
-                if (has_constant_input && DataType::GetCommonType(input_type) != DataType::INT64) {
+                if (hasConstantInput && DataType::GetCommonType(inputType) != DataType::INT64) {
                     return false;
                 }
-                type = input_type;
-            } else if (type != input_type) {
+                type = inputType;
+            } else if (type != inputType) {
                 return false;
             }
         }
 
         if (type == DataType::NO_TYPE) {
             // Do not remove phi with constants-only inputs.
-            if (!has_constant_input) {
+            if (!hasConstantInput) {
                 return false;
             }
             type = DataType::INT64;
         }
-        phi_inst->SetType(type);
+        phiInst->SetType(type);
         return true;
     }
 
     // Returns false if block with input instruction doesn't dominate the predecessor of the  PHI block
-    bool CheckPhiInputs(Inst *phi_inst)
+    bool CheckPhiInputs(Inst *phiInst)
     {
-        ASSERT(phi_inst->IsPhi() || phi_inst->IsCatchPhi());
-        if (phi_inst->HasType()) {
+        ASSERT(phiInst->IsPhi() || phiInst->IsCatchPhi());
+        if (phiInst->HasType()) {
             return true;
         }
-        if (phi_inst->IsPhi()) {
-            if (phi_inst->GetInputsCount() != phi_inst->GetBasicBlock()->GetPredsBlocks().size()) {
+        if (phiInst->IsPhi()) {
+            if (phiInst->GetInputsCount() != phiInst->GetBasicBlock()->GetPredsBlocks().size()) {
                 return false;
             }
-            for (size_t index = 0; index < phi_inst->GetInputsCount(); ++index) {
-                auto pred = phi_inst->GetBasicBlock()->GetPredBlockByIndex(index);
-                auto input_bb = phi_inst->GetInput(index).GetInst()->GetBasicBlock();
-                if (!input_bb->IsDominate(pred)) {
+            for (size_t index = 0; index < phiInst->GetInputsCount(); ++index) {
+                auto pred = phiInst->GetBasicBlock()->GetPredBlockByIndex(index);
+                auto inputBb = phiInst->GetInput(index).GetInst()->GetBasicBlock();
+                if (!inputBb->IsDominate(pred)) {
                     return false;
                 }
             }
         }
-        return CheckPhiRealInputs(phi_inst);
+        return CheckPhiRealInputs(phiInst);
     }
 
     void MarkHasRealUserRec(Inst *inst)
     {
-        if (inst->SetMarker(has_real_user_marker_)) {
+        if (inst->SetMarker(hasRealUserMarker_)) {
             return;
         }
         for (auto &input : inst->GetInputs()) {
-            auto input_inst = input.GetInst();
-            if (input_inst->IsPhi() || input_inst->IsCatchPhi()) {
-                MarkHasRealUserRec(input_inst);
+            auto inputInst = input.GetInst();
+            if (inputInst->IsPhi() || inputInst->IsCatchPhi()) {
+                MarkHasRealUserRec(inputInst);
             }
         }
     }
 
     void TryRemoveFromSaveStates(Inst *inst)
     {
-        if (OPTIONS.IsCompilerNonOptimizing()) {
+        if (g_options.IsCompilerNonOptimizing()) {
             return;
         }
-        MarkerHolder marker_holder {graph_};
-        marker_ = marker_holder.GetMarker();
+        MarkerHolder markerHolder {graph_};
+        marker_ = markerHolder.GetMarker();
         for (auto &user : inst->GetUsers()) {
-            auto user_inst = user.GetInst();
-            if (user_inst->IsPhi() || user_inst->IsCatchPhi()) {
-                if (user_inst->IsMarked(has_real_user_marker_)) {
+            auto userInst = user.GetInst();
+            if (userInst->IsPhi() || userInst->IsCatchPhi()) {
+                if (userInst->IsMarked(hasRealUserMarker_)) {
                     return;
                 }
                 continue;
             }
-            if (user_inst->IsSaveState()) {
+            if (userInst->IsSaveState()) {
                 continue;
             }
-            MarkInstsOnPaths(user_inst->GetBasicBlock(), inst, user_inst);
+            MarkInstsOnPaths(userInst->GetBasicBlock(), inst, userInst);
         }
-        for (auto user_it = inst->GetUsers().begin(); user_it != inst->GetUsers().end();) {
-            auto user_inst = user_it->GetInst();
-            if (!user_inst->IsSaveState() || user_inst->GetBasicBlock()->IsMarked(marker_) ||
-                user_inst->IsMarked(marker_) || user_it->GetVirtualRegister().IsEnv()) {
-                ++user_it;
+        for (auto userIt = inst->GetUsers().begin(); userIt != inst->GetUsers().end();) {
+            auto userInst = userIt->GetInst();
+            if (!userInst->IsSaveState() || userInst->GetBasicBlock()->IsMarked(marker_) ||
+                userInst->IsMarked(marker_) || userIt->GetVirtualRegister().IsEnv()) {
+                ++userIt;
             } else {
-                user_inst->RemoveInput(user_it->GetIndex());
-                user_it = inst->GetUsers().begin();
+                userInst->RemoveInput(userIt->GetIndex());
+                userIt = inst->GetUsers().begin();
             }
         }
     }
 
-    void MarkInstsOnPaths(BasicBlock *block, Inst *object, Inst *start_from)
+    void MarkInstsOnPaths(BasicBlock *block, Inst *object, Inst *startFrom)
     {
         if (block->IsMarked(marker_)) {
             return;
         }
-        if (start_from != nullptr) {
-            auto it = InstSafeIterator<IterationType::ALL, IterationDirection::BACKWARD>(*block, start_from);
+        if (startFrom != nullptr) {
+            auto it = InstSafeIterator<IterationType::ALL, IterationDirection::BACKWARD>(*block, startFrom);
             for (; it != block->AllInstsSafeReverse().end(); ++it) {
                 auto inst = *it;
                 if (inst->SetMarker(marker_) || inst == object) {
@@ -285,18 +285,18 @@ private:
         CleanUp();
         inst->SetMarker(marker_);
         FindUsersRec(inst);
-        for (auto user : real_users_) {
+        for (auto user : realUsers_) {
             ASSERT(user->IsSaveState());
-            auto save_state = static_cast<SaveStateInst *>(user);
+            auto saveState = static_cast<SaveStateInst *>(user);
             size_t idx = 0;
-            size_t inputs_count = save_state->GetInputsCount();
-            while (idx < inputs_count) {
-                auto input_inst = save_state->GetInput(idx).GetInst();
-                if (input_inst->IsMarked(marker_)) {
+            size_t inputsCount = saveState->GetInputsCount();
+            while (idx < inputsCount) {
+                auto inputInst = saveState->GetInput(idx).GetInst();
+                if (inputInst->IsMarked(marker_)) {
                     // env values should not be marked for removal
-                    ASSERT(!save_state->GetVirtualRegister(idx).IsEnv());
-                    save_state->RemoveInput(idx);
-                    inputs_count--;
+                    ASSERT(!saveState->GetVirtualRegister(idx).IsEnv());
+                    saveState->RemoveInput(idx);
+                    inputsCount--;
                 } else {
                     idx++;
                 }
@@ -305,7 +305,7 @@ private:
         // Phi has only SafePoint in users, we can remove this phi and all phi in collected list.
         inst->RemoveUsers<true>();
         inst->GetBasicBlock()->RemoveInst(inst);
-        for (auto phi : phi_users_) {
+        for (auto phi : phiUsers_) {
             phi->RemoveUsers<true>();
             phi->GetBasicBlock()->RemoveInst(phi);
         }
@@ -315,10 +315,10 @@ private:
     void MarkPhiWithRealUsers(Inst *inst)
     {
         for (auto &user : inst->GetUsers()) {
-            auto user_inst = user.GetInst();
-            auto can_remove_user = user_inst->IsPhi() || user_inst->IsCatchPhi() ||
-                                   (user_inst->IsSaveState() && !user.GetVirtualRegister().IsEnv());
-            if (!can_remove_user) {
+            auto userInst = user.GetInst();
+            auto canRemoveUser = userInst->IsPhi() || userInst->IsCatchPhi() ||
+                                 (userInst->IsSaveState() && !user.GetVirtualRegister().IsEnv());
+            if (!canRemoveUser) {
                 // inst certainly cannot be removed from user's inputs
                 MarkHasRealUserRec(inst);
                 break;
@@ -329,15 +329,15 @@ private:
     void ReplaceDeadPhiUsers(Inst *inst, BasicBlock *bb)
     {
         if (inst->GetInputsCount() != 0) {
-            auto input_inst = inst->GetInput(0).GetInst();
+            auto inputInst = inst->GetInput(0).GetInst();
 #ifndef NDEBUG
             if (!inst->GetUsers().Empty()) {
                 for ([[maybe_unused]] auto &input : inst->GetInputs()) {
-                    ASSERT(input.GetInst() == input_inst);
+                    ASSERT(input.GetInst() == inputInst);
                 }
             }
 #endif
-            inst->ReplaceUsers(input_inst);
+            inst->ReplaceUsers(inputInst);
         }
         bb->RemoveInst(inst);
     }
@@ -363,12 +363,12 @@ private:
 
 private:
     Graph *graph_ {nullptr};
-    InstVector real_inputs_;
-    InstVector phi_users_;
-    InstVector real_users_;
+    InstVector realInputs_;
+    InstVector phiUsers_;
+    InstVector realUsers_;
     Marker marker_ {UNDEF_MARKER};
-    Marker has_real_user_marker_ {UNDEF_MARKER};
-    bool has_save_state_inst_only_ {true};
+    Marker hasRealUserMarker_ {UNDEF_MARKER};
+    bool hasSaveStateInstOnly_ {true};
 };
 }  // namespace panda::compiler
 

@@ -43,8 +43,8 @@ Register UseTable::GetNextUseOnFixedLocation(const Inst *inst, LifeNumber ln) co
         return INVALID_REG;
     }
     const auto &uses = it->second;
-    auto uses_it = uses.lower_bound(ln);
-    return uses_it == uses.end() ? INVALID_REG : uses_it->second;
+    auto usesIt = uses.lower_bound(ln);
+    return usesIt == uses.end() ? INVALID_REG : usesIt->second;
 }
 
 void UseTable::Dump(std::ostream &out, Arch arch) const

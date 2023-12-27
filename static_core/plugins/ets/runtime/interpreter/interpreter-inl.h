@@ -99,23 +99,23 @@ public:
     constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
 
     template <panda_file::Type::TypeId FIELD_TYPE, bool IS_LOAD>
-    ALWAYS_INLINE Field *LookupFieldByName(Class *klass, Field *raw_field)
+    ALWAYS_INLINE Field *LookupFieldByName(Class *klass, Field *rawField)
     {
         auto cache = this->GetThread()->GetInterpreterCache();
         auto *res = cache->template Get<Field>(this->GetInst().GetAddress(), this->GetFrame()->GetMethod());
-        auto res_uint = reinterpret_cast<uint64_t>(res);
-        if (res != nullptr && ((res_uint & METHOD_FLAG_MASK) != 1) && (res->GetClass() == klass)) {
+        auto resUint = reinterpret_cast<uint64_t>(res);
+        if (res != nullptr && ((resUint & METHOD_FLAG_MASK) != 1) && (res->GetClass() == klass)) {
             return res;
         }
 
-        auto field = klass->LookupFieldByName(raw_field->GetName());
+        auto field = klass->LookupFieldByName(rawField->GetName());
 
         if (field != nullptr) {
             if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
                 if constexpr (IS_LOAD) {
-                    ASSERT(raw_field->ResolveTypeClass()->IsAssignableFrom(field->ResolveTypeClass()));
+                    ASSERT(rawField->ResolveTypeClass()->IsAssignableFrom(field->ResolveTypeClass()));
                 } else {
-                    ASSERT(field->ResolveTypeClass()->IsAssignableFrom(raw_field->ResolveTypeClass()));
+                    ASSERT(field->ResolveTypeClass()->IsAssignableFrom(rawField->ResolveTypeClass()));
                 }
             }
             ASSERT((reinterpret_cast<uint64_t>(field) & METHOD_FLAG_MASK) == 0);
@@ -125,17 +125,17 @@ public:
     }
 
     template <panda_file::Type::TypeId FIELD_TYPE>
-    ALWAYS_INLINE Method *LookupGetterByName(Class *klass, Field *raw_field)
+    ALWAYS_INLINE Method *LookupGetterByName(Class *klass, Field *rawField)
     {
         auto cache = this->GetThread()->GetInterpreterCache();
         auto *res = cache->template Get<Method>(this->GetInst().GetAddress(), this->GetFrame()->GetMethod());
-        auto res_uint = reinterpret_cast<uint64_t>(res);
-        auto method_ptr = reinterpret_cast<Method *>(res_uint & ~METHOD_FLAG_MASK);
-        if (res != nullptr && ((res_uint & METHOD_FLAG_MASK) == 1) && (method_ptr->GetClass() == klass)) {
-            return method_ptr;
+        auto resUint = reinterpret_cast<uint64_t>(res);
+        auto methodPtr = reinterpret_cast<Method *>(resUint & ~METHOD_FLAG_MASK);
+        if (res != nullptr && ((resUint & METHOD_FLAG_MASK) == 1) && (methodPtr->GetClass() == klass)) {
+            return methodPtr;
         }
 
-        auto method = klass->LookupGetterByName<FIELD_TYPE>(raw_field->GetName());
+        auto method = klass->LookupGetterByName<FIELD_TYPE>(rawField->GetName());
 
         if (method != nullptr) {
 #ifndef NDEBUG
@@ -143,45 +143,45 @@ public:
                 auto pf = method->GetPandaFile();
                 panda_file::ProtoDataAccessor pda(*pf,
                                                   panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
-                auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-                auto arg_class = class_linker->GetClass(*pf, pda.GetReferenceType(0), klass->GetLoadContext());
-                ASSERT(raw_field->ResolveTypeClass()->IsAssignableFrom(arg_class));
+                auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+                auto argClass = classLinker->GetClass(*pf, pda.GetReferenceType(0), klass->GetLoadContext());
+                ASSERT(rawField->ResolveTypeClass()->IsAssignableFrom(argClass));
             }
 #endif  // !NDEBUG
-            auto m_uint = reinterpret_cast<uint64_t>(method);
-            ASSERT((m_uint & METHOD_FLAG_MASK) == 0);
-            cache->template Set(this->GetInst().GetAddress(), reinterpret_cast<Method *>(m_uint | METHOD_FLAG_MASK),
+            auto mUint = reinterpret_cast<uint64_t>(method);
+            ASSERT((mUint & METHOD_FLAG_MASK) == 0);
+            cache->template Set(this->GetInst().GetAddress(), reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK),
                                 this->GetFrame()->GetMethod());
         }
         return method;
     }
 
     template <panda_file::Type::TypeId FIELD_TYPE>
-    ALWAYS_INLINE Method *LookupSetterByName(Class *klass, Field *raw_field)
+    ALWAYS_INLINE Method *LookupSetterByName(Class *klass, Field *rawField)
     {
         auto cache = this->GetThread()->GetInterpreterCache();
         auto *res = cache->template Get<Method>(this->GetInst().GetAddress(), this->GetFrame()->GetMethod());
-        auto res_uint = reinterpret_cast<uint64_t>(res);
-        auto method_ptr = reinterpret_cast<Method *>(res_uint & ~METHOD_FLAG_MASK);
-        if (res != nullptr && ((res_uint & METHOD_FLAG_MASK) == 1) && (method_ptr->GetClass() == klass)) {
-            return method_ptr;
+        auto resUint = reinterpret_cast<uint64_t>(res);
+        auto methodPtr = reinterpret_cast<Method *>(resUint & ~METHOD_FLAG_MASK);
+        if (res != nullptr && ((resUint & METHOD_FLAG_MASK) == 1) && (methodPtr->GetClass() == klass)) {
+            return methodPtr;
         }
 
-        auto method = klass->LookupSetterByName<FIELD_TYPE>(raw_field->GetName());
+        auto method = klass->LookupSetterByName<FIELD_TYPE>(rawField->GetName());
         if (method != nullptr) {
 #ifndef NDEBUG
             if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
                 auto pf = method->GetPandaFile();
                 panda_file::ProtoDataAccessor pda(*pf,
                                                   panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
-                auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-                auto arg_class = class_linker->GetClass(*pf, pda.GetReferenceType(0), klass->GetLoadContext());
-                ASSERT(arg_class->IsAssignableFrom(raw_field->ResolveTypeClass()));
+                auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+                auto argClass = classLinker->GetClass(*pf, pda.GetReferenceType(0), klass->GetLoadContext());
+                ASSERT(argClass->IsAssignableFrom(rawField->ResolveTypeClass()));
             }
 #endif  // !NDEBUG
-            auto m_uint = reinterpret_cast<uint64_t>(method);
-            ASSERT((m_uint & METHOD_FLAG_MASK) == 0);
-            cache->template Set(this->GetInst().GetAddress(), reinterpret_cast<Method *>(m_uint | METHOD_FLAG_MASK),
+            auto mUint = reinterpret_cast<uint64_t>(method);
+            ASSERT((mUint & METHOD_FLAG_MASK) == 0);
+            cache->template Set(this->GetInst().GetAddress(), reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK),
                                 this->GetFrame()->GetMethod());
         }
         return method;
@@ -201,17 +201,17 @@ public:
             this->MoveToExceptionHandler();
         } else {
             auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
-            auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
+            auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::I32, true>(klass, raw_field);
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto field = LookupFieldByName<panda_file::Type::TypeId::I32, true>(klass, rawField);
             if (field != nullptr) {
                 this->LoadPrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
 
-            auto method = LookupGetterByName<panda_file::Type::TypeId::I32>(klass, raw_field);
+            auto method = LookupGetterByName<panda_file::Type::TypeId::I32>(klass, rawField);
             if (method != nullptr) {
                 this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
@@ -219,14 +219,14 @@ public:
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto error_msg = "Class " + panda::ConvertToString(klass->GetName()) +
-                             " does not have field and getter with name " +
-                             utf::Mutf8AsCString(raw_field->GetName().data);
+            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+                            " does not have field and getter with name " +
+                            utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
                               utf::Mutf8AsCString(Runtime::GetCurrent()
                                                       ->GetLanguageContext(panda_file::SourceLang::ETS)
                                                       .GetNoSuchFieldErrorDescriptor()),
-                              error_msg);
+                              errorMsg);
             this->MoveToExceptionHandler();
         }
     }
@@ -245,17 +245,17 @@ public:
             this->MoveToExceptionHandler();
         } else {
             auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
-            auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
+            auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::I64, true>(klass, raw_field);
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto field = LookupFieldByName<panda_file::Type::TypeId::I64, true>(klass, rawField);
             if (field != nullptr) {
                 this->LoadPrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
 
-            auto method = LookupGetterByName<panda_file::Type::TypeId::I64>(klass, raw_field);
+            auto method = LookupGetterByName<panda_file::Type::TypeId::I64>(klass, rawField);
             if (method != nullptr) {
                 this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
@@ -263,14 +263,14 @@ public:
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto error_msg = "Class " + panda::ConvertToString(klass->GetName()) +
-                             " does not have field and getter with name " +
-                             utf::Mutf8AsCString(raw_field->GetName().data);
+            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+                            " does not have field and getter with name " +
+                            utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
                               utf::Mutf8AsCString(Runtime::GetCurrent()
                                                       ->GetLanguageContext(panda_file::SourceLang::ETS)
                                                       .GetNoSuchFieldErrorDescriptor()),
-                              error_msg);
+                              errorMsg);
             this->MoveToExceptionHandler();
         }
     }
@@ -289,10 +289,10 @@ public:
             this->MoveToExceptionHandler();
         } else {
             auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
-            auto class_linker = Runtime::GetCurrent()->GetClassLinker();
+            auto classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::REFERENCE, true>(klass, raw_field);
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto field = LookupFieldByName<panda_file::Type::TypeId::REFERENCE, true>(klass, rawField);
             if (field != nullptr) {
                 ASSERT(field->GetType().IsReference());
                 this->GetAccAsVReg().SetReference(
@@ -301,7 +301,7 @@ public:
                 return;
             }
 
-            auto method = LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(klass, raw_field);
+            auto method = LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(klass, rawField);
             if (method != nullptr) {
                 this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
@@ -309,14 +309,14 @@ public:
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto error_msg = "Class " + panda::ConvertToString(klass->GetName()) +
-                             " does not have field and getter with name " +
-                             utf::Mutf8AsCString(raw_field->GetName().data);
+            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+                            " does not have field and getter with name " +
+                            utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
                               utf::Mutf8AsCString(Runtime::GetCurrent()
                                                       ->GetLanguageContext(panda_file::SourceLang::ETS)
                                                       .GetNoSuchFieldErrorDescriptor()),
-                              error_msg);
+                              errorMsg);
             this->MoveToExceptionHandler();
         }
     }
@@ -335,17 +335,17 @@ public:
             this->MoveToExceptionHandler();
         } else {
             auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
-            auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
+            auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::I32, false>(klass, raw_field);
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto field = LookupFieldByName<panda_file::Type::TypeId::I32, false>(klass, rawField);
             if (field != nullptr) {
                 this->StorePrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
 
-            auto method = LookupSetterByName<panda_file::Type::TypeId::I32>(klass, raw_field);
+            auto method = LookupSetterByName<panda_file::Type::TypeId::I32>(klass, rawField);
             if (method != nullptr) {
                 this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
@@ -353,14 +353,14 @@ public:
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto error_msg = "Class " + panda::ConvertToString(klass->GetName()) +
-                             " does not have field and setter with name " +
-                             utf::Mutf8AsCString(raw_field->GetName().data);
+            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+                            " does not have field and setter with name " +
+                            utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
                               utf::Mutf8AsCString(Runtime::GetCurrent()
                                                       ->GetLanguageContext(panda_file::SourceLang::ETS)
                                                       .GetNoSuchFieldErrorDescriptor()),
-                              error_msg);
+                              errorMsg);
             this->MoveToExceptionHandler();
         }
     }
@@ -379,17 +379,17 @@ public:
             this->MoveToExceptionHandler();
         } else {
             auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
-            auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
+            auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::I64, false>(klass, raw_field);
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto field = LookupFieldByName<panda_file::Type::TypeId::I64, false>(klass, rawField);
             if (field != nullptr) {
                 this->StorePrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
 
-            auto method = LookupSetterByName<panda_file::Type::TypeId::I64>(klass, raw_field);
+            auto method = LookupSetterByName<panda_file::Type::TypeId::I64>(klass, rawField);
             if (method != nullptr) {
                 this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
@@ -397,14 +397,14 @@ public:
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto error_msg = "Class " + panda::ConvertToString(klass->GetName()) +
-                             " does not have field and setter with name " +
-                             utf::Mutf8AsCString(raw_field->GetName().data);
+            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+                            " does not have field and setter with name " +
+                            utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
                               utf::Mutf8AsCString(Runtime::GetCurrent()
                                                       ->GetLanguageContext(panda_file::SourceLang::ETS)
                                                       .GetNoSuchFieldErrorDescriptor()),
-                              error_msg);
+                              errorMsg);
             this->MoveToExceptionHandler();
         }
     }
@@ -423,10 +423,10 @@ public:
             this->MoveToExceptionHandler();
         } else {
             auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
-            auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
+            auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::REFERENCE, false>(klass, raw_field);
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto field = LookupFieldByName<panda_file::Type::TypeId::REFERENCE, false>(klass, rawField);
             if (field != nullptr) {
                 ASSERT(field->GetType().IsReference());
                 obj->SetFieldObject<RuntimeIfaceT::NEED_WRITE_BARRIER>(this->GetThread(), *field,
@@ -435,7 +435,7 @@ public:
                 return;
             }
 
-            auto method = LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(klass, raw_field);
+            auto method = LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(klass, rawField);
             if (method != nullptr) {
                 this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
@@ -443,14 +443,14 @@ public:
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto error_msg = "Class " + panda::ConvertToString(klass->GetName()) +
-                             " does not have field and setter with name " +
-                             utf::Mutf8AsCString(raw_field->GetName().data);
+            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+                            " does not have field and setter with name " +
+                            utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
                               utf::Mutf8AsCString(Runtime::GetCurrent()
                                                       ->GetLanguageContext(panda_file::SourceLang::ETS)
                                                       .GetNoSuchFieldErrorDescriptor()),
-                              error_msg);
+                              errorMsg);
             this->MoveToExceptionHandler();
         }
     }
@@ -491,9 +491,9 @@ private:
     }
 
     template <BytecodeInstruction::Format FORMAT, bool IS_RANGE>
-    ALWAYS_INLINE void HandleLaunchVirt(BytecodeId method_id)
+    ALWAYS_INLINE void HandleLaunchVirt(BytecodeId methodId)
     {
-        auto *method = ResolveMethod(method_id);
+        auto *method = ResolveMethod(methodId);
         if (LIKELY(method != nullptr)) {
             ObjectHeader *obj = this->GetCallerObject<FORMAT>();
             if (UNLIKELY(obj == nullptr)) {
@@ -510,9 +510,9 @@ private:
     }
 
     template <BytecodeInstruction::Format FORMAT, bool IS_RANGE>
-    ALWAYS_INLINE void HandleLaunch(BytecodeId method_id)
+    ALWAYS_INLINE void HandleLaunch(BytecodeId methodId)
     {
-        auto *method = ResolveMethod(method_id);
+        auto *method = ResolveMethod(methodId);
         if (LIKELY(method != nullptr)) {
             HandleLaunch<FORMAT, IS_RANGE>(method);
         } else {
@@ -536,32 +536,32 @@ private:
             this->MoveToExceptionHandler();
             return;
         }
-        PandaEtsVM *ets_vm = coroutine->GetPandaVM();
-        auto promise_ref = ets_vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::WEAK);
-        auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promise_ref);
+        PandaEtsVM *etsVm = coroutine->GetPandaVM();
+        auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::WEAK);
+        auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef);
         promise->SetEventPtr(evt);
 
         // create the coro and put it to the ready queue
         [[maybe_unused]] EtsHandleScope scope(coroutine);
-        EtsHandle<EtsPromise> promise_handle(coroutine, promise);
+        EtsHandle<EtsPromise> promiseHandle(coroutine, promise);
 
         // since transferring arguments from frame registers (which are local roots for GC) to a C++ vector
         // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
         // we would like to do this transfer below all potential GC invocation points (e.g. Promise::Create)
-        size_t num_args = method->GetNumArgs();
-        PandaVector<Value> args(num_args);
+        size_t numArgs = method->GetNumArgs();
+        PandaVector<Value> args(numArgs);
         FillArgs<FORMAT, IS_RANGE>(args);
 
         auto *coro = coroutine->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineAffinity::NONE);
         if (UNLIKELY(coro == nullptr)) {
             // OOM
-            promise_handle.GetPtr()->SetEventPtr(nullptr);
+            promiseHandle.GetPtr()->SetEventPtr(nullptr);
             Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
             this->MoveToExceptionHandler();
             return;
         }
 
-        this->GetAccAsVReg().SetReference(promise_handle.GetPtr());
+        this->GetAccAsVReg().SetReference(promiseHandle.GetPtr());
         this->GetFrame()->SetAcc(this->GetAcc());
         this->template MoveToNextInst<FORMAT, false>();
     }
@@ -573,26 +573,24 @@ private:
             return;
         }
 
-        auto cur_frame_handler = this->template GetFrameHandler<false>();
+        auto curFrameHandler = this->template GetFrameHandler<false>();
         if constexpr (IS_RANGE) {
-            uint16_t start_reg = this->GetInst().template GetVReg<FORMAT, 0>();
+            uint16_t startReg = this->GetInst().template GetVReg<FORMAT, 0>();
             for (size_t i = 0; i < args.size(); ++i) {
-                args[i] = Value::FromVReg(cur_frame_handler.GetVReg(start_reg + i));
+                args[i] = Value::FromVReg(curFrameHandler.GetVReg(startReg + i));
             }
         } else {
             // launch.short of launch
-            args[0] = Value::FromVReg(cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0U>()));
+            args[0] = Value::FromVReg(curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0U>()));
             if (args.size() > 1U) {
-                args[1] = Value::FromVReg(cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1U>()));
+                args[1] = Value::FromVReg(curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1U>()));
             }
             if constexpr (FORMAT == BytecodeInstruction::Format::PREF_V4_V4_V4_V4_ID16) {
                 if (args.size() > 2U) {
-                    args[2] =
-                        Value::FromVReg(cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2U>()));
+                    args[2] = Value::FromVReg(curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2U>()));
                 }
                 if (args.size() > 3U) {
-                    args[3] =
-                        Value::FromVReg(cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 3U>()));
+                    args[3] = Value::FromVReg(curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 3U>()));
                 }
             }
         }
@@ -601,8 +599,8 @@ private:
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE ObjectHeader *GetObjHelper()
     {
-        uint16_t obj_vreg = this->GetInst().template GetVReg<FORMAT, 0>();
-        return this->GetFrame()->GetVReg(obj_vreg).GetReference();
+        uint16_t objVreg = this->GetInst().template GetVReg<FORMAT, 0>();
+        return this->GetFrame()->GetVReg(objVreg).GetReference();
     }
 
     template <BytecodeInstruction::Format FORMAT>

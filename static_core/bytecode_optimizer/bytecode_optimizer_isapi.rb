@@ -322,19 +322,19 @@ def label
 end
 
 def string_id
-  'enc->ir_interface_->GetStringIdByOffset(inst->GetTypeId())'
+  'enc->irInterface_->GetStringIdByOffset(inst->GetTypeId())'
 end
 
 def literalarray_id
-  'enc->ir_interface_->GetLiteralArrayIdByOffset(inst->GetTypeId()).value()'
+  'enc->irInterface_->GetLiteralArrayIdByOffset(inst->GetTypeId()).value()'
 end
 
 def type_id
-  'enc->ir_interface_->GetTypeIdByOffset(inst->GetTypeId())'
+  'enc->irInterface_->GetTypeIdByOffset(inst->GetTypeId())'
 end
 
 def field_id
-  'enc->ir_interface_->GetFieldIdByOffset(inst->GetTypeId())'
+  'enc->irInterface_->GetFieldIdByOffset(inst->GetTypeId())'
 end
 
 # Lda/Sta printers
@@ -375,7 +375,7 @@ end
 
 # Misc printers
 def visitor_sig(op_name, with_class = true)
-  "void #{'BytecodeGen::' if with_class}Visit#{op_name}(GraphVisitor* v, Inst* inst_base)"
+  "void #{'BytecodeGen::' if with_class}Visit#{op_name}(GraphVisitor* v, Inst* instBase)"
 end
 
 # Bytecode description itself

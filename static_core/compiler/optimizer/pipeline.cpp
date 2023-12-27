@@ -84,31 +84,31 @@ static inline bool RunCodegenPass(Graph *graph)
 
 /* static */
 template <TaskRunnerMode RUNNER_MODE>
-void Pipeline::Run(CompilerTaskRunner<RUNNER_MODE> task_runner)
+void Pipeline::Run(CompilerTaskRunner<RUNNER_MODE> taskRunner)
 {
-    auto pipeline = task_runner.GetContext().GetPipeline();
+    auto pipeline = taskRunner.GetContext().GetPipeline();
     auto *graph = pipeline->GetGraph();
 #if !defined(NDEBUG) && !defined(PANDA_TARGET_MOBILE)
-    if (OPTIONS.IsCompilerVisualizerDump()) {
+    if (g_options.IsCompilerVisualizerDump()) {
         graph->GetPassManager()->InitialDumpVisualizerGraph();
     }
 #endif  // NDEBUG && PANDA_TARGET_MOBILE
 
-    task_runner.AddFinalize(
-        [](CompilerContext<RUNNER_MODE> &compiler_ctx) { compiler_ctx.GetGraph()->GetPassManager()->Finalize(); });
+    taskRunner.AddFinalize(
+        [](CompilerContext<RUNNER_MODE> &compilerCtx) { compilerCtx.GetGraph()->GetPassManager()->Finalize(); });
 
-    if (OPTIONS.WasSetCompilerRegallocRegMask()) {
+    if (g_options.WasSetCompilerRegallocRegMask()) {
         COMPILER_LOG(DEBUG, REGALLOC) << "Regalloc mask force set to " << std::hex
-                                      << OPTIONS.GetCompilerRegallocRegMask() << "\n";
-        graph->SetArchUsedRegs(OPTIONS.GetCompilerRegallocRegMask());
+                                      << g_options.GetCompilerRegallocRegMask() << "\n";
+        graph->SetArchUsedRegs(g_options.GetCompilerRegallocRegMask());
     }
 
-    if (!OPTIONS.IsCompilerNonOptimizing()) {
-        task_runner.SetTaskOnSuccess([](CompilerTaskRunner<RUNNER_MODE> next_runner) {
-            Pipeline::RunRegAllocAndCodeGenPass<RUNNER_MODE>(std::move(next_runner));
+    if (!g_options.IsCompilerNonOptimizing()) {
+        taskRunner.SetTaskOnSuccess([](CompilerTaskRunner<RUNNER_MODE> nextRunner) {
+            Pipeline::RunRegAllocAndCodeGenPass<RUNNER_MODE>(std::move(nextRunner));
         });
         bool success = pipeline->RunOptimizations();
-        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), success);
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), success);
         return;
     }
     // TryCatchResolving is needed in the non-optimizing mode since it removes unreachable for compiler
@@ -117,45 +117,45 @@ void Pipeline::Run(CompilerTaskRunner<RUNNER_MODE> task_runner)
     graph->template RunPass<TryCatchResolving>();
     if (!graph->template RunPass<MonitorAnalysis>()) {
         LOG(WARNING, COMPILER) << "Compiler detected incorrect monitor policy";
-        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), false);
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), false);
         return;
     }
-    Pipeline::RunRegAllocAndCodeGenPass<RUNNER_MODE>(std::move(task_runner));
+    Pipeline::RunRegAllocAndCodeGenPass<RUNNER_MODE>(std::move(taskRunner));
 }
 
 /* static */
 template <TaskRunnerMode RUNNER_MODE>
-void Pipeline::RunRegAllocAndCodeGenPass(CompilerTaskRunner<RUNNER_MODE> task_runner)
+void Pipeline::RunRegAllocAndCodeGenPass(CompilerTaskRunner<RUNNER_MODE> taskRunner)
 {
-    auto *graph = task_runner.GetContext().GetPipeline()->GetGraph();
-    bool fatal_on_err = !OPTIONS.IsCompilerAllowBackendFailures();
+    auto *graph = taskRunner.GetContext().GetPipeline()->GetGraph();
+    bool fatalOnErr = !g_options.IsCompilerAllowBackendFailures();
     // Do not try to encode too large graph
-    auto inst_size = graph->GetCurrentInstructionId();
-    auto insts_per_byte = graph->GetEncoder()->MaxArchInstPerEncoded();
-    auto max_bits_in_inst = GetInstructionSizeBits(graph->GetArch());
-    if ((inst_size * insts_per_byte * max_bits_in_inst) > OPTIONS.GetCompilerMaxGenCodeSize()) {
-        if (fatal_on_err) {
+    auto instSize = graph->GetCurrentInstructionId();
+    auto instsPerByte = graph->GetEncoder()->MaxArchInstPerEncoded();
+    auto maxBitsInInst = GetInstructionSizeBits(graph->GetArch());
+    if ((instSize * instsPerByte * maxBitsInInst) > g_options.GetCompilerMaxGenCodeSize()) {
+        if (fatalOnErr) {
             LOG(FATAL, COMPILER) << "RunOptimizations failed: code predicted size too big";
         }
-        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), false);
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), false);
         return;
     }
     graph->template RunPass<Cleanup>();
 
-    task_runner.SetTaskOnSuccess([fatal_on_err](CompilerTaskRunner<RUNNER_MODE> next_runner) {
-        next_runner.AddCallbackOnFail([fatal_on_err]([[maybe_unused]] CompilerContext<RUNNER_MODE> &compiler_ctx) {
-            if (fatal_on_err) {
+    taskRunner.SetTaskOnSuccess([fatalOnErr](CompilerTaskRunner<RUNNER_MODE> nextRunner) {
+        nextRunner.AddCallbackOnFail([fatalOnErr]([[maybe_unused]] CompilerContext<RUNNER_MODE> &compilerCtx) {
+            if (fatalOnErr) {
                 LOG(FATAL, COMPILER) << "RunOptimizations failed: code generation error";
             }
         });
-        bool success = RunCodegenPass(next_runner.GetContext().GetPipeline()->GetGraph());
-        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(next_runner), success);
+        bool success = RunCodegenPass(nextRunner.GetContext().GetPipeline()->GetGraph());
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(nextRunner), success);
     });
     bool success = RegAlloc(graph);
-    if (!success && fatal_on_err) {
+    if (!success && fatalOnErr) {
         LOG(FATAL, COMPILER) << "RunOptimizations failed: register allocation error";
     }
-    CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), success);
+    CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), success);
 }
 
 bool Pipeline::RunOptimizations()
@@ -165,7 +165,7 @@ bool Pipeline::RunOptimizations()
     /* peepholer and branch elimination have some parts that have
      * to be delayed up until loop unrolling is done, however, if
      * loop unrolling is not going to be run we don't have to delay */
-    if (!OPTIONS.IsCompilerLoopUnroll()) {
+    if (!g_options.IsCompilerLoopUnroll()) {
         graph->SetUnrollComplete();
     }
     graph->RunPass<Peepholes>();
@@ -205,11 +205,12 @@ bool Pipeline::RunOptimizations()
         graph->RunPass<Cleanup>(false);
     }
     graph->RunPass<ChecksElimination>();
-    graph->RunPass<Licm>(OPTIONS.GetCompilerLicmHoistLimit());
+    graph->RunPass<Licm>(g_options.GetCompilerLicmHoistLimit());
     graph->RunPass<LicmConditions>();
     graph->RunPass<RedundantLoopElimination>();
     graph->RunPass<LoopPeeling>();
-    graph->RunPass<LoopUnswitch>(OPTIONS.GetCompilerLoopUnswitchMaxLevel(), OPTIONS.GetCompilerLoopUnswitchMaxInsts());
+    graph->RunPass<LoopUnswitch>(g_options.GetCompilerLoopUnswitchMaxLevel(),
+                                 g_options.GetCompilerLoopUnswitchMaxInsts());
     graph->RunPass<Lse>();
     graph->RunPass<ValNum>();
     if (graph->RunPass<Peepholes>() && graph->RunPass<BranchElimination>()) {
@@ -223,7 +224,7 @@ bool Pipeline::RunOptimizations()
     graph->RunPass<EscapeAnalysis>();
     graph->RunPass<LoopIdioms>();
     graph->RunPass<ChecksElimination>();
-    graph->RunPass<LoopUnroll>(OPTIONS.GetCompilerLoopUnrollInstLimit(), OPTIONS.GetCompilerLoopUnrollFactor());
+    graph->RunPass<LoopUnroll>(g_options.GetCompilerLoopUnrollInstLimit(), g_options.GetCompilerLoopUnrollFactor());
 #include <plugins/optimizations_after_unroll.h>
 
     /* to be removed once generic loop unrolling is implemented */
@@ -247,8 +248,8 @@ bool Pipeline::RunOptimizations()
     graph->RunPass<Lowering>();
     graph->RunPass<Cleanup>(false);
     graph->RunPass<CodeSink>();
-    graph->RunPass<MemoryCoalescing>(OPTIONS.IsCompilerMemoryCoalescingAligned());
-    graph->RunPass<IfConversion>(OPTIONS.GetCompilerIfConversionLimit());
+    graph->RunPass<MemoryCoalescing>(g_options.IsCompilerMemoryCoalescingAligned());
+    graph->RunPass<IfConversion>(g_options.GetCompilerIfConversionLimit());
     graph->RunPass<Scheduler>();
     // Perform MoveConstants after Scheduler because Scheduler can rearrange constants
     // and cause spillfill in reg alloc

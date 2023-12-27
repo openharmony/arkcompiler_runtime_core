@@ -87,16 +87,15 @@ public:
         using RefTypeVector = PandaSmallVector<std::string_view>;
         Proto() = default;
 
-        Proto(const panda_file::File &pf, panda_file::File::EntityId proto_id);
+        Proto(const panda_file::File &pf, panda_file::File::EntityId protoId);
 
-        Proto(ShortyVector shorty, RefTypeVector ref_types)
-            : shorty_(std::move(shorty)), ref_types_(std::move(ref_types))
+        Proto(ShortyVector shorty, RefTypeVector refTypes) : shorty_(std::move(shorty)), refTypes_(std::move(refTypes))
         {
         }
 
         bool operator==(const Proto &other) const
         {
-            return shorty_ == other.shorty_ && ref_types_ == other.ref_types_;
+            return shorty_ == other.shorty_ && refTypes_ == other.refTypes_;
         }
 
         panda_file::Type GetReturnType() const
@@ -105,7 +104,7 @@ public:
         }
 
         PANDA_PUBLIC_API std::string_view GetReturnTypeDescriptor() const;
-        PandaString GetSignature(bool include_return_type = true);
+        PandaString GetSignature(bool includeReturnType = true);
 
         ShortyVector &GetShorty()
         {
@@ -119,12 +118,12 @@ public:
 
         RefTypeVector &GetRefTypes()
         {
-            return ref_types_;
+            return refTypes_;
         }
 
         const RefTypeVector &GetRefTypes() const
         {
-            return ref_types_;
+            return refTypes_;
         }
 
         ~Proto() = default;
@@ -134,12 +133,12 @@ public:
 
     private:
         ShortyVector shorty_;
-        RefTypeVector ref_types_;
+        RefTypeVector refTypes_;
     };
 
     class PANDA_PUBLIC_API ProtoId {
     public:
-        ProtoId(const panda_file::File &pf, panda_file::File::EntityId proto_id) : pf_(pf), proto_id_(proto_id) {}
+        ProtoId(const panda_file::File &pf, panda_file::File::EntityId protoId) : pf_(pf), protoId_(protoId) {}
         bool operator==(const ProtoId &other) const;
         bool operator==(const Proto &other) const;
         bool operator!=(const ProtoId &other) const
@@ -159,36 +158,36 @@ public:
 
     private:
         const panda_file::File &pf_;
-        panda_file::File::EntityId proto_id_;
+        panda_file::File::EntityId protoId_;
     };
 
-    PANDA_PUBLIC_API Method(Class *klass, const panda_file::File *pf, panda_file::File::EntityId file_id,
-                            panda_file::File::EntityId code_id, uint32_t access_flags, uint32_t num_args,
+    PANDA_PUBLIC_API Method(Class *klass, const panda_file::File *pf, panda_file::File::EntityId fileId,
+                            panda_file::File::EntityId codeId, uint32_t accessFlags, uint32_t numArgs,
                             const uint16_t *shorty);
 
     explicit Method(const Method *method)
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        : access_flags_(method->access_flags_.load(std::memory_order_acquire)),
-          num_args_(method->num_args_),
-          stor_16_pair_(method->stor_16_pair_),
-          class_word_(method->class_word_),
-          panda_file_(method->panda_file_),
-          file_id_(method->file_id_),
-          code_id_(method->code_id_),
+        : accessFlags_(method->accessFlags_.load(std::memory_order_acquire)),
+          numArgs_(method->numArgs_),
+          stor16Pair_(method->stor16Pair_),
+          classWord_(method->classWord_),
+          pandaFile_(method->pandaFile_),
+          fileId_(method->fileId_),
+          codeId_(method->codeId_),
           shorty_(method->shorty_)
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        pointer_.native_pointer.store(
+        pointer_.nativePointer.store(
             // Atomic with relaxed order reason: data race with native_pointer_ with no synchronization or ordering
             // constraints imposed on other reads or writes NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            method->pointer_.native_pointer.load(std::memory_order_relaxed), std::memory_order_relaxed);
+            method->pointer_.nativePointer.load(std::memory_order_relaxed), std::memory_order_relaxed);
 
         // Atomic with release order reason: data race with compiled_entry_point_ with dependecies on writes before the
         // store which should become visible acquire
-        compiled_entry_point_.store(method->IsNative() ? method->GetCompiledEntryPoint()
-                                                       : GetCompiledCodeToInterpreterBridge(method),
-                                    std::memory_order_release);
+        compiledEntryPoint_.store(method->IsNative() ? method->GetCompiledEntryPoint()
+                                                     : GetCompiledCodeToInterpreterBridge(method),
+                                  std::memory_order_release);
         SetCompilationStatus(CompilationStage::NOT_COMPILED);
     }
 
@@ -201,39 +200,39 @@ public:
 
     uint32_t GetNumArgs() const
     {
-        return num_args_;
+        return numArgs_;
     }
 
     uint32_t GetNumVregs() const
     {
-        if (!code_id_.IsValid()) {
+        if (!codeId_.IsValid()) {
             return 0;
         }
-        return panda_file::CodeDataAccessor::GetNumVregs(*(panda_file_), code_id_);
+        return panda_file::CodeDataAccessor::GetNumVregs(*(pandaFile_), codeId_);
     }
 
     uint32_t GetCodeSize() const
     {
-        if (!code_id_.IsValid()) {
+        if (!codeId_.IsValid()) {
             return 0;
         }
-        panda_file::CodeDataAccessor cda(*(panda_file_), code_id_);
+        panda_file::CodeDataAccessor cda(*(pandaFile_), codeId_);
         return cda.GetCodeSize();
     }
 
     const uint8_t *GetInstructions() const
     {
-        if (!code_id_.IsValid()) {
+        if (!codeId_.IsValid()) {
             return nullptr;
         }
-        return panda_file::CodeDataAccessor::GetInstructions(*panda_file_, code_id_);
+        return panda_file::CodeDataAccessor::GetInstructions(*pandaFile_, codeId_);
     }
 
     /*
      * Invoke the method as a static method.
      * Number of arguments and their types must match the method's signature
      */
-    PANDA_PUBLIC_API Value Invoke(ManagedThread *thread, Value *args, bool proxy_call = false);
+    PANDA_PUBLIC_API Value Invoke(ManagedThread *thread, Value *args, bool proxyCall = false);
 
     void InvokeVoid(ManagedThread *thread, Value *args)
     {
@@ -247,13 +246,13 @@ public:
      * num_args - length of args array
      * data - panda::ExtFrame language-related extension data
      */
-    coretypes::TaggedValue InvokeDyn(ManagedThread *thread, uint32_t num_args, coretypes::TaggedValue *args);
+    coretypes::TaggedValue InvokeDyn(ManagedThread *thread, uint32_t numArgs, coretypes::TaggedValue *args);
 
     template <class InvokeHelper>
-    coretypes::TaggedValue InvokeDyn(ManagedThread *thread, uint32_t num_args, coretypes::TaggedValue *args);
+    coretypes::TaggedValue InvokeDyn(ManagedThread *thread, uint32_t numArgs, coretypes::TaggedValue *args);
 
     template <class InvokeHelper>
-    void InvokeEntry(ManagedThread *thread, Frame *current_frame, Frame *frame, const uint8_t *pc);
+    void InvokeEntry(ManagedThread *thread, Frame *currentFrame, Frame *frame, const uint8_t *pc);
 
     /*
      * Enter execution context (ECMAScript generators)
@@ -279,7 +278,7 @@ public:
      * data - panda::ExtFrame language-related extension data
      */
     template <class InvokeHelper, class ValueT>
-    Frame *EnterNativeMethodFrame(ManagedThread *thread, uint32_t num_vregs, uint32_t num_args, ValueT *args);
+    Frame *EnterNativeMethodFrame(ManagedThread *thread, uint32_t numVregs, uint32_t numArgs, ValueT *args);
 
     /*
      * Pop native method frame
@@ -288,42 +287,42 @@ public:
 
     Class *GetClass() const
     {
-        return reinterpret_cast<Class *>(class_word_);
+        return reinterpret_cast<Class *>(classWord_);
     }
 
     void SetClass(Class *cls)
     {
-        class_word_ = static_cast<ClassHelper::ClassWordSize>(ToObjPtrType(cls));
+        classWord_ = static_cast<ClassHelper::ClassWordSize>(ToObjPtrType(cls));
     }
 
     void SetPandaFile(const panda_file::File *file)
     {
-        panda_file_ = file;
+        pandaFile_ = file;
     }
 
     const panda_file::File *GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     panda_file::File::EntityId GetFileId() const
     {
-        return file_id_;
+        return fileId_;
     }
 
     panda_file::File::EntityId GetCodeId() const
     {
-        return code_id_;
+        return codeId_;
     }
 
     inline int16_t GetHotnessCounter() const
     {
-        return stor_16_pair_.hotness_counter;
+        return stor16Pair_.hotnessCounter;
     }
 
     inline NO_THREAD_SANITIZE void DecrementHotnessCounter()
     {
-        --stor_16_pair_.hotness_counter;
+        --stor16Pair_.hotnessCounter;
     }
 
     static NO_THREAD_SANITIZE int16_t GetInitialHotnessCounter();
@@ -337,19 +336,19 @@ public:
 
     // NO_THREAD_SANITIZE because of perfomance degradation (see commit 7c913cb1 and MR 997#note_113500)
     template <bool IS_CALL, class AccVRegisterPtrT>
-    NO_THREAD_SANITIZE bool DecrementHotnessCounter(uintptr_t bytecode_offset, [[maybe_unused]] AccVRegisterPtrT cc,
+    NO_THREAD_SANITIZE bool DecrementHotnessCounter(uintptr_t bytecodeOffset, [[maybe_unused]] AccVRegisterPtrT cc,
                                                     bool osr = false,
                                                     coretypes::TaggedValue func = coretypes::TaggedValue::Hole());
 
     template <bool IS_CALL, class AccVRegisterPtrT>
-    NO_THREAD_SANITIZE bool DecrementHotnessCounter(ManagedThread *thread, uintptr_t bytecode_offset,
+    NO_THREAD_SANITIZE bool DecrementHotnessCounter(ManagedThread *thread, uintptr_t bytecodeOffset,
                                                     [[maybe_unused]] AccVRegisterPtrT cc, bool osr = false,
                                                     coretypes::TaggedValue func = coretypes::TaggedValue::Hole());
 
     // NOTE(xucheng): change the input type to uint16_t when we don't input the max num of int32_t
     inline NO_THREAD_SANITIZE void SetHotnessCounter(uint32_t counter)
     {
-        stor_16_pair_.hotness_counter = static_cast<uint16_t>(counter);
+        stor16Pair_.hotnessCounter = static_cast<uint16_t>(counter);
     }
 
     PANDA_PUBLIC_API int64_t GetBranchTakenCounter(uint32_t pc);
@@ -361,21 +360,21 @@ public:
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return compiled_entry_point_.load(std::memory_order_acquire);
+        return compiledEntryPoint_.load(std::memory_order_acquire);
     }
 
     const void *GetCompiledEntryPoint() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return compiled_entry_point_.load(std::memory_order_acquire);
+        return compiledEntryPoint_.load(std::memory_order_acquire);
     }
 
-    void SetCompiledEntryPoint(const void *entry_point)
+    void SetCompiledEntryPoint(const void *entryPoint)
     {
         // Atomic with release order reason: data race with compiled_entry_point_ with dependecies on writes before the
         // store which should become visible acquire
-        compiled_entry_point_.store(entry_point, std::memory_order_release);
+        compiledEntryPoint_.store(entryPoint, std::memory_order_release);
     }
 
     void SetInterpreterEntryPoint()
@@ -387,17 +386,17 @@ public:
 
     bool HasCompiledCode() const
     {
-        auto entry_point = GetCompiledEntryPoint();
-        return entry_point != GetCompiledCodeToInterpreterBridge() &&
-               entry_point != GetCompiledCodeToInterpreterBridgeDyn();
+        auto entryPoint = GetCompiledEntryPoint();
+        return entryPoint != GetCompiledCodeToInterpreterBridge() &&
+               entryPoint != GetCompiledCodeToInterpreterBridgeDyn();
     }
 
     inline CompilationStage GetCompilationStatus() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return static_cast<CompilationStage>(
-            (access_flags_.load(std::memory_order_acquire) & COMPILATION_STATUS_MASK) >> COMPILATION_STATUS_SHIFT);
+        return static_cast<CompilationStage>((accessFlags_.load(std::memory_order_acquire) & COMPILATION_STATUS_MASK) >>
+                                             COMPILATION_STATUS_SHIFT);
     }
 
     inline CompilationStage GetCompilationStatus(uint32_t value)
@@ -405,25 +404,25 @@ public:
         return static_cast<CompilationStage>((value & COMPILATION_STATUS_MASK) >> COMPILATION_STATUS_SHIFT);
     }
 
-    inline void SetCompilationStatus(enum CompilationStage new_status)
+    inline void SetCompilationStatus(enum CompilationStage newStatus)
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        auto result = (access_flags_.load(std::memory_order_acquire) & ~COMPILATION_STATUS_MASK) |
-                      static_cast<uint32_t>(new_status) << COMPILATION_STATUS_SHIFT;
+        auto result = (accessFlags_.load(std::memory_order_acquire) & ~COMPILATION_STATUS_MASK) |
+                      static_cast<uint32_t>(newStatus) << COMPILATION_STATUS_SHIFT;
         // Atomic with release order reason: data race with access_flags_ with dependecies on writes before the store
         // which should become visible acquire
-        access_flags_.store(result, std::memory_order_release);
+        accessFlags_.store(result, std::memory_order_release);
     }
 
-    inline bool AtomicSetCompilationStatus(enum CompilationStage old_status, enum CompilationStage new_status)
+    inline bool AtomicSetCompilationStatus(enum CompilationStage oldStatus, enum CompilationStage newStatus)
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        uint32_t old_value = access_flags_.load(std::memory_order_acquire);
-        while (GetCompilationStatus(old_value) == old_status) {
-            uint32_t new_value = MakeCompilationStatusValue(old_value, new_status);
-            if (access_flags_.compare_exchange_strong(old_value, new_value)) {
+        uint32_t oldValue = accessFlags_.load(std::memory_order_acquire);
+        while (GetCompilationStatus(oldValue) == oldStatus) {
+            uint32_t newValue = MakeCompilationStatusValue(oldValue, newStatus);
+            if (accessFlags_.compare_exchange_strong(oldValue, newValue)) {
                 return true;
             }
         }
@@ -446,8 +445,8 @@ public:
 
     PANDA_PUBLIC_API panda_file::File::StringData GetClassName() const;
 
-    PANDA_PUBLIC_API PandaString GetFullName(bool with_signature = false) const;
-    PANDA_PUBLIC_API PandaString GetLineNumberAndSourceFile(uint32_t bc_offset) const;
+    PANDA_PUBLIC_API PandaString GetFullName(bool withSignature = false) const;
+    PANDA_PUBLIC_API PandaString GetLineNumberAndSourceFile(uint32_t bcOffset) const;
 
     static uint32_t GetFullNameHashFromString(const PandaString &str);
     static uint32_t GetClassNameHashFromString(const PandaString &str);
@@ -461,112 +460,112 @@ public:
         return Frame::GetAllocSize(GetNumArgs() + GetNumVregs(), EMPTY_EXT_FRAME_DATA_SIZE);
     }
 
-    uint32_t GetNumericalAnnotation(AnnotationField field_id) const;
-    panda_file::File::StringData GetStringDataAnnotation(AnnotationField field_id) const;
+    uint32_t GetNumericalAnnotation(AnnotationField fieldId) const;
+    panda_file::File::StringData GetStringDataAnnotation(AnnotationField fieldId) const;
 
     uint32_t GetAccessFlags() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return access_flags_.load(std::memory_order_acquire);
+        return accessFlags_.load(std::memory_order_acquire);
     }
 
-    void SetAccessFlags(uint32_t access_flags)
+    void SetAccessFlags(uint32_t accessFlags)
     {
         // Atomic with release order reason: data race with access_flags_ with dependecies on writes before the store
         // which should become visible acquire
-        access_flags_.store(access_flags, std::memory_order_release);
+        accessFlags_.store(accessFlags, std::memory_order_release);
     }
 
     bool IsStatic() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_STATIC) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_STATIC) != 0;
     }
 
     bool IsNative() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_NATIVE) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_NATIVE) != 0;
     }
 
     bool IsPublic() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_PUBLIC) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_PUBLIC) != 0;
     }
 
     bool IsPrivate() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_PRIVATE) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_PRIVATE) != 0;
     }
 
     bool IsProtected() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_PROTECTED) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_PROTECTED) != 0;
     }
 
     bool IsIntrinsic() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_INTRINSIC) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_INTRINSIC) != 0;
     }
 
     bool IsSynthetic() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_SYNTHETIC) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_SYNTHETIC) != 0;
     }
 
     bool IsAbstract() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_ABSTRACT) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_ABSTRACT) != 0;
     }
 
     bool IsFinal() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_FINAL) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_FINAL) != 0;
     }
 
     bool IsSynchronized() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_SYNCHRONIZED) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_SYNCHRONIZED) != 0;
     }
 
     bool HasSingleImplementation() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_SINGLE_IMPL) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_SINGLE_IMPL) != 0;
     }
 
     bool IsProfiled() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_PROFILING) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_PROFILING) != 0;
     }
 
     bool IsDestroyed() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_DESTROYED) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_DESTROYED) != 0;
     }
 
     void SetHasSingleImplementation(bool v)
@@ -574,11 +573,11 @@ public:
         if (v) {
             // Atomic with acq_rel order reason: data race with access_flags_ with dependecies on reads after the load
             // and on writes before the store
-            access_flags_.fetch_or(ACC_SINGLE_IMPL, std::memory_order_acq_rel);
+            accessFlags_.fetch_or(ACC_SINGLE_IMPL, std::memory_order_acq_rel);
         } else {
             // Atomic with acq_rel order reason: data race with access_flags_ with dependecies on reads after the load
             // and on writes before the store
-            access_flags_.fetch_and(~ACC_SINGLE_IMPL, std::memory_order_acq_rel);
+            accessFlags_.fetch_and(~ACC_SINGLE_IMPL, std::memory_order_acq_rel);
         }
     }
 
@@ -587,7 +586,7 @@ public:
         ASSERT(!IsIntrinsic());
         // Atomic with acq_rel order reason: data race with access_flags_ with dependecies on reads after the load
         // and on writes before the store
-        access_flags_.fetch_or(ACC_PROFILING, std::memory_order_acq_rel);
+        accessFlags_.fetch_or(ACC_PROFILING, std::memory_order_acq_rel);
     }
 
     void SetDestroyed()
@@ -595,7 +594,7 @@ public:
         ASSERT(!IsIntrinsic());
         // Atomic with acq_rel order reason: data race with access_flags_ with dependecies on reads after the load
         // and on writes before the store
-        access_flags_.fetch_or(ACC_DESTROYED, std::memory_order_acq_rel);
+        accessFlags_.fetch_or(ACC_DESTROYED, std::memory_order_acq_rel);
     }
 
     Method *GetSingleImplementation()
@@ -608,11 +607,11 @@ public:
         ASSERT(!IsIntrinsic());
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        ASSERT((access_flags_.load(std::memory_order_acquire) & INTRINSIC_MASK) == 0);
+        ASSERT((accessFlags_.load(std::memory_order_acquire) & INTRINSIC_MASK) == 0);
         auto result = ACC_INTRINSIC | static_cast<uint32_t>(intrinsic) << INTRINSIC_SHIFT;
         // Atomic with acq_rel order reason: data race with access_flags_ with dependecies on reads after the load and
         // on writes before the store
-        access_flags_.fetch_or(result, std::memory_order_acq_rel);
+        accessFlags_.fetch_or(result, std::memory_order_acq_rel);
     }
 
     intrinsics::Intrinsic GetIntrinsic() const
@@ -620,26 +619,26 @@ public:
         ASSERT(IsIntrinsic());
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return static_cast<intrinsics::Intrinsic>((access_flags_.load(std::memory_order_acquire) & INTRINSIC_MASK) >>
+        return static_cast<intrinsics::Intrinsic>((accessFlags_.load(std::memory_order_acquire) & INTRINSIC_MASK) >>
                                                   INTRINSIC_SHIFT);
     }
 
-    void SetVTableIndex(uint16_t vtable_index)
+    void SetVTableIndex(uint16_t vtableIndex)
     {
-        stor_16_pair_.vtable_index = vtable_index;
+        stor16Pair_.vtableIndex = vtableIndex;
     }
 
     uint16_t GetVTableIndex() const
     {
-        return stor_16_pair_.vtable_index;
+        return stor16Pair_.vtableIndex;
     }
 
-    void SetNativePointer(void *native_pointer)
+    void SetNativePointer(void *nativePointer)
     {
         ASSERT((IsNative() || IsProxy()));
         // Atomic with relaxed order reason: data race with native_pointer_ with no synchronization or ordering
         // constraints imposed on other reads or writes NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        pointer_.native_pointer.store(native_pointer, std::memory_order_relaxed);
+        pointer_.nativePointer.store(nativePointer, std::memory_order_relaxed);
     }
 
     void *GetNativePointer() const
@@ -647,7 +646,7 @@ public:
         ASSERT((IsNative() || IsProxy()));
         // Atomic with relaxed order reason: data race with native_pointer_ with no synchronization or ordering
         // constraints imposed on other reads or writes NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        return pointer_.native_pointer.load(std::memory_order_relaxed);
+        return pointer_.nativePointer.load(std::memory_order_relaxed);
     }
 
     const uint16_t *GetShorty() const
@@ -666,21 +665,21 @@ public:
     {
         // Atomic with acq_rel order reason: data race with access_flags_ with dependecies on reads after the load and
         // on writes before the store
-        access_flags_.fetch_or(ACC_DEFAULT_INTERFACE_METHOD, std::memory_order_acq_rel);
+        accessFlags_.fetch_or(ACC_DEFAULT_INTERFACE_METHOD, std::memory_order_acq_rel);
     }
 
     bool IsDefaultInterfaceMethod() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_DEFAULT_INTERFACE_METHOD) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_DEFAULT_INTERFACE_METHOD) != 0;
     }
 
     bool IsConstructor() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return (access_flags_.load(std::memory_order_acquire) & ACC_CONSTRUCTOR) != 0;
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_CONSTRUCTOR) != 0;
     }
 
     bool IsInstanceConstructor() const
@@ -695,36 +694,36 @@ public:
 
     static constexpr uint32_t GetAccessFlagsOffset()
     {
-        return MEMBER_OFFSET(Method, access_flags_);
+        return MEMBER_OFFSET(Method, accessFlags_);
     }
     static constexpr uint32_t GetNumArgsOffset()
     {
-        return MEMBER_OFFSET(Method, num_args_);
+        return MEMBER_OFFSET(Method, numArgs_);
     }
     static constexpr uint32_t GetVTableIndexOffset()
     {
-        return MEMBER_OFFSET(Method, stor_16_pair_) + MEMBER_OFFSET(Storage16Pair, vtable_index);
+        return MEMBER_OFFSET(Method, stor16Pair_) + MEMBER_OFFSET(Storage16Pair, vtableIndex);
     }
     static constexpr uint32_t GetHotnessCounterOffset()
     {
-        return MEMBER_OFFSET(Method, stor_16_pair_) + MEMBER_OFFSET(Storage16Pair, hotness_counter);
+        return MEMBER_OFFSET(Method, stor16Pair_) + MEMBER_OFFSET(Storage16Pair, hotnessCounter);
     }
     static constexpr uint32_t GetClassOffset()
     {
-        return MEMBER_OFFSET(Method, class_word_);
+        return MEMBER_OFFSET(Method, classWord_);
     }
 
     static constexpr uint32_t GetCompiledEntryPointOffset()
     {
-        return MEMBER_OFFSET(Method, compiled_entry_point_);
+        return MEMBER_OFFSET(Method, compiledEntryPoint_);
     }
     static constexpr uint32_t GetPandaFileOffset()
     {
-        return MEMBER_OFFSET(Method, panda_file_);
+        return MEMBER_OFFSET(Method, pandaFile_);
     }
     static constexpr uint32_t GetCodeIdOffset()
     {
-        return MEMBER_OFFSET(Method, code_id_);
+        return MEMBER_OFFSET(Method, codeId_);
     }
     static constexpr uint32_t GetNativePointerOffset()
     {
@@ -744,24 +743,24 @@ public:
     template <typename Callback>
     void EnumerateExceptionHandlers(Callback callback) const;
 
-    static inline UniqId CalcUniqId(const panda_file::File *file, panda_file::File::EntityId file_id)
+    static inline UniqId CalcUniqId(const panda_file::File *file, panda_file::File::EntityId fileId)
     {
         constexpr uint64_t HALF = 32ULL;
         uint64_t uid = file->GetUniqId();
         uid <<= HALF;
-        uid |= file_id.GetOffset();
+        uid |= fileId.GetOffset();
         return uid;
     }
 
     // for synthetic methods, like array .ctor
-    static UniqId CalcUniqId(const uint8_t *class_descr, const uint8_t *name);
+    static UniqId CalcUniqId(const uint8_t *classDescr, const uint8_t *name);
 
     UniqId GetUniqId() const
     {
-        return CalcUniqId(panda_file_, file_id_);
+        return CalcUniqId(pandaFile_, fileId_);
     }
 
-    int32_t GetLineNumFromBytecodeOffset(uint32_t bc_offset) const;
+    int32_t GetLineNumFromBytecodeOffset(uint32_t bcOffset) const;
 
     panda_file::File::StringData GetClassSourceFile() const;
 
@@ -777,14 +776,14 @@ public:
         }
         // Atomic with acquire order reason: data race with profiling_data_ with dependecies on reads after the load
         // which should become visible NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        return pointer_.profiling_data.load(std::memory_order_acquire);
+        return pointer_.profilingData.load(std::memory_order_acquire);
     }
 
     ProfilingData *GetProfilingDataWithoutCheck()
     {
         // Atomic with acquire order reason: data race with profiling_data_ with dependecies on reads after the load
         // which should become visible NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        return pointer_.profiling_data.load(std::memory_order_acquire);
+        return pointer_.profilingData.load(std::memory_order_acquire);
     }
 
     const ProfilingData *GetProfilingData() const
@@ -794,7 +793,7 @@ public:
         }
         // Atomic with acquire order reason: data race with profiling_data_ with dependecies on reads after the load
         // which should become visible NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        return pointer_.profiling_data.load(std::memory_order_acquire);
+        return pointer_.profilingData.load(std::memory_order_acquire);
     }
 
     bool IsProfiling() const
@@ -809,7 +808,7 @@ public:
         }
         // Atomic with acquire order reason: data race with profiling_data_ with dependecies on reads after the load
         // which should become visible NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        return pointer_.profiling_data.load(std::memory_order_acquire) != nullptr;
+        return pointer_.profilingData.load(std::memory_order_acquire) != nullptr;
     }
 
     void SetVerified(bool result);
@@ -827,95 +826,95 @@ public:
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        return GetVerificationStage(access_flags_.load(std::memory_order_acquire));
+        return GetVerificationStage(accessFlags_.load(std::memory_order_acquire));
     }
 
-    inline void SetVerificationStage(enum VerificationStage new_stage)
+    inline void SetVerificationStage(enum VerificationStage newStage)
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
-        uint32_t old_value = access_flags_.load(std::memory_order_acquire);
-        uint32_t new_value = MakeVerificationStageValue(old_value, new_stage);
-        while (!access_flags_.compare_exchange_weak(old_value, new_value, std::memory_order_acq_rel)) {
-            new_value = MakeVerificationStageValue(old_value, new_stage);
+        uint32_t oldValue = accessFlags_.load(std::memory_order_acquire);
+        uint32_t newValue = MakeVerificationStageValue(oldValue, newStage);
+        while (!accessFlags_.compare_exchange_weak(oldValue, newValue, std::memory_order_acq_rel)) {
+            newValue = MakeVerificationStageValue(oldValue, newStage);
         }
     }
 
 private:
-    Value InvokeCompiledCode(ManagedThread *thread, uint32_t num_args, Value *args);
+    Value InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs, Value *args);
 
-    Value GetReturnValueFromTaggedValue(uint64_t ret_value)
+    Value GetReturnValueFromTaggedValue(uint64_t retValue)
     {
-        panda_file::Type ret_type = GetReturnType();
-        if (ret_type.GetId() == panda_file::Type::TypeId::VOID) {
+        panda_file::Type retType = GetReturnType();
+        if (retType.GetId() == panda_file::Type::TypeId::VOID) {
             return Value(static_cast<int64_t>(0));
         }
-        if (ret_type.GetId() == panda_file::Type::TypeId::REFERENCE) {
-            return Value(reinterpret_cast<ObjectHeader *>(ret_value));
+        if (retType.GetId() == panda_file::Type::TypeId::REFERENCE) {
+            return Value(reinterpret_cast<ObjectHeader *>(retValue));
         }
-        return Value(ret_value);
+        return Value(retValue);
     }
 
-    inline static uint32_t MakeCompilationStatusValue(uint32_t value, CompilationStage new_status)
+    inline static uint32_t MakeCompilationStatusValue(uint32_t value, CompilationStage newStatus)
     {
         value &= ~COMPILATION_STATUS_MASK;
-        value |= static_cast<uint32_t>(new_status) << COMPILATION_STATUS_SHIFT;
+        value |= static_cast<uint32_t>(newStatus) << COMPILATION_STATUS_SHIFT;
         return value;
     }
 
-    inline static uint32_t MakeVerificationStageValue(uint32_t value, VerificationStage new_stage)
+    inline static uint32_t MakeVerificationStageValue(uint32_t value, VerificationStage newStage)
     {
         value &= ~VERIFICATION_STATUS_MASK;
-        value |= static_cast<uint32_t>(new_stage) << VERIFICATION_STATUS_SHIFT;
+        value |= static_cast<uint32_t>(newStage) << VERIFICATION_STATUS_SHIFT;
         return value;
     }
 
     template <class InvokeHelper, class ValueT>
-    ValueT InvokeInterpretedCode(ManagedThread *thread, uint32_t num_actual_args, ValueT *args);
+    ValueT InvokeInterpretedCode(ManagedThread *thread, uint32_t numActualArgs, ValueT *args);
 
     template <class InvokeHelper, class ValueT>
-    PandaUniquePtr<Frame, FrameDeleter> InitFrame(ManagedThread *thread, uint32_t num_actual_args, ValueT *args,
-                                                  Frame *current_frame);
+    PandaUniquePtr<Frame, FrameDeleter> InitFrame(ManagedThread *thread, uint32_t numActualArgs, ValueT *args,
+                                                  Frame *currentFrame);
 
     template <class InvokeHelper, class ValueT, bool IS_NATIVE_METHOD>
-    PandaUniquePtr<Frame, FrameDeleter> InitFrameWithNumVRegs(ManagedThread *thread, uint32_t num_vregs,
-                                                              uint32_t num_actual_args, ValueT *args,
-                                                              Frame *current_frame);
+    PandaUniquePtr<Frame, FrameDeleter> InitFrameWithNumVRegs(ManagedThread *thread, uint32_t numVregs,
+                                                              uint32_t numActualArgs, ValueT *args,
+                                                              Frame *currentFrame);
 
     template <class InvokeHelper, class ValueT>
     ValueT GetReturnValueFromException();
 
     template <class InvokeHelper, class ValueT>
-    ValueT GetReturnValueFromAcc(interpreter::AccVRegister &aac_vreg);
+    ValueT GetReturnValueFromAcc(interpreter::AccVRegister &aacVreg);
 
     template <class InvokeHelper, class ValueT>
-    ValueT InvokeImpl(ManagedThread *thread, uint32_t num_actual_args, ValueT *args, bool proxy_call);
+    ValueT InvokeImpl(ManagedThread *thread, uint32_t numActualArgs, ValueT *args, bool proxyCall);
 
 private:
     union PointerInMethod {
         // It's native pointer when the method is native or proxy method.
-        std::atomic<void *> native_pointer;
+        std::atomic<void *> nativePointer;
         // It's profiling data when the method isn't native or proxy method.
-        std::atomic<ProfilingData *> profiling_data;
+        std::atomic<ProfilingData *> profilingData;
     };
 
     struct Storage16Pair {
-        uint16_t vtable_index;
-        int16_t hotness_counter;
+        uint16_t vtableIndex;
+        int16_t hotnessCounter;
     };
 
-    std::atomic_uint32_t access_flags_;
-    uint32_t num_args_;
-    Storage16Pair stor_16_pair_;
-    ClassHelper::ClassWordSize class_word_;
+    std::atomic_uint32_t accessFlags_;
+    uint32_t numArgs_;
+    Storage16Pair stor16Pair_;
+    ClassHelper::ClassWordSize classWord_;
 
-    std::atomic<const void *> compiled_entry_point_ {nullptr};
-    const panda_file::File *panda_file_;
+    std::atomic<const void *> compiledEntryPoint_ {nullptr};
+    const panda_file::File *pandaFile_;
     union PointerInMethod pointer_ {
     };
 
-    panda_file::File::EntityId file_id_;
-    panda_file::File::EntityId code_id_;
+    panda_file::File::EntityId fileId_;
+    panda_file::File::EntityId codeId_;
     const uint16_t *shorty_;
 };
 

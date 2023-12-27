@@ -38,8 +38,8 @@ class ReferenceStorage {
 public:
     static_assert(offsetof(RefBlock, refs_) == 0);
 
-    explicit ReferenceStorage(GlobalObjectStorage *global_storage, mem::InternalAllocatorPtr allocator,
-                              bool ref_check_validate);
+    explicit ReferenceStorage(GlobalObjectStorage *globalStorage, mem::InternalAllocatorPtr allocator,
+                              bool refCheckValidate);
 
     ~ReferenceStorage();
 
@@ -47,16 +47,16 @@ public:
 
     static Reference::ObjectType GetObjectType(const Reference *ref);
 
-    [[nodiscard]] static Reference *NewStackRef(ObjectHeader **object_ptr)
+    [[nodiscard]] static Reference *NewStackRef(ObjectHeader **objectPtr)
     {
-        ASSERT(object_ptr != nullptr);
-        if (*object_ptr == nullptr) {
+        ASSERT(objectPtr != nullptr);
+        if (*objectPtr == nullptr) {
             return nullptr;
         }
-        return Reference::Create(ToUintPtr(object_ptr), Reference::ObjectType::STACK);
+        return Reference::Create(ToUintPtr(objectPtr), Reference::ObjectType::STACK);
     }
 
-    [[nodiscard]] PANDA_PUBLIC_API Reference *NewRef(const ObjectHeader *object, Reference::ObjectType object_type);
+    [[nodiscard]] PANDA_PUBLIC_API Reference *NewRef(const ObjectHeader *object, Reference::ObjectType objectType);
 
     void RemoveRef(const Reference *ref);
 
@@ -89,7 +89,7 @@ public:
     /// Get all objects in global & local storage. Use for debugging only
     PandaVector<ObjectHeader *> GetAllObjects();
 
-    void VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType root_type);
+    void VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType);
 
     /// Update pointers to moved Objects in local storage
     void UpdateMovedRefs();
@@ -100,7 +100,7 @@ public:
     /// Dump the top MAX_DUMP_LOCAL_NUMS(if exists) classes of local references.
     void DumpLocalRefClasses();
     bool IsValidRef(const Reference *ref);
-    void SetRefCheckValidate(bool ref_check_validate);
+    void SetRefCheckValidate(bool refCheckValidate);
 
 private:
     NO_COPY_SEMANTIC(ReferenceStorage);
@@ -125,15 +125,15 @@ private:
 
     using StorageFrameAllocator = mem::FrameAllocator<BLOCK_ALIGNMENT, false>;
 
-    GlobalObjectStorage *global_storage_;
-    mem::InternalAllocatorPtr internal_allocator_;
-    PandaVector<RefBlock *> *local_storage_ {nullptr};
-    StorageFrameAllocator *frame_allocator_ {nullptr};
-    size_t blocks_count_ {0};
+    GlobalObjectStorage *globalStorage_;
+    mem::InternalAllocatorPtr internalAllocator_;
+    PandaVector<RefBlock *> *localStorage_ {nullptr};
+    StorageFrameAllocator *frameAllocator_ {nullptr};
+    size_t blocksCount_ {0};
     // NOTE(alovkov): remove it when storage will be working over mmap
-    RefBlock *cached_block_ {nullptr};
+    RefBlock *cachedBlock_ {nullptr};
 
-    bool ref_check_validate_;
+    bool refCheckValidate_;
     // private methods for test purpose only
     size_t GetGlobalObjectStorageSize();
 
@@ -141,7 +141,7 @@ private:
 
     void RemoveAllLocalRefs();
 
-    bool StackReferenceCheck(const Reference *stack_ref);
+    bool StackReferenceCheck(const Reference *stackRef);
 
     friend class panda::mem::test::ReferenceStorageTest;
 };
@@ -175,9 +175,9 @@ public:
     }
 
     template <typename T>
-    Reference *NewRef(T *object, bool release_old = true, Reference::ObjectType type = Reference::ObjectType::LOCAL)
+    Reference *NewRef(T *object, bool releaseOld = true, Reference::ObjectType type = Reference::ObjectType::LOCAL)
     {
-        if (release_old && ref_ != nullptr) {
+        if (releaseOld && ref_ != nullptr) {
             rs_->RemoveRef(ref_);
         }
         ref_ = rs_->NewRef(reinterpret_cast<ObjectHeader *>(object), type);

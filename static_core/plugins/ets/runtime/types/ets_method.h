@@ -70,32 +70,32 @@ public:
 
     EtsType GetArgType(size_t idx) const
     {
-        EtsType ets_type = ConvertPandaTypeToEtsType(GetPandaMethod()->GetArgType(idx));
-        if (ets_type == EtsType::VOID) {
+        EtsType etsType = ConvertPandaTypeToEtsType(GetPandaMethod()->GetArgType(idx));
+        if (etsType == EtsType::VOID) {
             LOG(FATAL, RUNTIME) << "VOID parameter";
         }
-        return ets_type;
+        return etsType;
     }
 
     EtsType GetReturnValueType() const
     {
-        panda_file::Type panda_type = GetPandaMethod()->GetReturnType();
-        return ConvertPandaTypeToEtsType(panda_type);
+        panda_file::Type pandaType = GetPandaMethod()->GetReturnType();
+        return ConvertPandaTypeToEtsType(pandaType);
     }
 
     EtsType GetEffectiveArgType(size_t idx) const
     {
-        EtsType ets_type = ConvertPandaTypeToEtsType(GetPandaMethod()->GetEffectiveArgType(idx));
-        if (ets_type == EtsType::VOID) {
+        EtsType etsType = ConvertPandaTypeToEtsType(GetPandaMethod()->GetEffectiveArgType(idx));
+        if (etsType == EtsType::VOID) {
             LOG(FATAL, RUNTIME) << "VOID parameter";
         }
-        return ets_type;
+        return etsType;
     }
 
     EtsType GetEffectiveReturnValueType() const
     {
-        panda_file::Type panda_type = GetPandaMethod()->GetEffectiveReturnType();
-        return ConvertPandaTypeToEtsType(panda_type);
+        panda_file::Type pandaType = GetPandaMethod()->GetEffectiveReturnType();
+        return ConvertPandaTypeToEtsType(pandaType);
     }
 
     const char *GetRefArgType(size_t idx) const
@@ -108,15 +108,15 @@ public:
         return utf::Mutf8AsCString(GetPandaMethod()->GetName().data);
     }
 
-    PandaString GetFullName(bool with_signature = false) const
+    PandaString GetFullName(bool withSignature = false) const
     {
-        return GetPandaMethod()->GetFullName(with_signature);
+        return GetPandaMethod()->GetFullName(withSignature);
     }
 
     EtsString *GetNameString()
     {
-        auto name_data = GetPandaMethod()->GetName();
-        return EtsString::Resolve(name_data.data, name_data.utf16_length);
+        auto nameData = GetPandaMethod()->GetName();
+        return EtsString::Resolve(nameData.data, nameData.utf16Length);
     }
 
     bool IsStatic() const
@@ -252,7 +252,7 @@ public:
 
     PANDA_PUBLIC_API EtsMethod *GetOverriddenMethod();
 
-    int32_t GetLineNumFromBytecodeOffset(uint32_t bc_offset) const
+    int32_t GetLineNumFromBytecodeOffset(uint32_t bcOffset) const
     {
         if (IsNative()) {
             return -2;  // -2
@@ -262,7 +262,7 @@ public:
             return -1;
         }
 
-        return GetPandaMethod()->GetLineNumFromBytecodeOffset(bc_offset);
+        return GetPandaMethod()->GetLineNumFromBytecodeOffset(bcOffset);
     }
 
     panda_file::File::StringData GetClassSourceFile() const
@@ -275,9 +275,9 @@ public:
         return reinterpret_cast<EtsMethod *>(method);
     }
 
-    static Method *ToRuntimeMethod(EtsMethod *ets_method)
+    static Method *ToRuntimeMethod(EtsMethod *etsMethod)
     {
-        return reinterpret_cast<Method *>(ets_method);
+        return reinterpret_cast<Method *>(etsMethod);
     }
 
     EtsMethod() = delete;
@@ -298,7 +298,7 @@ public:
         return GetPandaMethod()->GetProto().GetReturnTypeDescriptor();
     }
 
-    PANDA_PUBLIC_API PandaString GetMethodSignature(bool include_return_type = true) const;
+    PANDA_PUBLIC_API PandaString GetMethodSignature(bool includeReturnType = true) const;
 
     PANDA_PUBLIC_API PandaString GetDescriptor() const;
 

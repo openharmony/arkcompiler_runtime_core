@@ -23,16 +23,16 @@ namespace panda::bytecodeopt::test {
 
 class RegAccAllocTest : public CommonTest {
 public:
-    void CheckInstructionsDestRegIsAcc(std::vector<int> &&inst_ids)
+    void CheckInstructionsDestRegIsAcc(std::vector<int> &&instIds)
     {
-        for (auto id : inst_ids) {
+        for (auto id : instIds) {
             ASSERT_EQ(INS(id).GetDstReg(), compiler::ACC_REG_ID);
         }
     }
 
-    void CheckInstructionsSrcRegIsAcc(std::vector<int> &&inst_ids)
+    void CheckInstructionsSrcRegIsAcc(std::vector<int> &&instIds)
     {
-        for (auto id : inst_ids) {
+        for (auto id : instIds) {
             uint8_t idx = 0;
             switch (INS(id).GetOpcode()) {
                 case compiler::Opcode::LoadArray:
@@ -1063,22 +1063,22 @@ TEST_F(RegAccAllocTest, Ldai_Exist)
     auto res = p.Parse(source);
     auto &program = res.Value();
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
-    std::string file_name = "Ldai_Exist";
-    auto pfile = pandasm::AsmEmitter::Emit(file_name, program, nullptr, &maps);
+    std::string fileName = "Ldai_Exist";
+    auto pfile = pandasm::AsmEmitter::Emit(fileName, program, nullptr, &maps);
     ASSERT_NE(pfile, false);
 
-    auto old_options = panda::bytecodeopt::OPTIONS;
-    panda::bytecodeopt::OPTIONS = panda::bytecodeopt::Options("--opt-level=2");
-    EXPECT_TRUE(OptimizeBytecode(&program, &maps, file_name, false, true));
-    panda::bytecodeopt::OPTIONS = old_options;
-    bool fldai_exists = false;
-    for (const auto &inst : program.function_table.find("main:()")->second.ins) {
+    auto oldOptions = panda::bytecodeopt::g_options;
+    panda::bytecodeopt::g_options = panda::bytecodeopt::Options("--opt-level=2");
+    EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
+    panda::bytecodeopt::g_options = oldOptions;
+    bool fldaiExists = false;
+    for (const auto &inst : program.functionTable.find("main:()")->second.ins) {
         if (inst.opcode == panda::pandasm::Opcode::FLDAI) {
-            fldai_exists = true;
+            fldaiExists = true;
             break;
         }
     }
-    EXPECT_EQ(fldai_exists, true);
+    EXPECT_EQ(fldaiExists, true);
 }
 
 TEST_F(RegAccAllocTest, Lda_Extra1)
@@ -1103,22 +1103,22 @@ TEST_F(RegAccAllocTest, Lda_Extra1)
     auto res = p.Parse(source);
     auto &program = res.Value();
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
-    std::string file_name = "Lda_Extra1";
-    auto pfile = pandasm::AsmEmitter::Emit(file_name, program, nullptr, &maps);
+    std::string fileName = "Lda_Extra1";
+    auto pfile = pandasm::AsmEmitter::Emit(fileName, program, nullptr, &maps);
     ASSERT_NE(pfile, false);
 
-    auto old_options = panda::bytecodeopt::OPTIONS;
-    panda::bytecodeopt::OPTIONS = panda::bytecodeopt::Options("--opt-level=2");
-    EXPECT_TRUE(OptimizeBytecode(&program, &maps, file_name, false, true));
-    panda::bytecodeopt::OPTIONS = old_options;
-    bool lda_exists = false;
-    for (const auto &inst : program.function_table.find("main:()")->second.ins) {
+    auto oldOptions = panda::bytecodeopt::g_options;
+    panda::bytecodeopt::g_options = panda::bytecodeopt::Options("--opt-level=2");
+    EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
+    panda::bytecodeopt::g_options = oldOptions;
+    bool ldaExists = false;
+    for (const auto &inst : program.functionTable.find("main:()")->second.ins) {
         if (inst.opcode == panda::pandasm::Opcode::LDA) {
-            lda_exists = true;
+            ldaExists = true;
             break;
         }
     }
-    EXPECT_EQ(lda_exists, false);
+    EXPECT_EQ(ldaExists, false);
 }
 
 TEST_F(RegAccAllocTest, Lda_Extra2)
@@ -1154,21 +1154,21 @@ TEST_F(RegAccAllocTest, Lda_Extra2)
     auto res = p.Parse(source);
     auto &program = res.Value();
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
-    std::string file_name = "Lda_Extra2";
-    auto pfile = pandasm::AsmEmitter::Emit(file_name, program, nullptr, &maps);
+    std::string fileName = "Lda_Extra2";
+    auto pfile = pandasm::AsmEmitter::Emit(fileName, program, nullptr, &maps);
     ASSERT_NE(pfile, false);
 
-    auto old_options = panda::bytecodeopt::OPTIONS;
-    panda::bytecodeopt::OPTIONS = panda::bytecodeopt::Options("--opt-level=2");
-    EXPECT_TRUE(OptimizeBytecode(&program, &maps, file_name, false, true));
-    panda::bytecodeopt::OPTIONS = old_options;
-    int lda_amount = 0;
-    for (const auto &inst : program.function_table.find("main:(i32)")->second.ins) {
+    auto oldOptions = panda::bytecodeopt::g_options;
+    panda::bytecodeopt::g_options = panda::bytecodeopt::Options("--opt-level=2");
+    EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
+    panda::bytecodeopt::g_options = oldOptions;
+    int ldaAmount = 0;
+    for (const auto &inst : program.functionTable.find("main:(i32)")->second.ins) {
         if (inst.opcode == panda::pandasm::Opcode::LDA) {
-            lda_amount += 1;
+            ldaAmount += 1;
         }
     }
-    EXPECT_EQ(lda_amount, 1U);
+    EXPECT_EQ(ldaAmount, 1U);
 }
 
 TEST_F(RegAccAllocTest, Const_Phi)

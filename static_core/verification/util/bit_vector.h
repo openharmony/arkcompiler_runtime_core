@@ -42,7 +42,7 @@ using Word = uint32_t;
 template <typename GetFunc>
 class ConstBits {
 public:
-    explicit ConstBits(GetFunc &&f) : get_f_ {std::move(f)} {}
+    explicit ConstBits(GetFunc &&f) : getF_ {std::move(f)} {}
     ~ConstBits() = default;
     ConstBits() = delete;
     ConstBits(const ConstBits & /* unused */) = delete;
@@ -53,17 +53,17 @@ public:
     // NOLINTNEXTLINE(google-explicit-constructor)
     operator Word() const
     {
-        return get_f_();
+        return getF_();
     }
 
     template <typename Rhs>
     bool operator==(const Rhs &rhs) const
     {
-        return get_f_() == rhs.get_f_();
+        return getF_() == rhs.getF_();
     }
 
 private:
-    GetFunc get_f_;
+    GetFunc getF_;
     template <typename A>
     friend class ConstBits;
 };
@@ -71,26 +71,26 @@ private:
 template <typename GetFunc, typename SetFunc>
 class Bits : public ConstBits<GetFunc> {
 public:
-    Bits(GetFunc &&get, SetFunc &&set) : ConstBits<GetFunc>(std::move(get)), set_f_ {std::move(set)} {}
+    Bits(GetFunc &&get, SetFunc &&set) : ConstBits<GetFunc>(std::move(get)), setF_ {std::move(set)} {}
     ~Bits() = default;
     Bits() = delete;
     Bits(const Bits &) = delete;
     Bits(Bits &&) = default;
     Bits &operator=(const Bits &rhs)
     {
-        set_f_(rhs);
+        setF_(rhs);
         return *this;
     }
     Bits &operator=(Bits &&) = default;
 
     Bits &operator=(Word val)
     {
-        set_f_(val);
+        setF_(val);
         return *this;
     }
 
 private:
-    SetFunc set_f_;
+    SetFunc setF_;
 };
 
 class BitVector {
@@ -117,26 +117,26 @@ class BitVector {
 
     class Bit {
     public:
-        Bit(BitVector &bit_vector, size_t index) : bit_vector_ {bit_vector}, index_ {index} {};
+        Bit(BitVector &bitVector, size_t index) : bitVector_ {bitVector}, index_ {index} {};
 
         // NOLINTNEXTLINE(google-explicit-constructor)
         operator bool() const
         {
-            return const_cast<const BitVector &>(bit_vector_)[index_];
+            return const_cast<const BitVector &>(bitVector_)[index_];
         }
 
         Bit &operator=(bool value)
         {
             if (value) {
-                bit_vector_.Set(index_);
+                bitVector_.Set(index_);
             } else {
-                bit_vector_.Clr(index_);
+                bitVector_.Clr(index_);
             }
             return *this;
         }
 
     private:
-        BitVector &bit_vector_;
+        BitVector &bitVector_;
         size_t index_;
     };
 
@@ -208,14 +208,14 @@ public:
         ASSERT(to <= MaxBitIdx());
         ASSERT(to - from <= BITS_IN_WORD - 1);
         const Word mask = MaskUpToIndex(to - from + 1);
-        const size_t pos_from = from >> POS_SHIFT;
-        const size_t pos_to = to >> POS_SHIFT;
-        const size_t idx_from = from & POS_MASK;
-        return ConstBits([this, mask, pos_from, pos_to, idx_from]() -> Word {
-            if (pos_from == pos_to) {
-                return (data_[pos_from] >> idx_from) & mask;
+        const size_t posFrom = from >> POS_SHIFT;
+        const size_t posTo = to >> POS_SHIFT;
+        const size_t idxFrom = from & POS_MASK;
+        return ConstBits([this, mask, posFrom, posTo, idxFrom]() -> Word {
+            if (posFrom == posTo) {
+                return (data_[posFrom] >> idxFrom) & mask;
             }
-            Word data = (data_[pos_from] >> idx_from) | (data_[pos_to] << (BITS_IN_WORD - idx_from));
+            Word data = (data_[posFrom] >> idxFrom) | (data_[posTo] << (BITS_IN_WORD - idxFrom));
             return data & mask;
         });
     }
@@ -227,32 +227,32 @@ public:
         ASSERT(to <= MaxBitIdx());
         ASSERT(to - from <= BITS_IN_WORD - 1);
         const Word mask = MaskUpToIndex(to - from + 1);
-        const size_t pos_from = from >> POS_SHIFT;
-        const size_t pos_to = to >> POS_SHIFT;
-        const size_t idx_from = from & POS_MASK;
+        const size_t posFrom = from >> POS_SHIFT;
+        const size_t posTo = to >> POS_SHIFT;
+        const size_t idxFrom = from & POS_MASK;
         return Bits(
-            [this, mask, pos_from, pos_to, idx_from]() -> Word {
-                if (pos_from == pos_to) {
-                    return (data_[pos_from] >> idx_from) & mask;
+            [this, mask, posFrom, posTo, idxFrom]() -> Word {
+                if (posFrom == posTo) {
+                    return (data_[posFrom] >> idxFrom) & mask;
                 }
-                Word data = (data_[pos_from] >> idx_from) | (data_[pos_to] << (BITS_IN_WORD - idx_from));
+                Word data = (data_[posFrom] >> idxFrom) | (data_[posTo] << (BITS_IN_WORD - idxFrom));
                 return data & mask;
             },
-            [this, mask, pos_from, pos_to, idx_from](Word val_incomming) {
-                const Word val = val_incomming & mask;
-                const auto low_mask = mask << idx_from;
-                const auto low_val = val << idx_from;
-                if (pos_from == pos_to) {
-                    data_[pos_from] &= ~low_mask;
-                    data_[pos_from] |= low_val;
+            [this, mask, posFrom, posTo, idxFrom](Word valIncomming) {
+                const Word val = valIncomming & mask;
+                const auto lowMask = mask << idxFrom;
+                const auto lowVal = val << idxFrom;
+                if (posFrom == posTo) {
+                    data_[posFrom] &= ~lowMask;
+                    data_[posFrom] |= lowVal;
                 } else {
-                    const auto high_shift = BITS_IN_WORD - idx_from;
-                    const auto high_mask = mask >> high_shift;
-                    const auto high_val = val >> high_shift;
-                    data_[pos_from] &= ~low_mask;
-                    data_[pos_from] |= low_val;
-                    data_[pos_to] &= ~high_mask;
-                    data_[pos_to] |= high_val;
+                    const auto highShift = BITS_IN_WORD - idxFrom;
+                    const auto highMask = mask >> highShift;
+                    const auto highVal = val >> highShift;
+                    data_[posFrom] &= ~lowMask;
+                    data_[posFrom] |= lowVal;
+                    data_[posTo] &= ~highMask;
+                    data_[posTo] |= highVal;
                 }
             });
     }
@@ -312,16 +312,16 @@ public:
         if (Size() != rhs.Size()) {
             return false;
         }
-        size_t last_word_partial_bits = Size() % BITS_IN_WORD;
-        size_t num_full_words = SizeInWords() - ((last_word_partial_bits != 0) ? 1 : 0);
-        for (size_t pos = 0; pos < num_full_words; pos++) {
+        size_t lastWordPartialBits = Size() % BITS_IN_WORD;
+        size_t numFullWords = SizeInWords() - ((lastWordPartialBits != 0) ? 1 : 0);
+        for (size_t pos = 0; pos < numFullWords; pos++) {
             if (data_[pos] != rhs.data_[pos]) {
                 return false;
             }
         }
-        if (last_word_partial_bits != 0) {
-            size_t last_word_start = Size() - last_word_partial_bits;
-            return bits(last_word_start, Size() - 1) == rhs.bits(last_word_start, Size() - 1);
+        if (lastWordPartialBits != 0) {
+            size_t lastWordStart = Size() - lastWordPartialBits;
+            return bits(lastWordStart, Size() - 1) == rhs.bits(lastWordStart, Size() - 1);
         }
         return true;
     }
@@ -337,33 +337,33 @@ public:
         ASSERT(data_ != nullptr);
         ASSERT(from <= to);
         ASSERT(to <= MaxBitIdx());
-        const size_t pos_from = from >> POS_SHIFT;
-        const size_t pos_to = to >> POS_SHIFT;
-        const size_t idx_from = from & POS_MASK;
-        const size_t idx_to = to & POS_MASK;
-        auto process_word = [this, &handler](size_t pos) {
+        const size_t posFrom = from >> POS_SHIFT;
+        const size_t posTo = to >> POS_SHIFT;
+        const size_t idxFrom = from & POS_MASK;
+        const size_t idxTo = to & POS_MASK;
+        auto processWord = [this, &handler](size_t pos) {
             const Word val = handler(data_[pos], BITS_IN_WORD);
             data_[pos] = val;
         };
-        auto process_part = [this, &handler, &process_word](size_t pos, size_t idx_start, size_t idx_dest) {
-            const auto len = idx_dest - idx_start + 1;
+        auto processPart = [this, &handler, &processWord](size_t pos, size_t idxStart, size_t idxDest) {
+            const auto len = idxDest - idxStart + 1;
             if (len == BITS_IN_WORD) {
-                process_word(pos);
+                processWord(pos);
             } else {
                 const Word mask = MaskUpToIndex(len);
-                const Word val = handler((data_[pos] >> idx_start) & mask, len) & mask;
-                data_[pos] &= ~(mask << idx_start);
-                data_[pos] |= val << idx_start;
+                const Word val = handler((data_[pos] >> idxStart) & mask, len) & mask;
+                data_[pos] &= ~(mask << idxStart);
+                data_[pos] |= val << idxStart;
             }
         };
-        if (pos_from == pos_to) {
-            process_part(pos_from, idx_from, idx_to);
+        if (posFrom == posTo) {
+            processPart(posFrom, idxFrom, idxTo);
         } else {
-            process_part(pos_from, idx_from, BITS_IN_WORD - 1);
-            for (size_t pos = pos_from + 1; pos < pos_to; ++pos) {
-                process_word(pos);
+            processPart(posFrom, idxFrom, BITS_IN_WORD - 1);
+            for (size_t pos = posFrom + 1; pos < posTo; ++pos) {
+                processWord(pos);
             }
-            process_part(pos_to, 0, idx_to);
+            processPart(posTo, 0, idxTo);
         }
     }
 
@@ -388,15 +388,15 @@ public:
     {
         size_t sz = std::min(Size(), rhs.Size());
         size_t words = SizeInWordsFromSizeInBits(sz);
-        size_t lhs_words = SizeInWords();
+        size_t lhsWords = SizeInWords();
         size_t pos = 0;
         for (; pos < words; ++pos) {
             data_[pos] = handler(data_[pos], rhs.data_[pos]);
         }
-        if ((pos >= lhs_words) || ((handler(0U, 0U) == 0U) && (handler(1U, 0U) == 1U))) {
+        if ((pos >= lhsWords) || ((handler(0U, 0U) == 0U) && (handler(1U, 0U) == 1U))) {
             return;
         }
-        for (; pos < lhs_words; ++pos) {
+        for (; pos < lhsWords; ++pos) {
             data_[pos] = handler(data_[pos], 0U);
         }
     }
@@ -458,18 +458,18 @@ public:
     template <typename Handler>
     void ForAllIdxVal(Handler handler) const
     {
-        size_t last_word_partial_bits = Size() % BITS_IN_WORD;
-        size_t num_full_words = SizeInWords() - (last_word_partial_bits ? 1 : 0);
-        for (size_t pos = 0; pos < num_full_words; pos++) {
+        size_t lastWordPartialBits = Size() % BITS_IN_WORD;
+        size_t numFullWords = SizeInWords() - (lastWordPartialBits ? 1 : 0);
+        for (size_t pos = 0; pos < numFullWords; pos++) {
             Word val = data_[pos];
             if (!handler(pos * BITS_IN_WORD, val)) {
                 return;
             }
         }
-        if (last_word_partial_bits) {
-            size_t last_word_start = Size() - last_word_partial_bits;
-            Word val = bits(last_word_start, Size() - 1);
-            handler(last_word_start, val);
+        if (lastWordPartialBits) {
+            size_t lastWordStart = Size() - lastWordPartialBits;
+            Word val = bits(lastWordStart, Size() - 1);
+            handler(lastWordStart, val);
         }
     }
 
@@ -538,13 +538,13 @@ public:
         size_t result = 0;
 
         size_t pos = 0;
-        bool last_word_partially_filled = (Size() & POS_MASK) != 0;
+        bool lastWordPartiallyFilled = (Size() & POS_MASK) != 0;
         if (SizeInWords() > 0) {
-            for (; pos < (SizeInWords() - (last_word_partially_filled ? 1 : 0)); ++pos) {
+            for (; pos < (SizeInWords() - (lastWordPartiallyFilled ? 1 : 0)); ++pos) {
                 result += static_cast<size_t>(panda::Popcount(data_[pos]));
             }
         }
-        if (last_word_partially_filled) {
+        if (lastWordPartiallyFilled) {
             const Word mask = MaskUpToIndex(Size() & POS_MASK);
             result += static_cast<size_t>(panda::Popcount(data_[pos] & mask));
         }
@@ -558,24 +558,24 @@ public:
 
         size_t sz = NAry {[](size_t a, size_t b) { return std::min(a, b); }}(args.SizeInWords()...);
         size_t size = NAry {[](size_t a, size_t b) { return std::min(a, b); }}(args.Size()...);
-        size_t num_args = sizeof...(Args);
-        auto get_processed_word = [&op, &binop, num_args, &args...](size_t idx) {
+        size_t numArgs = sizeof...(Args);
+        auto getProcessedWord = [&op, &binop, numArgs, &args...](size_t idx) {
             size_t n = 0;
-            auto unop = [&n, num_args, &op](Word val) { return op(val, n++, num_args); };
+            auto unop = [&n, numArgs, &op](Word val) { return op(val, n++, numArgs); };
             return NAry {binop}(std::tuple<std::decay_t<decltype(args.data_[idx])>...> {unop(args.data_[idx])...});
         };
 
         size_t pos = 0;
-        bool last_word_partially_filled = (size & POS_MASK) != 0;
+        bool lastWordPartiallyFilled = (size & POS_MASK) != 0;
         if (sz > 0) {
-            for (; pos < (sz - (last_word_partially_filled ? 1 : 0)); ++pos) {
-                auto val = get_processed_word(pos);
+            for (; pos < (sz - (lastWordPartiallyFilled ? 1 : 0)); ++pos) {
+                auto val = getProcessedWord(pos);
                 result += static_cast<size_t>(panda::Popcount(val));
             }
         }
-        if (last_word_partially_filled) {
+        if (lastWordPartiallyFilled) {
             const Word mask = MaskUpToIndex(size & POS_MASK);
-            result += static_cast<size_t>(panda::Popcount(get_processed_word(pos) & mask));
+            result += static_cast<size_t>(panda::Popcount(getProcessedWord(pos) & mask));
         }
         return result;
     }
@@ -604,9 +604,8 @@ public:
     template <typename... Args>
     static size_t PowerOfAndNot(const Args &...args)
     {
-        return PowerOfOpThenFold(
-            [](Word val, size_t idx, size_t num_args) { return (idx < num_args - 1) ? val : ~val; },
-            [](Word lhs, Word rhs) { return lhs & rhs; }, args...);
+        return PowerOfOpThenFold([](Word val, size_t idx, size_t numArgs) { return (idx < numArgs - 1) ? val : ~val; },
+                                 [](Word lhs, Word rhs) { return lhs & rhs; }, args...);
     }
 
     size_t Size() const
@@ -624,21 +623,21 @@ public:
         if (sz == 0) {
             Deallocate();
         } else {
-            size_t new_size_in_words = SizeInWordsFromSizeInBits(sz);
-            size_t old_size_in_words = SizeInWordsFromSizeInBits(size_);
-            if (old_size_in_words != new_size_in_words) {
+            size_t newSizeInWords = SizeInWordsFromSizeInBits(sz);
+            size_t oldSizeInWords = SizeInWordsFromSizeInBits(size_);
+            if (oldSizeInWords != newSizeInWords) {
                 Allocator allocator;
-                Word *new_data = allocator.allocate(new_size_in_words);
-                ASSERT(new_data != nullptr);
+                Word *newData = allocator.allocate(newSizeInWords);
+                ASSERT(newData != nullptr);
                 size_t pos = 0;
-                for (; pos < std::min(old_size_in_words, new_size_in_words); ++pos) {
-                    new_data[pos] = data_[pos];
+                for (; pos < std::min(oldSizeInWords, newSizeInWords); ++pos) {
+                    newData[pos] = data_[pos];
                 }
-                for (; pos < new_size_in_words; ++pos) {
-                    new_data[pos] = 0;
+                for (; pos < newSizeInWords; ++pos) {
+                    newData[pos] = 0;
                 }
                 Deallocate();
-                data_ = new_data;
+                data_ = newData;
             }
             size_ = sz;
         }
@@ -651,17 +650,17 @@ public:
         using namespace panda::verifier;
         size_t sz = NAry {[](size_t a, size_t b) { return std::min(a, b); }}(args.SizeInWords()...);
         size_t size = NAry {[](size_t a, size_t b) { return std::min(a, b); }}(args.Size()...);
-        size_t num_args = sizeof...(Args);
-        auto get_processed_word = [op, binop, num_args, &args...](size_t idx) {
+        size_t numArgs = sizeof...(Args);
+        auto getProcessedWord = [op, binop, numArgs, &args...](size_t idx) {
             size_t n = 0;
-            auto unop = [&n, num_args, &op](Word val) { return op(val, n++, num_args); };
+            auto unop = [&n, numArgs, &op](Word val) { return op(val, n++, numArgs); };
             Word val = NAry {binop}(std::tuple<std::decay_t<decltype(args.data_[idx])>...> {unop(args.data_[idx])...});
             return V ? val : ~val;
         };
         size_t pos = 0;
-        auto val = get_processed_word(pos++);
+        auto val = getProcessedWord(pos++);
         size_t idx = 0;
-        return [sz, size, pos, val, idx, get_processed_word]() mutable -> Index<size_t> {
+        return [sz, size, pos, val, idx, getProcessedWord]() mutable -> Index<size_t> {
             do {
                 if (idx >= size) {
                     return {};
@@ -677,7 +676,7 @@ public:
                     return idx++;
                 }
                 while (val == 0 && pos < sz) {
-                    val = get_processed_word(pos++);
+                    val = getProcessedWord(pos++);
                 }
                 idx = (pos - 1) << POS_SHIFT;
                 if (pos >= sz && val == 0) {
@@ -712,8 +711,8 @@ public:
     static auto LazyAndNotThenIndicesOf(const Args &...args)
     {
         return LazyOpThenFoldThenIndicesOf<V>(
-            [](Word val, size_t idx, size_t num_args) {
-                val = (idx < num_args - 1) ? val : ~val;
+            [](Word val, size_t idx, size_t numArgs) {
+                val = (idx < numArgs - 1) ? val : ~val;
                 return val;
             },
             [](Word lhs, Word rhs) { return lhs & rhs; }, args...);
@@ -728,9 +727,9 @@ private:
     void CopyFrom(const BitVector &other)
     {
         size_ = other.size_;
-        size_t size_in_words = other.SizeInWords();
-        data_ = Allocator().allocate(size_in_words);
-        std::copy_n(other.data_, size_in_words, data_);
+        size_t sizeInWords = other.SizeInWords();
+        data_ = Allocator().allocate(sizeInWords);
+        std::copy_n(other.data_, sizeInWords, data_);
     }
 
     void MoveFrom(BitVector &&other) noexcept

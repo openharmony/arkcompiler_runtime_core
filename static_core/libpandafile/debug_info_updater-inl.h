@@ -32,19 +32,18 @@ class DebugInfoUpdater {
 public:
     explicit DebugInfoUpdater(const File *file) : file_(file) {}
 
-    void Scrap(File::EntityId debug_info_id)
+    void Scrap(File::EntityId debugInfoId)
     {
-        DebugInfoDataAccessor debug_acc(*file_, debug_info_id);
-        const uint8_t *program = debug_acc.GetLineNumberProgram();
+        DebugInfoDataAccessor debugAcc(*file_, debugInfoId);
+        const uint8_t *program = debugAcc.GetLineNumberProgram();
         auto size = file_->GetSpanFromId(file_->GetIdFromPointer(program)).size();
-        auto opcode_sp = Span(program, size);
+        auto opcodeSp = Span(program, size);
 
         size_t i = 0;
         LineNumberProgramItem::Opcode opcode;
-        panda_file::LineProgramState state(*file_, File::EntityId(0), debug_acc.GetLineStart(),
-                                           debug_acc.GetConstantPool());
-        while ((opcode = LineNumberProgramItem::Opcode(opcode_sp[i++])) !=
-               LineNumberProgramItem::Opcode::END_SEQUENCE) {
+        panda_file::LineProgramState state(*file_, File::EntityId(0), debugAcc.GetLineStart(),
+                                           debugAcc.GetConstantPool());
+        while ((opcode = LineNumberProgramItem::Opcode(opcodeSp[i++])) != LineNumberProgramItem::Opcode::END_SEQUENCE) {
             switch (opcode) {
                 case LineNumberProgramItem::Opcode::ADVANCE_PC:
                 case LineNumberProgramItem::Opcode::ADVANCE_LINE:
@@ -53,63 +52,63 @@ public:
                     break;
                 }
                 case LineNumberProgramItem::Opcode::START_LOCAL: {
-                    [[maybe_unused]] int32_t reg_number;
+                    [[maybe_unused]] int32_t regNumber;
                     size_t n;
-                    bool is_full;
-                    std::tie(reg_number, n, is_full) = leb128::DecodeSigned<int32_t>(&opcode_sp[i]);
-                    LOG_IF(!is_full, FATAL, COMMON) << "Cannot read a register number";
+                    bool isFull;
+                    std::tie(regNumber, n, isFull) = leb128::DecodeSigned<int32_t>(&opcodeSp[i]);
+                    LOG_IF(!isFull, FATAL, COMMON) << "Cannot read a register number";
                     i += n;
 
-                    auto name_id = File::EntityId(state.ReadULeb128());
-                    std::string name = utf::Mutf8AsCString(file_->GetStringData(name_id).data);
+                    auto nameId = File::EntityId(state.ReadULeb128());
+                    std::string name = utf::Mutf8AsCString(file_->GetStringData(nameId).data);
                     This()->GetOrCreateStringItem(name);
 
-                    auto type_id = File::EntityId(state.ReadULeb128());
-                    std::string type_name = utf::Mutf8AsCString(file_->GetStringData(type_id).data);
-                    This()->GetType(type_id, type_name);
+                    auto typeId = File::EntityId(state.ReadULeb128());
+                    std::string typeName = utf::Mutf8AsCString(file_->GetStringData(typeId).data);
+                    This()->GetType(typeId, typeName);
                     break;
                 }
                 case LineNumberProgramItem::Opcode::START_LOCAL_EXTENDED: {
-                    [[maybe_unused]] int32_t reg_number;
+                    [[maybe_unused]] int32_t regNumber;
                     size_t n;
-                    bool is_full;
-                    std::tie(reg_number, n, is_full) = leb128::DecodeSigned<int32_t>(&opcode_sp[i]);
-                    LOG_IF(!is_full, FATAL, COMMON) << "Cannot read a register number";
+                    bool isFull;
+                    std::tie(regNumber, n, isFull) = leb128::DecodeSigned<int32_t>(&opcodeSp[i]);
+                    LOG_IF(!isFull, FATAL, COMMON) << "Cannot read a register number";
                     i += n;
 
-                    auto name_id = File::EntityId(state.ReadULeb128());
-                    std::string name = utf::Mutf8AsCString(file_->GetStringData(name_id).data);
+                    auto nameId = File::EntityId(state.ReadULeb128());
+                    std::string name = utf::Mutf8AsCString(file_->GetStringData(nameId).data);
                     This()->GetOrCreateStringItem(name);
 
-                    auto type_id = File::EntityId(state.ReadULeb128());
-                    std::string type_name = utf::Mutf8AsCString(file_->GetStringData(type_id).data);
-                    This()->GetType(type_id, type_name);
+                    auto typeId = File::EntityId(state.ReadULeb128());
+                    std::string typeName = utf::Mutf8AsCString(file_->GetStringData(typeId).data);
+                    This()->GetType(typeId, typeName);
 
-                    auto type_signature_id = File::EntityId(state.ReadULeb128());
-                    std::string type_signature = utf::Mutf8AsCString(file_->GetStringData(type_signature_id).data);
-                    This()->GetOrCreateStringItem(type_signature);
+                    auto typeSignatureId = File::EntityId(state.ReadULeb128());
+                    std::string typeSignature = utf::Mutf8AsCString(file_->GetStringData(typeSignatureId).data);
+                    This()->GetOrCreateStringItem(typeSignature);
                     break;
                 }
                 case LineNumberProgramItem::Opcode::END_LOCAL:
                 case LineNumberProgramItem::Opcode::RESTART_LOCAL: {
-                    [[maybe_unused]] int32_t reg_number;
+                    [[maybe_unused]] int32_t regNumber;
                     size_t n;
-                    bool is_full;
-                    std::tie(reg_number, n, is_full) = leb128::DecodeSigned<int32_t>(&opcode_sp[i]);
-                    LOG_IF(!is_full, FATAL, COMMON) << "Cannot read a register number";
+                    bool isFull;
+                    std::tie(regNumber, n, isFull) = leb128::DecodeSigned<int32_t>(&opcodeSp[i]);
+                    LOG_IF(!isFull, FATAL, COMMON) << "Cannot read a register number";
                     i += n;
                     break;
                 }
                 case LineNumberProgramItem::Opcode::SET_FILE: {
-                    auto source_file_id = File::EntityId(state.ReadULeb128());
-                    std::string source_file = utf::Mutf8AsCString(file_->GetStringData(source_file_id).data);
-                    This()->GetOrCreateStringItem(source_file);
+                    auto sourceFileId = File::EntityId(state.ReadULeb128());
+                    std::string sourceFile = utf::Mutf8AsCString(file_->GetStringData(sourceFileId).data);
+                    This()->GetOrCreateStringItem(sourceFile);
                     break;
                 }
                 case LineNumberProgramItem::Opcode::SET_SOURCE_CODE: {
-                    auto source_code_id = File::EntityId(state.ReadULeb128());
-                    std::string source_code = utf::Mutf8AsCString(file_->GetStringData(source_code_id).data);
-                    This()->GetOrCreateStringItem(source_code);
+                    auto sourceCodeId = File::EntityId(state.ReadULeb128());
+                    std::string sourceCode = utf::Mutf8AsCString(file_->GetStringData(sourceCodeId).data);
+                    This()->GetOrCreateStringItem(sourceCode);
                     break;
                 }
                 default: {
@@ -119,125 +118,124 @@ public:
         }
     }
 
-    void Emit(DebugInfoItem *debug_info_item, File::EntityId debug_info_id)
+    void Emit(DebugInfoItem *debugInfoItem, File::EntityId debugInfoId)
     {
-        auto *lnp_item = debug_info_item->GetLineNumberProgram();
-        if (!lnp_item->GetData().empty()) {
+        auto *lnpItem = debugInfoItem->GetLineNumberProgram();
+        if (!lnpItem->GetData().empty()) {
             return;
         }
 
-        DebugInfoDataAccessor debug_acc(*file_, debug_info_id);
-        const uint8_t *program = debug_acc.GetLineNumberProgram();
+        DebugInfoDataAccessor debugAcc(*file_, debugInfoId);
+        const uint8_t *program = debugAcc.GetLineNumberProgram();
         auto size = file_->GetSpanFromId(file_->GetIdFromPointer(program)).size();
-        auto opcode_sp = Span(program, size);
+        auto opcodeSp = Span(program, size);
 
         size_t i = 0;
         LineNumberProgramItem::Opcode opcode;
-        panda_file::LineProgramState state(*file_, File::EntityId(0), debug_acc.GetLineStart(),
-                                           debug_acc.GetConstantPool());
-        while ((opcode = LineNumberProgramItem::Opcode(opcode_sp[i++])) !=
-               LineNumberProgramItem::Opcode::END_SEQUENCE) {
+        panda_file::LineProgramState state(*file_, File::EntityId(0), debugAcc.GetLineStart(),
+                                           debugAcc.GetConstantPool());
+        while ((opcode = LineNumberProgramItem::Opcode(opcodeSp[i++])) != LineNumberProgramItem::Opcode::END_SEQUENCE) {
             switch (opcode) {
                 case LineNumberProgramItem::Opcode::ADVANCE_PC: {
-                    lnp_item->EmitAdvancePc(debug_info_item->GetConstantPool(), state.ReadULeb128());
+                    lnpItem->EmitAdvancePc(debugInfoItem->GetConstantPool(), state.ReadULeb128());
                     break;
                 }
                 case LineNumberProgramItem::Opcode::ADVANCE_LINE: {
-                    lnp_item->EmitAdvanceLine(debug_info_item->GetConstantPool(), state.ReadSLeb128());
+                    lnpItem->EmitAdvanceLine(debugInfoItem->GetConstantPool(), state.ReadSLeb128());
                     break;
                 }
                 case LineNumberProgramItem::Opcode::START_LOCAL: {
-                    auto [reg_number, n, is_full] = leb128::DecodeSigned<int32_t>(&opcode_sp[i]);
+                    auto [reg_number, n, is_full] = leb128::DecodeSigned<int32_t>(&opcodeSp[i]);
                     LOG_IF(!is_full, FATAL, COMMON) << "Cannot read a register number";
                     i += n;
 
-                    auto name_id = File::EntityId(state.ReadULeb128());
-                    std::string name = utf::Mutf8AsCString(file_->GetStringData(name_id).data);
-                    auto *name_item = This()->GetOrCreateStringItem(name);
+                    auto nameId = File::EntityId(state.ReadULeb128());
+                    std::string name = utf::Mutf8AsCString(file_->GetStringData(nameId).data);
+                    auto *nameItem = This()->GetOrCreateStringItem(name);
 
-                    auto type_id = File::EntityId(state.ReadULeb128());
-                    std::string type_name = utf::Mutf8AsCString(file_->GetStringData(type_id).data);
-                    auto *type_item = This()->GetType(type_id, type_name);
+                    auto typeId = File::EntityId(state.ReadULeb128());
+                    std::string typeName = utf::Mutf8AsCString(file_->GetStringData(typeId).data);
+                    auto *typeItem = This()->GetType(typeId, typeName);
 
-                    lnp_item->EmitStartLocal(debug_info_item->GetConstantPool(), reg_number, name_item,
-                                             type_item->GetNameItem());
+                    lnpItem->EmitStartLocal(debugInfoItem->GetConstantPool(), reg_number, nameItem,
+                                            typeItem->GetNameItem());
                     break;
                 }
                 case LineNumberProgramItem::Opcode::START_LOCAL_EXTENDED: {
-                    auto [reg_number, n, is_full] = leb128::DecodeSigned<int32_t>(&opcode_sp[i]);
+                    auto [reg_number, n, is_full] = leb128::DecodeSigned<int32_t>(&opcodeSp[i]);
                     LOG_IF(!is_full, FATAL, COMMON) << "Cannot read a register number";
                     i += n;
 
-                    auto name_id = File::EntityId(state.ReadULeb128());
-                    std::string name = utf::Mutf8AsCString(file_->GetStringData(name_id).data);
-                    auto *name_item = This()->GetOrCreateStringItem(name);
+                    auto nameId = File::EntityId(state.ReadULeb128());
+                    std::string name = utf::Mutf8AsCString(file_->GetStringData(nameId).data);
+                    auto *nameItem = This()->GetOrCreateStringItem(name);
 
-                    auto type_id = File::EntityId(state.ReadULeb128());
-                    std::string type_name = utf::Mutf8AsCString(file_->GetStringData(type_id).data);
-                    auto *type_item = This()->GetType(type_id, type_name);
+                    auto typeId = File::EntityId(state.ReadULeb128());
+                    std::string typeName = utf::Mutf8AsCString(file_->GetStringData(typeId).data);
+                    auto *typeItem = This()->GetType(typeId, typeName);
 
-                    auto type_signature_id = File::EntityId(state.ReadULeb128());
-                    std::string type_signature = utf::Mutf8AsCString(file_->GetStringData(type_signature_id).data);
-                    auto *type_signature_item = This()->GetOrCreateStringItem(type_signature);
+                    auto typeSignatureId = File::EntityId(state.ReadULeb128());
+                    std::string typeSignature = utf::Mutf8AsCString(file_->GetStringData(typeSignatureId).data);
+                    auto *typeSignatureItem = This()->GetOrCreateStringItem(typeSignature);
 
-                    lnp_item->EmitStartLocalExtended(debug_info_item->GetConstantPool(), reg_number, name_item,
-                                                     type_item->GetNameItem(), type_signature_item);
+                    lnpItem->EmitStartLocalExtended(debugInfoItem->GetConstantPool(), reg_number, nameItem,
+                                                    typeItem->GetNameItem(), typeSignatureItem);
                     break;
                 }
                 case LineNumberProgramItem::Opcode::END_LOCAL: {
-                    auto [reg_number, n, is_full] = leb128::DecodeSigned<int32_t>(&opcode_sp[i]);
+                    auto [reg_number, n, is_full] = leb128::DecodeSigned<int32_t>(&opcodeSp[i]);
                     LOG_IF(!is_full, FATAL, COMMON) << "Cannot read a register number";
                     i += n;
 
-                    lnp_item->EmitEndLocal(reg_number);
+                    lnpItem->EmitEndLocal(reg_number);
                     break;
                 }
                 case LineNumberProgramItem::Opcode::RESTART_LOCAL: {
-                    auto [reg_number, n, is_full] = leb128::DecodeSigned<int32_t>(&opcode_sp[i]);
+                    auto [reg_number, n, is_full] = leb128::DecodeSigned<int32_t>(&opcodeSp[i]);
                     LOG_IF(!is_full, FATAL, COMMON) << "Cannot read a register number";
                     i += n;
 
-                    lnp_item->EmitRestartLocal(reg_number);
+                    lnpItem->EmitRestartLocal(reg_number);
                     break;
                 }
                 case LineNumberProgramItem::Opcode::SET_PROLOGUE_END: {
-                    lnp_item->EmitPrologEnd();
+                    lnpItem->EmitPrologEnd();
                     break;
                 }
                 case LineNumberProgramItem::Opcode::SET_EPILOGUE_BEGIN: {
-                    lnp_item->EmitEpilogBegin();
+                    lnpItem->EmitEpilogBegin();
                     break;
                 }
                 case LineNumberProgramItem::Opcode::SET_FILE: {
-                    auto source_file_id = File::EntityId(state.ReadULeb128());
-                    std::string source_file = utf::Mutf8AsCString(file_->GetStringData(source_file_id).data);
-                    auto *source_file_item = This()->GetOrCreateStringItem(source_file);
-                    lnp_item->EmitSetFile(debug_info_item->GetConstantPool(), source_file_item);
+                    auto sourceFileId = File::EntityId(state.ReadULeb128());
+                    std::string sourceFile = utf::Mutf8AsCString(file_->GetStringData(sourceFileId).data);
+                    auto *sourceFileItem = This()->GetOrCreateStringItem(sourceFile);
+                    lnpItem->EmitSetFile(debugInfoItem->GetConstantPool(), sourceFileItem);
                     break;
                 }
                 case LineNumberProgramItem::Opcode::SET_SOURCE_CODE: {
-                    auto source_code_id = File::EntityId(state.ReadULeb128());
-                    std::string source_code = utf::Mutf8AsCString(file_->GetStringData(source_code_id).data);
-                    auto *source_code_item = This()->GetOrCreateStringItem(source_code);
-                    lnp_item->EmitSetSourceCode(debug_info_item->GetConstantPool(), source_code_item);
+                    auto sourceCodeId = File::EntityId(state.ReadULeb128());
+                    std::string sourceCode = utf::Mutf8AsCString(file_->GetStringData(sourceCodeId).data);
+                    auto *sourceCodeItem = This()->GetOrCreateStringItem(sourceCode);
+                    lnpItem->EmitSetSourceCode(debugInfoItem->GetConstantPool(), sourceCodeItem);
                     break;
                 }
                 case LineNumberProgramItem::Opcode::SET_COLUMN: {
-                    lnp_item->EmitColumn(debug_info_item->GetConstantPool(), 0, state.ReadULeb128());
+                    lnpItem->EmitColumn(debugInfoItem->GetConstantPool(), 0, state.ReadULeb128());
                     break;
                 }
                 default: {
-                    auto opcode_value = static_cast<uint8_t>(opcode);
-                    auto adjust_opcode = opcode_value - LineNumberProgramItem::OPCODE_BASE;
-                    uint32_t pc_diff = adjust_opcode / LineNumberProgramItem::LINE_RANGE;
-                    int32_t line_diff =
-                        adjust_opcode % LineNumberProgramItem::LINE_RANGE + LineNumberProgramItem::LINE_BASE;
-                    lnp_item->EmitSpecialOpcode(pc_diff, line_diff);
+                    auto opcodeValue = static_cast<uint8_t>(opcode);
+                    auto adjustOpcode = opcodeValue - LineNumberProgramItem::OPCODE_BASE;
+                    uint32_t pcDiff = adjustOpcode / LineNumberProgramItem::LINE_RANGE;
+                    int32_t lineDiff =
+                        adjustOpcode % LineNumberProgramItem::LINE_RANGE + LineNumberProgramItem::LINE_BASE;
+                    lnpItem->EmitSpecialOpcode(pcDiff, lineDiff);
                     break;
                 }
             }
         }
-        lnp_item->EmitEnd();
+        lnpItem->EmitEnd();
     }
 
 protected:

@@ -137,23 +137,23 @@ inline napi_value GetReferenceValue(napi_env env, napi_ref ref)
 
 inline napi_value GetUndefined(napi_env env)
 {
-    napi_value js_value_undefined {};
-    NAPI_CHECK_FATAL(napi_get_undefined(env, &js_value_undefined));
-    return js_value_undefined;
+    napi_value jsValueUndefined {};
+    NAPI_CHECK_FATAL(napi_get_undefined(env, &jsValueUndefined));
+    return jsValueUndefined;
 }
 
 inline napi_value GetNull(napi_env env)
 {
-    napi_value js_value_null {};
-    NAPI_CHECK_FATAL(napi_get_null(env, &js_value_null));
-    return js_value_null;
+    napi_value jsValueNull {};
+    NAPI_CHECK_FATAL(napi_get_null(env, &jsValueNull));
+    return jsValueNull;
 }
 
 inline napi_value GetGlobal(napi_env env)
 {
-    napi_value js_value_global {};
-    NAPI_CHECK_FATAL(napi_get_global(env, &js_value_global));
-    return js_value_global;
+    napi_value jsValueGlobal {};
+    NAPI_CHECK_FATAL(napi_get_global(env, &jsValueGlobal));
+    return jsValueGlobal;
 }
 
 inline bool IsUndefined(napi_env env, napi_value val)
@@ -167,14 +167,14 @@ inline bool IsNullOrUndefined(napi_env env, napi_value val)
     return vtype == napi_undefined || vtype == napi_null;
 }
 
-inline std::string GetString(napi_env env, napi_value js_val)
+inline std::string GetString(napi_env env, napi_value jsVal)
 {
     size_t length;
-    NAPI_CHECK_FATAL(napi_get_value_string_utf8(env, js_val, nullptr, 0, &length));
+    NAPI_CHECK_FATAL(napi_get_value_string_utf8(env, jsVal, nullptr, 0, &length));
     std::string value;
     value.resize(length);
     // +1 for NULL terminated string!!!
-    NAPI_CHECK_FATAL(napi_get_value_string_utf8(env, js_val, value.data(), value.size() + 1, &length));
+    NAPI_CHECK_FATAL(napi_get_value_string_utf8(env, jsVal, value.data(), value.size() + 1, &length));
     return value;
 }
 
@@ -191,12 +191,12 @@ inline bool NapiThrownGeneric(napi_status rc)
     return rc == napi_generic_failure;
 }
 
-inline napi_status NapiObjectSeal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_val)
+inline napi_status NapiObjectSeal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value jsVal)
 {
 // Ark js vm crashes in napi_object_seal.
 // Disable the call temporary
 #ifndef PANDA_TARGET_OHOS
-    return napi_object_seal(env, js_val);
+    return napi_object_seal(env, jsVal);
 #else
     return napi_ok;
 #endif  // PANDA_TARGET_OHOS
@@ -212,18 +212,18 @@ inline napi_status NapiCallFunction(napi_env env, napi_value recv, napi_value fu
     return napi_call_function(env, recv, func, argc, argv, result);
 }
 
-inline napi_status NapiWrap(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
-                            void *finalize_hint, napi_ref *result)
+inline napi_status NapiWrap(napi_env env, napi_value jsObject, void *nativeObject, napi_finalize finalizeCb,
+                            void *finalizeHint, napi_ref *result)
 {
 #ifdef PANDA_TARGET_OHOS
-    napi_status status = napi_wrap(env, js_object, native_object, finalize_cb, finalize_hint, nullptr);
+    napi_status status = napi_wrap(env, jsObject, nativeObject, finalizeCb, finalizeHint, nullptr);
     if (result == nullptr || UNLIKELY(status != napi_ok)) {
         return status;
     }
-    return napi_create_reference(env, js_object, 0, result);
+    return napi_create_reference(env, jsObject, 0, result);
 #else
-    ASSERT(result == nullptr || finalize_cb != nullptr);
-    return napi_wrap(env, js_object, native_object, finalize_cb, finalize_hint, result);
+    ASSERT(result == nullptr || finalizeCb != nullptr);
+    return napi_wrap(env, jsObject, nativeObject, finalizeCb, finalizeHint, result);
 #endif
 }
 

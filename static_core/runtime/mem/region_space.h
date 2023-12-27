@@ -92,19 +92,19 @@ public:
         return top_;
     }
 
-    void SetTop(uintptr_t new_top)
+    void SetTop(uintptr_t newTop)
     {
         ASSERT(!IsTLAB());
-        top_ = new_top;
+        top_ = newTop;
     }
 
     uint32_t GetLiveBytes() const
     {
-        ASSERT(live_bytes_ != nullptr);
+        ASSERT(liveBytes_ != nullptr);
         // Atomic with relaxed order reason: load value without concurrency
-        auto live_bytes = live_bytes_->load(std::memory_order_relaxed);
-        ASSERT(live_bytes <= Size());
-        return live_bytes;
+        auto liveBytes = liveBytes_->load(std::memory_order_relaxed);
+        ASSERT(liveBytes <= Size());
+        return liveBytes;
     }
 
     uint32_t GetAllocatedBytes() const;
@@ -119,20 +119,20 @@ public:
 
     void SetLiveBytes(uint32_t count)
     {
-        ASSERT(live_bytes_ != nullptr);
+        ASSERT(liveBytes_ != nullptr);
         // Atomic with relaxed order reason: store value without concurrency
-        live_bytes_->store(count, std::memory_order_relaxed);
+        liveBytes_->store(count, std::memory_order_relaxed);
     }
 
     template <bool ATOMICALLY>
     void AddLiveBytes(uint32_t count)
     {
-        ASSERT(live_bytes_ != nullptr);
+        ASSERT(liveBytes_ != nullptr);
         if constexpr (ATOMICALLY) {
             // Atomic with seq_cst order reason: store value with concurrency
-            live_bytes_->fetch_add(count, std::memory_order_seq_cst);
+            liveBytes_->fetch_add(count, std::memory_order_seq_cst);
         } else {
-            auto *field = reinterpret_cast<uint32_t *>(live_bytes_);
+            auto *field = reinterpret_cast<uint32_t *>(liveBytes_);
             *field += count;
         }
     }
@@ -143,35 +143,35 @@ public:
 
     MarkBitmap *GetLiveBitmap() const
     {
-        return live_bitmap_;
+        return liveBitmap_;
     }
 
     void IncreaseAllocatedObjects()
     {
         // We can call it from the promoted region
-        ASSERT(live_bitmap_ != nullptr);
-        allocated_objects_++;
+        ASSERT(liveBitmap_ != nullptr);
+        allocatedObjects_++;
     }
 
     size_t GetAllocatedObjects()
     {
         ASSERT(HasFlag(RegionFlag::IS_OLD));
-        return allocated_objects_;
+        return allocatedObjects_;
     }
 
     MarkBitmap *GetMarkBitmap() const
     {
-        return mark_bitmap_;
+        return markBitmap_;
     }
 
     RemSetT *GetRemSet()
     {
-        return rem_set_;
+        return remSet_;
     }
 
     size_t GetRemSetSize() const
     {
-        return rem_set_->Size();
+        return remSet_->Size();
     }
 
     void AddFlag(RegionFlag flag)
@@ -217,8 +217,8 @@ public:
 
     bool IsTLAB() const
     {
-        ASSERT((tlab_vector_ == nullptr) || (top_ == begin_));
-        return tlab_vector_ != nullptr;
+        ASSERT((tlabVector_ == nullptr) || (top_ == begin_));
+        return tlabVector_ != nullptr;
     }
 
     size_t Size() const
@@ -228,27 +228,27 @@ public:
 
     void PinObject()
     {
-        ASSERT(pinned_objects_ != nullptr);
+        ASSERT(pinnedObjects_ != nullptr);
         // Atomic with seq_cst order reason: add value with concurrency
-        pinned_objects_->fetch_add(1, std::memory_order_seq_cst);
+        pinnedObjects_->fetch_add(1, std::memory_order_seq_cst);
     }
 
     void UnpinObject()
     {
-        ASSERT(pinned_objects_ != nullptr);
+        ASSERT(pinnedObjects_ != nullptr);
         // Atomic with seq_cst order reason: sub value with concurrency
-        pinned_objects_->fetch_sub(1, std::memory_order_seq_cst);
+        pinnedObjects_->fetch_sub(1, std::memory_order_seq_cst);
     }
 
     bool HasPinnedObjects() const
     {
-        ASSERT(pinned_objects_ != nullptr);
+        ASSERT(pinnedObjects_ != nullptr);
         // Atomic with seq_cst order reason: load value with concurrency
-        return pinned_objects_->load(std::memory_order_seq_cst) > 0;
+        return pinnedObjects_->load(std::memory_order_seq_cst) > 0;
     }
 
     template <bool ATOMIC = true>
-    NO_THREAD_SANITIZE void *Alloc(size_t aligned_size);
+    NO_THREAD_SANITIZE void *Alloc(size_t alignedSize);
 
     template <typename ObjectVisitor>
     void IterateOverObjects(const ObjectVisitor &visitor);
@@ -266,23 +266,24 @@ public:
 
     [[nodiscard]] bool IsInAllocRange(const ObjectHeader *object) const
     {
-        bool in_range = false;
+        bool inRange = false;
         if (!IsTLAB()) {
-            in_range = (ToUintPtr(object) >= begin_ && ToUintPtr(object) < top_);
+            inRange = (ToUintPtr(object) >= begin_ && ToUintPtr(object) < top_);
         } else {
-            for (auto i : *tlab_vector_) {
-                in_range = i->ContainObject(object);
-                if (in_range) {
+            for (auto i : *tlabVector_) {
+                inRange = i->ContainObject(object);
+                if (inRange) {
                     break;
                 }
             }
         }
-        return in_range;
+        return inRange;
     }
 
-    static bool IsAlignment(uintptr_t region_addr, size_t region_size)
+    static bool IsAlignment(uintptr_t regionAddr, size_t regionSize)
     {
-        return ((region_addr - HeapStartAddress()) % region_size) == 0;
+        ASSERT(regionSize != 0);
+        return ((regionAddr - HeapStartAddress()) % regionSize) == 0;
     }
 
     constexpr static size_t HeadSize()
@@ -290,9 +291,9 @@ public:
         return AlignUp(sizeof(Region), DEFAULT_ALIGNMENT_IN_BYTES);
     }
 
-    constexpr static size_t RegionSize(size_t object_size, size_t region_size)
+    constexpr static size_t RegionSize(size_t objectSize, size_t regionSize)
     {
-        return AlignUp(HeadSize() + object_size, region_size);
+        return AlignUp(HeadSize() + objectSize, regionSize);
     }
 
     static uintptr_t HeapStartAddress()
@@ -316,16 +317,16 @@ public:
 
     void SwapMarkBitmap()
     {
-        ASSERT(live_bitmap_ != nullptr);
-        ASSERT(mark_bitmap_ != nullptr);
-        std::swap(live_bitmap_, mark_bitmap_);
+        ASSERT(liveBitmap_ != nullptr);
+        ASSERT(markBitmap_ != nullptr);
+        std::swap(liveBitmap_, markBitmap_);
     }
 
     void CloneMarkBitmapToLiveBitmap()
     {
-        ASSERT(live_bitmap_ != nullptr);
-        ASSERT(mark_bitmap_ != nullptr);
-        mark_bitmap_->CopyTo(live_bitmap_);
+        ASSERT(liveBitmap_ != nullptr);
+        ASSERT(markBitmap_ != nullptr);
+        markBitmap_->CopyTo(liveBitmap_);
     }
 
     void SetMarkBit(ObjectHeader *object);
@@ -335,14 +336,14 @@ public:
     {
         // Atomic with acquire order reason: data race with is_allocating_ with dependecies on reads after the load
         // which should become visible
-        return reinterpret_cast<std::atomic<bool> *>(&is_allocating_)->load(std::memory_order_acquire);
+        return reinterpret_cast<std::atomic<bool> *>(&isAllocating_)->load(std::memory_order_acquire);
     }
 
     NO_THREAD_SANITIZE bool IsIterating()
     {
         // Atomic with acquire order reason: data race with is_iterating_ with dependecies on reads after the load which
         // should become visible
-        return reinterpret_cast<std::atomic<bool> *>(&is_iterating_)->load(std::memory_order_acquire);
+        return reinterpret_cast<std::atomic<bool> *>(&isIterating_)->load(std::memory_order_acquire);
     }
 
     NO_THREAD_SANITIZE bool SetAllocating(bool value)
@@ -352,7 +353,7 @@ public:
         }
         // Atomic with release order reason: data race with is_allocating_ with dependecies on writes before the store
         // which should become visible acquire
-        reinterpret_cast<std::atomic<bool> *>(&is_allocating_)->store(value, std::memory_order_release);
+        reinterpret_cast<std::atomic<bool> *>(&isAllocating_)->store(value, std::memory_order_release);
         return true;
     }
 
@@ -363,7 +364,7 @@ public:
         }
         // Atomic with release order reason: data race with is_iterating_ with dependecies on writes before the store
         // which should become visible acquire
-        reinterpret_cast<std::atomic<bool> *>(&is_iterating_)->store(value, std::memory_order_release);
+        reinterpret_cast<std::atomic<bool> *>(&isIterating_)->store(value, std::memory_order_release);
         return true;
     }
 #endif
@@ -385,16 +386,16 @@ private:
     uintptr_t end_;
     uintptr_t top_;
     uint32_t flags_ {0};
-    size_t allocated_objects_ {0};
-    std::atomic<uint32_t> *live_bytes_ {nullptr};
-    std::atomic<uint32_t> *pinned_objects_ {nullptr};
-    MarkBitmap *live_bitmap_ {nullptr};           // records live objects for old region
-    MarkBitmap *mark_bitmap_ {nullptr};           // mark bitmap used in current gc marking phase
-    RemSetT *rem_set_ {nullptr};                  // remember set(old region -> eden/survivor region)
-    PandaVector<TLAB *> *tlab_vector_ {nullptr};  // pointer to a vector with thread tlabs associated with this region
+    size_t allocatedObjects_ {0};
+    std::atomic<uint32_t> *liveBytes_ {nullptr};
+    std::atomic<uint32_t> *pinnedObjects_ {nullptr};
+    MarkBitmap *liveBitmap_ {nullptr};           // records live objects for old region
+    MarkBitmap *markBitmap_ {nullptr};           // mark bitmap used in current gc marking phase
+    RemSetT *remSet_ {nullptr};                  // remember set(old region -> eden/survivor region)
+    PandaVector<TLAB *> *tlabVector_ {nullptr};  // pointer to a vector with thread tlabs associated with this region
 #ifndef NDEBUG
-    bool is_allocating_ = false;
-    bool is_iterating_ = false;
+    bool isAllocating_ = false;
+    bool isIterating_ = false;
 #endif
 };
 
@@ -446,9 +447,7 @@ inline std::ostream &operator<<(std::ostream &out, const Region &region)
 // |...........Region.........|<-------|
 class RegionBlock {
 public:
-    RegionBlock(size_t region_size, InternalAllocatorPtr allocator) : region_size_(region_size), allocator_(allocator)
-    {
-    }
+    RegionBlock(size_t regionSize, InternalAllocatorPtr allocator) : regionSize_(regionSize), allocator_(allocator) {}
 
     ~RegionBlock()
     {
@@ -460,17 +459,17 @@ public:
     NO_COPY_SEMANTIC(RegionBlock);
     NO_MOVE_SEMANTIC(RegionBlock);
 
-    void Init(uintptr_t regions_begin, uintptr_t regions_end);
+    void Init(uintptr_t regionsBegin, uintptr_t regionsEnd);
 
     Region *AllocRegion();
 
-    Region *AllocLargeRegion(size_t large_region_size);
+    Region *AllocLargeRegion(size_t largeRegionSize);
 
-    void FreeRegion(Region *region, bool release_pages = true);
+    void FreeRegion(Region *region, bool releasePages = true);
 
     bool IsAddrInRange(const void *addr) const
     {
-        return ToUintPtr(addr) < regions_end_ && ToUintPtr(addr) >= regions_begin_;
+        return ToUintPtr(addr) < regionsEnd_ && ToUintPtr(addr) >= regionsBegin_;
     }
 
     Region *GetAllocatedRegion(const void *addr) const
@@ -483,25 +482,25 @@ public:
     size_t GetFreeRegionsNum() const
     {
         os::memory::LockHolder lock(lock_);
-        return occupied_.Size() - num_used_regions_;
+        return occupied_.Size() - numUsedRegions_;
     }
 
 private:
     Region *RegionAt(size_t index) const
     {
-        return reinterpret_cast<Region *>(regions_begin_ + index * region_size_);
+        return reinterpret_cast<Region *>(regionsBegin_ + index * regionSize_);
     }
 
     size_t RegionIndex(const void *addr) const
     {
-        return (ToUintPtr(addr) - regions_begin_) / region_size_;
+        return (ToUintPtr(addr) - regionsBegin_) / regionSize_;
     }
 
-    size_t region_size_;
+    size_t regionSize_;
     InternalAllocatorPtr allocator_;
-    uintptr_t regions_begin_ = 0;
-    uintptr_t regions_end_ = 0;
-    size_t num_used_regions_ = 0;
+    uintptr_t regionsBegin_ = 0;
+    uintptr_t regionsEnd_ = 0;
+    size_t numUsedRegions_ = 0;
     Span<Region *> occupied_ GUARDED_BY(lock_);
     mutable os::memory::Mutex lock_;
 };
@@ -512,20 +511,20 @@ private:
 // 3.mixed above two ways
 class RegionPool {
 public:
-    explicit RegionPool(size_t region_size, bool extend, GenerationalSpaces *spaces, InternalAllocatorPtr allocator)
-        : block_(region_size, allocator),
-          region_size_(region_size),
+    explicit RegionPool(size_t regionSize, bool extend, GenerationalSpaces *spaces, InternalAllocatorPtr allocator)
+        : block_(regionSize, allocator),
+          regionSize_(regionSize),
           spaces_(spaces),
           allocator_(allocator),
           extend_(extend)
     {
     }
 
-    Region *NewRegion(RegionSpace *space, SpaceType space_type, AllocatorType allocator_type, size_t region_size,
-                      RegionFlag eden_or_old_or_nonmovable, RegionFlag properties,
-                      OSPagesAllocPolicy alloc_policy = OSPagesAllocPolicy::NO_POLICY);
+    Region *NewRegion(RegionSpace *space, SpaceType spaceType, AllocatorType allocatorType, size_t regionSize,
+                      RegionFlag edenOrOldOrNonmovable, RegionFlag properties,
+                      OSPagesAllocPolicy allocPolicy = OSPagesAllocPolicy::NO_POLICY);
 
-    Region *NewRegion(void *region, RegionSpace *space, size_t region_size, RegionFlag eden_or_old_or_nonmovable,
+    Region *NewRegion(void *region, RegionSpace *space, size_t regionSize, RegionFlag edenOrOldOrNonmovable,
                       RegionFlag properties);
 
     template <OSPagesPolicy OS_PAGES_POLICY = OSPagesPolicy::IMMEDIATE_RETURN>
@@ -533,9 +532,9 @@ public:
 
     void PromoteYoungRegion(Region *region);
 
-    void InitRegionBlock(uintptr_t regions_begin, uintptr_t regions_end)
+    void InitRegionBlock(uintptr_t regionsBegin, uintptr_t regionsEnd)
     {
-        block_.Init(regions_begin, regions_end);
+        block_.Init(regionsBegin, regionsEnd);
     }
 
     bool IsAddrInPoolRange(const void *addr) const
@@ -562,7 +561,7 @@ public:
 
     bool HaveTenuredSize(size_t size) const;
 
-    bool HaveFreeRegions(size_t num_regions, size_t region_size) const;
+    bool HaveFreeRegions(size_t numRegions, size_t regionSize) const;
 
     InternalAllocatorPtr GetInternalAllocator()
     {
@@ -582,8 +581,8 @@ private:
         if constexpr (CROSS_REGION) {  // NOLINT(readability-braces-around-statements, bugprone-suspicious-semicolon)
             ASSERT(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(addr) == SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
 
-            auto region_addr = PoolManager::GetMmapMemPool()->GetStartAddrPoolForAddr(const_cast<void *>(addr));
-            return reinterpret_cast<Region *>(region_addr);
+            auto regionAddr = PoolManager::GetMmapMemPool()->GetStartAddrPoolForAddr(const_cast<void *>(addr));
+            return reinterpret_cast<Region *>(regionAddr);
         }
         ASSERT(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(addr) != SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
 
@@ -593,14 +592,14 @@ private:
     bool IsAddrInExtendPoolRange(const void *addr) const
     {
         if (extend_) {
-            AllocatorInfo alloc_info = PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(const_cast<void *>(addr));
-            return alloc_info.GetAllocatorHeaderAddr() == this;
+            AllocatorInfo allocInfo = PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(const_cast<void *>(addr));
+            return allocInfo.GetAllocatorHeaderAddr() == this;
         }
         return false;
     }
 
     RegionBlock block_;
-    size_t region_size_;
+    size_t regionSize_;
     GenerationalSpaces *spaces_ {nullptr};
     InternalAllocatorPtr allocator_;
     bool extend_ = true;
@@ -608,12 +607,12 @@ private:
 
 class RegionSpace {
 public:
-    explicit RegionSpace(SpaceType space_type, AllocatorType allocator_type, RegionPool *region_pool,
-                         size_t empty_tenured_regions_max_count = 0)
-        : space_type_(space_type),
-          allocator_type_(allocator_type),
-          region_pool_(region_pool),
-          empty_tenured_regions_max_count_(empty_tenured_regions_max_count)
+    explicit RegionSpace(SpaceType spaceType, AllocatorType allocatorType, RegionPool *regionPool,
+                         size_t emptyTenuredRegionsMaxCount = 0)
+        : spaceType_(spaceType),
+          allocatorType_(allocatorType),
+          regionPool_(regionPool),
+          emptyTenuredRegionsMaxCount_(emptyTenuredRegionsMaxCount)
     {
     }
 
@@ -630,8 +629,8 @@ public:
         NoRelease,  // NOLINT(readability-identifier-naming)
     };
 
-    Region *NewRegion(size_t region_size, RegionFlag eden_or_old_or_nonmovable, RegionFlag properties,
-                      OSPagesAllocPolicy alloc_policy = OSPagesAllocPolicy::NO_POLICY);
+    Region *NewRegion(size_t regionSize, RegionFlag edenOrOldOrNonmovable, RegionFlag properties,
+                      OSPagesAllocPolicy allocPolicy = OSPagesAllocPolicy::NO_POLICY);
 
     template <ReleaseRegionsPolicy REGIONS_RELEASE_POLICY = ReleaseRegionsPolicy::Release,
               OSPagesPolicy OS_PAGES_POLICY = OSPagesPolicy::IMMEDIATE_RETURN>
@@ -646,13 +645,13 @@ public:
 
     RegionPool *GetPool() const
     {
-        return region_pool_;
+        return regionPool_;
     }
 
     template <bool CROSS_REGION = false>
     Region *GetRegion(const ObjectHeader *object) const
     {
-        auto *region = region_pool_->GetRegion<CROSS_REGION>(object);
+        auto *region = regionPool_->GetRegion<CROSS_REGION>(object);
 
         // check if the region is allocated by this space
         return (region != nullptr && region->GetSpace() == this) ? region : nullptr;
@@ -667,37 +666,37 @@ public:
     template <RegionFlag REGION_TYPE, OSPagesPolicy OS_PAGES_POLICY>
     void ReleaseEmptyRegions();
 
-    void SetDesiredEdenLength(size_t eden_length)
+    void SetDesiredEdenLength(size_t edenLength)
     {
-        desired_eden_length_ = eden_length;
+        desiredEdenLength_ = edenLength;
     }
 
 private:
     template <typename RegionVisitor>
-    void IterateRegionsList(DList &regions_list, RegionVisitor visitor);
+    void IterateRegionsList(DList &regionsList, RegionVisitor visitor);
 
-    Region *GetRegionFromEmptyList(DList &region_list);
+    Region *GetRegionFromEmptyList(DList &regionList);
 
-    SpaceType space_type_;
+    SpaceType spaceType_;
 
     // related allocator type
-    AllocatorType allocator_type_;
+    AllocatorType allocatorType_;
 
     // underlying shared region pool
-    RegionPool *region_pool_;
+    RegionPool *regionPool_;
 
-    size_t empty_tenured_regions_max_count_;
+    size_t emptyTenuredRegionsMaxCount_;
 
     // region allocated by this space
     DList regions_;
 
     // Empty regions which is not returned back
-    DList empty_young_regions_;
-    DList empty_tenured_regions_;
+    DList emptyYoungRegions_;
+    DList emptyTenuredRegions_;
     // Use atomic because it is updated in RegionSpace::PromoteYoungRegion without lock
-    std::atomic<size_t> young_regions_in_use_ {0};
+    std::atomic<size_t> youngRegionsInUse_ {0};
     // Desired eden length is not restricted initially
-    size_t desired_eden_length_ {std::numeric_limits<size_t>::max()};
+    size_t desiredEdenLength_ {std::numeric_limits<size_t>::max()};
 };
 
 }  // namespace panda::mem

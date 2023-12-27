@@ -212,25 +212,25 @@ void TestIteration(T &vector, size_t bits)
 TEST_F(BitVectorTest, Iteration)
 {
     std::array<uint32_t, 10U> data {};
-    size_t bits_num = data.size() * BitsNumInValue(data[0U]);
+    size_t bitsNum = data.size() * BitsNumInValue(data[0U]);
 
     BitVector<> vec1;
-    vec1.resize(bits_num);
-    TestIteration(vec1, bits_num);
+    vec1.resize(bitsNum);
+    TestIteration(vec1, bitsNum);
 
     BitVector<ArenaAllocator> vec2(GetAllocator());
-    vec2.resize(bits_num);
-    TestIteration(vec2, bits_num);
+    vec2.resize(bitsNum);
+    TestIteration(vec2, bitsNum);
 
-    BitVector<ArenaAllocator> vec3(bits_num, GetAllocator());
-    TestIteration(vec3, bits_num);
+    BitVector<ArenaAllocator> vec3(bitsNum, GetAllocator());
+    TestIteration(vec3, bitsNum);
 
     BitVectorSpan vec4(Span<uint32_t>(data.data(), data.size()));
-    TestIteration(vec4, bits_num);
+    TestIteration(vec4, bitsNum);
 
     data.fill(0U);
-    BitVectorSpan vec5(data.data(), bits_num);
-    TestIteration(vec5, bits_num);
+    BitVectorSpan vec5(data.data(), bitsNum);
+    TestIteration(vec5, bitsNum);
 }
 
 template <typename T>

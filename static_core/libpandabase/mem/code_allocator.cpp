@@ -25,69 +25,69 @@ namespace panda {
 
 const Alignment CodeAllocator::PAGE_LOG_ALIGN = GetLogAlignment(os::mem::GetPageSize());
 
-CodeAllocator::CodeAllocator(BaseMemStats *mem_stats)
-    : arena_allocator_([&]() {
-          trace::ScopedTrace scoped_trace(__PRETTY_FUNCTION__);
+CodeAllocator::CodeAllocator(BaseMemStats *memStats)
+    : arenaAllocator_([&]() {
+          trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
           // Do not set up mem_stats in internal arena allocator, because we will manage memstats here.
           return ArenaAllocator(SpaceType::SPACE_TYPE_CODE, nullptr);
       }()),
-      mem_stats_(mem_stats)
+      memStats_(memStats)
 {
     ASSERT(LOG_ALIGN_MIN <= PAGE_LOG_ALIGN && PAGE_LOG_ALIGN <= LOG_ALIGN_MAX);
 }
 
 CodeAllocator::~CodeAllocator()
 {
-    code_range_start_ = nullptr;
-    code_range_end_ = nullptr;
+    codeRangeStart_ = nullptr;
+    codeRangeEnd_ = nullptr;
 }
 
-void *CodeAllocator::AllocateCode(size_t size, const void *code_buff)
+void *CodeAllocator::AllocateCode(size_t size, const void *codeBuff)
 {
-    trace::ScopedTrace scoped_trace("Allocate Code");
-    void *code_ptr = arena_allocator_.Alloc(size, PAGE_LOG_ALIGN);
-    if (UNLIKELY(code_ptr == nullptr || memcpy_s(code_ptr, size, code_buff, size) != EOK)) {
+    trace::ScopedTrace scopedTrace("Allocate Code");
+    void *codePtr = arenaAllocator_.Alloc(size, PAGE_LOG_ALIGN);
+    if (UNLIKELY(codePtr == nullptr || memcpy_s(codePtr, size, codeBuff, size) != EOK)) {
         return nullptr;
     }
-    ProtectCode(os::mem::MapRange<std::byte>(static_cast<std::byte *>(code_ptr), size));
-    mem_stats_->RecordAllocateRaw(size, SpaceType::SPACE_TYPE_CODE);
-    CodeRangeUpdate(code_ptr, size);
-    return code_ptr;
+    ProtectCode(os::mem::MapRange<std::byte>(static_cast<std::byte *>(codePtr), size));
+    memStats_->RecordAllocateRaw(size, SpaceType::SPACE_TYPE_CODE);
+    CodeRangeUpdate(codePtr, size);
+    return codePtr;
 }
 
 os::mem::MapRange<std::byte> CodeAllocator::AllocateCodeUnprotected(size_t size)
 {
-    trace::ScopedTrace scoped_trace("Allocate Code");
-    void *code_ptr = arena_allocator_.Alloc(size, PAGE_LOG_ALIGN);
-    if (UNLIKELY(code_ptr == nullptr)) {
+    trace::ScopedTrace scopedTrace("Allocate Code");
+    void *codePtr = arenaAllocator_.Alloc(size, PAGE_LOG_ALIGN);
+    if (UNLIKELY(codePtr == nullptr)) {
         return os::mem::MapRange<std::byte>(nullptr, 0);
     }
-    mem_stats_->RecordAllocateRaw(size, SpaceType::SPACE_TYPE_CODE);
-    CodeRangeUpdate(code_ptr, size);
-    return os::mem::MapRange<std::byte>(static_cast<std::byte *>(code_ptr), size);
+    memStats_->RecordAllocateRaw(size, SpaceType::SPACE_TYPE_CODE);
+    CodeRangeUpdate(codePtr, size);
+    return os::mem::MapRange<std::byte>(static_cast<std::byte *>(codePtr), size);
 }
 
 /* static */
-void CodeAllocator::ProtectCode(os::mem::MapRange<std::byte> mem_range)
+void CodeAllocator::ProtectCode(os::mem::MapRange<std::byte> memRange)
 {
-    mem_range.MakeReadExec();
+    memRange.MakeReadExec();
 }
 
 bool CodeAllocator::InAllocatedCodeRange(const void *pc)
 {
-    os::memory::ReadLockHolder rlock(code_range_lock_);
-    return (pc >= code_range_start_) && (pc <= code_range_end_);
+    os::memory::ReadLockHolder rlock(codeRangeLock_);
+    return (pc >= codeRangeStart_) && (pc <= codeRangeEnd_);
 }
 
 void CodeAllocator::CodeRangeUpdate(void *ptr, size_t size)
 {
-    os::memory::WriteLockHolder rwlock(code_range_lock_);
-    if (ptr < code_range_start_ || code_range_start_ == nullptr) {
-        code_range_start_ = ptr;
+    os::memory::WriteLockHolder rwlock(codeRangeLock_);
+    if (ptr < codeRangeStart_ || codeRangeStart_ == nullptr) {
+        codeRangeStart_ = ptr;
     }
-    void *buffer_end = ToVoidPtr(ToUintPtr(ptr) + size);
-    if (buffer_end > code_range_end_ || code_range_end_ == nullptr) {
-        code_range_end_ = buffer_end;
+    void *bufferEnd = ToVoidPtr(ToUintPtr(ptr) + size);
+    if (bufferEnd > codeRangeEnd_ || codeRangeEnd_ == nullptr) {
+        codeRangeEnd_ = bufferEnd;
     }
 }
 

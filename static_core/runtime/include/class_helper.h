@@ -44,13 +44,13 @@ public:
 
     static const uint8_t *GetTypeDescriptor(const PandaString &name, PandaString *storage);
 
-    static const uint8_t *GetArrayDescriptor(const uint8_t *component_name, size_t rank, PandaString *storage);
+    static const uint8_t *GetArrayDescriptor(const uint8_t *componentName, size_t rank, PandaString *storage);
 
-    static char GetPrimitiveTypeDescriptorChar(panda_file::Type::TypeId type_id);
+    static char GetPrimitiveTypeDescriptorChar(panda_file::Type::TypeId typeId);
 
-    static const uint8_t *GetPrimitiveTypeDescriptorStr(panda_file::Type::TypeId type_id);
+    static const uint8_t *GetPrimitiveTypeDescriptorStr(panda_file::Type::TypeId typeId);
 
-    static const char *GetPrimitiveTypeStr(panda_file::Type::TypeId type_id);
+    static const char *GetPrimitiveTypeStr(panda_file::Type::TypeId typeId);
 
     static const uint8_t *GetPrimitiveDescriptor(panda_file::Type type, PandaString *storage);
 

@@ -83,23 +83,23 @@ Class *GetClass()
     auto res = p.Parse(source.c_str());
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
-    return class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+    return classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
         ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
 }
 
-void CompileMethods(int initial_number_of_threads, size_t scaled_number_of_threads)
+void CompileMethods(int initialNumberOfThreads, size_t scaledNumberOfThreads)
 {
     auto *klass = GetClass();
     ASSERT_NE(klass, nullptr);
 
     auto *compiler = static_cast<Compiler *>(PandaVM::GetCurrent()->GetCompiler());
 
-    compiler->ScaleThreadPool(initial_number_of_threads);
+    compiler->ScaleThreadPool(initialNumberOfThreads);
 
     for (size_t i = 0; i < CompilerThreadPoolTest::METHOD_COUNT; i++) {
         Method *method = GetMethod(klass, i);
@@ -107,10 +107,10 @@ void CompileMethods(int initial_number_of_threads, size_t scaled_number_of_threa
         compiler->CompileMethod(method, i, false, TaggedValue::Hole());
     }
 
-    compiler->ScaleThreadPool(scaled_number_of_threads);
+    compiler->ScaleThreadPool(scaledNumberOfThreads);
 
     for (;;) {
-        bool is_completed = true;
+        bool isCompleted = true;
         for (size_t i = 0; i < CompilerThreadPoolTest::METHOD_COUNT; i++) {
             Method *method = GetMethod(klass, i);
             if (method->GetCompilationStatus() == Method::NOT_COMPILED) {
@@ -118,10 +118,10 @@ void CompileMethods(int initial_number_of_threads, size_t scaled_number_of_threa
                 compiler->CompileMethod(method, i, false, TaggedValue::Hole());
             }
             if (method->GetCompilationStatus() != Method::COMPILED) {
-                is_completed = false;
+                isCompleted = false;
             }
         }
-        if (is_completed) {
+        if (isCompleted) {
             break;
         }
     }

@@ -60,49 +60,49 @@ namespace {
  */
 class PatchReturnHandlerStackAdjustment : public MachineFunctionPass {
 public:
-    explicit PatchReturnHandlerStackAdjustment(LLVMArkInterface *ark_interface = nullptr)
-        : MachineFunctionPass(ID), ark_interface_(ark_interface)
+    explicit PatchReturnHandlerStackAdjustment(LLVMArkInterface *arkInterface = nullptr)
+        : MachineFunctionPass(ID), arkInterface_(arkInterface)
     {
     }
 
-    bool runOnMachineFunction(MachineFunction &machine_function) override
+    bool runOnMachineFunction(MachineFunction &machineFunction) override
     {
-        ASSERT(ark_interface_ != nullptr);
-        if (!ark_interface_->IsIrtocReturnHandler(machine_function.getFunction())) {
+        ASSERT(arkInterface_ != nullptr);
+        if (!arkInterface_->IsIrtocReturnHandler(machineFunction.getFunction())) {
             return false;
         }
 
-        auto &frame_info = machine_function.getFrameInfo();
-        if (frame_info.hasVarSizedObjects()) {
-            report_fatal_error(StringRef("Return handler '") + machine_function.getName() + "' uses var sized objects");
+        auto &frameInfo = machineFunction.getFrameInfo();
+        if (frameInfo.hasVarSizedObjects()) {
+            report_fatal_error(StringRef("Return handler '") + machineFunction.getName() + "' uses var sized objects");
             return false;
         }
-        auto stack_size = frame_info.getStackSize();
-        if (stack_size == 0) {
+        auto stackSize = frameInfo.getStackSize();
+        if (stackSize == 0) {
             return false;
         }
 
         bool changed = false;
-        for (auto &basic_block : machine_function) {
-            for (auto &instruction : basic_block) {
+        for (auto &basicBlock : machineFunction) {
+            for (auto &instruction : basicBlock) {
                 if (!instruction.isInlineAsm()) {
                     continue;
                 }
                 static constexpr unsigned INLINE_ASM_INDEX = 0;
                 static constexpr unsigned STACK_ADJUSTMENT_INDEX = 3;
 
-                std::string_view inline_asm {instruction.getOperand(INLINE_ASM_INDEX).getSymbolName()};
-                if (inline_asm.find(LLVMArkInterface::PATCH_STACK_ADJUSTMENT_COMMENT) != std::string::npos) {
-                    auto &stack_adjustment = instruction.getOperand(STACK_ADJUSTMENT_INDEX);
-                    ASSERT(stack_adjustment.isImm());
-                    auto old_stack_size = stack_adjustment.getImm();
-                    auto new_stack_size = old_stack_size + stack_size;
+                std::string_view inlineAsm {instruction.getOperand(INLINE_ASM_INDEX).getSymbolName()};
+                if (inlineAsm.find(LLVMArkInterface::PATCH_STACK_ADJUSTMENT_COMMENT) != std::string::npos) {
+                    auto &stackAdjustment = instruction.getOperand(STACK_ADJUSTMENT_INDEX);
+                    ASSERT(stackAdjustment.isImm());
+                    auto oldStackSize = stackAdjustment.getImm();
+                    auto newStackSize = oldStackSize + stackSize;
                     LLVM_DEBUG(llvm::dbgs()
-                               << "Replaced old_stack_size = " << old_stack_size
-                               << " with new_stack_size = " << new_stack_size << " in inline_asm = '" << inline_asm
-                               << "' because llvm used " << stack_size << " bytes of stack in function = '"
-                               << machine_function.getName() << "'\n");
-                    stack_adjustment.setImm(new_stack_size);
+                               << "Replaced old_stack_size = " << oldStackSize
+                               << " with new_stack_size = " << newStackSize << " in inline_asm = '" << inlineAsm
+                               << "' because llvm used " << stackSize << " bytes of stack in function = '"
+                               << machineFunction.getName() << "'\n");
+                    stackAdjustment.setImm(newStackSize);
                     changed = true;
                 }
             }
@@ -121,20 +121,20 @@ public:
     static constexpr StringRef ARG_NAME = "patch-return-handler-stack-adjustment";
 
 private:
-    LLVMArkInterface *ark_interface_;
+    LLVMArkInterface *arkInterface_;
 };
 
 }  // namespace
 
 namespace panda::llvmbackend {
 
-MachineFunctionPass *CreatePatchReturnHandlerStackAdjustmentPass(LLVMArkInterface *ark_interface)
+MachineFunctionPass *CreatePatchReturnHandlerStackAdjustmentPass(LLVMArkInterface *arkInterface)
 {
-    return new PatchReturnHandlerStackAdjustment(ark_interface);
+    return new PatchReturnHandlerStackAdjustment(arkInterface);
 }
 
 }  // namespace panda::llvmbackend
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static RegisterPass<PatchReturnHandlerStackAdjustment> P1(PatchReturnHandlerStackAdjustment::ARG_NAME,
+static RegisterPass<PatchReturnHandlerStackAdjustment> g_p1(PatchReturnHandlerStackAdjustment::ARG_NAME,
                                                           PatchReturnHandlerStackAdjustment::PASS_NAME, false, false);

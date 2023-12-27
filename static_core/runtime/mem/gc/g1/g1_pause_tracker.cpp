@@ -19,86 +19,86 @@
 #include "libpandabase/os/time.h"
 
 namespace panda::mem {
-G1PauseTracker::G1PauseTracker(int64_t gc_pause_interval_ms, int64_t max_gc_time_ms)
-    : gc_pause_interval_us_(gc_pause_interval_ms * panda::os::time::MILLIS_TO_MICRO),
-      max_gc_time_us_(max_gc_time_ms * panda::os::time::MILLIS_TO_MICRO)
+G1PauseTracker::G1PauseTracker(int64_t gcPauseIntervalMs, int64_t maxGcTimeMs)
+    : gcPauseIntervalUs_(gcPauseIntervalMs * panda::os::time::MILLIS_TO_MICRO),
+      maxGcTimeUs_(maxGcTimeMs * panda::os::time::MILLIS_TO_MICRO)
 {
 }
 
-bool G1PauseTracker::AddPauseInNanos(int64_t start_time_ns, int64_t end_time_ns)
+bool G1PauseTracker::AddPauseInNanos(int64_t startTimeNs, int64_t endTimeNs)
 {
-    return AddPause(start_time_ns / panda::os::time::MICRO_TO_NANO, end_time_ns / panda::os::time::MICRO_TO_NANO);
+    return AddPause(startTimeNs / panda::os::time::MICRO_TO_NANO, endTimeNs / panda::os::time::MICRO_TO_NANO);
 }
 
-bool G1PauseTracker::AddPause(int64_t start_time_us, int64_t end_time_us)
+bool G1PauseTracker::AddPause(int64_t startTimeUs, int64_t endTimeUs)
 {
-    RemoveOutOfIntervalEntries(end_time_us);
-    pauses_.push_back(PauseEntry(start_time_us, end_time_us));
-    auto gc_time = CalculateIntervalPauseInMicros(end_time_us);
-    if (gc_time > max_gc_time_us_) {
+    RemoveOutOfIntervalEntries(endTimeUs);
+    pauses_.push_back(PauseEntry(startTimeUs, endTimeUs));
+    auto gcTime = CalculateIntervalPauseInMicros(endTimeUs);
+    if (gcTime > maxGcTimeUs_) {
         LOG(DEBUG, GC) << "Target GC pause was exceeded: "
-                       << panda::helpers::TimeConverter(gc_time * panda::os::time::MICRO_TO_NANO) << " > "
-                       << panda::helpers::TimeConverter(max_gc_time_us_ * panda::os::time::MICRO_TO_NANO)
+                       << panda::helpers::TimeConverter(gcTime * panda::os::time::MICRO_TO_NANO) << " > "
+                       << panda::helpers::TimeConverter(maxGcTimeUs_ * panda::os::time::MICRO_TO_NANO)
                        << " in time interval "
-                       << panda::helpers::TimeConverter(gc_pause_interval_us_ * panda::os::time::MICRO_TO_NANO);
+                       << panda::helpers::TimeConverter(gcPauseIntervalUs_ * panda::os::time::MICRO_TO_NANO);
         return false;
     }
     return true;
 }
 
-void G1PauseTracker::RemoveOutOfIntervalEntries(int64_t now_us)
+void G1PauseTracker::RemoveOutOfIntervalEntries(int64_t nowUs)
 {
-    auto oldest_interval_time = now_us - gc_pause_interval_us_;
+    auto oldestIntervalTime = nowUs - gcPauseIntervalUs_;
     while (!pauses_.empty()) {
-        auto oldest_pause = pauses_.front();
-        if (oldest_pause.GetEndTimeInMicros() > oldest_interval_time) {
+        auto oldestPause = pauses_.front();
+        if (oldestPause.GetEndTimeInMicros() > oldestIntervalTime) {
             break;
         }
         pauses_.pop_front();
     }
 }
 
-int64_t G1PauseTracker::CalculateIntervalPauseInMicros(int64_t now_us)
+int64_t G1PauseTracker::CalculateIntervalPauseInMicros(int64_t nowUs)
 {
-    int64_t gc_time = 0;
-    auto oldest_interval_time = now_us - gc_pause_interval_us_;
+    int64_t gcTime = 0;
+    auto oldestIntervalTime = nowUs - gcPauseIntervalUs_;
     auto end = pauses_.cend();
     for (auto it = pauses_.cbegin(); it != end; ++it) {
-        if (it->GetEndTimeInMicros() > oldest_interval_time) {
-            gc_time += it->DurationInMicros(oldest_interval_time);
+        if (it->GetEndTimeInMicros() > oldestIntervalTime) {
+            gcTime += it->DurationInMicros(oldestIntervalTime);
         }
     }
-    return gc_time;
+    return gcTime;
 }
 
-int64_t G1PauseTracker::MinDelayBeforePauseInMicros(int64_t now_us, int64_t pause_time_us)
+int64_t G1PauseTracker::MinDelayBeforePauseInMicros(int64_t nowUs, int64_t pauseTimeUs)
 {
-    pause_time_us = std::min(pause_time_us, max_gc_time_us_);
-    auto gc_budget = max_gc_time_us_ - pause_time_us;
-    auto new_interval_time = now_us + pause_time_us;
-    auto oldest_interval_time = new_interval_time - gc_pause_interval_us_;
+    pauseTimeUs = std::min(pauseTimeUs, maxGcTimeUs_);
+    auto gcBudget = maxGcTimeUs_ - pauseTimeUs;
+    auto newIntervalTime = nowUs + pauseTimeUs;
+    auto oldestIntervalTime = newIntervalTime - gcPauseIntervalUs_;
 
     auto rend = pauses_.crend();
     for (auto it = pauses_.crbegin(); it != rend; ++it) {
-        if (it->GetEndTimeInMicros() <= oldest_interval_time) {
+        if (it->GetEndTimeInMicros() <= oldestIntervalTime) {
             break;
         }
 
-        auto duration = it->DurationInMicros(oldest_interval_time);
-        if (duration > gc_budget) {
-            auto new_oldest_interval_time = it->GetEndTimeInMicros() - gc_budget;
-            ASSERT(new_oldest_interval_time >= oldest_interval_time);
-            return new_oldest_interval_time - oldest_interval_time;
+        auto duration = it->DurationInMicros(oldestIntervalTime);
+        if (duration > gcBudget) {
+            auto newOldestIntervalTime = it->GetEndTimeInMicros() - gcBudget;
+            ASSERT(newOldestIntervalTime >= oldestIntervalTime);
+            return newOldestIntervalTime - oldestIntervalTime;
         }
 
-        gc_budget -= duration;
+        gcBudget -= duration;
     }
 
     return 0;
 }
 
-int64_t G1PauseTracker::MinDelayBeforeMaxPauseInMicros(int64_t now_us)
+int64_t G1PauseTracker::MinDelayBeforeMaxPauseInMicros(int64_t nowUs)
 {
-    return MinDelayBeforePauseInMicros(now_us, max_gc_time_us_);
+    return MinDelayBeforePauseInMicros(nowUs, maxGcTimeUs_);
 }
 }  // namespace panda::mem

@@ -387,10 +387,10 @@ TEST_F(EtsNativeInterfaceArrayTest, NewObjectsArrayZeroAndOneSize)
     ets_string str = env_->NewStringUTF(example.c_str());
     ASSERT_NE(str, nullptr);
 
-    ets_objectArray arr_zero = env_->NewObjectsArray(0, cls, str);
-    EXPECT_EQ(env_->GetArrayLength(arr_zero), static_cast<ets_size>(0));
-    ets_objectArray arr_one = env_->NewObjectsArray(1, cls, str);
-    EXPECT_EQ(env_->GetArrayLength(arr_one), static_cast<ets_size>(1));
+    ets_objectArray arrZero = env_->NewObjectsArray(0, cls, str);
+    EXPECT_EQ(env_->GetArrayLength(arrZero), static_cast<ets_size>(0));
+    ets_objectArray arrOne = env_->NewObjectsArray(1, cls, str);
+    EXPECT_EQ(env_->GetArrayLength(arrOne), static_cast<ets_size>(1));
 }
 
 TEST_F(EtsNativeInterfaceArrayTest, NewObjectArrayTest)
@@ -398,40 +398,40 @@ TEST_F(EtsNativeInterfaceArrayTest, NewObjectArrayTest)
     //  NOLINTNEXTLINE(bugprone-string-literal-with-embedded-nul)
     const std::vector<std::string> src = {"\t", "\n",       "\0",   "abcdefghijklmnopqrstuvwxyz",
                                           "",   "texttext", "ABCD", "1111111"};
-    std::vector<ets_string> ets_src;
-    ets_src.reserve(src.size());
+    std::vector<ets_string> etsSrc;
+    etsSrc.reserve(src.size());
     for (auto &s : src) {
-        ets_src.push_back(env_->NewStringUTF(s.c_str()));
+        etsSrc.push_back(env_->NewStringUTF(s.c_str()));
     }
 
     ets_class cls = env_->FindClass("std/core/String");
     ASSERT_NE(cls, nullptr);
-    ets_objectArray array = env_->NewObjectsArray(src.size(), cls, ets_src[0]);
+    ets_objectArray array = env_->NewObjectsArray(src.size(), cls, etsSrc[0]);
     ASSERT_NE(array, nullptr);
     ets_size size = env_->GetArrayLength(array);
     ASSERT_EQ(size, src.size());
     for (ets_size i = 1; i < size; ++i) {
-        env_->SetObjectArrayElement(array, i, ets_src[i]);
+        env_->SetObjectArrayElement(array, i, etsSrc[i]);
     }
 
-    std::vector<std::string> ets_res;
-    ets_res.reserve(src.size());
+    std::vector<std::string> etsRes;
+    etsRes.reserve(src.size());
     for (ets_size i = 0; i < size; ++i) {
         auto str = static_cast<ets_string>(env_->GetObjectArrayElement(array, i));
-        ets_boolean is_copy;
-        const char *res = env_->GetStringUTFChars(str, &is_copy);
-        ets_res.emplace_back(res);
+        ets_boolean isCopy;
+        const char *res = env_->GetStringUTFChars(str, &isCopy);
+        etsRes.emplace_back(res);
         env_->ReleaseStringUTFChars(str, res);
     }
-    ASSERT_EQ(ets_res, src);
+    ASSERT_EQ(etsRes, src);
 
     panda::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
-    auto *object_arr = s.Convert<EtsObjectArray>(array);
-    auto *desc = object_arr->GetClass()->GetDescriptor();
+    auto *objectArr = s.Convert<EtsObjectArray>(array);
+    auto *desc = objectArr->GetClass()->GetDescriptor();
 
-    const char *expected_desc = "[Lstd/core/String;";
+    const char *expectedDesc = "[Lstd/core/String;";
     uint32_t len = 18;
-    ASSERT_THAT(std::vector<char>(desc, desc + len), ::testing::ElementsAreArray(expected_desc, len));
+    ASSERT_THAT(std::vector<char>(desc, desc + len), ::testing::ElementsAreArray(expectedDesc, len));
 }
 
 }  // namespace panda::ets::test

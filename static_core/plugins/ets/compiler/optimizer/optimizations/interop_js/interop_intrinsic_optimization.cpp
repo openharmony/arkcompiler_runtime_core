@@ -91,135 +91,135 @@ static bool CanCreateNewScopeObject(Inst *inst)
 
 InteropIntrinsicOptimization::BlockInfo &InteropIntrinsicOptimization::GetInfo(BasicBlock *block)
 {
-    return block_info_[block->GetId()];
+    return blockInfo_[block->GetId()];
 }
 
 void InteropIntrinsicOptimization::MergeScopesInsideBlock(BasicBlock *block)
 {
-    Inst *last_start = nullptr;  // Start of the current scope or nullptr if no scope is open
-    Inst *last_end = nullptr;    // End of the last closed scope
+    Inst *lastStart = nullptr;  // Start of the current scope or nullptr if no scope is open
+    Inst *lastEnd = nullptr;    // End of the last closed scope
     // Number of object creations in the last closed scope (valid value if we are in the next scope now)
-    uint32_t last_object_count = 0;
-    uint32_t current_object_count = 0;  // Number of object creations in the current scope or 0
+    uint32_t lastObjectCount = 0;
+    uint32_t currentObjectCount = 0;  // Number of object creations in the current scope or 0
     for (auto *inst : block->InstsSafe()) {
         if (IsScopeStart(inst)) {
-            ASSERT(last_start == nullptr);
-            ASSERT(current_object_count == 0);
-            has_scopes_ = true;
-            last_start = inst;
+            ASSERT(lastStart == nullptr);
+            ASSERT(currentObjectCount == 0);
+            hasScopes_ = true;
+            lastStart = inst;
         } else if (IsScopeEnd(inst)) {
-            ASSERT(last_start != nullptr);
-            if (last_end != nullptr && last_object_count + current_object_count <= scope_object_limit_) {
-                ASSERT(last_end->IsPrecedingInSameBlock(last_start));
-                COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT) << "Remove scope end " << *last_end << "\nand scope start "
-                                                           << *last_start << "\nfrom BB " << block->GetId();
-                block->RemoveInst(last_end);
-                block->RemoveInst(last_start);
-                last_object_count += current_object_count;
-                is_applied_ = true;
+            ASSERT(lastStart != nullptr);
+            if (lastEnd != nullptr && lastObjectCount + currentObjectCount <= scopeObjectLimit_) {
+                ASSERT(lastEnd->IsPrecedingInSameBlock(lastStart));
+                COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT) << "Remove scope end " << *lastEnd << "\nand scope start "
+                                                           << *lastStart << "\nfrom BB " << block->GetId();
+                block->RemoveInst(lastEnd);
+                block->RemoveInst(lastStart);
+                lastObjectCount += currentObjectCount;
+                isApplied_ = true;
             } else {
-                object_limit_hit_ |= (last_end != nullptr);
-                last_object_count = current_object_count;
+                objectLimitHit_ |= (lastEnd != nullptr);
+                lastObjectCount = currentObjectCount;
             }
-            current_object_count = 0;
+            currentObjectCount = 0;
 
-            last_end = inst;
-            last_start = nullptr;
+            lastEnd = inst;
+            lastStart = nullptr;
         } else if (IsForbiddenInst(inst)) {
-            ASSERT(last_start == nullptr);
-            last_end = nullptr;
-            last_object_count = 0;
-            current_object_count = 0;
+            ASSERT(lastStart == nullptr);
+            lastEnd = nullptr;
+            lastObjectCount = 0;
+            currentObjectCount = 0;
         } else if (CanCreateNewScopeObject(inst)) {
-            ASSERT(last_start != nullptr);
-            ++current_object_count;
+            ASSERT(lastStart != nullptr);
+            ++currentObjectCount;
         }
     }
 }
 
 bool InteropIntrinsicOptimization::TryCreateSingleScope(BasicBlock *bb)
 {
-    bool is_start = bb == GetGraph()->GetStartBlock()->GetSuccessor(0);
-    bool has_start = false;
-    auto last_inst = bb->GetLastInst();
+    bool isStart = bb == GetGraph()->GetStartBlock()->GetSuccessor(0);
+    bool hasStart = false;
+    auto lastInst = bb->GetLastInst();
     // We do not need to close scope in compiler before deoptimize or throw inst
-    bool is_end = last_inst != nullptr && last_inst->IsReturn();
+    bool isEnd = lastInst != nullptr && lastInst->IsReturn();
     SaveStateInst *ss = nullptr;
-    Inst *last_end = nullptr;
+    Inst *lastEnd = nullptr;
     for (auto *inst : bb->InstsSafe()) {
-        if (is_start && !has_start && IsScopeStart(inst)) {
-            has_start = true;
-        } else if (is_end && IsScopeEnd(inst)) {
-            if (last_end != nullptr) {
-                bb->RemoveInst(last_end);
+        if (isStart && !hasStart && IsScopeStart(inst)) {
+            hasStart = true;
+        } else if (isEnd && IsScopeEnd(inst)) {
+            if (lastEnd != nullptr) {
+                bb->RemoveInst(lastEnd);
             }
-            last_end = inst;
+            lastEnd = inst;
         } else if (IsScopeStart(inst) || IsScopeEnd(inst)) {
             bb->RemoveInst(inst);
-        } else if (is_end && inst->GetOpcode() == Opcode::SaveState && ss == nullptr) {
+        } else if (isEnd && inst->GetOpcode() == Opcode::SaveState && ss == nullptr) {
             ss = inst->CastToSaveState();
         }
     }
-    if (!is_end || last_end != nullptr) {
-        return has_start;
+    if (!isEnd || lastEnd != nullptr) {
+        return hasStart;
     }
     if (ss == nullptr) {
-        ss = GetGraph()->CreateInstSaveState(DataType::NO_TYPE, last_inst->GetPc());
-        last_inst->InsertBefore(ss);
-        if (last_inst->GetOpcode() == Opcode::Return && last_inst->GetInput(0).GetInst()->IsMovableObject()) {
-            ss->AppendBridge(last_inst->GetInput(0).GetInst());
+        ss = GetGraph()->CreateInstSaveState(DataType::NO_TYPE, lastInst->GetPc());
+        lastInst->InsertBefore(ss);
+        if (lastInst->GetOpcode() == Opcode::Return && lastInst->GetInput(0).GetInst()->IsMovableObject()) {
+            ss->AppendBridge(lastInst->GetInput(0).GetInst());
         }
     }
-    auto scope_end = GetGraph()->CreateInstIntrinsic(
+    auto scopeEnd = GetGraph()->CreateInstIntrinsic(
         DataType::VOID, ss->GetPc(), RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_DESTROY_LOCAL_SCOPE);
-    scope_end->SetInputs(GetGraph()->GetAllocator(), {{ss, DataType::NO_TYPE}});
-    ss->InsertAfter(scope_end);
-    return has_start;
+    scopeEnd->SetInputs(GetGraph()->GetAllocator(), {{ss, DataType::NO_TYPE}});
+    ss->InsertAfter(scopeEnd);
+    return hasStart;
 }
 
 bool InteropIntrinsicOptimization::TryCreateSingleScope()
 {
     for (auto *bb : GetGraph()->GetBlocksRPO()) {
         for (auto *inst : bb->Insts()) {
-            if (try_single_scope_ && IsForbiddenInst(inst)) {
-                try_single_scope_ = false;
+            if (trySingleScope_ && IsForbiddenInst(inst)) {
+                trySingleScope_ = false;
             }
             if (IsScopeStart(inst)) {
-                has_scopes_ = true;
+                hasScopes_ = true;
             }
         }
     }
-    if (!has_scopes_ || !try_single_scope_) {
+    if (!hasScopes_ || !trySingleScope_) {
         return false;
     }
-    bool has_start = false;
+    bool hasStart = false;
     for (auto *bb : GetGraph()->GetBlocksRPO()) {
-        has_start |= TryCreateSingleScope(bb);
+        hasStart |= TryCreateSingleScope(bb);
     }
-    if (has_start) {
+    if (hasStart) {
         return true;
     }
-    auto *start_block = GetGraph()->GetStartBlock()->GetSuccessor(0);
+    auto *startBlock = GetGraph()->GetStartBlock()->GetSuccessor(0);
     SaveStateInst *ss = nullptr;
-    for (auto *inst : start_block->InstsReverse()) {
+    for (auto *inst : startBlock->InstsReverse()) {
         if (inst->GetOpcode() == Opcode::SaveState) {
             ss = inst->CastToSaveState();
             break;
         }
     }
     if (ss == nullptr) {
-        ss = GetGraph()->CreateInstSaveState(DataType::NO_TYPE, start_block->GetFirstInst()->GetPc());
-        start_block->PrependInst(ss);
+        ss = GetGraph()->CreateInstSaveState(DataType::NO_TYPE, startBlock->GetFirstInst()->GetPc());
+        startBlock->PrependInst(ss);
         for (auto *inst : GetGraph()->GetStartBlock()->Insts()) {
             if (inst->IsMovableObject()) {
                 ss->AppendBridge(inst);
             }
         }
     }
-    auto scope_start = GetGraph()->CreateInstIntrinsic(
+    auto scopeStart = GetGraph()->CreateInstIntrinsic(
         DataType::VOID, ss->GetPc(), RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_CREATE_LOCAL_SCOPE);
-    scope_start->SetInputs(GetGraph()->GetAllocator(), {{ss, DataType::NO_TYPE}});
-    ss->InsertAfter(scope_start);
+    scopeStart->SetInputs(GetGraph()->GetAllocator(), {{ss, DataType::NO_TYPE}});
+    ss->InsertAfter(scopeStart);
     return true;
 }
 
@@ -228,22 +228,22 @@ std::optional<uint64_t> InteropIntrinsicOptimization::FindForbiddenLoops(Loop *l
 {
     bool forbidden = false;
     uint64_t objects = 0;
-    for (auto *inner_loop : loop->GetInnerLoops()) {
-        auto inner_objects = FindForbiddenLoops(inner_loop);
-        if (inner_objects.has_value()) {
-            objects += *inner_objects;
+    for (auto *innerLoop : loop->GetInnerLoops()) {
+        auto innerObjects = FindForbiddenLoops(innerLoop);
+        if (innerObjects.has_value()) {
+            objects += *innerObjects;
         } else {
             forbidden = true;
         }
     }
     if (forbidden || loop->IsIrreducible()) {
-        forbidden_loops_.insert(loop);
+        forbiddenLoops_.insert(loop);
         return std::nullopt;
     }
     for (auto *block : loop->GetBlocks()) {
         for (auto *inst : block->Insts()) {
             if (IsForbiddenInst(inst)) {
-                forbidden_loops_.insert(loop);
+                forbiddenLoops_.insert(loop);
                 return std::nullopt;
             }
             if (CanCreateNewScopeObject(inst)) {
@@ -254,26 +254,26 @@ std::optional<uint64_t> InteropIntrinsicOptimization::FindForbiddenLoops(Loop *l
     if (objects == 0) {
         return 0;
     }
-    if (objects > scope_object_limit_) {
-        forbidden_loops_.insert(loop);
+    if (objects > scopeObjectLimit_) {
+        forbiddenLoops_.insert(loop);
         return std::nullopt;
     }
-    if (auto loop_info = CountableLoopParser(*loop).Parse()) {
-        auto opt_iterations = CountableLoopParser::GetLoopIterations(*loop_info);
-        if (opt_iterations.has_value() &&
-            *opt_iterations <= scope_object_limit_ / objects) {  // compare using division to avoid overflow
+    if (auto loopInfo = CountableLoopParser(*loop).Parse()) {
+        auto optIterations = CountableLoopParser::GetLoopIterations(*loopInfo);
+        if (optIterations.has_value() &&
+            *optIterations <= scopeObjectLimit_ / objects) {  // compare using division to avoid overflow
             COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
-                << "Found small countable loop, id = " << loop->GetId() << ", iterations = " << *opt_iterations;
-            return objects * *opt_iterations;
+                << "Found small countable loop, id = " << loop->GetId() << ", iterations = " << *optIterations;
+            return objects * *optIterations;
         }
     }
-    forbidden_loops_.insert(loop);
+    forbiddenLoops_.insert(loop);
     return std::nullopt;
 }
 
 bool InteropIntrinsicOptimization::IsForbiddenLoopEntry(BasicBlock *block)
 {
-    return block->GetLoop()->IsIrreducible() || (block->IsLoopHeader() && forbidden_loops_.count(block->GetLoop()) > 0);
+    return block->GetLoop()->IsIrreducible() || (block->IsLoopHeader() && forbiddenLoops_.count(block->GetLoop()) > 0);
 }
 
 template <bool REVERSE>
@@ -302,33 +302,33 @@ void InteropIntrinsicOptimization::MergeComponents(int32_t first, int32_t second
     first = GetParentComponent(first);
     second = GetParentComponent(second);
     if (first != second) {
-        components_[first].object_count += components_[second].object_count;
+        components_[first].objectCount += components_[second].objectCount;
         components_[second].parent = first;
     }
 }
 
-void InteropIntrinsicOptimization::UpdateStatsForMerging(Inst *inst, int32_t other_end_component,
-                                                         uint32_t *scope_switches,
-                                                         uint32_t *objects_in_block_after_merge)
+void InteropIntrinsicOptimization::UpdateStatsForMerging(Inst *inst, int32_t otherEndComponent,
+                                                         uint32_t *scopeSwitches,
+                                                         uint32_t *objectsInBlockAfterMerge)
 {
     if (IsScopeStart(inst) || IsScopeEnd(inst)) {
-        ++*scope_switches;
+        ++*scopeSwitches;
     } else if (CanCreateNewScopeObject(inst)) {
-        if (*scope_switches == 1) {
-            ++*objects_in_block_after_merge;
-        } else if (*scope_switches == 0 && other_end_component != current_component_) {
+        if (*scopeSwitches == 1) {
+            ++*objectsInBlockAfterMerge;
+        } else if (*scopeSwitches == 0 && otherEndComponent != currentComponent_) {
             // If both ends of the block belong to the same component, count instructions only from
             // the first visited end
-            ++components_[current_component_].object_count;
+            ++components_[currentComponent_].objectCount;
         }
     } else if (IsForbiddenInst(inst)) {
-        if (*scope_switches == 1) {
-            can_merge_ = false;
-        } else if (*scope_switches == 0) {
-            COMPILER_LOG_IF(!components_[current_component_].is_forbidden, DEBUG, INTEROP_INTRINSIC_OPT)
-                << "Connected component " << current_component_
+        if (*scopeSwitches == 1) {
+            canMerge_ = false;
+        } else if (*scopeSwitches == 0) {
+            COMPILER_LOG_IF(!components_[currentComponent_].isForbidden, DEBUG, INTEROP_INTRINSIC_OPT)
+                << "Connected component " << currentComponent_
                 << " cannot be moved into scope because it contains forbidden inst " << *inst;
-            components_[current_component_].is_forbidden = true;
+            components_[currentComponent_].isForbidden = true;
         }
     }
 }
@@ -336,35 +336,35 @@ void InteropIntrinsicOptimization::UpdateStatsForMerging(Inst *inst, int32_t oth
 template <bool IS_END>
 void InteropIntrinsicOptimization::IterateBlockFromBoundary(BasicBlock *block)
 {
-    auto other_end_component = GetInfo(block).block_component[static_cast<int32_t>(!IS_END)];
-    if (other_end_component != current_component_) {
-        current_component_blocks_.push_back(block);
+    auto otherEndComponent = GetInfo(block).blockComponent[static_cast<int32_t>(!IS_END)];
+    if (otherEndComponent != currentComponent_) {
+        currentComponentBlocks_.push_back(block);
     }
-    uint32_t scope_switches = 0;
-    uint32_t objects_in_block_after_merge = 0;
+    uint32_t scopeSwitches = 0;
+    uint32_t objectsInBlockAfterMerge = 0;
     for (auto *inst : GetInstsIter<IS_END>(block)) {
-        UpdateStatsForMerging(inst, other_end_component, &scope_switches, &objects_in_block_after_merge);
+        UpdateStatsForMerging(inst, otherEndComponent, &scopeSwitches, &objectsInBlockAfterMerge);
     }
-    if (scope_switches == 0) {
+    if (scopeSwitches == 0) {
         if (block->IsStartBlock() || block->IsEndBlock()) {
-            COMPILER_LOG_IF(!components_[current_component_].is_forbidden, DEBUG, INTEROP_INTRINSIC_OPT)
-                << "Connected component " << current_component_ << " cannot be moved into scope because it contains "
+            COMPILER_LOG_IF(!components_[currentComponent_].isForbidden, DEBUG, INTEROP_INTRINSIC_OPT)
+                << "Connected component " << currentComponent_ << " cannot be moved into scope because it contains "
                 << (block->IsStartBlock() ? "start" : "end") << " block " << block->GetId();
-            components_[current_component_].is_forbidden = true;
+            components_[currentComponent_].isForbidden = true;
         }
         BlockBoundaryDfs<!IS_END>(block);
-    } else if (scope_switches == 1) {
+    } else if (scopeSwitches == 1) {
         // Other end of the block was already moved into scope (otherwise scope switch count in block would be even)
-        ASSERT(other_end_component != DFS_NOT_VISITED && other_end_component != current_component_);
-        other_end_component = GetParentComponent(other_end_component);
-        if (components_[other_end_component].is_forbidden) {
-            can_merge_ = false;
+        ASSERT(otherEndComponent != DFS_NOT_VISITED && otherEndComponent != currentComponent_);
+        otherEndComponent = GetParentComponent(otherEndComponent);
+        if (components_[otherEndComponent].isForbidden) {
+            canMerge_ = false;
         } else {
-            objects_in_scope_after_merge_ +=
-                GetObjectCountIfUnused(components_[other_end_component], current_component_);
+            objectsInScopeAfterMerge_ +=
+                GetObjectCountIfUnused(components_[otherEndComponent], currentComponent_);
         }
-    } else if (scope_switches > 2U || other_end_component != current_component_) {
-        objects_in_scope_after_merge_ += objects_in_block_after_merge;
+    } else if (scopeSwitches > 2U || otherEndComponent != currentComponent_) {
+        objectsInScopeAfterMerge_ += objectsInBlockAfterMerge;
     }
 }
 
@@ -372,18 +372,18 @@ template <bool IS_END>
 void InteropIntrinsicOptimization::BlockBoundaryDfs(BasicBlock *block)
 {
     auto index = static_cast<int32_t>(IS_END);
-    if (GetInfo(block).block_component[index] != DFS_NOT_VISITED) {
+    if (GetInfo(block).blockComponent[index] != DFS_NOT_VISITED) {
         return;
     }
     COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT) << "Added " << (IS_END ? "end" : "start ") << " of block "
-                                               << block->GetId() << " to connected component " << current_component_;
-    GetInfo(block).block_component[index] = current_component_;
+                                               << block->GetId() << " to connected component " << currentComponent_;
+    GetInfo(block).blockComponent[index] = currentComponent_;
     if (!IS_END && IsForbiddenLoopEntry(block)) {
-        COMPILER_LOG_IF(!components_[current_component_].is_forbidden, DEBUG, INTEROP_INTRINSIC_OPT)
-            << "Connected component " << current_component_
+        COMPILER_LOG_IF(!components_[currentComponent_].isForbidden, DEBUG, INTEROP_INTRINSIC_OPT)
+            << "Connected component " << currentComponent_
             << " cannot be moved into scope because it contains entry to forbidden loop " << block->GetLoop()->GetId()
             << " via BB " << block->GetId();
-        components_[current_component_].is_forbidden = true;
+        components_[currentComponent_].isForbidden = true;
     }
     IterateBlockFromBoundary<IS_END>(block);
 
@@ -434,42 +434,42 @@ static bool MoveBlockEndIntoScope(BasicBlock *block)
 void InteropIntrinsicOptimization::MergeCurrentComponentWithNeighbours()
 {
     COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
-        << "Merging connected component " << current_component_ << " with its neighbours";
-    for (auto *block : current_component_blocks_) {
-        if (GetInfo(block).block_component[0] == current_component_ && MoveBlockStartIntoScope(block)) {
-            MergeComponents(current_component_, GetInfo(block).block_component[1]);
+        << "Merging connected component " << currentComponent_ << " with its neighbours";
+    for (auto *block : currentComponentBlocks_) {
+        if (GetInfo(block).blockComponent[0] == currentComponent_ && MoveBlockStartIntoScope(block)) {
+            MergeComponents(currentComponent_, GetInfo(block).blockComponent[1]);
         }
-        if (GetInfo(block).block_component[1] == current_component_ && MoveBlockEndIntoScope(block)) {
-            MergeComponents(current_component_, GetInfo(block).block_component[0]);
+        if (GetInfo(block).blockComponent[1] == currentComponent_ && MoveBlockEndIntoScope(block)) {
+            MergeComponents(currentComponent_, GetInfo(block).blockComponent[0]);
         }
     }
-    is_applied_ = true;
+    isApplied_ = true;
 }
 
 template <bool IS_END>
 void InteropIntrinsicOptimization::FindComponentAndTryMerge(BasicBlock *block)
 {
     auto index = static_cast<int32_t>(IS_END);
-    if (GetInfo(block).block_component[index] != DFS_NOT_VISITED) {
+    if (GetInfo(block).blockComponent[index] != DFS_NOT_VISITED) {
         return;
     }
-    components_.push_back({current_component_, 0, 0, false});
-    current_component_blocks_.clear();
-    objects_in_scope_after_merge_ = 0;
-    can_merge_ = true;
+    components_.push_back({currentComponent_, 0, 0, false});
+    currentComponentBlocks_.clear();
+    objectsInScopeAfterMerge_ = 0;
+    canMerge_ = true;
     BlockBoundaryDfs<IS_END>(block);
-    if (components_[current_component_].is_forbidden) {
-        can_merge_ = false;
+    if (components_[currentComponent_].isForbidden) {
+        canMerge_ = false;
     }
-    if (can_merge_) {
-        objects_in_scope_after_merge_ += components_[current_component_].object_count;
-        if (objects_in_scope_after_merge_ > scope_object_limit_) {
-            object_limit_hit_ = true;
+    if (canMerge_) {
+        objectsInScopeAfterMerge_ += components_[currentComponent_].objectCount;
+        if (objectsInScopeAfterMerge_ > scopeObjectLimit_) {
+            objectLimitHit_ = true;
         } else {
             MergeCurrentComponentWithNeighbours();
         }
     }
-    ++current_component_;
+    ++currentComponent_;
 }
 
 void InteropIntrinsicOptimization::MergeInterScopeRegions()
@@ -483,21 +483,21 @@ void InteropIntrinsicOptimization::MergeInterScopeRegions()
 // Numbering is similar to pre-order, but we stop in blocks with scope starts
 void InteropIntrinsicOptimization::DfsNumbering(BasicBlock *block)
 {
-    if (GetInfo(block).dfs_num_in != DFS_NOT_VISITED) {
+    if (GetInfo(block).dfsNumIn != DFS_NOT_VISITED) {
         return;
     }
-    GetInfo(block).dfs_num_in = dfs_num_++;
+    GetInfo(block).dfsNumIn = dfsNum_++;
     for (auto inst : block->Insts()) {
         ASSERT(!IsScopeEnd(inst));
         if (IsScopeStart(inst)) {
-            GetInfo(block).dfs_num_out = dfs_num_;
+            GetInfo(block).dfsNumOut = dfsNum_;
             return;
         }
     }
     for (auto *succ : block->GetSuccsBlocks()) {
         DfsNumbering(succ);
     }
-    GetInfo(block).dfs_num_out = dfs_num_;
+    GetInfo(block).dfsNumOut = dfsNum_;
 }
 
 // Calculate minimal and maximal `dfs_num_in` for blocks that can be reached by walking some edges forward
@@ -510,44 +510,44 @@ void InteropIntrinsicOptimization::CalculateReachabilityRec(BasicBlock *block)
         return;
     }
     auto &info = GetInfo(block);
-    info.subgraph_min_num = info.subgraph_max_num = info.dfs_num_in;
+    info.subgraphMinNum = info.subgraphMaxNum = info.dfsNumIn;
 
-    bool is_scope_start = false;
+    bool isScopeStart = false;
     for (auto inst : block->Insts()) {
         ASSERT(!IsScopeEnd(inst));
         if (IsForbiddenInst(inst)) {
-            info.subgraph_min_num = DFS_NOT_VISITED;
+            info.subgraphMinNum = DFS_NOT_VISITED;
         }
         if (IsScopeStart(inst)) {
-            is_scope_start = true;
+            isScopeStart = true;
             break;
         }
     }
 
-    if (!is_scope_start) {
+    if (!isScopeStart) {
         for (auto *succ : block->GetSuccsBlocks()) {
             CalculateReachabilityRec(succ);
-            info.subgraph_min_num = std::min(info.subgraph_min_num, GetInfo(succ).subgraph_min_num);
-            info.subgraph_max_num = std::max(info.subgraph_max_num, GetInfo(succ).subgraph_max_num);
+            info.subgraphMinNum = std::min(info.subgraphMinNum, GetInfo(succ).subgraphMinNum);
+            info.subgraphMaxNum = std::max(info.subgraphMaxNum, GetInfo(succ).subgraphMaxNum);
             if (IsForbiddenLoopEntry(succ)) {
-                info.subgraph_min_num = DFS_NOT_VISITED;
+                info.subgraphMinNum = DFS_NOT_VISITED;
                 COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
                     << "BB " << block->GetId() << " cannot be moved into scope because succ " << succ->GetId()
                     << " is entry to forbidden loop " << succ->GetLoop()->GetId();
                 break;
             }
         }
-        if (info.dfs_num_in <= info.subgraph_min_num && info.subgraph_max_num < info.dfs_num_out) {
-            block->SetMarker(can_hoist_to_);
+        if (info.dfsNumIn <= info.subgraphMinNum && info.subgraphMaxNum < info.dfsNumOut) {
+            block->SetMarker(canHoistTo_);
         }
     }
     for (auto *pred : block->GetPredsBlocks()) {
-        if (pred->IsMarked(start_dfs_)) {
-            info.subgraph_min_num = DFS_NOT_VISITED;
+        if (pred->IsMarked(startDfs_)) {
+            info.subgraphMinNum = DFS_NOT_VISITED;
             break;
         }
-        info.subgraph_min_num = std::min(info.subgraph_min_num, GetInfo(pred).dfs_num_in);
-        info.subgraph_max_num = std::max(info.subgraph_max_num, GetInfo(pred).dfs_num_in);
+        info.subgraphMinNum = std::min(info.subgraphMinNum, GetInfo(pred).dfsNumIn);
+        info.subgraphMaxNum = std::max(info.subgraphMaxNum, GetInfo(pred).dfsNumIn);
     }
 }
 
@@ -562,7 +562,7 @@ void InteropIntrinsicOptimization::DoDfs()
         // We mark block with `start_dfs_` marker if its **end** is contained in a new inter-scope region
         // (i. e. block is the start block or last scope switch in block is scope end)
         // And since our graph contains **starts** of blocks, we launch DFS from succs, not from the block itself
-        if (block->IsMarked(start_dfs_)) {
+        if (block->IsMarked(startDfs_)) {
             for (auto *succ : block->GetSuccsBlocks()) {
                 (this->*DFS)(succ);
             }
@@ -575,11 +575,11 @@ bool InteropIntrinsicOptimization::CreateScopeStartInBlock(BasicBlock *block)
     for (auto *inst : block->InstsSafeReverse()) {
         ASSERT(!IsForbiddenInst(inst) && !IsScopeStart(inst) && !IsScopeEnd(inst));
         if (inst->GetOpcode() == Opcode::SaveState) {
-            auto scope_start = GetGraph()->CreateInstIntrinsic(
+            auto scopeStart = GetGraph()->CreateInstIntrinsic(
                 DataType::VOID, inst->GetPc(), RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_CREATE_LOCAL_SCOPE);
-            scope_start->SetInputs(GetGraph()->GetAllocator(), {{inst, DataType::NO_TYPE}});
-            inst->InsertAfter(scope_start);
-            is_applied_ = true;
+            scopeStart->SetInputs(GetGraph()->GetAllocator(), {{inst, DataType::NO_TYPE}});
+            inst->InsertAfter(scopeStart);
+            isApplied_ = true;
             return true;
         }
     }
@@ -587,67 +587,67 @@ bool InteropIntrinsicOptimization::CreateScopeStartInBlock(BasicBlock *block)
     return false;
 }
 
-void InteropIntrinsicOptimization::RemoveReachableScopeStarts(BasicBlock *block, BasicBlock *new_start_block)
+void InteropIntrinsicOptimization::RemoveReachableScopeStarts(BasicBlock *block, BasicBlock *newStartBlock)
 {
     ASSERT(!block->IsEndBlock());
     if (block->SetMarker(visited_)) {
         return;
     }
-    block->ResetMarker(can_hoist_to_);
-    ASSERT(new_start_block->IsDominate(block));
-    if (block != new_start_block) {
+    block->ResetMarker(canHoistTo_);
+    ASSERT(newStartBlock->IsDominate(block));
+    if (block != newStartBlock) {
         ASSERT(!IsForbiddenLoopEntry(block));
         for (auto *inst : block->Insts()) {
             ASSERT(!IsForbiddenInst(inst) && !IsScopeEnd(inst));
             if (IsScopeStart(inst)) {
                 COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
                     << "Removed scope start " << *inst << "from BB " << block->GetId() << ", new scope start in "
-                    << new_start_block->GetId();
+                    << newStartBlock->GetId();
                 block->RemoveInst(inst);
                 return;
             }
         }
     }
     for (auto *succ : block->GetSuccsBlocks()) {
-        RemoveReachableScopeStarts(succ, new_start_block);
+        RemoveReachableScopeStarts(succ, newStartBlock);
     }
 }
 
 void InteropIntrinsicOptimization::HoistScopeStarts()
 {
-    auto start_dfs_holder = MarkerHolder(GetGraph());
-    start_dfs_ = start_dfs_holder.GetMarker();
+    auto startDfsHolder = MarkerHolder(GetGraph());
+    startDfs_ = startDfsHolder.GetMarker();
     for (auto *block : GetGraph()->GetBlocksRPO()) {
-        bool end_in_scope = false;
+        bool endInScope = false;
         for (auto inst : block->InstsReverse()) {
             if (IsScopeEnd(inst)) {
-                block->SetMarker(start_dfs_);
+                block->SetMarker(startDfs_);
                 break;
             }
             if (IsScopeStart(inst)) {
-                end_in_scope = true;
+                endInScope = true;
                 break;
             }
         }
-        if (block->IsStartBlock() && !end_in_scope) {
-            block->SetMarker(start_dfs_);
+        if (block->IsStartBlock() && !endInScope) {
+            block->SetMarker(startDfs_);
         }
     }
     DoDfs<&InteropIntrinsicOptimization::DfsNumbering>();
-    auto can_hoist_to_holder = MarkerHolder(GetGraph());
-    can_hoist_to_ = can_hoist_to_holder.GetMarker();
+    auto canHoistToHolder = MarkerHolder(GetGraph());
+    canHoistTo_ = canHoistToHolder.GetMarker();
     {
-        auto visited_holder = MarkerHolder(GetGraph());
-        visited_ = visited_holder.GetMarker();
+        auto visitedHolder = MarkerHolder(GetGraph());
+        visited_ = visitedHolder.GetMarker();
         DoDfs<&InteropIntrinsicOptimization::CalculateReachabilityRec>();
     }
 
     for (auto *block : GetGraph()->GetBlocksRPO()) {
-        if (block->IsMarked(can_hoist_to_) && CreateScopeStartInBlock(block)) {
+        if (block->IsMarked(canHoistTo_) && CreateScopeStartInBlock(block)) {
             COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
                 << "Hoisted scope start to BB " << block->GetId() << ", removing scope starts reachable from it";
-            auto visited_holder = MarkerHolder(GetGraph());
-            visited_ = visited_holder.GetMarker();
+            auto visitedHolder = MarkerHolder(GetGraph());
+            visited_ = visitedHolder.GetMarker();
             RemoveReachableScopeStarts(block, block);
         }
     }
@@ -656,7 +656,7 @@ void InteropIntrinsicOptimization::HoistScopeStarts()
 void InteropIntrinsicOptimization::InvalidateScopesInSubgraph(BasicBlock *block)
 {
     ASSERT(!block->IsEndBlock());
-    if (block->SetMarker(scope_start_invalidated_)) {
+    if (block->SetMarker(scopeStartInvalidated_)) {
         return;
     }
     for (auto *inst : block->Insts()) {
@@ -665,7 +665,7 @@ void InteropIntrinsicOptimization::InvalidateScopesInSubgraph(BasicBlock *block)
             return;
         }
         if (IsInteropIntrinsic(inst)) {
-            scope_for_inst_[inst] = nullptr;
+            scopeForInst_[inst] = nullptr;
         }
     }
     for (auto *succ : block->GetSuccsBlocks()) {
@@ -673,136 +673,136 @@ void InteropIntrinsicOptimization::InvalidateScopesInSubgraph(BasicBlock *block)
     }
 }
 
-void InteropIntrinsicOptimization::CheckGraphRec(BasicBlock *block, Inst *scope_start)
+void InteropIntrinsicOptimization::CheckGraphRec(BasicBlock *block, Inst *scopeStart)
 {
     if (block->SetMarker(visited_)) {
-        if (GetInfo(block).last_scope_start != scope_start) {
+        if (GetInfo(block).lastScopeStart != scopeStart) {
             // It's impossible to have scope start in one path to block and to have no scope in another path
-            ASSERT(GetInfo(block).last_scope_start != nullptr);
-            ASSERT(scope_start != nullptr);
+            ASSERT(GetInfo(block).lastScopeStart != nullptr);
+            ASSERT(scopeStart != nullptr);
             // Different scope starts for different execution paths are possible
             // NOTE(aefremov): find insts with always equal scopes somehow
             InvalidateScopesInSubgraph(block);
         }
         return;
     }
-    GetInfo(block).last_scope_start = scope_start;
+    GetInfo(block).lastScopeStart = scopeStart;
     for (auto *inst : block->Insts()) {
         if (IsScopeEnd(inst)) {
-            ASSERT(scope_start != nullptr);
-            scope_start = nullptr;
+            ASSERT(scopeStart != nullptr);
+            scopeStart = nullptr;
         } else if (IsScopeStart(inst)) {
-            ASSERT(scope_start == nullptr);
-            scope_start = inst;
+            ASSERT(scopeStart == nullptr);
+            scopeStart = inst;
         } else if (IsForbiddenInst(inst)) {
-            ASSERT(scope_start == nullptr);
+            ASSERT(scopeStart == nullptr);
         } else if (IsInteropIntrinsic(inst)) {
-            ASSERT(scope_start != nullptr);
-            scope_for_inst_[inst] = scope_start;
+            ASSERT(scopeStart != nullptr);
+            scopeForInst_[inst] = scopeStart;
         }
     }
     if (block->IsEndBlock()) {
-        ASSERT(scope_start == nullptr);
+        ASSERT(scopeStart == nullptr);
     }
     for (auto *succ : block->GetSuccsBlocks()) {
-        CheckGraphRec(succ, scope_start);
+        CheckGraphRec(succ, scopeStart);
     }
 }
 
 void InteropIntrinsicOptimization::CheckGraphAndFindScopes()
 {
-    auto visited_holder = MarkerHolder(GetGraph());
-    visited_ = visited_holder.GetMarker();
-    auto invalidated_holder = MarkerHolder(GetGraph());
-    scope_start_invalidated_ = invalidated_holder.GetMarker();
+    auto visitedHolder = MarkerHolder(GetGraph());
+    visited_ = visitedHolder.GetMarker();
+    auto invalidatedHolder = MarkerHolder(GetGraph());
+    scopeStartInvalidated_ = invalidatedHolder.GetMarker();
     CheckGraphRec(GetGraph()->GetStartBlock(), nullptr);
 }
 
 void InteropIntrinsicOptimization::MarkRequireRegMap(Inst *inst)
 {
-    SaveStateInst *save_state = nullptr;
+    SaveStateInst *saveState = nullptr;
     if (inst->IsSaveState()) {
-        save_state = static_cast<SaveStateInst *>(inst);
+        saveState = static_cast<SaveStateInst *>(inst);
     } else if (inst->RequireState()) {
-        save_state = inst->GetSaveState();
+        saveState = inst->GetSaveState();
     }
-    while (save_state != nullptr && save_state->SetMarker(require_reg_map_) && save_state->GetCallerInst() != nullptr) {
-        save_state = save_state->GetCallerInst()->GetSaveState();
+    while (saveState != nullptr && saveState->SetMarker(requireRegMap_) && saveState->GetCallerInst() != nullptr) {
+        saveState = saveState->GetCallerInst()->GetSaveState();
     }
 }
 
 void InteropIntrinsicOptimization::TryRemoveUnwrapAndWrap(Inst *inst, Inst *input)
 {
-    if (scope_for_inst_.at(inst) == nullptr || scope_for_inst_.at(inst) != scope_for_inst_.at(input)) {
+    if (scopeForInst_.at(inst) == nullptr || scopeForInst_.at(inst) != scopeForInst_.at(input)) {
         COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
             << "Scopes don't match, skip: wrap " << *inst << "\nwith unwrap input " << *input;
         return;
     }
     COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT) << "Remove wrap " << *inst << "\nwith unwrap input " << *input;
-    auto *new_input = input->GetInput(0).GetInst();
+    auto *newInput = input->GetInput(0).GetInst();
     // We don't extend scopes out of basic blocks in OSR mode
-    ASSERT(!GetGraph()->IsOsrMode() || inst->GetBasicBlock() == new_input->GetBasicBlock());
-    ASSERT(new_input->GetType() == DataType::POINTER);
+    ASSERT(!GetGraph()->IsOsrMode() || inst->GetBasicBlock() == newInput->GetBasicBlock());
+    ASSERT(newInput->GetType() == DataType::POINTER);
     ASSERT(inst->GetType() == DataType::POINTER);
-    inst->ReplaceUsers(new_input);
+    inst->ReplaceUsers(newInput);
     inst->GetBasicBlock()->RemoveInst(inst);
     // If `input` (unwrap from local to JSValue or ets primitve) has SaveState users which require regmap,
     // we will not delete the unwrap intrinsic
     // NOTE(aefremov): support unwrap (local => JSValue/primitive) during deoptimization
-    is_applied_ = true;
+    isApplied_ = true;
 }
 
 void InteropIntrinsicOptimization::TryRemoveUnwrapToJSValue(Inst *inst)
 {
-    auto common_id = RuntimeInterface::IntrinsicId::INVALID;
-    DataType::Type user_type;
+    auto commonId = RuntimeInterface::IntrinsicId::INVALID;
+    DataType::Type userType;
     for (auto &user : inst->GetUsers()) {
-        auto *user_inst = user.GetInst();
-        if (user_inst->IsSaveState()) {
+        auto *userInst = user.GetInst();
+        if (userInst->IsSaveState()) {
             // see the previous note
-            if (user_inst->IsMarked(require_reg_map_)) {
+            if (userInst->IsMarked(requireRegMap_)) {
                 COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
-                    << "User " << *user_inst << "\nof inst " << *inst << " requires regmap, skip";
+                    << "User " << *userInst << "\nof inst " << *inst << " requires regmap, skip";
                 return;
             }
             continue;
         }
-        if (!user_inst->IsIntrinsic()) {
+        if (!userInst->IsIntrinsic()) {
             return;
         }
-        if (HasOsrEntryBetween(inst, user_inst)) {
+        if (HasOsrEntryBetween(inst, userInst)) {
             return;
         }
-        auto current_id = user_inst->CastToIntrinsic()->GetIntrinsicId();
-        if (common_id == RuntimeInterface::IntrinsicId::INVALID) {
-            user_type = user_inst->GetType();
-            common_id = current_id;
-        } else if (current_id != common_id) {
+        auto currentId = userInst->CastToIntrinsic()->GetIntrinsicId();
+        if (commonId == RuntimeInterface::IntrinsicId::INVALID) {
+            userType = userInst->GetType();
+            commonId = currentId;
+        } else if (currentId != commonId) {
             return;
         }
     }
-    auto new_id = GetUnwrapIntrinsicId(common_id);
-    if (new_id == RuntimeInterface::IntrinsicId::INVALID) {
+    auto newId = GetUnwrapIntrinsicId(commonId);
+    if (newId == RuntimeInterface::IntrinsicId::INVALID) {
         // includes the case when common_id is INVALID
         return;
     }
-    inst->CastToIntrinsic()->SetIntrinsicId(new_id);
+    inst->CastToIntrinsic()->SetIntrinsicId(newId);
     inst->SetOpcode(Opcode::Intrinsic);  // reset flags to default for intrinsic inst
-    AdjustFlags(new_id, inst);
-    inst->SetType(user_type);
-    for (auto user_it = inst->GetUsers().begin(); user_it != inst->GetUsers().end();) {
-        auto user_inst = user_it->GetInst();
-        if (user_inst->IsIntrinsic() && user_inst->CastToIntrinsic()->GetIntrinsicId() == common_id) {
+    AdjustFlags(newId, inst);
+    inst->SetType(userType);
+    for (auto userIt = inst->GetUsers().begin(); userIt != inst->GetUsers().end();) {
+        auto userInst = userIt->GetInst();
+        if (userInst->IsIntrinsic() && userInst->CastToIntrinsic()->GetIntrinsicId() == commonId) {
             COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
-                << "Replace cast from JSValue " << *user_inst << "\nwith direct unwrap " << *inst;
-            user_inst->ReplaceUsers(inst);
-            user_inst->GetBasicBlock()->RemoveInst(user_inst);
-            user_it = inst->GetUsers().begin();
+                << "Replace cast from JSValue " << *userInst << "\nwith direct unwrap " << *inst;
+            userInst->ReplaceUsers(inst);
+            userInst->GetBasicBlock()->RemoveInst(userInst);
+            userIt = inst->GetUsers().begin();
         } else {
-            ++user_it;
+            ++userIt;
         }
     }
-    is_applied_ = true;
+    isApplied_ = true;
 }
 
 void InteropIntrinsicOptimization::TryRemoveIntrinsic(Inst *inst)
@@ -811,28 +811,28 @@ void InteropIntrinsicOptimization::TryRemoveIntrinsic(Inst *inst)
         return;
     }
     auto *input = inst->GetInput(0).GetInst();
-    auto intrinsic_id = inst->CastToIntrinsic()->GetIntrinsicId();
-    if (input->IsIntrinsic() && IsWrapIntrinsicId(intrinsic_id) &&
+    auto intrinsicId = inst->CastToIntrinsic()->GetIntrinsicId();
+    if (input->IsIntrinsic() && IsWrapIntrinsicId(intrinsicId) &&
         IsUnwrapIntrinsicId(input->CastToIntrinsic()->GetIntrinsicId())) {
         TryRemoveUnwrapAndWrap(inst, input);
-    } else if (intrinsic_id == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_JS_VALUE) {
+    } else if (intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_JS_VALUE) {
         TryRemoveUnwrapToJSValue(inst);
-    } else if (intrinsic_id == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_CALL_FUNCTION &&
+    } else if (intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_CALL_FUNCTION &&
                !inst->HasUsers()) {
         // avoid creation of handle for return value in local scope if it is unused
         inst->SetType(DataType::VOID);
         inst->CastToIntrinsic()->SetIntrinsicId(
             RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_CALL_VOID_FUNCTION);
-        is_applied_ = true;
+        isApplied_ = true;
     }
 }
 
 void InteropIntrinsicOptimization::EliminateCastPairs()
 {
-    auto require_reg_map_holder = MarkerHolder(GetGraph());
-    require_reg_map_ = require_reg_map_holder.GetMarker();
-    auto &blocks_rpo = GetGraph()->GetBlocksRPO();
-    for (auto it = blocks_rpo.rbegin(); it != blocks_rpo.rend(); ++it) {
+    auto requireRegMapHolder = MarkerHolder(GetGraph());
+    requireRegMap_ = requireRegMapHolder.GetMarker();
+    auto &blocksRpo = GetGraph()->GetBlocksRPO();
+    for (auto it = blocksRpo.rbegin(); it != blocksRpo.rend(); ++it) {
         auto *block = *it;
         for (auto inst : block->InstsSafeReverse()) {
             if (inst->RequireRegMap()) {
@@ -846,85 +846,85 @@ void InteropIntrinsicOptimization::EliminateCastPairs()
 void InteropIntrinsicOptimization::DomTreeDfs(BasicBlock *block)
 {
     // bb1->IsDominate(bb2) iff bb1.dom_tree_in <= bb2.dom_tree_in < bb1.dom_tree_out
-    GetInfo(block).dom_tree_in = dom_tree_num_++;
+    GetInfo(block).domTreeIn = domTreeNum_++;
     for (auto *dom : block->GetDominatedBlocks()) {
         DomTreeDfs(dom);
     }
-    GetInfo(block).dom_tree_out = dom_tree_num_;
+    GetInfo(block).domTreeOut = domTreeNum_;
 }
 
-void InteropIntrinsicOptimization::MarkPartiallyAnticipated(BasicBlock *block, BasicBlock *stop_block)
+void InteropIntrinsicOptimization::MarkPartiallyAnticipated(BasicBlock *block, BasicBlock *stopBlock)
 {
-    if (block->SetMarker(inst_anticipated_)) {
+    if (block->SetMarker(instAnticipated_)) {
         return;
     }
     COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
         << "Mark block " << block->GetId() << " where current inst is partially anticipated";
-    GetInfo(block).subgraph_min_num = DFS_NOT_VISITED;
-    GetInfo(block).max_chain = 0;
-    GetInfo(block).max_depth = -1L;
-    if (block == stop_block) {
+    GetInfo(block).subgraphMinNum = DFS_NOT_VISITED;
+    GetInfo(block).maxChain = 0;
+    GetInfo(block).maxDepth = -1L;
+    if (block == stopBlock) {
         return;
     }
     ASSERT(!block->IsStartBlock());
     for (auto *pred : block->GetPredsBlocks()) {
-        MarkPartiallyAnticipated(pred, stop_block);
+        MarkPartiallyAnticipated(pred, stopBlock);
     }
 }
 
 void InteropIntrinsicOptimization::CalculateDownSafe(BasicBlock *block)
 {
     auto &info = GetInfo(block);
-    if (!block->IsMarked(inst_anticipated_)) {
-        info.max_chain = 0;
-        info.max_depth = -1L;
-        info.subgraph_min_num = DFS_NOT_VISITED;
+    if (!block->IsMarked(instAnticipated_)) {
+        info.maxChain = 0;
+        info.maxDepth = -1L;
+        info.subgraphMinNum = DFS_NOT_VISITED;
         return;
     }
-    if (info.subgraph_min_num != DFS_NOT_VISITED) {
+    if (info.subgraphMinNum != DFS_NOT_VISITED) {
         return;
     }
-    ASSERT(info.dom_tree_in >= 0);
-    info.subgraph_min_num = info.subgraph_max_num = info.dom_tree_in;
-    int32_t succ_max_chain = 0;
+    ASSERT(info.domTreeIn >= 0);
+    info.subgraphMinNum = info.subgraphMaxNum = info.domTreeIn;
+    int32_t succMaxChain = 0;
     for (auto *succ : block->GetSuccsBlocks()) {
         CalculateDownSafe(succ);
-        succ_max_chain = std::max(succ_max_chain, GetInfo(succ).max_chain);
-        if (!block->IsMarked(elimination_candidate_)) {
-            info.subgraph_min_num = std::min(info.subgraph_min_num, GetInfo(succ).subgraph_min_num);
-            info.subgraph_max_num = std::max(info.subgraph_max_num, GetInfo(succ).subgraph_max_num);
+        succMaxChain = std::max(succMaxChain, GetInfo(succ).maxChain);
+        if (!block->IsMarked(eliminationCandidate_)) {
+            info.subgraphMinNum = std::min(info.subgraphMinNum, GetInfo(succ).subgraphMinNum);
+            info.subgraphMaxNum = std::max(info.subgraphMaxNum, GetInfo(succ).subgraphMaxNum);
         }
     }
     for (auto *dom : block->GetSuccsBlocks()) {
-        if (dom->IsMarked(inst_anticipated_)) {
-            info.max_depth = std::max(info.max_depth, GetInfo(dom).max_depth);
+        if (dom->IsMarked(instAnticipated_)) {
+            info.maxDepth = std::max(info.maxDepth, GetInfo(dom).maxDepth);
         }
     }
-    info.max_chain += succ_max_chain;
+    info.maxChain += succMaxChain;
 }
 
-void InteropIntrinsicOptimization::ReplaceInst(Inst *inst, Inst **new_inst, Inst *insert_after)
+void InteropIntrinsicOptimization::ReplaceInst(Inst *inst, Inst **newInst, Inst *insertAfter)
 {
     ASSERT(inst != nullptr);
-    ASSERT(*new_inst != nullptr);
-    ASSERT((*new_inst)->IsDominate(inst));
-    if ((*new_inst)->GetOpcode() == Opcode::SaveState) {
-        ASSERT(insert_after != nullptr);
-        auto old_next_inst = inst->GetNext();
+    ASSERT(*newInst != nullptr);
+    ASSERT((*newInst)->IsDominate(inst));
+    if ((*newInst)->GetOpcode() == Opcode::SaveState) {
+        ASSERT(insertAfter != nullptr);
+        auto oldNextInst = inst->GetNext();
         auto *block = inst->GetBasicBlock();
         block->EraseInst(inst);
-        insert_after->InsertAfter(inst);
-        inst->SetSaveState(*new_inst);
-        *new_inst = inst;
+        insertAfter->InsertAfter(inst);
+        inst->SetSaveState(*newInst);
+        *newInst = inst;
         if (inst->IsReferenceOrAny()) {
             // SSB is needed for conversion from local to JSValue or other ref type
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), *new_inst, old_next_inst, nullptr, block);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), *newInst, oldNextInst, nullptr, block);
         }
     } else {
-        ASSERT(inst->GetOpcode() == (*new_inst)->GetOpcode());
-        inst->ReplaceUsers(*new_inst);
+        ASSERT(inst->GetOpcode() == (*newInst)->GetOpcode());
+        inst->ReplaceUsers(*newInst);
         if (inst->IsReferenceOrAny()) {
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), *new_inst, inst);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), *newInst, inst);
         }
     }
 }
@@ -941,27 +941,27 @@ static bool HasSaveState(BasicBlock *block)
 
 bool InteropIntrinsicOptimization::CanHoistTo(BasicBlock *block)
 {
-    ASSERT(!block->IsMarked(elimination_candidate_));
+    ASSERT(!block->IsMarked(eliminationCandidate_));
     auto &info = GetInfo(block);
-    bool dominates_subgraph = info.dom_tree_in <= info.subgraph_min_num && info.subgraph_max_num < info.dom_tree_out;
+    bool dominatesSubgraph = info.domTreeIn <= info.subgraphMinNum && info.subgraphMaxNum < info.domTreeOut;
     auto depth = block->GetLoop()->GetDepth();
     // Heuristics to estimate if hoisting to this blocks is profitable, and it is not better to hoist to some dominated
     // blocks instead
-    if (dominates_subgraph && info.max_chain > 1) {
+    if (dominatesSubgraph && info.maxChain > 1) {
         for (auto *dom : block->GetDominatedBlocks()) {
-            auto dom_depth = dom->GetLoop()->GetDepth();
-            if (GetInfo(dom).max_chain > 0 &&
-                (GetInfo(dom).max_chain < info.max_chain || dom_depth > depth || !HasSaveState(dom))) {
+            auto domDepth = dom->GetLoop()->GetDepth();
+            if (GetInfo(dom).maxChain > 0 &&
+                (GetInfo(dom).maxChain < info.maxChain || domDepth > depth || !HasSaveState(dom))) {
                 COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
                     << " Block " << block->GetId() << " is candidate for hoisting";
                 return true;
             }
         }
     }
-    if (info.max_depth > static_cast<int32_t>(depth)) {
+    if (info.maxDepth > static_cast<int32_t>(depth)) {
         for (auto *dom : block->GetDominatedBlocks()) {
-            auto dom_depth = dom->GetLoop()->GetDepth();
-            if (GetInfo(dom).max_depth >= 0 && (dom_depth > depth || !HasSaveState(dom))) {
+            auto domDepth = dom->GetLoop()->GetDepth();
+            if (GetInfo(dom).maxDepth >= 0 && (domDepth > depth || !HasSaveState(dom))) {
                 COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
                     << " Block " << block->GetId() << " is candidate for hoisting";
                 return true;
@@ -974,36 +974,36 @@ bool InteropIntrinsicOptimization::CanHoistTo(BasicBlock *block)
 // DFS blocks dominated by start block, and save blocks from its dominance frontier to process them later in
 // HoistAndEliminate. If *new_inst is SaveState, we move the first dominated inst we want to replace after insert_after
 // and set *new_inst to it. Otherwise just replace dominated inst with *new_inst
-void InteropIntrinsicOptimization::HoistAndEliminateRec(BasicBlock *block, const BlockInfo &start_info, Inst **new_inst,
-                                                        Inst *insert_after)
+void InteropIntrinsicOptimization::HoistAndEliminateRec(BasicBlock *block, const BlockInfo &startInfo, Inst **newInst,
+                                                        Inst *insertAfter)
 {
-    if (block->ResetMarker(elimination_candidate_)) {
+    if (block->ResetMarker(eliminationCandidate_)) {
         for (auto *inst : block->InstsSafe()) {
-            if (inst->IsMarked(elimination_candidate_) && inst != *new_inst) {
-                ReplaceInst(inst, new_inst, insert_after);
-                is_applied_ = true;
+            if (inst->IsMarked(eliminationCandidate_) && inst != *newInst) {
+                ReplaceInst(inst, newInst, insertAfter);
+                isApplied_ = true;
             }
         }
     }
     for (auto *succ : block->GetSuccsBlocks()) {
-        if (!succ->ResetMarker(inst_anticipated_)) {
+        if (!succ->ResetMarker(instAnticipated_)) {
             continue;
         }
         // Fast IsDominate check
-        if (start_info.dom_tree_in <= GetInfo(succ).dom_tree_in &&
-            GetInfo(succ).dom_tree_in < start_info.dom_tree_out) {
-            HoistAndEliminateRec(succ, start_info, new_inst, insert_after);
+        if (startInfo.domTreeIn <= GetInfo(succ).domTreeIn &&
+            GetInfo(succ).domTreeIn < startInfo.domTreeOut) {
+            HoistAndEliminateRec(succ, startInfo, newInst, insertAfter);
         } else {
-            blocks_to_process_.push_back(succ);
+            blocksToProcess_.push_back(succ);
         }
     }
 }
 
 // Returns SaveState and inst to insert after
-static std::pair<Inst *, Inst *> GetHoistPosition(BasicBlock *block, Inst *boundary_inst)
+static std::pair<Inst *, Inst *> GetHoistPosition(BasicBlock *block, Inst *boundaryInst)
 {
     for (auto inst : block->InstsReverse()) {
-        if (inst == boundary_inst) {
+        if (inst == boundaryInst) {
             auto prev = inst->GetPrev();
             if (prev != nullptr && prev->GetOpcode() == Opcode::SaveState && !inst->IsMovableObject()) {
                 return {prev, inst};
@@ -1020,86 +1020,86 @@ static std::pair<Inst *, Inst *> GetHoistPosition(BasicBlock *block, Inst *bound
 Inst *InteropIntrinsicOptimization::FindEliminationCandidate(BasicBlock *block)
 {
     for (auto inst : block->Insts()) {
-        if (inst->IsMarked(elimination_candidate_)) {
+        if (inst->IsMarked(eliminationCandidate_)) {
             return inst;
         }
     }
     UNREACHABLE();
 }
 
-void InteropIntrinsicOptimization::HoistAndEliminate(BasicBlock *start_block, Inst *boundary_inst)
+void InteropIntrinsicOptimization::HoistAndEliminate(BasicBlock *startBlock, Inst *boundaryInst)
 {
-    ASSERT(boundary_inst->GetBasicBlock() == start_block);
-    blocks_to_process_.clear();
-    blocks_to_process_.push_back(start_block);
-    ASSERT(start_block->ResetMarker(inst_anticipated_));
-    while (!blocks_to_process_.empty()) {
-        auto *block = blocks_to_process_.back();
-        blocks_to_process_.pop_back();
+    ASSERT(boundaryInst->GetBasicBlock() == startBlock);
+    blocksToProcess_.clear();
+    blocksToProcess_.push_back(startBlock);
+    ASSERT(startBlock->ResetMarker(instAnticipated_));
+    while (!blocksToProcess_.empty()) {
+        auto *block = blocksToProcess_.back();
+        blocksToProcess_.pop_back();
         // We reset inst_anticipated_ marker while we traverse the subgraph where inst is anticipated
-        ASSERT(!block->IsMarked(inst_anticipated_));
+        ASSERT(!block->IsMarked(instAnticipated_));
         auto &info = GetInfo(block);
-        ASSERT(info.subgraph_min_num != DFS_INVALIDATED);
-        Inst *new_inst = nullptr;
-        Inst *insert_after = nullptr;
-        if (block->IsMarked(elimination_candidate_)) {
-            new_inst = FindEliminationCandidate(block);
+        ASSERT(info.subgraphMinNum != DFS_INVALIDATED);
+        Inst *newInst = nullptr;
+        Inst *insertAfter = nullptr;
+        if (block->IsMarked(eliminationCandidate_)) {
+            newInst = FindEliminationCandidate(block);
         } else if (CanHoistTo(block)) {
-            std::tie(new_inst, insert_after) = GetHoistPosition(block, boundary_inst);
-            if (new_inst == nullptr) {
-                info.subgraph_min_num = DFS_INVALIDATED;
+            std::tie(newInst, insertAfter) = GetHoistPosition(block, boundaryInst);
+            if (newInst == nullptr) {
+                info.subgraphMinNum = DFS_INVALIDATED;
                 continue;
             }
         }
-        info.subgraph_min_num = DFS_INVALIDATED;
-        if (new_inst != nullptr) {
-            HoistAndEliminateRec(block, GetInfo(block), &new_inst, insert_after);
+        info.subgraphMinNum = DFS_INVALIDATED;
+        if (newInst != nullptr) {
+            HoistAndEliminateRec(block, GetInfo(block), &newInst, insertAfter);
             continue;
         }
         for (auto *succ : block->GetSuccsBlocks()) {
-            if (succ->ResetMarker(inst_anticipated_)) {
-                blocks_to_process_.push_back(succ);
+            if (succ->ResetMarker(instAnticipated_)) {
+                blocksToProcess_.push_back(succ);
             }
         }
     }
 }
 
-void InteropIntrinsicOptimization::DoRedundancyElimination(Inst *input, Inst *scope_start, InstVector &insts)
+void InteropIntrinsicOptimization::DoRedundancyElimination(Inst *input, Inst *scopeStart, InstVector &insts)
 {
     COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
-        << "Process group of intrinsics with identical inputs and scope start: " << *scope_start
+        << "Process group of intrinsics with identical inputs and scope start: " << *scopeStart
         << "\ninput: " << *input;
-    auto *boundary_inst = input->IsDominate(scope_start) ? scope_start : input;
-    auto *boundary = boundary_inst->GetBasicBlock();
-    ASSERT(input->IsDominate(boundary_inst) && scope_start->IsDominate(boundary_inst));
-    auto inst_anticipated_holder = MarkerHolder(GetGraph());
-    inst_anticipated_ = inst_anticipated_holder.GetMarker();
-    auto elimination_candidate_holder = MarkerHolder(GetGraph());
-    elimination_candidate_ = elimination_candidate_holder.GetMarker();
+    auto *boundaryInst = input->IsDominate(scopeStart) ? scopeStart : input;
+    auto *boundary = boundaryInst->GetBasicBlock();
+    ASSERT(input->IsDominate(boundaryInst) && scopeStart->IsDominate(boundaryInst));
+    auto instAnticipatedHolder = MarkerHolder(GetGraph());
+    instAnticipated_ = instAnticipatedHolder.GetMarker();
+    auto eliminationCandidateHolder = MarkerHolder(GetGraph());
+    eliminationCandidate_ = eliminationCandidateHolder.GetMarker();
     // Marking blocks where inst is partially anticipated is needed only to reduce number of processed blocks
     for (auto *inst : insts) {
         COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT) << " Inst in this group: " << *inst;
-        inst->SetMarker(elimination_candidate_);
+        inst->SetMarker(eliminationCandidate_);
         auto *block = inst->GetBasicBlock();
-        block->SetMarker(elimination_candidate_);
+        block->SetMarker(eliminationCandidate_);
         MarkPartiallyAnticipated(block, boundary);
-        GetInfo(block).max_chain++;
-        GetInfo(block).max_depth = block->GetLoop()->GetDepth();
+        GetInfo(block).maxChain++;
+        GetInfo(block).maxDepth = block->GetLoop()->GetDepth();
     }
     CalculateDownSafe(boundary);
-    HoistAndEliminate(boundary, boundary_inst);
+    HoistAndEliminate(boundary, boundaryInst);
 }
 
-void InteropIntrinsicOptimization::SaveSiblingForElimination(Inst *sibling, ArenaMap<Inst *, InstVector> &current_insts,
+void InteropIntrinsicOptimization::SaveSiblingForElimination(Inst *sibling, ArenaMap<Inst *, InstVector> &currentInsts,
                                                              RuntimeInterface::IntrinsicId id, Marker processed)
 {
     if (!sibling->IsIntrinsic() || sibling->CastToIntrinsic()->GetIntrinsicId() != id) {
         return;
     }
     sibling->SetMarker(processed);
-    auto scope_start = scope_for_inst_.at(sibling);
-    if (scope_start != nullptr) {
-        auto it = current_insts.try_emplace(scope_start, GetGraph()->GetLocalAllocator()->Adapter()).first;
+    auto scopeStart = scopeForInst_.at(sibling);
+    if (scopeStart != nullptr) {
+        auto it = currentInsts.try_emplace(scopeStart, GetGraph()->GetLocalAllocator()->Adapter()).first;
         it->second.push_back(sibling);
     }
 }
@@ -1107,21 +1107,21 @@ void InteropIntrinsicOptimization::SaveSiblingForElimination(Inst *sibling, Aren
 void InteropIntrinsicOptimization::RedundancyElimination()
 {
     DomTreeDfs(GetGraph()->GetStartBlock());
-    auto processed_holder = MarkerHolder(GetGraph());
-    auto processed = processed_holder.GetMarker();
-    ArenaMap<Inst *, InstVector> current_insts(GetGraph()->GetLocalAllocator()->Adapter());
+    auto processedHolder = MarkerHolder(GetGraph());
+    auto processed = processedHolder.GetMarker();
+    ArenaMap<Inst *, InstVector> currentInsts(GetGraph()->GetLocalAllocator()->Adapter());
     for (auto *block : GetGraph()->GetBlocksRPO()) {
         for (auto *inst : block->InstsSafe()) {
             if (inst->IsMarked(processed) || !IsConvertIntrinsic(inst)) {
                 continue;
             }
             auto id = inst->CastToIntrinsic()->GetIntrinsicId();
-            current_insts.clear();
+            currentInsts.clear();
             auto *input = inst->GetInput(0).GetInst();
             for (auto &user : input->GetUsers()) {
-                SaveSiblingForElimination(user.GetInst(), current_insts, id, processed);
+                SaveSiblingForElimination(user.GetInst(), currentInsts, id, processed);
             }
-            for (auto &[scope, insts] : current_insts) {
+            for (auto &[scope, insts] : currentInsts) {
                 DoRedundancyElimination(input, scope, insts);
             }
         }
@@ -1130,13 +1130,13 @@ void InteropIntrinsicOptimization::RedundancyElimination()
 
 bool InteropIntrinsicOptimization::RunImpl()
 {
-    bool one_scope = TryCreateSingleScope();
-    if (!has_scopes_) {
+    bool oneScope = TryCreateSingleScope();
+    if (!hasScopes_) {
         return false;
     }
     GetGraph()->RunPass<LoopAnalyzer>();
     GetGraph()->RunPass<DominatorsTree>();
-    if (!one_scope) {
+    if (!oneScope) {
         COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT) << "  Phase I: merge scopes inside basic blocks";
         for (auto *block : GetGraph()->GetBlocksRPO()) {
             MergeScopesInsideBlock(block);
@@ -1148,7 +1148,7 @@ bool InteropIntrinsicOptimization::RunImpl()
             COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
                 << "  Phase II: remove inter-scope regions to merge neighbouring scopes";
             MergeInterScopeRegions();
-            if (!object_limit_hit_) {
+            if (!objectLimitHit_) {
                 COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT) << "  Phase III: hoist scope starts";
                 HoistScopeStarts();
             }

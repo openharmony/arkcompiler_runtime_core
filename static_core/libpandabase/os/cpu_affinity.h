@@ -125,7 +125,7 @@ public:
      * @param power_flags Flags to indicate CPUs power
      * @return true if setting was successfully, false - otherwise
      */
-    PANDA_PUBLIC_API static bool SetAffinityForThread(int tid, uint8_t power_flags);
+    PANDA_PUBLIC_API static bool SetAffinityForThread(int tid, uint8_t powerFlags);
 
     /**
      * Set current thread on CPUs with specific flags
@@ -133,7 +133,7 @@ public:
      * @see CpuPower
      * @return true if setting was successfully, false - otherwise
      */
-    PANDA_PUBLIC_API static bool SetAffinityForCurrentThread(uint8_t power_flags);
+    PANDA_PUBLIC_API static bool SetAffinityForCurrentThread(uint8_t powerFlags);
 
     /**
      * Set current thread on specific CPUs
@@ -146,7 +146,7 @@ public:
     /// @return const reference on best + middle cpu-set in system
     PANDA_PUBLIC_API static const CpuSet &GetBestAndMiddleCpuSet()
     {
-        return best_and_middle_cpu_set_;
+        return bestAndMiddleCpuSet_;
     }
 
     /**
@@ -173,10 +173,10 @@ public:
     template <class StringType = std::string>
     static std::enable_if_t<is_stringable_v<StringType>, StringType> CpuSetToString(const CpuSet &cpuset)
     {
-        StringType mask(cpu_count_, '0');
-        for (size_t i = 0U; i < cpu_count_; ++i) {
+        StringType mask(cpuCount_, '0');
+        for (size_t i = 0U; i < cpuCount_; ++i) {
             if (cpuset.IsSet(i)) {
-                mask[cpu_count_ - 1 - i] = '1';
+                mask[cpuCount_ - 1 - i] = '1';
             }
         }
         return mask;
@@ -189,12 +189,12 @@ private:
     /// Load cpu frequency info from system
     static void LoadCpuFreq();
 
-    static size_t cpu_count_;
+    static size_t cpuCount_;
 
-    static CpuSet best_cpu_set_;
-    static CpuSet middle_cpu_set_;
-    PANDA_PUBLIC_API static CpuSet best_and_middle_cpu_set_;
-    static CpuSet weak_cpu_set_;
+    static CpuSet bestCpuSet_;
+    static CpuSet middleCpuSet_;
+    PANDA_PUBLIC_API static CpuSet bestAndMiddleCpuSet_;
+    static CpuSet weakCpuSet_;
 };
 
 }  // namespace panda::os

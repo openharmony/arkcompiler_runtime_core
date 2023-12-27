@@ -43,32 +43,32 @@ extern "C" <%= intrinsic.impl_signature.ret %> <%= implementation %>CompiledAbi(
 % end
 
 // NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
-bool Initialize(panda::panda_file::SourceLang vm_lang) {
+bool Initialize(panda::panda_file::SourceLang vmLang) {
     Runtime *runtime = Runtime::GetCurrent();
-    ClassLinker *class_linker = runtime->GetClassLinker();
-    const auto& runtime_options = Runtime::GetOptions();
+    ClassLinker *classLinker = runtime->GetClassLinker();
+    const auto& runtimeOptions = Runtime::GetOptions();
 
-    if (!runtime_options.ShouldInitializeIntrinsics()) {
+    if (!runtimeOptions.ShouldInitializeIntrinsics()) {
         return true;
     }
 
-    if (!class_linker->HasExtension(vm_lang)) {
+    if (!classLinker->HasExtension(vmLang)) {
         // No extension here.
         return true;
     }
 
-    ClassLinkerExtension *cle = class_linker->GetExtension(vm_lang);
+    ClassLinkerExtension *cle = classLinker->GetExtension(vmLang);
 
-    auto spaces = runtime_options.GetBootIntrinsicSpaces();
+    auto spaces = runtimeOptions.GetBootIntrinsicSpaces();
 
 #ifndef PANDA_PRODUCT_BUILD
-    auto blacklist = runtime_options.GetIntrinsicsBlacklist();
+    auto blacklist = runtimeOptions.GetIntrinsicsBlacklist();
 #endif // PANDA_PRODUCT_BUILD
 
     std::string_view space;
-    for (const auto &space_arg : spaces) {
-        if (runtime->GetLanguageContext(space_arg).GetLanguage() == vm_lang) {
-            space = space_arg;
+    for (const auto &spaceArg : spaces) {
+        if (runtime->GetLanguageContext(spaceArg).GetLanguage() == vmLang) {
+            space = spaceArg;
             break;
         }
     }
@@ -84,13 +84,13 @@ bool Initialize(panda::panda_file::SourceLang vm_lang) {
 %     end
     // Init intrinsics only for current vm.
     if (space == "<%= intrinsic.space %>") {
-        auto mutf8_name = reinterpret_cast<const uint8_t *>("<%= get_object_descriptor(intrinsic.class_name) %>");
-        auto klass = cle->GetClass(mutf8_name);
+        auto mutf8Name = reinterpret_cast<const uint8_t *>("<%= get_object_descriptor(intrinsic.class_name) %>");
+        auto klass = cle->GetClass(mutf8Name);
         if (klass == nullptr) {
-            LOG(ERROR, RUNTIME) << "Cannot find class '" << mutf8_name << "'";
+            LOG(ERROR, RUNTIME) << "Cannot find class '" << mutf8Name << "'";
             return false;
         }
-        mutf8_name = reinterpret_cast<const uint8_t *>("<%= intrinsic.method_name %>");
+        mutf8Name = reinterpret_cast<const uint8_t *>("<%= intrinsic.method_name %>");
 
         Method::Proto proto;
         auto &shorty = proto.GetShorty();
@@ -103,7 +103,7 @@ bool Initialize(panda::panda_file::SourceLang vm_lang) {
 %     end
 %   end
 
-        auto method = klass->GetDirectMethod(mutf8_name, proto);
+        auto method = klass->GetDirectMethod(mutf8Name, proto);
         if (method == nullptr) {
             LOG(ERROR, RUNTIME) << "Cannot find method '<%= intrinsic.class_name %>.<%= intrinsic.method_name %>' in space '<%= intrinsic.space %>'";
             return false;

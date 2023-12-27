@@ -26,11 +26,10 @@
 
 namespace panda::ets {
 
-void EtsLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *mutf8_name,
-                                        const uint8_t *mutf8_msg) const
+void EtsLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const
 {
     EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(thread);
-    ThrowEtsException(coroutine, utf::Mutf8AsCString(mutf8_name), utf::Mutf8AsCString(mutf8_msg));
+    ThrowEtsException(coroutine, utf::Mutf8AsCString(mutf8Name), utf::Mutf8AsCString(mutf8Msg));
 }
 
 PandaUniquePtr<ITableBuilder> EtsLanguageContext::CreateITableBuilder() const
@@ -56,19 +55,19 @@ ets::PandaEtsVM *EtsLanguageContext::CreateVM(Runtime *runtime, const RuntimeOpt
     return vm.Value();
 }
 
-mem::GC *EtsLanguageContext::CreateGC(mem::GCType gc_type, mem::ObjectAllocatorBase *object_allocator,
+mem::GC *EtsLanguageContext::CreateGC(mem::GCType gcType, mem::ObjectAllocatorBase *objectAllocator,
                                       const mem::GCSettings &settings) const
 {
-    return mem::CreateGC<EtsLanguageConfig>(gc_type, object_allocator, settings);
+    return mem::CreateGC<EtsLanguageConfig>(gcType, objectAllocator, settings);
 }
 
 void EtsLanguageContext::ThrowStackOverflowException(ManagedThread *thread) const
 {
     ASSERT(thread != nullptr);
     EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(thread);
-    EtsClassLinker *class_linker = coroutine->GetPandaVM()->GetClassLinker();
-    const char *class_descriptor = utf::Mutf8AsCString(GetStackOverflowErrorClassDescriptor());
-    EtsClass *cls = class_linker->GetClass(class_descriptor, true);
+    EtsClassLinker *classLinker = coroutine->GetPandaVM()->GetClassLinker();
+    const char *classDescriptor = utf::Mutf8AsCString(GetStackOverflowErrorClassDescriptor());
+    EtsClass *cls = classLinker->GetClass(classDescriptor, true);
     ASSERT(cls != nullptr);
 
     EtsHandleScope scope(coroutine);
@@ -78,30 +77,30 @@ void EtsLanguageContext::ThrowStackOverflowException(ManagedThread *thread) cons
 
 VerificationInitAPI EtsLanguageContext::GetVerificationInitAPI() const
 {
-    VerificationInitAPI v_api;
-    v_api.primitive_roots_for_verification = {
+    VerificationInitAPI vApi;
+    vApi.primitiveRootsForVerification = {
         panda_file::Type::TypeId::TAGGED, panda_file::Type::TypeId::VOID, panda_file::Type::TypeId::U1,
         panda_file::Type::TypeId::U8,     panda_file::Type::TypeId::U16,  panda_file::Type::TypeId::U32,
         panda_file::Type::TypeId::U64,    panda_file::Type::TypeId::I8,   panda_file::Type::TypeId::I16,
         panda_file::Type::TypeId::I32,    panda_file::Type::TypeId::I64,  panda_file::Type::TypeId::F32,
         panda_file::Type::TypeId::F64};
 
-    v_api.array_elements_for_verification = {reinterpret_cast<const uint8_t *>("[Z"),
-                                             reinterpret_cast<const uint8_t *>("[B"),
-                                             reinterpret_cast<const uint8_t *>("[S"),
-                                             reinterpret_cast<const uint8_t *>("[C"),
-                                             reinterpret_cast<const uint8_t *>("[I"),
-                                             reinterpret_cast<const uint8_t *>("[J"),
-                                             reinterpret_cast<const uint8_t *>("[F"),
-                                             reinterpret_cast<const uint8_t *>("[D")
+    vApi.arrayElementsForVerification = {reinterpret_cast<const uint8_t *>("[Z"),
+                                         reinterpret_cast<const uint8_t *>("[B"),
+                                         reinterpret_cast<const uint8_t *>("[S"),
+                                         reinterpret_cast<const uint8_t *>("[C"),
+                                         reinterpret_cast<const uint8_t *>("[I"),
+                                         reinterpret_cast<const uint8_t *>("[J"),
+                                         reinterpret_cast<const uint8_t *>("[F"),
+                                         reinterpret_cast<const uint8_t *>("[D")
 
     };
 
-    v_api.is_need_class_synthetic_class = true;
-    v_api.is_need_object_synthetic_class = false;
-    v_api.is_need_string_synthetic_class = false;
+    vApi.isNeedClassSyntheticClass = true;
+    vApi.isNeedObjectSyntheticClass = false;
+    vApi.isNeedStringSyntheticClass = false;
 
-    return v_api;
+    return vApi;
 }
 
 }  // namespace panda::ets

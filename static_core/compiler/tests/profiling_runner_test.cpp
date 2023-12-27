@@ -65,10 +65,10 @@ TEST_F(ProfilingRunnerTest, BranchStatisticsCpp)
     auto runtime = runner.CreateRuntime();
     runner.Run(runtime, SOURCE, std::vector<std::string> {});
     auto method = runner.GetMethod("foo");
-    auto profiling_data = method->GetProfilingData();
-    ASSERT_EQ(132U, profiling_data->GetBranchTakenCounter(0x10U));
-    ASSERT_EQ(199U, profiling_data->GetBranchNotTakenCounter(0x09U));
-    ASSERT_EQ(67U, profiling_data->GetBranchNotTakenCounter(0x10U));
+    auto profilingData = method->GetProfilingData();
+    ASSERT_EQ(132U, profilingData->GetBranchTakenCounter(0x10U));
+    ASSERT_EQ(199U, profilingData->GetBranchNotTakenCounter(0x09U));
+    ASSERT_EQ(67U, profilingData->GetBranchNotTakenCounter(0x10U));
     Runtime::Destroy();
 }
 
@@ -80,10 +80,10 @@ TEST_F(ProfilingRunnerTest, BranchStatistics)
     auto runtime = runner.CreateRuntime();
     runner.Run(runtime, SOURCE, std::vector<std::string> {});
     auto method = runner.GetMethod("foo");
-    auto profiling_data = method->GetProfilingData();
-    ASSERT_EQ(132U, profiling_data->GetBranchTakenCounter(0x10U));
-    ASSERT_EQ(199U, profiling_data->GetBranchNotTakenCounter(0x09U));
-    ASSERT_EQ(67U, profiling_data->GetBranchNotTakenCounter(0x10U));
+    auto profilingData = method->GetProfilingData();
+    ASSERT_EQ(132U, profilingData->GetBranchTakenCounter(0x10U));
+    ASSERT_EQ(199U, profilingData->GetBranchNotTakenCounter(0x09U));
+    ASSERT_EQ(67U, profilingData->GetBranchNotTakenCounter(0x10U));
     Runtime::Destroy();
 }
 #endif

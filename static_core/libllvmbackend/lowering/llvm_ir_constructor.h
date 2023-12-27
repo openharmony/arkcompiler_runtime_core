@@ -31,7 +31,7 @@ namespace panda::compiler {
 class LLVMIrConstructor : public GraphVisitor {
     using RuntimeCallId = std::variant<RuntimeInterface::EntrypointId, RuntimeInterface::IntrinsicId>;
 
-    bool TryEmitIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId ark_id);
+    bool TryEmitIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId arkId);
 
 private:
     // Specific intrinsic Emitters
@@ -47,8 +47,8 @@ private:
 
 public:
     llvm::Value *GetMappedValue(Inst *inst, DataType::Type type);
-    llvm::Value *GetInputValue(Inst *inst, size_t index, bool skip_coerce = false);
-    llvm::Value *GetInputValueFromConstant(ConstantInst *constant, DataType::Type panda_type);
+    llvm::Value *GetInputValue(Inst *inst, size_t index, bool skipCoerce = false);
+    llvm::Value *GetInputValueFromConstant(ConstantInst *constant, DataType::Type pandaType);
 
     Graph *GetGraph() const
     {
@@ -73,14 +73,14 @@ private:
 
     // Creator functions for internal usage
 
-    void CreateInterpreterReturnRestoreRegs(RegMask &reg_mask, size_t offset, bool fp);
+    void CreateInterpreterReturnRestoreRegs(RegMask &regMask, size_t offset, bool fp);
     llvm::Value *CreateBinaryOp(Inst *inst, llvm::Instruction::BinaryOps opcode);
     llvm::Value *CreateBinaryImmOp(Inst *inst, llvm::Instruction::BinaryOps opcode, uint64_t c);
     llvm::Value *CreateShiftOp(Inst *inst, llvm::Instruction::BinaryOps opcode);
     llvm::Value *CreateSignDivMod(Inst *inst, llvm::Instruction::BinaryOps opcode);
     llvm::Value *CreateAArch64SignDivMod(Inst *inst, llvm::Instruction::BinaryOps opcode, llvm::Value *x,
                                          llvm::Value *y);
-    llvm::Value *CreateFloatComparison(CmpInst *cmp_inst, llvm::Value *x, llvm::Value *y);
+    llvm::Value *CreateFloatComparison(CmpInst *cmpInst, llvm::Value *x, llvm::Value *y);
     llvm::Value *CreateIntegerComparison(CmpInst *inst, llvm::Value *x, llvm::Value *y);
     llvm::Value *CreateCastToInt(Inst *inst);
     llvm::Value *CreateLoadWithOrdering(Inst *inst, llvm::Value *value, llvm::AtomicOrdering ordering,
@@ -109,23 +109,23 @@ private:
         return func_->arg_begin() + offset + index;
     }
 
-    llvm::Type *GetType(DataType::Type panda_type);
-    llvm::Type *GetExactType(DataType::Type target_type);
+    llvm::Type *GetType(DataType::Type pandaType);
+    llvm::Type *GetExactType(DataType::Type targetType);
 
     llvm::Instruction::CastOps GetCastOp(DataType::Type from, DataType::Type to);
 
-    llvm::Value *CoerceValue(llvm::Value *value, DataType::Type source_type, DataType::Type target_type);
-    llvm::Value *CoerceValue(llvm::Value *value, llvm::Type *target_type);
+    llvm::Value *CoerceValue(llvm::Value *value, DataType::Type sourceType, DataType::Type targetType);
+    llvm::Value *CoerceValue(llvm::Value *value, llvm::Type *targetType);
 
-    void ValueMapAdd(Inst *inst, llvm::Value *value, bool set_name = true);
+    void ValueMapAdd(Inst *inst, llvm::Value *value, bool setName = true);
     void FillValueMapForUsers(Inst *inst, llvm::Value *value, DataType::Type type,
-                              ArenaUnorderedMap<DataType::Type, llvm::Value *> *type_map);
+                              ArenaUnorderedMap<DataType::Type, llvm::Value *> *typeMap);
 
     void AddBlock(BasicBlock *pb, llvm::BasicBlock *lb)
     {
-        ASSERT(block_tail_map_.count(pb) == 0);
-        block_tail_map_.insert({pb, lb});
-        block_head_map_.insert({pb, lb});
+        ASSERT(blockTailMap_.count(pb) == 0);
+        blockTailMap_.insert({pb, lb});
+        blockHeadMap_.insert({pb, lb});
     }
 
     void SetCurrentBasicBlock(llvm::BasicBlock *block)
@@ -138,25 +138,25 @@ private:
         return builder_.GetInsertBlock();
     }
 
-    void ReplaceTailBlock(BasicBlock *panda_block, llvm::BasicBlock *llvm_block)
+    void ReplaceTailBlock(BasicBlock *pandaBlock, llvm::BasicBlock *llvmBlock)
     {
-        auto it = block_tail_map_.find(panda_block);
-        ASSERT(it != block_tail_map_.end());
-        it->second = llvm_block;
+        auto it = blockTailMap_.find(pandaBlock);
+        ASSERT(it != blockTailMap_.end());
+        it->second = llvmBlock;
     }
 
     llvm::BasicBlock *GetHeadBlock(BasicBlock *block)
     {
-        ASSERT(block_head_map_.count(block) == 1);
-        auto result = block_head_map_.at(block);
+        ASSERT(blockHeadMap_.count(block) == 1);
+        auto result = blockHeadMap_.at(block);
         ASSERT(result != nullptr);
         return result;
     }
 
     llvm::BasicBlock *GetTailBlock(BasicBlock *block)
     {
-        ASSERT(block_tail_map_.count(block) == 1);
-        auto result = block_tail_map_.at(block);
+        ASSERT(blockTailMap_.count(block) == 1);
+        auto result = blockTailMap_.at(block);
         ASSERT(result != nullptr);
         return result;
     }
@@ -212,8 +212,8 @@ protected:
 
 public:
     explicit LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::LLVMContext *context,
-                               llvmbackend::LLVMArkInterface *ark_interface,
-                               const std::unique_ptr<llvmbackend::DebugDataBuilder> &debug_data);
+                               llvmbackend::LLVMArkInterface *arkInterface,
+                               const std::unique_ptr<llvmbackend::DebugDataBuilder> &debugData);
 
     bool BuildIr();
 
@@ -226,13 +226,13 @@ private:
     Graph *graph_ {nullptr};
     llvm::Function *func_;
     llvm::IRBuilder<> builder_;
-    ArenaDoubleUnorderedMap<Inst *, DataType::Type, llvm::Value *> input_map_;
-    ArenaUnorderedMap<BasicBlock *, llvm::BasicBlock *> block_tail_map_;
-    ArenaUnorderedMap<BasicBlock *, llvm::BasicBlock *> block_head_map_;
-    llvmbackend::LLVMArkInterface *ark_interface_;
-    const std::unique_ptr<llvmbackend::DebugDataBuilder> &debug_data_;
+    ArenaDoubleUnorderedMap<Inst *, DataType::Type, llvm::Value *> inputMap_;
+    ArenaUnorderedMap<BasicBlock *, llvm::BasicBlock *> blockTailMap_;
+    ArenaUnorderedMap<BasicBlock *, llvm::BasicBlock *> blockHeadMap_;
+    llvmbackend::LLVMArkInterface *arkInterface_;
+    const std::unique_ptr<llvmbackend::DebugDataBuilder> &debugData_;
     ArenaVector<uint8_t> cc_;
-    ArenaVector<llvm::Value *> cc_values_;
+    ArenaVector<llvm::Value *> ccValues_;
 };
 
 }  // namespace panda::compiler

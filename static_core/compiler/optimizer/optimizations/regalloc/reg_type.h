@@ -35,8 +35,8 @@ inline DataType::Type ConvertRegType(const Graph *graph, DataType::Type type)
         return type;
     }
 
-    bool use_reg32 = graph->IsRegScalarMapped() || graph->IsBytecodeOptimizer();
-    if (use_reg32 && DataType::Is32Bits(type, graph->GetArch())) {
+    bool useReg32 = graph->IsRegScalarMapped() || graph->IsBytecodeOptimizer();
+    if (useReg32 && DataType::Is32Bits(type, graph->GetArch())) {
         return DataType::Type::UINT32;
     }
 

@@ -27,21 +27,21 @@ class CollectionSet {
 public:
     CollectionSet()
     {
-        tenured_begin_ = 0;
-        humongous_begin_ = 0;
+        tenuredBegin_ = 0;
+        humongousBegin_ = 0;
     }
 
     template <typename Container>
-    explicit CollectionSet(const Container &set) : collection_set_(set.begin(), set.end())
+    explicit CollectionSet(const Container &set) : collectionSet_(set.begin(), set.end())
     {
-        tenured_begin_ = collection_set_.size();
-        humongous_begin_ = tenured_begin_;
+        tenuredBegin_ = collectionSet_.size();
+        humongousBegin_ = tenuredBegin_;
     }
 
-    explicit CollectionSet(PandaVector<Region *> &&young_regions) : collection_set_(young_regions)
+    explicit CollectionSet(PandaVector<Region *> &&youngRegions) : collectionSet_(youngRegions)
     {
-        tenured_begin_ = collection_set_.size();
-        humongous_begin_ = tenured_begin_;
+        tenuredBegin_ = collectionSet_.size();
+        humongousBegin_ = tenuredBegin_;
     }
 
     ~CollectionSet() = default;
@@ -49,97 +49,97 @@ public:
     void AddRegion(Region *region)
     {
         ASSERT(region->HasFlag(RegionFlag::IS_OLD));
-        collection_set_.push_back(region);
-        if (!region->HasFlag(RegionFlag::IS_LARGE_OBJECT) && humongous_begin_ != collection_set_.size()) {
-            std::swap(collection_set_[humongous_begin_], collection_set_.back());
-            ++humongous_begin_;
+        collectionSet_.push_back(region);
+        if (!region->HasFlag(RegionFlag::IS_LARGE_OBJECT) && humongousBegin_ != collectionSet_.size()) {
+            std::swap(collectionSet_[humongousBegin_], collectionSet_.back());
+            ++humongousBegin_;
         }
     }
 
     auto begin()  // NOLINT(readability-identifier-naming)
     {
-        return collection_set_.begin();
+        return collectionSet_.begin();
     }
 
     auto begin() const  // NOLINT(readability-identifier-naming)
     {
-        return collection_set_.begin();
+        return collectionSet_.begin();
     }
 
     auto end()  // NOLINT(readability-identifier-naming)
     {
-        return collection_set_.end();
+        return collectionSet_.end();
     }
 
     auto end() const  // NOLINT(readability-identifier-naming)
     {
-        return collection_set_.end();
+        return collectionSet_.end();
     }
 
     size_t size() const  // NOLINT(readability-identifier-naming)
     {
-        return collection_set_.size();
+        return collectionSet_.size();
     }
 
     bool empty() const  // NOLINT(readability-identifier-naming)
     {
-        return collection_set_.empty();
+        return collectionSet_.empty();
     }
 
     void clear()  // NOLINT(readability-identifier-naming)
     {
-        collection_set_.clear();
-        tenured_begin_ = 0;
-        humongous_begin_ = 0;
+        collectionSet_.clear();
+        tenuredBegin_ = 0;
+        humongousBegin_ = 0;
     }
 
     auto Young()
     {
-        return Range<PandaVector<Region *>::iterator>(begin(), begin() + tenured_begin_);
+        return Range<PandaVector<Region *>::iterator>(begin(), begin() + tenuredBegin_);
     }
 
     auto Young() const
     {
-        return Range<PandaVector<Region *>::const_iterator>(begin(), begin() + tenured_begin_);
+        return Range<PandaVector<Region *>::const_iterator>(begin(), begin() + tenuredBegin_);
     }
 
     auto Tenured()
     {
-        return Range<PandaVector<Region *>::iterator>(begin() + tenured_begin_, begin() + humongous_begin_);
+        return Range<PandaVector<Region *>::iterator>(begin() + tenuredBegin_, begin() + humongousBegin_);
     }
 
     auto Tenured() const
     {
-        return Range<PandaVector<Region *>::const_iterator>(begin() + tenured_begin_, begin() + humongous_begin_);
+        return Range<PandaVector<Region *>::const_iterator>(begin() + tenuredBegin_, begin() + humongousBegin_);
     }
 
     auto Humongous()
     {
-        return Range<PandaVector<Region *>::iterator>(begin() + humongous_begin_, end());
+        return Range<PandaVector<Region *>::iterator>(begin() + humongousBegin_, end());
     }
 
     auto Humongous() const
     {
-        return Range<PandaVector<Region *>::const_iterator>(begin() + humongous_begin_, end());
+        return Range<PandaVector<Region *>::const_iterator>(begin() + humongousBegin_, end());
     }
 
     auto Movable()
     {
-        return Range<PandaVector<Region *>::iterator>(begin(), begin() + humongous_begin_);
+        return Range<PandaVector<Region *>::iterator>(begin(), begin() + humongousBegin_);
     }
 
     auto Movable() const
     {
-        return Range<PandaVector<Region *>::const_iterator>(begin(), begin() + humongous_begin_);
+        return Range<PandaVector<Region *>::const_iterator>(begin(), begin() + humongousBegin_);
     }
 
     DEFAULT_COPY_SEMANTIC(CollectionSet);
     DEFAULT_MOVE_SEMANTIC(CollectionSet);
 
 private:
-    PandaVector<Region *> collection_set_;
-    size_t tenured_begin_;
-    size_t humongous_begin_;
+    PandaVector<Region *> collectionSet_;
+    size_t tenuredBegin_;
+    size_t humongousBegin_;
 };
 
 }  // namespace panda::mem

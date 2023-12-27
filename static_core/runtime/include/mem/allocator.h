@@ -76,25 +76,25 @@ public:
 
     NO_COPY_SEMANTIC(Allocator);
     NO_MOVE_SEMANTIC(Allocator);
-    explicit Allocator(MemStatsType *mem_stats, AllocatorPurpose purpose, GCCollectMode gc_collect_mode)
-        : mem_stats_(mem_stats), allocator_purpose_(purpose), gc_collect_mode_(gc_collect_mode)
+    explicit Allocator(MemStatsType *memStats, AllocatorPurpose purpose, GCCollectMode gcCollectMode)
+        : memStats_(memStats), allocatorPurpose_(purpose), gcCollectMode_(gcCollectMode)
     {
     }
     virtual ~Allocator() = 0;
 
     ALWAYS_INLINE AllocatorPurpose GetPurpose() const
     {
-        return allocator_purpose_;
+        return allocatorPurpose_;
     }
 
     ALWAYS_INLINE GCCollectMode GetCollectMode() const
     {
-        return gc_collect_mode_;
+        return gcCollectMode_;
     }
 
     ALWAYS_INLINE MemStatsType *GetMemStats() const
     {
-        return mem_stats_;
+        return memStats_;
     }
 
     [[nodiscard]] void *Alloc(size_t size)
@@ -171,28 +171,28 @@ public:
 
     virtual void Free(void *mem) = 0;
 
-    virtual void VisitAndRemoveAllPools(const MemVisitor &mem_visitor) = 0;
+    virtual void VisitAndRemoveAllPools(const MemVisitor &memVisitor) = 0;
 
-    virtual void VisitAndRemoveFreePools(const MemVisitor &mem_visitor) = 0;
+    virtual void VisitAndRemoveFreePools(const MemVisitor &memVisitor) = 0;
 
-    virtual void IterateOverYoungObjects([[maybe_unused]] const ObjectVisitor &object_visitor)
+    virtual void IterateOverYoungObjects([[maybe_unused]] const ObjectVisitor &objectVisitor)
     {
         LOG(FATAL, ALLOC) << "Allocator::IterateOverYoungObjects" << std::endl;
     }
 
-    virtual void IterateOverTenuredObjects([[maybe_unused]] const ObjectVisitor &object_visitor)
+    virtual void IterateOverTenuredObjects([[maybe_unused]] const ObjectVisitor &objectVisitor)
     {
         LOG(FATAL, ALLOC) << "Allocator::IterateOverTenuredObjects" << std::endl;
     }
 
     /// @brief iterates all objects in object allocator
-    virtual void IterateRegularSizeObjects([[maybe_unused]] const ObjectVisitor &object_visitor)
+    virtual void IterateRegularSizeObjects([[maybe_unused]] const ObjectVisitor &objectVisitor)
     {
         LOG(FATAL, ALLOC) << "Allocator::IterateRegularSizeObjects";
     }
 
     /// @brief iterates objects in all allocators except object allocator
-    virtual void IterateNonRegularSizeObjects([[maybe_unused]] const ObjectVisitor &object_visitor)
+    virtual void IterateNonRegularSizeObjects([[maybe_unused]] const ObjectVisitor &objectVisitor)
     {
         LOG(FATAL, ALLOC) << "Allocator::IterateNonRegularSizeObjects";
     }
@@ -202,9 +202,9 @@ public:
         LOG(FATAL, ALLOC) << "Allocator::FreeObjectsMovedToPygoteSpace";
     }
 
-    virtual void IterateOverObjectsInRange(MemRange mem_range, const ObjectVisitor &object_visitor) = 0;
+    virtual void IterateOverObjectsInRange(MemRange memRange, const ObjectVisitor &objectVisitor) = 0;
 
-    virtual void IterateOverObjects(const ObjectVisitor &object_visitor) = 0;
+    virtual void IterateOverObjects(const ObjectVisitor &objectVisitor) = 0;
 
     template <AllocScope ALLOC_SCOPE_T = AllocScope::GLOBAL>
     AllocatorAdapter<void, ALLOC_SCOPE_T> Adapter();
@@ -232,10 +232,10 @@ public:
         }
         *static_cast<size_t *>(p) = size;
         auto *data = ToNativePtr<ElementType>(ToUintPtr(p) + SIZE_BEFORE_DATA_OFFSET);
-        ElementType *current_element = data;
+        ElementType *currentElement = data;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (size_t i = 0; i < size; ++i, ++current_element) {
-            new (current_element) ElementType();
+        for (size_t i = 0; i < size; ++i, ++currentElement) {
+            new (currentElement) ElementType();
         }
         return data;
     }
@@ -261,10 +261,10 @@ public:
             AllocLocal(SIZE_BEFORE_DATA_OFFSET + sizeof(ElementType) * size, CalculateAllocatorAlignment(alignof(T)));
         *static_cast<size_t *>(p) = size;
         auto *data = ToNativePtr<ElementType>(ToUintPtr(p) + SIZE_BEFORE_DATA_OFFSET);
-        ElementType *current_element = data;
+        ElementType *currentElement = data;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (size_t i = 0; i < size; ++i, ++current_element) {
-            new (current_element) ElementType();
+        for (size_t i = 0; i < size; ++i, ++currentElement) {
+            new (currentElement) ElementType();
         }
         return data;
     }
@@ -281,13 +281,13 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    MemStatsType *mem_stats_;
+    MemStatsType *memStats_;
 
 private:
     virtual Alignment CalculateAllocatorAlignment(size_t align) = 0;
 
-    AllocatorPurpose allocator_purpose_;
-    GCCollectMode gc_collect_mode_;
+    AllocatorPurpose allocatorPurpose_;
+    GCCollectMode gcCollectMode_;
 };
 
 class ObjectAllocatorBase : public Allocator {
@@ -296,8 +296,8 @@ protected:
 
     /// @brief Add new memory pools to object_allocator and allocate memory in them
     template <typename AllocT, bool NEED_LOCK = true>
-    inline void *AddPoolsAndAlloc(size_t size, Alignment align, AllocT *object_allocator, size_t pool_size,
-                                  SpaceType space_type, HeapSpace *heap_space);
+    inline void *AddPoolsAndAlloc(size_t size, Alignment align, AllocT *objectAllocator, size_t poolSize,
+                                  SpaceType spaceType, HeapSpace *heapSpace);
 
     /**
      * Try to allocate memory for the object and if failed add new memory pools and allocate again
@@ -309,8 +309,8 @@ protected:
      * @return pointer to allocated memory or nullptr if failed
      */
     template <typename AllocT, bool NEED_LOCK = true>
-    inline void *AllocateSafe(size_t size, Alignment align, AllocT *object_allocator, size_t pool_size,
-                              SpaceType space_type, HeapSpace *heap_space);
+    inline void *AllocateSafe(size_t size, Alignment align, AllocT *objectAllocator, size_t poolSize,
+                              SpaceType spaceType, HeapSpace *heapSpace);
 
     /**
      * @brief Initialize an object memory allocated by an allocator.
@@ -333,8 +333,7 @@ public:
     NO_COPY_SEMANTIC(ObjectAllocatorBase);
     NO_MOVE_SEMANTIC(ObjectAllocatorBase);
 
-    explicit ObjectAllocatorBase(MemStatsType *mem_stats, GCCollectMode gc_collect_mode,
-                                 bool create_pygote_space_allocator);
+    explicit ObjectAllocatorBase(MemStatsType *memStats, GCCollectMode gcCollectMode, bool createPygoteSpaceAllocator);
 
     ~ObjectAllocatorBase() override;
     void *Allocate([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
@@ -346,16 +345,16 @@ public:
     }
 
     [[nodiscard]] virtual void *Allocate(size_t size, Alignment align, panda::ManagedThread *thread,
-                                         ObjMemInitPolicy obj_init) = 0;
+                                         ObjMemInitPolicy objInit) = 0;
     [[nodiscard]] virtual void *AllocateNonMovable(size_t size, Alignment align, panda::ManagedThread *thread,
-                                                   ObjMemInitPolicy obj_init) = 0;
+                                                   ObjMemInitPolicy objInit) = 0;
 
     /**
      * Iterate over all objects and reclaim memory for objects reported as true by gc_object_visitor
      * @param gc_object_visitor - function which return true for ObjectHeader if we can reclaim memory occupied by
      * object
      */
-    virtual void Collect(const GCObjectVisitor &gc_object_visitor, GCCollectMode collect_mode) = 0;
+    virtual void Collect(const GCObjectVisitor &gcObjectVisitor, GCCollectMode collectMode) = 0;
 
     /**
      * Return max size for regular size objects
@@ -381,7 +380,7 @@ public:
      * @param mem_range
      * @return true if @param mem_range is intersect young space
      */
-    virtual bool IsIntersectedWithYoung(const MemRange &mem_range) = 0;
+    virtual bool IsIntersectedWithYoung(const MemRange &memRange) = 0;
 
     /**
      * Checks if object in the non-movable space
@@ -438,23 +437,23 @@ public:
 
     PygoteAllocator *GetPygoteSpaceAllocator()
     {
-        return pygote_space_allocator_;
+        return pygoteSpaceAllocator_;
     }
 
     const PygoteAllocator *GetPygoteSpaceAllocator() const
     {
-        return pygote_space_allocator_;
+        return pygoteSpaceAllocator_;
     }
 
     void DisablePygoteAlloc()
     {
-        pygote_alloc_enabled_ = false;
+        pygoteAllocEnabled_ = false;
     }
 
     bool IsPygoteAllocEnabled() const
     {
-        ASSERT(!pygote_alloc_enabled_ || pygote_space_allocator_ != nullptr);
-        return pygote_alloc_enabled_;
+        ASSERT(!pygoteAllocEnabled_ || pygoteSpaceAllocator_ != nullptr);
+        return pygoteAllocEnabled_;
     }
 
     static size_t GetObjectSpaceFreeBytes()
@@ -462,13 +461,13 @@ public:
         return PoolManager::GetMmapMemPool()->GetObjectSpaceFreeBytes();
     }
 
-    bool HaveEnoughPoolsInObjectSpace(size_t pools_num) const;
+    bool HaveEnoughPoolsInObjectSpace(size_t poolsNum) const;
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    PygoteAllocator *pygote_space_allocator_ = nullptr;
+    PygoteAllocator *pygoteSpaceAllocator_ = nullptr;
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    bool pygote_alloc_enabled_ = false;
+    bool pygoteAllocEnabled_ = false;
 
 private:
     void Free([[maybe_unused]] void *mem) final
@@ -485,8 +484,8 @@ template <typename AllocT, AllocatorPurpose ALLOCATOR_PURPOSE>
 class AllocatorSingleT final : public Allocator {
 public:
     // NOLINTNEXTLINE(readability-magic-numbers)
-    explicit AllocatorSingleT(MemStatsType *mem_stats)
-        : Allocator(mem_stats, ALLOCATOR_PURPOSE, GCCollectMode::GC_NONE), allocator_(mem_stats)
+    explicit AllocatorSingleT(MemStatsType *memStats)
+        : Allocator(memStats, ALLOCATOR_PURPOSE, GCCollectMode::GC_NONE), allocator_(memStats)
     {
     }
     ~AllocatorSingleT() final = default;
@@ -508,23 +507,23 @@ public:
         allocator_.Free(mem);
     }
 
-    void VisitAndRemoveAllPools(const MemVisitor &mem_visitor) final
+    void VisitAndRemoveAllPools(const MemVisitor &memVisitor) final
     {
-        allocator_.VisitAndRemoveAllPools(mem_visitor);
+        allocator_.VisitAndRemoveAllPools(memVisitor);
     }
 
-    void VisitAndRemoveFreePools(const MemVisitor &mem_visitor) final
+    void VisitAndRemoveFreePools(const MemVisitor &memVisitor) final
     {
-        allocator_.VisitAndRemoveFreePools(mem_visitor);
+        allocator_.VisitAndRemoveFreePools(memVisitor);
     }
 
-    void IterateOverObjectsInRange([[maybe_unused]] MemRange mem_range,
-                                   [[maybe_unused]] const ObjectVisitor &object_visitor) final
+    void IterateOverObjectsInRange([[maybe_unused]] MemRange memRange,
+                                   [[maybe_unused]] const ObjectVisitor &objectVisitor) final
     {
         LOG(FATAL, ALLOC) << "IterateOverObjectsInRange not implemented for AllocatorSinglet";
     }
 
-    void IterateOverObjects([[maybe_unused]] const ObjectVisitor &object_visitor) final
+    void IterateOverObjects([[maybe_unused]] const ObjectVisitor &objectVisitor) final
     {
         LOG(FATAL, ALLOC) << "IterateOverObjects not implemented for AllocatorSinglet";
     }
@@ -557,52 +556,52 @@ class AllocatorPtr {
 public:
     AllocatorPtr() = default;
     // NOLINTNEXTLINE(google-explicit-constructor)
-    AllocatorPtr(std::nullptr_t a_nullptr) noexcept : allocator_ptr_(a_nullptr) {}
+    AllocatorPtr(std::nullptr_t aNullptr) noexcept : allocatorPtr_(aNullptr) {}
 
-    explicit AllocatorPtr(Allocator *allocator) : allocator_ptr_(allocator) {}
+    explicit AllocatorPtr(Allocator *allocator) : allocatorPtr_(allocator) {}
 
     Allocator *operator->()
     {
-        ASSERT((allocator_ptr_ == nullptr) || (allocator_ptr_->GetPurpose() == ALLOCATOR_PURPOSE));
-        return allocator_ptr_;
+        ASSERT((allocatorPtr_ == nullptr) || (allocatorPtr_->GetPurpose() == ALLOCATOR_PURPOSE));
+        return allocatorPtr_;
     }
 
-    AllocatorPtr &operator=(std::nullptr_t a_nullptr) noexcept
+    AllocatorPtr &operator=(std::nullptr_t aNullptr) noexcept
     {
-        allocator_ptr_ = a_nullptr;
+        allocatorPtr_ = aNullptr;
         return *this;
     }
 
     AllocatorPtr &operator=(Allocator *allocator)
     {
-        allocator_ptr_ = allocator;
+        allocatorPtr_ = allocator;
         return *this;
     }
 
     explicit operator Allocator *()
     {
-        return allocator_ptr_;
+        return allocatorPtr_;
     }
 
     explicit operator ObjectAllocatorBase *()
     {
-        ASSERT(allocator_ptr_->GetPurpose() == AllocatorPurpose::ALLOCATOR_PURPOSE_OBJECT);
-        return static_cast<ObjectAllocatorBase *>(allocator_ptr_);
+        ASSERT(allocatorPtr_->GetPurpose() == AllocatorPurpose::ALLOCATOR_PURPOSE_OBJECT);
+        return static_cast<ObjectAllocatorBase *>(allocatorPtr_);
     }
 
     ALWAYS_INLINE bool operator==(const AllocatorPtr &other)
     {
-        return allocator_ptr_ == static_cast<Allocator *>(other);
+        return allocatorPtr_ == static_cast<Allocator *>(other);
     }
 
     ALWAYS_INLINE bool operator==(std::nullptr_t) noexcept
     {
-        return allocator_ptr_ == nullptr;
+        return allocatorPtr_ == nullptr;
     }
 
     ALWAYS_INLINE bool operator!=(std::nullptr_t) noexcept
     {
-        return allocator_ptr_ != nullptr;
+        return allocatorPtr_ != nullptr;
     }
 
     ObjectAllocatorBase *AsObjectAllocator()
@@ -618,7 +617,7 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    Allocator *allocator_ptr_ = nullptr;
+    Allocator *allocatorPtr_ = nullptr;
 };
 
 using InternalAllocatorPtr = AllocatorPtr<AllocatorPurpose::ALLOCATOR_PURPOSE_INTERNAL>;
@@ -637,31 +636,31 @@ public:
     NO_MOVE_SEMANTIC(ObjectAllocatorNoGen);
     NO_COPY_SEMANTIC(ObjectAllocatorNoGen);
 
-    explicit ObjectAllocatorNoGen(MemStatsType *mem_stats, bool create_pygote_space_allocator);
+    explicit ObjectAllocatorNoGen(MemStatsType *memStats, bool createPygoteSpaceAllocator);
 
     ~ObjectAllocatorNoGen() final;
 
     [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
-                                 ObjMemInitPolicy obj_init) final;
+                                 ObjMemInitPolicy objInit) final;
 
     [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, panda::ManagedThread *thread,
-                                           ObjMemInitPolicy obj_init) final;
+                                           ObjMemInitPolicy objInit) final;
 
-    void VisitAndRemoveAllPools(const MemVisitor &mem_visitor) final;
+    void VisitAndRemoveAllPools(const MemVisitor &memVisitor) final;
 
-    void VisitAndRemoveFreePools(const MemVisitor &mem_visitor) final;
+    void VisitAndRemoveFreePools(const MemVisitor &memVisitor) final;
 
-    void IterateOverObjects(const ObjectVisitor &object_visitor) final;
+    void IterateOverObjects(const ObjectVisitor &objectVisitor) final;
 
     /// @brief iterates all objects in object allocator
-    void IterateRegularSizeObjects(const ObjectVisitor &object_visitor) final;
+    void IterateRegularSizeObjects(const ObjectVisitor &objectVisitor) final;
 
     /// @brief iterates objects in all allocators except object allocator
-    void IterateNonRegularSizeObjects(const ObjectVisitor &object_visitor) final;
+    void IterateNonRegularSizeObjects(const ObjectVisitor &objectVisitor) final;
 
     void FreeObjectsMovedToPygoteSpace() final;
 
-    void Collect(const GCObjectVisitor &gc_object_visitor, GCCollectMode collect_mode) final;
+    void Collect(const GCObjectVisitor &gcObjectVisitor, GCCollectMode collectMode) final;
 
     size_t GetRegularObjectMaxSize() final;
 
@@ -672,7 +671,7 @@ public:
         return false;
     }
 
-    bool IsIntersectedWithYoung([[maybe_unused]] const MemRange &mem_range) final
+    bool IsIntersectedWithYoung([[maybe_unused]] const MemRange &memRange) final
     {
         LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: IsIntersectedWithYoung not applicable";
         return false;
@@ -718,8 +717,8 @@ public:
         return false;
     }
 
-    void IterateOverObjectsInRange([[maybe_unused]] MemRange mem_range,
-                                   [[maybe_unused]] const ObjectVisitor &object_visitor) final
+    void IterateOverObjectsInRange([[maybe_unused]] MemRange memRange,
+                                   [[maybe_unused]] const ObjectVisitor &objectVisitor) final
     {
         LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: IterateOverObjectsInRange not implemented";
     }
@@ -730,10 +729,10 @@ public:
 
     size_t VerifyAllocatorStatus() final
     {
-        size_t fail_count = 0;
-        fail_count += object_allocator_->VerifyAllocator();
+        size_t failCount = 0;
+        failCount += objectAllocator_->VerifyAllocator();
         // NOTE(yyang): add verify for large/humongous allocator
-        return fail_count;
+        return failCount;
     }
 
     [[nodiscard]] void *AllocateLocal(size_t /* size */, Alignment /* align */,
@@ -745,27 +744,27 @@ public:
 
     HeapSpace *GetHeapSpace() override
     {
-        return &heap_space_;
+        return &heapSpace_;
     }
 
 private:
     Alignment CalculateAllocatorAlignment(size_t align) final;
 
-    ObjectAllocator *object_allocator_ = nullptr;
-    LargeObjectAllocator *large_object_allocator_ = nullptr;
-    HumongousObjectAllocator *humongous_object_allocator_ = nullptr;
-    HeapSpace heap_space_;
+    ObjectAllocator *objectAllocator_ = nullptr;
+    LargeObjectAllocator *largeObjectAllocator_ = nullptr;
+    HumongousObjectAllocator *humongousObjectAllocator_ = nullptr;
+    HeapSpace heapSpace_;
 };
 
 // Base class for all generational GCs
 class ObjectAllocatorGenBase : public ObjectAllocatorBase {
 public:
-    explicit ObjectAllocatorGenBase(MemStatsType *mem_stats, GCCollectMode gc_collect_mode,
-                                    bool create_pygote_space_allocator);
+    explicit ObjectAllocatorGenBase(MemStatsType *memStats, GCCollectMode gcCollectMode,
+                                    bool createPygoteSpaceAllocator);
 
     GenerationalSpaces *GetHeapSpace() override
     {
-        return &heap_spaces_;
+        return &heapSpaces_;
     }
 
     ~ObjectAllocatorGenBase() override = default;
@@ -792,13 +791,13 @@ protected:
 
     ALWAYS_INLINE std::vector<MarkBitmap *> &GetYoungBitmaps()
     {
-        return young_bitmaps_;
+        return youngBitmaps_;
     }
 
-    GenerationalSpaces heap_spaces_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    GenerationalSpaces heapSpaces_;  // NOLINT(misc-non-private-member-variables-in-classes)
 private:
-    std::vector<MemRange> ranges_;             // Ranges for young space
-    std::vector<MarkBitmap *> young_bitmaps_;  // Bitmaps for young regions
+    std::vector<MemRange> ranges_;            // Ranges for young space
+    std::vector<MarkBitmap *> youngBitmaps_;  // Bitmaps for young regions
 };
 
 template <MTModeT MT_MODE = MT_MODE_MULTI>
@@ -819,15 +818,15 @@ public:
     NO_MOVE_SEMANTIC(ObjectAllocatorGen);
     NO_COPY_SEMANTIC(ObjectAllocatorGen);
 
-    explicit ObjectAllocatorGen(MemStatsType *mem_stats, bool create_pygote_space_allocator);
+    explicit ObjectAllocatorGen(MemStatsType *memStats, bool createPygoteSpaceAllocator);
 
     ~ObjectAllocatorGen() final;
 
     [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
-                                 ObjMemInitPolicy obj_init) final;
+                                 ObjMemInitPolicy objInit) final;
 
     [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
-                                           ObjMemInitPolicy obj_init) final;
+                                           ObjMemInitPolicy objInit) final;
 
     void *AllocateTenured(size_t size) final
     {
@@ -839,25 +838,25 @@ public:
         return AllocateTenuredImpl<false>(size);
     }
 
-    void VisitAndRemoveAllPools(const MemVisitor &mem_visitor) final;
+    void VisitAndRemoveAllPools(const MemVisitor &memVisitor) final;
 
-    void VisitAndRemoveFreePools(const MemVisitor &mem_visitor) final;
+    void VisitAndRemoveFreePools(const MemVisitor &memVisitor) final;
 
-    void IterateOverYoungObjects(const ObjectVisitor &object_visitor) final;
+    void IterateOverYoungObjects(const ObjectVisitor &objectVisitor) final;
 
-    void IterateOverTenuredObjects(const ObjectVisitor &object_visitor) final;
+    void IterateOverTenuredObjects(const ObjectVisitor &objectVisitor) final;
 
-    void IterateOverObjects(const ObjectVisitor &object_visitor) final;
+    void IterateOverObjects(const ObjectVisitor &objectVisitor) final;
 
     /// @brief iterates all objects in object allocator
-    void IterateRegularSizeObjects(const ObjectVisitor &object_visitor) final;
+    void IterateRegularSizeObjects(const ObjectVisitor &objectVisitor) final;
 
     /// @brief iterates objects in all allocators except object allocator
-    void IterateNonRegularSizeObjects(const ObjectVisitor &object_visitor) final;
+    void IterateNonRegularSizeObjects(const ObjectVisitor &objectVisitor) final;
 
     void FreeObjectsMovedToPygoteSpace() final;
 
-    void Collect(const GCObjectVisitor &gc_object_visitor, GCCollectMode collect_mode) final;
+    void Collect(const GCObjectVisitor &gcObjectVisitor, GCCollectMode collectMode) final;
 
     size_t GetRegularObjectMaxSize() final;
 
@@ -875,7 +874,7 @@ public:
         ASSERT(!IsObjectInYoungSpace(object));
     }
 
-    bool IsIntersectedWithYoung(const MemRange &mem_range) final;
+    bool IsIntersectedWithYoung(const MemRange &memRange) final;
 
     bool IsObjectInNonMovableSpace(const ObjectHeader *obj) final;
 
@@ -896,7 +895,7 @@ public:
         return true;
     }
 
-    void IterateOverObjectsInRange(MemRange mem_range, const ObjectVisitor &object_visitor) final;
+    void IterateOverObjectsInRange(MemRange memRange, const ObjectVisitor &objectVisitor) final;
 
     bool ContainObject(const ObjectHeader *obj) const final;
 
@@ -904,10 +903,10 @@ public:
 
     size_t VerifyAllocatorStatus() final
     {
-        size_t fail_count = 0;
-        fail_count += object_allocator_->VerifyAllocator();
+        size_t failCount = 0;
+        failCount += objectAllocator_->VerifyAllocator();
         // NOTE(yyang): add verify for large/humongous allocator
-        return fail_count;
+        return failCount;
     }
 
     [[nodiscard]] void *AllocateLocal(size_t /* size */, Alignment /* align */,
@@ -927,14 +926,14 @@ public:
 private:
     Alignment CalculateAllocatorAlignment(size_t align) final;
 
-    YoungGenAllocator *young_gen_allocator_ = nullptr;
-    ObjectAllocator *object_allocator_ = nullptr;
-    LargeObjectAllocator *large_object_allocator_ = nullptr;
-    HumongousObjectAllocator *humongous_object_allocator_ = nullptr;
-    MemStatsType *mem_stats_ = nullptr;
-    ObjectAllocator *non_movable_object_allocator_ = nullptr;
-    LargeObjectAllocator *large_non_movable_object_allocator_ = nullptr;
-    size_t tlab_size_ = DEFAULT_YOUNG_TLAB_SIZE;
+    YoungGenAllocator *youngGenAllocator_ = nullptr;
+    ObjectAllocator *objectAllocator_ = nullptr;
+    LargeObjectAllocator *largeObjectAllocator_ = nullptr;
+    HumongousObjectAllocator *humongousObjectAllocator_ = nullptr;
+    MemStatsType *memStats_ = nullptr;
+    ObjectAllocator *nonMovableObjectAllocator_ = nullptr;
+    LargeObjectAllocator *largeNonMovableObjectAllocator_ = nullptr;
+    size_t tlabSize_ = DEFAULT_YOUNG_TLAB_SIZE;
 
     template <bool NEED_LOCK = true>
     void *AllocateTenuredImpl(size_t size);

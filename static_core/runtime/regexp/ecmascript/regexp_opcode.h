@@ -65,13 +65,13 @@ public:
     static constexpr size_t OP_SIZE_NINE = 9;
     static constexpr size_t OP_SIZE_THIRTEEN = 13;
 
-    RegExpOpCode(uint8_t op_code, int size);
+    RegExpOpCode(uint8_t opCode, int size);
     NO_COPY_SEMANTIC(RegExpOpCode);
     NO_MOVE_SEMANTIC(RegExpOpCode);
 
     virtual ~RegExpOpCode() = default;
-    static RegExpOpCode *GetRegExpOpCode(const DynChunk &buf, int pc_offset);
-    static RegExpOpCode *GetRegExpOpCode(uint8_t op_code);
+    static RegExpOpCode *GetRegExpOpCode(const DynChunk &buf, int pcOffset);
+    static RegExpOpCode *GetRegExpOpCode(uint8_t opCode);
     static void DumpRegExpOpCode(std::ostream &out, const DynChunk &buf);
     inline uint8_t GetSize() const
     {
@@ -79,7 +79,7 @@ public:
     }
     inline uint8_t GetOpCode() const
     {
-        return op_code_;
+        return opCode_;
     }
     inline int GetDynChunkfSize(const DynChunk &buf) const
     {
@@ -88,7 +88,7 @@ public:
     virtual uint32_t DumpOpCode(std::ostream &out, const DynChunk &buf, uint32_t offset) const = 0;
 
 private:
-    uint8_t op_code_ {0};
+    uint8_t opCode_ {0};
     uint8_t size_ {0};
 };
 
@@ -314,9 +314,9 @@ public:
     {
         Insert(start, end);
     }
-    explicit RangeSet(const std::list<std::pair<uint32_t, uint32_t>> &range_set)
+    explicit RangeSet(const std::list<std::pair<uint32_t, uint32_t>> &rangeSet)
     {
-        range_set_ = range_set;
+        rangeSet_ = rangeSet;
     }
     ~RangeSet() = default;
 
@@ -331,12 +331,12 @@ public:
 
     inline bool operator==(const RangeSet &other) const
     {
-        return range_set_ == other.range_set_;
+        return rangeSet_ == other.rangeSet_;
     }
 
     inline bool IsContain(uint32_t value) const
     {
-        for (auto range : range_set_) {
+        for (auto range : rangeSet_) {
             if (value >= range.first && value <= range.second) {
                 return true;
             }
@@ -345,8 +345,8 @@ public:
     }
     inline uint32_t HighestValue() const
     {
-        if (!range_set_.empty()) {
-            return range_set_.back().second;
+        if (!rangeSet_.empty()) {
+            return rangeSet_.back().second;
         }
         return 0;
     }
@@ -357,13 +357,13 @@ public:
 
     void Insert(uint32_t start, uint32_t end);
     void Insert(const RangeSet &s1);
-    void Invert(bool is_utf16);
+    void Invert(bool isUtf16);
     void Compress();
 
 private:
     friend class RangeOpCode;
     friend class Range32OpCode;
-    std::list<std::pair<uint32_t, uint32_t>> range_set_ {};
+    std::list<std::pair<uint32_t, uint32_t>> rangeSet_ {};
 };
 
 class RangeOpCode : public RegExpOpCode {
@@ -373,7 +373,7 @@ public:
     NO_COPY_SEMANTIC(RangeOpCode);
     NO_MOVE_SEMANTIC(RangeOpCode);
     uint32_t DumpOpCode(std::ostream &out, const DynChunk &buf, uint32_t offset) const override;
-    uint32_t InsertOpCode(DynChunk *buf, const RangeSet &range_set) const;
+    uint32_t InsertOpCode(DynChunk *buf, const RangeSet &rangeSet) const;
 };
 
 class MatchAheadOpCode : public RegExpOpCode {
@@ -443,7 +443,7 @@ public:
     NO_COPY_SEMANTIC(Range32OpCode);
     NO_MOVE_SEMANTIC(Range32OpCode);
     uint32_t DumpOpCode(std::ostream &out, const DynChunk &buf, uint32_t offset) const override;
-    uint32_t InsertOpCode(DynChunk *buf, const RangeSet &range_set) const;
+    uint32_t InsertOpCode(DynChunk *buf, const RangeSet &rangeSet) const;
 };
 }  // namespace panda
 #endif

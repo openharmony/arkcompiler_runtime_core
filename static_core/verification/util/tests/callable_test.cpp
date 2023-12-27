@@ -44,11 +44,11 @@ TEST_F(VerifierTest, callable)
     cal = Func;
     ASSERT_TRUE(cal);
     EXPECT_EQ(cal(3, 7), 10);
-    Obj obj_example;
-    cal = obj_example;
+    Obj objExample;
+    cal = objExample;
     ASSERT_TRUE(cal);
     EXPECT_EQ(cal(3, 7), 13);
-    cal = callable<int(int, int)> {obj_example, &Obj::SomeMethod};
+    cal = callable<int(int, int)> {objExample, &Obj::SomeMethod};
     ASSERT_TRUE(cal);
     EXPECT_EQ(cal(3, 7), 15);
 }

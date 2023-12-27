@@ -21,12 +21,12 @@
 
 namespace panda::compiler {
 class Inst;
-BasicBlock::BasicBlock(Graph *graph, uint32_t guest_pc)
+BasicBlock::BasicBlock(Graph *graph, uint32_t guestPc)
     : graph_(graph),
       preds_(graph_->GetAllocator()->Adapter()),
       succs_(graph_->GetAllocator()->Adapter()),
-      dom_blocks_(graph_->GetAllocator()->Adapter()),
-      guest_pc_(guest_pc)
+      domBlocks_(graph_->GetAllocator()->Adapter()),
+      guestPc_(guestPc)
 {
 }
 
@@ -49,64 +49,64 @@ bool BasicBlock::IsLoopHeader() const
     return (GetLoop()->GetHeader() == this);
 }
 
-BasicBlock *BasicBlock::SplitBlockAfterInstruction(Inst *inst, bool make_edge)
+BasicBlock *BasicBlock::SplitBlockAfterInstruction(Inst *inst, bool makeEdge)
 {
     ASSERT(inst != nullptr);
     ASSERT(inst->GetBasicBlock() == this);
     ASSERT(!IsStartBlock() && !IsEndBlock());
 
-    auto next_inst = inst->GetNext();
-    auto new_bb = GetGraph()->CreateEmptyBlock((next_inst != nullptr) ? next_inst->GetPc() : INVALID_PC);
-    new_bb->SetAllFields(this->GetAllFields());
-    new_bb->SetOsrEntry(false);
-    GetLoop()->AppendBlock(new_bb);
+    auto nextInst = inst->GetNext();
+    auto newBb = GetGraph()->CreateEmptyBlock((nextInst != nullptr) ? nextInst->GetPc() : INVALID_PC);
+    newBb->SetAllFields(this->GetAllFields());
+    newBb->SetOsrEntry(false);
+    GetLoop()->AppendBlock(newBb);
 
-    for (; next_inst != nullptr; next_inst = next_inst->GetNext()) {
-        new_bb->AppendInst(next_inst);
+    for (; nextInst != nullptr; nextInst = nextInst->GetNext()) {
+        newBb->AppendInst(nextInst);
     }
     inst->SetNext(nullptr);
-    last_inst_ = inst;
+    lastInst_ = inst;
     if (inst->IsPhi()) {
-        first_inst_ = nullptr;
+        firstInst_ = nullptr;
     }
     for (auto succ : GetSuccsBlocks()) {
-        succ->ReplacePred(this, new_bb);
+        succ->ReplacePred(this, newBb);
     }
     GetSuccsBlocks().clear();
 
     ASSERT(GetSuccsBlocks().empty());
-    if (make_edge) {
-        AddSucc(new_bb);
+    if (makeEdge) {
+        AddSucc(newBb);
     }
-    return new_bb;
+    return newBb;
 }
 
-void BasicBlock::AddSucc(BasicBlock *succ, bool can_add_empty_block)
+void BasicBlock::AddSucc(BasicBlock *succ, bool canAddEmptyBlock)
 {
     auto it = std::find(succs_.begin(), succs_.end(), succ);
-    ASSERT_PRINT(it == succs_.end() || can_add_empty_block, "Uncovered case where empty block needed to fix CFG");
-    if (it != succs_.end() && can_add_empty_block) {
+    ASSERT_PRINT(it == succs_.end() || canAddEmptyBlock, "Uncovered case where empty block needed to fix CFG");
+    if (it != succs_.end() && canAddEmptyBlock) {
         // If edge already exists we create empty block on it
-        auto empty_bb = GetGraph()->CreateEmptyBlock(GetGuestPc());
-        ReplaceSucc(succ, empty_bb);
-        succ->ReplacePred(this, empty_bb);
+        auto emptyBb = GetGraph()->CreateEmptyBlock(GetGuestPc());
+        ReplaceSucc(succ, emptyBb);
+        succ->ReplacePred(this, emptyBb);
     }
     succs_.push_back(succ);
     succ->GetPredsBlocks().push_back(this);
 }
 
-void BasicBlock::ReplaceSucc(const BasicBlock *prev_succ, BasicBlock *new_succ, bool can_add_empty_block)
+void BasicBlock::ReplaceSucc(const BasicBlock *prevSucc, BasicBlock *newSucc, bool canAddEmptyBlock)
 {
-    auto it = std::find(succs_.begin(), succs_.end(), new_succ);
-    ASSERT_PRINT(it == succs_.end() || can_add_empty_block, "Uncovered case where empty block needed to fix CFG");
-    if (it != succs_.end() && can_add_empty_block) {
+    auto it = std::find(succs_.begin(), succs_.end(), newSucc);
+    ASSERT_PRINT(it == succs_.end() || canAddEmptyBlock, "Uncovered case where empty block needed to fix CFG");
+    if (it != succs_.end() && canAddEmptyBlock) {
         // If edge already exists we create empty block on it
-        auto empty_bb = GetGraph()->CreateEmptyBlock(GetGuestPc());
-        ReplaceSucc(new_succ, empty_bb);
-        new_succ->ReplacePred(this, empty_bb);
+        auto emptyBb = GetGraph()->CreateEmptyBlock(GetGuestPc());
+        ReplaceSucc(newSucc, emptyBb);
+        newSucc->ReplacePred(this, emptyBb);
     }
-    succs_[GetSuccBlockIndex(prev_succ)] = new_succ;
-    new_succ->preds_.push_back(this);
+    succs_[GetSuccBlockIndex(prevSucc)] = newSucc;
+    newSucc->preds_.push_back(this);
 }
 
 BasicBlock *BasicBlock::InsertNewBlockToSuccEdge(BasicBlock *succ)
@@ -136,7 +136,7 @@ void BasicBlock::InsertBlockBeforeSucc(BasicBlock *block, BasicBlock *succ)
 
 static void RemovePhiProcessing(BasicBlock *bb, BasicBlock *succ)
 {
-    size_t num_preds = bb->GetPredsBlocks().size();
+    size_t numPreds = bb->GetPredsBlocks().size();
 
     for (auto phi : succ->PhiInsts()) {
         auto index = phi->CastToPhi()->GetPredBlockIndex(bb);
@@ -144,14 +144,14 @@ static void RemovePhiProcessing(BasicBlock *bb, BasicBlock *succ)
         if (inst->GetBasicBlock() == bb) {  // When INST is from empty basic block ...
             ASSERT(inst->IsPhi());
             // ... we have to copy it's inputs into corresponding inputs of PHI
-            auto pred_bb = bb->GetPredBlockByIndex(0);
-            phi->SetInput(index, inst->CastToPhi()->GetPhiInput(pred_bb));
-            for (size_t i = 1; i < num_preds; i++) {
-                pred_bb = bb->GetPredBlockByIndex(i);
-                phi->AppendInput(inst->CastToPhi()->GetPhiInput(pred_bb));
+            auto predBb = bb->GetPredBlockByIndex(0);
+            phi->SetInput(index, inst->CastToPhi()->GetPhiInput(predBb));
+            for (size_t i = 1; i < numPreds; i++) {
+                predBb = bb->GetPredBlockByIndex(i);
+                phi->AppendInput(inst->CastToPhi()->GetPhiInput(predBb));
             }
         } else {  // otherwise, just copy inputs for new arrived predecessors
-            for (size_t i = 1; i < num_preds; i++) {
+            for (size_t i = 1; i < numPreds; i++) {
                 phi->AppendInput(inst);
             }
         }
@@ -163,7 +163,7 @@ static void RemovePhiProcessing(BasicBlock *bb, BasicBlock *succ)
 }
 
 // Remove empty block with one successor, may have more than one predecessors and Phi(s)
-void BasicBlock::RemoveEmptyBlock(bool irr_loop)
+void BasicBlock::RemoveEmptyBlock(bool irrLoop)
 {
     ASSERT(GetFirstInst() == nullptr);
     ASSERT(!GetPredsBlocks().empty());
@@ -171,12 +171,12 @@ void BasicBlock::RemoveEmptyBlock(bool irr_loop)
     auto succ = succs_[0];
 
     // Save old amount of predecessors in successor block
-    size_t succ_preds_num = succ->GetPredsBlocks().size();
+    size_t succPredsNum = succ->GetPredsBlocks().size();
 
-    size_t num_preds = preds_.size();
+    size_t numPreds = preds_.size();
     // If empty block had more than one predecessors
-    if (num_preds > 1) {
-        if (succ_preds_num > 1) {
+    if (numPreds > 1) {
+        if (succPredsNum > 1) {
             // We have to process Phi instructions in successor block in a special way
             RemovePhiProcessing(this, succ);
         } else {  // successor didn't have other predecessors, we are moving Phi(s) into successor
@@ -184,8 +184,8 @@ void BasicBlock::RemoveEmptyBlock(bool irr_loop)
             for (auto phi : PhiInstsSafe()) {
                 succ->AppendPhi(phi);
             }
-            first_phi_ = nullptr;
-            last_inst_ = nullptr;
+            firstPhi_ = nullptr;
+            lastInst_ = nullptr;
         }
     }
 
@@ -194,16 +194,16 @@ void BasicBlock::RemoveEmptyBlock(bool irr_loop)
     auto pred = preds_[0];
     pred->succs_[pred->GetSuccBlockIndex(this)] = succ;
     succ->preds_[succ->GetPredBlockIndex(this)] = pred;
-    for (size_t i = 1; i < num_preds; ++i) {
+    for (size_t i = 1; i < numPreds; ++i) {
         pred = preds_[i];
         pred->succs_[pred->GetSuccBlockIndex(this)] = succ;
         succ->preds_.push_back(pred);
     }
 
     ASSERT(GetLastInst() == nullptr);
-    ASSERT(GetLoop()->IsIrreducible() == irr_loop);
+    ASSERT(GetLoop()->IsIrreducible() == irrLoop);
     // N.B. info about Irreducible loop can not be fixed on the fly
-    if (!irr_loop) {
+    if (!irrLoop) {
         RemoveFixLoopInfo();
     }
     // Finally clean lists
@@ -215,12 +215,12 @@ static void FixLoopInfoHelper(BasicBlock *bb)
 {
     ASSERT(!bb->GetPredsBlocks().empty());
     auto loop = bb->GetLoop();
-    auto first_pred = bb->GetPredBlockByIndex(0);
+    auto firstPred = bb->GetPredBlockByIndex(0);
     // Do not dup back-edge
-    if (loop->HasBackEdge(first_pred)) {
+    if (loop->HasBackEdge(firstPred)) {
         loop->RemoveBackEdge(bb);
     } else {
-        loop->ReplaceBackEdge(bb, first_pred);
+        loop->ReplaceBackEdge(bb, firstPred);
     }
     // If empty block has more than 1 predecessor, append others to the loop back-edges' list
     for (size_t i = 1; i < bb->GetPredsBlocks().size(); ++i) {
@@ -272,14 +272,14 @@ void BasicBlock::JoinSuccessorBlock()
 
     // moving instructions from successor
     ASSERT(!succ->HasPhi());
-    for (auto succ_inst : succ->Insts()) {
-        AppendInst(succ_inst);
+    for (auto succInst : succ->Insts()) {
+        AppendInst(succInst);
     }
 
     // moving successor blocks from the successor
     GetSuccsBlocks().clear();
-    for (auto succ_succ : succ->GetSuccsBlocks()) {
-        succ_succ->ReplacePred(succ, this);
+    for (auto succSucc : succ->GetSuccsBlocks()) {
+        succSucc->ReplacePred(succ, this);
     }
 
     if (GetGraph()->IsAnalysisValid<LoopAnalyzer>()) {
@@ -297,15 +297,15 @@ void BasicBlock::JoinSuccessorBlock()
         }
     }
 
-    succ->first_inst_ = nullptr;
-    succ->last_inst_ = nullptr;
+    succ->firstInst_ = nullptr;
+    succ->lastInst_ = nullptr;
     succ->GetPredsBlocks().clear();
     succ->GetSuccsBlocks().clear();
 
-    this->bit_fields_ |= succ->bit_fields_;
+    this->bitFields_ |= succ->bitFields_;
     // NOTE (a.popov) replace by assert
-    if (succ->try_id_ != INVALID_ID) {
-        this->try_id_ = succ->try_id_;
+    if (succ->tryId_ != INVALID_ID) {
+        this->tryId_ = succ->tryId_;
     }
     GetGraph()->RemoveEmptyBlock(succ);
 }
@@ -315,14 +315,14 @@ void BasicBlock::ReplaceSuccessorLoopBackEdges(Loop *loop, BasicBlock *succ)
     if (loop->HasBackEdge(succ)) {
         loop->ReplaceBackEdge(succ, this);
     }
-    for (auto outer_loop = loop->GetOuterLoop(); outer_loop != nullptr; outer_loop = outer_loop->GetOuterLoop()) {
-        if (outer_loop->HasBackEdge(succ)) {
-            outer_loop->ReplaceBackEdge(succ, this);
+    for (auto outerLoop = loop->GetOuterLoop(); outerLoop != nullptr; outerLoop = outerLoop->GetOuterLoop()) {
+        if (outerLoop->HasBackEdge(succ)) {
+            outerLoop->ReplaceBackEdge(succ, this);
         }
     }
-    for (auto inner_loop : loop->GetInnerLoops()) {
-        if (inner_loop->GetPreHeader() == succ) {
-            inner_loop->SetPreHeader(this);
+    for (auto innerLoop : loop->GetInnerLoops()) {
+        if (innerLoop->GetPreHeader() == succ) {
+            innerLoop->SetPreHeader(this);
         }
     }
 }
@@ -383,7 +383,7 @@ void BasicBlock::ReplaceSuccessorLoopBackEdges(Loop *loop, BasicBlock *succ)
  *
  * Function returns whether we need DCE for If inputs.
  */
-void BasicBlock::JoinBlocksUsingSelect(BasicBlock *succ, BasicBlock *select_bb, bool swapped)
+void BasicBlock::JoinBlocksUsingSelect(BasicBlock *succ, BasicBlock *selectBb, bool swapped)
 {
     ASSERT(!IsStartBlock());
     ASSERT(GetSuccsBlocks().size() == MAX_SUCCS_NUM);
@@ -396,32 +396,32 @@ void BasicBlock::JoinBlocksUsingSelect(BasicBlock *succ, BasicBlock *select_bb, 
      * There are 2 steps in Join operation.
      * Step 1. Move instructions from 'succ' into 'this'.
      */
-    Inst *if_inst = GetLastInst();
-    SavedIfInfo if_info {succ,
-                         swapped,
-                         0,
-                         ConditionCode::CC_FIRST,
-                         DataType::NO_TYPE,
-                         if_inst->GetPc(),
-                         if_inst->GetOpcode(),
-                         if_inst->GetInput(0).GetInst(),
-                         nullptr};
+    Inst *ifInst = GetLastInst();
+    SavedIfInfo ifInfo {succ,
+                        swapped,
+                        0,
+                        ConditionCode::CC_FIRST,
+                        DataType::NO_TYPE,
+                        ifInst->GetPc(),
+                        ifInst->GetOpcode(),
+                        ifInst->GetInput(0).GetInst(),
+                        nullptr};
 
     // Save necessary info
-    if (if_info.if_opcode == Opcode::IfImm) {
-        if_info.if_imm = if_inst->CastToIfImm()->GetImm();
-        if_info.if_cc = if_inst->CastToIfImm()->GetCc();
-        if_info.if_type = if_inst->CastToIfImm()->GetOperandsType();
-    } else if (if_info.if_opcode == Opcode::If) {
-        if_info.if_input1 = if_inst->GetInput(1).GetInst();
-        if_info.if_cc = if_inst->CastToIf()->GetCc();
-        if_info.if_type = if_inst->CastToIf()->GetOperandsType();
+    if (ifInfo.ifOpcode == Opcode::IfImm) {
+        ifInfo.ifImm = ifInst->CastToIfImm()->GetImm();
+        ifInfo.ifCc = ifInst->CastToIfImm()->GetCc();
+        ifInfo.ifType = ifInst->CastToIfImm()->GetOperandsType();
+    } else if (ifInfo.ifOpcode == Opcode::If) {
+        ifInfo.ifInput1 = ifInst->GetInput(1).GetInst();
+        ifInfo.ifCc = ifInst->CastToIf()->GetCc();
+        ifInfo.ifType = ifInst->CastToIf()->GetOperandsType();
     } else {
         UNREACHABLE();
     }
 
     // Remove 'If' instruction
-    RemoveInst(if_inst);
+    RemoveInst(ifInst);
 
     // Remove incoming 'this->succ' edge
     RemoveSucc(succ);
@@ -432,8 +432,8 @@ void BasicBlock::JoinBlocksUsingSelect(BasicBlock *succ, BasicBlock *select_bb, 
     for (auto inst : succ->Insts()) {
         AppendInst(inst);
     }
-    succ->first_inst_ = nullptr;
-    succ->last_inst_ = nullptr;
+    succ->firstInst_ = nullptr;
+    succ->lastInst_ = nullptr;
 
     auto other = succ->GetSuccessor(0);
     /**
@@ -441,26 +441,26 @@ void BasicBlock::JoinBlocksUsingSelect(BasicBlock *succ, BasicBlock *select_bb, 
      * We generate them in 'select_bb' if provided (another successor in Diamond case),
      * or in 'this' block otherwise (Triangle case).
      */
-    if (select_bb == nullptr) {
-        select_bb = this;
+    if (selectBb == nullptr) {
+        selectBb = this;
     }
-    select_bb->GenerateSelects(&if_info);
-    succ->SelectsFixLoopInfo(select_bb, other);
+    selectBb->GenerateSelects(&ifInfo);
+    succ->SelectsFixLoopInfo(selectBb, other);
 }
 
-void BasicBlock::GenerateSelect(Inst *phi, Inst *inst1, Inst *inst2, const SavedIfInfo *if_info)
+void BasicBlock::GenerateSelect(Inst *phi, Inst *inst1, Inst *inst2, const SavedIfInfo *ifInfo)
 {
-    auto other = if_info->succ->GetSuccessor(0);
+    auto other = ifInfo->succ->GetSuccessor(0);
     Inst *select = nullptr;
     ASSERT(GetGraph()->GetEncoder()->CanEncodeFloatSelect() || !DataType::IsFloatType(phi->GetType()));
-    if (if_info->if_opcode == Opcode::IfImm) {
-        select = GetGraph()->CreateInstSelectImm(phi->GetType(), if_info->if_pc, if_info->swapped ? inst2 : inst1,
-                                                 if_info->swapped ? inst1 : inst2, if_info->if_input0, if_info->if_imm,
-                                                 if_info->if_type, if_info->if_cc);
-    } else if (if_info->if_opcode == Opcode::If) {
-        select = GetGraph()->CreateInstSelect(phi->GetType(), if_info->if_pc, if_info->swapped ? inst2 : inst1,
-                                              if_info->swapped ? inst1 : inst2, if_info->if_input0, if_info->if_input1,
-                                              if_info->if_type, if_info->if_cc);
+    if (ifInfo->ifOpcode == Opcode::IfImm) {
+        select = GetGraph()->CreateInstSelectImm(phi->GetType(), ifInfo->ifPc, ifInfo->swapped ? inst2 : inst1,
+                                                 ifInfo->swapped ? inst1 : inst2, ifInfo->ifInput0, ifInfo->ifImm,
+                                                 ifInfo->ifType, ifInfo->ifCc);
+    } else if (ifInfo->ifOpcode == Opcode::If) {
+        select = GetGraph()->CreateInstSelect(phi->GetType(), ifInfo->ifPc, ifInfo->swapped ? inst2 : inst1,
+                                              ifInfo->swapped ? inst1 : inst2, ifInfo->ifInput0, ifInfo->ifInput1,
+                                              ifInfo->ifType, ifInfo->ifCc);
     } else {
         UNREACHABLE();
     }
@@ -472,7 +472,7 @@ void BasicBlock::GenerateSelect(Inst *phi, Inst *inst1, Inst *inst2, const Saved
         auto index = phi->CastToPhi()->GetPredBlockIndex(this);
         phi->CastToPhi()->SetInput(index, select);
         // Remove input from 'succ'
-        index = phi->CastToPhi()->GetPredBlockIndex(if_info->succ);
+        index = phi->CastToPhi()->GetPredBlockIndex(ifInfo->succ);
         phi->CastToPhi()->RemoveInput(index);
     } else {
         // Remove Phi
@@ -483,9 +483,9 @@ void BasicBlock::GenerateSelect(Inst *phi, Inst *inst1, Inst *inst2, const Saved
     ASSERT(select->HasUsers());
 }
 
-void BasicBlock::GenerateSelects(const SavedIfInfo *if_info)
+void BasicBlock::GenerateSelects(const SavedIfInfo *ifInfo)
 {
-    auto succ = if_info->succ;
+    auto succ = ifInfo->succ;
 
     // The only successor whether we will check Phi(s)
     auto other = succ->GetSuccessor(0);
@@ -514,11 +514,11 @@ void BasicBlock::GenerateSelects(const SavedIfInfo *if_info)
             continue;
         }
 
-        GenerateSelect(phi, inst1, inst2, if_info);
+        GenerateSelect(phi, inst1, inst2, ifInfo);
     }
 }
 
-void BasicBlock::SelectsFixLoopInfo(BasicBlock *select_bb, BasicBlock *other)
+void BasicBlock::SelectsFixLoopInfo(BasicBlock *selectBb, BasicBlock *other)
 {
     // invariant: 'this' block has one predecessor, so it cannot be a loop header
     auto loop = GetLoop();
@@ -530,9 +530,9 @@ void BasicBlock::SelectsFixLoopInfo(BasicBlock *select_bb, BasicBlock *other)
         if (loop->HasBackEdge(this)) {
             loop->RemoveBackEdge(this);
         }
-        for (auto inner_loop : loop->GetInnerLoops()) {
-            if (inner_loop->GetPreHeader() == this) {
-                inner_loop->SetPreHeader(select_bb);
+        for (auto innerLoop : loop->GetInnerLoops()) {
+            if (innerLoop->GetPreHeader() == this) {
+                innerLoop->SetPreHeader(selectBb);
                 break;
             }
         }
@@ -550,29 +550,29 @@ void BasicBlock::AppendPhi(Inst *inst)
 {
     ASSERT_PRINT(inst->IsPhi(), "Instruction must be phi");
     inst->SetBasicBlock(this);
-    if (first_phi_ == nullptr) {
-        inst->SetNext(first_inst_);
-        if (first_inst_ != nullptr) {
-            first_inst_->SetPrev(inst);
+    if (firstPhi_ == nullptr) {
+        inst->SetNext(firstInst_);
+        if (firstInst_ != nullptr) {
+            firstInst_->SetPrev(inst);
         }
-        first_phi_ = inst;
-        if (last_inst_ == nullptr) {
-            last_inst_ = inst;
+        firstPhi_ = inst;
+        if (lastInst_ == nullptr) {
+            lastInst_ = inst;
         }
     } else {
-        if (first_inst_ != nullptr) {
-            Inst *prev = first_inst_->GetPrev();
+        if (firstInst_ != nullptr) {
+            Inst *prev = firstInst_->GetPrev();
             ASSERT_PRINT(prev && prev->IsPhi(), "There is no phi in the block");
             inst->SetPrev(prev);
             prev->SetNext(inst);
-            inst->SetNext(first_inst_);
-            first_inst_->SetPrev(inst);
+            inst->SetNext(firstInst_);
+            firstInst_->SetPrev(inst);
         } else {
-            ASSERT_PRINT(last_inst_ && last_inst_->IsPhi(),
+            ASSERT_PRINT(lastInst_ && lastInst_->IsPhi(),
                          "If first_phi is defined and first_inst is undefined, last_inst must be phi");
-            last_inst_->SetNext(inst);
-            inst->SetPrev(last_inst_);
-            last_inst_ = inst;
+            lastInst_->SetNext(inst);
+            inst->SetPrev(lastInst_);
+            lastInst_ = inst;
         }
     }
 }
@@ -582,64 +582,64 @@ void BasicBlock::AddInst(Inst *inst)
 {
     ASSERT_PRINT(!inst->IsPhi(), "Instruction mustn't be phi");
     inst->SetBasicBlock(this);
-    if (first_inst_ == nullptr) {
-        inst->SetPrev(last_inst_);
-        if (last_inst_ != nullptr) {
-            ASSERT(last_inst_->IsPhi());
-            last_inst_->SetNext(inst);
+    if (firstInst_ == nullptr) {
+        inst->SetPrev(lastInst_);
+        if (lastInst_ != nullptr) {
+            ASSERT(lastInst_->IsPhi());
+            lastInst_->SetNext(inst);
         }
-        first_inst_ = inst;
-        last_inst_ = inst;
+        firstInst_ = inst;
+        lastInst_ = inst;
     } else {
         // NOLINTNEXTLINE(readability-braces-around-statements)
         if constexpr (TO_END) {
-            ASSERT_PRINT(last_inst_, "Last instruction is undefined");
-            inst->SetPrev(last_inst_);
-            last_inst_->SetNext(inst);
-            last_inst_ = inst;
+            ASSERT_PRINT(lastInst_, "Last instruction is undefined");
+            inst->SetPrev(lastInst_);
+            lastInst_->SetNext(inst);
+            lastInst_ = inst;
             // NOLINTNEXTLINE(readability-misleading-indentation)
         } else {
-            auto first_prev = first_inst_->GetPrev();
-            if (first_prev != nullptr) {
-                first_prev->SetNext(inst);
+            auto firstPrev = firstInst_->GetPrev();
+            if (firstPrev != nullptr) {
+                firstPrev->SetNext(inst);
             }
-            inst->SetPrev(first_prev);
-            inst->SetNext(first_inst_);
-            first_inst_->SetPrev(inst);
-            first_inst_ = inst;
+            inst->SetPrev(firstPrev);
+            inst->SetNext(firstInst_);
+            firstInst_->SetPrev(inst);
+            firstInst_ = inst;
         }
     }
 }
 
-void BasicBlock::AppendRangeInst(Inst *range_first, Inst *range_last)
+void BasicBlock::AppendRangeInst(Inst *rangeFirst, Inst *rangeLast)
 {
 #ifndef NDEBUG
-    ASSERT(range_first && range_last && range_first->IsDominate(range_last));
-    ASSERT(range_first->GetPrev() == nullptr);
-    ASSERT(range_last->GetNext() == nullptr);
-    auto inst_db = range_first;
-    while (inst_db != range_last) {
-        ASSERT_PRINT(!inst_db->IsPhi(), "Instruction mustn't be phi");
-        ASSERT_PRINT(inst_db->GetBasicBlock() == this, "Inst::SetBasicBlock() should be called beforehand");
-        inst_db = inst_db->GetNext();
+    ASSERT(rangeFirst && rangeLast && rangeFirst->IsDominate(rangeLast));
+    ASSERT(rangeFirst->GetPrev() == nullptr);
+    ASSERT(rangeLast->GetNext() == nullptr);
+    auto instDb = rangeFirst;
+    while (instDb != rangeLast) {
+        ASSERT_PRINT(!instDb->IsPhi(), "Instruction mustn't be phi");
+        ASSERT_PRINT(instDb->GetBasicBlock() == this, "Inst::SetBasicBlock() should be called beforehand");
+        instDb = instDb->GetNext();
     }
-    ASSERT_PRINT(!inst_db->IsPhi(), "Instruction mustn't be phi");
-    ASSERT_PRINT(inst_db->GetBasicBlock() == this, "Inst::SetBasicBlock() should be called beforehand");
+    ASSERT_PRINT(!instDb->IsPhi(), "Instruction mustn't be phi");
+    ASSERT_PRINT(instDb->GetBasicBlock() == this, "Inst::SetBasicBlock() should be called beforehand");
 #endif
 
-    if (first_inst_ == nullptr) {
-        range_first->SetPrev(last_inst_);
-        if (last_inst_ != nullptr) {
-            ASSERT(last_inst_->IsPhi());
-            last_inst_->SetNext(range_first);
+    if (firstInst_ == nullptr) {
+        rangeFirst->SetPrev(lastInst_);
+        if (lastInst_ != nullptr) {
+            ASSERT(lastInst_->IsPhi());
+            lastInst_->SetNext(rangeFirst);
         }
-        first_inst_ = range_first;
-        last_inst_ = range_last;
+        firstInst_ = rangeFirst;
+        lastInst_ = rangeLast;
     } else {
-        ASSERT_PRINT(last_inst_, "Last instruction is undefined");
-        range_first->SetPrev(last_inst_);
-        last_inst_->SetNext(range_first);
-        last_inst_ = range_last;
+        ASSERT_PRINT(lastInst_, "Last instruction is undefined");
+        rangeFirst->SetPrev(lastInst_);
+        lastInst_->SetNext(rangeFirst);
+        lastInst_ = rangeLast;
     }
 }
 
@@ -657,8 +657,8 @@ void BasicBlock::InsertAfter(Inst *inst, Inst *after)
     if (next != nullptr) {
         next->SetPrev(inst);
     } else {
-        ASSERT(after == last_inst_);
-        last_inst_ = inst;
+        ASSERT(after == lastInst_);
+        lastInst_ = inst;
     }
 }
 
@@ -676,75 +676,75 @@ void BasicBlock::InsertBefore(Inst *inst, Inst *before)
     if (prev != nullptr) {
         prev->SetNext(inst);
     }
-    if (before == first_phi_) {
-        first_phi_ = inst;
+    if (before == firstPhi_) {
+        firstPhi_ = inst;
     }
-    if (before == first_inst_) {
-        first_inst_ = inst;
+    if (before == firstInst_) {
+        firstInst_ = inst;
     }
 }
 
-void BasicBlock::InsertRangeBefore(Inst *range_first, Inst *range_last, Inst *before)
+void BasicBlock::InsertRangeBefore(Inst *rangeFirst, Inst *rangeLast, Inst *before)
 {
 #ifndef NDEBUG
-    ASSERT(range_first && range_last && range_first->IsDominate(range_last));
+    ASSERT(rangeFirst && rangeLast && rangeFirst->IsDominate(rangeLast));
     ASSERT(before && !before->IsPhi());
-    ASSERT(range_first->GetPrev() == nullptr);
-    ASSERT(range_last->GetNext() == nullptr);
+    ASSERT(rangeFirst->GetPrev() == nullptr);
+    ASSERT(rangeLast->GetNext() == nullptr);
     ASSERT(before->GetBasicBlock() == this);
-    auto inst_db = range_first;
-    while (inst_db != range_last) {
-        ASSERT_PRINT(!inst_db->IsPhi(), "Instruction mustn't be phi");
-        ASSERT_PRINT(inst_db->GetBasicBlock() == this, "Inst::SetBasicBlock() should be called beforehand");
-        inst_db = inst_db->GetNext();
+    auto instDb = rangeFirst;
+    while (instDb != rangeLast) {
+        ASSERT_PRINT(!instDb->IsPhi(), "Instruction mustn't be phi");
+        ASSERT_PRINT(instDb->GetBasicBlock() == this, "Inst::SetBasicBlock() should be called beforehand");
+        instDb = instDb->GetNext();
     }
-    ASSERT_PRINT(!inst_db->IsPhi(), "Instruction mustn't be phi");
-    ASSERT_PRINT(inst_db->GetBasicBlock() == this, "Inst::SetBasicBlock() should be called beforehand");
+    ASSERT_PRINT(!instDb->IsPhi(), "Instruction mustn't be phi");
+    ASSERT_PRINT(instDb->GetBasicBlock() == this, "Inst::SetBasicBlock() should be called beforehand");
 #endif
 
     Inst *prev = before->GetPrev();
-    range_first->SetPrev(prev);
-    range_last->SetNext(before);
-    before->SetPrev(range_last);
+    rangeFirst->SetPrev(prev);
+    rangeLast->SetNext(before);
+    before->SetPrev(rangeLast);
     if (prev != nullptr) {
-        prev->SetNext(range_first);
+        prev->SetNext(rangeFirst);
     }
-    if (before == first_inst_) {
-        first_inst_ = range_first;
+    if (before == firstInst_) {
+        firstInst_ = rangeFirst;
     }
 }
 
-void BasicBlock::ReplaceInst(Inst *old_inst, Inst *new_inst)
+void BasicBlock::ReplaceInst(Inst *oldInst, Inst *newInst)
 {
-    ASSERT(old_inst && new_inst);
-    ASSERT(old_inst->IsPhi() == new_inst->IsPhi());
-    ASSERT(old_inst->GetBasicBlock() == this);
-    ASSERT(new_inst->GetBasicBlock() == nullptr);
-    new_inst->SetBasicBlock(this);
-    Inst *prev = old_inst->GetPrev();
-    Inst *next = old_inst->GetNext();
+    ASSERT(oldInst && newInst);
+    ASSERT(oldInst->IsPhi() == newInst->IsPhi());
+    ASSERT(oldInst->GetBasicBlock() == this);
+    ASSERT(newInst->GetBasicBlock() == nullptr);
+    newInst->SetBasicBlock(this);
+    Inst *prev = oldInst->GetPrev();
+    Inst *next = oldInst->GetNext();
 
-    old_inst->SetBasicBlock(nullptr);
+    oldInst->SetBasicBlock(nullptr);
     if (prev != nullptr) {
-        prev->SetNext(new_inst);
+        prev->SetNext(newInst);
     }
     if (next != nullptr) {
-        next->SetPrev(new_inst);
+        next->SetPrev(newInst);
     }
-    new_inst->SetPrev(prev);
-    new_inst->SetNext(next);
-    if (first_phi_ == old_inst) {
-        first_phi_ = new_inst;
+    newInst->SetPrev(prev);
+    newInst->SetNext(next);
+    if (firstPhi_ == oldInst) {
+        firstPhi_ = newInst;
     }
-    if (first_inst_ == old_inst) {
-        first_inst_ = new_inst;
+    if (firstInst_ == oldInst) {
+        firstInst_ = newInst;
     }
-    if (last_inst_ == old_inst) {
-        last_inst_ = new_inst;
+    if (lastInst_ == oldInst) {
+        lastInst_ = newInst;
     }
 
-    if (graph_->IsInstThrowable(old_inst)) {
-        graph_->ReplaceThrowableInst(old_inst, new_inst);
+    if (graph_->IsInstThrowable(oldInst)) {
+        graph_->ReplaceThrowableInst(oldInst, newInst);
     }
 }
 
@@ -754,15 +754,15 @@ void BasicBlock::ReplaceInstByDeoptimize(Inst *inst)
     ASSERT(inst->GetBasicBlock() == this);
     auto ss = inst->GetSaveState();
     ASSERT(ss != nullptr);
-    auto call_inst = ss->GetCallerInst();
+    auto callInst = ss->GetCallerInst();
     // if inst in inlined method, we need to build all return.inlined before deoptimize to correct restore registers.
-    while (call_inst != nullptr && call_inst->IsInlined()) {
-        ss = call_inst->GetSaveState();
+    while (callInst != nullptr && callInst->IsInlined()) {
+        ss = callInst->GetSaveState();
         ASSERT(ss != nullptr);
-        auto ret_inl = GetGraph()->CreateInstReturnInlined(DataType::NO_TYPE, INVALID_PC, ss);
-        ret_inl->SetExtendedLiveness();
-        InsertBefore(ret_inl, inst);
-        call_inst = ss->GetCallerInst();
+        auto retInl = GetGraph()->CreateInstReturnInlined(DataType::NO_TYPE, INVALID_PC, ss);
+        retInl->SetExtendedLiveness();
+        InsertBefore(retInl, inst);
+        callInst = ss->GetCallerInst();
     }
     // Replace Inst
     auto deopt = GetGraph()->CreateInstDeoptimize(DataType::NO_TYPE, inst->GetPc(), inst->GetSaveState());
@@ -777,9 +777,9 @@ void BasicBlock::ReplaceInstByDeoptimize(Inst *inst)
     }
     ASSERT(GetSuccsBlocks().size() == 1);
     GetGraph()->RemoveSuccessors(this);
-    auto end_block = GetGraph()->HasEndBlock() ? GetGraph()->GetEndBlock() : GetGraph()->CreateEndBlock();
-    ASSERT(end_block->GetGraph() != nullptr);
-    this->AddSucc(end_block);
+    auto endBlock = GetGraph()->HasEndBlock() ? GetGraph()->GetEndBlock() : GetGraph()->CreateEndBlock();
+    ASSERT(endBlock->GetGraph() != nullptr);
+    this->AddSucc(endBlock);
     ASSERT(GetGraph()->IsAnalysisValid<LoopAnalyzer>());
     GetGraph()->DisconnectBlockRec(succ, true, false);
 }
@@ -787,32 +787,32 @@ void BasicBlock::ReplaceInstByDeoptimize(Inst *inst)
 void BasicBlock::RemoveOverflowCheck(Inst *inst)
 {
     // replace by Add/Sub
-    Inst *new_inst = nullptr;
+    Inst *newInst = nullptr;
     switch (inst->GetOpcode()) {
         case Opcode::AddOverflowCheck:
-            new_inst = GetGraph()->CreateInstAdd(inst->GetType(), inst->GetPc());
+            newInst = GetGraph()->CreateInstAdd(inst->GetType(), inst->GetPc());
             break;
         case Opcode::SubOverflowCheck:
-            new_inst = GetGraph()->CreateInstSub(inst->GetType(), inst->GetPc());
+            newInst = GetGraph()->CreateInstSub(inst->GetType(), inst->GetPc());
             break;
         case Opcode::NegOverflowAndZeroCheck:
-            new_inst = GetGraph()->CreateInstNeg(inst->GetType(), inst->GetPc());
+            newInst = GetGraph()->CreateInstNeg(inst->GetType(), inst->GetPc());
             break;
         default:
             UNREACHABLE();
     }
     // clone inputs, except savestate
     for (size_t i = 0; i < inst->GetInputsCount() - 1; ++i) {
-        new_inst->SetInput(i, inst->GetInput(i).GetInst());
+        newInst->SetInput(i, inst->GetInput(i).GetInst());
     }
-    inst->ReplaceUsers(new_inst);
+    inst->ReplaceUsers(newInst);
     inst->RemoveInputs();
-    ReplaceInst(inst, new_inst);
+    ReplaceInst(inst, newInst);
 }
 
-void BasicBlock::EraseInst(Inst *inst, [[maybe_unused]] bool will_be_moved)
+void BasicBlock::EraseInst(Inst *inst, [[maybe_unused]] bool willBeMoved)
 {
-    ASSERT(will_be_moved || !GetGraph()->IsInstThrowable(inst));
+    ASSERT(willBeMoved || !GetGraph()->IsInstThrowable(inst));
     Inst *prev = inst->GetPrev();
     Inst *next = inst->GetNext();
 
@@ -826,14 +826,14 @@ void BasicBlock::EraseInst(Inst *inst, [[maybe_unused]] bool will_be_moved)
     }
     inst->SetPrev(nullptr);
     inst->SetNext(nullptr);
-    if (inst == first_phi_) {
-        first_phi_ = (next != nullptr && next->IsPhi()) ? next : nullptr;
+    if (inst == firstPhi_) {
+        firstPhi_ = (next != nullptr && next->IsPhi()) ? next : nullptr;
     }
-    if (inst == first_inst_) {
-        first_inst_ = next;
+    if (inst == firstInst_) {
+        firstInst_ = next;
     }
-    if (inst == last_inst_) {
-        last_inst_ = prev;
+    if (inst == lastInst_) {
+        lastInst_ = prev;
     }
 }
 
@@ -870,14 +870,14 @@ bool BasicBlock::IsDominate(const BasicBlock *other) const
         return true;
     }
     ASSERT(GetGraph()->IsAnalysisValid<DominatorsTree>());
-    BasicBlock *dom_block = other->GetDominator();
-    while (dom_block != nullptr) {
-        if (dom_block == this) {
+    BasicBlock *domBlock = other->GetDominator();
+    while (domBlock != nullptr) {
+        if (domBlock == this) {
             return true;
         }
         // Otherwise we are in infinite loop!?
-        ASSERT(dom_block != dom_block->GetDominator());
-        dom_block = dom_block->GetDominator();
+        ASSERT(domBlock != domBlock->GetDominator());
+        domBlock = domBlock->GetDominator();
     }
     return false;
 }
@@ -906,7 +906,7 @@ BasicBlock *BasicBlock::GetDominator() const
 const ArenaVector<BasicBlock *> &BasicBlock::GetDominatedBlocks() const
 {
     ASSERT(GetGraph()->IsAnalysisValid<DominatorsTree>());
-    return dom_blocks_;
+    return domBlocks_;
 }
 
 PhiInstIter BasicBlock::PhiInsts() const
@@ -965,24 +965,24 @@ void BasicBlock::InsertBlockBefore(BasicBlock *block)
     block->AddSucc(this);
 }
 
-BasicBlock *BasicBlock::Clone(Graph *target_graph) const
+BasicBlock *BasicBlock::Clone(Graph *targetGraph) const
 {
     BasicBlock *clone = nullptr;
 #ifndef NDEBUG
-    if (GetGraph() == target_graph) {
-        clone = target_graph->CreateEmptyBlock();
+    if (GetGraph() == targetGraph) {
+        clone = targetGraph->CreateEmptyBlock();
     } else {
-        clone = target_graph->CreateEmptyBlock(GetId(), GetGuestPc());
+        clone = targetGraph->CreateEmptyBlock(GetId(), GetGuestPc());
     }
 #else
-    clone = target_graph->CreateEmptyBlock();
+    clone = targetGraph->CreateEmptyBlock();
 #endif
     clone->SetAllFields(this->GetAllFields());
-    clone->try_id_ = GetTryId();
+    clone->tryId_ = GetTryId();
     if (this->IsStartBlock()) {
-        target_graph->SetStartBlock(clone);
+        targetGraph->SetStartBlock(clone);
     } else if (this->IsEndBlock()) {
-        target_graph->SetEndBlock(clone);
+        targetGraph->SetEndBlock(clone);
     }
     return clone;
 }
@@ -1028,18 +1028,18 @@ uint32_t BasicBlock::CountInsts() const
     return count;
 }
 
-bool BlocksPathDfsSearch(Marker marker, BasicBlock *block, const BasicBlock *target_block,
-                         const BasicBlock *exclude_block)
+bool BlocksPathDfsSearch(Marker marker, BasicBlock *block, const BasicBlock *targetBlock,
+                         const BasicBlock *excludeBlock)
 {
     ASSERT(marker != UNDEF_MARKER);
-    if (block == target_block) {
+    if (block == targetBlock) {
         return true;
     }
     block->SetMarker(marker);
 
-    for (auto succ_block : block->GetSuccsBlocks()) {
-        if (!succ_block->IsMarked(marker) && succ_block != exclude_block) {
-            if (BlocksPathDfsSearch(marker, succ_block, target_block, exclude_block)) {
+    for (auto succBlock : block->GetSuccsBlocks()) {
+        if (!succBlock->IsMarked(marker) && succBlock != excludeBlock) {
+            if (BlocksPathDfsSearch(marker, succBlock, targetBlock, excludeBlock)) {
                 return true;
             }
         }

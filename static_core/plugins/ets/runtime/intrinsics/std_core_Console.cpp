@@ -42,8 +42,8 @@ extern "C" EtsVoid *StdConsolePrintBool([[maybe_unused]] ObjectHeader *header, u
 
 extern "C" EtsVoid *StdConsolePrintChar([[maybe_unused]] ObjectHeader *header, uint16_t c)
 {
-    const utf::Utf8Char utf8_ch = utf::ConvertUtf16ToUtf8(c, 0, false);
-    std::cout << std::string_view(reinterpret_cast<const char *>(utf8_ch.ch.data()), utf8_ch.n);
+    const utf::Utf8Char utf8Ch = utf::ConvertUtf16ToUtf8(c, 0, false);
+    std::cout << std::string_view(reinterpret_cast<const char *>(utf8Ch.ch.data()), utf8Ch.n);
     return EtsVoid::GetInstance();
 }
 

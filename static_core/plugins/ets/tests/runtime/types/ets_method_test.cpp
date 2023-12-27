@@ -104,18 +104,18 @@ TEST_F(EtsMethodTest, Invoke)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo_method = klass->GetMethod("foo");
-    ASSERT(foo_method);
-    EtsMethod *goo_method = klass->GetMethod("goo");
-    ASSERT(goo_method);
-    EtsMethod *sum_method = klass->GetMethod("sum");
-    ASSERT(sum_method);
+    EtsMethod *fooMethod = klass->GetMethod("foo");
+    ASSERT(fooMethod);
+    EtsMethod *gooMethod = klass->GetMethod("goo");
+    ASSERT(gooMethod);
+    EtsMethod *sumMethod = klass->GetMethod("sum");
+    ASSERT(sumMethod);
 
-    EtsValue res = foo_method->Invoke(GetScopedManagedCodeFix(), nullptr);
+    EtsValue res = fooMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
     ASSERT_EQ(res.GetAs<int32_t>(), 111);
-    res = goo_method->Invoke(GetScopedManagedCodeFix(), nullptr);
+    res = gooMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
     ASSERT_EQ(res.GetAs<int32_t>(), 222);
-    res = sum_method->Invoke(GetScopedManagedCodeFix(), nullptr);
+    res = sumMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
     ASSERT_EQ(res.GetAs<int32_t>(), 333);
 }
 
@@ -142,23 +142,23 @@ TEST_F(EtsMethodTest, GetNumArgSlots)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1_method = klass->GetMethod("foo1");
-    ASSERT(foo1_method);
-    EtsMethod *foo2_method = klass->GetMethod("foo2");
-    ASSERT(foo2_method);
-    EtsMethod *foo3_method = klass->GetMethod("foo3");
-    ASSERT(foo3_method);
+    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    ASSERT(foo1Method);
+    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    ASSERT(foo2Method);
+    EtsMethod *foo3Method = klass->GetMethod("foo3");
+    ASSERT(foo3Method);
 
-    ASSERT_TRUE(foo1_method->IsStatic());
-    ASSERT_TRUE(foo2_method->IsStatic());
-    ASSERT_TRUE(foo3_method->IsStatic());
-    ASSERT_TRUE(foo1_method->IsPublic());
-    ASSERT_FALSE(foo2_method->IsPublic());
-    ASSERT_TRUE(foo3_method->IsPublic());
+    ASSERT_TRUE(foo1Method->IsStatic());
+    ASSERT_TRUE(foo2Method->IsStatic());
+    ASSERT_TRUE(foo3Method->IsStatic());
+    ASSERT_TRUE(foo1Method->IsPublic());
+    ASSERT_FALSE(foo2Method->IsPublic());
+    ASSERT_TRUE(foo3Method->IsPublic());
 
-    ASSERT_EQ(foo1_method->GetNumArgSlots(), 0);
-    ASSERT_EQ(foo2_method->GetNumArgSlots(), 1);
-    ASSERT_EQ(foo3_method->GetNumArgSlots(), 5);
+    ASSERT_EQ(foo1Method->GetNumArgSlots(), 0);
+    ASSERT_EQ(foo2Method->GetNumArgSlots(), 1);
+    ASSERT_EQ(foo3Method->GetNumArgSlots(), 5);
 }
 
 TEST_F(EtsMethodTest, GetArgType)
@@ -176,16 +176,16 @@ TEST_F(EtsMethodTest, GetArgType)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo_method = klass->GetMethod("foo");
-    ASSERT(foo_method);
+    EtsMethod *fooMethod = klass->GetMethod("foo");
+    ASSERT(fooMethod);
 
-    std::vector<EtsType> expected_arg_types = {EtsType::BOOLEAN, EtsType::BYTE, EtsType::CHAR,  EtsType::SHORT,
-                                               EtsType::INT,     EtsType::LONG, EtsType::FLOAT, EtsType::DOUBLE};
-    EtsType arg_type;
+    std::vector<EtsType> expectedArgTypes = {EtsType::BOOLEAN, EtsType::BYTE, EtsType::CHAR,  EtsType::SHORT,
+                                             EtsType::INT,     EtsType::LONG, EtsType::FLOAT, EtsType::DOUBLE};
+    EtsType argType;
 
-    for (std::size_t i = 0; i < expected_arg_types.size(); i++) {
-        arg_type = foo_method->GetArgType(i);
-        ASSERT_EQ(arg_type, expected_arg_types[i]);
+    for (std::size_t i = 0; i < expectedArgTypes.size(); i++) {
+        argType = fooMethod->GetArgType(i);
+        ASSERT_EQ(argType, expectedArgTypes[i]);
     }
 }
 
@@ -211,20 +211,20 @@ TEST_F(EtsMethodTest, GetReturnValueType)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    std::vector<EtsType> return_val_types = {EtsType::BOOLEAN, EtsType::BYTE, EtsType::CHAR,  EtsType::SHORT,
-                                             EtsType::INT,     EtsType::LONG, EtsType::FLOAT, EtsType::DOUBLE,
-                                             EtsType::OBJECT,  EtsType::VOID};
+    std::vector<EtsType> returnValTypes = {EtsType::BOOLEAN, EtsType::BYTE, EtsType::CHAR,  EtsType::SHORT,
+                                           EtsType::INT,     EtsType::LONG, EtsType::FLOAT, EtsType::DOUBLE,
+                                           EtsType::OBJECT,  EtsType::VOID};
     std::vector<EtsMethod *> methods;
-    EtsMethod *current_method = nullptr;
+    EtsMethod *currentMethod = nullptr;
 
-    for (std::size_t i = 0; i < return_val_types.size(); i++) {
-        std::string foo_name("foo");
-        current_method = klass->GetMethod((foo_name + std::to_string(i)).data());
-        ASSERT(current_method);
-        methods.push_back(current_method);
+    for (std::size_t i = 0; i < returnValTypes.size(); i++) {
+        std::string fooName("foo");
+        currentMethod = klass->GetMethod((fooName + std::to_string(i)).data());
+        ASSERT(currentMethod);
+        methods.push_back(currentMethod);
     }
-    for (std::size_t i = 0; i < return_val_types.size(); i++) {
-        ASSERT_EQ(methods[i]->GetReturnValueType(), return_val_types[i]);
+    for (std::size_t i = 0; i < returnValTypes.size(); i++) {
+        ASSERT_EQ(methods[i]->GetReturnValueType(), returnValTypes[i]);
     }
 }
 
@@ -251,16 +251,16 @@ TEST_F(EtsMethodTest, GetMethodSignature)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1_method = klass->GetMethod("foo1");
-    ASSERT(foo1_method);
-    EtsMethod *foo2_method = klass->GetMethod("foo2");
-    ASSERT(foo2_method);
-    EtsMethod *foo3_method = klass->GetMethod("foo3");
-    ASSERT(foo3_method);
+    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    ASSERT(foo1Method);
+    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    ASSERT(foo2Method);
+    EtsMethod *foo3Method = klass->GetMethod("foo3");
+    ASSERT(foo3Method);
 
-    ASSERT_EQ(foo1_method->GetMethodSignature(), "I:LTestObject;");
-    ASSERT_EQ(foo2_method->GetMethodSignature(), "IFD:I");
-    ASSERT_EQ(foo3_method->GetMethodSignature(), "IIFDF:Z");
+    ASSERT_EQ(foo1Method->GetMethodSignature(), "I:LTestObject;");
+    ASSERT_EQ(foo2Method->GetMethodSignature(), "IFD:I");
+    ASSERT_EQ(foo3Method->GetMethodSignature(), "IIFDF:Z");
 }
 
 TEST_F(EtsMethodTest, GetLineNumFromBytecodeOffset)
@@ -279,27 +279,27 @@ TEST_F(EtsMethodTest, GetLineNumFromBytecodeOffset)
 
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
-    EtsMethod *foo_method = klass->GetMethod("foo");
-    ASSERT(foo_method);
+    EtsMethod *fooMethod = klass->GetMethod("foo");
+    ASSERT(fooMethod);
 
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(0), 5);
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(1), 5);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(0), 5);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(1), 5);
 
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(2), 6);
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(3), 6);
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(4), 6);
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(5), 6);
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(6), 6);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(2), 6);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(3), 6);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(4), 6);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(5), 6);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(6), 6);
 
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(7), 7);
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(8), 7);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(7), 7);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(8), 7);
 
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(9), 8);
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(10), 8);
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(11), 8);
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(12), 8);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(9), 8);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(10), 8);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(11), 8);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(12), 8);
 
-    ASSERT_EQ(foo_method->GetLineNumFromBytecodeOffset(13), 9);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(13), 9);
 }
 
 TEST_F(EtsMethodTest, GetName)
@@ -321,18 +321,18 @@ TEST_F(EtsMethodTest, GetName)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1_method = klass->GetMethod("foo1");
-    ASSERT(foo1_method);
-    EtsMethod *foo2_method = klass->GetMethod("foo2");
-    ASSERT(foo2_method);
+    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    ASSERT(foo1Method);
+    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    ASSERT(foo2Method);
 
-    ASSERT_TRUE(!strcmp(foo1_method->GetName(), "foo1"));
-    ASSERT_TRUE(!strcmp(foo2_method->GetName(), "foo2"));
+    ASSERT_TRUE(!strcmp(foo1Method->GetName(), "foo1"));
+    ASSERT_TRUE(!strcmp(foo2Method->GetName(), "foo2"));
 
-    EtsString *str1 = foo1_method->GetNameString();
+    EtsString *str1 = foo1Method->GetNameString();
     EtsString *str2 = EtsString::CreateFromMUtf8("foo1");
     ASSERT_TRUE(str1->StringsAreEqual(reinterpret_cast<EtsObject *>(str2)));
-    str1 = foo2_method->GetNameString();
+    str1 = foo2Method->GetNameString();
     str2 = EtsString::CreateFromMUtf8("foo2");
     ASSERT_TRUE(str1->StringsAreEqual(reinterpret_cast<EtsObject *>(str2)));
 }
@@ -358,18 +358,18 @@ TEST_F(EtsMethodTest, ResolveArgType)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1_method = klass->GetMethod("foo1");
-    ASSERT(foo1_method);
-    EtsMethod *foo2_method = klass->GetMethod("foo2");
-    ASSERT(foo2_method);
-    EtsMethod *foo3_method = klass->GetMethod("foo3");
-    ASSERT(foo3_method);
+    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    ASSERT(foo1Method);
+    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    ASSERT(foo2Method);
+    EtsMethod *foo3Method = klass->GetMethod("foo3");
+    ASSERT(foo3Method);
 
-    ASSERT_EQ(foo1_method->ResolveArgType(0), foo2_method->ResolveArgType(0));
-    ASSERT_EQ(foo2_method->ResolveArgType(0), foo2_method->ResolveArgType(1));
+    ASSERT_EQ(foo1Method->ResolveArgType(0), foo2Method->ResolveArgType(0));
+    ASSERT_EQ(foo2Method->ResolveArgType(0), foo2Method->ResolveArgType(1));
 
-    ASSERT_EQ(foo1_method->ResolveArgType(1), foo3_method->ResolveArgType(0));
-    ASSERT_EQ(foo3_method->ResolveArgType(0), foo3_method->ResolveArgType(1));
+    ASSERT_EQ(foo1Method->ResolveArgType(1), foo3Method->ResolveArgType(0));
+    ASSERT_EQ(foo3Method->ResolveArgType(0), foo3Method->ResolveArgType(1));
 }
 
 TEST_F(EtsMethodTest, ResolveReturnType)
@@ -396,17 +396,17 @@ TEST_F(EtsMethodTest, ResolveReturnType)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1_method = klass->GetMethod("foo1");
-    ASSERT(foo1_method);
-    EtsMethod *foo2_method = klass->GetMethod("foo2");
-    ASSERT(foo2_method);
-    EtsMethod *foo3_method = klass->GetMethod("foo3");
-    ASSERT(foo3_method);
-    EtsMethod *foo4_method = klass->GetMethod("foo4");
-    ASSERT(foo4_method);
+    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    ASSERT(foo1Method);
+    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    ASSERT(foo2Method);
+    EtsMethod *foo3Method = klass->GetMethod("foo3");
+    ASSERT(foo3Method);
+    EtsMethod *foo4Method = klass->GetMethod("foo4");
+    ASSERT(foo4Method);
 
-    ASSERT_EQ(foo1_method->ResolveReturnType(), foo2_method->ResolveReturnType());
-    ASSERT_EQ(foo3_method->ResolveReturnType(), foo4_method->ResolveReturnType());
+    ASSERT_EQ(foo1Method->ResolveReturnType(), foo2Method->ResolveReturnType());
+    ASSERT_EQ(foo3Method->ResolveReturnType(), foo4Method->ResolveReturnType());
 }
 
 TEST_F(EtsMethodTest, GetClassSourceFile)
@@ -420,17 +420,17 @@ TEST_F(EtsMethodTest, GetClassSourceFile)
         }
     )";
 
-    std::string source_filename = "EtsMethodTestSource.pa";
+    std::string sourceFilename = "EtsMethodTestSource.pa";
 
-    EtsClass *klass = GetTestClass(source, "LTest;", source_filename);
+    EtsClass *klass = GetTestClass(source, "LTest;", sourceFilename);
     ASSERT(klass);
-    EtsMethod *foo_method = klass->GetMethod("foo");
-    ASSERT(foo_method);
+    EtsMethod *fooMethod = klass->GetMethod("foo");
+    ASSERT(fooMethod);
 
-    auto result = foo_method->GetClassSourceFile();
+    auto result = fooMethod->GetClassSourceFile();
     ASSERT(result.data);
 
-    ASSERT_TRUE(!strcmp(reinterpret_cast<const char *>(result.data), source_filename.data()));
+    ASSERT_TRUE(!strcmp(reinterpret_cast<const char *>(result.data), sourceFilename.data()));
 }
 
 }  // namespace panda::ets::test

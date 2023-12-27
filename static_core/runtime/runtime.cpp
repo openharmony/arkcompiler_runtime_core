@@ -79,39 +79,38 @@ namespace panda {
 using std::unique_ptr;
 
 Runtime *Runtime::instance_ = nullptr;
-RuntimeOptions Runtime::options_;    // NOLINT(fuchsia-statically-constructed-objects)
-std::string Runtime::runtime_type_;  // NOLINT(fuchsia-statically-constructed-objects)
-os::memory::Mutex Runtime::mutex_;   // NOLINT(fuchsia-statically-constructed-objects)
-taskmanager::TaskScheduler *Runtime::task_scheduler_ = nullptr;
+RuntimeOptions Runtime::options_;   // NOLINT(fuchsia-statically-constructed-objects)
+std::string Runtime::runtimeType_;  // NOLINT(fuchsia-statically-constructed-objects)
+os::memory::Mutex Runtime::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
+taskmanager::TaskScheduler *Runtime::taskScheduler_ = nullptr;
 
-const LanguageContextBase *CTXS_JS_RUNTIME = nullptr;  // Deprecated. Only for capability with js_runtime.
+const LanguageContextBase *g_ctxsJsRuntime = nullptr;  // Deprecated. Only for capability with js_runtime.
 
 class RuntimeInternalAllocator {
 public:
-    static mem::InternalAllocatorPtr Create(bool use_malloc_for_internal_allocation)
+    static mem::InternalAllocatorPtr Create(bool useMallocForInternalAllocation)
     {
         ASSERT(mem::InternalAllocator<>::GetInternalAllocatorFromRuntime() == nullptr);
 
-        mem_stats_s_ = new (std::nothrow) mem::MemStatsType();
-        ASSERT(mem_stats_s_ != nullptr);
+        memStatsS_ = new (std::nothrow) mem::MemStatsType();
+        ASSERT(memStatsS_ != nullptr);
 
-        if (use_malloc_for_internal_allocation) {
-            internal_allocator_s_ = new (std::nothrow)
-                mem::InternalAllocatorT<mem::InternalAllocatorConfig::MALLOC_ALLOCATOR>(mem_stats_s_);
+        if (useMallocForInternalAllocation) {
+            internalAllocatorS_ =
+                new (std::nothrow) mem::InternalAllocatorT<mem::InternalAllocatorConfig::MALLOC_ALLOCATOR>(memStatsS_);
         } else {
-            internal_allocator_s_ = new (std::nothrow)
-                mem::InternalAllocatorT<mem::InternalAllocatorConfig::PANDA_ALLOCATORS>(mem_stats_s_);
+            internalAllocatorS_ =
+                new (std::nothrow) mem::InternalAllocatorT<mem::InternalAllocatorConfig::PANDA_ALLOCATORS>(memStatsS_);
         }
-        ASSERT(internal_allocator_s_ != nullptr);
-        mem::InternalAllocator<>::InitInternalAllocatorFromRuntime(
-            static_cast<mem::Allocator *>(internal_allocator_s_));
+        ASSERT(internalAllocatorS_ != nullptr);
+        mem::InternalAllocator<>::InitInternalAllocatorFromRuntime(static_cast<mem::Allocator *>(internalAllocatorS_));
 
-        return internal_allocator_s_;
+        return internalAllocatorS_;
     }
 
     static void Finalize()
     {
-        internal_allocator_s_->VisitAndRemoveAllPools(
+        internalAllocatorS_->VisitAndRemoveAllPools(
             [](void *mem, size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
     }
 
@@ -120,55 +119,55 @@ public:
         ASSERT(mem::InternalAllocator<>::GetInternalAllocatorFromRuntime() != nullptr);
 
         mem::InternalAllocator<>::ClearInternalAllocatorFromRuntime();
-        delete static_cast<mem::Allocator *>(internal_allocator_s_);
-        internal_allocator_s_ = nullptr;
+        delete static_cast<mem::Allocator *>(internalAllocatorS_);
+        internalAllocatorS_ = nullptr;
 
-        if (daemon_memory_leak_threshold_ == 0) {
+        if (daemonMemoryLeakThreshold_ == 0) {
             // One more check that we don't have memory leak in internal allocator.
-            ASSERT(daemon_threads_cnt_ > 0 || mem_stats_s_->GetFootprint(SpaceType::SPACE_TYPE_INTERNAL) == 0);
+            ASSERT(daemonThreadsCnt_ > 0 || memStatsS_->GetFootprint(SpaceType::SPACE_TYPE_INTERNAL) == 0);
         } else {
             // There might be a memory leaks in daemon threads, which we intend to ignore (issue #6539).
-            ASSERT(mem_stats_s_->GetFootprint(SpaceType::SPACE_TYPE_INTERNAL) <= daemon_memory_leak_threshold_);
+            ASSERT(memStatsS_->GetFootprint(SpaceType::SPACE_TYPE_INTERNAL) <= daemonMemoryLeakThreshold_);
         }
 
-        delete mem_stats_s_;
-        mem_stats_s_ = nullptr;
+        delete memStatsS_;
+        memStatsS_ = nullptr;
     }
 
     static mem::InternalAllocatorPtr Get()
     {
-        ASSERT(internal_allocator_s_ != nullptr);
-        return internal_allocator_s_;
+        ASSERT(internalAllocatorS_ != nullptr);
+        return internalAllocatorS_;
     }
 
-    static void SetDaemonMemoryLeakThreshold(uint32_t daemon_memory_leak_threshold)
+    static void SetDaemonMemoryLeakThreshold(uint32_t daemonMemoryLeakThreshold)
     {
-        daemon_memory_leak_threshold_ = daemon_memory_leak_threshold;
+        daemonMemoryLeakThreshold_ = daemonMemoryLeakThreshold;
     }
 
-    static void SetDaemonThreadsCount(uint32_t daemon_threads_cnt)
+    static void SetDaemonThreadsCount(uint32_t daemonThreadsCnt)
     {
-        daemon_threads_cnt_ = daemon_threads_cnt;
+        daemonThreadsCnt_ = daemonThreadsCnt;
     }
 
 private:
-    static mem::MemStatsType *mem_stats_s_;
-    static mem::InternalAllocatorPtr internal_allocator_s_;  // NOLINT(fuchsia-statically-constructed-objects)
-    static uint32_t daemon_memory_leak_threshold_;
-    static uint32_t daemon_threads_cnt_;
+    static mem::MemStatsType *memStatsS_;
+    static mem::InternalAllocatorPtr internalAllocatorS_;  // NOLINT(fuchsia-statically-constructed-objects)
+    static uint32_t daemonMemoryLeakThreshold_;
+    static uint32_t daemonThreadsCnt_;
 };
 
-uint32_t RuntimeInternalAllocator::daemon_memory_leak_threshold_ = 0;
-uint32_t RuntimeInternalAllocator::daemon_threads_cnt_ = 0;
+uint32_t RuntimeInternalAllocator::daemonMemoryLeakThreshold_ = 0;
+uint32_t RuntimeInternalAllocator::daemonThreadsCnt_ = 0;
 
-mem::MemStatsType *RuntimeInternalAllocator::mem_stats_s_ = nullptr;
+mem::MemStatsType *RuntimeInternalAllocator::memStatsS_ = nullptr;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-mem::InternalAllocatorPtr RuntimeInternalAllocator::internal_allocator_s_ = nullptr;
+mem::InternalAllocatorPtr RuntimeInternalAllocator::internalAllocatorS_ = nullptr;
 
 Runtime::DebugSession::DebugSession(Runtime &runtime)
-    : runtime_(runtime), is_jit_enabled_(runtime.IsJitEnabled()), lock_(runtime.debug_session_uniqueness_mutex_)
+    : runtime_(runtime), isJitEnabled_(runtime.IsJitEnabled()), lock_(runtime.debugSessionUniquenessMutex_)
 {
-    ASSERT(runtime_.is_debug_mode_);
+    ASSERT(runtime_.isDebugMode_);
     runtime_.ForceDisableJit();
     debugger_ = MakePandaUnique<tooling::Debugger>(&runtime_);
 }
@@ -176,7 +175,7 @@ Runtime::DebugSession::DebugSession(Runtime &runtime)
 Runtime::DebugSession::~DebugSession()
 {
     debugger_.reset();
-    if (is_jit_enabled_) {
+    if (isJitEnabled_) {
         runtime_.ForceEnableJit();
     }
 }
@@ -189,9 +188,9 @@ tooling::DebugInterface &Runtime::DebugSession::GetDebugger()
 // all GetLanguageContext(...) methods should be based on this one
 LanguageContext Runtime::GetLanguageContext(panda_file::SourceLang lang)
 {
-    if (CTXS_JS_RUNTIME != nullptr) {
+    if (g_ctxsJsRuntime != nullptr) {
         // Deprecated. Only for capability with js_runtime.
-        return LanguageContext(CTXS_JS_RUNTIME);
+        return LanguageContext(g_ctxsJsRuntime);
     }
 
     auto *ctx = plugins::GetLanguageContextBase(lang);
@@ -232,13 +231,13 @@ LanguageContext Runtime::GetLanguageContext(panda_file::ClassDataAccessor *cda)
     return GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
 }
 
-LanguageContext Runtime::GetLanguageContext(const std::string &runtime_type)
+LanguageContext Runtime::GetLanguageContext(const std::string &runtimeType)
 {
-    return GetLanguageContext(plugins::RuntimeTypeToLang(runtime_type));
+    return GetLanguageContext(plugins::RuntimeTypeToLang(runtimeType));
 }
 
 /* static */
-bool Runtime::CreateInstance(const RuntimeOptions &options, mem::InternalAllocatorPtr internal_allocator)
+bool Runtime::CreateInstance(const RuntimeOptions &options, mem::InternalAllocatorPtr internalAllocator)
 {
     Locks::Initialize();
 
@@ -253,7 +252,7 @@ bool Runtime::CreateInstance(const RuntimeOptions &options, mem::InternalAllocat
             return false;
         }
 
-        instance_ = new Runtime(options, internal_allocator);
+        instance_ = new Runtime(options, internalAllocator);
     }
 
     return true;
@@ -261,50 +260,49 @@ bool Runtime::CreateInstance(const RuntimeOptions &options, mem::InternalAllocat
 
 inline bool CreateMemorySpaces(const RuntimeOptions &options)
 {
-    uint32_t min_free_percentage = options.GetMinHeapFreePercentage();
-    uint32_t max_free_percentage = options.GetMaxHeapFreePercentage();
-    if (min_free_percentage > PERCENT_100_U32) {
-        LOG(ERROR, RUNTIME) << "Incorrect minimum free heap size percentage (min-free-percentage="
-                            << min_free_percentage << "), 0 <= min-free-percentage <= 100";
+    uint32_t minFreePercentage = options.GetMinHeapFreePercentage();
+    uint32_t maxFreePercentage = options.GetMaxHeapFreePercentage();
+    if (minFreePercentage > PERCENT_100_U32) {
+        LOG(ERROR, RUNTIME) << "Incorrect minimum free heap size percentage (min-free-percentage=" << minFreePercentage
+                            << "), 0 <= min-free-percentage <= 100";
         return false;
     }
-    if (max_free_percentage > PERCENT_100_U32) {
-        LOG(ERROR, RUNTIME) << "Incorrect maximum free heap size percentage (max-free-percentage="
-                            << max_free_percentage << "), 0 <= max-free-percentage <= 100";
+    if (maxFreePercentage > PERCENT_100_U32) {
+        LOG(ERROR, RUNTIME) << "Incorrect maximum free heap size percentage (max-free-percentage=" << maxFreePercentage
+                            << "), 0 <= max-free-percentage <= 100";
         return false;
     }
-    if (min_free_percentage > max_free_percentage) {
-        LOG(ERROR, RUNTIME) << "Minimum free heap size percentage(min-free-percentage=" << min_free_percentage
+    if (minFreePercentage > maxFreePercentage) {
+        LOG(ERROR, RUNTIME) << "Minimum free heap size percentage(min-free-percentage=" << minFreePercentage
                             << ") must be <= maximum free heap size percentage (max-free-percentage="
-                            << max_free_percentage << ")";
+                            << maxFreePercentage << ")";
         return false;
     }
-    size_t initial_object_size = options.GetInitHeapSizeLimit();
-    size_t max_object_size = options.GetHeapSizeLimit();
-    bool was_set_initial_object_size = options.WasSetInitHeapSizeLimit();
-    bool was_set_max_object_size = options.WasSetHeapSizeLimit();
-    if (!was_set_initial_object_size && was_set_max_object_size) {
-        initial_object_size = max_object_size;
-    } else if (initial_object_size > max_object_size) {
-        if (was_set_initial_object_size && !was_set_max_object_size) {
+    size_t initialObjectSize = options.GetInitHeapSizeLimit();
+    size_t maxObjectSize = options.GetHeapSizeLimit();
+    bool wasSetInitialObjectSize = options.WasSetInitHeapSizeLimit();
+    bool wasSetMaxObjectSize = options.WasSetHeapSizeLimit();
+    if (!wasSetInitialObjectSize && wasSetMaxObjectSize) {
+        initialObjectSize = maxObjectSize;
+    } else if (initialObjectSize > maxObjectSize) {
+        if (wasSetInitialObjectSize && !wasSetMaxObjectSize) {
             // Initial object heap size was set more default maximum object heap size, so set maximum heap size as
             // initial heap size
-            max_object_size = initial_object_size;
+            maxObjectSize = initialObjectSize;
         } else {  // In this case user set initial object heap size more maximum object heap size explicitly
-            LOG(ERROR, RUNTIME) << "Initial heap size (" << initial_object_size << ") must be <= max heap size ("
-                                << max_object_size << ")";
+            LOG(ERROR, RUNTIME) << "Initial heap size (" << initialObjectSize << ") must be <= max heap size ("
+                                << maxObjectSize << ")";
             return false;
         }
     }
-    initial_object_size =
-        std::max(AlignDown(initial_object_size, PANDA_POOL_ALIGNMENT_IN_BYTES), PANDA_POOL_ALIGNMENT_IN_BYTES);
-    max_object_size =
-        std::max(AlignDown(max_object_size, PANDA_POOL_ALIGNMENT_IN_BYTES), PANDA_POOL_ALIGNMENT_IN_BYTES);
+    initialObjectSize =
+        std::max(AlignDown(initialObjectSize, PANDA_POOL_ALIGNMENT_IN_BYTES), PANDA_POOL_ALIGNMENT_IN_BYTES);
+    maxObjectSize = std::max(AlignDown(maxObjectSize, PANDA_POOL_ALIGNMENT_IN_BYTES), PANDA_POOL_ALIGNMENT_IN_BYTES);
     // Initialize memory spaces sizes
-    mem::MemConfig::Initialize(max_object_size, options.GetInternalMemorySizeLimit(),
+    mem::MemConfig::Initialize(maxObjectSize, options.GetInternalMemorySizeLimit(),
                                options.GetCompilerMemorySizeLimit(), options.GetCodeCacheSizeLimit(),
                                options.GetFramesMemorySizeLimit(), options.GetCoroutinesStackMemLimit(),
-                               initial_object_size);
+                               initialObjectSize);
     PoolManager::Initialize();
     return true;
 }
@@ -312,7 +310,7 @@ inline bool CreateMemorySpaces(const RuntimeOptions &options)
 // Deprecated. Only for capability with js_runtime.
 bool Runtime::Create(const RuntimeOptions &options, const std::vector<LanguageContextBase *> &ctxs)
 {
-    CTXS_JS_RUNTIME = ctxs.front();
+    g_ctxsJsRuntime = ctxs.front();
     return Runtime::Create(options);
 }
 
@@ -326,7 +324,7 @@ bool Runtime::Create(const RuntimeOptions &options)
     IntrusiveTestOption::SetTestId(options);
 
     const_cast<RuntimeOptions &>(options).InitializeRuntimeSpacesAndType();
-    trace::ScopedTrace scoped_trace("Runtime::Create");
+    trace::ScopedTrace scopedTrace("Runtime::Create");
 
     os::CpuAffinityManager::Initialize();
 
@@ -335,14 +333,14 @@ bool Runtime::Create(const RuntimeOptions &options)
         return false;
     }
 
-    mem::InternalAllocatorPtr internal_allocator =
+    mem::InternalAllocatorPtr internalAllocator =
         RuntimeInternalAllocator::Create(options.UseMallocForInternalAllocations());
 
     BlockSignals();
 
     CreateDfxController(options);
 
-    CreateInstance(options, internal_allocator);
+    CreateInstance(options, internalAllocator);
 
     if (instance_ == nullptr) {
         LOG(ERROR, RUNTIME) << "Failed to create runtime instance";
@@ -419,14 +417,14 @@ bool Runtime::Destroy()
         return false;
     }
 
-    trace::ScopedTrace scoped_trace("Runtime shutdown");
+    trace::ScopedTrace scopedTrace("Runtime shutdown");
 
     if (instance_->GetOptions().IsSamplingProfilerEnable()) {
         instance_->GetTools().StopSamplingProfiler();
     }
 
     // when signal start, but no signal stop tracing, should stop it
-    if (Trace::is_tracing_) {
+    if (Trace::isTracing_) {
         Trace::StopTracing();
     }
 
@@ -459,21 +457,21 @@ bool Runtime::Destroy()
     // uses barriers
     instance_->GetPandaVM()->StopGC();
 
-    if (task_scheduler_ != nullptr) {
-        task_scheduler_->Finalize();
+    if (taskScheduler_ != nullptr) {
+        taskScheduler_->Finalize();
     }
 
     if (IsEnabled(options_.GetVerificationMode())) {
-        verifier::DestroyService(instance_->verifier_service_, options_.IsVerificationUpdateCache());
+        verifier::DestroyService(instance_->verifierService_, options_.IsVerificationUpdateCache());
     }
 
     DestroyUnderLockHolder();
     RuntimeInternalAllocator::Destroy();
 
     os::CpuAffinityManager::Finalize();
-    if (task_scheduler_ != nullptr) {
+    if (taskScheduler_ != nullptr) {
         taskmanager::TaskScheduler::Destroy();
-        task_scheduler_ = nullptr;
+        taskScheduler_ = nullptr;
     }
 
     return true;
@@ -483,9 +481,8 @@ void Runtime::InitializeVerifierRuntime()
 {
     auto mode = options_.GetVerificationMode();
     if (IsEnabled(mode)) {
-        std::string const &cache_file = options_.GetVerificationCacheFile();
-        verifier_service_ =
-            panda::verifier::CreateService(verifier_config_, internal_allocator_, class_linker_, cache_file);
+        std::string const &cacheFile = options_.GetVerificationCacheFile();
+        verifierService_ = panda::verifier::CreateService(verifierConfig_, internalAllocator_, classLinker_, cacheFile);
     }
 }
 
@@ -514,12 +511,12 @@ void Runtime::Abort(const char *message /* = nullptr */)
     std::abort();
 }
 
-Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr internal_allocator)
-    : internal_allocator_(internal_allocator),
-      notification_manager_(new RuntimeNotificationManager(internal_allocator_)),
+Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr internalAllocator)
+    : internalAllocator_(internalAllocator),
+      notificationManager_(new RuntimeNotificationManager(internalAllocator_)),
       cha_(new ClassHierarchyAnalysis)
 {
-    Runtime::runtime_type_ = options.GetRuntimeType();
+    Runtime::runtimeType_ = options.GetRuntimeType();
     /* @sync 1
      * @description Right before setting runtime options in Runtime constructor
      */
@@ -537,9 +534,9 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
         extensions.push_back(GetLanguageContext(space).CreateClassLinkerExtension());
     }
 
-    class_linker_ = new ClassLinker(internal_allocator_, std::move(extensions));
+    classLinker_ = new ClassLinker(internalAllocator_, std::move(extensions));
 #ifndef PANDA_TARGET_WINDOWS
-    signal_manager_ = new SignalManager(internal_allocator_);
+    signalManager_ = new SignalManager(internalAllocator_);
 #endif
 
     if (IsEnableMemoryHooks()) {
@@ -547,22 +544,22 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
         panda::os::mem_hooks::PandaHooks::Enable();
     }
 
-    save_profiling_info_ = options_.IsCompilerEnableJit() && options_.IsProfilesaverEnabled();
+    saveProfilingInfo_ = options_.IsCompilerEnableJit() && options_.IsProfilesaverEnabled();
 
 #ifdef PANDA_COMPILER_ENABLE
     // NOTE(maksenov): Enable JIT for debug mode
-    is_jit_enabled_ = !this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit();
+    isJitEnabled_ = !this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit();
 #else
     is_jit_enabled_ = false;
 #endif
 
-    verifier_config_ = panda::verifier::NewConfig();
+    verifierConfig_ = panda::verifier::NewConfig();
     InitializeVerifierRuntime();
 
-    is_zygote_ = options_.IsStartAsZygote();
+    isZygote_ = options_.IsStartAsZygote();
 
 #ifdef PANDA_ENABLE_RELAYOUT_PROFILE
-    relayout_profiler_ = internal_allocator_->New<RelayoutProfiler>();
+    relayoutProfiler_ = internalAllocator_->New<RelayoutProfiler>();
 #endif
     /* @sync 2
      * @description At the very end of the Runtime's constructor when all initialization actions have completed.
@@ -571,34 +568,34 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
 
 Runtime::~Runtime()
 {
-    panda::verifier::DestroyConfig(verifier_config_);
+    panda::verifier::DestroyConfig(verifierConfig_);
 
     if (IsEnableMemoryHooks()) {
         panda::os::mem_hooks::PandaHooks::Disable();
     }
-    trace::ScopedTrace scoped_trace("Delete state");
+    trace::ScopedTrace scopedTrace("Delete state");
 
 #ifndef PANDA_TARGET_WINDOWS
-    signal_manager_->DeleteHandlersArray();
-    delete signal_manager_;
+    signalManager_->DeleteHandlersArray();
+    delete signalManager_;
 #endif
     delete cha_;
-    delete class_linker_;
+    delete classLinker_;
     if (dprofiler_ != nullptr) {
-        internal_allocator_->Delete(dprofiler_);
+        internalAllocator_->Delete(dprofiler_);
     }
-    delete notification_manager_;
+    delete notificationManager_;
 
-    if (panda_vm_ != nullptr) {
-        internal_allocator_->Delete(panda_vm_);
+    if (pandaVm_ != nullptr) {
+        internalAllocator_->Delete(pandaVm_);
         /* @sync 1
          * @description: This point is right after runtime deastroys panda VM.
          * */
     }
 
 #ifdef PANDA_ENABLE_RELAYOUT_PROFILE
-    if (relayout_profiler_ != nullptr) {
-        internal_allocator_->Delete(relayout_profiler_);
+    if (relayoutProfiler_ != nullptr) {
+        internalAllocator_->Delete(relayoutProfiler_);
     }
 #endif
     /* @sync 1
@@ -614,9 +611,8 @@ Runtime::~Runtime()
 
 bool Runtime::IsEnableMemoryHooks() const
 {
-    auto log_level = Logger::IsInitialized() ? Logger::GetLevel() : Logger::Level::DEBUG;
-    return options_.IsLimitStandardAlloc() &&
-           (log_level == Logger::Level::FATAL || log_level == Logger::Level::ERROR) &&
+    auto logLevel = Logger::IsInitialized() ? Logger::GetLevel() : Logger::Level::DEBUG;
+    return options_.IsLimitStandardAlloc() && (logLevel == Logger::Level::FATAL || logLevel == Logger::Level::ERROR) &&
            (!options_.UseMallocForInternalAllocations());
 }
 
@@ -634,23 +630,23 @@ static PandaVector<PandaString> GetPandaFilesList(const std::vector<std::string>
 PandaVector<PandaString> Runtime::GetBootPandaFiles()
 {
     // NOLINTNEXTLINE(readability-redundant-string-cstr)
-    const auto &boot_panda_files = GetPandaFilesList(options_.GetBootPandaFiles());
-    return boot_panda_files;
+    const auto &bootPandaFiles = GetPandaFilesList(options_.GetBootPandaFiles());
+    return bootPandaFiles;
 }
 
 PandaVector<PandaString> Runtime::GetPandaFiles()
 {
     // NOLINTNEXTLINE(readability-redundant-string-cstr)
-    const auto &app_panda_files = GetPandaFilesList(options_.GetPandaFiles());
-    return app_panda_files;
+    const auto &appPandaFiles = GetPandaFilesList(options_.GetPandaFiles());
+    return appPandaFiles;
 }
 
-bool Runtime::LoadBootPandaFiles(panda_file::File::OpenMode open_mode)
+bool Runtime::LoadBootPandaFiles(panda_file::File::OpenMode openMode)
 {
     // NOLINTNEXTLINE(readability-redundant-string-cstr)
-    const auto &boot_panda_files = options_.GetBootPandaFiles();
-    for (const auto &name : boot_panda_files) {
-        if (!FileManager::LoadAbcFile(name, open_mode)) {
+    const auto &bootPandaFiles = options_.GetBootPandaFiles();
+    for (const auto &name : bootPandaFiles) {
+        if (!FileManager::LoadAbcFile(name, openMode)) {
 #ifdef PANDA_PRODUCT_BUILD
             LOG(FATAL, RUNTIME) << "Load boot panda file failed: " << name;
 #else
@@ -665,91 +661,91 @@ bool Runtime::LoadBootPandaFiles(panda_file::File::OpenMode open_mode)
 
 void Runtime::CheckBootPandaFiles()
 {
-    auto skip_last = static_cast<size_t>(options_.GetPandaFiles().empty() && !options_.IsStartAsZygote());
+    auto skipLast = static_cast<size_t>(options_.GetPandaFiles().empty() && !options_.IsStartAsZygote());
     // NOLINTNEXTLINE(readability-redundant-string-cstr)
-    const auto &boot_panda_files = options_.GetBootPandaFiles();
-    for (size_t i = 0; i + skip_last < boot_panda_files.size(); ++i) {
-        auto &name = boot_panda_files[i];
-        if (class_linker_->GetAotManager()->FindPandaFile(name) == nullptr) {
+    const auto &bootPandaFiles = options_.GetBootPandaFiles();
+    for (size_t i = 0; i + skipLast < bootPandaFiles.size(); ++i) {
+        auto &name = bootPandaFiles[i];
+        if (classLinker_->GetAotManager()->FindPandaFile(name) == nullptr) {
             LOG(FATAL, RUNTIME) << "AOT file wasn't loaded for panda file: " << name;
         }
     }
 }
 
-void Runtime::SetDaemonMemoryLeakThreshold(uint32_t daemon_memory_leak_threshold)
+void Runtime::SetDaemonMemoryLeakThreshold(uint32_t daemonMemoryLeakThreshold)
 {
-    RuntimeInternalAllocator::SetDaemonMemoryLeakThreshold(daemon_memory_leak_threshold);
+    RuntimeInternalAllocator::SetDaemonMemoryLeakThreshold(daemonMemoryLeakThreshold);
 }
 
-void Runtime::SetDaemonThreadsCount(uint32_t daemon_threads_cnt)
+void Runtime::SetDaemonThreadsCount(uint32_t daemonThreadsCnt)
 {
-    RuntimeInternalAllocator::SetDaemonThreadsCount(daemon_threads_cnt);
+    RuntimeInternalAllocator::SetDaemonThreadsCount(daemonThreadsCnt);
 }
 
 mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang)
 {
-    auto gc_type = panda::mem::GCTypeFromString(options.GetGcType(plugins::LangToRuntimeType(lang)));
+    auto gcType = panda::mem::GCTypeFromString(options.GetGcType(plugins::LangToRuntimeType(lang)));
     if (options.IsNoAsyncJit()) {
         // With no-async-jit we can force compilation inside of c2i bridge (we have DecrementHotnessCounter there)
         // and it can trigger GC which can move objects which are arguments for the method
         // because StackWalker ignores c2i frame
-        return (gc_type != panda::mem::GCType::EPSILON_GC) ? (panda::mem::GCType::STW_GC) : gc_type;
+        return (gcType != panda::mem::GCType::EPSILON_GC) ? (panda::mem::GCType::STW_GC) : gcType;
     }
-    return gc_type;
+    return gcType;
 }
 
 bool Runtime::LoadVerificationConfig()
 {
     return !IsEnabled(options_.GetVerificationMode()) ||
-           verifier::LoadConfigFile(verifier_config_, options_.GetVerificationConfigFile());
+           verifier::LoadConfigFile(verifierConfig_, options_.GetVerificationConfigFile());
 }
 
-bool Runtime::CreatePandaVM(std::string_view runtime_type)
+bool Runtime::CreatePandaVM(std::string_view runtimeType)
 {
     ManagedThread::Initialize();
 
-    panda_vm_ = PandaVM::Create(this, options_, runtime_type);
-    if (panda_vm_ == nullptr) {
+    pandaVm_ = PandaVM::Create(this, options_, runtimeType);
+    if (pandaVm_ == nullptr) {
         LOG(ERROR, RUNTIME) << "Failed to create panda vm";
         return false;
     }
 
-    if (task_scheduler_ != nullptr) {
-        task_scheduler_->Initialize();
+    if (taskScheduler_ != nullptr) {
+        taskScheduler_->Initialize();
     }
 
-    panda_file::File::OpenMode open_mode = GetLanguageContext(GetRuntimeType()).GetBootPandaFilesOpenMode();
-    bool load_boot_panda_files_is_failed = options_.ShouldLoadBootPandaFiles() && !LoadBootPandaFiles(open_mode);
-    if (load_boot_panda_files_is_failed) {
+    panda_file::File::OpenMode openMode = GetLanguageContext(GetRuntimeType()).GetBootPandaFilesOpenMode();
+    bool loadBootPandaFilesIsFailed = options_.ShouldLoadBootPandaFiles() && !LoadBootPandaFiles(openMode);
+    if (loadBootPandaFilesIsFailed) {
         LOG(ERROR, RUNTIME) << "Failed to load boot panda files";
         return false;
     }
 
-    auto aot_boot_ctx = class_linker_->GetClassContextForAot(options_.IsAotVerifyAbsPath());
+    auto aotBootCtx = classLinker_->GetClassContextForAot(options_.IsAotVerifyAbsPath());
     if (options_.GetPandaFiles().empty() && !options_.IsStartAsZygote()) {
         // Main from panda.cpp puts application file into boot panda files as the last element.
         // During AOT compilation of boot files no application panda files were used.
-        auto idx = aot_boot_ctx.find_last_of(':');
+        auto idx = aotBootCtx.find_last_of(':');
         if (idx == std::string::npos) {
             // Only application file is in aot_boot_ctx
-            class_linker_->GetAotManager()->SetAppClassContext(aot_boot_ctx);
-            aot_boot_ctx = "";
+            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx);
+            aotBootCtx = "";
         } else {
             // Last file is an application
-            class_linker_->GetAotManager()->SetAppClassContext(aot_boot_ctx.substr(idx + 1));
-            aot_boot_ctx = aot_boot_ctx.substr(0, idx);
+            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx.substr(idx + 1));
+            aotBootCtx = aotBootCtx.substr(0, idx);
         }
     }
-    class_linker_->GetAotManager()->SetBootClassContext(aot_boot_ctx);
-    if (panda_vm_->GetLanguageContext().IsEnabledCHA()) {
-        class_linker_->GetAotManager()->VerifyClassHierarchy();
+    classLinker_->GetAotManager()->SetBootClassContext(aotBootCtx);
+    if (pandaVm_->GetLanguageContext().IsEnabledCHA()) {
+        classLinker_->GetAotManager()->VerifyClassHierarchy();
     }
 #ifndef PANDA_PRODUCT_BUILD
     if (Runtime::GetOptions().IsEnableAnForce() && !Runtime::GetOptions().IsArkAot()) {
         CheckBootPandaFiles();
     }
 #endif  // PANDA_PRODUCT_BUILD
-    notification_manager_->SetRendezvous(panda_vm_->GetRendezvous());
+    notificationManager_->SetRendezvous(pandaVm_->GetRendezvous());
 
     return true;
 }
@@ -761,17 +757,17 @@ bool Runtime::InitializePandaVM()
         LOG(FATAL, RUNTIME) << "Non compressed strings is not supported";
     }
 
-    if (!class_linker_->Initialize(options_.IsRuntimeCompressedStringsEnabled())) {
+    if (!classLinker_->Initialize(options_.IsRuntimeCompressedStringsEnabled())) {
         LOG(ERROR, RUNTIME) << "Failed to initialize class loader";
         return false;
     }
 
-    if (panda_vm_->ShouldEnableDebug()) {
+    if (pandaVm_->ShouldEnableDebug()) {
         SetDebugMode(true);
         StartDebugSession();
     }
 
-    if (!panda_vm_->Initialize()) {
+    if (!pandaVm_->Initialize()) {
         LOG(ERROR, RUNTIME) << "Failed to initialize panda vm";
         return false;
     }
@@ -781,13 +777,13 @@ bool Runtime::InitializePandaVM()
 
 bool Runtime::HandleAotOptions()
 {
-    auto aot_files = options_.GetAotFiles();
+    auto aotFiles = options_.GetAotFiles();
     const auto &name = options_.GetAotFile();
     if (!name.empty()) {
-        aot_files.push_back(name);
+        aotFiles.push_back(name);
     }
-    if (!aot_files.empty()) {
-        for (auto &fname : aot_files) {
+    if (!aotFiles.empty()) {
+        for (auto &fname : aotFiles) {
             auto res = FileManager::LoadAnFile(fname, true);
             if (!res) {
                 LOG(FATAL, AOT) << "Failed to load AoT file: " << res.Error();
@@ -804,31 +800,31 @@ bool Runtime::HandleAotOptions()
 void Runtime::HandleJitOptions()
 {
 #ifndef PANDA_TARGET_WINDOWS
-    auto signal_manager_flag = DfxController::GetOptionValue(DfxOptionHandler::SIGNAL_HANDLER);
-    if (signal_manager_flag == 1) {
-        signal_manager_->InitSignals();
+    auto signalManagerFlag = DfxController::GetOptionValue(DfxOptionHandler::SIGNAL_HANDLER);
+    if (signalManagerFlag == 1) {
+        signalManager_->InitSignals();
     } else {
         LOG(ERROR, DFX) << "signal handler disabled, setprop ark.dfx.options to restart";
     }
 #endif
 
-    bool enable_np_handler = options_.IsCompilerEnableJit() && panda::compiler::OPTIONS.IsCompilerImplicitNullCheck();
+    bool enableNpHandler = options_.IsCompilerEnableJit() && panda::compiler::g_options.IsCompilerImplicitNullCheck();
     if (GetClassLinker()->GetAotManager()->HasAotFiles()) {
         ASSERT(GetPandaVM()->GetCompiler()->IsNoAsyncJit() == options_.IsNoAsyncJit());
         if (GetPandaVM()->GetCompiler()->IsNoAsyncJit()) {
             LOG(FATAL, AOT) << "We can't use the option --no-async-jit=true with AOT";
         }
-        enable_np_handler = true;
+        enableNpHandler = true;
     }
 
 #ifndef PANDA_TARGET_WINDOWS
-    if (signal_manager_->IsInitialized() && enable_np_handler) {
-        auto *handler = signal_manager_->GetAllocator()->New<NullPointerHandler>();
-        signal_manager_->AddHandler(handler, true);
+    if (signalManager_->IsInitialized() && enableNpHandler) {
+        auto *handler = signalManager_->GetAllocator()->New<NullPointerHandler>();
+        signalManager_->AddHandler(handler, true);
     }
     {
-        auto *handler = signal_manager_->GetAllocator()->New<StackOverflowHandler>();
-        signal_manager_->AddHandler(handler, true);
+        auto *handler = signalManager_->GetAllocator()->New<StackOverflowHandler>();
+        signalManager_->AddHandler(handler, true);
     }
 #endif
 }
@@ -850,11 +846,11 @@ bool Runtime::CheckOptionsConsistency()
 
 void Runtime::SetPandaPath()
 {
-    PandaVector<PandaString> app_panda_files = GetPandaFiles();
-    for (size_t i = 0; i < app_panda_files.size(); ++i) {
-        panda_path_string_ += PandaStringToStd(app_panda_files[i]);
-        if (i != app_panda_files.size() - 1) {
-            panda_path_string_ += ":";
+    PandaVector<PandaString> appPandaFiles = GetPandaFiles();
+    for (size_t i = 0; i < appPandaFiles.size(); ++i) {
+        pandaPathString_ += PandaStringToStd(appPandaFiles[i]);
+        if (i != appPandaFiles.size() - 1) {
+            pandaPathString_ += ":";
         }
     }
 }
@@ -862,7 +858,7 @@ void Runtime::SetPandaPath()
 void Runtime::SetThreadClassPointers()
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
-    class_linker_->InitializeRoots(thread);
+    classLinker_->InitializeRoots(thread);
     auto ext = GetClassLinker()->GetExtension(GetLanguageContext(GetRuntimeType()));
     if (ext != nullptr) {
         thread->SetStringClassPtr(ext->GetClassRoot(ClassRoot::STRING));
@@ -872,7 +868,7 @@ void Runtime::SetThreadClassPointers()
 
 bool Runtime::Initialize()
 {
-    trace::ScopedTrace scoped_trace("Runtime::Initialize");
+    trace::ScopedTrace scopedTrace("Runtime::Initialize");
 
     if (!CheckOptionsConsistency()) {
         return false;
@@ -889,8 +885,8 @@ bool Runtime::Initialize()
     }
 
 #if defined(PANDA_COMPILER_DEBUG_INFO) && !defined(NDEBUG)
-    if (!compiler::OPTIONS.WasSetCompilerEmitDebugInfo()) {
-        compiler::OPTIONS.SetCompilerEmitDebugInfo(true);
+    if (!compiler::g_options.WasSetCompilerEmitDebugInfo()) {
+        compiler::g_options.SetCompilerEmitDebugInfo(true);
     }
 #endif
 
@@ -905,19 +901,19 @@ bool Runtime::Initialize()
 
     SetThreadClassPointers();
 
-    finger_print_ = ConvertToString(options_.GetFingerprint());
+    fingerPrint_ = ConvertToString(options_.GetFingerprint());
 
     HandleJitOptions();
 
     SetPandaPath();
 
-    if (!panda_vm_->InitializeFinish()) {
+    if (!pandaVm_->InitializeFinish()) {
         LOG(ERROR, RUNTIME) << "Failed to finish panda vm initialization";
         return false;
     }
 
     if (IsDebugMode()) {
-        panda_vm_->LoadDebuggerAgent();
+        pandaVm_->LoadDebuggerAgent();
     }
 
     if (options_.WasSetMemAllocDumpExec()) {
@@ -930,27 +926,27 @@ bool Runtime::Initialize()
     mem::GcHung::InitPreFork(false);
 #endif  // PANDA_TARGET_MOBILE
 
-    is_initialized_ = true;
+    isInitialized_ = true;
     return true;
 }
 
-int Runtime::StartMemAllocDumper(const PandaString &dump_file)
+int Runtime::StartMemAllocDumper(const PandaString &dumpFile)
 {
-    ASSERT(mem_alloc_dumper_ == nullptr);
+    ASSERT(memAllocDumper_ == nullptr);
 
-    mem_alloc_dumper_ = internal_allocator_->New<tooling::MemoryAllocationDumper>(dump_file, Runtime::GetCurrent());
+    memAllocDumper_ = internalAllocator_->New<tooling::MemoryAllocationDumper>(dumpFile, Runtime::GetCurrent());
     return 0;
 }
 
-static bool GetClassAndMethod(std::string_view entry_point, PandaString *class_name, PandaString *method_name)
+static bool GetClassAndMethod(std::string_view entryPoint, PandaString *className, PandaString *methodName)
 {
-    size_t pos = entry_point.find_last_of("::");
+    size_t pos = entryPoint.find_last_of("::");
     if (pos == std::string_view::npos) {
         return false;
     }
 
-    *class_name = PandaString(entry_point.substr(0, pos - 1));
-    *method_name = PandaString(entry_point.substr(pos + 1));
+    *className = PandaString(entryPoint.substr(0, pos - 1));
+    *methodName = PandaString(entryPoint.substr(pos + 1));
 
     return true;
 }
@@ -963,48 +959,48 @@ static const uint8_t *GetStringArrayDescriptor(const LanguageContext &ctx, Panda
     return utf::CStringAsMutf8(out->c_str());
 }
 
-Expected<Method *, Runtime::Error> Runtime::ResolveEntryPoint(std::string_view entry_point)
+Expected<Method *, Runtime::Error> Runtime::ResolveEntryPoint(std::string_view entryPoint)
 {
-    PandaString class_name;
-    PandaString method_name;
+    PandaString className;
+    PandaString methodName;
 
-    if (!GetClassAndMethod(entry_point, &class_name, &method_name)) {
-        LOG(ERROR, RUNTIME) << "Invalid entry point: " << entry_point;
+    if (!GetClassAndMethod(entryPoint, &className, &methodName)) {
+        LOG(ERROR, RUNTIME) << "Invalid entry point: " << entryPoint;
         return Unexpected(Runtime::Error::INVALID_ENTRY_POINT);
     }
 
     PandaString descriptor;
-    auto class_name_bytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(class_name.c_str()), &descriptor);
-    auto method_name_bytes = utf::CStringAsMutf8(method_name.c_str());
+    auto classNameBytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor);
+    auto methodNameBytes = utf::CStringAsMutf8(methodName.c_str());
 
     Class *cls = nullptr;
-    ClassLinkerContext *context = app_context_.ctx;
+    ClassLinkerContext *context = appContext_.ctx;
     if (context == nullptr) {
-        context = class_linker_->GetExtension(GetLanguageContext(GetRuntimeType()))->GetBootContext();
+        context = classLinker_->GetExtension(GetLanguageContext(GetRuntimeType()))->GetBootContext();
     }
 
     ManagedThread *thread = ManagedThread::GetCurrent();
     ScopedManagedCodeThread sa(thread);
-    cls = class_linker_->GetClass(class_name_bytes, true, context);
+    cls = classLinker_->GetClass(classNameBytes, true, context);
 
     if (cls == nullptr) {
-        LOG(ERROR, RUNTIME) << "Cannot find class '" << class_name << "'";
+        LOG(ERROR, RUNTIME) << "Cannot find class '" << className << "'";
         return Unexpected(Runtime::Error::CLASS_NOT_FOUND);
     }
 
     LanguageContext ctx = GetLanguageContext(*cls);
-    PandaString string_array_descriptor;
-    GetStringArrayDescriptor(ctx, &string_array_descriptor);
+    PandaString stringArrayDescriptor;
+    GetStringArrayDescriptor(ctx, &stringArrayDescriptor);
 
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
-                        Method::Proto::RefTypeVector {string_array_descriptor});
+                        Method::Proto::RefTypeVector {stringArrayDescriptor});
 
-    auto method = cls->GetDirectMethod(method_name_bytes, proto);
+    auto method = cls->GetDirectMethod(methodNameBytes, proto);
     if (method == nullptr) {
-        method = cls->GetDirectMethod(method_name_bytes);
+        method = cls->GetDirectMethod(methodNameBytes);
         if (method == nullptr) {
-            LOG(ERROR, RUNTIME) << "Cannot find method '" << entry_point << "'";
+            LOG(ERROR, RUNTIME) << "Cannot find method '" << entryPoint << "'";
             return Unexpected(Runtime::Error::METHOD_NOT_FOUND);
         }
     }
@@ -1014,19 +1010,19 @@ Expected<Method *, Runtime::Error> Runtime::ResolveEntryPoint(std::string_view e
 
 PandaString Runtime::GetMemoryStatistics()
 {
-    return panda_vm_->GetMemStats()->GetStatistics();
+    return pandaVm_->GetMemStats()->GetStatistics();
 }
 
 PandaString Runtime::GetFinalStatistics()
 {
-    return panda_vm_->GetGCStats()->GetFinalStatistics(panda_vm_->GetHeapManager());
+    return pandaVm_->GetGCStats()->GetFinalStatistics(pandaVm_->GetHeapManager());
 }
 
 void Runtime::NotifyAboutLoadedModules()
 {
     PandaVector<const panda_file::File *> pfs;
 
-    class_linker_->EnumerateBootPandaFiles([&pfs](const panda_file::File &pf) {
+    classLinker_->EnumerateBootPandaFiles([&pfs](const panda_file::File &pf) {
         pfs.push_back(&pf);
         return true;
     });
@@ -1037,30 +1033,30 @@ void Runtime::NotifyAboutLoadedModules()
 }
 
 Expected<LanguageContext, Runtime::Error> Runtime::ExtractLanguageContext(const panda_file::File *pf,
-                                                                          std::string_view entry_point)
+                                                                          std::string_view entryPoint)
 {
-    PandaString class_name;
-    PandaString method_name;
-    if (!GetClassAndMethod(entry_point, &class_name, &method_name)) {
-        LOG(ERROR, RUNTIME) << "Invalid entry point: " << entry_point;
+    PandaString className;
+    PandaString methodName;
+    if (!GetClassAndMethod(entryPoint, &className, &methodName)) {
+        LOG(ERROR, RUNTIME) << "Invalid entry point: " << entryPoint;
         return Unexpected(Runtime::Error::INVALID_ENTRY_POINT);
     }
 
     PandaString descriptor;
-    auto class_name_bytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(class_name.c_str()), &descriptor);
-    auto method_name_bytes = utf::CStringAsMutf8(method_name.c_str());
+    auto classNameBytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor);
+    auto methodNameBytes = utf::CStringAsMutf8(methodName.c_str());
 
-    auto class_id = pf->GetClassId(class_name_bytes);
-    if (!class_id.IsValid() || pf->IsExternal(class_id)) {
-        LOG(ERROR, RUNTIME) << "Cannot find class '" << class_name << "'";
+    auto classId = pf->GetClassId(classNameBytes);
+    if (!classId.IsValid() || pf->IsExternal(classId)) {
+        LOG(ERROR, RUNTIME) << "Cannot find class '" << className << "'";
         return Unexpected(Runtime::Error::CLASS_NOT_FOUND);
     }
 
-    panda_file::ClassDataAccessor cda(*pf, class_id);
+    panda_file::ClassDataAccessor cda(*pf, classId);
     LanguageContext ctx = GetLanguageContext(&cda);
     bool found = false;
-    cda.EnumerateMethods([this, &pf, method_name_bytes, &found, &ctx](panda_file::MethodDataAccessor &mda) {
-        if (!found && utf::IsEqual(pf->GetStringData(mda.GetNameId()).data, method_name_bytes)) {
+    cda.EnumerateMethods([this, &pf, methodNameBytes, &found, &ctx](panda_file::MethodDataAccessor &mda) {
+        if (!found && utf::IsEqual(pf->GetStringData(mda.GetNameId()).data, methodNameBytes)) {
             found = true;
             auto val = mda.GetSourceLang();
             if (val) {
@@ -1070,7 +1066,7 @@ Expected<LanguageContext, Runtime::Error> Runtime::ExtractLanguageContext(const 
     });
 
     if (!found) {
-        LOG(ERROR, RUNTIME) << "Cannot find method '" << entry_point << "'";
+        LOG(ERROR, RUNTIME) << "Cannot find method '" << entryPoint << "'";
         return Unexpected(Runtime::Error::METHOD_NOT_FOUND);
     }
 
@@ -1078,18 +1074,18 @@ Expected<LanguageContext, Runtime::Error> Runtime::ExtractLanguageContext(const 
 }
 
 std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::string_view filename,
-                                                                           std::string_view entry_point)
+                                                                           std::string_view entryPoint)
 {
-    bool is_loaded = false;
-    class_linker_->EnumerateBootPandaFiles([&is_loaded, filename](const panda_file::File &pf) {
+    bool isLoaded = false;
+    classLinker_->EnumerateBootPandaFiles([&isLoaded, filename](const panda_file::File &pf) {
         if (pf.GetFilename() == filename) {
-            is_loaded = true;
+            isLoaded = true;
             return false;
         }
         return true;
     });
 
-    if (is_loaded) {
+    if (isLoaded) {
         return {};
     }
 
@@ -1099,76 +1095,76 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
         return Runtime::Error::PANDA_FILE_LOAD_ERROR;
     }
 
-    auto res = ExtractLanguageContext(pf.get(), entry_point);
+    auto res = ExtractLanguageContext(pf.get(), entryPoint);
 
     if (!res) {
         return res.Error();
     }
 
-    if (!class_linker_->HasExtension(res.Value())) {
+    if (!classLinker_->HasExtension(res.Value())) {
         LOG(ERROR, RUNTIME) << "class linker hasn't " << res.Value() << " language extension";
         return Runtime::Error::CLASS_LINKER_EXTENSION_NOT_FOUND;
     }
 
-    auto *ext = class_linker_->GetExtension(res.Value());
-    app_context_.lang = ext->GetLanguage();
-    app_context_.ctx = class_linker_->GetAppContext(filename);
-    if (app_context_.ctx == nullptr) {
-        auto app_files = GetPandaFiles();
-        auto found_iter = std::find_if(app_files.begin(), app_files.end(),
-                                       [&](auto &app_file_name) { return app_file_name == filename; });
-        if (found_iter == app_files.end()) {
+    auto *ext = classLinker_->GetExtension(res.Value());
+    appContext_.lang = ext->GetLanguage();
+    appContext_.ctx = classLinker_->GetAppContext(filename);
+    if (appContext_.ctx == nullptr) {
+        auto appFiles = GetPandaFiles();
+        auto foundIter =
+            std::find_if(appFiles.begin(), appFiles.end(), [&](auto &appFileName) { return appFileName == filename; });
+        if (foundIter == appFiles.end()) {
             PandaString path(filename);
-            app_files.push_back(path);
+            appFiles.push_back(path);
         }
-        app_context_.ctx = ext->CreateApplicationClassLinkerContext(app_files);
+        appContext_.ctx = ext->CreateApplicationClassLinkerContext(appFiles);
     }
 
-    PandaString aot_ctx;
-    app_context_.ctx->EnumeratePandaFiles(compiler::AotClassContextCollector(&aot_ctx, options_.IsAotVerifyAbsPath()));
-    class_linker_->GetAotManager()->SetAppClassContext(aot_ctx);
+    PandaString aotCtx;
+    appContext_.ctx->EnumeratePandaFiles(compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
+    classLinker_->GetAotManager()->SetAppClassContext(aotCtx);
 
     tooling::DebugInf::AddCodeMetaInfo(pf.get());
     return {};
 }
 
-Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filename, std::string_view entry_point,
+Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filename, std::string_view entryPoint,
                                                         const std::vector<std::string> &args)
 {
     if (options_.IsDistributedProfiling()) {
         // Create app name from path to executable file.
-        std::string_view app_name = [](std::string_view path) -> std::string_view {
+        std::string_view appName = [](std::string_view path) -> std::string_view {
             auto pos = path.find_last_of('/');
             return path.substr((pos == std::string_view::npos) ? 0 : (pos + 1));
         }(filename);
-        StartDProfiler(app_name);
+        StartDProfiler(appName);
     }
 
-    auto ctx_err = CreateApplicationClassLinkerContext(filename, entry_point);
+    auto ctxErr = CreateApplicationClassLinkerContext(filename, entryPoint);
 
-    if (ctx_err) {
-        return Unexpected(ctx_err.value());
+    if (ctxErr) {
+        return Unexpected(ctxErr.value());
     }
 
-    if (panda_vm_->GetLanguageContext().IsEnabledCHA()) {
-        class_linker_->GetAotManager()->VerifyClassHierarchy();
+    if (pandaVm_->GetLanguageContext().IsEnabledCHA()) {
+        classLinker_->GetAotManager()->VerifyClassHierarchy();
     }
 
     // Check if all input files are either quickened or not
-    uint32_t quickened_files = 0;
-    uint32_t panda_files = 0;
-    class_linker_->EnumeratePandaFiles([&quickened_files, &panda_files](const panda_file::File &pf) {
-        if (pf.GetHeader()->quickened_flag != 0) {
-            ++quickened_files;
+    uint32_t quickenedFiles = 0;
+    uint32_t pandaFiles = 0;
+    classLinker_->EnumeratePandaFiles([&quickenedFiles, &pandaFiles](const panda_file::File &pf) {
+        if (pf.GetHeader()->quickenedFlag != 0) {
+            ++quickenedFiles;
         }
-        panda_files++;
+        pandaFiles++;
         return true;
     });
-    if (quickened_files != 0 && quickened_files != panda_files) {
-        LOG(ERROR, RUNTIME) << "All input files should be either quickened or not. Got " << quickened_files
-                            << " quickened files out of " << panda_files << " input files.";
-        class_linker_->EnumeratePandaFiles([](const panda_file::File &pf) {
-            if (pf.GetHeader()->quickened_flag != 0) {
+    if (quickenedFiles != 0 && quickenedFiles != pandaFiles) {
+        LOG(ERROR, RUNTIME) << "All input files should be either quickened or not. Got " << quickenedFiles
+                            << " quickened files out of " << pandaFiles << " input files.";
+        classLinker_->EnumeratePandaFiles([](const panda_file::File &pf) {
+            if (pf.GetHeader()->quickenedFlag != 0) {
                 LOG(ERROR, RUNTIME) << "File " << pf.GetFilename() << " is quickened";
             } else {
                 LOG(ERROR, RUNTIME) << "File " << pf.GetFilename() << " is not quickened";
@@ -1178,58 +1174,58 @@ Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filenam
         UNREACHABLE();
     }
 
-    return Execute(entry_point, args);
+    return Execute(entryPoint, args);
 }
 
-Expected<int, Runtime::Error> Runtime::Execute(std::string_view entry_point, const std::vector<std::string> &args)
+Expected<int, Runtime::Error> Runtime::Execute(std::string_view entryPoint, const std::vector<std::string> &args)
 {
-    auto resolve_res = ResolveEntryPoint(entry_point);
+    auto resolveRes = ResolveEntryPoint(entryPoint);
 
-    if (!resolve_res) {
-        return Unexpected(resolve_res.Error());
+    if (!resolveRes) {
+        return Unexpected(resolveRes.Error());
     }
 
     NotifyAboutLoadedModules();
 
-    Method *method = resolve_res.Value();
+    Method *method = resolveRes.Value();
 
-    return panda_vm_->InvokeEntrypoint(method, args);
+    return pandaVm_->InvokeEntrypoint(method, args);
 }
 
-int Runtime::StartDProfiler(std::string_view app_name)
+int Runtime::StartDProfiler(std::string_view appName)
 {
     if (dprofiler_ != nullptr) {
         LOG(ERROR, RUNTIME) << "DProfiller already started";
         return -1;
     }
 
-    dprofiler_ = internal_allocator_->New<DProfiler>(app_name, Runtime::GetCurrent());
+    dprofiler_ = internalAllocator_->New<DProfiler>(appName, Runtime::GetCurrent());
     return 0;
 }
 
 Runtime::DebugSessionHandle Runtime::StartDebugSession()
 {
-    os::memory::LockHolder<os::memory::Mutex> lock(debug_session_creation_mutex_);
+    os::memory::LockHolder<os::memory::Mutex> lock(debugSessionCreationMutex_);
 
-    auto session = debug_session_;
+    auto session = debugSession_;
     if (session) {
         return session;
     }
 
     session = MakePandaShared<DebugSession>(*this);
 
-    debug_session_ = session;
+    debugSession_ = session;
 
     return session;
 }
 
 bool Runtime::Shutdown()
 {
-    if (mem_alloc_dumper_ != nullptr) {
-        internal_allocator_->Delete(mem_alloc_dumper_);
+    if (memAllocDumper_ != nullptr) {
+        internalAllocator_->Delete(memAllocDumper_);
     }
-    panda_vm_->UnloadDebuggerAgent();
-    debug_session_.reset();
+    pandaVm_->UnloadDebuggerAgent();
+    debugSession_.reset();
     ManagedThread::Shutdown();
     return true;
 }
@@ -1325,10 +1321,10 @@ Class *Runtime::GetClassRootForLiteralTag(const ClassLinkerExtension &ext, panda
 bool Runtime::GetLiteralTagAndValue(const panda_file::File &pf, uint32_t id, panda_file::LiteralTag *tag,
                                     panda_file::LiteralDataAccessor::LiteralValue *value)
 {
-    panda_file::File::EntityId literal_arrays_id = pf.GetLiteralArraysId();
-    panda_file::LiteralDataAccessor literal_data_accessor(pf, literal_arrays_id);
+    panda_file::File::EntityId literalArraysId = pf.GetLiteralArraysId();
+    panda_file::LiteralDataAccessor literalDataAccessor(pf, literalArraysId);
     bool result = false;
-    literal_data_accessor.EnumerateLiteralVals(
+    literalDataAccessor.EnumerateLiteralVals(
         panda_file::File::EntityId(id), [tag, value, &result](const panda_file::LiteralDataAccessor::LiteralValue &val,
                                                               const panda_file::LiteralTag &tg) {
             *tag = tg;
@@ -1377,8 +1373,8 @@ coretypes::Array *Runtime::ResolveLiteralArray(PandaVM *vm, const panda_file::Fi
     VMHandle<coretypes::Array> obj(ManagedThread::GetCurrent(), array);
     // NOLINTNEXTLINE(modernize-loop-convert)
     for (size_t i = 0; i < len; i++) {
-        auto str_id = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
-        auto str = Runtime::GetCurrent()->ResolveString(vm, pf, panda_file::File::EntityId(str_id), ctx);
+        auto strId = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
+        auto str = Runtime::GetCurrent()->ResolveString(vm, pf, panda_file::File::EntityId(strId), ctx);
         obj->Set<ObjectHeader *>(i, str);
     }
     return obj.GetPtr();
@@ -1407,9 +1403,9 @@ void Runtime::CreateDfxController(const RuntimeOptions &options)
     DfxController::SetOptionValue(DfxOptionHandler::MOBILE_LOG, options.GetMobileLogFlag());
     DfxController::SetOptionValue(DfxOptionHandler::DFXLOG, options.GetDfxLog());
 
-    auto compiler_nullcheck_flag = DfxController::GetOptionValue(DfxOptionHandler::COMPILER_NULLCHECK);
-    if (compiler_nullcheck_flag == 0) {
-        panda::compiler::OPTIONS.SetCompilerImplicitNullCheck(false);
+    auto compilerNullcheckFlag = DfxController::GetOptionValue(DfxOptionHandler::COMPILER_NULLCHECK);
+    if (compilerNullcheckFlag == 0) {
+        panda::compiler::g_options.SetCompilerImplicitNullCheck(false);
     }
 }
 
@@ -1441,7 +1437,7 @@ void Runtime::DumpForSigQuit(std::ostream &os)
 {
     os << "\n";
     os << "-> Dump class loaders\n";
-    class_linker_->EnumerateContextsForDump(
+    classLinker_->EnumerateContextsForDump(
         [](ClassLinkerContext *ctx, std::ostream &stream, ClassLinkerContext *parent) {
             ctx->Dump(stream);
             return ctx->FindClassLoaderParent(parent);
@@ -1461,17 +1457,16 @@ void Runtime::DumpForSigQuit(std::ostream &os)
 
     // dump PandaVM
     os << "-> Dump Ark VM\n";
-    panda_vm_->DumpForSigQuit(os);
+    pandaVm_->DumpForSigQuit(os);
     os << "\n";
 
     WRITE_RELAYOUT_PROFILE_DATA();
 }
 
-void Runtime::InitNonZygoteOrPostFork(bool is_system_server, [[maybe_unused]] const char *isa,
-                                      const std::function<void()> &init_hook,
-                                      [[maybe_unused]] bool profile_system_server)
+void Runtime::InitNonZygoteOrPostFork(bool isSystemServer, [[maybe_unused]] const char *isa,
+                                      const std::function<void()> &initHook, [[maybe_unused]] bool profileSystemServer)
 {
-    is_zygote_ = false;
+    isZygote_ = false;
 
     // NOTE(00510180): wait NativeBridge ready
 
@@ -1481,27 +1476,27 @@ void Runtime::InitNonZygoteOrPostFork(bool is_system_server, [[maybe_unused]] co
 
     // NOTE(00510180): wait ResetGcPerformanceInfo() ready
 
-    panda_vm_->PreStartup();
+    pandaVm_->PreStartup();
 
-    init_hook();
+    initHook();
 
-    mem::GcHung::InitPostFork(is_system_server);
+    mem::GcHung::InitPostFork(isSystemServer);
 }
 
 void Runtime::PreZygoteFork()
 {
-    panda_vm_->PreZygoteFork();
+    pandaVm_->PreZygoteFork();
 }
 
 void Runtime::PostZygoteFork()
 {
-    panda_vm_->PostZygoteFork();
+    pandaVm_->PostZygoteFork();
 }
 
 // Returns true if profile saving is enabled. GetJit() will be not null in this case.
 bool Runtime::SaveProfileInfo() const
 {
-    return save_profiling_info_;
+    return saveProfilingInfo_;
 }
 
 void Runtime::CheckOptionsFromOs() const

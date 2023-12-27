@@ -29,10 +29,10 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::BuildForInterface(panda
         }
 
         if (!mda.IsAbstract()) {
-            has_default_methods_ = true;
+            hasDefaultMethods_ = true;
         }
 
-        ++num_vmethods_;
+        ++numVmethods_;
     });
 }
 
@@ -45,20 +45,20 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::BuildForInterface(Span<
         }
 
         if (!method.IsAbstract()) {
-            has_default_methods_ = true;
+            hasDefaultMethods_ = true;
         }
 
-        ++num_vmethods_;
+        ++numVmethods_;
     }
 }
 
 template <class SearchBySignature, class OverridePred>
-void VTableBuilderImpl<SearchBySignature, OverridePred>::AddBaseMethods(Class *base_class)
+void VTableBuilderImpl<SearchBySignature, OverridePred>::AddBaseMethods(Class *baseClass)
 {
-    if (base_class != nullptr) {
-        auto base_class_vtable = base_class->GetVTable();
+    if (baseClass != nullptr) {
+        auto baseClassVtable = baseClass->GetVTable();
 
-        for (auto *method : base_class_vtable) {
+        for (auto *method : baseClassVtable) {
             vtable_.AddBaseMethod(MethodInfo(method, 0, true));
         }
     }
@@ -73,12 +73,12 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::AddClassMethods(panda_f
             return;
         }
 
-        MethodInfo method_info(mda, num_vmethods_, ctx);
-        if (!vtable_.AddMethod(method_info).first) {
-            vtable_.AddBaseMethod(method_info);
+        MethodInfo methodInfo(mda, numVmethods_, ctx);
+        if (!vtable_.AddMethod(methodInfo).first) {
+            vtable_.AddBaseMethod(methodInfo);
         }
 
-        ++num_vmethods_;
+        ++numVmethods_;
     });
 }
 
@@ -90,12 +90,12 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::AddClassMethods(Span<Me
             continue;
         }
 
-        MethodInfo method_info(&method, num_vmethods_);
-        if (!vtable_.AddMethod(method_info).first) {
-            vtable_.AddBaseMethod(method_info);
+        MethodInfo methodInfo(&method, numVmethods_);
+        if (!vtable_.AddMethod(methodInfo).first) {
+            vtable_.AddBaseMethod(methodInfo);
         }
 
-        ++num_vmethods_;
+        ++numVmethods_;
     }
 }
 
@@ -115,7 +115,7 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::AddDefaultInterfaceMeth
                 continue;
             }
 
-            auto [flag, idx] = vtable_.AddMethod(MethodInfo(&method, copied_methods_.size(), false, true));
+            auto [flag, idx] = vtable_.AddMethod(MethodInfo(&method, copiedMethods_.size(), false, true));
             if (!flag) {
                 continue;
             }
@@ -123,9 +123,9 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::AddDefaultInterfaceMeth
             if (idx == MethodInfo::INVALID_METHOD_IDX) {
                 CopiedMethod cmethod(&method, false, false);
                 if (!IsMaxSpecificMethod(iface, method, i, itable)) {
-                    cmethod.default_abstract = true;
+                    cmethod.defaultAbstract = true;
                 }
-                copied_methods_.push_back(cmethod);
+                copiedMethods_.push_back(cmethod);
                 continue;
             }
             // use the following algorithm to judge whether we have to replace existing DEFAULT METHOD.
@@ -135,45 +135,45 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::AddDefaultInterfaceMeth
             // 3. if this new method is max-specific method, check whether existing default method is AME
             //   3.1  if no, set ICCE flag for exist method
             //   3.2  if yes, replace exist method with new method(new method becomes a candidate)
-            if (copied_methods_[idx].default_conflict) {
+            if (copiedMethods_[idx].defaultConflict) {
                 continue;
             }
             if (!IsMaxSpecificMethod(iface, method, i, itable)) {
                 continue;
             }
 
-            if (!copied_methods_[idx].default_abstract) {
-                copied_methods_[idx].default_conflict = true;
+            if (!copiedMethods_[idx].defaultAbstract) {
+                copiedMethods_[idx].defaultConflict = true;
                 continue;
             }
             CopiedMethod cmethod(&method, false, false);
-            copied_methods_[idx] = cmethod;
+            copiedMethods_[idx] = cmethod;
         }
     }
 }
 
 template <class SearchBySignature, class OverridePred>
-void VTableBuilderImpl<SearchBySignature, OverridePred>::Build(panda_file::ClassDataAccessor *cda, Class *base_class,
+void VTableBuilderImpl<SearchBySignature, OverridePred>::Build(panda_file::ClassDataAccessor *cda, Class *baseClass,
                                                                ITable itable, ClassLinkerContext *ctx)
 {
     if (cda->IsInterface()) {
         return BuildForInterface(cda);
     }
 
-    AddBaseMethods(base_class);
+    AddBaseMethods(baseClass);
     AddClassMethods(cda, ctx);
     AddDefaultInterfaceMethods(itable);
 }
 
 template <class SearchBySignature, class OverridePred>
-void VTableBuilderImpl<SearchBySignature, OverridePred>::Build(Span<Method> methods, Class *base_class, ITable itable,
-                                                               bool is_interface)
+void VTableBuilderImpl<SearchBySignature, OverridePred>::Build(Span<Method> methods, Class *baseClass, ITable itable,
+                                                               bool isInterface)
 {
-    if (is_interface) {
+    if (isInterface) {
         return BuildForInterface(methods);
     }
 
-    AddBaseMethods(base_class);
+    AddBaseMethods(baseClass);
     AddClassMethods(methods);
     AddDefaultInterfaceMethods(itable);
 }
@@ -182,7 +182,7 @@ template <class SearchBySignature, class OverridePred>
 void VTableBuilderImpl<SearchBySignature, OverridePred>::UpdateClass(Class *klass) const
 {
     if (klass->IsInterface()) {
-        if (has_default_methods_) {
+        if (hasDefaultMethods_) {
             klass->SetHasDefaultMethods();
         }
 

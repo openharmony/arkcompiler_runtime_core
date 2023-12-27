@@ -68,14 +68,14 @@ public:
 
 protected:
 #ifndef NDEBUG
-    bool Check(Enum e, bool prev_set) const
+    bool Check(Enum e, bool prevSet) const
 #else
-    bool Check([[maybe_unused]] Enum e, bool prev_set) const
+    bool Check([[maybe_unused]] Enum e, bool prevSet) const
 #endif
     {
         // to catch missed enum members
         ASSERT(e == E);
-        return prev_set || value_ == E;
+        return prevSet || value_ == E;
     }
 
     void Set(Enum e)
@@ -85,10 +85,10 @@ protected:
     }
 
     template <typename Handler>
-    void Enumerate(Handler &&handler, bool prev_set) const
+    void Enumerate(Handler &&handler, bool prevSet) const
     {
-        prev_set = prev_set || (value_ == E);
-        if (prev_set) {
+        prevSet = prevSet || (value_ == E);
+        if (prevSet) {
             handler(E);
         }
     }
@@ -132,13 +132,13 @@ public:
     }
 
 protected:
-    bool Check(Enum e, bool prev_set) const
+    bool Check(Enum e, bool prevSet) const
     {
-        prev_set = prev_set || (Base::value_ == E);
+        prevSet = prevSet || (Base::value_ == E);
         if (e == E) {
-            return prev_set;
+            return prevSet;
         }
-        return Base::Check(e, prev_set);
+        return Base::Check(e, prevSet);
     }
 
     void Set(Enum e)
@@ -154,13 +154,13 @@ protected:
     }
 
     template <typename Handler>
-    void Enumerate(Handler &&handler, bool prev_set) const
+    void Enumerate(Handler &&handler, bool prevSet) const
     {
-        prev_set = prev_set || (Base::value_ == E);
-        if (prev_set && !handler(E)) {
+        prevSet = prevSet || (Base::value_ == E);
+        if (prevSet && !handler(E)) {
             return;
         }
-        Base::template Enumerate<Handler>(std::forward<Handler>(handler), prev_set);
+        Base::template Enumerate<Handler>(std::forward<Handler>(handler), prevSet);
     }
 };
 

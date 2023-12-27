@@ -31,31 +31,31 @@ public:
 
     CardTable *GetCardTable() const override
     {
-        return card_table_.get();
+        return cardTable_.get();
     }
 
     bool Trigger(PandaUniquePtr<GCTask> task) override;
 
 protected:
-    GenerationalGC(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
-        : GCLang<LanguageConfig>(object_allocator, settings)
+    GenerationalGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
+        : GCLang<LanguageConfig>(objectAllocator, settings)
     {
     }
     virtual bool ShouldRunTenuredGC(const GCTask &task);
 
     void DisableTenuredGC()
     {
-        major_period_ = DISABLED_MAJOR_PERIOD;  // Disable tenured GC temporarily.
+        majorPeriod_ = DISABLED_MAJOR_PERIOD;  // Disable tenured GC temporarily.
     }
 
     void RestoreTenuredGC()
     {
-        major_period_ = DEFAULT_MAJOR_PERIOD;
+        majorPeriod_ = DEFAULT_MAJOR_PERIOD;
     }
 
     ALWAYS_INLINE size_t GetMajorPeriod() const
     {
-        return major_period_;
+        return majorPeriod_;
     }
 
     void PostForkCallback() override
@@ -64,16 +64,16 @@ protected:
     }
 
     template <typename Marker>
-    NO_THREAD_SAFETY_ANALYSIS void MarkImpl(Marker *marker, GCMarkingStackType *objects_stack,
-                                            CardTableVisitFlag visit_card_table_roots,
-                                            const ReferenceCheckPredicateT &ref_pred,
-                                            const MemRangeChecker &mem_range_checker,
-                                            const GC::MarkPreprocess &mark_preprocess = GC::EmptyMarkPreprocess);
+    NO_THREAD_SAFETY_ANALYSIS void MarkImpl(Marker *marker, GCMarkingStackType *objectsStack,
+                                            CardTableVisitFlag visitCardTableRoots,
+                                            const ReferenceCheckPredicateT &refPred,
+                                            const MemRangeChecker &memRangeChecker,
+                                            const GC::MarkPreprocess &markPreprocess = GC::EmptyMarkPreprocess);
 
     /// Mark all objects in stack recursively
     template <typename Marker, class... ReferenceCheckPredicate>
-    void MarkStack(Marker *marker, GCMarkingStackType *stack, const GC::MarkPreprocess &mark_preprocess,
-                   const ReferenceCheckPredicate &...ref_pred);
+    void MarkStack(Marker *marker, GCMarkingStackType *stack, const GC::MarkPreprocess &markPreprocess,
+                   const ReferenceCheckPredicate &...refPred);
 
     /**
      * Update statistics in MemStats. Required initialized mem_stats_ field.
@@ -82,8 +82,8 @@ protected:
      * @param record_allocation_for_moved_objects - if true, we will record allocation for all moved objects (young and
      *  tenured)
      */
-    void UpdateMemStats(size_t bytes_in_heap_before, bool update_tenured_stats = false,
-                        bool record_allocation_for_moved_objects = false);
+    void UpdateMemStats(size_t bytesInHeapBefore, bool updateTenuredStats = false,
+                        bool recordAllocationForMovedObjects = false);
 
     class MemStats {
     public:
@@ -93,11 +93,11 @@ protected:
             // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
             if constexpr (ATOMIC) {
                 // Atomic with relaxed order reason: memory accesses from different threads
-                reinterpret_cast<std::atomic<uint32_t> *>(&young_free_object_count_)
+                reinterpret_cast<std::atomic<uint32_t> *>(&youngFreeObjectCount_)
                     ->fetch_add(count, std::memory_order_relaxed);
                 // NOLINTNEXTLINE(readability-misleading-indentation)
             } else {
-                young_free_object_count_ += count;
+                youngFreeObjectCount_ += count;
             }
         }
 
@@ -107,11 +107,11 @@ protected:
             // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
             if constexpr (ATOMIC) {
                 // Atomic with relaxed order reason: memory accesses from different threads
-                reinterpret_cast<std::atomic<uint64_t> *>(&young_free_object_size_)
+                reinterpret_cast<std::atomic<uint64_t> *>(&youngFreeObjectSize_)
                     ->fetch_add(size, std::memory_order_relaxed);
                 // NOLINTNEXTLINE(readability-misleading-indentation)
             } else {
-                young_free_object_size_ += size;
+                youngFreeObjectSize_ += size;
             }
         }
 
@@ -121,11 +121,11 @@ protected:
             // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
             if constexpr (ATOMIC) {
                 // Atomic with relaxed order reason: memory accesses from different threads
-                reinterpret_cast<std::atomic<uint32_t> *>(&young_move_object_count_)
+                reinterpret_cast<std::atomic<uint32_t> *>(&youngMoveObjectCount_)
                     ->fetch_add(count, std::memory_order_relaxed);
                 // NOLINTNEXTLINE(readability-misleading-indentation)
             } else {
-                young_move_object_count_ += count;
+                youngMoveObjectCount_ += count;
             }
         }
 
@@ -135,11 +135,11 @@ protected:
             // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
             if constexpr (ATOMIC) {
                 // Atomic with relaxed order reason: memory accesses from different threads
-                reinterpret_cast<std::atomic<uint64_t> *>(&young_move_object_size_)
+                reinterpret_cast<std::atomic<uint64_t> *>(&youngMoveObjectSize_)
                     ->fetch_add(size, std::memory_order_relaxed);
                 // NOLINTNEXTLINE(readability-misleading-indentation)
             } else {
-                young_move_object_size_ += size;
+                youngMoveObjectSize_ += size;
             }
         }
 
@@ -149,11 +149,11 @@ protected:
             // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
             if constexpr (ATOMIC) {
                 // Atomic with relaxed order reason: memory accesses from different threads
-                reinterpret_cast<std::atomic<uint32_t> *>(&tenured_move_object_count_)
+                reinterpret_cast<std::atomic<uint32_t> *>(&tenuredMoveObjectCount_)
                     ->fetch_add(count, std::memory_order_relaxed);
                 // NOLINTNEXTLINE(readability-misleading-indentation)
             } else {
-                tenured_move_object_count_ += count;
+                tenuredMoveObjectCount_ += count;
             }
         }
 
@@ -163,11 +163,11 @@ protected:
             // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
             if constexpr (ATOMIC) {
                 // Atomic with relaxed order reason: memory accesses from different threads
-                reinterpret_cast<std::atomic<uint64_t> *>(&tenured_move_object_size_)
+                reinterpret_cast<std::atomic<uint64_t> *>(&tenuredMoveObjectSize_)
                     ->fetch_add(size, std::memory_order_relaxed);
                 // NOLINTNEXTLINE(readability-misleading-indentation)
             } else {
-                tenured_move_object_size_ += size;
+                tenuredMoveObjectSize_ += size;
             }
         }
 
@@ -177,11 +177,11 @@ protected:
             // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
             if constexpr (ATOMIC) {
                 // Atomic with relaxed order reason: memory accesses from different threads
-                reinterpret_cast<std::atomic<uint32_t> *>(&tenured_free_object_count_)
+                reinterpret_cast<std::atomic<uint32_t> *>(&tenuredFreeObjectCount_)
                     ->fetch_add(count, std::memory_order_relaxed);
                 // NOLINTNEXTLINE(readability-misleading-indentation)
             } else {
-                tenured_free_object_count_ += count;
+                tenuredFreeObjectCount_ += count;
             }
         }
 
@@ -191,77 +191,77 @@ protected:
             // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
             if constexpr (ATOMIC) {
                 // Atomic with relaxed order reason: memory accesses from different threads
-                reinterpret_cast<std::atomic<uint64_t> *>(&tenured_free_object_size_)
+                reinterpret_cast<std::atomic<uint64_t> *>(&tenuredFreeObjectSize_)
                     ->fetch_add(size, std::memory_order_relaxed);
                 // NOLINTNEXTLINE(readability-misleading-indentation)
             } else {
-                tenured_free_object_size_ += size;
+                tenuredFreeObjectSize_ += size;
             }
         }
 
         void Reset()
         {
-            young_free_object_count_ = 0U;
-            young_free_object_size_ = 0U;
-            young_move_object_count_ = 0U;
-            young_move_object_size_ = 0U;
-            tenured_free_object_count_ = 0U;
-            tenured_free_object_size_ = 0U;
-            tenured_move_object_count_ = 0U;
-            tenured_move_object_size_ = 0U;
+            youngFreeObjectCount_ = 0U;
+            youngFreeObjectSize_ = 0U;
+            youngMoveObjectCount_ = 0U;
+            youngMoveObjectSize_ = 0U;
+            tenuredFreeObjectCount_ = 0U;
+            tenuredFreeObjectSize_ = 0U;
+            tenuredMoveObjectCount_ = 0U;
+            tenuredMoveObjectSize_ = 0U;
         }
 
         PandaString Dump();
 
         ALWAYS_INLINE size_t GetCountFreedYoung()
         {
-            return young_free_object_count_;
+            return youngFreeObjectCount_;
         }
 
         ALWAYS_INLINE size_t GetSizeFreedYoung()
         {
-            return young_free_object_size_;
+            return youngFreeObjectSize_;
         }
 
         ALWAYS_INLINE size_t GetCountMovedYoung()
         {
-            return young_move_object_count_;
+            return youngMoveObjectCount_;
         }
 
         ALWAYS_INLINE size_t GetSizeMovedYoung()
         {
-            return young_move_object_size_;
+            return youngMoveObjectSize_;
         }
 
         ALWAYS_INLINE size_t GetCountFreedTenured()
         {
-            return tenured_free_object_count_;
+            return tenuredFreeObjectCount_;
         }
 
         ALWAYS_INLINE size_t GetSizeFreedTenured()
         {
-            return tenured_free_object_size_;
+            return tenuredFreeObjectSize_;
         }
 
         ALWAYS_INLINE size_t GetCountMovedTenured()
         {
-            return tenured_move_object_count_;
+            return tenuredMoveObjectCount_;
         }
 
         ALWAYS_INLINE size_t GetSizeMovedTenured()
         {
-            return tenured_move_object_size_;
+            return tenuredMoveObjectSize_;
         }
 
     private:
-        uint32_t young_free_object_count_ {0U};
-        uint64_t young_free_object_size_ {0U};
-        uint32_t young_move_object_count_ {0U};
-        uint64_t young_move_object_size_ {0U};
-        uint32_t tenured_free_object_count_ {0U};
-        uint64_t tenured_free_object_size_ {0U};
-        uint32_t tenured_move_object_count_ {0U};
-        uint64_t tenured_move_object_size_ {0U};
+        uint32_t youngFreeObjectCount_ {0U};
+        uint64_t youngFreeObjectSize_ {0U};
+        uint32_t youngMoveObjectCount_ {0U};
+        uint64_t youngMoveObjectSize_ {0U};
+        uint32_t tenuredFreeObjectCount_ {0U};
+        uint64_t tenuredFreeObjectSize_ {0U};
+        uint32_t tenuredMoveObjectCount_ {0U};
+        uint64_t tenuredMoveObjectSize_ {0U};
 
         friend class GenerationalGC;
         friend class test::MemStatsGenGCTest;
@@ -272,20 +272,20 @@ protected:
         return static_cast<ObjectAllocatorGenBase *>(this->GetObjectAllocator());
     }
 
-    void CreateCardTable(InternalAllocatorPtr internal_allocator_ptr, uintptr_t min_address, size_t size);
+    void CreateCardTable(InternalAllocatorPtr internalAllocatorPtr, uintptr_t minAddress, size_t size);
 
     void PrintDetailedLog() override
     {
-        LOG(INFO, GC) << mem_stats_.Dump();
+        LOG(INFO, GC) << memStats_.Dump();
         GC::PrintDetailedLog();
     }
 
-    MemStats mem_stats_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    MemStats memStats_;  // NOLINT(misc-non-private-member-variables-in-classes)
 private:
     static constexpr size_t DEFAULT_MAJOR_PERIOD = 3;
     static constexpr size_t DISABLED_MAJOR_PERIOD = 65535;
-    size_t major_period_ {DEFAULT_MAJOR_PERIOD};
-    PandaUniquePtr<CardTable> card_table_ {nullptr};
+    size_t majorPeriod_ {DEFAULT_MAJOR_PERIOD};
+    PandaUniquePtr<CardTable> cardTable_ {nullptr};
     friend class test::MemStatsGenGCTest;
 };
 

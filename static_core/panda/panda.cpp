@@ -42,11 +42,11 @@
 #include <csignal>
 
 namespace panda {
-const panda_file::File *GetPandaFile(const ClassLinker &class_linker, std::string_view file_name)
+const panda_file::File *GetPandaFile(const ClassLinker &classLinker, std::string_view fileName)
 {
     const panda_file::File *res = nullptr;
-    class_linker.EnumerateBootPandaFiles([&res, file_name](const panda_file::File &pf) {
-        if (pf.GetFilename() == file_name) {
+    classLinker.EnumerateBootPandaFiles([&res, fileName](const panda_file::File &pf) {
+        if (pf.GetFilename() == fileName) {
             res = &pf;
             return false;
         }
@@ -55,54 +55,54 @@ const panda_file::File *GetPandaFile(const ClassLinker &class_linker, std::strin
     return res;
 }
 
-void PrintHelp(const panda::PandArgParser &pa_parser)
+void PrintHelp(const panda::PandArgParser &paParser)
 {
-    std::cerr << pa_parser.GetErrorString() << std::endl;
+    std::cerr << paParser.GetErrorString() << std::endl;
     std::cerr << "Usage: "
               << "panda"
               << " [OPTIONS] [file] [entrypoint] -- [arguments]" << std::endl;
     std::cerr << std::endl;
     std::cerr << "optional arguments:" << std::endl;
-    std::cerr << pa_parser.GetHelpString() << std::endl;
+    std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-bool PrepareArguments(panda::PandArgParser *pa_parser, const RuntimeOptions &runtime_options,
+bool PrepareArguments(panda::PandArgParser *paParser, const RuntimeOptions &runtimeOptions,
                       const panda::PandArg<std::string> &file, const panda::PandArg<std::string> &entrypoint,
                       const panda::PandArg<bool> &help, int argc, const char **argv)
 {
-    auto start_time =
+    auto startTime =
         std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
             .count();
 
-    if (!pa_parser->Parse(argc, argv)) {
-        PrintHelp(*pa_parser);
+    if (!paParser->Parse(argc, argv)) {
+        PrintHelp(*paParser);
         return false;
     }
 
-    if (runtime_options.IsVersion()) {
+    if (runtimeOptions.IsVersion()) {
         PrintPandaVersion();
         return false;
     }
 
     if (file.GetValue().empty() || entrypoint.GetValue().empty() || help.GetValue()) {
-        PrintHelp(*pa_parser);
+        PrintHelp(*paParser);
         return false;
     }
 
-    if (runtime_options.IsStartupTime()) {
+    if (runtimeOptions.IsStartupTime()) {
         std::cout << "\n"
-                  << "Startup start time: " << start_time << std::endl;
+                  << "Startup start time: " << startTime << std::endl;
     }
 
-    auto runtime_options_err = runtime_options.Validate();
-    if (runtime_options_err) {
-        std::cerr << "Error: " << runtime_options_err.value().GetMessage() << std::endl;
+    auto runtimeOptionsErr = runtimeOptions.Validate();
+    if (runtimeOptionsErr) {
+        std::cerr << "Error: " << runtimeOptionsErr.value().GetMessage() << std::endl;
         return false;
     }
 
-    auto compiler_options_err = compiler::OPTIONS.Validate();
-    if (compiler_options_err) {
-        std::cerr << "Error: " << compiler_options_err.value().GetMessage() << std::endl;
+    auto compilerOptionsErr = compiler::g_options.Validate();
+    if (compilerOptionsErr) {
+        std::cerr << "Error: " << compilerOptionsErr.value().GetMessage() << std::endl;
         return false;
     }
 
@@ -112,9 +112,9 @@ bool PrepareArguments(panda::PandArgParser *pa_parser, const RuntimeOptions &run
 int Main(int argc, const char **argv)
 {
     Span<const char *> sp(argv, argc);
-    RuntimeOptions runtime_options(sp[0]);
-    base_options::Options base_options(sp[0]);
-    panda::PandArgParser pa_parser;
+    RuntimeOptions runtimeOptions(sp[0]);
+    base_options::Options baseOptions(sp[0]);
+    panda::PandArgParser paParser;
 
     panda::PandArg<bool> help("help", false, "Print this message and exit");
     panda::PandArg<bool> options("options", false, "Print compiler and runtime options");
@@ -122,57 +122,57 @@ int Main(int argc, const char **argv)
     panda::PandArg<std::string> file("file", "", "path to pandafile");
     panda::PandArg<std::string> entrypoint("entrypoint", "", "full name of entrypoint function or method");
 
-    runtime_options.AddOptions(&pa_parser);
-    base_options.AddOptions(&pa_parser);
-    compiler::OPTIONS.AddOptions(&pa_parser);
+    runtimeOptions.AddOptions(&paParser);
+    baseOptions.AddOptions(&paParser);
+    compiler::g_options.AddOptions(&paParser);
 
-    pa_parser.Add(&help);
-    pa_parser.Add(&options);
-    pa_parser.PushBackTail(&file);
-    pa_parser.PushBackTail(&entrypoint);
-    pa_parser.EnableTail();
-    pa_parser.EnableRemainder();
+    paParser.Add(&help);
+    paParser.Add(&options);
+    paParser.PushBackTail(&file);
+    paParser.PushBackTail(&entrypoint);
+    paParser.EnableTail();
+    paParser.EnableRemainder();
 
-    if (!panda::PrepareArguments(&pa_parser, runtime_options, file, entrypoint, help, argc, argv)) {
+    if (!panda::PrepareArguments(&paParser, runtimeOptions, file, entrypoint, help, argc, argv)) {
         return 1;
     }
 
-    compiler::OPTIONS.AdjustCpuFeatures(false);
+    compiler::g_options.AdjustCpuFeatures(false);
 
-    Logger::Initialize(base_options);
+    Logger::Initialize(baseOptions);
 
-    runtime_options.SetVerificationMode(VerificationModeFromString(
-        static_cast<Options>(runtime_options).GetVerificationMode()));  // NOLINT(cppcoreguidelines-slicing)
-    if (runtime_options.IsVerificationEnabled()) {
-        if (!runtime_options.WasSetVerificationMode()) {
-            runtime_options.SetVerificationMode(VerificationMode::AHEAD_OF_TIME);
+    runtimeOptions.SetVerificationMode(VerificationModeFromString(
+        static_cast<Options>(runtimeOptions).GetVerificationMode()));  // NOLINT(cppcoreguidelines-slicing)
+    if (runtimeOptions.IsVerificationEnabled()) {
+        if (!runtimeOptions.WasSetVerificationMode()) {
+            runtimeOptions.SetVerificationMode(VerificationMode::AHEAD_OF_TIME);
         }
     }
 
-    arg_list_t arguments = pa_parser.GetRemainder();
+    arg_list_t arguments = paParser.GetRemainder();
 
-    panda::compiler::CompilerLogger::SetComponents(panda::compiler::OPTIONS.GetCompilerLog());
-    if (compiler::OPTIONS.IsCompilerEnableEvents()) {
-        panda::compiler::EventWriter::Init(panda::compiler::OPTIONS.GetCompilerEventsPath());
+    panda::compiler::CompilerLogger::SetComponents(panda::compiler::g_options.GetCompilerLog());
+    if (compiler::g_options.IsCompilerEnableEvents()) {
+        panda::compiler::EventWriter::Init(panda::compiler::g_options.GetCompilerEventsPath());
     }
 
-    auto boot_panda_files = runtime_options.GetBootPandaFiles();
+    auto bootPandaFiles = runtimeOptions.GetBootPandaFiles();
 
-    if (runtime_options.GetPandaFiles().empty()) {
-        boot_panda_files.push_back(file.GetValue());
+    if (runtimeOptions.GetPandaFiles().empty()) {
+        bootPandaFiles.push_back(file.GetValue());
     } else {
-        auto panda_files = runtime_options.GetPandaFiles();
-        auto found_iter = std::find_if(panda_files.begin(), panda_files.end(),
-                                       [&](auto &file_name) { return file_name == file.GetValue(); });
-        if (found_iter == panda_files.end()) {
-            panda_files.push_back(file.GetValue());
-            runtime_options.SetPandaFiles(panda_files);
+        auto pandaFiles = runtimeOptions.GetPandaFiles();
+        auto foundIter = std::find_if(pandaFiles.begin(), pandaFiles.end(),
+                                      [&](auto &fileName) { return fileName == file.GetValue(); });
+        if (foundIter == pandaFiles.end()) {
+            pandaFiles.push_back(file.GetValue());
+            runtimeOptions.SetPandaFiles(pandaFiles);
         }
     }
 
-    runtime_options.SetBootPandaFiles(boot_panda_files);
+    runtimeOptions.SetBootPandaFiles(bootPandaFiles);
 
-    if (!Runtime::Create(runtime_options)) {
+    if (!Runtime::Create(runtimeOptions)) {
         std::cerr << "Error: cannot create runtime" << std::endl;
         return -1;
     }
@@ -180,33 +180,33 @@ int Main(int argc, const char **argv)
     int ret = 0;
 
     if (options.GetValue()) {
-        std::cout << pa_parser.GetRegularArgs() << std::endl;
+        std::cout << paParser.GetRegularArgs() << std::endl;
     }
 
-    std::string file_name = file.GetValue();
+    std::string fileName = file.GetValue();
     std::string entry = entrypoint.GetValue();
 
     auto &runtime = *Runtime::GetCurrent();
 
-    auto res = runtime.ExecutePandaFile(file_name, entry, arguments);
+    auto res = runtime.ExecutePandaFile(fileName, entry, arguments);
     if (!res) {
-        std::cerr << "Cannot execute panda file '" << file_name << "' with entry '" << entry << "'" << std::endl;
+        std::cerr << "Cannot execute panda file '" << fileName << "' with entry '" << entry << "'" << std::endl;
         ret = -1;
     } else {
         ret = res.Value();
     }
 
-    if (runtime_options.IsPrintMemoryStatistics()) {
+    if (runtimeOptions.IsPrintMemoryStatistics()) {
         std::cout << runtime.GetMemoryStatistics();
     }
-    if (runtime_options.IsPrintGcStatistics()) {
+    if (runtimeOptions.IsPrintGcStatistics()) {
         std::cout << runtime.GetFinalStatistics();
     }
     if (!Runtime::Destroy()) {
         std::cerr << "Error: cannot destroy runtime" << std::endl;
         return -1;
     }
-    pa_parser.DisableTail();
+    paParser.DisableTail();
     return ret;
 }
 }  // namespace panda

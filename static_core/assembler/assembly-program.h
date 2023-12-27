@@ -34,13 +34,13 @@ struct Program {
     using StringT = std::set<std::string>;
 
     panda::panda_file::SourceLang lang {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
-    std::map<std::string, panda::pandasm::Record> record_table;
-    std::map<std::string, panda::pandasm::Function> function_table;
+    std::map<std::string, panda::pandasm::Record> recordTable;
+    std::map<std::string, panda::pandasm::Function> functionTable;
     std::unordered_map<std::string, std::vector<std::string>>
-        function_synonyms;  // we might keep unordered, since we don't iterate over it
-    std::map<std::string, panda::pandasm::LiteralArray> literalarray_table;
+        functionSynonyms;  // we might keep unordered, since we don't iterate over it
+    std::map<std::string, panda::pandasm::LiteralArray> literalarrayTable;
     StringT strings;
-    std::set<Type> array_types;
+    std::set<Type> arrayTypes;
 
     /*
      * Returns a JSON string with the program structure and scopes locations

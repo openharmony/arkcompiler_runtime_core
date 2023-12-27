@@ -27,17 +27,16 @@ namespace panda::coretypes {
 
 class Class : public ObjectHeader {
 public:
-    Class(const uint8_t *descriptor, uint32_t vtable_size, uint32_t imt_size, uint32_t klass_size)
-        : ObjectHeader(), klass_(descriptor, panda_file::SourceLang::PANDA_ASSEMBLY, vtable_size, imt_size, klass_size)
+    Class(const uint8_t *descriptor, uint32_t vtableSize, uint32_t imtSize, uint32_t klassSize)
+        : ObjectHeader(), klass_(descriptor, panda_file::SourceLang::PANDA_ASSEMBLY, vtableSize, imtSize, klassSize)
     {
     }
 
     // We shouldn't init header_ here - because it has been memset(0) in object allocation,
     // otherwise it may cause data race while visiting object's class concurrently in gc.
-    void InitClass(const uint8_t *descriptor, uint32_t vtable_size, uint32_t imt_size, uint32_t klass_size)
+    void InitClass(const uint8_t *descriptor, uint32_t vtableSize, uint32_t imtSize, uint32_t klassSize)
     {
-        new (&klass_)
-            panda::Class(descriptor, panda_file::SourceLang::PANDA_ASSEMBLY, vtable_size, imt_size, klass_size);
+        new (&klass_) panda::Class(descriptor, panda_file::SourceLang::PANDA_ASSEMBLY, vtableSize, imtSize, klassSize);
     }
 
     panda::Class *GetRuntimeClass()
@@ -74,9 +73,9 @@ public:
         klass_.SetFieldObject<NEED_WRITE_BARRIER>(field, value);
     }
 
-    static size_t GetSize(uint32_t klass_size)
+    static size_t GetSize(uint32_t klassSize)
     {
-        return GetRuntimeClassOffset() + klass_size;
+        return GetRuntimeClassOffset() + klassSize;
     }
 
     static constexpr size_t GetRuntimeClassOffset()

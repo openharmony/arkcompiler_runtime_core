@@ -38,18 +38,18 @@ namespace panda::compiler {
  */
 class RegisterMap {
 public:
-    explicit RegisterMap(ArenaAllocator *allocator) : codegen_reg_map_(allocator->Adapter()) {}
+    explicit RegisterMap(ArenaAllocator *allocator) : codegenRegMap_(allocator->Adapter()) {}
     ~RegisterMap() = default;
     NO_MOVE_SEMANTIC(RegisterMap);
     NO_COPY_SEMANTIC(RegisterMap);
 
-    void SetMask(const LocationMask &reg_mask, size_t priority_reg);
-    void SetCallerFirstMask(const LocationMask &reg_mask, size_t first_callee_reg, size_t last_callee_reg);
+    void SetMask(const LocationMask &regMask, size_t priorityReg);
+    void SetCallerFirstMask(const LocationMask &regMask, size_t firstCalleeReg, size_t lastCalleeReg);
     size_t Size() const;
     size_t GetAvailableRegsCount() const;
     bool IsRegAvailable(Register reg, Arch arch) const;
-    Register CodegenToRegallocReg(Register codegen_reg) const;
-    Register RegallocToCodegenReg(Register regalloc_reg) const;
+    Register CodegenToRegallocReg(Register codegenReg) const;
+    Register RegallocToCodegenReg(Register regallocReg) const;
     Register GetBorder() const
     {
         return border_;
@@ -57,8 +57,8 @@ public:
     void Dump(std::ostream *out) const;
 
 private:
-    ArenaVector<Register> codegen_reg_map_;
-    size_t available_regs_count_ {0};
+    ArenaVector<Register> codegenRegMap_;
+    size_t availableRegsCount_ {0};
     Register border_ {0};
 };
 

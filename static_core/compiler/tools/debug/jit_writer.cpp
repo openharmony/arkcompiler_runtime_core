@@ -20,70 +20,70 @@
 namespace panda::compiler {
 class JitCodeDataProvider : public ElfSectionDataProvider {
 public:
-    explicit JitCodeDataProvider(JitDebugWriter *jit_debug_writer) : jit_debug_writer_(jit_debug_writer) {}
+    explicit JitCodeDataProvider(JitDebugWriter *jitDebugWriter) : jitDebugWriter_(jitDebugWriter) {}
 
-    void FillData(Span<uint8_t> stream, size_t stream_begin) const override
+    void FillData(Span<uint8_t> stream, size_t streamBegin) const override
     {
-        const size_t code_offset = CodeInfo::GetCodeOffset(jit_debug_writer_->GetArch());
+        const size_t codeOffset = CodeInfo::GetCodeOffset(jitDebugWriter_->GetArch());
         CodePrefix prefix;
-        size_t curr_pos = stream_begin;
-        for (size_t i = 0; i < jit_debug_writer_->methods_.size(); i++) {
-            auto &method = jit_debug_writer_->methods_[i];
-            auto &method_header = jit_debug_writer_->method_headers_[i];
-            prefix.code_size = method.GetCode().size();
-            prefix.code_info_offset = code_offset + RoundUp(method.GetCode().size(), CodeInfo::ALIGNMENT);
-            prefix.code_info_size = method.GetCodeInfo().size();
+        size_t currPos = streamBegin;
+        for (size_t i = 0; i < jitDebugWriter_->methods_.size(); i++) {
+            auto &method = jitDebugWriter_->methods_[i];
+            auto &methodHeader = jitDebugWriter_->methodHeaders_[i];
+            prefix.codeSize = method.GetCode().size();
+            prefix.codeInfoOffset = codeOffset + RoundUp(method.GetCode().size(), CodeInfo::ALIGNMENT);
+            prefix.codeInfoSize = method.GetCodeInfo().size();
             // Prefix
-            curr_pos = stream_begin + method_header.code_offset;
+            currPos = streamBegin + methodHeader.codeOffset;
             const char *data = reinterpret_cast<char *>(&prefix);
-            CopyToSpan(stream, data, sizeof(prefix), curr_pos);
-            curr_pos += sizeof(prefix);
+            CopyToSpan(stream, data, sizeof(prefix), currPos);
+            currPos += sizeof(prefix);
 
             // Code
-            curr_pos += code_offset - sizeof(prefix);
+            currPos += codeOffset - sizeof(prefix);
             data = reinterpret_cast<const char *>(method.GetCode().data());
-            CopyToSpan(stream, data, method.GetCode().size(), curr_pos);
-            curr_pos += method.GetCode().size();
+            CopyToSpan(stream, data, method.GetCode().size(), currPos);
+            currPos += method.GetCode().size();
 
             // CodeInfo
-            curr_pos += RoundUp(method.GetCode().size(), CodeInfo::ALIGNMENT) - method.GetCode().size();
+            currPos += RoundUp(method.GetCode().size(), CodeInfo::ALIGNMENT) - method.GetCode().size();
             data = reinterpret_cast<const char *>(method.GetCodeInfo().data());
-            CopyToSpan(stream, data, method.GetCodeInfo().size(), curr_pos);
+            CopyToSpan(stream, data, method.GetCodeInfo().size(), currPos);
         }
     }
 
     size_t GetDataSize() const override
     {
-        return jit_debug_writer_->current_code_size_;
+        return jitDebugWriter_->currentCodeSize_;
     }
 
 private:
-    JitDebugWriter *jit_debug_writer_;
+    JitDebugWriter *jitDebugWriter_;
 };
 
 void JitDebugWriter::Start()
 {
-    auto &file_header = file_headers_.emplace_back();
-    file_header.classes_offset = class_headers_.size();
-    file_header.file_checksum = 0;
-    file_header.file_offset = 0;
-    file_header.file_name_str = AddString("jit_code");
-    file_header.methods_offset = method_headers_.size();
+    auto &fileHeader = fileHeaders_.emplace_back();
+    fileHeader.classesOffset = classHeaders_.size();
+    fileHeader.fileChecksum = 0;
+    fileHeader.fileOffset = 0;
+    fileHeader.fileNameStr = AddString("jit_code");
+    fileHeader.methodsOffset = methodHeaders_.size();
 }
 
 void JitDebugWriter::End()
 {
-    ASSERT(!file_headers_.empty());
-    auto &file_header = file_headers_.back();
-    file_header.classes_count = class_headers_.size() - file_header.classes_offset;
-    if (file_header.classes_count == 0) {
-        file_headers_.pop_back();
+    ASSERT(!fileHeaders_.empty());
+    auto &fileHeader = fileHeaders_.back();
+    fileHeader.classesCount = classHeaders_.size() - fileHeader.classesOffset;
+    if (fileHeader.classesCount == 0) {
+        fileHeaders_.pop_back();
         return;
     }
-    file_header.methods_count = method_headers_.size() - file_header.methods_offset;
+    fileHeader.methodsCount = methodHeaders_.size() - fileHeader.methodsOffset;
     // We should keep class headers sorted, since AOT manager uses binary search to find classes.
-    std::sort(class_headers_.begin() + file_header.classes_offset, class_headers_.end(),
-              [](const auto &a, const auto &b) { return a.class_id < b.class_id; });
+    std::sort(classHeaders_.begin() + fileHeader.classesOffset, classHeaders_.end(),
+              [](const auto &a, const auto &b) { return a.classId < b.classId; });
 }
 
 bool JitDebugWriter::Write()
@@ -109,26 +109,26 @@ bool JitDebugWriter::WriteImpl()
     ElfBuilder<ARCH, true> builder;
 
     // In gdb you may use '(gdb) info functions jitted' for find all jit-entry
-    builder.SetCodeName("(jitted) " + method_name_);
+    builder.SetCodeName("(jitted) " + methodName_);
 
-    auto code_provider = std::make_unique<JitCodeDataProvider>(this);
-    builder.GetTextSection()->SetDataProvider(std::move(code_provider));
+    auto codeProvider = std::make_unique<JitCodeDataProvider>(this);
+    builder.GetTextSection()->SetDataProvider(std::move(codeProvider));
 
     builder.SetFrameData(GetFrameData());
     builder.Build("jitted_code");
 
-    auto elf_size {builder.GetFileSize()};
-    auto mem_range {code_allocator_->AllocateCodeUnprotected(elf_size)};
-    auto elf_data {reinterpret_cast<uint8_t *>(mem_range.GetData())};
-    if (elf_data == nullptr) {
+    auto elfSize {builder.GetFileSize()};
+    auto memRange {codeAllocator_->AllocateCodeUnprotected(elfSize)};
+    auto elfData {reinterpret_cast<uint8_t *>(memRange.GetData())};
+    if (elfData == nullptr) {
         return false;
     }
 
-    builder.HackAddressesForJit(elf_data);
+    builder.HackAddressesForJit(elfData);
 
-    elf_ = {elf_data, elf_size};
+    elf_ = {elfData, elfSize};
     builder.Write(elf_);
-    code_allocator_->ProtectCode(mem_range);
+    codeAllocator_->ProtectCode(memRange);
 
     code_ = builder.GetTextSectionData();
     return true;

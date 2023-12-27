@@ -22,15 +22,15 @@ class RpoTest : public GraphTest {
 public:
     void CheckSubsequence(const std::vector<BasicBlock *> &&subsequence)
     {
-        auto subseq_iter = subsequence.begin();
+        auto subseqIter = subsequence.begin();
         for (auto block : GetGraph()->GetBlocksRPO()) {
-            if (block == *subseq_iter) {
-                if (++subseq_iter == subsequence.end()) {
+            if (block == *subseqIter) {
+                if (++subseqIter == subsequence.end()) {
                     break;
                 }
             }
         }
-        EXPECT_TRUE(subseq_iter == subsequence.end());
+        EXPECT_TRUE(subseqIter == subsequence.end());
     }
 };
 
@@ -125,8 +125,8 @@ TEST_F(RpoTest, GraphNoCycles)
     auto cmp =
         GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0U), &INS(1U), DataType::Type::INT64, CC_NE);
     e->AppendInst(cmp);
-    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0U, DataType::BOOL, CC_NE);
-    e->AppendInst(if_inst);
+    auto ifInst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0U, DataType::BOOL, CC_NE);
+    e->AppendInst(ifInst);
     e->AddSucc(n);
     m->AddSucc(k);
     k->AddSucc(exit);
@@ -134,8 +134,8 @@ TEST_F(RpoTest, GraphNoCycles)
     // Check handle tree update
     EXPECT_FALSE(GetGraph()->GetAnalysis<Rpo>().IsValid());
     GetGraph()->GetAnalysis<Rpo>().SetValid(true);
-    ArenaVector<BasicBlock *> added_blocks({m, k}, GetGraph()->GetAllocator()->Adapter());
-    GetGraph()->GetAnalysis<Rpo>().AddVectorAfter(d, added_blocks);
+    ArenaVector<BasicBlock *> addedBlocks({m, k}, GetGraph()->GetAllocator()->Adapter());
+    GetGraph()->GetAnalysis<Rpo>().AddVectorAfter(d, addedBlocks);
     GetGraph()->GetAnalysis<Rpo>().AddBasicBlockAfter(e, n);
 
     GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
@@ -238,8 +238,8 @@ TEST_F(RpoTest, GraphWithCycles)
     auto cmp =
         GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0U), &INS(1U), DataType::Type::INT64, CC_NE);
     g->AppendInst(cmp);
-    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0U, DataType::BOOL, CC_NE);
-    g->AppendInst(if_inst);
+    auto ifInst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0U, DataType::BOOL, CC_NE);
+    g->AppendInst(ifInst);
     auto k = GetGraph()->CreateEmptyBlock();
     g->AddSucc(n);
     n->AddSucc(k);

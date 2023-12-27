@@ -27,14 +27,14 @@ namespace panda::compiler {
  */
 class LoopUnroll : public LoopTransform<LoopExitPoint::LOOP_EXIT_BACKEDGE> {
     struct UnrollParams {
-        uint32_t unroll_factor;
-        uint32_t cloneable_insts;
-        bool has_call;
+        uint32_t unrollFactor;
+        uint32_t cloneableInsts;
+        bool hasCall;
     };
 
 public:
-    LoopUnroll(Graph *graph, uint32_t inst_limit, uint32_t unroll_factor)
-        : LoopTransform(graph), inst_limit_(inst_limit), unroll_factor_(unroll_factor)
+    LoopUnroll(Graph *graph, uint32_t instLimit, uint32_t unrollFactor)
+        : LoopTransform(graph), instLimit_(instLimit), unrollFactor_(unrollFactor)
     {
     }
 
@@ -42,7 +42,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerLoopUnroll();
+        return g_options.IsCompilerLoopUnroll();
     }
 
     const char *GetPassName() const override
@@ -51,20 +51,20 @@ public:
     }
 
     void InvalidateAnalyses() override;
-    static bool HasPreHeaderCompare(Loop *loop, const CountableLoopInfo &loop_info);
+    static bool HasPreHeaderCompare(Loop *loop, const CountableLoopInfo &loopInfo);
 
 private:
     bool TransformLoop(Loop *loop) override;
     UnrollParams GetUnrollParams(Loop *loop);
-    void TransformLoopImpl(Loop *loop, std::optional<uint64_t> opt_iterations, bool no_side_exits,
-                           uint32_t unroll_factor, std::optional<CountableLoopInfo> loop_info);
-    void FixCompareInst(const CountableLoopInfo &loop_info, BasicBlock *header, uint32_t unroll_factor);
-    Inst *CreateNewTestInst(const CountableLoopInfo &loop_info, Inst *const_inst, Inst *pre_header_cmp);
+    void TransformLoopImpl(Loop *loop, std::optional<uint64_t> optIterations, bool noSideExits, uint32_t unrollFactor,
+                           std::optional<CountableLoopInfo> loopInfo);
+    void FixCompareInst(const CountableLoopInfo &loopInfo, BasicBlock *header, uint32_t unrollFactor);
+    Inst *CreateNewTestInst(const CountableLoopInfo &loopInfo, Inst *constInst, Inst *preHeaderCmp);
 
 private:
-    const uint32_t inst_limit_ {0};
-    const uint32_t unroll_factor_ {0};
-    bool is_applied_ {false};
+    const uint32_t instLimit_ {0};
+    const uint32_t unrollFactor_ {0};
+    bool isApplied_ {false};
 };
 }  // namespace panda::compiler
 

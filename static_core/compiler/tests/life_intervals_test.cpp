@@ -51,24 +51,24 @@ public:
     void CheckRanges(LifeIntervals *interval, std::initializer_list<std::pair<LifeNumber, LifeNumber>> ranges)
     {
         ASSERT(interval != nullptr);
-        auto li_ranges = interval->GetRanges();
-        ASSERT_EQ(li_ranges.size(), ranges.size());
+        auto liRanges = interval->GetRanges();
+        ASSERT_EQ(liRanges.size(), ranges.size());
 
-        auto actual_it = li_ranges.rbegin();
-        auto expected_it = std::begin(ranges);
-        while (actual_it != li_ranges.rend() && expected_it != std::end(ranges)) {
-            auto actual_range = *(actual_it++);
-            auto expected_lns = *(expected_it++);
-            ASSERT_EQ(actual_range.GetBegin(), expected_lns.first);
-            ASSERT_EQ(actual_range.GetEnd(), expected_lns.second);
+        auto actualIt = liRanges.rbegin();
+        auto expectedIt = std::begin(ranges);
+        while (actualIt != liRanges.rend() && expectedIt != std::end(ranges)) {
+            auto actualRange = *(actualIt++);
+            auto expectedLns = *(expectedIt++);
+            ASSERT_EQ(actualRange.GetBegin(), expectedLns.first);
+            ASSERT_EQ(actualRange.GetEnd(), expectedLns.second);
         }
     }
 
     void CheckSiblingSequence(LifeIntervals *interval, std::initializer_list<std::pair<LifeNumber, LifeNumber>> ranges)
     {
-        auto expected_it = std::begin(ranges);
+        auto expectedIt = std::begin(ranges);
         for (auto sibling = interval; sibling != nullptr; sibling = sibling->GetSibling()) {
-            auto expected = *(expected_it++);
+            auto expected = *(expectedIt++);
             ASSERT_EQ(sibling->GetBegin(), expected.first);
             ASSERT_EQ(sibling->GetEnd(), expected.second);
         }
@@ -235,12 +235,12 @@ TEST_F(LifeIntervalsTest, IsSameLocation)
             return li;
         }};
 
-    for (size_t l1_idx = 0; l1_idx < factories.size(); l1_idx++) {
-        auto interval0 = factories[l1_idx]();
-        for (size_t l2_idx = 0; l2_idx < factories.size(); l2_idx++) {
-            auto interval1 = factories[l2_idx]();
-            bool same_settings = l1_idx == l2_idx;
-            EXPECT_EQ(same_settings, interval0->GetLocation() == interval1->GetLocation());
+    for (size_t l1Idx = 0; l1Idx < factories.size(); l1Idx++) {
+        auto interval0 = factories[l1Idx]();
+        for (size_t l2Idx = 0; l2Idx < factories.size(); l2Idx++) {
+            auto interval1 = factories[l2Idx]();
+            bool sameSettings = l1Idx == l2Idx;
+            EXPECT_EQ(sameSettings, interval0->GetLocation() == interval1->GetLocation());
         }
     }
 }

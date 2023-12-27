@@ -44,11 +44,11 @@ public:
     using PassInserterFunction = std::function<void(InsertingPassManager *manager)>;
 
     explicit MIRCompiler(
-        std::shared_ptr<llvm::TargetMachine> target_machine, PassInserterFunction insert_passes,
-        CreatedObjectFile::ObjectFilePostProcessor object_file_post_processor = [](llvm::object::ObjectFile *) {})
-        : target_machine_(std::move(target_machine)),
-          insert_passes_(std::move(insert_passes)),
-          object_file_post_processor_(std::move(object_file_post_processor))
+        std::shared_ptr<llvm::TargetMachine> targetMachine, PassInserterFunction insertPasses,
+        CreatedObjectFile::ObjectFilePostProcessor objectFilePostProcessor = [](llvm::object::ObjectFile *) {})
+        : targetMachine_(std::move(targetMachine)),
+          insertPasses_(std::move(insertPasses)),
+          objectFilePostProcessor_(std::move(objectFilePostProcessor))
     {
     }
 
@@ -56,13 +56,13 @@ public:
 
     std::shared_ptr<llvm::TargetMachine> GetTargetMachine()
     {
-        return target_machine_;
+        return targetMachine_;
     }
 
 private:
-    std::shared_ptr<llvm::TargetMachine> target_machine_;
-    PassInserterFunction insert_passes_;
-    CreatedObjectFile::ObjectFilePostProcessor object_file_post_processor_;
+    std::shared_ptr<llvm::TargetMachine> targetMachine_;
+    PassInserterFunction insertPasses_;
+    CreatedObjectFile::ObjectFilePostProcessor objectFilePostProcessor_;
 };
 
 }  // namespace panda::llvmbackend

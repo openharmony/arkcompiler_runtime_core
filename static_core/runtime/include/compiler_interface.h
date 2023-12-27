@@ -36,15 +36,15 @@ class CompilerTask : public TaskInterface {
     NO_COPY_SEMANTIC(CompilerTask);
 
 public:
-    explicit CompilerTask(Method *method = nullptr, bool is_osr = false, PandaVM *vm = nullptr)
-        : method_(method), is_osr_(is_osr), vm_(vm)
+    explicit CompilerTask(Method *method = nullptr, bool isOsr = false, PandaVM *vm = nullptr)
+        : method_(method), isOsr_(isOsr), vm_(vm)
     {
     }
     inline ~CompilerTask();
     CompilerTask(CompilerTask &&task)
     {
         method_ = task.method_;
-        is_osr_ = task.is_osr_;
+        isOsr_ = task.isOsr_;
         vm_ = task.vm_;
         task.vm_ = nullptr;
     }
@@ -52,7 +52,7 @@ public:
     CompilerTask &operator=(CompilerTask &&task)
     {
         method_ = task.method_;
-        is_osr_ = task.is_osr_;
+        isOsr_ = task.isOsr_;
         vm_ = task.vm_;
         task.vm_ = nullptr;
         return *this;
@@ -64,7 +64,7 @@ public:
     }
     bool IsOsr() const
     {
-        return is_osr_;
+        return isOsr_;
     }
 
     bool IsEmpty() const
@@ -79,7 +79,7 @@ public:
 
 private:
     Method *method_ {nullptr};
-    bool is_osr_ {false};
+    bool isOsr_ {false};
     PandaVM *vm_ {nullptr};
 };
 
@@ -90,8 +90,8 @@ public:
 
     class ExecState {
     public:
-        ExecState(const uint8_t *pc, Frame *frame, Method *callee, size_t num_args, const bool *sp_flag)
-            : pc_(pc), frame_(frame), callee_method_(callee), num_args_(num_args), sp_flag_(sp_flag)
+        ExecState(const uint8_t *pc, Frame *frame, Method *callee, size_t numArgs, const bool *spFlag)
+            : pc_(pc), frame_(frame), calleeMethod_(callee), numArgs_(numArgs), spFlag_(spFlag)
         {
         }
 
@@ -117,7 +117,7 @@ public:
 
         size_t GetNumArgs() const
         {
-            return num_args_;
+            return numArgs_;
         }
 
         const interpreter::VRegister &GetAcc() const
@@ -152,12 +152,12 @@ public:
 
         const bool *GetSPFlag() const
         {
-            return sp_flag_;
+            return spFlag_;
         }
 
         Method *GetCalleeMethod()
         {
-            return callee_method_;
+            return calleeMethod_;
         }
 
         static size_t GetSize(size_t nargs)
@@ -187,20 +187,20 @@ public:
 
         static constexpr uint32_t GetExecStateSPFlagAddrOffset()
         {
-            return MEMBER_OFFSET(ExecState, sp_flag_);
+            return MEMBER_OFFSET(ExecState, spFlag_);
         }
 
         static constexpr uint32_t GetCalleeMethodOffset()
         {
-            return MEMBER_OFFSET(ExecState, callee_method_);
+            return MEMBER_OFFSET(ExecState, calleeMethod_);
         }
 
     private:
         const uint8_t *pc_;
         Frame *frame_;
-        Method *callee_method_;
-        size_t num_args_;
-        const bool *sp_flag_;
+        Method *calleeMethod_;
+        size_t numArgs_;
+        const bool *spFlag_;
         interpreter::VRegister acc_;
         __extension__ interpreter::VRegister args_[0];  // NOLINT(modernize-avoid-c-arrays)
     };
@@ -209,7 +209,7 @@ public:
 
     using CompiledEntryPoint = ReturnReason (*)(ExecState *);
 
-    virtual bool CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr, coretypes::TaggedValue func) = 0;
+    virtual bool CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr, coretypes::TaggedValue func) = 0;
 
     virtual void JoinWorker() = 0;
 

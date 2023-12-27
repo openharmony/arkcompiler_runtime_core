@@ -33,12 +33,12 @@
 namespace panda {
 std::pair<Method *, uint32_t> LanguageContextBase::GetCatchMethodAndOffset(Method *method, ManagedThread *thread) const
 {
-    uint32_t catch_offset = 0;
-    Method *catch_method = method;
+    uint32_t catchOffset = 0;
+    Method *catchMethod = method;
     auto stack = StackWalker::Create(thread);
     while (stack.HasFrame()) {
-        catch_method = stack.GetMethod();
-        if (catch_method->GetPandaFile() == nullptr) {
+        catchMethod = stack.GetMethod();
+        if (catchMethod->GetPandaFile() == nullptr) {
             stack.NextFrame();
             continue;
         }
@@ -46,15 +46,15 @@ std::pair<Method *, uint32_t> LanguageContextBase::GetCatchMethodAndOffset(Metho
             stack.NextFrame();
             continue;
         }
-        catch_offset = catch_method->FindCatchBlock(thread->GetException()->ClassAddr<Class>(), stack.GetBytecodePc());
+        catchOffset = catchMethod->FindCatchBlock(thread->GetException()->ClassAddr<Class>(), stack.GetBytecodePc());
 
-        if (catch_offset != panda_file::INVALID_OFFSET) {
+        if (catchOffset != panda_file::INVALID_OFFSET) {
             break;
         }
         stack.NextFrame();
     }
 
-    return std::make_pair(catch_method, catch_offset);
+    return std::make_pair(catchMethod, catchOffset);
 }
 
 std::unique_ptr<ClassLinkerExtension> LanguageContextBase::CreateClassLinkerExtension() const
@@ -80,8 +80,8 @@ PandaUniquePtr<tooling::PtLangExt> LanguageContextBase::CreatePtLangExt() const
 }
 
 void LanguageContextBase::ThrowException([[maybe_unused]] ManagedThread *thread,
-                                         [[maybe_unused]] const uint8_t *mutf8_name,
-                                         [[maybe_unused]] const uint8_t *mutf8_msg) const
+                                         [[maybe_unused]] const uint8_t *mutf8Name,
+                                         [[maybe_unused]] const uint8_t *mutf8Msg) const
 {
 }
 
@@ -91,17 +91,17 @@ void LanguageContextBase::SetExceptionToVReg(
 {
 }
 
-void LanguageContextBase::WrapClassInitializerException(ClassLinker *class_linker, ManagedThread *thread) const
+void LanguageContextBase::WrapClassInitializerException(ClassLinker *classLinker, ManagedThread *thread) const
 {
     ASSERT(thread->HasPendingException());
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*thread->GetException()->ClassAddr<Class>());
 
-    auto *error_class = class_linker->GetExtension(ctx)->GetClass(ctx.GetErrorClassDescriptor(), false);
-    ASSERT(error_class != nullptr);
+    auto *errorClass = classLinker->GetExtension(ctx)->GetClass(ctx.GetErrorClassDescriptor(), false);
+    ASSERT(errorClass != nullptr);
 
     auto *cause = thread->GetException();
-    if (cause->IsInstanceOf(error_class)) {
+    if (cause->IsInstanceOf(errorClass)) {
         return;
     }
 

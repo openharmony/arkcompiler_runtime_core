@@ -35,13 +35,13 @@ void WorkerThread::ProcessCreatedThread()
 {
     Thread::SetCurrent(this);
     // Runtime takes ownership of the thread
-    trace::ScopedTrace scoped_trace2("ThreadManager::RegisterThread");
+    trace::ScopedTrace scopedTrace2("ThreadManager::RegisterThread");
     // NOTE(xuliang): RegisterThread
 }
 
 WorkerThread *WorkerThread::AttachThread()
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
 
     return WorkerThread::Create(Runtime::GetCurrent()->GetPandaVM());
 }

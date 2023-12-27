@@ -30,12 +30,12 @@ struct Field {
     Type type;
     std::string name;
     std::unique_ptr<FieldMetadata> metadata;
-    size_t line_of_def = 0;
-    std::string whole_line; /* The line in which the field is defined */
-                            /*  Or line in which the field met, if the field is not defined */
-    size_t bound_left = 0;
-    size_t bound_right = 0;
-    bool is_defined = true;
+    size_t lineOfDef = 0;
+    std::string wholeLine; /* The line in which the field is defined */
+                           /*  Or line in which the field met, if the field is not defined */
+    size_t boundLeft = 0;
+    size_t boundRight = 0;
+    bool isDefined = true;
 
     explicit Field(panda::panda_file::SourceLang lang)
         : metadata(extensions::MetadataExtension::CreateFieldMetadata(lang))

@@ -35,70 +35,70 @@ void LoadPandFileExt();
 class PandaFileWrapper {
 public:
     static std::unique_ptr<PandaFileWrapper> OpenPandafileFromMemory(void *addr, uint64_t *size,
-                                                                     const std::string &file_name)
+                                                                     const std::string &fileName)
     {
         if (pOpenPandafileFromMemoryExt == nullptr) {
             LoadPandFileExt();
         }
 
-        PandaFileExt *pf_ext = nullptr;
+        PandaFileExt *pfExt = nullptr;
         std::unique_ptr<PandaFileWrapper> pfw;
-        auto ret = pOpenPandafileFromMemoryExt(addr, size, file_name, &pf_ext);
+        auto ret = pOpenPandafileFromMemoryExt(addr, size, fileName, &pfExt);
         if (ret) {
-            pfw.reset(new PandaFileWrapper(pf_ext));
+            pfw.reset(new PandaFileWrapper(pfExt));
         }
         return pfw;
     }
 
-    static std::unique_ptr<PandaFileWrapper> OpenPandafileFromFd(int fd, uint64_t offset, const std::string &file_name)
+    static std::unique_ptr<PandaFileWrapper> OpenPandafileFromFd(int fd, uint64_t offset, const std::string &fileName)
     {
         if (pOpenPandafileFromFdExt == nullptr) {
             LoadPandFileExt();
         }
 
-        PandaFileExt *pf_ext = nullptr;
+        PandaFileExt *pfExt = nullptr;
         std::unique_ptr<PandaFileWrapper> pfw;
-        auto ret = pOpenPandafileFromFdExt(fd, offset, file_name, &pf_ext);
+        auto ret = pOpenPandafileFromFdExt(fd, offset, fileName, &pfExt);
         if (ret) {
-            pfw.reset(new PandaFileWrapper(pf_ext));
+            pfw.reset(new PandaFileWrapper(pfExt));
         }
         return pfw;
     }
 
     MethodSymInfoExt QueryMethodSymByOffset(uint64_t offset)
     {
-        MethodSymInfoExt method_info {0, 0, std::string()};
+        MethodSymInfoExt methodInfo {0, 0, std::string()};
         if (pQueryMethodSymByOffsetExt == nullptr) {
             return {0, 0, std::string()};
         }
-        auto ret = pQueryMethodSymByOffsetExt(pf_ext_, offset, &method_info);
+        auto ret = pQueryMethodSymByOffsetExt(pfExt_, offset, &methodInfo);
         if (ret) {
-            return method_info;
+            return methodInfo;
         }
         return {0, 0, std::string()};
     }
 
     MethodSymInfoExt QueryMethodSymAndLineByOffset(uint64_t offset) const
     {
-        MethodSymInfoExt method_info {0, 0, std::string()};
+        MethodSymInfoExt methodInfo {0, 0, std::string()};
         if (pQueryMethodSymAndLineByOffsetExt == nullptr) {
             return {0, 0, std::string()};
         }
-        auto ret = pQueryMethodSymAndLineByOffsetExt(pf_ext_, offset, &method_info);
+        auto ret = pQueryMethodSymAndLineByOffsetExt(pfExt_, offset, &methodInfo);
         if (ret) {
-            return method_info;
+            return methodInfo;
         }
         return {0, 0, std::string()};
     }
 
     std::vector<MethodSymInfoExt> QueryAllMethodSyms()
     {
-        std::vector<MethodSymInfoExt> method_infos;
+        std::vector<MethodSymInfoExt> methodInfos;
         if (pQueryAllMethodSymsExt == nullptr) {
-            return method_infos;
+            return methodInfos;
         }
-        pQueryAllMethodSymsExt(pf_ext_, AppendMethodInfo, static_cast<void *>(&method_infos));
-        return method_infos;
+        pQueryAllMethodSymsExt(pfExt_, AppendMethodInfo, static_cast<void *>(&methodInfos));
+        return methodInfos;
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
@@ -115,14 +115,14 @@ public:
     ~PandaFileWrapper() = default;
 
 private:
-    explicit PandaFileWrapper(PandaFileExt *pf_ext) : pf_ext_(pf_ext) {}
-    PandaFileExt *pf_ext_;
+    explicit PandaFileWrapper(PandaFileExt *pfExt) : pfExt_(pfExt) {}
+    PandaFileExt *pfExt_;
 
     // callback
-    static void AppendMethodInfo(MethodSymInfoExt *method_info, void *user_data)
+    static void AppendMethodInfo(MethodSymInfoExt *methodInfo, void *userData)
     {
-        auto method_infos = reinterpret_cast<std::vector<MethodSymInfoExt> *>(user_data);
-        method_infos->push_back(*method_info);
+        auto methodInfos = reinterpret_cast<std::vector<MethodSymInfoExt> *>(userData);
+        methodInfos->push_back(*methodInfo);
     }
 
     friend void LoadPandFileExt();

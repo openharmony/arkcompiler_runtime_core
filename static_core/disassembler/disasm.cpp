@@ -25,53 +25,53 @@ struct Options {
     panda::PandArg<bool> help {"help", false, "Print this message and exit"};
     panda::PandArg<bool> verbose {"verbose", false, "enable informative code output"};
     panda::PandArg<bool> quiet {"quiet", false, "enables all of the --skip-* flags"};
-    panda::PandArg<bool> skip_strings {
+    panda::PandArg<bool> skipStrings {
         "skip-string-literals", false,
         "replaces string literals with their respectie id's, thus shortening emitted code size"};
-    panda::PandArg<bool> with_separators {"with_separators", false,
-                                          "adds comments that separate sections in the output file"};
+    panda::PandArg<bool> withSeparators {"with_separators", false,
+                                         "adds comments that separate sections in the output file"};
     panda::PandArg<bool> debug {
         "debug", false, "enable debug messages (will be printed to standard output if no --debug-file was specified) "};
-    panda::PandArg<std::string> debug_file {"debug-file", "",
-                                            "(--debug-file FILENAME) set debug file name. default is std::cout"};
-    panda::PandArg<std::string> input_file {"input_file", "", "Path to the source binary code"};
-    panda::PandArg<std::string> output_file {"output_file", "", "Path to the generated assembly code"};
+    panda::PandArg<std::string> debugFile {"debug-file", "",
+                                           "(--debug-file FILENAME) set debug file name. default is std::cout"};
+    panda::PandArg<std::string> inputFile {"input_file", "", "Path to the source binary code"};
+    panda::PandArg<std::string> outputFile {"output_file", "", "Path to the generated assembly code"};
     panda::PandArg<std::string> profile {"profile", "", "Path to the profile"};
     panda::PandArg<bool> version {"version", false,
                                   "Ark version, file format version and minimum supported file format version"};
 
-    explicit Options(panda::PandArgParser &pa_parser)
+    explicit Options(panda::PandArgParser &paParser)
     {
-        pa_parser.Add(&help);
-        pa_parser.Add(&verbose);
-        pa_parser.Add(&quiet);
-        pa_parser.Add(&skip_strings);
-        pa_parser.Add(&debug);
-        pa_parser.Add(&debug_file);
-        pa_parser.Add(&version);
-        pa_parser.PushBackTail(&input_file);
-        pa_parser.PushBackTail(&output_file);
-        pa_parser.Add(&profile);
-        pa_parser.EnableTail();
+        paParser.Add(&help);
+        paParser.Add(&verbose);
+        paParser.Add(&quiet);
+        paParser.Add(&skipStrings);
+        paParser.Add(&debug);
+        paParser.Add(&debugFile);
+        paParser.Add(&version);
+        paParser.PushBackTail(&inputFile);
+        paParser.PushBackTail(&outputFile);
+        paParser.Add(&profile);
+        paParser.EnableTail();
     }
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-void PrintHelp(panda::PandArgParser &pa_parser)
+void PrintHelp(panda::PandArgParser &paParser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "ark_disasm [options] input_file output_file" << std::endl << std::endl;
     std::cerr << "Supported options:" << std::endl << std::endl;
-    std::cerr << pa_parser.GetHelpString() << std::endl;
+    std::cerr << paParser.GetHelpString() << std::endl;
 }
 
 void Disassemble(const Options &options)
 {
-    auto input_file = options.input_file.GetValue();
-    LOG(DEBUG, DISASSEMBLER) << "[initializing disassembler]\nfile: " << input_file << "\n";
+    auto inputFile = options.inputFile.GetValue();
+    LOG(DEBUG, DISASSEMBLER) << "[initializing disassembler]\nfile: " << inputFile << "\n";
 
     panda::disasm::Disassembler disasm {};
-    disasm.Disassemble(input_file, options.quiet.GetValue(), options.skip_strings.GetValue());
+    disasm.Disassemble(inputFile, options.quiet.GetValue(), options.skipStrings.GetValue());
     auto verbose = options.verbose.GetValue();
     if (verbose) {
         auto profile = options.profile.GetValue();
@@ -83,16 +83,16 @@ void Disassemble(const Options &options)
 
     LOG(DEBUG, DISASSEMBLER) << "[serializing results]\n";
 
-    std::ofstream res_pa;
-    res_pa.open(options.output_file.GetValue(), std::ios::trunc | std::ios::out);
-    disasm.Serialize(res_pa, options.with_separators.GetValue(), verbose);
-    res_pa.close();
+    std::ofstream resPa;
+    resPa.open(options.outputFile.GetValue(), std::ios::trunc | std::ios::out);
+    disasm.Serialize(resPa, options.withSeparators.GetValue(), verbose);
+    resPa.close();
 }
 
-bool ProcessArgs(panda::PandArgParser &pa_parser, const Options &options, int argc, const char **argv)
+bool ProcessArgs(panda::PandArgParser &paParser, const Options &options, int argc, const char **argv)
 {
-    if (!pa_parser.Parse(argc, argv)) {
-        PrintHelp(pa_parser);
+    if (!paParser.Parse(argc, argv)) {
+        PrintHelp(paParser);
         return false;
     }
 
@@ -102,20 +102,20 @@ bool ProcessArgs(panda::PandArgParser &pa_parser, const Options &options, int ar
         return false;
     }
 
-    if (options.input_file.GetValue().empty() || options.output_file.GetValue().empty() || options.help.GetValue()) {
-        PrintHelp(pa_parser);
+    if (options.inputFile.GetValue().empty() || options.outputFile.GetValue().empty() || options.help.GetValue()) {
+        PrintHelp(paParser);
         return false;
     }
 
     if (options.debug.GetValue()) {
-        auto debug_file = options.debug_file.GetValue();
-        if (debug_file.empty()) {
+        auto debugFile = options.debugFile.GetValue();
+        if (debugFile.empty()) {
             panda::Logger::InitializeStdLogging(
                 panda::Logger::Level::DEBUG,
                 panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER));
         } else {
             panda::Logger::InitializeFileLogging(
-                debug_file, panda::Logger::Level::DEBUG,
+                debugFile, panda::Logger::Level::DEBUG,
                 panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER));
         }
     } else {
@@ -128,16 +128,16 @@ bool ProcessArgs(panda::PandArgParser &pa_parser, const Options &options, int ar
 
 int main(int argc, const char **argv)
 {
-    panda::PandArgParser pa_parser;
-    Options options {pa_parser};
+    panda::PandArgParser paParser;
+    Options options {paParser};
 
-    if (!ProcessArgs(pa_parser, options, argc, argv)) {
+    if (!ProcessArgs(paParser, options, argc, argv)) {
         return 1;
     }
 
     Disassemble(options);
 
-    pa_parser.DisableTail();
+    paParser.DisableTail();
 
     return 0;
 }

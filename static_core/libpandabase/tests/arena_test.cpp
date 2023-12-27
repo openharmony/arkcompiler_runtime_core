@@ -53,36 +53,36 @@ protected:
     }
 
     template <class ArenaT>
-    void GetOccupiedAndFreeSizeTestImplementation(size_t arena_size, size_t alloc_size)
+    void GetOccupiedAndFreeSizeTestImplementation(size_t arenaSize, size_t allocSize)
     {
-        ASSERT_TRUE(arena_size != 0U);
-        ASSERT_TRUE(alloc_size != 0U);
-        auto *arena = CreateArena<ArenaT>(arena_size);
-        size_t old_free_size = arena->GetFreeSize();
-        ASSERT_TRUE(arena->Alloc(alloc_size) != nullptr);
-        ASSERT_TRUE(arena->GetOccupiedSize() == alloc_size);
-        ASSERT_TRUE(old_free_size - alloc_size == arena->GetFreeSize());
+        ASSERT_TRUE(arenaSize != 0U);
+        ASSERT_TRUE(allocSize != 0U);
+        auto *arena = CreateArena<ArenaT>(arenaSize);
+        size_t oldFreeSize = arena->GetFreeSize();
+        ASSERT_TRUE(arena->Alloc(allocSize) != nullptr);
+        ASSERT_TRUE(arena->GetOccupiedSize() == allocSize);
+        ASSERT_TRUE(oldFreeSize - allocSize == arena->GetFreeSize());
     }
 
     template <class ArenaT>
-    void ResizeAndResetTestImplementation(size_t arena_size, size_t alloc_size)
+    void ResizeAndResetTestImplementation(size_t arenaSize, size_t allocSize)
     {
         constexpr const int64_t IMM_TWO = 2;
-        ASSERT_TRUE(arena_size != 0U);
-        ASSERT_TRUE(alloc_size != 0U);
-        auto *arena = CreateArena<ArenaT>(arena_size);
-        ASSERT_TRUE(alloc_size * IMM_TWO <= arena->GetFreeSize());
-        void *first_allocation = arena->Alloc(alloc_size);
-        void *second_allocation = arena->Alloc(alloc_size);
-        ASSERT_TRUE(first_allocation != nullptr);
-        ASSERT_TRUE(first_allocation != nullptr);
-        ASSERT_TRUE(arena->GetOccupiedSize() == IMM_TWO * alloc_size);
-        arena->Resize(alloc_size);
-        ASSERT_TRUE(arena->GetOccupiedSize() == alloc_size);
-        void *third_allocation = arena->Alloc(alloc_size);
+        ASSERT_TRUE(arenaSize != 0U);
+        ASSERT_TRUE(allocSize != 0U);
+        auto *arena = CreateArena<ArenaT>(arenaSize);
+        ASSERT_TRUE(allocSize * IMM_TWO <= arena->GetFreeSize());
+        void *firstAllocation = arena->Alloc(allocSize);
+        void *secondAllocation = arena->Alloc(allocSize);
+        ASSERT_TRUE(firstAllocation != nullptr);
+        ASSERT_TRUE(firstAllocation != nullptr);
+        ASSERT_TRUE(arena->GetOccupiedSize() == IMM_TWO * allocSize);
+        arena->Resize(allocSize);
+        ASSERT_TRUE(arena->GetOccupiedSize() == allocSize);
+        void *thirdAllocation = arena->Alloc(allocSize);
         // we expect that we get the same address
-        ASSERT_TRUE(ToUintPtr(second_allocation) == ToUintPtr(third_allocation));
-        ASSERT_TRUE(arena->GetOccupiedSize() == IMM_TWO * alloc_size);
+        ASSERT_TRUE(ToUintPtr(secondAllocation) == ToUintPtr(thirdAllocation));
+        ASSERT_TRUE(arena->GetOccupiedSize() == IMM_TWO * allocSize);
         arena->Reset();
         ASSERT_TRUE(arena->GetOccupiedSize() == 0U);
     }

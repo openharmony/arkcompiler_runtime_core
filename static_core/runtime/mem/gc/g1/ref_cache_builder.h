@@ -28,49 +28,49 @@ class RefCacheBuilder {
     using RefVector = typename G1GC<LanguageConfig>::RefVector;
 
 public:
-    RefCacheBuilder(G1GC<LanguageConfig> *gc, PandaList<RefVector *> *refs, size_t region_size_bits,
-                    GCMarkingStackType *objects_stack)
-        : gc_(gc), refs_(refs), region_size_bits_(region_size_bits), objects_stack_(objects_stack)
+    RefCacheBuilder(G1GC<LanguageConfig> *gc, PandaList<RefVector *> *refs, size_t regionSizeBits,
+                    GCMarkingStackType *objectsStack)
+        : gc_(gc), refs_(refs), regionSizeBits_(regionSizeBits), objectsStack_(objectsStack)
     {
     }
 
-    bool operator()(ObjectHeader *object, ObjectHeader *field, uint32_t offset, [[maybe_unused]] bool is_volatile)
+    bool operator()(ObjectHeader *object, ObjectHeader *field, uint32_t offset, [[maybe_unused]] bool isVolatile)
     {
         if (!gc_->InGCSweepRange(field)) {
-            all_cross_region_refs_processed_ &= panda::mem::IsSameRegion(object, field, region_size_bits_);
+            allCrossRegionRefsProcessed_ &= panda::mem::IsSameRegion(object, field, regionSizeBits_);
             return true;
         }
-        RefVector *ref_vector = refs_->back();
-        if (ref_vector->size() == ref_vector->capacity()) {
+        RefVector *refVector = refs_->back();
+        if (refVector->size() == refVector->capacity()) {
             // There is no room to store references.
             // Create a new vector and store everithing inside it
-            auto *new_ref_vector = gc_->GetInternalAllocator()->template New<RefVector>();
-            new_ref_vector->reserve(ref_vector->capacity() * 2);
-            refs_->push_back(new_ref_vector);
-            ref_vector = new_ref_vector;
+            auto *newRefVector = gc_->GetInternalAllocator()->template New<RefVector>();
+            newRefVector->reserve(refVector->capacity() * 2);
+            refs_->push_back(newRefVector);
+            refVector = newRefVector;
         }
-        ASSERT(ref_vector->size() < ref_vector->capacity());
+        ASSERT(refVector->size() < refVector->capacity());
         // There is room to store references
-        ASSERT(objects_stack_ != nullptr);
-        if (gc_->mixed_marker_.MarkIfNotMarkedInCollectionSet(field)) {
-            objects_stack_->PushToStack(object, field);
+        ASSERT(objectsStack_ != nullptr);
+        if (gc_->mixedMarker_.MarkIfNotMarkedInCollectionSet(field)) {
+            objectsStack_->PushToStack(object, field);
         }
-        ref_vector->emplace_back(object, offset);
+        refVector->emplace_back(object, offset);
         return true;
     }
 
     bool AllCrossRegionRefsProcessed() const
     {
-        return all_cross_region_refs_processed_;
+        return allCrossRegionRefsProcessed_;
     }
 
 private:
     G1GC<LanguageConfig> *gc_;
     PandaList<RefVector *> *refs_;
-    bool all_cross_region_refs_processed_ = true;
-    size_t region_size_bits_;
+    bool allCrossRegionRefsProcessed_ = true;
+    size_t regionSizeBits_;
     // object stack pointer which will be used to store unmarked objects if it is not nullptr
-    GCMarkingStackType *objects_stack_ = nullptr;
+    GCMarkingStackType *objectsStack_ = nullptr;
 };
 }  // namespace panda::mem
 #endif  // PANDA_RUNTIME_MEM_GC_G1_REF_CACHE_BUILDER_H

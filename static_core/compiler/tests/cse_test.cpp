@@ -20,21 +20,21 @@
 namespace panda::compiler {
 class CSETest : public GraphTest {
 public:
-    CSETest() : is_cse_enable_default_(OPTIONS.IsCompilerCse())
+    CSETest() : isCseEnableDefault_(g_options.IsCompilerCse())
     {
-        OPTIONS.SetCompilerCse(true);
+        g_options.SetCompilerCse(true);
     }
 
     ~CSETest() override
     {
-        OPTIONS.SetCompilerCse(is_cse_enable_default_);
+        g_options.SetCompilerCse(isCseEnableDefault_);
     }
 
     NO_COPY_SEMANTIC(CSETest);
     NO_MOVE_SEMANTIC(CSETest);
 
 private:
-    bool is_cse_enable_default_;
+    bool isCseEnableDefault_;
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -91,8 +91,8 @@ TEST_F(CSETest, CSETestApply1)
     }
 
     // delete insts 10, 11, 12, 13, 23, 24, 25, 26, 27, 28, 29, 30, 31
-    Graph *graph_csed = CreateEmptyGraph();
-    GRAPH(graph_csed)
+    Graph *graphCsed = CreateEmptyGraph();
+    GRAPH(graphCsed)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -128,7 +128,7 @@ TEST_F(CSETest, CSETestApply1)
 
     GetGraph()->RunPass<Cse>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_csed));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
 TEST_F(CSETest, CSETestApply2)
@@ -176,8 +176,8 @@ TEST_F(CSETest, CSETestApply2)
     }
 
     // Delete Insts 12, 14, 16, 18
-    Graph *graph_csed = CreateEmptyGraph();
-    GRAPH(graph_csed)
+    Graph *graphCsed = CreateEmptyGraph();
+    GRAPH(graphCsed)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -216,7 +216,7 @@ TEST_F(CSETest, CSETestApply2)
 
     ASSERT_TRUE(GetGraph()->RunPass<Cse>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_csed));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
 TEST_F(CSETest, CSETestApply3)
@@ -272,8 +272,8 @@ TEST_F(CSETest, CSETestApply3)
     }
 
     // Add Phi 30, 31, 32, 33; Delete Inst 16, 17, 18, 19
-    Graph *graph_csed = CreateEmptyGraph();
-    GRAPH(graph_csed)
+    Graph *graphCsed = CreateEmptyGraph();
+    GRAPH(graphCsed)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -324,7 +324,7 @@ TEST_F(CSETest, CSETestApply3)
 
     ASSERT_TRUE(GetGraph()->RunPass<Cse>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_csed));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
 TEST_F(CSETest, CSETestApply4)
@@ -367,8 +367,8 @@ TEST_F(CSETest, CSETestApply4)
     }
 
     // delete insts 8, 9, 15, 16, 17, 18, 19
-    Graph *graph_csed = CreateEmptyGraph();
-    GRAPH(graph_csed)
+    Graph *graphCsed = CreateEmptyGraph();
+    GRAPH(graphCsed)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -397,7 +397,7 @@ TEST_F(CSETest, CSETestApply4)
 
     GetGraph()->RunPass<Cse>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_csed));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
 TEST_F(CSETest, CSETestApply5)
@@ -445,8 +445,8 @@ TEST_F(CSETest, CSETestApply5)
     }
 
     // Delete Insts 12, 14, 16, 18
-    Graph *graph_csed = CreateEmptyGraph();
-    GRAPH(graph_csed)
+    Graph *graphCsed = CreateEmptyGraph();
+    GRAPH(graphCsed)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -485,7 +485,7 @@ TEST_F(CSETest, CSETestApply5)
 
     ASSERT_TRUE(GetGraph()->RunPass<Cse>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_csed));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
 TEST_F(CSETest, CSETestApply6)
@@ -541,8 +541,8 @@ TEST_F(CSETest, CSETestApply6)
     }
 
     // Add Phi 30, 31, 32, 33; Delete Inst 16, 17, 18, 19
-    Graph *graph_csed = CreateEmptyGraph();
-    GRAPH(graph_csed)
+    Graph *graphCsed = CreateEmptyGraph();
+    GRAPH(graphCsed)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -593,7 +593,7 @@ TEST_F(CSETest, CSETestApply6)
 
     ASSERT_TRUE(GetGraph()->RunPass<Cse>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_csed));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
 TEST_F(CSETest, CSETestNotApply1)
@@ -624,8 +624,8 @@ TEST_F(CSETest, CSETestNotApply1)
         }
     }
     // graph does not change
-    Graph *graph_csed = CreateEmptyGraph();
-    GRAPH(graph_csed)
+    Graph *graphCsed = CreateEmptyGraph();
+    GRAPH(graphCsed)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -652,7 +652,7 @@ TEST_F(CSETest, CSETestNotApply1)
 
     GraphChecker(GetGraph()).Check();
     ASSERT_FALSE(GetGraph()->RunPass<Cse>());
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_csed));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
 TEST_F(CSETest, CSETestNotApply2)
@@ -694,8 +694,8 @@ TEST_F(CSETest, CSETestNotApply2)
     }
 
     // Graph does not change
-    Graph *graph_csed = CreateEmptyGraph();
-    GRAPH(graph_csed)
+    Graph *graphCsed = CreateEmptyGraph();
+    GRAPH(graphCsed)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -732,7 +732,7 @@ TEST_F(CSETest, CSETestNotApply2)
 
     GraphChecker(GetGraph()).Check();
     ASSERT_FALSE(GetGraph()->RunPass<Cse>());
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_csed));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 // NOLINTEND(readability-magic-numbers)
 

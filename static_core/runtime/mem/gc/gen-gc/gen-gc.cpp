@@ -27,10 +27,10 @@
 namespace panda::mem {
 
 template <class LanguageConfig>
-GenGC<LanguageConfig>::GenGC(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
-    : GenerationalGC<LanguageConfig>(object_allocator, settings),
+GenGC<LanguageConfig>::GenGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
+    : GenerationalGC<LanguageConfig>(objectAllocator, settings),
       marker_(this),
-      is_explicit_concurrent_gc_enabled_(settings.IsExplicitConcurrentGcEnabled())
+      isExplicitConcurrentGcEnabled_(settings.IsExplicitConcurrentGcEnabled())
 {
     this->SetType(GCType::GEN_GC);
     this->SetTLABsSupported();
@@ -43,10 +43,10 @@ void GenGC<LanguageConfig>::InitializeImpl()
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     this->CreateCardTable(allocator, PoolManager::GetMmapMemPool()->GetMinObjectAddress(),
                           PoolManager::GetMmapMemPool()->GetTotalObjectSize());
-    auto barrier_set = allocator->New<GCGenBarrierSet>(allocator, this->GetCardTable(), CardTable::GetCardBits(),
-                                                       CardTable::GetCardDirtyValue());
-    ASSERT(barrier_set != nullptr);
-    this->SetGCBarrierSet(barrier_set);
+    auto barrierSet = allocator->New<GCGenBarrierSet>(allocator, this->GetCardTable(), CardTable::GetCardBits(),
+                                                      CardTable::GetCardDirtyValue());
+    ASSERT(barrierSet != nullptr);
+    this->SetGCBarrierSet(barrierSet);
     LOG_DEBUG_GC << "GenGC initialized";
 }
 
@@ -57,9 +57,9 @@ bool GenGC<LanguageConfig>::ShouldRunTenuredGC(const GCTask &task)
 }
 
 template <class LanguageConfig>
-bool GenGC<LanguageConfig>::ShouldRunFullGC(const GCTask &task, bool have_enough_space_for_young) const
+bool GenGC<LanguageConfig>::ShouldRunFullGC(const GCTask &task, bool haveEnoughSpaceForYoung) const
 {
-    return !have_enough_space_for_young || task.reason == GCTaskCause::OOM_CAUSE || this->IsExplicitFull(task) ||
+    return !haveEnoughSpaceForYoung || task.reason == GCTaskCause::OOM_CAUSE || this->IsExplicitFull(task) ||
            this->IsOnPygoteFork() || task.reason == GCTaskCause::STARTUP_COMPLETE_CAUSE;
 }
 
@@ -67,39 +67,39 @@ template <class LanguageConfig>
 void GenGC<LanguageConfig>::RunPhasesImpl(GCTask &task)
 {
     LOG(DEBUG, GC) << "GenGC start";
-    uint64_t footprint_before = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
-    LOG_DEBUG_GC << "Footprint before GC: " << footprint_before;
+    uint64_t footprintBefore = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
+    LOG_DEBUG_GC << "Footprint before GC: " << footprintBefore;
     if (this->IsLogDetailedGcInfoEnabled()) {
-        this->footprint_list_.clear();
-        this->footprint_list_.push_back({"Footprint before GC", footprint_before});
+        this->footprintList_.clear();
+        this->footprintList_.push_back({"Footprint before GC", footprintBefore});
     }
-    uint64_t young_total_time = 0;
+    uint64_t youngTotalTime = 0;
     {
         ScopedTiming t("Generational GC", *this->GetTiming());
-        this->mem_stats_.Reset();
+        this->memStats_.Reset();
         // We trigger a full gc at first pygote fork
         if (ShouldRunFullGC(task, HaveEnoughSpaceToMove())) {
-            GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats());
+            GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
             marker_.BindBitmaps(true);  // clear pygote live bitmaps, we will rebuild it
             this->GetObjectGenAllocator()->InvalidateSpaceData();
             this->GetObjectGenAllocator()->UpdateSpaceData();
             RunFullGC(task);
         } else {
             {
-                GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats());
-                time::Timer timer(&young_total_time, true);
+                GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
+                time::Timer timer(&youngTotalTime, true);
                 marker_.BindBitmaps(false);
                 this->GetObjectGenAllocator()->InvalidateSpaceData();
                 this->GetObjectGenAllocator()->UpdateSpaceData();
                 LOG_DEBUG_GC << "Young range: " << this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
                 RunYoungGC(task);
-                if (young_total_time > 0) {
-                    this->GetStats()->AddTimeValue(young_total_time, TimeTypeStats::YOUNG_TOTAL_TIME);
+                if (youngTotalTime > 0) {
+                    this->GetStats()->AddTimeValue(youngTotalTime, TimeTypeStats::YOUNG_TOTAL_TIME);
                 }
-                uint64_t footprint_young = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
-                LOG_DEBUG_GC << "Footprint after young: " << footprint_young;
+                uint64_t footprintYoung = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
+                LOG_DEBUG_GC << "Footprint after young: " << footprintYoung;
                 if (this->IsLogDetailedGcInfoEnabled()) {
-                    this->footprint_list_.push_back({"Footprint after young", footprint_young});
+                    this->footprintList_.push_back({"Footprint after young", footprintYoung});
                 }
             }
             if (ShouldRunTenuredGC(task)) {
@@ -110,10 +110,10 @@ void GenGC<LanguageConfig>::RunPhasesImpl(GCTask &task)
             }
         }
     }
-    uint64_t footprint_after = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
-    LOG_DEBUG_GC << "Footprint after GC: " << footprint_after;
+    uint64_t footprintAfter = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
+    LOG_DEBUG_GC << "Footprint after GC: " << footprintAfter;
     if (this->IsLogDetailedGcInfoEnabled()) {
-        this->footprint_list_.push_back({"Footprint after GC", footprint_after});
+        this->footprintList_.push_back({"Footprint after GC", footprintAfter});
     }
 }
 
@@ -124,49 +124,49 @@ void GenGC<LanguageConfig>::PreStartupImp()
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::InitGCBits(panda::ObjectHeader *obj_header)
+void GenGC<LanguageConfig>::InitGCBits(panda::ObjectHeader *objHeader)
 {
     if (UNLIKELY(this->GetGCPhase() == GCPhase::GC_PHASE_SWEEP) &&
-        (!this->GetObjectAllocator()->IsObjectInYoungSpace(obj_header))) {
-        obj_header->SetMarkedForGC();
+        (!this->GetObjectAllocator()->IsObjectInYoungSpace(objHeader))) {
+        objHeader->SetMarkedForGC();
         // do unmark if out of sweep phase otherwise we may miss it in sweep
         if (UNLIKELY(this->GetGCPhase() != GCPhase::GC_PHASE_SWEEP)) {
-            obj_header->SetUnMarkedForGC();
+            objHeader->SetUnMarkedForGC();
         }
     } else {
-        obj_header->SetUnMarkedForGC();
+        objHeader->SetUnMarkedForGC();
     }
-    LOG_DEBUG_GC << "Init gc bits for object: " << std::hex << obj_header << " bit: " << obj_header->IsMarkedForGC()
-                 << ", is marked = " << IsMarked(obj_header);
+    LOG_DEBUG_GC << "Init gc bits for object: " << std::hex << objHeader << " bit: " << objHeader->IsMarkedForGC()
+                 << ", is marked = " << IsMarked(objHeader);
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::InitGCBitsForAllocationInTLAB(panda::ObjectHeader *obj_header)
+void GenGC<LanguageConfig>::InitGCBitsForAllocationInTLAB(panda::ObjectHeader *objHeader)
 {
     // Compiler will allocate objects in TLABs only in young space
     // Therefore, set unmarked for GC here.
-    obj_header->SetUnMarkedForGC();
+    objHeader->SetUnMarkedForGC();
 }
 
 template <class LanguageConfig>
 void GenGC<LanguageConfig>::RunYoungGC(GCTask &task)
 {
-    GCScope<TRACE_TIMING> scoped_trace(__FUNCTION__, this);
+    GCScope<TRACE_TIMING> scopedTrace(__FUNCTION__, this);
     LOG_DEBUG_GC << "GenGC RunYoungGC start";
-    uint64_t young_pause_time;
+    uint64_t youngPauseTime;
     {
         NoAtomicGCMarkerScope scope(&this->marker_);
-        time::Timer timer(&young_pause_time, true);
+        time::Timer timer(&youngPauseTime, true);
         // NOLINTNEXTLINE(performance-unnecessary-value-param)
         MarkYoung(task);
         CollectYoungAndMove();
         this->GetCardTable()->ClearAll();
     }
-    if (young_pause_time > 0) {
-        this->GetStats()->AddTimeValue(young_pause_time, TimeTypeStats::YOUNG_PAUSED_TIME);
+    if (youngPauseTime > 0) {
+        this->GetStats()->AddTimeValue(youngPauseTime, TimeTypeStats::YOUNG_PAUSED_TIME);
     }
     LOG_DEBUG_GC << "GenGC RunYoungGC end";
-    task.collection_type = GCCollectionType::YOUNG;
+    task.collectionType = GCCollectionType::YOUNG;
 }
 
 template <class LanguageConfig>
@@ -175,99 +175,99 @@ void GenGC<LanguageConfig>::MarkYoung(const GCTask &task)
     GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK_YOUNG);
 
     // Iterate over roots and add other roots
-    GCMarkingStackType objects_stack(this);
+    GCMarkingStackType objectsStack(this);
     ASSERT(this->GetObjectAllocator()->GetYoungSpaceMemRanges().size() == 1);
-    auto young_mr = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
-    GCRootVisitor gc_mark_young = [&objects_stack, &young_mr, this](const GCRoot &gc_root) {
+    auto youngMr = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
+    GCRootVisitor gcMarkYoung = [&objectsStack, &youngMr, this](const GCRoot &gcRoot) {
         // Skip non-young roots
-        auto root_object_ptr = gc_root.GetObjectHeader();
-        ASSERT(root_object_ptr != nullptr);
-        if (!young_mr.IsAddressInRange(ToUintPtr(root_object_ptr))) {
-            LOG_DEBUG_GC << "Skip root for young mark: " << std::hex << root_object_ptr;
+        auto rootObjectPtr = gcRoot.GetObjectHeader();
+        ASSERT(rootObjectPtr != nullptr);
+        if (!youngMr.IsAddressInRange(ToUintPtr(rootObjectPtr))) {
+            LOG_DEBUG_GC << "Skip root for young mark: " << std::hex << rootObjectPtr;
             return;
         }
-        LOG(DEBUG, GC) << "root " << GetDebugInfoAboutObject(root_object_ptr);
-        if (this->MarkObjectIfNotMarked(root_object_ptr)) {
-            objects_stack.PushToStack(gc_root.GetType(), root_object_ptr);
-            this->MarkYoungStack(&objects_stack);
+        LOG(DEBUG, GC) << "root " << GetDebugInfoAboutObject(rootObjectPtr);
+        if (this->MarkObjectIfNotMarked(rootObjectPtr)) {
+            objectsStack.PushToStack(gcRoot.GetType(), rootObjectPtr);
+            this->MarkYoungStack(&objectsStack);
         }
     };
     {
-        GCScope<TRACE_TIMING> marking_young_roots_trace("Marking roots young", this);
-        this->VisitRoots(gc_mark_young,
+        GCScope<TRACE_TIMING> markingYoungRootsTrace("Marking roots young", this);
+        this->VisitRoots(gcMarkYoung,
                          VisitGCRootFlags::ACCESS_ROOT_NONE | VisitGCRootFlags::ACCESS_ROOT_AOT_STRINGS_ONLY_YOUNG);
     }
     {
-        ScopedTiming visit_card_table_roots_timing("VisitCardTableRoots", *this->GetTiming());
+        ScopedTiming visitCardTableRootsTiming("VisitCardTableRoots", *this->GetTiming());
         LOG_DEBUG_GC << "START Marking tenured -> young roots";
-        MemRangeChecker tenured_range_checker = [&young_mr](MemRange &mem_range) -> bool {
-            return !young_mr.IsIntersect(mem_range);
+        MemRangeChecker tenuredRangeChecker = [&youngMr](MemRange &memRange) -> bool {
+            return !youngMr.IsIntersect(memRange);
         };
-        ObjectChecker tenured_range_young_object_checker = [&young_mr](const ObjectHeader *object_header) -> bool {
-            return young_mr.IsAddressInRange(ToUintPtr(object_header));
+        ObjectChecker tenuredRangeYoungObjectChecker = [&youngMr](const ObjectHeader *objectHeader) -> bool {
+            return youngMr.IsAddressInRange(ToUintPtr(objectHeader));
         };
 
-        ObjectChecker from_object_checker = []([[maybe_unused]] const ObjectHeader *object_header) -> bool {
+        ObjectChecker fromObjectChecker = []([[maybe_unused]] const ObjectHeader *objectHeader) -> bool {
             return true;
         };
 
-        this->VisitCardTableRoots(this->GetCardTable(), gc_mark_young, tenured_range_checker,
-                                  tenured_range_young_object_checker, from_object_checker,
+        this->VisitCardTableRoots(this->GetCardTable(), gcMarkYoung, tenuredRangeChecker,
+                                  tenuredRangeYoungObjectChecker, fromObjectChecker,
                                   CardTableProcessedFlag::VISIT_MARKED | CardTableProcessedFlag::VISIT_PROCESSED);
     }
     // reference-processor in VisitCardTableRoots can add new objects to stack
-    this->MarkYoungStack(&objects_stack);
+    this->MarkYoungStack(&objectsStack);
     LOG_DEBUG_GC << "END Marking tenured -> young roots";
-    auto ref_clear_pred = [this]([[maybe_unused]] const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
-    this->GetPandaVm()->HandleReferences(task, ref_clear_pred);
+    auto refClearPred = [this]([[maybe_unused]] const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+    this->GetPandaVm()->HandleReferences(task, refClearPred);
 }
 
 template <class LanguageConfig>
 void GenGC<LanguageConfig>::MarkYoungStack(GCMarkingStackType *stack)
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
     ASSERT(stack != nullptr);
     auto allocator = this->GetObjectAllocator();
-    auto &young_ranges = allocator->GetYoungSpaceMemRanges();
-    auto ref_pred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+    auto &youngRanges = allocator->GetYoungSpaceMemRanges();
+    auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
     while (!stack->Empty()) {
         auto *object = this->PopObjectFromStack(stack);
         ValidateObject(nullptr, object);
         auto *cls = object->template ClassAddr<BaseClass>();
         LOG_DEBUG_GC << "current object " << GetDebugInfoAboutObject(object);
 
-        bool in_range = false;
-        for (const auto &r : young_ranges) {
+        bool inRange = false;
+        for (const auto &r : youngRanges) {
             if (r.IsAddressInRange(ToUintPtr(object))) {
-                in_range = true;
+                inRange = true;
                 break;
             }
         }
-        if (in_range) {
-            marker_.MarkInstance(stack, object, cls, ref_pred);
+        if (inRange) {
+            marker_.MarkInstance(stack, object, cls, refPred);
         }
     }
 }
 
 template <class LanguageConfig>
-HeapVerifierIntoGC<LanguageConfig> GenGC<LanguageConfig>::CollectVerificationInfo(const MemRange &young_mem_range)
+HeapVerifierIntoGC<LanguageConfig> GenGC<LanguageConfig>::CollectVerificationInfo(const MemRange &youngMemRange)
 {
-    HeapVerifierIntoGC<LanguageConfig> young_verifier(this->GetPandaVm()->GetHeapManager());
+    HeapVerifierIntoGC<LanguageConfig> youngVerifier(this->GetPandaVm()->GetHeapManager());
     if (this->GetSettings()->IntoGCHeapVerification() && !this->IsFullGC()) {
-        ScopedTiming collect_verification_timing("CollectVerificationInfo", *this->GetTiming());
-        young_verifier.CollectVerificationInfo(PandaVector<MemRange>(1U, young_mem_range));
+        ScopedTiming collectVerificationTiming("CollectVerificationInfo", *this->GetTiming());
+        youngVerifier.CollectVerificationInfo(PandaVector<MemRange>(1U, youngMemRange));
     }
-    return young_verifier;
+    return youngVerifier;
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfig> &&young_verifier)
+void GenGC<LanguageConfig>::VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfig> &&youngVerifier)
 {
     if (this->GetSettings()->IntoGCHeapVerification() && !this->IsFullGC()) {
-        ScopedTiming verification_timing("Verification", *this->GetTiming());
-        size_t fails_count = young_verifier.VerifyAll();
-        if (this->GetSettings()->FailOnHeapVerification() && fails_count > 0) {
-            LOG(FATAL, GC) << "Heap was corrupted during GC, HeapVerifier found " << fails_count << " corruptions";
+        ScopedTiming verificationTiming("Verification", *this->GetTiming());
+        size_t failsCount = youngVerifier.VerifyAll();
+        if (this->GetSettings()->FailOnHeapVerification() && failsCount > 0) {
+            LOG(FATAL, GC) << "Heap was corrupted during GC, HeapVerifier found " << failsCount << " corruptions";
         }
     }
 }
@@ -279,90 +279,90 @@ void GenGC<LanguageConfig>::CollectYoungAndMove()
     GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE);
     LOG_DEBUG_GC << "== GenGC CollectYoungAndMove start ==";
     // NOTE(dtrubenkov): add assert that we in STW
-    PandaVector<ObjectHeader *> moved_objects;
-    size_t prev_moved_size = this->GetPandaVm()->GetMemStats()->GetLastYoungObjectsMovedBytes();
+    PandaVector<ObjectHeader *> movedObjects;
+    size_t prevMovedSize = this->GetPandaVm()->GetMemStats()->GetLastYoungObjectsMovedBytes();
     constexpr size_t MINIMAL_PREALLOC_MOVE_OBJ = 32U;
     // Adaptive preallocate buffer for moved_objects to avoid useless reallocations
-    moved_objects.reserve(std::max(MINIMAL_PREALLOC_MOVE_OBJ, prev_moved_size / GetMinimalObjectSize()));
-    size_t young_move_size = 0;
-    size_t young_move_count = 0;
-    size_t young_delete_size = 0;
-    size_t young_delete_count = 0;
-    size_t bytes_in_heap_before_move = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
+    movedObjects.reserve(std::max(MINIMAL_PREALLOC_MOVE_OBJ, prevMovedSize / GetMinimalObjectSize()));
+    size_t youngMoveSize = 0;
+    size_t youngMoveCount = 0;
+    size_t youngDeleteSize = 0;
+    size_t youngDeleteCount = 0;
+    size_t bytesInHeapBeforeMove = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
 
-    auto *object_allocator = this->GetObjectGenAllocator();
+    auto *objectAllocator = this->GetObjectGenAllocator();
     ASSERT(this->GetObjectAllocator()->GetYoungSpaceMemRanges().size() == 1);
-    auto young_mem_range = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
-    HeapVerifierIntoGC<LanguageConfig> young_verifier = CollectVerificationInfo(young_mem_range);
+    auto youngMemRange = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
+    HeapVerifierIntoGC<LanguageConfig> youngVerifier = CollectVerificationInfo(youngMemRange);
 
-    std::function<void(ObjectHeader * object_header)> move_visitor(
-        [this, &object_allocator, &moved_objects, &young_move_size, &young_move_count, &young_delete_size,
-         &young_delete_count](ObjectHeader *object_header) -> void {
-            size_t size = GetObjectSize(object_header);
+    std::function<void(ObjectHeader * objectHeader)> moveVisitor(
+        [this, &objectAllocator, &movedObjects, &youngMoveSize, &youngMoveCount, &youngDeleteSize,
+         &youngDeleteCount](ObjectHeader *objectHeader) -> void {
+            size_t size = GetObjectSize(objectHeader);
             ASSERT(size <= ObjectAllocatorGen<>::GetYoungAllocMaxSize());
             // Use aligned size here, because we need to proceed MemStats correctly.
-            size_t aligned_size = GetAlignedObjectSize(size);
-            if (object_header->IsMarkedForGC<false>()) {
-                auto dst = reinterpret_cast<ObjectHeader *>(object_allocator->AllocateTenuredWithoutLocks(size));
+            size_t alignedSize = GetAlignedObjectSize(size);
+            if (objectHeader->IsMarkedForGC<false>()) {
+                auto dst = reinterpret_cast<ObjectHeader *>(objectAllocator->AllocateTenuredWithoutLocks(size));
                 ASSERT(dst != nullptr);
-                memcpy_s(dst, size, object_header, size);
-                young_move_size += aligned_size;
-                young_move_count++;
-                LOG_DEBUG_OBJECT_EVENTS << "MOVE object " << object_header << " -> " << dst << ", size = " << size;
-                moved_objects.push_back(dst);
+                memcpy_s(dst, size, objectHeader, size);
+                youngMoveSize += alignedSize;
+                youngMoveCount++;
+                LOG_DEBUG_OBJECT_EVENTS << "MOVE object " << objectHeader << " -> " << dst << ", size = " << size;
+                movedObjects.push_back(dst);
                 // set unmarked dst
                 UnMarkObject(dst);
-                this->SetForwardAddress(object_header, dst);
+                this->SetForwardAddress(objectHeader, dst);
             } else {
-                LOG_DEBUG_OBJECT_EVENTS << "DELETE OBJECT young: " << object_header;
-                ++young_delete_count;
-                young_delete_size += aligned_size;
+                LOG_DEBUG_OBJECT_EVENTS << "DELETE OBJECT young: " << objectHeader;
+                ++youngDeleteCount;
+                youngDeleteSize += alignedSize;
             }
             // We will record all object in MemStats as SPACE_TYPE_OBJECT, so check it
-            ASSERT(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(object_header) == SpaceType::SPACE_TYPE_OBJECT);
+            ASSERT(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(objectHeader) == SpaceType::SPACE_TYPE_OBJECT);
         });
     {
-        ScopedTiming move_timing("MoveAndSweep", *this->GetTiming());
-        object_allocator->IterateOverYoungObjects(move_visitor);
+        ScopedTiming moveTiming("MoveAndSweep", *this->GetTiming());
+        objectAllocator->IterateOverYoungObjects(moveVisitor);
     }
-    this->mem_stats_.RecordSizeMovedYoung(young_move_size);
-    this->mem_stats_.RecordCountMovedYoung(young_move_count);
-    this->mem_stats_.RecordSizeFreedYoung(young_delete_size);
-    this->mem_stats_.RecordCountFreedYoung(young_delete_count);
-    UpdateRefsToMovedObjects(&moved_objects);
-    this->VerifyCollectAndMove(std::move(young_verifier));
+    this->memStats_.RecordSizeMovedYoung(youngMoveSize);
+    this->memStats_.RecordCountMovedYoung(youngMoveCount);
+    this->memStats_.RecordSizeFreedYoung(youngDeleteSize);
+    this->memStats_.RecordCountFreedYoung(youngDeleteCount);
+    UpdateRefsToMovedObjects(&movedObjects);
+    this->VerifyCollectAndMove(std::move(youngVerifier));
     SweepYoungVmRefs();
     // Remove young
-    object_allocator->ResetYoungAllocator();
+    objectAllocator->ResetYoungAllocator();
 
-    this->UpdateMemStats(bytes_in_heap_before_move, false);
+    this->UpdateMemStats(bytesInHeapBeforeMove, false);
 
     LOG_DEBUG_GC << "== GenGC CollectYoungAndMove end ==";
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::UpdateRefsToMovedObjects(PandaVector<ObjectHeader *> *moved_objects)
+void GenGC<LanguageConfig>::UpdateRefsToMovedObjects(PandaVector<ObjectHeader *> *movedObjects)
 {
     GCScope<TRACE_TIMING> scope("UpdateRefsToMovedObjects", this);
 
-    auto obj_allocator = this->GetObjectAllocator();
+    auto objAllocator = this->GetObjectAllocator();
     // Update references exyoung -> young
-    LOG_DEBUG_GC << "process moved objects cnt = " << std::dec << moved_objects->size();
+    LOG_DEBUG_GC << "process moved objects cnt = " << std::dec << movedObjects->size();
     LOG_DEBUG_GC << "=== Update exyoung -> young references. START. ===";
-    for (auto obj : *moved_objects) {
+    for (auto obj : *movedObjects) {
         ObjectHelpers<LanguageConfig::LANG_TYPE>::UpdateRefsToMovedObjects(obj);
     }
 
     LOG_DEBUG_GC << "=== Update exyoung -> young references. END. ===";
     // update references tenured -> young
     LOG_DEBUG_GC << "=== Update tenured -> young references. START. ===";
-    auto young_space = obj_allocator->GetYoungSpaceMemRanges().at(0);
-    auto update_refs_in_object(
+    auto youngSpace = objAllocator->GetYoungSpaceMemRanges().at(0);
+    auto updateRefsInObject(
         [](ObjectHeader *obj) { ObjectHelpers<LanguageConfig::LANG_TYPE>::UpdateRefsToMovedObjects(obj); });
     this->GetCardTable()->VisitMarked(
-        [&update_refs_in_object, &obj_allocator, &young_space](const MemRange &mem_range) {
-            if (!young_space.Contains(mem_range)) {
-                obj_allocator->IterateOverObjectsInRange(mem_range, update_refs_in_object);
+        [&updateRefsInObject, &objAllocator, &youngSpace](const MemRange &memRange) {
+            if (!youngSpace.Contains(memRange)) {
+                objAllocator->IterateOverObjectsInRange(memRange, updateRefsInObject);
             }
         },
         CardTableProcessedFlag::VISIT_MARKED | CardTableProcessedFlag::VISIT_PROCESSED);
@@ -375,40 +375,40 @@ void GenGC<LanguageConfig>::RunTenuredGC(GCTask &task)
 {
     GCScope<TRACE_TIMING> scope(__FUNCTION__, this);
     LOG_DEBUG_GC << "GC tenured start";
-    GCMarkingStackType objects_stack(this);
+    GCMarkingStackType objectsStack(this);
     {
-        GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
+        GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
         {
-            ScopedTiming un_mark_timing("UnMark", *this->GetTiming());
+            ScopedTiming unMarkTiming("UnMark", *this->GetTiming());
             // Unmark all because no filter out tenured when mark young
             // NOTE(dtrubenk): remove this
             this->GetObjectAllocator()->IterateOverObjects([this](ObjectHeader *obj) { this->marker_.UnMark(obj); });
         }
-        InitialMark(&objects_stack);
+        InitialMark(&objectsStack);
     }
-    this->ConcurrentMark(&objects_stack);
+    this->ConcurrentMark(&objectsStack);
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    ReMark(&objects_stack, task);
+    ReMark(&objectsStack, task);
 
-    ASSERT(objects_stack.Empty());
+    ASSERT(objectsStack.Empty());
     {
-        ScopedTiming un_mark_young_timing("UnMarkYoung", *this->GetTiming());
+        ScopedTiming unMarkYoungTiming("UnMarkYoung", *this->GetTiming());
         this->GetObjectAllocator()->IterateOverYoungObjects([this](ObjectHeader *obj) { this->marker_.UnMark(obj); });
     }
     Sweep<true>();
     LOG_DEBUG_GC << "GC tenured end";
-    task.collection_type = GCCollectionType::TENURED;
+    task.collectionType = GCCollectionType::TENURED;
 }
 
 // Full GC is ran on pause
 template <class LanguageConfig>
 void GenGC<LanguageConfig>::RunFullGC(GCTask &task)
 {
-    GCScope<TRACE_TIMING> full_gc_scope(__FUNCTION__, this);
+    GCScope<TRACE_TIMING> fullGcScope(__FUNCTION__, this);
     LOG_DEBUG_GC << "Full GC start";
     this->SetFullGC(true);
     {
-        ScopedTiming un_mark_timing("UnMark", *this->GetTiming());
+        ScopedTiming unMarkTiming("UnMark", *this->GetTiming());
         this->GetObjectAllocator()->IterateOverObjects([this](ObjectHeader *obj) { this->marker_.UnMark(obj); });
     }
     FullMark(task);
@@ -421,102 +421,101 @@ void GenGC<LanguageConfig>::RunFullGC(GCTask &task)
     }
     this->SetFullGC(false);
     LOG_DEBUG_GC << "Full GC end";
-    task.collection_type = GCCollectionType::FULL;
+    task.collectionType = GCCollectionType::FULL;
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::MarkRoots(GCMarkingStackType *objects_stack, CardTableVisitFlag visit_card_table_roots,
-                                      const ReferenceCheckPredicateT &ref_pred, VisitGCRootFlags flags)
+void GenGC<LanguageConfig>::MarkRoots(GCMarkingStackType *objectsStack, CardTableVisitFlag visitCardTableRoots,
+                                      const ReferenceCheckPredicateT &refPred, VisitGCRootFlags flags)
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
-    GCRootVisitor gc_mark_roots = [this, &objects_stack, &ref_pred](const GCRoot &gc_root) {
-        ObjectHeader *root_object = gc_root.GetObjectHeader();
-        ObjectHeader *from_object = gc_root.GetFromObjectHeader();
-        LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(root_object);
-        if (UNLIKELY(from_object != nullptr) &&
-            this->IsReference(from_object->NotAtomicClassAddr<BaseClass>(), from_object, ref_pred)) {
-            LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(from_object) << " to stack";
-            marker_.Mark(from_object);
-            this->ProcessReference(objects_stack, from_object->NotAtomicClassAddr<BaseClass>(), from_object,
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    GCRootVisitor gcMarkRoots = [this, &objectsStack, &refPred](const GCRoot &gcRoot) {
+        ObjectHeader *rootObject = gcRoot.GetObjectHeader();
+        ObjectHeader *fromObject = gcRoot.GetFromObjectHeader();
+        LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(rootObject);
+        if (UNLIKELY(fromObject != nullptr) &&
+            this->IsReference(fromObject->NotAtomicClassAddr<BaseClass>(), fromObject, refPred)) {
+            LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(fromObject) << " to stack";
+            marker_.Mark(fromObject);
+            this->ProcessReference(objectsStack, fromObject->NotAtomicClassAddr<BaseClass>(), fromObject,
                                    GC::EmptyReferenceProcessPredicate);
         } else {
             // we should always add this object to the stack, because we could mark this object in InitialMark, but
             // write to some fields in ConcurrentMark - need to iterate over all fields again, MarkObjectIfNotMarked
             // can't be used here
-            marker_.Mark(root_object);
-            objects_stack->PushToStack(gc_root.GetType(), root_object);
+            marker_.Mark(rootObject);
+            objectsStack->PushToStack(gcRoot.GetType(), rootObject);
         }
     };
-    this->VisitRoots(gc_mark_roots, flags);
-    if (visit_card_table_roots == CardTableVisitFlag::VISIT_ENABLED) {
+    this->VisitRoots(gcMarkRoots, flags);
+    if (visitCardTableRoots == CardTableVisitFlag::VISIT_ENABLED) {
         auto allocator = this->GetObjectAllocator();
         ASSERT(allocator->GetYoungSpaceMemRanges().size() == 1);
-        MemRange young_mr = allocator->GetYoungSpaceMemRanges().at(0);
-        MemRangeChecker young_range_checker = []([[maybe_unused]] MemRange &mem_range) -> bool { return true; };
-        ObjectChecker young_range_tenured_object_checker = [&young_mr](const ObjectHeader *object_header) -> bool {
-            return !young_mr.IsAddressInRange(ToUintPtr(object_header));
+        MemRange youngMr = allocator->GetYoungSpaceMemRanges().at(0);
+        MemRangeChecker youngRangeChecker = []([[maybe_unused]] MemRange &memRange) -> bool { return true; };
+        ObjectChecker youngRangeTenuredObjectChecker = [&youngMr](const ObjectHeader *objectHeader) -> bool {
+            return !youngMr.IsAddressInRange(ToUintPtr(objectHeader));
         };
-        ObjectChecker from_object_checker = [&young_mr, this](const ObjectHeader *object_header) -> bool {
+        ObjectChecker fromObjectChecker = [&youngMr, this](const ObjectHeader *objectHeader) -> bool {
             // Don't visit objects which are in tenured and not marked.
-            return young_mr.IsAddressInRange(ToUintPtr(object_header)) || IsMarked(object_header);
+            return youngMr.IsAddressInRange(ToUintPtr(objectHeader)) || IsMarked(objectHeader);
         };
-        this->VisitCardTableRoots(this->GetCardTable(), gc_mark_roots, young_range_checker,
-                                  young_range_tenured_object_checker, from_object_checker,
-                                  CardTableProcessedFlag::VISIT_MARKED);
+        this->VisitCardTableRoots(this->GetCardTable(), gcMarkRoots, youngRangeChecker, youngRangeTenuredObjectChecker,
+                                  fromObjectChecker, CardTableProcessedFlag::VISIT_MARKED);
     }
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::InitialMark(GCMarkingStackType *objects_stack)
+void GenGC<LanguageConfig>::InitialMark(GCMarkingStackType *objectsStack)
 {
-    GCScope<TRACE_TIMING_PHASE> gc_scope(__FUNCTION__, this, GCPhase::GC_PHASE_INITIAL_MARK);
+    GCScope<TRACE_TIMING_PHASE> gcScope(__FUNCTION__, this, GCPhase::GC_PHASE_INITIAL_MARK);
     {
         NoAtomicGCMarkerScope scope(&this->marker_);
-        auto ref_pred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
-        MarkRoots(objects_stack, CardTableVisitFlag::VISIT_DISABLED, ref_pred,
+        auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+        MarkRoots(objectsStack, CardTableVisitFlag::VISIT_DISABLED, refPred,
                   VisitGCRootFlags::ACCESS_ROOT_NONE | VisitGCRootFlags::START_RECORDING_NEW_ROOT);
     }
 }
 
 template <class LanguageConfig>
-NO_THREAD_SAFETY_ANALYSIS void GenGC<LanguageConfig>::ConcurrentMark(GCMarkingStackType *objects_stack)
+NO_THREAD_SAFETY_ANALYSIS void GenGC<LanguageConfig>::ConcurrentMark(GCMarkingStackType *objectsStack)
 {
-    GCScope<TRACE_TIMING_PHASE> scoped_func(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
-    ConcurrentScope concurrent_scope(this);
-    auto *object_allocator = this->GetObjectAllocator();
+    GCScope<TRACE_TIMING_PHASE> scopedFunc(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
+    ConcurrentScope concurrentScope(this);
+    auto *objectAllocator = this->GetObjectAllocator();
     this->MarkImpl(
-        &marker_, objects_stack, CardTableVisitFlag::VISIT_ENABLED,
+        &marker_, objectsStack, CardTableVisitFlag::VISIT_ENABLED,
         // Process 'weak' references as regular object on concurrent phase to avoid
         // concurrent access to referent
         []([[maybe_unused]] const ObjectHeader *obj) { return false; },
         // non-young mem range checker
-        [object_allocator](MemRange &mem_range) { return !object_allocator->IsIntersectedWithYoung(mem_range); });
+        [objectAllocator](MemRange &memRange) { return !objectAllocator->IsIntersectedWithYoung(memRange); });
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::ReMark(GCMarkingStackType *objects_stack, const GCTask &task)
+void GenGC<LanguageConfig>::ReMark(GCMarkingStackType *objectsStack, const GCTask &task)
 {
-    GCScope<TRACE_TIMING_PHASE> gc_scope(__FUNCTION__, this, GCPhase::GC_PHASE_REMARK);
-    GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::REMARK_PAUSE);
+    GCScope<TRACE_TIMING_PHASE> gcScope(__FUNCTION__, this, GCPhase::GC_PHASE_REMARK);
+    GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::REMARK_PAUSE);
 
     // NOTE(dtrubenkov): consider iterational concurrent marking of card table
     {
         NoAtomicGCMarkerScope scope(&this->marker_);
-        auto ref_pred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
-        MarkRoots(objects_stack, CardTableVisitFlag::VISIT_ENABLED, ref_pred,
+        auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+        MarkRoots(objectsStack, CardTableVisitFlag::VISIT_ENABLED, refPred,
                   VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW | VisitGCRootFlags::END_RECORDING_NEW_ROOT);
-        this->MarkStack(&marker_, objects_stack, GC::EmptyMarkPreprocess, ref_pred);
+        this->MarkStack(&marker_, objectsStack, GC::EmptyMarkPreprocess, refPred);
         {
             ScopedTiming t1("VisitInternalStringTable", *this->GetTiming());
             this->GetPandaVm()->VisitStringTable(
-                [this, &objects_stack](ObjectHeader *str) {
+                [this, &objectsStack](ObjectHeader *str) {
                     if (this->MarkObjectIfNotMarked(str)) {
                         ASSERT(str != nullptr);
-                        objects_stack->PushToStack(RootType::STRING_TABLE, str);
+                        objectsStack->PushToStack(RootType::STRING_TABLE, str);
                     }
                 },
                 VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW | VisitGCRootFlags::END_RECORDING_NEW_ROOT);
-            this->MarkStack(&marker_, objects_stack, GC::EmptyMarkPreprocess, ref_pred);
+            this->MarkStack(&marker_, objectsStack, GC::EmptyMarkPreprocess, refPred);
         }
         // NOLINTNEXTLINE(performance-unnecessary-value-param)
         this->GetPandaVm()->HandleReferences(task, GC::EmptyReferenceProcessPredicate);
@@ -526,39 +525,39 @@ void GenGC<LanguageConfig>::ReMark(GCMarkingStackType *objects_stack, const GCTa
 template <class LanguageConfig>
 void GenGC<LanguageConfig>::FullMark(const GCTask &task)
 {
-    GCScope<TRACE_TIMING_PHASE> full_mark_scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
-    NoAtomicGCMarkerScope marker_scope(&this->marker_);
+    GCScope<TRACE_TIMING_PHASE> fullMarkScope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
+    NoAtomicGCMarkerScope markerScope(&this->marker_);
 
-    GCMarkingStackType objects_stack(this);
+    GCMarkingStackType objectsStack(this);
     VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL;
-    auto ref_pred = GC::EmptyReferenceProcessPredicate;
+    auto refPred = GC::EmptyReferenceProcessPredicate;
     // Mark all reachable objects
-    MarkRoots(&objects_stack, CardTableVisitFlag::VISIT_DISABLED, ref_pred, flags);
+    MarkRoots(&objectsStack, CardTableVisitFlag::VISIT_DISABLED, refPred, flags);
     this->GetPandaVm()->VisitStringTable(
-        [this, &objects_stack](ObjectHeader *str) {
+        [this, &objectsStack](ObjectHeader *str) {
             if (this->MarkObjectIfNotMarked(str)) {
                 ASSERT(str != nullptr);
-                objects_stack.PushToStack(RootType::STRING_TABLE, str);
+                objectsStack.PushToStack(RootType::STRING_TABLE, str);
             }
         },
         flags);
-    this->MarkStack(&marker_, &objects_stack, GC::EmptyMarkPreprocess, ref_pred);
-    auto ref_clear_pred = []([[maybe_unused]] const ObjectHeader *obj) { return true; };
+    this->MarkStack(&marker_, &objectsStack, GC::EmptyMarkPreprocess, refPred);
+    auto refClearPred = []([[maybe_unused]] const ObjectHeader *obj) { return true; };
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    this->GetPandaVm()->HandleReferences(task, ref_clear_pred);
+    this->GetPandaVm()->HandleReferences(task, refClearPred);
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::MarkReferences(GCMarkingStackType *references, GCPhase gc_phase)
+void GenGC<LanguageConfig>::MarkReferences(GCMarkingStackType *references, GCPhase gcPhase)
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG_DEBUG_GC << "Start marking " << references->Size() << " references";
-    auto ref_pred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
-    if (gc_phase == GCPhase::GC_PHASE_MARK_YOUNG) {
+    auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+    if (gcPhase == GCPhase::GC_PHASE_MARK_YOUNG) {
         this->MarkYoungStack(references);
-    } else if (gc_phase == GCPhase::GC_PHASE_INITIAL_MARK || gc_phase == GCPhase::GC_PHASE_MARK ||
-               gc_phase == GCPhase::GC_PHASE_REMARK) {
-        this->MarkStack(&marker_, references, GC::EmptyMarkPreprocess, ref_pred);
+    } else if (gcPhase == GCPhase::GC_PHASE_INITIAL_MARK || gcPhase == GCPhase::GC_PHASE_MARK ||
+               gcPhase == GCPhase::GC_PHASE_REMARK) {
+        this->MarkStack(&marker_, references, GC::EmptyMarkPreprocess, refPred);
     } else {
         UNREACHABLE();
     }
@@ -571,10 +570,10 @@ void GenGC<LanguageConfig>::MarkObject(ObjectHeader *object)
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::UnMarkObject(ObjectHeader *object_header)
+void GenGC<LanguageConfig>::UnMarkObject(ObjectHeader *objectHeader)
 {
-    LOG_DEBUG_GC << "Set unmark for GC " << GetDebugInfoAboutObject(object_header);
-    this->marker_.UnMark(object_header);
+    LOG_DEBUG_GC << "Set unmark for GC " << GetDebugInfoAboutObject(objectHeader);
+    this->marker_.UnMark(objectHeader);
 }
 
 template <class LanguageConfig>
@@ -588,46 +587,46 @@ template <class LanguageConfig>
 template <bool CONCURRENT>
 NO_THREAD_SAFETY_ANALYSIS void GenGC<LanguageConfig>::Sweep()
 {
-    GCScope<TRACE_TIMING> gc_scope(__FUNCTION__, this);
-    ConcurrentScope concurrent_scope(this, false);
-    size_t freed_object_size = 0U;
-    size_t freed_object_count = 0U;
+    GCScope<TRACE_TIMING> gcScope(__FUNCTION__, this);
+    ConcurrentScope concurrentScope(this, false);
+    size_t freedObjectSize = 0U;
+    size_t freedObjectCount = 0U;
 
     // NB! can't move block out of brace, we need to make sure GC_PHASE_SWEEP cleared
     {
-        GCScopedPhase scoped_phase(this, GCPhase::GC_PHASE_SWEEP);
+        GCScopedPhase scopedPhase(this, GCPhase::GC_PHASE_SWEEP);
         // NOTE(dtrubenkov): make concurrent
         ASSERT(this->GetObjectAllocator()->GetYoungSpaceMemRanges().size() == 1);
         // new strings may be created in young space during tenured gc, we shouldn't collect them
-        auto young_mem_range = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
-        this->GetPandaVm()->SweepVmRefs([this, &young_mem_range](ObjectHeader *object) {
-            if (young_mem_range.IsAddressInRange(ToUintPtr(object))) {
+        auto youngMemRange = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
+        this->GetPandaVm()->SweepVmRefs([this, &youngMemRange](ObjectHeader *object) {
+            if (youngMemRange.IsAddressInRange(ToUintPtr(object))) {
                 return ObjectStatus::ALIVE_OBJECT;
             }
             return this->marker_.MarkChecker(object);
         });
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (CONCURRENT) {
-            concurrent_scope.Start();  // enable concurrent after GC_PHASE_SWEEP has been set
+            concurrentScope.Start();  // enable concurrent after GC_PHASE_SWEEP has been set
         }
 
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (CONCURRENT && LanguageConfig::MT_MODE == MT_MODE_MULTI) {
             // Run monitor deflation again, to avoid object was reclaimed before monitor deflate.
-            auto young_mr = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
-            this->GetPandaVm()->GetMonitorPool()->DeflateMonitorsWithCallBack([&young_mr, this](Monitor *monitor) {
-                ObjectHeader *object_header = monitor->GetObject();
-                return (!IsMarked(object_header)) && (!young_mr.IsAddressInRange(ToUintPtr(object_header)));
+            auto youngMr = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
+            this->GetPandaVm()->GetMonitorPool()->DeflateMonitorsWithCallBack([&youngMr, this](Monitor *monitor) {
+                ObjectHeader *objectHeader = monitor->GetObject();
+                return (!IsMarked(objectHeader)) && (!youngMr.IsAddressInRange(ToUintPtr(objectHeader)));
             });
         }
 
         this->GetObjectAllocator()->Collect(
-            [this, &freed_object_size, &freed_object_count](ObjectHeader *object) {
+            [this, &freedObjectSize, &freedObjectCount](ObjectHeader *object) {
                 auto status = this->marker_.MarkChecker(object);
                 if (status == ObjectStatus::DEAD_OBJECT) {
                     LOG_DEBUG_OBJECT_EVENTS << "DELETE OBJECT tenured: " << object;
-                    freed_object_size += GetAlignedObjectSize(GetObjectSize(object));
-                    freed_object_count++;
+                    freedObjectSize += GetAlignedObjectSize(GetObjectSize(object));
+                    freedObjectCount++;
                 }
                 return status;
             },
@@ -638,8 +637,8 @@ NO_THREAD_SAFETY_ANALYSIS void GenGC<LanguageConfig>::Sweep()
         });
     }
 
-    this->mem_stats_.RecordSizeFreedTenured(freed_object_size);
-    this->mem_stats_.RecordCountFreedTenured(freed_object_count);
+    this->memStats_.RecordSizeFreedTenured(freedObjectSize);
+    this->memStats_.RecordCountFreedTenured(freedObjectCount);
 
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (CONCURRENT) {
@@ -658,9 +657,9 @@ void GenGC<LanguageConfig>::SweepYoungVmRefs()
     // Sweep string table here to avoid dangling references
     ASSERT(this->GetObjectAllocator()->GetYoungSpaceMemRanges().size() == 1);
     // new strings may be created in young space during tenured gc, we shouldn't collect them
-    auto young_mem_range = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
-    this->GetPandaVm()->SweepVmRefs([&young_mem_range](ObjectHeader *object_header) {
-        if (young_mem_range.IsAddressInRange(ToUintPtr(object_header))) {
+    auto youngMemRange = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
+    this->GetPandaVm()->SweepVmRefs([&youngMemRange](ObjectHeader *objectHeader) {
+        if (youngMemRange.IsAddressInRange(ToUintPtr(objectHeader))) {
             return ObjectStatus::DEAD_OBJECT;
         }
         return ObjectStatus::ALIVE_OBJECT;
@@ -670,16 +669,16 @@ void GenGC<LanguageConfig>::SweepYoungVmRefs()
 template <class LanguageConfig>
 bool GenGC<LanguageConfig>::InGCSweepRange(const ObjectHeader *obj) const
 {
-    bool in_young_space = this->GetObjectAllocator()->IsObjectInYoungSpace(obj);
+    bool inYoungSpace = this->GetObjectAllocator()->IsObjectInYoungSpace(obj);
     auto phase = this->GetGCPhase();
 
     // Do young GC and the object is in the young space
-    if (phase == GCPhase::GC_PHASE_MARK_YOUNG && in_young_space) {
+    if (phase == GCPhase::GC_PHASE_MARK_YOUNG && inYoungSpace) {
         return true;
     }
 
     // Do tenured GC and the object is in the tenured space
-    if (phase != GCPhase::GC_PHASE_MARK_YOUNG && !in_young_space) {
+    if (phase != GCPhase::GC_PHASE_MARK_YOUNG && !inYoungSpace) {
         return true;
     }
 

@@ -30,16 +30,16 @@ std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const
         }
     }
 
-    auto load_res = EtsNativeLibrary::Load(name);
-    if (!load_res) {
-        return load_res.Error().ToString();
+    auto loadRes = EtsNativeLibrary::Load(name);
+    if (!loadRes) {
+        return loadRes.Error().ToString();
     }
 
     const EtsNativeLibrary *lib = nullptr;
     {
         os::memory::WriteLockHolder lock(lock_);
 
-        auto [it, inserted] = libraries_.emplace(std::move(load_res.Value()));
+        auto [it, inserted] = libraries_.emplace(std::move(loadRes.Value()));
         if (!inserted) {
             return {};
         }
@@ -48,12 +48,12 @@ std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const
     }
     ASSERT(lib != nullptr);
 
-    if (auto on_load_symbol = lib->FindSymbol("EtsNapiOnLoad")) {
+    if (auto onLoadSymbol = lib->FindSymbol("EtsNapiOnLoad")) {
         using EtsNapiOnLoadHandle = ets_int (*)(EtsEnv *);
-        auto on_load_handle = reinterpret_cast<EtsNapiOnLoadHandle>(on_load_symbol.Value());
-        ets_int ets_napi_version = on_load_handle(env);
-        if (!napi::CheckVersionEtsNapi(ets_napi_version)) {
-            return {"Unsupported Ets napi version " + std::to_string(ets_napi_version)};
+        auto onLoadHandle = reinterpret_cast<EtsNapiOnLoadHandle>(onLoadSymbol.Value());
+        ets_int etsNapiVersion = onLoadHandle(env);
+        if (!napi::CheckVersionEtsNapi(etsNapiVersion)) {
+            return {"Unsupported Ets napi version " + std::to_string(etsNapiVersion)};
         }
     }
 

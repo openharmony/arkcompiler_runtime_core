@@ -25,7 +25,7 @@ template <class LanguageConfig>
 class BaseRefUpdater {
 public:
     bool operator()(ObjectHeader *object, ObjectHeader *ref, uint32_t offset,
-                    [[maybe_unused]] bool is_volatile = false) const
+                    [[maybe_unused]] bool isVolatile = false) const
     {
         auto *forwarded = UpdateRefToMovedObject(object, ref, offset);
         Process(object, offset, forwarded);
@@ -37,25 +37,25 @@ public:
     virtual ~BaseRefUpdater() = default;
 
 protected:
-    explicit BaseRefUpdater(uint32_t region_size_bits) : region_size_bits_(region_size_bits) {}
+    explicit BaseRefUpdater(uint32_t regionSizeBits) : regionSizeBits_(regionSizeBits) {}
 
     virtual void Process(ObjectHeader *object, size_t offset, ObjectHeader *ref) const = 0;
 
     bool IsSameRegion(ObjectHeader *o1, ObjectHeader *o2) const
     {
-        return panda::mem::IsSameRegion(o1, o2, region_size_bits_);
+        return panda::mem::IsSameRegion(o1, o2, regionSizeBits_);
     }
 
 private:
     ObjectHeader *UpdateRefToMovedObject(ObjectHeader *object, ObjectHeader *ref, uint32_t offset) const;
 
-    uint32_t region_size_bits_;
+    uint32_t regionSizeBits_;
 };
 
 template <class LanguageConfig, bool NEED_LOCK = false>
 class UpdateRemsetRefUpdater : public BaseRefUpdater<LanguageConfig> {
 public:
-    explicit UpdateRemsetRefUpdater(uint32_t region_size_bits) : BaseRefUpdater<LanguageConfig>(region_size_bits) {}
+    explicit UpdateRemsetRefUpdater(uint32_t regionSizeBits) : BaseRefUpdater<LanguageConfig>(regionSizeBits) {}
 
 protected:
     void Process(ObjectHeader *object, size_t offset, ObjectHeader *ref) const override;
@@ -64,11 +64,9 @@ protected:
 template <class LanguageConfig>
 class EnqueueRemsetRefUpdater : public BaseRefUpdater<LanguageConfig> {
 public:
-    EnqueueRemsetRefUpdater(CardTable *card_table, GCG1BarrierSet::ThreadLocalCardQueues *updated_refs_queue,
-                            uint32_t region_size_bits)
-        : BaseRefUpdater<LanguageConfig>(region_size_bits),
-          card_table_(card_table),
-          updated_refs_queue_(updated_refs_queue)
+    EnqueueRemsetRefUpdater(CardTable *cardTable, GCG1BarrierSet::ThreadLocalCardQueues *updatedRefsQueue,
+                            uint32_t regionSizeBits)
+        : BaseRefUpdater<LanguageConfig>(regionSizeBits), cardTable_(cardTable), updatedRefsQueue_(updatedRefsQueue)
     {
     }
 
@@ -76,17 +74,17 @@ protected:
     void Process(ObjectHeader *object, size_t offset, ObjectHeader *ref) const override
     {
         if (!this->IsSameRegion(object, ref)) {
-            auto *card = card_table_->GetCardPtr(ToUintPtr(object) + offset);
+            auto *card = cardTable_->GetCardPtr(ToUintPtr(object) + offset);
             if (card->IsClear()) {
                 card->Mark();
-                updated_refs_queue_->push_back(card);
+                updatedRefsQueue_->push_back(card);
             }
         }
     }
 
 private:
-    CardTable *card_table_;
-    GCG1BarrierSet::ThreadLocalCardQueues *updated_refs_queue_;
+    CardTable *cardTable_;
+    GCG1BarrierSet::ThreadLocalCardQueues *updatedRefsQueue_;
 };
 }  // namespace panda::mem
 

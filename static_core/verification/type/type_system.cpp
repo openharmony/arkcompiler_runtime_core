@@ -38,14 +38,14 @@ static PandaString ClassNameToDescriptorString(char const *name)
 TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
     : service_ {service},
       plugin_ {plugin::GetLanguagePlugin(lang)},
-      lang_ctx_ {panda::plugins::GetLanguageContextBase(lang)},
-      linker_ctx_ {service->GetClassLinker()->GetExtension(LanguageContext {lang_ctx_})->GetBootContext()}
+      langCtx_ {panda::plugins::GetLanguageContextBase(lang)},
+      linkerCtx_ {service->GetClassLinker()->GetExtension(LanguageContext {langCtx_})->GetBootContext()}
 {
     ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
     auto compute = [&](uint8_t const *descr) -> Type {
         if (descr != nullptr) {
             Job::ErrorHandler handler;
-            auto *klass = service->GetClassLinker()->GetClass(descr, true, linker_ctx_, &handler);
+            auto *klass = service->GetClassLinker()->GetClass(descr, true, linkerCtx_, &handler);
             if (klass == nullptr) {
                 return Type {};
             }
@@ -54,13 +54,13 @@ TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
         return Type {};
     };
 
-    class_ = compute(lang_ctx_.GetClassClassDescriptor());
-    object_ = compute(lang_ctx_.GetObjectClassDescriptor());
+    class_ = compute(langCtx_.GetClassClassDescriptor());
+    object_ = compute(langCtx_.GetObjectClassDescriptor());
     // Throwable is not given to us as descriptor for some reason. NOTE(gogabr): correct this.
-    auto throwable_class_name = lang_ctx_.GetVerificationTypeThrowable();
-    if (throwable_class_name != nullptr) {
-        auto throwable_descr_str = ClassNameToDescriptorString(throwable_class_name);
-        throwable_ = compute(utf::CStringAsMutf8(throwable_descr_str.c_str()));
+    auto throwableClassName = langCtx_.GetVerificationTypeThrowable();
+    if (throwableClassName != nullptr) {
+        auto throwableDescrStr = ClassNameToDescriptorString(throwableClassName);
+        throwable_ = compute(utf::CStringAsMutf8(throwableDescrStr.c_str()));
     } else {
         throwable_ = Type {};
     }
@@ -70,7 +70,7 @@ TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
 Class const *TypeSystem::DescriptorToClass(uint8_t const *descr)
 {
     Job::ErrorHandler handler;
-    return service_->GetClassLinker()->GetClass(descr, true, linker_ctx_, &handler);
+    return service_->GetClassLinker()->GetClass(descr, true, linkerCtx_, &handler);
 }
 
 Type TypeSystem::DescriptorToType(uint8_t const *descr)
@@ -85,11 +85,11 @@ Type TypeSystem::DescriptorToType(uint8_t const *descr)
 void TypeSystem::ExtendBySupers(PandaUnorderedSet<Type> *set, Class const *klass)
 {
     // NOTE(gogabr): do we need to cache intermediate results? Measure!
-    Type new_tp = Type {klass};
-    if (set->count(new_tp) > 0) {
+    Type newTp = Type {klass};
+    if (set->count(newTp) > 0) {
         return;
     }
-    set->insert(new_tp);
+    set->insert(newTp);
 
     Class const *super = klass->GetBase();
     if (super != nullptr) {
@@ -107,25 +107,25 @@ Type TypeSystem::NormalizedTypeOf(Type type)
     if (type == Type::Bot() || type == Type::Top()) {
         return type;
     }
-    auto t = normalized_type_of_.find(type);
-    if (t != normalized_type_of_.cend()) {
+    auto t = normalizedTypeOf_.find(type);
+    if (t != normalizedTypeOf_.cend()) {
         return t->second;
     }
     Type result = plugin_->NormalizeType(type, this);
-    normalized_type_of_[type] = result;
+    normalizedTypeOf_[type] = result;
     return result;
 }
 
 MethodSignature const *TypeSystem::GetMethodSignature(Method const *method)
 {
     ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
-    auto &&method_id = method->GetUniqId();
-    auto it = signature_of_method_.find(method_id);
-    if (it != signature_of_method_.end()) {
+    auto &&methodId = method->GetUniqId();
+    auto it = signatureOfMethod_.find(methodId);
+    if (it != signatureOfMethod_.end()) {
         return &it->second;
     }
 
-    method_of_id_[method_id] = method;
+    methodOfId_[methodId] = method;
 
     MethodSignature sig;
     if (method->GetReturnType().IsReference()) {
@@ -133,36 +133,36 @@ MethodSignature const *TypeSystem::GetMethodSignature(Method const *method)
     } else {
         sig.result = Type::FromTypeId(method->GetReturnType().GetId());
     }
-    size_t ref_idx = 0;
+    size_t refIdx = 0;
     for (size_t i = 0; i < method->GetNumArgs(); i++) {
-        Type arg_type;
+        Type argType;
         if (method->GetArgType(i).IsReference()) {
-            arg_type = DescriptorToType(method->GetRefArgType(ref_idx++).data);
+            argType = DescriptorToType(method->GetRefArgType(refIdx++).data);
         } else {
-            arg_type = Type::FromTypeId(method->GetArgType(i).GetId());
+            argType = Type::FromTypeId(method->GetArgType(i).GetId());
         }
-        sig.args.push_back(arg_type);
+        sig.args.push_back(argType);
     }
-    signature_of_method_[method_id] = sig;
-    return &signature_of_method_[method_id];
+    signatureOfMethod_[methodId] = sig;
+    return &signatureOfMethod_[methodId];
 }
 
 PandaUnorderedSet<Type> const *TypeSystem::SupertypesOfClass(Class const *klass)
 {
     ASSERT(!klass->IsArrayClass());
-    if (supertypes_cache_.count(klass) > 0) {
-        return &supertypes_cache_[klass];
+    if (supertypesCache_.count(klass) > 0) {
+        return &supertypesCache_[klass];
     }
 
-    PandaUnorderedSet<Type> to_cache;
-    ExtendBySupers(&to_cache, klass);
-    supertypes_cache_[klass] = std::move(to_cache);
-    return &supertypes_cache_[klass];
+    PandaUnorderedSet<Type> toCache;
+    ExtendBySupers(&toCache, klass);
+    supertypesCache_[klass] = std::move(toCache);
+    return &supertypesCache_[klass];
 }
 
 void TypeSystem::MentionClass(Class const *klass)
 {
-    known_classes_.insert(klass);
+    knownClasses_.insert(klass);
 }
 
 void TypeSystem::DisplayTypeSystem(std::function<void(PandaString const &)> const &handler)
@@ -177,30 +177,30 @@ void TypeSystem::DisplayTypeSystem(std::function<void(PandaString const &)> cons
 
 void TypeSystem::DisplayClasses(std::function<void(PandaString const &)> const &handler) const
 {
-    for (auto const *klass : known_classes_) {
+    for (auto const *klass : knownClasses_) {
         handler((Type {klass}).ToString(this));
     }
 }
 
 void TypeSystem::DisplayMethods(std::function<void(PandaString const &, PandaString const &)> const &handler) const
 {
-    for (auto const &it : signature_of_method_) {
+    for (auto const &it : signatureOfMethod_) {
         auto &id = it.first;
         auto &sig = it.second;
-        auto const *method = method_of_id_.at(id);
+        auto const *method = methodOfId_.at(id);
         handler(method->GetFullName(), sig.ToString(this));
     }
 }
 
 void TypeSystem::DisplaySubtyping(std::function<void(PandaString const &, PandaString const &)> const &handler)
 {
-    for (auto const *klass : known_classes_) {
+    for (auto const *klass : knownClasses_) {
         if (klass->IsArrayClass()) {
             continue;
         }
-        auto klass_str = (Type {klass}).ToString(this);
+        auto klassStr = (Type {klass}).ToString(this);
         for (auto const &supertype : *SupertypesOfClass(klass)) {
-            handler(klass_str, supertype.ToString(this));
+            handler(klassStr, supertype.ToString(this));
         }
     }
 }

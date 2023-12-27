@@ -24,20 +24,20 @@
 namespace panda::compiler {
 
 template <Opcode OPCODE>
-void InstBuilder::BuildLaunch(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read)
+void InstBuilder::BuildLaunch(const BytecodeInstruction *bcInst, bool isRange, bool accRead)
 {
     if (graph_->GetArch() == Arch::AARCH32) {
         failed_ = true;
         return;
     }
-    auto pc = GetPc(bc_inst->GetAddress());
+    auto pc = GetPc(bcInst->GetAddress());
     auto inst = graph_->CreateInstLoadRuntimeClass(DataType::REFERENCE, pc, TypeIdMixin::MEM_PROMISE_CLASS_ID,
                                                    GetGraph()->GetMethod(), nullptr);
-    auto save_state = CreateSaveState(Opcode::SaveState, pc);
-    auto new_obj = CreateNewObjectInst(pc, TypeIdMixin::MEM_PROMISE_CLASS_ID, save_state, inst);
-    AddInstruction(save_state, inst, new_obj);
-    BuildCall<OPCODE>(bc_inst, is_range, acc_read, new_obj);
-    UpdateDefinitionAcc(new_obj);
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    auto newObj = CreateNewObjectInst(pc, TypeIdMixin::MEM_PROMISE_CLASS_ID, saveState, inst);
+    AddInstruction(saveState, inst, newObj);
+    BuildCall<OPCODE>(bcInst, isRange, accRead, newObj);
+    UpdateDefinitionAcc(newObj);
 }
 
 template void InstBuilder::BuildLaunch<Opcode::CallLaunchStatic>(const BytecodeInstruction *bc_inst, bool is_range,
@@ -45,21 +45,20 @@ template void InstBuilder::BuildLaunch<Opcode::CallLaunchStatic>(const BytecodeI
 template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual>(const BytecodeInstruction *bc_inst, bool is_range,
                                                                   bool acc_read);
 
-void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bc_inst, DataType::Type type)
+void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, DataType::Type type)
 {
-    auto pc = GetPc(bc_inst->GetAddress());
+    auto pc = GetPc(bcInst->GetAddress());
     // Create SaveState instruction
-    auto save_state = CreateSaveState(Opcode::SaveState, pc);
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
 
     // Create NullCheck instruction
-    auto null_check =
-        graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bc_inst->GetVReg(0)), save_state);
+    auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bcInst->GetVReg(0)), saveState);
 
     auto runtime = GetRuntime();
-    auto field_index = bc_inst->GetId(0).AsIndex();
-    auto field_id = runtime->ResolveFieldIndex(GetMethod(), field_index);
+    auto fieldIndex = bcInst->GetId(0).AsIndex();
+    auto fieldId = runtime->ResolveFieldIndex(GetMethod(), fieldIndex);
     if (type != DataType::REFERENCE) {
-        type = runtime->GetFieldTypeById(GetMethod(), field_id);
+        type = runtime->GetFieldTypeById(GetMethod(), fieldId);
     }
 
     RuntimeInterface::IntrinsicId id;
@@ -92,45 +91,44 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bc_inst, DataType:
     auto intrinsic = GetGraph()->CreateInstIntrinsic(type, pc, id);
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2);
 
-    intrinsic->AppendInput(null_check);
+    intrinsic->AppendInput(nullCheck);
     intrinsic->AddInputType(DataType::REFERENCE);
 
-    intrinsic->AppendInput(save_state);
+    intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
 
-    intrinsic->AddImm(GetGraph()->GetAllocator(), field_id);
+    intrinsic->AddImm(GetGraph()->GetAllocator(), fieldId);
     intrinsic->AddImm(GetGraph()->GetAllocator(), pc);
 
     intrinsic->SetMethodFirstInput();
     intrinsic->SetMethod(GetMethod());
 
-    AddInstruction(save_state);
-    AddInstruction(null_check);
+    AddInstruction(saveState);
+    AddInstruction(nullCheck);
     AddInstruction(intrinsic);
 
     UpdateDefinitionAcc(intrinsic);
 }
 
-void InstBuilder::BuildStObjByName(const BytecodeInstruction *bc_inst, DataType::Type type)
+void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::Type type)
 {
-    auto pc = GetPc(bc_inst->GetAddress());
+    auto pc = GetPc(bcInst->GetAddress());
     // Create SaveState instruction
-    auto save_state = CreateSaveState(Opcode::SaveState, pc);
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
 
     // Create NullCheck instruction
-    auto null_check =
-        graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bc_inst->GetVReg(0)), save_state);
+    auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bcInst->GetVReg(0)), saveState);
 
     auto runtime = GetRuntime();
-    auto field_index = bc_inst->GetId(0).AsIndex();
-    auto field_id = runtime->ResolveFieldIndex(GetMethod(), field_index);
+    auto fieldIndex = bcInst->GetId(0).AsIndex();
+    auto fieldId = runtime->ResolveFieldIndex(GetMethod(), fieldIndex);
     if (type != DataType::REFERENCE) {
-        type = runtime->GetFieldTypeById(GetMethod(), field_id);
+        type = runtime->GetFieldTypeById(GetMethod(), fieldId);
     }
 
     // Get a value to store
-    Inst *store_val = nullptr;
-    store_val = GetDefinitionAcc();
+    Inst *storeVal = nullptr;
+    storeVal = GetDefinitionAcc();
 
     RuntimeInterface::IntrinsicId id;
     switch (type) {
@@ -162,22 +160,22 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bc_inst, DataType:
     auto intrinsic = GetGraph()->CreateInstIntrinsic(type, pc, id);
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3);
 
-    intrinsic->AppendInput(null_check);
+    intrinsic->AppendInput(nullCheck);
     intrinsic->AddInputType(DataType::REFERENCE);
 
-    intrinsic->AppendInput(store_val);
+    intrinsic->AppendInput(storeVal);
     intrinsic->AddInputType(type);
 
-    intrinsic->AppendInput(save_state);
+    intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
-    intrinsic->AddImm(GetGraph()->GetAllocator(), field_id);
+    intrinsic->AddImm(GetGraph()->GetAllocator(), fieldId);
     intrinsic->AddImm(GetGraph()->GetAllocator(), pc);
 
     intrinsic->SetMethodFirstInput();
     intrinsic->SetMethod(GetMethod());
 
-    AddInstruction(save_state);
-    AddInstruction(null_check);
+    AddInstruction(saveState);
+    AddInstruction(nullCheck);
     AddInstruction(intrinsic);
 }
 

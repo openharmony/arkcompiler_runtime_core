@@ -24,60 +24,59 @@
 
 namespace panda::mem {
 
-static HeapManager *CreateHeapManager(InternalAllocatorPtr internal_allocator,
-                                      const MemoryManager::HeapOptions &options, GCType gc_type,
-                                      MemStatsType *mem_stats)
+static HeapManager *CreateHeapManager(InternalAllocatorPtr internalAllocator, const MemoryManager::HeapOptions &options,
+                                      GCType gcType, MemStatsType *memStats)
 {
-    auto *heap_manager = new HeapManager();
-    if (heap_manager == nullptr) {
+    auto *heapManager = new HeapManager();
+    if (heapManager == nullptr) {
         LOG(ERROR, RUNTIME) << "Failed to allocate HeapManager";
         return nullptr;
     }
 
-    if (!heap_manager->Initialize(gc_type, options.is_single_thread, options.is_use_tlab_for_allocations, mem_stats,
-                                  internal_allocator, options.is_start_as_zygote)) {
+    if (!heapManager->Initialize(gcType, options.isSingleThread, options.isUseTlabForAllocations, memStats,
+                                 internalAllocator, options.isStartAsZygote)) {
         LOG(ERROR, RUNTIME) << "Failed to initialize HeapManager";
         return nullptr;
     }
-    heap_manager->SetIsFinalizableFunc(options.is_object_finalizeble_func);
-    heap_manager->SetRegisterFinalizeReferenceFunc(options.register_finalize_reference_func);
+    heapManager->SetIsFinalizableFunc(options.isObjectFinalizebleFunc);
+    heapManager->SetRegisterFinalizeReferenceFunc(options.registerFinalizeReferenceFunc);
 
-    return heap_manager;
+    return heapManager;
 }
 
 /* static */
-MemoryManager *MemoryManager::Create(const LanguageContext &ctx, InternalAllocatorPtr internal_allocator,
-                                     GCType gc_type, const GCSettings &gc_settings,
-                                     const GCTriggerConfig &gc_trigger_config, const HeapOptions &heap_options)
+MemoryManager *MemoryManager::Create(const LanguageContext &ctx, InternalAllocatorPtr internalAllocator, GCType gcType,
+                                     const GCSettings &gcSettings, const GCTriggerConfig &gcTriggerConfig,
+                                     const HeapOptions &heapOptions)
 {
-    std::unique_ptr<MemStatsType> mem_stats = std::make_unique<MemStatsType>();
+    std::unique_ptr<MemStatsType> memStats = std::make_unique<MemStatsType>();
 
-    HeapManager *heap_manager = CreateHeapManager(internal_allocator, heap_options, gc_type, mem_stats.get());
-    if (heap_manager == nullptr) {
+    HeapManager *heapManager = CreateHeapManager(internalAllocator, heapOptions, gcType, memStats.get());
+    if (heapManager == nullptr) {
         return nullptr;
     }
 
-    InternalAllocatorPtr allocator = heap_manager->GetInternalAllocator();
-    GCStats *gc_stats = allocator->New<GCStats>(mem_stats.get(), gc_type, allocator);
-    GC *gc = ctx.CreateGC(gc_type, heap_manager->GetObjectAllocator().AsObjectAllocator(), gc_settings);
-    GCTrigger *gc_trigger =
-        CreateGCTrigger(mem_stats.get(), heap_manager->GetObjectAllocator().AsObjectAllocator()->GetHeapSpace(),
-                        gc_trigger_config, allocator);
-    if (gc_settings.G1EnablePauseTimeGoal() &&
-        (gc_type != GCType::G1_GC || gc_trigger->GetType() != GCTriggerType::PAUSE_TIME_GOAL_TRIGGER)) {
+    InternalAllocatorPtr allocator = heapManager->GetInternalAllocator();
+    GCStats *gcStats = allocator->New<GCStats>(memStats.get(), gcType, allocator);
+    GC *gc = ctx.CreateGC(gcType, heapManager->GetObjectAllocator().AsObjectAllocator(), gcSettings);
+    GCTrigger *gcTrigger =
+        CreateGCTrigger(memStats.get(), heapManager->GetObjectAllocator().AsObjectAllocator()->GetHeapSpace(),
+                        gcTriggerConfig, allocator);
+    if (gcSettings.G1EnablePauseTimeGoal() &&
+        (gcType != GCType::G1_GC || gcTrigger->GetType() != GCTriggerType::PAUSE_TIME_GOAL_TRIGGER)) {
         LOG(FATAL, RUNTIME) << "Pause time goal is supported with G1 GC and pause-time-goal trigger only";
         return nullptr;
     }
 
-    GlobalObjectStorage *global_object_storage = internal_allocator->New<GlobalObjectStorage>(
-        internal_allocator, heap_options.max_global_ref_size, heap_options.is_global_reference_size_check_enabled);
-    if (global_object_storage == nullptr) {
+    GlobalObjectStorage *globalObjectStorage = internalAllocator->New<GlobalObjectStorage>(
+        internalAllocator, heapOptions.maxGlobalRefSize, heapOptions.isGlobalReferenceSizeCheckEnabled);
+    if (globalObjectStorage == nullptr) {
         LOG(ERROR, RUNTIME) << "Failed to allocate GlobalObjectStorage";
         return nullptr;
     }
 
-    return new MemoryManager(internal_allocator, heap_manager, gc, gc_trigger, gc_stats, mem_stats.release(),
-                             global_object_storage);
+    return new MemoryManager(internalAllocator, heapManager, gc, gcTrigger, gcStats, memStats.release(),
+                             globalObjectStorage);
 }
 
 /* static */
@@ -88,28 +87,28 @@ void MemoryManager::Destroy(MemoryManager *mm)
 
 MemoryManager::~MemoryManager()
 {
-    heap_manager_->GetInternalAllocator()->Delete(gc_);
-    heap_manager_->GetInternalAllocator()->Delete(gc_trigger_);
-    heap_manager_->GetInternalAllocator()->Delete(gc_stats_);
-    heap_manager_->GetInternalAllocator()->Delete(global_object_storage_);
+    heapManager_->GetInternalAllocator()->Delete(gc_);
+    heapManager_->GetInternalAllocator()->Delete(gcTrigger_);
+    heapManager_->GetInternalAllocator()->Delete(gcStats_);
+    heapManager_->GetInternalAllocator()->Delete(globalObjectStorage_);
 
-    delete heap_manager_;
+    delete heapManager_;
 
     // One more check that we don't have memory leak in internal allocator.
-    ASSERT(mem_stats_->GetFootprint(SpaceType::SPACE_TYPE_INTERNAL) == 0);
-    delete mem_stats_;
+    ASSERT(memStats_->GetFootprint(SpaceType::SPACE_TYPE_INTERNAL) == 0);
+    delete memStats_;
 }
 
 void MemoryManager::Finalize()
 {
-    heap_manager_->Finalize();
+    heapManager_->Finalize();
 }
 
 void MemoryManager::InitializeGC(PandaVM *vm)
 {
-    heap_manager_->SetPandaVM(vm);
+    heapManager_->SetPandaVM(vm);
     gc_->Initialize(vm);
-    gc_->AddListener(gc_trigger_);
+    gc_->AddListener(gcTrigger_);
 }
 
 void MemoryManager::PreStartup()
@@ -120,7 +119,7 @@ void MemoryManager::PreStartup()
 void MemoryManager::PreZygoteFork()
 {
     gc_->PreZygoteFork();
-    heap_manager_->PreZygoteFork();
+    heapManager_->PreZygoteFork();
 }
 
 void MemoryManager::PostZygoteFork()

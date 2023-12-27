@@ -105,8 +105,8 @@ TEST_F(RegExpTest, ParseError1)
     PandaString source("0{2,1}");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError2)
@@ -115,8 +115,8 @@ TEST_F(RegExpTest, ParseError2)
     PandaString source("^[z-a]$");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError3)
@@ -125,8 +125,8 @@ TEST_F(RegExpTest, ParseError3)
     PandaString source("\\");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError4)
@@ -135,8 +135,8 @@ TEST_F(RegExpTest, ParseError4)
     PandaString source("a**");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError5)
@@ -145,8 +145,8 @@ TEST_F(RegExpTest, ParseError5)
     PandaString source("a***");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError6)
@@ -155,8 +155,8 @@ TEST_F(RegExpTest, ParseError6)
     PandaString source("a**");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError7)
@@ -165,8 +165,8 @@ TEST_F(RegExpTest, ParseError7)
     PandaString source("a++");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError8)
@@ -175,8 +175,8 @@ TEST_F(RegExpTest, ParseError8)
     PandaString source("a+++");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError9)
@@ -185,8 +185,8 @@ TEST_F(RegExpTest, ParseError9)
     PandaString source("a???");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError10)
@@ -195,8 +195,8 @@ TEST_F(RegExpTest, ParseError10)
     PandaString source("a????");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError11)
@@ -205,8 +205,8 @@ TEST_F(RegExpTest, ParseError11)
     PandaString source("*a");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError12)
@@ -215,8 +215,8 @@ TEST_F(RegExpTest, ParseError12)
     PandaString source("**a");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError13)
@@ -225,8 +225,8 @@ TEST_F(RegExpTest, ParseError13)
     PandaString source("+a");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError14)
@@ -235,8 +235,8 @@ TEST_F(RegExpTest, ParseError14)
     PandaString source("++a");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError15)
@@ -245,8 +245,8 @@ TEST_F(RegExpTest, ParseError15)
     PandaString source("?a");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError16)
@@ -255,8 +255,8 @@ TEST_F(RegExpTest, ParseError16)
     PandaString source("??a");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError17)
@@ -265,8 +265,8 @@ TEST_F(RegExpTest, ParseError17)
     PandaString source("x{1}{1,}");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError18)
@@ -275,8 +275,8 @@ TEST_F(RegExpTest, ParseError18)
     PandaString source("x{1,2}{1}");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError19)
@@ -285,8 +285,8 @@ TEST_F(RegExpTest, ParseError19)
     PandaString source("x{1,}{1}");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError20)
@@ -295,8 +295,8 @@ TEST_F(RegExpTest, ParseError20)
     PandaString source("x{0,1}{1,}");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError21)
@@ -305,8 +305,8 @@ TEST_F(RegExpTest, ParseError21)
     PandaString source("[b-ac-e]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError22)
@@ -315,8 +315,8 @@ TEST_F(RegExpTest, ParseError22)
     PandaString source("[\\10b-G]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError23)
@@ -325,8 +325,8 @@ TEST_F(RegExpTest, ParseError23)
     PandaString source("[\\0b-G]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError24)
@@ -335,8 +335,8 @@ TEST_F(RegExpTest, ParseError24)
     PandaString source("(");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError25)
@@ -345,8 +345,8 @@ TEST_F(RegExpTest, ParseError25)
     PandaString source(")");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError26)
@@ -355,8 +355,8 @@ TEST_F(RegExpTest, ParseError26)
     PandaString source("{");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError27)
@@ -365,8 +365,8 @@ TEST_F(RegExpTest, ParseError27)
     PandaString source("}");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError28)
@@ -375,8 +375,8 @@ TEST_F(RegExpTest, ParseError28)
     PandaString source("[");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError29)
@@ -385,8 +385,8 @@ TEST_F(RegExpTest, ParseError29)
     PandaString source("]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError30)
@@ -395,8 +395,8 @@ TEST_F(RegExpTest, ParseError30)
     PandaString source("\\c");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError31)
@@ -405,8 +405,8 @@ TEST_F(RegExpTest, ParseError31)
     PandaString source("\\c\024");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError32)
@@ -415,8 +415,8 @@ TEST_F(RegExpTest, ParseError32)
     PandaString source("[\\c]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError33)
@@ -425,8 +425,8 @@ TEST_F(RegExpTest, ParseError33)
     PandaString source("[\\c\024]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError34)
@@ -435,8 +435,8 @@ TEST_F(RegExpTest, ParseError34)
     PandaString source("[\\d-a]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError35)
@@ -445,8 +445,8 @@ TEST_F(RegExpTest, ParseError35)
     PandaString source("[\\s-a]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError36)
@@ -455,8 +455,8 @@ TEST_F(RegExpTest, ParseError36)
     PandaString source("[\\s-\\w]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError37)
@@ -465,8 +465,8 @@ TEST_F(RegExpTest, ParseError37)
     PandaString source("[a-\\w]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError38)
@@ -475,8 +475,8 @@ TEST_F(RegExpTest, ParseError38)
     PandaString source("\\{");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_FALSE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_FALSE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError39)
@@ -485,8 +485,8 @@ TEST_F(RegExpTest, ParseError39)
     PandaString source("\\/");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_FALSE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_FALSE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError40)
@@ -498,8 +498,8 @@ TEST_F(RegExpTest, ParseError40)
             RegExpParser parser = RegExpParser();
             parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
             parser.Parse();
-            bool parse_result = parser.IsError();
-            ASSERT_TRUE(parse_result);
+            bool parseResult = parser.IsError();
+            ASSERT_TRUE(parseResult);
         }
     }
     for (char cu = 0x61; cu <= 0x7a; ++cu) {
@@ -509,8 +509,8 @@ TEST_F(RegExpTest, ParseError40)
             RegExpParser parser = RegExpParser();
             parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
             parser.Parse();
-            bool parse_result = parser.IsError();
-            ASSERT_TRUE(parse_result);
+            bool parseResult = parser.IsError();
+            ASSERT_TRUE(parseResult);
         }
     }
     for (char cu = 0x41; cu <= 0x5a; ++cu) {
@@ -521,8 +521,8 @@ TEST_F(RegExpTest, ParseError40)
             RegExpParser parser = RegExpParser();
             parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
             parser.Parse();
-            bool parse_result = parser.IsError();
-            ASSERT_TRUE(parse_result);
+            bool parseResult = parser.IsError();
+            ASSERT_TRUE(parseResult);
         }
     }
     for (char cu = 0x61; cu <= 0x7a; ++cu) {
@@ -533,8 +533,8 @@ TEST_F(RegExpTest, ParseError40)
             RegExpParser parser = RegExpParser();
             parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
             parser.Parse();
-            bool parse_result = parser.IsError();
-            ASSERT_TRUE(parse_result);
+            bool parseResult = parser.IsError();
+            ASSERT_TRUE(parseResult);
         }
     }
 }
@@ -545,8 +545,8 @@ TEST_F(RegExpTest, ParseError44)
     PandaString source("\\1");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError45)
@@ -555,8 +555,8 @@ TEST_F(RegExpTest, ParseError45)
     PandaString source("[\\1]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError46)
@@ -565,8 +565,8 @@ TEST_F(RegExpTest, ParseError46)
     PandaString source("\\00");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseError47)
@@ -575,8 +575,8 @@ TEST_F(RegExpTest, ParseError47)
     PandaString source("[\\00]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_TRUE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_TRUE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseNoError1)
@@ -585,8 +585,8 @@ TEST_F(RegExpTest, ParseNoError1)
     PandaString source("a{10,2147483648}");  // 2^31
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_FALSE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_FALSE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseNoError2)
@@ -595,8 +595,8 @@ TEST_F(RegExpTest, ParseNoError2)
     PandaString source("a{10,4294967306}");  // 2^32+10
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 16);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_FALSE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_FALSE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseNoError3)
@@ -605,8 +605,8 @@ TEST_F(RegExpTest, ParseNoError3)
     PandaString source("[\\⥚]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 1);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_FALSE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_FALSE(parseResult);
 }
 
 TEST_F(RegExpTest, ParseNoError4)
@@ -615,154 +615,154 @@ TEST_F(RegExpTest, ParseNoError4)
     PandaString source("[\\⊲|\\⇐]");
     parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 1);
     parser.Parse();
-    bool parse_result = parser.IsError();
-    ASSERT_FALSE(parse_result);
+    bool parseResult = parser.IsError();
+    ASSERT_FALSE(parseResult);
 }
 
 TEST_F(RegExpTest, RangeSet1)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_input = {
+    std::list<std::pair<uint32_t, uint32_t>> listInput = {
         std::make_pair(1, 1),
         std::make_pair(2, 2),
         std::make_pair(3, 3),
     };
-    std::list<std::pair<uint32_t, uint32_t>> list_expected = {
+    std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(1, 5),
     };
-    RangeSet range_result(list_input);
-    RangeSet range_expected(list_expected);
-    range_result.Insert(4, 5);
-    range_result.Compress();
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult(listInput);
+    RangeSet rangeExpected(listExpected);
+    rangeResult.Insert(4, 5);
+    rangeResult.Compress();
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 
 TEST_F(RegExpTest, RangeSet2)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_expected = {
+    std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(4, 5),
     };
-    RangeSet range_result;
-    RangeSet range_expected(list_expected);
-    range_result.Insert(4, 5);
-    range_result.Compress();
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult;
+    RangeSet rangeExpected(listExpected);
+    rangeResult.Insert(4, 5);
+    rangeResult.Compress();
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 
 TEST_F(RegExpTest, RangeSet3)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_input = {
+    std::list<std::pair<uint32_t, uint32_t>> listInput = {
         std::make_pair(2, 2),
     };
-    std::list<std::pair<uint32_t, uint32_t>> list_expected = {
+    std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(1, 5),
     };
-    RangeSet range_result(list_input);
-    RangeSet range_expected(list_expected);
-    range_result.Insert(1, 5);
-    range_result.Compress();
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult(listInput);
+    RangeSet rangeExpected(listExpected);
+    rangeResult.Insert(1, 5);
+    rangeResult.Compress();
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 
 TEST_F(RegExpTest, RangeSet4)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_input = {
+    std::list<std::pair<uint32_t, uint32_t>> listInput = {
         std::make_pair(1, 5),
     };
-    std::list<std::pair<uint32_t, uint32_t>> list_expected = {
+    std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(1, 5),
     };
-    RangeSet range_result(list_input);
-    RangeSet range_expected(list_expected);
-    range_result.Insert(2, 4);
-    range_result.Compress();
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult(listInput);
+    RangeSet rangeExpected(listExpected);
+    rangeResult.Insert(2, 4);
+    rangeResult.Compress();
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 
 TEST_F(RegExpTest, RangeSet5)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_input = {
+    std::list<std::pair<uint32_t, uint32_t>> listInput = {
         std::make_pair(1, 2),
         std::make_pair(9, UINT16_MAX),
     };
-    std::list<std::pair<uint32_t, uint32_t>> list_expected = {
+    std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(1, 2),
         std::make_pair(4, 7),
         std::make_pair(9, UINT16_MAX),
     };
-    RangeSet range_result(list_input);
-    RangeSet range_expected(list_expected);
-    range_result.Insert(4, 7);
-    range_result.Compress();
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult(listInput);
+    RangeSet rangeExpected(listExpected);
+    rangeResult.Insert(4, 7);
+    rangeResult.Compress();
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 
 TEST_F(RegExpTest, RangeSet6)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_expected = {
+    std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(0, UINT16_MAX),
     };
-    RangeSet range_result;
-    RangeSet range_expected(list_expected);
-    range_result.Invert(false);
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult;
+    RangeSet rangeExpected(listExpected);
+    rangeResult.Invert(false);
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 
 TEST_F(RegExpTest, RangeSet7)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_input = {
+    std::list<std::pair<uint32_t, uint32_t>> listInput = {
         std::make_pair(1, 5),
     };
-    std::list<std::pair<uint32_t, uint32_t>> list_expected = {
+    std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(0, 0),
         std::make_pair(6, UINT16_MAX),
     };
-    RangeSet range_result(list_input);
-    RangeSet range_expected(list_expected);
-    range_result.Invert(false);
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult(listInput);
+    RangeSet rangeExpected(listExpected);
+    rangeResult.Invert(false);
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 
 TEST_F(RegExpTest, RangeSet8)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_input = {
+    std::list<std::pair<uint32_t, uint32_t>> listInput = {
         std::make_pair(1, 5),
         std::make_pair(0xfffe, UINT16_MAX),
     };
-    std::list<std::pair<uint32_t, uint32_t>> list_expected = {
+    std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(0, 0),
         std::make_pair(6, 0xfffd),
     };
-    RangeSet range_result(list_input);
-    RangeSet range_expected(list_expected);
-    range_result.Invert(false);
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult(listInput);
+    RangeSet rangeExpected(listExpected);
+    rangeResult.Invert(false);
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 
 TEST_F(RegExpTest, RangeSet9)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_input = {
+    std::list<std::pair<uint32_t, uint32_t>> listInput = {
         std::make_pair(0, 5),
         std::make_pair(0xfffe, 0xfffe),
     };
-    std::list<std::pair<uint32_t, uint32_t>> list_expected = {
+    std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(6, 0xfffd),
         std::make_pair(UINT16_MAX, UINT16_MAX),
     };
-    RangeSet range_result(list_input);
-    RangeSet range_expected(list_expected);
-    range_result.Invert(false);
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult(listInput);
+    RangeSet rangeExpected(listExpected);
+    rangeResult.Invert(false);
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 
 TEST_F(RegExpTest, RangeSet10)
 {
-    std::list<std::pair<uint32_t, uint32_t>> list_input = {
+    std::list<std::pair<uint32_t, uint32_t>> listInput = {
         std::make_pair(0, UINT16_MAX),
     };
-    RangeSet range_result(list_input);
-    RangeSet range_expected;
-    range_result.Invert(false);
-    EXPECT_EQ(range_result, range_expected);
+    RangeSet rangeResult(listInput);
+    RangeSet rangeExpected;
+    rangeResult.Invert(false);
+    EXPECT_EQ(rangeResult, rangeExpected);
 }
 }  // namespace panda::test
 

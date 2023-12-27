@@ -77,11 +77,11 @@ void TestLoop(TestCfgFunc func)
     for (size_t i = 0; i < buf.size(); i++) {
         buf[i] = i + i % 3;
     }
-    std::array<uint64_t, 8> buf_expected = buf;
-    auto expected = ModifyArrayForLoopTest(&buf_expected);
+    std::array<uint64_t, 8> bufExpected = buf;
+    auto expected = ModifyArrayForLoopTest(&bufExpected);
     uint64_t res = func(static_cast<void *>(buf.data()), buf.size());
     ASSERT_EQ(expected, res);
-    ASSERT_EQ(buf_expected, buf);
+    ASSERT_EQ(bufExpected, buf);
 }
 
 TEST(Irtoc, Loop)

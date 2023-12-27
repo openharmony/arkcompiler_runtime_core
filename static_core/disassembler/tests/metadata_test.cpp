@@ -75,15 +75,15 @@ TEST(MetadataTest, test1)
     EXPECT_TRUE(prog.find(".record A {\n}") != std::string::npos);
     EXPECT_TRUE(prog.find(".record B <external>") != std::string::npos);
 
-    std::string body_a_eee = ExtractFuncBody(ss.str(), ".function u1 A.EEE(A a0, u1 a1) {\n");
-    std::stringstream a_eee {body_a_eee};
+    std::string bodyAEee = ExtractFuncBody(ss.str(), ".function u1 A.EEE(A a0, u1 a1) {\n");
+    std::stringstream aEee {bodyAEee};
 
     std::string line;
-    std::getline(a_eee, line);
+    std::getline(aEee, line);
     EXPECT_EQ("\tcall.short DDD:(u1), v0", line);
-    std::getline(a_eee, line);
+    std::getline(aEee, line);
     EXPECT_EQ("\tinitobj.short A._ctor_:(u1), v0", line);
-    std::getline(a_eee, line);
+    std::getline(aEee, line);
     EXPECT_EQ("\tinitobj.short A._cctor_:(u1), v1", line);
 }
 
@@ -114,19 +114,19 @@ TEST(MetadataTest, ExternalFieldTest)
     EXPECT_TRUE(prog.find(".record B <external> {") != std::string::npos);
     EXPECT_TRUE(prog.find("\ti32 fieldB <external>") != std::string::npos);
 
-    std::string body_a_eee = ExtractFuncBody(ss.str(), ".function void main() <static> {\n");
-    std::stringstream a_eee {body_a_eee};
+    std::string bodyAEee = ExtractFuncBody(ss.str(), ".function void main() <static> {\n");
+    std::stringstream aEee {bodyAEee};
 
     std::string line;
-    std::getline(a_eee, line);
+    std::getline(aEee, line);
     EXPECT_EQ("\tldstatic.obj B.fieldB", line);
-    std::getline(a_eee, line);
+    std::getline(aEee, line);
     EXPECT_EQ("\treturn.void", line);
 }
 
 TEST(MetadataTest, Access)
 {
-    auto match_string = [](const char *pattern, const std::string &str) {
+    auto matchString = [](const char *pattern, const std::string &str) {
         auto regex = std::regex(pattern);
         auto m = std::smatch {};
         std::regex_search(str, m, regex);
@@ -156,9 +156,9 @@ TEST(MetadataTest, Access)
         d.Disassemble(pf);
         d.Serialize(ss);
 
-        EXPECT_TRUE(match_string("[.record A][^.]*[.record=public]", ss.str()));
-        EXPECT_TRUE(match_string("[.record B][^.]*[.record=protected]", ss.str()));
-        EXPECT_TRUE(match_string("[.record C][^.]*[.record=private]", ss.str()));
+        EXPECT_TRUE(matchString("[.record A][^.]*[.record=public]", ss.str()));
+        EXPECT_TRUE(matchString("[.record B][^.]*[.record=protected]", ss.str()));
+        EXPECT_TRUE(matchString("[.record C][^.]*[.record=private]", ss.str()));
     }
     {
         auto program = panda::pandasm::Parser().Parse(R"(
@@ -183,19 +183,19 @@ TEST(MetadataTest, Access)
         d.Serialize(ss);
 
         auto str = ss.str();
-        EXPECT_TRUE(match_string("[.record A][^.]*[.record=protected]>", str));
-        EXPECT_TRUE(match_string("[i32 pub][^.]*[.field=public]>", str));
-        EXPECT_TRUE(match_string("[i32 prt][^.]*[.field=protected]>", str));
-        EXPECT_TRUE(match_string("[i32 prv][^.]*[.field=private]>", str));
-        EXPECT_TRUE(match_string("[void f()][^.]*[.function=public]>", str));
-        EXPECT_TRUE(match_string("[void A.g()][^.]*[.function=protected]>", str));
-        EXPECT_TRUE(match_string("[void h()][^.]*[.function=private]>", str));
+        EXPECT_TRUE(matchString("[.record A][^.]*[.record=protected]>", str));
+        EXPECT_TRUE(matchString("[i32 pub][^.]*[.field=public]>", str));
+        EXPECT_TRUE(matchString("[i32 prt][^.]*[.field=protected]>", str));
+        EXPECT_TRUE(matchString("[i32 prv][^.]*[.field=private]>", str));
+        EXPECT_TRUE(matchString("[void f()][^.]*[.function=public]>", str));
+        EXPECT_TRUE(matchString("[void A.g()][^.]*[.function=protected]>", str));
+        EXPECT_TRUE(matchString("[void h()][^.]*[.function=private]>", str));
     }
 }
 
 TEST(MetadataTest, Final)
 {
-    auto match_string = [](const char *pattern, const std::string &str) {
+    auto matchString = [](const char *pattern, const std::string &str) {
         auto regex = std::regex(pattern);
         auto m = std::smatch {};
         std::regex_search(str, m, regex);
@@ -219,7 +219,7 @@ TEST(MetadataTest, Final)
         d.Disassemble(pf);
         d.Serialize(ss);
 
-        EXPECT_TRUE(match_string("[.record A][^.]*[final]>", ss.str()));
+        EXPECT_TRUE(matchString("[.record A][^.]*[final]>", ss.str()));
     }
     {
         auto program = panda::pandasm::Parser().Parse(R"(
@@ -238,7 +238,7 @@ TEST(MetadataTest, Final)
         d.Serialize(ss);
 
         auto str = ss.str();
-        EXPECT_TRUE(match_string("[i32 fld][^<]*[final]>", str));
+        EXPECT_TRUE(matchString("[i32 fld][^<]*[final]>", str));
     }
     {
         auto program = panda::pandasm::Parser().Parse(R"(
@@ -257,7 +257,7 @@ TEST(MetadataTest, Final)
 
         auto str = ss.str();
         std::cout << str << std::endl;
-        EXPECT_TRUE(match_string("[void A.f][^<]*[final]>", str));
+        EXPECT_TRUE(matchString("[void A.f][^<]*[final]>", str));
     }
 }
 

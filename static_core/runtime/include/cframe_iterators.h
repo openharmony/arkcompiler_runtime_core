@@ -37,66 +37,66 @@ class CFrameStaticNativeMethodIterator {
 public:
     static auto MakeRange(CFrame *cframe)
     {
-        CFrameLayout cframe_layout(ARCH, 0);
+        CFrameLayout cframeLayout(ARCH, 0);
 
-        const ptrdiff_t in_regs_start_slot = cframe_layout.GetCallerRegsStartSlot() -
-                                             cframe_layout.GetStackStartSlot()
-                                             // skipped the slot to align the stack
-                                             + ((ARCH == Arch::X86_64) ? 1 : 0);
-        const ptrdiff_t in_stack_start_slot = cframe_layout.GetStackArgsStartSlot() - cframe_layout.GetStackStartSlot();
+        const ptrdiff_t inRegsStartSlot = cframeLayout.GetCallerRegsStartSlot() -
+                                          cframeLayout.GetStackStartSlot()
+                                          // skipped the slot to align the stack
+                                          + ((ARCH == Arch::X86_64) ? 1 : 0);
+        const ptrdiff_t inStackStartSlot = cframeLayout.GetStackArgsStartSlot() - cframeLayout.GetStackStartSlot();
 
-        ptrdiff_t fp_end_slot = in_regs_start_slot - 1;
-        ptrdiff_t fp_begin_slot = fp_end_slot + ARG_FP_REGS_COUNG;
-        ptrdiff_t gpr_end_slot = fp_begin_slot;
-        ptrdiff_t gpr_begin_slot = gpr_end_slot + ARG_GP_REGS_COUNG;
-        ptrdiff_t stack_begin_slot = in_stack_start_slot + 1;
+        ptrdiff_t fpEndSlot = inRegsStartSlot - 1;
+        ptrdiff_t fpBeginSlot = fpEndSlot + ARG_FP_REGS_COUNG;
+        ptrdiff_t gprEndSlot = fpBeginSlot;
+        ptrdiff_t gprBeginSlot = gprEndSlot + ARG_GP_REGS_COUNG;
+        ptrdiff_t stackBeginSlot = inStackStartSlot + 1;
 
         Method *method = cframe->GetMethod();
-        bool is_static = method->IsStatic();
-        if (!is_static) {
-            --gpr_begin_slot;  // skip Method*
+        bool isStatic = method->IsStatic();
+        if (!isStatic) {
+            --gprBeginSlot;  // skip Method*
         }
 
-        uint32_t num_args = method->GetNumArgs();
-        uint32_t vreg_num = num_args + (is_static ? 1 : 0);
+        uint32_t numArgs = method->GetNumArgs();
+        uint32_t vregNum = numArgs + (isStatic ? 1 : 0);
 
         return Range<CFrameStaticNativeMethodIterator>(
-            CFrameStaticNativeMethodIterator(0, vreg_num, method->GetShorty(), gpr_begin_slot, gpr_end_slot,
-                                             fp_begin_slot + 1, fp_end_slot, stack_begin_slot),
-            CFrameStaticNativeMethodIterator(vreg_num, vreg_num, method->GetShorty(), 0, 0, 0, 0, 0));
+            CFrameStaticNativeMethodIterator(0, vregNum, method->GetShorty(), gprBeginSlot, gprEndSlot, fpBeginSlot + 1,
+                                             fpEndSlot, stackBeginSlot),
+            CFrameStaticNativeMethodIterator(vregNum, vregNum, method->GetShorty(), 0, 0, 0, 0, 0));
     }
 
     VRegInfo operator*()
     {
-        return VRegInfo(current_slot_, VRegInfo::Location::SLOT, vreg_type_, VRegInfo::VRegType::VREG, vreg_index_);
+        return VRegInfo(currentSlot_, VRegInfo::Location::SLOT, vregType_, VRegInfo::VRegType::VREG, vregIndex_);
     }
 
     auto operator++()
     {
-        if (++vreg_index_ >= vreg_num_) {
+        if (++vregIndex_ >= vregNum_) {
             return *this;
         }
 
         // Update vreg_type_
-        vreg_type_ = ConvertType(*shorty_it_);
-        ++shorty_it_;
+        vregType_ = ConvertType(*shortyIt_);
+        ++shortyIt_;
 
         // Update current_slot_
-        if (vreg_type_ == VRegInfo::Type::FLOAT32 || vreg_type_ == VRegInfo::Type::FLOAT64) {
-            if ((fp_current_slot_ - 1) > fp_end_slot_) {
-                --fp_current_slot_;
-                current_slot_ = fp_current_slot_;
+        if (vregType_ == VRegInfo::Type::FLOAT32 || vregType_ == VRegInfo::Type::FLOAT64) {
+            if ((fpCurrentSlot_ - 1) > fpEndSlot_) {
+                --fpCurrentSlot_;
+                currentSlot_ = fpCurrentSlot_;
             } else {
-                --stack_current_slot_;
-                current_slot_ = stack_current_slot_;
+                --stackCurrentSlot_;
+                currentSlot_ = stackCurrentSlot_;
             }
         } else {
-            if ((gpr_current_slot_ - 1) > gpr_end_slot_) {
-                --gpr_current_slot_;
-                current_slot_ = gpr_current_slot_;
+            if ((gprCurrentSlot_ - 1) > gprEndSlot_) {
+                --gprCurrentSlot_;
+                currentSlot_ = gprCurrentSlot_;
             } else {
-                --stack_current_slot_;
-                current_slot_ = stack_current_slot_;
+                --stackCurrentSlot_;
+                currentSlot_ = stackCurrentSlot_;
             }
         }
 
@@ -112,7 +112,7 @@ public:
 
     bool operator==(const CFrameStaticNativeMethodIterator &it) const
     {
-        return vreg_index_ == it.vreg_index_;
+        return vregIndex_ == it.vregIndex_;
     }
 
     bool operator!=(const CFrameStaticNativeMethodIterator &it) const
@@ -121,20 +121,20 @@ public:
     }
 
 private:
-    CFrameStaticNativeMethodIterator(uint32_t vreg_index, uint32_t vreg_num, const uint16_t *shorty,
-                                     ptrdiff_t gpr_begin_slot, ptrdiff_t gpr_end_slot, ptrdiff_t fp_begin_slot,
-                                     ptrdiff_t fp_end_slot, ptrdiff_t stack_current_slot)
-        : vreg_index_(vreg_index),
-          vreg_num_(vreg_num),
-          shorty_it_(shorty),
-          current_slot_(gpr_begin_slot),
-          gpr_current_slot_(gpr_begin_slot),
-          gpr_end_slot_(gpr_end_slot),
-          fp_current_slot_(fp_begin_slot),
-          fp_end_slot_(fp_end_slot),
-          stack_current_slot_(stack_current_slot)
+    CFrameStaticNativeMethodIterator(uint32_t vregIndex, uint32_t vregNum, const uint16_t *shorty,
+                                     ptrdiff_t gprBeginSlot, ptrdiff_t gprEndSlot, ptrdiff_t fpBeginSlot,
+                                     ptrdiff_t fpEndSlot, ptrdiff_t stackCurrentSlot)
+        : vregIndex_(vregIndex),
+          vregNum_(vregNum),
+          shortyIt_(shorty),
+          currentSlot_(gprBeginSlot),
+          gprCurrentSlot_(gprBeginSlot),
+          gprEndSlot_(gprEndSlot),
+          fpCurrentSlot_(fpBeginSlot),
+          fpEndSlot_(fpEndSlot),
+          stackCurrentSlot_(stackCurrentSlot)
     {
-        ++shorty_it_;  // skip return value
+        ++shortyIt_;  // skip return value
     }
 
     VRegInfo::Type ConvertType(panda_file::Type type) const
@@ -167,16 +167,16 @@ private:
     }
 
 private:
-    uint32_t vreg_index_;
-    uint32_t vreg_num_;
-    panda_file::ShortyIterator shorty_it_;
-    ptrdiff_t current_slot_;
-    ptrdiff_t gpr_current_slot_;
-    ptrdiff_t gpr_end_slot_;
-    ptrdiff_t fp_current_slot_;
-    ptrdiff_t fp_end_slot_;
-    ptrdiff_t stack_current_slot_;
-    VRegInfo::Type vreg_type_ = VRegInfo::Type::OBJECT;
+    uint32_t vregIndex_;
+    uint32_t vregNum_;
+    panda_file::ShortyIterator shortyIt_;
+    ptrdiff_t currentSlot_;
+    ptrdiff_t gprCurrentSlot_;
+    ptrdiff_t gprEndSlot_;
+    ptrdiff_t fpCurrentSlot_;
+    ptrdiff_t fpEndSlot_;
+    ptrdiff_t stackCurrentSlot_;
+    VRegInfo::Type vregType_ = VRegInfo::Type::OBJECT;
 };
 
 template <>
@@ -198,32 +198,32 @@ class CFrameStaticNativeMethodIterator<Arch::AARCH32> {
 public:
     static auto MakeRange(CFrame *cframe)
     {
-        ptrdiff_t gpr_begin_slot = GPR_BEGIN_SLOT;
+        ptrdiff_t gprBeginSlot = GPR_BEGIN_SLOT;
         Method *method = cframe->GetMethod();
-        bool is_static = method->IsStatic();
-        if (!is_static) {
-            --gpr_begin_slot;  // skip Method*
+        bool isStatic = method->IsStatic();
+        if (!isStatic) {
+            --gprBeginSlot;  // skip Method*
         }
 
-        uint32_t num_args = method->GetNumArgs();
-        uint32_t vreg_num = num_args + (is_static ? 1 : 0);
+        uint32_t numArgs = method->GetNumArgs();
+        uint32_t vregNum = numArgs + (isStatic ? 1 : 0);
 
         return Range<CFrameStaticNativeMethodIterator>(
-            CFrameStaticNativeMethodIterator(0, vreg_num, method->GetShorty(), gpr_begin_slot, GPR_END_SLOT,
-                                             FP_BEGIN_SLOT, FP_END_SLOT, STACK_BEGIN_SLOT),
-            CFrameStaticNativeMethodIterator(vreg_num, vreg_num, method->GetShorty(), 0, 0, 0, 0, 0));
+            CFrameStaticNativeMethodIterator(0, vregNum, method->GetShorty(), gprBeginSlot, GPR_END_SLOT, FP_BEGIN_SLOT,
+                                             FP_END_SLOT, STACK_BEGIN_SLOT),
+            CFrameStaticNativeMethodIterator(vregNum, vregNum, method->GetShorty(), 0, 0, 0, 0, 0));
     }
 
     VRegInfo operator*()
     {
-        return VRegInfo(current_slot_, VRegInfo::Location::SLOT, vreg_type_, VRegInfo::VRegType::VREG, vreg_index_);
+        return VRegInfo(currentSlot_, VRegInfo::Location::SLOT, vregType_, VRegInfo::VRegType::VREG, vregIndex_);
     }
 
-    uint32_t GetSlotsCountForType(VRegInfo::Type vreg_type)
+    uint32_t GetSlotsCountForType(VRegInfo::Type vregType)
     {
         static_assert(arch::ExtArchTraits<Arch::AARCH32>::GPR_SIZE == 4);  // 4 bytes -- register size on AARCH32
 
-        if (vreg_type == VRegInfo::Type::INT64 || vreg_type == VRegInfo::Type::FLOAT64) {
+        if (vregType == VRegInfo::Type::INT64 || vregType == VRegInfo::Type::FLOAT64) {
             return 2;  // 2 slots
         }
         return 1;
@@ -231,46 +231,46 @@ public:
 
     auto operator++()
     {
-        if (++vreg_index_ >= vreg_num_) {
+        if (++vregIndex_ >= vregNum_) {
             return *this;
         }
 
         // Update type
-        vreg_type_ = ConvertType(*shorty_it_);
-        ++shorty_it_;
+        vregType_ = ConvertType(*shortyIt_);
+        ++shortyIt_;
 
         // Update slots
-        auto inc = static_cast<ptrdiff_t>(GetSlotsCountForType(vreg_type_));
+        auto inc = static_cast<ptrdiff_t>(GetSlotsCountForType(vregType_));
         ASSERT(inc == 1 || inc == 2);  // 1 or 2 slots
         if (inc == 1) {
             if constexpr (arch::ExtArchTraits<Arch::AARCH32>::HARDFP) {
-                if (vreg_type_ == VRegInfo::Type::FLOAT32) {  // in this case one takes 1 slots
+                if (vregType_ == VRegInfo::Type::FLOAT32) {  // in this case one takes 1 slots
                     return HandleHardFloat();
                 }
             }
-            if ((gpr_current_slot_ - 1) > gpr_end_slot_) {
-                --gpr_current_slot_;
-                current_slot_ = gpr_current_slot_;
+            if ((gprCurrentSlot_ - 1) > gprEndSlot_) {
+                --gprCurrentSlot_;
+                currentSlot_ = gprCurrentSlot_;
             } else {
-                gpr_current_slot_ = gpr_end_slot_;
+                gprCurrentSlot_ = gprEndSlot_;
 
-                --stack_current_slot_;
-                current_slot_ = stack_current_slot_;
+                --stackCurrentSlot_;
+                currentSlot_ = stackCurrentSlot_;
             }
         } else {
             if constexpr (arch::ExtArchTraits<Arch::AARCH32>::HARDFP) {
-                if (vreg_type_ == VRegInfo::Type::FLOAT64) {  // in this case one takes 2 slots
+                if (vregType_ == VRegInfo::Type::FLOAT64) {  // in this case one takes 2 slots
                     return HandleHardDouble();
                 }
             }
-            gpr_current_slot_ = RoundUp(gpr_current_slot_ - 1, 2) - 1;  // 2
-            if (gpr_current_slot_ > gpr_end_slot_) {
-                current_slot_ = gpr_current_slot_;
-                gpr_current_slot_ -= 1;
+            gprCurrentSlot_ = RoundUp(gprCurrentSlot_ - 1, 2) - 1;  // 2
+            if (gprCurrentSlot_ > gprEndSlot_) {
+                currentSlot_ = gprCurrentSlot_;
+                gprCurrentSlot_ -= 1;
             } else {
-                stack_current_slot_ = RoundUp(stack_current_slot_ - 1, 2) - 1;  // 2
-                current_slot_ = stack_current_slot_;
-                stack_current_slot_ -= 1;
+                stackCurrentSlot_ = RoundUp(stackCurrentSlot_ - 1, 2) - 1;  // 2
+                currentSlot_ = stackCurrentSlot_;
+                stackCurrentSlot_ -= 1;
             }
         }
 
@@ -286,7 +286,7 @@ public:
 
     bool operator==(const CFrameStaticNativeMethodIterator &it) const
     {
-        return vreg_index_ == it.vreg_index_;
+        return vregIndex_ == it.vregIndex_;
     }
 
     bool operator!=(const CFrameStaticNativeMethodIterator &it) const
@@ -295,20 +295,20 @@ public:
     }
 
 private:
-    CFrameStaticNativeMethodIterator(uint32_t vreg_index, uint32_t vreg_num, const uint16_t *shorty,
-                                     ptrdiff_t gpr_begin_slot, ptrdiff_t gpr_end_slot, ptrdiff_t fp_begin_slot,
-                                     ptrdiff_t fp_end_slot, ptrdiff_t stack_current_slot)
-        : vreg_index_(vreg_index),
-          vreg_num_(vreg_num),
-          shorty_it_(shorty),
-          current_slot_(gpr_begin_slot),
-          gpr_current_slot_(gpr_begin_slot),
-          gpr_end_slot_(gpr_end_slot),
-          fp_current_slot_(fp_begin_slot),
-          fp_end_slot_(fp_end_slot),
-          stack_current_slot_(stack_current_slot)
+    CFrameStaticNativeMethodIterator(uint32_t vregIndex, uint32_t vregNum, const uint16_t *shorty,
+                                     ptrdiff_t gprBeginSlot, ptrdiff_t gprEndSlot, ptrdiff_t fpBeginSlot,
+                                     ptrdiff_t fpEndSlot, ptrdiff_t stackCurrentSlot)
+        : vregIndex_(vregIndex),
+          vregNum_(vregNum),
+          shortyIt_(shorty),
+          currentSlot_(gprBeginSlot),
+          gprCurrentSlot_(gprBeginSlot),
+          gprEndSlot_(gprEndSlot),
+          fpCurrentSlot_(fpBeginSlot),
+          fpEndSlot_(fpEndSlot),
+          stackCurrentSlot_(stackCurrentSlot)
     {
-        ++shorty_it_;  // skip return value
+        ++shortyIt_;  // skip return value
     }
 
     VRegInfo::Type ConvertType(panda_file::Type type) const
@@ -342,43 +342,43 @@ private:
 
     CFrameStaticNativeMethodIterator &HandleHardFloat()
     {
-        ASSERT(vreg_type_ == VRegInfo::Type::FLOAT32);
-        if (fp_current_slot_ > fp_end_slot_) {
-            current_slot_ = fp_current_slot_;
-            --fp_current_slot_;
+        ASSERT(vregType_ == VRegInfo::Type::FLOAT32);
+        if (fpCurrentSlot_ > fpEndSlot_) {
+            currentSlot_ = fpCurrentSlot_;
+            --fpCurrentSlot_;
         } else {
-            --stack_current_slot_;
-            current_slot_ = stack_current_slot_;
+            --stackCurrentSlot_;
+            currentSlot_ = stackCurrentSlot_;
         }
         return *this;
     }
 
     CFrameStaticNativeMethodIterator &HandleHardDouble()
     {
-        ASSERT(vreg_type_ == VRegInfo::Type::FLOAT64);
-        fp_current_slot_ = static_cast<ptrdiff_t>(RoundDown(static_cast<uintptr_t>(fp_current_slot_) + 1, 2U) - 1);
-        if (fp_current_slot_ > fp_end_slot_) {
-            current_slot_ = fp_current_slot_;
-            fp_current_slot_ -= 2U;
+        ASSERT(vregType_ == VRegInfo::Type::FLOAT64);
+        fpCurrentSlot_ = static_cast<ptrdiff_t>(RoundDown(static_cast<uintptr_t>(fpCurrentSlot_) + 1, 2U) - 1);
+        if (fpCurrentSlot_ > fpEndSlot_) {
+            currentSlot_ = fpCurrentSlot_;
+            fpCurrentSlot_ -= 2U;
         } else {
-            stack_current_slot_ = RoundUp(stack_current_slot_ - 1, 2U) - 1;
-            current_slot_ = stack_current_slot_;
-            stack_current_slot_ -= 1;
+            stackCurrentSlot_ = RoundUp(stackCurrentSlot_ - 1, 2U) - 1;
+            currentSlot_ = stackCurrentSlot_;
+            stackCurrentSlot_ -= 1;
         }
         return *this;
     }
 
 private:
-    uint32_t vreg_index_;
-    uint32_t vreg_num_;
-    panda_file::ShortyIterator shorty_it_;
-    ptrdiff_t current_slot_;
-    ptrdiff_t gpr_current_slot_;
-    ptrdiff_t gpr_end_slot_;
-    ptrdiff_t fp_current_slot_;
-    ptrdiff_t fp_end_slot_;
-    ptrdiff_t stack_current_slot_;
-    VRegInfo::Type vreg_type_ = VRegInfo::Type::OBJECT;
+    uint32_t vregIndex_;
+    uint32_t vregNum_;
+    panda_file::ShortyIterator shortyIt_;
+    ptrdiff_t currentSlot_;
+    ptrdiff_t gprCurrentSlot_;
+    ptrdiff_t gprEndSlot_;
+    ptrdiff_t fpCurrentSlot_;
+    ptrdiff_t fpEndSlot_;
+    ptrdiff_t stackCurrentSlot_;
+    VRegInfo::Type vregType_ = VRegInfo::Type::OBJECT;
 };
 
 template <Arch ARCH = RUNTIME_ARCH>
@@ -392,50 +392,49 @@ public:
         size_t constexpr GPR_ARGS_MAX = arch::ExtArchTraits<ARCH>::NUM_GP_ARG_REGS;
         size_t constexpr GPR_ARGS_INTERNAL = 2U;  // Depends on dyn callconv
         size_t constexpr GPR_FN_ARGS_NUM = 0U;    // Depends on dyn callconv
-        CFrameLayout cframe_layout(ARCH, 0);
+        CFrameLayout cframeLayout(ARCH, 0);
 
-        ptrdiff_t const gpr_end_slot = cframe_layout.GetCallerRegsStartSlot() - 1 - cframe_layout.GetStackStartSlot();
-        ptrdiff_t const gpr_start_slot = gpr_end_slot + GPR_ARGS_MAX;
+        ptrdiff_t const gprEndSlot = cframeLayout.GetCallerRegsStartSlot() - 1 - cframeLayout.GetStackStartSlot();
+        ptrdiff_t const gprStartSlot = gprEndSlot + GPR_ARGS_MAX;
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        Span<SlotType const> gpr_slots(cframe->GetValuePtrFromSlot(gpr_start_slot), GPR_ARGS_MAX);
+        Span<SlotType const> gprSlots(cframe->GetValuePtrFromSlot(gprStartSlot), GPR_ARGS_MAX);
 
-        auto const actual_args_num = static_cast<uint32_t>(gpr_slots[1]);
-        auto const stack_args_num = actual_args_num - GPR_FN_ARGS_NUM;
+        auto const actualArgsNum = static_cast<uint32_t>(gprSlots[1]);
+        auto const stackArgsNum = actualArgsNum - GPR_FN_ARGS_NUM;
 
-        ptrdiff_t const gpr_tagged_end_slot = gpr_end_slot + GPR_ARGS_INTERNAL;
-        ptrdiff_t const gpr_tagged_start_slot = gpr_tagged_end_slot + GPR_FN_ARGS_NUM;
+        ptrdiff_t const gprTaggedEndSlot = gprEndSlot + GPR_ARGS_INTERNAL;
+        ptrdiff_t const gprTaggedStartSlot = gprTaggedEndSlot + GPR_FN_ARGS_NUM;
 
-        ptrdiff_t const stack_start_slot = cframe_layout.GetStackArgsStartSlot() - cframe_layout.GetStackStartSlot();
-        ptrdiff_t const stack_end_slot = stack_start_slot - stack_args_num;
+        ptrdiff_t const stackStartSlot = cframeLayout.GetStackArgsStartSlot() - cframeLayout.GetStackStartSlot();
+        ptrdiff_t const stackEndSlot = stackStartSlot - stackArgsNum;
 
         return Range<CFrameDynamicNativeMethodIterator>(
-            CFrameDynamicNativeMethodIterator(cframe, gpr_tagged_start_slot, gpr_tagged_end_slot, stack_start_slot,
-                                              stack_end_slot),
-            CFrameDynamicNativeMethodIterator(cframe, gpr_tagged_end_slot, gpr_tagged_end_slot, stack_end_slot,
-                                              stack_end_slot));
+            CFrameDynamicNativeMethodIterator(cframe, gprTaggedStartSlot, gprTaggedEndSlot, stackStartSlot,
+                                              stackEndSlot),
+            CFrameDynamicNativeMethodIterator(cframe, gprTaggedEndSlot, gprTaggedEndSlot, stackEndSlot, stackEndSlot));
     }
 
     VRegInfo operator*()
     {
-        if (gpr_start_slot_ > gpr_end_slot_) {
-            return VRegInfo(gpr_start_slot_, VRegInfo::Location::SLOT, VRegInfo::Type::ANY, VRegInfo::VRegType::VREG,
-                            vreg_num_);
+        if (gprStartSlot_ > gprEndSlot_) {
+            return VRegInfo(gprStartSlot_, VRegInfo::Location::SLOT, VRegInfo::Type::ANY, VRegInfo::VRegType::VREG,
+                            vregNum_);
         }
-        ASSERT(stack_start_slot_ > stack_end_slot_);
-        return VRegInfo(stack_start_slot_, VRegInfo::Location::SLOT, VRegInfo::Type::ANY, VRegInfo::VRegType::VREG,
-                        vreg_num_);
+        ASSERT(stackStartSlot_ > stackEndSlot_);
+        return VRegInfo(stackStartSlot_, VRegInfo::Location::SLOT, VRegInfo::Type::ANY, VRegInfo::VRegType::VREG,
+                        vregNum_);
     }
 
     CFrameDynamicNativeMethodIterator &operator++()
     {
         size_t inc = sizeof(interpreter::VRegister) / sizeof(SlotType);
-        if (gpr_start_slot_ > gpr_end_slot_) {
-            gpr_start_slot_ -= inc;
-            ++vreg_num_;
-        } else if (stack_start_slot_ > stack_end_slot_) {
-            stack_start_slot_ -= inc;
-            ++vreg_num_;
+        if (gprStartSlot_ > gprEndSlot_) {
+            gprStartSlot_ -= inc;
+            ++vregNum_;
+        } else if (stackStartSlot_ > stackEndSlot_) {
+            stackStartSlot_ -= inc;
+            ++vregNum_;
         }
         return *this;
     }
@@ -450,7 +449,7 @@ public:
 
     bool operator==(const CFrameDynamicNativeMethodIterator &it) const
     {
-        return gpr_start_slot_ == it.gpr_start_slot_ && stack_start_slot_ == it.stack_start_slot_;
+        return gprStartSlot_ == it.gprStartSlot_ && stackStartSlot_ == it.stackStartSlot_;
     }
 
     bool operator!=(const CFrameDynamicNativeMethodIterator &it) const
@@ -459,23 +458,23 @@ public:
     }
 
 private:
-    CFrameDynamicNativeMethodIterator(CFrame *cframe, ptrdiff_t gpr_start_slot, ptrdiff_t gpr_end_slot,
-                                      ptrdiff_t stack_start_slot, ptrdiff_t stack_end_slot)
+    CFrameDynamicNativeMethodIterator(CFrame *cframe, ptrdiff_t gprStartSlot, ptrdiff_t gprEndSlot,
+                                      ptrdiff_t stackStartSlot, ptrdiff_t stackEndSlot)
         : cframe_(cframe),
-          gpr_start_slot_(gpr_start_slot),
-          gpr_end_slot_(gpr_end_slot),
-          stack_start_slot_(stack_start_slot),
-          stack_end_slot_(stack_end_slot)
+          gprStartSlot_(gprStartSlot),
+          gprEndSlot_(gprEndSlot),
+          stackStartSlot_(stackStartSlot),
+          stackEndSlot_(stackEndSlot)
     {
     }
 
 private:
     CFrame *cframe_;
-    uint32_t vreg_num_ = 0;
-    ptrdiff_t gpr_start_slot_;
-    ptrdiff_t gpr_end_slot_;
-    ptrdiff_t stack_start_slot_;
-    ptrdiff_t stack_end_slot_;
+    uint32_t vregNum_ = 0;
+    ptrdiff_t gprStartSlot_;
+    ptrdiff_t gprEndSlot_;
+    ptrdiff_t stackStartSlot_;
+    ptrdiff_t stackEndSlot_;
 };
 
 }  // namespace panda

@@ -41,10 +41,10 @@ using ColumnNumberTable = std::vector<ColumnTableEntry>;
 struct LocalVariableInfo {
     std::string name;
     std::string type;
-    std::string type_signature;
-    int32_t reg_number;
-    uint32_t start_offset;
-    uint32_t end_offset;
+    std::string typeSignature;
+    int32_t regNumber;
+    uint32_t startOffset;
+    uint32_t endOffset;
 };
 
 using LocalVariableTable = std::vector<LocalVariableInfo>;
@@ -63,17 +63,17 @@ public:
     DEFAULT_COPY_SEMANTIC(DebugInfoExtractor);
     DEFAULT_MOVE_SEMANTIC(DebugInfoExtractor);
 
-    virtual const LineNumberTable &GetLineNumberTable(File::EntityId method_id) const;
+    virtual const LineNumberTable &GetLineNumberTable(File::EntityId methodId) const;
 
-    virtual const ColumnNumberTable &GetColumnNumberTable(File::EntityId method_id) const;
+    virtual const ColumnNumberTable &GetColumnNumberTable(File::EntityId methodId) const;
 
-    virtual const LocalVariableTable &GetLocalVariableTable(File::EntityId method_id) const;
+    virtual const LocalVariableTable &GetLocalVariableTable(File::EntityId methodId) const;
 
-    virtual const std::vector<ParamInfo> &GetParameterInfo(File::EntityId method_id) const;
+    virtual const std::vector<ParamInfo> &GetParameterInfo(File::EntityId methodId) const;
 
-    virtual const char *GetSourceFile(File::EntityId method_id) const;
+    virtual const char *GetSourceFile(File::EntityId methodId) const;
 
-    virtual const char *GetSourceCode(File::EntityId method_id) const;
+    virtual const char *GetSourceCode(File::EntityId methodId) const;
 
     virtual std::vector<File::EntityId> GetMethodIdList() const;
 
@@ -81,13 +81,13 @@ private:
     void Extract(const File *pf);
 
     struct MethodDebugInfo {
-        std::string source_file;
-        std::string source_code;
-        File::EntityId method_id;
-        LineNumberTable line_number_table;
-        LocalVariableTable local_variable_table;
-        std::vector<ParamInfo> param_info;
-        ColumnNumberTable column_number_table;
+        std::string sourceFile;
+        std::string sourceCode;
+        File::EntityId methodId;
+        LineNumberTable lineNumberTable;
+        LocalVariableTable localVariableTable;
+        std::vector<ParamInfo> paramInfo;
+        ColumnNumberTable columnNumberTable;
     };
 
     std::unordered_map<File::EntityId, MethodDebugInfo> methods_;

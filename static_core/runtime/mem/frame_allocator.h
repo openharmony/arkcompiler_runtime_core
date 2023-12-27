@@ -46,7 +46,7 @@ namespace panda::mem {
 template <Alignment ALIGNMENT = DEFAULT_FRAME_ALIGNMENT, bool USE_MEMSET = true>
 class FrameAllocator {
 public:
-    explicit FrameAllocator(bool use_malloc = false, SpaceType space_type = SpaceType::SPACE_TYPE_INTERNAL);
+    explicit FrameAllocator(bool useMalloc = false, SpaceType spaceType = SpaceType::SPACE_TYPE_INTERNAL);
     ~FrameAllocator();
     FrameAllocator(const FrameAllocator &) noexcept = delete;
     FrameAllocator(FrameAllocator &&) noexcept = default;
@@ -68,7 +68,7 @@ public:
 
     size_t GetAllocatedSize() const
     {
-        return allocated_size_;
+        return allocatedSize_;
     }
 
 private:
@@ -115,26 +115,26 @@ private:
     void FreeArenaImpl(FramesArena *arena);
 
     // A pointer to the current arena with the last allocated frame
-    FramesArena *cur_arena_ {nullptr};
+    FramesArena *curArena_ {nullptr};
 
     // A pointer to the last allocated arena (so it is equal to the top arena in the list)
-    FramesArena *last_alloc_arena_ {nullptr};
+    FramesArena *lastAllocArena_ {nullptr};
 
     // The biggest arena size during FrameAllocator workflow. Needed for computing a new arena size.
-    size_t biggest_arena_size_ {0};
+    size_t biggestArenaSize_ {0};
 
     // A marker which tells us if we need to increase the size of a new arena or not.
-    bool arena_size_need_to_grow_ {true};
+    bool arenaSizeNeedToGrow_ {true};
 
-    size_t empty_arenas_count_ {0};
+    size_t emptyArenasCount_ {0};
 
     // Total allocated size
-    size_t allocated_size_ {0};
+    size_t allocatedSize_ {0};
 
-    MmapMemPool *mem_pool_alloc_ {nullptr};
+    MmapMemPool *memPoolAlloc_ {nullptr};
 
-    bool use_malloc_ {false};
-    SpaceType space_type_;
+    bool useMalloc_ {false};
+    SpaceType spaceType_;
 
     friend class FrameAllocatorTest;
 };

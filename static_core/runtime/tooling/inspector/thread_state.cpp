@@ -18,87 +18,87 @@
 namespace panda::tooling::inspector {
 std::vector<BreakpointId> ThreadState::GetBreakpointsByLocation(const PtLocation &location) const
 {
-    std::vector<BreakpointId> hit_breakpoints;
+    std::vector<BreakpointId> hitBreakpoints;
 
-    auto range = breakpoint_locations_.equal_range(location);
-    std::transform(range.first, range.second, std::back_inserter(hit_breakpoints), [](auto &p) { return p.second; });
+    auto range = breakpointLocations_.equal_range(location);
+    std::transform(range.first, range.second, std::back_inserter(hitBreakpoints), [](auto &p) { return p.second; });
 
-    return hit_breakpoints;
+    return hitBreakpoints;
 }
 
 void ThreadState::Reset()
 {
-    if (step_kind_ != StepKind::BREAK_ON_START) {
-        step_kind_ = StepKind::NONE;
+    if (stepKind_ != StepKind::BREAK_ON_START) {
+        stepKind_ = StepKind::NONE;
     }
-    step_locations_.clear();
-    method_entered_ = false;
-    breakpoints_active_ = true;
-    next_breakpoint_id_ = 0;
-    breakpoint_locations_.clear();
-    pause_on_exceptions_state_ = PauseOnExceptionsState::NONE;
+    stepLocations_.clear();
+    methodEntered_ = false;
+    breakpointsActive_ = true;
+    nextBreakpointId_ = 0;
+    breakpointLocations_.clear();
+    pauseOnExceptionsState_ = PauseOnExceptionsState::NONE;
 }
 
 void ThreadState::BreakOnStart()
 {
     if (!paused_) {
-        step_kind_ = StepKind::BREAK_ON_START;
+        stepKind_ = StepKind::BREAK_ON_START;
     }
 }
 
 void ThreadState::Continue()
 {
-    step_kind_ = StepKind::NONE;
+    stepKind_ = StepKind::NONE;
     paused_ = false;
 }
 
 void ThreadState::ContinueTo(std::unordered_set<PtLocation, HashLocation> locations)
 {
-    step_kind_ = StepKind::CONTINUE_TO;
-    step_locations_ = std::move(locations);
+    stepKind_ = StepKind::CONTINUE_TO;
+    stepLocations_ = std::move(locations);
     paused_ = false;
 }
 
 void ThreadState::StepInto(std::unordered_set<PtLocation, HashLocation> locations)
 {
-    step_kind_ = StepKind::STEP_INTO;
-    method_entered_ = false;
-    step_locations_ = std::move(locations);
+    stepKind_ = StepKind::STEP_INTO;
+    methodEntered_ = false;
+    stepLocations_ = std::move(locations);
     paused_ = false;
 }
 
 void ThreadState::StepOver(std::unordered_set<PtLocation, HashLocation> locations)
 {
-    step_kind_ = StepKind::STEP_OVER;
-    method_entered_ = false;
-    step_locations_ = std::move(locations);
+    stepKind_ = StepKind::STEP_OVER;
+    methodEntered_ = false;
+    stepLocations_ = std::move(locations);
     paused_ = false;
 }
 
 void ThreadState::StepOut()
 {
-    step_kind_ = StepKind::STEP_OUT;
-    method_entered_ = true;
+    stepKind_ = StepKind::STEP_OUT;
+    methodEntered_ = true;
     paused_ = false;
 }
 
 void ThreadState::Pause()
 {
     if (!paused_) {
-        step_kind_ = StepKind::PAUSE;
+        stepKind_ = StepKind::PAUSE;
     }
 }
 
 void ThreadState::SetBreakpointsActive(bool active)
 {
-    breakpoints_active_ = active;
+    breakpointsActive_ = active;
 }
 
 BreakpointId ThreadState::SetBreakpoint(const std::vector<PtLocation> &locations)
 {
-    auto id = next_breakpoint_id_++;
+    auto id = nextBreakpointId_++;
     for (auto &location : locations) {
-        breakpoint_locations_.emplace(location, id);
+        breakpointLocations_.emplace(location, id);
     }
 
     return id;
@@ -106,9 +106,9 @@ BreakpointId ThreadState::SetBreakpoint(const std::vector<PtLocation> &locations
 
 void ThreadState::RemoveBreakpoint(BreakpointId id)
 {
-    for (auto it = breakpoint_locations_.begin(); it != breakpoint_locations_.end();) {
+    for (auto it = breakpointLocations_.begin(); it != breakpointLocations_.end();) {
         if (it->second == id) {
-            it = breakpoint_locations_.erase(it);
+            it = breakpointLocations_.erase(it);
         } else {
             ++it;
         }
@@ -117,13 +117,13 @@ void ThreadState::RemoveBreakpoint(BreakpointId id)
 
 void ThreadState::SetPauseOnExceptions(PauseOnExceptionsState state)
 {
-    pause_on_exceptions_state_ = state;
+    pauseOnExceptionsState_ = state;
 }
 
 void ThreadState::OnException(bool uncaught)
 {
     ASSERT(!paused_);
-    switch (pause_on_exceptions_state_) {
+    switch (pauseOnExceptionsState_) {
         case PauseOnExceptionsState::NONE:
             break;
         case PauseOnExceptionsState::CAUGHT:
@@ -141,7 +141,7 @@ void ThreadState::OnException(bool uncaught)
 void ThreadState::OnFramePop()
 {
     ASSERT(!paused_);
-    switch (step_kind_) {
+    switch (stepKind_) {
         case StepKind::NONE:
         case StepKind::BREAK_ON_START:
         case StepKind::CONTINUE_TO:
@@ -152,7 +152,7 @@ void ThreadState::OnFramePop()
 
         case StepKind::STEP_OUT:
         case StepKind::STEP_OVER: {
-            method_entered_ = false;
+            methodEntered_ = false;
             break;
         }
     }
@@ -161,7 +161,7 @@ void ThreadState::OnFramePop()
 bool ThreadState::OnMethodEntry()
 {
     ASSERT(!paused_);
-    switch (step_kind_) {
+    switch (stepKind_) {
         case StepKind::NONE:
         case StepKind::BREAK_ON_START:
         case StepKind::CONTINUE_TO:
@@ -172,7 +172,7 @@ bool ThreadState::OnMethodEntry()
 
         case StepKind::STEP_OUT:
         case StepKind::STEP_OVER: {
-            return !std::exchange(method_entered_, true);
+            return !std::exchange(methodEntered_, true);
         }
     }
 
@@ -182,8 +182,8 @@ bool ThreadState::OnMethodEntry()
 void ThreadState::OnSingleStep(const PtLocation &location)
 {
     ASSERT(!paused_);
-    if (!breakpoints_active_ || breakpoint_locations_.find(location) == breakpoint_locations_.end()) {
-        switch (step_kind_) {
+    if (!breakpointsActive_ || breakpointLocations_.find(location) == breakpointLocations_.end()) {
+        switch (stepKind_) {
             case StepKind::NONE: {
                 paused_ = false;
                 break;
@@ -195,7 +195,7 @@ void ThreadState::OnSingleStep(const PtLocation &location)
             }
 
             case StepKind::CONTINUE_TO: {
-                paused_ = step_locations_.find(location) != step_locations_.end();
+                paused_ = stepLocations_.find(location) != stepLocations_.end();
                 break;
             }
 
@@ -205,17 +205,17 @@ void ThreadState::OnSingleStep(const PtLocation &location)
             }
 
             case StepKind::STEP_INTO: {
-                paused_ = step_locations_.find(location) == step_locations_.end();
+                paused_ = stepLocations_.find(location) == stepLocations_.end();
                 break;
             }
 
             case StepKind::STEP_OUT: {
-                paused_ = !method_entered_;
+                paused_ = !methodEntered_;
                 break;
             }
 
             case StepKind::STEP_OVER: {
-                paused_ = !method_entered_ && step_locations_.find(location) == step_locations_.end();
+                paused_ = !methodEntered_ && stepLocations_.find(location) == stepLocations_.end();
                 break;
             }
         }

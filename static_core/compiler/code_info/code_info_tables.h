@@ -66,9 +66,9 @@ public:
         return address * GetInstructionAlignment(arch);
     }
 
-    static constexpr uint32_t CreateProperties(bool is_osr, bool has_regmap)
+    static constexpr uint32_t CreateProperties(bool isOsr, bool hasRegmap)
     {
-        return FieldIsOsr::Encode(is_osr) | FieldHasRegMap::Encode(has_regmap);
+        return FieldIsOsr::Encode(isOsr) | FieldHasRegMap::Encode(hasRegmap);
     }
 
     bool IsOsr() const

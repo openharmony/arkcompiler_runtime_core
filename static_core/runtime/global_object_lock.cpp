@@ -18,41 +18,41 @@
 
 namespace panda {
 // Use some global lock as fast solution.
-static os::memory::RecursiveMutex MTX;    // NOLINT(fuchsia-statically-constructed-objects)
-static os::memory::ConditionVariable CV;  // NOLINT(fuchsia-statically-constructed-objects)
+static os::memory::RecursiveMutex g_mtx;    // NOLINT(fuchsia-statically-constructed-objects)
+static os::memory::ConditionVariable g_cv;  // NOLINT(fuchsia-statically-constructed-objects)
 
 GlobalObjectLock::GlobalObjectLock([[maybe_unused]] const ObjectHeader *obj)
 {
     ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_BLOCKED);
-    MTX.Lock();
+    g_mtx.Lock();
 }
 
-bool GlobalObjectLock::Wait([[maybe_unused]] bool ignore_interruption) const
+bool GlobalObjectLock::Wait([[maybe_unused]] bool ignoreInterruption) const
 {
     ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_WAITING);
-    CV.Wait(&MTX);
+    g_cv.Wait(&g_mtx);
     return true;
 }
 
 bool GlobalObjectLock::TimedWait(uint64_t timeout) const
 {
     ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_TIMED_WAITING);
-    CV.TimedWait(&MTX, timeout);
+    g_cv.TimedWait(&g_mtx, timeout);
     return true;
 }
 
 void GlobalObjectLock::Notify()
 {
-    CV.Signal();
+    g_cv.Signal();
 }
 
 void GlobalObjectLock::NotifyAll()
 {
-    CV.SignalAll();
+    g_cv.SignalAll();
 }
 
 GlobalObjectLock::~GlobalObjectLock()
 {
-    MTX.Unlock();
+    g_mtx.Unlock();
 }
 }  // namespace panda

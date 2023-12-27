@@ -34,7 +34,7 @@ private:
 /// @brief Compiler worker task pool based on ThreadPool
 class CompilerThreadPoolWorker : public CompilerWorker {
 public:
-    CompilerThreadPoolWorker(mem::InternalAllocatorPtr internal_allocator, Compiler *compiler, bool &no_async_jit,
+    CompilerThreadPoolWorker(mem::InternalAllocatorPtr internalAllocator, Compiler *compiler, bool &noAsyncJit,
                              const RuntimeOptions &options);
     NO_COPY_SEMANTIC(CompilerThreadPoolWorker);
     NO_MOVE_SEMANTIC(CompilerThreadPoolWorker);
@@ -42,48 +42,48 @@ public:
 
     void InitializeWorker() override
     {
-        thread_pool_ = internal_allocator_->New<ThreadPool<CompilerTask, CompilerProcessor, Compiler *>>(
-            internal_allocator_, queue_, compiler_, 1, "JIT Thread");
+        threadPool_ = internalAllocator_->New<ThreadPool<CompilerTask, CompilerProcessor, Compiler *>>(
+            internalAllocator_, queue_, compiler_, 1, "JIT Thread");
     }
 
     void FinalizeWorker() override
     {
-        if (thread_pool_ != nullptr) {
+        if (threadPool_ != nullptr) {
             JoinWorker();
-            internal_allocator_->Delete(thread_pool_);
-            thread_pool_ = nullptr;
+            internalAllocator_->Delete(threadPool_);
+            threadPool_ = nullptr;
         }
     }
 
     void JoinWorker() override
     {
-        if (thread_pool_ != nullptr) {
-            thread_pool_->Shutdown(true);
+        if (threadPool_ != nullptr) {
+            threadPool_->Shutdown(true);
         }
     }
 
     bool IsWorkerJoined() override
     {
-        return !thread_pool_->IsActive();
+        return !threadPool_->IsActive();
     }
 
     void AddTask(CompilerTask &&ctx) override
     {
-        thread_pool_->PutTask(std::move(ctx));
+        threadPool_->PutTask(std::move(ctx));
     }
 
     ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *GetThreadPool()
     {
-        return thread_pool_;
+        return threadPool_;
     }
 
 private:
-    CompilerQueueInterface *CreateJITTaskQueue(const std::string &queue_type, uint64_t max_length, uint64_t task_life,
-                                               uint64_t death_counter, uint64_t epoch_duration);
+    CompilerQueueInterface *CreateJITTaskQueue(const std::string &queueType, uint64_t maxLength, uint64_t taskLife,
+                                               uint64_t deathCounter, uint64_t epochDuration);
 
     // This queue is used only in ThreadPool. Do not use it from this class.
     CompilerQueueInterface *queue_ {nullptr};
-    ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *thread_pool_ {nullptr};
+    ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *threadPool_ {nullptr};
 };
 
 }  // namespace panda

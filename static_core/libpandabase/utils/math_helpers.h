@@ -134,10 +134,10 @@ inline size_t MergeHashes(size_t lhash, size_t rhash)
 }
 
 template <typename T>
-inline T PowerOfTwoTableSlot(T key, T table_size, uint32_t skipped_lowest_bits = 0)
+inline T PowerOfTwoTableSlot(T key, T tableSize, uint32_t skippedLowestBits = 0)
 {
-    ASSERT(IsPowerOfTwo(table_size));
-    return (key >> skipped_lowest_bits) & (table_size - 1);
+    ASSERT(IsPowerOfTwo(tableSize));
+    return (key >> skippedLowestBits) & (tableSize - 1);
 }
 
 }  // namespace panda::helpers::math

@@ -56,7 +56,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsBytecodeOptPeepholes();
+        return g_options.IsBytecodeOptPeepholes();
     }
 
     /* This visitor replaces combination of NewObject, SaveState,
@@ -73,7 +73,7 @@ public:
 public:
     bool IsApplied()
     {
-        return is_applied_;
+        return isApplied_;
     }
 
 #include "compiler/optimizer/ir/visitor.inc"
@@ -81,10 +81,10 @@ public:
 private:
     void SetIsApplied()
     {
-        is_applied_ = true;
+        isApplied_ = true;
     }
 
-    bool is_applied_ {false};
+    bool isApplied_ {false};
 };
 
 }  // namespace panda::bytecodeopt

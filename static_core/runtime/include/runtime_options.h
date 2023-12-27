@@ -59,51 +59,51 @@ static inline VerificationMode VerificationModeFromString(const std::string &mod
  */
 class PANDA_PUBLIC_API RuntimeOptions : public Options {
 public:
-    explicit RuntimeOptions(const std::string &exe_path = "") : Options(exe_path) {}
+    explicit RuntimeOptions(const std::string &exePath = "") : Options(exePath) {}
 
     bool ShouldLoadBootPandaFiles() const
     {
-        return should_load_boot_panda_files_;
+        return shouldLoadBootPandaFiles_;
     }
 
     bool ShouldInitializeIntrinsics() const
     {
-        return should_initialize_intrinsics_;
+        return shouldInitializeIntrinsics_;
     }
 
     void *GetMobileLog()
     {
-        return mlog_buf_print_ptr_;
+        return mlogBufPrintPtr_;
     }
 
     const std::string &GetFingerprint() const
     {
-        return finger_print_;
+        return fingerPrint_;
     }
 
     void SetFingerprint(const std::string &in)
     {
-        finger_print_.assign(in);
+        fingerPrint_.assign(in);
     }
 
     VerificationMode GetVerificationMode() const
     {
-        return verification_mode_;
+        return verificationMode_;
     }
 
     void SetVerificationMode(VerificationMode in)
     {
-        verification_mode_ = in;
+        verificationMode_ = in;
     }
 
     bool IsVerifyRuntimeLibraries() const
     {
-        return verify_runtime_libraries_;
+        return verifyRuntimeLibraries_;
     }
 
     void SetVerifyRuntimeLibraries(bool in)
     {
-        verify_runtime_libraries_ = in;
+        verifyRuntimeLibraries_ = in;
     }
 
     void SetUnwindStack(void *in)
@@ -118,54 +118,54 @@ public:
 
     void SetCrashConnect(void *in)
     {
-        crash_connect_ = reinterpret_cast<char *>(in);
+        crashConnect_ = reinterpret_cast<char *>(in);
     }
 
     void *GetCrashConnect() const
     {
-        return crash_connect_;
+        return crashConnect_;
     }
 
-    void SetMobileLog(void *mlog_buf_print_ptr)
+    void SetMobileLog(void *mlogBufPrintPtr)
     {
-        mlog_buf_print_ptr_ = mlog_buf_print_ptr;
-        Logger::SetMobileLogPrintEntryPointByPtr(mlog_buf_print_ptr);
+        mlogBufPrintPtr_ = mlogBufPrintPtr;
+        Logger::SetMobileLogPrintEntryPointByPtr(mlogBufPrintPtr);
     }
 
     void SetForSnapShotStart()
     {
-        should_load_boot_panda_files_ = false;
-        should_initialize_intrinsics_ = false;
+        shouldLoadBootPandaFiles_ = false;
+        shouldInitializeIntrinsics_ = false;
     }
 
     void SetShouldLoadBootPandaFiles(bool value)
     {
-        should_load_boot_panda_files_ = value;
+        shouldLoadBootPandaFiles_ = value;
     }
 
     void SetShouldInitializeIntrinsics(bool value)
     {
-        should_initialize_intrinsics_ = value;
+        shouldInitializeIntrinsics_ = value;
     }
 
     bool UseMallocForInternalAllocations() const
     {
-        bool use_malloc = false;
+        bool useMalloc = false;
         auto option = GetInternalAllocatorType();
         if (option == "default") {
 #ifdef NDEBUG
-            use_malloc = true;
+            useMalloc = true;
 #else
-            use_malloc = false;
+            useMalloc = false;
 #endif
         } else if (option == "malloc") {
-            use_malloc = true;
+            useMalloc = true;
         } else if (option == "panda_allocators") {
-            use_malloc = false;
+            useMalloc = false;
         } else {
             UNREACHABLE();
         }
-        return use_malloc;
+        return useMalloc;
     }
 
     bool IsG1TrackFreedObjects() const
@@ -192,20 +192,20 @@ public:
     {
         CheckAndFixIntrinsicSpaces();
         if (WasSetLoadRuntimes()) {
-            std::vector<std::string> load_runtimes = GetLoadRuntimes();
-            std::string runtime_type = "core";
+            std::vector<std::string> loadRuntimes = GetLoadRuntimes();
+            std::string runtimeType = "core";
 
             // Select first non-core runtime
-            for (auto &runtime : load_runtimes) {
+            for (auto &runtime : loadRuntimes) {
                 if (runtime != "core") {
-                    runtime_type = runtime;
+                    runtimeType = runtime;
                     break;
                 }
             }
 
-            SetRuntimeType(runtime_type);
-            SetBootClassSpaces(load_runtimes);
-            SetBootIntrinsicSpaces(load_runtimes);
+            SetRuntimeType(runtimeType);
+            SetBootClassSpaces(loadRuntimes);
+            SetBootIntrinsicSpaces(loadRuntimes);
         }
     }
 
@@ -213,7 +213,7 @@ private:
     // Fix default value for possible missing plugins.
     void CheckAndFixIntrinsicSpaces()
     {
-        bool intr_set = WasSetBootIntrinsicSpaces();
+        bool intrSet = WasSetBootIntrinsicSpaces();
         std::vector<std::string> spaces = GetBootIntrinsicSpaces();
         for (auto it = spaces.begin(); it != spaces.end();) {
             if (panda::plugins::HasRuntime(*it)) {
@@ -221,7 +221,7 @@ private:
                 continue;
             }
 
-            if (intr_set) {
+            if (intrSet) {
                 LOG(FATAL, RUNTIME) << "Missing runtime for intrinsic space " << *it;
             }
             it = spaces.erase(it);
@@ -230,14 +230,14 @@ private:
         SetBootIntrinsicSpaces(spaces);
     }
 
-    bool should_load_boot_panda_files_ {true};
-    bool should_initialize_intrinsics_ {true};
-    void *mlog_buf_print_ptr_ {nullptr};
-    std::string finger_print_ {"unknown"};
+    bool shouldLoadBootPandaFiles_ {true};
+    bool shouldInitializeIntrinsics_ {true};
+    void *mlogBufPrintPtr_ {nullptr};
+    std::string fingerPrint_ {"unknown"};
     void *unwindstack_ {nullptr};
-    void *crash_connect_ {nullptr};
-    VerificationMode verification_mode_ {VerificationMode::DISABLED};
-    bool verify_runtime_libraries_ {false};
+    void *crashConnect_ {nullptr};
+    VerificationMode verificationMode_ {VerificationMode::DISABLED};
+    bool verifyRuntimeLibraries_ {false};
 };
 }  // namespace panda
 

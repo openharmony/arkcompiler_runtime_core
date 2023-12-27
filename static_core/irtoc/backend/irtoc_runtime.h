@@ -40,12 +40,12 @@ public:
         return MethodCast(method)->GetName();
     }
 
-    std::string GetExternalMethodName(MethodPtr method, uint32_t external_id) const override
+    std::string GetExternalMethodName(MethodPtr method, uint32_t externalId) const override
     {
-        return reinterpret_cast<Function *>(method)->GetExternalFunction(external_id);
+        return reinterpret_cast<Function *>(method)->GetExternalFunction(externalId);
     }
 
-    std::string GetMethodFullName(MethodPtr method, [[maybe_unused]] bool with_signature) const override
+    std::string GetMethodFullName(MethodPtr method, [[maybe_unused]] bool withSignature) const override
     {
         return std::string("Irtoc::") + MethodCast(method)->GetName();
     }
@@ -64,18 +64,18 @@ public:
     {
         auto unit = reinterpret_cast<Function *>(method);
         ASSERT(unit->GetGraph()->HasEndBlock());
-        auto ret_type = compiler::DataType::NO_TYPE;
+        auto retType = compiler::DataType::NO_TYPE;
         for (auto exit : unit->GetGraph()->GetEndBlock()->GetPredsBlocks()) {
             if (exit->IsEmpty()) {
                 continue;
             }
             auto last = exit->GetLastInst();
             if (last->IsReturn()) {
-                ASSERT(ret_type == compiler::DataType::NO_TYPE || ret_type == last->GetType());
-                ret_type = last->GetType();
+                ASSERT(retType == compiler::DataType::NO_TYPE || retType == last->GetType());
+                retType = last->GetType();
             }
         }
-        return ret_type;
+        return retType;
     }
 
     size_t GetMethodTotalArgumentsCount(MethodPtr method) const override
@@ -99,12 +99,12 @@ public:
         return ::panda::mem::BarrierType::POST_INTERREGION_BARRIER;
     }
 
-    ::panda::mem::BarrierOperand GetBarrierOperand([[maybe_unused]] ::panda::mem::BarrierPosition barrier_position,
-                                                   [[maybe_unused]] std::string_view operand_name) const override
+    ::panda::mem::BarrierOperand GetBarrierOperand([[maybe_unused]] ::panda::mem::BarrierPosition barrierPosition,
+                                                   [[maybe_unused]] std::string_view operandName) const override
     {
-        ASSERT(operand_name == "REGION_SIZE_BITS");
-        uint8_t region_size_bits = helpers::math::GetIntLog2(panda::mem::G1_REGION_SIZE);
-        return mem::BarrierOperand(mem::BarrierOperandType::UINT8_LITERAL, mem::BarrierOperandValue(region_size_bits));
+        ASSERT(operandName == "REGION_SIZE_BITS");
+        uint8_t regionSizeBits = helpers::math::GetIntLog2(panda::mem::G1_REGION_SIZE);
+        return mem::BarrierOperand(mem::BarrierOperandType::UINT8_LITERAL, mem::BarrierOperandValue(regionSizeBits));
     }
 
     size_t GetFieldOffset(FieldPtr field) const override

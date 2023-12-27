@@ -28,137 +28,137 @@ namespace panda::compiler {
 /// Fills text section in the ELF builder by the code from the methods in AotBuilder.
 class CodeDataProvider : public ElfSectionDataProvider {
 public:
-    explicit CodeDataProvider(AotBuilder *aot_builder) : aot_builder_(aot_builder) {}
+    explicit CodeDataProvider(AotBuilder *aotBuilder) : aotBuilder_(aotBuilder) {}
 
-    void FillData(Span<uint8_t> stream, size_t stream_begin) const override
+    void FillData(Span<uint8_t> stream, size_t streamBegin) const override
     {
-        const size_t code_offset = CodeInfo::GetCodeOffset(aot_builder_->GetArch());
+        const size_t codeOffset = CodeInfo::GetCodeOffset(aotBuilder_->GetArch());
         CodePrefix prefix;
-        size_t curr_pos = stream_begin;
-        for (size_t i = 0; i < aot_builder_->methods_.size(); i++) {
-            auto &method = aot_builder_->methods_[i];
-            auto &method_header = aot_builder_->method_headers_[i];
-            prefix.code_size = method.GetCode().size();
-            prefix.code_info_offset = code_offset + RoundUp(method.GetCode().size(), CodeInfo::ALIGNMENT);
-            prefix.code_info_size = method.GetCodeInfo().size();
+        size_t currPos = streamBegin;
+        for (size_t i = 0; i < aotBuilder_->methods_.size(); i++) {
+            auto &method = aotBuilder_->methods_[i];
+            auto &methodHeader = aotBuilder_->methodHeaders_[i];
+            prefix.codeSize = method.GetCode().size();
+            prefix.codeInfoOffset = codeOffset + RoundUp(method.GetCode().size(), CodeInfo::ALIGNMENT);
+            prefix.codeInfoSize = method.GetCodeInfo().size();
             // Prefix
-            curr_pos = stream_begin + method_header.code_offset;
+            currPos = streamBegin + methodHeader.codeOffset;
             const char *data = reinterpret_cast<char *>(&prefix);
-            CopyToSpan(stream, data, sizeof(prefix), curr_pos);
-            curr_pos += sizeof(prefix);
+            CopyToSpan(stream, data, sizeof(prefix), currPos);
+            currPos += sizeof(prefix);
 
             // Code
-            curr_pos += code_offset - sizeof(prefix);
+            currPos += codeOffset - sizeof(prefix);
             data = reinterpret_cast<const char *>(method.GetCode().data());
-            CopyToSpan(stream, data, method.GetCode().size(), curr_pos);
-            curr_pos += method.GetCode().size();
+            CopyToSpan(stream, data, method.GetCode().size(), currPos);
+            currPos += method.GetCode().size();
 
             // CodeInfo
-            curr_pos += RoundUp(method.GetCode().size(), CodeInfo::ALIGNMENT) - method.GetCode().size();
+            currPos += RoundUp(method.GetCode().size(), CodeInfo::ALIGNMENT) - method.GetCode().size();
             data = reinterpret_cast<const char *>(method.GetCodeInfo().data());
-            CopyToSpan(stream, data, method.GetCodeInfo().size(), curr_pos);
+            CopyToSpan(stream, data, method.GetCodeInfo().size(), currPos);
         }
     }
 
     size_t GetDataSize() const override
     {
-        return aot_builder_->current_code_size_;
+        return aotBuilder_->currentCodeSize_;
     }
 
 private:
-    AotBuilder *aot_builder_;
+    AotBuilder *aotBuilder_;
 };
 
 void AotBuilder::StartFile(const std::string &name, uint32_t checksum)
 {
-    auto &file_header = file_headers_.emplace_back();
-    file_header.classes_offset = class_headers_.size();
-    file_header.file_checksum = checksum;
-    file_header.file_offset = 0;
-    file_header.file_name_str = AddString(name);
-    file_header.methods_offset = method_headers_.size();
+    auto &fileHeader = fileHeaders_.emplace_back();
+    fileHeader.classesOffset = classHeaders_.size();
+    fileHeader.fileChecksum = checksum;
+    fileHeader.fileOffset = 0;
+    fileHeader.fileNameStr = AddString(name);
+    fileHeader.methodsOffset = methodHeaders_.size();
 }
 
 void AotBuilder::EndFile()
 {
-    ASSERT(!file_headers_.empty());
-    auto &file_header = file_headers_.back();
-    file_header.classes_count = class_headers_.size() - file_header.classes_offset;
-    if (file_header.classes_count == 0 && (class_hash_tables_size_.empty() || class_hash_tables_size_.back() == 0)) {
+    ASSERT(!fileHeaders_.empty());
+    auto &fileHeader = fileHeaders_.back();
+    fileHeader.classesCount = classHeaders_.size() - fileHeader.classesOffset;
+    if (fileHeader.classesCount == 0 && (classHashTablesSize_.empty() || classHashTablesSize_.back() == 0)) {
         /* Just return, if there is nothing compiled in the file */
-        CHECK_EQ(file_header.methods_count, 0U);
-        file_headers_.pop_back();
+        CHECK_EQ(fileHeader.methodsCount, 0U);
+        fileHeaders_.pop_back();
         return;
     }
-    ASSERT(!class_hash_tables_size_.empty());
-    file_header.class_hash_table_offset =
-        (entity_pair_headers_.size() - class_hash_tables_size_.back()) * sizeof(panda_file::EntityPairHeader);
-    file_header.class_hash_table_size = class_hash_tables_size_.back();
-    file_header.methods_count = method_headers_.size() - file_header.methods_offset;
+    ASSERT(!classHashTablesSize_.empty());
+    fileHeader.classHashTableOffset =
+        (entityPairHeaders_.size() - classHashTablesSize_.back()) * sizeof(panda_file::EntityPairHeader);
+    fileHeader.classHashTableSize = classHashTablesSize_.back();
+    fileHeader.methodsCount = methodHeaders_.size() - fileHeader.methodsOffset;
     // We should keep class headers sorted, since AOT manager uses binary search to find classes.
-    std::sort(class_headers_.begin() + file_header.classes_offset, class_headers_.end(),
-              [](const auto &a, const auto &b) { return a.class_id < b.class_id; });
+    std::sort(classHeaders_.begin() + fileHeader.classesOffset, classHeaders_.end(),
+              [](const auto &a, const auto &b) { return a.classId < b.classId; });
 }
 
-int AotBuilder::Write(const std::string &cmdline, const std::string &file_name)
+int AotBuilder::Write(const std::string &cmdline, const std::string &fileName)
 {
     switch (arch_) {
         case Arch::AARCH32:
-            return WriteImpl<Arch::AARCH32>(cmdline, file_name);
+            return WriteImpl<Arch::AARCH32>(cmdline, fileName);
         case Arch::AARCH64:
-            return WriteImpl<Arch::AARCH64>(cmdline, file_name);
+            return WriteImpl<Arch::AARCH64>(cmdline, fileName);
         case Arch::X86:
-            return WriteImpl<Arch::X86>(cmdline, file_name);
+            return WriteImpl<Arch::X86>(cmdline, fileName);
         case Arch::X86_64:
-            return WriteImpl<Arch::X86_64>(cmdline, file_name);
+            return WriteImpl<Arch::X86_64>(cmdline, fileName);
         default:
             LOG(ERROR, COMPILER) << "AotBuilder: Unsupported arch";
             return 1;
     }
 }
 
-void AotBuilder::FillHeader(const std::string &cmdline, const std::string &file_name)
+void AotBuilder::FillHeader(const std::string &cmdline, const std::string &fileName)
 {
-    aot_header_.magic = compiler::AotFile::MAGIC;
-    aot_header_.version = compiler::AotFile::VERSION;
-    aot_header_.checksum = 0;  // NOTE(msherstennikov)
+    aotHeader_.magic = compiler::AotFile::MAGIC;
+    aotHeader_.version = compiler::AotFile::VERSION;
+    aotHeader_.checksum = 0;  // NOTE(msherstennikov)
     ASSERT(GetRuntime() != nullptr);
-    aot_header_.environment_checksum = GetRuntime()->GetEnvironmentChecksum(arch_);
-    aot_header_.arch = static_cast<uint32_t>(arch_);
-    aot_header_.gc_type = gc_type_;
-    aot_header_.files_offset = sizeof(aot_header_);
-    aot_header_.files_count = file_headers_.size();
-    aot_header_.class_hash_tables_offset =
-        aot_header_.files_offset + aot_header_.files_count * sizeof(compiler::PandaFileHeader);
-    size_t class_hash_tables_size = entity_pair_headers_.size() * sizeof(panda_file::EntityPairHeader);
-    aot_header_.classes_offset = aot_header_.class_hash_tables_offset + class_hash_tables_size;
-    aot_header_.methods_offset = aot_header_.classes_offset + class_headers_.size() * sizeof(compiler::ClassHeader);
-    aot_header_.bitmap_offset = aot_header_.methods_offset + methods_.size() * sizeof(compiler::MethodHeader);
-    size_t bitmaps_size =
-        std::accumulate(class_methods_bitmaps_.begin(), class_methods_bitmaps_.end(), 0U,
+    aotHeader_.environmentChecksum = GetRuntime()->GetEnvironmentChecksum(arch_);
+    aotHeader_.arch = static_cast<uint32_t>(arch_);
+    aotHeader_.gcType = gcType_;
+    aotHeader_.filesOffset = sizeof(aotHeader_);
+    aotHeader_.filesCount = fileHeaders_.size();
+    aotHeader_.classHashTablesOffset =
+        aotHeader_.filesOffset + aotHeader_.filesCount * sizeof(compiler::PandaFileHeader);
+    size_t classHashTablesSize = entityPairHeaders_.size() * sizeof(panda_file::EntityPairHeader);
+    aotHeader_.classesOffset = aotHeader_.classHashTablesOffset + classHashTablesSize;
+    aotHeader_.methodsOffset = aotHeader_.classesOffset + classHeaders_.size() * sizeof(compiler::ClassHeader);
+    aotHeader_.bitmapOffset = aotHeader_.methodsOffset + methods_.size() * sizeof(compiler::MethodHeader);
+    size_t bitmapsSize =
+        std::accumulate(classMethodsBitmaps_.begin(), classMethodsBitmaps_.end(), 0U,
                         [](size_t sum, const auto &vec) { return vec.GetContainerSizeInBytes() + sum; });
-    aot_header_.strtab_offset = aot_header_.bitmap_offset + bitmaps_size;
-    aot_header_.file_name_str = AddString(file_name);
-    aot_header_.cmdline_str = AddString(cmdline);
-    aot_header_.boot_aot = static_cast<uint32_t>(boot_aot_);
-    aot_header_.with_cha = static_cast<uint32_t>(with_cha_);
-    aot_header_.class_ctx_str = AddString(class_ctx_);
+    aotHeader_.strtabOffset = aotHeader_.bitmapOffset + bitmapsSize;
+    aotHeader_.fileNameStr = AddString(fileName);
+    aotHeader_.cmdlineStr = AddString(cmdline);
+    aotHeader_.bootAot = static_cast<uint32_t>(bootAot_);
+    aotHeader_.withCha = static_cast<uint32_t>(withCha_);
+    aotHeader_.classCtxStr = AddString(classCtx_);
 }
 
 template <Arch ARCH>
-int AotBuilder::WriteImpl(const std::string &cmdline, const std::string &file_name)
+int AotBuilder::WriteImpl(const std::string &cmdline, const std::string &fileName)
 {
     ElfBuilder<ARCH> builder;
 
-    PrepareElfBuilder(builder, cmdline, file_name);
-    builder.Build(file_name);
-    builder.Write(file_name);
+    PrepareElfBuilder(builder, cmdline, fileName);
+    builder.Build(fileName);
+    builder.Write(fileName);
 
     return 0;
 }
 
 template <Arch ARCH>
-int AotBuilder::PrepareElfBuilder(ElfBuilder<ARCH> &builder, const std::string &cmdline, const std::string &file_name)
+int AotBuilder::PrepareElfBuilder(ElfBuilder<ARCH> &builder, const std::string &cmdline, const std::string &fileName)
 {
     constexpr size_t PAGE_SIZE_BYTES = 0x1000;
     constexpr size_t CALL_STATIC_SLOT_SIZE = 3;
@@ -167,54 +167,53 @@ int AotBuilder::PrepareElfBuilder(ElfBuilder<ARCH> &builder, const std::string &
     constexpr size_t INLINE_CACHE_SLOT_SIZE = 1;
     constexpr size_t COMMON_SLOT_SIZE = 1;
 
-    auto code_provider = std::make_unique<CodeDataProvider>(this);
-    builder.GetTextSection()->SetDataProvider(std::move(code_provider));
+    auto codeProvider = std::make_unique<CodeDataProvider>(this);
+    builder.GetTextSection()->SetDataProvider(std::move(codeProvider));
 
-    builder.PreSizeRoDataSections(ro_datas_.size());
-    for (const auto &ro_data : ro_datas_) {
-        builder.AddRoDataSection(ro_data.name, ro_data.alignment);
+    builder.PreSizeRoDataSections(roDatas_.size());
+    for (const auto &roData : roDatas_) {
+        builder.AddRoDataSection(roData.name, roData.alignment);
     }
-    auto ro_data_sections = builder.GetRoDataSections();
-    auto aot_section = builder.GetAotSection();
-    auto got_section = builder.GetGotSection();
-    std::vector<uint8_t> &got_data = got_section->GetVector();
+    auto roDataSections = builder.GetRoDataSections();
+    auto aotSection = builder.GetAotSection();
+    auto gotSection = builder.GetGotSection();
+    std::vector<uint8_t> &gotData = gotSection->GetVector();
     // +1 is the extra slot that indicates the end of the aot table
-    auto got_data_size = static_cast<size_t>(RuntimeInterface::IntrinsicId::COUNT) + 1 +
-                         CALL_STATIC_SLOT_SIZE * (got_plt_.size() + got_class_.size()) +
-                         CALL_VIRTUAL_SLOT_SIZE * got_virt_indexes_.size() + STRING_SLOT_SIZE * got_string_.size() +
-                         INLINE_CACHE_SLOT_SIZE * got_intf_inline_cache_.size() + COMMON_SLOT_SIZE * got_common_.size();
+    auto gotDataSize = static_cast<size_t>(RuntimeInterface::IntrinsicId::COUNT) + 1 +
+                       CALL_STATIC_SLOT_SIZE * (gotPlt_.size() + gotClass_.size()) +
+                       CALL_VIRTUAL_SLOT_SIZE * gotVirtIndexes_.size() + STRING_SLOT_SIZE * gotString_.size() +
+                       INLINE_CACHE_SLOT_SIZE * gotIntfInlineCache_.size() + COMMON_SLOT_SIZE * gotCommon_.size();
     // We need to fill the whole segment with aot_got section because it is filled from the end.
-    got_data.resize(RoundUp(PointerSize(ARCH) * got_data_size, PAGE_SIZE_BYTES), 0);
+    gotData.resize(RoundUp(PointerSize(ARCH) * gotDataSize, PAGE_SIZE_BYTES), 0);
 
     GenerateSymbols(builder);
 
-    FillHeader(cmdline, file_name);
+    FillHeader(cmdline, fileName);
 
-    aot_section->AppendData(&aot_header_, sizeof(aot_header_));
-    aot_section->AppendData(file_headers_.data(), file_headers_.size() * sizeof(compiler::PandaFileHeader));
-    aot_section->AppendData(entity_pair_headers_.data(),
-                            entity_pair_headers_.size() * sizeof(panda_file::EntityPairHeader));
-    aot_section->AppendData(class_headers_.data(), class_headers_.size() * sizeof(compiler::ClassHeader));
-    aot_section->AppendData(method_headers_.data(), method_headers_.size() * sizeof(compiler::MethodHeader));
+    aotSection->AppendData(&aotHeader_, sizeof(aotHeader_));
+    aotSection->AppendData(fileHeaders_.data(), fileHeaders_.size() * sizeof(compiler::PandaFileHeader));
+    aotSection->AppendData(entityPairHeaders_.data(), entityPairHeaders_.size() * sizeof(panda_file::EntityPairHeader));
+    aotSection->AppendData(classHeaders_.data(), classHeaders_.size() * sizeof(compiler::ClassHeader));
+    aotSection->AppendData(methodHeaders_.data(), methodHeaders_.size() * sizeof(compiler::MethodHeader));
 
-    for (auto &bitmap : class_methods_bitmaps_) {
-        aot_section->AppendData(bitmap.data(), bitmap.GetContainerSizeInBytes());
+    for (auto &bitmap : classMethodsBitmaps_) {
+        aotSection->AppendData(bitmap.data(), bitmap.GetContainerSizeInBytes());
     }
-    aot_section->AppendData(string_table_.data(), string_table_.size());
+    aotSection->AppendData(stringTable_.data(), stringTable_.size());
 
-    for (size_t i = 0; i < ro_datas_.size(); i++) {
-        auto &section = ro_datas_.at(i);
-        auto data_section = ro_data_sections->at(i);
-        ASSERT(section.name == data_section->GetName());
-        data_section->AppendData(section.content.data(), section.content.size());
+    for (size_t i = 0; i < roDatas_.size(); i++) {
+        auto &section = roDatas_.at(i);
+        auto dataSection = roDataSections->at(i);
+        ASSERT(section.name == dataSection->GetName());
+        dataSection->AppendData(section.content.data(), section.content.size());
     }
 
     using PtrType = typename ArchTraits<ARCH>::WordType;
-    auto ptr_view = Span(got_data).template SubSpan<PtrType>(0, got_data.size() / sizeof(PtrType));
-    EmitPlt<ARCH>(ptr_view, got_data_size);
+    auto ptrView = Span(gotData).template SubSpan<PtrType>(0, gotData.size() / sizeof(PtrType));
+    EmitPlt<ARCH>(ptrView, gotDataSize);
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    builder.SetFrameData(&frame_data_);
+    builder.SetFrameData(&frameData_);
 #endif
 
     return 0;
@@ -229,46 +228,46 @@ template int AotBuilder::PrepareElfBuilder<Arch::AARCH64>(ElfBuilder<Arch::AARCH
                                                           const std::string &cmdline, const std::string &file_name);
 
 template <Arch ARCH>
-void AotBuilder::EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptr_view, size_t got_data_size)
+void AotBuilder::EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptrView, size_t gotDataSize)
 {
-    if (!got_plt_.empty() || !got_virt_indexes_.empty() || !got_class_.empty() || !got_string_.empty() ||
-        !got_intf_inline_cache_.empty() || !got_common_.empty()) {
+    if (!gotPlt_.empty() || !gotVirtIndexes_.empty() || !gotClass_.empty() || !gotString_.empty() ||
+        !gotIntfInlineCache_.empty() || !gotCommon_.empty()) {
         ASSERT(PointerSize(ARCH) >= sizeof(uint32_t));
 
-        auto ptr_cnt = ptr_view.Size();
+        auto ptrCnt = ptrView.Size();
         auto end = static_cast<size_t>(RuntimeInterface::IntrinsicId::COUNT);
 
-        ptr_view[ptr_cnt - got_data_size] = 0;
+        ptrView[ptrCnt - gotDataSize] = 0;
         constexpr size_t IMM_2 = 2;
-        for (auto [method, idx] : got_plt_) {
+        for (auto [method, idx] : gotPlt_) {
             ASSERT(idx <= 0);
-            ptr_view[ptr_cnt - end + idx] = AotFile::AotSlotType::PLT_SLOT;
-            ptr_view[ptr_cnt - end + idx - IMM_2] = method.second;
+            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::PLT_SLOT;
+            ptrView[ptrCnt - end + idx - IMM_2] = method.second;
         }
-        for (auto [method, idx] : got_virt_indexes_) {
+        for (auto [method, idx] : gotVirtIndexes_) {
             ASSERT(idx <= 0);
-            ptr_view[ptr_cnt - end + idx] = AotFile::AotSlotType::VTABLE_INDEX;
-            ptr_view[ptr_cnt - end + idx - 1] = method.second;
+            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::VTABLE_INDEX;
+            ptrView[ptrCnt - end + idx - 1] = method.second;
         }
-        for (auto [klass, idx] : got_class_) {
+        for (auto [klass, idx] : gotClass_) {
             ASSERT(idx <= 0);
-            ptr_view[ptr_cnt - end + idx] = AotFile::AotSlotType::CLASS_SLOT;
-            ptr_view[ptr_cnt - end + idx - IMM_2] = klass.second;
+            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::CLASS_SLOT;
+            ptrView[ptrCnt - end + idx - IMM_2] = klass.second;
         }
-        for (auto [string_id, idx] : got_string_) {
+        for (auto [string_id, idx] : gotString_) {
             ASSERT(idx <= 0);
-            ptr_view[ptr_cnt - end + idx] = AotFile::AotSlotType::STRING_SLOT;
-            ptr_view[ptr_cnt - end + idx - 1] = string_id.second;
+            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::STRING_SLOT;
+            ptrView[ptrCnt - end + idx - 1] = string_id.second;
         }
-        for (auto [cache, idx] : got_intf_inline_cache_) {
+        for (auto [cache, idx] : gotIntfInlineCache_) {
             (void)cache;
             ASSERT(idx < 0);
-            ptr_view[ptr_cnt - end + idx] = AotFile::AotSlotType::INLINECACHE_SLOT;
+            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::INLINECACHE_SLOT;
         }
-        for (auto [cache, idx] : got_common_) {
+        for (auto [cache, idx] : gotCommon_) {
             (void)cache;
             ASSERT(idx < 0);
-            ptr_view[ptr_cnt - end + idx] = AotFile::AotSlotType::COMMON_SLOT;
+            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::COMMON_SLOT;
         }
     }
 }
@@ -277,104 +276,103 @@ void AotBuilder::EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptr_view, siz
 template <Arch ARCH>
 void AotBuilder::GenerateSymbols(ElfBuilder<ARCH> &builder)
 {
-    if (generate_symbols_) {
-        auto text_section = builder.GetTextSection();
+    if (generateSymbols_) {
+        auto textSection = builder.GetTextSection();
         std::string name;
-        ASSERT(methods_.size() == method_headers_.size());
+        ASSERT(methods_.size() == methodHeaders_.size());
         for (size_t i = 0; i < methods_.size(); i++) {
             auto method = methods_.at(i).GetMethod();
             if (method->GetPandaFile() == nullptr) {
                 name = "Error: method doesn't belong to any panda file";
             } else {
-                auto method_casted = reinterpret_cast<RuntimeInterface::MethodPtr>(method);
-                name = runtime_->GetMethodFullName(method_casted, true);
+                auto methodCasted = reinterpret_cast<RuntimeInterface::MethodPtr>(method);
+                name = runtime_->GetMethodFullName(methodCasted, true);
             }
-            size_t offset = method_headers_[i].code_offset;
-            builder.template AddSymbol<true>(
-                name, method_headers_[i].code_size, *text_section, [offset, text_section]() {
-                    return text_section->GetAddress() + offset + CodeInfo::GetCodeOffset(ARCH);
-                });
+            size_t offset = methodHeaders_[i].codeOffset;
+            builder.template AddSymbol<true>(name, methodHeaders_[i].codeSize, *textSection, [offset, textSection]() {
+                return textSection->GetAddress() + offset + CodeInfo::GetCodeOffset(ARCH);
+            });
         }
     }
 }
 
-void AotBuilder::AddClassHashTable(const panda_file::File &panda_file)
+void AotBuilder::AddClassHashTable(const panda_file::File &pandaFile)
 {
-    const panda_file::File::Header *header = panda_file.GetHeader();
-    uint32_t num_classes = header->num_classes;
-    if (num_classes == 0) {
+    const panda_file::File::Header *header = pandaFile.GetHeader();
+    uint32_t numClasses = header->numClasses;
+    if (numClasses == 0) {
         return;
     }
 
-    size_t hash_table_size = panda::helpers::math::GetPowerOfTwoValue32(num_classes);
-    std::vector<panda_file::EntityPairHeader> entity_pairs;
-    std::vector<unsigned int> conflict_entity_table;
-    entity_pairs.resize(hash_table_size);
-    conflict_entity_table.resize(hash_table_size);
-    size_t conflict_num = 0;
+    size_t hashTableSize = panda::helpers::math::GetPowerOfTwoValue32(numClasses);
+    std::vector<panda_file::EntityPairHeader> entityPairs;
+    std::vector<unsigned int> conflictEntityTable;
+    entityPairs.resize(hashTableSize);
+    conflictEntityTable.resize(hashTableSize);
+    size_t conflictNum = 0;
 
-    auto classes = panda_file.GetClasses();
-    for (size_t i = 0; i < num_classes; ++i) {
-        auto entity_id = panda_file::File::EntityId(classes[i]);
-        auto name = panda_file.GetStringData(entity_id).data;
+    auto classes = pandaFile.GetClasses();
+    for (size_t i = 0; i < numClasses; ++i) {
+        auto entityId = panda_file::File::EntityId(classes[i]);
+        auto name = pandaFile.GetStringData(entityId).data;
         uint32_t hash = GetHash32String(name);
-        uint32_t pos = hash & (hash_table_size - 1);
-        auto &entity_pair = entity_pairs[pos];
-        if (entity_pair.descriptor_hash == 0) {
-            entity_pair.descriptor_hash = hash;
-            entity_pair.entity_id_offset = entity_id.GetOffset();
+        uint32_t pos = hash & (hashTableSize - 1);
+        auto &entityPair = entityPairs[pos];
+        if (entityPair.descriptorHash == 0) {
+            entityPair.descriptorHash = hash;
+            entityPair.entityIdOffset = entityId.GetOffset();
         } else {
-            conflict_entity_table[conflict_num] = i;
-            conflict_num++;
+            conflictEntityTable[conflictNum] = i;
+            conflictNum++;
         }
     }
-    if (conflict_num == 0) {
-        entity_pair_headers_.insert(entity_pair_headers_.end(), entity_pairs.begin(), entity_pairs.end());
-        class_hash_tables_size_.emplace_back(entity_pairs.size());
+    if (conflictNum == 0) {
+        entityPairHeaders_.insert(entityPairHeaders_.end(), entityPairs.begin(), entityPairs.end());
+        classHashTablesSize_.emplace_back(entityPairs.size());
     } else {
-        ResolveConflictClassHashTable(panda_file, std::move(conflict_entity_table), conflict_num, entity_pairs);
+        ResolveConflictClassHashTable(pandaFile, std::move(conflictEntityTable), conflictNum, entityPairs);
     }
 }
 
-void AotBuilder::ResolveConflictClassHashTable(const panda_file::File &panda_file,
-                                               std::vector<unsigned int> conflict_entity_table, size_t conflict_num,
-                                               std::vector<panda_file::EntityPairHeader> &entity_pairs)
+void AotBuilder::ResolveConflictClassHashTable(const panda_file::File &pandaFile,
+                                               std::vector<unsigned int> conflictEntityTable, size_t conflictNum,
+                                               std::vector<panda_file::EntityPairHeader> &entityPairs)
 {
-    auto classes = panda_file.GetClasses();
-    auto hash_table_size = entity_pairs.size();
-    for (size_t j = 0; j < conflict_num; ++j) {
-        if (j > 0 && conflict_entity_table[j - 1] == conflict_entity_table[j]) {
+    auto classes = pandaFile.GetClasses();
+    auto hashTableSize = entityPairs.size();
+    for (size_t j = 0; j < conflictNum; ++j) {
+        if (j > 0 && conflictEntityTable[j - 1] == conflictEntityTable[j]) {
             break;  // Exit for loop if there is no conlict elements anymore
         }
-        auto i = conflict_entity_table[j];
-        auto entity_id = panda_file::File::EntityId(classes[i]);
-        auto name = panda_file.GetStringData(entity_id).data;
+        auto i = conflictEntityTable[j];
+        auto entityId = panda_file::File::EntityId(classes[i]);
+        auto name = pandaFile.GetStringData(entityId).data;
         uint32_t hash = GetHash32String(name);
-        uint32_t theory_pos = hash & (hash_table_size - 1);
-        ASSERT(entity_pairs[theory_pos].descriptor_hash != 0);
+        uint32_t theoryPos = hash & (hashTableSize - 1);
+        ASSERT(entityPairs[theoryPos].descriptorHash != 0);
 
-        uint32_t actual_pos = theory_pos;
-        while (actual_pos < (hash_table_size - 1) && entity_pairs[actual_pos].descriptor_hash != 0) {
-            actual_pos++;
+        uint32_t actualPos = theoryPos;
+        while (actualPos < (hashTableSize - 1) && entityPairs[actualPos].descriptorHash != 0) {
+            actualPos++;
         }
-        if (actual_pos == (hash_table_size - 1) && entity_pairs[actual_pos].descriptor_hash != 0) {
-            actual_pos = 0;
-            while (actual_pos < theory_pos && entity_pairs[actual_pos].descriptor_hash != 0) {
-                actual_pos++;
+        if (actualPos == (hashTableSize - 1) && entityPairs[actualPos].descriptorHash != 0) {
+            actualPos = 0;
+            while (actualPos < theoryPos && entityPairs[actualPos].descriptorHash != 0) {
+                actualPos++;
             }
         }
-        ASSERT(entity_pairs[actual_pos].descriptor_hash == 0);
-        auto &entity_pair = entity_pairs[actual_pos];
-        entity_pair.descriptor_hash = hash;
-        entity_pair.entity_id_offset = entity_id.GetOffset();
-        while (entity_pairs[theory_pos].next_pos != 0) {
-            theory_pos = entity_pairs[theory_pos].next_pos - 1;
+        ASSERT(entityPairs[actualPos].descriptorHash == 0);
+        auto &entityPair = entityPairs[actualPos];
+        entityPair.descriptorHash = hash;
+        entityPair.entityIdOffset = entityId.GetOffset();
+        while (entityPairs[theoryPos].nextPos != 0) {
+            theoryPos = entityPairs[theoryPos].nextPos - 1;
         }
         // add 1 is to distinguish the initial value 0 of next_pos and the situation that the next pos is really 0
-        entity_pairs[theory_pos].next_pos = actual_pos + 1;
+        entityPairs[theoryPos].nextPos = actualPos + 1;
     }
-    entity_pair_headers_.insert(entity_pair_headers_.end(), entity_pairs.begin(), entity_pairs.end());
-    class_hash_tables_size_.emplace_back(entity_pairs.size());
+    entityPairHeaders_.insert(entityPairHeaders_.end(), entityPairs.begin(), entityPairs.end());
+    classHashTablesSize_.emplace_back(entityPairs.size());
 }
 
 }  // namespace panda::compiler

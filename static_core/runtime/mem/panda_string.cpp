@@ -27,35 +27,35 @@ static constexpr int BASE = 10;
 
 int64_t PandaStringToLL(const PandaString &str)
 {
-    [[maybe_unused]] char *end_ptr = nullptr;
-    int64_t result = std::strtoll(str.c_str(), &end_ptr, BASE);
-    ASSERT(!(result == 0 && str.c_str() == end_ptr) && "PandaString argument is not long long int");
+    [[maybe_unused]] char *endPtr = nullptr;
+    int64_t result = std::strtoll(str.c_str(), &endPtr, BASE);
+    ASSERT(!(result == 0 && str.c_str() == endPtr) && "PandaString argument is not long long int");
     return result;
 }
 
 uint64_t PandaStringToULL(const PandaString &str)
 {
-    [[maybe_unused]] char *end_ptr = nullptr;
-    uint64_t result = std::strtoull(str.c_str(), &end_ptr, BASE);
-    ASSERT(!(result == 0 && str.c_str() == end_ptr) && "PandaString argument is not unsigned long long int");
+    [[maybe_unused]] char *endPtr = nullptr;
+    uint64_t result = std::strtoull(str.c_str(), &endPtr, BASE);
+    ASSERT(!(result == 0 && str.c_str() == endPtr) && "PandaString argument is not unsigned long long int");
     return result;
 }
 
 float PandaStringToF(const PandaString &str)
 {
-    [[maybe_unused]] char *end_ptr = nullptr;
-    float result = std::strtof(str.c_str(), &end_ptr);
+    [[maybe_unused]] char *endPtr = nullptr;
+    float result = std::strtof(str.c_str(), &endPtr);
     ASSERT(result != HUGE_VALF && "PandaString argument is not float");
-    ASSERT(!(result == 0 && str.c_str() == end_ptr) && "PandaString argument is not float");
+    ASSERT(!(result == 0 && str.c_str() == endPtr) && "PandaString argument is not float");
     return result;
 }
 
 double PandaStringToD(const PandaString &str)
 {
-    [[maybe_unused]] char *end_ptr = nullptr;
-    double result = std::strtod(str.c_str(), &end_ptr);
+    [[maybe_unused]] char *endPtr = nullptr;
+    double result = std::strtod(str.c_str(), &endPtr);
     ASSERT(result != HUGE_VALF && "PandaString argument is not double");
-    ASSERT(!(result == 0 && str.c_str() == end_ptr) && "PandaString argument is not double");
+    ASSERT(!(result == 0 && str.c_str() == endPtr) && "PandaString argument is not double");
     return result;
 }
 

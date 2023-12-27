@@ -45,13 +45,13 @@ void *MallocProxyAllocator<AllocConfigT>::Alloc(size_t size, Alignment align)
     if constexpr (!DUMMY_ALLOC_CONFIG) {
         lock_.Lock();
     }
-    size_t alignment_in_bytes = GetAlignmentInBytes(align);
-    void *ret = os::mem::AlignedAlloc(alignment_in_bytes, size);
+    size_t alignmentInBytes = GetAlignmentInBytes(align);
+    void *ret = os::mem::AlignedAlloc(alignmentInBytes, size);
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (!DUMMY_ALLOC_CONFIG) {
-        ASSERT(allocated_memory_.find(ret) == allocated_memory_.end());
-        allocated_memory_.insert({ret, size});
-        AllocConfigT::OnAlloc(size, type_allocation_, mem_stats_);
+        ASSERT(allocatedMemory_.find(ret) == allocatedMemory_.end());
+        allocatedMemory_.insert({ret, size});
+        AllocConfigT::OnAlloc(size, typeAllocation_, memStats_);
         AllocConfigT::MemoryInit(ret);
         lock_.Unlock();
     }
@@ -73,11 +73,11 @@ void MallocProxyAllocator<AllocConfigT>::Free(void *mem)
     os::mem::AlignedFree(mem);
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (!DUMMY_ALLOC_CONFIG) {
-        auto iterator = allocated_memory_.find(mem);
-        ASSERT(iterator != allocated_memory_.end());
+        auto iterator = allocatedMemory_.find(mem);
+        ASSERT(iterator != allocatedMemory_.end());
         size_t size = iterator->second;
-        allocated_memory_.erase(mem);
-        AllocConfigT::OnFree(size, type_allocation_, mem_stats_);
+        allocatedMemory_.erase(mem);
+        AllocConfigT::OnFree(size, typeAllocation_, memStats_);
         lock_.Unlock();
     }
     LOG_MALLOCPROXY_ALLOCATOR(DEBUG) << "Free memory at " << mem;

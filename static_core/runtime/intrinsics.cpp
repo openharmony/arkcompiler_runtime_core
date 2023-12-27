@@ -165,12 +165,12 @@ void PrintStringInternal(coretypes::String *v)
 {
     static auto &outstream = IS_ERR ? std::cerr : std::cout;
     if (v->IsUtf16()) {
-        uint16_t *vdata_ptr = v->GetDataUtf16();
+        uint16_t *vdataPtr = v->GetDataUtf16();
         uint32_t vlength = v->GetLength();
-        size_t mutf8_len = utf::Utf16ToMUtf8Size(vdata_ptr, vlength);
+        size_t mutf8Len = utf::Utf16ToMUtf8Size(vdataPtr, vlength);
 
-        PandaVector<uint8_t> out(mutf8_len);
-        utf::ConvertRegionUtf16ToMUtf8(vdata_ptr, out.data(), vlength, mutf8_len, 0);
+        PandaVector<uint8_t> out(mutf8Len);
+        utf::ConvertRegionUtf16ToMUtf8(vdataPtr, out.data(), vlength, mutf8Len, 0);
 
         outstream << reinterpret_cast<const char *>(out.data());
     } else {
@@ -261,9 +261,9 @@ void CheckTag(int64_t reg, int64_t expected)
 }
 
 #ifndef PANDA_PRODUCT_BUILD
-uint8_t CompileMethod(coretypes::String *full_method_name)
+uint8_t CompileMethod(coretypes::String *fullMethodName)
 {
-    return panda::CompileMethodImpl(full_method_name, panda_file::SourceLang::PANDA_ASSEMBLY);
+    return panda::CompileMethodImpl(fullMethodName, panda_file::SourceLang::PANDA_ASSEMBLY);
 }
 
 double CalculateDouble(uint32_t n, double s)
@@ -402,45 +402,45 @@ void ObjectNotifyAll(ObjectHeader *header)
     LOG_IF(state != Monitor::State::OK, FATAL, RUNTIME) << "Monitor::NotifyAll() failed";
 }
 
-void Memset8(ObjectHeader *array, uint8_t value, uint32_t initial_index, uint32_t max_index)
+void Memset8(ObjectHeader *array, uint8_t value, uint32_t initialIndex, uint32_t maxIndex)
 {
     auto data = reinterpret_cast<uint8_t *>(panda::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    std::fill(data + initial_index, data + max_index, value);
+    std::fill(data + initialIndex, data + maxIndex, value);
 }
 
-void Memset16(ObjectHeader *array, uint16_t value, uint32_t initial_index, uint32_t max_index)
+void Memset16(ObjectHeader *array, uint16_t value, uint32_t initialIndex, uint32_t maxIndex)
 {
     auto data = reinterpret_cast<uint16_t *>(panda::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    std::fill(data + initial_index, data + max_index, value);
+    std::fill(data + initialIndex, data + maxIndex, value);
 }
 
-void Memset32(ObjectHeader *array, uint32_t value, uint32_t initial_index, uint32_t max_index)
+void Memset32(ObjectHeader *array, uint32_t value, uint32_t initialIndex, uint32_t maxIndex)
 {
     auto data = reinterpret_cast<uint32_t *>(panda::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    std::fill(data + initial_index, data + max_index, value);
+    std::fill(data + initialIndex, data + maxIndex, value);
 }
 
-void Memset64(ObjectHeader *array, uint64_t value, uint32_t initial_index, uint32_t max_index)
+void Memset64(ObjectHeader *array, uint64_t value, uint32_t initialIndex, uint32_t maxIndex)
 {
     auto data = reinterpret_cast<uint64_t *>(panda::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    std::fill(data + initial_index, data + max_index, value);
+    std::fill(data + initialIndex, data + maxIndex, value);
 }
-void Memsetf32(ObjectHeader *array, float value, uint32_t initial_index, uint32_t max_index)
+void Memsetf32(ObjectHeader *array, float value, uint32_t initialIndex, uint32_t maxIndex)
 {
     auto data = reinterpret_cast<float *>(panda::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    std::fill(data + initial_index, data + max_index, value);
+    std::fill(data + initialIndex, data + maxIndex, value);
 }
 
-void Memsetf64(ObjectHeader *array, double value, uint32_t initial_index, uint32_t max_index)
+void Memsetf64(ObjectHeader *array, double value, uint32_t initialIndex, uint32_t maxIndex)
 {
     auto data = reinterpret_cast<double *>(panda::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    std::fill(data + initial_index, data + max_index, value);
+    std::fill(data + initialIndex, data + maxIndex, value);
 }
 }  // namespace panda::intrinsics
 

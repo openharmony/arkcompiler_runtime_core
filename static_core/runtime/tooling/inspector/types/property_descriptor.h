@@ -28,21 +28,21 @@
 namespace panda::tooling::inspector {
 class PropertyDescriptor {
 public:
-    PropertyDescriptor(std::string name, RemoteObject value, bool is_entry = false)
-        : name_(std::move(name)), value_(std::move(value)), is_entry_(is_entry)
+    PropertyDescriptor(std::string name, RemoteObject value, bool isEntry = false)
+        : name_(std::move(name)), value_(std::move(value)), isEntry_(isEntry)
     {
     }
 
     static PropertyDescriptor Accessor(std::string name, RemoteObject getter)
     {
         PropertyDescriptor property(std::move(name), std::move(getter));
-        property.is_accessor_ = true;
+        property.isAccessor_ = true;
         return property;
     }
 
     bool IsAccessor() const
     {
-        return is_accessor_;
+        return isAccessor_;
     }
 
     bool IsConfigurable() const
@@ -52,7 +52,7 @@ public:
 
     bool IsEntry() const
     {
-        return is_entry_;
+        return isEntry_;
     }
 
     bool IsEnumerable() const
@@ -111,22 +111,22 @@ public:
 
     std::function<void(JsonObjectBuilder &)> ToJson() const
     {
-        return [this](JsonObjectBuilder &json_builder) {
-            json_builder.AddProperty("name", name_);
+        return [this](JsonObjectBuilder &jsonBuilder) {
+            jsonBuilder.AddProperty("name", name_);
 
             if (symbol_) {
-                json_builder.AddProperty("symbol", symbol_->ToJson());
+                jsonBuilder.AddProperty("symbol", symbol_->ToJson());
             }
 
-            if (is_accessor_) {
-                json_builder.AddProperty("get", value_.ToJson());
+            if (isAccessor_) {
+                jsonBuilder.AddProperty("get", value_.ToJson());
             } else {
-                json_builder.AddProperty("value", value_.ToJson());
-                json_builder.AddProperty("writable", writable_);
+                jsonBuilder.AddProperty("value", value_.ToJson());
+                jsonBuilder.AddProperty("writable", writable_);
             }
 
-            json_builder.AddProperty("configurable", configurable_);
-            json_builder.AddProperty("enumerable", enumerable_);
+            jsonBuilder.AddProperty("configurable", configurable_);
+            jsonBuilder.AddProperty("enumerable", enumerable_);
         };
     }
 
@@ -134,8 +134,8 @@ private:
     std::string name_;
     std::optional<RemoteObject> symbol_;
     RemoteObject value_;
-    bool is_accessor_ {false};
-    bool is_entry_ {false};
+    bool isAccessor_ {false};
+    bool isEntry_ {false};
     bool configurable_ {false};
     bool enumerable_ {true};
     bool writable_ {true};

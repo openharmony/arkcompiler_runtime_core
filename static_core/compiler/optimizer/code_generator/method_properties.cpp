@@ -26,13 +26,13 @@ MethodProperties::MethodProperties(const Graph *graph)
         // Calls may be in the middle of method
         for (auto inst : bb->Insts()) {
             if (inst->IsInitObject()) {
-                ASSERT(OPTIONS.IsCompilerSupportInitObjectInst());
+                ASSERT(g_options.IsCompilerSupportInitObjectInst());
             }
             if (inst->GetFlag(inst_flags::CAN_DEOPTIMIZE)) {
                 SetHasDeopt(true);
             }
             if (inst->IsReturn()) {
-                last_return_ = inst;
+                lastReturn_ = inst;
             }
             if (!GetHasParamsOnStack() && inst->GetOpcode() == Opcode::Parameter) {
                 auto sf = static_cast<const ParameterInst *>(inst)->GetLocationData();
@@ -74,7 +74,7 @@ MethodProperties::MethodProperties(const Graph *graph)
      * 2. We don't support compact prologue/epilogue for OSR to simplify OSR entry bridge.
      */
     SetCompactPrologueAllowed(graph->GetArch() == Arch::AARCH64 && !graph->IsOsrMode() &&
-                              OPTIONS.IsCompilerCompactPrologue());
+                              g_options.IsCompilerCompactPrologue());
 
     SetRequireFrameSetup(!IsLeaf() || graph->IsOsrMode());
 }

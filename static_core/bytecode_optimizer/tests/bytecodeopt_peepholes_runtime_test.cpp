@@ -88,28 +88,28 @@ TEST_F(BytecodeOptPeepholes, TryBlock)
     auto res = p.Parse(source);
     auto &program = res.Value();
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
-    std::string file_name = "bc_peepholes";
-    auto piece = pandasm::AsmEmitter::Emit(file_name, program, nullptr, &maps);
+    std::string fileName = "bc_peepholes";
+    auto piece = pandasm::AsmEmitter::Emit(fileName, program, nullptr, &maps);
     ASSERT_NE(piece, false);
 
-    EXPECT_TRUE(OptimizeBytecode(&program, &maps, file_name, false, true));
+    EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
 
     // Check if there is initobj instruction in the bytecode
-    bool contains_initobj = false;
-    const auto sig_try_catch = pandasm::GetFunctionSignatureFromName("try_catch", {});
-    for (const auto &inst : program.function_table.at(sig_try_catch).ins) {
+    bool containsInitobj = false;
+    const auto sigTryCatch = pandasm::GetFunctionSignatureFromName("try_catch", {});
+    for (const auto &inst : program.functionTable.at(sigTryCatch).ins) {
         if (inst.opcode == pandasm::Opcode::INITOBJ) {
-            contains_initobj = true;
+            containsInitobj = true;
         }
     }
-    EXPECT_FALSE(contains_initobj);
+    EXPECT_FALSE(containsInitobj);
 
     auto pf = pandasm::AsmEmitter::Emit(program);
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     PandaString descriptor;
 
     auto *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));

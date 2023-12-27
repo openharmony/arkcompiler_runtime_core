@@ -18,19 +18,19 @@
 
 namespace panda::taskmanager {
 
-WorkerThread::WorkerThread(FinishedTasksCallback callback, size_t tasks_count)
-    : finished_tasks_callback_(std::move(callback))
+WorkerThread::WorkerThread(FinishedTasksCallback callback, size_t tasksCount)
+    : finishedTasksCallback_(std::move(callback))
 {
-    thread_ = new std::thread(&WorkerThread::WorkerLoop, this, tasks_count);
+    thread_ = new std::thread(&WorkerThread::WorkerLoop, this, tasksCount);
     os::thread::SetThreadName(thread_->native_handle(), "TaskSchedulerWorker");
 }
 
 void WorkerThread::AddTask(Task &&task)
 {
     if (task.GetTaskProperties().GetTaskExecutionMode() == TaskExecutionMode::FOREGROUND) {
-        foreground_queue_.push(std::move(task));
+        foregroundQueue_.push(std::move(task));
     } else {
-        background_queue_.push(std::move(task));
+        backgroundQueue_.push(std::move(task));
     }
     size_++;
 }
@@ -39,10 +39,10 @@ Task WorkerThread::PopTask()
 {
     ASSERT(!IsEmpty());
     std::queue<Task> *queue = nullptr;
-    if (!foreground_queue_.empty()) {
-        queue = &foreground_queue_;
+    if (!foregroundQueue_.empty()) {
+        queue = &foregroundQueue_;
     } else {
-        queue = &background_queue_;
+        queue = &backgroundQueue_;
     }
     auto task = std::move(queue->front());
     queue->pop();
@@ -60,16 +60,16 @@ bool WorkerThread::IsEmpty() const
     return size_ == 0;
 }
 
-void WorkerThread::WorkerLoop(size_t tasks_count)
+void WorkerThread::WorkerLoop(size_t tasksCount)
 {
     while (true) {
-        auto finish_cond = TaskScheduler::GetTaskScheduler()->FillWithTasks(this, tasks_count);
+        auto finishCond = TaskScheduler::GetTaskScheduler()->FillWithTasks(this, tasksCount);
         ExecuteTasks();
-        if (finish_cond) {
+        if (finishCond) {
             break;
         }
-        finished_tasks_callback_(finished_tasks_counter_map_);
-        finished_tasks_counter_map_.clear();
+        finishedTasksCallback_(finishedTasksCounterMap_);
+        finishedTasksCounterMap_.clear();
     }
 }
 
@@ -78,7 +78,7 @@ void WorkerThread::ExecuteTasks()
     while (!IsEmpty()) {
         auto task = PopTask();
         task.RunTask();
-        finished_tasks_counter_map_[task.GetTaskProperties()]++;
+        finishedTasksCounterMap_[task.GetTaskProperties()]++;
     }
 }
 

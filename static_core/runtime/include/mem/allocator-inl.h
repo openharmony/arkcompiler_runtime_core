@@ -20,33 +20,33 @@
 namespace panda::mem {
 
 template <typename AllocT, bool NEED_LOCK>
-inline void *ObjectAllocatorBase::AllocateSafe(size_t size, Alignment align, AllocT *object_allocator, size_t pool_size,
-                                               SpaceType space_type, HeapSpace *heap_space)
+inline void *ObjectAllocatorBase::AllocateSafe(size_t size, Alignment align, AllocT *objectAllocator, size_t poolSize,
+                                               SpaceType spaceType, HeapSpace *heapSpace)
 {
-    void *mem = object_allocator->template Alloc<NEED_LOCK>(size, align);
+    void *mem = objectAllocator->template Alloc<NEED_LOCK>(size, align);
     if (UNLIKELY(mem == nullptr)) {
-        return AddPoolsAndAlloc<AllocT, NEED_LOCK>(size, align, object_allocator, pool_size, space_type, heap_space);
+        return AddPoolsAndAlloc<AllocT, NEED_LOCK>(size, align, objectAllocator, poolSize, spaceType, heapSpace);
     }
     return mem;
 }
 
 template <typename AllocT, bool NEED_LOCK>
-inline void *ObjectAllocatorBase::AddPoolsAndAlloc(size_t size, Alignment align, AllocT *object_allocator,
-                                                   size_t pool_size, SpaceType space_type, HeapSpace *heap_space)
+inline void *ObjectAllocatorBase::AddPoolsAndAlloc(size_t size, Alignment align, AllocT *objectAllocator,
+                                                   size_t poolSize, SpaceType spaceType, HeapSpace *heapSpace)
 {
     void *mem = nullptr;
-    static os::memory::Mutex pool_lock;
-    os::memory::LockHolder<os::memory::Mutex, NEED_LOCK> lock(pool_lock);
+    static os::memory::Mutex poolLock;
+    os::memory::LockHolder<os::memory::Mutex, NEED_LOCK> lock(poolLock);
     while (true) {
-        auto pool = heap_space->TryAllocPool(pool_size, space_type, AllocT::GetAllocatorType(), object_allocator);
+        auto pool = heapSpace->TryAllocPool(poolSize, spaceType, AllocT::GetAllocatorType(), objectAllocator);
         if (UNLIKELY(pool.GetMem() == nullptr)) {
             return nullptr;
         }
-        bool added_memory_pool = object_allocator->AddMemoryPool(pool.GetMem(), pool.GetSize());
-        if (!added_memory_pool) {
+        bool addedMemoryPool = objectAllocator->AddMemoryPool(pool.GetMem(), pool.GetSize());
+        if (!addedMemoryPool) {
             LOG(FATAL, ALLOC) << "ObjectAllocator: couldn't add memory pool to object allocator";
         }
-        mem = object_allocator->template Alloc<NEED_LOCK>(size, align);
+        mem = objectAllocator->template Alloc<NEED_LOCK>(size, align);
         if (mem != nullptr) {
             break;
         }
@@ -60,19 +60,19 @@ void *ObjectAllocatorGen<MT_MODE>::AllocateTenuredImpl(size_t size)
 {
     void *mem = nullptr;
     Alignment align = DEFAULT_ALIGNMENT;
-    size_t aligned_size = AlignUp(size, GetAlignmentInBytes(align));
-    if (aligned_size <= ObjectAllocator::GetMaxSize()) {
-        size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, ObjectAllocator::GetMinPoolSize());
-        mem = AllocateSafe<ObjectAllocator, NEED_LOCK>(size, align, object_allocator_, pool_size,
-                                                       SpaceType::SPACE_TYPE_OBJECT, &heap_spaces_);
-    } else if (aligned_size <= LargeObjectAllocator::GetMaxSize()) {
-        size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, LargeObjectAllocator::GetMinPoolSize());
-        mem = AllocateSafe<LargeObjectAllocator, NEED_LOCK>(size, align, large_object_allocator_, pool_size,
-                                                            SpaceType::SPACE_TYPE_OBJECT, &heap_spaces_);
+    size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
+    if (alignedSize <= ObjectAllocator::GetMaxSize()) {
+        size_t poolSize = std::max(PANDA_DEFAULT_POOL_SIZE, ObjectAllocator::GetMinPoolSize());
+        mem = AllocateSafe<ObjectAllocator, NEED_LOCK>(size, align, objectAllocator_, poolSize,
+                                                       SpaceType::SPACE_TYPE_OBJECT, &heapSpaces_);
+    } else if (alignedSize <= LargeObjectAllocator::GetMaxSize()) {
+        size_t poolSize = std::max(PANDA_DEFAULT_POOL_SIZE, LargeObjectAllocator::GetMinPoolSize());
+        mem = AllocateSafe<LargeObjectAllocator, NEED_LOCK>(size, align, largeObjectAllocator_, poolSize,
+                                                            SpaceType::SPACE_TYPE_OBJECT, &heapSpaces_);
     } else {
-        size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, HumongousObjectAllocator::GetMinPoolSize(size));
-        mem = AllocateSafe<HumongousObjectAllocator, NEED_LOCK>(size, align, humongous_object_allocator_, pool_size,
-                                                                SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT, &heap_spaces_);
+        size_t poolSize = std::max(PANDA_DEFAULT_POOL_SIZE, HumongousObjectAllocator::GetMinPoolSize(size));
+        mem = AllocateSafe<HumongousObjectAllocator, NEED_LOCK>(size, align, humongousObjectAllocator_, poolSize,
+                                                                SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT, &heapSpaces_);
     }
     return mem;
 }

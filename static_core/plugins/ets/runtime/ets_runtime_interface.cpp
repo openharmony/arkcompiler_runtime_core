@@ -31,55 +31,55 @@ compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr met
     return PandaRuntimeInterface::GetClass(method, id);
 }
 
-compiler::RuntimeInterface::FieldPtr EtsRuntimeInterface::ResolveLookUpField(FieldPtr raw_field, ClassPtr klass)
+compiler::RuntimeInterface::FieldPtr EtsRuntimeInterface::ResolveLookUpField(FieldPtr rawField, ClassPtr klass)
 {
     ScopedMutatorLock lock;
-    ASSERT(raw_field != nullptr);
+    ASSERT(rawField != nullptr);
     ASSERT(klass != nullptr);
-    return ClassCast(klass)->LookupFieldByName(FieldCast(raw_field)->GetName());
+    return ClassCast(klass)->LookupFieldByName(FieldCast(rawField)->GetName());
 }
 
 template <panda_file::Type::TypeId FIELD_TYPE>
-compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::GetLookUpCall(FieldPtr raw_field, ClassPtr klass,
-                                                                         bool is_setter)
+compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::GetLookUpCall(FieldPtr rawField, ClassPtr klass,
+                                                                         bool isSetter)
 {
-    if (is_setter) {
-        return ClassCast(klass)->LookupSetterByName<FIELD_TYPE>(FieldCast(raw_field)->GetName());
+    if (isSetter) {
+        return ClassCast(klass)->LookupSetterByName<FIELD_TYPE>(FieldCast(rawField)->GetName());
     }
-    return ClassCast(klass)->LookupGetterByName<FIELD_TYPE>(FieldCast(raw_field)->GetName());
+    return ClassCast(klass)->LookupGetterByName<FIELD_TYPE>(FieldCast(rawField)->GetName());
 }
 
-compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::ResolveLookUpCall(FieldPtr raw_field, ClassPtr klass,
-                                                                             bool is_setter)
+compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::ResolveLookUpCall(FieldPtr rawField, ClassPtr klass,
+                                                                             bool isSetter)
 {
     ScopedMutatorLock lock;
-    ASSERT(raw_field != nullptr);
+    ASSERT(rawField != nullptr);
     ASSERT(klass != nullptr);
-    switch (FieldCast(raw_field)->GetTypeId()) {
+    switch (FieldCast(rawField)->GetTypeId()) {
         case panda_file::Type::TypeId::U1:
-            return GetLookUpCall<panda_file::Type::TypeId::U1>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::U1>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::U8:
-            return GetLookUpCall<panda_file::Type::TypeId::U8>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::U8>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::I8:
-            return GetLookUpCall<panda_file::Type::TypeId::I8>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::I8>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::I16:
-            return GetLookUpCall<panda_file::Type::TypeId::I16>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::I16>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::U16:
-            return GetLookUpCall<panda_file::Type::TypeId::U16>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::U16>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::I32:
-            return GetLookUpCall<panda_file::Type::TypeId::I32>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::I32>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::U32:
-            return GetLookUpCall<panda_file::Type::TypeId::U32>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::U32>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::I64:
-            return GetLookUpCall<panda_file::Type::TypeId::I64>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::I64>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::U64:
-            return GetLookUpCall<panda_file::Type::TypeId::U64>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::U64>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::F32:
-            return GetLookUpCall<panda_file::Type::TypeId::F32>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::F32>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::F64:
-            return GetLookUpCall<panda_file::Type::TypeId::F64>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::F64>(rawField, klass, isSetter);
         case panda_file::Type::TypeId::REFERENCE:
-            return GetLookUpCall<panda_file::Type::TypeId::REFERENCE>(raw_field, klass, is_setter);
+            return GetLookUpCall<panda_file::Type::TypeId::REFERENCE>(rawField, klass, isSetter);
         default: {
             UNREACHABLE();
             break;
@@ -93,50 +93,50 @@ uint64_t EtsRuntimeInterface::GetUndefinedObject() const
     return ToUintPtr(PandaEtsVM::GetCurrent()->GetUndefinedObject());
 }
 
-compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallKind(MethodPtr method_ptr) const
+compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallKind(MethodPtr methodPtr) const
 {
-    auto class_name = GetClassNameFromMethod(method_ptr);
-    auto class_name_suffix = class_name.substr(class_name.find_last_of('.') + 1);
-    if (class_name_suffix == "$jsnew") {
+    auto className = GetClassNameFromMethod(methodPtr);
+    auto classNameSuffix = className.substr(className.find_last_of('.') + 1);
+    if (classNameSuffix == "$jsnew") {
         return InteropCallKind::NEW_INSTANCE;
     }
-    if (class_name_suffix != "$jscall") {
+    if (classNameSuffix != "$jscall") {
         return InteropCallKind::UNKNOWN;
     }
 
-    auto method = MethodCast(method_ptr);
+    auto method = MethodCast(methodPtr);
     auto pf = method->GetPandaFile();
     panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*method);
-    auto linker_ctx = static_cast<EtsClassLinkerExtension *>(class_linker->GetExtension(ctx))->GetBootContext();
+    auto linkerCtx = static_cast<EtsClassLinkerExtension *>(classLinker->GetExtension(ctx))->GetBootContext();
 
     ScopedMutatorLock lock;
 
     ASSERT(method->GetArgType(0).IsReference());  // arg0 is always a reference
     ASSERT(method->GetArgType(1).IsReference());  // arg1 is always a reference
-    uint32_t const arg_reftype_shift = method->GetReturnType().IsReference() ? 1 : 0;
-    auto cls = class_linker->GetClass(*pf, pda.GetReferenceType(1 + arg_reftype_shift), linker_ctx);
+    uint32_t const argReftypeShift = method->GetReturnType().IsReference() ? 1 : 0;
+    auto cls = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), linkerCtx);
     if (cls->IsStringClass()) {
         return InteropCallKind::CALL;
     }
     return InteropCallKind::CALL_BY_VALUE;
 }
 
-char *EtsRuntimeInterface::GetFuncPropName(MethodPtr method_ptr, uint32_t str_id) const
+char *EtsRuntimeInterface::GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const
 {
-    auto method = MethodCast(method_ptr);
+    auto method = MethodCast(methodPtr);
     auto pf = method->GetPandaFile();
-    auto str = reinterpret_cast<const char *>(pf->GetStringData(panda::panda_file::File::EntityId(str_id)).data);
+    auto str = reinterpret_cast<const char *>(pf->GetStringData(panda::panda_file::File::EntityId(strId)).data);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     return const_cast<char *>(std::strrchr(str, '.') + 1);
 }
 
-uint64_t EtsRuntimeInterface::GetFuncPropNameOffset(MethodPtr method_ptr, uint32_t str_id) const
+uint64_t EtsRuntimeInterface::GetFuncPropNameOffset(MethodPtr methodPtr, uint32_t strId) const
 {
-    auto pf = MethodCast(method_ptr)->GetPandaFile();
-    auto str = GetFuncPropName(method_ptr, str_id);
+    auto pf = MethodCast(methodPtr)->GetPandaFile();
+    auto str = GetFuncPropName(methodPtr, strId);
     return reinterpret_cast<uint64_t>(str) - reinterpret_cast<uint64_t>(pf->GetBase());
 }
 

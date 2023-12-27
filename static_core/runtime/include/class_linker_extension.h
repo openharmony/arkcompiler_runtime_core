@@ -30,19 +30,19 @@ class ClassLinkerErrorHandler;
 
 class ClassLinkerExtension {
 public:
-    explicit ClassLinkerExtension(panda_file::SourceLang lang) : lang_(lang), boot_context_(this) {}
+    explicit ClassLinkerExtension(panda_file::SourceLang lang) : lang_(lang), bootContext_(this) {}
 
     virtual ~ClassLinkerExtension();
 
-    bool Initialize(ClassLinker *class_linker, bool compressed_string_enabled);
+    bool Initialize(ClassLinker *classLinker, bool compressedStringEnabled);
 
     bool InitializeFinish();
 
     bool InitializeRoots(ManagedThread *thread);
 
-    virtual bool InitializeArrayClass(Class *array_class, Class *component_class) = 0;
+    virtual bool InitializeArrayClass(Class *arrayClass, Class *componentClass) = 0;
 
-    virtual void InitializePrimitiveClass(Class *primitive_class) = 0;
+    virtual void InitializePrimitiveClass(Class *primitiveClass) = 0;
 
     virtual size_t GetClassVTableSize(ClassRoot root) = 0;
 
@@ -56,7 +56,7 @@ public:
 
     virtual size_t GetArrayClassSize() = 0;
 
-    virtual Class *CreateClass(const uint8_t *descriptor, size_t vtable_size, size_t imt_size, size_t size) = 0;
+    virtual Class *CreateClass(const uint8_t *descriptor, size_t vtableSize, size_t imtSize, size_t size) = 0;
 
     virtual void FreeClass(Class *klass) = 0;
 
@@ -72,29 +72,29 @@ public:
 
     Class *GetClassRoot(ClassRoot root) const
     {
-        return class_roots_[ToIndex(root)];
+        return classRoots_[ToIndex(root)];
     }
 
     ClassLinkerContext *GetBootContext()
     {
-        return &boot_context_;
+        return &bootContext_;
     }
 
     void SetClassRoot(ClassRoot root, Class *klass)
     {
-        class_roots_[ToIndex(root)] = klass;
-        boot_context_.InsertClass(klass);
+        classRoots_[ToIndex(root)] = klass;
+        bootContext_.InsertClass(klass);
     }
 
     Class *FindLoadedClass(const uint8_t *descriptor, ClassLinkerContext *context = nullptr);
 
-    PANDA_PUBLIC_API Class *GetClass(const uint8_t *descriptor, bool need_copy_descriptor = true,
+    PANDA_PUBLIC_API Class *GetClass(const uint8_t *descriptor, bool needCopyDescriptor = true,
                                      ClassLinkerContext *context = nullptr,
-                                     ClassLinkerErrorHandler *error_handler = nullptr);
+                                     ClassLinkerErrorHandler *errorHandler = nullptr);
 
     PANDA_PUBLIC_API Class *GetClass(const panda_file::File &pf, panda_file::File::EntityId id,
                                      ClassLinkerContext *context = nullptr,
-                                     ClassLinkerErrorHandler *error_handler = nullptr);
+                                     ClassLinkerErrorHandler *errorHandler = nullptr);
 
     panda_file::SourceLang GetLanguage() const
     {
@@ -103,17 +103,17 @@ public:
 
     ClassLinker *GetClassLinker() const
     {
-        return class_linker_;
+        return classLinker_;
     }
 
     bool IsInitialized() const
     {
-        return class_linker_ != nullptr;
+        return classLinker_ != nullptr;
     }
 
     bool CanInitializeClasses()
     {
-        return can_initialize_classes_;
+        return canInitializeClasses_;
     }
 
     template <class Callback>
@@ -123,16 +123,16 @@ public:
                                  mem::VisitGCRootFlags::ACCESS_ROOT_NONE)) == 1);
         if (((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ALL) != 0) ||
             ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW) != 0)) {
-            os::memory::LockHolder lock(created_classes_lock_);
-            for (const auto &cls : created_classes_) {
+            os::memory::LockHolder lock(createdClassesLock_);
+            for (const auto &cls : createdClasses_) {
                 if (!cb(cls)) {
                     return false;
                 }
             }
         }
         if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW) != 0) {
-            os::memory::LockHolder lock(new_classes_lock_);
-            for (const auto &cls : new_classes_) {
+            os::memory::LockHolder lock(newClassesLock_);
+            for (const auto &cls : newClasses_) {
                 if (!cb(cls)) {
                     return false;
                 }
@@ -140,12 +140,12 @@ public:
         }
 
         if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ALL) != 0) {
-            if (!boot_context_.EnumerateClasses(cb)) {
+            if (!bootContext_.EnumerateClasses(cb)) {
                 return false;
             }
 
             {
-                os::memory::LockHolder lock(contexts_lock_);
+                os::memory::LockHolder lock(contextsLock_);
                 for (auto *ctx : contexts_) {
                     if (!ctx->EnumerateClasses(cb)) {
                         return false;
@@ -155,8 +155,8 @@ public:
         }
 
         {
-            os::memory::LockHolder lock(obsolete_classes_lock_);
-            for (const auto &cls : obsolete_classes_) {
+            os::memory::LockHolder lock(obsoleteClassesLock_);
+            for (const auto &cls : obsoleteClasses_) {
                 if (!cb(cls)) {
                     return false;
                 }
@@ -168,13 +168,13 @@ public:
         if ((flags & mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT) != 0) {
             // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
             // consistent order where threads observe all modifications in the same order
-            record_new_class_.store(true, std::memory_order_seq_cst);
+            recordNewClass_.store(true, std::memory_order_seq_cst);
         } else if ((flags & mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT) != 0) {
             // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
             // consistent order where threads observe all modifications in the same order
-            record_new_class_.store(false, std::memory_order_seq_cst);
-            os::memory::LockHolder lock(new_classes_lock_);
-            new_classes_.clear();
+            recordNewClass_.store(false, std::memory_order_seq_cst);
+            os::memory::LockHolder lock(newClassesLock_);
+            newClasses_.clear();
         }
 
         return true;
@@ -183,7 +183,7 @@ public:
     template <class ContextGetterFn>
     void RegisterContext(const ContextGetterFn &fn)
     {
-        os::memory::LockHolder lock(contexts_lock_);
+        os::memory::LockHolder lock(contextsLock_);
         auto *context = fn();
         if (context != nullptr) {
             contexts_.push_back(context);
@@ -193,11 +193,11 @@ public:
     template <class Callback>
     void EnumerateContexts(const Callback &cb)
     {
-        if (!cb(&boot_context_)) {
+        if (!cb(&bootContext_)) {
             return;
         }
 
-        os::memory::LockHolder lock(contexts_lock_);
+        os::memory::LockHolder lock(contextsLock_);
         for (auto *context : contexts_) {
             if (!cb(context)) {
                 return;
@@ -212,7 +212,7 @@ public:
     ClassLinkerContext *ResolveContext(ClassLinkerContext *context)
     {
         if (context == nullptr) {
-            return &boot_context_;
+            return &bootContext_;
         }
 
         return context;
@@ -237,9 +237,9 @@ public:
     NO_MOVE_SEMANTIC(ClassLinkerExtension);
 
 protected:
-    void InitializePrimitiveClassRoot(ClassRoot root, panda_file::Type::TypeId type_id, const char *descriptor);
+    void InitializePrimitiveClassRoot(ClassRoot root, panda_file::Type::TypeId typeId, const char *descriptor);
 
-    void InitializeArrayClassRoot(ClassRoot root, ClassRoot component_root, const char *descriptor);
+    void InitializeArrayClassRoot(ClassRoot root, ClassRoot componentRoot, const char *descriptor);
 
     void FreeLoadedClasses();
 
@@ -252,7 +252,7 @@ protected:
     void RemoveCreatedClass(Class *klass);
 
     using PandaFilePtr = std::unique_ptr<const panda_file::File>;
-    virtual ClassLinkerContext *CreateApplicationClassLinkerContext(PandaVector<PandaFilePtr> &&app_files);
+    virtual ClassLinkerContext *CreateApplicationClassLinkerContext(PandaVector<PandaFilePtr> &&appFiles);
 
 private:
     class BootContext : public ClassLinkerContext {
@@ -267,8 +267,8 @@ private:
             return true;
         }
 
-        Class *LoadClass(const uint8_t *descriptor, bool need_copy_descriptor,
-                         ClassLinkerErrorHandler *error_handler) override;
+        Class *LoadClass(const uint8_t *descriptor, bool needCopyDescriptor,
+                         ClassLinkerErrorHandler *errorHandler) override;
 
         void EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> &cb) const override;
 
@@ -278,13 +278,13 @@ private:
 
     class AppContext : public ClassLinkerContext {
     public:
-        explicit AppContext(ClassLinkerExtension *extension, PandaVector<const panda_file::File *> &&pf_list)
-            : ClassLinkerContext(extension->GetLanguage()), extension_(extension), pfs_(pf_list)
+        explicit AppContext(ClassLinkerExtension *extension, PandaVector<const panda_file::File *> &&pfList)
+            : ClassLinkerContext(extension->GetLanguage()), extension_(extension), pfs_(pfList)
         {
         }
 
-        Class *LoadClass(const uint8_t *descriptor, bool need_copy_descriptor,
-                         ClassLinkerErrorHandler *error_handler) override;
+        Class *LoadClass(const uint8_t *descriptor, bool needCopyDescriptor,
+                         ClassLinkerErrorHandler *errorHandler) override;
 
         void EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> &cb) const override
         {
@@ -300,13 +300,13 @@ private:
 
         PandaVector<std::string_view> GetPandaFilePaths() const override
         {
-            PandaVector<std::string_view> file_paths;
+            PandaVector<std::string_view> filePaths;
             for (auto &pf : pfs_) {
                 if (pf != nullptr) {
-                    file_paths.emplace_back(pf->GetFilename());
+                    filePaths.emplace_back(pf->GetFilename());
                 }
             }
-            return file_paths;
+            return filePaths;
         }
 
     private:
@@ -316,41 +316,41 @@ private:
 
     static constexpr size_t CLASS_ROOT_COUNT = static_cast<size_t>(ClassRoot::LAST_CLASS_ROOT_ENTRY) + 1;
 
-    virtual bool InitializeImpl(bool compressed_string_enabled) = 0;
+    virtual bool InitializeImpl(bool compressedStringEnabled) = 0;
 
     static constexpr size_t ToIndex(ClassRoot root)
     {
         return static_cast<size_t>(root);
     }
-    ClassLinkerErrorHandler *ResolveErrorHandler(ClassLinkerErrorHandler *error_handler)
+    ClassLinkerErrorHandler *ResolveErrorHandler(ClassLinkerErrorHandler *errorHandler)
     {
-        if (error_handler == nullptr) {
+        if (errorHandler == nullptr) {
             return GetErrorHandler();
         }
 
-        return error_handler;
+        return errorHandler;
     }
 
     panda_file::SourceLang lang_;
-    BootContext boot_context_;
+    BootContext bootContext_;
 
-    std::array<Class *, CLASS_ROOT_COUNT> class_roots_ {};
-    ClassLinker *class_linker_ {nullptr};
+    std::array<Class *, CLASS_ROOT_COUNT> classRoots_ {};
+    ClassLinker *classLinker_ {nullptr};
 
-    os::memory::RecursiveMutex contexts_lock_;
-    PandaVector<ClassLinkerContext *> contexts_ GUARDED_BY(contexts_lock_);
+    os::memory::RecursiveMutex contextsLock_;
+    PandaVector<ClassLinkerContext *> contexts_ GUARDED_BY(contextsLock_);
 
-    os::memory::RecursiveMutex created_classes_lock_;
-    PandaVector<Class *> created_classes_ GUARDED_BY(created_classes_lock_);
+    os::memory::RecursiveMutex createdClassesLock_;
+    PandaVector<Class *> createdClasses_ GUARDED_BY(createdClassesLock_);
 
-    os::memory::RecursiveMutex new_classes_lock_;
-    std::atomic_bool record_new_class_ {false};
-    PandaVector<Class *> new_classes_ GUARDED_BY(new_classes_lock_);
+    os::memory::RecursiveMutex newClassesLock_;
+    std::atomic_bool recordNewClass_ {false};
+    PandaVector<Class *> newClasses_ GUARDED_BY(newClassesLock_);
 
-    os::memory::RecursiveMutex obsolete_classes_lock_;
-    PandaVector<Class *> obsolete_classes_ GUARDED_BY(obsolete_classes_lock_);
+    os::memory::RecursiveMutex obsoleteClassesLock_;
+    PandaVector<Class *> obsoleteClasses_ GUARDED_BY(obsoleteClassesLock_);
 
-    bool can_initialize_classes_ {false};
+    bool canInitializeClasses_ {false};
 };
 
 }  // namespace panda

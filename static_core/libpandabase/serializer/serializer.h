@@ -66,8 +66,8 @@ inline auto TypeToBuffer(const VecT &vec, std::vector<uint8_t> &buffer)
 
     // pack data
     const auto *ptr = reinterpret_cast<const uint8_t *>(vec.data());
-    const uint8_t *ptr_end = ToUint8tPtr(ToUintPtr(ptr) + size);
-    std::copy(ptr, ptr_end, std::back_inserter(buffer));
+    const uint8_t *ptrEnd = ToUint8tPtr(ToUintPtr(ptr) + size);
+    std::copy(ptr, ptrEnd, std::back_inserter(buffer));
     return ret.Value() + size;
 }
 
@@ -116,30 +116,30 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, T 
 
 // NOLINTNEXTLINE(google-runtime-references)
 inline Expected<size_t, const char *> BufferToTypeUnpackString(const uint8_t *data, size_t size, std::string &out,
-                                                               uint32_t str_size, size_t value)
+                                                               uint32_t strSize, size_t value)
 {
-    if (size < str_size) {
+    if (size < strSize) {
         return Unexpected("Cannot deserialize string, the buffer is too small.");
     }
 
-    out.resize(str_size);
-    memcpy_s(out.data(), str_size, data, str_size);
-    return value + str_size;
+    out.resize(strSize);
+    memcpy_s(out.data(), strSize, data, strSize);
+    return value + strSize;
 }
 
 // NOLINTNEXTLINE(google-runtime-references)
 inline Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, std::string &out)
 {
     // unpack size
-    uint32_t str_size = 0;
-    auto r = BufferToType(data, size, str_size);
-    if (!r || str_size == 0) {
+    uint32_t strSize = 0;
+    auto r = BufferToType(data, size, strSize);
+    if (!r || strSize == 0) {
         return r;
     }
     ASSERT(r.Value() <= size);
     data = ToUint8tPtr(ToUintPtr(data) + r.Value());
     size -= r.Value();
-    return BufferToTypeUnpackString(data, size, out, str_size, r.Value());
+    return BufferToTypeUnpackString(data, size, out, strSize, r.Value());
 }
 
 template <typename T>
@@ -148,9 +148,9 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, st
     static_assert(std::is_pod<T>::value, "Type is not supported");
 
     // unpack size
-    uint32_t vector_size = 0;
-    auto r = BufferToType(data, size, vector_size);
-    if (!r || vector_size == 0) {
+    uint32_t vectorSize = 0;
+    auto r = BufferToType(data, size, vectorSize);
+    if (!r || vectorSize == 0) {
         return r;
     }
     ASSERT(r.Value() <= size);
@@ -158,20 +158,20 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, st
     size -= r.Value();
 
     // unpack data
-    if (size < vector_size || (vector_size % sizeof(T))) {
+    if (size < vectorSize || (vectorSize % sizeof(T))) {
         return Unexpected("Cannot deserialize vector, the buffer is too small.");
     }
 
-    vector.resize(vector_size / sizeof(T));
-    memcpy_s(vector.data(), vector_size, data, vector_size);
+    vector.resize(vectorSize / sizeof(T));
+    memcpy_s(vector.data(), vectorSize, data, vectorSize);
 
-    return r.Value() + vector_size;
+    return r.Value() + vectorSize;
 }
 
 template <typename K, typename V>
 Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, std::unordered_map<K, V> &out)
 {
-    size_t backup_size = size;
+    size_t backupSize = size;
     uint32_t count = 0;
     auto r = BufferToType(data, size, count);
     if (!r) {
@@ -205,7 +205,7 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, st
             return Unexpected("Cannot emplace KeyValue to map.");
         }
     }
-    return backup_size - size;
+    return backupSize - size;
 }
 
 namespace internal {

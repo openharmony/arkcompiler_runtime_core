@@ -16,7 +16,7 @@
 inline bool CheckSSE42([[maybe_unused]] RuntimeInterface *runtime, Arch arch)
 {
     if (arch == Arch::X86_64) {
-        return OPTIONS.IsCpuFeatureEnabled(SSE42);
+        return g_options.IsCpuFeatureEnabled(SSE42);
     }
     return true;
 }

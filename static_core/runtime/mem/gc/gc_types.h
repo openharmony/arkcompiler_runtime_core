@@ -37,11 +37,11 @@ enum class GCType {
     GCTYPE_LAST = G1_GC,
 };
 
-constexpr bool IsGenerationalGCType(const GCType gc_type)
+constexpr bool IsGenerationalGCType(const GCType gcType)
 {
     bool ret = false;
-    ASSERT(gc_type != GCType::INVALID_GC);
-    switch (gc_type) {
+    ASSERT(gcType != GCType::INVALID_GC);
+    switch (gcType) {
         case GCType::GEN_GC:
         case GCType::G1_GC:
         case GCType::EPSILON_G1_GC:
@@ -79,41 +79,41 @@ static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::STW_GC)], "Stop-The-World GC
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::GEN_GC)], "Generation GC"));
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::G1_GC)], "G1 GC"));
 
-inline GCType GCTypeFromString(std::string_view gc_type_str)
+inline GCType GCTypeFromString(std::string_view gcTypeStr)
 {
-    if (gc_type_str == "epsilon") {
+    if (gcTypeStr == "epsilon") {
         return GCType::EPSILON_GC;
     }
-    if (gc_type_str == "epsilon-g1") {
+    if (gcTypeStr == "epsilon-g1") {
         return GCType::EPSILON_G1_GC;
     }
-    if (gc_type_str == "stw") {
+    if (gcTypeStr == "stw") {
         return GCType::STW_GC;
     }
-    if (gc_type_str == "gen-gc") {
+    if (gcTypeStr == "gen-gc") {
         return GCType::GEN_GC;
     }
-    if (gc_type_str == "g1-gc") {
+    if (gcTypeStr == "g1-gc") {
         return GCType::G1_GC;
     }
     return GCType::INVALID_GC;
 }
 
-constexpr std::string_view GCStringFromType(GCType gc_type)
+constexpr std::string_view GCStringFromType(GCType gcType)
 {
-    if (gc_type == GCType::EPSILON_GC) {
+    if (gcType == GCType::EPSILON_GC) {
         return "epsilon";
     }
-    if (gc_type == GCType::EPSILON_G1_GC) {
+    if (gcType == GCType::EPSILON_G1_GC) {
         return "epsilon-g1";
     }
-    if (gc_type == GCType::STW_GC) {
+    if (gcType == GCType::STW_GC) {
         return "stw";
     }
-    if (gc_type == GCType::GEN_GC) {
+    if (gcType == GCType::GEN_GC) {
         return "gen-gc";
     }
-    if (gc_type == GCType::G1_GC) {
+    if (gcType == GCType::G1_GC) {
         return "g1-gc";
     }
     return "invalid-gc";

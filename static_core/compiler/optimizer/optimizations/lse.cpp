@@ -65,8 +65,8 @@ public:
         : aa_(graph->GetAnalysis<AliasAnalysis>()),
           heaps_(*heaps),
           eliminations_(graph->GetLocalAllocator()->Adapter()),
-          shadowed_stores_(graph->GetLocalAllocator()->Adapter()),
-          disabled_objects_(graph->GetLocalAllocator()->Adapter())
+          shadowedStores_(graph->GetLocalAllocator()->Adapter()),
+          disabledObjects_(graph->GetLocalAllocator()->Adapter())
     {
     }
 
@@ -93,10 +93,10 @@ public:
             /* Instruction has no stored value (e.g. FillConstArray) */
             return;
         }
-        auto base_object = inst->GetDataFlowInput(0);
-        for (auto disabled_object : disabled_objects_) {
-            alias_calls_++;
-            if (aa_.CheckRefAlias(base_object, disabled_object) == MUST_ALIAS) {
+        auto baseObject = inst->GetDataFlowInput(0);
+        for (auto disabledObject : disabledObjects_) {
+            aliasCalls_++;
+            if (aa_.CheckRefAlias(baseObject, disabledObject) == MUST_ALIAS) {
                 return;
             }
         }
@@ -117,7 +117,7 @@ public:
                 const Lse::HeapValue heap = {inst, alive, false, false};
                 MarkForElimination(hvalue->origin, inst, &heap);
             } else {
-                shadowed_stores_[hvalue->origin].push_back(inst);
+                shadowedStores_[hvalue->origin].push_back(inst);
             }
         }
         COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(inst) << " updated heap with v" << alive->GetId();
@@ -125,40 +125,40 @@ public:
         /* Stores added to eliminations_ above aren't checked versus phis -> no double instruction elimination */
         UpdatePhis(inst);
 
-        auto &block_heap = heaps_.at(GetEquivClass(inst)).first.at(inst->GetBasicBlock());
+        auto &blockHeap = heaps_.at(GetEquivClass(inst)).first.at(inst->GetBasicBlock());
         uint32_t encounters = 0;
         /* Erase all aliased values, because they may be overwritten */
-        EraseAliasedValues(block_heap, inst, base_object, encounters);
+        EraseAliasedValues(blockHeap, inst, baseObject, encounters);
 
         // If we reached limit for this object, remove all its MUST_ALIASed instructions from heap
         // and disable this object for this BB
         if (encounters > Lse::LS_ACCESS_LIMIT) {
-            for (auto heap_iter = block_heap.begin(), heap_last = block_heap.end(); heap_iter != heap_last;) {
-                auto hinst = heap_iter->first;
-                alias_calls_++;
-                if (HasBaseObject(hinst) && aa_.CheckRefAlias(base_object, hinst->GetDataFlowInput(0)) == MUST_ALIAS) {
+            for (auto heapIter = blockHeap.begin(), heapLast = blockHeap.end(); heapIter != heapLast;) {
+                auto hinst = heapIter->first;
+                aliasCalls_++;
+                if (HasBaseObject(hinst) && aa_.CheckRefAlias(baseObject, hinst->GetDataFlowInput(0)) == MUST_ALIAS) {
                     COMPILER_LOG(DEBUG, LSE_OPT)
-                        << "\tDrop from heap { " << LogInst(hinst) << ", v" << heap_iter->second.val->GetId() << "}";
-                    heap_iter = block_heap.erase(heap_iter);
+                        << "\tDrop from heap { " << LogInst(hinst) << ", v" << heapIter->second.val->GetId() << "}";
+                    heapIter = blockHeap.erase(heapIter);
                 } else {
-                    heap_iter++;
+                    heapIter++;
                 }
             }
-            disabled_objects_.push_back(base_object);
+            disabledObjects_.push_back(baseObject);
             return;
         }
 
         /* Set value of the inst to VAL */
-        block_heap[inst] = {inst, alive, false, false};
+        blockHeap[inst] = {inst, alive, false, false};
     }
 
     void VisitLoad(Inst *inst)
     {
         if (HasBaseObject(inst)) {
             auto input = inst->GetDataFlowInput(0);
-            for (auto disabled_object : disabled_objects_) {
-                alias_calls_++;
-                if (aa_.CheckRefAlias(input, disabled_object) == MUST_ALIAS) {
+            for (auto disabledObject : disabledObjects_) {
+                aliasCalls_++;
+                if (aa_.CheckRefAlias(input, disabledObject) == MUST_ALIAS) {
                     return;
                 }
             }
@@ -197,18 +197,18 @@ public:
                 return;
         }
         for (auto inv : *invs) {
-            for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-                auto &block_heap = heaps_.at(eq_class).first.at(inv->GetBasicBlock());
-                for (auto heap_iter = block_heap.begin(), heap_last = block_heap.end(); heap_iter != heap_last;) {
-                    auto hinst = heap_iter->first;
-                    alias_calls_++;
+            for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+                auto &blockHeap = heaps_.at(eqClass).first.at(inv->GetBasicBlock());
+                for (auto heapIter = blockHeap.begin(), heapLast = blockHeap.end(); heapIter != heapLast;) {
+                    auto hinst = heapIter->first;
+                    aliasCalls_++;
 
                     if (!HasBaseObject(hinst) || aa_.CheckRefAlias(inv, hinst->GetDataFlowInput(0)) == NO_ALIAS) {
-                        heap_iter++;
+                        heapIter++;
                     } else {
-                        COMPILER_LOG(DEBUG, LSE_OPT) << "\tDrop from heap { " << LogInst(hinst) << ", v"
-                                                     << heap_iter->second.val->GetId() << "}";
-                        heap_iter = block_heap.erase(heap_iter);
+                        COMPILER_LOG(DEBUG, LSE_OPT)
+                            << "\tDrop from heap { " << LogInst(hinst) << ", v" << heapIter->second.val->GetId() << "}";
+                        heapIter = blockHeap.erase(heapIter);
                     }
                 }
             }
@@ -219,29 +219,29 @@ public:
     /// Completely resets the accumulated state: heap and phi candidates.
     void InvalidateHeap(BasicBlock *block)
     {
-        for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-            heaps_.at(eq_class).first.at(block).clear();
+        for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+            heaps_.at(eqClass).first.at(block).clear();
             auto loop = block->GetLoop();
             while (!loop->IsRoot()) {
-                heaps_.at(eq_class).second.at(loop).clear();
+                heaps_.at(eqClass).second.at(loop).clear();
                 loop = loop->GetOuterLoop();
             }
         }
-        disabled_objects_.clear();
+        disabledObjects_.clear();
     }
 
     /// Clears heap of local only values as we don't want them to affect analysis further
     void ClearLocalValuesFromHeap(BasicBlock *block)
     {
-        for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-            auto &block_heap = heaps_.at(eq_class).first.at(block);
+        for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+            auto &blockHeap = heaps_.at(eqClass).first.at(block);
 
-            auto heap_it = block_heap.begin();
-            while (heap_it != block_heap.end()) {
-                if (heap_it->second.local) {
-                    heap_it = block_heap.erase(heap_it);
+            auto heapIt = blockHeap.begin();
+            while (heapIt != blockHeap.end()) {
+                if (heapIt->second.local) {
+                    heapIt = blockHeap.erase(heapIt);
                 } else {
-                    heap_it++;
+                    heapIt++;
                 }
             }
         }
@@ -250,20 +250,20 @@ public:
     /// Release objects and reset Alias Analysis count
     void ResetLimits()
     {
-        disabled_objects_.clear();
-        alias_calls_ = 0;
+        disabledObjects_.clear();
+        aliasCalls_ = 0;
     }
 
     uint32_t GetAliasAnalysisCallCount()
     {
-        return alias_calls_;
+        return aliasCalls_;
     }
 
     /// Marks all values currently on heap as potentially read
     void SetHeapAsRead(BasicBlock *block)
     {
-        for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-            auto &bheap = heaps_.at(eq_class).first.at(block);
+        for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+            auto &bheap = heaps_.at(eqClass).first.at(block);
             for (auto it = bheap.begin(); it != bheap.end();) {
                 it->second.read = true;
                 it++;
@@ -286,9 +286,9 @@ public:
                 phi->AppendInput(cand->IsStore() ? InstStoredValue(cand) : cand);
                 continue;
             }
-            auto &block_heap = heap.at(bb);
+            auto &blockHeap = heap.at(bb);
             Inst *alive = nullptr;
-            for (auto &entry : block_heap) {
+            for (auto &entry : blockHeap) {
                 if (std::find(insts->begin(), insts->end(), entry.first) != insts->end()) {
                     alive = entry.first;
                     break;
@@ -306,8 +306,8 @@ public:
                 // We've checked that no stores exist in inner loops earlier, which allows us to just check
                 // the first store before the load
                 while (it != insts->rend()) {
-                    auto s_inst = *it;
-                    if (s_inst->IsStore()) {
+                    auto sInst = *it;
+                    if (sInst->IsStore()) {
                         break;
                     }
                     it++;
@@ -322,7 +322,7 @@ public:
                     continue;
                 }
             }
-            phi->AppendInput(block_heap[alive].val);
+            phi->AppendInput(blockHeap[alive].val);
         }
         return true;
     }
@@ -352,12 +352,11 @@ public:
         if (phi != nullptr) {
             for (size_t i = 0; i < phi->GetInputsCount(); i++) {
                 auto bb = loop->GetHeader()->GetPredecessor(i);
-                auto phi_input = phi->GetInput(i).GetInst();
+                auto phiInput = phi->GetInput(i).GetInst();
                 if (bb == loop->GetPreHeader() && cand->IsLoad() && cand->IsMovableObject()) {
                     ssb_.SearchAndCreateMissingObjInSaveState(bb->GetGraph(), cand, phi);
-                } else if (phi_input->IsMovableObject()) {
-                    ssb_.SearchAndCreateMissingObjInSaveState(bb->GetGraph(), phi_input, bb->GetLastInst(), nullptr,
-                                                              bb);
+                } else if (phiInput->IsMovableObject()) {
+                    ssb_.SearchAndCreateMissingObjInSaveState(bb->GetGraph(), phiInput, bb->GetLastInst(), nullptr, bb);
                 }
             }
         } else if (hvalue.val->IsMovableObject()) {
@@ -371,8 +370,8 @@ public:
     /// Add eliminations inside loops if there is no overwrites on backedges.
     void FinalizeLoops(Graph *graph)
     {
-        for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-            for (auto &[loop, phis] : heaps_.at(eq_class).second) {
+        for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+            for (auto &[loop, phis] : heaps_.at(eqClass).second) {
                 COMPILER_LOG(DEBUG, LSE_OPT) << "Finalizing loop #" << loop->GetId();
                 FinalizeLoopsWithPhiCands(graph, loop, phis);
             }
@@ -386,10 +385,10 @@ public:
 
                 [[maybe_unused]] auto initial = hvalue.val;
                 while (eliminations_.find(hvalue.val) != eliminations_.end()) {
-                    auto elim_value = eliminations_[hvalue.val];
+                    auto elimValue = eliminations_[hvalue.val];
                     COMPILER_LOG(DEBUG, LSE_OPT) << "\t" << LogInst(hvalue.val)
-                                                 << " is eliminated. Trying to replace by " << LogInst(elim_value.val);
-                    hvalue = elim_value;
+                                                 << " is eliminated. Trying to replace by " << LogInst(elimValue.val);
+                    hvalue = elimValue;
                     ASSERT_PRINT(initial != hvalue.val, "A cyclic elimination has been detected");
                 }
                 entry.second = hvalue;
@@ -428,10 +427,10 @@ public:
     void FinalizeShadowedStores()
     {
         // We want to see if there are no paths from the store that evade any of its shadow stores
-        for (auto &entry : shadowed_stores_) {
+        for (auto &entry : shadowedStores_) {
             auto inst = entry.first;
             auto marker = inst->GetBasicBlock()->GetGraph()->NewMarker();
-            auto &shadows = shadowed_stores_.at(inst);
+            auto &shadows = shadowedStores_.at(inst);
             for (auto shadow : shadows) {
                 shadow->GetBasicBlock()->SetMarker(marker);
             }
@@ -453,9 +452,9 @@ private:
     /// Return a MUST_ALIASed heap entry, nullptr if not present.
     const Lse::HeapValue *GetHeapValue(Inst *inst)
     {
-        auto &block_heap = heaps_.at(GetEquivClass(inst)).first.at(inst->GetBasicBlock());
-        for (auto &entry : block_heap) {
-            alias_calls_++;
+        auto &blockHeap = heaps_.at(GetEquivClass(inst)).first.at(inst->GetBasicBlock());
+        for (auto &entry : blockHeap) {
+            aliasCalls_++;
             if (aa_.CheckInstAlias(inst, entry.first) == MUST_ALIAS) {
                 return &entry.second;
             }
@@ -471,7 +470,7 @@ private:
         while (!loop->IsRoot()) {
             auto &phis = heaps_.at(GetEquivClass(inst)).second.at(loop);
             for (auto &[mem, values] : phis) {
-                alias_calls_++;
+                aliasCalls_++;
                 if (aa_.CheckInstAlias(inst, mem) != NO_ALIAS) {
                     values.push_back(inst);
                 }
@@ -480,42 +479,42 @@ private:
         }
     }
 
-    void EraseAliasedValues(ArenaUnorderedMap<Inst *, Lse::HeapValue> &block_heap, Inst *inst, Inst *base_object,
+    void EraseAliasedValues(ArenaUnorderedMap<Inst *, Lse::HeapValue> &blockHeap, Inst *inst, Inst *baseObject,
                             uint32_t &encounters)
     {
-        for (auto heap_iter = block_heap.begin(), heap_last = block_heap.end(); heap_iter != heap_last;) {
-            auto hinst = heap_iter->first;
+        for (auto heapIter = blockHeap.begin(), heapLast = blockHeap.end(); heapIter != heapLast;) {
+            auto hinst = heapIter->first;
             ASSERT(GetEquivClass(inst) == GetEquivClass(hinst));
-            alias_calls_++;
+            aliasCalls_++;
             if (aa_.CheckInstAlias(inst, hinst) == NO_ALIAS) {
                 // Keep track if it's the same object but with different offset
-                heap_iter++;
-                alias_calls_++;
-                if (aa_.CheckRefAlias(base_object, hinst->GetDataFlowInput(0)) == MUST_ALIAS) {
+                heapIter++;
+                aliasCalls_++;
+                if (aa_.CheckRefAlias(baseObject, hinst->GetDataFlowInput(0)) == MUST_ALIAS) {
                     encounters++;
                 }
             } else {
                 COMPILER_LOG(DEBUG, LSE_OPT)
-                    << "\tDrop from heap { " << LogInst(hinst) << ", v" << heap_iter->second.val->GetId() << "}";
-                heap_iter = block_heap.erase(heap_iter);
+                    << "\tDrop from heap { " << LogInst(hinst) << ", v" << heapIter->second.val->GetId() << "}";
+                heapIter = blockHeap.erase(heapIter);
             }
         }
     }
 
     void FinalizeLoopsWithPhiCands(Graph *graph, Loop *loop, ArenaUnorderedMap<Inst *, InstVector> &phis)
     {
-        InstVector insts_must_alias(graph->GetLocalAllocator()->Adapter());
+        InstVector instsMustAlias(graph->GetLocalAllocator()->Adapter());
         for (auto &[cand, insts] : phis) {
             if (insts.empty()) {
                 COMPILER_LOG(DEBUG, LSE_OPT) << "Skipping phi candidate " << LogInst(cand) << " (no users)";
                 continue;
             }
 
-            insts_must_alias.clear();
+            instsMustAlias.clear();
 
             COMPILER_LOG(DEBUG, LSE_OPT) << "Processing phi candidate: " << LogInst(cand);
-            bool has_stores = false;
-            bool has_loads = false;
+            bool hasStores = false;
+            bool hasLoads = false;
             bool valid = true;
 
             for (auto inst : insts) {
@@ -523,11 +522,11 @@ private:
                 if (eliminations_.find(inst) != eliminations_.end()) {
                     continue;
                 }
-                auto alias_result = aa_.CheckInstAlias(cand, inst);
-                if (alias_result == MAY_ALIAS && inst->IsLoad()) {
+                auto aliasResult = aa_.CheckInstAlias(cand, inst);
+                if (aliasResult == MAY_ALIAS && inst->IsLoad()) {
                     // Ignore MAY_ALIAS loads, they won't interfere with our analysis
                     continue;
-                } else if (alias_result == MAY_ALIAS) {  // NOLINT(readability-else-after-return)
+                } else if (aliasResult == MAY_ALIAS) {  // NOLINT(readability-else-after-return)
                     // If we have a MAY_ALIAS store we can't be sure about our values
                     // in phi creation
                     ASSERT(inst->IsStore());
@@ -536,7 +535,7 @@ private:
                     valid = false;
                     break;
                 }
-                ASSERT(alias_result == MUST_ALIAS);
+                ASSERT(aliasResult == MUST_ALIAS);
 
                 if (inst->IsStore() && inst->GetBasicBlock()->GetLoop() != loop) {
                     // We can handle if loads are in inner loop, but if a store is in inner loop
@@ -547,26 +546,26 @@ private:
                     break;
                 }
 
-                insts_must_alias.push_back(inst);
+                instsMustAlias.push_back(inst);
                 if (inst->IsStore()) {
-                    has_stores = true;
+                    hasStores = true;
                 } else if (inst->IsLoad()) {
-                    has_loads = true;
+                    hasLoads = true;
                 }
             }
             // Other than validity, it's also possible that all instructions are already eliminated
-            if (!valid || insts_must_alias.empty()) {
+            if (!valid || instsMustAlias.empty()) {
                 continue;
             }
 
-            TryLoopDoElimination(cand, loop, &insts_must_alias, has_loads, has_stores);
+            TryLoopDoElimination(cand, loop, &instsMustAlias, hasLoads, hasStores);
         }
     }
 
-    void TryLoopDoElimination(Inst *cand, Loop *loop, InstVector *insts, bool has_loads, bool has_stores)
+    void TryLoopDoElimination(Inst *cand, Loop *loop, InstVector *insts, bool hasLoads, bool hasStores)
     {
-        if (has_stores) {
-            if (!has_loads) {
+        if (hasStores) {
+            if (!hasLoads) {
                 // Nothing to replace
                 COMPILER_LOG(DEBUG, LSE_OPT)
                     << "Skipping phi candidate " << LogInst(cand) << ": no loads to convert to phi";
@@ -583,7 +582,7 @@ private:
 
             LoopDoElimination(cand, loop, phi, insts);
         } else {
-            ASSERT(has_loads);
+            ASSERT(hasLoads);
             // Without stores, we can replace all MUST_ALIAS loads with instruction itself
             LoopDoElimination(cand, loop, nullptr, insts);
         }
@@ -594,10 +593,10 @@ private:
     Lse::HeapEqClasses &heaps_;
     /* Map of instructions to be deleted with values to replace them with */
     ArenaUnorderedMap<Inst *, struct Lse::HeapValue> eliminations_;
-    ArenaUnorderedMap<Inst *, std::vector<Inst *>> shadowed_stores_;
+    ArenaUnorderedMap<Inst *, std::vector<Inst *>> shadowedStores_;
     SaveStateBridgesBuilder ssb_;
-    InstVector disabled_objects_;
-    uint32_t alias_calls_ {0};
+    InstVector disabledObjects_;
+    uint32_t aliasCalls_ {0};
 };
 
 /// Returns true if the instruction invalidates the whole heap
@@ -681,14 +680,13 @@ bool Lse::CanEliminateInstruction(Inst *inst)
 
 void Lse::InitializeHeap(BasicBlock *block, HeapEqClasses *heaps)
 {
-    for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-        auto &heap = heaps->at(eq_class).first;
-        auto &phi_cands = heaps->at(eq_class).second;
+    for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+        auto &heap = heaps->at(eqClass).first;
+        auto &phiCands = heaps->at(eqClass).second;
         [[maybe_unused]] auto it = heap.emplace(block, GetGraph()->GetLocalAllocator()->Adapter());
         ASSERT(it.second);
         if (block->IsLoopHeader()) {
-            [[maybe_unused]] auto phit =
-                phi_cands.emplace(block->GetLoop(), GetGraph()->GetLocalAllocator()->Adapter());
+            [[maybe_unused]] auto phit = phiCands.emplace(block->GetLoop(), GetGraph()->GetLocalAllocator()->Adapter());
             ASSERT(phit.second);
         }
     }
@@ -710,99 +708,99 @@ void Lse::MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps)
 
     auto preheader = loop->GetPreHeader();
 
-    for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-        auto &preheader_heap = heaps->at(eq_class).first.at(preheader);
+    for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+        auto &preheaderHeap = heaps->at(eqClass).first.at(preheader);
 
-        auto &block_phis = heaps->at(eq_class).second.at(loop);
-        for (auto mem : preheader_heap) {
-            block_phis.try_emplace(mem.second.origin, GetGraph()->GetLocalAllocator()->Adapter());
+        auto &blockPhis = heaps->at(eqClass).second.at(loop);
+        for (auto mem : preheaderHeap) {
+            blockPhis.try_emplace(mem.second.origin, GetGraph()->GetLocalAllocator()->Adapter());
             COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(mem.first) << " is a phi cand for BB #" << block->GetId();
         }
     }
 }
 
 /// Merge heap values for passed block from its direct predecessors.
-int Lse::MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phi_fixup_mrk)
+int Lse::MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk)
 {
-    int alias_calls = 0;
-    for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-        auto &heap = heaps->at(eq_class).first;
-        auto &block_heap = heap.at(block);
+    int aliasCalls = 0;
+    for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+        auto &heap = heaps->at(eqClass).first;
+        auto &blockHeap = heap.at(block);
         /* Copy a heap of one of predecessors */
         auto preds = block->GetPredsBlocks();
-        auto pred_it = preds.begin();
-        if (pred_it != preds.end()) {
-            block_heap.insert(heap.at(*pred_it).begin(), heap.at(*pred_it).end());
-            pred_it++;
+        auto predIt = preds.begin();
+        if (predIt != preds.end()) {
+            blockHeap.insert(heap.at(*predIt).begin(), heap.at(*predIt).end());
+            predIt++;
         }
 
         /* Erase from the heap anything that disappeared or was changed in other predecessors */
-        while (pred_it != preds.end()) {
-            auto pred_heap = heap.at(*pred_it);
-            auto heap_it = block_heap.begin();
-            while (heap_it != block_heap.end()) {
-                auto &heap_value = heap_it->second;
-                auto pred_inst_it = pred_heap.begin();
-                while (pred_inst_it != pred_heap.end()) {
-                    if (pred_inst_it->first == heap_it->first) {
+        while (predIt != preds.end()) {
+            auto predHeap = heap.at(*predIt);
+            auto heapIt = blockHeap.begin();
+            while (heapIt != blockHeap.end()) {
+                auto &heapValue = heapIt->second;
+                auto predInstIt = predHeap.begin();
+                while (predInstIt != predHeap.end()) {
+                    if (predInstIt->first == heapIt->first) {
                         break;
                     }
-                    alias_calls++;
-                    if (GetGraph()->CheckInstAlias(heap_it->first, pred_inst_it->first) == MUST_ALIAS) {
+                    aliasCalls++;
+                    if (GetGraph()->CheckInstAlias(heapIt->first, predInstIt->first) == MUST_ALIAS) {
                         break;
                     }
-                    pred_inst_it++;
+                    predInstIt++;
                 }
-                if (pred_inst_it == pred_heap.end()) {
+                if (predInstIt == predHeap.end()) {
                     // If this is a phi we're creating during merge, delete it
-                    if (heap_value.val->IsPhi() && heap_value.local) {
-                        block->RemoveInst(heap_value.val);
+                    if (heapValue.val->IsPhi() && heapValue.local) {
+                        block->RemoveInst(heapValue.val);
                     }
-                    heap_it = block_heap.erase(heap_it);
+                    heapIt = blockHeap.erase(heapIt);
                     continue;
                 }
-                if (pred_inst_it->second.val != heap_value.val) {
+                if (predInstIt->second.val != heapValue.val) {
                     // Try to create a phi instead
                     // We limit possible phis to cases where value originated in the same predecessor
                     // in order to not increase register usage too much
                     if (block->GetLoop()->IsIrreducible() || block->IsCatch() ||
-                        pred_inst_it->second.origin->GetBasicBlock() != *pred_it) {
+                        predInstIt->second.origin->GetBasicBlock() != *predIt) {
                         // If this is a phi we're creating during merge, delete it
-                        if (heap_value.val->IsPhi() && heap_value.local) {
-                            block->RemoveInst(heap_value.val);
+                        if (heapValue.val->IsPhi() && heapValue.local) {
+                            block->RemoveInst(heapValue.val);
                         }
-                        heap_it = block_heap.erase(heap_it);
+                        heapIt = blockHeap.erase(heapIt);
                         continue;
                     }
-                    if (heap_value.val->IsPhi() && heap_value.local) {
-                        heap_value.val->AppendInput(pred_inst_it->second.val);
+                    if (heapValue.val->IsPhi() && heapValue.local) {
+                        heapValue.val->AppendInput(predInstIt->second.val);
                     } else {
                         // Values can only originate in a single block. If this predecessor is not
                         // the second predecessor, that means that this value did not originate in other
                         // predecessors, thus we don't create a phi
-                        if (heap_value.origin->GetBasicBlock() != *(preds.begin()) ||
-                            std::distance(preds.begin(), pred_it) > 1) {
-                            heap_it = block_heap.erase(heap_it);
+                        if (heapValue.origin->GetBasicBlock() != *(preds.begin()) ||
+                            std::distance(preds.begin(), predIt) > 1) {
+                            heapIt = blockHeap.erase(heapIt);
                             continue;
                         }
                         auto phi =
-                            block->GetGraph()->CreateInstPhi(heap_value.origin->GetType(), heap_value.origin->GetPc());
+                            block->GetGraph()->CreateInstPhi(heapValue.origin->GetType(), heapValue.origin->GetPc());
                         block->AppendPhi(phi);
-                        phi->AppendInput(heap_value.val);
-                        phi->AppendInput(pred_inst_it->second.val);
-                        phi->SetMarker(phi_fixup_mrk);
-                        heap_value.val = phi;
-                        heap_value.local = true;
+                        phi->AppendInput(heapValue.val);
+                        phi->AppendInput(predInstIt->second.val);
+                        phi->SetMarker(phiFixupMrk);
+                        heapValue.val = phi;
+                        heapValue.local = true;
                     }
                 } else {
-                    heap_it->second.read |= pred_inst_it->second.read;
+                    heapIt->second.read |= predInstIt->second.read;
                 }
-                heap_it++;
+                heapIt++;
             }
-            pred_it++;
+            predIt++;
         }
     }
-    return alias_calls;
+    return aliasCalls;
 }
 
 /**
@@ -810,11 +808,11 @@ int Lse::MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker
  * we're creating a useful phi, and can't fix SaveStates because of that.
  * Do that here.
  */
-void Lse::FixupPhisInBlock(BasicBlock *block, Marker phi_fixup_mrk)
+void Lse::FixupPhisInBlock(BasicBlock *block, Marker phiFixupMrk)
 {
-    for (auto phi_inst : block->PhiInstsSafe()) {
-        auto phi = phi_inst->CastToPhi();
-        if (!phi->IsMarked(phi_fixup_mrk)) {
+    for (auto phiInst : block->PhiInstsSafe()) {
+        auto phi = phiInst->CastToPhi();
+        if (!phi->IsMarked(phiFixupMrk)) {
             continue;
         }
         if (!phi->HasUsers()) {
@@ -926,22 +924,22 @@ void Lse::DeleteInstruction(Inst *inst, Inst *value)
     ArenaQueue<Inst *> queue(GetGraph()->GetLocalAllocator()->Adapter());
     queue.push(inst);
     while (!queue.empty()) {
-        Inst *front_inst = queue.front();
-        BasicBlock *block = front_inst->GetBasicBlock();
+        Inst *frontInst = queue.front();
+        BasicBlock *block = frontInst->GetBasicBlock();
         queue.pop();
 
         // Have been already deleted or could not be deleted
-        if (block == nullptr || front_inst->HasUsers()) {
+        if (block == nullptr || frontInst->HasUsers()) {
             continue;
         }
 
-        for (auto &input : front_inst->GetInputs()) {
+        for (auto &input : frontInst->GetInputs()) {
             /* Delete only instructions that has no data flow impact */
             if (input.GetInst()->HasPseudoDestination()) {
                 queue.push(input.GetInst());
             }
         }
-        block->RemoveInst(front_inst);
+        block->RemoveInst(frontInst);
         applied_ = true;
     }
 }
@@ -958,9 +956,9 @@ void Lse::DeleteInstructions(const ArenaUnorderedMap<Inst *, struct HeapValue> &
                    std::cerr << "is replaced by eliminated value:\n", value->Dump(&std::cerr)));
 
         while (origin->GetBasicBlock() == nullptr) {
-            auto elim_it = eliminated.find(origin);
-            ASSERT(elim_it != eliminated.end());
-            origin = elim_it->second.origin;
+            auto elimIt = eliminated.find(origin);
+            ASSERT(elimIt != eliminated.end());
+            origin = elimIt->second.origin;
         }
 
         GetGraph()->GetEventWriter().EventLse(inst->GetId(), inst->GetPc(), origin->GetId(), origin->GetPc(),
@@ -997,10 +995,10 @@ void Lse::ApplyHoistToCandidate(Loop *loop, Inst *alive)
         }
     }
     const auto &rpo = GetGraph()->GetBlocksRPO();
-    auto block_iter = std::find(rpo.rbegin(), rpo.rend(), alive->GetBasicBlock());
-    ASSERT(block_iter != rpo.rend());
+    auto blockIter = std::find(rpo.rbegin(), rpo.rend(), alive->GetBasicBlock());
+    ASSERT(blockIter != rpo.rend());
     auto inst = alive->GetPrev();
-    while (*block_iter != loop->GetPreHeader()) {
+    while (*blockIter != loop->GetPreHeader()) {
         while (inst != nullptr) {
             if (IsHeapInvalidatingInst(inst) || (inst->IsMemory() && GetEquivClass(inst) == GetEquivClass(alive) &&
                                                  GetGraph()->CheckInstAlias(inst, alive) != NO_ALIAS)) {
@@ -1009,13 +1007,13 @@ void Lse::ApplyHoistToCandidate(Loop *loop, Inst *alive)
             }
             inst = inst->GetPrev();
         }
-        block_iter++;
-        inst = (*block_iter)->GetLastInst();
+        blockIter++;
+        inst = (*blockIter)->GetLastInst();
     }
     alive->GetBasicBlock()->EraseInst(alive, true);
-    auto last_inst = loop->GetPreHeader()->GetLastInst();
-    if (last_inst != nullptr && last_inst->IsControlFlow()) {
-        loop->GetPreHeader()->InsertBefore(alive, last_inst);
+    auto lastInst = loop->GetPreHeader()->GetLastInst();
+    if (lastInst != nullptr && lastInst->IsControlFlow()) {
+        loop->GetPreHeader()->InsertBefore(alive, lastInst);
     } else {
         loop->GetPreHeader()->AppendInst(alive);
     }
@@ -1031,51 +1029,51 @@ void Lse::ApplyHoistToCandidate(Loop *loop, Inst *alive)
 void Lse::TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps,
                                  const ArenaUnorderedMap<Inst *, struct HeapValue> *eliminated)
 {
-    for (auto inner_loop : loop->GetInnerLoops()) {
-        TryToHoistLoadFromLoop(inner_loop, heaps, eliminated);
+    for (auto innerLoop : loop->GetInnerLoops()) {
+        TryToHoistLoadFromLoop(innerLoop, heaps, eliminated);
     }
 
     if (loop->IsIrreducible() || loop->IsOsrLoop()) {
         return;
     }
 
-    auto &back_bbs = loop->GetBackEdges();
-    be_alive_.clear();
+    auto &backBbs = loop->GetBackEdges();
+    beAlive_.clear();
 
     // Initiate alive set
-    auto back_bb = back_bbs.begin();
-    ASSERT(back_bb != back_bbs.end());
-    for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-        for (const auto &entry : heaps->at(eq_class).first.at(*back_bb)) {
+    auto backBb = backBbs.begin();
+    ASSERT(backBb != backBbs.end());
+    for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+        for (const auto &entry : heaps->at(eqClass).first.at(*backBb)) {
             // Do not touch Stores and eliminated ones
             if (entry.first->IsLoad() && eliminated->find(entry.first) == eliminated->end()) {
-                be_alive_.insert(entry.first);
+                beAlive_.insert(entry.first);
             }
         }
     }
 
     // Throw values not alive on other backedges
-    while (++back_bb != back_bbs.end()) {
-        auto alive = be_alive_.begin();
-        while (alive != be_alive_.end()) {
+    while (++backBb != backBbs.end()) {
+        auto alive = beAlive_.begin();
+        while (alive != beAlive_.end()) {
             auto &heap = heaps->at(GetEquivClass(*alive)).first;
-            if (heap.at(*back_bb).find(*alive) == heap.at(*back_bb).end()) {
-                alive = be_alive_.erase(alive);
+            if (heap.at(*backBb).find(*alive) == heap.at(*backBb).end()) {
+                alive = beAlive_.erase(alive);
             } else {
                 alive++;
             }
         }
     }
     COMPILER_LOG(DEBUG, LSE_OPT) << "Loop #" << loop->GetId() << " has the following motion candidates:";
-    for (auto alive : be_alive_) {
+    for (auto alive : beAlive_) {
         ApplyHoistToCandidate(loop, alive);
     }
 }
 
-void Lse::ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phi_fixup_mrk)
+void Lse::ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phiFixupMrk)
 {
     InstVector invs(GetGraph()->GetLocalAllocator()->Adapter());
-    int alias_calls = 0;
+    int aliasCalls = 0;
     for (auto block : GetGraph()->GetBlocksRPO()) {
         COMPILER_LOG(DEBUG, LSE_OPT) << "Processing BB " << block->GetId();
         InitializeHeap(block, heaps);
@@ -1083,7 +1081,7 @@ void Lse::ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phi_fi
         if (block->IsLoopHeader()) {
             MergeHeapValuesForLoop(block, heaps);
         } else {
-            alias_calls += MergeHeapValuesForBlock(block, heaps, phi_fixup_mrk);
+            aliasCalls += MergeHeapValuesForBlock(block, heaps, phiFixupMrk);
         }
 
         for (auto inst : block->Insts()) {
@@ -1103,7 +1101,7 @@ void Lse::ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phi_fi
             }
             // If we call Alias Analysis too much, we assume that this block has too many
             // instructions and we should bail in favor of performance.
-            if (visitor.GetAliasAnalysisCallCount() + alias_calls > Lse::AA_CALLS_LIMIT) {
+            if (visitor.GetAliasAnalysisCallCount() + aliasCalls > Lse::AA_CALLS_LIMIT) {
                 COMPILER_LOG(DEBUG, LSE_OPT) << "Exiting BB " << block->GetId() << ": too many Alias Analysis calls";
                 visitor.InvalidateHeap(block);
                 break;
@@ -1122,27 +1120,27 @@ bool Lse::RunImpl()
     }
 
     HeapEqClasses heaps(GetGraph()->GetLocalAllocator()->Adapter());
-    for (int eq_class = Lse::EquivClass::EQ_ARRAY; eq_class != Lse::EquivClass::EQ_LAST; eq_class++) {
-        std::pair<Heap, PhiCands> heap_phi(GetGraph()->GetLocalAllocator()->Adapter(),
-                                           GetGraph()->GetLocalAllocator()->Adapter());
-        heaps.emplace(eq_class, heap_phi);
+    for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+        std::pair<Heap, PhiCands> heapPhi(GetGraph()->GetLocalAllocator()->Adapter(),
+                                          GetGraph()->GetLocalAllocator()->Adapter());
+        heaps.emplace(eqClass, heapPhi);
     }
 
     GetGraph()->RunPass<LoopAnalyzer>();
     GetGraph()->RunPass<AliasAnalysis>();
 
     LseVisitor visitor(GetGraph(), &heaps);
-    auto marker_holder = MarkerHolder(GetGraph());
-    auto phi_fixup_mrk = marker_holder.GetMarker();
+    auto markerHolder = MarkerHolder(GetGraph());
+    auto phiFixupMrk = markerHolder.GetMarker();
 
-    ProcessAllBBs(visitor, &heaps, phi_fixup_mrk);
+    ProcessAllBBs(visitor, &heaps, phiFixupMrk);
 
     visitor.FinalizeShadowedStores();
     visitor.FinalizeLoops(GetGraph());
 
     auto &eliminated = visitor.GetEliminations();
     GetGraph()->RunPass<DominatorsTree>();
-    if (hoist_loads_) {
+    if (hoistLoads_) {
         for (auto loop : GetGraph()->GetRootLoop()->GetInnerLoops()) {
             TryToHoistLoadFromLoop(loop, &heaps, &eliminated);
         }
@@ -1151,7 +1149,7 @@ bool Lse::RunImpl()
     DeleteInstructions(visitor.GetEliminations());
 
     for (auto block : GetGraph()->GetBlocksRPO()) {
-        FixupPhisInBlock(block, phi_fixup_mrk);
+        FixupPhisInBlock(block, phiFixupMrk);
     }
 
     COMPILER_LOG(DEBUG, LSE_OPT) << "Load-Store Elimination complete";

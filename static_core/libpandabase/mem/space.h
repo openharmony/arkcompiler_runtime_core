@@ -40,17 +40,17 @@ constexpr SpaceType ToSpaceType(size_t index)
     return static_cast<SpaceType>(index);
 }
 
-constexpr size_t SpaceTypeToIndex(SpaceType space_type)
+constexpr size_t SpaceTypeToIndex(SpaceType spaceType)
 {
-    return helpers::ToUnderlying(space_type);
+    return helpers::ToUnderlying(spaceType);
 }
 
 constexpr size_t SPACE_TYPE_SIZE = helpers::ToUnderlying(SpaceType::SPACE_TYPE_LAST);
 
-constexpr bool IsHeapSpace(SpaceType space_type)
+constexpr bool IsHeapSpace(SpaceType spaceType)
 {
-    return (space_type == SpaceType::SPACE_TYPE_OBJECT) || (space_type == SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT) ||
-           (space_type == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    return (spaceType == SpaceType::SPACE_TYPE_OBJECT) || (spaceType == SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT) ||
+           (spaceType == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
 }
 
 inline const char *SpaceTypeToString(SpaceType type)

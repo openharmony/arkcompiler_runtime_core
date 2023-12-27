@@ -27,19 +27,19 @@ namespace panda::taskmanager {
 class FineGrainedTaskStatisticsImpl : public TaskStatistics {
     class GuardedCounter {
     public:
-        explicit GuardedCounter(size_t start_value = 0) : counter_(start_value) {}
+        explicit GuardedCounter(size_t startValue = 0) : counter_(startValue) {}
 
         GuardedCounter &operator+=(size_t value)
         {
-            os::memory::LockHolder lock_holder(lock_);
+            os::memory::LockHolder lockHolder(lock_);
             counter_ += value;
             return *this;
         }
 
         friend bool operator==(const GuardedCounter &lv, const GuardedCounter &rv)
         {
-            os::memory::LockHolder lv_lock_holder(lv.lock_);
-            os::memory::LockHolder rv_lock_holder(rv.lock_);
+            os::memory::LockHolder lvLockHolder(lv.lock_);
+            os::memory::LockHolder rvLockHolder(rv.lock_);
             return lv.counter_ == rv.counter_;
         }
 
@@ -55,24 +55,24 @@ class FineGrainedTaskStatisticsImpl : public TaskStatistics {
 
         void SetValue(size_t value)
         {
-            os::memory::LockHolder lock_holder(lock_);
+            os::memory::LockHolder lockHolder(lock_);
             counter_ = value;
         }
 
         size_t GetValue() const
         {
-            os::memory::LockHolder lock_holder(lock_);
+            os::memory::LockHolder lockHolder(lock_);
             return counter_;
         }
 
-        friend size_t CalcCountOfTasksInSystem(const GuardedCounter &added_count, const GuardedCounter &executed_count,
-                                               const GuardedCounter &popped_count)
+        friend size_t CalcCountOfTasksInSystem(const GuardedCounter &addedCount, const GuardedCounter &executedCount,
+                                               const GuardedCounter &poppedCount)
         {
-            os::memory::LockHolder added_lock_holder(added_count.lock_);
-            os::memory::LockHolder executed_lock_holder(executed_count.lock_);
-            os::memory::LockHolder popped_lock_holder(popped_count.lock_);
-            ASSERT(added_count.counter_ >= executed_count.counter_ + popped_count.counter_);
-            return added_count.counter_ - executed_count.counter_ - popped_count.counter_;
+            os::memory::LockHolder addedLockHolder(addedCount.lock_);
+            os::memory::LockHolder executedLockHolder(executedCount.lock_);
+            os::memory::LockHolder poppedLockHolder(poppedCount.lock_);
+            ASSERT(addedCount.counter_ >= executedCount.counter_ + poppedCount.counter_);
+            return addedCount.counter_ - executedCount.counter_ - poppedCount.counter_;
         }
 
     private:
@@ -99,7 +99,7 @@ public:
     void ResetCountersWithTaskProperties(TaskProperties properties) override;
 
 private:
-    std::unordered_map<TaskStatus, TaskPropertiesGuardedCounter> task_properties_counter_map_;
+    std::unordered_map<TaskStatus, TaskPropertiesGuardedCounter> taskPropertiesCounterMap_;
 };
 
 }  // namespace panda::taskmanager

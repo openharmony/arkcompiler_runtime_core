@@ -19,10 +19,10 @@
 namespace panda::ets {
 
 /* static */
-EtsObject *EtsObject::Create(EtsCoroutine *ets_coroutine, EtsClass *klass)
+EtsObject *EtsObject::Create(EtsCoroutine *etsCoroutine, EtsClass *klass)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-    return static_cast<EtsObject *>(ObjectHeader::Create(ets_coroutine, klass->GetRuntimeClass()));
+    return static_cast<EtsObject *>(ObjectHeader::Create(etsCoroutine, klass->GetRuntimeClass()));
 }
 
 /* static */

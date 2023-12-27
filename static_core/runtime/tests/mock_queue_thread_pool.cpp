@@ -85,8 +85,8 @@ private:
 class MockQueue : public TaskQueueInterface<MockTask> {
 public:
     explicit MockQueue(mem::InternalAllocatorPtr allocator) : queue_(allocator->Adapter()) {}
-    MockQueue(mem::InternalAllocatorPtr allocator, size_t queue_size)
-        : TaskQueueInterface<MockTask>(queue_size), queue_(allocator->Adapter())
+    MockQueue(mem::InternalAllocatorPtr allocator, size_t queueSize)
+        : TaskQueueInterface<MockTask>(queueSize), queue_(allocator->Adapter())
     {
     }
 
@@ -137,16 +137,16 @@ public:
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         task.SetStatus(MockTask::COMPLETED);
         LOG(DEBUG, RUNTIME) << "Task " << task.GetId() << " has been solved";
-        solved_tasks_++;
+        solvedTasks_++;
     }
 
     size_t GetSolvedTasks()
     {
-        return solved_tasks_;
+        return solvedTasks_;
     }
 
 private:
-    std::atomic_size_t solved_tasks_ = 0;
+    std::atomic_size_t solvedTasks_ = 0;
 };
 
 class MockProcessor : public ProcessorInterface<MockTask, MockTaskController *> {
@@ -166,49 +166,49 @@ private:
     MockTaskController *controller_;
 };
 
-void CreateTasks(ThreadPool<MockTask, MockProcessor, MockTaskController *> *thread_pool, size_t number_of_elements)
+void CreateTasks(ThreadPool<MockTask, MockProcessor, MockTaskController *> *threadPool, size_t numberOfElements)
 {
-    for (size_t i = 0; i < number_of_elements; i++) {
+    for (size_t i = 0; i < numberOfElements; i++) {
         MockTask task(i + 1);
         LOG(DEBUG, RUNTIME) << "Queue task " << task.GetId();
         // NOLINTNEXTLINE(performance-move-const-arg)
-        thread_pool->PutTask(std::move(task));
+        threadPool->PutTask(std::move(task));
     }
 }
 
-void TestThreadPool(size_t initial_number_of_threads, size_t scaled_number_of_threads, float scale_threshold)
+void TestThreadPool(size_t initialNumberOfThreads, size_t scaledNumberOfThreads, float scaleThreshold)
 {
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     auto queue = allocator->New<MockQueue>(allocator);
     auto controller = allocator->New<MockTaskController>();
-    auto thread_pool = allocator->New<ThreadPool<MockTask, MockProcessor, MockTaskController *>>(
-        allocator, queue, controller, initial_number_of_threads, "Test thread");
+    auto threadPool = allocator->New<ThreadPool<MockTask, MockProcessor, MockTaskController *>>(
+        allocator, queue, controller, initialNumberOfThreads, "Test thread");
 
-    CreateTasks(thread_pool, MockThreadPoolTest::TASK_NUMBER);
+    CreateTasks(threadPool, MockThreadPoolTest::TASK_NUMBER);
 
-    if (scale_threshold < 1.0) {
-        while (controller->GetSolvedTasks() < scale_threshold * MockThreadPoolTest::TASK_NUMBER) {
+    if (scaleThreshold < 1.0) {
+        while (controller->GetSolvedTasks() < scaleThreshold * MockThreadPoolTest::TASK_NUMBER) {
         }
-        thread_pool->Scale(scaled_number_of_threads);
+        threadPool->Scale(scaledNumberOfThreads);
     }
 
     for (;;) {
-        auto solved_tasks = controller->GetSolvedTasks();
+        auto solvedTasks = controller->GetSolvedTasks();
         // NOLINTNEXTLINE(readability-magic-numbers)
-        auto rate = static_cast<size_t>((static_cast<float>(solved_tasks) / MockThreadPoolTest::TASK_NUMBER) * 100);
-        LOG(DEBUG, RUNTIME) << "Number of solved tasks is " << solved_tasks << " (" << rate << "%)";
-        if (scale_threshold == 1.0) {
+        auto rate = static_cast<size_t>((static_cast<float>(solvedTasks) / MockThreadPoolTest::TASK_NUMBER) * 100);
+        LOG(DEBUG, RUNTIME) << "Number of solved tasks is " << solvedTasks << " (" << rate << "%)";
+        if (scaleThreshold == 1.0) {
             // NOLINTNEXTLINE(readability-magic-numbers)
-            size_t dynamic_scaling = rate / 10 + 1;
-            thread_pool->Scale(dynamic_scaling);
+            size_t dynamicScaling = rate / 10 + 1;
+            threadPool->Scale(dynamicScaling);
         }
 
-        if (solved_tasks == MockThreadPoolTest::TASK_NUMBER) {
+        if (solvedTasks == MockThreadPoolTest::TASK_NUMBER) {
             break;
         }
     }
 
-    allocator->Delete(thread_pool);
+    allocator->Delete(threadPool);
     allocator->Delete(controller);
     allocator->Delete(queue);
 }
@@ -245,40 +245,40 @@ TEST_F(MockThreadPoolTest, DifferentNumberOfThreads)
     TestThreadPool(NUMBER_OF_THREADS_INITIAL, NUMBER_OF_THREADS_SCALED, SCALE_THRESHOLD);
 }
 
-void ControllerThreadPutTask(ThreadPool<MockTask, MockProcessor, MockTaskController *> *thread_pool,
-                             size_t number_of_tasks)
+void ControllerThreadPutTask(ThreadPool<MockTask, MockProcessor, MockTaskController *> *threadPool,
+                             size_t numberOfTasks)
 {
-    CreateTasks(thread_pool, number_of_tasks);
+    CreateTasks(threadPool, numberOfTasks);
 }
 
-void ControllerThreadTryPutTask(ThreadPool<MockTask, MockProcessor, MockTaskController *> *thread_pool,
-                                size_t number_of_tasks)
+void ControllerThreadTryPutTask(ThreadPool<MockTask, MockProcessor, MockTaskController *> *threadPool,
+                                size_t numberOfTasks)
 {
-    for (size_t i = 0; i < number_of_tasks; i++) {
+    for (size_t i = 0; i < numberOfTasks; i++) {
         for (;;) {
-            if (thread_pool->TryPutTask(MockTask {i + 1}) || !thread_pool->IsActive()) {
+            if (threadPool->TryPutTask(MockTask {i + 1}) || !threadPool->IsActive()) {
                 break;
             }
         }
     }
 }
 
-void ControllerThreadScale(ThreadPool<MockTask, MockProcessor, MockTaskController *> *thread_pool,
-                           size_t number_of_threads)
+void ControllerThreadScale(ThreadPool<MockTask, MockProcessor, MockTaskController *> *threadPool,
+                           size_t numberOfThreads)
 {
-    thread_pool->Scale(number_of_threads);
+    threadPool->Scale(numberOfThreads);
 }
 
-void ControllerThreadShutdown(ThreadPool<MockTask, MockProcessor, MockTaskController *> *thread_pool, bool is_shutdown,
-                              bool is_force_shutdown)
+void ControllerThreadShutdown(ThreadPool<MockTask, MockProcessor, MockTaskController *> *threadPool, bool isShutdown,
+                              bool isForceShutdown)
 {
-    if (is_shutdown) {
-        thread_pool->Shutdown(is_force_shutdown);
+    if (isShutdown) {
+        threadPool->Shutdown(isForceShutdown);
     }
 }
 
-void TestThreadPoolWithControllers(size_t number_of_threads_initial, size_t number_of_threads_scaled, bool is_shutdown,
-                                   bool is_force_shutdown)
+void TestThreadPoolWithControllers(size_t numberOfThreadsInitial, size_t numberOfThreadsScaled, bool isShutdown,
+                                   bool isForceShutdown)
 {
     constexpr size_t NUMBER_OF_TASKS = MockThreadPoolTest::TASK_NUMBER / 4;
     constexpr size_t QUEUE_SIZE = 16;
@@ -286,42 +286,42 @@ void TestThreadPoolWithControllers(size_t number_of_threads_initial, size_t numb
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     auto queue = allocator->New<MockQueue>(allocator, QUEUE_SIZE);
     auto controller = allocator->New<MockTaskController>();
-    auto thread_pool = allocator->New<ThreadPool<MockTask, MockProcessor, MockTaskController *>>(
-        allocator, queue, controller, number_of_threads_initial, "Test thread");
+    auto threadPool = allocator->New<ThreadPool<MockTask, MockProcessor, MockTaskController *>>(
+        allocator, queue, controller, numberOfThreadsInitial, "Test thread");
 
-    std::thread controller_thread_put_task_1(ControllerThreadPutTask, thread_pool, NUMBER_OF_TASKS);
-    std::thread controller_thread_put_task_2(ControllerThreadPutTask, thread_pool, NUMBER_OF_TASKS);
-    std::thread controller_thread_try_put_task_1(ControllerThreadTryPutTask, thread_pool, NUMBER_OF_TASKS);
-    std::thread controller_thread_try_put_task_2(ControllerThreadTryPutTask, thread_pool, NUMBER_OF_TASKS);
-    std::thread controller_thread_scale_1(ControllerThreadScale, thread_pool, number_of_threads_scaled);
-    std::thread controller_thread_scale_2(ControllerThreadScale, thread_pool,
-                                          number_of_threads_scaled + number_of_threads_initial);
-    std::thread controller_thread_shutdown_1(ControllerThreadShutdown, thread_pool, is_shutdown, is_force_shutdown);
-    std::thread controller_thread_shutdown_2(ControllerThreadShutdown, thread_pool, is_shutdown, is_force_shutdown);
+    std::thread controllerThreadPutTask1(ControllerThreadPutTask, threadPool, NUMBER_OF_TASKS);
+    std::thread controllerThreadPutTask2(ControllerThreadPutTask, threadPool, NUMBER_OF_TASKS);
+    std::thread controllerThreadTryPutTask1(ControllerThreadTryPutTask, threadPool, NUMBER_OF_TASKS);
+    std::thread controllerThreadTryPutTask2(ControllerThreadTryPutTask, threadPool, NUMBER_OF_TASKS);
+    std::thread controllerThreadScale1(ControllerThreadScale, threadPool, numberOfThreadsScaled);
+    std::thread controllerThreadScale2(ControllerThreadScale, threadPool,
+                                       numberOfThreadsScaled + numberOfThreadsInitial);
+    std::thread controllerThreadShutdown1(ControllerThreadShutdown, threadPool, isShutdown, isForceShutdown);
+    std::thread controllerThreadShutdown2(ControllerThreadShutdown, threadPool, isShutdown, isForceShutdown);
 
     // Wait for tasks completion.
     for (;;) {
-        auto solved_tasks = controller->GetSolvedTasks();
+        auto solvedTasks = controller->GetSolvedTasks();
         // NOLINTNEXTLINE(readability-magic-numbers)
-        auto rate = static_cast<size_t>((static_cast<float>(solved_tasks) / MockThreadPoolTest::TASK_NUMBER) * 100);
+        auto rate = static_cast<size_t>((static_cast<float>(solvedTasks) / MockThreadPoolTest::TASK_NUMBER) * 100);
         (void)rate;
-        LOG(DEBUG, RUNTIME) << "Number of solved tasks is " << solved_tasks << " (" << rate << "%)";
-        if (solved_tasks == MockThreadPoolTest::TASK_NUMBER || !thread_pool->IsActive()) {
+        LOG(DEBUG, RUNTIME) << "Number of solved tasks is " << solvedTasks << " (" << rate << "%)";
+        if (solvedTasks == MockThreadPoolTest::TASK_NUMBER || !threadPool->IsActive()) {
             break;
         }
         // NOLINTNEXTLINE(readability-magic-numbers)
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-    controller_thread_put_task_1.join();
-    controller_thread_put_task_2.join();
-    controller_thread_try_put_task_1.join();
-    controller_thread_try_put_task_2.join();
-    controller_thread_scale_1.join();
-    controller_thread_scale_2.join();
-    controller_thread_shutdown_1.join();
-    controller_thread_shutdown_2.join();
+    controllerThreadPutTask1.join();
+    controllerThreadPutTask2.join();
+    controllerThreadTryPutTask1.join();
+    controllerThreadTryPutTask2.join();
+    controllerThreadScale1.join();
+    controllerThreadScale2.join();
+    controllerThreadShutdown1.join();
+    controllerThreadShutdown2.join();
 
-    allocator->Delete(thread_pool);
+    allocator->Delete(threadPool);
     allocator->Delete(controller);
     allocator->Delete(queue);
 }

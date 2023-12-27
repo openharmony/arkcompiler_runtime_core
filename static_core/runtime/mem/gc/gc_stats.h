@@ -120,42 +120,42 @@ class GCInstanceStats {
 public:
     GCInstanceStats()
     {
-        std::fill(begin(objects_stats_), end(objects_stats_),
+        std::fill(begin(objectsStats_), end(objectsStats_),
                   SimpleHistogram<uint64_t>(helpers::ValueType::VALUE_TYPE_OBJECT));
-        std::fill(begin(memory_stats_), end(memory_stats_),
+        std::fill(begin(memoryStats_), end(memoryStats_),
                   SimpleHistogram<uint64_t>(helpers::ValueType::VALUE_TYPE_MEMORY));
-        std::fill(begin(time_stats_), end(time_stats_), SimpleHistogram<uint64_t>(helpers::ValueType::VALUE_TYPE_TIME));
+        std::fill(begin(timeStats_), end(timeStats_), SimpleHistogram<uint64_t>(helpers::ValueType::VALUE_TYPE_TIME));
     }
 
-    void AddObjectsValue(uint64_t value, ObjectTypeStats memory_type)
+    void AddObjectsValue(uint64_t value, ObjectTypeStats memoryType)
     {
-        auto index = static_cast<size_t>(memory_type);
-        objects_stats_[index].AddValue(value);
+        auto index = static_cast<size_t>(memoryType);
+        objectsStats_[index].AddValue(value);
     }
 
-    void AddMemoryValue(uint64_t value, MemoryTypeStats memory_type)
+    void AddMemoryValue(uint64_t value, MemoryTypeStats memoryType)
     {
-        auto index = static_cast<size_t>(memory_type);
-        memory_stats_[index].AddValue(value);
+        auto index = static_cast<size_t>(memoryType);
+        memoryStats_[index].AddValue(value);
     }
 
-    void AddTimeValue(uint64_t value, TimeTypeStats time_type)
+    void AddTimeValue(uint64_t value, TimeTypeStats timeType)
     {
-        auto index = static_cast<size_t>(time_type);
-        time_stats_[index].AddValue(value);
+        auto index = static_cast<size_t>(timeType);
+        timeStats_[index].AddValue(value);
     }
 
     void AddReclaimRatioValue(double value)
     {
-        reclaim_bytes_.AddValue(value);
+        reclaimBytes_.AddValue(value);
     }
 
     void AddCopiedRatioValue(double value)
     {
-        copied_bytes_.AddValue(value);
+        copiedBytes_.AddValue(value);
     }
 
-    PandaString GetDump(GCType gc_type);
+    PandaString GetDump(GCType gcType);
 
     virtual ~GCInstanceStats() = default;
 
@@ -163,19 +163,19 @@ public:
     NO_MOVE_SEMANTIC(GCInstanceStats);
 
 private:
-    PandaString GetYoungSpaceDump(GCType gc_type);
-    PandaString GetAllSpacesDump(GCType gc_type);
-    std::array<SimpleHistogram<uint64_t>, OBJECT_TYPE_STATS_SIZE> objects_stats_;
-    std::array<SimpleHistogram<uint64_t>, MEMORY_TYPE_STATS_SIZE> memory_stats_;
-    std::array<SimpleHistogram<uint64_t>, TIME_TYPE_STATS_SIZE> time_stats_;
-    SimpleHistogram<double> reclaim_bytes_;
-    SimpleHistogram<double> copied_bytes_;
+    PandaString GetYoungSpaceDump(GCType gcType);
+    PandaString GetAllSpacesDump(GCType gcType);
+    std::array<SimpleHistogram<uint64_t>, OBJECT_TYPE_STATS_SIZE> objectsStats_;
+    std::array<SimpleHistogram<uint64_t>, MEMORY_TYPE_STATS_SIZE> memoryStats_;
+    std::array<SimpleHistogram<uint64_t>, TIME_TYPE_STATS_SIZE> timeStats_;
+    SimpleHistogram<double> reclaimBytes_;
+    SimpleHistogram<double> copiedBytes_;
 };
 
 // scoped all field GCStats except pause_
 class GCScopedStats {
 public:
-    explicit GCScopedStats(GCStats *stats, GCInstanceStats *instance_stats = nullptr);
+    explicit GCScopedStats(GCStats *stats, GCInstanceStats *instanceStats = nullptr);
 
     NO_COPY_SEMANTIC(GCScopedStats);
     NO_MOVE_SEMANTIC(GCScopedStats);
@@ -183,16 +183,16 @@ public:
     ~GCScopedStats();
 
 private:
-    uint64_t start_time_;
-    GCInstanceStats *instance_stats_;
+    uint64_t startTime_;
+    GCInstanceStats *instanceStats_;
     GCStats *stats_;
 };
 
 // scoped field GCStats while GC in pause
 class GCScopedPauseStats {
 public:
-    explicit GCScopedPauseStats(GCStats *stats, GCInstanceStats *instance_stats = nullptr,
-                                PauseTypeStats pause_type = PauseTypeStats::COMMON_PAUSE);
+    explicit GCScopedPauseStats(GCStats *stats, GCInstanceStats *instanceStats = nullptr,
+                                PauseTypeStats pauseType = PauseTypeStats::COMMON_PAUSE);
 
     NO_COPY_SEMANTIC(GCScopedPauseStats);
     NO_MOVE_SEMANTIC(GCScopedPauseStats);
@@ -200,15 +200,15 @@ public:
     ~GCScopedPauseStats();
 
 private:
-    uint64_t start_time_;
-    GCInstanceStats *instance_stats_;
+    uint64_t startTime_;
+    GCInstanceStats *instanceStats_;
     GCStats *stats_;
-    PauseTypeStats pause_type_;
+    PauseTypeStats pauseType_;
 };
 
 class GCStats {
 public:
-    explicit GCStats(MemStatsType *mem_stats, GCType gc_type_from_runtime, InternalAllocatorPtr allocator);
+    explicit GCStats(MemStatsType *memStats, GCType gcTypeFromRuntime, InternalAllocatorPtr allocator);
     ~GCStats();
 
     NO_COPY_SEMANTIC(GCStats);
@@ -216,43 +216,43 @@ public:
 
     PandaString GetStatistics();
 
-    PandaString GetFinalStatistics(HeapManager *heap_manager);
+    PandaString GetFinalStatistics(HeapManager *heapManager);
 
-    PandaString GetPhasePauseStat(PauseTypeStats pause_type);
+    PandaString GetPhasePauseStat(PauseTypeStats pauseType);
 
-    uint64_t GetPhasePause(PauseTypeStats pause_type);
+    uint64_t GetPhasePause(PauseTypeStats pauseType);
     void ResetLastPause();
 
     size_t GetObjectsFreedBytes()
     {
 #ifdef PANDA_TARGET_64
-        static_assert(sizeof(objects_freed_bytes_) == sizeof(std::atomic_uint64_t));
+        static_assert(sizeof(objectsFreedBytes_) == sizeof(std::atomic_uint64_t));
         // Atomic with seq_cst order reason: data race with objects_freed_bytes_ with requirement for sequentially
         // consistent order where threads observe all modifications in the same order
-        return reinterpret_cast<std::atomic_uint64_t *>(&objects_freed_bytes_)->load(std::memory_order_seq_cst);
+        return reinterpret_cast<std::atomic_uint64_t *>(&objectsFreedBytes_)->load(std::memory_order_seq_cst);
 #endif
 #ifdef PANDA_TARGET_32
-        static_assert(sizeof(objects_freed_bytes_) == sizeof(std::atomic_uint32_t));
+        static_assert(sizeof(objectsFreedBytes_) == sizeof(std::atomic_uint32_t));
         // Atomic with seq_cst order reason: data race with objects_freed_bytes_ with requirement for sequentially
         // consistent order where threads observe all modifications in the same order
-        return reinterpret_cast<std::atomic_uint32_t *>(&objects_freed_bytes_)->load(std::memory_order_seq_cst);
+        return reinterpret_cast<std::atomic_uint32_t *>(&objectsFreedBytes_)->load(std::memory_order_seq_cst);
 #endif
         UNREACHABLE();
     }
 
     uint64_t GetObjectsFreedCount()
     {
-        return objects_freed_;
+        return objectsFreed_;
     }
 
     uint64_t GetLargeObjectsFreedBytes()
     {
-        return large_objects_freed_bytes_;
+        return largeObjectsFreedBytes_;
     }
 
     uint64_t GetLargeObjectsFreedCount()
     {
-        return large_objects_freed_;
+        return largeObjectsFreed_;
     }
 
     void StartMutatorLock();
@@ -261,44 +261,44 @@ public:
 private:
     // For convert from nano to 10 seconds
     using PERIOD = std::deca;
-    GCType gc_type_ {GCType::INVALID_GC};
-    size_t objects_freed_ {0};
-    size_t objects_freed_bytes_ {0};
-    size_t large_objects_freed_ {0};
-    size_t large_objects_freed_bytes_ {0};
-    uint64_t start_time_ {0};
-    size_t count_mutator_ GUARDED_BY(mutator_stats_lock_) {0};
-    uint64_t mutator_start_time_ GUARDED_BY(mutator_stats_lock_) {0};
+    GCType gcType_ {GCType::INVALID_GC};
+    size_t objectsFreed_ {0};
+    size_t objectsFreedBytes_ {0};
+    size_t largeObjectsFreed_ {0};
+    size_t largeObjectsFreedBytes_ {0};
+    uint64_t startTime_ {0};
+    size_t countMutator_ GUARDED_BY(mutatorStatsLock_) {0};
+    uint64_t mutatorStartTime_ GUARDED_BY(mutatorStatsLock_) {0};
 
-    uint64_t last_duration_ {0};
-    uint64_t total_duration_ {0};
-    uint64_t total_pause_ {0};
-    uint64_t total_mutator_pause_ GUARDED_BY(mutator_stats_lock_) {0};
+    uint64_t lastDuration_ {0};
+    uint64_t totalDuration_ {0};
+    uint64_t totalPause_ {0};
+    uint64_t totalMutatorPause_ GUARDED_BY(mutatorStatsLock_) {0};
 
-    uint64_t last_start_duration_ {0};
+    uint64_t lastStartDuration_ {0};
     // GC in the last PERIOD
-    uint64_t count_gc_period_ {0};
+    uint64_t countGcPeriod_ {0};
     // GC number of times every PERIOD
-    PandaVector<uint64_t> *all_number_durations_ {nullptr};
+    PandaVector<uint64_t> *allNumberDurations_ {nullptr};
 
-    std::array<uint64_t, PAUSE_TYPE_STATS_SIZE> last_pause_ {};
+    std::array<uint64_t, PAUSE_TYPE_STATS_SIZE> lastPause_ {};
 
-    os::memory::Mutex mutator_stats_lock_;
-    MemStatsType *mem_stats_;
+    os::memory::Mutex mutatorStatsLock_;
+    MemStatsType *memStats_;
 
     void StartCollectStats();
-    void StopCollectStats(GCInstanceStats *instance_stats);
+    void StopCollectStats(GCInstanceStats *instanceStats);
 
-    void AddPause(uint64_t pause, GCInstanceStats *instance_stats, PauseTypeStats pause_type);
+    void AddPause(uint64_t pause, GCInstanceStats *instanceStats, PauseTypeStats pauseType);
 
-    void RecordDuration(uint64_t duration, GCInstanceStats *instance_stats);
+    void RecordDuration(uint64_t duration, GCInstanceStats *instanceStats);
 
-    uint64_t ConvertTimeToPeriod(uint64_t time_in_nanos, bool ceil = false);
+    uint64_t ConvertTimeToPeriod(uint64_t timeInNanos, bool ceil = false);
 
     InternalAllocatorPtr allocator_ {nullptr};
 
 #ifndef NDEBUG
-    PauseTypeStats prev_pause_type_ {PauseTypeStats::COMMON_PAUSE};
+    PauseTypeStats prevPauseType_ {PauseTypeStats::COMMON_PAUSE};
 #endif
 
     friend GCScopedPauseStats;

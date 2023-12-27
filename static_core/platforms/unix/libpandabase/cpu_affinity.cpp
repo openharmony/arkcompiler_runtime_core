@@ -121,38 +121,38 @@ CpuSet &CpuSet::operator^=(const CpuSet &other)
     return *this;
 }
 
-size_t CpuAffinityManager::cpu_count_ = 0U;
-CpuSet CpuAffinityManager::best_cpu_set_;             // NOLINT(fuchsia-statically-constructed-objects)
-CpuSet CpuAffinityManager::middle_cpu_set_;           // NOLINT(fuchsia-statically-constructed-objects)
-CpuSet CpuAffinityManager::best_and_middle_cpu_set_;  // NOLINT(fuchsia-statically-constructed-objects)
-CpuSet CpuAffinityManager::weak_cpu_set_;             // NOLINT(fuchsia-statically-constructed-objects)
+size_t CpuAffinityManager::cpuCount_ = 0U;
+CpuSet CpuAffinityManager::bestCpuSet_;           // NOLINT(fuchsia-statically-constructed-objects)
+CpuSet CpuAffinityManager::middleCpuSet_;         // NOLINT(fuchsia-statically-constructed-objects)
+CpuSet CpuAffinityManager::bestAndMiddleCpuSet_;  // NOLINT(fuchsia-statically-constructed-objects)
+CpuSet CpuAffinityManager::weakCpuSet_;           // NOLINT(fuchsia-statically-constructed-objects)
 
 /* static */
 void CpuAffinityManager::Initialize()
 {
     ASSERT(!IsCpuAffinityEnabled());
-    ASSERT(best_cpu_set_.IsEmpty());
-    ASSERT(middle_cpu_set_.IsEmpty());
-    ASSERT(best_and_middle_cpu_set_.IsEmpty());
-    ASSERT(weak_cpu_set_.IsEmpty());
-    cpu_count_ = std::thread::hardware_concurrency();
+    ASSERT(bestCpuSet_.IsEmpty());
+    ASSERT(middleCpuSet_.IsEmpty());
+    ASSERT(bestAndMiddleCpuSet_.IsEmpty());
+    ASSERT(weakCpuSet_.IsEmpty());
+    cpuCount_ = std::thread::hardware_concurrency();
     LoadCpuFreq();
 }
 
 /* static */
 bool CpuAffinityManager::IsCpuAffinityEnabled()
 {
-    return cpu_count_ != 0U;
+    return cpuCount_ != 0U;
 }
 
 /* static */
 void CpuAffinityManager::Finalize()
 {
-    cpu_count_ = 0U;
-    best_cpu_set_.Clear();
-    middle_cpu_set_.Clear();
-    best_and_middle_cpu_set_.Clear();
-    weak_cpu_set_.Clear();
+    cpuCount_ = 0U;
+    bestCpuSet_.Clear();
+    middleCpuSet_.Clear();
+    bestAndMiddleCpuSet_.Clear();
+    weakCpuSet_.Clear();
 }
 
 /* static */
@@ -162,58 +162,58 @@ void CpuAffinityManager::LoadCpuFreq()
         return;
     }
     std::vector<CpuInfo> cpu;
-    cpu.reserve(cpu_count_);
-    for (size_t cpu_num = 0; cpu_num < cpu_count_; ++cpu_num) {
-        std::string cpu_freq_path =
-            "/sys/devices/system/cpu/cpu" + std::to_string(cpu_num) + "/cpufreq/cpuinfo_max_freq";
-        std::ifstream cpu_freq_file(cpu_freq_path.c_str());
+    cpu.reserve(cpuCount_);
+    for (size_t cpuNumber = 0; cpuNumber < cpuCount_; ++cpuNumber) {
+        std::string cpuFreqPath =
+            "/sys/devices/system/cpu/cpu" + std::to_string(cpuNumber) + "/cpufreq/cpuinfo_max_freq";
+        std::ifstream cpuFreqFile(cpuFreqPath.c_str());
         uint64_t freq = 0U;
-        if (cpu_freq_file.is_open()) {
-            if (!(cpu_freq_file >> freq)) {
+        if (cpuFreqFile.is_open()) {
+            if (!(cpuFreqFile >> freq)) {
                 freq = 0U;
             } else {
-                cpu.push_back({cpu_num, freq});
+                cpu.push_back({cpuNumber, freq});
             }
-            cpu_freq_file.close();
+            cpuFreqFile.close();
         }
         if (freq == 0U) {
-            cpu_count_ = 0;
+            cpuCount_ = 0;
             return;
         }
     }
     // Sort by cpu frequency from best to weakest
     std::sort(cpu.begin(), cpu.end(), [](const CpuInfo &lhs, const CpuInfo &rhs) { return lhs.freq > rhs.freq; });
-    auto cpu_info = cpu.front();
-    best_cpu_set_.Set(cpu_info.number);
+    auto cpuInfo = cpu.front();
+    bestCpuSet_.Set(cpuInfo.number);
     for (auto it = cpu.begin() + 1U; it != cpu.end(); ++it) {
-        if (it->freq == cpu_info.freq) {
-            best_cpu_set_.Set(it->number);
+        if (it->freq == cpuInfo.freq) {
+            bestCpuSet_.Set(it->number);
         } else {
             break;
         }
     }
-    cpu_info = cpu.back();
-    weak_cpu_set_.Set(cpu_info.number);
+    cpuInfo = cpu.back();
+    weakCpuSet_.Set(cpuInfo.number);
     for (auto it = cpu.rbegin() + 1U; it != cpu.rend(); ++it) {
-        if (it->freq == cpu_info.freq) {
-            weak_cpu_set_.Set(it->number);
+        if (it->freq == cpuInfo.freq) {
+            weakCpuSet_.Set(it->number);
         } else {
             break;
         }
     }
-    if (best_cpu_set_.Count() + weak_cpu_set_.Count() >= cpu_count_) {
-        CpuSet::Copy(middle_cpu_set_, weak_cpu_set_);
+    if (bestCpuSet_.Count() + weakCpuSet_.Count() >= cpuCount_) {
+        CpuSet::Copy(middleCpuSet_, weakCpuSet_);
     } else {
-        for (auto it = cpu.begin() + best_cpu_set_.Count(); it != cpu.end() - weak_cpu_set_.Count(); ++it) {
-            middle_cpu_set_.Set(it->number);
+        for (auto it = cpu.begin() + bestCpuSet_.Count(); it != cpu.end() - weakCpuSet_.Count(); ++it) {
+            middleCpuSet_.Set(it->number);
         }
-        ASSERT(best_cpu_set_.Count() + middle_cpu_set_.Count() + weak_cpu_set_.Count() == cpu_count_);
+        ASSERT(bestCpuSet_.Count() + middleCpuSet_.Count() + weakCpuSet_.Count() == cpuCount_);
     }
-    ASSERT(!best_cpu_set_.IsEmpty());
-    ASSERT(!middle_cpu_set_.IsEmpty());
-    ASSERT(!weak_cpu_set_.IsEmpty());
-    CpuSet::Or(best_and_middle_cpu_set_, best_cpu_set_, middle_cpu_set_);
-    ASSERT(!best_and_middle_cpu_set_.IsEmpty());
+    ASSERT(!bestCpuSet_.IsEmpty());
+    ASSERT(!middleCpuSet_.IsEmpty());
+    ASSERT(!weakCpuSet_.IsEmpty());
+    CpuSet::Or(bestAndMiddleCpuSet_, bestCpuSet_, middleCpuSet_);
+    ASSERT(!bestAndMiddleCpuSet_.IsEmpty());
     for (auto it : cpu) {
         LOG(DEBUG, COMMON) << "CPU number: " << it.number << ", freq: " << it.freq;
     }
@@ -250,29 +250,29 @@ bool CpuAffinityManager::SetAffinityForThread(int tid, const CpuSet &cpuset)
 }
 
 /* static */
-bool CpuAffinityManager::SetAffinityForThread(int tid, uint8_t power_flags)
+bool CpuAffinityManager::SetAffinityForThread(int tid, uint8_t powerFlags)
 {
-    if (power_flags == CpuPower::ANY) {
+    if (powerFlags == CpuPower::ANY) {
         return true;
     }
     CpuSet cpuset;
-    if ((power_flags & CpuPower::BEST) != 0) {
-        cpuset |= best_cpu_set_;
+    if ((powerFlags & CpuPower::BEST) != 0) {
+        cpuset |= bestCpuSet_;
     }
-    if ((power_flags & CpuPower::MIDDLE) != 0) {
-        cpuset |= middle_cpu_set_;
+    if ((powerFlags & CpuPower::MIDDLE) != 0) {
+        cpuset |= middleCpuSet_;
     }
-    if ((power_flags & CpuPower::WEAK) != 0) {
-        cpuset |= weak_cpu_set_;
+    if ((powerFlags & CpuPower::WEAK) != 0) {
+        cpuset |= weakCpuSet_;
     }
     return SetAffinityForThread(tid, cpuset);
 }
 
 /* static */
-bool CpuAffinityManager::SetAffinityForCurrentThread(uint8_t power_flags)
+bool CpuAffinityManager::SetAffinityForCurrentThread(uint8_t powerFlags)
 {
     // 0 is value for current thread
-    return SetAffinityForThread(0, power_flags);
+    return SetAffinityForThread(0, powerFlags);
 }
 
 /* static */

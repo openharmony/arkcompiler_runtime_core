@@ -28,7 +28,7 @@ bool operator==(const SpillFillData &left, const SpillFillData &right)
 // NOLINTBEGIN(readability-magic-numbers)
 TEST_F(SpillFillEncoderTest, SpillFillDataSorting)
 {
-    ArenaVector<SpillFillData> spill_fills {
+    ArenaVector<SpillFillData> spillFills {
         {{LocationType::REGISTER, LocationType::STACK, 1U, 0U, DataType::Type::INT64},
          {LocationType::REGISTER, LocationType::STACK, 0U, 2U, DataType::Type::INT64},
          {LocationType::REGISTER, LocationType::REGISTER, 0U, 1U, DataType::Type::INT64},
@@ -44,7 +44,7 @@ TEST_F(SpillFillEncoderTest, SpillFillDataSorting)
          {LocationType::STACK, LocationType::STACK, 8U, 10U, DataType::Type::INT64}},
         GetAllocator()->Adapter()};
 
-    ArenaVector<SpillFillData> expected_order {
+    ArenaVector<SpillFillData> expectedOrder {
         {// reorder spills
          {LocationType::REGISTER, LocationType::STACK, 0U, 2U, DataType::Type::INT64},
          {LocationType::REGISTER, LocationType::STACK, 1U, 0U, DataType::Type::INT64},
@@ -66,9 +66,9 @@ TEST_F(SpillFillEncoderTest, SpillFillDataSorting)
          {LocationType::STACK, LocationType::STACK, 8U, 10U, DataType::Type::INT64}},
         GetAllocator()->Adapter()};
 
-    SpillFillEncoder::SortSpillFillData(&spill_fills);
-    for (size_t i = 0; i < expected_order.size(); i++) {
-        EXPECT_EQ(spill_fills[i], expected_order[i]) << "Mismatch at " << i;
+    SpillFillEncoder::SortSpillFillData(&spillFills);
+    for (size_t i = 0; i < expectedOrder.size(); i++) {
+        EXPECT_EQ(spillFills[i], expectedOrder[i]) << "Mismatch at " << i;
     }
 }
 

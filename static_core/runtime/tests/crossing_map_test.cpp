@@ -35,24 +35,24 @@ public:
         srand(seed_);
         panda::mem::MemConfig::Initialize(MEMORY_POOL_SIZE, MEMORY_POOL_SIZE, 0, 0, 0, 0);
         PoolManager::Initialize();
-        start_addr_ = GetPoolMinAddress();
-        mem_stats_ = new mem::MemStatsType();
-        internal_allocator_ = new InternalAllocatorT<InternalAllocatorConfig::PANDA_ALLOCATORS>(mem_stats_);
-        crossing_map_ = new CrossingMap(internal_allocator_, start_addr_, GetPoolSize());
-        crossing_map_->Initialize();
-        crossing_map_->InitializeCrossingMapForMemory(ToVoidPtr(start_addr_), GetPoolSize());
+        startAddr_ = GetPoolMinAddress();
+        memStats_ = new mem::MemStatsType();
+        internalAllocator_ = new InternalAllocatorT<InternalAllocatorConfig::PANDA_ALLOCATORS>(memStats_);
+        crossingMap_ = new CrossingMap(internalAllocator_, startAddr_, GetPoolSize());
+        crossingMap_->Initialize();
+        crossingMap_->InitializeCrossingMapForMemory(ToVoidPtr(startAddr_), GetPoolSize());
     }
 
     ~CrossingMapTest() override
     {
-        crossing_map_->RemoveCrossingMapForMemory(ToVoidPtr(start_addr_), GetPoolSize());
-        crossing_map_->Destroy();
-        delete crossing_map_;
-        delete static_cast<Allocator *>(internal_allocator_);
+        crossingMap_->RemoveCrossingMapForMemory(ToVoidPtr(startAddr_), GetPoolSize());
+        crossingMap_->Destroy();
+        delete crossingMap_;
+        delete static_cast<Allocator *>(internalAllocator_);
         PoolManager::Finalize();
         panda::mem::MemConfig::Finalize();
         // Logger::Destroy();
-        delete mem_stats_;
+        delete memStats_;
     }
 
     NO_COPY_SEMANTIC(CrossingMapTest);
@@ -61,17 +61,16 @@ public:
 protected:
     CrossingMap *GetCrossingMap()
     {
-        return crossing_map_;
+        return crossingMap_;
     }
 
     void *GetRandomObjAddr(size_t size)
     {
         ASSERT(size < GetPoolSize());
         // NOLINTNEXTLINE(cert-msc50-cpp)
-        uintptr_t rand_offset = rand() % (GetPoolSize() - size);
-        rand_offset = (rand_offset >> CrossingMap::CROSSING_MAP_OBJ_ALIGNMENT)
-                      << CrossingMap::CROSSING_MAP_OBJ_ALIGNMENT;
-        return ToVoidPtr(start_addr_ + rand_offset);
+        uintptr_t randOffset = rand() % (GetPoolSize() - size);
+        randOffset = (randOffset >> CrossingMap::CROSSING_MAP_OBJ_ALIGNMENT) << CrossingMap::CROSSING_MAP_OBJ_ALIGNMENT;
+        return ToVoidPtr(startAddr_ + randOffset);
     }
 
     void *AddPage(void *addr)
@@ -91,7 +90,7 @@ protected:
 
     size_t GetMapNumFromAddr(void *addr)
     {
-        return crossing_map_->GetMapNumFromAddr(addr);
+        return crossingMap_->GetMapNumFromAddr(addr);
     }
 
     static constexpr size_t MIN_GAP_BETWEEN_OBJECTS = 1U << CrossingMap::CROSSING_MAP_OBJ_ALIGNMENT;
@@ -111,10 +110,10 @@ protected:
                PoolManager::GetMmapMemPool()->GetMinObjectAddress();
     }
 
-    void *GetLastObjectByte(void *obj_addr, size_t obj_size)
+    void *GetLastObjectByte(void *objAddr, size_t objSize)
     {
-        ASSERT(obj_size != 0);
-        return ToVoidPtr(ToUintPtr(obj_addr) + obj_size - 1U);
+        ASSERT(objSize != 0);
+        return ToVoidPtr(ToUintPtr(objAddr) + objSize - 1U);
     }
 
     unsigned int GetSeed()
@@ -124,40 +123,40 @@ protected:
 
 private:
     unsigned int seed_;
-    InternalAllocatorPtr internal_allocator_;
-    uintptr_t start_addr_;
-    CrossingMap *crossing_map_;
-    mem::MemStatsType *mem_stats_;
+    InternalAllocatorPtr internalAllocator_;
+    uintptr_t startAddr_;
+    CrossingMap *crossingMap_;
+    mem::MemStatsType *memStats_;
 };
 
 TEST_F(CrossingMapTest, OneSmallObjTest)
 {
     static constexpr size_t OBJ_SIZE = 1;
     // Use OBJ_SIZE + PAGE_SIZE here or we can get an overflow during AddPage(obj_addr)
-    void *obj_addr = GetRandomObjAddr(OBJ_SIZE + PAGE_SIZE);
-    GetCrossingMap()->AddObject(obj_addr, OBJ_SIZE);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(obj_addr, obj_addr) == obj_addr) << " seed = " << GetSeed();
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(AddPage(obj_addr), AddPage(obj_addr)) == nullptr)
+    void *objAddr = GetRandomObjAddr(OBJ_SIZE + PAGE_SIZE);
+    GetCrossingMap()->AddObject(objAddr, OBJ_SIZE);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(objAddr, objAddr) == objAddr) << " seed = " << GetSeed();
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(AddPage(objAddr), AddPage(objAddr)) == nullptr)
         << " seed = " << GetSeed();
 }
 
 TEST_F(CrossingMapTest, BigSmallObjTest)
 {
     static constexpr size_t OBJ_SIZE = PAGE_SIZE * 2;
-    void *obj_addr = GetRandomObjAddr(OBJ_SIZE);
-    GetCrossingMap()->AddObject(obj_addr, OBJ_SIZE);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(obj_addr, ToVoidPtr(ToUintPtr(obj_addr) + OBJ_SIZE)) == obj_addr)
+    void *objAddr = GetRandomObjAddr(OBJ_SIZE);
+    GetCrossingMap()->AddObject(objAddr, OBJ_SIZE);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(objAddr, ToVoidPtr(ToUintPtr(objAddr) + OBJ_SIZE)) == objAddr)
         << " seed = " << GetSeed();
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(AddPage(obj_addr), ToVoidPtr(ToUintPtr(obj_addr) + OBJ_SIZE)) ==
-                    obj_addr)
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(AddPage(objAddr), ToVoidPtr(ToUintPtr(objAddr) + OBJ_SIZE)) ==
+                    objAddr)
             << " seed = " << GetSeed();
     }
-    GetCrossingMap()->RemoveObject(obj_addr, OBJ_SIZE);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(obj_addr, ToVoidPtr(ToUintPtr(obj_addr) + OBJ_SIZE)) == nullptr)
+    GetCrossingMap()->RemoveObject(objAddr, OBJ_SIZE);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(objAddr, ToVoidPtr(ToUintPtr(objAddr) + OBJ_SIZE)) == nullptr)
         << " seed = " << GetSeed();
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(AddPage(obj_addr), ToVoidPtr(ToUintPtr(obj_addr) + OBJ_SIZE)) ==
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(AddPage(objAddr), ToVoidPtr(ToUintPtr(objAddr) + OBJ_SIZE)) ==
                     nullptr)
             << " seed = " << GetSeed();
     }
@@ -166,20 +165,20 @@ TEST_F(CrossingMapTest, BigSmallObjTest)
 TEST_F(CrossingMapTest, HugeObjTest)
 {
     static constexpr size_t OBJ_SIZE = MEMORY_POOL_SIZE >> 1U;
-    void *obj_addr = GetRandomObjAddr(OBJ_SIZE);
-    GetCrossingMap()->AddObject(obj_addr, OBJ_SIZE);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(obj_addr, obj_addr) == obj_addr) << " seed = " << GetSeed();
+    void *objAddr = GetRandomObjAddr(OBJ_SIZE);
+    GetCrossingMap()->AddObject(objAddr, OBJ_SIZE);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(objAddr, objAddr) == objAddr) << " seed = " << GetSeed();
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
         for (size_t i = 1_MB; i < OBJ_SIZE; i += 1_MB) {
-            void *addr = ToVoidPtr(ToUintPtr(obj_addr) + i);
-            ASSERT_TRUE(GetCrossingMap()->FindFirstObject(addr, addr) == obj_addr) << " seed = " << GetSeed();
+            void *addr = ToVoidPtr(ToUintPtr(objAddr) + i);
+            ASSERT_TRUE(GetCrossingMap()->FindFirstObject(addr, addr) == objAddr) << " seed = " << GetSeed();
         }
     }
-    GetCrossingMap()->RemoveObject(obj_addr, OBJ_SIZE);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(obj_addr, obj_addr) == nullptr) << " seed = " << GetSeed();
+    GetCrossingMap()->RemoveObject(objAddr, OBJ_SIZE);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(objAddr, objAddr) == nullptr) << " seed = " << GetSeed();
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
         for (size_t i = 1_MB; i < OBJ_SIZE; i += 1_MB) {
-            void *addr = ToVoidPtr(ToUintPtr(obj_addr) + i);
+            void *addr = ToVoidPtr(ToUintPtr(objAddr) + i);
             ASSERT_TRUE(GetCrossingMap()->FindFirstObject(addr, addr) == nullptr) << " seed = " << GetSeed();
         }
     }
@@ -190,27 +189,26 @@ TEST_F(CrossingMapTest, TwoSequentialObjectsTest)
     static constexpr size_t FIRST_OBJ_SIZE = MIN_GAP_BETWEEN_OBJECTS;
     static constexpr size_t SECOND_OBJ_SIZE = 1_KB;
     // Add some extra memory for possible shifts
-    void *first_obj_addr = GetRandomObjAddr(FIRST_OBJ_SIZE + SECOND_OBJ_SIZE + FIRST_OBJ_SIZE);
-    void *second_obj_addr = IncreaseAddr(first_obj_addr, FIRST_OBJ_SIZE);
+    void *firstObjAddr = GetRandomObjAddr(FIRST_OBJ_SIZE + SECOND_OBJ_SIZE + FIRST_OBJ_SIZE);
+    void *secondObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE);
     // We must be sure that these objects will be saved in the same locations
-    if (GetMapNumFromAddr(first_obj_addr) != GetMapNumFromAddr(second_obj_addr)) {
-        first_obj_addr = IncreaseAddr(first_obj_addr, FIRST_OBJ_SIZE);
-        second_obj_addr = IncreaseAddr(first_obj_addr, FIRST_OBJ_SIZE);
-        ASSERT_TRUE(GetMapNumFromAddr(first_obj_addr) == GetMapNumFromAddr(second_obj_addr)) << " seed = " << GetSeed();
+    if (GetMapNumFromAddr(firstObjAddr) != GetMapNumFromAddr(secondObjAddr)) {
+        firstObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE);
+        secondObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE);
+        ASSERT_TRUE(GetMapNumFromAddr(firstObjAddr) == GetMapNumFromAddr(secondObjAddr)) << " seed = " << GetSeed();
     }
-    GetCrossingMap()->AddObject(first_obj_addr, FIRST_OBJ_SIZE);
-    GetCrossingMap()->AddObject(second_obj_addr, SECOND_OBJ_SIZE);
+    GetCrossingMap()->AddObject(firstObjAddr, FIRST_OBJ_SIZE);
+    GetCrossingMap()->AddObject(secondObjAddr, SECOND_OBJ_SIZE);
 
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(first_obj_addr, first_obj_addr) == first_obj_addr)
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(firstObjAddr, firstObjAddr) == firstObjAddr)
         << " seed = " << GetSeed();
 
-    GetCrossingMap()->RemoveObject(first_obj_addr, FIRST_OBJ_SIZE, second_obj_addr);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(first_obj_addr, first_obj_addr) == second_obj_addr)
+    GetCrossingMap()->RemoveObject(firstObjAddr, FIRST_OBJ_SIZE, secondObjAddr);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(firstObjAddr, firstObjAddr) == secondObjAddr)
         << " seed = " << GetSeed();
 
-    GetCrossingMap()->RemoveObject(second_obj_addr, SECOND_OBJ_SIZE);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(first_obj_addr, first_obj_addr) == nullptr)
-        << " seed = " << GetSeed();
+    GetCrossingMap()->RemoveObject(secondObjAddr, SECOND_OBJ_SIZE);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(firstObjAddr, firstObjAddr) == nullptr) << " seed = " << GetSeed();
 }
 
 TEST_F(CrossingMapTest, TwoNonSequentialObjectsTest)
@@ -219,24 +217,22 @@ TEST_F(CrossingMapTest, TwoNonSequentialObjectsTest)
     static constexpr size_t GAP_BETWEEN_OBJECTS = 1_MB;
     static constexpr size_t SECOND_OBJ_SIZE = 1_KB;
     // Add some extra memory for possible shifts
-    void *first_obj_addr = GetRandomObjAddr(FIRST_OBJ_SIZE + SECOND_OBJ_SIZE + GAP_BETWEEN_OBJECTS);
-    void *second_obj_addr = IncreaseAddr(first_obj_addr, FIRST_OBJ_SIZE + GAP_BETWEEN_OBJECTS);
+    void *firstObjAddr = GetRandomObjAddr(FIRST_OBJ_SIZE + SECOND_OBJ_SIZE + GAP_BETWEEN_OBJECTS);
+    void *secondObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE + GAP_BETWEEN_OBJECTS);
 
-    GetCrossingMap()->AddObject(first_obj_addr, FIRST_OBJ_SIZE);
-    GetCrossingMap()->AddObject(second_obj_addr, SECOND_OBJ_SIZE);
+    GetCrossingMap()->AddObject(firstObjAddr, FIRST_OBJ_SIZE);
+    GetCrossingMap()->AddObject(secondObjAddr, SECOND_OBJ_SIZE);
 
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(first_obj_addr, second_obj_addr) == first_obj_addr)
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(firstObjAddr, secondObjAddr) == firstObjAddr)
         << " seed = " << GetSeed();
 
-    GetCrossingMap()->RemoveObject(first_obj_addr, FIRST_OBJ_SIZE, second_obj_addr);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(first_obj_addr, first_obj_addr) == nullptr)
-        << " seed = " << GetSeed();
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(first_obj_addr, second_obj_addr) == second_obj_addr)
+    GetCrossingMap()->RemoveObject(firstObjAddr, FIRST_OBJ_SIZE, secondObjAddr);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(firstObjAddr, firstObjAddr) == nullptr) << " seed = " << GetSeed();
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(firstObjAddr, secondObjAddr) == secondObjAddr)
         << " seed = " << GetSeed();
 
-    GetCrossingMap()->RemoveObject(second_obj_addr, SECOND_OBJ_SIZE);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(first_obj_addr, second_obj_addr) == nullptr)
-        << " seed = " << GetSeed();
+    GetCrossingMap()->RemoveObject(secondObjAddr, SECOND_OBJ_SIZE);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(firstObjAddr, secondObjAddr) == nullptr) << " seed = " << GetSeed();
 }
 
 TEST_F(CrossingMapTest, ThreeSequentialObjectsTest)
@@ -245,63 +241,62 @@ TEST_F(CrossingMapTest, ThreeSequentialObjectsTest)
     static constexpr size_t SECOND_OBJ_SIZE = MIN_GAP_BETWEEN_OBJECTS;
     static constexpr size_t THIRD_OBJ_SIZE = 1_KB;
     // Add some extra memory for possible shifts
-    void *first_obj_addr = GetRandomObjAddr(FIRST_OBJ_SIZE + SECOND_OBJ_SIZE + THIRD_OBJ_SIZE + 3 * SECOND_OBJ_SIZE);
-    void *second_obj_addr = IncreaseAddr(first_obj_addr, FIRST_OBJ_SIZE);
-    void *third_obj_addr = IncreaseAddr(second_obj_addr, SECOND_OBJ_SIZE);
+    void *firstObjAddr = GetRandomObjAddr(FIRST_OBJ_SIZE + SECOND_OBJ_SIZE + THIRD_OBJ_SIZE + 3 * SECOND_OBJ_SIZE);
+    void *secondObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE);
+    void *thirdObjAddr = IncreaseAddr(secondObjAddr, SECOND_OBJ_SIZE);
 
     // We must be sure that the first object will cross the borders for the second one
-    if (GetMapNumFromAddr(GetLastObjectByte(first_obj_addr, FIRST_OBJ_SIZE)) != GetMapNumFromAddr(second_obj_addr)) {
-        first_obj_addr = IncreaseAddr(first_obj_addr, SECOND_OBJ_SIZE);
-        second_obj_addr = IncreaseAddr(first_obj_addr, FIRST_OBJ_SIZE);
-        third_obj_addr = IncreaseAddr(second_obj_addr, SECOND_OBJ_SIZE);
-        ASSERT_TRUE(GetMapNumFromAddr(GetLastObjectByte(first_obj_addr, FIRST_OBJ_SIZE)) ==
-                    GetMapNumFromAddr(second_obj_addr))
+    if (GetMapNumFromAddr(GetLastObjectByte(firstObjAddr, FIRST_OBJ_SIZE)) != GetMapNumFromAddr(secondObjAddr)) {
+        firstObjAddr = IncreaseAddr(firstObjAddr, SECOND_OBJ_SIZE);
+        secondObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE);
+        thirdObjAddr = IncreaseAddr(secondObjAddr, SECOND_OBJ_SIZE);
+        ASSERT_TRUE(GetMapNumFromAddr(GetLastObjectByte(firstObjAddr, FIRST_OBJ_SIZE)) ==
+                    GetMapNumFromAddr(secondObjAddr))
             << " seed = " << GetSeed();
     }
 
     // We must be sure that the second and the third object will be saved in the same locations
-    if (GetMapNumFromAddr(second_obj_addr) != GetMapNumFromAddr(third_obj_addr)) {
-        first_obj_addr = IncreaseAddr(first_obj_addr, 2 * SECOND_OBJ_SIZE);
-        second_obj_addr = IncreaseAddr(first_obj_addr, FIRST_OBJ_SIZE);
-        third_obj_addr = IncreaseAddr(second_obj_addr, SECOND_OBJ_SIZE);
-        ASSERT_TRUE(GetMapNumFromAddr(GetLastObjectByte(first_obj_addr, FIRST_OBJ_SIZE)) ==
-                    GetMapNumFromAddr(second_obj_addr))
+    if (GetMapNumFromAddr(secondObjAddr) != GetMapNumFromAddr(thirdObjAddr)) {
+        firstObjAddr = IncreaseAddr(firstObjAddr, 2 * SECOND_OBJ_SIZE);
+        secondObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE);
+        thirdObjAddr = IncreaseAddr(secondObjAddr, SECOND_OBJ_SIZE);
+        ASSERT_TRUE(GetMapNumFromAddr(GetLastObjectByte(firstObjAddr, FIRST_OBJ_SIZE)) ==
+                    GetMapNumFromAddr(secondObjAddr))
             << " seed = " << GetSeed();
-        ASSERT_TRUE(GetMapNumFromAddr(second_obj_addr) == GetMapNumFromAddr(third_obj_addr)) << " seed = " << GetSeed();
+        ASSERT_TRUE(GetMapNumFromAddr(secondObjAddr) == GetMapNumFromAddr(thirdObjAddr)) << " seed = " << GetSeed();
     }
 
-    GetCrossingMap()->AddObject(first_obj_addr, FIRST_OBJ_SIZE);
-    GetCrossingMap()->AddObject(second_obj_addr, SECOND_OBJ_SIZE);
-    GetCrossingMap()->AddObject(third_obj_addr, THIRD_OBJ_SIZE);
+    GetCrossingMap()->AddObject(firstObjAddr, FIRST_OBJ_SIZE);
+    GetCrossingMap()->AddObject(secondObjAddr, SECOND_OBJ_SIZE);
+    GetCrossingMap()->AddObject(thirdObjAddr, THIRD_OBJ_SIZE);
 
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(second_obj_addr, second_obj_addr) == first_obj_addr)
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == firstObjAddr)
             << " seed = " << GetSeed();
     } else {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(second_obj_addr, second_obj_addr) == second_obj_addr)
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == secondObjAddr)
             << " seed = " << GetSeed();
     }
 
-    GetCrossingMap()->RemoveObject(second_obj_addr, SECOND_OBJ_SIZE, third_obj_addr, first_obj_addr, FIRST_OBJ_SIZE);
+    GetCrossingMap()->RemoveObject(secondObjAddr, SECOND_OBJ_SIZE, thirdObjAddr, firstObjAddr, FIRST_OBJ_SIZE);
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(second_obj_addr, second_obj_addr) == first_obj_addr)
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == firstObjAddr)
             << " seed = " << GetSeed();
     } else {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(second_obj_addr, second_obj_addr) == third_obj_addr)
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == thirdObjAddr)
             << " seed = " << GetSeed();
     }
-    GetCrossingMap()->RemoveObject(third_obj_addr, THIRD_OBJ_SIZE, nullptr, first_obj_addr, FIRST_OBJ_SIZE);
+    GetCrossingMap()->RemoveObject(thirdObjAddr, THIRD_OBJ_SIZE, nullptr, firstObjAddr, FIRST_OBJ_SIZE);
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(second_obj_addr, second_obj_addr) == first_obj_addr)
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == firstObjAddr)
             << " seed = " << GetSeed();
     } else {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(second_obj_addr, second_obj_addr) == nullptr)
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == nullptr)
             << " seed = " << GetSeed();
     }
 
-    GetCrossingMap()->RemoveObject(first_obj_addr, FIRST_OBJ_SIZE);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(second_obj_addr, second_obj_addr) == nullptr)
-        << " seed = " << GetSeed();
+    GetCrossingMap()->RemoveObject(firstObjAddr, FIRST_OBJ_SIZE);
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == nullptr) << " seed = " << GetSeed();
 }
 
 TEST_F(CrossingMapTest, InitializeCrosingMapForMemoryTest)
@@ -309,29 +304,29 @@ TEST_F(CrossingMapTest, InitializeCrosingMapForMemoryTest)
     static constexpr size_t POOL_COUNT = 6;
     static constexpr size_t GRANULARITY = 2;
     GetCrossingMap()->RemoveCrossingMapForMemory(ToVoidPtr(GetPoolMinAddress()), GetPoolSize());
-    void *start_addr =
+    void *startAddr =
         GetRandomObjAddr((POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES) * POOL_COUNT + PANDA_POOL_ALIGNMENT_IN_BYTES);
-    uintptr_t aligned_start_addr = AlignUp(ToUintPtr(start_addr), PANDA_POOL_ALIGNMENT_IN_BYTES);
+    uintptr_t alignedStartAddr = AlignUp(ToUintPtr(startAddr), PANDA_POOL_ALIGNMENT_IN_BYTES);
 
-    std::array<bool, POOL_COUNT> deleted_pools {};
+    std::array<bool, POOL_COUNT> deletedPools {};
     for (size_t i = 0; i < POOL_COUNT; i++) {
-        void *pool_addr = ToVoidPtr(aligned_start_addr + i * (POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES));
-        GetCrossingMap()->InitializeCrossingMapForMemory(pool_addr, POOLS_SIZE * 2);
-        deleted_pools[i] = false;
+        void *poolAddr = ToVoidPtr(alignedStartAddr + i * (POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES));
+        GetCrossingMap()->InitializeCrossingMapForMemory(poolAddr, POOLS_SIZE * 2);
+        deletedPools[i] = false;
     }
 
     for (size_t i = 0; i < POOL_COUNT; i += GRANULARITY) {
-        void *pool_addr = ToVoidPtr(aligned_start_addr + i * (POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES));
-        GetCrossingMap()->RemoveCrossingMapForMemory(pool_addr, POOLS_SIZE * 2);
-        deleted_pools[i] = true;
+        void *poolAddr = ToVoidPtr(alignedStartAddr + i * (POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES));
+        GetCrossingMap()->RemoveCrossingMapForMemory(poolAddr, POOLS_SIZE * 2);
+        deletedPools[i] = true;
     }
 
     for (size_t i = 0; i < POOL_COUNT; i++) {
-        if (deleted_pools[i]) {
+        if (deletedPools[i]) {
             continue;
         }
-        void *pool_addr = ToVoidPtr(aligned_start_addr + i * (POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES));
-        GetCrossingMap()->RemoveCrossingMapForMemory(pool_addr, POOLS_SIZE * 2);
+        void *poolAddr = ToVoidPtr(alignedStartAddr + i * (POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES));
+        GetCrossingMap()->RemoveCrossingMapForMemory(poolAddr, POOLS_SIZE * 2);
     }
 
     GetCrossingMap()->InitializeCrossingMapForMemory(ToVoidPtr(GetPoolMinAddress()), GetPoolSize());

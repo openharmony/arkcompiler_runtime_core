@@ -29,47 +29,47 @@ namespace panda::compiler {
 class IrBuilderTest : public AsmTest {
 public:
     IrBuilderTest()
-        : default_compiler_non_optimizing_(OPTIONS.IsCompilerNonOptimizing()),
-          default_compiler_use_safe_point_(OPTIONS.IsCompilerUseSafepoint())
+        : defaultCompilerNonOptimizing_(g_options.IsCompilerNonOptimizing()),
+          defaultCompilerUseSafePoint_(g_options.IsCompilerUseSafepoint())
     {
-        OPTIONS.SetCompilerNonOptimizing(false);
-        OPTIONS.SetCompilerUseSafepoint(false);
+        g_options.SetCompilerNonOptimizing(false);
+        g_options.SetCompilerUseSafepoint(false);
     }
 
     ~IrBuilderTest() override
     {
-        OPTIONS.SetCompilerNonOptimizing(default_compiler_non_optimizing_);
-        OPTIONS.SetCompilerUseSafepoint(default_compiler_use_safe_point_);
+        g_options.SetCompilerNonOptimizing(defaultCompilerNonOptimizing_);
+        g_options.SetCompilerUseSafepoint(defaultCompilerUseSafePoint_);
     }
 
     NO_COPY_SEMANTIC(IrBuilderTest);
     NO_MOVE_SEMANTIC(IrBuilderTest);
 
-    void CheckSimple(const std::string &inst_name, DataType::Type data_type, const std::string &inst_type)
+    void CheckSimple(const std::string &instName, DataType::Type dataType, const std::string &instType)
     {
-        ASSERT(inst_name == "mov" || inst_name == "lda" || inst_name == "sta");
-        std::string curr_type;
-        if (data_type == DataType::Type::REFERENCE) {
-            curr_type = "i64[]";
+        ASSERT(instName == "mov" || instName == "lda" || instName == "sta");
+        std::string currType;
+        if (dataType == DataType::Type::REFERENCE) {
+            currType = "i64[]";
         } else {
-            curr_type = ToString(data_type);
+            currType = ToString(dataType);
         }
 
-        std::string source = ".function " + curr_type + " main(";
-        source += curr_type + " a0) {\n";
-        if (inst_name == "mov") {
-            source += "mov" + inst_type + " v0, a0\n";
-            source += "lda" + inst_type + " v0\n";
-        } else if (inst_name == "lda") {
-            source += "lda" + inst_type + " a0\n";
-        } else if (inst_name == "sta") {
-            source += "lda" + inst_type + " a0\n";
-            source += "sta" + inst_type + " v0\n";
-            source += "lda" + inst_type + " v0\n";
+        std::string source = ".function " + currType + " main(";
+        source += currType + " a0) {\n";
+        if (instName == "mov") {
+            source += "mov" + instType + " v0, a0\n";
+            source += "lda" + instType + " v0\n";
+        } else if (instName == "lda") {
+            source += "lda" + instType + " a0\n";
+        } else if (instName == "sta") {
+            source += "lda" + instType + " a0\n";
+            source += "sta" + instType + " v0\n";
+            source += "lda" + instType + " v0\n";
         } else {
             UNREACHABLE();
         }
-        source += "return" + inst_type + "\n";
+        source += "return" + instType + "\n";
         source += "}";
 
         ASSERT_TRUE(ParseToGraph(source.c_str(), "main"));
@@ -78,72 +78,72 @@ public:
         GRAPH(graph)
         {
             PARAMETER(0U, 0U);
-            INS(0U).SetType(data_type);
+            INS(0U).SetType(dataType);
 
             BASIC_BLOCK(2U, -1L)
             {
                 INST(1U, Opcode::Return).Inputs(0U);
-                INS(1U).SetType(data_type);
+                INS(1U).SetType(dataType);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    void CheckSimpleWithImm(const std::string &inst_name, DataType::Type data_type, const std::string &inst_type)
+    void CheckSimpleWithImm(const std::string &instName, DataType::Type dataType, const std::string &instType)
     {
-        ASSERT(inst_name == "mov" || inst_name == "fmov" || inst_name == "lda" || inst_name == "flda");
-        std::string curr_type = ToString(data_type);
+        ASSERT(instName == "mov" || instName == "fmov" || instName == "lda" || instName == "flda");
+        std::string currType = ToString(dataType);
 
-        std::string source = ".function " + curr_type + " main() {\n";
-        if (inst_name == "mov") {
-            source += "movi" + inst_type + " v0, 0\n";
-            source += "lda" + inst_type + " v0\n";
-        } else if (inst_name == "fmov") {
-            source += "fmovi" + inst_type + " v0, 0.\n";
-            source += "lda" + inst_type + " v0\n";
-        } else if (inst_name == "lda") {
-            source += "ldai" + inst_type + " 0\n";
-        } else if (inst_name == "flda") {
-            source += "fldai" + inst_type + " 0.\n";
+        std::string source = ".function " + currType + " main() {\n";
+        if (instName == "mov") {
+            source += "movi" + instType + " v0, 0\n";
+            source += "lda" + instType + " v0\n";
+        } else if (instName == "fmov") {
+            source += "fmovi" + instType + " v0, 0.\n";
+            source += "lda" + instType + " v0\n";
+        } else if (instName == "lda") {
+            source += "ldai" + instType + " 0\n";
+        } else if (instName == "flda") {
+            source += "fldai" + instType + " 0.\n";
         } else {
             UNREACHABLE();
         }
-        source += "return" + inst_type + "\n";
+        source += "return" + instType + "\n";
         source += "}";
 
         ASSERT_TRUE(ParseToGraph(source.c_str(), "main"));
 
-        auto constant_type = GetCommonType(data_type);
+        auto constantType = GetCommonType(dataType);
         auto graph = CreateGraphWithDefaultRuntime();
 
         GRAPH(graph)
         {
             CONSTANT(0U, 0U);
-            INS(0U).SetType(constant_type);
+            INS(0U).SetType(constantType);
 
             BASIC_BLOCK(2U, -1L)
             {
                 INST(1U, Opcode::Return).Inputs(0U);
-                INS(1U).SetType(data_type);
+                INS(1U).SetType(dataType);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    void CheckCmp(const std::string &inst_name, DataType::Type data_type, const std::string &inst_type)
+    void CheckCmp(const std::string &instName, DataType::Type dataType, const std::string &instType)
     {
-        ASSERT(inst_name == "cmp" || inst_name == "ucmp" || inst_name == "fcmpl" || inst_name == "fcmpg");
-        std::string curr_type;
-        if (data_type == DataType::Type::REFERENCE) {
-            curr_type = "i64[]";
+        ASSERT(instName == "cmp" || instName == "ucmp" || instName == "fcmpl" || instName == "fcmpg");
+        std::string currType;
+        if (dataType == DataType::Type::REFERENCE) {
+            currType = "i64[]";
         } else {
-            curr_type = ToString(data_type);
+            currType = ToString(dataType);
         }
         std::string source = ".function i32 main(";
-        source += curr_type + " a0, ";
-        source += curr_type + " a1) {\n";
-        source += "lda" + inst_type + " a0\n";
-        source += inst_name + inst_type + " a1\n";
+        source += currType + " a0, ";
+        source += currType + " a1) {\n";
+        source += "lda" + instType + " a0\n";
+        source += instName + instType + " a1\n";
         source += "return\n";
         source += "}";
 
@@ -153,9 +153,9 @@ public:
         GRAPH(graph)
         {
             PARAMETER(0U, 0U);
-            INS(0U).SetType(data_type);
+            INS(0U).SetType(dataType);
             PARAMETER(1U, 1U);
-            INS(1U).SetType(data_type);
+            INS(1U).SetType(dataType);
 
             BASIC_BLOCK(2U, -1L)
             {
@@ -166,16 +166,16 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    void CheckFloatCmp(const std::string &inst_name, DataType::Type data_type, const std::string &inst_type, bool fcmpg)
+    void CheckFloatCmp(const std::string &instName, DataType::Type dataType, const std::string &instType, bool fcmpg)
     {
-        ASSERT(inst_name == "fcmpl" || inst_name == "fcmpg");
-        std::string curr_type = ToString(data_type);
+        ASSERT(instName == "fcmpl" || instName == "fcmpg");
+        std::string currType = ToString(dataType);
 
         std::string source = ".function i32 main(";
-        source += curr_type + " a0, ";
-        source += curr_type + " a1) {\n";
-        source += "lda" + inst_type + " a0\n";
-        source += inst_name + inst_type + " a1\n";
+        source += currType + " a0, ";
+        source += currType + " a1) {\n";
+        source += "lda" + instType + " a0\n";
+        source += instName + instType + " a1\n";
         source += "return\n";
         source += "}";
 
@@ -185,13 +185,13 @@ public:
         GRAPH(graph)
         {
             PARAMETER(0U, 0U);
-            INS(0U).SetType(data_type);
+            INS(0U).SetType(dataType);
             PARAMETER(1U, 1U);
-            INS(1U).SetType(data_type);
+            INS(1U).SetType(dataType);
 
             BASIC_BLOCK(2U, -1L)
             {
-                INST(2U, Opcode::Cmp).s32().SrcType(data_type).Fcmpg(fcmpg).Inputs(0U, 1U);
+                INST(2U, Opcode::Cmp).s32().SrcType(dataType).Fcmpg(fcmpg).Inputs(0U, 1U);
                 INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
@@ -225,19 +225,19 @@ public:
                 UNREACHABLE();
         }
 
-        std::string inst_postfix;
-        std::string param_type = "i32";
+        std::string instPostfix;
+        std::string paramType = "i32";
         auto type = DataType::INT32;
         if constexpr (IS_OBJ) {
-            inst_postfix = ".obj";
-            param_type = "i64[]";
+            instPostfix = ".obj";
+            paramType = "i64[]";
             type = DataType::REFERENCE;
         }
 
         std::string source = ".function void main(";
-        source += param_type + " a0, " + param_type + " a1) {\n";
-        source += "lda" + inst_postfix + " a0\n";
-        source += cmd + inst_postfix + " a1, label\n";
+        source += paramType + " a0, " + paramType + " a1) {\n";
+        source += "lda" + instPostfix + " a0\n";
+        source += cmd + instPostfix + " a1, label\n";
         source += "label:\n";
         source += "return.void\n}";
 
@@ -297,19 +297,19 @@ public:
     void CheckCondJumpWithZero(ConditionCode cc)
     {
         std::string cmd = GetCcString(cc);
-        std::string inst_postfix;
-        std::string param_type = "i32";
+        std::string instPostfix;
+        std::string paramType = "i32";
         auto type = DataType::INT32;
         if constexpr (IS_OBJ) {
-            inst_postfix = ".obj";
-            param_type = "i64[]";
+            instPostfix = ".obj";
+            paramType = "i64[]";
             type = DataType::REFERENCE;
         }
 
         std::string source = ".function void main(";
-        source += param_type + " a0) {\n";
-        source += "lda" + inst_postfix + " a0\n";
-        source += cmd + inst_postfix + " label\n";
+        source += paramType + " a0) {\n";
+        source += "lda" + instPostfix + " a0\n";
+        source += cmd + instPostfix + " label\n";
         source += "label:\n";
         source += "return.void\n}";
 
@@ -341,8 +341,8 @@ public:
     }
 
 private:
-    bool default_compiler_non_optimizing_;
-    bool default_compiler_use_safe_point_;
+    bool defaultCompilerNonOptimizing_;
+    bool defaultCompilerUseSafePoint_;
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -851,41 +851,41 @@ TEST_F(IrBuilderTest, RemoveNotDominateInputs)
 // Checks the build of the mov instruction with integer parameters
 TEST_F(IrBuilderTest, MovInt)
 {
-    DataType::Type data_type = DataType::Type::INT32;
-    std::string inst_type;
-    CheckSimple("mov", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT32;
+    std::string instType;
+    CheckSimple("mov", dataType, instType);
 }
 
 // Checks the build of the mov instruction with real parameters
 TEST_F(IrBuilderTest, MovReal)
 {
-    DataType::Type data_type = DataType::Type::FLOAT32;
-    std::string inst_type;
-    CheckSimple("mov", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT32;
+    std::string instType;
+    CheckSimple("mov", dataType, instType);
 }
 
 // Checks the build of the mov.64 instruction with integer parameters
 TEST_F(IrBuilderTest, Mov64Int)
 {
-    DataType::Type data_type = DataType::Type::INT64;
-    std::string inst_type = ".64";
-    CheckSimple("mov", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT64;
+    std::string instType = ".64";
+    CheckSimple("mov", dataType, instType);
 }
 
 // Checks the build of the mov.64 instruction with real parameters
 TEST_F(IrBuilderTest, Mov64Real)
 {
-    DataType::Type data_type = DataType::Type::FLOAT64;
-    std::string inst_type = ".64";
-    CheckSimple("mov", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT64;
+    std::string instType = ".64";
+    CheckSimple("mov", dataType, instType);
 }
 
 // Checks the build of the mov.obj instruction
 TEST_F(IrBuilderTest, MovObj)
 {
-    DataType::Type data_type = DataType::Type::REFERENCE;
-    std::string inst_type = ".obj";
-    CheckSimple("mov", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::REFERENCE;
+    std::string instType = ".obj";
+    CheckSimple("mov", dataType, instType);
 }
 
 // Checks the build of the mov.null instruction
@@ -916,73 +916,73 @@ TEST_F(IrBuilderTest, MovNull)
 // Checks the build of the movi instruction with integer parameters
 TEST_F(IrBuilderTest, MoviInt)
 {
-    DataType::Type data_type = DataType::Type::INT32;
-    std::string inst_type;
-    CheckSimpleWithImm("mov", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT32;
+    std::string instType;
+    CheckSimpleWithImm("mov", dataType, instType);
 }
 
 // Checks the build of the fmovi instruction with real parameters
 TEST_F(IrBuilderTest, FmoviReal)
 {
-    DataType::Type data_type = DataType::Type::FLOAT32;
-    std::string inst_type;
-    CheckSimpleWithImm("fmov", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT32;
+    std::string instType;
+    CheckSimpleWithImm("fmov", dataType, instType);
 }
 
 // Checks the build of the movi.64 instruction with integer parameters
 TEST_F(IrBuilderTest, Movi64Int)
 {
-    DataType::Type data_type = DataType::Type::INT64;
-    std::string inst_type = ".64";
-    CheckSimpleWithImm("mov", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT64;
+    std::string instType = ".64";
+    CheckSimpleWithImm("mov", dataType, instType);
 }
 
 // Checks the build of the movi.64 instruction with real parameters
 TEST_F(IrBuilderTest, Fmovi64Real)
 {
-    DataType::Type data_type = DataType::Type::FLOAT64;
-    std::string inst_type = ".64";
-    CheckSimpleWithImm("fmov", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT64;
+    std::string instType = ".64";
+    CheckSimpleWithImm("fmov", dataType, instType);
 }
 
 // Checks the build of the lda instruction with integer parameters
 TEST_F(IrBuilderTest, LdaInt)
 {
-    DataType::Type data_type = DataType::Type::INT32;
-    std::string inst_type;
-    CheckSimple("lda", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT32;
+    std::string instType;
+    CheckSimple("lda", dataType, instType);
 }
 
 // Checks the build of the lda instruction with real parameters
 TEST_F(IrBuilderTest, LdaReal)
 {
-    DataType::Type data_type = DataType::Type::FLOAT32;
-    std::string inst_type;
-    CheckSimple("lda", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT32;
+    std::string instType;
+    CheckSimple("lda", dataType, instType);
 }
 
 // Checks the build of the lda.64 instruction with integer parameters
 TEST_F(IrBuilderTest, Lda64Int)
 {
-    DataType::Type data_type = DataType::Type::INT64;
-    std::string inst_type = ".64";
-    CheckSimple("lda", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT64;
+    std::string instType = ".64";
+    CheckSimple("lda", dataType, instType);
 }
 
 // Checks the build of the lda.64 instruction with real parameters
 TEST_F(IrBuilderTest, Lda64Real)
 {
-    DataType::Type data_type = DataType::Type::FLOAT64;
-    std::string inst_type = ".64";
-    CheckSimple("lda", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT64;
+    std::string instType = ".64";
+    CheckSimple("lda", dataType, instType);
 }
 
 // Checks the build of the lda.obj instruction
 TEST_F(IrBuilderTest, LdaObj)
 {
-    DataType::Type data_type = DataType::Type::REFERENCE;
-    std::string inst_type = ".obj";
-    CheckSimple("lda", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::REFERENCE;
+    std::string instType = ".obj";
+    CheckSimple("lda", dataType, instType);
 }
 
 // Checks the build of the lda.obj instruction
@@ -1012,33 +1012,33 @@ TEST_F(IrBuilderTest, LdaNull)
 // Checks the build of the ldai instruction with integer parameters
 TEST_F(IrBuilderTest, LdaiInt)
 {
-    DataType::Type data_type = DataType::Type::INT32;
-    std::string inst_type;
-    CheckSimpleWithImm("lda", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT32;
+    std::string instType;
+    CheckSimpleWithImm("lda", dataType, instType);
 }
 
 // Checks the build of the ldai instruction with real parameters
 TEST_F(IrBuilderTest, FldaiReal)
 {
-    DataType::Type data_type = DataType::Type::FLOAT32;
-    std::string inst_type;
-    CheckSimpleWithImm("flda", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT32;
+    std::string instType;
+    CheckSimpleWithImm("flda", dataType, instType);
 }
 
 // Checks the build of the ldai.64 instruction with integer parameters
 TEST_F(IrBuilderTest, Ldai64Int)
 {
-    DataType::Type data_type = DataType::Type::INT64;
-    std::string inst_type = ".64";
-    CheckSimpleWithImm("lda", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT64;
+    std::string instType = ".64";
+    CheckSimpleWithImm("lda", dataType, instType);
 }
 
 // Checks the build of the ldai.64 instruction with real parameters
 TEST_F(IrBuilderTest, Fldai64Real)
 {
-    DataType::Type data_type = DataType::Type::FLOAT64;
-    std::string inst_type = ".64";
-    CheckSimpleWithImm("flda", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT64;
+    std::string instType = ".64";
+    CheckSimpleWithImm("flda", dataType, instType);
 }
 
 // Checks the build of the lda.str instruction
@@ -1094,41 +1094,41 @@ TEST_F(IrBuilderTest, LdaType)
 // Checks the build of the sta instruction with integer parameters
 TEST_F(IrBuilderTest, StaInt)
 {
-    DataType::Type data_type = DataType::Type::INT32;
-    std::string inst_type;
-    CheckSimple("sta", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT32;
+    std::string instType;
+    CheckSimple("sta", dataType, instType);
 }
 
 // Checks the build of the sta instruction with real parameters
 TEST_F(IrBuilderTest, StaReal)
 {
-    DataType::Type data_type = DataType::Type::FLOAT32;
-    std::string inst_type;
-    CheckSimple("sta", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT32;
+    std::string instType;
+    CheckSimple("sta", dataType, instType);
 }
 
 // Checks the build of the sta.64 instruction with integer parameters
 TEST_F(IrBuilderTest, Sta64Int)
 {
-    DataType::Type data_type = DataType::Type::INT64;
-    std::string inst_type = ".64";
-    CheckSimple("sta", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT64;
+    std::string instType = ".64";
+    CheckSimple("sta", dataType, instType);
 }
 
 // Checks the build of the sta.64 instruction with real parameters
 TEST_F(IrBuilderTest, Sta64Real)
 {
-    DataType::Type data_type = DataType::Type::FLOAT64;
-    std::string inst_type = ".64";
-    CheckSimple("sta", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::FLOAT64;
+    std::string instType = ".64";
+    CheckSimple("sta", dataType, instType);
 }
 
 // Checks the build of the sta.obj instruction
 TEST_F(IrBuilderTest, StaObj)
 {
-    DataType::Type data_type = DataType::Type::REFERENCE;
-    std::string inst_type = ".obj";
-    CheckSimple("sta", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::REFERENCE;
+    std::string instType = ".obj";
+    CheckSimple("sta", dataType, instType);
 }
 
 // Checks the build of the jmp instruction
@@ -1158,57 +1158,57 @@ TEST_F(IrBuilderTest, Jmp)
 // Checks the build of the cmp.64 instruction
 TEST_F(IrBuilderTest, Cmp64)
 {
-    DataType::Type data_type = DataType::Type::INT64;
-    std::string inst_type = ".64";
-    CheckCmp("cmp", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::INT64;
+    std::string instType = ".64";
+    CheckCmp("cmp", dataType, instType);
 }
 
 // Checks the build of the ucmp instruction
 TEST_F(IrBuilderTest, Ucmp)
 {
-    DataType::Type data_type = DataType::Type::UINT32;
-    std::string inst_type;
-    CheckCmp("ucmp", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::UINT32;
+    std::string instType;
+    CheckCmp("ucmp", dataType, instType);
 }
 
 // Checks the build of the ucmp.64 instruction
 TEST_F(IrBuilderTest, Ucmp64)
 {
-    DataType::Type data_type = DataType::Type::UINT64;
-    std::string inst_type = ".64";
-    CheckCmp("ucmp", data_type, inst_type);
+    DataType::Type dataType = DataType::Type::UINT64;
+    std::string instType = ".64";
+    CheckCmp("ucmp", dataType, instType);
 }
 
 // Checks the build of the fcmpl instruction
 TEST_F(IrBuilderTest, Fcmpl)
 {
-    DataType::Type data_type = DataType::Type::FLOAT32;
-    std::string inst_type;
-    CheckFloatCmp("fcmpl", data_type, inst_type, false);
+    DataType::Type dataType = DataType::Type::FLOAT32;
+    std::string instType;
+    CheckFloatCmp("fcmpl", dataType, instType, false);
 }
 
 // Checks the build of the fcmpl.64 instruction
 TEST_F(IrBuilderTest, Fcmpl64)
 {
-    DataType::Type data_type = DataType::Type::FLOAT64;
-    std::string inst_type = ".64";
-    CheckFloatCmp("fcmpl", data_type, inst_type, false);
+    DataType::Type dataType = DataType::Type::FLOAT64;
+    std::string instType = ".64";
+    CheckFloatCmp("fcmpl", dataType, instType, false);
 }
 
 // Checks the build of the fcmpg instruction
 TEST_F(IrBuilderTest, Fcmpg)
 {
-    DataType::Type data_type = DataType::Type::FLOAT32;
-    std::string inst_type;
-    CheckFloatCmp("fcmpg", data_type, inst_type, true);
+    DataType::Type dataType = DataType::Type::FLOAT32;
+    std::string instType;
+    CheckFloatCmp("fcmpg", dataType, instType, true);
 }
 
 // Checks the build of the fcmpg.64 instruction
 TEST_F(IrBuilderTest, Fcmpg64)
 {
-    DataType::Type data_type = DataType::Type::FLOAT64;
-    std::string inst_type = ".64";
-    CheckFloatCmp("fcmpg", data_type, inst_type, true);
+    DataType::Type dataType = DataType::Type::FLOAT64;
+    std::string instType = ".64";
+    CheckFloatCmp("fcmpg", dataType, instType, true);
 }
 
 // Checks the build of the jeqz.obj instruction
@@ -4109,8 +4109,8 @@ lda.const v3, array3
 return.void
 }
 )";
-    auto default_option = OPTIONS.GetCompilerUnfoldConstArrayMaxSize();
-    OPTIONS.SetCompilerUnfoldConstArrayMaxSize(2U);
+    auto defaultOption = g_options.GetCompilerUnfoldConstArrayMaxSize();
+    g_options.SetCompilerUnfoldConstArrayMaxSize(2U);
     ASSERT_TRUE(ParseToGraph(source, "main"));
     auto graph = CreateGraphWithDefaultRuntime();
     GRAPH(graph)
@@ -4153,7 +4153,7 @@ return.void
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
-    OPTIONS.SetCompilerUnfoldConstArrayMaxSize(default_option);
+    g_options.SetCompilerUnfoldConstArrayMaxSize(defaultOption);
 }
 
 // Checks the build of unfolded lda.const instruction
@@ -5057,8 +5057,8 @@ TEST_F(IrBuilderTest, SimpleTryCatch)
     auto graph = CreateGraph();
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         CONSTANT(0U, 2U);
         CONSTANT(1U, 1U);
@@ -5089,8 +5089,8 @@ TEST_F(IrBuilderTest, SimpleTryCatch)
             INST(13U, Opcode::Return).b().Inputs(1U);
         }
     }
-    GraphChecker(expected_graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, TryCatchFinally)
@@ -5129,8 +5129,8 @@ TEST_F(IrBuilderTest, TryCatchFinally)
     auto graph = CreateGraph();
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         CONSTANT(0U, 1U);
         CONSTANT(1U, 3U);
@@ -5155,7 +5155,7 @@ TEST_F(IrBuilderTest, TryCatchFinally)
             INST(13U, Opcode::Return).b().Inputs(12U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, CatchPhis)
@@ -5195,8 +5195,8 @@ TEST_F(IrBuilderTest, CatchPhis)
     auto graph = CreateGraph();
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s64();
         CONSTANT(1U, 100U);
@@ -5236,8 +5236,8 @@ TEST_F(IrBuilderTest, CatchPhis)
             INST(13U, Opcode::Return).s64().Inputs(12U);
         }
     }
-    GraphChecker(expected_graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, NestedTryCatch)
@@ -5277,8 +5277,8 @@ TEST_F(IrBuilderTest, NestedTryCatch)
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -5318,8 +5318,8 @@ TEST_F(IrBuilderTest, NestedTryCatch)
             INST(18U, Opcode::Return).s32().Inputs(17U);
         }
     }
-    GraphChecker(expected_graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, EmptyCatchBlock)
@@ -5351,8 +5351,8 @@ TEST_F(IrBuilderTest, EmptyCatchBlock)
 
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(4U, 0U).s32();
         PARAMETER(5U, 1U).s32();
@@ -5377,7 +5377,7 @@ TEST_F(IrBuilderTest, EmptyCatchBlock)
             INST(14U, Opcode::Return).s32().Inputs(12U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, EmptyTryBlock)
@@ -5417,8 +5417,8 @@ TEST_F(IrBuilderTest, EmptyTryBlock)
     auto graph = CreateGraph();
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         CONSTANT(2U, 0U);
 
@@ -5427,7 +5427,7 @@ TEST_F(IrBuilderTest, EmptyTryBlock)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, CatchBlockWithCycle)
@@ -5462,8 +5462,8 @@ TEST_F(IrBuilderTest, CatchBlockWithCycle)
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -5502,8 +5502,8 @@ TEST_F(IrBuilderTest, CatchBlockWithCycle)
             INST(14U, Opcode::Return).s32().Inputs(13U);
         }
     }
-    GraphChecker(expected_graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, DeadBlocksAfterThrow)
@@ -5539,8 +5539,8 @@ ok:
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         CONSTANT(11U, 1U);
         CONSTANT(13U, 0U);
@@ -5579,8 +5579,8 @@ ok:
             INST(15U, Opcode::Return).s32().Inputs(13U);
         }
     }
-    GraphChecker(expected_graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, FallthroughBeforeTryBlockEnd)
@@ -5618,8 +5618,8 @@ exit:
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(6U, 0U).s32();
         PARAMETER(7U, 1U).s32();
@@ -5671,8 +5671,8 @@ exit:
             INST(26U, Opcode::Return).s32().Inputs(25U);
         }
     }
-    GraphChecker(expected_graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, CatchWithFallthrough)
@@ -5709,8 +5709,8 @@ exit:
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -5748,8 +5748,8 @@ exit:
             INST(15U, Opcode::Return).s32().Inputs(14U);
         }
     }
-    GraphChecker(expected_graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, OsrMode)
@@ -5770,8 +5770,8 @@ TEST_F(IrBuilderTest, OsrMode)
     ASSERT_TRUE(ParseToGraph(source, "foo", graph));
     EXPECT_TRUE(graph->RunPass<Cleanup>(false));
 
-    auto expected_graph = CreateGraphOsrWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphOsrWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).u32();
         CONSTANT(1U, 0U);
@@ -5794,7 +5794,7 @@ TEST_F(IrBuilderTest, OsrMode)
             INST(8U, Opcode::Return).u32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, TestSaveStateDeoptimize)
@@ -5814,8 +5814,8 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimize)
     auto graph = CreateGraph();
     ASSERT_TRUE(ParseToGraph(source, "foo", graph));
     EXPECT_TRUE(graph->RunPass<Cleanup>());
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).u32();
         CONSTANT(1U, 0U);
@@ -5840,7 +5840,7 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimize)
             INST(8U, Opcode::Return).u32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, InfiniteLoop)
@@ -5855,8 +5855,8 @@ TEST_F(IrBuilderTest, InfiniteLoop)
     auto graph = CreateGraph();
     ASSERT_TRUE(ParseToGraph(source, "foo_inf", graph));
     ASSERT_FALSE(graph->HasEndBlock());
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 1U);
@@ -5870,7 +5870,7 @@ TEST_F(IrBuilderTest, InfiniteLoop)
             INST(3U, Opcode::Add).s32().Inputs(2U, 1U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(IrBuilderTest, TestSaveStateDeoptimizeAuxiliaryBlock)
@@ -5896,8 +5896,8 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimizeAuxiliaryBlock)
 
     ASSERT_TRUE(ParseToGraph(source, "foo"));
     EXPECT_TRUE(GetGraph()->RunPass<Cleanup>());
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0U);
@@ -5929,7 +5929,7 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimizeAuxiliaryBlock)
             INST(8U, Opcode::Return).u32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
 TEST_F(IrBuilderTest, TestEmptyLoop)
@@ -5950,8 +5950,8 @@ TEST_F(IrBuilderTest, TestEmptyLoop)
     // GraphComparator failed on the instruction
     EXPECT_TRUE(GetGraph()->RunPass<Cleanup>(false));
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         CONSTANT(0U, 1U);
         CONSTANT(1U, 0U);
@@ -5969,7 +5969,7 @@ TEST_F(IrBuilderTest, TestEmptyLoop)
             INST(5U, Opcode::Return).s32().Inputs(1U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
 TEST_F(IrBuilderTest, MultiThrowTryBlock)
@@ -6008,8 +6008,8 @@ TEST_F(IrBuilderTest, MultiThrowTryBlock)
 
     ASSERT_TRUE(ParseToGraph<true>(source, "main"));
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0U);
@@ -6050,7 +6050,7 @@ TEST_F(IrBuilderTest, MultiThrowTryBlock)
             INST(21U, Opcode::Return).s32().Inputs(20U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
 TEST_F(IrBuilderTest, JumpToCatchHandler)
@@ -6083,8 +6083,8 @@ TEST_F(IrBuilderTest, JumpToCatchHandler)
 
     ASSERT_TRUE(ParseToGraph<true>(source, "main"));
 
-    auto expected_graph = CreateGraphWithDefaultRuntime();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    GRAPH(expectedGraph)
     {
         PARAMETER(6U, 0U).s32();
         CONSTANT(8U, 0x0U).s64();
@@ -6123,7 +6123,7 @@ TEST_F(IrBuilderTest, JumpToCatchHandler)
             INST(19U, Opcode::Return).s32().Inputs(8U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
 TEST_F(IrBuilderTest, GroupOfThrowableInstructions)
@@ -6160,14 +6160,14 @@ TEST_F(IrBuilderTest, GroupOfThrowableInstructions)
     ASSERT_TRUE(ParseToGraph<true>(source, "main"));
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         if (bb->IsTryBegin()) {
-            auto try_bb = bb->GetSuccessor(0U);
-            EXPECT_TRUE(try_bb->IsTry());
+            auto tryBb = bb->GetSuccessor(0U);
+            EXPECT_TRUE(tryBb->IsTry());
 
-            auto first_real_inst = try_bb->GetFirstInst();
-            while (first_real_inst->IsSaveState()) {
-                first_real_inst = first_real_inst->GetNext();
+            auto firstRealInst = tryBb->GetFirstInst();
+            while (firstRealInst->IsSaveState()) {
+                firstRealInst = firstRealInst->GetNext();
             }
-            EXPECT_TRUE(GetGraph()->IsInstThrowable(first_real_inst));
+            EXPECT_TRUE(GetGraph()->IsInstThrowable(firstRealInst));
         }
     }
 }

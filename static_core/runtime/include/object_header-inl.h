@@ -106,97 +106,97 @@ inline void ObjectHeader::SetFieldObject(const ManagedThread *thread, size_t off
 }
 
 template <class T>
-inline T ObjectHeader::GetFieldPrimitive(size_t offset, std::memory_order memory_order) const
+inline T ObjectHeader::GetFieldPrimitive(size_t offset, std::memory_order memoryOrder) const
 {
-    return ObjectAccessor::GetFieldPrimitive<T>(this, offset, memory_order);
+    return ObjectAccessor::GetFieldPrimitive<T>(this, offset, memoryOrder);
 }
 
 template <class T>
-inline void ObjectHeader::SetFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline void ObjectHeader::SetFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    ObjectAccessor::SetFieldPrimitive(this, offset, value, memory_order);
+    ObjectAccessor::SetFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline ObjectHeader *ObjectHeader::GetFieldObject(size_t offset, std::memory_order memory_order) const
+inline ObjectHeader *ObjectHeader::GetFieldObject(size_t offset, std::memory_order memoryOrder) const
 {
-    return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER, IS_DYN>(this, offset, memory_order);
+    return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER, IS_DYN>(this, offset, memoryOrder);
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline void ObjectHeader::SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memory_order)
+inline void ObjectHeader::SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
-    ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, offset, value, memory_order);
+    ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, offset, value, memoryOrder);
 }
 
 template <typename T>
-inline bool ObjectHeader::CompareAndSetFieldPrimitive(size_t offset, T old_value, T new_value,
-                                                      std::memory_order memory_order, bool strong)
+inline bool ObjectHeader::CompareAndSetFieldPrimitive(size_t offset, T oldValue, T newValue,
+                                                      std::memory_order memoryOrder, bool strong)
 {
-    return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, old_value, new_value, memory_order, strong).first;
+    return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, oldValue, newValue, memoryOrder, strong).first;
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline bool ObjectHeader::CompareAndSetFieldObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                                                   std::memory_order memory_order, bool strong)
+inline bool ObjectHeader::CompareAndSetFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                                   std::memory_order memoryOrder, bool strong)
 {
-    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, offset, old_value, new_value,
-                                                                                memory_order, strong)
+    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, offset, oldValue, newValue,
+                                                                                memoryOrder, strong)
         .first;
 }
 
 template <typename T>
-inline T ObjectHeader::CompareAndExchangeFieldPrimitive(size_t offset, T old_value, T new_value,
-                                                        std::memory_order memory_order, bool strong)
+inline T ObjectHeader::CompareAndExchangeFieldPrimitive(size_t offset, T oldValue, T newValue,
+                                                        std::memory_order memoryOrder, bool strong)
 {
-    return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, old_value, new_value, memory_order, strong).second;
+    return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, oldValue, newValue, memoryOrder, strong).second;
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline ObjectHeader *ObjectHeader::CompareAndExchangeFieldObject(size_t offset, ObjectHeader *old_value,
-                                                                 ObjectHeader *new_value,
-                                                                 std::memory_order memory_order, bool strong)
+inline ObjectHeader *ObjectHeader::CompareAndExchangeFieldObject(size_t offset, ObjectHeader *oldValue,
+                                                                 ObjectHeader *newValue, std::memory_order memoryOrder,
+                                                                 bool strong)
 {
-    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, offset, old_value, new_value,
-                                                                                memory_order, strong)
+    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, offset, oldValue, newValue,
+                                                                                memoryOrder, strong)
         .second;
 }
 
 template <typename T>
-inline T ObjectHeader::GetAndSetFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T ObjectHeader::GetAndSetFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndSetFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndSetFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
 inline ObjectHeader *ObjectHeader::GetAndSetFieldObject(size_t offset, ObjectHeader *value,
-                                                        std::memory_order memory_order)
+                                                        std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T ObjectHeader::GetAndAddFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T ObjectHeader::GetAndAddFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndAddFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndAddFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T ObjectHeader::GetAndBitwiseOrFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T ObjectHeader::GetAndBitwiseOrFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndBitwiseOrFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndBitwiseOrFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T ObjectHeader::GetAndBitwiseAndFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T ObjectHeader::GetAndBitwiseAndFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndBitwiseAndFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndBitwiseAndFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T ObjectHeader::GetAndBitwiseXorFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T ObjectHeader::GetAndBitwiseXorFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 }  // namespace panda

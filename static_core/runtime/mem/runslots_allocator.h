@@ -65,7 +65,7 @@ class InternalAllocator;
 template <typename AllocConfigT, typename LockConfigT = RunSlotsAllocatorLockConfig::CommonLock>
 class RunSlotsAllocator {
 public:
-    explicit RunSlotsAllocator(MemStatsType *mem_stats, SpaceType type_allocation = SpaceType::SPACE_TYPE_OBJECT);
+    explicit RunSlotsAllocator(MemStatsType *memStats, SpaceType typeAllocation = SpaceType::SPACE_TYPE_OBJECT);
     ~RunSlotsAllocator();
     NO_COPY_SEMANTIC(RunSlotsAllocator);
     NO_MOVE_SEMANTIC(RunSlotsAllocator);
@@ -79,14 +79,14 @@ public:
     }
 
     template <typename T>
-    [[nodiscard]] T *AllocArray(size_t arr_length);
+    [[nodiscard]] T *AllocArray(size_t arrLength);
 
     template <bool NEED_LOCK = true, bool DISABLE_USE_FREE_RUNSLOTS = false>
     [[nodiscard]] void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT);
 
     void Free(void *mem);
 
-    void Collect(const GCObjectVisitor &death_checker_fn);
+    void Collect(const GCObjectVisitor &deathCheckerFn);
 
     bool AddMemoryPool(void *mem, size_t size);
 
@@ -96,7 +96,7 @@ public:
      * @param mem_visitor - function pointer or functor
      */
     template <typename ObjectVisitor>
-    void IterateOverObjects(const ObjectVisitor &object_visitor);
+    void IterateOverObjects(const ObjectVisitor &objectVisitor);
 
     /**
      * @brief Iterates over all memory pools used by this allocator
@@ -107,7 +107,7 @@ public:
      * @param mem_visitor - function pointer or functor
      */
     template <typename MemVisitor>
-    void VisitAndRemoveAllPools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveAllPools(const MemVisitor &memVisitor);
 
     /**
      * @brief Visit memory pools that can be returned to the system in this allocator
@@ -116,7 +116,7 @@ public:
      * @param mem_visitor - function pointer or functor
      */
     template <typename MemVisitor>
-    void VisitAndRemoveFreePools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveFreePools(const MemVisitor &memVisitor);
 
     /**
      * @brief Iterates over objects in the range inclusively.
@@ -126,7 +126,7 @@ public:
      * @param right_border - a pointer to the last byte of the range
      */
     template <typename MemVisitor>
-    void IterateOverObjectsInRange(const MemVisitor &mem_visitor, void *left_border, void *right_border);
+    void IterateOverObjectsInRange(const MemVisitor &memVisitor, void *leftBorder, void *rightBorder);
 
     RunSlotsAllocatorAdapter<void, AllocConfigT, LockConfigT> Adapter();
 
@@ -254,21 +254,21 @@ private:
         explicit MemPoolManager();
 
         template <bool NEED_LOCK = true>
-        RunSlotsType *GetNewRunSlots(size_t slots_size);
+        RunSlotsType *GetNewRunSlots(size_t slotsSize);
 
         bool AddNewMemoryPool(void *mem, size_t size);
 
         template <typename ObjectVisitor>
-        void IterateOverObjects(const ObjectVisitor &object_visitor);
+        void IterateOverObjects(const ObjectVisitor &objectVisitor);
 
         template <typename MemVisitor>
-        void VisitAllPools(const MemVisitor &mem_visitor);
+        void VisitAllPools(const MemVisitor &memVisitor);
 
         template <typename MemVisitor>
-        void VisitAllPoolsWithOccupiedSize(const MemVisitor &mem_visitor);
+        void VisitAllPoolsWithOccupiedSize(const MemVisitor &memVisitor);
 
         template <typename MemVisitor>
-        void VisitAndRemoveFreePools(const MemVisitor &mem_visitor);
+        void VisitAndRemoveFreePools(const MemVisitor &memVisitor);
 
         void ReturnAndReleaseRunSlotsMemory(RunSlotsType *runslots);
 
@@ -284,7 +284,7 @@ private:
         public:
             PoolListElement();
 
-            void Initialize(void *pool_mem, uintptr_t unoccupied_mem, size_t size, PoolListElement *prev);
+            void Initialize(void *poolMem, uintptr_t unoccupiedMem, size_t size, PoolListElement *prev);
 
             static PoolListElement *Create(void *mem, size_t size, PoolListElement *prev)
             {
@@ -293,24 +293,24 @@ private:
                 ASSERT(mem != nullptr);
                 ASSERT(sizeof(PoolListElement) <= RUNSLOTS_SIZE);
                 ASAN_UNPOISON_MEMORY_REGION(mem, sizeof(PoolListElement));
-                auto new_element = new (mem) PoolListElement();
-                uintptr_t unoccupied_mem = AlignUp(ToUintPtr(mem) + sizeof(PoolListElement), RUNSLOTS_SIZE);
-                ASSERT(unoccupied_mem < ToUintPtr(mem) + size);
-                new_element->Initialize(mem, unoccupied_mem, size, prev);
-                return new_element;
+                auto newElement = new (mem) PoolListElement();
+                uintptr_t unoccupiedMem = AlignUp(ToUintPtr(mem) + sizeof(PoolListElement), RUNSLOTS_SIZE);
+                ASSERT(unoccupiedMem < ToUintPtr(mem) + size);
+                newElement->Initialize(mem, unoccupiedMem, size, prev);
+                return newElement;
             }
 
             bool HasMemoryForRunSlots();
 
             bool IsInitialized()
             {
-                return start_mem_ != 0;
+                return startMem_ != 0;
             }
 
-            RunSlotsType *GetMemoryForRunSlots(size_t slots_size);
+            RunSlotsType *GetMemoryForRunSlots(size_t slotsSize);
 
             template <typename RunSlotsVisitor>
-            void IterateOverRunSlots(const RunSlotsVisitor &runslots_visitor);
+            void IterateOverRunSlots(const RunSlotsVisitor &runslotsVisitor);
 
             bool HasUsedMemory();
 
@@ -320,7 +320,7 @@ private:
 
             void *GetPoolMemory()
             {
-                return ToVoidPtr(pool_mem_);
+                return ToVoidPtr(poolMem_);
             }
 
             size_t GetSize()
@@ -330,43 +330,43 @@ private:
 
             PoolListElement *GetNext() const
             {
-                return next_pool_;
+                return nextPool_;
             }
 
             PoolListElement *GetPrev() const
             {
-                return prev_pool_;
+                return prevPool_;
             }
 
             void SetPrev(PoolListElement *prev)
             {
-                prev_pool_ = prev;
+                prevPool_ = prev;
             }
 
             void SetNext(PoolListElement *next)
             {
-                next_pool_ = next;
+                nextPool_ = next;
             }
 
             void PopFromList();
 
             void AddFreedRunSlots(RunSlotsType *slots)
             {
-                [[maybe_unused]] bool old_val = freed_runslots_bitmap_.AtomicTestAndSet(slots);
-                ASSERT(!old_val);
-                freeded_runslots_count_++;
+                [[maybe_unused]] bool oldVal = freedRunslotsBitmap_.AtomicTestAndSet(slots);
+                ASSERT(!oldVal);
+                freededRunslotsCount_++;
                 ASAN_POISON_MEMORY_REGION(slots, RUNSLOTS_SIZE);
             }
 
             bool IsInFreedRunSlots(void *addr)
             {
-                void *align_addr = ToVoidPtr((ToUintPtr(addr) >> RUNSLOTS_ALIGNMENT) << RUNSLOTS_ALIGNMENT);
-                return freed_runslots_bitmap_.TestIfAddrValid(align_addr);
+                void *alignAddr = ToVoidPtr((ToUintPtr(addr) >> RUNSLOTS_ALIGNMENT) << RUNSLOTS_ALIGNMENT);
+                return freedRunslotsBitmap_.TestIfAddrValid(alignAddr);
             }
 
             size_t GetFreedRunSlotsCount()
             {
-                return freeded_runslots_count_;
+                return freededRunslotsCount_;
             }
 
             ~PoolListElement() = default;
@@ -380,22 +380,22 @@ private:
 
             uintptr_t GetFirstRunSlotsBlock(uintptr_t mem);
 
-            RunSlotsType *GetFreedRunSlots(size_t slots_size);
+            RunSlotsType *GetFreedRunSlots(size_t slotsSize);
 
-            uintptr_t pool_mem_;
-            uintptr_t start_mem_;
-            std::atomic<uintptr_t> free_ptr_;
+            uintptr_t poolMem_;
+            uintptr_t startMem_;
+            std::atomic<uintptr_t> freePtr_;
             size_t size_;
-            PoolListElement *next_pool_;
-            PoolListElement *prev_pool_;
-            size_t freeded_runslots_count_;
-            BitMapStorageType storage_for_bitmap_;
-            MemBitmapClass freed_runslots_bitmap_ {nullptr, MIN_POOL_SIZE, storage_for_bitmap_.data()};
+            PoolListElement *nextPool_;
+            PoolListElement *prevPool_;
+            size_t freededRunslotsCount_;
+            BitMapStorageType storageForBitmap_;
+            MemBitmapClass freedRunslotsBitmap_ {nullptr, MIN_POOL_SIZE, storageForBitmap_.data()};
         };
 
-        PoolListElement *free_tail_;
-        PoolListElement *partially_occupied_head_;
-        PoolListElement *occupied_tail_;
+        PoolListElement *freeTail_;
+        PoolListElement *partiallyOccupiedHead_;
+        PoolListElement *occupiedTail_;
         typename LockConfigT::PoolLock lock_;
     };
 
@@ -415,7 +415,7 @@ private:
     bool AllocatedByRunSlotsAllocatorUnsafe(void *object);
 
     template <bool NEED_LOCK = true>
-    RunSlotsType *CreateNewRunSlotsFromMemory(size_t slots_size);
+    RunSlotsType *CreateNewRunSlotsFromMemory(size_t slotsSize);
 
     // Add one to the array size to just use the size (power of two) for RunSlots list without any modifications
     static constexpr size_t SLOTS_SIZES_VARIANTS = RunSlotsType::SlotSizesVariants() + 1;
@@ -423,12 +423,12 @@ private:
     std::array<RunSlotsList, SLOTS_SIZES_VARIANTS> runslots_;
 
     // Add totally free RunSlots in this list for possibility to reuse them with different element sizes.
-    RunSlotsList free_runslots_;
+    RunSlotsList freeRunslots_;
 
-    MemPoolManager memory_pool_;
-    SpaceType type_allocation_;
+    MemPoolManager memoryPool_;
+    SpaceType typeAllocation_;
 
-    MemStatsType *mem_stats_;
+    MemStatsType *memStats_;
 
     template <typename T>
     friend class PygoteSpaceAllocator;
@@ -439,10 +439,10 @@ private:
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename T>
-T *RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocArray(size_t arr_length)
+T *RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocArray(size_t arrLength)
 {
     // NOTE(aemelenko): Very dirty hack. If you want to fix it, you must change RunSlotsAllocatorAdapter::max_size() too
-    return static_cast<T *>(Alloc(sizeof(T) * arr_length));
+    return static_cast<T *>(Alloc(sizeof(T) * arrLength));
 }
 
 #undef LOG_RUNSLOTS_ALLOCATOR

@@ -159,27 +159,26 @@ Lexer::~Lexer()
     LOG(DEBUG, ASSEMBLER) << "element of class Lexer destructed";
 }
 
-Tokens Lexer::TokenizeString(const std::string &source_str)
+Tokens Lexer::TokenizeString(const std::string &sourceStr)
 {
     LOG(DEBUG, ASSEMBLER) << "started tokenizing of line " << (lines_.size() + 1) << ": ";
 
-    lines_.emplace_back(source_str);
+    lines_.emplace_back(sourceStr);
 
-    curr_line_ = &lines_.back();
+    currLine_ = &lines_.back();
 
-    LOG(DEBUG, ASSEMBLER) << std::string_view(&*(curr_line_->buffer.begin() + curr_line_->pos),
-                                              curr_line_->end - curr_line_->pos);
+    LOG(DEBUG, ASSEMBLER) << std::string_view(&*(currLine_->buffer.begin() + currLine_->pos),
+                                              currLine_->end - currLine_->pos);
 
     AnalyzeLine();
 
     LOG(DEBUG, ASSEMBLER) << "tokenization of line " << lines_.size() << " is successful";
     LOG(DEBUG, ASSEMBLER) << "         tokens identified: ";
 
-    for (const auto &f_i : lines_.back().tokens) {
+    for (const auto &fI : lines_.back().tokens) {
         LOG(DEBUG, ASSEMBLER) << "\n                           "
-                              << std::string_view(&*(f_i.whole_line.begin() + f_i.bound_left),
-                                                  f_i.bound_right - f_i.bound_left)
-                              << " (type: " << TokenTypeWhat(f_i.type) << ")";
+                              << std::string_view(&*(fI.wholeLine.begin() + fI.boundLeft), fI.boundRight - fI.boundLeft)
+                              << " (type: " << TokenTypeWhat(fI.type) << ")";
 
         LOG(DEBUG, ASSEMBLER);
         LOG(DEBUG, ASSEMBLER);
@@ -190,17 +189,17 @@ Tokens Lexer::TokenizeString(const std::string &source_str)
 /* End of line? */
 bool Lexer::Eol() const
 {
-    return curr_line_->pos == curr_line_->end;
+    return currLine_->pos == currLine_->end;
 }
 
 /* Return the type of token */
 Token::Type Lexer::LexGetType(size_t beg, size_t end) const
 {
-    if (FindDelim(curr_line_->buffer[beg]) != Token::Type::ID_BAD) { /* delimiter */
-        return FindDelim(curr_line_->buffer[beg]);
+    if (FindDelim(currLine_->buffer[beg]) != Token::Type::ID_BAD) { /* delimiter */
+        return FindDelim(currLine_->buffer[beg]);
     }
 
-    std::string_view p(&*(curr_line_->buffer.begin() + beg), end - beg);
+    std::string_view p(&*(currLine_->buffer.begin() + beg), end - beg);
 
     Token::Type type = Findkeyword(p);
 
@@ -214,7 +213,7 @@ Token::Type Lexer::LexGetType(size_t beg, size_t end) const
         return type;
     }
 
-    if (IsQuote(curr_line_->buffer[beg])) {
+    if (IsQuote(currLine_->buffer[beg])) {
         return Token::Type::ID_STRING;
     }
 
@@ -224,21 +223,21 @@ Token::Type Lexer::LexGetType(size_t beg, size_t end) const
 /* Handle string literal */
 bool Lexer::LexString()
 {
-    bool is_escape_seq = false;
-    char quote = curr_line_->buffer[curr_line_->pos];
-    size_t begin = curr_line_->pos;
+    bool isEscapeSeq = false;
+    char quote = currLine_->buffer[currLine_->pos];
+    size_t begin = currLine_->pos;
     while (!Eol()) {
-        ++(curr_line_->pos);
+        ++(currLine_->pos);
 
-        char c = curr_line_->buffer[curr_line_->pos];
+        char c = currLine_->buffer[currLine_->pos];
 
-        if (is_escape_seq) {
-            is_escape_seq = false;
+        if (isEscapeSeq) {
+            isEscapeSeq = false;
             continue;
         }
 
         if (c == '\\') {
-            is_escape_seq = true;
+            isEscapeSeq = true;
         }
 
         if (c == quote) {
@@ -246,14 +245,14 @@ bool Lexer::LexString()
         }
     }
 
-    if (curr_line_->buffer[curr_line_->pos] != quote) {
+    if (currLine_->buffer[currLine_->pos] != quote) {
         err_ = Error(std::string("Missing terminating ") + quote + " character", 0,
-                     Error::ErrorType::ERR_STRING_MISSING_TERMINATING_CHARACTER, "", begin, curr_line_->pos,
-                     curr_line_->buffer);
+                     Error::ErrorType::ERR_STRING_MISSING_TERMINATING_CHARACTER, "", begin, currLine_->pos,
+                     currLine_->buffer);
         return false;
     }
 
-    ++(curr_line_->pos);
+    ++(currLine_->pos);
 
     return true;
 }
@@ -279,58 +278,57 @@ void Lexer::LexTokens()
     }
 
     LOG(DEBUG, ASSEMBLER) << "token search started (line " << lines_.size() << "): "
-                          << std::string_view(&*(curr_line_->buffer.begin() + curr_line_->pos),
-                                              curr_line_->end - curr_line_->pos);
+                          << std::string_view(&*(currLine_->buffer.begin() + currLine_->pos),
+                                              currLine_->end - currLine_->pos);
 
-    while (curr_line_->end > curr_line_->pos && isspace(curr_line_->buffer[curr_line_->end - 1]) != 0) {
-        --(curr_line_->end);
+    while (currLine_->end > currLine_->pos && isspace(currLine_->buffer[currLine_->end - 1]) != 0) {
+        --(currLine_->end);
     }
 
-    while (isspace(curr_line_->buffer[curr_line_->pos]) != 0 && !Eol()) {
-        ++(curr_line_->pos);
+    while (isspace(currLine_->buffer[currLine_->pos]) != 0 && !Eol()) {
+        ++(currLine_->pos);
     }
 
-    size_t bound_right;
+    size_t boundRight;
 
-    size_t bound_left;
+    size_t boundLeft;
 
     while (!Eol()) {
-        bound_left = curr_line_->pos;
+        boundLeft = currLine_->pos;
 
-        if (FindDelim(curr_line_->buffer[curr_line_->pos]) != Token::Type::ID_BAD) {
-            ++(curr_line_->pos);
-        } else if (IsQuote(curr_line_->buffer[curr_line_->pos])) {
+        if (FindDelim(currLine_->buffer[currLine_->pos]) != Token::Type::ID_BAD) {
+            ++(currLine_->pos);
+        } else if (IsQuote(currLine_->buffer[currLine_->pos])) {
             if (!LexString()) {
                 return;
             }
         } else {
-            while (!Eol() && FindDelim(curr_line_->buffer[curr_line_->pos]) == Token::Type::ID_BAD &&
-                   isspace(curr_line_->buffer[curr_line_->pos]) == 0) {
-                ++(curr_line_->pos);
-                size_t position = curr_line_->pos;
-                while (FindDelim(curr_line_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_L ||
-                       FindDelim(curr_line_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_R) {
+            while (!Eol() && FindDelim(currLine_->buffer[currLine_->pos]) == Token::Type::ID_BAD &&
+                   isspace(currLine_->buffer[currLine_->pos]) == 0) {
+                ++(currLine_->pos);
+                size_t position = currLine_->pos;
+                while (FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_L ||
+                       FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_R) {
                     position++;
                 }
-                if (isspace(curr_line_->buffer[position]) == 0 && (position != curr_line_->end)) {
-                    curr_line_->pos = position;
+                if (isspace(currLine_->buffer[position]) == 0 && (position != currLine_->end)) {
+                    currLine_->pos = position;
                 }
             }
         }
 
-        bound_right = curr_line_->pos;
+        boundRight = currLine_->pos;
 
         LOG(DEBUG, ASSEMBLER) << "token identified (line " << lines_.size() << ", "
-                              << "token " << curr_line_->tokens.size() + 1 << "): "
-                              << std::string_view(&*(curr_line_->buffer.begin() + bound_left), bound_right - bound_left)
+                              << "token " << currLine_->tokens.size() + 1 << "): "
+                              << std::string_view(&*(currLine_->buffer.begin() + boundLeft), boundRight - boundLeft)
                               << " ("
-                              << "type: " << TokenTypeWhat(LexGetType(bound_left, bound_right)) << ")";
+                              << "type: " << TokenTypeWhat(LexGetType(boundLeft, boundRight)) << ")";
 
-        curr_line_->tokens.emplace_back(bound_left, bound_right, LexGetType(bound_left, bound_right),
-                                        curr_line_->buffer);
+        currLine_->tokens.emplace_back(boundLeft, boundRight, LexGetType(boundLeft, boundRight), currLine_->buffer);
 
-        while (isspace(curr_line_->buffer[curr_line_->pos]) != 0 && !Eol()) {
-            ++(curr_line_->pos);
+        while (isspace(currLine_->buffer[currLine_->pos]) != 0 && !Eol()) {
+            ++(currLine_->pos);
         }
     }
 
@@ -355,39 +353,39 @@ void Lexer::LexTokens()
 void Lexer::LexPreprocess()
 {
     LOG(DEBUG, ASSEMBLER) << "started removing comments (line " << lines_.size() << "): "
-                          << std::string_view(&*(curr_line_->buffer.begin() + curr_line_->pos),
-                                              curr_line_->end - curr_line_->pos);
+                          << std::string_view(&*(currLine_->buffer.begin() + currLine_->pos),
+                                              currLine_->end - currLine_->pos);
 
     // Searching for comment marker located outside of string literals.
-    bool inside_str_lit = !curr_line_->buffer.empty() && curr_line_->buffer[0] == '\"';
-    size_t cmt_pos = curr_line_->buffer.find_first_of("\"#", 0);
-    if (cmt_pos != std::string::npos) {
+    bool insideStrLit = !currLine_->buffer.empty() && currLine_->buffer[0] == '\"';
+    size_t cmtPos = currLine_->buffer.find_first_of("\"#", 0);
+    if (cmtPos != std::string::npos) {
         do {
-            if (cmt_pos != 0 && curr_line_->buffer[cmt_pos - 1] != '\\' && curr_line_->buffer[cmt_pos] == '\"') {
-                inside_str_lit = !inside_str_lit;
-            } else if (curr_line_->buffer[cmt_pos] == PARSE_COMMENT_MARKER && !inside_str_lit) {
+            if (cmtPos != 0 && currLine_->buffer[cmtPos - 1] != '\\' && currLine_->buffer[cmtPos] == '\"') {
+                insideStrLit = !insideStrLit;
+            } else if (currLine_->buffer[cmtPos] == PARSE_COMMENT_MARKER && !insideStrLit) {
                 break;
             }
-        } while ((cmt_pos = curr_line_->buffer.find_first_of("\"#", cmt_pos + 1)) != std::string::npos);
+        } while ((cmtPos = currLine_->buffer.find_first_of("\"#", cmtPos + 1)) != std::string::npos);
     }
 
-    if (cmt_pos != std::string::npos) {
-        curr_line_->end = cmt_pos;
+    if (cmtPos != std::string::npos) {
+        currLine_->end = cmtPos;
     }
 
-    while (curr_line_->end > curr_line_->pos && isspace(curr_line_->buffer[curr_line_->end - 1]) != 0) {
-        --(curr_line_->end);
+    while (currLine_->end > currLine_->pos && isspace(currLine_->buffer[currLine_->end - 1]) != 0) {
+        --(currLine_->end);
     }
 
     LOG(DEBUG, ASSEMBLER) << "comments removed (line " << lines_.size() << "): "
-                          << std::string_view(&*(curr_line_->buffer.begin() + curr_line_->pos),
-                                              curr_line_->end - curr_line_->pos);
+                          << std::string_view(&*(currLine_->buffer.begin() + currLine_->pos),
+                                              currLine_->end - currLine_->pos);
 }
 
 void Lexer::SkipSpace()
 {
-    while (!Eol() && isspace(curr_line_->buffer[curr_line_->pos]) != 0) {
-        ++(curr_line_->pos);
+    while (!Eol() && isspace(currLine_->buffer[currLine_->pos]) != 0) {
+        ++(currLine_->pos);
     }
 }
 

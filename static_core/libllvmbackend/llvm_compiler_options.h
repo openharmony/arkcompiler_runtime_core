@@ -24,13 +24,13 @@ struct LLVMCompilerOptions {
     bool optimize;
     int optlevel;
     bool inlining;
-    bool recursive_inlining;
-    bool dump_module_before_optimizations;
-    bool dump_module_after_optimizations;
-    std::string inline_module_file;
-    std::string pipeline_file;
+    bool recursiveInlining;
+    bool dumpModuleBeforeOptimizations;
+    bool dumpModuleAfterOptimizations;
+    std::string inlineModuleFile;
+    std::string pipelineFile;
     // Internal options
-    bool do_irtoc_inline;
+    bool doIrtocInline;
 };
 }  // namespace panda::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_COMPILER_OPTIONS_H

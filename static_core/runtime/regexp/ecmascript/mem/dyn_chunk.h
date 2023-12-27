@@ -49,7 +49,7 @@ public:
 
     ~DynChunk()
     {
-        if (!is_internal_buffer_) {
+        if (!isInternalBuffer_) {
             Runtime::GetCurrent()->GetInternalAllocator()->DeleteArray(buf_);
         }
     }
@@ -57,7 +57,7 @@ public:
     NO_COPY_SEMANTIC(DynChunk);
     NO_MOVE_SEMANTIC(DynChunk);
 
-    int Expand(size_t new_size);
+    int Expand(size_t newSize);
 
     int Insert(uint32_t position, size_t len);
 
@@ -96,7 +96,7 @@ public:
 
     inline size_t GetAllocatedSize() const
     {
-        return allocated_size_;
+        return allocatedSize_;
     }
 
     inline bool GetError() const
@@ -154,12 +154,12 @@ private:
     friend class RegExpOpCode;
     friend class RegExpExecutor;
 
-    explicit DynChunk(uint8_t *buf) : buf_(buf), is_internal_buffer_(true) {};
+    explicit DynChunk(uint8_t *buf) : buf_(buf), isInternalBuffer_(true) {};
 
     uint8_t *buf_ {nullptr};
-    bool is_internal_buffer_ {false};
+    bool isInternalBuffer_ {false};
     size_t size_ {0};
-    size_t allocated_size_ {0};
+    size_t allocatedSize_ {0};
     bool error_ {false};
 };
 }  // namespace panda

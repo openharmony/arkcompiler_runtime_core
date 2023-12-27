@@ -241,12 +241,12 @@ public:
     ALWAYS_INLINE typename std::enable_if_t<std::is_floating_point_v<T> && ExtArchTraits<A>::HARDFP, void> Count()
     {
         constexpr size_t NUM_BYTES = std::max(sizeof(T), ExtArchTraits<A>::FPR_SIZE);
-        fpr_arg_size_ = RoundUp(fpr_arg_size_, NUM_BYTES);
-        if (fpr_arg_size_ < ExtArchTraits<A>::FP_ARG_NUM_BYTES) {
-            fpr_arg_size_ += NUM_BYTES;
+        fprArgSize_ = RoundUp(fprArgSize_, NUM_BYTES);
+        if (fprArgSize_ < ExtArchTraits<A>::FP_ARG_NUM_BYTES) {
+            fprArgSize_ += NUM_BYTES;
         } else {
-            stack_size_ = RoundUp(stack_size_, NUM_BYTES);
-            stack_size_ += NUM_BYTES;
+            stackSize_ = RoundUp(stackSize_, NUM_BYTES);
+            stackSize_ += NUM_BYTES;
         }
     }
 
@@ -254,18 +254,18 @@ public:
     ALWAYS_INLINE typename std::enable_if_t<!(std::is_floating_point_v<T> && ExtArchTraits<A>::HARDFP), void> Count()
     {
         constexpr size_t NUM_BYTES = std::max(sizeof(T), PTR_SIZE);
-        gpr_arg_size_ = RoundUp(gpr_arg_size_, NUM_BYTES);
-        if (gpr_arg_size_ < ExtArchTraits<A>::GP_ARG_NUM_BYTES) {
-            gpr_arg_size_ += NUM_BYTES;
+        gprArgSize_ = RoundUp(gprArgSize_, NUM_BYTES);
+        if (gprArgSize_ < ExtArchTraits<A>::GP_ARG_NUM_BYTES) {
+            gprArgSize_ += NUM_BYTES;
         } else {
-            stack_size_ = RoundUp(stack_size_, NUM_BYTES);
-            stack_size_ += NUM_BYTES;
+            stackSize_ = RoundUp(stackSize_, NUM_BYTES);
+            stackSize_ += NUM_BYTES;
         }
     }
 
     size_t GetOnlyStackSize() const
     {
-        return stack_size_;
+        return stackSize_;
     }
 
     size_t GetStackSize() const
@@ -275,22 +275,22 @@ public:
 
     size_t GetStackSpaceSize() const
     {
-        return RoundUp(ExtArchTraits<A>::FP_ARG_NUM_BYTES + ExtArchTraits<A>::GP_ARG_NUM_BYTES + stack_size_,
+        return RoundUp(ExtArchTraits<A>::FP_ARG_NUM_BYTES + ExtArchTraits<A>::GP_ARG_NUM_BYTES + stackSize_,
                        2 * ArchTraits<A>::POINTER_SIZE);
     }
 
 private:
     static constexpr size_t PTR_SIZE = ArchTraits<A>::POINTER_SIZE;
-    size_t gpr_arg_size_ = 0;
-    size_t fpr_arg_size_ = 0;
-    size_t stack_size_ = 0;
+    size_t gprArgSize_ = 0;
+    size_t fprArgSize_ = 0;
+    size_t stackSize_ = 0;
 };
 
 template <Arch A>
 class ArgReader {
 public:
-    ArgReader(const Span<uint8_t> &gpr_args, const Span<uint8_t> &fpr_args, const uint8_t *stack_args)
-        : gpr_args_(gpr_args), fpr_args_(fpr_args), stack_args_(stack_args)
+    ArgReader(const Span<uint8_t> &gprArgs, const Span<uint8_t> &fprArgs, const uint8_t *stackArgs)
+        : gprArgs_(gprArgs), fprArgs_(fprArgs), stackArgs_(stackArgs)
     {
     }
 
@@ -305,15 +305,15 @@ public:
     ReadPtr()
     {
         constexpr size_t READ_BYTES = std::max(sizeof(T), ExtArchTraits<A>::FPR_SIZE);
-        fp_arg_bytes_read_ = RoundUp(fp_arg_bytes_read_, READ_BYTES);
-        if (fp_arg_bytes_read_ < ExtArchTraits<A>::FP_ARG_NUM_BYTES) {
-            const T *v = reinterpret_cast<const T *>(fpr_args_.data() + fp_arg_bytes_read_);
-            fp_arg_bytes_read_ += READ_BYTES;
+        fpArgBytesRead_ = RoundUp(fpArgBytesRead_, READ_BYTES);
+        if (fpArgBytesRead_ < ExtArchTraits<A>::FP_ARG_NUM_BYTES) {
+            const T *v = reinterpret_cast<const T *>(fprArgs_.data() + fpArgBytesRead_);
+            fpArgBytesRead_ += READ_BYTES;
             return v;
         }
-        stack_args_ = AlignPtr<T>(stack_args_);
-        const T *v = reinterpret_cast<const T *>(stack_args_);
-        stack_args_ += READ_BYTES;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        stackArgs_ = AlignPtr<T>(stackArgs_);
+        const T *v = reinterpret_cast<const T *>(stackArgs_);
+        stackArgs_ += READ_BYTES;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return v;
     }
 
@@ -322,25 +322,25 @@ public:
     ReadPtr()
     {
         constexpr size_t READ_BYTES = std::max(sizeof(T), PTR_SIZE);
-        gp_arg_bytes_read_ = RoundUp(gp_arg_bytes_read_, READ_BYTES);
-        if (gp_arg_bytes_read_ < ExtArchTraits<A>::GP_ARG_NUM_BYTES) {
-            const T *v = reinterpret_cast<const T *>(gpr_args_.data() + gp_arg_bytes_read_);
-            gp_arg_bytes_read_ += READ_BYTES;
+        gpArgBytesRead_ = RoundUp(gpArgBytesRead_, READ_BYTES);
+        if (gpArgBytesRead_ < ExtArchTraits<A>::GP_ARG_NUM_BYTES) {
+            const T *v = reinterpret_cast<const T *>(gprArgs_.data() + gpArgBytesRead_);
+            gpArgBytesRead_ += READ_BYTES;
             return v;
         }
-        stack_args_ = AlignPtr<T>(stack_args_);
-        const T *v = reinterpret_cast<const T *>(stack_args_);
-        stack_args_ += READ_BYTES;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        stackArgs_ = AlignPtr<T>(stackArgs_);
+        const T *v = reinterpret_cast<const T *>(stackArgs_);
+        stackArgs_ += READ_BYTES;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return v;
     }
 
 private:
     static constexpr size_t PTR_SIZE = ArchTraits<A>::POINTER_SIZE;
-    const Span<uint8_t> &gpr_args_;
-    const Span<uint8_t> &fpr_args_;
-    const uint8_t *stack_args_;
-    size_t gp_arg_bytes_read_ = 0;
-    size_t fp_arg_bytes_read_ = 0;
+    const Span<uint8_t> &gprArgs_;
+    const Span<uint8_t> &fprArgs_;
+    const uint8_t *stackArgs_;
+    size_t gpArgBytesRead_ = 0;
+    size_t fpArgBytesRead_ = 0;
 };
 
 template <Arch A, class T>
@@ -350,8 +350,8 @@ using ExtArchTraitsWorldType = std::conditional_t<std::is_signed_v<T>, typename 
 template <Arch A>
 class ArgWriterBase {
 public:
-    ArgWriterBase(Span<uint8_t> *gpr_args, Span<uint8_t> *fpr_args, uint8_t *stack_args)
-        : gpr_args_(gpr_args), fpr_args_(fpr_args), stack_args_(stack_args)
+    ArgWriterBase(Span<uint8_t> *gprArgs, Span<uint8_t> *fprArgs, uint8_t *stackArgs)
+        : gprArgs_(gprArgs), fprArgs_(fprArgs), stackArgs_(stackArgs)
     {
     }
     ~ArgWriterBase() = default;
@@ -361,14 +361,14 @@ protected:
     ALWAYS_INLINE typename std::enable_if_t<std::is_integral_v<T> && sizeof(T) < ArchTraits<A>::POINTER_SIZE, void>
     RegisterValueWrite(T v)
     {
-        *reinterpret_cast<ExtArchTraitsWorldType<A, T> *>(gpr_args_->data() + gp_arg_bytes_written_) = v;
+        *reinterpret_cast<ExtArchTraitsWorldType<A, T> *>(gprArgs_->data() + gpArgBytesWritten_) = v;
     }
 
     template <class T>
     ALWAYS_INLINE typename std::enable_if_t<!(std::is_integral_v<T> && sizeof(T) < ArchTraits<A>::POINTER_SIZE), void>
     RegisterValueWrite(T v)
     {
-        *reinterpret_cast<T *>(gpr_args_->data() + gp_arg_bytes_written_) = v;
+        *reinterpret_cast<T *>(gprArgs_->data() + gpArgBytesWritten_) = v;
     }
 
     template <class T>
@@ -377,14 +377,14 @@ protected:
         static_assert(!(std::is_floating_point_v<T> && ExtArchTraits<A>::HARDFP));
 
         constexpr size_t WRITE_BYTES = std::max(sizeof(T), PTR_SIZE);
-        gp_arg_bytes_written_ = RoundUp(gp_arg_bytes_written_, WRITE_BYTES);
+        gpArgBytesWritten_ = RoundUp(gpArgBytesWritten_, WRITE_BYTES);
 
-        if (gp_arg_bytes_written_ < ExtArchTraits<A>::GP_ARG_NUM_BYTES) {
+        if (gpArgBytesWritten_ < ExtArchTraits<A>::GP_ARG_NUM_BYTES) {
             ArgWriterBase<A>::RegisterValueWrite(v);
-            gp_arg_bytes_written_ += WRITE_BYTES;
+            gpArgBytesWritten_ += WRITE_BYTES;
         } else {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            stack_args_ = WriteToMem(v, stack_args_) + WRITE_BYTES;
+            stackArgs_ = WriteToMem(v, stackArgs_) + WRITE_BYTES;
         }
     }
 
@@ -392,27 +392,27 @@ protected:
     NO_MOVE_SEMANTIC(ArgWriterBase);
 
     static constexpr size_t PTR_SIZE =
-        ArchTraits<A>::POINTER_SIZE;   // NOLINT(misc-non-private-member-variables-in-classes)
-    Span<uint8_t> *gpr_args_;          // NOLINT(misc-non-private-member-variables-in-classes)
-    Span<uint8_t> *fpr_args_;          // NOLINT(misc-non-private-member-variables-in-classes)
-    uint8_t *stack_args_;              // NOLINT(misc-non-private-member-variables-in-classes)
-    size_t gp_arg_bytes_written_ = 0;  // NOLINT(misc-non-private-member-variables-in-classes)
-    size_t fp_arg_bytes_written_ = 0;  // NOLINT(misc-non-private-member-variables-in-classes)
+        ArchTraits<A>::POINTER_SIZE;  // NOLINT(misc-non-private-member-variables-in-classes)
+    Span<uint8_t> *gprArgs_;          // NOLINT(misc-non-private-member-variables-in-classes)
+    Span<uint8_t> *fprArgs_;          // NOLINT(misc-non-private-member-variables-in-classes)
+    uint8_t *stackArgs_;              // NOLINT(misc-non-private-member-variables-in-classes)
+    size_t gpArgBytesWritten_ = 0;    // NOLINT(misc-non-private-member-variables-in-classes)
+    size_t fpArgBytesWritten_ = 0;    // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 template <Arch A>
 class ArgWriter : private ArgWriterBase<A> {
 public:
-    using ArgWriterBase<A>::gpr_args_;
-    using ArgWriterBase<A>::fpr_args_;
-    using ArgWriterBase<A>::stack_args_;
-    using ArgWriterBase<A>::gp_arg_bytes_written_;
-    using ArgWriterBase<A>::fp_arg_bytes_written_;
+    using ArgWriterBase<A>::gprArgs_;
+    using ArgWriterBase<A>::fprArgs_;
+    using ArgWriterBase<A>::stackArgs_;
+    using ArgWriterBase<A>::gpArgBytesWritten_;
+    using ArgWriterBase<A>::fpArgBytesWritten_;
     using ArgWriterBase<A>::PTR_SIZE;
 
     // NOLINTNEXTLINE(readability-non-const-parameter)
-    ArgWriter(Span<uint8_t> *gpr_args, Span<uint8_t> *fpr_args, uint8_t *stack_args)
-        : ArgWriterBase<A>(gpr_args, fpr_args, stack_args)
+    ArgWriter(Span<uint8_t> *gprArgs, Span<uint8_t> *fprArgs, uint8_t *stackArgs)
+        : ArgWriterBase<A>(gprArgs, fprArgs, stackArgs)
     {
     }
     ~ArgWriter() = default;
@@ -423,12 +423,12 @@ public:
         constexpr size_t WRITE_BYTES = std::max(sizeof(T), PTR_SIZE);
 
         constexpr size_t NUM_BYTES = std::max(sizeof(T), ExtArchTraits<A>::FPR_SIZE);
-        if (fp_arg_bytes_written_ < ExtArchTraits<A>::FP_ARG_NUM_BYTES) {
-            *reinterpret_cast<T *>(fpr_args_->data() + fp_arg_bytes_written_) = v;
-            fp_arg_bytes_written_ += NUM_BYTES;
+        if (fpArgBytesWritten_ < ExtArchTraits<A>::FP_ARG_NUM_BYTES) {
+            *reinterpret_cast<T *>(fprArgs_->data() + fpArgBytesWritten_) = v;
+            fpArgBytesWritten_ += NUM_BYTES;
         } else {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            stack_args_ = WriteToMem(v, stack_args_) + WRITE_BYTES;
+            stackArgs_ = WriteToMem(v, stackArgs_) + WRITE_BYTES;
         }
     }
 
@@ -446,16 +446,16 @@ public:
 template <>
 class ArgWriter<Arch::AARCH32> : private ArgWriterBase<Arch::AARCH32> {
 public:
-    using ArgWriterBase<Arch::AARCH32>::gpr_args_;
-    using ArgWriterBase<Arch::AARCH32>::fpr_args_;
-    using ArgWriterBase<Arch::AARCH32>::stack_args_;
-    using ArgWriterBase<Arch::AARCH32>::gp_arg_bytes_written_;
-    using ArgWriterBase<Arch::AARCH32>::fp_arg_bytes_written_;
+    using ArgWriterBase<Arch::AARCH32>::gprArgs_;
+    using ArgWriterBase<Arch::AARCH32>::fprArgs_;
+    using ArgWriterBase<Arch::AARCH32>::stackArgs_;
+    using ArgWriterBase<Arch::AARCH32>::gpArgBytesWritten_;
+    using ArgWriterBase<Arch::AARCH32>::fpArgBytesWritten_;
     using ArgWriterBase<Arch::AARCH32>::PTR_SIZE;
 
     // NOLINTNEXTLINE(readability-non-const-parameter)
-    ArgWriter(Span<uint8_t> *gpr_args, Span<uint8_t> *fpr_args, uint8_t *stack_args)
-        : ArgWriterBase<Arch::AARCH32>(gpr_args, fpr_args, stack_args)
+    ArgWriter(Span<uint8_t> *gprArgs, Span<uint8_t> *fprArgs, uint8_t *stackArgs)
+        : ArgWriterBase<Arch::AARCH32>(gprArgs, fprArgs, stackArgs)
     {
     }
     ~ArgWriter() = default;
@@ -466,17 +466,17 @@ public:
     {
         constexpr size_t WRITE_BYTES = std::max(sizeof(T), PTR_SIZE);
 
-        if (fp_arg_bytes_written_ < ExtArchTraits<Arch::AARCH32>::FP_ARG_NUM_BYTES &&
+        if (fpArgBytesWritten_ < ExtArchTraits<Arch::AARCH32>::FP_ARG_NUM_BYTES &&
             (std::is_same_v<T, float> ||
-             (fp_arg_bytes_written_ < ExtArchTraits<Arch::AARCH32>::FP_ARG_NUM_BYTES - sizeof(float))) &&
-            !is_float_arm_stack_has_been_written_) {
+             (fpArgBytesWritten_ < ExtArchTraits<Arch::AARCH32>::FP_ARG_NUM_BYTES - sizeof(float))) &&
+            !isFloatArmStackHasBeenWritten_) {
             RegisterFloatingPointValueWriteArm32(v);
             return;
         }
 
-        is_float_arm_stack_has_been_written_ = true;
+        isFloatArmStackHasBeenWritten_ = true;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        stack_args_ = WriteToMem(v, stack_args_) + WRITE_BYTES;
+        stackArgs_ = WriteToMem(v, stackArgs_) + WRITE_BYTES;
     }
 
     template <class T>
@@ -495,16 +495,16 @@ private:
     ALWAYS_INLINE typename std::enable_if_t<(std::is_same_v<T, float>), void> RegisterFloatingPointValueWriteArm32(T v)
     {
         constexpr size_t NUM_BYTES = std::max(sizeof(T), ExtArchTraits<Arch::AARCH32>::FPR_SIZE);
-        if (half_empty_register_offset_ == 0) {
-            half_empty_register_offset_ = fp_arg_bytes_written_ + sizeof(float);
-            *reinterpret_cast<T *>(fpr_args_->data() + fp_arg_bytes_written_) = v;
-            fp_arg_bytes_written_ += NUM_BYTES;
+        if (halfEmptyRegisterOffset_ == 0) {
+            halfEmptyRegisterOffset_ = fpArgBytesWritten_ + sizeof(float);
+            *reinterpret_cast<T *>(fprArgs_->data() + fpArgBytesWritten_) = v;
+            fpArgBytesWritten_ += NUM_BYTES;
         } else {
-            *reinterpret_cast<T *>(fpr_args_->data() + half_empty_register_offset_) = v;
-            if (half_empty_register_offset_ == fp_arg_bytes_written_) {
-                fp_arg_bytes_written_ += NUM_BYTES;
+            *reinterpret_cast<T *>(fprArgs_->data() + halfEmptyRegisterOffset_) = v;
+            if (halfEmptyRegisterOffset_ == fpArgBytesWritten_) {
+                fpArgBytesWritten_ += NUM_BYTES;
             }
-            half_empty_register_offset_ = 0;
+            halfEmptyRegisterOffset_ = 0;
         }
     }
 
@@ -512,13 +512,13 @@ private:
     ALWAYS_INLINE typename std::enable_if_t<!(std::is_same_v<T, float>), void> RegisterFloatingPointValueWriteArm32(T v)
     {
         constexpr size_t NUM_BYTES = std::max(sizeof(T), ExtArchTraits<Arch::AARCH32>::FPR_SIZE);
-        fp_arg_bytes_written_ = RoundUp(fp_arg_bytes_written_, sizeof(T));
-        *reinterpret_cast<T *>(fpr_args_->data() + fp_arg_bytes_written_) = v;
-        fp_arg_bytes_written_ += NUM_BYTES;
+        fpArgBytesWritten_ = RoundUp(fpArgBytesWritten_, sizeof(T));
+        *reinterpret_cast<T *>(fprArgs_->data() + fpArgBytesWritten_) = v;
+        fpArgBytesWritten_ += NUM_BYTES;
     }
 
-    size_t half_empty_register_offset_ = 0;
-    bool is_float_arm_stack_has_been_written_ = false;
+    size_t halfEmptyRegisterOffset_ = 0;
+    bool isFloatArmStackHasBeenWritten_ = false;
 };
 
 class ValueWriter {
@@ -548,7 +548,7 @@ private:
 template <Arch A>
 class ArgReaderStack {
 public:
-    explicit ArgReaderStack(const uint8_t *stack_args) : stack_args_(stack_args) {}
+    explicit ArgReaderStack(const uint8_t *stackArgs) : stackArgs_(stackArgs) {}
 
     template <class T>
     ALWAYS_INLINE T Read()
@@ -561,8 +561,8 @@ public:
     ReadPtr()
     {
         constexpr size_t READ_BYTES = sizeof(uint64_t);
-        const T *v = reinterpret_cast<const T *>(stack_args_);
-        stack_args_ += READ_BYTES;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        const T *v = reinterpret_cast<const T *>(stackArgs_);
+        stackArgs_ += READ_BYTES;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return v;
     }
 
@@ -571,13 +571,13 @@ public:
     ReadPtr()
     {
         constexpr size_t READ_BYTES = sizeof(uint64_t);
-        const T *v = reinterpret_cast<const T *>(stack_args_);
-        stack_args_ += READ_BYTES;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        const T *v = reinterpret_cast<const T *>(stackArgs_);
+        stackArgs_ += READ_BYTES;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return v;
     }
 
 private:
-    const uint8_t *stack_args_;
+    const uint8_t *stackArgs_;
 };
 
 }  // namespace panda::arch

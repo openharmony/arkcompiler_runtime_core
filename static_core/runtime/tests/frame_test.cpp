@@ -53,9 +53,9 @@ private:
 template <bool IS_DYNAMIC = false>
 Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
 {
-    uint32_t ext_sz = EMPTY_EXT_FRAME_DATA_SIZE;
-    void *mem = aligned_alloc(8, panda::Frame::GetAllocSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), ext_sz));
-    return new (Frame::FromExt(mem, ext_sz)) panda::Frame(mem, method, prev, nregs);
+    uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
+    void *mem = aligned_alloc(8, panda::Frame::GetAllocSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), extSz));
+    return new (Frame::FromExt(mem, extSz)) panda::Frame(mem, method, prev, nregs);
 }
 
 void FreeFrame(Frame *f)
@@ -67,62 +67,62 @@ void FreeFrame(Frame *f)
 TEST_F(FrameTest, Test)
 {
     Frame *f = panda::test::CreateFrame(2, nullptr, nullptr);
-    auto frame_handler = StaticFrameHandler(f);
-    frame_handler.GetVReg(0).SetReference(nullptr);
-    EXPECT_TRUE(frame_handler.GetVReg(0).HasObject());
-    frame_handler.GetVReg(0).SetPrimitive(0);
-    EXPECT_FALSE(frame_handler.GetVReg(0).HasObject());
+    auto frameHandler = StaticFrameHandler(f);
+    frameHandler.GetVReg(0).SetReference(nullptr);
+    EXPECT_TRUE(frameHandler.GetVReg(0).HasObject());
+    frameHandler.GetVReg(0).SetPrimitive(0);
+    EXPECT_FALSE(frameHandler.GetVReg(0).HasObject());
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     int64_t v64 = 0x1122334455667788;
-    frame_handler.GetVReg(0).SetPrimitive(v64);
-    EXPECT_EQ(frame_handler.GetVReg(0).GetLong(), v64);
-    EXPECT_EQ(frame_handler.GetVReg(0).GetAs<int64_t>(), v64);
+    frameHandler.GetVReg(0).SetPrimitive(v64);
+    EXPECT_EQ(frameHandler.GetVReg(0).GetLong(), v64);
+    EXPECT_EQ(frameHandler.GetVReg(0).GetAs<int64_t>(), v64);
 
-    frame_handler.GetVReg(1).MovePrimitive(frame_handler.GetVReg(0));
-    EXPECT_FALSE(frame_handler.GetVReg(0).HasObject());
-    EXPECT_EQ(frame_handler.GetVReg(0).Get(), static_cast<int32_t>(v64));
+    frameHandler.GetVReg(1).MovePrimitive(frameHandler.GetVReg(0));
+    EXPECT_FALSE(frameHandler.GetVReg(0).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(0).Get(), static_cast<int32_t>(v64));
 
-    frame_handler.GetVReg(1).MovePrimitive(frame_handler.GetVReg(0));
-    EXPECT_FALSE(frame_handler.GetVReg(0).HasObject());
-    EXPECT_EQ(frame_handler.GetVReg(0).GetLong(), v64);
+    frameHandler.GetVReg(1).MovePrimitive(frameHandler.GetVReg(0));
+    EXPECT_FALSE(frameHandler.GetVReg(0).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(0).GetLong(), v64);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     ObjectHeader *ptr = panda::mem::AllocateNullifiedPayloadString(15);
-    frame_handler.GetVReg(0).SetReference(ptr);
-    frame_handler.GetVReg(1).MoveReference(frame_handler.GetVReg(0));
-    EXPECT_TRUE(frame_handler.GetVReg(0).HasObject());
-    EXPECT_EQ(frame_handler.GetVReg(0).GetReference(), ptr);
+    frameHandler.GetVReg(0).SetReference(ptr);
+    frameHandler.GetVReg(1).MoveReference(frameHandler.GetVReg(0));
+    EXPECT_TRUE(frameHandler.GetVReg(0).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(0).GetReference(), ptr);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     int32_t v32 = 0x11223344;
-    frame_handler.GetVReg(0).SetPrimitive(v32);
-    EXPECT_EQ(frame_handler.GetVReg(0).Get(), v32);
-    EXPECT_EQ(frame_handler.GetVReg(0).GetAs<int32_t>(), v32);
+    frameHandler.GetVReg(0).SetPrimitive(v32);
+    EXPECT_EQ(frameHandler.GetVReg(0).Get(), v32);
+    EXPECT_EQ(frameHandler.GetVReg(0).GetAs<int32_t>(), v32);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     int16_t v16 = 0x1122;
-    frame_handler.GetVReg(0).SetPrimitive(v16);
-    EXPECT_EQ(frame_handler.GetVReg(0).Get(), v16);
-    EXPECT_EQ(frame_handler.GetVReg(0).GetAs<int32_t>(), v16);
+    frameHandler.GetVReg(0).SetPrimitive(v16);
+    EXPECT_EQ(frameHandler.GetVReg(0).Get(), v16);
+    EXPECT_EQ(frameHandler.GetVReg(0).GetAs<int32_t>(), v16);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     int8_t v8 = 0x11;
-    frame_handler.GetVReg(0).SetPrimitive(v8);
-    EXPECT_EQ(frame_handler.GetVReg(0).Get(), v8);
-    EXPECT_EQ(frame_handler.GetVReg(0).GetAs<int32_t>(), v8);
+    frameHandler.GetVReg(0).SetPrimitive(v8);
+    EXPECT_EQ(frameHandler.GetVReg(0).Get(), v8);
+    EXPECT_EQ(frameHandler.GetVReg(0).GetAs<int32_t>(), v8);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     float f32 = 123.5;
-    frame_handler.GetVReg(0).SetPrimitive(f32);
-    EXPECT_EQ(frame_handler.GetVReg(0).GetFloat(), f32);
-    EXPECT_EQ(frame_handler.GetVReg(0).GetAs<float>(), f32);
+    frameHandler.GetVReg(0).SetPrimitive(f32);
+    EXPECT_EQ(frameHandler.GetVReg(0).GetFloat(), f32);
+    EXPECT_EQ(frameHandler.GetVReg(0).GetAs<float>(), f32);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     double f64 = 456.7;
-    frame_handler.GetVReg(0).SetPrimitive(f64);
-    EXPECT_EQ(frame_handler.GetVReg(0).GetDouble(), f64);
-    EXPECT_EQ(frame_handler.GetVReg(0).GetAs<double>(), f64);
+    frameHandler.GetVReg(0).SetPrimitive(f64);
+    EXPECT_EQ(frameHandler.GetVReg(0).GetDouble(), f64);
+    EXPECT_EQ(frameHandler.GetVReg(0).GetAs<double>(), f64);
 
     panda::test::FreeFrame(f);
 }

@@ -37,9 +37,9 @@ public:
     template <class T>
     size_t GetLocalObjects(T *allocator)
     {
-        size_t num_objects = 0;
-        allocator->IterateOverObjects([&num_objects]([[maybe_unused]] ObjectHeader *obj) { num_objects++; });
-        return num_objects;
+        size_t numObjects = 0;
+        allocator->IterateOverObjects([&numObjects]([[maybe_unused]] ObjectHeader *obj) { numObjects++; });
+        return numObjects;
     }
 
     ~PandaContainersTest() override
@@ -59,55 +59,55 @@ constexpr size_t MAX_SIZE = InternalAllocator<>::LocalSmallObjectAllocator::GetM
 TEST_F(PandaContainersTest, LocalTest)
 {
     ASSERT(!Runtime::GetCurrent()->GetOptions().UseMallocForInternalAllocations());
-    auto local_allocator = panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
-    ASSERT_EQ(GetLocalObjects(local_allocator), 0);
+    auto localAllocator = panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
+    ASSERT_EQ(GetLocalObjects(localAllocator), 0);
     {
-        PandaVectorTL<uint8_t> vector_local;
-        vector_local.push_back(0);
+        PandaVectorTL<uint8_t> vectorLocal;
+        vectorLocal.push_back(0);
         // std::vector allocated memory block for it's elements via local_allocator
-        ASSERT_EQ(GetLocalObjects(local_allocator), 1);
+        ASSERT_EQ(GetLocalObjects(localAllocator), 1);
         for (size_t i = 1; i < MAX_SIZE; i++) {
-            vector_local.push_back(i % MAX_SIZE);
-            if (vector_local.capacity() <= MAX_SIZE) {
+            vectorLocal.push_back(i % MAX_SIZE);
+            if (vectorLocal.capacity() <= MAX_SIZE) {
                 // Threre is 1 memory block for all elements
-                ASSERT_EQ(GetLocalObjects(local_allocator), 1);
+                ASSERT_EQ(GetLocalObjects(localAllocator), 1);
             } else {
                 // When vector size exceeds MAX_SIZE=256 bytes, we allocate it without thread-local runslots allocator
-                ASSERT_EQ(GetLocalObjects(local_allocator), 0);
+                ASSERT_EQ(GetLocalObjects(localAllocator), 0);
             }
         }
         // Simple check on data consistency
         for (size_t i = 0; i < MAX_SIZE; i++) {
-            ASSERT_EQ(vector_local.at(i), i % MAX_SIZE);
+            ASSERT_EQ(vectorLocal.at(i), i % MAX_SIZE);
         }
-        vector_local.push_back(0);
+        vectorLocal.push_back(0);
         // When vector size exceeds MAX_SIZE=256 bytes, we allocate it without thread-local runslots allocator
-        ASSERT_EQ(GetLocalObjects(local_allocator), 0);
+        ASSERT_EQ(GetLocalObjects(localAllocator), 0);
     }
-    ASSERT_EQ(GetLocalObjects(local_allocator), 0);
+    ASSERT_EQ(GetLocalObjects(localAllocator), 0);
 }
 
 // Check that, when we use GLOBAL scope, there is no memory in thread-local allocator
 TEST_F(PandaContainersTest, GlobalTest)
 {
-    auto local_allocator = panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
-    ASSERT_EQ(GetLocalObjects(local_allocator), 0);
+    auto localAllocator = panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
+    ASSERT_EQ(GetLocalObjects(localAllocator), 0);
     {
-        PandaVector<uint8_t> vector_global;
-        vector_global.push_back(0);
-        ASSERT_EQ(GetLocalObjects(local_allocator), 0);
+        PandaVector<uint8_t> vectorGlobal;
+        vectorGlobal.push_back(0);
+        ASSERT_EQ(GetLocalObjects(localAllocator), 0);
         for (size_t i = 1; i < MAX_SIZE; i++) {
-            vector_global.push_back(i % MAX_SIZE);
-            ASSERT_EQ(GetLocalObjects(local_allocator), 0);
+            vectorGlobal.push_back(i % MAX_SIZE);
+            ASSERT_EQ(GetLocalObjects(localAllocator), 0);
         }
 
         for (size_t i = 0; i < MAX_SIZE; i++) {
-            ASSERT_EQ(vector_global.at(i), i % MAX_SIZE);
+            ASSERT_EQ(vectorGlobal.at(i), i % MAX_SIZE);
         }
-        vector_global.push_back(0);
-        ASSERT_EQ(GetLocalObjects(local_allocator), 0);
+        vectorGlobal.push_back(0);
+        ASSERT_EQ(GetLocalObjects(localAllocator), 0);
     }
-    ASSERT_EQ(GetLocalObjects(local_allocator), 0);
+    ASSERT_EQ(GetLocalObjects(localAllocator), 0);
 }
 
 }  // namespace panda::mem::test

@@ -35,47 +35,47 @@ thread_local int Logger::nesting_ = 0;
 
 void Logger::Initialize(const base_options::Options &options)
 {
-    panda::Logger::ComponentMask component_mask;
-    auto load_components = [&component_mask](auto components) {
+    panda::Logger::ComponentMask componentMask;
+    auto loadComponents = [&componentMask](auto components) {
         for (const auto &s : components) {
-            component_mask |= Logger::ComponentMaskFromString(s);
+            componentMask |= Logger::ComponentMaskFromString(s);
         }
     };
     Level level = Level::LAST;
 
     if (options.WasSetLogFatal()) {
         ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
-        load_components(options.GetLogFatal());
+        loadComponents(options.GetLogFatal());
         level = Level::FATAL;
     } else if (options.WasSetLogError()) {
         ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
-        load_components(options.GetLogError());
+        loadComponents(options.GetLogError());
         level = Level::ERROR;
     } else if (options.WasSetLogWarning()) {
         ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
-        load_components(options.GetLogWarning());
+        loadComponents(options.GetLogWarning());
         level = Level::WARNING;
     } else if (options.WasSetLogInfo()) {
         ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
-        load_components(options.GetLogInfo());
+        loadComponents(options.GetLogInfo());
         level = Level::INFO;
     } else if (options.WasSetLogDebug()) {
         ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
-        load_components(options.GetLogDebug());
+        loadComponents(options.GetLogDebug());
         level = Level::DEBUG;
     } else {
         ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
-        load_components(options.GetLogComponents());
+        loadComponents(options.GetLogComponents());
         level = Logger::LevelFromString(options.GetLogLevel());
     }
 
     if (options.GetLogStream() == "std") {
-        Logger::InitializeStdLogging(level, component_mask);
+        Logger::InitializeStdLogging(level, componentMask);
     } else if (options.GetLogStream() == "file" || options.GetLogStream() == "fast-file") {
-        const std::string &file_name = options.GetLogFile();
-        Logger::InitializeFileLogging(file_name, level, component_mask, options.GetLogStream() == "fast-file");
+        const std::string &fileName = options.GetLogFile();
+        Logger::InitializeFileLogging(fileName, level, componentMask, options.GetLogStream() == "fast-file");
     } else if (options.GetLogStream() == "dummy") {
-        Logger::InitializeDummyLogging(level, component_mask);
+        Logger::InitializeDummyLogging(level, componentMask);
     } else {
         UNREACHABLE();
     }
@@ -87,7 +87,7 @@ void Logger::Initialize(const base_options::Options &options)
 bool Logger::IsMessageSuppressed([[maybe_unused]] Level level, [[maybe_unused]] Component component)
 {
     // Allowing only to log if it's not a nested log, or it's nested and it's severity is suitable
-    return level >= Logger::logger_->nested_allowed_level_ && nesting_ > 0;
+    return level >= Logger::logger_->nestedAllowedLevel_ && nesting_ > 0;
 }
 
 /// Increases log nesting (i.e. depth, or how many instances of Message{} is active atm) in a given thread
@@ -118,11 +118,11 @@ auto Logger::Buffer::Printf(const char *format, ...) -> Buffer &
 }
 
 os::memory::Mutex Logger::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
-FuncMobileLogPrint MLOG_BUF_PRINT = nullptr;
+FuncMobileLogPrint g_mlogBufPrint = nullptr;
 
 Logger::Message::~Message()
 {
-    if (print_system_error_) {
+    if (printSystemError_) {
         stream_ << ": " << os::Error(errno).ToString();
     }
 
@@ -179,8 +179,8 @@ std::string GetPrefix(Logger::Level level, Logger::Component component)
 }
 
 /* static */
-void Logger::InitializeFileLogging(const std::string &log_file, Level level, ComponentMask component_mask,
-                                   bool is_fast_logging)
+void Logger::InitializeFileLogging(const std::string &logFile, Level level, ComponentMask componentMask,
+                                   bool isFastLogging)
 {
     if (IsInitialized()) {
         return;
@@ -192,18 +192,18 @@ void Logger::InitializeFileLogging(const std::string &log_file, Level level, Com
         return;
     }
 
-    std::ofstream stream(log_file);
+    std::ofstream stream(logFile);
     if (stream) {
-        if (is_fast_logging) {
-            logger_ = new FastFileLogger(std::move(stream), level, component_mask);
+        if (isFastLogging) {
+            logger_ = new FastFileLogger(std::move(stream), level, componentMask);
         } else {
-            logger_ = new FileLogger(std::move(stream), level, component_mask);
+            logger_ = new FileLogger(std::move(stream), level, componentMask);
         }
     } else {
-        logger_ = new StderrLogger(level, component_mask);
+        logger_ = new StderrLogger(level, componentMask);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         std::string msg = helpers::string::Format("Fallback to stderr logging: cannot open log file '%s': %s",
-                                                  log_file.c_str(), os::Error(errno).ToString().c_str());
+                                                  logFile.c_str(), os::Error(errno).ToString().c_str());
         logger_->LogLineInternal(Level::ERROR, Component::COMMON, msg);
     }
 #ifdef PANDA_TARGET_UNIX
@@ -214,7 +214,7 @@ void Logger::InitializeFileLogging(const std::string &log_file, Level level, Com
 }
 
 /* static */
-void Logger::InitializeStdLogging(Level level, ComponentMask component_mask)
+void Logger::InitializeStdLogging(Level level, ComponentMask componentMask)
 {
     if (IsInitialized()) {
         return;
@@ -227,7 +227,7 @@ void Logger::InitializeStdLogging(Level level, ComponentMask component_mask)
             return;
         }
 
-        logger_ = new StderrLogger(level, component_mask);
+        logger_ = new StderrLogger(level, componentMask);
 #ifdef PANDA_TARGET_UNIX
         if (DfxController::IsInitialized() && DfxController::GetOptionValue(DfxOptionHandler::MOBILE_LOG) == 0) {
             Logger::SetMobileLogOpenFlag(false);
@@ -237,7 +237,7 @@ void Logger::InitializeStdLogging(Level level, ComponentMask component_mask)
 }
 
 /* static */
-void Logger::InitializeDummyLogging(Level level, ComponentMask component_mask)
+void Logger::InitializeDummyLogging(Level level, ComponentMask componentMask)
 {
     if (IsInitialized()) {
         return;
@@ -250,7 +250,7 @@ void Logger::InitializeDummyLogging(Level level, ComponentMask component_mask)
             return;
         }
 
-        logger_ = new DummyLogger(level, component_mask);
+        logger_ = new DummyLogger(level, componentMask);
     }
 }
 
@@ -291,16 +291,16 @@ void Logger::ProcessLogLevelFromString(std::string_view s)
 void Logger::ProcessLogComponentsFromString(std::string_view s)
 {
     Logger::ResetComponentMask();
-    size_t last_pos = s.find_first_not_of(',', 0);
-    size_t pos = s.find(',', last_pos);
-    while (last_pos != std::string_view::npos) {
-        std::string_view component_str = s.substr(last_pos, pos - last_pos);
-        last_pos = s.find_first_not_of(',', pos);
-        pos = s.find(',', last_pos);
-        if (Logger::IsInComponentList(component_str)) {
-            Logger::EnableComponent(Logger::ComponentMaskFromString(component_str));
+    size_t lastPos = s.find_first_not_of(',', 0);
+    size_t pos = s.find(',', lastPos);
+    while (lastPos != std::string_view::npos) {
+        std::string_view componentStr = s.substr(lastPos, pos - lastPos);
+        lastPos = s.find_first_not_of(',', pos);
+        pos = s.find(',', lastPos);
+        if (Logger::IsInComponentList(componentStr)) {
+            Logger::EnableComponent(Logger::ComponentMaskFromString(componentStr));
         } else {
-            LOG(ERROR, RUNTIME) << "Unknown component " << component_str;
+            LOG(ERROR, RUNTIME) << "Unknown component " << componentStr;
         }
     }
 }

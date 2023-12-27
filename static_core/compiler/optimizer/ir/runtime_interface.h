@@ -88,7 +88,7 @@ public:
 
     struct NamedAccessProfileData {
         ClassPtr klass;
-        uintptr_t cached_value;
+        uintptr_t cachedValue;
         uintptr_t key;
         uint32_t offset;
         NamedAccessProfileType type;
@@ -128,18 +128,18 @@ public:
         return 1;
     }
 
-    virtual MethodId ResolveMethodIndex([[maybe_unused]] MethodPtr parent_method,
+    virtual MethodId ResolveMethodIndex([[maybe_unused]] MethodPtr parentMethod,
                                         [[maybe_unused]] MethodIndex index) const
     {
         return 0;
     }
 
-    virtual FieldId ResolveFieldIndex([[maybe_unused]] MethodPtr parent_method, [[maybe_unused]] FieldIndex index) const
+    virtual FieldId ResolveFieldIndex([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] FieldIndex index) const
     {
         return 0;
     }
 
-    virtual IdType ResolveTypeIndex([[maybe_unused]] MethodPtr parent_method, [[maybe_unused]] TypeIndex index) const
+    virtual IdType ResolveTypeIndex([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] TypeIndex index) const
     {
         return 0;
     }
@@ -162,12 +162,12 @@ public:
     }
 
     /// Method information
-    virtual MethodPtr GetMethodById([[maybe_unused]] MethodPtr parent_method, [[maybe_unused]] MethodId id) const
+    virtual MethodPtr GetMethodById([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
     {
         return nullptr;
     }
 
-    virtual MethodPtr GetMethodByIdAndSaveJsFunction([[maybe_unused]] MethodPtr parent_method,
+    virtual MethodPtr GetMethodByIdAndSaveJsFunction([[maybe_unused]] MethodPtr parentMethod,
                                                      [[maybe_unused]] MethodId id)
     {
         return nullptr;
@@ -226,17 +226,17 @@ public:
     {
         return 0;
     }
-    virtual DataType::Type GetMethodReturnType([[maybe_unused]] MethodPtr parent_method,
+    virtual DataType::Type GetMethodReturnType([[maybe_unused]] MethodPtr parentMethod,
                                                [[maybe_unused]] MethodId id) const
     {
         return DataType::NO_TYPE;
     }
-    virtual DataType::Type GetMethodArgumentType([[maybe_unused]] MethodPtr parent_method, [[maybe_unused]] MethodId id,
+    virtual DataType::Type GetMethodArgumentType([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id,
                                                  [[maybe_unused]] size_t index) const
     {
         return DataType::NO_TYPE;
     }
-    virtual size_t GetMethodArgumentsCount([[maybe_unused]] MethodPtr parent_method, [[maybe_unused]] MethodId id) const
+    virtual size_t GetMethodArgumentsCount([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
     {
         return 0;
     }
@@ -257,8 +257,8 @@ public:
         return 0;
     }
 
-    virtual MethodPtr ResolveLookUpCall([[maybe_unused]] FieldPtr raw_field, [[maybe_unused]] ClassPtr klass,
-                                        [[maybe_unused]] bool is_setter)
+    virtual MethodPtr ResolveLookUpCall([[maybe_unused]] FieldPtr rawField, [[maybe_unused]] ClassPtr klass,
+                                        [[maybe_unused]] bool isSetter)
     {
         return nullptr;
     }
@@ -268,9 +268,9 @@ public:
         return SourceLanguage::PANDA_ASSEMBLY;
     }
 
-    virtual void SetCompiledEntryPoint([[maybe_unused]] MethodPtr method, [[maybe_unused]] void *entry_point) {}
+    virtual void SetCompiledEntryPoint([[maybe_unused]] MethodPtr method, [[maybe_unused]] void *entryPoint) {}
 
-    virtual bool TrySetOsrCode([[maybe_unused]] MethodPtr method, [[maybe_unused]] void *entry_point)
+    virtual bool TrySetOsrCode([[maybe_unused]] MethodPtr method, [[maybe_unused]] void *entryPoint)
     {
         return false;
     }
@@ -295,7 +295,7 @@ public:
         return 0;
     }
 
-    virtual bool IsMethodExternal([[maybe_unused]] MethodPtr method, [[maybe_unused]] MethodPtr callee_method) const
+    virtual bool IsMethodExternal([[maybe_unused]] MethodPtr method, [[maybe_unused]] MethodPtr calleeMethod) const
     {
         return false;
     }
@@ -310,7 +310,7 @@ public:
         return false;
     }
 
-    virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr parent_method, [[maybe_unused]] MethodId id) const
+    virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
     {
         return false;
     }
@@ -321,7 +321,7 @@ public:
         return false;
     }
 
-    virtual bool IsMethodStatic([[maybe_unused]] MethodPtr parent_method, [[maybe_unused]] MethodId id) const
+    virtual bool IsMethodStatic([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
     {
         return false;
     }
@@ -397,7 +397,7 @@ public:
         return nullptr;
     }
 
-    ClassPtr ResolveClassForField(MethodPtr method, size_t field_id);
+    ClassPtr ResolveClassForField(MethodPtr method, size_t fieldId);
 
     virtual bool IsInstantiable([[maybe_unused]] ClassPtr klass) const
     {
@@ -416,7 +416,7 @@ public:
     }
 
     virtual std::string GetExternalMethodName([[maybe_unused]] MethodPtr method,
-                                              [[maybe_unused]] uint32_t external_id) const
+                                              [[maybe_unused]] uint32_t externalId) const
     {
         return "UnknownExternalMethod";
     }
@@ -447,7 +447,7 @@ public:
         return false;
     }
 
-    virtual std::string GetMethodFullName([[maybe_unused]] MethodPtr method, [[maybe_unused]] bool with_signature) const
+    virtual std::string GetMethodFullName([[maybe_unused]] MethodPtr method, [[maybe_unused]] bool withSignature) const
     {
         return "UnknownMethod";
     }
@@ -473,7 +473,7 @@ public:
         return panda::pandasm::LiteralArray();
     }
 
-    virtual bool IsInterfaceMethod([[maybe_unused]] MethodPtr parent_method, [[maybe_unused]] MethodId id) const
+    virtual bool IsInterfaceMethod([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
     {
         return false;
     }
@@ -591,8 +591,8 @@ public:
     }
 
     virtual ::panda::mem::BarrierOperand GetBarrierOperand(
-        [[maybe_unused]] ::panda::mem::BarrierPosition barrier_position,
-        [[maybe_unused]] std::string_view operand_name) const
+        [[maybe_unused]] ::panda::mem::BarrierPosition barrierPosition,
+        [[maybe_unused]] std::string_view operandName) const
     {
         return ::panda::mem::BarrierOperand(::panda::mem::BarrierOperandType::PRE_WRITE_BARRIER_ADDRESS, false);
     }
@@ -741,7 +741,7 @@ public:
         return ClassType::UNRESOLVED_CLASS;
     }
 
-    virtual ClassType GetClassType([[maybe_unused]] ClassPtr klass_ptr) const
+    virtual ClassType GetClassType([[maybe_unused]] ClassPtr klassPtr) const
     {
         return ClassType::UNRESOLVED_CLASS;
     }
@@ -766,7 +766,7 @@ public:
         return nullptr;
     }
 
-    virtual bool CheckStoreArray([[maybe_unused]] ClassPtr array_cls, [[maybe_unused]] ClassPtr str_cls) const
+    virtual bool CheckStoreArray([[maybe_unused]] ClassPtr arrayCls, [[maybe_unused]] ClassPtr strCls) const
     {
         return false;
     }
@@ -819,7 +819,7 @@ public:
         return coretypes::TaggedValue::TAG_SPECIAL_MASK;
     }
 
-    virtual StringCtorType GetStringCtorType([[maybe_unused]] MethodPtr ctor_method) const
+    virtual StringCtorType GetStringCtorType([[maybe_unused]] MethodPtr ctorMethod) const
     {
         return StringCtorType::UNKNOWN;
     }
@@ -923,12 +923,12 @@ public:
      * @return return field or nullptr if it cannot be resolved
      */
     virtual FieldPtr ResolveField([[maybe_unused]] MethodPtr method, [[maybe_unused]] size_t unused,
-                                  [[maybe_unused]] bool allow_external, [[maybe_unused]] uint32_t *class_id)
+                                  [[maybe_unused]] bool allowExternal, [[maybe_unused]] uint32_t *classId)
     {
         return nullptr;
     }
 
-    virtual FieldPtr ResolveLookUpField([[maybe_unused]] FieldPtr raw_field, [[maybe_unused]] ClassPtr klass)
+    virtual FieldPtr ResolveLookUpField([[maybe_unused]] FieldPtr rawField, [[maybe_unused]] ClassPtr klass)
     {
         return nullptr;
     }
@@ -1108,7 +1108,7 @@ public:
         return IntrinsicId::INVALID;
     }
 
-    virtual uintptr_t GetIntrinsicAddress([[maybe_unused]] bool runtime_call, [[maybe_unused]] SourceLanguage lang,
+    virtual uintptr_t GetIntrinsicAddress([[maybe_unused]] bool runtimeCall, [[maybe_unused]] SourceLanguage lang,
                                           [[maybe_unused]] IntrinsicId unused) const
     {
         return 0;
@@ -1130,30 +1130,29 @@ public:
     }
 
     virtual void GetInfoForInteropCallArgsConversion(
-        [[maybe_unused]] MethodPtr method_ptr,
+        [[maybe_unused]] MethodPtr methodPtr,
         [[maybe_unused]] ArenaVector<std::pair<IntrinsicId, DataType::Type>> *intrinsics) const
     {
         UNREACHABLE();
     }
 
     virtual std::optional<std::pair<IntrinsicId, compiler::DataType::Type>> GetInfoForInteropCallRetValueConversion(
-        [[maybe_unused]] MethodPtr method_ptr) const
+        [[maybe_unused]] MethodPtr methodPtr) const
     {
         UNREACHABLE();
     }
 
-    virtual char *GetFuncPropName([[maybe_unused]] MethodPtr method_ptr, [[maybe_unused]] uint32_t str_id) const
+    virtual char *GetFuncPropName([[maybe_unused]] MethodPtr methodPtr, [[maybe_unused]] uint32_t strId) const
     {
         UNREACHABLE();
     }
 
-    virtual uint64_t GetFuncPropNameOffset([[maybe_unused]] MethodPtr method_ptr,
-                                           [[maybe_unused]] uint32_t str_id) const
+    virtual uint64_t GetFuncPropNameOffset([[maybe_unused]] MethodPtr methodPtr, [[maybe_unused]] uint32_t strId) const
     {
         UNREACHABLE();
     }
 
-    virtual ClassPtr GetRetValueClass([[maybe_unused]] MethodPtr method_ptr) const
+    virtual ClassPtr GetRetValueClass([[maybe_unused]] MethodPtr methodPtr) const
     {
         UNREACHABLE();
     }
@@ -1241,14 +1240,14 @@ public:
      *                    NOTE: create interface in the runtime to enumerate all methods despite of VM language.
      * @return profile data for the given method
      */
-    virtual MethodProfile GetMethodProfile([[maybe_unused]] MethodPtr method, [[maybe_unused]] bool from_vector) const
+    virtual MethodProfile GetMethodProfile([[maybe_unused]] MethodPtr method, [[maybe_unused]] bool fromVector) const
     {
         return nullptr;
     }
 
     virtual profiling::CallKind GetCallProfile([[maybe_unused]] MethodPtr profile, [[maybe_unused]] uint32_t pc,
                                                [[maybe_unused]] ArenaVector<uintptr_t> *methods,
-                                               [[maybe_unused]] bool is_aot)
+                                               [[maybe_unused]] bool isAot)
     {
         return profiling::CallKind::UNKNOWN;
     }
@@ -1263,15 +1262,13 @@ public:
      * @return return profile for `bc_inst`
      */
     virtual BytecodeProfile GetBytecodeProfile([[maybe_unused]] MethodProfile prof,
-                                               [[maybe_unused]] const uint8_t *bc_inst,
-                                               [[maybe_unused]] size_t pc) const
+                                               [[maybe_unused]] const uint8_t *bcInst, [[maybe_unused]] size_t pc) const
     {
         return 0;
     }
 
-    virtual bool CanInlineLdStObjByIndex([[maybe_unused]] const BytecodeInstruction *bc_inst,
-                                         [[maybe_unused]] size_t pc,
-                                         [[maybe_unused]] MethodProfile method_profile) const
+    virtual bool CanInlineLdStObjByIndex([[maybe_unused]] const BytecodeInstruction *bcInst, [[maybe_unused]] size_t pc,
+                                         [[maybe_unused]] MethodProfile methodProfile) const
     {
         return false;
     }
@@ -1282,15 +1279,15 @@ public:
     }
 
     virtual compiler::AnyBaseType GetProfilingAnyType([[maybe_unused]] RuntimeInterface::BytecodeProfile profile,
-                                                      [[maybe_unused]] const BytecodeInstruction *bc_inst,
+                                                      [[maybe_unused]] const BytecodeInstruction *bcInst,
                                                       [[maybe_unused]] unsigned index,
-                                                      [[maybe_unused]] profiling::AnyInputType *allowed_input_type,
-                                                      [[maybe_unused]] bool *is_type_profiled)
+                                                      [[maybe_unused]] profiling::AnyInputType *allowedInputType,
+                                                      [[maybe_unused]] bool *isTypeProfiled)
     {
         return compiler::AnyBaseType::UNDEFINED_TYPE;
     }
 
-    virtual compiler::AnyBaseType ResolveSpecialAnyTypeByConstant([[maybe_unused]] coretypes::TaggedValue any_const)
+    virtual compiler::AnyBaseType ResolveSpecialAnyTypeByConstant([[maybe_unused]] coretypes::TaggedValue anyConst)
     {
         return compiler::AnyBaseType::UNDEFINED_TYPE;
     }
@@ -1300,7 +1297,7 @@ public:
         return nullptr;
     }
 
-    virtual void *GetConstantPool([[maybe_unused]] uintptr_t func_address)
+    virtual void *GetConstantPool([[maybe_unused]] uintptr_t funcAddress)
     {
         return nullptr;
     }
@@ -1350,10 +1347,10 @@ public:
 class UnresolvedTypesInterface {
 public:
     enum class SlotKind { UNKNOWN, CLASS, MANAGED_CLASS, METHOD, VIRTUAL_METHOD, FIELD, STATIC_FIELD_PTR };
-    virtual bool AddTableSlot([[maybe_unused]] RuntimeInterface::MethodPtr method, [[maybe_unused]] uint32_t type_id,
+    virtual bool AddTableSlot([[maybe_unused]] RuntimeInterface::MethodPtr method, [[maybe_unused]] uint32_t typeId,
                               [[maybe_unused]] SlotKind kind) = 0;
     virtual uintptr_t GetTableSlot([[maybe_unused]] RuntimeInterface::MethodPtr method,
-                                   [[maybe_unused]] uint32_t type_id, [[maybe_unused]] SlotKind kind) const = 0;
+                                   [[maybe_unused]] uint32_t typeId, [[maybe_unused]] SlotKind kind) const = 0;
     virtual ~UnresolvedTypesInterface() = default;
     UnresolvedTypesInterface() = default;
 
@@ -1389,7 +1386,7 @@ enum class DeoptimizeType : uint8_t {
     COUNT
 };
 
-inline const char *DeoptimizeTypeToString(DeoptimizeType deopt_type)
+inline const char *DeoptimizeTypeToString(DeoptimizeType deoptType)
 {
     static constexpr auto COUNT = static_cast<uint8_t>(DeoptimizeType::COUNT);
 
@@ -1411,7 +1408,7 @@ inline const char *DeoptimizeTypeToString(DeoptimizeType deopt_type)
                                                                          "INLINE_DYN",
                                                                          "NOT_PROFILED"};
 
-    auto idx = static_cast<uint8_t>(deopt_type);
+    auto idx = static_cast<uint8_t>(deoptType);
     ASSERT(idx < COUNT);
     return DEOPT_TYPE_NAMES[idx];
 }

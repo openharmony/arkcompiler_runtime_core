@@ -30,11 +30,11 @@ TEST_F(VerifierTest, AbstractTypedValue)
 {
     using Builtin = Type::Builtin;
     auto *config = NewConfig();
-    RuntimeOptions runtime_opts;
-    Runtime::Create(runtime_opts);
+    RuntimeOptions runtimeOpts;
+    Runtime::Create(runtimeOpts);
     auto *service = CreateService(config, Runtime::GetCurrent()->GetInternalAllocator(),
                                   Runtime::GetCurrent()->GetClassLinker(), "");
-    TypeSystem type_system(service->verifier_service);
+    TypeSystem typeSystem(service->verifierService);
     Variables variables;
 
     auto top = Type::Top();
@@ -50,21 +50,21 @@ TEST_F(VerifierTest, AbstractTypedValue)
     AbstractTypedValue av1 {i16, nv()};
     AbstractTypedValue av2 {i32, nv()};
 
-    auto av3 = AtvJoin(&av1, &av2, &type_system);
+    auto av3 = AtvJoin(&av1, &av2, &typeSystem);
     auto t3 = av3.GetAbstractType();
 
     EXPECT_EQ(t3, i32);
 
     AbstractTypedValue av4 {u16, nv()};
 
-    auto av5 = AtvJoin(&av2, &av4, &type_system);
+    auto av5 = AtvJoin(&av2, &av4, &typeSystem);
     auto t5 = av5.GetAbstractType();
 
     EXPECT_EQ(t5, i32);
 
     AbstractTypedValue av6 {reference, nv()};
 
-    auto av7 = AtvJoin(&av1, &av6, &type_system);
+    auto av7 = AtvJoin(&av1, &av6, &typeSystem);
     auto t7 = av7.GetAbstractType();
 
     EXPECT_EQ(t7, top);

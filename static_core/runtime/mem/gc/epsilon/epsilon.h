@@ -29,7 +29,7 @@ public:
 template <class LanguageConfig>
 class EpsilonGC final : public GCLang<LanguageConfig> {
 public:
-    explicit EpsilonGC(ObjectAllocatorBase *object_allocator, const GCSettings &settings);
+    explicit EpsilonGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
 
     NO_COPY_SEMANTIC(EpsilonGC);
     NO_MOVE_SEMANTIC(EpsilonGC);
@@ -45,9 +45,9 @@ public:
         return true;
     }
 
-    void InitGCBits(panda::ObjectHeader *obj_header) override;
+    void InitGCBits(panda::ObjectHeader *objHeader) override;
 
-    void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *obj_header) override;
+    void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *objHeader) override;
 
     bool Trigger(PandaUniquePtr<GCTask> task) override;
 
@@ -58,7 +58,7 @@ private:
     bool IsMarked(const ObjectHeader *object) const override;
     void InitializeImpl() override;
     void RunPhasesImpl(GCTask &task) override;
-    void MarkReferences(GCMarkingStackType *references, GCPhase gc_phase) override;
+    void MarkReferences(GCMarkingStackType *references, GCPhase gcPhase) override;
 };
 
 }  // namespace panda::mem

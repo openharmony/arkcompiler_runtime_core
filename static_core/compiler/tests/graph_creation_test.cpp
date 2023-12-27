@@ -65,11 +65,11 @@ TEST_F(GraphCreationTest, OsrModeGraph)
         }
     }
     BB(2U).SetOsrEntry(true);
-    auto clone_graph = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
+    auto cloneGraph = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
 
     graph->RunPass<LoopPeeling>();
     graph->RunPass<LoopUnroll>(1000U, 4U);
-    EXPECT_TRUE(GraphComparator().Compare(graph, clone_graph));
+    EXPECT_TRUE(GraphComparator().Compare(graph, cloneGraph));
 }
 // NOLINTEND(readability-magic-numbers)
 

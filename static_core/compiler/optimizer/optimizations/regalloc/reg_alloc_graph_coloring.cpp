@@ -27,100 +27,100 @@
 
 namespace panda::compiler {
 RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph) : RegAllocBase(graph) {}
-RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, size_t regs_count) : RegAllocBase(graph, regs_count) {}
+RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, size_t regsCount) : RegAllocBase(graph, regsCount) {}
 
 void RegAllocGraphColoring::FillPhysicalNodes(InterferenceGraph *ig, WorkingRanges *ranges,
-                                              ArenaVector<ColorNode *> &physical_nodes)
+                                              ArenaVector<ColorNode *> &physicalNodes)
 {
-    for (auto physical_interval : ranges->physical) {
+    for (auto physicalInterval : ranges->physical) {
         ColorNode *node = ig->AllocNode();
-        node->Assign(physical_interval);
+        node->Assign(physicalInterval);
         node->SetPhysical();
-        physical_nodes.push_back(node);
+        physicalNodes.push_back(node);
     }
 }
 
-void RegAllocGraphColoring::BuildIG(InterferenceGraph *ig, WorkingRanges *ranges, bool remat_constants)
+void RegAllocGraphColoring::BuildIG(InterferenceGraph *ig, WorkingRanges *ranges, bool rematConstants)
 {
     ig->Reserve(ranges->regular.size() + ranges->physical.size());
-    ArenaDeque<ColorNode *> active_nodes(GetGraph()->GetLocalAllocator()->Adapter());
-    ArenaVector<ColorNode *> physical_nodes(GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaDeque<ColorNode *> activeNodes(GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaVector<ColorNode *> physicalNodes(GetGraph()->GetLocalAllocator()->Adapter());
     const auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
 
-    FillPhysicalNodes(ig, ranges, physical_nodes);
+    FillPhysicalNodes(ig, ranges, physicalNodes);
 
-    for (auto current_interval : ranges->regular) {
-        auto range_start = current_interval->GetBegin();
+    for (auto currentInterval : ranges->regular) {
+        auto rangeStart = currentInterval->GetBegin();
 
-        if (remat_constants && TryToSpillConstant(current_interval, GetGraph())) {
+        if (rematConstants && TryToSpillConstant(currentInterval, GetGraph())) {
             continue;
         }
 
         // Expire active_ranges
-        while (!active_nodes.empty() && active_nodes.front()->GetLifeIntervals()->GetEnd() <= range_start) {
-            active_nodes.pop_front();
+        while (!activeNodes.empty() && activeNodes.front()->GetLifeIntervals()->GetEnd() <= rangeStart) {
+            activeNodes.pop_front();
         }
 
         ColorNode *node = ig->AllocNode();
-        node->Assign(current_interval);
+        node->Assign(currentInterval);
 
         if (ig->IsUsedSpillWeight()) {
-            node->SetSpillWeight(CalcSpillWeight(la, current_interval));
+            node->SetSpillWeight(CalcSpillWeight(la, currentInterval));
         }
 
         // Interfer node
-        for (auto active_node : active_nodes) {
-            auto active_interval = active_node->GetLifeIntervals();
-            if (current_interval->IntersectsWith(active_interval)) {
-                ig->AddEdge(node->GetNumber(), active_node->GetNumber());
+        for (auto activeNode : activeNodes) {
+            auto activeInterval = activeNode->GetLifeIntervals();
+            if (currentInterval->IntersectsWith(activeInterval)) {
+                ig->AddEdge(node->GetNumber(), activeNode->GetNumber());
             }
         }
 
-        for (auto physical_node : physical_nodes) {
-            auto physical_interval = physical_node->GetLifeIntervals();
-            if (current_interval->IntersectsWith<true>(physical_interval)) {
-                ig->AddEdge(node->GetNumber(), physical_node->GetNumber());
-                node->AddCallsite(range_start);
+        for (auto physicalNode : physicalNodes) {
+            auto physicalInterval = physicalNode->GetLifeIntervals();
+            if (currentInterval->IntersectsWith<true>(physicalInterval)) {
+                ig->AddEdge(node->GetNumber(), physicalNode->GetNumber());
+                node->AddCallsite(rangeStart);
             }
         }
 
-        if (!current_interval->HasInst()) {
+        if (!currentInterval->HasInst()) {
             // current_interval - is additional life interval for an instruction required temp, add edges to the fixed
             // inputs' nodes of that instruction
-            la.EnumerateFixedLocationsOverlappingTemp(current_interval, [ig, node](Location location) {
+            la.EnumerateFixedLocationsOverlappingTemp(currentInterval, [ig, node](Location location) {
                 ASSERT(location.IsFixedRegister());
-                auto physical_node = ig->FindPhysicalNode(location);
-                if (physical_node == nullptr) {
+                auto physicalNode = ig->FindPhysicalNode(location);
+                if (physicalNode == nullptr) {
                     return;
                 }
-                ig->AddEdge(node->GetNumber(), physical_node->GetNumber());
+                ig->AddEdge(node->GetNumber(), physicalNode->GetNumber());
             });
         }
 
         // Add node to active_nodes sorted by End time
-        auto ranges_iter =
-            std::upper_bound(active_nodes.begin(), active_nodes.end(), node, [](const auto &lhs, const auto &rhs) {
+        auto rangesIter =
+            std::upper_bound(activeNodes.begin(), activeNodes.end(), node, [](const auto &lhs, const auto &rhs) {
                 return lhs->GetLifeIntervals()->GetEnd() <= rhs->GetLifeIntervals()->GetEnd();
             });
-        active_nodes.insert(ranges_iter, node);
+        activeNodes.insert(rangesIter, node);
     }
 }
 
 RegAllocGraphColoring::IndexVector RegAllocGraphColoring::PrecolorIG(InterferenceGraph *ig)
 {
     // Walk nodes and propagate properties
-    IndexVector affinity_nodes;
+    IndexVector affinityNodes;
     for (const auto &node : ig->GetNodes()) {
-        AddAffinityEdgesToSiblings(ig, node, &affinity_nodes);
+        AddAffinityEdgesToSiblings(ig, node, &affinityNodes);
     }
-    return affinity_nodes;
+    return affinityNodes;
 }
 
 // Find precolorings and set registers to intervals in advance
 RegAllocGraphColoring::IndexVector RegAllocGraphColoring::PrecolorIG(InterferenceGraph *ig, const RegisterMap &map)
 {
     // Walk nodes and propagate properties
-    IndexVector affinity_nodes;
+    IndexVector affinityNodes;
     for (auto &node : ig->GetNodes()) {
         const auto *interv = node.GetLifeIntervals();
         // Take in account preassigned registers in intervals
@@ -134,19 +134,19 @@ RegAllocGraphColoring::IndexVector RegAllocGraphColoring::PrecolorIG(Interferenc
             continue;
         }
 
-        AddAffinityEdgesToSiblings(ig, node, &affinity_nodes);
+        AddAffinityEdgesToSiblings(ig, node, &affinityNodes);
 
         const auto *inst = interv->GetInst();
         ASSERT(inst != nullptr);
         if (inst->IsPhi()) {
-            AddAffinityEdgesToPhi(ig, node, &affinity_nodes);
+            AddAffinityEdgesToPhi(ig, node, &affinityNodes);
         }
     }
-    AddAffinityEdgesToPhysicalNodes(ig, &affinity_nodes);
-    return affinity_nodes;
+    AddAffinityEdgesToPhysicalNodes(ig, &affinityNodes);
+    return affinityNodes;
 }
 
-void RegAllocGraphColoring::BuildBias(InterferenceGraph *ig, const IndexVector &affinity_nodes)
+void RegAllocGraphColoring::BuildBias(InterferenceGraph *ig, const IndexVector &affinityNodes)
 {
     auto &nodes = ig->GetNodes();
 
@@ -154,7 +154,7 @@ void RegAllocGraphColoring::BuildBias(InterferenceGraph *ig, const IndexVector &
     // nodes of same component)
     SmallVector<unsigned, DEFAULT_VECTOR_SIZE> walked;
     SmallVector<unsigned, DEFAULT_VECTOR_SIZE> biased;
-    for (auto index : affinity_nodes) {
+    for (auto index : affinityNodes) {
         auto &node = nodes[index];
 
         // Skip already biased
@@ -167,42 +167,42 @@ void RegAllocGraphColoring::BuildBias(InterferenceGraph *ig, const IndexVector &
         walked.push_back(node.GetNumber());
         biased.clear();
         biased.push_back(node.GetNumber());
-        unsigned bias_num = ig->GetBiasCount();
-        node.SetBias(bias_num);
+        unsigned biasNum = ig->GetBiasCount();
+        node.SetBias(biasNum);
         auto &bias = ig->AddBias();
         ig->UpdateBiasData(&bias, node);
         do {
             // Pop back
-            unsigned cur_index = walked.back();
+            unsigned curIndex = walked.back();
             walked.resize(walked.size() - 1);
 
             // Walk N affine nodes
-            for (auto try_index : affinity_nodes) {
-                auto &try_node = nodes[try_index];
-                if (try_node.HasBias() || !ig->HasAffinityEdge(cur_index, try_index)) {
+            for (auto tryIndex : affinityNodes) {
+                auto &tryNode = nodes[tryIndex];
+                if (tryNode.HasBias() || !ig->HasAffinityEdge(curIndex, tryIndex)) {
                     continue;
                 }
                 // Check if the `try_node` intersects one of the already biased
                 auto it = std::find_if(biased.cbegin(), biased.cend(),
-                                       [ig, try_index](auto id) { return ig->HasEdge(id, try_index); });
+                                       [ig, tryIndex](auto id) { return ig->HasEdge(id, tryIndex); });
                 if (it != biased.cend()) {
                     continue;
                 }
 
-                try_node.SetBias(bias_num);
-                ig->UpdateBiasData(&bias, try_node);
-                walked.push_back(try_index);
-                biased.push_back(try_index);
+                tryNode.SetBias(biasNum);
+                ig->UpdateBiasData(&bias, tryNode);
+                walked.push_back(tryIndex);
+                biased.push_back(tryIndex);
             }
         } while (!walked.empty());
     }
 }
 
 void RegAllocGraphColoring::AddAffinityEdgesToPhi(InterferenceGraph *ig, const ColorNode &node,
-                                                  IndexVector *affinity_nodes)
+                                                  IndexVector *affinityNodes)
 {
     // Duplicates are possible but we tolerate it
-    affinity_nodes->push_back(node.GetNumber());
+    affinityNodes->push_back(node.GetNumber());
 
     auto phi = node.GetLifeIntervals()->GetInst();
     ASSERT(phi->IsPhi());
@@ -210,26 +210,26 @@ void RegAllocGraphColoring::AddAffinityEdgesToPhi(InterferenceGraph *ig, const C
     // Iterate over Phi inputs
     for (size_t i = 0; i < phi->GetInputsCount(); i++) {
         // Add affinity edge
-        auto input_li = la->GetInstLifeIntervals(phi->GetDataFlowInput(i));
-        AddAffinityEdge(ig, affinity_nodes, node, input_li);
+        auto inputLi = la->GetInstLifeIntervals(phi->GetDataFlowInput(i));
+        AddAffinityEdge(ig, affinityNodes, node, inputLi);
     }
 }
 
 void RegAllocGraphColoring::AddAffinityEdgesToSiblings(InterferenceGraph *ig, const ColorNode &node,
-                                                       IndexVector *affinity_nodes)
+                                                       IndexVector *affinityNodes)
 {
     auto sibling = node.GetLifeIntervals()->GetSibling();
     if (sibling == nullptr) {
         return;
     }
-    affinity_nodes->push_back(node.GetNumber());
+    affinityNodes->push_back(node.GetNumber());
     while (sibling != nullptr) {
-        AddAffinityEdge(ig, affinity_nodes, node, sibling);
+        AddAffinityEdge(ig, affinityNodes, node, sibling);
         sibling = sibling->GetSibling();
     }
 }
 
-void RegAllocGraphColoring::AddAffinityEdgesToPhysicalNodes(InterferenceGraph *ig, IndexVector *affinity_nodes)
+void RegAllocGraphColoring::AddAffinityEdgesToPhysicalNodes(InterferenceGraph *ig, IndexVector *affinityNodes)
 {
     auto la = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
     for (auto *interval : la->GetLifeIntervals()) {
@@ -244,17 +244,17 @@ void RegAllocGraphColoring::AddAffinityEdgesToPhysicalNodes(InterferenceGraph *i
             if (!location.IsFixedRegister()) {
                 continue;
             }
-            auto fixed_node = ig->FindPhysicalNode(location);
+            auto fixedNode = ig->FindPhysicalNode(location);
             // Possible when general intervals are processing, while input is fp-interval or vice versa
-            if (fixed_node == nullptr) {
+            if (fixedNode == nullptr) {
                 continue;
             }
-            affinity_nodes->push_back(fixed_node->GetNumber());
+            affinityNodes->push_back(fixedNode->GetNumber());
 
-            auto input_li = la->GetInstLifeIntervals(inst->GetDataFlowInput(i));
-            auto sibling = input_li->FindSiblingAt(interval->GetBegin());
+            auto inputLi = la->GetInstLifeIntervals(inst->GetDataFlowInput(i));
+            auto sibling = inputLi->FindSiblingAt(interval->GetBegin());
             ASSERT(sibling != nullptr);
-            AddAffinityEdge(ig, affinity_nodes, *fixed_node, sibling);
+            AddAffinityEdge(ig, affinityNodes, *fixedNode, sibling);
         }
     }
 }
@@ -263,17 +263,17 @@ void RegAllocGraphColoring::AddAffinityEdgesToPhysicalNodes(InterferenceGraph *i
  * Try to find node for the `li` interval in the IG;
  * If node exists, create affinity edge between it and the `node`
  */
-void RegAllocGraphColoring::AddAffinityEdge(InterferenceGraph *ig, IndexVector *affinity_nodes, const ColorNode &node,
+void RegAllocGraphColoring::AddAffinityEdge(InterferenceGraph *ig, IndexVector *affinityNodes, const ColorNode &node,
                                             LifeIntervals *li)
 {
-    if (auto af_node = ig->FindNode(li)) {
-        COMPILER_LOG(DEBUG, REGALLOC) << "AfEdge: " << node.GetNumber() << " " << af_node->GetNumber();
-        ig->AddAffinityEdge(node.GetNumber(), af_node->GetNumber());
-        affinity_nodes->push_back(af_node->GetNumber());
+    if (auto afNode = ig->FindNode(li)) {
+        COMPILER_LOG(DEBUG, REGALLOC) << "AfEdge: " << node.GetNumber() << " " << afNode->GetNumber();
+        ig->AddAffinityEdge(node.GetNumber(), afNode->GetNumber());
+        affinityNodes->push_back(afNode->GetNumber());
     }
 }
 
-bool RegAllocGraphColoring::AllocateRegisters(InterferenceGraph *ig, WorkingRanges *ranges, WorkingRanges *stack_ranges,
+bool RegAllocGraphColoring::AllocateRegisters(InterferenceGraph *ig, WorkingRanges *ranges, WorkingRanges *stackRanges,
                                               const RegisterMap &map)
 {
     if (GetGraph()->IsBytecodeOptimizer()) {
@@ -295,15 +295,15 @@ bool RegAllocGraphColoring::AllocateRegisters(InterferenceGraph *ig, WorkingRang
         if (ig->AssignColors<MAX_NUM_REGS>(map.GetAvailableRegsCount(), map.GetBorder())) {
             break;
         }
-        SparseIG(ig, map.GetAvailableRegsCount(), ranges, stack_ranges);
+        SparseIG(ig, map.GetAvailableRegsCount(), ranges, stackRanges);
     }
     return true;
 }
 
-bool RegAllocGraphColoring::AllocateSlots(InterferenceGraph *ig, WorkingRanges *stack_ranges)
+bool RegAllocGraphColoring::AllocateSlots(InterferenceGraph *ig, WorkingRanges *stackRanges)
 {
     ig->SetUseSpillWeight(false);
-    BuildIG(ig, stack_ranges, true);
+    BuildIG(ig, stackRanges, true);
     BuildBias(ig, PrecolorIG(ig));
     return ig->AssignColors<MAX_NUM_STACK_SLOTS>(MAX_NUM_STACK_SLOTS, 0);
 }
@@ -311,27 +311,27 @@ bool RegAllocGraphColoring::AllocateSlots(InterferenceGraph *ig, WorkingRanges *
 /*
  * Coloring was unsuccessful, hence uncolored nodes should be split to sparse the interference graph
  */
-void RegAllocGraphColoring::SparseIG(InterferenceGraph *ig, unsigned regs_count, WorkingRanges *ranges,
-                                     WorkingRanges *stack_ranges)
+void RegAllocGraphColoring::SparseIG(InterferenceGraph *ig, unsigned regsCount, WorkingRanges *ranges,
+                                     WorkingRanges *stackRanges)
 {
     for (const auto &node : ig->GetNodes()) {
-        if (node.GetColor() != regs_count) {
+        if (node.GetColor() != regsCount) {
             continue;
         }
         auto interval = node.GetLifeIntervals();
         if (interval->GetUsePositions().empty()) {
-            SpillInterval(interval, ranges, stack_ranges);
+            SpillInterval(interval, ranges, stackRanges);
             continue;
         }
 
         interval->SplitAroundUses(GetGraph()->GetAllocator());
-        bool is_const = interval->GetInst()->IsConst();
-        if (is_const && interval->GetUsePositions().empty()) {
-            SpillInterval(interval, ranges, stack_ranges);
+        bool isConst = interval->GetInst()->IsConst();
+        if (isConst && interval->GetUsePositions().empty()) {
+            SpillInterval(interval, ranges, stackRanges);
         }
         for (auto sibling = interval->GetSibling(); sibling != nullptr; sibling = sibling->GetSibling()) {
-            if (is_const && sibling->GetUsePositions().empty()) {
-                AddRange(sibling, &stack_ranges->regular);
+            if (isConst && sibling->GetUsePositions().empty()) {
+                AddRange(sibling, &stackRanges->regular);
             } else {
                 AddRange(sibling, &ranges->regular);
             }
@@ -339,11 +339,11 @@ void RegAllocGraphColoring::SparseIG(InterferenceGraph *ig, unsigned regs_count,
     }
 }
 
-void RegAllocGraphColoring::SpillInterval(LifeIntervals *interval, WorkingRanges *ranges, WorkingRanges *stack_ranges)
+void RegAllocGraphColoring::SpillInterval(LifeIntervals *interval, WorkingRanges *ranges, WorkingRanges *stackRanges)
 {
     ASSERT(interval->GetUsePositions().empty());
     ranges->regular.erase(std::remove(ranges->regular.begin(), ranges->regular.end(), interval), ranges->regular.end());
-    AddRange(interval, &stack_ranges->regular);
+    AddRange(interval, &stackRanges->regular);
 }
 
 void RegAllocGraphColoring::Remap(const InterferenceGraph &ig, const RegisterMap &map)
@@ -384,38 +384,37 @@ bool RegAllocGraphColoring::Allocate()
 
     ReserveTempRegisters();
     // Create intervals sequences
-    WorkingRanges general_ranges(gr->GetLocalAllocator());
-    WorkingRanges fp_ranges(gr->GetLocalAllocator());
-    WorkingRanges stack_ranges(gr->GetLocalAllocator());
-    InitWorkingRanges(&general_ranges, &fp_ranges);
-    COMPILER_LOG(INFO, REGALLOC) << "Ranges reg " << general_ranges.regular.size() << " fp "
-                                 << fp_ranges.regular.size();
+    WorkingRanges generalRanges(gr->GetLocalAllocator());
+    WorkingRanges fpRanges(gr->GetLocalAllocator());
+    WorkingRanges stackRanges(gr->GetLocalAllocator());
+    InitWorkingRanges(&generalRanges, &fpRanges);
+    COMPILER_LOG(INFO, REGALLOC) << "Ranges reg " << generalRanges.regular.size() << " fp " << fpRanges.regular.size();
 
     // Register allocation
     InterferenceGraph ig(gr->GetLocalAllocator());
     RegisterMap map(gr->GetLocalAllocator());
 
-    if (!general_ranges.regular.empty()) {
+    if (!generalRanges.regular.empty()) {
         InitMap(&map, false);
-        if (!AllocateRegisters(&ig, &general_ranges, &stack_ranges, map)) {
+        if (!AllocateRegisters(&ig, &generalRanges, &stackRanges, map)) {
             COMPILER_LOG(DEBUG, REGALLOC) << "Integer RA failed";
             return false;
         }
         Remap(ig, map);
     }
 
-    if (!fp_ranges.regular.empty()) {
+    if (!fpRanges.regular.empty()) {
         GetGraph()->SetHasFloatRegs();
         InitMap(&map, true);
-        if (!AllocateRegisters(&ig, &fp_ranges, &stack_ranges, map)) {
+        if (!AllocateRegisters(&ig, &fpRanges, &stackRanges, map)) {
             COMPILER_LOG(DEBUG, REGALLOC) << "Vector RA failed";
             return false;
         }
         Remap(ig, map);
     }
 
-    if (!stack_ranges.regular.empty()) {
-        if (AllocateSlots(&ig, &stack_ranges) && MapSlots(ig)) {
+    if (!stackRanges.regular.empty()) {
+        if (AllocateSlots(&ig, &stackRanges) && MapSlots(ig)) {
             return true;
         }
         COMPILER_LOG(DEBUG, REGALLOC) << "Stack slots RA failed";
@@ -424,7 +423,7 @@ bool RegAllocGraphColoring::Allocate()
     return true;
 }
 
-void RegAllocGraphColoring::InitWorkingRanges(WorkingRanges *general_ranges, WorkingRanges *fp_ranges)
+void RegAllocGraphColoring::InitWorkingRanges(WorkingRanges *generalRanges, WorkingRanges *fpRanges)
 {
     for (auto *interval : GetGraph()->GetAnalysis<LivenessAnalyzer>().GetLifeIntervals()) {
         if (interval->GetReg() == ACC_REG_ID) {
@@ -442,10 +441,10 @@ void RegAllocGraphColoring::InitWorkingRanges(WorkingRanges *general_ranges, Wor
             continue;
         }
 
-        bool is_fp = DataType::IsFloatType(interval->GetType());
-        auto *ranges = is_fp ? fp_ranges : general_ranges;
+        bool isFp = DataType::IsFloatType(interval->GetType());
+        auto *ranges = isFp ? fpRanges : generalRanges;
         if (interval->IsPhysical()) {
-            auto mask = is_fp ? GetVRegMask() : GetRegMask();
+            auto mask = isFp ? GetVRegMask() : GetRegMask();
             if (mask.IsSet(interval->GetReg())) {
                 // skip physical intervals for unavailable registers, they do not affect allocation
                 continue;
@@ -457,23 +456,23 @@ void RegAllocGraphColoring::InitWorkingRanges(WorkingRanges *general_ranges, Wor
     }
 }
 
-void RegAllocGraphColoring::InitMap(RegisterMap *map, bool is_vector)
+void RegAllocGraphColoring::InitMap(RegisterMap *map, bool isVector)
 {
     auto arch = GetGraph()->GetArch();
     if (arch == Arch::NONE) {
         ASSERT(GetGraph()->IsBytecodeOptimizer());
-        ASSERT(!is_vector);
+        ASSERT(!isVector);
         map->SetMask(GetRegMask(), 0);
     } else {
-        size_t first_callee = GetFirstCalleeReg(arch, is_vector);
-        size_t last_callee = GetLastCalleeReg(arch, is_vector);
-        map->SetCallerFirstMask(is_vector ? GetVRegMask() : GetRegMask(), first_callee, last_callee);
+        size_t firstCallee = GetFirstCalleeReg(arch, isVector);
+        size_t lastCallee = GetLastCalleeReg(arch, isVector);
+        map->SetCallerFirstMask(isVector ? GetVRegMask() : GetRegMask(), firstCallee, lastCallee);
     }
 }
 
 void RegAllocGraphColoring::Presplit(WorkingRanges *ranges)
 {
-    ArenaVector<LifeIntervals *> to_split(GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaVector<LifeIntervals *> toSplit(GetGraph()->GetLocalAllocator()->Adapter());
 
     for (auto interval : ranges->regular) {
         if (!interval->GetLocation().IsFixedRegister()) {
@@ -484,24 +483,24 @@ void RegAllocGraphColoring::Presplit(WorkingRanges *ranges)
                 continue;
             }
             if (interval->GetLocation() == next->GetLocation() && interval->IntersectsWith(next)) {
-                to_split.push_back(interval);
+                toSplit.push_back(interval);
                 break;
             }
         }
 
-        if (!to_split.empty() && to_split.back() == interval) {
+        if (!toSplit.empty() && toSplit.back() == interval) {
             // Already added to split
             continue;
         }
         for (auto physical : ranges->physical) {
             if (interval->GetLocation() == physical->GetLocation() && interval->IntersectsWith<true>(physical)) {
-                to_split.push_back(interval);
+                toSplit.push_back(interval);
                 break;
             }
         }
     }
 
-    for (auto interval : to_split) {
+    for (auto interval : toSplit) {
         COMPILER_LOG(DEBUG, REGALLOC) << "Split at the beginning: " << interval->ToString();
         auto split = interval->SplitAt(interval->GetBegin() + 1, GetGraph()->GetAllocator());
         AddRange(split, &ranges->regular);

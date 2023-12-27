@@ -35,10 +35,10 @@ public:
 private:
     void ConnectSiblings(LifeIntervals *interval);
     void ProcessBlock(BasicBlock *block);
-    SpillFillInst *CreateSpillFillForSiblings(Inst *connect_at);
-    SpillFillInst *CreateSpillFillForSplitMove(BasicBlock *source_block);
-    void ConnectSplitFromPredBlock(BasicBlock *src_bb, LifeIntervals *src_interval, BasicBlock *target_bb,
-                                   LifeIntervals *target_split);
+    SpillFillInst *CreateSpillFillForSiblings(Inst *connectAt);
+    SpillFillInst *CreateSpillFillForSplitMove(BasicBlock *sourceBlock);
+    void ConnectSplitFromPredBlock(BasicBlock *srcBb, LifeIntervals *srcInterval, BasicBlock *targetBb,
+                                   LifeIntervals *targetSplit);
 
     template <SpillFillType EXPECTED_TYPE>
     static bool Is(Inst *inst)

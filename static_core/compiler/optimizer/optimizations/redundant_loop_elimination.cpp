@@ -27,22 +27,22 @@ bool RedundantLoopElimination::RunImpl()
     COMPILER_LOG(DEBUG, RLE_OPT) << "Run " << GetPassName();
     RunLoopsVisitor();
 
-    if (is_applied_) {
+    if (isApplied_) {
         COMPILER_LOG(DEBUG, RLE_OPT) << GetPassName() << " is applied";
     }
-    return is_applied_;
+    return isApplied_;
 }
 
 BasicBlock *RedundantLoopElimination::IsRedundant(Loop *loop)
 {
-    BasicBlock *outside_succ = nullptr;
+    BasicBlock *outsideSucc = nullptr;
     for (auto block : loop->GetBlocks()) {
         // check that loop have only one exit and one outside blocks
         for (auto succ : block->GetSuccsBlocks()) {
             if (succ->GetLoop() != loop) {
-                if (outside_succ == nullptr) {
-                    outside_succ = succ;
-                    loop_exit_ = block;
+                if (outsideSucc == nullptr) {
+                    outsideSucc = succ;
+                    loopExit_ = block;
                 } else {
                     return nullptr;
                 }
@@ -66,23 +66,23 @@ BasicBlock *RedundantLoopElimination::IsRedundant(Loop *loop)
     if (!CountableLoopParser(*loop).Parse().has_value()) {
         return nullptr;
     }
-    return outside_succ;
+    return outsideSucc;
 }
 
-void RedundantLoopElimination::DeleteLoop(Loop *loop, BasicBlock *outside_succ) const
+void RedundantLoopElimination::DeleteLoop(Loop *loop, BasicBlock *outsideSucc) const
 {
     auto header = loop->GetHeader();
-    auto pre_header = loop->GetPreHeader();
+    auto preHeader = loop->GetPreHeader();
     ASSERT(loop->GetBackEdges().size() == 1);
-    ASSERT(pre_header != nullptr);
+    ASSERT(preHeader != nullptr);
 
-    pre_header->ReplaceSucc(header, outside_succ, true);
-    ASSERT(outside_succ->GetPredsBlocks().back() == pre_header);
+    preHeader->ReplaceSucc(header, outsideSucc, true);
+    ASSERT(outsideSucc->GetPredsBlocks().back() == preHeader);
     // replace loop_exit_ by pre_header in pred_blocks of outside_succ
     // (important when outside_succ has Phi instructions)
-    outside_succ->RemovePred(loop_exit_);
+    outsideSucc->RemovePred(loopExit_);
     // prevent trying to remove loop_exit_ from outside_succ preds again in DisconnectBlock
-    loop_exit_->RemoveSucc(outside_succ);
+    loopExit_->RemoveSucc(outsideSucc);
 
     for (auto block : loop->GetBlocks()) {
         GetGraph()->DisconnectBlock(block, false, false);
@@ -92,10 +92,10 @@ void RedundantLoopElimination::DeleteLoop(Loop *loop, BasicBlock *outside_succ) 
 bool RedundantLoopElimination::TransformLoop(Loop *loop)
 {
     COMPILER_LOG(DEBUG, RLE_OPT) << "Visit loop with id = " << loop->GetId();
-    auto outside_succ = IsRedundant(loop);
-    if (outside_succ != nullptr) {
-        DeleteLoop(loop, outside_succ);
-        is_applied_ = true;
+    auto outsideSucc = IsRedundant(loop);
+    if (outsideSucc != nullptr) {
+        DeleteLoop(loop, outsideSucc);
+        isApplied_ = true;
         COMPILER_LOG(DEBUG, RLE_OPT) << "Loop with id = " << loop->GetId() << " is removed";
         GetGraph()->GetEventWriter().EventRedundantLoopElimination(loop->GetId(), loop->GetHeader()->GetGuestPc());
         return true;

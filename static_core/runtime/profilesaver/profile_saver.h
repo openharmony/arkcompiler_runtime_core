@@ -52,15 +52,15 @@ public:
      * output_filename records the profile name, code_paths stores all the locations contain pandafile(aka *.aex)
      * app_data_dir contains the location of application package file (aka *.hap)
      */
-    static void Start(const PandaString &output_filename, const PandaVector<PandaString> &code_paths,
-                      const PandaString &app_data_dir);
+    static void Start(const PandaString &outputFilename, const PandaVector<PandaString> &codePaths,
+                      const PandaString &appDataDir);
 
     /*
      * stop the profile saver daemon thread.
      *
      * if dump_info == true, dumps the debug information
      */
-    static void Stop(bool dump_info);
+    static void Stop(bool dumpInfo);
 
     /*
      * whether profile saver instance exists.
@@ -68,11 +68,11 @@ public:
     static bool IsStarted();
 
 private:
-    ProfileSaver(const PandaString &output_filename, const PandaVector<PandaString> &code_paths,
-                 const PandaString &app_dir);
+    ProfileSaver(const PandaString &outputFilename, const PandaVector<PandaString> &codePaths,
+                 const PandaString &appDir);
 
-    void AddTrackedLocations(const PandaString &output_filename, const PandaVector<PandaString> &code_paths,
-                             const PandaString &app_data_dir);
+    void AddTrackedLocations(const PandaString &outputFilename, const PandaVector<PandaString> &codePaths,
+                             const PandaString &appDataDir);
 
     /*
      * Callback for pthread_create, we attach/detach this thread to Runtime here
@@ -113,41 +113,41 @@ private:
 
     static ProfileSaver *instance_;
 
-    static std::thread profiler_saver_daemon_thread_;
+    static std::thread profilerSaverDaemonThread_;
 
-    PandaMap<PandaString, PandaSet<PandaString>> tracked_pandafile_base_locations_;
+    PandaMap<PandaString, PandaSet<PandaString>> trackedPandafileBaseLocations_;
 
-    PandaMap<PandaString, ProfileDumpInfo> profile_cache_;
+    PandaMap<PandaString, ProfileDumpInfo> profileCache_;
 
-    PandaSet<PandaString> app_data_dirs_;
+    PandaSet<PandaString> appDataDirs_;
 
-    bool shutting_down_ GUARDED_BY(profile_saver_lock_) {false};
+    bool shuttingDown_ GUARDED_BY(profile_saver_lock_) {false};
 
     struct CntStats {
     public:
         uint64_t GetMethodCount()
         {
-            return last_save_number_of_methods_;
+            return lastSaveNumberOfMethods_;
         }
 
         void SetMethodCount(uint64_t methodcnt)
         {
-            last_save_number_of_methods_ = methodcnt;
+            lastSaveNumberOfMethods_ = methodcnt;
         }
 
         uint64_t GetClassCount()
         {
-            return last_save_number_of_classes_;
+            return lastSaveNumberOfClasses_;
         }
 
         void SetClassCount(uint64_t classcnt)
         {
-            last_save_number_of_classes_ = classcnt;
+            lastSaveNumberOfClasses_ = classcnt;
         }
 
     private:
-        uint64_t last_save_number_of_methods_ {0};
-        uint64_t last_save_number_of_classes_ {0};
+        uint64_t lastSaveNumberOfMethods_ {0};
+        uint64_t lastSaveNumberOfClasses_ {0};
     };
 
     PandaMap<PandaString, CntStats> statcache;  // NOLINT(readability-identifier-naming)

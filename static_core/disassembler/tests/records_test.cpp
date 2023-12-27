@@ -135,10 +135,10 @@ TEST(RecordTest, RecordWithRecord)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    std::string body_a = ExtractRecordBody(ss.str(), ".record A {\n");
-    std::stringstream a {body_a};
-    std::string body_b = ExtractRecordBody(ss.str(), ".record B {\n");
-    std::stringstream b {body_b};
+    std::string bodyA = ExtractRecordBody(ss.str(), ".record A {\n");
+    std::stringstream a {bodyA};
+    std::string bodyB = ExtractRecordBody(ss.str(), ".record B {\n");
+    std::stringstream b {bodyB};
 
     std::string line;
     std::getline(b, line);

@@ -23,11 +23,11 @@ class RegAllocInterferenceTest : public GraphTest {};
 
 namespace {
 constexpr unsigned DEFAULT_CAPACITY1 = 10;
-unsigned TEST_EDGES1[2U][2U] = {{0U, 1U}, {7U, 4U}};  // NOLINT(modernize-avoid-c-arrays)
-auto IS_IN_SET = [](unsigned a, unsigned b) {
+unsigned g_testEdgeS1[2U][2U] = {{0U, 1U}, {7U, 4U}};  // NOLINT(modernize-avoid-c-arrays)
+auto g_isInSet = [](unsigned a, unsigned b) {
     for (size_t i = 0; i < 2U; i++) {  // NOLINT(modernize-loop-convert)
-        if ((a == TEST_EDGES1[i][0U] && b == TEST_EDGES1[i][1U]) ||
-            (b == TEST_EDGES1[i][0U] && a == TEST_EDGES1[i][1U])) {
+        if ((a == g_testEdgeS1[i][0U] && b == g_testEdgeS1[i][1U]) ||
+            (b == g_testEdgeS1[i][0U] && a == g_testEdgeS1[i][1U])) {
             return true;
         }
     }
@@ -44,7 +44,7 @@ TEST_F(RegAllocInterferenceTest, Basic)
     EXPECT_FALSE(matrix.AddEdge(7U, 4U));
     for (unsigned i = 0; i < DEFAULT_CAPACITY1; i++) {
         for (unsigned j = 0; j < DEFAULT_CAPACITY1; j++) {
-            ASSERT_EQ(matrix.HasEdge(i, j), IS_IN_SET(i, j));
+            ASSERT_EQ(matrix.HasEdge(i, j), g_isInSet(i, j));
         }
     }
     EXPECT_GE(matrix.GetCapacity(), DEFAULT_CAPACITY1);
@@ -58,7 +58,7 @@ TEST_F(RegAllocInterferenceTest, BasicAfinity)
     EXPECT_FALSE(matrix.AddAffinityEdge(7U, 4U));
     for (unsigned i = 0; i < DEFAULT_CAPACITY1; i++) {
         for (unsigned j = 0; j < DEFAULT_CAPACITY1; j++) {
-            EXPECT_EQ(matrix.HasAffinityEdge(i, j), IS_IN_SET(i, j));
+            EXPECT_EQ(matrix.HasAffinityEdge(i, j), g_isInSet(i, j));
         }
     }
     EXPECT_GE(matrix.GetCapacity(), DEFAULT_CAPACITY1);
@@ -118,22 +118,22 @@ namespace {
 const unsigned DEFAULT_CAPACITY2 = 5;
 const unsigned DEFAULT_EDGES2 = 6;
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-::std::pair<unsigned, unsigned> TEST_EDGES2[DEFAULT_EDGES2] = {{0U, 1U}, {1U, 2U}, {2U, 0U},
-                                                               {0U, 3U}, {2U, 3U}, {3U, 4U}};
+::std::pair<unsigned, unsigned> g_testEdgeS2[DEFAULT_EDGES2] = {{0U, 1U}, {1U, 2U}, {2U, 0U},
+                                                                {0U, 3U}, {2U, 3U}, {3U, 4U}};
 
 // To prevent adding "remove edge" interfaces to main code, edge removing is simulated via building new graph without
 // it.
-InterferenceGraph BuildSubgraph(InterferenceGraph &orig_gr, ArenaAllocator *alloc,
+InterferenceGraph BuildSubgraph(InterferenceGraph &origGr, ArenaAllocator *alloc,
                                 ::std::pair<unsigned, unsigned> *edges, unsigned count, ArenaVector<unsigned> &peo,
-                                unsigned peo_count)
+                                unsigned peoCount)
 {
     InterferenceGraph gr(alloc);
-    gr.Reserve(orig_gr.Size());
+    gr.Reserve(origGr.Size());
 
     for (unsigned i = 0; i < count; i++) {
         auto x = edges[i].first;   // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto y = edges[i].second;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (unsigned j = 0; j < peo_count; j++) {
+        for (unsigned j = 0; j < peoCount; j++) {
             if (x == peo[j] || y == peo[j]) {
                 continue;
             }
@@ -170,9 +170,9 @@ TEST_F(RegAllocInterferenceTest, LexBFS)
     gr.AllocNode();
     gr.AllocNode();
     gr.AllocNode();
-    for (auto &test_edge : TEST_EDGES2) {
-        auto x = test_edge.first;
-        auto y = test_edge.second;
+    for (auto &testEdge : g_testEdgeS2) {
+        auto x = testEdge.first;
+        auto y = testEdge.second;
         gr.AddEdge(x, y);
     }
 
@@ -181,7 +181,7 @@ TEST_F(RegAllocInterferenceTest, LexBFS)
     std::reverse(peo.begin(), peo.end());
 
     for (unsigned i = 0; i < (DEFAULT_CAPACITY2 - 1L); i++) {
-        auto gr2 = BuildSubgraph(gr, GetLocalAllocator(), TEST_EDGES2, DEFAULT_EDGES2, peo, i);
+        auto gr2 = BuildSubgraph(gr, GetLocalAllocator(), g_testEdgeS2, DEFAULT_EDGES2, peo, i);
         EXPECT_TRUE(gr2.IsChordal());
     }
 }
@@ -196,9 +196,9 @@ TEST_F(RegAllocInterferenceTest, AssignColorsSimple)
     auto *nd2 = gr.AllocNode();
     auto *nd3 = gr.AllocNode();
     auto *nd4 = gr.AllocNode();
-    for (auto &test_edge : TEST_EDGES2) {
-        auto x = test_edge.first;
-        auto y = test_edge.second;
+    for (auto &testEdge : g_testEdgeS2) {
+        auto x = testEdge.first;
+        auto y = testEdge.second;
         gr.AddEdge(x, y);
     }
 
@@ -215,18 +215,18 @@ TEST_F(RegAllocInterferenceTest, AssignColorsSimple)
 
 TEST_F(RegAllocInterferenceTest, AssignColors)
 {
-    const unsigned default_capacity = 11;
-    const unsigned default_edges = 12;
-    const unsigned default_aedges = 4;
+    const unsigned defaultCapacity = 11;
+    const unsigned defaultEdges = 12;
+    const unsigned defaultAedges = 4;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    ::std::pair<unsigned, unsigned> test_edges[default_edges] = {{0U, 1U}, {1U, 2U}, {2U, 0U},  {0U, 3U},
-                                                                 {2U, 3U}, {3U, 4U}, {6U, 5U},  {5U, 7U},
-                                                                 {6U, 7U}, {9U, 8U}, {9U, 10U}, {8U, 10U}};
+    ::std::pair<unsigned, unsigned> testEdges[defaultEdges] = {{0U, 1U}, {1U, 2U}, {2U, 0U},  {0U, 3U},
+                                                               {2U, 3U}, {3U, 4U}, {6U, 5U},  {5U, 7U},
+                                                               {6U, 7U}, {9U, 8U}, {9U, 10U}, {8U, 10U}};
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    ::std::pair<unsigned, unsigned> test_aedges[default_aedges] = {{3U, 6U}, {6U, 9U}, {2U, 5U}, {7U, 8U}};
+    ::std::pair<unsigned, unsigned> testAedges[defaultAedges] = {{3U, 6U}, {6U, 9U}, {2U, 5U}, {7U, 8U}};
 
     InterferenceGraph gr(GetLocalAllocator());
-    gr.Reserve(default_capacity);
+    gr.Reserve(defaultCapacity);
 
     auto *nd0 = gr.AllocNode();
     auto *nd1 = gr.AllocNode();
@@ -240,14 +240,14 @@ TEST_F(RegAllocInterferenceTest, AssignColors)
     auto *nd9 = gr.AllocNode();
     auto *nd10 = gr.AllocNode();
 
-    for (auto &test_edge : test_edges) {
-        auto x = test_edge.first;
-        auto y = test_edge.second;
+    for (auto &testEdge : testEdges) {
+        auto x = testEdge.first;
+        auto y = testEdge.second;
         gr.AddEdge(x, y);
     }
-    for (auto &test_edge : test_aedges) {
-        auto x = test_edge.first;
-        auto y = test_edge.second;
+    for (auto &testEdge : testAedges) {
+        auto x = testEdge.first;
+        auto y = testEdge.second;
         gr.AddAffinityEdge(x, y);
     }
     auto &bias0 = gr.AddBias();

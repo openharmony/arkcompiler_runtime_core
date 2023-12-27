@@ -61,8 +61,7 @@ constexpr size_t GetMinimalObjectSize()
  * @param from_object object from which we found object by reference
  * @param object object which we want to validate
  */
-inline void ValidateObject([[maybe_unused]] const ObjectHeader *from_object,
-                           [[maybe_unused]] const ObjectHeader *object)
+inline void ValidateObject([[maybe_unused]] const ObjectHeader *fromObject, [[maybe_unused]] const ObjectHeader *object)
 {
 #ifndef NDEBUG
     if (object == nullptr) {
@@ -71,7 +70,7 @@ inline void ValidateObject([[maybe_unused]] const ObjectHeader *from_object,
     // from_object can be null, because sometimes we call Validate when we don't know previous object (for example when
     // we extract it from stack)
     if (object->template ClassAddr<BaseClass>() == nullptr) {
-        LOG(ERROR, GC) << " Broken object doesn't have class: " << object << " accessed from object: " << from_object;
+        LOG(ERROR, GC) << " Broken object doesn't have class: " << object << " accessed from object: " << fromObject;
         UNREACHABLE();
     }
 #endif  // !NDEBUG
@@ -83,23 +82,22 @@ inline void ValidateObject([[maybe_unused]] const ObjectHeader *from_object,
  * @param root_type type of the root
  * @param object object (root) which we want to validate
  */
-inline void ValidateObject([[maybe_unused]] RootType root_type, [[maybe_unused]] const ObjectHeader *object)
+inline void ValidateObject([[maybe_unused]] RootType rootType, [[maybe_unused]] const ObjectHeader *object)
 {
 #ifndef NDEBUG
     if (object == nullptr) {
         return;
     }
-    ASSERT_DO(object->template ClassAddr<BaseClass>() != nullptr, LOG(FATAL, GC)
-                                                                      << " Broken object doesn't have class: " << object
-                                                                      << " accessed from root: " << root_type);
+    ASSERT_DO(object->template ClassAddr<BaseClass>() != nullptr,
+              LOG(FATAL, GC) << " Broken object doesn't have class: " << object << " accessed from root: " << rootType);
 #endif  // !NDEBUG
 }
 
-void DumpObject(ObjectHeader *object_header, std::basic_ostream<char, std::char_traits<char>> *o_stream = &std::cerr);
+void DumpObject(ObjectHeader *objectHeader, std::basic_ostream<char, std::char_traits<char>> *oStream = &std::cerr);
 
-void DumpClass(const Class *cls, std::basic_ostream<char, std::char_traits<char>> *o_stream = &std::cerr);
+void DumpClass(const Class *cls, std::basic_ostream<char, std::char_traits<char>> *oStream = &std::cerr);
 
-[[nodiscard]] ObjectHeader *GetForwardAddress(ObjectHeader *object_header);
+[[nodiscard]] ObjectHeader *GetForwardAddress(ObjectHeader *objectHeader);
 
 const char *GetFieldName(const Field &field);
 
@@ -111,8 +109,8 @@ public:
     static inline bool IsClassObject(ObjectHeader *obj);
 
     /// Traverse all kinds of object_header and call obj_visitor for each reference field.
-    static void TraverseAllObjects(ObjectHeader *object_header,
-                                   const std::function<void(ObjectHeader *, ObjectHeader *)> &obj_visitor);
+    static void TraverseAllObjects(ObjectHeader *objectHeader,
+                                   const std::function<void(ObjectHeader *, ObjectHeader *)> &objVisitor);
 
     /**
      * Traverse all kinds of object_header and call handler for each reference field.
@@ -141,7 +139,7 @@ private:
     template <bool INTERRUPTIBLE, typename Handler>
     static bool TraverseArray(coretypes::Array *array, Class *cls, void *begin, void *end, Handler &handler);
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool TraverseObject(ObjectHeader *object_header, Class *cls, Handler &handler);
+    static bool TraverseObject(ObjectHeader *objectHeader, Class *cls, Handler &handler);
 };
 
 class GCDynamicObjectHelpers {
@@ -150,8 +148,8 @@ public:
     static inline bool IsClassObject(ObjectHeader *obj);
 
     /// Traverse all kinds of object_header and call obj_visitor for each reference field.
-    static void TraverseAllObjects(ObjectHeader *object_header,
-                                   const std::function<void(ObjectHeader *, ObjectHeader *)> &obj_visitor);
+    static void TraverseAllObjects(ObjectHeader *objectHeader,
+                                   const std::function<void(ObjectHeader *, ObjectHeader *)> &objVisitor);
 
     /**
      * Traverse all kinds of object_header and call handler for each reference field.
@@ -163,7 +161,7 @@ public:
      * Return true if object was fully traversed, otherwise false.
      */
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool TraverseAllObjectsWithInfo(ObjectHeader *object_header, Handler &handler, void *begin = ToVoidPtr(0),
+    static bool TraverseAllObjectsWithInfo(ObjectHeader *objectHeader, Handler &handler, void *begin = ToVoidPtr(0),
                                            void *end = ToVoidPtr(UINTPTR_MAX));
 
     static void UpdateRefsToMovedObjects(ObjectHeader *object);
@@ -181,14 +179,13 @@ private:
     template <bool INTERRUPTIBLE, typename Handler>
     static bool TraverseArray(coretypes::Array *array, HClass *cls, void *begin, void *end, Handler &handler);
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool TraverseClass(coretypes::DynClass *dyn_class, Handler &handler);
+    static bool TraverseClass(coretypes::DynClass *dynClass, Handler &handler);
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool TraverseObject(ObjectHeader *object_header, HClass *cls, Handler &handler);
+    static bool TraverseObject(ObjectHeader *objectHeader, HClass *cls, Handler &handler);
 
-    static void UpdateDynArray(PandaVM *vm, coretypes::Array *array, ArraySizeT index, ObjectHeader *obj_ref);
+    static void UpdateDynArray(PandaVM *vm, coretypes::Array *array, ArraySizeT index, ObjectHeader *objRef);
 
-    static void UpdateDynObjectRef(PandaVM *vm, ObjectHeader *object_header, size_t offset,
-                                   ObjectHeader *field_obj_ref);
+    static void UpdateDynObjectRef(PandaVM *vm, ObjectHeader *objectHeader, size_t offset, ObjectHeader *fieldObjRef);
 };
 
 template <LangTypeT LANG_TYPE>

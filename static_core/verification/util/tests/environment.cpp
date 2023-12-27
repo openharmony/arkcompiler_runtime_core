@@ -21,7 +21,7 @@
 
 namespace panda::verifier::test {
 
-EnvOptions::EnvOptions(const char *env_var_name)
+EnvOptions::EnvOptions(const char *envVarName)
 {
     using panda::parser::Action;
     using panda::parser::Charset;
@@ -93,7 +93,7 @@ EnvOptions::EnvOptions(const char *env_var_name)
     static const auto KV_PAIR = ~WS >> NAME >> ~WS >> EQ >> ~WS >> VALUE >> ~WS >> DELIM |= KV_PAIR_HANDLER;
     static const auto OPTIONS = *KV_PAIR;
 
-    const char *s = std::getenv(env_var_name);
+    const char *s = std::getenv(envVarName);
     if (s == nullptr) {
         return;
     }

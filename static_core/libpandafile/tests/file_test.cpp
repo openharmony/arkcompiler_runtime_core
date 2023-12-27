@@ -48,30 +48,30 @@ static std::vector<uint8_t> GetEmptyPandaFileBytes()
 
     auto source = R"()";
 
-    std::string src_filename = "src.pa";
-    auto res = p.Parse(source, src_filename);
+    std::string srcFilename = "src.pa";
+    auto res = p.Parse(source, srcFilename);
     ASSERT(p.ShowError().err == pandasm::Error::ErrorType::ERR_NONE);
 
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT(pf != nullptr);
 
     std::vector<uint8_t> data {};
-    const auto header_ptr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+    const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    data.assign(header_ptr, header_ptr + sizeof(File::Header));
+    data.assign(headerPtr, headerPtr + sizeof(File::Header));
 
     ASSERT(data.size() == sizeof(File::Header));
 
     return data;
 }
 
-int CreateOrAddZipPandaFile(std::vector<uint8_t> *data, const char *zip_archive_name, const char *filename, int append,
+int CreateOrAddZipPandaFile(std::vector<uint8_t> *data, const char *zipArchiveName, const char *filename, int append,
                             int level)
 {
-    return CreateOrAddFileIntoZip(zip_archive_name, filename, (*data).data(), (*data).size(), append, level);
+    return CreateOrAddFileIntoZip(zipArchiveName, filename, (*data).data(), (*data).size(), append, level);
 }
 
-bool CheckAnonMemoryName([[maybe_unused]] const char *zip_archive_name)
+bool CheckAnonMemoryName([[maybe_unused]] const char *zipArchiveName)
 {
     // check if [annon:panda-classes.abc extracted in memory from /xx/__OpenPandaFileFromZip__.zip]
 #ifdef PANDA_TARGET_MOBILE
@@ -84,7 +84,7 @@ bool CheckAnonMemoryName([[maybe_unused]] const char *zip_archive_name)
     f.open(ss.str(), std::ios::in);
     EXPECT_TRUE(f.is_open());
     for (std::string line; std::getline(f, line);) {
-        if (line.find(prefix) != std::string::npos && line.find(zip_archive_name) != std::string::npos) {
+        if (line.find(prefix) != std::string::npos && line.find(zipArchiveName) != std::string::npos) {
             result = true;
         }
     }
@@ -124,18 +124,18 @@ TEST(File, GetClassByName)
         classes.push_back(container.GetOrCreateClassItem(name));
     }
 
-    MemoryWriter mem_writer;
+    MemoryWriter memWriter;
 
-    ASSERT_TRUE(container.Write(&mem_writer));
+    ASSERT_TRUE(container.Write(&memWriter));
 
     // Read panda file from memory
 
-    auto data = mem_writer.GetData();
-    auto panda_file = GetPandaFile(&data);
-    ASSERT_NE(panda_file, nullptr);
+    auto data = memWriter.GetData();
+    auto pandaFile = GetPandaFile(&data);
+    ASSERT_NE(pandaFile, nullptr);
 
     for (size_t i = 0; i < names.size(); i++) {
-        EXPECT_EQ(panda_file->GetClassId(reinterpret_cast<const uint8_t *>(names[i].c_str())).GetOffset(),
+        EXPECT_EQ(pandaFile->GetClassId(reinterpret_cast<const uint8_t *>(names[i].c_str())).GetOffset(),
                   classes[i]->GetOffset());
     }
 }
@@ -145,19 +145,19 @@ TEST(File, OpenPandaFile)
     // Create ZIP
     auto data = GetEmptyPandaFileBytes();
     int ret;
-    const char *zip_filename = "__OpenPandaFile__.zip";
+    const char *zipFilename = "__OpenPandaFile__.zip";
     const char *filename1 = ARCHIVE_FILENAME;
     const char *filename2 = "classses2.abc";  // just for testing.
-    ret = CreateOrAddZipPandaFile(&data, zip_filename, filename1, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
+    ret = CreateOrAddZipPandaFile(&data, zipFilename, filename1, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
     ASSERT_EQ(ret, 0);
-    ret = CreateOrAddZipPandaFile(&data, zip_filename, filename2, APPEND_STATUS_ADDINZIP, Z_BEST_COMPRESSION);
+    ret = CreateOrAddZipPandaFile(&data, zipFilename, filename2, APPEND_STATUS_ADDINZIP, Z_BEST_COMPRESSION);
     ASSERT_EQ(ret, 0);
 
     // Open from ZIP
-    auto pf = OpenPandaFile(zip_filename);
+    auto pf = OpenPandaFile(zipFilename);
     EXPECT_NE(pf, nullptr);
-    EXPECT_STREQ((pf->GetFilename()).c_str(), zip_filename);
-    remove(zip_filename);
+    EXPECT_STREQ((pf->GetFilename()).c_str(), zipFilename);
+    remove(zipFilename);
 }
 
 TEST(File, OpenPandaFileFromZipNameAnonMem)
@@ -165,17 +165,17 @@ TEST(File, OpenPandaFileFromZipNameAnonMem)
     // Create ZIP
     auto data = GetEmptyPandaFileBytes();
     int ret;
-    const char *zip_filename = "__OpenPandaFileFromZipNameAnonMem__.zip";
+    const char *zipFilename = "__OpenPandaFileFromZipNameAnonMem__.zip";
     const char *filename1 = ARCHIVE_FILENAME;
-    ret = CreateOrAddZipPandaFile(&data, zip_filename, filename1, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
+    ret = CreateOrAddZipPandaFile(&data, zipFilename, filename1, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
     ASSERT_EQ(ret, 0);
 
     // Open from ZIP
-    auto pf = OpenPandaFile(zip_filename);
+    auto pf = OpenPandaFile(zipFilename);
     EXPECT_NE(pf, nullptr);
-    EXPECT_STREQ((pf->GetFilename()).c_str(), zip_filename);
-    ASSERT_TRUE(CheckAnonMemoryName(zip_filename));
-    remove(zip_filename);
+    EXPECT_STREQ((pf->GetFilename()).c_str(), zipFilename);
+    ASSERT_TRUE(CheckAnonMemoryName(zipFilename));
+    remove(zipFilename);
 }
 
 TEST(File, OpenPandaFileOrZip)
@@ -183,19 +183,19 @@ TEST(File, OpenPandaFileOrZip)
     // Create ZIP
     auto data = GetEmptyPandaFileBytes();
     int ret;
-    const char *zip_filename = "__OpenPandaFileOrZip__.zip";
+    const char *zipFilename = "__OpenPandaFileOrZip__.zip";
     const char *filename1 = ARCHIVE_FILENAME;
     const char *filename2 = "classes2.abc";  // just for testing.
-    ret = CreateOrAddZipPandaFile(&data, zip_filename, filename1, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
+    ret = CreateOrAddZipPandaFile(&data, zipFilename, filename1, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
     ASSERT_EQ(ret, 0);
-    ret = CreateOrAddZipPandaFile(&data, zip_filename, filename2, APPEND_STATUS_ADDINZIP, Z_BEST_COMPRESSION);
+    ret = CreateOrAddZipPandaFile(&data, zipFilename, filename2, APPEND_STATUS_ADDINZIP, Z_BEST_COMPRESSION);
     ASSERT_EQ(ret, 0);
 
     // Open from ZIP
-    auto pf = OpenPandaFileOrZip(zip_filename);
+    auto pf = OpenPandaFileOrZip(zipFilename);
     EXPECT_NE(pf, nullptr);
-    EXPECT_STREQ((pf->GetFilename()).c_str(), zip_filename);
-    remove(zip_filename);
+    EXPECT_STREQ((pf->GetFilename()).c_str(), zipFilename);
+    remove(zipFilename);
 }
 
 TEST(File, OpenPandaFileUncompressed)
@@ -204,19 +204,19 @@ TEST(File, OpenPandaFileUncompressed)
     auto data = GetEmptyPandaFileBytes();
     std::cout << "pandafile size = " << data.size() << std::endl;
     int ret;
-    const char *zip_filename = "__OpenPandaFileUncompressed__.zip";
+    const char *zipFilename = "__OpenPandaFileUncompressed__.zip";
     const char *filename1 = ARCHIVE_FILENAME;
     const char *filename2 = "class.abc";  // just for testing.
-    ret = CreateOrAddZipPandaFile(&data, zip_filename, filename2, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
+    ret = CreateOrAddZipPandaFile(&data, zipFilename, filename2, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
     ASSERT_EQ(ret, 0);
-    ret = CreateOrAddZipPandaFile(&data, zip_filename, filename1, APPEND_STATUS_ADDINZIP, Z_NO_COMPRESSION);
+    ret = CreateOrAddZipPandaFile(&data, zipFilename, filename1, APPEND_STATUS_ADDINZIP, Z_NO_COMPRESSION);
     ASSERT_EQ(ret, 0);
 
     // Open from ZIP
-    auto pf = OpenPandaFileOrZip(zip_filename);
+    auto pf = OpenPandaFileOrZip(zipFilename);
     EXPECT_NE(pf, nullptr);
-    EXPECT_STREQ((pf->GetFilename()).c_str(), zip_filename);
-    remove(zip_filename);
+    EXPECT_STREQ((pf->GetFilename()).c_str(), zipFilename);
+    remove(zipFilename);
 }
 
 TEST(File, LineNumberProgramDeduplication)
@@ -233,12 +233,12 @@ TEST(File, LineNumberProgramDeduplication)
         }
     )delim";
 
-    std::string src_filename = "src.pa";
-    auto res = p.Parse(source, src_filename);
+    std::string srcFilename = "src.pa";
+    auto res = p.Parse(source, srcFilename);
     ASSERT(p.ShowError().err == pandasm::Error::ErrorType::ERR_NONE);
 
-    ASSERT_EQ(res.Value().function_table.size(), 2);
-    for (auto &a : res.Value().function_table) {
+    ASSERT_EQ(res.Value().functionTable.size(), 2);
+    for (auto &a : res.Value().functionTable) {
         ASSERT_TRUE(a.second.HasDebugInfo());
     }
 
@@ -249,21 +249,21 @@ TEST(File, LineNumberProgramDeduplication)
 
     ASSERT_TRUE(reader.ReadContainer());
 
-    int lnp_cnt = 0;
+    int lnpCnt = 0;
 
     ASSERT_NE(reader.GetItems()->size(), 0);
 
     for (const auto &a : *reader.GetItems()) {
         const auto typ = a.second->GetItemType();
         if (typ == ItemTypes::LINE_NUMBER_PROGRAM_ITEM) {
-            lnp_cnt++;
+            lnpCnt++;
         }
     }
 
     reader.GetContainerPtr()->ComputeLayout();
     reader.GetContainerPtr()->DeduplicateCodeAndDebugInfo();
 
-    ASSERT_EQ(lnp_cnt, 1);
+    ASSERT_EQ(lnpCnt, 1);
 }
 
 }  // namespace panda::panda_file::test

@@ -25,19 +25,19 @@ public:
     ProfileOptimizer() = default;
     ~ProfileOptimizer() = default;
     static std::string GetNameInfo(const std::unique_ptr<BaseItem> &item);
-    void MarkProfileItem(std::unique_ptr<BaseItem> &item, bool set_pgo) const;
+    void MarkProfileItem(std::unique_ptr<BaseItem> &item, bool setPgo) const;
     bool ParseProfileData();
     void ProfileGuidedRelayout(std::list<std::unique_ptr<BaseItem>> &items);
-    void SetProfilePath(std::string &file_path)
+    void SetProfilePath(std::string &filePath)
     {
-        profile_file_path_ = std::move(file_path);
+        profileFilePath_ = std::move(filePath);
     }
 
 private:
     NO_COPY_SEMANTIC(ProfileOptimizer);
     NO_MOVE_SEMANTIC(ProfileOptimizer);
-    std::string profile_file_path_;
-    std::vector<std::pair<std::string, std::string>> profile_data_;
+    std::string profileFilePath_;
+    std::vector<std::pair<std::string, std::string>> profileData_;
 };
 }  // namespace panda::panda_file::pgo
 

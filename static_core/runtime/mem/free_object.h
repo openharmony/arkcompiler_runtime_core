@@ -38,18 +38,18 @@ public:
 
     static constexpr size_t GetTaggedNextOffset()
     {
-        return MEMBER_OFFSET(FreeObject, tagged_next_);
+        return MEMBER_OFFSET(FreeObject, taggedNext_);
     }
 
     static constexpr size_t GetTaggedSizeOffset()
     {
-        return MEMBER_OFFSET(FreeObject, tagged_size_);
+        return MEMBER_OFFSET(FreeObject, taggedSize_);
     }
 
 private:
     // There should be primitive fields, but that's not friendly to concurrent marker
-    coretypes::TaggedType tagged_next_ FIELD_UNUSED;
-    coretypes::TaggedType tagged_size_ FIELD_UNUSED;
+    coretypes::TaggedType taggedNext_ FIELD_UNUSED;
+    coretypes::TaggedType taggedSize_ FIELD_UNUSED;
 };
 }  // namespace panda::mem
 

@@ -46,7 +46,7 @@ TEST(Span, Conversions)
 {
     int c[] {1U, 2U, 3U};
     std::vector v {4U, 5U, 6U};
-    const std::vector const_v {-4L, -5L, -6L};
+    const std::vector constV {-4L, -5L, -6L};
     std::array a {7U, 8U, 9U};
     size_t sz = 3;
     auto p = std::make_unique<int[]>(sz);
@@ -57,7 +57,7 @@ TEST(Span, Conversions)
 
     EXPECT_EQ(ToString(Double(Span(c))), "2 4 6 ");
     EXPECT_EQ(ToString(Double(Span(v))), "8 10 12 ");
-    EXPECT_EQ(ToString(Span(const_v)), "-4 -5 -6 ");
+    EXPECT_EQ(ToString(Span(constV)), "-4 -5 -6 ");
     EXPECT_EQ(ToString(Double(Span(a))), "14 16 18 ");
     EXPECT_EQ(ToString(Double(Span(p.get(), sz))), "20 22 24 ");
     EXPECT_EQ(ToString(Double(Span(p.get(), p.get() + 2U))), "40 44 ");
@@ -90,12 +90,12 @@ TEST(Span, SubSpanT)
         ASSERT_DEATH(sp.SubSpan<Foo>(4U, 3U), ".*");
         ASSERT_DEATH(sp.SubSpan<Foo>(3U, 2U), ".*");
 #endif
-        auto sub_sp = sp.SubSpan<Foo>(4U, 2U);
-        ASSERT_EQ(sub_sp.size(), 2U);
-        ASSERT_EQ(sub_sp[0U].a, 1U);
-        ASSERT_EQ(sub_sp[0U].b, 2U);
-        ASSERT_EQ(sub_sp[1U].a, 0x12345678U);
-        ASSERT_EQ(sub_sp[1U].b, -2L);
+        auto subSp = sp.SubSpan<Foo>(4U, 2U);
+        ASSERT_EQ(subSp.size(), 2U);
+        ASSERT_EQ(subSp[0U].a, 1U);
+        ASSERT_EQ(subSp[0U].b, 2U);
+        ASSERT_EQ(subSp[1U].a, 0x12345678U);
+        ASSERT_EQ(subSp[1U].b, -2L);
     }
     {
         uint32_t buf[] = {0x01020304U, 0x05060708U, 0x090a0b0cU};
@@ -103,12 +103,12 @@ TEST(Span, SubSpanT)
 #ifndef NDEBUG
         ASSERT_DEATH(sp.SubSpan<uint16_t>(4U, 1U), ".*");
 #endif
-        auto sub_sp = sp.SubSpan<uint16_t>(1U, 4U);
-        ASSERT_EQ(sub_sp.size(), 4U);
-        ASSERT_EQ(sub_sp[0U], 0x0708U);
-        ASSERT_EQ(sub_sp[1U], 0x0506U);
-        ASSERT_EQ(sub_sp[2U], 0x0b0cU);
-        ASSERT_EQ(sub_sp[3U], 0x090aU);
+        auto subSp = sp.SubSpan<uint16_t>(1U, 4U);
+        ASSERT_EQ(subSp.size(), 4U);
+        ASSERT_EQ(subSp[0U], 0x0708U);
+        ASSERT_EQ(subSp[1U], 0x0506U);
+        ASSERT_EQ(subSp[2U], 0x0b0cU);
+        ASSERT_EQ(subSp[3U], 0x090aU);
     }
 }
 

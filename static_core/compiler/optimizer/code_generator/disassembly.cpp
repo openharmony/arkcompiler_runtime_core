@@ -39,7 +39,7 @@ std::string_view Disassembly::GetIndent(uint32_t depth)
 }
 
 static constexpr auto STREAM_DELETER = [](std::ostream *stream) {
-    if (!OPTIONS.IsCompilerDisasmDumpStdout()) {
+    if (!g_options.IsCompilerDisasmDumpStdout()) {
         delete stream;
     }
 };
@@ -48,8 +48,8 @@ Disassembly::Disassembly(const Codegen *codegen)
     : codegen_(codegen),
       encoder_(codegen->GetEncoder()),
       stream_(nullptr, STREAM_DELETER),
-      is_enabled_(OPTIONS.IsCompilerDisasmDump()),
-      is_code_enabled_(is_enabled_ && OPTIONS.IsCompilerDisasmDumpCode())
+      isEnabled_(g_options.IsCompilerDisasmDump()),
+      isCodeEnabled_(isEnabled_ && g_options.IsCompilerDisasmDumpCode())
 {
 }
 
@@ -58,17 +58,17 @@ void Disassembly::Init()
     if (!IsEnabled()) {
         return;
     }
-    if (OPTIONS.IsCompilerDisasmDumpStdout()) {
+    if (g_options.IsCompilerDisasmDumpStdout()) {
         stream_.reset(&std::cout);
-    } else if (OPTIONS.IsCompilerDisasmDumpSingleFile()) {
+    } else if (g_options.IsCompilerDisasmDumpSingleFile()) {
         auto stm = new std::ofstream;
         if (stm == nullptr) {
             UNREACHABLE();
         }
         static std::once_flag flag;
-        auto file_name = OPTIONS.GetCompilerDisasmDumpFileName();
-        std::call_once(flag, [&file_name]() { std::remove(file_name.c_str()); });
-        stm->open(file_name, std::ios_base::app);
+        auto fileName = g_options.GetCompilerDisasmDumpFileName();
+        std::call_once(flag, [&fileName]() { std::remove(fileName.c_str()); });
+        stm->open(fileName, std::ios_base::app);
         if (!stm->is_open()) {
             LOG(FATAL, COMPILER) << "Cannot open 'disasm.txt'";
         }
@@ -80,8 +80,8 @@ void Disassembly::Init()
         }
         std::stringstream ss;
         auto graph = codegen_->GetGraph();
-        auto exec_num = graph->GetPassManager()->GetExecutionCounter();
-        ss << "disasm_" << exec_num << '_' << codegen_->GetRuntime()->GetClassNameFromMethod(graph->GetMethod()) << '_'
+        auto execNum = graph->GetPassManager()->GetExecutionCounter();
+        ss << "disasm_" << execNum << '_' << codegen_->GetRuntime()->GetClassNameFromMethod(graph->GetMethod()) << '_'
            << codegen_->GetRuntime()->GetMethodName(graph->GetMethod()) << (graph->IsOsrMode() ? "_osr" : "") << ".txt";
         stm->open(ss.str());
         if (!stm->is_open()) {
@@ -159,12 +159,12 @@ void Disassembly::PrintCodeInfo(const Codegen *codegen)
 {
     auto graph = codegen->GetGraph();
 
-    CodeInfo code_info;
+    CodeInfo codeInfo;
     ASSERT(!graph->GetCodeInfoData().empty());
-    code_info.Decode(graph->GetCodeInfoData());
+    codeInfo.Decode(graph->GetCodeInfoData());
     PrintChapter("CODE_INFO");
     ItemAppender item(this);
-    code_info.Dump(item.GetStream());
+    codeInfo.Dump(item.GetStream());
 }
 
 void Disassembly::PrintCodeStatistics(const Codegen *codegen)

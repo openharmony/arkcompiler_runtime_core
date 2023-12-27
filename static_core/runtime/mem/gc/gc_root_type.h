@@ -36,7 +36,7 @@ enum class RootType {
     CARD_TABLE,
 };
 
-PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, RootType root_type);
+PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, RootType rootType);
 }  // namespace panda::mem
 
 #endif  // PANDA_RUNTIME_MEM_ROOT_TYPE_H

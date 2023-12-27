@@ -23,12 +23,12 @@ namespace panda {
 
 os::thread::NativeHandleType ThreadedCoroutineContext::GetCoroutineNativeHandle()
 {
-    return native_handle_;
+    return nativeHandle_;
 }
 
 void ThreadedCoroutineContext::SetCoroutineNativeHandle(os::thread::NativeHandleType h)
 {
-    native_handle_ = h;
+    nativeHandle_ = h;
 }
 
 Coroutine::Status ThreadedCoroutineContext::GetStatus() const
@@ -36,21 +36,21 @@ Coroutine::Status ThreadedCoroutineContext::GetStatus() const
     return status_;
 }
 
-void ThreadedCoroutineContext::SetStatus(Coroutine::Status new_status)
+void ThreadedCoroutineContext::SetStatus(Coroutine::Status newStatus)
 {
 #ifndef NDEBUG
     PandaString setter = (Thread::GetCurrent() == nullptr) ? "null" : Coroutine::GetCurrent()->GetName();
-    LOG(DEBUG, COROUTINES) << GetCoroutine()->GetName() << ": " << status_ << " -> " << new_status << " by " << setter;
+    LOG(DEBUG, COROUTINES) << GetCoroutine()->GetName() << ": " << status_ << " -> " << newStatus << " by " << setter;
 #endif
-    status_ = new_status;
+    status_ = newStatus;
 }
 
 void ThreadedCoroutineContext::AttachToCoroutine(Coroutine *co)
 {
     CoroutineContext::AttachToCoroutine(co);
 
-    auto *thread_manager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
-    thread_manager->RegisterCoroutine(co);
+    auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
+    threadManager->RegisterCoroutine(co);
     if (co->HasManagedEntrypoint()) {
         std::thread t(ThreadProc, this);
         SetCoroutineNativeHandle(t.native_handle());
@@ -73,16 +73,16 @@ void ThreadedCoroutineContext::Destroy()
 
     co->UpdateStatus(ThreadStatus::TERMINATING);
 
-    auto *thread_manager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
-    if (thread_manager->TerminateCoroutine(co)) {
+    auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
+    if (threadManager->TerminateCoroutine(co)) {
         // detach
         Coroutine::SetCurrent(nullptr);
     }
 }
 
-bool ThreadedCoroutineContext::RetrieveStackInfo(void *&stack_addr, size_t &stack_size, size_t &guard_size)
+bool ThreadedCoroutineContext::RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize)
 {
-    int error = os::thread::ThreadGetStackInfo(GetCoroutineNativeHandle(), &stack_addr, &stack_size, &guard_size);
+    int error = os::thread::ThreadGetStackInfo(GetCoroutineNativeHandle(), &stackAddr, &stackSize, &guardSize);
     if (error != 0) {
         LOG(ERROR, RUNTIME) << "ThreadedCoroutineContext::RetrieveStackInfo: fail to get stack info, error = "
                             << strerror(errno);
@@ -115,32 +115,32 @@ bool ThreadedCoroutineContext::RetrieveStackInfo(void *&stack_addr, size_t &stac
     }
     ctx->SetStatus(Coroutine::Status::TERMINATING);
 
-    auto *thread_manager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
-    if (thread_manager->TerminateCoroutine(co)) {
+    auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
+    if (threadManager->TerminateCoroutine(co)) {
         Coroutine::SetCurrent(nullptr);
     }
 }
 
 void ThreadedCoroutineContext::WaitUntilInitialized()
 {
-    os::memory::LockHolder l(cv_mutex_);
+    os::memory::LockHolder l(cvMutex_);
     while (GetStatus() != Coroutine::Status::RUNNABLE) {
-        cv_.Wait(&cv_mutex_);
+        cv_.Wait(&cvMutex_);
     }
 }
 
 void ThreadedCoroutineContext::WaitUntilResumed()
 {
-    os::memory::LockHolder l(cv_mutex_);
+    os::memory::LockHolder l(cvMutex_);
     while (GetStatus() != Coroutine::Status::RUNNING) {
-        cv_.Wait(&cv_mutex_);
+        cv_.Wait(&cvMutex_);
     }
 }
 
 void ThreadedCoroutineContext::InitializationDone()
 {
     if (GetCoroutine()->IsSuspendOnStartup()) {
-        os::memory::LockHolder l(cv_mutex_);
+        os::memory::LockHolder l(cvMutex_);
         SetStatus(Coroutine::Status::RUNNABLE);
         cv_.Signal();
     } else {
@@ -148,15 +148,15 @@ void ThreadedCoroutineContext::InitializationDone()
     }
 }
 
-void ThreadedCoroutineContext::RequestSuspend(bool gets_blocked)
+void ThreadedCoroutineContext::RequestSuspend(bool getsBlocked)
 {
-    os::memory::LockHolder l(cv_mutex_);
-    SetStatus(gets_blocked ? Coroutine::Status::BLOCKED : Coroutine::Status::RUNNABLE);
+    os::memory::LockHolder l(cvMutex_);
+    SetStatus(getsBlocked ? Coroutine::Status::BLOCKED : Coroutine::Status::RUNNABLE);
 }
 
 void ThreadedCoroutineContext::RequestResume()
 {
-    os::memory::LockHolder l(cv_mutex_);
+    os::memory::LockHolder l(cvMutex_);
     SetStatus(Coroutine::Status::RUNNING);
     cv_.Signal();
 }

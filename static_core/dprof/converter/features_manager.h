@@ -27,46 +27,46 @@ namespace panda::dprof {
 class FeaturesManager {
 public:
     struct Functor {
-        virtual bool operator()(const AppData &app_data, const std::vector<uint8_t> &data) = 0;
+        virtual bool operator()(const AppData &appData, const std::vector<uint8_t> &data) = 0;
     };
 
-    bool RegisterFeature(const std::string &feature_name, Functor &functor)
+    bool RegisterFeature(const std::string &featureName, Functor &functor)
     {
-        auto it = map_.find(feature_name);
+        auto it = map_.find(featureName);
         if (it != map_.end()) {
-            LOG(ERROR, DPROF) << "Feature already exists, featureName=" << feature_name;
+            LOG(ERROR, DPROF) << "Feature already exists, featureName=" << featureName;
             return false;
         }
-        map_.insert({feature_name, functor});
+        map_.insert({featureName, functor});
         return true;
     }
 
-    bool UnregisterFeature(const std::string &feature_name)
+    bool UnregisterFeature(const std::string &featureName)
     {
-        if (map_.erase(feature_name) != 1) {
-            LOG(ERROR, DPROF) << "Feature does not exist, featureName=" << feature_name;
+        if (map_.erase(featureName) != 1) {
+            LOG(ERROR, DPROF) << "Feature does not exist, featureName=" << featureName;
             return false;
         }
         return true;
     }
 
-    bool ProcessingFeature(const AppData &app_data, const std::string &feature_name,
+    bool ProcessingFeature(const AppData &appData, const std::string &featureName,
                            const std::vector<uint8_t> &data) const
     {
-        auto it = map_.find(feature_name);
+        auto it = map_.find(featureName);
         if (it == map_.end()) {
-            LOG(ERROR, DPROF) << "Feature is not supported, featureName=" << feature_name;
+            LOG(ERROR, DPROF) << "Feature is not supported, featureName=" << featureName;
             return false;
         }
 
-        return it->second(app_data, data);
+        return it->second(appData, data);
     }
 
-    bool ProcessingFeatures(const AppData &app_data) const
+    bool ProcessingFeatures(const AppData &appData) const
     {
-        for (const auto &it : app_data.GetFeaturesMap()) {
-            if (!ProcessingFeature(app_data, it.first, it.second)) {
-                LOG(ERROR, DPROF) << "Cannot processing feature: " << it.first << ", app: " << app_data.GetName();
+        for (const auto &it : appData.GetFeaturesMap()) {
+            if (!ProcessingFeature(appData, it.first, it.second)) {
+                LOG(ERROR, DPROF) << "Cannot processing feature: " << it.first << ", app: " << appData.GetName();
                 return false;
             }
         }

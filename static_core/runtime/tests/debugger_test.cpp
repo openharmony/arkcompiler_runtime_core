@@ -67,9 +67,9 @@ static uint64_t FromPtr(ObjectHeader *ptr)
 template <bool IS_DYNAMIC = false>
 static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
 {
-    uint32_t ext_sz = EMPTY_EXT_FRAME_DATA_SIZE;
-    void *mem = aligned_alloc(8, Frame::GetAllocSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), ext_sz));
-    return new (Frame::FromExt(mem, ext_sz)) Frame(mem, method, prev, nregs);
+    uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
+    void *mem = aligned_alloc(8, Frame::GetAllocSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), extSz));
+    return new (Frame::FromExt(mem, extSz)) Frame(mem, method, prev, nregs);
 }
 
 static void FreeFrame(Frame *frame)
@@ -90,40 +90,40 @@ TEST_F(DebuggerTest, Frame)
         }
     )";
 
-    std::string src_filename = "src.pa";
-    auto res = p.Parse(source, src_filename);
+    std::string srcFilename = "src.pa";
+    auto res = p.Parse(source, srcFilename);
     ASSERT(p.ShowError().err == pandasm::Error::ErrorType::ERR_NONE);
 
-    auto file_ptr = pandasm::AsmEmitter::Emit(res.Value());
-    ASSERT(file_ptr != nullptr);
+    auto filePtr = pandasm::AsmEmitter::Emit(res.Value());
+    ASSERT(filePtr != nullptr);
 
     PandaString descriptor;
-    auto class_id = file_ptr->GetClassId(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
-    ASSERT_TRUE(class_id.IsValid());
+    auto classId = filePtr->GetClassId(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
+    ASSERT_TRUE(classId.IsValid());
 
-    panda_file::ClassDataAccessor cda(*file_ptr, class_id);
-    panda_file::File::EntityId method_id;
-    panda_file::File::EntityId code_id;
+    panda_file::ClassDataAccessor cda(*filePtr, classId);
+    panda_file::File::EntityId methodId;
+    panda_file::File::EntityId codeId;
 
     cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-        method_id = mda.GetMethodId();
+        methodId = mda.GetMethodId();
         ASSERT_TRUE(mda.GetCodeId());
-        code_id = mda.GetCodeId().value();
+        codeId = mda.GetCodeId().value();
     });
 
-    panda_file::CodeDataAccessor code_data_accessor(*file_ptr, code_id);
-    auto nargs = code_data_accessor.GetNumArgs();
-    auto nregs = code_data_accessor.GetNumVregs();
+    panda_file::CodeDataAccessor codeDataAccessor(*filePtr, codeId);
+    auto nargs = codeDataAccessor.GetNumArgs();
+    auto nregs = codeDataAccessor.GetNumVregs();
 
     constexpr size_t BYTECODE_OFFSET = 0xeeff;
 
-    Method method(nullptr, file_ptr.get(), method_id, code_id, 0, nargs, nullptr);
+    Method method(nullptr, filePtr.get(), methodId, codeId, 0, nargs, nullptr);
     panda::Frame *frame = test::CreateFrame(nregs + nargs, &method, nullptr);
     frame->SetBytecodeOffset(BYTECODE_OFFSET);
 
     struct VRegValue {
         uint64_t value {};
-        bool is_ref {};
+        bool isRef {};
     };
 
     // NOLINTBEGIN(readability-magic-numbers)
@@ -132,12 +132,12 @@ TEST_F(DebuggerTest, Frame)
                                  {0x3333333344444444, false},
                                  {FromPtr(panda::mem::AllocateNullifiedPayloadString(1)), true}};
     // NOLINTEND(readability-magic-numbers)
-    auto frame_handler = StaticFrameHandler(frame);
+    auto frameHandler = StaticFrameHandler(frame);
     for (size_t i = 0; i < regs.size(); i++) {
-        if (regs[i].is_ref) {
-            frame_handler.GetVReg(i).SetReference(ToPtr(regs[i].value));
+        if (regs[i].isRef) {
+            frameHandler.GetVReg(i).SetReference(ToPtr(regs[i].value));
         } else {
-            frame_handler.GetVReg(i).SetPrimitive(static_cast<int64_t>(regs[i].value));
+            frameHandler.GetVReg(i).SetPrimitive(static_cast<int64_t>(regs[i].value));
         }
     }
 
@@ -145,52 +145,50 @@ TEST_F(DebuggerTest, Frame)
         // NOLINTNEXTLINE(readability-magic-numbers)
         VRegValue acc {0xaaaaaaaabbbbbbbb, false};
         frame->GetAccAsVReg().SetPrimitive(static_cast<int64_t>(acc.value));
-        tooling::PtDebugFrame debug_frame(frame->GetMethod(), frame);
+        tooling::PtDebugFrame debugFrame(frame->GetMethod(), frame);
 
-        EXPECT_EQ(debug_frame.GetVRegNum(), nregs);
-        EXPECT_EQ(debug_frame.GetArgumentNum(), nargs);
-        EXPECT_EQ(debug_frame.GetMethodId(), method_id);
-        EXPECT_EQ(debug_frame.GetBytecodeOffset(), BYTECODE_OFFSET);
-        EXPECT_EQ(debug_frame.GetAccumulator(), acc.value);
-        EXPECT_EQ(debug_frame.GetAccumulatorKind(), tooling::PtFrame::RegisterKind::PRIMITIVE);
+        EXPECT_EQ(debugFrame.GetVRegNum(), nregs);
+        EXPECT_EQ(debugFrame.GetArgumentNum(), nargs);
+        EXPECT_EQ(debugFrame.GetMethodId(), methodId);
+        EXPECT_EQ(debugFrame.GetBytecodeOffset(), BYTECODE_OFFSET);
+        EXPECT_EQ(debugFrame.GetAccumulator(), acc.value);
+        EXPECT_EQ(debugFrame.GetAccumulatorKind(), tooling::PtFrame::RegisterKind::PRIMITIVE);
 
-        for (size_t i = 0; i < debug_frame.GetVRegNum(); i++) {
-            EXPECT_EQ(debug_frame.GetVReg(i), regs[i].value);
-            EXPECT_EQ(debug_frame.GetVRegKind(i), regs[i].is_ref ? tooling::PtFrame::RegisterKind::REFERENCE
-                                                                 : tooling::PtFrame::RegisterKind::PRIMITIVE);
+        for (size_t i = 0; i < debugFrame.GetVRegNum(); i++) {
+            EXPECT_EQ(debugFrame.GetVReg(i), regs[i].value);
+            EXPECT_EQ(debugFrame.GetVRegKind(i), regs[i].isRef ? tooling::PtFrame::RegisterKind::REFERENCE
+                                                               : tooling::PtFrame::RegisterKind::PRIMITIVE);
         }
 
-        for (size_t i = 0; i < debug_frame.GetArgumentNum(); i++) {
-            EXPECT_EQ(debug_frame.GetArgument(i), regs[i + nregs].value);
-            EXPECT_EQ(debug_frame.GetArgumentKind(i), regs[i + nregs].is_ref
-                                                          ? tooling::PtFrame::RegisterKind::REFERENCE
-                                                          : tooling::PtFrame::RegisterKind::PRIMITIVE);
+        for (size_t i = 0; i < debugFrame.GetArgumentNum(); i++) {
+            EXPECT_EQ(debugFrame.GetArgument(i), regs[i + nregs].value);
+            EXPECT_EQ(debugFrame.GetArgumentKind(i), regs[i + nregs].isRef ? tooling::PtFrame::RegisterKind::REFERENCE
+                                                                           : tooling::PtFrame::RegisterKind::PRIMITIVE);
         }
     }
 
     {
         VRegValue acc {FromPtr(panda::mem::AllocateNullifiedPayloadString(1)), true};
         frame->GetAccAsVReg().SetReference(ToPtr(acc.value));
-        tooling::PtDebugFrame debug_frame(frame->GetMethod(), frame);
+        tooling::PtDebugFrame debugFrame(frame->GetMethod(), frame);
 
-        EXPECT_EQ(debug_frame.GetVRegNum(), nregs);
-        EXPECT_EQ(debug_frame.GetArgumentNum(), nargs);
-        EXPECT_EQ(debug_frame.GetMethodId(), method_id);
-        EXPECT_EQ(debug_frame.GetBytecodeOffset(), BYTECODE_OFFSET);
-        EXPECT_EQ(debug_frame.GetAccumulator(), acc.value);
-        EXPECT_EQ(debug_frame.GetAccumulatorKind(), tooling::PtFrame::RegisterKind::REFERENCE);
+        EXPECT_EQ(debugFrame.GetVRegNum(), nregs);
+        EXPECT_EQ(debugFrame.GetArgumentNum(), nargs);
+        EXPECT_EQ(debugFrame.GetMethodId(), methodId);
+        EXPECT_EQ(debugFrame.GetBytecodeOffset(), BYTECODE_OFFSET);
+        EXPECT_EQ(debugFrame.GetAccumulator(), acc.value);
+        EXPECT_EQ(debugFrame.GetAccumulatorKind(), tooling::PtFrame::RegisterKind::REFERENCE);
 
-        for (size_t i = 0; i < debug_frame.GetVRegNum(); i++) {
-            EXPECT_EQ(debug_frame.GetVReg(i), regs[i].value);
-            EXPECT_EQ(debug_frame.GetVRegKind(i), regs[i].is_ref ? tooling::PtFrame::RegisterKind::REFERENCE
-                                                                 : tooling::PtFrame::RegisterKind::PRIMITIVE);
+        for (size_t i = 0; i < debugFrame.GetVRegNum(); i++) {
+            EXPECT_EQ(debugFrame.GetVReg(i), regs[i].value);
+            EXPECT_EQ(debugFrame.GetVRegKind(i), regs[i].isRef ? tooling::PtFrame::RegisterKind::REFERENCE
+                                                               : tooling::PtFrame::RegisterKind::PRIMITIVE);
         }
 
-        for (size_t i = 0; i < debug_frame.GetArgumentNum(); i++) {
-            EXPECT_EQ(debug_frame.GetArgument(i), regs[i + nregs].value);
-            EXPECT_EQ(debug_frame.GetArgumentKind(i), regs[i + nregs].is_ref
-                                                          ? tooling::PtFrame::RegisterKind::REFERENCE
-                                                          : tooling::PtFrame::RegisterKind::PRIMITIVE);
+        for (size_t i = 0; i < debugFrame.GetArgumentNum(); i++) {
+            EXPECT_EQ(debugFrame.GetArgument(i), regs[i + nregs].value);
+            EXPECT_EQ(debugFrame.GetArgumentKind(i), regs[i + nregs].isRef ? tooling::PtFrame::RegisterKind::REFERENCE
+                                                                           : tooling::PtFrame::RegisterKind::PRIMITIVE);
         }
     }
 

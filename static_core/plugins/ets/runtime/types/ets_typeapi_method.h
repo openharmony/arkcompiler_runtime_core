@@ -33,7 +33,7 @@ public:
     NO_COPY_SEMANTIC(EtsTypeAPIMethod);
     NO_MOVE_SEMANTIC(EtsTypeAPIMethod);
 
-    static EtsTypeAPIMethod *Create(EtsCoroutine *ets_coroutine = EtsCoroutine::GetCurrent());
+    static EtsTypeAPIMethod *Create(EtsCoroutine *etsCoroutine = EtsCoroutine::GetCurrent());
 
     EtsObject *AsObject()
     {
@@ -65,9 +65,9 @@ public:
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIMethod, name_), name->AsObject()->GetCoreType());
     }
 
-    void SetAccessMod(EtsTypeAPIAccessModifier access_mod)
+    void SetAccessMod(EtsTypeAPIAccessModifier accessMod)
     {
-        ObjectAccessor::SetPrimitive(this, MEMBER_OFFSET(EtsTypeAPIMethod, access_mod_), access_mod);
+        ObjectAccessor::SetPrimitive(this, MEMBER_OFFSET(EtsTypeAPIMethod, accessMod_), accessMod);
     }
 
     void SetAttributes(EtsInt attr)
@@ -79,7 +79,7 @@ private:
     ObjectPointer<EtsString> td_;
     ObjectPointer<EtsString> name_;
     FIELD_UNUSED EtsInt attr_;  // note alignment
-    FIELD_UNUSED EtsByte access_mod_;
+    FIELD_UNUSED EtsByte accessMod_;
 };
 
 }  // namespace panda::ets

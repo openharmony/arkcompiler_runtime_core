@@ -84,21 +84,21 @@ RemoteObject ObjectRepository::CreateObject(TypedValue value)
     UNREACHABLE();
 }
 
-std::vector<PropertyDescriptor> ObjectRepository::GetProperties(RemoteObjectId id, bool generate_preview)
+std::vector<PropertyDescriptor> ObjectRepository::GetProperties(RemoteObjectId id, bool generatePreview)
 {
     ASSERT(ManagedThread::GetCurrent()->GetMutatorLock()->HasLock());
 
     auto properties = GetProperties(id);
 
-    if (generate_preview) {
+    if (generatePreview) {
         for (auto &property : properties) {
             if (property.IsAccessor()) {
                 continue;
             }
 
             auto &value = property.GetValue();
-            if (auto value_id = value.GetObjectId()) {
-                value.GeneratePreview(GetProperties(*value_id));
+            if (auto valueId = value.GetObjectId()) {
+                value.GeneratePreview(GetProperties(*valueId));
             }
         }
     }
@@ -155,9 +155,9 @@ RemoteObject ObjectRepository::CreateObject(ObjectHeader *object)
     }
 
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    if (auto array_len = extension_->GetLengthIfArray(object)) {
+    if (auto arrayLen = extension_->GetLengthIfArray(object)) {
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-        return RemoteObject::Array(extension_->GetClassName(object), *array_len, id);
+        return RemoteObject::Array(extension_->GetClassName(object), *arrayLen, id);
     }
 
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -168,18 +168,18 @@ std::vector<PropertyDescriptor> ObjectRepository::GetProperties(RemoteObjectId i
 {
     ASSERT(ManagedThread::GetCurrent()->GetMutatorLock()->HasLock());
 
-    auto f_it = frames_.find(id);
-    if (f_it != frames_.end()) {
+    auto fIt = frames_.find(id);
+    if (fIt != frames_.end()) {
         ASSERT(objects_.find(id) == objects_.end());
-        return f_it->second;
+        return fIt->second;
     }
 
     std::vector<PropertyDescriptor> properties;
-    auto property_handler = [this, &properties](auto &name, auto value, auto is_array_element, auto is_final,
-                                                auto is_accessor) {
-        auto property = is_accessor ? PropertyDescriptor::Accessor(name, CreateObject(value))
-                                    : PropertyDescriptor(name, CreateObject(value), is_array_element);
-        if (!is_accessor && is_final) {
+    auto propertyHandler = [this, &properties](auto &name, auto value, auto isArrayElement, auto isFinal,
+                                               auto isAccessor) {
+        auto property = isAccessor ? PropertyDescriptor::Accessor(name, CreateObject(value))
+                                   : PropertyDescriptor(name, CreateObject(value), isArrayElement);
+        if (!isAccessor && isFinal) {
             property.SetWritable(false);
         }
         properties.emplace_back(std::move(property));
@@ -187,15 +187,15 @@ std::vector<PropertyDescriptor> ObjectRepository::GetProperties(RemoteObjectId i
 
     if (id == GLOBAL_OBJECT_ID) {
         ASSERT(objects_.find(id) == objects_.end());
-        extension_->EnumerateGlobals(property_handler);
+        extension_->EnumerateGlobals(propertyHandler);
     } else {
-        auto o_it = objects_.find(id);
-        if (o_it == objects_.end()) {
+        auto oIt = objects_.find(id);
+        if (oIt == objects_.end()) {
             LOG(INFO, DEBUGGER) << "Unknown object ID " << id;
             return {};
         }
 
-        extension_->EnumerateProperties(o_it->second.GetPtr(), property_handler);
+        extension_->EnumerateProperties(oIt->second.GetPtr(), propertyHandler);
     }
 
     return properties;

@@ -56,8 +56,8 @@ class InternalAllocator;
 template <typename AllocConfigT, typename LockConfigT = HumongousObjAllocatorLockConfig::CommonLock>
 class HumongousObjAllocator {
 public:
-    explicit HumongousObjAllocator(MemStatsType *mem_stats,
-                                   SpaceType type_allocation = SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    explicit HumongousObjAllocator(MemStatsType *memStats,
+                                   SpaceType typeAllocation = SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
     ~HumongousObjAllocator();
     NO_COPY_SEMANTIC(HumongousObjAllocator);
     NO_MOVE_SEMANTIC(HumongousObjAllocator);
@@ -71,14 +71,14 @@ public:
     }
 
     template <typename T>
-    [[nodiscard]] T *AllocArray(size_t arr_length);
+    [[nodiscard]] T *AllocArray(size_t arrLength);
 
     template <bool NEED_LOCK = true>
     [[nodiscard]] void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT);
 
     void Free(void *mem);
 
-    void Collect(const GCObjectVisitor &death_checker_fn);
+    void Collect(const GCObjectVisitor &deathCheckerFn);
 
     // It is essential that mem is page aligned
     bool AddMemoryPool(void *mem, size_t size);
@@ -89,7 +89,7 @@ public:
      * @param object_visitor - function pointer or functor
      */
     template <typename ObjectVisitor>
-    void IterateOverObjects(const ObjectVisitor &object_visitor);
+    void IterateOverObjects(const ObjectVisitor &objectVisitor);
 
     /**
      * @brief Iterates over all memory pools used by this allocator
@@ -100,7 +100,7 @@ public:
      * @param mem_visitor - function pointer or functor
      */
     template <typename MemVisitor>
-    void VisitAndRemoveAllPools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveAllPools(const MemVisitor &memVisitor);
 
     /**
      * @brief Visit memory pools that can be returned to the system in this allocator
@@ -109,7 +109,7 @@ public:
      * @param mem_visitor - function pointer or functor
      */
     template <typename MemVisitor>
-    void VisitAndRemoveFreePools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveFreePools(const MemVisitor &memVisitor);
 
     /**
      * @brief Iterates over objects in the range inclusively.
@@ -119,7 +119,7 @@ public:
      * @param right_border - a pointer to the last byte of the range
      */
     template <typename MemVisitor>
-    void IterateOverObjectsInRange(const MemVisitor &mem_visitor, void *left_border, void *right_border);
+    void IterateOverObjectsInRange(const MemVisitor &memVisitor, void *leftBorder, void *rightBorder);
 
     HumongousObjAllocatorAdapter<void, AllocConfigT, LockConfigT> Adapter();
 
@@ -136,11 +136,11 @@ public:
      * @brief returns minimum pool size to allocate an object with @param obj_size bytes
      * @return
      */
-    static constexpr size_t GetMinPoolSize(size_t obj_size)
+    static constexpr size_t GetMinPoolSize(size_t objSize)
     {
         // To note: It is not the smallest size of the pool
         // because we don't make a real object alignment value into account
-        return AlignUp(obj_size + sizeof(MemoryPoolHeader) + GetAlignmentInBytes(LOG_ALIGN_MAX),
+        return AlignUp(objSize + sizeof(MemoryPoolHeader) + GetAlignmentInBytes(LOG_ALIGN_MAX),
                        PANDA_POOL_ALIGNMENT_IN_BYTES);
     }
 
@@ -207,7 +207,7 @@ private:
         size_t GetPoolSize()
         {
             ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryPoolHeader));
-            size_t size = pool_size_;
+            size_t size = poolSize_;
             ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryPoolHeader));
             return size;
         }
@@ -216,7 +216,7 @@ private:
         void *GetMemory()
         {
             ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryPoolHeader));
-            void *addr = mem_addr_;
+            void *addr = memAddr_;
             ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryPoolHeader));
             return addr;
         }
@@ -224,8 +224,8 @@ private:
     private:
         MemoryPoolHeader *prev_ {nullptr};
         MemoryPoolHeader *next_ {nullptr};
-        size_t pool_size_ {0};
-        void *mem_addr_ {nullptr};
+        size_t poolSize_ {0};
+        void *memAddr_ {nullptr};
     };
 
     static constexpr size_t PAGE_SIZE_MASK = ~(PAGE_SIZE - 1);
@@ -244,7 +244,7 @@ private:
 
         /// @brief Iterate over pools in this list and pop all the elements.
         template <typename MemVisitor>
-        void IterateAndPopOverPools(const MemVisitor &mem_visitor);
+        void IterateAndPopOverPools(const MemVisitor &memVisitor);
 
         MemoryPoolHeader *GetListHead()
         {
@@ -272,9 +272,9 @@ private:
 
         void Pop(MemoryPoolHeader *pool)
         {
-            elements_count_--;
+            elementsCount_--;
             LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG)
-                << "Pop from Reserved list. Now, there are " << elements_count_ << " elements in it.";
+                << "Pop from Reserved list. Now, there are " << elementsCount_ << " elements in it.";
             MemoryPoolList::Pop(pool);
         }
 
@@ -284,10 +284,10 @@ private:
 
         void SortedInsert(MemoryPoolHeader *pool);
 
-        size_t elements_count_ {0};
+        size_t elementsCount_ {0};
     };
 
-    void ReleaseUnusedPagesOnAlloc(MemoryPoolHeader *memory_pool, size_t alloc_size);
+    void ReleaseUnusedPagesOnAlloc(MemoryPoolHeader *memoryPool, size_t allocSize);
 
     void InsertPool(MemoryPoolHeader *header);
 
@@ -297,17 +297,17 @@ private:
 
     bool AllocatedByHumongousObjAllocatorUnsafe(void *mem);
 
-    MemoryPoolList occupied_pools_list_;
-    ReservedMemoryPools reserved_pools_list_;
-    MemoryPoolList free_pools_list_;
-    SpaceType type_allocation_;
+    MemoryPoolList occupiedPoolsList_;
+    ReservedMemoryPools reservedPoolsList_;
+    MemoryPoolList freePoolsList_;
+    SpaceType typeAllocation_;
 
     // RW lock which allows only one thread to change smth inside allocator
     // NOTE: The MT support expects that we can't iterate
     // and free (i.e. collect for an object scenario) simultaneously
-    LockConfigT alloc_free_lock_;
+    LockConfigT allocFreeLock_;
 
-    MemStatsType *mem_stats_;
+    MemStatsType *memStats_;
 
     friend class HumongousObjAllocatorTest;
     template <InternalAllocatorConfig CONFIG>

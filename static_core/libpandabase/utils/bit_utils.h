@@ -150,9 +150,9 @@ constexpr T RoundUp(T x, size_t n)
     return (static_cast<size_t>(x) + n - 1U) & (-n);
 }
 
-constexpr size_t BitsToBytesRoundUp(size_t num_bits)
+constexpr size_t BitsToBytesRoundUp(size_t numBits)
 {
-    return RoundUp(num_bits, BITS_PER_BYTE) / BITS_PER_BYTE;
+    return RoundUp(numBits, BITS_PER_BYTE) / BITS_PER_BYTE;
 }
 
 template <typename T>

@@ -22,7 +22,7 @@ namespace panda::compiler {
 void VisualizerPrinter::Print()
 {
     PrintBeginTag("cfg");
-    PrintProperty("name", ArenaString(pass_name_, graph_->GetLocalAllocator()->Adapter()));
+    PrintProperty("name", ArenaString(passName_, graph_->GetLocalAllocator()->Adapter()));
     for (const auto &block : graph_->GetBlocksRPO()) {
         PrintBasicBlock(block);
     }
@@ -113,17 +113,17 @@ void VisualizerPrinter::PrintInsts(BasicBlock *block)
 
 void VisualizerPrinter::PrintInst(Inst *inst)
 {
-    uint32_t users_size = 0;
+    uint32_t usersSize = 0;
     for (auto it = inst->GetUsers().begin(); it != inst->GetUsers().end(); ++it) {
-        users_size++;
+        usersSize++;
     }
-    (*output_) << MakeOffset() << "0 " << std::dec << users_size << " ";
+    (*output_) << MakeOffset() << "0 " << std::dec << usersSize << " ";
     (*output_) << InstId(inst, graph_->GetLocalAllocator()) << " ";
     inst->DumpOpcode(output_);
     (*output_) << " type:" << DataType::ToString(inst->GetType()) << " ";
     (*output_) << "inputs: ";
-    bool has_input = inst->DumpInputs(output_);
-    if (has_input && !inst->GetUsers().Empty()) {
+    bool hasInput = inst->DumpInputs(output_);
+    if (hasInput && !inst->GetUsers().Empty()) {
         (*output_) << " users: ";
     }
     DumpUsers(inst, output_);

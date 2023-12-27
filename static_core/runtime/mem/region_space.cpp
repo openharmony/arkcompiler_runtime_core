@@ -25,12 +25,12 @@ uint32_t Region::GetAllocatedBytes() const
     if (!IsTLAB()) {
         return top_ - begin_;
     }
-    uint32_t allocated_bytes = 0;
-    ASSERT(tlab_vector_ != nullptr);
-    for (auto i : *tlab_vector_) {
-        allocated_bytes += i->GetOccupiedSize();
+    uint32_t allocatedBytes = 0;
+    ASSERT(tlabVector_ != nullptr);
+    for (auto i : *tlabVector_) {
+        allocatedBytes += i->GetOccupiedSize();
     }
-    return allocated_bytes;
+    return allocatedBytes;
 }
 
 double Region::GetFragmentation() const
@@ -46,29 +46,29 @@ InternalAllocatorPtr Region::GetInternalAllocator()
 
 void Region::CreateRemSet()
 {
-    ASSERT(rem_set_ == nullptr);
-    rem_set_ = GetInternalAllocator()->New<RemSetT>();
+    ASSERT(remSet_ == nullptr);
+    remSet_ = GetInternalAllocator()->New<RemSetT>();
 }
 
 void Region::SetupAtomics()
 {
-    live_bytes_ = GetInternalAllocator()->New<std::atomic<uint32_t>>();
-    pinned_objects_ = GetInternalAllocator()->New<std::atomic<uint32_t>>();
+    liveBytes_ = GetInternalAllocator()->New<std::atomic<uint32_t>>();
+    pinnedObjects_ = GetInternalAllocator()->New<std::atomic<uint32_t>>();
 }
 
 void Region::CreateTLABSupport()
 {
-    ASSERT(tlab_vector_ == nullptr);
-    tlab_vector_ = GetInternalAllocator()->New<PandaVector<TLAB *>>(GetInternalAllocator()->Adapter());
+    ASSERT(tlabVector_ == nullptr);
+    tlabVector_ = GetInternalAllocator()->New<PandaVector<TLAB *>>(GetInternalAllocator()->Adapter());
 }
 
 size_t Region::GetRemainingSizeForTLABs() const
 {
     ASSERT(IsTLAB());
     // TLABs are stored one by one.
-    uintptr_t last_tlab_end_byte = tlab_vector_->empty() ? Top() : ToUintPtr(tlab_vector_->back()->GetEndAddr());
-    ASSERT((last_tlab_end_byte <= End()) && (last_tlab_end_byte >= Top()));
-    return End() - last_tlab_end_byte;
+    uintptr_t lastTlabEndByte = tlabVector_->empty() ? Top() : ToUintPtr(tlabVector_->back()->GetEndAddr());
+    ASSERT((lastTlabEndByte <= End()) && (lastTlabEndByte >= Top()));
+    return End() - lastTlabEndByte;
 }
 
 TLAB *Region::CreateTLAB(size_t size)
@@ -76,112 +76,112 @@ TLAB *Region::CreateTLAB(size_t size)
     ASSERT(IsTLAB());
     ASSERT(Begin() != 0);
     ASSERT(Top() == Begin());
-    size_t remaining_size = GetRemainingSizeForTLABs();
-    if (remaining_size < size) {
+    size_t remainingSize = GetRemainingSizeForTLABs();
+    if (remainingSize < size) {
         return nullptr;
     }
-    ASSERT(End() > remaining_size);
-    TLAB *tlab = GetInternalAllocator()->New<TLAB>(ToVoidPtr(End() - remaining_size), size);
-    tlab_vector_->push_back(tlab);
+    ASSERT(End() > remainingSize);
+    TLAB *tlab = GetInternalAllocator()->New<TLAB>(ToVoidPtr(End() - remainingSize), size);
+    tlabVector_->push_back(tlab);
     return tlab;
 }
 
 MarkBitmap *Region::CreateMarkBitmap()
 {
-    ASSERT(mark_bitmap_ == nullptr);
+    ASSERT(markBitmap_ == nullptr);
     auto allocator = GetInternalAllocator();
-    auto bitmap_data = allocator->Alloc(MarkBitmap::GetBitMapSizeInByte(Size()));
-    ASSERT(bitmap_data != nullptr);
-    mark_bitmap_ = allocator->New<MarkBitmap>(this, Size(), bitmap_data);
-    ASSERT(mark_bitmap_ != nullptr);
-    mark_bitmap_->ClearAllBits();
-    return mark_bitmap_;
+    auto bitmapData = allocator->Alloc(MarkBitmap::GetBitMapSizeInByte(Size()));
+    ASSERT(bitmapData != nullptr);
+    markBitmap_ = allocator->New<MarkBitmap>(this, Size(), bitmapData);
+    ASSERT(markBitmap_ != nullptr);
+    markBitmap_->ClearAllBits();
+    return markBitmap_;
 }
 
 MarkBitmap *Region::CreateLiveBitmap()
 {
-    ASSERT(live_bitmap_ == nullptr);
+    ASSERT(liveBitmap_ == nullptr);
     auto allocator = GetInternalAllocator();
-    auto bitmap_data = allocator->Alloc(MarkBitmap::GetBitMapSizeInByte(Size()));
-    ASSERT(bitmap_data != nullptr);
-    live_bitmap_ = allocator->New<MarkBitmap>(this, Size(), bitmap_data);
-    ASSERT(live_bitmap_ != nullptr);
-    live_bitmap_->ClearAllBits();
-    return live_bitmap_;
+    auto bitmapData = allocator->Alloc(MarkBitmap::GetBitMapSizeInByte(Size()));
+    ASSERT(bitmapData != nullptr);
+    liveBitmap_ = allocator->New<MarkBitmap>(this, Size(), bitmapData);
+    ASSERT(liveBitmap_ != nullptr);
+    liveBitmap_->ClearAllBits();
+    return liveBitmap_;
 }
 
 void Region::SetMarkBit(ObjectHeader *object)
 {
     ASSERT(IsInRange(object));
-    mark_bitmap_->Set(object);
+    markBitmap_->Set(object);
 }
 
 uint32_t Region::CalcLiveBytes() const
 {
-    ASSERT(live_bitmap_ != nullptr);
-    uint32_t live_bytes = 0;
-    live_bitmap_->IterateOverMarkedChunks<true>(
-        [&live_bytes](const void *object) { live_bytes += GetAlignedObjectSize(GetObjectSize(object)); });
-    return live_bytes;
+    ASSERT(liveBitmap_ != nullptr);
+    uint32_t liveBytes = 0;
+    liveBitmap_->IterateOverMarkedChunks<true>(
+        [&liveBytes](const void *object) { liveBytes += GetAlignedObjectSize(GetObjectSize(object)); });
+    return liveBytes;
 }
 
 uint32_t Region::CalcMarkBytes() const
 {
-    ASSERT(mark_bitmap_ != nullptr);
-    uint32_t live_bytes = 0;
-    mark_bitmap_->IterateOverMarkedChunks(
-        [&live_bytes](const void *object) { live_bytes += GetAlignedObjectSize(GetObjectSize(object)); });
-    return live_bytes;
+    ASSERT(markBitmap_ != nullptr);
+    uint32_t liveBytes = 0;
+    markBitmap_->IterateOverMarkedChunks(
+        [&liveBytes](const void *object) { liveBytes += GetAlignedObjectSize(GetObjectSize(object)); });
+    return liveBytes;
 }
 
 void Region::Destroy()
 {
     auto allocator = GetInternalAllocator();
-    if (rem_set_ != nullptr) {
-        allocator->Delete(rem_set_);
-        rem_set_ = nullptr;
+    if (remSet_ != nullptr) {
+        allocator->Delete(remSet_);
+        remSet_ = nullptr;
     }
-    if (live_bytes_ != nullptr) {
-        allocator->Delete(live_bytes_);
-        live_bytes_ = nullptr;
+    if (liveBytes_ != nullptr) {
+        allocator->Delete(liveBytes_);
+        liveBytes_ = nullptr;
     }
-    if (pinned_objects_ != nullptr) {
-        allocator->Delete(pinned_objects_);
-        pinned_objects_ = nullptr;
+    if (pinnedObjects_ != nullptr) {
+        allocator->Delete(pinnedObjects_);
+        pinnedObjects_ = nullptr;
     }
-    if (tlab_vector_ != nullptr) {
-        for (auto i : *tlab_vector_) {
+    if (tlabVector_ != nullptr) {
+        for (auto i : *tlabVector_) {
             allocator->Delete(i);
         }
-        allocator->Delete(tlab_vector_);
-        tlab_vector_ = nullptr;
+        allocator->Delete(tlabVector_);
+        tlabVector_ = nullptr;
     }
-    if (live_bitmap_ != nullptr) {
-        allocator->Delete(live_bitmap_->GetBitMap().data());
-        allocator->Delete(live_bitmap_);
-        live_bitmap_ = nullptr;
+    if (liveBitmap_ != nullptr) {
+        allocator->Delete(liveBitmap_->GetBitMap().data());
+        allocator->Delete(liveBitmap_);
+        liveBitmap_ = nullptr;
     }
-    if (mark_bitmap_ != nullptr) {
-        allocator->Delete(mark_bitmap_->GetBitMap().data());
-        allocator->Delete(mark_bitmap_);
-        mark_bitmap_ = nullptr;
+    if (markBitmap_ != nullptr) {
+        allocator->Delete(markBitmap_->GetBitMap().data());
+        allocator->Delete(markBitmap_);
+        markBitmap_ = nullptr;
     }
 }
 
-void RegionBlock::Init(uintptr_t regions_begin, uintptr_t regions_end)
+void RegionBlock::Init(uintptr_t regionsBegin, uintptr_t regionsEnd)
 {
     os::memory::LockHolder lock(lock_);
     ASSERT(occupied_.Empty());
-    ASSERT(Region::IsAlignment(regions_begin, region_size_));
-    ASSERT((regions_end - regions_begin) % region_size_ == 0);
-    size_t num_regions = (regions_end - regions_begin) / region_size_;
-    if (num_regions > 0) {
-        size_t size = num_regions * sizeof(Region *);
+    ASSERT(Region::IsAlignment(regionsBegin, regionSize_));
+    ASSERT((regionsEnd - regionsBegin) % regionSize_ == 0);
+    size_t numRegions = (regionsEnd - regionsBegin) / regionSize_;
+    if (numRegions > 0) {
+        size_t size = numRegions * sizeof(Region *);
         auto data = reinterpret_cast<Region **>(allocator_->Alloc(size));
         memset_s(data, size, 0, size);
-        occupied_ = Span<Region *>(data, num_regions);
-        regions_begin_ = regions_begin;
-        regions_end_ = regions_end;
+        occupied_ = Span<Region *>(data, numRegions);
+        regionsBegin_ = regionsBegin;
+        regionsEnd_ = regionsEnd;
     }
 }
 
@@ -193,23 +193,23 @@ Region *RegionBlock::AllocRegion()
         if (occupied_[i] == nullptr) {
             auto *region = RegionAt(i);
             occupied_[i] = region;
-            num_used_regions_++;
+            numUsedRegions_++;
             return region;
         }
     }
     return nullptr;
 }
 
-Region *RegionBlock::AllocLargeRegion(size_t large_region_size)
+Region *RegionBlock::AllocLargeRegion(size_t largeRegionSize)
 {
     os::memory::LockHolder lock(lock_);
     // NOTE(yxr) : search continuous unused regions, improve it
-    size_t alloc_region_num = large_region_size / region_size_;
+    size_t allocRegionNum = largeRegionSize / regionSize_;
     size_t left = 0;
-    while (left + alloc_region_num <= occupied_.Size()) {
+    while (left + allocRegionNum <= occupied_.Size()) {
         bool found = true;
         size_t right = left;
-        while (right < left + alloc_region_num) {
+        while (right < left + allocRegionNum) {
             if (occupied_[right] != nullptr) {
                 found = false;
                 break;
@@ -219,10 +219,10 @@ Region *RegionBlock::AllocLargeRegion(size_t large_region_size)
         if (found) {
             // mark those regions as 'used'
             auto *region = RegionAt(left);
-            for (size_t i = 0; i < alloc_region_num; i++) {
+            for (size_t i = 0; i < allocRegionNum; i++) {
                 occupied_[left + i] = region;
             }
-            num_used_regions_ += alloc_region_num;
+            numUsedRegions_ += allocRegionNum;
             return region;
         }
         // next round
@@ -231,78 +231,77 @@ Region *RegionBlock::AllocLargeRegion(size_t large_region_size)
     return nullptr;
 }
 
-void RegionBlock::FreeRegion(Region *region, bool release_pages)
+void RegionBlock::FreeRegion(Region *region, bool releasePages)
 {
     os::memory::LockHolder lock(lock_);
-    size_t region_idx = RegionIndex(region);
-    size_t region_num = region->Size() / region_size_;
-    ASSERT(region_idx + region_num <= occupied_.Size());
-    for (size_t i = 0; i < region_num; i++) {
-        ASSERT(occupied_[region_idx + i] == region);
-        occupied_[region_idx + i] = nullptr;
+    size_t regionIdx = RegionIndex(region);
+    size_t regionNum = region->Size() / regionSize_;
+    ASSERT(regionIdx + regionNum <= occupied_.Size());
+    for (size_t i = 0; i < regionNum; i++) {
+        ASSERT(occupied_[regionIdx + i] == region);
+        occupied_[regionIdx + i] = nullptr;
     }
-    num_used_regions_ -= region_num;
-    if (release_pages) {
+    numUsedRegions_ -= regionNum;
+    if (releasePages) {
         os::mem::ReleasePages(ToUintPtr(region), region->End());
     }
 }
 
-Region *RegionPool::NewRegion(RegionSpace *space, SpaceType space_type, AllocatorType allocator_type,
-                              size_t region_size, RegionFlag eden_or_old_or_nonmovable, RegionFlag properties,
-                              OSPagesAllocPolicy alloc_policy)
+Region *RegionPool::NewRegion(RegionSpace *space, SpaceType spaceType, AllocatorType allocatorType, size_t regionSize,
+                              RegionFlag edenOrOldOrNonmovable, RegionFlag properties, OSPagesAllocPolicy allocPolicy)
 {
     // check that the input region_size is aligned
-    ASSERT(region_size % region_size_ == 0);
-    ASSERT(IsYoungRegionFlag(eden_or_old_or_nonmovable) || eden_or_old_or_nonmovable == RegionFlag::IS_OLD ||
-           eden_or_old_or_nonmovable == RegionFlag::IS_NONMOVABLE);
+    ASSERT(regionSize % regionSize_ == 0);
+    ASSERT(IsYoungRegionFlag(edenOrOldOrNonmovable) || edenOrOldOrNonmovable == RegionFlag::IS_OLD ||
+           edenOrOldOrNonmovable == RegionFlag::IS_NONMOVABLE);
 
     // Ensure leaving enough space so there's always some free regions in heap which we can use for full gc
-    if (eden_or_old_or_nonmovable == RegionFlag::IS_NONMOVABLE || region_size > region_size_) {
-        if (!spaces_->CanAllocInSpace(false, region_size + region_size_)) {
+    if (edenOrOldOrNonmovable == RegionFlag::IS_NONMOVABLE || regionSize > regionSize_) {
+        if (!spaces_->CanAllocInSpace(false, regionSize + regionSize_)) {
             return nullptr;
         }
     }
 
-    if (!spaces_->CanAllocInSpace(IsYoungRegionFlag(eden_or_old_or_nonmovable), region_size)) {
+    if (!spaces_->CanAllocInSpace(IsYoungRegionFlag(edenOrOldOrNonmovable), regionSize)) {
         return nullptr;
     }
 
     // 1.get region from pre-allocated region block(e.g. a big mmaped continuous space)
     void *region = nullptr;
     if (block_.GetFreeRegionsNum() > 0) {
-        region = (region_size <= region_size_) ? block_.AllocRegion() : block_.AllocLargeRegion(region_size);
+        region = (regionSize <= regionSize_) ? block_.AllocRegion() : block_.AllocLargeRegion(regionSize);
     }
     if (region != nullptr) {
-        IsYoungRegionFlag(eden_or_old_or_nonmovable) ? spaces_->IncreaseYoungOccupiedInSharedPool(region_size)
-                                                     : spaces_->IncreaseTenuredOccupiedInSharedPool(region_size);
+        IsYoungRegionFlag(edenOrOldOrNonmovable) ? spaces_->IncreaseYoungOccupiedInSharedPool(regionSize)
+                                                 : spaces_->IncreaseTenuredOccupiedInSharedPool(regionSize);
     } else if (extend_) {  // 2.mmap region directly, this is more flexible for memory usage
         region =
-            IsYoungRegionFlag(eden_or_old_or_nonmovable)
-                ? spaces_->TryAllocPoolForYoung(region_size, space_type, allocator_type, this).GetMem()
-                : spaces_->TryAllocPoolForTenured(region_size, space_type, allocator_type, this, alloc_policy).GetMem();
+            IsYoungRegionFlag(edenOrOldOrNonmovable)
+                ? spaces_->TryAllocPoolForYoung(regionSize, spaceType, allocatorType, this).GetMem()
+                : spaces_->TryAllocPoolForTenured(regionSize, spaceType, allocatorType, this, allocPolicy).GetMem();
     }
 
     if (UNLIKELY(region == nullptr)) {
         return nullptr;
     }
-    return NewRegion(region, space, region_size, eden_or_old_or_nonmovable, properties);
+    return NewRegion(region, space, regionSize, edenOrOldOrNonmovable, properties);
 }
 
-Region *RegionPool::NewRegion(void *region, RegionSpace *space, size_t region_size,
-                              RegionFlag eden_or_old_or_nonmovable, RegionFlag properties)
+Region *RegionPool::NewRegion(void *region, RegionSpace *space, size_t regionSize, RegionFlag edenOrOldOrNonmovable,
+                              RegionFlag properties)
 {
-    ASSERT(Region::IsAlignment(ToUintPtr(region), region_size_));
+    ASSERT(Region::IsAlignment(ToUintPtr(region), regionSize_));
 
     ASAN_UNPOISON_MEMORY_REGION(region, Region::HeadSize());
-    auto *ret = new (region) Region(space, ToUintPtr(region) + Region::HeadSize(), ToUintPtr(region) + region_size);
+    auto *ret = new (region) Region(space, ToUintPtr(region) + Region::HeadSize(), ToUintPtr(region) + regionSize);
     // NOTE(dtrubenkov): remove this fast fixup
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
-    ret->AddFlag(eden_or_old_or_nonmovable);
+    ret->AddFlag(edenOrOldOrNonmovable);
     ret->AddFlag(properties);
     ret->CreateRemSet();
     ret->SetupAtomics();
     ret->CreateMarkBitmap();
-    if (!IsYoungRegionFlag(eden_or_old_or_nonmovable)) {
+    if (!IsYoungRegionFlag(edenOrOldOrNonmovable)) {
         ret->CreateLiveBitmap();
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
@@ -329,48 +328,48 @@ bool RegionPool::HaveTenuredSize(size_t size) const
     return spaces_->CanAllocInSpace(GenerationalSpaces::IS_TENURED_SPACE, size);
 }
 
-bool RegionPool::HaveFreeRegions(size_t num_regions, size_t region_size) const
+bool RegionPool::HaveFreeRegions(size_t numRegions, size_t regionSize) const
 {
-    if (block_.GetFreeRegionsNum() >= num_regions) {
+    if (block_.GetFreeRegionsNum() >= numRegions) {
         return true;
     }
-    num_regions -= block_.GetFreeRegionsNum();
-    return PoolManager::GetMmapMemPool()->HaveEnoughPoolsInObjectSpace(num_regions, region_size);
+    numRegions -= block_.GetFreeRegionsNum();
+    return PoolManager::GetMmapMemPool()->HaveEnoughPoolsInObjectSpace(numRegions, regionSize);
 }
 
-Region *RegionSpace::NewRegion(size_t region_size, RegionFlag eden_or_old_or_nonmovable, RegionFlag properties,
-                               OSPagesAllocPolicy alloc_policy)
+Region *RegionSpace::NewRegion(size_t regionSize, RegionFlag edenOrOldOrNonmovable, RegionFlag properties,
+                               OSPagesAllocPolicy allocPolicy)
 {
     Region *region = nullptr;
-    auto young_region_flag = IsYoungRegionFlag(eden_or_old_or_nonmovable);
+    auto youngRegionFlag = IsYoungRegionFlag(edenOrOldOrNonmovable);
     // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
     // on other reads or writes
-    if (young_region_flag && young_regions_in_use_.load(std::memory_order_relaxed) > desired_eden_length_) {
+    if (youngRegionFlag && youngRegionsInUse_.load(std::memory_order_relaxed) > desiredEdenLength_) {
         return nullptr;
     }
-    if (young_region_flag && (!empty_young_regions_.empty())) {
-        region = GetRegionFromEmptyList(empty_young_regions_);
+    if (youngRegionFlag && (!emptyYoungRegions_.empty())) {
+        region = GetRegionFromEmptyList(emptyYoungRegions_);
         ASAN_UNPOISON_MEMORY_REGION(region, Region::HeadSize());
-        ASSERT(region_size == region->Size());
-        region_pool_->NewRegion(region, this, region_size, eden_or_old_or_nonmovable, properties);
-    } else if (!young_region_flag && (!empty_tenured_regions_.empty())) {
-        region = GetRegionFromEmptyList(empty_tenured_regions_);
+        ASSERT(regionSize == region->Size());
+        regionPool_->NewRegion(region, this, regionSize, edenOrOldOrNonmovable, properties);
+    } else if (!youngRegionFlag && (!emptyTenuredRegions_.empty())) {
+        region = GetRegionFromEmptyList(emptyTenuredRegions_);
         ASAN_UNPOISON_MEMORY_REGION(region, Region::HeadSize());
-        ASSERT(region_size == region->Size());
-        region_pool_->NewRegion(region, this, region_size, eden_or_old_or_nonmovable, properties);
+        ASSERT(regionSize == region->Size());
+        regionPool_->NewRegion(region, this, regionSize, edenOrOldOrNonmovable, properties);
     } else {
-        region = region_pool_->NewRegion(this, space_type_, allocator_type_, region_size, eden_or_old_or_nonmovable,
-                                         properties, alloc_policy);
+        region = regionPool_->NewRegion(this, spaceType_, allocatorType_, regionSize, edenOrOldOrNonmovable, properties,
+                                        allocPolicy);
     }
     if (UNLIKELY(region == nullptr)) {
         return nullptr;
     }
     ASAN_POISON_MEMORY_REGION(ToVoidPtr(region->Begin()), region->End() - region->Begin());
     regions_.push_back(region->AsListNode());
-    if (young_region_flag) {
+    if (youngRegionFlag) {
         // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
         // on other reads or writes
-        young_regions_in_use_.fetch_add(1, std::memory_order_relaxed);
+        youngRegionsInUse_.fetch_add(1, std::memory_order_relaxed);
     }
     return region;
 }
@@ -379,11 +378,11 @@ void RegionSpace::PromoteYoungRegion(Region *region)
 {
     ASSERT(region->GetSpace() == this);
     ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
-    region_pool_->PromoteYoungRegion(region);
+    regionPool_->PromoteYoungRegion(region);
     // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
     // on other reads or writes
-    [[maybe_unused]] auto previous_regions_in_use = young_regions_in_use_.fetch_sub(1, std::memory_order_relaxed);
-    ASSERT(previous_regions_in_use > 0);
+    [[maybe_unused]] auto previousRegionsInUse = youngRegionsInUse_.fetch_sub(1, std::memory_order_relaxed);
+    ASSERT(previousRegionsInUse > 0);
 }
 
 void RegionSpace::FreeAllRegions()
@@ -394,10 +393,10 @@ void RegionSpace::FreeAllRegions()
     ReleaseEmptyRegions<RegionFlag::IS_OLD, OSPagesPolicy::IMMEDIATE_RETURN>();
 }
 
-Region *RegionSpace::GetRegionFromEmptyList(DList &region_list)
+Region *RegionSpace::GetRegionFromEmptyList(DList &regionList)
 {
-    Region *region = Region::AsRegion(&(*region_list.begin()));
-    region_list.erase(region_list.begin());
+    Region *region = Region::AsRegion(&(*regionList.begin()));
+    regionList.erase(regionList.begin());
     ASSERT(region != nullptr);
     return region;
 }

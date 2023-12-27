@@ -24,146 +24,145 @@ intptr_t AotData::GetEpTableOffset() const
 
 intptr_t AotData::GetSharedSlowPathOffset(RuntimeInterface::EntrypointId id, uintptr_t pc) const
 {
-    auto offset = slow_path_data_->GetSharedSlowPathOffset(id);
+    auto offset = slowPathData_->GetSharedSlowPathOffset(id);
     if (offset == 0) {
         return 0;
     }
-    return offset - (code_address_ + pc + CodeInfo::GetCodeOffset(graph_->GetArch()));
+    return offset - (codeAddress_ + pc + CodeInfo::GetCodeOffset(graph_->GetArch()));
 }
 
 void AotData::SetSharedSlowPathOffset(RuntimeInterface::EntrypointId id, uintptr_t pc)
 {
-    slow_path_data_->SetSharedSlowPathOffset(id, code_address_ + pc + CodeInfo::GetCodeOffset(graph_->GetArch()));
+    slowPathData_->SetSharedSlowPathOffset(id, codeAddress_ + pc + CodeInfo::GetCodeOffset(graph_->GetArch()));
 }
 
-intptr_t AotData::GetEntrypointOffset(uint64_t pc, int32_t slot_id) const
+intptr_t AotData::GetEntrypointOffset(uint64_t pc, int32_t slotId) const
 {
     // Initialize offset by offset to the origin of the entrypoint table
     intptr_t offset = GetEpTableOffset();
     // Increment/decrement offset to specified slot
-    offset += slot_id * PointerSize(graph_->GetArch());
+    offset += slotId * PointerSize(graph_->GetArch());
     // Decrement by sum of method code start address and current pc
-    offset -= (code_address_ + pc);
+    offset -= (codeAddress_ + pc);
     // Decrement by header size that prepend method code
     offset -= CodeInfo::GetCodeOffset(graph_->GetArch());
     return offset;
 }
 
-intptr_t AotData::GetPltSlotOffset(uint64_t pc, uint32_t method_id)
+intptr_t AotData::GetPltSlotOffset(uint64_t pc, uint32_t methodId)
 {
-    int32_t slot_id = GetPltSlotId(method_id);
-    return GetEntrypointOffset(pc, slot_id);
+    int32_t slotId = GetPltSlotId(methodId);
+    return GetEntrypointOffset(pc, slotId);
 }
 
-int32_t AotData::GetPltSlotId(uint32_t method_id)
+int32_t AotData::GetPltSlotId(uint32_t methodId)
 {
-    int32_t slot_id;
-    auto slot = got_plt_->find({pfile_, method_id});
-    if (slot != got_plt_->end()) {
-        slot_id = slot->second;
+    int32_t slotId;
+    auto slot = gotPlt_->find({pfile_, methodId});
+    if (slot != gotPlt_->end()) {
+        slotId = slot->second;
     } else {
-        slot_id = GetSlotId();
-        got_plt_->insert({{pfile_, method_id}, slot_id});
+        slotId = GetSlotId();
+        gotPlt_->insert({{pfile_, methodId}, slotId});
     }
-    return slot_id;
+    return slotId;
 }
 
-intptr_t AotData::GetVirtIndexSlotOffset(uint64_t pc, uint32_t method_id)
+intptr_t AotData::GetVirtIndexSlotOffset(uint64_t pc, uint32_t methodId)
 {
-    int32_t slot_id;
-    auto slot = got_virt_indexes_->find({pfile_, method_id});
-    if (slot != got_virt_indexes_->end()) {
-        slot_id = slot->second;
+    int32_t slotId;
+    auto slot = gotVirtIndexes_->find({pfile_, methodId});
+    if (slot != gotVirtIndexes_->end()) {
+        slotId = slot->second;
     } else {
-        slot_id = GetSlotId();
-        got_virt_indexes_->insert({{pfile_, method_id}, slot_id});
+        slotId = GetSlotId();
+        gotVirtIndexes_->insert({{pfile_, methodId}, slotId});
     }
-    return GetEntrypointOffset(pc, slot_id);
+    return GetEntrypointOffset(pc, slotId);
 }
 
-intptr_t AotData::GetClassSlotOffset(uint64_t pc, uint32_t klass_id, bool init)
+intptr_t AotData::GetClassSlotOffset(uint64_t pc, uint32_t klassId, bool init)
 {
-    int32_t slot_id = GetClassSlotId(klass_id);
-    return GetEntrypointOffset(pc, init ? slot_id - 1 : slot_id);
+    int32_t slotId = GetClassSlotId(klassId);
+    return GetEntrypointOffset(pc, init ? slotId - 1 : slotId);
 }
 
-intptr_t AotData::GetStringSlotOffset(uint64_t pc, uint32_t string_id)
+intptr_t AotData::GetStringSlotOffset(uint64_t pc, uint32_t stringId)
 {
-    int32_t slot_id = GetStringSlotId(string_id);
-    return GetEntrypointOffset(pc, slot_id);
+    int32_t slotId = GetStringSlotId(stringId);
+    return GetEntrypointOffset(pc, slotId);
 }
 
-int32_t AotData::GetClassSlotId(uint32_t klass_id)
+int32_t AotData::GetClassSlotId(uint32_t klassId)
 {
-    int32_t slot_id;
-    auto slot = got_class_->find({pfile_, klass_id});
-    if (slot != got_class_->end()) {
-        slot_id = slot->second;
+    int32_t slotId;
+    auto slot = gotClass_->find({pfile_, klassId});
+    if (slot != gotClass_->end()) {
+        slotId = slot->second;
     } else {
-        slot_id = GetSlotId();
-        got_class_->insert({{pfile_, klass_id}, slot_id});
+        slotId = GetSlotId();
+        gotClass_->insert({{pfile_, klassId}, slotId});
     }
-    return slot_id;
+    return slotId;
 }
 
-int32_t AotData::GetStringSlotId(uint32_t string_id)
+int32_t AotData::GetStringSlotId(uint32_t stringId)
 {
-    int32_t slot_id;
-    auto slot = got_string_->find({pfile_, string_id});
-    if (slot != got_string_->end()) {
-        slot_id = slot->second;
+    int32_t slotId;
+    auto slot = gotString_->find({pfile_, stringId});
+    if (slot != gotString_->end()) {
+        slotId = slot->second;
     } else {
-        slot_id = GetSlotId();
-        got_string_->insert({{pfile_, string_id}, slot_id});
+        slotId = GetSlotId();
+        gotString_->insert({{pfile_, stringId}, slotId});
     }
-    return slot_id;
+    return slotId;
 }
 
 intptr_t AotData::GetCommonSlotOffset(uint64_t pc, uint32_t id)
 {
-    int32_t slot_id;
-    auto slot = got_common_->find({pfile_, id});
-    if (slot != got_common_->end()) {
-        slot_id = slot->second;
+    int32_t slotId;
+    auto slot = gotCommon_->find({pfile_, id});
+    if (slot != gotCommon_->end()) {
+        slotId = slot->second;
     } else {
-        slot_id = GetSlotId();
-        got_common_->insert({{pfile_, id}, slot_id});
+        slotId = GetSlotId();
+        gotCommon_->insert({{pfile_, id}, slotId});
     }
-    return GetEntrypointOffset(pc, slot_id);
+    return GetEntrypointOffset(pc, slotId);
 }
 
 uint64_t AotData::GetInfInlineCacheSlotOffset(uint64_t pc, uint64_t index)
 {
-    int32_t slot_id;
-    auto slot = got_intf_inline_cache_->find({pfile_, index});
-    if (slot != got_intf_inline_cache_->end()) {
-        slot_id = slot->second;
+    int32_t slotId;
+    auto slot = gotIntfInlineCache_->find({pfile_, index});
+    if (slot != gotIntfInlineCache_->end()) {
+        slotId = slot->second;
     } else {
-        slot_id = GetSlotId();
-        got_intf_inline_cache_->insert({{pfile_, index}, slot_id});
+        slotId = GetSlotId();
+        gotIntfInlineCache_->insert({{pfile_, index}, slotId});
     }
-    return GetEntrypointOffset(pc, slot_id);
+    return GetEntrypointOffset(pc, slotId);
 }
 
-int32_t AotData::GetIntfInlineCacheId(uint64_t cache_idx)
+int32_t AotData::GetIntfInlineCacheId(uint64_t cacheIdx)
 {
-    int32_t slot_id;
-    auto slot = got_intf_inline_cache_->find({pfile_, cache_idx});
-    if (slot != got_intf_inline_cache_->end()) {
-        slot_id = slot->second;
+    int32_t slotId;
+    auto slot = gotIntfInlineCache_->find({pfile_, cacheIdx});
+    if (slot != gotIntfInlineCache_->end()) {
+        slotId = slot->second;
     } else {
-        slot_id = GetSlotId();
-        got_intf_inline_cache_->insert({{pfile_, cache_idx}, slot_id});
+        slotId = GetSlotId();
+        gotIntfInlineCache_->insert({{pfile_, cacheIdx}, slotId});
     }
-    return slot_id;
+    return slotId;
 }
 
 int32_t AotData::GetSlotId() const
 {
     constexpr auto IMM_3 = 3;
     constexpr auto IMM_2 = 2;
-    return -1 - IMM_3 * (got_plt_->size() + got_class_->size()) -
-           IMM_2 * (got_virt_indexes_->size() + got_string_->size()) - got_intf_inline_cache_->size() -
-           got_common_->size();
+    return -1 - IMM_3 * (gotPlt_->size() + gotClass_->size()) - IMM_2 * (gotVirtIndexes_->size() + gotString_->size()) -
+           gotIntfInlineCache_->size() - gotCommon_->size();
 }
 }  // namespace panda::compiler

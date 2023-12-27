@@ -65,8 +65,8 @@ std::pair<int, std::string> ExecPanda(const std::string &file)
 
     auto *runtime = panda::Runtime::GetCurrent();
 
-    std::stringstream str_buf;
-    auto old = std::cout.rdbuf(str_buf.rdbuf());
+    std::stringstream strBuf;
+    auto old = std::cout.rdbuf(strBuf.rdbuf());
     auto reset = [&](auto *cout) { cout->rdbuf(old); };
     auto guard = std::unique_ptr<std::ostream, decltype(reset)>(&std::cout, reset);
 
@@ -75,7 +75,7 @@ std::pair<int, std::string> ExecPanda(const std::string &file)
     if (!res) {
         ret = {1, "error " + std::to_string((int)res.Error())};
     } else {
-        ret = {0, str_buf.str()};
+        ret = {0, strBuf.str()};
     }
 
     if (!panda::Runtime::Destroy()) {
@@ -106,20 +106,20 @@ void NormalizeGold(std::string &gold)
     std::string out;
     out.reserve(gold.size());
     while (!in.empty()) {
-        auto nxt_nl = in.find('\n');
+        auto nxtNl = in.find('\n');
         if (in[0] == '#') {
-            if (nxt_nl == std::string::npos) {
+            if (nxtNl == std::string::npos) {
                 break;
             }
-            in = in.substr(nxt_nl + 1);
+            in = in.substr(nxtNl + 1);
             continue;
         }
-        if (nxt_nl == std::string::npos) {
+        if (nxtNl == std::string::npos) {
             out += in;
             break;
         }
-        out += in.substr(0, nxt_nl + 1);
-        in = in.substr(nxt_nl + 1);
+        out += in.substr(0, nxtNl + 1);
+        in = in.substr(nxtNl + 1);
     }
     gold = std::move(out);
 }
@@ -134,7 +134,7 @@ std::optional<std::string> Build(const std::string &path)
     panda::pandasm::Parser p;
     auto res = p.Parse(prog, path + ".pa");
     if (p.ShowError().err != panda::pandasm::Error::ErrorType::ERR_NONE) {
-        return p.ShowError().message + "\n" + p.ShowError().whole_line;
+        return p.ShowError().message + "\n" + p.ShowError().wholeLine;
     }
 
     if (!res.HasValue()) {
@@ -149,23 +149,22 @@ std::optional<std::string> Build(const std::string &path)
     return std::nullopt;
 }
 
-void TestSingle(const std::string &path, bool is_good = true,
-                const Config &conf = panda::static_linker::DefaultConfig(), bool *succeded = nullptr,
-                Result *save_result = nullptr)
+void TestSingle(const std::string &path, bool isGood = true, const Config &conf = panda::static_linker::DefaultConfig(),
+                bool *succeded = nullptr, Result *saveResult = nullptr)
 {
-    const auto path_prefix = "data/single/";
-    ASSERT_EQ(Build(path_prefix + path), std::nullopt);
+    const auto pathPrefix = "data/single/";
+    ASSERT_EQ(Build(pathPrefix + path), std::nullopt);
     auto gold = std::string {};
-    ASSERT_TRUE(ReadFile<false>(path_prefix + path + ".gold", gold));
+    ASSERT_TRUE(ReadFile<false>(pathPrefix + path + ".gold", gold));
 
     NormalizeGold(gold);
 
-    const auto out = path_prefix + path + ".linked.abc";
-    auto link_res = Link(conf, out, {path_prefix + path + ".abc"});
+    const auto out = pathPrefix + path + ".linked.abc";
+    auto linkRes = Link(conf, out, {pathPrefix + path + ".abc"});
 
-    ASSERT_EQ(link_res.errors.empty(), is_good);
+    ASSERT_EQ(linkRes.errors.empty(), isGood);
 
-    if (is_good) {
+    if (isGood) {
         auto res = ExecPanda(out);
         ASSERT_EQ(res.first, 0);
         ASSERT_EQ(res.second, gold);
@@ -175,42 +174,42 @@ void TestSingle(const std::string &path, bool is_good = true,
         *succeded = true;
     }
 
-    if (save_result != nullptr) {
-        *save_result = std::move(link_res);
+    if (saveResult != nullptr) {
+        *saveResult = std::move(linkRes);
     }
 }
 
-void TestMultiple(const std::string &path, std::vector<std::string> perms, bool is_good = true,
+void TestMultiple(const std::string &path, std::vector<std::string> perms, bool isGood = true,
                   const Config &conf = panda::static_linker::DefaultConfig(), Result *expected = nullptr)
 {
     std::sort(perms.begin(), perms.end());
 
-    const auto path_prefix = "data/multi/" + path + "/";
+    const auto pathPrefix = "data/multi/" + path + "/";
 
     for (const auto &p : perms) {
-        ASSERT_EQ(Build(path_prefix + p), std::nullopt);
+        ASSERT_EQ(Build(pathPrefix + p), std::nullopt);
     }
 
     auto gold = std::string {};
 
-    if (is_good) {
-        ASSERT_TRUE(ReadFile<false>(path_prefix + "out.gold", gold));
+    if (isGood) {
+        ASSERT_TRUE(ReadFile<false>(pathPrefix + "out.gold", gold));
         NormalizeGold(gold);
     }
 
     auto out = std::string {};
     auto files = std::vector<std::string> {};
 
-    std::optional<std::vector<char>> expected_file;
+    std::optional<std::vector<char>> expectedFile;
 
-    auto perform_test = [&](size_t iteration) {
-        out = path_prefix + "linked.";
+    auto performTest = [&](size_t iteration) {
+        out = pathPrefix + "linked.";
         files.clear();
 
         for (const auto &f : perms) {
             out += f;
             out += ".";
-            files.emplace_back(path_prefix + f + ".abc");
+            files.emplace_back(pathPrefix + f + ".abc");
         }
         out += "it";
         out += std::to_string(iteration);
@@ -218,28 +217,28 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
 
         SCOPED_TRACE(out);
 
-        auto link_res = Link(conf, out, files);
-        if (link_res.errors.empty() != is_good) {
+        auto linkRes = Link(conf, out, files);
+        if (linkRes.errors.empty() != isGood) {
             auto errs = std::string();
-            for (auto &err : link_res.errors) {
+            for (auto &err : linkRes.errors) {
                 errs += err;
                 errs += "\n";
             }
-            ASSERT_EQ(link_res.errors.empty(), is_good) << errs;
+            ASSERT_EQ(linkRes.errors.empty(), isGood) << errs;
         }
 
         if (expected != nullptr) {
-            ASSERT_EQ(link_res.stats.deduplicated_foreigners, expected->stats.deduplicated_foreigners);
+            ASSERT_EQ(linkRes.stats.deduplicatedForeigners, expected->stats.deduplicatedForeigners);
         }
 
-        if (is_good) {
-            std::vector<char> got_file;
-            ASSERT_TRUE(ReadFile<true>(out, got_file));
-            if (!expected_file.has_value()) {
-                expected_file = std::move(got_file);
+        if (isGood) {
+            std::vector<char> gotFile;
+            ASSERT_TRUE(ReadFile<true>(out, gotFile));
+            if (!expectedFile.has_value()) {
+                expectedFile = std::move(gotFile);
             } else {
                 (void)iteration;
-                ASSERT_EQ(expected_file.value(), got_file) << "on iteration: " << iteration;
+                ASSERT_EQ(expectedFile.value(), gotFile) << "on iteration: " << iteration;
             }
 
             auto res = ExecPanda(out);
@@ -249,9 +248,9 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
     };
 
     do {
-        expected_file = std::nullopt;
+        expectedFile = std::nullopt;
         for (size_t iteration = 0; iteration < TEST_REPEAT_COUNT; iteration++) {
-            perform_test(iteration);
+            performTest(iteration);
         }
     } while (std::next_permutation(perms.begin(), perms.end()));
 }
@@ -315,14 +314,14 @@ TEST(linkertests, BadFMethodOverloaded)
 TEST(linkertests, DeduplicatedField)
 {
     auto res = Result {};
-    res.stats.deduplicated_foreigners = 1;
+    res.stats.deduplicatedForeigners = 1;
     TestMultiple("dedup_field", {"1", "2"}, true, DefaultConfig(), &res);
 }
 
 TEST(linkertests, DeduplicatedMethod)
 {
     auto res = Result {};
-    res.stats.deduplicated_foreigners = 1;
+    res.stats.deduplicatedForeigners = 1;
     TestMultiple("dedup_method", {"1", "2"}, true, DefaultConfig(), &res);
 }
 
@@ -330,7 +329,7 @@ TEST(linkertests, UnresolvedInGlobal)
 {
     TestSingle("unresolved_global", false);
     auto conf = DefaultConfig();
-    conf.remains_partial = {std::string(panda::panda_file::ItemContainer::GetGlobalClassName())};
+    conf.remainsPartial = {std::string(panda::panda_file::ItemContainer::GetGlobalClassName())};
     TestSingle("unresolved_global", true, conf);
 }
 
@@ -340,7 +339,7 @@ TEST(linkertests, DeduplicateLineNumberNrogram)
     auto res = Result {};
     TestSingle("lnp_dedup", true, DefaultConfig(), &succ, &res);
     ASSERT_TRUE(succ);
-    ASSERT_EQ(res.stats.debug_count, 1);
+    ASSERT_EQ(res.stats.debugCount, 1);
 }
 
 TEST(linkertests, StripDebugInfo)
@@ -348,10 +347,10 @@ TEST(linkertests, StripDebugInfo)
     auto succ = false;
     auto res = Result {};
     auto conf = DefaultConfig();
-    conf.strip_debug_info = true;
+    conf.stripDebugInfo = true;
     TestSingle("hello_world", true, conf, &succ, &res);
     ASSERT_TRUE(succ);
-    ASSERT_EQ(res.stats.debug_count, 0);
+    ASSERT_EQ(res.stats.debugCount, 0);
 }
 
 TEST(linkertests, FieldOverload)
@@ -365,51 +364,51 @@ TEST(linkertests, ForeignBase)
 {
 #ifdef PANDA_WITH_ETS
     constexpr auto LANG = panda::panda_file::SourceLang::ETS;
-    auto make_record = [](panda::pandasm::Program &prog, const std::string &name) {
-        return &prog.record_table.emplace(name, panda::pandasm::Record(name, LANG)).first->second;
+    auto makeRecord = [](panda::pandasm::Program &prog, const std::string &name) {
+        return &prog.recordTable.emplace(name, panda::pandasm::Record(name, LANG)).first->second;
     };
 
-    const std::string base_path = "data/multi/ForeignBase.1.abc";
-    const std::string derv_path = "data/multi/ForeignBase.2.abc";
+    const std::string basePath = "data/multi/ForeignBase.1.abc";
+    const std::string dervPath = "data/multi/ForeignBase.2.abc";
 
     {
-        panda::pandasm::Program prog_base;
-        auto base = make_record(prog_base, "Base");
+        panda::pandasm::Program progBase;
+        auto base = makeRecord(progBase, "Base");
         auto fld = panda::pandasm::Field(LANG);
         fld.name = "fld";
         fld.type = panda::pandasm::Type("i32", 0);
-        base->field_list.push_back(std::move(fld));
+        base->fieldList.push_back(std::move(fld));
 
-        ASSERT_TRUE(panda::pandasm::AsmEmitter::Emit(base_path, prog_base));
+        ASSERT_TRUE(panda::pandasm::AsmEmitter::Emit(basePath, progBase));
     }
 
     {
-        panda::pandasm::Program prog_der;
-        auto base = make_record(prog_der, "Base");
+        panda::pandasm::Program progDer;
+        auto base = makeRecord(progDer, "Base");
         base->metadata->SetAttribute("external");
 
-        auto derv = make_record(prog_der, "Derv");
+        auto derv = makeRecord(progDer, "Derv");
         ASSERT_EQ(derv->metadata->SetAttributeValue("ets.extends", "Base"), std::nullopt);
         std::ignore = derv;
         auto fld = panda::pandasm::Field(LANG);
         fld.name = "fld";
         fld.type = panda::pandasm::Type("i32", 0);
         fld.metadata->SetAttribute("external");
-        derv->field_list.push_back(std::move(fld));
+        derv->fieldList.push_back(std::move(fld));
 
         auto func = panda::pandasm::Function("main", LANG);
-        func.regs_num = 1;
-        func.return_type = panda::pandasm::Type("void", 0);
+        func.regsNum = 1;
+        func.returnType = panda::pandasm::Type("void", 0);
         func.AddInstruction(panda::pandasm::Create_NEWOBJ(0, "Derv"));
         func.AddInstruction(panda::pandasm::Create_LDOBJ(0, "Derv.fld"));
         func.AddInstruction(panda::pandasm::Create_RETURN_VOID());
 
-        prog_der.function_table.emplace(func.name, std::move(func));
+        progDer.functionTable.emplace(func.name, std::move(func));
 
-        ASSERT_TRUE(panda::pandasm::AsmEmitter::Emit(derv_path, prog_der));
+        ASSERT_TRUE(panda::pandasm::AsmEmitter::Emit(dervPath, progDer));
     }
 
-    auto res = Link(DefaultConfig(), "data/multi/ForeignBase.linked.abc", {base_path, derv_path});
+    auto res = Link(DefaultConfig(), "data/multi/ForeignBase.linked.abc", {basePath, dervPath});
     ASSERT_TRUE(res.errors.empty()) << res.errors.front();
 #endif
 }

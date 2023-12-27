@@ -21,12 +21,12 @@ namespace panda::compiler {
 
 namespace {
 struct Split {
-    Split(LifeIntervalsIt p_begin, LifeIntervalsIt p_end, LifeNumber p_min, LifeNumber p_max,
-          LifeIntervalsTreeNode *p_parent)
-        : begin(p_begin), end(p_end), min(p_min), max(p_max), parent(p_parent)
+    Split(LifeIntervalsIt pBegin, LifeIntervalsIt pEnd, LifeNumber pMin, LifeNumber pMax,
+          LifeIntervalsTreeNode *pParent)
+        : begin(pBegin), end(pEnd), min(pMin), max(pMax), parent(pParent)
     {
-        ASSERT(p_begin < p_end);
-        ASSERT(p_min <= p_max);
+        ASSERT(pBegin < pEnd);
+        ASSERT(pMin <= pMax);
     }
     LifeIntervalsIt begin;          // NOLINT(misc-non-private-member-variables-in-classes)
     LifeIntervalsIt end;            // NOLINT(misc-non-private-member-variables-in-classes)
@@ -39,58 +39,58 @@ struct Split {
 std::pair<LifeNumber, LifeNumber> CopyIntervals(const ArenaVector<LifeIntervals *> &source,
                                                 ArenaVector<LifeIntervals *> *destination)
 {
-    LifeNumber min_ln = std::numeric_limits<LifeNumber>::max();
-    LifeNumber max_ln = 0;
+    LifeNumber minLn = std::numeric_limits<LifeNumber>::max();
+    LifeNumber maxLn = 0;
     for (auto &interval : source) {
         for (auto split = interval; !interval->IsPhysical() && split != nullptr; split = split->GetSibling()) {
             if (split->HasReg()) {
-                min_ln = std::min(min_ln, split->GetBegin());
-                max_ln = std::max(max_ln, split->GetEnd());
+                minLn = std::min(minLn, split->GetBegin());
+                maxLn = std::max(maxLn, split->GetEnd());
                 destination->push_back(split);
             }
         }
     }
-    return std::make_pair(min_ln, max_ln);
+    return std::make_pair(minLn, maxLn);
 }
 
 LifeIntervalsIt PartitionLeftSplit(const LifeIntervalsIt &left, const LifeIntervalsIt &right, LifeNumber midpoint,
-                                   LifeNumber *min_ln, LifeNumber *max_ln)
+                                   LifeNumber *minLn, LifeNumber *maxLn)
 {
-    LifeNumber left_min_ln = std::numeric_limits<LifeNumber>::max();
-    LifeNumber left_max_ln = 0;
-    auto result = std::partition(left, right, [&midpoint, &left_min_ln, &left_max_ln](const auto &em) {
+    LifeNumber leftMinLn = std::numeric_limits<LifeNumber>::max();
+    LifeNumber leftMaxLn = 0;
+    auto result = std::partition(left, right, [&midpoint, &leftMinLn, &leftMaxLn](const auto &em) {
         if (em->GetEnd() < midpoint) {
-            left_min_ln = std::min(left_min_ln, em->GetBegin());
-            left_max_ln = std::max(left_max_ln, em->GetEnd());
+            leftMinLn = std::min(leftMinLn, em->GetBegin());
+            leftMaxLn = std::max(leftMaxLn, em->GetEnd());
             return true;
         }
         return false;
     });
-    *min_ln = left_min_ln;
-    *max_ln = left_max_ln;
+    *minLn = leftMinLn;
+    *maxLn = leftMaxLn;
     return result;
 }
 
 LifeIntervalsIt PartitionRightSplit(const LifeIntervalsIt &left, const LifeIntervalsIt &right, LifeNumber midpoint,
-                                    LifeNumber *min_ln, LifeNumber *max_ln)
+                                    LifeNumber *minLn, LifeNumber *maxLn)
 {
-    LifeNumber right_min_ln = std::numeric_limits<LifeNumber>::max();
-    LifeNumber right_max_ln = 0;
-    auto result = std::partition(left, right, [&midpoint, &right_min_ln, &right_max_ln](const auto &em) {
+    LifeNumber rightMinLn = std::numeric_limits<LifeNumber>::max();
+    LifeNumber rightMaxLn = 0;
+    auto result = std::partition(left, right, [&midpoint, &rightMinLn, &rightMaxLn](const auto &em) {
         if (em->GetBegin() > midpoint) {
-            right_min_ln = std::min(right_min_ln, em->GetBegin());
-            right_max_ln = std::max(right_max_ln, em->GetEnd());
+            rightMinLn = std::min(rightMinLn, em->GetBegin());
+            rightMaxLn = std::max(rightMaxLn, em->GetEnd());
             return false;
         }
         return true;
     });
-    *min_ln = right_min_ln;
-    *max_ln = right_max_ln;
+    *minLn = rightMinLn;
+    *maxLn = rightMaxLn;
     return result;
 }
 }  // namespace
 
-LifeIntervalsTree *LifeIntervalsTree::BuildIntervalsTree(const ArenaVector<LifeIntervals *> &life_intervals,
+LifeIntervalsTree *LifeIntervalsTree::BuildIntervalsTree(const ArenaVector<LifeIntervals *> &lifeIntervals,
                                                          const Graph *graph)
 {
     auto alloc = graph->GetAllocator();
@@ -98,11 +98,11 @@ LifeIntervalsTree *LifeIntervalsTree::BuildIntervalsTree(const ArenaVector<LifeI
     auto intervals = alloc->New<ArenaVector<LifeIntervals *>>(alloc->Adapter());
     ArenaQueue<const Split *> queue(lalloc->Adapter());
 
-    auto ln_range = CopyIntervals(life_intervals, intervals);
+    auto lnRange = CopyIntervals(lifeIntervals, intervals);
     if (intervals->empty()) {
         return nullptr;
     }
-    queue.push(lalloc->New<Split>(intervals->begin(), intervals->end(), ln_range.first, ln_range.second, nullptr));
+    queue.push(lalloc->New<Split>(intervals->begin(), intervals->end(), lnRange.first, lnRange.second, nullptr));
 
     LifeIntervalsTreeNode *root {nullptr};
 
@@ -120,18 +120,18 @@ LifeIntervalsTree *LifeIntervalsTree::BuildIntervalsTree(const ArenaVector<LifeI
 
         auto midpoint = split->min + (split->max - split->min) / 2U;
 
-        LifeNumber left_min_ln;
-        LifeNumber left_max_ln;
-        auto left_midpoint = PartitionLeftSplit(split->begin, split->end, midpoint, &left_min_ln, &left_max_ln);
+        LifeNumber leftMinLn;
+        LifeNumber leftMaxLn;
+        auto leftMidpoint = PartitionLeftSplit(split->begin, split->end, midpoint, &leftMinLn, &leftMaxLn);
 
-        LifeNumber right_min_ln;
-        LifeNumber right_max_ln;
-        auto right_midpoint = PartitionRightSplit(left_midpoint, split->end, midpoint, &right_min_ln, &right_max_ln);
+        LifeNumber rightMinLn;
+        LifeNumber rightMaxLn;
+        auto rightMidpoint = PartitionRightSplit(leftMidpoint, split->end, midpoint, &rightMinLn, &rightMaxLn);
 
-        std::sort(left_midpoint, right_midpoint,
+        std::sort(leftMidpoint, rightMidpoint,
                   [](LifeIntervals *l, LifeIntervals *r) { return l->GetEnd() > r->GetEnd(); });
 
-        auto node = alloc->New<LifeIntervalsTreeNode>(split->min, split->max, left_midpoint, right_midpoint);
+        auto node = alloc->New<LifeIntervalsTreeNode>(split->min, split->max, leftMidpoint, rightMidpoint);
         if (split->parent == nullptr) {
             root = node;
         } else if (split->parent->GetMidpoint() > midpoint) {
@@ -139,11 +139,11 @@ LifeIntervalsTree *LifeIntervalsTree::BuildIntervalsTree(const ArenaVector<LifeI
         } else {
             split->parent->SetRight(node);
         }
-        if (split->begin < left_midpoint) {
-            queue.push(lalloc->New<Split>(split->begin, left_midpoint, left_min_ln, left_max_ln, node));
+        if (split->begin < leftMidpoint) {
+            queue.push(lalloc->New<Split>(split->begin, leftMidpoint, leftMinLn, leftMaxLn, node));
         }
-        if (right_midpoint < split->end) {
-            queue.push(lalloc->New<Split>(right_midpoint, split->end, right_min_ln, right_max_ln, node));
+        if (rightMidpoint < split->end) {
+            queue.push(lalloc->New<Split>(rightMidpoint, split->end, rightMinLn, rightMaxLn, node));
         }
     }
     return alloc->New<LifeIntervalsTree>(root);

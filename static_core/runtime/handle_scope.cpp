@@ -22,7 +22,7 @@ template <>
 uintptr_t HandleScope<coretypes::TaggedType>::NewHandle(coretypes::TaggedType value)
 {
     uintptr_t addr = thread_->GetHandleStorage<coretypes::TaggedType>()->NewHandle(value);
-    handle_count_++;
+    handleCount_++;
     return addr;
 }
 
@@ -31,7 +31,7 @@ template <>
 uintptr_t HandleScope<ObjectHeader *>::NewHandle(ObjectHeader *value)
 {
     uintptr_t addr = thread_->GetHandleStorage<ObjectHeader *>()->NewHandle(value);
-    handle_count_++;
+    handleCount_++;
     return addr;
 }
 }  // namespace panda

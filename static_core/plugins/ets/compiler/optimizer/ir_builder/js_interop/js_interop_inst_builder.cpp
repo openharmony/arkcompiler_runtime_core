@@ -52,13 +52,13 @@ using IntrinsicCompilerJSCallCheck = IntrinsicBuilder<RuntimeInterface::Intrinsi
                                                       DataType::POINTER, DataType::POINTER>;
 
 template <size_t N>
-IntrinsicInst *InstBuilder::BuildInteropIntrinsic(size_t pc, RuntimeInterface::IntrinsicId id, DataType::Type ret_type,
+IntrinsicInst *InstBuilder::BuildInteropIntrinsic(size_t pc, RuntimeInterface::IntrinsicId id, DataType::Type retType,
                                                   const std::array<DataType::Type, N> &types,
                                                   const std::array<Inst *, N + 1> &inputs)
 {
-    auto save_state = CreateSaveState(Opcode::SaveState, pc);
-    AddInstruction(save_state);
-    auto intrinsic = GetGraph()->CreateInstIntrinsic(ret_type, pc, id);
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    AddInstruction(saveState);
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(retType, pc, id);
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), N + 1);
     for (size_t i = 0; i < N; ++i) {
         intrinsic->AppendInputAndType(inputs[i], types[i]);
@@ -68,137 +68,137 @@ IntrinsicInst *InstBuilder::BuildInteropIntrinsic(size_t pc, RuntimeInterface::I
     return intrinsic;
 }
 
-std::pair<Inst *, Inst *> InstBuilder::BuildResolveInteropCallIntrinsic(RuntimeInterface::InteropCallKind call_kind,
+std::pair<Inst *, Inst *> InstBuilder::BuildResolveInteropCallIntrinsic(RuntimeInterface::InteropCallKind callKind,
                                                                         size_t pc, RuntimeInterface::MethodPtr method,
                                                                         Inst *arg0, Inst *arg1,
-                                                                        SaveStateInst *save_state)
+                                                                        SaveStateInst *saveState)
 {
-    IntrinsicInst *js_this = nullptr;
-    IntrinsicInst *js_fn = nullptr;
-    if (call_kind == RuntimeInterface::InteropCallKind::CALL_BY_VALUE) {
-        js_fn = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg0, save_state);
-        js_this = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg1, save_state);
+    IntrinsicInst *jsThis = nullptr;
+    IntrinsicInst *jsFn = nullptr;
+    if (callKind == RuntimeInterface::InteropCallKind::CALL_BY_VALUE) {
+        jsFn = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg0, saveState);
+        jsThis = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg1, saveState);
     } else {
-        auto js_val = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg0, save_state);
+        auto jsVal = IntrinsicCompilerConvertJSValueToLocal::Build(this, pc, arg0, saveState);
 
-        auto str_id = arg1->CastToLoadString()->GetTypeId();
-        js_this = IntrinsicCompilerResolveQualifiedJSCall::Build(this, pc, js_val, arg1, save_state);
+        auto strId = arg1->CastToLoadString()->GetTypeId();
+        jsThis = IntrinsicCompilerResolveQualifiedJSCall::Build(this, pc, jsVal, arg1, saveState);
 
-        Inst *prop_name = nullptr;
+        Inst *propName = nullptr;
         if (!GetGraph()->IsAotMode()) {
-            auto prop_name_str = GetGraph()->GetRuntime()->GetFuncPropName(method, str_id);
-            prop_name = GetGraph()->CreateInstLoadImmediate(DataType::POINTER, pc, prop_name_str,
-                                                            LoadImmediateInst::ObjectType::STRING);
+            auto propNameStr = GetGraph()->GetRuntime()->GetFuncPropName(method, strId);
+            propName = GetGraph()->CreateInstLoadImmediate(DataType::POINTER, pc, propNameStr,
+                                                           LoadImmediateInst::ObjectType::STRING);
         } else {
-            auto prop_name_str_offset = GetGraph()->GetRuntime()->GetFuncPropNameOffset(method, str_id);
-            prop_name = GetGraph()->CreateInstLoadImmediate(DataType::POINTER, pc, prop_name_str_offset,
-                                                            LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET);
+            auto propNameStrOffset = GetGraph()->GetRuntime()->GetFuncPropNameOffset(method, strId);
+            propName = GetGraph()->CreateInstLoadImmediate(DataType::POINTER, pc, propNameStrOffset,
+                                                           LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET);
         }
-        AddInstruction(prop_name);
+        AddInstruction(propName);
 
-        js_fn = IntrinsicCompilerGetJSNamedProperty::Build(this, pc, js_this, prop_name, save_state);
+        jsFn = IntrinsicCompilerGetJSNamedProperty::Build(this, pc, jsThis, propName, saveState);
     }
-    return {js_this, js_fn};
+    return {jsThis, jsFn};
 }
 
-void InstBuilder::BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::InteropCallKind call_kind, size_t pc,
-                                                          RuntimeInterface::MethodPtr method, Inst *js_call,
-                                                          SaveStateInst *save_state)
+void InstBuilder::BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::InteropCallKind callKind, size_t pc,
+                                                          RuntimeInterface::MethodPtr method, Inst *jsCall,
+                                                          SaveStateInst *saveState)
 {
-    if (call_kind == RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
-        auto ret = IntrinsicCompilerConvertLocalToJSValue::Build(this, pc, js_call, save_state);
+    if (callKind == RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
+        auto ret = IntrinsicCompilerConvertLocalToJSValue::Build(this, pc, jsCall, saveState);
         UpdateDefinitionAcc(ret);
     } else {
-        auto ret_intrinsic_id = GetGraph()->GetRuntime()->GetInfoForInteropCallRetValueConversion(method);
-        if (ret_intrinsic_id.has_value()) {
+        auto retIntrinsicId = GetGraph()->GetRuntime()->GetInfoForInteropCallRetValueConversion(method);
+        if (retIntrinsicId.has_value()) {
             Inst *ret = nullptr;
-            auto [id, ret_type] = ret_intrinsic_id.value();
+            auto [id, retType] = retIntrinsicId.value();
             if (id == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_REF_TYPE) {
-                auto load_class = BuildLoadClass(GetRuntime()->GetMethodReturnTypeId(method), pc, save_state);
-                AddInstruction(load_class);
+                auto loadClass = BuildLoadClass(GetRuntime()->GetMethodReturnTypeId(method), pc, saveState);
+                AddInstruction(loadClass);
                 // LoadClass returns ref, create a new SaveState
-                save_state = CreateSaveState(Opcode::SaveState, pc);
-                AddInstruction(save_state);
-                ret = BuildInteropIntrinsic<2>(pc, id, ret_type, {DataType::REFERENCE, DataType::POINTER},
-                                               {load_class, js_call, save_state});
+                saveState = CreateSaveState(Opcode::SaveState, pc);
+                AddInstruction(saveState);
+                ret = BuildInteropIntrinsic<2>(pc, id, retType, {DataType::REFERENCE, DataType::POINTER},
+                                               {loadClass, jsCall, saveState});
             } else {
-                ret = BuildInteropIntrinsic<1>(pc, id, ret_type, {DataType::POINTER}, {js_call, save_state});
+                ret = BuildInteropIntrinsic<1>(pc, id, retType, {DataType::POINTER}, {jsCall, saveState});
             }
             UpdateDefinitionAcc(ret);
         }
     }
 }
 
-void InstBuilder::BuildInteropCall(const BytecodeInstruction *bc_inst, RuntimeInterface::InteropCallKind call_kind,
-                                   RuntimeInterface::MethodPtr method, bool is_range, bool acc_read)
+void InstBuilder::BuildInteropCall(const BytecodeInstruction *bcInst, RuntimeInterface::InteropCallKind callKind,
+                                   RuntimeInterface::MethodPtr method, bool isRange, bool accRead)
 {
-    auto pc = GetPc(bc_inst->GetAddress());
-    auto save_state = CreateSaveState(Opcode::SaveState, pc);
-    AddInstruction(save_state);
+    auto pc = GetPc(bcInst->GetAddress());
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    AddInstruction(saveState);
 
     // Create LOCAL scope
-    IntrinsicCompilerCreateLocalScope::Build(this, pc, save_state);
+    IntrinsicCompilerCreateLocalScope::Build(this, pc, saveState);
     // Resolve call target
-    auto [js_this, js_fn] =
-        BuildResolveInteropCallIntrinsic(call_kind, pc, method, GetArgDefinition(bc_inst, 0, acc_read, is_range),
-                                         GetArgDefinition(bc_inst, 1, acc_read, is_range), save_state);
+    auto [jsThis, jsFn] =
+        BuildResolveInteropCallIntrinsic(callKind, pc, method, GetArgDefinition(bcInst, 0, accRead, isRange),
+                                         GetArgDefinition(bcInst, 1, accRead, isRange), saveState);
     // js call check
-    auto js_call_check = IntrinsicCompilerJSCallCheck::Build(this, pc, js_fn, save_state);
+    auto jsCallCheck = IntrinsicCompilerJSCallCheck::Build(this, pc, jsFn, saveState);
 
     // js call
-    RuntimeInterface::IntrinsicId call_id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_CALL_FUNCTION;
-    if (call_kind == RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
-        call_id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_NEW_INSTANCE;
+    RuntimeInterface::IntrinsicId callId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_CALL_FUNCTION;
+    if (callKind == RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
+        callId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_NEW_INSTANCE;
     }
-    auto js_call = GetGraph()->CreateInstIntrinsic(DataType::POINTER, pc, call_id);
-    ArenaVector<std::pair<RuntimeInterface::IntrinsicId, DataType::Type>> intrinsics_ids(
+    auto jsCall = GetGraph()->CreateInstIntrinsic(DataType::POINTER, pc, callId);
+    ArenaVector<std::pair<RuntimeInterface::IntrinsicId, DataType::Type>> intrinsicsIds(
         GetGraph()->GetLocalAllocator()->Adapter());
-    GetGraph()->GetRuntime()->GetInfoForInteropCallArgsConversion(method, &intrinsics_ids);
-    if (call_kind != RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
-        js_call->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsics_ids.size() + 4);
-        js_call->AppendInputs({{js_this, DataType::POINTER},
-                               {js_call_check, DataType::POINTER},
-                               {GetGraph()->FindOrCreateConstant(intrinsics_ids.size()), DataType::UINT32}});
+    GetGraph()->GetRuntime()->GetInfoForInteropCallArgsConversion(method, &intrinsicsIds);
+    if (callKind != RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
+        jsCall->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsicsIds.size() + 4);
+        jsCall->AppendInputs({{jsThis, DataType::POINTER},
+                              {jsCallCheck, DataType::POINTER},
+                              {GetGraph()->FindOrCreateConstant(intrinsicsIds.size()), DataType::UINT32}});
     } else {
-        js_call->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsics_ids.size() + 3);
-        js_call->AppendInputs({{js_call_check, DataType::POINTER},
-                               {GetGraph()->FindOrCreateConstant(intrinsics_ids.size()), DataType::UINT32}});
+        jsCall->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsicsIds.size() + 3);
+        jsCall->AppendInputs({{jsCallCheck, DataType::POINTER},
+                              {GetGraph()->FindOrCreateConstant(intrinsicsIds.size()), DataType::UINT32}});
     }
 
     // Convert args
-    size_t arg_idx = 0;
-    for (auto [intrinsic_id, type] : intrinsics_ids) {
+    size_t argIdx = 0;
+    for (auto [intrinsicId, type] : intrinsicsIds) {
         Inst *arg = nullptr;
         if (type != DataType::NO_TYPE) {
-            arg = BuildInteropIntrinsic<1>(pc, intrinsic_id, DataType::POINTER, {type},
-                                           {GetArgDefinition(bc_inst, arg_idx + 2, acc_read, is_range), save_state});
+            arg = BuildInteropIntrinsic<1>(pc, intrinsicId, DataType::POINTER, {type},
+                                           {GetArgDefinition(bcInst, argIdx + 2, accRead, isRange), saveState});
         } else {
-            arg = BuildInteropIntrinsic<0>(pc, intrinsic_id, DataType::POINTER, {}, {save_state});
+            arg = BuildInteropIntrinsic<0>(pc, intrinsicId, DataType::POINTER, {}, {saveState});
         }
-        js_call->AppendInputAndType(arg, DataType::POINTER);
-        arg_idx++;
+        jsCall->AppendInputAndType(arg, DataType::POINTER);
+        argIdx++;
     }
 
-    js_call->AppendInputAndType(save_state, DataType::NO_TYPE);
-    AddInstruction(js_call);
+    jsCall->AppendInputAndType(saveState, DataType::NO_TYPE);
+    AddInstruction(jsCall);
 
     // Convert ret value
-    BuildReturnValueConvertInteropIntrinsic(call_kind, pc, method, js_call, save_state);
+    BuildReturnValueConvertInteropIntrinsic(callKind, pc, method, jsCall, saveState);
     // Create new a SaveState because instruction with ref value was built
-    save_state = CreateSaveState(Opcode::SaveState, pc);
-    AddInstruction(save_state);
+    saveState = CreateSaveState(Opcode::SaveState, pc);
+    AddInstruction(saveState);
     // Destroy handle scope
-    IntrinsicCompilerDestroyLocalScope::Build(this, pc, save_state);
+    IntrinsicCompilerDestroyLocalScope::Build(this, pc, saveState);
 }
 
-bool InstBuilder::TryBuildInteropCall(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read)
+bool InstBuilder::TryBuildInteropCall(const BytecodeInstruction *bcInst, bool isRange, bool accRead)
 {
-    auto method_id = GetRuntime()->ResolveMethodIndex(GetMethod(), bc_inst->GetId(0).AsIndex());
-    auto method = GetRuntime()->GetMethodById(GetMethod(), method_id);
-    if (OPTIONS.IsCompilerEnableFastInterop()) {
-        auto interop_call_kind = GetRuntime()->GetInteropCallKind(method);
-        if (interop_call_kind != RuntimeInterface::InteropCallKind::UNKNOWN) {
-            BuildInteropCall(bc_inst, interop_call_kind, method, is_range, acc_read);
+    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), bcInst->GetId(0).AsIndex());
+    auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
+    if (g_options.IsCompilerEnableFastInterop()) {
+        auto interopCallKind = GetRuntime()->GetInteropCallKind(method);
+        if (interopCallKind != RuntimeInterface::InteropCallKind::UNKNOWN) {
+            BuildInteropCall(bcInst, interopCallKind, method, isRange, accRead);
             return true;
         }
     }

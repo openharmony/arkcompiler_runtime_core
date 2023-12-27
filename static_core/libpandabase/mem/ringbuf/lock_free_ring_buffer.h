@@ -36,9 +36,9 @@ public:
     LockFreeBuffer()
     {
         // Atomic with release order reason: threads should see correct initialization
-        tail_index_.store(0, std::memory_order_release);
+        tailIndex_.store(0, std::memory_order_release);
         // Atomic with release order reason: threads should see correct initialization
-        head_index_.store(0, std::memory_order_release);
+        headIndex_.store(0, std::memory_order_release);
         CheckInvariant();
     }
 
@@ -46,15 +46,15 @@ public:
     {
         CheckInvariant();
         // Atomic with acquire order reason: push should get the latest value
-        const auto current_tail = tail_index_.load(std::memory_order_acquire);
-        const auto next_tail = Increment(current_tail);
+        const auto currentTail = tailIndex_.load(std::memory_order_acquire);
+        const auto nextTail = Increment(currentTail);
         // Atomic with acquire order reason: push should get the latest value
-        auto local_head = head_index_.load(std::memory_order_acquire);
-        if (next_tail != local_head) {
-            ASSERT(current_tail < RING_BUFFER_SIZE);
-            buffer_[current_tail] = val;
+        auto localHead = headIndex_.load(std::memory_order_acquire);
+        if (nextTail != localHead) {
+            ASSERT(currentTail < RING_BUFFER_SIZE);
+            buffer_[currentTail] = val;
             // Atomic with release order reason: to allow pop to see the latest value
-            tail_index_.store(next_tail, std::memory_order_release);
+            tailIndex_.store(nextTail, std::memory_order_release);
             return true;
         }
         return false;
@@ -71,11 +71,11 @@ public:
     {
         CheckInvariant();
         // Atomic with acquire order reason: get the latest value
-        auto local_head = head_index_.load(std::memory_order_acquire);
+        auto localHead = headIndex_.load(std::memory_order_acquire);
         // Atomic with acquire order reason: get the latest value
-        auto local_tail = tail_index_.load(std::memory_order_acquire);
-        bool is_empty = (local_head == local_tail);
-        return is_empty;
+        auto localTail = tailIndex_.load(std::memory_order_acquire);
+        bool isEmpty = (localHead == localTail);
+        return isEmpty;
     }
 
     bool TryPop(T *pval)
@@ -83,16 +83,16 @@ public:
         CheckInvariant();
 
         // Atomic with acquire order reason: get the latest value
-        auto current_head = head_index_.load(std::memory_order_acquire);
+        auto currentHead = headIndex_.load(std::memory_order_acquire);
         // Atomic with acquire order reason: get the latest value
-        if (current_head == tail_index_.load(std::memory_order_acquire)) {
+        if (currentHead == tailIndex_.load(std::memory_order_acquire)) {
             return false;
         }
 
-        *pval = buffer_[current_head];
-        size_t new_value = Increment(current_head);
+        *pval = buffer_[currentHead];
+        size_t newValue = Increment(currentHead);
         // Atomic with release order reason: let others threads to see the latest value
-        head_index_.store(new_value, std::memory_order_release);
+        headIndex_.store(newValue, std::memory_order_release);
         return true;
     }
 
@@ -107,12 +107,12 @@ public:
 
     static constexpr uint32_t GetTailIndexOffset()
     {
-        return MEMBER_OFFSET(Self, tail_index_);
+        return MEMBER_OFFSET(Self, tailIndex_);
     }
 
     static constexpr uint32_t GetHeadIndexOffset()
     {
-        return MEMBER_OFFSET(Self, head_index_);
+        return MEMBER_OFFSET(Self, headIndex_);
     }
 
     static constexpr uint32_t GetBufferOffset()
@@ -123,8 +123,8 @@ public:
 private:
     using Self = LockFreeBuffer<T, RING_BUFFER_SIZE>;
 
-    alignas(panda::COHERENCY_LINE_SIZE) std::atomic<size_t> tail_index_;
-    std::atomic<size_t> head_index_;
+    alignas(panda::COHERENCY_LINE_SIZE) std::atomic<size_t> tailIndex_;
+    std::atomic<size_t> headIndex_;
     alignas(panda::COHERENCY_LINE_SIZE) std::array<T, RING_BUFFER_SIZE> buffer_;
 
     size_t Increment(size_t n)
@@ -136,12 +136,12 @@ private:
     {
 #ifndef NDEBUG
         // Atomic with acquire order reason: get the latest value
-        [[maybe_unused]] auto local_head = head_index_.load(std::memory_order_acquire);
-        ASSERT(local_head < RING_BUFFER_SIZE);
+        [[maybe_unused]] auto localHead = headIndex_.load(std::memory_order_acquire);
+        ASSERT(localHead < RING_BUFFER_SIZE);
 
         // Atomic with acquire order reason: get the latest value
-        [[maybe_unused]] auto local_tail = tail_index_.load(std::memory_order_acquire);
-        ASSERT(local_tail < RING_BUFFER_SIZE);
+        [[maybe_unused]] auto localTail = tailIndex_.load(std::memory_order_acquire);
+        ASSERT(localTail < RING_BUFFER_SIZE);
 #endif
     }
 };

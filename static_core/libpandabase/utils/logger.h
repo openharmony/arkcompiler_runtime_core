@@ -40,7 +40,7 @@ namespace panda {
 
 using FuncMobileLogPrint = int (*)(int, int, const char *, const char *, const char *);
 static constexpr int LOG_ID_MAIN = 0;
-PANDA_PUBLIC_API extern FuncMobileLogPrint MLOG_BUF_PRINT;
+PANDA_PUBLIC_API extern FuncMobileLogPrint g_mlogBufPrint;
 
 namespace base_options {
 class Options;
@@ -103,8 +103,8 @@ public:
 
     class Message {
     public:
-        PANDA_PUBLIC_API Message(Level level, Component component, bool print_system_error)
-            : level_(level), component_(component), print_system_error_(print_system_error)
+        PANDA_PUBLIC_API Message(Level level, Component component, bool printSystemError)
+            : level_(level), component_(component), printSystemError_(printSystemError)
         {
 #ifndef NDEBUG
             Logger::LogNestingInc();
@@ -121,7 +121,7 @@ public:
     private:
         Level level_;
         Component component_;
-        bool print_system_error_;
+        bool printSystemError_;
         std::ostringstream stream_;
 
         NO_COPY_SEMANTIC(Message);
@@ -130,55 +130,55 @@ public:
 
     PANDA_PUBLIC_API static void Initialize(const base_options::Options &options);
 
-    PANDA_PUBLIC_API static void InitializeFileLogging(const std::string &log_file, Level level,
-                                                       ComponentMask component_mask, bool is_fast_logging = false);
+    PANDA_PUBLIC_API static void InitializeFileLogging(const std::string &logFile, Level level,
+                                                       ComponentMask componentMask, bool isFastLogging = false);
 
-    PANDA_PUBLIC_API static void InitializeStdLogging(Level level, ComponentMask component_mask);
+    PANDA_PUBLIC_API static void InitializeStdLogging(Level level, ComponentMask componentMask);
 
-    PANDA_PUBLIC_API static void InitializeDummyLogging(Level level = Level::DEBUG, ComponentMask component_mask = 0);
+    PANDA_PUBLIC_API static void InitializeDummyLogging(Level level = Level::DEBUG, ComponentMask componentMask = 0);
 
     PANDA_PUBLIC_API static void Destroy();
 
-    static void SetMobileLogPrintEntryPointByPtr(void *mlog_buf_print_ptr)
+    static void SetMobileLogPrintEntryPointByPtr(void *mlogBufPrintPtr)
     {
-        MLOG_BUF_PRINT = reinterpret_cast<FuncMobileLogPrint>(mlog_buf_print_ptr);
+        g_mlogBufPrint = reinterpret_cast<FuncMobileLogPrint>(mlogBufPrintPtr);
     }
 
     static uint32_t GetLevelNumber(Logger::Level level);
 
     void WriteMobileLog(Level level, const char *component, const char *message)
     {
-        if (MLOG_BUF_PRINT == nullptr || !is_mlog_opened_) {
+        if (g_mlogBufPrint == nullptr || !isMlogOpened_) {
             return;
         }
-        PandaLog2MobileLog mlog_level = PandaLog2MobileLog::UNKNOWN;
+        PandaLog2MobileLog mlogLevel = PandaLog2MobileLog::UNKNOWN;
         switch (level) {
             case Level::DEBUG:
-                mlog_level = PandaLog2MobileLog::DEBUG;
+                mlogLevel = PandaLog2MobileLog::DEBUG;
                 break;
             case Level::INFO:
-                mlog_level = PandaLog2MobileLog::INFO;
+                mlogLevel = PandaLog2MobileLog::INFO;
                 break;
             case Level::ERROR:
-                mlog_level = PandaLog2MobileLog::ERROR;
+                mlogLevel = PandaLog2MobileLog::ERROR;
                 break;
             case Level::FATAL:
-                mlog_level = PandaLog2MobileLog::FATAL;
+                mlogLevel = PandaLog2MobileLog::FATAL;
                 break;
             case Level::WARNING:
-                mlog_level = PandaLog2MobileLog::WARN;
+                mlogLevel = PandaLog2MobileLog::WARN;
                 break;
             default:
                 UNREACHABLE();
         }
-        std::string panda_component = "Ark " + std::string(component);
-        MLOG_BUF_PRINT(LOG_ID_MAIN, mlog_level, panda_component.c_str(), "%s", message);
+        std::string pandaComponent = "Ark " + std::string(component);
+        g_mlogBufPrint(LOG_ID_MAIN, mlogLevel, pandaComponent.c_str(), "%s", message);
     }
 
     static bool IsLoggingOn(Level level, Component component)
     {
         return IsInitialized() && level <= logger_->level_ &&
-               (logger_->component_mask_.test(component) || level == Level::FATAL);
+               (logger_->componentMask_.test(component) || level == Level::FATAL);
     }
 
     PANDA_PUBLIC_API static bool IsLoggingOnOrAbort(Level level, Component component)
@@ -222,7 +222,7 @@ public:
 
     PANDA_PUBLIC_API static ComponentMask ComponentMaskFromString(std::string_view s);
 
-    static std::string StringfromDfxComponent(LogDfxComponent dfx_component);
+    static std::string StringfromDfxComponent(LogDfxComponent dfxComponent);
 
     static void SetLevel(Level level)
     {
@@ -239,31 +239,31 @@ public:
     static void EnableComponent(Component component)
     {
         ASSERT(IsInitialized());
-        logger_->component_mask_.set(component);
+        logger_->componentMask_.set(component);
     }
 
     static void EnableComponent(ComponentMask component)
     {
         ASSERT(IsInitialized());
-        logger_->component_mask_ |= component;
+        logger_->componentMask_ |= component;
     }
 
     static void DisableComponent(Component component)
     {
         ASSERT(IsInitialized());
-        logger_->component_mask_.reset(component);
+        logger_->componentMask_.reset(component);
     }
 
     static void ResetComponentMask()
     {
         ASSERT(IsInitialized());
-        logger_->component_mask_.reset();
+        logger_->componentMask_.reset();
     }
 
-    static void SetMobileLogOpenFlag(bool is_mlog_opened)
+    static void SetMobileLogOpenFlag(bool isMlogOpened)
     {
         ASSERT(IsInitialized());
-        logger_->is_mlog_opened_ = is_mlog_opened;
+        logger_->isMlogOpened_ = isMlogOpened;
     }
 
     static bool IsInLevelList(std::string_view s);
@@ -280,23 +280,23 @@ public:
     }
 
 protected:
-    Logger(Level level, ComponentMask component_mask)
+    Logger(Level level, ComponentMask componentMask)
         : level_(level),
-          component_mask_(component_mask)
+          componentMask_(componentMask)
 #ifndef NDEBUG
           ,
           // Means all the LOGs are allowed just as usual
-          nested_allowed_level_(Level::LAST)
+          nestedAllowedLevel_(Level::LAST)
 #endif
     {
     }
 
-    Logger(Level level, ComponentMask component_mask, [[maybe_unused]] Level nested_allowed_level)
+    Logger(Level level, ComponentMask componentMask, [[maybe_unused]] Level nestedAllowedLevel)
         : level_(level),
-          component_mask_(component_mask)
+          componentMask_(componentMask)
 #ifndef NDEBUG
           ,
-          nested_allowed_level_(nested_allowed_level)
+          nestedAllowedLevel_(nestedAllowedLevel)
 #endif
     {
     }
@@ -319,27 +319,27 @@ protected:
 
 private:
     Level level_;
-    ComponentMask component_mask_;
+    ComponentMask componentMask_;
 #ifndef NDEBUG
     // These are utilized by Fast* logger types.
     // For every thread, we trace events of staring shifting to a log (<<) and finishing doing it,
     // incrementing a log invocation depth variable bound to a thread, or decrementing it correspondingly.
     // Such variables we're doing as thread-local.
     // All the LOGs with levels < nested_allowed_level_ are only allowed to have depth of log == 1
-    Level nested_allowed_level_;  // Log level to suppress LOG triggering within << to another LOG
+    Level nestedAllowedLevel_;  // Log level to suppress LOG triggering within << to another LOG
 #endif
-    bool is_mlog_opened_ {true};
+    bool isMlogOpened_ {true};
 
     NO_COPY_SEMANTIC(Logger);
     NO_MOVE_SEMANTIC(Logger);
 };
 
-static Logger::ComponentMask LOGGER_COMPONENT_MASK_ALL = ~Logger::ComponentMask();
+static Logger::ComponentMask g_loggerComponentMaskAll = ~Logger::ComponentMask();
 
 class FileLogger : public Logger {
 protected:
-    FileLogger(std::ofstream &&stream, Level level, ComponentMask component_mask)
-        : Logger(level, component_mask), stream_(std::forward<std::ofstream>(stream))
+    FileLogger(std::ofstream &&stream, Level level, ComponentMask componentMask)
+        : Logger(level, componentMask), stream_(std::forward<std::ofstream>(stream))
     {
     }
 
@@ -360,8 +360,8 @@ private:
 class FastFileLogger : public Logger {
 protected:
     // Uses advanced Logger constructor, so we tell to suppress all nested messages below WARNING severity
-    FastFileLogger(std::ofstream &&stream, Level level, ComponentMask component_mask)
-        : Logger(level, component_mask, Logger::Level::WARNING), stream_(std::forward<std::ofstream>(stream))
+    FastFileLogger(std::ofstream &&stream, Level level, ComponentMask componentMask)
+        : Logger(level, componentMask, Logger::Level::WARNING), stream_(std::forward<std::ofstream>(stream))
     {
     }
 
@@ -381,7 +381,7 @@ private:
 
 class StderrLogger : public Logger {
 private:
-    StderrLogger(Level level, ComponentMask component_mask) : Logger(level, component_mask) {}
+    StderrLogger(Level level, ComponentMask componentMask) : Logger(level, componentMask) {}
 
     void LogLineInternal(Level level, Component component, const std::string &str) override;
     void SyncOutputResource() override {}
@@ -396,7 +396,7 @@ private:
 
 class DummyLogger : public Logger {
 private:
-    DummyLogger(Level level, ComponentMask component_mask) : Logger(level, component_mask) {}
+    DummyLogger(Level level, ComponentMask componentMask) : Logger(level, componentMask) {}
 
     void LogLineInternal([[maybe_unused]] Level level, [[maybe_unused]] Component component,
                          [[maybe_unused]] const std::string &str) override

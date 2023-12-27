@@ -24,7 +24,7 @@ namespace panda::panda_file {
 
 class DebugInfoDataAccessor {
 public:
-    DebugInfoDataAccessor(const File &panda_file, File::EntityId debug_info_id);
+    DebugInfoDataAccessor(const File &pandaFile, File::EntityId debugInfoId);
 
     ~DebugInfoDataAccessor() = default;
 
@@ -33,12 +33,12 @@ public:
 
     uint32_t GetLineStart() const
     {
-        return line_start_;
+        return lineStart_;
     }
 
     uint32_t GetNumParams() const
     {
-        return num_params_;
+        return numParams_;
     }
 
     template <class Callback>
@@ -59,12 +59,12 @@ public:
 
     const File &GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     File::EntityId GetDebugInfoId() const
     {
-        return debug_info_id_;
+        return debugInfoId_;
     }
 
 private:
@@ -74,14 +74,14 @@ private:
 
     void SkipLineNumberProgram();
 
-    const File &panda_file_;
-    File::EntityId debug_info_id_;
+    const File &pandaFile_;
+    File::EntityId debugInfoId_;
 
-    uint32_t line_start_;
-    uint32_t num_params_;
-    Span<const uint8_t> parameters_sp_ {nullptr, nullptr};
-    Span<const uint8_t> constant_pool_size_sp_ {nullptr, nullptr};
-    Span<const uint8_t> line_num_program_off_sp_ {nullptr, nullptr};
+    uint32_t lineStart_;
+    uint32_t numParams_;
+    Span<const uint8_t> parametersSp_ {nullptr, nullptr};
+    Span<const uint8_t> constantPoolSizeSp_ {nullptr, nullptr};
+    Span<const uint8_t> lineNumProgramOffSp_ {nullptr, nullptr};
 
     size_t size_ {0};
 };

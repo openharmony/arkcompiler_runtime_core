@@ -24,9 +24,9 @@ std::string Program::JsonDump() const
 {
     std::stringstream ss;
     ss << "{ \"functions\": ";
-    ss << JsonSerializeProgramItems(function_table);
+    ss << JsonSerializeProgramItems(functionTable);
     ss << ", \"records\": ";
-    ss << JsonSerializeProgramItems(record_table);
+    ss << JsonSerializeProgramItems(recordTable);
     ss << " }";
     return ss.str();
 }

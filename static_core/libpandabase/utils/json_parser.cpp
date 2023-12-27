@@ -19,7 +19,7 @@
 #include "utils.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG_JSON(level) LOG(level, COMMON) << "JsonParser: " << std::string(log_recursion_level_, '\t')
+#define LOG_JSON(level) LOG(level, COMMON) << "JsonParser: " << std::string(logRecursionLevel_, '\t')
 
 namespace panda {
 
@@ -30,17 +30,17 @@ bool JsonObject::Parser::Parse(const std::string &text)
     return Parse();
 }
 
-bool JsonObject::Parser::Parse(std::streambuf *stream_buf)
+bool JsonObject::Parser::Parse(std::streambuf *streamBuf)
 {
-    ASSERT(stream_buf != nullptr);
-    istream_.rdbuf(stream_buf);
+    ASSERT(streamBuf != nullptr);
+    istream_.rdbuf(streamBuf);
     return Parse();
 }
 
 bool JsonObject::Parser::Parse()
 {
-    ASSERT(current_obj_ != nullptr);
-    if (GetJsonObject(current_obj_) && TryGetSymbol('\0')) {
+    ASSERT(currentObj_ != nullptr);
+    if (GetJsonObject(currentObj_) && TryGetSymbol('\0')) {
         LOG_JSON(INFO) << "Successfully parsed JSON-object";
         return true;
     }
@@ -48,23 +48,23 @@ bool JsonObject::Parser::Parse()
     return false;
 }
 
-bool JsonObject::Parser::GetJsonObject(JsonObject *empty_obj)
+bool JsonObject::Parser::GetJsonObject(JsonObject *emptyObj)
 {
     LOG_JSON(DEBUG) << "Parsing object";
-    log_recursion_level_++;
-    ASSERT(empty_obj != nullptr);
-    ASSERT(empty_obj->values_map_.empty());
+    logRecursionLevel_++;
+    ASSERT(emptyObj != nullptr);
+    ASSERT(emptyObj->valuesMap_.empty());
     if (!TryGetSymbol('{')) {
         return false;
     }
 
     if (TryGetSymbol('}')) {
-        empty_obj->is_valid_ = true;
+        emptyObj->isValid_ = true;
         return true;
     }
 
     while (true) {
-        if (!InsertKeyValuePairIn(empty_obj)) {
+        if (!InsertKeyValuePairIn(emptyObj)) {
             return false;
         }
         if (TryGetSymbol(',')) {
@@ -74,8 +74,8 @@ bool JsonObject::Parser::GetJsonObject(JsonObject *empty_obj)
         break;
     }
 
-    log_recursion_level_--;
-    return (empty_obj->is_valid_ = TryGetSymbol('}'));
+    logRecursionLevel_--;
+    return (emptyObj->isValid_ = TryGetSymbol('}'));
 }
 
 bool JsonObject::Parser::InsertKeyValuePairIn(JsonObject *obj)
@@ -90,25 +90,25 @@ bool JsonObject::Parser::InsertKeyValuePairIn(JsonObject *obj)
         LOG_JSON(ERROR) << "Expected ':' between key and value:";
         return false;
     }
-    ASSERT(parsed_temp_.Get<StringT>() != nullptr);
-    Key key(std::move(*parsed_temp_.Get<StringT>()));
+    ASSERT(parsedTemp_.Get<StringT>() != nullptr);
+    Key key(std::move(*parsedTemp_.Get<StringT>()));
 
     if (!GetValue()) {
         return false;
     }
 
     // Get value:
-    Value value(std::move(parsed_temp_));
+    Value value(std::move(parsedTemp_));
     ASSERT(obj != nullptr);
 
     // Insert pair:
-    bool is_inserted = obj->values_map_.try_emplace(key, std::move(value)).second;
-    if (!is_inserted) {
+    bool isInserted = obj->valuesMap_.try_emplace(key, std::move(value)).second;
+    if (!isInserted) {
         LOG_JSON(ERROR) << "Key \"" << key << "\" must be unique";
         return false;
     }
     // Save string representation as a "source" of scalar values. For non-scalar types, string_temp_ is "":
-    obj->string_map_.try_emplace(key, std::move(string_temp_));
+    obj->stringMap_.try_emplace(key, std::move(stringTemp_));
     obj->keys_.push_back(key);
 
     LOG_JSON(DEBUG) << "Added entry with key \"" << key << "\"";
@@ -127,7 +127,7 @@ bool JsonObject::Parser::GetNull()
         return false;
     }
 
-    parsed_temp_.SetValue(JsonObjPointer {});
+    parsedTemp_.SetValue(JsonObjPointer {});
     LOG_JSON(DEBUG) << "Got null";
     return true;
 }
@@ -216,8 +216,8 @@ bool JsonObject::Parser::GetString(char delim)
     }
 
     LOG_JSON(DEBUG) << "Got a string: \"" << string << '"';
-    string_temp_ = string;
-    parsed_temp_.SetValue(std::move(string));
+    stringTemp_ = string;
+    parsedTemp_.SetValue(std::move(string));
 
     return true;
 }
@@ -230,7 +230,7 @@ bool JsonObject::Parser::GetNum()
         LOG_JSON(ERROR) << "Failed to read a num";
         return false;
     }
-    parsed_temp_.SetValue(num);
+    parsedTemp_.SetValue(num);
     LOG_JSON(DEBUG) << "Got an number: " << num;
     return true;
 }
@@ -243,7 +243,7 @@ bool JsonObject::Parser::GetBool()
         LOG_JSON(ERROR) << "Failed to read a boolean";
         return false;
     }
-    parsed_temp_.SetValue(boolean);
+    parsedTemp_.SetValue(boolean);
     LOG_JSON(DEBUG) << "Got a boolean: " << std::boolalpha << boolean;
     return true;
 }
@@ -251,7 +251,7 @@ bool JsonObject::Parser::GetBool()
 bool JsonObject::Parser::GetValue()
 {
     auto symbol = PeekSymbol();
-    auto pos_start = istream_.tellg();
+    auto posStart = istream_.tellg();
     bool res = false;
     switch (symbol) {
         case 'n':
@@ -282,16 +282,16 @@ bool JsonObject::Parser::GetValue()
         case '"':
             return GetJsonString();
         case '[':
-            string_temp_ = "";
+            stringTemp_ = "";
             return GetArray();
         case '{': {
-            string_temp_ = "";
-            auto inner_obj_ptr = std::make_unique<JsonObject>();
-            if (!GetJsonObject(inner_obj_ptr.get())) {
+            stringTemp_ = "";
+            auto innerObjPtr = std::make_unique<JsonObject>();
+            if (!GetJsonObject(innerObjPtr.get())) {
                 return false;
             }
             LOG_JSON(DEBUG) << "Got an inner JSON-object";
-            parsed_temp_.SetValue(std::move(inner_obj_ptr));
+            parsedTemp_.SetValue(std::move(innerObjPtr));
             return true;
         }
         default:
@@ -300,11 +300,11 @@ bool JsonObject::Parser::GetValue()
     }
 
     // Save source string of parsed value:
-    auto pos_end = istream_.tellg();
-    auto size = static_cast<size_t>(pos_end - pos_start);
-    string_temp_.resize(size, '\0');
-    istream_.seekg(pos_start);
-    istream_.read(&string_temp_[0], static_cast<std::streamsize>(size));
+    auto posEnd = istream_.tellg();
+    auto size = static_cast<size_t>(posEnd - posStart);
+    stringTemp_.resize(size, '\0');
+    istream_.seekg(posStart);
+    istream_.read(&stringTemp_[0], static_cast<std::streamsize>(size));
     ASSERT(istream_);
     return res;
 }
@@ -319,7 +319,7 @@ bool JsonObject::Parser::GetArray()
     ArrayT temp;
 
     if (TryGetSymbol(']')) {
-        parsed_temp_.SetValue(std::move(temp));
+        parsedTemp_.SetValue(std::move(temp));
         return true;
     }
 
@@ -327,14 +327,14 @@ bool JsonObject::Parser::GetArray()
         if (!GetValue()) {
             return false;
         }
-        temp.push_back(std::move(parsed_temp_));
+        temp.push_back(std::move(parsedTemp_));
         if (TryGetSymbol(',')) {
             LOG_JSON(DEBUG) << "Got a comma-separator, getting the next array element";
             continue;
         }
         break;
     }
-    parsed_temp_.SetValue(std::move(temp));
+    parsedTemp_.SetValue(std::move(temp));
     return TryGetSymbol(']');
 }
 

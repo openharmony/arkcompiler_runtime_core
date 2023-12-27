@@ -26,22 +26,22 @@ class CodeInfoBuilder {
 public:
     CodeInfoBuilder(Arch arch, ArenaAllocator *allocator)
         : arch_(arch),
-          stack_maps_(allocator),
-          inline_infos_(allocator),
-          roots_reg_masks_(allocator),
-          roots_stack_masks_(allocator),
-          method_ids_(allocator),
-          vregs_catalogue_(allocator),
-          vregs_map_(allocator),
-          vreg_masks_(allocator),
-          implicit_nullchecks_(allocator),
-          constant_table_(allocator),
-          current_vregs_(allocator->Adapter()),
-          last_vregs_(allocator->Adapter()),
-          vregs_last_change_(allocator->Adapter()),
-          inline_info_stack_(allocator->Adapter()),
-          vregs_map_storage_(allocator->Adapter()),
-          vregs_mask_storage_(allocator)
+          stackMaps_(allocator),
+          inlineInfos_(allocator),
+          rootsRegMasks_(allocator),
+          rootsStackMasks_(allocator),
+          methodIds_(allocator),
+          vregsCatalogue_(allocator),
+          vregsMap_(allocator),
+          vregMasks_(allocator),
+          implicitNullchecks_(allocator),
+          constantTable_(allocator),
+          currentVregs_(allocator->Adapter()),
+          lastVregs_(allocator->Adapter()),
+          vregsLastChange_(allocator->Adapter()),
+          inlineInfoStack_(allocator->Adapter()),
+          vregsMapStorage_(allocator->Adapter()),
+          vregsMaskStorage_(allocator)
     {
     }
 
@@ -49,16 +49,16 @@ public:
     NO_MOVE_SEMANTIC(CodeInfoBuilder);
     ~CodeInfoBuilder() = default;
 
-    void BeginMethod(uint32_t frame_size, uint32_t vregs_count);
+    void BeginMethod(uint32_t frameSize, uint32_t vregsCount);
 
     void EndMethod();
 
-    void BeginStackMap(uint32_t bpc, uint32_t npc, ArenaBitVector *stack_roots, uint32_t regs_roots,
-                       bool require_vreg_map, bool is_osr);
+    void BeginStackMap(uint32_t bpc, uint32_t npc, ArenaBitVector *stackRoots, uint32_t regsRoots, bool requireVregMap,
+                       bool isOsr);
 
     void EndStackMap();
 
-    void BeginInlineInfo(void *method, uint32_t method_id, uint32_t bpc, uint32_t vregs_count);
+    void BeginInlineInfo(void *method, uint32_t methodId, uint32_t bpc, uint32_t vregsCount);
 
     void EndInlineInfo();
 
@@ -66,10 +66,10 @@ public:
     {
         // Constant should be added via `AddConstant` method
         ASSERT(reg.GetLocation() != VRegInfo::Location::CONSTANT);
-        current_vregs_.push_back(reg);
+        currentVregs_.push_back(reg);
     }
 
-    void AddConstant(uint64_t value, VRegInfo::Type type, VRegInfo::VRegType vreg_type);
+    void AddConstant(uint64_t value, VRegInfo::Type type, VRegInfo::VRegType vregType);
 
     void SetFrameSize(uint32_t size)
     {
@@ -84,9 +84,9 @@ public:
         header_.SetCalleeFpRegMask(vmask);
     }
 
-    void AddImplicitNullCheck(uint32_t instruction_native_pc, uint32_t offset)
+    void AddImplicitNullCheck(uint32_t instructionNativePc, uint32_t offset)
     {
-        implicit_nullchecks_.Add({instruction_native_pc, offset});
+        implicitNullchecks_.Add({instructionNativePc, offset});
     }
 
     void SetHasFloatRegs(bool has)
@@ -98,16 +98,16 @@ public:
     constexpr void EnumerateTables(Func func)
     {
         size_t index = 0;
-        func(index++, &stack_maps_);
-        func(index++, &inline_infos_);
-        func(index++, &roots_reg_masks_);
-        func(index++, &roots_stack_masks_);
-        func(index++, &method_ids_);
-        func(index++, &vreg_masks_);
-        func(index++, &vregs_map_);
-        func(index++, &vregs_catalogue_);
-        func(index++, &implicit_nullchecks_);
-        func(index++, &constant_table_);
+        func(index++, &stackMaps_);
+        func(index++, &inlineInfos_);
+        func(index++, &rootsRegMasks_);
+        func(index++, &rootsStackMasks_);
+        func(index++, &methodIds_);
+        func(index++, &vregMasks_);
+        func(index++, &vregsMap_);
+        func(index++, &vregsCatalogue_);
+        func(index++, &implicitNullchecks_);
+        func(index++, &constantTable_);
         ASSERT(index == CodeInfo::TABLES_COUNT);
     }
 
@@ -118,36 +118,36 @@ private:
 
 private:
     Arch arch_;
-    uint32_t vregs_count_ {0};
-    uint32_t current_vregs_count_ {0};
+    uint32_t vregsCount_ {0};
+    uint32_t currentVregsCount_ {0};
 
     CodeInfoHeader header_ {};
 
     // Tables
-    BitTableBuilder<StackMap> stack_maps_;
-    BitTableBuilder<InlineInfo> inline_infos_;
-    BitTableBuilder<RegisterMask> roots_reg_masks_;
-    BitmapTableBuilder roots_stack_masks_;
-    BitTableBuilder<MethodId> method_ids_;
-    BitTableBuilder<VRegisterInfo> vregs_catalogue_;
-    BitTableBuilder<VRegisterCatalogueIndex> vregs_map_;
-    BitmapTableBuilder vreg_masks_;
-    BitTableBuilder<ImplicitNullChecks> implicit_nullchecks_;
-    BitTableBuilder<ConstantTable> constant_table_;
+    BitTableBuilder<StackMap> stackMaps_;
+    BitTableBuilder<InlineInfo> inlineInfos_;
+    BitTableBuilder<RegisterMask> rootsRegMasks_;
+    BitmapTableBuilder rootsStackMasks_;
+    BitTableBuilder<MethodId> methodIds_;
+    BitTableBuilder<VRegisterInfo> vregsCatalogue_;
+    BitTableBuilder<VRegisterCatalogueIndex> vregsMap_;
+    BitmapTableBuilder vregMasks_;
+    BitTableBuilder<ImplicitNullChecks> implicitNullchecks_;
+    BitTableBuilder<ConstantTable> constantTable_;
 
     // Auxiliary containers
-    BitTableBuilder<StackMap>::Entry current_stack_map_;
-    ArenaVector<VRegInfo> current_vregs_;
-    ArenaVector<VRegInfo> last_vregs_;
-    ArenaVector<uint32_t> vregs_last_change_;
-    ArenaVector<BitTableBuilder<InlineInfo>::Entry> inline_info_stack_;
-    ArenaVector<BitTableBuilder<VRegisterCatalogueIndex>::Entry> vregs_map_storage_;
-    ArenaBitVector vregs_mask_storage_;
+    BitTableBuilder<StackMap>::Entry currentStackMap_;
+    ArenaVector<VRegInfo> currentVregs_;
+    ArenaVector<VRegInfo> lastVregs_;
+    ArenaVector<uint32_t> vregsLastChange_;
+    ArenaVector<BitTableBuilder<InlineInfo>::Entry> inlineInfoStack_;
+    ArenaVector<BitTableBuilder<VRegisterCatalogueIndex>::Entry> vregsMapStorage_;
+    ArenaBitVector vregsMaskStorage_;
 
 #ifndef NDEBUG
-    bool was_method_begin_ {false};
-    bool was_stack_map_begin_ {false};
-    bool was_inline_info_begin_ {false};
+    bool wasMethodBegin_ {false};
+    bool wasStackMapBegin_ {false};
+    bool wasInlineInfoBegin_ {false};
 #endif
 
     static constexpr size_t MAX_VREG_LIVE_DISTANCE = 32;

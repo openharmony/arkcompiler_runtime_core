@@ -34,15 +34,15 @@ std::string GetString(EtsEnv *env, ets_string const &estr)
 }
 
 template <typename ValueType>
-std::vector<ValueType> EtsArrToVec(ValueType *buf, ets_size size_arr)
+std::vector<ValueType> EtsArrToVec(ValueType *buf, ets_size sizeArr)
 {
     if (buf == nullptr) {
         std::cerr << "Array empty, failed to get array";
         exit(1);
     }
     std::vector<ValueType> vec;
-    vec.reserve(size_arr);
-    for (ets_size i = 0; i < size_arr; i++) {
+    vec.reserve(sizeArr);
+    for (ets_size i = 0; i < sizeArr; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         vec.push_back(buf[i]);
     }

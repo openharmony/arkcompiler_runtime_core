@@ -56,8 +56,8 @@ TEST_F(MemoryCoalescingTest, ImmidiateLoads)
             INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -77,7 +77,7 @@ TEST_F(MemoryCoalescingTest, ImmidiateLoads)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, LoopLoadCoalescing)
@@ -112,8 +112,8 @@ TEST_F(MemoryCoalescingTest, LoopLoadCoalescing)
             INST(33U, Opcode::Return).s32().Inputs(28U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(5U, 0U).ref();
         CONSTANT(6U, 0x0U).s64();
@@ -142,7 +142,7 @@ TEST_F(MemoryCoalescingTest, LoopLoadCoalescing)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, LoopStoreCoalescing)
@@ -178,8 +178,8 @@ TEST_F(MemoryCoalescingTest, LoopStoreCoalescing)
             INST(29U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(4U, 0x0U).s64();
@@ -207,7 +207,7 @@ TEST_F(MemoryCoalescingTest, LoopStoreCoalescing)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, AliasedAccess)
@@ -227,8 +227,8 @@ TEST_F(MemoryCoalescingTest, AliasedAccess)
             INST(22U, Opcode::Return).s64().Inputs(21U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -242,7 +242,7 @@ TEST_F(MemoryCoalescingTest, AliasedAccess)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, OnlySingleCoalescing)
@@ -265,8 +265,8 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescing)
             INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -283,7 +283,7 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescing)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, PseudoParts)
@@ -305,8 +305,8 @@ TEST_F(MemoryCoalescingTest, PseudoParts)
             INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -323,7 +323,7 @@ TEST_F(MemoryCoalescingTest, PseudoParts)
     GetGraph()->RunPass<Scheduler>();
     RegAlloc(GetGraph());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, UnalignedStores)
@@ -351,8 +351,8 @@ TEST_F(MemoryCoalescingTest, UnalignedStores)
             INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -376,7 +376,7 @@ TEST_F(MemoryCoalescingTest, UnalignedStores)
 
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>(false));
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, NoAlignmentTestI)
@@ -396,8 +396,8 @@ TEST_F(MemoryCoalescingTest, NoAlignmentTestI)
             INST(4U, Opcode::Return).s64().Inputs(3U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -416,7 +416,7 @@ TEST_F(MemoryCoalescingTest, NoAlignmentTestI)
 
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>(false));
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, StoresRoundedByLoads)
@@ -440,8 +440,8 @@ TEST_F(MemoryCoalescingTest, StoresRoundedByLoads)
             INST(8U, Opcode::Return).s64().Inputs(7U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -457,7 +457,7 @@ TEST_F(MemoryCoalescingTest, StoresRoundedByLoads)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, LoadsRoundedByStores)
@@ -481,8 +481,8 @@ TEST_F(MemoryCoalescingTest, LoadsRoundedByStores)
             INST(8U, Opcode::Return).s64().Inputs(7U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -500,7 +500,7 @@ TEST_F(MemoryCoalescingTest, LoadsRoundedByStores)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, UnalignedInLoop)
@@ -532,8 +532,8 @@ TEST_F(MemoryCoalescingTest, UnalignedInLoop)
             INST(29U, Opcode::Return).s32().Inputs(33U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -562,7 +562,7 @@ TEST_F(MemoryCoalescingTest, UnalignedInLoop)
 
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>(false));
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, IndexInference)
@@ -585,8 +585,8 @@ TEST_F(MemoryCoalescingTest, IndexInference)
             INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -607,7 +607,7 @@ TEST_F(MemoryCoalescingTest, IndexInference)
 
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>(false));
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, SimplePlaceFinding)
@@ -629,8 +629,8 @@ TEST_F(MemoryCoalescingTest, SimplePlaceFinding)
             INST(11U, Opcode::Return).s32().Inputs(9U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -646,7 +646,7 @@ TEST_F(MemoryCoalescingTest, SimplePlaceFinding)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>(false));
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, ObjectAccessesCoalescing)
@@ -671,8 +671,8 @@ TEST_F(MemoryCoalescingTest, ObjectAccessesCoalescing)
             INST(27U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(1U, 0x2U).s64();
@@ -689,15 +689,15 @@ TEST_F(MemoryCoalescingTest, ObjectAccessesCoalescing)
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
-    OPTIONS.SetCompilerMemoryCoalescingObjects(false);
+    g_options.SetCompilerMemoryCoalescingObjects(false);
     ASSERT_FALSE(GetGraph()->RunPass<MemoryCoalescing>(true));
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), initial));
 
-    OPTIONS.SetCompilerMemoryCoalescingObjects(true);
+    g_options.SetCompilerMemoryCoalescingObjects(true);
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>(true));
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, AllowedVolatileReordering)
@@ -728,8 +728,8 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering)
             INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -751,7 +751,7 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, AllowedVolatileReordering2)
@@ -782,8 +782,8 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering2)
             INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -805,7 +805,7 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering2)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, UnrolledLoop)
@@ -845,8 +845,8 @@ TEST_F(MemoryCoalescingTest, UnrolledLoop)
             INST(40U, Opcode::ReturnVoid);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).ref();
@@ -879,7 +879,7 @@ TEST_F(MemoryCoalescingTest, UnrolledLoop)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, CoalescingOverSaveState)
@@ -914,8 +914,8 @@ TEST_F(MemoryCoalescingTest, CoalescingOverSaveState)
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
 
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
 
@@ -940,8 +940,8 @@ TEST_F(MemoryCoalescingTest, CoalescingOverSaveState)
             INST(40U, Opcode::Return).s64().Inputs(53U);
         }
     }
-    GraphChecker(opt_graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    GraphChecker(optGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, AlignmentTest)
@@ -1198,8 +1198,8 @@ TEST_F(MemoryCoalescingTest, NestedLoadCoalescing)
             INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1243,8 +1243,8 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSafePoint)
             INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1262,7 +1262,7 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSafePoint)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, PseudoPartsOverSafePoints)
@@ -1286,8 +1286,8 @@ TEST_F(MemoryCoalescingTest, PseudoPartsOverSafePoints)
             INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1304,7 +1304,7 @@ TEST_F(MemoryCoalescingTest, PseudoPartsOverSafePoints)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveState)
@@ -1328,8 +1328,8 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveState)
             INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1347,7 +1347,7 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveState)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, OverSaveState)
@@ -1371,8 +1371,8 @@ TEST_F(MemoryCoalescingTest, OverSaveState)
             INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1389,7 +1389,7 @@ TEST_F(MemoryCoalescingTest, OverSaveState)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveStateDeoptimize)
@@ -1413,8 +1413,8 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveStateDeoptimize)
             INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1432,7 +1432,7 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveStateDeoptimize)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, OverSaveStateDeoptimize)
@@ -1459,8 +1459,8 @@ TEST_F(MemoryCoalescingTest, OverSaveStateDeoptimize)
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
 
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1476,7 +1476,7 @@ TEST_F(MemoryCoalescingTest, OverSaveStateDeoptimize)
             INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveStateWithCheckUser)
@@ -1501,8 +1501,8 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveStateWithCheckUser)
             INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1521,7 +1521,7 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveStateWithCheckUser)
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, OverSaveStateWithCheckUser)
@@ -1550,8 +1550,8 @@ TEST_F(MemoryCoalescingTest, OverSaveStateWithCheckUser)
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
 
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1569,7 +1569,7 @@ TEST_F(MemoryCoalescingTest, OverSaveStateWithCheckUser)
             INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 TEST_F(MemoryCoalescingTest, OverSaveStateWithDeoptimizeUser)
@@ -1598,8 +1598,8 @@ TEST_F(MemoryCoalescingTest, OverSaveStateWithDeoptimizeUser)
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
 
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1617,7 +1617,7 @@ TEST_F(MemoryCoalescingTest, OverSaveStateWithDeoptimizeUser)
             INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 // NOLINTEND(readability-magic-numbers)
 

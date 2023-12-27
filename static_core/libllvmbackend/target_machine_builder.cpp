@@ -31,8 +31,8 @@ llvm::Expected<std::unique_ptr<llvm::TargetMachine>> TargetMachineBuilder::Build
     }
     assert(target != nullptr);
 
-    llvm::TargetOptions target_options {};
-    auto machine = target->createTargetMachine(triple_.getTriple(), cpu_, features_, target_options, llvm::Reloc::PIC_,
+    llvm::TargetOptions targetOptions {};
+    auto machine = target->createTargetMachine(triple_.getTriple(), cpu_, features_, targetOptions, llvm::Reloc::PIC_,
                                                llvm::CodeModel::Small, optlevel_);
     assert(machine != nullptr);
     return std::unique_ptr<llvm::TargetMachine>(machine);

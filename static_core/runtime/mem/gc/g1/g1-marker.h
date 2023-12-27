@@ -84,11 +84,11 @@ public:
 
     ALWAYS_INLINE bool MarkIfNotMarked(ObjectHeader *object) const
     {
-        Region *obj_region = ObjectToRegion(object);
-        if (!obj_region->IsInCollectionSet()) {
+        Region *objRegion = ObjectToRegion(object);
+        if (!objRegion->IsInCollectionSet()) {
             return false;
         }
-        MarkBitmap *bitmap = obj_region->GetMarkBitmap();
+        MarkBitmap *bitmap = objRegion->GetMarkBitmap();
         ASSERT(bitmap != nullptr);
         return !bitmap->AtomicTestAndSet(object);
     }

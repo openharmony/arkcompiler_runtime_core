@@ -132,8 +132,8 @@ public:
 };
 
 struct PtStepRange {
-    uint32_t start_bc_offset {0};
-    uint32_t end_bc_offset {0};
+    uint32_t startBcOffset {0};
+    uint32_t endBcOffset {0};
 };
 
 // * * * * *
@@ -151,17 +151,17 @@ using ExceptionWrapper = std::string;
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 struct ThreadInfo {
     char *name;
-    size_t name_length;
+    size_t nameLength;
     int32_t priority;
-    bool is_daemon;
-    ThreadGroup thread_group;
+    bool isDaemon;
+    ThreadGroup threadGroup;
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 struct PandaClassDefinition {
     PtClass klass;
-    uint32_t class_byte_count;
-    const unsigned char *class_bytes;
+    uint32_t classByteCount;
+    const unsigned char *classBytes;
 };
 
 enum PauseReason {
@@ -458,7 +458,7 @@ public:
      * @param hook_type Type of hook that must be enabled or disabled
      * @return Error if any errors occur
      */
-    virtual std::optional<Error> SetNotification(PtThread thread, bool enable, PtHookType hook_type) = 0;
+    virtual std::optional<Error> SetNotification(PtThread thread, bool enable, PtHookType hookType) = 0;
 
     /**
      * @brief Set breakpoint to @param location
@@ -511,7 +511,7 @@ public:
 
     virtual Expected<PtMethod, Error> GetPtMethod(const PtLocation &location) const = 0;
 
-    virtual std::optional<Error> GetThreadList(PandaVector<PtThread> *thread_list) const = 0;
+    virtual std::optional<Error> GetThreadList(PandaVector<PtThread> *threadList) const = 0;
 
     virtual std::optional<Error> SetVariable(PtThread /* thread */, uint32_t /* frameDepth */, int32_t /* regNumber */,
                                              const VRegValue & /* value */) const
@@ -525,25 +525,25 @@ public:
         return {};
     }
 
-    virtual std::optional<Error> GetProperty(PtObject this_object, PtProperty property, PtValue *value) const = 0;
+    virtual std::optional<Error> GetProperty(PtObject thisObject, PtProperty property, PtValue *value) const = 0;
 
-    virtual std::optional<Error> SetProperty(PtObject this_object, PtProperty property, const PtValue &value) const = 0;
+    virtual std::optional<Error> SetProperty(PtObject thisObject, PtProperty property, const PtValue &value) const = 0;
 
-    virtual std::optional<Error> EvaluateExpression(PtThread thread, uint32_t frame_number, ExpressionWrapper expr,
+    virtual std::optional<Error> EvaluateExpression(PtThread thread, uint32_t frameNumber, ExpressionWrapper expr,
                                                     PtValue *result) const = 0;
 
-    virtual std::optional<Error> GetThreadInfo(PtThread thread, ThreadInfo *info_ptr) const = 0;
+    virtual std::optional<Error> GetThreadInfo(PtThread thread, ThreadInfo *infoPtr) const = 0;
 
-    virtual std::optional<Error> RestartFrame(PtThread thread, uint32_t frame_number) const = 0;
+    virtual std::optional<Error> RestartFrame(PtThread thread, uint32_t frameNumber) const = 0;
 
-    virtual std::optional<Error> SetAsyncCallStackDepth(uint32_t max_depth) const = 0;
+    virtual std::optional<Error> SetAsyncCallStackDepth(uint32_t maxDepth) const = 0;
 
-    virtual std::optional<Error> AwaitPromise(PtObject promise_object, PtValue *result) const = 0;
+    virtual std::optional<Error> AwaitPromise(PtObject promiseObject, PtValue *result) const = 0;
 
     virtual std::optional<Error> CallFunctionOn(PtObject object, PtMethod method, const PandaVector<PtValue> &arguments,
                                                 PtValue *result) const = 0;
 
-    virtual std::optional<Error> GetProperties(uint32_t *count_ptr, char ***property_ptr) const = 0;
+    virtual std::optional<Error> GetProperties(uint32_t *countPtr, char ***propertyPtr) const = 0;
 
     virtual std::optional<Error> NotifyFramePop(PtThread thread, uint32_t depth) const = 0;
 
@@ -576,16 +576,16 @@ public:
     // * * * * *
     // Deprecated API
     // * * * * *
-    virtual std::optional<Error> GetThisVariableByFrame(PtThread thread, uint32_t frame_depth, PtValue *value) = 0;
+    virtual std::optional<Error> GetThisVariableByFrame(PtThread thread, uint32_t frameDepth, PtValue *value) = 0;
     virtual std::optional<Error> SetPropertyAccessWatch(PtClass klass, PtProperty property) = 0;
     virtual std::optional<Error> ClearPropertyAccessWatch(PtClass klass, PtProperty property) = 0;
     virtual std::optional<Error> SetPropertyModificationWatch(PtClass klass, PtProperty property) = 0;
     virtual std::optional<Error> ClearPropertyModificationWatch(PtClass klass, PtProperty property) = 0;
-    virtual std::optional<Error> RetransformClasses(int class_count, const PtClass *classes) const = 0;
-    virtual std::optional<Error> RedefineClasses(int class_count, const PandaClassDefinition *classes) const = 0;
-    virtual std::optional<Error> SetVariable(PtThread thread, uint32_t frame_depth, int32_t reg_number,
+    virtual std::optional<Error> RetransformClasses(int classCount, const PtClass *classes) const = 0;
+    virtual std::optional<Error> RedefineClasses(int classCount, const PandaClassDefinition *classes) const = 0;
+    virtual std::optional<Error> SetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
                                              const PtValue &value) const = 0;
-    virtual std::optional<Error> GetVariable(PtThread thread, uint32_t frame_depth, int32_t reg_number,
+    virtual std::optional<Error> GetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
                                              PtValue *value) const = 0;
 
     // * * * * *

@@ -28,9 +28,9 @@ struct CoroutineManagerConfig {
     static constexpr uint32_t WORKERS_COUNT_AUTO = 0;
 
     /// JS-compatible mode, affects async functions, await() and other things
-    bool emulate_js = false;
+    bool emulateJs = false;
     /// Number of coroutine workers for the N:M mode
-    uint32_t workers_count = WORKERS_COUNT_AUTO;
+    uint32_t workersCount = WORKERS_COUNT_AUTO;
 };
 
 /**
@@ -76,7 +76,7 @@ public:
      *
      */
     using CoroutineFactory = Coroutine *(*)(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *ctx,
-                                            std::optional<Coroutine::EntrypointInfo> &&ep_info);
+                                            std::optional<Coroutine::EntrypointInfo> &&epInfo);
 
     NO_COPY_SEMANTIC(CoroutineManager);
     NO_MOVE_SEMANTIC(CoroutineManager);
@@ -110,7 +110,7 @@ public:
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
      */
-    virtual Coroutine *Launch(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments,
+    virtual Coroutine *Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
                               CoroutineAffinity affinity) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
@@ -144,7 +144,7 @@ public:
      *
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
-    Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool make_current);
+    Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent);
     void DestroyEntrypointlessCoroutine(Coroutine *co);
 
     /// Destroy a coroutine with an entrypoint
@@ -170,7 +170,7 @@ public:
 
 protected:
     /// Create native coroutine context instance (implementation dependent)
-    virtual CoroutineContext *CreateCoroutineContext(bool coro_has_entrypoint) = 0;
+    virtual CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) = 0;
     /// Delete native coroutine context instance (implementation dependent)
     virtual void DeleteCoroutineContext(CoroutineContext *) = 0;
     /**
@@ -180,7 +180,7 @@ protected:
      *
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
-    Coroutine *CreateCoroutineInstance(CompletionEvent *completion_event, Method *entrypoint,
+    Coroutine *CreateCoroutineInstance(CompletionEvent *completionEvent, Method *entrypoint,
                                        PandaVector<Value> &&arguments, PandaString name);
     /// Returns number of existing coroutines
     virtual size_t GetCoroutineCount() = 0;
@@ -198,30 +198,30 @@ protected:
     static constexpr size_t UNINITIALIZED_COROUTINE_ID = 0x0U;
 
 private:
-    CoroutineFactory co_factory_ = nullptr;
+    CoroutineFactory coFactory_ = nullptr;
 
     // coroutine id management
-    os::memory::Mutex ids_lock_;
-    std::bitset<MAX_COROUTINE_ID> coroutine_ids_ GUARDED_BY(ids_lock_);
-    uint32_t last_coroutine_id_ GUARDED_BY(ids_lock_) = UNINITIALIZED_COROUTINE_ID;
+    os::memory::Mutex idsLock_;
+    std::bitset<MAX_COROUTINE_ID> coroutineIds_ GUARDED_BY(idsLock_);
+    uint32_t lastCoroutineId_ GUARDED_BY(idsLock_) = UNINITIALIZED_COROUTINE_ID;
 };
 
 /// Disables coroutine switch on the current worker for some scope. Can be used recursively.
 class ScopedDisableCoroutineSwitch {
 public:
-    explicit ScopedDisableCoroutineSwitch(CoroutineManager *coro_manager) : coro_manager_(coro_manager)
+    explicit ScopedDisableCoroutineSwitch(CoroutineManager *coroManager) : coroManager_(coroManager)
     {
-        ASSERT(coro_manager_ != nullptr);
-        coro_manager_->DisableCoroutineSwitch();
+        ASSERT(coroManager_ != nullptr);
+        coroManager_->DisableCoroutineSwitch();
     }
 
     ~ScopedDisableCoroutineSwitch()
     {
-        coro_manager_->EnableCoroutineSwitch();
+        coroManager_->EnableCoroutineSwitch();
     }
 
 private:
-    CoroutineManager *coro_manager_;
+    CoroutineManager *coroManager_;
 
     NO_COPY_SEMANTIC(ScopedDisableCoroutineSwitch);
     NO_MOVE_SEMANTIC(ScopedDisableCoroutineSwitch);

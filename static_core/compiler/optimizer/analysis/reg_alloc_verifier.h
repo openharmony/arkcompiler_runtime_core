@@ -65,7 +65,7 @@ class LocationState;
  */
 class RegAllocVerifier : public Analysis {
 public:
-    explicit RegAllocVerifier(Graph *graph, bool save_live_regs_on_call = true);
+    explicit RegAllocVerifier(Graph *graph, bool saveLiveRegsOnCall = true);
     NO_COPY_SEMANTIC(RegAllocVerifier);
     NO_MOVE_SEMANTIC(RegAllocVerifier);
     ~RegAllocVerifier() override = default;
@@ -78,21 +78,21 @@ public:
     }
 
 private:
-    BasicBlock *current_block_ {nullptr};
-    BlockState *current_state_ {nullptr};
+    BasicBlock *currentBlock_ {nullptr};
+    BlockState *currentState_ {nullptr};
     ArenaVector<LocationState> immediates_;
     // required to support Save/RestoreRegisters intrinsics
-    ArenaVector<LocationState> saved_regs_;
-    ArenaVector<LocationState> saved_vregs_;
+    ArenaVector<LocationState> savedRegs_;
+    ArenaVector<LocationState> savedVregs_;
     bool success_ {true};
-    Marker implicit_null_check_handled_marker_ {};
-    bool save_live_regs_ {false};
+    Marker implicitNullCheckHandledMarker_ {};
+    bool saveLiveRegs_ {false};
 
     void InitImmediates();
     bool IsZeroReg(Register reg, DataType::Type type) const;
     void HandleDest(Inst *inst);
     LocationState &GetLocationState(Location location);
-    void UpdateLocation(Location location, DataType::Type type, uint32_t inst_id);
+    void UpdateLocation(Location location, DataType::Type type, uint32_t instId);
     template <typename T>
     bool ForEachLocation(Location location, DataType::Type type, T callback);
     void ProcessCurrentBlock();
@@ -165,7 +165,7 @@ private:
 
 class BlockState {
 public:
-    BlockState(size_t regs, size_t vregs, size_t stack_slots, size_t stack_params, ArenaAllocator *alloc);
+    BlockState(size_t regs, size_t vregs, size_t stackSlots, size_t stackParams, ArenaAllocator *alloc);
     ~BlockState() = default;
     NO_COPY_SEMANTIC(BlockState);
     NO_MOVE_SEMANTIC(BlockState);
@@ -201,27 +201,27 @@ public:
     }
     const LocationState &GetStackArg(StackSlot slot) const
     {
-        ASSERT(slot < stack_arg_.size());
-        return stack_arg_[slot];
+        ASSERT(slot < stackArg_.size());
+        return stackArg_[slot];
     }
     LocationState &GetStackArg(StackSlot slot)
     {
-        if (slot >= stack_arg_.size()) {
-            stack_arg_.resize(slot + 1);
+        if (slot >= stackArg_.size()) {
+            stackArg_.resize(slot + 1);
         }
-        return stack_arg_[slot];
+        return stackArg_[slot];
     }
     const LocationState &GetStackParam(StackSlot slot) const
     {
-        ASSERT(slot < stack_param_.size());
-        return stack_param_[slot];
+        ASSERT(slot < stackParam_.size());
+        return stackParam_[slot];
     }
     LocationState &GetStackParam(StackSlot slot)
     {
-        if (slot >= stack_param_.size()) {
-            stack_param_.resize(slot + 1);
+        if (slot >= stackParam_.size()) {
+            stackParam_.resize(slot + 1);
         }
-        return stack_param_[slot];
+        return stackParam_[slot];
     }
 
     bool Merge(const BlockState &state, const PhiInstSafeIter &phis, BasicBlock *pred,
@@ -232,8 +232,8 @@ private:
     ArenaVector<LocationState> regs_;
     ArenaVector<LocationState> vregs_;
     ArenaVector<LocationState> stack_;
-    ArenaVector<LocationState> stack_param_;
-    ArenaVector<LocationState> stack_arg_;
+    ArenaVector<LocationState> stackParam_;
+    ArenaVector<LocationState> stackArg_;
 };
 }  // namespace panda::compiler
 

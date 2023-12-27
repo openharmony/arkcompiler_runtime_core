@@ -47,7 +47,7 @@ protected:
     }
 
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    const std::string abc_file_ = "coroswitch_in_cctor.abc";
+    const std::string abcFile_ = "coroswitch_in_cctor.abc";
 };
 
 using CoroInCctorDeathTest = CoroInCctorTest;
@@ -57,8 +57,8 @@ using CoroInCctorDeathTest = CoroInCctorTest;
  */
 TEST_F(CoroInCctorDeathTest, FatalOnCoroSwitchInCctor)
 {
-    const std::string main_func = "ETSGLOBAL::main";
-    EXPECT_EXIT(Runtime::GetCurrent()->ExecutePandaFile(abc_file_.c_str(), main_func.c_str(), {}),
+    const std::string mainFunc = "ETSGLOBAL::main";
+    EXPECT_EXIT(Runtime::GetCurrent()->ExecutePandaFile(abcFile_.c_str(), mainFunc.c_str(), {}),
                 testing::KilledBySignal(SIGABRT), ".*");
 }
 

@@ -61,7 +61,7 @@ DataType::Type InstBuilder::ConvertPbcType(panda_file::Type type)
     UNREACHABLE();
 }
 
-void InstBuilder::Prepare(bool is_inlined_graph)
+void InstBuilder::Prepare(bool isInlinedGraph)
 {
     SetCurrentBlock(GetGraph()->GetStartBlock());
 #ifndef PANDA_TARGET_WINDOWS
@@ -69,48 +69,48 @@ void InstBuilder::Prepare(bool is_inlined_graph)
 #endif
     // Create parameter for actual num args
     if (!GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod() && !GetGraph()->GetMode().IsDynamicStub()) {
-        auto param_inst = GetGraph()->AddNewParameter(ParameterInst::DYNAMIC_NUM_ARGS);
-        param_inst->SetType(DataType::UINT32);
-        param_inst->SetLocationData(GetGraph()->GetDataForNativeParam(DataType::UINT32));
+        auto paramInst = GetGraph()->AddNewParameter(ParameterInst::DYNAMIC_NUM_ARGS);
+        paramInst->SetType(DataType::UINT32);
+        paramInst->SetLocationData(GetGraph()->GetDataForNativeParam(DataType::UINT32));
     }
-    size_t arg_ref_num = 0;
+    size_t argRefNum = 0;
     if (GetRuntime()->GetMethodReturnType(GetMethod()) == DataType::REFERENCE) {
-        arg_ref_num = 1;
+        argRefNum = 1;
     }
-    auto num_args = GetRuntime()->GetMethodTotalArgumentsCount(GetMethod());
-    bool is_static = GetRuntime()->IsMethodStatic(GetMethod());
+    auto numArgs = GetRuntime()->GetMethodTotalArgumentsCount(GetMethod());
+    bool isStatic = GetRuntime()->IsMethodStatic(GetMethod());
     // Create Parameter instructions for all arguments
-    for (size_t i = 0; i < num_args; i++) {
-        auto param_inst = GetGraph()->AddNewParameter(i);
+    for (size_t i = 0; i < numArgs; i++) {
+        auto paramInst = GetGraph()->AddNewParameter(i);
         auto type = GetCurrentMethodArgumentType(i);
-        auto reg_num = GetRuntime()->GetMethodRegistersCount(GetMethod()) + i;
-        ASSERT(!GetGraph()->IsBytecodeOptimizer() || reg_num != INVALID_REG);
+        auto regNum = GetRuntime()->GetMethodRegistersCount(GetMethod()) + i;
+        ASSERT(!GetGraph()->IsBytecodeOptimizer() || regNum != INVALID_REG);
 
-        param_inst->SetType(type);
+        paramInst->SetType(type);
         // This parameter in virtaul method is implicit, so skipped
-        if (type == DataType::REFERENCE && (is_static || i > 0)) {
-            param_inst->SetArgRefNumber(arg_ref_num++);
+        if (type == DataType::REFERENCE && (isStatic || i > 0)) {
+            paramInst->SetArgRefNumber(argRefNum++);
         }
-        SetParamSpillFill(GetGraph(), param_inst, num_args, i, type);
+        SetParamSpillFill(GetGraph(), paramInst, numArgs, i, type);
 
-        UpdateDefinition(reg_num, param_inst);
+        UpdateDefinition(regNum, paramInst);
     }
 
     // We don't need to create SafePoint at the beginning of the callee graph
-    if (OPTIONS.IsCompilerUseSafepoint() && !is_inlined_graph) {
+    if (g_options.IsCompilerUseSafepoint() && !isInlinedGraph) {
         GetGraph()->GetStartBlock()->AppendInst(CreateSafePoint(GetGraph()->GetStartBlock()));
     }
-    method_profile_ = GetRuntime()->GetMethodProfile(GetMethod(), !GetGraph()->IsAotMode());
+    methodProfile_ = GetRuntime()->GetMethodProfile(GetMethod(), !GetGraph()->IsAotMode());
 }
 
 void InstBuilder::UpdateDefsForCatch()
 {
-    Inst *catch_phi = current_bb_->GetFirstInst();
-    ASSERT(catch_phi != nullptr);
+    Inst *catchPhi = currentBb_->GetFirstInst();
+    ASSERT(catchPhi != nullptr);
     for (size_t vreg = 0; vreg < GetVRegsCount(); vreg++) {
-        ASSERT(catch_phi->IsCatchPhi());
-        defs_[current_bb_->GetId()][vreg] = catch_phi;
-        catch_phi = catch_phi->GetNext();
+        ASSERT(catchPhi->IsCatchPhi());
+        defs_[currentBb_->GetId()][vreg] = catchPhi;
+        catchPhi = catchPhi->GetNext();
     }
 }
 
@@ -118,38 +118,38 @@ void InstBuilder::UpdateDefsForLoopHead()
 {
     // If current block is a loop header, then propagate all definitions from preheader's predecessors to
     // current block.
-    ASSERT(current_bb_->GetLoop()->GetPreHeader());
-    auto pred_defs = defs_[current_bb_->GetLoop()->GetPreHeader()->GetId()];
+    ASSERT(currentBb_->GetLoop()->GetPreHeader());
+    auto predDefs = defs_[currentBb_->GetLoop()->GetPreHeader()->GetId()];
     COMPILER_LOG(DEBUG, IR_BUILDER) << "basic block is loop header";
     for (size_t vreg = 0; vreg < GetVRegsCount(); vreg++) {
-        auto def_inst = pred_defs[vreg];
-        if (def_inst != nullptr) {
+        auto defInst = predDefs[vreg];
+        if (defInst != nullptr) {
             auto phi = GetGraph()->CreateInstPhi();
-            if (vreg > vregs_and_args_count_) {
+            if (vreg > vregsAndArgsCount_) {
                 phi->SetType(DataType::ANY);
             }
             phi->SetMarker(GetNoTypeMarker());
             phi->SetLinearNumber(vreg);
-            current_bb_->AppendPhi(phi);
-            (*current_defs_)[vreg] = phi;
+            currentBb_->AppendPhi(phi);
+            (*currentDefs_)[vreg] = phi;
             COMPILER_LOG(DEBUG, IR_BUILDER) << "create Phi(id=" << phi->GetId() << ") for r" << vreg
-                                            << "(def id=" << pred_defs[vreg]->GetId() << ")";
+                                            << "(def id=" << predDefs[vreg]->GetId() << ")";
         }
     }
 }
 
 bool InstBuilder::UpdateDefsForPreds(size_t vreg, std::optional<Inst *> &value)
 {
-    for (auto pred_bb : current_bb_->GetPredsBlocks()) {
+    for (auto predBb : currentBb_->GetPredsBlocks()) {
         // When irreducible loop header is visited before it's back-edge, phi should be created,
         // since we do not know if definitions are different at this point
-        if (!pred_bb->IsMarked(visited_block_marker_)) {
-            ASSERT(current_bb_->GetLoop()->IsIrreducible());
+        if (!predBb->IsMarked(visitedBlockMarker_)) {
+            ASSERT(currentBb_->GetLoop()->IsIrreducible());
             return true;
         }
         if (!value.has_value()) {
-            value = defs_[pred_bb->GetId()][vreg];
-        } else if (value.value() != defs_[pred_bb->GetId()][vreg]) {
+            value = defs_[predBb->GetId()][vreg];
+        } else if (value.value() != defs_[predBb->GetId()][vreg]) {
             return true;
         }
     }
@@ -158,16 +158,16 @@ bool InstBuilder::UpdateDefsForPreds(size_t vreg, std::optional<Inst *> &value)
 
 void InstBuilder::UpdateDefs()
 {
-    current_bb_->SetMarker(visited_block_marker_);
-    if (current_bb_->IsCatchBegin()) {
+    currentBb_->SetMarker(visitedBlockMarker_);
+    if (currentBb_->IsCatchBegin()) {
         UpdateDefsForCatch();
-    } else if (current_bb_->IsLoopHeader() && !current_bb_->GetLoop()->IsIrreducible()) {
+    } else if (currentBb_->IsLoopHeader() && !currentBb_->GetLoop()->IsIrreducible()) {
         UpdateDefsForLoopHead();
-    } else if (current_bb_->GetPredsBlocks().size() == 1) {
+    } else if (currentBb_->GetPredsBlocks().size() == 1) {
         // Only one predecessor - simply copy all its definitions
-        auto &pred_defs = defs_[current_bb_->GetPredsBlocks()[0]->GetId()];
-        std::copy(pred_defs.begin(), pred_defs.end(), current_defs_->begin());
-    } else if (current_bb_->GetPredsBlocks().size() > 1) {
+        auto &predDefs = defs_[currentBb_->GetPredsBlocks()[0]->GetId()];
+        std::copy(predDefs.begin(), predDefs.end(), currentDefs_->begin());
+    } else if (currentBb_->GetPredsBlocks().size() > 1) {
         // If there are multiple predecessors, then add phi for each register that has different definitions
         for (size_t vreg = 0; vreg < GetVRegsCount(); vreg++) {
             std::optional<Inst *> value;
@@ -176,68 +176,68 @@ void InstBuilder::UpdateDefs()
                 auto phi = GetGraph()->CreateInstPhi();
                 phi->SetMarker(GetNoTypeMarker());
                 phi->SetLinearNumber(vreg);
-                current_bb_->AppendPhi(phi);
-                (*current_defs_)[vreg] = phi;
+                currentBb_->AppendPhi(phi);
+                (*currentDefs_)[vreg] = phi;
                 COMPILER_LOG(DEBUG, IR_BUILDER) << "create Phi(id=" << phi->GetId() << ") for r" << vreg;
             } else {
-                (*current_defs_)[vreg] = value.value();
+                (*currentDefs_)[vreg] = value.value();
             }
         }
     }
 }
 
-void InstBuilder::AddCatchPhiInputs(const ArenaUnorderedSet<BasicBlock *> &catch_handlers, const InstVector &defs,
-                                    Inst *throwable_inst)
+void InstBuilder::AddCatchPhiInputs(const ArenaUnorderedSet<BasicBlock *> &catchHandlers, const InstVector &defs,
+                                    Inst *throwableInst)
 {
-    ASSERT(!catch_handlers.empty());
-    for (auto catch_bb : catch_handlers) {
-        auto inst = catch_bb->GetFirstInst();
+    ASSERT(!catchHandlers.empty());
+    for (auto catchBb : catchHandlers) {
+        auto inst = catchBb->GetFirstInst();
         while (!inst->IsCatchPhi()) {
             inst = inst->GetNext();
         }
         ASSERT(inst != nullptr);
-        GetGraph()->AppendThrowableInst(throwable_inst, catch_bb);
+        GetGraph()->AppendThrowableInst(throwableInst, catchBb);
         for (size_t vreg = 0; vreg < GetVRegsCount(); vreg++, inst = inst->GetNext()) {
             ASSERT(inst->GetOpcode() == Opcode::CatchPhi);
-            auto catch_phi = inst->CastToCatchPhi();
-            if (catch_phi->IsAcc()) {
-                ASSERT(vreg == vregs_and_args_count_);
+            auto catchPhi = inst->CastToCatchPhi();
+            if (catchPhi->IsAcc()) {
+                ASSERT(vreg == vregsAndArgsCount_);
                 continue;
             }
-            auto input_inst = defs[vreg];
-            if (input_inst != nullptr && input_inst != catch_phi) {
-                catch_phi->AppendInput(input_inst);
-                catch_phi->AppendThrowableInst(throwable_inst);
+            auto inputInst = defs[vreg];
+            if (inputInst != nullptr && inputInst != catchPhi) {
+                catchPhi->AppendInput(inputInst);
+                catchPhi->AppendThrowableInst(throwableInst);
             }
         }
     }
 }
 
-void InstBuilder::SetParamSpillFill(Graph *graph, ParameterInst *param_inst, size_t num_args, size_t i,
+void InstBuilder::SetParamSpillFill(Graph *graph, ParameterInst *paramInst, size_t numArgs, size_t i,
                                     DataType::Type type)
 {
     if (graph->IsBytecodeOptimizer()) {
-        auto reg_src = static_cast<Register>(VIRTUAL_FRAME_SIZE - num_args + i);
-        DataType::Type reg_type;
+        auto regSrc = static_cast<Register>(VIRTUAL_FRAME_SIZE - numArgs + i);
+        DataType::Type regType;
         if (DataType::IsReference(type)) {
-            reg_type = DataType::REFERENCE;
+            regType = DataType::REFERENCE;
         } else if (DataType::Is64Bits(type, graph->GetArch())) {
-            reg_type = DataType::UINT64;
+            regType = DataType::UINT64;
         } else {
-            reg_type = DataType::UINT32;
+            regType = DataType::UINT32;
         }
 
-        param_inst->SetLocationData({LocationType::REGISTER, LocationType::REGISTER, reg_src, reg_src, reg_type});
+        paramInst->SetLocationData({LocationType::REGISTER, LocationType::REGISTER, regSrc, regSrc, regType});
     } else {
 #ifndef PANDA_TARGET_WINDOWS
         if (graph->IsDynamicMethod() && !graph->GetMode().IsDynamicStub()) {
             ASSERT(type == DataType::ANY);
             uint16_t slot = i + CallConvDynInfo::FIXED_SLOT_COUNT;
             ASSERT(slot <= UINT8_MAX);
-            param_inst->SetLocationData(
+            paramInst->SetLocationData(
                 {LocationType::STACK_PARAMETER, LocationType::INVALID, slot, INVALID_REG, DataType::UINT64});
         } else {
-            param_inst->SetLocationData(graph->GetDataForNativeParam(type));
+            paramInst->SetLocationData(graph->GetDataForNativeParam(type));
         }
 #endif
     }
@@ -273,19 +273,19 @@ void InstBuilder::SetTypeRec(Inst *inst, DataType::Type type)
  * v89(vr8) used only in BB 2, so we need to remove its from "119.     SaveState"
  */
 /* static */
-void InstBuilder::RemoveNotDominateInputs(SaveStateInst *save_state)
+void InstBuilder::RemoveNotDominateInputs(SaveStateInst *saveState)
 {
     size_t idx = 0;
-    size_t inputs_count = save_state->GetInputsCount();
-    while (idx < inputs_count) {
-        auto input_inst = save_state->GetInput(idx).GetInst();
+    size_t inputsCount = saveState->GetInputsCount();
+    while (idx < inputsCount) {
+        auto inputInst = saveState->GetInput(idx).GetInst();
         // We can don't call IsDominate, if save_state and input_inst in one basic block.
         // It's reduce number of IsDominate calls.
-        if (!input_inst->InSameBlockOrDominate(save_state)) {
-            save_state->RemoveInput(idx);
-            inputs_count--;
+        if (!inputInst->InSameBlockOrDominate(saveState)) {
+            saveState->RemoveInput(idx);
+            inputsCount--;
         } else {
-            ASSERT(input_inst->GetBasicBlock() != save_state->GetBasicBlock() || input_inst->IsDominate(save_state));
+            ASSERT(inputInst->GetBasicBlock() != saveState->GetBasicBlock() || inputInst->IsDominate(saveState));
             idx++;
         }
     }
@@ -299,11 +299,11 @@ void InstBuilder::FixInstructions()
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->PhiInstsSafe()) {
             inst->ReserveInputs(bb->GetPredsBlocks().size());
-            for (auto &pred_bb : bb->GetPredsBlocks()) {
+            for (auto &predBb : bb->GetPredsBlocks()) {
                 if (inst->GetLinearNumber() == INVALID_LINEAR_NUM) {
                     continue;
                 }
-                auto pred = defs_[pred_bb->GetId()][inst->GetLinearNumber()];
+                auto pred = defs_[predBb->GetId()][inst->GetLinearNumber()];
                 if (pred == nullptr) {
                     // If any input of phi instruction is not defined then we assume that phi is dead. DCE should
                     // remove it.
@@ -321,21 +321,21 @@ void InstBuilder::FixInstructions()
                 RemoveNotDominateInputs(static_cast<SaveStateInst *>(inst));
                 continue;
             }
-            auto input_idx = 0;
+            auto inputIdx = 0;
             for (auto input : inst->GetInputs()) {
                 if (input.GetInst()->IsMarked(GetNoTypeMarker())) {
-                    auto input_type = inst->GetInputType(input_idx);
-                    if (input_type != DataType::NO_TYPE) {
-                        SetTypeRec(input.GetInst(), input_type);
+                    auto inputType = inst->GetInputType(inputIdx);
+                    if (inputType != DataType::NO_TYPE) {
+                        SetTypeRec(input.GetInst(), inputType);
                     }
                 }
-                input_idx++;
+                inputIdx++;
             }
         }
     }
     // Resolve dead and inconsistent phi instructions
-    PhiResolver phi_resolver(GetGraph());
-    phi_resolver.Run();
+    PhiResolver phiResolver(GetGraph());
+    phiResolver.Run();
     ResolveConstants();
 }
 
@@ -344,66 +344,66 @@ SaveStateInst *InstBuilder::CreateSaveState(Opcode opc, size_t pc)
     ASSERT(opc == Opcode::SaveState || opc == Opcode::SafePoint || opc == Opcode::SaveStateOsr ||
            opc == Opcode::SaveStateDeoptimize);
     SaveStateInst *inst;
-    bool without_numeric_inputs = false;
-    auto live_vergs_count =
-        std::count_if(current_defs_->begin(), current_defs_->end(), [](Inst *p) { return p != nullptr; });
+    bool withoutNumericInputs = false;
+    auto liveVergsCount =
+        std::count_if(currentDefs_->begin(), currentDefs_->end(), [](Inst *p) { return p != nullptr; });
     if (opc == Opcode::SaveState) {
-        inst = GetGraph()->CreateInstSaveState(pc, GetMethod(), caller_inst_, inlining_depth_);
+        inst = GetGraph()->CreateInstSaveState(pc, GetMethod(), callerInst_, inliningDepth_);
     } else if (opc == Opcode::SaveStateOsr) {
-        inst = GetGraph()->CreateInstSaveStateOsr(pc, GetMethod(), caller_inst_, inlining_depth_);
+        inst = GetGraph()->CreateInstSaveStateOsr(pc, GetMethod(), callerInst_, inliningDepth_);
     } else if (opc == Opcode::SafePoint) {
-        inst = GetGraph()->CreateInstSafePoint(pc, GetMethod(), caller_inst_, inlining_depth_);
-        without_numeric_inputs = true;
+        inst = GetGraph()->CreateInstSafePoint(pc, GetMethod(), callerInst_, inliningDepth_);
+        withoutNumericInputs = true;
     } else {
-        inst = GetGraph()->CreateInstSaveStateDeoptimize(pc, GetMethod(), caller_inst_, inlining_depth_);
+        inst = GetGraph()->CreateInstSaveStateDeoptimize(pc, GetMethod(), callerInst_, inliningDepth_);
     }
     if (GetGraph()->IsBytecodeOptimizer()) {
         inst->ReserveInputs(0);
         return inst;
     }
-    inst->ReserveInputs(live_vergs_count);
+    inst->ReserveInputs(liveVergsCount);
 
-    for (VirtualRegister::ValueType reg_idx = 0; reg_idx < vregs_and_args_count_; ++reg_idx) {
-        auto def_inst = (*current_defs_)[reg_idx];
-        if (def_inst != nullptr && (!without_numeric_inputs || !DataType::IsTypeNumeric(def_inst->GetType()))) {
-            auto input_idx = inst->AppendInput(def_inst);
-            inst->SetVirtualRegister(input_idx, VirtualRegister(reg_idx, VRegType::VREG));
+    for (VirtualRegister::ValueType regIdx = 0; regIdx < vregsAndArgsCount_; ++regIdx) {
+        auto defInst = (*currentDefs_)[regIdx];
+        if (defInst != nullptr && (!withoutNumericInputs || !DataType::IsTypeNumeric(defInst->GetType()))) {
+            auto inputIdx = inst->AppendInput(defInst);
+            inst->SetVirtualRegister(inputIdx, VirtualRegister(regIdx, VRegType::VREG));
         }
     }
-    VirtualRegister::ValueType reg_idx = vregs_and_args_count_;
-    auto def_inst = (*current_defs_)[reg_idx];
-    if (def_inst != nullptr && (!without_numeric_inputs || !DataType::IsTypeNumeric(def_inst->GetType()))) {
-        auto input_idx = inst->AppendInput(def_inst);
-        inst->SetVirtualRegister(input_idx, VirtualRegister(reg_idx, VRegType::ACC));
+    VirtualRegister::ValueType regIdx = vregsAndArgsCount_;
+    auto defInst = (*currentDefs_)[regIdx];
+    if (defInst != nullptr && (!withoutNumericInputs || !DataType::IsTypeNumeric(defInst->GetType()))) {
+        auto inputIdx = inst->AppendInput(defInst);
+        inst->SetVirtualRegister(inputIdx, VirtualRegister(regIdx, VRegType::ACC));
     }
-    reg_idx++;
-    if (GetGraph()->IsDynamicMethod() && !GetGraph()->IsBytecodeOptimizer() && (*current_defs_)[reg_idx] != nullptr) {
-        for (uint8_t env_idx = 0; env_idx < VRegInfo::ENV_COUNT; ++env_idx) {
-            auto input_idx = inst->AppendInput(GetEnvDefinition(env_idx));
-            inst->SetVirtualRegister(input_idx, VirtualRegister(reg_idx++, VRegType(VRegType::ENV_BEGIN + env_idx)));
+    regIdx++;
+    if (GetGraph()->IsDynamicMethod() && !GetGraph()->IsBytecodeOptimizer() && (*currentDefs_)[regIdx] != nullptr) {
+        for (uint8_t envIdx = 0; envIdx < VRegInfo::ENV_COUNT; ++envIdx) {
+            auto inputIdx = inst->AppendInput(GetEnvDefinition(envIdx));
+            inst->SetVirtualRegister(inputIdx, VirtualRegister(regIdx++, VRegType(VRegType::ENV_BEGIN + envIdx)));
         }
-        if (additional_def_ != nullptr) {
-            inst->AppendBridge(additional_def_);
+        if (additionalDef_ != nullptr) {
+            inst->AppendBridge(additionalDef_);
         }
     }
     return inst;
 }
 
-ClassInst *InstBuilder::CreateLoadAndInitClassGeneric(uint32_t class_id, size_t pc)
+ClassInst *InstBuilder::CreateLoadAndInitClassGeneric(uint32_t classId, size_t pc)
 {
-    auto class_ptr = GetRuntime()->ResolveType(GetGraph()->GetMethod(), class_id);
+    auto classPtr = GetRuntime()->ResolveType(GetGraph()->GetMethod(), classId);
     ClassInst *inst = nullptr;
-    if (class_ptr == nullptr) {
+    if (classPtr == nullptr) {
         ASSERT(!graph_->IsBytecodeOptimizer());
-        inst = graph_->CreateInstUnresolvedLoadAndInitClass(DataType::REFERENCE, pc, nullptr, class_id,
-                                                            GetGraph()->GetMethod(), class_ptr);
+        inst = graph_->CreateInstUnresolvedLoadAndInitClass(DataType::REFERENCE, pc, nullptr, classId,
+                                                            GetGraph()->GetMethod(), classPtr);
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
-            GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), class_id,
+            GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), classId,
                                                              UnresolvedTypesInterface::SlotKind::CLASS);
         }
     } else {
-        inst = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, nullptr, class_id, GetGraph()->GetMethod(),
-                                                  class_ptr);
+        inst = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, nullptr, classId, GetGraph()->GetMethod(),
+                                                  classPtr);
     }
     return inst;
 }
@@ -438,56 +438,56 @@ size_t InstBuilder::GetMethodArgumentsCount(uintptr_t id) const
     return GetRuntime()->GetMethodArgumentsCount(GetMethod(), id);
 }
 
-size_t InstBuilder::GetPc(const uint8_t *inst_ptr) const
+size_t InstBuilder::GetPc(const uint8_t *instPtr) const
 {
-    return inst_ptr - instructions_buf_;
+    return instPtr - instructionsBuf_;
 }
 
 void InstBuilder::ResolveConstants()
 {
-    ConstantInst *curr_const = GetGraph()->GetFirstConstInst();
-    while (curr_const != nullptr) {
-        SplitConstant(curr_const);
-        curr_const = curr_const->GetNextConst();
+    ConstantInst *currConst = GetGraph()->GetFirstConstInst();
+    while (currConst != nullptr) {
+        SplitConstant(currConst);
+        currConst = currConst->GetNextConst();
     }
 }
 
-void InstBuilder::SplitConstant(ConstantInst *const_inst)
+void InstBuilder::SplitConstant(ConstantInst *constInst)
 {
-    if (const_inst->GetType() != DataType::INT64 || !const_inst->HasUsers()) {
+    if (constInst->GetType() != DataType::INT64 || !constInst->HasUsers()) {
         return;
     }
-    auto users = const_inst->GetUsers();
-    auto curr_it = users.begin();
-    while (curr_it != users.end()) {
-        auto user = (*curr_it).GetInst();
-        DataType::Type type = user->GetInputType(curr_it->GetIndex());
-        ++curr_it;
+    auto users = constInst->GetUsers();
+    auto currIt = users.begin();
+    while (currIt != users.end()) {
+        auto user = (*currIt).GetInst();
+        DataType::Type type = user->GetInputType(currIt->GetIndex());
+        ++currIt;
         if (type != DataType::FLOAT32 && type != DataType::FLOAT64) {
             continue;
         }
-        ConstantInst *new_const = nullptr;
+        ConstantInst *newConst = nullptr;
         if (type == DataType::FLOAT32) {
-            auto val = bit_cast<float>(static_cast<uint32_t>(const_inst->GetIntValue()));
-            new_const = GetGraph()->FindOrCreateConstant(val);
+            auto val = bit_cast<float>(static_cast<uint32_t>(constInst->GetIntValue()));
+            newConst = GetGraph()->FindOrCreateConstant(val);
         } else {
-            auto val = bit_cast<double, uint64_t>(const_inst->GetIntValue());
-            new_const = GetGraph()->FindOrCreateConstant(val);
+            auto val = bit_cast<double, uint64_t>(constInst->GetIntValue());
+            newConst = GetGraph()->FindOrCreateConstant(val);
         }
-        user->ReplaceInput(const_inst, new_const);
+        user->ReplaceInput(constInst, newConst);
     }
 }
 
 void InstBuilder::SyncWithGraph()
 {
-    size_t idx = current_defs_ - &defs_[0];
+    size_t idx = currentDefs_ - &defs_[0];
     size_t size = defs_.size();
     defs_.resize(graph_->GetVectorBlocks().size(), InstVector(graph_->GetLocalAllocator()->Adapter()));
     for (size_t i = size; i < defs_.size(); i++) {
-        defs_[i].resize(vregs_and_args_count_ + 1 + graph_->GetEnvCount());
+        defs_[i].resize(vregsAndArgsCount_ + 1 + graph_->GetEnvCount());
         std::copy(defs_[idx].cbegin(), defs_[idx].cend(), defs_[i].begin());
     }
-    current_defs_ = &defs_[current_bb_->GetId()];
+    currentDefs_ = &defs_[currentBb_->GetId()];
 }
 
 }  // namespace panda::compiler

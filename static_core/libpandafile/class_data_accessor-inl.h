@@ -67,94 +67,93 @@ inline void ClassDataAccessor::SkipTypeAnnotations()
 template <class Callback>
 inline void ClassDataAccessor::EnumerateInterfaces(const Callback &cb)
 {
-    auto sp = ifaces_offsets_sp_;
+    auto sp = ifacesOffsetsSp_;
 
-    for (size_t i = 0; i < num_ifaces_; i++) {
+    for (size_t i = 0; i < numIfaces_; i++) {
         auto index = helpers::Read<IDX_SIZE>(&sp);
-        cb(panda_file_.ResolveClassIndex(class_id_, index));
+        cb(pandaFile_.ResolveClassIndex(classId_, index));
     }
 }
 
 inline File::EntityId ClassDataAccessor::GetInterfaceId(size_t idx) const
 {
-    ASSERT(idx < num_ifaces_);
-    auto sp = ifaces_offsets_sp_.SubSpan(idx * IDX_SIZE);
+    ASSERT(idx < numIfaces_);
+    auto sp = ifacesOffsetsSp_.SubSpan(idx * IDX_SIZE);
     auto index = helpers::Read<IDX_SIZE>(&sp);
-    return panda_file_.ResolveClassIndex(class_id_, index);
+    return pandaFile_.ResolveClassIndex(classId_, index);
 }
 
 inline std::optional<SourceLang> ClassDataAccessor::GetSourceLang()
 {
-    return helpers::GetOptionalTaggedValue<SourceLang>(source_lang_sp_, ClassTag::SOURCE_LANG,
-                                                       &runtime_annotations_sp_);
+    return helpers::GetOptionalTaggedValue<SourceLang>(sourceLangSp_, ClassTag::SOURCE_LANG, &runtimeAnnotationsSp_);
 }
 
 template <class Callback>
 inline void ClassDataAccessor::EnumerateRuntimeAnnotations(const Callback &cb)
 {
-    if (runtime_annotations_sp_.data() == nullptr) {
+    if (runtimeAnnotationsSp_.data() == nullptr) {
         SkipSourceLang();
     }
 
     helpers::EnumerateTaggedValues<File::EntityId, ClassTag, Callback>(
-        runtime_annotations_sp_, ClassTag::RUNTIME_ANNOTATION, cb, &annotations_sp_);
+        runtimeAnnotationsSp_, ClassTag::RUNTIME_ANNOTATION, cb, &annotationsSp_);
 }
 
 template <class Callback>
 inline void ClassDataAccessor::EnumerateAnnotations(const Callback &cb)
 {
-    if (annotations_sp_.data() == nullptr) {
+    if (annotationsSp_.data() == nullptr) {
         SkipRuntimeAnnotations();
     }
 
-    helpers::EnumerateTaggedValues<File::EntityId, ClassTag, Callback>(annotations_sp_, ClassTag::ANNOTATION, cb,
-                                                                       &runtime_type_annotation_sp_);
+    helpers::EnumerateTaggedValues<File::EntityId, ClassTag, Callback>(annotationsSp_, ClassTag::ANNOTATION, cb,
+                                                                       &runtimeTypeAnnotationSp_);
 }
 
 template <class Callback>
 inline bool ClassDataAccessor::EnumerateRuntimeAnnotationsWithEarlyStop(const Callback &cb)
 {
-    if (runtime_annotations_sp_.data() == nullptr) {
+    if (runtimeAnnotationsSp_.data() == nullptr) {
         SkipSourceLang();
     }
 
     return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, ClassTag, Callback>(
-        runtime_annotations_sp_, ClassTag::RUNTIME_ANNOTATION, cb);
+        runtimeAnnotationsSp_, ClassTag::RUNTIME_ANNOTATION, cb);
 }
 
 template <class Callback>
 inline bool ClassDataAccessor::EnumerateAnnotationsWithEarlyStop(const Callback &cb)
 {
-    if (annotations_sp_.data() == nullptr) {
+    if (annotationsSp_.data() == nullptr) {
         SkipRuntimeAnnotations();
     }
 
-    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, ClassTag, Callback>(annotations_sp_,
+    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, ClassTag, Callback>(annotationsSp_,
                                                                                            ClassTag::ANNOTATION, cb);
 }
 
 inline std::optional<File::EntityId> ClassDataAccessor::GetSourceFileId()
 {
-    if (source_file_sp_.data() == nullptr) {
+    if (sourceFileSp_.data() == nullptr) {
         SkipTypeAnnotations();
     }
 
-    auto v = helpers::GetOptionalTaggedValue<File::EntityId>(source_file_sp_, ClassTag::SOURCE_FILE, &fields_sp_);
+    auto v = helpers::GetOptionalTaggedValue<File::EntityId>(sourceFileSp_, ClassTag::SOURCE_FILE, &fieldsSp_);
 
-    fields_sp_ = fields_sp_.SubSpan(TAG_SIZE);  // NOTHING tag
+    fieldsSp_ = fieldsSp_.SubSpan(TAG_SIZE);  // NOTHING tag
 
     return v;
 }
 
 template <class Callback, class Accessor>
-static void EnumerateClassElements(const File &pf, Span<const uint8_t> sp, size_t elem_num, const Callback &cb,
+static void EnumerateClassElements(const File &pf, Span<const uint8_t> sp, size_t elemNum, const Callback &cb,
                                    Span<const uint8_t> *next)
 {
-    for (size_t i = 0; i < elem_num; i++) {
+    for (size_t i = 0; i < elemNum; i++) {
         File::EntityId id = pf.GetIdFromPointer(sp.data());
-        Accessor data_accessor(pf, id);
-        cb(data_accessor);
-        sp = sp.SubSpan(data_accessor.GetSize());
+        Accessor dataAccessor(pf, id);
+        cb(dataAccessor);
+        sp = sp.SubSpan(dataAccessor.GetSize());
     }
 
     *next = sp;
@@ -163,47 +162,47 @@ static void EnumerateClassElements(const File &pf, Span<const uint8_t> sp, size_
 template <class Callback>
 inline void ClassDataAccessor::EnumerateFields(const Callback &cb)
 {
-    if (fields_sp_.data() == nullptr) {
+    if (fieldsSp_.data() == nullptr) {
         SkipSourceFile();
     }
 
-    EnumerateClassElements<Callback, FieldDataAccessor>(panda_file_, fields_sp_, num_fields_, cb, &methods_sp_);
+    EnumerateClassElements<Callback, FieldDataAccessor>(pandaFile_, fieldsSp_, numFields_, cb, &methodsSp_);
 }
 
 template <class Callback>
 inline void ClassDataAccessor::EnumerateMethods(const Callback &cb)
 {
-    if (methods_sp_.data() == nullptr) {
+    if (methodsSp_.data() == nullptr) {
         SkipFields();
     }
 
     Span<const uint8_t> sp {nullptr, nullptr};
 
-    EnumerateClassElements<Callback, MethodDataAccessor>(panda_file_, methods_sp_, num_methods_, cb, &sp);
+    EnumerateClassElements<Callback, MethodDataAccessor>(pandaFile_, methodsSp_, numMethods_, cb, &sp);
 
-    size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - class_id_.GetOffset();
+    size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - classId_.GetOffset();
 }
 
 template <class Callback>
 inline void ClassDataAccessor::EnumerateRuntimeTypeAnnotations(const Callback &cb)
 {
-    if (runtime_type_annotation_sp_.data() == nullptr) {
+    if (runtimeTypeAnnotationSp_.data() == nullptr) {
         SkipAnnotations();
     }
 
     helpers::EnumerateTaggedValues<File::EntityId, ClassTag, Callback>(
-        runtime_type_annotation_sp_, ClassTag::RUNTIME_TYPE_ANNOTATION, cb, &type_annotation_sp_);
+        runtimeTypeAnnotationSp_, ClassTag::RUNTIME_TYPE_ANNOTATION, cb, &typeAnnotationSp_);
 }
 
 template <class Callback>
 inline void ClassDataAccessor::EnumerateTypeAnnotations(const Callback &cb)
 {
-    if (type_annotation_sp_.data() == nullptr) {
+    if (typeAnnotationSp_.data() == nullptr) {
         SkipRuntimeTypeAnnotations();
     }
 
-    helpers::EnumerateTaggedValues<File::EntityId, ClassTag, Callback>(type_annotation_sp_, ClassTag::TYPE_ANNOTATION,
-                                                                       cb, &source_file_sp_);
+    helpers::EnumerateTaggedValues<File::EntityId, ClassTag, Callback>(typeAnnotationSp_, ClassTag::TYPE_ANNOTATION, cb,
+                                                                       &sourceFileSp_);
 }
 
 inline uint32_t ClassDataAccessor::GetAnnotationsNumber()

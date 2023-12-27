@@ -42,28 +42,28 @@ public:
         // NOLINTNEXTLINE(readability-magic-numbers)
         {Arch::X86_64, {{"thread", 15}, {"frame", 5}, {"acc", 11}, {"acc_tag", 3}}}};
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-    inline static std::unordered_set<std::string> target_funcs_ {
+    inline static std::unordered_set<std::string> targetFuncs_ {
         "CreateArrayByIdEntrypoint",         "CreateObjectByClassInterpreter",  "CreateMultiArrayRecEntrypoint",
         "ResolveLiteralArrayByIdEntrypoint", "GetStaticFieldByIdEntrypoint",    "GetCalleeMethodFromBytecodeId",
         "ResolveTypeByIdEntrypoint",         "CreateMultiDimensionalArrayById", "SafepointEntrypointInterp"};
 
 private:
-    ArenaVector<const Inst *> objects_users_;
-    ArenaSet<const BasicBlock *> checked_blocks_;
-    ArenaVector<Inst *> phi_insts_;
-    ArenaSet<Inst *> object_insts_;
-    Inst *acc_livein_ {nullptr};
-    Inst *acc_tag_livein_ {nullptr};
-    Inst *frame_livein_ {nullptr};
-    Inst *thread_livein_ {nullptr};
-    Inst *last_acc_def_ {nullptr};
-    Inst *last_acc_tag_def_ {nullptr};
-    Inst *last_frame_def_ {nullptr};
+    ArenaVector<const Inst *> objectsUsers_;
+    ArenaSet<const BasicBlock *> checkedBlocks_;
+    ArenaVector<Inst *> phiInsts_;
+    ArenaSet<Inst *> objectInsts_;
+    Inst *accLivein_ {nullptr};
+    Inst *accTagLivein_ {nullptr};
+    Inst *frameLivein_ {nullptr};
+    Inst *threadLivein_ {nullptr};
+    Inst *lastAccDef_ {nullptr};
+    Inst *lastAccTagDef_ {nullptr};
+    Inst *lastFrameDef_ {nullptr};
 
     bool CheckAccSyncCallRuntime();
     void InitLiveIns();
     void UpdateLastAccAndFrameDef(Inst *inst);
-    void GetLastAccDefinition(CallInst *runtime_call_inst);
+    void GetLastAccDefinition(CallInst *runtimeCallInst);
     std::tuple<Inst *, Inst *> GetAccAndFrameDefs(Inst *inst);
     std::tuple<Inst *, Inst *> GetPhiAccDef();
     std::tuple<Inst *, Inst *> GetAccDefFromInputs(Inst *inst);
@@ -76,12 +76,12 @@ private:
     bool IsAccTagPtr(Inst *inst);
     bool IsSaveAcc(const Inst *inst);
     bool CheckObjectInputs(Inst *inst);
-    bool CheckStoreAcc(CallInst *runtime_call_inst);
-    bool CheckStoreAccTag(CallInst *runtime_call_inst);
-    bool CheckAccUsers(CallInst *runtime_call_inst);
-    bool CheckObjectsUsers(CallInst *runtime_call_inst);
-    bool CheckUsers(CallInst *runtime_call_inst);
-    bool CheckSuccessors(BasicBlock *bb, bool prev_res);
+    bool CheckStoreAcc(CallInst *runtimeCallInst);
+    bool CheckStoreAccTag(CallInst *runtimeCallInst);
+    bool CheckAccUsers(CallInst *runtimeCallInst);
+    bool CheckObjectsUsers(CallInst *runtimeCallInst);
+    bool CheckUsers(CallInst *runtimeCallInst);
+    bool CheckSuccessors(BasicBlock *bb, bool prevRes);
 };
 }  // namespace panda::compiler
 

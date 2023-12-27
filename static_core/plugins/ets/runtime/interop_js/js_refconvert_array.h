@@ -58,65 +58,65 @@ public:
     {
         auto env = ctx->GetJSEnv();
 
-        auto ets_arr = static_cast<coretypes::Array *>(obj->GetCoreType());
-        auto len = ets_arr->GetLength();
+        auto etsArr = static_cast<coretypes::Array *>(obj->GetCoreType());
+        auto len = etsArr->GetLength();
 
-        NapiEscapableScope js_handle_scope(env);
-        napi_value js_arr;
-        NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &js_arr));
+        NapiEscapableScope jsHandleScope(env);
+        napi_value jsArr;
+        NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
 
         for (size_t idx = 0; idx < len; ++idx) {
-            ElemCpptype ets_elem = GetElem(ets_arr, idx);
-            auto js_elem = Conv::WrapWithNullCheck(env, ets_elem);
-            if (UNLIKELY(js_elem == nullptr)) {
+            ElemCpptype etsElem = GetElem(etsArr, idx);
+            auto jsElem = Conv::WrapWithNullCheck(env, etsElem);
+            if (UNLIKELY(jsElem == nullptr)) {
                 return nullptr;
             }
-            napi_status rc = napi_set_element(env, js_arr, idx, js_elem);
+            napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
             if (UNLIKELY(NapiThrownGeneric(rc))) {
                 return nullptr;
             }
         }
-        js_handle_scope.Escape(js_arr);
-        return js_arr;
+        jsHandleScope.Escape(jsArr);
+        return jsArr;
     }
 
-    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value js_arr)
+    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsArr)
     {
         auto coro = EtsCoroutine::GetCurrent();
         auto env = ctx->GetJSEnv();
         {
-            bool is_array;
-            NAPI_CHECK_FATAL(napi_is_array(env, js_arr, &is_array));
-            if (UNLIKELY(!is_array)) {
+            bool isArray;
+            NAPI_CHECK_FATAL(napi_is_array(env, jsArr, &isArray));
+            if (UNLIKELY(!isArray)) {
                 JSConvertTypeCheckFailed("array");
                 return nullptr;
             }
         }
 
         uint32_t len;
-        napi_status rc = napi_get_array_length(env, js_arr, &len);
+        napi_status rc = napi_get_array_length(env, jsArr, &len);
         if (UNLIKELY(NapiThrownGeneric(rc))) {
             return nullptr;
         }
 
         // NOTE(vpukhov): elide handles for primitive arrays
-        LocalObjectHandle<coretypes::Array> ets_arr(coro, coretypes::Array::Create(klass_, len));
-        NapiScope js_handle_scope(env);
+        LocalObjectHandle<coretypes::Array> etsArr(coro, coretypes::Array::Create(klass_, len));
+        NapiScope jsHandleScope(env);
 
         for (size_t idx = 0; idx < len; ++idx) {
-            napi_value js_elem;
-            rc = napi_get_element(env, js_arr, idx, &js_elem);
+            napi_value jsElem;
+            rc = napi_get_element(env, jsArr, idx, &jsElem);
             if (UNLIKELY(NapiThrownGeneric(rc))) {
                 return nullptr;
             }
-            auto res = Conv::UnwrapWithNullCheck(ctx, env, js_elem);
+            auto res = Conv::UnwrapWithNullCheck(ctx, env, jsElem);
             if (UNLIKELY(!res)) {
                 return nullptr;
             }
-            SetElem(ets_arr.GetPtr(), idx, res.value());
+            SetElem(etsArr.GetPtr(), idx, res.value());
         }
 
-        return EtsObject::FromCoreType(ets_arr.GetPtr());
+        return EtsObject::FromCoreType(etsArr.GetPtr());
     }
 
 private:
@@ -140,100 +140,100 @@ public:
         auto coro = EtsCoroutine::GetCurrent();
         auto env = ctx->GetJSEnv();
 
-        LocalObjectHandle<coretypes::Array> ets_arr(coro, obj->GetCoreType());
-        auto len = ets_arr->GetLength();
+        LocalObjectHandle<coretypes::Array> etsArr(coro, obj->GetCoreType());
+        auto len = etsArr->GetLength();
 
-        NapiEscapableScope js_handle_scope(env);
-        napi_value js_arr;
-        NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &js_arr));
+        NapiEscapableScope jsHandleScope(env);
+        napi_value jsArr;
+        NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
 
         for (size_t idx = 0; idx < len; ++idx) {
-            EtsObject *ets_elem = EtsObject::FromCoreType(ets_arr->Get<ObjectHeader *>(idx));
-            napi_value js_elem;
-            if (LIKELY(ets_elem != nullptr)) {
-                JSRefConvert *elem_conv = GetElemConvertor(ctx, ets_elem->GetClass());
-                if (UNLIKELY(elem_conv == nullptr)) {
+            EtsObject *etsElem = EtsObject::FromCoreType(etsArr->Get<ObjectHeader *>(idx));
+            napi_value jsElem;
+            if (LIKELY(etsElem != nullptr)) {
+                JSRefConvert *elemConv = GetElemConvertor(ctx, etsElem->GetClass());
+                if (UNLIKELY(elemConv == nullptr)) {
                     return nullptr;
                 }
-                js_elem = elem_conv->Wrap(ctx, ets_elem);
-                if (UNLIKELY(js_elem == nullptr)) {
+                jsElem = elemConv->Wrap(ctx, etsElem);
+                if (UNLIKELY(jsElem == nullptr)) {
                     return nullptr;
                 }
             } else {
-                js_elem = GetNull(env);
+                jsElem = GetNull(env);
             }
-            napi_status rc = napi_set_element(env, js_arr, idx, js_elem);
+            napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
             if (UNLIKELY(NapiThrownGeneric(rc))) {
                 return nullptr;
             }
         }
-        js_handle_scope.Escape(js_arr);
-        return js_arr;
+        jsHandleScope.Escape(jsArr);
+        return jsArr;
     }
 
-    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value js_arr)
+    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsArr)
     {
         auto coro = EtsCoroutine::GetCurrent();
         auto env = ctx->GetJSEnv();
         {
-            bool is_array;
-            NAPI_CHECK_FATAL(napi_is_array(env, js_arr, &is_array));
-            if (UNLIKELY(!is_array)) {
+            bool isArray;
+            NAPI_CHECK_FATAL(napi_is_array(env, jsArr, &isArray));
+            if (UNLIKELY(!isArray)) {
                 JSConvertTypeCheckFailed("array");
                 return nullptr;
             }
         }
 
         uint32_t len;
-        napi_status rc = napi_get_array_length(env, js_arr, &len);
+        napi_status rc = napi_get_array_length(env, jsArr, &len);
         if (UNLIKELY(NapiThrownGeneric(rc))) {
             return nullptr;
         }
 
-        LocalObjectHandle<coretypes::Array> ets_arr(coro, coretypes::Array::Create(klass_, len));
-        NapiScope js_handle_scope(env);
+        LocalObjectHandle<coretypes::Array> etsArr(coro, coretypes::Array::Create(klass_, len));
+        NapiScope jsHandleScope(env);
 
         for (size_t idx = 0; idx < len; ++idx) {
-            napi_value js_elem;
-            rc = napi_get_element(env, js_arr, idx, &js_elem);
+            napi_value jsElem;
+            rc = napi_get_element(env, jsArr, idx, &jsElem);
             if (UNLIKELY(NapiThrownGeneric(rc))) {
                 return nullptr;
             }
-            if (LIKELY(!IsNullOrUndefined(env, js_elem))) {
-                if (UNLIKELY(base_elem_conv_ == nullptr)) {
-                    base_elem_conv_ = JSRefConvertResolve(ctx, klass_->GetComponentType());
-                    if (UNLIKELY(base_elem_conv_ == nullptr)) {
+            if (LIKELY(!IsNullOrUndefined(env, jsElem))) {
+                if (UNLIKELY(baseElemConv_ == nullptr)) {
+                    baseElemConv_ = JSRefConvertResolve(ctx, klass_->GetComponentType());
+                    if (UNLIKELY(baseElemConv_ == nullptr)) {
                         return nullptr;
                     }
                 }
-                EtsObject *ets_elem = base_elem_conv_->Unwrap(ctx, js_elem);
-                if (UNLIKELY(ets_elem == nullptr)) {
+                EtsObject *etsElem = baseElemConv_->Unwrap(ctx, jsElem);
+                if (UNLIKELY(etsElem == nullptr)) {
                     return nullptr;
                 }
-                ets_arr->Set(idx, ets_elem->GetCoreType());
+                etsArr->Set(idx, etsElem->GetCoreType());
             }
         }
 
-        return EtsObject::FromCoreType(ets_arr.GetPtr());
+        return EtsObject::FromCoreType(etsArr.GetPtr());
     }
 
 private:
     static constexpr auto ELEM_SIZE = ClassHelper::OBJECT_POINTER_SIZE;
 
-    JSRefConvert *GetElemConvertor(InteropCtx *ctx, EtsClass *elem_ets_klass)
+    JSRefConvert *GetElemConvertor(InteropCtx *ctx, EtsClass *elemEtsKlass)
     {
-        Class *elem_klass = elem_ets_klass->GetRuntimeClass();
-        if (elem_klass != klass_->GetComponentType()) {
-            return JSRefConvertResolve(ctx, elem_klass);
+        Class *elemKlass = elemEtsKlass->GetRuntimeClass();
+        if (elemKlass != klass_->GetComponentType()) {
+            return JSRefConvertResolve(ctx, elemKlass);
         }
-        if (LIKELY(base_elem_conv_ != nullptr)) {
-            return base_elem_conv_;
+        if (LIKELY(baseElemConv_ != nullptr)) {
+            return baseElemConv_;
         }
-        return base_elem_conv_ = JSRefConvertResolve(ctx, klass_->GetComponentType());
+        return baseElemConv_ = JSRefConvertResolve(ctx, klass_->GetComponentType());
     }
 
     Class *klass_ {};
-    JSRefConvert *base_elem_conv_ {};
+    JSRefConvert *baseElemConv_ {};
 };
 
 }  // namespace panda::ets::interop::js

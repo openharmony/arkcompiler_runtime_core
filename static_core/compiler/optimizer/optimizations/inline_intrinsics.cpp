@@ -35,8 +35,8 @@ namespace panda::compiler {
 InlineIntrinsics::InlineIntrinsics(Graph *graph)
     : Optimization(graph),
       types_ {graph->GetLocalAllocator()->Adapter()},
-      saved_inputs_ {graph->GetLocalAllocator()->Adapter()},
-      named_access_profile_ {graph->GetLocalAllocator()->Adapter()}
+      savedInputs_ {graph->GetLocalAllocator()->Adapter()},
+      namedAccessProfile_ {graph->GetLocalAllocator()->Adapter()}
 {
 }
 
@@ -50,11 +50,11 @@ void InlineIntrinsics::InvalidateAnalyses()
 
 bool InlineIntrinsics::RunImpl()
 {
-    bool is_applied = false;
+    bool isApplied = false;
     GetGraph()->RunPass<TypesAnalysis>();
-    bool clear_bbs = false;
+    bool clearBbs = false;
     // We can't replace intrinsics on Deoptimize in OSR mode, because we can get incorrect value
-    bool is_replace_on_deopt = !GetGraph()->IsAotMode() && !GetGraph()->IsOsrMode();
+    bool isReplaceOnDeopt = !GetGraph()->IsAotMode() && !GetGraph()->IsOsrMode();
     for (auto bb : GetGraph()->GetVectorBlocks()) {
         if (bb == nullptr || bb->IsEmpty()) {
             continue;
@@ -64,36 +64,36 @@ bool InlineIntrinsics::RunImpl()
                 break;
             }
             if (inst->GetOpcode() == Opcode::CallDynamic) {
-                is_applied |= TryInline(inst->CastToCallDynamic());
+                isApplied |= TryInline(inst->CastToCallDynamic());
                 continue;
             }
             if (inst->GetOpcode() != Opcode::Intrinsic) {
                 continue;
             }
-            auto intrinsics_inst = inst->CastToIntrinsic();
-            if (OPTIONS.IsCompilerInlineFullIntrinsics() && !intrinsics_inst->CanBeInlined()) {
+            auto intrinsicsInst = inst->CastToIntrinsic();
+            if (g_options.IsCompilerInlineFullIntrinsics() && !intrinsicsInst->CanBeInlined()) {
                 // skip intrinsics built inside inlined irtoc handler
                 continue;
             }
-            if (TryInline(intrinsics_inst)) {
-                is_applied = true;
+            if (TryInline(intrinsicsInst)) {
+                isApplied = true;
                 continue;
             }
-            if (is_replace_on_deopt && intrinsics_inst->IsReplaceOnDeoptimize()) {
+            if (isReplaceOnDeopt && intrinsicsInst->IsReplaceOnDeoptimize()) {
                 inst->GetBasicBlock()->ReplaceInstByDeoptimize(inst);
-                clear_bbs = true;
+                clearBbs = true;
                 break;
             }
         }
     }
-    if (clear_bbs) {
+    if (clearBbs) {
         GetGraph()->RemoveUnreachableBlocks();
         if (GetGraph()->IsOsrMode()) {
             CleanupGraphSaveStateOSR(GetGraph());
         }
-        is_applied = true;
+        isApplied = true;
     }
-    return is_applied;
+    return isApplied;
 }
 
 AnyBaseType InlineIntrinsics::GetAssumedAnyType(const Inst *inst)
@@ -115,8 +115,8 @@ AnyBaseType InlineIntrinsics::GetAssumedAnyType(const Inst *inst)
                 // NOTE(dkofanov): Probably, we should resolve const's type based on `inst->GetType()`:
                 return AnyBaseType::UNDEFINED_TYPE;
             }
-            coretypes::TaggedValue any_const(inst->CastToConstant()->GetRawValue());
-            auto type = GetGraph()->GetRuntime()->ResolveSpecialAnyTypeByConstant(any_const);
+            coretypes::TaggedValue anyConst(inst->CastToConstant()->GetRawValue());
+            auto type = GetGraph()->GetRuntime()->ResolveSpecialAnyTypeByConstant(anyConst);
             ASSERT(type != AnyBaseType::UNDEFINED_TYPE);
             return type;
         }
@@ -144,12 +144,12 @@ bool InlineIntrinsics::DoInline(IntrinsicInst *intrinsic)
     }
 }
 
-bool InlineIntrinsics::TryInline(CallInst *call_inst)
+bool InlineIntrinsics::TryInline(CallInst *callInst)
 {
-    if ((call_inst->GetCallMethod() == nullptr)) {
+    if ((callInst->GetCallMethod() == nullptr)) {
         return false;
     }
-    switch (GetGraph()->GetRuntime()->GetMethodSourceLanguage(call_inst->GetCallMethod())) {
+    switch (GetGraph()->GetRuntime()->GetMethodSourceLanguage(callInst->GetCallMethod())) {
 #include "intrinsics_inline_native_method.inl"
         default: {
             return false;
@@ -163,25 +163,25 @@ bool InlineIntrinsics::TryInline(IntrinsicInst *intrinsic)
         return DoInline(intrinsic);
     }
     types_.clear();
-    saved_inputs_.clear();
+    savedInputs_.clear();
     AnyBaseType type = AnyBaseType::UNDEFINED_TYPE;
     for (auto &input : intrinsic->GetInputs()) {
-        auto input_inst = input.GetInst();
-        if (input_inst->IsSaveState()) {
+        auto inputInst = input.GetInst();
+        if (inputInst->IsSaveState()) {
             continue;
         }
-        auto input_type = GetAssumedAnyType(input_inst);
-        if (input_type != AnyBaseType::UNDEFINED_TYPE) {
-            type = input_type;
-        } else if (input_inst->GetOpcode() == Opcode::AnyTypeCheck &&
-                   input_inst->CastToAnyTypeCheck()->IsTypeWasProfiled()) {
+        auto inputType = GetAssumedAnyType(inputInst);
+        if (inputType != AnyBaseType::UNDEFINED_TYPE) {
+            type = inputType;
+        } else if (inputInst->GetOpcode() == Opcode::AnyTypeCheck &&
+                   inputInst->CastToAnyTypeCheck()->IsTypeWasProfiled()) {
             // Type is mixed and compiler cannot make optimization for that case.
             // Any deduced type will also cause deoptimization. So avoid intrinsic inline here.
             // Revise it in the future optimizations.
             return false;
         }
-        types_.emplace_back(input_type);
-        saved_inputs_.emplace_back(input_inst);
+        types_.emplace_back(inputType);
+        savedInputs_.emplace_back(inputInst);
     }
     // last input is SaveState
     ASSERT(types_.size() + 1 == intrinsic->GetInputsCount());
@@ -190,17 +190,17 @@ bool InlineIntrinsics::TryInline(IntrinsicInst *intrinsic)
         AnyBaseTypeToDataType(type) != DataType::ANY) {
         // Set known type to undefined input types.
         // Do not set type based on special input types like Undefined or Null
-        for (auto &curr_type : types_) {
-            if (curr_type == AnyBaseType::UNDEFINED_TYPE) {
-                curr_type = type;
+        for (auto &currType : types_) {
+            if (currType == AnyBaseType::UNDEFINED_TYPE) {
+                currType = type;
             }
         }
     }
     if (DoInline(intrinsic)) {
-        for (size_t i = 0; i < saved_inputs_.size(); i++) {
-            ASSERT(!saved_inputs_[i]->IsSaveState());
-            if (saved_inputs_[i]->GetOpcode() == Opcode::AnyTypeCheck) {
-                saved_inputs_[i]->CastToAnyTypeCheck()->SetAnyType(types_[i]);
+        for (size_t i = 0; i < savedInputs_.size(); i++) {
+            ASSERT(!savedInputs_[i]->IsSaveState());
+            if (savedInputs_[i]->GetOpcode() == Opcode::AnyTypeCheck) {
+                savedInputs_[i]->CastToAnyTypeCheck()->SetAnyType(types_[i]);
             }
         }
         return true;

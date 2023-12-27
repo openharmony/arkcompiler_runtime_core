@@ -83,21 +83,21 @@ TEST_F(InterpreterTestSwitch, SwitchToDebug)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
     class Listener : public RuntimeListener {
     public:
         struct Event {
             ManagedThread *thread;
             Method *method;
-            uint32_t bc_offset;
+            uint32_t bcOffset;
         };
 
-        void BytecodePcChanged(ManagedThread *thread, Method *method, uint32_t bc_offset) override
+        void BytecodePcChanged(ManagedThread *thread, Method *method, uint32_t bcOffset) override
         {
-            events_.push_back({thread, method, bc_offset});
+            events_.push_back({thread, method, bcOffset});
         }
 
         auto &GetEvents() const
@@ -111,12 +111,12 @@ TEST_F(InterpreterTestSwitch, SwitchToDebug)
 
     Listener listener {};
 
-    auto *notification_manager = Runtime::GetCurrent()->GetNotificationManager();
-    notification_manager->AddListener(&listener, RuntimeNotificationManager::BYTECODE_PC_CHANGED);
+    auto *notificationManager = Runtime::GetCurrent()->GetNotificationManager();
+    notificationManager->AddListener(&listener, RuntimeNotificationManager::BYTECODE_PC_CHANGED);
 
     std::vector<Value> args;
     Value v;
-    Method *main_method;
+    Method *mainMethod;
 
     auto *thread = ManagedThread::GetCurrent();
 
@@ -127,26 +127,26 @@ TEST_F(InterpreterTestSwitch, SwitchToDebug)
         Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
         ASSERT_NE(klass, nullptr);
 
-        main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-        ASSERT_NE(main_method, nullptr);
+        mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+        ASSERT_NE(mainMethod, nullptr);
 
-        Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-        ASSERT_NE(f_method, nullptr);
+        Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+        ASSERT_NE(fMethod, nullptr);
 
-        f_method->SetCompiledEntryPoint(reinterpret_cast<const void *>(EntryPoint));
+        fMethod->SetCompiledEntryPoint(reinterpret_cast<const void *>(EntryPoint));
 
-        v = main_method->Invoke(thread, args.data());
+        v = mainMethod->Invoke(thread, args.data());
     }
 
-    notification_manager->RemoveListener(&listener, RuntimeNotificationManager::BYTECODE_PC_CHANGED);
+    notificationManager->RemoveListener(&listener, RuntimeNotificationManager::BYTECODE_PC_CHANGED);
 
     ASSERT_EQ(v.GetAs<int32_t>(), RET);
     ASSERT_EQ(listener.GetEvents().size(), 1U);
 
     auto &event = listener.GetEvents()[0];
     EXPECT_EQ(event.thread, thread);
-    EXPECT_EQ(event.method, main_method);
-    EXPECT_EQ(event.bc_offset, BytecodeInstruction::Size(BytecodeInstruction::Format::V4_V4_ID16));
+    EXPECT_EQ(event.method, mainMethod);
+    EXPECT_EQ(event.bcOffset, BytecodeInstruction::Size(BytecodeInstruction::Format::V4_V4_ID16));
 }
 
 }  // namespace panda::interpreter::test

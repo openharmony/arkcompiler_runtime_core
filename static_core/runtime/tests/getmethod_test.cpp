@@ -70,10 +70,10 @@ TEST_F(GetMethodTest, GetMethod)
 
     // define some methods unsorted
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    std::string methods_name[] = {"ab", "hello", "f1", "say", "world", "k0", "a"};
-    size_t methods_num = sizeof(methods_name) / sizeof(methods_name[0]);
-    for (size_t i = 0; i < methods_num; i++) {
-        ss << ".function void R1." << methods_name[i] << "() {" << std::endl;
+    std::string methodsName[] = {"ab", "hello", "f1", "say", "world", "k0", "a"};
+    size_t methodsNum = sizeof(methodsName) / sizeof(methodsName[0]);
+    for (size_t i = 0; i < methodsNum; i++) {
+        ss << ".function void R1." << methodsName[i] << "() {" << std::endl;
         ss << "    return.void" << std::endl;
         ss << "}" << std::endl;
     }
@@ -86,19 +86,19 @@ TEST_F(GetMethodTest, GetMethod)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr) << pandasm::AsmEmitter::GetLastError();
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
-    auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     Class *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R1"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     // check if methods sorted by id and name
     auto methods = klass->GetMethods();
-    ASSERT_EQ(methods.size(), methods_num);
-    for (size_t i = 0; i < methods_num; i++) {
-        for (size_t j = i + 1; j < methods_num; j++) {
+    ASSERT_EQ(methods.size(), methodsNum);
+    for (size_t i = 0; i < methodsNum; i++) {
+        for (size_t j = i + 1; j < methodsNum; j++) {
             ASSERT_TRUE(methods[i].GetFileId().GetOffset() < methods[j].GetFileId().GetOffset());
             ASSERT_TRUE(methods[i].GetName() < methods[j].GetName());
         }
@@ -107,8 +107,8 @@ TEST_F(GetMethodTest, GetMethod)
     // get each method by id and name
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID)},
                         Method::Proto::RefTypeVector {});
-    for (size_t i = 0; i < methods_num; i++) {
-        Method *method = klass->GetClassMethod(utf::CStringAsMutf8(methods_name[i].c_str()), proto);
+    for (size_t i = 0; i < methodsNum; i++) {
+        Method *method = klass->GetClassMethod(utf::CStringAsMutf8(methodsName[i].c_str()), proto);
         ASSERT_NE(method, nullptr);
         ASSERT_EQ(method, klass->GetStaticClassMethod(method->GetFileId()));
     }

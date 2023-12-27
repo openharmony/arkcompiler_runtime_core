@@ -18,39 +18,39 @@
 #include "rpo.h"
 
 namespace panda::compiler {
-Rpo::Rpo(Graph *graph) : Analysis(graph), rpo_vector_(graph->GetAllocator()->Adapter()) {}
+Rpo::Rpo(Graph *graph) : Analysis(graph), rpoVector_(graph->GetAllocator()->Adapter()) {}
 
 /**
  *  Depth-first search
  * `blocks_count` needs for filling `rpo_vector_` in reverse order
  */
-void Rpo::DFS(BasicBlock *block, size_t *blocks_count)
+void Rpo::DFS(BasicBlock *block, size_t *blocksCount)
 {
     ASSERT(block != nullptr);
     block->SetMarker(marker_);
 
-    for (auto succ_block : block->GetSuccsBlocks()) {
-        if (!succ_block->IsMarked(marker_)) {
-            DFS(succ_block, blocks_count);
+    for (auto succBlock : block->GetSuccsBlocks()) {
+        if (!succBlock->IsMarked(marker_)) {
+            DFS(succBlock, blocksCount);
         }
     }
 
-    ASSERT(blocks_count != nullptr && *blocks_count > 0);
-    rpo_vector_[--(*blocks_count)] = block;
+    ASSERT(blocksCount != nullptr && *blocksCount > 0);
+    rpoVector_[--(*blocksCount)] = block;
 }
 
 bool Rpo::RunImpl()
 {
-    size_t blocks_count = GetGraph()->GetAliveBlocksCount();
-    rpo_vector_.resize(blocks_count);
-    if (blocks_count == 0) {
+    size_t blocksCount = GetGraph()->GetAliveBlocksCount();
+    rpoVector_.resize(blocksCount);
+    if (blocksCount == 0) {
         return true;
     }
     marker_ = GetGraph()->NewMarker();
     ASSERT_PRINT(marker_ != UNDEF_MARKER, "There are no free markers. Please erase unused markers");
-    DFS(GetGraph()->GetStartBlock(), &blocks_count);
+    DFS(GetGraph()->GetStartBlock(), &blocksCount);
 #ifndef NDEBUG
-    if (blocks_count != 0) {
+    if (blocksCount != 0) {
         std::cerr << "There are unreachable blocks:\n";
         for (auto bb : *GetGraph()) {
             if (bb != nullptr && !bb->IsMarked(marker_)) {

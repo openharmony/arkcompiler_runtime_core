@@ -26,7 +26,7 @@ static constexpr size_t MIN_ARRAY_ELEMENTS_AMOUNT = 2;
 
 bool ConstArrayResolver::RunImpl()
 {
-    if (ir_interface_ == nullptr) {
+    if (irInterface_ == nullptr) {
         return false;
     }
 
@@ -64,9 +64,9 @@ static std::optional<compiler::ConstantInst *> GetConstantIfPossible(Inst *inst)
         if ((input->GetOpcode() == Opcode::NullPtr) || !input->IsConst()) {
             return std::nullopt;
         }
-        auto constant_inst = compiler::ConstFoldingCastConst(inst, input, true);
-        if (constant_inst != nullptr) {
-            return constant_inst;
+        auto constantInst = compiler::ConstFoldingCastConst(inst, input, true);
+        if (constantInst != nullptr) {
+            return constantInst;
         }
     }
     if (inst->IsConst()) {
@@ -78,10 +78,10 @@ static std::optional<compiler::ConstantInst *> GetConstantIfPossible(Inst *inst)
 std::optional<std::vector<pandasm::LiteralArray::Literal>> ConstArrayResolver::FillLiteralArray(Inst *inst, size_t size)
 {
     std::vector<pandasm::LiteralArray::Literal> literals {size};
-    std::vector<Inst *> store_insts;
+    std::vector<Inst *> storeInsts;
 
     auto next = inst->GetNext();
-    size_t real_size = 0;
+    size_t realSize = 0;
 
     // are looking for instructions for uninterrupted filling the array
     while (next != nullptr) {
@@ -96,70 +96,70 @@ std::optional<std::vector<pandasm::LiteralArray::Literal>> ConstArrayResolver::F
             continue;
         }
 
-        auto store_array_inst = next->CastToStoreArray();
-        if (store_array_inst == nullptr || store_array_inst->GetArray() != inst) {
+        auto storeArrayInst = next->CastToStoreArray();
+        if (storeArrayInst == nullptr || storeArrayInst->GetArray() != inst) {
             break;
         }
 
         // get an index of the inserted element if possible
-        auto index_inst = store_array_inst->GetIndex();
-        auto index_const_inst = GetConstantIfPossible(index_inst);
-        if (!index_const_inst) {
+        auto indexInst = storeArrayInst->GetIndex();
+        auto indexConstInst = GetConstantIfPossible(indexInst);
+        if (!indexConstInst) {
             return std::nullopt;
         }
-        auto index = static_cast<size_t>((*index_const_inst)->GetIntValue());
+        auto index = static_cast<size_t>((*indexConstInst)->GetIntValue());
         if (index >= size) {
             return std::nullopt;
         }
 
         pandasm::LiteralArray::Literal literal {};
         // create a literal from the array element, if possible
-        if (!FillLiteral(store_array_inst, &literal)) {
+        if (!FillLiteral(storeArrayInst, &literal)) {
             // if not, then we can't create a constant literal array
             return std::nullopt;
         }
 
         // checks if there is free space on the [index] position in the vector
-        pandasm::LiteralArray::Literal default_literal {};
-        if (literals[index] == default_literal) {
-            real_size++;
+        pandasm::LiteralArray::Literal defaultLiteral {};
+        if (literals[index] == defaultLiteral) {
+            realSize++;
         }
 
         literals[index] = literal;
-        store_insts.push_back(next);
+        storeInsts.push_back(next);
         next = next->GetNext();
     }
 
     // save the literal array only if it is completely filled
     // or its size exceeds the minimum number of elements to save
-    if (real_size != size || store_insts.size() < MIN_ARRAY_ELEMENTS_AMOUNT) {
+    if (realSize != size || storeInsts.size() < MIN_ARRAY_ELEMENTS_AMOUNT) {
         return std::nullopt;
     }
 
     // save the store instructions for deleting them later
-    const_arrays_fill_.emplace(inst, std::move(store_insts));
+    constArraysFill_.emplace(inst, std::move(storeInsts));
     return std::optional<std::vector<pandasm::LiteralArray::Literal>> {std::move(literals)};
 }
 
-void ConstArrayResolver::AddIntroLiterals(pandasm::LiteralArray *lt_ar)
+void ConstArrayResolver::AddIntroLiterals(pandasm::LiteralArray *ltAr)
 {
     // add an element that stores the array size (it will be stored in the first element)
-    pandasm::LiteralArray::Literal len_lit;
-    len_lit.tag = panda_file::LiteralTag::INTEGER;
-    len_lit.value = static_cast<uint32_t>(lt_ar->literals.size());
-    lt_ar->literals.insert(lt_ar->literals.begin(), len_lit);
+    pandasm::LiteralArray::Literal lenLit;
+    lenLit.tag = panda_file::LiteralTag::INTEGER;
+    lenLit.value = static_cast<uint32_t>(ltAr->literals.size());
+    ltAr->literals.insert(ltAr->literals.begin(), lenLit);
 
     // add an element that stores the array type (it will be stored in the zero element)
-    pandasm::LiteralArray::Literal tag_lit;
-    tag_lit.tag = panda_file::LiteralTag::TAGVALUE;
-    tag_lit.value = static_cast<uint8_t>(lt_ar->literals.back().tag);
-    lt_ar->literals.insert(lt_ar->literals.begin(), tag_lit);
+    pandasm::LiteralArray::Literal tagLit;
+    tagLit.tag = panda_file::LiteralTag::TAGVALUE;
+    tagLit.value = static_cast<uint8_t>(ltAr->literals.back().tag);
+    ltAr->literals.insert(ltAr->literals.begin(), tagLit);
 }
 
 bool ConstArrayResolver::IsMultidimensionalArray(compiler::NewArrayInst *inst)
 {
-    auto array_type = pandasm::Type::FromName(ir_interface_->GetTypeIdByOffset(inst->GetTypeId()));
-    return array_type.GetRank() > SINGLE_DIM_ARRAY_RANK;
+    auto arrayType = pandasm::Type::FromName(irInterface_->GetTypeIdByOffset(inst->GetTypeId()));
+    return arrayType.GetRank() > SINGLE_DIM_ARRAY_RANK;
 }
 
 static bool IsSameBB(Inst *inst1, Inst *inst2)
@@ -174,7 +174,7 @@ static bool IsSameBB(Inst *inst, compiler::BasicBlock *bb)
 
 bool ConstArrayResolver::FindConstantArrays()
 {
-    size_t init_size = ir_interface_->GetLiteralArrayTableSize();
+    size_t initSize = irInterface_->GetLiteralArrayTableSize();
 
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         // go through the instructions of the basic block in reverse order
@@ -187,122 +187,122 @@ bool ConstArrayResolver::FindConstantArrays()
             }
 
             // the patch for creating and filling an array should start with the NewArray instruction
-            auto array_inst = inst->CastToStoreArray()->GetArray();
-            if (array_inst->GetOpcode() != Opcode::NewArray) {
+            auto arrayInst = inst->CastToStoreArray()->GetArray();
+            if (arrayInst->GetOpcode() != Opcode::NewArray) {
                 inst = inst->GetPrev();
                 continue;
             }
-            auto new_array_inst = array_inst->CastToNewArray();
+            auto newArrayInst = arrayInst->CastToNewArray();
             // the instructions included in the patch must be in one basic block
-            if (!IsSameBB(inst, new_array_inst)) {
+            if (!IsSameBB(inst, newArrayInst)) {
                 inst = inst->GetPrev();
                 continue;
             }
 
             // NOTE(aantipina): add the ability to save multidimensional arrays
-            if (IsMultidimensionalArray(new_array_inst)) {
-                inst = IsSameBB(inst, new_array_inst) ? new_array_inst->GetPrev() : inst->GetPrev();
+            if (IsMultidimensionalArray(newArrayInst)) {
+                inst = IsSameBB(inst, newArrayInst) ? newArrayInst->GetPrev() : inst->GetPrev();
                 continue;
             }
 
-            auto array_size_inst =
-                GetConstantIfPossible(new_array_inst->GetInput(compiler::NewArrayInst::INDEX_SIZE).GetInst());
-            if (array_size_inst == std::nullopt) {
-                inst = new_array_inst->GetPrev();
+            auto arraySizeInst =
+                GetConstantIfPossible(newArrayInst->GetInput(compiler::NewArrayInst::INDEX_SIZE).GetInst());
+            if (arraySizeInst == std::nullopt) {
+                inst = newArrayInst->GetPrev();
                 continue;
             }
-            auto array_size = (*array_size_inst)->CastToConstant()->GetIntValue();
-            if (array_size < MIN_ARRAY_ELEMENTS_AMOUNT) {
-                inst = new_array_inst->GetPrev();
+            auto arraySize = (*arraySizeInst)->CastToConstant()->GetIntValue();
+            if (arraySize < MIN_ARRAY_ELEMENTS_AMOUNT) {
+                inst = newArrayInst->GetPrev();
                 continue;
             }
 
             // creating a literal array, if possible
-            auto raw_literal_array = FillLiteralArray(new_array_inst, array_size);
-            if (raw_literal_array == std::nullopt) {
-                inst = new_array_inst->GetPrev();
+            auto rawLiteralArray = FillLiteralArray(newArrayInst, arraySize);
+            if (rawLiteralArray == std::nullopt) {
+                inst = newArrayInst->GetPrev();
                 continue;
             }
 
-            pandasm::LiteralArray literal_array(*raw_literal_array);
+            pandasm::LiteralArray literalArray(*rawLiteralArray);
 
             // save the type and length of the array in the first two elements
-            AddIntroLiterals(&literal_array);
-            auto id = ir_interface_->GetLiteralArrayTableSize();
-            ir_interface_->StoreLiteralArray(std::to_string(id), std::move(literal_array));
+            AddIntroLiterals(&literalArray);
+            auto id = irInterface_->GetLiteralArrayTableSize();
+            irInterface_->StoreLiteralArray(std::to_string(id), std::move(literalArray));
 
             // save the NewArray instructions for replacing them with LoadConst instructions later
-            const_arrays_init_.emplace(id, new_array_inst);
+            constArraysInit_.emplace(id, newArrayInst);
 
-            inst = new_array_inst->GetPrev();
+            inst = newArrayInst->GetPrev();
         }
     }
 
     // the pass worked if the size of the literal array table increased
-    return init_size < ir_interface_->GetLiteralArrayTableSize();
+    return initSize < irInterface_->GetLiteralArrayTableSize();
 }
 
 void ConstArrayResolver::RemoveArraysFill()
 {
-    for (const auto &it : const_arrays_fill_) {
-        for (const auto &store_inst : it.second) {
-            store_inst->GetBasicBlock()->RemoveInst(store_inst);
+    for (const auto &it : constArraysFill_) {
+        for (const auto &storeInst : it.second) {
+            storeInst->GetBasicBlock()->RemoveInst(storeInst);
         }
     }
 }
 
 void ConstArrayResolver::InsertLoadConstArrayInsts()
 {
-    for (const auto &[id, start_inst] : const_arrays_init_) {
+    for (const auto &[id, start_inst] : constArraysInit_) {
         auto method = GetGraph()->GetMethod();
-        compiler::LoadConstArrayInst *new_inst = GetGraph()->CreateInstLoadConstArray(REFERENCE, start_inst->GetPc());
-        new_inst->SetTypeId(id);
-        new_inst->SetMethod(method);
+        compiler::LoadConstArrayInst *newInst = GetGraph()->CreateInstLoadConstArray(REFERENCE, start_inst->GetPc());
+        newInst->SetTypeId(id);
+        newInst->SetMethod(method);
 
-        start_inst->ReplaceUsers(new_inst);
+        start_inst->ReplaceUsers(newInst);
         start_inst->RemoveInputs();
 
-        compiler::SaveStateInst *save_state = GetGraph()->CreateInstSaveState();
-        save_state->SetPc(start_inst->GetPc());
-        save_state->SetMethod(method);
-        save_state->ReserveInputs(0U);
+        compiler::SaveStateInst *saveState = GetGraph()->CreateInstSaveState();
+        saveState->SetPc(start_inst->GetPc());
+        saveState->SetMethod(method);
+        saveState->ReserveInputs(0U);
 
-        new_inst->SetInput(0U, save_state);
-        start_inst->InsertBefore(save_state);
-        start_inst->GetBasicBlock()->ReplaceInst(start_inst, new_inst);
+        newInst->SetInput(0U, saveState);
+        start_inst->InsertBefore(saveState);
+        start_inst->GetBasicBlock()->ReplaceInst(start_inst, newInst);
     }
 }
 
 static bool FillPrimitiveLiteral(pandasm::LiteralArray::Literal *literal, panda_file::Type::TypeId type,
-                                 compiler::ConstantInst *value_inst)
+                                 compiler::ConstantInst *valueInst)
 {
     auto tag = pandasm::LiteralArray::GetArrayTagFromComponentType(type);
     literal->tag = tag;
     switch (tag) {
         case panda_file::LiteralTag::ARRAY_U1:
-            literal->value = static_cast<bool>(value_inst->GetInt32Value());
+            literal->value = static_cast<bool>(valueInst->GetInt32Value());
             return true;
         case panda_file::LiteralTag::ARRAY_U8:
         case panda_file::LiteralTag::ARRAY_I8:
-            literal->value = static_cast<uint8_t>(value_inst->GetInt32Value());
+            literal->value = static_cast<uint8_t>(valueInst->GetInt32Value());
             return true;
         case panda_file::LiteralTag::ARRAY_U16:
         case panda_file::LiteralTag::ARRAY_I16:
-            literal->value = static_cast<uint16_t>(value_inst->GetInt32Value());
+            literal->value = static_cast<uint16_t>(valueInst->GetInt32Value());
             return true;
         case panda_file::LiteralTag::ARRAY_U32:
         case panda_file::LiteralTag::ARRAY_I32:
-            literal->value = value_inst->GetInt32Value();
+            literal->value = valueInst->GetInt32Value();
             return true;
         case panda_file::LiteralTag::ARRAY_U64:
         case panda_file::LiteralTag::ARRAY_I64:
-            literal->value = value_inst->GetInt64Value();
+            literal->value = valueInst->GetInt64Value();
             return true;
         case panda_file::LiteralTag::ARRAY_F32:
-            literal->value = value_inst->GetFloatValue();
+            literal->value = valueInst->GetFloatValue();
             return true;
         case panda_file::LiteralTag::ARRAY_F64:
-            literal->value = value_inst->GetDoubleValue();
+            literal->value = valueInst->GetDoubleValue();
             return true;
         default:
             UNREACHABLE();
@@ -310,33 +310,33 @@ static bool FillPrimitiveLiteral(pandasm::LiteralArray::Literal *literal, panda_
     return false;
 }
 
-bool ConstArrayResolver::FillLiteral(compiler::StoreInst *store_array_inst, pandasm::LiteralArray::Literal *literal)
+bool ConstArrayResolver::FillLiteral(compiler::StoreInst *storeArrayInst, pandasm::LiteralArray::Literal *literal)
 {
-    if (store_array_inst->GetInputsCount() > STOREARRAY_INPUTS_NUM) {
+    if (storeArrayInst->GetInputsCount() > STOREARRAY_INPUTS_NUM) {
         return false;
     }
-    auto raw_elem_inst = store_array_inst->GetStoredValue();
-    auto new_array_inst = store_array_inst->GetArray();
+    auto rawElemInst = storeArrayInst->GetStoredValue();
+    auto newArrayInst = storeArrayInst->GetArray();
 
-    auto array_type =
-        pandasm::Type::FromName(ir_interface_->GetTypeIdByOffset(new_array_inst->CastToNewArray()->GetTypeId()));
-    auto component_type = array_type.GetComponentType();
-    auto component_type_name = array_type.GetComponentName();
+    auto arrayType =
+        pandasm::Type::FromName(irInterface_->GetTypeIdByOffset(newArrayInst->CastToNewArray()->GetTypeId()));
+    auto componentType = arrayType.GetComponentType();
+    auto componentTypeName = arrayType.GetComponentName();
 
-    if (pandasm::Type::IsPandaPrimitiveType(component_type_name)) {
-        auto value_inst = GetConstantIfPossible(raw_elem_inst);
-        if (value_inst == std::nullopt) {
+    if (pandasm::Type::IsPandaPrimitiveType(componentTypeName)) {
+        auto valueInst = GetConstantIfPossible(rawElemInst);
+        if (valueInst == std::nullopt) {
             return false;
         }
-        return FillPrimitiveLiteral(literal, component_type.GetId(), *value_inst);
+        return FillPrimitiveLiteral(literal, componentType.GetId(), *valueInst);
     }
 
-    auto string_type =
-        pandasm::Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(ir_interface_->GetSourceLang()));
-    if ((raw_elem_inst->GetOpcode() == Opcode::LoadString) && (component_type_name == string_type.GetName())) {
+    auto stringType =
+        pandasm::Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(irInterface_->GetSourceLang()));
+    if ((rawElemInst->GetOpcode() == Opcode::LoadString) && (componentTypeName == stringType.GetName())) {
         literal->tag = panda_file::LiteralTag::ARRAY_STRING;
-        std::string string_value = ir_interface_->GetStringIdByOffset(raw_elem_inst->CastToLoadString()->GetTypeId());
-        literal->value = string_value;
+        std::string stringValue = irInterface_->GetStringIdByOffset(rawElemInst->CastToLoadString()->GetTypeId());
+        literal->value = stringValue;
         return true;
     }
 

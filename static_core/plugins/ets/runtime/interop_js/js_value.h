@@ -33,10 +33,10 @@ struct JSValueMemberOffsets;
 
 class JSValue : private EtsObject {
 public:
-    static JSValue *FromEtsObject(EtsObject *ets_object)
+    static JSValue *FromEtsObject(EtsObject *etsObject)
     {
-        ASSERT(ets_object->GetClass() == EtsClass::FromRuntimeClass(InteropCtx::Current()->GetJSValueClass()));
-        return static_cast<JSValue *>(ets_object);
+        ASSERT(etsObject->GetClass() == EtsClass::FromRuntimeClass(InteropCtx::Current()->GetJSValueClass()));
+        return static_cast<JSValue *>(etsObject);
     }
 
     static JSValue *FromCoreType(ObjectHeader *object)
@@ -150,7 +150,7 @@ public:
 
     // Specific for experimental ts2ets_tstype
     static JSValue *CreateTSTypeDerived([[maybe_unused]] Class *klass, [[maybe_unused]] napi_env env,
-                                        [[maybe_unused]] napi_value js_val)
+                                        [[maybe_unused]] napi_value jsVal)
     {
         UNREACHABLE();
     }
@@ -198,21 +198,21 @@ private:
 
     static JSValue *AllocUndefined(EtsCoroutine *coro, InteropCtx *ctx)
     {
-        JSValue *js_value;
+        JSValue *jsValue;
         {
             auto obj = ObjectHeader::Create(coro, ctx->GetJSValueClass());
             if (UNLIKELY(!obj)) {
                 return nullptr;
             }
-            js_value = FromCoreType(obj);
+            jsValue = FromCoreType(obj);
         }
         static_assert(napi_undefined == 0);  // zero-initialized
-        ASSERT(js_value->GetType() == napi_undefined);
-        return js_value;
+        ASSERT(jsValue->GetType() == napi_undefined);
+        return jsValue;
     }
 
-    // Returns moved js_value
-    [[nodiscard]] static JSValue *AttachFinalizer(EtsCoroutine *coro, JSValue *js_value);
+    // Returns moved jsValue
+    [[nodiscard]] static JSValue *AttachFinalizer(EtsCoroutine *coro, JSValue *jsValue);
 
     void SetNapiRef(napi_ref ref, napi_valuetype type)
     {
@@ -255,12 +255,12 @@ private:
         SetData(value);
     }
 
-    void SetRefValue(napi_env env, napi_value js_value, napi_valuetype type)
+    void SetRefValue(napi_env env, napi_value jsValue, napi_valuetype type)
     {
-        ASSERT(GetValueType(env, js_value) == type);
-        napi_ref js_ref;
-        NAPI_ASSERT_OK(napi_create_reference(env, js_value, 1, &js_ref));
-        SetNapiRef(js_ref, type);
+        ASSERT(GetValueType(env, jsValue) == type);
+        napi_ref jsRef;
+        NAPI_ASSERT_OK(napi_create_reference(env, jsValue, 1, &jsRef));
+        SetNapiRef(jsRef, type);
     }
 
     FIELD_UNUSED uint32_t type_;

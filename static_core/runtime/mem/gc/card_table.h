@@ -93,7 +93,7 @@ public:
     using Iterator = CardPtrIterator<CardPtr>;
     using ConstIterator = CardPtrIterator<const CardPtr>;
 
-    explicit CardTable(InternalAllocatorPtr internal_allocator, uintptr_t min_address, size_t size);
+    explicit CardTable(InternalAllocatorPtr internalAllocator, uintptr_t minAddress, size_t size);
     ~CardTable();
     CardTable(const CardTable &other) = delete;
     CardTable &operator=(const CardTable &other) = delete;
@@ -106,14 +106,14 @@ public:
     bool IsClear(uintptr_t addr) const;   // returns true if the card(for the addr) state is clear
     void ClearCard(uintptr_t addr);       // set card state to the cleared
     void ClearAll();                      // set card state to the cleared for the all cards
-    void ClearCardRange(uintptr_t begin_addr, uintptr_t end_addr);
+    void ClearCardRange(uintptr_t beginAddr, uintptr_t endAddr);
     static constexpr uint32_t GetCardSize()
     {
         return CARD_SIZE;
     }
     size_t GetCardsCount() const
     {
-        return cards_count_;
+        return cardsCount_;
     }
 
     uintptr_t GetCardStartAddress(CardPtr card) const;  // returns address of the first byte in the card
@@ -121,10 +121,10 @@ public:
     MemRange GetMemoryRange(CardPtr card) const;        // returns memory range for the card
 
     template <typename CardVisitor>
-    void VisitMarked(CardVisitor card_visitor, uint32_t processed_flag);
+    void VisitMarked(CardVisitor cardVisitor, uint32_t processedFlag);
 
     template <typename CardVisitor>
-    void VisitMarkedCompact(CardVisitor card_visitor);
+    void VisitMarkedCompact(CardVisitor cardVisitor);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     Iterator begin()
@@ -135,7 +135,7 @@ public:
     // NOLINTNEXTLINE(readability-identifier-naming)
     Iterator end()
     {
-        return Iterator(cards_ + cards_count_);
+        return Iterator(cards_ + cardsCount_);
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
@@ -147,7 +147,7 @@ public:
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator end() const
     {
-        return ConstIterator(cards_ + cards_count_);
+        return ConstIterator(cards_ + cardsCount_);
     }
 
     static constexpr uint8_t GetCardBits()
@@ -174,7 +174,7 @@ public:
         bool IsYoung() const;
         void SetYoung();
         uint8_t GetCard() const;
-        void SetCard(uint8_t new_val);
+        void SetCard(uint8_t newVal);
 
         static constexpr uint32_t GetValueOffset()
         {
@@ -209,24 +209,24 @@ public:
 
     ALWAYS_INLINE uintptr_t GetMinAddress() const
     {
-        return min_address_;
+        return minAddress_;
     }
 
-    void MarkCardsAsYoung(const MemRange &mem_range);
+    void MarkCardsAsYoung(const MemRange &memRange);
 
 private:
-    void ClearCards(CardPtr start, size_t card_count);
+    void ClearCards(CardPtr start, size_t cardCount);
     size_t GetSize() const;  // returns size of card table array
-    inline void FillRanges(PandaVector<MemRange> *ranges, const Card *start_card, const Card *end_card);
+    inline void FillRanges(PandaVector<MemRange> *ranges, const Card *startCard, const Card *endCard);
 
     static constexpr uint8_t LOG2_CARD_SIZE = 12;
     static constexpr uint32_t CARD_SIZE = 1U << LOG2_CARD_SIZE;
     static constexpr uint8_t DIRTY_CARD = 1U;
 
     CardPtr cards_ {nullptr};
-    uintptr_t min_address_ {0};
-    size_t cards_count_ {0};
-    InternalAllocatorPtr internal_allocator_ {nullptr};
+    uintptr_t minAddress_ {0};
+    size_t cardsCount_ {0};
+    InternalAllocatorPtr internalAllocator_ {nullptr};
 };
 
 using CardVisitor = std::function<void(CardTable::CardPtr)>;

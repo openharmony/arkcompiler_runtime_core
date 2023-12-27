@@ -32,26 +32,26 @@ public:
     CompilerTask GetTask() override
     {
         if (queue_.empty()) {
-            LOG(DEBUG, COMPILATION_QUEUE) << "Empty " << queue_name_ << ", return nothing";
+            LOG(DEBUG, COMPILATION_QUEUE) << "Empty " << queueName_ << ", return nothing";
             return CompilerTask();
         }
         auto task = std::move(queue_.front());
         queue_.pop_front();
-        LOG(DEBUG, COMPILATION_QUEUE) << "Extract a task from a " << queue_name_ << ": " << GetTaskDescription(task);
+        LOG(DEBUG, COMPILATION_QUEUE) << "Extract a task from a " << queueName_ << ": " << GetTaskDescription(task);
         return task;
     }
 
     // NOLINTNEXTLINE(google-default-arguments)
     void AddTask(CompilerTask &&ctx, [[maybe_unused]] size_t priority = 0) override
     {
-        LOG(DEBUG, COMPILATION_QUEUE) << "Add task to a " << queue_name_ << ": " << GetTaskDescription(ctx);
+        LOG(DEBUG, COMPILATION_QUEUE) << "Add task to a " << queueName_ << ": " << GetTaskDescription(ctx);
         queue_.push_front(std::move(ctx));
     }
 
     void Finalize() override
     {
         // Nothing to deallocate
-        LOG(DEBUG, COMPILATION_QUEUE) << "Clear a " << queue_name_;
+        LOG(DEBUG, COMPILATION_QUEUE) << "Clear a " << queueName_;
         queue_.clear();
     }
 
@@ -63,7 +63,7 @@ protected:
 
 private:
     PandaList<CompilerTask> queue_;
-    const char *queue_name_ = "simple compilation queue";
+    const char *queueName_ = "simple compilation queue";
 };
 
 }  // namespace panda

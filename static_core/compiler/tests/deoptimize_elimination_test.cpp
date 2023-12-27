@@ -25,13 +25,13 @@ class DeoptimizeEliminationTest : public CommonTest {
 public:
     DeoptimizeEliminationTest()
         : graph_(CreateGraphStartEndBlocks()),
-          default_compiler_safe_points_require_reg_map_(OPTIONS.IsCompilerSafePointsRequireRegMap())
+          defaultCompilerSafePointsRequireRegMap_(g_options.IsCompilerSafePointsRequireRegMap())
     {
     }
 
     ~DeoptimizeEliminationTest() override
     {
-        OPTIONS.SetCompilerSafePointsRequireRegMap(default_compiler_safe_points_require_reg_map_);
+        g_options.SetCompilerSafePointsRequireRegMap(defaultCompilerSafePointsRequireRegMap_);
     }
 
     NO_COPY_SEMANTIC(DeoptimizeEliminationTest);
@@ -44,7 +44,7 @@ public:
 
 private:
     Graph *graph_ {nullptr};
-    bool default_compiler_safe_points_require_reg_map_;
+    bool defaultCompilerSafePointsRequireRegMap_;
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -908,7 +908,7 @@ TEST_F(DeoptimizeEliminationTest, RemoveSafePoint1)
 // Not applied, a lot of instructions
 TEST_F(DeoptimizeEliminationTest, RemoveSafePoint2)
 {
-    uint64_t n = OPTIONS.GetCompilerSafepointEliminationLimit();
+    uint64_t n = g_options.GetCompilerSafepointEliminationLimit();
     auto block = GetGraph()->CreateEmptyBlock();
     GetGraph()->GetStartBlock()->AddSucc(block);
     block->AddSucc(GetGraph()->GetEndBlock());
@@ -992,8 +992,8 @@ TEST_F(DeoptimizeEliminationTest, RemovNumericInputs)
             INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).b();
         PARAMETER(1U, 2U).s32();
@@ -1011,7 +1011,7 @@ TEST_F(DeoptimizeEliminationTest, RemovNumericInputs)
 
     ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 // Removes object inputs from SS without Deoptimize
@@ -1033,8 +1033,8 @@ TEST_F(DeoptimizeEliminationTest, RemovObjectInputs)
             INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).b();
         PARAMETER(1U, 2U).ref();
@@ -1052,7 +1052,7 @@ TEST_F(DeoptimizeEliminationTest, RemovObjectInputs)
 
     ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 // Removes object inputs from SP
@@ -1070,8 +1070,8 @@ TEST_F(DeoptimizeEliminationTest, RemoveObjectInputsSafePoint)
             INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).b();
         PARAMETER(1U, 2U).ref();
@@ -1086,13 +1086,13 @@ TEST_F(DeoptimizeEliminationTest, RemoveObjectInputsSafePoint)
 
     ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 // Doesn't remove object inputs from SP
 TEST_F(DeoptimizeEliminationTest, RemoveObjectInputsSafePointRequireRegMap)
 {
-    OPTIONS.SetCompilerSafePointsRequireRegMap(true);
+    g_options.SetCompilerSafePointsRequireRegMap(true);
 
     GRAPH(GetGraph())
     {
@@ -1106,11 +1106,11 @@ TEST_F(DeoptimizeEliminationTest, RemoveObjectInputsSafePointRequireRegMap)
             INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *graph_et = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    Graph *graphEt = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
 
     ASSERT_FALSE(GetGraph()->RunPass<DeoptimizeElimination>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 // NOLINTEND(readability-magic-numbers)
 

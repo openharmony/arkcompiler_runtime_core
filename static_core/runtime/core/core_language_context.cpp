@@ -22,26 +22,25 @@
 
 namespace panda {
 
-static Class *GetExceptionClass(const uint8_t *mutf8_name, ManagedThread *thread, ClassLinker *class_linker)
+static Class *GetExceptionClass(const uint8_t *mutf8Name, ManagedThread *thread, ClassLinker *classLinker)
 {
     auto runtime = Runtime::GetCurrent();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *extension = class_linker->GetExtension(ctx);
-    auto *cls = class_linker->GetClass(mutf8_name, true, extension->GetBootContext());
+    auto *extension = classLinker->GetExtension(ctx);
+    auto *cls = classLinker->GetClass(mutf8Name, true, extension->GetBootContext());
     if (cls == nullptr) {
-        LOG(ERROR, CORE) << "Class " << utf::Mutf8AsCString(mutf8_name) << " not found";
+        LOG(ERROR, CORE) << "Class " << utf::Mutf8AsCString(mutf8Name) << " not found";
         return nullptr;
     }
 
-    if (!class_linker->InitializeClass(thread, cls)) {
-        LOG(ERROR, CORE) << "Class " << utf::Mutf8AsCString(mutf8_name) << " cannot be initialized";
+    if (!classLinker->InitializeClass(thread, cls)) {
+        LOG(ERROR, CORE) << "Class " << utf::Mutf8AsCString(mutf8Name) << " cannot be initialized";
         return nullptr;
     }
     return cls;
 }
 
-void CoreLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *mutf8_name,
-                                         const uint8_t *mutf8_msg) const
+void CoreLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const
 {
     ASSERT(thread == ManagedThread::GetCurrent());
 
@@ -58,17 +57,17 @@ void CoreLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *m
 
     auto runtime = Runtime::GetCurrent();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *class_linker = runtime->GetClassLinker();
-    auto *cls = GetExceptionClass(mutf8_name, thread, class_linker);
+    auto *classLinker = runtime->GetClassLinker();
+    auto *cls = GetExceptionClass(mutf8Name, thread, classLinker);
     if (cls == nullptr) {
         return;
     }
 
-    VMHandle<ObjectHeader> exc_handle(thread, ObjectHeader::Create(cls));
+    VMHandle<ObjectHeader> excHandle(thread, ObjectHeader::Create(cls));
 
     coretypes::String *msg;
-    if (mutf8_msg != nullptr) {
-        msg = coretypes::String::CreateFromMUtf8(mutf8_msg, ctx, Runtime::GetCurrent()->GetPandaVM());
+    if (mutf8Msg != nullptr) {
+        msg = coretypes::String::CreateFromMUtf8(mutf8Msg, ctx, Runtime::GetCurrent()->GetPandaVM());
         if (UNLIKELY(msg == nullptr)) {
             // OOM happened during msg allocation
             ASSERT(thread->HasPendingException());
@@ -77,26 +76,26 @@ void CoreLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *m
     } else {
         msg = nullptr;
     }
-    VMHandle<ObjectHeader> msg_handle(thread, msg);
+    VMHandle<ObjectHeader> msgHandle(thread, msg);
 
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
                         Method::Proto::RefTypeVector {utf::Mutf8AsCString(ctx.GetStringClassDescriptor()),
                                                       utf::Mutf8AsCString(ctx.GetObjectClassDescriptor())});
-    auto *ctor_name = ctx.GetCtorName();
-    auto *ctor = cls->GetDirectMethod(ctor_name, proto);
+    auto *ctorName = ctx.GetCtorName();
+    auto *ctor = cls->GetDirectMethod(ctorName, proto);
     if (ctor == nullptr) {
-        LOG(ERROR, CORE) << "No method " << utf::Mutf8AsCString(ctor_name) << " in class "
-                         << utf::Mutf8AsCString(mutf8_name);
+        LOG(ERROR, CORE) << "No method " << utf::Mutf8AsCString(ctorName) << " in class "
+                         << utf::Mutf8AsCString(mutf8Name);
         return;
     }
 
     constexpr size_t NARGS = 3;
-    std::array<Value, NARGS> args {Value(exc_handle.GetPtr()), Value(msg_handle.GetPtr()), Value(cause.GetPtr())};
+    std::array<Value, NARGS> args {Value(excHandle.GetPtr()), Value(msgHandle.GetPtr()), Value(cause.GetPtr())};
     ctor->InvokeVoid(thread, args.data());
     if (LIKELY(!thread->HasPendingException())) {
-        thread->SetException(exc_handle.GetPtr());
+        thread->SetException(excHandle.GetPtr());
     }
 }
 
@@ -112,27 +111,27 @@ PandaUniquePtr<VTableBuilder> CoreLanguageContext::CreateVTableBuilder() const
 
 PandaVM *CoreLanguageContext::CreateVM(Runtime *runtime, const RuntimeOptions &options) const
 {
-    auto core_vm = core::PandaCoreVM::Create(runtime, options);
-    if (!core_vm) {
-        LOG(ERROR, CORE) << core_vm.Error();
+    auto coreVm = core::PandaCoreVM::Create(runtime, options);
+    if (!coreVm) {
+        LOG(ERROR, CORE) << coreVm.Error();
         return nullptr;
     }
-    return core_vm.Value();
+    return coreVm.Value();
 }
 
-mem::GC *CoreLanguageContext::CreateGC(mem::GCType gc_type, mem::ObjectAllocatorBase *object_allocator,
+mem::GC *CoreLanguageContext::CreateGC(mem::GCType gcType, mem::ObjectAllocatorBase *objectAllocator,
                                        const mem::GCSettings &settings) const
 {
-    return mem::CreateGC<PandaAssemblyLanguageConfig>(gc_type, object_allocator, settings);
+    return mem::CreateGC<PandaAssemblyLanguageConfig>(gcType, objectAllocator, settings);
 }
 
 void CoreLanguageContext::ThrowStackOverflowException(ManagedThread *thread) const
 {
     auto runtime = Runtime::GetCurrent();
-    auto *class_linker = runtime->GetClassLinker();
+    auto *classLinker = runtime->GetClassLinker();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *extension = class_linker->GetExtension(ctx);
-    auto *cls = class_linker->GetClass(ctx.GetStackOverflowErrorClassDescriptor(), true, extension->GetBootContext());
+    auto *extension = classLinker->GetExtension(ctx);
+    auto *cls = classLinker->GetClass(ctx.GetStackOverflowErrorClassDescriptor(), true, extension->GetBootContext());
 
     HandleScope<ObjectHeader *> scope(thread);
     VMHandle<ObjectHeader> exc(thread, ObjectHeader::Create(cls));
@@ -141,30 +140,30 @@ void CoreLanguageContext::ThrowStackOverflowException(ManagedThread *thread) con
 
 VerificationInitAPI CoreLanguageContext::GetVerificationInitAPI() const
 {
-    VerificationInitAPI v_api;
-    v_api.primitive_roots_for_verification = {
+    VerificationInitAPI vApi;
+    vApi.primitiveRootsForVerification = {
         panda_file::Type::TypeId::TAGGED, panda_file::Type::TypeId::VOID, panda_file::Type::TypeId::U1,
         panda_file::Type::TypeId::U8,     panda_file::Type::TypeId::U16,  panda_file::Type::TypeId::U32,
         panda_file::Type::TypeId::U64,    panda_file::Type::TypeId::I8,   panda_file::Type::TypeId::I16,
         panda_file::Type::TypeId::I32,    panda_file::Type::TypeId::I64,  panda_file::Type::TypeId::F32,
         panda_file::Type::TypeId::F64};
 
-    v_api.array_elements_for_verification = {reinterpret_cast<const uint8_t *>("[Z"),
-                                             reinterpret_cast<const uint8_t *>("[B"),
-                                             reinterpret_cast<const uint8_t *>("[S"),
-                                             reinterpret_cast<const uint8_t *>("[C"),
-                                             reinterpret_cast<const uint8_t *>("[I"),
-                                             reinterpret_cast<const uint8_t *>("[J"),
-                                             reinterpret_cast<const uint8_t *>("[F"),
-                                             reinterpret_cast<const uint8_t *>("[D")
+    vApi.arrayElementsForVerification = {reinterpret_cast<const uint8_t *>("[Z"),
+                                         reinterpret_cast<const uint8_t *>("[B"),
+                                         reinterpret_cast<const uint8_t *>("[S"),
+                                         reinterpret_cast<const uint8_t *>("[C"),
+                                         reinterpret_cast<const uint8_t *>("[I"),
+                                         reinterpret_cast<const uint8_t *>("[J"),
+                                         reinterpret_cast<const uint8_t *>("[F"),
+                                         reinterpret_cast<const uint8_t *>("[D")
 
     };
 
-    v_api.is_need_class_synthetic_class = true;
-    v_api.is_need_object_synthetic_class = true;
-    v_api.is_need_string_synthetic_class = true;
+    vApi.isNeedClassSyntheticClass = true;
+    vApi.isNeedObjectSyntheticClass = true;
+    vApi.isNeedStringSyntheticClass = true;
 
-    return v_api;
+    return vApi;
 }
 
 }  // namespace panda

@@ -43,10 +43,10 @@ public:
     }
 
     // Convert js->ets, returns nullopt if failed, throws ETS/JS exceptions
-    EtsObject *Unwrap(InteropCtx *ctx, napi_value js_value)
+    EtsObject *Unwrap(InteropCtx *ctx, napi_value jsValue)
     {
-        ASSERT(!IsNullOrUndefined(JSEnvFromInteropCtx(ctx), js_value));
-        return (this->*(this->unwrap_))(ctx, js_value);
+        ASSERT(!IsNullOrUndefined(JSEnvFromInteropCtx(ctx), jsValue));
+        return (this->*(this->unwrap_))(ctx, jsValue);
     }
 
     JSRefConvert() = delete;
@@ -94,12 +94,12 @@ public:
     {
         ASSERT(value != nullptr);
         ASSERT(klass->IsInitialized());
-        auto owned_value = value.get();
+        auto ownedValue = value.get();
         auto [it, inserted] = cache_.insert_or_assign(klass, std::move(value));
         ASSERT(inserted);
         (void)inserted;
-        *GetDirCacheEntry(klass) = {klass, owned_value};
-        return owned_value;
+        *GetDirCacheEntry(klass) = {klass, ownedValue};
+        return ownedValue;
     }
 
     JSRefConvertCache() : dircache_(new DirCachePair[DIRCACHE_SZ]) {}
@@ -161,8 +161,8 @@ inline bool CheckClassInitialized(Class *klass)
     if constexpr (ALLOW_INIT) {
         if (UNLIKELY(!klass->IsInitialized())) {
             auto coro = EtsCoroutine::GetCurrent();
-            auto class_linker = coro->GetPandaVM()->GetClassLinker();
-            if (!class_linker->InitializeClass(coro, EtsClass::FromRuntimeClass(klass))) {
+            auto classLinker = coro->GetPandaVM()->GetClassLinker();
+            if (!classLinker->InitializeClass(coro, EtsClass::FromRuntimeClass(klass))) {
                 INTEROP_LOG(ERROR) << "Class " << klass->GetDescriptor() << " cannot be initialized";
                 return false;
             }

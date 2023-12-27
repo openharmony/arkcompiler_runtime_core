@@ -26,7 +26,7 @@ class RegAccAlloc : public compiler::Optimization {
     using Optimization::Optimization;
 
 public:
-    explicit RegAccAlloc(compiler::Graph *graph) : compiler::Optimization(graph), acc_marker_(graph->NewMarker()) {};
+    explicit RegAccAlloc(compiler::Graph *graph) : compiler::Optimization(graph), accMarker_(graph->NewMarker()) {};
 
     ~RegAccAlloc() override = default;
     NO_COPY_SEMANTIC(RegAccAlloc);
@@ -34,7 +34,7 @@ public:
 
     bool IsEnable() const override
     {
-        return compiler::OPTIONS.IsCompilerRegAccAlloc();
+        return compiler::g_options.IsCompilerRegAccAlloc();
     }
 
     const char *GetPassName() const override
@@ -53,7 +53,7 @@ private:
     bool IsPhiAccReady(compiler::Inst *phi) const;
     void SetNeedLda(compiler::Inst *inst, bool need);
 
-    compiler::Marker acc_marker_ {0};
+    compiler::Marker accMarker_ {0};
 };
 
 }  // namespace panda::bytecodeopt

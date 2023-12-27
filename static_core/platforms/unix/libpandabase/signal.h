@@ -29,10 +29,10 @@ namespace panda::os::unix {
 
 class SignalCtl {
 public:
-    SignalCtl(std::initializer_list<int> signal_list = {})  // NOLINT(cppcoreguidelines-pro-type-member-init)
+    SignalCtl(std::initializer_list<int> signalList = {})  // NOLINT(cppcoreguidelines-pro-type-member-init)
     {
         LOG_IF(::sigemptyset(&sigset_) == -1, FATAL, COMMON) << "sigemptyset failed";
-        for (int sig : signal_list) {
+        for (int sig : signalList) {
             Add(sig);
         }
     }
@@ -85,12 +85,12 @@ private:
 
 class SignalCatcherThread {
 public:
-    SignalCatcherThread(std::initializer_list<int> signals_list = {SIGUSR1}) : signal_ctl_(signals_list)
+    SignalCatcherThread(std::initializer_list<int> signalsList = {SIGUSR1}) : signalCtl_(signalsList)
     {
-        ASSERT(signals_list.size() > 0);
+        ASSERT(signalsList.size() > 0);
 
         // Use the first signal as the stop catcher thread signal
-        stop_chatcher_thread_signal_ = *signals_list.begin();
+        stopChatcherThreadSignal_ = *signalsList.begin();
     }
     ~SignalCatcherThread() = default;
     NO_MOVE_SEMANTIC(SignalCatcherThread);
@@ -98,115 +98,115 @@ public:
 
     void CatchOnlyCatcherThread()
     {
-        ASSERT(catcher_thread_ == 0 && "Use CatchOnlyCatcherThread() before StartThread()");
-        catch_only_catcher_thread_ = true;
+        ASSERT(catcherThread_ == 0 && "Use CatchOnlyCatcherThread() before StartThread()");
+        catchOnlyCatcherThread_ = true;
     }
 
-    void SetupCallbacks(std::function<void()> after_thread_start_callback,
-                        std::function<void()> before_thread_stop_callback)
+    void SetupCallbacks(std::function<void()> afterThreadStartCallback,
+                        std::function<void()> beforeThreadStopCallback)
     {
-        after_thread_start_callback_ = std::move(after_thread_start_callback);
-        before_thread_stop_callback_ = std::move(before_thread_stop_callback);
+        afterThreadStartCallback_ = std::move(afterThreadStartCallback);
+        beforeThreadStopCallback_ = std::move(beforeThreadStopCallback);
     }
 
     void SendSignal(int sig)
     {
-        ASSERT(catcher_thread_ != 0);
-        thread::ThreadSendSignal(catcher_thread_, sig);
+        ASSERT(catcherThread_ != 0);
+        thread::ThreadSendSignal(catcherThread_, sig);
     }
 
     template <typename SigAction, typename... Args>
-    void StartThread(SigAction *sig_action, Args... args)
+    void StartThread(SigAction *sigAction, Args... args)
     {
-        ASSERT(catcher_thread_ == 0);
-        ASSERT(!is_running_);
+        ASSERT(catcherThread_ == 0);
+        ASSERT(!isRunning_);
 
-        if (!catch_only_catcher_thread_) {
-            signal_ctl_.Block();
+        if (!catchOnlyCatcherThread_) {
+            signalCtl_.Block();
         }
 
         // Start catcher_thread_
-        catcher_thread_ = thread::ThreadStart(&SignalCatcherThread::Run<SigAction, Args...>, this, sig_action, args...);
+        catcherThread_ = thread::ThreadStart(&SignalCatcherThread::Run<SigAction, Args...>, this, sigAction, args...);
 
         // Wait until the catcher_thread_ is started
-        std::unique_lock<std::mutex> cv_unique_lock(cv_lock_);
-        cv_.wait(cv_unique_lock, [this]() -> bool { return is_running_; });
+        std::unique_lock<std::mutex> cvUniqueLock(cvLock_);
+        cv_.wait(cvUniqueLock, [this]() -> bool { return isRunning_; });
     }
 
     void StopThread()
     {
-        ASSERT(catcher_thread_ != 0);
-        ASSERT(is_running_);
+        ASSERT(catcherThread_ != 0);
+        ASSERT(isRunning_);
 
         // Stop catcher_thread_
-        is_running_ = false;
-        SendSignal(stop_chatcher_thread_signal_);
+        isRunning_ = false;
+        SendSignal(stopChatcherThreadSignal_);
 
         // Wait for catcher_thread_ to finish
-        void **ret_val = nullptr;
-        thread::ThreadJoin(catcher_thread_, ret_val);
-        catcher_thread_ = 0;
+        void **retVal = nullptr;
+        thread::ThreadJoin(catcherThread_, retVal);
+        catcherThread_ = 0;
 
-        if (!catch_only_catcher_thread_) {
-            signal_ctl_.Unblock();
+        if (!catchOnlyCatcherThread_) {
+            signalCtl_.Unblock();
         }
     }
 
 private:
     template <typename SigAction, typename... Args>
-    static void Run(SignalCatcherThread *self, SigAction *sig_action, Args... args)
+    static void Run(SignalCatcherThread *self, SigAction *sigAction, Args... args)
     {
         LOG(DEBUG, COMMON) << "SignalCatcherThread::Run: Starting the signal catcher thread";
 
-        if (self->after_thread_start_callback_ != nullptr) {
-            self->after_thread_start_callback_();
+        if (self->afterThreadStartCallback_ != nullptr) {
+            self->afterThreadStartCallback_();
         }
 
-        if (self->catch_only_catcher_thread_) {
-            self->signal_ctl_.Block();
+        if (self->catchOnlyCatcherThread_) {
+            self->signalCtl_.Block();
         }
 
         {
-            std::lock_guard<std::mutex> lock_guard(self->cv_lock_);
-            self->is_running_ = true;
+            std::lock_guard<std::mutex> lockGuard(self->cvLock_);
+            self->isRunning_ = true;
         }
         self->cv_.notify_one();
         while (true) {
             LOG(DEBUG, COMMON) << "SignalCatcherThread::Run: waiting";
 
-            int sig = self->signal_ctl_.Wait();
-            if (!self->is_running_) {
+            int sig = self->signalCtl_.Wait();
+            if (!self->isRunning_) {
                 LOG(DEBUG, COMMON) << "SignalCatcherThread::Run: exit loop, cause signal catcher thread was stopped";
                 break;
             }
 
             LOG(DEBUG, COMMON) << "SignalCatcherThread::Run: signal[" << sig << "] handling begins";
-            sig_action(sig, args...);
+            sigAction(sig, args...);
             LOG(DEBUG, COMMON) << "SignalCatcherThread::Run: signal[" << sig << "] handling ends";
         }
 
-        if (self->catch_only_catcher_thread_) {
-            self->signal_ctl_.Unblock();
+        if (self->catchOnlyCatcherThread_) {
+            self->signalCtl_.Unblock();
         }
 
-        if (self->before_thread_stop_callback_ != nullptr) {
-            self->before_thread_stop_callback_();
+        if (self->beforeThreadStopCallback_ != nullptr) {
+            self->beforeThreadStopCallback_();
         }
 
         LOG(DEBUG, COMMON) << "SignalCatcherThread::Run: Finishing the signal catcher thread";
     }
 
-    std::mutex cv_lock_;
+    std::mutex cvLock_;
     std::condition_variable cv_;
 
-    SignalCtl signal_ctl_;
-    thread::NativeHandleType catcher_thread_ {0};
-    int stop_chatcher_thread_signal_ {SIGUSR1};
-    bool catch_only_catcher_thread_ {false};
-    std::atomic_bool is_running_ {false};
+    SignalCtl signalCtl_;
+    thread::NativeHandleType catcherThread_ {0};
+    int stopChatcherThreadSignal_ {SIGUSR1};
+    bool catchOnlyCatcherThread_ {false};
+    std::atomic_bool isRunning_ {false};
 
-    std::function<void()> after_thread_start_callback_ {nullptr};
-    std::function<void()> before_thread_stop_callback_ {nullptr};
+    std::function<void()> afterThreadStartCallback_ {nullptr};
+    std::function<void()> beforeThreadStopCallback_ {nullptr};
 };
 
 }  // namespace panda::os::unix

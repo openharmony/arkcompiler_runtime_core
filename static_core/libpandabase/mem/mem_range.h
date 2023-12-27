@@ -23,46 +23,46 @@ namespace panda::mem {
 /// Represents range of bytes [start_address, end_address]
 class MemRange final {
 public:
-    MemRange(uintptr_t start_address, uintptr_t end_address) : start_address_(start_address), end_address_(end_address)
+    MemRange(uintptr_t startAddress, uintptr_t endAddress) : startAddress_(startAddress), endAddress_(endAddress)
     {
-        ASSERT(end_address_ >= start_address_);
+        ASSERT(endAddress_ >= startAddress_);
     }
 
     bool IsAddressInRange(uintptr_t addr) const
     {
-        return (addr >= start_address_) && (addr <= end_address_);
+        return (addr >= startAddress_) && (addr <= endAddress_);
     }
 
     uintptr_t GetStartAddress() const
     {
-        return start_address_;
+        return startAddress_;
     }
 
     uintptr_t GetEndAddress() const
     {
-        return end_address_;
+        return endAddress_;
     }
 
     bool IsIntersect(const MemRange &other) const
     {
-        return ((end_address_ >= other.start_address_) && (end_address_ <= other.end_address_)) ||
-               ((start_address_ >= other.start_address_) && (start_address_ <= other.end_address_)) ||
-               ((start_address_ < other.start_address_) && (end_address_ > other.end_address_));
+        return ((endAddress_ >= other.startAddress_) && (endAddress_ <= other.endAddress_)) ||
+               ((startAddress_ >= other.startAddress_) && (startAddress_ <= other.endAddress_)) ||
+               ((startAddress_ < other.startAddress_) && (endAddress_ > other.endAddress_));
     }
 
     bool Contains(const MemRange &other) const
     {
-        return start_address_ <= other.start_address_ && end_address_ >= other.end_address_;
+        return startAddress_ <= other.startAddress_ && endAddress_ >= other.endAddress_;
     }
 
     bool Contains(uintptr_t addr) const
     {
-        return start_address_ <= addr && addr < end_address_;
+        return startAddress_ <= addr && addr < endAddress_;
     }
 
-    friend std::ostream &operator<<(std::ostream &os, MemRange const &mem_range)
+    friend std::ostream &operator<<(std::ostream &os, MemRange const &memRange)
     {
-        return os << std::hex << "[ 0x" << mem_range.GetStartAddress() << " : 0x" << mem_range.GetEndAddress() << "]";
+        return os << std::hex << "[ 0x" << memRange.GetStartAddress() << " : 0x" << memRange.GetEndAddress() << "]";
     }
 
     ~MemRange() = default;
@@ -71,8 +71,8 @@ public:
     DEFAULT_MOVE_SEMANTIC(MemRange);
 
 private:
-    uintptr_t start_address_;  ///< Address of the first byte in memory range
-    uintptr_t end_address_;    ///< Address of the last byte in memory range
+    uintptr_t startAddress_;  ///< Address of the first byte in memory range
+    uintptr_t endAddress_;    ///< Address of the last byte in memory range
 };
 
 }  // namespace panda::mem

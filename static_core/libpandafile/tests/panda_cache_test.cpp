@@ -58,20 +58,20 @@ TEST(PandaCache, TestFieldCache)
     // NOLINTNEXTLINE(readability-magic-numbers)
     EntityId id1(100);
     // NOTE(yxr) : make sure no conflicts
-    EntityId new_id1(id1.GetOffset() << 2U);
-    ASSERT_EQ(cache.GetFieldFromCache(new_id1), nullptr);
+    EntityId newId1(id1.GetOffset() << 2U);
+    ASSERT_EQ(cache.GetFieldFromCache(newId1), nullptr);
 
     auto *field1 = reinterpret_cast<Field *>(GetNewMockPointer());
-    cache.SetFieldCache(new_id1, field1);
-    ASSERT_EQ(cache.GetFieldFromCache(new_id1), field1);
+    cache.SetFieldCache(newId1, field1);
+    ASSERT_EQ(cache.GetFieldFromCache(newId1), field1);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     EntityId id2(10000);
     // NOTE(yxr) : make sure no conflicts
-    EntityId new_id2(id2.GetOffset() << 2U);
+    EntityId newId2(id2.GetOffset() << 2U);
     auto *field2 = reinterpret_cast<Field *>(GetNewMockPointer());
-    cache.SetFieldCache(new_id2, field2);
-    ASSERT_EQ(cache.GetFieldFromCache(new_id2), field2);
+    cache.SetFieldCache(newId2, field2);
+    ASSERT_EQ(cache.GetFieldFromCache(newId2), field2);
 }
 
 TEST(PandaCache, TestClassCache)
@@ -170,8 +170,8 @@ protected:
     {
         // NOTE(yxr) : make sure no conflicts
         // CacheOps.RunReader expect no conflicts
-        EntityId new_id(id.GetOffset() << 2U);
-        Field *f = cache_->GetFieldFromCache(new_id);
+        EntityId newId(id.GetOffset() << 2U);
+        Field *f = cache_->GetFieldFromCache(newId);
         if (f == nullptr) {
             return nullptr;
         }
@@ -182,9 +182,9 @@ protected:
     {
         // NOTE(yxr) : make sure no conflicts
         // CacheOps.RunReader expect no conflicts
-        EntityId new_id(id.GetOffset() << 2U);
+        EntityId newId(id.GetOffset() << 2U);
         auto *f = reinterpret_cast<Field *>(m);
-        cache_->SetFieldCache(new_id, f);
+        cache_->SetFieldCache(newId, f);
     }
 };
 
@@ -259,8 +259,8 @@ void CleanFieldMocks(const PandaCache *cache)
     for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
         EntityId id(i);
         // NOTE(yxr) : make sure no conflicts
-        EntityId new_id(id.GetOffset() << 2U);
-        auto *m = reinterpret_cast<ElementMock *>(cache->GetFieldFromCache(new_id));
+        EntityId newId(id.GetOffset() << 2U);
+        auto *m = reinterpret_cast<ElementMock *>(cache->GetFieldFromCache(newId));
         delete m;
     }
 }

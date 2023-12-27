@@ -31,7 +31,7 @@ public:
                                                                            mem::InternalAllocatorPtr allocator);
     PANDA_PUBLIC_API static PandaEtsNapiEnv *GetCurrent();
 
-    PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> reference_storage);
+    PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage);
     ~PandaEtsNapiEnv() = default;
 
     EtsCoroutine *GetEtsCoroutine() const
@@ -43,7 +43,7 @@ public:
 
     EtsReferenceStorage *GetEtsReferenceStorage() const
     {
-        return reference_storage_.get();
+        return referenceStorage_.get();
     }
 
     static PandaEtsNapiEnv *ToPandaEtsEnv(EtsEnv *env)
@@ -62,7 +62,7 @@ public:
 
 private:
     EtsCoroutine *coroutine_;
-    PandaUniquePtr<EtsReferenceStorage> reference_storage_;
+    PandaUniquePtr<EtsReferenceStorage> referenceStorage_;
 };
 
 }  // namespace panda::ets

@@ -29,7 +29,7 @@ public:
     using CFrameType = CFrame;
 
     StackWalkerBase() = default;
-    StackWalkerBase(void *fp, bool is_frame_compiled);
+    StackWalkerBase(void *fp, bool isFrameCompiled);
 
     virtual ~StackWalkerBase() = default;
 
@@ -95,8 +95,8 @@ public:
     template <FrameKind KIND>
     static uintptr_t GetBoundaryFrameMethod(const void *ptr)
     {
-        auto frame_method = reinterpret_cast<uintptr_t>(GetMethodFromBoundary<KIND>(ptr));
-        return frame_method;
+        auto frameMethod = reinterpret_cast<uintptr_t>(GetMethodFromBoundary<KIND>(ptr));
+        return frameMethod;
     }
 
     template <FrameKind KIND>
@@ -143,7 +143,7 @@ public:
     }
 
 private:
-    FrameVariant GetTopFrameFromFp(void *ptr, bool is_frame_compiled);
+    FrameVariant GetTopFrameFromFp(void *ptr, bool isFrameCompiled);
 
     CFrameType CreateCFrame(SlotType *ptr);
 

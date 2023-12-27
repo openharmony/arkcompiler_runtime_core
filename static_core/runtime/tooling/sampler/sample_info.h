@@ -30,25 +30,25 @@ struct SampleInfo {
     enum class ThreadStatus : uint32_t { UNDECLARED = 0, RUNNING = 1, SUSPENDED = 2 };
 
     struct ManagedStackFrameId {
-        uintptr_t file_id {0};
-        uintptr_t panda_file_ptr {0};
+        uintptr_t fileId {0};
+        uintptr_t pandaFilePtr {0};
     };
 
     struct StackInfo {
         static constexpr size_t MAX_STACK_DEPTH = 100;
-        uintptr_t managed_stack_size {0};
+        uintptr_t managedStackSize {0};
         // We can't use dynamic memory 'cause of usage inside the signal handler
-        std::array<ManagedStackFrameId, MAX_STACK_DEPTH> managed_stack;
+        std::array<ManagedStackFrameId, MAX_STACK_DEPTH> managedStack;
     };
 
     struct ThreadInfo {
         // Id of the thread from which sample was obtained
-        uint32_t thread_id {0};
-        ThreadStatus thread_status {ThreadStatus::UNDECLARED};
+        uint32_t threadId {0};
+        ThreadStatus threadStatus {ThreadStatus::UNDECLARED};
     };
 
-    ThreadInfo thread_info {};
-    StackInfo stack_info {};
+    ThreadInfo threadInfo {};
+    StackInfo stackInfo {};
 };
 
 // Saving one module info (panda file, .so)
@@ -91,7 +91,7 @@ inline uint32_t ReadUint32TBitMisaligned(const void *ptr)
 
 inline bool operator==(const SampleInfo::ManagedStackFrameId &lhs, const SampleInfo::ManagedStackFrameId &rhs)
 {
-    return lhs.file_id == rhs.file_id && lhs.panda_file_ptr == rhs.panda_file_ptr;
+    return lhs.fileId == rhs.fileId && lhs.pandaFilePtr == rhs.pandaFilePtr;
 }
 
 inline bool operator!=(const SampleInfo::ManagedStackFrameId &lhs, const SampleInfo::ManagedStackFrameId &rhs)
@@ -111,11 +111,11 @@ inline bool operator!=(const FileInfo &lhs, const FileInfo &rhs)
 
 inline bool operator==(const SampleInfo::StackInfo &lhs, const SampleInfo::StackInfo &rhs)
 {
-    if (lhs.managed_stack_size != rhs.managed_stack_size) {
+    if (lhs.managedStackSize != rhs.managedStackSize) {
         return false;
     }
-    for (uint32_t i = 0; i < lhs.managed_stack_size; ++i) {
-        if (lhs.managed_stack[i] != rhs.managed_stack[i]) {
+    for (uint32_t i = 0; i < lhs.managedStackSize; ++i) {
+        if (lhs.managedStack[i] != rhs.managedStack[i]) {
             return false;
         }
     }
@@ -129,7 +129,7 @@ inline bool operator!=(const SampleInfo::StackInfo &lhs, const SampleInfo::Stack
 
 inline bool operator==(const SampleInfo::ThreadInfo &lhs, const SampleInfo::ThreadInfo &rhs)
 {
-    return lhs.thread_id == rhs.thread_id && lhs.thread_status == rhs.thread_status;
+    return lhs.threadId == rhs.threadId && lhs.threadStatus == rhs.threadStatus;
 }
 
 inline bool operator!=(const SampleInfo::ThreadInfo &lhs, const SampleInfo::ThreadInfo &rhs)
@@ -139,10 +139,10 @@ inline bool operator!=(const SampleInfo::ThreadInfo &lhs, const SampleInfo::Thre
 
 inline bool operator==(const SampleInfo &lhs, const SampleInfo &rhs)
 {
-    if (lhs.thread_info != rhs.thread_info) {
+    if (lhs.threadInfo != rhs.threadInfo) {
         return false;
     }
-    if (lhs.stack_info != rhs.stack_info) {
+    if (lhs.stackInfo != rhs.stackInfo) {
         return false;
     }
     return true;
@@ -162,16 +162,16 @@ template <>
 struct hash<panda::tooling::sampler::SampleInfo> {
     std::size_t operator()(const panda::tooling::sampler::SampleInfo &s) const
     {
-        auto stack_info = s.stack_info;
-        ASSERT(stack_info.managed_stack_size <= panda::tooling::sampler::SampleInfo::StackInfo::MAX_STACK_DEPTH);
+        auto stackInfo = s.stackInfo;
+        ASSERT(stackInfo.managedStackSize <= panda::tooling::sampler::SampleInfo::StackInfo::MAX_STACK_DEPTH);
         size_t summ = 0;
-        for (size_t i = 0; i < stack_info.managed_stack_size; ++i) {
-            summ += stack_info.managed_stack[i].panda_file_ptr ^ stack_info.managed_stack[i].file_id;
+        for (size_t i = 0; i < stackInfo.managedStackSize; ++i) {
+            summ += stackInfo.managedStack[i].pandaFilePtr ^ stackInfo.managedStack[i].fileId;
         }
         constexpr uint32_t THREAD_STATUS_SHIFT = 20;
         return std::hash<size_t>()(
-            (summ ^ stack_info.managed_stack_size) +
-            (s.thread_info.thread_id ^ (static_cast<uint32_t>(s.thread_info.thread_status) << THREAD_STATUS_SHIFT)));
+            (summ ^ stackInfo.managedStackSize) +
+            (s.threadInfo.threadId ^ (static_cast<uint32_t>(s.threadInfo.threadStatus) << THREAD_STATUS_SHIFT)));
     }
 };
 

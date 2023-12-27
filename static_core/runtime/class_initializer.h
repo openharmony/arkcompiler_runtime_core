@@ -25,15 +25,15 @@ class ClassLinker;
 template <MTModeT MODE>
 class ClassInitializer {
 public:
-    static bool Initialize(ClassLinker *class_linker, ManagedThread *thread, Class *klass);
+    static bool Initialize(ClassLinker *classLinker, ManagedThread *thread, Class *klass);
 
     static bool InitializeFields(Class *klass);
 
 private:
-    static bool InitializeClass(ClassLinker *class_linker, ManagedThread *thread, Class *klass,
-                                const VMHandle<ObjectHeader> &managed_class_obj_handle);
+    static bool InitializeClass(ClassLinker *classLinker, ManagedThread *thread, Class *klass,
+                                const VMHandle<ObjectHeader> &managedClassObjHandle);
 
-    static bool InitializeInterface(ClassLinker *class_linker, ManagedThread *thread, Class *iface, Class *klass);
+    static bool InitializeInterface(ClassLinker *classLinker, ManagedThread *thread, Class *iface, Class *klass);
 
     static bool InitClassVerificationMode(Class *klass);
 

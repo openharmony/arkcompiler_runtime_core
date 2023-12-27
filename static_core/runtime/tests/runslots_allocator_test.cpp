@@ -39,7 +39,7 @@ public:
 
     ~RunSlotsAllocatorTest() override
     {
-        for (auto i : allocated_mem_mmap_) {
+        for (auto i : allocatedMemMmap_) {
             panda::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
         }
         // Logger::Destroy();
@@ -52,10 +52,10 @@ protected:
 
     void AddMemoryPoolToAllocator(NonObjectAllocator &alloc) override
     {
-        os::memory::LockHolder lock(pool_lock_);
+        os::memory::LockHolder lock(poolLock_);
         void *mem = panda::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC);
-        std::pair<void *, size_t> new_pair {mem, DEFAULT_POOL_SIZE_FOR_ALLOC};
-        allocated_mem_mmap_.push_back(new_pair);
+        std::pair<void *, size_t> newPair {mem, DEFAULT_POOL_SIZE_FOR_ALLOC};
+        allocatedMemMmap_.push_back(newPair);
         if (!alloc.AddMemoryPool(mem, DEFAULT_POOL_SIZE_FOR_ALLOC)) {
             ASSERT_TRUE(0 && "Can't add mem pool to allocator");
         }
@@ -63,12 +63,12 @@ protected:
 
     void AddMemoryPoolToAllocatorProtected(NonObjectAllocator &alloc) override
     {
-        os::memory::LockHolder lock(pool_lock_);
+        os::memory::LockHolder lock(poolLock_);
         void *mem = panda::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE);
         mprotect(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + DEFAULT_POOL_SIZE_FOR_ALLOC), PAGE_SIZE,
                  PROT_NONE);
-        std::pair<void *, size_t> new_pair {mem, DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE};
-        allocated_mem_mmap_.push_back(new_pair);
+        std::pair<void *, size_t> newPair {mem, DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE};
+        allocatedMemMmap_.push_back(newPair);
         if (!alloc.AddMemoryPool(mem, DEFAULT_POOL_SIZE_FOR_ALLOC)) {
             ASSERT_TRUE(0 && "Can't add mem pool to allocator");
         }
@@ -84,12 +84,12 @@ protected:
         return allocator.AllocatedByRunSlotsAllocator(mem);
     }
 
-    void TestRunSlots(size_t slots_size)
+    void TestRunSlots(size_t slotsSize)
     {
-        LOG(DEBUG, ALLOC) << "Test RunSlots with size " << slots_size;
+        LOG(DEBUG, ALLOC) << "Test RunSlots with size " << slotsSize;
         void *mem = aligned_alloc(RUNSLOTS_ALIGNMENT_IN_BYTES, RUNSLOTS_SIZE);
         auto runslots = reinterpret_cast<RunSlotsType *>(mem);
-        runslots->Initialize(slots_size, ToUintPtr(mem), true);
+        runslots->Initialize(slotsSize, ToUintPtr(mem), true);
         int i = 0;
         while (runslots->PopFreeSlot() != nullptr) {
             i++;
@@ -100,9 +100,9 @@ protected:
     }
 
 private:
-    std::vector<std::pair<void *, size_t>> allocated_mem_mmap_;
+    std::vector<std::pair<void *, size_t>> allocatedMemMmap_;
     // Mutex, which allows only one thread to add pool to the pool vector
-    os::memory::Mutex pool_lock_;
+    os::memory::Mutex poolLock_;
 };
 
 TEST_F(RunSlotsAllocatorTest, SimpleRunSlotsTest)
@@ -116,8 +116,8 @@ TEST_F(RunSlotsAllocatorTest, SimpleRunSlotsTest)
 TEST_F(RunSlotsAllocatorTest, SimpleAllocateDifferentObjSizeTest)
 {
     LOG(DEBUG, ALLOC) << "SimpleAllocateDifferentObjSizeTest";
-    mem::MemStatsType mem_stats;
-    NonObjectAllocator allocator(&mem_stats);
+    mem::MemStatsType memStats;
+    NonObjectAllocator allocator(&memStats);
     AddMemoryPoolToAllocator(allocator);
     // NOLINTNEXTLINE(readability-magic-numbers)
     for (size_t i = 23; i < 300; i++) {
@@ -131,8 +131,8 @@ TEST_F(RunSlotsAllocatorTest, TestReleaseRunSlotsPagesTest)
 {
     static constexpr size_t ALLOC_SIZE = RunSlotsType::ConvertToPowerOfTwoUnsafe(RunSlotsType::MinSlotSize());
     LOG(DEBUG, ALLOC) << "TestRunSlotsReusageTestTest";
-    mem::MemStatsType mem_stats;
-    NonObjectAllocator allocator(&mem_stats);
+    mem::MemStatsType memStats;
+    NonObjectAllocator allocator(&memStats);
     AddMemoryPoolToAllocator(allocator);
     std::vector<void *> elements;
     // Fill the whole pool
@@ -146,8 +146,8 @@ TEST_F(RunSlotsAllocatorTest, TestReleaseRunSlotsPagesTest)
     }
     // Free everything except the last element
     ASSERT(elements.size() > 1);
-    size_t element_to_free_count = elements.size() - 1;
-    for (size_t i = 0; i < element_to_free_count; i++) {
+    size_t elementToFreeCount = elements.size() - 1;
+    for (size_t i = 0; i < elementToFreeCount; i++) {
         allocator.Free(elements.back());
         elements.pop_back();
     }
@@ -156,7 +156,7 @@ TEST_F(RunSlotsAllocatorTest, TestReleaseRunSlotsPagesTest)
     ReleasePages(allocator);
 
     // Try to allocate everything again
-    for (size_t i = 0; i < element_to_free_count; i++) {
+    for (size_t i = 0; i < elementToFreeCount; i++) {
         void *mem = allocator.Alloc(ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr);
         elements.push_back(mem);
@@ -219,8 +219,8 @@ TEST_F(RunSlotsAllocatorTest, AllocateVectorTest)
 TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
 {
     // It's regression test
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectAllocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectAllocator allocator(memStats);
     static constexpr size_t SIZE1 = 60;
     static constexpr size_t SIZE2 = 204;
     constexpr char CHAR1 = 'a';
@@ -230,13 +230,13 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
     constexpr char CHAR5 = 'e';
     constexpr char CHAR6 = 'f';
     AddMemoryPoolToAllocatorProtected(allocator);
-    char *str_a;
-    char *str_b;
-    char *str_c;
-    char *str_d;
-    char *str_e;
-    char *str_f;
-    auto fill_str = [](char *str, char c, size_t size) {
+    char *strA;
+    char *strB;
+    char *strC;
+    char *strD;
+    char *strE;
+    char *strF;
+    auto fillStr = [](char *str, char c, size_t size) {
         for (size_t i = 0; i < size - 1; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             str[i] = c;
@@ -244,7 +244,7 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         str[size - 1] = 0;
     };
-    auto check_str = [](const char *str, char c, size_t size) {
+    auto checkStr = [](const char *str, char c, size_t size) {
         for (size_t i = 0; i < size - 1; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             if (str[i] != c) {
@@ -253,28 +253,28 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
         }
         return true;
     };
-    str_a = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
-    str_b = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
-    str_c = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
-    fill_str(str_a, CHAR1, SIZE1);
-    fill_str(str_b, CHAR2, SIZE1);
-    fill_str(str_c, CHAR3, SIZE1);
-    ASSERT_TRUE(check_str(str_a, CHAR1, SIZE1));
-    ASSERT_TRUE(check_str(str_b, CHAR2, SIZE1));
-    ASSERT_TRUE(check_str(str_c, CHAR3, SIZE1));
-    allocator.Free(static_cast<void *>(str_a));
-    allocator.Free(static_cast<void *>(str_b));
-    allocator.Free(static_cast<void *>(str_c));
-    str_d = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
-    str_e = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
-    str_f = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
-    fill_str(str_d, CHAR4, SIZE2);
-    fill_str(str_e, CHAR5, SIZE2);
-    fill_str(str_f, CHAR6, SIZE2);
-    ASSERT_TRUE(check_str(str_d, CHAR4, SIZE2));
-    ASSERT_TRUE(check_str(str_e, CHAR5, SIZE2));
-    ASSERT_TRUE(check_str(str_f, CHAR6, SIZE2));
-    delete mem_stats;
+    strA = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
+    strB = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
+    strC = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
+    fillStr(strA, CHAR1, SIZE1);
+    fillStr(strB, CHAR2, SIZE1);
+    fillStr(strC, CHAR3, SIZE1);
+    ASSERT_TRUE(checkStr(strA, CHAR1, SIZE1));
+    ASSERT_TRUE(checkStr(strB, CHAR2, SIZE1));
+    ASSERT_TRUE(checkStr(strC, CHAR3, SIZE1));
+    allocator.Free(static_cast<void *>(strA));
+    allocator.Free(static_cast<void *>(strB));
+    allocator.Free(static_cast<void *>(strC));
+    strD = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
+    strE = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
+    strF = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
+    fillStr(strD, CHAR4, SIZE2);
+    fillStr(strE, CHAR5, SIZE2);
+    fillStr(strF, CHAR6, SIZE2);
+    ASSERT_TRUE(checkStr(strD, CHAR4, SIZE2));
+    ASSERT_TRUE(checkStr(strE, CHAR5, SIZE2));
+    ASSERT_TRUE(checkStr(strF, CHAR6, SIZE2));
+    delete memStats;
 }
 
 TEST_F(RunSlotsAllocatorTest, ObjectIteratorTest)
@@ -313,8 +313,8 @@ TEST_F(RunSlotsAllocatorTest, RunSlotsReusingTest)
 {
     static constexpr size_t SMALL_OBJ_SIZE = sizeof(uint32_t);
     static constexpr size_t BIG_OBJ_SIZE = 128;
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectAllocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectAllocator allocator(memStats);
     AddMemoryPoolToAllocatorProtected(allocator);
     // Alloc one big object. this must cause runslots init with it size
     void *mem = allocator.Alloc(BIG_OBJ_SIZE);
@@ -322,21 +322,21 @@ TEST_F(RunSlotsAllocatorTest, RunSlotsReusingTest)
     allocator.Free(mem);
 
     // Alloc small object. We must reuse already allocated and freed RunSlots
-    void *small_obj_mem = allocator.Alloc(SMALL_OBJ_SIZE);
-    size_t small_obj_index = SetBytesFromByteArray(small_obj_mem, SMALL_OBJ_SIZE);
+    void *smallObjMem = allocator.Alloc(SMALL_OBJ_SIZE);
+    size_t smallObjIndex = SetBytesFromByteArray(smallObjMem, SMALL_OBJ_SIZE);
 
     // Alloc big obj again.
-    void *big_obj_mem = allocator.Alloc(BIG_OBJ_SIZE);
-    size_t big_obj_index = SetBytesFromByteArray(big_obj_mem, BIG_OBJ_SIZE);
+    void *bigObjMem = allocator.Alloc(BIG_OBJ_SIZE);
+    size_t bigObjIndex = SetBytesFromByteArray(bigObjMem, BIG_OBJ_SIZE);
 
     // Alloc one more small object.
-    void *second_small_obj_mem = allocator.Alloc(SMALL_OBJ_SIZE);
-    size_t second_small_obj_index = SetBytesFromByteArray(second_small_obj_mem, SMALL_OBJ_SIZE);
+    void *secondSmallObjMem = allocator.Alloc(SMALL_OBJ_SIZE);
+    size_t secondSmallObjIndex = SetBytesFromByteArray(secondSmallObjMem, SMALL_OBJ_SIZE);
 
-    ASSERT_TRUE(CompareBytesWithByteArray(big_obj_mem, BIG_OBJ_SIZE, big_obj_index));
-    ASSERT_TRUE(CompareBytesWithByteArray(small_obj_mem, SMALL_OBJ_SIZE, small_obj_index));
-    ASSERT_TRUE(CompareBytesWithByteArray(second_small_obj_mem, SMALL_OBJ_SIZE, second_small_obj_index));
-    delete mem_stats;
+    ASSERT_TRUE(CompareBytesWithByteArray(bigObjMem, BIG_OBJ_SIZE, bigObjIndex));
+    ASSERT_TRUE(CompareBytesWithByteArray(smallObjMem, SMALL_OBJ_SIZE, smallObjIndex));
+    ASSERT_TRUE(CompareBytesWithByteArray(secondSmallObjMem, SMALL_OBJ_SIZE, secondSmallObjIndex));
+    delete memStats;
 }
 
 TEST_F(RunSlotsAllocatorTest, MTAllocFreeTest)

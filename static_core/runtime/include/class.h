@@ -59,22 +59,22 @@ public:
 
     uint32_t GetObjectSize() const
     {
-        return object_size_;
+        return objectSize_;
     }
 
     void SetObjectSize(uint32_t size)
     {
-        object_size_ = size;
+        objectSize_ = size;
     }
 
     void SetManagedObject(ObjectHeader *obj)
     {
-        managed_object_ = obj;
+        managedObject_ = obj;
     }
 
     ObjectHeader *GetManagedObject() const
     {
-        return managed_object_;
+        return managedObject_;
     }
 
     panda_file::SourceLang GetSourceLang() const
@@ -93,11 +93,11 @@ public:
     }
     static constexpr size_t GetManagedObjectOffset()
     {
-        return MEMBER_OFFSET(BaseClass, managed_object_);
+        return MEMBER_OFFSET(BaseClass, managedObject_);
     }
     static constexpr size_t GetObjectSizeOffset()
     {
-        return MEMBER_OFFSET(BaseClass, object_size_);
+        return MEMBER_OFFSET(BaseClass, objectSize_);
     }
 
 protected:
@@ -111,8 +111,8 @@ private:
     // Size of the object of this class. In case of static classes it is 0
     // for abstract classes, interfaces and classes whose objects
     // have variable size (for example strings).
-    uint32_t object_size_ {0};
-    ObjectHeader *managed_object_ {nullptr};
+    uint32_t objectSize_ {0};
+    ObjectHeader *managedObject_ {nullptr};
     panda_file::SourceLang lang_;
 };
 
@@ -131,8 +131,7 @@ public:
 
     enum class State : uint8_t { INITIAL = 0, LOADED, VERIFIED, INITIALIZING, ERRONEOUS, INITIALIZED };
 
-    Class(const uint8_t *descriptor, panda_file::SourceLang lang, uint32_t vtable_size, uint32_t imt_size,
-          uint32_t size);
+    Class(const uint8_t *descriptor, panda_file::SourceLang lang, uint32_t vtableSize, uint32_t imtSize, uint32_t size);
 
     Class *GetBase() const
     {
@@ -146,22 +145,22 @@ public:
 
     panda_file::File::EntityId GetFileId() const
     {
-        return file_id_;
+        return fileId_;
     }
 
-    void SetFileId(panda_file::File::EntityId file_id)
+    void SetFileId(panda_file::File::EntityId fileId)
     {
-        file_id_ = file_id;
+        fileId_ = fileId;
     }
 
     const panda_file::File *GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     void SetPandaFile(const panda_file::File *pf)
     {
-        panda_file_ = pf;
+        pandaFile_ = pf;
     }
 
     const uint8_t *GetDescriptor() const
@@ -169,12 +168,12 @@ public:
         return descriptor_;
     }
 
-    void SetMethods(Span<Method> methods, uint32_t num_vmethods, uint32_t num_smethods)
+    void SetMethods(Span<Method> methods, uint32_t numVmethods, uint32_t numSmethods)
     {
         methods_ = methods.data();
-        num_methods_ = num_vmethods + num_smethods;
-        num_vmethods_ = num_vmethods;
-        num_copied_methods_ = methods.size() - num_methods_;
+        numMethods_ = numVmethods + numSmethods;
+        numVmethods_ = numVmethods;
+        numCopiedMethods_ = methods.size() - numMethods_;
     }
 
     Method *GetRawFirstMethodAddr() const
@@ -184,50 +183,50 @@ public:
 
     Span<Method> GetMethods() const
     {
-        return {methods_, num_methods_};
+        return {methods_, numMethods_};
     }
 
     Span<Method> GetMethodsWithCopied() const
     {
-        return {methods_, num_methods_ + num_copied_methods_};
+        return {methods_, numMethods_ + numCopiedMethods_};
     }
 
     Span<Method> GetStaticMethods() const
     {
-        return GetMethods().SubSpan(num_vmethods_);
+        return GetMethods().SubSpan(numVmethods_);
     }
 
     Span<Method> GetVirtualMethods() const
     {
-        return {methods_, num_vmethods_};
+        return {methods_, numVmethods_};
     }
 
     Span<Method> GetCopiedMethods() const
     {
-        Span<Method> res {methods_, num_methods_ + num_copied_methods_};
-        return res.SubSpan(num_methods_);
+        Span<Method> res {methods_, numMethods_ + numCopiedMethods_};
+        return res.SubSpan(numMethods_);
     }
 
     Span<Field> GetFields() const
     {
-        return {fields_, num_fields_};
+        return {fields_, numFields_};
     }
 
     Span<Field> GetStaticFields() const
     {
-        return {fields_, num_sfields_};
+        return {fields_, numSfields_};
     }
 
     Span<Field> GetInstanceFields() const
     {
-        return GetFields().SubSpan(num_sfields_);
+        return GetFields().SubSpan(numSfields_);
     }
 
-    void SetFields(Span<Field> fields, uint32_t num_sfields)
+    void SetFields(Span<Field> fields, uint32_t numSfields)
     {
         fields_ = fields.data();
-        num_fields_ = fields.size();
-        num_sfields_ = num_sfields;
+        numFields_ = fields.size();
+        numSfields_ = numSfields;
     }
 
     Span<Method *> GetVTable();
@@ -236,84 +235,84 @@ public:
 
     Span<Class *> GetInterfaces() const
     {
-        return {ifaces_, num_ifaces_};
+        return {ifaces_, numIfaces_};
     }
 
     void SetInterfaces(Span<Class *> ifaces)
     {
         ifaces_ = ifaces.data();
-        num_ifaces_ = ifaces.size();
+        numIfaces_ = ifaces.size();
     }
 
     Span<Method *> GetIMT()
     {
-        return GetClassSpan().SubSpan<Method *>(GetIMTOffset(), imt_size_);
+        return GetClassSpan().SubSpan<Method *>(GetIMTOffset(), imtSize_);
     }
 
     Span<Method *const> GetIMT() const
     {
-        return GetClassSpan().SubSpan<Method *const>(GetIMTOffset(), imt_size_);
+        return GetClassSpan().SubSpan<Method *const>(GetIMTOffset(), imtSize_);
     }
 
-    uint32_t GetIMTableIndex(uint32_t method_offset) const
+    uint32_t GetIMTableIndex(uint32_t methodOffset) const
     {
-        ASSERT(imt_size_ != 0);
-        return method_offset % imt_size_;
+        ASSERT(imtSize_ != 0);
+        return methodOffset % imtSize_;
     }
 
     uint32_t GetAccessFlags() const
     {
-        return access_flags_;
+        return accessFlags_;
     }
 
-    void SetAccessFlags(uint32_t access_flags)
+    void SetAccessFlags(uint32_t accessFlags)
     {
-        access_flags_ = access_flags;
+        accessFlags_ = accessFlags;
     }
 
     bool IsPublic() const
     {
-        return (access_flags_ & ACC_PUBLIC) != 0;
+        return (accessFlags_ & ACC_PUBLIC) != 0;
     }
 
     bool IsProtected() const
     {
-        return (access_flags_ & ACC_PROTECTED) != 0;
+        return (accessFlags_ & ACC_PROTECTED) != 0;
     }
 
     bool IsPrivate() const
     {
-        return (access_flags_ & ACC_PRIVATE) != 0;
+        return (accessFlags_ & ACC_PRIVATE) != 0;
     }
 
     bool IsFinal() const
     {
-        return (access_flags_ & ACC_FINAL) != 0;
+        return (accessFlags_ & ACC_FINAL) != 0;
     }
 
     bool IsAnnotation() const
     {
-        return (access_flags_ & ACC_ANNOTATION) != 0;
+        return (accessFlags_ & ACC_ANNOTATION) != 0;
     }
 
     bool IsEnum() const
     {
-        return (access_flags_ & ACC_ENUM) != 0;
+        return (accessFlags_ & ACC_ENUM) != 0;
     }
 
     uint32_t GetVTableSize() const
     {
-        return vtable_size_;
+        return vtableSize_;
     }
 
     uint32_t GetIMTSize() const
     {
-        return imt_size_;
+        return imtSize_;
     }
 
     uint32_t GetClassSize() const
     {
-        return class_size_;
+        return classSize_;
     }
 
     uint32_t GetObjectSize() const
@@ -333,22 +332,22 @@ public:
 
     Class *GetComponentType() const
     {
-        return component_type_;
+        return componentType_;
     }
 
     void SetComponentType(Class *type)
     {
-        component_type_ = type;
+        componentType_ = type;
     }
 
     bool IsArrayClass() const
     {
-        return component_type_ != nullptr;
+        return componentType_ != nullptr;
     }
 
     bool IsObjectArrayClass() const
     {
-        return IsArrayClass() && !component_type_->IsPrimitive();
+        return IsArrayClass() && !componentType_->IsPrimitive();
     }
 
     bool IsStringClass() const
@@ -390,12 +389,12 @@ public:
 
     bool IsAbstract() const
     {
-        return (access_flags_ & ACC_ABSTRACT) != 0;
+        return (accessFlags_ & ACC_ABSTRACT) != 0;
     }
 
     bool IsInterface() const
     {
-        return (access_flags_ & ACC_INTERFACE) != 0;
+        return (accessFlags_ & ACC_INTERFACE) != 0;
     }
 
     bool IsInstantiable() const
@@ -478,7 +477,7 @@ public:
     }
     static constexpr uint32_t GetComponentTypeOffset()
     {
-        return MEMBER_OFFSET(Class, component_type_);
+        return MEMBER_OFFSET(Class, componentType_);
     }
     static constexpr uint32_t GetTypeOffset()
     {
@@ -504,54 +503,54 @@ public:
     }
     void SetInitTid(uint32_t id)
     {
-        init_tid_ = id;
+        initTid_ = id;
     }
 
     uint32_t GetInitTid() const
     {
-        return init_tid_;
+        return initTid_;
     }
 
     static constexpr size_t GetVTableOffset();
 
     uint32_t GetNumVirtualMethods() const
     {
-        return num_vmethods_;
+        return numVmethods_;
     }
 
     void SetNumVirtualMethods(uint32_t n)
     {
-        num_vmethods_ = n;
+        numVmethods_ = n;
     }
 
     uint32_t GetNumCopiedMethods() const
     {
-        return num_copied_methods_;
+        return numCopiedMethods_;
     }
 
     void SetNumCopiedMethods(uint32_t n)
     {
-        num_copied_methods_ = n;
+        numCopiedMethods_ = n;
     }
 
     uint32_t GetNumStaticFields() const
     {
-        return num_sfields_;
+        return numSfields_;
     }
 
     void SetNumStaticFields(uint32_t n)
     {
-        num_sfields_ = n;
+        numSfields_ = n;
     }
 
     void SetHasDefaultMethods()
     {
-        access_flags_ |= ACC_HAS_DEFAULT_METHODS;
+        accessFlags_ |= ACC_HAS_DEFAULT_METHODS;
     }
 
     bool HasDefaultMethods() const
     {
-        return (access_flags_ & ACC_HAS_DEFAULT_METHODS) != 0;
+        return (accessFlags_ & ACC_HAS_DEFAULT_METHODS) != 0;
     }
 
     size_t GetIMTOffset() const;
@@ -560,14 +559,14 @@ public:
 
     ClassLinkerContext *GetLoadContext() const
     {
-        ASSERT(load_context_ != nullptr);
-        return load_context_;
+        ASSERT(loadContext_ != nullptr);
+        return loadContext_;
     }
 
     void SetLoadContext(ClassLinkerContext *context)
     {
         ASSERT(context != nullptr);
-        load_context_ = context;
+        loadContext_ = context;
     }
 
     template <class Pred>
@@ -586,11 +585,11 @@ public:
     template <class Pred>
     Field *FindDeclaredField(Pred pred) const;
 
-    Field *GetInstanceFieldByName(const uint8_t *mutf8_name) const;
+    Field *GetInstanceFieldByName(const uint8_t *mutf8Name) const;
 
-    Field *GetStaticFieldByName(const uint8_t *mutf8_name) const;
+    Field *GetStaticFieldByName(const uint8_t *mutf8Name) const;
 
-    Field *GetDeclaredFieldByName(const uint8_t *mutf8_name) const;
+    Field *GetDeclaredFieldByName(const uint8_t *mutf8Name) const;
 
     Method *GetVirtualInterfaceMethod(panda_file::File::EntityId id) const;
 
@@ -600,9 +599,9 @@ public:
 
     Method *GetVirtualClassMethod(panda_file::File::EntityId id) const;
 
-    Method *GetDirectMethod(const uint8_t *mutf8_name, const Method::Proto &proto) const;
+    Method *GetDirectMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
 
-    Method *GetClassMethod(const uint8_t *mutf8_name, const Method::Proto &proto) const;
+    Method *GetClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
 
     Method *GetClassMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
@@ -610,7 +609,7 @@ public:
 
     Method *GetVirtualClassMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
-    Method *GetInterfaceMethod(const uint8_t *mutf8_name, const Method::Proto &proto) const;
+    Method *GetInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
 
     Method *GetInterfaceMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
@@ -618,11 +617,11 @@ public:
 
     Method *GetVirtualInterfaceMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
-    Method *GetDirectMethod(const uint8_t *mutf8_name) const;
+    Method *GetDirectMethod(const uint8_t *mutf8Name) const;
 
-    Method *GetClassMethod(const uint8_t *mutf8_name) const;
+    Method *GetClassMethod(const uint8_t *mutf8Name) const;
 
-    Method *GetInterfaceMethod(const uint8_t *mutf8_name) const;
+    Method *GetInterfaceMethod(const uint8_t *mutf8Name) const;
 
     Method *ResolveVirtualMethod(const Method *method) const;
 
@@ -658,54 +657,53 @@ public:
     void SetFieldObject(ManagedThread *thread, const Field &field, ObjectHeader *value);
 
     template <class T>
-    T GetFieldPrimitive(size_t offset, std::memory_order memory_order) const;
+    T GetFieldPrimitive(size_t offset, std::memory_order memoryOrder) const;
 
     template <class T>
-    void SetFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    void SetFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <bool NEED_READ_BARRIER = true>
-    ObjectHeader *GetFieldObject(size_t offset, std::memory_order memory_order) const;
+    ObjectHeader *GetFieldObject(size_t offset, std::memory_order memoryOrder) const;
 
     template <bool NEED_WRITE_BARRIER = true>
-    void SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memory_order);
+    void SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder);
 
     template <typename T>
-    bool CompareAndSetFieldPrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order,
-                                     bool strong);
+    bool CompareAndSetFieldPrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder, bool strong);
 
     template <bool NEED_WRITE_BARRIER = true>
-    bool CompareAndSetFieldObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                                  std::memory_order memory_order, bool strong);
+    bool CompareAndSetFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                  std::memory_order memoryOrder, bool strong);
 
     template <typename T>
-    T CompareAndExchangeFieldPrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order,
+    T CompareAndExchangeFieldPrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder,
                                        bool strong);
 
     template <bool NEED_WRITE_BARRIER = true>
-    ObjectHeader *CompareAndExchangeFieldObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                                                std::memory_order memory_order, bool strong);
+    ObjectHeader *CompareAndExchangeFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                                std::memory_order memoryOrder, bool strong);
 
     template <typename T>
-    T GetAndSetFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndSetFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <bool NEED_WRITE_BARRIER = true>
-    ObjectHeader *GetAndSetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memory_order);
+    ObjectHeader *GetAndSetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndAddFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndAddFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndBitwiseOrFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndBitwiseOrFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndBitwiseAndFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndBitwiseAndFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndBitwiseXorFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndBitwiseXorFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     void DumpClass(std::ostream &os, size_t flags);
 
-    static UniqId CalcUniqId(const panda_file::File *file, panda_file::File::EntityId file_id);
+    static UniqId CalcUniqId(const panda_file::File *file, panda_file::File::EntityId fileId);
 
     // for synthetic classes, like arrays
     static UniqId CalcUniqId(const uint8_t *descriptor);
@@ -714,104 +712,104 @@ public:
     {
         // Atomic with acquire order reason: data race with uniq_id_ with dependecies on reads after the load which
         // should become visible
-        auto id = uniq_id_.load(std::memory_order_acquire);
+        auto id = uniqId_.load(std::memory_order_acquire);
         if (id == 0) {
             id = CalcUniqId();
             // Atomic with release order reason: data race with uniq_id_ with dependecies on writes before the store
             // which should become visible acquire
-            uniq_id_.store(id, std::memory_order_release);
+            uniqId_.store(id, std::memory_order_release);
         }
         return id;
     }
 
-    void SetRefFieldsNum(uint32_t num, bool is_static)
+    void SetRefFieldsNum(uint32_t num, bool isStatic)
     {
-        if (is_static) {
-            num_refsfields_ = num;
+        if (isStatic) {
+            numRefsfields_ = num;
         } else {
-            num_reffields_ = num;
+            numReffields_ = num;
         }
     }
 
-    void SetRefFieldsOffset(uint32_t offset, bool is_static)
+    void SetRefFieldsOffset(uint32_t offset, bool isStatic)
     {
-        if (is_static) {
-            offset_refsfields_ = offset;
+        if (isStatic) {
+            offsetRefsfields_ = offset;
         } else {
-            offset_reffields_ = offset;
+            offsetReffields_ = offset;
         }
     }
 
-    void SetVolatileRefFieldsNum(uint32_t num, bool is_static)
+    void SetVolatileRefFieldsNum(uint32_t num, bool isStatic)
     {
-        if (is_static) {
-            volatile_refsfields_num_ = num;
+        if (isStatic) {
+            volatileRefsfieldsNum_ = num;
         } else {
-            volatile_reffields_num_ = num;
+            volatileReffieldsNum_ = num;
         }
     }
 
     template <bool IS_STATIC>
     uint32_t GetRefFieldsNum() const
     {
-        return IS_STATIC ? num_refsfields_ : num_reffields_;
+        return IS_STATIC ? numRefsfields_ : numReffields_;
     }
 
     template <bool IS_STATIC>
     uint32_t GetRefFieldsOffset() const
     {
-        return IS_STATIC ? offset_refsfields_ : offset_reffields_;
+        return IS_STATIC ? offsetRefsfields_ : offsetReffields_;
     }
 
     template <bool IS_STATIC>
     uint32_t GetVolatileRefFieldsNum() const
     {
-        return IS_STATIC ? volatile_refsfields_num_ : volatile_reffields_num_;
+        return IS_STATIC ? volatileRefsfieldsNum_ : volatileReffieldsNum_;
     }
 
     panda_file::File::EntityId ResolveClassIndex(panda_file::File::Index idx) const
     {
-        return class_idx_[idx];
+        return classIdx_[idx];
     }
 
     panda_file::File::EntityId ResolveMethodIndex(panda_file::File::Index idx) const
     {
-        return method_idx_[idx];
+        return methodIdx_[idx];
     }
 
     panda_file::File::EntityId ResolveFieldIndex(panda_file::File::Index idx) const
     {
-        return field_idx_[idx];
+        return fieldIdx_[idx];
     }
 
     Span<const panda_file::File::EntityId> GetClassIndex() const
     {
-        return class_idx_;
+        return classIdx_;
     }
 
     void SetClassIndex(Span<const panda_file::File::EntityId> index)
     {
-        class_idx_ = index;
+        classIdx_ = index;
     }
 
     Span<const panda_file::File::EntityId> GetMethodIndex() const
     {
-        return method_idx_;
+        return methodIdx_;
     }
 
     void SetMethodIndex(Span<const panda_file::File::EntityId> index)
     {
-        method_idx_ = index;
+        methodIdx_ = index;
     }
 
     Span<const panda_file::File::EntityId> GetFieldIndex() const
     {
-        return field_idx_;
+        return fieldIdx_;
     }
 
     void SetFieldIndex(Span<const panda_file::File::EntityId> index)
     {
-        field_idx_ = index;
+        fieldIdx_ = index;
     }
 
     static Class *FromClassObject(const ObjectHeader *obj);
@@ -828,10 +826,9 @@ public:
     NO_COPY_SEMANTIC(Class);
     NO_MOVE_SEMANTIC(Class);
 
-    static constexpr size_t ComputeClassSize(size_t vtable_size, size_t imt_size, size_t num_8bit_sfields,
-                                             size_t num_16bit_sfields, size_t num_32bit_sfields,
-                                             size_t num_64bit_sfields, size_t num_ref_sfields,
-                                             size_t num_tagged_sfields);
+    static constexpr size_t ComputeClassSize(size_t vtableSize, size_t imtSize, size_t num8bitSfields,
+                                             size_t num16bitSfields, size_t num32bitSfields, size_t num64bitSfields,
+                                             size_t numRefSfields, size_t numTaggedSfields);
 
     Field *LookupFieldByName(panda_file::File::StringData name) const
     {
@@ -850,8 +847,8 @@ public:
             if (name != m.GetName()) {
                 continue;
             }
-            auto ret_type = m.GetReturnType();
-            if (ret_type.IsVoid()) {
+            auto retType = m.GetReturnType();
+            if (retType.IsVoid()) {
                 continue;
             }
             if (m.GetNumArgs() != 1) {
@@ -861,19 +858,19 @@ public:
                 continue;
             }
             if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
-                if (ret_type.IsPrimitive()) {
+                if (retType.IsPrimitive()) {
                     continue;
                 }
             } else {
-                if (ret_type.IsReference()) {
+                if (retType.IsReference()) {
                     continue;
                 }
                 if constexpr (panda_file::Type(FIELD_TYPE).GetBitWidth() == coretypes::INT64_BITS) {
-                    if (ret_type.GetBitWidth() != coretypes::INT64_BITS) {
+                    if (retType.GetBitWidth() != coretypes::INT64_BITS) {
                         continue;
                     }
                 } else {
-                    if (ret_type.GetBitWidth() > coretypes::INT32_BITS) {
+                    if (retType.GetBitWidth() > coretypes::INT32_BITS) {
                         continue;
                     }
                 }
@@ -904,16 +901,16 @@ public:
                     continue;
                 }
             } else {
-                auto arg_1 = m.GetArgType(1);
-                if (arg_1.IsReference()) {
+                auto arg1 = m.GetArgType(1);
+                if (arg1.IsReference()) {
                     continue;
                 }
                 if constexpr (panda_file::Type(FIELD_TYPE).GetBitWidth() == coretypes::INT64_BITS) {
-                    if (arg_1.GetBitWidth() != coretypes::INT64_BITS) {
+                    if (arg1.GetBitWidth() != coretypes::INT64_BITS) {
                         continue;
                     }
                 } else {
-                    if (arg_1.GetBitWidth() > coretypes::INT32_BITS) {
+                    if (arg1.GetBitWidth() > coretypes::INT32_BITS) {
                         continue;
                     }
                 }
@@ -954,60 +951,60 @@ private:
 
     Span<std::byte> GetClassSpan()
     {
-        return Span(reinterpret_cast<std::byte *>(this), class_size_);
+        return Span(reinterpret_cast<std::byte *>(this), classSize_);
     }
 
     Span<const std::byte> GetClassSpan() const
     {
-        return Span(reinterpret_cast<const std::byte *>(this), class_size_);
+        return Span(reinterpret_cast<const std::byte *>(this), classSize_);
     }
 
 private:
     Class *base_ {nullptr};
-    const panda_file::File *panda_file_ {nullptr};
+    const panda_file::File *pandaFile_ {nullptr};
     // Decscriptor is a valid MUTF8 string. See docs/file_format.md#typedescriptor for more information.
     const uint8_t *descriptor_;
     Method *methods_ {nullptr};
     Field *fields_ {nullptr};
     Class **ifaces_ {nullptr};
 
-    panda_file::File::EntityId file_id_ {};
-    uint32_t vtable_size_;
-    uint32_t imt_size_;
-    uint32_t class_size_;
-    uint32_t access_flags_ {0};
+    panda_file::File::EntityId fileId_ {};
+    uint32_t vtableSize_;
+    uint32_t imtSize_;
+    uint32_t classSize_;
+    uint32_t accessFlags_ {0};
 
-    uint32_t num_methods_ {0};
-    uint32_t num_vmethods_ {0};
-    uint32_t num_copied_methods_ {0};
-    uint32_t num_fields_ {0};
-    uint32_t num_sfields_ {0};
-    uint32_t num_ifaces_ {0};
-    uint32_t init_tid_ {0};
+    uint32_t numMethods_ {0};
+    uint32_t numVmethods_ {0};
+    uint32_t numCopiedMethods_ {0};
+    uint32_t numFields_ {0};
+    uint32_t numSfields_ {0};
+    uint32_t numIfaces_ {0};
+    uint32_t initTid_ {0};
 
     ITable itable_;
 
     // For array types this field contains array's element size, for non-array type it should be zero.
-    Class *component_type_ {nullptr};
+    Class *componentType_ {nullptr};
 
-    ClassLinkerContext *load_context_ {nullptr};
+    ClassLinkerContext *loadContext_ {nullptr};
 
     panda_file::Type type_ {panda_file::Type::TypeId::REFERENCE};
     std::atomic<State> state_;
 
     UniqId CalcUniqId() const;
-    mutable std::atomic<UniqId> uniq_id_ {0};
+    mutable std::atomic<UniqId> uniqId_ {0};
 
-    uint32_t num_reffields_ {0};      // instance reference fields num
-    uint32_t num_refsfields_ {0};     // static reference fields num
-    uint32_t offset_reffields_ {0};   // first instance reference fields offset in object layout
-    uint32_t offset_refsfields_ {0};  // first static reference fields offset in object layout
-    uint32_t volatile_reffields_num_ {0};
-    uint32_t volatile_refsfields_num_ {0};
+    uint32_t numReffields_ {0};      // instance reference fields num
+    uint32_t numRefsfields_ {0};     // static reference fields num
+    uint32_t offsetReffields_ {0};   // first instance reference fields offset in object layout
+    uint32_t offsetRefsfields_ {0};  // first static reference fields offset in object layout
+    uint32_t volatileReffieldsNum_ {0};
+    uint32_t volatileRefsfieldsNum_ {0};
 
-    Span<const panda_file::File::EntityId> class_idx_ {nullptr, nullptr};
-    Span<const panda_file::File::EntityId> method_idx_ {nullptr, nullptr};
-    Span<const panda_file::File::EntityId> field_idx_ {nullptr, nullptr};
+    Span<const panda_file::File::EntityId> classIdx_ {nullptr, nullptr};
+    Span<const panda_file::File::EntityId> methodIdx_ {nullptr, nullptr};
+    Span<const panda_file::File::EntityId> fieldIdx_ {nullptr, nullptr};
 };
 
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, const Class::State &state);

@@ -31,9 +31,9 @@ std::pair<UniqueFd, UniqueFd> CreatePipe();
 
 int SetFdNonblocking(const UniqueFd &fd);
 
-Expected<size_t, Error> ReadFromPipe(const UniqueFd &pipe_fd, void *buf, size_t size);
+Expected<size_t, Error> ReadFromPipe(const UniqueFd &pipeFd, void *buf, size_t size);
 
-Expected<size_t, Error> WriteToPipe(const UniqueFd &pipe_fd, const void *buf, size_t size);
+Expected<size_t, Error> WriteToPipe(const UniqueFd &pipeFd, const void *buf, size_t size);
 
 enum class EventType { READY };
 

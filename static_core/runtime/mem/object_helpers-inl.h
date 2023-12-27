@@ -35,22 +35,22 @@ template <bool INTERRUPTIBLE, typename Handler>
 bool GCStaticObjectHelpers::TraverseClass(Class *cls, Handler &handler)
 {
     // Iterate over static fields
-    uint32_t ref_num = cls->GetRefFieldsNum<true>();
-    if (ref_num > 0) {
+    uint32_t refNum = cls->GetRefFieldsNum<true>();
+    if (refNum > 0) {
         uint32_t offset = cls->GetRefFieldsOffset<true>();
         ObjectHeader *object = cls->GetManagedObject();
         ASSERT(ToUintPtr(cls) + offset >= ToUintPtr(object));
         // The offset is relative to the class. Adjust it to make relative to the managed object
-        uint32_t obj_offset = ToUintPtr(cls) + offset - ToUintPtr(object);
-        uint32_t ref_volatile_num = cls->GetVolatileRefFieldsNum<true>();
-        for (uint32_t i = 0; i < ref_num;
-             i++, offset += ClassHelper::OBJECT_POINTER_SIZE, obj_offset += ClassHelper::OBJECT_POINTER_SIZE) {
-            bool is_volatile = (i < ref_volatile_num);
-            auto *field_object = is_volatile ? cls->GetFieldObject<true>(offset) : cls->GetFieldObject<false>(offset);
-            if (field_object == nullptr) {
+        uint32_t objOffset = ToUintPtr(cls) + offset - ToUintPtr(object);
+        uint32_t refVolatileNum = cls->GetVolatileRefFieldsNum<true>();
+        for (uint32_t i = 0; i < refNum;
+             i++, offset += ClassHelper::OBJECT_POINTER_SIZE, objOffset += ClassHelper::OBJECT_POINTER_SIZE) {
+            bool isVolatile = (i < refVolatileNum);
+            auto *fieldObject = isVolatile ? cls->GetFieldObject<true>(offset) : cls->GetFieldObject<false>(offset);
+            if (fieldObject == nullptr) {
                 continue;
             }
-            [[maybe_unused]] bool res = handler(object, field_object, obj_offset, is_volatile);
+            [[maybe_unused]] bool res = handler(object, fieldObject, objOffset, isVolatile);
             if constexpr (INTERRUPTIBLE) {
                 if (!res) {
                     return false;
@@ -68,23 +68,23 @@ bool GCStaticObjectHelpers::TraverseObject(ObjectHeader *object, Class *cls, Han
     ASSERT(!cls->IsDynamicClass());
     while (cls != nullptr) {
         // Iterate over instance fields
-        uint32_t ref_num = cls->GetRefFieldsNum<false>();
-        if (ref_num == 0) {
+        uint32_t refNum = cls->GetRefFieldsNum<false>();
+        if (refNum == 0) {
             cls = cls->GetBase();
             continue;
         }
 
         uint32_t offset = cls->GetRefFieldsOffset<false>();
-        uint32_t ref_volatile_num = cls->GetVolatileRefFieldsNum<false>();
-        for (uint32_t i = 0; i < ref_num; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
-            bool is_volatile = (i < ref_volatile_num);
-            auto *field_object =
-                is_volatile ? object->GetFieldObject<true>(offset) : object->GetFieldObject<false>(offset);
-            if (field_object == nullptr) {
+        uint32_t refVolatileNum = cls->GetVolatileRefFieldsNum<false>();
+        for (uint32_t i = 0; i < refNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
+            bool isVolatile = (i < refVolatileNum);
+            auto *fieldObject =
+                isVolatile ? object->GetFieldObject<true>(offset) : object->GetFieldObject<false>(offset);
+            if (fieldObject == nullptr) {
                 continue;
             }
-            ValidateObject(object, field_object);
-            [[maybe_unused]] bool res = handler(object, field_object, offset, is_volatile);
+            ValidateObject(object, fieldObject);
+            [[maybe_unused]] bool res = handler(object, fieldObject, offset, isVolatile);
             if constexpr (INTERRUPTIBLE) {
                 if (!res) {
                     return false;
@@ -106,23 +106,23 @@ bool GCStaticObjectHelpers::TraverseArray(coretypes::Array *array, [[maybe_unuse
     ASSERT(cls->IsObjectArrayClass());
     ASSERT(IsAligned(ToUintPtr(begin), DEFAULT_ALIGNMENT_IN_BYTES));
 
-    auto *array_start = array->GetBase<ObjectPointerType *>();
+    auto *arrayStart = array->GetBase<ObjectPointerType *>();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto *array_end = array_start + array->GetLength();
-    auto *p = begin < array_start ? array_start : reinterpret_cast<ObjectPointerType *>(begin);
+    auto *arrayEnd = arrayStart + array->GetLength();
+    auto *p = begin < arrayStart ? arrayStart : reinterpret_cast<ObjectPointerType *>(begin);
 
-    if (end > array_end) {
-        end = array_end;
+    if (end > arrayEnd) {
+        end = arrayEnd;
     }
 
-    auto element_size = coretypes::Array::GetElementSize<ObjectHeader *, false>();
+    auto elementSize = coretypes::Array::GetElementSize<ObjectHeader *, false>();
     auto offset = ToUintPtr(p) - ToUintPtr(array);
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (ArraySizeT i = p - array_start; p < end; ++p, ++i, offset += element_size) {
-        auto *array_element = array->Get<ObjectHeader *>(i);
-        if (array_element != nullptr) {
-            [[maybe_unused]] bool res = handler(array, array_element, offset, false);
+    for (ArraySizeT i = p - arrayStart; p < end; ++p, ++i, offset += elementSize) {
+        auto *arrayElement = array->Get<ObjectHeader *>(i);
+        if (arrayElement != nullptr) {
+            [[maybe_unused]] bool res = handler(array, arrayElement, offset, false);
             if constexpr (INTERRUPTIBLE) {
                 if (!res) {
                     return false;
@@ -135,24 +135,24 @@ bool GCStaticObjectHelpers::TraverseArray(coretypes::Array *array, [[maybe_unuse
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool GCStaticObjectHelpers::TraverseAllObjectsWithInfo(ObjectHeader *object_header, Handler &handler, void *begin,
+bool GCStaticObjectHelpers::TraverseAllObjectsWithInfo(ObjectHeader *objectHeader, Handler &handler, void *begin,
                                                        void *end)
 {
-    auto *cls = object_header->ClassAddr<Class>();
+    auto *cls = objectHeader->ClassAddr<Class>();
     ASSERT(cls != nullptr);
 
     if (cls->IsObjectArrayClass()) {
-        return TraverseArray<INTERRUPTIBLE>(static_cast<coretypes::Array *>(object_header), cls, begin, end, handler);
+        return TraverseArray<INTERRUPTIBLE>(static_cast<coretypes::Array *>(objectHeader), cls, begin, end, handler);
     }
     if (cls->IsClassClass()) {
-        auto object_cls = panda::Class::FromClassObject(object_header);
-        if (object_cls->IsInitializing() || object_cls->IsInitialized()) {
-            if (!TraverseClass<INTERRUPTIBLE>(object_cls, handler)) {
+        auto objectCls = panda::Class::FromClassObject(objectHeader);
+        if (objectCls->IsInitializing() || objectCls->IsInitialized()) {
+            if (!TraverseClass<INTERRUPTIBLE>(objectCls, handler)) {
                 return false;
             }
         }
     }
-    return TraverseObject<INTERRUPTIBLE>(object_header, cls, handler);
+    return TraverseObject<INTERRUPTIBLE>(objectHeader, cls, handler);
 }
 
 bool GCDynamicObjectHelpers::IsClassObject(ObjectHeader *obj)
@@ -161,16 +161,16 @@ bool GCDynamicObjectHelpers::IsClassObject(ObjectHeader *obj)
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool GCDynamicObjectHelpers::TraverseClass(coretypes::DynClass *dyn_class, Handler &handler)
+bool GCDynamicObjectHelpers::TraverseClass(coretypes::DynClass *dynClass, Handler &handler)
 {
-    size_t hklass_size = dyn_class->ClassAddr<HClass>()->GetObjectSize() - sizeof(coretypes::DynClass);
-    size_t body_size = hklass_size - sizeof(HClass);
-    size_t num_of_fields = body_size / TaggedValue::TaggedTypeSize();
-    for (size_t i = 0; i < num_of_fields; i++) {
-        size_t field_offset = sizeof(ObjectHeader) + sizeof(HClass) + i * TaggedValue::TaggedTypeSize();
-        auto tagged_value = ObjectAccessor::GetDynValue<TaggedValue>(dyn_class, field_offset);
-        if (tagged_value.IsHeapObject()) {
-            [[maybe_unused]] bool res = handler(dyn_class, tagged_value.GetHeapObject(), field_offset, false);
+    size_t hklassSize = dynClass->ClassAddr<HClass>()->GetObjectSize() - sizeof(coretypes::DynClass);
+    size_t bodySize = hklassSize - sizeof(HClass);
+    size_t numOfFields = bodySize / TaggedValue::TaggedTypeSize();
+    for (size_t i = 0; i < numOfFields; i++) {
+        size_t fieldOffset = sizeof(ObjectHeader) + sizeof(HClass) + i * TaggedValue::TaggedTypeSize();
+        auto taggedValue = ObjectAccessor::GetDynValue<TaggedValue>(dynClass, fieldOffset);
+        if (taggedValue.IsHeapObject()) {
+            [[maybe_unused]] bool res = handler(dynClass, taggedValue.GetHeapObject(), fieldOffset, false);
             if constexpr (INTERRUPTIBLE) {
                 if (!res) {
                     return false;
@@ -187,18 +187,18 @@ bool GCDynamicObjectHelpers::TraverseObject(ObjectHeader *object, HClass *cls, H
     ASSERT(cls->IsDynamicClass());
     LOG(DEBUG, GC) << "TraverseObject Current object: " << GetDebugInfoAboutObject(object);
     // handle object data
-    uint32_t obj_body_size = cls->GetObjectSize() - ObjectHeader::ObjectHeaderSize();
-    ASSERT(obj_body_size % TaggedValue::TaggedTypeSize() == 0);
-    uint32_t num_of_fields = obj_body_size / TaggedValue::TaggedTypeSize();
-    size_t data_offset = ObjectHeader::ObjectHeaderSize();
-    for (uint32_t i = 0; i < num_of_fields; i++) {
-        size_t field_offset = data_offset + i * TaggedValue::TaggedTypeSize();
-        if (cls->IsNativeField(field_offset)) {
+    uint32_t objBodySize = cls->GetObjectSize() - ObjectHeader::ObjectHeaderSize();
+    ASSERT(objBodySize % TaggedValue::TaggedTypeSize() == 0);
+    uint32_t numOfFields = objBodySize / TaggedValue::TaggedTypeSize();
+    size_t dataOffset = ObjectHeader::ObjectHeaderSize();
+    for (uint32_t i = 0; i < numOfFields; i++) {
+        size_t fieldOffset = dataOffset + i * TaggedValue::TaggedTypeSize();
+        if (cls->IsNativeField(fieldOffset)) {
             continue;
         }
-        auto tagged_value = ObjectAccessor::GetDynValue<TaggedValue>(object, field_offset);
-        if (tagged_value.IsHeapObject()) {
-            [[maybe_unused]] bool res = handler(object, tagged_value.GetHeapObject(), field_offset, false);
+        auto taggedValue = ObjectAccessor::GetDynValue<TaggedValue>(object, fieldOffset);
+        if (taggedValue.IsHeapObject()) {
+            [[maybe_unused]] bool res = handler(object, taggedValue.GetHeapObject(), fieldOffset, false);
             if constexpr (INTERRUPTIBLE) {
                 if (!res) {
                     return false;
@@ -218,22 +218,22 @@ bool GCDynamicObjectHelpers::TraverseArray(coretypes::Array *array, [[maybe_unus
     ASSERT(cls->IsArray());
     ASSERT(IsAligned(ToUintPtr(begin), DEFAULT_ALIGNMENT_IN_BYTES));
 
-    auto *array_start = array->GetBase<TaggedType *>();
+    auto *arrayStart = array->GetBase<TaggedType *>();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto *array_end = array_start + array->GetLength();
-    auto *p = begin < array_start ? array_start : reinterpret_cast<TaggedType *>(begin);
+    auto *arrayEnd = arrayStart + array->GetLength();
+    auto *p = begin < arrayStart ? arrayStart : reinterpret_cast<TaggedType *>(begin);
 
-    if (end > array_end) {
-        end = array_end;
+    if (end > arrayEnd) {
+        end = arrayEnd;
     }
 
-    auto element_size = coretypes::Array::GetElementSize<TaggedType, true>();
+    auto elementSize = coretypes::Array::GetElementSize<TaggedType, true>();
     auto offset = ToUintPtr(p) - ToUintPtr(array);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (ArraySizeT i = p - array_start; p < end; ++p, ++i, offset += element_size) {
-        TaggedValue array_element(array->Get<TaggedType, false, true>(i));
-        if (array_element.IsHeapObject()) {
-            [[maybe_unused]] bool res = handler(array, array_element.GetHeapObject(), offset, false);
+    for (ArraySizeT i = p - arrayStart; p < end; ++p, ++i, offset += elementSize) {
+        TaggedValue arrayElement(array->Get<TaggedType, false, true>(i));
+        if (arrayElement.IsHeapObject()) {
+            [[maybe_unused]] bool res = handler(array, arrayElement.GetHeapObject(), offset, false);
             if constexpr (INTERRUPTIBLE) {
                 if (!res) {
                     return false;
@@ -246,22 +246,22 @@ bool GCDynamicObjectHelpers::TraverseArray(coretypes::Array *array, [[maybe_unus
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool GCDynamicObjectHelpers::TraverseAllObjectsWithInfo(ObjectHeader *object_header, Handler &handler, void *begin,
+bool GCDynamicObjectHelpers::TraverseAllObjectsWithInfo(ObjectHeader *objectHeader, Handler &handler, void *begin,
                                                         void *end)
 {
-    auto *cls = object_header->ClassAddr<HClass>();
+    auto *cls = objectHeader->ClassAddr<HClass>();
     ASSERT(cls != nullptr && cls->IsDynamicClass());
     if (cls->IsString() || cls->IsNativePointer()) {
         return true;
     }
     if (cls->IsArray()) {
-        return TraverseArray<INTERRUPTIBLE>(static_cast<coretypes::Array *>(object_header), cls, begin, end, handler);
+        return TraverseArray<INTERRUPTIBLE>(static_cast<coretypes::Array *>(objectHeader), cls, begin, end, handler);
     }
     if (cls->IsHClass()) {
-        return TraverseClass<INTERRUPTIBLE>(coretypes::DynClass::Cast(object_header), handler);
+        return TraverseClass<INTERRUPTIBLE>(coretypes::DynClass::Cast(objectHeader), handler);
     }
 
-    return TraverseObject<INTERRUPTIBLE>(object_header, cls, handler);
+    return TraverseObject<INTERRUPTIBLE>(objectHeader, cls, handler);
 }
 
 }  // namespace panda::mem

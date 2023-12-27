@@ -30,37 +30,37 @@ inline uint8_t CardTable::Card::GetCard() const
     return value_.load(std::memory_order_relaxed);
 }
 
-inline void CardTable::Card::SetCard(uint8_t new_val)
+inline void CardTable::Card::SetCard(uint8_t newVal)
 {
     // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
     // on other reads or writes
-    value_.store(new_val, std::memory_order_relaxed);
+    value_.store(newVal, std::memory_order_relaxed);
 }
 
-inline void CardTable::FillRanges(PandaVector<MemRange> *ranges, const Card *start_card, const Card *end_card)
+inline void CardTable::FillRanges(PandaVector<MemRange> *ranges, const Card *startCard, const Card *endCard)
 {
     constexpr size_t MIN_RANGE = 32;
     constexpr size_t MAX_CARDS_COUNT = 1000;  // How many cards we can process at once
-    static std::array<char, MAX_CARDS_COUNT> zero_array {};
+    static std::array<char, MAX_CARDS_COUNT> zeroArray {};
 
-    if (static_cast<size_t>(end_card - start_card) < MIN_RANGE) {
-        for (auto card_ptr = start_card; card_ptr <= end_card; card_ptr++) {
-            if (card_ptr->IsMarked()) {
-                ranges->emplace_back(min_address_ + (card_ptr - cards_) * CARD_SIZE,
-                                     min_address_ + (card_ptr - cards_ + 1) * CARD_SIZE - 1);
+    if (static_cast<size_t>(endCard - startCard) < MIN_RANGE) {
+        for (auto cardPtr = startCard; cardPtr <= endCard; cardPtr++) {
+            if (cardPtr->IsMarked()) {
+                ranges->emplace_back(minAddress_ + (cardPtr - cards_) * CARD_SIZE,
+                                     minAddress_ + (cardPtr - cards_ + 1) * CARD_SIZE - 1);
             }
         }
     } else {
-        size_t diff = end_card - start_card + 1;
-        size_t split_size = std::min(diff / 2, MAX_CARDS_COUNT);  // divide 2 to get smaller split_size
-        if (memcmp(start_card, &zero_array, split_size) != 0) {
-            FillRanges(ranges, start_card, ToNativePtr<Card>(ToUintPtr(start_card) + split_size - 1));
+        size_t diff = endCard - startCard + 1;
+        size_t splitSize = std::min(diff / 2, MAX_CARDS_COUNT);  // divide 2 to get smaller split_size
+        if (memcmp(startCard, &zeroArray, splitSize) != 0) {
+            FillRanges(ranges, startCard, ToNativePtr<Card>(ToUintPtr(startCard) + splitSize - 1));
         }
         // NOLINTNEXTLINE(bugprone-branch-clone)
-        if (diff - split_size > MAX_CARDS_COUNT) {
-            FillRanges(ranges, ToNativePtr<Card>(ToUintPtr(start_card) + split_size), end_card);
-        } else if (memcmp(ToNativePtr<Card>(ToUintPtr(start_card) + split_size), &zero_array, diff - split_size) != 0) {
-            FillRanges(ranges, ToNativePtr<Card>(ToUintPtr(start_card) + split_size), end_card);
+        if (diff - splitSize > MAX_CARDS_COUNT) {
+            FillRanges(ranges, ToNativePtr<Card>(ToUintPtr(startCard) + splitSize), endCard);
+        } else if (memcmp(ToNativePtr<Card>(ToUintPtr(startCard) + splitSize), &zeroArray, diff - splitSize) != 0) {
+            FillRanges(ranges, ToNativePtr<Card>(ToUintPtr(startCard) + splitSize), endCard);
         }
     }
 }
@@ -70,16 +70,16 @@ static_assert(std::atomic_size_t::is_always_lock_free);
 static_assert(sizeof(std::atomic_size_t) == sizeof(size_t));
 
 template <typename CardVisitor>
-void CardTable::VisitMarked(CardVisitor card_visitor, uint32_t processed_flag)
+void CardTable::VisitMarked(CardVisitor cardVisitor, uint32_t processedFlag)
 {
-    bool visit_marked = processed_flag & CardTableProcessedFlag::VISIT_MARKED;
-    bool visit_processed = processed_flag & CardTableProcessedFlag::VISIT_PROCESSED;
-    bool set_processed = processed_flag & CardTableProcessedFlag::SET_PROCESSED;
+    bool visitMarked = processedFlag & CardTableProcessedFlag::VISIT_MARKED;
+    bool visitProcessed = processedFlag & CardTableProcessedFlag::VISIT_PROCESSED;
+    bool setProcessed = processedFlag & CardTableProcessedFlag::SET_PROCESSED;
     static_assert(sizeof(std::atomic_size_t) % sizeof(Card) == 0);
     constexpr size_t CHUNK_CARD_NUM = sizeof(std::atomic_size_t) / sizeof(Card);
     auto *card = cards_;
-    auto *card_end = cards_ + (cards_count_ / CHUNK_CARD_NUM) * CHUNK_CARD_NUM;
-    while (card < card_end) {
+    auto *cardEnd = cards_ + (cardsCount_ / CHUNK_CARD_NUM) * CHUNK_CARD_NUM;
+    while (card < cardEnd) {
         // NB! In general wide load/short store on overlapping memory of different address are allowed to be reordered
         // This optimization currently is allowed since additional VisitMarked is called after concurrent mark with
         // global Mutator lock held, so all previous managed thread's writes should be visible by GC thread
@@ -91,53 +91,53 @@ void CardTable::VisitMarked(CardVisitor card_visitor, uint32_t processed_flag)
             continue;
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto *chunk_end = card + CHUNK_CARD_NUM;
-        while (card < chunk_end) {
-            if (!(visit_marked && card->IsMarked()) && !(visit_processed && card->IsProcessed())) {
+        auto *chunkEnd = card + CHUNK_CARD_NUM;
+        while (card < chunkEnd) {
+            if (!(visitMarked && card->IsMarked()) && !(visitProcessed && card->IsProcessed())) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 ++card;
                 continue;
             }
 
-            if (set_processed) {
+            if (setProcessed) {
                 card->SetProcessed();
             }
-            card_visitor(GetMemoryRange(card));
+            cardVisitor(GetMemoryRange(card));
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             ++card;
         }
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (; card < cards_ + cards_count_; ++card) {
-        if ((visit_marked && card->IsMarked()) || (visit_processed && card->IsProcessed())) {
-            if (set_processed) {
+    for (; card < cards_ + cardsCount_; ++card) {
+        if ((visitMarked && card->IsMarked()) || (visitProcessed && card->IsProcessed())) {
+            if (setProcessed) {
                 card->SetProcessed();
             }
-            card_visitor(GetMemoryRange(card));
+            cardVisitor(GetMemoryRange(card));
         }
     }
 }
 
 template <typename CardVisitor>
-void CardTable::VisitMarkedCompact(CardVisitor card_visitor)
+void CardTable::VisitMarkedCompact(CardVisitor cardVisitor)
 {
     constexpr size_t MAX_CARDS_COUNT = 1000;
-    size_t cur_pos = 0;
-    size_t end_pos = 0;
-    PandaVector<MemRange> mem_ranges;
+    size_t curPos = 0;
+    size_t endPos = 0;
+    PandaVector<MemRange> memRanges;
 
-    ASSERT(cards_count_ > 0);
-    auto max_pool_address = PoolManager::GetMmapMemPool()->GetMaxObjectAddress();
-    while (cur_pos < cards_count_) {
-        end_pos = std::min(cur_pos + MAX_CARDS_COUNT - 1, cards_count_ - 1);
-        FillRanges(&mem_ranges, &cards_[cur_pos], &cards_[end_pos]);
-        cur_pos = end_pos + 1;
-        if (GetCardStartAddress(&cards_[cur_pos]) > max_pool_address) {
+    ASSERT(cardsCount_ > 0);
+    auto maxPoolAddress = PoolManager::GetMmapMemPool()->GetMaxObjectAddress();
+    while (curPos < cardsCount_) {
+        endPos = std::min(curPos + MAX_CARDS_COUNT - 1, cardsCount_ - 1);
+        FillRanges(&memRanges, &cards_[curPos], &cards_[endPos]);
+        curPos = endPos + 1;
+        if (GetCardStartAddress(&cards_[curPos]) > maxPoolAddress) {
             break;
         }
     }
-    for (const auto &mem_range : mem_ranges) {
-        card_visitor(mem_range);
+    for (const auto &memRange : memRanges) {
+        cardVisitor(memRange);
     }
 }
 

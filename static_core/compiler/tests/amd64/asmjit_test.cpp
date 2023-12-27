@@ -200,28 +200,28 @@ TEST_F(AsmJitTest, AddExplicit)
 
     code.flatten();
     code.resolveUnresolvedLinks();
-    size_t estimated_size = code.codeSize();
+    size_t estimatedSize = code.codeSize();
 
     // Allocate memory for the function and relocate it there.
-    void *ro_ptr;
-    void *rw_ptr;
-    Error err = allocator.alloc(&ro_ptr, &rw_ptr, estimated_size);
+    void *roPtr;
+    void *rwPtr;
+    Error err = allocator.alloc(&roPtr, &rwPtr, estimatedSize);
     ASSERT_FALSE(err);
 
     // Relocate to the base-address of the allocated memory.
-    code.relocateToBase(reinterpret_cast<uintptr_t>(rw_ptr));
-    size_t code_size = code.codeSize();
+    code.relocateToBase(reinterpret_cast<uintptr_t>(rwPtr));
+    size_t codeSize = code.codeSize();
 
-    code.copyFlattenedData(rw_ptr, code_size, CodeHolder::kCopyPadSectionBuffer);
+    code.copyFlattenedData(rwPtr, codeSize, CodeHolder::kCopyPadSectionBuffer);
 
     // Execute the function and test whether it works.
     using Func = size_t (*)(size_t lhs, size_t rhs);
-    Func fn = reinterpret_cast<Func>(ro_ptr);
+    Func fn = reinterpret_cast<Func>(roPtr);
 
     size_t result {fn(size_t(2), size_t(3))};
     ASSERT_EQ(size_t(5), result);
 
-    err = allocator.release(ro_ptr);
+    err = allocator.release(roPtr);
     ASSERT_FALSE(err);
 }
 }  // namespace panda::compiler

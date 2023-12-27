@@ -26,7 +26,7 @@ auto constexpr FUZZING_EXIT_ON_FAILED_ASSERT_FOR = "";
 [[noreturn]] void Terminate(const char *file)
 {
     auto filepath = std::string(file);
-    std::string libs_tmp;
+    std::string libsTmp;
 
     char *replace = std::getenv("FUZZING_EXIT_ON_FAILED_ASSERT");
     if ((replace != nullptr) && (std::string(replace) == "false")) {
@@ -35,11 +35,11 @@ auto constexpr FUZZING_EXIT_ON_FAILED_ASSERT_FOR = "";
 
     char *libs = std::getenv("FUZZING_EXIT_ON_FAILED_ASSERT_FOR");
     if (libs == nullptr) {
-        libs_tmp = FUZZING_EXIT_ON_FAILED_ASSERT_FOR;
-        if (libs_tmp.empty()) {
+        libsTmp = FUZZING_EXIT_ON_FAILED_ASSERT_FOR;
+        if (libsTmp.empty()) {
             std::abort();
         }
-        libs = libs_tmp.data();
+        libs = libsTmp.data();
     }
 
     char *context;

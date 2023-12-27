@@ -44,31 +44,31 @@ void LoopAnalyzer::ResetLoopInfo()
     GetGraph()->SetRootLoop(nullptr);
     GetGraph()->SetHasIrreducibleLoop(false);
     GetGraph()->SetHasInfiniteLoop(false);
-    loop_counter_ = 0;
+    loopCounter_ = 0;
 }
 
-Loop *LoopAnalyzer::CreateNewLoop(BasicBlock *loop_header)
+Loop *LoopAnalyzer::CreateNewLoop(BasicBlock *loopHeader)
 {
-    auto loop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), loop_header, loop_counter_++);
-    loop->AppendBlock(loop_header);
+    auto loop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), loopHeader, loopCounter_++);
+    loop->AppendBlock(loopHeader);
     return loop;
 }
 
 void LoopAnalyzer::CreateRootLoop()
 {
     ASSERT(GetGraph()->GetRootLoop() == nullptr);
-    auto root_loop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), nullptr, loop_counter_++);
-    root_loop->SetAsRoot();
-    GetGraph()->SetRootLoop(root_loop);
+    auto rootLoop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), nullptr, loopCounter_++);
+    rootLoop->SetAsRoot();
+    GetGraph()->SetRootLoop(rootLoop);
 }
 
 void LoopAnalyzer::CollectBackEdges()
 {
-    black_marker_ = GetGraph()->NewMarker();
-    gray_marker_ = GetGraph()->NewMarker();
+    blackMarker_ = GetGraph()->NewMarker();
+    grayMarker_ = GetGraph()->NewMarker();
     BackEdgeSearch(GetGraph()->GetStartBlock());
-    GetGraph()->EraseMarker(black_marker_);
-    GetGraph()->EraseMarker(gray_marker_);
+    GetGraph()->EraseMarker(blackMarker_);
+    GetGraph()->EraseMarker(grayMarker_);
 }
 
 /*
@@ -79,16 +79,16 @@ void LoopAnalyzer::CollectBackEdges()
  */
 void LoopAnalyzer::BackEdgeSearch(BasicBlock *block)
 {
-    block->SetMarker(gray_marker_);
-    block->SetMarker(black_marker_);
+    block->SetMarker(grayMarker_);
+    block->SetMarker(blackMarker_);
     for (auto succ : block->GetSuccsBlocks()) {
-        if (succ->IsMarked(gray_marker_)) {
+        if (succ->IsMarked(grayMarker_)) {
             ProcessNewBackEdge(succ, block);
-        } else if (!succ->IsMarked(black_marker_)) {
+        } else if (!succ->IsMarked(blackMarker_)) {
             BackEdgeSearch(succ);
         }
     }
-    block->ResetMarker(gray_marker_);
+    block->ResetMarker(grayMarker_);
 }
 
 /*
@@ -96,15 +96,15 @@ void LoopAnalyzer::BackEdgeSearch(BasicBlock *block)
  * Append information about its header, back edge and check if this loop is irreducible.
  * Loop is irreducible when its header doesn't dominate back edge.
  */
-void LoopAnalyzer::ProcessNewBackEdge(BasicBlock *header, BasicBlock *back_edge)
+void LoopAnalyzer::ProcessNewBackEdge(BasicBlock *header, BasicBlock *backEdge)
 {
     auto loop = header->GetLoop();
     if (loop == nullptr) {
         loop = CreateNewLoop(header);
     }
 
-    loop->AppendBackEdge(back_edge);
-    if (!header->IsDominate(back_edge)) {
+    loop->AppendBackEdge(backEdge);
+    if (!header->IsDominate(backEdge)) {
         loop->SetIsIrreducible(true);
         GetGraph()->SetHasIrreducibleLoop(true);
     }
@@ -116,60 +116,60 @@ void LoopAnalyzer::ProcessNewBackEdge(BasicBlock *header, BasicBlock *back_edge)
 ArenaVector<int> LoopAnalyzer::GetForwardEdgesIndexes(BasicBlock *header)
 {
     // Mark back-edges
-    auto marker_holder = compiler::MarkerHolder(GetGraph());
-    auto back_edge_marker = marker_holder.GetMarker();
-    auto &back_edges = header->GetLoop()->GetBackEdges();
-    for (auto back_edge : back_edges) {
-        back_edge->SetMarker(back_edge_marker);
+    auto markerHolder = compiler::MarkerHolder(GetGraph());
+    auto backEdgeMarker = markerHolder.GetMarker();
+    auto &backEdges = header->GetLoop()->GetBackEdges();
+    for (auto backEdge : backEdges) {
+        backEdge->SetMarker(backEdgeMarker);
     }
 
     ArenaVector<int> indexes(header->GetGraph()->GetAllocator()->Adapter());
-    auto &pred_blocks = header->GetPredsBlocks();
-    for (int idx = static_cast<int>(pred_blocks.size()) - 1; idx >= 0; idx--) {
-        if (!pred_blocks[idx]->IsMarked(back_edge_marker)) {
+    auto &predBlocks = header->GetPredsBlocks();
+    for (int idx = static_cast<int>(predBlocks.size()) - 1; idx >= 0; idx--) {
+        if (!predBlocks[idx]->IsMarked(backEdgeMarker)) {
             indexes.push_back(idx);
         }
     }
-    ASSERT(indexes.size() + back_edges.size() == pred_blocks.size());
+    ASSERT(indexes.size() + backEdges.size() == predBlocks.size());
     return indexes;
 }
 
-void LoopAnalyzer::MovePhiInputsToPreHeader(BasicBlock *header, BasicBlock *pre_header,
-                                            const ArenaVector<int> &fw_edges_indexes)
+void LoopAnalyzer::MovePhiInputsToPreHeader(BasicBlock *header, BasicBlock *preHeader,
+                                            const ArenaVector<int> &fwEdgesIndexes)
 {
     for (auto phi : header->PhiInsts()) {
-        auto new_phi = GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
-        for (auto idx : fw_edges_indexes) {
+        auto newPhi = GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
+        for (auto idx : fwEdgesIndexes) {
             auto pred {header->GetPredBlockByIndex(idx)};
-            auto phi_idx {phi->CastToPhi()->GetPredBlockIndex(pred)};
-            new_phi->AppendInput(phi->GetInput(phi_idx).GetInst());
-            phi->RemoveInput(phi_idx);
+            auto phiIdx {phi->CastToPhi()->GetPredBlockIndex(pred)};
+            newPhi->AppendInput(phi->GetInput(phiIdx).GetInst());
+            phi->RemoveInput(phiIdx);
         }
-        pre_header->AppendPhi(new_phi);
-        phi->AppendInput(new_phi);
+        preHeader->AppendPhi(newPhi);
+        phi->AppendInput(newPhi);
     }
 }
 
-void LoopAnalyzer::UpdateControlFlowWithPreHeader(BasicBlock *header, BasicBlock *pre_header,
-                                                  const ArenaVector<int> &fw_edges_indexes)
+void LoopAnalyzer::UpdateControlFlowWithPreHeader(BasicBlock *header, BasicBlock *preHeader,
+                                                  const ArenaVector<int> &fwEdgesIndexes)
 {
     constexpr size_t IMM_2 = 2;
-    if (fw_edges_indexes.size() >= IMM_2) {
-        for (auto pred_idx : fw_edges_indexes) {
-            auto edge = header->GetPredBlockByIndex(pred_idx);
-            edge->ReplaceSucc(header, pre_header);
+    if (fwEdgesIndexes.size() >= IMM_2) {
+        for (auto predIdx : fwEdgesIndexes) {
+            auto edge = header->GetPredBlockByIndex(predIdx);
+            edge->ReplaceSucc(header, preHeader);
             header->RemovePred(edge);
         }
-        pre_header->AddSucc(header);
+        preHeader->AddSucc(header);
     } else {
-        ASSERT(fw_edges_indexes.size() == 1);
-        auto edge = header->GetPredBlockByIndex(fw_edges_indexes[0]);
-        edge->ReplaceSucc(header, pre_header);
-        header->ReplacePred(edge, pre_header);
+        ASSERT(fwEdgesIndexes.size() == 1);
+        auto edge = header->GetPredBlockByIndex(fwEdgesIndexes[0]);
+        edge->ReplaceSucc(header, preHeader);
+        header->ReplacePred(edge, preHeader);
     }
     // Update RPO
     GetGraph()->GetAnalysis<Rpo>().SetValid(true);
-    GetGraph()->GetAnalysis<Rpo>().AddBasicBlockBefore(header, pre_header);
+    GetGraph()->GetAnalysis<Rpo>().AddBasicBlockBefore(header, preHeader);
 }
 
 /*
@@ -178,14 +178,14 @@ void LoopAnalyzer::UpdateControlFlowWithPreHeader(BasicBlock *header, BasicBlock
  */
 BasicBlock *LoopAnalyzer::CreatePreHeader(BasicBlock *header)
 {
-    auto fw_edges_indexes = GetForwardEdgesIndexes(header);
-    auto pre_header = header->CreateImmediateDominator();
-    pre_header->SetGuestPc(header->GetGuestPc());
-    if (fw_edges_indexes.size() >= 2U) {
-        MovePhiInputsToPreHeader(header, pre_header, fw_edges_indexes);
+    auto fwEdgesIndexes = GetForwardEdgesIndexes(header);
+    auto preHeader = header->CreateImmediateDominator();
+    preHeader->SetGuestPc(header->GetGuestPc());
+    if (fwEdgesIndexes.size() >= 2U) {
+        MovePhiInputsToPreHeader(header, preHeader, fwEdgesIndexes);
     }
-    UpdateControlFlowWithPreHeader(header, pre_header, fw_edges_indexes);
-    return pre_header;
+    UpdateControlFlowWithPreHeader(header, preHeader, fwEdgesIndexes);
+    return preHeader;
 }
 
 bool LoopAnalyzer::PreHeaderExists(Loop *loop)
@@ -207,20 +207,20 @@ void LoopAnalyzer::FindAndInsertPreHeaders(Loop *loop)
     if (loop->IsTryCatchLoop()) {
         loop->SetPreHeader(nullptr);
     } else if (!loop->IsIrreducible()) {
-        BasicBlock *pre_header = nullptr;
+        BasicBlock *preHeader = nullptr;
         if (PreHeaderExists(loop)) {
-            pre_header = header->GetDominator();
+            preHeader = header->GetDominator();
         } else {
-            pre_header = CreatePreHeader(header);
-            pre_header->CopyTryCatchProps(header);
-            loop->GetOuterLoop()->AppendBlock(pre_header);
+            preHeader = CreatePreHeader(header);
+            preHeader->CopyTryCatchProps(header);
+            loop->GetOuterLoop()->AppendBlock(preHeader);
         }
-        loop->SetPreHeader(pre_header);
-        pre_header->SetNextLoop(loop);
+        loop->SetPreHeader(preHeader);
+        preHeader->SetNextLoop(loop);
     }
 
-    for (auto inner_loop : loop->GetInnerLoops()) {
-        FindAndInsertPreHeaders(inner_loop);
+    for (auto innerLoop : loop->GetInnerLoops()) {
+        FindAndInsertPreHeaders(innerLoop);
     }
 }
 
@@ -229,9 +229,9 @@ void LoopAnalyzer::PopulateIrreducibleLoop(Loop *loop)
     // Add back-edges to the loop for further analysis
     // Note that other blocks of `loop` besides the header are not added to it,
     // and outer loop of inner loops will be not `loop`, but its outer reducible (maybe root) loop
-    for (auto back_edge : loop->GetBackEdges()) {
-        if (back_edge->GetLoop() != loop) {
-            loop->AppendBlock(back_edge);
+    for (auto backEdge : loop->GetBackEdges()) {
+        if (backEdge->GetLoop() != loop) {
+            loop->AppendBlock(backEdge);
         }
     }
 }
@@ -251,24 +251,24 @@ void LoopAnalyzer::PopulateLoops()
         if (loop->IsIrreducible()) {
             PopulateIrreducibleLoop(loop);
         } else {
-            black_marker_ = GetGraph()->NewMarker();
-            block->SetMarker(black_marker_);
-            for (auto back_edge : loop->GetBackEdges()) {
-                NaturalLoopSearch(loop, back_edge);
+            blackMarker_ = GetGraph()->NewMarker();
+            block->SetMarker(blackMarker_);
+            for (auto backEdge : loop->GetBackEdges()) {
+                NaturalLoopSearch(loop, backEdge);
             }
-            GetGraph()->EraseMarker(black_marker_);
+            GetGraph()->EraseMarker(blackMarker_);
         }
     }
 
     // Populate the root loop with blocks which are not assign to any loops
     // Link all outer loops with the root loop
-    auto root_loop = GetGraph()->GetRootLoop();
+    auto rootLoop = GetGraph()->GetRootLoop();
     for (auto block : GetGraph()->GetBlocksRPO()) {
         if (block->GetLoop() == nullptr) {
-            root_loop->AppendBlock(block);
+            rootLoop->AppendBlock(block);
         } else if (block->GetLoop()->GetOuterLoop() == nullptr) {
-            block->GetLoop()->SetOuterLoop(root_loop);
-            root_loop->AppendInnerLoop(block->GetLoop());
+            block->GetLoop()->SetOuterLoop(rootLoop);
+            rootLoop->AppendInnerLoop(block->GetLoop());
         }
     }
 }
@@ -281,8 +281,8 @@ void LoopAnalyzer::PopulateLoops()
  */
 void LoopAnalyzer::NaturalLoopSearch(Loop *loop, BasicBlock *block)
 {
-    if (!block->IsMarked(black_marker_)) {
-        block->SetMarker(black_marker_);
+    if (!block->IsMarked(blackMarker_)) {
+        block->SetMarker(blackMarker_);
 
         if (block->GetLoop() == nullptr) {
             // `block` without assignment to any loop is found
@@ -310,8 +310,8 @@ void LoopAnalyzer::SetLoopProperties(Loop *loop, uint32_t depth)
         GetGraph()->SetHasInfiniteLoop(true);
     }
     depth++;
-    for (auto inner_loop : loop->GetInnerLoops()) {
-        SetLoopProperties(inner_loop, depth);
+    for (auto innerLoop : loop->GetInnerLoops()) {
+        SetLoopProperties(innerLoop, depth);
     }
 }
 
@@ -327,14 +327,14 @@ void Loop::RemoveBlock(BasicBlock *block)
     ASSERT(block != GetHeader());
     ASSERT(!HasBackEdge(block));
 #ifndef NDEBUG
-    for (auto inner_loop : GetInnerLoops()) {
-        ASSERT(block != inner_loop->GetPreHeader());
+    for (auto innerLoop : GetInnerLoops()) {
+        ASSERT(block != innerLoop->GetPreHeader());
     }
 #endif
 
-    auto block_it = std::find(blocks_.begin(), blocks_.end(), block);
-    ASSERT(block_it != blocks_.end());
-    blocks_.erase(block_it);
+    auto blockIt = std::find(blocks_.begin(), blocks_.end(), block);
+    ASSERT(blockIt != blocks_.end());
+    blocks_.erase(blockIt);
 }
 
 bool Loop::IsOsrLoop() const
@@ -374,21 +374,21 @@ void Loop::MoveHeaderToSucc()
 
 void Loop::CheckInfinity()
 {
-    is_infinite_ = false;
-    if (is_root_) {
+    isInfinite_ = false;
+    if (isRoot_) {
         return;
     }
-    auto outer_loop = GetOuterLoop();
+    auto outerLoop = GetOuterLoop();
     for (auto block : GetBlocks()) {
         const auto &succs = block->GetSuccsBlocks();
-        bool has_exit = std::find_if(succs.begin(), succs.end(), [&outer_loop](const BasicBlock *bb) {
-                            return bb->GetLoop() == outer_loop;
-                        }) != succs.end();
-        if (has_exit) {
+        bool hasExit = std::find_if(succs.begin(), succs.end(), [&outerLoop](const BasicBlock *bb) {
+                           return bb->GetLoop() == outerLoop;
+                       }) != succs.end();
+        if (hasExit) {
             return;
         }
     }
-    is_infinite_ = true;
+    isInfinite_ = true;
 }
 
 /*
@@ -397,12 +397,12 @@ void Loop::CheckInfinity()
 BasicBlock *GetLoopOutsideSuccessor(Loop *loop)
 {
     ASSERT(loop->GetBackEdges().size() == 1);
-    auto back_edge = loop->GetBackEdges()[0];
-    auto header_succ_idx = back_edge->GetSuccBlockIndex(loop->GetHeader());
-    ASSERT(back_edge->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
-    auto outside_block = back_edge->GetSuccessor(1 - header_succ_idx);
-    ASSERT(outside_block != nullptr);
-    return outside_block;
+    auto backEdge = loop->GetBackEdges()[0];
+    auto headerSuccIdx = backEdge->GetSuccBlockIndex(loop->GetHeader());
+    ASSERT(backEdge->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
+    auto outsideBlock = backEdge->GetSuccessor(1 - headerSuccIdx);
+    ASSERT(outsideBlock != nullptr);
+    return outsideBlock;
 }
 
 /**
@@ -419,10 +419,10 @@ bool IsLoopSingleBackEdgeExitPoint(Loop *loop)
     if (loop->GetBackEdges().size() != 1) {
         return false;
     }
-    auto back_edge = loop->GetBackEdges()[0];
+    auto backEdge = loop->GetBackEdges()[0];
     // Check there are no side-exits
     for (auto block : loop->GetBlocks()) {
-        if (block == back_edge) {
+        if (block == backEdge) {
             continue;
         }
         for (auto succ : block->GetSuccsBlocks()) {

@@ -50,10 +50,10 @@ public:
 
     explicit GCMarker(GC *gc) : GCMarkerBase(gc) {}
 
-    void MarkInstance(GCMarkingStackType *objects_stack, const ObjectHeader *object, const BaseClass *cls,
-                      const ReferenceCheckPredicateT &ref_pred);
+    void MarkInstance(GCMarkingStackType *objectsStack, const ObjectHeader *object, const BaseClass *cls,
+                      const ReferenceCheckPredicateT &refPred);
 
-    void MarkInstance(GCMarkingStackType *objects_stack, const ObjectHeader *object, const BaseClass *cls);
+    void MarkInstance(GCMarkingStackType *objectsStack, const ObjectHeader *object, const BaseClass *cls);
 
 private:
     Marker *AsMarker()
@@ -67,14 +67,14 @@ private:
      * @param object
      * @param base_cls - class of object(used for perf in case if class for the object already was obtained)
      */
-    void HandleObject(GCMarkingStackType *objects_stack, const ObjectHeader *object, const Class *cls);
+    void HandleObject(GCMarkingStackType *objectsStack, const ObjectHeader *object, const Class *cls);
 
     /**
      * Iterate over class data and add all found not null object references to the objects_stack
      * @param objects_stack - stack with objects
      * @param cls - class
      */
-    void HandleClass(GCMarkingStackType *objects_stack, const Class *cls);
+    void HandleClass(GCMarkingStackType *objectsStack, const Class *cls);
 
     /**
      * For arrays of objects add all not null object references to the objects_stack
@@ -82,7 +82,7 @@ private:
      * @param array_object - array object
      * @param cls - class of array object(used for perf)
      */
-    void HandleArrayClass(GCMarkingStackType *objects_stack, const coretypes::Array *array_object, const Class *cls);
+    void HandleArrayClass(GCMarkingStackType *objectsStack, const coretypes::Array *arrayObject, const Class *cls);
 };
 
 template <typename Marker>
@@ -92,10 +92,10 @@ public:
 
     explicit GCMarker(GC *gc) : GCMarkerBase(gc) {}
 
-    void MarkInstance(GCMarkingStackType *objects_stack, const ObjectHeader *object, const BaseClass *cls,
-                      const ReferenceCheckPredicateT &ref_pred);
+    void MarkInstance(GCMarkingStackType *objectsStack, const ObjectHeader *object, const BaseClass *cls,
+                      const ReferenceCheckPredicateT &refPred);
 
-    void MarkInstance(GCMarkingStackType *objects_stack, const ObjectHeader *object, const BaseClass *cls);
+    void MarkInstance(GCMarkingStackType *objectsStack, const ObjectHeader *object, const BaseClass *cls);
 
 private:
     Marker *AsMarker()
@@ -109,14 +109,14 @@ private:
      * @param object
      * @param base_cls - class of object(used for perf in case if class for the object already was obtained)
      */
-    void HandleObject(GCMarkingStackType *objects_stack, const ObjectHeader *object, const BaseClass *cls);
+    void HandleObject(GCMarkingStackType *objectsStack, const ObjectHeader *object, const BaseClass *cls);
 
     /**
      * Iterate over class data and add all found not null object references to the objects_stack
      * @param objects_stack - stack with objects
      * @param cls - class
      */
-    void HandleClass(GCMarkingStackType *objects_stack, const coretypes::DynClass *cls);
+    void HandleClass(GCMarkingStackType *objectsStack, const coretypes::DynClass *cls);
 
     /**
      * For arrays of objects add all not null object references to the objects_stack
@@ -124,8 +124,7 @@ private:
      * @param array_object - array object
      * @param cls - class of array object(used for perf)
      */
-    void HandleArrayClass(GCMarkingStackType *objects_stack, const coretypes::Array *array_object,
-                          const BaseClass *cls);
+    void HandleArrayClass(GCMarkingStackType *objectsStack, const coretypes::Array *arrayObject, const BaseClass *cls);
 };
 
 template <typename Marker, class LanguageConfig>
@@ -140,7 +139,7 @@ public:
     {
         MarkBitmap *bitmap = GetMarkBitMap(object);
         if (bitmap != nullptr) {
-            if (atomic_mark_flag_) {
+            if (atomicMarkFlag_) {
                 return !bitmap->AtomicTestAndSet(object);
             }
             if (bitmap->Test(object)) {
@@ -149,7 +148,7 @@ public:
             bitmap->Set(object);
             return true;
         }
-        if (atomic_mark_flag_) {
+        if (atomicMarkFlag_) {
             if (IsObjectHeaderMarked<REVERSED_MARK, true>(object)) {
                 return false;
             }
@@ -168,7 +167,7 @@ public:
     {
         MarkBitmap *bitmap = GetMarkBitMap(object);
         if (bitmap != nullptr) {
-            if (atomic_mark_flag_) {
+            if (atomicMarkFlag_) {
                 bitmap->AtomicTestAndSet(object);
             } else {
                 bitmap->Set(object);
@@ -176,14 +175,14 @@ public:
             return;
         }
         if constexpr (REVERSED_MARK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
-            if (atomic_mark_flag_) {
+            if (atomicMarkFlag_) {
                 object->SetUnMarkedForGC<true>();
             } else {
                 object->SetUnMarkedForGC<false>();
             }
             return;
         }
-        if (atomic_mark_flag_) {
+        if (atomicMarkFlag_) {
             object->SetMarkedForGC<true>();
         } else {
             object->SetMarkedForGC<false>();
@@ -198,14 +197,14 @@ public:
             return;  // no need for bitmap
         }
         if constexpr (REVERSED_MARK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
-            if (atomic_mark_flag_) {
+            if (atomicMarkFlag_) {
                 object->SetMarkedForGC<true>();
             } else {
                 object->SetMarkedForGC<false>();
             }
             return;
         }
-        if (atomic_mark_flag_) {
+        if (atomicMarkFlag_) {
             object->SetUnMarkedForGC<true>();
         } else {
             object->SetUnMarkedForGC<false>();
@@ -217,16 +216,16 @@ public:
     {
         MarkBitmap *bitmap = GetMarkBitMap(object);
         if (bitmap != nullptr) {
-            if (atomic_mark_flag_) {
+            if (atomicMarkFlag_) {
                 return bitmap->AtomicTest(object);
             }
             return bitmap->Test(object);
         }
-        bool is_marked = atomic_mark_flag_ ? object->IsMarkedForGC<true>() : object->IsMarkedForGC<false>();
+        bool isMarked = atomicMarkFlag_ ? object->IsMarkedForGC<true>() : object->IsMarkedForGC<false>();
         if constexpr (REVERSED_MARK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
-            return !is_marked;
+            return !isMarked;
         }
-        return is_marked;
+        return isMarked;
     }
 
     template <bool REVERSED_MARK = false>
@@ -238,16 +237,16 @@ public:
                 return ObjectStatus::ALIVE_OBJECT;
             }
         }
-        ObjectStatus object_status =
+        ObjectStatus objectStatus =
             IsMarked<REVERSED_MARK>(object) ? ObjectStatus::ALIVE_OBJECT : ObjectStatus::DEAD_OBJECT;
         LOG(DEBUG, GC) << " Mark check for " << std::hex << object << std::dec
-                       << " object is alive: " << static_cast<bool>(object_status);
-        return object_status;
+                       << " object is alive: " << static_cast<bool>(objectStatus);
+        return objectStatus;
     }
 
     MarkBitmap *GetMarkBitMap(const void *object) const
     {
-        for (auto bitmap : mark_bitmaps_) {
+        for (auto bitmap : markBitmaps_) {
             if (bitmap->IsAddrInRange(object)) {
                 return bitmap;
             }
@@ -257,47 +256,47 @@ public:
 
     void ClearMarkBitMaps()
     {
-        mark_bitmaps_.clear();
+        markBitmaps_.clear();
     }
 
     void AddMarkBitMap(MarkBitmap *bitmap)
     {
-        mark_bitmaps_.push_back(bitmap);
+        markBitmaps_.push_back(bitmap);
     }
 
     template <typename It>
     void AddMarkBitMaps(It start, It end)
     {
-        mark_bitmaps_.insert(mark_bitmaps_.end(), start, end);
+        markBitmaps_.insert(markBitmaps_.end(), start, end);
     }
 
     bool HasBitMap(MarkBitmap *bitmap)
     {
-        return std::find(mark_bitmaps_.begin(), mark_bitmaps_.end(), bitmap) != mark_bitmaps_.end();
+        return std::find(markBitmaps_.begin(), markBitmaps_.end(), bitmap) != markBitmaps_.end();
     }
 
     void SetAtomicMark(bool flag)
     {
-        atomic_mark_flag_ = flag;
+        atomicMarkFlag_ = flag;
     }
 
     bool GetAtomicMark() const
     {
-        return atomic_mark_flag_;
+        return atomicMarkFlag_;
     }
 
-    void BindBitmaps(bool clear_pygote_space_bitmaps)
+    void BindBitmaps(bool clearPygoteSpaceBitmaps)
     {
         // Set marking bitmaps
         ClearMarkBitMaps();
-        auto pygote_space_allocator = Base::GetGC()->GetObjectAllocator()->GetPygoteSpaceAllocator();
-        if (pygote_space_allocator != nullptr) {
+        auto pygoteSpaceAllocator = Base::GetGC()->GetObjectAllocator()->GetPygoteSpaceAllocator();
+        if (pygoteSpaceAllocator != nullptr) {
             // clear live bitmaps if we decide to rebuild it in full gc,
             // it will be used as marked bitmaps and updated at end of gc
-            if (clear_pygote_space_bitmaps) {
-                pygote_space_allocator->ClearLiveBitmaps();
+            if (clearPygoteSpaceBitmaps) {
+                pygoteSpaceAllocator->ClearLiveBitmaps();
             }
-            auto &bitmaps = pygote_space_allocator->GetLiveBitmaps();
+            auto &bitmaps = pygoteSpaceAllocator->GetLiveBitmaps();
             AddMarkBitMaps(bitmaps.begin(), bitmaps.end());
         }
     }
@@ -326,8 +325,8 @@ private:
 
 private:
     // Bitmaps for mark object
-    PandaVector<MarkBitmap *> mark_bitmaps_;
-    bool atomic_mark_flag_ = true;
+    PandaVector<MarkBitmap *> markBitmaps_;
+    bool atomicMarkFlag_ = true;
 };
 
 template <class Marker>
@@ -336,10 +335,10 @@ public:
     explicit NoAtomicGCMarkerScope(Marker *marker)
     {
         ASSERT(marker != nullptr);
-        gc_marker_ = marker;
-        old_state_ = gc_marker_->GetAtomicMark();
-        if (old_state_) {
-            gc_marker_->SetAtomicMark(false);
+        gcMarker_ = marker;
+        oldState_ = gcMarker_->GetAtomicMark();
+        if (oldState_) {
+            gcMarker_->SetAtomicMark(false);
         }
     }
 
@@ -348,14 +347,14 @@ public:
 
     ~NoAtomicGCMarkerScope()
     {
-        if (old_state_) {
-            gc_marker_->SetAtomicMark(old_state_);
+        if (oldState_) {
+            gcMarker_->SetAtomicMark(oldState_);
         }
     }
 
 private:
-    Marker *gc_marker_;
-    bool old_state_ = false;
+    Marker *gcMarker_;
+    bool oldState_ = false;
 };
 
 template <class LanguageConfig>

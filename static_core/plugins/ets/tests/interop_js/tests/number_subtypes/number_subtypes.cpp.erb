@@ -21,7 +21,7 @@ namespace panda::ets::interop::js::testing {
 class EtsInteropNumberSubtypesTest : public EtsInteropTest {
     void SetUp() override
     {
-        interop_js_test_path_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
+        interopJsTestPath_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
         // This object is used to save global js names
         if (!RunJsScript("var gtest_env = {};\n")) {
             std::abort();
@@ -33,26 +33,26 @@ class EtsInteropNumberSubtypesTest : public EtsInteropTest {
 % (@integral_primitives + @float_primitives).each do |primitive|
 TEST_F(EtsInteropNumberSubtypesTest, TestJSCall<%= primitive.getName() %>)
 {
-    auto jscall_ret = CallEtsMethod<int64_t>("jscall_<%= primitive.getName() %>");
-    ASSERT_EQ(jscall_ret, 0);
+    auto jscallRet = CallEtsMethod<int64_t>("jscall_<%= primitive.getName() %>");
+    ASSERT_EQ(jscallRet, 0);
 }
 
 TEST_F(EtsInteropNumberSubtypesTest, TestJSNewGetProperty<%= primitive.getName() %>)
 {
-    auto jsnew_ret = CallEtsMethod<int64_t>("jsnew_getproperty<%= primitive.getName() %>");
-    ASSERT_EQ(jsnew_ret, 0);
+    auto jsnewRet = CallEtsMethod<int64_t>("jsnew_getproperty<%= primitive.getName() %>");
+    ASSERT_EQ(jsnewRet, 0);
 }
 
 TEST_F(EtsInteropNumberSubtypesTest, TestJSNewSetProperty<%= primitive.getName() %>)
 {
-    auto jsnew_ret = CallEtsMethod<int64_t>("jsnew_setproperty<%= primitive.getName() %>");
-    ASSERT_EQ(jsnew_ret, 0);
+    auto jsnewRet = CallEtsMethod<int64_t>("jsnew_setproperty<%= primitive.getName() %>");
+    ASSERT_EQ(jsnewRet, 0);
 }
 
 TEST_F(EtsInteropNumberSubtypesTest, TestJSCallStatic<%= primitive.getName() %>)
 {
-    auto jscall_static_method_ret = CallEtsMethod<int64_t>("jscall_static_method_<%= primitive.getName() %>");
-    ASSERT_EQ(jscall_static_method_ret, 0);
+    auto jscallStaticMethodRet = CallEtsMethod<int64_t>("jscall_static_method_<%= primitive.getName() %>");
+    ASSERT_EQ(jscallStaticMethodRet, 0);
 }
 
 % end

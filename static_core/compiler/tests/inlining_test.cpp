@@ -25,7 +25,7 @@ class InliningTest : public AsmTest {
 public:
     InliningTest()
     {
-        OPTIONS.SetCompilerInlining(true);
+        g_options.SetCompilerInlining(true);
     }
 
     InlineCachesInterface *GetInlineCaches() override
@@ -189,16 +189,16 @@ label:
     return
 }
 )";
-    OPTIONS.SetCompilerInlineSimpleOnly(false);
+    g_options.SetCompilerInlineSimpleOnly(false);
     ASSERT_TRUE(ParseToGraph(source, "main"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     ASSERT_EQ(GetGraph()->GetPassManager()->GetStatistics()->GetInlinedMethods(), 2U);
-    auto inst_map = PopulateInstructionMap(GetGraph());
-    ASSERT_EQ(inst_map.at(Opcode::ReturnInlined).size(), 1U);
-    auto &call_insts = inst_map.at(Opcode::CallStatic);
-    ASSERT_EQ(call_insts.size(), 1U);
-    ASSERT_TRUE(static_cast<CallInst *>(call_insts[0U])->IsInlined());
-    ASSERT_TRUE(inst_map.at(Opcode::ReturnInlined)[0U]->GetInput(0U).GetInst()->GetOpcode() == Opcode::SaveState);
+    auto instMap = PopulateInstructionMap(GetGraph());
+    ASSERT_EQ(instMap.at(Opcode::ReturnInlined).size(), 1U);
+    auto &callInsts = instMap.at(Opcode::CallStatic);
+    ASSERT_EQ(callInsts.size(), 1U);
+    ASSERT_TRUE(static_cast<CallInst *>(callInsts[0U])->IsInlined());
+    ASSERT_TRUE(instMap.at(Opcode::ReturnInlined)[0U]->GetInput(0U).GetInst()->GetOpcode() == Opcode::SaveState);
 }
 
 TEST_F(InliningTest, WithLoop)
@@ -222,19 +222,19 @@ exit:
     return
 }
 )";
-    OPTIONS.SetCompilerInlineSimpleOnly(false);
-    auto use_safepoint_global = OPTIONS.IsCompilerUseSafepoint();
-    OPTIONS.SetCompilerUseSafepoint(true);
+    g_options.SetCompilerInlineSimpleOnly(false);
+    auto useSafepointGlobal = g_options.IsCompilerUseSafepoint();
+    g_options.SetCompilerUseSafepoint(true);
     ASSERT_TRUE(ParseToGraph(source, "main"));
     ASSERT_FALSE(GetGraph()->HasLoop());
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     ASSERT_EQ(GetGraph()->GetPassManager()->GetStatistics()->GetInlinedMethods(), 1U);
-    auto inst_map = PopulateInstructionMap(GetGraph());
-    ASSERT_EQ(inst_map.at(Opcode::ReturnInlined).size(), 1U);
-    ASSERT_EQ(inst_map.at(Opcode::CallStatic).size(), 1U);
+    auto instMap = PopulateInstructionMap(GetGraph());
+    ASSERT_EQ(instMap.at(Opcode::ReturnInlined).size(), 1U);
+    ASSERT_EQ(instMap.at(Opcode::CallStatic).size(), 1U);
     ASSERT_TRUE(GetGraph()->RunPass<LoopAnalyzer>());
     ASSERT_TRUE(GetGraph()->HasLoop());
-    OPTIONS.SetCompilerUseSafepoint(use_safepoint_global);
+    g_options.SetCompilerUseSafepoint(useSafepointGlobal);
 }
 
 TEST_F(InliningTest, WithChecks)
@@ -253,15 +253,15 @@ TEST_F(InliningTest, WithChecks)
     return
 }
 )";
-    OPTIONS.SetCompilerInlineSimpleOnly(false);
+    g_options.SetCompilerInlineSimpleOnly(false);
     ASSERT_TRUE(ParseToGraph(source, "main"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     ASSERT_EQ(GetGraph()->GetPassManager()->GetStatistics()->GetInlinedMethods(), 1U);
-    auto inst_map = PopulateInstructionMap(GetGraph());
-    ASSERT_EQ(inst_map.at(Opcode::ReturnInlined).size(), 1U);
-    ASSERT_EQ(inst_map.at(Opcode::CallStatic).size(), 1U);
-    ASSERT_TRUE(static_cast<CallInst *>(inst_map.at(Opcode::CallStatic)[0U])->IsInlined());
-    ASSERT_TRUE(inst_map.at(Opcode::ReturnInlined)[0U]->GetInput(0U).GetInst()->GetOpcode() == Opcode::SaveState);
+    auto instMap = PopulateInstructionMap(GetGraph());
+    ASSERT_EQ(instMap.at(Opcode::ReturnInlined).size(), 1U);
+    ASSERT_EQ(instMap.at(Opcode::CallStatic).size(), 1U);
+    ASSERT_TRUE(static_cast<CallInst *>(instMap.at(Opcode::CallStatic)[0U])->IsInlined());
+    ASSERT_TRUE(instMap.at(Opcode::ReturnInlined)[0U]->GetInput(0U).GetInst()->GetOpcode() == Opcode::SaveState);
 }
 
 TEST_F(InliningTest, InliningMethodWithDivu2)
@@ -294,11 +294,11 @@ wrapper_exit_positive:
     )";
     ASSERT_TRUE(ParseToGraph(source, "main_exitcode_wrapper"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
-    auto inst_map = PopulateInstructionMap(GetGraph());
-    ASSERT_EQ(inst_map.at(Opcode::ReturnInlined).size(), 1U);
-    auto &call_insts = inst_map.at(Opcode::CallStatic);
-    ASSERT_EQ(call_insts.size(), 1U);
-    ASSERT_TRUE(static_cast<CallInst *>(call_insts[0U])->IsInlined());
+    auto instMap = PopulateInstructionMap(GetGraph());
+    ASSERT_EQ(instMap.at(Opcode::ReturnInlined).size(), 1U);
+    auto &callInsts = instMap.at(Opcode::CallStatic);
+    ASSERT_EQ(callInsts.size(), 1U);
+    ASSERT_TRUE(static_cast<CallInst *>(callInsts[0U])->IsInlined());
 }
 
 TEST_F(InliningTest, InlineVoidFunc)
@@ -345,12 +345,12 @@ TEST_F(InliningTest, InlineVoidFunc)
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
-    auto inst_map = PopulateInstructionMap(GetGraph());
-    ASSERT_EQ(inst_map.at(Opcode::ReturnInlined).size(), 2U);
-    auto &call_insts = inst_map.at(Opcode::CallStatic);
-    ASSERT_EQ(call_insts.size(), 2U);
-    ASSERT_TRUE(static_cast<CallInst *>(call_insts[0U])->IsInlined());
-    ASSERT_TRUE(static_cast<CallInst *>(call_insts[1U])->IsInlined());
+    auto instMap = PopulateInstructionMap(GetGraph());
+    ASSERT_EQ(instMap.at(Opcode::ReturnInlined).size(), 2U);
+    auto &callInsts = instMap.at(Opcode::CallStatic);
+    ASSERT_EQ(callInsts.size(), 2U);
+    ASSERT_TRUE(static_cast<CallInst *>(callInsts[0U])->IsInlined());
+    ASSERT_TRUE(static_cast<CallInst *>(callInsts[1U])->IsInlined());
 }
 
 TEST_F(InliningTest, VirtualProvenByNewobj)
@@ -373,16 +373,16 @@ TEST_F(InliningTest, VirtualProvenByNewobj)
     }
 
     )";
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
 
     ASSERT_TRUE(ParseToGraph(source, "main"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     auto events = Events::CastTo<Events::MEMORY>();
-    auto inline_events = events->Select<events::EventsMemory::InlineEvent>();
-    ASSERT_EQ(inline_events.size(), 1U);
-    ASSERT_EQ(inline_events[0U]->result, events::InlineResult::SUCCESS);
-    ASSERT_EQ(inline_events[0U]->caller, "_GLOBAL::main");
-    ASSERT_EQ(inline_events[0U]->callee, "Obj::foo");
+    auto inlineEvents = events->Select<events::EventsMemory::InlineEvent>();
+    ASSERT_EQ(inlineEvents.size(), 1U);
+    ASSERT_EQ(inlineEvents[0U]->result, events::InlineResult::SUCCESS);
+    ASSERT_EQ(inlineEvents[0U]->caller, "_GLOBAL::main");
+    ASSERT_EQ(inlineEvents[0U]->callee, "Obj::foo");
 }
 
 TEST_F(InliningTest, VirtualProvenByNewArray)
@@ -408,19 +408,19 @@ TEST_F(InliningTest, VirtualProvenByNewArray)
         return
     }
     )";
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
 
-    OPTIONS.SetCompilerInlining(true);
+    g_options.SetCompilerInlining(true);
     CompilerLogger::Init({"inlining"});
 
     ASSERT_TRUE(ParseToGraph(source, "main"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     auto events = Events::CastTo<Events::MEMORY>();
-    auto inline_events = events->Select<events::EventsMemory::InlineEvent>();
-    ASSERT_EQ(inline_events.size(), 1U);
-    ASSERT_EQ(inline_events[0U]->result, events::InlineResult::SUCCESS);
-    ASSERT_EQ(inline_events[0U]->caller, "_GLOBAL::main");
-    ASSERT_EQ(inline_events[0U]->callee, "Obj::foo");
+    auto inlineEvents = events->Select<events::EventsMemory::InlineEvent>();
+    ASSERT_EQ(inlineEvents.size(), 1U);
+    ASSERT_EQ(inlineEvents[0U]->result, events::InlineResult::SUCCESS);
+    ASSERT_EQ(inlineEvents[0U]->caller, "_GLOBAL::main");
+    ASSERT_EQ(inlineEvents[0U]->callee, "Obj::foo");
 }
 
 TEST_F(InliningTest, VirtualProvenByInitobj)
@@ -448,19 +448,19 @@ TEST_F(InliningTest, VirtualProvenByInitobj)
     }
 
     )";
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
 
     ASSERT_TRUE(ParseToGraph(source, "main"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     auto events = Events::CastTo<Events::MEMORY>();
-    auto inline_events = events->Select<events::EventsMemory::InlineEvent>();
-    ASSERT_EQ(inline_events.size(), 2U);
-    ASSERT_EQ(inline_events[0U]->result, events::InlineResult::SUCCESS);
-    ASSERT_EQ(inline_events[0U]->caller, "_GLOBAL::main");
-    ASSERT_EQ(inline_events[0U]->callee, "Obj::.ctor");
-    ASSERT_EQ(inline_events[1U]->result, events::InlineResult::SUCCESS);
-    ASSERT_EQ(inline_events[1U]->caller, "_GLOBAL::main");
-    ASSERT_EQ(inline_events[1U]->callee, "Obj::foo");
+    auto inlineEvents = events->Select<events::EventsMemory::InlineEvent>();
+    ASSERT_EQ(inlineEvents.size(), 2U);
+    ASSERT_EQ(inlineEvents[0U]->result, events::InlineResult::SUCCESS);
+    ASSERT_EQ(inlineEvents[0U]->caller, "_GLOBAL::main");
+    ASSERT_EQ(inlineEvents[0U]->callee, "Obj::.ctor");
+    ASSERT_EQ(inlineEvents[1U]->result, events::InlineResult::SUCCESS);
+    ASSERT_EQ(inlineEvents[1U]->caller, "_GLOBAL::main");
+    ASSERT_EQ(inlineEvents[1U]->callee, "Obj::foo");
 }
 
 TEST_F(InliningTest, InliningToInfLoop)
@@ -481,16 +481,16 @@ TEST_F(InliningTest, InliningToInfLoop)
         return
     }
     )";
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
 
     ASSERT_TRUE(ParseToGraph(source, "foo_inf"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     auto events = Events::CastTo<Events::MEMORY>();
-    auto inline_events = events->Select<events::EventsMemory::InlineEvent>();
-    ASSERT_EQ(inline_events.size(), 1U);
-    ASSERT_EQ(inline_events[0U]->result, events::InlineResult::SUCCESS);
-    ASSERT_EQ(inline_events[0U]->caller, "_GLOBAL::foo_inf");
-    ASSERT_EQ(inline_events[0U]->callee, "_GLOBAL::foo_throw");
+    auto inlineEvents = events->Select<events::EventsMemory::InlineEvent>();
+    ASSERT_EQ(inlineEvents.size(), 1U);
+    ASSERT_EQ(inlineEvents[0U]->result, events::InlineResult::SUCCESS);
+    ASSERT_EQ(inlineEvents[0U]->caller, "_GLOBAL::foo_inf");
+    ASSERT_EQ(inlineEvents[0U]->callee, "_GLOBAL::foo_throw");
 }
 
 TEST_F(InliningTest, DontInlineAlwaysThrow)
@@ -511,16 +511,16 @@ TEST_F(InliningTest, DontInlineAlwaysThrow)
         throw v0
     }
     )";
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
 
     ASSERT_TRUE(ParseToGraph(source, "foo"));
     ASSERT_FALSE(GetGraph()->RunPass<Inlining>());
     auto events = Events::CastTo<Events::MEMORY>();
-    auto inline_events = events->Select<events::EventsMemory::InlineEvent>();
-    ASSERT_EQ(inline_events.size(), 1U);
-    ASSERT_EQ(inline_events[0U]->result, events::InlineResult::UNSUITABLE);
-    ASSERT_EQ(inline_events[0U]->caller, "_GLOBAL::foo");
-    ASSERT_EQ(inline_events[0U]->callee, "_GLOBAL::foo_throw");
+    auto inlineEvents = events->Select<events::EventsMemory::InlineEvent>();
+    ASSERT_EQ(inlineEvents.size(), 1U);
+    ASSERT_EQ(inlineEvents[0U]->result, events::InlineResult::UNSUITABLE);
+    ASSERT_EQ(inlineEvents[0U]->caller, "_GLOBAL::foo");
+    ASSERT_EQ(inlineEvents[0U]->callee, "_GLOBAL::foo_throw");
 }
 
 TEST_F(InliningTest, DontInlineIntoThrowBlock)
@@ -553,16 +553,16 @@ TEST_F(InliningTest, DontInlineIntoThrowBlock)
         return
     }
     )";
-    ScopeEvents scope_events;
+    ScopeEvents scopeEvents;
 
     ASSERT_TRUE(ParseToGraph(source, "foo"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     auto events = Events::CastTo<Events::MEMORY>();
-    auto inline_events = events->Select<events::EventsMemory::InlineEvent>();
-    ASSERT_EQ(inline_events.size(), 1U);
-    ASSERT_EQ(inline_events[0U]->result, events::InlineResult::SUCCESS);
-    ASSERT_EQ(inline_events[0U]->caller, "_GLOBAL::foo");
-    ASSERT_EQ(inline_events[0U]->callee, "_GLOBAL::foo_get_int");
+    auto inlineEvents = events->Select<events::EventsMemory::InlineEvent>();
+    ASSERT_EQ(inlineEvents.size(), 1U);
+    ASSERT_EQ(inlineEvents[0U]->result, events::InlineResult::SUCCESS);
+    ASSERT_EQ(inlineEvents[0U]->caller, "_GLOBAL::foo");
+    ASSERT_EQ(inlineEvents[0U]->callee, "_GLOBAL::foo_get_int");
 }
 
 TEST_F(InliningTest, InlineThrow)
@@ -600,17 +600,17 @@ TEST_F(InliningTest, InlineThrow)
         }
     )";
 
-    auto skip_throw = OPTIONS.IsCompilerInliningSkipThrowBlocks();
-    auto skip_throw_methods = OPTIONS.IsCompilerInliningSkipAlwaysThrowMethods();
-    OPTIONS.SetCompilerInliningSkipThrowBlocks(false);
-    OPTIONS.SetCompilerInliningSkipAlwaysThrowMethods(false);
+    auto skipThrow = g_options.IsCompilerInliningSkipThrowBlocks();
+    auto skipThrowMethods = g_options.IsCompilerInliningSkipAlwaysThrowMethods();
+    g_options.SetCompilerInliningSkipThrowBlocks(false);
+    g_options.SetCompilerInliningSkipAlwaysThrowMethods(false);
 
     ASSERT_TRUE(ParseToGraph(source, "main"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     ASSERT_EQ(GetGraph()->GetPassManager()->GetStatistics()->GetInlinedMethods(), 1U);
 
-    OPTIONS.SetCompilerInliningSkipThrowBlocks(skip_throw);
-    OPTIONS.SetCompilerInliningSkipAlwaysThrowMethods(skip_throw_methods);
+    g_options.SetCompilerInliningSkipThrowBlocks(skipThrow);
+    g_options.SetCompilerInliningSkipAlwaysThrowMethods(skipThrowMethods);
 }
 
 class InlineCachesMock : public InlineCachesInterface {
@@ -670,10 +670,10 @@ TEST_F(InliningTest, PolymorphicInlineWithThrow)
         }
     )";
 
-    auto skip_throw = OPTIONS.IsCompilerInliningSkipThrowBlocks();
-    auto skip_throw_methods = OPTIONS.IsCompilerInliningSkipAlwaysThrowMethods();
-    OPTIONS.SetCompilerInliningSkipThrowBlocks(false);
-    OPTIONS.SetCompilerInliningSkipAlwaysThrowMethods(false);
+    auto skipThrow = g_options.IsCompilerInliningSkipThrowBlocks();
+    auto skipThrowMethods = g_options.IsCompilerInliningSkipAlwaysThrowMethods();
+    g_options.SetCompilerInliningSkipThrowBlocks(false);
+    g_options.SetCompilerInliningSkipAlwaysThrowMethods(false);
 
     ASSERT_TRUE(ParseToGraph(source, "run"));
     auto cl = GetClassLinker();
@@ -694,26 +694,26 @@ TEST_F(InliningTest, PolymorphicInlineWithThrow)
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     EXPECT_EQ(GetGraph()->GetPassManager()->GetStatistics()->GetInlinedMethods(), 2U);
 
-    auto throw_blocks = 0;
+    auto throwBlocks = 0;
     for (auto bb : GetGraph()->GetVectorBlocks()) {
         auto *last = bb->GetLastInst();
         if (last == nullptr || last->GetOpcode() != Opcode::Throw) {
             continue;
         }
-        throw_blocks++;
-        auto ret_inl_within_block = 0;
+        throwBlocks++;
+        auto retInlWithinBlock = 0;
         for (auto inst : bb->AllInsts()) {
             if (inst->GetOpcode() == Opcode::ReturnInlined) {
-                ret_inl_within_block++;
+                retInlWithinBlock++;
             }
         }
-        EXPECT_EQ(ret_inl_within_block, 1U)
-            << "BB " << bb->GetId() << "should contain 1 ReturnInlined, but contains " << ret_inl_within_block;
+        EXPECT_EQ(retInlWithinBlock, 1U) << "BB " << bb->GetId() << "should contain 1 ReturnInlined, but contains "
+                                         << retInlWithinBlock;
     }
-    EXPECT_EQ(throw_blocks, 2U) << "There should be two throw blocks, from A::process and from B::process";
+    EXPECT_EQ(throwBlocks, 2U) << "There should be two throw blocks, from A::process and from B::process";
 
-    OPTIONS.SetCompilerInliningSkipThrowBlocks(skip_throw);
-    OPTIONS.SetCompilerInliningSkipAlwaysThrowMethods(skip_throw_methods);
+    g_options.SetCompilerInliningSkipThrowBlocks(skipThrow);
+    g_options.SetCompilerInliningSkipAlwaysThrowMethods(skipThrowMethods);
 }
 
 }  // namespace panda::compiler

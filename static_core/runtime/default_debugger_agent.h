@@ -28,10 +28,10 @@ public:
     bool Unload() override;
 
 private:
-    bool CallLoadCallback(void *resolved_function) override;
-    bool CallUnloadCallback(void *resolved_function) override;
+    bool CallLoadCallback(void *resolvedFunction) override;
+    bool CallUnloadCallback(void *resolvedFunction) override;
 
-    Runtime::DebugSessionHandle debug_session_;
+    Runtime::DebugSessionHandle debugSession_;
 };
 }  // namespace panda
 

@@ -66,7 +66,7 @@ public:
 
     tooling::PtThreadInfo *GetPtThreadInfo() const
     {
-        return pt_thread_info_.get();
+        return ptThreadInfo_.get();
     }
 
     Frame *GetCurrentFrame() const
@@ -87,12 +87,12 @@ public:
 
     bool IsCurrentFrameCompiled() const
     {
-        return is_compiled_frame_;
+        return isCompiledFrame_;
     }
 
     void SetCurrentFrameIsCompiled(bool value)
     {
-        is_compiled_frame_ = value;
+        isCompiledFrame_ = value;
     }
 
     void SetException(ObjectHeader *exception)
@@ -117,16 +117,16 @@ public:
 
     size_t GetIFrameStackSize() const
     {
-        return iframe_stack_size_;
+        return iframeStackSize_;
     }
 
     static bool ThreadIsManagedThread(const Thread *thread)
     {
         ASSERT(thread != nullptr);
-        Thread::ThreadType thread_type = thread->GetThreadType();
-        return thread_type == Thread::ThreadType::THREAD_TYPE_MANAGED ||
-               thread_type == Thread::ThreadType::THREAD_TYPE_MT_MANAGED ||
-               thread_type == Thread::ThreadType::THREAD_TYPE_TASK;
+        Thread::ThreadType threadType = thread->GetThreadType();
+        return threadType == Thread::ThreadType::THREAD_TYPE_MANAGED ||
+               threadType == Thread::ThreadType::THREAD_TYPE_MT_MANAGED ||
+               threadType == Thread::ThreadType::THREAD_TYPE_TASK;
     }
 
     static ManagedThread *CastFromThread(Thread *thread)
@@ -174,16 +174,16 @@ public:
     {
         ASSERT(ManagedThread::GetCurrent() == this);
 
-        ThreadStatus old_status = GetStatus();
-        if (old_status == ThreadStatus::RUNNING && status != ThreadStatus::RUNNING) {
+        ThreadStatus oldStatus = GetStatus();
+        if (oldStatus == ThreadStatus::RUNNING && status != ThreadStatus::RUNNING) {
             TransitionFromRunningToSuspended(status);
-        } else if (old_status != ThreadStatus::RUNNING && status == ThreadStatus::RUNNING) {
+        } else if (oldStatus != ThreadStatus::RUNNING && status == ThreadStatus::RUNNING) {
             // NB! This thread is treated as suspended so when we transition from suspended state to
             // running we need to check suspension flag and counter so SafepointPoll has to be done before
             // acquiring mutator_lock.
             // StoreStatus acquires lock here
             StoreStatus<CHECK_SAFEPOINT, READLOCK>(ThreadStatus::RUNNING);
-        } else if (old_status == ThreadStatus::NATIVE && status != ThreadStatus::IS_TERMINATED_LOOP &&
+        } else if (oldStatus == ThreadStatus::NATIVE && status != ThreadStatus::IS_TERMINATED_LOOP &&
                    IsRuntimeTerminated()) {
             // If a daemon thread with NATIVE status was deregistered, it should not access any managed object,
             // i.e. change its status from NATIVE, because such object may already be deleted by the runtime.
@@ -202,20 +202,20 @@ public:
         // Atomic with acquire order reason: data race with flags with dependecies on reads after
         // the load which should become visible
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        uint32_t res_int = fts_.as_atomic.load(std::memory_order_acquire);
-        return static_cast<enum ThreadStatus>(res_int >> THREAD_STATUS_OFFSET);
+        uint32_t resInt = fts_.asAtomic.load(std::memory_order_acquire);
+        return static_cast<enum ThreadStatus>(resInt >> THREAD_STATUS_OFFSET);
     }
 
     static PandaString ThreadStatusAsString(enum ThreadStatus status);
 
     panda::mem::StackFrameAllocator *GetStackFrameAllocator() const
     {
-        return stack_frame_allocator_;
+        return stackFrameAllocator_;
     }
 
     panda::mem::InternalAllocator<>::LocalSmallObjectAllocator *GetLocalInternalAllocator() const
     {
-        return internal_local_allocator_;
+        return internalLocalAllocator_;
     }
 
     mem::TLAB *GetTLAB() const
@@ -230,56 +230,55 @@ public:
 
     void SetStringClassPtr(void *p)
     {
-        string_class_ptr_ = p;
+        stringClassPtr_ = p;
     }
 
     void SetArrayU16ClassPtr(void *p)
     {
-        array_u16_class_ptr_ = p;
+        arrayU16ClassPtr_ = p;
     }
 
 #ifndef NDEBUG
     bool IsRuntimeCallEnabled() const
     {
-        return runtime_call_enabled_ != 0;
+        return runtimeCallEnabled_ != 0;
     }
 #endif
 
     static ManagedThread *Create(
         Runtime *runtime, PandaVM *vm,
-        panda::panda_file::SourceLang thread_lang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        panda::panda_file::SourceLang threadLang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
     ~ManagedThread() override;
 
-    explicit ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
-                           Thread::ThreadType thread_type,
-                           panda::panda_file::SourceLang thread_lang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    explicit ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, Thread::ThreadType threadType,
+                           panda::panda_file::SourceLang threadLang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
 
     // Here methods which are just proxy or cache for runtime interface
 
     ALWAYS_INLINE mem::BarrierType GetPreBarrierType() const
     {
-        return pre_barrier_type_;
+        return preBarrierType_;
     }
 
     ALWAYS_INLINE mem::BarrierType GetPostBarrierType() const
     {
-        return post_barrier_type_;
+        return postBarrierType_;
     }
 
     // Methods to access thread local storage
     InterpreterCache *GetInterpreterCache()
     {
-        return &interpreter_cache_;
+        return &interpreterCache_;
     }
 
     uintptr_t GetNativePc() const
     {
-        return native_pc_;
+        return nativePc_;
     }
 
     void SetNativePc(uintptr_t pc)
     {
-        native_pc_ = pc;
+        nativePc_ = pc;
     }
 
     // buffers may be destroyed during Detach(), so it should be initialized once more
@@ -287,34 +286,34 @@ public:
 
     PandaVector<ObjectHeader *> *GetPreBuff() const
     {
-        return pre_buff_;
+        return preBuff_;
     }
 
     PandaVector<ObjectHeader *> *MovePreBuff()
     {
-        auto res = pre_buff_;
-        pre_buff_ = nullptr;
+        auto res = preBuff_;
+        preBuff_ = nullptr;
         return res;
     }
 
     mem::GCG1BarrierSet::G1PostBarrierRingBufferType *GetG1PostBarrierBuffer()
     {
-        return g1_post_barrier_ring_buffer_;
+        return g1PostBarrierRingBuffer_;
     }
 
     void ResetG1PostBarrierBuffer()
     {
-        g1_post_barrier_ring_buffer_ = nullptr;
+        g1PostBarrierRingBuffer_ = nullptr;
     }
 
     static constexpr uint32_t GetG1PostBarrierBufferOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, g1_post_barrier_ring_buffer_);
+        return MEMBER_OFFSET(ManagedThread, g1PostBarrierRingBuffer_);
     }
 
     panda::panda_file::SourceLang GetThreadLang() const
     {
-        return thread_lang_;
+        return threadLang_;
     }
 
     PANDA_PUBLIC_API LanguageContext GetLanguageContext();
@@ -336,7 +335,7 @@ public:
 
     static constexpr uint32_t GetFrameKindOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, is_compiled_frame_);
+        return MEMBER_OFFSET(ManagedThread, isCompiledFrame_);
     }
     static constexpr uint32_t GetFlagOffset()
     {
@@ -361,7 +360,7 @@ public:
     }
     static constexpr uint32_t GetNativePcOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, native_pc_);
+        return MEMBER_OFFSET(ManagedThread, nativePc_);
     }
     static constexpr uint32_t GetTLABOffset()
     {
@@ -369,46 +368,46 @@ public:
     }
     static constexpr uint32_t GetTlsCardTableAddrOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, card_table_addr_);
+        return MEMBER_OFFSET(ManagedThread, cardTableAddr_);
     }
     static constexpr uint32_t GetTlsCardTableMinAddrOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, card_table_min_addr_);
+        return MEMBER_OFFSET(ManagedThread, cardTableMinAddr_);
     }
     static constexpr uint32_t GetTlsPostWrbOneObjectOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, post_wrb_one_object_);
+        return MEMBER_OFFSET(ManagedThread, postWrbOneObject_);
     }
     static constexpr uint32_t GetTlsPostWrbTwoObjectsOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, post_wrb_two_objects_);
+        return MEMBER_OFFSET(ManagedThread, postWrbTwoObjects_);
     }
     static constexpr uint32_t GetTlsPreWrbEntrypointOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, pre_wrb_entrypoint_);
+        return MEMBER_OFFSET(ManagedThread, preWrbEntrypoint_);
     }
     static constexpr uint32_t GetTlsStringClassPointerOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, string_class_ptr_);
+        return MEMBER_OFFSET(ManagedThread, stringClassPtr_);
     }
     static constexpr uint32_t GetTlsArrayU16ClassPointerOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, array_u16_class_ptr_);
+        return MEMBER_OFFSET(ManagedThread, arrayU16ClassPtr_);
     }
     static constexpr uint32_t GetPreBuffOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, pre_buff_);
+        return MEMBER_OFFSET(ManagedThread, preBuff_);
     }
 
     static constexpr uint32_t GetLanguageExtensionsDataOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, language_extension_data_);
+        return MEMBER_OFFSET(ManagedThread, languageExtensionData_);
     }
 
     static constexpr uint32_t GetRuntimeCallEnabledOffset()
     {
 #ifndef NDEBUG
-        return MEMBER_OFFSET(ManagedThread, runtime_call_enabled_);
+        return MEMBER_OFFSET(ManagedThread, runtimeCallEnabled_);
 #else
         // it should not be used
         return 0;
@@ -417,29 +416,29 @@ public:
 
     static constexpr uint32_t GetInterpreterCacheOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, interpreter_cache_);
+        return MEMBER_OFFSET(ManagedThread, interpreterCache_);
     }
 
     void *GetLanguageExtensionsData() const
     {
-        return language_extension_data_;
+        return languageExtensionData_;
     }
 
     void SetLanguageExtensionsData(void *data)
     {
-        language_extension_data_ = data;
+        languageExtensionData_ = data;
     }
 
     static constexpr uint32_t GetInternalIdOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, internal_id_);
+        return MEMBER_OFFSET(ManagedThread, internalId_);
     }
 
     virtual void VisitGCRoots(const ObjectVisitor &cb);
 
     virtual void UpdateGCRoots();
 
-    PANDA_PUBLIC_API void PushLocalObject(ObjectHeader **object_header);
+    PANDA_PUBLIC_API void PushLocalObject(ObjectHeader **objectHeader);
 
     PANDA_PUBLIC_API void PopLocalObject();
 
@@ -451,12 +450,12 @@ public:
     NO_THREAD_SANITIZE bool ReadFlag(ThreadFlag flag) const
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        return (fts_.as_struct.flags & static_cast<uint16_t>(flag)) != 0;
+        return (fts_.asStruct.flags & static_cast<uint16_t>(flag)) != 0;
     }
 
     NO_THREAD_SANITIZE bool TestAllFlags() const
     {
-        return (fts_.as_struct.flags) != initial_thread_flag_;  // NOLINT(cppcoreguidelines-pro-type-union-access)
+        return (fts_.asStruct.flags) != initialThreadFlag_;  // NOLINT(cppcoreguidelines-pro-type-union-access)
     }
 
     void SetFlag(ThreadFlag flag)
@@ -464,7 +463,7 @@ public:
         // Atomic with seq_cst order reason: data race with flags with requirement for sequentially consistent order
         // where threads observe all modifications in the same order
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        fts_.as_atomic.fetch_or(flag, std::memory_order_seq_cst);
+        fts_.asAtomic.fetch_or(flag, std::memory_order_seq_cst);
     }
 
     void ClearFlag(ThreadFlag flag)
@@ -472,24 +471,24 @@ public:
         // Atomic with seq_cst order reason: data race with flags with requirement for sequentially consistent order
         // where threads observe all modifications in the same order
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        fts_.as_atomic.fetch_and(UINT32_MAX ^ flag, std::memory_order_seq_cst);
+        fts_.asAtomic.fetch_and(UINT32_MAX ^ flag, std::memory_order_seq_cst);
     }
 
     // Separate functions for NO_THREAD_SANITIZE to suppress TSAN data race report
     NO_THREAD_SANITIZE uint32_t ReadFlagsAndThreadStatusUnsafe()
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        return fts_.as_int;
+        return fts_.asInt;
     }
 
     bool IsManagedCodeAllowed() const
     {
-        return is_managed_code_allowed_;
+        return isManagedCodeAllowed_;
     }
 
     void SetManagedCodeAllowed(bool allowed)
     {
-        is_managed_code_allowed_ = allowed;
+        isManagedCodeAllowed_ = allowed;
     }
 
     // TaggedType has been specialized for js, Other types are empty implementation
@@ -498,7 +497,7 @@ public:
 
     // TaggedType has been specialized for js, Other types are empty implementation
     template <typename T>
-    inline void PushHandleScope([[maybe_unused]] HandleScope<T> *handle_scope);
+    inline void PushHandleScope([[maybe_unused]] HandleScope<T> *handleScope);
 
     // TaggedType has been specialized for js, Other types are empty implementation
     template <typename T>
@@ -532,56 +531,56 @@ public:
     {
         // Atomic with relaxed order reason: data race with is_attached_ with no synchronization or ordering constraints
         // imposed on other reads or writes
-        return is_attached_.load(std::memory_order_relaxed);
+        return isAttached_.load(std::memory_order_relaxed);
     }
 
     void SetAttached()
     {
         // Atomic with relaxed order reason: data race with is_attached_ with no synchronization or ordering constraints
         // imposed on other reads or writes
-        is_attached_.store(true, std::memory_order_relaxed);
+        isAttached_.store(true, std::memory_order_relaxed);
     }
 
     void SetDetached()
     {
         // Atomic with relaxed order reason: data race with is_attached_ with no synchronization or ordering constraints
         // imposed on other reads or writes
-        is_attached_.store(false, std::memory_order_relaxed);
+        isAttached_.store(false, std::memory_order_relaxed);
     }
 
     bool IsVMThread()
     {
-        return is_vm_thread_;
+        return isVmThread_;
     }
 
     void SetVMThread()
     {
-        is_vm_thread_ = true;
+        isVmThread_ = true;
     }
 
     bool IsThrowingOOM()
     {
-        return throwing_oom_count_ > 0;
+        return throwingOomCount_ > 0;
     }
 
-    void SetThrowingOOM(bool is_throwing_oom)
+    void SetThrowingOOM(bool isThrowingOom)
     {
-        if (is_throwing_oom) {
-            throwing_oom_count_++;
+        if (isThrowingOom) {
+            throwingOomCount_++;
             return;
         }
-        ASSERT(throwing_oom_count_ > 0);
-        throwing_oom_count_--;
+        ASSERT(throwingOomCount_ > 0);
+        throwingOomCount_--;
     }
 
     bool IsUsePreAllocObj()
     {
-        return use_prealloc_obj_;
+        return usePreallocObj_;
     }
 
-    void SetUsePreAllocObj(bool use_prealloc_obj)
+    void SetUsePreAllocObj(bool usePreallocObj)
     {
-        use_prealloc_obj_ = use_prealloc_obj;
+        usePreallocObj_ = usePreallocObj;
     }
 
     PANDA_PUBLIC_API void PrintSuspensionStackIfNeeded();
@@ -599,11 +598,11 @@ public:
     /// Clears the pre/post barrier buffers (and other resources) without deallocation.
     void CleanupInternalResources();
 
-    void InitForStackOverflowCheck(size_t native_stack_reserved_size, size_t native_stack_protected_size);
+    void InitForStackOverflowCheck(size_t nativeStackReservedSize, size_t nativeStackProtectedSize);
     virtual void DisableStackOverflowCheck();
     virtual void EnableStackOverflowCheck();
     /// Obtains current thread's native stack parameters and returns true on success
-    virtual bool RetrieveStackInfo(void *&stack_addr, size_t &stack_size, size_t &guard_size);
+    virtual bool RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize);
 
     template <bool CHECK_NATIVE_STACK = true, bool CHECK_IFRAME_STACK = true>
     ALWAYS_INLINE inline bool StackOverflowCheck();
@@ -618,16 +617,16 @@ public:
 #ifdef PANDA_WITH_QUICKENER
         return const_cast<void *const *>(GetOrSetInnerDebugDispatchTable());
 #else
-        return debug_dispatch_table_;
+        return debugDispatchTable_;
 #endif
     }
 
-    void SetDebugDispatchTable(const void *const *dispatch_table)
+    void SetDebugDispatchTable(const void *const *dispatchTable)
     {
 #ifdef PANDA_WITH_QUICKENER
         GetOrSetInnerDebugDispatchTable(true, dispatch_table);
 #else
-        debug_dispatch_table_ = const_cast<void *const *>(dispatch_table);
+        debugDispatchTable_ = const_cast<void *const *>(dispatchTable);
 #endif
     }
 
@@ -638,29 +637,29 @@ public:
         return const_cast<void *const *>(GetOrSetInnerDispatchTable<is_debug>());
 #else
         if constexpr (IS_DEBUG) {
-            return debug_stub_dispatch_table_;
+            return debugStubDispatchTable_;
         } else {
-            return dispatch_table_;
+            return dispatchTable_;
         }
 #endif
     }
 
     template <bool IS_DEBUG>
-    void SetCurrentDispatchTable(const void *const *dispatch_table)
+    void SetCurrentDispatchTable(const void *const *dispatchTable)
     {
 #ifdef PANDA_WITH_QUICKENER
         GetOrSetInnerDispatchTable<is_debug>(true, dispatch_table);
 #else
         if constexpr (IS_DEBUG) {
-            debug_stub_dispatch_table_ = const_cast<void *const *>(dispatch_table);
+            debugStubDispatchTable_ = const_cast<void *const *>(dispatchTable);
         } else {
-            dispatch_table_ = const_cast<void *const *>(dispatch_table);
+            dispatchTable_ = const_cast<void *const *>(dispatchTable);
         }
 #endif
     }
 
-    PANDA_PUBLIC_API void SuspendImpl(bool internal_suspend = false);
-    PANDA_PUBLIC_API void ResumeImpl(bool internal_resume = false);
+    PANDA_PUBLIC_API void SuspendImpl(bool internalSuspend = false);
+    PANDA_PUBLIC_API void ResumeImpl(bool internalResume = false);
 
     virtual void Suspend()
     {
@@ -677,7 +676,7 @@ public:
 
     bool IsUserSuspended()
     {
-        return user_code_suspend_count_ > 0;
+        return userCodeSuspendCount_ > 0;
     }
 
     /* @sync 1
@@ -688,7 +687,7 @@ public:
     void WaitSuspension()
     {
         constexpr int TIMEOUT = 100;
-        auto old_status = GetStatus();
+        auto oldStatus = GetStatus();
         PrintSuspensionStackIfNeeded();
         UpdateStatus(ThreadStatus::IS_SUSPENDED);
         {
@@ -696,19 +695,19 @@ public:
              * @description Right after the thread updates its status to IS_SUSPENDED and right before beginning to wait
              * for actual suspension
              */
-            os::memory::LockHolder lock(suspend_lock_);
-            while (suspend_count_ > 0) {
-                suspend_var_.TimedWait(&suspend_lock_, TIMEOUT);
+            os::memory::LockHolder lock(suspendLock_);
+            while (suspendCount_ > 0) {
+                suspendVar_.TimedWait(&suspendLock_, TIMEOUT);
                 // In case runtime is being terminated, we should abort suspension and release monitors
                 if (UNLIKELY(IsRuntimeTerminated())) {
-                    suspend_lock_.Unlock();
+                    suspendLock_.Unlock();
                     OnRuntimeTerminated();
                     UNREACHABLE();
                 }
             }
             ASSERT(!IsSuspended());
         }
-        UpdateStatus(old_status);
+        UpdateStatus(oldStatus);
     }
 
     virtual void OnRuntimeTerminated() {}
@@ -739,7 +738,7 @@ public:
     static bool IsManagedScope()
     {
         auto thread = GetCurrent();
-        return thread != nullptr && thread->is_managed_scope_;
+        return thread != nullptr && thread->isManagedScope_;
     }
 
     [[nodiscard]] bool HasManagedCodeOnStack() const;
@@ -753,13 +752,13 @@ protected:
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (CHECK_NATIVE_STACK) {
-            if (UNLIKELY(__builtin_frame_address(0) < ToVoidPtr(native_stack_end_))) {
+            if (UNLIKELY(__builtin_frame_address(0) < ToVoidPtr(nativeStackEnd_))) {
                 return false;
             }
         }
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (CHECK_IFRAME_STACK) {
-            if (UNLIKELY(GetStackFrameAllocator()->GetAllocatedSize() > iframe_stack_size_)) {
+            if (UNLIKELY(GetStackFrameAllocator()->GetAllocatedSize() > iframeStackSize_)) {
                 return false;
             }
         }
@@ -799,31 +798,31 @@ private:
     enum SafepointFlag : bool { DONT_CHECK_SAFEPOINT = false, CHECK_SAFEPOINT = true };
     enum ReadlockFlag : bool { NO_READLOCK = false, READLOCK = true };
 
-    PandaString LogThreadStack(ThreadState new_state) const;
+    PandaString LogThreadStack(ThreadState newState) const;
 
     // NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status
     template <SafepointFlag SAFEPOINT = DONT_CHECK_SAFEPOINT, ReadlockFlag READLOCK_FLAG = NO_READLOCK>
     void StoreStatus(ThreadStatus status) NO_THREAD_SAFETY_ANALYSIS
     {
         while (true) {
-            union FlagsAndThreadStatus old_fts {
+            union FlagsAndThreadStatus oldFts {
             };
-            union FlagsAndThreadStatus new_fts {
+            union FlagsAndThreadStatus newFts {
             };
-            old_fts.as_int = ReadFlagsAndThreadStatusUnsafe();  // NOLINT(cppcoreguidelines-pro-type-union-access)
+            oldFts.asInt = ReadFlagsAndThreadStatusUnsafe();  // NOLINT(cppcoreguidelines-pro-type-union-access)
 
             // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
             if constexpr (SAFEPOINT == CHECK_SAFEPOINT) {  // NOLINT(bugprone-suspicious-semicolon)
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-                if (old_fts.as_struct.flags != initial_thread_flag_) {
+                if (oldFts.asStruct.flags != initialThreadFlag_) {
                     // someone requires a safepoint
                     SafepointPoll();
                     continue;
                 }
             }
 
-            new_fts.as_struct.flags = old_fts.as_struct.flags;  // NOLINT(cppcoreguidelines-pro-type-union-access)
-            new_fts.as_struct.status = status;                  // NOLINT(cppcoreguidelines-pro-type-union-access)
+            newFts.asStruct.flags = oldFts.asStruct.flags;  // NOLINT(cppcoreguidelines-pro-type-union-access)
+            newFts.asStruct.status = status;                // NOLINT(cppcoreguidelines-pro-type-union-access)
 
             // mutator lock should be acquired before change status
             // to avoid blocking in running state
@@ -835,9 +834,9 @@ private:
             // clang-format conflicts with CodeCheckAgent, so disable it here
             // clang-format off
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            if (fts_.as_atomic.compare_exchange_weak(
+            if (fts_.asAtomic.compare_exchange_weak(
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-                old_fts.as_nonvolatile_int, new_fts.as_nonvolatile_int, std::memory_order_release)) {
+                oldFts.asNonvolatileInt, newFts.asNonvolatileInt, std::memory_order_release)) {
                 // If CAS succeeded, we set new status and no request occurred here, safe to proceed.
                 break;
             }
@@ -881,32 +880,32 @@ private:
     // Can cause data races if child thread's UpdateId is executed concurrently with GetNativeThreadId
     std::atomic<ThreadId> id_;
 
-    static mem::TLAB *zero_tlab_;
-    PandaVector<ObjectHeader **> local_objects_;
+    static mem::TLAB *zeroTlab_;
+    PandaVector<ObjectHeader **> localObjects_;
 
     // Something like custom TLS - it is faster to access via ManagedThread than via thread_local
-    InterpreterCache interpreter_cache_;
+    InterpreterCache interpreterCache_;
 
-    PandaMap<const char *, PandaUniquePtr<CustomTLSData>> custom_tls_cache_ GUARDED_BY(Locks::custom_tls_lock_);
+    PandaMap<const char *, PandaUniquePtr<CustomTLSData>> customTlsCache_ GUARDED_BY(Locks::customTlsLock_);
 
-    mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1_post_barrier_ring_buffer_ {nullptr};
+    mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1PostBarrierRingBuffer_ {nullptr};
     // Keep these here to speed up interpreter
-    mem::BarrierType pre_barrier_type_ {mem::BarrierType::PRE_WRB_NONE};
-    mem::BarrierType post_barrier_type_ {mem::BarrierType::POST_WRB_NONE};
+    mem::BarrierType preBarrierType_ {mem::BarrierType::PRE_WRB_NONE};
+    mem::BarrierType postBarrierType_ {mem::BarrierType::POST_WRB_NONE};
     // Thread local storages to avoid locks in heap manager
-    mem::StackFrameAllocator *stack_frame_allocator_;
-    mem::InternalAllocator<>::LocalSmallObjectAllocator *internal_local_allocator_;
-    std::atomic_bool is_attached_ {false};  // Can be changed after thread is registered and can cause data race
-    bool is_vm_thread_ = false;
+    mem::StackFrameAllocator *stackFrameAllocator_;
+    mem::InternalAllocator<>::LocalSmallObjectAllocator *internalLocalAllocator_;
+    std::atomic_bool isAttached_ {false};  // Can be changed after thread is registered and can cause data race
+    bool isVmThread_ = false;
 
-    bool is_managed_code_allowed_ {true};
+    bool isManagedCodeAllowed_ {true};
 
-    size_t throwing_oom_count_ {0};
-    bool use_prealloc_obj_ {false};
+    size_t throwingOomCount_ {0};
+    bool usePreallocObj_ {false};
 
-    panda::panda_file::SourceLang thread_lang_ = panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+    panda::panda_file::SourceLang threadLang_ = panda::panda_file::SourceLang::PANDA_ASSEMBLY;
 
-    PandaUniquePtr<tooling::PtThreadInfo> pt_thread_info_;
+    PandaUniquePtr<tooling::PtThreadInfo> ptThreadInfo_;
 
     // for stack overflow check
     // |.....     Method 1    ....|
@@ -922,46 +921,46 @@ private:
     // |..... Reserved region ....|
     // |.... Protected region ....|_ _ _ native_stack_begin
     // |...... Guard region ......|
-    uintptr_t native_stack_begin_ {0};
+    uintptr_t nativeStackBegin_ {0};
     // end of stack for managed thread, throw exception if native stack grow over it
-    uintptr_t native_stack_end_ {0};
+    uintptr_t nativeStackEnd_ {0};
     // os thread stack size
-    size_t native_stack_size_ {0};
+    size_t nativeStackSize_ {0};
     // guard region size of stack
-    size_t native_stack_guard_size_ {0};
+    size_t nativeStackGuardSize_ {0};
     // reserved region is for throw exception handle if stack overflow happen
-    size_t native_stack_reserved_size_ {0};
+    size_t nativeStackReservedSize_ {0};
     // protected region is for compiled code to test load [sp - native_stack_reserved_size_] to trigger segv
-    size_t native_stack_protected_size_ {0};
+    size_t nativeStackProtectedSize_ {0};
     // max allowed size for interpreter frame
-    size_t iframe_stack_size_ {std::numeric_limits<size_t>::max()};
+    size_t iframeStackSize_ {std::numeric_limits<size_t>::max()};
 
-    PandaVector<HandleScope<coretypes::TaggedType> *> tagged_handle_scopes_ {};
-    HandleStorage<coretypes::TaggedType> *tagged_handle_storage_ {nullptr};
-    GlobalHandleStorage<coretypes::TaggedType> *tagged_global_handle_storage_ {nullptr};
+    PandaVector<HandleScope<coretypes::TaggedType> *> taggedHandleScopes_ {};
+    HandleStorage<coretypes::TaggedType> *taggedHandleStorage_ {nullptr};
+    GlobalHandleStorage<coretypes::TaggedType> *taggedGlobalHandleStorage_ {nullptr};
 
-    PandaVector<HandleScope<ObjectHeader *> *> object_header_handle_scopes_ {};
-    HandleStorage<ObjectHeader *> *object_header_handle_storage_ {nullptr};
+    PandaVector<HandleScope<ObjectHeader *> *> objectHeaderHandleScopes_ {};
+    HandleStorage<ObjectHeader *> *objectHeaderHandleStorage_ {nullptr};
 
-    os::memory::ConditionVariable suspend_var_ GUARDED_BY(suspend_lock_);
-    os::memory::Mutex suspend_lock_;
-    uint32_t suspend_count_ GUARDED_BY(suspend_lock_) = 0;
-    std::atomic_uint32_t user_code_suspend_count_ {0};
+    os::memory::ConditionVariable suspendVar_ GUARDED_BY(suspendLock_);
+    os::memory::Mutex suspendLock_;
+    uint32_t suspendCount_ GUARDED_BY(suspendLock_) = 0;
+    std::atomic_uint32_t userCodeSuspendCount_ {0};
 
-    PandaStack<ThreadState> thread_frame_states_;
+    PandaStack<ThreadState> threadFrameStates_;
 
     // Boolean which is safe to access after runtime is destroyed
-    bool is_managed_scope_ {false};
+    bool isManagedScope_ {false};
 
     friend class panda::test::ThreadTest;
     friend class panda::MTThreadManager;
 
     // Used in mathod events
-    uint32_t call_depth_ {0};
+    uint32_t callDepth_ {0};
 #ifndef PANDA_WITH_QUICKENER
-    void *const *debug_dispatch_table_ {nullptr};
-    void *const *debug_stub_dispatch_table_ {nullptr};
-    void *const *dispatch_table_ {nullptr};
+    void *const *debugDispatchTable_ {nullptr};
+    void *const *debugStubDispatchTable_ {nullptr};
+    void *const *dispatchTable_ {nullptr};
 #endif
 
     NO_COPY_SEMANTIC(ManagedThread);

@@ -70,22 +70,22 @@ public:
 
     CachedEntry Get(std::string &&str)
     {
-        auto [it, inserted] = string_tab_.insert({str, 0});
+        auto [it, inserted] = stringTab_.insert({str, 0});
         it->second++;
         return CachedEntry(&it->first);
     }
 
     void Release(CachedEntry str)
     {
-        auto it = string_tab_.find(*str.Data());
-        ASSERT(it != string_tab_.end());
+        auto it = stringTab_.find(*str.Data());
+        ASSERT(it != stringTab_.end());
         if (--(it->second) == 0) {
-            string_tab_.erase(it);
+            stringTab_.erase(it);
         }
     }
 
 private:
-    std::unordered_map<std::string, uint64_t> string_tab_;
+    std::unordered_map<std::string, uint64_t> stringTab_;
 };
 
 using ArgValueBox = std::variant<uint64_t, ObjectHeader **>;
@@ -96,7 +96,7 @@ public:
 
     ~LocalScopesStorage()
     {
-        ASSERT(local_scopes_storage_.empty());
+        ASSERT(localScopesStorage_.empty());
     }
 
     NO_COPY_SEMANTIC(LocalScopesStorage);
@@ -107,38 +107,38 @@ public:
         napi_handle_scope scope;
         [[maybe_unused]] auto status = napi_open_handle_scope(env, &scope);
         ASSERT(status == napi_ok);
-        local_scopes_storage_.emplace_back(frame, scope);
+        localScopesStorage_.emplace_back(frame, scope);
     }
 
-    void DestroyTopLocalScope(napi_env env, [[maybe_unused]] Frame *curr_frame)
+    void DestroyTopLocalScope(napi_env env, [[maybe_unused]] Frame *currFrame)
     {
-        ASSERT(!local_scopes_storage_.empty());
-        auto &[frame, scope] = local_scopes_storage_.back();
-        ASSERT(curr_frame == frame);
-        local_scopes_storage_.pop_back();
+        ASSERT(!localScopesStorage_.empty());
+        auto &[frame, scope] = localScopesStorage_.back();
+        ASSERT(currFrame == frame);
+        localScopesStorage_.pop_back();
         [[maybe_unused]] auto status = napi_close_handle_scope(env, scope);
         ASSERT(status == napi_ok);
     }
 
-    void DestroyLocalScopeForTopFrame(napi_env env, Frame *curr_frame)
+    void DestroyLocalScopeForTopFrame(napi_env env, Frame *currFrame)
     {
-        if (local_scopes_storage_.empty()) {
+        if (localScopesStorage_.empty()) {
             return;
         }
-        auto &[frame, scope] = local_scopes_storage_.back();
-        while (frame == curr_frame) {
-            local_scopes_storage_.pop_back();
+        auto &[frame, scope] = localScopesStorage_.back();
+        while (frame == currFrame) {
+            localScopesStorage_.pop_back();
             [[maybe_unused]] auto status = napi_close_handle_scope(env, scope);
             ASSERT(status == napi_ok);
-            if (local_scopes_storage_.empty()) {
+            if (localScopesStorage_.empty()) {
                 return;
             }
-            std::tie(frame, scope) = local_scopes_storage_.back();
+            std::tie(frame, scope) = localScopesStorage_.back();
         }
     }
 
 private:
-    std::vector<std::pair<const Frame *, napi_handle_scope>> local_scopes_storage_ {};
+    std::vector<std::pair<const Frame *, napi_handle_scope>> localScopesStorage_ {};
 };
 
 class InteropCtx {
@@ -149,11 +149,11 @@ public:
         new (InteropCtx::Current(coro)) InteropCtx(coro, env);
     }
 
-    static InteropCtx *Current(PandaEtsVM *ets_vm)
+    static InteropCtx *Current(PandaEtsVM *etsVm)
     {
         static_assert(sizeof(PandaEtsVM::ExternalData) >= sizeof(InteropCtx));
         static_assert(alignof(PandaEtsVM::ExternalData) >= alignof(InteropCtx));
-        return reinterpret_cast<InteropCtx *>(ets_vm->GetExternalData());
+        return reinterpret_cast<InteropCtx *>(etsVm->GetExternalData());
     }
 
     static InteropCtx *Current(EtsCoroutine *coro)
@@ -173,13 +173,13 @@ public:
 
     napi_env GetJSEnv() const
     {
-        ASSERT(js_env_ != nullptr);
-        return js_env_;
+        ASSERT(jsEnv_ != nullptr);
+        return jsEnv_;
     }
 
     void SetJSEnv(napi_env env)
     {
-        js_env_ = env;
+        jsEnv_ = env;
     }
 
     mem::GlobalObjectStorage *Refstor() const
@@ -189,41 +189,41 @@ public:
 
     ClassLinkerContext *LinkerCtx() const
     {
-        return linker_ctx_;
+        return linkerCtx_;
     }
 
     JSValueStringStorage *GetStringStor()
     {
-        return &js_value_string_stor_;
+        return &jsValueStringStor_;
     }
 
     LocalScopesStorage *GetLocalScopesStorage()
     {
-        return &local_scopes_storage_;
+        return &localScopesStorage_;
     }
 
     void DestroyLocalScopeForTopFrame(Frame *frame)
     {
-        GetLocalScopesStorage()->DestroyLocalScopeForTopFrame(js_env_, frame);
+        GetLocalScopesStorage()->DestroyLocalScopeForTopFrame(jsEnv_, frame);
     }
 
     mem::Reference *GetJSValueFinalizationQueue() const
     {
-        return jsvalue_fqueue_ref_;
+        return jsvalueFqueueRef_;
     }
 
     Method *GetRegisterFinalizerMethod() const
     {
-        return jsvalue_fqueue_register_;
+        return jsvalueFqueueRegister_;
     }
 
     // NOTE(vpukhov): implement in native code
     [[nodiscard]] bool PushOntoFinalizationQueue(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg)
     {
-        auto queue = Refstor()->Get(jsvalue_fqueue_ref_);
+        auto queue = Refstor()->Get(jsvalueFqueueRef_);
         std::array<Value, 4> args = {Value(queue), Value(obj->GetCoreType()), Value(cbarg->GetCoreType()),
                                      Value(static_cast<ObjectHeader *>(nullptr))};
-        jsvalue_fqueue_register_->Invoke(coro, args.data());
+        jsvalueFqueueRegister_->Invoke(coro, args.data());
         return !coro->HasPendingException();
     }
 
@@ -233,7 +233,7 @@ public:
         explicit TempArgs(size_t sz)
         {
             if (LIKELY(sz <= OPT_SZ)) {
-                sp_ = {new (inl_arr_.data()) T[sz], sz};
+                sp_ = {new (inlArr_.data()) T[sz], sz};
             } else {
                 sp_ = {new T[sz], sz};
             }
@@ -241,7 +241,7 @@ public:
 
         ~TempArgs()
         {
-            if (UNLIKELY(static_cast<void *>(sp_.data()) != inl_arr_.data())) {
+            if (UNLIKELY(static_cast<void *>(sp_.data()) != inlArr_.data())) {
                 delete[] sp_.data();
             } else {
                 static_assert(std::is_trivially_destructible_v<T>);
@@ -253,10 +253,10 @@ public:
         NO_MOVE_SEMANTIC(TempArgs);
 #elif defined(__GNUC__)  // RVO bug
         NO_MOVE_OPERATOR(TempArgs);
-        TempArgs(TempArgs &&other) : sp_(other.sp_), inl_arr_(other.inl_arr_)
+        TempArgs(TempArgs &&other) : sp_(other.sp_), inlArr_(other.inlArr_)
         {
             if (LIKELY(sp_.size() <= OPT_SZ)) {
-                sp_ = Span<T>(reinterpret_cast<T *>(inl_arr_.data()), sp_.size());
+                sp_ = Span<T>(reinterpret_cast<T *>(inlArr_.data()), sp_.size());
             }
         }
 #endif
@@ -276,7 +276,7 @@ public:
 
     private:
         Span<T> sp_;
-        alignas(T) std::array<uint8_t, sizeof(T) * OPT_SZ> inl_arr_;
+        alignas(T) std::array<uint8_t, sizeof(T) * OPT_SZ> inlArr_;
     };
 
     template <typename T, size_t OPT_SZ = 8U>
@@ -287,83 +287,83 @@ public:
 
     // NOTE(vpukhov): implement as flags in IFrame
     struct InteropFrameRecord {
-        void *ets_frame {};
-        bool to_js {};
+        void *etsFrame {};
+        bool toJs {};
     };
 
     std::vector<InteropFrameRecord> &GetInteropFrames()
     {
-        return interop_frames_;
+        return interopFrames_;
     }
 
     JSRefConvertCache *GetRefConvertCache()
     {
-        return &refconvert_cache_;
+        return &refconvertCache_;
     }
 
     Class *GetJSValueClass() const
     {
-        return jsvalue_class_;
+        return jsvalueClass_;
     }
 
     Class *GetJSErrorClass() const
     {
-        return jserror_class_;
+        return jserrorClass_;
     }
 
     Class *GetObjectClass() const
     {
-        return object_class_;
+        return objectClass_;
     }
 
     Class *GetStringClass() const
     {
-        return string_class_;
+        return stringClass_;
     }
 
     Class *GetVoidClass() const
     {
-        return void_class_;
+        return voidClass_;
     }
 
     Class *GetPromiseClass() const
     {
-        return promise_class_;
+        return promiseClass_;
     }
 
     Class *GetErrorClass() const
     {
-        return error_class_;
+        return errorClass_;
     }
 
     Class *GetExceptionClass() const
     {
-        return exception_class_;
+        return exceptionClass_;
     }
 
     Class *GetTypeClass() const
     {
-        return type_class_;
+        return typeClass_;
     }
 
     Class *GetBoxIntClass() const
     {
-        return box_int_class_;
+        return boxIntClass_;
     }
 
     Class *GetBoxLongClass() const
     {
-        return box_long_class_;
+        return boxLongClass_;
     }
 
     Class *GetArrayClass() const
     {
-        return array_class_;
+        return arrayClass_;
     }
 
     Class *GetArrayBufferClass() const
     {
-        return arraybuf_class_;
+        return arraybufClass_;
     }
 
     EtsObject *CreateETSCoreJSError(EtsCoroutine *coro, JSValue *jsvalue);
@@ -403,72 +403,72 @@ public:
         Fatal(msg.c_str());
     }
 
-    void SetPendingNewInstance(EtsObject *new_instance)
+    void SetPendingNewInstance(EtsObject *newInstance)
     {
-        pending_new_instance_ = new_instance;
+        pendingNewInstance_ = newInstance;
     }
 
     EtsObject *AcquirePendingNewInstance()
     {
-        auto res = pending_new_instance_;
-        pending_new_instance_ = nullptr;
+        auto res = pendingNewInstance_;
+        pendingNewInstance_ = nullptr;
         return res;
     }
 
     ets_proxy::EtsMethodWrappersCache *GetEtsMethodWrappersCache()
     {
-        return &ets_method_wrappers_cache_;
+        return &etsMethodWrappersCache_;
     }
 
     ets_proxy::EtsClassWrappersCache *GetEtsClassWrappersCache()
     {
-        return &ets_class_wrappers_cache_;
+        return &etsClassWrappersCache_;
     }
 
     ets_proxy::SharedReferenceStorage *GetSharedRefStorage()
     {
-        return ets_proxy_ref_storage_.get();
+        return etsProxyRefStorage_.get();
     }
 
 private:
     explicit InteropCtx(EtsCoroutine *coro, napi_env env);
 
-    napi_env js_env_ {};
+    napi_env jsEnv_ {};
 
     mem::GlobalObjectStorage *refstor_ {};
-    ClassLinkerContext *linker_ctx_ {};
-    JSValueStringStorage js_value_string_stor_ {};
-    LocalScopesStorage local_scopes_storage_ {};
-    mem::Reference *jsvalue_fqueue_ref_ {};
+    ClassLinkerContext *linkerCtx_ {};
+    JSValueStringStorage jsValueStringStor_ {};
+    LocalScopesStorage localScopesStorage_ {};
+    mem::Reference *jsvalueFqueueRef_ {};
 
-    std::vector<InteropFrameRecord> interop_frames_ {};
+    std::vector<InteropFrameRecord> interopFrames_ {};
 
-    JSRefConvertCache refconvert_cache_;
+    JSRefConvertCache refconvertCache_;
 
-    Class *jsruntime_class_ {};
-    Class *jsvalue_class_ {};
-    Class *jserror_class_ {};
-    Class *object_class_ {};
-    Class *string_class_ {};
-    Class *void_class_ {};
-    Class *promise_class_ {};
-    Class *error_class_ {};
-    Class *exception_class_ {};
-    Class *type_class_ {};
+    Class *jsruntimeClass_ {};
+    Class *jsvalueClass_ {};
+    Class *jserrorClass_ {};
+    Class *objectClass_ {};
+    Class *stringClass_ {};
+    Class *voidClass_ {};
+    Class *promiseClass_ {};
+    Class *errorClass_ {};
+    Class *exceptionClass_ {};
+    Class *typeClass_ {};
 
-    Class *box_int_class_ {};
-    Class *box_long_class_ {};
+    Class *boxIntClass_ {};
+    Class *boxLongClass_ {};
 
-    Class *array_class_ {};
-    Class *arraybuf_class_ {};
+    Class *arrayClass_ {};
+    Class *arraybufClass_ {};
 
-    Method *jsvalue_fqueue_register_ {};
+    Method *jsvalueFqueueRegister_ {};
 
     // ets_proxy data
-    EtsObject *pending_new_instance_ {};
-    ets_proxy::EtsMethodWrappersCache ets_method_wrappers_cache_ {};
-    ets_proxy::EtsClassWrappersCache ets_class_wrappers_cache_ {};
-    std::unique_ptr<ets_proxy::SharedReferenceStorage> ets_proxy_ref_storage_ {};
+    EtsObject *pendingNewInstance_ {};
+    ets_proxy::EtsMethodWrappersCache etsMethodWrappersCache_ {};
+    ets_proxy::EtsClassWrappersCache etsClassWrappersCache_ {};
+    std::unique_ptr<ets_proxy::SharedReferenceStorage> etsProxyRefStorage_ {};
 
     friend class EtsJSNapiEnvScope;
 };

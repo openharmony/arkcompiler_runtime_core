@@ -79,45 +79,45 @@ static void LogPrint([[maybe_unused]] int id, [[maybe_unused]] int level, [[mayb
 
 namespace panda::ets {
 
-bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)> const &add_options)
+bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)> const &addOptions)
 {
-    auto runtime_options = panda::RuntimeOptions("app");
-    runtime_options.SetLoadRuntimes({"ets"});
+    auto runtimeOptions = panda::RuntimeOptions("app");
+    runtimeOptions.SetLoadRuntimes({"ets"});
 #ifdef PANDA_TARGET_OHOS
-    runtime_options.SetMobileLog(reinterpret_cast<void *>(LogPrint));
+    runtimeOptions.SetMobileLog(reinterpret_cast<void *>(LogPrint));
 #endif
 
-    panda::base_options::Options base_options("app");
+    panda::base_options::Options baseOptions("app");
 
-    if (!add_options(&base_options, &runtime_options)) {
+    if (!addOptions(&baseOptions, &runtimeOptions)) {
         return false;
     }
 
-    panda::Logger::Initialize(base_options);
+    panda::Logger::Initialize(baseOptions);
 
     LOG(DEBUG, RUNTIME) << "CreateRuntime";
 
-    if (!panda::Runtime::Create(runtime_options)) {
+    if (!panda::Runtime::Create(runtimeOptions)) {
         LOG(ERROR, RUNTIME) << "CreateRuntime: cannot create ets runtime";
         return false;
     }
     return true;
 }
 
-bool CreateRuntime(const std::string &stdlib_abc, const std::string &path_abc, const bool use_jit, const bool use_aot)
+bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, const bool use_jit, const bool use_aot)
 {
-    auto add_opts = [&](base_options::Options *base_options, panda::RuntimeOptions *runtime_options) {
-        base_options->SetLogLevel("info");
-        runtime_options->SetBootPandaFiles({stdlib_abc, path_abc});
-        runtime_options->SetPandaFiles({path_abc});
-        runtime_options->SetGcTriggerType("heap-trigger");
-        runtime_options->SetCompilerEnableJit(use_jit);
-        runtime_options->SetEnableAn(use_aot);
-        runtime_options->SetCoroutineJsMode(true);
-        runtime_options->SetCoroutineImpl("stackful");
+    auto addOpts = [&](base_options::Options *baseOptions, panda::RuntimeOptions *runtimeOptions) {
+        baseOptions->SetLogLevel("info");
+        runtimeOptions->SetBootPandaFiles({stdlibAbc, pathAbc});
+        runtimeOptions->SetPandaFiles({pathAbc});
+        runtimeOptions->SetGcTriggerType("heap-trigger");
+        runtimeOptions->SetCompilerEnableJit(use_jit);
+        runtimeOptions->SetEnableAn(use_aot);
+        runtimeOptions->SetCoroutineJsMode(true);
+        runtimeOptions->SetCoroutineImpl("stackful");
         return true;
     };
-    return CreateRuntime(add_opts);
+    return CreateRuntime(addOpts);
 }
 
 bool DestroyRuntime()
@@ -131,31 +131,31 @@ bool DestroyRuntime()
 std::pair<bool, int> ExecuteMain()
 {
     auto runtime = panda::Runtime::GetCurrent();
-    auto pf_path = runtime->GetPandaFiles()[0];
-    LOG(INFO, RUNTIME) << "ExecuteEtsMain: '" << pf_path << "'";
-    auto res = panda::Runtime::GetCurrent()->ExecutePandaFile(pf_path, "ETSGLOBAL::main", {});
+    auto pfPath = runtime->GetPandaFiles()[0];
+    LOG(INFO, RUNTIME) << "ExecuteEtsMain: '" << pfPath << "'";
+    auto res = panda::Runtime::GetCurrent()->ExecutePandaFile(pfPath, "ETSGLOBAL::main", {});
     LOG(INFO, RUNTIME) << "ExecuteEtsMain: result = " << (res ? std::to_string(res.Value()) : "failed");
     return res ? std::make_pair(true, res.Value()) : std::make_pair(false, 1);
 }
 
-bool BindNative(const char *class_descriptor, const char *method_name, void *impl)
+bool BindNative(const char *classDescriptor, const char *methodName, void *impl)
 {
     auto *runtime = panda::Runtime::GetCurrent();
-    auto *class_linker = runtime->GetClassLinker();
-    auto *ext = class_linker->GetExtension(panda::SourceLanguage::ETS);
-    auto *klass = ext->GetClass(panda::utf::CStringAsMutf8(class_descriptor));
+    auto *classLinker = runtime->GetClassLinker();
+    auto *ext = classLinker->GetExtension(panda::SourceLanguage::ETS);
+    auto *klass = ext->GetClass(panda::utf::CStringAsMutf8(classDescriptor));
 
     if (klass == nullptr) {
         panda::ManagedThread::GetCurrent()->ClearException();
-        LOG(DEBUG, RUNTIME) << "BindNative: Cannot find class '" << class_descriptor << "'";
+        LOG(DEBUG, RUNTIME) << "BindNative: Cannot find class '" << classDescriptor << "'";
         return false;
     }
 
-    auto *method = klass->GetDirectMethod(panda::utf::CStringAsMutf8(method_name));
+    auto *method = klass->GetDirectMethod(panda::utf::CStringAsMutf8(methodName));
 
     if (method == nullptr) {
         panda::ManagedThread::GetCurrent()->ClearException();
-        LOG(DEBUG, RUNTIME) << "BindNative: Cannot find method '" << class_descriptor << "." << method_name << "'`";
+        LOG(DEBUG, RUNTIME) << "BindNative: Cannot find method '" << classDescriptor << "." << methodName << "'`";
         return false;
     }
 

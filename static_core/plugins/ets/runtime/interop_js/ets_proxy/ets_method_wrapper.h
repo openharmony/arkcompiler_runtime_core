@@ -37,44 +37,44 @@ using EtsMethodWrappersCache = WrappersCache<EtsMethod *, EtsMethodWrapper>;
 
 class EtsMethodWrapper {
 public:
-    static EtsMethodWrapper *GetMethod(InteropCtx *ctx, EtsMethod *ets_method);
-    static EtsMethodWrapper *GetFunction(InteropCtx *ctx, EtsMethod *ets_method);
+    static EtsMethodWrapper *GetMethod(InteropCtx *ctx, EtsMethod *etsMethod);
+    static EtsMethodWrapper *GetFunction(InteropCtx *ctx, EtsMethod *etsMethod);
 
     napi_value GetJsValue(napi_env env) const
     {
-        ASSERT(js_ref_);
-        napi_value js_value;
-        NAPI_CHECK_FATAL(napi_get_reference_value(env, js_ref_, &js_value));
-        return js_value;
+        ASSERT(jsRef_);
+        napi_value jsValue;
+        NAPI_CHECK_FATAL(napi_get_reference_value(env, jsRef_, &jsValue));
+        return jsValue;
     }
 
     EtsMethod *GetEtsMethod() const
     {
-        return ets_method_;
+        return etsMethod_;
     }
 
     Method *GetMethod() const
     {
-        return ets_method_->GetPandaMethod();
+        return etsMethod_->GetPandaMethod();
     }
 
-    static inline EtsMethodWrapper *ResolveLazyLink(InteropCtx *ctx, /* in/out */ LazyEtsMethodWrapperLink &lazy_link)
+    static inline EtsMethodWrapper *ResolveLazyLink(InteropCtx *ctx, /* in/out */ LazyEtsMethodWrapperLink &lazyLink)
     {
-        if (LIKELY(lazy_link.IsResolved())) {
-            return lazy_link.GetResolved();
+        if (LIKELY(lazyLink.IsResolved())) {
+            return lazyLink.GetResolved();
         }
-        EtsMethod *ets_method = EtsMethod::FromRuntimeMethod(lazy_link.GetUnresolved());
-        EtsMethodWrapper *wrapper = EtsMethodWrapper::GetMethod(ctx, ets_method);
+        EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(lazyLink.GetUnresolved());
+        EtsMethodWrapper *wrapper = EtsMethodWrapper::GetMethod(ctx, etsMethod);
         if (UNLIKELY(wrapper == nullptr)) {
             return nullptr;
         }
-        ASSERT(wrapper->js_ref_ == nullptr);
-        // Update lazy_link
-        lazy_link = LazyEtsMethodWrapperLink(wrapper);
+        ASSERT(wrapper->jsRef_ == nullptr);
+        // Update lazyLink
+        lazyLink = LazyEtsMethodWrapperLink(wrapper);
         return wrapper;
     }
 
-    static napi_property_descriptor MakeNapiProperty(Method *method, LazyEtsMethodWrapperLink *lazy_link_space);
+    static napi_property_descriptor MakeNapiProperty(Method *method, LazyEtsMethodWrapperLink *lazyLinkSpace);
 
     template <bool IS_STATIC, bool IS_FUNC>
     static napi_value EtsMethodCallHandler(napi_env env, napi_callback_info cinfo);
@@ -83,11 +83,11 @@ private:
     static std::unique_ptr<EtsMethodWrapper> CreateMethod(EtsMethod *method, EtsClassWrapper *owner);
     static std::unique_ptr<EtsMethodWrapper> CreateFunction(InteropCtx *ctx, EtsMethod *method);
 
-    EtsMethodWrapper(EtsMethod *method, EtsClassWrapper *owner) : ets_method_(method), owner_(owner) {}
+    EtsMethodWrapper(EtsMethod *method, EtsClassWrapper *owner) : etsMethod_(method), owner_(owner) {}
 
-    EtsMethod *const ets_method_ {};
+    EtsMethod *const etsMethod_ {};
     EtsClassWrapper *const owner_ {};  // only for instance methods
-    napi_ref js_ref_ {};               // only for functions (ETSGLOBAL::)
+    napi_ref jsRef_ {};                // only for functions (ETSGLOBAL::)
 };
 
 }  // namespace panda::ets::interop::js::ets_proxy

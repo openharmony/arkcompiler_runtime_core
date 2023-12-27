@@ -39,24 +39,24 @@ using LoadableAgentHandle = std::shared_ptr<LoadableAgent>;
 
 class LibraryAgent : public LoadableAgent {
 public:
-    PANDA_PUBLIC_API LibraryAgent(os::memory::Mutex &mutex, PandaString library_path, PandaString load_callback_name,
-                                  PandaString unload_callback_name);
+    PANDA_PUBLIC_API LibraryAgent(os::memory::Mutex &mutex, PandaString libraryPath, PandaString loadCallbackName,
+                                  PandaString unloadCallbackName);
 
     PANDA_PUBLIC_API bool Load() override;
     PANDA_PUBLIC_API bool Unload() override;
 
 private:
-    virtual bool CallLoadCallback(void *resolved_function) = 0;
-    virtual bool CallUnloadCallback(void *resolved_function) = 0;
+    virtual bool CallLoadCallback(void *resolvedFunction) = 0;
+    virtual bool CallUnloadCallback(void *resolvedFunction) = 0;
 
     os::memory::LockHolder<os::memory::Mutex> lock_;
 
-    PandaString library_path_;
-    PandaString load_callback_name_;
-    PandaString unload_callback_name_;
+    PandaString libraryPath_;
+    PandaString loadCallbackName_;
+    PandaString unloadCallbackName_;
 
     os::library_loader::LibraryHandle handle_ {nullptr};
-    void *unload_callback_ {};
+    void *unloadCallback_ {};
 };
 
 template <typename AgentType, bool REUSABLE>
@@ -67,8 +67,8 @@ public:
     {
         // This mutex is needed to be sure that getting / creation of an instance is made atomically
         // (e.g. there won't be two threads that found no instance and tried to create a new one).
-        static os::memory::Mutex creation_mutex;
-        os::memory::LockHolder<os::memory::Mutex> creation_mutex_lock(creation_mutex);
+        static os::memory::Mutex creationMutex;
+        os::memory::LockHolder<os::memory::Mutex> creationMutexLock(creationMutex);
 
         static std::weak_ptr<LoadableAgent> instance;
 
@@ -84,9 +84,9 @@ public:
 
         // This mutex is needed to be sure that there is only one library at a given point of time
         // (e.g. a new instance initialization won't be performed earlier than deinitialization of the old one).
-        static os::memory::Mutex uniqueness_mutex;
+        static os::memory::Mutex uniquenessMutex;
 
-        auto lib = MakePandaUnique<AgentType>(uniqueness_mutex, std::forward<Args>(args)...);
+        auto lib = MakePandaUnique<AgentType>(uniquenessMutex, std::forward<Args>(args)...);
         if (!lib->Load()) {
             LOG(ERROR, RUNTIME) << "Could not load library";
             return {};

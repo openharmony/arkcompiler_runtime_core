@@ -30,20 +30,20 @@ class SharedSlowPathData {
 public:
     SharedSlowPathData()
     {
-        ASSERT(std::all_of(entrypoints_offsets_.begin(), entrypoints_offsets_.end(), [](auto v) { return v == 0; }));
+        ASSERT(std::all_of(entrypointsOffsets_.begin(), entrypointsOffsets_.end(), [](auto v) { return v == 0; }));
     }
     void SetSharedSlowPathOffset(RuntimeInterface::EntrypointId id, uintptr_t offset)
     {
-        entrypoints_offsets_[static_cast<size_t>(id)] = offset;
+        entrypointsOffsets_[static_cast<size_t>(id)] = offset;
     }
     uintptr_t GetSharedSlowPathOffset(RuntimeInterface::EntrypointId id)
     {
-        return entrypoints_offsets_[static_cast<size_t>(id)];
+        return entrypointsOffsets_[static_cast<size_t>(id)];
     }
 
 private:
     static constexpr size_t SIZE = static_cast<size_t>(RuntimeInterface::EntrypointId::COUNT);
-    std::array<uintptr_t, SIZE> entrypoints_offsets_ {};
+    std::array<uintptr_t, SIZE> entrypointsOffsets_ {};
 };
 
 class AotData {
@@ -54,64 +54,64 @@ class AotData {
     using ClassPtr = RuntimeInterface::ClassPtr;
 
 public:
-    AotData(const File *pfile, Graph *graph, AddressType code_addr, uint64_t *intf_inline_cache_index,
-            std::map<std::pair<const File *, uint32_t>, int32_t> *got_plt,
-            std::map<std::pair<const File *, uint32_t>, int32_t> *got_virt_indexes,
-            std::map<std::pair<const File *, uint32_t>, int32_t> *got_class,
-            std::map<std::pair<const File *, uint32_t>, int32_t> *got_string,
-            std::map<std::pair<const File *, uint64_t>, int32_t> *got_intf_inline_cache,
-            std::map<std::pair<const File *, uint64_t>, int32_t> *got_common, SharedSlowPathData *slow_path_data)
+    AotData(const File *pfile, Graph *graph, AddressType codeAddr, uint64_t *intfInlineCacheIndex,
+            std::map<std::pair<const File *, uint32_t>, int32_t> *gotPlt,
+            std::map<std::pair<const File *, uint32_t>, int32_t> *gotVirtIndexes,
+            std::map<std::pair<const File *, uint32_t>, int32_t> *gotClass,
+            std::map<std::pair<const File *, uint32_t>, int32_t> *gotString,
+            std::map<std::pair<const File *, uint64_t>, int32_t> *gotIntfInlineCache,
+            std::map<std::pair<const File *, uint64_t>, int32_t> *gotCommon, SharedSlowPathData *slowPathData)
         : pfile_(pfile),
           graph_(graph),
-          slow_path_data_(slow_path_data),
-          code_address_(code_addr),
-          intf_inline_cache_index_(intf_inline_cache_index),
-          got_plt_(got_plt),
-          got_virt_indexes_(got_virt_indexes),
-          got_class_(got_class),
-          got_string_(got_string),
-          got_intf_inline_cache_(got_intf_inline_cache),
-          got_common_(got_common)
+          slowPathData_(slowPathData),
+          codeAddress_(codeAddr),
+          intfInlineCacheIndex_(intfInlineCacheIndex),
+          gotPlt_(gotPlt),
+          gotVirtIndexes_(gotVirtIndexes),
+          gotClass_(gotClass),
+          gotString_(gotString),
+          gotIntfInlineCache_(gotIntfInlineCache),
+          gotCommon_(gotCommon)
     {
     }
 
     intptr_t GetEpTableOffset() const;
-    intptr_t GetEntrypointOffset(uint64_t pc, int32_t slot_id) const;
+    intptr_t GetEntrypointOffset(uint64_t pc, int32_t slotId) const;
     intptr_t GetSharedSlowPathOffset(RuntimeInterface::EntrypointId id, uintptr_t pc) const;
     void SetSharedSlowPathOffset(RuntimeInterface::EntrypointId id, uintptr_t pc);
-    intptr_t GetPltSlotOffset(uint64_t pc, uint32_t method_id);
-    intptr_t GetVirtIndexSlotOffset(uint64_t pc, uint32_t method_id);
-    intptr_t GetClassSlotOffset(uint64_t pc, uint32_t klass_id, bool init);
+    intptr_t GetPltSlotOffset(uint64_t pc, uint32_t methodId);
+    intptr_t GetVirtIndexSlotOffset(uint64_t pc, uint32_t methodId);
+    intptr_t GetClassSlotOffset(uint64_t pc, uint32_t klassId, bool init);
     intptr_t GetCommonSlotOffset(uint64_t pc, uint32_t id);
-    intptr_t GetStringSlotOffset(uint64_t pc, uint32_t string_id);
+    intptr_t GetStringSlotOffset(uint64_t pc, uint32_t stringId);
     uint64_t GetInfInlineCacheSlotOffset(uint64_t pc, uint64_t index);
 
-    int32_t GetClassSlotId(uint32_t klass_id);
-    int32_t GetStringSlotId(uint32_t string_id);
-    int32_t GetPltSlotId(uint32_t method_id);
-    int32_t GetIntfInlineCacheId(uint64_t cache_idx);
+    int32_t GetClassSlotId(uint32_t klassId);
+    int32_t GetStringSlotId(uint32_t stringId);
+    int32_t GetPltSlotId(uint32_t methodId);
+    int32_t GetIntfInlineCacheId(uint64_t cacheIdx);
 
     AddressType GetCodeOffset() const
     {
-        return code_address_;
+        return codeAddress_;
     }
     bool GetUseCha() const
     {
-        return use_cha_;
+        return useCha_;
     }
-    void SetUseCha(bool use_cha)
+    void SetUseCha(bool useCha)
     {
-        use_cha_ = use_cha;
+        useCha_ = useCha;
     }
 
-    void SetIntfInlineCacheIndex(uint64_t intf_inline_cache_index)
+    void SetIntfInlineCacheIndex(uint64_t intfInlineCacheIndex)
     {
-        *intf_inline_cache_index_ = intf_inline_cache_index;
+        *intfInlineCacheIndex_ = intfInlineCacheIndex;
     }
 
     uint64_t GetIntfInlineCacheIndex() const
     {
-        return *intf_inline_cache_index_;
+        return *intfInlineCacheIndex_;
     }
 
 private:
@@ -119,16 +119,16 @@ private:
 
     const File *pfile_;
     Graph *graph_ {nullptr};
-    SharedSlowPathData *slow_path_data_;
-    AddressType code_address_ {INVALID_ADDRESS};
-    uint64_t *intf_inline_cache_index_;
-    std::map<std::pair<const File *, uint32_t>, int32_t> *got_plt_;
-    std::map<std::pair<const File *, uint32_t>, int32_t> *got_virt_indexes_;
-    std::map<std::pair<const File *, uint32_t>, int32_t> *got_class_;
-    std::map<std::pair<const File *, uint32_t>, int32_t> *got_string_;
-    std::map<std::pair<const File *, uint64_t>, int32_t> *got_intf_inline_cache_;
-    std::map<std::pair<const File *, uint64_t>, int32_t> *got_common_;
-    bool use_cha_ {false};
+    SharedSlowPathData *slowPathData_;
+    AddressType codeAddress_ {INVALID_ADDRESS};
+    uint64_t *intfInlineCacheIndex_;
+    std::map<std::pair<const File *, uint32_t>, int32_t> *gotPlt_;
+    std::map<std::pair<const File *, uint32_t>, int32_t> *gotVirtIndexes_;
+    std::map<std::pair<const File *, uint32_t>, int32_t> *gotClass_;
+    std::map<std::pair<const File *, uint32_t>, int32_t> *gotString_;
+    std::map<std::pair<const File *, uint64_t>, int32_t> *gotIntfInlineCache_;
+    std::map<std::pair<const File *, uint64_t>, int32_t> *gotCommon_;
+    bool useCha_ {false};
 };
 }  // namespace panda::compiler
 

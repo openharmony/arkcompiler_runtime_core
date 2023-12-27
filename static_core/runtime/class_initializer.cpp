@@ -65,7 +65,7 @@ public:
     public:
         explicit DummyObjectLock(ObjectHeader *header [[maybe_unused]]) {}
         ~DummyObjectLock() = default;
-        bool Wait([[maybe_unused]] bool ignore_interruption = false)
+        bool Wait([[maybe_unused]] bool ignoreInterruption = false)
         {
             return true;
         }
@@ -110,10 +110,10 @@ public:
     };
 };
 
-static void WrapException(ClassLinker *class_linker, ManagedThread *thread)
+static void WrapException(ClassLinker *classLinker, ManagedThread *thread)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*thread->GetException()->ClassAddr<Class>());
-    ctx.WrapClassInitializerException(class_linker, thread);
+    ctx.WrapClassInitializerException(classLinker, thread);
 }
 
 static void ThrowNoClassDefFoundError(ManagedThread *thread, const Class *klass)
@@ -160,7 +160,7 @@ static bool IsBadSuperClass(const Class *base, ManagedThread *thread, const Clas
 }
 
 template <class ObjectLockT>
-static bool WaitInitialization(ObjectLockT *lock, ClassLinker *class_linker, ManagedThread *thread, Class *klass)
+static bool WaitInitialization(ObjectLockT *lock, ClassLinker *classLinker, ManagedThread *thread, Class *klass)
 {
     while (true) {
         // Should be possible to interrupt Wait for termination
@@ -174,7 +174,7 @@ static bool WaitInitialization(ObjectLockT *lock, ClassLinker *class_linker, Man
         }
 
         if (thread->HasPendingException()) {
-            WrapException(class_linker, thread);
+            WrapException(classLinker, thread);
             klass->SetState(Class::State::ERRONEOUS);
             return false;
         }
@@ -198,7 +198,7 @@ static bool WaitInitialization(ObjectLockT *lock, ClassLinker *class_linker, Man
 
 /* static */
 template <MTModeT MODE>
-bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread *thread, Class *klass)
+bool ClassInitializer<MODE>::Initialize(ClassLinker *classLinker, ManagedThread *thread, Class *klass)
 {
     if (klass->IsInitialized()) {
         return true;
@@ -210,9 +210,9 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
     using ObjectLockT = typename ObjectLockConfig<MODE>::LockT;
 
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<ObjectHeader> managed_class_obj_handle(thread, klass->GetManagedObject());
+    VMHandle<ObjectHeader> managedClassObjHandle(thread, klass->GetManagedObject());
     {
-        ObjectLockT lock(managed_class_obj_handle.GetPtr());
+        ObjectLockT lock(managedClassObjHandle.GetPtr());
 
         if (klass->IsInitialized()) {
             return true;
@@ -239,7 +239,7 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
             }
 
             if constexpr ((MODE == MT_MODE_MULTI) || (MODE == MT_MODE_TASK)) {
-                return WaitInitialization(&lock, class_linker, thread, klass);
+                return WaitInitialization(&lock, classLinker, thread, klass);
             }
 
             UNREACHABLE();
@@ -259,7 +259,7 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
 
     LOG(DEBUG, CLASS_LINKER) << "Initializing class " << klass->GetName();
 
-    return InitializeClass(class_linker, thread, klass, managed_class_obj_handle);
+    return InitializeClass(classLinker, thread, klass, managedClassObjHandle);
 }
 
 template <MTModeT MODE>
@@ -293,8 +293,8 @@ bool ClassInitializer<MODE>::InitClassVerificationMode(Class *klass)
 
 /* static */
 template <MTModeT MODE>
-bool ClassInitializer<MODE>::InitializeClass(ClassLinker *class_linker, ManagedThread *thread, Class *klass,
-                                             const VMHandle<ObjectHeader> &managed_class_obj_handle)
+bool ClassInitializer<MODE>::InitializeClass(ClassLinker *classLinker, ManagedThread *thread, Class *klass,
+                                             const VMHandle<ObjectHeader> &managedClassObjHandle)
 {
     using ObjectLockT = typename ObjectLockConfig<MODE>::LockT;
 
@@ -306,8 +306,8 @@ bool ClassInitializer<MODE>::InitializeClass(ClassLinker *class_linker, ManagedT
                 return false;
             }
 
-            if (!Initialize(class_linker, thread, base)) {
-                ObjectLockT lock(managed_class_obj_handle.GetPtr());
+            if (!Initialize(classLinker, thread, base)) {
+                ObjectLockT lock(managedClassObjHandle.GetPtr());
                 klass->SetState(Class::State::ERRONEOUS);
                 lock.NotifyAll();
                 return false;
@@ -319,8 +319,8 @@ bool ClassInitializer<MODE>::InitializeClass(ClassLinker *class_linker, ManagedT
                 continue;
             }
 
-            if (!InitializeInterface(class_linker, thread, iface, klass)) {
-                ObjectLockT lock(managed_class_obj_handle.GetPtr());
+            if (!InitializeInterface(classLinker, thread, iface, klass)) {
+                ObjectLockT lock(managedClassObjHandle.GetPtr());
                 klass->SetState(Class::State::ERRONEOUS);
                 lock.NotifyAll();
                 return false;
@@ -331,17 +331,17 @@ bool ClassInitializer<MODE>::InitializeClass(ClassLinker *class_linker, ManagedT
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*klass);
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID)},
                         Method::Proto::RefTypeVector {});
-    auto *cctor_name = ctx.GetCctorName();
-    auto *cctor = klass->GetDirectMethod(cctor_name, proto);
+    auto *cctorName = ctx.GetCctorName();
+    auto *cctor = klass->GetDirectMethod(cctorName, proto);
     if (cctor != nullptr) {
         cctor->InvokeVoid(thread, nullptr);
     }
 
     {
-        ObjectLockT lock(managed_class_obj_handle.GetPtr());
+        ObjectLockT lock(managedClassObjHandle.GetPtr());
 
         if (thread->HasPendingException()) {
-            WrapException(class_linker, thread);
+            WrapException(classLinker, thread);
             klass->SetState(Class::State::ERRONEOUS);
             lock.NotifyAll();
             return false;
@@ -357,7 +357,7 @@ bool ClassInitializer<MODE>::InitializeClass(ClassLinker *class_linker, ManagedT
 
 /* static */
 template <MTModeT MODE>
-bool ClassInitializer<MODE>::InitializeInterface(ClassLinker *class_linker, ManagedThread *thread, Class *iface,
+bool ClassInitializer<MODE>::InitializeInterface(ClassLinker *classLinker, ManagedThread *thread, Class *iface,
                                                  Class *klass)
 {
     if (!iface->IsInterface()) {
@@ -365,12 +365,12 @@ bool ClassInitializer<MODE>::InitializeInterface(ClassLinker *class_linker, Mana
         return false;
     }
 
-    for (auto *base_iface : iface->GetInterfaces()) {
-        if (base_iface->IsInitialized()) {
+    for (auto *baseIface : iface->GetInterfaces()) {
+        if (baseIface->IsInitialized()) {
             continue;
         }
 
-        if (!InitializeInterface(class_linker, thread, base_iface, klass)) {
+        if (!InitializeInterface(classLinker, thread, baseIface, klass)) {
             return false;
         }
     }
@@ -379,7 +379,7 @@ bool ClassInitializer<MODE>::InitializeInterface(ClassLinker *class_linker, Mana
         return true;
     }
 
-    return Initialize(class_linker, thread, iface);
+    return Initialize(classLinker, thread, iface);
 }
 
 /* static */
@@ -395,8 +395,8 @@ bool ClassInitializer<MODE>::VerifyClass(Class *klass)
         return false;
     }
 
-    bool skip_verification = !opts.IsVerifyRuntimeLibraries() && verifier::IsSystemOrSyntheticClass(klass);
-    if (skip_verification) {
+    bool skipVerification = !opts.IsVerifyRuntimeLibraries() && verifier::IsSystemOrSyntheticClass(klass);
+    if (skipVerification) {
         for (auto &method : klass->GetMethods()) {
             method.SetVerified(true);
         }

@@ -49,14 +49,14 @@ enum class GCTaskCause : uint8_t {
 enum class GCCollectionType : uint8_t { NONE = 0, YOUNG, MIXED, TENURED, FULL };
 
 struct PANDA_PUBLIC_API GCTask {
-    explicit GCTask(GCTaskCause gc_reason) : GCTask(gc_reason, 0U) {}
+    explicit GCTask(GCTaskCause gcReason) : GCTask(gcReason, 0U) {}
 
-    explicit GCTask(GCTaskCause gc_reason, uint64_t gc_target_time)
+    explicit GCTask(GCTaskCause gcReason, uint64_t gcTargetTime)
     {
-        this->reason = gc_reason;
-        this->target_time_ = gc_target_time;
-        this->collection_type = GCCollectionType::NONE;
-        this->id_ = next_id_++;
+        this->reason = gcReason;
+        this->targetTime_ = gcTargetTime;
+        this->collectionType = GCCollectionType::NONE;
+        this->id_ = nextId_++;
     }
 
     uint64_t GetId() const
@@ -68,11 +68,11 @@ struct PANDA_PUBLIC_API GCTask {
      * Update collection type in the gc task if the new coolcetion type is bigger
      * @param gc_collection_type new gc collection type
      */
-    void UpdateGCCollectionType(GCCollectionType gc_collection_type);
+    void UpdateGCCollectionType(GCCollectionType gcCollectionType);
 
     uint64_t GetTargetTime() const
     {
-        return target_time_;
+        return targetTime_;
     }
 
     // NOLINTNEXTLINE(google-runtime-references)
@@ -87,17 +87,17 @@ struct PANDA_PUBLIC_API GCTask {
     GCTask(GCTask &&other) = default;
     GCTask &operator=(GCTask &&other) = default;
 
-    GCTaskCause reason;                // NOLINT(misc-non-private-member-variables-in-classes)
-    GCCollectionType collection_type;  // NOLINT(misc-non-private-member-variables-in-classes)
+    GCTaskCause reason;               // NOLINT(misc-non-private-member-variables-in-classes)
+    GCCollectionType collectionType;  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
     uint32_t id_ = 0;
-    uint64_t target_time_;
-    static std::atomic<uint32_t> next_id_;
+    uint64_t targetTime_;
+    static std::atomic<uint32_t> nextId_;
 };
 
 std::ostream &operator<<(std::ostream &os, const GCTaskCause &cause);
-std::ostream &operator<<(std::ostream &os, const GCCollectionType &collection_type);
+std::ostream &operator<<(std::ostream &os, const GCCollectionType &collectionType);
 
 }  // namespace panda
 

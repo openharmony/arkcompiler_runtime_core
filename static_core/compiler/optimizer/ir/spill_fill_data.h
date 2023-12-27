@@ -27,8 +27,8 @@ using LocationType = Location::Kind;
 class SpillFillData {
 public:
     SpillFillData() = default;
-    SpillFillData(LocationType src_type, LocationType dst_type, unsigned src_val, unsigned dst_val, DataType::Type tp)
-        : src_(src_type, src_val), dst_(dst_type, dst_val), type_(tp)
+    SpillFillData(LocationType srcType, LocationType dstType, unsigned srcVal, unsigned dstVal, DataType::Type tp)
+        : src_(srcType, srcVal), dst_(dstType, dstVal), type_(tp)
     {
     }
     SpillFillData(Location src, Location dst, DataType::Type type) : src_(src), dst_(dst), type_(type) {}

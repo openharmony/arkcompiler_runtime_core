@@ -24,14 +24,13 @@ namespace panda {
 class MallocMemPool : public MemPool<MallocMemPool> {
 private:
     template <class ArenaT = Arena, OSPagesAllocPolicy OS_ALLOC_POLICY>
-    ArenaT *AllocArenaImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, const void *allocator_addr);
+    ArenaT *AllocArenaImpl(size_t size, SpaceType spaceType, AllocatorType allocatorType, const void *allocatorAddr);
 
     template <class ArenaT = Arena, OSPagesPolicy OS_PAGES_POLICY>
     void FreeArenaImpl(ArenaT *arena);
 
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-    static Pool AllocPoolImpl(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                              const void *allocator_addr);
+    static Pool AllocPoolImpl(size_t size, SpaceType spaceType, AllocatorType allocatorType, const void *allocatorAddr);
 
     template <OSPagesPolicy OS_PAGES_POLICY>
     static void FreePoolImpl(void *mem, size_t size);

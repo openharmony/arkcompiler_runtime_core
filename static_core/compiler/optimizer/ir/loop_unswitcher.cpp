@@ -19,8 +19,8 @@
 #include "loop_unswitcher.h"
 
 namespace panda::compiler {
-LoopUnswitcher::LoopUnswitcher(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *local_allocator)
-    : GraphCloner(graph, allocator, local_allocator), conditions_(allocator->Adapter())
+LoopUnswitcher::LoopUnswitcher(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *localAllocator)
+    : GraphCloner(graph, allocator, localAllocator), conditions_(allocator->Adapter())
 {
 }
 
@@ -38,11 +38,11 @@ Loop *LoopUnswitcher::UnswitchLoop(Loop *loop, Inst *inst)
     if (loop->GetPreHeader()->GetSuccsBlocks().size() != MAX_SUCCS_NUM) {
         return nullptr;
     }
-    ASSERT(clone_marker_ == UNDEF_MARKER);
+    ASSERT(cloneMarker_ == UNDEF_MARKER);
 
-    auto marker_holder = MarkerHolder(GetGraph());
-    clone_marker_ = marker_holder.GetMarker();
-    auto unswitch_data = PrepareLoopToUnswitch(loop);
+    auto markerHolder = MarkerHolder(GetGraph());
+    cloneMarker_ = markerHolder.GetMarker();
+    auto unswitchData = PrepareLoopToUnswitch(loop);
 
     conditions_.clear();
     for (auto bb : loop->GetBlocks()) {
@@ -50,157 +50,157 @@ Loop *LoopUnswitcher::UnswitchLoop(Loop *loop, Inst *inst)
             continue;
         }
 
-        auto if_imm = bb->GetLastInst();
-        if (IsConditionEqual(if_imm, inst, false) || IsConditionEqual(if_imm, inst, true)) {
+        auto ifImm = bb->GetLastInst();
+        if (IsConditionEqual(ifImm, inst, false) || IsConditionEqual(ifImm, inst, true)) {
             // will replace all equal or oposite conditions
-            conditions_.push_back(if_imm);
+            conditions_.push_back(ifImm);
         }
     }
 
-    CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, false>(*unswitch_data->blocks, GetGraph());
-    BuildLoopUnswitchControlFlow(unswitch_data);
-    BuildLoopUnswitchDataFlow(unswitch_data, inst);
-    MakeLoopCloneInfo(unswitch_data);
+    CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, false>(*unswitchData->blocks, GetGraph());
+    BuildLoopUnswitchControlFlow(unswitchData);
+    BuildLoopUnswitchDataFlow(unswitchData, inst);
+    MakeLoopCloneInfo(unswitchData);
     GetGraph()->RunPass<DominatorsTree>();
 
-    auto clone_loop = GetClone(loop->GetHeader())->GetLoop();
-    ASSERT(clone_loop != loop && clone_loop->GetOuterLoop() == loop->GetOuterLoop());
+    auto cloneLoop = GetClone(loop->GetHeader())->GetLoop();
+    ASSERT(cloneLoop != loop && cloneLoop->GetOuterLoop() == loop->GetOuterLoop());
     COMPILER_LOG(DEBUG, GRAPH_CLONER) << "Loop " << loop->GetId() << " is copied";
-    COMPILER_LOG(DEBUG, GRAPH_CLONER) << "Created new loop, id = " << clone_loop->GetId();
-    return clone_loop;
+    COMPILER_LOG(DEBUG, GRAPH_CLONER) << "Created new loop, id = " << cloneLoop->GetId();
+    return cloneLoop;
 }
 
 GraphCloner::LoopClonerData *LoopUnswitcher::PrepareLoopToUnswitch(Loop *loop)
 {
-    auto pre_header = loop->GetPreHeader();
-    ASSERT(pre_header->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
+    auto preHeader = loop->GetPreHeader();
+    ASSERT(preHeader->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
     // If `outside_succ` has more than 2 predecessors, create a new one
     // with loop header and back-edge predecessors only and insert it before `outside_succ`
-    auto outside_succ = GetLoopOutsideSuccessor(loop);
+    auto outsideSucc = GetLoopOutsideSuccessor(loop);
     constexpr auto PREDS_NUM = 2;
-    if (outside_succ->GetPredsBlocks().size() > PREDS_NUM) {
-        auto back_edge = loop->GetBackEdges()[0];
-        outside_succ = CreateNewOutsideSucc(outside_succ, back_edge, pre_header);
+    if (outsideSucc->GetPredsBlocks().size() > PREDS_NUM) {
+        auto backEdge = loop->GetBackEdges()[0];
+        outsideSucc = CreateNewOutsideSucc(outsideSucc, backEdge, preHeader);
     }
     // Split outside succ after last phi
     // create empty block before outside succ if outside succ don't contain phi insts
-    if (outside_succ->HasPhi() && outside_succ->GetFirstInst() != nullptr) {
-        auto last_phi = outside_succ->GetFirstInst()->GetPrev();
-        auto block = outside_succ->SplitBlockAfterInstruction(last_phi, true);
+    if (outsideSucc->HasPhi() && outsideSucc->GetFirstInst() != nullptr) {
+        auto lastPhi = outsideSucc->GetFirstInst()->GetPrev();
+        auto block = outsideSucc->SplitBlockAfterInstruction(lastPhi, true);
         // if `outside_succ` is pre-header replace it by `block`
-        for (auto in_loop : loop->GetOuterLoop()->GetInnerLoops()) {
-            if (in_loop->GetPreHeader() == outside_succ) {
-                in_loop->SetPreHeader(block);
+        for (auto inLoop : loop->GetOuterLoop()->GetInnerLoops()) {
+            if (inLoop->GetPreHeader() == outsideSucc) {
+                inLoop->SetPreHeader(block);
             }
         }
-    } else if (outside_succ->GetFirstInst() != nullptr) {
-        auto block = outside_succ->InsertEmptyBlockBefore();
-        outside_succ->GetLoop()->AppendBlock(block);
-        outside_succ = block;
+    } else if (outsideSucc->GetFirstInst() != nullptr) {
+        auto block = outsideSucc->InsertEmptyBlockBefore();
+        outsideSucc->GetLoop()->AppendBlock(block);
+        outsideSucc = block;
     }
     // Populate `LoopClonerData`
     auto allocator = GetGraph()->GetLocalAllocator();
-    auto unswitch_data = allocator->New<LoopClonerData>();
-    unswitch_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
-    unswitch_data->blocks->resize(loop->GetBlocks().size() + 1);
-    unswitch_data->blocks->at(0) = pre_header;
-    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unswitch_data->blocks->begin() + 1);
-    unswitch_data->blocks->push_back(outside_succ);
-    unswitch_data->outer = outside_succ;
-    unswitch_data->header = loop->GetHeader();
-    unswitch_data->pre_header = loop->GetPreHeader();
-    return unswitch_data;
+    auto unswitchData = allocator->New<LoopClonerData>();
+    unswitchData->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+    unswitchData->blocks->resize(loop->GetBlocks().size() + 1);
+    unswitchData->blocks->at(0) = preHeader;
+    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unswitchData->blocks->begin() + 1);
+    unswitchData->blocks->push_back(outsideSucc);
+    unswitchData->outer = outsideSucc;
+    unswitchData->header = loop->GetHeader();
+    unswitchData->preHeader = loop->GetPreHeader();
+    return unswitchData;
 }
 
-void LoopUnswitcher::BuildLoopUnswitchControlFlow(LoopClonerData *unswitch_data)
+void LoopUnswitcher::BuildLoopUnswitchControlFlow(LoopClonerData *unswitchData)
 {
-    ASSERT(unswitch_data != nullptr);
-    auto outer_clone = GetClone(unswitch_data->outer);
-    auto pre_header_clone = GetClone(unswitch_data->pre_header);
+    ASSERT(unswitchData != nullptr);
+    auto outerClone = GetClone(unswitchData->outer);
+    auto preHeaderClone = GetClone(unswitchData->preHeader);
 
-    auto common_outer = GetGraph()->CreateEmptyBlock();
+    auto commonOuter = GetGraph()->CreateEmptyBlock();
 
-    while (!unswitch_data->outer->GetSuccsBlocks().empty()) {
-        auto succ = unswitch_data->outer->GetSuccsBlocks().front();
-        succ->ReplacePred(unswitch_data->outer, common_outer);
-        unswitch_data->outer->RemoveSucc(succ);
+    while (!unswitchData->outer->GetSuccsBlocks().empty()) {
+        auto succ = unswitchData->outer->GetSuccsBlocks().front();
+        succ->ReplacePred(unswitchData->outer, commonOuter);
+        unswitchData->outer->RemoveSucc(succ);
     }
-    unswitch_data->outer->AddSucc(common_outer);
-    outer_clone->AddSucc(common_outer);
+    unswitchData->outer->AddSucc(commonOuter);
+    outerClone->AddSucc(commonOuter);
 
-    auto common_predecessor = GetGraph()->CreateEmptyBlock();
-    while (!unswitch_data->pre_header->GetPredsBlocks().empty()) {
-        auto pred = unswitch_data->pre_header->GetPredsBlocks().front();
-        pred->ReplaceSucc(unswitch_data->pre_header, common_predecessor);
-        unswitch_data->pre_header->RemovePred(pred);
+    auto commonPredecessor = GetGraph()->CreateEmptyBlock();
+    while (!unswitchData->preHeader->GetPredsBlocks().empty()) {
+        auto pred = unswitchData->preHeader->GetPredsBlocks().front();
+        pred->ReplaceSucc(unswitchData->preHeader, commonPredecessor);
+        unswitchData->preHeader->RemovePred(pred);
     }
-    common_predecessor->AddSucc(unswitch_data->pre_header);
-    common_predecessor->AddSucc(pre_header_clone);
+    commonPredecessor->AddSucc(unswitchData->preHeader);
+    commonPredecessor->AddSucc(preHeaderClone);
 
-    for (auto &block : *unswitch_data->blocks) {
-        if (block != unswitch_data->pre_header) {
+    for (auto &block : *unswitchData->blocks) {
+        if (block != unswitchData->preHeader) {
             CloneEdges<CloneEdgeType::EDGE_PRED>(block);
         }
-        if (block != unswitch_data->outer) {
+        if (block != unswitchData->outer) {
             CloneEdges<CloneEdgeType::EDGE_SUCC>(block);
         }
     }
-    ASSERT(unswitch_data->outer->GetPredBlockIndex(unswitch_data->pre_header) ==
-           outer_clone->GetPredBlockIndex(pre_header_clone));
-    ASSERT(unswitch_data->header->GetPredBlockIndex(unswitch_data->pre_header) ==
-           GetClone(unswitch_data->header)->GetPredBlockIndex(pre_header_clone));
+    ASSERT(unswitchData->outer->GetPredBlockIndex(unswitchData->preHeader) ==
+           outerClone->GetPredBlockIndex(preHeaderClone));
+    ASSERT(unswitchData->header->GetPredBlockIndex(unswitchData->preHeader) ==
+           GetClone(unswitchData->header)->GetPredBlockIndex(preHeaderClone));
 }
 
-void LoopUnswitcher::BuildLoopUnswitchDataFlow(LoopClonerData *unswitch_data, Inst *if_inst)
+void LoopUnswitcher::BuildLoopUnswitchDataFlow(LoopClonerData *unswitchData, Inst *ifInst)
 {
-    ASSERT(unswitch_data != nullptr);
-    for (const auto &block : *unswitch_data->blocks) {
+    ASSERT(unswitchData != nullptr);
+    for (const auto &block : *unswitchData->blocks) {
         for (const auto &inst : block->AllInsts()) {
             if (inst->GetOpcode() == Opcode::NOP) {
                 continue;
             }
-            if (inst->IsMarked(clone_marker_)) {
+            if (inst->IsMarked(cloneMarker_)) {
                 SetCloneInputs<false>(inst);
                 UpdateCaller(inst);
             }
         }
     }
 
-    auto common_outer = unswitch_data->outer->GetSuccessor(0);
-    for (auto phi : unswitch_data->outer->PhiInsts()) {
-        auto phi_clone = GetClone(phi);
-        auto phi_join = common_outer->GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
-        phi->ReplaceUsers(phi_join);
-        phi_join->AppendInput(phi);
-        phi_join->AppendInput(phi_clone);
-        common_outer->AppendPhi(phi_join);
+    auto commonOuter = unswitchData->outer->GetSuccessor(0);
+    for (auto phi : unswitchData->outer->PhiInsts()) {
+        auto phiClone = GetClone(phi);
+        auto phiJoin = commonOuter->GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
+        phi->ReplaceUsers(phiJoin);
+        phiJoin->AppendInput(phi);
+        phiJoin->AppendInput(phiClone);
+        commonOuter->AppendPhi(phiJoin);
     }
 
-    auto common_predecessor = unswitch_data->pre_header->GetPredecessor(0);
-    auto if_inst_unswitch = if_inst->Clone(common_predecessor->GetGraph());
-    for (size_t i = 0; i < if_inst->GetInputsCount(); i++) {
-        auto input = if_inst->GetInput(i);
-        if_inst_unswitch->SetInput(i, input.GetInst());
+    auto commonPredecessor = unswitchData->preHeader->GetPredecessor(0);
+    auto ifInstUnswitch = ifInst->Clone(commonPredecessor->GetGraph());
+    for (size_t i = 0; i < ifInst->GetInputsCount(); i++) {
+        auto input = ifInst->GetInput(i);
+        ifInstUnswitch->SetInput(i, input.GetInst());
     }
-    common_predecessor->AppendInst(if_inst_unswitch);
+    commonPredecessor->AppendInst(ifInstUnswitch);
 
-    ReplaceWithConstantCondition(if_inst_unswitch);
+    ReplaceWithConstantCondition(ifInstUnswitch);
 }
 
-void LoopUnswitcher::ReplaceWithConstantCondition(Inst *if_inst)
+void LoopUnswitcher::ReplaceWithConstantCondition(Inst *ifInst)
 {
-    auto graph = if_inst->GetBasicBlock()->GetGraph();
+    auto graph = ifInst->GetBasicBlock()->GetGraph();
     auto i1 = graph->FindOrCreateConstant(1);
     auto i2 = graph->FindOrCreateConstant(0);
 
-    auto if_imm = if_inst->CastToIfImm();
-    ASSERT(if_imm->GetCc() == ConditionCode::CC_NE || if_imm->GetCc() == ConditionCode::CC_EQ);
-    if ((if_imm->GetImm() == 0) != (if_imm->GetCc() == ConditionCode::CC_NE)) {
+    auto ifImm = ifInst->CastToIfImm();
+    ASSERT(ifImm->GetCc() == ConditionCode::CC_NE || ifImm->GetCc() == ConditionCode::CC_EQ);
+    if ((ifImm->GetImm() == 0) != (ifImm->GetCc() == ConditionCode::CC_NE)) {
         std::swap(i1, i2);
     }
 
     for (auto inst : conditions_) {
-        if (IsConditionEqual(inst, if_inst, true)) {
+        if (IsConditionEqual(inst, ifInst, true)) {
             inst->SetInput(0, i2);
             GetClone(inst)->SetInput(0, i1);
         } else {
@@ -236,12 +236,12 @@ Inst *LoopUnswitcher::FindUnswitchInst(Loop *loop)
         if (bb->GetSuccsBlocks().size() != MAX_SUCCS_NUM) {
             continue;
         }
-        auto if_inst = bb->GetLastInst();
-        if (AllInputsConst(if_inst)) {
+        auto ifInst = bb->GetLastInst();
+        if (AllInputsConst(ifInst)) {
             continue;
         }
-        if (IsHoistable(if_inst, loop)) {
-            return if_inst;
+        if (IsHoistable(ifInst, loop)) {
+            return ifInst;
         }
     }
     return nullptr;
@@ -249,12 +249,12 @@ Inst *LoopUnswitcher::FindUnswitchInst(Loop *loop)
 
 bool LoopUnswitcher::IsSmallLoop(Loop *loop)
 {
-    auto loop_parser = CountableLoopParser(*loop);
-    auto loop_info = loop_parser.Parse();
-    if (!loop_info.has_value()) {
+    auto loopParser = CountableLoopParser(*loop);
+    auto loopInfo = loopParser.Parse();
+    if (!loopInfo.has_value()) {
         return false;
     }
-    auto iterations = CountableLoopParser::GetLoopIterations(*loop_info);
+    auto iterations = CountableLoopParser::GetLoopIterations(*loopInfo);
     if (!iterations.has_value()) {
         return false;
     }
@@ -270,8 +270,8 @@ static uint32_t CountLoopInstructions(const Loop *loop)
     return count;
 }
 
-static uint32_t EstimateUnswitchInstructionsCount(BasicBlock *bb, const BasicBlock *back_edge,
-                                                  const Inst *unswitch_inst, bool true_cond, Marker marker)
+static uint32_t EstimateUnswitchInstructionsCount(BasicBlock *bb, const BasicBlock *backEdge, const Inst *unswitchInst,
+                                                  bool trueCond, Marker marker)
 {
     if (bb->IsMarked(marker)) {
         return 0;
@@ -279,42 +279,41 @@ static uint32_t EstimateUnswitchInstructionsCount(BasicBlock *bb, const BasicBlo
     bb->SetMarker(marker);
 
     uint32_t count = bb->CountInsts();
-    if (bb == back_edge) {
+    if (bb == backEdge) {
         return count;
     }
 
     if (bb->GetSuccsBlocks().size() != MAX_SUCCS_NUM) {
-        count +=
-            EstimateUnswitchInstructionsCount(bb->GetSuccsBlocks()[0], back_edge, unswitch_inst, true_cond, marker);
-    } else if (IsConditionEqual(unswitch_inst, bb->GetLastInst(), false)) {
-        auto succ = true_cond ? bb->GetTrueSuccessor() : bb->GetFalseSuccessor();
-        count += EstimateUnswitchInstructionsCount(succ, back_edge, unswitch_inst, true_cond, marker);
-    } else if (IsConditionEqual(unswitch_inst, bb->GetLastInst(), true)) {
-        auto succ = true_cond ? bb->GetFalseSuccessor() : bb->GetTrueSuccessor();
-        count += EstimateUnswitchInstructionsCount(succ, back_edge, unswitch_inst, true_cond, marker);
+        count += EstimateUnswitchInstructionsCount(bb->GetSuccsBlocks()[0], backEdge, unswitchInst, trueCond, marker);
+    } else if (IsConditionEqual(unswitchInst, bb->GetLastInst(), false)) {
+        auto succ = trueCond ? bb->GetTrueSuccessor() : bb->GetFalseSuccessor();
+        count += EstimateUnswitchInstructionsCount(succ, backEdge, unswitchInst, trueCond, marker);
+    } else if (IsConditionEqual(unswitchInst, bb->GetLastInst(), true)) {
+        auto succ = trueCond ? bb->GetFalseSuccessor() : bb->GetTrueSuccessor();
+        count += EstimateUnswitchInstructionsCount(succ, backEdge, unswitchInst, trueCond, marker);
     } else {
         for (auto succ : bb->GetSuccsBlocks()) {
-            count += EstimateUnswitchInstructionsCount(succ, back_edge, unswitch_inst, true_cond, marker);
+            count += EstimateUnswitchInstructionsCount(succ, backEdge, unswitchInst, trueCond, marker);
         }
     }
     return count;
 }
 
-void LoopUnswitcher::EstimateInstructionsCount(const Loop *loop, const Inst *unswitch_inst, uint32_t *loop_size,
-                                               uint32_t *true_count, uint32_t *false_count)
+void LoopUnswitcher::EstimateInstructionsCount(const Loop *loop, const Inst *unswitchInst, uint32_t *loopSize,
+                                               uint32_t *trueCount, uint32_t *falseCount)
 {
     ASSERT(loop->GetBackEdges().size() == 1);
     ASSERT(loop->GetInnerLoops().empty());
-    *loop_size = CountLoopInstructions(loop);
-    auto back_edge = loop->GetBackEdges()[0];
-    auto graph = back_edge->GetGraph();
+    *loopSize = CountLoopInstructions(loop);
+    auto backEdge = loop->GetBackEdges()[0];
+    auto graph = backEdge->GetGraph();
 
-    auto true_marker = graph->NewMarker();
-    *true_count = EstimateUnswitchInstructionsCount(loop->GetHeader(), back_edge, unswitch_inst, true, true_marker);
-    graph->EraseMarker(true_marker);
+    auto trueMarker = graph->NewMarker();
+    *trueCount = EstimateUnswitchInstructionsCount(loop->GetHeader(), backEdge, unswitchInst, true, trueMarker);
+    graph->EraseMarker(trueMarker);
 
-    auto false_marker = graph->NewMarker();
-    *false_count = EstimateUnswitchInstructionsCount(loop->GetHeader(), back_edge, unswitch_inst, false, false_marker);
-    graph->EraseMarker(false_marker);
+    auto falseMarker = graph->NewMarker();
+    *falseCount = EstimateUnswitchInstructionsCount(loop->GetHeader(), backEdge, unswitchInst, false, falseMarker);
+    graph->EraseMarker(falseMarker);
 }
 }  // namespace panda::compiler

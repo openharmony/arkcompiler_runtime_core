@@ -25,17 +25,17 @@ namespace panda::ets {
 /*static*/
 panda_file::File::EntityId EtsAnnotation::FindAsyncAnnotation(Method *method)
 {
-    panda_file::File::EntityId async_ann_id;
+    panda_file::File::EntityId asyncAnnId;
     const panda_file::File &pf = *method->GetPandaFile();
     panda_file::MethodDataAccessor mda(pf, method->GetFileId());
-    mda.EnumerateAnnotations([&pf, &async_ann_id](panda_file::File::EntityId ann_id) {
-        panda_file::AnnotationDataAccessor ada(pf, ann_id);
-        const char *class_name = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
-        if (class_name == panda_file_items::class_descriptors::ASYNC) {
-            async_ann_id = ann_id;
+    mda.EnumerateAnnotations([&pf, &asyncAnnId](panda_file::File::EntityId annId) {
+        panda_file::AnnotationDataAccessor ada(pf, annId);
+        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
+        if (className == panda_file_items::class_descriptors::ASYNC) {
+            asyncAnnId = annId;
         }
     });
-    return async_ann_id;
+    return asyncAnnId;
 }
 
 }  // namespace panda::ets

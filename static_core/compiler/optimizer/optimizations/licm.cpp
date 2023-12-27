@@ -24,8 +24,8 @@
 #include "optimizer/ir/analysis.h"
 
 namespace panda::compiler {
-Licm::Licm(Graph *graph, uint32_t hoist_limit)
-    : Optimization(graph), hoist_limit_(hoist_limit), hoistable_instructions_(graph->GetLocalAllocator()->Adapter())
+Licm::Licm(Graph *graph, uint32_t hoistLimit)
+    : Optimization(graph), hoistLimit_(hoistLimit), hoistableInstructions_(graph->GetLocalAllocator()->Adapter())
 {
 }
 
@@ -38,14 +38,14 @@ bool Licm::RunImpl()
 
     ASSERT(GetGraph()->GetRootLoop() != nullptr);
     if (!GetGraph()->GetRootLoop()->GetInnerLoops().empty()) {
-        marker_loop_exit_ = GetGraph()->NewMarker();
-        MarkLoopExits(GetGraph(), marker_loop_exit_);
+        markerLoopExit_ = GetGraph()->NewMarker();
+        MarkLoopExits(GetGraph(), markerLoopExit_);
         for (auto loop : GetGraph()->GetRootLoop()->GetInnerLoops()) {
             LoopSearchDFS(loop);
         }
-        GetGraph()->EraseMarker(marker_loop_exit_);
+        GetGraph()->EraseMarker(markerLoopExit_);
     }
-    return (hoisted_inst_count_ != 0);
+    return (hoistedInstCount_ != 0);
 }
 
 void Licm::InvalidateAnalyses()
@@ -59,7 +59,7 @@ void Licm::InvalidateAnalyses()
  */
 bool Licm::IsBlockLoopExit(BasicBlock *block)
 {
-    return block->IsMarked(marker_loop_exit_) && !block->IsLoopHeader();
+    return block->IsMarked(markerLoopExit_) && !block->IsLoopHeader();
 }
 
 /*
@@ -68,8 +68,8 @@ bool Licm::IsBlockLoopExit(BasicBlock *block)
 void Licm::LoopSearchDFS(Loop *loop)
 {
     ASSERT(loop != nullptr);
-    for (auto inner_loop : loop->GetInnerLoops()) {
-        LoopSearchDFS(inner_loop);
+    for (auto innerLoop : loop->GetInnerLoops()) {
+        LoopSearchDFS(innerLoop);
     }
     if (IsLoopVisited(*loop)) {
         VisitLoop(loop);
@@ -90,7 +90,7 @@ bool Licm::IsLoopVisited(const Loop &loop) const
         COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Try-catch loop isn't visited, loop id = " << loop.GetId();
         return false;
     }
-    if (hoisted_inst_count_ >= hoist_limit_) {
+    if (hoistedInstCount_ >= hoistLimit_) {
         COMPILER_LOG(DEBUG, LICM_OPT) << "Limit is exceeded, loop isn't visited, id = " << loop.GetId();
         return false;
     }
@@ -110,46 +110,46 @@ bool AllInputsDominate(Inst *inst, Inst *dom)
 
 void Licm::TryAppendHoistableInst(Inst *inst, BasicBlock *block, Loop *loop)
 {
-    if (hoisted_inst_count_ >= hoist_limit_) {
+    if (hoistedInstCount_ >= hoistLimit_) {
         COMPILER_LOG(DEBUG, LICM_OPT) << "Limit is exceeded, Can't hoist instruction with id = " << inst->GetId();
         return;
     }
     if (inst->IsResolver()) {
         // If it is not "do-while" or "while(true)" loops then the resolver
         // can not be hoisted out as it might perform class loading/initialization.
-        if (block != loop->GetHeader() && loop->GetHeader()->IsMarked(marker_loop_exit_)) {
+        if (block != loop->GetHeader() && loop->GetHeader()->IsMarked(markerLoopExit_)) {
             COMPILER_LOG(DEBUG, LICM_OPT)
                 << "Header is a loop exit, Can't hoist (resolver) instruction with id = " << inst->GetId();
             return;
         }
         // Don't increment hoisted instruction count until check
         // if there is another suitable SaveState for the resolver.
-        hoistable_instructions_.push_back(inst);
-        inst->SetMarker(marker_hoist_inst_);
+        hoistableInstructions_.push_back(inst);
+        inst->SetMarker(markerHoistInst_);
     } else {
         COMPILER_LOG(DEBUG, LICM_OPT) << "Hoist instruction with id = " << inst->GetId();
-        hoistable_instructions_.push_back(inst);
-        inst->SetMarker(marker_hoist_inst_);
-        hoisted_inst_count_++;
+        hoistableInstructions_.push_back(inst);
+        inst->SetMarker(markerHoistInst_);
+        hoistedInstCount_++;
     }
 }
 
-void Licm::MoveInstructions(BasicBlock *pre_header, Loop *loop)
+void Licm::MoveInstructions(BasicBlock *preHeader, Loop *loop)
 {
     // Find position to move: either add first instruction to the empty block or after the last instruction
-    Inst *last_inst = pre_header->GetLastInst();
+    Inst *lastInst = preHeader->GetLastInst();
 
     // Move instructions
-    for (auto inst : hoistable_instructions_) {
+    for (auto inst : hoistableInstructions_) {
         Inst *target = nullptr;
         if (inst->IsResolver()) {
-            auto ss = FindSaveStateForResolver(inst, pre_header);
+            auto ss = FindSaveStateForResolver(inst, preHeader);
             if (ss != nullptr) {
                 ASSERT(ss->IsSaveState());
                 COMPILER_LOG(DEBUG, LICM_OPT) << "Hoist (resolver) instruction with id = " << inst->GetId();
                 inst->SetSaveState(ss);
                 inst->SetPc(ss->GetPc());
-                hoisted_inst_count_++;
+                hoistedInstCount_++;
             } else {
                 continue;
             }
@@ -164,21 +164,21 @@ void Licm::MoveInstructions(BasicBlock *pre_header, Loop *loop)
             }
         }
         inst->GetBasicBlock()->EraseInst(inst);
-        if (last_inst == nullptr || last_inst->IsPhi()) {
-            pre_header->AppendInst(inst);
-            last_inst = inst;
+        if (lastInst == nullptr || lastInst->IsPhi()) {
+            preHeader->AppendInst(inst);
+            lastInst = inst;
         } else {
-            ASSERT(last_inst->GetBasicBlock() == pre_header);
-            Inst *ss = pre_header->FindSaveStateDeoptimize();
+            ASSERT(lastInst->GetBasicBlock() == preHeader);
+            Inst *ss = preHeader->FindSaveStateDeoptimize();
             if (ss != nullptr && AllInputsDominate(inst, ss)) {
                 ss->InsertBefore(inst);
             } else {
-                last_inst->InsertAfter(inst);
-                last_inst = inst;
+                lastInst->InsertAfter(inst);
+                lastInst = inst;
             }
         }
         GetGraph()->GetEventWriter().EventLicm(inst->GetId(), inst->GetPc(), loop->GetId(),
-                                               pre_header->GetLoop()->GetId());
+                                               preHeader->GetLoop()->GetId());
         if (inst->IsMovableObject()) {
             ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), inst, target);
         }
@@ -190,9 +190,9 @@ void Licm::MoveInstructions(BasicBlock *pre_header, Loop *loop)
  */
 void Licm::VisitLoop(Loop *loop)
 {
-    auto marker_holder = MarkerHolder(GetGraph());
-    marker_hoist_inst_ = marker_holder.GetMarker();
-    hoistable_instructions_.clear();
+    auto markerHolder = MarkerHolder(GetGraph());
+    markerHoistInst_ = markerHolder.GetMarker();
+    hoistableInstructions_.clear();
     // Collect instruction, which can be hoisted
     for (auto block : loop->GetBlocks()) {
         ASSERT(block->GetLoop() == loop);
@@ -203,42 +203,42 @@ void Licm::VisitLoop(Loop *loop)
             TryAppendHoistableInst(inst, block, loop);
         }
     }
-    auto pre_header = loop->GetPreHeader();
-    ASSERT(pre_header != nullptr);
+    auto preHeader = loop->GetPreHeader();
+    ASSERT(preHeader != nullptr);
     auto header = loop->GetHeader();
-    if (pre_header->GetSuccsBlocks().size() > 1) {
+    if (preHeader->GetSuccsBlocks().size() > 1) {
         ASSERT(GetGraph()->IsAnalysisValid<DominatorsTree>());
         // Create new pre-header with single successor: loop header
-        auto new_pre_header = pre_header->InsertNewBlockToSuccEdge(header);
-        pre_header->GetLoop()->AppendBlock(new_pre_header);
+        auto newPreHeader = preHeader->InsertNewBlockToSuccEdge(header);
+        preHeader->GetLoop()->AppendBlock(newPreHeader);
         // Fix Dominators info
-        auto &dom_tree = GetGraph()->GetAnalysis<DominatorsTree>();
-        dom_tree.SetValid(true);
-        ASSERT(header->GetDominator() == pre_header);
-        pre_header->RemoveDominatedBlock(header);
-        dom_tree.SetDomPair(new_pre_header, header);
-        dom_tree.SetDomPair(pre_header, new_pre_header);
+        auto &domTree = GetGraph()->GetAnalysis<DominatorsTree>();
+        domTree.SetValid(true);
+        ASSERT(header->GetDominator() == preHeader);
+        preHeader->RemoveDominatedBlock(header);
+        domTree.SetDomPair(newPreHeader, header);
+        domTree.SetDomPair(preHeader, newPreHeader);
         // Change pre-header
-        loop->SetPreHeader(new_pre_header);
-        pre_header = new_pre_header;
+        loop->SetPreHeader(newPreHeader);
+        preHeader = newPreHeader;
     }
-    MoveInstructions(pre_header, loop);
+    MoveInstructions(preHeader, loop);
 }
 
-static bool FindUnsafeInstBetween(BasicBlock *dom_bb, BasicBlock *curr_bb, Marker visited, const Inst *resolver,
-                                  Inst *start_inst = nullptr)
+static bool FindUnsafeInstBetween(BasicBlock *domBb, BasicBlock *currBb, Marker visited, const Inst *resolver,
+                                  Inst *startInst = nullptr)
 {
     ASSERT(resolver->IsResolver());
 
-    if (dom_bb == curr_bb) {
+    if (domBb == currBb) {
         return false;
     }
-    if (curr_bb->SetMarker(visited)) {
+    if (currBb->SetMarker(visited)) {
         return false;
     }
     // Do not cross a try block because the resolver
     // can throw NoSuch{Method|Field}Exception
-    if (curr_bb->IsTry()) {
+    if (currBb->IsTry()) {
         return true;
     }
     // Field and Method resolvers may call GetField and InitializeClass methods
@@ -246,31 +246,31 @@ static bool FindUnsafeInstBetween(BasicBlock *dom_bb, BasicBlock *curr_bb, Marke
     // An order of class initialization must be preserved, so the resolver
     // must not cross other instructions performing class initialization
     // We have to be conservative with respect to calls.
-    for (auto inst : InstSafeReverseIter(*curr_bb, start_inst)) {
+    for (auto inst : InstSafeReverseIter(*currBb, startInst)) {
         if (inst->IsClassInst() || inst->IsResolver() || inst->IsCall()) {
             return true;
         }
     }
-    for (auto pred : curr_bb->GetPredsBlocks()) {
-        if (FindUnsafeInstBetween(dom_bb, pred, visited, resolver)) {
+    for (auto pred : currBb->GetPredsBlocks()) {
+        if (FindUnsafeInstBetween(domBb, pred, visited, resolver)) {
             return true;
         }
     }
     return false;
 }
 
-Inst *Licm::FindSaveStateForResolver(Inst *resolver, const BasicBlock *pre_header)
+Inst *Licm::FindSaveStateForResolver(Inst *resolver, const BasicBlock *preHeader)
 {
-    ASSERT(pre_header->GetSuccsBlocks().size() == 1);
+    ASSERT(preHeader->GetSuccsBlocks().size() == 1);
     // Lookup for an appropriate SaveState in the preheader
     Inst *ss = nullptr;
-    for (const auto &inst : pre_header->InstsSafeReverse()) {
+    for (const auto &inst : preHeader->InstsSafeReverse()) {
         if (inst->GetOpcode() == Opcode::SaveState) {
             // Give up further checking if SaveState came from an inlined function.
             if (static_cast<SaveStateInst *>(inst)->GetCallerInst() != nullptr) {
                 return nullptr;
             }
-            for (auto i = pre_header->GetLastInst(); i != inst; i = i->GetPrev()) {
+            for (auto i = preHeader->GetLastInst(); i != inst; i = i->GetPrev()) {
                 if (i->IsMovableObject()) {
                     // In this case we have to avoid instructions, which may trigger GC and move objects,
                     // thus we can not move the resolver to the pre_header and link with SaveState.
@@ -302,26 +302,26 @@ Inst *Licm::FindSaveStateForResolver(Inst *resolver, const BasicBlock *pre_heade
 bool Licm::InstInputDominatesPreheader(Inst *inst)
 {
     ASSERT(!inst->IsPhi());
-    auto inst_loop = inst->GetBasicBlock()->GetLoop();
+    auto instLoop = inst->GetBasicBlock()->GetLoop();
     for (auto input : inst->GetInputs()) {
         // Graph is in SSA form and the instructions not PHI,
         // so every 'input' must dominate 'inst'.
         ASSERT(input.GetInst()->IsDominate(inst));
-        auto input_loop = input.GetInst()->GetBasicBlock()->GetLoop();
-        if (inst_loop == input_loop) {
+        auto inputLoop = input.GetInst()->GetBasicBlock()->GetLoop();
+        if (instLoop == inputLoop) {
             if (inst->IsResolver() && input.GetInst()->IsSaveState()) {
                 // Resolver is coupled with SaveState that is not hoistable.
                 // We will try to find an appropriate SaveState in the preheader.
                 continue;
             }
-            if (!input.GetInst()->IsMarked(marker_hoist_inst_)) {
+            if (!input.GetInst()->IsMarked(markerHoistInst_)) {
                 return false;
             }
-        } else if (inst_loop->GetOuterLoop() == input_loop->GetOuterLoop()) {
-            if (!input.GetInst()->GetBasicBlock()->IsDominate(inst_loop->GetPreHeader())) {
+        } else if (instLoop->GetOuterLoop() == inputLoop->GetOuterLoop()) {
+            if (!input.GetInst()->GetBasicBlock()->IsDominate(instLoop->GetPreHeader())) {
                 return false;
             }
-        } else if (!inst_loop->IsInside(input_loop)) {
+        } else if (!instLoop->IsInside(inputLoop)) {
             return false;
         }
     }
@@ -333,8 +333,8 @@ bool Licm::InstInputDominatesPreheader(Inst *inst)
  */
 bool Licm::InstDominatesLoopExits(Inst *inst)
 {
-    auto inst_loop = inst->GetBasicBlock()->GetLoop();
-    for (auto block : inst_loop->GetBlocks()) {
+    auto instLoop = inst->GetBasicBlock()->GetLoop();
+    for (auto block : instLoop->GetBlocks()) {
         if (IsBlockLoopExit(block) && !inst->GetBasicBlock()->IsDominate(block)) {
             return false;
         }

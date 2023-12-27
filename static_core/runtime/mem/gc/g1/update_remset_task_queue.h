@@ -26,8 +26,8 @@ template <class LanguageConfig>
 class UpdateRemsetTaskQueue final : public UpdateRemsetWorker<LanguageConfig> {
 public:
     UpdateRemsetTaskQueue(G1GC<LanguageConfig> *gc, GCG1BarrierSet::ThreadLocalCardQueues *queue,
-                          os::memory::Mutex *queue_lock, size_t region_size, bool update_concurrent,
-                          size_t min_concurrent_cards_to_process);
+                          os::memory::Mutex *queueLock, size_t regionSize, bool updateConcurrent,
+                          size_t minConcurrentCardsToProcess);
     NO_COPY_SEMANTIC(UpdateRemsetTaskQueue);
     NO_MOVE_SEMANTIC(UpdateRemsetTaskQueue);
     ~UpdateRemsetTaskQueue() final;
@@ -37,16 +37,16 @@ private:
 
     void DestroyWorkerImpl() final;
 
-    void ContinueProcessCards() REQUIRES(this->update_remset_lock_) final;
+    void ContinueProcessCards() REQUIRES(this->updateRemsetLock_) final;
 
     /// @brief Add a new process cards task in task manager if such task does not exist, do nothing otherwise
-    void StartProcessCards() REQUIRES(this->update_remset_lock_);
+    void StartProcessCards() REQUIRES(this->updateRemsetLock_);
 
     /* TaskManager specific variables */
     static constexpr taskmanager::TaskProperties UPDATE_REMSET_TASK_PROPERTIES = {
         taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::FOREGROUND};
 
-    bool has_task_in_taskmanager_ GUARDED_BY(this->update_remset_lock_) {false};
+    bool hasTaskInTaskmanager_ GUARDED_BY(this->updateRemsetLock_) {false};
 };
 
 }  // namespace panda::mem

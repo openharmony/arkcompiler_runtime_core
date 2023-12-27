@@ -47,24 +47,24 @@ struct MultByMod {
 
 TEST_F(VerifierTest, function_traits)
 {
-    SquareSum sq_sum;
-    SquareDiversity sq_div;
-    NAry<SquareSum> op_s_sum {sq_sum};
-    NAry<SquareDiversity> op_s_div {sq_div};
-    EXPECT_EQ(op_s_sum(2, 2), 16);
-    EXPECT_EQ(op_s_div(2, 1), 1);
-    EXPECT_EQ(op_s_sum(2, 1, 2), 121);
-    EXPECT_EQ(op_s_div(2, 1, 2), 1);
+    SquareSum sqSum;
+    SquareDiversity sqDiv;
+    NAry<SquareSum> opSSum {sqSum};
+    NAry<SquareDiversity> opSDiv {sqDiv};
+    EXPECT_EQ(opSSum(2, 2), 16);
+    EXPECT_EQ(opSDiv(2, 1), 1);
+    EXPECT_EQ(opSSum(2, 1, 2), 121);
+    EXPECT_EQ(opSDiv(2, 1, 2), 1);
 
     MultByMod mod5 {5};
     // NOLINTNEXTLINE(readability-magic-numbers)
     MultByMod mod10 {10};
-    NAry<MultByMod> op_mult_mod5 {mod5};
-    NAry<MultByMod> op_mult_mod10 {mod10};
-    EXPECT_EQ(op_mult_mod5(2, 4), 3);
-    EXPECT_EQ(op_mult_mod10(2, 4), 8);
-    EXPECT_EQ(op_mult_mod5(2, 4, 2), 1);
-    EXPECT_EQ(op_mult_mod10(2, 4, 2), 6);
+    NAry<MultByMod> opMultMod5 {mod5};
+    NAry<MultByMod> opMultMod10 {mod10};
+    EXPECT_EQ(opMultMod5(2, 4), 3);
+    EXPECT_EQ(opMultMod10(2, 4), 8);
+    EXPECT_EQ(opMultMod5(2, 4, 2), 1);
+    EXPECT_EQ(opMultMod10(2, 4, 2), 6);
 }
 
 }  // namespace panda::verifier::test

@@ -65,7 +65,7 @@ protected:
     {
         std::cout << "Print at index:  ";
         ASSERT(idx + size < BYTE_ARRAY_SIZE);
-        auto mem = static_cast<uint8_t *>(&byte_array_[idx]);
+        auto mem = static_cast<uint8_t *>(&byteArray_[idx]);
         for (size_t i = 0; i < size; i++) {
             std::cout << *mem++;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
@@ -154,20 +154,20 @@ TEST_F(StackLikeAllocatorTest, CycledAllocateFreeForHugeFramesTest)
             vec.emplace_back(mem, SetBytesFromByteArray(mem, FRAME_SIZE));
         }
         for (size_t i = 1; i <= ITERATIONS / 2; i++) {
-            std::pair<void *, size_t> last_pair = vec.back();
-            ASSERT_TRUE(CompareBytesWithByteArray(last_pair.first, FRAME_SIZE, last_pair.second))
-                << "iteration: " << i << ", size: " << FRAME_SIZE << ", address: " << std::hex << last_pair.first
-                << ", index in byte array: " << last_pair.second << ", seed: " << seed_;
-            alloc.Free(last_pair.first);
+            std::pair<void *, size_t> lastPair = vec.back();
+            ASSERT_TRUE(CompareBytesWithByteArray(lastPair.first, FRAME_SIZE, lastPair.second))
+                << "iteration: " << i << ", size: " << FRAME_SIZE << ", address: " << std::hex << lastPair.first
+                << ", index in byte array: " << lastPair.second << ", seed: " << seed_;
+            alloc.Free(lastPair.first);
             vec.pop_back();
         }
     }
     while (!vec.empty()) {
-        std::pair<void *, size_t> last_pair = vec.back();
-        ASSERT_TRUE(CompareBytesWithByteArray(last_pair.first, FRAME_SIZE, last_pair.second))
-            << "vector size: " << vec.size() << ", size: " << FRAME_SIZE << ", address: " << std::hex << last_pair.first
-            << ", index in byte array: " << last_pair.second << ", seed: " << seed_;
-        alloc.Free(last_pair.first);
+        std::pair<void *, size_t> lastPair = vec.back();
+        ASSERT_TRUE(CompareBytesWithByteArray(lastPair.first, FRAME_SIZE, lastPair.second))
+            << "vector size: " << vec.size() << ", size: " << FRAME_SIZE << ", address: " << std::hex << lastPair.first
+            << ", index in byte array: " << lastPair.second << ", seed: " << seed_;
+        alloc.Free(lastPair.first);
         vec.pop_back();
     }
 }
@@ -176,25 +176,25 @@ TEST_F(StackLikeAllocatorTest, CheckAddrInsideAllocator)
 {
     static constexpr size_t FRAME_SIZE = 256;
     static constexpr size_t ALLOCATION_SIZE = 10;
-    void *invalid_addr = std::malloc(ALLOCATION_SIZE);  // NOLINT(cppcoreguidelines-no-malloc)
+    void *invalidAddr = std::malloc(ALLOCATION_SIZE);  // NOLINT(cppcoreguidelines-no-malloc)
 
     StackLikeAllocator<> alloc;
-    ASSERT_FALSE(alloc.Contains(invalid_addr));  // NOLINT(clang-analyzer-unix.Malloc)
+    ASSERT_FALSE(alloc.Contains(invalidAddr));  // NOLINT(clang-analyzer-unix.Malloc)
 
-    void *addr1_inside = alloc.Alloc(FRAME_SIZE);
-    ASSERT_TRUE(alloc.Contains(addr1_inside));
-    ASSERT_FALSE(alloc.Contains(invalid_addr));  // NOLINT(clang-analyzer-unix.Malloc)
+    void *addr1Inside = alloc.Alloc(FRAME_SIZE);
+    ASSERT_TRUE(alloc.Contains(addr1Inside));
+    ASSERT_FALSE(alloc.Contains(invalidAddr));  // NOLINT(clang-analyzer-unix.Malloc)
 
-    alloc.Free(addr1_inside);
-    ASSERT_FALSE(alloc.Contains(addr1_inside));
-    ASSERT_FALSE(alloc.Contains(invalid_addr));
+    alloc.Free(addr1Inside);
+    ASSERT_FALSE(alloc.Contains(addr1Inside));
+    ASSERT_FALSE(alloc.Contains(invalidAddr));
 
-    addr1_inside = alloc.Alloc(FRAME_SIZE);
+    addr1Inside = alloc.Alloc(FRAME_SIZE);
 
-    auto *addr2_inside = alloc.Alloc(FRAME_SIZE * 2);
-    ASSERT_TRUE(alloc.Contains(addr1_inside));
-    ASSERT_TRUE(alloc.Contains(addr2_inside));
-    ASSERT_FALSE(alloc.Contains(invalid_addr));
-    free(invalid_addr);  // NOLINT(cppcoreguidelines-no-malloc)
+    auto *addr2Inside = alloc.Alloc(FRAME_SIZE * 2);
+    ASSERT_TRUE(alloc.Contains(addr1Inside));
+    ASSERT_TRUE(alloc.Contains(addr2Inside));
+    ASSERT_FALSE(alloc.Contains(invalidAddr));
+    free(invalidAddr);  // NOLINT(cppcoreguidelines-no-malloc)
 }
 }  // namespace panda::mem

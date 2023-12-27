@@ -53,7 +53,7 @@ public:
     template <typename P, typename = std::enable_if_t<std::is_convertible_v<P *, T *>>>
     inline explicit VMHandle(const LocalObjectHandle<P> &other);
 
-    inline explicit VMHandle(mem::GlobalObjectStorage *global_storage, mem::Reference *reference);
+    inline explicit VMHandle(mem::GlobalObjectStorage *globalStorage, mem::Reference *reference);
 
     ~VMHandle() = default;
 

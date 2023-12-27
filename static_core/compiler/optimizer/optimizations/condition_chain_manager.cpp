@@ -18,7 +18,7 @@
 
 namespace panda::compiler {
 ConditionChainManager::ConditionChainManager(ArenaAllocator *allocator)
-    : allocator_(allocator), condition_chain_bb_(allocator->Adapter())
+    : allocator_(allocator), conditionChainBb_(allocator->Adapter())
 {
 }
 
@@ -28,51 +28,51 @@ ConditionChain *ConditionChainManager::FindConditionChain(BasicBlock *bb)
         return nullptr;
     }
 
-    auto condition_chain = TryConditionChain(bb, bb->GetTrueSuccessor(), bb->GetFalseSuccessor());
-    if (condition_chain != nullptr) {
-        return condition_chain;
+    auto conditionChain = TryConditionChain(bb, bb->GetTrueSuccessor(), bb->GetFalseSuccessor());
+    if (conditionChain != nullptr) {
+        return conditionChain;
     }
 
     return TryConditionChain(bb, bb->GetFalseSuccessor(), bb->GetTrueSuccessor());
 }
 
-ConditionChain *ConditionChainManager::TryConditionChain(BasicBlock *bb, BasicBlock *multiple_preds_succ,
-                                                         BasicBlock *chain_bb)
+ConditionChain *ConditionChainManager::TryConditionChain(BasicBlock *bb, BasicBlock *multiplePredsSucc,
+                                                         BasicBlock *chainBb)
 {
     auto loop = bb->GetLoop();
-    if (multiple_preds_succ->GetLoop() != loop) {
+    if (multiplePredsSucc->GetLoop() != loop) {
         return nullptr;
     }
-    if (chain_bb->GetLoop() != loop) {
+    if (chainBb->GetLoop() != loop) {
         return nullptr;
     }
-    auto chain_pos = condition_chain_bb_.size();
-    condition_chain_bb_.push_back(bb);
+    auto chainPos = conditionChainBb_.size();
+    conditionChainBb_.push_back(bb);
 
-    size_t single_pred_succ_index = 0;
+    size_t singlePredSuccIndex = 0;
     while (true) {
-        if (IsConditionChainCandidate(chain_bb)) {
-            if (chain_bb->GetTrueSuccessor() == multiple_preds_succ) {
-                condition_chain_bb_.push_back(chain_bb);
-                chain_bb = chain_bb->GetFalseSuccessor();
-                single_pred_succ_index = BasicBlock::FALSE_SUCC_IDX;
+        if (IsConditionChainCandidate(chainBb)) {
+            if (chainBb->GetTrueSuccessor() == multiplePredsSucc) {
+                conditionChainBb_.push_back(chainBb);
+                chainBb = chainBb->GetFalseSuccessor();
+                singlePredSuccIndex = BasicBlock::FALSE_SUCC_IDX;
                 continue;
             }
-            if (chain_bb->GetFalseSuccessor() == multiple_preds_succ) {
-                condition_chain_bb_.push_back(chain_bb);
-                chain_bb = chain_bb->GetTrueSuccessor();
-                single_pred_succ_index = BasicBlock::TRUE_SUCC_IDX;
+            if (chainBb->GetFalseSuccessor() == multiplePredsSucc) {
+                conditionChainBb_.push_back(chainBb);
+                chainBb = chainBb->GetTrueSuccessor();
+                singlePredSuccIndex = BasicBlock::TRUE_SUCC_IDX;
                 continue;
             }
         }
-        auto chain_size = condition_chain_bb_.size() - chain_pos;
-        if (chain_size > 1) {
+        auto chainSize = conditionChainBb_.size() - chainPos;
+        if (chainSize > 1) {
             // store successors indices instead of pointers to basic blocks because they can be changed during loop
             // transformation
-            return allocator_->New<ConditionChain>(condition_chain_bb_.begin() + chain_pos, chain_size,
-                                                   bb->GetSuccBlockIndex(multiple_preds_succ), single_pred_succ_index);
+            return allocator_->New<ConditionChain>(conditionChainBb_.begin() + chainPos, chainSize,
+                                                   bb->GetSuccBlockIndex(multiplePredsSucc), singlePredSuccIndex);
         }
-        condition_chain_bb_.pop_back();
+        conditionChainBb_.pop_back();
         break;
     }
     return nullptr;
@@ -87,6 +87,6 @@ bool ConditionChainManager::IsConditionChainCandidate(const BasicBlock *bb)
 
 void ConditionChainManager::Reset()
 {
-    condition_chain_bb_.clear();
+    conditionChainBb_.clear();
 }
 }  // namespace panda::compiler

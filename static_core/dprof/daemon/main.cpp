@@ -60,7 +60,7 @@ static std::unique_ptr<AppData> ProcessingConnect(const os::unique_fd::UniqueFd 
         return nullptr;
     }
 
-    ipc::protocol::AppInfo ipc_app_info;
+    ipc::protocol::AppInfo ipcAppInfo;
     {
         // Get app info
         ipc::Message msg;
@@ -72,14 +72,14 @@ static std::unique_ptr<AppData> ProcessingConnect(const os::unique_fd::UniqueFd 
             LOG(ERROR, DPROF) << "Incorrect second message id, id=" << static_cast<uint32_t>(msg.GetId());
             return nullptr;
         }
-        if (!serializer::BufferToStruct<ipc::protocol::APP_INFO_FCOUNT>(msg.GetData(), msg.GetSize(), ipc_app_info)) {
+        if (!serializer::BufferToStruct<ipc::protocol::APP_INFO_FCOUNT>(msg.GetData(), msg.GetSize(), ipcAppInfo)) {
             LOG(ERROR, DPROF) << "Cannot convert data to a app info message";
             return nullptr;
         }
     }
 
     // Get features data
-    AppData::FeaturesMap features_map;
+    AppData::FeaturesMap featuresMap;
     for (;;) {
         ipc::Message msg;
         int ret = RecvMessage(sock.Get(), msg);
@@ -98,18 +98,18 @@ static std::unique_ptr<AppData> ProcessingConnect(const os::unique_fd::UniqueFd 
             return nullptr;
         }
 
-        features_map.emplace(std::pair(std::move(tmp.name), std::move(tmp.data)));
+        featuresMap.emplace(std::pair(std::move(tmp.name), std::move(tmp.data)));
     }
 
-    return AppData::CreateByParams(ipc_app_info.app_name, ipc_app_info.hash, ipc_app_info.pid, std::move(features_map));
+    return AppData::CreateByParams(ipcAppInfo.appName, ipcAppInfo.hash, ipcAppInfo.pid, std::move(featuresMap));
 }
 
 class Worker {
 public:
-    void EnqueueClientSocket(os::unique_fd::UniqueFd client_sock)
+    void EnqueueClientSocket(os::unique_fd::UniqueFd clientSock)
     {
-        os::memory::LockHolder lock(queue_lock_);
-        queue_.push(std::move(client_sock));
+        os::memory::LockHolder lock(queueLock_);
+        queue_.push(std::move(clientSock));
         cond_.Signal();
     }
 
@@ -121,7 +121,7 @@ public:
 
     void Stop()
     {
-        os::memory::LockHolder lock(queue_lock_);
+        os::memory::LockHolder lock(queueLock_);
         done_ = true;
         cond_.Signal();
         thread_.join();
@@ -130,35 +130,35 @@ public:
     void DoRun(AppDataStorage *storage)
     {
         while (!done_) {
-            os::unique_fd::UniqueFd client_sock;
+            os::unique_fd::UniqueFd clientSock;
             {
-                os::memory::LockHolder lock(queue_lock_);
+                os::memory::LockHolder lock(queueLock_);
                 while (queue_.empty() && !done_) {
-                    cond_.Wait(&queue_lock_);
+                    cond_.Wait(&queueLock_);
                 }
                 if (done_) {
                     break;
                 }
 
-                client_sock = std::move(queue_.front());
+                clientSock = std::move(queue_.front());
                 queue_.pop();
             }
 
-            auto app_data = ProcessingConnect(client_sock);
-            if (!app_data) {
+            auto appData = ProcessingConnect(clientSock);
+            if (!appData) {
                 LOG(ERROR, DPROF) << "Connection cannot be processed";
                 continue;
             }
 
-            storage->SaveAppData(*app_data);
+            storage->SaveAppData(*appData);
         }
     }
 
 private:
     std::thread thread_;
-    os::memory::Mutex queue_lock_;
+    os::memory::Mutex queueLock_;
     std::queue<os::unique_fd::UniqueFd> queue_;
-    os::memory::ConditionVariable cond_ GUARDED_BY(queue_lock_);
+    os::memory::ConditionVariable cond_ GUARDED_BY(queueLock_);
     bool done_ = false;
 };
 
@@ -190,23 +190,23 @@ public:
 
     void Help() const
     {
-        std::cerr << "Usage: " << app_name_ << " [OPTIONS]" << std::endl;
+        std::cerr << "Usage: " << appName_ << " [OPTIONS]" << std::endl;
         std::cerr << "optional arguments:" << std::endl;
         std::cerr << parser_.GetHelpString() << std::endl;
     }
 
 private:
-    std::string app_name_;
+    std::string appName_;
     PandArgParser parser_;
     Options options_ {""};
 };
 
-static bool G_DONE = false;
+static bool g_gDone = false;
 
 static void SignalHandler(int sig)
 {
     if (sig == SIGINT || sig == SIGHUP || sig == SIGTERM) {
-        G_DONE = true;
+        g_gDone = true;
     }
 }
 
@@ -224,7 +224,7 @@ static void SetupSignals()
 
 static int Main(panda::Span<const char *> args)
 {
-    const int max_pending_connections_queue = 32;
+    const int maxPendingConnectionsQueue = 32;
 
     ArgsParser parser;
     if (!parser.Parse(args)) {
@@ -233,7 +233,7 @@ static int Main(panda::Span<const char *> args)
     }
     const Options &options = parser.GetOptionos();
 
-    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), panda::LOGGER_COMPONENT_MASK_ALL);
+    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), panda::g_loggerComponentMaskAll);
 
     SetupSignals();
 
@@ -244,7 +244,7 @@ static int Main(panda::Span<const char *> args)
     }
 
     // Create server socket
-    os::unique_fd::UniqueFd sock(ipc::CreateUnixServerSocket(max_pending_connections_queue));
+    os::unique_fd::UniqueFd sock(ipc::CreateUnixServerSocket(maxPendingConnectionsQueue));
     if (!sock.IsValid()) {
         LOG(FATAL, DPROF) << "Cannot create socket";
         return -1;
@@ -255,16 +255,16 @@ static int Main(panda::Span<const char *> args)
 
     LOG(INFO, DPROF) << "Daemon is ready for connections";
     // Main loop
-    while (!G_DONE) {
-        os::unique_fd::UniqueFd client_sock(::accept4(sock.Get(), nullptr, nullptr, SOCK_CLOEXEC));
-        if (!client_sock.IsValid()) {
+    while (!g_gDone) {
+        os::unique_fd::UniqueFd clientSock(::accept4(sock.Get(), nullptr, nullptr, SOCK_CLOEXEC));
+        if (!clientSock.IsValid()) {
             if (errno == EINTR) {
                 continue;
             }
             PLOG(FATAL, DPROF) << "accept() failed";
             return -1;
         }
-        worker.EnqueueClientSocket(std::move(client_sock));
+        worker.EnqueueClientSocket(std::move(clientSock));
     }
     LOG(INFO, DPROF) << "Daemon has received an end signal and stops";
     worker.Stop();

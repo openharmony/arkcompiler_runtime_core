@@ -44,10 +44,10 @@ public:
 
     ~BumpAllocatorTest() override
     {
-        for (auto i : allocated_mem_mmap_) {
+        for (auto i : allocatedMemMmap_) {
             panda::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
         }
-        for (auto i : allocated_arenas_) {
+        for (auto i : allocatedArenas_) {
             delete i;
         }
         PoolManager::Finalize();
@@ -63,10 +63,10 @@ protected:
     {
         void *mem = panda::os::mem::MapRWAnonymousRaw(size);
         ASAN_UNPOISON_MEMORY_REGION(mem, size);
-        std::pair<void *, size_t> new_pair {mem, size};
-        allocated_mem_mmap_.push_back(new_pair);
+        std::pair<void *, size_t> newPair {mem, size};
+        allocatedMemMmap_.push_back(newPair);
         auto arena = new Arena(size, mem);
-        allocated_arenas_.push_back(arena);
+        allocatedArenas_.push_back(arena);
         return arena;
     }
 
@@ -74,8 +74,8 @@ protected:
     unsigned seed_ {};
 
 private:
-    std::vector<std::pair<void *, size_t>> allocated_mem_mmap_;
-    std::vector<Arena *> allocated_arenas_;
+    std::vector<std::pair<void *, size_t>> allocatedMemMmap_;
+    std::vector<Arena *> allocatedArenas_;
 };
 
 DEATH_TEST_F(BumpAllocatorTest, AlignedAlloc)
@@ -86,8 +86,8 @@ DEATH_TEST_F(BumpAllocatorTest, AlignedAlloc)
     constexpr size_t ARRAY_SIZE = 1024;
     auto pool = PoolManager::GetMmapMemPool()->AllocPool(BUFF_SIZE, SpaceType::SPACE_TYPE_INTERNAL,
                                                          AllocatorType::BUMP_ALLOCATOR);
-    mem::MemStatsType mem_stats;
-    NonObjectBumpAllocator<false> bp_allocator(pool, SpaceType::SPACE_TYPE_INTERNAL, &mem_stats);
+    mem::MemStatsType memStats;
+    NonObjectBumpAllocator<false> bpAllocator(pool, SpaceType::SPACE_TYPE_INTERNAL, &memStats);
     Alignment align = DEFAULT_ALIGNMENT;
     std::array<int *, ARRAY_SIZE> arr {};
 
@@ -96,7 +96,7 @@ DEATH_TEST_F(BumpAllocatorTest, AlignedAlloc)
     // Allocations
     srand(seed_);
     for (size_t i = 0; i < ARRAY_SIZE; ++i) {
-        arr[i] = static_cast<int *>(bp_allocator.Alloc(sizeof(int), align));
+        arr[i] = static_cast<int *>(bpAllocator.Alloc(sizeof(int), align));
         // NOLINTNEXTLINE(cert-msc50-cpp)
         *arr[i] = rand() % std::numeric_limits<int>::max();
     }
@@ -114,10 +114,10 @@ DEATH_TEST_F(BumpAllocatorTest, AlignedAlloc)
     static_assert(LOG_ALIGN_MAX != DEFAULT_ALIGNMENT, "We expect minimal alignment != DEFAULT_ALIGNMENT");
     void *ptr;
 #ifndef NDEBUG
-    EXPECT_DEATH_IF_SUPPORTED(ptr = bp_allocator.Alloc(sizeof(int), LOG_ALIGN_MAX), "alignment == DEFAULT_ALIGNMENT")
+    EXPECT_DEATH_IF_SUPPORTED(ptr = bpAllocator.Alloc(sizeof(int), LOG_ALIGN_MAX), "alignment == DEFAULT_ALIGNMENT")
         << ", seed:" << seed_;
 #endif
-    ptr = bp_allocator.Alloc(SIZE_1M);
+    ptr = bpAllocator.Alloc(SIZE_1M);
     ASSERT_EQ(ptr, nullptr) << "Here Alloc with allocation size = 1 MB should return nullptr"
                             << ", seed:" << seed_;
 }
@@ -134,20 +134,20 @@ TEST_F(BumpAllocatorTest, CreateTLABAndAlloc)
 
     size_t mask = DEFAULT_ALIGNMENT_IN_BYTES - 1;
 
-    std::array<AllocType *, TLAB_ALLOC_COUNT_SIZE> tlab_elements {};
-    std::array<AllocType *, TLAB_ALLOC_COUNT_SIZE> common_elements {};
+    std::array<AllocType *, TLAB_ALLOC_COUNT_SIZE> tlabElements {};
+    std::array<AllocType *, TLAB_ALLOC_COUNT_SIZE> commonElements {};
     auto pool = PoolManager::GetMmapMemPool()->AllocPool(TLAB_SIZE + COMMON_BUFFER_SIZE, SpaceType::SPACE_TYPE_INTERNAL,
                                                          AllocatorType::BUMP_ALLOCATOR);
-    mem::MemStatsType mem_stats;
-    NonObjectBumpAllocator<true> allocator(pool, SpaceType::SPACE_TYPE_OBJECT, &mem_stats, 1);
+    mem::MemStatsType memStats;
+    NonObjectBumpAllocator<true> allocator(pool, SpaceType::SPACE_TYPE_OBJECT, &memStats, 1);
     {
         // Allocations in common buffer
         srand(seed_);
         for (size_t i = 0; i < COMMON_ALLOC_COUNT_SIZE; ++i) {
-            common_elements[i] = static_cast<AllocType *>(allocator.Alloc(sizeof(AllocType)));
-            ASSERT_TRUE(common_elements[i] != nullptr) << ", seed:" << seed_;
+            commonElements[i] = static_cast<AllocType *>(allocator.Alloc(sizeof(AllocType)));
+            ASSERT_TRUE(commonElements[i] != nullptr) << ", seed:" << seed_;
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            *common_elements[i] = rand() % std::numeric_limits<AllocType>::max();
+            *commonElements[i] = rand() % std::numeric_limits<AllocType>::max();
         }
 
         TLAB *tlab = allocator.CreateNewTLAB(TLAB_SIZE);
@@ -156,10 +156,10 @@ TEST_F(BumpAllocatorTest, CreateTLABAndAlloc)
         // Allocations in TLAB
         srand(seed_);
         for (size_t i = 0; i < TLAB_ALLOC_COUNT_SIZE; ++i) {
-            tlab_elements[i] = static_cast<AllocType *>(tlab->Alloc(sizeof(AllocType)));
-            ASSERT_TRUE(tlab_elements[i] != nullptr) << ", seed:" << seed_;
+            tlabElements[i] = static_cast<AllocType *>(tlab->Alloc(sizeof(AllocType)));
+            ASSERT_TRUE(tlabElements[i] != nullptr) << ", seed:" << seed_;
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            *tlab_elements[i] = rand() % std::numeric_limits<AllocType>::max();
+            *tlabElements[i] = rand() % std::numeric_limits<AllocType>::max();
         }
 
         // Check that we don't have memory in the buffer:
@@ -169,22 +169,22 @@ TEST_F(BumpAllocatorTest, CreateTLABAndAlloc)
         // Allocations checking in common buffer
         srand(seed_);
         for (size_t i = 0; i < COMMON_ALLOC_COUNT_SIZE; ++i) {
-            ASSERT_NE(common_elements[i], nullptr) << "value of i: " << i << ", seed:" << seed_;
-            ASSERT_EQ(reinterpret_cast<size_t>(common_elements[i]) & mask, static_cast<size_t>(0))
+            ASSERT_NE(commonElements[i], nullptr) << "value of i: " << i << ", seed:" << seed_;
+            ASSERT_EQ(reinterpret_cast<size_t>(commonElements[i]) & mask, static_cast<size_t>(0))
                 << "value of i: " << i << ", seed:" << seed_;
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            ASSERT_EQ(*common_elements[i], rand() % std::numeric_limits<AllocType>::max())
+            ASSERT_EQ(*commonElements[i], rand() % std::numeric_limits<AllocType>::max())
                 << "value of i: " << i << ", seed:" << seed_;
         }
 
         // Allocations checking in TLAB
         srand(seed_);
         for (size_t i = 0; i < TLAB_ALLOC_COUNT_SIZE; ++i) {
-            ASSERT_NE(tlab_elements[i], nullptr) << "value of i: " << i << ", seed:" << seed_;
-            ASSERT_EQ(reinterpret_cast<size_t>(tlab_elements[i]) & mask, static_cast<size_t>(0))
+            ASSERT_NE(tlabElements[i], nullptr) << "value of i: " << i << ", seed:" << seed_;
+            ASSERT_EQ(reinterpret_cast<size_t>(tlabElements[i]) & mask, static_cast<size_t>(0))
                 << "value of i: " << i << ", seed:" << seed_;
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            ASSERT_EQ(*tlab_elements[i], rand() % std::numeric_limits<AllocType>::max())
+            ASSERT_EQ(*tlabElements[i], rand() % std::numeric_limits<AllocType>::max())
                 << "value of i: " << i << ", seed:" << seed_;
         }
     }
@@ -196,19 +196,19 @@ TEST_F(BumpAllocatorTest, CreateTLABAndAlloc)
         // Allocations in TLAB
         srand(seed_);
         for (size_t i = 0; i < TLAB_ALLOC_COUNT_SIZE; ++i) {
-            tlab_elements[i] = static_cast<AllocType *>(tlab->Alloc(sizeof(AllocType)));
-            ASSERT_TRUE(tlab_elements[i] != nullptr) << ", seed:" << seed_;
+            tlabElements[i] = static_cast<AllocType *>(tlab->Alloc(sizeof(AllocType)));
+            ASSERT_TRUE(tlabElements[i] != nullptr) << ", seed:" << seed_;
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            *tlab_elements[i] = rand() % std::numeric_limits<AllocType>::max();
+            *tlabElements[i] = rand() % std::numeric_limits<AllocType>::max();
         }
 
         // Allocations in common buffer
         srand(seed_);
         for (size_t i = 0; i < COMMON_ALLOC_COUNT_SIZE; ++i) {
-            common_elements[i] = static_cast<AllocType *>(allocator.Alloc(sizeof(AllocType)));
-            ASSERT_TRUE(common_elements[i] != nullptr) << ", seed:" << seed_;
+            commonElements[i] = static_cast<AllocType *>(allocator.Alloc(sizeof(AllocType)));
+            ASSERT_TRUE(commonElements[i] != nullptr) << ", seed:" << seed_;
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            *common_elements[i] = rand() % std::numeric_limits<AllocType>::max();
+            *commonElements[i] = rand() % std::numeric_limits<AllocType>::max();
         }
 
         // Check that we don't have memory in the buffer:
@@ -218,22 +218,22 @@ TEST_F(BumpAllocatorTest, CreateTLABAndAlloc)
         // Allocations checking in TLAB
         srand(seed_);
         for (size_t i = 0; i < TLAB_ALLOC_COUNT_SIZE; ++i) {
-            ASSERT_NE(tlab_elements[i], nullptr) << "value of i: " << i << ", seed:" << seed_;
-            ASSERT_EQ(reinterpret_cast<size_t>(tlab_elements[i]) & mask, static_cast<size_t>(0))
+            ASSERT_NE(tlabElements[i], nullptr) << "value of i: " << i << ", seed:" << seed_;
+            ASSERT_EQ(reinterpret_cast<size_t>(tlabElements[i]) & mask, static_cast<size_t>(0))
                 << "value of i: " << i << ", seed:" << seed_;
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            ASSERT_EQ(*tlab_elements[i], rand() % std::numeric_limits<AllocType>::max())
+            ASSERT_EQ(*tlabElements[i], rand() % std::numeric_limits<AllocType>::max())
                 << "value of i: " << i << ", seed:" << seed_;
         }
 
         // Allocations checking in common buffer
         srand(seed_);
         for (size_t i = 0; i < COMMON_ALLOC_COUNT_SIZE; ++i) {
-            ASSERT_NE(common_elements[i], nullptr) << "value of i: " << i << ", seed:" << seed_;
-            ASSERT_EQ(reinterpret_cast<size_t>(common_elements[i]) & mask, static_cast<size_t>(0))
+            ASSERT_NE(commonElements[i], nullptr) << "value of i: " << i << ", seed:" << seed_;
+            ASSERT_EQ(reinterpret_cast<size_t>(commonElements[i]) & mask, static_cast<size_t>(0))
                 << "value of i: " << i << ", seed:" << seed_;
             // NOLINTNEXTLINE(cert-msc50-cpp)
-            ASSERT_EQ(*common_elements[i], rand() % std::numeric_limits<AllocType>::max())
+            ASSERT_EQ(*commonElements[i], rand() % std::numeric_limits<AllocType>::max())
                 << "value of i: " << i << ", seed:" << seed_;
         }
     }
@@ -245,8 +245,8 @@ TEST_F(BumpAllocatorTest, CreateTooManyTLABS)
     constexpr size_t TLAB_COUNT = 3;
     auto pool = PoolManager::GetMmapMemPool()->AllocPool(TLAB_SIZE * TLAB_COUNT, SpaceType::SPACE_TYPE_INTERNAL,
                                                          AllocatorType::BUMP_ALLOCATOR);
-    mem::MemStatsType mem_stats;
-    NonObjectBumpAllocator<true> allocator(pool, SpaceType::SPACE_TYPE_OBJECT, &mem_stats, TLAB_COUNT - 1);
+    mem::MemStatsType memStats;
+    NonObjectBumpAllocator<true> allocator(pool, SpaceType::SPACE_TYPE_OBJECT, &memStats, TLAB_COUNT - 1);
     {
         for (size_t i = 0; i < TLAB_COUNT - 1; i++) {
             TLAB *tlab = allocator.CreateNewTLAB(TLAB_SIZE);

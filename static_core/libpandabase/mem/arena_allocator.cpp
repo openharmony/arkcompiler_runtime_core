@@ -25,29 +25,29 @@
 namespace panda {
 
 template <bool USE_OOM_HANDLER>
-ArenaAllocatorT<USE_OOM_HANDLER>::ArenaAllocatorT(SpaceType space_type, BaseMemStats *mem_stats,
-                                                  bool limit_alloc_size_by_pool)
-    : mem_stats_(mem_stats), space_type_(space_type), limit_alloc_size_by_pool_(limit_alloc_size_by_pool)
+ArenaAllocatorT<USE_OOM_HANDLER>::ArenaAllocatorT(SpaceType spaceType, BaseMemStats *memStats,
+                                                  bool limitAllocSizeByPool)
+    : memStats_(memStats), spaceType_(spaceType), limitAllocSizeByPool_(limitAllocSizeByPool)
 {
     ASSERT(!USE_OOM_HANDLER);
     if (!ON_STACK_ALLOCATION_ENABLED) {
-        arenas_ = PoolManager::AllocArena(DEFAULT_ARENA_SIZE, space_type_, AllocatorType::ARENA_ALLOCATOR, this);
+        arenas_ = PoolManager::AllocArena(DEFAULT_ARENA_SIZE, spaceType_, AllocatorType::ARENA_ALLOCATOR, this);
         ASSERT(arenas_ != nullptr);
         AllocArenaMemStats(DEFAULT_ARENA_SIZE);
     }
 }
 
 template <bool USE_OOM_HANDLER>
-ArenaAllocatorT<USE_OOM_HANDLER>::ArenaAllocatorT(OOMHandler oom_handler, SpaceType space_type, BaseMemStats *mem_stats,
-                                                  bool limit_alloc_size_by_pool)
-    : mem_stats_(mem_stats),
-      space_type_(space_type),
-      oom_handler_(oom_handler),
-      limit_alloc_size_by_pool_(limit_alloc_size_by_pool)
+ArenaAllocatorT<USE_OOM_HANDLER>::ArenaAllocatorT(OOMHandler oomHandler, SpaceType spaceType, BaseMemStats *memStats,
+                                                  bool limitAllocSizeByPool)
+    : memStats_(memStats),
+      spaceType_(spaceType),
+      oomHandler_(oomHandler),
+      limitAllocSizeByPool_(limitAllocSizeByPool)
 {
     ASSERT(USE_OOM_HANDLER);
     if (!ON_STACK_ALLOCATION_ENABLED) {
-        arenas_ = PoolManager::AllocArena(DEFAULT_ARENA_SIZE, space_type_, AllocatorType::ARENA_ALLOCATOR, this);
+        arenas_ = PoolManager::AllocArena(DEFAULT_ARENA_SIZE, spaceType_, AllocatorType::ARENA_ALLOCATOR, this);
         ASSERT(arenas_ != nullptr);
         AllocArenaMemStats(DEFAULT_ARENA_SIZE);
     }
@@ -69,18 +69,18 @@ inline void *ArenaAllocatorT<USE_OOM_HANDLER>::AllocateAndAddNewPool(size_t size
 {
     void *mem = arenas_->Alloc(size, alignment);
     if (mem == nullptr) {
-        bool add_new_pool = false;
-        if (limit_alloc_size_by_pool_) {
-            add_new_pool = AddArenaFromPool(std::max(AlignUp(size, alignment) + sizeof(Arena), DEFAULT_ARENA_SIZE));
+        bool addNewPool = false;
+        if (limitAllocSizeByPool_) {
+            addNewPool = AddArenaFromPool(std::max(AlignUp(size, alignment) + sizeof(Arena), DEFAULT_ARENA_SIZE));
         } else {
-            add_new_pool = AddArenaFromPool(DEFAULT_ARENA_SIZE);
+            addNewPool = AddArenaFromPool(DEFAULT_ARENA_SIZE);
         }
-        if (UNLIKELY(!add_new_pool)) {
-            LOG(DEBUG, ALLOC) << "Can not add new pool for " << SpaceTypeToString(space_type_);
+        if (UNLIKELY(!addNewPool)) {
+            LOG(DEBUG, ALLOC) << "Can not add new pool for " << SpaceTypeToString(spaceType_);
             return nullptr;
         }
         mem = arenas_->Alloc(size, alignment);
-        ASSERT(!limit_alloc_size_by_pool_ || mem != nullptr);
+        ASSERT(!limitAllocSizeByPool_ || mem != nullptr);
     }
     return mem;
 }
@@ -88,7 +88,7 @@ inline void *ArenaAllocatorT<USE_OOM_HANDLER>::AllocateAndAddNewPool(size_t size
 template <bool USE_OOM_HANDLER>
 void *ArenaAllocatorT<USE_OOM_HANDLER>::Alloc(size_t size, Alignment align)
 {
-    trace::ScopedTrace scoped_trace("ArenaAllocator allocate");
+    trace::ScopedTrace scopedTrace("ArenaAllocator allocate");
     LOG(DEBUG, ALLOC) << "ArenaAllocator: try to alloc " << size << " with align " << align;
     void *ret = nullptr;
     if (ON_STACK_ALLOCATION_ENABLED && UNLIKELY(!arenas_)) {
@@ -104,7 +104,7 @@ void *ArenaAllocatorT<USE_OOM_HANDLER>::Alloc(size_t size, Alignment align)
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (USE_OOM_HANDLER) {
         if (ret == nullptr) {
-            oom_handler_();
+            oomHandler_();
         }
     }
     LOG(DEBUG, ALLOC) << "ArenaAllocator: allocated " << size << " bytes aligned by " << align;
@@ -113,52 +113,52 @@ void *ArenaAllocatorT<USE_OOM_HANDLER>::Alloc(size_t size, Alignment align)
 }
 
 template <bool USE_OOM_HANDLER>
-void ArenaAllocatorT<USE_OOM_HANDLER>::Resize(size_t new_size)
+void ArenaAllocatorT<USE_OOM_HANDLER>::Resize(size_t newSize)
 {
-    LOG(DEBUG, ALLOC) << "ArenaAllocator: resize to new size " << new_size;
+    LOG(DEBUG, ALLOC) << "ArenaAllocator: resize to new size " << newSize;
     // NOTE(aemelenko): we have O(2n) here in the worst case
-    size_t cur_size = GetAllocatedSize();
-    if (cur_size <= new_size) {
-        LOG_IF(cur_size < new_size, FATAL, ALLOC) << "ArenaAllocator: resize to bigger size than we have. Do nothing";
+    size_t curSize = GetAllocatedSize();
+    if (curSize <= newSize) {
+        LOG_IF(curSize < newSize, FATAL, ALLOC) << "ArenaAllocator: resize to bigger size than we have. Do nothing";
         return;
     }
 
-    size_t bytes_to_delete = cur_size - new_size;
+    size_t bytesToDelete = curSize - newSize;
 
     // Try to delete unused arenas
-    while ((arenas_ != nullptr) && (bytes_to_delete != 0)) {
+    while ((arenas_ != nullptr) && (bytesToDelete != 0)) {
         Arena *next = arenas_->GetNextArena();
-        size_t cur_arena_size = arenas_->GetOccupiedSize();
-        if (cur_arena_size < bytes_to_delete) {
+        size_t curArenaSize = arenas_->GetOccupiedSize();
+        if (curArenaSize < bytesToDelete) {
             // We need to free the whole arena
             PoolManager::FreeArena(arenas_);
             arenas_ = next;
-            bytes_to_delete -= cur_arena_size;
+            bytesToDelete -= curArenaSize;
         } else {
-            arenas_->Resize(cur_arena_size - bytes_to_delete);
-            bytes_to_delete = 0;
+            arenas_->Resize(curArenaSize - bytesToDelete);
+            bytesToDelete = 0;
         }
     }
-    if ((ON_STACK_ALLOCATION_ENABLED) && (bytes_to_delete > 0)) {
-        size_t stack_size = buff_.GetOccupiedSize();
-        ASSERT(stack_size >= bytes_to_delete);
-        buff_.Resize(stack_size - bytes_to_delete);
-        bytes_to_delete = 0;
+    if ((ON_STACK_ALLOCATION_ENABLED) && (bytesToDelete > 0)) {
+        size_t stackSize = buff_.GetOccupiedSize();
+        ASSERT(stackSize >= bytesToDelete);
+        buff_.Resize(stackSize - bytesToDelete);
+        bytesToDelete = 0;
     }
-    ASSERT(bytes_to_delete == 0);
+    ASSERT(bytesToDelete == 0);
 }
 
 template <bool USE_OOM_HANDLER>
-bool ArenaAllocatorT<USE_OOM_HANDLER>::AddArenaFromPool(size_t pool_size)
+bool ArenaAllocatorT<USE_OOM_HANDLER>::AddArenaFromPool(size_t poolSize)
 {
-    ASSERT(pool_size != 0);
-    pool_size = AlignUp(pool_size, PANDA_POOL_ALIGNMENT_IN_BYTES);
-    Arena *new_arena = PoolManager::AllocArena(pool_size, space_type_, GetAllocatorType(), this);
-    if (UNLIKELY(new_arena == nullptr)) {
+    ASSERT(poolSize != 0);
+    poolSize = AlignUp(poolSize, PANDA_POOL_ALIGNMENT_IN_BYTES);
+    Arena *newArena = PoolManager::AllocArena(poolSize, spaceType_, GetAllocatorType(), this);
+    if (UNLIKELY(newArena == nullptr)) {
         return false;
     }
-    new_arena->LinkTo(arenas_);
-    arenas_ = new_arena;
+    newArena->LinkTo(arenas_);
+    arenas_ = newArena;
     return true;
 }
 

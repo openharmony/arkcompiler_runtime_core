@@ -70,7 +70,7 @@ private:
 
     /* Internal thread specific functions */
 
-    static void GCThreadLoop(GCWorker *gc_worker);
+    static void GCThreadLoop(GCWorker *gcWorker);
 
     /* TaskManager specific functions */
 
@@ -78,15 +78,15 @@ private:
     void GCTaskRunner();
 
     GC *gc_ {nullptr};
-    GCQueueInterface *gc_task_queue_ {nullptr};
-    Thread *gc_thread_ {nullptr};
-    uint32_t collect_number_mod_ {1U};
+    GCQueueInterface *gcTaskQueue_ {nullptr};
+    Thread *gcThread_ {nullptr};
+    uint32_t collectNumberMod_ {1U};
     /* Internal thread specific variables */
-    std::thread *gc_internal_thread_ {nullptr};
+    std::thread *gcInternalThread_ {nullptr};
     /* TaskManager specific variables */
-    taskmanager::Task::RunnerCallback gc_runner_ {nullptr};
-    std::atomic_bool need_to_finish_ {false};
-    os::memory::Mutex gc_task_run_mutex_;
+    taskmanager::Task::RunnerCallback gcRunner_ {nullptr};
+    std::atomic_bool needToFinish_ {false};
+    os::memory::Mutex gcTaskRunMutex_;
 };
 
 }  // namespace panda::mem

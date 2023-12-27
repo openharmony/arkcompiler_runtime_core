@@ -24,7 +24,7 @@ namespace panda::ets {
 
 class RegExpExecutor : public panda::RegExpExecutor {
 public:
-    RegExpMatchResult<VMHandle<EtsString>> GetResult(bool is_success) const;
+    RegExpMatchResult<VMHandle<EtsString>> GetResult(bool isSuccess) const;
 };
 }  // namespace panda::ets
 

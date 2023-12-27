@@ -23,26 +23,26 @@ namespace panda::verifier::test {
 
 TEST_F(VerifierTest, shifted_vector)
 {
-    ShiftedVector<2, int> shift_vec {5};
-    ASSERT_EQ(shift_vec.BeginIndex(), -2);
-    ASSERT_EQ(shift_vec.EndIndex(), 3);
-    EXPECT_TRUE(shift_vec.InValidRange(-1));
-    EXPECT_FALSE(shift_vec.InValidRange(5));
+    ShiftedVector<2, int> shiftVec {5};
+    ASSERT_EQ(shiftVec.BeginIndex(), -2);
+    ASSERT_EQ(shiftVec.EndIndex(), 3);
+    EXPECT_TRUE(shiftVec.InValidRange(-1));
+    EXPECT_FALSE(shiftVec.InValidRange(5));
 
-    shift_vec[0] = 7;
-    shift_vec.At(1) = 8;
-    EXPECT_EQ(shift_vec.At(0), 7);
-    EXPECT_EQ(shift_vec[1], 8);
+    shiftVec[0] = 7;
+    shiftVec.At(1) = 8;
+    EXPECT_EQ(shiftVec.At(0), 7);
+    EXPECT_EQ(shiftVec[1], 8);
 
-    shift_vec.ExtendToInclude(5);
-    ASSERT_EQ(shift_vec.BeginIndex(), -2);
-    ASSERT_EQ(shift_vec.EndIndex(), 6);
-    EXPECT_TRUE(shift_vec.InValidRange(-1));
-    EXPECT_TRUE(shift_vec.InValidRange(5));
-    EXPECT_EQ(shift_vec.At(0), 7);
-    EXPECT_EQ(shift_vec[1], 8);
-    shift_vec[4] = 4;
-    EXPECT_EQ(shift_vec.At(4), 4);
+    shiftVec.ExtendToInclude(5);
+    ASSERT_EQ(shiftVec.BeginIndex(), -2);
+    ASSERT_EQ(shiftVec.EndIndex(), 6);
+    EXPECT_TRUE(shiftVec.InValidRange(-1));
+    EXPECT_TRUE(shiftVec.InValidRange(5));
+    EXPECT_EQ(shiftVec.At(0), 7);
+    EXPECT_EQ(shiftVec[1], 8);
+    shiftVec[4] = 4;
+    EXPECT_EQ(shiftVec.At(4), 4);
 }
 
 }  // namespace panda::verifier::test

@@ -33,7 +33,7 @@ public:
     NO_COPY_SEMANTIC(EtsTypeAPIParameter);
     NO_MOVE_SEMANTIC(EtsTypeAPIParameter);
 
-    static EtsTypeAPIParameter *Create(EtsCoroutine *ets_coroutine = EtsCoroutine::GetCurrent());
+    static EtsTypeAPIParameter *Create(EtsCoroutine *etsCoroutine = EtsCoroutine::GetCurrent());
 
     EtsObject *AsObject()
     {

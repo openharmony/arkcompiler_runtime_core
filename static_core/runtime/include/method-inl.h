@@ -46,22 +46,22 @@ class InvokeHelperStatic {
 public:
     static constexpr bool IS_DYNAMIC = false;
 
-    ALWAYS_INLINE inline static uint32_t GetFrameSize(uint32_t num_vregs, uint32_t num_declared_args,
-                                                      [[maybe_unused]] uint32_t num_actual_args)
+    ALWAYS_INLINE inline static uint32_t GetFrameSize(uint32_t numVregs, uint32_t numDeclaredArgs,
+                                                      [[maybe_unused]] uint32_t numActualArgs)
     {
-        return num_vregs + num_declared_args;
+        return numVregs + numDeclaredArgs;
     }
 
-    ALWAYS_INLINE inline static void InitActualArgs(Frame *frame, Span<Value> args_span, uint32_t num_vregs,
-                                                    [[maybe_unused]] uint32_t num_declared_args)
+    ALWAYS_INLINE inline static void InitActualArgs(Frame *frame, Span<Value> argsSpan, uint32_t numVregs,
+                                                    [[maybe_unused]] uint32_t numDeclaredArgs)
     {
-        StaticFrameHandler static_frame_helper(frame);
-        uint32_t num_actual_args = args_span.Size();
-        for (size_t i = 0; i < num_actual_args; ++i) {
-            if (args_span[i].IsReference()) {
-                static_frame_helper.GetVReg(num_vregs + i).SetReference(args_span[i].GetAs<ObjectHeader *>());
+        StaticFrameHandler staticFrameHelper(frame);
+        uint32_t numActualArgs = argsSpan.Size();
+        for (size_t i = 0; i < numActualArgs; ++i) {
+            if (argsSpan[i].IsReference()) {
+                staticFrameHelper.GetVReg(numVregs + i).SetReference(argsSpan[i].GetAs<ObjectHeader *>());
             } else {
-                static_frame_helper.GetVReg(num_vregs + i).SetPrimitive(args_span[i].GetAs<int64_t>());
+                staticFrameHelper.GetVReg(numVregs + i).SetPrimitive(argsSpan[i].GetAs<int64_t>());
             }
         }
     }
@@ -71,11 +71,11 @@ public:
         interpreter::Execute(thread, pc, frame);
     }
 
-    ALWAYS_INLINE static Frame *CreateFrame([[maybe_unused]] ManagedThread *thread, uint32_t nregs_size, Method *method,
-                                            Frame *prev, uint32_t nregs, uint32_t num_actual_args)
+    ALWAYS_INLINE static Frame *CreateFrame([[maybe_unused]] ManagedThread *thread, uint32_t nregsSize, Method *method,
+                                            Frame *prev, uint32_t nregs, uint32_t numActualArgs)
     {
-        return interpreter::RuntimeInterface::CreateFrameWithActualArgsAndSize(nregs_size, nregs, num_actual_args,
-                                                                               method, prev);
+        return interpreter::RuntimeInterface::CreateFrameWithActualArgsAndSize(nregsSize, nregs, numActualArgs, method,
+                                                                               prev);
     }
 };
 
@@ -83,25 +83,25 @@ class InvokeHelperDynamic {
 public:
     static constexpr bool IS_DYNAMIC = true;
 
-    ALWAYS_INLINE inline static uint32_t GetFrameSize(uint32_t num_vregs, uint32_t num_declared_args,
-                                                      uint32_t num_actual_args)
+    ALWAYS_INLINE inline static uint32_t GetFrameSize(uint32_t numVregs, uint32_t numDeclaredArgs,
+                                                      uint32_t numActualArgs)
     {
-        return num_vregs + std::max(num_declared_args, num_actual_args);
+        return numVregs + std::max(numDeclaredArgs, numActualArgs);
     }
 
-    ALWAYS_INLINE inline static void InitActualArgs(Frame *frame, Span<coretypes::TaggedValue> args_span,
-                                                    uint32_t num_vregs, [[maybe_unused]] uint32_t num_declared_args)
+    ALWAYS_INLINE inline static void InitActualArgs(Frame *frame, Span<coretypes::TaggedValue> argsSpan,
+                                                    uint32_t numVregs, [[maybe_unused]] uint32_t numDeclaredArgs)
     {
         frame->SetDynamic();
 
-        DynamicFrameHandler dynamic_frame_helper(frame);
-        uint32_t num_actual_args = args_span.Size();
-        for (size_t i = 0; i < num_actual_args; ++i) {
-            dynamic_frame_helper.GetVReg(num_vregs + i).SetValue(args_span[i].GetRawData());
+        DynamicFrameHandler dynamicFrameHelper(frame);
+        uint32_t numActualArgs = argsSpan.Size();
+        for (size_t i = 0; i < numActualArgs; ++i) {
+            dynamicFrameHelper.GetVReg(numVregs + i).SetValue(argsSpan[i].GetRawData());
         }
 
-        for (size_t i = num_actual_args; i < num_declared_args; i++) {
-            dynamic_frame_helper.GetVReg(num_vregs + i).SetValue(TaggedValue::VALUE_UNDEFINED);
+        for (size_t i = numActualArgs; i < numDeclaredArgs; i++) {
+            dynamicFrameHelper.GetVReg(numVregs + i).SetValue(TaggedValue::VALUE_UNDEFINED);
         }
     }
 
@@ -111,25 +111,25 @@ public:
     }
 
     ALWAYS_INLINE inline static coretypes::TaggedValue CompiledCodeExecute(ManagedThread *thread, Method *method,
-                                                                           uint32_t num_args,
+                                                                           uint32_t numArgs,
                                                                            coretypes::TaggedValue *args)
     {
-        Frame *current_frame = thread->GetCurrentFrame();
-        bool is_compiled = thread->IsCurrentFrameCompiled();
+        Frame *currentFrame = thread->GetCurrentFrame();
+        bool isCompiled = thread->IsCurrentFrameCompiled();
 
-        ASSERT(num_args >= 2U);  // NOTE(asoldatov): Adjust this check
-        uint64_t ret = InvokeCompiledCodeWithArgArrayDyn(reinterpret_cast<uint64_t *>(args), num_args, current_frame,
+        ASSERT(numArgs >= 2U);  // NOTE(asoldatov): Adjust this check
+        uint64_t ret = InvokeCompiledCodeWithArgArrayDyn(reinterpret_cast<uint64_t *>(args), numArgs, currentFrame,
                                                          method, thread);
-        thread->SetCurrentFrameIsCompiled(is_compiled);
-        thread->SetCurrentFrame(current_frame);
+        thread->SetCurrentFrameIsCompiled(isCompiled);
+        thread->SetCurrentFrame(currentFrame);
         return coretypes::TaggedValue(ret);
     }
 
-    ALWAYS_INLINE static Frame *CreateFrame([[maybe_unused]] ManagedThread *thread, uint32_t nregs_size, Method *method,
-                                            Frame *prev, uint32_t nregs, uint32_t num_actual_args)
+    ALWAYS_INLINE static Frame *CreateFrame([[maybe_unused]] ManagedThread *thread, uint32_t nregsSize, Method *method,
+                                            Frame *prev, uint32_t nregs, uint32_t numActualArgs)
     {
-        return interpreter::RuntimeInterface::CreateFrameWithActualArgsAndSize(nregs_size, nregs, num_actual_args,
-                                                                               method, prev);
+        return interpreter::RuntimeInterface::CreateFrameWithActualArgsAndSize(nregsSize, nregs, numActualArgs, method,
+                                                                               prev);
     }
 };
 
@@ -147,76 +147,76 @@ ValueT Method::GetReturnValueFromException()
 }
 
 template <class InvokeHelper, class ValueT>
-ValueT Method::GetReturnValueFromAcc(interpreter::AccVRegister &aac_vreg)
+ValueT Method::GetReturnValueFromAcc(interpreter::AccVRegister &aacVreg)
 {
     if constexpr (InvokeHelper::IS_DYNAMIC) {  // NOLINT(readability-braces-around-statements)
-        return TaggedValue(aac_vreg.GetAs<uint64_t>());
+        return TaggedValue(aacVreg.GetAs<uint64_t>());
     } else {  // NOLINT(readability-misleading-indentation)
         ASSERT(GetReturnType().GetId() != panda_file::Type::TypeId::TAGGED);
         if (GetReturnType().GetId() != panda_file::Type::TypeId::VOID) {
-            interpreter::StaticVRegisterRef acc = aac_vreg.AsVRegRef<false>();
+            interpreter::StaticVRegisterRef acc = aacVreg.AsVRegRef<false>();
             if (acc.HasObject()) {
-                return Value(aac_vreg.GetReference());
+                return Value(aacVreg.GetReference());
             }
-            return Value(aac_vreg.GetLong());
+            return Value(aacVreg.GetLong());
         }
         return Value(static_cast<int64_t>(0));
     }
 }
 
-inline Value Method::InvokeCompiledCode(ManagedThread *thread, uint32_t num_args, Value *args)
+inline Value Method::InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs, Value *args)
 {
-    Frame *current_frame = thread->GetCurrentFrame();
-    Span<Value> args_span(args, num_args);
-    bool is_compiled = thread->IsCurrentFrameCompiled();
+    Frame *currentFrame = thread->GetCurrentFrame();
+    Span<Value> argsSpan(args, numArgs);
+    bool isCompiled = thread->IsCurrentFrameCompiled();
     // Use frame allocator to alloc memory for parameters as thread can be terminated and
     // InvokeCompiledCodeWithArgArray will not return in this case we will get memory leak with internal
     // allocator
     mem::StackFrameAllocator *allocator = thread->GetStackFrameAllocator();
-    auto values_deleter = [allocator](int64_t *values) {
+    auto valuesDeleter = [allocator](int64_t *values) {
         if (values != nullptr) {
             allocator->Free(values);
         }
     };
-    auto values = PandaUniquePtr<int64_t, decltype(values_deleter)>(nullptr, values_deleter);
-    if (num_args > 0) {
+    auto values = PandaUniquePtr<int64_t, decltype(valuesDeleter)>(nullptr, valuesDeleter);
+    if (numArgs > 0) {
         // In the worse case we are calling a dynamic method in which all arguments are pairs ot int64_t
         // That is why we allocate 2 x num_actual_args
-        size_t capacity = num_args * sizeof(int64_t);
+        size_t capacity = numArgs * sizeof(int64_t);
         // All allocations though FrameAllocator must be aligned
         capacity = AlignUp(capacity, GetAlignmentInBytes(DEFAULT_FRAME_ALIGNMENT));
         values.reset(reinterpret_cast<int64_t *>(allocator->Alloc(capacity)));
-        Span<int64_t> values_span(values.get(), capacity);
-        for (uint32_t i = 0; i < num_args; ++i) {
-            if (args_span[i].IsReference()) {
-                values_span[i] = reinterpret_cast<int64_t>(args_span[i].GetAs<ObjectHeader *>());
+        Span<int64_t> valuesSpan(values.get(), capacity);
+        for (uint32_t i = 0; i < numArgs; ++i) {
+            if (argsSpan[i].IsReference()) {
+                valuesSpan[i] = reinterpret_cast<int64_t>(argsSpan[i].GetAs<ObjectHeader *>());
             } else {
-                values_span[i] = args_span[i].GetAs<int64_t>();
+                valuesSpan[i] = argsSpan[i].GetAs<int64_t>();
             }
         }
     }
 
-    uint64_t ret_value = InvokeCompiledCodeWithArgArray(values.get(), current_frame, this, thread);
+    uint64_t retValue = InvokeCompiledCodeWithArgArray(values.get(), currentFrame, this, thread);
 
-    thread->SetCurrentFrameIsCompiled(is_compiled);
-    thread->SetCurrentFrame(current_frame);
+    thread->SetCurrentFrameIsCompiled(isCompiled);
+    thread->SetCurrentFrame(currentFrame);
     if (UNLIKELY(thread->HasPendingException())) {
-        ret_value = 0;
+        retValue = 0;
     }
-    return GetReturnValueFromTaggedValue(ret_value);
+    return GetReturnValueFromTaggedValue(retValue);
 }
 
 template <class InvokeHelper, class ValueT>
-ValueT Method::InvokeInterpretedCode(ManagedThread *thread, uint32_t num_actual_args, ValueT *args)
+ValueT Method::InvokeInterpretedCode(ManagedThread *thread, uint32_t numActualArgs, ValueT *args)
 {
-    Frame *current_frame = thread->GetCurrentFrame();
-    PandaUniquePtr<Frame, FrameDeleter> frame = InitFrame<InvokeHelper>(thread, num_actual_args, args, current_frame);
+    Frame *currentFrame = thread->GetCurrentFrame();
+    PandaUniquePtr<Frame, FrameDeleter> frame = InitFrame<InvokeHelper>(thread, numActualArgs, args, currentFrame);
     if (UNLIKELY(frame.get() == nullptr)) {
         panda::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
         return GetReturnValueFromException<InvokeHelper, ValueT>();
     }
 
-    InvokeEntry<InvokeHelper>(thread, current_frame, frame.get(), GetInstructions());
+    InvokeEntry<InvokeHelper>(thread, currentFrame, frame.get(), GetInstructions());
 
     ValueT res = (UNLIKELY(thread->HasPendingException()))
                      ? GetReturnValueFromException<InvokeHelper, ValueT>()
@@ -226,21 +226,21 @@ ValueT Method::InvokeInterpretedCode(ManagedThread *thread, uint32_t num_actual_
 }
 
 template <class InvokeHelper>
-void Method::InvokeEntry(ManagedThread *thread, Frame *current_frame, Frame *frame, const uint8_t *pc)
+void Method::InvokeEntry(ManagedThread *thread, Frame *currentFrame, Frame *frame, const uint8_t *pc)
 {
     LOG(DEBUG, INTERPRETER) << "Invoke entry: " << GetFullName();
 
-    auto is_compiled = thread->IsCurrentFrameCompiled();
+    auto isCompiled = thread->IsCurrentFrameCompiled();
     thread->SetCurrentFrameIsCompiled(false);
     thread->SetCurrentFrame(frame);
 
-    if (is_compiled && current_frame != nullptr) {
+    if (isCompiled && currentFrame != nullptr) {
         // Create C2I bridge frame in case of previous frame is a native frame or other compiler frame.
         // But create only if the previous frame is not a C2I bridge already.
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
         C2IBridge bridge;
-        if (!StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(current_frame)) {
-            bridge = {0, reinterpret_cast<uintptr_t>(current_frame), COMPILED_CODE_TO_INTERPRETER,
+        if (!StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(currentFrame)) {
+            bridge = {0, reinterpret_cast<uintptr_t>(currentFrame), COMPILED_CODE_TO_INTERPRETER,
                       thread->GetNativePc()};
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             frame->SetPrevFrame(reinterpret_cast<Frame *>(&bridge.v[1]));
@@ -264,18 +264,18 @@ void Method::InvokeEntry(ManagedThread *thread, Frame *current_frame, Frame *fra
         InvokeHelper::InterpreterExecute(thread, pc, frame);
         Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, this);
     }
-    thread->SetCurrentFrame(current_frame);
+    thread->SetCurrentFrame(currentFrame);
 }
 
-inline coretypes::TaggedValue Method::InvokeDyn(ManagedThread *thread, uint32_t num_args, coretypes::TaggedValue *args)
+inline coretypes::TaggedValue Method::InvokeDyn(ManagedThread *thread, uint32_t numArgs, coretypes::TaggedValue *args)
 {
-    return InvokeDyn<InvokeHelperDynamic>(thread, num_args, args);
+    return InvokeDyn<InvokeHelperDynamic>(thread, numArgs, args);
 }
 
 template <class InvokeHelper>
-inline coretypes::TaggedValue Method::InvokeDyn(ManagedThread *thread, uint32_t num_args, coretypes::TaggedValue *args)
+inline coretypes::TaggedValue Method::InvokeDyn(ManagedThread *thread, uint32_t numArgs, coretypes::TaggedValue *args)
 {
-    return InvokeImpl<InvokeHelper>(thread, num_args, args, false);
+    return InvokeImpl<InvokeHelper>(thread, numArgs, args, false);
 }
 
 inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const uint8_t *pc,
@@ -304,10 +304,9 @@ inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const
         return res;
     }
 
-    Frame *current_frame = thread->GetCurrentFrame();
+    Frame *currentFrame = thread->GetCurrentFrame();
     PandaUniquePtr<Frame, FrameDeleter> frame(
-        interpreter::RuntimeInterface::CreateFrameWithActualArgs</*is_dynamic=*/true>(nregs, nregs, this,
-                                                                                      current_frame),
+        interpreter::RuntimeInterface::CreateFrameWithActualArgs</*is_dynamic=*/true>(nregs, nregs, this, currentFrame),
         FrameDeleter(thread));
     if (UNLIKELY(frame.get() == nullptr)) {
         panda::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
@@ -316,28 +315,28 @@ inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const
 
     frame->SetDynamic();
 
-    DynamicFrameHandler dynamic_frame_helper(frame.get());
-    Span<TaggedValue> args_span(regs, nregs);
+    DynamicFrameHandler dynamicFrameHelper(frame.get());
+    Span<TaggedValue> argsSpan(regs, nregs);
     for (size_t i = 0; i < nregs; ++i) {
-        dynamic_frame_helper.GetVReg(i).SetValue(args_span[i].GetRawData());
+        dynamicFrameHelper.GetVReg(i).SetValue(argsSpan[i].GetRawData());
     }
 
     LOG(DEBUG, INTERPRETER) << "Invoke entry: " << GetFullName();
 
-    dynamic_frame_helper.GetAcc().SetValue(acc->GetRawData());
-    InvokeEntry<InvokeHelper>(thread, current_frame, frame.get(), pc);
-    res = TaggedValue(dynamic_frame_helper.GetAcc().GetAs<uint64_t>());
+    dynamicFrameHelper.GetAcc().SetValue(acc->GetRawData());
+    InvokeEntry<InvokeHelper>(thread, currentFrame, frame.get(), pc);
+    res = TaggedValue(dynamicFrameHelper.GetAcc().GetAs<uint64_t>());
 
     LOG(DEBUG, INTERPRETER) << "Invoke exit: " << GetFullName();
     return res;
 }
 
 template <class InvokeHelper, class ValueT>
-Frame *Method::EnterNativeMethodFrame(ManagedThread *thread, uint32_t num_vregs, uint32_t num_args, ValueT *args)
+Frame *Method::EnterNativeMethodFrame(ManagedThread *thread, uint32_t numVregs, uint32_t numArgs, ValueT *args)
 {
-    Frame *current_frame = thread->GetCurrentFrame();
+    Frame *currentFrame = thread->GetCurrentFrame();
     PandaUniquePtr<Frame, FrameDeleter> frame =
-        InitFrameWithNumVRegs<InvokeHelper, ValueT, true>(thread, num_vregs, num_args, args, current_frame);
+        InitFrameWithNumVRegs<InvokeHelper, ValueT, true>(thread, numVregs, numArgs, args, currentFrame);
     if (UNLIKELY(frame.get() == nullptr)) {
         panda::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
         return nullptr;
@@ -351,56 +350,56 @@ Frame *Method::EnterNativeMethodFrame(ManagedThread *thread, uint32_t num_vregs,
 
 inline void Method::ExitNativeMethodFrame(ManagedThread *thread)
 {
-    Frame *current_frame = thread->GetCurrentFrame();
-    ASSERT(current_frame != nullptr);
+    Frame *currentFrame = thread->GetCurrentFrame();
+    ASSERT(currentFrame != nullptr);
 
     LOG(DEBUG, INTERPRETER) << "Exit native frame";
 
-    thread->SetCurrentFrame(current_frame->GetPrevFrame());
-    FreeFrame(current_frame);
+    thread->SetCurrentFrame(currentFrame->GetPrevFrame());
+    FreeFrame(currentFrame);
 }
 
 template <class InvokeHelper, class ValueT>
-PandaUniquePtr<Frame, FrameDeleter> Method::InitFrame(ManagedThread *thread, uint32_t num_actual_args, ValueT *args,
-                                                      Frame *current_frame)
+PandaUniquePtr<Frame, FrameDeleter> Method::InitFrame(ManagedThread *thread, uint32_t numActualArgs, ValueT *args,
+                                                      Frame *currentFrame)
 {
-    ASSERT(code_id_.IsValid());
-    auto num_vregs = panda_file::CodeDataAccessor::GetNumVregs(*(panda_file_), code_id_);
-    return InitFrameWithNumVRegs<InvokeHelper, ValueT, false>(thread, num_vregs, num_actual_args, args, current_frame);
+    ASSERT(codeId_.IsValid());
+    auto numVregs = panda_file::CodeDataAccessor::GetNumVregs(*(pandaFile_), codeId_);
+    return InitFrameWithNumVRegs<InvokeHelper, ValueT, false>(thread, numVregs, numActualArgs, args, currentFrame);
 }
 
 template <class InvokeHelper, class ValueT, bool IS_NATIVE_METHOD>
-PandaUniquePtr<Frame, FrameDeleter> Method::InitFrameWithNumVRegs(ManagedThread *thread, uint32_t num_vregs,
-                                                                  uint32_t num_actual_args, ValueT *args,
-                                                                  Frame *current_frame)
+PandaUniquePtr<Frame, FrameDeleter> Method::InitFrameWithNumVRegs(ManagedThread *thread, uint32_t numVregs,
+                                                                  uint32_t numActualArgs, ValueT *args,
+                                                                  Frame *currentFrame)
 {
-    Span<ValueT> args_span(args, num_actual_args);
+    Span<ValueT> argsSpan(args, numActualArgs);
 
-    uint32_t num_declared_args = GetNumArgs();
-    uint32_t frame_size = InvokeHelper::GetFrameSize(num_vregs, num_declared_args, num_actual_args);
+    uint32_t numDeclaredArgs = GetNumArgs();
+    uint32_t frameSize = InvokeHelper::GetFrameSize(numVregs, numDeclaredArgs, numActualArgs);
 
-    Frame *frame_ptr;
+    Frame *framePtr;
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (IS_NATIVE_METHOD) {
-        frame_ptr = interpreter::RuntimeInterface::CreateNativeFrameWithActualArgs<InvokeHelper::IS_DYNAMIC>(
-            frame_size, num_actual_args, this, current_frame);
+        framePtr = interpreter::RuntimeInterface::CreateNativeFrameWithActualArgs<InvokeHelper::IS_DYNAMIC>(
+            frameSize, numActualArgs, this, currentFrame);
     } else {  // NOLINTNEXTLINE(readability-braces-around-statements)
-        frame_ptr = InvokeHelper::CreateFrame(thread, Frame::GetActualSize<InvokeHelper::IS_DYNAMIC>(frame_size), this,
-                                              current_frame, frame_size, num_actual_args);
+        framePtr = InvokeHelper::CreateFrame(thread, Frame::GetActualSize<InvokeHelper::IS_DYNAMIC>(frameSize), this,
+                                             currentFrame, frameSize, numActualArgs);
     }
-    PandaUniquePtr<Frame, FrameDeleter> frame(frame_ptr, FrameDeleter(thread));
+    PandaUniquePtr<Frame, FrameDeleter> frame(framePtr, FrameDeleter(thread));
     if (UNLIKELY(frame.get() == nullptr)) {
         return frame;
     }
 
-    InvokeHelper::InitActualArgs(frame.get(), args_span, num_vregs, num_declared_args);
+    InvokeHelper::InitActualArgs(frame.get(), argsSpan, numVregs, numDeclaredArgs);
 
     frame->SetInvoke();
     return frame;
 }
 
 template <class InvokeHelper, class ValueT>
-ValueT Method::InvokeImpl(ManagedThread *thread, uint32_t num_actual_args, ValueT *args, bool proxy_call)
+ValueT Method::InvokeImpl(ManagedThread *thread, uint32_t numActualArgs, ValueT *args, bool proxyCall)
 {
     DecrementHotnessCounter<true>(thread, 0, nullptr);
     if (UNLIKELY(thread->HasPendingException())) {
@@ -410,20 +409,20 @@ ValueT Method::InvokeImpl(ManagedThread *thread, uint32_t num_actual_args, Value
     // Currently, proxy methods should always be invoked in the interpreter. This constraint should be relaxed once
     // we support same frame layout for interpreter and compiled methods.
     // NOTE(msherstennikov): remove `proxy_call`
-    bool run_interpreter = !HasCompiledCode() || proxy_call;
-    ASSERT(!(proxy_call && IsNative()));
-    if (!run_interpreter) {
+    bool runInterpreter = !HasCompiledCode() || proxyCall;
+    ASSERT(!(proxyCall && IsNative()));
+    if (!runInterpreter) {
         if constexpr (InvokeHelper::IS_DYNAMIC) {  // NOLINT(readability-braces-around-statements)
-            return InvokeHelper::CompiledCodeExecute(thread, this, num_actual_args, args);
+            return InvokeHelper::CompiledCodeExecute(thread, this, numActualArgs, args);
         } else {  // NOLINT(readability-misleading-indentation)
-            return InvokeCompiledCode(thread, num_actual_args, args);
+            return InvokeCompiledCode(thread, numActualArgs, args);
         }
     }
     if (!thread->template StackOverflowCheck<true, false>()) {
         return GetReturnValueFromException<InvokeHelper, ValueT>();
     }
 
-    return InvokeInterpretedCode<InvokeHelper>(thread, num_actual_args, args);
+    return InvokeInterpretedCode<InvokeHelper>(thread, numActualArgs, args);
 }
 
 template <class AccVRegisterPtrT>
@@ -452,7 +451,7 @@ inline void Method::SetAcc(AccVRegisterPtrT acc)
  * @return true if OSR has been occurred
  */
 template <bool IS_CALL, class AccVRegisterPtrT>
-inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bytecode_offset,
+inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bytecodeOffset,
                                             [[maybe_unused]] AccVRegisterPtrT acc, bool osr, TaggedValue func)
 {
     // The compilation process will start performing
@@ -479,10 +478,10 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t byt
     auto runtime = Runtime::GetCurrent();
     auto &options = Runtime::GetOptions();
     uint32_t threshold = options.GetCompilerHotnessThreshold();
-    uint32_t prof_threshold = options.GetCompilerProfilingThreshold();
+    uint32_t profThreshold = options.GetCompilerProfilingThreshold();
 
-    if ((prof_threshold < threshold) && !IsProfiling() && !HasCompiledCode() && !IsProfiled()) {
-        SetHotnessCounter(threshold - prof_threshold - 1);
+    if ((profThreshold < threshold) && !IsProfiling() && !HasCompiledCode() && !IsProfiled()) {
+        SetHotnessCounter(threshold - profThreshold - 1);
         if (thread->GetVM()->IsStaticProfileEnabled()) {
             StartProfiling();
         }
@@ -497,18 +496,18 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t byt
 
             if (func.IsHeapObject()) {
                 [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-                VMHandle<ObjectHeader> handle_func(thread, func.GetHeapObject());
+                VMHandle<ObjectHeader> handleFunc(thread, func.GetHeapObject());
                 if (!TryVerify<IS_CALL>()) {
                     return false;
                 }
-                return runtime->GetPandaVM()->GetCompiler()->CompileMethod(this, bytecode_offset, osr,
-                                                                           TaggedValue(handle_func.GetPtr()));
+                return runtime->GetPandaVM()->GetCompiler()->CompileMethod(this, bytecodeOffset, osr,
+                                                                           TaggedValue(handleFunc.GetPtr()));
             }
             if (!TryVerify<IS_CALL>()) {
                 return false;
             }
             return runtime->GetPandaVM()->GetCompiler()->CompileMethod(
-                this, bytecode_offset, osr, func);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+                this, bytecodeOffset, osr, func);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
         }
         if (status == WAITING) {
             DecrementHotnessCounter();
@@ -534,15 +533,15 @@ inline bool Method::TryVerify()
 }
 
 template <bool IS_CALL, class AccVRegisterPtrT>
-inline bool Method::DecrementHotnessCounter(uintptr_t bytecode_offset, AccVRegisterPtrT acc, bool osr, TaggedValue func)
+inline bool Method::DecrementHotnessCounter(uintptr_t bytecodeOffset, AccVRegisterPtrT acc, bool osr, TaggedValue func)
 {
-    return DecrementHotnessCounter<IS_CALL>(ManagedThread::GetCurrent(), bytecode_offset, acc, osr, func);
+    return DecrementHotnessCounter<IS_CALL>(ManagedThread::GetCurrent(), bytecodeOffset, acc, osr, func);
 }
 
 template <typename Callback>
 void Method::EnumerateTypes(Callback handler) const
 {
-    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
+    panda_file::MethodDataAccessor mda(*(pandaFile_), fileId_);
     mda.EnumerateTypesInProto(handler);
 }
 
@@ -551,8 +550,8 @@ void Method::EnumerateTryBlocks(Callback callback) const
 {
     ASSERT(!IsAbstract());
 
-    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
-    panda_file::CodeDataAccessor cda(*(panda_file_), mda.GetCodeId().value());
+    panda_file::MethodDataAccessor mda(*(pandaFile_), fileId_);
+    panda_file::CodeDataAccessor cda(*(pandaFile_), mda.GetCodeId().value());
 
     cda.EnumerateTryBlocks(callback);
 }
@@ -565,16 +564,16 @@ void Method::EnumerateCatchBlocks(Callback callback) const
     using TryBlock = panda_file::CodeDataAccessor::TryBlock;
     using CatchBlock = panda_file::CodeDataAccessor::CatchBlock;
 
-    EnumerateTryBlocks([&callback, code = GetInstructions()](const TryBlock &try_block) {
+    EnumerateTryBlocks([&callback, code = GetInstructions()](const TryBlock &tryBlock) {
         bool next = true;
-        const uint8_t *try_start_pc = reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(code) +
-                                                                  static_cast<uintptr_t>(try_block.GetStartPc()));
-        const uint8_t *try_end_pc = reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(try_start_pc) +
-                                                                static_cast<uintptr_t>(try_block.GetLength()));
+        const uint8_t *tryStartPc = reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(code) +
+                                                                static_cast<uintptr_t>(tryBlock.GetStartPc()));
+        const uint8_t *tryEndPc = reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(tryStartPc) +
+                                                              static_cast<uintptr_t>(tryBlock.GetLength()));
         // ugly, but API of TryBlock is bad designed: enumaration is paired with mutation & updating
-        const_cast<TryBlock &>(try_block).EnumerateCatchBlocks(
-            [&callback, &next, try_start_pc, try_end_pc](const CatchBlock &catch_block) {
-                return next = callback(try_start_pc, try_end_pc, catch_block);
+        const_cast<TryBlock &>(tryBlock).EnumerateCatchBlocks(
+            [&callback, &next, tryStartPc, tryEndPc](const CatchBlock &catchBlock) {
+                return next = callback(tryStartPc, tryEndPc, catchBlock);
             });
         return next;
     });
@@ -587,24 +586,24 @@ void Method::EnumerateExceptionHandlers(Callback callback) const
 
     using CatchBlock = panda_file::CodeDataAccessor::CatchBlock;
 
-    EnumerateCatchBlocks([this, callback = std::move(callback)](const uint8_t *try_start_pc, const uint8_t *try_end_pc,
-                                                                const CatchBlock &catch_block) {
-        auto type_idx = catch_block.GetTypeIdx();
+    EnumerateCatchBlocks([this, callback = std::move(callback)](const uint8_t *tryStartPc, const uint8_t *tryEndPc,
+                                                                const CatchBlock &catchBlock) {
+        auto typeIdx = catchBlock.GetTypeIdx();
         const uint8_t *pc =
-            &GetInstructions()[catch_block.GetHandlerPc()];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        size_t size = catch_block.GetCodeSize();
+            &GetInstructions()[catchBlock.GetHandlerPc()];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        size_t size = catchBlock.GetCodeSize();
         const Class *cls = nullptr;
-        if (type_idx != panda_file::INVALID_INDEX) {
+        if (typeIdx != panda_file::INVALID_INDEX) {
             Runtime *runtime = Runtime::GetCurrent();
-            auto type_id = GetClass()->ResolveClassIndex(type_idx);
+            auto typeId = GetClass()->ResolveClassIndex(typeIdx);
             // NOTE: remove next code, after solving #1220 '[Runtime] Proposal for class descriptors in panda files'
             //       and clean up of ClassLinker API
             // cut
             LanguageContext ctx = runtime->GetLanguageContext(*this);
-            cls = runtime->GetClassLinker()->GetExtension(ctx)->GetClass(*(panda_file_), type_id);
+            cls = runtime->GetClassLinker()->GetExtension(ctx)->GetClass(*(pandaFile_), typeId);
             // end cut
         }
-        return callback(try_start_pc, try_end_pc, cls, pc, size);
+        return callback(tryStartPc, tryEndPc, cls, pc, size);
     });
 }
 

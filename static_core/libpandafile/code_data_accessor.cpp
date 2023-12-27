@@ -20,32 +20,32 @@ namespace panda::panda_file {
 CodeDataAccessor::CatchBlock::CatchBlock(Span<const uint8_t> data)
 {
     auto sp = data;
-    type_idx_ = helpers::ReadULeb128(&sp) - 1;
-    handler_pc_ = helpers::ReadULeb128(&sp);
-    code_size_ = helpers::ReadULeb128(&sp);
+    typeIdx_ = helpers::ReadULeb128(&sp) - 1;
+    handlerPc_ = helpers::ReadULeb128(&sp);
+    codeSize_ = helpers::ReadULeb128(&sp);
     size_ = sp.data() - data.data();
 }
 
 CodeDataAccessor::TryBlock::TryBlock(Span<const uint8_t> data) : data_(data)
 {
-    start_pc_ = helpers::ReadULeb128(&data);
+    startPc_ = helpers::ReadULeb128(&data);
     length_ = helpers::ReadULeb128(&data);
-    num_catches_ = helpers::ReadULeb128(&data);
-    catch_blocks_sp_ = data;
+    numCatches_ = helpers::ReadULeb128(&data);
+    catchBlocksSp_ = data;
 }
 
-CodeDataAccessor::CodeDataAccessor(const File &panda_file, File::EntityId code_id)
-    : panda_file_(panda_file), code_id_(code_id)
+CodeDataAccessor::CodeDataAccessor(const File &pandaFile, File::EntityId codeId)
+    : pandaFile_(pandaFile), codeId_(codeId)
 {
-    auto sp = panda_file_.GetSpanFromId(code_id_);
+    auto sp = pandaFile_.GetSpanFromId(codeId_);
 
-    num_vregs_ = helpers::ReadULeb128(&sp);
-    num_args_ = helpers::ReadULeb128(&sp);
-    code_size_ = helpers::ReadULeb128(&sp);
-    tries_size_ = helpers::ReadULeb128(&sp);
-    instructions_ptr_ = sp.data();
-    sp = sp.SubSpan(code_size_);
-    try_blocks_sp_ = sp;
+    numVregs_ = helpers::ReadULeb128(&sp);
+    numArgs_ = helpers::ReadULeb128(&sp);
+    codeSize_ = helpers::ReadULeb128(&sp);
+    triesSize_ = helpers::ReadULeb128(&sp);
+    instructionsPtr_ = sp.data();
+    sp = sp.SubSpan(codeSize_);
+    tryBlocksSp_ = sp;
 }
 
 }  // namespace panda::panda_file

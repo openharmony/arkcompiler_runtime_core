@@ -36,7 +36,7 @@ enum CpuFeature : uint8_t {
 };
 
 class CompilerOptions;
-extern CompilerOptions OPTIONS;
+extern CompilerOptions g_options;
 
 /**
  * Extends `compiler::Options`, which may be not sufficient to provide the desired functionality
@@ -44,7 +44,7 @@ extern CompilerOptions OPTIONS;
  */
 class CompilerOptions : public Options {
 public:
-    explicit CompilerOptions(const std::string &exe_path) : Options(exe_path) {}
+    explicit CompilerOptions(const std::string &exePath) : Options(exePath) {}
     NO_MOVE_SEMANTIC(CompilerOptions);
     NO_COPY_SEMANTIC(CompilerOptions);
     ~CompilerOptions() = default;
@@ -57,28 +57,28 @@ public:
      * Static local variable doesn't suit as soon as `Options::SetCompilerRegex()` is used (e.g. in
      * tests).
      */
-    void SetCompilerRegex(const std::string &new_regex_pattern)
+    void SetCompilerRegex(const std::string &newRegexPattern)
     {
-        Options::SetCompilerRegex(new_regex_pattern);
-        regex_ = new_regex_pattern;
+        Options::SetCompilerRegex(newRegexPattern);
+        regex_ = newRegexPattern;
     }
     template <typename T>
-    bool MatchesRegex(const T &method_name)
+    bool MatchesRegex(const T &methodName)
     {
         if (!WasSetCompilerRegex()) {
             return true;
         }
-        if (!regex_initialized_) {
+        if (!regexInitialized_) {
             regex_ = GetCompilerRegex();
-            regex_initialized_ = true;
+            regexInitialized_ = true;
         }
-        return std::regex_match(method_name, regex_);
+        return std::regex_match(methodName, regex_);
     }
 
-    void AdjustCpuFeatures(bool cross_compilation)
+    void AdjustCpuFeatures(bool crossCompilation)
     {
         ParseEnabledCpuFeatures();
-        if (cross_compilation || WasSetCompilerCpuFeatures()) {
+        if (crossCompilation || WasSetCompilerCpuFeatures()) {
             return;
         }
         switch (RUNTIME_ARCH) {
@@ -136,7 +136,7 @@ private:
 
     // `--compiler-regex`:
     std::regex regex_;
-    bool regex_initialized_ {false};
+    bool regexInitialized_ {false};
     std::bitset<CPU_FEATURES_NUM> features_;
 };
 

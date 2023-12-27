@@ -28,7 +28,7 @@ class ITableBuilder {
 public:
     ITableBuilder() = default;
 
-    virtual void Build(ClassLinker *class_linker, Class *base, Span<Class *> class_interfaces, bool is_interface) = 0;
+    virtual void Build(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces, bool isInterface) = 0;
 
     virtual void Resolve(Class *klass) = 0;
 
@@ -46,8 +46,8 @@ public:
 
 class DummyITableBuilder final : public ITableBuilder {
 public:
-    void Build([[maybe_unused]] ClassLinker *class_linker, [[maybe_unused]] Class *base,
-               [[maybe_unused]] Span<Class *> class_interfaces, [[maybe_unused]] bool is_interface) override
+    void Build([[maybe_unused]] ClassLinker *classLinker, [[maybe_unused]] Class *base,
+               [[maybe_unused]] Span<Class *> classInterfaces, [[maybe_unused]] bool isInterface) override
     {
     }
 

@@ -26,7 +26,7 @@ bool LoopUnswitch::RunImpl()
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Run " << GetPassName();
     RunLoopsVisitor();
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << GetPassName() << " complete";
-    return is_applied_;
+    return isApplied_;
 }
 
 void LoopUnswitch::InvalidateAnalyses()
@@ -41,51 +41,51 @@ bool LoopUnswitch::TransformLoop(Loop *loop)
 {
     loops_.push(loop);
 
-    int32_t budget = max_insns_;
-    for (uint32_t level = 0; !loops_.empty() && level < max_level_ && budget > 0; ++level) {
-        auto level_size = loops_.size();
-        while (level_size-- != 0) {
-            auto orig_loop = loops_.front();
+    int32_t budget = maxInsns_;
+    for (uint32_t level = 0; !loops_.empty() && level < maxLevel_ && budget > 0; ++level) {
+        auto levelSize = loops_.size();
+        while (levelSize-- != 0) {
+            auto origLoop = loops_.front();
             loops_.pop();
 
-            if (LoopUnswitcher::IsSmallLoop(orig_loop)) {
+            if (LoopUnswitcher::IsSmallLoop(origLoop)) {
                 COMPILER_LOG(DEBUG, LOOP_UNSWITCH)
                     << "Level #" << level << ": estimated loop iterations < 2, skip loop " << loop->GetId();
                 continue;
             }
-            auto unswitch_inst = LoopUnswitcher::FindUnswitchInst(orig_loop);
-            if (unswitch_inst == nullptr) {
+            auto unswitchInst = LoopUnswitcher::FindUnswitchInst(origLoop);
+            if (unswitchInst == nullptr) {
                 COMPILER_LOG(DEBUG, LOOP_UNSWITCH)
                     << "Level #" << level << ": cannot find unswitch instruction, skip loop " << loop->GetId();
                 continue;
             }
 
-            uint32_t loop_size = 0;
-            uint32_t true_count = 0;
-            uint32_t false_count = 0;
-            LoopUnswitcher::EstimateInstructionsCount(loop, unswitch_inst, &loop_size, &true_count, &false_count);
-            if (true_count + false_count >= budget + loop_size) {
+            uint32_t loopSize = 0;
+            uint32_t trueCount = 0;
+            uint32_t falseCount = 0;
+            LoopUnswitcher::EstimateInstructionsCount(loop, unswitchInst, &loopSize, &trueCount, &falseCount);
+            if (trueCount + falseCount >= budget + loopSize) {
                 break;
             }
 
-            auto loop_unswitcher =
+            auto loopUnswitcher =
                 LoopUnswitcher(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator());
-            auto new_loop = loop_unswitcher.UnswitchLoop(orig_loop, unswitch_inst);
-            if (new_loop == nullptr) {
+            auto newLoop = loopUnswitcher.UnswitchLoop(origLoop, unswitchInst);
+            if (newLoop == nullptr) {
                 continue;
             }
 
-            if (true_count + false_count > loop_size) {
-                budget -= true_count + false_count - loop_size;
+            if (trueCount + falseCount > loopSize) {
+                budget -= trueCount + falseCount - loopSize;
             }
 
             COMPILER_LOG(DEBUG, LOOP_UNSWITCH)
-                << "Level #" << level << ": unswitch loop " << orig_loop->GetId() << ", new loop " << new_loop->GetId();
+                << "Level #" << level << ": unswitch loop " << origLoop->GetId() << ", new loop " << newLoop->GetId();
 
-            loops_.push(orig_loop);
-            loops_.push(new_loop);
+            loops_.push(origLoop);
+            loops_.push(newLoop);
 
-            is_applied_ = true;
+            isApplied_ = true;
         }
     }
     return true;

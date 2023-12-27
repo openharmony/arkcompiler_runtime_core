@@ -935,26 +935,26 @@ TEST_F(AliasAnalysisTest, MoreObjectFields)
 */
 TEST_F(AliasAnalysisTest, PoolAlias)
 {
-    uint32_t my_str_id = 0;
-    uint32_t your_str_id = 1;
+    uint32_t myStrId = 0;
+    uint32_t yourStrId = 1;
     GRAPH(GetGraph())
     {
         BASIC_BLOCK(2U, -1L)
         {
             INST(12U, Opcode::SaveState).NoVregs();
-            INST(0U, Opcode::LoadString).ref().Inputs(12U).TypeId(my_str_id);
+            INST(0U, Opcode::LoadString).ref().Inputs(12U).TypeId(myStrId);
             INST(9U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
             INST(6U, Opcode::LoadAndInitClass).ref().Inputs(9U);
             INST(1U, Opcode::StoreStatic).ref().Inputs(6U, 0U);
 
             INST(13U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(2U, Opcode::LoadString).ref().Inputs(13U).TypeId(your_str_id);
+            INST(2U, Opcode::LoadString).ref().Inputs(13U).TypeId(yourStrId);
             INST(10U, Opcode::SaveState).Inputs(2U).SrcVregs({0U});
             INST(7U, Opcode::LoadAndInitClass).ref().Inputs(10U);
             INST(3U, Opcode::StoreStatic).ref().Inputs(7U, 2U);
 
             INST(14U, Opcode::SaveState).Inputs(2U).SrcVregs({0U});
-            INST(4U, Opcode::LoadString).ref().Inputs(14U).TypeId(my_str_id);
+            INST(4U, Opcode::LoadString).ref().Inputs(14U).TypeId(myStrId);
             INST(11U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
             INST(8U, Opcode::LoadAndInitClass).ref().Inputs(11U);
             INST(5U, Opcode::StoreStatic).ref().Inputs(8U, 4U);

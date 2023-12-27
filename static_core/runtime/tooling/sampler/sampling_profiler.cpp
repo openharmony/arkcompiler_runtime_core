@@ -27,34 +27,34 @@
 
 namespace panda::tooling::sampler {
 
-static std::atomic<int> S_CURRENT_HANDLERS_COUNTER = 0;
+static std::atomic<int> g_sCurrentHandlersCounter = 0;
 
 /* static */
 Sampler *Sampler::instance_ = nullptr;
 
-static std::atomic<size_t> S_LOST_SAMPLES = 0;
-static std::atomic<size_t> S_LOST_SEGV_SAMPLES = 0;
-static std::atomic<size_t> S_LOST_INVALID_SAMPLES = 0;
-static std::atomic<size_t> S_LOST_NOT_FIND_SAMPLES = 0;
-static std::atomic<size_t> S_TOTAL_SAMPLES = 0;
+static std::atomic<size_t> g_sLostSamples = 0;
+static std::atomic<size_t> g_sLostSegvSamples = 0;
+static std::atomic<size_t> g_sLostInvalidSamples = 0;
+static std::atomic<size_t> g_sLostNotFindSamples = 0;
+static std::atomic<size_t> g_sTotalSamples = 0;
 
 class ScopedThreadSampling {
 public:
-    explicit ScopedThreadSampling(ThreadSamplingInfo *sampling_info) : sampling_info_(sampling_info)
+    explicit ScopedThreadSampling(ThreadSamplingInfo *samplingInfo) : samplingInfo_(samplingInfo)
     {
-        ASSERT(sampling_info_ != nullptr);
-        ASSERT(sampling_info_->IsThreadSampling() == false);
-        sampling_info_->SetThreadSampling(true);
+        ASSERT(samplingInfo_ != nullptr);
+        ASSERT(samplingInfo_->IsThreadSampling() == false);
+        samplingInfo_->SetThreadSampling(true);
     }
 
     ~ScopedThreadSampling()
     {
-        ASSERT(sampling_info_->IsThreadSampling() == true);
-        sampling_info_->SetThreadSampling(false);
+        ASSERT(samplingInfo_->IsThreadSampling() == true);
+        samplingInfo_->SetThreadSampling(false);
     }
 
 private:
-    ThreadSamplingInfo *sampling_info_;
+    ThreadSamplingInfo *samplingInfo_;
 
     NO_COPY_SEMANTIC(ScopedThreadSampling);
     NO_MOVE_SEMANTIC(ScopedThreadSampling);
@@ -64,12 +64,12 @@ class ScopedHandlersCounting {
 public:
     explicit ScopedHandlersCounting()
     {
-        ++S_CURRENT_HANDLERS_COUNTER;
+        ++g_sCurrentHandlersCounter;
     }
 
     ~ScopedHandlersCounting()
     {
-        --S_CURRENT_HANDLERS_COUNTER;
+        --g_sCurrentHandlersCounter;
     }
 
     NO_COPY_SEMANTIC(ScopedHandlersCounting);
@@ -113,12 +113,12 @@ void Sampler::Destroy(Sampler *sampler)
 {
     ASSERT(instance_ != nullptr);
     ASSERT(instance_ == sampler);
-    ASSERT(!sampler->is_active_);
+    ASSERT(!sampler->isActive_);
 
-    LOG(INFO, PROFILER) << "Total samples: " << S_TOTAL_SAMPLES << "\nLost samples: " << S_LOST_SAMPLES;
-    LOG(INFO, PROFILER) << "Lost samples(Invalid method ptr): " << S_LOST_INVALID_SAMPLES
-                        << "\nLost samples(Invalid pf ptr): " << S_LOST_NOT_FIND_SAMPLES;
-    LOG(INFO, PROFILER) << "Lost samples(SIGSEGV occured): " << S_LOST_SEGV_SAMPLES;
+    LOG(INFO, PROFILER) << "Total samples: " << g_sTotalSamples << "\nLost samples: " << g_sLostSamples;
+    LOG(INFO, PROFILER) << "Lost samples(Invalid method ptr): " << g_sLostInvalidSamples
+                        << "\nLost samples(Invalid pf ptr): " << g_sLostNotFindSamples;
+    LOG(INFO, PROFILER) << "Lost samples(SIGSEGV occured): " << g_sLostSegvSamples;
 
     Runtime::GetCurrent()->GetNotificationManager()->RemoveListener(instance_,
                                                                     RuntimeNotificationManager::Event::THREAD_EVENTS);
@@ -132,47 +132,47 @@ void Sampler::Destroy(Sampler *sampler)
     instance_ = nullptr;
 }
 
-Sampler::Sampler() : runtime_(Runtime::GetCurrent()), sample_interval_(DEFAULT_SAMPLE_INTERVAL_US)
+Sampler::Sampler() : runtime_(Runtime::GetCurrent()), sampleInterval_(DEFAULT_SAMPLE_INTERVAL_US)
 {
     ASSERT_NATIVE_CODE();
 }
 
 void Sampler::AddThreadHandle(ManagedThread *thread)
 {
-    os::memory::LockHolder holder(managed_threads_lock_);
-    managed_threads_.insert(thread->GetId());
+    os::memory::LockHolder holder(managedThreadsLock_);
+    managedThreads_.insert(thread->GetId());
 }
 
 void Sampler::EraseThreadHandle(ManagedThread *thread)
 {
-    os::memory::LockHolder holder(managed_threads_lock_);
-    managed_threads_.erase(thread->GetId());
+    os::memory::LockHolder holder(managedThreadsLock_);
+    managedThreads_.erase(thread->GetId());
 }
 
-void Sampler::ThreadStart(ManagedThread *managed_thread)
+void Sampler::ThreadStart(ManagedThread *managedThread)
 {
-    AddThreadHandle(managed_thread);
+    AddThreadHandle(managedThread);
 }
 
-void Sampler::ThreadEnd(ManagedThread *managed_thread)
+void Sampler::ThreadEnd(ManagedThread *managedThread)
 {
-    EraseThreadHandle(managed_thread);
+    EraseThreadHandle(managedThread);
 }
 
 void Sampler::LoadModule(std::string_view name)
 {
     auto callback = [this, name](const panda_file::File &pf) {
         if (pf.GetFilename() == name) {
-            auto ptr_id = reinterpret_cast<uintptr_t>(&pf);
-            FileInfo pf_module;
-            pf_module.ptr = ptr_id;
-            pf_module.pathname = pf.GetFullFileName();
-            pf_module.checksum = pf.GetHeader()->checksum;
-            if (!loaded_pfs_queue_.FindValue(ptr_id)) {
-                loaded_pfs_queue_.Push(pf_module);
+            auto ptrId = reinterpret_cast<uintptr_t>(&pf);
+            FileInfo pfModule;
+            pfModule.ptr = ptrId;
+            pfModule.pathname = pf.GetFullFileName();
+            pfModule.checksum = pf.GetHeader()->checksum;
+            if (!loadedPfsQueue_.FindValue(ptrId)) {
+                loadedPfsQueue_.Push(pfModule);
             }
-            os::memory::LockHolder holder(loaded_pfs_lock_);
-            this->loaded_pfs_.push_back(pf_module);
+            os::memory::LockHolder holder(loadedPfsLock_);
+            this->loadedPfs_.push_back(pfModule);
             return false;
         }
         return true;
@@ -182,7 +182,7 @@ void Sampler::LoadModule(std::string_view name)
 
 bool Sampler::Start(const char *filename)
 {
-    if (is_active_) {
+    if (isActive_) {
         LOG(ERROR, PROFILER) << "Attemp to start sampling profiler while it's already started";
         return false;
     }
@@ -192,68 +192,68 @@ bool Sampler::Start(const char *filename)
         return false;
     }
 
-    is_active_ = true;
+    isActive_ = true;
     // Creating std::string instead of sending pointer to avoid UB stack-use-after-scope
-    listener_thread_ = std::make_unique<std::thread>(&Sampler::ListenerThreadEntry, this, std::string(filename));
-    listener_tid_ = listener_thread_->native_handle();
+    listenerThread_ = std::make_unique<std::thread>(&Sampler::ListenerThreadEntry, this, std::string(filename));
+    listenerTid_ = listenerThread_->native_handle();
 
     // All prepairing actions should be done before this thread is started
-    sampler_thread_ = std::make_unique<std::thread>(&Sampler::SamplerThreadEntry, this);
-    sampler_tid_ = sampler_thread_->native_handle();
+    samplerThread_ = std::make_unique<std::thread>(&Sampler::SamplerThreadEntry, this);
+    samplerTid_ = samplerThread_->native_handle();
 
     return true;
 }
 
 void Sampler::Stop()
 {
-    if (!is_active_) {
+    if (!isActive_) {
         LOG(ERROR, PROFILER) << "Attemp to stop sampling profiler, but it was not started";
         return;
     }
-    if (!sampler_thread_->joinable()) {
+    if (!samplerThread_->joinable()) {
         LOG(FATAL, PROFILER) << "Sampling profiler thread unexpectedly disappeared";
         UNREACHABLE();
     }
-    if (!listener_thread_->joinable()) {
+    if (!listenerThread_->joinable()) {
         LOG(FATAL, PROFILER) << "Listener profiler thread unexpectedly disappeared";
         UNREACHABLE();
     }
 
-    is_active_ = false;
-    sampler_thread_->join();
-    listener_thread_->join();
+    isActive_ = false;
+    samplerThread_->join();
+    listenerThread_->join();
 
     // After threads are stopped we can clear all sampler info
-    sampler_thread_.reset();
-    listener_thread_.reset();
-    sampler_tid_ = 0;
-    listener_tid_ = 0;
+    samplerThread_.reset();
+    listenerThread_.reset();
+    samplerTid_ = 0;
+    listenerTid_ = 0;
 }
 
-void Sampler::WriteLoadedPandaFiles(StreamWriter *writer_ptr)
+void Sampler::WriteLoadedPandaFiles(StreamWriter *writerPtr)
 {
-    os::memory::LockHolder holder(loaded_pfs_lock_);
-    if (LIKELY(loaded_pfs_.empty())) {
+    os::memory::LockHolder holder(loadedPfsLock_);
+    if (LIKELY(loadedPfs_.empty())) {
         return;
     }
-    for (const auto &module : loaded_pfs_) {
-        if (!writer_ptr->IsModuleWritten(module)) {
-            writer_ptr->WriteModule(module);
+    for (const auto &module : loadedPfs_) {
+        if (!writerPtr->IsModuleWritten(module)) {
+            writerPtr->WriteModule(module);
         }
     }
-    loaded_pfs_.clear();
+    loadedPfs_.clear();
 }
 
 void Sampler::CollectThreads()
 {
-    auto t_manager = runtime_->GetPandaVM()->GetThreadManager();
-    if (UNLIKELY(t_manager == nullptr)) {
+    auto tManager = runtime_->GetPandaVM()->GetThreadManager();
+    if (UNLIKELY(tManager == nullptr)) {
         // NOTE(m.strizhak): make it for languages without thread_manager
         LOG(FATAL, PROFILER) << "Thread manager is nullptr";
         UNREACHABLE();
     }
 
-    t_manager->EnumerateThreads(
+    tManager->EnumerateThreads(
         [this](ManagedThread *thread) {
             AddThreadHandle(thread);
             return true;
@@ -264,19 +264,19 @@ void Sampler::CollectThreads()
 void Sampler::CollectModules()
 {
     auto callback = [this](const panda_file::File &pf) {
-        auto ptr_id = reinterpret_cast<uintptr_t>(&pf);
-        FileInfo pf_module;
+        auto ptrId = reinterpret_cast<uintptr_t>(&pf);
+        FileInfo pfModule;
 
-        pf_module.ptr = ptr_id;
-        pf_module.pathname = pf.GetFullFileName();
-        pf_module.checksum = pf.GetHeader()->checksum;
+        pfModule.ptr = ptrId;
+        pfModule.pathname = pf.GetFullFileName();
+        pfModule.checksum = pf.GetHeader()->checksum;
 
-        if (!loaded_pfs_queue_.FindValue(ptr_id)) {
-            loaded_pfs_queue_.Push(pf_module);
+        if (!loadedPfsQueue_.FindValue(ptrId)) {
+            loadedPfsQueue_.Push(pfModule);
         }
 
-        os::memory::LockHolder holder(loaded_pfs_lock_);
-        this->loaded_pfs_.push_back(pf_module);
+        os::memory::LockHolder holder(loadedPfsLock_);
+        this->loadedPfs_.push_back(pfModule);
 
         return true;
     };
@@ -286,156 +286,153 @@ void Sampler::CollectModules()
 void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]] siginfo_t *siginfo,
                                     [[maybe_unused]] void *ptr)
 {
-    if (S_CURRENT_HANDLERS_COUNTER == 0) {
+    if (g_sCurrentHandlersCounter == 0) {
         // Sampling ended if S_CURRENT_HANDLERS_COUNTER is 0. Thread started executing handler for signal
         // that was sent before end, so thread is late now and we should return from handler
         return;
     }
-    auto scoped_handlers_counting = ScopedHandlersCounting();
+    auto scopedHandlersCounting = ScopedHandlersCounting();
 
     ManagedThread *mthread = ManagedThread::GetCurrent();
     ASSERT(mthread != nullptr);
 
     // Checking that code is being executed
-    auto frame_ptr = reinterpret_cast<CFrame::SlotType *>(mthread->GetCurrentFrame());
-    if (frame_ptr == nullptr) {
+    auto framePtr = reinterpret_cast<CFrame::SlotType *>(mthread->GetCurrentFrame());
+    if (framePtr == nullptr) {
         return;
     }
 
     auto frame = mthread->GetCurrentFrame();
-    bool is_compiled = mthread->IsCurrentFrameCompiled();
-    auto thread_status = mthread->GetStatus();
+    bool isCompiled = mthread->IsCurrentFrameCompiled();
+    auto threadStatus = mthread->GetStatus();
 
-    bool is_coroutine_running = false;
+    bool isCoroutineRunning = false;
     if (Coroutine::ThreadIsCoroutine(mthread)) {
-        is_coroutine_running = Coroutine::CastFromThread(mthread)->GetCoroutineStatus() == Coroutine::Status::RUNNING;
+        isCoroutineRunning = Coroutine::CastFromThread(mthread)->GetCoroutineStatus() == Coroutine::Status::RUNNING;
     }
 
-    Method *top_method = frame->GetMethod();
+    Method *topMethod = frame->GetMethod();
 
-    S_TOTAL_SAMPLES++;
+    g_sTotalSamples++;
 
-    const LockFreeQueue &pfs_queue = Sampler::GetSampleQueuePF();
+    const LockFreeQueue &pfsQueue = Sampler::GetSampleQueuePF();
 
     SampleInfo sample {};
     // Volatile because we don't need to optimize this variable to be able to use setjmp without clobbering
     // Optimized variables may end up with incorrect value as a consequence of a longjmp() operation
-    volatile size_t stack_counter = 0;
+    volatile size_t stackCounter = 0;
 
-    ScopedThreadSampling scoped_thread_sampling(mthread->GetPtThreadInfo()->GetSamplingInfo());
+    ScopedThreadSampling scopedThreadSampling(mthread->GetPtThreadInfo()->GetSamplingInfo());
 
     // NOLINTNEXTLINE(cert-err52-cpp)
     if (setjmp(mthread->GetPtThreadInfo()->GetSamplingInfo()->GetSigSegvJmpEnv()) != 0) {
         // This code executed after longjmp()
         // In case of SIGSEGV we lose the sample
-        S_LOST_SAMPLES++;
-        S_LOST_SEGV_SAMPLES++;
+        g_sLostSamples++;
+        g_sLostSegvSamples++;
         return;
     }
 
-    if (thread_status == ThreadStatus::RUNNING) {
-        sample.thread_info.thread_status = SampleInfo::ThreadStatus::RUNNING;
-    } else if (thread_status == ThreadStatus::NATIVE && is_coroutine_running) {
-        sample.thread_info.thread_status = SampleInfo::ThreadStatus::RUNNING;
+    if (threadStatus == ThreadStatus::RUNNING) {
+        sample.threadInfo.threadStatus = SampleInfo::ThreadStatus::RUNNING;
+    } else if (threadStatus == ThreadStatus::NATIVE && isCoroutineRunning) {
+        sample.threadInfo.threadStatus = SampleInfo::ThreadStatus::RUNNING;
     } else {
-        sample.thread_info.thread_status = SampleInfo::ThreadStatus::SUSPENDED;
+        sample.threadInfo.threadStatus = SampleInfo::ThreadStatus::SUSPENDED;
     }
 
-    if (StackWalkerBase::IsMethodInBoundaryFrame(top_method)) {
-        bool is_frame_boundary = true;
-        while (is_frame_boundary) {
+    if (StackWalkerBase::IsMethodInBoundaryFrame(topMethod)) {
+        bool isFrameBoundary = true;
+        while (isFrameBoundary) {
             Method *method = frame->GetMethod();
             Frame *prev = frame->GetPrevFrame();
 
             if (StackWalkerBase::IsMethodInI2CFrame(method)) {
-                sample.stack_info.managed_stack[stack_counter].panda_file_ptr =
-                    helpers::ToUnderlying(FrameKind::BRIDGE);
-                sample.stack_info.managed_stack[stack_counter].file_id = helpers::ToUnderlying(FrameKind::BRIDGE);
-                ++stack_counter;
+                sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
+                sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
+                ++stackCounter;
 
                 frame = prev;
-                is_compiled = false;
+                isCompiled = false;
             } else if (StackWalkerBase::IsMethodInC2IFrame(method)) {
-                sample.stack_info.managed_stack[stack_counter].panda_file_ptr =
-                    helpers::ToUnderlying(FrameKind::BRIDGE);
-                sample.stack_info.managed_stack[stack_counter].file_id = helpers::ToUnderlying(FrameKind::BRIDGE);
-                ++stack_counter;
+                sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
+                sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
+                ++stackCounter;
 
                 frame = prev;
-                is_compiled = true;
+                isCompiled = true;
             } else if (StackWalkerBase::IsMethodInBPFrame(method)) {
-                S_LOST_SAMPLES++;
+                g_sLostSamples++;
                 return;
             } else {
-                is_frame_boundary = false;
+                isFrameBoundary = false;
             }
         }
-    } else if (is_compiled) {
-        auto signal_context = SignalContext(ptr);
-        auto pc = signal_context.GetPC();
-        auto fp = signal_context.GetFP();
-        bool pc_in_compiled = InAllocatedCodeRange(pc);
+    } else if (isCompiled) {
+        auto signalContext = SignalContext(ptr);
+        auto pc = signalContext.GetPC();
+        auto fp = signalContext.GetFP();
+        bool pcInCompiled = InAllocatedCodeRange(pc);
         CFrame cframe(frame);
-        bool is_native = cframe.IsNative();
-        if (!is_native && fp == nullptr) {
-            sample.stack_info.managed_stack[stack_counter].panda_file_ptr = helpers::ToUnderlying(FrameKind::BRIDGE);
-            sample.stack_info.managed_stack[stack_counter].file_id = helpers::ToUnderlying(FrameKind::BRIDGE);
-            ++stack_counter;
+        bool isNative = cframe.IsNative();
+        if (!isNative && fp == nullptr) {
+            sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
+            sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
+            ++stackCounter;
 
             // fp is not set yet, so cframe not finished, currently in bridge, previous frame iframe
-            is_compiled = false;
-        } else if (!is_native && fp != nullptr) {
-            auto pf_id = reinterpret_cast<uintptr_t>(frame->GetMethod()->GetPandaFile());
-            if (pc_in_compiled) {
+            isCompiled = false;
+        } else if (!isNative && fp != nullptr) {
+            auto pfId = reinterpret_cast<uintptr_t>(frame->GetMethod()->GetPandaFile());
+            if (pcInCompiled) {
                 // Currently in compiled method so get it from fp
                 frame = reinterpret_cast<Frame *>(fp);
-            } else if (!pc_in_compiled && pfs_queue.FindValue(pf_id)) {
-                sample.stack_info.managed_stack[stack_counter].panda_file_ptr =
-                    helpers::ToUnderlying(FrameKind::BRIDGE);
-                sample.stack_info.managed_stack[stack_counter].file_id = helpers::ToUnderlying(FrameKind::BRIDGE);
-                ++stack_counter;
+            } else if (!pcInCompiled && pfsQueue.FindValue(pfId)) {
+                sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
+                sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
+                ++stackCounter;
 
                 // pc not in jitted code, so fp is not up-to-date, currently not in cfame
-                is_compiled = false;
+                isCompiled = false;
             }
         }
     }
 
-    auto stack_walker = StackWalkerBase(frame, is_compiled);
+    auto stackWalker = StackWalkerBase(frame, isCompiled);
 
-    while (stack_walker.HasFrame()) {
-        auto method = stack_walker.GetMethod();
+    while (stackWalker.HasFrame()) {
+        auto method = stackWalker.GetMethod();
 
         if (method == nullptr || IsInvalidPointer(reinterpret_cast<uintptr_t>(method))) {
-            S_LOST_SAMPLES++;
-            S_LOST_INVALID_SAMPLES++;
+            g_sLostSamples++;
+            g_sLostInvalidSamples++;
             return;
         }
 
         auto pf = method->GetPandaFile();
-        auto pf_id = reinterpret_cast<uintptr_t>(pf);
-        if (!pfs_queue.FindValue(pf_id)) {
-            S_LOST_SAMPLES++;
-            S_LOST_NOT_FIND_SAMPLES++;
+        auto pfId = reinterpret_cast<uintptr_t>(pf);
+        if (!pfsQueue.FindValue(pfId)) {
+            g_sLostSamples++;
+            g_sLostNotFindSamples++;
             return;
         }
 
-        sample.stack_info.managed_stack[stack_counter].panda_file_ptr = pf_id;
-        sample.stack_info.managed_stack[stack_counter].file_id = method->GetFileId().GetOffset();
+        sample.stackInfo.managedStack[stackCounter].pandaFilePtr = pfId;
+        sample.stackInfo.managedStack[stackCounter].fileId = method->GetFileId().GetOffset();
 
-        ++stack_counter;
-        stack_walker.NextFrame();
+        ++stackCounter;
+        stackWalker.NextFrame();
 
-        if (stack_counter == SampleInfo::StackInfo::MAX_STACK_DEPTH) {
+        if (stackCounter == SampleInfo::StackInfo::MAX_STACK_DEPTH) {
             // According to the limitations we should drop all frames that is higher than MAX_STACK_DEPTH
             break;
         }
     }
-    if (stack_counter == 0) {
+    if (stackCounter == 0) {
         return;
     }
-    sample.stack_info.managed_stack_size = stack_counter;
-    sample.thread_info.thread_id = os::thread::GetCurrentThreadId();
+    sample.stackInfo.managedStackSize = stackCounter;
+    sample.threadInfo.threadId = os::thread::GetCurrentThreadId();
 
     const ThreadCommunicator &communicator = Sampler::GetSampleCommunicator();
     communicator.SendSample(sample);
@@ -451,72 +448,72 @@ void Sampler::SamplerThreadEntry()
     // Ignore incoming sigprof if handler isn't completed
     sigaddset(&action.sa_mask, SIGPROF);
 
-    struct sigaction old_action {};
+    struct sigaction oldAction {};
 
-    if (sigaction(SIGPROF, &action, &old_action) == -1) {
+    if (sigaction(SIGPROF, &action, &oldAction) == -1) {
         LOG(FATAL, PROFILER) << "Sigaction failed, can't start profiling";
         UNREACHABLE();
     }
 
     // We keep handler assigned to SigProfSamplingProfilerHandler after sampling end because
     // otherwice deadlock can happen if signal will be slow and reach thread after handler resignation
-    if (old_action.sa_sigaction != nullptr && old_action.sa_sigaction != SigProfSamplingProfilerHandler) {
+    if (oldAction.sa_sigaction != nullptr && oldAction.sa_sigaction != SigProfSamplingProfilerHandler) {
         LOG(FATAL, PROFILER) << "SIGPROF signal handler was overriden in sampling profiler";
         UNREACHABLE();
     }
-    ++S_CURRENT_HANDLERS_COUNTER;
+    ++g_sCurrentHandlersCounter;
 
     auto pid = getpid();
     // Atomic with relaxed order reason: data race with is_active_
-    while (is_active_.load(std::memory_order_relaxed)) {
+    while (isActive_.load(std::memory_order_relaxed)) {
         {
-            os::memory::LockHolder holder(managed_threads_lock_);
-            for (const auto &thread_id : managed_threads_) {
+            os::memory::LockHolder holder(managedThreadsLock_);
+            for (const auto &threadId : managedThreads_) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-                if (syscall(SYS_tgkill, pid, thread_id, SIGPROF) != 0) {
+                if (syscall(SYS_tgkill, pid, threadId, SIGPROF) != 0) {
                     LOG(ERROR, PROFILER) << "Can't send signal to thread";
                 }
             }
         }
-        os::thread::NativeSleepUS(sample_interval_);
+        os::thread::NativeSleepUS(sampleInterval_);
     }
 
     // Sending last sample on finish to avoid of deadlock in listener
-    SampleInfo last_sample;
-    last_sample.stack_info.managed_stack_size = 0;
-    communicator_.SendSample(last_sample);
+    SampleInfo lastSample;
+    lastSample.stackInfo.managedStackSize = 0;
+    communicator_.SendSample(lastSample);
 
-    --S_CURRENT_HANDLERS_COUNTER;
+    --g_sCurrentHandlersCounter;
 
-    const unsigned int time_to_sleep_ms = 100;
+    const unsigned int timeToSleepMs = 100;
     do {
-        os::thread::NativeSleep(time_to_sleep_ms);
-    } while (S_CURRENT_HANDLERS_COUNTER != 0);
+        os::thread::NativeSleep(timeToSleepMs);
+    } while (g_sCurrentHandlersCounter != 0);
 }
 
 // Passing std:string copy instead of reference, 'cause another thread owns this object
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
-void Sampler::ListenerThreadEntry(std::string output_file)
+void Sampler::ListenerThreadEntry(std::string outputFile)
 {
-    auto writer_ptr = std::make_unique<StreamWriter>(output_file.c_str());
+    auto writerPtr = std::make_unique<StreamWriter>(outputFile.c_str());
     // Writing panda files that were loaded before sampler was created
-    WriteLoadedPandaFiles(writer_ptr.get());
+    WriteLoadedPandaFiles(writerPtr.get());
 
-    SampleInfo buffer_sample;
+    SampleInfo bufferSample;
     // Atomic with relaxed order reason: data race with is_active_
-    while (is_active_.load(std::memory_order_relaxed)) {
-        WriteLoadedPandaFiles(writer_ptr.get());
-        communicator_.ReadSample(&buffer_sample);
-        if (LIKELY(buffer_sample.stack_info.managed_stack_size != 0)) {
-            writer_ptr->WriteSample(buffer_sample);
+    while (isActive_.load(std::memory_order_relaxed)) {
+        WriteLoadedPandaFiles(writerPtr.get());
+        communicator_.ReadSample(&bufferSample);
+        if (LIKELY(bufferSample.stackInfo.managedStackSize != 0)) {
+            writerPtr->WriteSample(bufferSample);
         }
     }
     // Writing all remaining samples
     while (!communicator_.IsPipeEmpty()) {
-        WriteLoadedPandaFiles(writer_ptr.get());
-        communicator_.ReadSample(&buffer_sample);
-        if (LIKELY(buffer_sample.stack_info.managed_stack_size != 0)) {
-            writer_ptr->WriteSample(buffer_sample);
+        WriteLoadedPandaFiles(writerPtr.get());
+        communicator_.ReadSample(&bufferSample);
+        if (LIKELY(bufferSample.stackInfo.managedStackSize != 0)) {
+            writerPtr->WriteSample(bufferSample);
         }
     }
 }

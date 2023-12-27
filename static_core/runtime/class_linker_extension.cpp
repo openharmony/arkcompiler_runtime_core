@@ -26,18 +26,18 @@ namespace panda {
 
 ClassLinkerExtension::~ClassLinkerExtension()
 {
-    os::memory::LockHolder lock(contexts_lock_);
+    os::memory::LockHolder lock(contextsLock_);
     for (auto *ctx : contexts_) {
-        class_linker_->GetAllocator()->Delete(ctx);
+        classLinker_->GetAllocator()->Delete(ctx);
     }
 }
 
-Class *ClassLinkerExtension::BootContext::LoadClass(const uint8_t *descriptor, bool need_copy_descriptor,
-                                                    ClassLinkerErrorHandler *error_handler)
+Class *ClassLinkerExtension::BootContext::LoadClass(const uint8_t *descriptor, bool needCopyDescriptor,
+                                                    ClassLinkerErrorHandler *errorHandler)
 {
     ASSERT(extension_->IsInitialized());
 
-    return extension_->GetClassLinker()->GetClass(descriptor, need_copy_descriptor, this, error_handler);
+    return extension_->GetClassLinker()->GetClass(descriptor, needCopyDescriptor, this, errorHandler);
 }
 
 void ClassLinkerExtension::BootContext::EnumeratePandaFiles(
@@ -50,74 +50,74 @@ class SuppressErrorHandler : public ClassLinkerErrorHandler {
     void OnError([[maybe_unused]] ClassLinker::Error error, [[maybe_unused]] const PandaString &message) override {}
 };
 
-Class *ClassLinkerExtension::AppContext::LoadClass(const uint8_t *descriptor, bool need_copy_descriptor,
-                                                   ClassLinkerErrorHandler *error_handler)
+Class *ClassLinkerExtension::AppContext::LoadClass(const uint8_t *descriptor, bool needCopyDescriptor,
+                                                   ClassLinkerErrorHandler *errorHandler)
 {
     ASSERT(extension_->IsInitialized());
 
     SuppressErrorHandler handler;
-    auto *cls = extension_->GetClass(descriptor, need_copy_descriptor, nullptr, &handler);
+    auto *cls = extension_->GetClass(descriptor, needCopyDescriptor, nullptr, &handler);
     if (cls != nullptr) {
         return cls;
     }
 
     for (auto &pf : pfs_) {
-        auto class_id = pf->GetClassId(descriptor);
-        if (!class_id.IsValid() || pf->IsExternal(class_id)) {
+        auto classId = pf->GetClassId(descriptor);
+        if (!classId.IsValid() || pf->IsExternal(classId)) {
             continue;
         }
-        return extension_->GetClassLinker()->LoadClass(*pf, class_id, this, error_handler);
+        return extension_->GetClassLinker()->LoadClass(*pf, classId, this, errorHandler);
     }
 
-    if (error_handler != nullptr) {
+    if (errorHandler != nullptr) {
         PandaStringStream ss;
         ss << "Cannot find class " << descriptor << " in all app panda files";
-        error_handler->OnError(ClassLinker::Error::CLASS_NOT_FOUND, ss.str());
+        errorHandler->OnError(ClassLinker::Error::CLASS_NOT_FOUND, ss.str());
     }
     return nullptr;
 }
 
-void ClassLinkerExtension::InitializeArrayClassRoot(ClassRoot root, ClassRoot component_root, const char *descriptor)
+void ClassLinkerExtension::InitializeArrayClassRoot(ClassRoot root, ClassRoot componentRoot, const char *descriptor)
 {
     ASSERT(IsInitialized());
 
-    auto *array_class = CreateClass(utf::CStringAsMutf8(descriptor), GetClassVTableSize(root), GetClassIMTSize(root),
-                                    GetClassSize(root));
-    array_class->SetLoadContext(&boot_context_);
-    auto *component_class = GetClassRoot(component_root);
-    if (!InitializeArrayClass(array_class, component_class)) {
-        LOG(FATAL, CLASS_LINKER) << "Failed to initialize array class root '" << array_class->GetName() << "'";
+    auto *arrayClass = CreateClass(utf::CStringAsMutf8(descriptor), GetClassVTableSize(root), GetClassIMTSize(root),
+                                   GetClassSize(root));
+    arrayClass->SetLoadContext(&bootContext_);
+    auto *componentClass = GetClassRoot(componentRoot);
+    if (!InitializeArrayClass(arrayClass, componentClass)) {
+        LOG(FATAL, CLASS_LINKER) << "Failed to initialize array class root '" << arrayClass->GetName() << "'";
         return;
     }
 
-    AddClass(array_class);
-    SetClassRoot(root, array_class);
+    AddClass(arrayClass);
+    SetClassRoot(root, arrayClass);
 }
 
-void ClassLinkerExtension::InitializePrimitiveClassRoot(ClassRoot root, panda_file::Type::TypeId type_id,
+void ClassLinkerExtension::InitializePrimitiveClassRoot(ClassRoot root, panda_file::Type::TypeId typeId,
                                                         const char *descriptor)
 {
     ASSERT(IsInitialized());
 
-    auto *primitive_class = CreateClass(utf::CStringAsMutf8(descriptor), GetClassVTableSize(root),
-                                        GetClassIMTSize(root), GetClassSize(root));
-    primitive_class->SetType(panda_file::Type(type_id));
-    primitive_class->SetLoadContext(&boot_context_);
-    InitializePrimitiveClass(primitive_class);
-    AddClass(primitive_class);
-    SetClassRoot(root, primitive_class);
+    auto *primitiveClass = CreateClass(utf::CStringAsMutf8(descriptor), GetClassVTableSize(root), GetClassIMTSize(root),
+                                       GetClassSize(root));
+    primitiveClass->SetType(panda_file::Type(typeId));
+    primitiveClass->SetLoadContext(&bootContext_);
+    InitializePrimitiveClass(primitiveClass);
+    AddClass(primitiveClass);
+    SetClassRoot(root, primitiveClass);
 }
 
-bool ClassLinkerExtension::Initialize(ClassLinker *class_linker, bool compressed_string_enabled)
+bool ClassLinkerExtension::Initialize(ClassLinker *classLinker, bool compressedStringEnabled)
 {
-    class_linker_ = class_linker;
-    InitializeImpl(compressed_string_enabled);
+    classLinker_ = classLinker;
+    InitializeImpl(compressedStringEnabled);
 
-    can_initialize_classes_ = true;
+    canInitializeClasses_ = true;
     // Copy classes to separate container as ClassLinkerExtension::InitializeClass
     // can load more classes and modify boot context
     PandaVector<Class *> klasses;
-    boot_context_.EnumerateClasses([&klasses](Class *klass) {
+    bootContext_.EnumerateClasses([&klasses](Class *klass) {
         if (!klass->IsLoaded()) {
             klasses.push_back(klass);
         }
@@ -139,12 +139,12 @@ bool ClassLinkerExtension::InitializeRoots(ManagedThread *thread)
 {
     ASSERT(IsInitialized());
 
-    for (auto *klass : class_roots_) {
+    for (auto *klass : classRoots_) {
         if (klass == nullptr) {
             continue;
         }
 
-        if (!class_linker_->InitializeClass(thread, klass)) {
+        if (!classLinker_->InitializeClass(thread, klass)) {
             LOG(FATAL, CLASS_LINKER) << "Failed to initialize class '" << klass->GetName() << "'";
             return false;
         }
@@ -155,20 +155,20 @@ bool ClassLinkerExtension::InitializeRoots(ManagedThread *thread)
 
 Class *ClassLinkerExtension::FindLoadedClass(const uint8_t *descriptor, ClassLinkerContext *context /* = nullptr */)
 {
-    return class_linker_->FindLoadedClass(descriptor, ResolveContext(context));
+    return classLinker_->FindLoadedClass(descriptor, ResolveContext(context));
 }
 
-Class *ClassLinkerExtension::GetClass(const uint8_t *descriptor, bool need_copy_descriptor /* = true */,
+Class *ClassLinkerExtension::GetClass(const uint8_t *descriptor, bool needCopyDescriptor /* = true */,
                                       ClassLinkerContext *context /* = nullptr */,
-                                      ClassLinkerErrorHandler *error_handler /* = nullptr */)
+                                      ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     ASSERT(IsInitialized());
 
-    return class_linker_->GetClass(descriptor, need_copy_descriptor, ResolveContext(context),
-                                   ResolveErrorHandler(error_handler));
+    return classLinker_->GetClass(descriptor, needCopyDescriptor, ResolveContext(context),
+                                  ResolveErrorHandler(errorHandler));
 }
 
-static void WrapClassNotFoundExceptionIfNeeded(ClassLinker *class_linker, const uint8_t *descriptor,
+static void WrapClassNotFoundExceptionIfNeeded(ClassLinker *classLinker, const uint8_t *descriptor,
                                                const LanguageContext &ctx)
 {
     auto *thread = ManagedThread::GetCurrent();
@@ -176,18 +176,18 @@ static void WrapClassNotFoundExceptionIfNeeded(ClassLinker *class_linker, const 
         return;
     }
 
-    auto *class_not_found_exception_class =
-        class_linker->GetExtension(ctx)->GetClass(ctx.GetClassNotFoundExceptionDescriptor());
-    if (class_not_found_exception_class == nullptr) {
+    auto *classNotFoundExceptionClass =
+        classLinker->GetExtension(ctx)->GetClass(ctx.GetClassNotFoundExceptionDescriptor());
+    if (classNotFoundExceptionClass == nullptr) {
         // We've got OOM
         ASSERT(thread->GetVM()->GetOOMErrorObject() == nullptr ||
                thread->GetException()->ClassAddr<Class>() == thread->GetVM()->GetOOMErrorObject()->ClassAddr<Class>());
         return;
     }
-    ASSERT(class_not_found_exception_class != nullptr);
+    ASSERT(classNotFoundExceptionClass != nullptr);
 
     auto *cause = thread->GetException();
-    if (cause->IsInstanceOf(class_not_found_exception_class)) {
+    if (cause->IsInstanceOf(classNotFoundExceptionClass)) {
         auto name = ClassHelper::GetName(descriptor);
         panda::ThrowException(ctx, thread, ctx.GetNoClassDefFoundErrorDescriptor(), utf::CStringAsMutf8(name.c_str()));
     }
@@ -195,16 +195,16 @@ static void WrapClassNotFoundExceptionIfNeeded(ClassLinker *class_linker, const 
 
 Class *ClassLinkerExtension::GetClass(const panda_file::File &pf, panda_file::File::EntityId id,
                                       ClassLinkerContext *context /* = nullptr */,
-                                      ClassLinkerErrorHandler *error_handler /* = nullptr */)
+                                      ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     ASSERT(IsInitialized());
 
-    auto *cls = class_linker_->GetClass(pf, id, ResolveContext(context), ResolveErrorHandler(error_handler));
+    auto *cls = classLinker_->GetClass(pf, id, ResolveContext(context), ResolveErrorHandler(errorHandler));
 
     if (UNLIKELY(cls == nullptr)) {
         auto *descriptor = pf.GetStringData(id).data;
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(GetLanguage());
-        WrapClassNotFoundExceptionIfNeeded(class_linker_, descriptor, ctx);
+        WrapClassNotFoundExceptionIfNeeded(classLinker_, descriptor, ctx);
     }
 
     return cls;
@@ -216,10 +216,10 @@ Class *ClassLinkerExtension::AddClass(Class *klass)
 
     auto *context = klass->GetLoadContext();
 
-    auto *other_klass = ResolveContext(context)->InsertClass(klass);
-    if (other_klass != nullptr) {
-        class_linker_->FreeClass(klass);
-        return other_klass;
+    auto *otherKlass = ResolveContext(context)->InsertClass(klass);
+    if (otherKlass != nullptr) {
+        classLinker_->FreeClass(klass);
+        return otherKlass;
     }
     OnClassPrepared(klass);
 
@@ -230,10 +230,10 @@ size_t ClassLinkerExtension::NumLoadedClasses()
 {
     ASSERT(IsInitialized());
 
-    size_t sum = boot_context_.NumLoadedClasses();
+    size_t sum = bootContext_.NumLoadedClasses();
 
     {
-        os::memory::LockHolder lock(contexts_lock_);
+        os::memory::LockHolder lock(contextsLock_);
         for (auto *ctx : contexts_) {
             sum += ctx->NumLoadedClasses();
         }
@@ -243,9 +243,9 @@ size_t ClassLinkerExtension::NumLoadedClasses()
 
 void ClassLinkerExtension::VisitLoadedClasses(size_t flag)
 {
-    boot_context_.VisitLoadedClasses(flag);
+    bootContext_.VisitLoadedClasses(flag);
     {
-        os::memory::LockHolder lock(contexts_lock_);
+        os::memory::LockHolder lock(contextsLock_);
         for (auto *ctx : contexts_) {
             ctx->VisitLoadedClasses(flag);
         }
@@ -256,17 +256,17 @@ void ClassLinkerExtension::FreeLoadedClasses()
 {
     ASSERT(IsInitialized());
 
-    boot_context_.EnumerateClasses([this](Class *klass) {
+    bootContext_.EnumerateClasses([this](Class *klass) {
         FreeClass(klass);
-        class_linker_->FreeClassData(klass);
+        classLinker_->FreeClassData(klass);
         return true;
     });
     {
-        os::memory::LockHolder lock(contexts_lock_);
+        os::memory::LockHolder lock(contextsLock_);
         for (auto *ctx : contexts_) {
             ctx->EnumerateClasses([this](Class *klass) {
                 FreeClass(klass);
-                class_linker_->FreeClassData(klass);
+                classLinker_->FreeClassData(klass);
                 return true;
             });
         }
@@ -275,47 +275,47 @@ void ClassLinkerExtension::FreeLoadedClasses()
 
 ClassLinkerContext *ClassLinkerExtension::CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path)
 {
-    PandaVector<PandaFilePtr> app_files;
-    for (auto &pf_path : path) {
-        auto pf = panda_file::OpenPandaFileOrZip(pf_path);
+    PandaVector<PandaFilePtr> appFiles;
+    for (auto &pfPath : path) {
+        auto pf = panda_file::OpenPandaFileOrZip(pfPath);
         if (pf == nullptr) {
             return nullptr;
         }
-        app_files.push_back(std::move(pf));
+        appFiles.push_back(std::move(pf));
     }
-    ClassLinkerContext *ctx = CreateApplicationClassLinkerContext(std::move(app_files));
+    ClassLinkerContext *ctx = CreateApplicationClassLinkerContext(std::move(appFiles));
     return ctx;
 }
 
-ClassLinkerContext *ClassLinkerExtension::CreateApplicationClassLinkerContext(PandaVector<PandaFilePtr> &&app_files)
+ClassLinkerContext *ClassLinkerExtension::CreateApplicationClassLinkerContext(PandaVector<PandaFilePtr> &&appFiles)
 {
-    PandaVector<const panda_file::File *> app_file_ptrs;
-    app_file_ptrs.reserve(app_files.size());
-    for (auto &pf : app_files) {
-        app_file_ptrs.emplace_back(pf.get());
+    PandaVector<const panda_file::File *> appFilePtrs;
+    appFilePtrs.reserve(appFiles.size());
+    for (auto &pf : appFiles) {
+        appFilePtrs.emplace_back(pf.get());
     }
 
-    auto allocator = class_linker_->GetAllocator();
-    auto *ctx = allocator->New<AppContext>(this, std::move(app_file_ptrs));
+    auto allocator = classLinker_->GetAllocator();
+    auto *ctx = allocator->New<AppContext>(this, std::move(appFilePtrs));
     RegisterContext([ctx]() { return ctx; });
-    for (auto &pf : app_files) {
-        class_linker_->AddPandaFile(std::move(pf), ctx);
+    for (auto &pf : appFiles) {
+        classLinker_->AddPandaFile(std::move(pf), ctx);
     }
     return ctx;
 }
 
 void ClassLinkerExtension::AddCreatedClass(Class *klass)
 {
-    os::memory::LockHolder lock(created_classes_lock_);
-    created_classes_.push_back(klass);
+    os::memory::LockHolder lock(createdClassesLock_);
+    createdClasses_.push_back(klass);
 }
 
 void ClassLinkerExtension::RemoveCreatedClass(Class *klass)
 {
-    os::memory::LockHolder lock(created_classes_lock_);
-    auto it = find(created_classes_.begin(), created_classes_.end(), klass);
-    if (it != created_classes_.end()) {
-        created_classes_.erase(it);
+    os::memory::LockHolder lock(createdClassesLock_);
+    auto it = find(createdClasses_.begin(), createdClasses_.end(), klass);
+    if (it != createdClasses_.end()) {
+        createdClasses_.erase(it);
     }
 }
 
@@ -323,9 +323,9 @@ void ClassLinkerExtension::OnClassPrepared(Class *klass)
 {
     // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
     // consistent order where threads observe all modifications in the same order
-    if (record_new_class_.load(std::memory_order_seq_cst)) {
-        os::memory::LockHolder new_classes_lock(new_classes_lock_);
-        new_classes_.push_back(klass);
+    if (recordNewClass_.load(std::memory_order_seq_cst)) {
+        os::memory::LockHolder newClassesLock(newClassesLock_);
+        newClasses_.push_back(klass);
     }
 
     RemoveCreatedClass(klass);
@@ -343,8 +343,8 @@ size_t ClassLinkerExtension::GetClassObjectSizeFromClassSize(uint32_t size)
 
 void ClassLinkerExtension::FreeObsoleteData()
 {
-    os::memory::LockHolder lock(obsolete_classes_lock_);
-    for (auto &cls : obsolete_classes_) {
+    os::memory::LockHolder lock(obsoleteClassesLock_);
+    for (auto &cls : obsoleteClasses_) {
         ASSERT(cls != nullptr);
         GetClassLinker()->FreeClass(cls);
     }
@@ -355,8 +355,8 @@ void ClassLinkerExtension::AddObsoleteClass(const PandaVector<Class *> &classes)
     if (classes.empty()) {
         return;
     }
-    os::memory::LockHolder lock(obsolete_classes_lock_);
-    obsolete_classes_.insert(obsolete_classes_.end(), classes.begin(), classes.end());
+    os::memory::LockHolder lock(obsoleteClassesLock_);
+    obsoleteClasses_.insert(obsoleteClasses_.end(), classes.begin(), classes.end());
 }
 
 }  // namespace panda

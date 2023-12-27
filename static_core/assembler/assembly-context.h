@@ -49,16 +49,16 @@ struct Context {
     Token::Type id = Token::Type::ID_BAD;      /* current token type */
     Token::Type signop = Token::Type::ID_BAD;  /* current token operand type (if it is an operation) */
     panda::pandasm::Error err;                 /* current error */
-    int64_t *max_value_of_reg = nullptr;
-    size_t ins_number = 0;
-    Type curr_func_return_type;
-    std::vector<std::pair<size_t, size_t>> *function_arguments_list = nullptr;
-    std::unordered_map<std::string, std::vector<std::pair<size_t, size_t>>> function_arguments_lists;
+    int64_t *maxValueOfReg = nullptr;
+    size_t insNumber = 0;
+    Type currFuncReturnType;
+    std::vector<std::pair<size_t, size_t>> *functionArgumentsList = nullptr;
+    std::unordered_map<std::string, std::vector<std::pair<size_t, size_t>>> functionArgumentsLists;
 
     void Make(const std::vector<panda::pandasm::Token> &t);
     void UpSignOperation();
     bool ValidateRegisterName(char c, size_t n = 0) const;
-    bool ValidateParameterName(size_t number_of_params_already_is) const;
+    bool ValidateParameterName(size_t numberOfParamsAlreadyIs) const;
     bool ValidateLabel();
     bool Mask();
     bool NextMask();

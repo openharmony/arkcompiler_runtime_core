@@ -64,31 +64,31 @@ void HashTest::OneObject32bitsHashTest()
 
     // NOLINTNEXTLINE(cert-msc50-cpp)
     uint32_t object32 = rand();
-    uint32_t first_hash = T::GetHash32(reinterpret_cast<uint8_t *>(&object32), KEY32INBYTES);
-    uint32_t second_hash = T::GetHash32(reinterpret_cast<uint8_t *>(&object32), KEY32INBYTES);
-    if (first_hash != second_hash) {
+    uint32_t firstHash = T::GetHash32(reinterpret_cast<uint8_t *>(&object32), KEY32INBYTES);
+    uint32_t secondHash = T::GetHash32(reinterpret_cast<uint8_t *>(&object32), KEY32INBYTES);
+    if (firstHash != secondHash) {
         std::cout << "Failed 32bit key hash on seed = 0x" << std::hex << seed_ << std::endl;
     }
-    ASSERT_EQ(first_hash, second_hash);
+    ASSERT_EQ(firstHash, secondHash);
 
     // NOLINTNEXTLINE(cert-msc50-cpp)
     uint8_t object8 = rand();
-    first_hash = T::GetHash32(reinterpret_cast<uint8_t *>(&object8), KEY8INBYTES);
-    second_hash = T::GetHash32(reinterpret_cast<uint8_t *>(&object8), KEY8INBYTES);
-    if (first_hash != second_hash) {
+    firstHash = T::GetHash32(reinterpret_cast<uint8_t *>(&object8), KEY8INBYTES);
+    secondHash = T::GetHash32(reinterpret_cast<uint8_t *>(&object8), KEY8INBYTES);
+    if (firstHash != secondHash) {
         std::cout << "Failed 32bit key hash on seed = 0x" << std::hex << seed_ << std::endl;
     }
-    ASSERT_EQ(first_hash, second_hash);
+    ASSERT_EQ(firstHash, secondHash);
 
     // Set up 64 bits value and use only 40 bits from it
     // NOLINTNEXTLINE(cert-msc50-cpp)
     uint64_t object40 = rand();
-    first_hash = T::GetHash32(reinterpret_cast<uint8_t *>(&object40), KEY40INBYTES);
-    second_hash = T::GetHash32(reinterpret_cast<uint8_t *>(&object40), KEY40INBYTES);
-    if (first_hash != second_hash) {
+    firstHash = T::GetHash32(reinterpret_cast<uint8_t *>(&object40), KEY40INBYTES);
+    secondHash = T::GetHash32(reinterpret_cast<uint8_t *>(&object40), KEY40INBYTES);
+    if (firstHash != secondHash) {
         std::cout << "Failed 32bit key hash on seed = 0x" << std::hex << seed_ << std::endl;
     }
-    ASSERT_EQ(first_hash, second_hash);
+    ASSERT_EQ(firstHash, secondHash);
 }
 
 template <class T>
@@ -100,10 +100,10 @@ void HashTest::OneStringHashTest()
     if (sizeof(char) != sizeof(uint8_t)) {
         return;
     }
-    auto mutf8_string = reinterpret_cast<uint8_t *>(string);
-    uint32_t first_hash = T::GetHash32String(mutf8_string);
-    uint32_t second_hash = T::GetHash32String(mutf8_string);
-    ASSERT_EQ(first_hash, second_hash);
+    auto mutf8String = reinterpret_cast<uint8_t *>(string);
+    uint32_t firstHash = T::GetHash32String(mutf8String);
+    uint32_t secondHash = T::GetHash32String(mutf8String);
+    ASSERT_EQ(firstHash, secondHash);
 }
 
 template <class T>
@@ -111,33 +111,33 @@ void HashTest::StringMemHashTest()
 {
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char string[] = "COULD YOU CREATE MORE COMPLEX TESTS,OK?\0";
-    size_t string_size = strlen(string);
-    auto *mutf8_string = reinterpret_cast<uint8_t *>(string);
-    uint32_t second_hash = T::GetHash32(mutf8_string, string_size);
-    uint32_t first_hash = T::GetHash32String(mutf8_string);
-    ASSERT_EQ(first_hash, second_hash);
+    size_t stringSize = strlen(string);
+    auto *mutf8String = reinterpret_cast<uint8_t *>(string);
+    uint32_t secondHash = T::GetHash32(mutf8String, stringSize);
+    uint32_t firstHash = T::GetHash32String(mutf8String);
+    ASSERT_EQ(firstHash, secondHash);
 }
 
 template <class T>
 void HashTest::EndOfPageStringHashTest()
 {
     constexpr const int64_t IMM_TWO = 2;
-    size_t string_size = 3;
+    size_t stringSize = 3;
     constexpr size_t ALLOC_SIZE = PAGE_SIZE * 2U;
     void *mem = panda::os::mem::MapRWAnonymousRaw(ALLOC_SIZE);
     ASAN_UNPOISON_MEMORY_REGION(mem, ALLOC_SIZE);
     panda::os::mem::MakeMemProtected(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE), PAGE_SIZE);
-    auto string = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE) - sizeof(char) * string_size);
+    auto string = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE) - sizeof(char) * stringSize);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     string[0U] = 'O';
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     string[1U] = 'K';
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     string[IMM_TWO] = '\0';
-    auto mutf8_string = reinterpret_cast<uint8_t *>(string);
-    uint32_t second_hash = T::GetHash32(mutf8_string, string_size - 1L);
-    uint32_t first_hash = T::GetHash32String(mutf8_string);
-    ASSERT_EQ(first_hash, second_hash);
+    auto mutf8String = reinterpret_cast<uint8_t *>(string);
+    uint32_t secondHash = T::GetHash32(mutf8String, stringSize - 1L);
+    uint32_t firstHash = T::GetHash32String(mutf8String);
+    ASSERT_EQ(firstHash, secondHash);
     auto res = panda::os::mem::UnmapRaw(mem, ALLOC_SIZE);
     ASSERT_FALSE(res);
 }

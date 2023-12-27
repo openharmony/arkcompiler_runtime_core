@@ -33,7 +33,7 @@ public:
 
         uint32_t GetStartPc() const
         {
-            return start_pc_;
+            return startPc_;
         }
 
         uint32_t GetLength() const
@@ -43,7 +43,7 @@ public:
 
         uint32_t GetNumCatches() const
         {
-            return num_catches_;
+            return numCatches_;
         }
 
         template <class Callback>
@@ -63,10 +63,10 @@ public:
 
         Span<const uint8_t> data_;
 
-        uint32_t start_pc_;
+        uint32_t startPc_;
         uint32_t length_;
-        uint32_t num_catches_;
-        Span<const uint8_t> catch_blocks_sp_ {nullptr, nullptr};
+        uint32_t numCatches_;
+        Span<const uint8_t> catchBlocksSp_ {nullptr, nullptr};
 
         size_t size_ {0};
     };
@@ -82,17 +82,17 @@ public:
 
         uint32_t GetTypeIdx() const
         {
-            return type_idx_;
+            return typeIdx_;
         }
 
         uint32_t GetHandlerPc() const
         {
-            return handler_pc_;
+            return handlerPc_;
         }
 
         uint32_t GetCodeSize() const
         {
-            return code_size_;
+            return codeSize_;
         }
 
         size_t GetSize() const
@@ -101,49 +101,49 @@ public:
         }
 
     private:
-        uint32_t type_idx_;
-        uint32_t handler_pc_;
-        uint32_t code_size_;
+        uint32_t typeIdx_;
+        uint32_t handlerPc_;
+        uint32_t codeSize_;
 
         size_t size_;
     };
 
-    CodeDataAccessor(const File &panda_file, File::EntityId code_id);
+    CodeDataAccessor(const File &pandaFile, File::EntityId codeId);
 
     ~CodeDataAccessor() = default;
 
     NO_COPY_SEMANTIC(CodeDataAccessor);
     NO_MOVE_SEMANTIC(CodeDataAccessor);
 
-    static uint32_t GetNumVregs(const File &pf, File::EntityId code_id);
+    static uint32_t GetNumVregs(const File &pf, File::EntityId codeId);
 
-    static const uint8_t *GetInstructions(const File &pf, File::EntityId code_id, uint32_t *vregs);
+    static const uint8_t *GetInstructions(const File &pf, File::EntityId codeId, uint32_t *vregs);
 
-    static const uint8_t *GetInstructions(const File &pf, File::EntityId code_id);
+    static const uint8_t *GetInstructions(const File &pf, File::EntityId codeId);
 
     uint32_t GetNumVregs() const
     {
-        return num_vregs_;
+        return numVregs_;
     }
 
     uint32_t GetNumArgs() const
     {
-        return num_args_;
+        return numArgs_;
     }
 
     uint32_t GetCodeSize() const
     {
-        return code_size_;
+        return codeSize_;
     }
 
     uint32_t GetTriesSize() const
     {
-        return tries_size_;
+        return triesSize_;
     }
 
     const uint8_t *GetInstructions() const
     {
-        return instructions_ptr_;
+        return instructionsPtr_;
     }
 
     template <class Callback>
@@ -160,26 +160,26 @@ public:
 
     const File &GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     File::EntityId GetCodeId()
     {
-        return code_id_;
+        return codeId_;
     }
 
 private:
     void SkipTryBlocks();
 
-    const File &panda_file_;
-    File::EntityId code_id_;
+    const File &pandaFile_;
+    File::EntityId codeId_;
 
-    uint32_t num_vregs_;
-    uint32_t num_args_;
-    uint32_t code_size_;
-    uint32_t tries_size_;
-    const uint8_t *instructions_ptr_;
-    Span<const uint8_t> try_blocks_sp_ {nullptr, nullptr};
+    uint32_t numVregs_;
+    uint32_t numArgs_;
+    uint32_t codeSize_;
+    uint32_t triesSize_;
+    const uint8_t *instructionsPtr_;
+    Span<const uint8_t> tryBlocksSp_ {nullptr, nullptr};
 
     size_t size_ {0};
 };

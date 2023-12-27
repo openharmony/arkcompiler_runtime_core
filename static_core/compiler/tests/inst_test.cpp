@@ -174,8 +174,8 @@ TEST_F(InstTest, Memory)
 
 TEST_F(InstTest, Const)
 {
-    std::array<int32_t, 3U> int32_const {-5L, 0U, 5U};
-    std::array<int64_t, 3U> int64_const {-5L, 0U, 5U};
+    std::array<int32_t, 3U> int32Const {-5L, 0U, 5U};
+    std::array<int64_t, 3U> int64Const {-5L, 0U, 5U};
     GRAPH(GetGraph())
     {
         BASIC_BLOCK(2U, -1L)
@@ -185,20 +185,20 @@ TEST_F(InstTest, Const)
     }
     auto start = GetGraph()->GetStartBlock();
     for (size_t i = 0; i < 3U; i++) {
-        int32_t val = int32_const[i];
+        int32_t val = int32Const[i];
         auto const1 = GetGraph()->FindOrCreateConstant(val);
         ASSERT_EQ(const1->GetType(), DataType::INT64);
         ASSERT_EQ(const1->GetBasicBlock(), start);
-        uint64_t val1 = int64_const[i];
+        uint64_t val1 = int64Const[i];
         auto const2 = GetGraph()->FindOrCreateConstant(val1);
         ASSERT_EQ(const2->GetType(), DataType::INT64);
         ASSERT_EQ(const1, const2);
         ASSERT_EQ(const1->GetIntValue(), val1);
     }
     GraphChecker(GetGraph()).Check();
-    std::array<float, 3U> float_const {-5.5F, 0.1F, 5.2F};
+    std::array<float, 3U> floatConst {-5.5F, 0.1F, 5.2F};
     for (size_t i = 0; i < 3U; i++) {
-        float val = float_const[i];
+        float val = floatConst[i];
         auto const1 = GetGraph()->FindOrCreateConstant(val);
         ASSERT_EQ(const1->GetType(), DataType::FLOAT32);
         ASSERT_EQ(const1->GetBasicBlock(), start);
@@ -207,9 +207,9 @@ TEST_F(InstTest, Const)
         ASSERT_EQ(const1->GetFloatValue(), val);
     }
     GraphChecker(GetGraph()).Check();
-    std::array<double, 3U> double_const {-5.5, 0.1, 5.2};
+    std::array<double, 3U> doubleConst {-5.5, 0.1, 5.2};
     for (size_t i = 0; i < 3U; i++) {
-        double val = double_const[i];
+        double val = doubleConst[i];
         auto const1 = GetGraph()->FindOrCreateConstant(val);
         ASSERT_EQ(const1->GetType(), DataType::FLOAT64);
         ASSERT_EQ(const1->GetBasicBlock(), start);
@@ -218,8 +218,8 @@ TEST_F(InstTest, Const)
         ASSERT_EQ(const1->GetDoubleValue(), val);
     }
     int i = 0;
-    for (auto current_const = GetGraph()->GetFirstConstInst(); current_const != nullptr;
-         current_const = current_const->GetNextConst()) {
+    for (auto currentConst = GetGraph()->GetFirstConstInst(); currentConst != nullptr;
+         currentConst = currentConst->GetNextConst()) {
         i++;
     }
     ASSERT_EQ(i, 9U);
@@ -227,8 +227,8 @@ TEST_F(InstTest, Const)
 
 TEST_F(InstTest, Const32)
 {
-    std::array<int32_t, 3U> int32_const {-5L, 0U, 5U};
-    std::array<int64_t, 3U> int64_const {-5L, 0U, 5U};
+    std::array<int32_t, 3U> int32Const {-5L, 0U, 5U};
+    std::array<int64_t, 3U> int64Const {-5L, 0U, 5U};
     auto graph = CreateEmptyBytecodeGraph();
 
     GRAPH(graph)
@@ -241,11 +241,11 @@ TEST_F(InstTest, Const32)
     auto start = graph->GetStartBlock();
     for (size_t i = 0; i < 3L; i++) {
         // add first int32 constant
-        int32_t val = int32_const[i];
+        int32_t val = int32Const[i];
         auto const1 = graph->FindOrCreateConstant(val);
         ASSERT_EQ(const1->GetType(), DataType::INT32);
         ASSERT_EQ(const1->GetBasicBlock(), start);
-        uint64_t val1 = int64_const[i];
+        uint64_t val1 = int64Const[i];
         // add int64 constant, graph creates new constant
         auto const2 = graph->FindOrCreateConstant(val1);
         ASSERT_EQ(const2->GetType(), DataType::INT64);
@@ -253,7 +253,7 @@ TEST_F(InstTest, Const32)
         ASSERT_EQ(const2->GetBasicBlock(), start);
         ASSERT_EQ(const1->GetIntValue(), val1);
         // add second int32 constant, graph doesn't create new constant
-        int32_t val2 = int32_const[i];
+        int32_t val2 = int32Const[i];
         auto const3 = graph->FindOrCreateConstant(val2);
         ASSERT_EQ(const3, const1);
         ASSERT_EQ(const1->GetInt32Value(), val2);
@@ -482,12 +482,12 @@ TEST_F(InstTest, SpillFill)
     StackSlot slot0 = 0;
     StackSlot slot1 = 1;
 
-    auto spill_fill_inst = GetGraph()->CreateInstSpillFill();
-    spill_fill_inst->AddFill(slot0, r0, DataType::UINT64);
-    spill_fill_inst->AddMove(r0, r1, DataType::UINT64);
-    spill_fill_inst->AddSpill(r1, slot1, DataType::UINT64);
+    auto spillFillInst = GetGraph()->CreateInstSpillFill();
+    spillFillInst->AddFill(slot0, r0, DataType::UINT64);
+    spillFillInst->AddMove(r0, r1, DataType::UINT64);
+    spillFillInst->AddSpill(r1, slot1, DataType::UINT64);
 
-    ASSERT_EQ(spill_fill_inst->GetSpillFills().size(), 3U);
+    ASSERT_EQ(spillFillInst->GetSpillFills().size(), 3U);
 }
 
 TEST_F(InstTest, RemovePhiInput)
@@ -509,22 +509,22 @@ TEST_F(InstTest, RemovePhiInput)
             INST(4U, Opcode::ReturnVoid);
         }
     }
-    auto init_inputs = INS(3U).GetInputs();
-    auto init_preds = BB(5U).GetPredsBlocks();
+    auto initInputs = INS(3U).GetInputs();
+    auto initPreds = BB(5U).GetPredsBlocks();
 
-    auto pred_bb_idx = INS(3U).CastToPhi()->GetPredBlockIndex(&BB(3U));
+    auto predBbIdx = INS(3U).CastToPhi()->GetPredBlockIndex(&BB(3U));
     BB(5U).RemovePred(&BB(3U));
-    INS(3U).RemoveInput(pred_bb_idx);
+    INS(3U).RemoveInput(predBbIdx);
 
-    auto curr_inputs = INS(3U).GetInputs();
-    auto curr_preds = BB(5U).GetPredsBlocks();
-    for (size_t idx = 0; idx < curr_inputs.size(); idx++) {
-        if (idx != pred_bb_idx) {
-            ASSERT_EQ(init_inputs[idx].GetInst(), curr_inputs[idx].GetInst());
-            ASSERT_EQ(init_preds[idx], curr_preds[idx]);
+    auto currInputs = INS(3U).GetInputs();
+    auto currPreds = BB(5U).GetPredsBlocks();
+    for (size_t idx = 0; idx < currInputs.size(); idx++) {
+        if (idx != predBbIdx) {
+            ASSERT_EQ(initInputs[idx].GetInst(), currInputs[idx].GetInst());
+            ASSERT_EQ(initPreds[idx], currPreds[idx]);
         } else {
-            ASSERT_EQ(init_inputs.rbegin()->GetInst(), curr_inputs[idx].GetInst());
-            ASSERT_EQ(init_preds.back(), curr_preds[idx]);
+            ASSERT_EQ(initInputs.rbegin()->GetInst(), currInputs[idx].GetInst());
+            ASSERT_EQ(initPreds.back(), currPreds[idx]);
         }
     }
 }
@@ -534,16 +534,16 @@ TEST_F(InstTest, HugeDynamicOperandsAmount)
 {
     auto graph = CreateGraphStartEndBlocks();
     const size_t count = 1000;
-    auto save_state = graph->CreateInstSaveState();
+    auto saveState = graph->CreateInstSaveState();
 
     for (size_t i = 0; i < count; i++) {
-        save_state->AppendInput(graph->FindOrCreateConstant(i));
-        save_state->SetVirtualRegister(i, VirtualRegister(i, VRegInfo::VRegType::VREG));
+        saveState->AppendInput(graph->FindOrCreateConstant(i));
+        saveState->SetVirtualRegister(i, VirtualRegister(i, VRegInfo::VRegType::VREG));
     }
 
     for (size_t i = 0; i < count; i++) {
         auto user = graph->FindOrCreateConstant(i)->GetUsers().begin()->GetInst();
-        ASSERT_EQ(user, save_state);
+        ASSERT_EQ(user, saveState);
     }
 }
 
@@ -551,28 +551,28 @@ TEST_F(InstTest, FloatConstants)
 {
     auto graph = CreateGraphStartEndBlocks();
     graph->GetStartBlock()->AddSucc(graph->GetEndBlock());
-    auto positiv_zero_float = graph->FindOrCreateConstant(0.0F);
-    auto negativ_zero_float = graph->FindOrCreateConstant(-0.0F);
-    auto positiv_zero_double = graph->FindOrCreateConstant(0.0);
-    auto negativ_zero_double = graph->FindOrCreateConstant(-0.0);
+    auto positivZeroFloat = graph->FindOrCreateConstant(0.0F);
+    auto negativZeroFloat = graph->FindOrCreateConstant(-0.0F);
+    auto positivZeroDouble = graph->FindOrCreateConstant(0.0);
+    auto negativZeroDouble = graph->FindOrCreateConstant(-0.0);
 
-    ASSERT_NE(positiv_zero_float, negativ_zero_float);
-    ASSERT_NE(positiv_zero_double, negativ_zero_double);
+    ASSERT_NE(positivZeroFloat, negativZeroFloat);
+    ASSERT_NE(positivZeroDouble, negativZeroDouble);
 }
 
 TEST_F(InstTest, Flags)
 {
-    auto initial_mask = inst_flags::GetFlagsMask(Opcode::LoadObject);
+    auto initialMask = inst_flags::GetFlagsMask(Opcode::LoadObject);
     auto inst = GetGraph()->CreateInstLoadObject();
-    ASSERT_EQ(initial_mask, inst->GetFlagsMask());
-    ASSERT_EQ(inst->GetFlagsMask(), initial_mask);
+    ASSERT_EQ(initialMask, inst->GetFlagsMask());
+    ASSERT_EQ(inst->GetFlagsMask(), initialMask);
     ASSERT_TRUE(inst->IsLoad());
     inst->SetFlag(inst_flags::ALLOC);
-    ASSERT_EQ(inst->GetFlagsMask(), initial_mask | inst_flags::ALLOC);
+    ASSERT_EQ(inst->GetFlagsMask(), initialMask | inst_flags::ALLOC);
     ASSERT_TRUE(inst->IsAllocation());
     inst->ClearFlag(inst_flags::LOAD);
     ASSERT_FALSE(inst->IsLoad());
-    ASSERT_EQ(inst->GetFlagsMask(), (initial_mask | inst_flags::ALLOC) & ~inst_flags::LOAD);
+    ASSERT_EQ(inst->GetFlagsMask(), (initialMask | inst_flags::ALLOC) & ~inst_flags::LOAD);
 }
 
 TEST_F(InstTest, IntrinsicFlags)

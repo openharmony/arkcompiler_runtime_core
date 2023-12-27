@@ -47,19 +47,19 @@ ArenaString GetId(uint32_t id, ArenaAllocator *allocator)
     return (id == INVALID_ID ? ArenaString("XX", allocator->Adapter()) : ToArenaString(id, allocator));
 }
 
-ArenaString IdToString(uint32_t id, ArenaAllocator *allocator, bool v_reg, bool is_phi)
+ArenaString IdToString(uint32_t id, ArenaAllocator *allocator, bool vReg, bool isPhi)
 {
-    ArenaString reg(v_reg ? "v" : "", allocator->Adapter());
-    ArenaString phi(is_phi ? "p" : "", allocator->Adapter());
+    ArenaString reg(vReg ? "v" : "", allocator->Adapter());
+    ArenaString phi(isPhi ? "p" : "", allocator->Adapter());
     return reg + GetId(id, allocator) + phi;
 }
 
 // If print without brackets, then we print with space.
-void PrintIfValidLocation(Location location, Arch arch, std::ostream *out, bool with_brackets = false)
+void PrintIfValidLocation(Location location, Arch arch, std::ostream *out, bool withBrackets = false)
 {
     if (!location.IsInvalid() && !location.IsUnallocatedRegister()) {
         auto string = location.ToString(arch);
-        if (with_brackets) {
+        if (withBrackets) {
             (*out) << "(" << string << ")";
         } else {
             (*out) << string << " ";
@@ -70,7 +70,7 @@ void PrintIfValidLocation(Location location, Arch arch, std::ostream *out, bool 
 ArenaString InstId(const Inst *inst, ArenaAllocator *allocator)
 {
     if (inst != nullptr) {
-        if (inst->IsSaveState() && OPTIONS.IsCompilerDumpCompact()) {
+        if (inst->IsSaveState() && g_options.IsCompilerDumpCompact()) {
             return ArenaString("ss", allocator->Adapter()) +
                    ArenaString(std::to_string(inst->GetId()), allocator->Adapter());
         }
@@ -96,15 +96,15 @@ void DumpUsers(const Inst *inst, std::ostream *out)
     for (size_t i = 0; i < inst->GetDstCount(); ++i) {
         PrintIfValidLocation(inst->GetDstLocation(i), arch, out);
     }
-    bool fl_first = true;
-    for (auto &node_inst : inst->GetUsers()) {
-        auto user = node_inst.GetInst();
-        (*out) << (fl_first ? "(" : ", ") << InstId(user, allocator);
-        if (fl_first) {
-            fl_first = false;
+    bool flFirst = true;
+    for (auto &nodeInst : inst->GetUsers()) {
+        auto user = nodeInst.GetInst();
+        (*out) << (flFirst ? "(" : ", ") << InstId(user, allocator);
+        if (flFirst) {
+            flFirst = false;
         }
     }
-    if (!fl_first) {
+    if (!flFirst) {
         (*out) << ')';
     }
 }
@@ -146,20 +146,20 @@ ArenaString GetCondCodeToString(ConditionCode cc, ArenaAllocator *allocator)
 
 ArenaString PcToString(uint32_t pc, ArenaAllocator *allocator)
 {
-    std::ostringstream out_string;
-    out_string << "bc: 0x" << std::setfill('0') << std::setw(HEX_PTR_SIZE) << std::hex << pc;
-    return ArenaString(out_string.str(), allocator->Adapter());
+    std::ostringstream outString;
+    outString << "bc: 0x" << std::setfill('0') << std::setw(HEX_PTR_SIZE) << std::hex << pc;
+    return ArenaString(outString.str(), allocator->Adapter());
 }
 
-void BBDependence(const char *type, const ArenaVector<BasicBlock *> &bb_vector, std::ostream *out,
+void BBDependence(const char *type, const ArenaVector<BasicBlock *> &bbVector, std::ostream *out,
                   ArenaAllocator *allocator)
 {
-    bool fl_first = true;
+    bool flFirst = true;
     (*out) << type << ": [";
-    for (auto block_it : bb_vector) {
-        (*out) << (fl_first ? "" : ", ") << "bb " << BBId(block_it, allocator);
-        if (fl_first) {
-            fl_first = false;
+    for (auto blockIt : bbVector) {
+        (*out) << (flFirst ? "" : ", ") << "bb " << BBId(blockIt, allocator);
+        if (flFirst) {
+            flFirst = false;
         }
     }
     (*out) << ']';
@@ -179,26 +179,26 @@ ArenaString FieldToString(RuntimeInterface *runtime, ObjectType type, RuntimeInt
     }
 
     ArenaString dot(".", adapter);
-    ArenaString cls_name(runtime->GetClassName(runtime->GetClassForField(field)), adapter);
-    ArenaString field_name(runtime->GetFieldName(field), adapter);
-    return cls_name + dot + field_name;
+    ArenaString clsName(runtime->GetClassName(runtime->GetClassForField(field)), adapter);
+    ArenaString fieldName(runtime->GetFieldName(field), adapter);
+    return clsName + dot + fieldName;
 }
 
-void DumpTypedFieldOpcode(std::ostream *out, Opcode opcode, uint32_t type_id, const ArenaString &field_name,
+void DumpTypedFieldOpcode(std::ostream *out, Opcode opcode, uint32_t typeId, const ArenaString &fieldName,
                           ArenaAllocator *allocator)
 {
     const auto &adapter = allocator->Adapter();
     ArenaString space(" ", adapter);
     ArenaString opc(GetOpcodeString(opcode), adapter);
-    ArenaString id(IdToString(type_id, allocator), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opc + space + id + space + field_name + space;
+    ArenaString id(IdToString(typeId, allocator), adapter);
+    (*out) << std::setw(INDENT_OPCODE) << opc + space + id + space + fieldName + space;
 }
 
-void DumpTypedOpcode(std::ostream *out, Opcode opcode, uint32_t type_id, ArenaAllocator *allocator)
+void DumpTypedOpcode(std::ostream *out, Opcode opcode, uint32_t typeId, ArenaAllocator *allocator)
 {
     ArenaString space(" ", allocator->Adapter());
     ArenaString opc(GetOpcodeString(opcode), allocator->Adapter());
-    ArenaString id(IdToString(type_id, allocator), allocator->Adapter());
+    ArenaString id(IdToString(typeId, allocator), allocator->Adapter());
     (*out) << std::setw(INDENT_OPCODE) << opc + space + id + space;
 }
 
@@ -206,21 +206,21 @@ bool Inst::DumpInputs(std::ostream *out) const
 {
     const auto &allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
     auto arch = GetBasicBlock()->GetGraph()->GetArch();
-    bool fl_first = true;
+    bool flFirst = true;
     unsigned i = 0;
-    for (auto node_inst : GetInputs()) {
-        Inst *input = node_inst.GetInst();
-        (*out) << (fl_first ? "" : ", ") << InstId(input, allocator);
+    for (auto nodeInst : GetInputs()) {
+        Inst *input = nodeInst.GetInst();
+        (*out) << (flFirst ? "" : ", ") << InstId(input, allocator);
         PrintIfValidLocation(GetLocation(i), arch, out, true);
         i++;
-        fl_first = false;
+        flFirst = false;
     }
 
     if (!GetTmpLocation().IsInvalid()) {
-        (*out) << (fl_first ? "" : ", ") << "Tmp(" << GetTmpLocation().ToString(arch) << ")";
+        (*out) << (flFirst ? "" : ", ") << "Tmp(" << GetTmpLocation().ToString(arch) << ")";
     }
 
-    return !fl_first;
+    return !flFirst;
 }
 
 bool SaveStateInst::DumpInputs(std::ostream *out) const
@@ -241,10 +241,10 @@ bool SaveStateInst::DumpInputs(std::ostream *out) const
     if (GetImmediatesCount() > 0) {
         for (auto imm : *GetImmediates()) {
             (*out) << sep << std::hex << "0x" << imm.value;
-            if (imm.vreg_type == VRegType::VREG) {
+            if (imm.vregType == VRegType::VREG) {
                 (*out) << std::dec << "(vr" << imm.vreg << ")";
             } else {
-                (*out) << "(" << VRegInfo::VRegTypeToString(imm.vreg_type) << ")";
+                (*out) << "(" << VRegInfo::VRegTypeToString(imm.vregType) << ")";
             }
             sep = ", ";
         }
@@ -294,16 +294,16 @@ bool IfImmInst::DumpInputs(std::ostream *out) const
 bool PhiInst::DumpInputs(std::ostream *out) const
 {
     const auto &allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
-    bool fl_first = true;
+    bool flFirst = true;
     for (size_t idx = 0; idx < GetInputsCount(); ++idx) {
         Inst *input = GetInput(idx).GetInst();
         auto block = GetPhiInputBb(idx);
-        (*out) << (fl_first ? "" : ", ") << InstId(input, allocator) << "(bb" << BBId(block, allocator) << ")";
-        if (fl_first) {
-            fl_first = false;
+        (*out) << (flFirst ? "" : ", ") << InstId(input, allocator) << "(bb" << BBId(block, allocator) << ")";
+        if (flFirst) {
+            flFirst = false;
         }
     }
-    return !fl_first;
+    return !flFirst;
 }
 
 bool ConstantInst::DumpInputs(std::ostream *out) const
@@ -339,22 +339,22 @@ bool ConstantInst::DumpInputs(std::ostream *out) const
 bool SpillFillInst::DumpInputs(std::ostream *out) const
 {
     bool first = true;
-    for (auto spill_fill : GetSpillFills()) {
+    for (auto spillFill : GetSpillFills()) {
         if (!first) {
             (*out) << ", ";
         }
         first = false;
-        (*out) << sf_data::ToString(spill_fill, GetBasicBlock()->GetGraph()->GetArch());
+        (*out) << sf_data::ToString(spillFill, GetBasicBlock()->GetGraph()->GetArch());
     }
     return true;
 }
 
 bool ParameterInst::DumpInputs(std::ostream *out) const
 {
-    auto arg_num = GetArgNumber();
+    auto argNum = GetArgNumber();
     auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
     ArenaString nums("nums", allocator->Adapter());
-    (*out) << "arg " << ((arg_num == ParameterInst::DYNAMIC_NUM_ARGS) ? nums : IdToString(arg_num, allocator));
+    (*out) << "arg " << ((argNum == ParameterInst::DYNAMIC_NUM_ARGS) ? nums : IdToString(argNum, allocator));
     return true;
 }
 
@@ -371,16 +371,16 @@ void CompareInst::DumpOpcode(std::ostream *out) const
 
 static void DumpOpcodeAnyTypeMixin(std::ostream &out, const Inst *inst)
 {
-    const auto *mixin_inst = static_cast<const AnyTypeMixin<FixedInputsInst1> *>(inst);
-    ASSERT(mixin_inst != nullptr);
-    auto allocator = mixin_inst->GetBasicBlock()->GetGraph()->GetLocalAllocator();
+    const auto *mixinInst = static_cast<const AnyTypeMixin<FixedInputsInst1> *>(inst);
+    ASSERT(mixinInst != nullptr);
+    auto allocator = mixinInst->GetBasicBlock()->GetGraph()->GetLocalAllocator();
     const auto &adapter = allocator->Adapter();
     ArenaString space(" ", adapter);
-    ArenaString opcode(GetOpcodeString(mixin_inst->GetOpcode()), adapter);
-    ArenaString any_base_type(AnyTypeTypeToString(mixin_inst->GetAnyType()), adapter);
+    ArenaString opcode(GetOpcodeString(mixinInst->GetOpcode()), adapter);
+    ArenaString anyBaseType(AnyTypeTypeToString(mixinInst->GetAnyType()), adapter);
     out << std::setw(INDENT_OPCODE)
-        << opcode + space + any_base_type + (mixin_inst->IsIntegerWasSeen() ? " i" : "") +
-               (mixin_inst->IsSpecialWasSeen() ? " s" : "") + (mixin_inst->IsTypeWasProfiled() ? " p" : "") + space;
+        << opcode + space + anyBaseType + (mixinInst->IsIntegerWasSeen() ? " i" : "") +
+               (mixinInst->IsSpecialWasSeen() ? " s" : "") + (mixinInst->IsTypeWasProfiled() ? " p" : "") + space;
 }
 
 void PhiInst::DumpOpcode(std::ostream *out) const
@@ -418,9 +418,9 @@ void AnyTypeCheckInst::DumpOpcode(std::ostream *out) const
     const auto &adapter = allocator->Adapter();
     ArenaString space(" ", adapter);
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString any_base_type(AnyTypeTypeToString(GetAnyType()), adapter);
+    ArenaString anyBaseType(AnyTypeTypeToString(GetAnyType()), adapter);
     (*out) << std::setw(INDENT_OPCODE)
-           << (opcode + space + any_base_type + (IsIntegerWasSeen() ? " i" : "") + (IsSpecialWasSeen() ? " s" : "") +
+           << (opcode + space + anyBaseType + (IsIntegerWasSeen() ? " i" : "") + (IsSpecialWasSeen() ? " s" : "") +
                (IsTypeWasProfiled() ? " p" : "") + space);
 }
 
@@ -432,14 +432,14 @@ void HclassCheckInst::DumpOpcode(std::ostream *out) const
     ArenaString open("[", adapter);
     ArenaString close("]", adapter);
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    bool is_first = true;
+    bool isFirst = true;
     ArenaString summary = opcode + space + open;
     if (GetCheckIsFunction()) {
         summary += ArenaString("IsFunc", adapter);
-        is_first = false;
+        isFirst = false;
     }
     if (GetCheckFunctionIsNotClassConstructor()) {
-        if (!is_first) {
+        if (!isFirst) {
             summary += ArenaString(", ", adapter);
         }
         summary += ArenaString("IsNotClassConstr", adapter);
@@ -456,12 +456,12 @@ void LoadImmediateInst::DumpOpcode(std::ostream *out) const
     ArenaString close(") ", adapter);
     if (IsClass()) {
         ArenaString type("class: ", adapter);
-        ArenaString class_name(GetBasicBlock()->GetGraph()->GetRuntime()->GetClassName(GetObject()), adapter);
-        (*out) << std::setw(INDENT_OPCODE) << opcode + open + type + class_name + close;
+        ArenaString className(GetBasicBlock()->GetGraph()->GetRuntime()->GetClassName(GetObject()), adapter);
+        (*out) << std::setw(INDENT_OPCODE) << opcode + open + type + className + close;
     } else if (IsMethod()) {
         ArenaString type("method: ", adapter);
-        ArenaString method_name(GetBasicBlock()->GetGraph()->GetRuntime()->GetMethodName(GetObject()), adapter);
-        (*out) << std::setw(INDENT_OPCODE) << opcode + open + type + method_name + close;
+        ArenaString methodName(GetBasicBlock()->GetGraph()->GetRuntime()->GetMethodName(GetObject()), adapter);
+        (*out) << std::setw(INDENT_OPCODE) << opcode + open + type + methodName + close;
     } else if (IsString()) {
         ArenaString type("string: 0x", adapter);
         (*out) << std::setw(INDENT_OPCODE) << opcode + open + type << std::hex << GetString() << close;
@@ -590,8 +590,8 @@ void FillConstArrayInst::DumpOpcode(std::ostream *out) const
 void LoadObjectInst::DumpOpcode(std::ostream *out) const
 {
     auto graph = GetBasicBlock()->GetGraph();
-    auto field_name = FieldToString(graph->GetRuntime(), GetObjectType(), GetObjField(), graph->GetLocalAllocator());
-    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), field_name, graph->GetLocalAllocator());
+    auto fieldName = FieldToString(graph->GetRuntime(), GetObjectType(), GetObjField(), graph->GetLocalAllocator());
+    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), fieldName, graph->GetLocalAllocator());
 }
 
 void LoadMemInst::DumpOpcode(std::ostream *out) const
@@ -612,8 +612,8 @@ void LoadResolvedObjectFieldInst::DumpOpcode(std::ostream *out) const
 void StoreObjectInst::DumpOpcode(std::ostream *out) const
 {
     auto graph = GetBasicBlock()->GetGraph();
-    auto field_name = FieldToString(graph->GetRuntime(), GetObjectType(), GetObjField(), graph->GetLocalAllocator());
-    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), field_name, graph->GetLocalAllocator());
+    auto fieldName = FieldToString(graph->GetRuntime(), GetObjectType(), GetObjField(), graph->GetLocalAllocator());
+    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), fieldName, graph->GetLocalAllocator());
 }
 
 void StoreResolvedObjectFieldInst::DumpOpcode(std::ostream *out) const
@@ -629,9 +629,9 @@ void StoreMemInst::DumpOpcode(std::ostream *out) const
 void LoadStaticInst::DumpOpcode(std::ostream *out) const
 {
     auto graph = GetBasicBlock()->GetGraph();
-    auto field_name =
+    auto fieldName =
         FieldToString(graph->GetRuntime(), ObjectType::MEM_STATIC, GetObjField(), graph->GetLocalAllocator());
-    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), field_name, graph->GetLocalAllocator());
+    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), fieldName, graph->GetLocalAllocator());
 }
 
 void ResolveObjectFieldStaticInst::DumpOpcode(std::ostream *out) const
@@ -647,9 +647,9 @@ void LoadResolvedObjectFieldStaticInst::DumpOpcode(std::ostream *out) const
 void StoreStaticInst::DumpOpcode(std::ostream *out) const
 {
     auto graph = GetBasicBlock()->GetGraph();
-    auto field_name =
+    auto fieldName =
         FieldToString(graph->GetRuntime(), ObjectType::MEM_STATIC, GetObjField(), graph->GetLocalAllocator());
-    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), field_name, graph->GetLocalAllocator());
+    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), fieldName, graph->GetLocalAllocator());
 }
 
 void UnresolvedStoreStaticInst::DumpOpcode(std::ostream *out) const
@@ -681,9 +681,9 @@ void ClassInst::DumpOpcode(std::ostream *out) const
     ArenaString space(" ", adapter);
     ArenaString qt("'", adapter);
     ArenaString opc(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString class_name(GetClass() == nullptr ? ArenaString("", adapter)
-                                                 : ArenaString(graph->GetRuntime()->GetClassName(GetClass()), adapter));
-    (*out) << std::setw(INDENT_OPCODE) << opc + space + qt + class_name + qt << " ";
+    ArenaString className(GetClass() == nullptr ? ArenaString("", adapter)
+                                                : ArenaString(graph->GetRuntime()->GetClassName(GetClass()), adapter));
+    (*out) << std::setw(INDENT_OPCODE) << opc + space + qt + className + qt << " ";
 }
 
 void RuntimeClassInst::DumpOpcode(std::ostream *out) const
@@ -695,9 +695,9 @@ void RuntimeClassInst::DumpOpcode(std::ostream *out) const
     ArenaString space(" ", adapter);
     ArenaString qt("'", adapter);
     ArenaString opc(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString class_name(GetClass() == nullptr ? ArenaString("", adapter)
-                                                 : ArenaString(graph->GetRuntime()->GetClassName(GetClass()), adapter));
-    (*out) << std::setw(INDENT_OPCODE) << opc + space + qt + class_name + qt << " ";
+    ArenaString className(GetClass() == nullptr ? ArenaString("", adapter)
+                                                : ArenaString(graph->GetRuntime()->GetClassName(GetClass()), adapter));
+    (*out) << std::setw(INDENT_OPCODE) << opc + space + qt + className + qt << " ";
 }
 
 void GlobalVarInst::DumpOpcode(std::ostream *out) const
@@ -719,7 +719,7 @@ void IntrinsicInst::DumpOpcode(std::ostream *out) const
 {
     const auto &adapter = GetBasicBlock()->GetGraph()->GetLocalAllocator()->Adapter();
     ArenaString intrinsic(IsBuiltin() ? ArenaString("BuiltinIntrinsic.", adapter) : ArenaString("Intrinsic.", adapter));
-    ArenaString opcode(GetIntrinsicName(intrinsic_id_), adapter);
+    ArenaString opcode(GetIntrinsicName(intrinsicId_), adapter);
     (*out) << std::setw(INDENT_OPCODE) << intrinsic + opcode << " ";
 }
 
@@ -749,12 +749,12 @@ void ResolveStaticInst::DumpOpcode(std::ostream *out) const
     const auto &adapter = allocator->Adapter();
     ArenaString space(" ", adapter);
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString method_id(ToArenaString(GetCallMethodId(), allocator));
+    ArenaString methodId(ToArenaString(GetCallMethodId(), allocator));
     if (GetCallMethod() != nullptr) {
         ArenaString method(graph->GetRuntime()->GetMethodFullName(GetCallMethod()), adapter);
-        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + method_id + ' ' + method << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId + ' ' + method << ' ';
     } else {
-        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + method_id << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId << ' ';
     }
 }
 
@@ -765,12 +765,12 @@ void ResolveVirtualInst::DumpOpcode(std::ostream *out) const
     const auto &adapter = allocator->Adapter();
     ArenaString space(" ", adapter);
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString method_id(ToArenaString(GetCallMethodId(), allocator));
+    ArenaString methodId(ToArenaString(GetCallMethodId(), allocator));
     if (GetCallMethod() != nullptr) {
         ArenaString method(graph->GetRuntime()->GetMethodFullName(GetCallMethod()), adapter);
-        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + method_id + ' ' + method << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId + ' ' + method << ' ';
     } else {
-        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + method_id << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId << ' ';
     }
 }
 
@@ -798,12 +798,12 @@ void CallInst::DumpOpcode(std::ostream *out) const
     ArenaString space(" ", adapter);
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
     ArenaString inlined(IsInlined() ? ".Inlined " : " ", adapter);
-    ArenaString method_id(ToArenaString(GetCallMethodId(), allocator));
+    ArenaString methodId(ToArenaString(GetCallMethodId(), allocator));
     if (!IsUnresolved() && GetCallMethod() != nullptr) {
         ArenaString method(graph->GetRuntime()->GetMethodFullName(GetCallMethod()), adapter);
-        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + method_id + ' ' + method << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + methodId + ' ' + method << ' ';
     } else {
-        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + method_id << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + methodId << ' ';
     }
 }
 
@@ -835,8 +835,8 @@ void DeoptimizeCompareInst::DumpOpcode(std::ostream *out) const
     ArenaString opcode(ArenaString(GetOpcodeString(GetOpcode()), adapter).append(" "));
     ArenaString cc(ArenaString(GetCondCodeToString(GetCc(), allocator), adapter).append(" "));
     ArenaString type(ArenaString(DeoptimizeTypeToString(GetDeoptimizeType()), adapter).append(" "));
-    ArenaString cmp_type(ArenaString(DataType::ToString(GetOperandsType()), adapter).append(" "));
-    (*out) << std::setw(INDENT_OPCODE) << opcode.append(cc).append(cmp_type).append(type);
+    ArenaString cmpType(ArenaString(DataType::ToString(GetOperandsType()), adapter).append(" "));
+    (*out) << std::setw(INDENT_OPCODE) << opcode.append(cc).append(cmpType).append(type);
 }
 
 void DeoptimizeCompareImmInst::DumpOpcode(std::ostream *out) const
@@ -847,8 +847,8 @@ void DeoptimizeCompareImmInst::DumpOpcode(std::ostream *out) const
     ArenaString opcode(ArenaString(GetOpcodeString(GetOpcode()), adapter).append(" "));
     ArenaString cc(ArenaString(GetCondCodeToString(GetCc(), allocator), adapter).append(" "));
     ArenaString type(ArenaString(DeoptimizeTypeToString(GetDeoptimizeType()), adapter).append(" "));
-    ArenaString cmp_type(ArenaString(DataType::ToString(GetOperandsType()), adapter).append(" "));
-    (*out) << std::setw(INDENT_OPCODE) << opcode.append(cc).append(cmp_type).append(type);
+    ArenaString cmpType(ArenaString(DataType::ToString(GetOperandsType()), adapter).append(" "));
+    (*out) << std::setw(INDENT_OPCODE) << opcode.append(cc).append(cmpType).append(type);
 }
 
 bool DeoptimizeCompareImmInst::DumpInputs(std::ostream *out) const
@@ -860,45 +860,45 @@ bool DeoptimizeCompareImmInst::DumpInputs(std::ostream *out) const
 
 bool BoundsCheckInstI::DumpInputs(std::ostream *out) const
 {
-    Inst *len_input = GetInput(0).GetInst();
-    Inst *ss_input = GetInput(1).GetInst();
+    Inst *lenInput = GetInput(0).GetInst();
+    Inst *ssInput = GetInput(1).GetInst();
     auto graph = GetBasicBlock()->GetGraph();
     auto allocator = graph->GetLocalAllocator();
 
-    (*out) << InstId(len_input, allocator);
+    (*out) << InstId(lenInput, allocator);
     PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
     (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    (*out) << ", " << InstId(ss_input, allocator);
+    (*out) << ", " << InstId(ssInput, allocator);
     return true;
 }
 
 bool StoreInstI::DumpInputs(std::ostream *out) const
 {
-    Inst *arr_input = GetInput(0).GetInst();
-    Inst *ss_input = GetInput(1).GetInst();
+    Inst *arrInput = GetInput(0).GetInst();
+    Inst *ssInput = GetInput(1).GetInst();
     auto graph = GetBasicBlock()->GetGraph();
     auto arch = graph->GetArch();
     const auto &allocator = graph->GetLocalAllocator();
 
-    (*out) << InstId(arr_input, allocator);
+    (*out) << InstId(arrInput, allocator);
     PrintIfValidLocation(GetLocation(0), arch, out, true);
     (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    (*out) << ", " << InstId(ss_input, allocator);
+    (*out) << ", " << InstId(ssInput, allocator);
     PrintIfValidLocation(GetLocation(1), arch, out, true);
     return true;
 }
 
 bool StoreMemInstI::DumpInputs(std::ostream *out) const
 {
-    Inst *arr_input = GetInput(0).GetInst();
-    Inst *ss_input = GetInput(1).GetInst();
+    Inst *arrInput = GetInput(0).GetInst();
+    Inst *ssInput = GetInput(1).GetInst();
     auto graph = GetBasicBlock()->GetGraph();
     const auto &allocator = graph->GetLocalAllocator();
 
-    (*out) << InstId(arr_input, allocator);
+    (*out) << InstId(arrInput, allocator);
     PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
     (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    (*out) << ", " << InstId(ss_input, allocator);
+    (*out) << ", " << InstId(ssInput, allocator);
     return true;
 }
 
@@ -936,11 +936,11 @@ bool StoreMemInst::DumpInputs(std::ostream *out) const
 
 bool LoadPairPartInst::DumpInputs(std::ostream *out) const
 {
-    Inst *arr_input = GetInput(0).GetInst();
+    Inst *arrInput = GetInput(0).GetInst();
     auto graph = GetBasicBlock()->GetGraph();
     const auto &allocator = graph->GetLocalAllocator();
 
-    (*out) << InstId(arr_input, allocator);
+    (*out) << InstId(arrInput, allocator);
     PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
     (*out) << ", 0x" << std::hex << GetImm() << std::dec;
     return true;
@@ -948,10 +948,10 @@ bool LoadPairPartInst::DumpInputs(std::ostream *out) const
 
 bool LoadArrayPairInstI::DumpInputs(std::ostream *out) const
 {
-    Inst *arr_input = GetInput(0).GetInst();
+    Inst *arrInput = GetInput(0).GetInst();
     auto graph = GetBasicBlock()->GetGraph();
     const auto &allocator = graph->GetLocalAllocator();
-    (*out) << InstId(arr_input, allocator);
+    (*out) << InstId(arrInput, allocator);
     PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
     (*out) << ", 0x" << std::hex << GetImm() << std::dec;
     return true;
@@ -959,18 +959,18 @@ bool LoadArrayPairInstI::DumpInputs(std::ostream *out) const
 
 bool StoreArrayPairInstI::DumpInputs(std::ostream *out) const
 {
-    Inst *arr_input = GetInput(0).GetInst();
-    Inst *fss_input = GetInput(1).GetInst();
+    Inst *arrInput = GetInput(0).GetInst();
+    Inst *fssInput = GetInput(1).GetInst();
     constexpr auto IMM_2 = 2;
-    Inst *sss_input = GetInput(IMM_2).GetInst();
+    Inst *sssInput = GetInput(IMM_2).GetInst();
     auto graph = GetBasicBlock()->GetGraph();
     auto allocator = graph->GetLocalAllocator();
 
-    (*out) << InstId(arr_input, allocator);
+    (*out) << InstId(arrInput, allocator);
     PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
     (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    (*out) << ", " << InstId(fss_input, allocator);
-    (*out) << ", " << InstId(sss_input, allocator);
+    (*out) << ", " << InstId(fssInput, allocator);
+    (*out) << ", " << InstId(sssInput, allocator);
     return true;
 }
 
@@ -1005,9 +1005,9 @@ void Inst::DumpBytecode(std::ostream *out) const
 {
     if (pc_ != INVALID_PC) {
         auto graph = GetBasicBlock()->GetGraph();
-        auto byte_code = graph->GetRuntime()->GetBytecodeString(graph->GetMethod(), pc_);
-        if (!byte_code.empty()) {
-            (*out) << byte_code << '\n';
+        auto byteCode = graph->GetRuntime()->GetBytecodeString(graph->GetMethod(), pc_);
+        if (!byteCode.empty()) {
+            (*out) << byteCode << '\n';
         }
     }
 }
@@ -1015,18 +1015,18 @@ void Inst::DumpBytecode(std::ostream *out) const
 #ifdef PANDA_COMPILER_DEBUG_INFO
 void Inst::DumpSourceLine(std::ostream *out) const
 {
-    auto current_method = GetCurrentMethod();
+    auto currentMethod = GetCurrentMethod();
     auto pc = GetPc();
-    if (current_method != nullptr && pc != INVALID_PC) {
-        auto line = GetBasicBlock()->GetGraph()->GetRuntime()->GetLineNumberAndSourceFile(current_method, pc);
+    if (currentMethod != nullptr && pc != INVALID_PC) {
+        auto line = GetBasicBlock()->GetGraph()->GetRuntime()->GetLineNumberAndSourceFile(currentMethod, pc);
         (*out) << " (" << line << " )";
     }
 }
 #endif  // PANDA_COMPILER_DEBUG_INFO
 
-void Inst::Dump(std::ostream *out, bool new_line) const
+void Inst::Dump(std::ostream *out, bool newLine) const
 {
-    if (OPTIONS.IsCompilerDumpCompact() && IsSaveState()) {
+    if (g_options.IsCompilerDumpCompact() && IsSaveState()) {
         return;
     }
     auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
@@ -1038,57 +1038,57 @@ void Inst::Dump(std::ostream *out, bool new_line) const
     (*out) << std::setw(INDENT_TYPE) << std::left << DataType::ToString(GetType());
     // opcode
     DumpOpcode(out);
-    auto operands_pos = out->tellp();
+    auto operandsPos = out->tellp();
     // inputs
-    bool has_input = DumpInputs(out);
+    bool hasInput = DumpInputs(out);
     // users
-    if (has_input && !GetUsers().Empty()) {
+    if (hasInput && !GetUsers().Empty()) {
         (*out) << " -> ";
     }
     DumpUsers(this, out);
     // Align rest of the instruction info
     static constexpr auto ALIGN_BUF_SIZE = 64;
-    if (auto pos_diff = out->tellp() - operands_pos; pos_diff < ALIGN_BUF_SIZE) {
-        pos_diff = ALIGN_BUF_SIZE - pos_diff;
-        static std::array<char, ALIGN_BUF_SIZE + 1> space_buf;
-        if (space_buf[0] != ' ') {
-            std::fill(space_buf.begin(), space_buf.end(), ' ');
+    if (auto posDiff = out->tellp() - operandsPos; posDiff < ALIGN_BUF_SIZE) {
+        posDiff = ALIGN_BUF_SIZE - posDiff;
+        static std::array<char, ALIGN_BUF_SIZE + 1> spaceBuf;
+        if (spaceBuf[0] != ' ') {
+            std::fill(spaceBuf.begin(), spaceBuf.end(), ' ');
         }
-        space_buf[pos_diff] = 0;
-        (*out) << space_buf.data();
-        space_buf[pos_diff] = ' ';
+        spaceBuf[posDiff] = 0;
+        (*out) << spaceBuf.data();
+        spaceBuf[posDiff] = ' ';
     }
     // bytecode pointer
-    if (pc_ != INVALID_PC && !OPTIONS.IsCompilerDumpCompact()) {
+    if (pc_ != INVALID_PC && !g_options.IsCompilerDumpCompact()) {
         (*out) << ' ' << PcToString(pc_, allocator);
     }
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    if (OPTIONS.IsCompilerDumpSourceLine()) {
+    if (g_options.IsCompilerDumpSourceLine()) {
         DumpSourceLine(out);
     }
 #endif
-    if (new_line) {
+    if (newLine) {
         (*out) << '\n';
     }
-    if (OPTIONS.IsCompilerDumpBytecode()) {
+    if (g_options.IsCompilerDumpBytecode()) {
         DumpBytecode(out);
     }
     if (GetOpcode() == Opcode::Parameter) {
-        auto spill_fill = static_cast<const ParameterInst *>(this)->GetLocationData();
-        if (spill_fill.DstValue() != INVALID_REG) {
-            (*out) << sf_data::ToString(spill_fill, GetBasicBlock()->GetGraph()->GetArch());
-            if (new_line) {
+        auto spillFill = static_cast<const ParameterInst *>(this)->GetLocationData();
+        if (spillFill.DstValue() != INVALID_REG) {
+            (*out) << sf_data::ToString(spillFill, GetBasicBlock()->GetGraph()->GetArch());
+            if (newLine) {
                 *out << std::endl;
             }
         }
     }
 }
 
-void CheckPrintPropsFlag(std::ostream *out, bool *print_props_flag)
+void CheckPrintPropsFlag(std::ostream *out, bool *printPropsFlag)
 {
-    if (!(*print_props_flag)) {
+    if (!(*printPropsFlag)) {
         (*out) << "prop: ";
-        (*print_props_flag) = true;
+        (*printPropsFlag) = true;
     } else {
         (*out) << ", ";
     }
@@ -1104,57 +1104,57 @@ void PrintLoopInfo(std::ostream *out, Loop *loop)
 
 void BlockProps(const BasicBlock *block, std::ostream *out)
 {
-    bool print_props_flag = false;
+    bool printPropsFlag = false;
     if (block->IsStartBlock()) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << "start";
     }
     if (block->IsEndBlock()) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << "end";
     }
     if (block->IsLoopPreHeader()) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << "prehead";
     }
     if (block->IsLoopValid() && !block->GetLoop()->IsRoot()) {
         if (block->IsLoopHeader()) {
-            CheckPrintPropsFlag(out, &print_props_flag);
+            CheckPrintPropsFlag(out, &printPropsFlag);
             (*out) << "head";
         }
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         PrintLoopInfo(out, block->GetLoop());
     }
     if (block->IsTryBegin()) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << "try_begin (id " << block->GetTryId() << ")";
     }
     if (block->IsTry()) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << "try (id " << block->GetTryId() << ")";
     }
     if (block->IsTryEnd()) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << "try_end (id " << block->GetTryId() << ")";
     }
     if (block->IsCatchBegin()) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << "catch_begin";
     }
     if (block->IsCatch()) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << "catch";
     }
     if (block->IsCatchEnd()) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << "catch_end";
     }
 
     if (block->GetGuestPc() != INVALID_PC) {
-        CheckPrintPropsFlag(out, &print_props_flag);
+        CheckPrintPropsFlag(out, &printPropsFlag);
         (*out) << PcToString(block->GetGuestPc(), block->GetGraph()->GetLocalAllocator());
     }
-    if (print_props_flag) {
+    if (printPropsFlag) {
         (*out) << std::endl;
     }
 }
@@ -1162,7 +1162,7 @@ void BlockProps(const BasicBlock *block, std::ostream *out)
 void BasicBlock::Dump(std::ostream *out) const
 {
     const auto &allocator = GetGraph()->GetLocalAllocator();
-    (*out) << "BB " << IdToString(bb_id_, allocator);
+    (*out) << "BB " << IdToString(bbId_, allocator);
     // predecessors
     if (!preds_.empty()) {
         (*out) << "  ";
@@ -1187,7 +1187,7 @@ void Graph::Dump(std::ostream *out) const
     const auto &runtime = GetRuntime();
     const auto &method = GetMethod();
     const auto &adapter = GetLocalAllocator()->Adapter();
-    ArenaString return_type(DataType::ToString(runtime->GetMethodReturnType(method)), adapter);
+    ArenaString returnType(DataType::ToString(runtime->GetMethodReturnType(method)), adapter);
     (*out) << "Method: " << runtime->GetMethodFullName(method, true) << " " << method << std::endl;
     if (IsOsrMode()) {
         (*out) << "OSR mode\n";
@@ -1195,13 +1195,13 @@ void Graph::Dump(std::ostream *out) const
     (*out) << std::endl;
 
     auto &blocks = GetAnalysis<LinearOrder>().IsValid() ? GetBlocksLinearOrder() : GetBlocksRPO();
-    for (const auto &block_it : blocks) {
-        if (!block_it->GetPredsBlocks().empty() || !block_it->GetSuccsBlocks().empty()) {
-            block_it->Dump(out);
+    for (const auto &blockIt : blocks) {
+        if (!blockIt->GetPredsBlocks().empty() || !blockIt->GetSuccsBlocks().empty()) {
+            blockIt->Dump(out);
             (*out) << '\n';
         } else {
             // to print the dump before cleanup, still unconnected nodes exist
-            (*out) << "BB " << block_it->GetId() << " is unconnected\n\n";
+            (*out) << "BB " << blockIt->GetId() << " is unconnected\n\n";
         }
     }
 }

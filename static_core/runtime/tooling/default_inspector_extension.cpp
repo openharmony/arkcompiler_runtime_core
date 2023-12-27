@@ -139,9 +139,9 @@ void StaticDefaultInspectorExtension::EnumerateProperties(
             handler(std::to_string(index), GetArrayElementValueStatic(array, offset, type), true, false, false);
         }
     } else if (cls->IsClassClass()) {
-        auto runtime_cls = panda::Class::FromClassObject(object);
-        for (auto &field : runtime_cls->GetStaticFields()) {
-            handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(runtime_cls, field), false,
+        auto runtimeCls = panda::Class::FromClassObject(object);
+        for (auto &field : runtimeCls->GetStaticFields()) {
+            handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(runtimeCls, field), false,
                     field.IsFinal(), false);
         }
     } else {
@@ -154,9 +154,9 @@ void StaticDefaultInspectorExtension::EnumerateProperties(
 
 void StaticDefaultInspectorExtension::EnumerateGlobals(const PropertyHandler &handler)
 {
-    auto class_linker_extension = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang_);
-    ASSERT(class_linker_extension != nullptr);
-    class_linker_extension->EnumerateClasses([&handler](auto cls) {
+    auto classLinkerExtension = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang_);
+    ASSERT(classLinkerExtension != nullptr);
+    classLinkerExtension->EnumerateClasses([&handler](auto cls) {
         if (cls->IsInitialized() && cls->GetNumStaticFields() > 0) {
             handler(cls->GetName(), TypedValue::Reference(cls->GetManagedObject()), false, false, false);
         }
@@ -197,33 +197,33 @@ void DynamicDefaultInspectorExtension::EnumerateProperties(
 
     if (cls->IsArray()) {
         auto &array = *coretypes::Array::Cast(const_cast<ObjectHeader *>(object));
-        ArraySizeT array_length = array.GetLength();
-        for (coretypes::ArraySizeT i = 0; i < array_length; i++) {
-            TaggedValue array_element(array.Get<TaggedType, false, true>(i));
-            handler(std::to_string(i), TypedValue::Tagged(array_element), true, false, false);
+        ArraySizeT arrayLength = array.GetLength();
+        for (coretypes::ArraySizeT i = 0; i < arrayLength; i++) {
+            TaggedValue arrayElement(array.Get<TaggedType, false, true>(i));
+            handler(std::to_string(i), TypedValue::Tagged(arrayElement), true, false, false);
         }
     } else if (cls->IsHClass()) {
-        auto data_offset = sizeof(ObjectHeader) + sizeof(HClass);
-        auto obj_body_size = cls->GetObjectSize() - data_offset;
-        ASSERT(obj_body_size % TaggedValue::TaggedTypeSize() == 0);
-        auto num_of_fields = obj_body_size / TaggedValue::TaggedTypeSize();
-        for (size_t i = 0; i < num_of_fields; i++) {
-            auto field_offset = data_offset + i * TaggedValue::TaggedTypeSize();
-            auto tagged_value = ObjectAccessor::GetDynValue<TaggedValue>(object, field_offset);
-            handler(std::to_string(i), TypedValue::Tagged(tagged_value), false, false, false);
+        auto dataOffset = sizeof(ObjectHeader) + sizeof(HClass);
+        auto objBodySize = cls->GetObjectSize() - dataOffset;
+        ASSERT(objBodySize % TaggedValue::TaggedTypeSize() == 0);
+        auto numOfFields = objBodySize / TaggedValue::TaggedTypeSize();
+        for (size_t i = 0; i < numOfFields; i++) {
+            auto fieldOffset = dataOffset + i * TaggedValue::TaggedTypeSize();
+            auto taggedValue = ObjectAccessor::GetDynValue<TaggedValue>(object, fieldOffset);
+            handler(std::to_string(i), TypedValue::Tagged(taggedValue), false, false, false);
         }
     } else {
-        uint32_t obj_body_size = cls->GetObjectSize() - ObjectHeader::ObjectHeaderSize();
-        ASSERT(obj_body_size % TaggedValue::TaggedTypeSize() == 0);
-        uint32_t num_of_fields = obj_body_size / TaggedValue::TaggedTypeSize();
-        size_t data_offset = ObjectHeader::ObjectHeaderSize();
-        for (uint32_t i = 0; i < num_of_fields; i++) {
-            size_t field_offset = data_offset + i * TaggedValue::TaggedTypeSize();
-            if (cls->IsNativeField(field_offset)) {
+        uint32_t objBodySize = cls->GetObjectSize() - ObjectHeader::ObjectHeaderSize();
+        ASSERT(objBodySize % TaggedValue::TaggedTypeSize() == 0);
+        uint32_t numOfFields = objBodySize / TaggedValue::TaggedTypeSize();
+        size_t dataOffset = ObjectHeader::ObjectHeaderSize();
+        for (uint32_t i = 0; i < numOfFields; i++) {
+            size_t fieldOffset = dataOffset + i * TaggedValue::TaggedTypeSize();
+            if (cls->IsNativeField(fieldOffset)) {
                 continue;
             }
-            auto tagged_value = ObjectAccessor::GetDynValue<TaggedValue>(object, field_offset);
-            handler(std::to_string(i), TypedValue::Tagged(tagged_value), false, false, false);
+            auto taggedValue = ObjectAccessor::GetDynValue<TaggedValue>(object, fieldOffset);
+            handler(std::to_string(i), TypedValue::Tagged(taggedValue), false, false, false);
         }
     }
 }

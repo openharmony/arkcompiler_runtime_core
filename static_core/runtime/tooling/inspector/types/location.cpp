@@ -27,36 +27,36 @@
 using namespace std::literals::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace panda::tooling::inspector {
-Expected<Location, std::string> Location::FromJsonProperty(const JsonObject &object, const char *property_name)
+Expected<Location, std::string> Location::FromJsonProperty(const JsonObject &object, const char *propertyName)
 {
-    auto property = object.GetValue<JsonObject::JsonObjPointer>(property_name);
+    auto property = object.GetValue<JsonObject::JsonObjPointer>(propertyName);
     if (property == nullptr) {
-        return Unexpected("No such property: "s + property_name);
+        return Unexpected("No such property: "s + propertyName);
     }
 
-    auto script_id = ParseNumericId<ScriptId>(**property, "scriptId");
-    if (!script_id) {
-        return Unexpected(script_id.Error());
+    auto scriptId = ParseNumericId<ScriptId>(**property, "scriptId");
+    if (!scriptId) {
+        return Unexpected(scriptId.Error());
     }
 
-    auto line_number = property->get()->GetValue<JsonObject::NumT>("lineNumber");
-    if (line_number == nullptr) {
+    auto lineNumber = property->get()->GetValue<JsonObject::NumT>("lineNumber");
+    if (lineNumber == nullptr) {
         return Unexpected("Invalid Location: No 'lineNumber' property"s);
     }
 
-    auto line_number_trunc = std::trunc(*line_number);
-    if (*line_number < 0 || *line_number - line_number_trunc > line_number_trunc * DBL_EPSILON) {
-        return Unexpected("Invalid line number: " + std::to_string(*line_number));
+    auto lineNumberTrunc = std::trunc(*lineNumber);
+    if (*lineNumber < 0 || *lineNumber - lineNumberTrunc > lineNumberTrunc * DBL_EPSILON) {
+        return Unexpected("Invalid line number: " + std::to_string(*lineNumber));
     }
 
-    return Location(*script_id, line_number_trunc + 1);
+    return Location(*scriptId, lineNumberTrunc + 1);
 }
 
 std::function<void(JsonObjectBuilder &)> Location::ToJson() const
 {
-    return [this](JsonObjectBuilder &json_builder) {
-        json_builder.AddProperty("scriptId", std::to_string(script_id_));
-        json_builder.AddProperty("lineNumber", line_number_ - 1);
+    return [this](JsonObjectBuilder &jsonBuilder) {
+        jsonBuilder.AddProperty("scriptId", std::to_string(scriptId_));
+        jsonBuilder.AddProperty("lineNumber", lineNumber_ - 1);
     };
 }
 }  // namespace panda::tooling::inspector

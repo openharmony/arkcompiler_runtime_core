@@ -21,46 +21,45 @@
 
 namespace panda {
 using RegExpState = RegExpExecutor::RegExpState;
-bool RegExpExecutor::Execute(const uint8_t *input, uint32_t last_index, uint32_t length, uint8_t *buf,
-                             bool is_wide_char)
+bool RegExpExecutor::Execute(const uint8_t *input, uint32_t lastIndex, uint32_t length, uint8_t *buf, bool isWideChar)
 {
     DynChunk buffer(buf);
     input_ = const_cast<uint8_t *>(input);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    input_end_ = const_cast<uint8_t *>(input + length * (is_wide_char ? WIDE_CHAR_SIZE : CHAR_SIZE));
+    inputEnd_ = const_cast<uint8_t *>(input + length * (isWideChar ? WIDE_CHAR_SIZE : CHAR_SIZE));
     uint32_t size = buffer.GetU32(0);
-    n_capture_ = buffer.GetU32(RegExpParser::NUM_CAPTURE__OFFSET);
-    n_stack_ = buffer.GetU32(RegExpParser::NUM_STACK_OFFSET);
+    nCapture_ = buffer.GetU32(RegExpParser::NUM_CAPTURE__OFFSET);
+    nStack_ = buffer.GetU32(RegExpParser::NUM_STACK_OFFSET);
     flags_ = buffer.GetU32(RegExpParser::FLAGS_OFFSET);
-    is_wide_char_ = is_wide_char;
+    isWideChar_ = isWideChar;
 
-    uint32_t capture_result_size = sizeof(CaptureState) * n_capture_;
-    uint32_t stack_size = sizeof(uintptr_t) * n_stack_;
-    state_size_ = sizeof(RegExpState) + capture_result_size + stack_size;
-    state_stack_len_ = 0;
+    uint32_t captureResultSize = sizeof(CaptureState) * nCapture_;
+    uint32_t stackSize = sizeof(uintptr_t) * nStack_;
+    stateSize_ = sizeof(RegExpState) + captureResultSize + stackSize;
+    stateStackLen_ = 0;
 
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
 
-    if (capture_result_size != 0) {
-        allocator->DeleteArray(capture_result_list_);
+    if (captureResultSize != 0) {
+        allocator->DeleteArray(captureResultList_);
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        capture_result_list_ = allocator->New<CaptureState[]>(n_capture_);
-        if (memset_s(capture_result_list_, capture_result_size, 0, capture_result_size) != EOK) {
+        captureResultList_ = allocator->New<CaptureState[]>(nCapture_);
+        if (memset_s(captureResultList_, captureResultSize, 0, captureResultSize) != EOK) {
             LOG(FATAL, COMMON) << "memset_s failed";
             UNREACHABLE();
         }
     }
-    if (stack_size != 0) {
+    if (stackSize != 0) {
         allocator->DeleteArray(stack_);
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        stack_ = allocator->New<uintptr_t[]>(n_stack_);
-        if (memset_s(stack_, stack_size, 0, stack_size) != EOK) {
+        stack_ = allocator->New<uintptr_t[]>(nStack_);
+        if (memset_s(stack_, stackSize, 0, stackSize) != EOK) {
             LOG(FATAL, COMMON) << "memset_s failed";
             UNREACHABLE();
         }
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    SetCurrentPtr(input + last_index * (is_wide_char ? WIDE_CHAR_SIZE : CHAR_SIZE));
+    SetCurrentPtr(input + lastIndex * (isWideChar ? WIDE_CHAR_SIZE : CHAR_SIZE));
     SetCurrentPC(RegExpParser::OP_START_OFFSET);
 
     // first split
@@ -70,22 +69,22 @@ bool RegExpExecutor::Execute(const uint8_t *input, uint32_t last_index, uint32_t
     return ExecuteInternal(buffer, size);
 }
 
-bool RegExpExecutor::MatchFailed(bool is_matched)
+bool RegExpExecutor::MatchFailed(bool isMatched)
 {
     while (true) {
-        if (state_stack_len_ == 0) {
+        if (stateStackLen_ == 0) {
             return true;
         }
         RegExpState *state = PeekRegExpState();
         if (state->type == StateType::STATE_SPLIT) {
-            if (!is_matched) {
+            if (!isMatched) {
                 PopRegExpState();
                 return false;
             }
         } else {
-            is_matched = (state->type == StateType::STATE_MATCH_AHEAD && is_matched) ||
-                         (state->type == StateType::STATE_NEGATIVE_MATCH_AHEAD && !is_matched);
-            if (is_matched) {
+            isMatched = (state->type == StateType::STATE_MATCH_AHEAD && isMatched) ||
+                        (state->type == StateType::STATE_NEGATIVE_MATCH_AHEAD && !isMatched);
+            if (isMatched) {
                 if (state->type == StateType::STATE_MATCH_AHEAD) {
                     PopRegExpState(false);
                     return false;
@@ -103,57 +102,57 @@ bool RegExpExecutor::MatchFailed(bool is_matched)
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-bool RegExpExecutor::ExecuteInternal(const DynChunk &byte_code, uint32_t pc_end)
+bool RegExpExecutor::ExecuteInternal(const DynChunk &byteCode, uint32_t pcEnd)
 {
-    while (GetCurrentPC() < pc_end) {
+    while (GetCurrentPC() < pcEnd) {
         // first split
         if (!HandleFirstSplit()) {
             return false;
         }
-        uint8_t op_code = byte_code.GetU8(GetCurrentPC());
-        switch (op_code) {
+        uint8_t opCode = byteCode.GetU8(GetCurrentPC());
+        switch (opCode) {
             case RegExpOpCode::OP_DOTS:
             case RegExpOpCode::OP_ALL: {
-                if (!HandleOpAll(op_code)) {
+                if (!HandleOpAll(opCode)) {
                     return false;
                 }
                 break;
             }
             case RegExpOpCode::OP_CHAR32:
             case RegExpOpCode::OP_CHAR: {
-                if (!HandleOpChar(byte_code, op_code)) {
+                if (!HandleOpChar(byteCode, opCode)) {
                     return false;
                 }
                 break;
             }
             case RegExpOpCode::OP_NOT_WORD_BOUNDARY:
             case RegExpOpCode::OP_WORD_BOUNDARY: {
-                if (!HandleOpWordBoundary(op_code)) {
+                if (!HandleOpWordBoundary(opCode)) {
                     return false;
                 }
                 break;
             }
             case RegExpOpCode::OP_LINE_START: {
-                if (!HandleOpLineStart(op_code)) {
+                if (!HandleOpLineStart(opCode)) {
                     return false;
                 }
                 break;
             }
             case RegExpOpCode::OP_LINE_END: {
-                if (!HandleOpLineEnd(op_code)) {
+                if (!HandleOpLineEnd(opCode)) {
                     return false;
                 }
                 break;
             }
             case RegExpOpCode::OP_SAVE_START:
-                HandleOpSaveStart(byte_code, op_code);
+                HandleOpSaveStart(byteCode, opCode);
                 break;
             case RegExpOpCode::OP_SAVE_END:
-                HandleOpSaveEnd(byte_code, op_code);
+                HandleOpSaveEnd(byteCode, opCode);
                 break;
             case RegExpOpCode::OP_GOTO: {
-                uint32_t offset = byte_code.GetU32(GetCurrentPC() + 1);
-                Advance(op_code, offset);
+                uint32_t offset = byteCode.GetU32(GetCurrentPC() + 1);
+                Advance(opCode, offset);
                 break;
             }
             case RegExpOpCode::OP_MATCH: {
@@ -166,65 +165,65 @@ bool RegExpExecutor::ExecuteInternal(const DynChunk &byte_code, uint32_t pc_end)
             case RegExpOpCode::OP_MATCH_END:
                 return true;
             case RegExpOpCode::OP_SAVE_RESET:
-                HandleOpSaveReset(byte_code, op_code);
+                HandleOpSaveReset(byteCode, opCode);
                 break;
             case RegExpOpCode::OP_SPLIT_NEXT:
             case RegExpOpCode::OP_MATCH_AHEAD:
             case RegExpOpCode::OP_NEGATIVE_MATCH_AHEAD:
-                HandleOpMatch(byte_code, op_code);
+                HandleOpMatch(byteCode, opCode);
                 break;
             case RegExpOpCode::OP_SPLIT_FIRST:
-                HandleOpSplitFirst(byte_code, op_code);
+                HandleOpSplitFirst(byteCode, opCode);
                 break;
             case RegExpOpCode::OP_PREV: {
-                if (!HandleOpPrev(op_code)) {
+                if (!HandleOpPrev(opCode)) {
                     return false;
                 }
                 break;
             }
             case RegExpOpCode::OP_LOOP_GREEDY:
             case RegExpOpCode::OP_LOOP:
-                HandleOpLoop(byte_code, op_code);
+                HandleOpLoop(byteCode, opCode);
                 break;
             case RegExpOpCode::OP_PUSH_CHAR: {
                 PushStack(reinterpret_cast<uintptr_t>(GetCurrentPtr()));
-                Advance(op_code);
+                Advance(opCode);
                 break;
             }
             case RegExpOpCode::OP_CHECK_CHAR: {
                 if (PopStack() != reinterpret_cast<uintptr_t>(GetCurrentPtr())) {
-                    Advance(op_code);
+                    Advance(opCode);
                 } else {
-                    uint32_t offset = byte_code.GetU32(GetCurrentPC() + 1);
-                    Advance(op_code, offset);
+                    uint32_t offset = byteCode.GetU32(GetCurrentPC() + 1);
+                    Advance(opCode, offset);
                 }
                 break;
             }
             case RegExpOpCode::OP_PUSH: {
                 PushStack(0);
-                Advance(op_code);
+                Advance(opCode);
                 break;
             }
             case RegExpOpCode::OP_POP: {
                 PopStack();
-                Advance(op_code);
+                Advance(opCode);
                 break;
             }
             case RegExpOpCode::OP_RANGE32: {
-                if (!HandleOpRange32(byte_code)) {
+                if (!HandleOpRange32(byteCode)) {
                     return false;
                 }
                 break;
             }
             case RegExpOpCode::OP_RANGE: {
-                if (!HandleOpRange(byte_code)) {
+                if (!HandleOpRange(byteCode)) {
                     return false;
                 }
                 break;
             }
             case RegExpOpCode::OP_BACKREFERENCE:
             case RegExpOpCode::OP_BACKWARD_BACKREFERENCE: {
-                if (!HandleOpBackReference(byte_code, op_code)) {
+                if (!HandleOpBackReference(byteCode, opCode)) {
                     return false;
                 }
                 break;
@@ -240,12 +239,12 @@ bool RegExpExecutor::ExecuteInternal(const DynChunk &byte_code, uint32_t pc_end)
 void RegExpExecutor::DumpResult(std::ostream &out) const
 {
     out << "captures:" << std::endl;
-    for (uint32_t i = 0; i < n_capture_; i++) {
+    for (uint32_t i = 0; i < nCapture_; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        CaptureState *capture_state = &capture_result_list_[i];
-        int32_t len = capture_state->capture_end - capture_state->capture_start;
-        if ((capture_state->capture_start != nullptr && capture_state->capture_end != nullptr) && (len >= 0)) {
-            out << i << ":\t" << PandaString(reinterpret_cast<const char *>(capture_state->capture_start), len)
+        CaptureState *captureState = &captureResultList_[i];
+        int32_t len = captureState->captureEnd - captureState->captureStart;
+        if ((captureState->captureStart != nullptr && captureState->captureEnd != nullptr) && (len >= 0)) {
+            out << i << ":\t" << PandaString(reinterpret_cast<const char *>(captureState->captureStart), len)
                 << std::endl;
         } else {
             out << i << ":\t"
@@ -256,80 +255,80 @@ void RegExpExecutor::DumpResult(std::ostream &out) const
 
 void RegExpExecutor::PushRegExpState(StateType type, uint32_t pc)
 {
-    ReAllocStack(state_stack_len_ + 1);
+    ReAllocStack(stateStackLen_ + 1);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto state = reinterpret_cast<RegExpState *>(state_stack_ + state_stack_len_ * state_size_);
+    auto state = reinterpret_cast<RegExpState *>(stateStack_ + stateStackLen_ * stateSize_);
     state->type = type;
-    state->current_pc = pc;
-    state->current_stack = current_stack_;
-    state->current_ptr = GetCurrentPtr();
-    size_t list_size = sizeof(CaptureState) * n_capture_;
-    if (memcpy_s(state->capture_result_list, list_size, GetCaptureResultList(), list_size) != EOK) {
+    state->currentPc = pc;
+    state->currentStack = currentStack_;
+    state->currentPtr = GetCurrentPtr();
+    size_t listSize = sizeof(CaptureState) * nCapture_;
+    if (memcpy_s(state->captureResultList, listSize, GetCaptureResultList(), listSize) != EOK) {
         LOG(FATAL, COMMON) << "memcpy_s failed";
         UNREACHABLE();
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    uint8_t *stack_start = reinterpret_cast<uint8_t *>(state->capture_result_list) + sizeof(CaptureState) * n_capture_;
+    uint8_t *stackStart = reinterpret_cast<uint8_t *>(state->captureResultList) + sizeof(CaptureState) * nCapture_;
     if (stack_ != nullptr) {
-        size_t stack_size = sizeof(uintptr_t) * n_stack_;
-        if (memcpy_s(stack_start, stack_size, stack_, stack_size) != EOK) {
+        size_t stackSize = sizeof(uintptr_t) * nStack_;
+        if (memcpy_s(stackStart, stackSize, stack_, stackSize) != EOK) {
             LOG(FATAL, COMMON) << "memcpy_s failed";
             UNREACHABLE();
         }
     }
-    state_stack_len_++;
+    stateStackLen_++;
 }
 
-RegExpState *RegExpExecutor::PopRegExpState(bool copy_captrue)
+RegExpState *RegExpExecutor::PopRegExpState(bool copyCaptrue)
 {
-    if (state_stack_len_ != 0) {
+    if (stateStackLen_ != 0) {
         auto state = PeekRegExpState();
-        size_t list_size = sizeof(CaptureState) * n_capture_;
-        if (copy_captrue) {
-            if (memcpy_s(GetCaptureResultList(), list_size, state->capture_result_list, list_size) != EOK) {
+        size_t listSize = sizeof(CaptureState) * nCapture_;
+        if (copyCaptrue) {
+            if (memcpy_s(GetCaptureResultList(), listSize, state->captureResultList, listSize) != EOK) {
                 LOG(FATAL, COMMON) << "memcpy_s failed";
                 UNREACHABLE();
             }
         }
-        SetCurrentPtr(state->current_ptr);
-        SetCurrentPC(state->current_pc);
-        current_stack_ = state->current_stack;
+        SetCurrentPtr(state->currentPtr);
+        SetCurrentPC(state->currentPc);
+        currentStack_ = state->currentStack;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        uint8_t *stack_start = reinterpret_cast<uint8_t *>(state->capture_result_list) + list_size;
+        uint8_t *stackStart = reinterpret_cast<uint8_t *>(state->captureResultList) + listSize;
         if (stack_ != nullptr) {
-            size_t stack_size = sizeof(uintptr_t) * n_stack_;
-            if (memcpy_s(stack_, stack_size, stack_start, stack_size) != EOK) {
+            size_t stackSize = sizeof(uintptr_t) * nStack_;
+            if (memcpy_s(stack_, stackSize, stackStart, stackSize) != EOK) {
                 LOG(FATAL, COMMON) << "memcpy_s failed";
                 UNREACHABLE();
             }
         }
-        state_stack_len_--;
+        stateStackLen_--;
         return state;
     }
     return nullptr;
 }
 
-void RegExpExecutor::ReAllocStack(uint32_t stack_len)
+void RegExpExecutor::ReAllocStack(uint32_t stackLen)
 {
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    if (stack_len > state_stack_size_) {
-        uint32_t new_stack_size = std::max(state_stack_size_ * 2, MIN_STACK_SIZE);  // 2: double the size
-        uint32_t stack_byte_size = new_stack_size * state_size_;
+    if (stackLen > stateStackSize_) {
+        uint32_t newStackSize = std::max(stateStackSize_ * 2, MIN_STACK_SIZE);  // 2: double the size
+        uint32_t stackByteSize = newStackSize * stateSize_;
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        auto new_stack = allocator->New<uint8_t[]>(stack_byte_size);
-        if (memset_s(new_stack, stack_byte_size, 0, stack_byte_size) != EOK) {
+        auto newStack = allocator->New<uint8_t[]>(stackByteSize);
+        if (memset_s(newStack, stackByteSize, 0, stackByteSize) != EOK) {
             LOG(FATAL, COMMON) << "memset_s failed";
             UNREACHABLE();
         }
-        if (state_stack_ != nullptr) {
-            size_t stack_size = state_stack_size_ * state_size_;
-            if (memcpy_s(new_stack, stack_size, state_stack_, stack_size) != EOK) {
+        if (stateStack_ != nullptr) {
+            size_t stackSize = stateStackSize_ * stateSize_;
+            if (memcpy_s(newStack, stackSize, stateStack_, stackSize) != EOK) {
                 return;
             }
         }
-        allocator->DeleteArray(state_stack_);
-        state_stack_ = new_stack;
-        state_stack_size_ = new_stack_size;
+        allocator->DeleteArray(stateStack_);
+        stateStack_ = newStack;
+        stateStackSize_ = newStackSize;
     }
 }
 }  // namespace panda

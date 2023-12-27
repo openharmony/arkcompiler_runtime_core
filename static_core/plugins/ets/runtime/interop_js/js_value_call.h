@@ -39,17 +39,17 @@ class InteropCtx;
 napi_value CallEtsFunctionImpl(napi_env env, Span<napi_value> jsargv);
 napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo);
 
-uint8_t JSRuntimeInitJSCallClass(EtsString *cls_str);
-uint8_t JSRuntimeInitJSNewClass(EtsString *cls_str);
+uint8_t JSRuntimeInitJSCallClass(EtsString *clsStr);
+uint8_t JSRuntimeInitJSNewClass(EtsString *clsStr);
 
 template <bool IS_STATIC>
 napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
-                       EtsObject *this_obj);
+                       EtsObject *thisObj);
 
 inline napi_value EtsCallImplInstance(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
-                                      EtsObject *this_obj)
+                                      EtsObject *thisObj)
 {
-    return EtsCallImpl<false>(coro, ctx, method, jsargv, this_obj);
+    return EtsCallImpl<false>(coro, ctx, method, jsargv, thisObj);
 }
 
 inline napi_value EtsCallImplStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv)

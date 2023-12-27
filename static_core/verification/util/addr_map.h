@@ -26,13 +26,13 @@ namespace panda::verifier {
 class AddrMap {
 public:
     AddrMap() = delete;
-    AddrMap(const void *start_ptr, const void *end_ptr)
-        : AddrMap(reinterpret_cast<uintptr_t>(start_ptr), reinterpret_cast<uintptr_t>(end_ptr))
+    AddrMap(const void *startPtr, const void *endPtr)
+        : AddrMap(reinterpret_cast<uintptr_t>(startPtr), reinterpret_cast<uintptr_t>(endPtr))
     {
     }
 
-    AddrMap(const void *start_ptr, size_t size)
-        : AddrMap(reinterpret_cast<uintptr_t>(start_ptr), reinterpret_cast<uintptr_t>(start_ptr) + size - 1)
+    AddrMap(const void *startPtr, size_t size)
+        : AddrMap(reinterpret_cast<uintptr_t>(startPtr), reinterpret_cast<uintptr_t>(startPtr) + size - 1)
     {
     }
 
@@ -49,66 +49,66 @@ public:
     template <typename PtrType>
     PtrType AddrStart() const
     {
-        return reinterpret_cast<PtrType>(addr_range_.Start());
+        return reinterpret_cast<PtrType>(addrRange_.Start());
     }
 
     template <typename PtrType>
     PtrType AddrEnd() const
     {
-        return reinterpret_cast<PtrType>(addr_range_.Finish());
+        return reinterpret_cast<PtrType>(addrRange_.Finish());
     }
 
-    bool Mark(const void *addr_ptr)
+    bool Mark(const void *addrPtr)
     {
-        return Mark(addr_ptr, addr_ptr);
+        return Mark(addrPtr, addrPtr);
     }
 
-    bool Mark(const void *addr_start_ptr, const void *addr_end_ptr)
+    bool Mark(const void *addrStartPtr, const void *addrEndPtr)
     {
-        return Mark(reinterpret_cast<uintptr_t>(addr_start_ptr), reinterpret_cast<uintptr_t>(addr_end_ptr));
+        return Mark(reinterpret_cast<uintptr_t>(addrStartPtr), reinterpret_cast<uintptr_t>(addrEndPtr));
     }
 
     void Clear()
     {
-        Clear(addr_range_.Start(), addr_range_.Finish());
+        Clear(addrRange_.Start(), addrRange_.Finish());
     }
 
-    bool Clear(const void *addr_ptr)
+    bool Clear(const void *addrPtr)
     {
-        return Clear(addr_ptr, addr_ptr);
+        return Clear(addrPtr, addrPtr);
     }
 
-    bool Clear(const void *addr_start_ptr, const void *addr_end_ptr)
+    bool Clear(const void *addrStartPtr, const void *addrEndPtr)
     {
-        return Clear(reinterpret_cast<uintptr_t>(addr_start_ptr), reinterpret_cast<uintptr_t>(addr_end_ptr));
+        return Clear(reinterpret_cast<uintptr_t>(addrStartPtr), reinterpret_cast<uintptr_t>(addrEndPtr));
     }
 
-    bool HasMark(const void *addr_ptr) const
+    bool HasMark(const void *addrPtr) const
     {
-        return HasMarks(addr_ptr, addr_ptr);
+        return HasMarks(addrPtr, addrPtr);
     }
 
-    bool HasMarks(const void *addr_start_ptr, const void *addr_end_ptr) const
+    bool HasMarks(const void *addrStartPtr, const void *addrEndPtr) const
     {
-        return HasMarks(reinterpret_cast<uintptr_t>(addr_start_ptr), reinterpret_cast<uintptr_t>(addr_end_ptr));
+        return HasMarks(reinterpret_cast<uintptr_t>(addrStartPtr), reinterpret_cast<uintptr_t>(addrEndPtr));
     }
 
     bool HasCommonMarks(const AddrMap &rhs) const
     {
         // NOTE: work with different addr spaces
-        ASSERT(addr_range_ == rhs.addr_range_);
-        return BitVector::LazyAndThenIndicesOf<true>(bit_map_, rhs.bit_map_)().IsValid();
+        ASSERT(addrRange_ == rhs.addrRange_);
+        return BitVector::LazyAndThenIndicesOf<true>(bitMap_, rhs.bitMap_)().IsValid();
     }
 
     template <typename PtrType>
     bool GetFirstCommonMark(const AddrMap &rhs, PtrType *ptr) const
     {
         // NOTE: work with different addr spaces
-        ASSERT(addr_range_ == rhs.addr_range_);
-        Index<size_t> idx = BitVector::LazyAndThenIndicesOf<true>(bit_map_, rhs.bit_map_)();
+        ASSERT(addrRange_ == rhs.addrRange_);
+        Index<size_t> idx = BitVector::LazyAndThenIndicesOf<true>(bitMap_, rhs.bitMap_)();
         if (idx.IsValid()) {
             size_t offset = idx;
-            *ptr = reinterpret_cast<PtrType>(addr_range_.IndexOf(offset));
+            *ptr = reinterpret_cast<PtrType>(addrRange_.IndexOf(offset));
             return true;
         }
         return false;
@@ -121,14 +121,14 @@ public:
     {
         PtrType start = nullptr;
         PtrType end = nullptr;
-        for (auto addr : addr_range_) {
-            uintptr_t bit_offset = addr_range_.OffsetOf(addr);
+        for (auto addr : addrRange_) {
+            uintptr_t bitOffset = addrRange_.OffsetOf(addr);
             if (start == nullptr) {
-                if (bit_map_[bit_offset]) {
+                if (bitMap_[bitOffset]) {
                     start = reinterpret_cast<PtrType>(addr);
                 }
             } else {
-                if (bit_map_[bit_offset]) {
+                if (bitMap_[bitOffset]) {
                     continue;
                 }
                 end = reinterpret_cast<PtrType>(addr - 1);
@@ -139,74 +139,72 @@ public:
             }
         }
         if (start != nullptr) {
-            end = reinterpret_cast<PtrType>(addr_range_.Finish());
+            end = reinterpret_cast<PtrType>(addrRange_.Finish());
             cb(start, end);
         }
     }
 
     void InvertMarks()
     {
-        bit_map_.Invert();
+        bitMap_.Invert();
     }
 
     template <typename PtrType, typename Handler>
-    void EnumerateMarksInScope(const void *addr_start_ptr, const void *addr_end_ptr, Handler handler) const
+    void EnumerateMarksInScope(const void *addrStartPtr, const void *addrEndPtr, Handler handler) const
     {
-        EnumerateMarksInScope<PtrType>(reinterpret_cast<uintptr_t>(addr_start_ptr),
-                                       reinterpret_cast<uintptr_t>(addr_end_ptr), std::move(handler));
+        EnumerateMarksInScope<PtrType>(reinterpret_cast<uintptr_t>(addrStartPtr),
+                                       reinterpret_cast<uintptr_t>(addrEndPtr), std::move(handler));
     }
 
 private:
-    AddrMap(uintptr_t addr_from, uintptr_t addr_to) : addr_range_ {addr_from, addr_to}, bit_map_ {addr_range_.Length()}
-    {
-    }
+    AddrMap(uintptr_t addrFrom, uintptr_t addrTo) : addrRange_ {addrFrom, addrTo}, bitMap_ {addrRange_.Length()} {}
 
     bool IsInAddressSpace(uintptr_t addr) const
     {
-        return addr_range_.Contains(addr);
+        return addrRange_.Contains(addr);
     }
 
-    bool Mark(uintptr_t addr_from, uintptr_t addr_to)
+    bool Mark(uintptr_t addrFrom, uintptr_t addrTo)
     {
-        if (!addr_range_.Contains(addr_from) || !addr_range_.Contains(addr_to)) {
+        if (!addrRange_.Contains(addrFrom) || !addrRange_.Contains(addrTo)) {
             return false;
         }
-        ASSERT(addr_from <= addr_to);
-        bit_map_.Set(addr_range_.OffsetOf(addr_from), addr_range_.OffsetOf(addr_to));
+        ASSERT(addrFrom <= addrTo);
+        bitMap_.Set(addrRange_.OffsetOf(addrFrom), addrRange_.OffsetOf(addrTo));
         return true;
     }
 
-    bool Clear(uintptr_t addr_from, uintptr_t addr_to)
+    bool Clear(uintptr_t addrFrom, uintptr_t addrTo)
     {
-        if (!addr_range_.Contains(addr_from) || !addr_range_.Contains(addr_to)) {
+        if (!addrRange_.Contains(addrFrom) || !addrRange_.Contains(addrTo)) {
             return false;
         }
-        ASSERT(addr_from <= addr_to);
-        bit_map_.Clr(addr_range_.OffsetOf(addr_from), addr_range_.OffsetOf(addr_to));
+        ASSERT(addrFrom <= addrTo);
+        bitMap_.Clr(addrRange_.OffsetOf(addrFrom), addrRange_.OffsetOf(addrTo));
         return true;
     }
 
-    bool HasMarks(uintptr_t addr_from, uintptr_t addr_to) const
+    bool HasMarks(uintptr_t addrFrom, uintptr_t addrTo) const
     {
-        if (!addr_range_.Contains(addr_from) || !addr_range_.Contains(addr_to)) {
+        if (!addrRange_.Contains(addrFrom) || !addrRange_.Contains(addrTo)) {
             return false;
         }
-        ASSERT(addr_from <= addr_to);
-        Index<size_t> first_mark_idx =
-            bit_map_.LazyIndicesOf<1>(addr_range_.OffsetOf(addr_from), addr_range_.OffsetOf(addr_to))();
-        return first_mark_idx.IsValid();
+        ASSERT(addrFrom <= addrTo);
+        Index<size_t> firstMarkIdx =
+            bitMap_.LazyIndicesOf<1>(addrRange_.OffsetOf(addrFrom), addrRange_.OffsetOf(addrTo))();
+        return firstMarkIdx.IsValid();
     }
 
     template <typename PtrType, typename Handler>
-    void EnumerateMarksInScope(uintptr_t addr_from, uintptr_t addr_to, Handler handler) const
+    void EnumerateMarksInScope(uintptr_t addrFrom, uintptr_t addrTo, Handler handler) const
     {
-        ASSERT(addr_from <= addr_to);
-        auto from = addr_range_.OffsetOf(addr_range_.PutInBounds(addr_from));
-        auto to = addr_range_.OffsetOf(addr_range_.PutInBounds(addr_to));
+        ASSERT(addrFrom <= addrTo);
+        auto from = addrRange_.OffsetOf(addrRange_.PutInBounds(addrFrom));
+        auto to = addrRange_.OffsetOf(addrRange_.PutInBounds(addrTo));
         // upper range point is excluded
         for (uintptr_t idx = from; idx < to; idx++) {
-            if (bit_map_[idx]) {
-                if (!handler(reinterpret_cast<PtrType>(addr_range_.IndexOf(idx)))) {
+            if (bitMap_[idx]) {
+                if (!handler(reinterpret_cast<PtrType>(addrRange_.IndexOf(idx)))) {
                     return;
                 }
             }
@@ -214,8 +212,8 @@ private:
     }
 
 private:
-    Range<uintptr_t> addr_range_;
-    BitVector bit_map_;
+    Range<uintptr_t> addrRange_;
+    BitVector bitMap_;
 };
 }  // namespace panda::verifier
 

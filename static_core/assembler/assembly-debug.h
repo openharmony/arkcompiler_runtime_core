@@ -22,25 +22,25 @@ namespace panda::pandasm::debuginfo {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Ins {
-    size_t line_number = 0;
-    uint32_t column_number = 0;
-    std::string whole_line;  // NOTE(mbolshov): redundant given file and line_number
-    size_t bound_left = 0;
-    size_t bound_right = 0;
+    size_t lineNumber = 0;
+    uint32_t columnNumber = 0;
+    std::string wholeLine;  // NOTE(mbolshov): redundant given file and line_number
+    size_t boundLeft = 0;
+    size_t boundRight = 0;
 
     void SetLineNumber(size_t ln)
     {
-        line_number = ln;
+        lineNumber = ln;
     }
 
     void SetColumnNumber(size_t cn)
     {
-        column_number = cn;
+        columnNumber = cn;
     }
 
     Ins() = default;
-    Ins(size_t l_n, std::string &f_c, size_t b_l, size_t b_r)
-        : line_number(l_n), whole_line(std::move(f_c)), bound_left(b_l), bound_right(b_r)
+    Ins(size_t lN, std::string &fC, size_t bL, size_t bR)
+        : lineNumber(lN), wholeLine(std::move(fC)), boundLeft(bL), boundRight(bR)
     {
     }
 };
@@ -49,7 +49,7 @@ struct Ins {
 struct LocalVariable {
     std::string name;
     std::string signature;
-    std::string signature_type;
+    std::string signatureType;
     int32_t reg = 0;
     uint32_t start = 0;
     uint32_t length = 0;

@@ -25,7 +25,7 @@ namespace panda::panda_file {
 
 #include "file_items_gen.inc"
 
-size_t IndexedItem::item_alloc_id_next_ = 0;
+size_t IndexedItem::itemAllocIdNext_ = 0;
 
 template <class Tag, class Val>
 static bool WriteUlebTaggedValue(Writer *writer, Tag tag, Val v)
@@ -148,38 +148,38 @@ std::string BaseItem::GetName() const
 StringItem::StringItem(std::string str) : str_(std::move(str))
 {
     str_.push_back(0);
-    utf16_length_ = utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(str_.data()));
-    is_ascii_ = 1;
+    utf16Length_ = utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(str_.data()));
+    isAscii_ = 1;
 
     for (auto c : str_) {
         if (static_cast<uint8_t>(c) > utf::UTF8_1B_MAX) {
-            is_ascii_ = 0;
+            isAscii_ = 0;
             break;
         }
     }
 }
 
 StringItem::StringItem(File::StringData data)
-    : str_(reinterpret_cast<const char *>(data.data)), utf16_length_(data.utf16_length)
+    : str_(reinterpret_cast<const char *>(data.data)), utf16Length_(data.utf16Length)
 {
 }
 
 size_t StringItem::CalculateSize() const
 {
     size_t n = str_.size();
-    return leb128::UnsignedEncodingSize(utf16_length_ << 1U | is_ascii_) + n;
+    return leb128::UnsignedEncodingSize(utf16Length_ << 1U | isAscii_) + n;
 }
 
 bool StringItem::Write(Writer *writer)
 {
     ASSERT(GetOffset() == writer->GetOffset());
     constexpr size_t MAX_LENGTH = 0x7fffffffU;
-    if (utf16_length_ > MAX_LENGTH) {
+    if (utf16Length_ > MAX_LENGTH) {
         LOG(ERROR, PANDAFILE) << "Writing StringItem with size greater than 0x7fffffffU is not supported!";
         return false;
     }
 
-    if (!writer->WriteUleb128(utf16_length_ << 1U | is_ascii_)) {
+    if (!writer->WriteUleb128(utf16Length_ << 1U | isAscii_)) {
         return false;
     }
 
@@ -213,7 +213,7 @@ bool BaseClassItem::Write(Writer *writer)
 
 size_t ClassItem::CalculateSizeWithoutFieldsAndMethods() const
 {
-    size_t size = BaseClassItem::CalculateSize() + ID_SIZE + leb128::UnsignedEncodingSize(access_flags_);
+    size_t size = BaseClassItem::CalculateSize() + ID_SIZE + leb128::UnsignedEncodingSize(accessFlags_);
 
     size += leb128::UnsignedEncodingSize(fields_.size());
     size += leb128::UnsignedEncodingSize(methods_.size());
@@ -222,16 +222,16 @@ size_t ClassItem::CalculateSizeWithoutFieldsAndMethods() const
         size += TAG_SIZE + leb128::UnsignedEncodingSize(ifaces_.size()) + IDX_SIZE * ifaces_.size();
     }
 
-    if (source_lang_ != SourceLang::PANDA_ASSEMBLY) {
+    if (sourceLang_ != SourceLang::PANDA_ASSEMBLY) {
         size += TAG_SIZE + sizeof(SourceLang);
     }
 
-    size += (TAG_SIZE + ID_SIZE) * runtime_annotations_.size();
+    size += (TAG_SIZE + ID_SIZE) * runtimeAnnotations_.size();
     size += (TAG_SIZE + ID_SIZE) * annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * runtime_type_annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * type_annotations_.size();
+    size += (TAG_SIZE + ID_SIZE) * runtimeTypeAnnotations_.size();
+    size += (TAG_SIZE + ID_SIZE) * typeAnnotations_.size();
 
-    if (source_file_ != nullptr) {
+    if (sourceFile_ != nullptr) {
         size += TAG_SIZE + ID_SIZE;
     }
 
@@ -300,8 +300,8 @@ bool ClassItem::WriteIfaces(Writer *writer)
 
 bool ClassItem::WriteAnnotations(Writer *writer)
 {
-    for (auto runtime_annotation : runtime_annotations_) {
-        if (!WriteIdTaggedValue(writer, ClassTag::RUNTIME_ANNOTATION, runtime_annotation)) {
+    for (auto runtimeAnnotation : runtimeAnnotations_) {
+        if (!WriteIdTaggedValue(writer, ClassTag::RUNTIME_ANNOTATION, runtimeAnnotation)) {
             return false;
         }
     }
@@ -312,14 +312,14 @@ bool ClassItem::WriteAnnotations(Writer *writer)
         }
     }
 
-    for (auto runtime_type_annotation : runtime_type_annotations_) {
-        if (!WriteIdTaggedValue(writer, ClassTag::RUNTIME_TYPE_ANNOTATION, runtime_type_annotation)) {
+    for (auto runtimeTypeAnnotation : runtimeTypeAnnotations_) {
+        if (!WriteIdTaggedValue(writer, ClassTag::RUNTIME_TYPE_ANNOTATION, runtimeTypeAnnotation)) {
             return false;
         }
     }
 
-    for (auto type_annotation : type_annotations_) {
-        if (!WriteIdTaggedValue(writer, ClassTag::TYPE_ANNOTATION, type_annotation)) {
+    for (auto typeAnnotation : typeAnnotations_) {
+        if (!WriteIdTaggedValue(writer, ClassTag::TYPE_ANNOTATION, typeAnnotation)) {
             return false;
         }
     }
@@ -333,8 +333,8 @@ bool ClassItem::WriteTaggedData(Writer *writer)
         return false;
     }
 
-    if (source_lang_ != SourceLang::PANDA_ASSEMBLY) {
-        if (!WriteTaggedValue(writer, ClassTag::SOURCE_LANG, static_cast<uint8_t>(source_lang_))) {
+    if (sourceLang_ != SourceLang::PANDA_ASSEMBLY) {
+        if (!WriteTaggedValue(writer, ClassTag::SOURCE_LANG, static_cast<uint8_t>(sourceLang_))) {
             return false;
         }
     }
@@ -343,8 +343,8 @@ bool ClassItem::WriteTaggedData(Writer *writer)
         return false;
     }
 
-    if (source_file_ != nullptr) {
-        if (!WriteIdTaggedValue(writer, ClassTag::SOURCE_FILE, source_file_)) {
+    if (sourceFile_ != nullptr) {
+        if (!WriteIdTaggedValue(writer, ClassTag::SOURCE_FILE, sourceFile_)) {
             return false;
         }
     }
@@ -358,12 +358,12 @@ bool ClassItem::Write(Writer *writer)
         return false;
     }
 
-    uint32_t offset = super_class_ != nullptr ? super_class_->GetOffset() : 0;
+    uint32_t offset = superClass_ != nullptr ? superClass_->GetOffset() : 0;
     if (!writer->Write(offset)) {
         return false;
     }
 
-    if (!writer->WriteUleb128(access_flags_)) {
+    if (!writer->WriteUleb128(accessFlags_)) {
         return false;
     }
 
@@ -394,17 +394,17 @@ bool ClassItem::Write(Writer *writer)
     return true;
 }
 
-ParamAnnotationsItem::ParamAnnotationsItem(MethodItem *method, bool is_runtime_annotations)
+ParamAnnotationsItem::ParamAnnotationsItem(MethodItem *method, bool isRuntimeAnnotations)
 {
     for (const auto &param : method->GetParams()) {
-        if (is_runtime_annotations) {
+        if (isRuntimeAnnotations) {
             annotations_.push_back(param.GetRuntimeAnnotations());
         } else {
             annotations_.push_back(param.GetAnnotations());
         }
     }
 
-    if (is_runtime_annotations) {
+    if (isRuntimeAnnotations) {
         method->SetRuntimeParamAnnotationItem(this);
     } else {
         method->SetParamAnnotationItem(this);
@@ -415,9 +415,9 @@ size_t ParamAnnotationsItem::CalculateSize() const
 {
     size_t size = sizeof(uint32_t);  // size
 
-    for (const auto &param_annotations : annotations_) {
+    for (const auto &paramAnnotations : annotations_) {
         size += sizeof(uint32_t);  // count
-        size += param_annotations.size() * ID_SIZE;
+        size += paramAnnotations.size() * ID_SIZE;
     }
 
     return size;
@@ -431,12 +431,12 @@ bool ParamAnnotationsItem::Write(Writer *writer)
         return false;
     }
 
-    for (const auto &param_annotations : annotations_) {
-        if (!writer->Write(static_cast<uint32_t>(param_annotations.size()))) {
+    for (const auto &paramAnnotations : annotations_) {
+        if (!writer->Write(static_cast<uint32_t>(paramAnnotations.size()))) {
             return false;
         }
 
-        for (auto *item : param_annotations) {
+        for (auto *item : paramAnnotations) {
             ASSERT(item->GetOffset() != 0);
 
             if (!writer->Write(item->GetOffset())) {
@@ -448,11 +448,11 @@ bool ParamAnnotationsItem::Write(Writer *writer)
     return true;
 }
 
-ProtoItem::ProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params)
+ProtoItem::ProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params)
 {
     size_t n = 0;
     shorty_.push_back(0);
-    AddType(ret_type, &n);
+    AddType(retType, &n);
     for (auto &p : params) {
         AddType(p.GetType(), &n);
     }
@@ -470,7 +470,7 @@ void ProtoItem::AddType(TypeItem *type, size_t *n)
     shorty_.back() = v;
 
     if (!type->GetType().IsPrimitive()) {
-        reference_types_.push_back(type);
+        referenceTypes_.push_back(type);
         AddIndexDependency(type);
     }
 
@@ -490,7 +490,7 @@ bool ProtoItem::Write(Writer *writer)
         }
     }
 
-    for (auto r : reference_types_) {
+    for (auto r : referenceTypes_) {
         ASSERT(r->HasIndex(this));
         if (!writer->Write<uint16_t>(r->GetIndex(this))) {
             return false;
@@ -500,8 +500,8 @@ bool ProtoItem::Write(Writer *writer)
     return true;
 }
 
-BaseMethodItem::BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags)
-    : class_(cls), name_(name), proto_(proto), access_flags_(access_flags)
+BaseMethodItem::BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags)
+    : class_(cls), name_(name), proto_(proto), accessFlags_(accessFlags)
 {
     AddIndexDependency(cls);
     AddIndexDependency(proto);
@@ -510,7 +510,7 @@ BaseMethodItem::BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *
 size_t BaseMethodItem::CalculateSize() const
 {
     // class id + proto id + name id + access flags
-    return IDX_SIZE + IDX_SIZE + ID_SIZE + leb128::UnsignedEncodingSize(access_flags_);
+    return IDX_SIZE + IDX_SIZE + ID_SIZE + leb128::UnsignedEncodingSize(accessFlags_);
 }
 
 bool BaseMethodItem::Write(Writer *writer)
@@ -535,12 +535,12 @@ bool BaseMethodItem::Write(Writer *writer)
         return false;
     }
 
-    return writer->WriteUleb128(access_flags_);
+    return writer->WriteUleb128(accessFlags_);
 }
 
-MethodItem::MethodItem(ClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags,
+MethodItem::MethodItem(ClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags,
                        std::vector<MethodParamItem> params)
-    : BaseMethodItem(cls, name, proto, access_flags), params_(std::move(params))
+    : BaseMethodItem(cls, name, proto, accessFlags), params_(std::move(params))
 {
 }
 
@@ -552,31 +552,31 @@ size_t MethodItem::CalculateSize() const
         size += TAG_SIZE + ID_SIZE;
     }
 
-    if (source_lang_ != SourceLang::PANDA_ASSEMBLY) {
+    if (sourceLang_ != SourceLang::PANDA_ASSEMBLY) {
         size += TAG_SIZE + sizeof(SourceLang);
     }
 
-    size += (TAG_SIZE + ID_SIZE) * runtime_annotations_.size();
+    size += (TAG_SIZE + ID_SIZE) * runtimeAnnotations_.size();
 
-    if (runtime_param_annotations_ != nullptr) {
+    if (runtimeParamAnnotations_ != nullptr) {
         size += TAG_SIZE + ID_SIZE;
     }
 
     size += (TAG_SIZE + ID_SIZE) * annotations_.size();
 
-    if (param_annotations_ != nullptr) {
+    if (paramAnnotations_ != nullptr) {
         size += TAG_SIZE + ID_SIZE;
     }
 
-    size += (TAG_SIZE + ID_SIZE) * runtime_type_annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * type_annotations_.size();
+    size += (TAG_SIZE + ID_SIZE) * runtimeTypeAnnotations_.size();
+    size += (TAG_SIZE + ID_SIZE) * typeAnnotations_.size();
 
-    if (debug_info_ != nullptr) {
+    if (debugInfo_ != nullptr) {
         size += TAG_SIZE + ID_SIZE;
     }
 
-    if (profile_size_ != 0) {
-        size += TAG_SIZE + sizeof(profile_size_);
+    if (profileSize_ != 0) {
+        size += TAG_SIZE + sizeof(profileSize_);
     }
 
     size += TAG_SIZE;  // null tag
@@ -586,14 +586,14 @@ size_t MethodItem::CalculateSize() const
 
 bool MethodItem::WriteRuntimeAnnotations(Writer *writer)
 {
-    for (auto runtime_annotation : runtime_annotations_) {
-        if (!WriteIdTaggedValue(writer, MethodTag::RUNTIME_ANNOTATION, runtime_annotation)) {
+    for (auto runtimeAnnotation : runtimeAnnotations_) {
+        if (!WriteIdTaggedValue(writer, MethodTag::RUNTIME_ANNOTATION, runtimeAnnotation)) {
             return false;
         }
     }
 
-    if (runtime_param_annotations_ != nullptr) {
-        if (!WriteIdTaggedValue(writer, MethodTag::RUNTIME_PARAM_ANNOTATION, runtime_param_annotations_)) {
+    if (runtimeParamAnnotations_ != nullptr) {
+        if (!WriteIdTaggedValue(writer, MethodTag::RUNTIME_PARAM_ANNOTATION, runtimeParamAnnotations_)) {
             return false;
         }
     }
@@ -603,14 +603,14 @@ bool MethodItem::WriteRuntimeAnnotations(Writer *writer)
 
 bool MethodItem::WriteTypeAnnotations(Writer *writer)
 {
-    for (auto runtime_type_annotation : runtime_type_annotations_) {
-        if (!WriteIdTaggedValue(writer, MethodTag::RUNTIME_TYPE_ANNOTATION, runtime_type_annotation)) {
+    for (auto runtimeTypeAnnotation : runtimeTypeAnnotations_) {
+        if (!WriteIdTaggedValue(writer, MethodTag::RUNTIME_TYPE_ANNOTATION, runtimeTypeAnnotation)) {
             return false;
         }
     }
 
-    for (auto type_annotation : type_annotations_) {
-        if (!WriteIdTaggedValue(writer, MethodTag::TYPE_ANNOTATION, type_annotation)) {
+    for (auto typeAnnotation : typeAnnotations_) {
+        if (!WriteIdTaggedValue(writer, MethodTag::TYPE_ANNOTATION, typeAnnotation)) {
             return false;
         }
     }
@@ -626,8 +626,8 @@ bool MethodItem::WriteTaggedData(Writer *writer)
         }
     }
 
-    if (source_lang_ != SourceLang::PANDA_ASSEMBLY) {
-        if (!WriteTaggedValue(writer, MethodTag::SOURCE_LANG, static_cast<uint8_t>(source_lang_))) {
+    if (sourceLang_ != SourceLang::PANDA_ASSEMBLY) {
+        if (!WriteTaggedValue(writer, MethodTag::SOURCE_LANG, static_cast<uint8_t>(sourceLang_))) {
             return false;
         }
     }
@@ -636,8 +636,8 @@ bool MethodItem::WriteTaggedData(Writer *writer)
         return false;
     }
 
-    if (debug_info_ != nullptr) {
-        if (!WriteIdTaggedValue(writer, MethodTag::DEBUG_INFO, debug_info_)) {
+    if (debugInfo_ != nullptr) {
+        if (!WriteIdTaggedValue(writer, MethodTag::DEBUG_INFO, debugInfo_)) {
             return false;
         }
     }
@@ -652,14 +652,14 @@ bool MethodItem::WriteTaggedData(Writer *writer)
         return false;
     }
 
-    if (param_annotations_ != nullptr) {
-        if (!WriteIdTaggedValue(writer, MethodTag::PARAM_ANNOTATION, param_annotations_)) {
+    if (paramAnnotations_ != nullptr) {
+        if (!WriteIdTaggedValue(writer, MethodTag::PARAM_ANNOTATION, paramAnnotations_)) {
             return false;
         }
     }
 
-    if (profile_size_ != 0) {
-        if (!WriteTaggedValue(writer, MethodTag::PROFILE_INFO, static_cast<uint16_t>(profile_size_))) {
+    if (profileSize_ != 0) {
+        if (!WriteTaggedValue(writer, MethodTag::PROFILE_INFO, static_cast<uint16_t>(profileSize_))) {
             return false;
         }
     }
@@ -679,9 +679,9 @@ bool MethodItem::Write(Writer *writer)
 size_t CodeItem::CatchBlock::CalculateSize() const
 {
     ASSERT(type_ == nullptr || type_->HasIndex(method_));
-    uint32_t type_off = type_ != nullptr ? type_->GetIndex(method_) + 1 : 0;
-    return leb128::UnsignedEncodingSize(type_off) + leb128::UnsignedEncodingSize(handler_pc_) +
-           leb128::UnsignedEncodingSize(code_size_);
+    uint32_t typeOff = type_ != nullptr ? type_->GetIndex(method_) + 1 : 0;
+    return leb128::UnsignedEncodingSize(typeOff) + leb128::UnsignedEncodingSize(handlerPc_) +
+           leb128::UnsignedEncodingSize(codeSize_);
 }
 
 bool CodeItem::CatchBlock::Write(Writer *writer)
@@ -689,17 +689,17 @@ bool CodeItem::CatchBlock::Write(Writer *writer)
     ASSERT(GetOffset() == writer->GetOffset());
     ASSERT(type_ == nullptr || type_->HasIndex(method_));
 
-    uint32_t type_off = type_ != nullptr ? type_->GetIndex(method_) + 1 : 0;
+    uint32_t typeOff = type_ != nullptr ? type_->GetIndex(method_) + 1 : 0;
 
-    if (!writer->WriteUleb128(type_off)) {
+    if (!writer->WriteUleb128(typeOff)) {
         return false;
     }
 
-    if (!writer->WriteUleb128(handler_pc_)) {
+    if (!writer->WriteUleb128(handlerPc_)) {
         return false;
     }
 
-    if (!writer->WriteUleb128(code_size_)) {
+    if (!writer->WriteUleb128(codeSize_)) {
         return false;
     }
 
@@ -711,25 +711,25 @@ void CodeItem::TryBlock::ComputeLayout()
     size_t offset = GetOffset();
     offset += CalculateSizeWithoutCatchBlocks();
 
-    for (auto &catch_block : catch_blocks_) {
-        catch_block.SetOffset(offset);
-        catch_block.ComputeLayout();
-        offset += catch_block.GetSize();
+    for (auto &catchBlock : catchBlocks_) {
+        catchBlock.SetOffset(offset);
+        catchBlock.ComputeLayout();
+        offset += catchBlock.GetSize();
     }
 }
 
 size_t CodeItem::TryBlock::CalculateSizeWithoutCatchBlocks() const
 {
-    return leb128::UnsignedEncodingSize(start_pc_) + leb128::UnsignedEncodingSize(length_) +
-           leb128::UnsignedEncodingSize(catch_blocks_.size());
+    return leb128::UnsignedEncodingSize(startPc_) + leb128::UnsignedEncodingSize(length_) +
+           leb128::UnsignedEncodingSize(catchBlocks_.size());
 }
 
 size_t CodeItem::TryBlock::CalculateSize() const
 {
     size_t size = CalculateSizeWithoutCatchBlocks();
 
-    for (auto &catch_block : catch_blocks_) {
-        size += catch_block.GetSize();
+    for (auto &catchBlock : catchBlocks_) {
+        size += catchBlock.GetSize();
     }
 
     return size;
@@ -739,7 +739,7 @@ bool CodeItem::TryBlock::Write(Writer *writer)
 {
     ASSERT(GetOffset() == writer->GetOffset());
 
-    if (!writer->WriteUleb128(start_pc_)) {
+    if (!writer->WriteUleb128(startPc_)) {
         return false;
     }
 
@@ -747,12 +747,12 @@ bool CodeItem::TryBlock::Write(Writer *writer)
         return false;
     }
 
-    if (!writer->WriteUleb128(catch_blocks_.size())) {
+    if (!writer->WriteUleb128(catchBlocks_.size())) {
         return false;
     }
 
-    for (auto &catch_block : catch_blocks_) {
-        if (!catch_block.Write(writer)) {
+    for (auto &catchBlock : catchBlocks_) {
+        if (!catchBlock.Write(writer)) {
             return false;
         }
     }
@@ -766,17 +766,17 @@ void CodeItem::ComputeLayout()
 
     offset += CalculateSizeWithoutTryBlocks();
 
-    for (auto &try_block : try_blocks_) {
-        try_block.SetOffset(offset);
-        try_block.ComputeLayout();
-        offset += try_block.GetSize();
+    for (auto &tryBlock : tryBlocks_) {
+        tryBlock.SetOffset(offset);
+        tryBlock.ComputeLayout();
+        offset += tryBlock.GetSize();
     }
 }
 
 size_t CodeItem::CalculateSizeWithoutTryBlocks() const
 {
-    size_t size = leb128::UnsignedEncodingSize(num_vregs_) + leb128::UnsignedEncodingSize(num_args_) +
-                  leb128::UnsignedEncodingSize(instructions_.size()) + leb128::UnsignedEncodingSize(try_blocks_.size());
+    size_t size = leb128::UnsignedEncodingSize(numVregs_) + leb128::UnsignedEncodingSize(numArgs_) +
+                  leb128::UnsignedEncodingSize(instructions_.size()) + leb128::UnsignedEncodingSize(tryBlocks_.size());
 
     size += instructions_.size();
 
@@ -792,8 +792,8 @@ size_t CodeItem::CalculateSize() const
 {
     size_t size = CalculateSizeWithoutTryBlocks();
 
-    for (auto &try_block : try_blocks_) {
-        size += try_block.GetSize();
+    for (auto &tryBlock : tryBlocks_) {
+        size += tryBlock.GetSize();
     }
 
     return size;
@@ -803,11 +803,11 @@ bool CodeItem::Write(Writer *writer)
 {
     ASSERT(GetOffset() == writer->GetOffset());
 
-    if (!writer->WriteUleb128(num_vregs_)) {
+    if (!writer->WriteUleb128(numVregs_)) {
         return false;
     }
 
-    if (!writer->WriteUleb128(num_args_)) {
+    if (!writer->WriteUleb128(numArgs_)) {
         return false;
     }
 
@@ -815,7 +815,7 @@ bool CodeItem::Write(Writer *writer)
         return false;
     }
 
-    if (!writer->WriteUleb128(try_blocks_.size())) {
+    if (!writer->WriteUleb128(tryBlocks_.size())) {
         return false;
     }
 
@@ -823,8 +823,8 @@ bool CodeItem::Write(Writer *writer)
         return false;
     }
 
-    for (auto &try_block : try_blocks_) {
-        if (!try_block.Write(writer)) {
+    for (auto &tryBlock : tryBlocks_) {
+        if (!tryBlock.Write(writer)) {
             return false;
         }
     }
@@ -995,7 +995,7 @@ bool ArrayValueItem::Write(Writer *writer)
         return false;
     }
 
-    switch (component_type_.GetId()) {
+    switch (componentType_.GetId()) {
         case panda_file::Type::TypeId::U1:
         case panda_file::Type::TypeId::I8:
         case panda_file::Type::TypeId::U8: {
@@ -1032,7 +1032,7 @@ bool ArrayValueItem::Write(Writer *writer)
 
 size_t ArrayValueItem::GetComponentSize() const
 {
-    switch (component_type_.GetId()) {
+    switch (componentType_.GetId()) {
         case panda_file::Type::TypeId::U1:
         case panda_file::Type::TypeId::I8:
         case panda_file::Type::TypeId::U8:
@@ -1214,8 +1214,8 @@ bool BaseFieldItem::Write(Writer *writer)
     return writer->Write(name_->GetOffset());
 }
 
-FieldItem::FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t access_flags)
-    : BaseFieldItem(cls, name, type), access_flags_(access_flags)
+FieldItem::FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags)
+    : BaseFieldItem(cls, name, type), accessFlags_(accessFlags)
 {
 }
 
@@ -1227,7 +1227,7 @@ void FieldItem::SetValue(ValueItem *value)
 
 size_t FieldItem::CalculateSize() const
 {
-    size_t size = BaseFieldItem::CalculateSize() + leb128::UnsignedEncodingSize(access_flags_);
+    size_t size = BaseFieldItem::CalculateSize() + leb128::UnsignedEncodingSize(accessFlags_);
 
     if (value_ != nullptr) {
         if (value_->GetType() == ValueItem::Type::INTEGER) {
@@ -1237,10 +1237,10 @@ size_t FieldItem::CalculateSize() const
         }
     }
 
-    size += (TAG_SIZE + ID_SIZE) * runtime_annotations_.size();
+    size += (TAG_SIZE + ID_SIZE) * runtimeAnnotations_.size();
     size += (TAG_SIZE + ID_SIZE) * annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * runtime_type_annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * type_annotations_.size();
+    size += (TAG_SIZE + ID_SIZE) * runtimeTypeAnnotations_.size();
+    size += (TAG_SIZE + ID_SIZE) * typeAnnotations_.size();
 
     size += TAG_SIZE;  // null tag
 
@@ -1281,8 +1281,8 @@ bool FieldItem::WriteValue(Writer *writer)
 
 bool FieldItem::WriteAnnotations(Writer *writer)
 {
-    for (auto runtime_annotation : runtime_annotations_) {
-        if (!WriteIdTaggedValue(writer, FieldTag::RUNTIME_ANNOTATION, runtime_annotation)) {
+    for (auto runtimeAnnotation : runtimeAnnotations_) {
+        if (!WriteIdTaggedValue(writer, FieldTag::RUNTIME_ANNOTATION, runtimeAnnotation)) {
             return false;
         }
     }
@@ -1293,14 +1293,14 @@ bool FieldItem::WriteAnnotations(Writer *writer)
         }
     }
 
-    for (auto runtime_type_annotation : runtime_type_annotations_) {
-        if (!WriteIdTaggedValue(writer, FieldTag::RUNTIME_TYPE_ANNOTATION, runtime_type_annotation)) {
+    for (auto runtimeTypeAnnotation : runtimeTypeAnnotations_) {
+        if (!WriteIdTaggedValue(writer, FieldTag::RUNTIME_TYPE_ANNOTATION, runtimeTypeAnnotation)) {
             return false;
         }
     }
 
-    for (auto type_annotation : type_annotations_) {
-        if (!WriteIdTaggedValue(writer, FieldTag::TYPE_ANNOTATION, type_annotation)) {
+    for (auto typeAnnotation : typeAnnotations_) {
+        if (!WriteIdTaggedValue(writer, FieldTag::TYPE_ANNOTATION, typeAnnotation)) {
             return false;
         }
     }
@@ -1327,7 +1327,7 @@ bool FieldItem::Write(Writer *writer)
         return false;
     }
 
-    if (!writer->WriteUleb128(access_flags_)) {
+    if (!writer->WriteUleb128(accessFlags_)) {
         return false;
     }
 
@@ -1361,30 +1361,30 @@ bool AnnotationItem::Write(Writer *writer)
             return false;
         }
 
-        ValueItem *value_item = elem.GetValue();
+        ValueItem *valueItem = elem.GetValue();
 
-        switch (value_item->GetType()) {
+        switch (valueItem->GetType()) {
             case ValueItem::Type::INTEGER: {
-                if (!writer->Write(value_item->GetAsScalar()->GetValue<uint32_t>())) {
+                if (!writer->Write(valueItem->GetAsScalar()->GetValue<uint32_t>())) {
                     return false;
                 }
                 break;
             }
             case ValueItem::Type::FLOAT: {
-                if (!writer->Write(bit_cast<uint32_t>(value_item->GetAsScalar()->GetValue<float>()))) {
+                if (!writer->Write(bit_cast<uint32_t>(valueItem->GetAsScalar()->GetValue<float>()))) {
                     return false;
                 }
                 break;
             }
             case ValueItem::Type::ID: {
-                if (!writer->Write(value_item->GetAsScalar()->GetId().GetOffset())) {
+                if (!writer->Write(valueItem->GetAsScalar()->GetId().GetOffset())) {
                     return false;
                 }
                 break;
             }
             default: {
-                ASSERT(value_item->GetOffset() != 0);
-                if (!writer->Write(value_item->GetOffset())) {
+                ASSERT(valueItem->GetOffset() != 0);
+                if (!writer->Write(valueItem->GetOffset())) {
                     return false;
                 }
                 break;
@@ -1406,35 +1406,35 @@ void LineNumberProgramItem::EmitEnd()
     EmitOpcode(Opcode::END_SEQUENCE);
 }
 
-void LineNumberProgramItem::EmitAdvancePc(std::vector<uint8_t> *constant_pool, uint32_t value)
+void LineNumberProgramItem::EmitAdvancePc(std::vector<uint8_t> *constantPool, uint32_t value)
 {
     EmitOpcode(Opcode::ADVANCE_PC);
-    EmitUleb128(constant_pool, value);
+    EmitUleb128(constantPool, value);
 }
 
-void LineNumberProgramItem::EmitAdvanceLine(std::vector<uint8_t> *constant_pool, int32_t value)
+void LineNumberProgramItem::EmitAdvanceLine(std::vector<uint8_t> *constantPool, int32_t value)
 {
     EmitOpcode(Opcode::ADVANCE_LINE);
-    EmitSleb128(constant_pool, value);
+    EmitSleb128(constantPool, value);
 }
 
-void LineNumberProgramItem::EmitColumn(std::vector<uint8_t> *constant_pool, uint32_t pc_inc, uint32_t column)
+void LineNumberProgramItem::EmitColumn(std::vector<uint8_t> *constantPool, uint32_t pcInc, uint32_t column)
 {
-    if (pc_inc != 0U) {
-        EmitAdvancePc(constant_pool, pc_inc);
+    if (pcInc != 0U) {
+        EmitAdvancePc(constantPool, pcInc);
     }
     EmitOpcode(Opcode::SET_COLUMN);
-    EmitUleb128(constant_pool, column);
+    EmitUleb128(constantPool, column);
 }
 
-void LineNumberProgramItem::EmitStartLocal(std::vector<uint8_t> *constant_pool, int32_t register_number,
-                                           StringItem *name, StringItem *type)
+void LineNumberProgramItem::EmitStartLocal(std::vector<uint8_t> *constantPool, int32_t registerNumber, StringItem *name,
+                                           StringItem *type)
 {
-    EmitStartLocalExtended(constant_pool, register_number, name, type, nullptr);
+    EmitStartLocalExtended(constantPool, registerNumber, name, type, nullptr);
 }
 
-void LineNumberProgramItem::EmitStartLocalExtended(std::vector<uint8_t> *constant_pool, int32_t register_number,
-                                                   StringItem *name, StringItem *type, StringItem *type_signature)
+void LineNumberProgramItem::EmitStartLocalExtended(std::vector<uint8_t> *constantPool, int32_t registerNumber,
+                                                   StringItem *name, StringItem *type, StringItem *typeSignature)
 {
     if (type == nullptr) {
         return;
@@ -1444,36 +1444,36 @@ void LineNumberProgramItem::EmitStartLocalExtended(std::vector<uint8_t> *constan
     ASSERT(name->GetOffset() != 0);
     ASSERT(type->GetOffset() != 0);
 
-    EmitOpcode(type_signature == nullptr ? Opcode::START_LOCAL : Opcode::START_LOCAL_EXTENDED);
-    EmitRegister(register_number);
-    EmitUleb128(constant_pool, name->GetOffset());
-    EmitUleb128(constant_pool, type->GetOffset());
+    EmitOpcode(typeSignature == nullptr ? Opcode::START_LOCAL : Opcode::START_LOCAL_EXTENDED);
+    EmitRegister(registerNumber);
+    EmitUleb128(constantPool, name->GetOffset());
+    EmitUleb128(constantPool, type->GetOffset());
 
-    if (type_signature != nullptr) {
-        ASSERT(type_signature->GetOffset() != 0);
-        EmitUleb128(constant_pool, type_signature->GetOffset());
+    if (typeSignature != nullptr) {
+        ASSERT(typeSignature->GetOffset() != 0);
+        EmitUleb128(constantPool, typeSignature->GetOffset());
     }
 }
 
-void LineNumberProgramItem::EmitEndLocal(int32_t register_number)
+void LineNumberProgramItem::EmitEndLocal(int32_t registerNumber)
 {
     EmitOpcode(Opcode::END_LOCAL);
-    EmitRegister(register_number);
+    EmitRegister(registerNumber);
 }
 
-void LineNumberProgramItem::EmitRestartLocal(int32_t register_number)
+void LineNumberProgramItem::EmitRestartLocal(int32_t registerNumber)
 {
     EmitOpcode(Opcode::RESTART_LOCAL);
-    EmitRegister(register_number);
+    EmitRegister(registerNumber);
 }
 
-bool LineNumberProgramItem::EmitSpecialOpcode(uint32_t pc_inc, int32_t line_inc)
+bool LineNumberProgramItem::EmitSpecialOpcode(uint32_t pcInc, int32_t lineInc)
 {
-    if (line_inc < LINE_BASE || (line_inc - LINE_BASE) >= LINE_RANGE) {
+    if (lineInc < LINE_BASE || (lineInc - LINE_BASE) >= LINE_RANGE) {
         return false;
     }
 
-    auto opcode = static_cast<size_t>(line_inc - LINE_BASE) + static_cast<size_t>(pc_inc * LINE_RANGE) + OPCODE_BASE;
+    auto opcode = static_cast<size_t>(lineInc - LINE_BASE) + static_cast<size_t>(pcInc * LINE_RANGE) + OPCODE_BASE;
     if (opcode > std::numeric_limits<uint8_t>::max()) {
         return false;
     }
@@ -1492,29 +1492,29 @@ void LineNumberProgramItem::EmitEpilogBegin()
     EmitOpcode(Opcode::SET_EPILOGUE_BEGIN);
 }
 
-void LineNumberProgramItem::EmitSetFile(std::vector<uint8_t> *constant_pool, StringItem *source_file)
+void LineNumberProgramItem::EmitSetFile(std::vector<uint8_t> *constantPool, StringItem *sourceFile)
 {
     EmitOpcode(Opcode::SET_FILE);
 
-    if (source_file == nullptr) {
+    if (sourceFile == nullptr) {
         return;
     }
 
-    ASSERT(source_file->GetOffset() != 0);
+    ASSERT(sourceFile->GetOffset() != 0);
 
-    EmitUleb128(constant_pool, source_file->GetOffset());
+    EmitUleb128(constantPool, sourceFile->GetOffset());
 }
 
-void LineNumberProgramItem::EmitSetSourceCode(std::vector<uint8_t> *constant_pool, StringItem *source_code)
+void LineNumberProgramItem::EmitSetSourceCode(std::vector<uint8_t> *constantPool, StringItem *sourceCode)
 {
     EmitOpcode(Opcode::SET_SOURCE_CODE);
 
-    if (source_code == nullptr) {
+    if (sourceCode == nullptr) {
         return;
     }
 
-    ASSERT(source_code->GetOffset() != 0);
-    EmitUleb128(constant_pool, source_code->GetOffset());
+    ASSERT(sourceCode->GetOffset() != 0);
+    EmitUleb128(constantPool, sourceCode->GetOffset());
 }
 
 void LineNumberProgramItem::EmitOpcode(Opcode opcode)
@@ -1522,9 +1522,9 @@ void LineNumberProgramItem::EmitOpcode(Opcode opcode)
     data_.push_back(static_cast<uint8_t>(opcode));
 }
 
-void LineNumberProgramItem::EmitRegister(int32_t register_number)
+void LineNumberProgramItem::EmitRegister(int32_t registerNumber)
 {
-    EmitSleb128(&data_, register_number);
+    EmitSleb128(&data_, registerNumber);
 }
 
 /* static */
@@ -1569,15 +1569,15 @@ void LineNumberProgramItem::SetData(std::vector<uint8_t> &&data)
 
 size_t DebugInfoItem::CalculateSize() const
 {
-    size_t n = leb128::UnsignedEncodingSize(line_num_) + leb128::UnsignedEncodingSize(parameters_.size());
+    size_t n = leb128::UnsignedEncodingSize(lineNum_) + leb128::UnsignedEncodingSize(parameters_.size());
 
     for (auto *p : parameters_) {
         ASSERT(p == nullptr || p->GetOffset() != 0);
         n += leb128::UnsignedEncodingSize(p == nullptr ? 0 : p->GetOffset());
     }
 
-    n += leb128::UnsignedEncodingSize(constant_pool_.size());
-    n += constant_pool_.size();
+    n += leb128::UnsignedEncodingSize(constantPool_.size());
+    n += constantPool_.size();
 
     n += leb128::UnsignedEncodingSize(program_->GetIndex(this));
 
@@ -1588,7 +1588,7 @@ bool DebugInfoItem::Write(Writer *writer)
 {
     ASSERT(GetOffset() == writer->GetOffset());
 
-    if (!writer->WriteUleb128(line_num_)) {
+    if (!writer->WriteUleb128(lineNum_)) {
         return false;
     }
 
@@ -1604,11 +1604,11 @@ bool DebugInfoItem::Write(Writer *writer)
         }
     }
 
-    if (!writer->WriteUleb128(constant_pool_.size())) {
+    if (!writer->WriteUleb128(constantPool_.size())) {
         return false;
     }
 
-    if (!writer->WriteBytes(constant_pool_)) {
+    if (!writer->WriteBytes(constantPool_)) {
         return false;
     }
 
@@ -1620,7 +1620,7 @@ bool DebugInfoItem::Write(Writer *writer)
 
 void DebugInfoItem::Dump(std::ostream &os) const
 {
-    os << "line_start = " << line_num_ << std::endl;
+    os << "line_start = " << lineNum_ << std::endl;
 
     os << "num_parameters = " << parameters_.size() << std::endl;
     for (auto *item : parameters_) {
@@ -1632,10 +1632,10 @@ void DebugInfoItem::Dump(std::ostream &os) const
     }
 
     os << "constant_pool = [";
-    for (size_t i = 0; i < constant_pool_.size(); i++) {
-        size_t b = constant_pool_[i];
+    for (size_t i = 0; i < constantPool_.size(); i++) {
+        size_t b = constantPool_[i];
         os << "0x" << std::setfill('0') << std::setw(2U) << std::right << std::hex << b << std::dec;
-        if (i < constant_pool_.size() - 1) {
+        if (i < constantPool_.size() - 1) {
             os << ", ";
         }
     }

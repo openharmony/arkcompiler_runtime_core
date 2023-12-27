@@ -43,19 +43,19 @@ void ClassHierarchyAnalysis::Update(Class *klass)
 
     ASSERT(klass->GetVTableSize() >= parent->GetVTableSize());
 
-    PandaSet<Method *> invalidated_methods;
+    PandaSet<Method *> invalidatedMethods;
 
     for (size_t i = 0; i < parent->GetVTableSize(); ++i) {
         auto method = klass->GetVTable()[i];
-        auto parent_method = parent->GetVTable()[i];
+        auto parentMethod = parent->GetVTable()[i];
 
-        if (method == parent_method || method->IsDefaultInterfaceMethod()) {
+        if (method == parentMethod || method->IsDefaultInterfaceMethod()) {
             continue;
         }
 
-        if (HasSingleImplementation(parent_method)) {
-            EVENT_CHA_INVALIDATE(std::string(parent_method->GetFullName()), klass->GetName());
-            invalidated_methods.insert(parent_method);
+        if (HasSingleImplementation(parentMethod)) {
+            EVENT_CHA_INVALIDATE(std::string(parentMethod->GetFullName()), klass->GetName());
+            invalidatedMethods.insert(parentMethod);
         }
         UpdateMethod(method);
     }
@@ -68,7 +68,7 @@ void ClassHierarchyAnalysis::Update(Class *klass)
         UpdateMethod(method);
     }
 
-    InvalidateMethods(invalidated_methods);
+    InvalidateMethods(invalidatedMethods);
 }
 
 bool ClassHierarchyAnalysis::HasSingleImplementation(Method *method)
@@ -77,10 +77,10 @@ bool ClassHierarchyAnalysis::HasSingleImplementation(Method *method)
     return method->HasSingleImplementation();
 }
 
-void ClassHierarchyAnalysis::SetHasSingleImplementation(Method *method, bool single_implementation)
+void ClassHierarchyAnalysis::SetHasSingleImplementation(Method *method, bool singleImplementation)
 {
     LockHolder lock(GetLock());
-    method->SetHasSingleImplementation(single_implementation);
+    method->SetHasSingleImplementation(singleImplementation);
 }
 
 void ClassHierarchyAnalysis::UpdateMethod(Method *method)
@@ -92,23 +92,23 @@ void ClassHierarchyAnalysis::UpdateMethod(Method *method)
 
 void ClassHierarchyAnalysis::InvalidateMethods(const PandaSet<Method *> &methods)
 {
-    PandaSet<Method *> dependent_methods;
+    PandaSet<Method *> dependentMethods;
 
     {
         LockHolder lock(GetLock());
         for (auto method : methods) {
-            InvalidateMethod(method, &dependent_methods);
+            InvalidateMethod(method, &dependentMethods);
         }
     }
 
-    if (dependent_methods.empty()) {
+    if (dependentMethods.empty()) {
         return;
     }
 
-    InvalidateCompiledEntryPoint(dependent_methods, true);
+    InvalidateCompiledEntryPoint(dependentMethods, true);
 }
 
-void ClassHierarchyAnalysis::InvalidateMethod(Method *method, PandaSet<Method *> *dependent_methods) REQUIRES(GetLock())
+void ClassHierarchyAnalysis::InvalidateMethod(Method *method, PandaSet<Method *> *dependentMethods) REQUIRES(GetLock())
 {
     if (!method->HasSingleImplementation()) {
         return;
@@ -118,16 +118,16 @@ void ClassHierarchyAnalysis::InvalidateMethod(Method *method, PandaSet<Method *>
 
     LOG(DEBUG, CLASS_LINKER) << "[CHA] Invalidate method " << method->GetFullName();
 
-    auto it = dependency_map_.find(method);
-    if (it == dependency_map_.end()) {
+    auto it = dependencyMap_.find(method);
+    if (it == dependencyMap_.end()) {
         return;
     }
 
-    for (auto dep_method : it->second) {
-        dependent_methods->insert(dep_method);
+    for (auto depMethod : it->second) {
+        dependentMethods->insert(depMethod);
     }
 
-    dependency_map_.erase(method);
+    dependencyMap_.erase(method);
 }
 
 void ClassHierarchyAnalysis::AddDependency(Method *callee, Method *caller)
@@ -141,7 +141,7 @@ void ClassHierarchyAnalysis::AddDependency(Method *callee, Method *caller)
     }
     // There is no sense to store dependencies for abstract methods.
     ASSERT(!callee->IsAbstract());
-    dependency_map_[callee].insert(caller);
+    dependencyMap_[callee].insert(caller);
 }
 
 }  // namespace panda

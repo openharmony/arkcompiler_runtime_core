@@ -74,7 +74,7 @@ inline bool CheckRestrictions([[maybe_unused]] RuntimeInterface *runtime, Intrin
 
 inline bool EncodesBuiltin(RuntimeInterface *runtime, IntrinsicId id, Arch arch)
 {
-    if (!OPTIONS.IsCompilerEncodeIntrinsics()) {
+    if (!g_options.IsCompilerEncodeIntrinsics()) {
         return false;
     }
     if (!builtins::CheckRestrictions(runtime, id, arch)) {

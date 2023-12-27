@@ -22,15 +22,15 @@
 namespace panda::tooling::test {
 class TestRunner : public PtHooks {
 public:
-    explicit TestRunner(const char *test_name)
+    explicit TestRunner(const char *testName)
     {
-        debug_session_ = Runtime::GetCurrent()->StartDebugSession();
-        debug_interface_ = &debug_session_->GetDebugger();
-        test_name_ = test_name;
-        test_ = TestUtil::GetTest(test_name);
-        test_->debug_interface = debug_interface_;
+        debugSession_ = Runtime::GetCurrent()->StartDebugSession();
+        debugInterface_ = &debugSession_->GetDebugger();
+        testName_ = testName;
+        test_ = TestUtil::GetTest(testName);
+        test_->debugInterface = debugInterface_;
         TestUtil::Reset();
-        debug_interface_->RegisterHooks(this);
+        debugInterface_->RegisterHooks(this);
     }
 
     void Run()
@@ -47,10 +47,10 @@ public:
         }
     }
 
-    void LoadModule(std::string_view panda_file_name) override
+    void LoadModule(std::string_view pandaFileName) override
     {
-        if (test_->load_module) {
-            test_->load_module(panda_file_name);
+        if (test_->loadModule) {
+            test_->loadModule(pandaFileName);
         }
     }
 
@@ -62,212 +62,212 @@ public:
     };
 
     void Exception(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *object,
-                   Method *catch_method, const PtLocation &catch_location) override
+                   Method *catchMethod, const PtLocation &catchLocation) override
     {
         if (test_->exception) {
-            test_->exception(thread, method, location, object, catch_method, catch_location);
+            test_->exception(thread, method, location, object, catchMethod, catchLocation);
         }
     }
 
     void ExceptionCatch(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *object) override
     {
-        if (test_->exception_catch) {
-            test_->exception_catch(thread, method, location, object);
+        if (test_->exceptionCatch) {
+            test_->exceptionCatch(thread, method, location, object);
         }
     }
 
     void PropertyAccess(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *object,
                         PtProperty property) override
     {
-        if (test_->property_access) {
-            test_->property_access(thread, method, location, object, property);
+        if (test_->propertyAccess) {
+            test_->propertyAccess(thread, method, location, object, property);
         }
     }
 
     void PropertyModification(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *object,
-                              PtProperty property, VRegValue new_value) override
+                              PtProperty property, VRegValue newValue) override
     {
-        if (test_->property_modification) {
-            test_->property_modification(thread, method, location, object, property, new_value);
+        if (test_->propertyModification) {
+            test_->propertyModification(thread, method, location, object, property, newValue);
         }
     }
 
-    void FramePop(PtThread thread, Method *method, bool was_popped_by_exception) override
+    void FramePop(PtThread thread, Method *method, bool wasPoppedByException) override
     {
-        if (test_->frame_pop) {
-            test_->frame_pop(thread, method, was_popped_by_exception);
+        if (test_->framePop) {
+            test_->framePop(thread, method, wasPoppedByException);
         }
     }
 
     void GarbageCollectionStart() override
     {
-        if (test_->garbage_collection_start) {
-            test_->garbage_collection_start();
+        if (test_->garbageCollectionStart) {
+            test_->garbageCollectionStart();
         }
     }
 
     void GarbageCollectionFinish() override
     {
-        if (test_->garbage_collection_finish) {
-            test_->garbage_collection_finish();
+        if (test_->garbageCollectionFinish) {
+            test_->garbageCollectionFinish();
         }
     }
 
     void MethodEntry(PtThread thread, Method *method) override
     {
-        if (test_->method_entry) {
-            test_->method_entry(thread, method);
+        if (test_->methodEntry) {
+            test_->methodEntry(thread, method);
         }
     }
 
-    void MethodExit(PtThread thread, Method *method, bool was_popped_by_exception, VRegValue return_value) override
+    void MethodExit(PtThread thread, Method *method, bool wasPoppedByException, VRegValue returnValue) override
     {
-        if (test_->method_exit) {
-            test_->method_exit(thread, method, was_popped_by_exception, return_value);
+        if (test_->methodExit) {
+            test_->methodExit(thread, method, wasPoppedByException, returnValue);
         }
     }
 
     void SingleStep(PtThread thread, Method *method, const PtLocation &location) override
     {
-        if (test_->single_step) {
-            test_->single_step(thread, method, location);
+        if (test_->singleStep) {
+            test_->singleStep(thread, method, location);
         }
     }
 
     void ThreadStart(PtThread thread) override
     {
-        if (test_->thread_start) {
-            test_->thread_start(thread);
+        if (test_->threadStart) {
+            test_->threadStart(thread);
         }
     }
 
     void ThreadEnd(PtThread thread) override
     {
-        if (test_->thread_end) {
-            test_->thread_end(thread);
+        if (test_->threadEnd) {
+            test_->threadEnd(thread);
         }
     }
 
     void VmDeath() override
     {
-        if (test_->vm_death) {
-            test_->vm_death();
+        if (test_->vmDeath) {
+            test_->vmDeath();
         }
         TestUtil::Event(DebugEvent::VM_DEATH);
     }
 
     void VmInitialization(PtThread thread) override
     {
-        if (test_->vm_init) {
-            test_->vm_init(thread);
+        if (test_->vmInit) {
+            test_->vmInit(thread);
         }
         TestUtil::Event(DebugEvent::VM_INITIALIZATION);
     }
 
     void VmStart() override
     {
-        if (test_->vm_start) {
-            test_->vm_start();
+        if (test_->vmStart) {
+            test_->vmStart();
         }
     }
 
-    void ExceptionRevoked(ExceptionWrapper reason, ExceptionID exception_id) override
+    void ExceptionRevoked(ExceptionWrapper reason, ExceptionID exceptionId) override
     {
-        if (test_->exception_revoked) {
-            test_->exception_revoked(reason, exception_id);
+        if (test_->exceptionRevoked) {
+            test_->exceptionRevoked(reason, exceptionId);
         }
     }
 
     void ExecutionContextCreated(ExecutionContextWrapper context) override
     {
-        if (test_->execution_context_created) {
-            test_->execution_context_created(context);
+        if (test_->executionContextCreated) {
+            test_->executionContextCreated(context);
         }
     }
 
     void ExecutionContextDestroyed(ExecutionContextWrapper context) override
     {
-        if (test_->execution_context_destroyed) {
-            test_->execution_context_destroyed(context);
+        if (test_->executionContextDestroyed) {
+            test_->executionContextDestroyed(context);
         }
     }
 
     void ExecutionContextsCleared() override
     {
-        if (test_->execution_context_cleared) {
-            test_->execution_context_cleared();
+        if (test_->executionContextCleared) {
+            test_->executionContextCleared();
         }
     }
 
     void InspectRequested(PtObject object, PtObject hints) override
     {
-        if (test_->inspect_requested) {
-            test_->inspect_requested(object, hints);
+        if (test_->inspectRequested) {
+            test_->inspectRequested(object, hints);
         }
     }
 
     void ClassLoad(PtThread thread, BaseClass *klass) override
     {
-        if (test_->class_load) {
-            test_->class_load(thread, klass);
+        if (test_->classLoad) {
+            test_->classLoad(thread, klass);
         }
     }
 
     void ClassPrepare(PtThread thread, BaseClass *klass) override
     {
-        if (test_->class_prepare) {
-            test_->class_prepare(thread, klass);
+        if (test_->classPrepare) {
+            test_->classPrepare(thread, klass);
         }
     }
 
     void MonitorWait(PtThread thread, ObjectHeader *object, int64_t timeout) override
     {
-        if (test_->monitor_wait) {
-            test_->monitor_wait(thread, object, timeout);
+        if (test_->monitorWait) {
+            test_->monitorWait(thread, object, timeout);
         }
     }
 
-    void MonitorWaited(PtThread thread, ObjectHeader *object, bool timed_out) override
+    void MonitorWaited(PtThread thread, ObjectHeader *object, bool timedOut) override
     {
-        if (test_->monitor_waited) {
-            test_->monitor_waited(thread, object, timed_out);
+        if (test_->monitorWaited) {
+            test_->monitorWaited(thread, object, timedOut);
         }
     }
 
     void MonitorContendedEnter(PtThread thread, ObjectHeader *object) override
     {
-        if (test_->monitor_contended_enter) {
-            test_->monitor_contended_enter(thread, object);
+        if (test_->monitorContendedEnter) {
+            test_->monitorContendedEnter(thread, object);
         }
     }
 
     void MonitorContendedEntered(PtThread thread, ObjectHeader *object) override
     {
-        if (test_->monitor_contended_entered) {
-            test_->monitor_contended_entered(thread, object);
+        if (test_->monitorContendedEntered) {
+            test_->monitorContendedEntered(thread, object);
         }
     }
 
     void ObjectAlloc(BaseClass *klass, ObjectHeader *object, PtThread thread, size_t size) override
     {
-        if (test_->object_alloc) {
-            test_->object_alloc(klass, object, thread, size);
+        if (test_->objectAlloc) {
+            test_->objectAlloc(klass, object, thread, size);
         }
     }
 
     void TerminateTest()
     {
-        debug_interface_->UnregisterHooks();
+        debugInterface_->UnregisterHooks();
         if (TestUtil::IsTestFinished()) {
             return;
         }
-        LOG(FATAL, DEBUGGER) << "Test " << test_name_ << " failed";
+        LOG(FATAL, DEBUGGER) << "Test " << testName_ << " failed";
     }
 
 private:
-    Runtime::DebugSessionHandle debug_session_;
-    DebugInterface *debug_interface_;
-    const char *test_name_;
+    Runtime::DebugSessionHandle debugSession_;
+    DebugInterface *debugInterface_;
+    const char *testName_;
     ApiTest *test_;
 };
 }  // namespace panda::tooling::test

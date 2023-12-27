@@ -31,8 +31,8 @@ class SharedSlowPathData;
 namespace panda::paoc {
 
 struct SkipInfo {
-    bool is_first_compiled;
-    bool is_last_compiled;
+    bool isFirstCompiled;
+    bool isLastCompiled;
 };
 
 enum class PaocMode : uint8_t { AOT, JIT, OSR, LLVM };
@@ -48,18 +48,18 @@ protected:
     struct CompilingContext {
         NO_COPY_SEMANTIC(CompilingContext);
         NO_MOVE_SEMANTIC(CompilingContext);
-        CompilingContext(Method *method_ptr, size_t method_index, std::ofstream *statistics_dump);
+        CompilingContext(Method *methodPtr, size_t methodIndex, std::ofstream *statisticsDump);
         ~CompilingContext();
         void DumpStatistics() const;
 
     public:
-        Method *method {nullptr};                     // NOLINT(misc-non-private-member-variables-in-classes)
-        panda::ArenaAllocator allocator;              // NOLINT(misc-non-private-member-variables-in-classes)
-        panda::ArenaAllocator graph_local_allocator;  // NOLINT(misc-non-private-member-variables-in-classes)
-        panda::compiler::Graph *graph {nullptr};      // NOLINT(misc-non-private-member-variables-in-classes)
-        size_t index;                                 // NOLINT(misc-non-private-member-variables-in-classes)
-        std::ofstream *stats {nullptr};               // NOLINT(misc-non-private-member-variables-in-classes)
-        bool compilation_status {true};               // NOLINT(misc-non-private-member-variables-in-classes)
+        Method *method {nullptr};                   // NOLINT(misc-non-private-member-variables-in-classes)
+        panda::ArenaAllocator allocator;            // NOLINT(misc-non-private-member-variables-in-classes)
+        panda::ArenaAllocator graphLocalAllocator;  // NOLINT(misc-non-private-member-variables-in-classes)
+        panda::compiler::Graph *graph {nullptr};    // NOLINT(misc-non-private-member-variables-in-classes)
+        size_t index;                               // NOLINT(misc-non-private-member-variables-in-classes)
+        std::ofstream *stats {nullptr};             // NOLINT(misc-non-private-member-variables-in-classes)
+        bool compilationStatus {true};              // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
     virtual std::unique_ptr<compiler::AotBuilder> CreateAotBuilder()
@@ -69,31 +69,31 @@ protected:
 
 private:
     void RunAotMode(const panda::Span<const char *> &args);
-    void StartAotFile(const panda_file::File &pfile_ref);
+    void StartAotFile(const panda_file::File &pfileRef);
     bool CompileFiles();
-    bool CompilePandaFile(const panda_file::File &pfile_ref);
-    panda::Class *ResolveClass(const panda_file::File &pfile_ref, panda_file::File::EntityId class_id);
-    bool PossibleToCompile(const panda_file::File &pfile_ref, const panda::Class *klass,
-                           panda_file::File::EntityId class_id);
-    bool Compile(Class *klass, const panda_file::File &pfile_ref);
+    bool CompilePandaFile(const panda_file::File &pfileRef);
+    panda::Class *ResolveClass(const panda_file::File &pfileRef, panda_file::File::EntityId classId);
+    bool PossibleToCompile(const panda_file::File &pfileRef, const panda::Class *klass,
+                           panda_file::File::EntityId classId);
+    bool Compile(Class *klass, const panda_file::File &pfileRef);
 
-    bool Compile(Method *method, size_t method_index);
-    bool CompileInGraph(CompilingContext *ctx, std::string method_name, bool is_osr);
+    bool Compile(Method *method, size_t methodIndex);
+    bool CompileInGraph(CompilingContext *ctx, std::string methodName, bool isOsr);
     bool RunOptimizations(CompilingContext *ctx);
     bool CompileJit(CompilingContext *ctx);
     bool CompileOsr(CompilingContext *ctx);
     bool CompileAot(CompilingContext *ctx);
-    bool FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t code_address);
+    bool FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t codeAddress);
     void PrintError(const std::string &error);
-    void PrintUsage(const panda::PandArgParser &pa_parser);
-    bool IsMethodInList(const std::string &method_full_name);
+    void PrintUsage(const panda::PandArgParser &paParser);
+    bool IsMethodInList(const std::string &methodFullName);
     bool Skip(Method *method);
-    static std::string GetFileLocation(const panda_file::File &pfile_ref, std::string location);
-    static bool CompareBootFiles(std::string filename, std::string paoc_location);
+    static std::string GetFileLocation(const panda_file::File &pfileRef, std::string location);
+    static bool CompareBootFiles(std::string filename, std::string paocLocation);
     bool LoadPandaFiles();
     bool TryCreateGraph(CompilingContext *ctx);
-    void BuildClassHashTable(const panda_file::File &pfile_ref);
-    std::string GetFilePath(std::string file_name);
+    void BuildClassHashTable(const panda_file::File &pfileRef);
+    std::string GetFilePath(std::string fileName);
 
     bool IsAotMode()
     {
@@ -112,7 +112,7 @@ protected:
 
     panda::paoc::Options *GetPaocOptions()
     {
-        return paoc_options_.get();
+        return paocOptions_.get();
     }
 
     compiler::RuntimeInterface *GetRuntime()
@@ -121,7 +121,7 @@ protected:
     }
     ArenaAllocator *GetCodeAllocator()
     {
-        return code_allocator_;
+        return codeAllocator_;
     }
 
     bool ShouldIgnoreFailures();
@@ -146,30 +146,30 @@ protected:
     }
 
 protected:
-    std::unique_ptr<compiler::AotBuilder> aot_builder_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    std::unique_ptr<compiler::AotBuilder> aotBuilder_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
-    std::unique_ptr<panda::RuntimeOptions> runtime_options_ {nullptr};
-    std::unique_ptr<panda::paoc::Options> paoc_options_ {nullptr};
+    std::unique_ptr<panda::RuntimeOptions> runtimeOptions_ {nullptr};
+    std::unique_ptr<panda::paoc::Options> paocOptions_ {nullptr};
 
     compiler::RuntimeInterface *runtime_ {nullptr};
 
     PaocMode mode_ {PaocMode::AOT};
     ClassLinker *loader_ {nullptr};
-    ArenaAllocator *code_allocator_ {nullptr};
-    std::set<std::string> methods_list_;
-    std::unordered_map<std::string, std::string> location_mapping_;
-    std::unordered_map<std::string, const panda_file::File *> preloaded_files_;
-    size_t compilation_index_ {0};
-    SkipInfo skip_info_ {false, false};
+    ArenaAllocator *codeAllocator_ {nullptr};
+    std::set<std::string> methodsList_;
+    std::unordered_map<std::string, std::string> locationMapping_;
+    std::unordered_map<std::string, const panda_file::File *> preloadedFiles_;
+    size_t compilationIndex_ {0};
+    SkipInfo skipInfo_ {false, false};
 
-    PaocClusters clusters_info_;
-    compiler::SharedSlowPathData *slow_path_data_ {nullptr};
+    PaocClusters clustersInfo_;
+    compiler::SharedSlowPathData *slowPathData_ {nullptr};
 
-    unsigned success_methods_ {0};
-    unsigned failed_methods_ {0};
+    unsigned successMethods_ {0};
+    unsigned failedMethods_ {0};
 
-    std::ofstream statistics_dump_;
+    std::ofstream statisticsDump_;
 };
 
 }  // namespace panda::paoc

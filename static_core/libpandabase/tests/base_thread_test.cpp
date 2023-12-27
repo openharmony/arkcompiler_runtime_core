@@ -20,13 +20,13 @@
 namespace panda::os::thread {
 class ThreadTest : public testing::Test {};
 
-uint32_t CUR_THREAD_ID = 0;
-bool UPDATED = false;
-bool OPERATED = false;
+uint32_t g_curThreadId = 0;
+bool g_updated = false;
+bool g_operated = false;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-os::memory::Mutex MU;
+os::memory::Mutex g_mu;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-os::memory::ConditionVariable CV;
+os::memory::ConditionVariable g_cv;
 
 #ifdef PANDA_TARGET_UNIX
 constexpr int LOWER_PRIOIRITY = 1;
@@ -36,17 +36,17 @@ constexpr int LOWER_PRIOIRITY = -1;
 
 void ThreadFunc()
 {
-    CUR_THREAD_ID = GetCurrentThreadId();
+    g_curThreadId = GetCurrentThreadId();
     {
-        os::memory::LockHolder lk(MU);
-        UPDATED = true;
+        os::memory::LockHolder lk(g_mu);
+        g_updated = true;
     }
-    CV.Signal();
+    g_cv.Signal();
     {
         // wait for the main thread to Set/GetPriority
-        os::memory::LockHolder lk(MU);
-        while (!OPERATED) {
-            CV.Wait(&MU);
+        os::memory::LockHolder lk(g_mu);
+        while (!g_operated) {
+            g_cv.Wait(&g_mu);
         }
     }
 }
@@ -73,35 +73,35 @@ TEST_F(ThreadTest, SetCurrentThreadPriorityTest)
 
 TEST_F(ThreadTest, SetOtherThreadPriorityTest)
 {
-    auto parent_pid = GetCurrentThreadId();
-    auto parent_prio_before = GetPriority(parent_pid);
+    auto parentPid = GetCurrentThreadId();
+    auto parentPrioBefore = GetPriority(parentPid);
 
-    auto new_thread = ThreadStart(ThreadFunc);
+    auto newThread = ThreadStart(ThreadFunc);
     // wait for the new_thread to update CUR_THREAD_ID
-    MU.Lock();
-    while (!UPDATED) {
-        CV.Wait(&MU);
+    g_mu.Lock();
+    while (!g_updated) {
+        g_cv.Wait(&g_mu);
     }
-    auto child_pid = CUR_THREAD_ID;
+    auto childPid = g_curThreadId;
 
-    auto child_prio_before = GetPriority(child_pid);
-    (void)child_prio_before;
-    auto ret = SetPriority(child_pid, LOWEST_PRIORITY);
+    auto childPrioBefore = GetPriority(childPid);
+    (void)childPrioBefore;
+    auto ret = SetPriority(childPid, LOWEST_PRIORITY);
 
-    auto child_prio_after = GetPriority(child_pid);
-    (void)child_prio_after;
-    auto parent_prio_after = GetPriority(parent_pid);
+    auto childPrioAfter = GetPriority(childPid);
+    (void)childPrioAfter;
+    auto parentPrioAfter = GetPriority(parentPid);
 
-    OPERATED = true;
-    MU.Unlock();
-    CV.Signal();
+    g_operated = true;
+    g_mu.Unlock();
+    g_cv.Signal();
     void *res;
-    ThreadJoin(new_thread, &res);
+    ThreadJoin(newThread, &res);
 
-    ASSERT_EQ(parent_prio_before, parent_prio_after);
+    ASSERT_EQ(parentPrioBefore, parentPrioAfter);
 #ifdef PANDA_TARGET_UNIX
     ASSERT_EQ(ret, 0U);
-    ASSERT(child_prio_before <= child_prio_after);
+    ASSERT(childPrioBefore <= childPrioAfter);
 #elif defined(PANDA_TARGET_WINDOWS)
     ASSERT_NE(ret, 0U);
     ASSERT(child_prio_after <= child_prio_before);

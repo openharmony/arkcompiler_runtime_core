@@ -50,102 +50,102 @@ inline void Array::SetObject(size_t offset, ObjectHeader *value)
 }
 
 template <class T>
-inline T Array::GetPrimitive(size_t offset, std::memory_order memory_order) const
+inline T Array::GetPrimitive(size_t offset, std::memory_order memoryOrder) const
 {
-    return ObjectAccessor::GetFieldPrimitive<T>(this, GetDataOffset() + offset, memory_order);
+    return ObjectAccessor::GetFieldPrimitive<T>(this, GetDataOffset() + offset, memoryOrder);
 }
 
 template <class T>
-inline void Array::SetPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline void Array::SetPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    ObjectAccessor::SetFieldPrimitive(this, GetDataOffset() + offset, value, memory_order);
+    ObjectAccessor::SetFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline ObjectHeader *Array::GetObject(size_t offset, std::memory_order memory_order) const
+inline ObjectHeader *Array::GetObject(size_t offset, std::memory_order memoryOrder) const
 {
-    return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER, IS_DYN>(this, GetDataOffset() + offset, memory_order);
+    return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER, IS_DYN>(this, GetDataOffset() + offset, memoryOrder);
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline void Array::SetObject(size_t offset, ObjectHeader *value, std::memory_order memory_order)
+inline void Array::SetObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
-    ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, GetDataOffset() + offset, value, memory_order);
+    ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <typename T>
-inline bool Array::CompareAndSetPrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order,
+inline bool Array::CompareAndSetPrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder,
                                           bool strong)
 {
-    return ObjectAccessor::CompareAndSetFieldPrimitive(this, GetDataOffset() + offset, old_value, new_value,
-                                                       memory_order, strong)
+    return ObjectAccessor::CompareAndSetFieldPrimitive(this, GetDataOffset() + offset, oldValue, newValue, memoryOrder,
+                                                       strong)
         .first;
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline bool Array::CompareAndSetObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                                       std::memory_order memory_order, bool strong)
+inline bool Array::CompareAndSetObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                       std::memory_order memoryOrder, bool strong)
 {
-    auto field_offset = GetDataOffset() + offset;
-    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, field_offset, old_value,
-                                                                                new_value, memory_order, strong)
+    auto fieldOffset = GetDataOffset() + offset;
+    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, fieldOffset, oldValue, newValue,
+                                                                                memoryOrder, strong)
         .first;
 }
 
 template <typename T>
-inline T Array::CompareAndExchangePrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order,
+inline T Array::CompareAndExchangePrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder,
                                             bool strong)
 {
-    return ObjectAccessor::CompareAndSetFieldPrimitive(this, GetDataOffset() + offset, old_value, new_value,
-                                                       memory_order, strong)
+    return ObjectAccessor::CompareAndSetFieldPrimitive(this, GetDataOffset() + offset, oldValue, newValue, memoryOrder,
+                                                       strong)
         .second;
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline ObjectHeader *Array::CompareAndExchangeObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                                                     std::memory_order memory_order, bool strong)
+inline ObjectHeader *Array::CompareAndExchangeObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                                     std::memory_order memoryOrder, bool strong)
 {
-    auto field_offset = GetDataOffset() + offset;
-    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, field_offset, old_value,
-                                                                                new_value, memory_order, strong)
+    auto fieldOffset = GetDataOffset() + offset;
+    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, fieldOffset, oldValue, newValue,
+                                                                                memoryOrder, strong)
         .second;
 }
 
 template <typename T>
-inline T Array::GetAndSetPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Array::GetAndSetPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndSetFieldPrimitive(this, GetDataOffset() + offset, value, memory_order);
+    return ObjectAccessor::GetAndSetFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline ObjectHeader *Array::GetAndSetObject(size_t offset, ObjectHeader *value, std::memory_order memory_order)
+inline ObjectHeader *Array::GetAndSetObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     return ObjectAccessor::GetAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, GetDataOffset() + offset, value,
-                                                                            memory_order);
+                                                                            memoryOrder);
 }
 
 template <typename T>
-inline T Array::GetAndAddPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Array::GetAndAddPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndAddFieldPrimitive(this, GetDataOffset() + offset, value, memory_order);
+    return ObjectAccessor::GetAndAddFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T Array::GetAndBitwiseOrPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Array::GetAndBitwiseOrPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndBitwiseOrFieldPrimitive(this, GetDataOffset() + offset, value, memory_order);
+    return ObjectAccessor::GetAndBitwiseOrFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T Array::GetAndBitwiseAndPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Array::GetAndBitwiseAndPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndBitwiseAndFieldPrimitive(this, GetDataOffset() + offset, value, memory_order);
+    return ObjectAccessor::GetAndBitwiseAndFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T Array::GetAndBitwiseXorPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Array::GetAndBitwiseXorPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, GetDataOffset() + offset, value, memory_order);
+    return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <class T, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
@@ -155,8 +155,8 @@ inline void Array::Set(ArraySizeT idx, T elem)
 
     static_assert(std::is_arithmetic_v<T> || IS_REF, "T should be arithmetic type or pointer to managed object type");
 
-    size_t elem_size = (IS_REF && !IS_DYN) ? sizeof(ObjectPointerType) : sizeof(T);
-    size_t offset = elem_size * idx;
+    size_t elemSize = (IS_REF && !IS_DYN) ? sizeof(ObjectPointerType) : sizeof(T);
+    size_t offset = elemSize * idx;
 
     // Disable checks due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
     // NOLINTNEXTLINE(readability-braces-around-statements)
@@ -205,8 +205,8 @@ inline void Array::Set([[maybe_unused]] const ManagedThread *thread, ArraySizeT 
 
     static_assert(std::is_arithmetic_v<T> || IS_REF, "T should be arithmetic type or pointer to managed object type");
 
-    size_t elem_size = (IS_REF && !IS_DYN) ? sizeof(ObjectPointerType) : sizeof(T);
-    size_t offset = elem_size * idx;
+    size_t elemSize = (IS_REF && !IS_DYN) ? sizeof(ObjectPointerType) : sizeof(T);
+    size_t offset = elemSize * idx;
 
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (IS_REF) {
@@ -223,8 +223,8 @@ inline T Array::Get([[maybe_unused]] const ManagedThread *thread, ArraySizeT idx
 
     static_assert(std::is_arithmetic_v<T> || IS_REF, "T should be arithmetic type or pointer to managed object type");
 
-    size_t elem_size = (IS_REF && !IS_DYN) ? sizeof(ObjectPointerType) : sizeof(T);
-    size_t offset = elem_size * idx;
+    size_t elemSize = (IS_REF && !IS_DYN) ? sizeof(ObjectPointerType) : sizeof(T);
+    size_t offset = elemSize * idx;
 
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (IS_REF) {
@@ -236,18 +236,18 @@ inline T Array::Get([[maybe_unused]] const ManagedThread *thread, ArraySizeT idx
 /* static */
 template <class DimIterator>
 Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *klass, uint32_t nargs,
-                                          const DimIterator &iter, size_t dim_idx)
+                                          const DimIterator &iter, size_t dimIdx)
 {
-    auto arr_size = iter.Get(dim_idx);
+    auto arrSize = iter.Get(dimIdx);
 
-    if (arr_size < 0) {
-        panda::ThrowNegativeArraySizeException(arr_size);
+    if (arrSize < 0) {
+        panda::ThrowNegativeArraySizeException(arrSize);
         return nullptr;
     }
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     // Will be added later special rule for CheckObjHeaderTypeRef and VMHandler.
     // SUPPRESS_CSA_NEXTLINE(alpha.core.CheckObjHeaderTypeRef)
-    VMHandle<Array> handle(thread, Array::Create(klass, arr_size));
+    VMHandle<Array> handle(thread, Array::Create(klass, arrSize));
 
     // avoid recursive OOM.
     if (handle.GetPtr() == nullptr) {
@@ -255,9 +255,9 @@ Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *k
     }
     auto *component = klass->GetComponentType();
 
-    if (component->IsArrayClass() && dim_idx + 1 < nargs) {
-        for (int32_t idx = 0; idx < arr_size; idx++) {
-            auto *array = CreateMultiDimensionalArray(thread, component, nargs, iter, dim_idx + 1);
+    if (component->IsArrayClass() && dimIdx + 1 < nargs) {
+        for (int32_t idx = 0; idx < arrSize; idx++) {
+            auto *array = CreateMultiDimensionalArray(thread, component, nargs, iter, dimIdx + 1);
 
             if (array == nullptr) {
                 return nullptr;

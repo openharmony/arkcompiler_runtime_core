@@ -30,34 +30,34 @@ void CodeInfo::Dump(std::ostream &stream) const
     });
 }
 
-void CodeInfo::Dump(std::ostream &stream, const StackMap &stack_map, Arch arch) const
+void CodeInfo::Dump(std::ostream &stream, const StackMap &stackMap, Arch arch) const
 {
-    stream << "Stackmap #" << stack_map.GetRow() << ": npc=0x" << std::hex << stack_map.GetNativePcUnpacked(arch)
-           << ", bpc=0x" << std::hex << stack_map.GetBytecodePc();
-    if (stack_map.HasInlineInfoIndex()) {
-        stream << ", inline_depth=" << (GetInlineDepth(stack_map) + 1);
+    stream << "Stackmap #" << stackMap.GetRow() << ": npc=0x" << std::hex << stackMap.GetNativePcUnpacked(arch)
+           << ", bpc=0x" << std::hex << stackMap.GetBytecodePc();
+    if (stackMap.HasInlineInfoIndex()) {
+        stream << ", inline_depth=" << (GetInlineDepth(stackMap) + 1);
     }
-    if (stack_map.HasRootsRegMaskIndex() || stack_map.HasRootsStackMaskIndex()) {
+    if (stackMap.HasRootsRegMaskIndex() || stackMap.HasRootsStackMaskIndex()) {
         stream << ", roots=[";
         const char *sep = "";
-        if (stack_map.HasRootsRegMaskIndex()) {
-            stream << "r:0x" << std::hex << GetRootsRegMask(stack_map);
+        if (stackMap.HasRootsRegMaskIndex()) {
+            stream << "r:0x" << std::hex << GetRootsRegMask(stackMap);
             sep = ",";
         }
-        if (stack_map.HasRootsStackMaskIndex()) {
-            auto region = GetRootsStackMask(stack_map);
+        if (stackMap.HasRootsStackMaskIndex()) {
+            auto region = GetRootsStackMask(stackMap);
             stream << sep << "s:" << region;
         }
         stream << "]";
     }
-    if (stack_map.HasVRegMaskIndex()) {
-        stream << ", vregs=" << GetVRegMask(stack_map);
+    if (stackMap.HasVRegMaskIndex()) {
+        stream << ", vregs=" << GetVRegMask(stackMap);
     }
 }
 
-void CodeInfo::DumpInlineInfo(std::ostream &stream, const StackMap &stack_map, int depth) const
+void CodeInfo::DumpInlineInfo(std::ostream &stream, const StackMap &stackMap, int depth) const
 {
-    auto ii = GetInlineInfo(stack_map, depth);
+    auto ii = GetInlineInfo(stackMap, depth);
     stream << "InlineInfo #" << depth << ": bpc=0x" << std::hex << ii.GetBytecodePc() << std::dec
            << ", vregs_num: " << ii.GetVRegsCount();
 }

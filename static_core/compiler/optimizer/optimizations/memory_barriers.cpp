@@ -21,22 +21,22 @@ namespace panda::compiler {
 
 void OptimizeMemoryBarriers::MergeBarriers()
 {
-    if (barriers_insts_.size() <= 1) {
-        barriers_insts_.clear();
+    if (barriersInsts_.size() <= 1) {
+        barriersInsts_.clear();
         return;
     }
-    is_applied_ = true;
-    auto last_barrier_inst = barriers_insts_.back();
-    for (auto inst : barriers_insts_) {
+    isApplied_ = true;
+    auto lastBarrierInst = barriersInsts_.back();
+    for (auto inst : barriersInsts_) {
         inst->ClearFlag(inst_flags::MEM_BARRIER);
     }
-    last_barrier_inst->SetFlag(inst_flags::MEM_BARRIER);
-    barriers_insts_.clear();
+    lastBarrierInst->SetFlag(inst_flags::MEM_BARRIER);
+    barriersInsts_.clear();
 }
 
 bool OptimizeMemoryBarriers::CheckInst(Inst *inst)
 {
-    return (std::find(barriers_insts_.begin(), barriers_insts_.end(), inst) != barriers_insts_.end());
+    return (std::find(barriersInsts_.begin(), barriersInsts_.end(), inst) != barriersInsts_.end());
 }
 
 void OptimizeMemoryBarriers::CheckAllInputs(Inst *inst)
@@ -221,18 +221,18 @@ static Inst *GetMemInstForImplicitNullCheck(Inst *inst)
     if (!inst->HasUsers()) {
         return nullptr;
     }
-    auto next_inst = inst->GetNext();
-    while (next_inst != nullptr) {
-        if (IsSuitableForImplicitNullCheck(next_inst)) {
-            if (next_inst->GetInput(0) != inst) {
+    auto nextInst = inst->GetNext();
+    while (nextInst != nullptr) {
+        if (IsSuitableForImplicitNullCheck(nextInst)) {
+            if (nextInst->GetInput(0) != inst) {
                 return nullptr;
             }
-            return next_inst;
+            return nextInst;
         }
-        if (!next_inst->IsSafeInst()) {
+        if (!nextInst->IsSafeInst()) {
             return nullptr;
         }
-        next_inst = next_inst->GetNext();
+        nextInst = nextInst->GetNext();
     }
 
     return nullptr;
@@ -251,15 +251,15 @@ void OptimizeMemoryBarriers::VisitNullCheck(GraphVisitor *v, Inst *inst)
     if (graph->GetArch() == Arch::AARCH32) {
         return;
     }
-    if (!OPTIONS.IsCompilerImplicitNullCheck() || graph->IsOsrMode() || graph->IsBytecodeOptimizer()) {
+    if (!g_options.IsCompilerImplicitNullCheck() || graph->IsOsrMode() || graph->IsBytecodeOptimizer()) {
         return;
     }
 
-    auto mem_inst = GetMemInstForImplicitNullCheck(inst);
-    if (mem_inst == nullptr) {
+    auto memInst = GetMemInstForImplicitNullCheck(inst);
+    if (memInst == nullptr) {
         return;
     }
-    mem_inst->SetFlag(compiler::inst_flags::CAN_THROW);
+    memInst->SetFlag(compiler::inst_flags::CAN_THROW);
     nc->SetImplicit(true);
 }
 
@@ -270,11 +270,11 @@ void OptimizeMemoryBarriers::VisitBoundCheck(GraphVisitor *v, Inst *inst)
 
 void OptimizeMemoryBarriers::ApplyGraph()
 {
-    barriers_insts_.clear();
+    barriersInsts_.clear();
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->Insts()) {
             if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
-                barriers_insts_.push_back(inst);
+                barriersInsts_.push_back(inst);
             }
             this->VisitInstruction(inst);
         }

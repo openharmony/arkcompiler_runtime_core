@@ -44,9 +44,9 @@ class ErrorHandler : public ClassLinkerErrorHandler {
     void OnError([[maybe_unused]] ClassLinker::Error error, [[maybe_unused]] const PandaString &message) override {}
 };
 
-bool Compiler::IsCompilationExpired(Method *method, bool is_osr)
+bool Compiler::IsCompilationExpired(Method *method, bool isOsr)
 {
-    return (is_osr && GetOsrCode(method) != nullptr) || (!is_osr && method->HasCompiledCode());
+    return (isOsr && GetOsrCode(method) != nullptr) || (!isOsr && method->HasCompiledCode());
 }
 
 /// Intrinsics fast paths are supported only for G1 GC.
@@ -56,34 +56,34 @@ bool PandaRuntimeInterface::IsGcValidForFastPath(SourceLanguage lang) const
     if (lang == SourceLanguage::INVALID) {
         lang = ManagedThread::GetCurrent()->GetThreadLang();
     }
-    auto gc_type = runtime->GetGCType(runtime->GetOptions(), lang);
-    return gc_type == mem::GCType::G1_GC;
+    auto gcType = runtime->GetGCType(runtime->GetOptions(), lang);
+    return gcType == mem::GCType::G1_GC;
 }
 
-compiler::RuntimeInterface::MethodId PandaRuntimeInterface::ResolveMethodIndex(MethodPtr parent_method,
+compiler::RuntimeInterface::MethodId PandaRuntimeInterface::ResolveMethodIndex(MethodPtr parentMethod,
                                                                                MethodIndex index) const
 {
-    return MethodCast(parent_method)->GetClass()->ResolveMethodIndex(index).GetOffset();
+    return MethodCast(parentMethod)->GetClass()->ResolveMethodIndex(index).GetOffset();
 }
 
-compiler::RuntimeInterface::FieldId PandaRuntimeInterface::ResolveFieldIndex(MethodPtr parent_method,
+compiler::RuntimeInterface::FieldId PandaRuntimeInterface::ResolveFieldIndex(MethodPtr parentMethod,
                                                                              FieldIndex index) const
 {
-    return MethodCast(parent_method)->GetClass()->ResolveFieldIndex(index).GetOffset();
+    return MethodCast(parentMethod)->GetClass()->ResolveFieldIndex(index).GetOffset();
 }
 
-compiler::RuntimeInterface::IdType PandaRuntimeInterface::ResolveTypeIndex(MethodPtr parent_method,
+compiler::RuntimeInterface::IdType PandaRuntimeInterface::ResolveTypeIndex(MethodPtr parentMethod,
                                                                            TypeIndex index) const
 {
-    return MethodCast(parent_method)->GetClass()->ResolveClassIndex(index).GetOffset();
+    return MethodCast(parentMethod)->GetClass()->ResolveClassIndex(index).GetOffset();
 }
 
-compiler::RuntimeInterface::MethodPtr PandaRuntimeInterface::GetMethodById(MethodPtr parent_method, MethodId id) const
+compiler::RuntimeInterface::MethodPtr PandaRuntimeInterface::GetMethodById(MethodPtr parentMethod, MethodId id) const
 {
     ScopedMutatorLock lock;
-    ErrorHandler error_handler;
-    return Runtime::GetCurrent()->GetClassLinker()->GetMethod(*MethodCast(parent_method),
-                                                              panda_file::File::EntityId(id), &error_handler);
+    ErrorHandler errorHandler;
+    return Runtime::GetCurrent()->GetClassLinker()->GetMethod(*MethodCast(parentMethod), panda_file::File::EntityId(id),
+                                                              &errorHandler);
 }
 
 compiler::RuntimeInterface::MethodId PandaRuntimeInterface::GetMethodId(MethodPtr method) const
@@ -159,12 +159,12 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayU16Class(Met
     return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_U16);
 }
 
-compiler::ClassType PandaRuntimeInterface::GetClassType(ClassPtr klass_ptr) const
+compiler::ClassType PandaRuntimeInterface::GetClassType(ClassPtr klassPtr) const
 {
-    if (klass_ptr == nullptr) {
+    if (klassPtr == nullptr) {
         return compiler::ClassType::UNRESOLVED_CLASS;
     }
-    auto klass = ClassCast(klass_ptr);
+    auto klass = ClassCast(klassPtr);
     if (klass == nullptr) {
         return compiler::ClassType::UNRESOLVED_CLASS;
     }
@@ -175,12 +175,12 @@ compiler::ClassType PandaRuntimeInterface::GetClassType(ClassPtr klass_ptr) cons
         return compiler::ClassType::INTERFACE_CLASS;
     }
     if (klass->IsArrayClass()) {
-        auto component_class = klass->GetComponentType();
-        ASSERT(component_class != nullptr);
-        if (component_class->IsObjectClass()) {
+        auto componentClass = klass->GetComponentType();
+        ASSERT(componentClass != nullptr);
+        if (componentClass->IsObjectClass()) {
             return compiler::ClassType::ARRAY_OBJECT_CLASS;
         }
-        if (component_class->IsPrimitive()) {
+        if (componentClass->IsPrimitive()) {
             return compiler::ClassType::FINAL_CLASS;
         }
         return compiler::ClassType::ARRAY_CLASS;
@@ -212,12 +212,12 @@ compiler::ClassType PandaRuntimeInterface::GetClassType(MethodPtr method, IdType
         return compiler::ClassType::INTERFACE_CLASS;
     }
     if (klass->IsArrayClass()) {
-        auto component_class = klass->GetComponentType();
-        ASSERT(component_class != nullptr);
-        if (component_class->IsObjectClass()) {
+        auto componentClass = klass->GetComponentType();
+        ASSERT(componentClass != nullptr);
+        if (componentClass->IsObjectClass()) {
             return compiler::ClassType::ARRAY_OBJECT_CLASS;
         }
-        if (component_class->IsPrimitive()) {
+        if (componentClass->IsPrimitive()) {
             return compiler::ClassType::FINAL_CLASS;
         }
         return compiler::ClassType::ARRAY_CLASS;
@@ -251,15 +251,15 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayElementClass
     return ClassCast(cls)->GetComponentType();
 }
 
-bool PandaRuntimeInterface::CheckStoreArray(ClassPtr array_cls, ClassPtr str_cls) const
+bool PandaRuntimeInterface::CheckStoreArray(ClassPtr arrayCls, ClassPtr strCls) const
 {
-    ASSERT(array_cls != nullptr);
-    auto *element_class = ClassCast(array_cls)->GetComponentType();
-    if (str_cls == nullptr) {
-        return element_class->IsObjectClass();
+    ASSERT(arrayCls != nullptr);
+    auto *elementClass = ClassCast(arrayCls)->GetComponentType();
+    if (strCls == nullptr) {
+        return elementClass->IsObjectClass();
     }
-    ASSERT(str_cls != nullptr);
-    return element_class->IsAssignableFrom(ClassCast(str_cls));
+    ASSERT(strCls != nullptr);
+    return elementClass->IsAssignableFrom(ClassCast(strCls));
 }
 
 bool PandaRuntimeInterface::IsAssignableFrom(ClassPtr cls1, ClassPtr cls2) const
@@ -269,11 +269,11 @@ bool PandaRuntimeInterface::IsAssignableFrom(ClassPtr cls1, ClassPtr cls2) const
     return ClassCast(cls1)->IsAssignableFrom(ClassCast(cls2));
 }
 
-bool PandaRuntimeInterface::IsInterfaceMethod(MethodPtr parent_method, MethodId id) const
+bool PandaRuntimeInterface::IsInterfaceMethod(MethodPtr parentMethod, MethodId id) const
 {
     ScopedMutatorLock lock;
     ErrorHandler handler;
-    auto method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*MethodCast(parent_method),
+    auto method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*MethodCast(parentMethod),
                                                                      panda_file::File::EntityId(id), &handler);
     return (method->GetClass()->IsInterface() && !method->IsDefaultInterfaceMethod());
 }
@@ -281,9 +281,9 @@ bool PandaRuntimeInterface::IsInterfaceMethod(MethodPtr parent_method, MethodId 
 bool PandaRuntimeInterface::CanThrowException(MethodPtr method) const
 {
     ScopedMutatorLock lock;
-    auto *panda_method = MethodCast(method);
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*panda_method);
-    return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->CanThrowException(panda_method);
+    auto *pandaMethod = MethodCast(method);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*pandaMethod);
+    return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->CanThrowException(pandaMethod);
 }
 
 uint32_t PandaRuntimeInterface::FindCatchBlock(MethodPtr m, ClassPtr cls, uint32_t pc) const
@@ -306,42 +306,42 @@ bool PandaRuntimeInterface::HasNativeException(MethodPtr method) const
     return CanThrowException(method);
 }
 
-bool PandaRuntimeInterface::IsMethodExternal(MethodPtr parent_method, MethodPtr callee_method) const
+bool PandaRuntimeInterface::IsMethodExternal(MethodPtr parentMethod, MethodPtr calleeMethod) const
 {
-    if (callee_method == nullptr) {
+    if (calleeMethod == nullptr) {
         return true;
     }
-    return MethodCast(parent_method)->GetPandaFile() != MethodCast(callee_method)->GetPandaFile();
+    return MethodCast(parentMethod)->GetPandaFile() != MethodCast(calleeMethod)->GetPandaFile();
 }
 
-compiler::DataType::Type PandaRuntimeInterface::GetMethodReturnType(MethodPtr parent_method, MethodId id) const
+compiler::DataType::Type PandaRuntimeInterface::GetMethodReturnType(MethodPtr parentMethod, MethodId id) const
 {
-    auto *pf = MethodCast(parent_method)->GetPandaFile();
+    auto *pf = MethodCast(parentMethod)->GetPandaFile();
     panda_file::MethodDataAccessor mda(*pf, panda_file::File::EntityId(id));
     panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
     return ToCompilerType(panda_file::GetEffectiveType(pda.GetReturnType()));
 }
 
-compiler::DataType::Type PandaRuntimeInterface::GetMethodArgumentType(MethodPtr parent_method, MethodId id,
+compiler::DataType::Type PandaRuntimeInterface::GetMethodArgumentType(MethodPtr parentMethod, MethodId id,
                                                                       size_t index) const
 {
-    auto *pf = MethodCast(parent_method)->GetPandaFile();
+    auto *pf = MethodCast(parentMethod)->GetPandaFile();
     panda_file::MethodDataAccessor mda(*pf, panda_file::File::EntityId(id));
     panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
     return ToCompilerType(panda_file::GetEffectiveType(pda.GetArgType(index)));
 }
 
-size_t PandaRuntimeInterface::GetMethodArgumentsCount(MethodPtr parent_method, MethodId id) const
+size_t PandaRuntimeInterface::GetMethodArgumentsCount(MethodPtr parentMethod, MethodId id) const
 {
-    auto *pf = MethodCast(parent_method)->GetPandaFile();
+    auto *pf = MethodCast(parentMethod)->GetPandaFile();
     panda_file::MethodDataAccessor mda(*pf, panda_file::File::EntityId(id));
     panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
     return pda.GetNumArgs();
 }
 
-bool PandaRuntimeInterface::IsMethodStatic(MethodPtr parent_method, MethodId id) const
+bool PandaRuntimeInterface::IsMethodStatic(MethodPtr parentMethod, MethodId id) const
 {
-    auto *pf = MethodCast(parent_method)->GetPandaFile();
+    auto *pf = MethodCast(parentMethod)->GetPandaFile();
     panda_file::MethodDataAccessor mda(*pf, panda_file::File::EntityId(id));
     return mda.IsStatic();
 }
@@ -373,16 +373,16 @@ bool PandaRuntimeInterface::IsMemoryBarrierRequired(MethodPtr method) const
     return false;
 }
 
-bool PandaRuntimeInterface::IsMethodIntrinsic(MethodPtr parent_method, MethodId id) const
+bool PandaRuntimeInterface::IsMethodIntrinsic(MethodPtr parentMethod, MethodId id) const
 {
-    Method *caller = MethodCast(parent_method);
+    Method *caller = MethodCast(parentMethod);
     auto *pf = caller->GetPandaFile();
     panda_file::MethodDataAccessor mda(*pf, panda_file::File::EntityId(id));
 
-    auto *class_name = pf->GetStringData(mda.GetClassId()).data;
-    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    auto *className = pf->GetStringData(mda.GetClassId()).data;
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    auto *klass = class_linker->FindLoadedClass(class_name, caller->GetClass()->GetLoadContext());
+    auto *klass = classLinker->FindLoadedClass(className, caller->GetClass()->GetLoadContext());
 
     // Class should be loaded during intrinsics initialization
     if (klass == nullptr) {
@@ -390,12 +390,12 @@ bool PandaRuntimeInterface::IsMethodIntrinsic(MethodPtr parent_method, MethodId 
     }
 
     auto name = pf->GetStringData(mda.GetNameId());
-    bool is_array_clone = ClassHelper::IsArrayDescriptor(class_name) &&
-                          (utf::CompareMUtf8ToMUtf8(name.data, utf::CStringAsMutf8("clone")) == 0);
+    bool isArrayClone = ClassHelper::IsArrayDescriptor(className) &&
+                        (utf::CompareMUtf8ToMUtf8(name.data, utf::CStringAsMutf8("clone")) == 0);
     Method::Proto proto(*pf, mda.GetProtoId());
     auto *method = klass->GetDirectMethod(name.data, proto);
     if (method == nullptr) {
-        if (is_array_clone) {
+        if (isArrayClone) {
             method = klass->GetClassMethod(name.data, proto);
         } else {
             return false;
@@ -415,7 +415,7 @@ std::string PandaRuntimeInterface::GetBytecodeString(MethodPtr method, uintptr_t
 }
 
 PandaRuntimeInterface::FieldPtr PandaRuntimeInterface::ResolveField(PandaRuntimeInterface::MethodPtr m, size_t id,
-                                                                    bool allow_external, uint32_t *pclass_id)
+                                                                    bool allowExternal, uint32_t *pclassId)
 {
     ScopedMutatorLock lock;
     ErrorHandler handler;
@@ -426,17 +426,17 @@ PandaRuntimeInterface::FieldPtr PandaRuntimeInterface::ResolveField(PandaRuntime
         return nullptr;
     }
     auto klass = field->GetClass();
-    if (pfile == field->GetPandaFile() || allow_external) {
-        if (pclass_id != nullptr) {
-            *pclass_id = klass->GetFileId().GetOffset();
+    if (pfile == field->GetPandaFile() || allowExternal) {
+        if (pclassId != nullptr) {
+            *pclassId = klass->GetFileId().GetOffset();
         }
         return field;
     }
 
-    auto class_id = GetClassIdWithinFile(m, klass);
-    if (class_id != 0) {
-        if (pclass_id != nullptr) {
-            *pclass_id = class_id;
+    auto classId = GetClassIdWithinFile(m, klass);
+    if (classId != 0) {
+        if (pclassId != nullptr) {
+            *pclassId = classId;
         }
         return field;
     }
@@ -444,7 +444,7 @@ PandaRuntimeInterface::FieldPtr PandaRuntimeInterface::ResolveField(PandaRuntime
 }
 
 template <typename T>
-void FillLiteralArrayData(const panda_file::File *pfile, pandasm::LiteralArray *lit_array,
+void FillLiteralArrayData(const panda_file::File *pfile, pandasm::LiteralArray *litArray,
                           const panda_file::LiteralTag &tag, const panda_file::LiteralDataAccessor::LiteralValue &value)
 {
     panda_file::File::EntityId id(std::get<uint32_t>(value));
@@ -455,7 +455,7 @@ void FillLiteralArrayData(const panda_file::File *pfile, pandasm::LiteralArray *
         pandasm::LiteralArray::Literal lit;
         lit.tag = tag;
         lit.value = bit_cast<T>(panda_file::helpers::Read<sizeof(T)>(&sp));
-        lit_array->literals.push_back(lit);
+        litArray->literals.push_back(lit);
     }
 }
 
@@ -464,78 +464,78 @@ panda::pandasm::LiteralArray PandaRuntimeInterface::GetLiteralArray(MethodPtr m,
     auto method = MethodCast(m);
     auto pfile = method->GetPandaFile();
     id = pfile->GetLiteralArrays()[id];
-    pandasm::LiteralArray lit_array;
+    pandasm::LiteralArray litArray;
 
-    panda_file::LiteralDataAccessor lit_array_accessor(*pfile, pfile->GetLiteralArraysId());
-    lit_array_accessor.EnumerateLiteralVals(
-        panda_file::File::EntityId(id), [&lit_array, pfile](const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                                            const panda_file::LiteralTag &tag) {
-            switch (tag) {
-                case panda_file::LiteralTag::ARRAY_U1: {
-                    FillLiteralArrayData<bool>(pfile, &lit_array, tag, value);
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I8:
-                case panda_file::LiteralTag::ARRAY_U8: {
-                    FillLiteralArrayData<uint8_t>(pfile, &lit_array, tag, value);
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I16:
-                case panda_file::LiteralTag::ARRAY_U16: {
-                    FillLiteralArrayData<uint16_t>(pfile, &lit_array, tag, value);
-                    break;
-                }
-                // in the case of ARRAY_STRING, the array stores strings ids
-                case panda_file::LiteralTag::ARRAY_STRING:
-                case panda_file::LiteralTag::ARRAY_I32:
-                case panda_file::LiteralTag::ARRAY_U32: {
-                    FillLiteralArrayData<uint32_t>(pfile, &lit_array, tag, value);
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I64:
-                case panda_file::LiteralTag::ARRAY_U64: {
-                    FillLiteralArrayData<uint64_t>(pfile, &lit_array, tag, value);
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_F32: {
-                    FillLiteralArrayData<float>(pfile, &lit_array, tag, value);
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_F64: {
-                    FillLiteralArrayData<double>(pfile, &lit_array, tag, value);
-                    break;
-                }
-                case panda_file::LiteralTag::TAGVALUE:
-                case panda_file::LiteralTag::ACCESSOR:
-                case panda_file::LiteralTag::NULLVALUE: {
-                    break;
-                }
-                default: {
-                    UNREACHABLE();
-                    break;
-                }
-            }
-        });
-    return lit_array;
+    panda_file::LiteralDataAccessor litArrayAccessor(*pfile, pfile->GetLiteralArraysId());
+    litArrayAccessor.EnumerateLiteralVals(panda_file::File::EntityId(id),
+                                          [&litArray, pfile](const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                                             const panda_file::LiteralTag &tag) {
+                                              switch (tag) {
+                                                  case panda_file::LiteralTag::ARRAY_U1: {
+                                                      FillLiteralArrayData<bool>(pfile, &litArray, tag, value);
+                                                      break;
+                                                  }
+                                                  case panda_file::LiteralTag::ARRAY_I8:
+                                                  case panda_file::LiteralTag::ARRAY_U8: {
+                                                      FillLiteralArrayData<uint8_t>(pfile, &litArray, tag, value);
+                                                      break;
+                                                  }
+                                                  case panda_file::LiteralTag::ARRAY_I16:
+                                                  case panda_file::LiteralTag::ARRAY_U16: {
+                                                      FillLiteralArrayData<uint16_t>(pfile, &litArray, tag, value);
+                                                      break;
+                                                  }
+                                                  // in the case of ARRAY_STRING, the array stores strings ids
+                                                  case panda_file::LiteralTag::ARRAY_STRING:
+                                                  case panda_file::LiteralTag::ARRAY_I32:
+                                                  case panda_file::LiteralTag::ARRAY_U32: {
+                                                      FillLiteralArrayData<uint32_t>(pfile, &litArray, tag, value);
+                                                      break;
+                                                  }
+                                                  case panda_file::LiteralTag::ARRAY_I64:
+                                                  case panda_file::LiteralTag::ARRAY_U64: {
+                                                      FillLiteralArrayData<uint64_t>(pfile, &litArray, tag, value);
+                                                      break;
+                                                  }
+                                                  case panda_file::LiteralTag::ARRAY_F32: {
+                                                      FillLiteralArrayData<float>(pfile, &litArray, tag, value);
+                                                      break;
+                                                  }
+                                                  case panda_file::LiteralTag::ARRAY_F64: {
+                                                      FillLiteralArrayData<double>(pfile, &litArray, tag, value);
+                                                      break;
+                                                  }
+                                                  case panda_file::LiteralTag::TAGVALUE:
+                                                  case panda_file::LiteralTag::ACCESSOR:
+                                                  case panda_file::LiteralTag::NULLVALUE: {
+                                                      break;
+                                                  }
+                                                  default: {
+                                                      UNREACHABLE();
+                                                      break;
+                                                  }
+                                              }
+                                          });
+    return litArray;
 }
 
 std::optional<RuntimeInterface::IdType> PandaRuntimeInterface::FindClassIdInFile(MethodPtr method, ClassPtr cls) const
 {
     auto klass = ClassCast(cls);
     auto pfile = MethodCast(method)->GetPandaFile();
-    auto class_name = klass->GetName();
+    auto className = klass->GetName();
     PandaString storage;
-    auto class_id = pfile->GetClassId(ClassHelper::GetDescriptor(utf::CStringAsMutf8(class_name.c_str()), &storage));
-    if (class_id.IsValid() && class_name == ClassHelper::GetName(pfile->GetStringData(class_id).data)) {
-        return std::optional<RuntimeInterface::IdType>(class_id.GetOffset());
+    auto classId = pfile->GetClassId(ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &storage));
+    if (classId.IsValid() && className == ClassHelper::GetName(pfile->GetStringData(classId).data)) {
+        return std::optional<RuntimeInterface::IdType>(classId.GetOffset());
     }
     return std::nullopt;
 }
 
 RuntimeInterface::IdType PandaRuntimeInterface::GetClassIdWithinFile(MethodPtr method, ClassPtr cls) const
 {
-    auto class_id = FindClassIdInFile(method, cls);
-    return class_id ? class_id.value() : 0;
+    auto classId = FindClassIdInFile(method, cls);
+    return classId ? classId.value() : 0;
 }
 
 RuntimeInterface::IdType PandaRuntimeInterface::GetLiteralArrayClassIdWithinFile(
@@ -548,11 +548,11 @@ RuntimeInterface::IdType PandaRuntimeInterface::GetLiteralArrayClassIdWithinFile
         *Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx), tag);
 
     auto pfile = MethodCast(method)->GetPandaFile();
-    auto class_name = cls->GetName();
-    for (decltype(auto) class_raw_id : pfile->GetClasses()) {
-        auto class_id = panda_file::File::EntityId(class_raw_id);
-        if (class_id.IsValid() && class_name == ClassHelper::GetName(pfile->GetStringData(class_id).data)) {
-            return class_id.GetOffset();
+    auto className = cls->GetName();
+    for (decltype(auto) classRawId : pfile->GetClasses()) {
+        auto classId = panda_file::File::EntityId(classRawId);
+        if (classId.IsValid() && className == ClassHelper::GetName(pfile->GetStringData(classId).data)) {
+            return classId.GetOffset();
         }
     }
     UNREACHABLE();
@@ -602,9 +602,9 @@ compiler::DataType::Type PandaRuntimeInterface::GetFieldType(FieldPtr field) con
     return ToCompilerType(FieldCast(field)->GetType());
 }
 
-compiler::DataType::Type PandaRuntimeInterface::GetFieldTypeById(MethodPtr parent_method, IdType id) const
+compiler::DataType::Type PandaRuntimeInterface::GetFieldTypeById(MethodPtr parentMethod, IdType id) const
 {
-    auto *pf = MethodCast(parent_method)->GetPandaFile();
+    auto *pf = MethodCast(parentMethod)->GetPandaFile();
     panda_file::FieldDataAccessor fda(*pf, panda_file::File::EntityId(id));
     return ToCompilerType(panda_file::Type::GetTypeFromFieldEncoding(fda.GetType()));
 }
@@ -612,8 +612,8 @@ compiler::DataType::Type PandaRuntimeInterface::GetFieldTypeById(MethodPtr paren
 compiler::RuntimeInterface::IdType PandaRuntimeInterface::GetFieldValueTypeId(MethodPtr method, IdType id) const
 {
     auto *pf = MethodCast(method)->GetPandaFile();
-    auto type_id = panda_file::FieldDataAccessor::GetTypeId(*pf, panda_file::File::EntityId(id));
-    return type_id.GetOffset();
+    auto typeId = panda_file::FieldDataAccessor::GetTypeId(*pf, panda_file::File::EntityId(id));
+    return typeId.GetOffset();
 }
 
 RuntimeInterface::ClassPtr PandaRuntimeInterface::GetClassForField(FieldPtr field) const
@@ -698,10 +698,10 @@ panda::mem::BarrierType PandaRuntimeInterface::GetPostType() const
     return Thread::GetCurrent()->GetBarrierSet()->GetPostType();
 }
 
-panda::mem::BarrierOperand PandaRuntimeInterface::GetBarrierOperand(panda::mem::BarrierPosition barrier_position,
-                                                                    std::string_view operand_name) const
+panda::mem::BarrierOperand PandaRuntimeInterface::GetBarrierOperand(panda::mem::BarrierPosition barrierPosition,
+                                                                    std::string_view operandName) const
 {
-    return Thread::GetCurrent()->GetBarrierSet()->GetBarrierOperand(barrier_position, operand_name);
+    return Thread::GetCurrent()->GetBarrierSet()->GetBarrierOperand(barrierPosition, operandName);
 }
 
 uint32_t PandaRuntimeInterface::GetFunctionTargetOffset([[maybe_unused]] Arch arch) const
@@ -740,16 +740,16 @@ InlineCachesWrapper::CallKind InlineCachesWrapper::GetClasses(PandaRuntimeInterf
     ASSERT(classes != nullptr);
     classes->clear();
     auto method = static_cast<Method *>(m);
-    auto profiling_data = method->GetProfilingData();
-    if (profiling_data == nullptr) {
+    auto profilingData = method->GetProfilingData();
+    if (profilingData == nullptr) {
         return CallKind::UNKNOWN;
     }
-    auto ic = profiling_data->FindInlineCache(pc);
+    auto ic = profilingData->FindInlineCache(pc);
     if (ic == nullptr) {
         return CallKind::UNKNOWN;
     }
-    auto ic_classes = ic->GetClassesCopy();
-    classes->insert(classes->end(), ic_classes.begin(), ic_classes.end());
+    auto icClasses = ic->GetClassesCopy();
+    classes->insert(classes->end(), icClasses.begin(), icClasses.end());
     if (classes->empty()) {
         return CallKind::UNKNOWN;
     }
@@ -762,9 +762,9 @@ InlineCachesWrapper::CallKind InlineCachesWrapper::GetClasses(PandaRuntimeInterf
     return CallKind::POLYMORPHIC;
 }
 
-bool UnresolvedTypesWrapper::AddTableSlot(RuntimeInterface::MethodPtr method, uint32_t type_id, SlotKind kind)
+bool UnresolvedTypesWrapper::AddTableSlot(RuntimeInterface::MethodPtr method, uint32_t typeId, SlotKind kind)
 {
-    std::pair<uint32_t, UnresolvedTypesInterface::SlotKind> key {type_id, kind};
+    std::pair<uint32_t, UnresolvedTypesInterface::SlotKind> key {typeId, kind};
     if (slots_.find(method) == slots_.end()) {
         slots_[method][key] = 0;
         return true;
@@ -777,16 +777,15 @@ bool UnresolvedTypesWrapper::AddTableSlot(RuntimeInterface::MethodPtr method, ui
     return false;
 }
 
-uintptr_t UnresolvedTypesWrapper::GetTableSlot(RuntimeInterface::MethodPtr method, uint32_t type_id,
-                                               SlotKind kind) const
+uintptr_t UnresolvedTypesWrapper::GetTableSlot(RuntimeInterface::MethodPtr method, uint32_t typeId, SlotKind kind) const
 {
     ASSERT(slots_.find(method) != slots_.end());
     auto &table = slots_.at(method);
-    ASSERT(table.find({type_id, kind}) != table.end());
-    return reinterpret_cast<uintptr_t>(&table.at({type_id, kind}));
+    ASSERT(table.find({typeId, kind}) != table.end());
+    return reinterpret_cast<uintptr_t>(&table.at({typeId, kind}));
 }
 
-bool Compiler::CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr, TaggedValue func)
+bool Compiler::CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr, TaggedValue func)
 {
     if (method->IsAbstract()) {
         return false;
@@ -795,22 +794,22 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr
     if (osr && GetOsrCode(method) != nullptr) {
         ASSERT(method == ManagedThread::GetCurrent()->GetCurrentFrame()->GetMethod());
         ASSERT(method->HasCompiledCode());
-        return OsrEntry(bytecode_offset, GetOsrCode(method));
+        return OsrEntry(bytecodeOffset, GetOsrCode(method));
     }
     // In case if some thread raise compilation when another already compiled it, we just exit.
     if (method->HasCompiledCode() && !osr) {
         return false;
     }
-    bool ctx_osr = method->HasCompiledCode() ? osr : false;
-    if (method->AtomicSetCompilationStatus(ctx_osr ? Method::COMPILED : Method::NOT_COMPILED, Method::WAITING)) {
-        CompilerTask ctx {method, ctx_osr, ManagedThread::GetCurrent()->GetVM()};
+    bool ctxOsr = method->HasCompiledCode() ? osr : false;
+    if (method->AtomicSetCompilationStatus(ctxOsr ? Method::COMPILED : Method::NOT_COMPILED, Method::WAITING)) {
+        CompilerTask ctx {method, ctxOsr, ManagedThread::GetCurrent()->GetVM()};
         AddTask(std::move(ctx), func);
     }
-    if (no_async_jit_) {
+    if (noAsyncJit_) {
         auto status = method->GetCompilationStatus();
         for (; (status == Method::WAITING) || (status == Method::COMPILATION);
              status = method->GetCompilationStatus()) {
-            if (compiler_worker_ == nullptr || compiler_worker_->IsWorkerJoined()) {
+            if (compilerWorker_ == nullptr || compilerWorker_->IsWorkerJoined()) {
                 // JIT thread is destroyed, wait makes no sence
                 return false;
             }
@@ -826,70 +825,70 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr
 }
 
 template <compiler::TaskRunnerMode RUNNER_MODE>
-void Compiler::CompileMethodLocked(compiler::CompilerTaskRunner<RUNNER_MODE> task_runner)
+void Compiler::CompileMethodLocked(compiler::CompilerTaskRunner<RUNNER_MODE> taskRunner)
 {
-    os::memory::LockHolder lock(compilation_lock_);
-    StartCompileMethod<RUNNER_MODE>(std::move(task_runner));
+    os::memory::LockHolder lock(compilationLock_);
+    StartCompileMethod<RUNNER_MODE>(std::move(taskRunner));
 }
 
 template <compiler::TaskRunnerMode RUNNER_MODE>
-void Compiler::StartCompileMethod(compiler::CompilerTaskRunner<RUNNER_MODE> task_runner)
+void Compiler::StartCompileMethod(compiler::CompilerTaskRunner<RUNNER_MODE> taskRunner)
 {
-    ASSERT(runtime_iface_ != nullptr);
-    auto &task_ctx = task_runner.GetContext();
-    auto *method = task_ctx.GetMethod();
+    ASSERT(runtimeIface_ != nullptr);
+    auto &taskCtx = taskRunner.GetContext();
+    auto *method = taskCtx.GetMethod();
 
     method->ResetHotnessCounter();
 
-    if (IsCompilationExpired(method, task_ctx.IsOsr())) {
-        ASSERT(!no_async_jit_);
-        compiler::CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), false);
+    if (IsCompilationExpired(method, taskCtx.IsOsr())) {
+        ASSERT(!noAsyncJit_);
+        compiler::CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), false);
         return;
     }
 
-    mem::MemStatsType *mem_stats = task_ctx.GetVM()->GetMemStats();
+    mem::MemStatsType *memStats = taskCtx.GetVM()->GetMemStats();
 
-    auto allocator = std::make_unique<panda::ArenaAllocator>(panda::SpaceType::SPACE_TYPE_COMPILER, mem_stats);
-    auto local_allocator =
-        std::make_unique<panda::ArenaAllocator>(panda::SpaceType::SPACE_TYPE_COMPILER, mem_stats, true);
+    auto allocator = std::make_unique<panda::ArenaAllocator>(panda::SpaceType::SPACE_TYPE_COMPILER, memStats);
+    auto localAllocator =
+        std::make_unique<panda::ArenaAllocator>(panda::SpaceType::SPACE_TYPE_COMPILER, memStats, true);
 
     if constexpr (RUNNER_MODE == compiler::BACKGROUND_MODE) {
-        task_ctx.SetAllocator(std::move(allocator));
-        task_ctx.SetLocalAllocator(std::move(local_allocator));
+        taskCtx.SetAllocator(std::move(allocator));
+        taskCtx.SetLocalAllocator(std::move(localAllocator));
     } else {
-        task_ctx.SetAllocator(allocator.get());
-        task_ctx.SetLocalAllocator(local_allocator.get());
+        taskCtx.SetAllocator(allocator.get());
+        taskCtx.SetLocalAllocator(localAllocator.get());
     }
 
-    task_runner.AddFinalize([](compiler::CompilerContext<RUNNER_MODE> &compiler_ctx) {
-        auto *compiled_method = compiler_ctx.GetMethod();
-        auto is_compiled = compiler_ctx.GetCompilationStatus();
-        if (is_compiled) {
+    taskRunner.AddFinalize([](compiler::CompilerContext<RUNNER_MODE> &compilerCtx) {
+        auto *compiledMethod = compilerCtx.GetMethod();
+        auto isCompiled = compilerCtx.GetCompilationStatus();
+        if (isCompiled) {
             // Check that method was not deoptimized
-            compiled_method->AtomicSetCompilationStatus(Method::COMPILATION, Method::COMPILED);
+            compiledMethod->AtomicSetCompilationStatus(Method::COMPILATION, Method::COMPILED);
             return;
         }
         // If deoptimization occurred during OSR compilation, the compilation returns false.
         // For the case we need reset compiation status
-        if (compiler_ctx.IsOsr()) {
-            compiled_method->SetCompilationStatus(Method::NOT_COMPILED);
+        if (compilerCtx.IsOsr()) {
+            compiledMethod->SetCompilationStatus(Method::NOT_COMPILED);
             return;
         }
         // Failure during compilation, should we retry later?
-        compiled_method->SetCompilationStatus(Method::FAILED);
+        compiledMethod->SetCompilationStatus(Method::FAILED);
     });
 
-    compiler::JITCompileMethod<RUNNER_MODE>(runtime_iface_, code_allocator_, &gdb_debug_info_allocator_, jit_stats_,
-                                            std::move(task_runner));
+    compiler::JITCompileMethod<RUNNER_MODE>(runtimeIface_, codeAllocator_, &gdbDebugInfoAllocator_, jitStats_,
+                                            std::move(taskRunner));
 }
 
 void Compiler::JoinWorker()
 {
-    if (compiler_worker_ != nullptr) {
-        compiler_worker_->JoinWorker();
+    if (compilerWorker_ != nullptr) {
+        compilerWorker_->JoinWorker();
     }
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    if (!Runtime::GetOptions().IsArkAot() && compiler::OPTIONS.IsCompilerEmitDebugInfo()) {
+    if (!Runtime::GetOptions().IsArkAot() && compiler::g_options.IsCompilerEmitDebugInfo()) {
         compiler::CleanJitDebugCode();
     }
 #endif
@@ -903,30 +902,30 @@ ObjectPointerType PandaRuntimeInterface::GetNonMovableString(MethodPtr method, S
 }
 
 #ifndef PANDA_PRODUCT_BUILD
-uint8_t CompileMethodImpl(coretypes::String *full_method_name, panda_file::SourceLang source_lang)
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceLang sourceLang)
 {
-    auto name = ConvertToString(full_method_name);
-    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    auto name = ConvertToString(fullMethodName);
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
     size_t pos = name.find_last_of("::");
     if (pos == std::string_view::npos) {
         return 1;
     }
-    auto class_name = PandaString(name.substr(0, pos - 1));
-    auto method_name = PandaString(name.substr(pos + 1));
+    auto className = PandaString(name.substr(0, pos - 1));
+    auto methodName = PandaString(name.substr(pos + 1));
 
     PandaString descriptor;
-    auto class_name_bytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(class_name.c_str()), &descriptor);
-    auto method_name_bytes = utf::CStringAsMutf8(method_name.c_str());
+    auto classNameBytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor);
+    auto methodNameBytes = utf::CStringAsMutf8(methodName.c_str());
 
-    ClassLinkerExtension *ext = class_linker->GetExtension(source_lang);
-    Class *cls = class_linker->GetClass(class_name_bytes, true, ext->GetBootContext());
+    ClassLinkerExtension *ext = classLinker->GetExtension(sourceLang);
+    Class *cls = classLinker->GetClass(classNameBytes, true, ext->GetBootContext());
     if (cls == nullptr) {
         static constexpr uint8_t CLASS_IS_NULL = 2;
         return CLASS_IS_NULL;
     }
 
-    auto method = cls->GetDirectMethod(method_name_bytes);
+    auto method = cls->GetDirectMethod(methodNameBytes);
     if (method == nullptr) {
         static constexpr uint8_t METHOD_IS_NULL = 3;
         return METHOD_IS_NULL;

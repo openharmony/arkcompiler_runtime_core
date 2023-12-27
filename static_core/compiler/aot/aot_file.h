@@ -45,8 +45,8 @@ public:
         COUNT
     };
 
-    AotFile(panda::os::library_loader::LibraryHandle &&handle, Span<const uint8_t> aot_data, Span<const uint8_t> code)
-        : handle_(std::move(handle)), aot_data_(aot_data), code_(code)
+    AotFile(panda::os::library_loader::LibraryHandle &&handle, Span<const uint8_t> aotData, Span<const uint8_t> code)
+        : handle_(std::move(handle)), aotData_(aotData), code_(code)
     {
     }
 
@@ -55,8 +55,8 @@ public:
     ~AotFile() = default;
 
 public:
-    static Expected<std::unique_ptr<AotFile>, std::string> Open(const std::string &file_name, uint32_t gc_type,
-                                                                bool for_dump = false);
+    static Expected<std::unique_ptr<AotFile>, std::string> Open(const std::string &fileName, uint32_t gcType,
+                                                                bool forDump = false);
 
     const void *GetCode() const
     {
@@ -70,91 +70,88 @@ public:
 
     auto FileHeaders() const
     {
-        return aot_data_.SubSpan<const PandaFileHeader>(GetAotHeader()->files_offset, GetFilesCount());
+        return aotData_.SubSpan<const PandaFileHeader>(GetAotHeader()->filesOffset, GetFilesCount());
     }
 
     auto GetMethodHeader(size_t index) const
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return reinterpret_cast<const MethodHeader *>(&aot_data_[GetAotHeader()->methods_offset]) + index;
+        return reinterpret_cast<const MethodHeader *>(&aotData_[GetAotHeader()->methodsOffset]) + index;
     }
 
     const MethodHeader *GetMethodHeadersPtr() const
     {
-        return reinterpret_cast<const MethodHeader *>(&aot_data_[GetAotHeader()->methods_offset]);
+        return reinterpret_cast<const MethodHeader *>(&aotData_[GetAotHeader()->methodsOffset]);
     }
 
-    auto GetClassHeaders(const PandaFileHeader &file_header) const
+    auto GetClassHeaders(const PandaFileHeader &fileHeader) const
     {
-        return aot_data_.SubSpan<const ClassHeader>(GetAotHeader()->classes_offset +
-                                                        file_header.classes_offset * sizeof(ClassHeader),
-                                                    file_header.classes_count);
+        return aotData_.SubSpan<const ClassHeader>(
+            GetAotHeader()->classesOffset + fileHeader.classesOffset * sizeof(ClassHeader), fileHeader.classesCount);
     }
 
-    auto GetClassHashTable(const PandaFileHeader &file_header) const
+    auto GetClassHashTable(const PandaFileHeader &fileHeader) const
     {
-        return aot_data_.SubSpan<const panda::panda_file::EntityPairHeader>(GetAotHeader()->class_hash_tables_offset +
-                                                                                file_header.class_hash_table_offset,
-                                                                            file_header.class_hash_table_size);
+        return aotData_.SubSpan<const panda::panda_file::EntityPairHeader>(
+            GetAotHeader()->classHashTablesOffset + fileHeader.classHashTableOffset, fileHeader.classHashTableSize);
     }
 
     const uint8_t *GetMethodsBitmap() const
     {
-        return &aot_data_[GetAotHeader()->bitmap_offset];
+        return &aotData_[GetAotHeader()->bitmapOffset];
     }
 
     size_t GetFilesCount() const
     {
-        return GetAotHeader()->files_count;
+        return GetAotHeader()->filesCount;
     }
 
-    const PandaFileHeader *FindPandaFile(const std::string &file_name) const
+    const PandaFileHeader *FindPandaFile(const std::string &fileName) const
     {
-        auto file_headers = FileHeaders();
-        auto res = std::find_if(file_headers.begin(), file_headers.end(), [this, &file_name](auto &header) {
-            return file_name == GetString(header.file_name_str);
-        });
-        return res == file_headers.end() ? nullptr : res;
+        auto fileHeaders = FileHeaders();
+        auto res = std::find_if(fileHeaders.begin(), fileHeaders.end(),
+                                [this, &fileName](auto &header) { return fileName == GetString(header.fileNameStr); });
+        return res == fileHeaders.end() ? nullptr : res;
     }
 
-    const uint8_t *GetMethodCode(const MethodHeader *method_header) const
+    const uint8_t *GetMethodCode(const MethodHeader *methodHeader) const
     {
-        return code_.data() + method_header->code_offset;
+        return code_.data() + methodHeader->codeOffset;
     }
 
     const char *GetString(size_t offset) const
     {
-        return reinterpret_cast<const char *>(aot_data_.data() + GetAotHeader()->strtab_offset + offset);
+        return reinterpret_cast<const char *>(aotData_.data() + GetAotHeader()->strtabOffset + offset);
     }
 
     const AotHeader *GetAotHeader() const
     {
-        return reinterpret_cast<const AotHeader *>(aot_data_.data());
+        return reinterpret_cast<const AotHeader *>(aotData_.data());
     }
 
     const char *GetFileName() const
     {
-        return GetString(GetAotHeader()->file_name_str);
+        return GetString(GetAotHeader()->fileNameStr);
     }
 
     const char *GetCommandLine() const
     {
-        return GetString(GetAotHeader()->cmdline_str);
+        return GetString(GetAotHeader()->cmdlineStr);
     }
 
     const char *GetClassContext() const
     {
-        return GetString(GetAotHeader()->class_ctx_str);
+        return GetString(GetAotHeader()->classCtxStr);
     }
 
     bool IsCompiledWithCha() const
     {
-        return GetAotHeader()->with_cha != 0U;
+        return GetAotHeader()->withCha != 0U;
     }
 
     bool IsBootPandaFile() const
     {
-        return GetAotHeader()->boot_aot != 0U;
+        return GetAotHeader()->bootAot != 0U;
     }
 
     void InitializeGot(RuntimeInterface *runtime);
@@ -163,14 +160,14 @@ public:
 
 private:
     panda::os::library_loader::LibraryHandle handle_ {nullptr};
-    Span<const uint8_t> aot_data_;
+    Span<const uint8_t> aotData_;
     Span<const uint8_t> code_;
 };
 
 class AotClass final {
 public:
     AotClass() = default;
-    AotClass(const AotFile *file, const ClassHeader *header) : aot_file_(file), header_(header) {}
+    AotClass(const AotFile *file, const ClassHeader *header) : aotFile_(file), header_(header) {}
     ~AotClass() = default;
     DEFAULT_COPY_SEMANTIC(AotClass);
     DEFAULT_MOVE_SEMANTIC(AotClass);
@@ -184,7 +181,7 @@ public:
     auto GetMethodHeaders() const
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return Span(aot_file_->GetMethodHeadersPtr() + header_->methods_offset, header_->methods_count);
+        return Span(aotFile_->GetMethodHeadersPtr() + header_->methodsOffset, header_->methodsCount);
     }
 
     static AotClass Invalid()
@@ -198,14 +195,14 @@ public:
     }
 
 private:
-    const AotFile *aot_file_ {nullptr};
+    const AotFile *aotFile_ {nullptr};
     const ClassHeader *header_ {nullptr};
 };
 
 class AotPandaFile {
 public:
     AotPandaFile() = default;
-    AotPandaFile(AotFile *file, const PandaFileHeader *header) : aot_file_(file), header_(header)
+    AotPandaFile(AotFile *file, const PandaFileHeader *header) : aotFile_(file), header_(header)
     {
         LoadClassHashTable();
     }
@@ -216,7 +213,7 @@ public:
 
     const AotFile *GetAotFile() const
     {
-        return aot_file_;
+        return aotFile_;
     }
     const PandaFileHeader *GetHeader()
     {
@@ -228,34 +225,34 @@ public:
     }
     std::string GetFileName() const
     {
-        return GetAotFile()->GetString(GetHeader()->file_name_str);
+        return GetAotFile()->GetString(GetHeader()->fileNameStr);
     }
-    AotClass GetClass(uint32_t class_id) const;
+    AotClass GetClass(uint32_t classId) const;
 
     Span<const ClassHeader> GetClassHeaders() const
     {
-        return aot_file_->GetClassHeaders(*header_);
+        return aotFile_->GetClassHeaders(*header_);
     }
 
-    CodeInfo GetMethodCodeInfo(const MethodHeader *method_header) const
+    CodeInfo GetMethodCodeInfo(const MethodHeader *methodHeader) const
     {
-        return CodeInfo(GetAotFile()->GetMethodCode(method_header), method_header->code_size);
+        return CodeInfo(GetAotFile()->GetMethodCode(methodHeader), methodHeader->codeSize);
     }
 
     void LoadClassHashTable()
     {
-        class_hash_table_ = GetAotFile()->GetClassHashTable(*header_);
+        classHashTable_ = GetAotFile()->GetClassHashTable(*header_);
     }
 
     panda::Span<const panda::panda_file::EntityPairHeader> GetClassHashTable() const
     {
-        return class_hash_table_;
+        return classHashTable_;
     }
 
 private:
-    AotFile *aot_file_ {nullptr};
+    AotFile *aotFile_ {nullptr};
     const PandaFileHeader *header_ {nullptr};
-    panda::Span<const panda::panda_file::EntityPairHeader> class_hash_table_;
+    panda::Span<const panda::panda_file::EntityPairHeader> classHashTable_;
 };
 }  // namespace panda::compiler
 

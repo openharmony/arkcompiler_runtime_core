@@ -19,14 +19,14 @@
 #include "compiler_logger.h"
 
 namespace panda::compiler {
-void MonitorAnalysis::MarkedMonitorRec(BasicBlock *bb, int32_t num_monitors)
+void MonitorAnalysis::MarkedMonitorRec(BasicBlock *bb, int32_t numMonitors)
 {
-    ASSERT(num_monitors >= 0);
-    if (num_monitors > 0) {
+    ASSERT(numMonitors >= 0);
+    if (numMonitors > 0) {
         bb->SetMonitorBlock(true);
         if (bb->IsEndBlock()) {
             COMPILER_LOG(DEBUG, MONITOR_ANALYSIS) << "There is MonitorEntry without MonitorExit";
-            incorrect_monitors_ = true;
+            incorrectMonitors_ = true;
             return;
         }
     }
@@ -34,72 +34,72 @@ void MonitorAnalysis::MarkedMonitorRec(BasicBlock *bb, int32_t num_monitors)
         if (inst->GetOpcode() == Opcode::Throw) {
             // The Monitor.Exit is removed from the compiled code after explicit Throw instruction
             // in the syncronized block because the execution is switching to the interpreting mode
-            num_monitors = 0;
+            numMonitors = 0;
         }
         if (inst->GetOpcode() == Opcode::Monitor) {
             bb->SetMonitorBlock(true);
             if (inst->CastToMonitor()->IsEntry()) {
                 bb->SetMonitorEntryBlock(true);
-                ++num_monitors;
+                ++numMonitors;
                 continue;
             }
             ASSERT(inst->CastToMonitor()->IsExit());
-            if (num_monitors <= 0) {
+            if (numMonitors <= 0) {
                 COMPILER_LOG(DEBUG, MONITOR_ANALYSIS) << "There is MonitorExit without MonitorEntry";
-                incorrect_monitors_ = true;
+                incorrectMonitors_ = true;
                 return;
             }
             bb->SetMonitorExitBlock(true);
-            --num_monitors;
+            --numMonitors;
         }
     }
-    entered_monitors_count_->at(bb->GetId()) = num_monitors;
-    if (num_monitors == 0) {
+    enteredMonitorsCount_->at(bb->GetId()) = numMonitors;
+    if (numMonitors == 0) {
         return;
     }
     for (auto succ : bb->GetSuccsBlocks()) {
-        if (check_non_catch_only_ && succ->IsCatch()) {
+        if (checkNonCatchOnly_ && succ->IsCatch()) {
             continue;
         }
         if (succ->SetMarker(marker_)) {
             continue;
         }
-        MarkedMonitorRec(succ, num_monitors);
+        MarkedMonitorRec(succ, numMonitors);
     }
 }
 
 bool MonitorAnalysis::RunImpl()
 {
     auto allocator = GetGraph()->GetLocalAllocator();
-    incorrect_monitors_ = false;
-    entered_monitors_count_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
-    entered_monitors_count_->resize(GetGraph()->GetVectorBlocks().size());
+    incorrectMonitors_ = false;
+    enteredMonitorsCount_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
+    enteredMonitorsCount_->resize(GetGraph()->GetVectorBlocks().size());
     marker_ = GetGraph()->NewMarker();
     for (auto bb : GetGraph()->GetBlocksRPO()) {
-        if (check_non_catch_only_ && bb->IsCatch()) {
+        if (checkNonCatchOnly_ && bb->IsCatch()) {
             continue;
         }
         if (bb->SetMarker(marker_)) {
             continue;
         }
         MarkedMonitorRec(bb, 0);
-        if (incorrect_monitors_) {
+        if (incorrectMonitors_) {
             return false;
         }
     }
     for (auto bb : GetGraph()->GetBlocksRPO()) {
-        if (check_non_catch_only_ && bb->IsCatch()) {
+        if (checkNonCatchOnly_ && bb->IsCatch()) {
             continue;
         }
         const uint32_t uninitialized = 0xFFFFFFFF;
         uint32_t count = uninitialized;
         for (auto prev : bb->GetPredsBlocks()) {
-            if (check_non_catch_only_ && prev->IsCatch()) {
+            if (checkNonCatchOnly_ && prev->IsCatch()) {
                 continue;
             }
             if (count == uninitialized) {
-                count = entered_monitors_count_->at(prev->GetId());
-            } else if (count != entered_monitors_count_->at(prev->GetId())) {
+                count = enteredMonitorsCount_->at(prev->GetId());
+            } else if (count != enteredMonitorsCount_->at(prev->GetId())) {
                 COMPILER_LOG(DEBUG, MONITOR_ANALYSIS)
                     << "There is an inconsistent MonitorEntry counters in parent basic blocks";
                 return false;

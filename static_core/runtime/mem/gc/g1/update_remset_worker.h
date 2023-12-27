@@ -30,8 +30,8 @@ template <class LanguageConfig>
 class UpdateRemsetWorker {
 public:
     UpdateRemsetWorker(G1GC<LanguageConfig> *gc, GCG1BarrierSet::ThreadLocalCardQueues *queue,
-                       os::memory::Mutex *queue_lock, size_t region_size, bool update_concurrent,
-                       size_t min_concurrent_cards_to_process);
+                       os::memory::Mutex *queueLock, size_t regionSize, bool updateConcurrent,
+                       size_t minConcurrentCardsToProcess);
     NO_COPY_SEMANTIC(UpdateRemsetWorker);
     NO_MOVE_SEMANTIC(UpdateRemsetWorker);
 
@@ -45,8 +45,8 @@ public:
 
     ALWAYS_INLINE void SetUpdateConcurrent(bool value)
     {
-        os::memory::LockHolder holder(update_remset_lock_);
-        update_concurrent_ = value;
+        os::memory::LockHolder holder(updateRemsetLock_);
+        updateConcurrent_ = value;
     }
 
     /**
@@ -99,7 +99,7 @@ public:
     // only debug purpose
     ALWAYS_INLINE size_t GetQueueSize() const
     {
-        os::memory::LockHolder holder(*queue_lock_);
+        os::memory::LockHolder holder(*queueLock_);
         return queue_->size();
     }
 #endif  // NDEBUG
@@ -112,7 +112,7 @@ protected:
     virtual void DestroyWorkerImpl() = 0;
 
     /// @brief Try to process all unprocessed cards in one thread
-    size_t ProcessAllCards() REQUIRES(update_remset_lock_);
+    size_t ProcessAllCards() REQUIRES(updateRemsetLock_);
 
     /**
      * @brief Notify UpdateRemsetWorker to continue process cards
@@ -120,7 +120,7 @@ protected:
      * @see ResumeWorkerAfterGCPause
      * @see InvalidateRegions
      */
-    virtual void ContinueProcessCards() REQUIRES(update_remset_lock_) = 0;
+    virtual void ContinueProcessCards() REQUIRES(updateRemsetLock_) = 0;
 
     ALWAYS_INLINE G1GC<LanguageConfig> *GetGC() const
     {
@@ -137,69 +137,69 @@ protected:
 
     ALWAYS_INLINE bool IsFlag(UpdateRemsetWorkerFlags value) const
     {
-        return iteration_flag_ == value;
+        return iterationFlag_ == value;
     }
 
     ALWAYS_INLINE void SetFlag(UpdateRemsetWorkerFlags value)
     {
-        iteration_flag_ = value;
+        iterationFlag_ = value;
     }
 
     ALWAYS_INLINE void RemoveFlag([[maybe_unused]] UpdateRemsetWorkerFlags value)
     {
-        ASSERT(iteration_flag_ == value);
-        iteration_flag_ = UpdateRemsetWorkerFlags::IS_PROCESS_CARD;
+        ASSERT(iterationFlag_ == value);
+        iterationFlag_ = UpdateRemsetWorkerFlags::IS_PROCESS_CARD;
     }
 
     ALWAYS_INLINE UpdateRemsetWorkerFlags GetFlag() const
     {
-        return iteration_flag_;
+        return iterationFlag_;
     }
 
     ALWAYS_INLINE size_t GetMinConcurrentCardsToProcess() const
     {
-        return min_concurrent_cards_to_process_;
+        return minConcurrentCardsToProcess_;
     }
 
     /**
      * We use this lock to synchronize UpdateRemsetWorker and external operations with it
      * (as SuspendWorkerForGCPause/ResumeWorkerAfterGCPause/DestroyWorker/etc), wait and notify this worker.
      */
-    os::memory::Mutex update_remset_lock_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    os::memory::Mutex updateRemsetLock_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
 #ifndef NDEBUG
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    std::atomic<bool> paused_by_gc_thread_ GUARDED_BY(update_remset_lock_) {false};
+    std::atomic<bool> pausedByGcThread_ GUARDED_BY(updateRemsetLock_) {false};
 #endif
 
 private:
-    void FillFromDefered(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(update_remset_lock_);
-    void FillFromQueue(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(update_remset_lock_);
-    void FillFromThreads(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(update_remset_lock_);
+    void FillFromDefered(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(updateRemsetLock_);
+    void FillFromQueue(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(updateRemsetLock_);
+    void FillFromThreads(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(updateRemsetLock_);
 
     void FillFromPostBarrierBuffers(PandaUnorderedSet<CardTable::CardPtr> *cards);
-    void FillFromPostBarrierBuffer(GCG1BarrierSet::G1PostBarrierRingBufferType *post_wrb,
+    void FillFromPostBarrierBuffer(GCG1BarrierSet::G1PostBarrierRingBufferType *postWrb,
                                    PandaUnorderedSet<CardTable::CardPtr> *cards);
-    void FillFromPostBarrierBuffer(GCG1BarrierSet::ThreadLocalCardQueues *post_wrb,
+    void FillFromPostBarrierBuffer(GCG1BarrierSet::ThreadLocalCardQueues *postWrb,
                                    PandaUnorderedSet<CardTable::CardPtr> *cards);
 
-    void DoInvalidateRegions(RegionVector *regions) REQUIRES(update_remset_lock_);
+    void DoInvalidateRegions(RegionVector *regions) REQUIRES(updateRemsetLock_);
 
     G1GC<LanguageConfig> *gc_ {nullptr};
-    size_t region_size_bits_;
-    size_t min_concurrent_cards_to_process_;
-    GCG1BarrierSet::ThreadLocalCardQueues *queue_ GUARDED_BY(queue_lock_) {nullptr};
-    os::memory::Mutex *queue_lock_ {nullptr};
-    bool update_concurrent_;  // used to process references in gc-thread between zygote phases
+    size_t regionSizeBits_;
+    size_t minConcurrentCardsToProcess_;
+    GCG1BarrierSet::ThreadLocalCardQueues *queue_ GUARDED_BY(queueLock_) {nullptr};
+    os::memory::Mutex *queueLock_ {nullptr};
+    bool updateConcurrent_;  // used to process references in gc-thread between zygote phases
 
     PandaUnorderedSet<CardTable::CardPtr> cards_;
-    PandaVector<GCG1BarrierSet::ThreadLocalCardQueues *> post_barrier_buffers_ GUARDED_BY(post_barrier_buffers_lock_);
-    os::memory::Mutex post_barrier_buffers_lock_;
+    PandaVector<GCG1BarrierSet::ThreadLocalCardQueues *> postBarrierBuffers_ GUARDED_BY(postBarrierBuffersLock_);
+    os::memory::Mutex postBarrierBuffersLock_;
 
-    std::atomic<UpdateRemsetWorkerFlags> iteration_flag_ {UpdateRemsetWorkerFlags::IS_STOP_WORKER};
+    std::atomic<UpdateRemsetWorkerFlags> iterationFlag_ {UpdateRemsetWorkerFlags::IS_STOP_WORKER};
 
     // We do not fully update remset during collection pause
-    std::atomic<bool> defer_cards_ {false};
+    std::atomic<bool> deferCards_ {false};
 };
 
 template <class LanguageConfig>

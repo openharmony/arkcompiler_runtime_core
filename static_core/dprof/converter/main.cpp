@@ -54,13 +54,13 @@ public:
 
     void Help() const
     {
-        std::cerr << "Usage: " << app_name_ << " [OPTIONS]" << std::endl;
+        std::cerr << "Usage: " << appName_ << " [OPTIONS]" << std::endl;
         std::cerr << "optional arguments:" << std::endl;
         std::cerr << parser_.GetHelpString() << std::endl;
     }
 
 private:
-    std::string app_name_;
+    std::string appName_;
     PandArgParser parser_;
     Options options_ {""};
 };
@@ -74,7 +74,7 @@ int Main(panda::Span<const char *> args)
     }
     const Options &options = parser.GetOptionos();
 
-    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), panda::LOGGER_COMPONENT_MASK_ALL);
+    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), panda::g_loggerComponentMaskAll);
 
     auto storage = AppDataStorage::Create(options.GetStorageDir());
     if (!storage) {
@@ -83,16 +83,15 @@ int Main(panda::Span<const char *> args)
     }
 
     FeaturesManager fm;
-    HCountersFunctor hcounters_functor(std::cout);
-    if (!fm.RegisterFeature(HCOUNTERS_FEATURE_NAME, hcounters_functor)) {
+    HCountersFunctor hcountersFunctor(std::cout);
+    if (!fm.RegisterFeature(HCOUNTERS_FEATURE_NAME, hcountersFunctor)) {
         LOG(FATAL, DPROF) << "Cannot register feature: " << HCOUNTERS_FEATURE_NAME;
         return -1;
     }
 
-    storage->ForEachApps(
-        [&fm](std::unique_ptr<AppData> &&app_data) -> bool { return fm.ProcessingFeatures(*app_data); });
+    storage->ForEachApps([&fm](std::unique_ptr<AppData> &&appData) -> bool { return fm.ProcessingFeatures(*appData); });
 
-    if (hcounters_functor.ShowInfo(options.GetFormat())) {
+    if (hcountersFunctor.ShowInfo(options.GetFormat())) {
         return -1;
     }
     return 0;

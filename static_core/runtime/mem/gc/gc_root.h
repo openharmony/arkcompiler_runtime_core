@@ -58,7 +58,7 @@ PANDA_PUBLIC_API VisitGCRootFlags operator|(VisitGCRootFlags left, VisitGCRootFl
 class GCRoot {
 public:
     GCRoot(RootType type, ObjectHeader *obj);
-    GCRoot(RootType type, ObjectHeader *from_object, ObjectHeader *obj);
+    GCRoot(RootType type, ObjectHeader *fromObject, ObjectHeader *obj);
 
     RootType GetType() const;
     ObjectHeader *GetObjectHeader() const;
@@ -76,7 +76,7 @@ private:
      * From which object current root was found by reference. Usually from_object is nullptr, except when object was
      * found from card_table
      */
-    ObjectHeader *from_object_;
+    ObjectHeader *fromObject_;
     ObjectHeader *object_;
 };
 
@@ -84,11 +84,11 @@ template <class LanguageConfig>
 class RootManager final {
 public:
     /// Visit all non-heap roots(registers, thread locals, etc)
-    void VisitNonHeapRoots(const GCRootVisitor &gc_root_visitor,
+    void VisitNonHeapRoots(const GCRootVisitor &gcRootVisitor,
                            VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL) const;
 
     /// Visit local roots for frame
-    void VisitLocalRoots(const GCRootVisitor &gc_root_visitor) const;
+    void VisitLocalRoots(const GCRootVisitor &gcRootVisitor) const;
 
     /**
      * Visit card table roots
@@ -100,15 +100,15 @@ public:
      * traversing
      * @param from_object_checker - return true if we need to traverse objects approved by range_checker
      */
-    void VisitCardTableRoots(CardTable *card_table, ObjectAllocatorBase *allocator, GCRootVisitor root_visitor,
-                             MemRangeChecker range_checker, ObjectChecker range_object_checker,
-                             ObjectChecker from_object_checker, uint32_t processed_flag) const;
+    void VisitCardTableRoots(CardTable *cardTable, ObjectAllocatorBase *allocator, GCRootVisitor rootVisitor,
+                             MemRangeChecker rangeChecker, ObjectChecker rangeObjectChecker,
+                             ObjectChecker fromObjectChecker, uint32_t processedFlag) const;
 
     /// Visit roots in class linker
-    void VisitClassRoots(const GCRootVisitor &gc_root_visitor,
+    void VisitClassRoots(const GCRootVisitor &gcRootVisitor,
                          VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL) const;
 
-    void VisitAotStringRoots(const GCRootVisitor &gc_root_visitor, VisitGCRootFlags flags) const;
+    void VisitAotStringRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) const;
 
     /// Updates references to moved objects in TLS
     void UpdateThreadLocals();
@@ -128,18 +128,18 @@ public:
 
 private:
     /// Visit VM-specific roots
-    void VisitVmRoots(const GCRootVisitor &gc_root_visitor) const;
+    void VisitVmRoots(const GCRootVisitor &gcRootVisitor) const;
 
     template <class VRegRef>
-    void VisitRegisterRoot(const VRegRef &v_register, const GCRootVisitor &gc_root_visitor) const;
+    void VisitRegisterRoot(const VRegRef &vRegister, const GCRootVisitor &gcRootVisitor) const;
 
-    void VisitClassLinkerContextRoots(const GCRootVisitor &gc_root_visitor) const;
+    void VisitClassLinkerContextRoots(const GCRootVisitor &gcRootVisitor) const;
 
     /**
      * Visit roots for @param thread
      * @param thread
      */
-    void VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gc_root_visitor) const;
+    void VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gcRootVisitor) const;
 
     PandaVM *vm_ {nullptr};
 };

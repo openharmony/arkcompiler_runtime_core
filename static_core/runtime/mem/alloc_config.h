@@ -35,14 +35,14 @@ namespace panda::mem {
 /// Config for objects allocators with Crossing Map support.
 class ObjectAllocConfigWithCrossingMap {
 public:
-    static void OnAlloc(size_t size, SpaceType type_mem, MemStatsType *mem_stats)
+    static void OnAlloc(size_t size, SpaceType typeMem, MemStatsType *memStats)
     {
-        mem_stats->RecordAllocateObject(size, type_mem);
+        memStats->RecordAllocateObject(size, typeMem);
     }
 
-    static void OnFree(size_t size, SpaceType type_mem, MemStatsType *mem_stats)
+    static void OnFree(size_t size, SpaceType typeMem, MemStatsType *memStats)
     {
-        mem_stats->RecordFreeObject(size, type_mem);
+        memStats->RecordFreeObject(size, typeMem);
     }
 
     /// @brief Initialize an object memory allocated by an allocator.
@@ -59,9 +59,9 @@ public:
     }
 
     /// @brief Record new allocation of an object and add it to Crossing Map.
-    static void AddToCrossingMap(void *obj_addr, size_t obj_size)
+    static void AddToCrossingMap(void *objAddr, size_t objSize)
     {
-        CrossingMapSingleton::AddObject(obj_addr, obj_size);
+        CrossingMapSingleton::AddObject(objAddr, objSize);
     }
 
     /**
@@ -73,10 +73,10 @@ public:
      * @param prev_obj_size - size of the previous object.
      *        It is used check if previous object crosses the borders of the current map.
      */
-    static void RemoveFromCrossingMap(void *obj_addr, size_t obj_size, void *next_obj_addr,
-                                      void *prev_obj_addr = nullptr, size_t prev_obj_size = 0)
+    static void RemoveFromCrossingMap(void *objAddr, size_t objSize, void *nextObjAddr, void *prevObjAddr = nullptr,
+                                      size_t prevObjSize = 0)
     {
-        CrossingMapSingleton::RemoveObject(obj_addr, obj_size, next_obj_addr, prev_obj_addr, prev_obj_size);
+        CrossingMapSingleton::RemoveObject(objAddr, objSize, nextObjAddr, prevObjAddr, prevObjSize);
     }
 
     /**
@@ -90,9 +90,9 @@ public:
      *  or an object which crosses a border of this interval
      *  or nullptr
      */
-    static void *FindFirstObjInCrossingMap(void *start_addr, void *end_addr)
+    static void *FindFirstObjInCrossingMap(void *startAddr, void *endAddr)
     {
-        return CrossingMapSingleton::FindFirstObject(start_addr, end_addr);
+        return CrossingMapSingleton::FindFirstObject(startAddr, endAddr);
     }
 
     /**
@@ -100,9 +100,9 @@ public:
      * @param start_addr - pointer to the first byte of the interval.
      * @param size - size of the interval.
      */
-    static void InitializeCrossingMapForMemory(void *start_addr, size_t size)
+    static void InitializeCrossingMapForMemory(void *startAddr, size_t size)
     {
-        return CrossingMapSingleton::InitializeCrossingMapForMemory(start_addr, size);
+        return CrossingMapSingleton::InitializeCrossingMapForMemory(startAddr, size);
     }
 
     /**
@@ -110,32 +110,32 @@ public:
      * @param start_addr - pointer to the first byte of the interval.
      * @param size - size of the interval.
      */
-    static void RemoveCrossingMapForMemory(void *start_addr, size_t size)
+    static void RemoveCrossingMapForMemory(void *startAddr, size_t size)
     {
-        return CrossingMapSingleton::RemoveCrossingMapForMemory(start_addr, size);
+        return CrossingMapSingleton::RemoveCrossingMapForMemory(startAddr, size);
     }
 
     /**
      * @brief Record new allocation of the young range.
      * @param mem_range - range of a new young memory.
      */
-    static void OnInitYoungRegion(const MemRange &mem_range)
+    static void OnInitYoungRegion(const MemRange &memRange)
     {
-        CrossingMapSingleton::MarkCardsAsYoung(mem_range);
+        CrossingMapSingleton::MarkCardsAsYoung(memRange);
     }
 };
 
 /// Config for objects allocators.
 class ObjectAllocConfig {
 public:
-    static void OnAlloc(size_t size, SpaceType type_mem, MemStatsType *mem_stats)
+    static void OnAlloc(size_t size, SpaceType typeMem, MemStatsType *memStats)
     {
-        mem_stats->RecordAllocateObject(size, type_mem);
+        memStats->RecordAllocateObject(size, typeMem);
     }
 
-    static void OnFree(size_t size, SpaceType type_mem, MemStatsType *mem_stats)
+    static void OnFree(size_t size, SpaceType typeMem, MemStatsType *memStats)
     {
-        mem_stats->RecordFreeObject(size, type_mem);
+        memStats->RecordFreeObject(size, typeMem);
     }
 
     /// @brief Initialize an object memory allocated by an allocator.
@@ -152,97 +152,97 @@ public:
     }
 
     // We don't use crossing map in this config.
-    static void AddToCrossingMap([[maybe_unused]] void *obj_addr, [[maybe_unused]] size_t obj_size) {}
+    static void AddToCrossingMap([[maybe_unused]] void *objAddr, [[maybe_unused]] size_t objSize) {}
 
     // We don't use crossing map in this config.
-    static void RemoveFromCrossingMap([[maybe_unused]] void *obj_addr, [[maybe_unused]] size_t obj_size,
-                                      [[maybe_unused]] void *next_obj_addr = nullptr,
-                                      [[maybe_unused]] void *prev_obj_addr = nullptr,
-                                      [[maybe_unused]] size_t prev_obj_size = 0)
+    static void RemoveFromCrossingMap([[maybe_unused]] void *objAddr, [[maybe_unused]] size_t objSize,
+                                      [[maybe_unused]] void *nextObjAddr = nullptr,
+                                      [[maybe_unused]] void *prevObjAddr = nullptr,
+                                      [[maybe_unused]] size_t prevObjSize = 0)
     {
     }
 
     // We don't use crossing map in this config.
-    static void *FindFirstObjInCrossingMap([[maybe_unused]] void *start_addr, [[maybe_unused]] void *end_addr)
+    static void *FindFirstObjInCrossingMap([[maybe_unused]] void *startAddr, [[maybe_unused]] void *endAddr)
     {
         // We can't call CrossingMap when we don't use it
-        ASSERT(start_addr == nullptr);
+        ASSERT(startAddr == nullptr);
         return nullptr;
     }
 
     // We don't use crossing map in this config.
-    static void InitializeCrossingMapForMemory([[maybe_unused]] void *start_addr, [[maybe_unused]] size_t size) {}
+    static void InitializeCrossingMapForMemory([[maybe_unused]] void *startAddr, [[maybe_unused]] size_t size) {}
 
     // We don't use crossing map in this config.
-    static void RemoveCrossingMapForMemory([[maybe_unused]] void *start_addr, [[maybe_unused]] size_t size) {}
+    static void RemoveCrossingMapForMemory([[maybe_unused]] void *startAddr, [[maybe_unused]] size_t size) {}
 
     /**
      * @brief Record new allocation of the young range.
      * @param mem_range - range of a new young memory.
      */
-    static void OnInitYoungRegion(const MemRange &mem_range)
+    static void OnInitYoungRegion(const MemRange &memRange)
     {
-        CrossingMapSingleton::MarkCardsAsYoung(mem_range);
+        CrossingMapSingleton::MarkCardsAsYoung(memRange);
     }
 };
 
 /// Config for raw memory allocators.
 class RawMemoryConfig {
 public:
-    static void OnAlloc(size_t size, SpaceType type_mem, MemStatsType *mem_stats)
+    static void OnAlloc(size_t size, SpaceType typeMem, MemStatsType *memStats)
     {
-        ASSERT(type_mem == SpaceType::SPACE_TYPE_INTERNAL);
-        mem_stats->RecordAllocateRaw(size, type_mem);
+        ASSERT(typeMem == SpaceType::SPACE_TYPE_INTERNAL);
+        memStats->RecordAllocateRaw(size, typeMem);
     }
 
-    static void OnFree(size_t size, SpaceType type_mem, MemStatsType *mem_stats)
+    static void OnFree(size_t size, SpaceType typeMem, MemStatsType *memStats)
     {
-        ASSERT(type_mem == SpaceType::SPACE_TYPE_INTERNAL);
-        mem_stats->RecordFreeRaw(size, type_mem);
+        ASSERT(typeMem == SpaceType::SPACE_TYPE_INTERNAL);
+        memStats->RecordFreeRaw(size, typeMem);
     }
 
     /// @brief We don't need it for raw memory.
     static void MemoryInit([[maybe_unused]] void *mem) {}
 
     // We don't use crossing map for raw memory allocations.
-    static void AddToCrossingMap([[maybe_unused]] void *obj_addr, [[maybe_unused]] size_t obj_size) {}
+    static void AddToCrossingMap([[maybe_unused]] void *objAddr, [[maybe_unused]] size_t objSize) {}
 
     // We don't use crossing map for raw memory allocations.
-    static void RemoveFromCrossingMap([[maybe_unused]] void *obj_addr, [[maybe_unused]] size_t obj_size,
-                                      [[maybe_unused]] void *next_obj_addr = nullptr,
-                                      [[maybe_unused]] void *prev_obj_addr = nullptr,
-                                      [[maybe_unused]] size_t prev_obj_size = 0)
+    static void RemoveFromCrossingMap([[maybe_unused]] void *objAddr, [[maybe_unused]] size_t objSize,
+                                      [[maybe_unused]] void *nextObjAddr = nullptr,
+                                      [[maybe_unused]] void *prevObjAddr = nullptr,
+                                      [[maybe_unused]] size_t prevObjSize = 0)
     {
     }
 
     // We don't use crossing map for raw memory allocations.
-    static void *FindFirstObjInCrossingMap([[maybe_unused]] void *start_addr, [[maybe_unused]] void *end_addr)
+    static void *FindFirstObjInCrossingMap([[maybe_unused]] void *startAddr, [[maybe_unused]] void *endAddr)
     {
         // We can't call CrossingMap when we don't use it
-        ASSERT(start_addr == nullptr);
+        ASSERT(startAddr == nullptr);
         return nullptr;
     }
 
     // We don't use crossing map for raw memory allocations.
-    static void InitializeCrossingMapForMemory([[maybe_unused]] void *start_addr, [[maybe_unused]] size_t size) {}
+    static void InitializeCrossingMapForMemory([[maybe_unused]] void *startAddr, [[maybe_unused]] size_t size) {}
 
     // We don't use crossing map for raw memory allocations.
-    static void RemoveCrossingMapForMemory([[maybe_unused]] void *start_addr, [[maybe_unused]] size_t size) {}
+    static void RemoveCrossingMapForMemory([[maybe_unused]] void *startAddr, [[maybe_unused]] size_t size) {}
 
     // We don't need to track young memory for raw allocations.
-    static void OnInitYoungRegion([[maybe_unused]] const MemRange &mem_range) {}
+    static void OnInitYoungRegion([[maybe_unused]] const MemRange &memRange) {}
 };
 
 /// Debug config with empty MemStats calls and with Crossing Map support.
 class EmptyAllocConfigWithCrossingMap {
 public:
-    static void OnAlloc([[maybe_unused]] size_t size, [[maybe_unused]] SpaceType type_mem,
-                        [[maybe_unused]] MemStatsType *mem_stats)
+    static void OnAlloc([[maybe_unused]] size_t size, [[maybe_unused]] SpaceType typeMem,
+                        [[maybe_unused]] MemStatsType *memStats)
     {
     }
 
-    static void OnFree([[maybe_unused]] size_t size, [[maybe_unused]] SpaceType type_mem,
-                       [[maybe_unused]] MemStatsType *mem_stats)
+    static void OnFree([[maybe_unused]] size_t size, [[maybe_unused]] SpaceType typeMem,
+                       [[maybe_unused]] MemStatsType *memStats)
     {
     }
 
@@ -250,9 +250,9 @@ public:
     static void MemoryInit([[maybe_unused]] void *mem) {}
 
     /// @brief Record new allocation of an object and add it to Crossing Map.
-    static void AddToCrossingMap(void *obj_addr, size_t obj_size)
+    static void AddToCrossingMap(void *objAddr, size_t objSize)
     {
-        CrossingMapSingleton::AddObject(obj_addr, obj_size);
+        CrossingMapSingleton::AddObject(objAddr, objSize);
     }
 
     /**
@@ -264,10 +264,10 @@ public:
      * @param prev_obj_size - size of the previous object.
      *        It is used check if previous object crosses the borders of the current map.
      */
-    static void RemoveFromCrossingMap(void *obj_addr, size_t obj_size, void *next_obj_addr,
-                                      void *prev_obj_addr = nullptr, size_t prev_obj_size = 0)
+    static void RemoveFromCrossingMap(void *objAddr, size_t objSize, void *nextObjAddr, void *prevObjAddr = nullptr,
+                                      size_t prevObjSize = 0)
     {
-        CrossingMapSingleton::RemoveObject(obj_addr, obj_size, next_obj_addr, prev_obj_addr, prev_obj_size);
+        CrossingMapSingleton::RemoveObject(objAddr, objSize, nextObjAddr, prevObjAddr, prevObjSize);
     }
 
     /**
@@ -281,9 +281,9 @@ public:
      *  or an object which crosses a border of this interval
      *  or nullptr
      */
-    static void *FindFirstObjInCrossingMap(void *start_addr, void *end_addr)
+    static void *FindFirstObjInCrossingMap(void *startAddr, void *endAddr)
     {
-        return CrossingMapSingleton::FindFirstObject(start_addr, end_addr);
+        return CrossingMapSingleton::FindFirstObject(startAddr, endAddr);
     }
 
     /**
@@ -291,9 +291,9 @@ public:
      * @param start_addr - pointer to the first byte of the interval.
      * @param size - size of the interval.
      */
-    static void InitializeCrossingMapForMemory(void *start_addr, size_t size)
+    static void InitializeCrossingMapForMemory(void *startAddr, size_t size)
     {
-        return CrossingMapSingleton::InitializeCrossingMapForMemory(start_addr, size);
+        return CrossingMapSingleton::InitializeCrossingMapForMemory(startAddr, size);
     }
 
     /**
@@ -301,13 +301,13 @@ public:
      * @param start_addr - pointer to the first byte of the interval.
      * @param size - size of the interval.
      */
-    static void RemoveCrossingMapForMemory(void *start_addr, size_t size)
+    static void RemoveCrossingMapForMemory(void *startAddr, size_t size)
     {
-        return CrossingMapSingleton::RemoveCrossingMapForMemory(start_addr, size);
+        return CrossingMapSingleton::RemoveCrossingMapForMemory(startAddr, size);
     }
 
     // We don't need to track young memory for these allocations.
-    static void OnInitYoungRegion([[maybe_unused]] const MemRange &mem_range) {}
+    static void OnInitYoungRegion([[maybe_unused]] const MemRange &memRange) {}
 };
 
 /*
@@ -315,36 +315,36 @@ public:
  */
 class EmptyMemoryConfig {
 public:
-    ALWAYS_INLINE static void OnAlloc([[maybe_unused]] size_t size, [[maybe_unused]] SpaceType type_mem,
-                                      [[maybe_unused]] MemStatsType *mem_stats)
+    ALWAYS_INLINE static void OnAlloc([[maybe_unused]] size_t size, [[maybe_unused]] SpaceType typeMem,
+                                      [[maybe_unused]] MemStatsType *memStats)
     {
     }
-    ALWAYS_INLINE static void OnFree([[maybe_unused]] size_t size, [[maybe_unused]] SpaceType type_mem,
-                                     [[maybe_unused]] MemStatsType *mem_stats)
+    ALWAYS_INLINE static void OnFree([[maybe_unused]] size_t size, [[maybe_unused]] SpaceType typeMem,
+                                     [[maybe_unused]] MemStatsType *memStats)
     {
     }
     ALWAYS_INLINE static void MemoryInit([[maybe_unused]] void *mem) {}
-    ALWAYS_INLINE static void AddToCrossingMap([[maybe_unused]] void *obj_addr, [[maybe_unused]] size_t obj_size) {}
-    ALWAYS_INLINE static void RemoveFromCrossingMap([[maybe_unused]] void *obj_addr, [[maybe_unused]] size_t obj_size,
-                                                    [[maybe_unused]] void *next_obj_addr = nullptr,
-                                                    [[maybe_unused]] void *prev_obj_addr = nullptr,
-                                                    [[maybe_unused]] size_t prev_obj_size = 0)
+    ALWAYS_INLINE static void AddToCrossingMap([[maybe_unused]] void *objAddr, [[maybe_unused]] size_t objSize) {}
+    ALWAYS_INLINE static void RemoveFromCrossingMap([[maybe_unused]] void *objAddr, [[maybe_unused]] size_t objSize,
+                                                    [[maybe_unused]] void *nextObjAddr = nullptr,
+                                                    [[maybe_unused]] void *prevObjAddr = nullptr,
+                                                    [[maybe_unused]] size_t prevObjSize = 0)
     {
     }
 
-    ALWAYS_INLINE static void *FindFirstObjInCrossingMap([[maybe_unused]] void *start_addr,
-                                                         [[maybe_unused]] void *end_addr)
+    ALWAYS_INLINE static void *FindFirstObjInCrossingMap([[maybe_unused]] void *startAddr,
+                                                         [[maybe_unused]] void *endAddr)
     {
         // We can't call CrossingMap when we don't use it
-        ASSERT(start_addr == nullptr);
+        ASSERT(startAddr == nullptr);
         return nullptr;
     }
 
-    static void InitializeCrossingMapForMemory([[maybe_unused]] void *start_addr, [[maybe_unused]] size_t size) {}
+    static void InitializeCrossingMapForMemory([[maybe_unused]] void *startAddr, [[maybe_unused]] size_t size) {}
 
-    static void RemoveCrossingMapForMemory([[maybe_unused]] void *start_addr, [[maybe_unused]] size_t size) {}
+    static void RemoveCrossingMapForMemory([[maybe_unused]] void *startAddr, [[maybe_unused]] size_t size) {}
 
-    static void OnInitYoungRegion([[maybe_unused]] const MemRange &mem_range) {}
+    static void OnInitYoungRegion([[maybe_unused]] const MemRange &memRange) {}
 };
 
 }  // namespace panda::mem

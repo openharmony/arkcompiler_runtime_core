@@ -31,16 +31,16 @@ PendingPromiseListener::~PendingPromiseListener()
 void PendingPromiseListener::OnPromiseStateChanged(EtsHandle<EtsPromise> &promise)
 {
     auto *main = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
-    auto *main_coro = static_cast<EtsCoroutine *>(main);
-    auto *cur_ctx = EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>();
+    auto *mainCoro = static_cast<EtsCoroutine *>(main);
+    auto *curCtx = EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>();
 
-    auto on_changed_proc = [&]() { OnPromiseStateChangedImpl(promise); };
+    auto onChangedProc = [&]() { OnPromiseStateChangedImpl(promise); };
 
-    if (EtsCoroutine::GetCurrent() != main_coro) {
+    if (EtsCoroutine::GetCurrent() != mainCoro) {
         // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
-        main_coro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(&on_changed_proc, cur_ctx);
+        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(&onChangedProc, curCtx);
     } else {
-        on_changed_proc();
+        onChangedProc();
     }
 }
 
@@ -51,24 +51,24 @@ void PendingPromiseListener::OnPromiseStateChangedImpl(EtsHandle<EtsPromise> &pr
     auto *ctx = InteropCtx::Current(coro);
     EtsObject *value = promise->GetValue(coro);
     napi_env env = ctx->GetJSEnv();
-    napi_value completion_value;
+    napi_value completionValue;
     if (value == nullptr) {
-        napi_get_null(env, &completion_value);
+        napi_get_null(env, &completionValue);
     } else if (value->GetClass()->IsStringClass()) {
-        completion_value = JSConvertString::Wrap(env, reinterpret_cast<EtsString *>(value));
+        completionValue = JSConvertString::Wrap(env, reinterpret_cast<EtsString *>(value));
     } else if (value->GetClass() == EtsClass::FromRuntimeClass(ctx->GetPromiseClass())) {
-        completion_value = JSConvertPromise::Wrap(env, reinterpret_cast<EtsPromise *>(value));
+        completionValue = JSConvertPromise::Wrap(env, reinterpret_cast<EtsPromise *>(value));
     } else if (value->GetClass() == EtsClass::FromRuntimeClass(ctx->GetJSValueClass())) {
-        completion_value = JSConvertJSValue::Wrap(env, reinterpret_cast<JSValue *>(value));
+        completionValue = JSConvertJSValue::Wrap(env, reinterpret_cast<JSValue *>(value));
     } else {
         auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
-        completion_value = refconv->Wrap(ctx, value);
+        completionValue = refconv->Wrap(ctx, value);
     }
     napi_status status;
     if (promise->IsResolved()) {
-        status = napi_resolve_deferred(env, deferred_, completion_value);
+        status = napi_resolve_deferred(env, deferred_, completionValue);
     } else {
-        status = napi_reject_deferred(env, deferred_, completion_value);
+        status = napi_reject_deferred(env, deferred_, completionValue);
     }
     if (status == napi_ok) {
         completed_ = true;

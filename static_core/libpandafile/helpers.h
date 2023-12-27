@@ -86,9 +86,9 @@ inline uint32_t ReadULeb128(Span<const uint8_t> *sp)
 {
     uint32_t result;
     size_t n;
-    [[maybe_unused]] bool is_full;
-    std::tie(result, n, is_full) = leb128::DecodeUnsigned<uint32_t>(sp->data());
-    ASSERT(is_full);
+    [[maybe_unused]] bool isFull;
+    std::tie(result, n, isFull) = leb128::DecodeUnsigned<uint32_t>(sp->data());
+    ASSERT(isFull);
     *sp = sp->SubSpan(n);
     return result;
 }
@@ -118,9 +118,9 @@ inline int32_t ReadLeb128(Span<const uint8_t> *sp)
 {
     int32_t result;
     size_t n;
-    [[maybe_unused]] bool is_full;
-    std::tie(result, n, is_full) = leb128::DecodeSigned<int32_t>(sp->data());
-    ASSERT(is_full);
+    [[maybe_unused]] bool isFull;
+    std::tie(result, n, isFull) = leb128::DecodeSigned<int32_t>(sp->data());
+    ASSERT(isFull);
     *sp = sp->SubSpan(n);
     return result;
 }

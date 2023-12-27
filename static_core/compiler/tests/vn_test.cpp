@@ -62,8 +62,8 @@ TEST_F(VNTest, VnTestApply1)
             INST(15U, Opcode::ReturnVoid);
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -90,7 +90,7 @@ TEST_F(VNTest, VnTestApply1)
 
     GetGraph()->RunPass<ValNum>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestApply2)
@@ -140,8 +140,8 @@ TEST_F(VNTest, VnTestApply2)
             INST(22U, Opcode::ReturnVoid);
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -188,7 +188,7 @@ TEST_F(VNTest, VnTestApply2)
 
     GetGraph()->RunPass<ValNum>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestNotApply1)
@@ -220,9 +220,9 @@ TEST_F(VNTest, VnTestNotApply1)
             INST(17U, Opcode::ReturnVoid);
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
     // graph_et is equal the graph
-    GRAPH(graph_et)
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -251,7 +251,7 @@ TEST_F(VNTest, VnTestNotApply1)
 
     GetGraph()->RunPass<ValNum>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestNotApply2)
@@ -305,9 +305,9 @@ TEST_F(VNTest, VnTestNotApply2)
             INST(22U, Opcode::ReturnVoid);
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
     // graph_et is equal the graph
-    GRAPH(graph_et)
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -354,7 +354,7 @@ TEST_F(VNTest, VnTestNotApply2)
 
     GetGraph()->RunPass<ValNum>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestNotApply3)
@@ -411,9 +411,9 @@ TEST_F(VNTest, VnTestNotApply3)
     ASSERT_EQ(INS(15U).GetVN(), INS(22U).GetVN());
     ASSERT_EQ(INS(16U).GetVN(), INS(23U).GetVN());
 
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
     // graph_et is equal the graph
-    GRAPH(graph_et)
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -455,7 +455,7 @@ TEST_F(VNTest, VnTestNotApply3)
         }
     }
 
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestApply3)
@@ -496,9 +496,9 @@ TEST_F(VNTest, VnTestApply3)
     GraphChecker(GetGraph()).Check();
     ASSERT_EQ(INS(5U).GetVN(), INS(17U).GetVN());
 
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
     // graph_et is equal the graph
-    GRAPH(graph_et)
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(1U, 0U);
@@ -530,7 +530,7 @@ TEST_F(VNTest, VnTestApply3)
             INST(23U, Opcode::Return).ref().Inputs(0U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, CleanupTrigger)
@@ -641,9 +641,9 @@ TEST_F(VNTest, OSR)
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 
-    auto graph_osr = CreateGraphOsrWithDefaultRuntime();
+    auto graphOsr = CreateGraphOsrWithDefaultRuntime();
 
-    GRAPH(graph_osr)
+    GRAPH(graphOsr)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -670,20 +670,20 @@ TEST_F(VNTest, OSR)
         }
     }
 
-    for (auto bb : graph_osr->GetBlocksRPO()) {
+    for (auto bb : graphOsr->GetBlocksRPO()) {
         if (bb->IsLoopHeader()) {
             bb->SetOsrEntry(true);
         }
     }
 
-    auto clone_osr = GraphCloner(graph_osr, graph_osr->GetAllocator(), graph_osr->GetLocalAllocator()).CloneGraph();
+    auto cloneOsr = GraphCloner(graphOsr, graphOsr->GetAllocator(), graphOsr->GetLocalAllocator()).CloneGraph();
 
     // Don't remove Inst 11 with OSR
 
-    graph_osr->RunPass<ValNum>();
-    graph_osr->RunPass<Cleanup>();
+    graphOsr->RunPass<ValNum>();
+    graphOsr->RunPass<Cleanup>();
 
-    ASSERT_TRUE(GraphComparator().Compare(clone_osr, graph_osr));
+    ASSERT_TRUE(GraphComparator().Compare(cloneOsr, graphOsr));
 }
 
 TEST_F(VNTest, VnTestCommutative)
@@ -717,8 +717,8 @@ TEST_F(VNTest, VnTestCommutative)
             INST(17U, Opcode::ReturnVoid);
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -743,7 +743,7 @@ TEST_F(VNTest, VnTestCommutative)
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestCommutativeNotAppliedNoApplied)
@@ -773,8 +773,8 @@ TEST_F(VNTest, VnTestCommutativeNotAppliedNoApplied)
             INST(15U, Opcode::ReturnVoid);
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).f64();
         PARAMETER(1U, 1U).f64();
@@ -802,7 +802,7 @@ TEST_F(VNTest, VnTestCommutativeNotAppliedNoApplied)
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestIsInstance)
@@ -829,8 +829,8 @@ TEST_F(VNTest, VnTestIsInstance)
             INST(11U, Opcode::ReturnVoid);
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -852,7 +852,7 @@ TEST_F(VNTest, VnTestIsInstance)
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestInitDifferentClasses)
@@ -868,13 +868,12 @@ TEST_F(VNTest, VnTestInitDifferentClasses)
         }
     }
 
-    auto clone_graph =
-        GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    auto cloneGraph = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
 
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), cloneGraph));
 }
 
 TEST_F(VNTest, VnTestInitClass)
@@ -890,8 +889,8 @@ TEST_F(VNTest, VnTestInitClass)
         }
     }
 
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    GRAPH(graphEt)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -904,7 +903,7 @@ TEST_F(VNTest, VnTestInitClass)
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestInitAfterLoad)
@@ -927,8 +926,8 @@ TEST_F(VNTest, VnTestInitAfterLoad)
             INST(8U, Opcode::Return).b().Inputs(3U);
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -946,7 +945,7 @@ TEST_F(VNTest, VnTestInitAfterLoad)
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestLoadAfterInit)
@@ -966,8 +965,8 @@ TEST_F(VNTest, VnTestLoadAfterInit)
             INST(8U, Opcode::Return).b().Inputs(3U);
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -985,7 +984,7 @@ TEST_F(VNTest, VnTestLoadAfterInit)
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, VnTestLoadAndInit)
@@ -1008,8 +1007,8 @@ TEST_F(VNTest, VnTestLoadAndInit)
             INST(9U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *graph_et = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -1026,7 +1025,7 @@ TEST_F(VNTest, VnTestLoadAndInit)
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(VNTest, Domination)
@@ -1131,8 +1130,8 @@ TEST_F(VNTest, BridgeCreator)
         }
     }
 
-    auto graph_after = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_after)
+    auto graphAfter = CreateGraphWithDefaultRuntime();
+    GRAPH(graphAfter)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -1154,7 +1153,7 @@ TEST_F(VNTest, BridgeCreator)
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<ValNum>());
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_after));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphAfter));
 }
 
 // NOTE(schernykh): ????
@@ -1193,11 +1192,10 @@ TEST_F(VNTest, DISABLED_BridgeCreatorExceptionInstNotApplied)
             INST(17U, Opcode::ReturnVoid).v0id();
         }
     }
-    auto clone_graph =
-        GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    auto cloneGraph = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
 
     ASSERT_TRUE(GetGraph()->RunPass<ValNum>());
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), cloneGraph));
 }
 
 TEST_F(VNTest, VNMethodResolver)
@@ -1625,8 +1623,8 @@ TEST_F(VNTest, LoadObjFromConstBridgeCreator)
     ASSERT_TRUE(graph->RunPass<ValNum>());
     ASSERT_TRUE(graph->RunPass<Cleanup>());
 
-    auto graph_after = CreateGraphWithDefaultRuntime();
-    GRAPH(graph_after)
+    auto graphAfter = CreateGraphWithDefaultRuntime();
+    GRAPH(graphAfter)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -1638,8 +1636,8 @@ TEST_F(VNTest, LoadObjFromConstBridgeCreator)
             INST(7U, Opcode::ReturnVoid);
         }
     }
-    GraphChecker(graph_after).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_after));
+    GraphChecker(graphAfter).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphAfter));
 }
 
 TEST_F(VNTest, FunctionImmediateBridgeCreator)
@@ -1667,12 +1665,12 @@ TEST_F(VNTest, FunctionImmediateBridgeCreator)
     ASSERT_TRUE(graph->RunPass<ValNum>());
     ASSERT_TRUE(graph->RunPass<Cleanup>());
 
-    auto graph_after = CreateGraphWithDefaultRuntime();
-    graph_after->SetDynamicMethod();
+    auto graphAfter = CreateGraphWithDefaultRuntime();
+    graphAfter->SetDynamicMethod();
 #ifndef NDEBUG
-    graph_after->SetDynUnitTestFlag();
+    graphAfter->SetDynUnitTestFlag();
 #endif
-    GRAPH(graph_after)
+    GRAPH(graphAfter)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -1684,8 +1682,8 @@ TEST_F(VNTest, FunctionImmediateBridgeCreator)
             INST(7U, Opcode::ReturnVoid);
         }
     }
-    GraphChecker(graph_after).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_after));
+    GraphChecker(graphAfter).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphAfter));
 }
 
 TEST_F(VNTest, LoadFromConstantPool)

@@ -40,51 +40,51 @@ using std::string;
 GcHung *GcHung::instance_ = nullptr;
 
 // NOLINT(google-runtime-references)
-static void Split(const PandaString &str, char delim, PandaVector<PandaString> *elems, bool skip_empty = true)
+static void Split(const PandaString &str, char delim, PandaVector<PandaString> *elems, bool skipEmpty = true)
 {
     PandaIStringStream iss(str);
     for (PandaString item; getline(iss, item, delim);) {
-        if (!(skip_empty && item.empty())) {
+        if (!(skipEmpty && item.empty())) {
             elems->push_back(item);
         }
     }
 }
 
 GcHung::GcHung()
-    : interval_limit_ms_(INTERVAL_LIMIT_MS_INIT),
-      over_time_limit_ms_(OVER_TIME_LIMIT_INIT_MS),
-      water_mark_limit_(WATER_MARK_LIMIT)
+    : intervalLimitMs_(INTERVAL_LIMIT_MS_INIT),
+      overTimeLimitMs_(OVER_TIME_LIMIT_INIT_MS),
+      waterMarkLimit_(WATER_MARK_LIMIT)
 {
     LOG(DEBUG, GC) << "GcHung: Instance created";
 }
 
 GcHung::~GcHung()
 {
-    if (libimonitor_dl_handler_.GetNativeHandle() != nullptr) {
-        dlclose(libimonitor_dl_handler_.GetNativeHandle());
+    if (libimonitorDlHandler_.GetNativeHandle() != nullptr) {
+        dlclose(libimonitorDlHandler_.GetNativeHandle());
     }
-    LOG(DEBUG, GC) << "GcHung: Instance deleted: water_mark: " << water_mark_;
+    LOG(DEBUG, GC) << "GcHung: Instance deleted: water_mark: " << waterMark_;
 }
 
 int GcHung::GetConfig()
 {
-    const unsigned int max_para_len = 100;
+    const unsigned int maxParaLen = 100;
     // get parameter from zrhung
-    if (zrhung_get_config_ == nullptr) {
+    if (zrhungGetConfig_ == nullptr) {
         return -1;
     }
 
-    char para_buf[max_para_len] = {0};  // NOLINT(modernize-avoid-c-arrays)
-    if (zrhung_get_config_(ZRHUNG_WP_GC, para_buf, max_para_len) != 0) {
+    char paraBuf[maxParaLen] = {0};  // NOLINT(modernize-avoid-c-arrays)
+    if (zrhungGetConfig_(ZRHUNG_WP_GC, paraBuf, maxParaLen) != 0) {
         LOG(DEBUG, GC) << "GcHung: failed to get config";
         return -1;
     }
 
-    PandaString para_str(para_buf);
-    PandaVector<PandaString> para_vec;
-    Split(para_str, ',', &para_vec);
+    PandaString paraStr(paraBuf);
+    PandaVector<PandaString> paraVec;
+    Split(paraStr, ',', &paraVec);
 
-    if (para_vec.size() != GC_PARA_COUNT) {
+    if (paraVec.size() != GC_PARA_COUNT) {
         LOG(ERROR, GC) << "GcHung: parse parameters failed";
         return -1;
     }
@@ -92,61 +92,61 @@ int GcHung::GetConfig()
 #ifdef HUNG_SYSTEM_SERVER_ONLY
     enabled_ = (stoi(PandaStringToStd(paraVec[GC_PARA_ENABLE])) == 1) && is_systemserver_;
 #else
-    enabled_ = (stoi(PandaStringToStd(para_vec[GC_PARA_ENABLE])) == 1);
+    enabled_ = (stoi(PandaStringToStd(paraVec[GC_PARA_ENABLE])) == 1);
 #endif  // HUNG_SYSTEM_SERVER_ONLY
     LOG(INFO, GC) << "GcHung: module enable:" << enabled_;
 
-    interval_limit_ms_ = static_cast<uint64_t>(std::stoi(PandaStringToStd(para_vec[GC_PARA_INTERVAL])));
-    water_mark_limit_ = std::stoi(PandaStringToStd(para_vec[GC_PARA_WATERMARK]));
-    over_time_limit_ms_ = static_cast<uint64_t>(std::stoi(PandaStringToStd(para_vec[GC_PARA_OVERTIME])));
-    LOG(DEBUG, GC) << "GcHung: set parameter: interval_limit_ms_ = " << interval_limit_ms_ << "ms";
-    LOG(DEBUG, GC) << "GcHung: set parameter: water_mark_limit_ = " << water_mark_limit_;
-    LOG(DEBUG, GC) << "GcHung: set parameter: over_time_limit_ms_ = " << over_time_limit_ms_ << "ms";
-    config_ready_ = true;
+    intervalLimitMs_ = static_cast<uint64_t>(std::stoi(PandaStringToStd(paraVec[GC_PARA_INTERVAL])));
+    waterMarkLimit_ = std::stoi(PandaStringToStd(paraVec[GC_PARA_WATERMARK]));
+    overTimeLimitMs_ = static_cast<uint64_t>(std::stoi(PandaStringToStd(paraVec[GC_PARA_OVERTIME])));
+    LOG(DEBUG, GC) << "GcHung: set parameter: interval_limit_ms_ = " << intervalLimitMs_ << "ms";
+    LOG(DEBUG, GC) << "GcHung: set parameter: water_mark_limit_ = " << waterMarkLimit_;
+    LOG(DEBUG, GC) << "GcHung: set parameter: over_time_limit_ms_ = " << overTimeLimitMs_ << "ms";
+    configReady_ = true;
 
     return 0;
 }
 
 int GcHung::LoadLibimonitor()
 {
-    if ((zrhung_send_event_ != nullptr) && (zrhung_get_config_ != nullptr)) {
+    if ((zrhungSendEvent_ != nullptr) && (zrhungGetConfig_ != nullptr)) {
         return 1;
     }
     LOG(DEBUG, GC) << "GcHung: load libimonitor";
-    auto res_load = os::library_loader::Load(LIB_IMONITOR);
-    if (!res_load) {
-        LOG(ERROR, RUNTIME) << "failed to load " << LIB_IMONITOR << " Error: " << res_load.Error().ToString();
+    auto resLoad = os::library_loader::Load(LIB_IMONITOR);
+    if (!resLoad) {
+        LOG(ERROR, RUNTIME) << "failed to load " << LIB_IMONITOR << " Error: " << resLoad.Error().ToString();
         return -1;
     }
-    libimonitor_dl_handler_ = std::move(res_load.Value());
+    libimonitorDlHandler_ = std::move(resLoad.Value());
 
-    auto zrhung_send_event_dlsym = os::library_loader::ResolveSymbol(libimonitor_dl_handler_, "zrhung_send_event");
-    if (!zrhung_send_event_dlsym) {
+    auto zrhungSendEventDlsym = os::library_loader::ResolveSymbol(libimonitorDlHandler_, "zrhung_send_event");
+    if (!zrhungSendEventDlsym) {
         LOG(ERROR, RUNTIME) << "failed to dlsym symbol: zrhung_send_event";
-        dlclose(libimonitor_dl_handler_.GetNativeHandle());
+        dlclose(libimonitorDlHandler_.GetNativeHandle());
         return -1;
     }
-    zrhung_send_event_ = reinterpret_cast<ZrhungSendEvent>(zrhung_send_event_dlsym.Value());
+    zrhungSendEvent_ = reinterpret_cast<ZrhungSendEvent>(zrhungSendEventDlsym.Value());
 
-    auto zrhung_get_config_dlsym = os::library_loader::ResolveSymbol(libimonitor_dl_handler_, "zrhung_get_config");
-    if (!zrhung_get_config_dlsym) {
+    auto zrhungGetConfigDlsym = os::library_loader::ResolveSymbol(libimonitorDlHandler_, "zrhung_get_config");
+    if (!zrhungGetConfigDlsym) {
         LOG(ERROR, RUNTIME) << "failed to dlsym symbol: zrhung_get_config";
-        dlclose(libimonitor_dl_handler_.GetNativeHandle());
+        dlclose(libimonitorDlHandler_.GetNativeHandle());
         return -1;
     }
-    zrhung_get_config_ = reinterpret_cast<ZrhungGetConfig>(zrhung_get_config_dlsym.Value());
+    zrhungGetConfig_ = reinterpret_cast<ZrhungGetConfig>(zrhungGetConfigDlsym.Value());
     return 0;
 }
 
-void GcHung::InitInternal(bool is_systemserver)
+void GcHung::InitInternal(bool isSystemserver)
 {
     pid_ = getpid();
-    last_gc_time_ns_ = 0;
-    congestion_duration_ns_ = 0;
-    water_mark_ = 0;
-    report_count_ = 0;
-    start_time_ns_ = 0;
-    is_systemserver_ = is_systemserver;
+    lastGcTimeNs_ = 0;
+    congestionDurationNs_ = 0;
+    waterMark_ = 0;
+    reportCount_ = 0;
+    startTimeNs_ = 0;
+    isSystemserver_ = isSystemserver;
 #ifdef HUNG_SYSTEM_SERVER_ONLY
     ready_ = is_systemserver;  // if is_systemserver == false, hung will be close and no way to open again
 #else
@@ -159,20 +159,20 @@ void GcHung::InitInternal(bool is_systemserver)
 void GcHung::SendZerohungEvent(const PandaString &error, int pid, PandaString msg)
 {
     msg = ">>>*******************" + error + "******************\n" + msg;
-    if ((zrhung_send_event_ == nullptr) || (zrhung_get_config_ == nullptr)) {
+    if ((zrhungSendEvent_ == nullptr) || (zrhungGetConfig_ == nullptr)) {
         LOG(ERROR, GC) << "GcHung: zrhung functions not defined";
         return;
     }
     if (pid > 0) {
         PandaString command = "P=" + ToPandaString(pid);
-        zrhung_send_event_(ZRHUNG_WP_GC, command.c_str(), msg.c_str());
+        zrhungSendEvent_(ZRHUNG_WP_GC, command.c_str(), msg.c_str());
     } else {
-        zrhung_send_event_(ZRHUNG_WP_GC, nullptr, msg.c_str());
+        zrhungSendEvent_(ZRHUNG_WP_GC, nullptr, msg.c_str());
     }
 }
 
 // check threads suspend while get "Locks::mutator_lock->WriteLock()", and report to hung
-void GcHung::CheckSuspend(const PandaList<MTManagedThread *> &threads, uint64_t start_time)
+void GcHung::CheckSuspend(const PandaList<MTManagedThread *> &threads, uint64_t startTime)
 {
     LOG(DEBUG, GC) << "GcHung: check suspend timeout";
     PandaOStringStream oss;
@@ -184,12 +184,12 @@ void GcHung::CheckSuspend(const PandaList<MTManagedThread *> &threads, uint64_t 
             auto tid = thread->GetId();
 
             oss << "GcHung: Timed out waiting for thread " << tid << " to suspend, waited for "
-                << helpers::TimeConverter(time::GetCurrentTimeInNanos() - start_time) << std::endl;
+                << helpers::TimeConverter(time::GetCurrentTimeInNanos() - startTime) << std::endl;
         }
     }
     LOG(ERROR, GC) << oss.str();
 
-    if (config_ready_ && enabled_) {
+    if (configReady_ && enabled_) {
         SendZerohungEvent("SuspendAll timed out", getpid(), oss.str());
     }
 }
@@ -197,54 +197,54 @@ void GcHung::CheckSuspend(const PandaList<MTManagedThread *> &threads, uint64_t 
 void GcHung::CheckFrequency()
 {
     LOG(DEBUG, GC) << "GcHung: gc frequency check: PID = " << pid_
-                   << " last_gc_time_ns_=" << helpers::TimeConverter(last_gc_time_ns_)
+                   << " last_gc_time_ns_=" << helpers::TimeConverter(lastGcTimeNs_)
                    << " current_time=" << helpers::TimeConverter(time::GetCurrentTimeInNanos());
 
-    if (last_gc_time_ns_ == 0) {
-        last_gc_time_ns_ = time::GetCurrentTimeInNanos();
+    if (lastGcTimeNs_ == 0) {
+        lastGcTimeNs_ = time::GetCurrentTimeInNanos();
         return;
     }
 
     using ResultDuration = std::chrono::duration<uint64_t, std::deca>;
-    std::chrono::microseconds msec(interval_limit_ms_);
-    if ((start_time_ns_ - last_gc_time_ns_) < std::chrono::duration_cast<ResultDuration>(msec).count()) {
-        water_mark_++;
-        congestion_duration_ns_ += (time::GetCurrentTimeInNanos() - last_gc_time_ns_);
-        LOG(DEBUG, GC) << "GcHung: proc " << pid_ << " water_mark_:" << water_mark_
-                       << " duration:" << helpers::TimeConverter(time::GetCurrentTimeInNanos() - last_gc_time_ns_);
+    std::chrono::microseconds msec(intervalLimitMs_);
+    if ((startTimeNs_ - lastGcTimeNs_) < std::chrono::duration_cast<ResultDuration>(msec).count()) {
+        waterMark_++;
+        congestionDurationNs_ += (time::GetCurrentTimeInNanos() - lastGcTimeNs_);
+        LOG(DEBUG, GC) << "GcHung: proc " << pid_ << " water_mark_:" << waterMark_
+                       << " duration:" << helpers::TimeConverter(time::GetCurrentTimeInNanos() - lastGcTimeNs_);
     } else {
-        water_mark_ = 0;
-        congestion_duration_ns_ = 0;
+        waterMark_ = 0;
+        congestionDurationNs_ = 0;
     }
 
-    if (water_mark_ > water_mark_limit_) {
+    if (waterMark_ > waterMarkLimit_) {
         PandaOStringStream oss;
-        oss << "GcHung: GC congestion PID:" << pid_ << " Freq:" << water_mark_ << "/"
-            << helpers::TimeConverter(congestion_duration_ns_);
+        oss << "GcHung: GC congestion PID:" << pid_ << " Freq:" << waterMark_ << "/"
+            << helpers::TimeConverter(congestionDurationNs_);
 
         LOG(ERROR, GC) << oss.str();
-        if (config_ready_ && enabled_) {
+        if (configReady_ && enabled_) {
             SendZerohungEvent("GC congestion", -1, oss.str());  // -1: invalid pid
         }
-        water_mark_ = 0;
-        congestion_duration_ns_ = 0;
+        waterMark_ = 0;
+        congestionDurationNs_ = 0;
     }
-    last_gc_time_ns_ = time::GetCurrentTimeInNanos();
+    lastGcTimeNs_ = time::GetCurrentTimeInNanos();
 }
 
 void GcHung::CheckOvertime(const GCTask &task)
 {
-    uint64_t gc_time = time::GetCurrentTimeInNanos() - start_time_ns_;
-    LOG(DEBUG, GC) << "GcHung: gc overtime check: start_time_ns_=" << helpers::TimeConverter(start_time_ns_)
+    uint64_t gcTime = time::GetCurrentTimeInNanos() - startTimeNs_;
+    LOG(DEBUG, GC) << "GcHung: gc overtime check: start_time_ns_=" << helpers::TimeConverter(startTimeNs_)
                    << " current_time=" << helpers::TimeConverter(time::GetCurrentTimeInNanos())
-                   << " total_time=" << helpers::TimeConverter(gc_time);
+                   << " total_time=" << helpers::TimeConverter(gcTime);
     using ResultDuration = std::chrono::duration<uint64_t, std::deca>;
-    std::chrono::microseconds msec(over_time_limit_ms_);
-    if (gc_time > std::chrono::duration_cast<ResultDuration>(msec).count()) {
+    std::chrono::microseconds msec(overTimeLimitMs_);
+    if (gcTime > std::chrono::duration_cast<ResultDuration>(msec).count()) {
         PandaOStringStream oss;
-        oss << "GcHung: GC overtime: total:" << helpers::TimeConverter(gc_time) << " cause: " << task.reason;
+        oss << "GcHung: GC overtime: total:" << helpers::TimeConverter(gcTime) << " cause: " << task.reason;
         LOG(ERROR, GC) << oss.str();
-        if (config_ready_ && enabled_) {
+        if (configReady_ && enabled_) {
             SendZerohungEvent("GC overtime", -1, oss.str());  // -1: invalid pid
         }
     }
@@ -252,7 +252,7 @@ void GcHung::CheckOvertime(const GCTask &task)
 
 void GcHung::UpdateStartTime()
 {
-    start_time_ns_ = time::GetCurrentTimeInNanos();
+    startTimeNs_ = time::GetCurrentTimeInNanos();
 }
 
 void GcHung::Start()
@@ -282,10 +282,10 @@ void GcHung::Check(const GCTask &task)
 }
 
 // NOLINTNEXTLINE(google-runtime-references)
-void GcHung::Check(const PandaList<MTManagedThread *> &threads, uint64_t start_time)
+void GcHung::Check(const PandaList<MTManagedThread *> &threads, uint64_t startTime)
 {
     if (instance_ != nullptr) {
-        instance_->CheckSuspend(threads, start_time);
+        instance_->CheckSuspend(threads, startTime);
     } else {
         LOG(INFO, GC) << "GcHung not initiated yet, skip checking";
     }
@@ -322,11 +322,11 @@ void GcHung::InitPreFork(bool enabled)
     }
 }
 
-void GcHung::InitPostFork(bool is_systemserver)
+void GcHung::InitPostFork(bool isSystemserver)
 {
     LOG(DEBUG, GC) << "GcHung: InitPostFork";
     if (instance_ != nullptr) {
-        instance_->InitInternal(is_systemserver);
+        instance_->InitInternal(isSystemserver);
     }
 }
 

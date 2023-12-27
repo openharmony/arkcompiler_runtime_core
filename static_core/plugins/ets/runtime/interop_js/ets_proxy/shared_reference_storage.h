@@ -39,17 +39,17 @@ public:
     static std::unique_ptr<SharedReferenceStorage> Create();
     ~SharedReferenceStorage() = default;
 
-    static bool HasReference(EtsObject *ets_object)
+    static bool HasReference(EtsObject *etsObject)
     {
-        return SharedReference::HasReference(ets_object);
+        return SharedReference::HasReference(etsObject);
     }
 
-    SharedReference *CreateETSObjectRef(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object);
-    SharedReference *CreateJSObjectRef(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object);
-    SharedReference *CreateHybridObjectRef(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object);
+    SharedReference *CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+    SharedReference *CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+    SharedReference *CreateHybridObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
 
-    SharedReference *GetReference(napi_env env, napi_value js_object);
-    SharedReference *GetReference(EtsObject *ets_object);
+    SharedReference *GetReference(napi_env env, napi_value jsObject);
+    SharedReference *GetReference(EtsObject *etsObject);
 
     SharedReference *GetNextAlloc() const
     {
@@ -64,10 +64,10 @@ private:
     NO_MOVE_SEMANTIC(SharedReferenceStorage);
 
     template <SharedReference::InitFn REF_INIT>
-    inline SharedReference *CreateReference(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object);
+    inline SharedReference *CreateReference(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
 
     SharedReference *GetReference(void *data);
-    void RemoveReference(SharedReference *shared_ref);
+    void RemoveReference(SharedReference *sharedRef);
 
     bool CheckAlive(void *data);
     friend class SharedReference;

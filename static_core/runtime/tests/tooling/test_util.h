@@ -33,30 +33,30 @@ using TestMap = std::unordered_map<panda_file::SourceLang, std::unordered_map<co
 
 class TestUtil {
 public:
-    static void RegisterTest(panda_file::SourceLang language, const char *test_name, std::unique_ptr<ApiTest> test)
+    static void RegisterTest(panda_file::SourceLang language, const char *testName, std::unique_ptr<ApiTest> test)
     {
-        auto it = test_map_.find(language);
-        if (it == test_map_.end()) {
+        auto it = testMap_.find(language);
+        if (it == testMap_.end()) {
             std::unordered_map<const char *, std::unique_ptr<ApiTest>> entry;
-            auto res = test_map_.emplace(language, std::move(entry));
+            auto res = testMap_.emplace(language, std::move(entry));
             it = res.first;
         }
-        it->second.insert({test_name, std::move(test)});
+        it->second.insert({testName, std::move(test)});
     }
 
     static void SetExtractorFactory(TestExtractorFactory *factory)
     {
-        extractor_factory_ = factory;
+        extractorFactory_ = factory;
     }
 
     static ApiTest *GetTest(const char *name)
     {
-        for (const auto &[lang, internal_map] : test_map_) {
+        for (const auto &[lang, internal_map] : testMap_) {
             (void)lang;
-            auto internal_it = std::find_if(internal_map.begin(), internal_map.end(),
-                                            [name](auto &iterator) { return !::strcmp(iterator.first, name); });
-            if (internal_it != internal_map.end()) {
-                return internal_it->second.get();
+            auto internalIt = std::find_if(internal_map.begin(), internal_map.end(),
+                                           [name](auto &iterator) { return !::strcmp(iterator.first, name); });
+            if (internalIt != internal_map.end()) {
+                return internalIt->second.get();
             }
         }
         LOG(FATAL, DEBUGGER) << "Test " << name << " not found";
@@ -65,84 +65,84 @@ public:
 
     static PtThread WaitForBreakpoint(PtLocation location)
     {
-        PtThread stopped_thread(PtThread::NONE);
-        auto predicate = [&location]() REQUIRES(event_mutex_) { return last_event_location_ == location; };
-        auto on_success = [&stopped_thread]() REQUIRES(event_mutex_) {
-            stopped_thread = last_event_thread_;
+        PtThread stoppedThread(PtThread::NONE);
+        auto predicate = [&location]() REQUIRES(eventMutex_) { return lastEventLocation_ == location; };
+        auto onSuccess = [&stoppedThread]() REQUIRES(eventMutex_) {
+            stoppedThread = lastEventThread_;
 
             // Need to reset location, because we might want to stop at the same point
-            last_event_location_ = PtLocation("", EntityId(0), 0);
+            lastEventLocation_ = PtLocation("", EntityId(0), 0);
         };
 
-        WaitForEvent(DebugEvent::BREAKPOINT, predicate, on_success);
-        return stopped_thread;
+        WaitForEvent(DebugEvent::BREAKPOINT, predicate, onSuccess);
+        return stoppedThread;
     }
 
     static bool WaitForExit()
     {
         return WaitForEvent(
-            DebugEvent::VM_DEATH, []() REQUIRES(event_mutex_) { return last_event_ == DebugEvent::VM_DEATH; }, [] {});
+            DebugEvent::VM_DEATH, []() REQUIRES(eventMutex_) { return lastEvent_ == DebugEvent::VM_DEATH; }, [] {});
     }
 
     static bool WaitForInit()
     {
         return WaitForEvent(
-            DebugEvent::VM_INITIALIZATION, []() REQUIRES(event_mutex_) { return initialized_; }, [] {});
+            DebugEvent::VM_INITIALIZATION, []() REQUIRES(eventMutex_) { return initialized_; }, [] {});
     }
 
     static void Event(DebugEvent event, PtThread thread = PtThread::NONE,
                       PtLocation location = PtLocation("", EntityId(0), 0))
     {
         LOG(DEBUG, DEBUGGER) << "Occured event " << event << " in thread with id " << thread.GetId();
-        os::memory::LockHolder holder(event_mutex_);
-        last_event_ = event;
-        last_event_thread_ = thread;
-        last_event_location_ = location;
+        os::memory::LockHolder holder(eventMutex_);
+        lastEvent_ = event;
+        lastEventThread_ = thread;
+        lastEventLocation_ = location;
         if (event == DebugEvent::VM_INITIALIZATION) {
             initialized_ = true;
         }
-        event_cv_.Signal();
+        eventCv_.Signal();
     }
 
     static void Reset()
     {
-        os::memory::LockHolder lock(event_mutex_);
+        os::memory::LockHolder lock(eventMutex_);
         initialized_ = false;
-        last_event_ = DebugEvent::VM_START;
+        lastEvent_ = DebugEvent::VM_START;
     }
 
     static TestMap &GetTests()
     {
-        return test_map_;
+        return testMap_;
     }
 
     static bool IsTestFinished()
     {
-        os::memory::LockHolder lock(event_mutex_);
-        return last_event_ == DebugEvent::VM_DEATH;
+        os::memory::LockHolder lock(eventMutex_);
+        return lastEvent_ == DebugEvent::VM_DEATH;
     }
 
-    static PtLocation GetLocation(const char *source_file, uint32_t line, const char *panda_file)
+    static PtLocation GetLocation(const char *sourceFile, uint32_t line, const char *pandaFile)
     {
-        std::unique_ptr<const panda_file::File> u_file = panda_file::File::Open(panda_file);
-        const panda_file::File *pf = u_file.get();
+        std::unique_ptr<const panda_file::File> uFile = panda_file::File::Open(pandaFile);
+        const panda_file::File *pf = uFile.get();
         if (pf == nullptr) {
             return PtLocation("", EntityId(0), 0);
         }
 
-        auto extractor = extractor_factory_->MakeTestExtractor(pf);
-        auto [id, offset] = extractor->GetBreakpointAddress({source_file, line});
-        return PtLocation(panda_file, id, offset);
+        auto extractor = extractorFactory_->MakeTestExtractor(pf);
+        auto [id, offset] = extractor->GetBreakpointAddress({sourceFile, line});
+        return PtLocation(pandaFile, id, offset);
     }
 
     static std::vector<panda_file::LocalVariableInfo> GetVariables(Method *method, uint32_t offset);
 
-    static int32_t GetValueRegister(Method *method, const char *var_name, uint32_t offset = 0);
+    static int32_t GetValueRegister(Method *method, const char *varName, uint32_t offset = 0);
 
     static bool SuspendUntilContinue(DebugEvent reason, PtThread thread, PtLocation location)
     {
         {
-            os::memory::LockHolder lock(suspend_mutex_);
+            os::memory::LockHolder lock(suspendMutex_);
             suspended_ = true;
         }
 
@@ -151,9 +151,9 @@ public:
 
         // Wait for continue
         {
-            os::memory::LockHolder lock(suspend_mutex_);
+            os::memory::LockHolder lock(suspendMutex_);
             while (suspended_) {
-                suspend_cv_.Wait(&suspend_mutex_);
+                suspendCv_.Wait(&suspendMutex_);
             }
         }
 
@@ -162,26 +162,26 @@ public:
 
     static bool Continue()
     {
-        os::memory::LockHolder lock(suspend_mutex_);
+        os::memory::LockHolder lock(suspendMutex_);
         suspended_ = false;
-        suspend_cv_.Signal();
+        suspendCv_.Signal();
         return true;
     }
 
-    static bool GetUserThreadList(DebugInterface *debug_interface, PandaVector<PtThread> *thread_list)
+    static bool GetUserThreadList(DebugInterface *debugInterface, PandaVector<PtThread> *threadList)
     {
         PandaVector<PtThread> threads;
-        debug_interface->GetThreadList(&threads);
+        debugInterface->GetThreadList(&threads);
 
         for (auto &thread : threads) {
-            ManagedThread *managed_thread = thread.GetManagedThread();
-            if (MTManagedThread::ThreadIsMTManagedThread(managed_thread)) {
-                auto mt_managed_thread = MTManagedThread::CastFromThread(managed_thread);
-                if (mt_managed_thread->IsDaemon()) {
+            ManagedThread *managedThread = thread.GetManagedThread();
+            if (MTManagedThread::ThreadIsMTManagedThread(managedThread)) {
+                auto mtManagedThread = MTManagedThread::CastFromThread(managedThread);
+                if (mtManagedThread->IsDaemon()) {
                     continue;
                 }
             }
-            thread_list->push_back(thread);
+            threadList->push_back(thread);
         }
         return true;
     }
@@ -190,14 +190,14 @@ private:
     template <class Predicate, class OnSuccessAction>
     static bool WaitForEvent(DebugEvent event, Predicate predicate, OnSuccessAction action)
     {
-        os::memory::LockHolder holder(event_mutex_);
+        os::memory::LockHolder holder(eventMutex_);
         while (!predicate()) {
-            if (last_event_ == DebugEvent::VM_DEATH) {
+            if (lastEvent_ == DebugEvent::VM_DEATH) {
                 return false;
             }
             constexpr uint64_t TIMEOUT_MSEC = 100000U;
-            bool time_exceeded = event_cv_.TimedWait(&event_mutex_, TIMEOUT_MSEC);
-            if (time_exceeded) {
+            bool timeExceeded = eventCv_.TimedWait(&eventMutex_, TIMEOUT_MSEC);
+            if (timeExceeded) {
                 LOG(FATAL, DEBUGGER) << "Time limit exceeded while waiting " << event;
                 return false;
             }
@@ -206,17 +206,17 @@ private:
         return true;
     }
 
-    static TestMap test_map_;
-    static os::memory::Mutex event_mutex_;
-    static os::memory::ConditionVariable event_cv_ GUARDED_BY(event_mutex_);
-    static DebugEvent last_event_ GUARDED_BY(event_mutex_);
-    static PtThread last_event_thread_ GUARDED_BY(event_mutex_);
-    static PtLocation last_event_location_ GUARDED_BY(event_mutex_);
-    static os::memory::Mutex suspend_mutex_;
-    static os::memory::ConditionVariable suspend_cv_ GUARDED_BY(suspend_mutex_);
-    static bool suspended_ GUARDED_BY(suspend_mutex_);
-    static bool initialized_ GUARDED_BY(event_mutex_);
-    static TestExtractorFactory *extractor_factory_;
+    static TestMap testMap_;
+    static os::memory::Mutex eventMutex_;
+    static os::memory::ConditionVariable eventCv_ GUARDED_BY(eventMutex_);
+    static DebugEvent lastEvent_ GUARDED_BY(eventMutex_);
+    static PtThread lastEventThread_ GUARDED_BY(eventMutex_);
+    static PtLocation lastEventLocation_ GUARDED_BY(eventMutex_);
+    static os::memory::Mutex suspendMutex_;
+    static os::memory::ConditionVariable suspendCv_ GUARDED_BY(suspendMutex_);
+    static bool suspended_ GUARDED_BY(suspendMutex_);
+    static bool initialized_ GUARDED_BY(eventMutex_);
+    static TestExtractorFactory *extractorFactory_;
 };
 
 // Some toolchains have << overloading for std::nullptr_t

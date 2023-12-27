@@ -19,11 +19,11 @@
 
 namespace panda::ets::test {
 
-static const char *TEST_BIN_FILE_NAME = "AccessingObjectsFieldsTest.abc";
+static const char *g_testBinFileName = "AccessingObjectsFieldsTest.abc";
 
 class AccessingObjectsFieldsTestGeneral : public AccessingObjectsFieldsTestBase {
 public:
-    AccessingObjectsFieldsTestGeneral() : AccessingObjectsFieldsTestBase(TEST_BIN_FILE_NAME) {}
+    AccessingObjectsFieldsTestGeneral() : AccessingObjectsFieldsTestBase(g_testBinFileName) {}
 };
 
 class AccessingObjectsFieldsTest : public AccessingObjectsFieldsTestGeneral {};
@@ -48,34 +48,34 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetTypeFieldDeathTest1)
     {
         ets_class cls = env_->FindClass("F");
         ASSERT_NE(cls, nullptr);
-        ets_field member0_id = env_->Getp_field(cls, "member0", "Z");
-        ASSERT_NE(member0_id, nullptr);
-        ets_field member1_id = env_->Getp_field(cls, "member1", "B");
-        ASSERT_NE(member1_id, nullptr);
-        ets_field member2_id = env_->Getp_field(cls, "member2", "C");
-        ASSERT_NE(member2_id, nullptr);
-        ets_field member3_id = env_->Getp_field(cls, "member3", "S");
-        ASSERT_NE(member3_id, nullptr);
-        ets_field member4_id = env_->Getp_field(cls, "member4", "I");
-        ASSERT_NE(member4_id, nullptr);
-        ets_field member5_id = env_->Getp_field(cls, "member5", "J");
-        ASSERT_NE(member5_id, nullptr);
-        ets_field member6_id = env_->Getp_field(cls, "member6", "F");
-        ASSERT_NE(member6_id, nullptr);
-        ets_field member7_id = env_->Getp_field(cls, "member7", "D");
-        ASSERT_NE(member7_id, nullptr);
-        ets_field member8_id = env_->Getp_field(cls, "member8", "LA;");
-        ASSERT_NE(member8_id, nullptr);
+        ets_field member0Id = env_->Getp_field(cls, "member0", "Z");
+        ASSERT_NE(member0Id, nullptr);
+        ets_field member1Id = env_->Getp_field(cls, "member1", "B");
+        ASSERT_NE(member1Id, nullptr);
+        ets_field member2Id = env_->Getp_field(cls, "member2", "C");
+        ASSERT_NE(member2Id, nullptr);
+        ets_field member3Id = env_->Getp_field(cls, "member3", "S");
+        ASSERT_NE(member3Id, nullptr);
+        ets_field member4Id = env_->Getp_field(cls, "member4", "I");
+        ASSERT_NE(member4Id, nullptr);
+        ets_field member5Id = env_->Getp_field(cls, "member5", "J");
+        ASSERT_NE(member5Id, nullptr);
+        ets_field member6Id = env_->Getp_field(cls, "member6", "F");
+        ASSERT_NE(member6Id, nullptr);
+        ets_field member7Id = env_->Getp_field(cls, "member7", "D");
+        ASSERT_NE(member7Id, nullptr);
+        ets_field member8Id = env_->Getp_field(cls, "member8", "LA;");
+        ASSERT_NE(member8Id, nullptr);
 
-        EXPECT_DEATH(env_->GetObjectField(nullptr, member8_id), "");
-        EXPECT_DEATH(env_->GetBooleanField(nullptr, member0_id), "");
-        EXPECT_DEATH(env_->GetByteField(nullptr, member1_id), "");
-        EXPECT_DEATH(env_->GetCharField(nullptr, member2_id), "");
-        EXPECT_DEATH(env_->GetShortField(nullptr, member3_id), "");
-        EXPECT_DEATH(env_->GetIntField(nullptr, member4_id), "");
-        EXPECT_DEATH(env_->GetLongField(nullptr, member5_id), "");
-        EXPECT_DEATH(env_->GetFloatField(nullptr, member6_id), "");
-        EXPECT_DEATH(env_->GetDoubleField(nullptr, member7_id), "");
+        EXPECT_DEATH(env_->GetObjectField(nullptr, member8Id), "");
+        EXPECT_DEATH(env_->GetBooleanField(nullptr, member0Id), "");
+        EXPECT_DEATH(env_->GetByteField(nullptr, member1Id), "");
+        EXPECT_DEATH(env_->GetCharField(nullptr, member2Id), "");
+        EXPECT_DEATH(env_->GetShortField(nullptr, member3Id), "");
+        EXPECT_DEATH(env_->GetIntField(nullptr, member4Id), "");
+        EXPECT_DEATH(env_->GetLongField(nullptr, member5Id), "");
+        EXPECT_DEATH(env_->GetFloatField(nullptr, member6Id), "");
+        EXPECT_DEATH(env_->GetDoubleField(nullptr, member7Id), "");
     }
 }
 

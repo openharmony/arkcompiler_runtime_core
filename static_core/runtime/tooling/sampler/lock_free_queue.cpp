@@ -19,7 +19,7 @@ namespace panda::tooling::sampler {
 
 void LockFreeQueue::Push(const FileInfo &data)
 {
-    Node *new_node = new Node(std::make_unique<FileInfo>(data), nullptr);
+    Node *newNode = new Node(std::make_unique<FileInfo>(data), nullptr);
 
     for (;;) {
         // Atomic with acquire order reason: to sync with push in other threads
@@ -31,14 +31,14 @@ void LockFreeQueue::Push(const FileInfo &data)
         Node *tail2 = tail_.load(std::memory_order_acquire);
         if (tail == tail2) {
             if (next == nullptr) {
-                if (tail->next.compare_exchange_weak(next, new_node)) {
-                    tail_.compare_exchange_strong(tail, new_node);
+                if (tail->next.compare_exchange_weak(next, newNode)) {
+                    tail_.compare_exchange_strong(tail, newNode);
                     ++size_;
                     return;
                 }
             } else {
-                Node *new_tail = next;
-                tail_.compare_exchange_strong(tail, new_tail);
+                Node *newTail = next;
+                tail_.compare_exchange_strong(tail, newTail);
             }
         }
     }
@@ -59,16 +59,16 @@ void LockFreeQueue::Pop(FileInfo &ret)
         if (head == head2) {
             if (head == tail) {
                 ASSERT(next != nullptr);
-                Node *new_tail = next;
-                tail_.compare_exchange_strong(tail, new_tail);
+                Node *newTail = next;
+                tail_.compare_exchange_strong(tail, newTail);
             } else {
                 if (next == nullptr) {
                     continue;
                 }
                 ASSERT(next->data != nullptr);
                 ret = *(next->data);
-                Node *new_head = next;
-                if (head_.compare_exchange_weak(head, new_head)) {
+                Node *newHead = next;
+                if (head_.compare_exchange_weak(head, newHead)) {
                     delete head;
                     --size_;
                     return;

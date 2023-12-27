@@ -27,7 +27,7 @@ inline auto BytecodeInst<MODE>::ReadHelper(size_t byteoffset, size_t bytecount, 
 {
     constexpr size_t BYTE_WIDTH = 8;
 
-    size_t right_shift = offset % BYTE_WIDTH;
+    size_t rightShift = offset % BYTE_WIDTH;
 
     S v = 0;
     for (size_t i = 0; i < bytecount; i++) {
@@ -35,8 +35,8 @@ inline auto BytecodeInst<MODE>::ReadHelper(size_t byteoffset, size_t bytecount, 
         v |= mask;
     }
 
-    v >>= right_shift;
-    size_t left_shift = sizeof(R) * BYTE_WIDTH - width;
+    v >>= rightShift;
+    size_t leftShift = sizeof(R) * BYTE_WIDTH - width;
 
     // Do sign extension using arithmetic shift. It's implementation defined
     // so we check such behavior using static assert
@@ -44,7 +44,7 @@ inline auto BytecodeInst<MODE>::ReadHelper(size_t byteoffset, size_t bytecount, 
     static_assert((-1 >> 1) == -1);
 
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    return static_cast<R>(v << left_shift) >> left_shift;
+    return static_cast<R>(v << leftShift) >> leftShift;
 }
 
 template <const BytecodeInstMode MODE>
@@ -72,8 +72,8 @@ inline auto BytecodeInst<MODE>::Read64(size_t offset, size_t width) const
     ASSERT((offset % BYTE_WIDTH) + width <= BIT64);
 
     size_t byteoffset = offset / BYTE_WIDTH;
-    size_t byteoffset_end = (offset + width + BYTE_WIDTH - 1) / BYTE_WIDTH;
-    size_t bytecount = byteoffset_end - byteoffset;
+    size_t byteoffsetEnd = (offset + width + BYTE_WIDTH - 1) / BYTE_WIDTH;
+    size_t bytecount = byteoffsetEnd - byteoffset;
 
     using StorageType = helpers::TypeHelperT<BIT64, false>;
     using ReturnType = helpers::TypeHelperT<BIT64, IS_SIGNED>;

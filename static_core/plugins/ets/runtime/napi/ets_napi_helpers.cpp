@@ -44,8 +44,8 @@ using ArgCounter = arch::ArgCounter<RUNTIME_ARCH>;
 
 class ArgWriter : public arch::ArgWriter<RUNTIME_ARCH> {
 public:
-    ArgWriter(Span<uint8_t> *gpr_args, Span<uint8_t> *fpr_args, uint8_t *stack_args)
-        : arch::ArgWriter<RUNTIME_ARCH>(gpr_args, fpr_args, stack_args)
+    ArgWriter(Span<uint8_t> *gprArgs, Span<uint8_t> *fprArgs, uint8_t *stackArgs)
+        : arch::ArgWriter<RUNTIME_ARCH>(gprArgs, fprArgs, stackArgs)
     {
     }
     ~ArgWriter() = default;
@@ -84,12 +84,12 @@ const void *GetEtsNapiCriticalEntryPoint()
     return reinterpret_cast<const void *>(EtsNapiCriticalNativeEntryPoint);
 }
 
-extern "C" uint32_t EtsNapiCalcStackArgsSpaceSize(Method *method, bool is_critical)
+extern "C" uint32_t EtsNapiCalcStackArgsSpaceSize(Method *method, bool isCritical)
 {
     ASSERT(method != nullptr);
 
     ArgCounter counter;
-    if (!is_critical) {
+    if (!isCritical) {
         counter.Count<EtsEnv *>();        // EtsEnv arg
         counter.Count<ObjectHeader *>();  // class or this arg
     }
@@ -162,29 +162,29 @@ extern "C" uint32_t EtsNapiCalcStackArgsSpaceSize(Method *method, bool is_critic
 // | arg 0 |                         | stack |
 // +-------+                         | arg N |
 // |  ...  |                         +-------+
-extern "C" void EtsNapiBeginCritical(Method *method, uint8_t *in_regs_args, uint8_t *in_stack_args, uint8_t *out_args,
+extern "C" void EtsNapiBeginCritical(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outArgs,
                                      ManagedThread *thread)
 {
     ASSERT(method->IsStatic());
     ASSERT(thread == ManagedThread::GetCurrent());
 
-    Span<uint8_t> in_gpr_args(in_regs_args, ExtArchTraits::GP_ARG_NUM_BYTES);
-    Span<uint8_t> in_fpr_args(in_gpr_args.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
-    ArgReader arg_reader(in_gpr_args, in_fpr_args, in_stack_args);
+    Span<uint8_t> inGprArgs(inRegsArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
+    Span<uint8_t> inFprArgs(inGprArgs.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
+    ArgReader argReader(inGprArgs, inFprArgs, inStackArgs);
 
-    Span<uint8_t> out_gpr_args(out_args, ExtArchTraits::GP_ARG_NUM_BYTES);
-    Span<uint8_t> out_fpr_args(out_gpr_args.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
-    auto out_stack_args = out_fpr_args.end();
-    ArgWriter arg_writer(&out_gpr_args, &out_fpr_args, out_stack_args);
+    Span<uint8_t> outGprArgs(outArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
+    Span<uint8_t> outFprArgs(outGprArgs.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
+    auto outStackArgs = outFprArgs.end();
+    ArgWriter argWriter(&outGprArgs, &outFprArgs, outStackArgs);
 
-    arg_reader.Read<Method *>();  // Skip method
+    argReader.Read<Method *>();  // Skip method
 
     if (UNLIKELY(method->GetNativePointer() == nullptr)) {
         auto coroutine = EtsCoroutine::CastFromThread(thread);
         coroutine->GetPandaVM()->ResolveNativeMethod(method);
     }
 
-    ARCH_COPY_METHOD_ARGS(method, arg_reader, arg_writer);
+    ARCH_COPY_METHOD_ARGS(method, argReader, argWriter);
 
     Runtime::GetCurrent()->GetNotificationManager()->MethodEntryEvent(thread, method);
 }
@@ -238,56 +238,56 @@ extern "C" void EtsNapiBeginCritical(Method *method, uint8_t *in_regs_args, uint
 //       +---+--------------------+ <- out_stack_args -> +--------------------+---+
 //       |                        |                      |                        |
 // 0x0000
-extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *in_regs_args, uint8_t *in_stack_args, uint8_t *out_stack_args,
+extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
                                  ManagedThread *thread)
 {
     ASSERT(!method->IsSynchronized());
     ASSERT(thread == ManagedThread::GetCurrent());
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto out_regs_args = in_regs_args - ExtArchTraits ::FP_ARG_NUM_BYTES - ExtArchTraits ::GP_ARG_NUM_BYTES;
+    auto outRegsArgs = inRegsArgs - ExtArchTraits ::FP_ARG_NUM_BYTES - ExtArchTraits ::GP_ARG_NUM_BYTES;
 
-    ASSERT(out_stack_args <= out_regs_args);
-    ASSERT(out_regs_args < in_regs_args);
-    ASSERT(in_regs_args < in_stack_args);
+    ASSERT(outStackArgs <= outRegsArgs);
+    ASSERT(outRegsArgs < inRegsArgs);
+    ASSERT(inRegsArgs < inStackArgs);
 
-    Span<uint8_t> in_gpr_args(in_regs_args, ExtArchTraits::GP_ARG_NUM_BYTES);
-    Span<uint8_t> in_fpr_args(in_gpr_args.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
-    ArgReader arg_reader(in_gpr_args, in_fpr_args, in_stack_args);
+    Span<uint8_t> inGprArgs(inRegsArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
+    Span<uint8_t> inFprArgs(inGprArgs.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
+    ArgReader argReader(inGprArgs, inFprArgs, inStackArgs);
 
-    Span<uint8_t> out_gpr_args(out_regs_args, ExtArchTraits::GP_ARG_NUM_BYTES);
-    Span<uint8_t> out_fpr_args(out_gpr_args.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
-    ArgWriter arg_writer(&out_gpr_args, &out_fpr_args, out_stack_args);
+    Span<uint8_t> outGprArgs(outRegsArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
+    Span<uint8_t> outFprArgs(outGprArgs.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
+    ArgWriter argWriter(&outGprArgs, &outFprArgs, outStackArgs);
 
-    arg_reader.Read<Method *>();  // Skip method
+    argReader.Read<Method *>();  // Skip method
 
-    EtsReference *class_or_this_ref = nullptr;
+    EtsReference *classOrThisRef = nullptr;
     if (method->IsStatic()) {
         // Handle class object
-        auto class_obj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
-        ASSERT(class_obj != nullptr);
+        auto classObj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
+        ASSERT(classObj != nullptr);
 
         // Replace the method pointer (Method *) with a pointer to the class object
-        auto class_ptr = reinterpret_cast<EtsObject **>(in_regs_args);
-        *class_ptr = class_obj;
+        auto classPtr = reinterpret_cast<EtsObject **>(inRegsArgs);
+        *classPtr = classObj;
 
-        class_or_this_ref = EtsReferenceStorage::NewEtsStackRef(class_ptr);
+        classOrThisRef = EtsReferenceStorage::NewEtsStackRef(classPtr);
     } else {
         ASSERT(method->GetNumArgs() != 0);
         ASSERT(!method->GetArgType(0).IsPrimitive());
 
         // Handle this arg
-        auto this_ptr = const_cast<EtsObject **>(arg_reader.ReadPtr<EtsObject *>());
-        class_or_this_ref = EtsReferenceStorage::NewEtsStackRef(this_ptr);
+        auto thisPtr = const_cast<EtsObject **>(argReader.ReadPtr<EtsObject *>());
+        classOrThisRef = EtsReferenceStorage::NewEtsStackRef(thisPtr);
     }
 
     auto coroutine = EtsCoroutine::CastFromThread(thread);
-    auto ets_napi_env = coroutine->GetEtsNapiEnv();
+    auto etsNapiEnv = coroutine->GetEtsNapiEnv();
 
     // Prepare eTS NAPI args
-    arg_writer.Write(static_cast<EtsEnv *>(ets_napi_env));
-    arg_writer.Write(class_or_this_ref);
-    ARCH_COPY_METHOD_ARGS(method, arg_reader, arg_writer);
+    argWriter.Write(static_cast<EtsEnv *>(etsNapiEnv));
+    argWriter.Write(classOrThisRef);
+    ARCH_COPY_METHOD_ARGS(method, argReader, argWriter);
 
     // Completed the preparation of eTS NAPI arguments on the stack
 
@@ -303,16 +303,16 @@ extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *in_regs_args, uint8_t 
     Runtime::GetCurrent()->GetNotificationManager()->MethodEntryEvent(thread, method);
 
     constexpr uint32_t MAX_LOCAL_REF = 4096;
-    if (UNLIKELY(!ets_napi_env->GetEtsReferenceStorage()->PushLocalEtsFrame(MAX_LOCAL_REF))) {
+    if (UNLIKELY(!etsNapiEnv->GetEtsReferenceStorage()->PushLocalEtsFrame(MAX_LOCAL_REF))) {
         LOG(FATAL, RUNTIME) << "eTS NAPI push local frame failed";
     }
 
-    auto ets_method = EtsMethod::FromRuntimeMethod(method);
-    if (!ets_method->IsFastNative()) {
+    auto etsMethod = EtsMethod::FromRuntimeMethod(method);
+    if (!etsMethod->IsFastNative()) {
         thread->NativeCodeBegin();
     }
 
-    return out_regs_args;
+    return outRegsArgs;
 }
 
 #if defined(__clang__)
@@ -321,13 +321,13 @@ extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *in_regs_args, uint8_t 
 #pragma GCC diagnostic pop
 #endif
 
-extern "C" void EtsNapiEnd(Method *method, ManagedThread *thread, bool is_fast_native)
+extern "C" void EtsNapiEnd(Method *method, ManagedThread *thread, bool isFastNative)
 {
     ASSERT(method != nullptr);
     ASSERT(!method->IsSynchronized());
     ASSERT(thread == ManagedThread::GetCurrent());
 
-    if (!is_fast_native) {
+    if (!isFastNative) {
         thread->NativeCodeEnd();
     }
 
@@ -338,14 +338,14 @@ extern "C" void EtsNapiEnd(Method *method, ManagedThread *thread, bool is_fast_n
     storage->PopLocalEtsFrame(nullptr);
 }
 
-extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *ets_ref, ManagedThread *thread, bool is_fast_native)
+extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, ManagedThread *thread, bool isFastNative)
 {
     ASSERT(method != nullptr);
     ASSERT(!method->IsSynchronized());
     ASSERT(thread == ManagedThread::GetCurrent());
 
     // End native scope first to get into managed scope for object manipulation
-    if (!is_fast_native) {
+    if (!isFastNative) {
         thread->NativeCodeEnd();
     }
 
@@ -355,8 +355,8 @@ extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *ets_ref, Manag
 
     auto coroutine = EtsCoroutine::CastFromThread(thread);
     auto storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
-    if (ets_ref != nullptr) {
-        ret = storage->GetEtsObject(ets_ref);
+    if (etsRef != nullptr) {
+        ret = storage->GetEtsObject(etsRef);
     }
 
     storage->PopLocalEtsFrame(nullptr);
@@ -378,65 +378,65 @@ extern "C" bool IsEtsMethodFastNative(Method *method)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
-extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *current_coro, uint8_t *reg_args,
-                                          uint8_t *stack_args)
+extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentCoro, uint8_t *regArgs,
+                                          uint8_t *stackArgs)
 {
-    PandaEtsVM *vm = current_coro->GetPandaVM();
-    EtsClassLinker *ets_class_linker = vm->GetClassLinker();
-    Method *impl = ets_class_linker->GetAsyncImplMethod(method, current_coro);
+    PandaEtsVM *vm = currentCoro->GetPandaVM();
+    EtsClassLinker *etsClassLinker = vm->GetClassLinker();
+    Method *impl = etsClassLinker->GetAsyncImplMethod(method, currentCoro);
     if (impl == nullptr) {
-        ASSERT(current_coro->HasPendingException());
+        ASSERT(currentCoro->HasPendingException());
         // Exception is thrown by GetAsyncImplMethod
         return 0;
     }
-    ASSERT(!current_coro->HasPendingException());
+    ASSERT(!currentCoro->HasPendingException());
 
-    EtsPromise *promise = EtsPromise::Create(current_coro);
+    EtsPromise *promise = EtsPromise::Create(currentCoro);
     if (UNLIKELY(promise == nullptr)) {
-        ThrowOutOfMemoryError(current_coro, "Cannot allocate Promise");
+        ThrowOutOfMemoryError(currentCoro, "Cannot allocate Promise");
         return 0;
     }
-    auto promise_ref = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::WEAK);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promise_ref);
+    auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::WEAK);
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef);
     promise->SetEventPtr(evt);
 
-    auto *cm = current_coro->GetCoroutineManager();
+    auto *cm = currentCoro->GetCoroutineManager();
 
     PandaVector<Value> args;
     args.reserve(method->GetNumArgs());
-    Span<uint8_t> gpr_args(reg_args, ExtArchTraits::GP_ARG_NUM_BYTES);
-    Span<uint8_t> fpr_args(gpr_args.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
-    ArgReader arg_reader(gpr_args, fpr_args, stack_args);
-    arg_reader.Read<Method *>();  // Skip method
+    Span<uint8_t> gprArgs(regArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
+    Span<uint8_t> fprArgs(gprArgs.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
+    ArgReader argReader(gprArgs, fprArgs, stackArgs);
+    argReader.Read<Method *>();  // Skip method
     if (method->IsStatic()) {
         // Replace the method pointer (Method *) by the pointer to the object class
         // to satisfy stack walker
-        auto class_obj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
-        ASSERT(class_obj != nullptr);
-        auto class_ptr = reinterpret_cast<EtsObject **>(reg_args);
-        *class_ptr = class_obj;
+        auto classObj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
+        ASSERT(classObj != nullptr);
+        auto classPtr = reinterpret_cast<EtsObject **>(regArgs);
+        *classPtr = classObj;
     } else {
         // Handle this arg
         ASSERT(method->GetNumArgs() != 0);
         ASSERT(!method->GetArgType(0).IsPrimitive());
-        args.push_back(Value(*const_cast<ObjectHeader **>(arg_reader.ReadPtr<ObjectHeader *>())));
+        args.push_back(Value(*const_cast<ObjectHeader **>(argReader.ReadPtr<ObjectHeader *>())));
     }
 
     arch::ValueWriter writer(&args);
-    ARCH_COPY_METHOD_ARGS(method, arg_reader, writer);
+    ARCH_COPY_METHOD_ARGS(method, argReader, writer);
 
-    [[maybe_unused]] EtsHandleScope scope(current_coro);
-    EtsHandle<EtsPromise> promise_handle(current_coro, promise);
+    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
     auto *coro = cm->Launch(evt, impl, std::move(args), CoroutineAffinity::SAME_WORKER);
     if (UNLIKELY(coro == nullptr)) {
-        ASSERT(current_coro->HasPendingException());
+        ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch
-        promise_handle.GetPtr()->SetEventPtr(nullptr);
+        promiseHandle.GetPtr()->SetEventPtr(nullptr);
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         return 0;
     }
     cm->Schedule();
-    return ToObjPtr(promise_handle.GetPtr());
+    return ToObjPtr(promiseHandle.GetPtr());
 }
 #if defined(__clang__)
 #pragma clang diagnostic pop

@@ -104,24 +104,24 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, GetPrimitiveTypeArrayRegionDeathTests)
         EXPECT_DEATH(env_->GetDoubleArrayRegion(nullptr, 0, 1, nullptr), "");
     }
 
-    ets_booleanArray bool_array = env_->NewBooleanArray(10);
-    ets_byteArray byte_array = env_->NewByteArray(10);
-    ets_charArray char_array = env_->NewCharArray(10);
-    ets_shortArray short_array = env_->NewShortArray(10);
-    ets_intArray int_array = env_->NewIntArray(10);
-    ets_longArray long_array = env_->NewLongArray(10);
-    ets_floatArray float_array = env_->NewFloatArray(10);
-    ets_doubleArray double_array = env_->NewDoubleArray(10);
+    ets_booleanArray boolArray = env_->NewBooleanArray(10);
+    ets_byteArray byteArray = env_->NewByteArray(10);
+    ets_charArray charArray = env_->NewCharArray(10);
+    ets_shortArray shortArray = env_->NewShortArray(10);
+    ets_intArray intArray = env_->NewIntArray(10);
+    ets_longArray longArray = env_->NewLongArray(10);
+    ets_floatArray floatArray = env_->NewFloatArray(10);
+    ets_doubleArray doubleArray = env_->NewDoubleArray(10);
 
     {
-        EXPECT_DEATH(env_->GetBooleanArrayRegion(bool_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->GetByteArrayRegion(byte_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->GetCharArrayRegion(char_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->GetShortArrayRegion(short_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->GetIntArrayRegion(int_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->GetLongArrayRegion(long_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->GetFloatArrayRegion(float_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->GetDoubleArrayRegion(double_array, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->GetBooleanArrayRegion(boolArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->GetByteArrayRegion(byteArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->GetCharArrayRegion(charArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->GetShortArrayRegion(shortArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->GetIntArrayRegion(intArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->GetLongArrayRegion(longArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->GetFloatArrayRegion(floatArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->GetDoubleArrayRegion(doubleArray, 0, 1, nullptr), "");
     }
 }
 
@@ -140,24 +140,24 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, SetPrimitiveTypeArrayRegionDeathTests)
         EXPECT_DEATH(env_->SetDoubleArrayRegion(nullptr, 0, 1, nullptr), "");
     }
 
-    ets_booleanArray bool_array = env_->NewBooleanArray(10);
-    ets_byteArray byte_array = env_->NewByteArray(10);
-    ets_charArray char_array = env_->NewCharArray(10);
-    ets_shortArray short_array = env_->NewShortArray(10);
-    ets_intArray int_array = env_->NewIntArray(10);
-    ets_longArray long_array = env_->NewLongArray(10);
-    ets_floatArray float_array = env_->NewFloatArray(10);
-    ets_doubleArray double_array = env_->NewDoubleArray(10);
+    ets_booleanArray boolArray = env_->NewBooleanArray(10);
+    ets_byteArray byteArray = env_->NewByteArray(10);
+    ets_charArray charArray = env_->NewCharArray(10);
+    ets_shortArray shortArray = env_->NewShortArray(10);
+    ets_intArray intArray = env_->NewIntArray(10);
+    ets_longArray longArray = env_->NewLongArray(10);
+    ets_floatArray floatArray = env_->NewFloatArray(10);
+    ets_doubleArray doubleArray = env_->NewDoubleArray(10);
 
     {
-        EXPECT_DEATH(env_->SetBooleanArrayRegion(bool_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->SetByteArrayRegion(byte_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->SetCharArrayRegion(char_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->SetShortArrayRegion(short_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->SetIntArrayRegion(int_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->SetLongArrayRegion(long_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->SetFloatArrayRegion(float_array, 0, 1, nullptr), "");
-        EXPECT_DEATH(env_->SetDoubleArrayRegion(double_array, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->SetBooleanArrayRegion(boolArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->SetByteArrayRegion(byteArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->SetCharArrayRegion(charArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->SetShortArrayRegion(shortArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->SetIntArrayRegion(intArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->SetLongArrayRegion(longArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->SetFloatArrayRegion(floatArray, 0, 1, nullptr), "");
+        EXPECT_DEATH(env_->SetDoubleArrayRegion(doubleArray, 0, 1, nullptr), "");
     }
 }
 

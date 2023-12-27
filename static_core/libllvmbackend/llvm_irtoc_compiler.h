@@ -53,16 +53,16 @@ public:
 
     bool HasCompiledCode() override
     {
-        return object_file_ != nullptr;
+        return objectFile_ != nullptr;
     }
 
     bool IsIrFailed() override
     {
-        return ir_failed_;
+        return irFailed_;
     }
     void WriteObjectFile(std::string_view output) override;
 
-    CompiledCode GetCompiledCode(std::string_view function_name) override;
+    CompiledCode GetCompiledCode(std::string_view functionName) override;
 
 private:
     std::string GetFastPathFeatures() const;
@@ -76,17 +76,17 @@ private:
     size_t GetObjectFileSize() override;
 
 private:
-    llvm::ExitOnError exit_on_err_;
+    llvm::ExitOnError exitOnErr_;
 
     ArenaVector<panda::Method *> methods_;
     std::unique_ptr<llvm::Module> module_;
-    std::unique_ptr<DebugDataBuilder> debug_data_;
-    std::unique_ptr<panda::llvmbackend::CreatedObjectFile> object_file_ {nullptr};
+    std::unique_ptr<DebugDataBuilder> debugData_;
+    std::unique_ptr<panda::llvmbackend::CreatedObjectFile> objectFile_ {nullptr};
     std::string filename_;
 
-    LLVMArkInterface ark_interface_;
-    bool ir_failed_ {false};
-    std::unique_ptr<panda::llvmbackend::MIRCompiler> mir_compiler_;
+    LLVMArkInterface arkInterface_;
+    bool irFailed_ {false};
+    std::unique_ptr<panda::llvmbackend::MIRCompiler> mirCompiler_;
     std::unique_ptr<panda::llvmbackend::LLVMOptimizer> optimizer_;
 };
 }  // namespace panda::llvmbackend

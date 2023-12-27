@@ -22,20 +22,20 @@ namespace panda::mem {
 class Region;
 class CardHandler {
 public:
-    explicit CardHandler(CardTable *card_table) : card_table_(card_table) {}
+    explicit CardHandler(CardTable *cardTable) : cardTable_(cardTable) {}
 
-    bool Handle(CardTable::CardPtr card_ptr);
+    bool Handle(CardTable::CardPtr cardPtr);
 
 protected:
-    virtual bool HandleObject(ObjectHeader *object_header, void *begin, void *end) = 0;
+    virtual bool HandleObject(ObjectHeader *objectHeader, void *begin, void *end) = 0;
 
     CardTable *GetCardTable()
     {
-        return card_table_;
+        return cardTable_;
     }
 
 private:
-    CardTable *card_table_;
+    CardTable *cardTable_;
 };
 }  // namespace panda::mem
 

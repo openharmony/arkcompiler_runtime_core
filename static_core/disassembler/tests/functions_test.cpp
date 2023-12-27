@@ -82,10 +82,10 @@ TEST(FunctionsTest, OverloadingTest)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    std::string body_main = ExtractFuncBody(ss.str(), "main() <static> {\n");
+    std::string bodyMain = ExtractFuncBody(ss.str(), "main() <static> {\n");
 
     std::string line;
-    std::stringstream main {body_main};
+    std::stringstream main {bodyMain};
     std::getline(main, line);
     EXPECT_EQ("\tcall.short f:()", line);
     std::getline(main, line);
@@ -120,11 +120,11 @@ static std::pair<std::unique_ptr<const panda::panda_file::File>, panda::panda_fi
     auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::panda_file::DebugInfoExtractor debug_info(pf.get());
-    auto method_ids = debug_info.GetMethodIdList();
-    ASSERT(method_ids.size() == 1);
+    panda::panda_file::DebugInfoExtractor debugInfo(pf.get());
+    auto methodIds = debugInfo.GetMethodIdList();
+    ASSERT(methodIds.size() == 1);
 
-    return std::make_pair(std::move(pf), method_ids[0]);
+    return std::make_pair(std::move(pf), methodIds[0]);
 }
 
 TEST(FunctionsTest, SerializeText)
@@ -168,22 +168,22 @@ TEST(FunctionsTest, SerializeLineTable)
     d.GetMethod(&method, method_id);
 
     std::stringstream ss {};
-    panda::panda_file::LineNumberTable line_table;
-    d.Serialize(method, ss, false, &line_table);
+    panda::panda_file::LineNumberTable lineTable;
+    d.Serialize(method, ss, false, &lineTable);
 
-    ASSERT_EQ(line_table.size(), 4);
+    ASSERT_EQ(lineTable.size(), 4);
 
-    ASSERT_EQ(line_table[0].offset, 0);
-    ASSERT_EQ(line_table[0].line, 2);
+    ASSERT_EQ(lineTable[0].offset, 0);
+    ASSERT_EQ(lineTable[0].line, 2);
 
-    ASSERT_EQ(line_table[1].offset, 1);
-    ASSERT_EQ(line_table[1].line, 4);
+    ASSERT_EQ(lineTable[1].offset, 1);
+    ASSERT_EQ(lineTable[1].line, 4);
 
-    ASSERT_EQ(line_table[2].offset, 2);
-    ASSERT_EQ(line_table[2].line, 5);
+    ASSERT_EQ(lineTable[2].offset, 2);
+    ASSERT_EQ(lineTable[2].line, 5);
 
-    ASSERT_EQ(line_table[3].offset, 4);
-    ASSERT_EQ(line_table[3].line, 6);
+    ASSERT_EQ(lineTable[3].offset, 4);
+    ASSERT_EQ(lineTable[3].line, 6);
 }
 
 #undef DISASM_BIN_DIR

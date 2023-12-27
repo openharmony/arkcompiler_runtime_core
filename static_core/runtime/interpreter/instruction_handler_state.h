@@ -25,8 +25,8 @@ class InstructionHandlerState {
 public:
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     ALWAYS_INLINE InstructionHandlerState(ManagedThread *thread, const uint8_t *pc, Frame *frame,
-                                          const void *const *dispatch_table)
-        : state_(thread, pc, frame, dispatch_table)
+                                          const void *const *dispatchTable)
+        : state_(thread, pc, frame, dispatchTable)
     {
     }
 
@@ -65,9 +65,9 @@ public:
         return state_.GetDispatchTable();
     }
 
-    ALWAYS_INLINE void SetDispatchTable(const void *const *dispatch_table)
+    ALWAYS_INLINE void SetDispatchTable(const void *const *dispatchTable)
     {
-        return state_.SetDispatchTable(dispatch_table);
+        return state_.SetDispatchTable(dispatchTable);
     }
 
     ALWAYS_INLINE void SaveState()
@@ -82,12 +82,12 @@ public:
 
     ALWAYS_INLINE uint16_t GetOpcodeExtension() const
     {
-        return opcode_extension_;
+        return opcodeExtension_;
     }
 
-    ALWAYS_INLINE void SetOpcodeExtension(uint16_t opcode_extension)
+    ALWAYS_INLINE void SetOpcodeExtension(uint16_t opcodeExtension)
     {
-        opcode_extension_ = opcode_extension;
+        opcodeExtension_ = opcodeExtension;
     }
 
     ALWAYS_INLINE uint8_t GetPrimaryOpcode() const
@@ -122,7 +122,7 @@ public:
 
     ALWAYS_INLINE auto &GetFakeInstBuf()
     {
-        return fake_inst_buf_;
+        return fakeInstBuf_;
     }
 
     ALWAYS_INLINE uint32_t GetBytecodeOffset() const
@@ -135,8 +135,8 @@ private:
     static constexpr uint8_t OPCODE_MASK = 0xFFU;
 
     State state_;
-    std::array<uint8_t, FAKE_INST_BUF_SIZE> fake_inst_buf_;
-    uint16_t opcode_extension_ {0};
+    std::array<uint8_t, FAKE_INST_BUF_SIZE> fakeInstBuf_;
+    uint16_t opcodeExtension_ {0};
 };
 
 }  // namespace panda::interpreter

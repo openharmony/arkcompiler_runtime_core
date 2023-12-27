@@ -54,13 +54,13 @@ static size_t GetArrayObjectSize(panda::Class *klass, size_t n)
     return sizeof(Array) + klass->GetComponentSize() * n;
 }
 
-static void TestArrayObjectSize(ClassRoot class_root, uint32_t n)
+static void TestArrayObjectSize(ClassRoot classRoot, uint32_t n)
 {
     std::string msg = "Test with class_root ";
-    msg += std::to_string(static_cast<int>(class_root));
+    msg += std::to_string(static_cast<int>(classRoot));
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(class_root);
+    auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(classRoot);
 
     Array *array = Array::Create(klass, n);
     ASSERT_NE(array, nullptr) << msg;

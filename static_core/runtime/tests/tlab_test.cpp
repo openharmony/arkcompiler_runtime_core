@@ -39,7 +39,7 @@ public:
 
     ~TLABTest() override
     {
-        for (auto i : allocated_mem_mmap_) {
+        for (auto i : allocatedMemMmap_) {
             panda::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
         }
     }
@@ -52,18 +52,18 @@ protected:
     {
         void *mem = panda::os::mem::MapRWAnonymousRaw(TLAB_TEST_SIZE);
         ASAN_UNPOISON_MEMORY_REGION(mem, TLAB_TEST_SIZE);
-        std::pair<void *, size_t> new_pair {mem, TLAB_TEST_SIZE};
-        allocated_mem_mmap_.push_back(new_pair);
-        auto tlab_buff_offs = AlignUp(ToUintPtr(mem) + sizeof(mem::TLAB), DEFAULT_ALIGNMENT_IN_BYTES) - ToUintPtr(mem);
-        auto new_tlab = new (mem) TLAB(ToVoidPtr(ToUintPtr(mem) + tlab_buff_offs), TLAB_TEST_SIZE - tlab_buff_offs);
-        return new_tlab;
+        std::pair<void *, size_t> newPair {mem, TLAB_TEST_SIZE};
+        allocatedMemMmap_.push_back(newPair);
+        auto tlabBuffOffs = AlignUp(ToUintPtr(mem) + sizeof(mem::TLAB), DEFAULT_ALIGNMENT_IN_BYTES) - ToUintPtr(mem);
+        auto newTlab = new (mem) TLAB(ToVoidPtr(ToUintPtr(mem) + tlabBuffOffs), TLAB_TEST_SIZE - tlabBuffOffs);
+        return newTlab;
     }
 
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     unsigned seed_ {};
 
 private:
-    std::vector<std::pair<void *, size_t>> allocated_mem_mmap_;
+    std::vector<std::pair<void *, size_t>> allocatedMemMmap_;
 };
 
 TEST_F(TLABTest, AccessTest)
@@ -74,16 +74,16 @@ TEST_F(TLABTest, AccessTest)
     ASSERT_TRUE(tlab != nullptr);
     // All accesses has been created according implementation as we want to create in JIT.
     bool overflow = false;
-    auto free_pointer_addr = static_cast<uintptr_t *>(ToVoidPtr(ToUintPtr(tlab) + TLAB::TLABFreePointerOffset()));
-    auto end_addr = static_cast<uintptr_t *>(ToVoidPtr(ToUintPtr(tlab) + TLAB::TLABEndAddrOffset()));
+    auto freePointerAddr = static_cast<uintptr_t *>(ToVoidPtr(ToUintPtr(tlab) + TLAB::TLABFreePointerOffset()));
+    auto endAddr = static_cast<uintptr_t *>(ToVoidPtr(ToUintPtr(tlab) + TLAB::TLABEndAddrOffset()));
     for (size_t i = 1; i < ALLOC_COUNT; i++) {
-        uintptr_t old_free_pointer = (*free_pointer_addr);
+        uintptr_t oldFreePointer = (*freePointerAddr);
         // NOTE: All objects, allocated in Runtime, must have the DEFAULT_ALIGNMENT alignment.
         void *mem = tlab->Alloc(AlignUp(ALLOC_SIZE, DEFAULT_ALIGNMENT_IN_BYTES));
         if (mem != nullptr) {
-            ASSERT_TRUE(ToUintPtr(mem) == old_free_pointer);
+            ASSERT_TRUE(ToUintPtr(mem) == oldFreePointer);
         } else {
-            ASSERT_TRUE(*end_addr < (old_free_pointer + ALLOC_SIZE));
+            ASSERT_TRUE(*endAddr < (oldFreePointer + ALLOC_SIZE));
             overflow = true;
         }
     }

@@ -29,13 +29,13 @@ public:
         PandaUnorderedMap<PandaString, PandaUnorderedMap<RelayoutItemType, PandaSet<PandaString>, std::hash<int>>>;
 
     void WriteProfileData();
-    void AddProfileItem(const std::string &file_name, const std::string &item, RelayoutItemType type);
+    void AddProfileItem(const std::string &fileName, const std::string &item, RelayoutItemType type);
     void AddProfileClassItem(Class *klass);
     void AddProfileCodeItem(Method *method);
     ProfileDataType *GetProfileData();
 
 private:
-    ProfileDataType relayout_items_;
+    ProfileDataType relayoutItems_;
 };
 
 #ifdef PANDA_ENABLE_RELAYOUT_PROFILE

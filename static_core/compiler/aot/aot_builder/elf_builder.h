@@ -163,14 +163,14 @@ public:
             header_.sh_size = size;
         }
 
-        void SetDataProvider(std::unique_ptr<ElfSectionDataProvider> data_provider)
+        void SetDataProvider(std::unique_ptr<ElfSectionDataProvider> dataProvider)
         {
-            data_provider_ = std::move(data_provider);
+            dataProvider_ = std::move(dataProvider);
         }
 
         ElfSectionDataProvider *GetDataProvider() const
         {
-            return data_provider_.get();
+            return dataProvider_.get();
         }
 
     private:
@@ -179,7 +179,7 @@ public:
         size_t index_ {std::numeric_limits<size_t>::max()};
         ElfShdr header_ {};
         Section *link_ {};
-        std::unique_ptr<ElfSectionDataProvider> data_provider_ {nullptr};
+        std::unique_ptr<ElfSectionDataProvider> dataProvider_ {nullptr};
 
         friend class ElfBuilder;
     };
@@ -211,7 +211,7 @@ public:
 
         size_t GetDataSize() const override
         {
-            return this->data_provider_ != nullptr ? this->data_provider_->GetDataSize() : data_.size();
+            return this->dataProvider_ != nullptr ? this->dataProvider_->GetDataSize() : data_.size();
         }
 
     private:
@@ -269,8 +269,8 @@ public:
 public:
     ~ElfBuilder()
     {
-        for (auto ro_data_section : ro_data_sections_) {
-            delete ro_data_section;
+        for (auto roDataSection : roDataSections_) {
+            delete roDataSection;
         }
         for (auto segment : segments_) {
             delete segment;
@@ -279,18 +279,18 @@ public:
 
     ElfBuilder()
     {
-        AddSection(&hash_section_);
-        AddSection(&text_section_);
-        AddSection(&shstrtab_section_);
-        AddSection(&dynstr_section_);
-        AddSection(&dynsym_section_);
+        AddSection(&hashSection_);
+        AddSection(&textSection_);
+        AddSection(&shstrtabSection_);
+        AddSection(&dynstrSection_);
+        AddSection(&dynsymSection_);
         if constexpr (!IS_JIT_MODE) {  // NOLINT
-            AddSection(&aot_section_);
-            AddSection(&got_section_);
-            AddSection(&dynamic_section_);
+            AddSection(&aotSection_);
+            AddSection(&gotSection_);
+            AddSection(&dynamicSection_);
         }
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        AddSection(&frame_section_);
+        AddSection(&frameSection_);
 #endif
     }
 
@@ -299,7 +299,7 @@ public:
 
     ElfWord AddSectionName(const std::string &name)
     {
-        return name.empty() ? 0 : shstrtab_section_.AddString(name);
+        return name.empty() ? 0 : shstrtabSection_.AddString(name);
     }
 
     void AddSection(Section *section)
@@ -314,40 +314,40 @@ public:
 
     auto GetTextSection()
     {
-        return &text_section_;
+        return &textSection_;
     }
 
     auto GetAotSection()
     {
-        return &aot_section_;
+        return &aotSection_;
     }
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
     auto GetFrameSection()
     {
-        return &frame_section_;
+        return &frameSection_;
     }
 
-    void SetFrameData(std::vector<DwarfSectionData> *frame_data)
+    void SetFrameData(std::vector<DwarfSectionData> *frameData)
     {
-        frame_data_ = frame_data;
+        frameData_ = frameData;
     }
     void FillFrameSection();
 
-    void SetCodeName(const std::string &method_name)
+    void SetCodeName(const std::string &methodName)
     {
-        method_name_ = method_name;
+        methodName_ = methodName;
     }
 #endif
 
     auto GetGotSection()
     {
-        return &got_section_;
+        return &gotSection_;
     }
 
-    void PreSizeRoDataSections(size_t new_size)
+    void PreSizeRoDataSections(size_t newSize)
     {
-        ro_data_sections_.reserve(new_size);
+        roDataSections_.reserve(newSize);
     }
 
     void AddRoDataSection(const std::string &name, size_t alignment)
@@ -357,76 +357,76 @@ public:
             new DataSection(*this, name, SHT_PROGBITS, SHF_ALLOC | SHF_MERGE, nullptr,  // NOLINT(hicpp-signed-bitwise)
                             0, alignment, 0);
         AddSection(section);
-        ro_data_sections_.push_back(section);
+        roDataSections_.push_back(section);
     }
 
     std::vector<DataSection *> *GetRoDataSections()
     {
-        return &ro_data_sections_;
+        return &roDataSections_;
     }
 
-    void Build(const std::string &file_name);
+    void Build(const std::string &fileName);
 
     void SettleSection(Section *section);
 
-    void Write(const std::string &file_name);
+    void Write(const std::string &fileName);
     void Write(Span<uint8_t> stream);
 
     ElfOff UpdateOffset(ElfWord align)
     {
-        current_offset_ = RoundUp(current_offset_, align);
-        return current_offset_;
+        currentOffset_ = RoundUp(currentOffset_, align);
+        return currentOffset_;
     }
 
     ElfOff UpdateAddress(ElfWord align)
     {
-        current_address_ = RoundUp(current_address_, align);
-        return current_address_;
+        currentAddress_ = RoundUp(currentAddress_, align);
+        return currentAddress_;
     }
 
     size_t GetFileSize() const
     {
-        return current_offset_;
+        return currentOffset_;
     }
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
     std::vector<DwarfSectionData> *GetFrameData()
     {
-        return frame_data_;
+        return frameData_;
     }
 
     Span<uint8_t> GetTextSectionData() const
     {
         static_assert(IS_JIT_MODE);
-        return {reinterpret_cast<uint8_t *>(text_section_.header_.sh_addr), text_section_.header_.sh_size};
+        return {reinterpret_cast<uint8_t *>(textSection_.header_.sh_addr), textSection_.header_.sh_size};
     }
 
-    void HackAddressesForJit(const uint8_t *elf_data)
+    void HackAddressesForJit(const uint8_t *elfData)
     {
         static_assert(IS_JIT_MODE);
-        ASSERT(frame_data_->size() == 1U);
+        ASSERT(frameData_->size() == 1U);
         ASSERT(segments_.empty());
-        ASSERT(dynsym_section_.symbols_.size() == 2U);
+        ASSERT(dynsymSection_.symbols_.size() == 2U);
 
         for (auto section : sections_) {
             if ((section->header_.sh_flags & SHF_ALLOC) != 0) {  // NOLINT(hicpp-signed-bitwise)
-                section->header_.sh_addr += down_cast<typename ElfBuilder<ARCH, IS_JIT_MODE>::ElfAddr>(elf_data);
+                section->header_.sh_addr += down_cast<typename ElfBuilder<ARCH, IS_JIT_MODE>::ElfAddr>(elfData);
             }
         }
 
-        ASSERT(dynsym_section_.symbols_[0].st_value == 0);
-        dynsym_section_.symbols_[1U].st_value +=
-            down_cast<typename ElfBuilder<ARCH, IS_JIT_MODE>::ElfAddr>(elf_data) + CodeInfo::GetCodeOffset(ARCH);
+        ASSERT(dynsymSection_.symbols_[0].st_value == 0);
+        dynsymSection_.symbols_[1U].st_value +=
+            down_cast<typename ElfBuilder<ARCH, IS_JIT_MODE>::ElfAddr>(elfData) + CodeInfo::GetCodeOffset(ARCH);
 
         // Some dark magic there. Here we patch the address of JIT code in frame debug info entry.
         // NOTE (asidorov): rework to more readable code
-        uint8_t *cie_addr_8 {static_cast<uint8_t *>(frame_section_.GetData())};
-        uint32_t *cie_addr_32 {reinterpret_cast<uint32_t *>(cie_addr_8)};
-        uint32_t cie_length {*cie_addr_32 + static_cast<uint32_t>(sizeof(uint32_t))};
+        uint8_t *cieAddr8 {static_cast<uint8_t *>(frameSection_.GetData())};
+        uint32_t *cieAddr32 {reinterpret_cast<uint32_t *>(cieAddr8)};
+        uint32_t cieLength {*cieAddr32 + static_cast<uint32_t>(sizeof(uint32_t))};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        uint8_t *fde_initial_pc_addr_8 {cie_addr_8 + cie_length + 2U * sizeof(uint32_t)};
-        uintptr_t *fde_initial_pc_addr_ptr {reinterpret_cast<uintptr_t *>(fde_initial_pc_addr_8)};
-        *fde_initial_pc_addr_ptr += down_cast<typename ElfBuilder<ARCH, IS_JIT_MODE>::ElfAddr>(elf_data);
+        uint8_t *fdeInitialPcAddr8 {cieAddr8 + cieLength + 2U * sizeof(uint32_t)};
+        uintptr_t *fdeInitialPcAddrPtr {reinterpret_cast<uintptr_t *>(fdeInitialPcAddr8)};
+        *fdeInitialPcAddrPtr += down_cast<typename ElfBuilder<ARCH, IS_JIT_MODE>::ElfAddr>(elfData);
     }
 #endif
 
@@ -436,7 +436,7 @@ private:
     void SettleSectionsForAot();
     void SettleSectionsForJit();
     void ConstructHashSection();
-    void ConstructDynamicSection(const std::string &file_name);
+    void ConstructDynamicSection(const std::string &fileName);
 
     struct Segment {
         Segment(ElfAddr addr, ElfOff offset, ElfWord type, ElfWord flags, ElfWord align)
@@ -456,18 +456,18 @@ private:
         template <typename... Args>
         SegmentScope(ElfBuilder &builder, ElfWord type, ElfWord flags, bool first = false)
             : builder_(builder),
-              start_address_(first ? 0 : RoundUp(builder.current_address_, PAGE_SIZE_VALUE)),
-              start_offset_(first ? 0 : RoundUp(builder.current_offset_, PAGE_SIZE_VALUE))
+              startAddress_(first ? 0 : RoundUp(builder.currentAddress_, PAGE_SIZE_VALUE)),
+              startOffset_(first ? 0 : RoundUp(builder.currentOffset_, PAGE_SIZE_VALUE))
         {
-            auto *segment = new Segment(start_address_, start_offset_, type, flags, PAGE_SIZE_VALUE);
+            auto *segment = new Segment(startAddress_, startOffset_, type, flags, PAGE_SIZE_VALUE);
             builder_.segments_.push_back(segment);
-            builder_.current_segment_ = segment;
+            builder_.currentSegment_ = segment;
         }
         ~SegmentScope()
         {
-            builder_.current_segment_->header.p_filesz = builder_.current_offset_ - start_offset_;
-            builder_.current_segment_->header.p_memsz = builder_.current_address_ - start_address_;
-            builder_.current_segment_ = nullptr;
+            builder_.currentSegment_->header.p_filesz = builder_.currentOffset_ - startOffset_;
+            builder_.currentSegment_->header.p_memsz = builder_.currentAddress_ - startAddress_;
+            builder_.currentSegment_ = nullptr;
         }
 
         NO_MOVE_SEMANTIC(SegmentScope);
@@ -475,23 +475,23 @@ private:
 
     private:
         ElfBuilder &builder_;
-        ElfAddr start_address_;
-        ElfAddr start_offset_;
+        ElfAddr startAddress_;
+        ElfAddr startOffset_;
     };
 
     class AddrPatch {
         using PatchFunc = std::function<ElfAddr(void)>;
 
     public:
-        AddrPatch(ElfAddr *addr, PatchFunc func) : address_(addr), patch_func_(std::move(func)) {}
+        AddrPatch(ElfAddr *addr, PatchFunc func) : address_(addr), patchFunc_(std::move(func)) {}
         void Patch()
         {
-            *address_ = patch_func_();
+            *address_ = patchFunc_();
         }
 
     private:
         ElfAddr *address_;
-        PatchFunc patch_func_;
+        PatchFunc patchFunc_;
     };
 
 private:
@@ -504,35 +504,35 @@ private:
     std::vector<Section *> sections_;
     std::vector<Segment *> segments_;
     std::vector<AddrPatch> patches_;
-    ElfAddr current_address_ {0};
-    ElfOff current_offset_ {0};
-    Segment *current_segment_ {nullptr};
+    ElfAddr currentAddress_ {0};
+    ElfOff currentOffset_ {0};
+    Segment *currentSegment_ {nullptr};
 
-    std::vector<DataSection *> ro_data_sections_;
-    DataSection hash_section_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        DataSection(*this, ".hash", SHT_HASH, SHF_ALLOC, &dynsym_section_, 0, sizeof(ElfWord), sizeof(ElfWord));
-    DataSection text_section_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
+    std::vector<DataSection *> roDataSections_;
+    DataSection hashSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
+        DataSection(*this, ".hash", SHT_HASH, SHF_ALLOC, &dynsymSection_, 0, sizeof(ElfWord), sizeof(ElfWord));
+    DataSection textSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
         DataSection(*this, ".text", SHT_PROGBITS, SHF_ALLOC | SHF_EXECINSTR, nullptr, 0,
                     IS_JIT_MODE ? JIT_TEXT_ALIGNMENT : PAGE_SIZE_VALUE, 0);
-    StringSection shstrtab_section_ = StringSection(*this, ".shstrtab", 0, 1);
-    StringSection dynstr_section_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
+    StringSection shstrtabSection_ = StringSection(*this, ".shstrtab", 0, 1);
+    StringSection dynstrSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
         StringSection(*this, ".dynstr", SHF_ALLOC, IS_JIT_MODE ? JIT_DYNSTR_ALIGNMENT : DYNSTR_SECTION_ALIGN);
-    SymbolSection dynsym_section_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        SymbolSection(*this, ".dynsym", SHT_DYNSYM, SHF_ALLOC, &dynstr_section_, 1, sizeof(ElfOff), sizeof(ElfSym));
+    SymbolSection dynsymSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
+        SymbolSection(*this, ".dynsym", SHT_DYNSYM, SHF_ALLOC, &dynstrSection_, 1, sizeof(ElfOff), sizeof(ElfSym));
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    DataSection aot_section_ = DataSection(*this, ".aot", SHT_PROGBITS, SHF_ALLOC, nullptr, 0, sizeof(ElfWord), 0);
+    DataSection aotSection_ = DataSection(*this, ".aot", SHT_PROGBITS, SHF_ALLOC, nullptr, 0, sizeof(ElfWord), 0);
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    DataSection got_section_ = DataSection(*this, ".aot_got", SHT_PROGBITS, SHF_ALLOC, nullptr, 0, PAGE_SIZE_VALUE, 0);
-    DataSection dynamic_section_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        DataSection(*this, ".dynamic", SHT_DYNAMIC, SHF_ALLOC, &dynstr_section_, 0, PAGE_SIZE_VALUE, sizeof(ElfDyn));
+    DataSection gotSection_ = DataSection(*this, ".aot_got", SHT_PROGBITS, SHF_ALLOC, nullptr, 0, PAGE_SIZE_VALUE, 0);
+    DataSection dynamicSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
+        DataSection(*this, ".dynamic", SHT_DYNAMIC, SHF_ALLOC, &dynstrSection_, 0, PAGE_SIZE_VALUE, sizeof(ElfDyn));
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    DataSection frame_section_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
+    DataSection frameSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
         DataSection(*this, ".eh_frame", SHT_PROGBITS, SHF_ALLOC, nullptr, 0,
                     IS_JIT_MODE ? JIT_DATA_ALIGNMENT : PAGE_SIZE_VALUE, 0);
 
-    std::vector<DwarfSectionData> *frame_data_ {nullptr};
+    std::vector<DwarfSectionData> *frameData_ {nullptr};
 #endif
-    std::string method_name_ = std::string("code");
+    std::string methodName_ = std::string("code");
 
     friend SegmentScope;
 };
@@ -542,31 +542,31 @@ template <bool IS_FUNCTION>
 void ElfBuilder<ARCH, IS_JIT_MODE>::AddSymbol(const std::string &name, ElfWord size, const Section &section,
                                               typename SymbolSection::ThunkFunc thunk)
 {
-    uint8_t symbol_type = IS_FUNCTION ? STT_FUNC : STT_OBJECT;
-    auto name_idx = dynstr_section_.AddString(name);
+    uint8_t symbolType = IS_FUNCTION ? STT_FUNC : STT_OBJECT;
+    auto nameIdx = dynstrSection_.AddString(name);
     constexpr int LOW_BITS_MASK = 0b1111;
-    auto st_info =
+    auto stInfo =
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        static_cast<uint8_t>((STB_GLOBAL << 4U) + (symbol_type & LOW_BITS_MASK));
+        static_cast<uint8_t>((STB_GLOBAL << 4U) + (symbolType & LOW_BITS_MASK));
 
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (ArchTraits<ARCH>::IS_64_BITS) {
-        dynsym_section_.symbols_.push_back({name_idx,                                     // st_name
-                                            st_info,                                      // st_info
-                                            0,                                            // st_other
-                                            static_cast<ElfSection>(section.GetIndex()),  // st_shndx
-                                            0,                                            // st_value
-                                            size});                                       // st_size
+        dynsymSection_.symbols_.push_back({nameIdx,                                      // st_name
+                                           stInfo,                                       // st_info
+                                           0,                                            // st_other
+                                           static_cast<ElfSection>(section.GetIndex()),  // st_shndx
+                                           0,                                            // st_value
+                                           size});                                       // st_size
         // NOLINTNEXTLINE(readability-misleading-indentation)
     } else {
-        dynsym_section_.symbols_.push_back({name_idx,                                       // st_name
-                                            0,                                              // st_value
-                                            size,                                           // st_size
-                                            st_info,                                        // st_info
-                                            0,                                              // st_other
-                                            static_cast<ElfSection>(section.GetIndex())});  // st_shndx
+        dynsymSection_.symbols_.push_back({nameIdx,                                        // st_name
+                                           0,                                              // st_value
+                                           size,                                           // st_size
+                                           stInfo,                                         // st_info
+                                           0,                                              // st_other
+                                           static_cast<ElfSection>(section.GetIndex())});  // st_shndx
     }
-    dynsym_section_.thunks_.push_back(thunk);
+    dynsymSection_.thunks_.push_back(thunk);
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
@@ -580,13 +580,13 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::SymbolSection::Resolve()
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
-void ElfBuilder<ARCH, IS_JIT_MODE>::ConstructDynamicSection(const std::string &file_name)
+void ElfBuilder<ARCH, IS_JIT_MODE>::ConstructDynamicSection(const std::string &fileName)
 {
     using ElfDynDValType = decltype(ElfDyn::d_un.d_val);  // NOLINT(cppcoreguidelines-pro-type-union-access)
-    auto soname = dynstr_section_.AddString(file_name);
-    auto dynstr_section_size = dynstr_section_.GetDataSize();
+    auto soname = dynstrSection_.AddString(fileName);
+    auto dynstrSectionSize = dynstrSection_.GetDataSize();
     // Make sure widening is zero-extension, if any
-    static_assert(std::is_unsigned<decltype(soname)>::value && std::is_unsigned<decltype(dynstr_section_size)>::value);
+    static_assert(std::is_unsigned<decltype(soname)>::value && std::is_unsigned<decltype(dynstrSectionSize)>::value);
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     ElfDyn dyns[] = {
@@ -594,35 +594,35 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::ConstructDynamicSection(const std::string &f
         {DT_STRTAB, {0}},  // will be patched
         {DT_SYMTAB, {0}},  // will be patched
         {DT_SYMENT, {sizeof(ElfSym)}},
-        {DT_STRSZ, {static_cast<ElfDynDValType>(dynstr_section_size)}},
+        {DT_STRSZ, {static_cast<ElfDynDValType>(dynstrSectionSize)}},
         {DT_SONAME, {static_cast<ElfDynDValType>(soname)}},
         {DT_NULL, {0}},
     };
-    dynamic_section_.AppendData(&dyns, sizeof(dyns));
+    dynamicSection_.AppendData(&dyns, sizeof(dyns));
 
-    auto first_patch_argument =  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        reinterpret_cast<ElfAddr *>(reinterpret_cast<uint8_t *>(dynamic_section_.GetData()) +
+    auto firstPatchArgument =  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        reinterpret_cast<ElfAddr *>(reinterpret_cast<uint8_t *>(dynamicSection_.GetData()) +
                                     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                                     2U * sizeof(ElfDyn) + offsetof(ElfDyn, d_un.d_ptr));
-    patches_.emplace_back(first_patch_argument, [this]() { return dynsym_section_.GetAddress(); });
+    patches_.emplace_back(firstPatchArgument, [this]() { return dynsymSection_.GetAddress(); });
 
-    auto second_patch_argument =  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        reinterpret_cast<ElfAddr *>(reinterpret_cast<uint8_t *>(dynamic_section_.GetData()) +
+    auto secondPatchArgument =  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        reinterpret_cast<ElfAddr *>(reinterpret_cast<uint8_t *>(dynamicSection_.GetData()) +
                                     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                                     1U * sizeof(ElfDyn) + offsetof(ElfDyn, d_un.d_ptr));
-    patches_.emplace_back(second_patch_argument, [this]() { return dynstr_section_.GetAddress(); });
+    patches_.emplace_back(secondPatchArgument, [this]() { return dynstrSection_.GetAddress(); });
 
-    auto third_patch_argument =  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        reinterpret_cast<ElfAddr *>(reinterpret_cast<uint8_t *>(dynamic_section_.GetData()) +
+    auto thirdPatchArgument =  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        reinterpret_cast<ElfAddr *>(reinterpret_cast<uint8_t *>(dynamicSection_.GetData()) +
                                     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                                     0U * sizeof(ElfDyn) + offsetof(ElfDyn, d_un.d_ptr));
-    patches_.emplace_back(third_patch_argument, [this]() { return hash_section_.GetAddress(); });
+    patches_.emplace_back(thirdPatchArgument, [this]() { return hashSection_.GetAddress(); });
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
-void ElfBuilder<ARCH, IS_JIT_MODE>::Build(const std::string &file_name)
+void ElfBuilder<ARCH, IS_JIT_MODE>::Build(const std::string &fileName)
 {
-    shstrtab_section_.header_.sh_name = AddSectionName(shstrtab_section_.GetName());
+    shstrtabSection_.header_.sh_name = AddSectionName(shstrtabSection_.GetName());
     for (auto section : sections_) {
         section->header_.sh_name = AddSectionName(section->GetName());
         if (section->link_) {
@@ -635,7 +635,7 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::Build(const std::string &file_name)
     ConstructHashSection();
 
     if constexpr (!IS_JIT_MODE) {  // NOLINT
-        ConstructDynamicSection(file_name);
+        ConstructDynamicSection(fileName);
     }
 
     if constexpr (IS_JIT_MODE) {  // NOLINT
@@ -646,7 +646,7 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::Build(const std::string &file_name)
 
     MakeHeader();
 
-    dynsym_section_.Resolve();
+    dynsymSection_.Resolve();
     std::for_each(patches_.begin(), patches_.end(), [](auto &patch) { patch.Patch(); });
 }
 
@@ -654,17 +654,17 @@ template <Arch ARCH, bool IS_JIT_MODE>
 void ElfBuilder<ARCH, IS_JIT_MODE>::ConstructHashSection()
 {
     ElfWord value = 1;
-    auto sym_count = dynsym_section_.GetDataSize() / sizeof(ElfSym);
-    hash_section_.AppendData(&value, sizeof(value));
-    hash_section_.AppendData(&sym_count, sizeof(value));
-    hash_section_.AppendData(&value, sizeof(value));
+    auto symCount = dynsymSection_.GetDataSize() / sizeof(ElfSym);
+    hashSection_.AppendData(&value, sizeof(value));
+    hashSection_.AppendData(&symCount, sizeof(value));
+    hashSection_.AppendData(&value, sizeof(value));
     value = 0;
-    hash_section_.AppendData(&value, sizeof(value));
-    for (auto i = 2U; i < sym_count; i++) {
-        hash_section_.AppendData(&i, sizeof(value));
+    hashSection_.AppendData(&value, sizeof(value));
+    for (auto i = 2U; i < symCount; i++) {
+        hashSection_.AppendData(&i, sizeof(value));
     }
     value = 0;
-    hash_section_.AppendData(&value, sizeof(value));
+    hashSection_.AppendData(&value, sizeof(value));
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
@@ -706,10 +706,10 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::MakeHeader()
     header_.e_ehsize = sizeof(ElfEhdr);
     header_.e_phentsize = sizeof(ElfPhdr);
     header_.e_shentsize = sizeof(ElfShdr);
-    header_.e_shstrndx = shstrtab_section_.GetIndex();
-    current_offset_ = RoundUp(current_offset_, alignof(ElfShdr));
+    header_.e_shstrndx = shstrtabSection_.GetIndex();
+    currentOffset_ = RoundUp(currentOffset_, alignof(ElfShdr));
     header_.e_shoff = UpdateOffset(alignof(ElfShdr));
-    current_offset_ += sections_.size() * sizeof(ElfShdr);
+    currentOffset_ += sections_.size() * sizeof(ElfShdr);
     header_.e_phoff = IS_JIT_MODE ? 0U : sizeof(ElfEhdr);
     header_.e_shnum = sections_.size();
     header_.e_phnum = IS_JIT_MODE ? 0U : segments_.size();
@@ -718,14 +718,13 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::MakeHeader()
 template <Arch ARCH, bool IS_JIT_MODE>
 void ElfBuilder<ARCH, IS_JIT_MODE>::AddSymbols()
 {
-    AddSymbol(method_name_, text_section_.GetDataSize(), text_section_,
-              [this]() { return text_section_.GetAddress(); });
+    AddSymbol(methodName_, textSection_.GetDataSize(), textSection_, [this]() { return textSection_.GetAddress(); });
     if constexpr (!IS_JIT_MODE) {  // NOLINT
-        AddSymbol("code_end", text_section_.GetDataSize(), text_section_,
-                  [this]() { return text_section_.GetAddress() + text_section_.GetDataSize(); });
-        AddSymbol("aot", aot_section_.GetDataSize(), aot_section_, [this]() { return aot_section_.GetAddress(); });
-        AddSymbol("aot_end", aot_section_.GetDataSize(), aot_section_,
-                  [this]() { return aot_section_.GetAddress() + aot_section_.GetDataSize(); });
+        AddSymbol("code_end", textSection_.GetDataSize(), textSection_,
+                  [this]() { return textSection_.GetAddress() + textSection_.GetDataSize(); });
+        AddSymbol("aot", aotSection_.GetDataSize(), aotSection_, [this]() { return aotSection_.GetAddress(); });
+        AddSymbol("aot_end", aotSection_.GetDataSize(), aotSection_,
+                  [this]() { return aotSection_.GetAddress() + aotSection_.GetDataSize(); });
     }
 }
 
@@ -735,55 +734,55 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::SettleSectionsForAot()
     static_assert(!IS_JIT_MODE);
 
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    auto phdr_segment = new Segment(sizeof(ElfEhdr), sizeof(ElfEhdr), PT_PHDR, PF_R, sizeof(ElfOff));
-    segments_.push_back(phdr_segment);
+    auto phdrSegment = new Segment(sizeof(ElfEhdr), sizeof(ElfEhdr), PT_PHDR, PF_R, sizeof(ElfOff));
+    segments_.push_back(phdrSegment);
 
     {
-        SegmentScope segment_scope(*this, PT_LOAD, PF_R, true);  // NOLINT(hicpp-signed-bitwise)
-        current_address_ = sizeof(ElfEhdr) + sizeof(ElfPhdr) * MAX_SEGMENTS_COUNT;
-        current_offset_ = sizeof(ElfEhdr) + sizeof(ElfPhdr) * MAX_SEGMENTS_COUNT;
-        SettleSection(&dynstr_section_);
-        SettleSection(&dynsym_section_);
-        SettleSection(&hash_section_);
-        SettleSection(&aot_section_);
-        for (auto ro_data_section : ro_data_sections_) {
-            ASSERT(ro_data_section->GetDataSize() > 0);
-            SettleSection(ro_data_section);
+        SegmentScope segmentScope(*this, PT_LOAD, PF_R, true);  // NOLINT(hicpp-signed-bitwise)
+        currentAddress_ = sizeof(ElfEhdr) + sizeof(ElfPhdr) * MAX_SEGMENTS_COUNT;
+        currentOffset_ = sizeof(ElfEhdr) + sizeof(ElfPhdr) * MAX_SEGMENTS_COUNT;
+        SettleSection(&dynstrSection_);
+        SettleSection(&dynsymSection_);
+        SettleSection(&hashSection_);
+        SettleSection(&aotSection_);
+        for (auto roDataSection : roDataSections_) {
+            ASSERT(roDataSection->GetDataSize() > 0);
+            SettleSection(roDataSection);
         }
     }
 
     {
-        SegmentScope segment_scope(*this, PT_LOAD, PF_R | PF_W);  // NOLINT(hicpp-signed-bitwise)
-        SettleSection(&got_section_);
+        SegmentScope segmentScope(*this, PT_LOAD, PF_R | PF_W);  // NOLINT(hicpp-signed-bitwise)
+        SettleSection(&gotSection_);
     }
 
     {
-        SegmentScope segment_scope(*this, PT_LOAD, PF_R | PF_X);  // NOLINT(hicpp-signed-bitwise)
-        SettleSection(&text_section_);
+        SegmentScope segmentScope(*this, PT_LOAD, PF_R | PF_X);  // NOLINT(hicpp-signed-bitwise)
+        SettleSection(&textSection_);
     }
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    if (!frame_data_->empty()) {
-        SegmentScope segment_scope(*this, PT_LOAD, PF_R);  // NOLINT(hicpp-signed-bitwise)
+    if (!frameData_->empty()) {
+        SegmentScope segmentScope(*this, PT_LOAD, PF_R);  // NOLINT(hicpp-signed-bitwise)
         FillFrameSection();
-        SettleSection(&frame_section_);
+        SettleSection(&frameSection_);
     }
 #endif
 
     {
-        SegmentScope segment_scope(*this, PT_DYNAMIC, PF_R | PF_W);  // NOLINT(hicpp-signed-bitwise)
-        SettleSection(&dynamic_section_);
+        SegmentScope segmentScope(*this, PT_DYNAMIC, PF_R | PF_W);  // NOLINT(hicpp-signed-bitwise)
+        SettleSection(&dynamicSection_);
     }
 
-    SettleSection(&shstrtab_section_);
+    SettleSection(&shstrtabSection_);
 
-    auto lod_dynamic_segment = new Segment(*segments_.back());
-    ASSERT(lod_dynamic_segment->header.p_type == PT_DYNAMIC);
-    lod_dynamic_segment->header.p_type = PT_LOAD;
-    segments_.insert(segments_.end() - 1, lod_dynamic_segment);
+    auto lodDynamicSegment = new Segment(*segments_.back());
+    ASSERT(lodDynamicSegment->header.p_type == PT_DYNAMIC);
+    lodDynamicSegment->header.p_type = PT_LOAD;
+    segments_.insert(segments_.end() - 1, lodDynamicSegment);
 
     ASSERT(segments_.size() <= MAX_SEGMENTS_COUNT);
-    phdr_segment->header.p_filesz = phdr_segment->header.p_memsz = segments_.size() * sizeof(ElfPhdr);
+    phdrSegment->header.p_filesz = phdrSegment->header.p_memsz = segments_.size() * sizeof(ElfPhdr);
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
@@ -791,65 +790,65 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::SettleSectionsForJit()
 {
     static_assert(IS_JIT_MODE);
 
-    current_address_ = sizeof(ElfEhdr);
-    current_offset_ = sizeof(ElfEhdr);
+    currentAddress_ = sizeof(ElfEhdr);
+    currentOffset_ = sizeof(ElfEhdr);
 
-    SettleSection(&text_section_);
+    SettleSection(&textSection_);
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    if (!frame_data_->empty()) {
+    if (!frameData_->empty()) {
         FillFrameSection();
-        SettleSection(&frame_section_);
+        SettleSection(&frameSection_);
     }
 #endif
-    SettleSection(&dynsym_section_);
-    SettleSection(&hash_section_);
-    SettleSection(&dynstr_section_);
-    SettleSection(&shstrtab_section_);
+    SettleSection(&dynsymSection_);
+    SettleSection(&hashSection_);
+    SettleSection(&dynstrSection_);
+    SettleSection(&shstrtabSection_);
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
 void ElfBuilder<ARCH, IS_JIT_MODE>::SettleSection(Section *section)
 {
-    bool is_section_alloc {(section->header_.sh_flags & SHF_ALLOC) != 0};  // NOLINT(hicpp-signed-bitwise)
-    if (IS_JIT_MODE || !is_section_alloc) {
-        ASSERT(current_segment_ == nullptr);
+    bool isSectionAlloc {(section->header_.sh_flags & SHF_ALLOC) != 0};  // NOLINT(hicpp-signed-bitwise)
+    if (IS_JIT_MODE || !isSectionAlloc) {
+        ASSERT(currentSegment_ == nullptr);
     } else {
-        ASSERT(current_segment_ != nullptr && current_segment_->header.p_type != PT_NULL);
+        ASSERT(currentSegment_ != nullptr && currentSegment_->header.p_type != PT_NULL);
     }
 
     section->header_.sh_size = section->GetDataSize();
-    if (is_section_alloc) {
+    if (isSectionAlloc) {
         section->header_.sh_addr = UpdateAddress(section->header_.sh_addralign);
         if (section->header_.sh_type != SHT_NOBITS) {
             ASSERT(section->GetDataSize() != 0 || section->header_.sh_type == SHT_PROGBITS);
             section->header_.sh_offset = UpdateOffset(section->header_.sh_addralign);
-            current_offset_ += section->header_.sh_size;
+            currentOffset_ += section->header_.sh_size;
         } else {
             section->header_.sh_offset = 0;
         }
-        current_address_ += section->header_.sh_size;
+        currentAddress_ += section->header_.sh_size;
     } else {
-        section->header_.sh_offset = RoundUp(current_offset_, section->header_.sh_addralign);
-        current_offset_ += section->header_.sh_size;
+        section->header_.sh_offset = RoundUp(currentOffset_, section->header_.sh_addralign);
+        currentOffset_ += section->header_.sh_size;
     }
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
-void ElfBuilder<ARCH, IS_JIT_MODE>::Write(const std::string &file_name)
+void ElfBuilder<ARCH, IS_JIT_MODE>::Write(const std::string &fileName)
 {
     std::vector<uint8_t> data(GetFileSize());
-    auto data_span {Span(data)};
-    Write(data_span);
+    auto dataSpan {Span(data)};
+    Write(dataSpan);
 
-    std::ofstream elf_file(file_name, std::ios::binary);
-    elf_file.write(reinterpret_cast<char *>(data_span.Data()), data_span.Size());
+    std::ofstream elfFile(fileName, std::ios::binary);
+    elfFile.write(reinterpret_cast<char *>(dataSpan.Data()), dataSpan.Size());
 }
 
-inline void CopyToSpan(Span<uint8_t> to, const char *from, size_t size, size_t begin_index)
+inline void CopyToSpan(Span<uint8_t> to, const char *from, size_t size, size_t beginIndex)
 {
-    ASSERT(begin_index < to.Size());
-    auto max_size {to.Size() - begin_index};
-    errno_t res = memcpy_s(&to[begin_index], max_size, from, size);
+    ASSERT(beginIndex < to.Size());
+    auto maxSize {to.Size() - beginIndex};
+    errno_t res = memcpy_s(&to[beginIndex], maxSize, from, size);
     if (res != 0) {
         UNREACHABLE();
     }
@@ -862,9 +861,9 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::Write(Span<uint8_t> stream)
     char *header = reinterpret_cast<char *>(&header_);
     CopyToSpan(stream, header, sizeof(header_), 0);
     for (auto section : sections_) {
-        if (auto data_provider = section->GetDataProvider(); data_provider != nullptr) {
+        if (auto dataProvider = section->GetDataProvider(); dataProvider != nullptr) {
             auto i = section->header_.sh_offset;
-            data_provider->FillData(stream, i);
+            dataProvider->FillData(stream, i);
         } else if (section->GetDataSize() && section->header_.sh_type != SHT_NOBITS) {
             auto i = section->header_.sh_offset;
             const char *data = reinterpret_cast<const char *>(section->GetData());
@@ -891,18 +890,18 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::Write(Span<uint8_t> stream)
 template <Arch ARCH>
 class CfiGenerator {
 public:
-    explicit CfiGenerator(Span<DwarfSectionData> frame_data) : frame_data_(frame_data) {}
+    explicit CfiGenerator(Span<DwarfSectionData> frameData) : frameData_(frameData) {}
 
     void GenerateDebugInfo()
     {
-        if (!debug_info_.empty() || frame_data_.empty()) {
+        if (!debugInfo_.empty() || frameData_.empty()) {
             return;
         }
 
         auto dw {Initialize()};
         auto cie {CreateCie(dw)};
 
-        for (const auto &data : frame_data_) {
+        for (const auto &data : frameData_) {
             AddFde(dw, cie, data);
         }
 
@@ -911,7 +910,7 @@ public:
 
     Span<const uint8_t> GetDebugInfo() const
     {
-        return Span(debug_info_);
+        return Span(debugInfo_);
     }
 
 private:
@@ -923,8 +922,8 @@ private:
     static inline int CreateSectionCallback(char *name, [[maybe_unused]] int size, [[maybe_unused]] Dwarf_Unsigned type,
                                             [[maybe_unused]] Dwarf_Unsigned flags, [[maybe_unused]] Dwarf_Unsigned link,
                                             [[maybe_unused]] Dwarf_Unsigned info,
-                                            [[maybe_unused]] Dwarf_Unsigned *sect_name_index,
-                                            [[maybe_unused]] void *user_data, [[maybe_unused]] int *error)
+                                            [[maybe_unused]] Dwarf_Unsigned *sectNameIndex,
+                                            [[maybe_unused]] void *userData, [[maybe_unused]] int *error)
     {
         if (strcmp(name, ".rel.debug_frame") == 0) {
             return DwarfSection::REL_DEBUG_FRAME;
@@ -951,23 +950,23 @@ private:
     Span<Dwarf_Small> GetCieInitInstructions() const
     {
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        static Dwarf_Small cie_init_instructions_arm[] = {
+        static Dwarf_Small cieInitInstructionsArm[] = {
             DW_CFA_def_cfa,
             GetDwarfSP(ARCH),
             0U,
         };
 
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        static Dwarf_Small cie_init_instructions_amd64[] = {
+        static Dwarf_Small cieInitInstructionsAmd64[] = {
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
             DW_CFA_def_cfa, GetDwarfSP(ARCH), PointerSize(ARCH), DW_CFA_offset | GetDwarfRIP(ARCH), 1U,
         };
 
         if (ARCH == Arch::AARCH32 || ARCH == Arch::AARCH64) {
-            return Span(cie_init_instructions_arm, std::size(cie_init_instructions_arm));
+            return Span(cieInitInstructionsArm, std::size(cieInitInstructionsArm));
         }
         if (ARCH == Arch::X86_64) {
-            return Span(cie_init_instructions_amd64, std::size(cie_init_instructions_amd64));
+            return Span(cieInitInstructionsAmd64, std::size(cieInitInstructionsAmd64));
         }
         UNREACHABLE();
     }
@@ -975,11 +974,11 @@ private:
     Dwarf_Unsigned CreateCie(Dwarf_P_Debug dw) const
     {
         Dwarf_Error error {nullptr};
-        auto cie_init_instructions {GetCieInitInstructions()};
+        auto cieInitInstructions {GetCieInitInstructions()};
         Dwarf_Unsigned cie =
             dwarf_add_frame_cie(dw, const_cast<char *>(""), static_cast<Dwarf_Small>(GetInstructionAlignment(ARCH)),
                                 static_cast<Dwarf_Small>(-PointerSize(ARCH)), GetDwarfRIP(ARCH),
-                                cie_init_instructions.data(), cie_init_instructions.SizeBytes(), &error);
+                                cieInitInstructions.data(), cieInitInstructions.SizeBytes(), &error);
         ASSERT(error == DW_DLV_OK);
         return cie;
     }
@@ -1005,61 +1004,61 @@ private:
         auto sections = dwarf_transform_to_disk_form(dw, &error);
         ASSERT(error == DW_DLV_OK);
 
-        ASSERT(debug_info_.empty());
+        ASSERT(debugInfo_.empty());
         for (decltype(sections) i {0}; i < sections; ++i) {
             Dwarf_Unsigned len = 0;
-            Dwarf_Signed elf_idx = 0;
+            Dwarf_Signed elfIdx = 0;
             auto bytes = reinterpret_cast<const uint8_t *>(
-                dwarf_get_section_bytes(dw, DwarfSection::DEBUG_FRAME, &elf_idx, &len, &error));
+                dwarf_get_section_bytes(dw, DwarfSection::DEBUG_FRAME, &elfIdx, &len, &error));
             ASSERT(error == DW_DLV_OK);
 
-            std::copy_n(bytes, len, std::back_inserter(debug_info_));
+            std::copy_n(bytes, len, std::back_inserter(debugInfo_));
         }
 
         constexpr size_t TERMINATOR_SIZE {4U};
         constexpr uint8_t TERMINATOR_VALUE {0U};
-        std::fill_n(std::back_inserter(debug_info_), TERMINATOR_SIZE, TERMINATOR_VALUE);
+        std::fill_n(std::back_inserter(debugInfo_), TERMINATOR_SIZE, TERMINATOR_VALUE);
 
         dwarf_producer_finish(dw, &error);
         ASSERT(error == DW_DLV_OK);
 
         constexpr size_t CIE_ID_OFFSET {4U};
         // zero out CIE ID field
-        *reinterpret_cast<uint32_t *>(&debug_info_[CIE_ID_OFFSET]) = 0;
+        *reinterpret_cast<uint32_t *>(&debugInfo_[CIE_ID_OFFSET]) = 0;
 
         constexpr size_t FDE_CIE_DISTANCE_OFFSET {4U};
         constexpr size_t FDE_LENGTH_SIZE {4U};
         size_t base {0};
-        for (size_t i {0}; i < frame_data_.size(); ++i) {
+        for (size_t i {0}; i < frameData_.size(); ++i) {
             // read FDE length field + 4 bytes (size of length field), get next FDE
-            size_t fde_offset {base + *reinterpret_cast<uint32_t *>(&debug_info_[base]) + FDE_LENGTH_SIZE};
+            size_t fdeOffset {base + *reinterpret_cast<uint32_t *>(&debugInfo_[base]) + FDE_LENGTH_SIZE};
             // set distance to the parent CIE in FDE
-            ASSERT(debug_info_.size() > fde_offset + FDE_CIE_DISTANCE_OFFSET + 3U);
-            *reinterpret_cast<uint32_t *>(&debug_info_[fde_offset + FDE_CIE_DISTANCE_OFFSET]) =
-                fde_offset + FDE_CIE_DISTANCE_OFFSET;
-            base = fde_offset;
-            ASSERT(debug_info_.size() > base);
+            ASSERT(debugInfo_.size() > fdeOffset + FDE_CIE_DISTANCE_OFFSET + 3U);
+            *reinterpret_cast<uint32_t *>(&debugInfo_[fdeOffset + FDE_CIE_DISTANCE_OFFSET]) =
+                fdeOffset + FDE_CIE_DISTANCE_OFFSET;
+            base = fdeOffset;
+            ASSERT(debugInfo_.size() > base);
         }
     }
 
-    Span<DwarfSectionData> frame_data_;
-    std::vector<uint8_t> debug_info_;
+    Span<DwarfSectionData> frameData_;
+    std::vector<uint8_t> debugInfo_;
 };
 
 template <Arch ARCH, bool IS_JIT_MODE>
 void ElfBuilder<ARCH, IS_JIT_MODE>::FillFrameSection()
 {
     // compute code offset for method
-    for (auto &data : *frame_data_) {
-        data.SetOffset(text_section_.header_.sh_offset + data.GetOffset() + CodeInfo::GetCodeOffset(ARCH));
+    for (auto &data : *frameData_) {
+        data.SetOffset(textSection_.header_.sh_offset + data.GetOffset() + CodeInfo::GetCodeOffset(ARCH));
     }
 
-    CfiGenerator<ARCH> cfi_gen {Span(*frame_data_)};
-    cfi_gen.GenerateDebugInfo();
-    auto debug_info {cfi_gen.GetDebugInfo()};
+    CfiGenerator<ARCH> cfiGen {Span(*frameData_)};
+    cfiGen.GenerateDebugInfo();
+    auto debugInfo {cfiGen.GetDebugInfo()};
 
     // Generate frame data
-    GetFrameSection()->AppendData(debug_info.data(), debug_info.size());
+    GetFrameSection()->AppendData(debugInfo.data(), debugInfo.size());
 }
 #endif  // #ifdef PANDA_COMPILER_DEBUG_INFO
 
@@ -1086,32 +1085,32 @@ public:
 
     uintptr_t GetCurrentCodeAddress() const
     {
-        return current_code_size_;
+        return currentCodeSize_;
     }
 
     void StartClass(const Class &klass)
     {
-        ClassHeader *class_header = &class_headers_.emplace_back();
-        current_bitmap_ = &class_methods_bitmaps_.emplace_back();
-        class_header->class_id = klass.GetFileId().GetOffset();
-        class_header->methods_offset = method_headers_.size();
-        current_bitmap_->resize(klass.GetMethods().size());
+        ClassHeader *classHeader = &classHeaders_.emplace_back();
+        currentBitmap_ = &classMethodsBitmaps_.emplace_back();
+        classHeader->classId = klass.GetFileId().GetOffset();
+        classHeader->methodsOffset = methodHeaders_.size();
+        currentBitmap_->resize(klass.GetMethods().size());
     }
 
     void EndClass()
     {
-        ASSERT(!class_headers_.empty());
-        auto &class_header = class_headers_.back();
-        class_header.methods_count = method_headers_.size() - class_header.methods_offset;
-        if (class_header.methods_count != 0) {
-            ASSERT(IsAligned<sizeof(uint32_t)>(current_bitmap_->GetContainerSizeInBytes()));
-            class_header.methods_bitmap_offset = bitmap_size_;
-            class_header.methods_bitmap_size = current_bitmap_->size();
-            bitmap_size_ += current_bitmap_->GetContainerSize();
+        ASSERT(!classHeaders_.empty());
+        auto &classHeader = classHeaders_.back();
+        classHeader.methodsCount = methodHeaders_.size() - classHeader.methodsOffset;
+        if (classHeader.methodsCount != 0) {
+            ASSERT(IsAligned<sizeof(uint32_t)>(currentBitmap_->GetContainerSizeInBytes()));
+            classHeader.methodsBitmapOffset = bitmapSize_;
+            classHeader.methodsBitmapSize = currentBitmap_->size();
+            bitmapSize_ += currentBitmap_->GetContainerSize();
         } else {
-            CHECK_EQ(class_methods_bitmaps_.size(), class_headers_.size());
-            class_headers_.pop_back();
-            class_methods_bitmaps_.pop_back();
+            CHECK_EQ(classMethodsBitmaps_.size(), classHeaders_.size());
+            classHeaders_.pop_back();
+            classMethodsBitmaps_.pop_back();
         }
     }
 
@@ -1121,43 +1120,43 @@ public:
             return;
         }
         methods_.push_back(method);
-        auto &method_header = method_headers_.emplace_back();
-        method_header.method_id = method.GetMethod()->GetFileId().GetOffset();
-        method_header.code_offset = current_code_size_;
-        method_header.code_size = method.GetOverallSize();
-        current_code_size_ += method_header.code_size;
-        current_code_size_ = RoundUp(current_code_size_, GetCodeAlignment(arch_));
-        current_bitmap_->SetBit(method.GetIndex());
+        auto &methodHeader = methodHeaders_.emplace_back();
+        methodHeader.methodId = method.GetMethod()->GetFileId().GetOffset();
+        methodHeader.codeOffset = currentCodeSize_;
+        methodHeader.codeSize = method.GetOverallSize();
+        currentCodeSize_ += methodHeader.codeSize;
+        currentCodeSize_ = RoundUp(currentCodeSize_, GetCodeAlignment(arch_));
+        currentBitmap_->SetBit(method.GetIndex());
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
         if (GetEmitDebugInfo()) {
-            FillDebugInfo(method.GetCfiInfo(), method_header);
+            FillDebugInfo(method.GetCfiInfo(), methodHeader);
         }
 #endif
     }
 
     void SetClassContext(const std::string &ctx)
     {
-        class_ctx_ = ctx;
+        classCtx_ = ctx;
     }
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    void SetEmitDebugInfo([[maybe_unused]] bool emit_debug_info)
+    void SetEmitDebugInfo([[maybe_unused]] bool emitDebugInfo)
     {
-        emit_debug_info_ = emit_debug_info;
+        emitDebugInfo_ = emitDebugInfo;
     }
 
     bool GetEmitDebugInfo() const
     {
-        return emit_debug_info_;
+        return emitDebugInfo_;
     }
 #endif
 
     size_t AddString(const std::string &str)
     {
-        auto pos = string_table_.size();
+        auto pos = stringTable_.size();
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        string_table_.insert(string_table_.end(), str.data(), str.data() + str.size() + 1);
+        stringTable_.insert(stringTable_.end(), str.data(), str.data() + str.size() + 1);
         return pos;
     }
 
@@ -1167,49 +1166,49 @@ public:
 #ifdef PANDA_COMPILER_DEBUG_INFO
     inline void PrepareOffsetsForDwarf(CfiOffsets *offsets) const;
 
-    inline void FillPrologueInfo(DwarfSectionData *sect_data, const CfiOffsets &cfi_offsets) const;
+    inline void FillPrologueInfo(DwarfSectionData *sectData, const CfiOffsets &cfiOffsets) const;
 
-    inline void FillCalleesInfo(DwarfSectionData *sect_data, const CfiInfo &cfi_info) const;
+    inline void FillCalleesInfo(DwarfSectionData *sectData, const CfiInfo &cfiInfo) const;
 
-    inline void FillEpilogInfo(DwarfSectionData *sect_data, const CfiOffsets &cfi_offsets) const;
+    inline void FillEpilogInfo(DwarfSectionData *sectData, const CfiOffsets &cfiOffsets) const;
 
-    inline void FillDebugInfo(CfiInfo cfi_info, const compiler::MethodHeader &method_header);
+    inline void FillDebugInfo(CfiInfo cfiInfo, const compiler::MethodHeader &methodHeader);
 
     void AddFrameData(const DwarfSectionData &data)
     {
-        frame_data_.push_back(data);
+        frameData_.push_back(data);
     }
 
     std::vector<DwarfSectionData> *GetFrameData()
     {
-        return &frame_data_;
+        return &frameData_;
     }
 
 #endif
 protected:
-    std::vector<CompiledMethod> methods_;                 // NOLINT(misc-non-private-member-variables-in-classes)
-    std::vector<compiler::MethodHeader> method_headers_;  // NOLINT(misc-non-private-member-variables-in-classes)
-    Arch arch_ {Arch::NONE};                              // NOLINT(misc-non-private-member-variables-in-classes)
-    std::vector<char> string_table_;                      // NOLINT(misc-non-private-member-variables-in-classes)
-    BitVector<> *current_bitmap_ {nullptr};               // NOLINT(misc-non-private-member-variables-in-classes)
-    size_t current_code_size_ {0};                        // NOLINT(misc-non-private-member-variables-in-classes)
+    std::vector<CompiledMethod> methods_;                // NOLINT(misc-non-private-member-variables-in-classes)
+    std::vector<compiler::MethodHeader> methodHeaders_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    Arch arch_ {Arch::NONE};                             // NOLINT(misc-non-private-member-variables-in-classes)
+    std::vector<char> stringTable_;                      // NOLINT(misc-non-private-member-variables-in-classes)
+    BitVector<> *currentBitmap_ {nullptr};               // NOLINT(misc-non-private-member-variables-in-classes)
+    size_t currentCodeSize_ {0};                         // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
-    std::string class_ctx_;
+    std::string classCtx_;
 
-    std::vector<compiler::PandaFileHeader> file_headers_;
-    std::vector<compiler::ClassHeader> class_headers_;
+    std::vector<compiler::PandaFileHeader> fileHeaders_;
+    std::vector<compiler::ClassHeader> classHeaders_;
 
-    uint32_t gc_type_ {static_cast<uint32_t>(mem::GCType::INVALID_GC)};
+    uint32_t gcType_ {static_cast<uint32_t>(mem::GCType::INVALID_GC)};
 
-    std::vector<BitVector<>> class_methods_bitmaps_;
+    std::vector<BitVector<>> classMethodsBitmaps_;
     static_assert(sizeof(BitVector<>::container_value_type) == sizeof(uint32_t));
-    uint32_t bitmap_size_ {0};
+    uint32_t bitmapSize_ {0};
 
     RuntimeInterface *runtime_ {nullptr};
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    std::vector<DwarfSectionData> frame_data_;
-    bool emit_debug_info_ {false};
+    std::vector<DwarfSectionData> frameData_;
+    bool emitDebugInfo_ {false};
 #endif
 
     friend class CodeDataProvider;
@@ -1226,42 +1225,42 @@ static constexpr size_t DWARF_ARM_FP_REGS_START {64U};
 void ElfWriter::PrepareOffsetsForDwarf(CfiOffsets *offsets) const
 {
     // Make relative offsets
-    offsets->pop_fplr -= offsets->pop_callees;
-    offsets->pop_callees -= offsets->push_callees;
-    offsets->push_callees -= offsets->set_fp;
-    offsets->set_fp -= offsets->push_fplr;
+    offsets->popFplr -= offsets->popCallees;
+    offsets->popCallees -= offsets->pushCallees;
+    offsets->pushCallees -= offsets->setFp;
+    offsets->setFp -= offsets->pushFplr;
 
     // Make offsets in alignment units
-    auto inst_alignment {GetInstructionAlignment(arch_)};
+    auto instAlignment {GetInstructionAlignment(arch_)};
 
-    offsets->push_fplr /= inst_alignment;
-    offsets->set_fp /= inst_alignment;
-    offsets->push_callees /= inst_alignment;
-    offsets->pop_callees /= inst_alignment;
-    offsets->pop_fplr /= inst_alignment;
+    offsets->pushFplr /= instAlignment;
+    offsets->setFp /= instAlignment;
+    offsets->pushCallees /= instAlignment;
+    offsets->popCallees /= instAlignment;
+    offsets->popFplr /= instAlignment;
 }
 
-void ElfWriter::FillPrologueInfo(DwarfSectionData *sect_data, const CfiOffsets &cfi_offsets) const
+void ElfWriter::FillPrologueInfo(DwarfSectionData *sectData, const CfiOffsets &cfiOffsets) const
 {
-    sect_data->AddFdeInst(DW_CFA_advance_loc, cfi_offsets.push_fplr, 0);
-    sect_data->AddFdeInst(DW_CFA_def_cfa_offset, FP_CFA_OFFSET * PointerSize(arch_), 0);
+    sectData->AddFdeInst(DW_CFA_advance_loc, cfiOffsets.pushFplr, 0);
+    sectData->AddFdeInst(DW_CFA_def_cfa_offset, FP_CFA_OFFSET * PointerSize(arch_), 0);
     if (arch_ == Arch::AARCH32 || arch_ == Arch::AARCH64) {
-        sect_data->AddFdeInst(DW_CFA_offset, GetDwarfLR(arch_), LR_CFA_OFFSET);
+        sectData->AddFdeInst(DW_CFA_offset, GetDwarfLR(arch_), LR_CFA_OFFSET);
     }
-    sect_data->AddFdeInst(DW_CFA_offset, GetDwarfFP(arch_), FP_CFA_OFFSET);
+    sectData->AddFdeInst(DW_CFA_offset, GetDwarfFP(arch_), FP_CFA_OFFSET);
 
-    sect_data->AddFdeInst(DW_CFA_advance_loc, cfi_offsets.set_fp, 0);
-    sect_data->AddFdeInst(DW_CFA_def_cfa_register, GetDwarfFP(arch_), 0);
+    sectData->AddFdeInst(DW_CFA_advance_loc, cfiOffsets.setFp, 0);
+    sectData->AddFdeInst(DW_CFA_def_cfa_register, GetDwarfFP(arch_), 0);
 }
 
-void ElfWriter::FillCalleesInfo(DwarfSectionData *sect_data, const CfiInfo &cfi_info) const
+void ElfWriter::FillCalleesInfo(DwarfSectionData *sectData, const CfiInfo &cfiInfo) const
 {
-    const auto &cfi_offsets {cfi_info.offsets};
+    const auto &cfiOffsets {cfiInfo.offsets};
 
-    sect_data->AddFdeInst(DW_CFA_advance_loc, cfi_offsets.push_callees, 0);
+    sectData->AddFdeInst(DW_CFA_advance_loc, cfiOffsets.pushCallees, 0);
 
-    const auto &callees {cfi_info.callee_regs};
-    size_t callee_slot {0};
+    const auto &callees {cfiInfo.calleeRegs};
+    size_t calleeSlot {0};
     for (size_t i {0}; i < callees.size(); ++i) {
         auto reg {(callees.size() - 1U) - i};
         if (callees.test(reg)) {
@@ -1270,22 +1269,22 @@ void ElfWriter::FillCalleesInfo(DwarfSectionData *sect_data, const CfiInfo &cfi_
                 reg = amd64::ConvertRegNumber(reg);
             }
 #endif
-            sect_data->AddFdeInst(DW_CFA_offset, reg,
-                                  FP_CFA_OFFSET + CFrameLayout::CALLEE_REGS_START_SLOT + callee_slot++);
+            sectData->AddFdeInst(DW_CFA_offset, reg,
+                                 FP_CFA_OFFSET + CFrameLayout::CALLEE_REGS_START_SLOT + calleeSlot++);
         }
     }
 
-    const auto &vcallees {cfi_info.callee_vregs};
+    const auto &vcallees {cfiInfo.calleeVregs};
     for (size_t i {0}; i < vcallees.size(); ++i) {
         auto vreg {(vcallees.size() - 1) - i};
         if (vcallees.test(vreg)) {
             ASSERT(arch_ == Arch::AARCH32 || arch_ == Arch::AARCH64);
-            sect_data->AddFdeInst(DW_CFA_offset, DWARF_ARM_FP_REGS_START + vreg,
-                                  FP_CFA_OFFSET + CFrameLayout::CALLEE_REGS_START_SLOT + callee_slot++);
+            sectData->AddFdeInst(DW_CFA_offset, DWARF_ARM_FP_REGS_START + vreg,
+                                 FP_CFA_OFFSET + CFrameLayout::CALLEE_REGS_START_SLOT + calleeSlot++);
         }
     }
 
-    sect_data->AddFdeInst(DW_CFA_advance_loc, cfi_offsets.pop_callees, 0);
+    sectData->AddFdeInst(DW_CFA_advance_loc, cfiOffsets.popCallees, 0);
     for (size_t i {0}; i < callees.size(); ++i) {
         auto reg {(callees.size() - 1U) - i};
         if (callees.test(reg)) {
@@ -1294,7 +1293,7 @@ void ElfWriter::FillCalleesInfo(DwarfSectionData *sect_data, const CfiInfo &cfi_
                 reg = amd64::ConvertRegNumber(reg);
             }
 #endif
-            sect_data->AddFdeInst(DW_CFA_same_value, reg, 0);
+            sectData->AddFdeInst(DW_CFA_same_value, reg, 0);
         }
     }
 
@@ -1302,40 +1301,40 @@ void ElfWriter::FillCalleesInfo(DwarfSectionData *sect_data, const CfiInfo &cfi_
         auto vreg {(vcallees.size() - 1) - i};
         if (vcallees.test(vreg)) {
             ASSERT(arch_ == Arch::AARCH32 || arch_ == Arch::AARCH64);
-            sect_data->AddFdeInst(DW_CFA_same_value, DWARF_ARM_FP_REGS_START + vreg, 0);
+            sectData->AddFdeInst(DW_CFA_same_value, DWARF_ARM_FP_REGS_START + vreg, 0);
         }
     }
 }
 
-void ElfWriter::FillEpilogInfo(DwarfSectionData *sect_data, const CfiOffsets &cfi_offsets) const
+void ElfWriter::FillEpilogInfo(DwarfSectionData *sectData, const CfiOffsets &cfiOffsets) const
 {
-    sect_data->AddFdeInst(DW_CFA_advance_loc, cfi_offsets.pop_fplr, 0);
-    sect_data->AddFdeInst(DW_CFA_same_value, GetDwarfFP(arch_), 0);
+    sectData->AddFdeInst(DW_CFA_advance_loc, cfiOffsets.popFplr, 0);
+    sectData->AddFdeInst(DW_CFA_same_value, GetDwarfFP(arch_), 0);
     if (arch_ == Arch::AARCH32 || arch_ == Arch::AARCH64) {
-        sect_data->AddFdeInst(DW_CFA_same_value, GetDwarfLR(arch_), 0);
-        sect_data->AddFdeInst(DW_CFA_def_cfa, GetDwarfSP(arch_), 0);
+        sectData->AddFdeInst(DW_CFA_same_value, GetDwarfLR(arch_), 0);
+        sectData->AddFdeInst(DW_CFA_def_cfa, GetDwarfSP(arch_), 0);
     } else if (arch_ == Arch::X86_64) {
-        sect_data->AddFdeInst(DW_CFA_def_cfa, GetDwarfSP(arch_), 1U * PointerSize(arch_));
+        sectData->AddFdeInst(DW_CFA_def_cfa, GetDwarfSP(arch_), 1U * PointerSize(arch_));
     } else {
         UNREACHABLE();
     }
 }
 
-void ElfWriter::FillDebugInfo(CfiInfo cfi_info, const compiler::MethodHeader &method_header)
+void ElfWriter::FillDebugInfo(CfiInfo cfiInfo, const compiler::MethodHeader &methodHeader)
 {
-    DwarfSectionData sect_data;
+    DwarfSectionData sectData;
     // Will be patched later
-    sect_data.SetOffset(method_header.code_offset);
-    sect_data.SetSize(method_header.code_size);
+    sectData.SetOffset(methodHeader.codeOffset);
+    sectData.SetSize(methodHeader.codeSize);
 
-    auto &cfi_offsets {cfi_info.offsets};
-    PrepareOffsetsForDwarf(&cfi_offsets);
+    auto &cfiOffsets {cfiInfo.offsets};
+    PrepareOffsetsForDwarf(&cfiOffsets);
 
-    FillPrologueInfo(&sect_data, cfi_offsets);
-    FillCalleesInfo(&sect_data, cfi_info);
-    FillEpilogInfo(&sect_data, cfi_offsets);
+    FillPrologueInfo(&sectData, cfiOffsets);
+    FillCalleesInfo(&sectData, cfiInfo);
+    FillEpilogInfo(&sectData, cfiOffsets);
 
-    AddFrameData(sect_data);
+    AddFrameData(sectData);
 }
 #endif
 

@@ -32,26 +32,26 @@ RegAllocBase::RegAllocBase(Graph *graph)
 {
 }
 
-RegAllocBase::RegAllocBase(Graph *graph, const RegMask &reg_mask, const VRegMask &vreg_mask, size_t slots_count)
+RegAllocBase::RegAllocBase(Graph *graph, const RegMask &regMask, const VRegMask &vregMask, size_t slotsCount)
     : Optimization(graph),
-      regs_mask_(graph->GetLocalAllocator()),
-      vregs_mask_(graph->GetLocalAllocator()),
-      stack_mask_(graph->GetLocalAllocator()),
-      stack_use_last_positions_(graph->GetLocalAllocator()->Adapter())
+      regsMask_(graph->GetLocalAllocator()),
+      vregsMask_(graph->GetLocalAllocator()),
+      stackMask_(graph->GetLocalAllocator()),
+      stackUseLastPositions_(graph->GetLocalAllocator()->Adapter())
 {
-    SetRegMask(reg_mask);
-    SetVRegMask(vreg_mask);
-    SetSlotsCount(slots_count);
+    SetRegMask(regMask);
+    SetVRegMask(vregMask);
+    SetSlotsCount(slotsCount);
 }
 
-RegAllocBase::RegAllocBase(Graph *graph, size_t regs_count)
+RegAllocBase::RegAllocBase(Graph *graph, size_t regsCount)
     : Optimization(graph),
-      regs_mask_(graph->GetLocalAllocator()),
-      vregs_mask_(graph->GetLocalAllocator()),
-      stack_mask_(graph->GetLocalAllocator()),
-      stack_use_last_positions_(graph->GetLocalAllocator()->Adapter())
+      regsMask_(graph->GetLocalAllocator()),
+      vregsMask_(graph->GetLocalAllocator()),
+      stackMask_(graph->GetLocalAllocator()),
+      stackUseLastPositions_(graph->GetLocalAllocator()->Adapter())
 {
-    GetRegMask().Resize(regs_count);
+    GetRegMask().Resize(regsCount);
 }
 
 bool RegAllocBase::RunImpl()
@@ -113,7 +113,7 @@ bool RegAllocBase::Prepare()
 // Call resolvers (likely will be the same)
 bool RegAllocBase::Resolve()
 {
-    if (OPTIONS.IsCompilerDumpLifeIntervals()) {
+    if (g_options.IsCompilerDumpLifeIntervals()) {
         GetGraph()->GetPassManager()->DumpLifeIntervals(GetPassName());
     }
 
@@ -128,15 +128,15 @@ bool RegAllocBase::Resolve()
 
     // Resolve spill-fills overwriting
     if (GetGraph()->IsBytecodeOptimizer()) {
-        auto resolver_reg = GetRegMask().GetReserved().value();
-        auto regs_count = GetRegMask().GetSize();
-        SpillFillsResolver(GetGraph(), resolver_reg, regs_count).Run();
+        auto resolverReg = GetRegMask().GetReserved().value();
+        auto regsCount = GetRegMask().GetSize();
+        SpillFillsResolver(GetGraph(), resolverReg, regsCount).Run();
     } else {
         SpillFillsResolver(GetGraph()).Run();
     }
 
 #ifndef NDEBUG
-    if (!GetGraph()->IsBytecodeOptimizer() && OPTIONS.IsCompilerVerifyRegalloc() &&
+    if (!GetGraph()->IsBytecodeOptimizer() && g_options.IsCompilerVerifyRegalloc() &&
         !GetGraph()->RunPass<RegAllocVerifier>()) {
         LOG(FATAL, COMPILER) << "Regalloc verification failed";
     }
@@ -193,7 +193,7 @@ void RegAllocBase::SetPreassignedRegisters(LifeIntervals *interval)
     if (inst->GetOpcode() == Opcode::Parameter) {
         auto sf = inst->CastToParameter()->GetLocationData();
         if (sf.GetSrc().IsAnyRegister()) {
-            auto &mask = sf.GetSrc().IsFpRegister() ? vregs_mask_ : regs_mask_;
+            auto &mask = sf.GetSrc().IsFpRegister() ? vregsMask_ : regsMask_;
             if (GetGraph()->GetArch() != Arch::AARCH32 || !mask.IsSet(sf.SrcValue())) {
                 interval->SetPreassignedReg(sf.SrcValue());
             }
@@ -234,8 +234,8 @@ void RegAllocBase::ReserveTempRegisters()
     if (GetGraph()->IsBytecodeOptimizer()) {
         auto fixup =
             static_cast<int32_t>(GetGraph()->GetRuntime()->GetMethodTotalArgumentsCount(GetGraph()->GetMethod()));
-        auto reserved_bit = GetRegMask().GetSize() - 1 - fixup;
-        GetRegMask().Reserve(reserved_bit);
+        auto reservedBit = GetRegMask().GetSize() - 1 - fixup;
+        GetRegMask().Reserve(reservedBit);
         return;
     }
 
@@ -250,29 +250,29 @@ size_t RegAllocBase::GetTotalSlotsCount()
     if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->GetMode().IsFastPath()) {
         return GetStackMask().GetUsedCount();
     }
-    auto param_slots = GetGraph()->GetStackSlotsCount();
-    auto spill_slots_count = GetStackMask().GetUsedCount();
-    size_t lang_ext_slots = 0U;
+    auto paramSlots = GetGraph()->GetStackSlotsCount();
+    auto spillSlotsCount = GetStackMask().GetUsedCount();
+    size_t langExtSlots = 0U;
     if (GetGraph()->GetArch() != Arch::NONE) {
-        lang_ext_slots = GetGraph()->GetRuntime()->GetLanguageExtensionSize(GetGraph()->GetArch()) /
-                         PointerSize(GetGraph()->GetArch());
+        langExtSlots = GetGraph()->GetRuntime()->GetLanguageExtensionSize(GetGraph()->GetArch()) /
+                       PointerSize(GetGraph()->GetArch());
         // We reserve space in frame for currect method and all inlined methods
-        lang_ext_slots *= GetGraph()->GetMaxInliningDepth() + 1;
+        langExtSlots *= GetGraph()->GetMaxInliningDepth() + 1;
     }
 
     // language extension slots lies after spill slots
-    GetGraph()->SetExtSlotsStart(spill_slots_count);
-    COMPILER_LOG(INFO, REGALLOC) << "Call parameters slots: " << param_slots;
-    COMPILER_LOG(INFO, REGALLOC) << "Spill slots: " << spill_slots_count;
-    COMPILER_LOG(INFO, REGALLOC) << "Language Extension slots: " << lang_ext_slots;
-    auto total_slots = RoundUp(param_slots + lang_ext_slots + spill_slots_count, 2U);
-    return total_slots;
+    GetGraph()->SetExtSlotsStart(spillSlotsCount);
+    COMPILER_LOG(INFO, REGALLOC) << "Call parameters slots: " << paramSlots;
+    COMPILER_LOG(INFO, REGALLOC) << "Spill slots: " << spillSlotsCount;
+    COMPILER_LOG(INFO, REGALLOC) << "Language Extension slots: " << langExtSlots;
+    auto totalSlots = RoundUp(paramSlots + langExtSlots + spillSlotsCount, 2U);
+    return totalSlots;
 }
 
-void ConnectIntervals(SpillFillInst *spill_fill, const LifeIntervals *src, const LifeIntervals *dst)
+void ConnectIntervals(SpillFillInst *spillFill, const LifeIntervals *src, const LifeIntervals *dst)
 {
-    ASSERT(spill_fill->IsSpillFill());
-    spill_fill->AddSpillFill(src->GetLocation(), dst->GetLocation(), dst->GetType());
+    ASSERT(spillFill->IsSpillFill());
+    spillFill->AddSpillFill(src->GetLocation(), dst->GetLocation(), dst->GetType());
 
     if (dst->HasReg()) {
         dst->GetInst()->GetBasicBlock()->GetGraph()->SetRegUsage(dst->GetReg(), dst->GetType());
@@ -283,14 +283,14 @@ bool TryToSpillConstant(LifeIntervals *interval, Graph *graph)
 {
     auto inst = interval->GetInst();
     ASSERT(inst != nullptr);
-    if (!inst->IsConst() || graph->IsBytecodeOptimizer() || !OPTIONS.IsCompilerRematConst()) {
+    if (!inst->IsConst() || graph->IsBytecodeOptimizer() || !g_options.IsCompilerRematConst()) {
         return false;
     }
-    auto imm_slot = graph->AddSpilledConstant(inst->CastToConstant());
-    if (imm_slot == INVALID_IMM_TABLE_SLOT) {
+    auto immSlot = graph->AddSpilledConstant(inst->CastToConstant());
+    if (immSlot == INVALID_IMM_TABLE_SLOT) {
         return false;
     }
-    interval->SetLocation(Location::MakeConstant(imm_slot));
+    interval->SetLocation(Location::MakeConstant(immSlot));
     COMPILER_LOG(DEBUG, REGALLOC) << interval->GetLocation().ToString(graph->GetArch())
                                   << " was assigned to the interval " << interval->ToString();
     return true;

@@ -71,44 +71,44 @@ public:
     static void SetFieldObject(const ManagedThread *thread, void *obj, const Field &field, ObjectHeader *value);
 
     template <class T>
-    static T GetFieldPrimitive(const void *obj, size_t offset, std::memory_order memory_order);
+    static T GetFieldPrimitive(const void *obj, size_t offset, std::memory_order memoryOrder);
 
     template <class T>
-    static void SetFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memory_order);
+    static void SetFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
 
     template <bool NEED_READ_BARRIER = true, bool IS_DYN = false>
-    static ObjectHeader *GetFieldObject(const void *obj, int offset, std::memory_order memory_order);
+    static ObjectHeader *GetFieldObject(const void *obj, int offset, std::memory_order memoryOrder);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    static void SetFieldObject(void *obj, size_t offset, ObjectHeader *value, std::memory_order memory_order);
+    static void SetFieldObject(void *obj, size_t offset, ObjectHeader *value, std::memory_order memoryOrder);
 
     template <typename T>
-    static std::pair<bool, T> CompareAndSetFieldPrimitive(void *obj, size_t offset, T old_value, T new_value,
-                                                          std::memory_order memory_order, bool strong);
+    static std::pair<bool, T> CompareAndSetFieldPrimitive(void *obj, size_t offset, T oldValue, T newValue,
+                                                          std::memory_order memoryOrder, bool strong);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    static std::pair<bool, ObjectHeader *> CompareAndSetFieldObject(void *obj, size_t offset, ObjectHeader *old_value,
-                                                                    ObjectHeader *new_value,
-                                                                    std::memory_order memory_order, bool strong);
+    static std::pair<bool, ObjectHeader *> CompareAndSetFieldObject(void *obj, size_t offset, ObjectHeader *oldValue,
+                                                                    ObjectHeader *newValue,
+                                                                    std::memory_order memoryOrder, bool strong);
 
     template <typename T>
-    static T GetAndSetFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memory_order);
+    static T GetAndSetFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
     static ObjectHeader *GetAndSetFieldObject(void *obj, size_t offset, ObjectHeader *value,
-                                              std::memory_order memory_order);
+                                              std::memory_order memoryOrder);
 
     template <typename T>
-    static T GetAndAddFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memory_order);
+    static T GetAndAddFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    static T GetAndBitwiseOrFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memory_order);
+    static T GetAndBitwiseOrFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    static T GetAndBitwiseAndFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memory_order);
+    static T GetAndBitwiseAndFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    static T GetAndBitwiseXorFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memory_order);
+    static T GetAndBitwiseXorFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
 
     static inline void SetDynValueWithoutBarrier(void *obj, size_t offset, coretypes::TaggedType value);
 
@@ -126,7 +126,7 @@ public:
         return reinterpret_cast<const std::atomic<T> *>(addr)->load(std::memory_order_relaxed);
     }
 
-    static void SetClass(ObjectHeader *obj, BaseClass *new_class);
+    static void SetClass(ObjectHeader *obj, BaseClass *newClass);
 
 private:
     template <class T, bool IS_VOLATILE>
@@ -156,21 +156,21 @@ private:
     }
 
     template <class T>
-    static T Get(const void *obj, size_t offset, std::memory_order memory_order)
+    static T Get(const void *obj, size_t offset, std::memory_order memoryOrder)
     {
         auto *addr = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(obj) + offset);
         ASSERT(IsAddressInObjectsHeap(addr));
         // Atomic with parameterized order reason: memory order passed as argument
-        return reinterpret_cast<const std::atomic<T> *>(addr)->load(memory_order);
+        return reinterpret_cast<const std::atomic<T> *>(addr)->load(memoryOrder);
     }
 
     template <class T>
-    static void Set(void *obj, size_t offset, T value, std::memory_order memory_order)
+    static void Set(void *obj, size_t offset, T value, std::memory_order memoryOrder)
     {
         auto *addr = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(obj) + offset);
         ASSERT(IsAddressInObjectsHeap(addr));
         // Atomic with parameterized order reason: memory order passed as argument
-        return reinterpret_cast<std::atomic<T> *>(addr)->store(value, memory_order);
+        return reinterpret_cast<std::atomic<T> *>(addr)->store(value, memoryOrder);
     }
 
     PANDA_PUBLIC_API static mem::GCBarrierSet *GetBarrierSet();

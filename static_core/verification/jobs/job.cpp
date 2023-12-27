@@ -27,21 +27,21 @@ bool Job::UpdateTypes(TypeSystem *types) const
     bool result = true;
     Job::ErrorHandler handler;
 
-    auto has_type = [&](Class const *klass) {
+    auto hasType = [&](Class const *klass) {
         types->MentionClass(klass);
         return true;
     };
     ForAllCachedTypes([&](Type type) {
         if (type.IsClass()) {
-            result = result && has_type(type.GetClass());
+            result = result && hasType(type.GetClass());
         }
     });
     ForAllCachedMethods([&](Method const *method) { types->GetMethodSignature(method); });
     ForAllCachedFields([&](Field const *field) {
-        result = result && has_type(field->GetClass());
+        result = result && hasType(field->GetClass());
         if (field->GetType().IsReference()) {
             ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
-            result = result && has_type(field->ResolveTypeClass(&handler));
+            result = result && hasType(field->ResolveTypeClass(&handler));
         }
     });
     return result;
@@ -49,8 +49,8 @@ bool Job::UpdateTypes(TypeSystem *types) const
 
 bool Job::Verify(TypeSystem *types) const
 {
-    auto verif_context = PrepareVerificationContext(types, this);
-    auto result = VerifyMethod(verif_context);
+    auto verifContext = PrepareVerificationContext(types, this);
+    auto result = VerifyMethod(verifContext);
     return result != VerificationStatus::ERROR;
 }
 
@@ -66,15 +66,15 @@ bool Job::DoChecks(TypeSystem *types)
     }
 
     if (check[MethodOption::CheckType::CFLOW]) {
-        auto cflow_info = CheckCflow(method_);
-        if (!cflow_info) {
+        auto cflowInfo = CheckCflow(method_);
+        if (!cflowInfo) {
             LOG(WARNING, VERIFIER) << "Failed to check control flow for method " << method_->GetFullName(true);
             return false;
         }
-        cflow_info_ = std::move(cflow_info);
+        cflowInfo_ = std::move(cflowInfo);
     }
 
-    DBG_MANAGED_BRK(&service_->debug_ctx, method_->GetUniqId(), 0xFFFF);
+    DBG_MANAGED_BRK(&service_->debugCtx, method_->GetUniqId(), 0xFFFF);
 
     if (check[MethodOption::CheckType::TYPING]) {
         if (!UpdateTypes(types)) {

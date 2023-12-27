@@ -39,8 +39,8 @@ static void BackOff(uint32_t i)
     static constexpr uint32_t SPIN_MAX = 10;
     if (i <= SPIN_MAX) {
         volatile uint32_t x = 0;  // Volatile to make sure loop is not optimized out.
-        const uint32_t spin_count = 10 * i;
-        for (uint32_t spin = 0; spin < spin_count; spin++) {
+        const uint32_t spinCount = 10 * i;
+        for (uint32_t spin = 0; spin < spinCount; spin++) {
             ++x;
         }
     } else {
@@ -116,7 +116,7 @@ RWLock::~RWLock()
         if (state_.load(std::memory_order_relaxed) != 0) {
             LOG(FATAL, COMMON) << "RWLock destruction failed; state_ is non zero!";
             // Atomic with relaxed order reason: mutex synchronization
-        } else if (exclusive_owner_.load(std::memory_order_relaxed) != 0) {
+        } else if (exclusiveOwner_.load(std::memory_order_relaxed) != 0) {
             LOG(FATAL, COMMON) << "RWLock destruction failed; RWLock has an owner!";
             // Atomic with relaxed order reason: mutex synchronization
         } else if (waiters_.load(std::memory_order_relaxed) != 0) {
@@ -137,28 +137,28 @@ void RWLock::WriteLock()
     bool done = false;
     while (!done) {
         // Atomic with relaxed order reason: mutex synchronization
-        auto cur_state = state_.load(std::memory_order_relaxed);
-        if (LIKELY(cur_state == UNLOCKED)) {
+        auto curState = state_.load(std::memory_order_relaxed);
+        if (LIKELY(curState == UNLOCKED)) {
             // Unlocked, can acquire writelock
             // Do CAS in case other thread beats us and acquires readlock first
-            done = state_.compare_exchange_weak(cur_state, WRITE_LOCKED, std::memory_order_acquire);
+            done = state_.compare_exchange_weak(curState, WRITE_LOCKED, std::memory_order_acquire);
         } else {
             // Wait until RWLock is unlocked
             if (!WaitBrieflyFor(&state_, [](int32_t state) { return state == UNLOCKED; })) {
                 // WaitBrieflyFor failed, go to futex wait
                 // Increment waiters count.
                 IncrementWaiters();
-                // Retry wait until lock not held. If we have more than one reader, cur_state check fail
+                // Retry wait until lock not held. If we have more than one reader, curState check fail
                 // doesn't mean this lock is unlocked.
-                while (cur_state != UNLOCKED) {
+                while (curState != UNLOCKED) {
                     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                    if (futex(GetStateAddr(), FUTEX_WAIT_PRIVATE, cur_state, nullptr, nullptr, 0) != 0) {
+                    if (futex(GetStateAddr(), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0) {
                         if ((errno != EAGAIN) && (errno != EINTR)) {
                             LOG(FATAL, COMMON) << "Futex wait failed!";
                         }
                     }
                     // Atomic with relaxed order reason: mutex synchronization
-                    cur_state = state_.load(std::memory_order_relaxed);
+                    curState = state_.load(std::memory_order_relaxed);
                 }
                 DecrementWaiters();
             }
@@ -168,27 +168,27 @@ void RWLock::WriteLock()
     // Atomic with relaxed order reason: mutex synchronization
     ASSERT(state_.load(std::memory_order_relaxed) == WRITE_LOCKED);
     // Atomic with relaxed order reason: mutex synchronization
-    ASSERT(exclusive_owner_.load(std::memory_order_relaxed) == 0);
+    ASSERT(exclusiveOwner_.load(std::memory_order_relaxed) == 0);
     // Atomic with relaxed order reason: mutex synchronization
-    exclusive_owner_.store(current_tid, std::memory_order_relaxed);
+    exclusiveOwner_.store(current_tid, std::memory_order_relaxed);
 }
 
-void RWLock::HandleReadLockWait(int32_t cur_state)
+void RWLock::HandleReadLockWait(int32_t curState)
 {
     // Wait until RWLock WriteLock is unlocked
     if (!WaitBrieflyFor(&state_, [](int32_t state) { return state >= UNLOCKED; })) {
         // WaitBrieflyFor failed, go to futex wait
         IncrementWaiters();
         // Retry wait until WriteLock not held.
-        while (cur_state == WRITE_LOCKED) {
+        while (curState == WRITE_LOCKED) {
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
-            if (futex(GetStateAddr(), FUTEX_WAIT_PRIVATE, cur_state, nullptr, nullptr, 0) != 0) {
+            if (futex(GetStateAddr(), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0) {
                 if ((errno != EAGAIN) && (errno != EINTR)) {
                     LOG(FATAL, COMMON) << "Futex wait failed!";
                 }
             }
             // Atomic with relaxed order reason: mutex synchronization
-            cur_state = state_.load(std::memory_order_relaxed);
+            curState = state_.load(std::memory_order_relaxed);
         }
         DecrementWaiters();
     }
@@ -198,12 +198,12 @@ bool RWLock::TryReadLock()
 {
     bool done = false;
     // Atomic with relaxed order reason: mutex synchronization
-    auto cur_state = state_.load(std::memory_order_relaxed);
+    auto curState = state_.load(std::memory_order_relaxed);
     while (!done) {
-        if (cur_state >= UNLOCKED) {
-            auto new_state = cur_state + READ_INCREMENT;
-            // cur_state should be updated with fetched value on fail
-            done = state_.compare_exchange_weak(cur_state, new_state, std::memory_order_acquire);
+        if (curState >= UNLOCKED) {
+            auto new_state = curState + READ_INCREMENT;
+            // curState should be updated with fetched value on fail
+            done = state_.compare_exchange_weak(curState, new_state, std::memory_order_acquire);
         } else {
             // RWLock is Write held, trylock failed.
             return false;
@@ -220,13 +220,13 @@ bool RWLock::TryWriteLock()
     }
     bool done = false;
     // Atomic with relaxed order reason: mutex synchronization
-    auto cur_state = state_.load(std::memory_order_relaxed);
+    auto curState = state_.load(std::memory_order_relaxed);
     while (!done) {
-        if (LIKELY(cur_state == UNLOCKED)) {
+        if (LIKELY(curState == UNLOCKED)) {
             // Unlocked, can acquire writelock
             // Do CAS in case other thread beats us and acquires readlock first
-            // cur_state should be updated with fetched value on fail
-            done = state_.compare_exchange_weak(cur_state, WRITE_LOCKED, std::memory_order_acquire);
+            // curState should be updated with fetched value on fail
+            done = state_.compare_exchange_weak(curState, WRITE_LOCKED, std::memory_order_acquire);
         } else {
             // RWLock is held, trylock failed.
             return false;
@@ -236,9 +236,9 @@ bool RWLock::TryWriteLock()
     // Atomic with relaxed order reason: mutex synchronization
     ASSERT(state_.load(std::memory_order_relaxed) == WRITE_LOCKED);
     // Atomic with relaxed order reason: mutex synchronization
-    ASSERT(exclusive_owner_.load(std::memory_order_relaxed) == 0);
+    ASSERT(exclusiveOwner_.load(std::memory_order_relaxed) == 0);
     // Atomic with relaxed order reason: mutex synchronization
-    exclusive_owner_.store(current_tid, std::memory_order_relaxed);
+    exclusiveOwner_.store(current_tid, std::memory_order_relaxed);
     return true;
 }
 
@@ -251,17 +251,17 @@ void RWLock::WriteUnlock()
 
     bool done = false;
     // Atomic with relaxed order reason: mutex synchronization
-    int32_t cur_state = state_.load(std::memory_order_relaxed);
+    int32_t curState = state_.load(std::memory_order_relaxed);
     // CAS is weak and might fail, do in loop
     while (!done) {
-        if (LIKELY(cur_state == WRITE_LOCKED)) {
+        if (LIKELY(curState == WRITE_LOCKED)) {
             // Reset exclusive owner before changing state to avoid check failures if other thread sees UNLOCKED
             // Atomic with relaxed order reason: mutex synchronization
-            exclusive_owner_.store(0, std::memory_order_relaxed);
+            exclusiveOwner_.store(0, std::memory_order_relaxed);
             // Change state to unlocked and do release store.
             // waiters_ load should not be reordered before state_, so it's done with seq cst.
-            // cur_state should be updated with fetched value on fail
-            done = state_.compare_exchange_weak(cur_state, UNLOCKED, std::memory_order_seq_cst);
+            // curState should be updated with fetched value on fail
+            done = state_.compare_exchange_weak(curState, UNLOCKED, std::memory_order_seq_cst);
             if (LIKELY(done)) {
                 // We are doing write unlock, all waiters could be ReadLocks so we need to wake all.
                 // Atomic with seq_cst order reason: mutex synchronization

@@ -14,15 +14,15 @@
  */
 
 void GetInfoForInteropCallArgsConversion(
-    MethodPtr method_ptr, ArenaVector<std::pair<IntrinsicId, compiler::DataType::Type>> *intrinsics) const override
+    MethodPtr methodPtr, ArenaVector<std::pair<IntrinsicId, compiler::DataType::Type>> *intrinsics) const override
 {
-    auto method = MethodCast(method_ptr);
-    uint32_t num_args = method->GetNumArgs() - 2U;
+    auto method = MethodCast(methodPtr);
+    uint32_t numArgs = method->GetNumArgs() - 2U;
     panda_file::ShortyIterator it(method->GetShorty());
     it.IncrementWithoutCheck();
     it.IncrementWithoutCheck();
     it.IncrementWithoutCheck();
-    for (uint32_t arg_idx = 0; arg_idx < num_args; ++arg_idx, it.IncrementWithoutCheck()) {
+    for (uint32_t argIdx = 0; argIdx < numArgs; ++argIdx, it.IncrementWithoutCheck()) {
         auto type = *it;
         std::pair<IntrinsicId, compiler::DataType::Type> pair = {};
         switch (type.GetId()) {
@@ -74,9 +74,9 @@ void GetInfoForInteropCallArgsConversion(
 }
 
 std::optional<std::pair<compiler::RuntimeInterface::IntrinsicId, compiler::DataType::Type>>
-GetInfoForInteropCallRetValueConversion(MethodPtr method_ptr) const override
+GetInfoForInteropCallRetValueConversion(MethodPtr methodPtr) const override
 {
-    auto method = MethodCast(method_ptr);
+    auto method = MethodCast(methodPtr);
     auto type = method->GetReturnType();
     switch (type.GetId()) {
         case panda_file::Type::TypeId::VOID:
@@ -105,15 +105,14 @@ GetInfoForInteropCallRetValueConversion(MethodPtr method_ptr) const override
             return {{IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_F64, compiler::DataType::FLOAT64}};
         case panda_file::Type::TypeId::REFERENCE: {
             auto vm = reinterpret_cast<PandaEtsVM *>(Thread::GetCurrent()->GetVM());
-            auto class_linker = vm->GetClassLinker();
+            auto classLinker = vm->GetClassLinker();
             auto klass = GetClass(method, GetMethodReturnTypeId(method));
             // start fastpath
             if (klass ==
-                class_linker->GetClass(panda_file_items::class_descriptors::JS_VALUE.data())->GetRuntimeClass()) {
+                classLinker->GetClass(panda_file_items::class_descriptors::JS_VALUE.data())->GetRuntimeClass()) {
                 return {{IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_JS_VALUE, compiler::DataType::REFERENCE}};
             }
-            if (klass ==
-                class_linker->GetClass(panda_file_items::class_descriptors::STRING.data())->GetRuntimeClass()) {
+            if (klass == classLinker->GetClass(panda_file_items::class_descriptors::STRING.data())->GetRuntimeClass()) {
                 return {{IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_STRING, compiler::DataType::REFERENCE}};
             }
             return {{IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_REF_TYPE, compiler::DataType::REFERENCE}};

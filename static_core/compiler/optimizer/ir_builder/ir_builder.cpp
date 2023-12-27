@@ -33,41 +33,41 @@ bool IrBuilder::RunImpl()
                                    << ", regs=" << GetGraph()->GetRuntime()->GetMethodRegistersCount(GetMethod())
                                    << ")";
 
-    auto instructions_buf = GetGraph()->GetRuntime()->GetMethodCode(GetMethod());
-    BytecodeInstructions pbc_instructions(instructions_buf, GetGraph()->GetRuntime()->GetMethodCodeSize(GetMethod()));
-    size_t vregs_count = GetGraph()->GetRuntime()->GetMethodRegistersCount(GetMethod()) +
-                         GetGraph()->GetRuntime()->GetMethodTotalArgumentsCount(GetMethod()) + 1;
-    if (!CheckMethodLimitations(pbc_instructions, vregs_count)) {
+    auto instructionsBuf = GetGraph()->GetRuntime()->GetMethodCode(GetMethod());
+    BytecodeInstructions pbcInstructions(instructionsBuf, GetGraph()->GetRuntime()->GetMethodCodeSize(GetMethod()));
+    size_t vregsCount = GetGraph()->GetRuntime()->GetMethodRegistersCount(GetMethod()) +
+                        GetGraph()->GetRuntime()->GetMethodTotalArgumentsCount(GetMethod()) + 1;
+    if (!CheckMethodLimitations(pbcInstructions, vregsCount)) {
         return false;
     }
-    GetGraph()->SetVRegsCount(vregs_count);
-    BuildBasicBlocks(pbc_instructions);
+    GetGraph()->SetVRegsCount(vregsCount);
+    BuildBasicBlocks(pbcInstructions);
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
 
-    InstBuilder inst_builder(GetGraph(), GetMethod(), caller_inst_, inlining_depth_);
-    inst_builder.Prepare(is_inlined_graph_);
-    inst_defs_.resize(vregs_count + GetGraph()->GetEnvCount());
+    InstBuilder instBuilder(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
+    instBuilder.Prepare(isInlinedGraph_);
+    instDefs_.resize(vregsCount + GetGraph()->GetEnvCount());
     COMPILER_LOG(INFO, IR_BUILDER) << "Start instructions building...";
     for (auto bb : GetGraph()->GetBlocksRPO()) {
-        if (!BuildBasicBlock(bb, &inst_builder, instructions_buf)) {
+        if (!BuildBasicBlock(bb, &instBuilder, instructionsBuf)) {
             return false;
         }
     }
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
     GetGraph()->RunPass<LoopAnalyzer>();
-    inst_builder.FixInstructions();
+    instBuilder.FixInstructions();
     if (GetGraph()->GetRuntime()->IsMemoryBarrierRequired(GetMethod())) {
         SetMemoryBarrierFlag();
     }
 
-    if (OPTIONS.IsCompilerPrintStats() || OPTIONS.WasSetCompilerDumpStatsCsv()) {
-        uint64_t pbc_inst_num = 0;
-        for ([[maybe_unused]] auto i : pbc_instructions) {
-            pbc_inst_num++;
+    if (g_options.IsCompilerPrintStats() || g_options.WasSetCompilerDumpStatsCsv()) {
+        uint64_t pbcInstNum = 0;
+        for ([[maybe_unused]] auto i : pbcInstructions) {
+            pbcInstNum++;
         }
-        GetGraph()->GetPassManager()->GetStatistics()->AddPbcInstNum(pbc_inst_num);
+        GetGraph()->GetPassManager()->GetStatistics()->AddPbcInstNum(pbcInstNum);
     }
     COMPILER_LOG(INFO, IR_BUILDER) << "IR successfully built: " << GetGraph()->GetVectorBlocks().size()
                                    << " basic blocks, " << GetGraph()->GetCurrentInstructionId() << " instructions";
@@ -77,58 +77,58 @@ bool IrBuilder::RunImpl()
 void IrBuilder::SetMemoryBarrierFlag()
 {
     COMPILER_LOG(INFO, IR_BUILDER) << "Setting memory barrier flag";
-    for (auto pre_end : GetGraph()->GetEndBlock()->GetPredsBlocks()) {
-        if (pre_end->IsTryEnd()) {
-            ASSERT(pre_end->GetPredsBlocks().size() == 1U);
-            pre_end = pre_end->GetPredecessor(0);
+    for (auto preEnd : GetGraph()->GetEndBlock()->GetPredsBlocks()) {
+        if (preEnd->IsTryEnd()) {
+            ASSERT(preEnd->GetPredsBlocks().size() == 1U);
+            preEnd = preEnd->GetPredecessor(0);
         }
-        auto last_inst = pre_end->GetLastInst();
-        ASSERT(last_inst != nullptr);
-        if (last_inst->IsReturn()) {
+        auto lastInst = preEnd->GetLastInst();
+        ASSERT(lastInst != nullptr);
+        if (lastInst->IsReturn()) {
             ASSERT(GetGraph()->GetRuntime()->IsInstanceConstructor(GetMethod()));
-            last_inst->SetFlag(inst_flags::MEM_BARRIER);
-            COMPILER_LOG(INFO, IR_BUILDER) << "Set memory barrier flag to " << *last_inst;
+            lastInst->SetFlag(inst_flags::MEM_BARRIER);
+            COMPILER_LOG(INFO, IR_BUILDER) << "Set memory barrier flag to " << *lastInst;
         }
     }
 }
 
-bool IrBuilder::CheckMethodLimitations(const BytecodeInstructions &instructions, size_t vregs_count)
+bool IrBuilder::CheckMethodLimitations(const BytecodeInstructions &instructions, size_t vregsCount)
 {
     // NOTE(a.popov) Optimize catch-phi's memory consumption and get rid of this limitation
     static constexpr auto TRY_BLOCKS_LIMIT = 128U;
 
-    size_t bytecode_size_limit = OPTIONS.GetCompilerMaxBytecodeSize();
+    size_t bytecodeSizeLimit = g_options.GetCompilerMaxBytecodeSize();
 
     // The option CompilerInlineFullIntrinsics increases the size of the code several times.
     // So the limit for this option is reduced
-    if (OPTIONS.IsCompilerInlineFullIntrinsics()) {
+    if (g_options.IsCompilerInlineFullIntrinsics()) {
         ASSERT(GetGraph()->IsDynamicMethod());
-        bytecode_size_limit >>= 2U;
+        bytecodeSizeLimit >>= 2U;
     }
 
-    if (OPTIONS.GetCompilerMaxVregsNum() > VirtualRegister::MAX_NUM_VIRT_REGS) {
+    if (g_options.GetCompilerMaxVregsNum() > VirtualRegister::MAX_NUM_VIRT_REGS) {
         COMPILER_LOG(INFO, IR_BUILDER) << "Big limit for virtual registers from program options: "
-                                       << OPTIONS.GetCompilerMaxVregsNum()
+                                       << g_options.GetCompilerMaxVregsNum()
                                        << " max value:" << VirtualRegister::MAX_NUM_VIRT_REGS;
-        ASSERT(OPTIONS.GetCompilerMaxVregsNum() <= VirtualRegister::MAX_NUM_VIRT_REGS);
+        ASSERT(g_options.GetCompilerMaxVregsNum() <= VirtualRegister::MAX_NUM_VIRT_REGS);
         return false;
     }
 
-    if (instructions.GetSize() > bytecode_size_limit) {
+    if (instructions.GetSize() > bytecodeSizeLimit) {
         COMPILER_LOG(INFO, IR_BUILDER) << "Method is too big: size=" << instructions.GetSize()
-                                       << ", limit=" << bytecode_size_limit;
+                                       << ", limit=" << bytecodeSizeLimit;
         return false;
     }
-    if (vregs_count >= OPTIONS.GetCompilerMaxVregsNum()) {
-        COMPILER_LOG(INFO, IR_BUILDER) << "Method has too many virtual registers: " << vregs_count
-                                       << ", limit=" << OPTIONS.GetCompilerMaxVregsNum();
+    if (vregsCount >= g_options.GetCompilerMaxVregsNum()) {
+        COMPILER_LOG(INFO, IR_BUILDER) << "Method has too many virtual registers: " << vregsCount
+                                       << ", limit=" << g_options.GetCompilerMaxVregsNum();
         return false;
     }
 
-    auto panda_file = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
-    panda_file::MethodDataAccessor mda(*panda_file,
+    auto pandaFile = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
+    panda_file::MethodDataAccessor mda(*pandaFile,
                                        panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
-    panda_file::CodeDataAccessor cda(*panda_file, mda.GetCodeId().value());
+    panda_file::CodeDataAccessor cda(*pandaFile, mda.GetCodeId().value());
     if (cda.GetTriesSize() > TRY_BLOCKS_LIMIT) {
         COMPILER_LOG(INFO, IR_BUILDER) << "Method has too many try blocks: " << cda.GetTriesSize()
                                        << ", limit=" << TRY_BLOCKS_LIMIT;
@@ -137,13 +137,13 @@ bool IrBuilder::CheckMethodLimitations(const BytecodeInstructions &instructions,
     return true;
 }
 
-bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *inst_builder, const uint8_t *instructions_buf)
+bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf)
 {
-    inst_builder->SetCurrentBlock(bb);
-    inst_builder->UpdateDefs();
+    instBuilder->SetCurrentBlock(bb);
+    instBuilder->UpdateDefs();
     if (GetGraph()->IsDynamicMethod() && !GetGraph()->IsBytecodeOptimizer() &&
         bb == GetGraph()->GetStartBlock()->GetSuccessor(0)) {
-        inst_builder->InitEnv(bb);
+        instBuilder->InitEnv(bb);
     }
 
     // OSR needs additional design for try-catch processing.
@@ -156,21 +156,21 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *inst_builder, const
         // NOTE (a.popov) Support osr-entry for loops with catch-block back-edge
         if (GetGraph()->IsOsrMode()) {
             auto backedges = bb->GetLoop()->GetBackEdges();
-            auto is_catch = [](BasicBlock *basic_block) { return basic_block->IsCatch(); };
-            bool has_catch_backedge = std::find_if(backedges.begin(), backedges.end(), is_catch) != backedges.end();
-            if (has_catch_backedge) {
+            auto isCatch = [](BasicBlock *basicBlock) { return basicBlock->IsCatch(); };
+            bool hasCatchBackedge = std::find_if(backedges.begin(), backedges.end(), isCatch) != backedges.end();
+            if (hasCatchBackedge) {
                 COMPILER_LOG(WARNING, IR_BUILDER)
                     << "Osr-entry for loops with catch-handler as back-edge is not supported";
                 return false;
             }
             bb->SetOsrEntry(true);
-            auto ss = inst_builder->CreateSaveStateOsr(bb);
+            auto ss = instBuilder->CreateSaveStateOsr(bb);
             bb->AppendInst(ss);
             COMPILER_LOG(DEBUG, IR_BUILDER) << "create save state OSR: " << *ss;
         }
 
-        if (OPTIONS.IsCompilerUseSafepoint()) {
-            auto sp = inst_builder->CreateSafePoint(bb);
+        if (g_options.IsCompilerUseSafepoint()) {
+            auto sp = instBuilder->CreateSafePoint(bb);
             bb->AppendInst(sp);
             COMPILER_LOG(DEBUG, IR_BUILDER) << "create safepoint: " << *sp;
         }
@@ -180,12 +180,12 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *inst_builder, const
     // If block is not in the `blocks_` vector, it's auxiliary block without instructions
     if (bb == blocks_[bb->GetGuestPc()]) {
         if (bb->IsLoopPreHeader() && !GetGraph()->IsOsrMode()) {
-            return BuildInstructionsForBB<true>(bb, inst_builder, instructions_buf);
+            return BuildInstructionsForBB<true>(bb, instBuilder, instructionsBuf);
         }
-        return BuildInstructionsForBB<false>(bb, inst_builder, instructions_buf);
+        return BuildInstructionsForBB<false>(bb, instBuilder, instructionsBuf);
     }
     if (bb->IsLoopPreHeader() && !GetGraph()->IsOsrMode()) {
-        auto ss = inst_builder->CreateSaveStateDeoptimize(bb->GetGuestPc());
+        auto ss = instBuilder->CreateSaveStateDeoptimize(bb->GetGuestPc());
         bb->AppendInst(ss);
     }
     COMPILER_LOG(DEBUG, IR_BUILDER) << "Auxiliary block, skipping";
@@ -193,34 +193,34 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *inst_builder, const
 }
 
 template <bool NEED_SS_DEOPT>
-bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, InstBuilder *inst_builder, const uint8_t *instructions_buf)
+bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    BytecodeInstructions instructions(instructions_buf + bb->GetGuestPc(), std::numeric_limits<int>::max());
-    bool ss_deopt_was_builded = false;
+    BytecodeInstructions instructions(instructionsBuf + bb->GetGuestPc(), std::numeric_limits<int>::max());
+    bool ssDeoptWasBuilded = false;
     for (auto inst : instructions) {
-        auto pc = inst_builder->GetPc(inst.GetAddress());
+        auto pc = instBuilder->GetPc(inst.GetAddress());
         // Break if current pc is pc of some basic block, that means that it is the end of the current block.
         if (pc != bb->GetGuestPc() && GetBlockForPc(pc) != nullptr) {
             break;
         }
         COMPILER_LOG(DEBUG, IR_BUILDER) << "[PBC] " << inst << "  # "
-                                        << reinterpret_cast<void *>(inst.GetAddress() - instructions_buf);
+                                        << reinterpret_cast<void *>(inst.GetAddress() - instructionsBuf);
         // Copy current defs for assigning them to catch-phi if current inst is throwable
-        ASSERT(inst_builder->GetCurrentDefs().size() == inst_defs_.size());
-        std::copy(inst_builder->GetCurrentDefs().begin(), inst_builder->GetCurrentDefs().end(), inst_defs_.begin());
-        auto current_bb = inst_builder->GetCurrentBlock();
-        auto current_last_inst = current_bb->GetLastInst();
-        auto bb_count = GetGraph()->GetVectorBlocks().size();
+        ASSERT(instBuilder->GetCurrentDefs().size() == instDefs_.size());
+        std::copy(instBuilder->GetCurrentDefs().begin(), instBuilder->GetCurrentDefs().end(), instDefs_.begin());
+        auto currentBb = instBuilder->GetCurrentBlock();
+        auto currentLastInst = currentBb->GetLastInst();
+        auto bbCount = GetGraph()->GetVectorBlocks().size();
         if constexpr (NEED_SS_DEOPT) {
             if (inst.IsJump()) {
-                auto ss = inst_builder->CreateSaveStateDeoptimize(pc);
+                auto ss = instBuilder->CreateSaveStateDeoptimize(pc);
                 bb->AppendInst(ss);
-                ss_deopt_was_builded = true;
+                ssDeoptWasBuilded = true;
             }
         }
-        inst_builder->BuildInstruction(&inst);
-        if (inst_builder->IsFailed()) {
+        instBuilder->BuildInstruction(&inst);
+        if (instBuilder->IsFailed()) {
             COMPILER_LOG(WARNING, IR_BUILDER) << "Unsupported instruction";
             return false;
         }
@@ -229,13 +229,12 @@ bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, InstBuilder *inst_builder
             // this group, and then mark all instructions as throwable; All instructions should be marked, since some of
             // them can be deleted during optimizations, unnecessary catch-phi moves will be resolved before Register
             // Allocator
-            auto throwable_inst =
-                (current_last_inst == nullptr) ? current_bb->GetFirstInst() : current_last_inst->GetNext();
-            ProcessThrowableInstructions(inst_builder, throwable_inst);
+            auto throwableInst = (currentLastInst == nullptr) ? currentBb->GetFirstInst() : currentLastInst->GetNext();
+            ProcessThrowableInstructions(instBuilder, throwableInst);
 
             auto &vb = GetGraph()->GetVectorBlocks();
-            for (size_t i = bb_count; i < vb.size(); i++) {
-                ProcessThrowableInstructions(inst_builder, vb[i]->GetFirstInst());
+            for (size_t i = bbCount; i < vb.size(); i++) {
+                ProcessThrowableInstructions(instBuilder, vb[i]->GetFirstInst());
             }
         }
         // Break if we meet terminator instruction. If instruction in the middle of basic block we don't create
@@ -244,35 +243,35 @@ bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, InstBuilder *inst_builder
             break;
         }
     }
-    if (NEED_SS_DEOPT && !ss_deopt_was_builded) {
+    if (NEED_SS_DEOPT && !ssDeoptWasBuilded) {
         ASSERT(bb->GetSuccsBlocks().size() == 1);
         auto pc = bb->GetSuccsBlocks()[0]->GetGuestPc();
-        auto ss = inst_builder->CreateSaveStateDeoptimize(pc);
+        auto ss = instBuilder->CreateSaveStateDeoptimize(pc);
         bb->AppendInst(ss);
     }
     return true;
 }
 
-void IrBuilder::ProcessThrowableInstructions(InstBuilder *inst_builder, Inst *throwable_inst)
+void IrBuilder::ProcessThrowableInstructions(InstBuilder *instBuilder, Inst *throwableInst)
 {
-    for (; throwable_inst != nullptr; throwable_inst = throwable_inst->GetNext()) {
-        if (throwable_inst->IsSaveState()) {
+    for (; throwableInst != nullptr; throwableInst = throwableInst->GetNext()) {
+        if (throwableInst->IsSaveState()) {
             continue;
         }
-        if (throwable_inst->IsCheck()) {
-            throwable_inst = throwable_inst->GetFirstUser()->GetInst();
+        if (throwableInst->IsCheck()) {
+            throwableInst = throwableInst->GetFirstUser()->GetInst();
         }
-        COMPILER_LOG(DEBUG, IR_BUILDER) << "Throwable inst, Id = " << throwable_inst->GetId();
-        catch_handlers_.clear();
-        EnumerateTryBlocksCoveredPc(throwable_inst->GetPc(), [this](const TryCodeBlock &try_block) {
-            auto tbb = try_block.begin_bb;
-            tbb->EnumerateCatchHandlers([this](BasicBlock *catch_handler, [[maybe_unused]] size_t type_id) {
-                catch_handlers_.insert(catch_handler);
+        COMPILER_LOG(DEBUG, IR_BUILDER) << "Throwable inst, Id = " << throwableInst->GetId();
+        catchHandlers_.clear();
+        EnumerateTryBlocksCoveredPc(throwableInst->GetPc(), [this](const TryCodeBlock &tryBlock) {
+            auto tbb = tryBlock.beginBb;
+            tbb->EnumerateCatchHandlers([this](BasicBlock *catchHandler, [[maybe_unused]] size_t typeId) {
+                catchHandlers_.insert(catchHandler);
                 return true;
             });
         });
-        if (!catch_handlers_.empty()) {
-            inst_builder->AddCatchPhiInputs(catch_handlers_, inst_defs_, throwable_inst);
+        if (!catchHandlers_.empty()) {
+            instBuilder->AddCatchPhiInputs(catchHandlers_, instDefs_, throwableInst);
         }
     }
 }
@@ -299,8 +298,8 @@ void IrBuilder::BuildBasicBlocks(const BytecodeInstructions &instructions)
         }
         auto offset = InstBuilder::GetInstructionJumpOffset(&inst);
         if (offset != INVALID_OFFSET) {
-            auto target_pc = pc + offset;
-            CreateBlock(target_pc);
+            auto targetPc = pc + offset;
+            CreateBlock(targetPc);
             if (inst.HasFlag(BytecodeInstruction::CONDITIONAL)) {
                 fallthrough = true;
             }
@@ -317,113 +316,113 @@ void IrBuilder::BuildBasicBlocks(const BytecodeInstructions &instructions)
 template <class Callback>
 void IrBuilder::EnumerateTryBlocksCoveredPc(uint32_t pc, const Callback &callback)
 {
-    for (const auto &[begin_pc, try_block] : try_blocks_) {
-        if (begin_pc <= pc && pc < try_block.boundaries.end_pc) {
+    for (const auto &[begin_pc, try_block] : tryBlocks_) {
+        if (begin_pc <= pc && pc < try_block.boundaries.endPc) {
             callback(try_block);
         }
     }
 }
 
 /// Return `TryCodeBlock` and flag if was created a new one
-IrBuilder::TryCodeBlock *IrBuilder::InsertTryBlockInfo(const Boundaries &try_boundaries)
+IrBuilder::TryCodeBlock *IrBuilder::InsertTryBlockInfo(const Boundaries &tryBoundaries)
 {
-    auto try_id = static_cast<uint32_t>(try_blocks_.size());
-    auto range = try_blocks_.equal_range(try_boundaries.begin_pc);
+    auto tryId = static_cast<uint32_t>(tryBlocks_.size());
+    auto range = tryBlocks_.equal_range(tryBoundaries.beginPc);
     for (auto iter = range.first; iter != range.second; ++iter) {
         // use try-block with the same boundaries
-        if (try_boundaries.end_pc == iter->second.boundaries.end_pc) {
+        if (tryBoundaries.endPc == iter->second.boundaries.endPc) {
             return &iter->second;
         }
         // insert in the increasing `end_pc` order
-        if (try_boundaries.end_pc > iter->second.boundaries.end_pc) {
-            auto it = try_blocks_.emplace_hint(iter, try_boundaries.begin_pc, TryCodeBlock {try_boundaries});
-            it->second.Init(GetGraph(), try_id);
+        if (tryBoundaries.endPc > iter->second.boundaries.endPc) {
+            auto it = tryBlocks_.emplace_hint(iter, tryBoundaries.beginPc, TryCodeBlock {tryBoundaries});
+            it->second.Init(GetGraph(), tryId);
             return &it->second;
         }
     }
-    auto it = try_blocks_.emplace(try_boundaries.begin_pc, TryCodeBlock {try_boundaries});
-    it->second.Init(GetGraph(), try_id);
+    auto it = tryBlocks_.emplace(tryBoundaries.beginPc, TryCodeBlock {tryBoundaries});
+    it->second.Init(GetGraph(), tryId);
     return &it->second;
 }
 
 void IrBuilder::CreateTryCatchBoundariesBlocks()
 {
-    auto panda_file = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
-    panda_file::MethodDataAccessor mda(*panda_file,
+    auto pandaFile = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
+    panda_file::MethodDataAccessor mda(*pandaFile,
                                        panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
-    panda_file::CodeDataAccessor cda(*panda_file, mda.GetCodeId().value());
+    panda_file::CodeDataAccessor cda(*pandaFile, mda.GetCodeId().value());
 
-    cda.EnumerateTryBlocks([this](panda_file::CodeDataAccessor::TryBlock &try_block) {
-        auto start_pc = try_block.GetStartPc();
-        auto end_pc = start_pc + try_block.GetLength();
-        auto try_info = InsertTryBlockInfo({start_pc, end_pc});
-        try_block.EnumerateCatchBlocks([this, try_info](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
-            auto pc = catch_block.GetHandlerPc();
-            catches_pc_.insert(pc);
-            auto type_idx = catch_block.GetTypeIdx();
-            auto type_id = type_idx == panda_file::INVALID_INDEX
-                               ? 0
-                               : GetGraph()->GetRuntime()->ResolveTypeIndex(GetMethod(), type_idx);
-            try_info->catches->emplace_back(CatchCodeBlock {pc, type_id});
+    cda.EnumerateTryBlocks([this](panda_file::CodeDataAccessor::TryBlock &tryBlock) {
+        auto startPc = tryBlock.GetStartPc();
+        auto endPc = startPc + tryBlock.GetLength();
+        auto tryInfo = InsertTryBlockInfo({startPc, endPc});
+        tryBlock.EnumerateCatchBlocks([this, tryInfo](panda_file::CodeDataAccessor::CatchBlock &catchBlock) {
+            auto pc = catchBlock.GetHandlerPc();
+            catchesPc_.insert(pc);
+            auto typeIdx = catchBlock.GetTypeIdx();
+            auto typeId = typeIdx == panda_file::INVALID_INDEX
+                              ? 0
+                              : GetGraph()->GetRuntime()->ResolveTypeIndex(GetMethod(), typeIdx);
+            tryInfo->catches->emplace_back(CatchCodeBlock {pc, typeId});
             return true;
         });
 
         return true;
     });
 
-    COMPILER_LOG(INFO, IR_BUILDER) << "There are: " << try_blocks_.size() << " try-blocks in the method";
-    COMPILER_LOG(INFO, IR_BUILDER) << "There are: " << catches_pc_.size() << " catch-handlers in the method";
+    COMPILER_LOG(INFO, IR_BUILDER) << "There are: " << tryBlocks_.size() << " try-blocks in the method";
+    COMPILER_LOG(INFO, IR_BUILDER) << "There are: " << catchesPc_.size() << " catch-handlers in the method";
 
-    for (const auto &[pc, try_block] : try_blocks_) {
+    for (const auto &[pc, try_block] : tryBlocks_) {
         CreateBlock(pc);
-        CreateBlock(try_block.boundaries.end_pc);
+        CreateBlock(try_block.boundaries.endPc);
     }
-    for (auto pc : catches_pc_) {
+    for (auto pc : catchesPc_) {
         CreateBlock(pc);
     }
 }
 
 struct BlocksConnectorInfo {
     bool fallthrough {};
-    bool dead_instructions {};
-    BytecodeInstruction prev_inst {nullptr};
+    bool deadInstructions {};
+    BytecodeInstruction prevInst {nullptr};
 };
 
 void IrBuilder::ConnectBasicBlocks(const BytecodeInstructions &instructions)
 {
     BlocksConnectorInfo info;
-    BasicBlock *curr_bb = blocks_[0];
-    GetGraph()->GetStartBlock()->AddSucc(curr_bb);
+    BasicBlock *currBb = blocks_[0];
+    GetGraph()->GetStartBlock()->AddSucc(currBb);
     for (auto inst : instructions) {
         auto pc = instructions.GetPc(inst);
-        auto target_block = blocks_[pc];
+        auto targetBlock = blocks_[pc];
         TrackTryBoundaries(pc, inst);
         if (info.fallthrough) {
-            ASSERT(target_block != nullptr);
+            ASSERT(targetBlock != nullptr);
             // May be the second edge between same blocks
-            curr_bb->AddSucc(target_block, true);
+            currBb->AddSucc(targetBlock, true);
             info.fallthrough = false;
-            curr_bb = target_block;
-        } else if (target_block != nullptr) {
-            if (catches_pc_.count(pc) == 0 && InstNotJump(&info.prev_inst) && !info.dead_instructions) {
-                curr_bb->AddSucc(target_block);
+            currBb = targetBlock;
+        } else if (targetBlock != nullptr) {
+            if (catchesPc_.count(pc) == 0 && InstNotJump(&info.prevInst) && !info.deadInstructions) {
+                currBb->AddSucc(targetBlock);
             }
-            curr_bb = target_block;
-            info.dead_instructions = false;
-        } else if (info.dead_instructions) {
+            currBb = targetBlock;
+            info.deadInstructions = false;
+        } else if (info.deadInstructions) {
             // We are processing dead instructions now, skipping them until we meet the next block.
             continue;
         }
-        if (auto jmp_target_block = GetBlockToJump(&inst, pc); jmp_target_block != nullptr) {
-            curr_bb->AddSucc(jmp_target_block);
+        if (auto jmpTargetBlock = GetBlockToJump(&inst, pc); jmpTargetBlock != nullptr) {
+            currBb->AddSucc(jmpTargetBlock);
             // In case of unconditional branch, we reset curr_bb, so if next instruction won't start new block, then
             // we'll skip further dead instructions.
             info.fallthrough = inst.HasFlag(BytecodeInstruction::CONDITIONAL);
             if (!info.fallthrough) {
-                info.dead_instructions = true;
+                info.deadInstructions = true;
             }
         }
-        info.prev_inst = inst;
+        info.prevInst = inst;
     }
 
     // Erase end block if it wasn't connected, should be infinite loop in the graph
@@ -436,36 +435,36 @@ void IrBuilder::ConnectBasicBlocks(const BytecodeInstructions &instructions)
 
 void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst)
 {
-    opened_try_blocks_.remove_if([pc](TryCodeBlock *try_block) { return try_block->boundaries.end_pc == pc; });
+    openedTryBlocks_.remove_if([pc](TryCodeBlock *tryBlock) { return tryBlock->boundaries.endPc == pc; });
 
-    if (try_blocks_.count(pc) > 0) {
-        auto range = try_blocks_.equal_range(pc);
+    if (tryBlocks_.count(pc) > 0) {
+        auto range = tryBlocks_.equal_range(pc);
         for (auto it = range.first; it != range.second; ++it) {
-            auto &try_block = it->second;
-            if (try_block.boundaries.end_pc > pc) {
-                opened_try_blocks_.push_back(&try_block);
+            auto &tryBlock = it->second;
+            if (tryBlock.boundaries.endPc > pc) {
+                openedTryBlocks_.push_back(&tryBlock);
                 auto allocator = GetGraph()->GetLocalAllocator();
-                try_block.basic_blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+                tryBlock.basicBlocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
             } else {
                 // Empty try-block
-                ASSERT(try_block.boundaries.end_pc == pc);
+                ASSERT(tryBlock.boundaries.endPc == pc);
             }
         }
     }
 
-    if (opened_try_blocks_.empty()) {
+    if (openedTryBlocks_.empty()) {
         return;
     }
 
     if (auto bb = blocks_[pc]; bb != nullptr) {
-        for (auto try_block : opened_try_blocks_) {
-            try_block->basic_blocks->push_back(bb);
+        for (auto tryBlock : openedTryBlocks_) {
+            tryBlock->basicBlocks->push_back(bb);
         }
     }
 
     if (inst.CanThrow()) {
-        for (auto &try_block : opened_try_blocks_) {
-            try_block->contains_throwable_inst = true;
+        for (auto &tryBlock : openedTryBlocks_) {
+            tryBlock->containsThrowableInst = true;
         }
     }
 }
@@ -516,18 +515,18 @@ void IrBuilder::MarkTryCatchBlocks(Marker marker)
 
     // Nested try-blocks can be removed, but referring to them basic blocks can be placed in the external try-blocks.
     // So `try` marks are added after removing unreachable blocks
-    for (auto it : try_blocks_) {
-        const auto &try_block = it.second;
-        if (try_block.begin_bb->GetGraph() != try_block.end_bb->GetGraph()) {
-            RestoreTryEnd(try_block);
+    for (auto it : tryBlocks_) {
+        const auto &tryBlock = it.second;
+        if (tryBlock.beginBb->GetGraph() != tryBlock.endBb->GetGraph()) {
+            RestoreTryEnd(tryBlock);
         }
-        try_block.begin_bb->SetTryId(try_block.id);
-        try_block.end_bb->SetTryId(try_block.id);
-        if (try_block.basic_blocks == nullptr) {
+        tryBlock.beginBb->SetTryId(tryBlock.id);
+        tryBlock.endBb->SetTryId(tryBlock.id);
+        if (tryBlock.basicBlocks == nullptr) {
             continue;
         }
-        for (auto bb : *try_block.basic_blocks) {
-            bb->SetTryId(try_block.id);
+        for (auto bb : *tryBlock.basicBlocks) {
+            bb->SetTryId(tryBlock.id);
             bb->SetTry(true);
         }
     }
@@ -538,8 +537,8 @@ void IrBuilder::MarkTryCatchBlocks(Marker marker)
  */
 void IrBuilder::ResolveTryCatchBlocks()
 {
-    auto marker_holder = MarkerHolder(GetGraph());
-    auto marker = marker_holder.GetMarker();
+    auto markerHolder = MarkerHolder(GetGraph());
+    auto marker = markerHolder.GetMarker();
     MarkNormalControlFlow(GetGraph()->GetStartBlock(), marker);
     ConnectTryCatchBlocks();
     GetGraph()->RemoveUnreachableBlocks();
@@ -548,51 +547,51 @@ void IrBuilder::ResolveTryCatchBlocks()
 
 void IrBuilder::ConnectTryCatchBlocks()
 {
-    ArenaMap<uint32_t, BasicBlock *> catch_blocks(GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaMap<uint32_t, BasicBlock *> catchBlocks(GetGraph()->GetLocalAllocator()->Adapter());
     // Firstly create catch_begin blocks, as they should precede try_begin blocks
-    for (auto pc : catches_pc_) {
-        auto catch_begin = GetGraph()->CreateEmptyBlock();
-        catch_begin->SetGuestPc(pc);
-        catch_begin->SetCatch(true);
-        catch_begin->SetCatchBegin(true);
-        auto first_catch_bb = GetBlockForPc(pc);
-        catch_begin->AddSucc(first_catch_bb);
-        catch_blocks.emplace(pc, catch_begin);
+    for (auto pc : catchesPc_) {
+        auto catchBegin = GetGraph()->CreateEmptyBlock();
+        catchBegin->SetGuestPc(pc);
+        catchBegin->SetCatch(true);
+        catchBegin->SetCatchBegin(true);
+        auto firstCatchBb = GetBlockForPc(pc);
+        catchBegin->AddSucc(firstCatchBb);
+        catchBlocks.emplace(pc, catchBegin);
     }
 
     // Connect try_begin and catch_begin blocks
-    for (auto it : try_blocks_) {
-        const auto &try_block = it.second;
-        if (try_block.contains_throwable_inst) {
-            ConnectTryCodeBlock(try_block, catch_blocks);
-        } else if (try_block.basic_blocks != nullptr) {
-            try_block.basic_blocks->clear();
+    for (auto it : tryBlocks_) {
+        const auto &tryBlock = it.second;
+        if (tryBlock.containsThrowableInst) {
+            ConnectTryCodeBlock(tryBlock, catchBlocks);
+        } else if (tryBlock.basicBlocks != nullptr) {
+            tryBlock.basicBlocks->clear();
         }
     }
 }
 
-void IrBuilder::ConnectTryCodeBlock(const TryCodeBlock &try_block, const ArenaMap<uint32_t, BasicBlock *> &catch_blocks)
+void IrBuilder::ConnectTryCodeBlock(const TryCodeBlock &tryBlock, const ArenaMap<uint32_t, BasicBlock *> &catchBlocks)
 {
-    auto try_begin = try_block.begin_bb;
-    ASSERT(try_begin != nullptr);
-    auto try_end = try_block.end_bb;
-    ASSERT(try_end != nullptr);
+    auto tryBegin = tryBlock.beginBb;
+    ASSERT(tryBegin != nullptr);
+    auto tryEnd = tryBlock.endBb;
+    ASSERT(tryEnd != nullptr);
     // Create auxiliary `Try` instruction
-    auto try_inst = GetGraph()->CreateInstTry(try_end);
-    try_begin->AppendInst(try_inst);
+    auto tryInst = GetGraph()->CreateInstTry(tryEnd);
+    tryBegin->AppendInst(tryInst);
     // Insert `try_begin` and `try_end`
-    auto first_try_bb = GetBlockForPc(try_block.boundaries.begin_pc);
-    auto last_try_bb = GetPrevBlockForPc(try_block.boundaries.end_pc);
-    first_try_bb->InsertBlockBefore(try_begin);
-    last_try_bb->InsertBlockBeforeSucc(try_end, last_try_bb->GetSuccessor(0));
+    auto firstTryBb = GetBlockForPc(tryBlock.boundaries.beginPc);
+    auto lastTryBb = GetPrevBlockForPc(tryBlock.boundaries.endPc);
+    firstTryBb->InsertBlockBefore(tryBegin);
+    lastTryBb->InsertBlockBeforeSucc(tryEnd, lastTryBb->GetSuccessor(0));
     // Connect catch-handlers
-    for (auto catch_block : *try_block.catches) {
-        auto catch_begin = catch_blocks.at(catch_block.pc);
-        if (!try_begin->HasSucc(catch_begin)) {
-            try_begin->AddSucc(catch_begin, true);
-            try_end->AddSucc(catch_begin, true);
+    for (auto catchBlock : *tryBlock.catches) {
+        auto catchBegin = catchBlocks.at(catchBlock.pc);
+        if (!tryBegin->HasSucc(catchBegin)) {
+            tryBegin->AddSucc(catchBegin, true);
+            tryEnd->AddSucc(catchBegin, true);
         }
-        try_inst->AppendCatchTypeId(catch_block.type_id, try_begin->GetSuccBlockIndex(catch_begin));
+        tryInst->AppendCatchTypeId(catchBlock.typeId, tryBegin->GetSuccBlockIndex(catchBegin));
     }
 }
 
@@ -607,32 +606,32 @@ void IrBuilder::ConnectTryCodeBlock(const TryCodeBlock &try_block, const ArenaMa
  * As a result all `catch` basic blocks will be eliminated together with outer's `try_end`, since it was inserted just
  * after `catch`
  */
-void IrBuilder::RestoreTryEnd(const TryCodeBlock &try_block)
+void IrBuilder::RestoreTryEnd(const TryCodeBlock &tryBlock)
 {
-    ASSERT(try_block.end_bb->GetGraph() == nullptr);
-    ASSERT(try_block.end_bb->GetSuccsBlocks().empty());
-    ASSERT(try_block.end_bb->GetPredsBlocks().empty());
+    ASSERT(tryBlock.endBb->GetGraph() == nullptr);
+    ASSERT(tryBlock.endBb->GetSuccsBlocks().empty());
+    ASSERT(tryBlock.endBb->GetPredsBlocks().empty());
 
-    GetGraph()->RestoreBlock(try_block.end_bb);
-    auto last_try_bb = GetPrevBlockForPc(try_block.boundaries.end_pc);
-    last_try_bb->InsertBlockBeforeSucc(try_block.end_bb, last_try_bb->GetSuccessor(0));
-    for (auto succ : try_block.begin_bb->GetSuccsBlocks()) {
+    GetGraph()->RestoreBlock(tryBlock.endBb);
+    auto lastTryBb = GetPrevBlockForPc(tryBlock.boundaries.endPc);
+    lastTryBb->InsertBlockBeforeSucc(tryBlock.endBb, lastTryBb->GetSuccessor(0));
+    for (auto succ : tryBlock.beginBb->GetSuccsBlocks()) {
         if (succ->IsCatchBegin()) {
-            try_block.end_bb->AddSucc(succ);
+            tryBlock.endBb->AddSucc(succ);
         }
     }
 }
 
 bool IrBuilderInliningAnalysis::RunImpl()
 {
-    auto panda_file = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
-    panda_file::MethodDataAccessor mda(*panda_file,
+    auto pandaFile = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
+    panda_file::MethodDataAccessor mda(*pandaFile,
                                        panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
-    auto code_id = mda.GetCodeId();
-    if (!code_id.has_value()) {
+    auto codeId = mda.GetCodeId();
+    if (!codeId.has_value()) {
         return false;
     }
-    panda_file::CodeDataAccessor cda(*panda_file, code_id.value());
+    panda_file::CodeDataAccessor cda(*pandaFile, codeId.value());
 
     // NOTE(msherstennikov): Support inlining methods with try/catch
     if (cda.GetTriesSize() != 0) {

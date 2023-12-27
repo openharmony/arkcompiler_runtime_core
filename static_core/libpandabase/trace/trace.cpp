@@ -28,4 +28,4 @@ public:
     NO_MOVE_SEMANTIC(Initializer);
 };
 
-static Initializer S_INITIALIZER;  // NOLINT(fuchsia-statically-constructed-objects)
+static Initializer g_sInitializer;  // NOLINT(fuchsia-statically-constructed-objects)

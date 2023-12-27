@@ -41,7 +41,7 @@ public:
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
-    Coroutine *Launch(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments,
+    Coroutine *Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
                       CoroutineAffinity affinity) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
@@ -78,9 +78,9 @@ public:
     bool IsCoroutineSwitchDisabled() override;
 
 protected:
-    bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int inc_mask,
-                              unsigned int xor_mask) const override;
-    CoroutineContext *CreateCoroutineContext(bool coro_has_entrypoint) override;
+    bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
+                              unsigned int xorMask) const override;
+    CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) override;
     void DeleteCoroutineContext(CoroutineContext *ctx) override;
 
     size_t GetCoroutineCount() override;
@@ -94,14 +94,14 @@ protected:
      * @brief reuse a cached coroutine instance in case when coroutine pool is enabled
      * see Coroutine::ReInitialize for details
      */
-    void ReuseCoroutineInstance(Coroutine *co, CompletionEvent *completion_event, Method *entrypoint,
+    void ReuseCoroutineInstance(Coroutine *co, CompletionEvent *completionEvent, Method *entrypoint,
                                 PandaVector<Value> &&arguments, PandaString name);
 
 private:
-    StackfulCoroutineContext *CreateCoroutineContextImpl(bool need_stack);
+    StackfulCoroutineContext *CreateCoroutineContextImpl(bool needStack);
     StackfulCoroutineWorker *ChooseWorkerForCoroutine(CoroutineAffinity affinity);
 
-    Coroutine *LaunchImpl(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments,
+    Coroutine *LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
                           CoroutineAffinity affinity);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
@@ -114,11 +114,11 @@ private:
      * @brief create the arbitrary number of worker threads
      * @param how_many total number of worker threads, including MAIN
      */
-    void CreateWorkers(uint32_t how_many, Runtime *runtime, PandaVM *vm) REQUIRES(workers_lock_);
+    void CreateWorkers(uint32_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_);
 
     /* coroutine registry management */
     void AddToRegistry(Coroutine *co);
-    void RemoveFromRegistry(Coroutine *co) REQUIRES(coro_list_lock_);
+    void RemoveFromRegistry(Coroutine *co) REQUIRES(coroListLock_);
 
     /// call to check if we are done executing managed code and set appropriate member flags
     void CheckProgramCompletion();
@@ -132,33 +132,33 @@ private:
     void FreeCoroutineStack(uint8_t *stack);
 
     // for thread safety with GC
-    mutable os::memory::Mutex coro_list_lock_;
+    mutable os::memory::Mutex coroListLock_;
     // all registered coros
-    PandaSet<Coroutine *> coroutines_ GUARDED_BY(coro_list_lock_);
+    PandaSet<Coroutine *> coroutines_ GUARDED_BY(coroListLock_);
 
     // worker threads-related members
-    PandaVector<StackfulCoroutineWorker *> workers_ GUARDED_BY(workers_lock_);
-    size_t active_workers_count_ GUARDED_BY(workers_lock_) = 0;
-    mutable os::memory::RecursiveMutex workers_lock_;
-    mutable os::memory::ConditionVariable workers_shutdown_cv_;
+    PandaVector<StackfulCoroutineWorker *> workers_ GUARDED_BY(workersLock_);
+    size_t activeWorkersCount_ GUARDED_BY(workersLock_) = 0;
+    mutable os::memory::RecursiveMutex workersLock_;
+    mutable os::memory::ConditionVariable workersShutdownCv_;
 
     // events that control program completion
-    mutable os::memory::Mutex program_completion_lock_;
-    CoroutineEvent *program_completion_event_ = nullptr;
+    mutable os::memory::Mutex programCompletionLock_;
+    CoroutineEvent *programCompletionEvent_ = nullptr;
 
     // various counters
-    std::atomic_uint32_t coroutine_count_ = 0;
-    size_t coroutine_count_limit_ = 0;
-    size_t coro_stack_size_bytes_ = 0;
-    bool js_mode_ = false;
+    std::atomic_uint32_t coroutineCount_ = 0;
+    size_t coroutineCountLimit_ = 0;
+    size_t coroStackSizeBytes_ = 0;
+    bool jsMode_ = false;
 
     /**
      * @brief holds pointers to the cached coroutine instances in order to speedup coroutine creation and destruction.
      * linked coroutinecontext instances are cached too (we just keep the cached coroutines linked to their contexts).
      * used only in case when --use-coroutine-pool=true
      */
-    PandaVector<Coroutine *> coroutine_pool_ GUARDED_BY(coro_pool_lock_);
-    mutable os::memory::Mutex coro_pool_lock_;
+    PandaVector<Coroutine *> coroutinePool_ GUARDED_BY(coroPoolLock_);
+    mutable os::memory::Mutex coroPoolLock_;
 };
 
 }  // namespace panda

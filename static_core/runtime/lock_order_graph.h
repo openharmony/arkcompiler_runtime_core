@@ -33,7 +33,7 @@ public:
     using ThreadId = ManagedThread::ThreadId;
     using MonitorId = Monitor::MonitorId;
     static bool CheckForTerminationLoops(const PandaList<MTManagedThread *> &threads,
-                                         const PandaList<MTManagedThread *> &daemon_threads, MTManagedThread *current);
+                                         const PandaList<MTManagedThread *> &daemonThreads, MTManagedThread *current);
 
     bool CheckForTerminationLoops() const;
 

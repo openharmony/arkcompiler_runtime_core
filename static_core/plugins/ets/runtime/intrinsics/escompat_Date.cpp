@@ -27,8 +27,8 @@ constexpr const int32_t MS_IN_SECOND = 1000;
 extern "C" double EscompatDateNow()
 {
     auto now = std::chrono::system_clock::now();
-    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-    return now_ms.time_since_epoch().count();
+    auto nowMs = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+    return nowMs.time_since_epoch().count();
 }
 
 extern "C" int64_t EscompatDateGetLocalTimezoneOffset()
@@ -53,18 +53,18 @@ extern "C" EtsString *EscompatDateGetTimezoneName()
     return EtsString::CreateFromMUtf8(s.c_str());
 }
 
-extern "C" EtsString *EscompatDateGetLocaleString(EtsString *format, EtsString *locale, int64_t ms, uint8_t is_utc)
+extern "C" EtsString *EscompatDateGetLocaleString(EtsString *format, EtsString *locale, int64_t ms, uint8_t isUtc)
 {
     PandaVector<uint8_t> buf;
-    auto format_s = std::string(format->ConvertToStringView(&buf));
-    auto locale_s = std::string(locale->ConvertToStringView(&buf));
+    auto formatS = std::string(format->ConvertToStringView(&buf));
+    auto localeS = std::string(locale->ConvertToStringView(&buf));
     std::time_t seconds = ms / MS_IN_SECOND;
     std::stringstream ss;
-    ss.imbue(std::locale(ss.getloc(), new std::time_put_byname<char>(locale_s.c_str())));
-    if (static_cast<bool>(is_utc)) {
-        ss << std::put_time(std::gmtime(&seconds), format_s.c_str());
+    ss.imbue(std::locale(ss.getloc(), new std::time_put_byname<char>(localeS.c_str())));
+    if (static_cast<bool>(isUtc)) {
+        ss << std::put_time(std::gmtime(&seconds), formatS.c_str());
     } else {
-        ss << std::put_time(std::localtime(&seconds), format_s.c_str());
+        ss << std::put_time(std::localtime(&seconds), formatS.c_str());
     }
     return EtsString::CreateFromMUtf8(ss.str().c_str());
 }

@@ -41,40 +41,39 @@ extern "C" {
 
 struct PandaFileExt {
 public:
-    explicit PandaFileExt(std::unique_ptr<const panda::panda_file::File> &&panda_file)
-        : panda_file_(std::move(panda_file))
+    explicit PandaFileExt(std::unique_ptr<const panda::panda_file::File> &&pandaFile) : pandaFile_(std::move(pandaFile))
     {
     }
 
-    size_t GetExtFileLineNumber(panda::panda_file::MethodDataAccessor mda, uint32_t bc_offset)
+    size_t GetExtFileLineNumber(panda::panda_file::MethodDataAccessor mda, uint32_t bcOffset)
     {
-        return panda::panda_file::debug_helpers::GetLineNumber(mda, bc_offset, panda_file_.get());
+        return panda::panda_file::debug_helpers::GetLineNumber(mda, bcOffset, pandaFile_.get());
     }
 
     panda::panda_file::ext::MethodSymEntry *QueryMethodSymByOffset(uint64_t offset)
     {
-        auto it = method_symbols_.upper_bound(offset);
-        if (it != method_symbols_.end() && offset >= it->second.id.GetOffset()) {
+        auto it = methodSymbols_.upper_bound(offset);
+        if (it != methodSymbols_.end() && offset >= it->second.id.GetOffset()) {
             return &it->second;
         }
 
         // Enmuate all methods and put them to local cache.
         panda::panda_file::ext::MethodSymEntry *found = nullptr;
-        for (uint32_t id : panda_file_->GetClasses()) {
-            if (panda_file_->IsExternal(panda::panda_file::File::EntityId(id))) {
+        for (uint32_t id : pandaFile_->GetClasses()) {
+            if (pandaFile_->IsExternal(panda::panda_file::File::EntityId(id))) {
                 continue;
             }
-            panda::panda_file::ClassDataAccessor cda {*panda_file_, panda::panda_file::File::EntityId(id)};
+            panda::panda_file::ClassDataAccessor cda {*pandaFile_, panda::panda_file::File::EntityId(id)};
             cda.EnumerateMethods([&](panda::panda_file::MethodDataAccessor &mda) -> void {
                 if (mda.GetCodeId().has_value()) {
-                    panda::panda_file::CodeDataAccessor ca {*panda_file_, mda.GetCodeId().value()};
+                    panda::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
                     panda::panda_file::ext::MethodSymEntry entry;
                     entry.id = mda.GetCodeId().value();
                     entry.length = ca.GetCodeSize();
                     entry.name =
-                        std::string(panda::utf::Mutf8AsCString(panda_file_->GetStringData(mda.GetNameId()).data));
+                        std::string(panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data));
 
-                    auto ret = method_symbols_.emplace(offset, entry);
+                    auto ret = methodSymbols_.emplace(offset, entry);
                     if (mda.GetCodeId().value().GetOffset() <= offset &&
                         offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
                         found = &ret.first->second;
@@ -87,37 +86,37 @@ public:
 
     panda::panda_file::ext::MethodSymEntry *QueryMethodSymAndLineByOffset(uint64_t offset)
     {
-        auto it = method_symbols_.upper_bound(offset);
-        if (it != method_symbols_.end() && offset >= it->second.id.GetOffset()) {
+        auto it = methodSymbols_.upper_bound(offset);
+        if (it != methodSymbols_.end() && offset >= it->second.id.GetOffset()) {
             return &it->second;
         }
 
         // Enmuate all methods and put them to local cache.
         panda::panda_file::ext::MethodSymEntry *found = nullptr;
-        for (uint32_t id : panda_file_->GetClasses()) {
-            if (panda_file_->IsExternal(panda::panda_file::File::EntityId(id))) {
+        for (uint32_t id : pandaFile_->GetClasses()) {
+            if (pandaFile_->IsExternal(panda::panda_file::File::EntityId(id))) {
                 continue;
             }
-            panda::panda_file::ClassDataAccessor cda {*panda_file_, panda::panda_file::File::EntityId(id)};
+            panda::panda_file::ClassDataAccessor cda {*pandaFile_, panda::panda_file::File::EntityId(id)};
             cda.EnumerateMethods([&](panda::panda_file::MethodDataAccessor &mda) -> void {
                 if (mda.GetCodeId().has_value()) {
-                    panda::panda_file::CodeDataAccessor ca {*panda_file_, mda.GetCodeId().value()};
+                    panda::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
                     panda::panda_file::ext::MethodSymEntry entry;
                     entry.id = mda.GetCodeId().value();
                     entry.length = ca.GetCodeSize();
                     entry.name =
-                        std::string(panda::utf::Mutf8AsCString(panda_file_->GetStringData(mda.GetNameId()).data));
+                        std::string(panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data));
 
-                    auto ret = method_symbols_.emplace(offset, entry);
+                    auto ret = methodSymbols_.emplace(offset, entry);
                     if (mda.GetCodeId().value().GetOffset() <= offset &&
                         offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
-                        size_t line_number = GetExtFileLineNumber(mda, offset - mda.GetCodeId().value().GetOffset());
+                        size_t lineNumber = GetExtFileLineNumber(mda, offset - mda.GetCodeId().value().GetOffset());
                         found = &ret.first->second;
-                        panda::panda_file::File::EntityId id_new(line_number);
-                        auto name_id = cda.GetDescriptor();
-                        found->id = id_new;
+                        panda::panda_file::File::EntityId idNew(lineNumber);
+                        auto nameId = cda.GetDescriptor();
+                        found->id = idNew;
                         found->name =
-                            panda::os::native_stack::ChangeJaveStackFormat(reinterpret_cast<const char *>(name_id)) +
+                            panda::os::native_stack::ChangeJaveStackFormat(reinterpret_cast<const char *>(nameId)) +
                             "." + found->name;
                     }
                 }
@@ -130,105 +129,105 @@ public:
     {
         // Enmuate all methods and put them to local cache.
         std::vector<panda::panda_file::ext::MethodSymEntry> res;
-        for (uint32_t id : panda_file_->GetClasses()) {
-            if (panda_file_->IsExternal(panda::panda_file::File::EntityId(id))) {
+        for (uint32_t id : pandaFile_->GetClasses()) {
+            if (pandaFile_->IsExternal(panda::panda_file::File::EntityId(id))) {
                 continue;
             }
-            panda::panda_file::ClassDataAccessor cda {*panda_file_, panda::panda_file::File::EntityId(id)};
+            panda::panda_file::ClassDataAccessor cda {*pandaFile_, panda::panda_file::File::EntityId(id)};
             cda.EnumerateMethods([&](panda::panda_file::MethodDataAccessor &mda) -> void {
                 if (mda.GetCodeId().has_value()) {
-                    panda::panda_file::CodeDataAccessor ca {*panda_file_, mda.GetCodeId().value()};
+                    panda::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
                     std::stringstream ss;
                     std::string_view cname(
-                        panda::utf::Mutf8AsCString(panda_file_->GetStringData(mda.GetClassId()).data));
+                        panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetClassId()).data));
                     if (!cname.empty()) {
                         ss << cname.substr(0, cname.size() - 1);
                     }
-                    ss << "." << panda::utf::Mutf8AsCString(panda_file_->GetStringData(mda.GetNameId()).data);
+                    ss << "." << panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data);
                     res.push_back({mda.GetCodeId().value(), ca.GetCodeSize(), ss.str()});
                 }
             });
         }
 
-        std::vector<struct MethodSymInfoExt> method_info;
-        method_info.reserve(res.size());
+        std::vector<struct MethodSymInfoExt> methodInfo;
+        methodInfo.reserve(res.size());
         for (auto const &me : res) {
             struct MethodSymInfoExt msi {};
             msi.offset = me.id.GetOffset();
             msi.length = me.length;
             msi.name = me.name;
-            method_info.push_back(msi);
+            methodInfo.push_back(msi);
         }
-        return method_info;
+        return methodInfo;
     }
 
 private:
-    std::map<uint64_t, panda::panda_file::ext::MethodSymEntry> method_symbols_;
-    std::unique_ptr<const panda::panda_file::File> panda_file_;
+    std::map<uint64_t, panda::panda_file::ext::MethodSymEntry> methodSymbols_;
+    std::unique_ptr<const panda::panda_file::File> pandaFile_;
 };
 
-bool OpenPandafileFromMemoryExt(void *addr, const uint64_t *size, [[maybe_unused]] const std::string &file_name,
-                                PandaFileExt **panda_file_ext)
+bool OpenPandafileFromMemoryExt(void *addr, const uint64_t *size, [[maybe_unused]] const std::string &fileName,
+                                PandaFileExt **pandaFileExt)
 {
-    if (panda_file_ext == nullptr) {
+    if (pandaFileExt == nullptr) {
         return false;
     }
 
     panda::os::mem::ConstBytePtr ptr(
         reinterpret_cast<std::byte *>(addr), *size,
-        []([[maybe_unused]] std::byte *param_buffer, [[maybe_unused]] size_t param_size) noexcept {});
+        []([[maybe_unused]] std::byte *paramBuffer, [[maybe_unused]] size_t paramSize) noexcept {});
     auto pf = panda::panda_file::File::OpenFromMemory(std::move(ptr));
     if (pf == nullptr) {
         return false;
     }
 
-    auto pf_ext = std::make_unique<PandaFileExt>(std::move(pf));
-    *panda_file_ext = pf_ext.release();
+    auto pfExt = std::make_unique<PandaFileExt>(std::move(pf));
+    *pandaFileExt = pfExt.release();
     return true;
 }
 
-bool OpenPandafileFromFdExt([[maybe_unused]] int fd, [[maybe_unused]] uint64_t offset, const std::string &file_name,
-                            PandaFileExt **panda_file_ext)
+bool OpenPandafileFromFdExt([[maybe_unused]] int fd, [[maybe_unused]] uint64_t offset, const std::string &fileName,
+                            PandaFileExt **pandaFileExt)
 {
-    auto pf = panda::panda_file::OpenPandaFile(file_name);
+    auto pf = panda::panda_file::OpenPandaFile(fileName);
     if (pf == nullptr) {
         return false;
     }
 
-    auto pf_ext = std::make_unique<PandaFileExt>(std::move(pf));
-    *panda_file_ext = pf_ext.release();
+    auto pfExt = std::make_unique<PandaFileExt>(std::move(pf));
+    *pandaFileExt = pfExt.release();
     return true;
 }
 
-bool QueryMethodSymByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *method_info)
+bool QueryMethodSymByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *methodInfo)
 {
     auto entry = pf->QueryMethodSymByOffset(offset);
-    if ((entry != nullptr) && (method_info != nullptr)) {
-        method_info->offset = entry->id.GetOffset();
-        method_info->length = entry->length;
-        method_info->name = entry->name;
+    if ((entry != nullptr) && (methodInfo != nullptr)) {
+        methodInfo->offset = entry->id.GetOffset();
+        methodInfo->length = entry->length;
+        methodInfo->name = entry->name;
         return true;
     }
     return false;
 }
 
-bool QueryMethodSymAndLineByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *method_info)
+bool QueryMethodSymAndLineByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *methodInfo)
 {
     auto entry = pf->QueryMethodSymAndLineByOffset(offset);
-    if ((entry != nullptr) && (method_info != nullptr)) {
-        method_info->offset = entry->id.GetOffset();
-        method_info->length = entry->length;
-        method_info->name = entry->name;
+    if ((entry != nullptr) && (methodInfo != nullptr)) {
+        methodInfo->offset = entry->id.GetOffset();
+        methodInfo->length = entry->length;
+        methodInfo->name = entry->name;
         return true;
     }
     return false;
 }
 
-void QueryAllMethodSymsExt(PandaFileExt *pf, MethodSymInfoExtCallBack callback, void *user_data)
+void QueryAllMethodSymsExt(PandaFileExt *pf, MethodSymInfoExtCallBack callback, void *userData)
 {
-    auto method_infos = pf->QueryAllMethodSyms();
-    for (auto mi : method_infos) {
-        callback(&mi, user_data);
+    auto methodInfos = pf->QueryAllMethodSyms();
+    for (auto mi : methodInfos) {
+        callback(&mi, userData);
     }
 }
 

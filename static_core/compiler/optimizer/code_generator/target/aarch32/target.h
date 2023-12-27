@@ -116,9 +116,9 @@ static inline vixl::aarch32::Register VixlReg(Reg reg)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
-        auto vixl_reg = vixl::aarch32::Register(reg.GetId());
-        ASSERT(vixl_reg.IsValid());
-        return vixl_reg;
+        auto vixlReg = vixl::aarch32::Register(reg.GetId());
+        ASSERT(vixlReg.IsValid());
+        return vixlReg;
     }
     // Unsupported register type
     UNREACHABLE();
@@ -130,10 +130,10 @@ static inline vixl::aarch32::Register VixlRegU(Reg reg)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
-        auto vixl_reg = vixl::aarch32::Register(reg.GetId() + 1);
+        auto vixlReg = vixl::aarch32::Register(reg.GetId() + 1);
         ASSERT(reg.GetId() <= AVAILABLE_DOUBLE_WORD_REGISTERS * 2U);
-        ASSERT(vixl_reg.IsValid());
-        return vixl_reg;
+        ASSERT(vixlReg.IsValid());
+        return vixlReg;
     }
     // Unsupported register type
     UNREACHABLE();
@@ -146,15 +146,15 @@ static inline vixl::aarch32::VRegister VixlVReg(Reg reg)
     ASSERT(reg.IsFloat());
     if (reg.GetSize() == WORD_SIZE) {
         // Aarch32 Vreg map double regs for 2 single-word registers
-        auto vixl_vreg = vixl::aarch32::SRegister(reg.GetId());
-        ASSERT(vixl_vreg.IsValid());
-        return vixl_vreg;
+        auto vixlVreg = vixl::aarch32::SRegister(reg.GetId());
+        ASSERT(vixlVreg.IsValid());
+        return vixlVreg;
     }
     ASSERT(reg.GetSize() == DOUBLE_WORD_SIZE);
     ASSERT(reg.GetId() % 2U == 0);
-    auto vixl_vreg = vixl::aarch32::DRegister(reg.GetId() / 2U);
-    ASSERT(vixl_vreg.IsValid());
-    return vixl_vreg;
+    auto vixlVreg = vixl::aarch32::DRegister(reg.GetId() / 2U);
+    ASSERT(vixlVreg.IsValid());
+    return vixlVreg;
 }
 
 static inline vixl::aarch32::Operand VixlImm(const int32_t imm)
@@ -172,9 +172,9 @@ static inline vixl::aarch32::NeonImmediate VixlNeonImm(const double imm)
     return vixl::aarch32::NeonImmediate(imm);
 }
 
-static inline vixl::aarch32::DataType Convert(const TypeInfo info, const bool is_signed = false)
+static inline vixl::aarch32::DataType Convert(const TypeInfo info, const bool isSigned = false)
 {
-    if (!is_signed) {
+    if (!isSigned) {
         if (info.IsFloat()) {
             if (info.GetSize() == WORD_SIZE) {
                 return vixl::aarch32::DataType(vixl::aarch32::DataTypeValue::F32);
@@ -255,19 +255,19 @@ public:
 
     RegMask GetCallerSavedRegMask() const override
     {
-        return caller_saved_;
+        return callerSaved_;
     }
 
     VRegMask GetCallerSavedVRegMask() const override
     {
-        return caller_savedv_;
+        return callerSavedv_;
     }
 
     bool IsCalleeRegister(Reg reg) override
     {
-        bool is_fp = reg.IsFloat();
-        return reg.GetId() >= GetFirstCalleeReg(Arch::AARCH32, is_fp) &&
-               reg.GetId() <= GetLastCalleeReg(Arch::AARCH32, is_fp);
+        bool isFp = reg.IsFloat();
+        return reg.GetId() >= GetFirstCalleeReg(Arch::AARCH32, isFp) &&
+               reg.GetId() <= GetLastCalleeReg(Arch::AARCH32, isFp);
     }
 
     Reg GetZeroReg() const override
@@ -299,27 +299,27 @@ public:
     RegMask GetDefaultRegMask() const override
     {
         // Set all to 1
-        RegMask reg_mask;
-        reg_mask.set();
+        RegMask regMask;
+        regMask.set();
         for (size_t i = 0; i < AVAILABLE_DOUBLE_WORD_REGISTERS; ++i) {
-            reg_mask.reset(i * 2U);
+            regMask.reset(i * 2U);
         }
-        reg_mask.set(GetThreadReg(Arch::AARCH32));
-        return reg_mask;
+        regMask.set(GetThreadReg(Arch::AARCH32));
+        return regMask;
     }
 
     VRegMask GetVRegMask() override
     {
-        VRegMask vreg_mask;
-        for (auto vreg_code : AARCH32_TMP_VREG) {
-            vreg_mask.set(vreg_code);
+        VRegMask vregMask;
+        for (auto vregCode : AARCH32_TMP_VREG) {
+            vregMask.set(vregCode);
         }
         // Only d0-d15 available for alloc
         // They mapped on s0-s31 same, like scalar:
-        for (size_t i = 0; i < vreg_mask.size() / 2U; ++i) {
-            vreg_mask.set(i * 2U + 1);
+        for (size_t i = 0; i < vregMask.size() / 2U; ++i) {
+            vregMask.set(i * 2U + 1);
         }
-        return vreg_mask;
+        return vregMask;
     }
 
     bool SupportMapping(uint32_t type) override
@@ -339,7 +339,7 @@ public:
 
     bool IsValid() const override;
 
-    bool IsRegUsed(ArenaVector<Reg> vec_reg, Reg reg) override;
+    bool IsRegUsed(ArenaVector<Reg> vecReg, Reg reg) override;
 
     // NOTE(igorban): implement as virtual
     static bool IsTmp(Reg reg);
@@ -348,44 +348,44 @@ public:
     // Special implementation-specific getters
     RegMask GetCalleeSavedR()
     {
-        return callee_saved_;
+        return calleeSaved_;
     }
     VRegMask GetCalleeSavedV()
     {
-        return callee_savedv_;
+        return calleeSavedv_;
     }
     RegMask GetCallerSavedR()
     {
-        return caller_saved_;
+        return callerSaved_;
     }
     VRegMask GetCallerSavedV()
     {
-        return caller_savedv_;
+        return callerSavedv_;
     }
 
-    uint8_t GetAligmentReg(bool is_callee)
+    uint8_t GetAligmentReg(bool isCallee)
     {
-        auto allignment_reg = is_callee ? allignment_reg_callee_ : allignment_reg_caller_;
-        ASSERT(allignment_reg != UNDEF_REG);
-        return allignment_reg;
+        auto allignmentReg = isCallee ? allignmentRegCallee_ : allignmentRegCaller_;
+        ASSERT(allignmentReg != UNDEF_REG);
+        return allignmentReg;
     }
 
 private:
     // Full list of arm64 General-purpose registers (with vector registers)
-    ArenaVector<Reg> aarch32_reg_list_;
+    ArenaVector<Reg> aarch32RegList_;
     //
-    ArenaVector<Reg> used_regs_;
-    Reg tmp_reg1_;
-    Reg tmp_reg2_;
+    ArenaVector<Reg> usedRegs_;
+    Reg tmpReg1_;
+    Reg tmpReg2_;
 
-    RegMask callee_saved_ {CALLEE_SAVED};
-    RegMask caller_saved_ {CALLER_SAVED};
+    RegMask calleeSaved_ {CALLEE_SAVED};
+    RegMask callerSaved_ {CALLER_SAVED};
 
-    VRegMask callee_savedv_ {CALLEE_SAVEDV};
-    VRegMask caller_savedv_ {CALLER_SAVEDV};
+    VRegMask calleeSavedv_ {CALLEE_SAVEDV};
+    VRegMask callerSavedv_ {CALLER_SAVEDV};
 
-    uint8_t allignment_reg_callee_ {UNDEF_REG};
-    uint8_t allignment_reg_caller_ {UNDEF_REG};
+    uint8_t allignmentRegCallee_ {UNDEF_REG};
+    uint8_t allignmentRegCaller_ {UNDEF_REG};
 };  // Aarch32RegisterDescription
 
 class Aarch32Encoder;
@@ -485,20 +485,20 @@ public:
 
     // Additional special instructions
     void EncodeCastToBool(Reg dst, Reg src) override;
-    void EncodeCast(Reg dst, bool dst_signed, Reg src, bool src_signed) override;
-    void EncodeMin(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
-    void EncodeDiv(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
-    void EncodeMod(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
-    void EncodeMax(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
+    void EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned) override;
+    void EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
 
-    void EncodeLdr(Reg dst, bool dst_signed, MemRef mem) override;
-    void EncodeLdr(Reg dst, bool dst_signed, const vixl::aarch32::MemOperand &vixl_mem);
-    void EncodeLdrAcquire(Reg dst, bool dst_signed, MemRef mem) override;
+    void EncodeLdr(Reg dst, bool dstSigned, MemRef mem) override;
+    void EncodeLdr(Reg dst, bool dstSigned, const vixl::aarch32::MemOperand &vixlMem);
+    void EncodeLdrAcquire(Reg dst, bool dstSigned, MemRef mem) override;
 
     void EncodeMemoryBarrier(memory_order::Order order) override;
 
     void EncodeMov(Reg dst, Imm src) override;
-    void EncodeStr(Reg src, const vixl::aarch32::MemOperand &vixl_mem);
+    void EncodeStr(Reg src, const vixl::aarch32::MemOperand &vixlMem);
     void EncodeStr(Reg src, MemRef mem) override;
     void EncodeStrRelease(Reg src, MemRef mem) override;
     void EncodeStp(Reg src0, Reg src1, MemRef mem) override;
@@ -525,14 +525,14 @@ public:
 
     // zerod high part: [reg.size, 64)
     void EncodeStrz(Reg src, MemRef mem) override;
-    void EncodeSti(int64_t src, uint8_t src_size_bytes, MemRef mem) override;
+    void EncodeSti(int64_t src, uint8_t srcSizeBytes, MemRef mem) override;
     void EncodeSti(double src, MemRef mem) override;
     void EncodeSti(float src, MemRef mem) override;
     // size must be 8, 16,32 or 64
-    void EncodeMemCopy(MemRef mem_from, MemRef mem_to, size_t size) override;
+    void EncodeMemCopy(MemRef memFrom, MemRef memTo, size_t size) override;
     // size must be 8, 16,32 or 64
     // zerod high part: [reg.size, 64)
-    void EncodeMemCopyz(MemRef mem_from, MemRef mem_to, size_t size) override;
+    void EncodeMemCopyz(MemRef memFrom, MemRef memTo, size_t size) override;
 
     void EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc) override;
 
@@ -544,7 +544,7 @@ public:
     void EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3, Condition cc) override;
     void EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, Condition cc) override;
 
-    bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signed_compare) override;
+    bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signedCompare) override;
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
 
     size_t GetCursorOffset() const override
@@ -585,8 +585,8 @@ public:
     void AcquireScratchRegister(Reg reg) override
     {
         if (reg == GetTarget().GetLinkReg()) {
-            ASSERT_PRINT(!lr_acquired_, "Trying to acquire LR, which hasn't been released before");
-            lr_acquired_ = true;
+            ASSERT_PRINT(!lrAcquired_, "Trying to acquire LR, which hasn't been released before");
+            lrAcquired_ = true;
         } else if (reg.IsFloat()) {
             ASSERT(GetMasm()->GetScratchVRegisterList()->IncludesAliasOf(vixl::aarch32::SRegister(reg.GetId())));
             GetMasm()->GetScratchVRegisterList()->Remove(vixl::aarch32::SRegister(reg.GetId()));
@@ -599,8 +599,8 @@ public:
     void ReleaseScratchRegister(Reg reg) override
     {
         if (reg == GetTarget().GetLinkReg()) {
-            ASSERT_PRINT(lr_acquired_, "Trying to release LR, which hasn't been acquired before");
-            lr_acquired_ = false;
+            ASSERT_PRINT(lrAcquired_, "Trying to release LR, which hasn't been acquired before");
+            lrAcquired_ = false;
         } else if (reg.IsFloat()) {
             GetMasm()->GetScratchVRegisterList()->Combine(vixl::aarch32::SRegister(reg.GetId()));
         } else {
@@ -611,7 +611,7 @@ public:
     bool IsScratchRegisterReleased(Reg reg) override
     {
         if (reg == GetTarget().GetLinkReg()) {
-            return !lr_acquired_;
+            return !lrAcquired_;
         }
         if (reg.IsFloat()) {
             return GetMasm()->GetScratchVRegisterList()->IncludesAliasOf(vixl::aarch32::SRegister(reg.GetId()));
@@ -665,7 +665,7 @@ public:
         return INT32_TYPE;
     };
 
-    size_t DisasmInstr(std::ostream &stream, size_t pc, ssize_t code_offset) const override;
+    size_t DisasmInstr(std::ostream &stream, size_t pc, ssize_t codeOffset) const override;
 
     void *BufferData() const override
     {
@@ -682,8 +682,8 @@ public:
     void Finalize() override;
 
     void MakeCall(compiler::RelocationInfo *relocation) override;
-    void MakeCall(const void *entry_point) override;
-    void MakeCall(MemRef entry_point) override;
+    void MakeCall(const void *entryPoint) override;
+    void MakeCall(MemRef entryPoint) override;
     void MakeCall(Reg reg) override;
 
     void MakeCallAot(intptr_t offset) override;
@@ -714,7 +714,7 @@ public:
 
     void EncodeJump(RelocationInfo *relocation) override;
 
-    void EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bit_pos, bool bit_value) override;
+    void EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bitPos, bool bitValue) override;
 
     void EncodeAbort() override;
 
@@ -722,48 +722,48 @@ public:
 
     void EncodeStackOverflowCheck(ssize_t offset) override;
 
-    void SaveRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp) override
+    void SaveRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override
     {
-        LoadStoreRegisters<true>(registers, slot, start_reg, is_fp);
+        LoadStoreRegisters<true>(registers, slot, startReg, isFp);
     }
-    void LoadRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp) override
+    void LoadRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override
     {
-        LoadStoreRegisters<false>(registers, slot, start_reg, is_fp);
-    }
-
-    void SaveRegisters(RegMask registers, bool is_fp, ssize_t slot, Reg base, RegMask mask) override
-    {
-        LoadStoreRegisters<true>(registers, is_fp, slot, base, mask);
-    }
-    void LoadRegisters(RegMask registers, bool is_fp, ssize_t slot, Reg base, RegMask mask) override
-    {
-        LoadStoreRegisters<false>(registers, is_fp, slot, base, mask);
+        LoadStoreRegisters<false>(registers, slot, startReg, isFp);
     }
 
-    void PushRegisters(RegMask registers, bool is_fp) override;
-    void PopRegisters(RegMask registers, bool is_fp) override;
+    void SaveRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override
+    {
+        LoadStoreRegisters<true>(registers, isFp, slot, base, mask);
+    }
+    void LoadRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override
+    {
+        LoadStoreRegisters<false>(registers, isFp, slot, base, mask);
+    }
+
+    void PushRegisters(RegMask registers, bool isFp) override;
+    void PopRegisters(RegMask registers, bool isFp) override;
 
     static inline vixl::aarch32::MemOperand ConvertMem(MemRef mem)
     {
-        bool has_index = mem.HasIndex();
-        bool has_shift = mem.HasScale();
-        bool has_offset = mem.HasDisp();
-        auto base_reg = VixlReg(mem.GetBase());
-        if (has_index) {
+        bool hasIndex = mem.HasIndex();
+        bool hasShift = mem.HasScale();
+        bool hasOffset = mem.HasDisp();
+        auto baseReg = VixlReg(mem.GetBase());
+        if (hasIndex) {
             // MemRef with index and offser isn't supported
-            ASSERT(!has_offset);
-            auto index_reg = mem.GetIndex();
-            if (has_shift) {
+            ASSERT(!hasOffset);
+            auto indexReg = mem.GetIndex();
+            if (hasShift) {
                 auto shift = mem.GetScale();
-                return vixl::aarch32::MemOperand(base_reg, VixlReg(index_reg), vixl::aarch32::LSL, shift);
+                return vixl::aarch32::MemOperand(baseReg, VixlReg(indexReg), vixl::aarch32::LSL, shift);
             }
-            return vixl::aarch32::MemOperand(base_reg, VixlReg(index_reg));
+            return vixl::aarch32::MemOperand(baseReg, VixlReg(indexReg));
         }
-        if (has_offset) {
+        if (hasOffset) {
             auto offset = mem.GetDisp();
-            return vixl::aarch32::MemOperand(base_reg, offset);
+            return vixl::aarch32::MemOperand(baseReg, offset);
         }
-        return vixl::aarch32::MemOperand(base_reg);
+        return vixl::aarch32::MemOperand(baseReg);
     }
 
     /**
@@ -782,13 +782,13 @@ public:
      *
      * VLDR and VSTR has base and offset. The offset must be a multiple of 4, and lie in the range -1020 to +1020.
      */
-    static bool IsNeedToPrepareMemLdS(MemRef mem, const TypeInfo &mem_type, bool is_signed);
-    vixl::aarch32::MemOperand PrepareMemLdS(MemRef mem, const TypeInfo &mem_type, vixl::aarch32::Register tmp,
-                                            bool is_signed, bool copy_sp = false);
+    static bool IsNeedToPrepareMemLdS(MemRef mem, const TypeInfo &memType, bool isSigned);
+    vixl::aarch32::MemOperand PrepareMemLdS(MemRef mem, const TypeInfo &memType, vixl::aarch32::Register tmp,
+                                            bool isSigned, bool copySp = false);
 
-    void MakeLibCall(Reg dst, Reg src0, Reg src1, void *entry_point, bool second_value = false);
+    void MakeLibCall(Reg dst, Reg src0, Reg src1, void *entryPoint, bool secondValue = false);
 
-    void MakeLibCall(Reg dst, Reg src, void *entry_point);
+    void MakeLibCall(Reg dst, Reg src, void *entryPoint);
 
     vixl::aarch32::MacroAssembler *GetMasm() const
     {
@@ -811,34 +811,34 @@ public:
 
 private:
     template <bool IS_STORE>
-    void LoadStoreRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp);
+    void LoadStoreRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp);
 
     template <bool IS_STORE>
-    void LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
+    void LoadStoreRegisters(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask);
 
     template <bool IS_STORE>
-    void LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
+    void LoadStoreRegistersMainLoop(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask);
 
 private:
     vixl::aarch32::MemOperand PrepareMemLdSForFloat(MemRef mem, vixl::aarch32::Register tmp);
     void EncodeCastFloatToFloat(Reg dst, Reg src);
     void EncodeCastFloatToInt64(Reg dst, Reg src);
     void EncodeCastDoubleToInt64(Reg dst, Reg src);
-    void EncodeCastScalarToFloat(Reg dst, Reg src, bool src_signed);
-    void EncodeCastFloatToScalar(Reg dst, bool dst_signed, Reg src);
-    void EncodeCastFloatToScalarWithSmallDst(Reg dst, bool dst_signed, Reg src);
+    void EncodeCastScalarToFloat(Reg dst, Reg src, bool srcSigned);
+    void EncodeCastFloatToScalar(Reg dst, bool dstSigned, Reg src);
+    void EncodeCastFloatToScalarWithSmallDst(Reg dst, bool dstSigned, Reg src);
 
-    void EncoderCastExtendFromInt32(Reg dst, bool dst_signed);
-    void EncodeCastScalar(Reg dst, bool dst_signed, Reg src, bool src_signed);
+    void EncoderCastExtendFromInt32(Reg dst, bool dstSigned);
+    void EncodeCastScalar(Reg dst, bool dstSigned, Reg src, bool srcSigned);
     void EncodeCastScalarFromSignedScalar(Reg dst, Reg src);
     void EncodeCastScalarFromUnsignedScalar(Reg dst, Reg src);
     template <bool IS_MAX>
     void EncodeMinMaxFp(Reg dst, Reg src0, Reg src1);
     void EncodeVorr(Reg dst, Reg src0, Reg src1);
     void EncodeVand(Reg dst, Reg src0, Reg src1);
-    void MakeLibCallWithFloatResult(Reg dst, Reg src0, Reg src1, void *entry_point, bool second_value);
-    void MakeLibCallWithDoubleResult(Reg dst, Reg src0, Reg src1, void *entry_point, bool second_value);
-    void MakeLibCallWithInt64Result(Reg dst, Reg src0, Reg src1, void *entry_point, bool second_value);
+    void MakeLibCallWithFloatResult(Reg dst, Reg src0, Reg src1, void *entryPoint, bool secondValue);
+    void MakeLibCallWithDoubleResult(Reg dst, Reg src0, Reg src1, void *entryPoint, bool secondValue);
+    void MakeLibCallWithInt64Result(Reg dst, Reg src0, Reg src1, void *entryPoint, bool secondValue);
     void CompareHelper(Reg src0, Reg src1, Condition *cc);
     void TestHelper(Reg src0, Reg src1, Condition cc);
     bool CompareImmHelper(Reg src, int64_t imm, Condition *cc);
@@ -852,7 +852,7 @@ private:
     static inline constexpr int32_t VMEM_OFFSET = 1020;
     Aarch32LabelHolder *labels_ {nullptr};
     vixl::aarch32::MacroAssembler *masm_ {nullptr};
-    bool lr_acquired_ {false};
+    bool lrAcquired_ {false};
 };  // Aarch32Encoder
 
 class Aarch32ParameterInfo final : public ParameterInfo {
@@ -875,15 +875,15 @@ public:
         return true;
     }
 
-    void GeneratePrologue(const FrameInfo &frame_info) override;
-    void GenerateEpilogue(const FrameInfo &frame_info, std::function<void()> post_job) override;
-    void GenerateNativePrologue(const FrameInfo &frame_info) override
+    void GeneratePrologue(const FrameInfo &frameInfo) override;
+    void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
+    void GenerateNativePrologue(const FrameInfo &frameInfo) override
     {
-        GeneratePrologue(frame_info);
+        GeneratePrologue(frameInfo);
     }
-    void GenerateNativeEpilogue(const FrameInfo &frame_info, std::function<void()> post_job) override
+    void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override
     {
-        GenerateEpilogue(frame_info, post_job);
+        GenerateEpilogue(frameInfo, postJob);
     }
 
     void *GetCodeEntry() override;
@@ -895,16 +895,16 @@ public:
     }
 
     // Calculating information about parameters and save regs_offset registers for special needs
-    ParameterInfo *GetParameterInfo(uint8_t regs_offset) override;
+    ParameterInfo *GetParameterInfo(uint8_t regsOffset) override;
 
     NO_MOVE_SEMANTIC(Aarch32CallingConvention);
     NO_COPY_SEMANTIC(Aarch32CallingConvention);
     ~Aarch32CallingConvention() override = default;
 
 private:
-    uint8_t PushPopVRegs(VRegMask vregs, bool is_push);
-    uint8_t PushRegs(RegMask regs, VRegMask vregs, bool is_callee);
-    uint8_t PopRegs(RegMask regs, VRegMask vregs, bool is_callee);
+    uint8_t PushPopVRegs(VRegMask vregs, bool isPush);
+    uint8_t PushRegs(RegMask regs, VRegMask vregs, bool isCallee);
+    uint8_t PopRegs(RegMask regs, VRegMask vregs, bool isCallee);
 };  // Aarch32CallingConvention
 }  // namespace panda::compiler::aarch32
 

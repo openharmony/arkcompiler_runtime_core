@@ -25,34 +25,34 @@ namespace panda::mem {
 #define LOG_RUNSLOTS(level) LOG(level, ALLOC) << "RunSlots: "
 
 template <typename LockTypeT>
-void RunSlots<LockTypeT>::Initialize(size_t slot_size, uintptr_t pool_pointer, bool initialize_lock)
+void RunSlots<LockTypeT>::Initialize(size_t slotSize, uintptr_t poolPointer, bool initializeLock)
 {
     ASAN_UNPOISON_MEMORY_REGION(this, RUNSLOTS_SIZE);
     LOG_RUNSLOTS(DEBUG) << "Initializing RunSlots:";
-    ASSERT_PRINT((slot_size >= SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES)), "Size of slot in RunSlots is too small");
-    ASSERT_PRINT((slot_size <= SlotToSize(SlotsSizes::SLOT_MAX_SIZE_BYTES)), "Size of slot in RunSlots is too big");
-    ASSERT(pool_pointer != 0);
-    pool_pointer_ = pool_pointer;
+    ASSERT_PRINT((slotSize >= SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES)), "Size of slot in RunSlots is too small");
+    ASSERT_PRINT((slotSize <= SlotToSize(SlotsSizes::SLOT_MAX_SIZE_BYTES)), "Size of slot in RunSlots is too big");
+    ASSERT(poolPointer != 0);
+    poolPointer_ = poolPointer;
     ASSERT_PRINT(!(ToUintPtr(this) & RUNSLOTS_ALIGNMENT_MASK), "RunSlots object must have alignment");
-    slot_size_ = slot_size;
-    size_t first_slot_offset = ComputeFirstSlotOffset(slot_size);
-    first_uninitialized_slot_offset_ = first_slot_offset;
-    ASSERT(first_uninitialized_slot_offset_ != 0);
-    next_free_ = nullptr;
-    used_slots_ = 0;
-    next_runslot_ = nullptr;
-    prev_runslot_ = nullptr;
-    if (initialize_lock) {
+    slotSize_ = slotSize;
+    size_t firstSlotOffset = ComputeFirstSlotOffset(slotSize);
+    firstUninitializedSlotOffset_ = firstSlotOffset;
+    ASSERT(firstUninitializedSlotOffset_ != 0);
+    nextFree_ = nullptr;
+    usedSlots_ = 0;
+    nextRunslot_ = nullptr;
+    prevRunslot_ = nullptr;
+    if (initializeLock) {
         new (&lock_) LockTypeT();
     }
     memset_s(bitmap_.data(), BITMAP_ARRAY_SIZE, 0x0, BITMAP_ARRAY_SIZE);
     LOG_RUNSLOTS(DEBUG) << "- Memory started from = 0x" << std::hex << ToUintPtr(this);
     LOG_RUNSLOTS(DEBUG) << "- Pool size = " << RUNSLOTS_SIZE << " bytes";
-    LOG_RUNSLOTS(DEBUG) << "- Slots size = " << slot_size_ << " bytes";
-    LOG_RUNSLOTS(DEBUG) << "- First free slot = " << std::hex << static_cast<void *>(next_free_);
+    LOG_RUNSLOTS(DEBUG) << "- Slots size = " << slotSize_ << " bytes";
+    LOG_RUNSLOTS(DEBUG) << "- First free slot = " << std::hex << static_cast<void *>(nextFree_);
     LOG_RUNSLOTS(DEBUG) << "- First uninitialized slot offset = " << std::hex
-                        << static_cast<void *>(ToVoidPtr(first_uninitialized_slot_offset_));
-    LOG_RUNSLOTS(DEBUG) << "- Pool pointer = " << std::hex << static_cast<void *>(ToVoidPtr(pool_pointer_));
+                        << static_cast<void *>(ToVoidPtr(firstUninitializedSlotOffset_));
+    LOG_RUNSLOTS(DEBUG) << "- Pool pointer = " << std::hex << static_cast<void *>(ToVoidPtr(poolPointer_));
     LOG_RUNSLOTS(DEBUG) << "Successful finished RunSlots init";
     ASAN_POISON_MEMORY_REGION(this, RUNSLOTS_SIZE);
 }
@@ -61,98 +61,98 @@ template <typename LockTypeT>
 FreeSlot *RunSlots<LockTypeT>::PopFreeSlot()
 {
     ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-    FreeSlot *free_slot = nullptr;
-    if (next_free_ == nullptr) {
-        void *uninitialized_slot = PopUninitializedSlot();
-        if (uninitialized_slot == nullptr) {
+    FreeSlot *freeSlot = nullptr;
+    if (nextFree_ == nullptr) {
+        void *uninitializedSlot = PopUninitializedSlot();
+        if (uninitializedSlot == nullptr) {
             LOG_RUNSLOTS(DEBUG) << "Failed to get free slot - there are no free slots in RunSlots";
             ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
             return nullptr;
         }
-        free_slot = static_cast<FreeSlot *>(uninitialized_slot);
+        freeSlot = static_cast<FreeSlot *>(uninitializedSlot);
     } else {
-        free_slot = next_free_;
-        ASAN_UNPOISON_MEMORY_REGION(free_slot, sizeof(FreeSlot));
-        next_free_ = next_free_->GetNext();
-        ASAN_POISON_MEMORY_REGION(free_slot, sizeof(FreeSlot));
+        freeSlot = nextFree_;
+        ASAN_UNPOISON_MEMORY_REGION(freeSlot, sizeof(FreeSlot));
+        nextFree_ = nextFree_->GetNext();
+        ASAN_POISON_MEMORY_REGION(freeSlot, sizeof(FreeSlot));
     }
-    MarkAsOccupied(free_slot);
-    used_slots_++;
-    LOG_RUNSLOTS(DEBUG) << "Successfully get free slot " << std::hex << static_cast<void *>(free_slot)
-                        << ". Used slots in this RunSlots = " << std::dec << used_slots_;
+    MarkAsOccupied(freeSlot);
+    usedSlots_++;
+    LOG_RUNSLOTS(DEBUG) << "Successfully get free slot " << std::hex << static_cast<void *>(freeSlot)
+                        << ". Used slots in this RunSlots = " << std::dec << usedSlots_;
     ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
-    return free_slot;
+    return freeSlot;
 }
 
 template <typename LockTypeT>
-void RunSlots<LockTypeT>::PushFreeSlot(FreeSlot *mem_slot)
+void RunSlots<LockTypeT>::PushFreeSlot(FreeSlot *memSlot)
 {
     ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-    LOG_RUNSLOTS(DEBUG) << "Free slot in RunSlots at addr " << std::hex << static_cast<void *>(mem_slot);
+    LOG_RUNSLOTS(DEBUG) << "Free slot in RunSlots at addr " << std::hex << static_cast<void *>(memSlot);
     // We need to poison/unpoison mem_slot here because we could allocate an object with size less than FreeSlot size
-    ASAN_UNPOISON_MEMORY_REGION(mem_slot, sizeof(FreeSlot));
-    mem_slot->SetNext(next_free_);
-    ASAN_POISON_MEMORY_REGION(mem_slot, sizeof(FreeSlot));
-    next_free_ = mem_slot;
-    MarkAsFree(mem_slot);
-    used_slots_--;
-    LOG_RUNSLOTS(DEBUG) << "Used slots in RunSlots = " << used_slots_;
+    ASAN_UNPOISON_MEMORY_REGION(memSlot, sizeof(FreeSlot));
+    memSlot->SetNext(nextFree_);
+    ASAN_POISON_MEMORY_REGION(memSlot, sizeof(FreeSlot));
+    nextFree_ = memSlot;
+    MarkAsFree(memSlot);
+    usedSlots_--;
+    LOG_RUNSLOTS(DEBUG) << "Used slots in RunSlots = " << usedSlots_;
     ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
 }
 
 template <typename LockTypeT>
-size_t RunSlots<LockTypeT>::ComputeFirstSlotOffset(size_t slot_size)
+size_t RunSlots<LockTypeT>::ComputeFirstSlotOffset(size_t slotSize)
 {
-    size_t slots_for_header = (GetHeaderSize() / slot_size);
-    if ((GetHeaderSize() % slot_size) > 0) {
-        slots_for_header++;
+    size_t slotsForHeader = (GetHeaderSize() / slotSize);
+    if ((GetHeaderSize() % slotSize) > 0) {
+        slotsForHeader++;
     }
-    return slots_for_header * slot_size;
+    return slotsForHeader * slotSize;
 }
 
 template <typename LockTypeT>
 void *RunSlots<LockTypeT>::PopUninitializedSlot()
 {
-    if (first_uninitialized_slot_offset_ != 0) {
-        ASSERT(RUNSLOTS_SIZE > first_uninitialized_slot_offset_);
-        void *uninitialized_slot = ToVoidPtr(ToUintPtr(this) + first_uninitialized_slot_offset_);
-        first_uninitialized_slot_offset_ += slot_size_;
-        if (first_uninitialized_slot_offset_ >= RUNSLOTS_SIZE) {
-            ASSERT(first_uninitialized_slot_offset_ == RUNSLOTS_SIZE);
-            first_uninitialized_slot_offset_ = 0;
+    if (firstUninitializedSlotOffset_ != 0) {
+        ASSERT(RUNSLOTS_SIZE > firstUninitializedSlotOffset_);
+        void *uninitializedSlot = ToVoidPtr(ToUintPtr(this) + firstUninitializedSlotOffset_);
+        firstUninitializedSlotOffset_ += slotSize_;
+        if (firstUninitializedSlotOffset_ >= RUNSLOTS_SIZE) {
+            ASSERT(firstUninitializedSlotOffset_ == RUNSLOTS_SIZE);
+            firstUninitializedSlotOffset_ = 0;
         }
-        return uninitialized_slot;
+        return uninitializedSlot;
     }
     return nullptr;
 }
 
 template <typename LockTypeT>
-void RunSlots<LockTypeT>::MarkAsOccupied(const FreeSlot *slot_mem)
+void RunSlots<LockTypeT>::MarkAsOccupied(const FreeSlot *slotMem)
 {
-    uintptr_t bit_index =
-        (ToUintPtr(slot_mem) & (RUNSLOTS_SIZE - 1U)) >> SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES_POWER_OF_TWO);
-    uintptr_t array_index = bit_index >> BITS_IN_BYTE_POWER_OF_TWO;
-    uintptr_t bit_in_array_element = bit_index & ((1U << BITS_IN_BYTE_POWER_OF_TWO) - 1U);
-    ASSERT(!(bitmap_[array_index] & (1U << bit_in_array_element)));
-    bitmap_[array_index] |= 1U << bit_in_array_element;
+    uintptr_t bitIndex =
+        (ToUintPtr(slotMem) & (RUNSLOTS_SIZE - 1U)) >> SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES_POWER_OF_TWO);
+    uintptr_t arrayIndex = bitIndex >> BITS_IN_BYTE_POWER_OF_TWO;
+    uintptr_t bitInArrayElement = bitIndex & ((1U << BITS_IN_BYTE_POWER_OF_TWO) - 1U);
+    ASSERT(!(bitmap_[arrayIndex] & (1U << bitInArrayElement)));
+    bitmap_[arrayIndex] |= 1U << bitInArrayElement;
 }
 
 template <typename LockTypeT>
-void RunSlots<LockTypeT>::MarkAsFree(const FreeSlot *slot_mem)
+void RunSlots<LockTypeT>::MarkAsFree(const FreeSlot *slotMem)
 {
-    uintptr_t bit_index =
-        (ToUintPtr(slot_mem) & (RUNSLOTS_SIZE - 1U)) >> SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES_POWER_OF_TWO);
-    uintptr_t array_index = bit_index >> BITS_IN_BYTE_POWER_OF_TWO;
-    uintptr_t bit_in_array_element = bit_index & ((1U << BITS_IN_BYTE_POWER_OF_TWO) - 1U);
-    ASSERT(bitmap_[array_index] & (1U << bit_in_array_element));
-    bitmap_[array_index] ^= 1U << bit_in_array_element;
+    uintptr_t bitIndex =
+        (ToUintPtr(slotMem) & (RUNSLOTS_SIZE - 1U)) >> SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES_POWER_OF_TWO);
+    uintptr_t arrayIndex = bitIndex >> BITS_IN_BYTE_POWER_OF_TWO;
+    uintptr_t bitInArrayElement = bitIndex & ((1U << BITS_IN_BYTE_POWER_OF_TWO) - 1U);
+    ASSERT(bitmap_[arrayIndex] & (1U << bitInArrayElement));
+    bitmap_[arrayIndex] ^= 1U << bitInArrayElement;
 }
 
 template <typename LockTypeT>
-FreeSlot *RunSlots<LockTypeT>::BitMapToSlot(size_t array_index, size_t bit)
+FreeSlot *RunSlots<LockTypeT>::BitMapToSlot(size_t arrayIndex, size_t bit)
 {
     return static_cast<FreeSlot *>(
-        ToVoidPtr(ToUintPtr(this) + (((array_index << BITS_IN_BYTE_POWER_OF_TWO) + bit)
+        ToVoidPtr(ToUintPtr(this) + (((arrayIndex << BITS_IN_BYTE_POWER_OF_TWO) + bit)
                                      << SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES_POWER_OF_TWO))));
 }
 
@@ -164,32 +164,32 @@ size_t RunSlots<LockTypeT>::RunVerifier::operator()(RunSlots *run)
     // 2. should verify thread local run's ownership, but thread local run not implemented yet
 
     // check alloc'ed size
-    auto size_check_func = [this, &run](const ObjectHeader *obj) {
-        auto size_power_of_two = ConvertToPowerOfTwoUnsafe(obj->ObjectSize());
-        if ((1U << size_power_of_two) != run->GetSlotsSize()) {
-            ++(this->fail_cnt_);
+    auto sizeCheckFunc = [this, &run](const ObjectHeader *obj) {
+        auto sizePowerOfTwo = ConvertToPowerOfTwoUnsafe(obj->ObjectSize());
+        if ((1U << sizePowerOfTwo) != run->GetSlotsSize()) {
+            ++(this->failCnt_);
         }
     };
-    run->IterateOverOccupiedSlots(size_check_func);
+    run->IterateOverOccupiedSlots(sizeCheckFunc);
 
-    return fail_cnt_;
+    return failCnt_;
 }
 
 template <typename LockTypeT>
 bool RunSlots<LockTypeT>::IsLive(const ObjectHeader *obj) const
 {
     ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-    uintptr_t mem_tail_by_runslots = ToUintPtr(obj) & (RUNSLOTS_SIZE - 1U);
-    if ((mem_tail_by_runslots & (static_cast<uintptr_t>(slot_size_) - 1)) != 0) {
+    uintptr_t memTailByRunslots = ToUintPtr(obj) & (RUNSLOTS_SIZE - 1U);
+    if ((memTailByRunslots & (static_cast<uintptr_t>(slotSize_) - 1)) != 0) {
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
         return false;
     }
-    uintptr_t bit_index = mem_tail_by_runslots >> SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES_POWER_OF_TWO);
-    uintptr_t array_index = bit_index >> BITS_IN_BYTE_POWER_OF_TWO;
-    uintptr_t bit_in_array_element = bit_index & ((1U << BITS_IN_BYTE_POWER_OF_TWO) - 1U);
-    auto live_word = bitmap_[array_index] & (1U << bit_in_array_element);
+    uintptr_t bitIndex = memTailByRunslots >> SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES_POWER_OF_TWO);
+    uintptr_t arrayIndex = bitIndex >> BITS_IN_BYTE_POWER_OF_TWO;
+    uintptr_t bitInArrayElement = bitIndex & ((1U << BITS_IN_BYTE_POWER_OF_TWO) - 1U);
+    auto liveWord = bitmap_[arrayIndex] & (1U << bitInArrayElement);
     ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
-    return live_word != 0;
+    return liveWord != 0;
 }
 
 template class RunSlots<RunSlotsLockConfig::CommonLock>;

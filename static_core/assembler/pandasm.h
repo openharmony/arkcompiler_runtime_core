@@ -24,8 +24,8 @@ void PrintError(const panda::pandasm::Error &e, const std::string &msg);
 
 void PrintErrors(const panda::pandasm::ErrorList &warnings, const std::string &msg);
 
-bool PrepareArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input_file,
-                 const panda::PandArg<std::string> &output_file, const panda::PandArg<std::string> &log_file,
+bool PrepareArgs(panda::PandArgParser &paParser, const panda::PandArg<std::string> &inputFile,
+                 const panda::PandArg<std::string> &outputFile, const panda::PandArg<std::string> &logFile,
                  const panda::PandArg<bool> &help, const panda::PandArg<bool> &verbose, std::ifstream &inputfile,
                  int argc, char **argv);
 
@@ -33,18 +33,18 @@ bool Tokenize(panda::pandasm::Lexer &lexer, std::vector<std::vector<panda::panda
               std::ifstream &inputfile);
 
 bool ParseProgram(panda::pandasm::Parser &parser, std::vector<std::vector<panda::pandasm::Token>> &tokens,
-                  const panda::PandArg<std::string> &input_file,
+                  const panda::PandArg<std::string> &inputFile,
                   panda::Expected<panda::pandasm::Program, panda::pandasm::Error> &res);
 
-bool DumpProgramInJson(panda::pandasm::Program &program, const panda::PandArg<std::string> &scopes_file);
+bool DumpProgramInJson(panda::pandasm::Program &program, const panda::PandArg<std::string> &scopesFile);
 
-bool EmitProgramInBinary(panda::pandasm::Program &program, panda::PandArgParser &pa_parser,
-                         const panda::PandArg<std::string> &output_file, panda::PandArg<bool> &optimize,
-                         panda::PandArg<bool> &size_stat);
+bool EmitProgramInBinary(panda::pandasm::Program &program, panda::PandArgParser &paParser,
+                         const panda::PandArg<std::string> &outputFile, panda::PandArg<bool> &optimize,
+                         panda::PandArg<bool> &sizeStat);
 
-bool BuildFiles(panda::pandasm::Program &program, panda::PandArgParser &pa_parser,
-                const panda::PandArg<std::string> &output_file, panda::PandArg<bool> &optimize,
-                panda::PandArg<bool> &size_stat, panda::PandArg<std::string> &scopes_file);
+bool BuildFiles(panda::pandasm::Program &program, panda::PandArgParser &paParser,
+                const panda::PandArg<std::string> &outputFile, panda::PandArg<bool> &optimize,
+                panda::PandArg<bool> &sizeStat, panda::PandArg<std::string> &scopesFile);
 
 }  // namespace panda::pandasm
 

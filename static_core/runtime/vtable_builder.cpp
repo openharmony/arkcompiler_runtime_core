@@ -24,9 +24,9 @@ namespace panda {
 bool IsMaxSpecificMethod(const Class *iface, const Method &method, size_t startindex, const ITable &itable)
 {
     for (size_t j = startindex; j < itable.Size(); j++) {
-        auto current_iface = itable[j].GetInterface();
-        if (iface->IsAssignableFrom(current_iface)) {
-            for (auto &curmethod : current_iface->GetVirtualMethods()) {
+        auto currentIface = itable[j].GetInterface();
+        if (iface->IsAssignableFrom(currentIface)) {
+            for (auto &curmethod : currentIface->GetVirtualMethods()) {
                 if (method.GetName() == curmethod.GetName() && method.GetProto() == curmethod.GetProto()) {
                     ASSERT(curmethod.IsAbstract());
                     return false;

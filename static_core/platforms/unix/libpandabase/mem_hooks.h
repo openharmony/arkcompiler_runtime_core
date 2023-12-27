@@ -29,12 +29,12 @@ public:
 
     static size_t GetAllocViaStandard() noexcept
     {
-        return alloc_via_standard_;
+        return allocViaStandard_;
     }
 
     static bool IsActive() noexcept
     {
-        return is_active_;
+        return isActive_;
     }
 
     static void *MallocHook(size_t size, const void *caller);
@@ -42,9 +42,9 @@ public:
     static void FreeHook(void *ptr, const void *caller);
 
     static void SaveRealFunctions();
-    static void *(*real_malloc_)(size_t);
-    static void *(*real_memalign_)(size_t, size_t);
-    static void (*real_free_)(void *);
+    static void *(*realMalloc_)(size_t);
+    static void *(*realMemalign_)(size_t, size_t);
+    static void (*realFree_)(void *);
 
     class AddrRange {
     public:
@@ -70,9 +70,9 @@ private:
 
     static bool ShouldCountAllocation(const void *caller);
 
-    static size_t alloc_via_standard_;
-    static AddrRange ignore_code_range_;
-    static bool is_active_;
+    static size_t allocViaStandard_;
+    static AddrRange ignoreCodeRange_;
+    static bool isActive_;
 };
 
 }  // namespace panda::os::unix::mem_hooks

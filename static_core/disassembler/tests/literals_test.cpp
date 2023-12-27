@@ -118,10 +118,10 @@ TEST(LiteralsTest, LiteralsTestDynamicValues)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    auto array_body = ExtractArrayBody(ss.str(), ".array array_0 {\n");
+    auto arrayBody = ExtractArrayBody(ss.str(), ".array array_0 {\n");
 
     std::string line;
-    std::stringstream arr {array_body};
+    std::stringstream arr {arrayBody};
     std::getline(arr, line);
     EXPECT_EQ("\tu1 1", line);
     std::getline(arr, line);

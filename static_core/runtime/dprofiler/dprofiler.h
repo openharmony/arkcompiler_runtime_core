@@ -36,7 +36,7 @@ class RuntimeListener;
 class DProfiler final {
 public:
 #ifdef PANDA_TARGET_UNIX
-    DProfiler(std::string_view app_name, Runtime *runtime);
+    DProfiler(std::string_view appName, Runtime *runtime);
 #else
     DProfiler([[maybe_unused]] std::string_view app_name, [[maybe_unused]] Runtime *runtime)
     {
@@ -57,9 +57,9 @@ public:
 
 private:
     Runtime *runtime_;
-    PandaUniquePtr<dprof::ProfilingData> profiling_data_;
+    PandaUniquePtr<dprof::ProfilingData> profilingData_;
     PandaUniquePtr<RuntimeListener> listener_;
-    PandaUnorderedSet<const Method *> hot_methods_;
+    PandaUnorderedSet<const Method *> hotMethods_;
 
     NO_COPY_SEMANTIC(DProfiler);
     NO_MOVE_SEMANTIC(DProfiler);

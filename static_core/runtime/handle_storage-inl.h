@@ -33,8 +33,8 @@ inline uintptr_t HandleStorage<T>::GetNodeAddress(uint32_t index) const
 template <typename T>
 inline uintptr_t HandleStorage<T>::NewHandle(T value)
 {
-    uint32_t nid = last_index_ >> NODE_BLOCK_SIZE_LOG2;
-    uint32_t offset = last_index_ & NODE_BLOCK_SIZE_MASK;
+    uint32_t nid = lastIndex_ >> NODE_BLOCK_SIZE_LOG2;
+    uint32_t offset = lastIndex_ & NODE_BLOCK_SIZE_MASK;
     if (nodes_.size() <= nid) {
         auto n = allocator_->New<std::array<T, NODE_BLOCK_SIZE>>();
         nodes_.push_back(n);
@@ -42,18 +42,18 @@ inline uintptr_t HandleStorage<T>::NewHandle(T value)
     auto node = nodes_[nid];
     auto loc = &(*node)[offset];
     *loc = value;
-    last_index_++;
+    lastIndex_++;
     return reinterpret_cast<uintptr_t>(loc);
 }
 
 template <typename T>
 inline void HandleStorage<T>::FreeHandles(uint32_t begin_idx)
 {
-    last_index_ = begin_idx;
+    lastIndex_ = begin_idx;
 #ifndef NDEBUG
     ZapFreedHandles();
 #endif
-    uint32_t nid = last_index_ >> NODE_BLOCK_SIZE_LOG2;
+    uint32_t nid = lastIndex_ >> NODE_BLOCK_SIZE_LOG2;
     // reserve at least one block for perf.
     nid++;
     for (size_t i = nid; i < nodes_.size(); ++i) {
@@ -67,8 +67,8 @@ inline void HandleStorage<T>::FreeHandles(uint32_t begin_idx)
 template <typename T>
 void HandleStorage<T>::ZapFreedHandles()
 {
-    uint32_t nid = last_index_ >> NODE_BLOCK_SIZE_LOG2;
-    uint32_t offset = last_index_ & NODE_BLOCK_SIZE_MASK;
+    uint32_t nid = lastIndex_ >> NODE_BLOCK_SIZE_LOG2;
+    uint32_t offset = lastIndex_ & NODE_BLOCK_SIZE_MASK;
     for (size_t i = nid; i < nodes_.size(); ++i) {
         auto node = nodes_.at(i);
         if (i != nid) {
@@ -84,11 +84,11 @@ void HandleStorage<T>::ZapFreedHandles()
 template <>
 inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject()
 {
-    if (last_index_ == 0) {
+    if (lastIndex_ == 0) {
         return;
     }
-    uint32_t nid = last_index_ >> NODE_BLOCK_SIZE_LOG2;
-    uint32_t offset = last_index_ & NODE_BLOCK_SIZE_MASK;
+    uint32_t nid = lastIndex_ >> NODE_BLOCK_SIZE_LOG2;
+    uint32_t offset = lastIndex_ & NODE_BLOCK_SIZE_MASK;
     for (uint32_t i = 0; i <= nid; ++i) {
         auto node = nodes_.at(i);
         uint32_t count = (i != nid) ? NODE_BLOCK_SIZE : offset;
@@ -104,11 +104,11 @@ inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject()
 template <>
 inline void HandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb)
 {
-    if (last_index_ == 0) {
+    if (lastIndex_ == 0) {
         return;
     }
-    uint32_t nid = last_index_ >> NODE_BLOCK_SIZE_LOG2;
-    uint32_t offset = last_index_ & NODE_BLOCK_SIZE_MASK;
+    uint32_t nid = lastIndex_ >> NODE_BLOCK_SIZE_LOG2;
+    uint32_t offset = lastIndex_ & NODE_BLOCK_SIZE_MASK;
     if (offset == 0) {
         nid -= 1;
         offset = NODE_BLOCK_SIZE;
@@ -128,11 +128,11 @@ inline void HandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] 
 template <>
 inline void HandleStorage<ObjectHeader *>::UpdateHeapObject()
 {
-    if (last_index_ == 0) {
+    if (lastIndex_ == 0) {
         return;
     }
-    uint32_t nid = last_index_ >> NODE_BLOCK_SIZE_LOG2;
-    uint32_t offset = last_index_ & NODE_BLOCK_SIZE_MASK;
+    uint32_t nid = lastIndex_ >> NODE_BLOCK_SIZE_LOG2;
+    uint32_t offset = lastIndex_ & NODE_BLOCK_SIZE_MASK;
     if (offset == 0) {
         nid -= 1;
         offset = NODE_BLOCK_SIZE;
@@ -152,11 +152,11 @@ inline void HandleStorage<ObjectHeader *>::UpdateHeapObject()
 template <>
 inline void HandleStorage<ObjectHeader *>::VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb)
 {
-    if (last_index_ == 0) {
+    if (lastIndex_ == 0) {
         return;
     }
-    uint32_t nid = last_index_ >> NODE_BLOCK_SIZE_LOG2;
-    uint32_t offset = last_index_ & NODE_BLOCK_SIZE_MASK;
+    uint32_t nid = lastIndex_ >> NODE_BLOCK_SIZE_LOG2;
+    uint32_t offset = lastIndex_ & NODE_BLOCK_SIZE_MASK;
     for (uint32_t i = 0; i <= nid; ++i) {
         auto node = nodes_.at(i);
         uint32_t count = (i != nid) ? NODE_BLOCK_SIZE : offset;

@@ -229,10 +229,10 @@ public:
 
     Iterator InsertAfter(ConstIterator position, ValueType &value)
     {
-        auto new_node = static_cast<const ListNode *>(&value);
-        new_node->next_ = position.node_->next_;
-        position.node_->next_ = new_node;
-        return Iterator(new_node);
+        auto newNode = static_cast<const ListNode *>(&value);
+        newNode->next_ = position.node_->next_;
+        position.node_->next_ = newNode;
+        return Iterator(newNode);
     }
     template <typename InputIterator>
     Iterator InsertAfter(ConstIterator position, InputIterator first, InputIterator last)
@@ -303,7 +303,7 @@ public:
     }
 
     /// Transfers the elements in the range (first,last) into place after position.
-    void Splice(ConstIterator position, List &src_list, ConstIterator first, ConstIterator last)
+    void Splice(ConstIterator position, List &srcList, ConstIterator first, ConstIterator last)
     {
         ASSERT(position != end());
         ASSERT(first != last);
@@ -312,20 +312,20 @@ public:
             return;
         }
 
-        if (++ConstIterator(position) == end() && last == src_list.end()) {
+        if (++ConstIterator(position) == end() && last == srcList.end()) {
             position.node_->next_ = first.node_->next_;
             first.node_->next_ = nullptr;
             return;
         }
-        ConstIterator before_last = first;
-        while (++ConstIterator(before_last) != last) {
-            ++before_last;
+        ConstIterator beforeLast = first;
+        while (++ConstIterator(beforeLast) != last) {
+            ++beforeLast;
         }
 
-        const ListNode *first_taken = first.node_->next_;
+        const ListNode *firstTaken = first.node_->next_;
         first.node_->next_ = last.node_;
-        before_last.node_->next_ = position.node_->next_;
-        position.node_->next_ = first_taken;
+        beforeLast.node_->next_ = position.node_->next_;
+        position.node_->next_ = firstTaken;
     }
 
 private:

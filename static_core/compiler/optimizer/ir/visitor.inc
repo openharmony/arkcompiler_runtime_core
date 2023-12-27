@@ -26,14 +26,14 @@ void VisitGraph() override
 
 uint64_t VisitGraphAndCount() override
 {
-    uint64_t insts_number = 0;
+    uint64_t instsNumber = 0;
     for (auto &bb : GetBlocksToVisit()) {
         for (auto inst : bb->AllInsts()) {
-            insts_number++;
+            instsNumber++;
             TABLE[static_cast<unsigned>(inst->GetOpcode())](this, inst);
         }
     }
-    return insts_number;
+    return instsNumber;
 }
 
 void VisitBlock(BasicBlock *bb) override

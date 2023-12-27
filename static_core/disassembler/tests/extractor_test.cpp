@@ -42,34 +42,34 @@ TEST(ExtractorTest, LineNumberTable)
     auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::panda_file::File::EntityId method_id;
-    std::string_view source_name;
-    panda::disasm::DisasmBackedDebugInfoExtractor extractor(*pf, [&method_id, &source_name](auto id, auto sn) {
-        method_id = id;
-        source_name = sn;
+    panda::panda_file::File::EntityId methodId;
+    std::string_view sourceName;
+    panda::disasm::DisasmBackedDebugInfoExtractor extractor(*pf, [&methodId, &sourceName](auto id, auto sn) {
+        methodId = id;
+        sourceName = sn;
     });
 
-    auto id_list = extractor.GetMethodIdList();
-    ASSERT_EQ(id_list.size(), 1);
+    auto idList = extractor.GetMethodIdList();
+    ASSERT_EQ(idList.size(), 1);
 
-    auto id = id_list[0];
+    auto id = idList[0];
     ASSERT_NE(extractor.GetSourceCode(id), nullptr);
 
-    ASSERT_EQ(id, method_id);
-    ASSERT_EQ(extractor.GetSourceFile(id), source_name);
+    ASSERT_EQ(id, methodId);
+    ASSERT_EQ(extractor.GetSourceFile(id), sourceName);
 
-    auto line_table = extractor.GetLineNumberTable(id);
-    ASSERT_EQ(line_table.size(), 4);
+    auto lineTable = extractor.GetLineNumberTable(id);
+    ASSERT_EQ(lineTable.size(), 4);
 
-    ASSERT_EQ(line_table[0].offset, 0);
-    ASSERT_EQ(line_table[0].line, 2);
+    ASSERT_EQ(lineTable[0].offset, 0);
+    ASSERT_EQ(lineTable[0].line, 2);
 
-    ASSERT_EQ(line_table[1].offset, 1);
-    ASSERT_EQ(line_table[1].line, 4);
+    ASSERT_EQ(lineTable[1].offset, 1);
+    ASSERT_EQ(lineTable[1].line, 4);
 
-    ASSERT_EQ(line_table[2].offset, 2);
-    ASSERT_EQ(line_table[2].line, 5);
+    ASSERT_EQ(lineTable[2].offset, 2);
+    ASSERT_EQ(lineTable[2].line, 5);
 
-    ASSERT_EQ(line_table[3].offset, 4);
-    ASSERT_EQ(line_table[3].line, 6);
+    ASSERT_EQ(lineTable[3].offset, 4);
+    ASSERT_EQ(lineTable[3].line, 6);
 }

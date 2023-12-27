@@ -21,60 +21,60 @@ namespace panda::taskmanager {
 SimpleTaskStatisticsImpl::SimpleTaskStatisticsImpl()
 {
     for (const auto &status : ALL_TASK_STATUSES) {
-        per_status_lock_[status];  // Here we use implicitly construction of mutex
-        for (const auto &properties : all_task_properties_) {
-            task_properties_counter_map_[status][properties] = 0;
+        perStatusLock_[status];  // Here we use implicitly construction of mutex
+        for (const auto &properties : allTaskProperties_) {
+            taskPropertiesCounterMap_[status][properties] = 0;
         }
     }
 }
 
 void SimpleTaskStatisticsImpl::IncrementCount(TaskStatus status, TaskProperties properties, size_t count)
 {
-    os::memory::LockHolder lock_holder(per_status_lock_.at(status));
-    task_properties_counter_map_.at(status)[properties] += count;
+    os::memory::LockHolder lockHolder(perStatusLock_.at(status));
+    taskPropertiesCounterMap_.at(status)[properties] += count;
 }
 
 size_t SimpleTaskStatisticsImpl::GetCount(TaskStatus status, TaskProperties properties) const
 {
-    os::memory::LockHolder lock_holder(per_status_lock_.at(status));
-    return task_properties_counter_map_.at(status).at(properties);
+    os::memory::LockHolder lockHolder(perStatusLock_.at(status));
+    return taskPropertiesCounterMap_.at(status).at(properties);
 }
 
 size_t SimpleTaskStatisticsImpl::GetCountOfTaskInSystem() const
 {
-    os::memory::LockHolder added_lock_holder(per_status_lock_.at(TaskStatus::ADDED));
-    os::memory::LockHolder executed_lock_holder(per_status_lock_.at(TaskStatus::EXECUTED));
-    os::memory::LockHolder popped_lock_holder(per_status_lock_.at(TaskStatus::POPPED));
+    os::memory::LockHolder addedLockHolder(perStatusLock_.at(TaskStatus::ADDED));
+    os::memory::LockHolder executedLockHolder(perStatusLock_.at(TaskStatus::EXECUTED));
+    os::memory::LockHolder poppedLockHolder(perStatusLock_.at(TaskStatus::POPPED));
 
-    size_t in_system_tasks_count = 0;
-    for (const auto &properties : all_task_properties_) {
-        size_t added_task_count_val = task_properties_counter_map_.at(TaskStatus::ADDED).at(properties);
-        size_t executed_task_count_val = task_properties_counter_map_.at(TaskStatus::EXECUTED).at(properties);
-        size_t popped_task_count_val = task_properties_counter_map_.at(TaskStatus::POPPED).at(properties);
+    size_t inSystemTasksCount = 0;
+    for (const auto &properties : allTaskProperties_) {
+        size_t addedTaskCountVal = taskPropertiesCounterMap_.at(TaskStatus::ADDED).at(properties);
+        size_t executedTaskCountVal = taskPropertiesCounterMap_.at(TaskStatus::EXECUTED).at(properties);
+        size_t poppedTaskCountVal = taskPropertiesCounterMap_.at(TaskStatus::POPPED).at(properties);
 
-        ASSERT(added_task_count_val >= executed_task_count_val + popped_task_count_val);
-        in_system_tasks_count += added_task_count_val - executed_task_count_val - popped_task_count_val;
+        ASSERT(addedTaskCountVal >= executedTaskCountVal + poppedTaskCountVal);
+        inSystemTasksCount += addedTaskCountVal - executedTaskCountVal - poppedTaskCountVal;
     }
-    return in_system_tasks_count;
+    return inSystemTasksCount;
 }
 
 size_t SimpleTaskStatisticsImpl::GetCountOfTasksInSystemWithTaskProperties(TaskProperties properties) const
 {
-    os::memory::LockHolder added_lock_holder(per_status_lock_.at(TaskStatus::ADDED));
-    os::memory::LockHolder executed_lock_holder(per_status_lock_.at(TaskStatus::EXECUTED));
-    os::memory::LockHolder popped_lock_holder(per_status_lock_.at(TaskStatus::POPPED));
+    os::memory::LockHolder addedLockHolder(perStatusLock_.at(TaskStatus::ADDED));
+    os::memory::LockHolder executedLockHolder(perStatusLock_.at(TaskStatus::EXECUTED));
+    os::memory::LockHolder poppedLockHolder(perStatusLock_.at(TaskStatus::POPPED));
 
-    size_t added_task_count_val = task_properties_counter_map_.at(TaskStatus::ADDED).at(properties);
-    size_t executed_task_count_val = task_properties_counter_map_.at(TaskStatus::EXECUTED).at(properties);
-    size_t popped_task_count_val = task_properties_counter_map_.at(TaskStatus::POPPED).at(properties);
+    size_t addedTaskCountVal = taskPropertiesCounterMap_.at(TaskStatus::ADDED).at(properties);
+    size_t executedTaskCountVal = taskPropertiesCounterMap_.at(TaskStatus::EXECUTED).at(properties);
+    size_t poppedTaskCountVal = taskPropertiesCounterMap_.at(TaskStatus::POPPED).at(properties);
 
-    ASSERT(added_task_count_val >= executed_task_count_val + popped_task_count_val);
-    return added_task_count_val - executed_task_count_val - popped_task_count_val;
+    ASSERT(addedTaskCountVal >= executedTaskCountVal + poppedTaskCountVal);
+    return addedTaskCountVal - executedTaskCountVal - poppedTaskCountVal;
 }
 
 void SimpleTaskStatisticsImpl::ResetAllCounters()
 {
-    for (const auto &properties : all_task_properties_) {
+    for (const auto &properties : allTaskProperties_) {
         ResetCountersWithTaskProperties(properties);
     }
 }
@@ -82,12 +82,12 @@ void SimpleTaskStatisticsImpl::ResetAllCounters()
 void SimpleTaskStatisticsImpl::ResetCountersWithTaskProperties(TaskProperties properties)
 {
     // Getting locks for every state counter with specified properties
-    std::unordered_map<TaskStatus, os::memory::LockHolder<os::memory::Mutex>> lock_holder_map;
+    std::unordered_map<TaskStatus, os::memory::LockHolder<os::memory::Mutex>> lockHolderMap;
     for (const auto &status : ALL_TASK_STATUSES) {
-        lock_holder_map.emplace(status, per_status_lock_.at(status));
+        lockHolderMap.emplace(status, perStatusLock_.at(status));
     }
     for (const auto &status : ALL_TASK_STATUSES) {
-        task_properties_counter_map_[status][properties] = 0;
+        taskPropertiesCounterMap_[status][properties] = 0;
     }
 }
 

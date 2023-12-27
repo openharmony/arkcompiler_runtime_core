@@ -62,16 +62,16 @@ class BasicBlock : public MarkerSet {  // , public ArenaObject<ARENA_ALLOC_BASIC
 public:
     static constexpr size_t TRUE_SUCC_IDX = 0;
     static constexpr size_t FALSE_SUCC_IDX = 1;
-    explicit BasicBlock(Graph *graph, uint32_t guest_pc = INVALID_PC);
+    explicit BasicBlock(Graph *graph, uint32_t guestPc = INVALID_PC);
 
 public:
     void SetId(uint32_t id)
     {
-        bb_id_ = id;
+        bbId_ = id;
     }
     uint32_t GetId() const
     {
-        return bb_id_;
+        return bbId_;
     }
 
     ArenaVector<BasicBlock *> &GetPredsBlocks()
@@ -177,13 +177,13 @@ public:
         graph_ = graph;
     }
 
-    void SetGuestPc(uint32_t guest_pc)
+    void SetGuestPc(uint32_t guestPc)
     {
-        guest_pc_ = guest_pc;
+        guestPc_ = guestPc;
     }
     uint32_t GetGuestPc() const
     {
-        return guest_pc_;
+        return guestPc_;
     }
 
     /**
@@ -193,36 +193,36 @@ public:
      * @param make_edge whether to make control flow edge from first block to the second one
      * @return return created basic block
      */
-    BasicBlock *SplitBlockAfterInstruction(Inst *inst, bool make_edge);
+    BasicBlock *SplitBlockAfterInstruction(Inst *inst, bool makeEdge);
 
     // Add successor in the list
-    void AddSucc(BasicBlock *succ, bool can_add_empty_block = false);
+    void AddSucc(BasicBlock *succ, bool canAddEmptyBlock = false);
 
     bool HasSucc(BasicBlock *succ)
     {
         return std::find(succs_.begin(), succs_.end(), succ) != succs_.end();
     }
 
-    void ReplacePred(BasicBlock *prev_pred, BasicBlock *new_pred)
+    void ReplacePred(BasicBlock *prevPred, BasicBlock *newPred)
     {
-        preds_[GetPredBlockIndex(prev_pred)] = new_pred;
-        new_pred->succs_.push_back(this);
+        preds_[GetPredBlockIndex(prevPred)] = newPred;
+        newPred->succs_.push_back(this);
     }
 
-    void ReplaceSucc(const BasicBlock *prev_succ, BasicBlock *new_succ, bool can_add_empty_block = false);
+    void ReplaceSucc(const BasicBlock *prevSucc, BasicBlock *newSucc, bool canAddEmptyBlock = false);
 
-    void ReplaceTrueSuccessor(BasicBlock *new_succ)
+    void ReplaceTrueSuccessor(BasicBlock *newSucc)
     {
         ASSERT(!succs_.empty());
-        succs_[TRUE_SUCC_IDX] = new_succ;
-        new_succ->preds_.push_back(this);
+        succs_[TRUE_SUCC_IDX] = newSucc;
+        newSucc->preds_.push_back(this);
     }
 
-    void ReplaceFalseSuccessor(BasicBlock *new_succ)
+    void ReplaceFalseSuccessor(BasicBlock *newSucc)
     {
         ASSERT(succs_.size() > 1);
-        succs_[FALSE_SUCC_IDX] = new_succ;
-        new_succ->preds_.push_back(this);
+        succs_[FALSE_SUCC_IDX] = newSucc;
+        newSucc->preds_.push_back(this);
     }
 
     BasicBlock *InsertNewBlockToSuccEdge(BasicBlock *succ);
@@ -231,7 +231,7 @@ public:
     void InsertBlockBeforeSucc(BasicBlock *block, BasicBlock *succ);
 
     // Remove empty block with one successor
-    void RemoveEmptyBlock(bool irr_loop = false);
+    void RemoveEmptyBlock(bool irrLoop = false);
     void RemoveFixLoopInfo();
 
     // Join single successor into single predecessor
@@ -240,7 +240,7 @@ public:
 
     // Join successor block into the block, which have another successor;
     // Used in if-conversion pass and fixes dataflow using Select instructions.
-    void JoinBlocksUsingSelect(BasicBlock *succ, BasicBlock *select_bb, bool swapped);
+    void JoinBlocksUsingSelect(BasicBlock *succ, BasicBlock *selectBb, bool swapped);
 
     // Add instruction to the end or begin of the BasicBlock
     template <bool TO_END>
@@ -264,7 +264,7 @@ public:
     // Append range of instructions(NOT PHI) in BasicBlock at the end of instructions
     // It is implied that for instructions within range was already called correctly SetBasicBlock() and
     // range_last should dominate range_first.
-    void AppendRangeInst(Inst *range_first, Inst *range_last);
+    void AppendRangeInst(Inst *rangeFirst, Inst *rangeLast);
     // Insert new PHI instruction in BasicBlock at the end of PHI instructions
     void AppendPhi(Inst *inst);
     // Insert instruction after given instruction
@@ -274,13 +274,13 @@ public:
     // Insert range of instructions before given instruction.
     // It is implied that for instructions within range was already called correctly SetBasicBlock() and
     // range_last should dominate range_first.
-    void InsertRangeBefore(Inst *range_first, Inst *range_last, Inst *before);
+    void InsertRangeBefore(Inst *rangeFirst, Inst *rangeLast, Inst *before);
     // Remove instruction from instructions chain. All other data keep unmodified.
-    void EraseInst(Inst *inst, [[maybe_unused]] bool will_be_moved = false);
+    void EraseInst(Inst *inst, [[maybe_unused]] bool willBeMoved = false);
     // Remove instructions from instructions chain, remove its inputs and check that it hasn't users.
     void RemoveInst(Inst *inst);
     // Replace old_inst in BasicBlock to new_inst
-    void ReplaceInst(Inst *old_inst, Inst *new_inst);
+    void ReplaceInst(Inst *oldInst, Inst *newInst);
     // Replace inst by deoptimization
     void ReplaceInstByDeoptimize(Inst *inst);
     // Replace inst with overflow check on corresponding inst (e.g. AddOverflowCheck -> Add)
@@ -290,35 +290,35 @@ public:
 
     Inst *GetLastInst() const
     {
-        return last_inst_;
+        return lastInst_;
     }
 
     bool IsEndWithThrowOrDeoptimize() const
     {
-        if (last_inst_ == nullptr) {
+        if (lastInst_ == nullptr) {
             return false;
         }
-        return last_inst_->IsControlFlow() && last_inst_->CanThrow() && last_inst_->IsTerminator();
+        return lastInst_->IsControlFlow() && lastInst_->CanThrow() && lastInst_->IsTerminator();
     }
 
     Inst *GetFirstInst() const
     {
-        return first_inst_;
+        return firstInst_;
     }
 
     Inst *GetFirstPhi() const
     {
-        return first_phi_;
+        return firstPhi_;
     }
 
     bool IsEmpty() const
     {
-        return first_inst_ == nullptr;
+        return firstInst_ == nullptr;
     }
 
     bool HasPhi() const
     {
-        return first_phi_ != nullptr;
+        return firstPhi_ != nullptr;
     }
 
     void SetDominator(BasicBlock *dominator)
@@ -334,15 +334,15 @@ public:
 
     void AddDominatedBlock(BasicBlock *block)
     {
-        dom_blocks_.push_back(block);
+        domBlocks_.push_back(block);
     }
     void RemoveDominatedBlock(BasicBlock *block)
     {
-        dom_blocks_.erase(std::find(dom_blocks_.begin(), dom_blocks_.end(), block));
+        domBlocks_.erase(std::find(domBlocks_.begin(), domBlocks_.end(), block));
     }
     void ClearDominatedBlocks()
     {
-        dom_blocks_.clear();
+        domBlocks_.clear();
     }
 
     BasicBlock *GetDominator() const;
@@ -388,15 +388,15 @@ public:
 
     void SetNextLoop(Loop *loop)
     {
-        next_loop_ = loop;
+        nextLoop_ = loop;
     }
     Loop *GetNextLoop()
     {
-        return next_loop_;
+        return nextLoop_;
     }
     bool IsLoopPreHeader() const
     {
-        return (next_loop_ != nullptr);
+        return (nextLoop_ != nullptr);
     }
 
     void InsertBlockBefore(BasicBlock *block);
@@ -404,23 +404,23 @@ public:
     template <typename Accessor>
     typename Accessor::ValueType GetField() const
     {
-        return Accessor::Get(bit_fields_);
+        return Accessor::Get(bitFields_);
     }
 
     template <typename Accessor>
     void SetField(typename Accessor::ValueType value)
     {
-        Accessor::Set(value, &bit_fields_);
+        Accessor::Set(value, &bitFields_);
     }
 
-    void SetAllFields(uint32_t bit_fields)
+    void SetAllFields(uint32_t bitFields)
     {
-        bit_fields_ = bit_fields;
+        bitFields_ = bitFields;
     }
 
     uint32_t GetAllFields() const
     {
-        return bit_fields_;
+        return bitFields_;
     }
 
     void SetMonitorEntryBlock(bool v)
@@ -536,36 +536,36 @@ public:
 
     uint32_t GetTryId() const
     {
-        return try_id_;
+        return tryId_;
     }
 
-    void SetTryId(uint32_t try_id)
+    void SetTryId(uint32_t tryId)
     {
-        try_id_ = try_id;
+        tryId_ = tryId;
     }
 
     template <class Callback>
     void EnumerateCatchHandlers(const Callback &callback) const
     {
         ASSERT(this->IsTryBegin());
-        auto try_inst = GetTryBeginInst(this);
-        auto type_ids = try_inst->GetCatchTypeIds();
-        auto catch_indexes = try_inst->GetCatchEdgeIndexes();
-        ASSERT(type_ids != nullptr && catch_indexes != nullptr);
-        for (size_t idx = 0; idx < type_ids->size(); idx++) {
-            auto succ = GetSuccessor(catch_indexes->at(idx));
+        auto tryInst = GetTryBeginInst(this);
+        auto typeIds = tryInst->GetCatchTypeIds();
+        auto catchIndexes = tryInst->GetCatchEdgeIndexes();
+        ASSERT(typeIds != nullptr && catchIndexes != nullptr);
+        for (size_t idx = 0; idx < typeIds->size(); idx++) {
+            auto succ = GetSuccessor(catchIndexes->at(idx));
             while (!succ->IsCatchBegin()) {
                 ASSERT(succ->GetSuccsBlocks().size() == 1);
                 succ = succ->GetSuccessor(0);
             }
             ASSERT(succ != nullptr);
-            if (!callback(succ, type_ids->at(idx))) {
+            if (!callback(succ, typeIds->at(idx))) {
                 break;
             }
         }
     }
 
-    BasicBlock *Clone(Graph *target_graph) const;
+    BasicBlock *Clone(Graph *targetGraph) const;
 
     void SetNeedsJump(bool v)
     {
@@ -579,8 +579,8 @@ public:
 
     bool IsIfBlock() const
     {
-        if (last_inst_ != nullptr) {
-            if (last_inst_->GetOpcode() == Opcode::If || last_inst_->GetOpcode() == Opcode::IfImm) {
+        if (lastInst_ != nullptr) {
+            if (lastInst_->GetOpcode() == Opcode::If || lastInst_->GetOpcode() == Opcode::IfImm) {
                 return true;
             }
         }
@@ -626,18 +626,18 @@ private:
     struct SavedIfInfo {
         BasicBlock *succ;
         bool swapped;
-        uint64_t if_imm;
-        ConditionCode if_cc;
-        DataType::Type if_type;
-        uint32_t if_pc;
-        Opcode if_opcode;
-        Inst *if_input0;
-        Inst *if_input1;
+        uint64_t ifImm;
+        ConditionCode ifCc;
+        DataType::Type ifType;
+        uint32_t ifPc;
+        Opcode ifOpcode;
+        Inst *ifInput0;
+        Inst *ifInput1;
     };
 
-    void GenerateSelect(Inst *phi, Inst *inst1, Inst *inst2, const SavedIfInfo *if_info);
-    void GenerateSelects(const SavedIfInfo *if_info);
-    void SelectsFixLoopInfo(BasicBlock *select_bb, BasicBlock *other);
+    void GenerateSelect(Inst *phi, Inst *inst1, Inst *inst2, const SavedIfInfo *ifInfo);
+    void GenerateSelects(const SavedIfInfo *ifInfo);
+    void SelectsFixLoopInfo(BasicBlock *selectBb, BasicBlock *other);
 
     Graph *graph_;
 
@@ -648,27 +648,27 @@ private:
     ArenaVector<BasicBlock *> succs_;
 
     // List of dominated blocks.
-    ArenaVector<BasicBlock *> dom_blocks_;
+    ArenaVector<BasicBlock *> domBlocks_;
 
     // Dominator block
     BasicBlock *dominator_ {nullptr};
 
     /// This value hold properties of the basic block. It accessed via BitField types.
-    uint32_t bit_fields_ {0};
+    uint32_t bitFields_ {0};
 
     // pc address from bytecode file
-    uint32_t guest_pc_;
-    uint32_t bb_id_ {INVALID_ID};
+    uint32_t guestPc_;
+    uint32_t bbId_ {INVALID_ID};
 
-    Inst *first_phi_ {nullptr};
-    Inst *first_inst_ {nullptr};
-    Inst *last_inst_ {nullptr};
+    Inst *firstPhi_ {nullptr};
+    Inst *firstInst_ {nullptr};
+    Inst *lastInst_ {nullptr};
 
     Loop *loop_ {nullptr};
     // Not nullptr if block is pre-header of next_loop_
-    Loop *next_loop_ {nullptr};
+    Loop *nextLoop_ {nullptr};
 
-    uint32_t try_id_ {INVALID_ID};
+    uint32_t tryId_ {INVALID_ID};
     bool inverted_ {false};
 
     template <const IterationType T, const IterationDirection D>
@@ -739,21 +739,21 @@ protected:
     {
 #ifndef __clang_analyzer__
         if constexpr (IterationType::INST == T && IterationDirection::FORWARD == D) {
-            current_ = (start != nullptr) ? start : block.first_inst_;
+            current_ = (start != nullptr) ? start : block.firstInst_;
             return;
         }
         if constexpr (IterationType::ALL == T && IterationDirection::FORWARD == D) {
-            current_ = (block.first_phi_ != nullptr) ? block.first_phi_ : block.first_inst_;
+            current_ = (block.firstPhi_ != nullptr) ? block.firstPhi_ : block.firstInst_;
             current_ = (start != nullptr) ? start : current_;
             return;
         }
         if constexpr (IterationType::PHI == T && IterationDirection::BACKWARD == D) {
-            current_ = (block.first_inst_ != nullptr) ? block.first_inst_->GetPrev() : block.last_inst_;
+            current_ = (block.firstInst_ != nullptr) ? block.firstInst_->GetPrev() : block.lastInst_;
             current_ = (start != nullptr) ? start : current_;
             return;
         }
         if constexpr (IterationType::ALL == T && IterationDirection::BACKWARD == D) {
-            current_ = (start != nullptr) ? start : block.last_inst_;
+            current_ = (start != nullptr) ? start : block.lastInst_;
             return;
         }
 #else
@@ -821,9 +821,9 @@ template <>
 class InstForwardIterator<IterationType::PHI> : public InstForwardIterator<IterationType::INST> {
 public:
     explicit InstForwardIterator(const BasicBlock &block, Inst *start = nullptr)
-        : InstForwardIterator<IterationType::INST>(start != nullptr ? start : block.first_phi_)
+        : InstForwardIterator<IterationType::INST>(start != nullptr ? start : block.firstPhi_)
     {
-        final_ = ((block.first_phi_ != nullptr) && (block.first_inst_ != nullptr)) ? block.first_inst_ : nullptr;
+        final_ = ((block.firstPhi_ != nullptr) && (block.firstInst_ != nullptr)) ? block.firstInst_ : nullptr;
     }
 
 public:
@@ -899,9 +899,9 @@ public:
     explicit InstBackwardIterator(const BasicBlock &block, Inst *start = nullptr)
         : InstBackwardIterator<IterationType::ALL>(nullptr)
     {
-        auto last_inst = (block.first_inst_ != nullptr) ? block.last_inst_ : nullptr;
-        this->SetCurrent(start != nullptr ? start : last_inst);
-        final_ = (block.first_inst_ != nullptr) ? block.first_inst_->GetPrev() : nullptr;
+        auto lastInst = (block.firstInst_ != nullptr) ? block.lastInst_ : nullptr;
+        this->SetCurrent(start != nullptr ? start : lastInst);
+        final_ = (block.firstInst_ != nullptr) ? block.firstInst_->GetPrev() : nullptr;
     }
 
 public:
@@ -992,10 +992,9 @@ class InstSafeIterator<IterationType::PHI, IterationDirection::FORWARD>
     : public InstSafeIterator<IterationType::INST, IterationDirection::FORWARD> {
 public:
     explicit InstSafeIterator(const BasicBlock &block, Inst *start = nullptr)
-        : InstSafeIterator<IterationType::INST, IterationDirection::FORWARD>(start != nullptr ? start
-                                                                                              : block.first_phi_)
+        : InstSafeIterator<IterationType::INST, IterationDirection::FORWARD>(start != nullptr ? start : block.firstPhi_)
     {
-        final_ = ((block.first_phi_ != nullptr) && (block.first_inst_ != nullptr)) ? block.first_inst_ : nullptr;
+        final_ = ((block.firstPhi_ != nullptr) && (block.firstInst_ != nullptr)) ? block.firstInst_ : nullptr;
         this->SetFollower(GetFollower());
     }
 
@@ -1038,9 +1037,9 @@ public:
     explicit InstSafeIterator(const BasicBlock &block, Inst *start = nullptr)
         : InstSafeIterator<IterationType::ALL, IterationDirection::BACKWARD>(nullptr)
     {
-        auto last_inst = (block.first_inst_ != nullptr) ? block.last_inst_ : nullptr;
-        this->SetCurrent(start != nullptr ? start : last_inst);
-        final_ = (block.first_inst_ != nullptr) ? block.first_inst_->GetPrev() : nullptr;
+        auto lastInst = (block.firstInst_ != nullptr) ? block.lastInst_ : nullptr;
+        this->SetCurrent(start != nullptr ? start : lastInst);
+        final_ = (block.firstInst_ != nullptr) ? block.firstInst_->GetPrev() : nullptr;
         this->SetFollower(GetFollower());
     }
 
@@ -1077,7 +1076,7 @@ private:
  * DFS-search to find path between `block` and `target_block`,
  * `exclude_block` can be set to search path without this block
  */
-bool BlocksPathDfsSearch(Marker marker, BasicBlock *block, const BasicBlock *target_block,
-                         const BasicBlock *exclude_block = nullptr);
+bool BlocksPathDfsSearch(Marker marker, BasicBlock *block, const BasicBlock *targetBlock,
+                         const BasicBlock *excludeBlock = nullptr);
 }  // namespace panda::compiler
 #endif  // COMPILER_OPTIMIZER_IR_BASICBLOCK_H

@@ -38,11 +38,11 @@ public:
      */
     template <class T>
     static T *Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                     std::optional<EntrypointInfo> &&ep_info = std::nullopt)
+                     std::optional<EntrypointInfo> &&epInfo = std::nullopt)
     {
         mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
         auto co = allocator->New<EtsCoroutine>(os::thread::GetCurrentThreadId(), allocator, vm, std::move(name),
-                                               context, std::move(ep_info));
+                                               context, std::move(epInfo));
         co->Initialize();
         return co;
     }
@@ -63,30 +63,30 @@ public:
         return nullptr;
     }
 
-    void SetPromiseClass(void *promise_class)
+    void SetPromiseClass(void *promiseClass)
     {
-        promise_class_ptr_ = promise_class;
+        promiseClassPtr_ = promiseClass;
     }
 
     static constexpr uint32_t GetTlsPromiseClassPointerOffset()
     {
-        return MEMBER_OFFSET(EtsCoroutine, promise_class_ptr_);
+        return MEMBER_OFFSET(EtsCoroutine, promiseClassPtr_);
     }
 
     ALWAYS_INLINE ObjectHeader *GetUndefinedObject() const
     {
-        return undefined_obj_;
+        return undefinedObj_;
     }
 
     // For mainthread initializer
     void SetUndefinedObject(ObjectHeader *obj)
     {
-        undefined_obj_ = obj;
+        undefinedObj_ = obj;
     }
 
     static constexpr uint32_t GetTlsUndefinedObjectOffset()
     {
-        return MEMBER_OFFSET(EtsCoroutine, undefined_obj_);
+        return MEMBER_OFFSET(EtsCoroutine, undefinedObj_);
     }
 
     PANDA_PUBLIC_API PandaEtsVM *GetPandaVM() const;
@@ -94,26 +94,26 @@ public:
 
     PandaEtsNapiEnv *GetEtsNapiEnv() const
     {
-        return ets_napi_env_.get();
+        return etsNapiEnv_.get();
     }
 
     void Initialize() override;
-    void RequestCompletion(Value return_value) override;
+    void RequestCompletion(Value returnValue) override;
     void FreeInternalMemory() override;
 
 protected:
     // we would like everyone to use the factory to create a EtsCoroutine
     explicit EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                          CoroutineContext *context, std::optional<EntrypointInfo> &&ep_info);
+                          CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo);
 
 private:
     panda_file::Type GetReturnType();
-    EtsObject *GetReturnValueAsObject(panda_file::Type return_type, Value return_value);
+    EtsObject *GetReturnValueAsObject(panda_file::Type returnType, Value returnValue);
 
-    std::unique_ptr<PandaEtsNapiEnv> ets_napi_env_;
-    void *promise_class_ptr_ {nullptr};
+    std::unique_ptr<PandaEtsNapiEnv> etsNapiEnv_;
+    void *promiseClassPtr_ {nullptr};
 
-    ObjectHeader *undefined_obj_ {};
+    ObjectHeader *undefinedObj_ {};
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

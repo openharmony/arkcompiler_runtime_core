@@ -37,7 +37,7 @@ public:
 
     bool MarkIfNotMarked(ObjectHeader *object) const
     {
-        if (!reverse_mark_) {
+        if (!reverseMark_) {
             return Base::template MarkIfNotMarked<false>(object);
         }
         return Base::template MarkIfNotMarked<true>(object);
@@ -45,7 +45,7 @@ public:
 
     void Mark(ObjectHeader *object) const
     {
-        if (!reverse_mark_) {
+        if (!reverseMark_) {
             LOG(DEBUG, GC) << "Set mark for GC " << GetDebugInfoAboutObject(object);
             Base::template Mark<false>(object);
         } else {
@@ -56,7 +56,7 @@ public:
 
     bool IsMarked(const ObjectHeader *object) const
     {
-        if (!reverse_mark_) {
+        if (!reverseMark_) {
             LOG(DEBUG, GC) << "Get marked for GC " << GetDebugInfoAboutObject(object);
             return Base::template IsMarked<false>(object);
         }
@@ -66,23 +66,23 @@ public:
 
     void ReverseMark()
     {
-        reverse_mark_ = !reverse_mark_;
+        reverseMark_ = !reverseMark_;
     }
 
     bool IsReverseMark() const
     {
-        return reverse_mark_;
+        return reverseMark_;
     }
 
 private:
-    bool reverse_mark_ = false;
+    bool reverseMark_ = false;
 };
 
 /// @brief Stop the world, non-concurrent GC
 template <class LanguageConfig>
 class StwGC final : public GCLang<LanguageConfig> {
 public:
-    explicit StwGC(ObjectAllocatorBase *object_allocator, const GCSettings &settings);
+    explicit StwGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
 
     NO_COPY_SEMANTIC(StwGC);
     NO_MOVE_SEMANTIC(StwGC);
@@ -90,7 +90,7 @@ public:
 
     void InitGCBits(panda::ObjectHeader *object) override;
 
-    void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *obj_header) override;
+    void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *objHeader) override;
 
     bool IsPinningSupported() const final
     {
@@ -102,7 +102,7 @@ public:
 
     bool Trigger(PandaUniquePtr<GCTask> task) override;
 
-    void WorkerTaskProcessing(GCWorkersTask *task, void *worker_data) override;
+    void WorkerTaskProcessing(GCWorkersTask *task, void *workerData) override;
 
     bool IsPostponeGCSupported() const override;
 
@@ -119,8 +119,8 @@ private:
 
     void MarkObject(ObjectHeader *object) override;
     bool IsMarked(const ObjectHeader *object) const override;
-    void UnMarkObject(ObjectHeader *object_header);
-    void MarkReferences(GCMarkingStackType *references, GCPhase gc_phase) override;
+    void UnMarkObject(ObjectHeader *objectHeader);
+    void MarkReferences(GCMarkingStackType *references, GCPhase gcPhase) override;
 
     StwGCMarker<LanguageConfig> marker_;
 };

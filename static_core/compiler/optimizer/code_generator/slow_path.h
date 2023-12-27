@@ -28,7 +28,7 @@ public:
 
     explicit SlowPathBase(LabelHolder::LabelId label) : SlowPathBase(label, nullptr) {}
     SlowPathBase(LabelHolder::LabelId label, Inst *inst)
-        : label_(label), label_back_(LabelHolder::INVALID_LABEL), inst_(inst)
+        : label_(label), labelBack_(LabelHolder::INVALID_LABEL), inst_(inst)
     {
     }
     virtual ~SlowPathBase() = default;
@@ -48,20 +48,20 @@ public:
 
     void BindBackLabel(Encoder *encoder)
     {
-        if (!encoder->IsLabelValid(label_back_)) {
-            label_back_ = encoder->CreateLabel();
+        if (!encoder->IsLabelValid(labelBack_)) {
+            labelBack_ = encoder->CreateLabel();
         }
-        encoder->BindLabel(label_back_);
+        encoder->BindLabel(labelBack_);
     }
 
     void CreateBackLabel(Encoder *encoder)
     {
-        label_back_ = encoder->CreateLabel();
+        labelBack_ = encoder->CreateLabel();
     }
 
     LabelHolder::LabelId GetBackLabel()
     {
-        return label_back_;
+        return labelBack_;
     }
 
     void Generate(Codegen *codegen);
@@ -70,7 +70,7 @@ public:
 
 private:
     LabelHolder::LabelId label_ {LabelHolder::INVALID_LABEL};
-    LabelHolder::LabelId label_back_ {LabelHolder::INVALID_LABEL};
+    LabelHolder::LabelId labelBack_ {LabelHolder::INVALID_LABEL};
     Inst *inst_ {nullptr};
 
 #ifndef NDEBUG
@@ -129,15 +129,15 @@ public:
     NO_COPY_SEMANTIC(SlowPathDeoptimize);
     NO_MOVE_SEMANTIC(SlowPathDeoptimize);
 
-    SlowPathDeoptimize(LabelHolder::LabelId label, Inst *inst, DeoptimizeType deoptimize_type)
-        : SlowPathEntrypoint(label, inst, EntrypointId::DEOPTIMIZE), deoptimize_type_ {deoptimize_type}
+    SlowPathDeoptimize(LabelHolder::LabelId label, Inst *inst, DeoptimizeType deoptimizeType)
+        : SlowPathEntrypoint(label, inst, EntrypointId::DEOPTIMIZE), deoptimizeType_ {deoptimizeType}
     {
     }
 
     void GenerateImpl(Codegen *codegen) override;
 
 private:
-    DeoptimizeType deoptimize_type_;
+    DeoptimizeType deoptimizeType_;
 };
 
 class SlowPathImplicitNullCheck : public SlowPathEntrypoint {
@@ -154,15 +154,15 @@ public:
     void GenerateImpl(Codegen *codegen) override;
     void SetTmpReg(Reg reg)
     {
-        tmp_reg_ = reg;
+        tmpReg_ = reg;
     }
     Reg GetTmpReg() const
     {
-        return tmp_reg_;
+        return tmpReg_;
     }
 
 private:
-    Reg tmp_reg_ {INVALID_REGISTER};
+    Reg tmpReg_ {INVALID_REGISTER};
 };
 
 class SlowPathResolveStringAot : public SlowPathEntrypoint {
@@ -173,17 +173,17 @@ public:
 
     void SetDstReg(Reg reg)
     {
-        dst_reg_ = reg;
+        dstReg_ = reg;
     }
 
     void SetAddrReg(Reg reg)
     {
-        addr_reg_ = reg;
+        addrReg_ = reg;
     }
 
-    void SetStringId(uint32_t string_id)
+    void SetStringId(uint32_t stringId)
     {
-        string_id_ = string_id;
+        stringId_ = stringId;
     }
 
     void SetMethod(void *method)
@@ -192,9 +192,9 @@ public:
     }
 
 private:
-    Reg dst_reg_ {INVALID_REGISTER};
-    Reg addr_reg_ {INVALID_REGISTER};
-    uint32_t string_id_ {0};
+    Reg dstReg_ {INVALID_REGISTER};
+    Reg addrReg_ {INVALID_REGISTER};
+    uint32_t stringId_ {0};
     void *method_ {nullptr};
 };
 
@@ -209,11 +209,11 @@ public:
     void GenerateImpl(Codegen *codegen) override;
     void SetClassReg(Reg reg)
     {
-        class_reg_ = reg;
+        classReg_ = reg;
     }
 
 private:
-    Reg class_reg_ {INVALID_REGISTER};
+    Reg classReg_ {INVALID_REGISTER};
 };
 
 class SlowPathAbstract : public SlowPathEntrypoint {
@@ -222,11 +222,11 @@ public:
     void GenerateImpl(Codegen *codegen) override;
     void SetMethodReg(Reg reg)
     {
-        method_reg_ = reg;
+        methodReg_ = reg;
     }
 
 private:
-    Reg method_reg_ {INVALID_REGISTER};
+    Reg methodReg_ {INVALID_REGISTER};
 };
 
 class SlowPathRefCheck : public SlowPathEntrypoint {
@@ -235,15 +235,15 @@ public:
 
     void GenerateImpl(Codegen *codegen) override;
 
-    void SetRegs(Reg array_reg, Reg ref_reg)
+    void SetRegs(Reg arrayReg, Reg refReg)
     {
-        array_reg_ = array_reg;
-        ref_reg_ = ref_reg;
+        arrayReg_ = arrayReg;
+        refReg_ = refReg;
     }
 
 private:
-    Reg array_reg_ {INVALID_REGISTER};
-    Reg ref_reg_ {INVALID_REGISTER};
+    Reg arrayReg_ {INVALID_REGISTER};
+    Reg refReg_ {INVALID_REGISTER};
 };
 
 class SlowPathUnresolved : public SlowPathEntrypoint {
@@ -252,33 +252,33 @@ public:
 
     void GenerateImpl(Codegen *codegen) override;
 
-    void SetUnresolvedType(void *method, uint32_t type_id)
+    void SetUnresolvedType(void *method, uint32_t typeId)
     {
         method_ = method;
-        type_id_ = type_id;
+        typeId_ = typeId;
     }
 
     void SetSlotAddr(uintptr_t addr)
     {
-        slot_addr_ = addr;
+        slotAddr_ = addr;
     }
 
-    void SetDstReg(Reg dst_reg)
+    void SetDstReg(Reg dstReg)
     {
-        dst_reg_ = dst_reg;
+        dstReg_ = dstReg;
     }
 
-    void SetArgReg(Reg arg_reg)
+    void SetArgReg(Reg argReg)
     {
-        arg_reg_ = arg_reg;
+        argReg_ = argReg;
     }
 
 private:
-    Reg dst_reg_ {INVALID_REGISTER};
-    Reg arg_reg_ {INVALID_REGISTER};
+    Reg dstReg_ {INVALID_REGISTER};
+    Reg argReg_ {INVALID_REGISTER};
     void *method_ {nullptr};
-    uint32_t type_id_ {0};
-    uintptr_t slot_addr_ {0};
+    uint32_t typeId_ {0};
+    uintptr_t slotAddr_ {0};
 };
 
 class SlowPathJsCastDoubleToInt32 : public SlowPathBase {
@@ -290,21 +290,21 @@ public:
     NO_COPY_SEMANTIC(SlowPathJsCastDoubleToInt32);
     NO_MOVE_SEMANTIC(SlowPathJsCastDoubleToInt32);
 
-    void SetDstReg(Reg dst_reg)
+    void SetDstReg(Reg dstReg)
     {
-        dst_reg_ = dst_reg;
+        dstReg_ = dstReg;
     }
 
-    void SetSrcReg(Reg src_reg)
+    void SetSrcReg(Reg srcReg)
     {
-        src_reg_ = src_reg;
+        srcReg_ = srcReg;
     }
 
     void GenerateImpl(Codegen *codegen) override;
 
 private:
-    Reg dst_reg_ {INVALID_REGISTER};
-    Reg src_reg_ {INVALID_REGISTER};
+    Reg dstReg_ {INVALID_REGISTER};
+    Reg srcReg_ {INVALID_REGISTER};
 };
 
 class SlowPathStringHashCode : public SlowPathEntrypoint {
@@ -316,21 +316,21 @@ public:
     NO_COPY_SEMANTIC(SlowPathStringHashCode);
     NO_MOVE_SEMANTIC(SlowPathStringHashCode);
 
-    void SetDstReg(Reg dst_reg)
+    void SetDstReg(Reg dstReg)
     {
-        dst_reg_ = dst_reg;
+        dstReg_ = dstReg;
     }
 
-    void SetSrcReg(Reg src_reg)
+    void SetSrcReg(Reg srcReg)
     {
-        src_reg_ = src_reg;
+        srcReg_ = srcReg;
     }
 
     void GenerateImpl(Codegen *codegen) override;
 
 private:
-    Reg dst_reg_ {INVALID_REGISTER};
-    Reg src_reg_ {INVALID_REGISTER};
+    Reg dstReg_ {INVALID_REGISTER};
+    Reg srcReg_ {INVALID_REGISTER};
 };
 
 }  // namespace panda::compiler

@@ -18,27 +18,27 @@
 
 namespace panda::panda_file {
 
-MethodDataAccessor::MethodDataAccessor(const File &panda_file, File::EntityId method_id)
-    : panda_file_(panda_file), method_id_(method_id)
+MethodDataAccessor::MethodDataAccessor(const File &pandaFile, File::EntityId methodId)
+    : pandaFile_(pandaFile), methodId_(methodId)
 {
-    auto sp = panda_file_.GetSpanFromId(method_id);
+    auto sp = pandaFile_.GetSpanFromId(methodId);
 
-    class_idx_ = helpers::Read<IDX_SIZE>(&sp);
-    proto_idx_ = helpers::Read<IDX_SIZE>(&sp);
+    classIdx_ = helpers::Read<IDX_SIZE>(&sp);
+    protoIdx_ = helpers::Read<IDX_SIZE>(&sp);
 
-    class_off_ = panda_file.ResolveClassIndex(method_id, class_idx_).GetOffset();
-    proto_off_ = panda_file.ResolveProtoIndex(method_id, proto_idx_).GetOffset();
+    classOff_ = pandaFile.ResolveClassIndex(methodId, classIdx_).GetOffset();
+    protoOff_ = pandaFile.ResolveProtoIndex(methodId, protoIdx_).GetOffset();
 
-    name_off_ = helpers::Read<ID_SIZE>(&sp);
-    access_flags_ = helpers::ReadULeb128(&sp);
+    nameOff_ = helpers::Read<ID_SIZE>(&sp);
+    accessFlags_ = helpers::ReadULeb128(&sp);
 
-    is_external_ = panda_file_.IsExternal(method_id);
+    isExternal_ = pandaFile_.IsExternal(methodId);
 
-    if (!is_external_) {
-        tagged_values_sp_ = sp;
+    if (!isExternal_) {
+        taggedValuesSp_ = sp;
         size_ = 0;
     } else {
-        size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - method_id_.GetOffset();
+        size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - methodId_.GetOffset();
     }
 }
 

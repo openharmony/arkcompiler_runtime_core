@@ -37,34 +37,34 @@ namespace panda::compiler {
 void PandaRuntimeTest::Initialize([[maybe_unused]] int argc, char **argv)
 {
     ASSERT(argc > 0);
-    exec_path_ = argv[0];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    execPath_ = argv[0];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 }
 
 PandaRuntimeTest::PandaRuntimeTest()
 {
-    ASSERT(exec_path_ != nullptr);
+    ASSERT(execPath_ != nullptr);
 #if !defined(PANDA_TARGET_MOBILE)
 #if defined(USE_STD_FILESYSTEM)
-    std::filesystem::path exec_name(exec_path_);
+    std::filesystem::path execName(execPath_);
 #else
-    std::experimental::filesystem::path exec_name(exec_path_);
+    std::experimental::filesystem::path execName(execPath_);
 #endif  // defined(USE_STD_FILESYSTEM)
-    std::string pandastdlib_path = exec_name.parent_path() / "../pandastdlib/arkstdlib.abc";
+    std::string pandastdlibPath = execName.parent_path() / "../pandastdlib/arkstdlib.abc";
 #else
-    std::string exec_name = "compiler_unit_tests";
-    std::string pandastdlib_path = "../pandastdlib/arkstdlib.abc";
+    std::string execName = "compiler_unit_tests";
+    std::string pandastdlibPath = "../pandastdlib/arkstdlib.abc";
 #endif
-    panda::RuntimeOptions runtime_options(exec_name);
-    runtime_options.SetBootPandaFiles({pandastdlib_path});
-    runtime_options.SetLoadRuntimes({"core"});
-    runtime_options.SetHeapSizeLimit(50_MB);  // NOLINT(readability-magic-numbers)
-    runtime_options.SetEnableAn(true);
-    runtime_options.SetGcType("epsilon");
+    panda::RuntimeOptions runtimeOptions(execName);
+    runtimeOptions.SetBootPandaFiles({pandastdlibPath});
+    runtimeOptions.SetLoadRuntimes({"core"});
+    runtimeOptions.SetHeapSizeLimit(50_MB);  // NOLINT(readability-magic-numbers)
+    runtimeOptions.SetEnableAn(true);
+    runtimeOptions.SetGcType("epsilon");
     Logger::InitializeDummyLogging();
-    EXPECT_TRUE(panda::Runtime::Create(runtime_options));
+    EXPECT_TRUE(panda::Runtime::Create(runtimeOptions));
 
     allocator_ = new ArenaAllocator(panda::SpaceType::SPACE_TYPE_INTERNAL);
-    local_allocator_ = new ArenaAllocator(panda::SpaceType::SPACE_TYPE_INTERNAL);
+    localAllocator_ = new ArenaAllocator(panda::SpaceType::SPACE_TYPE_INTERNAL);
     builder_ = new IrConstructor();
 
     graph_ = CreateGraph();
@@ -74,7 +74,7 @@ PandaRuntimeTest::~PandaRuntimeTest()
 {
     delete builder_;
     delete allocator_;
-    delete local_allocator_;
+    delete localAllocator_;
     panda::Runtime::Destroy();
 }
 
@@ -83,22 +83,22 @@ RuntimeInterface *PandaRuntimeTest::GetDefaultRuntime()
     return Graph::GetDefaultRuntime();
 }
 
-std::unique_ptr<const panda_file::File> AsmTest::ParseToFile(const char *source, const char *file_name)
+std::unique_ptr<const panda_file::File> AsmTest::ParseToFile(const char *source, const char *fileName)
 {
     panda::pandasm::Parser parser;
-    auto res = parser.Parse(source, file_name);
+    auto res = parser.Parse(source, fileName);
     if (parser.ShowError().err != pandasm::Error::ErrorType::ERR_NONE) {
         std::cerr << "Parse failed: " << parser.ShowError().message << std::endl
-                  << parser.ShowError().whole_line << std::endl;
+                  << parser.ShowError().wholeLine << std::endl;
         ADD_FAILURE();
         return nullptr;
     }
     return pandasm::AsmEmitter::Emit(res.Value());
 }
 
-bool AsmTest::Parse(const char *source, const char *file_name)
+bool AsmTest::Parse(const char *source, const char *fileName)
 {
-    auto pfile = ParseToFile(source, file_name);
+    auto pfile = ParseToFile(source, fileName);
     if (pfile == nullptr) {
         ADD_FAILURE();
         return false;
@@ -107,7 +107,7 @@ bool AsmTest::Parse(const char *source, const char *file_name)
     return true;
 }
 
-Graph *AsmTest::BuildGraph(const char *method_name, Graph *graph)
+Graph *AsmTest::BuildGraph(const char *methodName, Graph *graph)
 {
     auto loader = GetClassLinker();
     PandaString storage;
@@ -117,7 +117,7 @@ Graph *AsmTest::BuildGraph(const char *method_name, Graph *graph)
     auto klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &storage));
     thread->ManagedCodeEnd();
 
-    auto method = klass->GetDirectMethod(utf::CStringAsMutf8(method_name));
+    auto method = klass->GetDirectMethod(utf::CStringAsMutf8(methodName));
     if (method == nullptr) {
         ADD_FAILURE();
         return nullptr;
@@ -148,8 +148,8 @@ CommonTest::~CommonTest()
     }
     delete builder_;
     delete allocator_;
-    delete object_allocator_;
-    delete local_allocator_;
+    delete objectAllocator_;
+    delete localAllocator_;
     PoolManager::Finalize();
 
     panda::mem::MemConfig::Finalize();
@@ -161,6 +161,6 @@ int main(int argc, char **argv)
     ::testing::InitGoogleTest(&argc, argv);
 
     panda::compiler::PandaRuntimeTest::Initialize(argc, argv);
-    panda::compiler::OPTIONS.SetCompilerUseSafepoint(false);
+    panda::compiler::g_options.SetCompilerUseSafepoint(false);
     return RUN_ALL_TESTS();
 }

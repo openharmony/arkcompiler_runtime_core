@@ -17,99 +17,96 @@
 
 namespace panda::pandasm {
 
-std::unique_ptr<ScalarValue> InitScalarValue(const ScalarValue &sc_val)
+std::unique_ptr<ScalarValue> InitScalarValue(const ScalarValue &scVal)
 {
-    std::unique_ptr<ScalarValue> copy_val;
-    switch (sc_val.GetType()) {
+    std::unique_ptr<ScalarValue> copyVal;
+    switch (scVal.GetType()) {
         case Value::Type::U1: {
-            copy_val = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U1>(sc_val.GetValue<uint8_t>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U1>(scVal.GetValue<uint8_t>()));
             break;
         }
         case Value::Type::U8: {
-            copy_val = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U8>(sc_val.GetValue<uint8_t>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U8>(scVal.GetValue<uint8_t>()));
             break;
         }
         case Value::Type::U16: {
-            copy_val =
-                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U16>(sc_val.GetValue<uint16_t>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U16>(scVal.GetValue<uint16_t>()));
             break;
         }
         case Value::Type::U32: {
-            copy_val =
-                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U32>(sc_val.GetValue<uint32_t>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U32>(scVal.GetValue<uint32_t>()));
             break;
         }
         case Value::Type::U64: {
-            copy_val =
-                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U64>(sc_val.GetValue<uint64_t>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::U64>(scVal.GetValue<uint64_t>()));
             break;
         }
         case Value::Type::I8: {
-            copy_val = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::I8>(sc_val.GetValue<int8_t>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::I8>(scVal.GetValue<int8_t>()));
             break;
         }
         case Value::Type::I16: {
-            copy_val = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::I16>(sc_val.GetValue<int16_t>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::I16>(scVal.GetValue<int16_t>()));
             break;
         }
         case Value::Type::I32: {
-            copy_val = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::I32>(sc_val.GetValue<int32_t>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::I32>(scVal.GetValue<int32_t>()));
             break;
         }
         case Value::Type::I64: {
-            copy_val = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::I64>(sc_val.GetValue<int64_t>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::I64>(scVal.GetValue<int64_t>()));
             break;
         }
         case Value::Type::F32: {
-            copy_val = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::F32>(sc_val.GetValue<float>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::F32>(scVal.GetValue<float>()));
             break;
         }
         case Value::Type::F64: {
-            copy_val = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::F64>(sc_val.GetValue<double>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::F64>(scVal.GetValue<double>()));
             break;
         }
         case Value::Type::STRING: {
-            copy_val =
-                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(sc_val.GetValue<std::string>()));
+            copyVal =
+                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(scVal.GetValue<std::string>()));
             break;
         }
         case Value::Type::STRING_NULLPTR: {
-            copy_val = std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::STRING_NULLPTR>(sc_val.GetValue<int32_t>()));
+            copyVal = std::make_unique<ScalarValue>(
+                ScalarValue::Create<Value::Type::STRING_NULLPTR>(scVal.GetValue<int32_t>()));
             break;
         }
         case Value::Type::RECORD: {
-            copy_val = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::RECORD>(sc_val.GetValue<Type>()));
+            copyVal = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::RECORD>(scVal.GetValue<Type>()));
             break;
         }
         case Value::Type::METHOD: {
-            copy_val =
-                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::METHOD>(sc_val.GetValue<std::string>()));
+            copyVal =
+                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::METHOD>(scVal.GetValue<std::string>()));
             break;
         }
         case Value::Type::ENUM: {
-            copy_val =
-                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::ENUM>(sc_val.GetValue<std::string>()));
+            copyVal =
+                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::ENUM>(scVal.GetValue<std::string>()));
             break;
         }
         case Value::Type::ANNOTATION: {
-            copy_val = std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::ANNOTATION>(sc_val.GetValue<AnnotationData>()));
+            copyVal = std::make_unique<ScalarValue>(
+                ScalarValue::Create<Value::Type::ANNOTATION>(scVal.GetValue<AnnotationData>()));
             break;
         }
         default: {
             UNREACHABLE();
-            copy_val = nullptr;
+            copyVal = nullptr;
             break;
         }
     }
-    return copy_val;
+    return copyVal;
 }
 
-std::unique_ptr<Value> MakingValue(const AnnotationElement &ann_elem)
+std::unique_ptr<Value> MakingValue(const AnnotationElement &annElem)
 {
-    std::unique_ptr<Value> copy_val;
-    switch (ann_elem.GetValue()->GetType()) {
+    std::unique_ptr<Value> copyVal;
+    switch (annElem.GetValue()->GetType()) {
         case Value::Type::U1:
         case Value::Type::U8:
         case Value::Type::U16:
@@ -127,47 +124,47 @@ std::unique_ptr<Value> MakingValue(const AnnotationElement &ann_elem)
         case Value::Type::METHOD:
         case Value::Type::ENUM:
         case Value::Type::ANNOTATION: {
-            copy_val = InitScalarValue(*static_cast<ScalarValue *>(ann_elem.GetValue()));
+            copyVal = InitScalarValue(*static_cast<ScalarValue *>(annElem.GetValue()));
             break;
         }
         case Value::Type::ARRAY: {
-            Value::Type c_type;
-            auto *elem_arr = static_cast<ArrayValue *>(ann_elem.GetValue());
-            if (elem_arr->GetValues().empty()) {
-                c_type = Value::Type::VOID;
+            Value::Type cType;
+            auto *elemArr = static_cast<ArrayValue *>(annElem.GetValue());
+            if (elemArr->GetValues().empty()) {
+                cType = Value::Type::VOID;
             } else {
-                c_type = elem_arr->GetValues().front().GetType();
+                cType = elemArr->GetValues().front().GetType();
             }
-            std::vector<ScalarValue> sc_vals;
-            for (const auto &sc_val : elem_arr->GetValues()) {
-                sc_vals.push_back(*InitScalarValue(sc_val));
+            std::vector<ScalarValue> scVals;
+            for (const auto &scVal : elemArr->GetValues()) {
+                scVals.push_back(*InitScalarValue(scVal));
             }
-            copy_val = std::make_unique<ArrayValue>(c_type, std::move(sc_vals));
+            copyVal = std::make_unique<ArrayValue>(cType, std::move(scVals));
             break;
         }
         default: {
             UNREACHABLE();
-            copy_val = nullptr;
+            copyVal = nullptr;
             break;
         }
     }
-    return copy_val;
+    return copyVal;
 }
 
-AnnotationElement::AnnotationElement(const AnnotationElement &ann_elem)
+AnnotationElement::AnnotationElement(const AnnotationElement &annElem)
 {
-    this->value_ = MakingValue(ann_elem);
-    this->name_ = ann_elem.GetName();
+    this->value_ = MakingValue(annElem);
+    this->name_ = annElem.GetName();
 }
 
-AnnotationElement &AnnotationElement::operator=(const AnnotationElement &ann_elem)
+AnnotationElement &AnnotationElement::operator=(const AnnotationElement &annElem)
 {
-    if (this == &ann_elem) {
+    if (this == &annElem) {
         return *this;
     }
 
-    this->value_ = MakingValue(ann_elem);
-    this->name_ = ann_elem.GetName();
+    this->value_ = MakingValue(annElem);
+    this->name_ = annElem.GetName();
     return *this;
 }
 

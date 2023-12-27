@@ -33,37 +33,37 @@ inline bool operator==(const SpillFillData &lhs, const SpillFillData &rhs)
 
 class RegAllocLinearScanTest : public GraphTest {
 public:
-    void CheckInstRegNotEqualOthersInstRegs(int check_id, std::vector<int> &&inst_ids)
+    void CheckInstRegNotEqualOthersInstRegs(int checkId, std::vector<int> &&instIds)
     {
-        for (auto id : inst_ids) {
-            ASSERT_NE(INS(check_id).GetDstReg(), INS(id).GetDstReg());
+        for (auto id : instIds) {
+            ASSERT_NE(INS(checkId).GetDstReg(), INS(id).GetDstReg());
         }
     }
 
     void CompareSpillFillInsts(SpillFillInst *lhs, SpillFillInst *rhs)
     {
-        const auto &lhs_sfs = lhs->GetSpillFills();
-        const auto &rhs_sfs = rhs->GetSpillFills();
-        ASSERT_EQ(lhs_sfs.size(), rhs_sfs.size());
+        const auto &lhsSfs = lhs->GetSpillFills();
+        const auto &rhsSfs = rhs->GetSpillFills();
+        ASSERT_EQ(lhsSfs.size(), rhsSfs.size());
 
-        for (size_t i = 0; i < lhs_sfs.size(); i++) {
-            auto res = lhs_sfs[i] == rhs_sfs[i];
+        for (size_t i = 0; i < lhsSfs.size(); i++) {
+            auto res = lhsSfs[i] == rhsSfs[i];
             ASSERT_TRUE(res);
         }
     }
 
-    bool CheckImmediateSpillFill(Inst *inst, size_t input_num)
+    bool CheckImmediateSpillFill(Inst *inst, size_t inputNum)
     {
-        auto sf_inst = inst->GetPrev();
-        auto const_input = inst->GetInput(input_num).GetInst();
-        if (sf_inst->GetOpcode() != Opcode::SpillFill || !const_input->IsConst()) {
+        auto sfInst = inst->GetPrev();
+        auto constInput = inst->GetInput(inputNum).GetInst();
+        if (sfInst->GetOpcode() != Opcode::SpillFill || !constInput->IsConst()) {
             return false;
         }
         auto graph = inst->GetBasicBlock()->GetGraph();
-        auto src_reg = inst->GetSrcReg(input_num);
-        for (auto sf : sf_inst->CastToSpillFill()->GetSpillFills()) {
-            if (sf.SrcType() == LocationType::IMMEDIATE && (graph->GetSpilledConstant(sf.SrcValue()) == const_input) &&
-                sf.DstValue() == src_reg) {
+        auto srcReg = inst->GetSrcReg(inputNum);
+        for (auto sf : sfInst->CastToSpillFill()->GetSpillFills()) {
+            if (sf.SrcType() == LocationType::IMMEDIATE && (graph->GetSpilledConstant(sf.SrcValue()) == constInput) &&
+                sf.DstValue() == srcReg) {
                 return true;
             }
         }
@@ -71,7 +71,7 @@ public:
     }
 
     template <DataType::Type REG_TYPE>
-    void TestPhiMovesOverwriting(Graph *graph, SpillFillInst *sf, SpillFillInst *expected_sf);
+    void TestPhiMovesOverwriting(Graph *graph, SpillFillInst *sf, SpillFillInst *expectedSf);
     template <unsigned int CONSTANTS_NUM>
     bool FillGraphWithConstants(Graph *graph);
 
@@ -206,8 +206,8 @@ TEST_F(RegAllocLinearScanTest, DISABLED_TwoFreeRegs)
     }
     // Create reg_mask with 2 available general registers
     RegAllocLinearScan ra(GetGraph());
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xF3FFFFFFU : 0xFABFFFFFU;
-    ra.SetRegMask(RegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xF3FFFFFFU : 0xFABFFFFFU;
+    ra.SetRegMask(RegMask {regMask});
     ra.SetVRegMask(VRegMask {0U});
     auto result = ra.Run();
     if (GetGraph()->GetCallingConvention() == nullptr) {
@@ -325,30 +325,30 @@ TEST_F(RegAllocLinearScanTest, RzeroAssigment)
         return;
     }
     ASSERT_TRUE(result);
-    auto zero_reg = GetGraph()->GetZeroReg();
+    auto zeroReg = GetGraph()->GetZeroReg();
     // check for target arch, which has a zero register
-    if (zero_reg != INVALID_REG) {
-        ASSERT_EQ(INS(0U).GetDstReg(), zero_reg);
-        ASSERT_EQ(INS(5U).GetSrcReg(1U), zero_reg);
-        ASSERT_EQ(INS(8U).GetSrcReg(1U), zero_reg);
+    if (zeroReg != INVALID_REG) {
+        ASSERT_EQ(INS(0U).GetDstReg(), zeroReg);
+        ASSERT_EQ(INS(5U).GetSrcReg(1U), zeroReg);
+        ASSERT_EQ(INS(8U).GetSrcReg(1U), zeroReg);
 
         // Find spill-fill with moving zero constant -> phi destination register
-        auto phi_resolver = BB(2U).GetPredBlockByIndex(0U);
-        auto spill_fill_inst = phi_resolver->GetLastInst()->IsControlFlow() ? phi_resolver->GetLastInst()->GetPrev()
-                                                                            : phi_resolver->GetLastInst();
-        ASSERT_TRUE(spill_fill_inst->GetOpcode() == Opcode::SpillFill);
-        auto spill_fills = spill_fill_inst->CastToSpillFill()->GetSpillFills();
-        auto phi_reg = INS(3U).GetDstReg();
-        ASSERT_TRUE(phi_reg != INVALID_REG);
-        auto iter = std::find_if(spill_fills.begin(), spill_fills.end(), [zero_reg, phi_reg](const SpillFillData &sf) {
-            return (sf.SrcValue() == zero_reg && sf.DstValue() == phi_reg);
+        auto phiResolver = BB(2U).GetPredBlockByIndex(0U);
+        auto spillFillInst = phiResolver->GetLastInst()->IsControlFlow() ? phiResolver->GetLastInst()->GetPrev()
+                                                                         : phiResolver->GetLastInst();
+        ASSERT_TRUE(spillFillInst->GetOpcode() == Opcode::SpillFill);
+        auto spillFills = spillFillInst->CastToSpillFill()->GetSpillFills();
+        auto phiReg = INS(3U).GetDstReg();
+        ASSERT_TRUE(phiReg != INVALID_REG);
+        auto iter = std::find_if(spillFills.begin(), spillFills.end(), [zeroReg, phiReg](const SpillFillData &sf) {
+            return (sf.SrcValue() == zeroReg && sf.DstValue() == phiReg);
         });
-        ASSERT_NE(iter, spill_fills.end());
+        ASSERT_NE(iter, spillFills.end());
     }
 }
 
 template <DataType::Type REG_TYPE>
-void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst *sf, SpillFillInst *expected_sf)
+void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst *sf, SpillFillInst *expectedSf)
 {
     auto resolver = SpillFillsResolver(graph);
 
@@ -356,39 +356,39 @@ void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst
     sf->ClearSpillFills();
     sf->AddMove(4U, 5U, REG_TYPE);
     sf->AddMove(5U, 4U, REG_TYPE);
-    expected_sf->ClearSpillFills();
+    expectedSf->ClearSpillFills();
     if (graph->GetArch() != Arch::AARCH32) {  // temp is register
-        Register temp_reg = DataType::IsFloatType(REG_TYPE) ? graph->GetArchTempVReg() : graph->GetArchTempReg();
-        expected_sf->AddMove(4U, temp_reg, REG_TYPE);
-        expected_sf->AddMove(5U, 4U, REG_TYPE);
-        expected_sf->AddMove(temp_reg, 5U, REG_TYPE);
+        Register tempReg = DataType::IsFloatType(REG_TYPE) ? graph->GetArchTempVReg() : graph->GetArchTempReg();
+        expectedSf->AddMove(4U, tempReg, REG_TYPE);
+        expectedSf->AddMove(5U, 4U, REG_TYPE);
+        expectedSf->AddMove(tempReg, 5U, REG_TYPE);
     } else {  // temp is stack slot
-        auto temp_slot = StackSlot(0U);
-        expected_sf->AddSpill(4U, temp_slot, REG_TYPE);
-        expected_sf->AddMove(5U, 4U, REG_TYPE);
-        expected_sf->AddFill(temp_slot, 5U, REG_TYPE);
+        auto tempSlot = StackSlot(0U);
+        expectedSf->AddSpill(4U, tempSlot, REG_TYPE);
+        expectedSf->AddMove(5U, 4U, REG_TYPE);
+        expectedSf->AddFill(tempSlot, 5U, REG_TYPE);
     }
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // cyclical sf with memcopy
     sf->ClearSpillFills();
     sf->AddMemCopy(4U, 5U, REG_TYPE);
     sf->AddMemCopy(5U, 4U, REG_TYPE);
-    expected_sf->ClearSpillFills();
+    expectedSf->ClearSpillFills();
     if (graph->GetArch() != Arch::AARCH32) {  // temp is register
-        Register temp_reg = DataType::IsFloatType(REG_TYPE) ? graph->GetArchTempVReg() : graph->GetArchTempReg();
-        expected_sf->AddFill(4U, temp_reg, REG_TYPE);
-        expected_sf->AddMemCopy(5U, 4U, REG_TYPE);
-        expected_sf->AddSpill(temp_reg, 5U, REG_TYPE);
+        Register tempReg = DataType::IsFloatType(REG_TYPE) ? graph->GetArchTempVReg() : graph->GetArchTempReg();
+        expectedSf->AddFill(4U, tempReg, REG_TYPE);
+        expectedSf->AddMemCopy(5U, 4U, REG_TYPE);
+        expectedSf->AddSpill(tempReg, 5U, REG_TYPE);
     } else {  // temp is stack slot
-        auto temp_slot = StackSlot(0U);
-        expected_sf->AddMemCopy(4U, temp_slot, REG_TYPE);
-        expected_sf->AddMemCopy(5U, 4U, REG_TYPE);
-        expected_sf->AddMemCopy(temp_slot, 5U, REG_TYPE);
+        auto tempSlot = StackSlot(0U);
+        expectedSf->AddMemCopy(4U, tempSlot, REG_TYPE);
+        expectedSf->AddMemCopy(5U, 4U, REG_TYPE);
+        expectedSf->AddMemCopy(tempSlot, 5U, REG_TYPE);
     }
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // cyclic sf with all move-types
     sf->ClearSpillFills();
@@ -396,36 +396,36 @@ void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst
     sf->AddSpill(5U, 10U, REG_TYPE);
     sf->AddMemCopy(10U, 11U, REG_TYPE);
     sf->AddFill(11U, 4U, REG_TYPE);
-    expected_sf->ClearSpillFills();
-    expected_sf->ClearSpillFills();
+    expectedSf->ClearSpillFills();
+    expectedSf->ClearSpillFills();
     if (graph->GetArch() != Arch::AARCH32) {  // temp is register
-        Register temp_reg = DataType::IsFloatType(REG_TYPE) ? graph->GetArchTempVReg() : graph->GetArchTempReg();
-        expected_sf->AddMove(4U, temp_reg, REG_TYPE);
-        expected_sf->AddFill(11U, 4U, REG_TYPE);
-        expected_sf->AddMemCopy(10U, 11U, REG_TYPE);
-        expected_sf->AddSpill(5U, 10U, REG_TYPE);
-        expected_sf->AddMove(temp_reg, 5U, REG_TYPE);
+        Register tempReg = DataType::IsFloatType(REG_TYPE) ? graph->GetArchTempVReg() : graph->GetArchTempReg();
+        expectedSf->AddMove(4U, tempReg, REG_TYPE);
+        expectedSf->AddFill(11U, 4U, REG_TYPE);
+        expectedSf->AddMemCopy(10U, 11U, REG_TYPE);
+        expectedSf->AddSpill(5U, 10U, REG_TYPE);
+        expectedSf->AddMove(tempReg, 5U, REG_TYPE);
     } else {  // temp is stack slot
-        auto temp_slot = StackSlot(0U);
-        expected_sf->AddSpill(4U, temp_slot, REG_TYPE);
-        expected_sf->AddFill(11U, 4U, REG_TYPE);
-        expected_sf->AddMemCopy(10U, 11U, REG_TYPE);
-        expected_sf->AddSpill(5U, 10U, REG_TYPE);
-        expected_sf->AddFill(temp_slot, 5U, REG_TYPE);
+        auto tempSlot = StackSlot(0U);
+        expectedSf->AddSpill(4U, tempSlot, REG_TYPE);
+        expectedSf->AddFill(11U, 4U, REG_TYPE);
+        expectedSf->AddMemCopy(10U, 11U, REG_TYPE);
+        expectedSf->AddSpill(5U, 10U, REG_TYPE);
+        expectedSf->AddFill(tempSlot, 5U, REG_TYPE);
     }
 
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // not applied
     sf->ClearSpillFills();
     sf->AddMove(4U, 5U, REG_TYPE);
     sf->AddMove(6U, 7U, REG_TYPE);
-    expected_sf->ClearSpillFills();
-    expected_sf->AddMove(4U, 5U, REG_TYPE);
-    expected_sf->AddMove(6U, 7U, REG_TYPE);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMove(4U, 5U, REG_TYPE);
+    expectedSf->AddMove(6U, 7U, REG_TYPE);
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // comlex sf
     sf->ClearSpillFills();
@@ -441,25 +441,25 @@ void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst
     sf->AddMove(21U, 20U, REG_TYPE);
     sf->AddSpill(15U, 3U, REG_TYPE);
     sf->AddMove(10U, 11U, REG_TYPE);
-    expected_sf->ClearSpillFills();
-    expected_sf->AddMove(7U, 9U, REG_TYPE);
-    expected_sf->AddMove(6U, 7U, REG_TYPE);
-    expected_sf->AddMove(5U, 6U, REG_TYPE);
-    expected_sf->AddMove(4U, 5U, REG_TYPE);
-    expected_sf->AddMove(7U, 4U, REG_TYPE);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMove(7U, 9U, REG_TYPE);
+    expectedSf->AddMove(6U, 7U, REG_TYPE);
+    expectedSf->AddMove(5U, 6U, REG_TYPE);
+    expectedSf->AddMove(4U, 5U, REG_TYPE);
+    expectedSf->AddMove(7U, 4U, REG_TYPE);
 
-    expected_sf->AddMove(11U, 12U, REG_TYPE);
-    expected_sf->AddMove(10U, 11U, REG_TYPE);
+    expectedSf->AddMove(11U, 12U, REG_TYPE);
+    expectedSf->AddMove(10U, 11U, REG_TYPE);
 
-    expected_sf->AddFill(2U, 16U, REG_TYPE);
+    expectedSf->AddFill(2U, 16U, REG_TYPE);
 
-    expected_sf->AddMove(20U, 19U, REG_TYPE);
-    expected_sf->AddMove(21U, 20U, REG_TYPE);
+    expectedSf->AddMove(20U, 19U, REG_TYPE);
+    expectedSf->AddMove(21U, 20U, REG_TYPE);
 
-    expected_sf->AddSpill(15U, 3U, REG_TYPE);
-    expected_sf->AddFill(1U, 15U, REG_TYPE);
+    expectedSf->AddSpill(15U, 3U, REG_TYPE);
+    expectedSf->AddFill(1U, 15U, REG_TYPE);
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 }
 
 TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
@@ -477,28 +477,28 @@ TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
     auto resolver = SpillFillsResolver(GetGraph());
     // Use the last available register as a temp
     auto sf = GetGraph()->CreateInstSpillFill();
-    auto expected_sf = GetGraph()->CreateInstSpillFill();
-    TestPhiMovesOverwriting<DataType::UINT32>(GetGraph(), sf, expected_sf);
-    TestPhiMovesOverwriting<DataType::UINT64>(GetGraph(), sf, expected_sf);
-    TestPhiMovesOverwriting<DataType::FLOAT64>(GetGraph(), sf, expected_sf);
+    auto expectedSf = GetGraph()->CreateInstSpillFill();
+    TestPhiMovesOverwriting<DataType::UINT32>(GetGraph(), sf, expectedSf);
+    TestPhiMovesOverwriting<DataType::UINT64>(GetGraph(), sf, expectedSf);
+    TestPhiMovesOverwriting<DataType::FLOAT64>(GetGraph(), sf, expectedSf);
 
     // not applied
     sf->ClearSpillFills();
     sf->AddMove(4U, 5U, DataType::UINT64);
     sf->AddMove(5U, 4U, DataType::FLOAT64);
-    expected_sf->ClearSpillFills();
-    expected_sf->AddMove(4U, 5U, DataType::UINT64);
-    expected_sf->AddMove(5U, 4U, DataType::FLOAT64);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMove(4U, 5U, DataType::UINT64);
+    expectedSf->AddMove(5U, 4U, DataType::FLOAT64);
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // not applied
     sf->ClearSpillFills();
     sf->AddMemCopy(0U, 1U, DataType::UINT64);
-    expected_sf->ClearSpillFills();
-    expected_sf->AddMemCopy(0U, 1U, DataType::UINT64);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMemCopy(0U, 1U, DataType::UINT64);
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // mixed reg-types sf
     sf->ClearSpillFills();
@@ -516,49 +516,49 @@ TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
     sf->AddMove(21U, 20U, DataType::UINT64);
     sf->AddMove(22U, 21U, DataType::FLOAT64);
     sf->AddSpill(15U, 5U, DataType::FLOAT64);
-    expected_sf->ClearSpillFills();
-    expected_sf->AddMove(10U, 11U, DataType::UINT64);
-    expected_sf->AddMove(21U, 20U, DataType::UINT64);
-    expected_sf->AddFill(1U, 5U, DataType::FLOAT64);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMove(10U, 11U, DataType::UINT64);
+    expectedSf->AddMove(21U, 20U, DataType::UINT64);
+    expectedSf->AddFill(1U, 5U, DataType::FLOAT64);
 
-    expected_sf->AddMove(7U, 9U, DataType::FLOAT64);
-    expected_sf->AddMove(6U, 7U, DataType::FLOAT64);
+    expectedSf->AddMove(7U, 9U, DataType::FLOAT64);
+    expectedSf->AddMove(6U, 7U, DataType::FLOAT64);
 
-    expected_sf->AddMove(11U, 12U, DataType::FLOAT64);
-    expected_sf->AddMove(22U, 21U, DataType::FLOAT64);
-    expected_sf->AddSpill(2U, 3U, DataType::UINT64);
+    expectedSf->AddMove(11U, 12U, DataType::FLOAT64);
+    expectedSf->AddMove(22U, 21U, DataType::FLOAT64);
+    expectedSf->AddSpill(2U, 3U, DataType::UINT64);
 
-    expected_sf->AddSpill(7U, 4U, DataType::UINT64);
-    expected_sf->AddFill(2U, 7U, DataType::UINT32);
+    expectedSf->AddSpill(7U, 4U, DataType::UINT64);
+    expectedSf->AddFill(2U, 7U, DataType::UINT32);
 
-    expected_sf->AddSpill(15U, 5U, DataType::FLOAT64);
+    expectedSf->AddSpill(15U, 5U, DataType::FLOAT64);
 
     if (GetGraph()->GetArch() != Arch::AARCH32) {  // temp is register
-        Register temp_reg = GetGraph()->GetArchTempReg();
-        expected_sf->AddMove(4U, temp_reg, DataType::UINT64);
-        expected_sf->AddMove(6U, 4U, DataType::UINT64);
-        expected_sf->AddMove(5U, 6U, DataType::UINT64);
-        expected_sf->AddMove(temp_reg, 5U, DataType::UINT64);
+        Register tempReg = GetGraph()->GetArchTempReg();
+        expectedSf->AddMove(4U, tempReg, DataType::UINT64);
+        expectedSf->AddMove(6U, 4U, DataType::UINT64);
+        expectedSf->AddMove(5U, 6U, DataType::UINT64);
+        expectedSf->AddMove(tempReg, 5U, DataType::UINT64);
     } else {  // temp is stack slot
-        auto temp_slot = StackSlot(0U);
-        expected_sf->AddSpill(4U, temp_slot, DataType::UINT64);
-        expected_sf->AddMove(6U, 4U, DataType::UINT64);
-        expected_sf->AddMove(5U, 6U, DataType::UINT64);
-        expected_sf->AddFill(temp_slot, 5U, DataType::UINT64);
+        auto tempSlot = StackSlot(0U);
+        expectedSf->AddSpill(4U, tempSlot, DataType::UINT64);
+        expectedSf->AddMove(6U, 4U, DataType::UINT64);
+        expectedSf->AddMove(5U, 6U, DataType::UINT64);
+        expectedSf->AddFill(tempSlot, 5U, DataType::UINT64);
     }
 
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // zero-reg reordering
     sf->ClearSpillFills();
     sf->AddMove(31U, 5U, DataType::UINT64);
     sf->AddMove(5U, 6U, DataType::UINT64);
-    expected_sf->ClearSpillFills();
-    expected_sf->AddMove(5U, 6U, DataType::UINT64);
-    expected_sf->AddMove(31U, 5U, DataType::UINT64);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMove(5U, 6U, DataType::UINT64);
+    expectedSf->AddMove(31U, 5U, DataType::UINT64);
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // find and resolve cycle in moves sequence starts with not-cycle move
     sf->ClearSpillFills();
@@ -566,25 +566,25 @@ TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
     sf->AddMove(10U, 18U, DataType::UINT64);
     sf->AddMove(18U, 10U, DataType::UINT64);
     sf->AddSpill(7U, 32U, DataType::UINT64);
-    expected_sf->ClearSpillFills();
-    expected_sf->AddSpill(7U, 32U, DataType::UINT64);
-    expected_sf->AddMove(18U, 7U, DataType::UINT64);
-    expected_sf->AddMove(10U, 18U, DataType::UINT64);
-    expected_sf->AddMove(7U, 10U, DataType::UINT64);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddSpill(7U, 32U, DataType::UINT64);
+    expectedSf->AddMove(18U, 7U, DataType::UINT64);
+    expectedSf->AddMove(10U, 18U, DataType::UINT64);
+    expectedSf->AddMove(7U, 10U, DataType::UINT64);
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // fix `moves_table_[dst].src != first_src'
     sf->ClearSpillFills();
     sf->AddMove(8U, 6U, DataType::UINT64);
     sf->AddMove(7U, 8U, DataType::UINT64);
     sf->AddMove(8U, 7U, DataType::UINT64);
-    expected_sf->ClearSpillFills();
-    expected_sf->AddMove(8U, 6U, DataType::UINT64);
-    expected_sf->AddMove(7U, 8U, DataType::UINT64);
-    expected_sf->AddMove(6U, 7U, DataType::UINT64);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMove(8U, 6U, DataType::UINT64);
+    expectedSf->AddMove(7U, 8U, DataType::UINT64);
+    expectedSf->AddMove(6U, 7U, DataType::UINT64);
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 
     // find and resolve cycle in moves sequence starts with not-cycle move
     sf->ClearSpillFills();
@@ -592,13 +592,13 @@ TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
     sf->AddMove(10U, 18U, DataType::UINT64);
     sf->AddMove(18U, 10U, DataType::UINT64);
     sf->AddMove(7U, 6U, DataType::UINT64);
-    expected_sf->ClearSpillFills();
-    expected_sf->AddMove(7U, 6U, DataType::UINT64);
-    expected_sf->AddMove(18U, 7U, DataType::UINT64);
-    expected_sf->AddMove(10U, 18U, DataType::UINT64);
-    expected_sf->AddMove(7U, 10U, DataType::UINT64);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMove(7U, 6U, DataType::UINT64);
+    expectedSf->AddMove(18U, 7U, DataType::UINT64);
+    expectedSf->AddMove(10U, 18U, DataType::UINT64);
+    expectedSf->AddMove(7U, 10U, DataType::UINT64);
     resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expected_sf);
+    CompareSpillFillInsts(sf, expectedSf);
 }
 
 TEST_F(RegAllocLinearScanTest, DynPhiMovesOverwriting)
@@ -621,8 +621,8 @@ TEST_F(RegAllocLinearScanTest, DynPhiMovesOverwriting)
     auto resolver = SpillFillsResolver(graph);
     // Use the last available register as a temp
     auto sf = graph->CreateInstSpillFill();
-    auto expected_sf = graph->CreateInstSpillFill();
-    TestPhiMovesOverwriting<DataType::ANY>(graph, sf, expected_sf);
+    auto expectedSf = graph->CreateInstSpillFill();
+    TestPhiMovesOverwriting<DataType::ANY>(graph, sf, expectedSf);
 }
 
 TEST_F(RegAllocLinearScanTest, BrokenTriangleWithEmptyBlock)
@@ -708,9 +708,9 @@ TEST_F(RegAllocLinearScanTest, LoadArrayPair)
     ASSERT_TRUE(result);
 
     auto &div = INS(11U);
-    auto &load_pair = INS(6U);
+    auto &loadPair = INS(6U);
     for (size_t i = 0; i < div.GetInputsCount(); ++i) {
-        if (div.GetSrcReg(0U) != load_pair.GetDstReg(0U)) {
+        if (div.GetSrcReg(0U) != loadPair.GetDstReg(0U)) {
             auto prev = div.GetPrev();
             ASSERT_EQ(prev->GetOpcode(), Opcode::SpillFill);
             ASSERT_EQ(prev->CastToSpillFill()->GetSpillFill(0U).DstValue(), div.GetSrcReg(0U));
@@ -776,14 +776,14 @@ TEST_F(RegAllocLinearScanTest, NullCheckAsPhiInput)
     }
 
     EXPECT_TRUE(graph->RunPass<RegAllocLinearScan>());
-    auto phi_location = Location::MakeRegister(INS(11U).GetDstReg());
-    auto param_location = INS(0U).CastToParameter()->GetLocationData().GetDst();
-    if (phi_location != param_location) {
-        auto sf_inst = BB(3U).GetLastInst();
-        ASSERT_TRUE(sf_inst->IsSpillFill());
-        auto spill_fill = sf_inst->CastToSpillFill()->GetSpillFill(0U);
-        EXPECT_EQ(spill_fill.GetSrc(), param_location);
-        EXPECT_EQ(spill_fill.GetDst(), phi_location);
+    auto phiLocation = Location::MakeRegister(INS(11U).GetDstReg());
+    auto paramLocation = INS(0U).CastToParameter()->GetLocationData().GetDst();
+    if (phiLocation != paramLocation) {
+        auto sfInst = BB(3U).GetLastInst();
+        ASSERT_TRUE(sfInst->IsSpillFill());
+        auto spillFill = sfInst->CastToSpillFill()->GetSpillFill(0U);
+        EXPECT_EQ(spillFill.GetSrc(), paramLocation);
+        EXPECT_EQ(spillFill.GetDst(), phiLocation);
     }
 }
 
@@ -809,15 +809,15 @@ TEST_F(RegAllocLinearScanTest, MultiDestInstruction)
     // Run regalloc without free regs to push all dst on the stack
     auto regalloc = RegAllocLinearScan(graph);
     RegAllocResolver(graph).ResolveCatchPhis();
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0x000FFFFFU : 0xAAAAAAFFU;
-    regalloc.SetRegMask(RegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0x000FFFFFU : 0xAAAAAAFFU;
+    regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     regalloc.Run();
 
-    auto load_pair = &INS(3U);
-    ASSERT_NE(load_pair->GetDstReg(0U), load_pair->GetDstReg(1U));
-    ASSERT_EQ(INS(6U).GetSrcReg(1U), load_pair->GetDstReg(0U));
-    ASSERT_EQ(INS(7U).GetSrcReg(1U), load_pair->GetDstReg(1U));
+    auto loadPair = &INS(3U);
+    ASSERT_NE(loadPair->GetDstReg(0U), loadPair->GetDstReg(1U));
+    ASSERT_EQ(INS(6U).GetSrcReg(1U), loadPair->GetDstReg(0U));
+    ASSERT_EQ(INS(7U).GetSrcReg(1U), loadPair->GetDstReg(1U));
 }
 
 /// Create COUNT constants and assign COUNT registers for them
@@ -828,16 +828,16 @@ TEST_F(RegAllocLinearScanTest, DynamicRegsMask)
     graph->CreateEndBlock();
 
     const size_t count = 100;
-    auto save_point = graph->CreateInstSafePoint();
+    auto savePoint = graph->CreateInstSafePoint();
     auto block = CreateEmptyBlock(graph);
-    block->AppendInst(save_point);
+    block->AppendInst(savePoint);
     block->AppendInst(graph->CreateInstReturnVoid());
     graph->GetStartBlock()->AddSucc(block);
     block->AddSucc(graph->GetEndBlock());
 
     for (size_t i = 0; i < count; i++) {
-        save_point->AppendInput(graph->FindOrCreateConstant(i));
-        save_point->SetVirtualRegister(i, VirtualRegister(i, VRegInfo::VRegType::VREG));
+        savePoint->AppendInput(graph->FindOrCreateConstant(i));
+        savePoint->SetVirtualRegister(i, VirtualRegister(i, VRegInfo::VRegType::VREG));
     }
     auto result = graph->RunPass<RegAllocLinearScan>(EmptyRegMask());
     ASSERT_TRUE(result);
@@ -868,8 +868,8 @@ TEST_F(RegAllocLinearScanTest, MultiDestAsCallInput)
         }
     }
     auto regalloc = RegAllocLinearScan(graph);
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0x000FFFFFU : 0xAAAAAAAFU;
-    regalloc.SetRegMask(RegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0x000FFFFFU : 0xAAAAAAAFU;
+    regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     auto result = regalloc.Run();
     if (graph->GetCallingConvention() == nullptr) {
@@ -878,23 +878,23 @@ TEST_F(RegAllocLinearScanTest, MultiDestAsCallInput)
     }
     ASSERT_TRUE(result);
 
-    auto load_arr = &INS(3U);
+    auto loadArr = &INS(3U);
     auto div = &INS(9U);
-    auto call_inst = INS(7U).CastToCallStatic();
-    auto spill_fill = call_inst->GetPrev()->CastToSpillFill();
+    auto callInst = INS(7U).CastToCallStatic();
+    auto spillFill = callInst->GetPrev()->CastToSpillFill();
     // Check split before call
     for (auto i = 0U; i < 2U; i++) {
-        ASSERT_EQ(spill_fill->GetSpillFill(i).SrcValue(), load_arr->GetDstReg(i));
-        if (load_arr->GetDstReg(i) == call_inst->GetSrcReg(i)) {
+        ASSERT_EQ(spillFill->GetSpillFill(i).SrcValue(), loadArr->GetDstReg(i));
+        if (loadArr->GetDstReg(i) == callInst->GetSrcReg(i)) {
             // LoadArrayPairI -> R1, R2 (caller-saved assigned)
             // R1 -> Rx, R2 -> Ry
             // call(R1, R2)
-            ASSERT_EQ(div->GetSrcReg(i), spill_fill->GetSpillFill(i).DstValue());
+            ASSERT_EQ(div->GetSrcReg(i), spillFill->GetSpillFill(i).DstValue());
         } else {
             // LoadArrayPairI -> RX, RY (callee-saved assigned)
             // RX -> R1, RY -> R2
             // call(R1, R2)
-            ASSERT_EQ(div->GetSrcReg(i), spill_fill->GetSpillFill(i).SrcValue());
+            ASSERT_EQ(div->GetSrcReg(i), spillFill->GetSpillFill(i).SrcValue());
         }
     }
 }
@@ -939,15 +939,15 @@ TEST_F(RegAllocLinearScanTest, MultiDestInLoop)
     regalloc.SetRegMask(RegMask {0xFFFFAAAAU});
     ASSERT_TRUE(regalloc.Run());
 
-    auto load_pair = &INS(11U);
-    EXPECT_NE(load_pair->GetDstReg(0U), INVALID_REG);
-    EXPECT_NE(load_pair->GetDstReg(1U), INVALID_REG);
+    auto loadPair = &INS(11U);
+    EXPECT_NE(loadPair->GetDstReg(0U), INVALID_REG);
+    EXPECT_NE(loadPair->GetDstReg(1U), INVALID_REG);
     // LoadArrayPair, SubI and AddI should use unique registers
     std::set<Register> regs;
     regs.insert(INS(10U).GetDstReg());
     regs.insert(INS(15U).GetDstReg());
-    regs.insert(load_pair->GetDstReg(0U));
-    regs.insert(load_pair->GetDstReg(1U));
+    regs.insert(loadPair->GetDstReg(0U));
+    regs.insert(loadPair->GetDstReg(1U));
     EXPECT_EQ(regs.size(), 4U);
 }
 
@@ -976,13 +976,13 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
     auto call0 = (&INS(3U))->CastToCallStatic();
     auto call1 = (&INS(5U))->CastToCallStatic();
     // split at save state to force usage of stack location as call's input
-    auto param_split0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(2U))->GetBegin() - 1U, GetAllocator());
-    param_split0->SetLocation(Location::MakeStackSlot(42U));
-    param_split0->SetType(DataType::UINT64);
+    auto paramSplit0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(2U))->GetBegin() - 1U, GetAllocator());
+    paramSplit0->SetLocation(Location::MakeStackSlot(42U));
+    paramSplit0->SetType(DataType::UINT64);
 
-    auto param_split1 = param_split0->SplitAt(la.GetInstLifeIntervals(call1)->GetBegin() - 1U, GetAllocator());
-    param_split1->SetReg(6U);
-    param_split1->SetType(DataType::UINT64);
+    auto paramSplit1 = paramSplit0->SplitAt(la.GetInstLifeIntervals(call1)->GetBegin() - 1U, GetAllocator());
+    paramSplit1->SetReg(6U);
+    paramSplit1->SetType(DataType::UINT64);
 
     graph->SetStackSlotsCount(MAX_NUM_STACK_SLOTS);
     auto regalloc = RegAllocLinearScan(graph);
@@ -994,14 +994,14 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
         return;
     }
     ASSERT_TRUE(result);
-    auto call0_sf = call0->GetPrev()->CastToSpillFill()->GetSpillFill(0U);
-    EXPECT_EQ(call0_sf.SrcType(), LocationType::STACK);
-    EXPECT_EQ(call0_sf.SrcValue(), 42U);
+    auto call0Sf = call0->GetPrev()->CastToSpillFill()->GetSpillFill(0U);
+    EXPECT_EQ(call0Sf.SrcType(), LocationType::STACK);
+    EXPECT_EQ(call0Sf.SrcValue(), 42U);
 
-    const auto &call1_sfs = call1->GetPrev()->CastToSpillFill()->GetSpillFills();
-    auto it = std::find_if(call1_sfs.begin(), call1_sfs.end(),
+    const auto &call1Sfs = call1->GetPrev()->CastToSpillFill()->GetSpillFills();
+    auto it = std::find_if(call1Sfs.begin(), call1Sfs.end(),
                            [](auto sf) { return sf.SrcType() == LocationType::REGISTER && sf.SrcValue() == 6; });
-    EXPECT_NE(it, call1_sfs.end());
+    EXPECT_NE(it, call1Sfs.end());
 }
 
 TEST_F(RegAllocLinearScanTest, ResolveSegmentedSaveStateInputs)
@@ -1026,15 +1026,15 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSaveStateInputs)
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
     auto param0 = la.GetInstLifeIntervals(&INS(0U));
     auto call = &INS(4U);
-    auto param_split = param0->SplitAt(la.GetInstLifeIntervals(call)->GetBegin() - 1U, GetAllocator());
+    auto paramSplit = param0->SplitAt(la.GetInstLifeIntervals(call)->GetBegin() - 1U, GetAllocator());
     static constexpr auto REG_FOR_SPLIT = Register(20U);
-    param_split->SetReg(REG_FOR_SPLIT);
-    param_split->SetType(DataType::UINT64);
+    paramSplit->SetReg(REG_FOR_SPLIT);
+    paramSplit->SetType(DataType::UINT64);
 
     auto regalloc = RegAllocLinearScan(graph);
     // on AARCH32 use only caller-saved register pairs
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFFAU;
-    regalloc.SetRegMask(RegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFFAU;
+    regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     auto result = regalloc.Run();
     if (graph->GetCallingConvention() == nullptr) {
@@ -1043,11 +1043,11 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSaveStateInputs)
     }
     ASSERT_TRUE(result);
 
-    auto null_check = &INS(3U);
-    auto call_save_state = call->GetInput(call->GetInputsCount() - 1L).GetInst()->CastToSaveState();
-    auto null_check_save_state = null_check->GetInput(null_check->GetInputsCount() - 1L).GetInst()->CastToSaveState();
+    auto nullCheck = &INS(3U);
+    auto callSaveState = call->GetInput(call->GetInputsCount() - 1L).GetInst()->CastToSaveState();
+    auto nullCheckSaveState = nullCheck->GetInput(nullCheck->GetInputsCount() - 1L).GetInst()->CastToSaveState();
 
-    ASSERT_NE(call_save_state, null_check_save_state);
+    ASSERT_NE(callSaveState, nullCheckSaveState);
 }
 
 TEST_F(RegAllocLinearScanTest, ResolveSegmentedInstInputs)
@@ -1068,14 +1068,14 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedInstInputs)
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
     auto param0 = la.GetInstLifeIntervals(&INS(0U));
-    auto param_split0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(3U))->GetBegin() - 1U, GetAllocator());
+    auto paramSplit0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(3U))->GetBegin() - 1U, GetAllocator());
     static constexpr auto REG_FOR_SPLIT = Register(20U);
-    param_split0->SetReg(REG_FOR_SPLIT);
-    param_split0->SetType(DataType::UINT64);
+    paramSplit0->SetReg(REG_FOR_SPLIT);
+    paramSplit0->SetType(DataType::UINT64);
 
     auto regalloc = RegAllocLinearScan(graph);
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
-    regalloc.SetRegMask(RegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
+    regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     auto result = regalloc.Run();
     if (graph->GetCallingConvention() == nullptr) {
@@ -1083,13 +1083,13 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedInstInputs)
         return;
     }
     ASSERT_TRUE(result);
-    auto add_sf = INS(3U).GetPrev();
-    ASSERT_TRUE(add_sf->IsSpillFill());
+    auto addSf = INS(3U).GetPrev();
+    ASSERT_TRUE(addSf->IsSpillFill());
 
     EXPECT_EQ(INS(3U).GetSrcReg(0U), REG_FOR_SPLIT);
-    SpillFillData expected_sf {LocationType::REGISTER, LocationType::REGISTER, param0->GetReg(), REG_FOR_SPLIT,
-                               DataType::UINT64};
-    EXPECT_EQ(add_sf->CastToSpillFill()->GetSpillFill(0U), expected_sf);
+    SpillFillData expectedSf {LocationType::REGISTER, LocationType::REGISTER, param0->GetReg(), REG_FOR_SPLIT,
+                              DataType::UINT64};
+    EXPECT_EQ(addSf->CastToSpillFill()->GetSpillFill(0U), expectedSf);
 }
 
 TEST_F(RegAllocLinearScanTest, ResolveSegmentedSafePointInput)
@@ -1110,18 +1110,18 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSafePointInput)
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
     auto param0 = la.GetInstLifeIntervals(&INS(0U));
     auto sp = &INS(2U);
-    auto param_split = param0->SplitAt(la.GetInstLifeIntervals(sp)->GetBegin() - 1U, GetAllocator());
+    auto paramSplit = param0->SplitAt(la.GetInstLifeIntervals(sp)->GetBegin() - 1U, GetAllocator());
     static constexpr auto STACK_SLOT = StackSlot(1U);
-    param_split->SetLocation(Location::MakeStackSlot(STACK_SLOT));
-    param_split->SetType(DataType::UINT64);
-    auto ret_split = param_split->SplitAt(la.GetInstLifeIntervals(&INS(3U))->GetBegin() - 1U, GetAllocator());
-    ret_split->SetReg(0U);
-    ret_split->SetType(DataType::UINT64);
+    paramSplit->SetLocation(Location::MakeStackSlot(STACK_SLOT));
+    paramSplit->SetType(DataType::UINT64);
+    auto retSplit = paramSplit->SplitAt(la.GetInstLifeIntervals(&INS(3U))->GetBegin() - 1U, GetAllocator());
+    retSplit->SetReg(0U);
+    retSplit->SetType(DataType::UINT64);
 
     graph->SetStackSlotsCount(MAX_NUM_STACK_SLOTS);
     auto regalloc = RegAllocLinearScan(graph);
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
-    regalloc.SetRegMask(RegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
+    regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     regalloc.SetSlotsCount(MAX_NUM_STACK_SLOTS);
     auto result = regalloc.Run();
@@ -1168,14 +1168,14 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedPhiInput)
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
     auto param0 = la.GetInstLifeIntervals(&INS(0U));
-    auto param_split0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(4U))->GetBegin() - 1U, GetAllocator());
+    auto paramSplit0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(4U))->GetBegin() - 1U, GetAllocator());
     static constexpr auto REG_FOR_SPLIT = Register(20U);
-    param_split0->SetReg(REG_FOR_SPLIT);
-    param_split0->SetType(DataType::UINT64);
+    paramSplit0->SetReg(REG_FOR_SPLIT);
+    paramSplit0->SetType(DataType::UINT64);
 
     auto regalloc = RegAllocLinearScan(graph);
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
-    regalloc.SetRegMask(RegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
+    regalloc.SetRegMask(RegMask {regMask});
     regalloc.SetVRegMask(VRegMask {});
     auto result = regalloc.Run();
     if (graph->GetCallingConvention() == nullptr) {
@@ -1184,16 +1184,16 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedPhiInput)
     }
     ASSERT_TRUE(result);
 
-    auto last_inst = INS(4U).GetBasicBlock()->GetLastInst();
-    ASSERT_TRUE(last_inst->IsSpillFill());
-    bool spill_fill_found = false;
-    SpillFillData expected_sf {LocationType::REGISTER, LocationType::REGISTER, REG_FOR_SPLIT, INS(6U).GetDstReg(),
-                               DataType::UINT64};
+    auto lastInst = INS(4U).GetBasicBlock()->GetLastInst();
+    ASSERT_TRUE(lastInst->IsSpillFill());
+    bool spillFillFound = false;
+    SpillFillData expectedSf {LocationType::REGISTER, LocationType::REGISTER, REG_FOR_SPLIT, INS(6U).GetDstReg(),
+                              DataType::UINT64};
 
-    for (auto &sf : last_inst->CastToSpillFill()->GetSpillFills()) {
-        spill_fill_found |= expected_sf == sf;
+    for (auto &sf : lastInst->CastToSpillFill()->GetSpillFills()) {
+        spillFillFound |= expectedSf == sf;
     }
-    ASSERT_TRUE(spill_fill_found);
+    ASSERT_TRUE(spillFillFound);
 }
 
 /**
@@ -1241,9 +1241,9 @@ TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
     BB(3U).SetTryId(0U);
     BB(4U).SetTryId(0U);
 
-    auto catch_phi = (&INS(7U))->CastToCatchPhi();
-    catch_phi->AppendThrowableInst(&INS(4U));
-    catch_phi->AppendThrowableInst(&INS(9U));
+    auto catchPhi = (&INS(7U))->CastToCatchPhi();
+    catchPhi->AppendThrowableInst(&INS(4U));
+    catchPhi->AppendThrowableInst(&INS(9U));
 
     graph->AppendThrowableInst(&INS(4U), &BB(5U));
     graph->AppendThrowableInst(&INS(9U), &BB(5U));
@@ -1254,27 +1254,27 @@ TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
 
     auto con = la.GetInstLifeIntervals(&INS(2U));
     auto streq = &INS(4U);
-    auto con_split = con->SplitAt(la.GetInstLifeIntervals(streq)->GetBegin() - 1L, GetAllocator());
+    auto conSplit = con->SplitAt(la.GetInstLifeIntervals(streq)->GetBegin() - 1L, GetAllocator());
 
     auto constexpr SPLIT_REG = 10;
-    con_split->SetReg(SPLIT_REG);
-    con_split->SetType(DataType::UINT32);
+    conSplit->SetReg(SPLIT_REG);
+    conSplit->SetType(DataType::UINT32);
 
     auto regalloc = RegAllocLinearScan(graph, EmptyRegMask());
     auto result = regalloc.Run();
     ASSERT_TRUE(result);
 
-    auto catch_phi_reg = la.GetInstLifeIntervals(&INS(7U))->GetReg();
-    auto sf_before_ins4 = (&INS(4U))->GetPrev()->CastToSpillFill();
-    EXPECT_EQ(std::count(sf_before_ins4->GetSpillFills().begin(), sf_before_ins4->GetSpillFills().end(),
-                         SpillFillData {LocationType::REGISTER, LocationType::REGISTER, SPLIT_REG, catch_phi_reg,
+    auto catchPhiReg = la.GetInstLifeIntervals(&INS(7U))->GetReg();
+    auto sfBeforeIns4 = (&INS(4U))->GetPrev()->CastToSpillFill();
+    EXPECT_EQ(std::count(sfBeforeIns4->GetSpillFills().begin(), sfBeforeIns4->GetSpillFills().end(),
+                         SpillFillData {LocationType::REGISTER, LocationType::REGISTER, SPLIT_REG, catchPhiReg,
                                         DataType::UINT32}),
               1U);
 
-    auto ins4_reg = la.GetInstLifeIntervals(&INS(4U))->GetReg();
-    auto sf_before_ins9 = (&INS(9U))->GetPrev()->CastToSpillFill();
-    EXPECT_EQ(std::count(sf_before_ins9->GetSpillFills().begin(), sf_before_ins9->GetSpillFills().end(),
-                         SpillFillData {LocationType::REGISTER, LocationType::REGISTER, ins4_reg, catch_phi_reg,
+    auto ins4Reg = la.GetInstLifeIntervals(&INS(4U))->GetReg();
+    auto sfBeforeIns9 = (&INS(9U))->GetPrev()->CastToSpillFill();
+    EXPECT_EQ(std::count(sfBeforeIns9->GetSpillFills().begin(), sfBeforeIns9->GetSpillFills().end(),
+                         SpillFillData {LocationType::REGISTER, LocationType::REGISTER, ins4Reg, catchPhiReg,
                                         DataType::UINT32}),
               1U);
 }
@@ -1310,9 +1310,9 @@ TEST_F(RegAllocLinearScanTest, RematConstants)
     }
 
     auto regalloc = RegAllocLinearScan(graph);
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFE1U : 0xFABFFFFFU;
-    regalloc.SetRegMask(RegMask {reg_mask});
-    regalloc.SetVRegMask(VRegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFE1U : 0xFABFFFFFU;
+    regalloc.SetRegMask(RegMask {regMask});
+    regalloc.SetVRegMask(VRegMask {regMask});
     auto result = regalloc.Run();
     if (graph->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
@@ -1326,14 +1326,14 @@ TEST_F(RegAllocLinearScanTest, RematConstants)
     EXPECT_TRUE(CheckImmediateSpillFill(&INS(16U), 1U));
 
     // Check call instruction's spill-fills
-    auto call_inst = INS(11U).CastToCallStatic();
-    auto spill_fill = call_inst->GetPrev()->CastToSpillFill();
-    for (auto sf : spill_fill->GetSpillFills()) {
+    auto callInst = INS(11U).CastToCallStatic();
+    auto spillFill = callInst->GetPrev()->CastToSpillFill();
+    for (auto sf : spillFill->GetSpillFills()) {
         if (sf.SrcType() == LocationType::IMMEDIATE) {
-            auto input_const = graph->GetSpilledConstant(sf.SrcValue());
-            auto it = std::find_if(call_inst->GetInputs().begin(), call_inst->GetInputs().end(),
-                                   [input_const](Input input) { return input.GetInst() == input_const; });
-            EXPECT_NE(it, call_inst->GetInputs().end());
+            auto inputConst = graph->GetSpilledConstant(sf.SrcValue());
+            auto it = std::find_if(callInst->GetInputs().begin(), callInst->GetInputs().end(),
+                                   [inputConst](Input input) { return input.GetInst() == inputConst; });
+            EXPECT_NE(it, callInst->GetInputs().end());
         } else {
             EXPECT_TRUE(sf.GetSrc().IsAnyRegister());
         }
@@ -1361,16 +1361,16 @@ TEST_F(RegAllocLinearScanTest, LoadPairPartDiffRegisters)
         }
     }
     auto regalloc = RegAllocLinearScan(GetGraph());
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xF3FFFFFFU : 0xFAFFFFFFU;
-    regalloc.SetRegMask(RegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xF3FFFFFFU : 0xFAFFFFFFU;
+    regalloc.SetRegMask(RegMask {regMask});
     auto result = regalloc.Run();
     if (GetGraph()->GetCallingConvention() == nullptr) {
         ASSERT_FALSE(result);
         return;
     }
     ASSERT_TRUE(result);
-    auto load_pair_i = &INS(3U);
-    EXPECT_NE(load_pair_i->GetDstReg(0U), load_pair_i->GetDstReg(1U));
+    auto loadPairI = &INS(3U);
+    EXPECT_NE(loadPairI->GetDstReg(0U), loadPairI->GetDstReg(1U));
 }
 
 TEST_F(RegAllocLinearScanTest, SpillRegistersAroundCall)
@@ -1392,32 +1392,32 @@ TEST_F(RegAllocLinearScanTest, SpillRegistersAroundCall)
     ASSERT_TRUE(regalloc.Run());
 
     // parameter 0 should be splitted before call and split should be used by add
-    auto spill_fill = (&INS(3U))->GetPrev();
-    EXPECT_TRUE(spill_fill->IsSpillFill());
-    auto sf = spill_fill->CastToSpillFill()->GetSpillFill(0U);
-    auto param_dst = (&INS(0U))->GetDstReg();
-    auto call_src = (&INS(3U))->GetSrcReg(0U);
-    auto add_src = (&INS(4U))->GetSrcReg(0U);
-    ASSERT_EQ(sf.SrcValue(), param_dst);
-    if (call_src == param_dst) {
+    auto spillFill = (&INS(3U))->GetPrev();
+    EXPECT_TRUE(spillFill->IsSpillFill());
+    auto sf = spillFill->CastToSpillFill()->GetSpillFill(0U);
+    auto paramDst = (&INS(0U))->GetDstReg();
+    auto callSrc = (&INS(3U))->GetSrcReg(0U);
+    auto addSrc = (&INS(4U))->GetSrcReg(0U);
+    ASSERT_EQ(sf.SrcValue(), paramDst);
+    if (callSrc == paramDst) {
         // param -> R1 (caller-saved assigned)
         // R1 -> Rx
         // call(R1, ..)
-        ASSERT_EQ(add_src, sf.DstValue());
+        ASSERT_EQ(addSrc, sf.DstValue());
     } else {
         // param -> Rx (callee-saved assigned)
         // Rx -> R1
         // call(R1, ..)
-        ASSERT_EQ(add_src, sf.SrcValue());
+        ASSERT_EQ(addSrc, sf.SrcValue());
     }
     // all caller-saved regs should be spilled at call
     auto &lr = GetGraph()->GetAnalysis<LiveRegisters>();
     auto graph = GetGraph();
     lr.VisitIntervalsWithLiveRegisters(&INS(3), [graph](const auto &li) {
         auto rd = graph->GetRegisters();
-        auto caller_mask =
+        auto callerMask =
             DataType::IsFloatType(li->GetType()) ? rd->GetCallerSavedVRegMask() : rd->GetCallerSavedRegMask();
-        ASSERT_FALSE(caller_mask.Test(li->GetReg()));
+        ASSERT_FALSE(callerMask.Test(li->GetReg()));
     });
 }
 
@@ -1440,20 +1440,20 @@ TEST_F(RegAllocLinearScanTest, SplitCallIntervalAroundNextCall)
     }
 
     auto regalloc = RegAllocLinearScan(GetGraph());
-    uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
-    regalloc.SetRegMask(RegMask {reg_mask});
-    regalloc.SetVRegMask(RegMask {reg_mask});
+    uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFF0U : 0xFFFFFFAAU;
+    regalloc.SetRegMask(RegMask {regMask});
+    regalloc.SetVRegMask(RegMask {regMask});
     ASSERT_TRUE(regalloc.Run());
 
     // Spill after last use before next call
     auto spill = INS(4U).GetNext()->CastToSpillFill()->GetSpillFill(0U);
     // Fill before firt use after call
     auto fill = INS(7U).GetPrev()->CastToSpillFill()->GetSpillFill(0U);
-    auto call_reg = Location::MakeFpRegister(INS(3U).GetDstReg());
+    auto callReg = Location::MakeFpRegister(INS(3U).GetDstReg());
 
-    EXPECT_EQ(spill.GetSrc(), call_reg);
+    EXPECT_EQ(spill.GetSrc(), callReg);
     EXPECT_EQ(spill.GetDst(), fill.GetSrc());
-    EXPECT_EQ(call_reg, fill.GetDst());
+    EXPECT_EQ(callReg, fill.GetDst());
 }
 
 static bool CheckInstsDstRegs(Inst *inst0, const Inst *inst1, Register reg)
@@ -1482,11 +1482,11 @@ static bool CheckInstsDstRegs(Inst *inst0, const Inst *inst1, Register reg)
 TEST_F(RegAllocLinearScanTest, PreassignedRegisters)
 {
     // Check with different masks:
-    RegMask full_mask {0x0U};           // All registers are available for RA
-    RegMask short_mask {0xFFFFFFAAU};   // only {R0, R2, R4, R6} are available for RA
-    RegMask short_mask_invert {0x55U};  // {R0, R2, R4, R6} are NOT available for RA
+    RegMask fullMask {0x0U};          // All registers are available for RA
+    RegMask shortMask {0xFFFFFFAAU};  // only {R0, R2, R4, R6} are available for RA
+    RegMask shortMaskInvert {0x55U};  // {R0, R2, R4, R6} are NOT available for RA
 
-    for (auto &mask : {full_mask, short_mask, short_mask_invert}) {
+    for (auto &mask : {fullMask, shortMask, shortMaskInvert}) {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
@@ -1531,16 +1531,16 @@ TEST_F(RegAllocLinearScanTest, Select3Regs)
     }
 
     auto regalloc = RegAllocLinearScan(GetGraph());
-    auto reg_mask = GetGraph()->GetArch() == Arch::AARCH32 ? 0xFFFFFFABU : 0xFFFFFFF1U;
-    regalloc.SetRegMask(RegMask {reg_mask});
+    auto regMask = GetGraph()->GetArch() == Arch::AARCH32 ? 0xFFFFFFABU : 0xFFFFFFF1U;
+    regalloc.SetRegMask(RegMask {regMask});
     auto result = regalloc.Run();
     ASSERT_FALSE(result);
 }
 
 TEST_F(RegAllocLinearScanTest, TwoInstsWithZeroReg)
 {
-    auto zero_reg = GetGraph()->GetZeroReg();
-    if (zero_reg == INVALID_REG) {
+    auto zeroReg = GetGraph()->GetZeroReg();
+    if (zeroReg == INVALID_REG) {
         return;
     }
 
@@ -1562,23 +1562,23 @@ TEST_F(RegAllocLinearScanTest, TwoInstsWithZeroReg)
     regalloc.Run();
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     auto const0 = la.GetInstLifeIntervals(&INS(0U));
-    auto nullptr_inst = la.GetInstLifeIntervals(&INS(1U));
+    auto nullptrInst = la.GetInstLifeIntervals(&INS(1U));
     // Constant and Nullptr should not be split
     EXPECT_EQ(const0->GetSibling(), nullptr);
-    EXPECT_EQ(nullptr_inst->GetSibling(), nullptr);
+    EXPECT_EQ(nullptrInst->GetSibling(), nullptr);
     // Intervals' regs and dst's regs should be 'zero_reg'
-    EXPECT_EQ(const0->GetReg(), zero_reg);
-    EXPECT_EQ(nullptr_inst->GetReg(), zero_reg);
-    EXPECT_EQ(INS(0U).GetDstReg(), zero_reg);
-    EXPECT_EQ(INS(1U).GetDstReg(), zero_reg);
+    EXPECT_EQ(const0->GetReg(), zeroReg);
+    EXPECT_EQ(nullptrInst->GetReg(), zeroReg);
+    EXPECT_EQ(INS(0U).GetDstReg(), zeroReg);
+    EXPECT_EQ(INS(1U).GetDstReg(), zeroReg);
     // Src's reg should be 'zero_reg'
-    EXPECT_EQ(INS(4U).GetSrcReg(0U), zero_reg);
+    EXPECT_EQ(INS(4U).GetSrcReg(0U), zeroReg);
     if (INS(5U).GetPrev()->IsSpillFill()) {
         auto sf = INS(5U).GetPrev()->CastToSpillFill();
-        EXPECT_EQ(sf->GetSpillFill(0U).SrcValue(), zero_reg);
+        EXPECT_EQ(sf->GetSpillFill(0U).SrcValue(), zeroReg);
         EXPECT_EQ(sf->GetSpillFill(0U).DstValue(), INS(5U).GetSrcReg(0U));
     } else {
-        EXPECT_EQ(INS(5U).GetSrcReg(0U), zero_reg);
+        EXPECT_EQ(INS(5U).GetSrcReg(0U), zeroReg);
     }
 }
 
@@ -1608,7 +1608,7 @@ bool RegAllocLinearScanTest::FillGraphWithConstants(Graph *graph)
 // Ensure that we can spill at least 255 constants to graph only:
 TEST_F(RegAllocLinearScanTest, SpillConstantsGraph)
 {
-    ASSERT_TRUE(compiler::OPTIONS.IsCompilerRematConst());
+    ASSERT_TRUE(compiler::g_options.IsCompilerRematConst());
     ASSERT_TRUE(FillGraphWithConstants<255U>(GetGraph()));
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
@@ -1627,7 +1627,7 @@ TEST_F(RegAllocLinearScanTest, SpillConstantsGraph)
 // Ensure that we can spill at least 2*255 constants to stack/graph:
 TEST_F(RegAllocLinearScanTest, SpillConstantsGraphStack)
 {
-    ASSERT_TRUE(compiler::OPTIONS.IsCompilerRematConst());
+    ASSERT_TRUE(compiler::g_options.IsCompilerRematConst());
     ASSERT_TRUE(FillGraphWithConstants<510U>(GetGraph()));
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
@@ -1646,7 +1646,7 @@ TEST_F(RegAllocLinearScanTest, SpillConstantsGraphStack)
 // There are no available imm slots nor stack slots:
 TEST_F(RegAllocLinearScanTest, SpillConstantsLimit)
 {
-    ASSERT_TRUE(compiler::OPTIONS.IsCompilerRematConst());
+    ASSERT_TRUE(compiler::g_options.IsCompilerRematConst());
     ASSERT_FALSE(FillGraphWithConstants<513U>(GetGraph()));
 }
 
@@ -1671,8 +1671,8 @@ TEST_F(RegAllocLinearScanTest, ParameterWithUnavailableRegister)
 
     RegAllocLinearScan ra(GetGraph());
     // r1 is blocked (but param 0 resides there)
-    uint32_t reg_mask = 0xFFFFFFF3U;
-    ra.SetRegMask(RegMask {reg_mask});
+    uint32_t regMask = 0xFFFFFFF3U;
+    ra.SetRegMask(RegMask {regMask});
     ra.SetVRegMask(VRegMask {0U});
     // we can't assign a register to first parameter, so allocation will fail
     ASSERT_FALSE(ra.Run());

@@ -29,8 +29,8 @@ class RuntimeInterface;
 
 class JITStats {
 public:
-    explicit JITStats(mem::InternalAllocatorPtr internal_allocator)
-        : internal_allocator_(internal_allocator), stats_list_(internal_allocator->Adapter())
+    explicit JITStats(mem::InternalAllocatorPtr internalAllocator)
+        : internalAllocator_(internalAllocator), statsList_(internalAllocator->Adapter())
     {
     }
     NO_MOVE_SEMANTIC(JITStats);
@@ -40,23 +40,23 @@ public:
         DumpCsv();
     }
     void SetCompilationStart();
-    void EndCompilationWithStats(const std::string &method_name, bool is_osr, size_t bc_size, size_t code_size);
+    void EndCompilationWithStats(const std::string &methodName, bool isOsr, size_t bcSize, size_t codeSize);
     void ResetCompilationStart();
 
 private:
     void DumpCsv(char sep = ',');
     struct Entry {
-        PandaString method_name;
-        bool is_osr;
-        size_t bc_size;
-        size_t code_size;
+        PandaString methodName;
+        bool isOsr;
+        size_t bcSize;
+        size_t codeSize;
         uint64_t time;
     };
 
 private:
-    mem::InternalAllocatorPtr internal_allocator_;
-    uint64_t start_time_ {};
-    std::vector<Entry, typename mem::AllocatorAdapter<Entry>> stats_list_;
+    mem::InternalAllocatorPtr internalAllocator_;
+    uint64_t startTime_ {};
+    std::vector<Entry, typename mem::AllocatorAdapter<Entry>> statsList_;
 };
 
 Arch ChooseArch(Arch arch);
@@ -65,13 +65,12 @@ Arch ChooseArch(Arch arch);
 // is divided into tasks for TaskManager and occurs in its threads.
 // Otherwise compilation occurs in-place.
 template <TaskRunnerMode RUNNER_MODE>
-void JITCompileMethod(RuntimeInterface *runtime, CodeAllocator *code_allocator,
-                      ArenaAllocator *gdb_debug_info_allocator, JITStats *jit_stats,
-                      CompilerTaskRunner<RUNNER_MODE> task_runner);
+void JITCompileMethod(RuntimeInterface *runtime, CodeAllocator *codeAllocator, ArenaAllocator *gdbDebugInfoAllocator,
+                      JITStats *jitStats, CompilerTaskRunner<RUNNER_MODE> taskRunner);
 template <TaskRunnerMode RUNNER_MODE>
-void CompileInGraph(RuntimeInterface *runtime, bool is_dynamic, Arch arch, CompilerTaskRunner<RUNNER_MODE> task_runner,
-                    JITStats *jit_stats = nullptr);
-bool CheckMethodInLists(const std::string &method_name);
+void CompileInGraph(RuntimeInterface *runtime, bool isDynamic, Arch arch, CompilerTaskRunner<RUNNER_MODE> taskRunner,
+                    JITStats *jitStats = nullptr);
+bool CheckMethodInLists(const std::string &methodName);
 }  // namespace panda::compiler
 
 #endif  // COMPILER_COMPILE_METHOD_H

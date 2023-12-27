@@ -53,9 +53,9 @@ bool InAllocatedCodeRange(uintptr_t pc);
 
 class SignalContext {
 public:
-    explicit SignalContext(void *ucontext_raw)
+    explicit SignalContext(void *ucontextRaw)
     {
-        uc_ = reinterpret_cast<ucontext_t *>(ucontext_raw);
+        uc_ = reinterpret_cast<ucontext_t *>(ucontextRaw);
     }
     uintptr_t GetPC()
     {
@@ -105,18 +105,18 @@ public:
 
     bool IsInitialized()
     {
-        return is_init_;
+        return isInit_;
     }
 
     bool SignalActionHandler(int sig, siginfo_t *info, void *context);
-    bool InOatCode(const siginfo_t *siginfo, const void *context, bool check_bytecode_pc) const;
+    bool InOatCode(const siginfo_t *siginfo, const void *context, bool checkBytecodePc) const;
     bool InOtherCode(int sig, const siginfo_t *info, const void *context) const;
 
-    void AddHandler(SignalHandler *handler, bool oat_code);
+    void AddHandler(SignalHandler *handler, bool oatCode);
 
     void RemoveHandler(SignalHandler *handler);
-    void GetMethodAndReturnPcAndSp(const siginfo_t *siginfo, const void *context, const Method **out_method,
-                                   const uintptr_t *out_return_pc, const uintptr_t *out_sp);
+    void GetMethodAndReturnPcAndSp(const siginfo_t *siginfo, const void *context, const Method **outMethod,
+                                   const uintptr_t *outReturnPc, const uintptr_t *outSp);
 
     mem::InternalAllocatorPtr GetAllocator()
     {
@@ -131,10 +131,10 @@ public:
     virtual ~SignalManager() = default;
 
 private:
-    bool is_init_ {false};
+    bool isInit_ {false};
     mem::InternalAllocatorPtr allocator_;
-    PandaVector<SignalHandler *> oat_code_handler_;
-    PandaVector<SignalHandler *> other_handlers_;
+    PandaVector<SignalHandler *> oatCodeHandler_;
+    PandaVector<SignalHandler *> otherHandlers_;
     NO_COPY_SEMANTIC(SignalManager);
 };
 

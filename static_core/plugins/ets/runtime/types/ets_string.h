@@ -122,15 +122,15 @@ public:
             Runtime::GetCurrent()->GetPandaVM()));
     }
 
-    static EtsString *CreateNewStringFromString(EtsString *ets_string)
+    static EtsString *CreateNewStringFromString(EtsString *etsString)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        if (ets_string == nullptr) {
+        if (etsString == nullptr) {
             ThrowNullPointerException(ctx, ManagedThread::GetCurrent());
             return nullptr;
         }
-        coretypes::String *string = ets_string->GetCoreType();
+        coretypes::String *string = etsString->GetCoreType();
         return reinterpret_cast<EtsString *>(
             coretypes::String::CreateFromString(string, ctx, Runtime::GetCurrent()->GetPandaVM()));
     }
@@ -150,11 +150,11 @@ public:
             Runtime::GetCurrent()->ResolveString(Runtime::GetCurrent()->GetPandaVM(), mutf8, length, ctx));
     }
 
-    static EtsString *Concat(EtsString *ets_string1, EtsString *ets_string2)
+    static EtsString *Concat(EtsString *etsString1, EtsString *etsString2)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        coretypes::String *string3 = coretypes::String::Concat(ets_string1->GetCoreType(), ets_string2->GetCoreType(),
+        coretypes::String *string3 = coretypes::String::Concat(etsString1->GetCoreType(), etsString2->GetCoreType(),
                                                                ctx, Runtime::GetCurrent()->GetPandaVM());
         return reinterpret_cast<EtsString *>(string3);
     }
@@ -169,15 +169,15 @@ public:
         return GetCoreType()->At(index);
     }
 
-    static EtsString *DoReplace(EtsString *src, ets_char old_c, ets_char new_c)
+    static EtsString *DoReplace(EtsString *src, ets_char oldC, ets_char newC)
     {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         if (src->GetLength() == 0) {
             return reinterpret_cast<EtsString *>(
                 coretypes::String::CreateEmptyString(ctx, Runtime::GetCurrent()->GetPandaVM()));
         }
-        coretypes::String *result = coretypes::String::DoReplace(reinterpret_cast<coretypes::String *>(src), old_c,
-                                                                 new_c, ctx, Runtime::GetCurrent()->GetPandaVM());
+        coretypes::String *result = coretypes::String::DoReplace(reinterpret_cast<coretypes::String *>(src), oldC, newC,
+                                                                 ctx, Runtime::GetCurrent()->GetPandaVM());
         return reinterpret_cast<EtsString *>(result);
     }
 
@@ -210,24 +210,24 @@ public:
         return GetCoreType()->GetLength();
     }
 
-    size_t CopyDataMUtf8(void *buf, size_t max_length, bool is_c_string)
+    size_t CopyDataMUtf8(void *buf, size_t maxLength, bool isCString)
     {
-        return GetCoreType()->CopyDataMUtf8(reinterpret_cast<uint8_t *>(buf), max_length, is_c_string);
+        return GetCoreType()->CopyDataMUtf8(reinterpret_cast<uint8_t *>(buf), maxLength, isCString);
     }
 
-    size_t CopyDataRegionMUtf8(void *buf, size_t start, size_t length, size_t max_length)
+    size_t CopyDataRegionMUtf8(void *buf, size_t start, size_t length, size_t maxLength)
     {
-        return GetCoreType()->CopyDataRegionMUtf8(reinterpret_cast<uint8_t *>(buf), start, length, max_length);
+        return GetCoreType()->CopyDataRegionMUtf8(reinterpret_cast<uint8_t *>(buf), start, length, maxLength);
     }
 
-    uint32_t CopyDataUtf16(void *buf, uint32_t max_length)
+    uint32_t CopyDataUtf16(void *buf, uint32_t maxLength)
     {
-        return GetCoreType()->CopyDataUtf16(reinterpret_cast<uint16_t *>(buf), max_length);
+        return GetCoreType()->CopyDataUtf16(reinterpret_cast<uint16_t *>(buf), maxLength);
     }
 
-    uint32_t CopyDataRegionUtf16(void *buf, uint32_t start, uint32_t length, uint32_t max_length)
+    uint32_t CopyDataRegionUtf16(void *buf, uint32_t start, uint32_t length, uint32_t maxLength)
     {
-        return GetCoreType()->CopyDataRegionUtf16(reinterpret_cast<uint16_t *>(buf), start, length, max_length);
+        return GetCoreType()->CopyDataRegionUtf16(reinterpret_cast<uint16_t *>(buf), start, length, maxLength);
     }
 
     std::string_view ConvertToStringView(PandaVector<uint8_t> *buf)
@@ -253,8 +253,8 @@ public:
 
     bool IsEqual(const char *str)
     {
-        auto *mutf8_str = utf::CStringAsMutf8(str);
-        return coretypes::String::StringsAreEqualMUtf8(GetCoreType(), mutf8_str, utf::Mutf8Size(mutf8_str));
+        auto *mutf8Str = utf::CStringAsMutf8(str);
+        return coretypes::String::StringsAreEqualMUtf8(GetCoreType(), mutf8Str, utf::Mutf8Size(mutf8Str));
     }
 
     PandaString GetMutf8()

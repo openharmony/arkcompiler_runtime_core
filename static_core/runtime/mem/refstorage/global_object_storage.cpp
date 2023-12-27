@@ -28,19 +28,19 @@
 
 namespace panda::mem {
 
-GlobalObjectStorage::GlobalObjectStorage(mem::InternalAllocatorPtr allocator, size_t max_size, bool enable_size_check)
+GlobalObjectStorage::GlobalObjectStorage(mem::InternalAllocatorPtr allocator, size_t maxSize, bool enableSizeCheck)
     : allocator_(allocator)
 {
-    global_storage_ = allocator->New<ArrayStorage>(allocator, max_size, enable_size_check);
-    weak_storage_ = allocator->New<ArrayStorage>(allocator, max_size, enable_size_check);
-    global_fixed_storage_ = allocator->New<ArrayStorage>(allocator, max_size, enable_size_check, true);
+    globalStorage_ = allocator->New<ArrayStorage>(allocator, maxSize, enableSizeCheck);
+    weakStorage_ = allocator->New<ArrayStorage>(allocator, maxSize, enableSizeCheck);
+    globalFixedStorage_ = allocator->New<ArrayStorage>(allocator, maxSize, enableSizeCheck, true);
 }
 
 GlobalObjectStorage::~GlobalObjectStorage()
 {
-    allocator_->Delete(global_storage_);
-    allocator_->Delete(weak_storage_);
-    allocator_->Delete(global_fixed_storage_);
+    allocator_->Delete(globalStorage_);
+    allocator_->Delete(weakStorage_);
+    allocator_->Delete(globalFixedStorage_);
 }
 
 bool GlobalObjectStorage::IsValidGlobalRef(const Reference *ref) const
@@ -49,15 +49,15 @@ bool GlobalObjectStorage::IsValidGlobalRef(const Reference *ref) const
     Reference::ObjectType type = Reference::GetType(ref);
     AssertType(type);
     if (type == Reference::ObjectType::GLOBAL) {
-        if (!global_storage_->IsValidGlobalRef(ref)) {
+        if (!globalStorage_->IsValidGlobalRef(ref)) {
             return false;
         }
     } else if (type == Reference::ObjectType::WEAK) {
-        if (!weak_storage_->IsValidGlobalRef(ref)) {
+        if (!weakStorage_->IsValidGlobalRef(ref)) {
             return false;
         }
     } else {
-        if (!global_fixed_storage_->IsValidGlobalRef(ref)) {
+        if (!globalFixedStorage_->IsValidGlobalRef(ref)) {
             return false;
         }
     }
@@ -72,11 +72,11 @@ Reference *GlobalObjectStorage::Add(const ObjectHeader *object, Reference::Objec
     }
     Reference *ref = nullptr;
     if (type == Reference::ObjectType::GLOBAL) {
-        ref = global_storage_->Add(object);
+        ref = globalStorage_->Add(object);
     } else if (type == Reference::ObjectType::WEAK) {
-        ref = weak_storage_->Add(object);
+        ref = weakStorage_->Add(object);
     } else {
-        ref = global_fixed_storage_->Add(object);
+        ref = globalFixedStorage_->Add(object);
     }
     if (ref != nullptr) {
         ref = Reference::SetType(ref, type);
@@ -93,11 +93,11 @@ void GlobalObjectStorage::Remove(const Reference *reference)
     AssertType(type);
     reference = Reference::GetRefWithoutType(reference);
     if (type == Reference::ObjectType::GLOBAL) {
-        global_storage_->Remove(reference);
+        globalStorage_->Remove(reference);
     } else if (type == Reference::ObjectType::WEAK) {
-        weak_storage_->Remove(reference);
+        weakStorage_->Remove(reference);
     } else {
-        global_fixed_storage_->Remove(reference);
+        globalFixedStorage_->Remove(reference);
     }
 }
 
@@ -105,46 +105,45 @@ PandaVector<ObjectHeader *> GlobalObjectStorage::GetAllObjects()
 {
     auto objects = PandaVector<ObjectHeader *>(allocator_->Adapter());
 
-    auto global_objects = global_storage_->GetAllObjects();
-    objects.insert(objects.end(), global_objects.begin(), global_objects.end());
+    auto globalObjects = globalStorage_->GetAllObjects();
+    objects.insert(objects.end(), globalObjects.begin(), globalObjects.end());
 
-    auto weak_objects = weak_storage_->GetAllObjects();
-    objects.insert(objects.end(), weak_objects.begin(), weak_objects.end());
+    auto weakObjects = weakStorage_->GetAllObjects();
+    objects.insert(objects.end(), weakObjects.begin(), weakObjects.end());
 
-    auto fixed_objects = global_fixed_storage_->GetAllObjects();
-    objects.insert(objects.end(), fixed_objects.begin(), fixed_objects.end());
+    auto fixedObjects = globalFixedStorage_->GetAllObjects();
+    objects.insert(objects.end(), fixedObjects.begin(), fixedObjects.end());
 
     return objects;
 }
 
-void GlobalObjectStorage::VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType root_type)
+void GlobalObjectStorage::VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType)
 {
-    global_storage_->VisitObjects(gc_root_visitor, root_type);
-    global_fixed_storage_->VisitObjects(gc_root_visitor, root_type);
+    globalStorage_->VisitObjects(gcRootVisitor, rootType);
+    globalFixedStorage_->VisitObjects(gcRootVisitor, rootType);
 }
 
 void GlobalObjectStorage::UpdateMovedRefs()
 {
     LOG(DEBUG, GC) << "=== GlobalStorage Update moved. BEGIN ===";
-    global_storage_->UpdateMovedRefs();
-    weak_storage_->UpdateMovedRefs();
-    global_fixed_storage_->UpdateMovedRefs();
+    globalStorage_->UpdateMovedRefs();
+    weakStorage_->UpdateMovedRefs();
+    globalFixedStorage_->UpdateMovedRefs();
     LOG(DEBUG, GC) << "=== GlobalStorage Update moved. END ===";
 }
 
 void GlobalObjectStorage::ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred)
 {
-    weak_storage_->ClearUnmarkedWeakRefs(gc, pred);
+    weakStorage_->ClearUnmarkedWeakRefs(gc, pred);
 }
 
 size_t GlobalObjectStorage::GetSize()
 {
-    return global_storage_->GetSizeWithLock() + weak_storage_->GetSizeWithLock() +
-           global_fixed_storage_->GetSizeWithLock();
+    return globalStorage_->GetSizeWithLock() + weakStorage_->GetSizeWithLock() + globalFixedStorage_->GetSizeWithLock();
 }
 
 void GlobalObjectStorage::Dump()
 {
-    global_storage_->DumpWithLock();
+    globalStorage_->DumpWithLock();
 }
 }  // namespace panda::mem

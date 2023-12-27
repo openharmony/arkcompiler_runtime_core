@@ -41,9 +41,9 @@ PANDA_PUBLIC_API PandaString ConvertToString(coretypes::String *s);
 template <class T>
 std::enable_if_t<std::is_arithmetic_v<T>, PandaString> ToPandaString(T value)
 {
-    PandaStringStream str_stream;
-    str_stream << value;
-    return str_stream.str();
+    PandaStringStream strStream;
+    strStream << value;
+    return strStream.str();
 }
 
 struct PandaStringHash {

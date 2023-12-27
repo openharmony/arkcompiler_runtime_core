@@ -28,17 +28,17 @@ class LLVMArkInterface;
 
 namespace panda::llvmbackend::runtime_calls {
 
-llvm::Value *GetAddressToTLS(llvm::IRBuilder<> *builder, LLVMArkInterface *ark_interface, uintptr_t tls_offset);
-llvm::Value *LoadTLSValue(llvm::IRBuilder<> *builder, LLVMArkInterface *ark_interface, uintptr_t tls_offset,
+llvm::Value *GetAddressToTLS(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface, uintptr_t tlsOffset);
+llvm::Value *LoadTLSValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface, uintptr_t tlsOffset,
                           llvm::Type *type);
 
 using EntrypointId = int;
-llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Value *thread_reg_value,
-                                           LLVMArkInterface *ark_interface, EntrypointId eid,
+llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Value *threadRegValue,
+                                           LLVMArkInterface *arkInterface, EntrypointId eid,
                                            llvm::ArrayRef<llvm::Value *> arguments = llvm::None);
 
-llvm::Value *GetThreadRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *ark_interface);
-llvm::Value *GetRealFrameRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *ark_interface);
+llvm::Value *GetThreadRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface);
+llvm::Value *GetRealFrameRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface);
 
 }  // namespace panda::llvmbackend::runtime_calls
 

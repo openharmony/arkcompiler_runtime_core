@@ -43,10 +43,10 @@ enum class AllocatorType : uint16_t {
 
 class AllocatorInfo {
 public:
-    explicit constexpr AllocatorInfo(AllocatorType type, const void *addr) : type_(type), header_addr_(addr)
+    explicit constexpr AllocatorInfo(AllocatorType type, const void *addr) : type_(type), headerAddr_(addr)
     {
         // We can't create AllocatorInfo without correct pointer to the allocator header
-        ASSERT(header_addr_ != nullptr);
+        ASSERT(headerAddr_ != nullptr);
     }
 
     AllocatorType GetType() const
@@ -56,7 +56,7 @@ public:
 
     const void *GetAllocatorHeaderAddr() const
     {
-        return header_addr_;
+        return headerAddr_;
     }
 
     virtual ~AllocatorInfo() = default;
@@ -66,16 +66,16 @@ public:
 
 private:
     AllocatorType type_;
-    const void *header_addr_;
+    const void *headerAddr_;
 };
 
 // PoolMap is used to manage all pools which has been given to the allocators.
 // It can be used to find which allocator has been used to allocate an object.
 class PoolMap {
 public:
-    PANDA_PUBLIC_API void AddPoolToMap(const void *pool_addr, size_t pool_size, SpaceType space_type,
-                                       AllocatorType allocator_type, const void *allocator_addr);
-    PANDA_PUBLIC_API void RemovePoolFromMap(const void *pool_addr, size_t pool_size);
+    PANDA_PUBLIC_API void AddPoolToMap(const void *poolAddr, size_t poolSize, SpaceType spaceType,
+                                       AllocatorType allocatorType, const void *allocatorAddr);
+    PANDA_PUBLIC_API void RemovePoolFromMap(const void *poolAddr, size_t poolSize);
     // Get Allocator info for the object allocated at this address.
     PANDA_PUBLIC_API AllocatorInfo GetAllocatorInfo(const void *addr) const;
 
@@ -98,79 +98,79 @@ private:
 
     class PoolInfo {
     public:
-        void Initialize(MapNumType segment_first_map_num, SpaceType space_type, AllocatorType allocator_type,
-                        const void *allocator_addr)
+        void Initialize(MapNumType segmentFirstMapNum, SpaceType spaceType, AllocatorType allocatorType,
+                        const void *allocatorAddr)
         {
-            ASSERT(allocator_type_ == AllocatorType::UNDEFINED);
+            ASSERT(allocatorType_ == AllocatorType::UNDEFINED);
             // Added a TSAN ignore here because TSAN thinks
             // that we can have a data race here - concurrent
             // initialization and reading.
             // However, we can't get an access for this fields
             // without initialization in the correct flow.
             TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
-            segment_first_map_num_ = segment_first_map_num;
-            allocator_addr_ = allocator_addr;
-            space_type_ = space_type;
-            allocator_type_ = allocator_type;
+            segmentFirstMapNum_ = segmentFirstMapNum;
+            allocatorAddr_ = allocatorAddr;
+            spaceType_ = spaceType;
+            allocatorType_ = allocatorType;
             TSAN_ANNOTATE_IGNORE_WRITES_END();
         }
 
         inline bool IsEmpty() const
         {
-            return space_type_ == SpaceType::SPACE_TYPE_UNDEFINED;
+            return spaceType_ == SpaceType::SPACE_TYPE_UNDEFINED;
         }
 
         void Destroy()
         {
-            segment_first_map_num_ = 0;
-            allocator_addr_ = nullptr;
-            allocator_type_ = AllocatorType::UNDEFINED;
-            space_type_ = SpaceType::SPACE_TYPE_UNDEFINED;
+            segmentFirstMapNum_ = 0;
+            allocatorAddr_ = nullptr;
+            allocatorType_ = AllocatorType::UNDEFINED;
+            spaceType_ = SpaceType::SPACE_TYPE_UNDEFINED;
         }
 
         MapNumType GetSegmentFirstMapNum() const
         {
-            ASSERT(space_type_ != SpaceType::SPACE_TYPE_UNDEFINED);
-            return segment_first_map_num_;
+            ASSERT(spaceType_ != SpaceType::SPACE_TYPE_UNDEFINED);
+            return segmentFirstMapNum_;
         }
 
         AllocatorType GetAllocatorType() const
         {
-            return allocator_type_;
+            return allocatorType_;
         }
 
         const void *GetAllocatorAddr() const
         {
-            return allocator_addr_;
+            return allocatorAddr_;
         }
 
         SpaceType GetSpaceType() const
         {
-            return space_type_;
+            return spaceType_;
         }
 
     private:
-        AllocatorType allocator_type_ {AllocatorType::UNDEFINED};
-        SpaceType space_type_ {SpaceType::SPACE_TYPE_UNDEFINED};
-        MapNumType segment_first_map_num_ {0};
-        const void *allocator_addr_ = nullptr;
+        AllocatorType allocatorType_ {AllocatorType::UNDEFINED};
+        SpaceType spaceType_ {SpaceType::SPACE_TYPE_UNDEFINED};
+        MapNumType segmentFirstMapNum_ {0};
+        const void *allocatorAddr_ = nullptr;
     };
 
     static MapNumType AddrToMapNum(const void *addr)
     {
-        MapNumType map_num = ToUintPtr(addr) >> POOL_MAP_GRANULARITY_SHIFT;
-        ASSERT(map_num < POOL_MAP_SIZE);
-        return map_num;
+        MapNumType mapNum = ToUintPtr(addr) >> POOL_MAP_GRANULARITY_SHIFT;
+        ASSERT(mapNum < POOL_MAP_SIZE);
+        return mapNum;
     }
 
-    static void *MapNumToAddr(MapNumType map_num)
+    static void *MapNumToAddr(MapNumType mapNum)
     {
         // Checking overflow
-        ASSERT(static_cast<uint64_t>(map_num) << POOL_MAP_GRANULARITY_SHIFT == map_num << POOL_MAP_GRANULARITY_SHIFT);
-        return ToVoidPtr(map_num << POOL_MAP_GRANULARITY_SHIFT);
+        ASSERT(static_cast<uint64_t>(mapNum) << POOL_MAP_GRANULARITY_SHIFT == mapNum << POOL_MAP_GRANULARITY_SHIFT);
+        return ToVoidPtr(mapNum << POOL_MAP_GRANULARITY_SHIFT);
     }
 
-    std::array<PoolInfo, POOL_MAP_SIZE> pool_map_;
+    std::array<PoolInfo, POOL_MAP_SIZE> poolMap_;
 
     friend class PoolMapTest;
 };

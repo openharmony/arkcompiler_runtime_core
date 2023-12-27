@@ -51,11 +51,11 @@ public:
     bool Compare(VnObject *obj);
     uint32_t GetSize() const
     {
-        return size_objs_;
+        return sizeObjs_;
     }
     ObjType GetElement(uint32_t index) const
     {
-        ASSERT(index < size_objs_);
+        ASSERT(index < sizeObjs_);
         return objs_[index];
     }
     ObjType *GetArray()
@@ -64,7 +64,7 @@ public:
     }
 
 private:
-    uint8_t size_objs_ {0};
+    uint8_t sizeObjs_ {0};
     // opcode, type, 2 inputs, 3 advanced property
     static constexpr uint8_t MAX_ARRAY_SIZE = 7;
     std::array<ObjType, MAX_ARRAY_SIZE> objs_;
@@ -110,7 +110,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerVn();
+        return g_options.IsCompilerVn();
     }
 
     void InvalidateAnalyses() override;
@@ -123,13 +123,13 @@ private:
     // Sets vn for the inst
     void SetInstValNum(Inst *inst);
 
-    bool TryToApplyCse(Inst *inst, InstVector *equiv_insts);
+    bool TryToApplyCse(Inst *inst, InstVector *equivInsts);
 
     // !NOTE add own allocator
-    ArenaUnorderedMap<VnObject *, InstVector, VnObjHash, VnObjEqual> map_insts_;
+    ArenaUnorderedMap<VnObject *, InstVector, VnObjHash, VnObjEqual> mapInsts_;
     SaveStateBridgesBuilder ssb_;
-    uint32_t curr_vn_ {0};
-    bool cse_is_applied_ {false};
+    uint32_t currVn_ {0};
+    bool cseIsApplied_ {false};
 };
 }  // namespace panda::compiler
 

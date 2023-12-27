@@ -34,7 +34,7 @@ TEST_F(IrBuilderTest, Lowering)
         {"div", compiler::Opcode::DivI}, {"mod", compiler::Opcode::ModI},
     };
 
-    const std::string template_source = R"(
+    const std::string templateSource = R"(
     .function i32 main() {
         movi v0, 0x3
         movi v1, 0xffffffffffffffe2
@@ -45,9 +45,9 @@ TEST_F(IrBuilderTest, Lowering)
 
     for (auto const &opcode : opcodes) {
         // Specialize template source to the current opcode
-        std::string source(template_source);
-        size_t start_pos = source.find("OPCODE");
-        source.replace(start_pos, 6 /* OPCODE */, opcode.first);
+        std::string source(templateSource);
+        size_t startPos = source.find("OPCODE");
+        source.replace(startPos, 6 /* OPCODE */, opcode.first);
 
         ASSERT_TRUE(ParseToGraph(source, "main"));
 #ifndef NDEBUG

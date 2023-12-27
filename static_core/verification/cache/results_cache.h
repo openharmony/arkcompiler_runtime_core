@@ -24,9 +24,9 @@ class VerificationResultCache {
 public:
     enum class Status { OK, FAILED, UNKNOWN };
     static void Initialize(const std::string &filename);
-    static void Destroy(bool update_file = true);
-    static void CacheResult(uint64_t method_id, bool result);
-    static Status Check(uint64_t method_id);
+    static void Destroy(bool updateFile = true);
+    static void CacheResult(uint64_t methodId, bool result);
+    static Status Check(uint64_t methodId);
     static bool Enabled();
 
 private:

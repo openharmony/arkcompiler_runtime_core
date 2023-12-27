@@ -25,19 +25,19 @@ namespace panda::mem::ets {
 
 EtsReferenceProcessor::EtsReferenceProcessor(GC *gc) : gc_(gc) {}
 
-bool EtsReferenceProcessor::IsReference(const BaseClass *base_cls, const ObjectHeader *ref,
+bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
                                         const ReferenceCheckPredicateT &pred) const
 {
-    ASSERT(base_cls != nullptr);
+    ASSERT(baseCls != nullptr);
     ASSERT(ref != nullptr);
-    ASSERT(base_cls->GetSourceLang() == panda_file::SourceLang::ETS);
+    ASSERT(baseCls->GetSourceLang() == panda_file::SourceLang::ETS);
 
-    const auto *obj_ets_class = panda::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(base_cls));
+    const auto *objEtsClass = panda::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(baseCls));
 
-    if (obj_ets_class->IsWeakReference()) {
-        const auto *ets_ref = reinterpret_cast<const panda::ets::EtsWeakReference *>(ref);
+    if (objEtsClass->IsWeakReference()) {
+        const auto *etsRef = reinterpret_cast<const panda::ets::EtsWeakReference *>(ref);
 
-        auto *referent = ets_ref->GetReferent();
+        auto *referent = etsRef->GetReferent();
         if (referent == nullptr) {
             LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref)
                                  << " as normal object, because referent is null";
@@ -45,66 +45,65 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *base_cls, const ObjectH
         }
 
         ASSERT(IsMarking(gc_->GetGCPhase()));
-        bool referent_is_marked = false;
+        bool referentIsMarked = false;
         if (pred(referent->GetCoreType())) {
-            referent_is_marked = gc_->IsMarked(referent->GetCoreType());
+            referentIsMarked = gc_->IsMarked(referent->GetCoreType());
         } else {
             LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref) << " as normal object, because referent "
                                  << std::hex << GetDebugInfoAboutObject(referent->GetCoreType())
                                  << " doesn't suit predicate";
-            referent_is_marked = true;
+            referentIsMarked = true;
         }
-        return !referent_is_marked;
+        return !referentIsMarked;
     }
     return false;
 }
 
-void EtsReferenceProcessor::HandleReference([[maybe_unused]] GC *gc, [[maybe_unused]] GCMarkingStackType *objects_stack,
+void EtsReferenceProcessor::HandleReference([[maybe_unused]] GC *gc, [[maybe_unused]] GCMarkingStackType *objectsStack,
                                             [[maybe_unused]] const BaseClass *cls, const ObjectHeader *object,
                                             [[maybe_unused]] const ReferenceProcessPredicateT &pred)
 {
-    os::memory::LockHolder lock(weak_ref_lock_);
+    os::memory::LockHolder lock(weakRefLock_);
     LOG(DEBUG, REF_PROC) << GetDebugInfoAboutObject(object) << " is added to weak references set for processing";
-    weak_references_.insert(const_cast<ObjectHeader *>(object));
+    weakReferences_.insert(const_cast<ObjectHeader *>(object));
 }
 
 void EtsReferenceProcessor::ProcessReferences([[maybe_unused]] bool concurrent,
-                                              [[maybe_unused]] bool clear_soft_references,
-                                              [[maybe_unused]] GCPhase gc_phase,
+                                              [[maybe_unused]] bool clearSoftReferences,
+                                              [[maybe_unused]] GCPhase gcPhase,
                                               const mem::GC::ReferenceClearPredicateT &pred)
 {
-    os::memory::LockHolder lock(weak_ref_lock_);
-    while (!weak_references_.empty()) {
-        auto *weak_ref_obj = weak_references_.extract(weak_references_.begin()).value();
-        ASSERT(panda::ets::EtsClass::FromRuntimeClass(weak_ref_obj->ClassAddr<Class>())->IsWeakReference());
-        auto *weak_ref = static_cast<panda::ets::EtsWeakReference *>(panda::ets::EtsObject::FromCoreType(weak_ref_obj));
-        auto *referent = weak_ref->GetReferent();
+    os::memory::LockHolder lock(weakRefLock_);
+    while (!weakReferences_.empty()) {
+        auto *weakRefObj = weakReferences_.extract(weakReferences_.begin()).value();
+        ASSERT(panda::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
+        auto *weakRef = static_cast<panda::ets::EtsWeakReference *>(panda::ets::EtsObject::FromCoreType(weakRefObj));
+        auto *referent = weakRef->GetReferent();
         if (referent == nullptr) {
-            LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weak_ref_obj)
+            LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
                                  << " because referent is null";
             continue;
         }
-        auto *referent_obj = referent->GetCoreType();
-        if (!pred(referent_obj)) {
-            LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weak_ref_obj)
-                                 << " because referent " << GetDebugInfoAboutObject(referent_obj)
-                                 << " failed predicate";
+        auto *referentObj = referent->GetCoreType();
+        if (!pred(referentObj)) {
+            LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
+                                 << " because referent " << GetDebugInfoAboutObject(referentObj) << " failed predicate";
             continue;
         }
-        if (gc_->IsMarked(referent_obj)) {
-            LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weak_ref_obj)
-                                 << " because referent " << GetDebugInfoAboutObject(referent_obj) << " is marked";
+        if (gc_->IsMarked(referentObj)) {
+            LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
+                                 << " because referent " << GetDebugInfoAboutObject(referentObj) << " is marked";
             continue;
         }
-        LOG(DEBUG, REF_PROC) << "In " << GetDebugInfoAboutObject(weak_ref_obj) << " clear referent";
-        weak_ref->ClearReferent();
+        LOG(DEBUG, REF_PROC) << "In " << GetDebugInfoAboutObject(weakRefObj) << " clear referent";
+        weakRef->ClearReferent();
     }
 }
 
 size_t EtsReferenceProcessor::GetReferenceQueueSize() const
 {
-    os::memory::LockHolder lock(weak_ref_lock_);
-    return weak_references_.size();
+    os::memory::LockHolder lock(weakRefLock_);
+    return weakReferences_.size();
 }
 
 }  // namespace panda::mem::ets

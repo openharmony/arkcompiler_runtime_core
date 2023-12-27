@@ -18,15 +18,15 @@
 
 namespace panda::panda_file {
 
-MethodHandleDataAccessor::MethodHandleDataAccessor(const File &panda_file, File::EntityId method_handle_id)
-    : panda_file_(panda_file), method_handle_id_(method_handle_id)
+MethodHandleDataAccessor::MethodHandleDataAccessor(const File &pandaFile, File::EntityId methodHandleId)
+    : pandaFile_(pandaFile), methodHandleId_(methodHandleId)
 {
-    auto sp = panda_file_.GetSpanFromId(method_handle_id_);
+    auto sp = pandaFile_.GetSpanFromId(methodHandleId_);
 
     type_ = static_cast<MethodHandleType>(helpers::Read<sizeof(uint8_t)>(&sp));
     offset_ = helpers::ReadULeb128(&sp);
 
-    size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - method_handle_id_.GetOffset();
+    size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - methodHandleId_.GetOffset();
 }
 
 }  // namespace panda::panda_file

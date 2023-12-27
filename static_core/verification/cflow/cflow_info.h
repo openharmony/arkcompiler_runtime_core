@@ -36,11 +36,11 @@ public:
     enum Flag : uint8_t { INSTRUCTION = 1, EXCEPTION_SOURCE = 2, EXCEPTION_HANDLER = 4, JUMP_TARGET = 8 };
 
     CflowMethodInfo() = delete;
-    CflowMethodInfo(uint8_t const *addr_start, size_t code_size)
-        : addr_start_ {addr_start},
-          addr_end_ {addr_start + code_size}  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    CflowMethodInfo(uint8_t const *addrStart, size_t codeSize)
+        : addrStart_ {addrStart},
+          addrEnd_ {addrStart + codeSize}  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     {
-        flags_.resize(code_size);
+        flags_.resize(codeSize);
     }
     ~CflowMethodInfo() = default;
     NO_COPY_SEMANTIC(CflowMethodInfo);
@@ -48,50 +48,50 @@ public:
 
     uint8_t const *GetAddrStart() const
     {
-        return addr_start_;
+        return addrStart_;
     }
 
     uint8_t const *GetAddrEnd() const
     {
-        return addr_end_;
+        return addrEnd_;
     }
 
     bool IsAddrValid(uint8_t const *addr) const
     {
-        return addr_start_ <= addr && addr < addr_end_;
+        return addrStart_ <= addr && addr < addrEnd_;
     }
 
     bool IsFlagSet(uint8_t const *addr, Flag flag) const
     {
-        ASSERT(addr >= addr_start_);
-        ASSERT(addr < addr_end_);
-        return ((flags_[addr - addr_start_] & flag) != 0);
+        ASSERT(addr >= addrStart_);
+        ASSERT(addr < addrEnd_);
+        return ((flags_[addr - addrStart_] & flag) != 0);
     }
 
     void SetFlag(uint8_t const *addr, Flag flag)
     {
-        ASSERT(addr >= addr_start_);
-        ASSERT(addr < addr_end_);
-        flags_[addr - addr_start_] |= flag;
+        ASSERT(addr >= addrStart_);
+        ASSERT(addr < addrEnd_);
+        flags_[addr - addrStart_] |= flag;
     }
 
     void ClearFlag(uint8_t const *addr, Flag flag)
     {
-        ASSERT(addr >= addr_start_);
-        ASSERT(addr < addr_end_);
-        flags_[addr - addr_start_] &= static_cast<uint8_t>(~flag);
+        ASSERT(addr >= addrStart_);
+        ASSERT(addr < addrEnd_);
+        flags_[addr - addrStart_] &= static_cast<uint8_t>(~flag);
     }
 
     PandaVector<uint8_t const *> const *GetHandlerStartAddresses() const
     {
-        return &handler_start_addresses_;
+        return &handlerStartAddresses_;
     }
 
 private:
-    uint8_t const *addr_start_;
-    uint8_t const *addr_end_;
+    uint8_t const *addrStart_;
+    uint8_t const *addrEnd_;
     PandaVector<uint8_t> flags_;
-    PandaVector<uint8_t const *> handler_start_addresses_;
+    PandaVector<uint8_t const *> handlerStartAddresses_;
 
     VerificationStatus FillCodeMaps(Method const *method);
     VerificationStatus ProcessCatchBlocks(Method const *method);

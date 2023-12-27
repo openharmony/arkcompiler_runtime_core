@@ -20,7 +20,7 @@
 
 namespace panda::ets::interop::js {
 
-napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool do_clscheck);
+napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool doClscheck);
 
 }  // namespace panda::ets::interop::js
 

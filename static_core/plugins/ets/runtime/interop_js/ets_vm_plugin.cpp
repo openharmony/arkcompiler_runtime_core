@@ -45,51 +45,51 @@ static napi_value Fatal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_cal
 
 static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
 {
-    size_t js_argc = 0;
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &js_argc, nullptr, nullptr, nullptr));
-    if (js_argc != 2) {
-        InteropCtx::ThrowJSError(env, "GetEtsFunction: bad args, actual args count: " + std::to_string(js_argc));
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+    if (jsArgc != 2) {
+        InteropCtx::ThrowJSError(env, "GetEtsFunction: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
 
-    std::array<napi_value, 2> js_argv {};
-    ASSERT(js_argc == js_argv.size());
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &js_argc, js_argv.data(), nullptr, nullptr));
+    std::array<napi_value, 2> jsArgv {};
+    ASSERT(jsArgc == jsArgv.size());
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv.data(), nullptr, nullptr));
 
-    napi_value js_class_descriptor = js_argv[0];
-    napi_value js_function_name = js_argv[1];
+    napi_value jsClassDescriptor = jsArgv[0];
+    napi_value jsFunctionName = jsArgv[1];
 
-    if (GetValueType(env, js_class_descriptor) != napi_string) {
+    if (GetValueType(env, jsClassDescriptor) != napi_string) {
         InteropCtx::ThrowJSError(env, "GetEtsFunction: class descriptor is not a string");
     }
 
-    if (GetValueType(env, js_function_name) != napi_string) {
+    if (GetValueType(env, jsFunctionName) != napi_string) {
         InteropCtx::ThrowJSError(env, "GetEtsFunction: function name is not a string");
         return nullptr;
     }
 
-    std::string class_descriptor = GetString(env, js_class_descriptor);
-    std::string method_name = GetString(env, js_function_name);
+    std::string classDescriptor = GetString(env, jsClassDescriptor);
+    std::string methodName = GetString(env, jsFunctionName);
 
-    return ets_proxy::GetETSFunction(env, class_descriptor, method_name);
+    return ets_proxy::GetETSFunction(env, classDescriptor, methodName);
 }
 
 static napi_value GetEtsClass(napi_env env, napi_callback_info info)
 {
-    size_t js_argc = 0;
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &js_argc, nullptr, nullptr, nullptr));
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
-    if (js_argc != 1) {
-        InteropCtx::ThrowJSError(env, "GetEtsClass: bad args, actual args count: " + std::to_string(js_argc));
+    if (jsArgc != 1) {
+        InteropCtx::ThrowJSError(env, "GetEtsClass: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
 
-    napi_value js_class_descriptor {};
-    ASSERT(js_argc == 1);
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &js_argc, &js_class_descriptor, nullptr, nullptr));
+    napi_value jsClassDescriptor {};
+    ASSERT(jsArgc == 1);
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, &jsClassDescriptor, nullptr, nullptr));
 
-    std::string class_descriptor = GetString(env, js_class_descriptor);
-    return ets_proxy::GetETSClass(env, class_descriptor);
+    std::string classDescriptor = GetString(env, jsClassDescriptor);
+    return ets_proxy::GetETSClass(env, classDescriptor);
 }
 
 static napi_value Call(napi_env env, napi_callback_info info)
@@ -101,9 +101,9 @@ static napi_value Call(napi_env env, napi_callback_info info)
 
     auto coro = EtsCoroutine::GetCurrent();
     auto argv = InteropCtx::Current(coro)->GetTempArgs<napi_value>(argc);
-    napi_value this_arg {};
+    napi_value thisArg {};
     void *data = nullptr;
-    status = napi_get_cb_info(env, info, &argc, argv->data(), &this_arg, &data);
+    status = napi_get_cb_info(env, info, &argc, argv->data(), &thisArg, &data);
     assert(status == napi_ok);
 
     return CallEtsFunctionImpl(env, *argv);
@@ -118,9 +118,9 @@ static napi_value CallWithCopy(napi_env env, napi_callback_info info)
 
     auto coro = EtsCoroutine::GetCurrent();
     auto argv = InteropCtx::Current(coro)->GetTempArgs<napi_value>(argc);
-    napi_value this_arg {};
+    napi_value thisArg {};
     void *data = nullptr;
-    status = napi_get_cb_info(env, info, &argc, argv->data(), &this_arg, &data);
+    status = napi_get_cb_info(env, info, &argc, argv->data(), &thisArg, &data);
     assert(status == napi_ok);
 
     return InvokeEtsMethodImpl(env, argv->data(), argc, false);
@@ -129,8 +129,8 @@ static napi_value CallWithCopy(napi_env env, napi_callback_info info)
 static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
 {
     [[maybe_unused]] napi_status status;
-    napi_value napi_false;
-    status = napi_get_boolean(env, false, &napi_false);
+    napi_value napiFalse;
+    status = napi_get_boolean(env, false, &napiFalse);
     assert(status == napi_ok);
 
     size_t argc = 0;
@@ -138,57 +138,57 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     assert(status == napi_ok);
 
     std::vector<napi_value> argv(argc);
-    napi_value this_arg {};
+    napi_value thisArg {};
     void *data = nullptr;
-    status = napi_get_cb_info(env, info, &argc, argv.data(), &this_arg, &data);
+    status = napi_get_cb_info(env, info, &argc, argv.data(), &thisArg, &data);
     assert(status == napi_ok);
 
     if (argc != 4) {
         LogError("CreateEtsRuntime: exactly 4 arguments are required");
-        return napi_false;
+        return napiFalse;
     }
 
     napi_valuetype type;
     napi_typeof(env, argv[0], &type);
     if (type != napi_string) {
         LogError("CreateEtsRuntime: first argument is not a string");
-        return napi_false;
+        return napiFalse;
     }
-    auto stdlib_path = GetString(env, argv[0]);
+    auto stdlibPath = GetString(env, argv[0]);
 
     napi_typeof(env, argv[1], &type);
     if (type != napi_string) {
         LogError("CreateEtsRuntime: second argument is not a string");
-        return napi_false;
+        return napiFalse;
     }
-    auto index_path = GetString(env, argv[1]);
+    auto indexPath = GetString(env, argv[1]);
 
     napi_typeof(env, argv[2], &type);
     if (type != napi_boolean) {
         LogError("CreateEtsRuntime: third argument is not a boolean");
-        return napi_false;
+        return napiFalse;
     }
-    bool use_jit;
-    napi_get_value_bool(env, argv[2], &use_jit);
+    bool useJit;
+    napi_get_value_bool(env, argv[2], &useJit);
 
     napi_typeof(env, argv[3], &type);
     if (type != napi_boolean) {
         LogError("CreateEtsRuntime: fourth argument is not a boolean");
-        return napi_false;
+        return napiFalse;
     }
-    bool use_aot;
-    napi_get_value_bool(env, argv[3], &use_aot);
+    bool useAot;
+    napi_get_value_bool(env, argv[3], &useAot);
 
-    bool res = panda::ets::CreateRuntime(stdlib_path, index_path, use_jit, use_aot);
+    bool res = panda::ets::CreateRuntime(stdlibPath, indexPath, useJit, useAot);
     if (res) {
         auto coro = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scoped(coro);
         InteropCtx::Init(coro, env);
     }
-    napi_value napi_res;
-    status = napi_get_boolean(env, res, &napi_res);
+    napi_value napiRes;
+    status = napi_get_boolean(env, res, &napiRes);
     assert(status == napi_ok);
-    return napi_res;
+    return napiRes;
 }
 
 static napi_value CreateRuntime(napi_env env, napi_callback_info info)
@@ -201,94 +201,94 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
     size_t argc = ARGC;
     NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr));
 
-    napi_value napi_false;
-    NAPI_ASSERT_OK(napi_get_boolean(env, false, &napi_false));
+    napi_value napiFalse;
+    NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
 
     if (argc != ARGC) {
         LogError("CreateEtsRuntime: bad args number");
-        return napi_false;
+        return napiFalse;
     }
 
     napi_value options = argv[0];
     if (GetValueType(env, options) != napi_object) {
         LogError("CreateEtsRuntime: argument is not an object");
-        return napi_false;
+        return napiFalse;
     }
 
-    uint32_t num_options;
-    std::vector<std::string> arg_strings;
+    uint32_t numOptions;
+    std::vector<std::string> argStrings;
 
-    if (napi_get_array_length(env, options, &num_options) == napi_ok) {
+    if (napi_get_array_length(env, options, &numOptions) == napi_ok) {
         // options passed as an array
-        arg_strings.reserve(num_options + 1);
-        arg_strings.emplace_back("argv[0] placeholder");
+        argStrings.reserve(numOptions + 1);
+        argStrings.emplace_back("argv[0] placeholder");
 
-        for (uint32_t i = 0; i < num_options; ++i) {
+        for (uint32_t i = 0; i < numOptions; ++i) {
             napi_value option;
             NAPI_ASSERT_OK(napi_get_element(env, options, i, &option));
             if (napi_coerce_to_string(env, option, &option) != napi_ok) {
                 LogError("Option values must be coercible to string");
-                return napi_false;
+                return napiFalse;
             }
-            arg_strings.push_back(GetString(env, option));
+            argStrings.push_back(GetString(env, option));
         }
     } else {
         // options passed as a map
-        napi_value prop_names;
-        NAPI_ASSERT_OK(napi_get_property_names(env, options, &prop_names));
-        NAPI_ASSERT_OK(napi_get_array_length(env, prop_names, &num_options));
+        napi_value propNames;
+        NAPI_ASSERT_OK(napi_get_property_names(env, options, &propNames));
+        NAPI_ASSERT_OK(napi_get_array_length(env, propNames, &numOptions));
 
-        arg_strings.reserve(num_options + 1);
-        arg_strings.emplace_back("argv[0] placeholder");
+        argStrings.reserve(numOptions + 1);
+        argStrings.emplace_back("argv[0] placeholder");
 
-        for (uint32_t i = 0; i < num_options; ++i) {
+        for (uint32_t i = 0; i < numOptions; ++i) {
             napi_value key;
             napi_value value;
-            NAPI_ASSERT_OK(napi_get_element(env, prop_names, i, &key));
+            NAPI_ASSERT_OK(napi_get_element(env, propNames, i, &key));
             NAPI_ASSERT_OK(napi_get_property(env, options, key, &value));
             if (napi_coerce_to_string(env, value, &value) != napi_ok) {
                 LogError("Option values must be coercible to string");
-                return napi_false;
+                return napiFalse;
             }
-            arg_strings.push_back("--" + GetString(env, key) + "=" + GetString(env, value));
+            argStrings.push_back("--" + GetString(env, key) + "=" + GetString(env, value));
         }
     }
 
-    auto add_opts = [&](base_options::Options *base_options, panda::RuntimeOptions *runtime_options) {
-        panda::PandArgParser pa_parser;
-        base_options->AddOptions(&pa_parser);
-        runtime_options->AddOptions(&pa_parser);
-        panda::compiler::OPTIONS.AddOptions(&pa_parser);
+    auto addOpts = [&](base_options::Options *baseOptions, panda::RuntimeOptions *runtimeOptions) {
+        panda::PandArgParser paParser;
+        baseOptions->AddOptions(&paParser);
+        runtimeOptions->AddOptions(&paParser);
+        panda::compiler::g_options.AddOptions(&paParser);
 
-        std::vector<const char *> fake_argv;
-        fake_argv.reserve(arg_strings.size());
-        for (auto const &arg : arg_strings) {
-            fake_argv.push_back(arg.c_str());  // Be careful, do not reallocate referenced strings
+        std::vector<const char *> fakeArgv;
+        fakeArgv.reserve(argStrings.size());
+        for (auto const &arg : argStrings) {
+            fakeArgv.push_back(arg.c_str());  // Be careful, do not reallocate referenced strings
         }
 
-        if (!pa_parser.Parse(fake_argv.size(), fake_argv.data())) {
-            LogError("Parse options failed. Optional arguments:\n" + pa_parser.GetHelpString());
+        if (!paParser.Parse(fakeArgv.size(), fakeArgv.data())) {
+            LogError("Parse options failed. Optional arguments:\n" + paParser.GetHelpString());
             return false;
         }
 
-        auto runtime_options_err = runtime_options->Validate();
-        if (runtime_options_err) {
-            LogError("Parse options failed: " + runtime_options_err.value().GetMessage());
+        auto runtimeOptionsErr = runtimeOptions->Validate();
+        if (runtimeOptionsErr) {
+            LogError("Parse options failed: " + runtimeOptionsErr.value().GetMessage());
             return false;
         }
-        panda::compiler::CompilerLogger::SetComponents(panda::compiler::OPTIONS.GetCompilerLog());
+        panda::compiler::CompilerLogger::SetComponents(panda::compiler::g_options.GetCompilerLog());
         return true;
     };
 
-    bool res = ets::CreateRuntime(add_opts);
+    bool res = ets::CreateRuntime(addOpts);
     if (res) {
         auto coro = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scoped(coro);
         InteropCtx::Init(coro, env);
     }
-    napi_value napi_res;
-    NAPI_ASSERT_OK(napi_get_boolean(env, res, &napi_res));
-    return napi_res;
+    napi_value napiRes;
+    NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));
+    return napiRes;
 }
 
 static napi_value Init(napi_env env, napi_value exports)

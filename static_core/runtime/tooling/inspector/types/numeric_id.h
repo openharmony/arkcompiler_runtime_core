@@ -33,11 +33,11 @@ using RemoteObjectId = size_t;
 using ScriptId = size_t;
 
 template <typename T, typename = std::enable_if_t<std::is_unsigned_v<T>>>
-Expected<T, std::string> ParseNumericId(const JsonObject &object, const char *property_name)
+Expected<T, std::string> ParseNumericId(const JsonObject &object, const char *propertyName)
 {
-    auto property = object.GetValue<JsonObject::StringT>(property_name);
+    auto property = object.GetValue<JsonObject::StringT>(propertyName);
     if (!property) {
-        return Unexpected(std::string("No such property: ") + property_name);
+        return Unexpected(std::string("No such property: ") + propertyName);
     }
 
     intmax_t value;

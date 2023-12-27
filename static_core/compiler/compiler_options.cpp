@@ -17,5 +17,5 @@
 
 namespace panda::compiler {
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-CompilerOptions OPTIONS("");
+CompilerOptions g_options("");
 }  // namespace panda::compiler

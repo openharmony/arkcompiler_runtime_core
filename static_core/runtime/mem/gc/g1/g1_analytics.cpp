@@ -18,160 +18,159 @@
 #include "libpandabase/os/time.h"
 
 namespace panda::mem {
-G1Analytics::G1Analytics(uint64_t now) : previous_young_collection_end_(now) {}
+G1Analytics::G1Analytics(uint64_t now) : previousYoungCollectionEnd_(now) {}
 
 void G1Analytics::ReportEvacuatedBytes(size_t bytes)
 {
     // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
     // on other reads or writes
-    copied_bytes_.fetch_add(bytes, std::memory_order_relaxed);
+    copiedBytes_.fetch_add(bytes, std::memory_order_relaxed);
 }
 
 void G1Analytics::ReportScanRemsetStart(uint64_t time)
 {
-    scan_remset_start_ = time;
+    scanRemsetStart_ = time;
 }
 
 void G1Analytics::ReportScanRemsetEnd(uint64_t time)
 {
-    scan_remset_end_ = time;
+    scanRemsetEnd_ = time;
 }
 
 void G1Analytics::ReportMarkingStart(uint64_t time)
 {
-    marking_start_ = time;
+    markingStart_ = time;
 }
 
 void G1Analytics::ReportMarkingEnd(uint64_t time)
 {
-    marking_end_ = time;
+    markingEnd_ = time;
 }
 
 void G1Analytics::ReportEvacuationStart(uint64_t time)
 {
-    evacuation_start_ = time;
+    evacuationStart_ = time;
 }
 
 void G1Analytics::ReportEvacuationEnd(uint64_t time)
 {
-    evacuation_end_ = time;
+    evacuationEnd_ = time;
 }
 
 void G1Analytics::ReportUpdateRefsStart(uint64_t time)
 {
-    update_refs_start_ = time;
+    updateRefsStart_ = time;
 }
 
 void G1Analytics::ReportUpdateRefsEnd(uint64_t time)
 {
-    update_refs_end_ = time;
+    updateRefsEnd_ = time;
 }
 
 void G1Analytics::ReportPromotedRegion()
 {
     // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
     // on other reads or writes
-    promoted_regions_.fetch_add(1, std::memory_order_relaxed);
+    promotedRegions_.fetch_add(1, std::memory_order_relaxed);
 }
 
 void G1Analytics::ReportLiveObjects(size_t num)
 {
     // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
     // on other reads or writes
-    live_objects_.fetch_add(num, std::memory_order_relaxed);
+    liveObjects_.fetch_add(num, std::memory_order_relaxed);
 }
 
 double G1Analytics::PredictAllocationRate() const
 {
-    return predictor_.Predict(allocation_rate_seq_);
+    return predictor_.Predict(allocationRateSeq_);
 }
 
 int64_t G1Analytics::EstimatePredictionErrorInMicros() const
 {
-    return predictor_.Predict(prediction_error_seq_);
+    return predictor_.Predict(predictionErrorSeq_);
 }
 
 void G1Analytics::ReportCollectionStart(uint64_t time)
 {
-    current_young_collection_start_ = time;
-    copied_bytes_ = 0;
-    promoted_regions_ = 0;
-    live_objects_ = 0;
+    currentYoungCollectionStart_ = time;
+    copiedBytes_ = 0;
+    promotedRegions_ = 0;
+    liveObjects_ = 0;
 }
 
-void G1Analytics::ReportCollectionEnd(uint64_t end_time, const CollectionSet &collection_set)
+void G1Analytics::ReportCollectionEnd(uint64_t endTime, const CollectionSet &collectionSet)
 {
-    auto eden_length = collection_set.Young().size();
-    auto app_time = (current_young_collection_start_ - previous_young_collection_end_) / panda::os::time::MICRO_TO_NANO;
-    allocation_rate_seq_.Add(static_cast<double>(eden_length) / app_time);
+    auto edenLength = collectionSet.Young().size();
+    auto appTime = (currentYoungCollectionStart_ - previousYoungCollectionEnd_) / panda::os::time::MICRO_TO_NANO;
+    allocationRateSeq_.Add(static_cast<double>(edenLength) / appTime);
 
-    if (collection_set.Young().size() == collection_set.size()) {
-        if (eden_length != promoted_regions_) {
-            auto compacted_regions = eden_length - promoted_regions_;
-            live_objects_seq_.Add(static_cast<double>(live_objects_) / compacted_regions);
-            copied_bytes_seq_.Add(static_cast<double>(copied_bytes_) / compacted_regions);
-            auto estimated_promotion_time = EstimatePromotionTimeInMicros(promoted_regions_);
-            auto evacuation_time = (evacuation_end_ - evacuation_start_) / panda::os::time::MICRO_TO_NANO;
-            if (evacuation_time > estimated_promotion_time) {
-                copying_bytes_rate_seq_.Add(static_cast<double>(copied_bytes_) /
-                                            (evacuation_time - estimated_promotion_time));
+    if (collectionSet.Young().size() == collectionSet.size()) {
+        if (edenLength != promotedRegions_) {
+            auto compactedRegions = edenLength - promotedRegions_;
+            liveObjectsSeq_.Add(static_cast<double>(liveObjects_) / compactedRegions);
+            copiedBytesSeq_.Add(static_cast<double>(copiedBytes_) / compactedRegions);
+            auto estimatedPromotionTime = EstimatePromotionTimeInMicros(promotedRegions_);
+            auto evacuationTime = (evacuationEnd_ - evacuationStart_) / panda::os::time::MICRO_TO_NANO;
+            if (evacuationTime > estimatedPromotionTime) {
+                copyingBytesRateSeq_.Add(static_cast<double>(copiedBytes_) / (evacuationTime - estimatedPromotionTime));
             }
         }
 
-        auto marking_time = (marking_end_ - marking_start_) / panda::os::time::MICRO_TO_NANO;
-        marking_rate_seq_.Add(static_cast<double>(live_objects_) / marking_time);
+        auto markingTime = (markingEnd_ - markingStart_) / panda::os::time::MICRO_TO_NANO;
+        markingRateSeq_.Add(static_cast<double>(liveObjects_) / markingTime);
 
-        auto update_refs_time = (update_refs_end_ - update_refs_start_) / panda::os::time::MICRO_TO_NANO;
-        update_refs_time_seq_.Add(static_cast<double>(update_refs_time));
+        auto updateRefsTime = (updateRefsEnd_ - updateRefsStart_) / panda::os::time::MICRO_TO_NANO;
+        updateRefsTimeSeq_.Add(static_cast<double>(updateRefsTime));
 
-        promotion_seq_.Add(static_cast<double>(promoted_regions_) / eden_length);
+        ASSERT(edenLength != 0);
+        promotionSeq_.Add(static_cast<double>(promotedRegions_) / edenLength);
 
-        auto pause_time = (end_time - current_young_collection_start_) / panda::os::time::MICRO_TO_NANO;
-        prediction_error_seq_.Add(static_cast<double>(pause_time) - PredictYoungCollectionTimeInMicros(eden_length));
+        auto pauseTime = (endTime - currentYoungCollectionStart_) / panda::os::time::MICRO_TO_NANO;
+        predictionErrorSeq_.Add(static_cast<double>(pauseTime) - PredictYoungCollectionTimeInMicros(edenLength));
     }
 
-    auto scan_remset_time = (scan_remset_end_ - scan_remset_start_) / panda::os::time::MICRO_TO_NANO;
-    scan_remset_time_seq_.Add(static_cast<double>(scan_remset_time) / collection_set.size());
+    auto scanRemsetTime = (scanRemsetEnd_ - scanRemsetStart_) / panda::os::time::MICRO_TO_NANO;
+    scanRemsetTimeSeq_.Add(static_cast<double>(scanRemsetTime) / collectionSet.size());
 
-    previous_young_collection_end_ = end_time;
+    previousYoungCollectionEnd_ = endTime;
 }
 
-int64_t G1Analytics::PredictYoungCollectionTimeInMicros(size_t eden_length) const
+int64_t G1Analytics::PredictYoungCollectionTimeInMicros(size_t edenLength) const
 {
-    auto expected_promoted_regions = PredictPromotedRegions(eden_length);
-    auto expected_compacted_regions = eden_length - expected_promoted_regions;
-    auto expected_copied_bytes = expected_compacted_regions * predictor_.Predict(copied_bytes_seq_);
-    auto expected_live_objects = expected_compacted_regions * predictor_.Predict(live_objects_seq_);
-    auto marking_rate_prediction = marking_rate_seq_.IsEmpty() ? 0 : predictor_.Predict(marking_rate_seq_);
-    auto marking_cost = marking_rate_prediction == 0 ? 0 : expected_live_objects / marking_rate_prediction;
-    auto copying_bytes_rate_prediction =
-        copying_bytes_rate_seq_.IsEmpty() ? 0 : predictor_.Predict(copying_bytes_rate_seq_);
-    auto copying_cost = copying_bytes_rate_prediction == 0 ? 0 : expected_copied_bytes / copying_bytes_rate_prediction;
-    return marking_cost + copying_cost + eden_length * predictor_.Predict(scan_remset_time_seq_) +
-           predictor_.Predict(update_refs_time_seq_) + EstimatePromotionTimeInMicros(expected_promoted_regions);
+    auto expectedPromotedRegions = PredictPromotedRegions(edenLength);
+    auto expectedCompactedRegions = edenLength - expectedPromotedRegions;
+    auto expectedCopiedBytes = expectedCompactedRegions * predictor_.Predict(copiedBytesSeq_);
+    auto expectedLiveObjects = expectedCompactedRegions * predictor_.Predict(liveObjectsSeq_);
+    auto markingRatePrediction = markingRateSeq_.IsEmpty() ? 0 : predictor_.Predict(markingRateSeq_);
+    auto markingCost = markingRatePrediction == 0 ? 0 : expectedLiveObjects / markingRatePrediction;
+    auto copyingBytesRatePrediction = copyingBytesRateSeq_.IsEmpty() ? 0 : predictor_.Predict(copyingBytesRateSeq_);
+    auto copyingCost = copyingBytesRatePrediction == 0 ? 0 : expectedCopiedBytes / copyingBytesRatePrediction;
+    return markingCost + copyingCost + edenLength * predictor_.Predict(scanRemsetTimeSeq_) +
+           predictor_.Predict(updateRefsTimeSeq_) + EstimatePromotionTimeInMicros(expectedPromotedRegions);
 }
 
 int64_t G1Analytics::PredictOldCollectionTimeInMicros(Region *region) const
 {
-    auto expected_live_objects = region->GetLiveBytes() * region->GetAllocatedObjects() / region->GetAllocatedBytes();
-    return PredictOldCollectionTimeInMicros(region->GetLiveBytes(), expected_live_objects);
+    auto expectedLiveObjects = region->GetLiveBytes() * region->GetAllocatedObjects() / region->GetAllocatedBytes();
+    return PredictOldCollectionTimeInMicros(region->GetLiveBytes(), expectedLiveObjects);
 }
 
-int64_t G1Analytics::PredictOldCollectionTimeInMicros(size_t live_bytes, size_t live_objects) const
+int64_t G1Analytics::PredictOldCollectionTimeInMicros(size_t liveBytes, size_t liveObjects) const
 {
     // Currently remset scan esimation is too rough. We can improve it after #11263
-    auto remset_scan_cost = predictor_.Predict(scan_remset_time_seq_);
-    return live_objects / predictor_.Predict(marking_rate_seq_) +
-           live_bytes / predictor_.Predict(copying_bytes_rate_seq_) + remset_scan_cost;
+    auto remsetScanCost = predictor_.Predict(scanRemsetTimeSeq_);
+    return liveObjects / predictor_.Predict(markingRateSeq_) + liveBytes / predictor_.Predict(copyingBytesRateSeq_) +
+           remsetScanCost;
 }
 
-double G1Analytics::PredictPromotedRegions(size_t eden_length) const
+double G1Analytics::PredictPromotedRegions(size_t edenLength) const
 {
-    return predictor_.Predict(promotion_seq_) * eden_length;
+    return predictor_.Predict(promotionSeq_) * edenLength;
 }
 
-size_t G1Analytics::EstimatePromotionTimeInMicros(size_t promoted_regions) const
+size_t G1Analytics::EstimatePromotionTimeInMicros(size_t promotedRegions) const
 {
-    return promotion_cost_ * promoted_regions;
+    return promotionCost_ * promotedRegions;
 }
 }  // namespace panda::mem

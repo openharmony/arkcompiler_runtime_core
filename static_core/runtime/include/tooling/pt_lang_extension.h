@@ -50,9 +50,9 @@ public:
 
     // PtObject API
     virtual PandaList<PtProperty> GetProperties(PtObject object) const = 0;
-    virtual PtProperty GetProperty(PtObject object, const char *property_name) const = 0;
-    virtual bool AddProperty(PtObject object, const char *property_name, PtValue value) const = 0;
-    virtual bool RemoveProperty(PtObject object, const char *property_name) const = 0;
+    virtual PtProperty GetProperty(PtObject object, const char *propertyName) const = 0;
+    virtual bool AddProperty(PtObject object, const char *propertyName, PtValue value) const = 0;
+    virtual bool RemoveProperty(PtObject object, const char *propertyName) const = 0;
 
     // PtProperty API
     virtual const char *GetPropertyName(PtProperty propery) const = 0;

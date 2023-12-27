@@ -35,11 +35,11 @@ public:
         mem_ = nullptr;
     }
 
-    void Reset(void *new_mem)
+    void Reset(void *newMem)
     {
-        if (mem_ != new_mem && mem_ != nullptr) {
+        if (mem_ != newMem && mem_ != nullptr) {
             dwarf_dealloc(dbg_, mem_, tag_);
-            mem_ = new_mem;
+            mem_ = newMem;
         }
     }
 
@@ -85,10 +85,10 @@ static void FreeAranges(Dwarf_Debug dbg, Dwarf_Arange *aranges, Dwarf_Signed cou
 
 static void SkipCuHeaders(Dwarf_Debug dbg)
 {
-    Dwarf_Unsigned cu_header_idx;
-    Dwarf_Half cu_type;
+    Dwarf_Unsigned cuHeaderIdx;
+    Dwarf_Half cuType;
     while (dwarf_next_cu_header_d(dbg, static_cast<Dwarf_Bool>(true), nullptr, nullptr, nullptr, nullptr, nullptr,
-                                  nullptr, nullptr, nullptr, &cu_header_idx, &cu_type, nullptr) != DW_DLV_NO_ENTRY) {
+                                  nullptr, nullptr, nullptr, &cuHeaderIdx, &cuType, nullptr) != DW_DLV_NO_ENTRY) {
     }
 }
 
@@ -97,22 +97,22 @@ static void DwarfErrorHandler(Dwarf_Error err, [[maybe_unused]] Dwarf_Ptr errarg
     LOG(ERROR, RUNTIME) << "libdwarf error: " << dwarf_errmsg(err);
 }
 
-static bool GetDieRange(Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc)
+static bool GetDieRange(Dwarf_Die die, Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc)
 {
-    Dwarf_Addr low_pc = DW_DLV_BADADDR;
-    Dwarf_Addr high_pc = 0;
+    Dwarf_Addr lowPc = DW_DLV_BADADDR;
+    Dwarf_Addr highPc = 0;
     Dwarf_Half form = 0;
     Dwarf_Form_Class formclass;
 
-    if (dwarf_lowpc(die, &low_pc, nullptr) != DW_DLV_OK ||
-        dwarf_highpc_b(die, &high_pc, &form, &formclass, nullptr) != DW_DLV_OK) {
+    if (dwarf_lowpc(die, &lowPc, nullptr) != DW_DLV_OK ||
+        dwarf_highpc_b(die, &highPc, &form, &formclass, nullptr) != DW_DLV_OK) {
         return false;
     }
     if (formclass == DW_FORM_CLASS_CONSTANT) {
-        high_pc += low_pc;
+        highPc += lowPc;
     }
-    *out_low_pc = low_pc;
-    *out_high_pc = high_pc;
+    *outLowPc = lowPc;
+    *outHighPc = highPc;
     return true;
 }
 
@@ -156,17 +156,17 @@ bool IterateDieRanges([[maybe_unused]] F func, [[maybe_unused]] Dwarf_Attribute 
 }
 
 template <class F>
-bool IterateDieRanges(F func, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr base_addr)
+bool IterateDieRanges(F func, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr baseAddr)
 {
     for (const Dwarf_Ranges &range : ranges) {
         if (range.dwr_type == DW_RANGES_ENTRY) {
-            Dwarf_Addr rng_low_pc = base_addr + range.dwr_addr1;
-            Dwarf_Addr rng_high_pc = base_addr + range.dwr_addr2;
-            if (func(rng_low_pc, rng_high_pc)) {
+            Dwarf_Addr rngLowPc = baseAddr + range.dwr_addr1;
+            Dwarf_Addr rngHighPc = baseAddr + range.dwr_addr2;
+            if (func(rngLowPc, rngHighPc)) {
                 return true;
             }
         } else if (range.dwr_type == DW_RANGES_ADDRESS_SELECTION) {
-            base_addr = range.dwr_addr2;
+            baseAddr = range.dwr_addr2;
         } else {
             break;
         }
@@ -176,24 +176,24 @@ bool IterateDieRanges(F func, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr base_
 }
 
 template <class F>
-bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func, Dwarf_Attribute attr, Dwarf_Addr low_pc)
+bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func, Dwarf_Attribute attr, Dwarf_Addr lowPc)
 {
     Dwarf_Half form = 0;
     if (dwarf_whatform(attr, &form, nullptr) != DW_DLV_OK) {
         return false;
     }
 
-    Dwarf_Half offset_size = 0;
+    Dwarf_Half offsetSize = 0;
     Dwarf_Half dwversion = 0;
-    if (dwarf_get_version_of_die(die, &dwversion, &offset_size) != DW_DLV_OK) {
+    if (dwarf_get_version_of_die(die, &dwversion, &offsetSize) != DW_DLV_OK) {
         return false;
     }
 
     DwarfGuard g(dbg, attr, DW_DLA_ATTR);
     Dwarf_Unsigned offset = 0;
-    Dwarf_Addr base_addr = 0;
-    if (low_pc != DW_DLV_BADADDR) {
-        base_addr = low_pc;
+    Dwarf_Addr baseAddr = 0;
+    if (lowPc != DW_DLV_BADADDR) {
+        baseAddr = lowPc;
     }
     Dwarf_Signed count = 0;
     Dwarf_Ranges *buf = nullptr;
@@ -212,7 +212,7 @@ bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func, Dwarf_Attribute at
         if (dwarf_get_ranges_a(dbg, offset, die, &buf, &count, nullptr, nullptr) == DW_DLV_OK) {
             AtReturn r([dbg, buf, count]() { dwarf_ranges_dealloc(dbg, buf, count); });
             Span<Dwarf_Ranges> ranges(buf, count);
-            return IterateDieRanges(func, ranges, base_addr);
+            return IterateDieRanges(func, ranges, baseAddr);
         }
     }
 
@@ -222,11 +222,11 @@ bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func, Dwarf_Attribute at
 template <class F>
 bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func)
 {
-    Dwarf_Addr low_pc = DW_DLV_BADADDR;
-    Dwarf_Addr high_pc = DW_DLV_BADADDR;
+    Dwarf_Addr lowPc = DW_DLV_BADADDR;
+    Dwarf_Addr highPc = DW_DLV_BADADDR;
 
-    if (GetDieRange(die, &low_pc, &high_pc)) {
-        return func(low_pc, high_pc);
+    if (GetDieRange(die, &lowPc, &highPc)) {
+        return func(lowPc, highPc);
     }
 
     Dwarf_Attribute attr;
@@ -234,31 +234,31 @@ bool IterateDieRanges(Dwarf_Debug dbg, Dwarf_Die die, F func)
         return false;
     }
 
-    return IterateDieRanges(dbg, die, func, attr, low_pc);
+    return IterateDieRanges(dbg, die, func, attr, lowPc);
 }
 
 DebugInfo::CompUnit::~CompUnit()
 {
-    if (line_ctx_ != nullptr) {
-        dwarf_srclines_dealloc_b(line_ctx_);
+    if (lineCtx_ != nullptr) {
+        dwarf_srclines_dealloc_b(lineCtx_);
     }
-    if (cu_die_ != nullptr) {
-        dwarf_dealloc(dbg_, cu_die_, DW_DLA_DIE);
+    if (cuDie_ != nullptr) {
+        dwarf_dealloc(dbg_, cuDie_, DW_DLA_DIE);
     }
 }
 
 Dwarf_Line_Context DebugInfo::CompUnit::GetLineContext()
 {
-    if (line_ctx_ != nullptr) {
-        return line_ctx_;
+    if (lineCtx_ != nullptr) {
+        return lineCtx_;
     }
     // Decode line number information for the whole compilation unit
     Dwarf_Unsigned version = 0;
-    Dwarf_Small table_count = 0;
-    if (dwarf_srclines_b(cu_die_, &version, &table_count, &line_ctx_, nullptr) != DW_DLV_OK) {
-        line_ctx_ = nullptr;
+    Dwarf_Small tableCount = 0;
+    if (dwarf_srclines_b(cuDie_, &version, &tableCount, &lineCtx_, nullptr) != DW_DLV_OK) {
+        lineCtx_ = nullptr;
     }
-    return line_ctx_;
+    return lineCtx_;
 }
 
 void DebugInfo::Destroy()
@@ -267,11 +267,11 @@ void DebugInfo::Destroy()
         return;
     }
     if (aranges_ != nullptr) {
-        FreeAranges(dbg_, aranges_, arange_count_);
+        FreeAranges(dbg_, aranges_, arangeCount_);
     }
     aranges_ = nullptr;
-    arange_count_ = 0;
-    cu_list_.clear();
+    arangeCount_ = 0;
+    cuList_.clear();
     ranges_.clear();
     dwarf_finish(dbg_, nullptr);
     close(fd_);
@@ -306,14 +306,14 @@ DebugInfo::ErrorCode DebugInfo::ReadFromFile(const char *filename)
         return NO_DEBUG_INFO;
     }
     // Aranges (address ranges) is an entity which help us to find the compilation unit quickly (something like index)
-    if (dwarf_get_aranges(dbg_, &aranges_, &arange_count_, nullptr) != DW_DLV_OK) {
+    if (dwarf_get_aranges(dbg_, &aranges_, &arangeCount_, nullptr) != DW_DLV_OK) {
         aranges_ = nullptr;
-        arange_count_ = 0;
+        arangeCount_ = 0;
     }
     return SUCCESS;
 }
 
-bool DebugInfo::GetSrcLocation(uintptr_t pc, std::string *function, std::string *src_file, uint32_t *line)
+bool DebugInfo::GetSrcLocation(uintptr_t pc, std::string *function, std::string *srcFile, uint32_t *line)
 {
     if (dbg_ == nullptr) {
         return false;
@@ -331,18 +331,18 @@ bool DebugInfo::GetSrcLocation(uintptr_t pc, std::string *function, std::string 
     Range range(pc, pc);
     auto it = ranges_.upper_bound(range);
     if (it == ranges_.end() || !it->Contain(pc)) {
-        Dwarf_Die cu_die = nullptr;
-        if (!FindCompUnitByPc(pc, &cu_die)) {
+        Dwarf_Die cuDie = nullptr;
+        if (!FindCompUnitByPc(pc, &cuDie)) {
             return false;
         }
-        cu_list_.emplace_back(CompUnit(cu_die, dbg_));
+        cuList_.emplace_back(CompUnit(cuDie, dbg_));
         auto ranges = &ranges_;
-        auto cu = &cu_list_.back();
-        IterateDieRanges(dbg_, cu_die, [ranges, cu](Dwarf_Addr low_pc, Dwarf_Addr high_pc) {
-            ranges->insert(Range(low_pc, high_pc, cu));
+        auto cu = &cuList_.back();
+        IterateDieRanges(dbg_, cuDie, [ranges, cu](Dwarf_Addr lowPc, Dwarf_Addr highPc) {
+            ranges->insert(Range(lowPc, highPc, cu));
             return false;
         });
-        TraverseChildren(cu, cu_die);
+        TraverseChildren(cu, cuDie);
     }
     it = ranges_.upper_bound(range);
     if (it == ranges_.end() || !it->Contain(pc)) {
@@ -352,33 +352,33 @@ bool DebugInfo::GetSrcLocation(uintptr_t pc, std::string *function, std::string 
     ASSERT(it->GetCu() != nullptr);
     *function = it->GetFunction();
     // Find the corresponding line number and source file.
-    GetSrcFileAndLine(pc, it->GetCu()->GetLineContext(), src_file, line);
+    GetSrcFileAndLine(pc, it->GetCu()->GetLineContext(), srcFile, line);
     return true;
 }
 
-bool DebugInfo::FindCompUnitByPc(uintptr_t pc, Dwarf_Die *cu_die)
+bool DebugInfo::FindCompUnitByPc(uintptr_t pc, Dwarf_Die *cuDie)
 {
     if (aranges_ != nullptr) {
         Dwarf_Arange arange = nullptr;
         Dwarf_Off offset = 0;
-        if (dwarf_get_arange(aranges_, arange_count_, pc, &arange, nullptr) == DW_DLV_OK &&
+        if (dwarf_get_arange(aranges_, arangeCount_, pc, &arange, nullptr) == DW_DLV_OK &&
             dwarf_get_cu_die_offset(arange, &offset, nullptr) == DW_DLV_OK &&
-            dwarf_offdie(dbg_, offset, cu_die, nullptr) == DW_DLV_OK) {
+            dwarf_offdie(dbg_, offset, cuDie, nullptr) == DW_DLV_OK) {
             return true;
         }
     }
 
     // No aranges are available or we can't find the corresponding arange. Iterate over all compilation units.
     // Its slow but works.
-    Dwarf_Unsigned cu_header_idx;
-    Dwarf_Half cu_type;
+    Dwarf_Unsigned cuHeaderIdx;
+    Dwarf_Half cuType;
     int res = dwarf_next_cu_header_d(dbg_, static_cast<Dwarf_Bool>(true), nullptr, nullptr, nullptr, nullptr, nullptr,
-                                     nullptr, nullptr, nullptr, &cu_header_idx, &cu_type, nullptr);
+                                     nullptr, nullptr, nullptr, &cuHeaderIdx, &cuType, nullptr);
     while (res == DW_DLV_OK) {
         Dwarf_Die die = nullptr;
         if (dwarf_siblingof_b(dbg_, nullptr, static_cast<Dwarf_Bool>(true), &die, nullptr) == DW_DLV_OK) {
             if (PcMatches(pc, die)) {
-                *cu_die = die;
+                *cuDie = die;
                 // Skip the rest cu headers because next time we need to stat search from the beginning.
                 SkipCuHeaders(dbg_);
                 return true;
@@ -386,18 +386,18 @@ bool DebugInfo::FindCompUnitByPc(uintptr_t pc, Dwarf_Die *cu_die)
             dwarf_dealloc(dbg_, die, DW_DLA_DIE);
         }
         res = dwarf_next_cu_header_d(dbg_, static_cast<Dwarf_Bool>(true), nullptr, nullptr, nullptr, nullptr, nullptr,
-                                     nullptr, nullptr, nullptr, &cu_header_idx, &cu_type, nullptr);
+                                     nullptr, nullptr, nullptr, &cuHeaderIdx, &cuType, nullptr);
     }
     return false;
 }
 
 void DebugInfo::TraverseChildren(CompUnit *cu, Dwarf_Die die)
 {
-    Dwarf_Die child_die = nullptr;
-    if (dwarf_child(die, &child_die, nullptr) != DW_DLV_OK) {
+    Dwarf_Die childDie = nullptr;
+    if (dwarf_child(die, &childDie, nullptr) != DW_DLV_OK) {
         return;
     }
-    TraverseSiblings(cu, child_die);
+    TraverseSiblings(cu, childDie);
 }
 
 void DebugInfo::TraverseSiblings(CompUnit *cu, Dwarf_Die die)
@@ -410,13 +410,13 @@ void DebugInfo::TraverseSiblings(CompUnit *cu, Dwarf_Die die)
             return;
         }
         if ((tag == DW_TAG_subprogram || tag == DW_TAG_inlined_subroutine)) {
-            Dwarf_Addr low_pc = DW_DLV_BADADDR;
-            Dwarf_Addr high_pc = 0;
+            Dwarf_Addr lowPc = DW_DLV_BADADDR;
+            Dwarf_Addr highPc = 0;
 
-            if (GetDieRange(die, &low_pc, &high_pc)) {
+            if (GetDieRange(die, &lowPc, &highPc)) {
                 std::string fname;
                 GetFunctionName(die, &fname);
-                AddFunction(cu, low_pc, high_pc, fname);
+                AddFunction(cu, lowPc, highPc, fname);
             }
         }
         TraverseChildren(cu, die);
@@ -429,25 +429,25 @@ void DebugInfo::TraverseSiblings(CompUnit *cu, Dwarf_Die die)
     } while (res == DW_DLV_OK);
 }
 
-void DebugInfo::AddFunction(CompUnit *cu, Dwarf_Addr low_pc, Dwarf_Addr high_pc, const std::string &function)
+void DebugInfo::AddFunction(CompUnit *cu, Dwarf_Addr lowPc, Dwarf_Addr highPc, const std::string &function)
 {
-    auto it = ranges_.upper_bound(Range(low_pc, low_pc));
+    auto it = ranges_.upper_bound(Range(lowPc, lowPc));
     ASSERT(it != ranges_.end());
-    Range range(low_pc, high_pc, cu, function);
+    Range range(lowPc, highPc, cu, function);
     if (it->Contain(range)) {
         Range enclosing = *it;  // NOLINT(performance-unnecessary-copy-initialization)
         ranges_.erase(it);
-        if (enclosing.GetLowPc() < low_pc) {
-            ranges_.insert(Range(enclosing.GetLowPc(), low_pc, enclosing.GetCu(), enclosing.GetFunction()));
+        if (enclosing.GetLowPc() < lowPc) {
+            ranges_.insert(Range(enclosing.GetLowPc(), lowPc, enclosing.GetCu(), enclosing.GetFunction()));
         }
         ranges_.insert(range);
-        if (high_pc < enclosing.GetHighPc()) {
-            ranges_.insert(Range(high_pc, enclosing.GetHighPc(), enclosing.GetCu(), enclosing.GetFunction()));
+        if (highPc < enclosing.GetHighPc()) {
+            ranges_.insert(Range(highPc, enclosing.GetHighPc(), enclosing.GetCu(), enclosing.GetFunction()));
         }
     } else if (range.Contain(*it)) {
         ranges_.insert(Range(range.GetLowPc(), it->GetLowPc(), cu, function));
         ranges_.insert(Range(it->GetHighPc(), range.GetHighPc(), cu, function));
-    } else if (high_pc <= it->GetLowPc()) {
+    } else if (highPc <= it->GetLowPc()) {
         ranges_.insert(range);
     }
 }
@@ -469,64 +469,63 @@ void DebugInfo::GetFunctionName(Dwarf_Die die, std::string *function)
 
     Dwarf_Off off = 0;
     Dwarf_Attribute attr = nullptr;
-    Dwarf_Die abs_orig_die = nullptr;
+    Dwarf_Die absOrigDie = nullptr;
     // If there is no name | linkage_name the function may be inlined.
     // Try to get it from the abstract origin
     if (dwarf_attr(die, DW_AT_abstract_origin, &attr, nullptr) == DW_DLV_OK) {
         DwarfGuard ag(dbg_, attr, DW_DLA_ATTR);
         if (dwarf_global_formref(attr, &off, nullptr) == DW_DLV_OK &&
-            dwarf_offdie(dbg_, off, &abs_orig_die, nullptr) == DW_DLV_OK) {
-            DwarfGuard dg(dbg_, abs_orig_die, DW_DLA_DIE);
-            GetFunctionName(abs_orig_die, function);
+            dwarf_offdie(dbg_, off, &absOrigDie, nullptr) == DW_DLV_OK) {
+            DwarfGuard dg(dbg_, absOrigDie, DW_DLA_DIE);
+            GetFunctionName(absOrigDie, function);
             return;
         }
     }
 
     // If there is no name | linkage_name try to get it from the specification.
-    Dwarf_Die spec_die = nullptr;
+    Dwarf_Die specDie = nullptr;
     if (dwarf_attr(die, DW_AT_specification, &attr, nullptr) == DW_DLV_OK) {
         DwarfGuard ag(dbg_, attr, DW_DLA_ATTR);
         if (dwarf_global_formref(attr, &off, nullptr) == DW_DLV_OK &&
-            dwarf_offdie(dbg_, off, &spec_die, nullptr) == DW_DLV_OK) {
-            DwarfGuard dg(dbg_, spec_die, DW_DLA_DIE);
-            GetFunctionName(spec_die, function);
+            dwarf_offdie(dbg_, off, &specDie, nullptr) == DW_DLV_OK) {
+            DwarfGuard dg(dbg_, specDie, DW_DLA_DIE);
+            GetFunctionName(specDie, function);
         }
     }
 }
 
-bool DebugInfo::GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context line_ctx, std::string *out_src_file,
-                                  uint32_t *out_line)
+bool DebugInfo::GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context lineCtx, std::string *outSrcFile, uint32_t *outLine)
 {
-    if (line_ctx == nullptr) {
+    if (lineCtx == nullptr) {
         return false;
     }
-    Dwarf_Line *line_buf = nullptr;
-    Dwarf_Signed line_buf_size = 0;
-    if (dwarf_srclines_from_linecontext(line_ctx, &line_buf, &line_buf_size, nullptr) != DW_DLV_OK) {
+    Dwarf_Line *lineBuf = nullptr;
+    Dwarf_Signed lineBufSize = 0;
+    if (dwarf_srclines_from_linecontext(lineCtx, &lineBuf, &lineBufSize, nullptr) != DW_DLV_OK) {
         return false;
     }
-    Span<Dwarf_Line> lines(line_buf, line_buf_size);
-    Dwarf_Addr prev_line_pc = 0;
-    Dwarf_Line prev_line = nullptr;
+    Span<Dwarf_Line> lines(lineBuf, lineBufSize);
+    Dwarf_Addr prevLinePc = 0;
+    Dwarf_Line prevLine = nullptr;
     bool found = false;
     for (auto it = lines.begin(); it != lines.end() && !found; ++it) {
         Dwarf_Line line = *it;
-        Dwarf_Addr line_pc = 0;
-        dwarf_lineaddr(line, &line_pc, nullptr);
-        if (pc == line_pc) {
-            GetSrcFileAndLine(GetLastLineWithPc(pc, it, lines.end()), out_src_file, out_line);
+        Dwarf_Addr linePc = 0;
+        dwarf_lineaddr(line, &linePc, nullptr);
+        if (pc == linePc) {
+            GetSrcFileAndLine(GetLastLineWithPc(pc, it, lines.end()), outSrcFile, outLine);
             found = true;
-        } else if (prev_line != nullptr && prev_line_pc < pc && pc < line_pc) {
-            GetSrcFileAndLine(prev_line, out_src_file, out_line);
+        } else if (prevLine != nullptr && prevLinePc < pc && pc < linePc) {
+            GetSrcFileAndLine(prevLine, outSrcFile, outLine);
             found = true;
         } else {
-            Dwarf_Bool is_line_end;
-            dwarf_lineendsequence(line, &is_line_end, nullptr);
-            if (is_line_end != 0) {
-                prev_line = nullptr;
+            Dwarf_Bool isLineEnd;
+            dwarf_lineendsequence(line, &isLineEnd, nullptr);
+            if (isLineEnd != 0) {
+                prevLine = nullptr;
             } else {
-                prev_line_pc = line_pc;
-                prev_line = line;
+                prevLinePc = linePc;
+                prevLine = line;
             }
         }
     }
@@ -536,11 +535,11 @@ bool DebugInfo::GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context line_ctx, std
 Dwarf_Line DebugInfo::GetLastLineWithPc(Dwarf_Addr pc, Span<Dwarf_Line>::ConstIterator it,
                                         Span<Dwarf_Line>::ConstIterator end)
 {
-    Dwarf_Addr line_pc = 0;
+    Dwarf_Addr linePc = 0;
     auto next = std::next(it);
     while (next != end) {
-        dwarf_lineaddr(*next, &line_pc, nullptr);
-        if (pc != line_pc) {
+        dwarf_lineaddr(*next, &linePc, nullptr);
+        if (pc != linePc) {
             return *it;
         }
         it = next;
@@ -549,56 +548,56 @@ Dwarf_Line DebugInfo::GetLastLineWithPc(Dwarf_Addr pc, Span<Dwarf_Line>::ConstIt
     return *it;
 }
 
-void DebugInfo::GetSrcFileAndLine(Dwarf_Line line, std::string *out_src_file, uint32_t *out_line)
+void DebugInfo::GetSrcFileAndLine(Dwarf_Line line, std::string *outSrcFile, uint32_t *outLine)
 {
     Dwarf_Unsigned ln;
     dwarf_lineno(line, &ln, nullptr);
-    *out_line = ln;
-    char *src_file = nullptr;
-    if (dwarf_linesrc(line, &src_file, nullptr) == DW_DLV_OK) {
-        *out_src_file = src_file;
-        DwarfGuard g(dbg_, src_file, DW_DLA_STRING);
+    *outLine = ln;
+    char *srcFile = nullptr;
+    if (dwarf_linesrc(line, &srcFile, nullptr) == DW_DLV_OK) {
+        *outSrcFile = srcFile;
+        DwarfGuard g(dbg_, srcFile, DW_DLA_STRING);
     } else {
-        dwarf_linesrc(line, &src_file, nullptr);
-        *out_src_file = src_file;
-        DwarfGuard g(dbg_, src_file, DW_DLA_STRING);
+        dwarf_linesrc(line, &srcFile, nullptr);
+        *outSrcFile = srcFile;
+        DwarfGuard g(dbg_, srcFile, DW_DLA_STRING);
     }
 }
 
 bool DebugInfo::PcMatches(uintptr_t pc, Dwarf_Die die)
 {
-    Dwarf_Addr low_pc = DW_DLV_BADADDR;
-    Dwarf_Addr high_pc = 0;
-    return GetDieRangeForPc(pc, die, &low_pc, &high_pc);
+    Dwarf_Addr lowPc = DW_DLV_BADADDR;
+    Dwarf_Addr highPc = 0;
+    return GetDieRangeForPc(pc, die, &lowPc, &highPc);
 }
 
-bool DebugInfo::GetDieRange(Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc)
+bool DebugInfo::GetDieRange(Dwarf_Die die, Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc)
 {
-    Dwarf_Addr low_pc = DW_DLV_BADADDR;
-    Dwarf_Addr high_pc = 0;
+    Dwarf_Addr lowPc = DW_DLV_BADADDR;
+    Dwarf_Addr highPc = 0;
     Dwarf_Half form = 0;
     Dwarf_Form_Class formclass;
 
-    if (dwarf_lowpc(die, &low_pc, nullptr) != DW_DLV_OK ||
-        dwarf_highpc_b(die, &high_pc, &form, &formclass, nullptr) != DW_DLV_OK) {
+    if (dwarf_lowpc(die, &lowPc, nullptr) != DW_DLV_OK ||
+        dwarf_highpc_b(die, &highPc, &form, &formclass, nullptr) != DW_DLV_OK) {
         return false;
     }
     if (formclass == DW_FORM_CLASS_CONSTANT) {
-        high_pc += low_pc;
+        highPc += lowPc;
     }
-    *out_low_pc = low_pc;
-    *out_high_pc = high_pc;
+    *outLowPc = lowPc;
+    *outHighPc = highPc;
     return true;
 }
 
-bool DebugInfo::GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc)
+bool DebugInfo::GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc)
 {
-    Dwarf_Addr low_pc = DW_DLV_BADADDR;
-    Dwarf_Addr high_pc = 0;
+    Dwarf_Addr lowPc = DW_DLV_BADADDR;
+    Dwarf_Addr highPc = 0;
 
-    if (GetDieRange(die, &low_pc, &high_pc) && (*out_low_pc <= pc && pc < *out_high_pc)) {
-        *out_low_pc = low_pc;
-        *out_high_pc = high_pc;
+    if (GetDieRange(die, &lowPc, &highPc) && (*outLowPc <= pc && pc < *outHighPc)) {
+        *outLowPc = lowPc;
+        *outHighPc = highPc;
         return true;
     }
 
@@ -606,9 +605,9 @@ bool DebugInfo::GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *out_lo
     if (dwarf_attr(die, DW_AT_ranges, &attr, nullptr) == DW_DLV_OK) {
         DwarfGuard g(dbg_, attr, DW_DLA_ATTR);
         Dwarf_Unsigned offset;
-        Dwarf_Addr base_addr = 0;
-        if (low_pc != DW_DLV_BADADDR) {
-            base_addr = low_pc;
+        Dwarf_Addr baseAddr = 0;
+        if (lowPc != DW_DLV_BADADDR) {
+            baseAddr = lowPc;
         }
         Dwarf_Signed count = 0;
         Dwarf_Ranges *ranges = nullptr;
@@ -616,26 +615,26 @@ bool DebugInfo::GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *out_lo
             dwarf_get_ranges_a(dbg_, offset, die, &ranges, &count, nullptr, nullptr) == DW_DLV_OK) {
             Dwarf_Debug dbg = dbg_;
             AtReturn r([dbg, ranges, count]() { dwarf_ranges_dealloc(dbg, ranges, count); });
-            return FindRangeForPc(pc, Span<Dwarf_Ranges>(ranges, count), base_addr, out_low_pc, out_high_pc);
+            return FindRangeForPc(pc, Span<Dwarf_Ranges>(ranges, count), baseAddr, outLowPc, outHighPc);
         }
     }
     return false;
 }
 
-bool DebugInfo::FindRangeForPc(uintptr_t pc, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr base_addr,
-                               Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc)
+bool DebugInfo::FindRangeForPc(uintptr_t pc, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr baseAddr,
+                               Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc)
 {
     for (const Dwarf_Ranges &range : ranges) {
         if (range.dwr_type == DW_RANGES_ENTRY) {
-            Dwarf_Addr rng_low_pc = base_addr + range.dwr_addr1;
-            Dwarf_Addr rng_high_pc = base_addr + range.dwr_addr2;
-            if (rng_low_pc <= pc && pc < rng_high_pc) {
-                *out_low_pc = rng_low_pc;
-                *out_high_pc = rng_high_pc;
+            Dwarf_Addr rngLowPc = baseAddr + range.dwr_addr1;
+            Dwarf_Addr rngHighPc = baseAddr + range.dwr_addr2;
+            if (rngLowPc <= pc && pc < rngHighPc) {
+                *outLowPc = rngLowPc;
+                *outHighPc = rngHighPc;
                 return true;
             }
         } else if (range.dwr_type == DW_RANGES_ADDRESS_SELECTION) {
-            base_addr = range.dwr_addr2;
+            baseAddr = range.dwr_addr2;
         } else {
             break;
         }

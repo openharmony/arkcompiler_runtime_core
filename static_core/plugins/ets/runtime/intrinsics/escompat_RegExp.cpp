@@ -36,29 +36,29 @@ EtsObject *GetFieldObjectByName(EtsObject *object, const char *name)
     return object->GetFieldObject(field);
 }
 
-uint32_t CastToBitMask(EtsString *check_str)
+uint32_t CastToBitMask(EtsString *checkStr)
 {
-    uint32_t flags_bits = 0;
-    uint32_t flags_bits_temp = 0;
-    for (int i = 0; i < check_str->GetLength(); i++) {
-        switch (check_str->At(i)) {
+    uint32_t flagsBits = 0;
+    uint32_t flagsBitsTemp = 0;
+    for (int i = 0; i < checkStr->GetLength(); i++) {
+        switch (checkStr->At(i)) {
             case 'g':
-                flags_bits_temp = RegExpParser::FLAG_GLOBAL;
+                flagsBitsTemp = RegExpParser::FLAG_GLOBAL;
                 break;
             case 'i':
-                flags_bits_temp = RegExpParser::FLAG_IGNORECASE;
+                flagsBitsTemp = RegExpParser::FLAG_IGNORECASE;
                 break;
             case 'm':
-                flags_bits_temp = RegExpParser::FLAG_MULTILINE;
+                flagsBitsTemp = RegExpParser::FLAG_MULTILINE;
                 break;
             case 's':
-                flags_bits_temp = RegExpParser::FLAG_DOTALL;
+                flagsBitsTemp = RegExpParser::FLAG_DOTALL;
                 break;
             case 'u':
-                flags_bits_temp = RegExpParser::FLAG_UTF16;
+                flagsBitsTemp = RegExpParser::FLAG_UTF16;
                 break;
             case 'y':
-                flags_bits_temp = RegExpParser::FLAG_STICKY;
+                flagsBitsTemp = RegExpParser::FLAG_STICKY;
                 break;
             default: {
                 auto *thread = ManagedThread::GetCurrent();
@@ -69,7 +69,7 @@ uint32_t CastToBitMask(EtsString *check_str)
                 return 0;
             }
         }
-        if ((flags_bits & flags_bits_temp) != 0) {
+        if ((flagsBits & flagsBitsTemp) != 0) {
             auto *thread = ManagedThread::GetCurrent();
             auto ctx = PandaEtsVM::GetCurrent()->GetLanguageContext();
             std::string message = "invalid regular expression flags";
@@ -77,9 +77,9 @@ uint32_t CastToBitMask(EtsString *check_str)
                                   utf::CStringAsMutf8(message.c_str()));
             return 0;
         }
-        flags_bits |= flags_bits_temp;
+        flagsBits |= flagsBitsTemp;
     }
-    return flags_bits;
+    return flagsBits;
 }
 }  // namespace
 
@@ -88,43 +88,42 @@ extern "C" EtsVoid *EscompatRegExpCompile(ObjectHeader *obj)
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
 
-    auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto string_class = class_linker->GetClassRoot(EtsClassRoot::STRING);
-    auto regexp_object = EtsObject::FromCoreType(obj);
-    VMHandle<EtsObject> reg_obj_handle(thread, regexp_object->GetCoreType());
-    auto regexp_class = reg_obj_handle.GetPtr()->GetClass();
+    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto stringClass = classLinker->GetClassRoot(EtsClassRoot::STRING);
+    auto regexpObject = EtsObject::FromCoreType(obj);
+    VMHandle<EtsObject> regObjHandle(thread, regexpObject->GetCoreType());
+    auto regexpClass = regObjHandle.GetPtr()->GetClass();
 
-    EtsField *group_names_field = regexp_class->GetDeclaredFieldIDByName("groupNames");
-    EtsString *pattern_str = EtsString::FromEtsObject(GetFieldObjectByName(reg_obj_handle.GetPtr(), "pattern"));
-    VMHandle<coretypes::String> s_handle(thread, pattern_str->GetCoreType());
+    EtsField *groupNamesField = regexpClass->GetDeclaredFieldIDByName("groupNames");
+    EtsString *patternStr = EtsString::FromEtsObject(GetFieldObjectByName(regObjHandle.GetPtr(), "pattern"));
+    VMHandle<coretypes::String> sHandle(thread, patternStr->GetCoreType());
 
-    EtsString *flags = EtsString::FromEtsObject(GetFieldObjectByName(reg_obj_handle.GetPtr(), "flags"));
-    auto flags_bits = static_cast<uint8_t>(CastToBitMask(flags));
+    EtsString *flags = EtsString::FromEtsObject(GetFieldObjectByName(regObjHandle.GetPtr(), "flags"));
+    auto flagsBits = static_cast<uint8_t>(CastToBitMask(flags));
 
     RegExpParser parser = RegExpParser();
-    parser.Init(reinterpret_cast<char *>(s_handle.GetPtr()->GetDataMUtf8()), s_handle.GetPtr()->GetLength(),
-                flags_bits);
+    parser.Init(reinterpret_cast<char *>(sHandle.GetPtr()->GetDataMUtf8()), sHandle.GetPtr()->GetLength(), flagsBits);
     parser.Parse();
 
-    PandaVector<PandaString> group_name = parser.GetGroupNames();
+    PandaVector<PandaString> groupName = parser.GetGroupNames();
 
-    EtsObjectArray *ets_group_names = EtsObjectArray::Create(string_class, group_name.size());
-    VMHandle<EtsObjectArray> arr_handle(thread, ets_group_names->GetCoreType());
+    EtsObjectArray *etsGroupNames = EtsObjectArray::Create(stringClass, groupName.size());
+    VMHandle<EtsObjectArray> arrHandle(thread, etsGroupNames->GetCoreType());
 
-    for (size_t i = 0; i < group_name.size(); ++i) {
-        EtsString *str = EtsString::CreateFromMUtf8(group_name[i].c_str(), group_name[i].size());
-        arr_handle.GetPtr()->Set(i, str->AsObject());
+    for (size_t i = 0; i < groupName.size(); ++i) {
+        EtsString *str = EtsString::CreateFromMUtf8(groupName[i].c_str(), groupName[i].size());
+        arrHandle.GetPtr()->Set(i, str->AsObject());
     }
-    reg_obj_handle.GetPtr()->SetFieldObject(group_names_field, arr_handle.GetPtr()->AsObject());
+    regObjHandle.GetPtr()->SetFieldObject(groupNamesField, arrHandle.GetPtr()->AsObject());
 
-    auto buffer_size = parser.GetOriginBufferSize();
+    auto bufferSize = parser.GetOriginBufferSize();
     auto buffer = parser.GetOriginBuffer();
-    EtsField *buffer_field = regexp_class->GetDeclaredFieldIDByName("buffer");
-    EtsByteArray *ets_buffer = EtsByteArray::Create(buffer_size);
-    for (size_t i = 0; i < buffer_size; ++i) {
-        ets_buffer->Set(i, buffer[i]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    EtsField *bufferField = regexpClass->GetDeclaredFieldIDByName("buffer");
+    EtsByteArray *etsBuffer = EtsByteArray::Create(bufferSize);
+    for (size_t i = 0; i < bufferSize; ++i) {
+        etsBuffer->Set(i, buffer[i]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-    reg_obj_handle.GetPtr()->SetFieldObject(buffer_field, ets_buffer->AsObject());
+    regObjHandle.GetPtr()->SetFieldObject(bufferField, etsBuffer->AsObject());
 
     return EtsVoid::GetInstance();
 }
@@ -134,94 +133,94 @@ extern "C" EtsObject *EscompatRegExpExec(ObjectHeader *obj, EtsString *str)
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
 
-    VMHandle<EtsString> str_handle(thread, str->GetCoreType());
+    VMHandle<EtsString> strHandle(thread, str->GetCoreType());
 
-    auto regexp_object = EtsObject::FromCoreType(obj);
-    VMHandle<EtsObject> reg_obj_handle(thread, regexp_object->GetCoreType());
+    auto regexpObject = EtsObject::FromCoreType(obj);
+    VMHandle<EtsObject> regObjHandle(thread, regexpObject->GetCoreType());
 
-    auto regexp_class = reg_obj_handle.GetPtr()->GetClass();
-    auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto string_class = class_linker->GetClassRoot(EtsClassRoot::STRING);
+    auto regexpClass = regObjHandle.GetPtr()->GetClass();
+    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto stringClass = classLinker->GetClassRoot(EtsClassRoot::STRING);
 
-    EtsField *last_index_field = regexp_class->GetDeclaredFieldIDByName("lastIndex");
-    auto last_index = reg_obj_handle.GetPtr()->GetFieldPrimitive<int32_t>(last_index_field);
-    EtsString *flags = EtsString::FromEtsObject(GetFieldObjectByName(reg_obj_handle.GetPtr(), "flags"));
-    auto flags_bits = static_cast<uint8_t>(CastToBitMask(flags));
+    EtsField *lastIndexField = regexpClass->GetDeclaredFieldIDByName("lastIndex");
+    auto lastIndex = regObjHandle.GetPtr()->GetFieldPrimitive<int32_t>(lastIndexField);
+    EtsString *flags = EtsString::FromEtsObject(GetFieldObjectByName(regObjHandle.GetPtr(), "flags"));
+    auto flagsBits = static_cast<uint8_t>(CastToBitMask(flags));
 
-    auto result_class = class_linker->GetClass("Lescompat/RegExpExecResult;");
-    auto result_object = EtsObject::Create(result_class);
-    VMHandle<EtsObject> obj_handle(thread, result_object->GetCoreType());
+    auto resultClass = classLinker->GetClass("Lescompat/RegExpExecResult;");
+    auto resultObject = EtsObject::Create(resultClass);
+    VMHandle<EtsObject> objHandle(thread, resultObject->GetCoreType());
 
-    auto result_correct_field = result_class->GetDeclaredFieldIDByName("isCorrect");
+    auto resultCorrectField = resultClass->GetDeclaredFieldIDByName("isCorrect");
 
-    bool global = (flags_bits & RegExpParser::FLAG_GLOBAL) > 0;
-    bool sticky = (flags_bits & RegExpParser::FLAG_STICKY) > 0;
+    bool global = (flagsBits & RegExpParser::FLAG_GLOBAL) > 0;
+    bool sticky = (flagsBits & RegExpParser::FLAG_STICKY) > 0;
     if (!global && !sticky) {
-        last_index = 0;
+        lastIndex = 0;
     }
 
-    int32_t string_length = str_handle.GetPtr()->GetLength();
-    if (last_index > string_length) {
+    int32_t stringLength = strHandle.GetPtr()->GetLength();
+    if (lastIndex > stringLength) {
         if (global || sticky) {
-            reg_obj_handle.GetPtr()->SetFieldPrimitive(last_index_field, 0);
+            regObjHandle.GetPtr()->SetFieldPrimitive(lastIndexField, 0);
         }
-        obj_handle.GetPtr()->SetFieldPrimitive(result_correct_field, false);
-        return obj_handle.GetPtr();
+        objHandle.GetPtr()->SetFieldPrimitive(resultCorrectField, false);
+        return objHandle.GetPtr();
     }
 
     RegExpExecutor executor = RegExpExecutor();
-    PandaVector<uint8_t> u8_buffer;
-    PandaVector<uint16_t> u16_buffer;
-    const uint8_t *str_buffer;
-    bool is_utf16 = str_handle.GetPtr()->IsUtf16();
-    if (is_utf16) {
-        u16_buffer = PandaVector<uint16_t>(string_length);
-        str_handle.GetPtr()->CopyDataUtf16(u16_buffer.data(), string_length);
-        str_buffer = reinterpret_cast<uint8_t *>(u16_buffer.data());
+    PandaVector<uint8_t> u8Buffer;
+    PandaVector<uint16_t> u16Buffer;
+    const uint8_t *strBuffer;
+    bool isUtf16 = strHandle.GetPtr()->IsUtf16();
+    if (isUtf16) {
+        u16Buffer = PandaVector<uint16_t>(stringLength);
+        strHandle.GetPtr()->CopyDataUtf16(u16Buffer.data(), stringLength);
+        strBuffer = reinterpret_cast<uint8_t *>(u16Buffer.data());
     } else {
-        u8_buffer = PandaVector<uint8_t>(string_length + 1);
-        str_handle.GetPtr()->CopyDataMUtf8(u8_buffer.data(), string_length + 1, true);
-        str_buffer = u8_buffer.data();
+        u8Buffer = PandaVector<uint8_t>(stringLength + 1);
+        strHandle.GetPtr()->CopyDataMUtf8(u8Buffer.data(), stringLength + 1, true);
+        strBuffer = u8Buffer.data();
     }
 
-    auto ets_buffer = reinterpret_cast<EtsByteArray *>(GetFieldObjectByName(reg_obj_handle.GetPtr(), "buffer"));
-    auto buffer = reinterpret_cast<uint8_t *>(ets_buffer->GetData<int8_t>());
-    bool ret = executor.Execute(str_buffer, last_index, string_length, buffer, is_utf16);
-    RegExpMatchResult exec_result = executor.GetResult(ret);
-    if (!exec_result.is_success) {
+    auto etsBuffer = reinterpret_cast<EtsByteArray *>(GetFieldObjectByName(regObjHandle.GetPtr(), "buffer"));
+    auto buffer = reinterpret_cast<uint8_t *>(etsBuffer->GetData<int8_t>());
+    bool ret = executor.Execute(strBuffer, lastIndex, stringLength, buffer, isUtf16);
+    RegExpMatchResult execResult = executor.GetResult(ret);
+    if (!execResult.isSuccess) {
         if (global || sticky) {
-            reg_obj_handle.GetPtr()->SetFieldPrimitive(last_index_field, 0);
+            regObjHandle.GetPtr()->SetFieldPrimitive(lastIndexField, 0);
         }
-        obj_handle.GetPtr()->SetFieldPrimitive<bool>(result_correct_field, false);
-        return obj_handle.GetPtr();
+        objHandle.GetPtr()->SetFieldPrimitive<bool>(resultCorrectField, false);
+        return objHandle.GetPtr();
     }
 
-    uint32_t end_index = exec_result.end_index;
+    uint32_t endIndex = execResult.endIndex;
     if (global || sticky) {
-        reg_obj_handle.GetPtr()->SetFieldPrimitive(last_index_field, end_index);
+        regObjHandle.GetPtr()->SetFieldPrimitive(lastIndexField, endIndex);
     }
     // isCorrect field
-    obj_handle.GetPtr()->SetFieldPrimitive<bool>(result_correct_field, true);
+    objHandle.GetPtr()->SetFieldPrimitive<bool>(resultCorrectField, true);
     // index field
-    auto index_field = result_class->GetDeclaredFieldIDByName("index");
-    obj_handle.GetPtr()->SetFieldPrimitive<int32_t>(index_field, exec_result.index);
+    auto indexField = resultClass->GetDeclaredFieldIDByName("index");
+    objHandle.GetPtr()->SetFieldPrimitive<int32_t>(indexField, execResult.index);
     // input field
-    auto input_field = result_class->GetDeclaredFieldIDByName("input");
-    obj_handle.GetPtr()->SetFieldObject(input_field, str_handle.GetPtr()->AsObject());
+    auto inputField = resultClass->GetDeclaredFieldIDByName("input");
+    objHandle.GetPtr()->SetFieldObject(inputField, strHandle.GetPtr()->AsObject());
     // result field
-    auto result_field = result_class->GetDeclaredFieldIDByName("result");
-    uint32_t captures_size = exec_result.captures.size();
+    auto resultField = resultClass->GetDeclaredFieldIDByName("result");
+    uint32_t capturesSize = execResult.captures.size();
     PandaVector<VMHandle<EtsString>> matches;
-    for (size_t i = 0; i < captures_size; ++i) {
-        if (!exec_result.captures[i].first) {
-            matches.push_back(exec_result.captures[i].second);
+    for (size_t i = 0; i < capturesSize; ++i) {
+        if (!execResult.captures[i].first) {
+            matches.push_back(execResult.captures[i].second);
         }
     }
-    EtsObjectArray *result_array = EtsObjectArray::Create(string_class, matches.size());
+    EtsObjectArray *resultArray = EtsObjectArray::Create(stringClass, matches.size());
     for (size_t i = 0; i < matches.size(); i++) {
-        result_array->Set(i, matches[i]->AsObject());
+        resultArray->Set(i, matches[i]->AsObject());
     }
-    obj_handle.GetPtr()->SetFieldObject(result_field, result_array->AsObject());
-    return obj_handle.GetPtr();
+    objHandle.GetPtr()->SetFieldObject(resultField, resultArray->AsObject());
+    return objHandle.GetPtr();
 }
 }  // namespace panda::ets::intrinsics

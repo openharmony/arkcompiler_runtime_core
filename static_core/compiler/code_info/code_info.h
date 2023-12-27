@@ -51,9 +51,9 @@ namespace panda::compiler {
 struct CodePrefix {
     static constexpr uint32_t MAGIC = 0xaccadeca;
     uint32_t magic {MAGIC};
-    uint32_t code_size {};
-    uint32_t code_info_offset {};
-    uint32_t code_info_size {};
+    uint32_t codeSize {};
+    uint32_t codeInfoOffset {};
+    uint32_t codeInfoSize {};
 
     static constexpr size_t STRUCT_SIZE = 16;
 };
@@ -168,14 +168,14 @@ public:
         ASSERT(GetDataSize() <= code.size());
     }
 
-    explicit CodeInfo(const void *code_entry)
+    explicit CodeInfo(const void *codeEntry)
     {
-        ASSERT(code_entry != nullptr);
-        auto prefix = reinterpret_cast<const CodePrefix *>(code_entry);
+        ASSERT(codeEntry != nullptr);
+        auto prefix = reinterpret_cast<const CodePrefix *>(codeEntry);
         ASSERT(prefix->magic == CodePrefix::MAGIC);
-        data_ = Span(reinterpret_cast<const uint8_t *>(code_entry), prefix->code_info_offset + prefix->code_info_size);
-        auto code_info = Span<const uint8_t>(&data_[prefix->code_info_offset], prefix->code_info_size);
-        Decode(code_info);
+        data_ = Span(reinterpret_cast<const uint8_t *>(codeEntry), prefix->codeInfoOffset + prefix->codeInfoSize);
+        auto codeInfo = Span<const uint8_t>(&data_[prefix->codeInfoOffset], prefix->codeInfoSize);
+        Decode(codeInfo);
     }
 
     virtual ~CodeInfo() = default;
@@ -193,9 +193,9 @@ public:
         return CodeInfo(reinterpret_cast<const uint8_t *>(data) - CodeInfo::GetCodeOffset(RUNTIME_ARCH));
     }
 
-    void Decode(Span<const uint8_t> code_info)
+    void Decode(Span<const uint8_t> codeInfo)
     {
-        BitMemoryStreamIn stream(const_cast<uint8_t *>(code_info.data()), code_info.size() * BITS_PER_BYTE);
+        BitMemoryStreamIn stream(const_cast<uint8_t *>(codeInfo.data()), codeInfo.size() * BITS_PER_BYTE);
         header_.Decode(&stream);
         EnumerateTables([this, &stream](size_t index, auto member) {
             if (HasTable(index)) {
@@ -240,7 +240,7 @@ public:
 
     size_t GetCodeSize() const
     {
-        return GetPrefix()->code_size;
+        return GetPrefix()->codeSize;
     }
 
     Span<const uint8_t> GetCodeSpan() const
@@ -250,7 +250,7 @@ public:
 
     size_t GetInfoSize() const
     {
-        return GetPrefix()->code_info_size;
+        return GetPrefix()->codeInfoSize;
     }
 
     bool HasTable(size_t index) const
@@ -258,27 +258,27 @@ public:
         return (GetHeader().GetTableMask() & (1U << index)) != 0;
     }
 
-    std::variant<void *, uint32_t> GetMethod(const StackMap &stackmap, int inline_depth)
+    std::variant<void *, uint32_t> GetMethod(const StackMap &stackmap, int inlineDepth)
     {
-        ASSERT(inline_depth >= 0);
-        auto inline_info = inline_infos_.GetRow(stackmap.GetInlineInfoIndex() + inline_depth);
-        if (inline_info.HasMethodLow()) {
+        ASSERT(inlineDepth >= 0);
+        auto inlineInfo = inlineInfos_.GetRow(stackmap.GetInlineInfoIndex() + inlineDepth);
+        if (inlineInfo.HasMethodLow()) {
             if constexpr (ArchTraits<RUNTIME_ARCH>::IS_64_BITS) {
                 uintptr_t val =
-                    inline_info.GetMethodLow() | (static_cast<uint64_t>(inline_info.GetMethodHi()) << BITS_PER_UINT32);
+                    inlineInfo.GetMethodLow() | (static_cast<uint64_t>(inlineInfo.GetMethodHi()) << BITS_PER_UINT32);
                 return reinterpret_cast<void *>(val);
             } else {
-                return reinterpret_cast<void *>(inline_info.GetMethodLow());
+                return reinterpret_cast<void *>(inlineInfo.GetMethodLow());
             }
         }
-        return method_ids_.GetRow(inline_info.GetMethodIdIndex()).GetId();
+        return methodIds_.GetRow(inlineInfo.GetMethodIdIndex()).GetId();
     }
 
     uint64_t GetConstant(const VRegInfo &vreg) const
     {
         ASSERT(vreg.GetLocation() == VRegInfo::Location::CONSTANT);
-        uint64_t low = constant_table_.GetRow(vreg.GetConstantLowIndex()).GetValue();
-        uint64_t hi = constant_table_.GetRow(vreg.GetConstantHiIndex()).GetValue();
+        uint64_t low = constantTable_.GetRow(vreg.GetConstantLowIndex()).GetValue();
+        uint64_t hi = constantTable_.GetRow(vreg.GetConstantHiIndex()).GetValue();
         return low | (hi << BITS_PER_UINT32);
     }
 
@@ -287,126 +287,124 @@ public:
         return RoundUp(CodePrefix::STRUCT_SIZE, GetCodeAlignment(arch));
     }
 
-    uint32_t GetSavedCalleeRegsMask(bool is_fp) const
+    uint32_t GetSavedCalleeRegsMask(bool isFp) const
     {
-        return is_fp ? GetHeader().GetCalleeFpRegMask() : GetHeader().GetCalleeRegMask();
+        return isFp ? GetHeader().GetCalleeFpRegMask() : GetHeader().GetCalleeRegMask();
     }
 
-    auto GetVRegMask(const StackMap &stack_map)
+    auto GetVRegMask(const StackMap &stackMap)
     {
-        return stack_map.HasVRegMaskIndex() ? vreg_masks_.GetBitMemoryRegion(stack_map.GetVRegMaskIndex())
-                                            : BitMemoryRegion<const uint8_t>();
+        return stackMap.HasVRegMaskIndex() ? vregMasks_.GetBitMemoryRegion(stackMap.GetVRegMaskIndex())
+                                           : BitMemoryRegion<const uint8_t>();
     }
 
-    auto GetVRegMask(const StackMap &stack_map) const
+    auto GetVRegMask(const StackMap &stackMap) const
     {
-        return const_cast<CodeInfo *>(this)->GetVRegMask(stack_map);
+        return const_cast<CodeInfo *>(this)->GetVRegMask(stackMap);
     }
 
-    size_t GetVRegCount(const StackMap &stack_map) const
+    size_t GetVRegCount(const StackMap &stackMap) const
     {
-        return GetVRegMask(stack_map).Popcount();
+        return GetVRegMask(stackMap).Popcount();
     }
 
-    uint32_t GetRootsRegMask(const StackMap &stack_map) const
+    uint32_t GetRootsRegMask(const StackMap &stackMap) const
     {
-        return stack_map.HasRootsRegMaskIndex() ? roots_reg_masks_.GetRow(stack_map.GetRootsRegMaskIndex()).GetMask()
-                                                : 0;
+        return stackMap.HasRootsRegMaskIndex() ? rootsRegMasks_.GetRow(stackMap.GetRootsRegMaskIndex()).GetMask() : 0;
     }
 
-    auto GetRootsStackMask(const StackMap &stack_map) const
+    auto GetRootsStackMask(const StackMap &stackMap) const
     {
-        return stack_map.HasRootsStackMaskIndex()
-                   ? roots_stack_masks_.GetBitMemoryRegion(stack_map.GetRootsStackMaskIndex())
+        return stackMap.HasRootsStackMaskIndex()
+                   ? rootsStackMasks_.GetBitMemoryRegion(stackMap.GetRootsStackMaskIndex())
                    : BitMemoryRegion<const uint8_t>();
     }
 
-    auto GetInlineInfos(const StackMap &stack_map)
+    auto GetInlineInfos(const StackMap &stackMap)
     {
-        if (!stack_map.HasInlineInfoIndex()) {
-            return inline_infos_.GetRangeReversed(0, 0);
+        if (!stackMap.HasInlineInfoIndex()) {
+            return inlineInfos_.GetRangeReversed(0, 0);
         }
-        auto index = stack_map.GetInlineInfoIndex();
+        auto index = stackMap.GetInlineInfoIndex();
         uint32_t size = index;
-        for (; inline_infos_.GetRow(size).GetIsLast() == 0; size++) {
+        for (; inlineInfos_.GetRow(size).GetIsLast() == 0; size++) {
         }
 
-        return inline_infos_.GetRangeReversed(index, helpers::ToSigned(size) + 1);
+        return inlineInfos_.GetRangeReversed(index, helpers::ToSigned(size) + 1);
     }
 
-    auto GetInlineInfo(const StackMap &stack_map, int inline_depth) const
+    auto GetInlineInfo(const StackMap &stackMap, int inlineDepth) const
     {
-        ASSERT(stack_map.HasInlineInfoIndex());
-        CHECK_GE(GetInlineDepth(stack_map), inline_depth);
-        return inline_infos_.GetRow(stack_map.GetInlineInfoIndex() + inline_depth);
+        ASSERT(stackMap.HasInlineInfoIndex());
+        CHECK_GE(GetInlineDepth(stackMap), inlineDepth);
+        return inlineInfos_.GetRow(stackMap.GetInlineInfoIndex() + inlineDepth);
     }
 
-    int GetInlineDepth(const StackMap &stack_map) const
+    int GetInlineDepth(const StackMap &stackMap) const
     {
-        if (!stack_map.HasInlineInfoIndex()) {
+        if (!stackMap.HasInlineInfoIndex()) {
             return -1;
         }
-        int index = stack_map.GetInlineInfoIndex();
+        int index = stackMap.GetInlineInfoIndex();
         int depth = index;
-        for (; inline_infos_.GetRow(depth).GetIsLast() == 0; depth++) {
+        for (; inlineInfos_.GetRow(depth).GetIsLast() == 0; depth++) {
         }
         return depth - index;
     }
 
     StackMap FindStackMapForNativePc(uint32_t pc, Arch arch = RUNTIME_ARCH) const
     {
-        auto it =
-            std::lower_bound(stack_maps_.begin(), stack_maps_.end(), pc, [arch](const auto &a, uintptr_t counter) {
-                return a.GetNativePcUnpacked(arch) < counter;
-            });
-        return (it == stack_maps_.end() || it->GetNativePcUnpacked(arch) != pc) ? stack_maps_.GetInvalidRow() : *it;
+        auto it = std::lower_bound(stackMaps_.begin(), stackMaps_.end(), pc, [arch](const auto &a, uintptr_t counter) {
+            return a.GetNativePcUnpacked(arch) < counter;
+        });
+        return (it == stackMaps_.end() || it->GetNativePcUnpacked(arch) != pc) ? stackMaps_.GetInvalidRow() : *it;
     }
 
     StackMap FindOsrStackMap(uint32_t pc) const
     {
-        auto it = std::find_if(stack_maps_.begin(), stack_maps_.end(),
+        auto it = std::find_if(stackMaps_.begin(), stackMaps_.end(),
                                [pc](const auto &a) { return a.GetBytecodePc() == pc && a.IsOsr(); });
-        return it == stack_maps_.end() ? stack_maps_.GetInvalidRow() : *it;
+        return it == stackMaps_.end() ? stackMaps_.GetInvalidRow() : *it;
     }
 
     auto GetStackMap(size_t index) const
     {
-        return StackMap(&stack_maps_, index);
+        return StackMap(&stackMaps_, index);
     }
 
     auto &GetStackMaps()
     {
-        return stack_maps_;
+        return stackMaps_;
     }
 
     auto &GetVRegCatalogue()
     {
-        return vregs_catalogue_;
+        return vregsCatalogue_;
     }
 
     auto &GetVRegMapTable()
     {
-        return vregs_map_;
+        return vregsMap_;
     }
 
     auto &GetVRegMaskTable()
     {
-        return vreg_masks_;
+        return vregMasks_;
     }
 
     auto &GetInlineInfosTable()
     {
-        return inline_infos_;
+        return inlineInfos_;
     }
 
     auto &GetConstantTable()
     {
-        return constant_table_;
+        return constantTable_;
     }
 
     const auto &GetImplicitNullChecksTable() const
     {
-        return implicit_nullchecks_;
+        return implicitNullchecks_;
     }
 
     bool HasFloatRegs() const
@@ -418,147 +416,147 @@ public:
     static void EnumerateTables(Func func)
     {
         size_t index = 0;
-        func(index++, &CodeInfo::stack_maps_);
-        func(index++, &CodeInfo::inline_infos_);
-        func(index++, &CodeInfo::roots_reg_masks_);
-        func(index++, &CodeInfo::roots_stack_masks_);
-        func(index++, &CodeInfo::method_ids_);
-        func(index++, &CodeInfo::vreg_masks_);
-        func(index++, &CodeInfo::vregs_map_);
-        func(index++, &CodeInfo::vregs_catalogue_);
-        func(index++, &CodeInfo::implicit_nullchecks_);
-        func(index++, &CodeInfo::constant_table_);
+        func(index++, &CodeInfo::stackMaps_);
+        func(index++, &CodeInfo::inlineInfos_);
+        func(index++, &CodeInfo::rootsRegMasks_);
+        func(index++, &CodeInfo::rootsStackMasks_);
+        func(index++, &CodeInfo::methodIds_);
+        func(index++, &CodeInfo::vregMasks_);
+        func(index++, &CodeInfo::vregsMap_);
+        func(index++, &CodeInfo::vregsCatalogue_);
+        func(index++, &CodeInfo::implicitNullchecks_);
+        func(index++, &CodeInfo::constantTable_);
         ASSERT(index == TABLES_COUNT);
     }
 
     template <typename Callback>
-    void EnumerateStaticRoots(const StackMap &stack_map, Callback callback)
+    void EnumerateStaticRoots(const StackMap &stackMap, Callback callback)
     {
-        return EnumerateRoots<Callback, false>(stack_map, callback);
+        return EnumerateRoots<Callback, false>(stackMap, callback);
     }
 
     template <typename Callback>
-    void EnumerateDynamicRoots(const StackMap &stack_map, Callback callback)
+    void EnumerateDynamicRoots(const StackMap &stackMap, Callback callback)
     {
-        return EnumerateRoots<Callback, true>(stack_map, callback);
+        return EnumerateRoots<Callback, true>(stackMap, callback);
     }
 
     template <typename Allocator>
-    VRegList<Allocator> GetVRegList(StackMap stack_map, uint32_t first_vreg, uint32_t vregs_count,
+    VRegList<Allocator> GetVRegList(StackMap stackMap, uint32_t firstVreg, uint32_t vregsCount,
                                     Allocator *allocator = nullptr) const
     {
-        if (vregs_count == 0 || !stack_map.HasRegMap()) {
+        if (vregsCount == 0 || !stackMap.HasRegMap()) {
             return CodeInfo::VRegList<Allocator>(allocator);
         }
-        VRegList<Allocator> vreg_list(allocator);
-        vreg_list.resize(vregs_count, VRegInfo());
-        ASSERT(!vreg_list[0].IsLive());
-        std::vector<bool> reg_set(vregs_count);
+        VRegList<Allocator> vregList(allocator);
+        vregList.resize(vregsCount, VRegInfo());
+        ASSERT(!vregList[0].IsLive());
+        std::vector<bool> regSet(vregsCount);
 
-        uint32_t remaining_registers = vregs_count;
-        for (int sindex = stack_map.GetRow(); sindex >= 0 && remaining_registers > 0; sindex--) {
-            stack_map = GetStackMap(sindex);
-            if (!stack_map.HasVRegMaskIndex()) {
+        uint32_t remainingRegisters = vregsCount;
+        for (int sindex = stackMap.GetRow(); sindex >= 0 && remainingRegisters > 0; sindex--) {
+            stackMap = GetStackMap(sindex);
+            if (!stackMap.HasVRegMaskIndex()) {
                 continue;
             }
             // Skip stackmaps that are not in the same inline depth
-            auto vreg_mask = GetVRegMask(stack_map);
-            if (vreg_mask.Size() <= first_vreg) {
+            auto vregMask = GetVRegMask(stackMap);
+            if (vregMask.Size() <= firstVreg) {
                 continue;
             }
-            ASSERT(stack_map.HasVRegMapIndex());
-            uint32_t map_index = stack_map.GetVRegMapIndex();
+            ASSERT(stackMap.HasVRegMapIndex());
+            uint32_t mapIndex = stackMap.GetVRegMapIndex();
 
-            map_index += vreg_mask.Popcount(0, first_vreg);
-            vreg_mask = vreg_mask.Subregion(first_vreg, vreg_mask.Size() - first_vreg);
+            mapIndex += vregMask.Popcount(0, firstVreg);
+            vregMask = vregMask.Subregion(firstVreg, vregMask.Size() - firstVreg);
 
-            uint32_t end = std::min<uint32_t>(vreg_mask.Size(), vregs_count);
+            uint32_t end = std::min<uint32_t>(vregMask.Size(), vregsCount);
             for (size_t i = 0; i < end; i += BITS_PER_UINT32) {
-                uint32_t mask = vreg_mask.Read(i, std::min<uint32_t>(end - i, BITS_PER_UINT32));
+                uint32_t mask = vregMask.Read(i, std::min<uint32_t>(end - i, BITS_PER_UINT32));
                 while (mask != 0) {
-                    uint32_t reg_idx = Ctz(mask);
-                    if (!reg_set[i + reg_idx]) {
-                        auto vreg_index = vregs_map_.GetRow(map_index);
-                        if (vreg_index.GetIndex() != StackMap::NO_VALUE) {
-                            ASSERT(!vreg_list[i + reg_idx].IsLive());
-                            vreg_list[i + reg_idx] = vregs_catalogue_.GetRow(vreg_index.GetIndex()).GetVRegInfo();
-                            vreg_list[i + reg_idx].SetIndex(i + reg_idx);
+                    uint32_t regIdx = Ctz(mask);
+                    if (!regSet[i + regIdx]) {
+                        auto vregIndex = vregsMap_.GetRow(mapIndex);
+                        if (vregIndex.GetIndex() != StackMap::NO_VALUE) {
+                            ASSERT(!vregList[i + regIdx].IsLive());
+                            vregList[i + regIdx] = vregsCatalogue_.GetRow(vregIndex.GetIndex()).GetVRegInfo();
+                            vregList[i + regIdx].SetIndex(i + regIdx);
                         }
-                        remaining_registers--;
-                        reg_set[i + reg_idx] = true;
+                        remainingRegisters--;
+                        regSet[i + regIdx] = true;
                     }
-                    map_index++;
-                    mask ^= 1U << reg_idx;
+                    mapIndex++;
+                    mask ^= 1U << regIdx;
                 }
             }
         }
-        return vreg_list;
+        return vregList;
     }
 
     template <typename Allocator>
-    VRegList<Allocator> GetVRegList(StackMap stack_map, int inline_depth, Allocator *allocator = nullptr) const
+    VRegList<Allocator> GetVRegList(StackMap stackMap, int inlineDepth, Allocator *allocator = nullptr) const
     {
-        if (inline_depth < 0) {
-            return GetVRegList<Allocator>(stack_map, 0, GetHeader().GetVRegsCount(), allocator);
+        if (inlineDepth < 0) {
+            return GetVRegList<Allocator>(stackMap, 0, GetHeader().GetVRegsCount(), allocator);
         }
-        ASSERT(stack_map.HasInlineInfoIndex());
-        auto inline_info = GetInlineInfo(stack_map, inline_depth);
-        if (inline_info.GetVRegsCount() == 0) {
+        ASSERT(stackMap.HasInlineInfoIndex());
+        auto inlineInfo = GetInlineInfo(stackMap, inlineDepth);
+        if (inlineInfo.GetVRegsCount() == 0) {
             return VRegList<Allocator>(allocator);
         }
-        auto depth = inline_info.GetRow() - stack_map.GetInlineInfoIndex();
+        auto depth = inlineInfo.GetRow() - stackMap.GetInlineInfoIndex();
         uint32_t first =
-            depth == 0 ? GetHeader().GetVRegsCount() : inline_infos_.GetRow(inline_info.GetRow() - 1).GetVRegsCount();
-        ASSERT(inline_info.GetVRegsCount() >= first);
-        return GetVRegList<Allocator>(stack_map, first, inline_info.GetVRegsCount() - first, allocator);
+            depth == 0 ? GetHeader().GetVRegsCount() : inlineInfos_.GetRow(inlineInfo.GetRow() - 1).GetVRegsCount();
+        ASSERT(inlineInfo.GetVRegsCount() >= first);
+        return GetVRegList<Allocator>(stackMap, first, inlineInfo.GetVRegsCount() - first, allocator);
     }
 
     template <typename Allocator>
-    VRegList<Allocator> GetVRegList(StackMap stack_map, Allocator *allocator = nullptr) const
+    VRegList<Allocator> GetVRegList(StackMap stackMap, Allocator *allocator = nullptr) const
     {
-        return GetVRegList<Allocator>(stack_map, -1, allocator);
+        return GetVRegList<Allocator>(stackMap, -1, allocator);
     }
 
-    static bool VerifyCompiledEntry(uintptr_t compiled_entry)
+    static bool VerifyCompiledEntry(uintptr_t compiledEntry)
     {
-        auto codeheader = compiled_entry - GetCodeOffset(RUNTIME_ARCH);
+        auto codeheader = compiledEntry - GetCodeOffset(RUNTIME_ARCH);
         return (*reinterpret_cast<const uint32_t *>(codeheader) == CodePrefix::MAGIC);
     }
 
     void Dump(std::ostream &stream) const;
 
-    void Dump(std::ostream &stream, const StackMap &stack_map, Arch arch = RUNTIME_ARCH) const;
+    void Dump(std::ostream &stream, const StackMap &stackMap, Arch arch = RUNTIME_ARCH) const;
 
-    void DumpInlineInfo(std::ostream &stream, const StackMap &stack_map, int depth) const;
+    void DumpInlineInfo(std::ostream &stream, const StackMap &stackMap, int depth) const;
 
     size_t CountSpillSlots()
     {
-        auto frame_slots = GetFrameSize() / PointerSize(RUNTIME_ARCH);
-        auto spills_count = frame_slots - (CFrameSlots::Start() + GetRegsCount(RUNTIME_ARCH) + 1U);
+        auto frameSlots = GetFrameSize() / PointerSize(RUNTIME_ARCH);
+        auto spillsCount = frameSlots - (CFrameSlots::Start() + GetRegsCount(RUNTIME_ARCH) + 1U);
         // Reverse 'CFrameLayout::AlignSpillCount' counting
         if (RUNTIME_ARCH == Arch::AARCH32) {
-            spills_count = spills_count / 2U - 1;
+            spillsCount = spillsCount / 2U - 1;
         }
-        if (spills_count % 2U != 0) {
-            spills_count--;
+        if (spillsCount % 2U != 0) {
+            spillsCount--;
         }
-        return spills_count;
+        return spillsCount;
     }
 
 private:
     template <typename Callback, bool IS_DYNAMIC>
-    void EnumerateRoots(const StackMap &stack_map, Callback callback);
+    void EnumerateRoots(const StackMap &stackMap, Callback callback);
 
-    BitTable<StackMap> stack_maps_;
-    BitTable<InlineInfo> inline_infos_;
-    BitTable<RegisterMask> roots_reg_masks_;
-    BitTable<StackMask> roots_stack_masks_;
-    BitTable<MethodId> method_ids_;
-    BitTable<VRegisterInfo> vregs_catalogue_;
-    BitTable<VRegisterCatalogueIndex> vregs_map_;
-    BitTable<VRegisterMask> vreg_masks_;
-    BitTable<ImplicitNullChecks> implicit_nullchecks_;
-    BitTable<ConstantTable> constant_table_;
+    BitTable<StackMap> stackMaps_;
+    BitTable<InlineInfo> inlineInfos_;
+    BitTable<RegisterMask> rootsRegMasks_;
+    BitTable<StackMask> rootsStackMasks_;
+    BitTable<MethodId> methodIds_;
+    BitTable<VRegisterInfo> vregsCatalogue_;
+    BitTable<VRegisterCatalogueIndex> vregsMap_;
+    BitTable<VRegisterMask> vregMasks_;
+    BitTable<ImplicitNullChecks> implicitNullchecks_;
+    BitTable<ConstantTable> constantTable_;
 
     CodeInfoHeader header_ {};
 
@@ -566,41 +564,41 @@ private:
 };
 
 template <typename Callback, bool IS_DYNAMIC>
-void CodeInfo::EnumerateRoots(const StackMap &stack_map, Callback callback)
+void CodeInfo::EnumerateRoots(const StackMap &stackMap, Callback callback)
 {
-    auto root_type = IS_DYNAMIC ? VRegInfo::Type::ANY : VRegInfo::Type::OBJECT;
+    auto rootType = IS_DYNAMIC ? VRegInfo::Type::ANY : VRegInfo::Type::OBJECT;
 
-    if (stack_map.HasRootsRegMaskIndex()) {
-        auto reg_mask = roots_reg_masks_.GetRow(stack_map.GetRootsRegMaskIndex()).GetMask();
-        ArenaBitVectorSpan vec(&reg_mask, BITS_PER_UINT32);
-        for (auto reg_idx : vec.GetSetBitsIndices()) {
-            if (!callback(VRegInfo(reg_idx, VRegInfo::Location::REGISTER, root_type, VRegInfo::VRegType::VREG))) {
+    if (stackMap.HasRootsRegMaskIndex()) {
+        auto regMask = rootsRegMasks_.GetRow(stackMap.GetRootsRegMaskIndex()).GetMask();
+        ArenaBitVectorSpan vec(&regMask, BITS_PER_UINT32);
+        for (auto regIdx : vec.GetSetBitsIndices()) {
+            if (!callback(VRegInfo(regIdx, VRegInfo::Location::REGISTER, rootType, VRegInfo::VRegType::VREG))) {
                 return;
             }
         }
     }
-    if (!stack_map.HasRootsStackMaskIndex()) {
+    if (!stackMap.HasRootsStackMaskIndex()) {
         return;
     }
     // Simplify after renumbering stack slots
-    auto stack_slots_count = CountSpillSlots();
-    auto reg_mask = roots_stack_masks_.GetBitMemoryRegion(stack_map.GetRootsStackMaskIndex());
-    for (auto reg_idx : reg_mask) {
-        if (reg_idx >= stack_slots_count) {
+    auto stackSlotsCount = CountSpillSlots();
+    auto regMask = rootsStackMasks_.GetBitMemoryRegion(stackMap.GetRootsStackMaskIndex());
+    for (auto regIdx : regMask) {
+        if (regIdx >= stackSlotsCount) {
             // Parameter-slots' indexes are added to the root-mask with `stack_slots_count` offset to distinct them
             // from spill-slots
-            auto param_slot_idx = reg_idx - stack_slots_count;
-            reg_idx = static_cast<size_t>(CFrameLayout::StackArgSlot::Start()) - param_slot_idx -
-                      static_cast<size_t>(CFrameSlots::Start());
+            auto paramSlotIdx = regIdx - stackSlotsCount;
+            regIdx = static_cast<size_t>(CFrameLayout::StackArgSlot::Start()) - paramSlotIdx -
+                     static_cast<size_t>(CFrameSlots::Start());
         } else {
             if constexpr (!ArchTraits<RUNTIME_ARCH>::IS_64_BITS) {  // NOLINT
-                reg_idx = (reg_idx << 1U) + 1;
+                regIdx = (regIdx << 1U) + 1;
             }
             // Stack roots are began from spill/fill stack origin, so we need to adjust it according to registers
             // buffer
-            reg_idx += GetRegsCount(RUNTIME_ARCH);
+            regIdx += GetRegsCount(RUNTIME_ARCH);
         }
-        VRegInfo vreg(reg_idx, VRegInfo::Location::SLOT, root_type, VRegInfo::VRegType::VREG);
+        VRegInfo vreg(regIdx, VRegInfo::Location::SLOT, rootType, VRegInfo::VRegType::VREG);
         if (!callback(vreg)) {
             return;
         }

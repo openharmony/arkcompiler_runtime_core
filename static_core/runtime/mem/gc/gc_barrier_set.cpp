@@ -27,59 +27,59 @@ namespace panda::mem {
 
 GCBarrierSet::~GCBarrierSet() = default;
 
-bool CheckPostBarrier(CardTable *card_table, const void *obj_addr, bool check_card_table = true)
+bool CheckPostBarrier(CardTable *cardTable, const void *objAddr, bool checkCardTable = true)
 {
     if constexpr (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
         return true;
     }
 
     // check that obj_addr must be object header
-    ASSERT(IsAddressInObjectsHeap(obj_addr));
-    [[maybe_unused]] auto *object = reinterpret_cast<const ObjectHeader *>(obj_addr);
+    ASSERT(IsAddressInObjectsHeap(objAddr));
+    [[maybe_unused]] auto *object = reinterpret_cast<const ObjectHeader *>(objAddr);
     ASSERT(IsAddressInObjectsHeap(object->ClassAddr<BaseClass>()));
 
     // we need to check that card related by object header must be young/marked/processed.
     // doesn't for G1, because card_table is processed concurrently, so it can be cleared before we enter here
     bool res = true;
-    if (check_card_table) {
-        res = !card_table->GetCardPtr(ToUintPtr(obj_addr))->IsClear();
+    if (checkCardTable) {
+        res = !cardTable->GetCardPtr(ToUintPtr(objAddr))->IsClear();
     }
     return res;
 }
 
-static void PreSATBBarrier(ObjectHeader *pre_val)
+static void PreSATBBarrier(ObjectHeader *preVal)
 {
-    if (pre_val != nullptr) {
-        LOG(DEBUG, GC) << "GC PreSATBBarrier pre val -> new val:" << pre_val;
-        auto pre_buff = static_cast<PandaVector<ObjectHeader *> *>(ManagedThread::GetCurrent()->GetPreBuff());
-        ASSERT(pre_buff != nullptr);
-        ValidateObject(RootType::SATB_BUFFER, pre_val);
-        pre_buff->push_back(pre_val);
+    if (preVal != nullptr) {
+        LOG(DEBUG, GC) << "GC PreSATBBarrier pre val -> new val:" << preVal;
+        auto preBuff = static_cast<PandaVector<ObjectHeader *> *>(ManagedThread::GetCurrent()->GetPreBuff());
+        ASSERT(preBuff != nullptr);
+        ValidateObject(RootType::SATB_BUFFER, preVal);
+        preBuff->push_back(preVal);
     }
 }
 
-void PostIntergenerationalBarrier(const void *min_addr, uint8_t *card_table_addr, uint8_t card_bits,
-                                  uint8_t dirty_card_value, const void *obj_field_addr)
+void PostIntergenerationalBarrier(const void *minAddr, uint8_t *cardTableAddr, uint8_t cardBits, uint8_t dirtyCardValue,
+                                  const void *objFieldAddr)
 {
-    size_t card_index = (ToUintPtr(obj_field_addr) - ToUintPtr(min_addr)) >> card_bits;
-    auto *card_addr = static_cast<std::atomic_uint8_t *>(ToVoidPtr(ToUintPtr(card_table_addr) + card_index));
+    size_t cardIndex = (ToUintPtr(objFieldAddr) - ToUintPtr(minAddr)) >> cardBits;
+    auto *cardAddr = static_cast<std::atomic_uint8_t *>(ToVoidPtr(ToUintPtr(cardTableAddr) + cardIndex));
     // Atomic with relaxed order reason: data race with card_addr with no synchronization or ordering constraints
     // imposed on other reads or writes
-    card_addr->store(dirty_card_value, std::memory_order_relaxed);
+    cardAddr->store(dirtyCardValue, std::memory_order_relaxed);
 }
 
-BarrierOperand GCBarrierSet::GetBarrierOperand(BarrierPosition barrier_position, std::string_view name)
+BarrierOperand GCBarrierSet::GetBarrierOperand(BarrierPosition barrierPosition, std::string_view name)
 {
-    if (barrier_position == BarrierPosition::BARRIER_POSITION_PRE) {
-        if (UNLIKELY(pre_operands_.find(name.data()) == pre_operands_.end())) {
+    if (barrierPosition == BarrierPosition::BARRIER_POSITION_PRE) {
+        if (UNLIKELY(preOperands_.find(name.data()) == preOperands_.end())) {
             LOG(FATAL, GC) << "Operand " << name << " not found for pre barrier";
         }
-        return pre_operands_.at(name.data());
+        return preOperands_.at(name.data());
     }
-    if (UNLIKELY(post_operands_.find(name.data()) == post_operands_.end())) {
+    if (UNLIKELY(postOperands_.find(name.data()) == postOperands_.end())) {
         LOG(FATAL, GC) << "Operand " << name << " not found for post barrier";
     }
-    return post_operands_.at(name.data());
+    return postOperands_.at(name.data());
 }
 
 BarrierOperand GCBarrierSet::GetPostBarrierOperand(std::string_view name)
@@ -87,23 +87,23 @@ BarrierOperand GCBarrierSet::GetPostBarrierOperand(std::string_view name)
     return GetBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, name);
 }
 
-void GCGenBarrierSet::PreBarrier([[maybe_unused]] void *pre_val_addr) {}
+void GCGenBarrierSet::PreBarrier([[maybe_unused]] void *preValAddr) {}
 
-void GCGenBarrierSet::PostBarrier(const void *obj_addr, [[maybe_unused]] size_t offset,
-                                  [[maybe_unused]] void *stored_val_addr)
+void GCGenBarrierSet::PostBarrier(const void *objAddr, [[maybe_unused]] size_t offset,
+                                  [[maybe_unused]] void *storedValAddr)
 {
-    LOG(DEBUG, GC) << "GC PostBarrier: write to " << std::hex << obj_addr << " value " << stored_val_addr;
-    PostIntergenerationalBarrier(min_addr_, card_table_addr_, card_bits_, dirty_card_value_, obj_addr);
-    ASSERT(CheckPostBarrier(card_table_, obj_addr));
+    LOG(DEBUG, GC) << "GC PostBarrier: write to " << std::hex << objAddr << " value " << storedValAddr;
+    PostIntergenerationalBarrier(minAddr_, cardTableAddr_, cardBits_, dirtyCardValue_, objAddr);
+    ASSERT(CheckPostBarrier(cardTable_, objAddr));
 }
 
-void GCGenBarrierSet::PostBarrier(const void *obj_addr, [[maybe_unused]] size_t offset, [[maybe_unused]] size_t count)
+void GCGenBarrierSet::PostBarrier(const void *objAddr, [[maybe_unused]] size_t offset, [[maybe_unused]] size_t count)
 {
     // NOTE: We can improve an implementation here
     // because now we consider every field as an object reference field.
     // Maybe, it will be better to check it, but there can be possible performance degradation.
-    PostIntergenerationalBarrier(min_addr_, card_table_addr_, card_bits_, dirty_card_value_, obj_addr);
-    ASSERT(CheckPostBarrier(card_table_, obj_addr));
+    PostIntergenerationalBarrier(minAddr_, cardTableAddr_, cardBits_, dirtyCardValue_, objAddr);
+    ASSERT(CheckPostBarrier(cardTable_, objAddr));
 }
 
 bool GCG1BarrierSet::IsPreBarrierEnabled()
@@ -112,39 +112,39 @@ bool GCG1BarrierSet::IsPreBarrierEnabled()
     return Thread::GetCurrent()->GetPreWrbEntrypoint() != nullptr;
 }
 
-void GCG1BarrierSet::PreBarrier(void *pre_val_addr)
+void GCG1BarrierSet::PreBarrier(void *preValAddr)
 {
-    LOG_IF(pre_val_addr != nullptr, DEBUG, GC) << "GC PreBarrier: with pre-value " << pre_val_addr;
+    LOG_IF(preValAddr != nullptr, DEBUG, GC) << "GC PreBarrier: with pre-value " << preValAddr;
     ASSERT(Thread::GetCurrent()->GetPreWrbEntrypoint() != nullptr);
 
-    PreSATBBarrier(reinterpret_cast<ObjectHeader *>(pre_val_addr));
+    PreSATBBarrier(reinterpret_cast<ObjectHeader *>(preValAddr));
 }
 
-void GCG1BarrierSet::PostBarrier(const void *obj_addr, size_t offset, void *stored_val_addr)
+void GCG1BarrierSet::PostBarrier(const void *objAddr, size_t offset, void *storedValAddr)
 {
-    LOG_IF(stored_val_addr != nullptr, DEBUG, GC)
-        << "GC PostBarrier: write to " << std::hex << obj_addr << " value " << stored_val_addr;
-    if (stored_val_addr != nullptr) {
+    LOG_IF(storedValAddr != nullptr, DEBUG, GC)
+        << "GC PostBarrier: write to " << std::hex << objAddr << " value " << storedValAddr;
+    if (storedValAddr != nullptr) {
         // If it is cross-region reference
-        auto *card = card_table_->GetCardPtr(ToUintPtr(obj_addr) + offset);
+        auto *card = cardTable_->GetCardPtr(ToUintPtr(objAddr) + offset);
         if (!card->IsYoung() && !card->IsMarked() &&
-            !panda::mem::IsSameRegion(obj_addr, stored_val_addr, region_size_bits_count_)) {
-            LOG(DEBUG, GC) << "GC Interregion barrier write to " << obj_addr << " value " << stored_val_addr;
+            !panda::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_)) {
+            LOG(DEBUG, GC) << "GC Interregion barrier write to " << objAddr << " value " << storedValAddr;
             card->Mark();
             Enqueue(card);
         }
     }
-    ASSERT(stored_val_addr == nullptr || panda::mem::IsSameRegion(obj_addr, stored_val_addr, region_size_bits_count_) ||
-           CheckPostBarrier(card_table_, obj_addr, false));
+    ASSERT(storedValAddr == nullptr || panda::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_) ||
+           CheckPostBarrier(cardTable_, objAddr, false));
 }
 
-void GCG1BarrierSet::PostBarrier(const void *obj_addr, size_t offset, size_t count)
+void GCG1BarrierSet::PostBarrier(const void *objAddr, size_t offset, size_t count)
 {
     // Force post inter-region barrier
-    auto first_addr = ToUintPtr(obj_addr) + offset;
-    auto last_addr = first_addr + count - 1;
-    Invalidate(first_addr, last_addr);
-    ASSERT(CheckPostBarrier(card_table_, obj_addr, false));
+    auto firstAddr = ToUintPtr(objAddr) + offset;
+    auto lastAddr = firstAddr + count - 1;
+    Invalidate(firstAddr, lastAddr);
+    ASSERT(CheckPostBarrier(cardTable_, objAddr, false));
     // NOTE: We can improve an implementation here
     // because now we consider every field as an object reference field.
     // Maybe, it will be better to check it, but there can be possible performance degradation.
@@ -154,10 +154,10 @@ void GCG1BarrierSet::Invalidate(uintptr_t begin, uintptr_t last)
 {
     LOG(DEBUG, GC) << "GC Interregion barrier write for memory range from  " << ToVoidPtr(begin) << " to "
                    << ToVoidPtr(last);
-    auto *begin_card = card_table_->GetCardPtr(begin);
-    auto *last_card = card_table_->GetCardPtr(last);
+    auto *beginCard = cardTable_->GetCardPtr(begin);
+    auto *lastCard = cardTable_->GetCardPtr(last);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (auto *card = begin_card; card <= last_card; ++card) {
+    for (auto *card = beginCard; card <= lastCard; ++card) {
         if (!card->IsYoung() && !card->IsMarked()) {
             card->Mark();
             Enqueue(card);
@@ -169,8 +169,8 @@ void GCG1BarrierSet::Enqueue(CardTable::CardPtr card)
 {
     auto *thread = ManagedThread::GetCurrent();
     if (thread == nullptr) {  // slow path via shared-queue for VM threads: gc/compiler/etc
-        os::memory::LockHolder lock(*queue_lock_);
-        updated_refs_queue_->push_back(card);
+        os::memory::LockHolder lock(*queueLock_);
+        updatedRefsQueue_->push_back(card);
     } else {
         // general fast-path for mutators
         ASSERT(thread->GetPreBuff() != nullptr);  // write barrier cant be called after Terminate
@@ -185,8 +185,8 @@ void GCG1BarrierSet::Enqueue(CardTable::CardPtr card)
         }
         // After 2 unsuccessfull pushing, we see that current buffer still full
         // so, reuse shared buffer
-        os::memory::LockHolder lock(*queue_lock_);
-        updated_refs_queue_->push_back(card);
+        os::memory::LockHolder lock(*queueLock_);
+        updatedRefsQueue_->push_back(card);
     }
 }
 }  // namespace panda::mem

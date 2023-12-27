@@ -62,12 +62,12 @@ inline const auto &MessageSetParser()
 
     static const auto RANGE_HANDLER = [](Action a, MessageSetContext &c) {
         if (a == Action::PARSED) {
-            auto num_end = c.stack.back();
+            auto numEnd = c.stack.back();
             c.stack.pop_back();
-            auto num_start = c.stack.back();
+            auto numStart = c.stack.back();
             c.stack.pop_back();
 
-            c.stack.push_back(std::make_pair(num_start.first, num_end.first));
+            c.stack.push_back(std::make_pair(numStart.first, numEnd.first));
         }
         return true;
     };

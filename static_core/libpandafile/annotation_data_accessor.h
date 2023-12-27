@@ -26,8 +26,8 @@ class AnnotationDataAccessor {
 public:
     class Elem {
     public:
-        Elem(const File &panda_file, File::EntityId name_id, uint32_t value)
-            : panda_file_(panda_file), name_id_(name_id), value_(value)
+        Elem(const File &pandaFile, File::EntityId nameId, uint32_t value)
+            : pandaFile_(pandaFile), nameId_(nameId), value_(value)
         {
         }
         ~Elem() = default;
@@ -37,22 +37,22 @@ public:
 
         File::EntityId GetNameId() const
         {
-            return name_id_;
+            return nameId_;
         }
 
         ScalarValue GetScalarValue() const
         {
-            return ScalarValue(panda_file_, value_);
+            return ScalarValue(pandaFile_, value_);
         }
 
         ArrayValue GetArrayValue() const
         {
-            return ArrayValue(panda_file_, File::EntityId(value_));
+            return ArrayValue(pandaFile_, File::EntityId(value_));
         }
 
     private:
-        const File &panda_file_;
-        File::EntityId name_id_;
+        const File &pandaFile_;
+        File::EntityId nameId_;
         uint32_t value_;
     };
 
@@ -73,7 +73,7 @@ public:
         char item_;
     };
 
-    AnnotationDataAccessor(const File &panda_file, File::EntityId annotation_id);
+    AnnotationDataAccessor(const File &pandaFile, File::EntityId annotationId);
     ~AnnotationDataAccessor() = default;
 
     NO_COPY_SEMANTIC(AnnotationDataAccessor);
@@ -81,7 +81,7 @@ public:
 
     File::EntityId GetClassId() const
     {
-        return File::EntityId(class_off_);
+        return File::EntityId(classOff_);
     }
 
     uint32_t GetCount() const
@@ -100,7 +100,7 @@ public:
 
     File::EntityId GetAnnotationId() const
     {
-        return annotation_id_;
+        return annotationId_;
     }
 
 private:
@@ -108,13 +108,13 @@ private:
     static constexpr size_t VALUE_SIZE = sizeof(uint32_t);
     static constexpr size_t TYPE_TAG_SIZE = sizeof(uint8_t);
 
-    const File &panda_file_;
-    File::EntityId annotation_id_;
+    const File &pandaFile_;
+    File::EntityId annotationId_;
 
-    uint32_t class_off_;
+    uint32_t classOff_;
     uint32_t count_;
-    Span<const uint8_t> elements_sp_ {nullptr, nullptr};
-    Span<const uint8_t> elements_tags_ {nullptr, nullptr};
+    Span<const uint8_t> elementsSp_ {nullptr, nullptr};
+    Span<const uint8_t> elementsTags_ {nullptr, nullptr};
     size_t size_;
 };
 

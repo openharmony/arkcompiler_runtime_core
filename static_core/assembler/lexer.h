@@ -64,15 +64,15 @@ struct Token {
 #undef KEYWORDS
     };
 
-    std::string whole_line;
-    size_t bound_left; /* right and left bounds of tokens */
-    size_t bound_right;
+    std::string wholeLine;
+    size_t boundLeft; /* right and left bounds of tokens */
+    size_t boundRight;
     Type type;
 
     Token() : Token(0, 0, Type::ID_BAD, "") {}
 
-    Token(size_t b_l, size_t b_r, Type t, std::string beg_of_line)
-        : whole_line(std::move(beg_of_line)), bound_left(b_l), bound_right(b_r), type(t)
+    Token(size_t bL, size_t bR, Type t, std::string begOfLine)
+        : wholeLine(std::move(begOfLine)), boundLeft(bL), boundRight(bR), type(t)
     {
     }
 };
@@ -102,11 +102,11 @@ public:
      * The main function of Tokenizing, which takes a string.
      * Returns a vector of tokens.
      */
-    PANDA_PUBLIC_API Tokens TokenizeString(const std::string &source_str);
+    PANDA_PUBLIC_API Tokens TokenizeString(const std::string &sourceStr);
 
 private:
     std::vector<Line> lines_;
-    Line *curr_line_ {nullptr};
+    Line *currLine_ {nullptr};
     Error err_;
 
     bool Eol() const; /* End of line */

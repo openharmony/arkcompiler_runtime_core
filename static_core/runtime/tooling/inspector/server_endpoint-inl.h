@@ -30,7 +30,7 @@ template <>  // NOLINTNEXTLINE(misc-definitions-in-headers)
 ServerEndpoint<CONFIG>::ServerEndpoint() noexcept
 {
     this->endpoint_.set_validate_handler([this](auto hdl) {
-        on_validate_();
+        onValidate_();
 
         if (Pin(hdl)) {
             return true;
@@ -40,9 +40,9 @@ ServerEndpoint<CONFIG>::ServerEndpoint() noexcept
         return false;
     });
 
-    this->endpoint_.set_open_handler([this](auto) { on_open_(); });
+    this->endpoint_.set_open_handler([this](auto) { onOpen_(); });
     this->endpoint_.set_fail_handler([this](auto hdl) {
-        on_fail_();
+        onFail_();
         Unpin(hdl);
     });
 
@@ -50,26 +50,26 @@ ServerEndpoint<CONFIG>::ServerEndpoint() noexcept
 }
 
 template <>  // NOLINTNEXTLINE(misc-definitions-in-headers)
-void ServerEndpoint<CONFIG>::Call(const std::string &session_id, const char *method,
+void ServerEndpoint<CONFIG>::Call(const std::string &sessionId, const char *method,
                                   std::function<void(JsonObjectBuilder &)> &&params)
 {
-    Endpoint<websocketpp::server<CONFIG>>::Call(session_id, std::nullopt, method, std::move(params));
+    Endpoint<websocketpp::server<CONFIG>>::Call(sessionId, std::nullopt, method, std::move(params));
 }
 
 template <>  // NOLINTNEXTLINE(misc-definitions-in-headers)
 void ServerEndpoint<CONFIG>::OnCall(
     const char *method,
-    std::function<void(const std::string &session_id, JsonObjectBuilder &, const JsonObject &)> &&handler)
+    std::function<void(const std::string &sessionId, JsonObjectBuilder &, const JsonObject &)> &&handler)
 {
     Endpoint<websocketpp::server<CONFIG>>::OnCall(
-        method, [this, handler = std::move(handler)](auto &session_id, auto id, auto &params) {
+        method, [this, handler = std::move(handler)](auto &sessionId, auto id, auto &params) {
             if (!id) {
                 LOG(INFO, DEBUGGER) << "Invalid request: request has no \"id\"";
                 return;
             }
 
-            Reply(session_id, *id,
-                  std::bind(std::ref(handler), std::cref(session_id),  // NOLINT(modernize-avoid-bind)
+            Reply(sessionId, *id,
+                  std::bind(std::ref(handler), std::cref(sessionId),  // NOLINT(modernize-avoid-bind)
                             std::placeholders::_1, std::cref(params)));
         });
 }

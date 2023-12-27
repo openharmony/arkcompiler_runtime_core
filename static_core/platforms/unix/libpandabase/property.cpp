@@ -21,11 +21,11 @@
 
 namespace panda::os::unix::property {
 
-bool GetPropertyBuffer([[maybe_unused]] const char *ark_prop, [[maybe_unused]] std::string &out)
+bool GetPropertyBuffer([[maybe_unused]] const char *arkProp, [[maybe_unused]] std::string &out)
 {
 #ifdef PANDA_TARGET_MOBILE
     char buf[PROP_VALUE_MAX] = {};
-    if (__system_property_get(ark_prop, buf) > 0) {
+    if (__system_property_get(arkProp, buf) > 0) {
         out = buf;
         return true;
     }

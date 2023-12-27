@@ -23,21 +23,21 @@
 
 namespace panda::verifier::debug {
 
-void DebugContext::AddMethod(const Method &method, bool is_debug)
+void DebugContext::AddMethod(const Method &method, bool isDebug)
 {
-    if (config->whitelist_not_empty || is_debug) {
+    if (config->whitelistNotEmpty || isDebug) {
         auto id = method.GetUniqId();
         // this is calculated repeatedly for each class, but caching was tried and didn't improve performance
         auto name {ClassHelper::GetName<PandaString>(method.GetClassName().data)};
-        if (config->whitelist_not_empty) {
+        if (config->whitelistNotEmpty) {
             InsertIntoWhitelist(name, true, id);
         }
         name += "::";
         name += utf::Mutf8AsCString(method.GetName().data);
-        if (config->whitelist_not_empty) {
+        if (config->whitelistNotEmpty) {
             InsertIntoWhitelist(name, false, id);
         }
-        if (is_debug) {
+        if (isDebug) {
             InsertBreakpoints(name, id);
         }
     }

@@ -21,11 +21,11 @@
 
 namespace panda::ets::test {
 
-static const char *TEST_BIN_FILE_NAME = "CallingMethodsTest.abc";
+static const char *g_testBinFileName = "CallingMethodsTest.abc";
 
 class CallingMethodsTestGeneral : public CallingMethodsTestBase {
 public:
-    CallingMethodsTestGeneral() : CallingMethodsTestBase(TEST_BIN_FILE_NAME) {}
+    CallingMethodsTestGeneral() : CallingMethodsTestBase(g_testBinFileName) {}
 };
 
 class MethodsTest : public CallingMethodsTestGeneral {};

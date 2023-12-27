@@ -205,83 +205,83 @@ constexpr const char *GetArchString(Arch arch)
     }
 }
 
-inline constexpr RegMask GetCallerRegsMask(Arch arch, bool is_fp)
+inline constexpr RegMask GetCallerRegsMask(Arch arch, bool isFp)
 {
     switch (arch) {
         case Arch::AARCH32:
-            return is_fp ? ArchTraits<Arch::AARCH32>::CALLER_FP_REG_MASK : ArchTraits<Arch::AARCH32>::CALLER_REG_MASK;
+            return isFp ? ArchTraits<Arch::AARCH32>::CALLER_FP_REG_MASK : ArchTraits<Arch::AARCH32>::CALLER_REG_MASK;
         case Arch::AARCH64:
-            return is_fp ? ArchTraits<Arch::AARCH64>::CALLER_FP_REG_MASK : ArchTraits<Arch::AARCH64>::CALLER_REG_MASK;
+            return isFp ? ArchTraits<Arch::AARCH64>::CALLER_FP_REG_MASK : ArchTraits<Arch::AARCH64>::CALLER_REG_MASK;
         case Arch::X86:
-            return is_fp ? ArchTraits<Arch::X86>::CALLER_FP_REG_MASK : ArchTraits<Arch::X86>::CALLER_REG_MASK;
+            return isFp ? ArchTraits<Arch::X86>::CALLER_FP_REG_MASK : ArchTraits<Arch::X86>::CALLER_REG_MASK;
         case Arch::X86_64:
-            return is_fp ? ArchTraits<Arch::X86_64>::CALLER_FP_REG_MASK : ArchTraits<Arch::X86_64>::CALLER_REG_MASK;
+            return isFp ? ArchTraits<Arch::X86_64>::CALLER_FP_REG_MASK : ArchTraits<Arch::X86_64>::CALLER_REG_MASK;
         default:
             UNREACHABLE();
     }
 }
 
-inline constexpr RegMask GetCalleeRegsMask(Arch arch, bool is_fp, bool irtoc_optimized = false)
+inline constexpr RegMask GetCalleeRegsMask(Arch arch, bool isFp, bool irtocOptimized = false)
 {
     switch (arch) {
         case Arch::AARCH32:
-            return is_fp ? ArchTraits<Arch::AARCH32>::CALLEE_FP_REG_MASK : ArchTraits<Arch::AARCH32>::CALLEE_REG_MASK;
+            return isFp ? ArchTraits<Arch::AARCH32>::CALLEE_FP_REG_MASK : ArchTraits<Arch::AARCH32>::CALLEE_REG_MASK;
         case Arch::AARCH64:
             static_assert((~ArchTraits<Arch::AARCH64>::CALLEE_FP_REG_MASK &
                            ArchTraits<Arch::AARCH64>::IRTOC_OPTIMIZED_CALLEE_FP_REG_MASK) == 0);
             static_assert((~ArchTraits<Arch::AARCH64>::CALLEE_REG_MASK &
                            ArchTraits<Arch::AARCH64>::IRTOC_OPTIMIZED_CALLEE_REG_MASK) == 0);
-            return is_fp             ? irtoc_optimized ? ArchTraits<Arch::AARCH64>::IRTOC_OPTIMIZED_CALLEE_FP_REG_MASK
-                                                       : ArchTraits<Arch::AARCH64>::CALLEE_FP_REG_MASK
-                   : irtoc_optimized ? ArchTraits<Arch::AARCH64>::IRTOC_OPTIMIZED_CALLEE_REG_MASK
-                                     : ArchTraits<Arch::AARCH64>::CALLEE_REG_MASK;
+            return isFp             ? irtocOptimized ? ArchTraits<Arch::AARCH64>::IRTOC_OPTIMIZED_CALLEE_FP_REG_MASK
+                                                     : ArchTraits<Arch::AARCH64>::CALLEE_FP_REG_MASK
+                   : irtocOptimized ? ArchTraits<Arch::AARCH64>::IRTOC_OPTIMIZED_CALLEE_REG_MASK
+                                    : ArchTraits<Arch::AARCH64>::CALLEE_REG_MASK;
         case Arch::X86:
-            return is_fp ? ArchTraits<Arch::X86>::CALLEE_FP_REG_MASK : ArchTraits<Arch::X86>::CALLEE_REG_MASK;
+            return isFp ? ArchTraits<Arch::X86>::CALLEE_FP_REG_MASK : ArchTraits<Arch::X86>::CALLEE_REG_MASK;
         case Arch::X86_64:
-            return is_fp ? ArchTraits<Arch::X86_64>::CALLEE_FP_REG_MASK : ArchTraits<Arch::X86_64>::CALLEE_REG_MASK;
+            return isFp ? ArchTraits<Arch::X86_64>::CALLEE_FP_REG_MASK : ArchTraits<Arch::X86_64>::CALLEE_REG_MASK;
         default:
             UNREACHABLE();
     }
 }
 
-inline constexpr size_t GetFirstCalleeReg(Arch arch, bool is_fp)
+inline constexpr size_t GetFirstCalleeReg(Arch arch, bool isFp)
 {
-    if (arch == Arch::X86_64 && is_fp) {
+    if (arch == Arch::X86_64 && isFp) {
         // in amd64 xmm regs are volatile, so we return first reg (1) > last reg(0) to imitate empty list;
         // also number of registers = last reg (0) - first reg (1) + 1 == 0
         return 1;
     }
 
-    return GetCalleeRegsMask(arch, is_fp).GetMinRegister();
+    return GetCalleeRegsMask(arch, isFp).GetMinRegister();
 }
 
-inline constexpr size_t GetLastCalleeReg(Arch arch, bool is_fp)
+inline constexpr size_t GetLastCalleeReg(Arch arch, bool isFp)
 {
-    if (arch == Arch::X86_64 && is_fp) {
+    if (arch == Arch::X86_64 && isFp) {
         return 0;
     }
 
-    return GetCalleeRegsMask(arch, is_fp).GetMaxRegister();
+    return GetCalleeRegsMask(arch, isFp).GetMaxRegister();
 }
 
-inline constexpr size_t GetCalleeRegsCount(Arch arch, bool is_fp)
+inline constexpr size_t GetCalleeRegsCount(Arch arch, bool isFp)
 {
-    return GetCalleeRegsMask(arch, is_fp).Count();
+    return GetCalleeRegsMask(arch, isFp).Count();
 }
 
-inline constexpr size_t GetFirstCallerReg(Arch arch, bool is_fp)
+inline constexpr size_t GetFirstCallerReg(Arch arch, bool isFp)
 {
-    return GetCallerRegsMask(arch, is_fp).GetMinRegister();
+    return GetCallerRegsMask(arch, isFp).GetMinRegister();
 }
 
-inline constexpr size_t GetLastCallerReg(Arch arch, bool is_fp)
+inline constexpr size_t GetLastCallerReg(Arch arch, bool isFp)
 {
-    return GetCallerRegsMask(arch, is_fp).GetMaxRegister();
+    return GetCallerRegsMask(arch, isFp).GetMaxRegister();
 }
 
-inline constexpr size_t GetCallerRegsCount(Arch arch, bool is_fp)
+inline constexpr size_t GetCallerRegsCount(Arch arch, bool isFp)
 {
-    return GetCallerRegsMask(arch, is_fp).Count();
+    return GetCallerRegsMask(arch, isFp).Count();
 }
 
 inline constexpr size_t GetRegsCount(Arch arch)

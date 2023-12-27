@@ -24,12 +24,12 @@ bool ObjectTypePropagation::RunImpl()
     visited_ = GetGraph()->NewMarker();
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto phi : bb->PhiInsts()) {
-            auto type_info = GetPhiTypeInfo(phi);
-            for (auto visited_phi : visited_phis_) {
-                ASSERT(visited_phi->GetObjectTypeInfo() == ObjectTypeInfo::UNKNOWN);
-                visited_phi->SetObjectTypeInfo(type_info);
+            auto typeInfo = GetPhiTypeInfo(phi);
+            for (auto visitedPhi : visitedPhis_) {
+                ASSERT(visitedPhi->GetObjectTypeInfo() == ObjectTypeInfo::UNKNOWN);
+                visitedPhi->SetObjectTypeInfo(typeInfo);
             }
-            visited_phis_.clear();
+            visitedPhis_.clear();
         }
     }
     GetGraph()->EraseMarker(visited_);
@@ -80,17 +80,17 @@ void ObjectTypePropagation::VisitLoadObject(GraphVisitor *v, Inst *i)
     }
     auto self = static_cast<ObjectTypePropagation *>(v);
     auto inst = i->CastToLoadObject();
-    auto field_id = inst->GetTypeId();
-    if (field_id == 0) {
+    auto fieldId = inst->GetTypeId();
+    if (fieldId == 0) {
         return;
     }
     auto runtime = self->GetGraph()->GetRuntime();
     auto method = inst->GetMethod();
-    auto type_id = runtime->GetFieldValueTypeId(method, field_id);
-    auto klass = runtime->GetClass(method, type_id);
+    auto typeId = runtime->GetFieldValueTypeId(method, fieldId);
+    auto klass = runtime->GetClass(method, typeId);
     if (klass != nullptr) {
-        auto is_exact = runtime->GetClassType(method, type_id) == ClassType::FINAL_CLASS;
-        inst->SetObjectTypeInfo({klass, is_exact});
+        auto isExact = runtime->GetClassType(method, typeId) == ClassType::FINAL_CLASS;
+        inst->SetObjectTypeInfo({klass, isExact});
     }
 }
 
@@ -123,23 +123,23 @@ void ObjectTypePropagation::VisitParameter([[maybe_unused]] GraphVisitor *v, Ins
     if (inst->GetType() != DataType::REFERENCE || graph->IsBytecodeOptimizer() || inst->HasObjectTypeInfo()) {
         return;
     }
-    auto ref_num = inst->GetArgRefNumber();
+    auto refNum = inst->GetArgRefNumber();
     auto runtime = graph->GetRuntime();
     auto method = graph->GetMethod();
     RuntimeInterface::ClassPtr klass;
-    if (ref_num == ParameterInst::INVALID_ARG_REF_NUM) {
+    if (refNum == ParameterInst::INVALID_ARG_REF_NUM) {
         // This parametr doesn't have ArgRefNumber
         if (inst->GetArgNumber() != 0 || runtime->IsMethodStatic(method)) {
             return;
         }
         klass = runtime->GetClass(method);
     } else {
-        auto type_id = runtime->GetMethodArgReferenceTypeId(method, ref_num);
-        klass = runtime->GetClass(method, type_id);
+        auto typeId = runtime->GetMethodArgReferenceTypeId(method, refNum);
+        klass = runtime->GetClass(method, typeId);
     }
     if (klass != nullptr) {
-        auto is_exact = runtime->GetClassType(klass) == ClassType::FINAL_CLASS;
-        inst->SetObjectTypeInfo({klass, is_exact});
+        auto isExact = runtime->GetClassType(klass) == ClassType::FINAL_CLASS;
+        inst->SetObjectTypeInfo({klass, isExact});
     }
 }
 
@@ -151,11 +151,11 @@ void ObjectTypePropagation::ProcessManagedCall(GraphVisitor *v, CallInst *inst)
     auto self = static_cast<ObjectTypePropagation *>(v);
     auto runtime = self->GetGraph()->GetRuntime();
     auto method = inst->GetCallMethod();
-    auto type_id = runtime->GetMethodReturnTypeId(method);
-    auto klass = runtime->GetClass(method, type_id);
+    auto typeId = runtime->GetMethodReturnTypeId(method);
+    auto klass = runtime->GetClass(method, typeId);
     if (klass != nullptr) {
-        auto is_exact = runtime->GetClassType(method, type_id) == ClassType::FINAL_CLASS;
-        inst->SetObjectTypeInfo({klass, is_exact});
+        auto isExact = runtime->GetClassType(method, typeId) == ClassType::FINAL_CLASS;
+        inst->SetObjectTypeInfo({klass, isExact});
     }
 }
 
@@ -164,33 +164,33 @@ ObjectTypeInfo ObjectTypePropagation::GetPhiTypeInfo(Inst *inst)
     if (!inst->IsPhi() || inst->SetMarker(visited_)) {
         return inst->GetObjectTypeInfo();
     }
-    auto type_info = ObjectTypeInfo::UNKNOWN;
-    inst->SetObjectTypeInfo(type_info);
-    bool need_update = false;
+    auto typeInfo = ObjectTypeInfo::UNKNOWN;
+    inst->SetObjectTypeInfo(typeInfo);
+    bool needUpdate = false;
     for (auto input : inst->GetInputs()) {
-        auto input_info = GetPhiTypeInfo(input.GetInst());
-        if (input_info == ObjectTypeInfo::UNKNOWN) {
+        auto inputInfo = GetPhiTypeInfo(input.GetInst());
+        if (inputInfo == ObjectTypeInfo::UNKNOWN) {
             ASSERT(input.GetInst()->IsPhi());
-            need_update = true;
+            needUpdate = true;
             continue;
         }
-        if (input_info == ObjectTypeInfo::INVALID ||
-            (type_info.IsValid() && type_info.GetClass() != input_info.GetClass())) {
+        if (inputInfo == ObjectTypeInfo::INVALID ||
+            (typeInfo.IsValid() && typeInfo.GetClass() != inputInfo.GetClass())) {
             inst->SetObjectTypeInfo(ObjectTypeInfo::INVALID);
             return ObjectTypeInfo::INVALID;
         }
-        if (type_info == ObjectTypeInfo::UNKNOWN) {
-            type_info = input_info;
+        if (typeInfo == ObjectTypeInfo::UNKNOWN) {
+            typeInfo = inputInfo;
             continue;
         }
-        type_info = {type_info.GetClass(), type_info.IsExact() && input_info.IsExact()};
+        typeInfo = {typeInfo.GetClass(), typeInfo.IsExact() && inputInfo.IsExact()};
     }
-    if (need_update) {
-        visited_phis_.push_back(inst);
+    if (needUpdate) {
+        visitedPhis_.push_back(inst);
     } else {
-        inst->SetObjectTypeInfo(type_info);
+        inst->SetObjectTypeInfo(typeInfo);
     }
-    return type_info;
+    return typeInfo;
 }
 
 }  // namespace panda::compiler

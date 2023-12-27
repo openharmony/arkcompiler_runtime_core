@@ -27,13 +27,13 @@ Aarch64CallingConvention::Aarch64CallingConvention(ArenaAllocator *allocator, En
 {
 }
 
-ParameterInfo *Aarch64CallingConvention::GetParameterInfo(uint8_t regs_offset)
+ParameterInfo *Aarch64CallingConvention::GetParameterInfo(uint8_t regsOffset)
 {
-    auto param_info = GetAllocator()->New<aarch64::Aarch64ParameterInfo>();
-    for (int i = 0; i < regs_offset; ++i) {
-        param_info->GetNativeParam(INT64_TYPE);
+    auto paramInfo = GetAllocator()->New<aarch64::Aarch64ParameterInfo>();
+    for (int i = 0; i < regsOffset; ++i) {
+        paramInfo->GetNativeParam(INT64_TYPE);
     }
-    return param_info;
+    return paramInfo;
 }
 
 void *Aarch64CallingConvention::GetCodeEntry()
@@ -47,7 +47,7 @@ uint32_t Aarch64CallingConvention::GetCodeSize()
 }
 
 size_t Aarch64CallingConvention::PushRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs,
-                                          bool is_callee)
+                                          bool isCallee)
 {
     if ((regs.GetCount() % IMM_2) == 1) {
         ASSERT((regs.GetList() & (UINT64_C(1) << vixl::aarch64::xzr.GetCode())) == 0);
@@ -55,17 +55,16 @@ size_t Aarch64CallingConvention::PushRegs(vixl::aarch64::CPURegList regs, vixl::
     }
     if ((vregs.GetCount() % IMM_2) == 1) {
         auto regdescr = static_cast<Aarch64RegisterDescription *>(GetRegfile());
-        uint8_t allignment_vreg = regdescr->GetAlignmentVreg(is_callee);
-        ASSERT((vregs.GetList() & (UINT64_C(1) << allignment_vreg)) == 0);
-        vregs.Combine(allignment_vreg);
+        uint8_t allignmentVreg = regdescr->GetAlignmentVreg(isCallee);
+        ASSERT((vregs.GetList() & (UINT64_C(1) << allignmentVreg)) == 0);
+        vregs.Combine(allignmentVreg);
     }
     GetMasm()->PushCPURegList(vregs);
     GetMasm()->PushCPURegList(regs);
     return vregs.GetCount() + regs.GetCount();
 }
 
-size_t Aarch64CallingConvention::PopRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs,
-                                         bool is_callee)
+size_t Aarch64CallingConvention::PopRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs, bool isCallee)
 {
     if ((regs.GetCount() % IMM_2) == 1) {
         ASSERT((regs.GetList() & (UINT64_C(1) << vixl::aarch64::xzr.GetCode())) == 0);
@@ -73,9 +72,9 @@ size_t Aarch64CallingConvention::PopRegs(vixl::aarch64::CPURegList regs, vixl::a
     }
     if ((vregs.GetCount() % IMM_2) == 1) {
         auto regdescr = static_cast<Aarch64RegisterDescription *>(GetRegfile());
-        uint8_t allignment_vreg = regdescr->GetAlignmentVreg(is_callee);
-        ASSERT((vregs.GetList() & (UINT64_C(1) << allignment_vreg)) == 0);
-        vregs.Combine(allignment_vreg);
+        uint8_t allignmentVreg = regdescr->GetAlignmentVreg(isCallee);
+        ASSERT((vregs.GetList() & (UINT64_C(1) << allignmentVreg)) == 0);
+        vregs.Combine(allignmentVreg);
     }
     GetMasm()->PopCPURegList(regs);
     GetMasm()->PopCPURegList(vregs);
@@ -85,17 +84,17 @@ size_t Aarch64CallingConvention::PopRegs(vixl::aarch64::CPURegList regs, vixl::a
 std::variant<Reg, uint8_t> Aarch64ParameterInfo::GetNativeParam(const TypeInfo &type)
 {
     if (type.IsFloat()) {
-        if (current_vector_number_ > MAX_VECTOR_PARAM_ID) {
-            return current_stack_offset_++;
+        if (currentVectorNumber_ > MAX_VECTOR_PARAM_ID) {
+            return currentStackOffset_++;
         }
-        return Reg(current_vector_number_++, type);
+        return Reg(currentVectorNumber_++, type);
     }
-    if (current_scalar_number_ > MAX_SCALAR_PARAM_ID) {
-        return current_stack_offset_++;
+    if (currentScalarNumber_ > MAX_SCALAR_PARAM_ID) {
+        return currentStackOffset_++;
     }
-    auto ret = Reg(current_scalar_number_++, type);
+    auto ret = Reg(currentScalarNumber_++, type);
     if (type.GetSize() > DOUBLE_WORD_SIZE) {
-        current_scalar_number_++;
+        currentScalarNumber_++;
     }
     return ret;
 }
@@ -103,32 +102,32 @@ std::variant<Reg, uint8_t> Aarch64ParameterInfo::GetNativeParam(const TypeInfo &
 Location Aarch64ParameterInfo::GetNextLocation(DataType::Type type)
 {
     if (DataType::IsFloatType(type)) {
-        if (current_vector_number_ > MAX_VECTOR_PARAM_ID) {
-            return Location::MakeStackArgument(current_stack_offset_++);
+        if (currentVectorNumber_ > MAX_VECTOR_PARAM_ID) {
+            return Location::MakeStackArgument(currentStackOffset_++);
         }
-        return Location::MakeFpRegister(current_vector_number_++);
+        return Location::MakeFpRegister(currentVectorNumber_++);
     }
-    if (current_scalar_number_ > MAX_SCALAR_PARAM_ID) {
-        return Location::MakeStackArgument(current_stack_offset_++);
+    if (currentScalarNumber_ > MAX_SCALAR_PARAM_ID) {
+        return Location::MakeStackArgument(currentStackOffset_++);
     }
     Target target(Arch::AARCH64);
-    return Location::MakeRegister(target.GetParamRegId(current_scalar_number_++));
+    return Location::MakeRegister(target.GetParamRegId(currentScalarNumber_++));
 }
 
-Reg Aarch64CallingConvention::InitFlagsReg(bool has_float_regs)
+Reg Aarch64CallingConvention::InitFlagsReg(bool hasFloatRegs)
 {
-    auto flags {static_cast<uint64_t>(has_float_regs) << CFrameLayout::HasFloatRegsFlag::START_BIT};
-    auto flags_reg {GetTarget().GetZeroReg()};
+    auto flags {static_cast<uint64_t>(hasFloatRegs) << CFrameLayout::HasFloatRegsFlag::START_BIT};
+    auto flagsReg {GetTarget().GetZeroReg()};
     if (flags != 0U) {
-        flags_reg = GetTarget().GetLinkReg();
-        GetEncoder()->EncodeMov(flags_reg, Imm(flags));
+        flagsReg = GetTarget().GetLinkReg();
+        GetEncoder()->EncodeMov(flagsReg, Imm(flags));
     }
-    return flags_reg;
+    return flagsReg;
 }
 
 using vixl::aarch64::CPURegList, vixl::aarch64::CPURegister, vixl::aarch64::MemOperand;
 
-void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frame_info)
+void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frameInfo)
 {
     static_assert((CFrameLayout::GetLocalsCount() & 1U) == 0);
     auto encoder = GetEncoder();
@@ -137,79 +136,79 @@ void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frame_info)
     auto sp = GetTarget().GetStackReg();
     auto fp = GetTarget().GetFrameReg();
     auto lr = GetTarget().GetLinkReg();
-    auto sp_to_regs_slots = CFrameLayout::GetTopToRegsSlotsCount();
+    auto spToRegsSlots = CFrameLayout::GetTopToRegsSlotsCount();
 
     // Save FP and LR
-    if (frame_info.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
+    if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
         static_assert(CFrameLayout::GetTopToRegsSlotsCount() > CFrameLayout::GetFpLrSlotsCount());
         GetMasm()->PushCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
-        SET_CFI_OFFSET(push_fplr, encoder->GetCursorOffset());
-        sp_to_regs_slots -= CFrameLayout::GetFpLrSlotsCount();
+        SET_CFI_OFFSET(pushFplr, encoder->GetCursorOffset());
+        spToRegsSlots -= CFrameLayout::GetFpLrSlotsCount();
     }
 
     // Setup FP
-    if (frame_info.GetSetupFrame() || ProvideCFI()) {
+    if (frameInfo.GetSetupFrame() || ProvideCFI()) {
         // If SetupFrame flag is set, then SaveFrameAndLinkRegs must be set also.
         // These are separate flags as it looks like Irtoc does not need frame setup
         // but requires to save frame and link regs.
-        ASSERT(!frame_info.GetSetupFrame() || frame_info.GetSaveFrameAndLinkRegs());
+        ASSERT(!frameInfo.GetSetupFrame() || frameInfo.GetSaveFrameAndLinkRegs());
         encoder->EncodeMov(fp, sp);
-        SET_CFI_OFFSET(set_fp, encoder->GetCursorOffset());
+        SET_CFI_OFFSET(setFp, encoder->GetCursorOffset());
     }
 
     if (IsDynCallMode() && GetDynInfo().IsCheckRequired()) {
         static_assert(CallConvDynInfo::REG_NUM_ARGS == 1);
         static_assert(CallConvDynInfo::REG_COUNT == CallConvDynInfo::REG_NUM_ARGS + 1);
 
-        ASSERT(frame_info.GetSaveFrameAndLinkRegs());
+        ASSERT(frameInfo.GetSaveFrameAndLinkRegs());
 
         constexpr auto NUM_ACTUAL_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_NUM_ARGS);
         constexpr auto NUM_EXPECTED_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_COUNT);
-        auto num_expected = GetDynInfo().GetNumExpectedArgs();
+        auto numExpected = GetDynInfo().GetNumExpectedArgs();
 
-        auto expand_done = encoder->CreateLabel();
-        encoder->EncodeJump(expand_done, NUM_ACTUAL_REG, Imm(num_expected), Condition::GE);
-        encoder->EncodeMov(NUM_EXPECTED_REG, Imm(num_expected));
+        auto expandDone = encoder->CreateLabel();
+        encoder->EncodeJump(expandDone, NUM_ACTUAL_REG, Imm(numExpected), Condition::GE);
+        encoder->EncodeMov(NUM_EXPECTED_REG, Imm(numExpected));
 
-        MemRef expand_entrypoint(Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType()),
-                                 GetDynInfo().GetExpandEntrypointTlsOffset());
-        GetEncoder()->MakeCall(expand_entrypoint);
-        encoder->BindLabel(expand_done);
+        MemRef expandEntrypoint(Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType()),
+                                GetDynInfo().GetExpandEntrypointTlsOffset());
+        GetEncoder()->MakeCall(expandEntrypoint);
+        encoder->BindLabel(expandDone);
     }
 
     // Reset flags and setup method
-    if (frame_info.GetSetupFrame()) {
+    if (frameInfo.GetSetupFrame()) {
         static_assert(CFrameMethod::End() == CFrameFlags::Start());
         constexpr int64_t SLOTS_COUNT = CFrameMethod::GetSize() + CFrameFlags::GetSize();
 
-        GetMasm()->Stp(VixlReg(InitFlagsReg(frame_info.GetHasFloatRegs())),  // Reset OSR flag and set HasFloatRegsFlag
-                       VixlReg(GetTarget().GetParamReg(0)),                  // Set Method pointer
+        GetMasm()->Stp(VixlReg(InitFlagsReg(frameInfo.GetHasFloatRegs())),  // Reset OSR flag and set HasFloatRegsFlag
+                       VixlReg(GetTarget().GetParamReg(0)),                 // Set Method pointer
                        vixl::aarch64::MemOperand(VixlReg(sp), VixlImm(-SLOTS_COUNT * fl.GetSlotSize()),
                                                  vixl::aarch64::AddrMode::PreIndex));
-        sp_to_regs_slots -= SLOTS_COUNT;
+        spToRegsSlots -= SLOTS_COUNT;
     }
 
-    RegMask callee_regs_mask;
-    VRegMask callee_vregs_mask;
-    regdescr->FillUsedCalleeSavedRegisters(&callee_regs_mask, &callee_vregs_mask, frame_info.GetSaveUnusedCalleeRegs());
-    SET_CFI_CALLEE_REGS(callee_regs_mask);
-    SET_CFI_CALLEE_VREGS(callee_vregs_mask);
-    auto last_callee_reg = sp_to_regs_slots + callee_regs_mask.Count();
-    auto last_callee_vreg = sp_to_regs_slots + fl.GetCalleeRegistersCount(false) + callee_vregs_mask.Count();
-    auto callee_regs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, callee_regs_mask.GetValue());
-    auto callee_vregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, callee_vregs_mask.GetValue());
-    GetMasm()->StoreCPURegList(callee_regs, MemOperand(VixlReg(sp), VixlImm(-last_callee_reg * fl.GetSlotSize())));
-    GetMasm()->StoreCPURegList(callee_vregs, MemOperand(VixlReg(sp), VixlImm(-last_callee_vreg * fl.GetSlotSize())));
-    SET_CFI_OFFSET(push_callees, encoder->GetCursorOffset());
+    RegMask calleeRegsMask;
+    VRegMask calleeVregsMask;
+    regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs());
+    SET_CFI_CALLEE_REGS(calleeRegsMask);
+    SET_CFI_CALLEE_VREGS(calleeVregsMask);
+    auto lastCalleeReg = spToRegsSlots + calleeRegsMask.Count();
+    auto lastCalleeVreg = spToRegsSlots + fl.GetCalleeRegistersCount(false) + calleeVregsMask.Count();
+    auto calleeRegs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, calleeRegsMask.GetValue());
+    auto calleeVregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, calleeVregsMask.GetValue());
+    GetMasm()->StoreCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeReg * fl.GetSlotSize())));
+    GetMasm()->StoreCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeVreg * fl.GetSlotSize())));
+    SET_CFI_OFFSET(pushCallees, encoder->GetCursorOffset());
 
     // Adjust SP
-    if (frame_info.GetAdjustSpReg()) {
-        auto sp_to_frame_end_offset = (sp_to_regs_slots + fl.GetRegsSlotsCount()) * fl.GetSlotSize();
-        encoder->EncodeSub(sp, sp, Imm(sp_to_frame_end_offset));
+    if (frameInfo.GetAdjustSpReg()) {
+        auto spToFrameEndOffset = (spToRegsSlots + fl.GetRegsSlotsCount()) * fl.GetSlotSize();
+        encoder->EncodeSub(sp, sp, Imm(spToFrameEndOffset));
     }
 }
 
-void Aarch64CallingConvention::GenerateEpilogue(const FrameInfo &frame_info, std::function<void()> post_job)
+void Aarch64CallingConvention::GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
 {
     auto encoder = GetEncoder();
     const CFrameLayout &fl = encoder->GetFrameLayout();
@@ -218,62 +217,62 @@ void Aarch64CallingConvention::GenerateEpilogue(const FrameInfo &frame_info, std
     auto fp = GetTarget().GetFrameReg();
     auto lr = GetTarget().GetLinkReg();
 
-    if (post_job) {
-        post_job();
+    if (postJob) {
+        postJob();
     }
 
     // Restore callee-registers
-    RegMask callee_regs_mask;
-    VRegMask callee_vregs_mask;
-    regdescr->FillUsedCalleeSavedRegisters(&callee_regs_mask, &callee_vregs_mask, frame_info.GetSaveUnusedCalleeRegs());
+    RegMask calleeRegsMask;
+    VRegMask calleeVregsMask;
+    regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs());
 
-    auto callee_regs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, callee_regs_mask.GetValue());
-    auto callee_vregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, callee_vregs_mask.GetValue());
+    auto calleeRegs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, calleeRegsMask.GetValue());
+    auto calleeVregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, calleeVregsMask.GetValue());
 
-    if (frame_info.GetAdjustSpReg()) {
+    if (frameInfo.GetAdjustSpReg()) {
         // SP points to the frame's bottom
-        auto last_callee_reg = fl.GetRegsSlotsCount() - callee_regs_mask.Count();
-        auto last_callee_vreg = fl.GetRegsSlotsCount() - fl.GetCalleeRegistersCount(false) - callee_vregs_mask.Count();
-        GetMasm()->LoadCPURegList(callee_regs, MemOperand(VixlReg(sp), VixlImm(last_callee_reg * fl.GetSlotSize())));
-        GetMasm()->LoadCPURegList(callee_vregs, MemOperand(VixlReg(sp), VixlImm(last_callee_vreg * fl.GetSlotSize())));
+        auto lastCalleeReg = fl.GetRegsSlotsCount() - calleeRegsMask.Count();
+        auto lastCalleeVreg = fl.GetRegsSlotsCount() - fl.GetCalleeRegistersCount(false) - calleeVregsMask.Count();
+        GetMasm()->LoadCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(lastCalleeReg * fl.GetSlotSize())));
+        GetMasm()->LoadCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(lastCalleeVreg * fl.GetSlotSize())));
     } else {
         // SP either points to the frame's top or frame's top + FPLR slot
-        auto sp_to_regs_slots = CFrameLayout::GetTopToRegsSlotsCount();
-        if (frame_info.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
+        auto spToRegsSlots = CFrameLayout::GetTopToRegsSlotsCount();
+        if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
             // Adjust for FPLR slot
-            sp_to_regs_slots -= CFrameLayout::GetFpLrSlotsCount();
+            spToRegsSlots -= CFrameLayout::GetFpLrSlotsCount();
         }
-        auto last_callee_reg = sp_to_regs_slots + callee_regs_mask.Count();
-        auto last_callee_vreg = sp_to_regs_slots + fl.GetCalleeRegistersCount(false) + callee_vregs_mask.Count();
-        GetMasm()->LoadCPURegList(callee_regs, MemOperand(VixlReg(sp), VixlImm(-last_callee_reg * fl.GetSlotSize())));
-        GetMasm()->LoadCPURegList(callee_vregs, MemOperand(VixlReg(sp), VixlImm(-last_callee_vreg * fl.GetSlotSize())));
+        auto lastCalleeReg = spToRegsSlots + calleeRegsMask.Count();
+        auto lastCalleeVreg = spToRegsSlots + fl.GetCalleeRegistersCount(false) + calleeVregsMask.Count();
+        GetMasm()->LoadCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeReg * fl.GetSlotSize())));
+        GetMasm()->LoadCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeVreg * fl.GetSlotSize())));
     }
-    SET_CFI_OFFSET(pop_callees, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popCallees, encoder->GetCursorOffset());
 
     // Adjust SP
-    if (frame_info.GetAdjustSpReg()) {
+    if (frameInfo.GetAdjustSpReg()) {
         // SP points to the frame's bottom
-        auto sp_to_frame_top_slots = fl.GetRegsSlotsCount() + CFrameRegs::Start() - CFrameReturnAddr::Start();
-        if (frame_info.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
-            sp_to_frame_top_slots -= CFrameLayout::GetFpLrSlotsCount();
+        auto spToFrameTopSlots = fl.GetRegsSlotsCount() + CFrameRegs::Start() - CFrameReturnAddr::Start();
+        if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
+            spToFrameTopSlots -= CFrameLayout::GetFpLrSlotsCount();
         }
-        auto sp_to_frame_top_offset = sp_to_frame_top_slots * fl.GetSlotSize();
-        encoder->EncodeAdd(sp, sp, Imm(sp_to_frame_top_offset));
+        auto spToFrameTopOffset = spToFrameTopSlots * fl.GetSlotSize();
+        encoder->EncodeAdd(sp, sp, Imm(spToFrameTopOffset));
     }
 
     // Restore FP and LR
     if (IsOsrMode()) {
         encoder->EncodeAdd(sp, sp, Imm(CFrameLayout::GetFpLrSlotsCount() * fl.GetSlotSize()));
         encoder->EncodeLdp(fp, lr, false, MemRef(fp, -fl.GetOsrFpLrOffset()));
-    } else if (frame_info.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
+    } else if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
         GetMasm()->PopCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
     }
-    SET_CFI_OFFSET(pop_fplr, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popFplr, encoder->GetCursorOffset());
 
     GetMasm()->Ret();
 }
 
-void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frame_info)
+void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo)
 {
     static_assert((CFrameLayout::GetLocalsCount() & 1U) == 0);
     auto encoder = GetEncoder();
@@ -282,65 +281,65 @@ void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frame_inf
     auto sp = GetTarget().GetStackReg();
     auto fp = GetTarget().GetFrameReg();
     auto lr = GetTarget().GetLinkReg();
-    auto sp_to_regs_slots = CFrameLayout::GetTopToRegsSlotsCount();
+    auto spToRegsSlots = CFrameLayout::GetTopToRegsSlotsCount();
 
     // Save FP and LR
-    if (frame_info.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
+    if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
         static_assert(CFrameLayout::GetTopToRegsSlotsCount() > CFrameLayout::GetFpLrSlotsCount());
         GetMasm()->PushCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
-        SET_CFI_OFFSET(push_fplr, encoder->GetCursorOffset());
-        sp_to_regs_slots -= CFrameLayout::GetFpLrSlotsCount();
+        SET_CFI_OFFSET(pushFplr, encoder->GetCursorOffset());
+        spToRegsSlots -= CFrameLayout::GetFpLrSlotsCount();
     }
 
     // 'Native' calling convention requires setting up FP for FastPath calls from IRtoC Interpreter entrypoint
-    if (frame_info.GetSetupFrame() || ProvideCFI()) {
+    if (frameInfo.GetSetupFrame() || ProvideCFI()) {
         encoder->EncodeMov(fp, sp);
-        SET_CFI_OFFSET(set_fp, encoder->GetCursorOffset());
+        SET_CFI_OFFSET(setFp, encoder->GetCursorOffset());
     }
 
     if (IsDynCallMode() && GetDynInfo().IsCheckRequired()) {
         static_assert(CallConvDynInfo::REG_NUM_ARGS == 1);
         static_assert(CallConvDynInfo::REG_COUNT == CallConvDynInfo::REG_NUM_ARGS + 1);
 
-        ASSERT(frame_info.GetSaveFrameAndLinkRegs());
+        ASSERT(frameInfo.GetSaveFrameAndLinkRegs());
 
         constexpr auto NUM_ACTUAL_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_NUM_ARGS);
         constexpr auto NUM_EXPECTED_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_COUNT);
-        auto num_expected = GetDynInfo().GetNumExpectedArgs();
+        auto numExpected = GetDynInfo().GetNumExpectedArgs();
 
-        auto expand_done = encoder->CreateLabel();
-        encoder->EncodeJump(expand_done, NUM_ACTUAL_REG, Imm(num_expected), Condition::GE);
-        encoder->EncodeMov(NUM_EXPECTED_REG, Imm(num_expected));
+        auto expandDone = encoder->CreateLabel();
+        encoder->EncodeJump(expandDone, NUM_ACTUAL_REG, Imm(numExpected), Condition::GE);
+        encoder->EncodeMov(NUM_EXPECTED_REG, Imm(numExpected));
 
-        MemRef expand_entrypoint(Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType()),
-                                 GetDynInfo().GetExpandEntrypointTlsOffset());
-        GetEncoder()->MakeCall(expand_entrypoint);
-        encoder->BindLabel(expand_done);
+        MemRef expandEntrypoint(Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType()),
+                                GetDynInfo().GetExpandEntrypointTlsOffset());
+        GetEncoder()->MakeCall(expandEntrypoint);
+        encoder->BindLabel(expandDone);
     }
 
     // Save callee-saved registers
-    RegMask callee_regs_mask;
-    VRegMask callee_vregs_mask;
-    regdescr->FillUsedCalleeSavedRegisters(&callee_regs_mask, &callee_vregs_mask, frame_info.GetSaveUnusedCalleeRegs(),
+    RegMask calleeRegsMask;
+    VRegMask calleeVregsMask;
+    regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs(),
                                            GetMode().IsOptIrtoc());
-    SET_CFI_CALLEE_REGS(callee_regs_mask);
-    SET_CFI_CALLEE_VREGS(callee_vregs_mask);
-    auto last_callee_reg = sp_to_regs_slots + callee_regs_mask.Count();
-    auto last_callee_vreg = sp_to_regs_slots + fl.GetCalleeRegistersCount(false) + callee_vregs_mask.Count();
-    auto callee_regs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, callee_regs_mask.GetValue());
-    auto callee_vregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, callee_vregs_mask.GetValue());
-    GetMasm()->StoreCPURegList(callee_regs, MemOperand(VixlReg(sp), VixlImm(-last_callee_reg * fl.GetSlotSize())));
-    GetMasm()->StoreCPURegList(callee_vregs, MemOperand(VixlReg(sp), VixlImm(-last_callee_vreg * fl.GetSlotSize())));
-    SET_CFI_OFFSET(push_callees, encoder->GetCursorOffset());
+    SET_CFI_CALLEE_REGS(calleeRegsMask);
+    SET_CFI_CALLEE_VREGS(calleeVregsMask);
+    auto lastCalleeReg = spToRegsSlots + calleeRegsMask.Count();
+    auto lastCalleeVreg = spToRegsSlots + fl.GetCalleeRegistersCount(false) + calleeVregsMask.Count();
+    auto calleeRegs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, calleeRegsMask.GetValue());
+    auto calleeVregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, calleeVregsMask.GetValue());
+    GetMasm()->StoreCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeReg * fl.GetSlotSize())));
+    GetMasm()->StoreCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeVreg * fl.GetSlotSize())));
+    SET_CFI_OFFSET(pushCallees, encoder->GetCursorOffset());
 
     // Adjust SP
-    if (frame_info.GetAdjustSpReg()) {
-        auto sp_to_frame_end_offset = (sp_to_regs_slots + fl.GetRegsSlotsCount()) * fl.GetSlotSize();
-        encoder->EncodeSub(sp, sp, Imm(sp_to_frame_end_offset));
+    if (frameInfo.GetAdjustSpReg()) {
+        auto spToFrameEndOffset = (spToRegsSlots + fl.GetRegsSlotsCount()) * fl.GetSlotSize();
+        encoder->EncodeSub(sp, sp, Imm(spToFrameEndOffset));
     }
 }
 
-void Aarch64CallingConvention::GenerateNativeEpilogue(const FrameInfo &frame_info, std::function<void()> post_job)
+void Aarch64CallingConvention::GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
 {
     auto encoder = GetEncoder();
     const CFrameLayout &fl = encoder->GetFrameLayout();
@@ -349,58 +348,58 @@ void Aarch64CallingConvention::GenerateNativeEpilogue(const FrameInfo &frame_inf
     auto fp = GetTarget().GetFrameReg();
     auto lr = GetTarget().GetLinkReg();
 
-    if (post_job) {
-        post_job();
+    if (postJob) {
+        postJob();
     }
 
     // Restore callee-registers
-    RegMask callee_regs_mask;
-    VRegMask callee_vregs_mask;
-    regdescr->FillUsedCalleeSavedRegisters(&callee_regs_mask, &callee_vregs_mask, frame_info.GetSaveUnusedCalleeRegs(),
+    RegMask calleeRegsMask;
+    VRegMask calleeVregsMask;
+    regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs(),
                                            GetMode().IsOptIrtoc());
 
-    auto callee_regs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, callee_regs_mask.GetValue());
-    auto callee_vregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, callee_vregs_mask.GetValue());
+    auto calleeRegs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, calleeRegsMask.GetValue());
+    auto calleeVregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, calleeVregsMask.GetValue());
 
-    if (frame_info.GetAdjustSpReg()) {
+    if (frameInfo.GetAdjustSpReg()) {
         // SP points to the frame's bottom
-        auto last_callee_reg = fl.GetRegsSlotsCount() - callee_regs_mask.Count();
-        auto last_callee_vreg = fl.GetRegsSlotsCount() - fl.GetCalleeRegistersCount(false) - callee_vregs_mask.Count();
-        GetMasm()->LoadCPURegList(callee_regs, MemOperand(VixlReg(sp), VixlImm(last_callee_reg * fl.GetSlotSize())));
-        GetMasm()->LoadCPURegList(callee_vregs, MemOperand(VixlReg(sp), VixlImm(last_callee_vreg * fl.GetSlotSize())));
+        auto lastCalleeReg = fl.GetRegsSlotsCount() - calleeRegsMask.Count();
+        auto lastCalleeVreg = fl.GetRegsSlotsCount() - fl.GetCalleeRegistersCount(false) - calleeVregsMask.Count();
+        GetMasm()->LoadCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(lastCalleeReg * fl.GetSlotSize())));
+        GetMasm()->LoadCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(lastCalleeVreg * fl.GetSlotSize())));
     } else {
         // SP either points to the frame's top or frame's top + FPLR slot
-        auto sp_to_regs_slots = CFrameLayout::GetTopToRegsSlotsCount();
-        if (frame_info.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
+        auto spToRegsSlots = CFrameLayout::GetTopToRegsSlotsCount();
+        if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
             // Adjust for FPLR slot
-            sp_to_regs_slots -= CFrameLayout::GetFpLrSlotsCount();
+            spToRegsSlots -= CFrameLayout::GetFpLrSlotsCount();
         }
-        auto last_callee_reg = sp_to_regs_slots + callee_regs_mask.Count();
-        auto last_callee_vreg = sp_to_regs_slots + fl.GetCalleeRegistersCount(false) + callee_vregs_mask.Count();
-        GetMasm()->LoadCPURegList(callee_regs, MemOperand(VixlReg(sp), VixlImm(-last_callee_reg * fl.GetSlotSize())));
-        GetMasm()->LoadCPURegList(callee_vregs, MemOperand(VixlReg(sp), VixlImm(-last_callee_vreg * fl.GetSlotSize())));
+        auto lastCalleeReg = spToRegsSlots + calleeRegsMask.Count();
+        auto lastCalleeVreg = spToRegsSlots + fl.GetCalleeRegistersCount(false) + calleeVregsMask.Count();
+        GetMasm()->LoadCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeReg * fl.GetSlotSize())));
+        GetMasm()->LoadCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeVreg * fl.GetSlotSize())));
     }
-    SET_CFI_OFFSET(pop_callees, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popCallees, encoder->GetCursorOffset());
 
     // Adjust SP
-    if (frame_info.GetAdjustSpReg()) {
+    if (frameInfo.GetAdjustSpReg()) {
         // SP points to the frame's bottom
-        auto sp_to_frame_top_slots = fl.GetRegsSlotsCount() + CFrameRegs::Start() - CFrameReturnAddr::Start();
-        if (frame_info.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
-            sp_to_frame_top_slots -= CFrameLayout::GetFpLrSlotsCount();
+        auto spToFrameTopSlots = fl.GetRegsSlotsCount() + CFrameRegs::Start() - CFrameReturnAddr::Start();
+        if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
+            spToFrameTopSlots -= CFrameLayout::GetFpLrSlotsCount();
         }
-        auto sp_to_frame_top_offset = sp_to_frame_top_slots * fl.GetSlotSize();
-        encoder->EncodeAdd(sp, sp, Imm(sp_to_frame_top_offset));
+        auto spToFrameTopOffset = spToFrameTopSlots * fl.GetSlotSize();
+        encoder->EncodeAdd(sp, sp, Imm(spToFrameTopOffset));
     }
 
     // Restore FP and LR
     if (IsOsrMode()) {
         encoder->EncodeAdd(sp, sp, Imm(CFrameLayout::GetFpLrSlotsCount() * fl.GetSlotSize()));
         encoder->EncodeLdp(fp, lr, false, MemRef(fp, -fl.GetOsrFpLrOffset()));
-    } else if (frame_info.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
+    } else if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
         GetMasm()->PopCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
     }
-    SET_CFI_OFFSET(pop_fplr, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popFplr, encoder->GetCursorOffset());
 
     GetMasm()->Ret();
 }

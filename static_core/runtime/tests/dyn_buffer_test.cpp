@@ -50,20 +50,20 @@ private:
 
 TEST_F(DynBufferTest, EmitAndGet)
 {
-    DynChunk dyn_chunk = DynChunk();
+    DynChunk dynChunk = DynChunk();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    dyn_chunk.EmitChar(65);
+    dynChunk.EmitChar(65);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    dyn_chunk.EmitU16(66);
+    dynChunk.EmitU16(66);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    dyn_chunk.EmitU32(67);
-    ASSERT_EQ(dyn_chunk.GetSize(), 7);
-    ASSERT_EQ(dyn_chunk.GetAllocatedSize(), DynChunk::ALLOCATE_MIN_SIZE);
-    ASSERT_EQ(dyn_chunk.GetError(), false);
-    dyn_chunk.Insert(1, 1);
-    uint32_t val1 = dyn_chunk.GetU8(0);
-    uint32_t val2 = dyn_chunk.GetU16(2);
-    uint32_t val3 = dyn_chunk.GetU32(4);
+    dynChunk.EmitU32(67);
+    ASSERT_EQ(dynChunk.GetSize(), 7);
+    ASSERT_EQ(dynChunk.GetAllocatedSize(), DynChunk::ALLOCATE_MIN_SIZE);
+    ASSERT_EQ(dynChunk.GetError(), false);
+    dynChunk.Insert(1, 1);
+    uint32_t val1 = dynChunk.GetU8(0);
+    uint32_t val2 = dynChunk.GetU16(2);
+    uint32_t val3 = dynChunk.GetU32(4);
     ASSERT_EQ(val1, 65);
     ASSERT_EQ(val2, 66);
     ASSERT_EQ(val3, 67);
@@ -71,30 +71,30 @@ TEST_F(DynBufferTest, EmitAndGet)
 
 TEST_F(DynBufferTest, EmitSelfAndGet)
 {
-    DynChunk dyn_chunk = DynChunk();
+    DynChunk dynChunk = DynChunk();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    dyn_chunk.EmitChar(65);
-    dyn_chunk.EmitSelf(0, 1);
-    ASSERT_EQ(dyn_chunk.GetSize(), 2);
-    ASSERT_EQ(dyn_chunk.GetAllocatedSize(), DynChunk::ALLOCATE_MIN_SIZE);
-    ASSERT_EQ(dyn_chunk.GetError(), false);
-    uint32_t val1 = dyn_chunk.GetU8(0);
-    uint32_t val2 = dyn_chunk.GetU8(1);
+    dynChunk.EmitChar(65);
+    dynChunk.EmitSelf(0, 1);
+    ASSERT_EQ(dynChunk.GetSize(), 2);
+    ASSERT_EQ(dynChunk.GetAllocatedSize(), DynChunk::ALLOCATE_MIN_SIZE);
+    ASSERT_EQ(dynChunk.GetError(), false);
+    uint32_t val1 = dynChunk.GetU8(0);
+    uint32_t val2 = dynChunk.GetU8(1);
     ASSERT_EQ(val1, 65);
     ASSERT_EQ(val2, 65);
 }
 
 TEST_F(DynBufferTest, EmitStrAndGet)
 {
-    DynChunk dyn_chunk = DynChunk();
-    dyn_chunk.EmitStr("abc");
-    ASSERT_EQ(dyn_chunk.GetSize(), 4);
-    ASSERT_EQ(dyn_chunk.GetAllocatedSize(), DynChunk::ALLOCATE_MIN_SIZE);
-    ASSERT_EQ(dyn_chunk.GetError(), false);
-    uint32_t val1 = dyn_chunk.GetU8(0);
-    uint32_t val2 = dyn_chunk.GetU8(1);
-    uint32_t val3 = dyn_chunk.GetU8(2);
-    uint32_t val4 = dyn_chunk.GetU8(3);
+    DynChunk dynChunk = DynChunk();
+    dynChunk.EmitStr("abc");
+    ASSERT_EQ(dynChunk.GetSize(), 4);
+    ASSERT_EQ(dynChunk.GetAllocatedSize(), DynChunk::ALLOCATE_MIN_SIZE);
+    ASSERT_EQ(dynChunk.GetError(), false);
+    uint32_t val1 = dynChunk.GetU8(0);
+    uint32_t val2 = dynChunk.GetU8(1);
+    uint32_t val3 = dynChunk.GetU8(2);
+    uint32_t val4 = dynChunk.GetU8(3);
     ASSERT_EQ(val1, 97);
     ASSERT_EQ(val2, 98);
     ASSERT_EQ(val3, 99);

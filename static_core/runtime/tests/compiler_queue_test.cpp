@@ -76,12 +76,12 @@ static Class *TestClassPrepare()
     auto res = p.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+    Class *klass = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
                        ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
     return klass;
 }
@@ -114,13 +114,13 @@ static void GetAndCheckMethodsIfExists(CompilerQueueInterface *queue, Method *ta
 static void WaitForExpire(uint millis)
 {
     constexpr uint DELTA = 10;
-    uint64_t start_time = time::GetCurrentTimeInMillis();
+    uint64_t startTime = time::GetCurrentTimeInMillis();
     std::this_thread::sleep_for(std::chrono::milliseconds(millis));
     // sleep_for() works nondeterministically
     // use an additional check for more confidence
     // Note, the queue implementation uses GetCurrentTimeInMillis
     // to update aged counter
-    while (time::GetCurrentTimeInMillis() < start_time + millis) {
+    while (time::GetCurrentTimeInMillis() < startTime + millis) {
         std::this_thread::sleep_for(std::chrono::milliseconds(DELTA));
     }
 }
@@ -131,57 +131,57 @@ TEST_F(CompilerQueueTest, AddGet)
 {
     Class *klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
     // Manual range
-    main_method->SetHotnessCounter(3);
-    f_method->SetHotnessCounter(2);
-    g_method->SetHotnessCounter(1);
+    mainMethod->SetHotnessCounter(3);
+    fMethod->SetHotnessCounter(2);
+    gMethod->SetHotnessCounter(1);
 
     RuntimeOptions options;
     CompilerPriorityCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                        options.GetCompilerQueueMaxLength(), options.GetCompilerTaskLifeSpan());
-    queue.AddTask(CompilerTask {main_method, false});
-    queue.AddTask(CompilerTask {f_method, false});
-    queue.AddTask(CompilerTask {g_method, false});
+    queue.AddTask(CompilerTask {mainMethod, false});
+    queue.AddTask(CompilerTask {fMethod, false});
+    queue.AddTask(CompilerTask {gMethod, false});
 
-    GetAndCheckMethodsIfExists(&queue, g_method, f_method, main_method);
+    GetAndCheckMethodsIfExists(&queue, gMethod, fMethod, mainMethod);
 }
 
 TEST_F(CompilerQueueTest, EqualCounters)
 {
     Class *klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
     // Manual range
-    main_method->SetHotnessCounter(3);
-    f_method->SetHotnessCounter(3);
-    g_method->SetHotnessCounter(3);
+    mainMethod->SetHotnessCounter(3);
+    fMethod->SetHotnessCounter(3);
+    gMethod->SetHotnessCounter(3);
 
     RuntimeOptions options;
     CompilerPriorityCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                        options.GetCompilerQueueMaxLength(), options.GetCompilerTaskLifeSpan());
 
-    queue.AddTask(CompilerTask {f_method, false});
-    queue.AddTask(CompilerTask {g_method, false});
-    queue.AddTask(CompilerTask {main_method, false});
+    queue.AddTask(CompilerTask {fMethod, false});
+    queue.AddTask(CompilerTask {gMethod, false});
+    queue.AddTask(CompilerTask {mainMethod, false});
 
-    GetAndCheckMethodsIfExists(&queue, f_method, g_method, main_method);
+    GetAndCheckMethodsIfExists(&queue, fMethod, gMethod, mainMethod);
 }
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -190,22 +190,22 @@ TEST_F(CompilerQueueTest, Expire)
 {
     auto klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
     RuntimeOptions options;
     constexpr int COMPILER_TASK_LIFE_SPAN1 = 500;
     CompilerPriorityCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                        options.GetCompilerQueueMaxLength(), COMPILER_TASK_LIFE_SPAN1);
-    queue.AddTask(CompilerTask {main_method, false});
-    queue.AddTask(CompilerTask {f_method, false});
-    queue.AddTask(CompilerTask {g_method, false});
+    queue.AddTask(CompilerTask {mainMethod, false});
+    queue.AddTask(CompilerTask {fMethod, false});
+    queue.AddTask(CompilerTask {gMethod, false});
 
     WaitForExpire(1000);
 
@@ -216,9 +216,9 @@ TEST_F(CompilerQueueTest, Expire)
     constexpr int COMPILER_TASK_LIFE_SPAN2 = 0;
     CompilerPriorityCounterQueue queue2(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                         options.GetCompilerQueueMaxLength(), COMPILER_TASK_LIFE_SPAN2);
-    queue2.AddTask(CompilerTask {main_method, false});
-    queue2.AddTask(CompilerTask {f_method, false});
-    queue2.AddTask(CompilerTask {g_method, false});
+    queue2.AddTask(CompilerTask {mainMethod, false});
+    queue2.AddTask(CompilerTask {fMethod, false});
+    queue2.AddTask(CompilerTask {gMethod, false});
 
     // All tasks should expire without sleep
     method = queue2.GetTask().GetMethod();
@@ -229,18 +229,18 @@ TEST_F(CompilerQueueTest, Reorder)
 {
     auto klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
-    main_method->SetHotnessCounter(3);
-    f_method->SetHotnessCounter(2);
-    g_method->SetHotnessCounter(1);
+    mainMethod->SetHotnessCounter(3);
+    fMethod->SetHotnessCounter(2);
+    gMethod->SetHotnessCounter(1);
 
     RuntimeOptions options;
     CompilerPriorityCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
@@ -248,34 +248,34 @@ TEST_F(CompilerQueueTest, Reorder)
 
     // It is possible, that the first added method is expired, and others are not
     // So, add to queue in reversed order to be sure, that the first method is present anyway
-    queue.AddTask(CompilerTask {g_method, false});
-    queue.AddTask(CompilerTask {f_method, false});
-    queue.AddTask(CompilerTask {main_method, false});
+    queue.AddTask(CompilerTask {gMethod, false});
+    queue.AddTask(CompilerTask {fMethod, false});
+    queue.AddTask(CompilerTask {mainMethod, false});
 
     // Change the order
-    main_method->SetHotnessCounter(-6);
-    f_method->SetHotnessCounter(-5);
-    g_method->SetHotnessCounter(-4);
+    mainMethod->SetHotnessCounter(-6);
+    fMethod->SetHotnessCounter(-5);
+    gMethod->SetHotnessCounter(-4);
 
-    GetAndCheckMethodsIfExists(&queue, main_method, f_method, g_method);
+    GetAndCheckMethodsIfExists(&queue, mainMethod, fMethod, gMethod);
 }
 
 TEST_F(CompilerQueueTest, MaxLimit)
 {
     auto klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
-    main_method->SetHotnessCounter(1);
-    f_method->SetHotnessCounter(2);
-    g_method->SetHotnessCounter(3);
+    mainMethod->SetHotnessCounter(1);
+    fMethod->SetHotnessCounter(2);
+    gMethod->SetHotnessCounter(3);
 
     RuntimeOptions options;
     constexpr int COMPILER_QUEUE_MAX_LENGTH1 = 100;
@@ -283,9 +283,9 @@ TEST_F(CompilerQueueTest, MaxLimit)
                                        COMPILER_QUEUE_MAX_LENGTH1, options.GetCompilerTaskLifeSpan());
 
     for (int i = 0; i < 40; i++) {
-        queue.AddTask(CompilerTask {main_method, false});
-        queue.AddTask(CompilerTask {f_method, false});
-        queue.AddTask(CompilerTask {g_method, false});
+        queue.AddTask(CompilerTask {mainMethod, false});
+        queue.AddTask(CompilerTask {fMethod, false});
+        queue.AddTask(CompilerTask {gMethod, false});
     }
 
     // 100 as Max_Limit
@@ -302,9 +302,9 @@ TEST_F(CompilerQueueTest, MaxLimit)
     CompilerPriorityCounterQueue queue2(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                         COMPILER_QUEUE_MAX_LENGTH2, options.GetCompilerTaskLifeSpan());
 
-    queue2.AddTask(CompilerTask {main_method, false});
-    queue2.AddTask(CompilerTask {f_method, false});
-    queue2.AddTask(CompilerTask {g_method, false});
+    queue2.AddTask(CompilerTask {mainMethod, false});
+    queue2.AddTask(CompilerTask {fMethod, false});
+    queue2.AddTask(CompilerTask {gMethod, false});
 
     queue2.GetTask().GetMethod();
     method = queue2.GetTask().GetMethod();
@@ -317,86 +317,86 @@ TEST_F(CompilerQueueTest, AgedAddGet)
 {
     Class *klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
     // Manual range
-    main_method->SetHotnessCounter(-1000);
-    f_method->SetHotnessCounter(-1200);
-    g_method->SetHotnessCounter(-1300);
+    mainMethod->SetHotnessCounter(-1000);
+    fMethod->SetHotnessCounter(-1200);
+    gMethod->SetHotnessCounter(-1300);
 
     RuntimeOptions options;
     CompilerPriorityAgedCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                            options.GetCompilerQueueMaxLength(), options.GetCompilerDeathCounterValue(),
                                            options.GetCompilerEpochDuration());
-    queue.AddTask(CompilerTask {main_method, false});
-    queue.AddTask(CompilerTask {f_method, false});
-    queue.AddTask(CompilerTask {g_method, false});
+    queue.AddTask(CompilerTask {mainMethod, false});
+    queue.AddTask(CompilerTask {fMethod, false});
+    queue.AddTask(CompilerTask {gMethod, false});
 
-    GetAndCheckMethodsIfExists(&queue, g_method, f_method, main_method);
+    GetAndCheckMethodsIfExists(&queue, gMethod, fMethod, mainMethod);
 }
 
 TEST_F(CompilerQueueTest, AgedEqualCounters)
 {
     Class *klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
     // Manual range
-    main_method->SetHotnessCounter(3000);
-    g_method->SetHotnessCounter(3000);
-    f_method->SetHotnessCounter(3000);
+    mainMethod->SetHotnessCounter(3000);
+    gMethod->SetHotnessCounter(3000);
+    fMethod->SetHotnessCounter(3000);
 
     RuntimeOptions options;
     CompilerPriorityAgedCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                            options.GetCompilerQueueMaxLength(), options.GetCompilerDeathCounterValue(),
                                            options.GetCompilerEpochDuration());
     // Add in reversed order, as methods with equal counters will be ordered by timestamp
-    queue.AddTask(CompilerTask {f_method, false});
-    queue.AddTask(CompilerTask {g_method, false});
-    queue.AddTask(CompilerTask {main_method, false});
+    queue.AddTask(CompilerTask {fMethod, false});
+    queue.AddTask(CompilerTask {gMethod, false});
+    queue.AddTask(CompilerTask {mainMethod, false});
 
-    GetAndCheckMethodsIfExists(&queue, f_method, g_method, main_method);
+    GetAndCheckMethodsIfExists(&queue, fMethod, gMethod, mainMethod);
 }
 
 TEST_F(CompilerQueueTest, AgedExpire)
 {
     auto klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
-    main_method->SetHotnessCounter(1000);
-    f_method->SetHotnessCounter(1000);
-    g_method->SetHotnessCounter(1000);
+    mainMethod->SetHotnessCounter(1000);
+    fMethod->SetHotnessCounter(1000);
+    gMethod->SetHotnessCounter(1000);
 
     RuntimeOptions options;
     constexpr int COMPILER_EPOCH_DURATION1 = 500;
     CompilerPriorityAgedCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                            options.GetCompilerQueueMaxLength(), options.GetCompilerDeathCounterValue(),
                                            COMPILER_EPOCH_DURATION1);
-    queue.AddTask(CompilerTask {main_method, false});
-    queue.AddTask(CompilerTask {f_method, false});
-    queue.AddTask(CompilerTask {g_method, false});
+    queue.AddTask(CompilerTask {mainMethod, false});
+    queue.AddTask(CompilerTask {fMethod, false});
+    queue.AddTask(CompilerTask {gMethod, false});
 
     WaitForExpire(1600);
 
@@ -409,9 +409,9 @@ TEST_F(CompilerQueueTest, AgedExpire)
                                             options.GetCompilerQueueMaxLength(), options.GetCompilerDeathCounterValue(),
                                             COMPILER_EPOCH_DURATION2);
 
-    queue2.AddTask(CompilerTask {main_method, false});
-    queue2.AddTask(CompilerTask {f_method, false});
-    queue2.AddTask(CompilerTask {g_method, false});
+    queue2.AddTask(CompilerTask {mainMethod, false});
+    queue2.AddTask(CompilerTask {fMethod, false});
+    queue2.AddTask(CompilerTask {gMethod, false});
 
     WaitForExpire(5);
 
@@ -423,18 +423,18 @@ TEST_F(CompilerQueueTest, AgedReorder)
 {
     auto klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
-    main_method->SetHotnessCounter(-1500);
-    f_method->SetHotnessCounter(-2000);
-    g_method->SetHotnessCounter(-3000);
+    mainMethod->SetHotnessCounter(-1500);
+    fMethod->SetHotnessCounter(-2000);
+    gMethod->SetHotnessCounter(-3000);
 
     RuntimeOptions options;
     CompilerPriorityAgedCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
@@ -442,34 +442,34 @@ TEST_F(CompilerQueueTest, AgedReorder)
                                            options.GetCompilerEpochDuration());
     // It is possible, that the first added method is expired, and others are not
     // So, add to queue in reversed order to be sure, that the first method is present anyway
-    queue.AddTask(CompilerTask {g_method, false});
-    queue.AddTask(CompilerTask {f_method, false});
-    queue.AddTask(CompilerTask {main_method, false});
+    queue.AddTask(CompilerTask {gMethod, false});
+    queue.AddTask(CompilerTask {fMethod, false});
+    queue.AddTask(CompilerTask {mainMethod, false});
 
     // Change the order
-    main_method->SetHotnessCounter(-6000);
-    f_method->SetHotnessCounter(-5000);
-    g_method->SetHotnessCounter(-4000);
+    mainMethod->SetHotnessCounter(-6000);
+    fMethod->SetHotnessCounter(-5000);
+    gMethod->SetHotnessCounter(-4000);
 
-    GetAndCheckMethodsIfExists(&queue, main_method, f_method, g_method);
+    GetAndCheckMethodsIfExists(&queue, mainMethod, fMethod, gMethod);
 }
 
 TEST_F(CompilerQueueTest, AgedMaxLimit)
 {
     auto klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
-    main_method->SetHotnessCounter(1000);
-    f_method->SetHotnessCounter(2000);
-    g_method->SetHotnessCounter(3000);
+    mainMethod->SetHotnessCounter(1000);
+    fMethod->SetHotnessCounter(2000);
+    gMethod->SetHotnessCounter(3000);
 
     RuntimeOptions options;
     CompilerPriorityAgedCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
@@ -477,9 +477,9 @@ TEST_F(CompilerQueueTest, AgedMaxLimit)
                                            options.GetCompilerEpochDuration());
 
     for (int i = 0; i < 40; i++) {
-        queue.AddTask(CompilerTask {main_method, false});
-        queue.AddTask(CompilerTask {f_method, false});
-        queue.AddTask(CompilerTask {g_method, false});
+        queue.AddTask(CompilerTask {mainMethod, false});
+        queue.AddTask(CompilerTask {fMethod, false});
+        queue.AddTask(CompilerTask {gMethod, false});
     }
 
     // 100 as Max_Limit
@@ -497,9 +497,9 @@ TEST_F(CompilerQueueTest, AgedMaxLimit)
                                             COMPILER_QUEUE_MAX_LENGTH, options.GetCompilerDeathCounterValue(),
                                             options.GetCompilerEpochDuration());
 
-    queue2.AddTask(CompilerTask {main_method, false});
-    queue2.AddTask(CompilerTask {f_method, false});
-    queue2.AddTask(CompilerTask {g_method, false});
+    queue2.AddTask(CompilerTask {mainMethod, false});
+    queue2.AddTask(CompilerTask {fMethod, false});
+    queue2.AddTask(CompilerTask {gMethod, false});
 
     queue2.GetTask().GetMethod();
     method = queue2.GetTask().GetMethod();
@@ -510,18 +510,18 @@ TEST_F(CompilerQueueTest, AgedDeathCounter)
 {
     auto klass = TestClassPrepare();
 
-    Method *main_method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
-    ASSERT_NE(main_method, nullptr);
+    Method *mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
+    ASSERT_NE(mainMethod, nullptr);
 
-    Method *f_method = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
-    ASSERT_NE(f_method, nullptr);
+    Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
+    ASSERT_NE(fMethod, nullptr);
 
-    Method *g_method = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
-    ASSERT_NE(g_method, nullptr);
+    Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+    ASSERT_NE(gMethod, nullptr);
 
-    main_method->SetHotnessCounter(10);
-    f_method->SetHotnessCounter(20);
-    g_method->SetHotnessCounter(30000);
+    mainMethod->SetHotnessCounter(10);
+    fMethod->SetHotnessCounter(20);
+    gMethod->SetHotnessCounter(30000);
 
     RuntimeOptions options;
     constexpr int COMPILER_DEATH_COUNTER_VALUE = 50;
@@ -529,12 +529,12 @@ TEST_F(CompilerQueueTest, AgedDeathCounter)
                                            options.GetCompilerQueueMaxLength(), COMPILER_DEATH_COUNTER_VALUE,
                                            options.GetCompilerEpochDuration());
 
-    queue.AddTask(CompilerTask {main_method, false});
-    queue.AddTask(CompilerTask {f_method, false});
-    queue.AddTask(CompilerTask {g_method, false});
+    queue.AddTask(CompilerTask {mainMethod, false});
+    queue.AddTask(CompilerTask {fMethod, false});
+    queue.AddTask(CompilerTask {gMethod, false});
 
     auto method = queue.GetTask().GetMethod();
-    ASSERT_EQ(method, g_method);
+    ASSERT_EQ(method, gMethod);
     method = queue.GetTask().GetMethod();
     ASSERT_EQ(method, nullptr);
 }

@@ -29,35 +29,35 @@ public:
     NO_COPY_SEMANTIC(G1PauseTracker);
     NO_MOVE_SEMANTIC(G1PauseTracker);
 
-    G1PauseTracker(int64_t gc_pause_interval_ms, int64_t max_gc_time_ms);
+    G1PauseTracker(int64_t gcPauseIntervalMs, int64_t maxGcTimeMs);
 
     ~G1PauseTracker() = default;
 
-    bool AddPauseInNanos(int64_t start_time_ns, int64_t end_time_ns);
+    bool AddPauseInNanos(int64_t startTimeNs, int64_t endTimeNs);
 
-    bool AddPause(int64_t start_time_us, int64_t end_time_us);
+    bool AddPause(int64_t startTimeUs, int64_t endTimeUs);
 
     /// @return minimum delay for pause from now to achieve pause goal
-    int64_t MinDelayBeforePauseInMicros(int64_t now_us, int64_t pause_time_us);
+    int64_t MinDelayBeforePauseInMicros(int64_t nowUs, int64_t pauseTimeUs);
 
     /// @return minimum delay for maximum allowed pause from now to achieve pause goal
-    int64_t MinDelayBeforeMaxPauseInMicros(int64_t now_us);
+    int64_t MinDelayBeforeMaxPauseInMicros(int64_t nowUs);
 
     class Scope {
     public:
         ~Scope()
         {
-            owner_->AddPause(start_time_us_, panda::time::GetCurrentTimeInMicros());
+            owner_->AddPause(startTimeUs_, panda::time::GetCurrentTimeInMicros());
         }
 
         NO_COPY_SEMANTIC(Scope);
         NO_MOVE_SEMANTIC(Scope);
 
     private:
-        explicit Scope(G1PauseTracker *owner) : owner_(owner), start_time_us_(panda::time::GetCurrentTimeInMicros()) {}
+        explicit Scope(G1PauseTracker *owner) : owner_(owner), startTimeUs_(panda::time::GetCurrentTimeInMicros()) {}
 
         G1PauseTracker *owner_;
-        int64_t start_time_us_;
+        int64_t startTimeUs_;
 
         friend class G1PauseTracker;
     };
@@ -71,42 +71,41 @@ private:
     class PauseEntry {
     public:
         PauseEntry() : PauseEntry(0, 0) {}
-        PauseEntry(int64_t start_time_us, int64_t end_time_us)
-            : start_time_us_(start_time_us), end_time_us_(end_time_us)
+        PauseEntry(int64_t startTimeUs, int64_t endTimeUs) : startTimeUs_(startTimeUs), endTimeUs_(endTimeUs)
         {
-            ASSERT(end_time_us_ >= start_time_us_);
+            ASSERT(endTimeUs_ >= startTimeUs_);
         }
         int64_t DurationInMicros() const
         {
-            return end_time_us_ - start_time_us_;
+            return endTimeUs_ - startTimeUs_;
         }
-        int64_t DurationInMicros(int64_t oldest_interval_time) const
+        int64_t DurationInMicros(int64_t oldestIntervalTime) const
         {
-            return GetStartTimeInMicros() > oldest_interval_time ? DurationInMicros()
-                                                                 : GetEndTimeInMicros() - oldest_interval_time;
+            return GetStartTimeInMicros() > oldestIntervalTime ? DurationInMicros()
+                                                               : GetEndTimeInMicros() - oldestIntervalTime;
         }
         int64_t GetStartTimeInMicros() const
         {
-            return start_time_us_;
+            return startTimeUs_;
         }
         int64_t GetEndTimeInMicros() const
         {
-            return end_time_us_;
+            return endTimeUs_;
         }
 
     private:
-        int64_t start_time_us_;
-        int64_t end_time_us_;
+        int64_t startTimeUs_;
+        int64_t endTimeUs_;
     };
 
-    int64_t CalculateIntervalPauseInMicros(int64_t now_us);
-    void RemoveOutOfIntervalEntries(int64_t now_us);
+    int64_t CalculateIntervalPauseInMicros(int64_t nowUs);
+    void RemoveOutOfIntervalEntries(int64_t nowUs);
 
     // Need to analyze real apps what size is required
     static constexpr int SIZE = 16;
     panda::RingBuffer<PauseEntry, SIZE> pauses_;
-    int64_t gc_pause_interval_us_;
-    int64_t max_gc_time_us_;
+    int64_t gcPauseIntervalUs_;
+    int64_t maxGcTimeUs_;
 };
 }  // namespace panda::mem
 

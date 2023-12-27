@@ -94,22 +94,22 @@ public:
         return RemoteObject(SymbolT {std::move(description)});
     }
 
-    static RemoteObject Object(std::string class_name, std::optional<RemoteObjectId> object_id = std::nullopt,
+    static RemoteObject Object(std::string className, std::optional<RemoteObjectId> objectId = std::nullopt,
                                std::optional<std::string> description = std::nullopt)
     {
-        return RemoteObject(ObjectT {std::move(class_name), object_id, std::move(description)});
+        return RemoteObject(ObjectT {std::move(className), objectId, std::move(description)});
     }
 
-    static RemoteObject Array(std::string class_name, size_t length,
-                              std::optional<RemoteObjectId> object_id = std::nullopt)
+    static RemoteObject Array(std::string className, size_t length,
+                              std::optional<RemoteObjectId> objectId = std::nullopt)
     {
-        return RemoteObject(ArrayT {std::move(class_name), object_id, length});
+        return RemoteObject(ArrayT {std::move(className), objectId, length});
     }
 
-    static RemoteObject Function(std::string class_name, std::string name, size_t length,
-                                 std::optional<RemoteObjectId> object_id = std::nullopt)
+    static RemoteObject Function(std::string className, std::string name, size_t length,
+                                 std::optional<RemoteObjectId> objectId = std::nullopt)
     {
-        return RemoteObject(FunctionT {std::move(class_name), object_id, std::move(name), length});
+        return RemoteObject(FunctionT {std::move(className), objectId, std::move(name), length});
     }
 
     std::optional<RemoteObjectId> GetObjectId() const;
@@ -128,18 +128,18 @@ private:
         std::string description;
     };
     struct ObjectT {
-        std::string class_name;
-        std::optional<RemoteObjectId> object_id;
+        std::string className;
+        std::optional<RemoteObjectId> objectId;
         std::optional<std::string> description;
     };
     struct ArrayT {
-        std::string class_name;
-        std::optional<RemoteObjectId> object_id;
+        std::string className;
+        std::optional<RemoteObjectId> objectId;
         size_t length;
     };
     struct FunctionT {
-        std::string class_name;
-        std::optional<RemoteObjectId> object_id;
+        std::string className;
+        std::optional<RemoteObjectId> objectId;
         std::string name;
         size_t length;
     };
@@ -169,7 +169,7 @@ private:
         std::string name;
         Type type;
         std::optional<std::string> value;
-        bool is_entry;
+        bool isEntry;
     };
 
     template <typename... T>

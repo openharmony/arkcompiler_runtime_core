@@ -34,22 +34,22 @@ bool EtsMethod::IsMethod(const PandaString &td)
 
 EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td)
 {
-    EtsClassLinker *class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     if (td[0] == METHOD_PREFIX) {
         // here we resolve method in existing class, which is stored as pointer to panda file + entity id
-        uint64_t file_ptr;
+        uint64_t filePtr;
         uint64_t id;
-        const auto scanf_str = std::string_view {td}.substr(1).data();
+        const auto scanfStr = std::string_view {td}.substr(1).data();
         // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg,cert-err34-c)
-        [[maybe_unused]] auto res = sscanf_s(scanf_str, "%" PRIu64 ";%" PRIu64 ";", &file_ptr, &id);
+        [[maybe_unused]] auto res = sscanf_s(scanfStr, "%" PRIu64 ";%" PRIu64 ";", &filePtr, &id);
         // NOLINTEND(cppcoreguidelines-pro-type-vararg,cert-err34-c)
         [[maybe_unused]] static constexpr int SCANF_PARAM_CNT = 2;
         ASSERT(res == SCANF_PARAM_CNT);
-        auto panda_file = reinterpret_cast<const panda_file::File *>(file_ptr);
-        return EtsMethod::FromRuntimeMethod(class_linker->GetMethod(*panda_file, panda_file::File::EntityId(id)));
+        auto pandaFile = reinterpret_cast<const panda_file::File *>(filePtr);
+        return EtsMethod::FromRuntimeMethod(classLinker->GetMethod(*pandaFile, panda_file::File::EntityId(id)));
     }
     ASSERT(td[0] == CLASS_TYPE_PREFIX);
-    auto type = class_linker->GetClass(td.c_str());
+    auto type = classLinker->GetClass(td.c_str());
     return type->GetMethod(LAMBDA_METHOD_NAME);
 }
 
@@ -73,25 +73,25 @@ EtsValue EtsMethod::Invoke(napi::ScopedManagedCodeFix *s, Value *args)
 
 uint32_t EtsMethod::GetNumArgSlots() const
 {
-    uint32_t num_of_slots = 0;
+    uint32_t numOfSlots = 0;
     auto proto = GetPandaMethod()->GetProto();
     auto &shorty = proto.GetShorty();
-    auto shorty_end = shorty.end();
+    auto shortyEnd = shorty.end();
     // must skip the return type
-    auto shorty_it = shorty.begin() + 1;
-    for (; shorty_it != shorty_end; ++shorty_it) {
-        auto arg_type_id = shorty_it->GetId();
+    auto shortyIt = shorty.begin() + 1;
+    for (; shortyIt != shortyEnd; ++shortyIt) {
+        auto argTypeId = shortyIt->GetId();
         // double and long arguments take two slots
-        if (arg_type_id == panda_file::Type::TypeId::I64 || arg_type_id == panda_file::Type::TypeId::F64) {
-            num_of_slots += 2;
+        if (argTypeId == panda_file::Type::TypeId::I64 || argTypeId == panda_file::Type::TypeId::F64) {
+            numOfSlots += 2;
         } else {
-            num_of_slots += 1;
+            numOfSlots += 1;
         }
     }
     if (!IsStatic()) {
-        ++num_of_slots;
+        ++numOfSlots;
     }
-    return num_of_slots;
+    return numOfSlots;
 }
 
 EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
@@ -103,75 +103,75 @@ EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
     }
 
     // get reference type
-    EtsClassLinker *class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     auto type = GetPandaMethod()->GetArgType(idx);
     if (!type.IsPrimitive()) {
-        size_t ref_idx = 0;
-        size_t short_end = IsStatic() ? (idx + 1) : idx;  // first is return type
+        size_t refIdx = 0;
+        size_t shortEnd = IsStatic() ? (idx + 1) : idx;  // first is return type
         auto proto = GetPandaMethod()->GetProto();
-        for (size_t short_idx = 0; short_idx < short_end; short_idx++) {
-            if (proto.GetShorty()[short_idx].IsReference()) {
-                ref_idx++;
+        for (size_t shortIdx = 0; shortIdx < shortEnd; shortIdx++) {
+            if (proto.GetShorty()[shortIdx].IsReference()) {
+                refIdx++;
             }
         }
-        ASSERT(ref_idx <= proto.GetRefTypes().size());
-        return class_linker->GetClass(proto.GetRefTypes()[ref_idx].data(), false, GetClass()->GetClassLoader());
+        ASSERT(refIdx <= proto.GetRefTypes().size());
+        return classLinker->GetClass(proto.GetRefTypes()[refIdx].data(), false, GetClass()->GetClassLoader());
     }
 
     // get primitive type
     switch (type.GetId()) {
         case panda_file::Type::TypeId::U1:
-            return class_linker->GetClassRoot(EtsClassRoot::BOOLEAN);
+            return classLinker->GetClassRoot(EtsClassRoot::BOOLEAN);
         case panda_file::Type::TypeId::I8:
-            return class_linker->GetClassRoot(EtsClassRoot::BYTE);
+            return classLinker->GetClassRoot(EtsClassRoot::BYTE);
         case panda_file::Type::TypeId::I16:
-            return class_linker->GetClassRoot(EtsClassRoot::SHORT);
+            return classLinker->GetClassRoot(EtsClassRoot::SHORT);
         case panda_file::Type::TypeId::U16:
-            return class_linker->GetClassRoot(EtsClassRoot::CHAR);
+            return classLinker->GetClassRoot(EtsClassRoot::CHAR);
         case panda_file::Type::TypeId::I32:
-            return class_linker->GetClassRoot(EtsClassRoot::INT);
+            return classLinker->GetClassRoot(EtsClassRoot::INT);
         case panda_file::Type::TypeId::I64:
-            return class_linker->GetClassRoot(EtsClassRoot::LONG);
+            return classLinker->GetClassRoot(EtsClassRoot::LONG);
         case panda_file::Type::TypeId::F32:
-            return class_linker->GetClassRoot(EtsClassRoot::FLOAT);
+            return classLinker->GetClassRoot(EtsClassRoot::FLOAT);
         case panda_file::Type::TypeId::F64:
-            return class_linker->GetClassRoot(EtsClassRoot::DOUBLE);
+            return classLinker->GetClassRoot(EtsClassRoot::DOUBLE);
         default:
             LOG(FATAL, RUNTIME) << "ResolveArgType: not a valid ets type for " << type;
             return nullptr;
     };
 }
 
-PandaString EtsMethod::GetMethodSignature(bool include_return_type) const
+PandaString EtsMethod::GetMethodSignature(bool includeReturnType) const
 {
     PandaOStringStream signature;
     auto proto = GetPandaMethod()->GetProto();
     auto &shorty = proto.GetShorty();
-    auto &ref_types = proto.GetRefTypes();
+    auto &refTypes = proto.GetRefTypes();
 
-    auto ref_it = ref_types.begin();
-    panda_file::Type return_type = shorty[0];
-    if (!return_type.IsPrimitive()) {
-        ++ref_it;
+    auto refIt = refTypes.begin();
+    panda_file::Type returnType = shorty[0];
+    if (!returnType.IsPrimitive()) {
+        ++refIt;
     }
 
-    auto shorty_end = shorty.end();
-    auto shorty_it = shorty.begin() + 1;
-    for (; shorty_it != shorty_end; ++shorty_it) {
-        if ((*shorty_it).IsPrimitive()) {
-            signature << panda_file::Type::GetSignatureByTypeId(*shorty_it);
+    auto shortyEnd = shorty.end();
+    auto shortyIt = shorty.begin() + 1;
+    for (; shortyIt != shortyEnd; ++shortyIt) {
+        if ((*shortyIt).IsPrimitive()) {
+            signature << panda_file::Type::GetSignatureByTypeId(*shortyIt);
         } else {
-            signature << *ref_it;
-            ++ref_it;
+            signature << *refIt;
+            ++refIt;
         }
     }
 
-    if (include_return_type) {
+    if (includeReturnType) {
         signature << ":";
-        if (return_type.IsPrimitive()) {
-            signature << panda_file::Type::GetSignatureByTypeId(return_type);
+        if (returnType.IsPrimitive()) {
+            signature << panda_file::Type::GetSignatureByTypeId(returnType);
         } else {
-            signature << ref_types[0];
+            signature << refTypes[0];
         }
     }
     return signature.str();
@@ -180,13 +180,13 @@ PandaString EtsMethod::GetMethodSignature(bool include_return_type) const
 PandaString EtsMethod::GetDescriptor() const
 {
     constexpr size_t TD_MAX_SIZE = 256;
-    std::array<char, TD_MAX_SIZE> actual_td;  // NOLINT(cppcoreguidelines-pro-type-member-init)
+    std::array<char, TD_MAX_SIZE> actualTd;  // NOLINT(cppcoreguidelines-pro-type-member-init)
     // initialize in printf
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    snprintf_s(actual_td.data(), actual_td.size(), actual_td.size() - 1, "%c%" PRIu64 ";%" PRIu64 ";", METHOD_PREFIX,
+    snprintf_s(actualTd.data(), actualTd.size(), actualTd.size() - 1, "%c%" PRIu64 ";%" PRIu64 ";", METHOD_PREFIX,
                reinterpret_cast<uint64_t>(GetPandaMethod()->GetPandaFile()),
                static_cast<uint64_t>(GetPandaMethod()->GetFileId().GetOffset()));
-    return {actual_td.data()};
+    return {actualTd.data()};
 }
 
 }  // namespace panda::ets

@@ -27,45 +27,45 @@ namespace panda {
 
 uint8_t *StackfulCoroutineManager::AllocCoroutineStack()
 {
-    Pool stack_pool = PoolManager::GetMmapMemPool()->AllocPool<OSPagesAllocPolicy::NO_POLICY>(
-        coro_stack_size_bytes_, SpaceType::SPACE_TYPE_NATIVE_STACKS, AllocatorType::NATIVE_STACKS_ALLOCATOR);
-    return static_cast<uint8_t *>(stack_pool.GetMem());
+    Pool stackPool = PoolManager::GetMmapMemPool()->AllocPool<OSPagesAllocPolicy::NO_POLICY>(
+        coroStackSizeBytes_, SpaceType::SPACE_TYPE_NATIVE_STACKS, AllocatorType::NATIVE_STACKS_ALLOCATOR);
+    return static_cast<uint8_t *>(stackPool.GetMem());
 }
 
 void StackfulCoroutineManager::FreeCoroutineStack(uint8_t *stack)
 {
     if (stack != nullptr) {
-        PoolManager::GetMmapMemPool()->FreePool(stack, coro_stack_size_bytes_);
+        PoolManager::GetMmapMemPool()->FreePool(stack, coroStackSizeBytes_);
     }
 }
 
-void StackfulCoroutineManager::CreateWorkers(uint32_t how_many, Runtime *runtime, PandaVM *vm)
+void StackfulCoroutineManager::CreateWorkers(uint32_t howMany, Runtime *runtime, PandaVM *vm)
 {
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
 
-    auto *w_main = allocator->New<StackfulCoroutineWorker>(
+    auto *wMain = allocator->New<StackfulCoroutineWorker>(
         runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::FIBER, "[main] worker 0");
-    workers_.push_back(w_main);
+    workers_.push_back(wMain);
 
-    for (uint32_t i = 1; i < how_many; ++i) {
+    for (uint32_t i = 1; i < howMany; ++i) {
         auto *w = allocator->New<StackfulCoroutineWorker>(
             runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker " + ToPandaString(i));
         workers_.push_back(w);
     }
-    active_workers_count_ = how_many;
+    activeWorkersCount_ = howMany;
 
-    auto *main_co = CreateMainCoroutine(runtime, vm);
-    main_co->GetContext<StackfulCoroutineContext>()->SetWorker(w_main);
-    Coroutine::SetCurrent(main_co);
+    auto *mainCo = CreateMainCoroutine(runtime, vm);
+    mainCo->GetContext<StackfulCoroutineContext>()->SetWorker(wMain);
+    Coroutine::SetCurrent(mainCo);
 }
 
 void StackfulCoroutineManager::OnWorkerShutdown()
 {
-    os::memory::LockHolder lock(workers_lock_);
-    --active_workers_count_;
-    workers_shutdown_cv_.Signal();
+    os::memory::LockHolder lock(workersLock_);
+    --activeWorkersCount_;
+    workersShutdownCv_.Signal();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::OnWorkerShutdown(): COMPLETED, workers left = "
-                           << active_workers_count_;
+                           << activeWorkersCount_;
 }
 
 void StackfulCoroutineManager::DisableCoroutineSwitch()
@@ -85,58 +85,58 @@ bool StackfulCoroutineManager::IsCoroutineSwitchDisabled()
 
 void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
 {
-    coro_stack_size_bytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();
-    if (coro_stack_size_bytes_ != AlignUp(coro_stack_size_bytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
-        size_t alignment_pages = PANDA_POOL_ALIGNMENT_IN_BYTES / os::mem::GetPageSize();
-        LOG(FATAL, COROUTINES) << "Coroutine stack size should be >= " << alignment_pages
-                               << " pages and should be aligned to " << alignment_pages << "-page boundary!";
+    coroStackSizeBytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();
+    if (coroStackSizeBytes_ != AlignUp(coroStackSizeBytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
+        size_t alignmentPages = PANDA_POOL_ALIGNMENT_IN_BYTES / os::mem::GetPageSize();
+        LOG(FATAL, COROUTINES) << "Coroutine stack size should be >= " << alignmentPages
+                               << " pages and should be aligned to " << alignmentPages << "-page boundary!";
     }
-    size_t coro_stack_area_size_bytes = Runtime::GetCurrent()->GetOptions().GetCoroutinesStackMemLimit();
-    coroutine_count_limit_ = coro_stack_area_size_bytes / coro_stack_size_bytes_;
-    js_mode_ = config.emulate_js;
+    size_t coroStackAreaSizeBytes = Runtime::GetCurrent()->GetOptions().GetCoroutinesStackMemLimit();
+    coroutineCountLimit_ = coroStackAreaSizeBytes / coroStackSizeBytes_;
+    jsMode_ = config.emulateJs;
 
-    os::memory::LockHolder lock(workers_lock_);
-    if (config.workers_count == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
+    os::memory::LockHolder lock(workersLock_);
+    if (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
         CreateWorkers(std::thread::hardware_concurrency(), runtime, vm);
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): setting number of coroutine workers to CPU count = "
                                << workers_.size();
     } else {
-        CreateWorkers(static_cast<uint32_t>(config.workers_count), runtime, vm);
+        CreateWorkers(static_cast<uint32_t>(config.workersCount), runtime, vm);
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): setting number of coroutine workers to "
                                << workers_.size();
     }
-    program_completion_event_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>();
+    programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>();
 }
 
 void StackfulCoroutineManager::Finalize()
 {
-    os::memory::LockHolder lock(coro_pool_lock_);
+    os::memory::LockHolder lock(coroPoolLock_);
 
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    allocator->Delete(program_completion_event_);
-    for (auto *co : coroutine_pool_) {
+    allocator->Delete(programCompletionEvent_);
+    for (auto *co : coroutinePool_) {
         co->DestroyInternalResources();
         CoroutineManager::DestroyEntrypointfulCoroutine(co);
     }
-    coroutine_pool_.clear();
+    coroutinePool_.clear();
 }
 
 void StackfulCoroutineManager::AddToRegistry(Coroutine *co)
 {
-    os::memory::LockHolder lock(coro_list_lock_);
-    auto *main_co = GetMainThread();
-    if (main_co != nullptr) {
+    os::memory::LockHolder lock(coroListLock_);
+    auto *mainCo = GetMainThread();
+    if (mainCo != nullptr) {
         // NOTE(konstanting, #I67QXC): we should get this callback from GC instead of copying from the main thread
-        co->SetPreWrbEntrypoint(main_co->GetPreWrbEntrypoint());
+        co->SetPreWrbEntrypoint(mainCo->GetPreWrbEntrypoint());
     }
     coroutines_.insert(co);
-    coroutine_count_++;
+    coroutineCount_++;
 }
 
 void StackfulCoroutineManager::RemoveFromRegistry(Coroutine *co)
 {
     coroutines_.erase(co);
-    coroutine_count_--;
+    coroutineCount_--;
 }
 
 void StackfulCoroutineManager::RegisterCoroutine(Coroutine *co)
@@ -151,7 +151,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
     co->UpdateStatus(ThreadStatus::TERMINATING);
 
     {
-        os::memory::LockHolder l_list(coro_list_lock_);
+        os::memory::LockHolder lList(coroListLock_);
         RemoveFromRegistry(co);
         // DestroyInternalResources()/CleanupInternalResources() must be called in one critical section with
         // RemoveFromRegistry (under core_list_lock_). This functions transfer cards from coro's post_barrier buffer to
@@ -182,30 +182,30 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
 
 size_t StackfulCoroutineManager::GetActiveWorkersCount()
 {
-    os::memory::LockHolder lk_workers(workers_lock_);
-    return active_workers_count_;
+    os::memory::LockHolder lkWorkers(workersLock_);
+    return activeWorkersCount_;
 }
 
 void StackfulCoroutineManager::CheckProgramCompletion()
 {
-    os::memory::LockHolder lk_completion(program_completion_lock_);
-    size_t active_worker_coros = GetActiveWorkersCount();
+    os::memory::LockHolder lkCompletion(programCompletionLock_);
+    size_t activeWorkerCoros = GetActiveWorkersCount();
 
-    if (coroutine_count_ == 1 + active_worker_coros) {  // 1 here is for MAIN
+    if (coroutineCount_ == 1 + activeWorkerCoros) {  // 1 here is for MAIN
         LOG(DEBUG, COROUTINES)
             << "StackfulCoroutineManager::CheckProgramCompletion(): all coroutines finished execution!";
         // program_completion_event_ acts as a stackful-friendly cond var
-        program_completion_event_->SetHappened();
-        UnblockWaiters(program_completion_event_);
+        programCompletionEvent_->SetHappened();
+        UnblockWaiters(programCompletionEvent_);
     } else {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::CheckProgramCompletion(): still "
-                               << coroutine_count_ - 1 - active_worker_coros << " coroutines exist...";
+                               << coroutineCount_ - 1 - activeWorkerCoros << " coroutines exist...";
     }
 }
 
-CoroutineContext *StackfulCoroutineManager::CreateCoroutineContext(bool coro_has_entrypoint)
+CoroutineContext *StackfulCoroutineManager::CreateCoroutineContext(bool coroHasEntrypoint)
 {
-    return CreateCoroutineContextImpl(coro_has_entrypoint);
+    return CreateCoroutineContextImpl(coroHasEntrypoint);
 }
 
 void StackfulCoroutineManager::DeleteCoroutineContext(CoroutineContext *ctx)
@@ -216,20 +216,20 @@ void StackfulCoroutineManager::DeleteCoroutineContext(CoroutineContext *ctx)
 
 size_t StackfulCoroutineManager::GetCoroutineCount()
 {
-    return coroutine_count_;
+    return coroutineCount_;
 }
 
 size_t StackfulCoroutineManager::GetCoroutineCountLimit()
 {
-    return coroutine_count_limit_;
+    return coroutineCountLimit_;
 }
 
-Coroutine *StackfulCoroutineManager::Launch(CompletionEvent *completion_event, Method *entrypoint,
+Coroutine *StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
                                             PandaVector<Value> &&arguments, CoroutineAffinity affinity)
 {
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Launch started";
 
-    auto *result = LaunchImpl(completion_event, entrypoint, std::move(arguments), affinity);
+    auto *result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), affinity);
     if (result == nullptr) {
         ThrowOutOfMemoryError("Launch failed");
     }
@@ -253,11 +253,11 @@ void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
 
 void StackfulCoroutineManager::UnblockWaiters(CoroutineEvent *blocker)
 {
-    os::memory::LockHolder lk_workers(workers_lock_);
+    os::memory::LockHolder lkWorkers(workersLock_);
     ASSERT(blocker != nullptr);
 #ifndef NDEBUG
     {
-        os::memory::LockHolder lk_blocker(*blocker);
+        os::memory::LockHolder lkBlocker(*blocker);
         ASSERT(blocker->Happened());
     }
 #endif
@@ -274,12 +274,12 @@ void StackfulCoroutineManager::Schedule()
     GetCurrentWorker()->RequestSchedule();
 }
 
-bool StackfulCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int inc_mask,
-                                                    unsigned int xor_mask) const
+bool StackfulCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
+                                                    unsigned int xorMask) const
 {
-    os::memory::LockHolder lock(coro_list_lock_);
+    os::memory::LockHolder lock(coroListLock_);
     for (auto *t : coroutines_) {
-        if (!ApplyCallbackToThread(cb, t, inc_mask, xor_mask)) {
+        if (!ApplyCallbackToThread(cb, t, incMask, xorMask)) {
             return false;
         }
     }
@@ -288,7 +288,7 @@ bool StackfulCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callbac
 
 void StackfulCoroutineManager::SuspendAllThreads()
 {
-    os::memory::LockHolder lock(coro_list_lock_);
+    os::memory::LockHolder lock(coroListLock_);
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::SuspendAllThreads started";
     for (auto *t : coroutines_) {
         t->SuspendImpl(true);
@@ -298,7 +298,7 @@ void StackfulCoroutineManager::SuspendAllThreads()
 
 void StackfulCoroutineManager::ResumeAllThreads()
 {
-    os::memory::LockHolder lock(coro_list_lock_);
+    os::memory::LockHolder lock(coroListLock_);
     for (auto *t : coroutines_) {
         t->ResumeImpl(true);
     }
@@ -316,23 +316,23 @@ void StackfulCoroutineManager::WaitForDeregistration()
     MainCoroutineCompleted();
 }
 
-void StackfulCoroutineManager::ReuseCoroutineInstance(Coroutine *co, CompletionEvent *completion_event,
+void StackfulCoroutineManager::ReuseCoroutineInstance(Coroutine *co, CompletionEvent *completionEvent,
                                                       Method *entrypoint, PandaVector<Value> &&arguments,
                                                       PandaString name)
 {
     auto *ctx = co->GetContext<CoroutineContext>();
     co->ReInitialize(std::move(name), ctx,
-                     Coroutine::ManagedEntrypointInfo {completion_event, entrypoint, std::move(arguments)});
+                     Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)});
 }
 
 Coroutine *StackfulCoroutineManager::TryGetCoroutineFromPool()
 {
-    os::memory::LockHolder lk_pool(coro_pool_lock_);
-    if (coroutine_pool_.empty()) {
+    os::memory::LockHolder lkPool(coroPoolLock_);
+    if (coroutinePool_.empty()) {
         return nullptr;
     }
-    Coroutine *co = coroutine_pool_.back();
-    coroutine_pool_.pop_back();
+    Coroutine *co = coroutinePool_.back();
+    coroutinePool_.pop_back();
     return co;
 }
 
@@ -345,7 +345,7 @@ StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForCoroutine(Coro
         case CoroutineAffinity::NONE:
         default: {
             // choosing the least loaded worker
-            os::memory::LockHolder lk_workers(workers_lock_);
+            os::memory::LockHolder lkWorkers(workersLock_);
             auto w = std::min_element(workers_.begin(), workers_.end(),
                                       [](const StackfulCoroutineWorker *a, const StackfulCoroutineWorker *b) {
                                           return a->GetLoadFactor() < b->GetLoadFactor();
@@ -355,22 +355,22 @@ StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForCoroutine(Coro
     }
 }
 
-Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completion_event, Method *entrypoint,
+Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
                                                 PandaVector<Value> &&arguments, CoroutineAffinity affinity)
 {
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl begin");
 #endif
-    auto coro_name = entrypoint->GetFullName();
+    auto coroName = entrypoint->GetFullName();
 
     Coroutine *co = nullptr;
     if (Runtime::GetOptions().IsUseCoroutinePool()) {
         co = TryGetCoroutineFromPool();
     }
     if (co != nullptr) {
-        ReuseCoroutineInstance(co, completion_event, entrypoint, std::move(arguments), std::move(coro_name));
+        ReuseCoroutineInstance(co, completionEvent, entrypoint, std::move(arguments), std::move(coroName));
     } else {
-        co = CreateCoroutineInstance(completion_event, entrypoint, std::move(arguments), std::move(coro_name));
+        co = CreateCoroutineInstance(completionEvent, entrypoint, std::move(arguments), std::move(coroName));
     }
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImpl: failed to create a coroutine!";
@@ -397,18 +397,18 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
         << "StackfulCoroutineManager::MainCoroutineCompleted(): waiting for other coroutines to complete";
 
     {
-        os::memory::LockHolder lk_completion(program_completion_lock_);
+        os::memory::LockHolder lkCompletion(programCompletionLock_);
         auto *main = Coroutine::GetCurrent();
-        while (coroutine_count_ > 1 + GetActiveWorkersCount()) {  // 1 is for MAIN
-            program_completion_event_->SetNotHappened();
-            program_completion_event_->Lock();
-            program_completion_lock_.Unlock();
+        while (coroutineCount_ > 1 + GetActiveWorkersCount()) {  // 1 is for MAIN
+            programCompletionEvent_->SetNotHappened();
+            programCompletionEvent_->Lock();
+            programCompletionLock_.Unlock();
             ScopedManagedCodeThread s(main);  // perf?
-            GetCurrentWorker()->WaitForEvent(program_completion_event_);
+            GetCurrentWorker()->WaitForEvent(programCompletionEvent_);
             LOG(DEBUG, COROUTINES)
                 << "StackfulCoroutineManager::MainCoroutineCompleted(): possibly spurious wakeup from wait...";
             // NOTE(konstanting, #I67QXC): test for the spurious wakeup
-            program_completion_lock_.Lock();
+            programCompletionLock_.Lock();
         }
     }
 
@@ -418,25 +418,25 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): stopping workers";
     {
-        os::memory::LockHolder lock(workers_lock_);
+        os::memory::LockHolder lock(workersLock_);
         for (auto *worker : workers_) {
             worker->SetActive(false);
         }
-        while (active_workers_count_ > 1) {  // 1 is for MAIN
+        while (activeWorkersCount_ > 1) {  // 1 is for MAIN
             // NOTE(konstanting, #I67QXC): need timed wait?..
-            workers_shutdown_cv_.Wait(&workers_lock_);
+            workersShutdownCv_.Wait(&workersLock_);
         }
     }
 
     LOG(DEBUG, COROUTINES)
         << "StackfulCoroutineManager::MainCoroutineCompleted(): stopping await loop on the main worker";
-    while (coroutine_count_ > 1) {
+    while (coroutineCount_ > 1) {
         GetCurrentWorker()->FinalizeFiberScheduleLoop();
     }
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): deleting workers";
     {
-        os::memory::LockHolder lk_workers(workers_lock_);
+        os::memory::LockHolder lkWorkers(workersLock_);
         for (auto *worker : workers_) {
             Runtime::GetCurrent()->GetInternalAllocator()->Delete(worker);
         }
@@ -458,32 +458,32 @@ StackfulCoroutineWorker *StackfulCoroutineManager::GetCurrentWorker()
 
 bool StackfulCoroutineManager::IsJsMode()
 {
-    return js_mode_;
+    return jsMode_;
 }
 
 void StackfulCoroutineManager::DestroyEntrypointfulCoroutine(Coroutine *co)
 {
     if (Runtime::GetOptions().IsUseCoroutinePool() && co->HasManagedEntrypoint()) {
         co->CleanUp();
-        os::memory::LockHolder lock(coro_pool_lock_);
-        coroutine_pool_.push_back(co);
+        os::memory::LockHolder lock(coroPoolLock_);
+        coroutinePool_.push_back(co);
     } else {
         CoroutineManager::DestroyEntrypointfulCoroutine(co);
     }
 }
 
-StackfulCoroutineContext *StackfulCoroutineManager::CreateCoroutineContextImpl(bool need_stack)
+StackfulCoroutineContext *StackfulCoroutineManager::CreateCoroutineContextImpl(bool needStack)
 {
     uint8_t *stack = nullptr;
-    size_t stack_size_bytes = 0;
-    if (need_stack) {
+    size_t stackSizeBytes = 0;
+    if (needStack) {
         stack = AllocCoroutineStack();
         if (stack == nullptr) {
             return nullptr;
         }
-        stack_size_bytes = coro_stack_size_bytes_;
+        stackSizeBytes = coroStackSizeBytes_;
     }
-    return Runtime::GetCurrent()->GetInternalAllocator()->New<StackfulCoroutineContext>(stack, stack_size_bytes);
+    return Runtime::GetCurrent()->GetInternalAllocator()->New<StackfulCoroutineContext>(stack, stackSizeBytes);
 }
 
 Coroutine *StackfulCoroutineManager::CreateNativeCoroutine(Runtime *runtime, PandaVM *vm,

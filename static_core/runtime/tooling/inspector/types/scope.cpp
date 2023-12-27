@@ -36,11 +36,11 @@ Scope::Scope(Scope::Type type, RemoteObject object, std::optional<std::string> n
 
 std::function<void(JsonObjectBuilder &)> Scope::ToJson() const
 {
-    return [this](JsonObjectBuilder &json_builder) {
-        json_builder.AddProperty("type", GetTypeString(type_));
-        json_builder.AddProperty("object", object_.ToJson());
+    return [this](JsonObjectBuilder &jsonBuilder) {
+        jsonBuilder.AddProperty("type", GetTypeString(type_));
+        jsonBuilder.AddProperty("object", object_.ToJson());
         if (name_) {
-            json_builder.AddProperty("name", *name_);
+            jsonBuilder.AddProperty("name", *name_);
         }
     };
 }

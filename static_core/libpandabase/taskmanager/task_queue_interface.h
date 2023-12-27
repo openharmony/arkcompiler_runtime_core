@@ -68,8 +68,8 @@ public:
     static constexpr uint8_t MIN_PRIORITY = 1;
     static constexpr uint8_t DEFAULT_PRIORITY = 5;
 
-    PANDA_PUBLIC_API TaskQueueInterface(TaskType task_type, VMType vm_type, uint8_t priority)
-        : task_type_(task_type), vm_type_(vm_type), priority_(priority)
+    PANDA_PUBLIC_API TaskQueueInterface(TaskType taskType, VMType vmType, uint8_t priority)
+        : taskType_(taskType), vmType_(vmType), priority_(priority)
     {
         ASSERT(priority >= MIN_PRIORITY);
         ASSERT(priority <= MAX_PRIORITY);
@@ -110,12 +110,12 @@ public:
 
     TaskType GetTaskType() const
     {
-        return task_type_;
+        return taskType_;
     }
 
     VMType GetVMType() const
     {
-        return vm_type_;
+        return vmType_;
     }
 
     /**
@@ -125,8 +125,8 @@ public:
     void virtual WaitForQueueEmptyAndFinish() = 0;
 
 private:
-    TaskType task_type_;
-    VMType vm_type_;
+    TaskType taskType_;
+    VMType vmType_;
     std::atomic_uint8_t priority_;
 };
 

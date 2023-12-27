@@ -47,7 +47,7 @@ bool RunLocationsBuilder(Graph *graph)
     return false;
 }
 
-LOCATIONS_BUILDER()::LocationsBuilder(Graph *graph, ParameterInfo *pinfo) : Optimization(graph), params_info_(pinfo)
+LOCATIONS_BUILDER()::LocationsBuilder(Graph *graph, ParameterInfo *pinfo) : Optimization(graph), paramsInfo_(pinfo)
 {
     if (graph->SupportManagedCode()) {
         /* We skip first parameter location in managed mode, because calling convention for Panda methods requires
@@ -79,9 +79,9 @@ LOCATIONS_BUILDER(void)::ProcessManagedCall(Inst *inst, ParameterInfo *pinfo)
         }
     }
 
-    size_t inputs_count = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
-    size_t stack_args = 0;
-    for (size_t i = 0; i < inputs_count; i++) {
+    size_t inputsCount = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
+    size_t stackArgs = 0;
+    for (size_t i = 0; i < inputsCount; i++) {
         ASSERT(inst->GetInputType(i) != DataType::NO_TYPE);
         auto param = pinfo->GetNextLocation(inst->GetInputType(i));
         if (i == 0 && inst->IsIntrinsic() && inst->CastToIntrinsic()->HasIdInput()) {
@@ -89,19 +89,19 @@ LOCATIONS_BUILDER(void)::ProcessManagedCall(Inst *inst, ParameterInfo *pinfo)
         }
         locations->SetLocation(i, param);
         if (param.IsStackArgument()) {
-            stack_args++;
+            stackArgs++;
         }
     }
-    if (inst->IsIntrinsic() && stack_args > 0) {
+    if (inst->IsIntrinsic() && stackArgs > 0) {
         inst->CastToIntrinsic()->SetArgumentsOnStack();
     }
     if (!inst->NoDest()) {
         locations->SetDstLocation(GetLocationForReturn(inst));
     }
-    GetGraph()->UpdateStackSlotsCount(stack_args);
+    GetGraph()->UpdateStackSlotsCount(stackArgs);
 }
 
-LOCATIONS_BUILDER(void)::ProcessManagedCallStackRange(Inst *inst, size_t range_start, ParameterInfo *pinfo)
+LOCATIONS_BUILDER(void)::ProcessManagedCallStackRange(Inst *inst, size_t rangeStart, ParameterInfo *pinfo)
 {
     ArenaAllocator *allocator = GetGraph()->GetAllocator();
     LocationsInfo *locations = allocator->New<LocationsInfo>(allocator, inst);
@@ -112,25 +112,25 @@ LOCATIONS_BUILDER(void)::ProcessManagedCallStackRange(Inst *inst, size_t range_s
         pinfo->GetNextLocation(GetWordType());
     }
 
-    size_t inputs_count = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
-    size_t stack_args = 0;
-    ASSERT(inputs_count >= range_start);
-    for (size_t i = 0; i < range_start; i++) {
+    size_t inputsCount = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
+    size_t stackArgs = 0;
+    ASSERT(inputsCount >= rangeStart);
+    for (size_t i = 0; i < rangeStart; i++) {
         ASSERT(inst->GetInputType(i) != DataType::NO_TYPE);
         auto param = pinfo->GetNextLocation(inst->GetInputType(i));
         locations->SetLocation(i, param);
         if (param.IsStackArgument()) {
-            stack_args++;
+            stackArgs++;
         }
     }
-    if (inst->IsIntrinsic() && stack_args > 0) {
+    if (inst->IsIntrinsic() && stackArgs > 0) {
         inst->CastToIntrinsic()->SetArgumentsOnStack();
     }
-    for (size_t i = range_start; i < inputs_count; i++) {
-        locations->SetLocation(i, Location::MakeStackArgument(stack_args++));
+    for (size_t i = rangeStart; i < inputsCount; i++) {
+        locations->SetLocation(i, Location::MakeStackArgument(stackArgs++));
     }
     locations->SetDstLocation(GetLocationForReturn(inst));
-    GetGraph()->UpdateStackSlotsCount(stack_args);
+    GetGraph()->UpdateStackSlotsCount(stackArgs);
 }
 
 LOCATIONS_BUILDER(void)::VisitResolveStatic([[maybe_unused]] GraphVisitor *visitor, Inst *inst)
@@ -192,15 +192,15 @@ LOCATIONS_BUILDER(void)::VisitCallDynamic(GraphVisitor *visitor, Inst *inst)
         [[maybe_unused]] Location loc = pinfo->GetNextLocation(GetWordType());
         ASSERT(loc.IsRegister());
     }
-    size_t inputs_count = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
+    size_t inputsCount = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
 
-    for (size_t i = 0; i < inputs_count; ++i) {
+    for (size_t i = 0; i < inputsCount; ++i) {
         ASSERT(inst->GetInputType(i) == DataType::ANY);
         auto param = Location::MakeStackArgument(i + CallConvDynInfo::FIXED_SLOT_COUNT);
         locations->SetLocation(i, param);
     }
     locations->SetDstLocation(GetLocationForReturn(inst));
-    static_cast<LocationsBuilder *>(visitor)->GetGraph()->UpdateStackSlotsCount(inputs_count);
+    static_cast<LocationsBuilder *>(visitor)->GetGraph()->UpdateStackSlotsCount(inputsCount);
 }
 
 LOCATIONS_BUILDER(void)::VisitCallIndirect(GraphVisitor *visitor, Inst *inst)
@@ -251,9 +251,9 @@ LOCATIONS_BUILDER(void)::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
                 pinfo->GetNextLocation(DataType::INT32);
             }
         }
-        size_t explicit_args;
-        if (IsStackRangeIntrinsic(intrinsic->GetIntrinsicId(), &explicit_args)) {
-            static_cast<LocationsBuilder *>(visitor)->ProcessManagedCallStackRange(inst, explicit_args, pinfo);
+        size_t explicitArgs;
+        if (IsStackRangeIntrinsic(intrinsic->GetIntrinsicId(), &explicitArgs)) {
+            static_cast<LocationsBuilder *>(visitor)->ProcessManagedCallStackRange(inst, explicitArgs, pinfo);
         } else {
             static_cast<LocationsBuilder *>(visitor)->ProcessManagedCall(inst, pinfo);
         }
@@ -262,8 +262,8 @@ LOCATIONS_BUILDER(void)::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
 
     ArenaAllocator *allocator = static_cast<LocationsBuilder *>(visitor)->GetGraph()->GetAllocator();
     LocationsInfo *locations = allocator->New<LocationsInfo>(allocator, inst);
-    auto inputs_count = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
-    for (size_t i = 0; i < inputs_count; i++) {
+    auto inputsCount = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
+    for (size_t i = 0; i < inputsCount; i++) {
         locations->SetLocation(i, Location::RequireRegister());
     }
 }
@@ -292,9 +292,9 @@ LOCATIONS_BUILDER(void)::VisitParameter([[maybe_unused]] GraphVisitor *visitor, 
 
 LOCATIONS_BUILDER(void)::VisitReturn([[maybe_unused]] GraphVisitor *visitor, Inst *inst)
 {
-    auto return_reg =
+    auto returnReg =
         DataType::IsFloatType(inst->GetType()) ? GetTarget().GetReturnRegId() : GetTarget().GetReturnFpRegId();
-    inst->CastToReturn()->SetLocation(0, Location::MakeRegister(return_reg));
+    inst->CastToReturn()->SetLocation(0, Location::MakeRegister(returnReg));
 }
 
 LOCATIONS_BUILDER(void)::VisitThrow([[maybe_unused]] GraphVisitor *visitor, Inst *inst)
@@ -317,8 +317,8 @@ LOCATIONS_BUILDER(void)::VisitMultiArray(GraphVisitor *visitor, Inst *inst)
     for (size_t i = 1; i < inst->GetInputsCount() - 1; i++) {
         locations->SetLocation(i, Location::MakeStackArgument(i - 1));
     }
-    auto stack_args = inst->GetInputsCount() - 2U;
-    graph->UpdateStackSlotsCount(RoundUp(stack_args, 2U));
+    auto stackArgs = inst->GetInputsCount() - 2U;
+    graph->UpdateStackSlotsCount(RoundUp(stackArgs, 2U));
     locations->SetDstLocation(GetLocationForReturn(inst));
 }
 
@@ -333,8 +333,8 @@ LOCATIONS_BUILDER(void)::VisitCallLaunchStatic(GraphVisitor *visitor, Inst *inst
     for (size_t i = 1; i < inst->GetInputsCount() - 1; i++) {
         locations->SetLocation(i, Location::MakeStackArgument(i - 1));
     }
-    auto stack_args = inst->GetInputsCount() - 2U;
-    graph->UpdateStackSlotsCount(RoundUp(stack_args, 2U));
+    auto stackArgs = inst->GetInputsCount() - 2U;
+    graph->UpdateStackSlotsCount(RoundUp(stackArgs, 2U));
     locations->SetDstLocation(GetLocationForReturn(inst));
 }
 
@@ -351,8 +351,8 @@ LOCATIONS_BUILDER(void)::VisitCallLaunchVirtual(GraphVisitor *visitor, Inst *ins
     for (size_t i = 2; i < inst->GetInputsCount() - 1; i++) {
         locations->SetLocation(i, Location::MakeStackArgument(i - 2));
     }
-    auto stack_args = inst->GetInputsCount() - 3U;
-    graph->UpdateStackSlotsCount(RoundUp(stack_args, 2U));
+    auto stackArgs = inst->GetInputsCount() - 3U;
+    graph->UpdateStackSlotsCount(RoundUp(stackArgs, 2U));
     locations->SetDstLocation(GetLocationForReturn(inst));
 }
 
@@ -369,8 +369,8 @@ LOCATIONS_BUILDER(void)::VisitCallResolvedLaunchStatic(GraphVisitor *visitor, In
     for (size_t i = 2; i < inst->GetInputsCount() - 1; i++) {
         locations->SetLocation(i, Location::MakeStackArgument(i - 2));
     }
-    auto stack_args = inst->GetInputsCount() - 3U;
-    graph->UpdateStackSlotsCount(RoundUp(stack_args, 2U));
+    auto stackArgs = inst->GetInputsCount() - 3U;
+    graph->UpdateStackSlotsCount(RoundUp(stackArgs, 2U));
     locations->SetDstLocation(GetLocationForReturn(inst));
 }
 
@@ -389,8 +389,8 @@ LOCATIONS_BUILDER(void)::VisitCallResolvedLaunchVirtual(GraphVisitor *visitor, I
     for (size_t i = 3; i < inst->GetInputsCount() - 1; i++) {
         locations->SetLocation(i, Location::MakeStackArgument(i - 3));
     }
-    auto stack_args = inst->GetInputsCount() - 4U;
-    graph->UpdateStackSlotsCount(RoundUp(stack_args, 2U));
+    auto stackArgs = inst->GetInputsCount() - 4U;
+    graph->UpdateStackSlotsCount(RoundUp(stackArgs, 2U));
     locations->SetDstLocation(GetLocationForReturn(inst));
 }
 
@@ -404,15 +404,15 @@ LOCATIONS_BUILDER(void)::VisitStoreStatic([[maybe_unused]] GraphVisitor *visitor
 template <Arch ARCH>
 Location LocationsBuilder<ARCH>::GetLocationForReturn(Inst *inst)
 {
-    auto return_reg =
+    auto returnReg =
         DataType::IsFloatType(inst->GetType()) ? GetTarget().GetReturnFpRegId() : GetTarget().GetReturnRegId();
-    return Location::MakeRegister(return_reg, inst->GetType());
+    return Location::MakeRegister(returnReg, inst->GetType());
 }
 
 template <Arch ARCH>
 ParameterInfo *LocationsBuilder<ARCH>::GetResetParameterInfo()
 {
-    params_info_->Reset();
-    return params_info_;
+    paramsInfo_->Reset();
+    return paramsInfo_;
 }
 }  // namespace panda::compiler

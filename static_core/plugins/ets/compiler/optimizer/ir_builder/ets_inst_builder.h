@@ -17,13 +17,13 @@
 #define PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_ETS_INST_BUILDER_H
 
 template <Opcode OPCODE>
-void BuildLaunch(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
+void BuildLaunch(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
 
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/compiler/optimizer/ir_builder/js_interop/js_interop_inst_builder.h"
 #endif
 
-void BuildLdObjByName(const BytecodeInstruction *bc_inst, DataType::Type type);
-void BuildStObjByName(const BytecodeInstruction *bc_inst, DataType::Type type);
+void BuildLdObjByName(const BytecodeInstruction *bcInst, DataType::Type type);
+void BuildStObjByName(const BytecodeInstruction *bcInst, DataType::Type type);
 
 #endif  // PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_ETS_INST_BUILDER_H

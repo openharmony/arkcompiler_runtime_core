@@ -46,15 +46,15 @@ static inline Expected<const uint8_t *, std::string> LoadSymbol(const panda::os:
         return Unexpected("Cannot load name section: " + (name).Error()); \
     }
 
-Expected<std::unique_ptr<AotFile>, std::string> AotFile::Open(const std::string &file_name, uint32_t gc_type,
-                                                              bool for_dump)
+Expected<std::unique_ptr<AotFile>, std::string> AotFile::Open(const std::string &fileName, uint32_t gcType,
+                                                              bool forDump)
 {
-    trace::ScopedTrace scoped_trace("Open aot file " + file_name);
-    auto handle_load = panda::os::library_loader::Load(file_name);
-    if (!handle_load) {
-        return Unexpected("AOT elf library open failed: " + handle_load.Error().ToString());
+    trace::ScopedTrace scopedTrace("Open aot file " + fileName);
+    auto handleLoad = panda::os::library_loader::Load(fileName);
+    if (!handleLoad) {
+        return Unexpected("AOT elf library open failed: " + handleLoad.Error().ToString());
     }
-    auto handle = std::move(handle_load.Value());
+    auto handle = std::move(handleLoad.Value());
 
     LOAD_AOT_SYMBOL(aot);
     LOAD_AOT_SYMBOL(aot_end);
@@ -65,23 +65,23 @@ Expected<std::unique_ptr<AotFile>, std::string> AotFile::Open(const std::string 
         return Unexpected(std::string("Invalid symbols"));
     }
 
-    auto aot_header = reinterpret_cast<const AotHeader *>(aot.Value());
-    if (aot_header->magic != MAGIC) {
+    auto aotHeader = reinterpret_cast<const AotHeader *>(aot.Value());
+    if (aotHeader->magic != MAGIC) {
         return Unexpected(std::string("Wrong AotHeader magic"));
     }
 
-    if (aot_header->version != VERSION) {
+    if (aotHeader->version != VERSION) {
         return Unexpected(std::string("Wrong AotHeader version"));
     }
 
-    if (!for_dump && aot_header->environment_checksum != RuntimeInterface::GetEnvironmentChecksum(RUNTIME_ARCH)) {
+    if (!forDump && aotHeader->environmentChecksum != RuntimeInterface::GetEnvironmentChecksum(RUNTIME_ARCH)) {
         return Unexpected(std::string("Compiler environment checksum mismatch"));
     }
 
-    if (!for_dump && aot_header->gc_type != gc_type) {
+    if (!forDump && aotHeader->gcType != gcType) {
         return Unexpected(std::string("Wrong AotHeader gc-type: ") +
-                          std::string(mem::GCStringFromType(static_cast<mem::GCType>(aot_header->gc_type))) + " vs " +
-                          std::string(mem::GCStringFromType(static_cast<mem::GCType>(gc_type))));
+                          std::string(mem::GCStringFromType(static_cast<mem::GCType>(aotHeader->gcType))) + " vs " +
+                          std::string(mem::GCStringFromType(static_cast<mem::GCType>(gcType))));
     }
     return std::make_unique<AotFile>(std::move(handle), Span(aot.Value(), aot_end.Value() - aot.Value()),
                                      Span(code.Value(), code_end.Value() - code.Value()));
@@ -89,9 +89,9 @@ Expected<std::unique_ptr<AotFile>, std::string> AotFile::Open(const std::string 
 
 void AotFile::InitializeGot(RuntimeInterface *runtime)
 {
-    size_t minus_first_slot = static_cast<size_t>(RuntimeInterface::IntrinsicId::COUNT) + 1;
+    size_t minusFirstSlot = static_cast<size_t>(RuntimeInterface::IntrinsicId::COUNT) + 1;
     auto *table = const_cast<uintptr_t *>(
-        reinterpret_cast<const uintptr_t *>(code_.data() - minus_first_slot * PointerSize(RUNTIME_ARCH)));
+        reinterpret_cast<const uintptr_t *>(code_.data() - minusFirstSlot * PointerSize(RUNTIME_ARCH)));
     ASSERT(BitsToBytesRoundUp(MinimumBitsToStore(static_cast<uint32_t>(AotSlotType::COUNT) - 1)) == 1);
     while (*table != 0) {
         switch (GetByteFrom(*table, 0U)) {
@@ -142,36 +142,36 @@ void AotFile::PatchTable(RuntimeInterface *runtime)
     }
 }
 
-AotClass AotPandaFile::GetClass(uint32_t class_id) const
+AotClass AotPandaFile::GetClass(uint32_t classId) const
 {
-    auto classes = aot_file_->GetClassHeaders(*header_);
-    auto it = std::lower_bound(classes.begin(), classes.end(), class_id,
-                               [](const auto &a, uintptr_t klass_id) { return a.class_id < klass_id; });
-    if (it == classes.end() || it->class_id != class_id) {
+    auto classes = aotFile_->GetClassHeaders(*header_);
+    auto it = std::lower_bound(classes.begin(), classes.end(), classId,
+                               [](const auto &a, uintptr_t klassId) { return a.classId < klassId; });
+    if (it == classes.end() || it->classId != classId) {
         return {};
     }
-    ASSERT(it->methods_count != 0 && "AOT file shall not contain empty classes");
-    return AotClass(aot_file_, &*it);
+    ASSERT(it->methodsCount != 0 && "AOT file shall not contain empty classes");
+    return AotClass(aotFile_, &*it);
 }
 
 const void *AotClass::FindMethodCodeEntry(size_t index) const
 {
-    auto method_header = FindMethodHeader(index);
-    if (method_header == nullptr) {
+    auto methodHeader = FindMethodHeader(index);
+    if (methodHeader == nullptr) {
         return nullptr;
     }
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    return aot_file_->GetMethodCode(method_header) + CodeInfo::GetCodeOffset(RUNTIME_ARCH);
+    return aotFile_->GetMethodCode(methodHeader) + CodeInfo::GetCodeOffset(RUNTIME_ARCH);
 }
 
 Span<const uint8_t> AotClass::FindMethodCodeSpan(size_t index) const
 {
-    auto method_header = FindMethodHeader(index);
-    if (method_header == nullptr) {
+    auto methodHeader = FindMethodHeader(index);
+    if (methodHeader == nullptr) {
         return {};
     }
-    auto code = Span(aot_file_->GetMethodCode(method_header), method_header->code_size);
+    auto code = Span(aotFile_->GetMethodCode(methodHeader), methodHeader->codeSize);
     return CodeInfo(code).GetCodeSpan();
 }
 
@@ -182,17 +182,17 @@ const MethodHeader *AotClass::FindMethodHeader(size_t index) const
     if (!bitmap[index]) {
         return nullptr;
     }
-    auto method_index = bitmap.PopCount(index);
-    ASSERT(method_index < header_->methods_count);
-    return aot_file_->GetMethodHeader(header_->methods_offset + method_index);
+    auto methodIndex = bitmap.PopCount(index);
+    ASSERT(methodIndex < header_->methodsCount);
+    return aotFile_->GetMethodHeader(header_->methodsOffset + methodIndex);
 }
 
 BitVectorSpan AotClass::GetBitmap() const
 {
     // NOTE(msherstennikov): remove const_cast once BitVector support constant storage
-    auto bitmap_base = const_cast<uint32_t *>(reinterpret_cast<const uint32_t *>(aot_file_->GetMethodsBitmap()));
+    auto bitmapBase = const_cast<uint32_t *>(reinterpret_cast<const uint32_t *>(aotFile_->GetMethodsBitmap()));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    return BitVectorSpan(bitmap_base + header_->methods_bitmap_offset, header_->methods_bitmap_size);
+    return BitVectorSpan(bitmapBase + header_->methodsBitmapOffset, header_->methodsBitmapSize);
 }
 
 }  // namespace panda::compiler

@@ -25,13 +25,13 @@ namespace panda::mem {
 
 TEST_F(BitmapTest, ClearRange)
 {
-    auto heap_begin = HEAP_STARTING_ADDRESS;
+    auto heapBegin = HEAP_STARTING_ADDRESS;
     constexpr size_t HEAP_CAPACITY = 16_MB;
     // NOLINTBEGIN(modernize-avoid-c-arrays)
-    auto bm_ptr =
+    auto bmPtr =
         std::make_unique<BitmapWordType[]>((HEAP_CAPACITY >> Bitmap::LOG_BITSPERWORD) / DEFAULT_ALIGNMENT_IN_BYTES);
     // NOLINTEND(modernize-avoid-c-arrays)
-    MemBitmap<DEFAULT_ALIGNMENT_IN_BYTES> bm(ToVoidPtr(heap_begin), HEAP_CAPACITY, bm_ptr.get());
+    MemBitmap<DEFAULT_ALIGNMENT_IN_BYTES> bm(ToVoidPtr(heapBegin), HEAP_CAPACITY, bmPtr.get());
 
     using MemRangeTest = std::pair<ObjectPointerType, ObjectPointerType>;
     constexpr MemRangeTest FIRST_RANGE {0, 10_KB + DEFAULT_ALIGNMENT_IN_BYTES};
@@ -45,17 +45,17 @@ TEST_F(BitmapTest, ClearRange)
 
     for (const auto &range : ranges) {
         bm.IterateOverChunks([&bm](void *mem) { bm.Set(mem); });
-        bm.ClearRange(ToVoidPtr(heap_begin + range.first), ToVoidPtr(heap_begin + range.second));
+        bm.ClearRange(ToVoidPtr(heapBegin + range.first), ToVoidPtr(heapBegin + range.second));
 
-        auto test_true_fn = [&bm](void *mem) { EXPECT_TRUE(bm.Test(mem)) << "address: " << mem << std::endl; };
-        auto test_false_fn = [&bm](void *mem) { EXPECT_FALSE(bm.Test(mem)) << "address: " << mem << std::endl; };
-        bm.IterateOverChunkInRange(ToVoidPtr(heap_begin), ToVoidPtr(heap_begin + range.first), test_true_fn);
-        bm.IterateOverChunkInRange(ToVoidPtr(heap_begin + range.first), ToVoidPtr(heap_begin + range.second),
-                                   test_false_fn);
+        auto testTrueFn = [&bm](void *mem) { EXPECT_TRUE(bm.Test(mem)) << "address: " << mem << std::endl; };
+        auto testFalseFn = [&bm](void *mem) { EXPECT_FALSE(bm.Test(mem)) << "address: " << mem << std::endl; };
+        bm.IterateOverChunkInRange(ToVoidPtr(heapBegin), ToVoidPtr(heapBegin + range.first), testTrueFn);
+        bm.IterateOverChunkInRange(ToVoidPtr(heapBegin + range.first), ToVoidPtr(heapBegin + range.second),
+                                   testFalseFn);
         // for SIXTH_RANGE, range.second is not in the heap, so we skip this test
         if (range.second < bm.MemSizeInBytes()) {
-            bm.IterateOverChunkInRange(ToVoidPtr(heap_begin + range.second),
-                                       ToVoidPtr(heap_begin + bm.MemSizeInBytes()), test_true_fn);
+            bm.IterateOverChunkInRange(ToVoidPtr(heapBegin + range.second), ToVoidPtr(heapBegin + bm.MemSizeInBytes()),
+                                       testTrueFn);
         }
     }
 }

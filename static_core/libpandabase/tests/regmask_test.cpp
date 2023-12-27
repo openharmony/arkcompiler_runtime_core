@@ -58,10 +58,10 @@ void TestRegMask(RegMask::ValueType value)
     CompareWithBitset(mask, base);
 }
 
-void TestDistance(RegMask mask, size_t bit, size_t bits_before, size_t bits_after)
+void TestDistance(RegMask mask, size_t bit, size_t bitsBefore, size_t bitsAfter)
 {
-    ASSERT_EQ(mask.GetDistanceFromTail(bit), bits_before);
-    ASSERT_EQ(mask.GetDistanceFromHead(bit), bits_after);
+    ASSERT_EQ(mask.GetDistanceFromTail(bit), bitsBefore);
+    ASSERT_EQ(mask.GetDistanceFromHead(bit), bitsAfter);
 }
 
 TEST(RegMask, Base)

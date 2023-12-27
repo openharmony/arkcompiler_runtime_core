@@ -27,47 +27,47 @@ constexpr uint64_t NS_PER_MICROSECOND = 1000;
 
 PandaString Timing::PrettyTimeNs(uint64_t duration)
 {
-    uint64_t time_uint;
-    PandaString time_uint_name;
-    uint64_t main_part;
-    uint64_t fractional_part;
+    uint64_t timeUint;
+    PandaString timeUintName;
+    uint64_t mainPart;
+    uint64_t fractionalPart;
     if (duration > NS_PER_SECOND) {
-        time_uint = NS_PER_SECOND;
-        main_part = duration / time_uint;
-        fractional_part = duration % time_uint / NS_PER_MILLISECOND;
-        time_uint_name = "s";
+        timeUint = NS_PER_SECOND;
+        mainPart = duration / timeUint;
+        fractionalPart = duration % timeUint / NS_PER_MILLISECOND;
+        timeUintName = "s";
     } else if (duration > NS_PER_MILLISECOND) {
-        time_uint = NS_PER_MILLISECOND;
-        main_part = duration / time_uint;
-        fractional_part = duration % time_uint / NS_PER_MICROSECOND;
-        time_uint_name = "ms";
+        timeUint = NS_PER_MILLISECOND;
+        mainPart = duration / timeUint;
+        fractionalPart = duration % timeUint / NS_PER_MICROSECOND;
+        timeUintName = "ms";
     } else {
-        time_uint = NS_PER_MICROSECOND;
-        main_part = duration / time_uint;
-        fractional_part = duration % time_uint;
-        time_uint_name = "us";
+        timeUint = NS_PER_MICROSECOND;
+        mainPart = duration / timeUint;
+        fractionalPart = duration % timeUint;
+        timeUintName = "us";
     }
     PandaStringStream ss;
     constexpr size_t FRACTION_WIDTH = 3U;
-    ss << main_part << "." << std::setfill('0') << std::setw(FRACTION_WIDTH) << fractional_part << time_uint_name;
+    ss << mainPart << "." << std::setfill('0') << std::setw(FRACTION_WIDTH) << fractionalPart << timeUintName;
     return ss.str();
 }
 
 void Timing::Process()
 {
-    PandaStack<PandaVector<TimeLabel>::iterator> label_stack;
+    PandaStack<PandaVector<TimeLabel>::iterator> labelStack;
     // NOLINTNEXTLINE(modernize-loop-convert)
     for (auto it = labels_.begin(); it != labels_.end(); it++) {
         if (it->GetType() == TimeLabelType::BEGIN) {
-            label_stack.push(it);
+            labelStack.push(it);
             continue;
         }
-        auto begin_it = label_stack.top();
-        label_stack.pop();
-        uint64_t duration = it->GetTime() - begin_it->GetTime();
-        uint64_t cpu_duration = it->GetCPUTime() - begin_it->GetCPUTime();
-        begin_it->SetTime(duration);
-        begin_it->SetCPUTime(cpu_duration);
+        auto beginIt = labelStack.top();
+        labelStack.pop();
+        uint64_t duration = it->GetTime() - beginIt->GetTime();
+        uint64_t cpuDuration = it->GetCPUTime() - beginIt->GetCPUTime();
+        beginIt->SetTime(duration);
+        beginIt->SetCPUTime(cpuDuration);
     }
 }
 
@@ -76,19 +76,19 @@ PandaString Timing::Dump()
     Process();
     PandaStringStream ss;
     std::string indent = "    ";
-    size_t indent_count = 0;
+    size_t indentCount = 0;
     for (auto &label : labels_) {
         if (label.GetType() == TimeLabelType::BEGIN) {
-            for (size_t i = 0; i < indent_count; i++) {
+            for (size_t i = 0; i < indentCount; i++) {
                 ss << indent;
             }
             ss << label.GetName() << " " << PrettyTimeNs(label.GetCPUTime()) << "/" << PrettyTimeNs(label.GetTime())
                << std::endl;
-            indent_count++;
+            indentCount++;
             continue;
         }
-        if (indent_count > 0U) {
-            indent_count--;
+        if (indentCount > 0U) {
+            indentCount--;
         }
     }
     return ss.str();

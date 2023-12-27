@@ -52,24 +52,24 @@ public:
     NO_COPY_SEMANTIC(ExplicitGC);
     NO_MOVE_SEMANTIC(ExplicitGC);
 
-    void SetupRuntime(const std::string &gc_type, bool is_explicit_full) const
+    void SetupRuntime(const std::string &gcType, bool isExplicitFull) const
     {
-        panda::Logger::ComponentMask component_mask;
-        component_mask.set(Logger::Component::GC);
+        panda::Logger::ComponentMask componentMask;
+        componentMask.set(Logger::Component::GC);
 
-        Logger::InitializeStdLogging(Logger::Level::INFO, component_mask);
+        Logger::InitializeStdLogging(Logger::Level::INFO, componentMask);
         EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::INFO, Logger::Component::GC));
 
         RuntimeOptions options;
         options.SetLoadRuntimes({"core"});
-        options.SetGcType(gc_type);
+        options.SetGcType(gcType);
         options.SetRunGcInPlace(true);
         options.SetCompilerEnableJit(false);
         options.SetGcWorkersCount(0);
         options.SetGcTriggerType("debug-never");
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
-        options.SetExplicitConcurrentGcEnabled(is_explicit_full);
+        options.SetExplicitConcurrentGcEnabled(isExplicitFull);
         [[maybe_unused]] bool success = Runtime::Create(options);
         ASSERT(success);
     }
@@ -79,9 +79,9 @@ TEST_F(ExplicitGC, TestG1GCPhases)
 {
     SetupRuntime("g1-gc", true);
 
-    uint32_t garbage_rate = Runtime::GetOptions().GetG1RegionGarbageRateThreshold();
+    uint32_t garbageRate = Runtime::GetOptions().GetG1RegionGarbageRateThreshold();
     // NOLINTNEXTLINE(readability-magic-numbers,-warnings-as-errors)
-    size_t big_len = garbage_rate * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
+    size_t bigLen = garbageRate * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
 
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
@@ -91,21 +91,21 @@ TEST_F(ExplicitGC, TestG1GCPhases)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
 
     VMHandle<coretypes::Array> holder;
-    std::string expected_log;
+    std::string expectedLog;
     std::string log;
 
     holder = VMHandle<coretypes::Array>(thread, allocator.AllocArray(2, ClassRoot::ARRAY_STRING, false));
-    holder->Set(0, allocator.AllocString(big_len));
-    holder->Set(1, allocator.AllocString(big_len));
+    holder->Set(0, allocator.AllocString(bigLen));
+    holder->Set(1, allocator.AllocString(bigLen));
 
     {
         ScopedNativeCodeThread sn(thread);
         testing::internal::CaptureStderr();
         GCTask task(GCTaskCause::EXPLICIT_CAUSE);
         task.Run(*gc);  // run young
-        expected_log = "[YOUNG (Explicit)]";
+        expectedLog = "[YOUNG (Explicit)]";
         log = testing::internal::GetCapturedStderr();
-        ASSERT_NE(log.find(expected_log), std::string::npos) << "Expected:\n" << expected_log << "\nLog:\n" << log;
+        ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
     }
 
     ASSERT_TRUE(ObjectToRegion(holder->Get<ObjectHeader *>(1))->HasFlag(RegionFlag::IS_OLD));
@@ -119,9 +119,9 @@ TEST_F(ExplicitGC, TestG1GCPhases)
         testing::internal::CaptureStderr();
         GCTask task(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
         task.Run(*gc);  // prepare for mix
-        expected_log = "[TENURED (Threshold)]";
+        expectedLog = "[TENURED (Threshold)]";
         log = testing::internal::GetCapturedStderr();
-        ASSERT_NE(log.find(expected_log), std::string::npos) << "Expected:\n" << expected_log << "\nLog:\n" << log;
+        ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
     }
 
     {
@@ -129,9 +129,9 @@ TEST_F(ExplicitGC, TestG1GCPhases)
         testing::internal::CaptureStderr();
         GCTask task(GCTaskCause::EXPLICIT_CAUSE);
         task.Run(*gc);  // run mixed gc
-        expected_log = "[MIXED (Explicit)]";
+        expectedLog = "[MIXED (Explicit)]";
         log = testing::internal::GetCapturedStderr();
-        ASSERT_NE(log.find(expected_log), std::string::npos) << "Expected:\n" << expected_log << "\nLog:\n" << log;
+        ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
     }
 }
 
@@ -144,22 +144,22 @@ TEST_F(ExplicitGC, TestGenGCPhases)
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    ObjectAllocator object_allocator;
+    ObjectAllocator objectAllocator;
 
-    std::string expected_log;
+    std::string expectedLog;
     std::string log;
 
     VMHandle<ObjectHeader> obj;
-    obj = VMHandle<ObjectHeader>(thread, object_allocator.AllocObjectInYoung());
+    obj = VMHandle<ObjectHeader>(thread, objectAllocator.AllocObjectInYoung());
 
     {
         ScopedNativeCodeThread sn(thread);
         testing::internal::CaptureStderr();
         GCTask task(GCTaskCause::EXPLICIT_CAUSE);
         task.Run(*gc);  // run young
-        expected_log = "[YOUNG (Explicit)]";
+        expectedLog = "[YOUNG (Explicit)]";
         log = testing::internal::GetCapturedStderr();
-        ASSERT_NE(log.find(expected_log), std::string::npos) << "Expected:\n" << expected_log << "\nLog:\n" << log;
+        ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
     }
 }
 
@@ -172,22 +172,22 @@ TEST_F(ExplicitGC, TestG1GCWithFullExplicit)
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    ObjectAllocator object_allocator;
+    ObjectAllocator objectAllocator;
 
-    std::string expected_log;
+    std::string expectedLog;
     std::string log;
 
     VMHandle<ObjectHeader> obj;
-    obj = VMHandle<ObjectHeader>(thread, object_allocator.AllocObjectInYoung());
+    obj = VMHandle<ObjectHeader>(thread, objectAllocator.AllocObjectInYoung());
 
     {
         ScopedNativeCodeThread sn(thread);
         testing::internal::CaptureStderr();
         GCTask task(GCTaskCause::EXPLICIT_CAUSE);
         task.Run(*gc);  // run full
-        expected_log = "[FULL (Explicit)]";
+        expectedLog = "[FULL (Explicit)]";
         log = testing::internal::GetCapturedStderr();
-        ASSERT_NE(log.find(expected_log), std::string::npos) << "Expected:\n" << expected_log << "\nLog:\n" << log;
+        ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
     }
 }
 
@@ -200,22 +200,22 @@ TEST_F(ExplicitGC, TestGenGCWithFullExplicit)
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    ObjectAllocator object_allocator;
+    ObjectAllocator objectAllocator;
 
-    std::string expected_log;
+    std::string expectedLog;
     std::string log;
 
     VMHandle<ObjectHeader> obj;
-    obj = VMHandle<ObjectHeader>(thread, object_allocator.AllocObjectInYoung());
+    obj = VMHandle<ObjectHeader>(thread, objectAllocator.AllocObjectInYoung());
 
     {
         ScopedNativeCodeThread sn(thread);
         testing::internal::CaptureStderr();
         GCTask task(GCTaskCause::EXPLICIT_CAUSE);
         task.Run(*gc);  // run full
-        expected_log = "[FULL (Explicit)]";
+        expectedLog = "[FULL (Explicit)]";
         log = testing::internal::GetCapturedStderr();
-        ASSERT_NE(log.find(expected_log), std::string::npos) << "Expected:\n" << expected_log << "\nLog:\n" << log;
+        ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
     }
 }
 

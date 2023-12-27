@@ -26,8 +26,8 @@ namespace panda {
  * @param pc    PC from which interpreter starts execution, if nullptr, pc is got from deoptimized CFrame.
  * @param has_exception we use exception from current thread
  */
-[[noreturn]] void Deoptimize(StackWalker *stack, const uint8_t *pc, bool has_exception = false,
-                             Method *destroy_method = nullptr);
+[[noreturn]] void Deoptimize(StackWalker *stack, const uint8_t *pc, bool hasException = false,
+                             Method *destroyMethod = nullptr);
 
 /**
  * @brief Drop given CFrame and return to its caller.
@@ -35,7 +35,7 @@ namespace panda {
  */
 [[noreturn]] void DropCompiledFrame(StackWalker *stack);
 
-void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha);
+void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha);
 
 }  // namespace panda
 

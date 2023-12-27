@@ -27,75 +27,74 @@ namespace panda::mem {
 /// class for global memory parameters
 class MemConfig {
 public:
-    static void Initialize(size_t object_pool_size, size_t internal_size, size_t compiler_size, size_t code_size,
-                           size_t frames_size, size_t stacks_size, size_t initial_object_pool_size)
+    static void Initialize(size_t objectPoolSize, size_t internalSize, size_t compilerSize, size_t codeSize,
+                           size_t framesSize, size_t stacksSize, size_t initialObjectPoolSize)
     {
-        ASSERT(!is_initialized_);
-        initial_heap_size_limit_ = initial_object_pool_size;
-        heap_size_limit_ = object_pool_size;
-        internal_memory_size_limit_ = internal_size;
-        compiler_memory_size_limit_ = compiler_size;
-        code_cache_size_limit_ = code_size;
-        frames_memory_size_limit_ = frames_size;
-        native_stacks_memory_size_limit_ = stacks_size;
-        is_initialized_ = true;
+        ASSERT(!isInitialized_);
+        initialHeapSizeLimit_ = initialObjectPoolSize;
+        heapSizeLimit_ = objectPoolSize;
+        internalMemorySizeLimit_ = internalSize;
+        compilerMemorySizeLimit_ = compilerSize;
+        codeCacheSizeLimit_ = codeSize;
+        framesMemorySizeLimit_ = framesSize;
+        nativeStacksMemorySizeLimit_ = stacksSize;
+        isInitialized_ = true;
     }
 
-    static void Initialize(size_t object_pool_size, size_t internal_size, size_t compiler_size, size_t code_size,
-                           size_t frames_size, size_t stacks_size)
+    static void Initialize(size_t objectPoolSize, size_t internalSize, size_t compilerSize, size_t codeSize,
+                           size_t framesSize, size_t stacksSize)
     {
-        Initialize(object_pool_size, internal_size, compiler_size, code_size, frames_size, stacks_size,
-                   object_pool_size);
+        Initialize(objectPoolSize, internalSize, compilerSize, codeSize, framesSize, stacksSize, objectPoolSize);
     }
 
     static void Finalize()
     {
-        is_initialized_ = false;
-        heap_size_limit_ = 0;
-        internal_memory_size_limit_ = 0;
-        code_cache_size_limit_ = 0;
+        isInitialized_ = false;
+        heapSizeLimit_ = 0;
+        internalMemorySizeLimit_ = 0;
+        codeCacheSizeLimit_ = 0;
     }
 
     static size_t GetInitialHeapSizeLimit()
     {
-        ASSERT(is_initialized_);
-        return initial_heap_size_limit_;
+        ASSERT(isInitialized_);
+        return initialHeapSizeLimit_;
     }
 
     static size_t GetHeapSizeLimit()
     {
-        ASSERT(is_initialized_);
-        return heap_size_limit_;
+        ASSERT(isInitialized_);
+        return heapSizeLimit_;
     }
 
     static size_t GetInternalMemorySizeLimit()
     {
-        ASSERT(is_initialized_);
-        return internal_memory_size_limit_;
+        ASSERT(isInitialized_);
+        return internalMemorySizeLimit_;
     }
 
     static size_t GetCodeCacheSizeLimit()
     {
-        ASSERT(is_initialized_);
-        return code_cache_size_limit_;
+        ASSERT(isInitialized_);
+        return codeCacheSizeLimit_;
     }
 
     static size_t GetCompilerMemorySizeLimit()
     {
-        ASSERT(is_initialized_);
-        return compiler_memory_size_limit_;
+        ASSERT(isInitialized_);
+        return compilerMemorySizeLimit_;
     }
 
     static size_t GetFramesMemorySizeLimit()
     {
-        ASSERT(is_initialized_);
-        return frames_memory_size_limit_;
+        ASSERT(isInitialized_);
+        return framesMemorySizeLimit_;
     }
 
     static size_t GetNativeStacksMemorySizeLimit()
     {
-        ASSERT(is_initialized_);
-        return native_stacks_memory_size_limit_;
+        ASSERT(isInitialized_);
+        return nativeStacksMemorySizeLimit_;
     }
 
     MemConfig() = delete;
@@ -106,15 +105,15 @@ public:
     NO_MOVE_SEMANTIC(MemConfig);
 
 private:
-    PANDA_PUBLIC_API static bool is_initialized_;
-    PANDA_PUBLIC_API static size_t initial_heap_size_limit_;          // Initial heap size
-    PANDA_PUBLIC_API static size_t heap_size_limit_;                  // Max heap size
-    PANDA_PUBLIC_API static size_t internal_memory_size_limit_;       // Max internal memory used by the VM
-    PANDA_PUBLIC_API static size_t code_cache_size_limit_;            // The limit for compiled code size.
-    PANDA_PUBLIC_API static size_t compiler_memory_size_limit_;       // Max memory used by compiler
-    PANDA_PUBLIC_API static size_t frames_memory_size_limit_;         // Max memory used for frames
-    PANDA_PUBLIC_API static size_t native_stacks_memory_size_limit_;  // Limit for manually (i.e. not by OS means on
-                                                                      // thread creation) allocated native stacks
+    PANDA_PUBLIC_API static bool isInitialized_;
+    PANDA_PUBLIC_API static size_t initialHeapSizeLimit_;         // Initial heap size
+    PANDA_PUBLIC_API static size_t heapSizeLimit_;                // Max heap size
+    PANDA_PUBLIC_API static size_t internalMemorySizeLimit_;      // Max internal memory used by the VM
+    PANDA_PUBLIC_API static size_t codeCacheSizeLimit_;           // The limit for compiled code size.
+    PANDA_PUBLIC_API static size_t compilerMemorySizeLimit_;      // Max memory used by compiler
+    PANDA_PUBLIC_API static size_t framesMemorySizeLimit_;        // Max memory used for frames
+    PANDA_PUBLIC_API static size_t nativeStacksMemorySizeLimit_;  // Limit for manually (i.e. not by OS means on
+                                                                  // thread creation) allocated native stacks
 };
 
 }  // namespace panda::mem

@@ -63,31 +63,31 @@ public:
 
     const LockFreeQueue &GetQueuePF()
     {
-        return loaded_pfs_queue_;
+        return loadedPfsQueue_;
     }
 
     void SetSampleInterval(uint32_t us)
     {
-        ASSERT(is_active_ == false);
-        sample_interval_ = static_cast<std::chrono::microseconds>(us);
+        ASSERT(isActive_ == false);
+        sampleInterval_ = static_cast<std::chrono::microseconds>(us);
     }
 
-    void SetSegvHandlerStatus(bool segv_handler_status)
+    void SetSegvHandlerStatus(bool segvHandlerStatus)
     {
-        is_segv_handler_enable_ = segv_handler_status;
+        isSegvHandlerEnable_ = segvHandlerStatus;
     }
 
     bool IsSegvHandlerEnable() const
     {
-        return is_segv_handler_enable_;
+        return isSegvHandlerEnable_;
     }
 
     PANDA_PUBLIC_API bool Start(const char *filename);
     PANDA_PUBLIC_API void Stop();
 
     // Events: Notify profiler that managed thread created or finished
-    void ThreadStart(ManagedThread *managed_thread) override;
-    void ThreadEnd(ManagedThread *managed_thread) override;
+    void ThreadStart(ManagedThread *managedThread) override;
+    void ThreadEnd(ManagedThread *managedThread) override;
     void LoadModule(std::string_view name) override;
 
     static constexpr uint32_t DEFAULT_SAMPLE_INTERVAL_US = 500;
@@ -96,7 +96,7 @@ private:
     Sampler();
 
     void SamplerThreadEntry();
-    void ListenerThreadEntry(std::string output_file);
+    void ListenerThreadEntry(std::string outputFile);
 
     void AddThreadHandle(ManagedThread *thread);
     void EraseThreadHandle(ManagedThread *thread);
@@ -104,42 +104,42 @@ private:
     void CollectThreads();
     void CollectModules();
 
-    void WriteLoadedPandaFiles(StreamWriter *writer_ptr);
+    void WriteLoadedPandaFiles(StreamWriter *writerPtr);
 
     void ClearManagedThreadSet()
     {
-        os::memory::LockHolder holder(managed_threads_lock_);
-        managed_threads_.clear();
+        os::memory::LockHolder holder(managedThreadsLock_);
+        managedThreads_.clear();
     }
 
     void ClearLoadedPfs()
     {
-        os::memory::LockHolder holder(loaded_pfs_lock_);
-        loaded_pfs_.clear();
+        os::memory::LockHolder holder(loadedPfsLock_);
+        loadedPfs_.clear();
     }
 
     static Sampler *instance_;
 
     Runtime *runtime_ {nullptr};
     // Remember agent thread id for security
-    os::thread::NativeHandleType listener_tid_ {0};
-    os::thread::NativeHandleType sampler_tid_ {0};
-    std::unique_ptr<std::thread> sampler_thread_ {nullptr};
-    std::unique_ptr<std::thread> listener_thread_ {nullptr};
+    os::thread::NativeHandleType listenerTid_ {0};
+    os::thread::NativeHandleType samplerTid_ {0};
+    std::unique_ptr<std::thread> samplerThread_ {nullptr};
+    std::unique_ptr<std::thread> listenerThread_ {nullptr};
     ThreadCommunicator communicator_;
 
-    std::atomic<bool> is_active_ {false};
-    bool is_segv_handler_enable_ {true};
+    std::atomic<bool> isActive_ {false};
+    bool isSegvHandlerEnable_ {true};
 
-    PandaSet<os::thread::ThreadId> managed_threads_ GUARDED_BY(managed_threads_lock_);
-    os::memory::Mutex managed_threads_lock_;
+    PandaSet<os::thread::ThreadId> managedThreads_ GUARDED_BY(managedThreadsLock_);
+    os::memory::Mutex managedThreadsLock_;
 
-    LockFreeQueue loaded_pfs_queue_;
+    LockFreeQueue loadedPfsQueue_;
 
-    PandaVector<FileInfo> loaded_pfs_ GUARDED_BY(loaded_pfs_lock_);
-    os::memory::Mutex loaded_pfs_lock_;
+    PandaVector<FileInfo> loadedPfs_ GUARDED_BY(loadedPfsLock_);
+    os::memory::Mutex loadedPfsLock_;
 
-    std::chrono::microseconds sample_interval_;
+    std::chrono::microseconds sampleInterval_;
 
     friend class test::SamplerTest;
 

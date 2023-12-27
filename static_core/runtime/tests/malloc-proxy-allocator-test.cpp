@@ -56,12 +56,12 @@ protected:
 TEST_F(MallocProxyAllocatorTest, SimpleTest)
 {
     static constexpr size_t SIZE = 23;
-    auto *mem_stats = new mem::MemStatsType();
-    MallocProxyNonObjectAllocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    MallocProxyNonObjectAllocator allocator(memStats);
     void *a1;
     a1 = allocator.Alloc(SIZE);
     allocator.Free(a1);
-    delete mem_stats;
+    delete memStats;
 }
 
 TEST_F(MallocProxyAllocatorTest, AlignedAllocFreeTest)
@@ -77,8 +77,8 @@ TEST_F(MallocProxyAllocatorTest, AllocFreeTest)
 
 TEST_F(MallocProxyAllocatorTest, AdapterTest)
 {
-    auto *mem_stats = new mem::MemStatsType();
-    MallocProxyNonObjectAllocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    MallocProxyNonObjectAllocator allocator(memStats);
     // NOLINTNEXTLINE(readability-magic-numbers)
     std::array<int, 20> arr {{12, 14, 3, 5, 43, 12, 22, 42, 89, 10, 89, 32, 43, 12, 43, 12, 54, 89, 27, 84}};
 
@@ -90,7 +90,7 @@ TEST_F(MallocProxyAllocatorTest, AdapterTest)
     for (auto *mem : v) {
         allocator.Free(mem);
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 }  // namespace panda::mem

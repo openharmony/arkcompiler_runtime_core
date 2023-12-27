@@ -58,14 +58,14 @@ Amd64Encoder::~Amd64Encoder()
         masm_ = nullptr;
     }
 
-    if (code_holder_ != nullptr) {
-        code_holder_->~CodeHolder();
-        code_holder_ = nullptr;
+    if (codeHolder_ != nullptr) {
+        codeHolder_->~CodeHolder();
+        codeHolder_ = nullptr;
     }
 
-    if (error_handler_ != nullptr) {
-        error_handler_->~ErrorHandler();
-        error_handler_ = nullptr;
+    if (errorHandler_ != nullptr) {
+        errorHandler_->~ErrorHandler();
+        errorHandler_ = nullptr;
     }
 
     if (labels_ != nullptr) {
@@ -86,14 +86,14 @@ bool Amd64Encoder::InitMasm()
         asmjit::Environment env;
         env.setArch(asmjit::Environment::kArchX64);
 
-        code_holder_ = GetAllocator()->New<asmjit::CodeHolder>(GetAllocator());
-        if (code_holder_ == nullptr) {
+        codeHolder_ = GetAllocator()->New<asmjit::CodeHolder>(GetAllocator());
+        if (codeHolder_ == nullptr) {
             SetFalseResult();
             return false;
         }
-        code_holder_->init(env, 0U);
+        codeHolder_->init(env, 0U);
 
-        masm_ = GetAllocator()->New<asmjit::x86::Assembler>(code_holder_);
+        masm_ = GetAllocator()->New<asmjit::x86::Assembler>(codeHolder_);
         if (masm_ == nullptr) {
             SetFalseResult();
             return false;
@@ -101,12 +101,12 @@ bool Amd64Encoder::InitMasm()
 
         // Enable strict validation.
         masm_->addValidationOptions(asmjit::BaseEmitter::kValidationOptionAssembler);
-        error_handler_ = GetAllocator()->New<AsmJitErrorHandler>(this);
-        if (error_handler_ == nullptr) {
+        errorHandler_ = GetAllocator()->New<AsmJitErrorHandler>(this);
+        if (errorHandler_ == nullptr) {
             SetFalseResult();
             return false;
         }
-        masm_->setErrorHandler(error_handler_);
+        masm_->setErrorHandler(errorHandler_);
 
         // Make sure that the compiler uses the same scratch registers as the assembler
         CHECK_EQ(compiler::arch_info::x86_64::TEMP_REGS, GetTarget().GetTempRegsMask());
@@ -118,15 +118,15 @@ bool Amd64Encoder::InitMasm()
 void Amd64Encoder::Finalize()
 {
     auto code = GetMasm()->code();
-    auto code_size = code->codeSize();
+    auto codeSize = code->codeSize();
 
     code->flatten();
     code->resolveUnresolvedLinks();
 
-    auto code_buffer = GetAllocator()->Alloc(code_size);
+    auto codeBuffer = GetAllocator()->Alloc(codeSize);
 
-    code->relocateToBase(reinterpret_cast<uintptr_t>(code_buffer));
-    code->copyFlattenedData(code_buffer, code_size, asmjit::CodeHolder::kCopyPadSectionBuffer);
+    code->relocateToBase(reinterpret_cast<uintptr_t>(codeBuffer));
+    code->copyFlattenedData(codeBuffer, codeSize, asmjit::CodeHolder::kCopyPadSectionBuffer);
 }
 
 void Amd64Encoder::EncodeJump(LabelHolder::LabelId id)
@@ -141,13 +141,13 @@ void Amd64Encoder::EncodeJump(LabelHolder::LabelId id, Reg src0, Reg src1, Condi
         if (src0.GetSize() == src1.GetSize()) {
             GetMasm()->cmp(ArchReg(src0), ArchReg(src1));
         } else if (src0.GetSize() > src1.GetSize()) {
-            ScopedTmpReg tmp_reg(this, src0.GetType());
-            EncodeCast(tmp_reg, false, src1, false);
-            GetMasm()->cmp(ArchReg(src0), ArchReg(tmp_reg));
+            ScopedTmpReg tmpReg(this, src0.GetType());
+            EncodeCast(tmpReg, false, src1, false);
+            GetMasm()->cmp(ArchReg(src0), ArchReg(tmpReg));
         } else {
-            ScopedTmpReg tmp_reg(this, src1.GetType());
-            EncodeCast(tmp_reg, false, src0, false);
-            GetMasm()->cmp(ArchReg(tmp_reg), ArchReg(src1));
+            ScopedTmpReg tmpReg(this, src1.GetType());
+            EncodeCast(tmpReg, false, src0, false);
+            GetMasm()->cmp(ArchReg(tmpReg), ArchReg(src1));
         }
     } else if (src0.GetType() == FLOAT32_TYPE) {
         GetMasm()->comiss(ArchVReg(src0), ArchVReg(src1));
@@ -177,21 +177,21 @@ void Amd64Encoder::EncodeJump(LabelHolder::LabelId id, Reg src, Imm imm, Conditi
 {
     ASSERT(src.IsScalar());
 
-    auto imm_val = imm.GetAsInt();
-    if (imm_val == 0) {
+    auto immVal = imm.GetAsInt();
+    if (immVal == 0) {
         EncodeJump(id, src, cc);
         return;
     }
 
-    if (ImmFitsSize(imm_val, src.GetSize())) {
+    if (ImmFitsSize(immVal, src.GetSize())) {
         auto label = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(id);
 
-        GetMasm()->cmp(ArchReg(src), asmjit::imm(imm_val));
+        GetMasm()->cmp(ArchReg(src), asmjit::imm(immVal));
         GetMasm()->j(ArchCc(cc), *label);
     } else {
-        ScopedTmpReg tmp_reg(this, src.GetType());
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(imm_val));
-        EncodeJump(id, src, tmp_reg, cc);
+        ScopedTmpReg tmpReg(this, src.GetType());
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(immVal));
+        EncodeJump(id, src, tmpReg, cc);
     }
 }
 
@@ -201,13 +201,13 @@ void Amd64Encoder::EncodeJumpTest(LabelHolder::LabelId id, Reg src0, Reg src1, C
     if (src0.GetSize() == src1.GetSize()) {
         GetMasm()->test(ArchReg(src0), ArchReg(src1));
     } else if (src0.GetSize() > src1.GetSize()) {
-        ScopedTmpReg tmp_reg(this, src0.GetType());
-        EncodeCast(tmp_reg, false, src1, false);
-        GetMasm()->test(ArchReg(src0), ArchReg(tmp_reg));
+        ScopedTmpReg tmpReg(this, src0.GetType());
+        EncodeCast(tmpReg, false, src1, false);
+        GetMasm()->test(ArchReg(src0), ArchReg(tmpReg));
     } else {
-        ScopedTmpReg tmp_reg(this, src1.GetType());
-        EncodeCast(tmp_reg, false, src0, false);
-        GetMasm()->test(ArchReg(tmp_reg), ArchReg(src1));
+        ScopedTmpReg tmpReg(this, src1.GetType());
+        EncodeCast(tmpReg, false, src0, false);
+        GetMasm()->test(ArchReg(tmpReg), ArchReg(src1));
     }
 
     auto label = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(id);
@@ -218,16 +218,16 @@ void Amd64Encoder::EncodeJumpTest(LabelHolder::LabelId id, Reg src, Imm imm, Con
 {
     ASSERT(src.IsScalar());
 
-    auto imm_val = imm.GetAsInt();
-    if (ImmFitsSize(imm_val, src.GetSize())) {
+    auto immVal = imm.GetAsInt();
+    if (ImmFitsSize(immVal, src.GetSize())) {
         auto label = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(id);
 
-        GetMasm()->test(ArchReg(src), asmjit::imm(imm_val));
+        GetMasm()->test(ArchReg(src), asmjit::imm(immVal));
         GetMasm()->j(ArchCcTest(cc), *label);
     } else {
-        ScopedTmpReg tmp_reg(this, src.GetType());
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(imm_val));
-        EncodeJumpTest(id, src, tmp_reg, cc);
+        ScopedTmpReg tmpReg(this, src.GetType());
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(immVal));
+        EncodeJumpTest(id, src, tmpReg, cc);
     }
 }
 
@@ -241,13 +241,13 @@ void Amd64Encoder::EncodeJump(LabelHolder::LabelId id, Reg src, Condition cc)
         return;
     }
 
-    ScopedTmpReg tmp_reg(this, src.GetType());
+    ScopedTmpReg tmpReg(this, src.GetType());
     if (src.GetType() == FLOAT32_TYPE) {
-        GetMasm()->xorps(ArchVReg(tmp_reg), ArchVReg(tmp_reg));
+        GetMasm()->xorps(ArchVReg(tmpReg), ArchVReg(tmpReg));
     } else {
-        GetMasm()->xorpd(ArchVReg(tmp_reg), ArchVReg(tmp_reg));
+        GetMasm()->xorpd(ArchVReg(tmpReg), ArchVReg(tmpReg));
     }
-    EncodeJump(id, src, tmp_reg, cc);
+    EncodeJump(id, src, tmpReg, cc);
 }
 
 void Amd64Encoder::EncodeJump(Reg dst)
@@ -271,18 +271,18 @@ void Amd64Encoder::EncodeJump(RelocationInfo *relocation)
 #endif
 }
 
-void Amd64Encoder::EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bit_pos, bool bit_value)
+void Amd64Encoder::EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bitPos, bool bitValue)
 {
-    ASSERT(reg.IsScalar() && reg.GetSize() > bit_pos);
+    ASSERT(reg.IsScalar() && reg.GetSize() > bitPos);
     auto label = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(id);
     if (reg.GetSize() == DOUBLE_WORD_SIZE) {
-        ScopedTmpRegU64 tmp_reg(this);
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(static_cast<uint64_t>(1) << bit_pos));
-        GetMasm()->test(ArchReg(reg), ArchReg(tmp_reg));
+        ScopedTmpRegU64 tmpReg(this);
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(static_cast<uint64_t>(1) << bitPos));
+        GetMasm()->test(ArchReg(reg), ArchReg(tmpReg));
     } else {
-        GetMasm()->test(ArchReg(reg), asmjit::imm(1U << bit_pos));
+        GetMasm()->test(ArchReg(reg), asmjit::imm(1U << bitPos));
     }
-    if (bit_value) {
+    if (bitValue) {
         GetMasm()->j(ArchCc(Condition::NE), *label);
     } else {
         GetMasm()->j(ArchCc(Condition::EQ), *label);
@@ -310,11 +310,11 @@ void Amd64Encoder::MakeCall(LabelHolder::LabelId id)
     GetMasm()->call(*label);
 }
 
-void Amd64Encoder::MakeCall(const void *entry_point)
+void Amd64Encoder::MakeCall(const void *entryPoint)
 {
-    ScopedTmpRegU64 tmp_reg(this);
-    GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(entry_point));
-    GetMasm()->call(ArchReg(tmp_reg));
+    ScopedTmpRegU64 tmpReg(this);
+    GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(entryPoint));
+    GetMasm()->call(ArchReg(tmpReg));
 }
 
 void Amd64Encoder::MakeCall(Reg reg)
@@ -322,33 +322,33 @@ void Amd64Encoder::MakeCall(Reg reg)
     GetMasm()->call(ArchReg(reg));
 }
 
-void Amd64Encoder::MakeCall(MemRef entry_point)
+void Amd64Encoder::MakeCall(MemRef entryPoint)
 {
-    ScopedTmpRegU64 tmp_reg(this);
-    EncodeLdr(tmp_reg, false, entry_point);
-    GetMasm()->call(ArchReg(tmp_reg));
+    ScopedTmpRegU64 tmpReg(this);
+    EncodeLdr(tmpReg, false, entryPoint);
+    GetMasm()->call(ArchReg(tmpReg));
 }
 
 template <typename Func>
-void Amd64Encoder::EncodeRelativePcMov(Reg reg, intptr_t offset, Func encode_instruction)
+void Amd64Encoder::EncodeRelativePcMov(Reg reg, intptr_t offset, Func encodeInstruction)
 {
     // NOLINTNEXTLINE(readability-identifier-naming)
     auto pos = GetMasm()->offset();
-    encode_instruction(reg, offset);
+    encodeInstruction(reg, offset);
     // NOLINTNEXTLINE(readability-identifier-naming)
     offset -= (GetMasm()->offset() - pos);
     // NOLINTNEXTLINE(readability-identifier-naming)
     GetMasm()->setOffset(pos);
-    encode_instruction(reg, offset);
+    encodeInstruction(reg, offset);
 }
 
 void Amd64Encoder::MakeCallAot(intptr_t offset)
 {
-    ScopedTmpRegU64 tmp_reg(this);
-    EncodeRelativePcMov(tmp_reg, offset, [this](Reg reg, intptr_t offset) {
+    ScopedTmpRegU64 tmpReg(this);
+    EncodeRelativePcMov(tmpReg, offset, [this](Reg reg, intptr_t offset) {
         GetMasm()->long_().mov(ArchReg(reg), asmjit::x86::ptr(asmjit::x86::rip, offset));
     });
-    GetMasm()->call(ArchReg(tmp_reg));
+    GetMasm()->call(ArchReg(tmpReg));
 }
 
 bool Amd64Encoder::CanMakeCallByOffset(intptr_t offset)
@@ -480,13 +480,13 @@ void Amd64Encoder::EncodeAbs(Reg dst, Reg src)
             GetMasm()->neg(ArchReg(dst));
             GetMasm()->cmovl(ArchReg(dst, size), ArchReg(src, size));
         } else if (GetScratchRegistersCount() > 0) {
-            ScopedTmpReg tmp_reg(this, dst.GetType());
+            ScopedTmpReg tmpReg(this, dst.GetType());
 
-            GetMasm()->mov(ArchReg(tmp_reg), ArchReg(src));
-            GetMasm()->neg(ArchReg(tmp_reg));
+            GetMasm()->mov(ArchReg(tmpReg), ArchReg(src));
+            GetMasm()->neg(ArchReg(tmpReg));
 
-            GetMasm()->cmovl(ArchReg(tmp_reg, size), ArchReg(src, size));
-            GetMasm()->mov(ArchReg(dst), ArchReg(tmp_reg));
+            GetMasm()->cmovl(ArchReg(tmpReg, size), ArchReg(src, size));
+            GetMasm()->mov(ArchReg(dst), ArchReg(tmpReg));
         } else {
             auto end = GetMasm()->newLabel();
 
@@ -538,7 +538,7 @@ void Amd64Encoder::EncodeSqrt(Reg dst, Reg src)
     }
 }
 
-void Amd64Encoder::EncodeCastFloatToScalar(Reg dst, bool dst_signed, Reg src)
+void Amd64Encoder::EncodeCastFloatToScalar(Reg dst, bool dstSigned, Reg src)
 {
     // We DON'T support casts from float32/64 to int8/16 and bool, because this caste is not declared anywhere
     // in other languages and architecture, we do not know what the behavior should be.
@@ -548,7 +548,7 @@ void Amd64Encoder::EncodeCastFloatToScalar(Reg dst, bool dst_signed, Reg src)
     // if src is NaN, then dst = 0
     EncodeCastFloatCheckNan(dst, src, end);
 
-    if (dst_signed) {
+    if (dstSigned) {
         EncodeCastFloatSignCheckRange(dst, src, end);
     } else {
         EncodeCastFloatUnsignCheckRange(dst, src, end);
@@ -573,54 +573,54 @@ void Amd64Encoder::EncodeCastFloatToScalar(Reg dst, bool dst_signed, Reg src)
 
 void Amd64Encoder::EncodeCastFloat32ToUint64(Reg dst, Reg src)
 {
-    auto big_number_label = GetMasm()->newLabel();
-    auto end_label = GetMasm()->newLabel();
-    ScopedTmpReg tmp_reg(this, src.GetType());
-    ScopedTmpReg tmp_num(this, dst.GetType());
+    auto bigNumberLabel = GetMasm()->newLabel();
+    auto endLabel = GetMasm()->newLabel();
+    ScopedTmpReg tmpReg(this, src.GetType());
+    ScopedTmpReg tmpNum(this, dst.GetType());
 
     // It is max number with max degree that we can load in sign int64
     // NOLINTNEXTLINE (readability-magic-numbers)
     GetMasm()->mov(ArchReg(dst, WORD_SIZE), asmjit::imm(0x5F000000));
-    GetMasm()->movd(ArchVReg(tmp_reg), ArchReg(dst, WORD_SIZE));
-    GetMasm()->comiss(ArchVReg(src), ArchVReg(tmp_reg));
-    GetMasm()->jnb(big_number_label);
+    GetMasm()->movd(ArchVReg(tmpReg), ArchReg(dst, WORD_SIZE));
+    GetMasm()->comiss(ArchVReg(src), ArchVReg(tmpReg));
+    GetMasm()->jnb(bigNumberLabel);
 
     GetMasm()->cvttss2si(ArchReg(dst), ArchVReg(src));
-    GetMasm()->jmp(end_label);
+    GetMasm()->jmp(endLabel);
 
-    GetMasm()->bind(big_number_label);
-    GetMasm()->subss(ArchVReg(src), ArchVReg(tmp_reg));
+    GetMasm()->bind(bigNumberLabel);
+    GetMasm()->subss(ArchVReg(src), ArchVReg(tmpReg));
     GetMasm()->cvttss2si(ArchReg(dst), ArchVReg(src));
     // NOLINTNEXTLINE (readability-magic-numbers)
-    GetMasm()->mov(ArchReg(tmp_num), asmjit::imm(0x8000000000000000));
-    GetMasm()->xor_(ArchReg(dst), ArchReg(tmp_num));
-    GetMasm()->bind(end_label);
+    GetMasm()->mov(ArchReg(tmpNum), asmjit::imm(0x8000000000000000));
+    GetMasm()->xor_(ArchReg(dst), ArchReg(tmpNum));
+    GetMasm()->bind(endLabel);
 }
 
 void Amd64Encoder::EncodeCastFloat64ToUint64(Reg dst, Reg src)
 {
-    auto big_number_label = GetMasm()->newLabel();
-    auto end_label = GetMasm()->newLabel();
-    ScopedTmpReg tmp_reg(this, src.GetType());
-    ScopedTmpReg tmp_num(this, dst.GetType());
+    auto bigNumberLabel = GetMasm()->newLabel();
+    auto endLabel = GetMasm()->newLabel();
+    ScopedTmpReg tmpReg(this, src.GetType());
+    ScopedTmpReg tmpNum(this, dst.GetType());
 
     // It is max number with max degree that we can load in sign int64
     // NOLINTNEXTLINE (readability-magic-numbers)
     GetMasm()->mov(ArchReg(dst), asmjit::imm(0x43E0000000000000));
-    GetMasm()->movq(ArchVReg(tmp_reg), ArchReg(dst));
-    GetMasm()->comisd(ArchVReg(src), ArchVReg(tmp_reg));
-    GetMasm()->jnb(big_number_label);
+    GetMasm()->movq(ArchVReg(tmpReg), ArchReg(dst));
+    GetMasm()->comisd(ArchVReg(src), ArchVReg(tmpReg));
+    GetMasm()->jnb(bigNumberLabel);
 
     GetMasm()->cvttsd2si(ArchReg(dst), ArchVReg(src));
-    GetMasm()->jmp(end_label);
+    GetMasm()->jmp(endLabel);
 
-    GetMasm()->bind(big_number_label);
-    GetMasm()->subsd(ArchVReg(src), ArchVReg(tmp_reg));
+    GetMasm()->bind(bigNumberLabel);
+    GetMasm()->subsd(ArchVReg(src), ArchVReg(tmpReg));
     GetMasm()->cvttsd2si(ArchReg(dst), ArchVReg(src));
     // NOLINTNEXTLINE (readability-magic-numbers)
-    GetMasm()->mov(ArchReg(tmp_num), asmjit::imm(0x8000000000000000));
-    GetMasm()->xor_(ArchReg(dst), ArchReg(tmp_num));
-    GetMasm()->bind(end_label);
+    GetMasm()->mov(ArchReg(tmpNum), asmjit::imm(0x8000000000000000));
+    GetMasm()->xor_(ArchReg(dst), ArchReg(tmpNum));
+    GetMasm()->bind(endLabel);
 }
 
 void Amd64Encoder::EncodeCastFloatCheckNan(Reg dst, Reg src, const asmjit::Label &end)
@@ -645,33 +645,33 @@ void Amd64Encoder::EncodeCastFloatSignCheckRange(Reg dst, Reg src, const asmjit:
     }
 }
 
-void Amd64Encoder::EncodeCastFloatCheckRange(Reg dst, Reg src, const asmjit::Label &end, const int64_t min_value,
-                                             const uint64_t max_value)
+void Amd64Encoder::EncodeCastFloatCheckRange(Reg dst, Reg src, const asmjit::Label &end, const int64_t minValue,
+                                             const uint64_t maxValue)
 {
-    ScopedTmpReg cmp_reg(this, src.GetType());
-    ScopedTmpReg tmp_reg(this, src.GetType() == FLOAT64_TYPE ? INT64_TYPE : INT32_TYPE);
+    ScopedTmpReg cmpReg(this, src.GetType());
+    ScopedTmpReg tmpReg(this, src.GetType() == FLOAT64_TYPE ? INT64_TYPE : INT32_TYPE);
 
-    GetMasm()->mov(ArchReg(dst, DOUBLE_WORD_SIZE), asmjit::imm(min_value));
+    GetMasm()->mov(ArchReg(dst, DOUBLE_WORD_SIZE), asmjit::imm(minValue));
     if (src.GetType() == FLOAT32_TYPE) {
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(bit_cast<uint32_t>(float(min_value))));
-        GetMasm()->movd(ArchVReg(cmp_reg), ArchReg(tmp_reg));
-        GetMasm()->ucomiss(ArchVReg(src), ArchVReg(cmp_reg));
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(bit_cast<uint32_t>(float(minValue))));
+        GetMasm()->movd(ArchVReg(cmpReg), ArchReg(tmpReg));
+        GetMasm()->ucomiss(ArchVReg(src), ArchVReg(cmpReg));
     } else {
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(bit_cast<uint64_t>(double(min_value))));
-        GetMasm()->movq(ArchVReg(cmp_reg), ArchReg(tmp_reg));
-        GetMasm()->ucomisd(ArchVReg(src), ArchVReg(cmp_reg));
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(bit_cast<uint64_t>(double(minValue))));
+        GetMasm()->movq(ArchVReg(cmpReg), ArchReg(tmpReg));
+        GetMasm()->ucomisd(ArchVReg(src), ArchVReg(cmpReg));
     }
     GetMasm()->jb(end);
 
-    GetMasm()->mov(ArchReg(dst, DOUBLE_WORD_SIZE), asmjit::imm(max_value));
+    GetMasm()->mov(ArchReg(dst, DOUBLE_WORD_SIZE), asmjit::imm(maxValue));
     if (src.GetType() == FLOAT32_TYPE) {
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(bit_cast<uint32_t>(float(max_value) + 1U)));
-        GetMasm()->movd(ArchVReg(cmp_reg), ArchReg(tmp_reg));
-        GetMasm()->ucomiss(ArchVReg(src), ArchVReg(cmp_reg));
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(bit_cast<uint32_t>(float(maxValue) + 1U)));
+        GetMasm()->movd(ArchVReg(cmpReg), ArchReg(tmpReg));
+        GetMasm()->ucomiss(ArchVReg(src), ArchVReg(cmpReg));
     } else {
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(bit_cast<uint64_t>(double(max_value) + 1U)));
-        GetMasm()->movq(ArchVReg(cmp_reg), ArchReg(tmp_reg));
-        GetMasm()->ucomisd(ArchVReg(src), ArchVReg(cmp_reg));
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(bit_cast<uint64_t>(double(maxValue) + 1U)));
+        GetMasm()->movq(ArchVReg(cmpReg), ArchReg(tmpReg));
+        GetMasm()->ucomisd(ArchVReg(src), ArchVReg(cmpReg));
     }
     GetMasm()->jae(end);
 }
@@ -690,8 +690,8 @@ void Amd64Encoder::EncodeCastFloatUnsignCheckRange(Reg dst, Reg src, const asmji
 void Amd64Encoder::EncodeCastScalarToFloatUnsignDouble(Reg dst, Reg src)
 {
     if (dst.GetType() == FLOAT32_TYPE) {
-        ScopedTmpRegU64 int1_reg(this);
-        ScopedTmpRegU64 int2_reg(this);
+        ScopedTmpRegU64 int1Reg(this);
+        ScopedTmpRegU64 int2Reg(this);
 
         auto sgn = GetMasm()->newLabel();
         auto end = GetMasm()->newLabel();
@@ -702,12 +702,12 @@ void Amd64Encoder::EncodeCastScalarToFloatUnsignDouble(Reg dst, Reg src)
         GetMasm()->jmp(end);
 
         GetMasm()->bind(sgn);
-        GetMasm()->mov(ArchReg(int1_reg), ArchReg(src));
-        GetMasm()->mov(ArchReg(int2_reg), ArchReg(src));
-        GetMasm()->shr(ArchReg(int2_reg), asmjit::imm(1));
-        GetMasm()->and_(ArchReg(int1_reg, WORD_SIZE), asmjit::imm(1));
-        GetMasm()->or_(ArchReg(int1_reg), ArchReg(int2_reg));
-        GetMasm()->cvtsi2ss(ArchVReg(dst), ArchReg(int1_reg));
+        GetMasm()->mov(ArchReg(int1Reg), ArchReg(src));
+        GetMasm()->mov(ArchReg(int2Reg), ArchReg(src));
+        GetMasm()->shr(ArchReg(int2Reg), asmjit::imm(1));
+        GetMasm()->and_(ArchReg(int1Reg, WORD_SIZE), asmjit::imm(1));
+        GetMasm()->or_(ArchReg(int1Reg), ArchReg(int2Reg));
+        GetMasm()->cvtsi2ss(ArchVReg(dst), ArchReg(int1Reg));
         GetMasm()->addss(ArchVReg(dst), ArchVReg(dst));
 
         GetMasm()->bind(end);
@@ -715,28 +715,28 @@ void Amd64Encoder::EncodeCastScalarToFloatUnsignDouble(Reg dst, Reg src)
         static constexpr std::array<uint32_t, 4> ARR1 = {uint32_t(0x43300000), uint32_t(0x45300000), 0x0, 0x0};
         static constexpr std::array<uint64_t, 2> ARR2 = {uint64_t(0x4330000000000000), uint64_t(0x4530000000000000)};
 
-        ScopedTmpReg float1_reg(this, dst.GetType());
+        ScopedTmpReg float1Reg(this, dst.GetType());
         ScopedTmpRegF64 tmp(this);
 
-        GetMasm()->movq(ArchVReg(float1_reg), ArchReg(src));
+        GetMasm()->movq(ArchVReg(float1Reg), ArchReg(src));
         CopyArrayToXmm(tmp, ARR1);
-        GetMasm()->punpckldq(ArchVReg(float1_reg), ArchVReg(tmp));
+        GetMasm()->punpckldq(ArchVReg(float1Reg), ArchVReg(tmp));
         CopyArrayToXmm(tmp, ARR2);
-        GetMasm()->subpd(ArchVReg(float1_reg), ArchVReg(tmp));
-        GetMasm()->movapd(ArchVReg(dst), ArchVReg(float1_reg));
-        GetMasm()->unpckhpd(ArchVReg(dst), ArchVReg(float1_reg));
-        GetMasm()->addsd(ArchVReg(dst), ArchVReg(float1_reg));
+        GetMasm()->subpd(ArchVReg(float1Reg), ArchVReg(tmp));
+        GetMasm()->movapd(ArchVReg(dst), ArchVReg(float1Reg));
+        GetMasm()->unpckhpd(ArchVReg(dst), ArchVReg(float1Reg));
+        GetMasm()->addsd(ArchVReg(dst), ArchVReg(float1Reg));
     }
 }
 
-void Amd64Encoder::EncodeCastScalarToFloat(Reg dst, Reg src, bool src_signed)
+void Amd64Encoder::EncodeCastScalarToFloat(Reg dst, Reg src, bool srcSigned)
 {
-    if (!src_signed && src.GetSize() == DOUBLE_WORD_SIZE) {
+    if (!srcSigned && src.GetSize() == DOUBLE_WORD_SIZE) {
         EncodeCastScalarToFloatUnsignDouble(dst, src);
         return;
     }
 
-    if (src.GetSize() < WORD_SIZE || (src_signed && src.GetSize() == WORD_SIZE)) {
+    if (src.GetSize() < WORD_SIZE || (srcSigned && src.GetSize() == WORD_SIZE)) {
         if (dst.GetType() == FLOAT32_TYPE) {
             GetMasm()->cvtsi2ss(ArchVReg(dst), ArchReg(src, WORD_SIZE));
         } else {
@@ -745,19 +745,19 @@ void Amd64Encoder::EncodeCastScalarToFloat(Reg dst, Reg src, bool src_signed)
         return;
     }
 
-    if (!src_signed && src.GetSize() == WORD_SIZE) {
-        ScopedTmpRegU64 int1_reg(this);
+    if (!srcSigned && src.GetSize() == WORD_SIZE) {
+        ScopedTmpRegU64 int1Reg(this);
 
-        GetMasm()->mov(ArchReg(int1_reg, WORD_SIZE), ArchReg(src, WORD_SIZE));
+        GetMasm()->mov(ArchReg(int1Reg, WORD_SIZE), ArchReg(src, WORD_SIZE));
         if (dst.GetType() == FLOAT32_TYPE) {
-            GetMasm()->cvtsi2ss(ArchVReg(dst), ArchReg(int1_reg));
+            GetMasm()->cvtsi2ss(ArchVReg(dst), ArchReg(int1Reg));
         } else {
-            GetMasm()->cvtsi2sd(ArchVReg(dst), ArchReg(int1_reg));
+            GetMasm()->cvtsi2sd(ArchVReg(dst), ArchReg(int1Reg));
         }
         return;
     }
 
-    ASSERT(src_signed && src.GetSize() == DOUBLE_WORD_SIZE);
+    ASSERT(srcSigned && src.GetSize() == DOUBLE_WORD_SIZE);
     if (dst.GetType() == FLOAT32_TYPE) {
         GetMasm()->cvtsi2ss(ArchVReg(dst), ArchReg(src));
     } else {
@@ -797,22 +797,22 @@ void Amd64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::Labe
     GetMasm()->cvttsd2si(ArchReg(dst, DOUBLE_WORD_SIZE), ArchVReg(src));
     // check INT64_MIN
     GetMasm()->cmp(ArchReg(dst, DOUBLE_WORD_SIZE), asmjit::imm(1));
-    auto slow_label {static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(slow)};
+    auto slowLabel {static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(slow)};
     // jump to slow path in case of overflow
-    GetMasm()->jo(*slow_label);
+    GetMasm()->jo(*slowLabel);
 
     GetMasm()->bind(end);
 }
 
-void Amd64Encoder::EncodeCast(Reg dst, bool dst_signed, Reg src, bool src_signed)
+void Amd64Encoder::EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned)
 {
     if (src.IsFloat() && dst.IsScalar()) {
-        EncodeCastFloatToScalar(dst, dst_signed, src);
+        EncodeCastFloatToScalar(dst, dstSigned, src);
         return;
     }
 
     if (src.IsScalar() && dst.IsFloat()) {
-        EncodeCastScalarToFloat(dst, src, src_signed);
+        EncodeCastScalarToFloat(dst, src, srcSigned);
         return;
     }
 
@@ -835,14 +835,14 @@ void Amd64Encoder::EncodeCast(Reg dst, bool dst_signed, Reg src, bool src_signed
     }
 
     ASSERT(src.IsScalar() && dst.IsScalar());
-    EncodeCastScalar(dst, dst_signed, src, src_signed);
+    EncodeCastScalar(dst, dstSigned, src, srcSigned);
 }
 
-void Amd64Encoder::EncodeCastScalar(Reg dst, bool dst_signed, Reg src, bool src_signed)
+void Amd64Encoder::EncodeCastScalar(Reg dst, bool dstSigned, Reg src, bool srcSigned)
 {
-    auto extend_to_32bit = [this](Reg reg, bool is_signed) {
+    auto extendTo32bit = [this](Reg reg, bool isSigned) {
         if (reg.GetSize() < WORD_SIZE) {
-            if (is_signed) {
+            if (isSigned) {
                 GetMasm()->movsx(ArchReg(reg, WORD_SIZE), ArchReg(reg));
             } else {
                 GetMasm()->movzx(ArchReg(reg, WORD_SIZE), ArchReg(reg));
@@ -854,14 +854,14 @@ void Amd64Encoder::EncodeCastScalar(Reg dst, bool dst_signed, Reg src, bool src_
         if (dst.GetId() != src.GetId()) {
             GetMasm()->mov(ArchReg(dst), ArchReg(src, dst.GetSize()));
         }
-        extend_to_32bit(dst, dst_signed);
+        extendTo32bit(dst, dstSigned);
         return;
     }
 
-    if (src_signed) {
+    if (srcSigned) {
         if (dst.GetSize() < DOUBLE_WORD_SIZE) {
             GetMasm()->movsx(ArchReg(dst), ArchReg(src));
-            extend_to_32bit(dst, dst_signed);
+            extendTo32bit(dst, dstSigned);
         } else if (src.GetSize() == WORD_SIZE) {
             GetMasm()->movsxd(ArchReg(dst), ArchReg(src));
         } else {
@@ -877,7 +877,7 @@ void Amd64Encoder::EncodeCastScalar(Reg dst, bool dst_signed, Reg src, bool src_
         GetMasm()->movzx(ArchReg(dst, WORD_SIZE), ArchReg(src));
     } else {
         GetMasm()->movzx(ArchReg(dst), ArchReg(src));
-        extend_to_32bit(dst, dst_signed);
+        extendTo32bit(dst, dstSigned);
     }
 }
 
@@ -920,18 +920,18 @@ void Amd64Encoder::EncodeAdd(Reg dst, Reg src0, Shift src1)
 
     ASSERT(dst.GetSize() >= src0.GetSize());
 
-    auto shift_reg = MakeShift(src1);
+    auto shiftReg = MakeShift(src1);
 
     if (src0.GetSize() < WORD_SIZE) {
-        EncodeAdd(dst, src0, shift_reg);
+        EncodeAdd(dst, src0, shiftReg);
         return;
     }
 
-    if (src0.GetSize() == DOUBLE_WORD_SIZE && shift_reg.GetSize() < DOUBLE_WORD_SIZE) {
-        GetMasm()->movsxd(ArchReg(shift_reg, DOUBLE_WORD_SIZE), ArchReg(shift_reg));
+    if (src0.GetSize() == DOUBLE_WORD_SIZE && shiftReg.GetSize() < DOUBLE_WORD_SIZE) {
+        GetMasm()->movsxd(ArchReg(shiftReg, DOUBLE_WORD_SIZE), ArchReg(shiftReg));
     }
 
-    GetMasm()->lea(ArchReg(dst), asmjit::x86::ptr(ArchReg(src0), ArchReg(shift_reg, src0.GetSize())));
+    GetMasm()->lea(ArchReg(dst), asmjit::x86::ptr(ArchReg(src0), ArchReg(shiftReg, src0.GetSize())));
 }
 
 void Amd64Encoder::EncodeAdd(Reg dst, Reg src0, Reg src1)
@@ -985,10 +985,10 @@ void Amd64Encoder::EncodeSub(Reg dst, Reg src0, Reg src1)
             GetMasm()->movss(ArchVReg(dst), ArchVReg(src0));
             GetMasm()->subss(ArchVReg(dst), ArchVReg(src1));
         } else {
-            ScopedTmpReg tmp_reg(this, dst.GetType());
-            GetMasm()->movss(ArchVReg(tmp_reg), ArchVReg(src0));
-            GetMasm()->subss(ArchVReg(tmp_reg), ArchVReg(src1));
-            GetMasm()->movss(ArchVReg(dst), ArchVReg(tmp_reg));
+            ScopedTmpReg tmpReg(this, dst.GetType());
+            GetMasm()->movss(ArchVReg(tmpReg), ArchVReg(src0));
+            GetMasm()->subss(ArchVReg(tmpReg), ArchVReg(src1));
+            GetMasm()->movss(ArchVReg(dst), ArchVReg(tmpReg));
         }
     } else {
         if (dst.GetId() == src0.GetId()) {
@@ -997,10 +997,10 @@ void Amd64Encoder::EncodeSub(Reg dst, Reg src0, Reg src1)
             GetMasm()->movsd(ArchVReg(dst), ArchVReg(src0));
             GetMasm()->subsd(ArchVReg(dst), ArchVReg(src1));
         } else {
-            ScopedTmpReg tmp_reg(this, dst.GetType());
-            GetMasm()->movsd(ArchVReg(tmp_reg), ArchVReg(src0));
-            GetMasm()->subsd(ArchVReg(tmp_reg), ArchVReg(src1));
-            GetMasm()->movsd(ArchVReg(dst), ArchVReg(tmp_reg));
+            ScopedTmpReg tmpReg(this, dst.GetType());
+            GetMasm()->movsd(ArchVReg(tmpReg), ArchVReg(src0));
+            GetMasm()->subsd(ArchVReg(tmpReg), ArchVReg(src1));
+            GetMasm()->movsd(ArchVReg(dst), ArchVReg(tmpReg));
         }
     }
 }
@@ -1067,10 +1067,10 @@ void Amd64Encoder::EncodeSubOverflow(compiler::LabelHolder::LabelId id, Reg dst,
     if (dst.GetId() == src0.GetId()) {
         GetMasm()->sub(ArchReg(dst, size), ArchReg(src1, size));
     } else if (dst.GetId() == src1.GetId()) {
-        ScopedTmpReg tmp_reg(this, dst.GetType());
-        GetMasm()->mov(ArchReg(tmp_reg, size), ArchReg(src1, size));
+        ScopedTmpReg tmpReg(this, dst.GetType());
+        GetMasm()->mov(ArchReg(tmpReg, size), ArchReg(src1, size));
         GetMasm()->mov(ArchReg(dst, size), ArchReg(src0, size));
-        GetMasm()->sub(ArchReg(dst, size), ArchReg(tmp_reg, size));
+        GetMasm()->sub(ArchReg(dst, size), ArchReg(tmpReg, size));
     } else {
         GetMasm()->mov(ArchReg(dst, size), ArchReg(src0, size));
         GetMasm()->sub(ArchReg(dst, size), ArchReg(src1, size));
@@ -1119,19 +1119,19 @@ void Amd64Encoder::EncodeDivFloat(Reg dst, Reg src0, Reg src1)
     }
 }
 
-void Amd64Encoder::EncodeDiv(Reg dst, bool dst_signed, Reg src0, Reg src1)
+void Amd64Encoder::EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsFloat()) {
         EncodeDivFloat(dst, src0, src1);
         return;
     }
 
-    auto neg_path = GetMasm()->newLabel();
+    auto negPath = GetMasm()->newLabel();
     auto crossroad = GetMasm()->newLabel();
 
-    if (dst_signed) {
+    if (dstSigned) {
         GetMasm()->cmp(ArchReg(src1), asmjit::imm(-1));
-        GetMasm()->je(neg_path);
+        GetMasm()->je(negPath);
     }
 
     if (dst.GetId() != ConvertRegNumber(asmjit::x86::rdx.id())) {
@@ -1141,19 +1141,19 @@ void Amd64Encoder::EncodeDiv(Reg dst, bool dst_signed, Reg src0, Reg src1)
         GetMasm()->push(asmjit::x86::rax);
     }
 
-    ScopedTmpReg tmp_reg(this, dst.GetType());
+    ScopedTmpReg tmpReg(this, dst.GetType());
     Reg op1 {src1};
     if (src1.GetId() == ConvertRegNumber(asmjit::x86::rax.id()) ||
         src1.GetId() == ConvertRegNumber(asmjit::x86::rdx.id())) {
-        GetMasm()->mov(ArchReg(tmp_reg), ArchReg(src1));
-        op1 = Reg(tmp_reg);
+        GetMasm()->mov(ArchReg(tmpReg), ArchReg(src1));
+        op1 = Reg(tmpReg);
     }
 
     if (src0.GetId() != ConvertRegNumber(asmjit::x86::rax.id())) {
         GetMasm()->mov(asmjit::x86::rax, ArchReg(src0, DOUBLE_WORD_SIZE));
     }
 
-    if (dst_signed) {
+    if (dstSigned) {
         if (dst.GetSize() <= WORD_SIZE) {
             GetMasm()->cdq();
         } else {
@@ -1175,7 +1175,7 @@ void Amd64Encoder::EncodeDiv(Reg dst, bool dst_signed, Reg src0, Reg src1)
     }
     GetMasm()->jmp(crossroad);
 
-    GetMasm()->bind(neg_path);
+    GetMasm()->bind(negPath);
     if (dst.GetId() != src0.GetId()) {
         GetMasm()->mov(ArchReg(dst), ArchReg(src0));
     }
@@ -1196,19 +1196,19 @@ void Amd64Encoder::EncodeModFloat(Reg dst, Reg src0, Reg src1)
     }
 }
 
-void Amd64Encoder::EncodeMod(Reg dst, bool dst_signed, Reg src0, Reg src1)
+void Amd64Encoder::EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsFloat()) {
         EncodeModFloat(dst, src0, src1);
         return;
     }
 
-    auto zero_path = GetMasm()->newLabel();
+    auto zeroPath = GetMasm()->newLabel();
     auto crossroad = GetMasm()->newLabel();
 
-    if (dst_signed) {
+    if (dstSigned) {
         GetMasm()->cmp(ArchReg(src1), asmjit::imm(-1));
-        GetMasm()->je(zero_path);
+        GetMasm()->je(zeroPath);
     }
 
     if (dst.GetId() != ConvertRegNumber(asmjit::x86::rax.id())) {
@@ -1218,19 +1218,19 @@ void Amd64Encoder::EncodeMod(Reg dst, bool dst_signed, Reg src0, Reg src1)
         GetMasm()->push(asmjit::x86::rdx);
     }
 
-    ScopedTmpReg tmp_reg(this, dst.GetType());
+    ScopedTmpReg tmpReg(this, dst.GetType());
     Reg op1 {src1};
     if (src1.GetId() == ConvertRegNumber(asmjit::x86::rax.id()) ||
         src1.GetId() == ConvertRegNumber(asmjit::x86::rdx.id())) {
-        GetMasm()->mov(ArchReg(tmp_reg), ArchReg(src1));
-        op1 = Reg(tmp_reg);
+        GetMasm()->mov(ArchReg(tmpReg), ArchReg(src1));
+        op1 = Reg(tmpReg);
     }
 
     if (src0.GetId() != ConvertRegNumber(asmjit::x86::rax.id())) {
         GetMasm()->mov(asmjit::x86::rax, ArchReg(src0, DOUBLE_WORD_SIZE));
     }
 
-    if (dst_signed) {
+    if (dstSigned) {
         if (dst.GetSize() <= WORD_SIZE) {
             GetMasm()->cdq();
         } else {
@@ -1252,46 +1252,46 @@ void Amd64Encoder::EncodeMod(Reg dst, bool dst_signed, Reg src0, Reg src1)
     }
     GetMasm()->jmp(crossroad);
 
-    GetMasm()->bind(zero_path);
+    GetMasm()->bind(zeroPath);
     GetMasm()->xor_(ArchReg(dst, WORD_SIZE), ArchReg(dst, WORD_SIZE));
 
     GetMasm()->bind(crossroad);
 }
 
-void Amd64Encoder::EncodeMin(Reg dst, bool dst_signed, Reg src0, Reg src1)
+void Amd64Encoder::EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsScalar()) {
-        ScopedTmpReg tmp_reg(this, dst.GetType());
-        GetMasm()->mov(ArchReg(tmp_reg), ArchReg(src1));
+        ScopedTmpReg tmpReg(this, dst.GetType());
+        GetMasm()->mov(ArchReg(tmpReg), ArchReg(src1));
         GetMasm()->cmp(ArchReg(src0), ArchReg(src1));
 
         auto size = std::max<uint8_t>(src0.GetSize(), WORD_SIZE);
-        if (dst_signed) {
-            GetMasm()->cmovle(ArchReg(tmp_reg, size), ArchReg(src0, size));
+        if (dstSigned) {
+            GetMasm()->cmovle(ArchReg(tmpReg, size), ArchReg(src0, size));
         } else {
-            GetMasm()->cmovb(ArchReg(tmp_reg, size), ArchReg(src0, size));
+            GetMasm()->cmovb(ArchReg(tmpReg, size), ArchReg(src0, size));
         }
-        EncodeMov(dst, tmp_reg);
+        EncodeMov(dst, tmpReg);
         return;
     }
 
     EncodeMinMaxFp<false>(dst, src0, src1);
 }
 
-void Amd64Encoder::EncodeMax(Reg dst, bool dst_signed, Reg src0, Reg src1)
+void Amd64Encoder::EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsScalar()) {
-        ScopedTmpReg tmp_reg(this, dst.GetType());
-        GetMasm()->mov(ArchReg(tmp_reg), ArchReg(src1));
+        ScopedTmpReg tmpReg(this, dst.GetType());
+        GetMasm()->mov(ArchReg(tmpReg), ArchReg(src1));
         GetMasm()->cmp(ArchReg(src0), ArchReg(src1));
 
         auto size = std::max<uint8_t>(src0.GetSize(), WORD_SIZE);
-        if (dst_signed) {
-            GetMasm()->cmovge(ArchReg(tmp_reg, size), ArchReg(src0, size));
+        if (dstSigned) {
+            GetMasm()->cmovge(ArchReg(tmpReg, size), ArchReg(src0, size));
         } else {
-            GetMasm()->cmova(ArchReg(tmp_reg, size), ArchReg(src0, size));
+            GetMasm()->cmova(ArchReg(tmpReg, size), ArchReg(src0, size));
         }
-        EncodeMov(dst, tmp_reg);
+        EncodeMov(dst, tmpReg);
         return;
     }
 
@@ -1302,54 +1302,54 @@ template <bool IS_MAX>
 void Amd64Encoder::EncodeMinMaxFp(Reg dst, Reg src0, Reg src1)
 {
     auto end = GetMasm()->newLabel();
-    auto not_equal = GetMasm()->newLabel();
-    auto got_nan = GetMasm()->newLabel();
-    auto &src_a = dst.GetId() != src1.GetId() ? src0 : src1;
-    auto &src_b = src_a.GetId() == src0.GetId() ? src1 : src0;
+    auto notEqual = GetMasm()->newLabel();
+    auto gotNan = GetMasm()->newLabel();
+    auto &srcA = dst.GetId() != src1.GetId() ? src0 : src1;
+    auto &srcB = srcA.GetId() == src0.GetId() ? src1 : src0;
     if (dst.GetType() == FLOAT32_TYPE) {
-        GetMasm()->movaps(ArchVReg(dst), ArchVReg(src_a));
-        GetMasm()->ucomiss(ArchVReg(src_b), ArchVReg(src_a));
-        GetMasm()->jne(not_equal);
-        GetMasm()->jp(got_nan);
+        GetMasm()->movaps(ArchVReg(dst), ArchVReg(srcA));
+        GetMasm()->ucomiss(ArchVReg(srcB), ArchVReg(srcA));
+        GetMasm()->jne(notEqual);
+        GetMasm()->jp(gotNan);
         // calculate result for positive/negative zero operands
         if (IS_MAX) {
-            GetMasm()->andps(ArchVReg(dst), ArchVReg(src_b));
+            GetMasm()->andps(ArchVReg(dst), ArchVReg(srcB));
         } else {
-            GetMasm()->orps(ArchVReg(dst), ArchVReg(src_b));
+            GetMasm()->orps(ArchVReg(dst), ArchVReg(srcB));
         }
         GetMasm()->jmp(end);
-        GetMasm()->bind(got_nan);
+        GetMasm()->bind(gotNan);
         // if any operand is NaN result is NaN
-        GetMasm()->por(ArchVReg(dst), ArchVReg(src_b));
+        GetMasm()->por(ArchVReg(dst), ArchVReg(srcB));
         GetMasm()->jmp(end);
-        GetMasm()->bind(not_equal);
+        GetMasm()->bind(notEqual);
         if (IS_MAX) {
-            GetMasm()->maxss(ArchVReg(dst), ArchVReg(src_b));
+            GetMasm()->maxss(ArchVReg(dst), ArchVReg(srcB));
         } else {
-            GetMasm()->minss(ArchVReg(dst), ArchVReg(src_b));
+            GetMasm()->minss(ArchVReg(dst), ArchVReg(srcB));
         }
         GetMasm()->bind(end);
     } else {
-        GetMasm()->movapd(ArchVReg(dst), ArchVReg(src_a));
-        GetMasm()->ucomisd(ArchVReg(src_b), ArchVReg(src_a));
-        GetMasm()->jne(not_equal);
-        GetMasm()->jp(got_nan);
+        GetMasm()->movapd(ArchVReg(dst), ArchVReg(srcA));
+        GetMasm()->ucomisd(ArchVReg(srcB), ArchVReg(srcA));
+        GetMasm()->jne(notEqual);
+        GetMasm()->jp(gotNan);
         // calculate result for positive/negative zero operands
         if (IS_MAX) {
-            GetMasm()->andpd(ArchVReg(dst), ArchVReg(src_b));
+            GetMasm()->andpd(ArchVReg(dst), ArchVReg(srcB));
         } else {
-            GetMasm()->orpd(ArchVReg(dst), ArchVReg(src_b));
+            GetMasm()->orpd(ArchVReg(dst), ArchVReg(srcB));
         }
         GetMasm()->jmp(end);
-        GetMasm()->bind(got_nan);
+        GetMasm()->bind(gotNan);
         // if any operand is NaN result is NaN
-        GetMasm()->por(ArchVReg(dst), ArchVReg(src_b));
+        GetMasm()->por(ArchVReg(dst), ArchVReg(srcB));
         GetMasm()->jmp(end);
-        GetMasm()->bind(not_equal);
+        GetMasm()->bind(notEqual);
         if (IS_MAX) {
-            GetMasm()->maxsd(ArchVReg(dst), ArchVReg(src_b));
+            GetMasm()->maxsd(ArchVReg(dst), ArchVReg(srcB));
         } else {
-            GetMasm()->minsd(ArchVReg(dst), ArchVReg(src_b));
+            GetMasm()->minsd(ArchVReg(dst), ArchVReg(srcB));
         }
         GetMasm()->bind(end);
     }
@@ -1358,52 +1358,52 @@ void Amd64Encoder::EncodeMinMaxFp(Reg dst, Reg src0, Reg src1)
 void Amd64Encoder::EncodeShl(Reg dst, Reg src0, Reg src1)
 {
     ASSERT(dst.IsScalar());
-    ScopedTmpReg tmp_reg(this, dst.GetType());
+    ScopedTmpReg tmpReg(this, dst.GetType());
     Reg rcx(ConvertRegNumber(asmjit::x86::rcx.id()), dst.GetType());
-    GetMasm()->mov(ArchReg(tmp_reg), ArchReg(src0));
+    GetMasm()->mov(ArchReg(tmpReg), ArchReg(src0));
     if (dst.GetId() != rcx.GetId()) {
         GetMasm()->push(ArchReg(rcx, DOUBLE_WORD_SIZE));
     }
     GetMasm()->mov(ArchReg(rcx), ArchReg(src1));
-    GetMasm()->shl(ArchReg(tmp_reg), asmjit::x86::cl);
+    GetMasm()->shl(ArchReg(tmpReg), asmjit::x86::cl);
     if (dst.GetId() != rcx.GetId()) {
         GetMasm()->pop(ArchReg(rcx, DOUBLE_WORD_SIZE));
     }
-    GetMasm()->mov(ArchReg(dst), ArchReg(tmp_reg));
+    GetMasm()->mov(ArchReg(dst), ArchReg(tmpReg));
 }
 
 void Amd64Encoder::EncodeShr(Reg dst, Reg src0, Reg src1)
 {
     ASSERT(dst.IsScalar());
-    ScopedTmpReg tmp_reg(this, dst.GetType());
+    ScopedTmpReg tmpReg(this, dst.GetType());
     Reg rcx(ConvertRegNumber(asmjit::x86::rcx.id()), dst.GetType());
-    GetMasm()->mov(ArchReg(tmp_reg), ArchReg(src0));
+    GetMasm()->mov(ArchReg(tmpReg), ArchReg(src0));
     if (dst.GetId() != rcx.GetId()) {
         GetMasm()->push(ArchReg(rcx, DOUBLE_WORD_SIZE));
     }
     GetMasm()->mov(ArchReg(rcx), ArchReg(src1));
-    GetMasm()->shr(ArchReg(tmp_reg), asmjit::x86::cl);
+    GetMasm()->shr(ArchReg(tmpReg), asmjit::x86::cl);
     if (dst.GetId() != rcx.GetId()) {
         GetMasm()->pop(ArchReg(rcx, DOUBLE_WORD_SIZE));
     }
-    GetMasm()->mov(ArchReg(dst), ArchReg(tmp_reg));
+    GetMasm()->mov(ArchReg(dst), ArchReg(tmpReg));
 }
 
 void Amd64Encoder::EncodeAShr(Reg dst, Reg src0, Reg src1)
 {
     ASSERT(dst.IsScalar());
-    ScopedTmpReg tmp_reg(this, dst.GetType());
+    ScopedTmpReg tmpReg(this, dst.GetType());
     Reg rcx(ConvertRegNumber(asmjit::x86::rcx.id()), dst.GetType());
-    GetMasm()->mov(ArchReg(tmp_reg), ArchReg(src0));
+    GetMasm()->mov(ArchReg(tmpReg), ArchReg(src0));
     if (dst.GetId() != rcx.GetId()) {
         GetMasm()->push(ArchReg(rcx, DOUBLE_WORD_SIZE));
     }
     GetMasm()->mov(ArchReg(rcx), ArchReg(src1));
-    GetMasm()->sar(ArchReg(tmp_reg), asmjit::x86::cl);
+    GetMasm()->sar(ArchReg(tmpReg), asmjit::x86::cl);
     if (dst.GetId() != rcx.GetId()) {
         GetMasm()->pop(ArchReg(rcx, DOUBLE_WORD_SIZE));
     }
-    GetMasm()->mov(ArchReg(dst), ArchReg(tmp_reg));
+    GetMasm()->mov(ArchReg(dst), ArchReg(tmpReg));
 }
 
 void Amd64Encoder::EncodeAnd(Reg dst, Reg src0, Reg src1)
@@ -1452,18 +1452,18 @@ void Amd64Encoder::EncodeAdd(Reg dst, Reg src, Imm imm)
         return;
     }
 
-    auto imm_val = imm.GetAsInt();
+    auto immVal = imm.GetAsInt();
     auto size = std::max<uint8_t>(WORD_SIZE, dst.GetSize());
-    if (ImmFitsSize(imm_val, size)) {
-        GetMasm()->lea(ArchReg(dst, size), asmjit::x86::ptr(ArchReg(src, size), imm_val));
+    if (ImmFitsSize(immVal, size)) {
+        GetMasm()->lea(ArchReg(dst, size), asmjit::x86::ptr(ArchReg(src, size), immVal));
     } else {
         if (dst.GetId() != src.GetId()) {
-            GetMasm()->mov(ArchReg(dst), asmjit::imm(imm_val));
+            GetMasm()->mov(ArchReg(dst), asmjit::imm(immVal));
             GetMasm()->add(ArchReg(dst), ArchReg(src));
         } else {
-            ScopedTmpReg tmp_reg(this, dst.GetType());
-            GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(imm_val));
-            GetMasm()->add(ArchReg(dst), ArchReg(tmp_reg));
+            ScopedTmpReg tmpReg(this, dst.GetType());
+            GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(immVal));
+            GetMasm()->add(ArchReg(dst), ArchReg(tmpReg));
         }
     }
 }
@@ -1475,18 +1475,18 @@ void Amd64Encoder::EncodeSub(Reg dst, Reg src, Imm imm)
         return;
     }
 
-    auto imm_val = -imm.GetAsInt();
+    auto immVal = -imm.GetAsInt();
     auto size = std::max<uint8_t>(WORD_SIZE, dst.GetSize());
-    if (ImmFitsSize(imm_val, size)) {
-        GetMasm()->lea(ArchReg(dst, size), asmjit::x86::ptr(ArchReg(src, size), imm_val));
+    if (ImmFitsSize(immVal, size)) {
+        GetMasm()->lea(ArchReg(dst, size), asmjit::x86::ptr(ArchReg(src, size), immVal));
     } else {
         if (dst.GetId() != src.GetId()) {
-            GetMasm()->mov(ArchReg(dst), asmjit::imm(imm_val));
+            GetMasm()->mov(ArchReg(dst), asmjit::imm(immVal));
             GetMasm()->add(ArchReg(dst), ArchReg(src));
         } else {
-            ScopedTmpReg tmp_reg(this, dst.GetType());
-            GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(imm_val));
-            GetMasm()->add(ArchReg(dst), ArchReg(tmp_reg));
+            ScopedTmpReg tmpReg(this, dst.GetType());
+            GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(immVal));
+            GetMasm()->add(ArchReg(dst), ArchReg(tmpReg));
         }
     }
 }
@@ -1516,17 +1516,17 @@ void Amd64Encoder::EncodeAShr(Reg dst, Reg src, Imm imm)
 void Amd64Encoder::EncodeAnd(Reg dst, Reg src, Imm imm)
 {
     ASSERT(dst.IsScalar());
-    auto imm_val = ImmToUnsignedInt(imm);
+    auto immVal = ImmToUnsignedInt(imm);
 
     switch (src.GetSize()) {
         case BYTE_SIZE:
-            imm_val |= ~uint64_t(0xFF);  // NOLINT
+            immVal |= ~uint64_t(0xFF);  // NOLINT
             break;
         case HALF_SIZE:
-            imm_val |= ~uint64_t(0xFFFF);  // NOLINT
+            immVal |= ~uint64_t(0xFFFF);  // NOLINT
             break;
         case WORD_SIZE:
-            imm_val |= ~uint64_t(0xFFFFFFFF);  // NOLINT
+            immVal |= ~uint64_t(0xFFFFFFFF);  // NOLINT
             break;
         default:
             break;
@@ -1534,20 +1534,20 @@ void Amd64Encoder::EncodeAnd(Reg dst, Reg src, Imm imm)
 
     if (dst.GetSize() != DOUBLE_WORD_SIZE) {
         // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-        imm_val &= (uint64_t(1) << dst.GetSize()) - 1;
+        immVal &= (uint64_t(1) << dst.GetSize()) - 1;
     }
 
-    if (ImmFitsSize(imm_val, dst.GetSize())) {
+    if (ImmFitsSize(immVal, dst.GetSize())) {
         EncodeMov(dst, src);
-        GetMasm()->and_(ArchReg(dst), imm_val);
+        GetMasm()->and_(ArchReg(dst), immVal);
     } else {
         if (dst.GetId() != src.GetId()) {
-            GetMasm()->mov(ArchReg(dst), asmjit::imm(imm_val));
+            GetMasm()->mov(ArchReg(dst), asmjit::imm(immVal));
             GetMasm()->and_(ArchReg(dst), ArchReg(src));
         } else {
-            ScopedTmpReg tmp_reg(this, dst.GetType());
-            GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(imm_val));
-            GetMasm()->and_(ArchReg(dst), ArchReg(tmp_reg));
+            ScopedTmpReg tmpReg(this, dst.GetType());
+            GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(immVal));
+            GetMasm()->and_(ArchReg(dst), ArchReg(tmpReg));
         }
     }
 }
@@ -1555,18 +1555,18 @@ void Amd64Encoder::EncodeAnd(Reg dst, Reg src, Imm imm)
 void Amd64Encoder::EncodeOr(Reg dst, Reg src, Imm imm)
 {
     ASSERT(dst.IsScalar());
-    auto imm_val = ImmToUnsignedInt(imm);
-    if (ImmFitsSize(imm_val, dst.GetSize())) {
+    auto immVal = ImmToUnsignedInt(imm);
+    if (ImmFitsSize(immVal, dst.GetSize())) {
         EncodeMov(dst, src);
-        GetMasm()->or_(ArchReg(dst), imm_val);
+        GetMasm()->or_(ArchReg(dst), immVal);
     } else {
         if (dst.GetId() != src.GetId()) {
-            GetMasm()->mov(ArchReg(dst), asmjit::imm(imm_val));
+            GetMasm()->mov(ArchReg(dst), asmjit::imm(immVal));
             GetMasm()->or_(ArchReg(dst), ArchReg(src));
         } else {
-            ScopedTmpReg tmp_reg(this, dst.GetType());
-            GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(imm_val));
-            GetMasm()->or_(ArchReg(dst), ArchReg(tmp_reg));
+            ScopedTmpReg tmpReg(this, dst.GetType());
+            GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(immVal));
+            GetMasm()->or_(ArchReg(dst), ArchReg(tmpReg));
         }
     }
 }
@@ -1574,18 +1574,18 @@ void Amd64Encoder::EncodeOr(Reg dst, Reg src, Imm imm)
 void Amd64Encoder::EncodeXor(Reg dst, Reg src, Imm imm)
 {
     ASSERT(dst.IsScalar());
-    auto imm_val = ImmToUnsignedInt(imm);
-    if (ImmFitsSize(imm_val, dst.GetSize())) {
+    auto immVal = ImmToUnsignedInt(imm);
+    if (ImmFitsSize(immVal, dst.GetSize())) {
         EncodeMov(dst, src);
-        GetMasm()->xor_(ArchReg(dst), imm_val);
+        GetMasm()->xor_(ArchReg(dst), immVal);
     } else {
         if (dst.GetId() != src.GetId()) {
-            GetMasm()->mov(ArchReg(dst), asmjit::imm(imm_val));
+            GetMasm()->mov(ArchReg(dst), asmjit::imm(immVal));
             GetMasm()->xor_(ArchReg(dst), ArchReg(src));
         } else {
-            ScopedTmpReg tmp_reg(this, dst.GetType());
-            GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(imm_val));
-            GetMasm()->xor_(ArchReg(dst), ArchReg(tmp_reg));
+            ScopedTmpReg tmpReg(this, dst.GetType());
+            GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(immVal));
+            GetMasm()->xor_(ArchReg(dst), ArchReg(tmpReg));
         }
     }
 }
@@ -1601,19 +1601,19 @@ void Amd64Encoder::EncodeMov(Reg dst, Imm src)
     }
 
     if (dst.GetType() == FLOAT32_TYPE) {
-        ScopedTmpRegU32 tmp_reg(this);
+        ScopedTmpRegU32 tmpReg(this);
         auto val = bit_cast<uint32_t>(src.GetAsFloat());
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(val));
-        GetMasm()->movd(ArchVReg(dst), ArchReg(tmp_reg));
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(val));
+        GetMasm()->movd(ArchVReg(dst), ArchReg(tmpReg));
     } else {
-        ScopedTmpRegU64 tmp_reg(this);
+        ScopedTmpRegU64 tmpReg(this);
         auto val = bit_cast<uint64_t>(src.GetAsDouble());
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(val));
-        GetMasm()->movq(ArchVReg(dst), ArchReg(tmp_reg));
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(val));
+        GetMasm()->movq(ArchVReg(dst), ArchReg(tmpReg));
     }
 }
 
-void Amd64Encoder::EncodeLdr(Reg dst, bool dst_signed, MemRef mem)
+void Amd64Encoder::EncodeLdr(Reg dst, bool dstSigned, MemRef mem)
 {
     auto m = ArchMem(mem).Prepare(GetMasm());
 
@@ -1628,7 +1628,7 @@ void Amd64Encoder::EncodeLdr(Reg dst, bool dst_signed, MemRef mem)
 
     m.setSize(dst.GetSize() / BITS_PER_BYTE);
 
-    if (dst_signed && dst.GetSize() < DOUBLE_WORD_SIZE) {
+    if (dstSigned && dst.GetSize() < DOUBLE_WORD_SIZE) {
         if (dst.GetSize() == WORD_SIZE) {
             GetMasm()->movsxd(ArchReg(dst, DOUBLE_WORD_SIZE), m);
         } else {
@@ -1636,7 +1636,7 @@ void Amd64Encoder::EncodeLdr(Reg dst, bool dst_signed, MemRef mem)
         }
         return;
     }
-    if (!dst_signed && dst.GetSize() < WORD_SIZE) {
+    if (!dstSigned && dst.GetSize() < WORD_SIZE) {
         GetMasm()->movzx(ArchReg(dst, WORD_SIZE), m);
         return;
     }
@@ -1644,9 +1644,9 @@ void Amd64Encoder::EncodeLdr(Reg dst, bool dst_signed, MemRef mem)
     GetMasm()->mov(ArchReg(dst), m);
 }
 
-void Amd64Encoder::EncodeLdrAcquire(Reg dst, bool dst_signed, MemRef mem)
+void Amd64Encoder::EncodeLdrAcquire(Reg dst, bool dstSigned, MemRef mem)
 {
-    EncodeLdr(dst, dst_signed, mem);
+    EncodeLdr(dst, dstSigned, mem);
     // LoadLoad and LoadStore barrier should be here, but this is no-op in amd64 memory model
 }
 
@@ -1681,30 +1681,30 @@ void Amd64Encoder::EncodeStrz(Reg src, MemRef mem)
         if (src.GetSize() == DOUBLE_WORD_SIZE) {
             GetMasm()->mov(ArchMem(mem).Prepare(GetMasm()), ArchReg(src));
         } else {
-            ScopedTmpRegU64 tmp_reg(this);
-            GetMasm()->xor_(ArchReg(tmp_reg), ArchReg(tmp_reg));
-            GetMasm()->mov(ArchReg(tmp_reg, src.GetSize()), ArchReg(src));
-            GetMasm()->mov(ArchMem(mem).Prepare(GetMasm()), ArchReg(tmp_reg));
+            ScopedTmpRegU64 tmpReg(this);
+            GetMasm()->xor_(ArchReg(tmpReg), ArchReg(tmpReg));
+            GetMasm()->mov(ArchReg(tmpReg, src.GetSize()), ArchReg(src));
+            GetMasm()->mov(ArchMem(mem).Prepare(GetMasm()), ArchReg(tmpReg));
         }
     } else {
         if (src.GetType() == FLOAT64_TYPE) {
             GetMasm()->movsd(ArchMem(mem).Prepare(GetMasm()), ArchVReg(src));
         } else {
-            ScopedTmpRegF64 tmp_reg(this);
+            ScopedTmpRegF64 tmpReg(this);
 
-            GetMasm()->xorpd(ArchVReg(tmp_reg), ArchVReg(tmp_reg));
-            GetMasm()->movss(ArchVReg(tmp_reg), ArchVReg(src));
-            GetMasm()->movsd(ArchMem(mem).Prepare(GetMasm()), ArchVReg(tmp_reg));
+            GetMasm()->xorpd(ArchVReg(tmpReg), ArchVReg(tmpReg));
+            GetMasm()->movss(ArchVReg(tmpReg), ArchVReg(src));
+            GetMasm()->movsd(ArchMem(mem).Prepare(GetMasm()), ArchVReg(tmpReg));
         }
     }
 }
 
-void Amd64Encoder::EncodeSti(int64_t src, uint8_t src_size_bytes, MemRef mem)
+void Amd64Encoder::EncodeSti(int64_t src, uint8_t srcSizeBytes, MemRef mem)
 {
-    ASSERT(src_size_bytes <= 8U);
+    ASSERT(srcSizeBytes <= 8U);
     auto m = ArchMem(mem).Prepare(GetMasm());
-    if (src_size_bytes <= HALF_WORD_SIZE_BYTES) {
-        m.setSize(src_size_bytes);
+    if (srcSizeBytes <= HALF_WORD_SIZE_BYTES) {
+        m.setSize(srcSizeBytes);
         GetMasm()->mov(m, asmjit::imm(src));
     } else {
         m.setSize(DOUBLE_WORD_SIZE_BYTES);
@@ -1712,9 +1712,9 @@ void Amd64Encoder::EncodeSti(int64_t src, uint8_t src_size_bytes, MemRef mem)
         if (ImmFitsSize(src, DOUBLE_WORD_SIZE)) {
             GetMasm()->mov(m, asmjit::imm(src));
         } else {
-            ScopedTmpRegU64 tmp_reg(this);
-            GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(src));
-            GetMasm()->mov(m, ArchReg(tmp_reg));
+            ScopedTmpRegU64 tmpReg(this);
+            GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(src));
+            GetMasm()->mov(m, ArchReg(tmpReg));
         }
     }
 }
@@ -1729,21 +1729,21 @@ void Amd64Encoder::EncodeSti(double src, MemRef mem)
     EncodeSti(bit_cast<int64_t>(src), sizeof(int64_t), mem);
 }
 
-void Amd64Encoder::EncodeMemCopy(MemRef mem_from, MemRef mem_to, size_t size)
+void Amd64Encoder::EncodeMemCopy(MemRef memFrom, MemRef memTo, size_t size)
 {
-    ScopedTmpRegU64 tmp_reg(this);
-    GetMasm()->mov(ArchReg(tmp_reg, size), ArchMem(mem_from).Prepare(GetMasm()));
-    GetMasm()->mov(ArchMem(mem_to).Prepare(GetMasm()), ArchReg(tmp_reg, size));
+    ScopedTmpRegU64 tmpReg(this);
+    GetMasm()->mov(ArchReg(tmpReg, size), ArchMem(memFrom).Prepare(GetMasm()));
+    GetMasm()->mov(ArchMem(memTo).Prepare(GetMasm()), ArchReg(tmpReg, size));
 }
 
-void Amd64Encoder::EncodeMemCopyz(MemRef mem_from, MemRef mem_to, size_t size)
+void Amd64Encoder::EncodeMemCopyz(MemRef memFrom, MemRef memTo, size_t size)
 {
-    ScopedTmpRegU64 tmp_reg(this);
+    ScopedTmpRegU64 tmpReg(this);
     if (size < DOUBLE_WORD_SIZE) {
-        GetMasm()->xor_(ArchReg(tmp_reg), ArchReg(tmp_reg));
+        GetMasm()->xor_(ArchReg(tmpReg), ArchReg(tmpReg));
     }
-    GetMasm()->mov(ArchReg(tmp_reg, size), ArchMem(mem_from).Prepare(GetMasm()));
-    GetMasm()->mov(ArchMem(mem_to).Prepare(GetMasm()), ArchReg(tmp_reg));
+    GetMasm()->mov(ArchReg(tmpReg, size), ArchMem(memFrom).Prepare(GetMasm()));
+    GetMasm()->mov(ArchMem(memTo).Prepare(GetMasm()), ArchReg(tmpReg));
 }
 
 void Amd64Encoder::EncodeCompare(Reg dst, Reg src0, Reg src1, Condition cc)
@@ -1829,27 +1829,27 @@ void Amd64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3,
     }
 
     auto size = std::max<uint8_t>(src0.GetSize(), WORD_SIZE);
-    bool dst_aliased = dst.GetId() == src0.GetId();
-    ScopedTmpReg tmp_reg(this, dst.GetType());
-    auto dst_reg = dst_aliased ? ArchReg(tmp_reg, size) : ArchReg(dst, size);
+    bool dstAliased = dst.GetId() == src0.GetId();
+    ScopedTmpReg tmpReg(this, dst.GetType());
+    auto dstReg = dstAliased ? ArchReg(tmpReg, size) : ArchReg(dst, size);
 
-    GetMasm()->mov(dst_reg, ArchReg(src1, size));
+    GetMasm()->mov(dstReg, ArchReg(src1, size));
 
     if (src2.IsScalar()) {
-        GetMasm()->cmov(ArchCc(cc), dst_reg, ArchReg(src0, size));
+        GetMasm()->cmov(ArchCc(cc), dstReg, ArchReg(src0, size));
     } else if (CcMatchesNan(cc)) {
-        GetMasm()->cmovp(dst_reg, ArchReg(src0, size));
-        GetMasm()->cmov(ArchCc(cc, src2.IsFloat()), dst_reg, ArchReg(src0, size));
+        GetMasm()->cmovp(dstReg, ArchReg(src0, size));
+        GetMasm()->cmov(ArchCc(cc, src2.IsFloat()), dstReg, ArchReg(src0, size));
     } else {
         auto end = GetMasm()->newLabel();
 
         GetMasm()->jp(end);
-        GetMasm()->cmov(ArchCc(cc, src2.IsFloat()), dst_reg, ArchReg(src0, size));
+        GetMasm()->cmov(ArchCc(cc, src2.IsFloat()), dstReg, ArchReg(src0, size));
 
         GetMasm()->bind(end);
     }
-    if (dst_aliased) {
-        EncodeMov(dst, tmp_reg);
+    if (dstAliased) {
+        EncodeMov(dst, tmpReg);
     }
 }
 
@@ -1857,24 +1857,24 @@ void Amd64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, 
 {
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
 
-    auto imm_val = imm.GetAsInt();
-    if (ImmFitsSize(imm_val, src2.GetSize())) {
-        GetMasm()->cmp(ArchReg(src2), asmjit::imm(imm_val));
+    auto immVal = imm.GetAsInt();
+    if (ImmFitsSize(immVal, src2.GetSize())) {
+        GetMasm()->cmp(ArchReg(src2), asmjit::imm(immVal));
     } else {
-        ScopedTmpReg tmp_reg(this, src2.GetType());
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(imm_val));
-        GetMasm()->cmp(ArchReg(src2), ArchReg(tmp_reg));
+        ScopedTmpReg tmpReg(this, src2.GetType());
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(immVal));
+        GetMasm()->cmp(ArchReg(src2), ArchReg(tmpReg));
     }
 
-    ScopedTmpReg tmp_reg(this, dst.GetType());
+    ScopedTmpReg tmpReg(this, dst.GetType());
     auto size = std::max<uint8_t>(src0.GetSize(), WORD_SIZE);
-    bool dst_aliased = dst.GetId() == src0.GetId();
-    auto dst_reg = dst_aliased ? ArchReg(tmp_reg, size) : ArchReg(dst, size);
+    bool dstAliased = dst.GetId() == src0.GetId();
+    auto dstReg = dstAliased ? ArchReg(tmpReg, size) : ArchReg(dst, size);
 
-    GetMasm()->mov(dst_reg, ArchReg(src1, size));
-    GetMasm()->cmov(ArchCc(cc), dst_reg, ArchReg(src0, size));
-    if (dst_aliased) {
-        EncodeMov(dst, tmp_reg);
+    GetMasm()->mov(dstReg, ArchReg(src1, size));
+    GetMasm()->cmov(ArchCc(cc), dstReg, ArchReg(src0, size));
+    if (dstAliased) {
+        EncodeMov(dst, tmpReg);
     }
 }
 
@@ -1884,15 +1884,15 @@ void Amd64Encoder::EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Reg s
 
     GetMasm()->test(ArchReg(src2), ArchReg(src3));
 
-    ScopedTmpReg tmp_reg(this, dst.GetType());
+    ScopedTmpReg tmpReg(this, dst.GetType());
     auto size = std::max<uint8_t>(src0.GetSize(), WORD_SIZE);
-    bool dst_aliased = dst.GetId() == src0.GetId();
-    auto dst_reg = dst_aliased ? ArchReg(tmp_reg, size) : ArchReg(dst, size);
+    bool dstAliased = dst.GetId() == src0.GetId();
+    auto dstReg = dstAliased ? ArchReg(tmpReg, size) : ArchReg(dst, size);
 
-    GetMasm()->mov(dst_reg, ArchReg(src1, size));
-    GetMasm()->cmov(ArchCcTest(cc), dst_reg, ArchReg(src0, size));
-    if (dst_aliased) {
-        EncodeMov(dst, tmp_reg);
+    GetMasm()->mov(dstReg, ArchReg(src1, size));
+    GetMasm()->cmov(ArchCcTest(cc), dstReg, ArchReg(src0, size));
+    if (dstAliased) {
+        EncodeMov(dst, tmpReg);
     }
 }
 
@@ -1900,28 +1900,28 @@ void Amd64Encoder::EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Imm i
 {
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
 
-    auto imm_val = imm.GetAsInt();
-    if (ImmFitsSize(imm_val, src2.GetSize())) {
-        GetMasm()->test(ArchReg(src2), asmjit::imm(imm_val));
+    auto immVal = imm.GetAsInt();
+    if (ImmFitsSize(immVal, src2.GetSize())) {
+        GetMasm()->test(ArchReg(src2), asmjit::imm(immVal));
     } else {
-        ScopedTmpReg tmp_reg(this, src2.GetType());
-        GetMasm()->mov(ArchReg(tmp_reg), asmjit::imm(imm_val));
-        GetMasm()->test(ArchReg(src2), ArchReg(tmp_reg));
+        ScopedTmpReg tmpReg(this, src2.GetType());
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(immVal));
+        GetMasm()->test(ArchReg(src2), ArchReg(tmpReg));
     }
 
-    ScopedTmpReg tmp_reg(this, dst.GetType());
+    ScopedTmpReg tmpReg(this, dst.GetType());
     auto size = std::max<uint8_t>(src0.GetSize(), WORD_SIZE);
-    bool dst_aliased = dst.GetId() == src0.GetId();
-    auto dst_reg = dst_aliased ? ArchReg(tmp_reg, size) : ArchReg(dst, size);
+    bool dstAliased = dst.GetId() == src0.GetId();
+    auto dstReg = dstAliased ? ArchReg(tmpReg, size) : ArchReg(dst, size);
 
-    GetMasm()->mov(dst_reg, ArchReg(src1, size));
-    GetMasm()->cmov(ArchCcTest(cc), dst_reg, ArchReg(src0, size));
-    if (dst_aliased) {
-        EncodeMov(dst, tmp_reg);
+    GetMasm()->mov(dstReg, ArchReg(src1, size));
+    GetMasm()->cmov(ArchCcTest(cc), dstReg, ArchReg(src0, size));
+    if (dstAliased) {
+        EncodeMov(dst, tmpReg);
     }
 }
 
-void Amd64Encoder::EncodeLdp(Reg dst0, Reg dst1, bool dst_signed, MemRef mem)
+void Amd64Encoder::EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem)
 {
     ASSERT(dst0.IsFloat() == dst1.IsFloat());
     ASSERT(dst0.GetSize() == dst1.GetSize());
@@ -1943,7 +1943,7 @@ void Amd64Encoder::EncodeLdp(Reg dst0, Reg dst1, bool dst_signed, MemRef mem)
         return;
     }
 
-    if (dst_signed && dst0.GetSize() == WORD_SIZE) {
+    if (dstSigned && dst0.GetSize() == WORD_SIZE) {
         m.setSize(WORD_SIZE_BYTES);
         GetMasm()->movsxd(ArchReg(dst0, DOUBLE_WORD_SIZE), m);
 
@@ -2003,7 +2003,7 @@ void Amd64Encoder::EncodeReverseBytes(Reg dst, Reg src)
     }
 }
 
-bool Amd64Encoder::CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, [[maybe_unused]] bool signed_compare)
+bool Amd64Encoder::CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, [[maybe_unused]] bool signedCompare)
 {
     return ImmFitsSize(imm, size);
 }
@@ -2102,11 +2102,11 @@ void Amd64Encoder::EncodeRoundToPInfFloat(Reg dst, Reg src)
     ScopedTmpReg t3(this, src.GetType());
     ScopedTmpReg t4(this, dst.GetType());
 
-    auto skip_incr_id = CreateLabel();
-    auto done_id = CreateLabel();
+    auto skipIncrId = CreateLabel();
+    auto doneId = CreateLabel();
 
-    auto skip_incr = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(skip_incr_id);
-    auto done = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(done_id);
+    auto skipIncr = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(skipIncrId);
+    auto done = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(doneId);
 
     GetMasm()->movss(ArchVReg(t2), ArchVReg(src));
     GetMasm()->roundss(ArchVReg(t1), ArchVReg(src), asmjit::imm(1));
@@ -2115,12 +2115,12 @@ void Amd64Encoder::EncodeRoundToPInfFloat(Reg dst, Reg src)
     GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int32_t, float>(0.5F)));
     GetMasm()->movd(ArchVReg(t3), ArchReg(t4));
     GetMasm()->comiss(ArchVReg(t2), ArchVReg(t3));
-    GetMasm()->j(asmjit::x86::Condition::Code::kB, *skip_incr);
+    GetMasm()->j(asmjit::x86::Condition::Code::kB, *skipIncr);
     // NOLINTNEXTLINE(readability-magic-numbers)
     GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int32_t, float>(1.0F)));
     GetMasm()->movd(ArchVReg(t3), ArchReg(t4));
     GetMasm()->addss(ArchVReg(t1), ArchVReg(t3));
-    BindLabel(skip_incr_id);
+    BindLabel(skipIncrId);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     GetMasm()->mov(ArchReg(dst), asmjit::imm(0x7FFFFFFF));
@@ -2131,7 +2131,7 @@ void Amd64Encoder::EncodeRoundToPInfFloat(Reg dst, Reg src)
     GetMasm()->mov(ArchReg(dst), asmjit::imm(0));  // does not change flags
     GetMasm()->j(asmjit::x86::Condition::Code::kParityEven, *done);  // NaN mapped to 0 (just moved in dst)
     GetMasm()->cvttss2si(ArchReg(dst), ArchVReg(t1));
-    BindLabel(done_id);
+    BindLabel(doneId);
 }
 
 void Amd64Encoder::EncodeRoundToPInfDouble(Reg dst, Reg src)
@@ -2141,11 +2141,11 @@ void Amd64Encoder::EncodeRoundToPInfDouble(Reg dst, Reg src)
     ScopedTmpReg t3(this, src.GetType());
     ScopedTmpReg t4(this, dst.GetType());
 
-    auto skip_incr_id = CreateLabel();
-    auto done_id = CreateLabel();
+    auto skipIncrId = CreateLabel();
+    auto doneId = CreateLabel();
 
-    auto skip_incr = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(skip_incr_id);
-    auto done = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(done_id);
+    auto skipIncr = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(skipIncrId);
+    auto done = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(doneId);
 
     GetMasm()->movsd(ArchVReg(t2), ArchVReg(src));
     GetMasm()->roundsd(ArchVReg(t1), ArchVReg(src), asmjit::imm(1));
@@ -2154,12 +2154,12 @@ void Amd64Encoder::EncodeRoundToPInfDouble(Reg dst, Reg src)
     GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int64_t, double>(0.5)));
     GetMasm()->movq(ArchVReg(t3), ArchReg(t4));
     GetMasm()->comisd(ArchVReg(t2), ArchVReg(t3));
-    GetMasm()->j(asmjit::x86::Condition::Code::kB, *skip_incr);
+    GetMasm()->j(asmjit::x86::Condition::Code::kB, *skipIncr);
     // NOLINTNEXTLINE(readability-magic-numbers)
     GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int64_t, double>(1.0)));
     GetMasm()->movq(ArchVReg(t3), ArchReg(t4));
     GetMasm()->addsd(ArchVReg(t1), ArchVReg(t3));
-    BindLabel(skip_incr_id);
+    BindLabel(skipIncrId);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     GetMasm()->mov(ArchReg(dst), asmjit::imm(0x7FFFFFFFFFFFFFFFL));
@@ -2170,7 +2170,7 @@ void Amd64Encoder::EncodeRoundToPInfDouble(Reg dst, Reg src)
     GetMasm()->mov(ArchReg(dst), asmjit::imm(0));  // does not change flags
     GetMasm()->j(asmjit::x86::Condition::Code::kParityEven, *done);  // NaN mapped to 0 (just moved in dst)
     GetMasm()->cvttsd2si(ArchReg(dst), ArchVReg(t1));
-    BindLabel(done_id);
+    BindLabel(doneId);
 }
 
 void Amd64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
@@ -2196,8 +2196,8 @@ void Amd64Encoder::EncodeReverseBitsImpl(Reg dst0, Reg src0)
                                   static_cast<T>(UINT64_C(0x0f0f0f0f0f0f0f0f))};
 
     ScopedTmpReg tmp(this, dst0.GetType());
-    ScopedTmpReg imm_holder(this, dst0.GetType());
-    auto imm_holder_reg = ArchReg(imm_holder);
+    ScopedTmpReg immHolder(this, dst0.GetType());
+    auto immHolderReg = ArchReg(immHolder);
 
     GetMasm()->mov(ArchReg(dst0), ArchReg(src0));
     GetMasm()->mov(ArchReg(tmp), ArchReg(src0));
@@ -2207,9 +2207,9 @@ void Amd64Encoder::EncodeReverseBitsImpl(Reg dst0, Reg src0)
         auto mask = asmjit::imm(MASKS[round]);
         GetMasm()->shr(ArchReg(dst0), shift);
         if (dst0.GetSize() == DOUBLE_WORD_SIZE) {
-            GetMasm()->mov(imm_holder_reg, mask);
-            GetMasm()->and_(ArchReg(tmp), imm_holder_reg);
-            GetMasm()->and_(ArchReg(dst0), imm_holder_reg);
+            GetMasm()->mov(immHolderReg, mask);
+            GetMasm()->and_(ArchReg(tmp), immHolderReg);
+            GetMasm()->and_(ArchReg(dst0), immHolderReg);
         } else {
             GetMasm()->and_(ArchReg(tmp), mask);
             GetMasm()->and_(ArchReg(dst0), mask);
@@ -2268,10 +2268,10 @@ void Amd64Encoder::EncodeIsInf(Reg dst, Reg src)
     if (src.GetSize() == WORD_SIZE) {
         constexpr auto INF_MASK = uint32_t(0x7f800000) << 1U;
 
-        ScopedTmpRegU32 tmp_reg(this);
-        ScopedTmpRegU32 tmp1_reg(this);
-        auto tmp = ArchReg(tmp_reg);
-        auto tmp1 = ArchReg(tmp1_reg);
+        ScopedTmpRegU32 tmpReg(this);
+        ScopedTmpRegU32 tmp1Reg(this);
+        auto tmp = ArchReg(tmpReg);
+        auto tmp1 = ArchReg(tmp1Reg);
 
         GetMasm()->movd(tmp1, ArchVReg(src));
         GetMasm()->shl(tmp1, 1);
@@ -2280,10 +2280,10 @@ void Amd64Encoder::EncodeIsInf(Reg dst, Reg src)
     } else {
         constexpr auto INF_MASK = uint64_t(0x7ff0000000000000) << 1U;
 
-        ScopedTmpRegU64 tmp_reg(this);
-        ScopedTmpRegU64 tmp1_reg(this);
-        auto tmp = ArchReg(tmp_reg);
-        auto tmp1 = ArchReg(tmp1_reg);
+        ScopedTmpRegU64 tmpReg(this);
+        ScopedTmpRegU64 tmp1Reg(this);
+        auto tmp = ArchReg(tmpReg);
+        auto tmp1 = ArchReg(tmp1Reg);
 
         GetMasm()->movq(tmp1, ArchVReg(src));
         GetMasm()->shl(tmp1, 1);
@@ -2328,13 +2328,13 @@ void Amd64Encoder::EncodeIsInteger(Reg dst, Reg src)
     ASSERT(dst.IsScalar() && src.IsFloat());
     ASSERT(src.GetType() == FLOAT32_TYPE || src.GetType() == FLOAT64_TYPE);
 
-    auto label_exit = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelExit = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     GetMasm()->xor_(ArchReg(dst, WORD_SIZE), ArchReg(dst, WORD_SIZE));
     EncodeCmpFracWithDelta(src);
-    GetMasm()->jp(*label_exit);  // Inf or NaN
+    GetMasm()->jp(*labelExit);  // Inf or NaN
     GetMasm()->set(ArchCc(Condition::LE, true), ArchReg(dst, BYTE_SIZE));
-    GetMasm()->bind(*label_exit);
+    GetMasm()->bind(*labelExit);
 }
 
 void Amd64Encoder::EncodeIsSafeInteger(Reg dst, Reg src)
@@ -2342,14 +2342,14 @@ void Amd64Encoder::EncodeIsSafeInteger(Reg dst, Reg src)
     ASSERT(dst.IsScalar() && src.IsFloat());
     ASSERT(src.GetType() == FLOAT32_TYPE || src.GetType() == FLOAT64_TYPE);
 
-    auto label_exit = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelExit = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     GetMasm()->xor_(ArchReg(dst, WORD_SIZE), ArchReg(dst, WORD_SIZE));
 
     // Check if IsInteger
     EncodeCmpFracWithDelta(src);
-    GetMasm()->jp(*label_exit);  // Inf or NaN
-    GetMasm()->j(ArchCc(Condition::GT, true), *label_exit);
+    GetMasm()->jp(*labelExit);  // Inf or NaN
+    GetMasm()->j(ArchCc(Condition::GT, true), *labelExit);
 
     // Check if it is safe, i.e. src can be represented in float/double without losing precision
     if (src.GetType() == FLOAT32_TYPE) {
@@ -2366,7 +2366,7 @@ void Amd64Encoder::EncodeIsSafeInteger(Reg dst, Reg src)
         GetMasm()->ucomisd(ArchVReg(tmp1), ArchVReg(tmp2));
     }
     GetMasm()->set(ArchCc(Condition::LE, true), ArchReg(dst, BYTE_SIZE));
-    GetMasm()->bind(*label_exit);
+    GetMasm()->bind(*labelExit);
 }
 
 /* Since NaNs have to be canonicalized we compare the
@@ -2433,7 +2433,7 @@ void Amd64Encoder::EncodeCompareAndSwap(Reg dst, Reg obj, const Reg *offset, Reg
     ScopedTmpRegU64 tmp3(this);
     Reg newvalue = newval;
     auto addr = ArchMem(MemRef(tmp2)).Prepare(GetMasm());
-    auto addr_reg = ArchReg(tmp2);
+    auto addrReg = ArchReg(tmp2);
     Reg rax(ConvertRegNumber(asmjit::x86::rax.id()), INT64_TYPE);
 
     /* NOTE(ayodkev) this is a workaround for the failure of
@@ -2445,9 +2445,9 @@ void Amd64Encoder::EncodeCompareAndSwap(Reg dst, Reg obj, const Reg *offset, Reg
     }
 
     if (offset != nullptr) {
-        GetMasm()->lea(addr_reg, asmjit::x86::ptr(ArchReg(obj), ArchReg(*offset)));
+        GetMasm()->lea(addrReg, asmjit::x86::ptr(ArchReg(obj), ArchReg(*offset)));
     } else {
-        GetMasm()->mov(addr_reg, ArchReg(obj));
+        GetMasm()->mov(addrReg, ArchReg(obj));
     }
 
     /* the [er]ax register will be overwritten by cmpxchg instruction
@@ -2478,9 +2478,9 @@ void Amd64Encoder::EncodeCompareAndSwap(Reg dst, Reg obj, const Reg *offset, Reg
 void Amd64Encoder::EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val)
 {
     ScopedTmpRegU64 tmp(this);
-    auto addr_reg = ArchReg(tmp);
+    auto addrReg = ArchReg(tmp);
     auto addr = ArchMem(MemRef(tmp)).Prepare(GetMasm());
-    GetMasm()->lea(addr_reg, asmjit::x86::ptr(ArchReg(obj), ArchReg(offset)));
+    GetMasm()->lea(addrReg, asmjit::x86::ptr(ArchReg(obj), ArchReg(offset)));
     GetMasm()->mov(ArchReg(dst), ArchReg(val));
     GetMasm()->lock().xchg(addr, ArchReg(dst));
 }
@@ -2488,9 +2488,9 @@ void Amd64Encoder::EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val)
 void Amd64Encoder::EncodeUnsafeGetAndAdd(Reg dst, Reg obj, Reg offset, Reg val, [[maybe_unused]] Reg tmp)
 {
     ScopedTmpRegU64 tmp1(this);
-    auto addr_reg = ArchReg(tmp1);
+    auto addrReg = ArchReg(tmp1);
     auto addr = ArchMem(MemRef(tmp1)).Prepare(GetMasm());
-    GetMasm()->lea(addr_reg, asmjit::x86::ptr(ArchReg(obj), ArchReg(offset)));
+    GetMasm()->lea(addrReg, asmjit::x86::ptr(ArchReg(obj), ArchReg(offset)));
     GetMasm()->mov(ArchReg(dst), ArchReg(val));
     GetMasm()->lock().xadd(addr, ArchReg(dst));
 }
@@ -2510,7 +2510,7 @@ void Amd64Encoder::EncodeStackOverflowCheck(ssize_t offset)
     GetMasm()->test(m, ArchReg(GetTarget().GetParamReg(0)));
 }
 
-void Amd64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, void *entry_point)
+void Amd64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, void *entryPoint)
 {
     if (!dst.IsFloat()) {
         SetFalseResult();
@@ -2530,7 +2530,7 @@ void Amd64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, void *entry_point)
             GetMasm()->movss(asmjit::x86::xmm1, ArchVReg(tmp));
         }
 
-        MakeCall(entry_point);
+        MakeCall(entryPoint);
 
         if (dst.GetId() != asmjit::x86::xmm0.id()) {
             GetMasm()->movss(ArchVReg(dst), asmjit::x86::xmm0);
@@ -2548,7 +2548,7 @@ void Amd64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, void *entry_point)
             GetMasm()->movsd(asmjit::x86::xmm1, ArchVReg(tmp));
         }
 
-        MakeCall(entry_point);
+        MakeCall(entryPoint);
 
         if (dst.GetId() != asmjit::x86::xmm0.id()) {
             GetMasm()->movsd(ArchVReg(dst), asmjit::x86::xmm0);
@@ -2559,23 +2559,23 @@ void Amd64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, void *entry_point)
 }
 
 template <bool IS_STORE>
-void Amd64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp)
+void Amd64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp)
 {
     for (size_t i {0}; i < registers.size(); ++i) {
         if (!registers.test(i)) {
             continue;
         }
 
-        asmjit::x86::Mem mem = asmjit::x86::ptr(asmjit::x86::rsp, (slot + i - start_reg) * DOUBLE_WORD_SIZE_BYTES);
+        asmjit::x86::Mem mem = asmjit::x86::ptr(asmjit::x86::rsp, (slot + i - startReg) * DOUBLE_WORD_SIZE_BYTES);
 
         if constexpr (IS_STORE) {  // NOLINT
-            if (is_fp) {
+            if (isFp) {
                 GetMasm()->movsd(mem, asmjit::x86::xmm(i));
             } else {
                 GetMasm()->mov(mem, asmjit::x86::gpq(ConvertRegNumber(i)));
             }
         } else {  // NOLINT
-            if (is_fp) {
+            if (isFp) {
                 GetMasm()->movsd(asmjit::x86::xmm(i), mem);
             } else {
                 GetMasm()->mov(asmjit::x86::gpq(ConvertRegNumber(i)), mem);
@@ -2585,14 +2585,14 @@ void Amd64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t st
 }
 
 template <bool IS_STORE>
-void Amd64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+void Amd64Encoder::LoadStoreRegisters(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask)
 {
-    auto base_reg = ArchReg(base);
-    bool has_mask = mask.any();
-    int32_t index = has_mask ? static_cast<int32_t>(mask.GetMinRegister()) : 0;
+    auto baseReg = ArchReg(base);
+    bool hasMask = mask.any();
+    int32_t index = hasMask ? static_cast<int32_t>(mask.GetMinRegister()) : 0;
     slot -= index;
     for (size_t i = index; i < registers.size(); ++i) {
-        if (has_mask) {
+        if (hasMask) {
             if (!mask.test(i)) {
                 continue;
             }
@@ -2602,21 +2602,21 @@ void Amd64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slo
             continue;
         }
 
-        if (!has_mask) {
+        if (!hasMask) {
             index++;
         }
 
         // `-1` because we've incremented `index` in advance
-        asmjit::x86::Mem mem = asmjit::x86::ptr(base_reg, (slot + index - 1) * DOUBLE_WORD_SIZE_BYTES);
+        asmjit::x86::Mem mem = asmjit::x86::ptr(baseReg, (slot + index - 1) * DOUBLE_WORD_SIZE_BYTES);
 
         if constexpr (IS_STORE) {  // NOLINT
-            if (is_fp) {
+            if (isFp) {
                 GetMasm()->movsd(mem, asmjit::x86::xmm(i));
             } else {
                 GetMasm()->mov(mem, asmjit::x86::gpq(ConvertRegNumber(i)));
             }
         } else {  // NOLINT
-            if (is_fp) {
+            if (isFp) {
                 GetMasm()->movsd(asmjit::x86::xmm(i), mem);
             } else {
                 GetMasm()->mov(asmjit::x86::gpq(ConvertRegNumber(i)), mem);
@@ -2625,11 +2625,11 @@ void Amd64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slo
     }
 }
 
-void Amd64Encoder::PushRegisters(RegMask registers, bool is_fp)
+void Amd64Encoder::PushRegisters(RegMask registers, bool isFp)
 {
     for (size_t i = 0; i < registers.size(); i++) {
         if (registers[i]) {
-            if (is_fp) {
+            if (isFp) {
                 GetMasm()->sub(asmjit::x86::rsp, DOUBLE_WORD_SIZE_BYTES);
                 GetMasm()->movsd(asmjit::x86::ptr(asmjit::x86::rsp), ArchVReg(Reg(i, FLOAT64_TYPE)));
             } else {
@@ -2639,11 +2639,11 @@ void Amd64Encoder::PushRegisters(RegMask registers, bool is_fp)
     }
 }
 
-void Amd64Encoder::PopRegisters(RegMask registers, bool is_fp)
+void Amd64Encoder::PopRegisters(RegMask registers, bool isFp)
 {
     for (ssize_t i = registers.size() - 1; i >= 0; i--) {
         if (registers[i]) {
-            if (is_fp) {
+            if (isFp) {
                 GetMasm()->movsd(ArchVReg(Reg(i, FLOAT64_TYPE)), asmjit::x86::ptr(asmjit::x86::rsp));
                 GetMasm()->add(asmjit::x86::rsp, DOUBLE_WORD_SIZE_BYTES);
             } else {
@@ -2662,17 +2662,17 @@ void Amd64Encoder::CopyArrayToXmm(Reg xmm, const std::array<T, N> &arr)
 
     auto data {reinterpret_cast<const uint64_t *>(arr.data())};
 
-    ScopedTmpRegU64 tmp_gpr(this);
+    ScopedTmpRegU64 tmpGpr(this);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    GetMasm()->mov(ArchReg(tmp_gpr), asmjit::imm(data[0]));
-    GetMasm()->movq(ArchVReg(xmm), ArchReg(tmp_gpr));
+    GetMasm()->mov(ArchReg(tmpGpr), asmjit::imm(data[0]));
+    GetMasm()->movq(ArchVReg(xmm), ArchReg(tmpGpr));
 
     if constexpr (SIZE == 2U * DOUBLE_WORD_SIZE_BYTES) {
-        ScopedTmpRegF64 tmp_xmm(this);
+        ScopedTmpRegF64 tmpXmm(this);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        GetMasm()->mov(ArchReg(tmp_gpr), asmjit::imm(data[1]));
-        GetMasm()->movq(ArchVReg(tmp_xmm), ArchReg(tmp_gpr));
-        GetMasm()->unpcklpd(ArchVReg(xmm), ArchVReg(tmp_xmm));
+        GetMasm()->mov(ArchReg(tmpGpr), asmjit::imm(data[1]));
+        GetMasm()->movq(ArchVReg(tmpXmm), ArchReg(tmpGpr));
+        GetMasm()->unpcklpd(ArchVReg(xmm), ArchVReg(tmpXmm));
     }
 }
 
@@ -2683,25 +2683,25 @@ void Amd64Encoder::CopyImmToXmm(Reg xmm, T imm)
     ASSERT(xmm.GetSize() == BYTE_SIZE * sizeof(imm));
 
     if constexpr (sizeof(imm) == WORD_SIZE_BYTES) {  // NOLINT
-        ScopedTmpRegU32 tmp_gpr(this);
-        GetMasm()->mov(ArchReg(tmp_gpr), asmjit::imm(bit_cast<uint32_t>(imm)));
-        GetMasm()->movd(ArchVReg(xmm), ArchReg(tmp_gpr));
+        ScopedTmpRegU32 tmpGpr(this);
+        GetMasm()->mov(ArchReg(tmpGpr), asmjit::imm(bit_cast<uint32_t>(imm)));
+        GetMasm()->movd(ArchVReg(xmm), ArchReg(tmpGpr));
     } else {  // NOLINT
-        ScopedTmpRegU64 tmp_gpr(this);
-        GetMasm()->mov(ArchReg(tmp_gpr), asmjit::imm(bit_cast<uint64_t>(imm)));
-        GetMasm()->movq(ArchVReg(xmm), ArchReg(tmp_gpr));
+        ScopedTmpRegU64 tmpGpr(this);
+        GetMasm()->mov(ArchReg(tmpGpr), asmjit::imm(bit_cast<uint64_t>(imm)));
+        GetMasm()->movq(ArchVReg(xmm), ArchReg(tmpGpr));
     }
 }
 
-size_t Amd64Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t code_offset) const
+size_t Amd64Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t codeOffset) const
 {
-    if (code_offset < 0) {
+    if (codeOffset < 0) {
         (const_cast<Amd64Encoder *>(this))->Finalize();
     }
     // NOLINTNEXTLINE(readability-identifier-naming)
     Span code(GetMasm()->bufferData(), GetMasm()->offset());
 
-    [[maybe_unused]] size_t data_left = code.Size() - pc;
+    [[maybe_unused]] size_t dataLeft = code.Size() - pc;
     [[maybe_unused]] constexpr size_t LENGTH = ZYDIS_MAX_INSTRUCTION_LENGTH;  // 15 bytes is max inst length in amd64
 
     // Initialize decoder context
@@ -2717,7 +2717,7 @@ size_t Amd64Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t code_o
 
     ZydisDecodedInstruction instruction;
 
-    res &= ZYAN_SUCCESS(ZydisDecoderDecodeBuffer(&decoder, &code[pc], std::min(LENGTH, data_left), &instruction));
+    res &= ZYAN_SUCCESS(ZydisDecoderDecodeBuffer(&decoder, &code[pc], std::min(LENGTH, dataLeft), &instruction));
 
     // Format & print the binary instruction structure to human readable format
     char buffer[256];  // NOLINT (modernize-avoid-c-arrays, readability-identifier-naming, readability-magic-numbers)
@@ -2727,10 +2727,10 @@ size_t Amd64Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t code_o
     ASSERT(res);
 
     // Print disassembly
-    if (code_offset < 0) {
+    if (codeOffset < 0) {
         stream << buffer;
     } else {
-        stream << std::setw(0x8) << std::right << std::setfill('0') << std::hex << pc + code_offset << std::dec
+        stream << std::setw(0x8) << std::right << std::setfill('0') << std::hex << pc + codeOffset << std::dec
                << std::setfill(' ') << ": " << buffer;
     }
 

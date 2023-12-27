@@ -38,9 +38,9 @@ std::string ProfileOptimizer::GetNameInfo(const std::unique_ptr<BaseItem> &item)
     return identity;
 }
 
-void ProfileOptimizer::MarkProfileItem(std::unique_ptr<BaseItem> &item, bool set_pgo) const
+void ProfileOptimizer::MarkProfileItem(std::unique_ptr<BaseItem> &item, bool setPgo) const
 {
-    auto inc = static_cast<uint32_t>(set_pgo);
+    auto inc = static_cast<uint32_t>(setPgo);
     if (item->GetName() == CLASS_ITEM) {
         item->SetPGORank(PGO_CLASS_DEFAULT_COUNT + inc);
     } else if (item->GetName() == STRING_ITEM) {
@@ -55,23 +55,23 @@ void ProfileOptimizer::MarkProfileItem(std::unique_ptr<BaseItem> &item, bool set
 bool ProfileOptimizer::ParseProfileData()
 {
     std::ifstream file;
-    file.open(profile_file_path_, std::ios::in);
+    file.open(profileFilePath_, std::ios::in);
     if (!file.is_open()) {
-        LOG(ERROR, PANDAFILE) << "failed to open pgo files: " << profile_file_path_;
+        LOG(ERROR, PANDAFILE) << "failed to open pgo files: " << profileFilePath_;
         return false;
     }
-    std::string str_line;
-    while (std::getline(file, str_line)) {
-        if (str_line.empty()) {
+    std::string strLine;
+    while (std::getline(file, strLine)) {
+        if (strLine.empty()) {
             continue;
         }
-        auto comma_pos = str_line.find(':');
-        if (comma_pos == std::string::npos) {
+        auto commaPos = strLine.find(':');
+        if (commaPos == std::string::npos) {
             continue;
         }
-        auto item_type = str_line.substr(0, comma_pos);
-        auto str = str_line.substr(comma_pos + 1);
-        profile_data_.emplace_back(item_type, str);
+        auto itemType = strLine.substr(0, commaPos);
+        auto str = strLine.substr(commaPos + 1);
+        profileData_.emplace_back(itemType, str);
     }
 
     return true;
@@ -93,14 +93,14 @@ static bool Cmp(const std::unique_ptr<BaseItem> &item1, const std::unique_ptr<Ba
 void ProfileOptimizer::ProfileGuidedRelayout(std::list<std::unique_ptr<BaseItem>> &items)
 {
     ParseProfileData();
-    uint32_t original_rank = 0;
+    uint32_t originalRank = 0;
     for (auto &item : items) {
-        item->SetOriginalRank(original_rank++);
+        item->SetOriginalRank(originalRank++);
         if (!item->NeedsEmit()) {
             continue;
         }
-        auto type_name = item->GetName();
-        if (type_name != CLASS_ITEM && type_name != STRING_ITEM && type_name != CODE_ITEM) {
+        auto typeName = item->GetName();
+        if (typeName != CLASS_ITEM && typeName != STRING_ITEM && typeName != CODE_ITEM) {
             continue;
         }
 
@@ -114,10 +114,10 @@ void ProfileOptimizer::ProfileGuidedRelayout(std::list<std::unique_ptr<BaseItem>
                 return p.second == GetNameInfo(item);
             }
             // CodeItem can be shared between multiple methods, so we need to check all these methods
-            auto method_names = static_cast<CodeItem *>(item.get())->GetMethodNames();
-            return std::find(method_names.begin(), method_names.end(), p.second) != method_names.end();
+            auto methodNames = static_cast<CodeItem *>(item.get())->GetMethodNames();
+            return std::find(methodNames.begin(), methodNames.end(), p.second) != methodNames.end();
         };
-        if (std::find_if(profile_data_.begin(), profile_data_.end(), finder) != profile_data_.end()) {
+        if (std::find_if(profileData_.begin(), profileData_.end(), finder) != profileData_.end()) {
             MarkProfileItem(item, true);
         }
     }

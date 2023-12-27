@@ -342,10 +342,10 @@ TEST_F(CommonTest, RegEncoderStoreObject)
 // Check processing instructions with the same args by RegEncoder.
 TEST_F(CommonTest, RegEncoderSameArgsInst)
 {
-    auto src_graph = CreateEmptyGraph();
-    ArenaVector<bool> reg_mask(254U, false, src_graph->GetLocalAllocator()->Adapter());
-    src_graph->InitUsedRegs<compiler::DataType::INT64>(&reg_mask);
-    GRAPH(src_graph)
+    auto srcGraph = CreateEmptyGraph();
+    ArenaVector<bool> regMask(254U, false, srcGraph->GetLocalAllocator()->Adapter());
+    srcGraph->InitUsedRegs<compiler::DataType::INT64>(&regMask);
+    GRAPH(srcGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -357,11 +357,11 @@ TEST_F(CommonTest, RegEncoderSameArgsInst)
         }
     }
 
-    src_graph->RunPass<RegEncoder>();
+    srcGraph->RunPass<RegEncoder>();
 
-    auto opt_graph = CreateEmptyGraph();
-    opt_graph->InitUsedRegs<compiler::DataType::INT64>(&reg_mask);
-    GRAPH(opt_graph)
+    auto optGraph = CreateEmptyGraph();
+    optGraph->InitUsedRegs<compiler::DataType::INT64>(&regMask);
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -374,9 +374,9 @@ TEST_F(CommonTest, RegEncoderSameArgsInst)
         }
     }
 
-    ASSERT_TRUE(GraphComparator().Compare(src_graph, opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(srcGraph, optGraph));
 
-    for (auto bb : src_graph->GetBlocksRPO()) {
+    for (auto bb : srcGraph->GetBlocksRPO()) {
         for (auto inst : bb->AllInstsSafe()) {
             if (inst->GetOpcode() == Opcode::StoreArray) {
                 ASSERT_TRUE(inst->GetSrcReg(0U) == inst->GetSrcReg(1U));

@@ -24,36 +24,36 @@ namespace panda::tooling {
 class PtHookTypeInfo {
 public:
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-    explicit PtHookTypeInfo(bool defalut_value)
+    explicit PtHookTypeInfo(bool defalutValue)
     {
-        for (auto &v : is_enabled_) {
-            v = defalut_value;
+        for (auto &v : isEnabled_) {
+            v = defalutValue;
         }
     }
 
     bool IsEnabled(const PtHookType type) const
     {
-        return is_enabled_.at(ToIndex(type));
+        return isEnabled_.at(ToIndex(type));
     }
 
     void Enable(const PtHookType type)
     {
-        is_enabled_[ToIndex(type)] = true;
+        isEnabled_[ToIndex(type)] = true;
     }
 
     void Disable(const PtHookType type)
     {
-        is_enabled_[ToIndex(type)] = false;
+        isEnabled_[ToIndex(type)] = false;
     }
 
     void EnableAll()
     {
-        is_enabled_.fill(true);
+        isEnabled_.fill(true);
     }
 
     void DisableAll()
     {
-        is_enabled_.fill(false);
+        isEnabled_.fill(false);
     }
 
     ~PtHookTypeInfo() = default;
@@ -69,7 +69,7 @@ private:
     }
 
     static constexpr size_t HOOKS_COUNT = static_cast<size_t>(PtHookType::PT_HOOK_TYPE_COUNT);
-    std::array<bool, HOOKS_COUNT> is_enabled_;
+    std::array<bool, HOOKS_COUNT> isEnabled_;
 };
 }  // namespace panda::tooling
 

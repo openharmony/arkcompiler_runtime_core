@@ -48,7 +48,7 @@ public:
 
     bool IsApplied() const
     {
-        return is_applied_;
+        return isApplied_;
     }
 
     void InvalidateAnalyses() override;
@@ -110,21 +110,21 @@ public:
 #include "optimizer/ir/visitor.inc"
 
 private:
-    void SetIsApplied(Inst *inst, bool alt_format = false, const char *file = nullptr, int line = 0)
+    void SetIsApplied(Inst *inst, bool altFormat = false, const char *file = nullptr, int line = 0)
     {
-        is_applied_ = true;
-        if (alt_format) {
+        isApplied_ = true;
+        if (altFormat) {
             COMPILER_LOG(DEBUG, PEEPHOLE) << "Peephole (" << file << ":" << line << ") is applied for " << *inst;
         } else {
             COMPILER_LOG(DEBUG, PEEPHOLE) << "Peephole is applied for " << GetOpcodeString(inst->GetOpcode());
         }
         inst->GetBasicBlock()->GetGraph()->GetEventWriter().EventPeephole(GetOpcodeString(inst->GetOpcode()),
                                                                           inst->GetId(), inst->GetPc());
-        if (OPTIONS.IsCompilerDumpPeepholes()) {
+        if (g_options.IsCompilerDumpPeepholes()) {
             std::string name(GetPassName());
-            name += "_" + std::to_string(apply_index_);
+            name += "_" + std::to_string(applyIndex_);
             GetGraph()->GetPassManager()->DumpGraph(name.c_str());
-            apply_index_++;
+            applyIndex_++;
         }
     }
 
@@ -136,7 +136,7 @@ private:
     static int64_t GetPowerOfTwo(uint64_t n);
 
     // Create new instruction instead of current inst
-    static Inst *CreateAndInsertInst(Opcode new_opc, Inst *curr_inst, Inst *input0, Inst *input1 = nullptr);
+    static Inst *CreateAndInsertInst(Opcode newOpc, Inst *currInst, Inst *input0, Inst *input1 = nullptr);
 
     // Try put constant in second input
     void TrySwapInputs(Inst *inst);
@@ -154,34 +154,34 @@ private:
     bool TrySimplifyShlShlAdd(Inst *inst);
     bool TryReassociateShlShlAddSub(Inst *inst);
     void TrySimplifyNeg(Inst *inst);
-    void TryReplaceDivByShrAndAshr(Inst *inst, uint64_t unsigned_val, Inst *input0);
+    void TryReplaceDivByShrAndAshr(Inst *inst, uint64_t unsignedVal, Inst *input0);
     void TryReplaceDivByShift(Inst *inst);
     bool TrySimplifyCompareCaseInputInv(Inst *inst, Inst *input);
-    bool TrySimplifyCompareWithBoolInput(Inst *inst, bool *is_osr_blocked);
-    bool TrySimplifyCmpCompareWithZero(Inst *inst, bool *is_osr_blocked);
+    bool TrySimplifyCompareWithBoolInput(Inst *inst, bool *isOsrBlocked);
+    bool TrySimplifyCmpCompareWithZero(Inst *inst, bool *isOsrBlocked);
     bool TrySimplifyTestEqualInputs(Inst *inst);
     void TryRemoveOverflowCheck(Inst *inst);
-    static bool TrySimplifyCompareAndZero(Inst *inst, bool *is_osr_blocked);
+    static bool TrySimplifyCompareAndZero(Inst *inst, bool *isOsrBlocked);
     static bool TrySimplifyCompareAnyType(Inst *inst);
     static bool TrySimplifyCompareAnyTypeCase1(Inst *inst, Inst *input0, Inst *input1);
     static bool TrySimplifyCompareAnyTypeCase2(Inst *inst, Inst *input0, Inst *input1);
     static bool TrySimplifyCompareLenArrayWithZero(Inst *inst);
     // Try to combine constants when arithmetic operations with constants are repeated
     template <typename T>
-    static bool TryCombineConst(Inst *inst, ConstantInst *cnst1, T combine, bool *is_osr_blocked);
-    static bool TryCombineAddSubConst(Inst *inst, ConstantInst *cnst1, bool *is_osr_blocked);
-    static bool TryCombineShiftConst(Inst *inst, ConstantInst *cnst1, bool *is_osr_blocked);
-    static bool TryCombineMulConst(Inst *inst, ConstantInst *cnst1, bool *is_osr_blocked);
+    static bool TryCombineConst(Inst *inst, ConstantInst *cnst1, T combine, bool *isOsrBlocked);
+    static bool TryCombineAddSubConst(Inst *inst, ConstantInst *cnst1, bool *isOsrBlocked);
+    static bool TryCombineShiftConst(Inst *inst, ConstantInst *cnst1, bool *isOsrBlocked);
+    static bool TryCombineMulConst(Inst *inst, ConstantInst *cnst1, bool *isOsrBlocked);
 
-    static bool GetInputsOfCompareWithConst(const Inst *inst, Inst **input, ConstantInst **const_input,
-                                            bool *inputs_swapped);
+    static bool GetInputsOfCompareWithConst(const Inst *inst, Inst **input, ConstantInst **constInput,
+                                            bool *inputsSwapped);
 
-    static bool CreateCompareInsteadOfXorAdd(Inst *old_inst);
+    static bool CreateCompareInsteadOfXorAdd(Inst *oldInst);
 
-    bool OptimizeLenArrayForMultiArray(Inst *len_array, Inst *inst, size_t index_size);
+    bool OptimizeLenArrayForMultiArray(Inst *lenArray, Inst *inst, size_t indexSize);
     static bool TryEliminatePhi(PhiInst *phi);
     // It is check can we use this peephole in OSR or not
-    static bool SkipThisPeepholeInOSR(Inst *inst, Inst *new_input);
+    static bool SkipThisPeepholeInOSR(Inst *inst, Inst *newInput);
 
     // Table for eliminating 'Compare <CC> <INPUT>, <CONST>'
     enum InputCode {
@@ -229,9 +229,9 @@ private:
 
 private:
     // Each peephole application has own unique index, it will be used in peepholes dumps
-    uint32_t apply_index_ {0};
+    uint32_t applyIndex_ {0};
 
-    bool is_applied_ {false};
+    bool isApplied_ {false};
 };
 }  // namespace panda::compiler
 

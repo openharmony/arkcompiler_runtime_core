@@ -58,8 +58,8 @@ TEST_F(AdjustRefsTest, OneBlockContinuousChain)
         }
     }
 
-    Graph *graph_et = CreateEmptyFastpathGraph(RUNTIME_ARCH);
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -91,7 +91,7 @@ TEST_F(AdjustRefsTest, OneBlockContinuousChain)
     ASSERT_TRUE(graph->RunPass<AdjustRefs>());
 
     GraphChecker(graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphEt));
 }
 
 /* One block, broken chain */
@@ -129,8 +129,8 @@ TEST_F(AdjustRefsTest, OneBlockBrokenChain)
         }
     }
 
-    Graph *graph_et = CreateEmptyFastpathGraph(RUNTIME_ARCH);
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -167,7 +167,7 @@ TEST_F(AdjustRefsTest, OneBlockBrokenChain)
     ASSERT_TRUE(graph->RunPass<AdjustRefs>());
 
     GraphChecker(graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphEt));
 }
 
 /* one head, the chain spans across multiple blocks, not broken */
@@ -214,8 +214,8 @@ TEST_F(AdjustRefsTest, MultipleBlockContinuousChain)
         }
     }
 
-    Graph *graph_et = CreateEmptyFastpathGraph(RUNTIME_ARCH);
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -255,7 +255,7 @@ TEST_F(AdjustRefsTest, MultipleBlockContinuousChain)
     ASSERT_TRUE(graph->RunPass<AdjustRefs>());
 
     GraphChecker(graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphEt));
 }
 
 /* one head, the chain spans across multiple blocks,
@@ -304,8 +304,8 @@ TEST_F(AdjustRefsTest, MultipleBlockBrokenChain)
         }
     }
 
-    Graph *graph_et = CreateEmptyFastpathGraph(RUNTIME_ARCH);
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -346,7 +346,7 @@ TEST_F(AdjustRefsTest, MultipleBlockBrokenChain)
     ASSERT_TRUE(graph->RunPass<AdjustRefs>());
 
     GraphChecker(graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphEt));
 }
 
 TEST_F(AdjustRefsTest, ProcessIndex)
@@ -377,12 +377,12 @@ TEST_F(AdjustRefsTest, ProcessIndex)
         }
     }
 
-    Graph *graph_et = CreateEmptyFastpathGraph(RUNTIME_ARCH);
-    auto arr_data = graph->GetRuntime()->GetArrayDataOffset(graph->GetArch());
-    uint64_t new_offset1 = arr_data + (offset1 << 3U);
-    uint64_t new_offset2 = arr_data - (offset2 << 0U);
-    uint64_t new_offset3 = (offset3 << 2U) - arr_data;
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
+    auto arrData = graph->GetRuntime()->GetArrayDataOffset(graph->GetArch());
+    uint64_t newOffset1 = arrData + (offset1 << 3U);
+    uint64_t newOffset2 = arrData - (offset2 << 0U);
+    uint64_t newOffset3 = (offset3 << 2U) - arrData;
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).i32();
@@ -391,11 +391,11 @@ TEST_F(AdjustRefsTest, ProcessIndex)
         PARAMETER(4U, 4U).u32();
         BASIC_BLOCK(3U, 1U)
         {
-            INST(56U, Opcode::AddI).ptr().Inputs(0U).Imm(new_offset1);
+            INST(56U, Opcode::AddI).ptr().Inputs(0U).Imm(newOffset1);
             INST(57U, Opcode::Store).u64().Inputs(56U, 1U, 2U);
-            INST(58U, Opcode::AddI).ptr().Inputs(0U).Imm(new_offset2);
+            INST(58U, Opcode::AddI).ptr().Inputs(0U).Imm(newOffset2);
             INST(59U, Opcode::Store).u8().Inputs(58U, 1U, 3U);
-            INST(60U, Opcode::SubI).ptr().Inputs(0U).Imm(new_offset3);
+            INST(60U, Opcode::SubI).ptr().Inputs(0U).Imm(newOffset3);
             INST(61U, Opcode::Store).u32().Inputs(60U, 1U, 4U);
             INST(100U, Opcode::ReturnVoid);
         }
@@ -405,7 +405,7 @@ TEST_F(AdjustRefsTest, ProcessIndex)
     ASSERT_TRUE(graph->RunPass<Cleanup>());
 
     GraphChecker(graph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphEt));
 }
 
 // BB 4 dominates BB 9, but there is SafePoint in BB 6 and reference cannot be adjusted

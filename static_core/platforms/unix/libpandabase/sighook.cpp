@@ -88,14 +88,14 @@ public:
 
     bool IsHook()
     {
-        return is_hook_;
+        return isHook_;
     }
 
     void HookSig(int signo)
     {
-        if (!is_hook_) {
+        if (!isHook_) {
             RegisterAction(signo);
-            is_hook_ = true;
+            isHook_ = true;
         }
     }
 
@@ -112,14 +112,14 @@ public:
         // SA_ONSTACK-: call signal handler on the same stack
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
         handler_action.sa_flags = SA_RESTART | SA_SIGINFO | SA_NODEFER;
-        REAL_SIGACTION(signo, nullptr, &old_action_);
-        REAL_SIGACTION(signo, &handler_action, &user_action_);
+        REAL_SIGACTION(signo, nullptr, &oldAction_);
+        REAL_SIGACTION(signo, &handler_action, &userAction_);
     }
 
     void RegisterHookAction(const SighookAction *sa)
     {
-        for (SighookAction &handler : hook_action_handlers_) {
-            if (handler.sc_sigaction == nullptr) {
+        for (SighookAction &handler : hookActionHandlers_) {
+            if (handler.scSigaction == nullptr) {
                 handler = *sa;
                 return;
             }
@@ -127,52 +127,52 @@ public:
         LOG(FATAL, RUNTIME) << "failed to Register Hook Action, too much handlers";
     }
 
-    void RegisterUserAction(const struct sigaction *new_action)
+    void RegisterUserAction(const struct sigaction *newAction)
     {
-        user_action_register_ = true;
-        if constexpr (std::is_same_v<decltype(user_action_), struct sigaction>) {
-            user_action_ = *new_action;
+        userActionRegister_ = true;
+        if constexpr (std::is_same_v<decltype(userAction_), struct sigaction>) {
+            userAction_ = *newAction;
         } else {
-            user_action_.sa_flags = new_action->sa_flags;      // NOLINT
-            user_action_.sa_handler = new_action->sa_handler;  // NOLINT
+            userAction_.sa_flags = newAction->sa_flags;      // NOLINT
+            userAction_.sa_handler = newAction->sa_handler;  // NOLINT
 #if defined(SA_RESTORER)
-            user_action_.sa_restorer = new_action->sa_restorer;  // NOLINT
+            userAction_.sa_restorer = newAction->sa_restorer;  // NOLINT
 #endif
-            sigemptyset(&user_action_.sa_mask);
-            memcpy_s(&user_action_.sa_mask, sizeof(user_action_.sa_mask), &new_action->sa_mask,
-                     std::min(sizeof(user_action_.sa_mask), sizeof(new_action->sa_mask)));
+            sigemptyset(&userAction_.sa_mask);
+            memcpy_s(&userAction_.sa_mask, sizeof(userAction_.sa_mask), &newAction->sa_mask,
+                     std::min(sizeof(userAction_.sa_mask), sizeof(newAction->sa_mask)));
         }
     }
 
     struct sigaction GetUserAction()
     {
-        if constexpr (std::is_same_v<decltype(user_action_), struct sigaction>) {
-            return user_action_;
+        if constexpr (std::is_same_v<decltype(userAction_), struct sigaction>) {
+            return userAction_;
         } else {
             struct sigaction result {};
-            result.sa_flags = user_action_.sa_flags;      // NOLINT
-            result.sa_handler = user_action_.sa_handler;  // NOLINT
+            result.sa_flags = userAction_.sa_flags;      // NOLINT
+            result.sa_handler = userAction_.sa_handler;  // NOLINT
 #if defined(SA_RESTORER)
-            result.sa_restorer = user_action_.sa_restorer;
+            result.sa_restorer = userAction_.sa_restorer;
 #endif
-            memcpy_s(&result.sa_mask, sizeof(result.sa_mask), &user_action_.sa_mask,
-                     std::min(sizeof(user_action_.sa_mask), sizeof(result.sa_mask)));
+            memcpy_s(&result.sa_mask, sizeof(result.sa_mask), &userAction_.sa_mask,
+                     std::min(sizeof(userAction_.sa_mask), sizeof(result.sa_mask)));
             return result;
         }
     }
 
-    static void Handler(int signo, siginfo_t *siginfo, void *ucontext_raw);
-    static void CallOldAction(int signo, siginfo_t *siginfo, void *ucontext_raw);
+    static void Handler(int signo, siginfo_t *siginfo, void *ucontextRaw);
+    static void CallOldAction(int signo, siginfo_t *siginfo, void *ucontextRaw);
 
     void RemoveHookAction(bool (*action)(int, siginfo_t *, void *))
     {
         // no thread safe
         for (size_t i = 0; i < HOOK_LENGTH; ++i) {
-            if (hook_action_handlers_[i].sc_sigaction == action) {
+            if (hookActionHandlers_[i].scSigaction == action) {
                 for (size_t j = i; j < HOOK_LENGTH - 1; ++j) {
-                    hook_action_handlers_[j] = hook_action_handlers_[j + 1];
+                    hookActionHandlers_[j] = hookActionHandlers_[j + 1];
                 }
-                hook_action_handlers_[HOOK_LENGTH - 1].sc_sigaction = nullptr;
+                hookActionHandlers_[HOOK_LENGTH - 1].scSigaction = nullptr;
                 return;
             }
         }
@@ -181,111 +181,111 @@ public:
 
     bool IsUserActionRegister()
     {
-        return user_action_register_;
+        return userActionRegister_;
     }
 
     void ClearHookActionHandlers()
     {
-        for (SighookAction &handler : hook_action_handlers_) {
-            handler.sc_sigaction = nullptr;
+        for (SighookAction &handler : hookActionHandlers_) {
+            handler.scSigaction = nullptr;
         }
     }
 
 private:
-    static bool SetHandlingSignal(int signo, siginfo_t *siginfo, void *ucontext_raw);
+    static bool SetHandlingSignal(int signo, siginfo_t *siginfo, void *ucontextRaw);
 
     constexpr static const int HOOK_LENGTH = 2;
-    bool is_hook_ {false};
-    std::array<SighookAction, HOOK_LENGTH> hook_action_handlers_ {};
-    struct sigaction user_action_ {};
-    struct sigaction old_action_ = {};
-    bool user_action_register_ {false};
+    bool isHook_ {false};
+    std::array<SighookAction, HOOK_LENGTH> hookActionHandlers_ {};
+    struct sigaction userAction_ {};
+    struct sigaction oldAction_ = {};
+    bool userActionRegister_ {false};
 };
 
 static std::array<SignalHook, _NSIG + 1> SIGNAL_HOOKS;
 
-void SignalHook::CallOldAction(int signo, siginfo_t *siginfo, void *ucontext_raw)
+void SignalHook::CallOldAction(int signo, siginfo_t *siginfo, void *ucontextRaw)
 {
-    auto handler_flags = static_cast<size_t>(SIGNAL_HOOKS[signo].old_action_.sa_flags);
-    sigset_t mask = SIGNAL_HOOKS[signo].old_action_.sa_mask;
+    auto handlerFlags = static_cast<size_t>(SIGNAL_HOOKS[signo].oldAction_.sa_flags);
+    sigset_t mask = SIGNAL_HOOKS[signo].oldAction_.sa_mask;
     REAL_SIGPROCMASK(SIG_SETMASK, &mask, nullptr);
 
-    if ((handler_flags & SA_SIGINFO)) {                                              // NOLINT
-        SIGNAL_HOOKS[signo].old_action_.sa_sigaction(signo, siginfo, ucontext_raw);  // NOLINT
+    if ((handlerFlags & SA_SIGINFO)) {                                             // NOLINT
+        SIGNAL_HOOKS[signo].oldAction_.sa_sigaction(signo, siginfo, ucontextRaw);  // NOLINT
     } else {
-        if (SIGNAL_HOOKS[signo].old_action_.sa_handler == nullptr) {  // NOLINT
-            REAL_SIGACTION(signo, &SIGNAL_HOOKS[signo].old_action_, nullptr);
+        if (SIGNAL_HOOKS[signo].oldAction_.sa_handler == nullptr) {  // NOLINT
+            REAL_SIGACTION(signo, &SIGNAL_HOOKS[signo].oldAction_, nullptr);
             kill(getpid(), signo);  // send signal again
             return;
         }
-        SIGNAL_HOOKS[signo].old_action_.sa_handler(signo);  // NOLINT
+        SIGNAL_HOOKS[signo].oldAction_.sa_handler(signo);  // NOLINT
     }
 }
 
-bool SignalHook::SetHandlingSignal(int signo, siginfo_t *siginfo, void *ucontext_raw)
+bool SignalHook::SetHandlingSignal(int signo, siginfo_t *siginfo, void *ucontextRaw)
 {
-    for (const auto &handler : SIGNAL_HOOKS[signo].hook_action_handlers_) {
-        if (handler.sc_sigaction == nullptr) {
+    for (const auto &handler : SIGNAL_HOOKS[signo].hookActionHandlers_) {
+        if (handler.scSigaction == nullptr) {
             break;
         }
 
-        bool handler_noreturn = ((handler.sc_flags & SIGHOOK_ALLOW_NORETURN) != 0);
-        sigset_t previous_mask;
-        REAL_SIGPROCMASK(SIG_SETMASK, &handler.sc_mask, &previous_mask);
+        bool handler_noreturn = ((handler.scFlags & SIGHOOK_ALLOW_NORETURN) != 0);
+        sigset_t previousMask;
+        REAL_SIGPROCMASK(SIG_SETMASK, &handler.scMask, &previousMask);
 
         bool old_handle_key = GetHandlingSignal();
         if (!handler_noreturn) {
             ::panda::SetHandlingSignal(true);
         }
-        if (handler.sc_sigaction(signo, siginfo, ucontext_raw)) {
+        if (handler.scSigaction(signo, siginfo, ucontextRaw)) {
             ::panda::SetHandlingSignal(old_handle_key);
             return false;
         }
 
-        REAL_SIGPROCMASK(SIG_SETMASK, &previous_mask, nullptr);
+        REAL_SIGPROCMASK(SIG_SETMASK, &previousMask, nullptr);
         ::panda::SetHandlingSignal(old_handle_key);
     }
 
     return true;
 }
 
-void SignalHook::Handler(int signo, siginfo_t *siginfo, void *ucontext_raw)
+void SignalHook::Handler(int signo, siginfo_t *siginfo, void *ucontextRaw)
 {
     if (!GetHandlingSignal()) {
-        if (!SetHandlingSignal(signo, siginfo, ucontext_raw)) {
+        if (!SetHandlingSignal(signo, siginfo, ucontextRaw)) {
             return;
         }
     }
 
     // if not set user handler,call linker handler
     if (!SIGNAL_HOOKS[signo].IsUserActionRegister()) {
-        CallOldAction(signo, siginfo, ucontext_raw);
+        CallOldAction(signo, siginfo, ucontextRaw);
         return;
     }
 
     // call user handler
-    auto handler_flags = static_cast<size_t>(SIGNAL_HOOKS[signo].user_action_.sa_flags);
-    auto *ucontext = static_cast<ucontext_t *>(ucontext_raw);
+    auto handlerFlags = static_cast<size_t>(SIGNAL_HOOKS[signo].userAction_.sa_flags);
+    auto *ucontext = static_cast<ucontext_t *>(ucontextRaw);
     sigset_t mask;
     sigemptyset(&mask);
     constexpr int N = sizeof(sigset_t) * 2;
     for (int i = 0; i < N; ++i) {
         if (sigismember(&ucontext->uc_sigmask, i) == 1 ||
-            sigismember(&SIGNAL_HOOKS[signo].user_action_.sa_mask, i) == 1) {
+            sigismember(&SIGNAL_HOOKS[signo].userAction_.sa_mask, i) == 1) {
             sigaddset(&mask, i);
         }
     }
 
-    if ((handler_flags & SA_NODEFER) == 0) {  // NOLINT
+    if ((handlerFlags & SA_NODEFER) == 0) {  // NOLINT
         sigaddset(&mask, signo);
     }
     REAL_SIGPROCMASK(SIG_SETMASK, &mask, nullptr);
 
-    if ((handler_flags & SA_SIGINFO)) {                                               // NOLINT
-        SIGNAL_HOOKS[signo].user_action_.sa_sigaction(signo, siginfo, ucontext_raw);  // NOLINT
+    if ((handlerFlags & SA_SIGINFO)) {                                              // NOLINT
+        SIGNAL_HOOKS[signo].userAction_.sa_sigaction(signo, siginfo, ucontextRaw);  // NOLINT
     } else {
-        auto handler = SIGNAL_HOOKS[signo].user_action_.sa_handler;  // NOLINT
-        if (handler == SIG_IGN) {                                    // NOLINT
+        auto handler = SIGNAL_HOOKS[signo].userAction_.sa_handler;  // NOLINT
+        if (handler == SIG_IGN) {                                   // NOLINT
             return;
         }
         if (handler == SIG_DFL) {  // NOLINT
@@ -295,23 +295,23 @@ void SignalHook::Handler(int signo, siginfo_t *siginfo, void *ucontext_raw)
     }
 
     // if user handler not exit, continue call Old Action
-    CallOldAction(signo, siginfo, ucontext_raw);
+    CallOldAction(signo, siginfo, ucontextRaw);
 }
 
 template <typename Sigaction>
-static bool FindRealSignal(Sigaction *real_fun, [[maybe_unused]] Sigaction hook_fun, const char *name)
+static bool FindRealSignal(Sigaction *realFun, [[maybe_unused]] Sigaction hookFun, const char *name)
 {
-    void *find_fun = dlsym(RTLD_NEXT, name);
-    if (find_fun != nullptr) {
-        *real_fun = reinterpret_cast<Sigaction>(find_fun);
+    void *findFun = dlsym(RTLD_NEXT, name);
+    if (findFun != nullptr) {
+        *realFun = reinterpret_cast<Sigaction>(findFun);
     } else {
-        find_fun = dlsym(RTLD_DEFAULT, name);
-        if (find_fun == nullptr || reinterpret_cast<uintptr_t>(find_fun) == reinterpret_cast<uintptr_t>(hook_fun) ||
-            reinterpret_cast<uintptr_t>(find_fun) == reinterpret_cast<uintptr_t>(sigaction)) {
+        findFun = dlsym(RTLD_DEFAULT, name);
+        if (findFun == nullptr || reinterpret_cast<uintptr_t>(findFun) == reinterpret_cast<uintptr_t>(hookFun) ||
+            reinterpret_cast<uintptr_t>(findFun) == reinterpret_cast<uintptr_t>(sigaction)) {
             LOG(ERROR, RUNTIME) << "dlsym(RTLD_DEFAULT, " << name << ") can not find really " << name;
             return false;
         }
-        *real_fun = reinterpret_cast<Sigaction>(find_fun);
+        *realFun = reinterpret_cast<Sigaction>(findFun);
     }
     LOG(INFO, RUNTIME) << "find " << name << " success";
     return true;
@@ -326,20 +326,20 @@ __attribute__((constructor)) static bool InitRealSignalFun()
     {
         os::memory::LockHolder lock(REAL_LOCK);
         if (!IS_INIT_REALLY) {
-            bool is_error = true;
-            is_error = is_error && FindRealSignal(&REAL_SIGACTION, sigaction, "sigaction");
-            is_error = is_error && FindRealSignal(&REAL_SIGPROCMASK, sigprocmask, "sigprocmask");
-            if (is_error) {
+            bool isError = true;
+            isError = isError && FindRealSignal(&REAL_SIGACTION, sigaction, "sigaction");
+            isError = isError && FindRealSignal(&REAL_SIGPROCMASK, sigprocmask, "sigprocmask");
+            if (isError) {
                 IS_INIT_REALLY = true;
             }
-            return is_error;
+            return isError;
         }
     }
     return true;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-static int RegisterUserHandler(int signal, const struct sigaction *new_action, struct sigaction *old_action,
+static int RegisterUserHandler(int signal, const struct sigaction *newAction, struct sigaction *oldAction,
                                int (*really)(int, const struct sigaction *, struct sigaction *))
 {
     // just hook signal in range, other use libc sigaction
@@ -349,40 +349,40 @@ static int RegisterUserHandler(int signal, const struct sigaction *new_action, s
     }
 
     if (SIGNAL_HOOKS[signal].IsHook()) {
-        auto user_action = SIGNAL_HOOKS[signal].SignalHook::GetUserAction();
-        if (new_action != nullptr) {
-            SIGNAL_HOOKS[signal].RegisterUserAction(new_action);
+        auto userAction = SIGNAL_HOOKS[signal].SignalHook::GetUserAction();
+        if (newAction != nullptr) {
+            SIGNAL_HOOKS[signal].RegisterUserAction(newAction);
         }
-        if (old_action != nullptr) {
-            *old_action = user_action;
+        if (oldAction != nullptr) {
+            *oldAction = userAction;
         }
         return 0;
     }
 
-    return really(signal, new_action, old_action);
+    return really(signal, newAction, oldAction);
 }
 
-int RegisterUserMask(int how, const sigset_t *new_set, sigset_t *old_set,
+int RegisterUserMask(int how, const sigset_t *newSet, sigset_t *oldSet,
                      int (*really)(int, const sigset_t *, sigset_t *))
 {
     if (GetHandlingSignal()) {
-        return really(how, new_set, old_set);
+        return really(how, newSet, oldSet);
     }
 
-    if (new_set == nullptr) {
-        return really(how, new_set, old_set);
+    if (newSet == nullptr) {
+        return really(how, newSet, oldSet);
     }
 
-    sigset_t build_sigset = *new_set;
+    sigset_t buildSigset = *newSet;
     if (how == SIG_BLOCK || how == SIG_SETMASK) {
         for (int i = 1; i < _NSIG; ++i) {
-            if (SIGNAL_HOOKS[i].IsHook() && (sigismember(&build_sigset, i) != 0)) {
-                sigdelset(&build_sigset, i);
+            if (SIGNAL_HOOKS[i].IsHook() && (sigismember(&buildSigset, i) != 0)) {
+                sigdelset(&buildSigset, i);
             }
         }
     }
-    const sigset_t *build_sigset_const = &build_sigset;
-    return really(how, build_sigset_const, old_set);
+    const sigset_t *buildSigsetConst = &buildSigset;
+    return really(how, buildSigsetConst, oldSet);
 }
 
 // NOTE: #2681
@@ -410,12 +410,12 @@ extern "C" int sigactionStub([[maybe_unused]] int __sig, [[maybe_unused]] const 
 #endif  // USE_ADDRESS_SANITIZER
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" int sigprocmask(int how, const sigset_t *new_set, sigset_t *old_set)  // NOLINT
+extern "C" int sigprocmask(int how, const sigset_t *newSet, sigset_t *oldSet)  // NOLINT
 {
     if (!InitRealSignalFun()) {
         return -1;
     }
-    return RegisterUserMask(how, new_set, old_set, REAL_SIGPROCMASK);
+    return RegisterUserMask(how, newSet, oldSet, REAL_SIGPROCMASK);
 }
 
 extern "C" void RegisterHookHandler(int signal, const SighookAction *sa)
@@ -456,12 +456,12 @@ extern "C" void CheckOldHookHandler(int signal)
     }
 
     // get old action
-    struct sigaction old_action {};
-    REAL_SIGACTION(signal, nullptr, &old_action);
+    struct sigaction oldAction {};
+    REAL_SIGACTION(signal, nullptr, &oldAction);
 
-    if (old_action.sa_sigaction != SignalHook::Handler) {  // NOLINT
+    if (oldAction.sa_sigaction != SignalHook::Handler) {  // NOLINT
         LOG(ERROR, RUNTIME) << "error: Check old hook handler found unexpected action "
-                            << (old_action.sa_sigaction != nullptr);  // NOLINT
+                            << (oldAction.sa_sigaction != nullptr);  // NOLINT
         SIGNAL_HOOKS[signal].RegisterAction(signal);
     }
 }

@@ -24,7 +24,7 @@
 namespace panda {
 
 inline Class *ClassLinker::GetClass(const Method &caller, panda_file::File::EntityId id,
-                                    ClassLinkerErrorHandler *error_handler /* = nullptr */)
+                                    ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
@@ -37,7 +37,7 @@ inline Class *ClassLinker::GetClass(const Method &caller, panda_file::File::Enti
     auto *ext = GetExtension(ctx);
     ASSERT(ext != nullptr);
     klass = ext->GetClass(*caller.GetPandaFile(), id, caller.GetClass()->GetLoadContext(),
-                          (error_handler == nullptr) ? ext->GetErrorHandler() : error_handler);
+                          (errorHandler == nullptr) ? ext->GetErrorHandler() : errorHandler);
     if (LIKELY(klass != nullptr)) {
         caller.GetPandaFile()->GetPandaCache()->SetClassCache(id, klass);
     }

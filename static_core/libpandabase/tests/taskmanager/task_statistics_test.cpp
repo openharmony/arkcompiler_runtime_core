@@ -35,57 +35,57 @@ public:
     {
         switch (GetParam()) {
             case TaskStatisticsImplType::SIMPLE:
-                return &simple_task_statistics_;
+                return &simpleTaskStatistics_;
             case TaskStatisticsImplType::FINE_GRAINED:
-                return &fine_grained_task_statistics_;
+                return &fineGrainedTaskStatistics_;
             default:
                 UNREACHABLE();
         }
     }
 
 private:
-    SimpleTaskStatisticsImpl simple_task_statistics_;
-    FineGrainedTaskStatisticsImpl fine_grained_task_statistics_;
+    SimpleTaskStatisticsImpl simpleTaskStatistics_;
+    FineGrainedTaskStatisticsImpl fineGrainedTaskStatistics_;
 };
 
 TEST_P(TaskStatisticsTest, MultithreadedUsageTest)
 {
-    auto *task_statistics = GetStatistics();
+    auto *taskStatistics = GetStatistics();
     constexpr size_t COUNT_OF_TASKS = 10'000U;
-    auto added_task_worker = [task_statistics](TaskProperties properties) {
+    auto addedTaskWorker = [taskStatistics](TaskProperties properties) {
         for (size_t i = 0U; i < COUNT_OF_TASKS; i++) {
-            task_statistics->IncrementCount(TaskStatus::ADDED, properties, 1U);
+            taskStatistics->IncrementCount(TaskStatus::ADDED, properties, 1U);
         }
     };
-    auto executed_task_worker = [task_statistics](TaskProperties properties) {
+    auto executedTaskWorker = [taskStatistics](TaskProperties properties) {
         for (size_t i = 0U; i < COUNT_OF_TASKS; i++) {
-            task_statistics->IncrementCount(TaskStatus::EXECUTED, properties, 1U);
+            taskStatistics->IncrementCount(TaskStatus::EXECUTED, properties, 1U);
         }
     };
 
     constexpr size_t COUNT_OF_THREADS = 10U;
     std::vector<std::thread> threads;
     for (size_t i = 0; i < COUNT_OF_THREADS; i++) {
-        threads.emplace_back(added_task_worker, GC_STATIC_VM_BACKGROUND_PROPERTIES);
-        threads.emplace_back(added_task_worker, GC_STATIC_VM_FOREGROUND_PROPERTIES);
-        threads.emplace_back(added_task_worker, GC_DYNAMIC_VM_BACKGROUND_PROPERTIES);
-        threads.emplace_back(added_task_worker, GC_DYNAMIC_VM_FOREGROUND_PROPERTIES);
+        threads.emplace_back(addedTaskWorker, GC_STATIC_VM_BACKGROUND_PROPERTIES);
+        threads.emplace_back(addedTaskWorker, GC_STATIC_VM_FOREGROUND_PROPERTIES);
+        threads.emplace_back(addedTaskWorker, GC_DYNAMIC_VM_BACKGROUND_PROPERTIES);
+        threads.emplace_back(addedTaskWorker, GC_DYNAMIC_VM_FOREGROUND_PROPERTIES);
 
-        threads.emplace_back(executed_task_worker, GC_STATIC_VM_BACKGROUND_PROPERTIES);
-        threads.emplace_back(executed_task_worker, GC_STATIC_VM_FOREGROUND_PROPERTIES);
-        threads.emplace_back(executed_task_worker, GC_DYNAMIC_VM_BACKGROUND_PROPERTIES);
-        threads.emplace_back(executed_task_worker, GC_DYNAMIC_VM_FOREGROUND_PROPERTIES);
+        threads.emplace_back(executedTaskWorker, GC_STATIC_VM_BACKGROUND_PROPERTIES);
+        threads.emplace_back(executedTaskWorker, GC_STATIC_VM_FOREGROUND_PROPERTIES);
+        threads.emplace_back(executedTaskWorker, GC_DYNAMIC_VM_BACKGROUND_PROPERTIES);
+        threads.emplace_back(executedTaskWorker, GC_DYNAMIC_VM_FOREGROUND_PROPERTIES);
     }
 
     for (auto &thread : threads) {
         thread.join();
     }
 
-    ASSERT_EQ(task_statistics->GetCountOfTasksInSystemWithTaskProperties(GC_DYNAMIC_VM_BACKGROUND_PROPERTIES), 0U);
-    ASSERT_EQ(task_statistics->GetCountOfTasksInSystemWithTaskProperties(GC_DYNAMIC_VM_FOREGROUND_PROPERTIES), 0U);
-    ASSERT_EQ(task_statistics->GetCountOfTasksInSystemWithTaskProperties(GC_STATIC_VM_BACKGROUND_PROPERTIES), 0U);
-    ASSERT_EQ(task_statistics->GetCountOfTasksInSystemWithTaskProperties(GC_STATIC_VM_FOREGROUND_PROPERTIES), 0U);
-    ASSERT_EQ(task_statistics->GetCountOfTaskInSystem(), 0U);
+    ASSERT_EQ(taskStatistics->GetCountOfTasksInSystemWithTaskProperties(GC_DYNAMIC_VM_BACKGROUND_PROPERTIES), 0U);
+    ASSERT_EQ(taskStatistics->GetCountOfTasksInSystemWithTaskProperties(GC_DYNAMIC_VM_FOREGROUND_PROPERTIES), 0U);
+    ASSERT_EQ(taskStatistics->GetCountOfTasksInSystemWithTaskProperties(GC_STATIC_VM_BACKGROUND_PROPERTIES), 0U);
+    ASSERT_EQ(taskStatistics->GetCountOfTasksInSystemWithTaskProperties(GC_STATIC_VM_FOREGROUND_PROPERTIES), 0U);
+    ASSERT_EQ(taskStatistics->GetCountOfTaskInSystem(), 0U);
 }
 
 INSTANTIATE_TEST_SUITE_P(TaskStatisticsImplSet, TaskStatisticsTest,

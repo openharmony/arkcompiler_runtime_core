@@ -24,48 +24,48 @@ namespace panda::verifier::test {
 
 TEST(Verifier, Lazy)
 {
-    std::vector<int> test_data {1, 2, 3, -1, -2, -3, 5};
+    std::vector<int> testData {1, 2, 3, -1, -2, -3, 5};
 
-    auto stream1 = LazyFetch(test_data);
-    auto calc_func = [](int acc, int val) { return acc + val; };
-    auto result1 = FoldLeft(stream1, -4, calc_func);
+    auto stream1 = LazyFetch(testData);
+    auto calcFunc = [](int acc, int val) { return acc + val; };
+    auto result1 = FoldLeft(stream1, -4, calcFunc);
 
     EXPECT_EQ(result1, 1);
 
-    EXPECT_EQ(FoldLeft(ConstLazyFetch(test_data), -3, calc_func), 2);
+    EXPECT_EQ(FoldLeft(ConstLazyFetch(testData), -3, calcFunc), 2);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto result2 = FoldLeft(Transform(ConstLazyFetch(test_data), [](int val) { return val * 10; }), -49, calc_func);
+    auto result2 = FoldLeft(Transform(ConstLazyFetch(testData), [](int val) { return val * 10; }), -49, calcFunc);
     EXPECT_EQ(result2, 1);
 
-    auto result3 = FoldLeft(Filter(ConstLazyFetch(test_data), [](int val) { return val > 0; }), -1, calc_func);
+    auto result3 = FoldLeft(Filter(ConstLazyFetch(testData), [](int val) { return val > 0; }), -1, calcFunc);
     EXPECT_EQ(result3, 10);
 
     auto result4 =
-        FoldLeft(Enumerate(ConstLazyFetch(test_data)), 0, [](int acc, auto val) { return acc + std::get<0>(val); });
+        FoldLeft(Enumerate(ConstLazyFetch(testData)), 0, [](int acc, auto val) { return acc + std::get<0>(val); });
     EXPECT_EQ(result4, 21);
 
-    auto result5 = FoldLeft(IndicesOf(test_data), 0, calc_func);
+    auto result5 = FoldLeft(IndicesOf(testData), 0, calcFunc);
     EXPECT_EQ(result5, 21);
 
     int sum = 0;
-    ForEach(ConstLazyFetch(test_data), [&sum](int val) { sum += val; });
+    ForEach(ConstLazyFetch(testData), [&sum](int val) { sum += val; });
     EXPECT_EQ(sum, 5);
 
     int num = 0;
-    for (const auto val : Iterable(Filter(ConstLazyFetch(test_data), [](int val) { return val > 0; }))) {
+    for (const auto val : Iterable(Filter(ConstLazyFetch(testData), [](int val) { return val > 0; }))) {
         EXPECT_TRUE(val > 0);
         ++num;
     }
     EXPECT_EQ(num, 4);
 
-    auto result6 = FoldLeft(ConstLazyFetch(test_data) + ConstLazyFetch(test_data), 0, calc_func);
+    auto result6 = FoldLeft(ConstLazyFetch(testData) + ConstLazyFetch(testData), 0, calcFunc);
     EXPECT_EQ(result6, 10);
 
-    auto result7 = ContainerOf<std::set<int>>(ConstLazyFetch(test_data));
+    auto result7 = ContainerOf<std::set<int>>(ConstLazyFetch(testData));
     EXPECT_EQ(result7, (std::set<int> {1, 2, 3, -1, -2, -3, 5}));
 
-    auto result8 = ContainerOf<std::vector<int>>(ConstLazyFetch(test_data));
+    auto result8 = ContainerOf<std::vector<int>>(ConstLazyFetch(testData));
     EXPECT_EQ(result8, (std::vector<int> {1, 2, 3, -1, -2, -3, 5}));
 }
 

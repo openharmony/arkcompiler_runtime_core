@@ -39,8 +39,8 @@ public:
     inline explicit SampleReader(const char *filename);
     ~SampleReader() = default;
 
-    inline bool GetNextSample(SampleInfo *sample_out);
-    inline bool GetNextModule(FileInfo *module_out);
+    inline bool GetNextSample(SampleInfo *sampleOut);
+    inline bool GetNextModule(FileInfo *moduleOut);
 
     NO_COPY_SEMANTIC(SampleReader);
     NO_MOVE_SEMANTIC(SampleReader);
@@ -48,10 +48,10 @@ public:
 private:
     // Using std::vector instead of PandaVector 'cause it should be used in tool without runtime
     std::vector<char> buffer_;
-    std::vector<char *> sample_row_ptrs_;
-    std::vector<char *> module_row_ptrs_;
-    size_t sample_row_counter_ {0};
-    size_t module_row_counter_ {0};
+    std::vector<char *> sampleRowPtrs_;
+    std::vector<char *> moduleRowPtrs_;
+    size_t sampleRowCounter_ {0};
+    size_t moduleRowCounter_ {0};
 };
 
 }  // namespace panda::tooling::sampler

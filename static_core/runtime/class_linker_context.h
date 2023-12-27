@@ -35,9 +35,9 @@ public:
     explicit ClassLinkerContext(panda_file::SourceLang lang) : lang_(lang) {}
     Class *FindClass(const uint8_t *descriptor)
     {
-        os::memory::LockHolder lock(classes_lock_);
-        auto it = loaded_classes_.find(descriptor);
-        if (it != loaded_classes_.cend()) {
+        os::memory::LockHolder lock(classesLock_);
+        auto it = loadedClasses_.find(descriptor);
+        if (it != loadedClasses_.cend()) {
             return it->second;
         }
 
@@ -54,36 +54,36 @@ public:
         return lang_;
     }
 
-    virtual Class *LoadClass([[maybe_unused]] const uint8_t *descriptor, [[maybe_unused]] bool need_copy_descriptor,
-                             [[maybe_unused]] ClassLinkerErrorHandler *error_handler)
+    virtual Class *LoadClass([[maybe_unused]] const uint8_t *descriptor, [[maybe_unused]] bool needCopyDescriptor,
+                             [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
     {
         return nullptr;
     }
 
     Class *InsertClass(Class *klass)
     {
-        os::memory::LockHolder lock(classes_lock_);
-        auto *other_klass = FindClass(klass->GetDescriptor());
-        if (other_klass != nullptr) {
-            return other_klass;
+        os::memory::LockHolder lock(classesLock_);
+        auto *otherKlass = FindClass(klass->GetDescriptor());
+        if (otherKlass != nullptr) {
+            return otherKlass;
         }
 
         ASSERT(klass->GetSourceLang() == lang_);
-        loaded_classes_.insert({klass->GetDescriptor(), klass});
+        loadedClasses_.insert({klass->GetDescriptor(), klass});
         return nullptr;
     }
 
     void RemoveClass(Class *klass)
     {
-        os::memory::LockHolder lock(classes_lock_);
-        loaded_classes_.erase(klass->GetDescriptor());
+        os::memory::LockHolder lock(classesLock_);
+        loadedClasses_.erase(klass->GetDescriptor());
     }
 
     template <class Callback>
     bool EnumerateClasses(const Callback &cb)
     {
-        os::memory::LockHolder lock(classes_lock_);
-        for (const auto &v : loaded_classes_) {
+        os::memory::LockHolder lock(classesLock_);
+        for (const auto &v : loadedClasses_) {
             if (!cb(v.second)) {
                 return false;
             }
@@ -95,16 +95,16 @@ public:
 
     size_t NumLoadedClasses()
     {
-        os::memory::LockHolder lock(classes_lock_);
-        return loaded_classes_.size();
+        os::memory::LockHolder lock(classesLock_);
+        return loadedClasses_.size();
     }
 
     void VisitLoadedClasses(size_t flag)
     {
-        os::memory::LockHolder lock(classes_lock_);
-        for (auto &loaded_class : loaded_classes_) {
-            auto class_ptr = loaded_class.second;
-            class_ptr->DumpClass(GET_LOG_STREAM(ERROR, RUNTIME), flag);
+        os::memory::LockHolder lock(classesLock_);
+        for (auto &loadedClass : loadedClasses_) {
+            auto classPtr = loadedClass.second;
+            classPtr->DumpClass(GET_LOG_STREAM(ERROR, RUNTIME), flag);
         }
     }
 
@@ -117,7 +117,7 @@ public:
 
     bool AddGCRoot(ObjectHeader *obj)
     {
-        os::memory::LockHolder lock(classes_lock_);
+        os::memory::LockHolder lock(classesLock_);
         for (auto root : roots_) {
             if (root == obj) {
                 return false;
@@ -162,9 +162,9 @@ public:
 
 private:
     // Dummy fix of concurrency issues to evaluate degradation
-    os::memory::RecursiveMutex classes_lock_;
-    PandaUnorderedMap<const uint8_t *, Class *, utf::Mutf8Hash, utf::Mutf8Equal> loaded_classes_
-        GUARDED_BY(classes_lock_);
+    os::memory::RecursiveMutex classesLock_;
+    PandaUnorderedMap<const uint8_t *, Class *, utf::Mutf8Hash, utf::Mutf8Equal> loadedClasses_
+        GUARDED_BY(classesLock_);
     PandaVector<ObjectPointer<ObjectHeader>> roots_;
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };

@@ -59,7 +59,7 @@ namespace panda::compiler {
  */
 bool CodeSink::RunImpl()
 {
-    is_applied_ = false;
+    isApplied_ = false;
     GetGraph()->RunPass<LoopAnalyzer>();
     // Iteratively sink instructions.  On each iteration an instruction can be
     // sunk to it's basic block dominatee.  Iterate sinking until no changes
@@ -71,16 +71,16 @@ bool CodeSink::RunImpl()
         for (auto block : GetGraph()->GetBlocksRPO()) {
             changed |= ProcessBlock(block);
         }
-        is_applied_ |= changed;
+        isApplied_ |= changed;
     }
 
     COMPILER_LOG(DEBUG, CODE_SINK) << "Code Sink complete";
-    return is_applied_;
+    return isApplied_;
 }
 
 void CodeSink::InvalidateAnalyses()
 {
-    if (is_applied_) {
+    if (isApplied_) {
         // Bounds analysis works with instructions in a particular basic block
         // reordering breaks it
         GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
@@ -97,8 +97,8 @@ bool CodeSink::ProcessBlock(BasicBlock *block)
     if (block->IsStartBlock() || block->IsEndBlock()) {
         return false;
     }
-    bool made_change = false;
-    bool mem_barrier = false;
+    bool madeChange = false;
+    bool memBarrier = false;
     InstVector stores(GetGraph()->GetLocalAllocator()->Adapter());
     for (auto inst : block->InstsSafeReverse()) {
         if (inst->IsCatchPhi() || !inst->HasUsers()) {
@@ -108,10 +108,10 @@ bool CodeSink::ProcessBlock(BasicBlock *block)
             inst->GetFlag(compiler::inst_flags::HEAP_INV)) {
             // Ensures that we do not move in or out monitored section
             // Also ensures we do not sink over volatile store
-            mem_barrier = true;
+            memBarrier = true;
             continue;
         }
-        BasicBlock *candidate = SinkInstruction(inst, &stores, mem_barrier);
+        BasicBlock *candidate = SinkInstruction(inst, &stores, memBarrier);
         if (candidate != nullptr) {
             COMPILER_LOG(DEBUG, CODE_SINK) << "Sunk v" << inst->GetId() << " to BB " << candidate->GetId();
             GetGraph()->GetEventWriter().EventCodeSink(inst->GetId(), inst->GetPc(), block->GetId(),
@@ -120,10 +120,10 @@ bool CodeSink::ProcessBlock(BasicBlock *block)
             // Insertion in the beginning of the block guaranties we do not
             // enter or exit monitor in candidate block
             candidate->PrependInst(inst);
-            made_change = true;
+            madeChange = true;
         }
     }
-    return made_change;
+    return madeChange;
 }
 
 static bool InstHasRefInput(Inst *inst)
@@ -194,9 +194,9 @@ bool CodeSink::IsAcceptableTarget(Inst *inst, BasicBlock *candidate)
         return false;
     }
 
-    Loop *cand_loop = candidate->GetLoop();
+    Loop *candLoop = candidate->GetLoop();
     // Do not sink into irreducible loops
-    if (cand_loop->IsIrreducible()) {
+    if (candLoop->IsIrreducible()) {
         return false;
     }
 
@@ -208,11 +208,11 @@ bool CodeSink::IsAcceptableTarget(Inst *inst, BasicBlock *candidate)
         if (inst->IsLoad()) {
             return false;
         }
-        if (loop != cand_loop) {
+        if (loop != candLoop) {
             return false;
         }
     }
-    ASSERT_PRINT(loop == cand_loop || loop->IsInside(cand_loop), "Can sink only into outer loop");
+    ASSERT_PRINT(loop == candLoop || loop->IsInside(candLoop), "Can sink only into outer loop");
 
     // Check that all uses are dominated by the candidate
     for (auto &user : inst->GetUsers()) {

@@ -134,32 +134,32 @@ public:
 #ifndef __clang_analyzer__
         static_assert(std::is_arithmetic_v<T>);
         if constexpr (std::is_same<T, uint8_t>()) {
-            type_id_ = INT8;
+            typeId_ = INT8;
         } else if constexpr (std::is_same<T, int8_t>()) {
-            type_id_ = INT8;
+            typeId_ = INT8;
         } else if constexpr (std::is_same<T, uint16_t>()) {
-            type_id_ = INT16;
+            typeId_ = INT16;
         } else if constexpr (std::is_same<T, int16_t>()) {
-            type_id_ = INT16;
+            typeId_ = INT16;
         } else if constexpr (std::is_same<T, uint32_t>()) {
-            type_id_ = INT32;
+            typeId_ = INT32;
         } else if constexpr (std::is_same<T, int32_t>()) {
-            type_id_ = INT32;
+            typeId_ = INT32;
         } else if constexpr (std::is_same<T, uint64_t>()) {
-            type_id_ = INT64;
+            typeId_ = INT64;
         } else if constexpr (std::is_same<T, int64_t>()) {
-            type_id_ = INT64;
+            typeId_ = INT64;
         } else if constexpr (std::is_same<T, float>()) {
-            type_id_ = FLOAT32;
+            typeId_ = FLOAT32;
         } else if constexpr (std::is_same<T, double>()) {
-            type_id_ = FLOAT64;
+            typeId_ = FLOAT64;
         } else {
-            type_id_ = INVALID;
+            typeId_ = INVALID;
         }
 #endif
     }
 
-    constexpr explicit TypeInfo(TypeId type) : type_id_(type) {}
+    constexpr explicit TypeInfo(TypeId type) : typeId_(type) {}
 
     DEFAULT_MOVE_SEMANTIC(TypeInfo);
     DEFAULT_COPY_SEMANTIC(TypeInfo);
@@ -171,14 +171,14 @@ public:
     /// Validation check
     constexpr bool IsValid() const
     {
-        return type_id_ != INVALID;
+        return typeId_ != INVALID;
     }
 
     /// Type expected size
     constexpr size_t GetSize() const
     {
         ASSERT(IsValid());
-        switch (type_id_) {
+        switch (typeId_) {
             case INT8:
                 return BYTE_SIZE;
             case INT16:
@@ -198,7 +198,7 @@ public:
     constexpr bool IsFloat() const
     {
         ASSERT(IsValid());
-        return type_id_ == FLOAT32 || type_id_ == FLOAT64;
+        return typeId_ == FLOAT32 || typeId_ == FLOAT64;
     }
 
     constexpr bool IsScalar() const
@@ -209,7 +209,7 @@ public:
 
     constexpr bool operator==(const TypeInfo &other) const
     {
-        return (type_id_ == other.type_id_);
+        return (typeId_ == other.typeId_);
     }
 
     constexpr bool operator!=(const TypeInfo &other) const
@@ -257,7 +257,7 @@ public:
 
     DataType::Type ToDataType() const
     {
-        switch (type_id_) {
+        switch (typeId_) {
             case INT8:
                 return DataType::INT8;
             case INT16:
@@ -280,7 +280,7 @@ public:
     void Dump()
     {
         std::cerr << "TypeInfo:";
-        switch (type_id_) {
+        switch (typeId_) {
             case INT8:
                 std::cerr << "INT8";
                 break;
@@ -307,7 +307,7 @@ public:
     }
 
 private:
-    TypeId type_id_ {INVALID};
+    TypeId typeId_ {INVALID};
 };
 
 constexpr TypeInfo INT8_TYPE {TypeInfo::INT8};
@@ -318,14 +318,14 @@ constexpr TypeInfo FLOAT32_TYPE {TypeInfo::FLOAT32};
 constexpr TypeInfo FLOAT64_TYPE {TypeInfo::FLOAT64};
 constexpr TypeInfo INVALID_TYPE;
 
-constexpr TypeInfo TypeInfo::GetScalarTypeBySize(size_t size_bits)
+constexpr TypeInfo TypeInfo::GetScalarTypeBySize(size_t sizeBits)
 {
     auto type = INT64_TYPE;
-    if (size_bits == BYTE_SIZE) {
+    if (sizeBits == BYTE_SIZE) {
         type = INT8_TYPE;
-    } else if (size_bits == HALF_SIZE) {
+    } else if (sizeBits == HALF_SIZE) {
         type = INT16_TYPE;
-    } else if (size_bits == WORD_SIZE) {
+    } else if (sizeBits == WORD_SIZE) {
         type = INT32_TYPE;
     }
     return type;
@@ -703,12 +703,12 @@ private:
 };  // MemRef
 
 inline ArenaVector<std::pair<uint8_t, uint8_t>> ResoveParameterSequence(
-    ArenaVector<std::pair<uint8_t, uint8_t>> *moved_registers, uint8_t tmp, ArenaAllocator *allocator)
+    ArenaVector<std::pair<uint8_t, uint8_t>> *movedRegisters, uint8_t tmp, ArenaAllocator *allocator)
 {
     constexpr uint8_t INVALID_FIRST = -1;
     constexpr uint8_t INVALID_SECOND = -2;
 
-    moved_registers->emplace_back(std::pair<uint8_t, uint8_t>(INVALID_FIRST, INVALID_SECOND));
+    movedRegisters->emplace_back(std::pair<uint8_t, uint8_t>(INVALID_FIRST, INVALID_SECOND));
     /*
         Example:
         1. mov x0 <- x3
@@ -732,15 +732,15 @@ inline ArenaVector<std::pair<uint8_t, uint8_t>> ResoveParameterSequence(
     // Calculate weigth
     ArenaVector<std::pair<uint8_t, uint8_t>> result(allocator->Adapter());
     // --moved_registers->end() - for remove marker-element
-    for (auto pair = moved_registers->begin(); pair != --moved_registers->end();) {
-        auto conflict = std::find_if(moved_registers->begin(), moved_registers->end(), [pair](auto in_pair) {
-            return (in_pair.second == pair->first && (in_pair != *pair));
+    for (auto pair = movedRegisters->begin(); pair != --movedRegisters->end();) {
+        auto conflict = std::find_if(movedRegisters->begin(), movedRegisters->end(), [pair](auto inPair) {
+            return (inPair.second == pair->first && (inPair != *pair));
         });
-        if (conflict == moved_registers->end()) {
+        if (conflict == movedRegisters->end()) {
             // emit immediate - there are no another possible combinations
             result.emplace_back(*pair);
-            moved_registers->erase(pair);
-            pair = moved_registers->begin();
+            movedRegisters->erase(pair);
+            pair = movedRegisters->begin();
         } else {
             ++pair;
         }
@@ -751,32 +751,32 @@ inline ArenaVector<std::pair<uint8_t, uint8_t>> ResoveParameterSequence(
            ASSERT(moved_registers->size() != 1);
         */
 
-        auto curr_pair = moved_registers->begin();
-        if (curr_pair->first == INVALID_FIRST && curr_pair->second == INVALID_SECOND) {
-            moved_registers->erase(curr_pair);
+        auto currPair = movedRegisters->begin();
+        if (currPair->first == INVALID_FIRST && currPair->second == INVALID_SECOND) {
+            movedRegisters->erase(currPair);
             break;
             // Finish algorithm - only marker in vector
         }
-        auto saved_reg = curr_pair->first;
-        result.emplace_back(std::pair<uint8_t, uint8_t>(tmp, curr_pair->first));
-        result.emplace_back(*curr_pair);  // we already save dst_register
+        auto savedReg = currPair->first;
+        result.emplace_back(std::pair<uint8_t, uint8_t>(tmp, currPair->first));
+        result.emplace_back(*currPair);  // we already save dst_register
 
         // Remove current instruction
-        auto curr_reg = curr_pair->second;
-        moved_registers->erase(curr_pair);
+        auto currReg = currPair->second;
+        movedRegisters->erase(currPair);
 
-        while (curr_pair != moved_registers->end()) {
-            curr_pair = std::find_if(moved_registers->begin(), moved_registers->end(),
-                                     [curr_reg](auto in_pair) { return in_pair.first == curr_reg; });
-            ASSERT(curr_pair != moved_registers->end());
-            if (curr_pair->second == saved_reg) {
-                result.emplace_back(std::pair<uint8_t, uint8_t>(curr_pair->first, tmp));
-                moved_registers->erase(curr_pair);
+        while (currPair != movedRegisters->end()) {
+            currPair = std::find_if(movedRegisters->begin(), movedRegisters->end(),
+                                    [currReg](auto inPair) { return inPair.first == currReg; });
+            ASSERT(currPair != movedRegisters->end());
+            if (currPair->second == savedReg) {
+                result.emplace_back(std::pair<uint8_t, uint8_t>(currPair->first, tmp));
+                movedRegisters->erase(currPair);
                 break;
             };
-            result.emplace_back(*curr_pair);
-            curr_reg = curr_pair->second;
-            moved_registers->erase(curr_pair);
+            result.emplace_back(*currPair);
+            currReg = currPair->second;
+            movedRegisters->erase(currPair);
         }
     }
     return result;

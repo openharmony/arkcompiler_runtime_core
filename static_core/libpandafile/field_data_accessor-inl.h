@@ -26,24 +26,24 @@
 namespace panda::panda_file {
 
 // static
-inline File::EntityId FieldDataAccessor::GetTypeId(const File &panda_file, File::EntityId field_id)
+inline File::EntityId FieldDataAccessor::GetTypeId(const File &pandaFile, File::EntityId fieldId)
 {
-    auto sp = panda_file.GetSpanFromId(field_id).SubSpan(IDX_SIZE);  // skip class_idx
-    auto type_idx = helpers::Read<panda_file::IDX_SIZE>(&sp);
-    return panda_file.ResolveClassIndex(field_id, type_idx);
+    auto sp = pandaFile.GetSpanFromId(fieldId).SubSpan(IDX_SIZE);  // skip class_idx
+    auto typeIdx = helpers::Read<panda_file::IDX_SIZE>(&sp);
+    return pandaFile.ResolveClassIndex(fieldId, typeIdx);
 }
 
 // static
-inline File::EntityId FieldDataAccessor::GetNameId(const File &panda_file, File::EntityId field_id)
+inline File::EntityId FieldDataAccessor::GetNameId(const File &pandaFile, File::EntityId fieldId)
 {
-    auto sp = panda_file.GetSpanFromId(field_id).SubSpan(IDX_SIZE * 2);  // skip class_idx, type_idx
+    auto sp = pandaFile.GetSpanFromId(fieldId).SubSpan(IDX_SIZE * 2);  // skip class_idx, type_idx
     return File::EntityId(helpers::Read<panda_file::ID_SIZE>(&sp));
 }
 
 template <class T>
 inline std::optional<T> FieldDataAccessor::GetValue()
 {
-    if (is_external_) {
+    if (isExternal_) {
         // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
         // which fails Release builds for GCC 8 and 9.
         std::optional<T> novalue = {};
@@ -59,26 +59,26 @@ inline std::optional<T> FieldDataAccessor::GetValue()
         return novalue;
     }
 
-    FieldValue field_value = *v;
+    FieldValue fieldValue = *v;
 
     // Disable checks due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
     // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
     if constexpr (std::is_integral_v<T>) {
         // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
         if constexpr (sizeof(T) <= sizeof(uint32_t)) {
-            return static_cast<T>(std::get<uint32_t>(field_value));
+            return static_cast<T>(std::get<uint32_t>(fieldValue));
             // NOLINTNEXTLINE(readability-misleading-indentation)
         } else {
-            return static_cast<T>(std::get<uint64_t>(field_value));
+            return static_cast<T>(std::get<uint64_t>(fieldValue));
         }
         // NOLINTNEXTLINE(readability-misleading-indentation)
     } else {
         // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
         if constexpr (sizeof(T) <= sizeof(uint32_t)) {
-            return bit_cast<T, uint32_t>(std::get<uint32_t>(field_value));
+            return bit_cast<T, uint32_t>(std::get<uint32_t>(fieldValue));
             // NOLINTNEXTLINE(readability-misleading-indentation)
         } else {
-            return bit_cast<T, uint64_t>(std::get<uint64_t>(field_value));
+            return bit_cast<T, uint64_t>(std::get<uint64_t>(fieldValue));
         }
     }
 }
@@ -86,7 +86,7 @@ inline std::optional<T> FieldDataAccessor::GetValue()
 template <>
 inline std::optional<File::EntityId> FieldDataAccessor::GetValue()
 {
-    if (is_external_) {
+    if (isExternal_) {
         return {};
     }
 
@@ -96,9 +96,9 @@ inline std::optional<File::EntityId> FieldDataAccessor::GetValue()
         return {};
     }
 
-    FieldValue field_value = *v;
+    FieldValue fieldValue = *v;
 
-    return File::EntityId(std::get<uint32_t>(field_value));
+    return File::EntityId(std::get<uint32_t>(fieldValue));
 }
 
 inline void FieldDataAccessor::SkipValue()
@@ -129,93 +129,93 @@ inline void FieldDataAccessor::SkipTypeAnnotations()
 template <class Callback>
 inline void FieldDataAccessor::EnumerateRuntimeAnnotations(const Callback &cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return;
     }
 
-    if (runtime_annotations_sp_.data() == nullptr) {
+    if (runtimeAnnotationsSp_.data() == nullptr) {
         SkipValue();
     }
 
     helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(
-        runtime_annotations_sp_, FieldTag::RUNTIME_ANNOTATION, cb, &annotations_sp_);
+        runtimeAnnotationsSp_, FieldTag::RUNTIME_ANNOTATION, cb, &annotationsSp_);
 }
 
 template <class Callback>
 inline void FieldDataAccessor::EnumerateAnnotations(const Callback &cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return;
     }
 
-    if (annotations_sp_.data() == nullptr) {
+    if (annotationsSp_.data() == nullptr) {
         SkipRuntimeAnnotations();
     }
 
-    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(annotations_sp_, FieldTag::ANNOTATION, cb,
-                                                                       &runtime_type_annotations_sp_);
+    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(annotationsSp_, FieldTag::ANNOTATION, cb,
+                                                                       &runtimeTypeAnnotationsSp_);
 }
 
 template <class Callback>
 inline void FieldDataAccessor::EnumerateRuntimeTypeAnnotations(const Callback &cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return;
     }
 
-    if (runtime_type_annotations_sp_.data() == nullptr) {
+    if (runtimeTypeAnnotationsSp_.data() == nullptr) {
         SkipAnnotations();
     }
 
-    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(runtime_type_annotations_sp_,
-                                                                       FieldTag::ANNOTATION, cb, &type_annotations_sp_);
+    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(runtimeTypeAnnotationsSp_, FieldTag::ANNOTATION,
+                                                                       cb, &typeAnnotationsSp_);
 }
 
 template <class Callback>
 inline void FieldDataAccessor::EnumerateTypeAnnotations(const Callback &cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return;
     }
 
-    if (type_annotations_sp_.data() == nullptr) {
+    if (typeAnnotationsSp_.data() == nullptr) {
         SkipRuntimeTypeAnnotations();
     }
 
     Span<const uint8_t> sp {nullptr, nullptr};
-    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(type_annotations_sp_, FieldTag::ANNOTATION, cb,
+    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(typeAnnotationsSp_, FieldTag::ANNOTATION, cb,
                                                                        &sp);
 
-    size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - field_id_.GetOffset() + 1;  // + 1 for NOTHING tag
+    size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - fieldId_.GetOffset() + 1;  // + 1 for NOTHING tag
 }
 
 template <class Callback>
 inline bool FieldDataAccessor::EnumerateRuntimeAnnotationsWithEarlyStop(const Callback &cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return false;
     }
 
-    if (runtime_annotations_sp_.data() == nullptr) {
+    if (runtimeAnnotationsSp_.data() == nullptr) {
         SkipValue();
     }
 
     return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, FieldTag, Callback>(
-        runtime_annotations_sp_, FieldTag::RUNTIME_ANNOTATION, cb);
+        runtimeAnnotationsSp_, FieldTag::RUNTIME_ANNOTATION, cb);
 }
 
 template <class Callback>
 inline bool FieldDataAccessor::EnumerateAnnotationsWithEarlyStop(const Callback &cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return false;
     }
 
-    if (annotations_sp_.data() == nullptr) {
+    if (annotationsSp_.data() == nullptr) {
         SkipRuntimeAnnotations();
     }
 
-    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, FieldTag, Callback>(annotations_sp_,
+    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, FieldTag, Callback>(annotationsSp_,
                                                                                            FieldTag::ANNOTATION, cb);
 }
 

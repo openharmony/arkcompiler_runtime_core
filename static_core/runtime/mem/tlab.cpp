@@ -25,8 +25,8 @@ namespace panda::mem {
 
 TLAB::TLAB(void *address, size_t size)
 {
-    prev_tlab_ = nullptr;
-    next_tlab_ = nullptr;
+    prevTlab_ = nullptr;
+    nextTlab_ = nullptr;
     Fill(address, size);
     LOG_TLAB_ALLOCATOR(DEBUG) << "Construct a new TLAB at addr " << std::hex << address << " with size " << std::dec
                               << size;
@@ -35,81 +35,81 @@ TLAB::TLAB(void *address, size_t size)
 void TLAB::Fill(void *address, size_t size)
 {
     ASSERT(ToUintPtr(address) == AlignUp(ToUintPtr(address), DEFAULT_ALIGNMENT_IN_BYTES));
-    memory_start_addr_ = address;
-    memory_end_addr_ = ToVoidPtr(ToUintPtr(address) + size);
-    cur_free_position_ = address;
-    ASAN_POISON_MEMORY_REGION(memory_start_addr_, GetSize());
+    memoryStartAddr_ = address;
+    memoryEndAddr_ = ToVoidPtr(ToUintPtr(address) + size);
+    curFreePosition_ = address;
+    ASAN_POISON_MEMORY_REGION(memoryStartAddr_, GetSize());
     LOG_TLAB_ALLOCATOR(DEBUG) << "Fill a TLAB with buffer at addr " << std::hex << address << " with size " << std::dec
                               << size;
 }
 
 TLAB::~TLAB()
 {
-    LOG_TLAB_ALLOCATOR(DEBUG) << "Destroy a TLAB at addr " << std::hex << memory_start_addr_ << " with size "
-                              << std::dec << GetSize();
+    LOG_TLAB_ALLOCATOR(DEBUG) << "Destroy a TLAB at addr " << std::hex << memoryStartAddr_ << " with size " << std::dec
+                              << GetSize();
 }
 
 void TLAB::Destroy()
 {
     LOG_TLAB_ALLOCATOR(DEBUG) << "Destroy the TLAB at addr " << std::hex << this;
-    ASAN_UNPOISON_MEMORY_REGION(memory_start_addr_, GetSize());
+    ASAN_UNPOISON_MEMORY_REGION(memoryStartAddr_, GetSize());
 }
 
 void *TLAB::Alloc(size_t size)
 {
     void *ret = nullptr;
-    size_t free_size = GetFreeSize();
-    size_t requested_size = GetAlignedObjectSize(size);
-    if (requested_size <= free_size) {
-        ASSERT(ToUintPtr(cur_free_position_) == AlignUp(ToUintPtr(cur_free_position_), DEFAULT_ALIGNMENT_IN_BYTES));
-        ret = cur_free_position_;
+    size_t freeSize = GetFreeSize();
+    size_t requestedSize = GetAlignedObjectSize(size);
+    if (requestedSize <= freeSize) {
+        ASSERT(ToUintPtr(curFreePosition_) == AlignUp(ToUintPtr(curFreePosition_), DEFAULT_ALIGNMENT_IN_BYTES));
+        ret = curFreePosition_;
         ASAN_UNPOISON_MEMORY_REGION(ret, size);
-        cur_free_position_ = ToVoidPtr(ToUintPtr(cur_free_position_) + requested_size);
+        curFreePosition_ = ToVoidPtr(ToUintPtr(curFreePosition_) + requestedSize);
     }
     LOG_TLAB_ALLOCATOR(DEBUG) << "Alloc size = " << size << " at addr = " << ret;
     return ret;
 }
 
-void TLAB::IterateOverObjects(const std::function<void(ObjectHeader *object_header)> &object_visitor)
+void TLAB::IterateOverObjects(const std::function<void(ObjectHeader *objectHeader)> &objectVisitor)
 {
     LOG_TLAB_ALLOCATOR(DEBUG) << "IterateOverObjects started";
-    auto *cur_ptr = memory_start_addr_;
-    void *end_ptr = cur_free_position_;
-    while (cur_ptr < end_ptr) {
-        auto object_header = static_cast<ObjectHeader *>(cur_ptr);
-        size_t object_size = GetObjectSize(cur_ptr);
-        object_visitor(object_header);
-        cur_ptr = ToVoidPtr(AlignUp(ToUintPtr(cur_ptr) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
+    auto *curPtr = memoryStartAddr_;
+    void *endPtr = curFreePosition_;
+    while (curPtr < endPtr) {
+        auto objectHeader = static_cast<ObjectHeader *>(curPtr);
+        size_t objectSize = GetObjectSize(curPtr);
+        objectVisitor(objectHeader);
+        curPtr = ToVoidPtr(AlignUp(ToUintPtr(curPtr) + objectSize, DEFAULT_ALIGNMENT_IN_BYTES));
     }
     LOG_TLAB_ALLOCATOR(DEBUG) << "IterateOverObjects finished";
 }
 
-void TLAB::IterateOverObjectsInRange(const std::function<void(ObjectHeader *object_header)> &mem_visitor,
-                                     const MemRange &mem_range)
+void TLAB::IterateOverObjectsInRange(const std::function<void(ObjectHeader *objectHeader)> &memVisitor,
+                                     const MemRange &memRange)
 {
     LOG_TLAB_ALLOCATOR(DEBUG) << "IterateOverObjectsInRange started";
-    if (!GetMemRangeForOccupiedMemory().IsIntersect(mem_range)) {
+    if (!GetMemRangeForOccupiedMemory().IsIntersect(memRange)) {
         return;
     }
-    void *current_ptr = memory_start_addr_;
-    void *end_ptr = ToVoidPtr(std::min(ToUintPtr(cur_free_position_), mem_range.GetEndAddress() + 1));
-    void *start_iterate_pos = ToVoidPtr(std::max(ToUintPtr(current_ptr), mem_range.GetStartAddress()));
-    while (current_ptr < start_iterate_pos) {
-        size_t object_size = GetObjectSize(static_cast<ObjectHeader *>(current_ptr));
-        current_ptr = ToVoidPtr(AlignUp(ToUintPtr(current_ptr) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
+    void *currentPtr = memoryStartAddr_;
+    void *endPtr = ToVoidPtr(std::min(ToUintPtr(curFreePosition_), memRange.GetEndAddress() + 1));
+    void *startIteratePos = ToVoidPtr(std::max(ToUintPtr(currentPtr), memRange.GetStartAddress()));
+    while (currentPtr < startIteratePos) {
+        size_t objectSize = GetObjectSize(static_cast<ObjectHeader *>(currentPtr));
+        currentPtr = ToVoidPtr(AlignUp(ToUintPtr(currentPtr) + objectSize, DEFAULT_ALIGNMENT_IN_BYTES));
     }
-    while (current_ptr < end_ptr) {
-        auto object_header = static_cast<ObjectHeader *>(current_ptr);
-        size_t object_size = GetObjectSize(current_ptr);
-        mem_visitor(object_header);
-        current_ptr = ToVoidPtr(AlignUp(ToUintPtr(current_ptr) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
+    while (currentPtr < endPtr) {
+        auto objectHeader = static_cast<ObjectHeader *>(currentPtr);
+        size_t objectSize = GetObjectSize(currentPtr);
+        memVisitor(objectHeader);
+        currentPtr = ToVoidPtr(AlignUp(ToUintPtr(currentPtr) + objectSize, DEFAULT_ALIGNMENT_IN_BYTES));
     }
     LOG_TLAB_ALLOCATOR(DEBUG) << "IterateOverObjects finished";
 }
 
 bool TLAB::ContainObject(const ObjectHeader *obj)
 {
-    return (ToUintPtr(cur_free_position_) > ToUintPtr(obj)) && (ToUintPtr(memory_start_addr_) <= ToUintPtr(obj));
+    return (ToUintPtr(curFreePosition_) > ToUintPtr(obj)) && (ToUintPtr(memoryStartAddr_) <= ToUintPtr(obj));
 }
 
 bool TLAB::IsLive(const ObjectHeader *obj)

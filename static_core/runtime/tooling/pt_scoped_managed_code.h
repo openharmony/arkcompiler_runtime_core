@@ -23,22 +23,22 @@ namespace panda::tooling {
 class PtScopedManagedCode {
 public:
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-    explicit PtScopedManagedCode() : managed_thread_(MTManagedThread::GetCurrent())
+    explicit PtScopedManagedCode() : managedThread_(MTManagedThread::GetCurrent())
     {
-        ASSERT(managed_thread_ != nullptr);
-        managed_thread_->ManagedCodeBegin();
+        ASSERT(managedThread_ != nullptr);
+        managedThread_->ManagedCodeBegin();
     }
 
     ~PtScopedManagedCode()
     {
-        managed_thread_->ManagedCodeEnd();
+        managedThread_->ManagedCodeEnd();
     }
 
     NO_COPY_SEMANTIC(PtScopedManagedCode);
     NO_MOVE_SEMANTIC(PtScopedManagedCode);
 
 private:
-    MTManagedThread *managed_thread_;
+    MTManagedThread *managedThread_;
 };
 }  // namespace panda::tooling
 

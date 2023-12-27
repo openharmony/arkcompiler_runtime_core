@@ -66,15 +66,15 @@ public:
         return mask_[position];
     }
 
-    void Reserve(size_t reserved_bit)
+    void Reserve(size_t reservedBit)
     {
-        reserved_bit_ = reserved_bit;
-        Set(reserved_bit);
+        reservedBit_ = reservedBit;
+        Set(reservedBit);
     }
 
     std::optional<size_t> GetReserved() const
     {
-        return reserved_bit_;
+        return reservedBit_;
     }
 
     const auto &GetVector() const
@@ -82,15 +82,15 @@ public:
         return mask_;
     }
 
-    std::optional<size_t> GetNextNotSet(size_t first_bit = 0)
+    std::optional<size_t> GetNextNotSet(size_t firstBit = 0)
     {
-        for (size_t r = first_bit; r < mask_.size(); r++) {
+        for (size_t r = firstBit; r < mask_.size(); r++) {
             if (!mask_[r]) {
                 Set(r);
                 return r;
             }
         }
-        for (size_t r = 0; r < first_bit; r++) {
+        for (size_t r = 0; r < firstBit; r++) {
             if (!mask_[r]) {
                 Set(r);
                 return r;
@@ -130,7 +130,7 @@ public:
 private:
     ArenaVector<bool> mask_;
     ArenaVector<bool> usage_;
-    std::optional<size_t> reserved_bit_ {std::nullopt};
+    std::optional<size_t> reservedBit_ {std::nullopt};
 };
 }  // namespace panda::compiler
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOCATION_MASK_H

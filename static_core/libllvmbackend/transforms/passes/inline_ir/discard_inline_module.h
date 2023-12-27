@@ -38,7 +38,7 @@ public:
 private:
     bool DiscardIfNecessary(llvm::GlobalObject *object);
 
-    bool ShouldKeep(const llvm::GlobalValue &global_value) const;
+    bool ShouldKeep(const llvm::GlobalValue &globalValue) const;
 
 public:
     static constexpr llvm::StringRef ARG_NAME = "discard-inline-module";

@@ -46,91 +46,91 @@ public:
 
     using OverloadsMap = std::unordered_map<uint8_t const *, char const *, utf::Mutf8Hash, utf::Mutf8Equal>;
 
-    static std::unique_ptr<EtsClassWrapper> Create(InteropCtx *ctx, EtsClass *ets_class,
-                                                   const char *js_builtin_name = nullptr,
+    static std::unique_ptr<EtsClassWrapper> Create(InteropCtx *ctx, EtsClass *etsClass,
+                                                   const char *jsBuiltinName = nullptr,
                                                    const OverloadsMap *overloads = nullptr);
 
-    static EtsClassWrapper *Get(InteropCtx *ctx, EtsClass *ets_class);
+    static EtsClassWrapper *Get(InteropCtx *ctx, EtsClass *etsClass);
 
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertEtsProxy(InteropCtx *ctx, Class *klass);
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertJSProxy(InteropCtx *ctx, Class *klass);
 
     EtsClass *GetEtsClass()
     {
-        return ets_class_;
+        return etsClass_;
     }
 
     napi_value GetJsCtor(napi_env env) const
     {
-        return GetReferenceValue(env, js_ctor_ref_);
+        return GetReferenceValue(env, jsCtorRef_);
     }
 
     bool HasBuiltin() const
     {
-        return js_builtin_ctor_ref_ != nullptr;
+        return jsBuiltinCtorRef_ != nullptr;
     }
 
     napi_value GetBuiltin(napi_env env) const
     {
         ASSERT(HasBuiltin());
-        return GetReferenceValue(env, js_builtin_ctor_ref_);
+        return GetReferenceValue(env, jsBuiltinCtorRef_);
     }
 
     void SetJSBuiltinMatcher(std::function<EtsObject *(InteropCtx *, napi_value, bool)> &&matcher)
     {
-        js_builtin_matcher_ = matcher;
+        jsBuiltinMatcher_ = matcher;
     }
 
-    napi_value Wrap(InteropCtx *ctx, EtsObject *ets_object);
-    EtsObject *Unwrap(InteropCtx *ctx, napi_value js_value);
+    napi_value Wrap(InteropCtx *ctx, EtsObject *etsObject);
+    EtsObject *Unwrap(InteropCtx *ctx, napi_value jsValue);
 
-    EtsObject *UnwrapEtsProxy(InteropCtx *ctx, napi_value js_value);
-    EtsObject *CreateJSBuiltinProxy(InteropCtx *ctx, napi_value js_value);
+    EtsObject *UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue);
+    EtsObject *CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsValue);
 
     ~EtsClassWrapper() = default;
 
 private:
-    explicit EtsClassWrapper(EtsClass *ets_cls) : ets_class_(ets_cls) {}
+    explicit EtsClassWrapper(EtsClass *etsCls) : etsClass_(etsCls) {}
     NO_COPY_SEMANTIC(EtsClassWrapper);
     NO_MOVE_SEMANTIC(EtsClassWrapper);
 
-    bool SetupHierarchy(InteropCtx *ctx, const char *js_builtin_name);
+    bool SetupHierarchy(InteropCtx *ctx, const char *jsBuiltinName);
     std::pair<std::vector<Field *>, std::vector<Method *>> CalculateProperties(const OverloadsMap *overloads);
     std::vector<napi_property_descriptor> BuildJSProperties(Span<Field *> fields, Span<Method *> methods);
     EtsClassWrapper *LookupBaseWrapper(EtsClass *klass);
 
     static napi_value JSCtorCallback(napi_env env, napi_callback_info cinfo);
-    bool CreateAndWrap(napi_env env, napi_value js_newtarget, napi_value js_this, Span<napi_value> js_args);
+    bool CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_value jsThis, Span<napi_value> jsArgs);
 
-    static void ThrowJSErrorNotAssignable(napi_env env, EtsClass *from_klass, EtsClass *to_klass);
+    static void ThrowJSErrorNotAssignable(napi_env env, EtsClass *fromKlass, EtsClass *toKlass);
 
     Span<EtsFieldWrapper> GetFields()
     {
-        return Span<EtsFieldWrapper>(ets_field_wrappers_.get(), num_fields_);
+        return Span<EtsFieldWrapper>(etsFieldWrappers_.get(), numFields_);
     }
 
     Span<LazyEtsMethodWrapperLink> GetMethods()
     {
-        return Span<LazyEtsMethodWrapperLink>(ets_method_wrappers_.get(), num_methods_);
+        return Span<LazyEtsMethodWrapperLink>(etsMethodWrappers_.get(), numMethods_);
     }
 
-    EtsClass *const ets_class_ {};
-    EtsClassWrapper *base_wrapper_ {};
+    EtsClass *const etsClass_ {};
+    EtsClassWrapper *baseWrapper_ {};
 
-    LazyEtsMethodWrapperLink ets_ctor_link_ {};
-    napi_ref js_ctor_ref_ {};
+    LazyEtsMethodWrapperLink etsCtorLink_ {};
+    napi_ref jsCtorRef_ {};
 
     // For built-in classes
-    napi_ref js_builtin_ctor_ref_ {};
-    std::function<EtsObject *(InteropCtx *, napi_value, bool)> js_builtin_matcher_;
+    napi_ref jsBuiltinCtorRef_ {};
+    std::function<EtsObject *(InteropCtx *, napi_value, bool)> jsBuiltinMatcher_;
 
-    std::unique_ptr<js_proxy::JSProxy> jsproxy_wrapper_ {};
+    std::unique_ptr<js_proxy::JSProxy> jsproxyWrapper_ {};
 
     // NOTE(vpukhov): allocate inplace to reduce memory consumption
-    std::unique_ptr<LazyEtsMethodWrapperLink[]> ets_method_wrappers_;  // NOLINT(modernize-avoid-c-arrays)
-    std::unique_ptr<EtsFieldWrapper[]> ets_field_wrappers_;            // NOLINT(modernize-avoid-c-arrays)
-    uint32_t num_methods_ {};
-    uint32_t num_fields_ {};
+    std::unique_ptr<LazyEtsMethodWrapperLink[]> etsMethodWrappers_;  // NOLINT(modernize-avoid-c-arrays)
+    std::unique_ptr<EtsFieldWrapper[]> etsFieldWrappers_;            // NOLINT(modernize-avoid-c-arrays)
+    uint32_t numMethods_ {};
+    uint32_t numFields_ {};
 };
 
 }  // namespace panda::ets::interop::js::ets_proxy

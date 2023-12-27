@@ -49,56 +49,56 @@ bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
 }
 
 template <bool IS_STORE>
-bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr klass_ptr,
-                        RuntimeInterface::FieldPtr raw_field, size_t field_id)
+bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr klassPtr,
+                        RuntimeInterface::FieldPtr rawField, size_t fieldId)
 {
     auto graph = intrinsic->GetBasicBlock()->GetGraph();
     auto runtime = graph->GetRuntime();
-    auto field = runtime->ResolveLookUpField(raw_field, klass_ptr);
+    auto field = runtime->ResolveLookUpField(rawField, klassPtr);
     if (field == nullptr) {
         return false;
     }
-    Inst *mem_obj;
+    Inst *memObj;
     auto type = intrinsic->GetType();
     auto pc = intrinsic->GetPc();
     if constexpr (IS_STORE) {
-        auto store_field = graph->CreateInstStoreObject(type, pc);
-        store_field->SetTypeId(field_id);
-        store_field->SetMethod(intrinsic->GetMethod());
-        store_field->SetObjField(field);
+        auto storeField = graph->CreateInstStoreObject(type, pc);
+        storeField->SetTypeId(fieldId);
+        storeField->SetMethod(intrinsic->GetMethod());
+        storeField->SetObjField(field);
         if (runtime->IsFieldVolatile(field)) {
-            store_field->SetVolatile(true);
+            storeField->SetVolatile(true);
         }
         if (type == DataType::REFERENCE) {
-            store_field->SetNeedBarrier(true);
+            storeField->SetNeedBarrier(true);
         }
-        store_field->SetInput(1, intrinsic->GetInput(1).GetInst());
-        mem_obj = store_field;
+        storeField->SetInput(1, intrinsic->GetInput(1).GetInst());
+        memObj = storeField;
     } else {
-        auto load_field = graph->CreateInstLoadObject(type, pc);
-        load_field->SetTypeId(field_id);
-        load_field->SetMethod(intrinsic->GetMethod());
-        load_field->SetObjField(field);
+        auto loadField = graph->CreateInstLoadObject(type, pc);
+        loadField->SetTypeId(fieldId);
+        loadField->SetMethod(intrinsic->GetMethod());
+        loadField->SetObjField(field);
         if (runtime->IsFieldVolatile(field)) {
-            load_field->SetVolatile(true);
+            loadField->SetVolatile(true);
         }
-        mem_obj = load_field;
-        intrinsic->ReplaceUsers(load_field);
+        memObj = loadField;
+        intrinsic->ReplaceUsers(loadField);
     }
-    mem_obj->SetInput(0, intrinsic->GetInput(0).GetInst());
-    intrinsic->InsertAfter(mem_obj);
+    memObj->SetInput(0, intrinsic->GetInput(0).GetInst());
+    intrinsic->InsertAfter(memObj);
 
     intrinsic->ClearFlag(inst_flags::NO_DCE);
     return true;
 }
 
 template <bool IS_STORE>
-bool TryInsertCallInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr klass_ptr,
-                       RuntimeInterface::FieldPtr raw_field)
+bool TryInsertCallInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr klassPtr,
+                       RuntimeInterface::FieldPtr rawField)
 {
     auto graph = intrinsic->GetBasicBlock()->GetGraph();
     auto runtime = graph->GetRuntime();
-    auto method = runtime->ResolveLookUpCall(raw_field, klass_ptr, IS_STORE);
+    auto method = runtime->ResolveLookUpCall(rawField, klassPtr, IS_STORE);
     if (method == nullptr) {
         return false;
     }
@@ -107,10 +107,10 @@ bool TryInsertCallInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr klas
 
     auto call = graph->CreateInstCallVirtual(type, pc, runtime->GetMethodId(method));
     call->SetCallMethod(method);
-    size_t num_inputs = IS_STORE ? 3 : 2;
-    call->ReserveInputs(num_inputs);
-    call->AllocateInputTypes(graph->GetAllocator(), num_inputs);
-    for (size_t i = 0; i < num_inputs; ++i) {
+    size_t numInputs = IS_STORE ? 3 : 2;
+    call->ReserveInputs(numInputs);
+    call->AllocateInputTypes(graph->GetAllocator(), numInputs);
+    for (size_t i = 0; i < numInputs; ++i) {
         call->AppendInputAndType(intrinsic->GetInput(i).GetInst(), intrinsic->GetInputType(i));
     }
     intrinsic->InsertAfter(call);
@@ -121,22 +121,22 @@ bool TryInsertCallInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr klas
 
 bool Peepholes::PeepholeLdObjByName(GraphVisitor *v, IntrinsicInst *intrinsic)
 {
-    auto klass_ptr = GetClassPtrForObject(intrinsic);
-    if (klass_ptr == nullptr) {
+    auto klassPtr = GetClassPtrForObject(intrinsic);
+    if (klassPtr == nullptr) {
         return false;
     }
     auto graph = intrinsic->GetBasicBlock()->GetGraph();
     auto method = intrinsic->GetMethod();
     auto runtime = graph->GetRuntime();
-    auto field_id = intrinsic->GetImm(0);
-    auto raw_field = runtime->ResolveField(method, field_id, !graph->IsAotMode(), nullptr);
-    ASSERT(raw_field != nullptr);
+    auto fieldId = intrinsic->GetImm(0);
+    auto rawField = runtime->ResolveField(method, fieldId, !graph->IsAotMode(), nullptr);
+    ASSERT(rawField != nullptr);
 
-    if (TryInsertFieldInst<false>(intrinsic, klass_ptr, raw_field, field_id)) {
+    if (TryInsertFieldInst<false>(intrinsic, klassPtr, rawField, fieldId)) {
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), intrinsic);
         return true;
     }
-    if (TryInsertCallInst<false>(intrinsic, klass_ptr, raw_field)) {
+    if (TryInsertCallInst<false>(intrinsic, klassPtr, rawField)) {
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), intrinsic);
         return true;
     }
@@ -145,22 +145,22 @@ bool Peepholes::PeepholeLdObjByName(GraphVisitor *v, IntrinsicInst *intrinsic)
 
 bool Peepholes::PeepholeStObjByName(GraphVisitor *v, IntrinsicInst *intrinsic)
 {
-    auto klass_ptr = GetClassPtrForObject(intrinsic);
-    if (klass_ptr == nullptr) {
+    auto klassPtr = GetClassPtrForObject(intrinsic);
+    if (klassPtr == nullptr) {
         return false;
     }
     auto graph = intrinsic->GetBasicBlock()->GetGraph();
     auto method = intrinsic->GetMethod();
     auto runtime = graph->GetRuntime();
-    auto field_id = intrinsic->GetImm(0);
-    auto raw_field = runtime->ResolveField(method, field_id, !graph->IsAotMode(), nullptr);
-    ASSERT(raw_field != nullptr);
+    auto fieldId = intrinsic->GetImm(0);
+    auto rawField = runtime->ResolveField(method, fieldId, !graph->IsAotMode(), nullptr);
+    ASSERT(rawField != nullptr);
 
-    if (TryInsertFieldInst<true>(intrinsic, klass_ptr, raw_field, field_id)) {
+    if (TryInsertFieldInst<true>(intrinsic, klassPtr, rawField, fieldId)) {
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), intrinsic);
         return true;
     }
-    if (TryInsertCallInst<true>(intrinsic, klass_ptr, raw_field)) {
+    if (TryInsertCallInst<true>(intrinsic, klassPtr, rawField)) {
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), intrinsic);
         return true;
     }

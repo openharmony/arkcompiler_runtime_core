@@ -17,12 +17,12 @@
 
 namespace panda::mem {
 
-bool MemConfig::is_initialized_ = false;
-size_t MemConfig::initial_heap_size_limit_ = 0;
-size_t MemConfig::heap_size_limit_ = 0;
-size_t MemConfig::internal_memory_size_limit_ = 0;
-size_t MemConfig::code_cache_size_limit_ = 0;
-size_t MemConfig::compiler_memory_size_limit_ = 0;
-size_t MemConfig::frames_memory_size_limit_ = 0;
-size_t MemConfig::native_stacks_memory_size_limit_ = 0;
+bool MemConfig::isInitialized_ = false;
+size_t MemConfig::initialHeapSizeLimit_ = 0;
+size_t MemConfig::heapSizeLimit_ = 0;
+size_t MemConfig::internalMemorySizeLimit_ = 0;
+size_t MemConfig::codeCacheSizeLimit_ = 0;
+size_t MemConfig::compilerMemorySizeLimit_ = 0;
+size_t MemConfig::framesMemorySizeLimit_ = 0;
+size_t MemConfig::nativeStacksMemorySizeLimit_ = 0;
 }  // namespace panda::mem

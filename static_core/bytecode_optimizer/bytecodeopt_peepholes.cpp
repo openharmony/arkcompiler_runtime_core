@@ -24,11 +24,11 @@ bool BytecodeOptPeepholes::RunImpl()
     return IsApplied();
 }
 
-CallInst *FindCtorCall(Inst *new_object)
+CallInst *FindCtorCall(Inst *newObject)
 {
-    auto *graph = new_object->GetBasicBlock()->GetGraph();
+    auto *graph = newObject->GetBasicBlock()->GetGraph();
     auto *adapter = graph->GetRuntime();
-    for (auto &user : new_object->GetUsers()) {
+    for (auto &user : newObject->GetUsers()) {
         auto *inst = user.GetInst();
         if (inst->GetOpcode() == Opcode::NullCheck) {
             return FindCtorCall(inst);
@@ -37,10 +37,10 @@ CallInst *FindCtorCall(Inst *new_object)
             continue;
         }
         auto call = inst->CastToCallStatic();
-        auto call_first_arg = call->GetInput(0U).GetInst();
-        if (call_first_arg->GetOpcode() == Opcode::NewObject) {
-            auto new_object_as_arg = call_first_arg->CastToNewObject();
-            if (new_object_as_arg != new_object) {
+        auto callFirstArg = call->GetInput(0U).GetInst();
+        if (callFirstArg->GetOpcode() == Opcode::NewObject) {
+            auto newObjectAsArg = callFirstArg->CastToNewObject();
+            if (newObjectAsArg != newObject) {
                 continue;
             }
         }
@@ -52,52 +52,52 @@ CallInst *FindCtorCall(Inst *new_object)
     return nullptr;
 }
 
-CallInst *CreateInitObject(compiler::GraphVisitor *v, compiler::ClassInst *load, const CallInst *call_init)
+CallInst *CreateInitObject(compiler::GraphVisitor *v, compiler::ClassInst *load, const CallInst *callInit)
 {
     auto *graph = static_cast<BytecodeOptPeepholes *>(v)->GetGraph();
-    auto *init_object = static_cast<CallInst *>(graph->CreateInst(compiler::Opcode::InitObject));
-    init_object->SetType(compiler::DataType::REFERENCE);
+    auto *initObject = static_cast<CallInst *>(graph->CreateInst(compiler::Opcode::InitObject));
+    initObject->SetType(compiler::DataType::REFERENCE);
 
-    auto input_types_count = call_init->GetInputsCount();
-    init_object->AllocateInputTypes(graph->GetAllocator(), input_types_count);
-    init_object->AppendInputAndType(load, compiler::DataType::REFERENCE);
-    for (size_t i = 1; i < input_types_count; ++i) {
-        auto input_inst = call_init->GetInput(i).GetInst();
-        init_object->AppendInputAndType(input_inst, input_inst->GetType());
+    auto inputTypesCount = callInit->GetInputsCount();
+    initObject->AllocateInputTypes(graph->GetAllocator(), inputTypesCount);
+    initObject->AppendInputAndType(load, compiler::DataType::REFERENCE);
+    for (size_t i = 1; i < inputTypesCount; ++i) {
+        auto inputInst = callInit->GetInput(i).GetInst();
+        initObject->AppendInputAndType(inputInst, inputInst->GetType());
     }
 
-    init_object->SetCallMethodId(call_init->GetCallMethodId());
-    init_object->SetCallMethod(static_cast<const CallInst *>(call_init)->GetCallMethod());
-    return init_object;
+    initObject->SetCallMethodId(callInit->GetCallMethodId());
+    initObject->SetCallMethod(static_cast<const CallInst *>(callInit)->GetCallMethod());
+    return initObject;
 }
 
-void ReplaceNewObjectUsers(Inst *new_object, Inst *null_check, CallInst *init_object)
+void ReplaceNewObjectUsers(Inst *newObject, Inst *nullCheck, CallInst *initObject)
 {
-    for (auto it = new_object->GetUsers().begin(); it != new_object->GetUsers().end();
-         it = new_object->GetUsers().begin()) {
+    for (auto it = newObject->GetUsers().begin(); it != newObject->GetUsers().end();
+         it = newObject->GetUsers().begin()) {
         auto user = it->GetInst();
-        if (user != null_check) {
-            user->SetInput(it->GetIndex(), init_object);
+        if (user != nullCheck) {
+            user->SetInput(it->GetIndex(), initObject);
         } else {
-            new_object->RemoveUser(&(*it));
+            newObject->RemoveUser(&(*it));
         }
     }
 
     // Update throwable instructions data
-    auto graph = new_object->GetBasicBlock()->GetGraph();
-    if (graph->IsInstThrowable(new_object)) {
-        graph->ReplaceThrowableInst(new_object, init_object);
+    auto graph = newObject->GetBasicBlock()->GetGraph();
+    if (graph->IsInstThrowable(newObject)) {
+        graph->ReplaceThrowableInst(newObject, initObject);
     }
 }
 
 void BytecodeOptPeepholes::VisitNewObject(GraphVisitor *v, Inst *inst)
 {
-    CallInst *call_init = FindCtorCall(inst);
-    if (call_init == nullptr) {
+    CallInst *callInit = FindCtorCall(inst);
+    if (callInit == nullptr) {
         return;
     }
 
-    if (inst->GetBasicBlock() != call_init->GetBasicBlock()) {
+    if (inst->GetBasicBlock() != callInit->GetBasicBlock()) {
         return;
     }
 
@@ -106,15 +106,15 @@ void BytecodeOptPeepholes::VisitNewObject(GraphVisitor *v, Inst *inst)
     // Moreover, when we are inside a try block, local register state also matters, because it may be used inside
     // catch blocks. In such case we also abort if there are any instructions in corresponding bytecode.
     const auto graph = static_cast<BytecodeOptPeepholes *>(v)->GetGraph();
-    const size_t newobj_size =
+    const size_t newobjSize =
         BytecodeInstruction::Size(  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             BytecodeInstruction(graph->GetRuntime()->GetMethodCode(graph->GetMethod()) + inst->GetPc()).GetFormat());
-    if (inst->GetBasicBlock()->IsTry() && call_init->GetPc() - inst->GetPc() > newobj_size) {
+    if (inst->GetBasicBlock()->IsTry() && callInit->GetPc() - inst->GetPc() > newobjSize) {
         return;
     }
 
-    Inst *null_check = nullptr;
-    for (auto *i = inst->GetNext(); i != call_init; i = i->GetNext()) {
+    Inst *nullCheck = nullptr;
+    for (auto *i = inst->GetNext(); i != callInit; i = i->GetNext()) {
         if (i->GetOpcode() != Opcode::SaveState && i->GetOpcode() != Opcode::NullCheck) {
             return;
         }
@@ -123,33 +123,33 @@ void BytecodeOptPeepholes::VisitNewObject(GraphVisitor *v, Inst *inst)
             continue;
         }
 
-        for (auto null_check_input : i->GetInputs()) {
-            if (null_check_input.GetInst() == inst) {
-                ASSERT(null_check == nullptr);
-                null_check = i;
+        for (auto nullCheckInput : i->GetInputs()) {
+            if (nullCheckInput.GetInst() == inst) {
+                ASSERT(nullCheck == nullptr);
+                nullCheck = i;
             }
         }
-        if (null_check == nullptr) {
+        if (nullCheck == nullptr) {
             return;
         }
     }
 
     auto load = static_cast<compiler::ClassInst *>(inst->GetInput(0U).GetInst());
-    auto *init_object = CreateInitObject(v, load, call_init);
-    call_init->InsertBefore(init_object);
-    init_object->SetPc(call_init->GetPc());
+    auto *initObject = CreateInitObject(v, load, callInit);
+    callInit->InsertBefore(initObject);
+    initObject->SetPc(callInit->GetPc());
 
-    ReplaceNewObjectUsers(inst, null_check, init_object);
+    ReplaceNewObjectUsers(inst, nullCheck, initObject);
     inst->ClearFlag(compiler::inst_flags::NO_DCE);
-    if (null_check != nullptr) {
-        null_check->ReplaceUsers(init_object);
-        null_check->ClearFlag(compiler::inst_flags::NO_DCE);
-        null_check->RemoveInputs();
-        null_check->GetBasicBlock()->ReplaceInst(null_check,
-                                                 static_cast<BytecodeOptPeepholes *>(v)->GetGraph()->CreateInstNOP());
+    if (nullCheck != nullptr) {
+        nullCheck->ReplaceUsers(initObject);
+        nullCheck->ClearFlag(compiler::inst_flags::NO_DCE);
+        nullCheck->RemoveInputs();
+        nullCheck->GetBasicBlock()->ReplaceInst(nullCheck,
+                                                static_cast<BytecodeOptPeepholes *>(v)->GetGraph()->CreateInstNOP());
     }
-    ASSERT(!call_init->HasUsers());
-    call_init->ClearFlag(compiler::inst_flags::NO_DCE);
+    ASSERT(!callInit->HasUsers());
+    callInit->ClearFlag(compiler::inst_flags::NO_DCE);
 
     static_cast<BytecodeOptPeepholes *>(v)->SetIsApplied();
 }

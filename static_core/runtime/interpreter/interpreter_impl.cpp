@@ -34,45 +34,45 @@ namespace panda::interpreter {
 
 enum InterpreterType { CPP = 0, IRTOC, LLVM };
 
-void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh)
+void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh)
 {
     const uint8_t *inst = frame->GetMethod()->GetInstructions();
     frame->SetInstruction(inst);
-    InterpreterType interpreter_type = InterpreterType::CPP;
+    InterpreterType interpreterType = InterpreterType::CPP;
 #if !defined(PANDA_TARGET_ARM32)  // Arm32 sticks to cpp - irtoc is not available there
-    bool was_set = Runtime::GetOptions().WasSetInterpreterType();
+    bool wasSet = Runtime::GetOptions().WasSetInterpreterType();
     // Dynamic languages default is always cpp interpreter (unless option was set)
-    if (!frame->IsDynamic() || was_set) {
-        auto interpreter_type_str = Runtime::GetOptions().GetInterpreterType();
-        if (interpreter_type_str == "llvm") {
-            interpreter_type = InterpreterType::LLVM;
-        } else if (interpreter_type_str == "irtoc") {
-            interpreter_type = InterpreterType::IRTOC;
+    if (!frame->IsDynamic() || wasSet) {
+        auto interpreterTypeStr = Runtime::GetOptions().GetInterpreterType();
+        if (interpreterTypeStr == "llvm") {
+            interpreterType = InterpreterType::LLVM;
+        } else if (interpreterTypeStr == "irtoc") {
+            interpreterType = InterpreterType::IRTOC;
         } else {
-            ASSERT(interpreter_type_str == "cpp");
+            ASSERT(interpreterTypeStr == "cpp");
         }
-        if (!was_set) {
+        if (!wasSet) {
 #ifndef PANDA_LLVM_INTERPRETER
-            if (interpreter_type == InterpreterType::LLVM) {
-                interpreter_type = InterpreterType::IRTOC;
+            if (interpreterType == InterpreterType::LLVM) {
+                interpreterType = InterpreterType::IRTOC;
             }
 #endif
 #ifndef PANDA_WITH_IRTOC
-            if (interpreter_type == InterpreterType::IRTOC) {
-                interpreter_type = InterpreterType::CPP;
+            if (interpreterType == InterpreterType::IRTOC) {
+                interpreterType = InterpreterType::CPP;
             }
 #endif
         }
     }
-    if (interpreter_type > InterpreterType::CPP) {
+    if (interpreterType > InterpreterType::CPP) {
         if (Runtime::GetCurrent()->IsDebugMode()) {
             LOG(FATAL, RUNTIME) << "--debug-mode=true option is supported only with --interpreter-type=cpp";
             return;
         }
         if (frame->IsDynamic()) {
-            auto gc_type = thread->GetVM()->GetGC()->GetType();
-            if (gc_type != mem::GCType::G1_GC) {
-                LOG(FATAL, RUNTIME) << "For dynamic languages, --gc-type=" << mem::GCStringFromType(gc_type)
+            auto gcType = thread->GetVM()->GetGC()->GetType();
+            if (gcType != mem::GCType::G1_GC) {
+                LOG(FATAL, RUNTIME) << "For dynamic languages, --gc-type=" << mem::GCStringFromType(gcType)
                                     << " option is supported only with --interpreter-type=cpp";
                 return;
             }
@@ -82,26 +82,26 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
         }
     }
 #endif
-    if (interpreter_type == InterpreterType::LLVM) {
+    if (interpreterType == InterpreterType::LLVM) {
 #ifdef PANDA_LLVM_INTERPRETER
         LOG(DEBUG, RUNTIME) << "Setting up LLVM Irtoc dispatch table";
-        auto dispath_table = SetupLLVMDispatchTableImpl();
-        if (jump_to_eh) {
-            ExecuteImplFastEH_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispath_table);
+        auto dispathTable = SetupLLVMDispatchTableImpl();
+        if (jumpToEh) {
+            ExecuteImplFastEH_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
         } else {
-            ExecuteImplFast_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispath_table);
+            ExecuteImplFast_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
         }
 #else
         LOG(FATAL, RUNTIME) << "--interpreter-type=llvm is not supported in this configuration";
 #endif
-    } else if (interpreter_type == InterpreterType::IRTOC) {
+    } else if (interpreterType == InterpreterType::IRTOC) {
 #ifdef PANDA_WITH_IRTOC
         LOG(DEBUG, RUNTIME) << "Setting up Irtoc dispatch table";
-        auto dispath_table = SetupDispatchTableImpl();
-        if (jump_to_eh) {
-            ExecuteImplFastEH(thread, const_cast<uint8_t *>(pc), frame, dispath_table);
+        auto dispathTable = SetupDispatchTableImpl();
+        if (jumpToEh) {
+            ExecuteImplFastEH(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
         } else {
-            ExecuteImplFast(thread, const_cast<uint8_t *>(pc), frame, dispath_table);
+            ExecuteImplFast(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
         }
 #else
         LOG(FATAL, RUNTIME) << "--interpreter-type=irtoc is not supported in this configuration";
@@ -109,12 +109,12 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     } else {
         if (frame->IsDynamic()) {
             if (thread->GetVM()->IsBytecodeProfilingEnabled()) {
-                ExecuteImplInner<RuntimeInterface, true, true>(thread, pc, frame, jump_to_eh);
+                ExecuteImplInner<RuntimeInterface, true, true>(thread, pc, frame, jumpToEh);
             } else {
-                ExecuteImplInner<RuntimeInterface, true, false>(thread, pc, frame, jump_to_eh);
+                ExecuteImplInner<RuntimeInterface, true, false>(thread, pc, frame, jumpToEh);
             }
         } else {
-            ExecuteImplInner<RuntimeInterface, false>(thread, pc, frame, jump_to_eh);
+            ExecuteImplInner<RuntimeInterface, false>(thread, pc, frame, jumpToEh);
         }
     }
 }
@@ -134,9 +134,9 @@ void InstructionHandlerBase<RuntimeIfaceT, IS_DYNAMIC>::DebugDump()
     std::cerr << pad << "total frame size = " << frame->GetSize() << std::endl;
     std::cerr << "Frame:" << std::endl;
     std::cerr << pad << "acc." << GetAccAsVReg<IS_DYNAMIC>().DumpVReg() << std::endl;
-    auto frame_handler = GetFrameHandler(frame);
+    auto frameHandler = GetFrameHandler(frame);
     for (size_t i = 0; i < frame->GetSize(); ++i) {
-        std::cerr << pad << "v" << i << "." << frame_handler.GetVReg(i).DumpVReg() << std::endl;
+        std::cerr << pad << "v" << i << "." << frameHandler.GetVReg(i).DumpVReg() << std::endl;
     }
     std::cerr << "Bytecode:" << std::endl;
     size_t offset = 0;

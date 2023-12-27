@@ -19,39 +19,39 @@ namespace panda::tooling::sampler {
 
 size_t AsptConverter::CollectTracesStats()
 {
-    stack_traces_.clear();
+    stackTraces_.clear();
 
-    size_t sample_counter = 0;
+    size_t sampleCounter = 0;
     SampleInfo sample;
     while (reader_.GetNextSample(&sample)) {
-        ++sample_counter;
+        ++sampleCounter;
 
-        if (dump_type_ == DumpType::WITHOUT_THREAD_SEPARATION) {
+        if (dumpType_ == DumpType::WITHOUT_THREAD_SEPARATION) {
             // NOTE: zeroing thread_id to make samples indistinguishable in mode without thread separation
-            sample.thread_info.thread_id = 0;
+            sample.threadInfo.threadId = 0;
         }
 
-        if (!build_cold_graph_) {
+        if (!buildColdGraph_) {
             // NOTE: zeroing thread_status to make samples indistinguishable
             // in mode without building cold flamegraph
-            sample.thread_info.thread_status = SampleInfo::ThreadStatus::UNDECLARED;
+            sample.threadInfo.threadStatus = SampleInfo::ThreadStatus::UNDECLARED;
         }
 
-        auto it = stack_traces_.find(sample);
-        if (it == stack_traces_.end()) {
-            stack_traces_.insert({sample, 1});
+        auto it = stackTraces_.find(sample);
+        if (it == stackTraces_.end()) {
+            stackTraces_.insert({sample, 1});
             continue;
         }
         ++it->second;
     }
-    return sample_counter;
+    return sampleCounter;
 }
 
 bool AsptConverter::CollectModules()
 {
-    FileInfo m_info;
-    while (reader_.GetNextModule(&m_info)) {
-        modules_.push_back(m_info);
+    FileInfo mInfo;
+    while (reader_.GetNextModule(&mInfo)) {
+        modules_.push_back(mInfo);
     }
 
     return !modules_.empty();
@@ -62,7 +62,7 @@ bool AsptConverter::BuildModulesMap()
     for (auto &mdl : modules_) {
         std::string filepath = mdl.pathname;
 
-        if (substitute_directories_.has_value()) {
+        if (substituteDirectories_.has_value()) {
             SubstituteDirectories(&filepath);
         }
 
@@ -70,27 +70,27 @@ bool AsptConverter::BuildModulesMap()
             LOG(ERROR, PROFILER) << "Module not found, path: " << filepath;
         }
 
-        if (modules_map_.find(mdl.ptr) == modules_map_.end()) {
-            auto pf_unique = panda_file::OpenPandaFileOrZip(filepath.c_str());
+        if (modulesMap_.find(mdl.ptr) == modulesMap_.end()) {
+            auto pfUnique = panda_file::OpenPandaFileOrZip(filepath.c_str());
 
-            if (mdl.checksum != pf_unique->GetHeader()->checksum) {
+            if (mdl.checksum != pfUnique->GetHeader()->checksum) {
                 LOG(FATAL, PROFILER) << "Сhecksum of panda files isn't equal";
                 return false;
             }
 
-            modules_map_.insert({mdl.ptr, std::move(pf_unique)});
+            modulesMap_.insert({mdl.ptr, std::move(pfUnique)});
         }
     }
 
-    return !modules_map_.empty();
+    return !modulesMap_.empty();
 }
 
 void AsptConverter::SubstituteDirectories(std::string *pathname) const
 {
-    for (size_t i = 0; i < substitute_directories_->source.size(); ++i) {
-        auto pos = pathname->find(substitute_directories_->source[i]);
+    for (size_t i = 0; i < substituteDirectories_->source.size(); ++i) {
+        auto pos = pathname->find(substituteDirectories_->source[i]);
         if (pos != std::string::npos) {
-            pathname->replace(pos, substitute_directories_->source[i].size(), substitute_directories_->destination[i]);
+            pathname->replace(pos, substituteDirectories_->source[i].size(), substituteDirectories_->destination[i]);
             break;
         }
     }
@@ -100,20 +100,20 @@ bool AsptConverter::DumpResolvedTracesAsCSV(const char *filename)
 {
     std::unique_ptr<TraceDumper> dumper;
 
-    switch (dump_type_) {
+    switch (dumpType_) {
         case DumpType::WITHOUT_THREAD_SEPARATION:
         case DumpType::THREAD_SEPARATION_BY_TID:
-            dumper = std::make_unique<SingleCSVDumper>(filename, dump_type_, &modules_map_, &methods_map_,
-                                                       build_cold_graph_);
+            dumper =
+                std::make_unique<SingleCSVDumper>(filename, dumpType_, &modulesMap_, &methodsMap_, buildColdGraph_);
             break;
         case DumpType::THREAD_SEPARATION_BY_CSV:
-            dumper = std::make_unique<MultipleCSVDumper>(filename, &modules_map_, &methods_map_, build_cold_graph_);
+            dumper = std::make_unique<MultipleCSVDumper>(filename, &modulesMap_, &methodsMap_, buildColdGraph_);
             break;
         default:
             UNREACHABLE();
     }
-    for (auto &[sample, count] : stack_traces_) {
-        ASSERT(sample.stack_info.managed_stack_size <= SampleInfo::StackInfo::MAX_STACK_DEPTH);
+    for (auto &[sample, count] : stackTraces_) {
+        ASSERT(sample.stackInfo.managedStackSize <= SampleInfo::StackInfo::MAX_STACK_DEPTH);
         dumper->DumpTraces(sample, count);
     }
     return true;
@@ -121,26 +121,26 @@ bool AsptConverter::DumpResolvedTracesAsCSV(const char *filename)
 
 void AsptConverter::BuildMethodsMap()
 {
-    for (const auto &pf_pair : modules_map_) {
-        const panda_file::File *pf = pf_pair.second.get();
+    for (const auto &pfPair : modulesMap_) {
+        const panda_file::File *pf = pfPair.second.get();
         if (pf == nullptr) {
             continue;
         }
-        auto classes_span = pf->GetClasses();
-        for (auto id : classes_span) {
+        auto classesSpan = pf->GetClasses();
+        for (auto id : classesSpan) {
             if (pf->IsExternal(panda_file::File::EntityId(id))) {
                 continue;
             }
             panda_file::ClassDataAccessor cda(*pf, panda_file::File::EntityId(id));
             cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-                std::string method_name = utf::Mutf8AsCString(mda.GetName().data);
-                std::string class_name = utf::Mutf8AsCString(cda.GetDescriptor());
-                if (class_name[class_name.length() - 1] == ';') {
-                    class_name.pop_back();
+                std::string methodName = utf::Mutf8AsCString(mda.GetName().data);
+                std::string className = utf::Mutf8AsCString(cda.GetDescriptor());
+                if (className[className.length() - 1] == ';') {
+                    className.pop_back();
                 }
-                std::string full_name = class_name + "::";
-                full_name += method_name;
-                methods_map_[pf][mda.GetMethodId().GetOffset()] = std::move(full_name);
+                std::string fullName = className + "::";
+                fullName += methodName;
+                methodsMap_[pf][mda.GetMethodId().GetOffset()] = std::move(fullName);
             });
         }
     }
@@ -169,24 +169,24 @@ bool AsptConverter::DumpModulesToFile(const std::string &outname) const
 }
 
 /* static */
-DumpType AsptConverter::GetDumpTypeFromOptions(const Options &cli_options)
+DumpType AsptConverter::GetDumpTypeFromOptions(const Options &cliOptions)
 {
-    const std::string dump_type_str = cli_options.GetCsvTidSeparation();
+    const std::string dumpTypeStr = cliOptions.GetCsvTidSeparation();
 
-    DumpType dump_type = DumpType::WITHOUT_THREAD_SEPARATION;
-    if (dump_type_str == "single-csv-single-tid") {
-        dump_type = DumpType::WITHOUT_THREAD_SEPARATION;
-    } else if (dump_type_str == "single-csv-multi-tid") {
-        dump_type = DumpType::THREAD_SEPARATION_BY_TID;
-    } else if (dump_type_str == "multi-csv") {
-        dump_type = DumpType::THREAD_SEPARATION_BY_CSV;
+    DumpType dumpType = DumpType::WITHOUT_THREAD_SEPARATION;
+    if (dumpTypeStr == "single-csv-single-tid") {
+        dumpType = DumpType::WITHOUT_THREAD_SEPARATION;
+    } else if (dumpTypeStr == "single-csv-multi-tid") {
+        dumpType = DumpType::THREAD_SEPARATION_BY_TID;
+    } else if (dumpTypeStr == "multi-csv") {
+        dumpType = DumpType::THREAD_SEPARATION_BY_CSV;
     } else {
-        std::cerr << "unknown value of csv-tid-distribution option: '" << dump_type_str
+        std::cerr << "unknown value of csv-tid-distribution option: '" << dumpTypeStr
                   << "' single-csv-multi-tid will be set" << std::endl;
-        dump_type = DumpType::THREAD_SEPARATION_BY_TID;
+        dumpType = DumpType::THREAD_SEPARATION_BY_TID;
     }
 
-    return dump_type;
+    return dumpType;
 }
 
 bool AsptConverter::RunDumpModulesMode(const std::string &outname)
@@ -231,21 +231,21 @@ bool AsptConverter::RunDumpTracesInCsvMode(const std::string &outname)
     return true;
 }
 
-bool AsptConverter::RunWithOptions(const Options &cli_options)
+bool AsptConverter::RunWithOptions(const Options &cliOptions)
 {
-    std::string outname = cli_options.GetOutput();
+    std::string outname = cliOptions.GetOutput();
 
-    dump_type_ = GetDumpTypeFromOptions(cli_options);
-    build_cold_graph_ = cli_options.IsColdGraphEnable();
+    dumpType_ = GetDumpTypeFromOptions(cliOptions);
+    buildColdGraph_ = cliOptions.IsColdGraphEnable();
 
-    if (cli_options.IsSubstituteModuleDir()) {
-        substitute_directories_ = {cli_options.GetSubstituteSourceStr(), cli_options.GetSubstituteDestinationStr()};
-        if (substitute_directories_->source.size() != substitute_directories_->destination.size()) {
+    if (cliOptions.IsSubstituteModuleDir()) {
+        substituteDirectories_ = {cliOptions.GetSubstituteSourceStr(), cliOptions.GetSubstituteDestinationStr()};
+        if (substituteDirectories_->source.size() != substituteDirectories_->destination.size()) {
             LOG(FATAL, PROFILER) << "different number of strings in substitute option";
         }
     }
 
-    if (cli_options.IsDumpModules()) {
+    if (cliOptions.IsDumpModules()) {
         return RunDumpModulesMode(outname);
     }
 

@@ -111,11 +111,11 @@ inline uint32_t Class::GetTypeSize(panda_file::Type type)
 
 inline uint32_t Class::GetComponentSize() const
 {
-    if (component_type_ == nullptr) {
+    if (componentType_ == nullptr) {
         return 0;
     }
 
-    return GetTypeSize(component_type_->GetType());
+    return GetTypeSize(componentType_->GetType());
 }
 
 inline bool Class::IsClassClass() const
@@ -194,7 +194,7 @@ inline Field *Class::FindDeclaredField(Pred pred) const
 
 ALWAYS_INLINE inline Field *BinarySearchField(Span<Field> fields, panda_file::File::EntityId id)
 {
-    auto comp = [](const Field &field, panda_file::File::EntityId field_id) { return field.GetFileId() < field_id; };
+    auto comp = [](const Field &field, panda_file::File::EntityId fieldId) { return field.GetFileId() < fieldId; };
     auto it = std::lower_bound(fields.begin(), fields.end(), id, comp);
     if (it != fields.end() && (*it).GetFileId() == id) {
         return &*it;
@@ -206,15 +206,15 @@ template <Class::FindFilter FILTER>
 inline Field *Class::FindDeclaredField(panda_file::File::EntityId id) const
 {
     if (FILTER == FindFilter::ALL) {
-        auto static_fields = GetStaticFields();
-        auto *static_field = BinarySearchField(static_fields, id);
-        if (static_field != nullptr) {
-            return static_field;
+        auto staticFields = GetStaticFields();
+        auto *staticField = BinarySearchField(staticFields, id);
+        if (staticField != nullptr) {
+            return staticField;
         }
-        auto instance_fields = GetInstanceFields();
-        auto *instance_field = BinarySearchField(instance_fields, id);
-        if (instance_field != nullptr) {
-            return instance_field;
+        auto instanceFields = GetInstanceFields();
+        auto *instanceField = BinarySearchField(instanceFields, id);
+        if (instanceField != nullptr) {
+            return instanceField;
         }
     } else {
         auto fields = GetFields<FILTER>();
@@ -405,26 +405,26 @@ inline Field *Class::FindDeclaredField(Pred pred) const
     return FindDeclaredField<FindFilter::ALL>(pred);
 }
 
-inline Field *Class::GetInstanceFieldByName(const uint8_t *mutf8_name) const
+inline Field *Class::GetInstanceFieldByName(const uint8_t *mutf8Name) const
 {
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8_name)), mutf8_name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return FindInstanceField([sd](const Field &field) { return field.GetName() == sd; });
 }
 
-inline Field *Class::GetStaticFieldByName(const uint8_t *mutf8_name) const
+inline Field *Class::GetStaticFieldByName(const uint8_t *mutf8Name) const
 {
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8_name)), mutf8_name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return FindStaticField([sd](const Field &field) { return field.GetName() == sd; });
 }
 
 inline size_t Class::GetStaticFieldsOffset() const
 {
-    return ComputeClassSize(vtable_size_, imt_size_, 0, 0, 0, 0, 0, 0);
+    return ComputeClassSize(vtableSize_, imtSize_, 0, 0, 0, 0, 0, 0);
 }
 
-inline Field *Class::GetDeclaredFieldByName(const uint8_t *mutf8_name) const
+inline Field *Class::GetDeclaredFieldByName(const uint8_t *mutf8Name) const
 {
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8_name)), mutf8_name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return FindDeclaredField([sd](const Field &field) { return field.GetName() == sd; });
 }
 
@@ -438,16 +438,16 @@ inline Method *Class::GetStaticClassMethod(panda_file::File::EntityId id) const
     return FindClassMethod<FindFilter::STATIC, MethodIdComp>(id);
 }
 
-inline Method *Class::GetDirectMethod(const uint8_t *mutf8_name, const Method::Proto &proto) const
+inline Method *Class::GetDirectMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
 {
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8_name)), mutf8_name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return FindDirectMethod<FindFilter::ALL, MethodNameComp>(
         sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
 }
 
-inline Method *Class::GetClassMethod(const uint8_t *mutf8_name, const Method::Proto &proto) const
+inline Method *Class::GetClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
 {
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8_name)), mutf8_name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return GetClassMethod(sd, proto);
 }
 
@@ -471,9 +471,9 @@ inline Method *Class::GetVirtualClassMethodByName(const panda_file::File::String
         sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
 }
 
-inline Method *Class::GetInterfaceMethod(const uint8_t *mutf8_name, const Method::Proto &proto) const
+inline Method *Class::GetInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
 {
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8_name)), mutf8_name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return GetInterfaceMethod(sd, proto);
 }
 
@@ -497,21 +497,21 @@ inline Method *Class::GetVirtualInterfaceMethodByName(const panda_file::File::St
         sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
 }
 
-inline Method *Class::GetDirectMethod(const uint8_t *mutf8_name) const
+inline Method *Class::GetDirectMethod(const uint8_t *mutf8Name) const
 {
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8_name)), mutf8_name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return FindDirectMethod<FindFilter::ALL, MethodNameComp>(sd);
 }
 
-inline Method *Class::GetClassMethod(const uint8_t *mutf8_name) const
+inline Method *Class::GetClassMethod(const uint8_t *mutf8Name) const
 {
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8_name)), mutf8_name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return FindClassMethod<FindFilter::ALL, MethodNameComp>(sd);
 }
 
-inline Method *Class::GetInterfaceMethod(const uint8_t *mutf8_name) const
+inline Method *Class::GetInterfaceMethod(const uint8_t *mutf8Name) const
 {
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8_name)), mutf8_name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return FindInterfaceMethod<FindFilter::ALL, MethodNameComp>(sd);
 }
 
@@ -523,11 +523,11 @@ inline Method *Class::ResolveVirtualMethod(const Method *method) const
 
     if (method->GetClass()->IsInterface() && !method->IsDefaultInterfaceMethod()) {
         // find method in imtable
-        auto imtable_size = GetIMTSize();
-        if (LIKELY(imtable_size != 0)) {
+        auto imtableSize = GetIMTSize();
+        if (LIKELY(imtableSize != 0)) {
             auto imtable = GetIMT();
-            auto method_id = GetIMTableIndex(method->GetFileId().GetOffset());
-            resolved = imtable[method_id];
+            auto methodId = GetIMTableIndex(method->GetFileId().GetOffset());
+            resolved = imtable[methodId];
             if (resolved != nullptr) {
                 return resolved;
             }
@@ -555,15 +555,15 @@ inline Method *Class::ResolveVirtualMethod(const Method *method) const
     return resolved;
 }
 
-constexpr size_t Class::ComputeClassSize(size_t vtable_size, size_t imt_size, size_t num_8bit_sfields,
-                                         size_t num_16bit_sfields, size_t num_32bit_sfields, size_t num_64bit_sfields,
-                                         size_t num_ref_sfields, size_t num_tagged_sfields)
+constexpr size_t Class::ComputeClassSize(size_t vtableSize, size_t imtSize, size_t num8bitSfields,
+                                         size_t num16bitSfields, size_t num32bitSfields, size_t num64bitSfields,
+                                         size_t numRefSfields, size_t numTaggedSfields)
 {
     size_t size = sizeof(Class);
     size = AlignUp(size, ClassHelper::OBJECT_POINTER_SIZE);
-    size += vtable_size * ClassHelper::POINTER_SIZE;
-    size += imt_size * ClassHelper::POINTER_SIZE;
-    size += num_ref_sfields * ClassHelper::OBJECT_POINTER_SIZE;
+    size += vtableSize * ClassHelper::POINTER_SIZE;
+    size += imtSize * ClassHelper::POINTER_SIZE;
+    size += numRefSfields * ClassHelper::OBJECT_POINTER_SIZE;
 
     constexpr size_t SIZE_64 = sizeof(uint64_t);
     constexpr size_t SIZE_32 = sizeof(uint32_t);
@@ -573,32 +573,32 @@ constexpr size_t Class::ComputeClassSize(size_t vtable_size, size_t imt_size, si
     // Try to fill alignment gaps with fields that have smaller size from largest to smallests
     static_assert(coretypes::TaggedValue::TaggedTypeSize() == SIZE_64,
                   "Please fix alignment of the fields of type \"TaggedValue\"");
-    if (!IsAligned<SIZE_64>(size) && (num_64bit_sfields > 0 || num_tagged_sfields > 0)) {
+    if (!IsAligned<SIZE_64>(size) && (num64bitSfields > 0 || numTaggedSfields > 0)) {
         size_t padding = AlignUp(size, SIZE_64) - size;
         size += padding;
 
-        Pad(SIZE_32, &padding, &num_32bit_sfields);
-        Pad(SIZE_16, &padding, &num_16bit_sfields);
-        Pad(SIZE_8, &padding, &num_8bit_sfields);
+        Pad(SIZE_32, &padding, &num32bitSfields);
+        Pad(SIZE_16, &padding, &num16bitSfields);
+        Pad(SIZE_8, &padding, &num8bitSfields);
     }
 
-    if (!IsAligned<SIZE_32>(size) && num_32bit_sfields > 0) {
+    if (!IsAligned<SIZE_32>(size) && num32bitSfields > 0) {
         size_t padding = AlignUp(size, SIZE_32) - size;
         size += padding;
 
-        Pad(SIZE_16, &padding, &num_16bit_sfields);
-        Pad(SIZE_8, &padding, &num_8bit_sfields);
+        Pad(SIZE_16, &padding, &num16bitSfields);
+        Pad(SIZE_8, &padding, &num8bitSfields);
     }
 
-    if (!IsAligned<SIZE_16>(size) && num_16bit_sfields > 0) {
+    if (!IsAligned<SIZE_16>(size) && num16bitSfields > 0) {
         size_t padding = AlignUp(size, SIZE_16) - size;
         size += padding;
 
-        Pad(SIZE_8, &padding, &num_8bit_sfields);
+        Pad(SIZE_8, &padding, &num8bitSfields);
     }
 
-    size += num_64bit_sfields * SIZE_64 + num_32bit_sfields * SIZE_32 + num_16bit_sfields * SIZE_16 +
-            num_8bit_sfields * SIZE_8 + num_tagged_sfields * coretypes::TaggedValue::TaggedTypeSize();
+    size += num64bitSfields * SIZE_64 + num32bitSfields * SIZE_32 + num16bitSfields * SIZE_16 +
+            num8bitSfields * SIZE_8 + numTaggedSfields * coretypes::TaggedValue::TaggedTypeSize();
 
     return size;
 }
@@ -618,17 +618,17 @@ constexpr size_t Class::GetVTableOffset()
 
 inline Span<Method *> Class::GetVTable()
 {
-    return GetClassSpan().SubSpan<Method *>(GetVTableOffset(), vtable_size_);
+    return GetClassSpan().SubSpan<Method *>(GetVTableOffset(), vtableSize_);
 }
 
 inline Span<Method *const> Class::GetVTable() const
 {
-    return GetClassSpan().SubSpan<Method *const>(GetVTableOffset(), vtable_size_);
+    return GetClassSpan().SubSpan<Method *const>(GetVTableOffset(), vtableSize_);
 }
 
 inline size_t Class::GetIMTOffset() const
 {
-    return GetVTableOffset() + vtable_size_ * sizeof(uintptr_t);
+    return GetVTableOffset() + vtableSize_ * sizeof(uintptr_t);
 }
 
 template <class T, bool IS_VOLATILE /* = false */>
@@ -659,8 +659,8 @@ inline void Class::SetFieldObject(size_t offset, ObjectHeader *value)
 {
     auto object = GetManagedObject();
     ASSERT(ToUintPtr(object) < ToUintPtr(this) && ToUintPtr(this) < ToUintPtr(object) + object->ObjectSize());
-    auto new_offset = offset + (ToUintPtr(this) - ToUintPtr(object));
-    ObjectAccessor::SetObject<IS_VOLATILE, NEED_WRITE_BARRIER>(object, new_offset, value);
+    auto newOffset = offset + (ToUintPtr(this) - ToUintPtr(object));
+    ObjectAccessor::SetObject<IS_VOLATILE, NEED_WRITE_BARRIER>(object, newOffset, value);
 }
 
 template <class T>
@@ -714,108 +714,107 @@ inline void Class::SetFieldObject(ManagedThread *thread, const Field &field, Obj
 }
 
 template <class T>
-inline T Class::GetFieldPrimitive(size_t offset, std::memory_order memory_order) const
+inline T Class::GetFieldPrimitive(size_t offset, std::memory_order memoryOrder) const
 {
-    return ObjectAccessor::GetFieldPrimitive<T>(this, offset, memory_order);
+    return ObjectAccessor::GetFieldPrimitive<T>(this, offset, memoryOrder);
 }
 
 template <class T>
-inline void Class::SetFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline void Class::SetFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    ObjectAccessor::SetFieldPrimitive(this, offset, value, memory_order);
+    ObjectAccessor::SetFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <bool NEED_READ_BARRIER /* = true */>
-inline ObjectHeader *Class::GetFieldObject(size_t offset, std::memory_order memory_order) const
+inline ObjectHeader *Class::GetFieldObject(size_t offset, std::memory_order memoryOrder) const
 {
-    return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER>(this, offset, memory_order);
+    return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER>(this, offset, memoryOrder);
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */>
-inline void Class::SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memory_order)
+inline void Class::SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     auto object = GetManagedObject();
     ASSERT(ToUintPtr(object) < ToUintPtr(this) && ToUintPtr(this) < ToUintPtr(object) + object->ObjectSize());
-    auto new_offset = offset + (ToUintPtr(this) - ToUintPtr(object));
-    ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER>(object, new_offset, value, memory_order);
+    auto newOffset = offset + (ToUintPtr(this) - ToUintPtr(object));
+    ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER>(object, newOffset, value, memoryOrder);
 }
 
 template <typename T>
-inline bool Class::CompareAndSetFieldPrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order,
+inline bool Class::CompareAndSetFieldPrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder,
                                                bool strong)
 {
-    return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, old_value, new_value, memory_order, strong).first;
+    return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, oldValue, newValue, memoryOrder, strong).first;
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */>
-inline bool Class::CompareAndSetFieldObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                                            std::memory_order memory_order, bool strong)
+inline bool Class::CompareAndSetFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                            std::memory_order memoryOrder, bool strong)
 {
     auto object = GetManagedObject();
     ASSERT(ToUintPtr(object) < ToUintPtr(this) && ToUintPtr(this) < ToUintPtr(object) + object->ObjectSize());
-    auto new_offset = offset + (ToUintPtr(this) - ToUintPtr(object));
-    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER>(object, new_offset, old_value, new_value,
-                                                                        memory_order, strong)
+    auto newOffset = offset + (ToUintPtr(this) - ToUintPtr(object));
+    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER>(object, newOffset, oldValue, newValue,
+                                                                        memoryOrder, strong)
         .first;
 }
 
 template <typename T>
-inline T Class::CompareAndExchangeFieldPrimitive(size_t offset, T old_value, T new_value,
-                                                 std::memory_order memory_order, bool strong)
+inline T Class::CompareAndExchangeFieldPrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder,
+                                                 bool strong)
 {
-    return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, old_value, new_value, memory_order, strong).second;
+    return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, oldValue, newValue, memoryOrder, strong).second;
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */>
-inline ObjectHeader *Class::CompareAndExchangeFieldObject(size_t offset, ObjectHeader *old_value,
-                                                          ObjectHeader *new_value, std::memory_order memory_order,
-                                                          bool strong)
+inline ObjectHeader *Class::CompareAndExchangeFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                                          std::memory_order memoryOrder, bool strong)
 {
     auto object = GetManagedObject();
     ASSERT(ToUintPtr(object) < ToUintPtr(this) && ToUintPtr(this) < ToUintPtr(object) + object->ObjectSize());
-    auto new_offset = offset + (ToUintPtr(this) - ToUintPtr(object));
-    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER>(object, new_offset, old_value, new_value,
-                                                                        memory_order, strong)
+    auto newOffset = offset + (ToUintPtr(this) - ToUintPtr(object));
+    return ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER>(object, newOffset, oldValue, newValue,
+                                                                        memoryOrder, strong)
         .second;
 }
 
 template <typename T>
-inline T Class::GetAndSetFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Class::GetAndSetFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndSetFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndSetFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <bool NEED_WRITE_BARRIER /* = true */>
-inline ObjectHeader *Class::GetAndSetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memory_order)
+inline ObjectHeader *Class::GetAndSetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     auto object = GetManagedObject();
     ASSERT(ToUintPtr(object) < ToUintPtr(this) && ToUintPtr(this) < ToUintPtr(object) + object->ObjectSize());
-    auto new_offset = offset + (ToUintPtr(this) - ToUintPtr(object));
-    return ObjectAccessor::GetAndSetFieldObject<NEED_WRITE_BARRIER>(object, new_offset, value, memory_order);
+    auto newOffset = offset + (ToUintPtr(this) - ToUintPtr(object));
+    return ObjectAccessor::GetAndSetFieldObject<NEED_WRITE_BARRIER>(object, newOffset, value, memoryOrder);
 }
 
 template <typename T>
-inline T Class::GetAndAddFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Class::GetAndAddFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndAddFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndAddFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T Class::GetAndBitwiseOrFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Class::GetAndBitwiseOrFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndBitwiseOrFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndBitwiseOrFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T Class::GetAndBitwiseAndFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Class::GetAndBitwiseAndFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndBitwiseAndFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndBitwiseAndFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 template <typename T>
-inline T Class::GetAndBitwiseXorFieldPrimitive(size_t offset, T value, std::memory_order memory_order)
+inline T Class::GetAndBitwiseXorFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder)
 {
-    return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, offset, value, memory_order);
+    return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, offset, value, memoryOrder);
 }
 
 }  // namespace panda

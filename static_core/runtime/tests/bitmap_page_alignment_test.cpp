@@ -28,26 +28,26 @@ TEST_F(BitmapTest, Init)
 {
     const size_t sz = 1_MB;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    auto bm_ptr = std::make_unique<BitmapWordType[]>(sz >> MemBitmap<>::LOG_BITSPERWORD);
-    MemBitmap<> bm(ToVoidPtr(HEAP_STARTING_ADDRESS), sz, bm_ptr.get());
+    auto bmPtr = std::make_unique<BitmapWordType[]>(sz >> MemBitmap<>::LOG_BITSPERWORD);
+    MemBitmap<> bm(ToVoidPtr(HEAP_STARTING_ADDRESS), sz, bmPtr.get());
     EXPECT_EQ(bm.Size(), sz);
 }
 
 TEST_F(BitmapTest, ScanRange)
 {
-    auto heap_begin = HEAP_STARTING_ADDRESS;
+    auto heapBegin = HEAP_STARTING_ADDRESS;
     constexpr size_t HEAP_CAPACITY = 16_MB;
     // NOLINTBEGIN(modernize-avoid-c-arrays)
-    auto bm_ptr =
+    auto bmPtr =
         std::make_unique<BitmapWordType[]>((HEAP_CAPACITY >> Bitmap::LOG_BITSPERWORD) / DEFAULT_ALIGNMENT_IN_BYTES);
     // NOLINTEND(modernize-avoid-c-arrays)
 
-    MemBitmap<DEFAULT_ALIGNMENT_IN_BYTES> bm(ToVoidPtr(heap_begin), HEAP_CAPACITY, bm_ptr.get());
+    MemBitmap<DEFAULT_ALIGNMENT_IN_BYTES> bm(ToVoidPtr(heapBegin), HEAP_CAPACITY, bmPtr.get());
 
     constexpr size_t BIT_SET_RANGE_END = Bitmap::BITSPERWORD * 3;
 
     for (size_t j = 0; j < BIT_SET_RANGE_END; ++j) {
-        auto *obj = ToVoidPtr(heap_begin + j * DEFAULT_ALIGNMENT_IN_BYTES);
+        auto *obj = ToVoidPtr(heapBegin + j * DEFAULT_ALIGNMENT_IN_BYTES);
         if ((ToUintPtr(obj) & BitmapVerify::ADDRESS_MASK_TO_SET) != 0U) {
             bm.Set(obj);
         }
@@ -56,9 +56,9 @@ TEST_F(BitmapTest, ScanRange)
     constexpr size_t BIT_VERIFY_RANGE_END = Bitmap::BITSPERWORD * 2;
 
     for (size_t i = 0; i < Bitmap::BITSPERWORD; ++i) {
-        auto *start = ToVoidPtr(heap_begin + i * DEFAULT_ALIGNMENT_IN_BYTES);
+        auto *start = ToVoidPtr(heapBegin + i * DEFAULT_ALIGNMENT_IN_BYTES);
         for (size_t j = 0; j < BIT_VERIFY_RANGE_END; ++j) {
-            auto *end = ToVoidPtr(heap_begin + (i + j) * DEFAULT_ALIGNMENT_IN_BYTES);
+            auto *end = ToVoidPtr(heapBegin + (i + j) * DEFAULT_ALIGNMENT_IN_BYTES);
             BitmapVerify(&bm, start, end);
         }
     }

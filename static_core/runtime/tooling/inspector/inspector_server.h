@@ -55,11 +55,11 @@ public:
     void OnFail(std::function<void()> &&handler);
 
     void CallDebuggerPaused(
-        PtThread thread, const std::vector<BreakpointId> &hit_breakpoints, const std::optional<RemoteObject> &exception,
+        PtThread thread, const std::vector<BreakpointId> &hitBreakpoints, const std::optional<RemoteObject> &exception,
         const std::function<void(const std::function<void(FrameId, std::string_view, std::string_view, size_t,
-                                                          const std::vector<Scope> &)> &)> &enumerate_frames);
+                                                          const std::vector<Scope> &)> &)> &enumerateFrames);
     void CallDebuggerResumed(PtThread thread);
-    void CallDebuggerScriptParsed(PtThread thread, ScriptId id, std::string_view source_file);
+    void CallDebuggerScriptParsed(PtThread thread, ScriptId id, std::string_view sourceFile);
     void CallRuntimeConsoleApiCalled(PtThread thread, ConsoleCallType type, uint64_t timestamp,
                                      const std::vector<RemoteObject> &arguments);
     void CallRuntimeExecutionContextCreated(PtThread thread);
@@ -92,11 +92,11 @@ public:
     void OnCallRuntimeRunIfWaitingForDebugger(std::function<void(PtThread)> &&handler);
 
 private:
-    void SendTargetAttachedToTarget(const std::string &session_id);
+    void SendTargetAttachedToTarget(const std::string &sessionId);
 
     Server &server_;
-    SessionManager session_manager_;
-    SourceManager source_manager_;
+    SessionManager sessionManager_;
+    SourceManager sourceManager_;
 };
 }  // namespace panda::tooling::inspector
 

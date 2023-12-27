@@ -61,28 +61,28 @@ void SplitResolver::ConnectSiblings(LifeIntervals *interval)
             continue;
         }
 
-        auto spill_fill = CreateSpillFillForSiblings(inst);
-        ConnectIntervals(spill_fill, prev, curr);
+        auto spillFill = CreateSpillFillForSiblings(inst);
+        ConnectIntervals(spillFill, prev, curr);
     }
 }
 
 void SplitResolver::ProcessBlock(BasicBlock *block)
 {
-    auto succ_begin = liveness_->GetBlockLiveRange(block).GetBegin();
+    auto succBegin = liveness_->GetBlockLiveRange(block).GetBegin();
     for (auto interval : liveness_->GetLifeIntervals()) {
         // PHI and its inputs can be considered as one interval, which was split,
         // so that the logic is equivalent to the logic of connecting split intervals
-        if (interval->GetBegin() == succ_begin) {
+        if (interval->GetBegin() == succBegin) {
             auto phi = interval->GetInst();
             if (!phi->IsPhi() || phi->GetDstReg() == ACC_REG_ID) {
                 continue;
             }
             ASSERT(phi->IsPhi());
             for (size_t i = 0; i < phi->GetInputsCount(); i++) {
-                auto input_inst = phi->GetDataFlowInput(i);
-                auto input_bb = phi->CastToPhi()->GetPhiInputBb(i);
-                auto input_liveness = liveness_->GetInstLifeIntervals(input_inst);
-                ConnectSplitFromPredBlock(input_bb, input_liveness, block, interval);
+                auto inputInst = phi->GetDataFlowInput(i);
+                auto inputBb = phi->CastToPhi()->GetPhiInputBb(i);
+                auto inputLiveness = liveness_->GetInstLifeIntervals(inputInst);
+                ConnectSplitFromPredBlock(inputBb, inputLiveness, block, interval);
             }
             continue;
         }
@@ -92,67 +92,67 @@ void SplitResolver::ProcessBlock(BasicBlock *block)
             continue;
         }
         ASSERT(!interval->IsPhysical());
-        auto succ_split = interval->FindSiblingAt(succ_begin);
-        if (succ_split == nullptr || succ_split->GetLocation().IsConstant() || !succ_split->SplitCover(succ_begin)) {
+        auto succSplit = interval->FindSiblingAt(succBegin);
+        if (succSplit == nullptr || succSplit->GetLocation().IsConstant() || !succSplit->SplitCover(succBegin)) {
             continue;
         }
         for (auto pred : block->GetPredsBlocks()) {
-            ConnectSplitFromPredBlock(pred, interval, block, succ_split);
+            ConnectSplitFromPredBlock(pred, interval, block, succSplit);
         }
     }
 }
 
-void SplitResolver::ConnectSplitFromPredBlock(BasicBlock *src_bb, LifeIntervals *src_interval, BasicBlock *target_bb,
-                                              LifeIntervals *target_split)
+void SplitResolver::ConnectSplitFromPredBlock(BasicBlock *srcBb, LifeIntervals *srcInterval, BasicBlock *targetBb,
+                                              LifeIntervals *targetSplit)
 {
     BasicBlock *resolver {nullptr};
     // It's a resolver block inserted during register allocation
-    if (src_bb->GetId() >= liveness_->GetBlocksCount()) {
-        ASSERT(src_bb->GetSuccsBlocks().size() == 1 && src_bb->GetPredsBlocks().size() == 1);
-        resolver = src_bb;
-        src_bb = src_bb->GetPredecessor(0);
+    if (srcBb->GetId() >= liveness_->GetBlocksCount()) {
+        ASSERT(srcBb->GetSuccsBlocks().size() == 1 && srcBb->GetPredsBlocks().size() == 1);
+        resolver = srcBb;
+        srcBb = srcBb->GetPredecessor(0);
     }
-    auto src_liveness = liveness_->GetBlockLiveRange(src_bb);
+    auto srcLiveness = liveness_->GetBlockLiveRange(srcBb);
     // Find sibling at the 'end - LIFE_NUMBER_GAP' position to connect siblings that were split at the end of the
     // 'src_bb'
-    auto src_end_pos = src_liveness.GetEnd() - 1U;
-    auto src_split = src_interval->FindSiblingAt(src_end_pos);
+    auto srcEndPos = srcLiveness.GetEnd() - 1U;
+    auto srcSplit = srcInterval->FindSiblingAt(srcEndPos);
     // Instruction was not defined at predecessor or has the same location there
-    if (src_split == nullptr || src_split->GetLocation() == target_split->GetLocation() ||
-        !src_split->SplitCover<true>(src_end_pos)) {
+    if (srcSplit == nullptr || srcSplit->GetLocation() == targetSplit->GetLocation() ||
+        !srcSplit->SplitCover<true>(srcEndPos)) {
         return;
     }
 
-    COMPILER_LOG(DEBUG, SPLIT_RESOLVER) << "Resolve split move for inst v" << src_interval->GetInst()->GetId()
-                                        << " between blocks: BB" << src_bb->GetId() << " -> BB" << target_bb->GetId();
+    COMPILER_LOG(DEBUG, SPLIT_RESOLVER) << "Resolve split move for inst v" << srcInterval->GetInst()->GetId()
+                                        << " between blocks: BB" << srcBb->GetId() << " -> BB" << targetBb->GetId();
 
     if (resolver == nullptr) {
-        if (src_bb->GetSuccsBlocks().size() == 1U) {
-            resolver = src_bb;
+        if (srcBb->GetSuccsBlocks().size() == 1U) {
+            resolver = srcBb;
         } else {
             // Get rid of critical edge by inserting a new block and append SpillFill into it.
-            resolver = src_bb->InsertNewBlockToSuccEdge(target_bb);
+            resolver = srcBb->InsertNewBlockToSuccEdge(targetBb);
             // Fix Dominators info
-            auto &dom_tree = graph_->GetAnalysis<DominatorsTree>();
-            dom_tree.UpdateAfterResolverInsertion(src_bb, target_bb, resolver);
+            auto &domTree = graph_->GetAnalysis<DominatorsTree>();
+            domTree.UpdateAfterResolverInsertion(srcBb, targetBb, resolver);
             graph_->InvalidateAnalysis<LoopAnalyzer>();
         }
     }
-    auto spill_fill = CreateSpillFillForSplitMove(resolver);
-    ConnectIntervals(spill_fill, src_split, target_split);
+    auto spillFill = CreateSpillFillForSplitMove(resolver);
+    ConnectIntervals(spillFill, srcSplit, targetSplit);
 }
 
-SpillFillInst *SplitResolver::CreateSpillFillForSplitMove(BasicBlock *source_block)
+SpillFillInst *SplitResolver::CreateSpillFillForSplitMove(BasicBlock *sourceBlock)
 {
-    auto iter = source_block->InstsReverse().begin();
+    auto iter = sourceBlock->InstsReverse().begin();
     while (iter != iter.end() && (*iter)->IsControlFlow() && !(*iter)->IsPhi()) {
         ++iter;
     }
 
     if (iter == iter.end()) {
-        auto spill_fill = graph_->CreateInstSpillFill(SpillFillType::SPLIT_MOVE);
-        source_block->PrependInst(spill_fill);
-        return spill_fill;
+        auto spillFill = graph_->CreateInstSpillFill(SpillFillType::SPLIT_MOVE);
+        sourceBlock->PrependInst(spillFill);
+        return spillFill;
     }
 
     auto inst = *iter;
@@ -176,26 +176,26 @@ SpillFillInst *SplitResolver::CreateSpillFillForSplitMove(BasicBlock *source_blo
     }
 
     ASSERT(!inst->IsPhi());
-    auto spill_fill = graph_->CreateInstSpillFill(SpillFillType::SPLIT_MOVE);
-    source_block->InsertAfter(spill_fill, inst);
-    return spill_fill;
+    auto spillFill = graph_->CreateInstSpillFill(SpillFillType::SPLIT_MOVE);
+    sourceBlock->InsertAfter(spillFill, inst);
+    return spillFill;
 }
 
-SpillFillInst *SplitResolver::CreateSpillFillForSiblings(Inst *connect_at)
+SpillFillInst *SplitResolver::CreateSpillFillForSiblings(Inst *connectAt)
 {
     // Try to reuse existing CONNECT_SPLIT_SIBLINGS spill-fill-inst
-    auto prev = connect_at->GetPrev();
+    auto prev = connectAt->GetPrev();
     while (prev != nullptr && prev->IsSpillFill()) {
         if (Is<SpillFillType::CONNECT_SPLIT_SIBLINGS>(prev)) {
             return prev->CastToSpillFill();
         }
         ASSERT(Is<SpillFillType::INPUT_FILL>(prev));
-        connect_at = prev;
+        connectAt = prev;
         prev = prev->GetPrev();
     }
-    auto spill_fill = graph_->CreateInstSpillFill(SpillFillType::CONNECT_SPLIT_SIBLINGS);
-    connect_at->InsertBefore(spill_fill);
-    return spill_fill;
+    auto spillFill = graph_->CreateInstSpillFill(SpillFillType::CONNECT_SPLIT_SIBLINGS);
+    connectAt->InsertBefore(spillFill);
+    return spillFill;
 }
 
 }  // namespace panda::compiler

@@ -59,10 +59,10 @@ public:
     template <typename T>
     using AdapterType = ArenaAllocatorAdapter<T, USE_OOM_HANDLER>;
 
-    PANDA_PUBLIC_API explicit ArenaAllocatorT(SpaceType space_type, BaseMemStats *mem_stats = nullptr,
-                                              bool limit_alloc_size_by_pool = false);
-    ArenaAllocatorT(OOMHandler oom_handler, SpaceType space_type, BaseMemStats *mem_stats = nullptr,
-                    bool limit_alloc_size_by_pool = false);
+    PANDA_PUBLIC_API explicit ArenaAllocatorT(SpaceType spaceType, BaseMemStats *memStats = nullptr,
+                                              bool limitAllocSizeByPool = false);
+    ArenaAllocatorT(OOMHandler oomHandler, SpaceType spaceType, BaseMemStats *memStats = nullptr,
+                    bool limitAllocSizeByPool = false);
 
     PANDA_PUBLIC_API ~ArenaAllocatorT();
     NO_COPY_SEMANTIC(ArenaAllocatorT);
@@ -93,16 +93,16 @@ public:
         }
         *static_cast<size_t *>(p) = size;
         auto *data = ToNativePtr<ElementType>(ToUintPtr(p) + SIZE_BEFORE_DATA_OFFSET);
-        ElementType *current_element = data;
+        ElementType *currentElement = data;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (size_t i = 0; i < size; ++i, ++current_element) {
-            new (current_element) ElementType();
+        for (size_t i = 0; i < size; ++i, ++currentElement) {
+            new (currentElement) ElementType();
         }
         return data;
     }
 
     template <typename T>
-    [[nodiscard]] T *AllocArray(size_t arr_length);
+    [[nodiscard]] T *AllocArray(size_t arrLength);
 
     ArenaAllocatorAdapter<void, USE_OOM_HANDLER> Adapter();
 
@@ -112,7 +112,7 @@ public:
      * @brief Set the size of allocated memory to @param new_size.
      *  Free all memory that exceeds @param new_size bytes in the allocator.
      */
-    PANDA_PUBLIC_API void Resize(size_t new_size);
+    PANDA_PUBLIC_API void Resize(size_t newSize);
 
     static constexpr AllocatorType GetAllocatorType()
     {
@@ -128,34 +128,34 @@ private:
     public:
         void *Alloc(size_t size, Alignment align = DEFAULT_ARENA_ALIGNMENT)
         {
-            size_t free_size = GetFreeSize();
-            void *new_pos = cur_pos_;
-            void *ret = std::align(GetAlignmentInBytes(align), size, new_pos, free_size);
+            size_t freeSize = GetFreeSize();
+            void *newPos = curPos_;
+            void *ret = std::align(GetAlignmentInBytes(align), size, newPos, freeSize);
             if (ret != nullptr) {
-                cur_pos_ = static_cast<char *>(ToVoidPtr(ToUintPtr(ret) + size));
+                curPos_ = static_cast<char *>(ToVoidPtr(ToUintPtr(ret) + size));
             }
             return ret;
         }
 
         size_t GetFreeSize() const
         {
-            return DEFAULT_ON_STACK_ARENA_ALLOCATOR_BUFF_SIZE - (cur_pos_ - &buff_[0]);
+            return DEFAULT_ON_STACK_ARENA_ALLOCATOR_BUFF_SIZE - (curPos_ - &buff_[0]);
         }
 
         size_t GetOccupiedSize() const
         {
-            return cur_pos_ - &buff_[0];
+            return curPos_ - &buff_[0];
         }
 
-        void Resize(size_t new_size)
+        void Resize(size_t newSize)
         {
-            ASSERT(new_size <= GetOccupiedSize());
-            cur_pos_ = static_cast<char *>(ToVoidPtr(ToUintPtr(&buff_[0]) + new_size));
+            ASSERT(newSize <= GetOccupiedSize());
+            curPos_ = static_cast<char *>(ToVoidPtr(ToUintPtr(&buff_[0]) + newSize));
         }
 
     private:
         std::array<char, ON_STACK_BUFFER_SIZE> buff_ {0};
-        char *cur_pos_ = &buff_[0];
+        char *curPos_ = &buff_[0];
     };
 
     template <typename DummyArg>
@@ -171,9 +171,9 @@ private:
             return 0;
         }
 
-        void Resize(size_t new_size)
+        void Resize(size_t newSize)
         {
-            (void)new_size;
+            (void)newSize;
         }
     };
 
@@ -181,7 +181,7 @@ private:
      * @brief Adds Arena from MallocMemPool and links it to active
      * @param pool_size size of new pool
      */
-    bool AddArenaFromPool(size_t pool_size);
+    bool AddArenaFromPool(size_t poolSize);
 
     /**
      * @brief Allocate new element.
@@ -194,17 +194,17 @@ private:
 
     inline void AllocArenaMemStats(size_t size)
     {
-        if (mem_stats_ != nullptr) {
-            mem_stats_->RecordAllocateRaw(size, space_type_);
+        if (memStats_ != nullptr) {
+            memStats_->RecordAllocateRaw(size, spaceType_);
         }
     }
 
     using OnStackBuff = OnStackBuffT<ON_STACK_ALLOCATION_ENABLED>;
     OnStackBuff buff_;
-    BaseMemStats *mem_stats_;
-    SpaceType space_type_;
-    OOMHandler oom_handler_ {nullptr};
-    bool limit_alloc_size_by_pool_ {false};
+    BaseMemStats *memStats_;
+    SpaceType spaceType_;
+    OOMHandler oomHandler_ {nullptr};
+    bool limitAllocSizeByPool_ {false};
 };
 
 using ArenaAllocator = ArenaAllocatorT<false>;
@@ -213,18 +213,18 @@ using ArenaAllocatorWithOOMHandler = ArenaAllocatorT<true>;
 template <bool USE_OOM_HANDLER>
 class ArenaResizeWrapper {
 public:
-    explicit ArenaResizeWrapper(ArenaAllocatorT<USE_OOM_HANDLER> *arena_allocator)
-        : old_size_(arena_allocator->GetAllocatedSize()), allocator_(arena_allocator)
+    explicit ArenaResizeWrapper(ArenaAllocatorT<USE_OOM_HANDLER> *arenaAllocator)
+        : oldSize_(arenaAllocator->GetAllocatedSize()), allocator_(arenaAllocator)
     {
     }
 
     ~ArenaResizeWrapper()
     {
-        allocator_->Resize(old_size_);
+        allocator_->Resize(oldSize_);
     }
 
 private:
-    size_t old_size_;
+    size_t oldSize_;
     ArenaAllocatorT<USE_OOM_HANDLER> *allocator_;
 
     NO_COPY_SEMANTIC(ArenaResizeWrapper);
@@ -233,10 +233,10 @@ private:
 
 template <bool USE_OOM_HANDLER>
 template <typename T>
-T *ArenaAllocatorT<USE_OOM_HANDLER>::AllocArray(size_t arr_length)
+T *ArenaAllocatorT<USE_OOM_HANDLER>::AllocArray(size_t arrLength)
 {
     // NOTE(Dmitrii Trubenkov): change to the proper implementation
-    return static_cast<T *>(Alloc(sizeof(T) * arr_length));
+    return static_cast<T *>(Alloc(sizeof(T) * arrLength));
 }
 
 }  // namespace panda

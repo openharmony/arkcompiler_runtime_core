@@ -31,44 +31,44 @@ public:
 
     ~PtThreadInfo()
     {
-        ASSERT(managed_thread_ref_ == nullptr);
+        ASSERT(managedThreadRef_ == nullptr);
     }
 
     PtHookTypeInfo &GetHookTypeInfo()
     {
-        return hook_type_info_;
+        return hookTypeInfo_;
     }
 
     sampler::ThreadSamplingInfo *GetSamplingInfo()
     {
-        return &sampling_info_;
+        return &samplingInfo_;
     }
 
-    void SetThreadObjectHeader(ObjectHeader *thread_object_header)
+    void SetThreadObjectHeader(ObjectHeader *threadObjectHeader)
     {
-        ASSERT(managed_thread_ref_ == nullptr);
-        managed_thread_ref_ = PandaVM::GetCurrent()->GetGlobalObjectStorage()->Add(thread_object_header,
-                                                                                   mem::Reference::ObjectType::GLOBAL);
+        ASSERT(managedThreadRef_ == nullptr);
+        managedThreadRef_ = PandaVM::GetCurrent()->GetGlobalObjectStorage()->Add(threadObjectHeader,
+                                                                                 mem::Reference::ObjectType::GLOBAL);
     }
 
     void Destroy()
     {
-        if (managed_thread_ref_ != nullptr) {
-            PandaVM::GetCurrent()->GetGlobalObjectStorage()->Remove(managed_thread_ref_);
-            managed_thread_ref_ = nullptr;
+        if (managedThreadRef_ != nullptr) {
+            PandaVM::GetCurrent()->GetGlobalObjectStorage()->Remove(managedThreadRef_);
+            managedThreadRef_ = nullptr;
         }
     }
 
     ObjectHeader *GetThreadObjectHeader() const
     {
-        ASSERT(managed_thread_ref_ != nullptr);
-        return PandaVM::GetCurrent()->GetGlobalObjectStorage()->Get(managed_thread_ref_);
+        ASSERT(managedThreadRef_ != nullptr);
+        return PandaVM::GetCurrent()->GetGlobalObjectStorage()->Get(managedThreadRef_);
     }
 
 private:
-    PtHookTypeInfo hook_type_info_ {false};
-    mem::Reference *managed_thread_ref_ {nullptr};
-    sampler::ThreadSamplingInfo sampling_info_ {};
+    PtHookTypeInfo hookTypeInfo_ {false};
+    mem::Reference *managedThreadRef_ {nullptr};
+    sampler::ThreadSamplingInfo samplingInfo_ {};
 
     NO_COPY_SEMANTIC(PtThreadInfo);
     NO_MOVE_SEMANTIC(PtThreadInfo);

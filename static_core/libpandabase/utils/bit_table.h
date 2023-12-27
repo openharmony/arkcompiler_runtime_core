@@ -89,12 +89,12 @@ public:
     using Reversed = BitTableRow<N_COLUMNS, Accessor, !REVERSE_ITERATION>;
 
     BitTableRow() = default;
-    BitTableRow(const BitTableType *table, int row_index) : table_(table), row_index_(row_index) {}
-    explicit BitTableRow(Reversed *rhs) : table_(rhs->table_), row_index_(rhs->row_index_) {}
+    BitTableRow(const BitTableType *table, int rowIndex) : table_(table), rowIndex_(rowIndex) {}
+    explicit BitTableRow(Reversed *rhs) : table_(rhs->table_), rowIndex_(rhs->row_index_) {}
 
     uint32_t GetRow() const
     {
-        return row_index_;
+        return rowIndex_;
     }
 
     std::string GetColumnStr(size_t column) const
@@ -112,7 +112,7 @@ public:
 
     uint32_t Get(size_t index) const
     {
-        return table_->ReadColumn(row_index_, index);
+        return table_->ReadColumn(rowIndex_, index);
     }
 
     bool Has(size_t index) const
@@ -127,12 +127,12 @@ public:
 
     bool IsValid() const
     {
-        return row_index_ != -1;
+        return rowIndex_ != -1;
     }
 
     bool operator==(const BitTableRow &rhs) const
     {
-        return table_ == rhs.table_ && row_index_ == rhs.row_index_;
+        return table_ == rhs.table_ && rowIndex_ == rhs.rowIndex_;
     }
 
     bool operator!=(const BitTableRow &rhs) const
@@ -153,7 +153,7 @@ protected:
 
 private:
     const BitTableType *table_ {nullptr};
-    int row_index_ {-1};
+    int rowIndex_ {-1};
 
     friend Reversed;
     template <typename, bool>
@@ -171,15 +171,15 @@ public:
     using reference = value_type &;
     // NOLINTEND(readability-identifier-naming)
 
-    BitTableIterator(const typename Accessor::BitTableType *table, int row_index) : row_(table, row_index) {}
+    BitTableIterator(const typename Accessor::BitTableType *table, int rowIndex) : row_(table, rowIndex) {}
     explicit BitTableIterator(Accessor &row) : row_(row) {}
 
     BitTableIterator &operator++()
     {
         if constexpr (REVERSE_ITERATION) {  // NOLINT
-            row_.row_index_--;
+            row_.rowIndex_--;
         } else {  // NOLINT
-            row_.row_index_++;
+            row_.rowIndex_++;
         }
         return *this;
     }
@@ -189,7 +189,7 @@ public:
         if constexpr (REVERSE_ITERATION) {  // NOLINT
             row_.row_index_++;
         } else {  // NOLINT
-            row_.row_index_--;
+            row_.rowIndex_--;
         }
         return *this;
     }
@@ -212,9 +212,9 @@ public:
     auto operator+(int32_t n) const
     {
         if constexpr (REVERSE_ITERATION) {  // NOLINT
-            return BitTableIterator(row_.table_, row_.row_index_ - n);
+            return BitTableIterator(row_.table_, row_.rowIndex_ - n);
         } else {  // NOLINT
-            return BitTableIterator(row_.table_, row_.row_index_ + n);
+            return BitTableIterator(row_.table_, row_.rowIndex_ + n);
         }
     }
     auto operator-(int32_t n) const
@@ -228,9 +228,9 @@ public:
     int32_t operator-(const BitTableIterator &rhs) const
     {
         if constexpr (REVERSE_ITERATION) {  // NOLINT
-            return rhs.row_.row_index_ - row_.row_index_;
+            return rhs.row_.rowIndex_ - row_.rowIndex_;
         } else {  // NOLINT
-            return row_.row_index_ - rhs.row_.row_index_;
+            return row_.rowIndex_ - rhs.row_.rowIndex_;
         }
     }
 
@@ -239,7 +239,7 @@ public:
         if constexpr (REVERSE_ITERATION) {  // NOLINT
             row_.row_index_ -= n;
         } else {  // NOLINT
-            row_.row_index_ += n;
+            row_.rowIndex_ += n;
         }
         return *this;
     }
@@ -390,23 +390,23 @@ public:
 
     size_t GetRowsCount() const
     {
-        return rows_count_;
+        return rowsCount_;
     }
 
     size_t GetRowSizeInBits() const
     {
-        return columns_offsets_[NUM_COLUMNS];
+        return columnsOffsets_[NUM_COLUMNS];
     }
 
     size_t GetColumnWidth(size_t index) const
     {
-        return columns_offsets_[index + 1] - columns_offsets_[index];
+        return columnsOffsets_[index + 1] - columnsOffsets_[index];
     }
 
-    uint32_t ReadColumn(size_t row_index, size_t column) const
+    uint32_t ReadColumn(size_t rowIndex, size_t column) const
     {
         ASSERT(column < GetColumnsCount());
-        return region_.Read(row_index * GetRowSizeInBits() + columns_offsets_[column], GetColumnWidth(column)) +
+        return region_.Read(rowIndex * GetRowSizeInBits() + columnsOffsets_[column], GetColumnWidth(column)) +
                NO_VALUE_DIFF;
     }
 
@@ -432,19 +432,19 @@ public:
         if (row == NO_VALUE) {
             return RegionType();
         }
-        size_t offset = row * GetRowSizeInBits() + columns_offsets_[0];
+        size_t offset = row * GetRowSizeInBits() + columnsOffsets_[0];
         return region_.Subregion(offset, GetColumnWidth(0));
     }
 
     void Decode(BitMemoryStreamIn *stream)
     {
         auto columns = VarintPack::Read<NUM_COLUMNS + 1>(stream);
-        rows_count_ = columns[NUM_COLUMNS];
+        rowsCount_ = columns[NUM_COLUMNS];
 
         // Calculate offsets
-        columns_offsets_[0] = 0;
+        columnsOffsets_[0] = 0;
         for (size_t i = 0; i < NUM_COLUMNS; i++) {
-            columns_offsets_[i + 1] = columns_offsets_[i] + columns[i];
+            columnsOffsets_[i + 1] = columnsOffsets_[i] + columns[i];
         }
 
         region_ = stream->ReadRegion(GetRowsCount() * GetRowSizeInBits());
@@ -483,8 +483,8 @@ public:
 
 private:
     BitMemoryRegion<const uint8_t> region_;
-    std::array<uint16_t, NUM_COLUMNS + 1> columns_offsets_ {};
-    uint16_t rows_count_ {0};
+    std::array<uint16_t, NUM_COLUMNS + 1> columnsOffsets_ {};
+    uint16_t rowsCount_ {0};
 };
 
 template <typename Accessor>
@@ -545,7 +545,7 @@ public:
 
 public:
     explicit BitTableBuilder(ArenaAllocator *allocator)
-        : entries_(allocator->Adapter()), dedup_map_(allocator->Adapter())
+        : entries_(allocator->Adapter()), dedupMap_(allocator->Adapter())
     {
     }
 
@@ -582,7 +582,7 @@ public:
     size_t AddArray(Span<Entry> entries)
     {
         uint32_t hash = FnvHash(entries.template SubSpan<uint32_t>(0, entries.size() * NUM_COLUMNS));
-        auto range = dedup_map_.equal_range(hash);
+        auto range = dedupMap_.equal_range(hash);
         for (auto it = range.first; it != range.second; ++it) {
             uint32_t row = it->second;
             if (entries.size() + row <= entries_.size() &&
@@ -592,19 +592,19 @@ public:
         }
         uint32_t row = GetRowsCount();
         entries_.insert(entries_.end(), entries.begin(), entries.end());
-        dedup_map_.emplace(hash, row);
+        dedupMap_.emplace(hash, row);
         return row;
     }
 
-    void CalculateColumnsWidth(Span<uint32_t> columns_width)
+    void CalculateColumnsWidth(Span<uint32_t> columnsWidth)
     {
-        std::fill(columns_width.begin(), columns_width.end(), 0);
+        std::fill(columnsWidth.begin(), columnsWidth.end(), 0);
         for (const auto &entry : entries_) {
             for (size_t i = 0; i < NUM_COLUMNS; i++) {
-                columns_width[i] |= entry[i] - NO_VALUE_DIFF;
+                columnsWidth[i] |= entry[i] - NO_VALUE_DIFF;
             }
         }
-        for (auto &value : columns_width) {
+        for (auto &value : columnsWidth) {
             value = MinimumBitsToStore(value);
         }
     }
@@ -613,14 +613,14 @@ public:
     void Encode(BitMemoryStreamOut<Container> &stream)
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-        std::array<uint32_t, NUM_COLUMNS + 1> columns_width;
-        CalculateColumnsWidth(Span(columns_width.data(), NUM_COLUMNS));
-        columns_width[NUM_COLUMNS] = entries_.size();
-        VarintPack::Write(stream, columns_width);
+        std::array<uint32_t, NUM_COLUMNS + 1> columnsWidth;
+        CalculateColumnsWidth(Span(columnsWidth.data(), NUM_COLUMNS));
+        columnsWidth[NUM_COLUMNS] = entries_.size();
+        VarintPack::Write(stream, columnsWidth);
 
         for (const auto &entry : entries_) {
             for (size_t i = 0; i < NUM_COLUMNS; i++) {
-                stream.Write(entry[i] - NO_VALUE_DIFF, columns_width[i]);
+                stream.Write(entry[i] - NO_VALUE_DIFF, columnsWidth[i]);
             }
         }
     }
@@ -632,7 +632,7 @@ public:
 
 private:
     ArenaDeque<Entry> entries_;
-    ArenaUnorderedMultiMap<uint32_t, uint32_t> dedup_map_;
+    ArenaUnorderedMultiMap<uint32_t, uint32_t> dedupMap_;
 };
 
 class BitmapTableBuilder {
@@ -640,7 +640,7 @@ public:
     using Entry = std::pair<uint32_t *, uint32_t>;
 
     explicit BitmapTableBuilder(ArenaAllocator *allocator)
-        : allocator_(allocator), rows_(allocator->Adapter()), dedup_map_(allocator->Adapter())
+        : allocator_(allocator), rows_(allocator->Adapter()), dedupMap_(allocator->Adapter())
     {
     }
 
@@ -660,32 +660,32 @@ public:
             return BitTableDefault<1>::NO_VALUE;
         }
         uint32_t hash = FnvHash(vec.GetContainerDataSpan());
-        auto range = dedup_map_.equal_range(hash);
+        auto range = dedupMap_.equal_range(hash);
         for (auto it = range.first; it != range.second; ++it) {
             auto &row = rows_[it->second];
             if (BitVectorSpan(row.first, row.second) == vec) {
                 return it->second;
             }
         }
-        size_t vec_size_in_bytes = BitsToBytesRoundUp(vec.size());
-        size_t data_size_in_bytes = RoundUp(vec_size_in_bytes, sizeof(uint32_t));
-        auto data = allocator_->AllocArray<uint32_t>(data_size_in_bytes / sizeof(uint32_t));
-        if (data_size_in_bytes != 0) {
-            errno_t res = memcpy_s(data, vec_size_in_bytes, vec.data(), vec_size_in_bytes);
+        size_t vecSizeInBytes = BitsToBytesRoundUp(vec.size());
+        size_t dataSizeInBytes = RoundUp(vecSizeInBytes, sizeof(uint32_t));
+        auto data = allocator_->AllocArray<uint32_t>(dataSizeInBytes / sizeof(uint32_t));
+        if (dataSizeInBytes != 0) {
+            errno_t res = memcpy_s(data, vecSizeInBytes, vec.data(), vecSizeInBytes);
             if (res != EOK) {
                 UNREACHABLE();
             }
         }
 
         // Clear extra bytes, which are not be covered by vector's data
-        size_t extra_bytes = data_size_in_bytes - vec_size_in_bytes;
-        if (extra_bytes != 0) {
+        size_t extraBytes = dataSizeInBytes - vecSizeInBytes;
+        if (extraBytes != 0) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,-warnings-as-errors)
-            memset_s(reinterpret_cast<uint8_t *>(data) + vec_size_in_bytes, extra_bytes, 0, extra_bytes);
+            memset_s(reinterpret_cast<uint8_t *>(data) + vecSizeInBytes, extraBytes, 0, extraBytes);
         }
         uint32_t index = rows_.size();
         rows_.push_back({data, vec.size()});
-        dedup_map_.emplace(hash, index);
+        dedupMap_.emplace(hash, index);
         return index;
     }
 
@@ -711,7 +711,7 @@ public:
 private:
     ArenaAllocator *allocator_ {nullptr};
     ArenaDeque<Entry> rows_;
-    ArenaUnorderedMultiMap<uint32_t, uint32_t> dedup_map_;
+    ArenaUnorderedMultiMap<uint32_t, uint32_t> dedupMap_;
 };
 
 }  // namespace panda

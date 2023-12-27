@@ -35,12 +35,12 @@ public:
         encoder_->InitMasm();
         encoder_->SetRegfile(RegistersDescription::Create(allocator_, Arch::AARCH64));
 
-        exec_module_ = allocator_->New<VixlExecModule>(allocator_, nullptr);
+        execModule_ = allocator_->New<VixlExecModule>(allocator_, nullptr);
     }
 
     ~EncoderArm64VixlTest() override
     {
-        exec_module_->~VixlExecModule();
+        execModule_->~VixlExecModule();
         Logger::Destroy();
         encoder_->~Aarch64Encoder();
         delete allocator_;
@@ -73,29 +73,28 @@ public:
     }
 
     template <typename T>
-    void TestPcRelativeLoad(size_t data_size, ssize_t offset, bool get_address,
-                            std::initializer_list<const char *> insts)
+    void TestPcRelativeLoad(size_t dataSize, ssize_t offset, bool getAddress, std::initializer_list<const char *> insts)
     {
         auto buffer = GetEncoder()->GetMasm()->GetBuffer();
-        T *data = reinterpret_cast<T *>(buffer->template GetOffsetAddress<uint8_t *>(data_size) + offset);
-        T good_value = GetGoodValue<T>();
-        T bad_value = GetBadValue<T>();
+        T *data = reinterpret_cast<T *>(buffer->template GetOffsetAddress<uint8_t *>(dataSize) + offset);
+        T goodValue = GetGoodValue<T>();
+        T badValue = GetBadValue<T>();
 
         {
-            T tmp_value;
-            memcpy_s(&tmp_value, sizeof(T), data, sizeof(T));
-            ASSERT_EQ(tmp_value, bad_value);
+            T tmpValue;
+            memcpy_s(&tmpValue, sizeof(T), data, sizeof(T));
+            ASSERT_EQ(tmpValue, badValue);
         }
 
         // We use memcpy here (instead of just assigning), because the data can be aligned by 4 for 64-bit target, and
         // asan will complain about this.
-        memcpy_s(data, sizeof(T), &good_value, sizeof(T));
+        memcpy_s(data, sizeof(T), &goodValue, sizeof(T));
 
         GetEncoder()->SetCodeOffset(0U);
 
-        buffer->Rewind(data_size);
+        buffer->Rewind(dataSize);
         Reg reg(0U, TypeInfo(T(0U)));
-        if (get_address) {
+        if (getAddress) {
             Reg addr(1U, INT64_TYPE);
             GetEncoder()->LoadPcRelative(reg, offset, addr);
         } else {
@@ -103,19 +102,19 @@ public:
         }
         GetEncoder()->EncodeReturn();
 
-        auto start_addr = buffer->GetOffsetAddress<const char *>(data_size);
-        exec_module_->SetInstructions(start_addr, buffer->GetEndAddress<const char *>());
-        exec_module_->Execute();
+        auto startAddr = buffer->GetOffsetAddress<const char *>(dataSize);
+        execModule_->SetInstructions(startAddr, buffer->GetEndAddress<const char *>());
+        execModule_->Execute();
 
         {
-            T tmp_value;
-            memcpy_s(&tmp_value, sizeof(T), data, sizeof(T));
-            ASSERT_EQ(tmp_value, good_value);
+            T tmpValue;
+            memcpy_s(&tmpValue, sizeof(T), data, sizeof(T));
+            ASSERT_EQ(tmpValue, goodValue);
         }
 
         {
             auto inst = insts.begin();
-            for (uint32_t i = data_size; i < buffer->GetCursorOffset() && inst != insts.end(); ++inst) {
+            for (uint32_t i = dataSize; i < buffer->GetCursorOffset() && inst != insts.end(); ++inst) {
                 std::stringstream ss;
                 i = encoder_->DisasmInstr(ss, i, 0U);
                 auto pos = ss.str().find(*inst);
@@ -126,42 +125,42 @@ public:
             }
         }
 
-        memcpy_s(data, sizeof(T), &bad_value, sizeof(T));
+        memcpy_s(data, sizeof(T), &badValue, sizeof(T));
 
-        if (get_address) {
-            EXPECT_EQ(exec_module_->GetSimulator()->ReadXRegister(1U), reinterpret_cast<int64_t>(data));
+        if (getAddress) {
+            EXPECT_EQ(execModule_->GetSimulator()->ReadXRegister(1U), reinterpret_cast<int64_t>(data));
         }
-        EXPECT_EQ(exec_module_->GetRetValue(), GetGoodValue<T>());
+        EXPECT_EQ(execModule_->GetRetValue(), GetGoodValue<T>());
     }
 
-    void TestOffset(size_t data_size, ssize_t offset)
+    void TestOffset(size_t dataSize, ssize_t offset)
     {
         ASSERT((offset & 3U) == 0U);  // NOLINT(hicpp-signed-bitwise)
         if (vixl::IsInt21(offset)) {
-            TestPcRelativeLoad<uint64_t>(data_size, offset, false, {"adr", "ldr"});
-            TestPcRelativeLoad<uint64_t>(data_size, offset, true, {"adr", "ldr"});
-            TestPcRelativeLoad<uint64_t>(data_size, -offset, false, {"adr", "ldr"});
-            TestPcRelativeLoad<uint64_t>(data_size, -offset, true, {"adr", "ldr"});
-            TestPcRelativeLoad<uint32_t>(data_size, offset, false, {"adr", "ldr"});
-            TestPcRelativeLoad<uint32_t>(data_size, offset, true, {"adr", "ldr"});
-            TestPcRelativeLoad<uint32_t>(data_size, -offset, false, {"adr", "ldr"});
-            TestPcRelativeLoad<uint32_t>(data_size, -offset, true, {"adr", "ldr"});
+            TestPcRelativeLoad<uint64_t>(dataSize, offset, false, {"adr", "ldr"});
+            TestPcRelativeLoad<uint64_t>(dataSize, offset, true, {"adr", "ldr"});
+            TestPcRelativeLoad<uint64_t>(dataSize, -offset, false, {"adr", "ldr"});
+            TestPcRelativeLoad<uint64_t>(dataSize, -offset, true, {"adr", "ldr"});
+            TestPcRelativeLoad<uint32_t>(dataSize, offset, false, {"adr", "ldr"});
+            TestPcRelativeLoad<uint32_t>(dataSize, offset, true, {"adr", "ldr"});
+            TestPcRelativeLoad<uint32_t>(dataSize, -offset, false, {"adr", "ldr"});
+            TestPcRelativeLoad<uint32_t>(dataSize, -offset, true, {"adr", "ldr"});
         } else {
             if ((offset & 7U) == 0U) {  // NOLINT(hicpp-signed-bitwise)
-                TestPcRelativeLoad<uint64_t>(data_size, offset, false, {"adrp", "ldr"});
-                TestPcRelativeLoad<uint64_t>(data_size, offset, true, {"adrp", "add", "ldr"});
-                TestPcRelativeLoad<uint64_t>(data_size, -offset, false, {"adrp", "ldr"});
-                TestPcRelativeLoad<uint64_t>(data_size, -offset, true, {"adrp", "add", "ldr"});
+                TestPcRelativeLoad<uint64_t>(dataSize, offset, false, {"adrp", "ldr"});
+                TestPcRelativeLoad<uint64_t>(dataSize, offset, true, {"adrp", "add", "ldr"});
+                TestPcRelativeLoad<uint64_t>(dataSize, -offset, false, {"adrp", "ldr"});
+                TestPcRelativeLoad<uint64_t>(dataSize, -offset, true, {"adrp", "add", "ldr"});
             } else {
-                TestPcRelativeLoad<uint64_t>(data_size, offset, false, {"adrp", "mov", "ldr"});
-                TestPcRelativeLoad<uint64_t>(data_size, offset, true, {"adrp", "add", "ldr"});
-                TestPcRelativeLoad<uint64_t>(data_size, -offset, false, {"adrp", "mov", "ldr"});
-                TestPcRelativeLoad<uint64_t>(data_size, -offset, true, {"adrp", "add", "ldr"});
+                TestPcRelativeLoad<uint64_t>(dataSize, offset, false, {"adrp", "mov", "ldr"});
+                TestPcRelativeLoad<uint64_t>(dataSize, offset, true, {"adrp", "add", "ldr"});
+                TestPcRelativeLoad<uint64_t>(dataSize, -offset, false, {"adrp", "mov", "ldr"});
+                TestPcRelativeLoad<uint64_t>(dataSize, -offset, true, {"adrp", "add", "ldr"});
             }
-            TestPcRelativeLoad<uint32_t>(data_size, offset, false, {"adrp", "ldr"});
-            TestPcRelativeLoad<uint32_t>(data_size, offset, true, {"adrp", "add", "ldr"});
-            TestPcRelativeLoad<uint32_t>(data_size, -offset, false, {"adrp", "ldr"});
-            TestPcRelativeLoad<uint32_t>(data_size, -offset, true, {"adrp", "add", "ldr"});
+            TestPcRelativeLoad<uint32_t>(dataSize, offset, false, {"adrp", "ldr"});
+            TestPcRelativeLoad<uint32_t>(dataSize, offset, true, {"adrp", "add", "ldr"});
+            TestPcRelativeLoad<uint32_t>(dataSize, -offset, false, {"adrp", "ldr"});
+            TestPcRelativeLoad<uint32_t>(dataSize, -offset, true, {"adrp", "add", "ldr"});
         }
     }
 
@@ -193,7 +192,7 @@ protected:
 private:
     ArenaAllocator *allocator_ {nullptr};
     aarch64::Aarch64Encoder *encoder_ {nullptr};
-    VixlExecModule *exec_module_ {nullptr};
+    VixlExecModule *execModule_ {nullptr};
 };
 
 // NOLINTBEGIN(readability-magic-numbers)

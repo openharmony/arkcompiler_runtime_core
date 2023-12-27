@@ -29,20 +29,20 @@ size_t HeapVerifier<LanguageConfig>::VerifyAllPaused() const
 {
     Rendezvous *rendezvous = Thread::GetCurrent()->GetVM()->GetRendezvous();
     rendezvous->SafepointBegin();
-    size_t fail_count = VerifyAll();
+    size_t failCount = VerifyAll();
     rendezvous->SafepointEnd();
-    return fail_count;
+    return failCount;
 }
 
 template <LangTypeT LANG_TYPE>
 void HeapObjectVerifier<LANG_TYPE>::operator()(ObjectHeader *obj)
 {
-    HeapReferenceVerifier<LANG_TYPE> ref_verifier(heap_, fail_count_);
-    ObjectHelpers<LANG_TYPE>::TraverseAllObjects(obj, ref_verifier);
+    HeapReferenceVerifier<LANG_TYPE> refVerifier(heap_, failCount_);
+    ObjectHelpers<LANG_TYPE>::TraverseAllObjects(obj, refVerifier);
 }
 
 template <LangTypeT LANG_TYPE>
-void HeapReferenceVerifier<LANG_TYPE>::operator()([[maybe_unused]] ObjectHeader *object_header, ObjectHeader *referent)
+void HeapReferenceVerifier<LANG_TYPE>::operator()([[maybe_unused]] ObjectHeader *objectHeader, ObjectHeader *referent)
 {
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (LANG_TYPE == LANG_TYPE_DYNAMIC) {
@@ -53,13 +53,13 @@ void HeapReferenceVerifier<LANG_TYPE>::operator()([[maybe_unused]] ObjectHeader 
         }
     }
     if (!heap_->IsLiveObject(referent)) {
-        LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << object_header
+        LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
                           << " references a dead object at " << referent;
-        ++(*fail_count_);
+        ++(*failCount_);
     } else if (referent->IsForwarded()) {
-        LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << object_header
+        LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
                           << " references a forwarded object at " << referent;
-        ++(*fail_count_);
+        ++(*failCount_);
     }
 }
 
@@ -77,10 +77,10 @@ void HeapReferenceVerifier<LANG_TYPE>::operator()(const GCRoot &root)
     }
     if (!heap_->IsLiveObject(referent)) {
         LOG_HEAP_VERIFIER << "Heap corruption found! Root references a dead object at " << std::hex << referent;
-        ++(*fail_count_);
+        ++(*failCount_);
     } else if (referent->IsForwarded()) {
         LOG_HEAP_VERIFIER << "Heap corruption found! Root references a forwarded object at " << std::hex << referent;
-        ++(*fail_count_);
+        ++(*failCount_);
     }
 }
 
@@ -105,52 +105,53 @@ size_t HeapVerifier<LanguageConfig>::VerifyHeap() const
 template <class LanguageConfig>
 size_t HeapVerifier<LanguageConfig>::VerifyRoot() const
 {
-    RootManager<LanguageConfig> root_manager;
-    size_t fail_count = 0;
-    root_manager.SetPandaVM(heap_->GetPandaVM());
-    root_manager.VisitNonHeapRoots([this, &fail_count](const GCRoot &root) {
+    RootManager<LanguageConfig> rootManager;
+    size_t failCount = 0;
+    rootManager.SetPandaVM(heap_->GetPandaVM());
+    rootManager.VisitNonHeapRoots([this, &failCount](const GCRoot &root) {
         if (root.GetType() == RootType::ROOT_FRAME || root.GetType() == RootType::ROOT_THREAD) {
-            auto *base_cls = root.GetObjectHeader()->ClassAddr<BaseClass>();
-            if (base_cls == nullptr) {
+            auto *baseCls = root.GetObjectHeader()->ClassAddr<BaseClass>();
+            if (baseCls == nullptr) {
                 LOG_HEAP_VERIFIER << "Heap corruption found! Class address for root " << std::hex
                                   << root.GetObjectHeader() << " is null";
-                ++fail_count;
-            } else if (!(!base_cls->IsDynamicClass() && static_cast<Class *>(base_cls)->IsClassClass())) {
-                HeapReferenceVerifier<LanguageConfig::LANG_TYPE>(heap_, &fail_count)(root);
+                ++failCount;
+            } else if (!(!baseCls->IsDynamicClass() && static_cast<Class *>(baseCls)->IsClassClass())) {
+                HeapReferenceVerifier<LanguageConfig::LANG_TYPE>(heap_, &failCount)(root);
             }
         }
     });
 
-    return fail_count;
+    return failCount;
 }
 
 template <class LanguageConfig>
 size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
 {
-    PandaUnorderedSet<const ObjectHeader *> heap_objects;
-    PandaVector<ObjectCache> referent_objects;
-    size_t fails_count = 0;
+    PandaUnorderedSet<const ObjectHeader *> heapObjects;
+    PandaVector<ObjectCache> referentObjects;
+    size_t failsCount = 0;
 
-    auto lazy_verify = [&](const ObjectHeader *object_header, const ObjectHeader *referent) {
+    auto lazyVerify = [&heapObjects, &referentObjects, &failsCount](const ObjectHeader *objectHeader,
+                                                                      const ObjectHeader *referent) {
         // Lazy verify during heap objects collection
-        if (heap_objects.find(referent) == heap_objects.end()) {
-            referent_objects.push_back(ObjectCache({object_header, referent}));
+        if (heapObjects.find(referent) == heapObjects.end()) {
+            referentObjects.push_back(ObjectCache({objectHeader, referent}));
         }
-        if (object_header->IsForwarded()) {
-            LOG_HEAP_VERIFIER << "Heap object " << std::hex << object_header << " is forwarded object";
-            ++fails_count;
+        if (objectHeader->IsForwarded()) {
+            LOG_HEAP_VERIFIER << "Heap object " << std::hex << objectHeader << " is forwarded object";
+            ++failsCount;
         }
-        auto *class_addr = object_header->ClassAddr<BaseClass>();
-        if (!IsAddressInObjectsHeap(class_addr)) {
-            LOG_HEAP_VERIFIER << "Heap object " << std::hex << object_header
-                              << " has non-heap class address: " << class_addr;
-            ++fails_count;
+        auto *classAddr = objectHeader->ClassAddr<BaseClass>();
+        if (!IsAddressInObjectsHeap(classAddr)) {
+            LOG_HEAP_VERIFIER << "Heap object " << std::hex << objectHeader
+                              << " has non-heap class address: " << classAddr;
+            ++failsCount;
         }
     };
-    const std::function<void(ObjectHeader *, ObjectHeader *)> lazy_verify_functor(lazy_verify);
-    auto collect_objects = [&](ObjectHeader *object) {
-        heap_objects.insert(object);
-        ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, lazy_verify_functor);
+    const std::function<void(ObjectHeader *, ObjectHeader *)> lazyVerifyFunctor(lazyVerify);
+    auto collectObjects = [&heapObjects, &lazyVerifyFunctor](ObjectHeader *object) {
+        heapObjects.insert(object);
+        ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, lazyVerifyFunctor);
     };
 
     // Heap objects verifier
@@ -159,78 +160,77 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
     // A string object may exist but there are no live references to it (no bit set in the live bitmap).
     // But later code may reuse it by calling StringTable::GetOrInternString so this string
     // get alive. That is why we mark all strings as alive by visiting the string table.
-    Thread::GetCurrent()->GetVM()->VisitStrings(collect_objects);
-    heap_->IterateOverObjects(collect_objects);
-    for (auto object_cache : referent_objects) {
-        if (heap_objects.find(object_cache.referent) == heap_objects.end()) {
+    Thread::GetCurrent()->GetVM()->VisitStrings(collectObjects);
+    heap_->IterateOverObjects(collectObjects);
+    for (auto objectCache : referentObjects) {
+        if (heapObjects.find(objectCache.referent) == heapObjects.end()) {
             static constexpr const char *UNKNOWN_CLASS = "unknown class";
-            PandaString ref_class_str = UNKNOWN_CLASS;
-            PandaString obj_class_str = UNKNOWN_CLASS;
+            PandaString refClassStr = UNKNOWN_CLASS;
+            PandaString objClassStr = UNKNOWN_CLASS;
             if constexpr (LanguageConfig::LANG_TYPE == LANG_TYPE_STATIC) {
-                auto *cls = object_cache.referent->template ClassAddr<Class>();
+                auto *cls = objectCache.referent->template ClassAddr<Class>();
                 if (IsAddressInObjectsHeap(cls)) {
-                    ref_class_str = cls->GetName();
+                    refClassStr = cls->GetName();
                 }
-                cls = object_cache.heap_object->template ClassAddr<Class>();
+                cls = objectCache.heapObject->template ClassAddr<Class>();
                 if (IsAddressInObjectsHeap(cls)) {
-                    obj_class_str = cls->GetName();
+                    objClassStr = cls->GetName();
                 }
             }
-            LOG_HEAP_VERIFIER << "Heap object " << std::hex << object_cache.heap_object << " (" << obj_class_str
-                              << ") references a dead object at " << object_cache.referent << " (" << ref_class_str
-                              << ")";
-            ++fails_count;
+            LOG_HEAP_VERIFIER << "Heap object " << std::hex << objectCache.heapObject << " (" << objClassStr
+                              << ") references a dead object at " << objectCache.referent << " (" << refClassStr << ")";
+            ++failsCount;
         }
     }
     // Stack verifier
-    RootManager<LanguageConfig> root_manager;
-    root_manager.SetPandaVM(heap_->GetPandaVM());
-    auto root_verifier = [&](const GCRoot &root) {
-        const auto *root_obj_header = root.GetObjectHeader();
-        auto *base_cls = root_obj_header->ClassAddr<BaseClass>();
-        if (!IsAddressInObjectsHeap(ToUintPtr(base_cls))) {
-            LOG_HEAP_VERIFIER << "Class address for root " << std::hex << root_obj_header
-                              << " is not in objects heap: " << base_cls;
-            ++fails_count;
-        } else if (base_cls->IsDynamicClass() || !static_cast<Class *>(base_cls)->IsClassClass()) {
-            if (heap_objects.find(root_obj_header) == heap_objects.end()) {
-                LOG_HEAP_VERIFIER << "Root references a dead object at " << std::hex << root_obj_header;
-                ++fails_count;
+    RootManager<LanguageConfig> rootManager;
+    rootManager.SetPandaVM(heap_->GetPandaVM());
+    auto rootVerifier = [&heapObjects, &failsCount](const GCRoot &root) {
+        const auto *rootObjHeader = root.GetObjectHeader();
+        auto *baseCls = rootObjHeader->ClassAddr<BaseClass>();
+        if (!IsAddressInObjectsHeap(ToUintPtr(baseCls))) {
+            LOG_HEAP_VERIFIER << "Class address for root " << std::hex << rootObjHeader
+                              << " is not in objects heap: " << baseCls;
+            ++failsCount;
+        } else if (baseCls->IsDynamicClass() || !static_cast<Class *>(baseCls)->IsClassClass()) {
+            if (heapObjects.find(rootObjHeader) == heapObjects.end()) {
+                LOG_HEAP_VERIFIER << "Root references a dead object at " << std::hex << rootObjHeader;
+                ++failsCount;
             }
         }
     };
-    root_manager.VisitLocalRoots(root_verifier);
+    rootManager.VisitLocalRoots(rootVerifier);
 
-    return fails_count;
+    return failsCount;
 }
 
 ObjectVerificationInfo::ObjectVerificationInfo(ObjectHeader *referent)
-    : class_address_(referent->ClassAddr<void *>()), old_address_(referent)
+    : classAddress_(referent->ClassAddr<void *>()), oldAddress_(referent)
 {
 }
 
-bool ObjectVerificationInfo::VerifyUpdatedRef(ObjectHeader *object_header, ObjectHeader *updated_ref,
-                                              bool in_alive_space) const
+bool ObjectVerificationInfo::VerifyUpdatedRef(ObjectHeader *objectHeader, ObjectHeader *updatedRef,
+                                              bool inAliveSpace) const
 {
-    ObjectHeader *correct_address = old_address_;
-    if (!in_alive_space) {
-        if (!old_address_->IsForwarded()) {
-            LOG_HEAP_VERIFIER << "Object " << std::hex << object_header << " had reference " << old_address_
-                              << ", which is not forwarded, new reference address: " << updated_ref;
+    ObjectHeader *correctAddress = oldAddress_;
+    if (!inAliveSpace) {
+        if (!oldAddress_->IsForwarded()) {
+            LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << " had reference " << oldAddress_
+                              << ", which is not forwarded, new reference address: " << updatedRef;
             return false;
         }
-        correct_address = GetForwardAddress(old_address_);
+        correctAddress = GetForwardAddress(oldAddress_);
     }
-    if (correct_address != updated_ref) {
-        LOG_HEAP_VERIFIER << "Object " << std::hex << object_header << " has incorrect updated reference "
-                          << updated_ref << ", correct address: " << correct_address;
+    if (correctAddress != updatedRef) {
+        LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << " has incorrect updated reference " << updatedRef
+                          << ", correct address: " << correctAddress;
         return false;
     }
-    void *new_class_addr = updated_ref->ClassAddr<void *>();
-    if (new_class_addr != class_address_) {
-        LOG_HEAP_VERIFIER << "Object " << std::hex << object_header << " has incorrect class address ("
-                          << new_class_addr << ") in updated reference " << updated_ref
-                          << ", class address before collection: " << class_address_;
+    void *newClassAddr = updatedRef->ClassAddr<void *>();
+    if (newClassAddr != classAddress_) {
+        LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << " has incorrect class address (" << newClassAddr
+                          << ") in updated reference " << updatedRef
+                          << ", class address before collection: " << classAddress_;
         return false;
     }
 
@@ -240,8 +240,8 @@ bool ObjectVerificationInfo::VerifyUpdatedRef(ObjectHeader *object_header, Objec
 template <class LanguageConfig>
 bool HeapVerifierIntoGC<LanguageConfig>::InCollectableSpace(const ObjectHeader *object) const
 {
-    for (const auto &mem_range : this->collectable_mem_ranges_) {
-        if (mem_range.Contains(ToUintPtr(object))) {
+    for (const auto &memRange : this->collectableMemRanges_) {
+        if (memRange.Contains(ToUintPtr(object))) {
             return true;
         }
     }
@@ -251,8 +251,8 @@ bool HeapVerifierIntoGC<LanguageConfig>::InCollectableSpace(const ObjectHeader *
 template <class LanguageConfig>
 bool HeapVerifierIntoGC<LanguageConfig>::InAliveSpace(const ObjectHeader *object) const
 {
-    for (const auto &mem_range : this->alive_mem_ranges_) {
-        if (mem_range.Contains(ToUintPtr(object))) {
+    for (const auto &memRange : this->aliveMemRanges_) {
+        if (memRange.Contains(ToUintPtr(object))) {
             return true;
         }
     }
@@ -260,100 +260,98 @@ bool HeapVerifierIntoGC<LanguageConfig>::InAliveSpace(const ObjectHeader *object
 }
 
 template <class LanguageConfig>
-void HeapVerifierIntoGC<LanguageConfig>::AddToVerificationInfo(RefsVerificationInfo &verification_info,
-                                                               size_t ref_number, ObjectHeader *object_header,
+void HeapVerifierIntoGC<LanguageConfig>::AddToVerificationInfo(RefsVerificationInfo &verificationInfo,
+                                                               size_t refNumber, ObjectHeader *objectHeader,
                                                                ObjectHeader *referent)
 {
     if (this->InCollectableSpace(referent)) {
-        ObjectVerificationInfo obj_info(referent);
-        auto it = verification_info.find(object_header);
-        if (it != verification_info.end()) {
-            it->second.insert({ref_number, obj_info});
+        ObjectVerificationInfo objInfo(referent);
+        auto it = verificationInfo.find(objectHeader);
+        if (it != verificationInfo.end()) {
+            it->second.insert({refNumber, objInfo});
         } else {
-            verification_info.insert({object_header, VerifyingRefs({{ref_number, obj_info}})});
+            verificationInfo.insert({objectHeader, VerifyingRefs({{refNumber, objInfo}})});
         }
     }
 }
 
 template <class LanguageConfig>
-void HeapVerifierIntoGC<LanguageConfig>::CollectVerificationInfo(PandaVector<MemRange> &&collectable_mem_ranges)
+void HeapVerifierIntoGC<LanguageConfig>::CollectVerificationInfo(PandaVector<MemRange> &&collectableMemRanges)
 {
-    size_t ref_number = 0;
-    collectable_mem_ranges_ = std::move(collectable_mem_ranges);
-    const std::function<void(ObjectHeader *, ObjectHeader *)> refs_collector =
-        [this, &ref_number](ObjectHeader *object_header, ObjectHeader *referent) {
-            if (this->InCollectableSpace(object_header)) {
-                this->AddToVerificationInfo(this->collectable_verification_info_, ref_number, object_header, referent);
+    size_t refNumber = 0;
+    collectableMemRanges_ = std::move(collectableMemRanges);
+    const std::function<void(ObjectHeader *, ObjectHeader *)> refsCollector =
+        [this, &refNumber](ObjectHeader *objectHeader, ObjectHeader *referent) {
+            if (this->InCollectableSpace(objectHeader)) {
+                this->AddToVerificationInfo(this->collectableVerificationInfo_, refNumber, objectHeader, referent);
             } else {
-                this->AddToVerificationInfo(this->permanent_verification_info_, ref_number, object_header, referent);
+                this->AddToVerificationInfo(this->permanentVerificationInfo_, refNumber, objectHeader, referent);
             }
-            ++ref_number;
+            ++refNumber;
         };
 
-    auto collect_functor = [&ref_number, &refs_collector](ObjectHeader *object) {
+    auto collectFunctor = [&refNumber, &refsCollector](ObjectHeader *object) {
         if (object->IsMarkedForGC<false>()) {
-            ref_number = 0;
-            ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, refs_collector);
+            refNumber = 0;
+            ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, refsCollector);
         }
     };
-    heap_->IterateOverObjects(collect_functor);
+    heap_->IterateOverObjects(collectFunctor);
 }
 
 template <class LanguageConfig>
-size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&alive_mem_ranges)
+size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&aliveMemRanges)
 {
-    size_t fails_count = 0U;
-    size_t ref_number = 0U;
-    alive_mem_ranges_ = std::move(alive_mem_ranges);
-    auto it = permanent_verification_info_.begin();
-    for (auto &info : collectable_verification_info_) {
+    size_t failsCount = 0U;
+    size_t refNumber = 0U;
+    aliveMemRanges_ = std::move(aliveMemRanges);
+    auto it = permanentVerificationInfo_.begin();
+    for (auto &info : collectableVerificationInfo_) {
         ObjectHeader *obj = info.first;
         if (obj->IsForwarded()) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            permanent_verification_info_[GetForwardAddress(obj)] = std::move(info.second);
+            permanentVerificationInfo_[GetForwardAddress(obj)] = std::move(info.second);
         } else if (this->InAliveSpace(obj)) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            permanent_verification_info_[obj] = std::move(info.second);
+            permanentVerificationInfo_[obj] = std::move(info.second);
         }
     }
-    collectable_verification_info_.clear();
-    const std::function<void(ObjectHeader *, ObjectHeader *)> non_young_checker =
-        [this, &fails_count](const ObjectHeader *object_header, const ObjectHeader *referent) {
+    collectableVerificationInfo_.clear();
+    const std::function<void(ObjectHeader *, ObjectHeader *)> nonYoungChecker =
+        [this, &failsCount](const ObjectHeader *objectHeader, const ObjectHeader *referent) {
             if (this->InCollectableSpace(referent)) {
-                LOG_HEAP_VERIFIER << "Object " << std::hex << object_header << " references a dead object " << referent
+                LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << " references a dead object " << referent
                                   << " after collection";
-                ++fails_count;
+                ++failsCount;
             }
         };
-    const std::function<void(ObjectHeader *, ObjectHeader *)> same_obj_checker =
-        [this, &non_young_checker, &ref_number, &fails_count, &it](ObjectHeader *object_header,
-                                                                   ObjectHeader *referent) {
-            auto ref_it = it->second.find(ref_number);
-            if (ref_it != it->second.end()) {
-                if (!ref_it->second.VerifyUpdatedRef(object_header, referent, this->InAliveSpace(referent))) {
-                    ++fails_count;
+    const std::function<void(ObjectHeader *, ObjectHeader *)> sameObjChecker =
+        [this, &nonYoungChecker, &refNumber, &failsCount, &it](ObjectHeader *objectHeader, ObjectHeader *referent) {
+            auto refIt = it->second.find(refNumber);
+            if (refIt != it->second.end()) {
+                if (!refIt->second.VerifyUpdatedRef(objectHeader, referent, this->InAliveSpace(referent))) {
+                    ++failsCount;
                 }
             } else {
-                non_young_checker(object_header, referent);
+                nonYoungChecker(objectHeader, referent);
             }
-            ++ref_number;
+            ++refNumber;
         };
     // Check references in alive objects
-    ObjectVisitor traverse_alive_obj = [&non_young_checker, &same_obj_checker, &ref_number, this,
-                                        &it](ObjectHeader *object) {
+    ObjectVisitor traverseAliveObj = [&nonYoungChecker, &sameObjChecker, &refNumber, this, &it](ObjectHeader *object) {
         if (!object->IsMarkedForGC<false>() || (this->InCollectableSpace(object) && !this->InAliveSpace(object))) {
             return;
         }
-        it = this->permanent_verification_info_.find(object);
-        if (it == this->permanent_verification_info_.end()) {
-            ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, non_young_checker);
+        it = this->permanentVerificationInfo_.find(object);
+        if (it == this->permanentVerificationInfo_.end()) {
+            ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, nonYoungChecker);
         } else {
-            ref_number = 0U;
-            ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, same_obj_checker);
+            refNumber = 0U;
+            ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, sameObjChecker);
         }
     };
-    heap_->IterateOverObjects(traverse_alive_obj);
-    return fails_count;
+    heap_->IterateOverObjects(traverseAliveObj);
+    return failsCount;
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(HeapVerifier);

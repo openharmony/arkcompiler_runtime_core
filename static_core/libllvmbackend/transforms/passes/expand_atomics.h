@@ -39,7 +39,7 @@ public:
     llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &analysis_manager);
 
 private:
-    bool InsertAddrSpaceCast(llvm::Instruction *atomic_instruction);
+    bool InsertAddrSpaceCast(llvm::Instruction *atomicInstruction);
 };
 
 }  // namespace panda::llvmbackend::passes

@@ -53,7 +53,7 @@
 
 namespace panda::bytecodeopt {
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-panda::bytecodeopt::Options OPTIONS("");
+panda::bytecodeopt::Options g_options("");
 
 template <typename T>
 constexpr void RunOpts(compiler::Graph *graph, [[maybe_unused]] BytecodeOptIrInterface *iface)
@@ -87,7 +87,7 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     constexpr int OPT_LEVEL_1 = 1;
     constexpr int OPT_LEVEL_2 = 2;
 
-    if (panda::bytecodeopt::OPTIONS.GetOptLevel() == OPT_LEVEL_0) {
+    if (panda::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_0) {
         return false;
     }
 
@@ -99,9 +99,9 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     // Lowering can't work without Canonicalization pass.
     if (graph->IsDynamicMethod()) {
         RunOpts<compiler::ValNum, compiler::Lowering, compiler::MoveConstants>(graph);
-    } else if (panda::bytecodeopt::OPTIONS.GetOptLevel() == OPT_LEVEL_1) {
+    } else if (panda::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_1) {
         RunOpts<Canonicalization, compiler::Lowering>(graph);
-    } else if (panda::bytecodeopt::OPTIONS.GetOptLevel() == OPT_LEVEL_2) {
+    } else if (panda::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_2) {
         // ConstArrayResolver Pass is disabled as it requires fixes for stability
         RunOpts<ConstArrayResolver, compiler::BranchElimination, compiler::ValNum, compiler::IfMerging, compiler::Cse,
                 compiler::Peepholes, compiler::Licm, compiler::Lse, compiler::ValNum, compiler::Cse,
@@ -129,18 +129,18 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     return true;
 }
 
-void BuildMapFromPcToIns(pandasm::Function &function, BytecodeOptIrInterface &ir_interface,
-                         const compiler::Graph *graph, compiler::RuntimeInterface::MethodPtr method_ptr)
+void BuildMapFromPcToIns(pandasm::Function &function, BytecodeOptIrInterface &irInterface, const compiler::Graph *graph,
+                         compiler::RuntimeInterface::MethodPtr methodPtr)
 {
-    function.local_variable_debug.clear();
-    auto *pc_ins_map = ir_interface.GetPcInsMap();
-    pc_ins_map->reserve(function.ins.size());
-    auto instructions_buf = graph->GetRuntime()->GetMethodCode(method_ptr);
-    compiler::BytecodeInstructions instructions(instructions_buf, graph->GetRuntime()->GetMethodCodeSize(method_ptr));
+    function.localVariableDebug.clear();
+    auto *pcInsMap = irInterface.GetPcInsMap();
+    pcInsMap->reserve(function.ins.size());
+    auto instructionsBuf = graph->GetRuntime()->GetMethodCode(methodPtr);
+    compiler::BytecodeInstructions instructions(instructionsBuf, graph->GetRuntime()->GetMethodCodeSize(methodPtr));
     size_t idx = 0;
     for (auto insn : instructions) {
         pandasm::Ins &ins = function.ins[idx++];
-        pc_ins_map->emplace(instructions.GetPc(insn), &ins);
+        pcInsMap->emplace(instructions.GetPc(insn), &ins);
         if (idx >= function.ins.size()) {
             break;
         }
@@ -149,27 +149,27 @@ void BuildMapFromPcToIns(pandasm::Function &function, BytecodeOptIrInterface &ir
 
 static void ColumnNumberPropagate(pandasm::Function *function)
 {
-    auto &ins_vec = function->ins;
+    auto &insVec = function->ins;
     uint32_t cn = compiler::INVALID_COLUMN_NUM;
     // handle the instructions that are at the beginning of code but do not have column number
     size_t k = 0;
-    while (k < ins_vec.size() && cn == compiler::INVALID_COLUMN_NUM) {
-        cn = ins_vec[k++].ins_debug.column_number;
+    while (k < insVec.size() && cn == compiler::INVALID_COLUMN_NUM) {
+        cn = insVec[k++].insDebug.columnNumber;
     }
     if (cn == compiler::INVALID_COLUMN_NUM) {
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "Failed ColumnNumberPropagate: All insts have invalid column number";
         return;
     }
     for (size_t j = 0; j < k - 1L; j++) {
-        ins_vec[j].ins_debug.SetColumnNumber(cn);
+        insVec[j].insDebug.SetColumnNumber(cn);
     }
 
     // handle other instructions that do not have column number
-    for (; k < ins_vec.size(); k++) {
-        if (ins_vec[k].ins_debug.column_number != compiler::INVALID_COLUMN_NUM) {
-            cn = ins_vec[k].ins_debug.column_number;
+    for (; k < insVec.size(); k++) {
+        if (insVec[k].insDebug.columnNumber != compiler::INVALID_COLUMN_NUM) {
+            cn = insVec[k].insDebug.columnNumber;
         } else {
-            ins_vec[k].ins_debug.SetColumnNumber(cn);
+            insVec[k].insDebug.SetColumnNumber(cn);
         }
     }
 }
@@ -180,168 +180,167 @@ static void LineNumberPropagate(pandasm::Function *function)
         return;
     }
     size_t ln = 0;
-    auto &ins_vec = function->ins;
+    auto &insVec = function->ins;
 
     // handle the instructions that are at the beginning of code but do not have line number
     size_t i = 0;
-    while (i < ins_vec.size() && ln == 0U) {
-        ln = ins_vec[i++].ins_debug.line_number;
+    while (i < insVec.size() && ln == 0U) {
+        ln = insVec[i++].insDebug.lineNumber;
     }
     if (ln == 0U) {
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "Failed LineNumberPropagate: All insts have invalid line number";
         return;
     }
     for (size_t j = 0; j < i - 1L; j++) {
-        ins_vec[j].ins_debug.SetLineNumber(ln);
+        insVec[j].insDebug.SetLineNumber(ln);
     }
 
     // handle other instructions that do not have line number
-    for (; i < ins_vec.size(); i++) {
-        if (ins_vec[i].ins_debug.line_number != 0U) {
-            ln = ins_vec[i].ins_debug.line_number;
+    for (; i < insVec.size(); i++) {
+        if (insVec[i].insDebug.lineNumber != 0U) {
+            ln = insVec[i].insDebug.lineNumber;
         } else {
-            ins_vec[i].ins_debug.SetLineNumber(ln);
+            insVec[i].insDebug.SetLineNumber(ln);
         }
     }
 }
 
 static void DebugInfoPropagate(pandasm::Function &function, const compiler::Graph *graph,
-                               BytecodeOptIrInterface &ir_interface)
+                               BytecodeOptIrInterface &irInterface)
 {
     LineNumberPropagate(&function);
     if (graph->IsDynamicMethod()) {
         ColumnNumberPropagate(&function);
     }
-    ir_interface.ClearPcInsMap();
+    irInterface.ClearPcInsMap();
 }
 
-static bool SkipFunction(const pandasm::Function &function, const std::string &func_name)
+static bool SkipFunction(const pandasm::Function &function, const std::string &funcName)
 {
-    if (panda::bytecodeopt::OPTIONS.WasSetMethodRegex()) {
-        static std::regex rgx(panda::bytecodeopt::OPTIONS.GetMethodRegex());
-        if (!std::regex_match(func_name, rgx)) {
-            LOG(INFO, BYTECODE_OPTIMIZER) << "Skip Function " << func_name << ":Function's name doesn't match regex";
+    if (panda::bytecodeopt::g_options.WasSetMethodRegex()) {
+        static std::regex rgx(panda::bytecodeopt::g_options.GetMethodRegex());
+        if (!std::regex_match(funcName, rgx)) {
+            LOG(INFO, BYTECODE_OPTIMIZER) << "Skip Function " << funcName << ":Function's name doesn't match regex";
             return true;
         }
     }
 
-    if (panda::bytecodeopt::OPTIONS.IsSkipMethodsWithEh() && !function.catch_blocks.empty()) {
-        LOG(INFO, BYTECODE_OPTIMIZER) << "Was not optimized " << func_name << ":Function has catch blocks";
+    if (panda::bytecodeopt::g_options.IsSkipMethodsWithEh() && !function.catchBlocks.empty()) {
+        LOG(INFO, BYTECODE_OPTIMIZER) << "Was not optimized " << funcName << ":Function has catch blocks";
         return true;
     }
 
-    if ((function.regs_num + function.GetParamsNum()) > compiler::VIRTUAL_FRAME_SIZE) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Unable to optimize " << func_name
+    if ((function.regsNum + function.GetParamsNum()) > compiler::VIRTUAL_FRAME_SIZE) {
+        LOG(ERROR, BYTECODE_OPTIMIZER) << "Unable to optimize " << funcName
                                        << ": Function frame size is larger than allowed one";
         return true;
     }
     return false;
 }
 
-static void SetCompilerOptions(bool is_dynamic)
+static void SetCompilerOptions(bool isDynamic)
 {
-    compiler::OPTIONS.SetCompilerUseSafepoint(false);
-    compiler::OPTIONS.SetCompilerSupportInitObjectInst(true);
-    if (!compiler::OPTIONS.WasSetCompilerMaxBytecodeSize()) {
-        compiler::OPTIONS.SetCompilerMaxBytecodeSize(~0U);
+    compiler::g_options.SetCompilerUseSafepoint(false);
+    compiler::g_options.SetCompilerSupportInitObjectInst(true);
+    if (!compiler::g_options.WasSetCompilerMaxBytecodeSize()) {
+        compiler::g_options.SetCompilerMaxBytecodeSize(~0U);
     }
-    if (is_dynamic) {
-        panda::bytecodeopt::OPTIONS.SetSkipMethodsWithEh(true);
+    if (isDynamic) {
+        panda::bytecodeopt::g_options.SetSkipMethodsWithEh(true);
     }
 }
 
 bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
-                      const panda_file::MethodDataAccessor &mda, bool is_dynamic, SourceLanguage lang)
+                      const panda_file::MethodDataAccessor &mda, bool isDynamic, SourceLanguage lang)
 {
     ArenaAllocator allocator {SpaceType::SPACE_TYPE_COMPILER};
-    ArenaAllocator local_allocator {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
+    ArenaAllocator localAllocator {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
 
-    SetCompilerOptions(is_dynamic);
+    SetCompilerOptions(isDynamic);
 
-    auto ir_interface = BytecodeOptIrInterface(maps, prog);
+    auto irInterface = BytecodeOptIrInterface(maps, prog);
 
-    auto func_name = ir_interface.GetMethodIdByOffset(mda.GetMethodId().GetOffset());
-    LOG(INFO, BYTECODE_OPTIMIZER) << "Optimizing function: " << func_name;
+    auto funcName = irInterface.GetMethodIdByOffset(mda.GetMethodId().GetOffset());
+    LOG(INFO, BYTECODE_OPTIMIZER) << "Optimizing function: " << funcName;
 
-    auto it = prog->function_table.find(func_name);
-    if (it == prog->function_table.end()) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Cannot find function: " << func_name;
+    auto it = prog->functionTable.find(funcName);
+    if (it == prog->functionTable.end()) {
+        LOG(ERROR, BYTECODE_OPTIMIZER) << "Cannot find function: " << funcName;
         return false;
     }
-    auto method_ptr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
+    auto methodPtr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
 
     panda::BytecodeOptimizerRuntimeAdapter adapter(mda.GetPandaFile());
-    auto graph = allocator.New<compiler::Graph>(&allocator, &local_allocator, Arch::NONE, method_ptr, &adapter, false,
-                                                nullptr, is_dynamic, true);
+    auto graph = allocator.New<compiler::Graph>(&allocator, &localAllocator, Arch::NONE, methodPtr, &adapter, false,
+                                                nullptr, isDynamic, true);
     graph->SetLanguage(lang);
 
     panda::pandasm::Function &function = it->second;
 
-    if (SkipFunction(function, func_name)) {
+    if (SkipFunction(function, funcName)) {
         return false;
     }
 
     // build map from pc to pandasm::ins (to re-build line-number info in BytecodeGen)
-    BuildMapFromPcToIns(function, ir_interface, graph, method_ptr);
+    BuildMapFromPcToIns(function, irInterface, graph, methodPtr);
 
     if ((graph == nullptr) || !graph->RunPass<panda::compiler::IrBuilder>()) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << func_name << ": IR builder failed!";
+        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": IR builder failed!";
         return false;
     }
 
     if (graph->HasIrreducibleLoop()) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << func_name << ": Graph has irreducible loop!";
+        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": Graph has irreducible loop!";
         return false;
     }
 
-    if (!RunOptimizations(graph, &ir_interface)) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << func_name << ": Running optimizations failed!";
+    if (!RunOptimizations(graph, &irInterface)) {
+        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": Running optimizations failed!";
         return false;
     }
 
-    if (!graph->RunPass<BytecodeGen>(&function, &ir_interface)) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << func_name << ": Code generation failed!";
+    if (!graph->RunPass<BytecodeGen>(&function, &irInterface)) {
+        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": Code generation failed!";
         return false;
     }
 
-    DebugInfoPropagate(function, graph, ir_interface);
+    DebugInfoPropagate(function, graph, irInterface);
 
-    function.value_of_first_param =
-        static_cast<int64_t>(graph->GetStackSlotsCount()) - 1L;  // Work-around promotion rules
-    function.regs_num = static_cast<size_t>(function.value_of_first_param + 1U);
+    function.valueOfFirstParam = static_cast<int64_t>(graph->GetStackSlotsCount()) - 1L;  // Work-around promotion rules
+    function.regsNum = static_cast<size_t>(function.valueOfFirstParam + 1U);
 
-    if (auto frame_size = function.regs_num + function.GetParamsNum(); frame_size >= NUM_COMPACTLY_ENCODED_REGS) {
-        LOG(INFO, BYTECODE_OPTIMIZER) << "Function " << func_name << " has frame size " << frame_size;
+    if (auto frameSize = function.regsNum + function.GetParamsNum(); frameSize >= NUM_COMPACTLY_ENCODED_REGS) {
+        LOG(INFO, BYTECODE_OPTIMIZER) << "Function " << funcName << " has frame size " << frameSize;
     }
 
-    LOG(DEBUG, BYTECODE_OPTIMIZER) << "Optimized " << func_name;
+    LOG(DEBUG, BYTECODE_OPTIMIZER) << "Optimized " << funcName;
 
     return true;
 }
 
 bool OptimizePandaFile(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
-                       const std::string &pfile_name, bool is_dynamic)
+                       const std::string &pfileName, bool isDynamic)
 {
-    auto pfile = panda_file::OpenPandaFile(pfile_name);
+    auto pfile = panda_file::OpenPandaFile(pfileName);
     if (!pfile) {
-        LOG(FATAL, BYTECODE_OPTIMIZER) << "Can not open binary file: " << pfile_name;
+        LOG(FATAL, BYTECODE_OPTIMIZER) << "Can not open binary file: " << pfileName;
     }
 
     bool result = true;
 
     for (uint32_t id : pfile->GetClasses()) {
-        panda_file::File::EntityId record_id {id};
+        panda_file::File::EntityId recordId {id};
 
-        if (pfile->IsExternal(record_id)) {
+        if (pfile->IsExternal(recordId)) {
             continue;
         }
 
-        panda_file::ClassDataAccessor cda {*pfile, record_id};
+        panda_file::ClassDataAccessor cda {*pfile, recordId};
         auto lang = cda.GetSourceLang().value_or(SourceLanguage::PANDA_ASSEMBLY);
 
-        cda.EnumerateMethods([prog, maps, is_dynamic, lang, &result](panda_file::MethodDataAccessor &mda) {
+        cda.EnumerateMethods([prog, maps, isDynamic, lang, &result](panda_file::MethodDataAccessor &mda) {
             if (!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative()) {
-                result = OptimizeFunction(prog, maps, mda, is_dynamic, lang) && result;
+                result = OptimizeFunction(prog, maps, mda, isDynamic, lang) && result;
             }
         });
     }
@@ -350,18 +349,18 @@ bool OptimizePandaFile(pandasm::Program *prog, const pandasm::AsmEmitter::PandaF
 }
 
 bool OptimizeBytecode(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
-                      const std::string &pandafile_name, bool is_dynamic, bool has_memory_pool)
+                      const std::string &pandafileName, bool isDynamic, bool hasMemoryPool)
 {
     ASSERT(prog != nullptr);
     ASSERT(maps != nullptr);
 
-    if (!has_memory_pool) {
+    if (!hasMemoryPool) {
         PoolManager::Initialize(PoolType::MALLOC);
     }
 
-    auto res = OptimizePandaFile(prog, maps, pandafile_name, is_dynamic);
+    auto res = OptimizePandaFile(prog, maps, pandafileName, isDynamic);
 
-    if (!has_memory_pool) {
+    if (!hasMemoryPool) {
         PoolManager::Finalize();
     }
 

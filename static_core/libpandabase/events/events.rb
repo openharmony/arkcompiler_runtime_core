@@ -18,6 +18,10 @@ class String
   def camelize
     self.split('_').collect(&:capitalize).join
   end
+
+  def camelizeback
+    self.split('_').inject([]){ |buffer,e| buffer.push(buffer.empty? ? e : e.capitalize) }.join
+  end
 end
 
 class Field

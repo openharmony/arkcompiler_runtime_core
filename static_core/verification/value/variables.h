@@ -79,17 +79,17 @@ public:
 
     Var NewVar()
     {
-        return {var_pool_.New()};
+        return {varPool_.New()};
     }
 
     size_t AmountOfUsedVars() const
     {
-        return var_pool_.Count() - var_pool_.FreeCount();
+        return varPool_.Count() - varPool_.FreeCount();
     }
 
     auto AllVariables()
     {
-        return [fetcher = var_pool_.AllObjects()]() mutable -> std::optional<Var> {
+        return [fetcher = varPool_.AllObjects()]() mutable -> std::optional<Var> {
             if (auto v = fetcher()) {
                 return {Var {std::move(*v)}};
             }
@@ -98,7 +98,7 @@ public:
     }
 
 private:
-    PoolType var_pool_ {Wrapper::Init};
+    PoolType varPool_ {Wrapper::Init};
 };
 
 }  // namespace panda::verifier

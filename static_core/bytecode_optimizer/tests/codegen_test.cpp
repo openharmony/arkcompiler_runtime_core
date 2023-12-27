@@ -44,7 +44,7 @@ TEST(ToolTest, BytecodeOptIrInterfaceCommon)
     maps.literalarrays.insert({0U, std::string("0")});
 
     pandasm::Program prog;
-    prog.literalarray_table.emplace("0", pandasm::LiteralArray());
+    prog.literalarrayTable.emplace("0", pandasm::LiteralArray());
 
     BytecodeOptIrInterface interface(&maps, &prog);
 
@@ -62,7 +62,7 @@ TEST(ToolTest, BytecodeOptIrInterfacePcLineNumber)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
 
     pandasm::Program prog;
-    prog.literalarray_table.emplace("0", pandasm::LiteralArray());
+    prog.literalarrayTable.emplace("0", pandasm::LiteralArray());
 
     BytecodeOptIrInterface interface(&maps, &prog);
 
@@ -70,7 +70,7 @@ TEST(ToolTest, BytecodeOptIrInterfacePcLineNumber)
     EXPECT_EQ(interface.GetLineNumberByPc(0U), 0U);
 
     auto ins = pandasm::Ins();
-    ins.ins_debug.line_number = 1;
+    ins.insDebug.lineNumber = 1;
     ASSERT_NE(map, nullptr);
     map->insert({0U, &ins});
     EXPECT_EQ(interface.GetLineNumberByPc(0U), 1U);
@@ -1653,27 +1653,27 @@ TEST(TotalTest, OptimizeBytecode)
     )";
     panda::pandasm::Parser parser;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    const char file_name[] = "opt_bc.bin";
-    auto res = parser.Parse(source, file_name);
+    const char fileName[] = "opt_bc.bin";
+    auto res = parser.Parse(source, fileName);
     ASSERT_TRUE(parser.ShowError().err == pandasm::Error::ErrorType::ERR_NONE);
     auto &prog = res.Value();
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
-    pandasm::AsmEmitter::Emit(file_name, prog, nullptr, &maps);
-    EXPECT_TRUE(OptimizeBytecode(&prog, &maps, file_name));
-    EXPECT_TRUE(OptimizeBytecode(&prog, &maps, file_name, true));
+    pandasm::AsmEmitter::Emit(fileName, prog, nullptr, &maps);
+    EXPECT_TRUE(OptimizeBytecode(&prog, &maps, fileName));
+    EXPECT_TRUE(OptimizeBytecode(&prog, &maps, fileName, true));
 
-    OPTIONS.SetOptLevel(0U);
-    EXPECT_FALSE(OptimizeBytecode(&prog, &maps, file_name));
-    OPTIONS.SetOptLevel(1U);
-    EXPECT_TRUE(OptimizeBytecode(&prog, &maps, file_name));
+    g_options.SetOptLevel(0U);
+    EXPECT_FALSE(OptimizeBytecode(&prog, &maps, fileName));
+    g_options.SetOptLevel(1U);
+    EXPECT_TRUE(OptimizeBytecode(&prog, &maps, fileName));
 #ifndef NDEBUG
-    OPTIONS.SetOptLevel(-1L);
-    EXPECT_DEATH_IF_SUPPORTED(OptimizeBytecode(&prog, &maps, file_name), "");
+    g_options.SetOptLevel(-1L);
+    EXPECT_DEATH_IF_SUPPORTED(OptimizeBytecode(&prog, &maps, fileName), "");
 #endif
-    OPTIONS.SetOptLevel(2U);
+    g_options.SetOptLevel(2U);
 
-    OPTIONS.SetMethodRegex(std::string());
-    EXPECT_FALSE(OptimizeBytecode(&prog, &maps, file_name));
+    g_options.SetMethodRegex(std::string());
+    EXPECT_FALSE(OptimizeBytecode(&prog, &maps, fileName));
 }
 
 // NOLINTEND(readability-magic-numbers)

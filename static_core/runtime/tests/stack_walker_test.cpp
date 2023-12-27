@@ -50,15 +50,15 @@ public:
     using Callback = int (*)(uintptr_t, uintptr_t);
 
     StackWalkerTest()
-        : default_compiler_non_optimizing_(OPTIONS.IsCompilerNonOptimizing()),
-          default_compiler_regex_(OPTIONS.GetCompilerRegex())
+        : defaultCompilerNonOptimizing_(g_options.IsCompilerNonOptimizing()),
+          defaultCompilerRegex_(g_options.GetCompilerRegex())
     {
     }
 
     ~StackWalkerTest() override
     {
-        OPTIONS.SetCompilerNonOptimizing(default_compiler_non_optimizing_);
-        OPTIONS.SetCompilerRegex(default_compiler_regex_);
+        g_options.SetCompilerNonOptimizing(defaultCompilerNonOptimizing_);
+        g_options.SetCompilerRegex(defaultCompilerRegex_);
     }
 
     NO_COPY_SEMANTIC(StackWalkerTest);
@@ -71,9 +71,9 @@ public:
 #endif
     }
 
-    void TestModifyManyVregs(bool is_compiled);
+    void TestModifyManyVregs(bool isCompiled);
 
-    static Method *GetMethod(std::string_view method_name)
+    static Method *GetMethod(std::string_view methodName)
     {
         PandaString descriptor;
         auto *thread = MTManagedThread::GetCurrent();
@@ -82,17 +82,17 @@ public:
         auto cls = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
         thread->ManagedCodeEnd();
         ASSERT(cls);
-        return cls->GetDirectMethod(utf::CStringAsMutf8(method_name.data()));
+        return cls->GetDirectMethod(utf::CStringAsMutf8(methodName.data()));
     }
 
-    static mem::Reference *global_obj_;
+    static mem::Reference *globalObj_;
 
 private:
-    bool default_compiler_non_optimizing_;
-    std::string default_compiler_regex_;
+    bool defaultCompilerNonOptimizing_;
+    std::string defaultCompilerRegex_;
 };
 
-mem::Reference *StackWalkerTest::global_obj_;
+mem::Reference *StackWalkerTest::globalObj_;
 
 template <typename T>
 uint64_t ConvertToU64(T val)
@@ -162,31 +162,31 @@ TEST_F(StackWalkerTest, ModifyVreg)
     runner.GetCompilerOptions().SetCompilerRegex("(?!_GLOBAL::testb|_GLOBAL::hook).*");
     [[maybe_unused]] static constexpr std::array<uint64_t, 3> FRAME_VALUES = {0x123456789abcdef, 0xaaaabbbbccccdddd,
                                                                               0xabcdef20};
-    static int run_count = 0;
+    static int runCount = 0;
     runner.Run(source, [](uintptr_t lr, [[maybe_unused]] uintptr_t fp) -> int {
         StackWalker walker(reinterpret_cast<void *>(fp), true, lr);
         bool success = false;
         walker.NextFrame();
-        if (run_count == 0) {
-            bool was_set = false;
+        if (runCount == 0) {
+            bool wasSet = false;
             HOOK_ASSERT(!walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([&was_set, &walker](const auto &reg_info, const auto &reg) {
-                if (!reg_info.IsAccumulator()) {
+            success = walker.IterateVRegsWithInfo([&wasSet, &walker](const auto &regInfo, const auto &reg) {
+                if (!regInfo.IsAccumulator()) {
                     HOOK_ASSERT(reg.GetLong() == 27, return false);
-                    walker.SetVRegValue(reg_info, FRAME_VALUES[0]);
-                    was_set = true;
+                    walker.SetVRegValue(regInfo, FRAME_VALUES[0]);
+                    wasSet = true;
                 }
                 return true;
             });
             HOOK_ASSERT(success, return 1);
-            HOOK_ASSERT(was_set, return 1);
+            HOOK_ASSERT(wasSet, return 1);
 
             walker.NextFrame();
             HOOK_ASSERT(walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([&walker](const auto &reg_info, const auto &reg) {
-                if (!reg_info.IsAccumulator()) {
+            success = walker.IterateVRegsWithInfo([&walker](const auto &regInfo, const auto &reg) {
+                if (!regInfo.IsAccumulator()) {
                     HOOK_ASSERT(reg.GetLong() == 27, return false);
-                    walker.SetVRegValue(reg_info, FRAME_VALUES[1]);
+                    walker.SetVRegValue(regInfo, FRAME_VALUES[1]);
                 }
                 return true;
             });
@@ -194,18 +194,18 @@ TEST_F(StackWalkerTest, ModifyVreg)
 
             walker.NextFrame();
             HOOK_ASSERT(walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([&walker](const auto &reg_info, const auto &reg) {
-                if (!reg_info.IsAccumulator()) {
+            success = walker.IterateVRegsWithInfo([&walker](const auto &regInfo, const auto &reg) {
+                if (!regInfo.IsAccumulator()) {
                     HOOK_ASSERT(reg.GetLong() == 27, return true;);
-                    walker.SetVRegValue(reg_info, FRAME_VALUES[2]);
+                    walker.SetVRegValue(regInfo, FRAME_VALUES[2]);
                 }
                 return true;
             });
             HOOK_ASSERT(success, return 1);
-        } else if (run_count == 1) {
+        } else if (runCount == 1) {
             HOOK_ASSERT(!walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([](const auto &reg_info, const auto &reg) {
-                if (!reg_info.IsAccumulator()) {
+            success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
+                if (!regInfo.IsAccumulator()) {
                     HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[0]), return true;);
                 }
                 return true;
@@ -214,8 +214,8 @@ TEST_F(StackWalkerTest, ModifyVreg)
 
             walker.NextFrame();
             HOOK_ASSERT(walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([](const auto &reg_info, const auto &reg) {
-                if (!reg_info.IsAccumulator()) {
+            success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
+                if (!regInfo.IsAccumulator()) {
                     HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[1]), return true;);
                 }
                 return true;
@@ -224,8 +224,8 @@ TEST_F(StackWalkerTest, ModifyVreg)
 
             walker.NextFrame();
             HOOK_ASSERT(walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([](const auto &reg_info, const auto &reg) {
-                if (!reg_info.IsAccumulator()) {
+            success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
+                if (!regInfo.IsAccumulator()) {
                     HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[2]), return true;);
                 }
                 return true;
@@ -234,13 +234,13 @@ TEST_F(StackWalkerTest, ModifyVreg)
         } else {
             return 1;
         }
-        run_count++;
+        runCount++;
         return 0;
     });
-    ASSERT_EQ(run_count, 2);
+    ASSERT_EQ(runCount, 2);
 }
 
-void StackWalkerTest::TestModifyManyVregs(bool is_compiled)
+void StackWalkerTest::TestModifyManyVregs(bool isCompiled)
 {
     auto source = R"(
         .function i32 main() {
@@ -315,19 +315,19 @@ void StackWalkerTest::TestModifyManyVregs(bool is_compiled)
         }
     )";
 
-    static bool first_run;
+    static bool firstRun;
     static bool compiled;
 
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(0);
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
-    if (!is_compiled) {
+    if (!isCompiled) {
         runner.GetCompilerOptions().SetCompilerRegex("(?!_GLOBAL::main)(?!_GLOBAL::test)(?!_GLOBAL::hook).*");
     }
 
-    first_run = true;
-    compiled = is_compiled;
+    firstRun = true;
+    compiled = isCompiled;
     runner.Run(source, [](uintptr_t lr, [[maybe_unused]] uintptr_t fp) -> int {
         StackWalker walker(reinterpret_cast<void *>(fp), true, lr);
 
@@ -336,53 +336,53 @@ void StackWalkerTest::TestModifyManyVregs(bool is_compiled)
         HOOK_ASSERT(walker.GetMethod()->GetFullName() == "_GLOBAL::test", return 1);
         HOOK_ASSERT(walker.IsCFrame() == compiled, return 1);
 
-        int reg_index = 1;
+        int regIndex = 1;
         bool success = false;
-        if (first_run) {
+        if (firstRun) {
             auto storage = Runtime::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage();
-            StackWalkerTest::global_obj_ =
+            StackWalkerTest::globalObj_ =
                 storage->Add(panda::mem::AllocateNullifiedPayloadString(1), mem::Reference::ObjectType::GLOBAL);
         }
-        auto obj = Runtime::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage()->Get(StackWalkerTest::global_obj_);
-        if (first_run) {
-            success = walker.IterateVRegsWithInfo([&reg_index, &walker, &obj](const auto &reg_info, const auto &reg) {
-                if (!reg_info.IsAccumulator()) {
+        auto obj = Runtime::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage()->Get(StackWalkerTest::globalObj_);
+        if (firstRun) {
+            success = walker.IterateVRegsWithInfo([&regIndex, &walker, &obj](const auto &regInfo, const auto &reg) {
+                if (!regInfo.IsAccumulator()) {
                     if (reg.HasObject()) {
                         HOOK_ASSERT(reg.GetReference() != nullptr, return false);
-                        walker.SetVRegValue(reg_info, obj);
-                    } else if (reg_info.GetLocation() != VRegInfo::Location::CONSTANT) {
+                        walker.SetVRegValue(regInfo, obj);
+                    } else if (regInfo.GetLocation() != VRegInfo::Location::CONSTANT) {
                         // frame_size is more than nregs_ now for inst `V4_V4_ID16` and `V4_V4_V4_V4_ID16`
-                        auto reg_idx = reg_info.GetIndex();
-                        if (reg_idx < walker.GetMethod()->GetNumVregs()) {
-                            HOOK_ASSERT(reg_idx == reg.GetLong(), return false);
+                        auto regIdx = regInfo.GetIndex();
+                        if (regIdx < walker.GetMethod()->GetNumVregs()) {
+                            HOOK_ASSERT(regIdx == reg.GetLong(), return false);
                         }
                         // NOLINTNEXTLINE(readability-magic-numbers)
-                        walker.SetVRegValue(reg_info, reg_idx + 100000000000);
+                        walker.SetVRegValue(regInfo, regIdx + 100000000000);
                     }
-                    reg_index++;
+                    regIndex++;
                 }
                 return true;
             });
             HOOK_ASSERT(success, return 1);
-            HOOK_ASSERT(reg_index >= 32, return 1);
-            first_run = false;
+            HOOK_ASSERT(regIndex >= 32, return 1);
+            firstRun = false;
         } else {
-            success = walker.IterateVRegsWithInfo([&reg_index, &obj](const auto &reg_info, const auto &reg) {
-                if (!reg_info.IsAccumulator()) {
+            success = walker.IterateVRegsWithInfo([&regIndex, &obj](const auto &regInfo, const auto &reg) {
+                if (!regInfo.IsAccumulator()) {
                     if (reg.HasObject()) {
                         HOOK_ASSERT((reg.GetReference() == reinterpret_cast<ObjectHeader *>(Low32Bits(obj))),
                                     return false);
                     } else {
-                        if (reg_info.GetLocation() != VRegInfo::Location::CONSTANT) {
-                            HOOK_ASSERT(reg.GetLong() == (reg_info.GetIndex() + 100000000000), return false);
+                        if (regInfo.GetLocation() != VRegInfo::Location::CONSTANT) {
+                            HOOK_ASSERT(reg.GetLong() == (regInfo.GetIndex() + 100000000000), return false);
                         }
-                        reg_index++;
+                        regIndex++;
                     }
                 }
                 return true;
             });
             HOOK_ASSERT(success, return 1);
-            HOOK_ASSERT(reg_index >= 32, return 1);
+            HOOK_ASSERT(regIndex >= 32, return 1);
         }
 
         HOOK_ASSERT(success, return 1);

@@ -28,16 +28,16 @@ class LoopUnswitcher : public GraphCloner {
 public:
     static Inst *FindUnswitchInst(Loop *loop);
     static bool IsSmallLoop(Loop *loop);
-    static void EstimateInstructionsCount(const Loop *loop, const Inst *unswitch_inst, uint32_t *loop_size,
-                                          uint32_t *true_count, uint32_t *false_count);
-    explicit LoopUnswitcher(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *local_allocator);
+    static void EstimateInstructionsCount(const Loop *loop, const Inst *unswitchInst, uint32_t *loopSize,
+                                          uint32_t *trueCount, uint32_t *falseCount);
+    explicit LoopUnswitcher(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *localAllocator);
     Loop *UnswitchLoop(Loop *loop, Inst *inst);
 
 private:
     LoopClonerData *PrepareLoopToUnswitch(Loop *loop);
-    void BuildLoopUnswitchControlFlow(LoopClonerData *unswitch_data);
-    void BuildLoopUnswitchDataFlow(LoopClonerData *unswitch_data, Inst *if_inst);
-    void ReplaceWithConstantCondition(Inst *if_inst);
+    void BuildLoopUnswitchControlFlow(LoopClonerData *unswitchData);
+    void BuildLoopUnswitchDataFlow(LoopClonerData *unswitchData, Inst *ifInst);
+    void ReplaceWithConstantCondition(Inst *ifInst);
     ArenaVector<Inst *> conditions_;
 };
 }  // namespace panda::compiler

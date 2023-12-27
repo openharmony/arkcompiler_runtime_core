@@ -91,9 +91,9 @@ TEST_F(InterpreterTestResolveField, ResolveField)
     auto pf = panda::panda_file::File::Open("../bin-gtests/pre-build/interpreter_test_resolve_field.abc");
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
     PandaString descriptor;
 

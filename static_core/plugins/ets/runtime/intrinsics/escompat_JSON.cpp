@@ -56,77 +56,77 @@ std::string_view EtsStringToView(panda::ets::EtsString *s)
 }
 
 template <typename PrimArr>
-void EtsPrimitiveArrayToJSON(panda::JsonArrayBuilder &json_builder, PrimArr *arr_ptr)
+void EtsPrimitiveArrayToJSON(panda::JsonArrayBuilder &jsonBuilder, PrimArr *arrPtr)
 {
-    ASSERT(arr_ptr->GetClass()->IsArrayClass() && arr_ptr->IsPrimitive());
-    auto len = arr_ptr->GetLength();
+    ASSERT(arrPtr->GetClass()->IsArrayClass() && arrPtr->IsPrimitive());
+    auto len = arrPtr->GetLength();
     for (size_t i = 0; i < len; ++i) {
-        json_builder.Add(arr_ptr->Get(i));
+        jsonBuilder.Add(arrPtr->Get(i));
     }
 }
 
 template <>
-void EtsPrimitiveArrayToJSON(panda::JsonArrayBuilder &json_builder, panda::ets::EtsBooleanArray *arr_ptr)
+void EtsPrimitiveArrayToJSON(panda::JsonArrayBuilder &jsonBuilder, panda::ets::EtsBooleanArray *arrPtr)
 {
-    ASSERT(arr_ptr->IsPrimitive());
-    auto len = arr_ptr->GetLength();
+    ASSERT(arrPtr->IsPrimitive());
+    auto len = arrPtr->GetLength();
     for (size_t i = 0; i < len; ++i) {
-        if (arr_ptr->Get(i) != 0) {
-            json_builder.Add(true);
+        if (arrPtr->Get(i) != 0) {
+            jsonBuilder.Add(true);
         } else {
-            json_builder.Add(false);
+            jsonBuilder.Add(false);
         }
     }
 }
 
 template <>
-void EtsPrimitiveArrayToJSON(panda::JsonArrayBuilder &json_builder, panda::ets::EtsCharArray *arr_ptr)
+void EtsPrimitiveArrayToJSON(panda::JsonArrayBuilder &jsonBuilder, panda::ets::EtsCharArray *arrPtr)
 {
-    ASSERT(arr_ptr->IsPrimitive());
-    auto len = arr_ptr->GetLength();
+    ASSERT(arrPtr->IsPrimitive());
+    auto len = arrPtr->GetLength();
     for (size_t i = 0; i < len; ++i) {
-        auto data = arr_ptr->Get(i);
-        json_builder.Add(EtsCharToString(data));
+        auto data = arrPtr->Get(i);
+        jsonBuilder.Add(EtsCharToString(data));
     }
 }
 
-panda::JsonArrayBuilder EtsArrayToJSON(panda::ets::EtsArray *arr_ptr)
+panda::JsonArrayBuilder EtsArrayToJSON(panda::ets::EtsArray *arrPtr)
 {
-    auto json_builder = panda::JsonArrayBuilder();
-    if (arr_ptr->IsPrimitive()) {
-        panda::panda_file::Type::TypeId component_type =
-            arr_ptr->GetCoreType()->ClassAddr<panda::Class>()->GetComponentType()->GetType().GetId();
-        switch (component_type) {
+    auto jsonBuilder = panda::JsonArrayBuilder();
+    if (arrPtr->IsPrimitive()) {
+        panda::panda_file::Type::TypeId componentType =
+            arrPtr->GetCoreType()->ClassAddr<panda::Class>()->GetComponentType()->GetType().GetId();
+        switch (componentType) {
             case panda::panda_file::Type::TypeId::U1: {
-                EtsPrimitiveArrayToJSON(json_builder, reinterpret_cast<panda::ets::EtsBooleanArray *>(arr_ptr));
+                EtsPrimitiveArrayToJSON(jsonBuilder, reinterpret_cast<panda::ets::EtsBooleanArray *>(arrPtr));
                 break;
             }
             case panda::panda_file::Type::TypeId::I8: {
-                EtsPrimitiveArrayToJSON(json_builder, reinterpret_cast<panda::ets::EtsByteArray *>(arr_ptr));
+                EtsPrimitiveArrayToJSON(jsonBuilder, reinterpret_cast<panda::ets::EtsByteArray *>(arrPtr));
                 break;
             }
             case panda::panda_file::Type::TypeId::I16: {
-                EtsPrimitiveArrayToJSON(json_builder, reinterpret_cast<panda::ets::EtsShortArray *>(arr_ptr));
+                EtsPrimitiveArrayToJSON(jsonBuilder, reinterpret_cast<panda::ets::EtsShortArray *>(arrPtr));
                 break;
             }
             case panda::panda_file::Type::TypeId::U16: {
-                EtsPrimitiveArrayToJSON(json_builder, reinterpret_cast<panda::ets::EtsCharArray *>(arr_ptr));
+                EtsPrimitiveArrayToJSON(jsonBuilder, reinterpret_cast<panda::ets::EtsCharArray *>(arrPtr));
                 break;
             }
             case panda::panda_file::Type::TypeId::I32: {
-                EtsPrimitiveArrayToJSON(json_builder, reinterpret_cast<panda::ets::EtsIntArray *>(arr_ptr));
+                EtsPrimitiveArrayToJSON(jsonBuilder, reinterpret_cast<panda::ets::EtsIntArray *>(arrPtr));
                 break;
             }
             case panda::panda_file::Type::TypeId::F32: {
-                EtsPrimitiveArrayToJSON(json_builder, reinterpret_cast<panda::ets::EtsFloatArray *>(arr_ptr));
+                EtsPrimitiveArrayToJSON(jsonBuilder, reinterpret_cast<panda::ets::EtsFloatArray *>(arrPtr));
                 break;
             }
             case panda::panda_file::Type::TypeId::F64: {
-                EtsPrimitiveArrayToJSON(json_builder, reinterpret_cast<panda::ets::EtsDoubleArray *>(arr_ptr));
+                EtsPrimitiveArrayToJSON(jsonBuilder, reinterpret_cast<panda::ets::EtsDoubleArray *>(arrPtr));
                 break;
             }
             case panda::panda_file::Type::TypeId::I64: {
-                EtsPrimitiveArrayToJSON(json_builder, reinterpret_cast<panda::ets::EtsLongArray *>(arr_ptr));
+                EtsPrimitiveArrayToJSON(jsonBuilder, reinterpret_cast<panda::ets::EtsLongArray *>(arrPtr));
                 break;
             }
             case panda::panda_file::Type::TypeId::U8:
@@ -140,134 +140,133 @@ panda::JsonArrayBuilder EtsArrayToJSON(panda::ets::EtsArray *arr_ptr)
                 break;
         }
     } else {
-        auto arr_obj_ptr = reinterpret_cast<panda::ets::EtsObjectArray *>(arr_ptr);
-        auto len = arr_obj_ptr->GetLength();
+        auto arrObjPtr = reinterpret_cast<panda::ets::EtsObjectArray *>(arrPtr);
+        auto len = arrObjPtr->GetLength();
         for (size_t i = 0; i < len; ++i) {
-            auto d = arr_obj_ptr->Get(i);
-            auto d_cls = d->GetClass();
-            auto type_desc = d_cls->GetDescriptor();
-            if (d_cls->IsStringClass()) {
-                auto s_ptr = reinterpret_cast<panda::ets::EtsString *>(d);
-                json_builder.Add(EtsStringToView(s_ptr));
-            } else if (d_cls->IsArrayClass()) {
-                json_builder.Add([d](panda::JsonArrayBuilder &x) {
+            auto d = arrObjPtr->Get(i);
+            auto dCls = d->GetClass();
+            auto typeDesc = dCls->GetDescriptor();
+            if (dCls->IsStringClass()) {
+                auto sPtr = reinterpret_cast<panda::ets::EtsString *>(d);
+                jsonBuilder.Add(EtsStringToView(sPtr));
+            } else if (dCls->IsArrayClass()) {
+                jsonBuilder.Add([d](panda::JsonArrayBuilder &x) {
                     x = EtsArrayToJSON(reinterpret_cast<panda::ets::EtsArray *>(d));
                 });
-            } else if (d_cls->IsBoxedClass()) {
-                if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
-                    json_builder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsBoolean>::FromCoreType(d)->GetValue());
-                } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
-                    json_builder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsByte>::FromCoreType(d)->GetValue());
-                } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
-                    json_builder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsChar>::FromCoreType(d)->GetValue());
-                } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
-                    json_builder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsShort>::FromCoreType(d)->GetValue());
-                } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
-                    json_builder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsInt>::FromCoreType(d)->GetValue());
-                } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
-                    json_builder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsLong>::FromCoreType(d)->GetValue());
-                } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
-                    json_builder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsFloat>::FromCoreType(d)->GetValue());
-                } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
-                    json_builder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsDouble>::FromCoreType(d)->GetValue());
+            } else if (dCls->IsBoxedClass()) {
+                if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
+                    jsonBuilder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsBoolean>::FromCoreType(d)->GetValue());
+                } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
+                    jsonBuilder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsByte>::FromCoreType(d)->GetValue());
+                } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
+                    jsonBuilder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsChar>::FromCoreType(d)->GetValue());
+                } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
+                    jsonBuilder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsShort>::FromCoreType(d)->GetValue());
+                } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
+                    jsonBuilder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsInt>::FromCoreType(d)->GetValue());
+                } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
+                    jsonBuilder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsLong>::FromCoreType(d)->GetValue());
+                } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
+                    jsonBuilder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsFloat>::FromCoreType(d)->GetValue());
+                } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
+                    jsonBuilder.Add(panda::ets::EtsBoxPrimitive<panda::ets::EtsDouble>::FromCoreType(d)->GetValue());
                 } else {
                     UNREACHABLE();
                 }
             } else {
-                json_builder.Add([d](panda::JsonObjectBuilder &x) { x = ObjectToJSON(d); });
+                jsonBuilder.Add([d](panda::JsonObjectBuilder &x) { x = ObjectToJSON(d); });
             }
         }
     }
-    return json_builder;
+    return jsonBuilder;
 }
 
-void AddFieldsToJSON(panda::JsonObjectBuilder &cur_json, const panda::Span<panda::Field> &fields,
+void AddFieldsToJSON(panda::JsonObjectBuilder &curJson, const panda::Span<panda::Field> &fields,
                      panda::ets::EtsObject *d)
 {
     for (const auto &f : fields) {
         ASSERT(f.IsStatic() == false);
-        auto field_name = reinterpret_cast<const char *>(f.GetName().data);
+        auto fieldName = reinterpret_cast<const char *>(f.GetName().data);
 
         switch (f.GetTypeId()) {
             case panda::panda_file::Type::TypeId::U1:
-                cur_json.AddProperty(field_name, d->GetFieldPrimitive<bool>(f.GetOffset()));
+                curJson.AddProperty(fieldName, d->GetFieldPrimitive<bool>(f.GetOffset()));
                 break;
             case panda::panda_file::Type::TypeId::I8:
-                cur_json.AddProperty(field_name, d->GetFieldPrimitive<int8_t>(f.GetOffset()));
+                curJson.AddProperty(fieldName, d->GetFieldPrimitive<int8_t>(f.GetOffset()));
                 break;
             case panda::panda_file::Type::TypeId::I16:
-                cur_json.AddProperty(field_name, d->GetFieldPrimitive<int16_t>(f.GetOffset()));
+                curJson.AddProperty(fieldName, d->GetFieldPrimitive<int16_t>(f.GetOffset()));
                 break;
             case panda::panda_file::Type::TypeId::U16:
-                cur_json.AddProperty(field_name, EtsCharToString(d->GetFieldPrimitive<ets_char>(f.GetOffset())));
+                curJson.AddProperty(fieldName, EtsCharToString(d->GetFieldPrimitive<ets_char>(f.GetOffset())));
                 break;
             case panda::panda_file::Type::TypeId::I32:
-                cur_json.AddProperty(field_name, d->GetFieldPrimitive<int32_t>(f.GetOffset()));
+                curJson.AddProperty(fieldName, d->GetFieldPrimitive<int32_t>(f.GetOffset()));
                 break;
             case panda::panda_file::Type::TypeId::F32:
-                cur_json.AddProperty(field_name, d->GetFieldPrimitive<float>(f.GetOffset()));
+                curJson.AddProperty(fieldName, d->GetFieldPrimitive<float>(f.GetOffset()));
                 break;
             case panda::panda_file::Type::TypeId::F64:
-                cur_json.AddProperty(field_name, d->GetFieldPrimitive<double>(f.GetOffset()));
+                curJson.AddProperty(fieldName, d->GetFieldPrimitive<double>(f.GetOffset()));
                 break;
             case panda::panda_file::Type::TypeId::I64:
-                cur_json.AddProperty(field_name, d->GetFieldPrimitive<int64_t>(f.GetOffset()));
+                curJson.AddProperty(fieldName, d->GetFieldPrimitive<int64_t>(f.GetOffset()));
                 break;
             case panda::panda_file::Type::TypeId::REFERENCE: {
-                auto *f_ptr = d->GetFieldObject(f.GetOffset());
-                if (f_ptr != nullptr) {
-                    auto f_cls = f_ptr->GetClass();
-                    auto type_desc = f_cls->GetDescriptor();
-                    if (f_cls->IsStringClass()) {
-                        auto s_ptr = reinterpret_cast<panda::ets::EtsString *>(f_ptr);
-                        cur_json.AddProperty(field_name, EtsStringToView(s_ptr));
-                    } else if (f_cls->IsArrayClass()) {
-                        auto a_ptr = reinterpret_cast<panda::ets::EtsArray *>(f_ptr);
-                        cur_json.AddProperty(field_name,
-                                             [a_ptr](panda::JsonArrayBuilder &x) { x = EtsArrayToJSON(a_ptr); });
-                    } else if (f_cls->IsBoxedClass()) {
-                        if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
-                            cur_json.AddProperty(
-                                field_name, static_cast<bool>(
-                                                panda::ets::EtsBoxPrimitive<panda::ets::EtsBoolean>::FromCoreType(f_ptr)
-                                                    ->GetValue()));
-                        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
-                            cur_json.AddProperty(
-                                field_name,
-                                panda::ets::EtsBoxPrimitive<panda::ets::EtsByte>::FromCoreType(f_ptr)->GetValue());
-                        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
-                            cur_json.AddProperty(
-                                field_name,
-                                panda::ets::EtsBoxPrimitive<panda::ets::EtsChar>::FromCoreType(f_ptr)->GetValue());
-                        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
-                            cur_json.AddProperty(
-                                field_name,
-                                panda::ets::EtsBoxPrimitive<panda::ets::EtsShort>::FromCoreType(f_ptr)->GetValue());
-                        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
-                            cur_json.AddProperty(
-                                field_name,
-                                panda::ets::EtsBoxPrimitive<panda::ets::EtsInt>::FromCoreType(f_ptr)->GetValue());
-                        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
-                            cur_json.AddProperty(
-                                field_name,
-                                panda::ets::EtsBoxPrimitive<panda::ets::EtsLong>::FromCoreType(f_ptr)->GetValue());
-                        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
-                            cur_json.AddProperty(
-                                field_name,
-                                panda::ets::EtsBoxPrimitive<panda::ets::EtsFloat>::FromCoreType(f_ptr)->GetValue());
-                        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
-                            cur_json.AddProperty(
-                                field_name,
-                                panda::ets::EtsBoxPrimitive<panda::ets::EtsDouble>::FromCoreType(f_ptr)->GetValue());
+                auto *fPtr = d->GetFieldObject(f.GetOffset());
+                if (fPtr != nullptr) {
+                    auto fCls = fPtr->GetClass();
+                    auto typeDesc = fCls->GetDescriptor();
+                    if (fCls->IsStringClass()) {
+                        auto sPtr = reinterpret_cast<panda::ets::EtsString *>(fPtr);
+                        curJson.AddProperty(fieldName, EtsStringToView(sPtr));
+                    } else if (fCls->IsArrayClass()) {
+                        auto aPtr = reinterpret_cast<panda::ets::EtsArray *>(fPtr);
+                        curJson.AddProperty(fieldName,
+                                            [aPtr](panda::JsonArrayBuilder &x) { x = EtsArrayToJSON(aPtr); });
+                    } else if (fCls->IsBoxedClass()) {
+                        if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
+                            curJson.AddProperty(
+                                fieldName, static_cast<bool>(
+                                               panda::ets::EtsBoxPrimitive<panda::ets::EtsBoolean>::FromCoreType(fPtr)
+                                                   ->GetValue()));
+                        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
+                            curJson.AddProperty(
+                                fieldName,
+                                panda::ets::EtsBoxPrimitive<panda::ets::EtsByte>::FromCoreType(fPtr)->GetValue());
+                        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
+                            curJson.AddProperty(
+                                fieldName,
+                                panda::ets::EtsBoxPrimitive<panda::ets::EtsChar>::FromCoreType(fPtr)->GetValue());
+                        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
+                            curJson.AddProperty(
+                                fieldName,
+                                panda::ets::EtsBoxPrimitive<panda::ets::EtsShort>::FromCoreType(fPtr)->GetValue());
+                        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
+                            curJson.AddProperty(
+                                fieldName,
+                                panda::ets::EtsBoxPrimitive<panda::ets::EtsInt>::FromCoreType(fPtr)->GetValue());
+                        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
+                            curJson.AddProperty(
+                                fieldName,
+                                panda::ets::EtsBoxPrimitive<panda::ets::EtsLong>::FromCoreType(fPtr)->GetValue());
+                        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
+                            curJson.AddProperty(
+                                fieldName,
+                                panda::ets::EtsBoxPrimitive<panda::ets::EtsFloat>::FromCoreType(fPtr)->GetValue());
+                        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
+                            curJson.AddProperty(
+                                fieldName,
+                                panda::ets::EtsBoxPrimitive<panda::ets::EtsDouble>::FromCoreType(fPtr)->GetValue());
                         } else {
                             UNREACHABLE();
                         }
                     } else {
-                        cur_json.AddProperty(field_name,
-                                             [f_ptr](panda::JsonObjectBuilder &x) { x = ObjectToJSON(f_ptr); });
+                        curJson.AddProperty(fieldName, [fPtr](panda::JsonObjectBuilder &x) { x = ObjectToJSON(fPtr); });
                     }
                 } else {
-                    cur_json.AddProperty(field_name, std::nullptr_t());
+                    curJson.AddProperty(fieldName, std::nullptr_t());
                 }
                 break;
             }
@@ -290,12 +289,12 @@ panda::JsonObjectBuilder ObjectToJSON(panda::ets::EtsObject *d)
     ASSERT(kls != nullptr);
 
     // Only instance fields are required according to JS/TS JSON.stringify behaviour
-    auto cur_json = panda::JsonObjectBuilder();
+    auto curJson = panda::JsonObjectBuilder();
     kls->EnumerateBaseClasses([&](panda::ets::EtsClass *c) {
-        AddFieldsToJSON(cur_json, c->GetRuntimeClass()->GetInstanceFields(), d);
+        AddFieldsToJSON(curJson, c->GetRuntimeClass()->GetInstanceFields(), d);
         return false;
     });
-    return cur_json;
+    return curJson;
 }
 }  // namespace
 
@@ -305,42 +304,42 @@ EtsString *EscompatJSONStringifyObj(EtsObject *d)
     ASSERT(d != nullptr);
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] auto _ = HandleScope<ObjectHeader *>(thread);
-    auto d_handle = VMHandle<EtsObject>(thread, d->GetCoreType());
-    auto cls = d_handle.GetPtr()->GetClass();
-    auto type_desc = cls->GetDescriptor();
+    auto dHandle = VMHandle<EtsObject>(thread, d->GetCoreType());
+    auto cls = dHandle.GetPtr()->GetClass();
+    auto typeDesc = cls->GetDescriptor();
 
-    auto res_string = std::string();
+    auto resString = std::string();
     if (cls->IsArrayClass()) {
-        auto arr = reinterpret_cast<panda::ets::EtsArray *>(d_handle.GetPtr());
-        res_string = EtsArrayToJSON(reinterpret_cast<panda::ets::EtsArray *>(arr)).Build();
+        auto arr = reinterpret_cast<panda::ets::EtsArray *>(dHandle.GetPtr());
+        resString = EtsArrayToJSON(reinterpret_cast<panda::ets::EtsArray *>(arr)).Build();
     } else if (cls->IsBoxedClass()) {
         std::stringstream ss;
         ss.setf(std::stringstream::boolalpha);
-        if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
+        if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
             ss << static_cast<bool>(panda::ets::EtsBoxPrimitive<panda::ets::EtsBoolean>::FromCoreType(d)->GetValue());
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
+        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
             ss << panda::ets::EtsBoxPrimitive<panda::ets::EtsByte>::FromCoreType(d)->GetValue();
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
+        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
             ss << panda::ets::EtsBoxPrimitive<panda::ets::EtsChar>::FromCoreType(d)->GetValue();
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
+        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
             ss << panda::ets::EtsBoxPrimitive<panda::ets::EtsShort>::FromCoreType(d)->GetValue();
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
+        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
             ss << panda::ets::EtsBoxPrimitive<panda::ets::EtsInt>::FromCoreType(d)->GetValue();
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
+        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
             ss << panda::ets::EtsBoxPrimitive<panda::ets::EtsLong>::FromCoreType(d)->GetValue();
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
+        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
             ss << panda::ets::EtsBoxPrimitive<panda::ets::EtsFloat>::FromCoreType(d)->GetValue();
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
+        } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
             ss << panda::ets::EtsBoxPrimitive<panda::ets::EtsDouble>::FromCoreType(d)->GetValue();
         } else {
             UNREACHABLE();
         }
-        res_string = ss.str();
+        resString = ss.str();
     } else {
-        res_string = ObjectToJSON(d_handle.GetPtr()).Build();
+        resString = ObjectToJSON(dHandle.GetPtr()).Build();
     }
-    auto ets_res_string = EtsString::CreateFromUtf8(res_string.data(), res_string.size());
-    return ets_res_string;
+    auto etsResString = EtsString::CreateFromUtf8(resString.data(), resString.size());
+    return etsResString;
 }
 
 }  // namespace panda::ets::intrinsics

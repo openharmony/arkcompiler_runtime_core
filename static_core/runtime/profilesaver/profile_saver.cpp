@@ -26,7 +26,7 @@ namespace panda {
 
 ProfileSaver *ProfileSaver::instance_ = nullptr;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-std::thread ProfileSaver::profiler_saver_daemon_thread_;
+std::thread ProfileSaver::profilerSaverDaemonThread_;
 
 static bool CheckLocationForCompilation(const PandaString &location)
 {
@@ -34,34 +34,34 @@ static bool CheckLocationForCompilation(const PandaString &location)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-ProfileSaver::ProfileSaver(const PandaString &output_filename, const PandaVector<PandaString> &code_paths,
-                           const PandaString &app_dir)
+ProfileSaver::ProfileSaver(const PandaString &outputFilename, const PandaVector<PandaString> &codePaths,
+                           const PandaString &appDir)
 {
-    AddTrackedLocations(output_filename, code_paths, app_dir);
+    AddTrackedLocations(outputFilename, codePaths, appDir);
 }
 
 // NB! it is the caller's responsibility to pass suitable output_filename, code_paths as well as app_data_dir.
-void ProfileSaver::AddTrackedLocations(const PandaString &output_filename, const PandaVector<PandaString> &code_paths,
-                                       const PandaString &app_data_dir)
+void ProfileSaver::AddTrackedLocations(const PandaString &outputFilename, const PandaVector<PandaString> &codePaths,
+                                       const PandaString &appDataDir)
 {
-    auto it = tracked_pandafile_base_locations_.find(output_filename);
-    if (it == tracked_pandafile_base_locations_.end()) {
-        tracked_pandafile_base_locations_.insert(
-            std::make_pair(output_filename, PandaSet<PandaString>(code_paths.begin(), code_paths.end())));
-        if (!app_data_dir.empty()) {
-            app_data_dirs_.insert(app_data_dir);
+    auto it = trackedPandafileBaseLocations_.find(outputFilename);
+    if (it == trackedPandafileBaseLocations_.end()) {
+        trackedPandafileBaseLocations_.insert(
+            std::make_pair(outputFilename, PandaSet<PandaString>(codePaths.begin(), codePaths.end())));
+        if (!appDataDir.empty()) {
+            appDataDirs_.insert(appDataDir);
         }
     } else {
-        if (UNLIKELY(app_data_dirs_.count(app_data_dir) <= 0)) {
+        if (UNLIKELY(appDataDirs_.count(appDataDir) <= 0)) {
             LOG(INFO, RUNTIME) << "Cannot find app dir, bad output filename";
             return;
         }
-        it->second.insert(code_paths.begin(), code_paths.end());
+        it->second.insert(codePaths.begin(), codePaths.end());
     }
 }
 
-void ProfileSaver::Start(const PandaString &output_filename, const PandaVector<PandaString> &code_paths,
-                         const PandaString &app_data_dir)
+void ProfileSaver::Start(const PandaString &outputFilename, const PandaVector<PandaString> &codePaths,
+                         const PandaString &appDataDir)
 {
     if (Runtime::GetCurrent() == nullptr) {
         LOG(ERROR, RUNTIME) << "Runtime is nullptr";
@@ -73,37 +73,36 @@ void ProfileSaver::Start(const PandaString &output_filename, const PandaVector<P
         return;
     }
 
-    if (output_filename.empty()) {
+    if (outputFilename.empty()) {
         LOG(ERROR, RUNTIME) << "Invalid output filename";
         return;
     }
 
-    PandaVector<PandaString> code_paths_to_profile;
-    for (const PandaString &location : code_paths) {
+    PandaVector<PandaString> codePathsToProfile;
+    for (const PandaString &location : codePaths) {
         if (CheckLocationForCompilation(location)) {
-            code_paths_to_profile.push_back(location);
+            codePathsToProfile.push_back(location);
         }
     }
 
-    if (code_paths_to_profile.empty()) {
+    if (codePathsToProfile.empty()) {
         LOG(INFO, RUNTIME) << "No code paths should be profiled.";
         return;
     }
 
     if (UNLIKELY(instance_ != nullptr)) {
         LOG(INFO, RUNTIME) << "Profile Saver Singleton already exists";
-        instance_->AddTrackedLocations(output_filename, code_paths_to_profile, app_data_dir);
+        instance_->AddTrackedLocations(outputFilename, codePathsToProfile, appDataDir);
         return;
     }
 
-    LOG(INFO, RUNTIME) << "Starting dumping profile saver output file" << output_filename;
+    LOG(INFO, RUNTIME) << "Starting dumping profile saver output file" << outputFilename;
 
-    instance_ = new ProfileSaver(output_filename, code_paths_to_profile, app_data_dir);
-    profiler_saver_daemon_thread_ =
-        std::thread(ProfileSaver::RunProfileSaverThread, reinterpret_cast<void *>(instance_));
+    instance_ = new ProfileSaver(outputFilename, codePathsToProfile, appDataDir);
+    profilerSaverDaemonThread_ = std::thread(ProfileSaver::RunProfileSaverThread, reinterpret_cast<void *>(instance_));
 }
 
-void ProfileSaver::Stop(bool dump_info)
+void ProfileSaver::Stop(bool dumpInfo)
 {
     {
         os::memory::LockHolder lock(profile_saver_lock_);
@@ -113,21 +112,21 @@ void ProfileSaver::Stop(bool dump_info)
             return;
         }
 
-        if (instance_->shutting_down_) {
+        if (instance_->shuttingDown_) {
             LOG(ERROR, RUNTIME) << "Tried to stop the profile saver twice";
             return;
         }
 
-        instance_->shutting_down_ = true;
+        instance_->shuttingDown_ = true;
 
-        if (dump_info) {
+        if (dumpInfo) {
             instance_->DumpInfo();
         }
     }
 
     // Wait for the saver thread to stop.
     // NB! we must release profile_saver_lock_ here.
-    profiler_saver_daemon_thread_.join();
+    profilerSaverDaemonThread_.join();
 
     // Kill the singleton ...
     delete instance_;
@@ -147,8 +146,8 @@ void ProfileSaver::DumpInfo()
 void *ProfileSaver::RunProfileSaverThread(void *arg)
 {
     // NOLINTNEXTLINE(hicpp-use-auto, modernize-use-auto)
-    ProfileSaver *profile_saver = reinterpret_cast<ProfileSaver *>(arg);
-    profile_saver->Run();
+    ProfileSaver *profileSaver = reinterpret_cast<ProfileSaver *>(arg);
+    profileSaver->Run();
 
     LOG(INFO, RUNTIME) << "Profile saver shutdown";
     return nullptr;
@@ -178,15 +177,15 @@ void ProfileSaver::Run()
 bool ProfileSaver::ShuttingDown()
 {
     os::memory::LockHolder lock(profile_saver_lock_);
-    return shutting_down_;
+    return shuttingDown_;
 }
 
 void ProfileSaver::TranverseAndCacheResolvedClassAndMethods()
 {
-    trace::ScopedTrace scoped_trace(__PRETTY_FUNCTION__);
-    PandaSet<ExtractedResolvedClasses> resolved_classes;
+    trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
+    PandaSet<ExtractedResolvedClasses> resolvedClasses;
     PandaVector<ExtractedMethod> methods;
-    auto call_back = [&resolved_classes, &methods](Class *klass) -> bool {
+    auto callBack = [&resolvedClasses, &methods](Class *klass) -> bool {
         const panda_file::File *pandafile = klass->GetPandaFile();
         panda_file::File::EntityId classfieldid = klass->GetFileId();
 
@@ -197,10 +196,10 @@ void ProfileSaver::TranverseAndCacheResolvedClassAndMethods()
         LOG(INFO, RUNTIME) << "      pandafile name = " << pandafile->GetFilename()
                            << " classname = " << klass->GetName();
 
-        Span<Method> tmp_methods = klass->GetMethods();
-        LOG(INFO, RUNTIME) << "      methods size = " << tmp_methods.size();
-        for (int i = 0; i < static_cast<int>(tmp_methods.Size()); ++i) {
-            Method &method = tmp_methods[i];
+        Span<Method> tmpMethods = klass->GetMethods();
+        LOG(INFO, RUNTIME) << "      methods size = " << tmpMethods.size();
+        for (int i = 0; i < static_cast<int>(tmpMethods.Size()); ++i) {
+            Method &method = tmpMethods[i];
             if (!method.IsNative()) {
                 if (method.GetHotnessCounter() < Method::GetInitialHotnessCounter()) {
                     ASSERT(method.GetPandaFile() != nullptr);
@@ -210,15 +209,15 @@ void ProfileSaver::TranverseAndCacheResolvedClassAndMethods()
             }
         }
 
-        ExtractedResolvedClasses tmp_resolved_classes(ConvertToString(pandafile->GetFilename()),
-                                                      pandafile->GetHeader()->checksum);
+        ExtractedResolvedClasses tmpResolvedClasses(ConvertToString(pandafile->GetFilename()),
+                                                    pandafile->GetHeader()->checksum);
         LOG(INFO, RUNTIME) << "      Add class " << klass->GetName();
-        auto it = resolved_classes.find(tmp_resolved_classes);
-        if (it != resolved_classes.end()) {
+        auto it = resolvedClasses.find(tmpResolvedClasses);
+        if (it != resolvedClasses.end()) {
             it->AddClass(classfieldid.GetOffset());
         } else {
-            tmp_resolved_classes.AddClass(classfieldid.GetOffset());
-            resolved_classes.insert(tmp_resolved_classes);
+            tmpResolvedClasses.AddClass(classfieldid.GetOffset());
+            resolvedClasses.insert(tmpResolvedClasses);
         }
 
         return true;
@@ -231,15 +230,15 @@ void ProfileSaver::TranverseAndCacheResolvedClassAndMethods()
     }
 
     LOG(INFO, RUNTIME) << "  Step2.1: tranverse the resolved class and methods";
-    Runtime::GetCurrent()->GetClassLinker()->EnumerateClasses(call_back);
+    Runtime::GetCurrent()->GetClassLinker()->EnumerateClasses(callBack);
     LOG(INFO, RUNTIME) << "  Step2.2: starting tracking all the pandafile locations and flush the cache";
 
-    for (const auto &it : tracked_pandafile_base_locations_) {
+    for (const auto &it : trackedPandafileBaseLocations_) {
         const PandaString &filename = it.first;
         const PandaSet<PandaString> &locations = it.second;
 
-        PandaSet<ExtractedResolvedClasses> resolved_classes_for_location;
-        PandaVector<ExtractedMethod> methods_for_location;
+        PandaSet<ExtractedResolvedClasses> resolvedClassesForLocation;
+        PandaVector<ExtractedMethod> methodsForLocation;
 
         LOG(INFO, RUNTIME) << "      all the locations are:";
         for (auto const &iter : locations) {
@@ -248,57 +247,57 @@ void ProfileSaver::TranverseAndCacheResolvedClassAndMethods()
 
         LOG(INFO, RUNTIME) << "      Methods name : ";
         for (const ExtractedMethod &ref : methods) {
-            LOG(INFO, RUNTIME) << "      " << ref.panda_file->GetFilename();
-            if (locations.find(ConvertToString(ref.panda_file->GetFilename())) != locations.end()) {
+            LOG(INFO, RUNTIME) << "      " << ref.pandaFile->GetFilename();
+            if (locations.find(ConvertToString(ref.pandaFile->GetFilename())) != locations.end()) {
                 LOG(INFO, RUNTIME) << "      bingo method!";
-                methods_for_location.push_back(ref);
+                methodsForLocation.push_back(ref);
             }
         }
         LOG(INFO, RUNTIME) << std::endl;
         LOG(INFO, RUNTIME) << "      Classes name";
 
-        for (const ExtractedResolvedClasses &classes : resolved_classes) {
+        for (const ExtractedResolvedClasses &classes : resolvedClasses) {
             LOG(INFO, RUNTIME) << "      " << classes.GetPandaFileLocation();
             if (locations.find(classes.GetPandaFileLocation()) != locations.end()) {
                 LOG(INFO, RUNTIME) << "      bingo class!";
-                resolved_classes_for_location.insert(classes);
+                resolvedClassesForLocation.insert(classes);
             }
         }
 
         ProfileDumpInfo *info = GetOrAddCachedProfiledInfo(filename);
         LOG(INFO, RUNTIME) << "      Adding Bingo Methods and Classes";
-        info->AddMethodsAndClasses(methods_for_location, resolved_classes_for_location);
+        info->AddMethodsAndClasses(methodsForLocation, resolvedClassesForLocation);
     }
 }
 
 ProfileDumpInfo *ProfileSaver::GetOrAddCachedProfiledInfo(const PandaString &filename)
 {
-    auto info_it = profile_cache_.find(filename);
-    if (info_it == profile_cache_.end()) {
+    auto infoIt = profileCache_.find(filename);
+    if (infoIt == profileCache_.end()) {
         LOG(INFO, RUNTIME) << "      bingo profile_cache_!";
-        auto ret = profile_cache_.insert(std::make_pair(filename, ProfileDumpInfo()));
+        auto ret = profileCache_.insert(std::make_pair(filename, ProfileDumpInfo()));
         ASSERT(ret.second);
-        info_it = ret.first;
+        infoIt = ret.first;
     }
-    return &(info_it->second);
+    return &(infoIt->second);
 }
 
 ProfileSaver::CntStats *ProfileSaver::GetOrAddCachedProfiledStatsInfo(const PandaString &filename)
 {
-    auto info_it = statcache.find(filename);
-    if (info_it == statcache.end()) {
+    auto infoIt = statcache.find(filename);
+    if (infoIt == statcache.end()) {
         LOG(INFO, RUNTIME) << "      bingo StatsInfo_cache_!";
         auto ret = statcache.insert(std::make_pair(filename, CntStats()));
         ASSERT(ret.second);
-        info_it = ret.first;
+        infoIt = ret.first;
     }
-    return &(info_it->second);
+    return &(infoIt->second);
 }
 
 void ProfileSaver::MergeAndDumpProfileData()
 {
-    trace::ScopedTrace scoped_trace(__PRETTY_FUNCTION__);
-    for (const auto &it : tracked_pandafile_base_locations_) {
+    trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
+    for (const auto &it : trackedPandafileBaseLocations_) {
         if (ShuttingDown()) {
             return;
         }
@@ -306,22 +305,22 @@ void ProfileSaver::MergeAndDumpProfileData()
         LOG(INFO, RUNTIME) << "  Step3.1 starting merging and save the following file ***";
         LOG(INFO, RUNTIME) << "      filename = " << filename;
 
-        ProfileDumpInfo *cached_info = GetOrAddCachedProfiledInfo(filename);
-        CntStats *cached_stat = GetOrAddCachedProfiledStatsInfo(filename);
-        ASSERT(cached_info->GetNumberOfMethods() >= cached_stat->GetMethodCount());
-        ASSERT(cached_info->GetNumberOfResolvedClasses() >= cached_stat->GetClassCount());
-        uint64_t delta_number_of_methods = cached_info->GetNumberOfMethods() - cached_stat->GetMethodCount();
-        uint64_t delta_number_of_classes = cached_info->GetNumberOfResolvedClasses() - cached_stat->GetClassCount();
+        ProfileDumpInfo *cachedInfo = GetOrAddCachedProfiledInfo(filename);
+        CntStats *cachedStat = GetOrAddCachedProfiledStatsInfo(filename);
+        ASSERT(cachedInfo->GetNumberOfMethods() >= cachedStat->GetMethodCount());
+        ASSERT(cachedInfo->GetNumberOfResolvedClasses() >= cachedStat->GetClassCount());
+        uint64_t deltaNumberOfMethods = cachedInfo->GetNumberOfMethods() - cachedStat->GetMethodCount();
+        uint64_t deltaNumberOfClasses = cachedInfo->GetNumberOfResolvedClasses() - cachedStat->GetClassCount();
         uint64_t numthreshold = Runtime::GetOptions().GetProfilesaverDeltaNumberThreshold();
-        if (delta_number_of_methods < numthreshold && delta_number_of_classes < numthreshold) {
+        if (deltaNumberOfMethods < numthreshold && deltaNumberOfClasses < numthreshold) {
             LOG(INFO, RUNTIME) << "      number of delta number/class not enough";
             continue;
         }
 
-        uint64_t bytes_written;
-        if (cached_info->MergeAndSave(filename, &bytes_written, true)) {
-            cached_stat->SetMethodCount(cached_info->GetNumberOfMethods());
-            cached_stat->SetClassCount(cached_info->GetNumberOfResolvedClasses());
+        uint64_t bytesWritten;
+        if (cachedInfo->MergeAndSave(filename, &bytesWritten, true)) {
+            cachedStat->SetMethodCount(cachedInfo->GetNumberOfMethods());
+            cachedStat->SetClassCount(cachedInfo->GetNumberOfResolvedClasses());
         } else {
             LOG(INFO, RUNTIME) << "Could not save profiling info to " << filename;
         }

@@ -67,9 +67,9 @@
 
 #ifndef NDEBUG
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DBGBRK()                                                                       \
-    if (debug_) {                                                                      \
-        DBG_MANAGED_BRK(debug_ctx, job_->JobMethod()->GetUniqId(), inst_.GetOffset()); \
+#define DBGBRK()                                                                      \
+    if (debug_) {                                                                     \
+        DBG_MANAGED_BRK(debugCtx, job_->JobMethod()->GetUniqId(), inst_.GetOffset()); \
     }
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -158,29 +158,29 @@ public:
     Type const bits32_ {Builtin::BITS32};
     Type const bits64_ {Builtin::BITS64};
     Type const primitive_ {Builtin::PRIMITIVE};
-    Type const ref_type_ {Builtin::REFERENCE};
-    Type const null_ref_type_ {Builtin::NULL_REFERENCE};
-    Type const object_type_ {Builtin::OBJECT};
-    Type const array_type_ {Builtin::ARRAY};
+    Type const refType_ {Builtin::REFERENCE};
+    Type const nullRefType_ {Builtin::NULL_REFERENCE};
+    Type const objectType_ {Builtin::OBJECT};
+    Type const arrayType_ {Builtin::ARRAY};
 
     Job const *job_;
-    debug::DebugContext const *debug_ctx;
+    debug::DebugContext const *debugCtx;
     Config const *config;
 
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-    AbsIntInstructionHandler(VerificationContext &verif_ctx, const uint8_t *pc, EntryPointType code_type)
-        : job_ {verif_ctx.GetJob()},
-          debug_ctx {&job_->GetService()->debug_ctx},
+    AbsIntInstructionHandler(VerificationContext &verifCtx, const uint8_t *pc, EntryPointType codeType)
+        : job_ {verifCtx.GetJob()},
+          debugCtx {&job_->GetService()->debugCtx},
           config {GetServiceConfig(job_->GetService())},
-          inst_(pc, verif_ctx.CflowInfo().GetAddrStart(), verif_ctx.CflowInfo().GetAddrEnd()),
-          context_ {verif_ctx},
-          code_type_ {code_type}
+          inst_(pc, verifCtx.CflowInfo().GetAddrStart(), verifCtx.CflowInfo().GetAddrEnd()),
+          context_ {verifCtx},
+          codeType_ {codeType}
     {
 #ifndef NDEBUG
         if (config->opts.mode == VerificationMode::DEBUG) {
             const auto &method = job_->JobMethod();
-            debug_ = debug::ManagedBreakpointPresent(debug_ctx, method->GetUniqId());
+            debug_ = debug::ManagedBreakpointPresent(debugCtx, method->GetUniqId());
             if (debug_) {
                 LOG(DEBUG, VERIFIER) << "Debug mode for method " << method->GetFullName() << " is on";
             }
@@ -245,22 +245,22 @@ public:
         return res;
     }
 
-    bool CheckType(Type type, Type tgt_type)
+    bool CheckType(Type type, Type tgtType)
     {
-        return IsSubtype(type, tgt_type, GetTypeSystem());
+        return IsSubtype(type, tgtType, GetTypeSystem());
     }
 
-    bool CheckRegType(int reg, Type tgt_type);
+    bool CheckRegType(int reg, Type tgtType);
 
-    const AbstractTypedValue &GetReg(int reg_idx);
+    const AbstractTypedValue &GetReg(int regIdx);
 
-    Type GetRegType(int reg_idx);
+    Type GetRegType(int regIdx);
 
-    void SetReg(int reg_idx, const AbstractTypedValue &val);
-    void SetReg(int reg_idx, Type type);
+    void SetReg(int regIdx, const AbstractTypedValue &val);
+    void SetReg(int regIdx, Type type);
 
-    void SetRegAndOthersOfSameOrigin(int reg_idx, const AbstractTypedValue &val);
-    void SetRegAndOthersOfSameOrigin(int reg_idx, Type type);
+    void SetRegAndOthersOfSameOrigin(int regIdx, const AbstractTypedValue &val);
+    void SetRegAndOthersOfSameOrigin(int regIdx, Type type);
 
     const AbstractTypedValue &GetAcc();
 
@@ -296,9 +296,9 @@ public:
         auto atv = GetReg(src);
         if (!atv.GetOrigin().IsValid()) {
             // generate new origin and set all values to be originated at it
-            AbstractTypedValue new_atv {atv, inst_};
-            SetReg(src, new_atv);
-            SetReg(dst, new_atv);
+            AbstractTypedValue newAtv {atv, inst_};
+            SetReg(src, newAtv);
+            SetReg(dst, newAtv);
         } else {
             SetReg(dst, atv);
         }
@@ -361,7 +361,7 @@ public:
         uint16_t vd = inst_.GetVReg<FORMAT, 0x00>();
         uint16_t vs = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
-        if (!CheckRegType(vs, ref_type_)) {
+        if (!CheckRegType(vs, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -447,7 +447,7 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT>();
         Sync();
-        SetReg(vd, null_ref_type_);
+        SetReg(vd, nullRefType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -499,7 +499,7 @@ public:
         DBGBRK();
         uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
-        if (!CheckRegType(vs, ref_type_)) {
+        if (!CheckRegType(vs, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -562,12 +562,12 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        Type cached_type = GetCachedType();
-        if (!cached_type.IsConsistent()) {
+        Type cachedType = GetCachedType();
+        if (!cachedType.IsConsistent()) {
             SET_STATUS_FOR_MSG(CannotResolveClassId, OK);
             return false;
         }
-        SetAcc(cached_type);
+        SetAcc(cachedType);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -579,14 +579,14 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT, 0>();
         Sync();
-        Type cached_type = GetCachedType();
-        if (!cached_type.IsConsistent()) {
+        Type cachedType = GetCachedType();
+        if (!cachedType.IsConsistent()) {
             // NOTE(vdyadov): refactor to verifier-messages
             LOG(ERROR, VERIFIER) << "Verifier error: HandleLdaConst cache error";
             status_ = VerificationStatus::ERROR;
             return false;
         }
-        SetReg(vd, cached_type);
+        SetReg(vd, cachedType);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -597,12 +597,12 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        Type cached_type = GetCachedType();
-        if (!cached_type.IsConsistent()) {
+        Type cachedType = GetCachedType();
+        if (!cachedType.IsConsistent()) {
             SET_STATUS_FOR_MSG(CannotResolveClassId, OK);
             return false;
         }
-        if (cached_type != GetTypeSystem()->ClassClass()) {
+        if (cachedType != GetTypeSystem()->ClassClass()) {
             LOG(ERROR, VERIFIER) << "LDA_TYPE type must be Class.";
             return false;
         }
@@ -617,7 +617,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(null_ref_type_);
+        SetAcc(nullRefType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -666,7 +666,7 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT>();
         Sync();
-        if (!CheckRegType(ACC, ref_type_)) {
+        if (!CheckRegType(ACC, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -720,7 +720,7 @@ public:
 
         Sync();
 
-        if (!CheckRegType(ACC, ref_type_)) {
+        if (!CheckRegType(ACC, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -729,7 +729,7 @@ public:
         // NOTE(vdyadov): think of two-pass absint, where we can catch const-null cases
 
         auto type = GetRegType(ACC);
-        SetAccAndOthersOfSameOrigin(null_ref_type_);
+        SetAccAndOthersOfSameOrigin(nullRefType_);
 
         if (!ProcessBranching(imm)) {
             return false;
@@ -751,7 +751,7 @@ public:
         auto imm = inst_.GetImm<FORMAT>();
         Sync();
 
-        if (!CheckRegType(ACC, ref_type_)) {
+        if (!CheckRegType(ACC, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -761,7 +761,7 @@ public:
             return false;
         }
 
-        SetAccAndOthersOfSameOrigin(null_ref_type_);
+        SetAccAndOthersOfSameOrigin(nullRefType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -791,13 +791,13 @@ public:
 
         Sync();
 
-        if (!CheckRegType(ACC, ref_type_)) {
+        if (!CheckRegType(ACC, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
-        if (!CheckRegType(vs, ref_type_)) {
+        if (!CheckRegType(vs, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -824,13 +824,13 @@ public:
 
         Sync();
 
-        if (!CheckRegType(ACC, ref_type_)) {
+        if (!CheckRegType(ACC, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
-        if (!CheckRegType(vs, ref_type_)) {
+        if (!CheckRegType(vs, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -1536,14 +1536,14 @@ public:
             return false;
         }
 
-        if (!CheckRegType(vs, array_type_)) {
+        if (!CheckRegType(vs, arrayType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
-        auto reg_type = GetRegType(vs);
-        if (reg_type == null_ref_type_) {
+        auto regType = GetRegType(vs);
+        if (regType == nullRefType_) {
             // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
@@ -1554,15 +1554,15 @@ public:
             return false;
         }
 
-        auto arr_elt_type = reg_type.GetArrayElementType(GetTypeSystem());
-        if (!IsSubtype(arr_elt_type, ref_type_, GetTypeSystem())) {
+        auto arrEltType = regType.GetArrayElementType(GetTypeSystem());
+        if (!IsSubtype(arrEltType, refType_, GetTypeSystem())) {
             SHOW_MSG(BadArrayElementType)
-            LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE(ToString(arr_elt_type), ToString(ref_type_));
+            LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE(ToString(arrEltType), ToString(refType_));
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(BadArrayElementType, WARNING);
             return false;
         }
-        SetAcc(arr_elt_type);
+        SetAcc(arrEltType);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -1641,7 +1641,7 @@ public:
         uint16_t v1 = inst_.GetVReg<FORMAT, 0x00>();
         uint16_t v2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
-        return CheckArrayStore<FORMAT>(v1, v2, ref_type_);
+        return CheckArrayStore<FORMAT>(v1, v2, refType_);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -1651,7 +1651,7 @@ public:
         DBGBRK();
         uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
-        if (!CheckRegType(vs, array_type_)) {
+        if (!CheckRegType(vs, arrayType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -1682,7 +1682,7 @@ public:
         SHOW_MSG(DebugType)
         LOG_VERIFIER_DEBUG_TYPE(ToString(type));
         END_SHOW_MSG();
-        if (!IsSubtype(type, array_type_, GetTypeSystem())) {
+        if (!IsSubtype(type, arrayType_, GetTypeSystem())) {
             // NOTE(vdyadov): implement StrictSubtypes function to not include array_type_ in output
             SHOW_MSG(ArrayOfNonArrayType)
             LOG_VERIFIER_ARRAY_OF_NON_ARRAY_TYPE(ToString(type));
@@ -1702,23 +1702,23 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT, 0>();
         Sync();
-        Type cached_type = GetCachedType();
-        if (!cached_type.IsConsistent()) {
+        Type cachedType = GetCachedType();
+        if (!cachedType.IsConsistent()) {
             LOG(ERROR, VERIFIER) << "Verifier error: HandleNewobj cache error";
             status_ = VerificationStatus::ERROR;
             return false;
         }
         SHOW_MSG(DebugType)
-        LOG_VERIFIER_DEBUG_TYPE(ToString(cached_type));
+        LOG_VERIFIER_DEBUG_TYPE(ToString(cachedType));
         END_SHOW_MSG();
-        if (!IsSubtype(cached_type, object_type_, GetTypeSystem())) {
+        if (!IsSubtype(cachedType, objectType_, GetTypeSystem())) {
             SHOW_MSG(ObjectOfNonObjectType)
-            LOG_VERIFIER_OBJECT_OF_NON_OBJECT_TYPE(ToString(cached_type));
+            LOG_VERIFIER_OBJECT_OF_NON_OBJECT_TYPE(ToString(cachedType));
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(ObjectOfNonObjectType, WARNING);
             return false;
         }
-        SetReg(vd, cached_type);
+        SetReg(vd, cachedType);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -1726,22 +1726,22 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool CheckCallCtor(Method const *ctor, Span<int> regs)
     {
-        Type obj_type = TypeOfClass(ctor->GetClass());
+        Type objType = TypeOfClass(ctor->GetClass());
 
         // NOTE(vdyadov): put under NDEBUG?
         {
-            if (debug_ctx->SkipVerificationOfCall(ctor->GetUniqId())) {
-                SetAcc(obj_type);
+            if (debugCtx->SkipVerificationOfCall(ctor->GetUniqId())) {
+                SetAcc(objType);
                 MoveToNextInst<FORMAT>();
                 return true;
             }
         }
 
-        auto ctor_name_getter = [&ctor]() { return ctor->GetFullName(); };
+        auto ctorNameGetter = [&ctor]() { return ctor->GetFullName(); };
 
-        bool check = CheckMethodArgs(ctor_name_getter, ctor, regs, obj_type);
+        bool check = CheckMethodArgs(ctorNameGetter, ctor, regs, objType);
         if (check) {
-            SetAcc(obj_type);
+            SetAcc(objType);
             MoveToNextInst<FORMAT>();
         }
         return check;
@@ -1772,8 +1772,8 @@ public:
             return false;
         }
 
-        PandaString expected_name = panda::panda_file::GetCtorName(ctor->GetClass()->GetSourceLang());
-        if (!ctor->IsConstructor() || ctor->IsStatic() || expected_name != StringDataToString(ctor->GetName())) {
+        PandaString expectedName = panda::panda_file::GetCtorName(ctor->GetClass()->GetSourceLang());
+        if (!ctor->IsConstructor() || ctor->IsStatic() || expectedName != StringDataToString(ctor->GetName())) {
             SHOW_MSG(InitobjCallsNotConstructor)
             LOG_VERIFIER_INITOBJ_CALLS_NOT_CONSTRUCTOR(ctor->GetFullName());
             END_SHOW_MSG();
@@ -1822,8 +1822,8 @@ public:
         uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
         Sync();
         std::vector<int> regs;
-        for (auto reg_idx = vs; ExecCtx().CurrentRegContext().IsRegDefined(reg_idx); reg_idx++) {
-            regs.push_back(reg_idx);
+        for (auto regIdx = vs; ExecCtx().CurrentRegContext().IsRegDefined(regIdx); regIdx++) {
+            regs.push_back(regIdx);
         }
         return CheckCtor<FORMAT>(Span {regs});
     }
@@ -1839,11 +1839,11 @@ public:
 
         ScopedChangeThreadStatus st {ManagedThread::GetCurrent(), ThreadStatus::RUNNING};
         Job::ErrorHandler handler;
-        auto type_cls = field->ResolveTypeClass(&handler);
-        if (type_cls == nullptr) {
+        auto typeCls = field->ResolveTypeClass(&handler);
+        if (typeCls == nullptr) {
             return Type {};
         }
-        return Type {type_cls};
+        return Type {typeCls};
     }
 
     Type GetFieldObject()
@@ -1857,7 +1857,7 @@ public:
         return TypeOfClass(field->GetClass());
     }
 
-    bool CheckFieldAccess(int reg_idx, Type expected_field_type, bool is_static, bool is_volatile)
+    bool CheckFieldAccess(int regIdx, Type expectedFieldType, bool isStatic, bool isVolatile)
     {
         Field const *field = GetCachedField();
 
@@ -1866,17 +1866,17 @@ public:
             return false;
         }
 
-        if (is_static != field->IsStatic()) {
+        if (isStatic != field->IsStatic()) {
             SHOW_MSG(ExpectedStaticOrInstanceField)
-            LOG_VERIFIER_EXPECTED_STATIC_OR_INSTANCE_FIELD(is_static);
+            LOG_VERIFIER_EXPECTED_STATIC_OR_INSTANCE_FIELD(isStatic);
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(ExpectedStaticOrInstanceField, WARNING);
             return false;
         }
 
-        if (is_volatile != field->IsVolatile()) {
+        if (isVolatile != field->IsVolatile()) {
             // if the inst is volatile but the field is not
-            if (is_volatile) {
+            if (isVolatile) {
                 SHOW_MSG(ExpectedVolatileField)
                 LOG_VERIFIER_EXPECTED_VOLATILE_FIELD();
                 END_SHOW_MSG();
@@ -1891,52 +1891,51 @@ public:
             return false;
         }
 
-        Type field_obj_type = GetFieldObject();
-        Type field_type = GetFieldType();
-        if (!field_type.IsConsistent()) {
+        Type fieldObjType = GetFieldObject();
+        Type fieldType = GetFieldType();
+        if (!fieldType.IsConsistent()) {
             LOG_VERIFIER_CANNOT_RESOLVE_FIELD_TYPE(GetFieldName(field));
             return false;
         }
 
-        if (!is_static) {
-            if (!IsRegDefined(reg_idx)) {
+        if (!isStatic) {
+            if (!IsRegDefined(regIdx)) {
                 SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
                 return false;
             }
-            Type obj_type = GetRegType(reg_idx);
-            if (obj_type == null_ref_type_) {
+            Type objType = GetRegType(regIdx);
+            if (objType == nullRefType_) {
                 // NOTE(vdyadov): redesign next code, after support exception handlers,
                 //                treat it as always throw NPE
                 SHOW_MSG(AlwaysNpe)
-                LOG_VERIFIER_ALWAYS_NPE(reg_idx);
+                LOG_VERIFIER_ALWAYS_NPE(regIdx);
                 END_SHOW_MSG();
                 SET_STATUS_FOR_MSG(AlwaysNpe, OK);
                 return false;
             }
-            if (!IsSubtype(obj_type, field_obj_type, GetTypeSystem())) {
+            if (!IsSubtype(objType, fieldObjType, GetTypeSystem())) {
                 SHOW_MSG(InconsistentRegisterAndFieldTypes)
-                LOG_VERIFIER_INCONSISTENT_REGISTER_AND_FIELD_TYPES(GetFieldName(field), reg_idx, ToString(obj_type),
-                                                                   ToString(field_obj_type));
+                LOG_VERIFIER_INCONSISTENT_REGISTER_AND_FIELD_TYPES(GetFieldName(field), regIdx, ToString(objType),
+                                                                   ToString(fieldObjType));
                 END_SHOW_MSG();
                 SET_STATUS_FOR_MSG(InconsistentRegisterAndFieldTypes, WARNING);
             }
         }
 
-        if (!IsSubtype(field_type, expected_field_type, GetTypeSystem())) {
+        if (!IsSubtype(fieldType, expectedFieldType, GetTypeSystem())) {
             SHOW_MSG(UnexpectedFieldType)
-            LOG_VERIFIER_UNEXPECTED_FIELD_TYPE(GetFieldName(field), ToString(field_type),
-                                               ToString(expected_field_type));
+            LOG_VERIFIER_UNEXPECTED_FIELD_TYPE(GetFieldName(field), ToString(fieldType), ToString(expectedFieldType));
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(UnexpectedFieldType, WARNING);
             return false;
         }
 
         auto *plugin = job_->JobPlugin();
-        auto const *job_method = job_->JobMethod();
-        auto result = plugin->CheckFieldAccessViolation(field, job_method, GetTypeSystem());
+        auto const *jobMethod = job_->JobMethod();
+        auto result = plugin->CheckFieldAccessViolation(field, jobMethod, GetTypeSystem());
         if (!result.IsOk()) {
-            const auto &verif_opts = config->opts;
-            if (verif_opts.debug.allow.field_access_violation && result.IsError()) {
+            const auto &verifOpts = config->opts;
+            if (verifOpts.debug.allow.fieldAccessViolation && result.IsError()) {
                 result.status = VerificationStatus::WARNING;
             }
             LogInnerMessage(result);
@@ -1949,9 +1948,9 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessFieldLoad(int reg_dest, int reg_src, Type expected_field_type, bool is_static, bool is_volatile = false)
+    bool ProcessFieldLoad(int regDest, int regSrc, Type expectedFieldType, bool isStatic, bool isVolatile = false)
     {
-        if (!CheckFieldAccess(reg_src, expected_field_type, is_static, is_volatile)) {
+        if (!CheckFieldAccess(regSrc, expectedFieldType, isStatic, isVolatile)) {
             return false;
         }
         Field const *field = GetCachedField();
@@ -1965,27 +1964,27 @@ public:
         if (!type.IsConsistent()) {
             return false;
         }
-        SetReg(reg_dest, type);
+        SetReg(regDest, type);
         MoveToNextInst<FORMAT>();
         return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessFieldLoad(int reg_idx, Type expected_field_type, bool is_static)
+    bool ProcessFieldLoad(int regIdx, Type expectedFieldType, bool isStatic)
     {
-        return ProcessFieldLoad<FORMAT>(ACC, reg_idx, expected_field_type, is_static);
+        return ProcessFieldLoad<FORMAT>(ACC, regIdx, expectedFieldType, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessFieldLoadVolatile(int reg_dest, int reg_src, Type expected_field_type, bool is_static)
+    bool ProcessFieldLoadVolatile(int regDest, int regSrc, Type expectedFieldType, bool isStatic)
     {
-        return ProcessFieldLoad<FORMAT>(reg_dest, reg_src, expected_field_type, is_static, true);
+        return ProcessFieldLoad<FORMAT>(regDest, regSrc, expectedFieldType, isStatic, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessFieldLoadVolatile(int reg_idx, Type expected_field_type, bool is_static)
+    bool ProcessFieldLoadVolatile(int regIdx, Type expectedFieldType, bool isStatic)
     {
-        return ProcessFieldLoadVolatile<FORMAT>(ACC, reg_idx, expected_field_type, is_static);
+        return ProcessFieldLoadVolatile<FORMAT>(ACC, regIdx, expectedFieldType, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2015,7 +2014,7 @@ public:
         DBGBRK();
         uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
-        return ProcessFieldLoad<FORMAT>(vs, ref_type_, false);
+        return ProcessFieldLoad<FORMAT>(vs, refType_, false);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2048,7 +2047,7 @@ public:
         uint16_t vd = inst_.GetVReg<FORMAT, 0>();
         uint16_t vs = inst_.GetVReg<FORMAT, 1>();
         Sync();
-        return ProcessFieldLoad<FORMAT>(vd, vs, ref_type_, false);
+        return ProcessFieldLoad<FORMAT>(vd, vs, refType_, false);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2078,7 +2077,7 @@ public:
         DBGBRK();
         uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
-        return ProcessFieldLoadVolatile<FORMAT>(vs, ref_type_, false);
+        return ProcessFieldLoadVolatile<FORMAT>(vs, refType_, false);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2111,20 +2110,19 @@ public:
         uint16_t vd = inst_.GetVReg<FORMAT, 0>();
         uint16_t vs = inst_.GetVReg<FORMAT, 1>();
         Sync();
-        return ProcessFieldLoadVolatile<FORMAT>(vd, vs, ref_type_, false);
+        return ProcessFieldLoadVolatile<FORMAT>(vd, vs, refType_, false);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT, typename Check>
-    bool ProcessStoreField(int vs, int vd, Type expected_field_type, bool is_static, Check check,
-                           bool is_volatile = false)
+    bool ProcessStoreField(int vs, int vd, Type expectedFieldType, bool isStatic, Check check, bool isVolatile = false)
     {
-        if (!CheckRegType(vs, expected_field_type)) {
+        if (!CheckRegType(vs, expectedFieldType)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
-        if (!CheckFieldAccess(vd, expected_field_type, is_static, is_volatile)) {
+        if (!CheckFieldAccess(vd, expectedFieldType, isStatic, isVolatile)) {
             return false;
         }
 
@@ -2134,16 +2132,16 @@ public:
             SET_STATUS_FOR_MSG(CannotResolveFieldId, OK);
             return false;
         }
-        Type field_type = GetFieldType();
-        if (!field_type.IsConsistent()) {
+        Type fieldType = GetFieldType();
+        if (!fieldType.IsConsistent()) {
             return false;
         }
 
-        Type vs_type = GetRegType(vs);
+        Type vsType = GetRegType(vs);
 
-        CheckResult const &result = check(field_type.ToTypeId(), vs_type.ToTypeId());
+        CheckResult const &result = check(fieldType.ToTypeId(), vsType.ToTypeId());
         if (result.status != VerificationStatus::OK) {
-            LOG_VERIFIER_DEBUG_STORE_FIELD(GetFieldName(field), ToString(field_type), ToString(vs_type));
+            LOG_VERIFIER_DEBUG_STORE_FIELD(GetFieldName(field), ToString(fieldType), ToString(vsType));
             status_ = result.status;
             if (result.IsError()) {
                 return false;
@@ -2155,27 +2153,27 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobj(int vs, int vd, bool is_static)
+    bool ProcessStobj(int vs, int vd, bool isStatic)
     {
-        return ProcessStoreField<FORMAT>(vs, vd, bits32_, is_static, CheckStobj);
+        return ProcessStoreField<FORMAT>(vs, vd, bits32_, isStatic, CheckStobj);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobj(int vd, bool is_static)
+    bool ProcessStobj(int vd, bool isStatic)
     {
-        return ProcessStobj<FORMAT>(ACC, vd, is_static);
+        return ProcessStobj<FORMAT>(ACC, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjVolatile(int vs, int vd, bool is_static)
+    bool ProcessStobjVolatile(int vs, int vd, bool isStatic)
     {
-        return ProcessStoreField<FORMAT>(vs, vd, bits32_, is_static, CheckStobj, true);
+        return ProcessStoreField<FORMAT>(vs, vd, bits32_, isStatic, CheckStobj, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjVolatile(int vd, bool is_static)
+    bool ProcessStobjVolatile(int vd, bool isStatic)
     {
-        return ProcessStobjVolatile<FORMAT>(ACC, vd, is_static);
+        return ProcessStobjVolatile<FORMAT>(ACC, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2225,27 +2223,27 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjWide(int vs, int vd, bool is_static)
+    bool ProcessStobjWide(int vs, int vd, bool isStatic)
     {
-        return ProcessStoreField<FORMAT>(vs, vd, bits64_, is_static, CheckStobjWide);
+        return ProcessStoreField<FORMAT>(vs, vd, bits64_, isStatic, CheckStobjWide);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjWide(int vd, bool is_static)
+    bool ProcessStobjWide(int vd, bool isStatic)
     {
-        return ProcessStobjWide<FORMAT>(ACC, vd, is_static);
+        return ProcessStobjWide<FORMAT>(ACC, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjVolatileWide(int vs, int vd, bool is_static)
+    bool ProcessStobjVolatileWide(int vs, int vd, bool isStatic)
     {
-        return ProcessStoreField<FORMAT>(vs, vd, bits64_, is_static, CheckStobjWide, true);
+        return ProcessStoreField<FORMAT>(vs, vd, bits64_, isStatic, CheckStobjWide, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjVolatileWide(int vd, bool is_static)
+    bool ProcessStobjVolatileWide(int vd, bool isStatic)
     {
-        return ProcessStobjVolatileWide<FORMAT>(ACC, vd, is_static);
+        return ProcessStobjVolatileWide<FORMAT>(ACC, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2295,9 +2293,9 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjObj(int vs, int vd, bool is_static, bool is_volatile = false)
+    bool ProcessStobjObj(int vs, int vd, bool isStatic, bool isVolatile = false)
     {
-        if (!CheckFieldAccess(vd, ref_type_, is_static, is_volatile)) {
+        if (!CheckFieldAccess(vd, refType_, isStatic, isVolatile)) {
             return false;
         }
 
@@ -2308,22 +2306,22 @@ public:
             return false;
         }
 
-        Type field_type = GetFieldType();
-        if (!field_type.IsConsistent()) {
+        Type fieldType = GetFieldType();
+        if (!fieldType.IsConsistent()) {
             return false;
         }
 
-        if (!CheckRegType(vs, ref_type_)) {
+        if (!CheckRegType(vs, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
-        Type vs_type = GetRegType(vs);
+        Type vsType = GetRegType(vs);
 
-        if (!IsSubtype(vs_type, field_type, GetTypeSystem())) {
+        if (!IsSubtype(vsType, fieldType, GetTypeSystem())) {
             SHOW_MSG(BadAccumulatorType)
-            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(vs_type), ToString(field_type));
+            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(vsType), ToString(fieldType));
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(BadAccumulatorType, WARNING);
             return false;
@@ -2334,21 +2332,21 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjObj(int vd, bool is_static)
+    bool ProcessStobjObj(int vd, bool isStatic)
     {
-        return ProcessStobjObj<FORMAT>(ACC, vd, is_static);
+        return ProcessStobjObj<FORMAT>(ACC, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjVolatileObj(int vs, int vd, bool is_static)
+    bool ProcessStobjVolatileObj(int vs, int vd, bool isStatic)
     {
-        return ProcessStobjObj<FORMAT>(vs, vd, is_static, true);
+        return ProcessStobjObj<FORMAT>(vs, vd, isStatic, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessStobjVolatileObj(int vd, bool is_static)
+    bool ProcessStobjVolatileObj(int vd, bool isStatic)
     {
-        return ProcessStobjVolatileObj<FORMAT>(ACC, vd, is_static);
+        return ProcessStobjVolatileObj<FORMAT>(ACC, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2417,7 +2415,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessFieldLoad<FORMAT>(INVALID_REG, ref_type_, true);
+        return ProcessFieldLoad<FORMAT>(INVALID_REG, refType_, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2444,7 +2442,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessFieldLoadVolatile<FORMAT>(INVALID_REG, ref_type_, true);
+        return ProcessFieldLoadVolatile<FORMAT>(INVALID_REG, refType_, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2502,37 +2500,37 @@ public:
     }
 
     template <typename Check>
-    bool CheckReturn(Type ret_type, Type acc_type, Check check)
+    bool CheckReturn(Type retType, Type accType, Check check)
     {
-        TypeId ret_type_id = ret_type.ToTypeId();
+        TypeId retTypeId = retType.ToTypeId();
 
-        PandaVector<Type> compatible_acc_types;
+        PandaVector<Type> compatibleAccTypes;
         // NOTE (gogabr): why recompute each time?
-        for (size_t acc_idx = 0; acc_idx < static_cast<size_t>(TypeId::REFERENCE) + 1; ++acc_idx) {
-            auto acc_type_id = static_cast<TypeId>(acc_idx);
-            const CheckResult &info = check(ret_type_id, acc_type_id);
+        for (size_t accIdx = 0; accIdx < static_cast<size_t>(TypeId::REFERENCE) + 1; ++accIdx) {
+            auto accTypeId = static_cast<TypeId>(accIdx);
+            const CheckResult &info = check(retTypeId, accTypeId);
             if (!info.IsError()) {
-                compatible_acc_types.push_back(Type::FromTypeId(acc_type_id));
+                compatibleAccTypes.push_back(Type::FromTypeId(accTypeId));
             }
         }
 
-        if (!CheckType(acc_type, primitive_) || acc_type == primitive_) {
-            LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE(ToString(acc_type));
+        if (!CheckType(accType, primitive_) || accType == primitive_) {
+            LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE(ToString(accType));
             SET_STATUS_FOR_MSG(BadAccumulatorReturnValueType, WARNING);
             return false;
         }
 
-        TypeId acc_type_id = acc_type.ToTypeId();
+        TypeId accTypeId = accType.ToTypeId();
 
-        const auto &result = check(ret_type_id, acc_type_id);
+        const auto &result = check(retTypeId, accTypeId);
 
         if (!result.IsOk()) {
             LogInnerMessage(result);
             if (result.IsError()) {
                 LOG_VERIFIER_DEBUG_FUNCTION_RETURN_AND_ACCUMULATOR_TYPES_WITH_COMPATIBLE_TYPES(
-                    ToString(ReturnType()), ToString(acc_type), ToString(compatible_acc_types));
+                    ToString(ReturnType()), ToString(accType), ToString(compatibleAccTypes));
             } else {
-                LOG_VERIFIER_DEBUG_FUNCTION_RETURN_AND_ACCUMULATOR_TYPES(ToString(ReturnType()), ToString(acc_type));
+                LOG_VERIFIER_DEBUG_FUNCTION_RETURN_AND_ACCUMULATOR_TYPES(ToString(ReturnType()), ToString(accType));
             }
         }
 
@@ -2606,16 +2604,16 @@ public:
     }
 
     template <bool IS_LOAD>
-    bool CheckFieldAccessByName(int reg_idx, Type expected_field_type)
+    bool CheckFieldAccessByName(int regIdx, Type expectedFieldType)
     {
-        Field const *raw_field = GetCachedField();
+        Field const *rawField = GetCachedField();
 
-        if (raw_field == nullptr) {
+        if (rawField == nullptr) {
             SET_STATUS_FOR_MSG(CannotResolveFieldId, OK);
             return false;
         }
 
-        if (raw_field->IsStatic()) {
+        if (rawField->IsStatic()) {
             SHOW_MSG(ExpectedStaticOrInstanceField)
             LOG_VERIFIER_EXPECTED_STATIC_OR_INSTANCE_FIELD(false);
             END_SHOW_MSG();
@@ -2623,66 +2621,64 @@ public:
             return false;
         }
 
-        Type raw_field_type = GetFieldType();
-        if (!raw_field_type.IsConsistent()) {
-            LOG_VERIFIER_CANNOT_RESOLVE_FIELD_TYPE(GetFieldName(raw_field));
+        Type rawFieldType = GetFieldType();
+        if (!rawFieldType.IsConsistent()) {
+            LOG_VERIFIER_CANNOT_RESOLVE_FIELD_TYPE(GetFieldName(rawField));
             return false;
         }
 
-        if (!IsRegDefined(reg_idx)) {
+        if (!IsRegDefined(regIdx)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        Type obj_type = GetRegType(reg_idx);
-        if (obj_type == null_ref_type_) {
+        Type objType = GetRegType(regIdx);
+        if (objType == nullRefType_) {
             // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
-            LOG_VERIFIER_ALWAYS_NPE(reg_idx);
+            LOG_VERIFIER_ALWAYS_NPE(regIdx);
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(AlwaysNpe, OK);
             return false;
         }
 
-        if (!obj_type.IsClass()) {
+        if (!objType.IsClass()) {
             SHOW_MSG(BadRegisterType)
-            LOG_VERIFIER_BAD_REGISTER_CLASS_TYPE(RegisterName(reg_idx, true), ToString(obj_type));
+            LOG_VERIFIER_BAD_REGISTER_CLASS_TYPE(RegisterName(regIdx, true), ToString(objType));
             END_SHOW_MSG();
             return false;
         }
-        auto obj_class = obj_type.GetClass();
-        auto field = obj_class->LookupFieldByName(raw_field->GetName());
-        Type field_type;
+        auto objClass = objType.GetClass();
+        auto field = objClass->LookupFieldByName(rawField->GetName());
+        Type fieldType;
         if (field != nullptr) {
-            field_type = Type::FromTypeId(field->GetTypeId());
+            fieldType = Type::FromTypeId(field->GetTypeId());
         } else {
             Method *method = nullptr;
             if constexpr (IS_LOAD) {
-                switch (expected_field_type.GetTypeWidth()) {
+                switch (expectedFieldType.GetTypeWidth()) {
                     case coretypes::INT32_BITS:
-                        method = obj_class->LookupGetterByName<panda_file::Type::TypeId::I32>(raw_field->GetName());
+                        method = objClass->LookupGetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
                         break;
                     case coretypes::INT64_BITS:
-                        method = obj_class->LookupGetterByName<panda_file::Type::TypeId::I64>(raw_field->GetName());
+                        method = objClass->LookupGetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
                         break;
                     case 0:
-                        method =
-                            obj_class->LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(raw_field->GetName());
+                        method = objClass->LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
                         break;
                     default:
                         UNREACHABLE();
                 }
             } else {
-                switch (expected_field_type.GetTypeWidth()) {
+                switch (expectedFieldType.GetTypeWidth()) {
                     case coretypes::INT32_BITS:
-                        method = obj_class->LookupSetterByName<panda_file::Type::TypeId::I32>(raw_field->GetName());
+                        method = objClass->LookupSetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
                         break;
                     case coretypes::INT64_BITS:
-                        method = obj_class->LookupSetterByName<panda_file::Type::TypeId::I64>(raw_field->GetName());
+                        method = objClass->LookupSetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
                         break;
                     case 0:
-                        method =
-                            obj_class->LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(raw_field->GetName());
+                        method = objClass->LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
                         break;
                     default:
                         UNREACHABLE();
@@ -2691,32 +2687,31 @@ public:
             if (method == nullptr) {
                 SHOW_MSG(BadFieldNameOrBitWidth)
                 LOG_VERIFIER_BAD_FIELD_NAME_OR_BIT_WIDTH(GetFieldName(field), ToString(obj_type),
-                                                         ToString(expected_field_type));
+                                                         ToString(expectedFieldType));
                 END_SHOW_MSG();
                 return false;
             }
             if constexpr (IS_LOAD) {
-                field_type = Type::FromTypeId(method->GetReturnType().GetId());
+                fieldType = Type::FromTypeId(method->GetReturnType().GetId());
             } else {
-                field_type = Type::FromTypeId(method->GetArgType(1).GetId());
+                fieldType = Type::FromTypeId(method->GetArgType(1).GetId());
             }
         }
 
-        if (!IsSubtype(field_type, expected_field_type, GetTypeSystem())) {
+        if (!IsSubtype(fieldType, expectedFieldType, GetTypeSystem())) {
             SHOW_MSG(UnexpectedFieldType)
-            LOG_VERIFIER_UNEXPECTED_FIELD_TYPE(GetFieldName(field), ToString(field_type),
-                                               ToString(expected_field_type));
+            LOG_VERIFIER_UNEXPECTED_FIELD_TYPE(GetFieldName(field), ToString(fieldType), ToString(expectedFieldType));
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(UnexpectedFieldType, WARNING);
             return false;
         }
 
         auto *plugin = job_->JobPlugin();
-        auto const *job_method = job_->JobMethod();
-        auto result = plugin->CheckFieldAccessViolation(field, job_method, GetTypeSystem());
+        auto const *jobMethod = job_->JobMethod();
+        auto result = plugin->CheckFieldAccessViolation(field, jobMethod, GetTypeSystem());
         if (!result.IsOk()) {
-            const auto &verif_opts = config->opts;
-            if (verif_opts.debug.allow.field_access_violation && result.IsError()) {
+            const auto &verifOpts = config->opts;
+            if (verifOpts.debug.allow.fieldAccessViolation && result.IsError()) {
                 result.status = VerificationStatus::WARNING;
             }
             LogInnerMessage(result);
@@ -2729,9 +2724,9 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool ProcessFieldLoadByName(int reg_src, Type expected_field_type)
+    bool ProcessFieldLoadByName(int regSrc, Type expectedFieldType)
     {
-        if (!CheckFieldAccessByName<true>(reg_src, expected_field_type)) {
+        if (!CheckFieldAccessByName<true>(regSrc, expectedFieldType)) {
             return false;
         }
         Field const *field = GetCachedField();
@@ -2777,18 +2772,18 @@ public:
         DBGBRK();
         uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
-        return ProcessFieldLoadByName<FORMAT>(vs, ref_type_);
+        return ProcessFieldLoadByName<FORMAT>(vs, refType_);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT, typename Check>
-    bool ProcessStoreFieldByName(int vd, Type expected_field_type, Check check)
+    bool ProcessStoreFieldByName(int vd, Type expectedFieldType, Check check)
     {
-        if (!CheckRegType(ACC, expected_field_type)) {
+        if (!CheckRegType(ACC, expectedFieldType)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        if (!CheckFieldAccessByName<false>(vd, expected_field_type)) {
+        if (!CheckFieldAccessByName<false>(vd, expectedFieldType)) {
             return false;
         }
 
@@ -2798,16 +2793,16 @@ public:
             SET_STATUS_FOR_MSG(CannotResolveFieldId, OK);
             return false;
         }
-        Type field_type = GetFieldType();
-        if (!field_type.IsConsistent()) {
+        Type fieldType = GetFieldType();
+        if (!fieldType.IsConsistent()) {
             return false;
         }
 
-        Type vs_type = GetRegType(ACC);
+        Type vsType = GetRegType(ACC);
 
-        CheckResult const &result = check(field_type.ToTypeId(), vs_type.ToTypeId());
+        CheckResult const &result = check(fieldType.ToTypeId(), vsType.ToTypeId());
         if (result.status != VerificationStatus::OK) {
-            LOG_VERIFIER_DEBUG_STORE_FIELD(GetFieldName(field), ToString(field_type), ToString(vs_type));
+            LOG_VERIFIER_DEBUG_STORE_FIELD(GetFieldName(field), ToString(fieldType), ToString(vsType));
             status_ = result.status;
             if (result.IsError()) {
                 return false;
@@ -2821,7 +2816,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessStobjObjByName(int vd)
     {
-        if (!CheckFieldAccessByName<false>(vd, ref_type_)) {
+        if (!CheckFieldAccessByName<false>(vd, refType_)) {
             return false;
         }
 
@@ -2832,22 +2827,22 @@ public:
             return false;
         }
 
-        Type field_type = GetFieldType();
-        if (!field_type.IsConsistent()) {
+        Type fieldType = GetFieldType();
+        if (!fieldType.IsConsistent()) {
             return false;
         }
 
-        if (!CheckRegType(ACC, ref_type_)) {
+        if (!CheckRegType(ACC, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
-        Type vs_type = GetRegType(ACC);
+        Type vsType = GetRegType(ACC);
 
-        if (!IsSubtype(vs_type, field_type, GetTypeSystem())) {
+        if (!IsSubtype(vsType, fieldType, GetTypeSystem())) {
             SHOW_MSG(BadAccumulatorType)
-            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(vs_type), ToString(field_type));
+            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(vsType), ToString(fieldType));
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(BadAccumulatorType, WARNING);
             return false;
@@ -2895,7 +2890,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(object_type_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -2907,7 +2902,7 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT>();
         Sync();
-        SetReg(vd, object_type_);
+        SetReg(vd, objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -2919,7 +2914,7 @@ public:
         DBGBRK();
         Sync();
 
-        if (!CheckRegType(ACC, ref_type_)) {
+        if (!CheckRegType(ACC, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -2962,8 +2957,8 @@ public:
         DBGBRK();
         Sync();
 
-        if (!CheckType(ReturnType(), ref_type_)) {
-            LOG_VERIFIER_BAD_RETURN_INSTRUCTION_TYPE(".obj", ToString(ReturnType()), ToString(ref_type_));
+        if (!CheckType(ReturnType(), refType_)) {
+            LOG_VERIFIER_BAD_RETURN_INSTRUCTION_TYPE(".obj", ToString(ReturnType()), ToString(refType_));
             status_ = VerificationStatus::ERROR;
             return false;
         }
@@ -2973,10 +2968,10 @@ public:
             return false;
         }
 
-        auto acc_type = GetAccType();
+        auto accType = GetAccType();
 
-        if (!CheckType(acc_type, ReturnType())) {
-            LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE_WITH_SUBTYPE(ToString(acc_type), ToString(ReturnType()));
+        if (!CheckType(accType, ReturnType())) {
+            LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE_WITH_SUBTYPE(ToString(accType), ToString(ReturnType()));
             // NOTE(vdyadov) : after solving issues with set of types in LUB, uncomment next line
             status_ = VerificationStatus::WARNING;
         }
@@ -3006,14 +3001,14 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        Type cached_type = GetCachedType();
-        if (!cached_type.IsConsistent()) {
+        Type cachedType = GetCachedType();
+        if (!cachedType.IsConsistent()) {
             return false;
         }
-        LOG_VERIFIER_DEBUG_TYPE(ToString(cached_type));
-        if (!IsSubtype(cached_type, object_type_, GetTypeSystem()) &&
-            !IsSubtype(cached_type, array_type_, GetTypeSystem())) {
-            LOG_VERIFIER_CHECK_CAST_TO_NON_OBJECT_TYPE(ToString(cached_type));
+        LOG_VERIFIER_DEBUG_TYPE(ToString(cachedType));
+        if (!IsSubtype(cachedType, objectType_, GetTypeSystem()) &&
+            !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
+            LOG_VERIFIER_CHECK_CAST_TO_NON_OBJECT_TYPE(ToString(cachedType));
             SET_STATUS_FOR_MSG(CheckCastToNonObjectType, WARNING);
             return false;
         }
@@ -3021,51 +3016,49 @@ public:
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        auto acc_type = GetAccType();
+        auto accType = GetAccType();
         // NOTE(vdyadov): remove this check after #2365
-        auto res =
-            !IsSubtype(acc_type, ref_type_, GetTypeSystem()) && !IsSubtype(acc_type, array_type_, GetTypeSystem());
+        auto res = !IsSubtype(accType, refType_, GetTypeSystem()) && !IsSubtype(accType, arrayType_, GetTypeSystem());
         if (res) {
             LOG_VERIFIER_NON_OBJECT_ACCUMULATOR_TYPE();
             SET_STATUS_FOR_MSG(NonObjectAccumulatorType, WARNING);
             return false;
         }
 
-        if (IsSubtype(acc_type, null_ref_type_, GetTypeSystem())) {
+        if (IsSubtype(accType, nullRefType_, GetTypeSystem())) {
             LOG_VERIFIER_ACCUMULATOR_ALWAYS_NULL();
             SET_STATUS_FOR_MSG(AccumulatorAlwaysNull, OK);
             // Don't set types for "others of the same origin" when origin is null: n = null, a = n, b = n, a =
             // (NewType)x
-            SetAcc(cached_type);
+            SetAcc(cachedType);
             MoveToNextInst<FORMAT>();
             return true;
         }
 
-        if (IsSubtype(acc_type, cached_type, GetTypeSystem())) {
-            LOG_VERIFIER_REDUNDANT_CHECK_CAST(ToString(acc_type), ToString(cached_type));
+        if (IsSubtype(accType, cachedType, GetTypeSystem())) {
+            LOG_VERIFIER_REDUNDANT_CHECK_CAST(ToString(accType), ToString(cachedType));
             SET_STATUS_FOR_MSG(RedundantCheckCast, OK);
             // Do not update register type to parent type as we loose details and can get errors on further flow
             MoveToNextInst<FORMAT>();
             return true;
         }
 
-        if (IsSubtype(cached_type, array_type_, GetTypeSystem())) {
-            auto elt_type = cached_type.GetArrayElementType(GetTypeSystem());
-            res = !IsSubtype(acc_type, array_type_, GetTypeSystem()) &&
-                  !IsSubtype(cached_type, acc_type, GetTypeSystem());
+        if (IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
+            auto eltType = cachedType.GetArrayElementType(GetTypeSystem());
+            res = !IsSubtype(accType, arrayType_, GetTypeSystem()) && !IsSubtype(cachedType, accType, GetTypeSystem());
             if (res) {
-                LOG_VERIFIER_IMPOSSIBLE_CHECK_CAST(ToString(acc_type));
+                LOG_VERIFIER_IMPOSSIBLE_CHECK_CAST(ToString(accType));
                 status_ = VerificationStatus::WARNING;
-            } else if (IsSubtype(acc_type, array_type_, GetTypeSystem())) {
-                auto acc_elt_type = acc_type.GetArrayElementType(GetTypeSystem());
-                if (acc_elt_type.IsConsistent() && !IsSubtype(acc_elt_type, elt_type, GetTypeSystem()) &&
-                    !IsSubtype(elt_type, acc_elt_type, GetTypeSystem())) {
-                    LOG_VERIFIER_IMPOSSIBLE_ARRAY_CHECK_CAST(ToString(acc_elt_type));
+            } else if (IsSubtype(accType, arrayType_, GetTypeSystem())) {
+                auto accEltType = accType.GetArrayElementType(GetTypeSystem());
+                if (accEltType.IsConsistent() && !IsSubtype(accEltType, eltType, GetTypeSystem()) &&
+                    !IsSubtype(eltType, accEltType, GetTypeSystem())) {
+                    LOG_VERIFIER_IMPOSSIBLE_ARRAY_CHECK_CAST(ToString(accEltType));
                     SET_STATUS_FOR_MSG(ImpossibleArrayCheckCast, OK);
                 }
             }
-        } else if (TpIntersection(cached_type, acc_type, GetTypeSystem()) == bot_) {
-            LOG_VERIFIER_INCOMPATIBLE_ACCUMULATOR_TYPE(ToString(acc_type));
+        } else if (TpIntersection(cachedType, accType, GetTypeSystem()) == bot_) {
+            LOG_VERIFIER_INCOMPATIBLE_ACCUMULATOR_TYPE(ToString(accType));
             SET_STATUS_FOR_MSG(IncompatibleAccumulatorType, OK);
         }
 
@@ -3074,7 +3067,7 @@ public:
             return false;
         }
 
-        SetAccAndOthersOfSameOrigin(TpIntersection(cached_type, acc_type, GetTypeSystem()));
+        SetAccAndOthersOfSameOrigin(TpIntersection(cachedType, accType, GetTypeSystem()));
 
         MoveToNextInst<FORMAT>();
         return true;
@@ -3086,17 +3079,17 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        Type cached_type = GetCachedType();
-        if (!cached_type.IsConsistent()) {
+        Type cachedType = GetCachedType();
+        if (!cachedType.IsConsistent()) {
             return false;
         }
-        LOG_VERIFIER_DEBUG_TYPE(ToString(cached_type));
-        if (!IsSubtype(cached_type, object_type_, GetTypeSystem()) &&
-            !IsSubtype(cached_type, array_type_, GetTypeSystem())) {
+        LOG_VERIFIER_DEBUG_TYPE(ToString(cachedType));
+        if (!IsSubtype(cachedType, objectType_, GetTypeSystem()) &&
+            !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
             // !(type <= Types().ArrayType()) is redundant, because all arrays
             // are subtypes of either panda.Object <: ObjectType or java.lang.Object <: ObjectType
             // depending on selected language context
-            LOG_VERIFIER_BAD_IS_INSTANCE_INSTRUCTION(ToString(cached_type));
+            LOG_VERIFIER_BAD_IS_INSTANCE_INSTRUCTION(ToString(cachedType));
             SET_STATUS_FOR_MSG(BadIsInstanceInstruction, WARNING);
             return false;
         }
@@ -3106,51 +3099,49 @@ public:
         }
 
         auto *plugin = job_->JobPlugin();
-        auto const *job_method = job_->JobMethod();
+        auto const *jobMethod = job_->JobMethod();
         auto result = CheckResult::ok;
-        if (cached_type.IsClass()) {
-            result = plugin->CheckClassAccessViolation(cached_type.GetClass(), job_method, GetTypeSystem());
+        if (cachedType.IsClass()) {
+            result = plugin->CheckClassAccessViolation(cachedType.GetClass(), jobMethod, GetTypeSystem());
         }
         if (!result.IsOk()) {
             LogInnerMessage(CheckResult::protected_class);
-            LOG_VERIFIER_DEBUG_CALL_FROM_TO(job_->JobMethod()->GetClass()->GetName(), ToString(cached_type));
+            LOG_VERIFIER_DEBUG_CALL_FROM_TO(job_->JobMethod()->GetClass()->GetName(), ToString(cachedType));
             status_ = VerificationStatus::ERROR;
             return false;
         }
 
-        auto acc_type = GetAccType();
+        auto accType = GetAccType();
         // NOTE(vdyadov): remove this check after #2365
-        auto res =
-            !IsSubtype(acc_type, ref_type_, GetTypeSystem()) && !IsSubtype(acc_type, array_type_, GetTypeSystem());
+        auto res = !IsSubtype(accType, refType_, GetTypeSystem()) && !IsSubtype(accType, arrayType_, GetTypeSystem());
         if (res) {
             LOG_VERIFIER_NON_OBJECT_ACCUMULATOR_TYPE();
             status_ = VerificationStatus::ERROR;
             return false;
         }
 
-        if (IsSubtype(acc_type, null_ref_type_, GetTypeSystem())) {
+        if (IsSubtype(accType, nullRefType_, GetTypeSystem())) {
             LOG_VERIFIER_ACCUMULATOR_ALWAYS_NULL();
             SET_STATUS_FOR_MSG(AccumulatorAlwaysNull, OK);
-        } else if (IsSubtype(acc_type, cached_type, GetTypeSystem())) {
-            LOG_VERIFIER_REDUNDANT_IS_INSTANCE(ToString(acc_type), ToString(cached_type));
+        } else if (IsSubtype(accType, cachedType, GetTypeSystem())) {
+            LOG_VERIFIER_REDUNDANT_IS_INSTANCE(ToString(accType), ToString(cachedType));
             SET_STATUS_FOR_MSG(RedundantIsInstance, OK);
-        } else if (IsSubtype(cached_type, array_type_, GetTypeSystem())) {
-            auto elt_type = cached_type.GetArrayElementType(GetTypeSystem());
-            auto acc_elt_type = acc_type.GetArrayElementType(GetTypeSystem());
-            bool acc_elt_type_is_empty = acc_elt_type.IsConsistent();
-            res = !IsSubtype(acc_elt_type, elt_type, GetTypeSystem()) &&
-                  !IsSubtype(elt_type, acc_elt_type, GetTypeSystem());
+        } else if (IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
+            auto eltType = cachedType.GetArrayElementType(GetTypeSystem());
+            auto accEltType = accType.GetArrayElementType(GetTypeSystem());
+            bool accEltTypeIsEmpty = accEltType.IsConsistent();
+            res = !IsSubtype(accEltType, eltType, GetTypeSystem()) && !IsSubtype(eltType, accEltType, GetTypeSystem());
             if (res) {
-                if (acc_elt_type_is_empty) {
-                    LOG_VERIFIER_IMPOSSIBLE_IS_INSTANCE(ToString(acc_type));
+                if (accEltTypeIsEmpty) {
+                    LOG_VERIFIER_IMPOSSIBLE_IS_INSTANCE(ToString(accType));
                     SET_STATUS_FOR_MSG(ImpossibleIsInstance, OK);
                 } else {
-                    LOG_VERIFIER_IMPOSSIBLE_ARRAY_IS_INSTANCE(ToString(acc_elt_type));
+                    LOG_VERIFIER_IMPOSSIBLE_ARRAY_IS_INSTANCE(ToString(accEltType));
                     SET_STATUS_FOR_MSG(ImpossibleArrayIsInstance, OK);
                 }
             }
-        } else if (TpIntersection(cached_type, acc_type, GetTypeSystem()) == bot_) {
-            LOG_VERIFIER_IMPOSSIBLE_IS_INSTANCE(ToString(acc_type));
+        } else if (TpIntersection(cachedType, accType, GetTypeSystem()) == bot_) {
+            LOG_VERIFIER_IMPOSSIBLE_IS_INSTANCE(ToString(accType));
             SET_STATUS_FOR_MSG(ImpossibleIsInstance, OK);
         }  // else {
         // NOTE(vdyadov): here we may increase precision to concrete values in some cases
@@ -3160,78 +3151,78 @@ public:
     }
 
     template <typename NameGetter>
-    bool CheckMethodArgs(NameGetter name_getter, Method const *method, Span<int> regs, Type constructed_type = Type {})
+    bool CheckMethodArgs(NameGetter nameGetter, Method const *method, Span<int> regs, Type constructedType = Type {})
     {
-        bool checking_constructor = !constructed_type.IsNone();
+        bool checkingConstructor = !constructedType.IsNone();
         auto const *sig = GetTypeSystem()->GetMethodSignature(method);
-        auto const &formal_args = sig->args;
+        auto const &formalArgs = sig->args;
         bool result = true;
-        if (formal_args.empty()) {
+        if (formalArgs.empty()) {
             return true;
         }
 
-        size_t regs_needed = checking_constructor ? formal_args.size() - 1 : formal_args.size();
-        if (regs.size() < regs_needed) {
+        size_t regsNeeded = checkingConstructor ? formalArgs.size() - 1 : formalArgs.size();
+        if (regs.size() < regsNeeded) {
             SHOW_MSG(BadCallTooFewParameters)
-            LOG_VERIFIER_BAD_CALL_TOO_FEW_PARAMETERS(name_getter());
+            LOG_VERIFIER_BAD_CALL_TOO_FEW_PARAMETERS(nameGetter());
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(BadCallTooFewParameters, WARNING);
             return false;
         }
-        auto sig_iter = formal_args.cbegin();
-        auto regs_iter = regs.cbegin();
-        for (size_t argnum = 0; argnum < formal_args.size(); argnum++) {
-            auto reg_num = (checking_constructor && sig_iter == formal_args.cbegin()) ? INVALID_REG : *(regs_iter++);
-            auto formal_type = *(sig_iter++);
-            auto const norm_type = GetTypeSystem()->NormalizedTypeOf(formal_type);
+        auto sigIter = formalArgs.cbegin();
+        auto regsIter = regs.cbegin();
+        for (size_t argnum = 0; argnum < formalArgs.size(); argnum++) {
+            auto regNum = (checkingConstructor && sigIter == formalArgs.cbegin()) ? INVALID_REG : *(regsIter++);
+            auto formalType = *(sigIter++);
+            auto const normType = GetTypeSystem()->NormalizedTypeOf(formalType);
 
-            if (reg_num != INVALID_REG && !IsRegDefined(reg_num)) {
-                LOG_VERIFIER_BAD_CALL_UNDEFINED_REGISTER(name_getter(), reg_num);
+            if (regNum != INVALID_REG && !IsRegDefined(regNum)) {
+                LOG_VERIFIER_BAD_CALL_UNDEFINED_REGISTER(nameGetter(), regNum);
                 SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
                 result = false;
                 break;
             }
-            Type actual_type = reg_num == INVALID_REG ? constructed_type : GetRegType(reg_num);
-            Type norm_actual_type = GetTypeSystem()->NormalizedTypeOf(actual_type);
+            Type actualType = regNum == INVALID_REG ? constructedType : GetRegType(regNum);
+            Type normActualType = GetTypeSystem()->NormalizedTypeOf(actualType);
             // arg: NormalizedTypeOf(actual_type) <= norm_type
             // check of physical compatibility
-            bool incompatible_types = false;
-            auto actual_is_ref = IsSubtype(actual_type, ref_type_, GetTypeSystem());
-            if (reg_num != INVALID_REG && IsSubtype(formal_type, ref_type_, GetTypeSystem()) &&
-                formal_type != Type::Bot() && actual_is_ref) {
-                if (IsSubtype(actual_type, formal_type, GetTypeSystem())) {
+            bool incompatibleTypes = false;
+            auto actualIsRef = IsSubtype(actualType, refType_, GetTypeSystem());
+            if (regNum != INVALID_REG && IsSubtype(formalType, refType_, GetTypeSystem()) &&
+                formalType != Type::Bot() && actualIsRef) {
+                if (IsSubtype(actualType, formalType, GetTypeSystem())) {
                     continue;
                 }
-                if (!config->opts.debug.allow.wrong_subclassing_in_method_args) {
-                    incompatible_types = true;
+                if (!config->opts.debug.allow.wrongSubclassingInMethodArgs) {
+                    incompatibleTypes = true;
                 }
-            } else if (formal_type != Type::Bot() && formal_type != Type::Top() &&
-                       !IsSubtype(norm_actual_type, norm_type, GetTypeSystem())) {
-                incompatible_types = true;
+            } else if (formalType != Type::Bot() && formalType != Type::Top() &&
+                       !IsSubtype(normActualType, normType, GetTypeSystem())) {
+                incompatibleTypes = true;
             }
-            if (incompatible_types) {
-                PandaString reg_or_param = reg_num == INVALID_REG ? "Actual parameter" : RegisterName(reg_num, true);
+            if (incompatibleTypes) {
+                PandaString regOrParam = regNum == INVALID_REG ? "Actual parameter" : RegisterName(regNum, true);
                 SHOW_MSG(BadCallIncompatibleParameter)
-                LOG_VERIFIER_BAD_CALL_INCOMPATIBLE_PARAMETER(name_getter(), reg_or_param, ToString(norm_actual_type),
-                                                             ToString(norm_type));
+                LOG_VERIFIER_BAD_CALL_INCOMPATIBLE_PARAMETER(nameGetter(), regOrParam, ToString(normActualType),
+                                                             ToString(normType));
                 END_SHOW_MSG();
                 SET_STATUS_FOR_MSG(BadCallIncompatibleParameter, WARNING);
                 return result = false;
             }
-            if (formal_type == Type::Bot()) {
-                if (actual_type == Type::Bot()) {
+            if (formalType == Type::Bot()) {
+                if (actualType == Type::Bot()) {
                     LOG_VERIFIER_CALL_FORMAL_ACTUAL_BOTH_BOT_OR_TOP("Bot");
                     break;
                 }
 
                 SHOW_MSG(BadCallFormalIsBot)
-                LOG_VERIFIER_BAD_CALL_FORMAL_IS_BOT(name_getter(), ToString(actual_type));
+                LOG_VERIFIER_BAD_CALL_FORMAL_IS_BOT(nameGetter(), ToString(actualType));
                 END_SHOW_MSG();
                 SET_STATUS_FOR_MSG(BadCallFormalIsBot, WARNING);
                 return result = false;
             }
-            if (formal_type == Type::Top()) {
-                if (actual_type == Type::Top()) {
+            if (formalType == Type::Top()) {
+                if (actualType == Type::Top()) {
                     LOG_VERIFIER_CALL_FORMAL_ACTUAL_BOTH_BOT_OR_TOP("Top");
                     break;
                 }
@@ -3240,45 +3231,45 @@ public:
                 END_SHOW_MSG();
                 break;
             }
-            if (IsSubtype(formal_type, primitive_, GetTypeSystem())) {
+            if (IsSubtype(formalType, primitive_, GetTypeSystem())) {
                 // check implicit conversion of primitive types
-                TypeId formal_id = formal_type.ToTypeId();
-                CheckResult check_result = CheckResult::ok;
+                TypeId formalId = formalType.ToTypeId();
+                CheckResult checkResult = CheckResult::ok;
 
-                if (!IsSubtype(actual_type, primitive_, GetTypeSystem())) {
+                if (!IsSubtype(actualType, primitive_, GetTypeSystem())) {
                     result = false;
                     break;
                 }
                 // !!!!!! NOTE: need to check all possible TypeId-s against formal_id
-                TypeId actual_id = actual_type.ToTypeId();
-                if (actual_id != TypeId::INVALID) {
-                    check_result = panda::verifier::CheckMethodArgs(formal_id, actual_id);
+                TypeId actualId = actualType.ToTypeId();
+                if (actualId != TypeId::INVALID) {
+                    checkResult = panda::verifier::CheckMethodArgs(formalId, actualId);
                 } else {
                     // special case, where type after contexts LUB operation is inexact one, like
                     // integral32_Type()
-                    if ((IsSubtype(formal_type, integral32_, GetTypeSystem()) &&
-                         IsSubtype(actual_type, integral32_, GetTypeSystem())) ||
-                        (IsSubtype(formal_type, integral64_, GetTypeSystem()) &&
-                         IsSubtype(actual_type, integral64_, GetTypeSystem())) ||
-                        (IsSubtype(formal_type, float64_, GetTypeSystem()) &&
-                         IsSubtype(actual_type, float64_, GetTypeSystem()))) {
+                    if ((IsSubtype(formalType, integral32_, GetTypeSystem()) &&
+                         IsSubtype(actualType, integral32_, GetTypeSystem())) ||
+                        (IsSubtype(formalType, integral64_, GetTypeSystem()) &&
+                         IsSubtype(actualType, integral64_, GetTypeSystem())) ||
+                        (IsSubtype(formalType, float64_, GetTypeSystem()) &&
+                         IsSubtype(actualType, float64_, GetTypeSystem()))) {
                         SHOW_MSG(CallFormalActualDifferent)
-                        LOG_VERIFIER_CALL_FORMAL_ACTUAL_DIFFERENT(ToString(formal_type), ToString(actual_type));
+                        LOG_VERIFIER_CALL_FORMAL_ACTUAL_DIFFERENT(ToString(formalType), ToString(actualType));
                         END_SHOW_MSG();
                     } else {
-                        check_result = panda::verifier::CheckMethodArgs(formal_id, actual_id);
+                        checkResult = panda::verifier::CheckMethodArgs(formalId, actualId);
                     }
                 }
-                if (!check_result.IsOk()) {
+                if (!checkResult.IsOk()) {
                     SHOW_MSG(DebugCallParameterTypes)
-                    LogInnerMessage(check_result);
+                    LogInnerMessage(checkResult);
                     LOG_VERIFIER_DEBUG_CALL_PARAMETER_TYPES(
-                        name_getter(),
-                        (reg_num == INVALID_REG ? ""
-                                                : PandaString {"Actual parameter in "} + RegisterName(reg_num) + ". "),
-                        ToString(actual_type), ToString(formal_type));
+                        nameGetter(),
+                        (regNum == INVALID_REG ? ""
+                                               : PandaString {"Actual parameter in "} + RegisterName(regNum) + ". "),
+                        ToString(actualType), ToString(formalType));
                     END_SHOW_MSG();
-                    status_ = check_result.status;
+                    status_ = checkResult.status;
                     if (status_ == VerificationStatus::ERROR) {
                         result = false;
                         break;
@@ -3286,19 +3277,19 @@ public:
                 }
                 continue;
             }
-            if (!CheckType(actual_type, formal_type)) {
-                if (reg_num == INVALID_REG) {
+            if (!CheckType(actualType, formalType)) {
+                if (regNum == INVALID_REG) {
                     SHOW_MSG(BadCallWrongParameter)
-                    LOG_VERIFIER_BAD_CALL_WRONG_PARAMETER(name_getter(), ToString(actual_type), ToString(formal_type));
+                    LOG_VERIFIER_BAD_CALL_WRONG_PARAMETER(nameGetter(), ToString(actualType), ToString(formalType));
                     END_SHOW_MSG();
                     SET_STATUS_FOR_MSG(BadCallWrongParameter, WARNING);
                 } else {
                     SHOW_MSG(BadCallWrongRegister)
-                    LOG_VERIFIER_BAD_CALL_WRONG_REGISTER(name_getter(), reg_num);
+                    LOG_VERIFIER_BAD_CALL_WRONG_REGISTER(nameGetter(), regNum);
                     END_SHOW_MSG();
                     SET_STATUS_FOR_MSG(BadCallWrongRegister, WARNING);
                 }
-                if (!config->opts.debug.allow.wrong_subclassing_in_method_args) {
+                if (!config->opts.debug.allow.wrongSubclassingInMethodArgs) {
                     status_ = VerificationStatus::ERROR;
                     result = false;
                     break;
@@ -3317,11 +3308,11 @@ public:
         }
 
         auto *plugin = job_->JobPlugin();
-        auto const *job_method = job_->JobMethod();
-        auto result = plugin->CheckMethodAccessViolation(method, job_method, GetTypeSystem());
+        auto const *jobMethod = job_->JobMethod();
+        auto result = plugin->CheckMethodAccessViolation(method, jobMethod, GetTypeSystem());
         if (!result.IsOk()) {
-            const auto &verif_opts = config->opts;
-            if (verif_opts.debug.allow.method_access_violation && result.IsError()) {
+            const auto &verifOpts = config->opts;
+            if (verifOpts.debug.allow.methodAccessViolation && result.IsError()) {
                 result.status = VerificationStatus::WARNING;
             }
             LogInnerMessage(result);
@@ -3332,15 +3323,15 @@ public:
             }
         }
 
-        const auto *method_sig = GetTypeSystem()->GetMethodSignature(method);
-        auto method_name_getter = [method]() { return method->GetFullName(); };
-        Type result_type = method_sig->result;
+        const auto *methodSig = GetTypeSystem()->GetMethodSignature(method);
+        auto methodNameGetter = [method]() { return method->GetFullName(); };
+        Type resultType = methodSig->result;
 
-        if (!debug_ctx->SkipVerificationOfCall(method->GetUniqId()) &&
-            !CheckMethodArgs(method_name_getter, method, regs)) {
+        if (!debugCtx->SkipVerificationOfCall(method->GetUniqId()) &&
+            !CheckMethodArgs(methodNameGetter, method, regs)) {
             return false;
         }
-        SetAcc(result_type);
+        SetAcc(resultType);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3374,9 +3365,9 @@ public:
         LOG_INST();
         DBGBRK();
         uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
-        auto acc_pos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x00>());
+        auto accPos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x00>());
         static constexpr auto NUM_ARGS = 2;
-        if (acc_pos >= NUM_ARGS) {
+        if (accPos >= NUM_ARGS) {
             LOG_VERIFIER_ACCUMULATOR_POSITION_IS_OUT_OF_RANGE();
             SET_STATUS_FOR_MSG(AccumulatorPositionIsOutOfRange, WARNING);
             return status_ != VerificationStatus::ERROR;
@@ -3394,7 +3385,7 @@ public:
 
         Sync();
         std::array<int, NUM_ARGS> regs {};
-        if (acc_pos == 0) {
+        if (accPos == 0) {
             regs = {ACC, vs1};
         } else {
             regs = {vs1, ACC};
@@ -3441,9 +3432,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        auto acc_pos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x0>());
+        auto accPos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x0>());
         static constexpr auto NUM_ARGS = 4;
-        if (acc_pos >= NUM_ARGS) {
+        if (accPos >= NUM_ARGS) {
             LOG_VERIFIER_ACCUMULATOR_POSITION_IS_OUT_OF_RANGE();
             SET_STATUS_FOR_MSG(AccumulatorPositionIsOutOfRange, WARNING);
             return status_ != VerificationStatus::ERROR;
@@ -3461,12 +3452,12 @@ public:
 
         Sync();
         std::array<int, NUM_ARGS> regs {};
-        auto reg_idx = 0;
+        auto regIdx = 0;
         for (unsigned i = 0; i < NUM_ARGS; ++i) {
-            if (i == acc_pos) {
+            if (i == accPos) {
                 regs[i] = ACC;
             } else {
-                regs[i] = static_cast<int>(inst_.GetVReg(reg_idx++));
+                regs[i] = static_cast<int>(inst_.GetVReg(regIdx++));
             }
         }
         return CheckCall<FORMAT>(method, Span {regs});
@@ -3491,8 +3482,8 @@ public:
 
         Sync();
         std::vector<int> regs;
-        for (auto reg_idx = vs; ExecCtx().CurrentRegContext().IsRegDefined(reg_idx); reg_idx++) {
-            regs.push_back(reg_idx);
+        for (auto regIdx = vs; ExecCtx().CurrentRegContext().IsRegDefined(regIdx); regIdx++) {
+            regs.push_back(regIdx);
         }
         return CheckCall<FORMAT>(method, Span {regs});
     }
@@ -3525,7 +3516,7 @@ public:
         LOG_INST();
         DBGBRK();
         uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
-        auto acc_pos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x00>());
+        auto accPos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x00>());
         static constexpr auto NUM_ARGS = 2;
         Method const *method = GetCachedMethod();
         if (method != nullptr) {
@@ -3539,7 +3530,7 @@ public:
         // if (method != nullptr && method->ptr == nullptr) {
         Sync();
         std::array<int, NUM_ARGS> regs {};
-        if (acc_pos == 0) {
+        if (accPos == 0) {
             regs = {ACC, vs1};
         } else {
             regs = {vs1, ACC};
@@ -3576,7 +3567,7 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        auto acc_pos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x0>());
+        auto accPos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x0>());
         static constexpr auto NUM_ARGS = 4;
         Method const *method = GetCachedMethod();
         if (method != nullptr) {
@@ -3590,12 +3581,12 @@ public:
         // if (method != nullptr && method->ptr == nullptr) {
         Sync();
         std::array<int, NUM_ARGS> regs {};
-        auto reg_idx = 0;
+        auto regIdx = 0;
         for (unsigned i = 0; i < NUM_ARGS; ++i) {
-            if (i == acc_pos) {
+            if (i == accPos) {
                 regs[i] = ACC;
             } else {
-                regs[i] = static_cast<int>(inst_.GetVReg(reg_idx++));
+                regs[i] = static_cast<int>(inst_.GetVReg(regIdx++));
             }
         }
         return CheckCall<FORMAT>(method, Span {regs});
@@ -3620,8 +3611,8 @@ public:
 
         Sync();
         std::vector<int> regs;
-        for (auto reg_idx = vs; ExecCtx().CurrentRegContext().IsRegDefined(reg_idx); reg_idx++) {
-            regs.push_back(reg_idx);
+        for (auto regIdx = vs; ExecCtx().CurrentRegContext().IsRegDefined(regIdx); regIdx++) {
+            regs.push_back(regIdx);
         }
         return CheckCall<FORMAT>(method, Span {regs});
     }
@@ -3656,8 +3647,8 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        Type acc_type = GetAccType();
-        if (acc_type == null_ref_type_) {
+        Type accType = GetAccType();
+        if (accType == nullRefType_) {
             // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpeAccumulator)
@@ -3666,7 +3657,7 @@ public:
             SET_STATUS_FOR_MSG(AlwaysNpeAccumulator, OK);
             return false;
         }
-        if (!CheckType(acc_type, ref_type_)) {
+        if (!CheckType(accType, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -3681,8 +3672,8 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        Type acc_type = GetAccType();
-        if (acc_type == null_ref_type_) {
+        Type accType = GetAccType();
+        if (accType == nullRefType_) {
             // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpeAccumulator)
@@ -3691,7 +3682,7 @@ public:
             SET_STATUS_FOR_MSG(AlwaysNpeAccumulator, OK);
             return false;
         }
-        if (!CheckType(acc_type, ref_type_)) {
+        if (!CheckType(accType, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -3713,12 +3704,12 @@ public:
         return HandleCallRange<FORMAT>();
     }
 
-    static PandaString RegisterName(int reg_idx, bool capitalize = false)
+    static PandaString RegisterName(int regIdx, bool capitalize = false)
     {
-        if (reg_idx == ACC) {
+        if (regIdx == ACC) {
             return capitalize ? "Accumulator" : "accumulator";
         }
-        return PandaString {capitalize ? "Register v" : "register v"} + NumToStr(reg_idx);
+        return PandaString {capitalize ? "Register v" : "register v"} + NumToStr(regIdx);
     }
 
 private:
@@ -3777,7 +3768,7 @@ private:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckArrayStore(int v1, int v2, Type expected_elt_type)
+    bool CheckArrayStore(int v1, int v2, Type expectedEltType)
     {
         /*
         main rules:
@@ -3789,7 +3780,7 @@ private:
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        if (!CheckRegType(v1, array_type_)) {
+        if (!CheckRegType(v1, arrayType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -3798,9 +3789,9 @@ private:
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        Type reg_type = GetRegType(v1);
+        Type regType = GetRegType(v1);
 
-        if (reg_type == null_ref_type_) {
+        if (regType == nullRefType_) {
             // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
@@ -3811,26 +3802,26 @@ private:
             return false;
         }
 
-        auto arr_elt_type = reg_type.GetArrayElementType(GetTypeSystem());
+        auto arrEltType = regType.GetArrayElementType(GetTypeSystem());
 
-        if (!IsSubtype(arr_elt_type, expected_elt_type, GetTypeSystem())) {
+        if (!IsSubtype(arrEltType, expectedEltType, GetTypeSystem())) {
             SHOW_MSG(BadArrayElementType2)
-            LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE2(ToString(arr_elt_type), ToString(expected_elt_type));
+            LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE2(ToString(arrEltType), ToString(expectedEltType));
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(BadArrayElementType2, WARNING);
             return false;
         }
 
-        Type acc_type = GetAccType();
+        Type accType = GetAccType();
 
         // NOTE(dvyadov): think of subtyping here. Can we really write more precise type into array?
         // since there is no problems with storage (all refs are of the same size)
         // and no problems with information losses, it seems fine at first sight.
-        bool res = !IsSubtype(acc_type, arr_elt_type, GetTypeSystem());
+        bool res = !IsSubtype(accType, arrEltType, GetTypeSystem());
         if (res) {
             // accumulator is of wrong type
             SHOW_MSG(BadAccumulatorType)
-            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(acc_type), ToString(arr_elt_type));
+            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(accType), ToString(arrEltType));
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(BadAccumulatorType, WARNING);
             return false;
@@ -3841,16 +3832,16 @@ private:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckArrayStoreExact(int v1, int v2, Type acc_supertype, std::initializer_list<Type> const &expected_elt_types)
+    bool CheckArrayStoreExact(int v1, int v2, Type accSupertype, std::initializer_list<Type> const &expectedEltTypes)
     {
-        if (!CheckRegType(v2, integral32_) || !CheckRegType(v1, array_type_) || !IsRegDefined(ACC)) {
+        if (!CheckRegType(v2, integral32_) || !CheckRegType(v1, arrayType_) || !IsRegDefined(ACC)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        Type reg_type = GetRegType(v1);
+        Type regType = GetRegType(v1);
 
-        if (reg_type == null_ref_type_) {
+        if (regType == nullRefType_) {
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(v1);
             END_SHOW_MSG();
@@ -3859,10 +3850,10 @@ private:
             return false;
         }
 
-        auto arr_elt_type = reg_type.GetArrayElementType(GetTypeSystem());
+        auto arrEltType = regType.GetArrayElementType(GetTypeSystem());
 
-        auto find = [&expected_elt_types](auto type) {
-            for (Type t : expected_elt_types) {
+        auto find = [&expectedEltTypes](auto type) {
+            for (Type t : expectedEltTypes) {
                 if (type == t) {
                     return true;
                 }
@@ -3870,32 +3861,32 @@ private:
             return false;
         };
 
-        if (!find(arr_elt_type)) {
+        if (!find(arrEltType)) {
             // array elt type is not expected one
-            PandaVector<Type> expected_types_vec;
-            for (auto et : expected_elt_types) {
-                expected_types_vec.push_back(et);
+            PandaVector<Type> expectedTypesVec;
+            for (auto et : expectedEltTypes) {
+                expectedTypesVec.push_back(et);
             }
-            LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE3(ToString(arr_elt_type), ToString(expected_types_vec));
+            LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE3(ToString(arrEltType), ToString(expectedTypesVec));
             SET_STATUS_FOR_MSG(BadArrayElementType, WARNING);
             return false;
         }
 
-        Type acc_type = GetAccType();
+        Type accType = GetAccType();
 
-        if (!IsSubtype(acc_type, acc_supertype, GetTypeSystem())) {
-            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE2(ToString(acc_type));
+        if (!IsSubtype(accType, accSupertype, GetTypeSystem())) {
+            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE2(ToString(accType));
             SET_STATUS_FOR_MSG(BadArrayElementType, WARNING);
             return false;
         }
 
-        if (!find(acc_type)) {
+        if (!find(accType)) {
             // array elt type is not expected one
-            PandaVector<Type> expected_types_vec;
-            for (auto et : expected_elt_types) {
-                expected_types_vec.push_back(et);
+            PandaVector<Type> expectedTypesVec;
+            for (auto et : expectedEltTypes) {
+                expectedTypesVec.push_back(et);
             }
-            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE3(ToString(acc_type), ToString(expected_types_vec));
+            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE3(ToString(accType), ToString(expectedTypesVec));
             if (status_ != VerificationStatus::ERROR) {
                 status_ = VerificationStatus::WARNING;
             }
@@ -3906,7 +3897,7 @@ private:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT, bool REG_DST = false>
-    bool CheckBinaryOp2(Type acc_in, Type reg_in, Type out)
+    bool CheckBinaryOp2(Type accIn, Type regIn, Type out)
     {
         uint16_t vs;
         if constexpr (REG_DST) {
@@ -3914,12 +3905,12 @@ private:
         } else {
             vs = inst_.GetVReg<FORMAT>();
         }
-        if (!CheckRegType(ACC, acc_in)) {
+        if (!CheckRegType(ACC, accIn)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        if (!CheckRegType(vs, reg_in)) {
+        if (!CheckRegType(vs, regIn)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -3934,13 +3925,13 @@ private:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT, bool REG_DST = false>
-    bool CheckBinaryOp2(Type acc_in, Type reg_in)
+    bool CheckBinaryOp2(Type accIn, Type regIn)
     {
         if (!IsRegDefined(ACC)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        return CheckBinaryOp2<FORMAT, REG_DST>(acc_in, reg_in, GetAccType());
+        return CheckBinaryOp2<FORMAT, REG_DST>(accIn, regIn, GetAccType());
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -3959,62 +3950,62 @@ private:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckBinaryOp2Imm(Type acc_in, Type acc_out)
+    bool CheckBinaryOp2Imm(Type accIn, Type accOut)
     {
-        if (!CheckRegType(ACC, acc_in)) {
+        if (!CheckRegType(ACC, accIn)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        SetAcc(acc_out);
+        SetAcc(accOut);
         MoveToNextInst<FORMAT>();
         return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckBinaryOp2Imm(Type acc_in)
+    bool CheckBinaryOp2Imm(Type accIn)
     {
         if (!IsRegDefined(ACC)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        return CheckBinaryOp2Imm<FORMAT>(acc_in, GetAccType());
+        return CheckBinaryOp2Imm<FORMAT>(accIn, GetAccType());
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckUnaryOp(Type acc_in, Type acc_out)
+    bool CheckUnaryOp(Type accIn, Type accOut)
     {
-        if (!CheckRegType(ACC, acc_in)) {
+        if (!CheckRegType(ACC, accIn)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        SetAcc(acc_out);
+        SetAcc(accOut);
         MoveToNextInst<FORMAT>();
         return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckUnaryOp(Type acc_in)
+    bool CheckUnaryOp(Type accIn)
     {
         if (!IsRegDefined(ACC)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        return CheckUnaryOp<FORMAT>(acc_in, GetAccType());
+        return CheckUnaryOp<FORMAT>(accIn, GetAccType());
     }
 
     template <BytecodeInstructionSafe::Format FORMAT, bool REG_DST = false>
-    bool CheckBinaryOp(Type v1_in, Type v2_in, Type out)
+    bool CheckBinaryOp(Type v1In, Type v2In, Type out)
     {
         uint16_t v1 = inst_.GetVReg<FORMAT, 0x00>();
         uint16_t v2 = inst_.GetVReg<FORMAT, 0x01>();
-        if (!CheckRegType(v1, v1_in)) {
+        if (!CheckRegType(v1, v1In)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        if (!CheckRegType(v2, v2_in)) {
+        if (!CheckRegType(v2, v2In)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -4029,13 +4020,13 @@ private:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckBinaryOp(Type vs1_in, Type vs2_in)
+    bool CheckBinaryOp(Type vs1In, Type vs2In)
     {
         if (!IsRegDefined(ACC)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        return CheckBinaryOp<FORMAT>(vs1_in, vs2_in, GetAccType());
+        return CheckBinaryOp<FORMAT>(vs1In, vs2In, GetAccType());
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -4053,25 +4044,25 @@ private:
 
     bool IsConcreteArrayType(Type type)
     {
-        return IsSubtype(type, array_type_, GetTypeSystem()) && type != array_type_;
+        return IsSubtype(type, arrayType_, GetTypeSystem()) && type != arrayType_;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckArrayLoad(int vs, std::initializer_list<Type> const &expected_elt_types)
+    bool CheckArrayLoad(int vs, std::initializer_list<Type> const &expectedEltTypes)
     {
         if (!CheckRegType(ACC, integral32_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        if (!CheckRegType(vs, array_type_)) {
+        if (!CheckRegType(vs, arrayType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
-        Type reg_type = GetRegType(vs);
-        if (reg_type == null_ref_type_) {
+        Type regType = GetRegType(vs);
+        if (regType == nullRefType_) {
             // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
@@ -4081,34 +4072,34 @@ private:
             SET_STATUS_FOR_MSG(AlwaysNpe, OK);
             return false;
         }
-        auto &&arr_elt_type = reg_type.GetArrayElementType(GetTypeSystem());
-        auto find = [&expected_elt_types](auto type) {
-            for (Type t : expected_elt_types) {
+        auto &&arrEltType = regType.GetArrayElementType(GetTypeSystem());
+        auto find = [&expectedEltTypes](auto type) {
+            for (Type t : expectedEltTypes) {
                 if (type == t) {
                     return true;
                 }
             }
             return false;
         };
-        auto res = find(arr_elt_type);
+        auto res = find(arrEltType);
         if (!res) {
-            PandaVector<Type> expected_types_vec;
-            for (auto et : expected_elt_types) {
-                expected_types_vec.push_back(et);
+            PandaVector<Type> expectedTypesVec;
+            for (auto et : expectedEltTypes) {
+                expectedTypesVec.push_back(et);
             }
-            LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE3(ToString(arr_elt_type), ToString(expected_types_vec));
+            LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE3(ToString(arrEltType), ToString(expectedTypesVec));
             SET_STATUS_FOR_MSG(BadArrayElementType, WARNING);
             return false;
         }
-        SetAcc(arr_elt_type);
+        SetAcc(arrEltType);
         MoveToNextInst<FORMAT>();
         return true;
     }
 
     bool ProcessBranching(int32_t offset)
     {
-        auto new_inst = inst_.JumpTo(offset);
-        const uint8_t *target = new_inst.GetAddress();
+        auto newInst = inst_.JumpTo(offset);
+        const uint8_t *target = newInst.GetAddress();
         if (!context_.CflowInfo().IsAddrValid(target) ||
             !context_.CflowInfo().IsFlagSet(target, CflowMethodInfo::INSTRUCTION)) {
             LOG_VERIFIER_INCORRECT_JUMP();
@@ -4119,18 +4110,18 @@ private:
 #ifndef NDEBUG
         ExecCtx().ProcessJump(
             inst_.GetAddress(), target,
-            [this, print_hdr = true](int reg_idx, const auto &src_reg, const auto &dst_reg) mutable {
-                if (print_hdr) {
+            [this, printHdr = true](int regIdx, const auto &srcReg, const auto &dstReg) mutable {
+                if (printHdr) {
                     LOG_VERIFIER_REGISTER_CONFLICT_HEADER();
-                    print_hdr = false;
+                    printHdr = false;
                 }
-                LOG_VERIFIER_REGISTER_CONFLICT(RegisterName(reg_idx), ToString(src_reg.GetAbstractType()),
-                                               ToString(dst_reg.GetAbstractType()));
+                LOG_VERIFIER_REGISTER_CONFLICT(RegisterName(regIdx), ToString(srcReg.GetAbstractType()),
+                                               ToString(dstReg.GetAbstractType()));
                 return true;
             },
-            code_type_);
+            codeType_);
 #else
-        ExecCtx().ProcessJump(inst_.GetAddress(), target, code_type_);
+        ExecCtx().ProcessJump(inst_.GetAddress(), target, codeType_);
 #endif
         return true;
     }
@@ -4181,14 +4172,14 @@ private:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckArrayCtor(Type klass, Span<int> reg_nums)
+    bool CheckArrayCtor(Type klass, Span<int> regNums)
     {
         if (!klass.IsConsistent() || !klass.IsClass() || !klass.GetClass()->IsArrayClass()) {
             return false;
         }
-        auto args_num = GetArrayNumDimensions(klass.GetClass());
+        auto argsNum = GetArrayNumDimensions(klass.GetClass());
         bool result = false;
-        for (auto reg : reg_nums) {
+        for (auto reg : regNums) {
             if (!IsRegDefined(reg)) {
                 SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
                 result = false;
@@ -4200,14 +4191,14 @@ private:
                 status_ = VerificationStatus::ERROR;
                 break;
             }
-            --args_num;
-            if (args_num == 0) {
+            --argsNum;
+            if (argsNum == 0) {
                 break;
             }
         };
-        if (result && args_num > 0) {
+        if (result && argsNum > 0) {
             SHOW_MSG(TooFewArrayConstructorArgs)
-            LOG_VERIFIER_TOO_FEW_ARRAY_CONSTRUCTOR_ARGS(args_num);
+            LOG_VERIFIER_TOO_FEW_ARRAY_CONSTRUCTOR_ARGS(argsNum);
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(TooFewArrayConstructorArgs, WARNING);
             result = false;
@@ -4244,18 +4235,18 @@ private:
     VerificationStatus status_ {VerificationStatus::OK};
     // #ifndef NDEBUG
     bool debug_ {false};
-    uint32_t debug_offset_ {0};
+    uint32_t debugOffset_ {0};
     // #endif
-    EntryPointType code_type_;
+    EntryPointType codeType_;
 
-    void SetStatusAtLeast(VerificationStatus new_status)
+    void SetStatusAtLeast(VerificationStatus newStatus)
     {
-        status_ = std::max(status_, new_status);
+        status_ = std::max(status_, newStatus);
     }
 
-    static inline VerificationStatus MsgClassToStatus(MethodOption::MsgClass msg_class)
+    static inline VerificationStatus MsgClassToStatus(MethodOption::MsgClass msgClass)
     {
-        switch (msg_class) {
+        switch (msgClass) {
             case MethodOption::MsgClass::HIDDEN:
                 return VerificationStatus::OK;
             case MethodOption::MsgClass::WARNING:

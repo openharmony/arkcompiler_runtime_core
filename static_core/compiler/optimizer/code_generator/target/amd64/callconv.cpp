@@ -25,14 +25,14 @@ Amd64CallingConvention::Amd64CallingConvention(ArenaAllocator *allocator, Encode
 {
 }
 
-ParameterInfo *Amd64CallingConvention::GetParameterInfo(uint8_t regs_offset)
+ParameterInfo *Amd64CallingConvention::GetParameterInfo(uint8_t regsOffset)
 {
-    auto param_info = GetAllocator()->New<amd64::Amd64ParameterInfo>();
+    auto paramInfo = GetAllocator()->New<amd64::Amd64ParameterInfo>();
     // reserve first parameter to method pointer
-    for (int i = 0; i < regs_offset; ++i) {
-        param_info->GetNativeParam(INT64_TYPE);
+    for (int i = 0; i < regsOffset; ++i) {
+        paramInfo->GetNativeParam(INT64_TYPE);
     }
-    return param_info;
+    return paramInfo;
 }
 
 void *Amd64CallingConvention::GetCodeEntry()
@@ -49,13 +49,13 @@ uint32_t Amd64CallingConvention::GetCodeSize()
 
 size_t Amd64CallingConvention::PushRegs(RegList regs, RegList vregs)
 {
-    size_t regs_count {0};
-    size_t vregs_count {0};
+    size_t regsCount {0};
+    size_t vregsCount {0};
 
     for (uint32_t i = 0; i < MAX_NUM_REGS; ++i) {
         uint32_t ii {MAX_NUM_REGS - i - 1};
         if (vregs.Has(ii)) {
-            ++vregs_count;
+            ++vregsCount;
             GetMasm()->sub(asmjit::x86::rsp, asmjit::imm(DOUBLE_WORD_SIZE_BYTES));
             GetMasm()->movsd(asmjit::x86::ptr(asmjit::x86::rsp), asmjit::x86::xmm(ii));
         }
@@ -64,80 +64,80 @@ size_t Amd64CallingConvention::PushRegs(RegList regs, RegList vregs)
     for (uint32_t i = 0; i < MAX_NUM_REGS; ++i) {
         uint32_t ii {MAX_NUM_REGS - i - 1};
         if (regs.Has(ii)) {
-            ++regs_count;
+            ++regsCount;
             GetMasm()->push(asmjit::x86::gpq(ConvertRegNumber(ii)));
         }
     }
 
-    return vregs_count + regs_count;
+    return vregsCount + regsCount;
 }
 
 size_t Amd64CallingConvention::PopRegs(RegList regs, RegList vregs)
 {
-    size_t regs_count {0};
-    size_t vregs_count {0};
+    size_t regsCount {0};
+    size_t vregsCount {0};
 
     for (uint32_t i = 0; i < MAX_NUM_REGS; ++i) {
         if (regs.Has(i)) {
-            ++regs_count;
+            ++regsCount;
             GetMasm()->pop(asmjit::x86::gpq(ConvertRegNumber(i)));
         }
     }
 
     for (uint32_t i = 0; i < MAX_NUM_REGS; ++i) {
         if (vregs.Has(i)) {
-            ++vregs_count;
+            ++vregsCount;
             GetMasm()->movsd(asmjit::x86::xmm(i), asmjit::x86::ptr(asmjit::x86::rsp));
             GetMasm()->add(asmjit::x86::rsp, asmjit::imm(DOUBLE_WORD_SIZE_BYTES));
         }
     }
 
-    return vregs_count + regs_count;
+    return vregsCount + regsCount;
 }
 
 std::variant<Reg, uint8_t> Amd64ParameterInfo::GetNativeParam(const TypeInfo &type)
 {
     if (type.IsFloat()) {
-        if (current_vector_number_ > MAX_VECTOR_PARAM_ID) {
-            return current_stack_offset_++;
+        if (currentVectorNumber_ > MAX_VECTOR_PARAM_ID) {
+            return currentStackOffset_++;
         }
-        return Reg(current_vector_number_++, type);
+        return Reg(currentVectorNumber_++, type);
     }
-    if (current_scalar_number_ > MAX_SCALAR_PARAM_ID) {
-        return current_stack_offset_++;
+    if (currentScalarNumber_ > MAX_SCALAR_PARAM_ID) {
+        return currentStackOffset_++;
     }
 
-    return Target(Arch::X86_64).GetParamReg(current_scalar_number_++, type);
+    return Target(Arch::X86_64).GetParamReg(currentScalarNumber_++, type);
 }
 
 Location Amd64ParameterInfo::GetNextLocation(DataType::Type type)
 {
     if (DataType::IsFloatType(type)) {
-        if (current_vector_number_ > MAX_VECTOR_PARAM_ID) {
-            return Location::MakeStackArgument(current_stack_offset_++);
+        if (currentVectorNumber_ > MAX_VECTOR_PARAM_ID) {
+            return Location::MakeStackArgument(currentStackOffset_++);
         }
-        return Location::MakeFpRegister(current_vector_number_++);
+        return Location::MakeFpRegister(currentVectorNumber_++);
     }
-    if (current_scalar_number_ > MAX_SCALAR_PARAM_ID) {
-        return Location::MakeStackArgument(current_stack_offset_++);
+    if (currentScalarNumber_ > MAX_SCALAR_PARAM_ID) {
+        return Location::MakeStackArgument(currentStackOffset_++);
     }
     Target target(Arch::X86_64);
-    return Location::MakeRegister(target.GetParamRegId(current_scalar_number_++));
+    return Location::MakeRegister(target.GetParamRegId(currentScalarNumber_++));
 }
 
-void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &frame_info)
+void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &frameInfo)
 {
     auto encoder = GetEncoder();
     const CFrameLayout &fl = encoder->GetFrameLayout();
-    auto fp_reg = GetTarget().GetFrameReg();
-    auto sp_reg = GetTarget().GetStackReg();
+    auto fpReg = GetTarget().GetFrameReg();
+    auto spReg = GetTarget().GetStackReg();
 
     // we do not push return address, because in amd64 call instruction already pushed it
     GetMasm()->push(asmjit::x86::rbp);  // frame pointer
-    SET_CFI_OFFSET(push_fplr, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(pushFplr, encoder->GetCursorOffset());
 
-    encoder->EncodeMov(fp_reg, sp_reg);
-    SET_CFI_OFFSET(set_fp, encoder->GetCursorOffset());
+    encoder->EncodeMov(fpReg, spReg);
+    SET_CFI_OFFSET(setFp, encoder->GetCursorOffset());
 
     if (IsDynCallMode() && GetDynInfo().IsCheckRequired()) {
         static_assert(CallConvDynInfo::REG_NUM_ARGS == 1);
@@ -145,70 +145,70 @@ void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &
 
         constexpr auto NUM_ACTUAL_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_NUM_ARGS);
         constexpr auto NUM_EXPECTED_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_COUNT);
-        auto num_expected = GetDynInfo().GetNumExpectedArgs();
+        auto numExpected = GetDynInfo().GetNumExpectedArgs();
 
-        auto expand_done = encoder->CreateLabel();
-        encoder->EncodeJump(expand_done, NUM_ACTUAL_REG, Imm(num_expected), Condition::GE);
-        encoder->EncodeMov(NUM_EXPECTED_REG, Imm(num_expected));
+        auto expandDone = encoder->CreateLabel();
+        encoder->EncodeJump(expandDone, NUM_ACTUAL_REG, Imm(numExpected), Condition::GE);
+        encoder->EncodeMov(NUM_EXPECTED_REG, Imm(numExpected));
 
-        MemRef expand_entrypoint(Reg(GetThreadReg(Arch::X86_64), GetTarget().GetPtrRegType()),
-                                 GetDynInfo().GetExpandEntrypointTlsOffset());
-        GetEncoder()->MakeCall(expand_entrypoint);
-        encoder->BindLabel(expand_done);
+        MemRef expandEntrypoint(Reg(GetThreadReg(Arch::X86_64), GetTarget().GetPtrRegType()),
+                                GetDynInfo().GetExpandEntrypointTlsOffset());
+        GetEncoder()->MakeCall(expandEntrypoint);
+        encoder->BindLabel(expandDone);
     }
 
-    encoder->EncodeSub(sp_reg, sp_reg, Imm(2U * DOUBLE_WORD_SIZE_BYTES));
-    encoder->EncodeStr(GetTarget().GetParamReg(0), MemRef(sp_reg, DOUBLE_WORD_SIZE_BYTES));
+    encoder->EncodeSub(spReg, spReg, Imm(2U * DOUBLE_WORD_SIZE_BYTES));
+    encoder->EncodeStr(GetTarget().GetParamReg(0), MemRef(spReg, DOUBLE_WORD_SIZE_BYTES));
 
     // Reset OSR flag and set HasFloatRegsFlag
-    auto flags {static_cast<uint64_t>(frame_info.GetHasFloatRegs()) << CFrameLayout::HasFloatRegsFlag::START_BIT};
-    encoder->EncodeSti(flags, sizeof(flags), MemRef(sp_reg));
+    auto flags {static_cast<uint64_t>(frameInfo.GetHasFloatRegs()) << CFrameLayout::HasFloatRegsFlag::START_BIT};
+    encoder->EncodeSti(flags, sizeof(flags), MemRef(spReg));
     // Allocate space for locals
-    encoder->EncodeSub(sp_reg, sp_reg, Imm(DOUBLE_WORD_SIZE_BYTES * (CFrameSlots::Start() - CFrameData::Start())));
+    encoder->EncodeSub(spReg, spReg, Imm(DOUBLE_WORD_SIZE_BYTES * (CFrameSlots::Start() - CFrameData::Start())));
     static_assert((CFrameLayout::GetLocalsCount() & 1U) == 0);
 
-    RegList callee_regs {GetCalleeRegsMask(Arch::X86_64, false).GetValue()};
-    RegList callee_vregs {GetCalleeRegsMask(Arch::X86_64, true).GetValue()};
-    SET_CFI_CALLEE_REGS(RegMask(static_cast<size_t>(callee_regs)));
-    SET_CFI_CALLEE_VREGS(VRegMask(static_cast<size_t>(callee_vregs)));
-    PushRegs(callee_regs, callee_vregs);
-    SET_CFI_OFFSET(push_callees, encoder->GetCursorOffset());
+    RegList calleeRegs {GetCalleeRegsMask(Arch::X86_64, false).GetValue()};
+    RegList calleeVregs {GetCalleeRegsMask(Arch::X86_64, true).GetValue()};
+    SET_CFI_CALLEE_REGS(RegMask(static_cast<size_t>(calleeRegs)));
+    SET_CFI_CALLEE_VREGS(VRegMask(static_cast<size_t>(calleeVregs)));
+    PushRegs(calleeRegs, calleeVregs);
+    SET_CFI_OFFSET(pushCallees, encoder->GetCursorOffset());
 
     encoder->EncodeSub(
-        sp_reg, sp_reg,
+        spReg, spReg,
         Imm((fl.GetSpillsCount() + fl.GetCallerRegistersCount(false) + fl.GetCallerRegistersCount(true)) *
             DOUBLE_WORD_SIZE_BYTES));
 }
 
-void Amd64CallingConvention::GenerateEpilogue([[maybe_unused]] const FrameInfo &frame_info,
-                                              std::function<void()> post_job)
+void Amd64CallingConvention::GenerateEpilogue([[maybe_unused]] const FrameInfo &frameInfo,
+                                              std::function<void()> postJob)
 {
     auto encoder = GetEncoder();
     const CFrameLayout &fl = encoder->GetFrameLayout();
-    auto sp_reg = GetTarget().GetStackReg();
+    auto spReg = GetTarget().GetStackReg();
 
-    if (post_job) {
-        post_job();
+    if (postJob) {
+        postJob();
     }
 
     encoder->EncodeAdd(
-        sp_reg, sp_reg,
+        spReg, spReg,
         Imm((fl.GetSpillsCount() + fl.GetCallerRegistersCount(false) + fl.GetCallerRegistersCount(true)) *
             DOUBLE_WORD_SIZE_BYTES));
 
     PopRegs(RegList(GetCalleeRegsMask(Arch::X86_64, false).GetValue()),
             RegList(GetCalleeRegsMask(Arch::X86_64, true).GetValue()));
-    SET_CFI_OFFSET(pop_callees, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popCallees, encoder->GetCursorOffset());
 
     // X86_64 doesn't support OSR mode
     ASSERT(!IsOsrMode());
     // Support restoring of LR and FP registers once OSR is supported in x86_64
     static_assert(!ArchTraits<Arch::X86_64>::SUPPORT_OSR);
     constexpr auto SHIFT = DOUBLE_WORD_SIZE_BYTES * (2 + CFrameSlots::Start() - CFrameData::Start());
-    encoder->EncodeAdd(sp_reg, sp_reg, Imm(SHIFT));
+    encoder->EncodeAdd(spReg, spReg, Imm(SHIFT));
 
     GetMasm()->pop(asmjit::x86::rbp);  // frame pointer
-    SET_CFI_OFFSET(pop_fplr, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popFplr, encoder->GetCursorOffset());
     GetMasm()->ret();
 }
 }  // namespace panda::compiler::amd64

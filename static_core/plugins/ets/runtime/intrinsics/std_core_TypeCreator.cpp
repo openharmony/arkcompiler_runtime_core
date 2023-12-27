@@ -55,9 +55,9 @@ pandasm::Type GetPandasmTypeFromDescriptor(TypeCreatorCtx *ctx, std::string_view
 {
     auto ret = pandasm::Type::FromDescriptor(descriptor);
     if (ret.IsObject()) {
-        auto pandasm_name = ret.GetPandasmName();
-        ctx->AddRefTypeAsExternal(pandasm_name);
-        return pandasm::Type {std::move(pandasm_name), ret.GetRank()};
+        auto pandasmName = ret.GetPandasmName();
+        ctx->AddRefTypeAsExternal(pandasmName);
+        return pandasm::Type {std::move(pandasmName), ret.GetRank()};
     }
     return ret;
 }
@@ -95,21 +95,21 @@ PandasmMethodCreator CreateCopiedMethod(TypeCreatorCtx *ctx, const std::string &
 {
     PandasmMethodCreator fn {prefix + method->GetName(), ctx};
 
-    size_t ref_num = 0;
+    size_t refNum = 0;
 
-    for (size_t arg_num = 0; arg_num < method->GetNumArgs(); arg_num++) {
-        auto ets_type = method->GetArgType(arg_num);
-        if (ets_type == EtsType::OBJECT) {
-            fn.AddParameter(GetPandasmTypeFromDescriptor(ctx, method->GetRefArgType(ref_num++)));
+    for (size_t argNum = 0; argNum < method->GetNumArgs(); argNum++) {
+        auto etsType = method->GetArgType(argNum);
+        if (etsType == EtsType::OBJECT) {
+            fn.AddParameter(GetPandasmTypeFromDescriptor(ctx, method->GetRefArgType(refNum++)));
         } else {
-            fn.AddParameter(EtsTypeToPandasm(ets_type));
+            fn.AddParameter(EtsTypeToPandasm(etsType));
         }
     }
-    auto ets_ret_type = method->GetReturnValueType();
-    if (ets_ret_type == EtsType::OBJECT) {
+    auto etsRetType = method->GetReturnValueType();
+    if (etsRetType == EtsType::OBJECT) {
         fn.AddResult(GetPandasmTypeFromDescriptor(ctx, method->GetReturnTypeDescriptor()));
     } else {
-        fn.AddResult(EtsTypeToPandasm(ets_ret_type));
+        fn.AddResult(EtsTypeToPandasm(etsRetType));
     }
 
     return fn;
@@ -166,13 +166,13 @@ EtsVoid *TypeAPITypeCreatorCtxDestroy(EtsLong ctx)
     return EtsVoid::GetInstance();
 }
 
-EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctx_ptr, EtsArray *objects)
+EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctxPtr, EtsArray *objects)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsArray> objects_handle {coroutine, objects->GetCoreType()};
+    VMHandle<EtsArray> objectsHandle {coroutine, objects->GetCoreType()};
 
-    auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
+    auto ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
 
     ctx->FlushTypeAPICtxDataRecordsToProgram();
 
@@ -189,7 +189,7 @@ EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctx_ptr, EtsArray *objects)
     auto &data = writer.GetData();
     auto file = panda_file::OpenPandaFileFromMemory(data.data(), data.size());
 
-    ctx->SaveObjects(coroutine, objects_handle);
+    ctx->SaveObjects(coroutine, objectsHandle);
 
     linker->AddPandaFile(std::move(file));
 
@@ -197,9 +197,9 @@ EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctx_ptr, EtsArray *objects)
     return nullptr;
 }
 
-EtsLong TypeAPITypeCreatorCtxClassCreate(EtsLong ctx_ptr, EtsString *name, EtsInt attrs)
+EtsLong TypeAPITypeCreatorCtxClassCreate(EtsLong ctxPtr, EtsString *name, EtsInt attrs)
 {
-    auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
+    auto ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
     pandasm::Record rec {std::string {name->GetMutf8()}, SourceLanguage::ETS};
     rec.conflict = true;
 
@@ -207,49 +207,49 @@ EtsLong TypeAPITypeCreatorCtxClassCreate(EtsLong ctx_ptr, EtsString *name, EtsIn
         rec.metadata->SetAttribute(typeapi_create_consts::ATTR_FINAL);
     }
 
-    auto name_str = rec.name;
-    auto [iter, ok] = ctx->Program().record_table.emplace(name_str, std::move(rec));
+    auto nameStr = rec.name;
+    auto [iter, ok] = ctx->Program().recordTable.emplace(nameStr, std::move(rec));
     if (!ok) {
-        ctx->AddError("duplicate class " + name_str);
+        ctx->AddError("duplicate class " + nameStr);
         return 0;
     }
     return PtrToLong(ctx->Alloc<ClassCreator>(&iter->second, ctx));
 }
 
-EtsLong TypeAPITypeCreatorCtxInterfaceCreate(EtsLong ctx_ptr, EtsString *name)
+EtsLong TypeAPITypeCreatorCtxInterfaceCreate(EtsLong ctxPtr, EtsString *name)
 {
-    auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
+    auto ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
     pandasm::Record rec {std::string {name->GetMutf8()}, SourceLanguage::ETS};
     rec.conflict = true;
-    auto name_str = rec.name;
+    auto nameStr = rec.name;
     for (const auto &attr : typeapi_create_consts::ATTR_INTERFACE) {
         rec.metadata->SetAttribute(attr);
     }
-    auto [iter, ok] = ctx->Program().record_table.emplace(name_str, std::move(rec));
+    auto [iter, ok] = ctx->Program().recordTable.emplace(nameStr, std::move(rec));
     if (!ok) {
-        ctx->AddError("duplicate class " + name_str);
+        ctx->AddError("duplicate class " + nameStr);
         return 0;
     }
     return PtrToLong(ctx->Alloc<InterfaceCreator>(&iter->second, ctx));
 }
 
-EtsString *TypeAPITypeCreatorCtxGetError(EtsLong ctx_ptr)
+EtsString *TypeAPITypeCreatorCtxGetError(EtsLong ctxPtr)
 {
-    auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
+    auto ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
     return ErrorFromCtx(ctx);
 }
 
-EtsObject *TypeAPITypeCreatorCtxGetObjectsArrayForCCtor(EtsLong ctx_ptr)
+EtsObject *TypeAPITypeCreatorCtxGetObjectsArrayForCCtor(EtsLong ctxPtr)
 {
-    auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
+    auto ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
     auto coro = EtsCoroutine::GetCurrent();
     return ctx->GetObjects(coro)->AsObject();
 }
 
-EtsString *TypeAPITypeCreatorCtxClassSetBase(EtsLong class_ptr, EtsString *base_td)
+EtsString *TypeAPITypeCreatorCtxClassSetBase(EtsLong classPtr, EtsString *baseTd)
 {
-    auto creator = PtrFromLong<ClassCreator>(class_ptr);
-    auto par = GetPandasmTypeFromDescriptor(creator->GetCtx(), base_td->GetMutf8());
+    auto creator = PtrFromLong<ClassCreator>(classPtr);
+    auto par = GetPandasmTypeFromDescriptor(creator->GetCtx(), baseTd->GetMutf8());
     if (par.GetRank() != 0) {
         return EtsString::CreateFromMUtf8("can't have array base");
     }
@@ -257,10 +257,10 @@ EtsString *TypeAPITypeCreatorCtxClassSetBase(EtsLong class_ptr, EtsString *base_
     return nullptr;
 }
 
-EtsString *TypeAPITypeCreatorCtxInterfaceAddBase(EtsLong iface_ptr, EtsString *base_td)
+EtsString *TypeAPITypeCreatorCtxInterfaceAddBase(EtsLong ifacePtr, EtsString *baseTd)
 {
-    auto creator = PtrFromLong<InterfaceCreator>(iface_ptr);
-    auto par = GetPandasmTypeFromDescriptor(creator->GetCtx(), base_td->GetMutf8());
+    auto creator = PtrFromLong<InterfaceCreator>(ifacePtr);
+    auto par = GetPandasmTypeFromDescriptor(creator->GetCtx(), baseTd->GetMutf8());
     if (par.GetRank() != 0) {
         return EtsString::CreateFromMUtf8("can't have array base");
     }
@@ -275,32 +275,32 @@ EtsString *TypeAPITypeCreatorCtxGetTypeDescFromPointer(EtsLong nptr)
     return EtsString::CreateFromMUtf8(type.GetDescriptor(!type.IsPrimitive()).c_str());
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddParam(EtsLong method_ptr, EtsString *param_td,
-                                               [[maybe_unused]] EtsString *name, [[maybe_unused]] EtsInt attrs)
+EtsString *TypeAPITypeCreatorCtxMethodAddParam(EtsLong methodPtr, EtsString *paramTd, [[maybe_unused]] EtsString *name,
+                                               [[maybe_unused]] EtsInt attrs)
 {
     // NOTE(kprokopenko): dump meta info
-    auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
-    auto type = GetPandasmTypeFromDescriptor(m->Ctx(), param_td->GetMutf8());
+    auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
+    auto type = GetPandasmTypeFromDescriptor(m->Ctx(), paramTd->GetMutf8());
     m->AddParameter(std::move(type));
     return nullptr;
 }
 
-EtsLong TypeAPITypeCreatorCtxMethodCreate(EtsLong containing_type_ptr, EtsString *name, EtsInt attrs)
+EtsLong TypeAPITypeCreatorCtxMethodCreate(EtsLong containingTypePtr, EtsString *name, EtsInt attrs)
 {
-    auto klass = PtrFromLong<ClassCreator>(containing_type_ptr);
-    auto name_str = klass->GetRec()->name;
-    name_str += ".";
+    auto klass = PtrFromLong<ClassCreator>(containingTypePtr);
+    auto nameStr = klass->GetRec()->name;
+    nameStr += ".";
     if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::CONSTRUCTOR)) {
-        name_str += panda_file::GetCtorName(SourceLanguage::ETS);
+        nameStr += panda_file::GetCtorName(SourceLanguage::ETS);
     } else {
         if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::GETTER)) {
-            name_str += GETTER_BEGIN;
+            nameStr += GETTER_BEGIN;
         } else if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::SETTER)) {
-            name_str += SETTER_BEGIN;
+            nameStr += SETTER_BEGIN;
         }
-        name_str += name->GetMutf8();
+        nameStr += name->GetMutf8();
     }
-    auto ret = klass->GetCtx()->Alloc<PandasmMethodCreator>(std::move(name_str), klass->GetCtx());
+    auto ret = klass->GetCtx()->Alloc<PandasmMethodCreator>(std::move(nameStr), klass->GetCtx());
     if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::STATIC)) {
         ret->GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
     } else {
@@ -315,69 +315,68 @@ EtsLong TypeAPITypeCreatorCtxMethodCreate(EtsLong containing_type_ptr, EtsString
     return PtrToLong(ret);
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddAccessMod(EtsLong method_ptr, EtsInt access)
+EtsString *TypeAPITypeCreatorCtxMethodAddAccessMod(EtsLong methodPtr, EtsInt access)
 {
-    auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
+    auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
     SetAccessFlags(m->GetFn().metadata.get(), static_cast<EtsTypeAPIAccessModifier>(access));
     return ErrorFromCtx(m->Ctx());
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAdd(EtsLong method_ptr)
+EtsString *TypeAPITypeCreatorCtxMethodAdd(EtsLong methodPtr)
 {
-    auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
+    auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
     m->Create();
     return ErrorFromCtx(m->Ctx());
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromMethod(EtsLong method_ptr, EtsString *method_desc)
+EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromMethod(EtsLong methodPtr, EtsString *methodDesc)
 {
-    auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
-    auto meth = EtsMethod::FromTypeDescriptor(method_desc->GetMutf8());
+    auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
+    auto meth = EtsMethod::FromTypeDescriptor(methodDesc->GetMutf8());
     auto ctx = m->Ctx();
 
-    auto parent_method_class_name = GetPandasmTypeFromDescriptor(m->Ctx(), meth->GetClass()->GetDescriptor());
+    auto parentMethodClassName = GetPandasmTypeFromDescriptor(m->Ctx(), meth->GetClass()->GetDescriptor());
 
     // NOTE(kprokopenko): implement type checking
 
-    auto parent_method = CreateCopiedMethod(ctx, parent_method_class_name.GetName() + ".", meth);
-    parent_method.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-    parent_method.Create();
+    auto parentMethod = CreateCopiedMethod(ctx, parentMethodClassName.GetName() + ".", meth);
+    parentMethod.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+    parentMethod.Create();
 
-    m->GetFn().AddInstruction(pandasm::Create_CALL_RANGE(0, parent_method.GetFunctionName()));
+    m->GetFn().AddInstruction(pandasm::Create_CALL_RANGE(0, parentMethod.GetFunctionName()));
     m->GetFn().AddInstruction(GetReturnStatement(meth->GetReturnValueType()));
 
     return ErrorFromCtx(m->Ctx());
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromLambda(EtsLong method_ptr, EtsInt lambda_object_id,
-                                                        EtsString *lambda_td)
+EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromLambda(EtsLong methodPtr, EtsInt lambdaObjectId, EtsString *lambdaTd)
 {
-    auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
+    auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
     auto ctx = m->Ctx();
 
     auto coro = EtsCoroutine::GetCurrent();
-    auto klass_td = lambda_td->GetMutf8();
-    auto klass_name = GetPandasmTypeFromDescriptor(m->Ctx(), klass_td);
-    auto klass = coro->GetPandaVM()->GetClassLinker()->GetClass(klass_td.c_str());
+    auto klassTd = lambdaTd->GetMutf8();
+    auto klassName = GetPandasmTypeFromDescriptor(m->Ctx(), klassTd);
+    auto klass = coro->GetPandaVM()->GetClassLinker()->GetClass(klassTd.c_str());
     ASSERT(klass->IsInitialized());
     auto meth = klass->GetMethod("invoke");
     if (meth == nullptr) {
         return EtsString::CreateFromMUtf8("method is absent");
     }
 
-    auto fld = m->Ctx()->AddInitField(lambda_object_id, pandasm::Type {klass_name, 0});
+    auto fld = m->Ctx()->AddInitField(lambdaObjectId, pandasm::Type {klassName, 0});
 
-    auto external_fn = CreateCopiedMethod(ctx, klass_name.GetName() + ".", meth);
-    external_fn.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-    external_fn.Create();
+    auto externalFn = CreateCopiedMethod(ctx, klassName.GetName() + ".", meth);
+    externalFn.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+    externalFn.Create();
 
-    m->GetFn().regs_num = 1;
+    m->GetFn().regsNum = 1;
     m->GetFn().AddInstruction(pandasm::Create_LDSTATIC_OBJ(fld));
     m->GetFn().AddInstruction(pandasm::Create_STA_OBJ(0));
     if (EtsMethod::ToRuntimeMethod(meth)->IsFinal()) {
-        m->GetFn().AddInstruction(pandasm::Create_CALL_RANGE(0, external_fn.GetFunctionName()));
+        m->GetFn().AddInstruction(pandasm::Create_CALL_RANGE(0, externalFn.GetFunctionName()));
     } else {
-        m->GetFn().AddInstruction(pandasm::Create_CALL_VIRT_RANGE(0, external_fn.GetFunctionName()));
+        m->GetFn().AddInstruction(pandasm::Create_CALL_VIRT_RANGE(0, externalFn.GetFunctionName()));
     }
 
     m->GetFn().AddInstruction(GetReturnStatement(meth->GetReturnValueType()));
@@ -403,11 +402,11 @@ static constexpr int ARGS_REG_START = ARR_REG + 1;
 
 static void AddLambdaParamInst(pandasm::Function &fn, TypeCreatorCtx *ctx)
 {
-    const auto is_static = fn.metadata->GetAttribute(std::string {typeapi_create_consts::ATTR_STATIC});
+    const auto isStatic = fn.metadata->GetAttribute(std::string {typeapi_create_consts::ATTR_STATIC});
     for (size_t i = 0; i < fn.params.size(); i++) {
         // adjust array store index
         const auto &par = fn.params[i];
-        if (i != 0 && (i != 1 || is_static)) {
+        if (i != 0 && (i != 1 || isStatic)) {
             fn.AddInstruction(pandasm::Create_INCI(TMP_REG, 1));
         }
         if (par.type.IsObject()) {
@@ -416,7 +415,7 @@ static void AddLambdaParamInst(pandasm::Function &fn, TypeCreatorCtx *ctx)
             auto ctor = ctx->DeclarePrimitive(par.type.GetComponentName()).first;
             fn.AddInstruction(pandasm::Create_INITOBJ_SHORT(ARGS_REG_START + i, 0, ctor));
         }
-        if (i == 0 && !is_static) {
+        if (i == 0 && !isStatic) {
             // set recv
             fn.AddInstruction(pandasm::Create_STA_OBJ(RECV_REG));
         } else {
@@ -426,78 +425,78 @@ static void AddLambdaParamInst(pandasm::Function &fn, TypeCreatorCtx *ctx)
     }
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda(EtsLong method_ptr, EtsInt lambda_id)
+EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda(EtsLong methodPtr, EtsInt lambdaId)
 {
-    auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
+    auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
 
     m->Ctx()->AddRefTypeAsExternal(std::string {typeapi_create_consts::TYPE_OBJECT});
 
     auto lambda = PrepareLambdaTypeCreator(m->Ctx());
 
-    auto saved_lambda_field = m->Ctx()->AddInitField(lambda_id, lambda.GetType());
+    auto savedLambdaField = m->Ctx()->AddInitField(lambdaId, lambda.GetType());
 
     auto &fn = m->GetFn();
-    auto is_static = fn.metadata->GetAttribute(std::string {typeapi_create_consts::ATTR_STATIC});
-    fn.regs_num = ARGS_REG_START;
-    const auto &ret = fn.return_type;
+    auto isStatic = fn.metadata->GetAttribute(std::string {typeapi_create_consts::ATTR_STATIC});
+    fn.regsNum = ARGS_REG_START;
+    const auto &ret = fn.returnType;
     auto pars = fn.params.size();
-    auto arr_len = pars - (is_static ? 0 : 1);
-    fn.AddInstruction(pandasm::Create_MOVI(TMP_REG, arr_len));
+    auto arrLen = pars - (isStatic ? 0 : 1);
+    fn.AddInstruction(pandasm::Create_MOVI(TMP_REG, arrLen));
     fn.AddInstruction(
         pandasm::Create_NEWARR(ARR_REG, TMP_REG, pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1}.GetName()));
 
     fn.AddInstruction(pandasm::Create_MOVI(TMP_REG, 0));
 
-    if (is_static) {
+    if (isStatic) {
         fn.AddInstruction(pandasm::Create_LDA_NULL());
         fn.AddInstruction(pandasm::Create_STA_OBJ(RECV_REG));
     }
 
     AddLambdaParamInst(fn, m->Ctx());
 
-    fn.AddInstruction(pandasm::Create_LDSTATIC_OBJ(saved_lambda_field));
+    fn.AddInstruction(pandasm::Create_LDSTATIC_OBJ(savedLambdaField));
     fn.AddInstruction(pandasm::Create_STA_OBJ(LMB_REG));
 
     fn.AddInstruction(pandasm::Create_CALL_VIRT(LMB_REG, RECV_REG, ARR_REG, 0, lambda.GetFunctionName()));
 
     fn.AddInstruction(pandasm::Create_STA_OBJ(0));
-    if (!fn.return_type.IsObject()) {
-        auto destr = m->Ctx()->DeclarePrimitive(fn.return_type.GetComponentName()).second;
+    if (!fn.returnType.IsObject()) {
+        auto destr = m->Ctx()->DeclarePrimitive(fn.returnType.GetComponentName()).second;
         fn.AddInstruction(pandasm::Create_CALL_SHORT(0, 0, destr));
     }
 
-    if (fn.return_type.IsObject()) {
+    if (fn.returnType.IsObject()) {
         fn.AddInstruction(pandasm::Create_CHECKCAST(ret.GetName()));
     }
-    auto return_id = fn.return_type.GetId();
-    fn.AddInstruction(GetReturnStatement(ConvertPandaTypeToEtsType(panda_file::Type {return_id})));
+    auto returnId = fn.returnType.GetId();
+    fn.AddInstruction(GetReturnStatement(ConvertPandaTypeToEtsType(panda_file::Type {returnId})));
 
     return ErrorFromCtx(m->Ctx());
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddBodyDefault(EtsLong method_ptr)
+EtsString *TypeAPITypeCreatorCtxMethodAddBodyDefault(EtsLong methodPtr)
 {
-    auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
+    auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
     auto &fn = m->GetFn();
 
     // call default constructor in case of constructor
     if (fn.metadata->IsCtor()) {
-        auto self_name = m->GetFn().params.front().type.GetName();
-        auto &record_table = m->Ctx()->Program().record_table;
-        auto super_name = record_table.find(self_name)
-                              ->second.metadata->GetAttributeValue(std::string {typeapi_create_consts::ATTR_EXTENDS})
-                              .value();
-        m->Ctx()->AddRefTypeAsExternal(super_name);
-        PandasmMethodCreator super_ctor {super_name + "." + panda_file::GetCtorName(panda_file::SourceLang::ETS),
-                                         m->Ctx()};
-        super_ctor.AddParameter(pandasm::Type {super_name, 0, true});
-        super_ctor.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-        super_ctor.Create();
+        auto selfName = m->GetFn().params.front().type.GetName();
+        auto &recordTable = m->Ctx()->Program().recordTable;
+        auto superName = recordTable.find(selfName)
+                             ->second.metadata->GetAttributeValue(std::string {typeapi_create_consts::ATTR_EXTENDS})
+                             .value();
+        m->Ctx()->AddRefTypeAsExternal(superName);
+        PandasmMethodCreator superCtor {superName + "." + panda_file::GetCtorName(panda_file::SourceLang::ETS),
+                                        m->Ctx()};
+        superCtor.AddParameter(pandasm::Type {superName, 0, true});
+        superCtor.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+        superCtor.Create();
 
-        fn.AddInstruction(pandasm::Create_CALL_SHORT(0, 0, super_ctor.GetFunctionName()));
+        fn.AddInstruction(pandasm::Create_CALL_SHORT(0, 0, superCtor.GetFunctionName()));
     }
 
-    const auto &ret = fn.return_type;
+    const auto &ret = fn.returnType;
     if (ret.IsVoid()) {
         fn.AddInstruction(pandasm::Create_RETURN_VOID());
     } else if (ret.IsObject()) {
@@ -525,55 +524,55 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyDefault(EtsLong method_ptr)
     return ErrorFromCtx(m->Ctx());
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddResult(EtsLong method_ptr, EtsString *descriptor)
+EtsString *TypeAPITypeCreatorCtxMethodAddResult(EtsLong methodPtr, EtsString *descriptor)
 {
-    auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
+    auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
     m->AddResult(GetPandasmTypeFromDescriptor(m->Ctx(), descriptor->GetMutf8().c_str()));
     return ErrorFromCtx(m->Ctx());
 }
 
-EtsLong TypeAPITypeCreatorCtxLambdaTypeCreate(EtsLong ctx_ptr, [[maybe_unused]] EtsInt attrs)
+EtsLong TypeAPITypeCreatorCtxLambdaTypeCreate(EtsLong ctxPtr, [[maybe_unused]] EtsInt attrs)
 {
-    auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
+    auto ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
     // NOTE(kprokopenko): add attributes
     auto fn = ctx->Alloc<LambdaTypeCreator>(ctx);
     return PtrToLong(fn);
 }
 
-EtsString *TypeAPITypeCreatorCtxLambdaTypeAddParam(EtsLong ft_ptr, EtsString *td, [[maybe_unused]] EtsInt attrs)
+EtsString *TypeAPITypeCreatorCtxLambdaTypeAddParam(EtsLong ftPtr, EtsString *td, [[maybe_unused]] EtsInt attrs)
 {
     // NOTE(kprokopenko): dump meta info
-    auto creator = PtrFromLong<LambdaTypeCreator>(ft_ptr);
+    auto creator = PtrFromLong<LambdaTypeCreator>(ftPtr);
     creator->AddParameter(GetPandasmTypeFromDescriptor(creator->GetCtx(), td->GetMutf8()));
     return ErrorFromCtx(creator->GetCtx());
 }
 
-EtsString *TypeAPITypeCreatorCtxLambdaTypeAddResult(EtsLong ft_ptr, EtsString *td)
+EtsString *TypeAPITypeCreatorCtxLambdaTypeAddResult(EtsLong ftPtr, EtsString *td)
 {
-    auto creator = PtrFromLong<LambdaTypeCreator>(ft_ptr);
+    auto creator = PtrFromLong<LambdaTypeCreator>(ftPtr);
     creator->AddResult(GetPandasmTypeFromDescriptor(creator->GetCtx(), td->GetMutf8()));
     return ErrorFromCtx(creator->GetCtx());
 }
 
-EtsString *TypeAPITypeCreatorCtxLambdaTypeAdd(EtsLong ft_ptr)
+EtsString *TypeAPITypeCreatorCtxLambdaTypeAdd(EtsLong ftPtr)
 {
-    auto creator = PtrFromLong<LambdaTypeCreator>(ft_ptr);
+    auto creator = PtrFromLong<LambdaTypeCreator>(ftPtr);
     creator->Create();
     return ErrorFromCtx(creator->GetCtx());
 }
 
-EtsString *TypeAPITypeCreatorCtxClassAddIface(EtsLong class_ptr, EtsString *descr)
+EtsString *TypeAPITypeCreatorCtxClassAddIface(EtsLong classPtr, EtsString *descr)
 {
-    auto creator = PtrFromLong<ClassCreator>(class_ptr);
+    auto creator = PtrFromLong<ClassCreator>(classPtr);
     auto iface = GetPandasmTypeFromDescriptor(creator->GetCtx(), descr->GetMutf8());
     creator->GetRec()->metadata->SetAttributeValue(typeapi_create_consts::ATTR_IMPLEMENTS, iface.GetName());
     return ErrorFromCtx(creator->GetCtx());
 }
 
-EtsString *TypeAPITypeCreatorCtxClassAddField(EtsLong class_ptr, EtsString *name, EtsString *descr, EtsInt attrs,
+EtsString *TypeAPITypeCreatorCtxClassAddField(EtsLong classPtr, EtsString *name, EtsString *descr, EtsInt attrs,
                                               EtsInt access)
 {
-    auto klass = PtrFromLong<ClassCreator>(class_ptr);
+    auto klass = PtrFromLong<ClassCreator>(classPtr);
     auto type = GetPandasmTypeFromDescriptor(klass->GetCtx(), descr->GetMutf8());
     pandasm::Field fld {SourceLanguage::ETS};
     if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::STATIC)) {
@@ -585,7 +584,7 @@ EtsString *TypeAPITypeCreatorCtxClassAddField(EtsLong class_ptr, EtsString *name
     fld.name = name->GetMutf8();
     fld.type = pandasm::Type(type, 0);
     SetAccessFlags(fld.metadata.get(), static_cast<EtsTypeAPIAccessModifier>(access));
-    klass->GetRec()->field_list.emplace_back(std::move(fld));
+    klass->GetRec()->fieldList.emplace_back(std::move(fld));
     return ErrorFromCtx(klass->GetCtx());
 }
 }

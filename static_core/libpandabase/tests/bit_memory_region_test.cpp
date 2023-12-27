@@ -20,10 +20,10 @@
 
 namespace panda::test {
 
-static void CompareData(const uint8_t *data, size_t offset, size_t length, uint32_t value, uint8_t fill_value)
+static void CompareData(const uint8_t *data, size_t offset, size_t length, uint32_t value, uint8_t fillValue)
 {
     for (size_t i = 0; i < length; i++) {
-        uint8_t expected = (offset <= i && i < offset + length) ? value >> (i - offset) : fill_value;
+        uint8_t expected = (offset <= i && i < offset + length) ? value >> (i - offset) : fillValue;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         uint8_t actual = data[i / BITS_PER_BYTE] >> (i % BITS_PER_BYTE);
         ASSERT_EQ(expected & 1U, actual & 1U);
@@ -40,18 +40,18 @@ TEST(BitMemoryRegion, TestBitAccess)
 
     for (size_t offset = 0; offset < MAX_BITS_COUNT; offset++) {
         uint32_t mask = 0;
-        for (auto fill_value : FILL_DATA) {
+        for (auto fillValue : FILL_DATA) {
             for (auto value : VALUE_DATA) {
-                std::fill(data.begin(), data.end(), fill_value);
+                std::fill(data.begin(), data.end(), fillValue);
                 BitMemoryRegion region1(data.data(), offset, 1U);
                 region1.Write(value, 0U);
                 ASSERT_EQ(region1.Read(0U), value);
-                CompareData(data.data(), offset, 1U, static_cast<uint32_t>(value), fill_value);
-                std::fill(data.begin(), data.end(), fill_value);
+                CompareData(data.data(), offset, 1U, static_cast<uint32_t>(value), fillValue);
+                std::fill(data.begin(), data.end(), fillValue);
                 BitMemoryRegion region2(data.data(), data.size() * BITS_PER_BYTE);
                 region2.Write(value, offset);
                 ASSERT_EQ(region2.Read(offset), value);
-                CompareData(data.data(), offset, 1U, static_cast<uint32_t>(value), fill_value);
+                CompareData(data.data(), offset, 1U, static_cast<uint32_t>(value), fillValue);
             }
         }
     }
@@ -67,17 +67,17 @@ TEST(BitMemoryRegion, TestBitsAccess)
         uint32_t mask = 0;
         for (size_t length = 0; length < BITS_PER_UINT32; length++) {
             const uint32_t value = 0xBADDCAFEU & mask;
-            for (auto fill_value : FILL_DATA) {
-                std::fill(data.begin(), data.end(), fill_value);
+            for (auto fillValue : FILL_DATA) {
+                std::fill(data.begin(), data.end(), fillValue);
                 BitMemoryRegion region1(data.data(), offset, length);
                 region1.Write(value, 0U, length);
                 ASSERT_EQ(region1.Read(0U, length), value);
-                CompareData(data.data(), offset, length, value, fill_value);
-                std::fill(data.begin(), data.end(), fill_value);
+                CompareData(data.data(), offset, length, value, fillValue);
+                std::fill(data.begin(), data.end(), fillValue);
                 BitMemoryRegion region2(data.data(), data.size() * BITS_PER_BYTE);
                 region2.Write(value, offset, length);
                 ASSERT_EQ(region2.Read(offset, length), value);
-                CompareData(data.data(), offset, length, value, fill_value);
+                CompareData(data.data(), offset, length, value, fillValue);
             }
             mask = (mask << 1U) | 1U;
         }

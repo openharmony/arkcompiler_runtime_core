@@ -66,7 +66,7 @@ class EtsArrayBufferMembers {
 public:
     static std::vector<Member> GetMembers()
     {
-        return std::vector<Member> {{"byteLength", MEMBER_OFFSET(EtsArrayBuffer, byte_length_)},
+        return std::vector<Member> {{"byteLength", MEMBER_OFFSET(EtsArrayBuffer, byteLength_)},
                                     {"data", MEMBER_OFFSET(EtsArrayBuffer, data_)}};
     }
 };

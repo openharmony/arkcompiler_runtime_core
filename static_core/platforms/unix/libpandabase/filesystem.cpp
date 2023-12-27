@@ -24,8 +24,8 @@ namespace panda::os {
 std::string GetAbsolutePath(std::string_view path)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-    std::array<char, PATH_MAX> resolved_path;
-    auto res = realpath(path.data(), resolved_path.data());
+    std::array<char, PATH_MAX> resolvedPath;
+    auto res = realpath(path.data(), resolvedPath.data());
     return res == nullptr ? std::string() : res;
 }
 

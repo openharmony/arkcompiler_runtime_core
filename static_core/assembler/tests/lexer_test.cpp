@@ -181,8 +181,8 @@ TEST(lexertests, string_literal)
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
         ASSERT_EQ(tok.first.size(), 1U);
         ASSERT_EQ(tok.first[0].type, Token::Type::ID_STRING);
-        ASSERT_EQ(tok.first[0].bound_left, 0U);
-        ASSERT_EQ(tok.first[0].bound_right, s.length());
+        ASSERT_EQ(tok.first[0].boundLeft, 0U);
+        ASSERT_EQ(tok.first[0].boundRight, s.length());
     }
 
     {
@@ -195,8 +195,8 @@ TEST(lexertests, string_literal)
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
         ASSERT_EQ(tok.first.size(), 2U);
         ASSERT_EQ(tok.first[0].type, Token::Type::ID_STRING);
-        ASSERT_EQ(tok.first[0].bound_left, 0U);
-        ASSERT_EQ(tok.first[0].bound_right, s.find('1'));
+        ASSERT_EQ(tok.first[0].boundLeft, 0U);
+        ASSERT_EQ(tok.first[0].boundRight, s.find('1'));
     }
 }
 

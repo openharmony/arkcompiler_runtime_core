@@ -70,16 +70,16 @@ private:
 };
 
 template <class ClassType, EtsClassRoot ETS_CLASS_ROOT>
-static void TestEtsPrimitiveArray(uint32_t array_length, ClassType element)
+static void TestEtsPrimitiveArray(uint32_t arrayLength, ClassType element)
 {
-    auto *array = EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT>::Create(array_length);
+    auto *array = EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT>::Create(arrayLength);
     ASSERT_NE(array, nullptr);
 
-    ASSERT_EQ(array->GetLength(), array_length);
+    ASSERT_EQ(array->GetLength(), arrayLength);
     ASSERT_EQ(array->GetElementSize(), sizeof(ClassType));
     ASSERT_EQ(array->IsPrimitive(), true);
 
-    for (uint32_t idx = 0; idx < array_length; ++idx) {
+    for (uint32_t idx = 0; idx < arrayLength; ++idx) {
         array->Set(idx, element);
         ASSERT_EQ(array->Get(idx), element);
     }
@@ -87,31 +87,31 @@ static void TestEtsPrimitiveArray(uint32_t array_length, ClassType element)
 
 TEST_F(EtsArrayTest, PrimitiveEtsArray)
 {
-    uint32_t array_length = 100;
+    uint32_t arrayLength = 100;
 
-    TestEtsPrimitiveArray<EtsBoolean, EtsClassRoot::BOOLEAN_ARRAY>(array_length, 1U);      // EtsBooleanArray
-    TestEtsPrimitiveArray<EtsByte, EtsClassRoot::BYTE_ARRAY>(array_length, 127);           // EtsByteArray
-    TestEtsPrimitiveArray<EtsChar, EtsClassRoot::CHAR_ARRAY>(array_length, 65000U);        // EtsCharArray
-    TestEtsPrimitiveArray<EtsShort, EtsClassRoot::SHORT_ARRAY>(array_length, 150);         // EtsShortArray
-    TestEtsPrimitiveArray<EtsInt, EtsClassRoot::INT_ARRAY>(array_length, 65000);           // EtsIntArray
-    TestEtsPrimitiveArray<EtsLong, EtsClassRoot::LONG_ARRAY>(array_length, 65000);         // EtsLongArray
-    TestEtsPrimitiveArray<EtsFloat, EtsClassRoot::FLOAT_ARRAY>(array_length, 65000.0F);    // EtsFloatArray
-    TestEtsPrimitiveArray<EtsDouble, EtsClassRoot::DOUBLE_ARRAY>(array_length, 65000.0F);  // EtsDoubleArray
+    TestEtsPrimitiveArray<EtsBoolean, EtsClassRoot::BOOLEAN_ARRAY>(arrayLength, 1U);      // EtsBooleanArray
+    TestEtsPrimitiveArray<EtsByte, EtsClassRoot::BYTE_ARRAY>(arrayLength, 127);           // EtsByteArray
+    TestEtsPrimitiveArray<EtsChar, EtsClassRoot::CHAR_ARRAY>(arrayLength, 65000U);        // EtsCharArray
+    TestEtsPrimitiveArray<EtsShort, EtsClassRoot::SHORT_ARRAY>(arrayLength, 150);         // EtsShortArray
+    TestEtsPrimitiveArray<EtsInt, EtsClassRoot::INT_ARRAY>(arrayLength, 65000);           // EtsIntArray
+    TestEtsPrimitiveArray<EtsLong, EtsClassRoot::LONG_ARRAY>(arrayLength, 65000);         // EtsLongArray
+    TestEtsPrimitiveArray<EtsFloat, EtsClassRoot::FLOAT_ARRAY>(arrayLength, 65000.0F);    // EtsFloatArray
+    TestEtsPrimitiveArray<EtsDouble, EtsClassRoot::DOUBLE_ARRAY>(arrayLength, 65000.0F);  // EtsDoubleArray
 }
 
-static void TestEtsObjectArray(const char *class_name, const char *source, uint32_t array_length)
+static void TestEtsObjectArray(const char *className, const char *source, uint32_t arrayLength)
 {
-    EtsClass *klass = GetTestClass(source, class_name);
+    EtsClass *klass = GetTestClass(source, className);
     ASSERT_NE(klass, nullptr);
 
-    auto *array = EtsObjectArray::Create(klass, array_length);
+    auto *array = EtsObjectArray::Create(klass, arrayLength);
     ASSERT_NE(array, nullptr);
 
-    ASSERT_EQ(array->GetLength(), array_length);
+    ASSERT_EQ(array->GetLength(), arrayLength);
     ASSERT_EQ(array->GetElementSize(), array->GetClass()->GetComponentSize());
     ASSERT_EQ(array->IsPrimitive(), false);
 
-    for (uint32_t idx = 0; idx < array_length; idx++) {
+    for (uint32_t idx = 0; idx < arrayLength; idx++) {
         auto *obj = EtsObject::Create(klass);
         array->Set(idx, obj);
         ASSERT_EQ(array->Get(idx), obj);

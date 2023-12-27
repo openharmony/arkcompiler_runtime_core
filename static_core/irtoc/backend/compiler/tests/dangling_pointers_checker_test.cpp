@@ -47,12 +47,12 @@ TEST_F(DanglingPointersCheckerTest, test0)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -63,12 +63,12 @@ TEST_F(DanglingPointersCheckerTest, test0)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(5U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
-            INST(6U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
+            INST(5U, Opcode::LoadI).Inputs(0U).ref().Imm(frameAccOffset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frameAccOffset);
 
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
             INST(4U, Opcode::ReturnVoid).v0id();
@@ -93,12 +93,12 @@ TEST_F(DanglingPointersCheckerTest, test1)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -111,14 +111,14 @@ TEST_F(DanglingPointersCheckerTest, test1)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(5U, Opcode::AddI).Inputs(0U).Imm(frame_acc_offset).ptr();
+            INST(5U, Opcode::AddI).Inputs(0U).Imm(frameAccOffset).ptr();
             INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
-            INST(8U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frame_acc_offset);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frameAccOffset);
             INST(7U, Opcode::Mul).Inputs(10U, 11U).i64();
 
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).Inputs({{compiler::DataType::INT64, 7U}}).ptr();
             INST(4U, Opcode::ReturnVoid).v0id();
@@ -143,12 +143,12 @@ TEST_F(DanglingPointersCheckerTest, test2)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -159,13 +159,13 @@ TEST_F(DanglingPointersCheckerTest, test2)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(5U, Opcode::AddI).Inputs(1U).Imm(frame_acc_offset).ptr();
+            INST(5U, Opcode::AddI).Inputs(1U).Imm(frameAccOffset).ptr();
             INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
-            INST(8U, Opcode::StoreI).u64().Inputs(0U, 1U).Imm(frame_acc_offset);
+            INST(8U, Opcode::StoreI).u64().Inputs(0U, 1U).Imm(frameAccOffset);
 
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
             INST(4U, Opcode::ReturnVoid).v0id();
@@ -190,12 +190,12 @@ TEST_F(DanglingPointersCheckerTest, test3)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -206,13 +206,13 @@ TEST_F(DanglingPointersCheckerTest, test3)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(5U, Opcode::AddI).Inputs(1U).Imm(frame_acc_offset).ptr();
+            INST(5U, Opcode::AddI).Inputs(1U).Imm(frameAccOffset).ptr();
             INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
-            INST(8U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frame_acc_offset);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frameAccOffset);
 
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
             INST(4U, Opcode::ReturnVoid).v0id();
@@ -238,12 +238,12 @@ TEST_F(DanglingPointersCheckerTest, test4)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -255,13 +255,13 @@ TEST_F(DanglingPointersCheckerTest, test4)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(5U, Opcode::AddI).Inputs(10U).Imm(frame_acc_offset).ptr();
+            INST(5U, Opcode::AddI).Inputs(10U).Imm(frameAccOffset).ptr();
             INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
-            INST(8U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frame_acc_offset);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frameAccOffset);
 
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
             INST(4U, Opcode::ReturnVoid).v0id();
@@ -287,12 +287,12 @@ TEST_F(DanglingPointersCheckerTest, test5)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -306,13 +306,13 @@ TEST_F(DanglingPointersCheckerTest, test5)
         BASIC_BLOCK(2U, -1L)
         {
             INST(8U, Opcode::LoadI).Inputs(0U).ptr().Imm(Frame::GetPrevFrameOffset());
-            INST(5U, Opcode::AddI).Inputs(8U).Imm(frame_acc_offset).ptr();
+            INST(5U, Opcode::AddI).Inputs(8U).Imm(frameAccOffset).ptr();
             INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
             INST(7U, Opcode::Mul).Inputs(10U, 11U).i64();
-            INST(9U, Opcode::StoreI).ref().Inputs(8U, 6U).Imm(frame_acc_offset);
+            INST(9U, Opcode::StoreI).ref().Inputs(8U, 6U).Imm(frameAccOffset);
 
             // store tag
-            INST(31U, Opcode::StoreI).u64().Inputs(5U, 2U).Imm(acc_tag_offset);
+            INST(31U, Opcode::StoreI).u64().Inputs(5U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).Inputs({{compiler::DataType::INT64, 7U}}).ptr();
             INST(4U, Opcode::ReturnVoid).v0id();
@@ -337,12 +337,12 @@ TEST_F(DanglingPointersCheckerTest, test6)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -355,12 +355,12 @@ TEST_F(DanglingPointersCheckerTest, test6)
         BASIC_BLOCK(2U, -1L)
         {
             INST(8U, Opcode::LoadI).Inputs(2U).ptr().Imm(ManagedThread::GetFrameOffset());
-            INST(5U, Opcode::LoadI).Inputs(8U).Imm(frame_acc_offset).ref();
-            INST(9U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
+            INST(5U, Opcode::LoadI).Inputs(8U).Imm(frameAccOffset).ref();
+            INST(9U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frameAccOffset);
 
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 10U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 10U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
             INST(4U, Opcode::ReturnVoid).v0id();
@@ -385,12 +385,12 @@ TEST_F(DanglingPointersCheckerTest, test7)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -404,14 +404,14 @@ TEST_F(DanglingPointersCheckerTest, test7)
         BASIC_BLOCK(2U, -1L)
         {
             INST(8U, Opcode::LoadI).Inputs(0U).ptr().Imm(Frame::GetPrevFrameOffset());
-            INST(5U, Opcode::AddI).Inputs(8U).Imm(frame_acc_offset).ptr();
+            INST(5U, Opcode::AddI).Inputs(8U).Imm(frameAccOffset).ptr();
             INST(6U, Opcode::LoadI).Inputs(5U).ref().Imm(0U);
             INST(7U, Opcode::Mul).Inputs(10U, 11U).i64();
-            INST(9U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frame_acc_offset);
+            INST(9U, Opcode::StoreI).ref().Inputs(0U, 6U).Imm(frameAccOffset);
 
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).Inputs({{compiler::DataType::INT64, 7U}}).ptr();
             INST(4U, Opcode::ReturnVoid).v0id();
@@ -432,12 +432,12 @@ TEST_F(DanglingPointersCheckerTest, test8)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -448,15 +448,15 @@ TEST_F(DanglingPointersCheckerTest, test8)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(5U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
-            INST(6U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
+            INST(5U, Opcode::LoadI).Inputs(0U).ref().Imm(frameAccOffset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frameAccOffset);
 
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
-            INST(7U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frameAccOffset);
             INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
@@ -497,12 +497,12 @@ TEST_F(DanglingPointersCheckerTest, test9)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -516,44 +516,44 @@ TEST_F(DanglingPointersCheckerTest, test9)
 
         BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
-            INST(5U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
-            INST(19U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(4U, Opcode::LoadI).Inputs(0U).ref().Imm(frameAccOffset);
+            INST(5U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frameAccOffset);
+            INST(19U, Opcode::AddI).Inputs(11U).Imm(frameAccOffset).u64();
             INST(20U, Opcode::Mul).Inputs(12U, 19U).u64();
             INST(22U, Opcode::If).Inputs(19U, 20U).b().CC(CC_LE);
         }
         BASIC_BLOCK(3U, 5U)
         {
-            INST(6U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frameAccOffset);
         }
         BASIC_BLOCK(4U, 8U)
         {
-            INST(7U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frameAccOffset);
         }
         BASIC_BLOCK(5U, 6U, 7U)
         {
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
-            INST(17U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(17U, Opcode::AddI).Inputs(11U).Imm(frameAccOffset).u64();
             INST(18U, Opcode::Mul).Inputs(12U, 17U).u64();
             INST(21U, Opcode::If).Inputs(17U, 18U).b().CC(CC_NE);
         }
         BASIC_BLOCK(6U, 9U)
         {
-            INST(8U, Opcode::AddI).Inputs(10U).Imm(frame_acc_offset).u64();
+            INST(8U, Opcode::AddI).Inputs(10U).Imm(frameAccOffset).u64();
         }
         BASIC_BLOCK(7U, 8U, 9U)
         {
-            INST(16U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(16U, Opcode::AddI).Inputs(11U).Imm(frameAccOffset).u64();
             INST(9U, Opcode::Mul).Inputs(12U, 16U).u64();
             INST(15U, Opcode::If).Inputs(9U, 16U).b().CC(CC_EQ);
         }
         BASIC_BLOCK(8U, 9U)
         {
-            INST(13U, Opcode::AddI).Inputs(12U).Imm(frame_acc_offset).u64();
+            INST(13U, Opcode::AddI).Inputs(12U).Imm(frameAccOffset).u64();
         }
 
         BASIC_BLOCK(9U, -1L)
@@ -598,12 +598,12 @@ TEST_F(DanglingPointersCheckerTest, test10)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -617,45 +617,45 @@ TEST_F(DanglingPointersCheckerTest, test10)
 
         BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
-            INST(5U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
-            INST(19U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(4U, Opcode::LoadI).Inputs(0U).ref().Imm(frameAccOffset);
+            INST(5U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frameAccOffset);
+            INST(19U, Opcode::AddI).Inputs(11U).Imm(frameAccOffset).u64();
             INST(20U, Opcode::Mul).Inputs(12U, 19U).u64();
             INST(22U, Opcode::If).Inputs(19U, 20U).b().CC(CC_LE);
         }
         BASIC_BLOCK(3U, 5U)
         {
-            INST(6U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frameAccOffset);
         }
         BASIC_BLOCK(4U, 8U)
         {
-            INST(7U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frameAccOffset);
         }
         BASIC_BLOCK(5U, 6U, 7U)
         {
             // store tag
-            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(acc_tag_offset);
+            INST(30U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(31U, Opcode::StoreI).u64().Inputs(30U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
-            INST(17U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(17U, Opcode::AddI).Inputs(11U).Imm(frameAccOffset).u64();
             INST(18U, Opcode::Mul).Inputs(12U, 17U).u64();
             INST(21U, Opcode::If).Inputs(17U, 18U).b().CC(CC_NE);
         }
         BASIC_BLOCK(6U, 9U)
         {
-            INST(8U, Opcode::AddI).Inputs(10U).Imm(frame_acc_offset).u64();
+            INST(8U, Opcode::AddI).Inputs(10U).Imm(frameAccOffset).u64();
         }
         BASIC_BLOCK(7U, 8U, 9U)
         {
-            INST(16U, Opcode::AddI).Inputs(11U).Imm(frame_acc_offset).u64();
+            INST(16U, Opcode::AddI).Inputs(11U).Imm(frameAccOffset).u64();
             INST(9U, Opcode::Mul).Inputs(12U, 16U).u64();
             INST(15U, Opcode::If).Inputs(9U, 16U).b().CC(CC_EQ);
         }
         BASIC_BLOCK(8U, 9U)
         {
-            INST(23U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
-            INST(13U, Opcode::AddI).Inputs(12U).Imm(frame_acc_offset).u64();
+            INST(23U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frameAccOffset);
+            INST(13U, Opcode::AddI).Inputs(12U).Imm(frameAccOffset).u64();
         }
 
         BASIC_BLOCK(9U, -1L)
@@ -700,12 +700,12 @@ TEST_F(DanglingPointersCheckerTest, test11)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -718,22 +718,22 @@ TEST_F(DanglingPointersCheckerTest, test11)
 
         BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3U, Opcode::AddI).Inputs(10U).Imm(frame_acc_offset).u64();
+            INST(3U, Opcode::AddI).Inputs(10U).Imm(frameAccOffset).u64();
             INST(4U, Opcode::If).Inputs(3U, 11U).b().CC(CC_NE);
         }
         BASIC_BLOCK(3U, 4U)
         {
-            INST(5U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
+            INST(5U, Opcode::LoadI).Inputs(0U).ref().Imm(frameAccOffset);
             INST(6U, Opcode::AddI).Inputs(5U).ptr().Imm(10U);
         }
         BASIC_BLOCK(4U, -1L)
         {
             INST(7U, Opcode::Phi).Inputs(1U, 6U).ptr();
-            INST(8U, Opcode::StoreI).ref().Inputs(0U, 7U).Imm(frame_acc_offset);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 7U).Imm(frameAccOffset);
 
             // store tag
-            INST(21U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(22U, Opcode::StoreI).u64().Inputs(21U, 2U).Imm(acc_tag_offset);
+            INST(21U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(22U, Opcode::StoreI).u64().Inputs(21U, 2U).Imm(accTagOffset);
 
             INST(9U, Opcode::Call).TypeId(0U).ptr();
             INST(20U, Opcode::ReturnVoid).v0id();
@@ -757,12 +757,12 @@ TEST_F(DanglingPointersCheckerTest, test12)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -773,14 +773,14 @@ TEST_F(DanglingPointersCheckerTest, test12)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frameAccOffset);
 
             // store tag
-            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(acc_tag_offset);
+            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
-            INST(5U, Opcode::AddI).Inputs(1U).ptr().Imm(frame_acc_offset);
+            INST(5U, Opcode::AddI).Inputs(1U).ptr().Imm(frameAccOffset);
             INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
@@ -803,12 +803,12 @@ TEST_F(DanglingPointersCheckerTest, test13)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -820,14 +820,14 @@ TEST_F(DanglingPointersCheckerTest, test13)
         BASIC_BLOCK(2U, -1L)
         {
             INST(6U, Opcode::LoadI).Inputs(0U).u64().Imm(10U);
-            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frameAccOffset);
 
             // store tag
-            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(acc_tag_offset);
+            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
-            INST(5U, Opcode::AddI).Inputs(6U).u64().Imm(frame_acc_offset);
+            INST(5U, Opcode::AddI).Inputs(6U).u64().Imm(frameAccOffset);
             INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
@@ -850,12 +850,12 @@ TEST_F(DanglingPointersCheckerTest, test14)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -866,12 +866,12 @@ TEST_F(DanglingPointersCheckerTest, test14)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(6U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frame_acc_offset);
+            INST(6U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frameAccOffset);
 
             // store tag
-            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(acc_tag_offset);
+            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
             INST(5U, Opcode::LoadI).Inputs(6U).u64().Imm(0U);
@@ -896,12 +896,12 @@ TEST_F(DanglingPointersCheckerTest, test15)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -914,11 +914,11 @@ TEST_F(DanglingPointersCheckerTest, test15)
         {
             INST(10U, Opcode::LoadI).Inputs(0U).ref().Imm(10U);
             INST(6U, Opcode::AddI).Inputs(1U).ptr().Imm(10U);
-            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frame_acc_offset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 1U).Imm(frameAccOffset);
 
             // store tag
-            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(acc_tag_offset);
+            INST(8U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(9U, Opcode::StoreI).u64().Inputs(8U, 2U).Imm(accTagOffset);
 
             INST(3U, Opcode::Call).TypeId(0U).ptr();
             INST(5U, Opcode::LoadI).Inputs(10U).u64().Imm(0U);
@@ -945,12 +945,12 @@ TEST_F(DanglingPointersCheckerTest, test16)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -962,10 +962,10 @@ TEST_F(DanglingPointersCheckerTest, test16)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::LoadI).Inputs(0U).ref().Imm(frame_acc_offset);
-            INST(5U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
-            INST(6U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frame_acc_offset);
-            INST(7U, Opcode::StoreI).u64().Inputs(5U, 2U).Imm(acc_tag_offset);
+            INST(4U, Opcode::LoadI).Inputs(0U).ref().Imm(frameAccOffset);
+            INST(5U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
+            INST(6U, Opcode::StoreI).ref().Inputs(0U, 4U).Imm(frameAccOffset);
+            INST(7U, Opcode::StoreI).u64().Inputs(5U, 2U).Imm(accTagOffset);
             INST(8U, Opcode::Call).TypeId(0U).ptr();
             INST(9U, Opcode::ReturnVoid).v0id();
         }
@@ -992,12 +992,12 @@ TEST_F(DanglingPointersCheckerTest, test17)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -1009,11 +1009,11 @@ TEST_F(DanglingPointersCheckerTest, test17)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(4U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
             INST(5U, Opcode::LoadI).Inputs(4U).ref().Imm(0U);
-            INST(6U, Opcode::LoadI).Inputs(4U).i64().Imm(acc_tag_offset);
-            INST(7U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
-            INST(8U, Opcode::StoreI).u64().Inputs(4U, 6U).Imm(acc_tag_offset);
+            INST(6U, Opcode::LoadI).Inputs(4U).i64().Imm(accTagOffset);
+            INST(7U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frameAccOffset);
+            INST(8U, Opcode::StoreI).u64().Inputs(4U, 6U).Imm(accTagOffset);
             INST(9U, Opcode::Call).TypeId(0U).ptr();
             INST(10U, Opcode::ReturnVoid).v0id();
         }
@@ -1041,12 +1041,12 @@ TEST_F(DanglingPointersCheckerTest, test18)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -1058,12 +1058,12 @@ TEST_F(DanglingPointersCheckerTest, test18)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(4U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
             INST(5U, Opcode::LoadI).Inputs(4U).ref().Imm(0U);
-            INST(6U, Opcode::AddI).Inputs(4U).ptr().Imm(acc_tag_offset);
+            INST(6U, Opcode::AddI).Inputs(4U).ptr().Imm(accTagOffset);
             INST(7U, Opcode::LoadI).Inputs(6U).i64().Imm(0U);
-            INST(8U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
-            INST(9U, Opcode::StoreI).u64().Inputs(4U, 7U).Imm(acc_tag_offset);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frameAccOffset);
+            INST(9U, Opcode::StoreI).u64().Inputs(4U, 7U).Imm(accTagOffset);
             INST(10U, Opcode::Call).TypeId(0U).ptr();
             INST(11U, Opcode::ReturnVoid).v0id();
         }
@@ -1091,12 +1091,12 @@ TEST_F(DanglingPointersCheckerTest, test19)
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
     }
-    auto frame_acc_offset = cross_values::GetFrameAccOffset(arch);
-    auto acc_tag_offset = cross_values::GetFrameAccMirrorOffset(arch);
-    RelocationHandlerTest relocation_handler;
-    relocation_handler.SetTestExternalFunctions({*DanglingPointersChecker::target_funcs_.begin()});
-    GetGraph()->SetRelocationHandler(&relocation_handler);
-    GetGraph()->SetMethod(&relocation_handler);
+    auto frameAccOffset = cross_values::GetFrameAccOffset(arch);
+    auto accTagOffset = cross_values::GetFrameAccMirrorOffset(arch);
+    RelocationHandlerTest relocationHandler;
+    relocationHandler.SetTestExternalFunctions({*DanglingPointersChecker::targetFuncs_.begin()});
+    GetGraph()->SetRelocationHandler(&relocationHandler);
+    GetGraph()->SetMethod(&relocationHandler);
     GetGraph()->SetMode(GraphMode::InterpreterEntry());
 
     GRAPH(GetGraph())
@@ -1108,12 +1108,12 @@ TEST_F(DanglingPointersCheckerTest, test19)
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(4U, Opcode::AddI).Inputs(0U).ptr().Imm(frame_acc_offset);
+            INST(4U, Opcode::AddI).Inputs(0U).ptr().Imm(frameAccOffset);
             INST(5U, Opcode::LoadI).Inputs(4U).ref().Imm(0U);
-            INST(6U, Opcode::AddI).Inputs(4U).ptr().Imm(acc_tag_offset);
+            INST(6U, Opcode::AddI).Inputs(4U).ptr().Imm(accTagOffset);
             INST(7U, Opcode::LoadI).Inputs(6U).i64().Imm(0U);
-            INST(8U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frame_acc_offset);
-            INST(9U, Opcode::StoreI).u64().Inputs(4U, 2U).Imm(acc_tag_offset);
+            INST(8U, Opcode::StoreI).ref().Inputs(0U, 5U).Imm(frameAccOffset);
+            INST(9U, Opcode::StoreI).u64().Inputs(4U, 2U).Imm(accTagOffset);
             INST(10U, Opcode::Call).TypeId(0U).ptr();
             INST(11U, Opcode::ReturnVoid).v0id();
         }

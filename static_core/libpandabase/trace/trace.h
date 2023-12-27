@@ -23,7 +23,7 @@
 namespace panda::trace {
 
 namespace internal {
-extern int G_TRACE_MARKER_FD;
+extern int g_traceMarkerFd;
 bool DoInit();
 void DoBeginTracePoint(const char *str);
 void DoEndTracePoint();
@@ -33,7 +33,7 @@ void DoInt64TracePoint(const char *str, int64_t val);
 
 inline bool IsEnabled()
 {
-    return internal::G_TRACE_MARKER_FD != -1;
+    return internal::g_traceMarkerFd != -1;
 }
 
 inline void BeginTracePoint(const char *str)
@@ -87,19 +87,19 @@ public:
     ScopeTraceStremHelperBegin() = default;
     ~ScopeTraceStremHelperBegin()
     {
-        BeginTracePoint(message_buffer_.str().c_str());
+        BeginTracePoint(messageBuffer_.str().c_str());
     }
 
     std::ostream &GetStream()
     {
-        return message_buffer_;
+        return messageBuffer_;
     }
 
     NO_COPY_SEMANTIC(ScopeTraceStremHelperBegin);
     NO_MOVE_SEMANTIC(ScopeTraceStremHelperBegin);
 
 private:
-    std::ostringstream message_buffer_;
+    std::ostringstream messageBuffer_;
 };
 
 class ScopeTraceStremHelperEnd {

@@ -50,13 +50,13 @@ protected:
 
         EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scope(coroutine);
-        EtsClassLinker *ets_class_linker = coroutine->GetPandaVM()->GetClassLinker();
-        EtsClass *global = ets_class_linker->GetClass("LCoroutine;");
+        EtsClassLinker *etsClassLinker = coroutine->GetPandaVM()->GetClassLinker();
+        EtsClass *global = etsClassLinker->GetClass("LCoroutine;");
         ASSERT_NE(nullptr, global);
-        EtsMethod *get_coro_id_method = global->GetMethod("getCoroutineId");
-        ASSERT_NE(nullptr, get_coro_id_method);
-        ASSERT_TRUE(get_coro_id_method->IsNative());
-        get_coro_id_method->RegisterNativeImpl(reinterpret_cast<void *>(GetCoroId));
+        EtsMethod *getCoroIdMethod = global->GetMethod("getCoroutineId");
+        ASSERT_NE(nullptr, getCoroIdMethod);
+        ASSERT_TRUE(getCoroIdMethod->IsNative());
+        getCoroIdMethod->RegisterNativeImpl(reinterpret_cast<void *>(GetCoroId));
     }
 
     void TearDown() override
@@ -65,13 +65,13 @@ protected:
     }
 
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    const std::string abc_file_ = "js_mode_launch.abc";
+    const std::string abcFile_ = "js_mode_launch.abc";
 };
 
 TEST_F(JsModeLaunchTest, Call)
 {
-    const std::string main_func = "ETSGLOBAL::main";
-    auto res = Runtime::GetCurrent()->ExecutePandaFile(abc_file_.c_str(), main_func.c_str(), {});
+    const std::string mainFunc = "ETSGLOBAL::main";
+    auto res = Runtime::GetCurrent()->ExecutePandaFile(abcFile_.c_str(), mainFunc.c_str(), {});
     ASSERT_EQ(0, res.Value());
 }
 }  // namespace panda::ets::test

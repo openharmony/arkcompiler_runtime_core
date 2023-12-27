@@ -24,7 +24,7 @@ AdjustRefs::AdjustRefs(Graph *graph)
       defs_ {graph->GetLocalAllocator()->Adapter()},
       workset_ {graph->GetLocalAllocator()->Adapter()},
       heads_ {graph->GetLocalAllocator()->Adapter()},
-      insts_to_replace_ {graph->GetLocalAllocator()->Adapter()}
+      instsToReplace_ {graph->GetLocalAllocator()->Adapter()}
 {
 }
 
@@ -44,7 +44,7 @@ static bool IsRefAdjustable(const Inst *inst)
 
 bool AdjustRefs::RunImpl()
 {
-    auto def_marker = GetGraph()->NewMarker();
+    auto defMarker = GetGraph()->NewMarker();
     for (const auto &bb : GetGraph()->GetBlocksRPO()) {
         if (bb->GetLoop()->IsRoot()) {
             continue;
@@ -55,23 +55,23 @@ bool AdjustRefs::RunImpl()
                 continue;
             }
             auto def = inst->GetInput(0).GetInst();
-            if (!def->SetMarker(def_marker)) {
+            if (!def->SetMarker(defMarker)) {
                 defs_.push_back(def);
             }
         }
     }
-    GetGraph()->EraseMarker(def_marker);
+    GetGraph()->EraseMarker(defMarker);
     for (auto def : defs_) {
         workset_.clear();
-        auto marker_holder = MarkerHolder(GetGraph());
-        workset_marker_ = marker_holder.GetMarker();
+        auto markerHolder = MarkerHolder(GetGraph());
+        worksetMarker_ = markerHolder.GetMarker();
         for (auto &user : def->GetUsers()) {
             auto i = user.GetInst();
             if (!IsRefAdjustable(i) || i->GetBasicBlock()->GetLoop()->IsRoot()) {
                 continue;
             }
             workset_.push_back(i);
-            i->SetMarker(workset_marker_);
+            i->SetMarker(worksetMarker_);
         }
         ProcessArrayUses();
     }
@@ -90,22 +90,22 @@ bool AdjustRefs::RunImpl()
 void AdjustRefs::ProcessArrayUses()
 {
     ASSERT(heads_.empty());
-    auto entered_holder = MarkerHolder(GetGraph());
-    block_entered_ = entered_holder.GetMarker();
+    auto enteredHolder = MarkerHolder(GetGraph());
+    blockEntered_ = enteredHolder.GetMarker();
     GetHeads();
     while (!heads_.empty()) {
         auto head = heads_.back();
         heads_.pop_back();
         ASSERT(IsRefAdjustable(head));
-        ASSERT(head->IsMarked(workset_marker_));
+        ASSERT(head->IsMarked(worksetMarker_));
         ASSERT(head->GetBasicBlock() != nullptr);
         loop_ = head->GetBasicBlock()->GetLoop();
-        auto processed_holder = MarkerHolder(GetGraph());
-        block_processed_ = processed_holder.GetMarker();
-        insts_to_replace_.clear();
-        ASSERT(!head->GetBasicBlock()->IsMarked(block_processed_));
+        auto processedHolder = MarkerHolder(GetGraph());
+        blockProcessed_ = processedHolder.GetMarker();
+        instsToReplace_.clear();
+        ASSERT(!head->GetBasicBlock()->IsMarked(blockProcessed_));
         WalkChainDown(head->GetBasicBlock(), head, head);
-        if (insts_to_replace_.size() > 1) {
+        if (instsToReplace_.size() > 1) {
             ProcessChain(head);
         }
     }
@@ -121,41 +121,41 @@ void AdjustRefs::GetHeads()
         auto comp = [i](const Inst *i1) { return i1->IsDominate(i) && i != i1; };
         if (workset_.end() == std::find_if(workset_.begin(), workset_.end(), comp)) {
             heads_.push_back(i);
-            i->GetBasicBlock()->SetMarker(block_entered_);
+            i->GetBasicBlock()->SetMarker(blockEntered_);
         }
     }
 }
 
 /* Add instructions which can be merged with head to insts_to_replace_
  * Instructions which are visited but cannot be merged are added to heads_ */
-void AdjustRefs::WalkChainDown(BasicBlock *bb, Inst *start_from, Inst *head)
+void AdjustRefs::WalkChainDown(BasicBlock *bb, Inst *startFrom, Inst *head)
 {
-    bb->SetMarker(block_entered_);
-    for (auto cur = start_from; cur != nullptr; cur = cur->GetNext()) {
+    bb->SetMarker(blockEntered_);
+    for (auto cur = startFrom; cur != nullptr; cur = cur->GetNext()) {
         /* potential switch to VM, the chain breaks here */
         if (cur->IsRuntimeCall() || cur->GetOpcode() == Opcode::SafePoint) {
             head = nullptr;
-        } else if (cur->IsMarked(workset_marker_)) {
+        } else if (cur->IsMarked(worksetMarker_)) {
             if (head == nullptr) {
                 heads_.push_back(cur);
                 return;
             }
             ASSERT(head->IsDominate(cur));
-            insts_to_replace_.push_back(cur);
+            instsToReplace_.push_back(cur);
         }
     }
     if (head != nullptr) {
-        bb->SetMarker(block_processed_);
+        bb->SetMarker(blockProcessed_);
     }
     for (auto succ : bb->GetSuccsBlocks()) {
-        if (succ->GetLoop() != loop_ || succ->IsMarked(block_entered_)) {
+        if (succ->GetLoop() != loop_ || succ->IsMarked(blockEntered_)) {
             continue;
         }
-        auto all_preds_visited = true;
+        auto allPredsVisited = true;
         if (head != nullptr) {
             for (auto pred : succ->GetPredsBlocks()) {
-                if (!pred->IsMarked(block_processed_)) {
-                    all_preds_visited = false;
+                if (!pred->IsMarked(blockProcessed_)) {
+                    allPredsVisited = false;
                     break;
                 }
             }
@@ -163,7 +163,7 @@ void AdjustRefs::WalkChainDown(BasicBlock *bb, Inst *start_from, Inst *head)
         // If all predecessors of succ were walked with the current value of head,
         // we can be sure that there are no SafePoints or runtime calls
         // on any path from block with head to succ
-        if (all_preds_visited) {
+        if (allPredsVisited) {
             WalkChainDown(succ, succ->GetFirstInst(), head);
         }
     }
@@ -173,31 +173,31 @@ void AdjustRefs::ProcessChain(Inst *head)
 {
     Inst *def = head->GetInput(0).GetInst();
     auto off = GetGraph()->GetRuntime()->GetArrayDataOffset(GetGraph()->GetArch());
-    auto arr_data = InsertPointerArithmetic(def, off, head, def->GetPc(), true);
-    ASSERT(arr_data != nullptr);
+    auto arrData = InsertPointerArithmetic(def, off, head, def->GetPc(), true);
+    ASSERT(arrData != nullptr);
 
-    for (auto inst : insts_to_replace_) {
+    for (auto inst : instsToReplace_) {
         auto scale = DataType::ShiftByType(inst->GetType(), GetGraph()->GetArch());
-        InsertMem(inst, arr_data, inst->GetInput(1).GetInst(), scale);
+        InsertMem(inst, arrData, inst->GetInput(1).GetInst(), scale);
     }
 
     added_ = true;
 }
 
-Inst *AdjustRefs::InsertPointerArithmetic(Inst *input, uint64_t imm, Inst *insert_before, uint32_t pc, bool is_add)
+Inst *AdjustRefs::InsertPointerArithmetic(Inst *input, uint64_t imm, Inst *insertBefore, uint32_t pc, bool isAdd)
 {
     uint32_t size = DataType::GetTypeSize(DataType::POINTER, GetGraph()->GetArch());
     if (!GetGraph()->GetEncoder()->CanEncodeImmAddSubCmp(imm, size, false)) {
         return nullptr;
     }
-    Inst *new_inst;
-    if (is_add) {
-        new_inst = GetGraph()->CreateInstAddI(DataType::POINTER, pc, input, imm);
+    Inst *newInst;
+    if (isAdd) {
+        newInst = GetGraph()->CreateInstAddI(DataType::POINTER, pc, input, imm);
     } else {
-        new_inst = GetGraph()->CreateInstSubI(DataType::POINTER, pc, input, imm);
+        newInst = GetGraph()->CreateInstSubI(DataType::POINTER, pc, input, imm);
     }
-    insert_before->InsertBefore(new_inst);
-    return new_inst;
+    insertBefore->InsertBefore(newInst);
+    return newInst;
 }
 
 void AdjustRefs::InsertMem(Inst *org, Inst *base, Inst *index, uint8_t scale)
@@ -234,13 +234,13 @@ void AdjustRefs::InsertMem(Inst *org, Inst *base, Inst *index, uint8_t scale)
 void AdjustRefs::ProcessIndex(Inst *mem)
 {
     Inst *index = mem->GetInput(1).GetInst();
-    bool is_add;
+    bool isAdd;
     uint64_t imm;
     if (index->GetOpcode() == Opcode::AddI) {
-        is_add = true;
+        isAdd = true;
         imm = index->CastToAddI()->GetImm();
     } else if (index->GetOpcode() == Opcode::SubI) {
-        is_add = false;
+        isAdd = false;
         imm = index->CastToSubI()->GetImm();
     } else {
         return;
@@ -249,26 +249,26 @@ void AdjustRefs::ProcessIndex(Inst *mem)
     uint64_t off = GetGraph()->GetRuntime()->GetArrayDataOffset(GetGraph()->GetArch());
     Inst *base = mem->GetInput(0).GetInst();
 
-    Inst *new_base;
-    if (!is_add) {
+    Inst *newBase;
+    if (!isAdd) {
         if (off > (imm << scale)) {
-            uint64_t new_off = off - (imm << scale);
-            new_base = InsertPointerArithmetic(base, new_off, mem, mem->GetPc(), true);
+            uint64_t newOff = off - (imm << scale);
+            newBase = InsertPointerArithmetic(base, newOff, mem, mem->GetPc(), true);
         } else if (off < (imm << scale)) {
-            uint64_t new_off = (imm << scale) - off;
-            new_base = InsertPointerArithmetic(base, new_off, mem, mem->GetPc(), false);
+            uint64_t newOff = (imm << scale) - off;
+            newBase = InsertPointerArithmetic(base, newOff, mem, mem->GetPc(), false);
         } else {
             ASSERT(off == (imm << scale));
-            new_base = base;
+            newBase = base;
         }
     } else {
-        uint64_t new_off = off + (imm << scale);
-        new_base = InsertPointerArithmetic(base, new_off, mem, mem->GetPc(), true);
+        uint64_t newOff = off + (imm << scale);
+        newBase = InsertPointerArithmetic(base, newOff, mem, mem->GetPc(), true);
     }
-    if (new_base == nullptr) {
+    if (newBase == nullptr) {
         return;
     }
-    InsertMem(mem, new_base, index->GetInput(0).GetInst(), scale);
+    InsertMem(mem, newBase, index->GetInput(0).GetInst(), scale);
 
     added_ = true;
 }
