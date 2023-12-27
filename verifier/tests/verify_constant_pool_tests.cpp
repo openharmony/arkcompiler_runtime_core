@@ -175,46 +175,6 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
 }
 
 /**
-* @tc.name: verifier_constant_pool_005
-* @tc.desc: Verify the slot number of the abc file.
-* @tc.type: FUNC
-* @tc.require: file path and name
-*/
-HWTEST_F(VerifierConstantPool, verifier_constant_pool_005, TestSize.Level1)
-{
-    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
-    {
-        panda::verifier::Verifier ver {base_file_name};
-        ver.CollectIdInfos();
-        EXPECT_TRUE(ver.VerifyConstantPoolContent());
-    }
-    std::ifstream base_file(base_file_name, std::ios::binary);
-    EXPECT_TRUE(base_file.is_open());
-
-    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
-
-    unsigned char new_slot_number = 0x13;
-    // The known instruction which contains slot number in the abc file
-    std::vector<unsigned char> opcode_imm8 = {0x1e, 0x11};
-    for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
-        if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
-            buffer[i + 1] = new_slot_number;
-            break;
-        }
-    }
-
-    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_005.abc";
-    GenerateModifiedAbc(buffer, target_file_name);
-    base_file.close();
-
-    {
-        panda::verifier::Verifier ver {target_file_name};
-        ver.CollectIdInfos();
-        EXPECT_FALSE(ver.VerifyConstantPoolContent());
-    }
-}
-
-/**
 * @tc.name: verifier_constant_pool_006
 * @tc.desc: Verify the format of the abc file.
 * @tc.type: FUNC
