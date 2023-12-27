@@ -624,9 +624,6 @@ bool Verifier::CheckConstantPoolMethodContent(const panda_file::File::EntityId &
         }
         ins_slot_num += 1; // slot index starts with zero
     }
-    if (!VerifySlotNumber(method_accessor, ins_slot_num, method_id)) {
-        return false;
-    }
 
     return true;
 }
