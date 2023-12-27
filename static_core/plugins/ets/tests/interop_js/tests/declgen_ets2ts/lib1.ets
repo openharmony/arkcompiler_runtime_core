@@ -23,6 +23,10 @@ export function SumDouble(a: double, b: double): double {
     return a + b;
 }
 
+export function SumBoxedDouble(a: Double, b: Double): Number {
+    return a + b;
+}
+
 export function SumString(a: string, b: string): string {
     return a + b;
 }
@@ -87,13 +91,12 @@ export class Methods {
         return a;
     }
 
-    // TODO(ivagin): enable when supported by es2panda #12808
-    //SumIntVariadic(a: int, ...b: int[]): int {
-    //    for (let i = 0; i < b.length; i++) {
-    //        a += b[i];
-    //    }
-    //    return a;
-    //}
+    SumIntVariadic(a: int, ...b: int[]): int {
+       for (let i = 0; i < b.length; i++) {
+           a += b[i];
+       }
+       return a;
+    }
 };
 
 // ================ Classes/Interfaces ================
@@ -110,12 +113,14 @@ export interface I1 {
 
 export class Base {
     a: double = 1;
+    constructor(a: double) {this.a = a;}
 }
 
 export class Derived extends Base implements I0, I1 {
     I0Method(a: string): string { return a; };
     I1Method(a: double): double { return a; };
     b: double = 2;
+    constructor(a: double, b: double) {super(a); this.b = b;}
 }
 
 export interface Interface0 {
@@ -161,14 +166,16 @@ export interface IGeneric1<T> {
 export class BaseGeneric<T, U> {
     c: T;
     d: U;
+    constructor(c: T, d: U) {}
 }
 
-// TODO(ivagin): Enable when type arguments are supported by declgen/es2panda #12808
-//export class DerivedGeneric<T, U, V> extends BaseGeneric<T, U> implements IGeneric0<U>, IGeneric1<IGeneric0<V>> {
+// NOTE(ivagin): enable when supported by tsc compiler & runtime
+// export class DerivedGeneric<T, U, V> extends BaseGeneric<T, U> implements IGeneric0<U>, IGeneric1<IGeneric0<V>> {
 //    I0Method(a: U): U { return a; };
 //    I1Method(a: IGeneric0<V>): IGeneric0<V> { return a; };
 //    e: T;
-//}
+//    constructor(c: T, d: U) {super(c, d)}
+// }
 
 // ================ Dynamic objects ================
 
@@ -184,7 +191,6 @@ export class PromiseWrapper {
     });
 };
 
-// TODO(ivagin): enable when supported by ets2ts declgen
-// async function AsyncIdentity(param: int): Promise<int> {
-//     return param;
-// }
+async function AsyncIdentity(param: int): Promise<int> {
+    return param;
+}
