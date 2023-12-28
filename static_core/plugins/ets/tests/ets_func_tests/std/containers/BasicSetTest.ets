@@ -32,87 +32,95 @@ function main(): int {
 
 }
 
+function getIteratorLen<T>(iter: Iterator<T>): int {
+    let size: int = 0
+    while(!iter.next().done)
+        size++
+
+    return size;
+}
+
 function createSetAddAndCheckHasValue(): int {
     let set: Set<char> = new Set<char>;
-    set.put(c'a');
-    set.put(c'b');
-    set.put(c'c');
-    let result = set.hasValue(c'c') ? 0 : 1;
+    set.add(c'a');
+    set.add(c'b');
+    set.add(c'c');
+    let result = set.has(c'c') ? 0 : 1;
     return result;
 }
 
 function createEmptySet(): int {
     let set: Set<char> = new Set<char>;
-    return set.length();
+    return set.size();
 }
 
 function createSetAndGetValues(): int {
     let set: Set<char> = new Set<char>;
-    let values: Char[] = set.values();
+    let values = set.values();
 
-    let result = values.length == 0 ? 0 : 1;
+    let result = getIteratorLen<char>(values) == 0 ? 0 : 1;
     return result;
 }
 
 function createSetAddAndGetValues(): int {
     let set: Set<char> = new Set<char>;
-    set.put(c'a');
-    set.put(c'c');
-    set.put(c'b');
-    set.put(c'c');
-    let values: Char[] = set.values();
+    set.add(c'a');
+    set.add(c'c');
+    set.add(c'b');
+    set.add(c'c');
+    let values = set.values();
 
-    let result = values.length == 3 ? 0 : 1;
+    let result = getIteratorLen<char>(values) == 3 ? 0 : 1;
     return result;
 }
 
 function createSetAddRemoveAndGetValues(): int {
     let set: Set<char> = new Set<char>;
-    set.put(c'a');
-    set.put(c'b');
-    set.put(c'c');
-    set.remove(c'c');
-    let values: Char[] = set.values();
-    let result = values.length == 2 ? 0 : 1;
+    set.add(c'a');
+    set.add(c'b');
+    set.add(c'c');
+    set.delete(c'c');
+    let values = set.values();
+    let result = getIteratorLen<char>(values) == 2 ? 0 : 1;
     return result;
 }
 
 function createSetAddClearAndGetValues(): int {
     let set: Set<char> = new Set<char>;
-    set.put(c'a');
-    set.put(c'b');
-    set.put(c'c');
-    set.put(c'c');
+    set.add(c'a');
+    set.add(c'b');
+    set.add(c'c');
+    set.add(c'c');
     set.clear();
-    let values: Char[] = set.values();
-    let result = values.length == 0 ? 0 : 1;
+    let values = set.values();
+    let result = getIteratorLen<char>(values) == 0 ? 0 : 1;
     return result;
 }
 
 function createSetAddAndRemove(): int {
     let set: Set<char> = new Set<char>;
-    set.put(c'a');
-    set.put(c'b');
-    set.put(c'c');
-    set.remove(c'c');
-    let result = set.length() == 2 ? 0 : 1;
+    set.add(c'a');
+    set.add(c'b');
+    set.add(c'c');
+    set.delete(c'c');
+    let result = set.size() == 2 ? 0 : 1;
     return result;
 }
 
 function createSetAddAndClear(): int {
     let set: Set<char> = new Set<char>;
-    set.put(c'a');
-    set.put(c'b');
-    set.put(c'c');
+    set.add(c'a');
+    set.add(c'b');
+    set.add(c'c');
     set.clear();
-    let result = set.length() == 0 ? 0 : 1;
+    let result = set.size() == 0 ? 0 : 1;
     return result;
 }
 
 function createSetAndAdd(): int {
     let set: Set<char> = new Set<char>;
-    set.put(c'a');
-    let result = set.length() == 1 ? 0 : 1;
+    set.add(c'a');
+    let result = set.size() == 1 ? 0 : 1;
     return result;
 }
 

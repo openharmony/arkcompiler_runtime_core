@@ -373,7 +373,7 @@ export class JSON {
             throw new Error("Incorrect type: " + typ.toString())
         }
         let value = JSONParser.parse(str)
-        return JSON.parse(value, typ) as T|null
+        return JSON.parse(value, typ)
     }
 
     private static parseObject(jVal: JSONObject, cType: ClassType): Object {

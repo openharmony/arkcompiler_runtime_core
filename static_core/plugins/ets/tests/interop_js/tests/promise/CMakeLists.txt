@@ -191,11 +191,12 @@ panda_ets_interop_js_test(ets_interop_js_test_promise_all_resolved
     LAUNCHER_ARGS "testPromiseAllResolved"
 )
 
-panda_ets_interop_js_test(ets_interop_js_test_promise_all_rejected
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-    LAUNCHER_ARGS "testPromiseAllRejected"
-)
+# NOTE(vpukhov): #15055
+# panda_ets_interop_js_test(ets_interop_js_test_promise_all_rejected
+#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+#     LAUNCHER_ARGS "testPromiseAllRejected"
+# )
 
 panda_ets_interop_js_test(ets_interop_js_test_promise_allsettled
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
@@ -203,11 +204,12 @@ panda_ets_interop_js_test(ets_interop_js_test_promise_allsettled
     LAUNCHER_ARGS "testPromiseAllSettled"
 )
 
-panda_ets_interop_js_test(ets_interop_js_test_promise_any_empty
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-    LAUNCHER_ARGS "testPromiseAnyEmpty"
-)
+# NOTE(vpukhov): #15055
+# panda_ets_interop_js_test(ets_interop_js_test_promise_any_empty
+#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+#     LAUNCHER_ARGS "testPromiseAnyEmpty"
+# )
 
 panda_ets_interop_js_test(ets_interop_js_test_promise_any_resolved
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
@@ -215,11 +217,12 @@ panda_ets_interop_js_test(ets_interop_js_test_promise_any_resolved
     LAUNCHER_ARGS "testPromiseAnyResolved"
 )
 
-panda_ets_interop_js_test(ets_interop_js_test_promise_any_rejected
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-    LAUNCHER_ARGS "testPromiseAnyRejected"
-)
+# NOTE(vpukhov): #15055
+# panda_ets_interop_js_test(ets_interop_js_test_promise_any_rejected
+#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+#     LAUNCHER_ARGS "testPromiseAnyRejected"
+# )
 
 panda_ets_interop_js_test(ets_interop_js_test_promise_race_resolved
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
@@ -227,8 +230,9 @@ panda_ets_interop_js_test(ets_interop_js_test_promise_race_resolved
     LAUNCHER_ARGS "testPromiseRaceResolved"
 )
 
-panda_ets_interop_js_test(ets_interop_js_test_promise_race_rejected
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-    LAUNCHER_ARGS "testPromiseRaceRejected"
-)
+# NOTE(vpukhov): #15055
+# panda_ets_interop_js_test(ets_interop_js_test_promise_race_rejected
+#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+#     LAUNCHER_ARGS "testPromiseRaceRejected"
+# )

@@ -24,9 +24,9 @@ function main(): void {
     assert s.has(1) : "has 1"
     assert s.has(2) : "has 2"
     assert s.has(3) : "has 3"
-    //assert it.next().value! == 1 : "it1"
-    //assert it.next().value! == 2 : "it2"
-    //assert it.next().value! == 3 : "it3"
+    assert it.next().value! == 1 : "it1"
+    assert it.next().value! == 2 : "it2"
+    assert it.next().value! == 3 : "it3"
 
     test_bad_hash()
     test_obj()

@@ -16,7 +16,7 @@
 /*---
 desc: 05 Generics
 name: 05.generics/generic_02
-tags: [compile-only]
+
 ---*/
 
 class A {}

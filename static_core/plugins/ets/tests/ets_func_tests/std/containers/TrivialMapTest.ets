@@ -23,13 +23,13 @@ function main(): void {
     assert s.has(1) : "has 1"
     assert s.has(2) : "has 2"
     assert s.has(3) : "has 3"
-//    const it = s.values()
-//    assert it.next().value! == 4 : "it1"
-//    assert it.next().value! == 2 : "it2"
-//    assert it.next().value! == 3 : "it3"
-//
-//    const kit = s.keys()
-//    assert kit.next().value! == 1 : "kit1"
-//    assert kit.next().value! == 2 : "kit2"
-//    assert kit.next().value! == 3 : "kit3"
+    const it = s.values()
+    assert it.next().value! == 4 : "it1"
+    assert it.next().value! == 2 : "it2"
+    assert it.next().value! == 3 : "it3"
+
+    const kit = s.keys()
+    assert kit.next().value! == 1 : "kit1"
+    assert kit.next().value! == 2 : "kit2"
+    assert kit.next().value! == 3 : "kit3"
 }

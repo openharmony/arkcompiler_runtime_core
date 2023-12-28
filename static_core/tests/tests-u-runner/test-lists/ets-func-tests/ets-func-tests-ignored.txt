@@ -90,27 +90,35 @@ std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_short_ar
 regression/12581_box_type_array_Long_array.ets
 ### Issue 12581
 regression/12581_custom_class_Engine_array.ets
-### Issue 12562 end
-### Issue 12849
+### Issue 12849 begin
 escompat/escompat_Array_single_Test_escompat_Array.ets
 escompat/escompat_Array_Test_escompat_Array.ets
 escompat/escompat_Array_Test_escompat_Array_001.ets
 escompat/escompat_Array_Test_escompat_Array_002.ets
 escompat/escompat_Array_Test_escompat_Array_003.ets
-### Issue 12849
-### Issue 12989
-std/containers/BasicMapTest.ets
-std/containers/BasicSetTest.ets
-### Issue xxx end
+### Issue 12849 end
 
 ### Union issues
+### panda#15005: skip to stabilize fe_dev_202312
+spec/unions/union_cast_02.ets
+spec/unions/union_cast_03.ets
+spec/unions/union_cast_04.ets
+spec/unions/union_cast_05.ets
+spec/unions/union_cast_06.ets
+spec/unions/union_return_01_02.ets
+### End of panda#15005
 ### literal types not supported yet
-spec/unions/union02.ets
+spec/unions/union_literal_02.ets
+spec/unions/union_assignment_12_01.ets
+spec/unions/union_assignment_12_02.ets
+spec/unions/union_assignment_12_03.ets
+### undefined not supported yet
+spec/unions/union_generics_03.ets
 ### generics + unions not everything supported yet
 spec/unions/union_generics_01.ets
 spec/unions/union_generics_02.ets
 ### Negative tests
-spec/unions/union01.ets
+spec/unions/union_literal_01.ets
 spec/unions/union_assignment_n_01.ets
 spec/unions/union_assignment_n_02.ets
 spec/unions/union_assignment_n_03.ets
@@ -119,6 +127,11 @@ spec/unions/union_binary_n_02.ets
 spec/unions/union_cast_n_01.ets
 spec/unions/union_cast_n_02.ets
 spec/unions/union_cast_n_03.ets
+# panda#15005: skip to stabilize fe_dev_202312
+spec/unions/union_compare_02_05.ets
+spec/unions/union_compare_02_07.ets
+spec/unions/union_compare_06.ets
+# End of panda#15005
 spec/unions/union_compare_n_01.ets
 spec/unions/union_compare_n_02.ets
 spec/unions/union_compare_n_03.ets
@@ -128,6 +141,7 @@ spec/unions/union_compare_n_06.ets
 spec/unions/union_compare_n_07.ets
 spec/unions/union_compare_n_08.ets
 spec/unions/union_compare_n_09.ets
+spec/unions/union_compare_n_10.ets
 spec/unions/union_param_n_01.ets
 spec/unions/union_param_n_02.ets
 spec/unions/union_plus_n_01.ets
@@ -152,9 +166,17 @@ spec/unions/union_assignment_11.ets
 spec/unions/union_param_10_01.ets
 spec/unions/union_param_10_02.ets
 spec/unions/union_param_10_03.ets
+### Issue 14719
+spec/unions/union_14719.ets
+### Issue 14722
+spec/unions/union_14722_01.ets
+spec/unions/union_14722_02.ets
+### Issue 14585
+spec/unions/union_param_11_01.ets
 ### End of Unions
 ### Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
+koala-related-benchmarks/arkts-phase1.ets
 ### End of Koala
 ### Feature: Rest Params
 ### Issue 14111
@@ -245,14 +267,30 @@ spec/struct-type/test-use-struct-with-not-user-type_2.ets
 ### EOF Negative tests
 ### EOF ArkUI struct
 
-### Start string enum
+### Start enum
+spec/enum/enum_of_type.ets
 ### Issue 12947
-spec/string_enum/enumCallToStringFromAsyncLambda.ets
-### End string enum
+spec/enum/enumCallToStringFromAsyncLambda.ets
+### Issue 14655
+spec/enum/enum_trailing_comma_01.ets
+spec/enum/enum_trailing_comma_02.ets
+spec/enum/enum_trailing_comma_03.ets
+spec/enum/enum_trailing_comma_04.ets
+### Issue 14654
+spec/enum/enum_const_expr_01_01.ets
+spec/enum/enum_const_expr_01_02.ets
+spec/enum/enum_const_expr_01_03.ets
+spec/enum/enum_const_expr_01_04.ets
+spec/enum/enum_const_expr_01_05.ets
+spec/enum/enum_const_expr_02_01.ets
+### Issue 14633
+spec/enum/issue14633.ets
+spec/enum/issue14633_1.ets
+### Issue 14636
+spec/enum/issue14636.ets
+### End enum
 
 ### lambda issues begin
-### Issue 14018
-spec/lambda/callArrayLengthFromLambda.ets
 ### Issue 14054
 spec/lambda/callAsyncMethodFromAsyncLambda1.ets
 spec/lambda/callMethodFromAsyncLambda1.ets
@@ -269,6 +307,12 @@ spec/lambda/compareBooleanWithTrue.ets
 ### Negative tests
 spec/lambda/incorrectAsyncLambdaReturnValue.ets
 spec/lambda/incorrectVariableDeclaration.ets
+### Issue 14599
+spec/lambda/propertyLookupWithTypeAlias_01.ets
+spec/lambda/propertyLookupWithTypeAlias_02.ets
+spec/lambda/propertyLookupWithTypeAlias_03.ets
+### Issue 14634
+spec/lambda/lambdaExpressionWithoutParenthesis.ets
 ### lambda issues end
 ### Undefined type
 spec/undefined-type/define/define-interface-name-as-undefined.ets
@@ -316,6 +360,7 @@ spec/undefined-type/undefined-and-array-of-class-and-undefined_10.ets
 spec/undefined-type/undefined-array-type.ets
 spec/undefined-type/undefined-union-array-type_0.ets
 spec/undefined-type/undefined-union-array-type_1.ets
+spec/undefined-type/undefined-union-array-type_2.ets
 ###### Issue 14595
 spec/undefined-type/array-push/push-undefined-to-undefined.ets
 spec/undefined-type/assign/assign-undefined-to-undefined_0.ets
@@ -455,6 +500,10 @@ spec/nullables/nullable-lambda-default-param_5.ets
 ### End Of Feature: Null safety tests
 
 ### Generic issues
+### Issue 14751
+spec/generic/issue14751.ets
+### Issue 14752
+spec/generic/issue14752.ets
 ### Issue 14498
 spec/generic/generic_03.ets
 ### Issue 13642
@@ -467,6 +516,10 @@ spec/generic/usingOutT.ets
 ### Negative tests
 spec/generic/wrongUsingInT.ets
 spec/generic/generic_05.ets
+### Issue 14656
+spec/generic/genericTypeArgumentWithDefaultParameterValue_04.ets
+spec/generic/genericTypeArgumentWithDefaultParameterValue_05.ets
+spec/generic/genericTypeArgumentWithDefaultParameterValue_06.ets
 ### End of Generic
 ### Import-export issues
 ### Issue 14586
@@ -526,4 +579,32 @@ spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
 ### Issue 14675, 14769, 14841
 escompat/ArrayBufferTest2.ets
 ### End of 14675, 14769, 14841
+### issue 14836 begin
+spec/indexable/idx-s01-0010.ets
+spec/indexable/idx-s01-0011.ets
+spec/indexable/idx-s01-0012.ets
+spec/indexable/idx-s01-0013.ets
+spec/indexable/idx-s01-0030.ets
+spec/indexable/idx-s01-0080.ets
+spec/indexable/idx-s02-0000.ets
+spec/indexable/idx-s02-0001.ets
+spec/indexable/idx-s02-0020.ets
+spec/indexable/idx-s02-0030.ets
+spec/indexable/idx-s03-0000.ets
+spec/indexable/idx-s03-0020.ets
+### issue  14836 end
 
+### object-literals
+spec/object-literals/issue14680.ets
+### Issue 14658
+spec/object-literals/issue14687.ets
+### end Issue 14658
+### End of object-literals
+### Start functions issues
+### Issue 14842
+spec/functions/overrideModifier_01.ets
+spec/functions/overrideModifier_03.ets
+### Issue 14702
+spec/functions/subtypingWithFunctionsRequiresExplicitType_02.ets
+spec/functions/subtypingWithFunctionsRequiresExplicitType_03.ets
+### End functions issues

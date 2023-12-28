@@ -33,3 +33,4 @@ static_core/tools/sampler/scripts/fetch_modules_from_device.js
 static_core/tools/es2panda
 static_core/third_party
 static_core/**/__pycache__
+static_core/build

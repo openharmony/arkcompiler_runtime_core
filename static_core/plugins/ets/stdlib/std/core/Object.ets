@@ -389,3 +389,4 @@ export class Object {
 }
 
 export type NullishType = Object | null | undefined
+export type NullableType = Object | null

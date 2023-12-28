@@ -14,14 +14,22 @@
  */
 
 /*---
-desc: >-
-    03.08.11 Union types - literal types
-name: 03.types/08.reference_types/03.08.11.union_types/union01
-tags: [negative, compile-only]
+desc: 07.31 Lambda Expressions
+name: 07.expressions/31.lambda_expressions/propertyLookupWithTypeAlias_01
+tags: []
 ---*/
 
-type T = 3
+type RegularLambda = (arg:string) => string
+
+class A {
+    public regularLambda: RegularLambda;
+    public foo(): string {
+        return this.regularLambda("A");
+    }
+}
+
 function main(): void {
-    let t1: T = 3
-    let t2: T = 2
+    let a = new A()
+    a.regularLambda = (arg: string) => string = arg
+    assert a.foo() == "A"
 }

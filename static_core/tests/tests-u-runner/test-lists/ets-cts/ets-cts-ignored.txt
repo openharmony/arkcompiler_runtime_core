@@ -24,12 +24,7 @@
 
 # es2panda fails: panda#14451 Array with reference type elements is not initialized
 17.experimental_features/02.array_creation_expressions/expr_n_12.ets
-17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_6.ets
 17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_7.ets
-17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_8.ets
-17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_9.ets
-17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_n_0.ets
-17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_n_1.ets
 # end of es2panda fails
 
 # es2panda fails: panda Not implemented
@@ -190,7 +185,6 @@
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_18.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_22.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_23.ets
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_1.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_14.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_22.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_variance_0.ets

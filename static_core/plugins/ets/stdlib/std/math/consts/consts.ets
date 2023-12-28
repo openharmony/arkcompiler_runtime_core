@@ -65,12 +65,12 @@ export const doubleEpsilon: double = 2.22045e-16;
 /**
  * Minimal value that this type can have as a double
  */
-export const doubleMinimum: double = 2.22507e-308;
+export const doubleMinimum: double = 2.2250738585072014E-308;
 
 /**
  * Maximal value that this type can have as a double
  */
-export const doubleMaximum: double = 1.79769e+308;
+export const doubleMaximum: double = 1.7976931348623157E+308;
 
 /**
  * Represents the NaN value accoring to IEEE 754 specification

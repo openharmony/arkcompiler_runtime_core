@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,16 @@
  */
 
 /*---
-desc: >-
-    03.08.11 Union types
-name: 03.types/08.reference_types/03.08.11.union_types/union_compare_01
+desc: 7.6.2 Object literals of interface type
+name: issue14687.ets
 tags: []
 ---*/
-type Margin = number | string
 
-class A {}
+interface Person {
+    name: string = ""
+    age: number = 0;
+}
 
-function main(): int {
-    let a: Margin = "5 px"
-    let b: A = new A()
-    if (a == b) {
-        return -1
-    }
-    return 0
+function main(): void {
+    let p: Person = {name: "Bob", age: 42}
 }

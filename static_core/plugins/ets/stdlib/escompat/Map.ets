@@ -93,13 +93,13 @@ class MapEntry<K, V> extends Entry<K, V> {
 
     override equals(o: NullishType): boolean {
         if (o instanceof MapEntry) {
-            return this.key.equals((o as MapEntry<K, V>).key)
+            return (this.key as NullishType).equals(((o as MapEntry<K, V>).key) as NullishType)
         }
-        return this.key.equals(o)
+        return (this.key as NullishType).equals(o)
     }
 
     override hashCode(): int {
-        return this.key.hashCode()
+        return (this.key as NullishType).hashCode()
     }
 }
 
@@ -131,7 +131,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns true if the value is in the Map
      */
     override has(k: K): boolean {
-        return this.s.get(k) != null
+        return this.s.get(k as Object) != null
     }
 
     /**
@@ -149,7 +149,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      * @param k the key to remove
      */
     delete(k: K): boolean {
-        return this.s.deleteImpl(k)
+        return this.s.deleteImpl(k as Object)
     }
 
     /**
@@ -167,7 +167,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns value if assosiated with key presents.
      */
     override get(k: K): V | null {
-        const r = this.s.get(k)
+        const r = this.s.get(k as Object)
         if (r != null) {
             return r!.value
         }
@@ -184,7 +184,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns value if key presents, def otherwise
      */
     get(k: K, def: V): V {
-        const r = this.s.get(k)
+        const r = this.s.get(k as Object)
         if (r != null) {
             return r!.value
         }
@@ -197,7 +197,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns iterator with map keys
      */
     /* override */ keys(): IterableIterator<K> {
-        return this.s.mappedIterator<K>((x: ListNode): Object => { return (x.val as MapEntry<K, V>).key })
+        return this.s.mappedIterator<K>((x: ListNode): K => { return (x.val as MapEntry<K, V>).key as K })
     }
 
     /**
@@ -206,7 +206,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns iterator with map values
      */
     /* override */ values(): IterableIterator<V> {
-        return this.s.mappedIterator<V>((x: ListNode): Object => { return (x.val as MapEntry<K, V>).value })
+        return this.s.mappedIterator<V>((x: ListNode): V => { return (x.val as MapEntry<K, V>).value })
     }
 
     /**

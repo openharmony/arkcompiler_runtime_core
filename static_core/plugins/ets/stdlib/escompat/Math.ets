@@ -256,7 +256,7 @@ export class Math {
      * Math.clz32(0x0) == 32
      * ```
      */
-    public clz32(value: number): number {
+    public static clz32(value: number): number {
         let longBits = Double.bitCastToLong(value);
         let lowBits = (longBits & 0xFFFFFFFF) as int;    
         return Math.clz32(lowBits) as number;
@@ -373,25 +373,16 @@ export class Math {
      *
      * @returns The square root of the sum of squares of its arguments
      */
-    public static hypot(u: number, v: number): number {
-        return hypot(u, v);
-    }
-
-    /**
-     * Square root of the sum of squares of `v` and `u`
-     *
-     * @param u arbitrary number
-     * @param v arbitrary number
-     *
-     * @returns The square root of the sum of squares of its arguments
-     */
-    public hypot(...values: number[]): number {
+    public static hypot(...values: number[]): number {
         let max: number = 0;
         for (const value of values) {
+            if (isNaN(value)) {
+                return NaN;
+            }
             max = Math.max(max, Math.abs(value)) as number;
         }
         if (max == 0) return 0;
-        let sum = 0;
+        let sum: number = 0.0;
         for (const value of values) {
             let normalized = value / max;
             sum += normalized * normalized;
@@ -492,18 +483,6 @@ export class Math {
     /**
      * Largest value of `u` and `v`
      *
-     * @param u arbitrary number
-     * @param v arbitrary number
-     *
-     * @returns Largest value of `u` and `v`
-     */
-    public static max(u: number, v: number): number {
-        return max(u, v);
-    }
-
-    /**
-     * Largest value of `u` and `v`
-     *
      * @param u arbitrary number (of type `Int`)
      * @param v arbitrary number (of type `Int`)
      *
@@ -522,7 +501,7 @@ export class Math {
      * @returns Largest value of `u` and `v`
      */
 
-    public max(...values: number[]): number {
+    public static max(...values: number[]): number {
         if (values.length == 0) {
             return -Infinity;
         }
@@ -533,18 +512,6 @@ export class Math {
             }
         }
         return max;
-    }
-
-    /**
-     * Smallest value of `u` and `v`
-     *
-     * @param u arbitrary number
-     * @param v arbitrary number
-     *
-     * @returns Smallest value of `u` and `v`
-     */
-    public static min(u: number, v: number): number {
-        return min(u, v);
     }
 
     /**
@@ -567,7 +534,7 @@ export class Math {
      *
      * @returns Smallest value of `u` and `v`
      */
-    public min(...values: number[]): number {
+    public static min(...values: number[]): number {
         if (values.length == 0) {
             return Infinity;
         }

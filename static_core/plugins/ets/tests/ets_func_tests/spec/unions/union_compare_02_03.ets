@@ -21,15 +21,14 @@ tags: []
 ---*/
 
 class A {}
-class B {}
 
-type Union1 = B | string
+type Union1 = A | string
 
 function main(): int {
     let a: Union1 = "hello"
-    let b: A = new A()
+    let b: Union1 = "hello"
     if (a === b) {
-        return -1
+        return 0
     }
-    return 0
+    return -1
 }

@@ -13,6 +13,7 @@
 
 --- # List of soft keywords
 keywords:
+    - 'is'
     - 'catch'
     - 'declare'
     - 'default'
