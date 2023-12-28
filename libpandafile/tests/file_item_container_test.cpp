@@ -93,7 +93,7 @@ HWTEST(ItemContainer, TestFileOpen, testing::ext::TestSize.Level0)
     EXPECT_NE(File::Open(file_name), nullptr);
 }
 
-HWTEST(ItemContainer, TestFileFormatVersionTooOld, testing::ext::TestSize.Level0)
+HWTEST(ItemContainer, TestFileFormatVersionTooOldDeathTest, testing::ext::TestSize.Level0)
 {
     const std::string file_name = "test_file_format_version_too_old.abc";
     {
@@ -119,7 +119,7 @@ HWTEST(ItemContainer, TestFileFormatVersionTooOld, testing::ext::TestSize.Level0
         EXPECT_TRUE(writer.FinishWrite());
     }
 
-    EXPECT_EQ(File::Open(file_name), nullptr);
+    EXPECT_DEATH(File::Open(file_name), ".*");
 }
 
 HWTEST(ItemContainer, TestRewriteChecksum, testing::ext::TestSize.Level0)
@@ -163,7 +163,7 @@ HWTEST(ItemContainer, TestReserveBufferCapacity, testing::ext::TestSize.Level0)
     }
 }
 
-HWTEST(ItemContainer, TestFileFormatVersionTooNew, testing::ext::TestSize.Level0)
+HWTEST(ItemContainer, TestFileFormatVersionTooNewDeathTest, testing::ext::TestSize.Level0)
 {
     const std::string file_name = "test_file_format_version_too_new.abc";
     {
@@ -191,7 +191,7 @@ HWTEST(ItemContainer, TestFileFormatVersionTooNew, testing::ext::TestSize.Level0
         EXPECT_TRUE(writer.FinishWrite());
     }
 
-    EXPECT_EQ(File::Open(file_name), nullptr);
+    EXPECT_DEATH(File::Open(file_name), ".*");
 }
 
 HWTEST(ItemContainer, TestFileFormatVersionValid, testing::ext::TestSize.Level0)

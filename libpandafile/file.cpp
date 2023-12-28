@@ -553,24 +553,7 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
         return false;
     }
 
-    auto file_version = header->version;
-    // skip isa version check for version number of 10.0.0.0 temporarily
-    constexpr std::array<uint8_t, File::VERSION_SIZE> tempVersion = {10, 0, 0, 0};
-    if ((file_version < minVersion || file_version > version) && !(file_version == tempVersion)) {
-        LOG(ERROR, PANDAFILE) << "Unable to open file '" << filename << "' with bytecode version "
-                              << VersionToString(file_version);
-        if (file_version < minVersion) {
-            LOG(ERROR, PANDAFILE) << "Minimum supported abc file version on the current system image is "
-                << VersionToString(minVersion)
-                << "Please upgrade the sdk tools to generate supported version of abc files \
-                    or execute the abc file on former version of system image";
-        } else {
-            LOG(ERROR, PANDAFILE) << "Maximum supported abc file version on the current system image is "
-                << VersionToString(version)
-                << "Please upgrade the system image or use former version of SDK tools to generate abc files";
-        }
-        return false;
-    }
+    CheckFileVersion(header->version, filename);
 
     if (header->file_size < sizeof(File::Header) || header->file_size > ptr.GetSize()) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file size " << header->file_size;
@@ -611,6 +594,32 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
     return true;
 }
 
+void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_version, const std::string_view &filename)
+{
+    // 11.0.1.0 and 11.0.0.0 is not compatible with each other
+    constexpr std::array<uint8_t, File::VERSION_SIZE> incompatibleSdkVersion = {11, 0, 0, 0};
+    constexpr std::array<uint8_t, File::VERSION_SIZE> incompatibleSystemImageVersion = {11, 0, 1, 0};
+    if (file_version < minVersion) {
+        LOG(FATAL, PANDAFILE) << "Unable to open file '" << filename << "' with abc file version "
+            << VersionToString(file_version)
+            << ". Minimum supported abc file version on the current system image is " << VersionToString(minVersion)
+            << ". Please upgrade the sdk tools to generate supported version of abc files "
+            << "or execute the abc file on former version of system image";
+    } else if (file_version > version) {
+        LOG(FATAL, PANDAFILE) << "Unable to open file '" << filename << "' with abc file version "
+            << VersionToString(file_version)
+            << ". Maximum supported abc file version on the current system image is " << VersionToString(version)
+            << ". Please upgrade the system image or use former version of SDK tools to generate abc files";
+    } else if (file_version == incompatibleSdkVersion && version == incompatibleSystemImageVersion) {
+        LOG(FATAL, PANDAFILE) << "Unable to open file '" << filename << "' with  abc file version "
+            << VersionToString(file_version) << ". Current system image version is "
+            << VersionToString(version) << ", while abc file version is " << VersionToString(file_version)
+            << ". The version "<< VersionToString(file_version)
+            << " is not a compatible version, can't run on system image of version " << VersionToString(version)
+            << ". Please use sdk tools and system image in pairs "
+            << "and make the version of sdk tools and system image consistent";
+    }
+}
 /* static */
 std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr)
 {
