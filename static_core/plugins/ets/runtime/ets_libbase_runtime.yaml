@@ -58,7 +58,7 @@ intrinsics:
       args: [ f64 ]
     impl: ark::intrinsics::SinF64
     llvm_impl: sin
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathCos
     space: ets
@@ -70,7 +70,7 @@ intrinsics:
       args: [ f64 ]
     impl: ark::intrinsics::CosF64
     llvm_impl: cos
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathPower
     space: ets
@@ -82,7 +82,7 @@ intrinsics:
       args: [ f64, f64 ]
     impl: ark::intrinsics::PowF64
     llvm_impl: pow
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathSqrt
     space: ets
@@ -94,7 +94,7 @@ intrinsics:
       args: [ f64 ]
     impl: ark::intrinsics::SqrtF64
     llvm_impl: sqrt
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathAbs
     space: ets
@@ -105,7 +105,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::intrinsics::AbsF64
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathMaxI32
     space: ets
@@ -116,7 +116,7 @@ intrinsics:
       ret: i32
       args: [ i32, i32 ]
     impl: ark::intrinsics::MaxI32
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathMaxI64
     space: ets
@@ -127,7 +127,7 @@ intrinsics:
       ret: i64
       args: [ i64, i64 ]
     impl: ark::intrinsics::MaxI64
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathMaxF32
     space: ets
@@ -138,7 +138,7 @@ intrinsics:
       ret: f32
       args: [ f32, f32 ]
     impl: ark::intrinsics::MaxF32
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: ThrowUndefined
 
   - name: StdMathMaxF64
     space: ets
@@ -149,7 +149,7 @@ intrinsics:
       ret: f64
       args: [ f64, f64 ]
     impl: ark::intrinsics::MaxF64
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathMinI32
     space: ets
@@ -160,7 +160,7 @@ intrinsics:
       ret: i32
       args: [ i32, i32 ]
     impl: ark::intrinsics::MinI32
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathMinI64
     space: ets
@@ -171,7 +171,7 @@ intrinsics:
       ret: i64
       args: [ i64, i64 ]
     impl: ark::intrinsics::MinI64
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathMinF32
     space: ets
@@ -182,7 +182,7 @@ intrinsics:
       ret: f32
       args: [ f32, f32 ]
     impl: ark::intrinsics::MinF32
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathMinF64
     space: ets
@@ -193,7 +193,7 @@ intrinsics:
       ret: f64
       args: [ f64, f64 ]
     impl: ark::intrinsics::MinF64
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathRandom
     space: ets
@@ -204,7 +204,6 @@ intrinsics:
       ret: f64
       args: [ ]
     impl: ark::ets::intrinsics::StdMathRandom
-    clear_flags: [ ]
 
   - name: StdMathAcos
     space: ets
@@ -215,7 +214,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathAcos
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathAcosh
     space: ets
@@ -226,7 +225,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathAcosh
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathAsin
     space: ets
@@ -237,7 +236,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathAsin
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathAsinh
     space: ets
@@ -248,7 +247,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathAsinh
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathAtan2
     space: ets
@@ -259,7 +258,7 @@ intrinsics:
       ret: f64
       args: [ f64, f64 ]
     impl: ark::ets::intrinsics::StdMathAtan2
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathAtanh
     space: ets
@@ -270,7 +269,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathAtanh
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathAtan
     space: ets
@@ -281,7 +280,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathAtan
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathSinh
     space: ets
@@ -292,7 +291,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathSinh
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathCosh
     space: ets
@@ -303,7 +302,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathCosh
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathFloor
     space: ets
@@ -317,7 +316,7 @@ intrinsics:
     llvm_impl: floor
     codegen_func: CreateMathFloor
     can_encode_func: CheckSSE42
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathRound
     space: ets
@@ -331,7 +330,7 @@ intrinsics:
     llvm_impl: round
     codegen_func: CreateMathRoundAway
     can_encode_func: CheckSSE42
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathTrunc
     space: ets
@@ -345,7 +344,7 @@ intrinsics:
     llvm_impl: trunc
     codegen_func: CreateMathTrunc
     can_encode_func: CheckSSE42
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathCbrt
     space: ets
@@ -356,7 +355,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathCbrt
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathTan
     space: ets
@@ -367,7 +366,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathTan
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
 
   - name: StdMathTanh
@@ -379,7 +378,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathTanh
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathExp
     space: ets
@@ -390,7 +389,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathExp
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathLog10
     space: ets
@@ -401,7 +400,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathLog10
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathExpm1
     space: ets
@@ -412,7 +411,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathExpm1
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathCeil
     space: ets
@@ -426,7 +425,7 @@ intrinsics:
     codegen_func: CreateMathCeil
     can_encode_func: CheckSSE42
     llvm_impl: ceil
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathLog
     space: ets
@@ -438,7 +437,7 @@ intrinsics:
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathLog
     llvm_impl: log
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathRem
     space: ets
@@ -449,7 +448,7 @@ intrinsics:
       ret: f64
       args: [ f64, f64 ]
     impl: ark::ets::intrinsics::StdMathRem
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathMod
     space: ets
@@ -460,7 +459,7 @@ intrinsics:
       ret: f64
       args: [ f64, f64 ]
     impl: ark::ets::intrinsics::StdMathMod
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathClz64
     space: ets
@@ -473,7 +472,7 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathClz64
     codegen_func: CreateCountLeadingZeroBits
     llvm_codegen_func: EmitCtlz
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathClz32
     space: ets
@@ -486,7 +485,7 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathClz32
     codegen_func: CreateCountLeadingZeroBits
     llvm_codegen_func: EmitCtlz
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathClz32Double
     space: ets
@@ -497,7 +496,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathClz32Double
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathSignbit
     space: ets
@@ -509,7 +508,7 @@ intrinsics:
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathSignbit
     llvm_codegen_func: EmitSignbit
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathImul
     space: ets
@@ -520,7 +519,7 @@ intrinsics:
       ret: i32
       args: [ f64, f64 ]
     impl: ark::ets::intrinsics::StdMathImul
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdMathFround
     space: ets
@@ -532,7 +531,7 @@ intrinsics:
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathFround
     llvm_codegen_func: EmitFround
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
 ####################
 # std.core.Console #
@@ -546,7 +545,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::StdConsolePrintString
-    clear_flags: [ ]
 
   - name: StdConsolePrintU1
     space: ets
@@ -557,7 +555,6 @@ intrinsics:
       ret: std.core.void
       args: [ u1 ]
     impl: ark::ets::intrinsics::StdConsolePrintBool
-    clear_flags: [ ]
 
   - name: StdConsolePrintI8
     space: ets
@@ -568,7 +565,6 @@ intrinsics:
       ret: std.core.void
       args: [ i8 ]
     impl: ark::ets::intrinsics::StdConsolePrintI8
-    clear_flags: [ ]
 
   - name: StdConsolePrintI16
     space: ets
@@ -579,7 +575,6 @@ intrinsics:
       ret: std.core.void
       args: [ i16 ]
     impl: ark::ets::intrinsics::StdConsolePrintI16
-    clear_flags: [ ]
 
   - name: StdConsolePrintU16
     space: ets
@@ -590,7 +585,6 @@ intrinsics:
       ret: std.core.void
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdConsolePrintChar
-    clear_flags: [ ]
 
   - name: StdConsolePrintI32
     space: ets
@@ -601,7 +595,6 @@ intrinsics:
       ret: std.core.void
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdConsolePrintI32
-    clear_flags: [ ]
 
   - name: StdConsolePrintI64
     space: ets
@@ -612,7 +605,6 @@ intrinsics:
       ret: std.core.void
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdConsolePrintI64
-    clear_flags: [ ]
 
   - name: StdConsolePrintln
     space: ets
@@ -623,7 +615,6 @@ intrinsics:
       ret: std.core.void
       args: []
     impl: ark::ets::intrinsics::StdConsolePrintln
-    clear_flags: [ ]
 
   - name: StdCoreLoadLibrary
     space: ets
@@ -634,7 +625,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::LoadLibrary
-    clear_flags: [ ]
 
 ###################
 # std.core.String #
@@ -653,8 +643,8 @@ intrinsics:
     codegen_func: CreateStringGetCharsTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringGetCharsTlab
-    set_flags: [can_throw]
     clear_flags: [ ]
+    set_flags: [ ]
 
   - name: StdCoreStringGetLength
     space: ets
@@ -665,7 +655,6 @@ intrinsics:
       ret: i32
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringGetLength
-    clear_flags: [ ]
 
   - name: StdCoreStringLength
     space: ets
@@ -676,7 +665,6 @@ intrinsics:
       ret: f64
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringLength
-    clear_flags: [ ]
 
   - name: StdCoreStringIsEmpty
     space: ets
@@ -687,7 +675,6 @@ intrinsics:
       ret: u1
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringIsEmpty
-    clear_flags: [ ]
 
   - name: StdCoreStringCharAt
     space: ets
@@ -698,7 +685,6 @@ intrinsics:
       ret: u16
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCharAt
-    set_flags: [ can_throw ]
 
   - name: StdCoreStringEquals
     space: ets
@@ -714,7 +700,7 @@ intrinsics:
     llvm_codegen_func: EmitStringEquals
     peephole_func: PeepholeStringEquals
     need_param_locations: true
-    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+    safe_intrinsic: true
 
   - name: StdCoreStringLocaleCmp
     space: ets
@@ -725,8 +711,6 @@ intrinsics:
       ret: f64
       args: [ std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::StdCoreStringLocaleCmp
-    clear_flags: [ ]
-    set_flags: [can_throw]
 
   - name: StdCoreStringNormalizeNFC
     space: ets
@@ -737,8 +721,6 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringNormalizeNFC
-    clear_flags: [ ]
-    set_flags: [can_throw]
 
   - name: StdCoreStringNormalizeNFD
     space: ets
@@ -749,8 +731,6 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringNormalizeNFD
-    clear_flags: [ ]
-    set_flags: [can_throw]
 
   - name: StdCoreStringNormalizeNFKC
     space: ets
@@ -761,8 +741,6 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringNormalizeNFKC
-    clear_flags: [ ]
-    set_flags: [can_throw]
 
   - name: StdCoreStringNormalizeNFKD
     space: ets
@@ -773,8 +751,6 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringNormalizeNFKD
-    clear_flags: [ ]
-    set_flags: [can_throw]
 
   - name: StdCoreStringToLowerCase
     space: ets
@@ -785,8 +761,6 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringToLowerCase
-    clear_flags: [ ]
-    set_flags: [can_throw]
 
   - name: StdCoreStringToUpperCase
     space: ets
@@ -797,8 +771,6 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringToUpperCase
-    clear_flags: [ ]
-    set_flags: [can_throw]
 
   - name: StdCoreStringToLocaleLowerCase
     space: ets
@@ -809,8 +781,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::StdCoreStringToLocaleLowerCase
-    clear_flags: [ ]
-    set_flags: [can_throw]
 
   - name: StdCoreStringToLocaleUpperCase
     space: ets
@@ -821,8 +791,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::StdCoreStringToLocaleUpperCase
-    clear_flags: [ ]
-    set_flags: [can_throw]
 
   - name: StdCoreStringIsWellFormed
     space: ets
@@ -833,7 +801,6 @@ intrinsics:
       ret: u1
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringIsWellFormed
-    clear_flags: [ ]
 
   - name: StdCoreStringIndexOf
     space: ets
@@ -844,7 +811,7 @@ intrinsics:
       ret: i32
       args: [u16]
     impl: ark::ets::intrinsics::StdCoreStringIndexOf
-    clear_flags: [require_state, runtime_call]
+    safe_intrinsic: true
 
   - name: StdCoreStringIndexOfAfter
     space: ets
@@ -855,7 +822,7 @@ intrinsics:
       ret: i32
       args: [u16, i32]
     impl: ark::ets::intrinsics::StdCoreStringIndexOfAfter
-    clear_flags: [require_state, runtime_call]
+    safe_intrinsic: true
 
   - name: StdCoreStringIndexOfString
     space: ets
@@ -866,7 +833,7 @@ intrinsics:
       ret: i32
       args: [std.core.String, i32]
     impl: ark::ets::intrinsics::StdCoreStringIndexOfString
-    clear_flags: [require_state, runtime_call]
+    safe_intrinsic: true
 
   - name: StdCoreStringLastIndexOfString
     space: ets
@@ -877,7 +844,7 @@ intrinsics:
       ret: i32
       args: [std.core.String, i32]
     impl: ark::ets::intrinsics::StdCoreStringLastIndexOfString
-    clear_flags: [require_state, runtime_call]
+    safe_intrinsic: true
 
   - name: StdCoreStringSubstring
     space: ets
@@ -892,7 +859,6 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStdStringSubstring
     peephole_func: PeepholeStringSubstring
-    set_flags: [can_throw]
 
   - name: StdCoreStringCodePointToChar
     space: ets
@@ -903,7 +869,6 @@ intrinsics:
       ret: i32
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCodePointToChar
-    clear_flags: [ ]
 
   - name: StdCoreStringHashCode
     space: ets
@@ -917,7 +882,7 @@ intrinsics:
     codegen_func: CreateStringHashCode
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringHashCode
-    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+    safe_intrinsic: true
 
   - name: StdCoreStringIsCompressed
     space: ets
@@ -928,7 +893,6 @@ intrinsics:
         ret: u1
         args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringIsCompressed
-    clear_flags: [ ]
 
 ##########################
 # std.core.StringBuilder #
@@ -942,7 +906,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::StdCoreStringBuilderConcatStrings
-    clear_flags: [ ]
 
   - name: StdCoreToStringBoolean
     space: ets
@@ -953,7 +916,6 @@ intrinsics:
       ret: std.core.String
       args: [ u1 ]
     impl: ark::ets::intrinsics::StdCoreToStringBoolean
-    clear_flags: [ ]
 
   - name: StdCoreToStringByte
     space: ets
@@ -964,7 +926,6 @@ intrinsics:
       ret: std.core.String
       args: [ i8 ]
     impl: ark::ets::intrinsics::StdCoreToStringByte
-    clear_flags: [ ]
 
   - name: StdCoreToStringChar
     space: ets
@@ -975,7 +936,6 @@ intrinsics:
       ret: std.core.String
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreToStringChar
-    clear_flags: [ ]
 
   - name: StdCoreToStringShort
     space: ets
@@ -986,7 +946,6 @@ intrinsics:
       ret: std.core.String
       args: [ i16 ]
     impl: ark::ets::intrinsics::StdCoreToStringShort
-    clear_flags: [ ]
 
   - name: StdCoreToStringInt
     space: ets
@@ -997,7 +956,6 @@ intrinsics:
       ret: std.core.String
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreToStringInt
-    clear_flags: [ ]
 
   - name: StdCoreToStringLong
     space: ets
@@ -1008,14 +966,12 @@ intrinsics:
       ret: std.core.String
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdCoreToStringLong
-    clear_flags: [ ]
 
   - name: StdCoreSbAppendLong
     space: ets
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [i64]
@@ -1026,7 +982,6 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [i32]
@@ -1037,7 +992,7 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv, can_throw]
+    set_flags: []
     signature:
       ret: std.core.StringBuilder
       args: [i8]
@@ -1048,7 +1003,7 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv, can_throw]
+    set_flags: []
     signature:
       ret: std.core.StringBuilder
       args: [i16]
@@ -1059,7 +1014,6 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [u16]
@@ -1070,7 +1024,6 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [u1]
@@ -1081,7 +1034,6 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
-    set_flags: [heap_inv, can_throw]
     signature:
       ret: std.core.StringBuilder
       args: [std.core.String]
@@ -1092,12 +1044,11 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: toString
     static: false
-    set_flags: [heap_inv, can_throw]
+    set_flags: []
     signature:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringBuilderToString
-    clear_flags: [ ]
 
 #################
 # escompat.Date #
@@ -1111,7 +1062,6 @@ intrinsics:
       ret: f64
       args: []
     impl: ark::ets::intrinsics::EscompatDateNow
-    clear_flags: [ ]
 
   - name: EscompatDateGetLocalTimezoneOffset
     space: ets
@@ -1122,7 +1072,6 @@ intrinsics:
       ret: i64
       args: []
     impl: ark::ets::intrinsics::EscompatDateGetLocalTimezoneOffset
-    clear_flags: [ ]
 
   - name: EscompatDateGetTimezoneName
     space: ets
@@ -1133,7 +1082,6 @@ intrinsics:
       ret: std.core.String
       args: []
     impl: ark::ets::intrinsics::EscompatDateGetTimezoneName
-    clear_flags: [ ]
 
   - name: EscompatDateGetLocaleString
     space: ets
@@ -1144,7 +1092,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String, std.core.String, i64, u1 ]
     impl: ark::ets::intrinsics::EscompatDateGetLocaleString
-    clear_flags: [ ]
 
 ########################
 # escompat.ArrayBuffer #
@@ -1172,7 +1119,7 @@ intrinsics:
       ret: i64
       args: []
     impl: ark::intrinsics::NanoTime
-    clear_flags: [ require_state, runtime_call ]
+    clear_flags: [ require_state, runtime_call, can_throw ]
 
 ##################
 # std.core.Float #
@@ -1196,7 +1143,7 @@ intrinsics:
       ret: u1
       args: [f32]
     impl: ark::ets::intrinsics::StdCoreFloatIsNan
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdFloatIsFinite
     space: ets
@@ -1207,7 +1154,7 @@ intrinsics:
       ret: u1
       args: [f32]
     impl: ark::ets::intrinsics::StdCoreFloatIsFinite
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdFloatBitCastFromInt
     space: ets
@@ -1219,7 +1166,7 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::StdCoreFloatBitCastFromInt
     llvm_codegen_func: EmitRawBitcastFromInt
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdFloatBitCastToInt
     space: ets
@@ -1231,7 +1178,7 @@ intrinsics:
       args: [f32]
     impl: ark::ets::intrinsics::StdCoreFloatBitCastToInt
     llvm_codegen_func: EmitRawBitcastToInt
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdFloatIsInteger
     space: ets
@@ -1244,7 +1191,7 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreFloatIsInteger
     codegen_func: CreateFloatIsInteger
     llvm_codegen_func: EmitIsInteger
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdFloatIsSafeInteger
     space: ets
@@ -1257,7 +1204,7 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreFloatIsSafeInteger
     codegen_func: CreateFloatIsSafeInteger
     llvm_codegen_func: EmitIsSafeInteger
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
 ###################
 # std.core.Double #
@@ -1341,7 +1288,7 @@ intrinsics:
       ret: u1
       args: [f64]
     impl: ark::ets::intrinsics::StdCoreDoubleIsNan
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdDoubleIsFinite
     space: ets
@@ -1352,7 +1299,7 @@ intrinsics:
       ret: u1
       args: [f64]
     impl: ark::ets::intrinsics::StdCoreDoubleIsFinite
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdDoubleBitCastFromLong
     space: ets
@@ -1364,7 +1311,7 @@ intrinsics:
       args: [i64]
     impl: ark::ets::intrinsics::StdCoreDoubleBitCastFromLong
     llvm_codegen_func: EmitRawBitcastFromLong
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdDoubleBitCastToLong
     space: ets
@@ -1376,7 +1323,7 @@ intrinsics:
       args: [f64]
     impl: ark::ets::intrinsics::StdCoreDoubleBitCastToLong
     llvm_codegen_func: EmitRawBitcastToLong
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdDoubleIsInteger
     space: ets
@@ -1389,7 +1336,7 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreDoubleIsInteger
     codegen_func: CreateFloatIsInteger
     llvm_codegen_func: EmitIsInteger
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
   - name: StdDoubleIsSafeInteger
     space: ets
@@ -1402,7 +1349,7 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreDoubleIsSafeInteger
     codegen_func: CreateFloatIsSafeInteger
     llvm_codegen_func: EmitIsSafeInteger
-    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+    safe_intrinsic: true
 
 ############
 # std.core #
@@ -1421,7 +1368,6 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreBoolCopyTo
-    set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -1440,7 +1386,6 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreCharCopyTo
-    set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -1459,7 +1404,6 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreByteCopyTo
-    set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -1478,7 +1422,6 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreShortCopyTo
-    set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -1497,7 +1440,6 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreIntCopyTo
-    set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -1516,7 +1458,6 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreLongCopyTo
-    set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -1535,7 +1476,6 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreFloatCopyTo
-    set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -1554,7 +1494,6 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreDoubleCopyTo
-    set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -1592,7 +1531,7 @@ intrinsics:
       ret: std.core.void
       args: [i32]
     impl: ark::intrinsics::SystemExit
-    clear_flags: [require_state, runtime_call]
+    clear_flags: [require_state, runtime_call, can_throw]
 
 ######################
 # std.core.GC #
@@ -1895,7 +1834,6 @@ intrinsics:
       ret: std.core.void
       args: []
     impl: ark::ets::intrinsics::StdSystemScheduleCoroutine
-    set_flags: [heap_inv]
 
 ############################
 #   escompat.SharedMemory  #
@@ -2113,7 +2051,6 @@ intrinsics:
       ret: u1
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreRuntimeIsSameReference
-    clear_flags: [ ]
 
   - name: StdRuntimeGetHashCode
     space: ets
@@ -2124,7 +2061,6 @@ intrinsics:
       ret: i32
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreRuntimeGetHashCode
-    clear_flags: [ ]
 
   - name: StdCoreRuntimeFailedTypeCastException
     space: ets
@@ -2150,7 +2086,6 @@ intrinsics:
       ret: std.core.String
       args: [std.core.Object]
     impl: ark::ets::intrinsics::EscompatJSONStringifyObj
-    clear_flags: [ ]
 
 ###################
 # std.core.RegExp #
@@ -2164,8 +2099,6 @@ intrinsics:
       ret: escompat.RegExp
       args: []
     impl: ark::ets::intrinsics::EscompatRegExpCompile
-    set_flags: [heap_inv]
-
 
   - name: EscompatRegExpExec
     space: ets
@@ -2176,7 +2109,6 @@ intrinsics:
       ret: escompat.RegExpExecArray
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::EscompatRegExpExec
-    set_flags: [heap_inv]
 
 ###################
 # std.core.Type   #
@@ -2190,7 +2122,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::TypeAPIGetTypeDescriptor
-    clear_flags: [ ]
 
   - name: TypeAPIGetTypeKind
     space: ets
@@ -2201,7 +2132,6 @@ intrinsics:
       ret: i8
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetTypeKind
-    clear_flags: [ ]
 
   - name: TypeAPIIsValueType
     space: ets
@@ -2212,7 +2142,6 @@ intrinsics:
       ret: u1
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIIsValueType
-    clear_flags: [ ]
 
   - name: TypeAPIGetTypeName
     space: ets
@@ -2223,7 +2152,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetTypeName
-    clear_flags: [ ]
 
   - name: TypeAPIGetClassAttributes
     space: ets
@@ -2234,7 +2162,6 @@ intrinsics:
       ret: i32
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetClassAttributes
-    clear_flags: [ ]
 
   - name: TypeAPIGetFieldsNum
     space: ets
@@ -2245,7 +2172,6 @@ intrinsics:
       ret: i64
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetFieldsNum
-    clear_flags: [ ]
 
   - name: TypeAPIGetOwnFieldsNum
     space: ets
@@ -2256,7 +2182,6 @@ intrinsics:
       ret: i64
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetOwnFieldsNum
-    clear_flags: [ ]
 
   - name: TypeAPIGetField
     space: ets
@@ -2267,7 +2192,6 @@ intrinsics:
       ret: std.core.Field
       args: [ std.core.String, i64 ]
     impl: ark::ets::intrinsics::TypeAPIGetField
-    clear_flags: [ ]
 
   - name: TypeAPIGetOwnField
     space: ets
@@ -2278,7 +2202,6 @@ intrinsics:
       ret: std.core.Field
       args: [ std.core.String, i64 ]
     impl: ark::ets::intrinsics::TypeAPIGetOwnField
-    clear_flags: [ ]
 
   - name: TypeAPIGetFieldByName
     space: ets
@@ -2289,7 +2212,6 @@ intrinsics:
       ret: std.core.Field
       args: [ std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetFieldByName
-    clear_flags: [ ]
 
   - name: TypeAPIGetStaticFieldValue
     space: ets
@@ -2300,7 +2222,6 @@ intrinsics:
       ret: std.core.Object
       args: [ std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetStaticFieldValue
-    clear_flags: [ ]
 
   - name: TypeAPIGetMethodsNum
     space: ets
@@ -2311,7 +2232,6 @@ intrinsics:
       ret: i64
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetMethodsNum
-    clear_flags: [ ]
 
   - name: TypeAPIGetMethod
     space: ets
@@ -2322,7 +2242,6 @@ intrinsics:
       ret: std.core.Method
       args: [ std.core.String, i64 ]
     impl: ark::ets::intrinsics::TypeAPIGetMethod
-    clear_flags: [ ]
 
   - name: TypeAPIGetConstructorsNum
     space: ets
@@ -2333,7 +2252,6 @@ intrinsics:
       ret: i64
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetConstructorsNum
-    clear_flags: [ ]
 
   - name: TypeAPIGetConstructor
     space: ets
@@ -2344,7 +2262,6 @@ intrinsics:
       ret: std.core.Method
       args: [ std.core.String, i64 ]
     impl: ark::ets::intrinsics::TypeAPIGetConstructor
-    clear_flags: [ ]
 
   - name: TypeAPIGetParametersNum
     space: ets
@@ -2355,7 +2272,6 @@ intrinsics:
       ret: i64
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetParametersNum
-    clear_flags: [ ]
 
   - name: TypeAPIGetParameter
     space: ets
@@ -2366,7 +2282,6 @@ intrinsics:
       ret: std.core.Parameter
       args: [ std.core.String, i64 ]
     impl: ark::ets::intrinsics::TypeAPIGetParameter
-    clear_flags: [ ]
 
   - name: TypeAPIGetTypeId
     space: ets
@@ -2377,7 +2292,6 @@ intrinsics:
       ret: i64
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetTypeId
-    clear_flags: [ ]
 
   - name: TypeAPIGetArrayElementType
     space: ets
@@ -2388,7 +2302,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetArrayElementType
-    clear_flags: [ ]
 
   - name: TypeAPIMakeArrayInstance
     space: ets
@@ -2399,7 +2312,6 @@ intrinsics:
       ret: std.core.Object
       args: [ std.core.String, i64 ]
     impl: ark::ets::intrinsics::TypeAPIMakeArrayInstance
-    clear_flags: [ ]
 
   - name: TypeAPIGetBaseType
     space: ets
@@ -2410,7 +2322,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetBaseType
-    clear_flags: [ ]
 
   - name: TypeAPIGetInterfacesNum
     space: ets
@@ -2421,7 +2332,6 @@ intrinsics:
       ret: i64
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetInterfacesNum
-    clear_flags: [ ]
 
   - name: TypeAPIGetInterface
     space: ets
@@ -2432,7 +2342,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String, i64 ]
     impl: ark::ets::intrinsics::TypeAPIGetInterface
-    clear_flags: [ ]
 
   - name: TypeAPISetStaticFieldValue
     space: ets
@@ -2443,7 +2352,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.String, std.core.String, std.core.Object ]
     impl: ark::ets::intrinsics::TypeAPISetStaticFieldValue
-    clear_flags: [ ]
 
   - name: TypeAPIGetFunctionAttributes
     space: ets
@@ -2454,7 +2362,6 @@ intrinsics:
       ret: i32
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetFunctionAttributes
-    clear_flags: [ ]
 
   - name: TypeAPIGetResultType
     space: ets
@@ -2465,7 +2372,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetResultType
-    clear_flags: [ ]
 
   - name: StdMethodInvoke
     space: ets
@@ -2479,7 +2385,6 @@ intrinsics:
         - std.core.Object
         - std.core.Object[]
     impl: ark::ets::intrinsics::TypeAPIMethodInvoke
-    clear_flags: [ ]
 
   - name: StdMethodInvokeConstructor
     space: ets
@@ -2502,7 +2407,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetReceiverType
-    clear_flags: [ ]
 
 #################
 # std.core.Char #
@@ -2516,7 +2420,7 @@ intrinsics:
       ret: u1
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreCharIsUpperCase
-    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+    safe_intrinsic: true
 
   - name: StdCoreCharToUpperCase
     space: ets
@@ -2527,7 +2431,7 @@ intrinsics:
       ret: u16
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreCharToUpperCase
-    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+    safe_intrinsic: true
 
   - name: StdCoreCharIsLowerCase
     space: ets
@@ -2538,7 +2442,7 @@ intrinsics:
       ret: u1
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreCharIsLowerCase
-    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+    safe_intrinsic: true
 
   - name: StdCoreCharToLowerCase
     space: ets
@@ -2549,7 +2453,7 @@ intrinsics:
       ret: u16
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreCharToLowerCase
-    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+    safe_intrinsic: true
 
 ###################
 # std.core.Value  #
@@ -2564,7 +2468,6 @@ intrinsics:
       ret: std.core.Object
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldObject
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldBoolean
     space: ets
@@ -2575,7 +2478,6 @@ intrinsics:
       ret: u1
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldBoolean
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByte
     space: ets
@@ -2586,7 +2488,6 @@ intrinsics:
       ret: i8
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByte
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldChar
     space: ets
@@ -2597,7 +2498,6 @@ intrinsics:
       ret: u16
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldChar
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldShort
     space: ets
@@ -2608,7 +2508,6 @@ intrinsics:
       ret: i16
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldShort
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldInt
     space: ets
@@ -2619,7 +2518,6 @@ intrinsics:
       ret: i32
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldInt
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldLong
     space: ets
@@ -2630,7 +2528,6 @@ intrinsics:
       ret: i64
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldLong
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldFloat
     space: ets
@@ -2641,7 +2538,6 @@ intrinsics:
       ret: f32
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldFloat
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldDouble
     space: ets
@@ -2652,7 +2548,6 @@ intrinsics:
       ret: f64
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldDouble
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameObject
     space: ets
@@ -2663,7 +2558,6 @@ intrinsics:
       ret: std.core.Object
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByNameObject
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameBoolean
     space: ets
@@ -2674,7 +2568,6 @@ intrinsics:
       ret: u1
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByNameBoolean
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameByte
     space: ets
@@ -2685,7 +2578,6 @@ intrinsics:
       ret: i8
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByNameByte
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameChar
     space: ets
@@ -2696,7 +2588,6 @@ intrinsics:
       ret: u16
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByNameChar
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameShort
     space: ets
@@ -2707,7 +2598,6 @@ intrinsics:
       ret: i16
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByNameShort
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameInt
     space: ets
@@ -2718,7 +2608,6 @@ intrinsics:
       ret: i32
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByNameInt
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameLong
     space: ets
@@ -2729,7 +2618,6 @@ intrinsics:
       ret: i64
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByNameLong
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameFloat
     space: ets
@@ -2740,7 +2628,6 @@ intrinsics:
       ret: f32
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByNameFloat
-    clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameDouble
     space: ets
@@ -2751,7 +2638,6 @@ intrinsics:
       ret: f64
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::ValueAPIGetFieldByNameDouble
-    clear_flags: [ ]
 
   - name: ValueAPISetFieldObject
     space: ets
@@ -2762,7 +2648,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, std.core.Object ]
     impl: ark::ets::intrinsics::ValueAPISetFieldObject
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldBoolean
     space: ets
@@ -2773,7 +2658,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, u1 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldBoolean
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldByte
     space: ets
@@ -2784,7 +2668,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i8 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByte
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldChar
     space: ets
@@ -2795,7 +2678,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, u16 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldChar
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldShort
     space: ets
@@ -2806,7 +2688,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i16 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldShort
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldInt
     space: ets
@@ -2817,7 +2698,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i32 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldInt
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldLong
     space: ets
@@ -2828,7 +2708,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldLong
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldFloat
     space: ets
@@ -2839,7 +2718,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f32 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldFloat
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldDouble
     space: ets
@@ -2850,7 +2728,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldDouble
-    flags: [heap_inv]
 
 
 
@@ -2863,8 +2740,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, std.core.Object ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameObject
-    flags: [heap_inv]
-
 
   - name: ValueAPISetFieldByNameBoolean
     space: ets
@@ -2875,7 +2750,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, u1 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameBoolean
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameByte
     space: ets
@@ -2886,7 +2760,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i8 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameByte
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameChar
     space: ets
@@ -2897,7 +2770,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, u16 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameChar
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameShort
     space: ets
@@ -2908,7 +2780,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i16 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameShort
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameInt
     space: ets
@@ -2919,7 +2790,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i32 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameInt
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameLong
     space: ets
@@ -2930,7 +2800,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameLong
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameFloat
     space: ets
@@ -2941,7 +2810,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, f32 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameFloat
-    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameDouble
     space: ets
@@ -2952,7 +2820,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, f64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameDouble
-    flags: [heap_inv]
 
 
 
@@ -2965,7 +2832,6 @@ intrinsics:
       ret: i64
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::ValueAPIGetArrayLength
-    clear_flags: [ ]
 
   - name: ValueAPISetElementObject
     space: ets
@@ -2976,7 +2842,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, std.core.Object ]
     impl: ark::ets::intrinsics::ValueAPISetElementObject
-    flags: [heap_inv]
 
   - name: ValueAPISetElementBoolean
     space: ets
@@ -2987,7 +2852,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, u1 ]
     impl: ark::ets::intrinsics::ValueAPISetElementBoolean
-    flags: [heap_inv]
 
   - name: ValueAPISetElementByte
     space: ets
@@ -2998,7 +2862,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i8 ]
     impl: ark::ets::intrinsics::ValueAPISetElementByte
-    flags: [heap_inv]
 
   - name: ValueAPISetElementChar
     space: ets
@@ -3009,7 +2872,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, u16 ]
     impl: ark::ets::intrinsics::ValueAPISetElementChar
-    flags: [heap_inv]
 
   - name: ValueAPISetElementShort
     space: ets
@@ -3020,7 +2882,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i16 ]
     impl: ark::ets::intrinsics::ValueAPISetElementShort
-    flags: [heap_inv]
 
   - name: ValueAPISetElementInt
     space: ets
@@ -3031,7 +2892,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i32 ]
     impl: ark::ets::intrinsics::ValueAPISetElementInt
-    flags: [heap_inv]
 
   - name: ValueAPISetElementLong
     space: ets
@@ -3042,7 +2902,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i64 ]
     impl: ark::ets::intrinsics::ValueAPISetElementLong
-    flags: [heap_inv]
 
   - name: ValueAPISetElementFloat
     space: ets
@@ -3053,7 +2912,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f32 ]
     impl: ark::ets::intrinsics::ValueAPISetElementFloat
-    flags: [heap_inv]
 
   - name: ValueAPISetElementDouble
     space: ets
@@ -3064,7 +2922,6 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f64 ]
     impl: ark::ets::intrinsics::ValueAPISetElementDouble
-    flags: [heap_inv]
 
 
   - name: ValueAPIGetElementObject
@@ -3076,7 +2933,6 @@ intrinsics:
       ret: std.core.Object
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetElementObject
-    clear_flags: [ ]
 
   - name: ValueAPIGetElementBoolean
     space: ets
@@ -3087,7 +2943,6 @@ intrinsics:
       ret: u1
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetElementBoolean
-    clear_flags: [ ]
 
   - name: ValueAPIGetElementByte
     space: ets
@@ -3098,7 +2953,6 @@ intrinsics:
       ret: i8
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetElementByte
-    clear_flags: [ ]
 
   - name: ValueAPIGetElementChar
     space: ets
@@ -3109,7 +2963,6 @@ intrinsics:
       ret: u16
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetElementChar
-    clear_flags: [ ]
 
   - name: ValueAPIGetElementShort
     space: ets
@@ -3120,7 +2973,6 @@ intrinsics:
       ret: i16
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetElementShort
-    clear_flags: [ ]
 
   - name: ValueAPIGetElementInt
     space: ets
@@ -3131,7 +2983,6 @@ intrinsics:
       ret: i32
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetElementInt
-    clear_flags: [ ]
 
   - name: ValueAPIGetElementLong
     space: ets
@@ -3142,7 +2993,6 @@ intrinsics:
       ret: i64
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetElementLong
-    clear_flags: [ ]
 
   - name: ValueAPIGetElementFloat
     space: ets
@@ -3153,7 +3003,6 @@ intrinsics:
       ret: f32
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetElementFloat
-    clear_flags: [ ]
 
   - name: ValueAPIGetElementDouble
     space: ets
@@ -3164,7 +3013,6 @@ intrinsics:
       ret: f64
       args: [ std.core.Object, i64 ]
     impl: ark::ets::intrinsics::ValueAPIGetElementDouble
-    clear_flags: [ ]
 
 ###############################
 # std.core.TypeBuilderContext #
@@ -3179,7 +3027,6 @@ intrinsics:
       ret: i64
       args: []
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxCreate
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxDestroy
     space: ets
@@ -3190,7 +3037,6 @@ intrinsics:
       ret: std.core.void
       args: [ i64 ]
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxDestroy
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxCommit
     space: ets
@@ -3203,7 +3049,6 @@ intrinsics:
         - i64
         - std.core.Object[]
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxCommit
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxGetError
     space: ets
@@ -3215,7 +3060,6 @@ intrinsics:
       args:
         - i64
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxGetError
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxGetObjectsArrayForCCtor
     space: ets
@@ -3227,7 +3071,6 @@ intrinsics:
       args:
         - i64
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxGetObjectsArrayForCCtor
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxGetTypeDescFromPointer
     space: ets
@@ -3239,7 +3082,6 @@ intrinsics:
       args:
         - i64
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxGetTypeDescFromPointer
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxClassCreate
     space: ets
@@ -3253,7 +3095,6 @@ intrinsics:
         - std.core.String
         - i32
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxClassCreate
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxClassSetBase
     space: ets
@@ -3266,7 +3107,6 @@ intrinsics:
         - i64
         - std.core.String
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxClassSetBase
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxClassAddIface
     space: ets
@@ -3279,7 +3119,6 @@ intrinsics:
         - i64
         - std.core.String
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxClassAddIface
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxClassAddField
     space: ets
@@ -3295,7 +3134,6 @@ intrinsics:
         - i32
         - i32
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxClassAddField
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxInterfaceCreate
     space: ets
@@ -3308,7 +3146,6 @@ intrinsics:
         - i64
         - std.core.String
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxInterfaceCreate
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxInterfaceAddBase
     space: ets
@@ -3321,7 +3158,6 @@ intrinsics:
         - i64
         - std.core.String
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxInterfaceAddBase
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodCreate
     space: ets
@@ -3335,7 +3171,6 @@ intrinsics:
         - std.core.String
         - i32
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodCreate
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddAccessMod
     space: ets
@@ -3348,7 +3183,6 @@ intrinsics:
         - i64
         - i32
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddAccessMod
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddParam
     space: ets
@@ -3363,7 +3197,6 @@ intrinsics:
         - std.core.String
         - i32
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddParam
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromMethod
     space: ets
@@ -3376,7 +3209,6 @@ intrinsics:
         - i64
         - std.core.String
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromMethod
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromLambda
     space: ets
@@ -3390,7 +3222,6 @@ intrinsics:
         - i32
         - std.core.String
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromLambda
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda
     space: ets
@@ -3403,7 +3234,6 @@ intrinsics:
         - i64
         - i32
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyDefault
     space: ets
@@ -3415,7 +3245,6 @@ intrinsics:
       args:
         - i64
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyDefault
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddResult
     space: ets
@@ -3428,7 +3257,6 @@ intrinsics:
         - i64
         - std.core.String
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddResult
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAdd
     space: ets
@@ -3440,7 +3268,6 @@ intrinsics:
       args:
         - i64
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAdd
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxLambdaTypeCreate
     space: ets
@@ -3453,7 +3280,6 @@ intrinsics:
         - i64
         - i32
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeCreate
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxLambdaTypeAddParam
     space: ets
@@ -3467,7 +3293,6 @@ intrinsics:
         - std.core.String
         - i32
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAddParam
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxLambdaTypeAddResult
     space: ets
@@ -3480,7 +3305,6 @@ intrinsics:
         - i64
         - std.core.String
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAddResult
-    clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxLambdaTypeAdd
     space: ets
@@ -3492,4 +3316,3 @@ intrinsics:
       args:
         - i64
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAdd
-    clear_flags: [ ]

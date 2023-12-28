@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -138,7 +138,10 @@ if (is_llvmbackend) {
   ark_gen_file("libllvmbackend_intrinsics_gen_inl") {
     template_file = "$llvmbackend_templates_dir/intrinsics_gen.inl.erb"
     data_file = "$intrinsics_yaml"
-    requires = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
+    requires = [
+      "$llvmbackend_templates_dir/intrinsics.rb",
+      "$ark_root/libpandabase/utils.rb",
+    ]
     output_file = "$target_gen_dir/intrinsics_gen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
@@ -147,7 +150,10 @@ if (is_llvmbackend) {
     template_file =
         "$llvmbackend_templates_dir/can_compile_intrinsics_gen.inl.erb"
     data_file = "$intrinsics_yaml"
-    requires = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
+    requires = [
+      "$llvmbackend_templates_dir/intrinsics.rb",
+      "$ark_root/libpandabase/utils.rb",
+    ]
     output_file = "$target_gen_dir/can_compile_intrinsics_gen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
@@ -155,7 +161,10 @@ if (is_llvmbackend) {
   ark_gen_file("libllvmbackend_intrinsic_names_gen_inl") {
     template_file = "$llvmbackend_templates_dir/intrinsic_names_gen.inl.erb"
     data_file = "$intrinsics_yaml"
-    requires = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
+    requires = [
+      "$llvmbackend_templates_dir/intrinsics.rb",
+      "$ark_root/libpandabase/utils.rb",
+    ]
     output_file = "$target_gen_dir/intrinsic_names_gen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
@@ -163,7 +172,10 @@ if (is_llvmbackend) {
   ark_gen_file("libllvmbackend_intrinsics_llvm_codegen_inl") {
     template_file = "$llvmbackend_templates_dir/intrinsics_llvm_codegen.inl.erb"
     data_file = "$intrinsics_yaml"
-    requires = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
+    requires = [
+      "$llvmbackend_templates_dir/intrinsics.rb",
+      "$ark_root/libpandabase/utils.rb",
+    ]
     output_file = "$target_gen_dir/intrinsics_llvm_codegen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
