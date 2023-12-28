@@ -36,6 +36,9 @@ class RuntimeDefaultEtsTestDir:
 
     @property
     def es2panda_test(self) -> Path:
+        symlink_es2panda_test = self.__static_core_root / "tools" / "es2panda" / "test"
+        if symlink_es2panda_test.exists():
+            return symlink_es2panda_test
         return self.__static_core_root.parent.parent / 'ets_frontend' / 'ets2panda' / 'test'
 
     @property
