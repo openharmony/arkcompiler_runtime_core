@@ -2654,3 +2654,12 @@
 13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_1.ets
 13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_2.ets
 13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_3.ets
+
+# 15095
+09.classes/06.method_declarations/10.hiding_by_class_methods/hiding_instance_static_method.ets
+09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.ets
+# end 15095
+# 14595
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_2.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_1.ets
+# end 14595

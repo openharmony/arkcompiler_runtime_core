@@ -705,4 +705,5 @@ spec/bigint/bigint-arithmetic-div-2-operands-union.ets
 spec/bigint/bigint-arithmetic-mul-2-operands-union.ets
 spec/bigint/bigint-arithmetic-sub-2-union.ets
 ### Issue 14907 end
-
+### Issue 15096
+algorithms/SampleAppTest.ets
