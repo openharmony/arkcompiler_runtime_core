@@ -22,6 +22,9 @@
 namespace ark::ets {
 
 class EtsCoroutine;
+class EtsObject;
+
+PANDA_PUBLIC_API EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg);
 
 PANDA_PUBLIC_API void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg);
 

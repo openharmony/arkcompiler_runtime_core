@@ -25,7 +25,6 @@ type NullableSupplier = () => IntOrNull;
 function main(): void {
     let ss: NullableSupplier = (): IntOrNull => { return 42; }
 
-    assert ss !== null;
     assert ss() == 42;
 
 }

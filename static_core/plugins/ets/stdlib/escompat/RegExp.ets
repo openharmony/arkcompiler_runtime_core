@@ -407,7 +407,7 @@ export class RegExp extends Object {
         if (result == null) {
             return -1
         } else {
-            return result.index
+            return result!.index
         }
     }
 
@@ -496,7 +496,7 @@ export class RegExp extends Object {
                 let capN = result.get(n);
                 args.pushBack(capN)
             }
-            let namedCaptures = /*result.groups*/ undefined;
+            let namedCaptures: NullishType = /*result.groups*/ undefined;
             args.pushBack(new Double(position as double));
             args.pushBack(str)
             if (namedCaptures != undefined) {

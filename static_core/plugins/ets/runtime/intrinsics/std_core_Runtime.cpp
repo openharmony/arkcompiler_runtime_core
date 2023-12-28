@@ -17,6 +17,10 @@
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
 #include "runtime/handle_scope-inl.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets::intrinsics {
 
@@ -34,6 +38,28 @@ EtsInt StdCoreRuntimeGetHashCode([[maybe_unused]] ObjectHeader *header, EtsObjec
     auto hash = ObjectHeader::GenerateHashCode();
     source->SetInteropHash(hash);
     return bit_cast<EtsInt>(hash);
+}
+
+static char const *ReferenceTypeString(EtsCoroutine *coro, EtsObject *obj)
+{
+    if (obj == nullptr) {
+        return "null";
+    }
+    if (obj == EtsObject::FromCoreType(coro->GetUndefinedObject())) {
+        return "undefined";
+    }
+    return obj->GetClass()->GetDescriptor();
+}
+
+ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString *target)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+
+    auto message = PandaString(ReferenceTypeString(coro, source)) + " cannot be cast to " + target->GetMutf8();
+
+    return ets::SetupEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_EXCEPTION.data(),
+                                  message.data())
+        ->GetCoreType();
 }
 
 }  // namespace ark::ets::intrinsics

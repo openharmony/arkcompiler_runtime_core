@@ -26,7 +26,7 @@ function main(): void {
     let ss: NullableSupplier = null;
     assert ss === null;
     ss = (): int => { return 42; }
-    let rs: int = ss();
+    let rs: int = ss!();
     assert rs == 42;
 
 }

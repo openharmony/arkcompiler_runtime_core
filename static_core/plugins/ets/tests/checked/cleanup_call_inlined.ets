@@ -54,7 +54,7 @@ final class Counter {
 }
 
 function add(c: WeakRef<Counter>, value: int) : int {
-    return c.deref().add(value);
+    return c.deref()!.add(value);
 }
 
 function test_after_escape(): int {
@@ -62,7 +62,7 @@ function test_after_escape(): int {
     let ref = new WeakRef<Counter>(counter);
     add(ref, 4);
     add(ref, 5);
-    return ref.deref().total;
+    return ref.deref()!.total;
 }
 
 

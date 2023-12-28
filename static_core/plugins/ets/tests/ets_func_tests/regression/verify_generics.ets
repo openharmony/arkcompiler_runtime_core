@@ -59,7 +59,7 @@ function bar<T extends Comparable<string>>(x: T): T {
 }
 
 function main(): void {
-    console.println(foo<string>("123").charAt(1));
+    console.println(foo<string>("123")!.charAt(1));
     console.println(bar<string>("456").charAt(1));
 
     const myX = new X<string>();

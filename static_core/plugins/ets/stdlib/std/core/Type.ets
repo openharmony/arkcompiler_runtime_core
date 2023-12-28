@@ -2060,7 +2060,7 @@ export final class InterfaceType extends Type {
         used.push(new Long(this.getId()))
 
         while ((queue.length - qfront) > 0) {
-            let iface = queue.at(qfront)
+            let iface = queue.at(qfront)!
             qfront++
 
             let sifacesNum = iface.getInterfacesNum()

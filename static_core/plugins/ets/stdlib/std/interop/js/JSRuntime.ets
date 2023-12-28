@@ -306,7 +306,7 @@ export final class JSRuntime {
     // Internal api
     // ===================
     public static getNumSharedJSValues(): int {
-        return JSRuntime.finQueue.getSize();
+        return JSRuntime.finQueue!.getSize();
     }
 
     private static finalizationRegistryCallback(obj: Object): void {

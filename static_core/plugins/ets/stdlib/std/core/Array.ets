@@ -12384,7 +12384,7 @@ export function indexOf(arr: NullishType[], key: NullishType, startIndex: int, e
 
     for (let i: int = startIndex; i < endIndex; i++) {
         
-        if (arr[i].equals(key)) {
+        if (arr[i]!.equals(key)) {
             return i;
         } 
     }

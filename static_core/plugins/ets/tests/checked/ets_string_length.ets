@@ -70,7 +70,7 @@ function main(): int {
     let s2 = nullString();
     try {
         // The program must fall into the catch block as s2.getLength() throws the NullPointerException.
-        if (s2.getLength() == 0) {
+        if (s2!.getLength() == 0) {
             return 3;
         }
         return 4;

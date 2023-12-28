@@ -171,7 +171,7 @@ export final class Set<K> implements ReadonlySet<K> {
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val.equals(v as Object)) {
+            if (node.val!.equals(v as Object)) {
                 node.val = v as Object
                 return this
             }
@@ -201,7 +201,7 @@ export final class Set<K> implements ReadonlySet<K> {
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val.equals(v)) {
+            if (node.val!.equals(v)) {
                 return node.val as K
             }
         }
@@ -242,7 +242,7 @@ export final class Set<K> implements ReadonlySet<K> {
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val.equals(v)) {
+            if (node.val!.equals(v)) {
                 node.prev.next = node.next
                 node.next.prev = node.prev
                 buck.fill(buck.pop()!, i, i + 1)

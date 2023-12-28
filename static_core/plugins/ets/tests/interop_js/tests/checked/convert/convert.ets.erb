@@ -53,12 +53,12 @@ function test_deep_equal(): int {
     if (js_check_set() as int != 0) {
         return -1;
     }
-    obj.int_value = 2;
+    obj!.int_value = 2;
     js_set_object_for_equal(1, obj);
     if (js_check_set() as int == 0) {
         return -2;
     }
-    obj.int_value = 1;
+    obj!.int_value = 1;
     js_set_object_for_equal(1, obj);
     if (js_check_set() as int != 0) {
         return -3;

@@ -23,7 +23,7 @@ function n_cor_launch(n_cor: int): int {
         p[i] = launch return_value(i);
     }
     for (let i = 0; i < n_cor; ++i) {
-        let val = await p[i];
+        let val = await p[i]!;
         if(val != return_value(i)) {
             console.println("p[" + i + "] = \"" + val + "\" instead of \"" + return_value(i) + "\"");
             return 1;
@@ -43,7 +43,7 @@ function n_cor_exection_launch(n_cor: int): int {
     }
     for (let i = 0; i < n_cor; ++i) {
         try {
-            await p[i]
+            await p[i]!
         } catch (e) {
             if (!(e instanceof Error)) {
               console.println("Expected Error but another exception has been thrown!: " + e);

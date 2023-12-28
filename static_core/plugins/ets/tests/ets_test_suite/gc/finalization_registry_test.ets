@@ -51,18 +51,18 @@ function finalizationRegistryTest(queue: FinalizationRegistry | null): void {
     object3 = new Object();
     let object3_callbackArg = new String("Third object removed");
     let unregistered_token = new Object();
-    queue.register(object1!, object1_callbackArg as Object, object1_token);
-    queue.register(object2!, object2_callbackArg as Object, object2_token);
-    queue.register(object3!, object3_callbackArg as Object);
+    queue!.register(object1!, object1_callbackArg as Object, object1_token);
+    queue!.register(object2!, object2_callbackArg as Object, object2_token);
+    queue!.register(object3!, object3_callbackArg as Object);
 
     unused_queue = new FinalizationRegistry(callback);
 
     // Try to unregister unknown tokens:
-    queue.unregister(unregistered_token);
-    queue.unregister(null);
-    unused_queue.unregister(object1);
-    unused_queue.unregister(unregistered_token);
-    unused_queue.unregister(null);
+    queue!.unregister(unregistered_token);
+    queue!.unregister(null);
+    unused_queue!.unregister(object1);
+    unused_queue!.unregister(unregistered_token);
+    unused_queue!.unregister(null);
 
     // Check that we don't call any callbacks here
     doFullGC();
@@ -70,7 +70,7 @@ function finalizationRegistryTest(queue: FinalizationRegistry | null): void {
     // Unregister object2, remove unused_queue
     // and check that we don't call object2 callback
     unused_queue = null;
-    queue.unregister(object2_token);
+    queue!.unregister(object2_token);
     assert object2 != null : "Object 2 is alive";
     object2 = null;
     doFullGC();

@@ -214,7 +214,7 @@ export final class Promise<out T> {
         if (size == 0) {
             return new Object[2];
         }
-        if (size == queue.length) {
+        if (size == queue!.length) {
             let newQueue = new Object[size * 2];
             for (let i = 0; i < size; ++i) {
                 newQueue[i] = queue?.[i]!;
@@ -227,14 +227,14 @@ export final class Promise<out T> {
     private pushToThenQueue(job: Object): void {
         // length property of thenQueue Objet array represents its capacity, thenQueueSize represents its current size
         this.thenQueue = this.ensureCapacity(this.thenQueue, this.thenQueueSize);
-        (this.thenQueue)?.[this.thenQueueSize] = job;
+        this.thenQueue![this.thenQueueSize] = job;
         ++this.thenQueueSize;
     }
 
     private pushToCatchQueue(job: Object): void {
         // length property of catchQueue Objet array represents its capacity, catchQueueSize represents its current size
         this.catchQueue = this.ensureCapacity(this.catchQueue, this.catchQueueSize);
-        (this.catchQueue)?.[this.catchQueueSize] = job;
+        this.catchQueue![this.catchQueueSize] = job;
         ++this.catchQueueSize;  
     }
 
@@ -338,7 +338,7 @@ class PromiseConcurrency {
                 if (error == null || error instanceof Error) {
                     errors[idx] = error as Error;
                 } else {
-                    errors[idx] = new Error(error.toString());
+                    errors[idx] = new Error(error!.toString());
                 }
                 if (this.rejectedCnt == errors.length) {
                     this.reject(new AggregateError(errors, "All promises are rejected"));

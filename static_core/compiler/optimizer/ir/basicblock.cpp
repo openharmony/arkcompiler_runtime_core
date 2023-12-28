@@ -860,6 +860,8 @@ void BasicBlock::RemoveInst(Inst *inst)
     inst->RemoveInputs();
     if (inst->GetOpcode() == Opcode::NullPtr) {
         graph_->UnsetNullPtrInst();
+    } else if (inst->GetOpcode() == Opcode::LoadUndefined) {
+        graph_->UnsetUndefinedInst();
     } else if (inst->GetOpcode() == Opcode::Constant) {
         graph_->RemoveConstFromList(static_cast<ConstantInst *>(inst));
     }

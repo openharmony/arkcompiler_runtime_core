@@ -29,6 +29,6 @@ function log(param: Margin | null ): Margin | null  {
 
 function main(): void {
     let a: Margin = new A()
-    let b: Margin = log(a)
+    let b: Margin | null = log(a)
     assert a == b
 }

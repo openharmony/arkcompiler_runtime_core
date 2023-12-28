@@ -2133,11 +2133,6 @@
 07.expressions/07.object_literal/03.object_literal_of_record_type/spec_ex2.ets
 # end of es2panda fails
 
-# es2panda fails:#12570
-07.expressions/12.indexing_expression/01.array_indexing_expression/safe_array_access2.ets
-# end of es2panda fails
-
-
 # es2panda fails: panda#14140
 03.types/07.value_types/05.character_types_and_operations/ch_n_0.ets
 03.types/07.value_types/05.character_types_and_operations/ch_n_1.ets
@@ -2670,3 +2665,105 @@
 # Leftovers from bit operations on floats
 06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_61.ets
 06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_68.ets
+
+# New failures according to nullablity changes #15642
+# not recommended, yet allowed
+03.types/08.reference_types/08.null_type/null12.ets
+03.types/08.reference_types/08.null_type/null13.ets
+# these must be negative - null is not allowed in arithmetics, nullable is not assignable to non-nullable
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_10.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_14.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_15.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_16.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_3.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_4.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_5.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_6.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_7.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_9.ets
+# inferred type is null
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/null_initializer.ets
+# nullable in arithmetics
+04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_16.ets
+04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_8.ets
+# primitive allowed in union
+04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_n_0.ets
+# positive
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_2.ets
+# positive
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_2.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_3.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args2_neg_3.ets
+# non-compatible operands, null and non-nullable
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_1.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_4.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_5.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_6.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_7.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_1.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_10.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_11.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_12.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_13.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_4.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_5.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_6.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_7.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_8.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_9.ets
+# no reason to fail
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_4.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_5.ets
+# non-compatible operands
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/boxing2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/widening_refs.ets
+# assign nullable to non-nullable
+07.expressions/13.function_call_expression/optional_chaining_value_result.ets
+# should be allowed
+07.expressions/29.conditional_expressions/02.numeric_conditional_expressions/type_of_numeric_condition_expression_type_0.ets
+07.expressions/29.conditional_expressions/02.numeric_conditional_expressions/type_of_numeric_condition_expression_type_1.ets
+# legal
+07.expressions/29.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_0.ets
+# nullability violation
+07.expressions/15.cast_expressions/nullable_cast_1.ets
+# array is always truthy
+08.statements/05.if_statements/if2_19.ets
+# end
+
+# #15577 union type inference
+06.contexts_and_conversions/02.kinds_of_conversion/identity_5.ets
+07.expressions/07.object_literal/01.object_literal_of_class_type/cl_2.ets
+07.expressions/13.function_call_expression/fcall_7.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_1.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_11.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_12.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_14.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_5.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_7.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_3.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_4.ets
+07.expressions/13.function_call_expression/fcall_9.ets
+03.types/08.reference_types/11.union_types/ut_22.ets
+# end
+
+# 15276
+17.experimental_features/05.statements/05.function_overloading/fn_overloading_n_10.ets
+#end
+
+# #15610 undefined default array value
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_15.ets
+#
+
+#15642
+04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_14.ets
+03.types/08.reference_types/11.union_types/union_types_normalization/norm_7.ets
+#

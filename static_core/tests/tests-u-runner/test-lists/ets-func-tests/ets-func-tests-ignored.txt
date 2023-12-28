@@ -288,12 +288,6 @@ spec/undefined-type/define/define-class-member-as-question.ets
 spec/undefined-type/array-of-type_0.ets
 spec/undefined-type/array-of-type_1.ets
 ###### End Issue 13874
-###### Issue 14602
-spec/undefined-type/issue14602.ets
-###### End Issue 14602
-###### Issue 14610
-spec/undefined-type/issue14610.ets
-###### End Issue 14610
 ###### EOF Undefined type
 ### Feature: Callable classes
 ### issue 14539
@@ -347,8 +341,6 @@ spec/nullables/eval-lazy_1.ets
 spec/nullables/nullable-method-result_0.ets
 spec/nullables/nullable-method-result_1.ets
 spec/nullables/nullable-function-result_0.ets
-spec/nullables/issue13991.ets
-spec/nullables/issue14113.ets
 ### End Issue 14495
 ### Issue 14301
 spec/nullables/defined-primitive-type-nullable-union_0.ets
@@ -741,3 +733,19 @@ spec/types/double_to_string_2.ets
 ### BigInt64Array
 std/core/std_core_typedarrays__BigInt64Array.ets
 ### BigInt64Array end
+
+### Failures #15642
+# Type violation in type erasure 
+regression/12581_box_type_array_Boolean_array.ets
+regression/12581_box_type_array_Byte_array.ets
+regression/12581_box_type_array_Int_array.ets
+regression/12581_box_type_array_Short_array.ets
+regression/12581_box_type_array_Long_array.ets
+# undefined|number assigned to number
+std/core/std_core_string_String_codePointAt_number.ets
+###
+
+### 15577
+spec/nullables/defined-type-nullable-union_2.ets
+spec/nullables/defined-type-nullable-union_3.ets
+###

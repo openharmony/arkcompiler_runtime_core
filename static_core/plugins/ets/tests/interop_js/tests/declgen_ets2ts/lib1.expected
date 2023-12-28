@@ -95,7 +95,7 @@ class Methods {
     public SumString(a: string, b: string): string { return {} as any; };
     public static StaticSumDouble(a: number, b: number): number { return {} as any; };
     public SumIntArray(a: number[]): number { return {} as any; };
-    public OptionalString(a?: string | null): string | null { return {} as any; };
+    public OptionalString(a: string | null): string | null { return {} as any; };
     public SumIntVariadic(a: number, ...b: number[]): number { return {} as any; };
     constructor() {};
 };

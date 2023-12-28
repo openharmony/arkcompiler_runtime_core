@@ -45,24 +45,15 @@ static EtsClass *GetExceptionClass(EtsCoroutine *coroutine, const char *classDes
     return cls;
 }
 
-void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg)
+EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg)
 {
-    ASSERT(coroutine != nullptr);
-    ASSERT(coroutine == EtsCoroutine::GetCurrent());
-
-    if (coroutine->IsUsePreAllocObj()) {
-        coroutine->SetUsePreAllocObj(false);
-        coroutine->SetException(coroutine->GetVM()->GetOOMErrorObject());
-        return;
-    }
-
     [[maybe_unused]] EtsHandleScope scope(coroutine);
     EtsHandle<EtsObject> cause(coroutine, EtsObject::FromCoreType(coroutine->GetException()));
     coroutine->ClearException();
 
     EtsClass *cls = GetExceptionClass(coroutine, classDescriptor);
     if (cls == nullptr) {
-        return;
+        return nullptr;
     }
 
     EtsString *etsMsg = nullptr;
@@ -74,7 +65,7 @@ void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, con
     if (UNLIKELY(etsMsg == nullptr)) {
         // OOM happened during msg allocation
         ASSERT(coroutine->HasPendingException());
-        return;
+        return nullptr;
     }
 
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
@@ -85,7 +76,7 @@ void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, con
     EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), proto);
     if (ctor == nullptr) {
         LOG(FATAL, RUNTIME) << "No method " << panda_file_items::CTOR << " in class " << classDescriptor;
-        return;
+        return nullptr;
     }
 
     EtsHandle<EtsString> msgHandle(coroutine, etsMsg);
@@ -100,8 +91,27 @@ void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, con
 
     EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(coroutine, args.data());
     if (LIKELY(!coroutine->HasPendingException())) {
-        coroutine->SetException(excHandle.GetPtr()->GetCoreType());
+        return excHandle.GetPtr();
     }
+    return nullptr;
+}
+
+void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg)
+{
+    ASSERT(coroutine != nullptr);
+    ASSERT(coroutine == EtsCoroutine::GetCurrent());
+
+    if (coroutine->IsUsePreAllocObj()) {
+        coroutine->SetUsePreAllocObj(false);
+        coroutine->SetException(coroutine->GetVM()->GetOOMErrorObject());
+        return;
+    }
+
+    EtsObject *exc = SetupEtsException(coroutine, classDescriptor, msg);
+    if (LIKELY(exc != nullptr)) {
+        coroutine->SetException(exc->GetCoreType());
+    }
+    ASSERT(coroutine->HasPendingException());
 }
 
 }  // namespace ark::ets

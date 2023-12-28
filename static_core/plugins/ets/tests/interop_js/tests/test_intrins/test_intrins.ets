@@ -121,7 +121,7 @@ function test_undefined(): boolean {
 function test_null(): boolean {
     let v = JSRuntime.getNull();
     let r = "object:null";
-    if (jscall.any$a(jsvars.m, ".Identity", v) !== null) {
+    if (jscall.any$a(jsvars.m, ".Identity", v) as NullishType !== null) {
         return false;
     }
     return r == vstringify(v);

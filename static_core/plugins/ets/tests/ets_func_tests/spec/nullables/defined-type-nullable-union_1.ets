@@ -23,7 +23,6 @@ type NullableSupplier = () => Int | null; // Defines lambda with (Int|null) retu
 
 function main(): void {
     let ss: NullableSupplier = (): Int | null => { return 42; }
-    assert ss !== null;
 
     let rs: Int | null = ss();
     assert rs == 42;

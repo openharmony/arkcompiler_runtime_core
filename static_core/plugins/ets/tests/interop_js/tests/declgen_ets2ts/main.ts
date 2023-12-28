@@ -132,9 +132,10 @@ function testMethods() {
   AssertEq(o.OptionalString('Optional string'), 'Optional string');
 
   // NOTE(ivagin): enable when supported by runtime #12808
+  // NOTE(vpukhov): optional methods produce overload sets
   if (false) {
-    AssertEq(o.OptionalString(undefined), undefined);
-    AssertEq(o.OptionalString(), undefined);
+    // AssertEq(o.OptionalString(undefined), undefined);
+    // AssertEq(o.OptionalString(), undefined);
   }
 
   // NOTE(ivagin): enable when supported by interop #12808

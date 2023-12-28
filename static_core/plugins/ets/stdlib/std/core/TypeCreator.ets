@@ -1106,7 +1106,7 @@ export final class MethodCreator {
         const isAbstract = this.attrs.has(Attributes.ABSTRACT)
         const hasBody = this.body != null
         if (isAbstract == hasBody) {
-            ctx.checkError("only and only abstract methods don't have a body; abstract = " + isAbstract + "; body = " + (this.body == null ? "null" : this.body.toString()))
+            ctx.checkError("only and only abstract methods don't have a body; abstract = " + isAbstract + "; body = " + (this.body == null ? "null" : this.body!.toString()))
         }
         if (!isAbstract) {
             const body = this.body!

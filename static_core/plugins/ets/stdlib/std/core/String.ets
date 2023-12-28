@@ -1376,8 +1376,8 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * without modifying the original string.
      */
     public slice(begin?: Number, end?: Number): String {
-        const b = (begin == undefined) ? 0 : begin!
-        const e = (end == undefined) ? this.getLength() : end!
+        const b = (begin == undefined) ? 0 : (begin! as number)
+        const e = (end == undefined) ? this.getLength() : (end! as number)
         return this.slice(b as int, e as int)
     }
 

@@ -102,6 +102,22 @@ export final class Runtime {
      * @returns true if Objects are equal
      */
     public native isSameReference(o1: NullishType, o2: NullishType): boolean;
+
+    /**
+     * Internal entrypoint to create exception for failed type cast
+     * 
+     * @param src source value
+     * 
+     * @param dstStr target type string
+     * 
+     * @returns exception object to throw
+     */
+    internal static failedTypeCastException(src: NullishType, dstStr: string): ClassCastException {
+        let srcStr = src === null ? "null" :
+            (src === undefined ? "undefined" :
+                TypeAPIGetTypeDescriptor(src));
+        return new ClassCastException(srcStr + " cannot be cast to " + dstStr);
+    }
 }
 
 export const runtime = new Runtime();

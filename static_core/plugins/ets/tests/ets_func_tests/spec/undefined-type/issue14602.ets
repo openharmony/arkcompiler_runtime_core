@@ -27,7 +27,7 @@ class A {
 function main(): int {
     let a: A|undefined = new A();
     if(a!.b == false) {
-        a.b = true;
+        a!.b = true;
     }
     return 0;
 }

@@ -2048,6 +2048,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreRuntimeGetHashCode
     clear_flags: [ ]
 
+  - name: StdCoreRuntimeFailedTypeCastException
+    space: ets
+    class_name: std.core.Runtime
+    method_name: failedTypeCastException
+    static: true
+    signature:
+      ret: std.core.ClassCastException
+      args: [ std.core.Object, std.core.String ]
+    impl: panda::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
+    clear_flags: [ ]
+
 ##########################
 # std.serialization.JSON #
 ##########################
