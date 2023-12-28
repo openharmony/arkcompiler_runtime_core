@@ -61,7 +61,7 @@ private:
     void GetMethodIds();
     void GetLiteralIds();
     void CollectModuleLiteralId(const panda_file::File::EntityId &field_id);
-    bool CheckConstantPool(verifier::ActionType type);
+    bool CheckConstantPool(const verifier::ActionType type);
     size_t GetVRegCount(const BytecodeInstruction &bc_ins);
     bool CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id);
     bool VerifyMethodId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);

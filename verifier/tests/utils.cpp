@@ -49,6 +49,8 @@ void ModifyBuffer(std::unordered_map<uint32_t, uint32_t> &literal_map, std::vect
         ConvertToLittleEndian(inner_id, literal.second);
         for (size_t i = literal_id; i < buffer.size(); ++i) {
             if (buffer[i] == inner_id[0] && buffer[i+1] == inner_id[1]) {
+                // The purpose of this modification is to break abc
+                // The abc is tampered with by setting buffer[i + 1] to buffer[i] and buffer[i + 2] to buffer[i + 1]
                 buffer[i] = buffer[i + 1];
                 buffer[i + 1] = buffer[i + 2];
                 break;
