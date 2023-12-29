@@ -30,28 +30,3 @@ language/statements/while/tco-body.js
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js
 
-# 11486
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-add.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-bitand.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-bitor.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-bitxor.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-div.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-exp.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-lshift.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-mod.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-mult.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-rshift.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-srshift.js
-language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-sub.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-add.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-bitand.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-bitor.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-bitxor.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-div.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-exp.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-lshift.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-mod.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-mult.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-rshift.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-srshift.js
-language/expressions/compound-assignment/left-hand-side-private-reference-data-property-sub.js
