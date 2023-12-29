@@ -36,8 +36,14 @@ class LLVMIrConstructor : public GraphVisitor {
 private:
     // Specific intrinsic Emitters
     bool EmitUnreachable();
+    bool EmitSlowPathEntry(Inst *inst);
+    bool EmitExclusiveLoadWithAcquire(Inst *inst);
+    bool EmitExclusiveStoreWithRelease(Inst *inst);
     bool EmitInterpreterReturn();
     bool EmitTailCall(Inst *inst);
+    bool EmitMemoryFence(memory_order::Order order);
+    template <uint32_t VECTOR_SIZE>
+    bool EmitCompressUtf16ToUtf8CharsUsingSimd(Inst *inst);
 
 public:
     llvm::Value *GetMappedValue(Inst *inst, DataType::Type type);
@@ -85,6 +91,8 @@ private:
     llvm::Value *CreateMemoryFence(memory_order::Order order);
     llvm::Value *CreateCondition(ConditionCode cc, llvm::Value *x, llvm::Value *y);
     void CreateIf(Inst *inst, llvm::Value *cond, bool likely, bool unlikely);
+    llvm::CallInst *CreateTailCallFastPath(Inst *inst);
+    llvm::CallInst *CreateTailCallInterpreter(Inst *inst);
 
     // Getters
     llvm::FunctionType *GetEntryFunctionType();
@@ -93,6 +101,13 @@ private:
 
     llvm::Value *GetThreadRegValue();
     llvm::Value *GetRealFrameRegValue();
+
+    llvm::Argument *GetArgument(size_t index)
+    {
+        ASSERT(func_ != nullptr);
+        auto offset = 0;
+        return func_->arg_begin() + offset + index;
+    }
 
     llvm::Type *GetType(DataType::Type panda_type);
     llvm::Type *GetExactType(DataType::Type target_type);
@@ -152,6 +167,7 @@ protected:
     static void VisitConstant(GraphVisitor *v, Inst *inst);
     static void VisitNullPtr(GraphVisitor *v, Inst *inst);
     static void VisitLiveIn(GraphVisitor *v, Inst *inst);
+    static void VisitParameter(GraphVisitor *v, Inst *inst);
     static void VisitReturnVoid(GraphVisitor *v, Inst *inst);
     static void VisitReturn(GraphVisitor *v, Inst *inst);
     static void VisitLiveOut(GraphVisitor *v, Inst *inst);

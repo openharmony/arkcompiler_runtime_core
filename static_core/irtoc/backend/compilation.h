@@ -46,6 +46,7 @@ public:
     }
 
 private:
+    void CollectUsedRegisters(panda::ArenaAllocator *allocator);
     void CheckUsedRegisters();
     Result Compile();
 

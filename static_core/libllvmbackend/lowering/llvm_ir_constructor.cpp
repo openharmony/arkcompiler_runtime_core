@@ -39,6 +39,9 @@ using panda::llvmbackend::irtoc_function_utils::IsNoAliasIrtocFunction;
 using panda::llvmbackend::irtoc_function_utils::IsPtrIgnIrtocFunction;
 #endif
 
+static constexpr unsigned VECTOR_SIZE_8 = 8;
+static constexpr unsigned VECTOR_SIZE_16 = 16;
+
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_TYPE(input, expected_type)                                                                  \
     ASSERT_DO((input)->getType() == (expected_type),                                                       \
@@ -226,10 +229,26 @@ bool LLVMIrConstructor::TryEmitIntrinsic(Inst *inst, RuntimeInterface::Intrinsic
     switch (ark_id) {
         case RuntimeInterface::IntrinsicId::INTRINSIC_UNREACHABLE:
             return EmitUnreachable();
+        case RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY:
+            return EmitSlowPathEntry(inst);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE:
+            return EmitExclusiveLoadWithAcquire(inst);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STORE_RELEASE_MARK_WORD_EXCLUSIVE:
+            return EmitExclusiveStoreWithRelease(inst);
+        // LLVM encodes them using calling conventions
+        case RuntimeInterface::IntrinsicId::INTRINSIC_SAVE_REGISTERS_EP:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_RESTORE_REGISTERS_EP:
+            return true;
         case RuntimeInterface::IntrinsicId::INTRINSIC_INTERPRETER_RETURN:
             return EmitInterpreterReturn();
         case RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL:
             return EmitTailCall(inst);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_DATA_MEMORY_BARRIER_FULL:
+            return EmitMemoryFence(memory_order::FULL);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_EIGHT_UTF16_TO_UTF8_CHARS_USING_SIMD:
+            return EmitCompressUtf16ToUtf8CharsUsingSimd<VECTOR_SIZE_8>(inst);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_SIXTEEN_UTF16_TO_UTF8_CHARS_USING_SIMD:
+            return EmitCompressUtf16ToUtf8CharsUsingSimd<VECTOR_SIZE_16>(inst);
         default:
             return false;
     }
@@ -249,8 +268,87 @@ bool LLVMIrConstructor::EmitUnreachable()
     return true;
 }
 
+bool LLVMIrConstructor::EmitSlowPathEntry(Inst *inst)
+{
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT(func_->getCallingConv() == llvm::CallingConv::ArkFast0 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast1 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast2 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast3 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast4 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast5);
+
+    // Arguments
+    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
+    for (size_t i = 0; i < inst->GetInputs().Size(); ++i) {
+        args.push_back(GetInputValue(inst, i));
+    }
+    auto thread_reg_ptr = builder_.CreateIntToPtr(GetThreadRegValue(), builder_.getPtrTy());
+    auto frame_reg_ptr = builder_.CreateIntToPtr(GetRealFrameRegValue(), builder_.getPtrTy());
+    args.push_back(thread_reg_ptr);
+    args.push_back(frame_reg_ptr);
+
+    // Types
+    ArenaVector<llvm::Type *> arg_types(GetGraph()->GetLocalAllocator()->Adapter());
+    for (const auto &input : inst->GetInputs()) {
+        arg_types.push_back(GetExactType(input.GetInst()->GetType()));
+    }
+    arg_types.push_back(builder_.getPtrTy());
+    arg_types.push_back(builder_.getPtrTy());
+    auto ftype = llvm::FunctionType::get(GetType(inst->GetType()), arg_types, false);
+
+    ASSERT(inst->CastToIntrinsic()->GetImms().size() == 2U);
+    uint32_t offset = inst->CastToIntrinsic()->GetImms()[1];
+
+    auto addr = builder_.CreateConstInBoundsGEP1_64(builder_.getInt8Ty(), thread_reg_ptr, offset);
+    auto callee = builder_.CreateLoad(builder_.getPtrTy(), addr);
+
+    auto call = builder_.CreateCall(ftype, callee, args, "");
+    call->setCallingConv(func_->getCallingConv());
+    call->setTailCallKind(llvm::CallInst::TailCallKind::TCK_MustTail);
+    if (call->getType()->isVoidTy()) {
+        builder_.CreateRetVoid();
+    } else {
+        builder_.CreateRet(call);
+    }
+    return true;
+}
+
+bool LLVMIrConstructor::EmitExclusiveLoadWithAcquire(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(inst->GetInputType(0) == DataType::POINTER);
+    auto &ctx = func_->getContext();
+    auto addr = GetInputValue(inst, 0);
+    auto dst_type = GetExactType(inst->GetType());
+    auto intrinsic_id = llvm::Intrinsic::AARCH64Intrinsics::aarch64_ldaxr;
+    auto load = builder_.CreateUnaryIntrinsic(intrinsic_id, addr);
+    load->addParamAttr(0, llvm::Attribute::get(ctx, llvm::Attribute::ElementType, dst_type));
+    ValueMapAdd(inst, load);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitExclusiveStoreWithRelease(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(inst->GetInputType(0) == DataType::POINTER);
+    auto &ctx = func_->getContext();
+    auto addr = GetInputValue(inst, 0);
+    auto value = GetInputValue(inst, 1);
+    auto type = value->getType();
+    auto intrinsic_id = llvm::Intrinsic::AARCH64Intrinsics::aarch64_stlxr;
+    auto stlxr = llvm::Intrinsic::getDeclaration(func_->getParent(), intrinsic_id, builder_.getPtrTy());
+    value = builder_.CreateZExtOrBitCast(value, stlxr->getFunctionType()->getParamType(0));
+    auto store = builder_.CreateCall(stlxr, {value, addr});
+    store->addParamAttr(1, llvm::Attribute::get(ctx, llvm::Attribute::ElementType, type));
+    ValueMapAdd(inst, store);
+    return true;
+}
+
 bool LLVMIrConstructor::EmitInterpreterReturn()
 {
+    ASSERT(GetGraph()->GetMode().IsInterpreter());
+
     // This constant is hardcoded in codegen_interpreter.h and in interpreter.irt
     constexpr size_t SPILL_SLOTS = 32;
     CFrameLayout fl(GetGraph()->GetArch(), SPILL_SLOTS);
@@ -310,45 +408,22 @@ bool LLVMIrConstructor::EmitInterpreterReturn()
 
 bool LLVMIrConstructor::EmitTailCall(Inst *inst)
 {
-    ASSERT(func_->getCallingConv() == llvm::CallingConv::ArkInt);
+    ASSERT(func_->getCallingConv() == llvm::CallingConv::ArkFast0 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast1 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast2 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast3 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast4 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkFast5 ||
+           func_->getCallingConv() == llvm::CallingConv::ArkInt);
     llvm::CallInst *call;
 
-    auto ptr = GetInputValue(inst, 0);
-    ASSERT_TYPE(ptr, builder_.getPtrTy());
-    ASSERT(cc_values_.size() == (GetGraph()->GetArch() == Arch::AARCH64 ? 8U : 7U));
-    ASSERT(cc_values_.at(0) != nullptr);  // pc
-    static constexpr unsigned ACC = 1U;
-    static constexpr unsigned ACC_TAG = 2U;
-    ArenaVector<llvm::Type *> arg_types(GetGraph()->GetLocalAllocator()->Adapter());
-    for (size_t i = 0; i < cc_.size(); i++) {
-        if (cc_values_.at(i) != nullptr) {
-            arg_types.push_back(cc_values_.at(i)->getType());
-        } else {
-            arg_types.push_back(func_->getFunctionType()->getParamType(i));
-        }
-    }
-    if (cc_values_.at(ACC) == nullptr) {
-        cc_values_[ACC] = llvm::Constant::getNullValue(arg_types[ACC]);
-    }
-    if (cc_values_.at(ACC_TAG) == nullptr) {
-        cc_values_[ACC_TAG] = llvm::Constant::getNullValue(arg_types[ACC_TAG]);
-    }
-    ASSERT(cc_values_.at(3U) != nullptr);  // frame
-    ASSERT(cc_values_.at(4U) != nullptr);  // dispatch
-    if (GetGraph()->GetArch() == Arch::AARCH64) {
-        ASSERT(cc_values_.at(5U) != nullptr);  // moffset
-        ASSERT(cc_values_.at(6U) != nullptr);  // method_ptr
-        ASSERT(cc_values_.at(7U) != nullptr);  // thread
+    if (GetGraph()->GetMode().IsFastPath()) {
+        call = CreateTailCallFastPath(inst);
+    } else if (GetGraph()->GetMode().IsInterpreter()) {
+        call = CreateTailCallInterpreter(inst);
     } else {
-        static constexpr unsigned REAL_FRAME_POINER = 6U;
-        ASSERT(cc_values_.at(5U) != nullptr);                 // thread
-        ASSERT(cc_values_.at(REAL_FRAME_POINER) == nullptr);  // real frame pointer
-        cc_values_[REAL_FRAME_POINER] = func_->getArg(REAL_FRAME_POINER);
+        UNREACHABLE();
     }
-
-    auto function_type = llvm::FunctionType::get(func_->getReturnType(), arg_types, false);
-    call = builder_.CreateCall(function_type, ptr, cc_values_);
-
     call->setCallingConv(func_->getCallingConv());
     call->setTailCallKind(llvm::CallInst::TailCallKind::TCK_Tail);
     if (func_->getReturnType()->isVoidTy()) {
@@ -357,6 +432,31 @@ bool LLVMIrConstructor::EmitTailCall(Inst *inst)
         builder_.CreateRet(call);
     }
     std::fill(cc_values_.begin(), cc_values_.end(), nullptr);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitMemoryFence(memory_order::Order order)
+{
+    CreateMemoryFence(order);
+    return true;
+}
+
+template <uint32_t VECTOR_SIZE>
+bool LLVMIrConstructor::EmitCompressUtf16ToUtf8CharsUsingSimd(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(inst->GetInputType(0) == DataType::POINTER);
+    ASSERT(inst->GetInputType(1) == DataType::POINTER);
+    static_assert(VECTOR_SIZE == VECTOR_SIZE_8 || VECTOR_SIZE == VECTOR_SIZE_16, "Unexpected vector size");
+    auto intrinsic_id = llvm::Intrinsic::AARCH64Intrinsics::aarch64_neon_ld2;
+    auto vec_ty = llvm::VectorType::get(builder_.getInt8Ty(), VECTOR_SIZE, false);
+
+    auto u16_ptr = GetInputValue(inst, 0);  // ptr to src array of utf16 chars
+    auto u8_ptr = GetInputValue(inst, 1);   // ptr to dst array of utf8 chars
+    auto ld2 = llvm::Intrinsic::getDeclaration(func_->getParent(), intrinsic_id, {vec_ty, u16_ptr->getType()});
+    auto vld2 = builder_.CreateCall(ld2, {u16_ptr});
+    auto u8_vec = builder_.CreateExtractValue(vld2, {0});
+    builder_.CreateStore(u8_vec, u8_ptr);
     return true;
 }
 
@@ -431,6 +531,9 @@ void LLVMIrConstructor::BuildBasicBlocks()
         auto bb = llvm::BasicBlock::Create(context, llvm::StringRef("bb") + llvm::Twine(block->GetId()), func_);
         AddBlock(block, bb);
         // Checking that irtoc handler contains a return instruction
+        if (!graph_->GetMode().IsInterpreter()) {
+            continue;
+        }
         for (auto inst : block->AllInsts()) {
             if (inst->IsIntrinsic() && inst->CastToIntrinsic()->GetIntrinsicId() ==
                                            RuntimeInterface::IntrinsicId::INTRINSIC_INTERPRETER_RETURN) {
@@ -766,6 +869,7 @@ void LLVMIrConstructor::CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value 
         return;
     }
 
+    ASSERT(GetGraph()->GetMode().IsInterpreter());
     llvm::Value *frame_reg_value = nullptr;
     if (GetGraph()->GetArch() == Arch::X86_64) {
         frame_reg_value = GetRealFrameRegValue();
@@ -815,6 +919,68 @@ void LLVMIrConstructor::CreateIf(Inst *inst, llvm::Value *cond, bool likely, boo
                           GetHeadBlock(inst->GetBasicBlock()->GetFalseSuccessor()), weights);
 }
 
+llvm::CallInst *LLVMIrConstructor::CreateTailCallFastPath(Inst *inst)
+{
+    ASSERT(inst->GetInputs().Size() == 0);
+    // Arguments
+    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaVector<llvm::Type *> arg_types(GetGraph()->GetLocalAllocator()->Adapter());
+    ASSERT(cc_values_.size() == func_->arg_size());
+    for (size_t i = 0; i < func_->arg_size(); ++i) {
+        args.push_back(i < cc_values_.size() && cc_values_.at(i) != nullptr ? cc_values_.at(i) : func_->getArg(i));
+        arg_types.push_back(args.at(i)->getType());
+    }
+    ASSERT(inst->CastToIntrinsic()->HasImms() && inst->CastToIntrinsic()->GetImms().size() == 1U);
+    uint32_t offset = inst->CastToIntrinsic()->GetImms()[0];
+
+    auto ftype = llvm::FunctionType::get(func_->getReturnType(), arg_types, false);
+
+    auto thread_reg_ptr = builder_.CreateIntToPtr(GetThreadRegValue(), builder_.getPtrTy());
+    auto addr = builder_.CreateConstInBoundsGEP1_64(builder_.getInt8Ty(), thread_reg_ptr, offset);
+    auto callee = builder_.CreateLoad(builder_.getPtrTy(), addr);
+
+    return builder_.CreateCall(ftype, callee, args);
+}
+
+llvm::CallInst *LLVMIrConstructor::CreateTailCallInterpreter(Inst *inst)
+{
+    auto ptr = GetInputValue(inst, 0);
+    ASSERT_TYPE(ptr, builder_.getPtrTy());
+    ASSERT(cc_values_.size() == (GetGraph()->GetArch() == Arch::AARCH64 ? 8U : 7U));
+    ASSERT(cc_values_.at(0) != nullptr);  // pc
+    static constexpr unsigned ACC = 1U;
+    static constexpr unsigned ACC_TAG = 2U;
+    ArenaVector<llvm::Type *> arg_types(GetGraph()->GetLocalAllocator()->Adapter());
+    for (size_t i = 0; i < cc_.size(); i++) {
+        if (cc_values_.at(i) != nullptr) {
+            arg_types.push_back(cc_values_.at(i)->getType());
+        } else {
+            arg_types.push_back(func_->getFunctionType()->getParamType(i));
+        }
+    }
+    if (cc_values_.at(ACC) == nullptr) {
+        cc_values_[ACC] = llvm::Constant::getNullValue(arg_types[ACC]);
+    }
+    if (cc_values_.at(ACC_TAG) == nullptr) {
+        cc_values_[ACC_TAG] = llvm::Constant::getNullValue(arg_types[ACC_TAG]);
+    }
+    ASSERT(cc_values_.at(3U) != nullptr);  // frame
+    ASSERT(cc_values_.at(4U) != nullptr);  // dispatch
+    if (GetGraph()->GetArch() == Arch::AARCH64) {
+        ASSERT(cc_values_.at(5U) != nullptr);  // moffset
+        ASSERT(cc_values_.at(6U) != nullptr);  // method_ptr
+        ASSERT(cc_values_.at(7U) != nullptr);  // thread
+    } else {
+        static constexpr unsigned REAL_FRAME_POINER = 6U;
+        ASSERT(cc_values_.at(5U) != nullptr);                 // thread
+        ASSERT(cc_values_.at(REAL_FRAME_POINER) == nullptr);  // real frame pointer
+        cc_values_[REAL_FRAME_POINER] = func_->getArg(REAL_FRAME_POINER);
+    }
+
+    auto function_type = llvm::FunctionType::get(func_->getReturnType(), arg_types, false);
+    return builder_.CreateCall(function_type, ptr, cc_values_);
+}
+
 // Getters
 
 llvm::FunctionType *LLVMIrConstructor::GetEntryFunctionType()
@@ -822,15 +988,32 @@ llvm::FunctionType *LLVMIrConstructor::GetEntryFunctionType()
     ArenaVector<llvm::Type *> arg_types(graph_->GetLocalAllocator()->Adapter());
 
     // ArkInt have fake parameters
-    for (size_t i = 0; i < cc_.size(); ++i) {
-        arg_types.push_back(builder_.getPtrTy());
+    if (graph_->GetMode().IsInterpreter()) {
+        for (size_t i = 0; i < cc_.size(); ++i) {
+            arg_types.push_back(builder_.getPtrTy());
+        }
     }
 
     // Actual function arguments
     auto method = graph_->GetMethod();
-    ASSERT(graph_->GetRuntime()->GetMethodTotalArgumentsCount(method) == 0);
+    for (size_t i = 0; i < graph_->GetRuntime()->GetMethodTotalArgumentsCount(method); i++) {
+        ASSERT(!graph_->GetMode().IsInterpreter());
+        auto type = graph_->GetRuntime()->GetMethodTotalArgumentType(method, i);
+        if (graph_->GetMode().IsFastPath()) {
+            arg_types.push_back(GetExactType(type));
+        } else {
+            arg_types.push_back(GetType(type));
+        }
+    }
+
+    // ThreadReg and RealFP for FastPaths
+    if (graph_->GetMode().IsFastPath()) {
+        arg_types.push_back(builder_.getPtrTy());
+        arg_types.push_back(builder_.getPtrTy());
+    }
 
     auto ret_type = graph_->GetRuntime()->GetMethodReturnType(method);
+    ASSERT(graph_->GetMode().IsInterpreter() || ret_type != DataType::NO_TYPE);
     ret_type = ret_type == DataType::NO_TYPE ? DataType::VOID : ret_type;
     return llvm::FunctionType::get(GetType(ret_type), makeArrayRef(arg_types.data(), arg_types.size()), false);
 }
@@ -845,7 +1028,7 @@ llvm::Value *LLVMIrConstructor::GetThreadRegValue()
 
 llvm::Value *LLVMIrConstructor::GetRealFrameRegValue()
 {
-    ASSERT(GetGraph()->GetArch() == Arch::X86_64);
+    ASSERT(GetGraph()->GetMode().IsFastPath() || GetGraph()->GetArch() == Arch::X86_64);
     auto reg_input = std::find(cc_.begin(), cc_.end(), GetRealFrameReg(GetGraph()->GetArch()));
     ASSERT(reg_input != cc_.end());
     auto frame_reg_value = func_->arg_begin() + std::distance(cc_.begin(), reg_input);
@@ -1121,6 +1304,15 @@ void LLVMIrConstructor::VisitLiveIn(GraphVisitor *v, Inst *inst)
     auto idx = std::distance(ctor->cc_.begin(), reg_input);
     auto n = ctor->func_->arg_begin() + idx;
     ctor->ValueMapAdd(inst, ctor->CoerceValue(n, ctor->GetExactType(inst->GetType())));
+}
+
+void LLVMIrConstructor::VisitParameter(GraphVisitor *v, Inst *inst)
+{
+    ASSERT(inst->GetBasicBlock()->IsStartBlock());
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    ASSERT(ctor->GetGraph()->GetMode().IsFastPath());
+    auto n = ctor->GetArgument(inst->CastToParameter()->GetArgNumber());
+    ctor->ValueMapAdd(inst, n, false);
 }
 
 void LLVMIrConstructor::VisitReturnVoid(GraphVisitor *v, Inst *inst)
@@ -1616,6 +1808,7 @@ void LLVMIrConstructor::VisitCallIndirect(GraphVisitor *v, Inst *inst)
 void LLVMIrConstructor::VisitCall(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
+    ASSERT(!ctor->GetGraph()->SupportManagedCode());
 
     // Prepare external call if needed
     auto external_id = inst->CastToCall()->GetCallMethodId();
@@ -1712,16 +1905,24 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
       cc_values_(graph->GetLocalAllocator()->Adapter())
 {
     // Assign regmaps
-    if (graph->GetArch() == Arch::AARCH64) {
-        cc_.assign({AARCH64_PC, AARCH64_ACC, AARCH64_ACC_TAG, AARCH64_FP, AARCH64_DISPATCH, AARCH64_MOFFSET,
-                    AARCH64_METHOD_PTR, GetThreadReg(Arch::AARCH64)});
-    } else if (graph->GetArch() == Arch::X86_64) {
-        cc_.assign({X86_64_PC, X86_64_ACC, X86_64_ACC_TAG, X86_64_FP, X86_64_DISPATCH, GetThreadReg(Arch::X86_64),
-                    X86_64_REAL_FP});
-    } else {
-        LLVM_LOG(FATAL, ENTRY) << "Unsupported architecture for arkintcc";
+    if (graph->GetMode().IsInterpreter()) {
+        if (graph->GetArch() == Arch::AARCH64) {
+            cc_.assign({AARCH64_PC, AARCH64_ACC, AARCH64_ACC_TAG, AARCH64_FP, AARCH64_DISPATCH, AARCH64_MOFFSET,
+                        AARCH64_METHOD_PTR, GetThreadReg(Arch::AARCH64)});
+        } else if (graph->GetArch() == Arch::X86_64) {
+            cc_.assign({X86_64_PC, X86_64_ACC, X86_64_ACC_TAG, X86_64_FP, X86_64_DISPATCH, GetThreadReg(Arch::X86_64),
+                        X86_64_REAL_FP});
+        } else {
+            LLVM_LOG(FATAL, ENTRY) << "Unsupported architecture for arkintcc";
+        }
+    } else if (graph->GetMode().IsFastPath()) {
+        ASSERT(graph->GetArch() == Arch::AARCH64);
+        for (size_t i = 0; i < graph->GetRuntime()->GetMethodTotalArgumentsCount(graph->GetMethod()); i++) {
+            cc_.push_back(i);
+        }
+        cc_.push_back(GetThreadReg(Arch::AARCH64));
+        cc_.push_back(AARCH64_REAL_FP);
     }
-
     cc_values_.assign(cc_.size(), nullptr);
 
     // Create function
@@ -1785,6 +1986,14 @@ Expected<bool, std::string> LLVMIrConstructor::CanCompile(Graph *graph)
                                        << " unexpected in LLVM lowering. Method = "
                                        << graph->GetRuntime()->GetMethodFullName(graph->GetMethod());
                 return Unexpected(std::string("Unexpected opcode in CanCompile"));
+            }
+            if (graph->GetMode().IsInterpreter()) {
+                continue;
+            }
+
+            auto opcode = inst->GetOpcode();
+            if (opcode == Opcode::SaveState || opcode == Opcode::SaveStateDeoptimize) {
+                can = false;  // no immediate return here - to check CanCompile for other instructions
             }
         }
     }

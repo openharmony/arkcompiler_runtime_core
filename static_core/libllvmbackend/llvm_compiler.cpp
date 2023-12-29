@@ -69,7 +69,10 @@ panda::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOpti
     llvm_compiler_options.optlevel = llvm_compiler_options.optimize ? 2U : 0U;
     llvm_compiler_options.dump_module_after_optimizations = OPTIONS.IsLlvmDumpAfter();
     llvm_compiler_options.dump_module_before_optimizations = OPTIONS.IsLlvmDumpBefore();
+    llvm_compiler_options.inline_module_file = OPTIONS.GetLlvmInlineModule();
     llvm_compiler_options.pipeline_file = OPTIONS.GetLlvmPipeline();
+
+    llvm_compiler_options.do_irtoc_inline = !llvm_compiler_options.inline_module_file.empty();
 
     return llvm_compiler_options;
 }

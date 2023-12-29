@@ -55,13 +55,7 @@ static bool RunIrtocInterpreterOptimizations(Graph *graph);
 Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAllocator *local_allocator)
 {
     IrtocRuntimeInterface runtime;
-
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    ArenaAllocator &allocator_ = *allocator;
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    ArenaAllocator &local_allocator_ = *local_allocator;
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    graph_ = allocator_.New<Graph>(&allocator_, &local_allocator_, arch, this, &runtime, false);
+    graph_ = allocator->New<Graph>(allocator, local_allocator, arch, this, &runtime, false);
     builder_ = std::make_unique<compiler::IrConstructor>();
 
     MakeGraphImpl();
@@ -83,65 +77,65 @@ Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAl
         if (!success) {
             return Unexpected("RunOptimizations failed!");
         }
-        llvm_compilation_result_ = LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX;
+        compilation_result_ = CompilationResult::ARK;
     } else {
-        LLVMCompilationResult compilation_result = LLVMCompilationResult::INVALID;
-        auto result = RunOptimizations(compilation_result);
-        if (!result || result.Value() != 0) {
+        auto result = RunOptimizations();
+        if (!result) {
             return result;
         }
-        llvm_compilation_result_ = compilation_result;
+        compilation_result_ = result.Value();
     }
     builder_.reset(nullptr);
 
     auto code = GetGraph()->GetCode();
     SetCode(code);
 
-    return 0;
+    ASSERT(compilation_result_ != CompilationResult::INVALID);
+    return compilation_result_;
 }
 
-Function::Result Function::RunOptimizations(LLVMCompilationResult &compilation_result)
+Function::Result Function::RunOptimizations()
 {
+    auto result = CompilationResult::INVALID;
+    bool interpreter = GetGraph()->GetMode().IsInterpreter() || GetGraph()->GetMode().IsInterpreterEntry();
+    bool should_try_llvm = false;
 #ifdef PANDA_LLVM_IRTOC
-    graph_mode_ = GetGraph()->GetMode();
-#endif
-    bool has_llvm_suffix = std::string_view(GetName()).find(LLVM_SUFFIX) != std::string_view::npos;
-
-    if (GetGraph()->GetMode().IsInterpreter() || GetGraph()->GetMode().IsInterpreterEntry()) {
-        bool compile_by_ark = false;
-        if (has_llvm_suffix) {
-#ifndef PANDA_LLVM_INTERPRETER
-            ASSERT_PRINT(!has_llvm_suffix, "Must not create irtoc_code_llvm.cpp");
-            UNREACHABLE();
+    bool with_llvm_suffix = std::string_view {GetName()}.find(LLVM_SUFFIX) != std::string_view::npos;
+    if (with_llvm_suffix) {
+#ifdef PANDA_LLVM_INTERPRETER
+        should_try_llvm = true;
+        // Functions with "_LLVM" suffix must be interpreter handlers from the irtoc_code_llvm.cpp
+        LOG_IF(!interpreter, FATAL, IRTOC)
+            << "'" << GetName() << "' must not contain '" << LLVM_SUFFIX << "', only interpreter handlers can";
 #else
-            compilation_result = CompileByLLVM();
-            ASSERT(compilation_result == LLVMCompilationResult::USE_ARK_AS_SKIP_LIST ||
-                   compilation_result == LLVMCompilationResult::LLVM_COMPILED ||
-                   compilation_result == LLVMCompilationResult::LLVM_CAN_NOT_COMPILE);
-            compile_by_ark = compilation_result != LLVMCompilationResult::LLVM_COMPILED;
+        LOG(FATAL, IRTOC) << "'" << GetName() << "' handler can not exist with PANDA_LLVM_INTERPRETER disabled";
 #endif
-        } else {
-            compilation_result = LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX;
-            compile_by_ark = true;
-        }
-        if (compile_by_ark) {
-            ASSERT(GetGraph()->GetCode().Empty());
-            if (!irtoc::RunIrtocInterpreterOptimizations(GetGraph())) {
-                LOG(ERROR, IRTOC) << "RunIrtocInterpreterOptimizations failed for " << GetName();
-                return Unexpected("RunIrtocInterpreterOptimizations failed!");
-            }
+    }
+#ifdef PANDA_LLVM_FASTPATH
+    should_try_llvm |= !interpreter;
+#endif
+#endif  // PANDA_LLVM_IRTOC
+    if (should_try_llvm) {
+        result = CompileByLLVM();
+        ASSERT(result == CompilationResult::LLVM || result == CompilationResult::ARK_BECAUSE_SKIP ||
+               result == CompilationResult::ARK_BECAUSE_FALLBACK);
+    } else {
+        result = CompilationResult::ARK;
+    }
+    if (result == CompilationResult::LLVM) {
+        return result;
+    }
+    ASSERT(GetGraph()->GetCode().Empty());
+    if (interpreter) {
+        if (!RunIrtocInterpreterOptimizations(GetGraph())) {
+            return Unexpected {"RunIrtocInterpreterOptimizations failed"};
         }
     } else {
-        LOG_IF(has_llvm_suffix, FATAL, IRTOC)
-            << "'" << GetName() << "' must not contain '" << LLVM_SUFFIX << "', only interpreter handlers may";
-        compilation_result = LLVMCompilationResult::USE_ARK_AS_SKIP_LIST;
-        ASSERT(GetGraph()->GetCode().Empty());
-        if (!irtoc::RunIrtocOptimizations(GetGraph())) {
-            return Unexpected("RunOptimizations failed!");
+        if (!RunIrtocOptimizations(GetGraph())) {
+            return Unexpected {"RunIrtocOptimizations failed"};
         }
     }
-    ASSERT(compilation_result != LLVMCompilationResult::INVALID);
-    return 0;
+    return result;
 }
 
 void Function::SetCode(Span<uint8_t> code)
@@ -149,13 +143,13 @@ void Function::SetCode(Span<uint8_t> code)
     std::copy(code.begin(), code.end(), std::back_inserter(code_));
 }
 
-LLVMCompilationResult Function::CompileByLLVM()
+CompilationResult Function::CompileByLLVM()
 {
 #ifndef PANDA_LLVM_IRTOC
     UNREACHABLE();
 #else
     if (SkippedByLLVM()) {
-        return LLVMCompilationResult::USE_ARK_AS_SKIP_LIST;
+        return CompilationResult::ARK_BECAUSE_SKIP;
     }
     ASSERT(llvm_compiler_ != nullptr);
     auto can = llvm_compiler_->CanCompile(GetGraph());
@@ -163,12 +157,12 @@ LLVMCompilationResult Function::CompileByLLVM()
         LOG(FATAL, IRTOC) << can.Error() << "\n";
     }
     if (!can.Value()) {
-        return LLVMCompilationResult::LLVM_CAN_NOT_COMPILE;
+        return CompilationResult::ARK_BECAUSE_FALLBACK;
     }
     if (!llvm_compiler_->AddGraph(GetGraph())) {
         LOG(FATAL, IRTOC) << "LLVM compilation failed on compilable code graph for " << GetName() << " unit";
     }
-    return LLVMCompilationResult::LLVM_COMPILED;
+    return CompilationResult::LLVM;
 #endif  // ifndef PANDA_LLVM_IRTOC
 }
 
@@ -185,35 +179,30 @@ void Function::ReportCompilationStatistic(std::ostream *out)
         return;
     }
     if (stats_level == "short") {
-        if (llvm_compilation_result_ == LLVMCompilationResult::LLVM_COMPILED ||
-            llvm_compilation_result_ == LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX) {
+        if (compilation_result_ == CompilationResult::LLVM || compilation_result_ == CompilationResult::ARK) {
             return;
         }
     }
 
     static constexpr auto HANDLER_WIDTH = 96;
-    static constexpr auto RESULT_WIDTH = 5;
+    static constexpr auto RESULT_WIDTH = 8;
 
-    // "ark" if compilation unit was compiled by ark because the name does not end with LLVM_SUFFIX
-    // "ok" if successfully compiled by llvm
-    // "cant" compiled by ark because IrtocCompilerInterface::CanCompile returned false
-    // "skip" compiled by ark because SkippedByLLVM returned true
     *out << "LLVM " << GraphModeToString() << std::setw(HANDLER_WIDTH) << GetName() << " --- "
          << std::setw(RESULT_WIDTH) << LLVMCompilationResultToString() << "(size " << GetCodeSize() << ")" << std::endl;
 }
 
 std::string_view Function::LLVMCompilationResultToString() const
 {
-    if (llvm_compilation_result_ == LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX) {
+    if (compilation_result_ == CompilationResult::ARK) {
         return "ark";
     }
-    if (llvm_compilation_result_ == LLVMCompilationResult::LLVM_COMPILED) {
+    if (compilation_result_ == CompilationResult::LLVM) {
         return "ok";
     }
-    if (llvm_compilation_result_ == LLVMCompilationResult::LLVM_CAN_NOT_COMPILE) {
-        return "cant";
+    if (compilation_result_ == CompilationResult::ARK_BECAUSE_FALLBACK) {
+        return "fallback";
     }
-    if (llvm_compilation_result_ == LLVMCompilationResult::USE_ARK_AS_SKIP_LIST) {
+    if (compilation_result_ == CompilationResult::ARK_BECAUSE_SKIP) {
         return "skip";
     }
     UNREACHABLE();
@@ -221,16 +210,16 @@ std::string_view Function::LLVMCompilationResultToString() const
 
 std::string_view Function::GraphModeToString()
 {
-    if (GetGraphMode().IsFastPath()) {
+    if (GetGraph()->GetMode().IsFastPath()) {
         return "fastpath";
     }
-    if (GetGraphMode().IsBoundary()) {
+    if (GetGraph()->GetMode().IsBoundary()) {
         return "boundary";
     }
-    if (GetGraphMode().IsInterpreter() || GetGraphMode().IsInterpreterEntry()) {
+    if (GetGraph()->GetMode().IsInterpreter() || GetGraph()->GetMode().IsInterpreterEntry()) {
         return "interp";
     }
-    if (GetGraphMode().IsNative()) {
+    if (GetGraph()->GetMode().IsNative()) {
         return "native";
     }
     UNREACHABLE();
@@ -245,12 +234,18 @@ void Function::AddRelocation(const compiler::RelocationInfo &info)
 #ifdef PANDA_LLVM_IRTOC
 bool Function::SkippedByLLVM()
 {
-#ifdef PANDA_LLVM_INTERPRETER
     auto name = std::string(GetName());
+#ifdef PANDA_LLVM_INTERPRETER
     if (GetGraph()->GetMode().IsInterpreterEntry() || GetGraph()->GetMode().IsInterpreter()) {
         ASSERT(name.find(LLVM_SUFFIX) == name.size() - LLVM_SUFFIX.size());
         name = name.substr(0, name.size() - LLVM_SUFFIX.size());
         return std::find(SKIPPED_HANDLERS.begin(), SKIPPED_HANDLERS.end(), name) != SKIPPED_HANDLERS.end();
+    }
+#endif
+
+#ifdef PANDA_LLVM_FASTPATH
+    if (GetArch() == Arch::AARCH64 && GetGraph()->GetMode().IsFastPath()) {
+        return std::find(SKIPPED_FASTPATHS.begin(), SKIPPED_FASTPATHS.end(), name) != SKIPPED_FASTPATHS.end();
     }
 #endif
     return true;

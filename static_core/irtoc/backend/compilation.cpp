@@ -131,6 +131,20 @@ private:
 // it conflicts with elfio.
 static constexpr size_t EF_ARM_EABI_VER5 = 0x05000000;
 
+void Compilation::CollectUsedRegisters([[maybe_unused]] panda::ArenaAllocator *allocator)
+{
+#ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
+    if (arch_ == Arch::AARCH64) {
+        for (auto unit : units_) {
+            if ((unit->GetGraph()->GetMode().IsInterpreter() || unit->GetGraph()->GetMode().IsInterpreterEntry()) &&
+                unit->GetCompilationResult() != CompilationResult::ARK) {
+                used_registers_ |= UsedRegistersCollector::CollectForCode(allocator, unit->GetCode());
+            }
+        }
+    }
+#endif  // ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
+}
+
 void Compilation::CheckUsedRegisters()
 {
 #ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
@@ -225,7 +239,7 @@ Compilation::Result Compilation::Compile()
 #endif
         auto result = unit->Compile(arch_, allocator_.get(), local_allocator_.get());
         if (!result) {
-            return result;
+            return Unexpected {result.Error()};
         }
 #ifdef PANDA_COMPILER_DEBUG_INFO
         has_debug_info_ |= unit->GetGraph()->IsLineDebugInfoEnabled();
@@ -250,13 +264,7 @@ Compilation::Result Compilation::Compile()
     }
 
 #ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
-    for (auto unit : units_) {
-        if (!(unit->GetGraphMode().IsInterpreter() || unit->GetGraphMode().IsInterpreterEntry()) ||
-            arch_ != Arch::AARCH64 || unit->GetLLVMCompilationResult() == LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX) {
-            continue;
-        }
-        used_registers_ |= UsedRegistersCollector::CollectForCode(&allocator, unit->GetCode());
-    }
+    CollectUsedRegisters(&allocator);
 #endif
 #endif  // PANDA_LLVM_IRTOC
 

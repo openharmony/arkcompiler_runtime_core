@@ -33,8 +33,9 @@ namespace panda::llvmbackend {
 class LLVMOptimizer {
 public:
     void OptimizeModule(llvm::Module *module) const;
+    void ProcessInlineModule(llvm::Module *inline_module) const;
 
-    explicit LLVMOptimizer(panda::llvmbackend::LLVMCompilerOptions options,
+    explicit LLVMOptimizer(panda::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *ark_interface,
                            std::shared_ptr<llvm::TargetMachine> target_machine);
 
 private:
@@ -42,6 +43,7 @@ private:
 
 private:
     panda::llvmbackend::LLVMCompilerOptions options_;
+    panda::llvmbackend::LLVMArkInterface *ark_interface_;
     std::shared_ptr<llvm::TargetMachine> target_machine_;
 };
 

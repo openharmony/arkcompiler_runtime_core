@@ -13,24 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef LIBLLVMBACKEND_LLVM_COMPILER_OPTIONS_H
-#define LIBLLVMBACKEND_LLVM_COMPILER_OPTIONS_H
+#ifndef LIBLLVMBACKEND_TRANSFORMS_PASSES_INLINE_IR_INLINE_IR_UTILS_H
+#define LIBLLVMBACKEND_TRANSFORMS_PASSES_INLINE_IR_INLINE_IR_UTILS_H
 
-#include <string>
+namespace llvm {
+class Module;
+}  // namespace llvm
 
 namespace panda::llvmbackend {
-struct LLVMCompilerOptions {
-    // Options obtained using llvmbackend.yaml
-    bool optimize;
-    int optlevel;
-    bool inlining;
-    bool recursive_inlining;
-    bool dump_module_before_optimizations;
-    bool dump_module_after_optimizations;
-    std::string inline_module_file;
-    std::string pipeline_file;
-    // Internal options
-    bool do_irtoc_inline;
-};
+
+bool RemoveDanglingAliases(llvm::Module &module);
+
 }  // namespace panda::llvmbackend
-#endif  // LIBLLVMBACKEND_LLVM_COMPILER_OPTIONS_H
+
+#endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_INLINE_IR_INLINE_IR_UTILS_H

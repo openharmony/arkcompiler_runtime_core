@@ -94,11 +94,15 @@ to build Ark with LLVM Backend functions.
 cmake -DPANDA_LLVM_BACKEND=true -DLLVM_TARGET_PATH=/opt/llvm-15-{type}-{arch} ...
 ```
 
-The `PANDA_LLVM_BACKEND` effectively enables LLVM Irtoc Interpreter.
+The `PANDA_LLVM_BACKEND` enables:
 
-LLVM FastPaths compilation and LLVM AOT compiler are temporarily disabled in all builds.
+1. LLVM Irtoc Interpreter. Use `-DPANDA_LLVM_INTERPRETER=OFF` to disable.
+2. LLVM Fastpaths compilation. Use `-DPANDA_LLVM_FASTPATH=OFF` to disable.
+3. LLVM Interpreter inlining. Use `-DPANDA_LLVM_INTERPRETER_INLINING=OFF` to disable.
 
-`PANDA_LLVM_INTERPRETER` is `ON` when `PANDA_LLVM_BACKEND` is turned on.
+LLVM AOT compiler is temporarily disabled in all builds.
+
+`PANDA_LLVM_INTERPRETER` and `PANDA_LLVM_FASTPATH` are `ON` if `PANDA_LLVM_BACKEND` is turned on.
 
 It is recommended to choose `clang` compiler using toolchain files: `-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake`.
 By default GNU compiler `c++` is used, but some features are not available in such `gcc` builds.

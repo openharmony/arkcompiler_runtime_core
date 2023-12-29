@@ -21,11 +21,55 @@ pass_types:
 
 llvm_passes:
 
+- name: MarkAlwaysInline
+  description: Set AlwaysInline attribute to calls in root functions.
+  type: [function]
+  setup: default
+
+- name: CleanupInlineModule
+  description: >
+    Remove functions and variables unsuitable for inlining from module.
+  type: [module]
+  setup: default
+
+- name: DiscardInlineModule
+  description: >
+    Discard all functions and global variables from inline module.
+  type: [module]
+  setup: default
+
+- name: MarkInlineModule
+  description: >
+    Mark all functions and global variables from inline module
+    with FUNCTION_MD_INLINE_MODULE metadata.
+  type: [module]
+  setup: default
+
+- name: RemoveUnusedFunctions
+  description: >
+    Remove unused functions from the module.
+    The function is unused if it is not used by any root function.
+    A root function is a function without FUNCTION_MD_INLINE_MODULE metadata
+  type: [module]
+  setup: default
+
 - name: ArkSpeculativeExecution
   description: Wrapper for SpeculativeExecution pass
   type: [function]
+  setup: default
+
+- name: InlinePrepare
+  description: Wrapper for InlineAdvisorAnalysis pass
+  type: [module]
+  setup: custom
+
+- name: IrtocInlineChecker
+  description: Pass to check if Irtoc inlining succeeded
+  type: [scc]
+  setup: default
 
 - name: ExpandAtomics
   description: >
     Expand atomic operations' pointer operand into 64-bit pointer
   type: [function]
+  setup: default

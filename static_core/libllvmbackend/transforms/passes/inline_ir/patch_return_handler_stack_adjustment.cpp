@@ -24,6 +24,8 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/Support/Debug.h>
 
+#include "transforms/transform_utils.h"
+
 using llvm::MachineFunction;
 using llvm::MachineFunctionPass;
 using llvm::RegisterPass;
@@ -35,6 +37,27 @@ using panda::llvmbackend::LLVMArkInterface;
 
 namespace {
 
+/**
+ * Patch stack adjustment value in return handler
+ *
+ * We generate inline assembly with hardcoded constant for return handlers in LLVMEntry::EmitInterpreterReturn
+ *
+ * The inline assembly uses stack pointer and inserts own return. Examples of inline assemblies:
+ *
+ * 1. leaq  $0, %rsp - x86. We add a hardcoded value to %rsp and retq then
+ * 2. add  sp, sp, $0 - aarch64. We add hardcoded value to sp and ret then
+ *
+ * LLVM does not know about our rets
+ *
+ * We use stack pointer in inline assemblies assuming that llvm does not touch sp itself.
+ * For example, we assume that llvm does not spill any register value onto the stack
+ * But llvm can do it, example: 'sub    $0x10,%rsp' in function prologue.
+ * LLVM will insert corresponding 'add    $0x10,%rsp' before its own rets but not for ours.
+ *
+ * So we add the stack size of machine function to our "hardcoded value" in inline assemblies.
+ * To find such assemblies the pass looks for a comment in the inline assembly template -
+ * LLVMArkInterface::PATCH_STACK_ADJUSTMENT_COMMENT
+ */
 class PatchReturnHandlerStackAdjustment : public MachineFunctionPass {
 public:
     explicit PatchReturnHandlerStackAdjustment(LLVMArkInterface *ark_interface = nullptr)
@@ -44,7 +67,7 @@ public:
 
     bool runOnMachineFunction(MachineFunction &machine_function) override
     {
-        assert(ark_interface_ != nullptr);
+        ASSERT(ark_interface_ != nullptr);
         if (!ark_interface_->IsIrtocReturnHandler(machine_function.getFunction())) {
             return false;
         }
@@ -71,7 +94,7 @@ public:
                 std::string_view inline_asm {instruction.getOperand(INLINE_ASM_INDEX).getSymbolName()};
                 if (inline_asm.find(LLVMArkInterface::PATCH_STACK_ADJUSTMENT_COMMENT) != std::string::npos) {
                     auto &stack_adjustment = instruction.getOperand(STACK_ADJUSTMENT_INDEX);
-                    assert(stack_adjustment.isImm());
+                    ASSERT(stack_adjustment.isImm());
                     auto old_stack_size = stack_adjustment.getImm();
                     auto new_stack_size = old_stack_size + stack_size;
                     LLVM_DEBUG(llvm::dbgs()

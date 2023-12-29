@@ -15,8 +15,15 @@
 
 #include "llvm_optimizer.h"
 
+#include "passes/ark_inlining.h"
 #include "passes/ark_speculation.h"
 #include "passes/expand_atomics.h"
+
+#include "passes/inline_ir/cleanup_inline_module.h"
+#include "passes/inline_ir/discard_inline_module.h"
+#include "passes/inline_ir/mark_always_inline.h"
+#include "passes/inline_ir/mark_inline_module.h"
+#include "passes/inline_ir/remove_unused_functions.h"
 
 #include "llvm_ark_interface.h"
 
@@ -24,6 +31,8 @@
 #include <llvm/Analysis/GlobalsModRef.h>
 #include <llvm/Analysis/TargetLibraryInfo.h>
 #include <llvm/Analysis/ProfileSummaryInfo.h>
+#include <llvm/Transforms/Utils/CanonicalizeAliases.h>
+#include <llvm/Transforms/Utils/NameAnonGlobals.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/StandardInstrumentations.h>
 #include <llvm/IR/Verifier.h>
@@ -32,6 +41,8 @@
 #include <fstream>
 #include <streambuf>
 #include <type_traits>
+
+#include "transforms/transform_utils.h"
 
 namespace {
 
@@ -104,14 +115,40 @@ std::string GetOptimizationPipeline(const std::string &filename)
 
 namespace panda::llvmbackend {
 
-LLVMOptimizer::LLVMOptimizer(panda::llvmbackend::LLVMCompilerOptions options,
+LLVMOptimizer::LLVMOptimizer(panda::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *ark_interface,
                              std::shared_ptr<llvm::TargetMachine> target_machine)
-    : options_(std::move(options)), target_machine_(std::move(target_machine))
+    : options_(std::move(options)), ark_interface_(ark_interface), target_machine_(std::move(target_machine))
 {
+}
+
+void LLVMOptimizer::ProcessInlineModule(llvm::Module *inline_module) const
+{
+    namespace pass = panda::llvmbackend::passes;
+    llvm::ModulePassManager module_pm;
+    llvm::LoopAnalysisManager loop_am;
+    llvm::FunctionAnalysisManager function_am;
+    llvm::CGSCCAnalysisManager cgscc_am;
+    llvm::ModuleAnalysisManager module_am;
+
+    llvm::PassBuilder pass_builder(target_machine_.get());
+    pass_builder.registerModuleAnalyses(module_am);
+    pass_builder.registerCGSCCAnalyses(cgscc_am);
+    pass_builder.registerFunctionAnalyses(function_am);
+    pass_builder.registerLoopAnalyses(loop_am);
+    pass_builder.crossRegisterProxies(loop_am, function_am, cgscc_am, module_am);
+
+    AddPassIf(module_pm, llvm::CanonicalizeAliasesPass(), true);
+    AddPassIf(module_pm, llvm::NameAnonGlobalPass(), true);
+    AddPassIf(module_pm, pass::MarkInlineModule(), true);
+    AddPassIf(module_pm, pass::CleanupInlineModule(), true);
+
+    module_pm.run(*inline_module, module_am);
 }
 
 void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
 {
+    ASSERT(ark_interface_ != nullptr);
+
     if (options_.dump_module_before_optimizations) {
         llvm::errs() << "; =========================================\n";
         llvm::errs() << "; LLVM IR module BEFORE LLVM optimizations:\n";
@@ -157,7 +194,7 @@ void LLVMOptimizer::DoOptimizeModule(llvm::Module *module) const
     pass_builder.registerLoopAnalyses(loop_am);
     pass_builder.crossRegisterProxies(loop_am, function_am, cgscc_am, module_am);
 
-    panda::libllvmbackend::PassParser pass_parser {};
+    panda::libllvmbackend::PassParser pass_parser(ark_interface_);
     pass_parser.RegisterParserCallbacks(pass_builder, options_);
 
     llvm::ModulePassManager module_pm;

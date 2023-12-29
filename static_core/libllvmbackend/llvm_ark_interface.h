@@ -115,6 +115,7 @@ public:
     static constexpr auto NOT_ATOMIC_ORDER = llvm::AtomicOrdering::NotAtomic;
 
     static constexpr std::string_view FUNCTION_MD_CLASS_ID = "class_id";
+    static constexpr std::string_view FUNCTION_MD_INLINE_MODULE = "inline_module";
     static constexpr std::string_view PATCH_STACK_ADJUSTMENT_COMMENT = " ${:comment} patch-stack-adjustment";
 
     panda::compiler::RuntimeInterface *GetRuntime()
