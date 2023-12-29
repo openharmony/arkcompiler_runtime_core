@@ -17,7 +17,8 @@ enum class EntrypointId : uint8_t {
 % Compiler::entrypoints.each_with_index do |entrypoint, index|
     <%= entrypoint.enum_name %> = <%= index %>,
 % end
-    COUNT
+    COUNT,
+    INVALID = COUNT
 };
 
 constexpr const char* GetEntrypointName(EntrypointId id) {

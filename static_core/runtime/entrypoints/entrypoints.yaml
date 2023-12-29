@@ -1070,3 +1070,75 @@ entrypoints:
     - int32_t                    # begin index
     - int32_t                    # end index
     - panda::ObjectHeader*       # Array u16 class pointer
+
+- name: MemmoveInterposer        # "bridge" to avoid generating the excessive prologue
+  entrypoint: MemmoveInterposer
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - void*
+    - void*
+    - uint32_t
+    - uint32_t
+    - uint32_t
+
+- name: ArrayCopyTo_1b
+  entrypoint: ArrayCopyTo1B
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - panda::ObjectHeader*
+    - panda::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayCopyTo_2b
+  entrypoint: ArrayCopyTo2B
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - panda::ObjectHeader*
+    - panda::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayCopyTo_4b
+  entrypoint: ArrayCopyTo4B
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - panda::ObjectHeader*
+    - panda::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayCopyTo_8b
+  entrypoint: ArrayCopyTo8B
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - panda::ObjectHeader*
+    - panda::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArraycopyBigloop
+  entrypoint: TryBigCopy
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - void*
+    - void*
+    - int32_t
+    - int32_t
+    - int32_t

@@ -47,6 +47,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_TypeCreator.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_JSON.cpp
