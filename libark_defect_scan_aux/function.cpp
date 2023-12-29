@@ -19,6 +19,11 @@
 #include "callee_info.h"
 
 namespace panda::defect_scan_aux {
+const std::string &Function::GetRecordName() const
+{
+    return record_name_;
+}
+
 const std::string &Function::GetFunctionName() const
 {
     return func_name_;

@@ -121,6 +121,11 @@ public:
         return name_.data;
     }
 
+    const File::StringData GetName() const
+    {
+        return name_;
+    }
+
 private:
     void SkipSourceLang();
 
