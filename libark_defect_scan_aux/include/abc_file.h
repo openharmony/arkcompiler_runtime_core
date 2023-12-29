@@ -55,15 +55,17 @@ public:
     bool IsModule(std::string_view record_name = "") const;
     bool IsMergeAbc() const;
     const std::string &GetAbcFileName() const;
-    const std::vector<std::unique_ptr<Class>> &GetClassList() const;
+    const std::vector<std::shared_ptr<Class>> &GetClassList() const;
     size_t GetDefinedFunctionCount() const;
     size_t GetDefinedClassCount() const;
     const Function *GetDefinedFunctionByIndex(size_t index) const;
     const Function *GetFunctionByName(std::string_view func_name) const;
-    const Function *GetExportFunctionByExportName(std::string_view export_func_name, std::string_view record_name = "") const;
+    const Function *GetExportFunctionByExportName(std::string_view export_func_name,
+                                                  std::string_view record_name = "") const;
     const Class *GetDefinedClassByIndex(size_t index) const;
     const Class *GetClassByName(std::string_view class_name) const;
-    const Class *GetExportClassByExportName(std::string_view export_class_name, std::string_view record_name = "") const;
+    const Class *GetExportClassByExportName(std::string_view export_class_name,
+                                            std::string_view record_name = "") const;
     ssize_t GetLineNumberByInst(const Function *func, const Inst &inst) const;
     const std::set<std::string> GetFileRecordList() const;
     size_t GetFileRecordCount() const;
@@ -102,12 +104,19 @@ private:
     void ExtractModuleRecord(panda_file::File::EntityId module_id, std::unique_ptr<ModuleRecord> &module_record);
     void InitializeAllDefinedFunction();
     void ExtractDefinedClassAndFunctionInfo();
+    void ExtractMergedDefinedClassAndFunctionInfo();
+    void ExtractSingleDefinedClassAndFunctionInfo();
     void ExtractClassAndFunctionInfo(Function *func);
     void ExtractClassInheritInfo(Function *func) const;
     void ExtractFunctionCalleeInfo(Function *func);
     void BuildFunctionDefineChain(Function *parent_func, Function *child_func) const;
     void BuildClassAndMemberFuncRelation(Class *clazz, Function *member_func) const;
     void ExtractClassAndFunctionExportList();
+    void ExtractMergedClassAndFunctionExportList();
+    void ExtractSingleClassAndFunctionExportList();
+    void AddExportListForMerge(const Function *func_main, const Inst &inst);
+    void AddExportListForSingle(const Function *func_main, const Inst &inst);
+    void ExtractMergedClassAndFunctionInfo(Function *func);
     compiler::Graph *GenerateFunctionGraph(const panda_file::MethodDataAccessor &mda, std::string_view func_name);
     ResolveResult ResolveInstCommon(Function *func, Inst inst) const;
     ResolveResult HandleLdObjByNameInstResolveResult(const Inst &ldobjbyname_inst,
@@ -120,8 +129,10 @@ private:
     std::unique_ptr<CalleeInfo> ResolveSuperCallInst(Function *func, const Inst &call_inst) const;
     void ResolveDefineMethodInst(Function *member_func, const Inst &define_method_inst);
     void HandleMemberFunctionFromClassBuf(const std::string &func_name, Function *def_func, Class *def_class) const;
-    void AddDefinedClass(std::unique_ptr<Class> &&def_class);
-    void AddDefinedFunction(std::unique_ptr<Function> &&def_func);
+    void AddDefinedClass(std::shared_ptr<Class> &&def_class);
+    void AddDefinedFunction(std::shared_ptr<Function> &&def_func);
+    void AddMergedDefinedFunction(std::shared_ptr<Function> &&def_func);
+    void AddMergedDefinedClass(std::shared_ptr<Class> &&def_class, std::string record_name);
     void AddCalleeInfo(std::unique_ptr<CalleeInfo> &&callee_info);
     void AddModuleRecord(std::string record_name, std::unique_ptr<ModuleRecord> &&module_record);
     Function *GetFunctionByNameImpl(std::string_view func_name) const;
@@ -136,12 +147,18 @@ private:
     std::unique_ptr<const panda_file::DebugInfoExtractor> debug_info_ {nullptr};
     std::vector<const Class *> export_class_list_;
     std::vector<const Function *> export_func_list_;
-    std::vector<std::unique_ptr<Function>> def_func_list_;
+    std::unordered_map<std::string, std::vector<const Class *>> merge_export_class_map_;
+    std::unordered_map<std::string, std::vector<const Function *>> merge_export_func_map_;
+    std::vector<std::shared_ptr<Function>> def_func_list_;
+    std::vector<std::shared_ptr<Function>> merged_def_func_list_;
     std::unordered_map<std::string, Function *> def_func_map_;
+    std::unordered_map<std::string, std::vector<std::shared_ptr<Function>>> merge_def_func_map_;
     std::unordered_map<std::string, ModuleRecord *> module_record_map_;
     std::vector<std::unique_ptr<const ModuleRecord>> module_record_list_;
-    std::vector<std::unique_ptr<Class>> def_class_list_;
+    std::vector<std::shared_ptr<Class>> def_class_list_;
+    std::vector<std::shared_ptr<Class>> merged_def_class_list_;
     std::unordered_map<std::string, Class *> def_class_map_;
+    std::unordered_map<std::string, std::vector<std::shared_ptr<Class>>> merge_def_class_map_;
     std::list<std::unique_ptr<CalleeInfo>> callee_info_list_;
     std::set<std::string> record_name_set_;
     std::unique_ptr<ArenaAllocator> allocator_ {nullptr};
