@@ -107,10 +107,14 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 11.0.1.0
+version: 11.0.2.0
 
 # 0 is default value, alaways reflects to the newest version
-api_version_map: [[0, 11.0.1.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.1.0]]
+api_version_map: [[0, 11.0.2.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0]]
+
+# When delete bytecode or having any incompatible modification on bytecode,
+# please add the incompatible version in this list for prompting error message.
+incompatible_version: [11.0.0.0, 11.0.1.0]
 
 properties:
   - tag: type_id
@@ -255,7 +259,7 @@ isa_information:
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
-      last_callruntime_prefixed_opcode_idx: 0x0a
+      last_callruntime_prefixed_opcode_idx: 0x08
 
 prefixes:
   - name: throw
@@ -824,23 +828,11 @@ groups:
         format: [pref_op_imm1_16_id1_16_id2_16_imm2_16_v_8]
         prefix: callruntime
         properties: [method_id, ic_slot, one_slot, literalarray_id]
-      - sig: callruntime.newsendablelexenv imm
+      - sig: callruntime.ldsendableclass imm
         acc: out:top
         opcode_idx: [0x08]
         format: [pref_op_imm_16]
         prefix: callruntime
-      - sig: callruntime.definesendablemethod imm1, method_id, imm2
-        acc: inout:top
-        opcode_idx: [0x09]
-        format: [pref_op_imm1_8_id_16_imm2_8]
-        prefix: callruntime
-        properties: [method_id, ic_slot, one_slot]
-      - sig: callruntime.createsendableprivateproperty imm, literalarray_id
-        acc: none
-        opcode_idx: [0x0a]
-        format: [pref_op_imm_16_id_16]
-        prefix: callruntime
-        properties: [literalarray_id]
 
   - title: throw instructions
     description: throw instructions
