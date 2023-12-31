@@ -596,9 +596,9 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
 
 void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_version, const std::string_view &filename)
 {
-    // 11.0.1.0 and 11.0.0.0 is not compatible with each other
-    constexpr std::array<uint8_t, File::VERSION_SIZE> incompatibleSdkVersion = {11, 0, 0, 0};
-    constexpr std::array<uint8_t, File::VERSION_SIZE> incompatibleSystemImageVersion = {11, 0, 1, 0};
+    if (file_version == version) {
+        return;
+    }
     if (file_version < minVersion) {
         LOG(FATAL, PANDAFILE) << "Unable to open file '" << filename << "' with abc file version "
             << VersionToString(file_version)
@@ -610,7 +610,7 @@ void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_versio
             << VersionToString(file_version)
             << ". Maximum supported abc file version on the current system image is " << VersionToString(version)
             << ". Please upgrade the system image or use former version of SDK tools to generate abc files";
-    } else if (file_version == incompatibleSdkVersion && version == incompatibleSystemImageVersion) {
+    } else if (incompatibleVersion.count(file_version) != 0) {
         LOG(FATAL, PANDAFILE) << "Unable to open file '" << filename << "' with  abc file version "
             << VersionToString(file_version) << ". Current system image version is "
             << VersionToString(version) << ", while abc file version is " << VersionToString(file_version)

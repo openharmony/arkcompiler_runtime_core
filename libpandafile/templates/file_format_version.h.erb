@@ -20,12 +20,18 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <set>
 
 #include "file.h"
 
 namespace panda::panda_file {
 constexpr std::array<uint8_t, File::VERSION_SIZE> version {<%= Panda::version.split('.').join(', ') %>};
 constexpr std::array<uint8_t, File::VERSION_SIZE> minVersion {<%= Panda::min_version.split('.').join(', ') %>};
+const std::set<std::array<uint8_t, File::VERSION_SIZE>> incompatibleVersion {
+% Panda::incompatible_version.each do |api_version|
+    {<%= api_version.split('.').join(', ') %>},
+% end
+};
 
 std::string GetVersion(const std::array<uint8_t, File::VERSION_SIZE> &version);
 
