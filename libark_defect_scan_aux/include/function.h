@@ -30,15 +30,17 @@ class CalleeInfo;
 
 class Function final {
 public:
-    Function(std::string_view func_name, panda_file::File::EntityId m_id, uint32_t arg_count, const Graph &graph,
-             const AbcFile *abc_file)
-        : func_name_(func_name), m_id_(m_id), arg_count_(arg_count), graph_(graph), abc_file_(abc_file)
+    Function(std::string_view record_name, std::string_view func_name, panda_file::File::EntityId m_id,
+             uint32_t arg_count, const Graph &graph, const AbcFile *abc_file)
+        : func_name_(func_name), record_name_(record_name), m_id_(m_id),
+          arg_count_(arg_count), graph_(graph), abc_file_(abc_file)
     {
     }
     ~Function() = default;
     NO_COPY_SEMANTIC(Function);
     NO_MOVE_SEMANTIC(Function);
 
+    const std::string &GetRecordName() const;
     const std::string &GetFunctionName() const;
     const AbcFile *GetAbcFileInstance() const;
     const Graph &GetGraph() const;
@@ -63,7 +65,8 @@ private:
     void AddDefinedFunction(const Function *def_func);
     void AddCalleeInfo(const CalleeInfo *callee_info);
 
-    std::string func_name_;
+    const std::string func_name_;
+    const std::string record_name_;
     panda_file::File::EntityId m_id_;
     uint32_t arg_count_;
     const Graph graph_;

@@ -71,9 +71,18 @@ std::unique_ptr<const AbcFile> AbcFile::Open(std::string_view abc_filename)
     return abc_file;
 }
 
-bool AbcFile::IsModule() const
+bool AbcFile::IsModule(std::string_view record_name) const
 {
-    return module_record_ != nullptr;
+    if (IsMergeAbc() && record_name == "") {
+        LOG(FATAL, DEFECT_SCAN_AUX) <<
+            "For merge abc, need to specify record name to check if it has module info";
+    }
+    return GetModuleRecordByName(std::string(record_name)) != nullptr;
+}
+
+bool AbcFile::IsMergeAbc() const
+{
+    return is_merge_abc_;
 }
 
 const std::string &AbcFile::GetAbcFileName() const
@@ -83,21 +92,34 @@ const std::string &AbcFile::GetAbcFileName() const
 
 size_t AbcFile::GetDefinedFunctionCount() const
 {
+    if (IsMergeAbc()) {
+        return merged_def_func_list_.size();
+    }
     return def_func_list_.size();
 }
 
 size_t AbcFile::GetDefinedClassCount() const
 {
+    if (IsMergeAbc()) {
+        return merged_def_class_list_.size();
+    }
     return def_class_list_.size();
 }
 
-const std::vector<std::unique_ptr<Class>> &AbcFile::GetClassList() const
+const std::vector<std::shared_ptr<Class>> &AbcFile::GetClassList() const
 {
+    if (IsMergeAbc()) {
+        return merged_def_class_list_;
+    }
     return def_class_list_;
 }
 
 const Function *AbcFile::GetDefinedFunctionByIndex(size_t index) const
 {
+    if (IsMergeAbc()) {
+        ASSERT(index < merged_def_func_list_.size());
+        return def_func_list_[index].get();
+    }
     ASSERT(index < def_func_list_.size());
     return def_func_list_[index].get();
 }
@@ -107,13 +129,18 @@ const Function *AbcFile::GetFunctionByName(std::string_view func_name) const
     return GetFunctionByNameImpl(func_name);
 }
 
-const Function *AbcFile::GetExportFunctionByExportName(std::string_view export_func_name) const
+const Function *AbcFile::GetExportFunctionByExportName(std::string_view export_func_name,
+                                                       std::string_view record_name) const
 {
-    if (!IsModule()) {
+    if (!IsModule(record_name)) {
         return nullptr;
     }
 
-    std::string inter_func_name = GetLocalNameByExportName(export_func_name);
+    if (IsMergeAbc() && record_name == "") {
+        LOG(FATAL, DEFECT_SCAN_AUX) <<
+            "Failed to GetExportFunctionByExportName from merge abc, need to specify record name";
+    }
+    std::string inter_func_name = GetLocalNameByExportName(export_func_name, record_name);
     for (auto export_func : export_func_list_) {
         const std::string &ex_func_name = export_func->GetFunctionName();
         std::string_view no_hashtag_name = GetNameWithoutHashtag(ex_func_name);
@@ -126,6 +153,10 @@ const Function *AbcFile::GetExportFunctionByExportName(std::string_view export_f
 
 const Class *AbcFile::GetDefinedClassByIndex(size_t index) const
 {
+    if (IsMergeAbc()) {
+        ASSERT(index < merged_def_class_list_.size());
+        return merged_def_class_list_[index].get();
+    }
     ASSERT(index < def_class_list_.size());
     return def_class_list_[index].get();
 }
@@ -135,13 +166,21 @@ const Class *AbcFile::GetClassByName(std::string_view class_name) const
     return GetClassByNameImpl(class_name);
 }
 
-const Class *AbcFile::GetExportClassByExportName(std::string_view export_class_name) const
+const Class *AbcFile::GetExportClassByExportName(std::string_view export_class_name,
+                                                 std::string_view record_name) const
 {
-    if (!IsModule()) {
+    if (!IsModule(record_name)) {
         return nullptr;
     }
 
-    std::string inter_class_name = GetLocalNameByExportName(export_class_name);
+    if (IsMergeAbc() && record_name == "") {
+        LOG(FATAL, DEFECT_SCAN_AUX) <<
+            "Failed to GetExportClassByExportName from merge abc, need to specify record name";
+    }
+    if (!IsMergeAbc()) {
+        record_name = std::string(MODULE_CLASS);
+    }
+    std::string inter_class_name = GetLocalNameByExportName(export_class_name, record_name);
     for (auto export_class : export_class_list_) {
         const std::string &ex_class_name = export_class->GetClassName();
         std::string_view no_hashtag_name = GetNameWithoutHashtag(ex_class_name);
@@ -168,44 +207,91 @@ ssize_t AbcFile::GetLineNumberByInst(const Function *func, const Inst &inst) con
     return -1;
 }
 
-std::string AbcFile::GetLocalNameByExportName(std::string_view export_name) const
+const std::set<std::string> AbcFile::GetFileRecordList() const
 {
-    if (!IsModule()) {
-        return EMPTY_STR;
-    }
-    return module_record_->GetLocalNameByExportName(export_name);
+    return record_name_set_;
 }
 
-std::string AbcFile::GetImportNameByExportName(std::string_view export_name) const
+size_t AbcFile::GetFileRecordCount() const
 {
-    if (!IsModule()) {
-        return EMPTY_STR;
-    }
-    return module_record_->GetImportNameByExportName(export_name);
+    return record_name_set_.size();
 }
 
-std::string AbcFile::GetModuleNameByExportName(std::string_view export_name) const
+std::string AbcFile::GetLocalNameByExportName(std::string_view export_name, std::string_view record_name) const
 {
-    if (!IsModule()) {
+    if (!IsModule(record_name)) {
         return EMPTY_STR;
     }
-    return module_record_->GetModuleNameByExportName(export_name);
+    if (IsMergeAbc() && record_name == "") {
+        LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetLocalNameByExportName from merge abc, need to specify record name";
+    }
+    if (!IsMergeAbc()) {
+        record_name = std::string(MODULE_CLASS);
+    }
+    auto module_record = GetModuleRecordByName(std::string(record_name));
+    return module_record->GetLocalNameByExportName(export_name);
 }
 
-std::string AbcFile::GetModuleNameByLocalName(std::string_view local_name) const
+std::string AbcFile::GetImportNameByExportName(std::string_view export_name, std::string_view record_name) const
 {
-    if (!IsModule()) {
+    if (!IsModule(record_name)) {
         return EMPTY_STR;
     }
-    return module_record_->GetModuleNameByLocalName(local_name);
+    if (IsMergeAbc() && record_name == "") {
+        LOG(FATAL, DEFECT_SCAN_AUX)
+            << "Failed to GetImportNameByExportName from merge abc, need to specify record name";
+    }
+    if (!IsMergeAbc()) {
+        record_name = std::string(MODULE_CLASS);
+    }
+    auto module_record = GetModuleRecordByName(std::string(record_name));
+    return  module_record->GetImportNameByExportName(export_name);
 }
 
-std::string AbcFile::GetImportNameByLocalName(std::string_view local_name) const
+std::string AbcFile::GetModuleNameByExportName(std::string_view export_name, std::string_view record_name) const
 {
-    if (!IsModule()) {
+    if (!IsModule(record_name)) {
         return EMPTY_STR;
     }
-    return module_record_->GetImportNameByLocalName(local_name);
+    if (IsMergeAbc() && record_name == "") {
+        LOG(FATAL, DEFECT_SCAN_AUX)
+            << "Failed to GetModuleNameByExportName from merge abc, need to specify record name";
+    }
+    if (!IsMergeAbc()) {
+        record_name = std::string(MODULE_CLASS);
+    }
+    auto module_record = GetModuleRecordByName(std::string(record_name));
+    return module_record->GetModuleNameByExportName(export_name);
+}
+
+std::string AbcFile::GetModuleNameByLocalName(std::string_view local_name, std::string_view record_name) const
+{
+    if (!IsModule(record_name)) {
+        return EMPTY_STR;
+    }
+    if (IsMergeAbc() && record_name == "") {
+        LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetModuleNameByLocalName from merge abc, need to specify record name";
+    }
+    if (!IsMergeAbc()) {
+        record_name = std::string(MODULE_CLASS);
+    }
+    auto module_record = GetModuleRecordByName(std::string(record_name));
+    return module_record->GetModuleNameByLocalName(local_name);
+}
+
+std::string AbcFile::GetImportNameByLocalName(std::string_view local_name, std::string_view record_name) const
+{
+    if (!IsModule(record_name)) {
+        return EMPTY_STR;
+    }
+    if (IsMergeAbc() && record_name == "") {
+        LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetImportNameByLocalName from merge abc, need to specify record name";
+    }
+    if (!IsMergeAbc()) {
+        record_name = std::string(MODULE_CLASS);
+    }
+    auto module_record = GetModuleRecordByName(std::string(record_name));
+    return module_record->GetImportNameByLocalName(local_name);
 }
 
 std::string_view AbcFile::GetNameWithoutHashtag(std::string_view name) const
@@ -336,8 +422,15 @@ std::optional<FuncInstPair> AbcFile::GetStGlobalInstByLdGlobalInst(FuncInstPair 
     }
 
     uint32_t ld_str_id = ld_global_inst.GetImms()[0];
+    std::string record_name = func->GetRecordName();
+    Function *func_main;
     // TODO(wangyantian): only consider that func_main_0 has StGlobal inst for now, what about other cases?
-    Function *func_main = def_func_list_[0].get();
+    if (IsMergeAbc()) {
+        ASSERT(merge_def_func_map_.find(record_name) != merge_def_func_map_.end());
+        func_main = merge_def_func_map_.find(record_name)->second[0].get();
+    } else {
+        func_main = def_func_list_[0].get();
+    }
     auto &graph = func_main->GetGraph();
     Inst st_global_inst = ld_global_inst;
     graph.VisitAllInstructions([ld_str_id, &st_global_inst](const Inst &inst) {
@@ -366,6 +459,7 @@ void AbcFile::ExtractDebugInfo()
 void AbcFile::ExtractModuleInfo()
 {
     int module_offset = -1;
+    is_merge_abc_ = true;
     for (uint32_t id : panda_file_->GetClasses()) {
         EntityId class_id(id);
         if (panda_file_->IsExternal(class_id)) {
@@ -374,6 +468,7 @@ void AbcFile::ExtractModuleInfo()
         panda_file::ClassDataAccessor cda(*panda_file_, class_id);
         const char *desc = utf::Mutf8AsCString(cda.GetDescriptor());
         if (std::strcmp(MODULE_CLASS, desc) == 0) {
+            is_merge_abc_ = false;
             cda.EnumerateFields([&](panda_file::FieldDataAccessor &field_accessor) -> void {
                 EntityId field_name_id = field_accessor.GetNameId();
                 StringData sd = panda_file_->GetStringData(field_name_id);
@@ -385,7 +480,10 @@ void AbcFile::ExtractModuleInfo()
             break;
         }
     }
-    if (module_offset == -1) {
+    if (is_merge_abc_) {
+        ExtractMergeAbcModuleInfo();
+        return;
+    } else if (module_offset == -1) {
         return;
     }
 
@@ -394,7 +492,31 @@ void AbcFile::ExtractModuleInfo()
         LOG(FATAL, DEFECT_SCAN_AUX) << "Can not create ModuleRecord instance for '" << filename_ << "'";
     }
     ExtractModuleRecord(EntityId(module_offset), module_record);
-    module_record_ = std::move(module_record);
+    AddModuleRecord(MODULE_CLASS, std::move(module_record));
+}
+
+void AbcFile::ExtractMergeAbcModuleInfo()
+{
+    for (uint32_t id : panda_file_->GetClasses()) {
+        EntityId class_id(id);
+        if (panda_file_->IsExternal(class_id)) {
+            continue;
+        }
+        panda_file::ClassDataAccessor cda(*panda_file_, class_id);
+        const char *desc = utf::Mutf8AsCString(cda.GetDescriptor());
+        cda.EnumerateFields([&](panda_file::FieldDataAccessor &field_accessor) -> void {
+            EntityId field_name_id = field_accessor.GetNameId();
+            StringData sd = panda_file_->GetStringData(field_name_id);
+            if (std::strcmp(utf::Mutf8AsCString(sd.data), MODULE_IDX_FIELD_NAME) != 0) {
+                return;
+            }
+            auto module_offset = field_accessor.GetValue<int32_t>().value();
+            std::unique_ptr<ModuleRecord> module_record = std::make_unique<ModuleRecord>(desc);
+            ASSERT(module_record != nullptr);
+            ExtractModuleRecord(EntityId(module_offset), module_record);
+            AddModuleRecord(std::string(desc), std::move(module_record));
+        });
+    }
 }
 
 void AbcFile::ExtractModuleRecord(EntityId module_id, std::unique_ptr<ModuleRecord> &module_record)
@@ -467,6 +589,13 @@ void AbcFile::ExtractModuleRecord(EntityId module_id, std::unique_ptr<ModuleReco
     module_record->SetLocalExportNum(local_export_num);
 }
 
+void AbcFile::AddModuleRecord(std::string record_name, std::unique_ptr<ModuleRecord> &&module_record)
+{
+    ASSERT(module_record_map_.find(record_name) == module_record_map_.end());
+    module_record_map_[record_name] = module_record.get();
+    module_record_list_.emplace_back(std::move(module_record));
+}
+
 void AbcFile::InitializeAllDefinedFunction()
 {
     for (uint32_t id : panda_file_->GetClasses()) {
@@ -479,6 +608,13 @@ void AbcFile::InitializeAllDefinedFunction()
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
             if (!mda.IsExternal()) {
                 std::string func_name = GetStringByStringId(mda.GetNameId());
+                std::string record_name = "";
+                std::string name = func_name;
+                if (IsMergeAbc()) {
+                    record_name = std::string(utf::Mutf8AsCString(cda.GetName().data));
+                    record_name_set_.insert(record_name);
+                    func_name = record_name + func_name;
+                }
                 EntityId m_id = mda.GetMethodId();
                 panda_file::CodeDataAccessor cda {*panda_file_, mda.GetCodeId().value()};
                 uint32_t arg_count = cda.GetNumArgs();
@@ -487,18 +623,55 @@ void AbcFile::InitializeAllDefinedFunction()
                     return;
                 }
                 std::unique_ptr<Function> func =
-                    std::make_unique<Function>(func_name, m_id, arg_count, Graph(graph), this);
+                    std::make_unique<Function>(record_name, func_name, m_id, arg_count, Graph(graph), this);
                 if (func == nullptr) {
                     LOG(FATAL, DEFECT_SCAN_AUX) << "Can not allocate memory when processing '" << filename_ << "'";
                 }
                 LOG(DEBUG, DEFECT_SCAN_AUX) << "Create a new function: " << func_name;
-                AddDefinedFunction(std::move(func));
+                if (IsMergeAbc()) {
+                    AddMergedDefinedFunction(std::move(func));
+                } else {
+                    AddDefinedFunction(std::move(func));
+                }
             }
         });
     }
 }
 
 void AbcFile::ExtractDefinedClassAndFunctionInfo()
+{
+    if (IsMergeAbc()) {
+        ExtractMergedDefinedClassAndFunctionInfo();
+    } else {
+        ExtractSingleDefinedClassAndFunctionInfo();
+    }
+}
+
+void AbcFile::ExtractMergedDefinedClassAndFunctionInfo()
+{
+    for (auto &merge_def_func_pair : merge_def_func_map_) {
+        for (auto &func : merge_def_func_pair.second) {
+            ExtractMergedClassAndFunctionInfo(func.get());
+        }
+    }
+    std::unordered_set<const Function *> processed_func;
+    for (auto &merge_def_class_pair : merge_def_class_map_) {
+        for (auto &def_class : merge_def_class_pair.second) {
+            Function *def_func = def_class->GetDefiningFunction();
+            if (def_func != nullptr && processed_func.count(def_func) == 0) {
+                ExtractClassInheritInfo(def_func);
+                processed_func.insert(def_func);
+            }
+        }
+    }
+    for (auto &merge_def_func_pair : merge_def_func_map_) {
+        for (auto &func : merge_def_func_pair.second) {
+            ExtractFunctionCalleeInfo(func.get());
+        }
+    }
+}
+
+void AbcFile::ExtractSingleDefinedClassAndFunctionInfo()
 {
     for (auto &func : def_func_list_) {
         ExtractClassAndFunctionInfo(func.get());
@@ -550,16 +723,50 @@ void AbcFile::ExtractClassAndFunctionInfo(Function *func)
     });
 }
 
+void AbcFile::ExtractMergedClassAndFunctionInfo(Function *func)
+{
+    auto &graph = func->GetGraph();
+    std::string record_name = func->GetRecordName();
+    graph.VisitAllInstructions([&](const Inst &inst) {
+        auto type = inst.GetType();
+        switch (type) {
+            case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
+            case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
+                auto def_class = ResolveDefineClassWithBufferInst(func, inst);
+                AddMergedDefinedClass(std::move(def_class), record_name);
+                break;
+            }
+            case InstType::DEFINEFUNC_IMM8_ID16_IMM8:
+            case InstType::DEFINEFUNC_IMM16_ID16_IMM8: {
+                Function *def_func = ResolveDefineFuncInstCommon(func, inst);
+                BuildFunctionDefineChain(func, def_func);
+                break;
+            }
+            case InstType::DEFINEMETHOD_IMM8_ID16_IMM8:
+            case InstType::DEFINEMETHOD_IMM16_ID16_IMM8: {
+                auto member_func = ResolveDefineFuncInstCommon(func, inst);
+                BuildFunctionDefineChain(func, member_func);
+                // resolve the class where it's defined
+                ResolveDefineMethodInst(member_func, inst);
+                break;
+            }
+            default:
+                break;
+        }
+    });
+}
+
 void AbcFile::ExtractClassInheritInfo(Function *func) const
 {
     auto &graph = func->GetGraph();
+    std::string record_name = func->GetRecordName();
     graph.VisitAllInstructions([&](const Inst &inst) {
         if (inst.GetType() != InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 &&
             inst.GetType() != InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8) {
             return;
         }
 
-        Class *cur_class = GetClassByNameImpl(GetStringByInst(inst));
+        Class *cur_class = GetClassByNameImpl(record_name + GetStringByInst(inst));
         ASSERT(cur_class != nullptr);
         Inst def_class_input1 = inst.GetInputInsts()[0];
         auto [ret_ptr, ret_sym, ret_type] = ResolveInstCommon(func, def_class_input1);
@@ -577,13 +784,14 @@ void AbcFile::ExtractClassInheritInfo(Function *func) const
             var_name = ret_sym.substr(0, first_delim_idx);
             cur_class->SetParentClassName(par_class_name);
         }
+        std::string record_name = func->GetRecordName();
         if (ret_type == ResolveType::UNRESOLVED_MODULE) {
-            std::string imp_par_class_name = GetImportNameByLocalName(par_class_name);
+            std::string imp_par_class_name = GetImportNameByLocalName(par_class_name, record_name);
             if (!imp_par_class_name.empty()) {
                 cur_class->SetParentClassName(imp_par_class_name);
             }
             std::string inter_name = var_name.empty() ? par_class_name : var_name;
-            std::string module_name = GetModuleNameByLocalName(inter_name);
+            std::string module_name = GetModuleNameByLocalName(inter_name, record_name);
             if (!module_name.empty()) {
                 cur_class->SetParClassExternalModuleName(module_name);
             }
@@ -724,36 +932,107 @@ void AbcFile::BuildClassAndMemberFuncRelation(Class *clazz, Function *member_fun
 
 void AbcFile::ExtractClassAndFunctionExportList()
 {
+    if (IsMergeAbc()) {
+        ExtractMergedClassAndFunctionExportList();
+    } else {
+        ExtractSingleClassAndFunctionExportList();
+    }
+}
+
+void AbcFile::ExtractMergedClassAndFunctionExportList()
+{
+    if (merge_def_func_map_.empty()) {
+        return;
+    }
+
+    for (auto &merge_def_func_pair : merge_def_func_map_) {
+        if (merge_def_func_pair.second.empty()) {
+            continue;
+        }
+        const Function *func_main = merge_def_func_pair.second[0].get();
+        auto &graph = func_main->GetGraph();
+        graph.VisitAllInstructions([&](const Inst &inst) {
+            auto type = inst.GetType();
+            if (type == InstType::STMODULEVAR_IMM8 || type == InstType::WIDE_STMODULEVAR_PREF_IMM16) {
+                AddExportListForMerge(func_main, inst);
+            }
+        });
+    }
+}
+
+void AbcFile::AddExportListForMerge(const Function *func_main, const Inst &inst)
+{
+    [[maybe_unused]] auto type = inst.GetType();
+    ASSERT(type == InstType::STMODULEVAR_IMM8 || type == InstType::WIDE_STMODULEVAR_PREF_IMM16);
+
+    std::string record_name = func_main->GetRecordName();
+    Inst st_module_input0 = inst.GetInputInsts()[0];
+    switch (st_module_input0.GetType()) {
+        case InstType::DEFINEFUNC_IMM8_ID16_IMM8:
+        case InstType::DEFINEFUNC_IMM16_ID16_IMM8: {
+            auto export_func = ResolveDefineFuncInstCommon(func_main, st_module_input0);
+            ASSERT(export_func != nullptr);
+            if (merge_export_func_map_.find(record_name) == merge_export_func_map_.end()) {
+                merge_export_func_map_.emplace(record_name, std::vector<const Function *>());
+            }
+            merge_export_func_map_[record_name].push_back(export_func);
+            break;
+        }
+        case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
+        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
+            Class *export_clazz = GetClassByNameImpl(record_name + GetStringByInst(st_module_input0));
+            ASSERT(export_clazz != nullptr);
+            if (merge_export_class_map_.find(record_name) == merge_export_class_map_.end()) {
+                merge_export_class_map_.emplace(record_name, std::vector<const Class *>());
+            }
+            merge_export_class_map_[record_name].push_back(export_clazz);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void AbcFile::ExtractSingleClassAndFunctionExportList()
+{
     if (!IsModule() || def_func_list_.empty()) {
         return;
     }
     const Function *func_main = def_func_list_[0].get();
     ASSERT(func_main->GetFunctionName() == ENTRY_FUNCTION_NAME);
     auto &graph = func_main->GetGraph();
+    std::string record_name = func_main->GetRecordName();
     graph.VisitAllInstructions([&](const Inst &inst) {
         auto type = inst.GetType();
         if (type == InstType::STMODULEVAR_IMM8 || type == InstType::WIDE_STMODULEVAR_PREF_IMM16) {
-            Inst st_module_input0 = inst.GetInputInsts()[0];
-            switch (st_module_input0.GetType()) {
-                case InstType::DEFINEFUNC_IMM8_ID16_IMM8:
-                case InstType::DEFINEFUNC_IMM16_ID16_IMM8: {
-                    auto export_func = ResolveDefineFuncInstCommon(func_main, st_module_input0);
-                    ASSERT(export_func != nullptr);
-                    export_func_list_.push_back(export_func);
-                    break;
-                }
-                case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
-                case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
-                    Class *export_clazz = GetClassByNameImpl(GetStringByInst(st_module_input0));
-                    ASSERT(export_clazz != nullptr);
-                    export_class_list_.push_back(export_clazz);
-                    break;
-                }
-                default:
-                    break;
-            }
+            AddExportListForSingle(func_main, inst);
         }
     });
+}
+
+void AbcFile::AddExportListForSingle(const Function *func_main, const Inst &inst)
+{
+    [[maybe_unused]] auto type = inst.GetType();
+    ASSERT(type == InstType::STMODULEVAR_IMM8 || type == InstType::WIDE_STMODULEVAR_PREF_IMM16);
+    Inst st_module_input0 = inst.GetInputInsts()[0];
+    switch (st_module_input0.GetType()) {
+        case InstType::DEFINEFUNC_IMM8_ID16_IMM8:
+        case InstType::DEFINEFUNC_IMM16_ID16_IMM8: {
+            auto export_func = ResolveDefineFuncInstCommon(func_main, st_module_input0);
+            ASSERT(export_func != nullptr);
+            export_func_list_.push_back(export_func);
+            break;
+        }
+        case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
+        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
+            Class *export_clazz = GetClassByNameImpl(GetStringByInst(st_module_input0));
+            ASSERT(export_clazz != nullptr);
+            export_class_list_.push_back(export_clazz);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 compiler::Graph *AbcFile::GenerateFunctionGraph(const panda_file::MethodDataAccessor &mda, std::string_view func_name)
@@ -773,17 +1052,18 @@ compiler::Graph *AbcFile::GenerateFunctionGraph(const panda_file::MethodDataAcce
 ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
 {
     auto type = inst.GetType();
+    std::string record_name = func->GetRecordName();
     switch (type) {
         case InstType::DEFINEFUNC_IMM8_ID16_IMM8:
         case InstType::DEFINEFUNC_IMM16_ID16_IMM8: {
-            std::string func_name = GetStringByInst(inst);
+            std::string func_name = record_name + GetStringByInst(inst);
             const Function *func = GetFunctionByName(func_name);
             ASSERT(func != nullptr);
             return std::make_tuple(func, EMPTY_STR, ResolveType::FUNCTION_OBJECT);
         }
         case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
         case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
-            std::string class_name = GetStringByInst(inst);
+            std::string class_name = record_name + GetStringByInst(inst);
             const Class *clazz = GetClassByName(class_name);
             ASSERT(clazz != nullptr);
             return std::make_tuple(clazz, EMPTY_STR, ResolveType::CLASS_OBJECT);
@@ -821,12 +1101,13 @@ ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
         case InstType::LDLOCALMODULEVAR_IMM8:
         case InstType::WIDE_LDLOCALMODULEVAR_PREF_IMM16: {
             size_t index = inst.GetImms()[0];
-            const std::string &export_name = module_record_->GetExportNameByIndex(index);
-            const Function *func = GetExportFunctionByExportName(export_name);
+            auto module_record = GetModuleRecordByName(record_name);
+            const std::string &export_name = module_record->GetExportNameByIndex(index);
+            const Function *func = GetExportFunctionByExportName(export_name, record_name);
             if (func != nullptr) {
                 return std::make_tuple(func, EMPTY_STR, ResolveType::FUNCTION_OBJECT);
             }
-            const Class *clazz = GetExportClassByExportName(export_name);
+            const Class *clazz = GetExportClassByExportName(export_name, record_name);
             if (clazz != nullptr) {
                 return std::make_tuple(clazz, EMPTY_STR, ResolveType::CLASS_OBJECT);
             }
@@ -835,13 +1116,15 @@ ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
         case InstType::LDEXTERNALMODULEVAR_IMM8:
         case InstType::WIDE_LDEXTERNALMODULEVAR_PREF_IMM16: {
             size_t index = inst.GetImms()[0];
-            const std::string &inter_name = module_record_->GetImportLocalNameByIndex(index);
+            auto module_record = GetModuleRecordByName(func->GetRecordName());
+            const std::string &inter_name = module_record->GetImportLocalNameByIndex(index);
             return std::make_tuple(nullptr, inter_name, ResolveType::UNRESOLVED_MODULE);
         }
         case InstType::GETMODULENAMESPACE_IMM8:
         case InstType::WIDE_GETMODULENAMESPACE_PREF_IMM16: {
             size_t index = inst.GetImms()[0];
-            const std::string &str = module_record_->GetImportNamespaceNameByIndex(index);
+            auto module_record = GetModuleRecordByName(func->GetRecordName());
+            const std::string &str = module_record->GetImportNamespaceNameByIndex(index);
             return std::make_tuple(nullptr, str, ResolveType::UNRESOLVED_MODULE);
         }
         case InstType::LDGLOBAL: {
@@ -939,7 +1222,8 @@ ResolveResult AbcFile::HandleNewObjInstResolveResultCommon(const ResolveResult &
 
 Function *AbcFile::ResolveDefineFuncInstCommon(const Function *func, const Inst &def_func_inst) const
 {
-    std::string def_func_name = GetStringByInst(def_func_inst);
+    std::string record_name = func->GetRecordName();
+    std::string def_func_name = record_name + GetStringByInst(def_func_inst);
     Function *def_func = GetFunctionByNameImpl(def_func_name);
     ASSERT(def_func != nullptr);
     return def_func;
@@ -949,8 +1233,9 @@ std::unique_ptr<Class> AbcFile::ResolveDefineClassWithBufferInst(Function *func,
 {
     auto imms = define_class_inst.GetImms();
     auto m_id = EntityId(imms[1]);
-    std::string class_name = GetStringByMethodId(m_id);
-    std::unique_ptr<Class> def_class = std::make_unique<Class>(class_name, this, func);
+    std::string record_name = func->GetRecordName();
+    std::string class_name = record_name + GetStringByMethodId(m_id);
+    std::unique_ptr<Class> def_class = std::make_unique<Class>(class_name, record_name, this, func);
     if (def_class == nullptr) {
         LOG(FATAL, DEFECT_SCAN_AUX) << "Can not allocate memory when processing '" << filename_ << "'";
     }
@@ -958,7 +1243,7 @@ std::unique_ptr<Class> AbcFile::ResolveDefineClassWithBufferInst(Function *func,
     func->AddDefinedClass(def_class.get());
 
     // handle ctor of the class
-    std::string ctor_name = GetStringByInst(define_class_inst);
+    std::string ctor_name = record_name + GetStringByInst(define_class_inst);
     HandleMemberFunctionFromClassBuf(ctor_name, func, def_class.get());
 
     auto literal_array_id = EntityId(imms[2]);
@@ -969,7 +1254,7 @@ std::unique_ptr<Class> AbcFile::ResolveDefineClassWithBufferInst(Function *func,
                 tag == panda_file::LiteralTag::SETTER || tag == LiteralTag::GENERATORMETHOD ||
                 tag == LiteralTag::ASYNCGENERATORMETHOD) {
                 auto method_id = EntityId(std::get<uint32_t>(value));
-                std::string member_func_name = GetStringByMethodId(method_id);
+                std::string member_func_name = record_name + GetStringByMethodId(method_id);
                 HandleMemberFunctionFromClassBuf(member_func_name, func, def_class.get());
             }
         });
@@ -1001,12 +1286,13 @@ std::unique_ptr<CalleeInfo> AbcFile::ResolveCallInstCommon(Function *func, const
             callee_info->SetFunctionName(callee_name);
         }
         if (ret_type == ResolveType::UNRESOLVED_MODULE) {
-            std::string imp_callee_name = GetImportNameByLocalName(callee_name);
+            std::string record_name = func->GetRecordName();
+            std::string imp_callee_name = GetImportNameByLocalName(callee_name, record_name);
             if (!imp_callee_name.empty()) {
                 callee_info->SetFunctionName(imp_callee_name);
             }
             std::string inter_name = var_name.empty() ? callee_name : var_name;
-            std::string module_name = GetModuleNameByLocalName(inter_name);
+            std::string module_name = GetModuleNameByLocalName(inter_name, record_name);
             if (!module_name.empty()) {
                 callee_info->SetExternalModuleName(module_name);
             }
@@ -1040,6 +1326,7 @@ std::unique_ptr<CalleeInfo> AbcFile::ResolveSuperCallInst(Function *func, const 
 
 void AbcFile::ResolveDefineMethodInst(Function *member_func, const Inst &define_method_inst)
 {
+    std::string record_name = member_func->GetRecordName();
     Inst def_method_input0 = define_method_inst.GetInputInsts()[0];
     if ((def_method_input0.GetType() == InstType::LDOBJBYNAME_IMM8_ID16 ||
          def_method_input0.GetType() == InstType::LDOBJBYNAME_IMM16_ID16) &&
@@ -1047,7 +1334,7 @@ void AbcFile::ResolveDefineMethodInst(Function *member_func, const Inst &define_
         Inst ld_obj_input0 = def_method_input0.GetInputInsts()[0];
         if (ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 ||
             ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8) {
-            auto clazz = GetClassByNameImpl(GetStringByInst(ld_obj_input0));
+            auto clazz = GetClassByNameImpl(record_name + GetStringByInst(ld_obj_input0));
             if (clazz != nullptr) {
                 BuildClassAndMemberFuncRelation(clazz, member_func);
             }
@@ -1063,7 +1350,7 @@ void AbcFile::HandleMemberFunctionFromClassBuf(const std::string &func_name, Fun
     BuildClassAndMemberFuncRelation(def_class, member_func);
 }
 
-void AbcFile::AddDefinedClass(std::unique_ptr<Class> &&def_class)
+void AbcFile::AddDefinedClass(std::shared_ptr<Class> &&def_class)
 {
     auto &class_name = def_class->GetClassName();
     ASSERT(def_class_map_.find(class_name) == def_class_map_.end());
@@ -1071,7 +1358,19 @@ void AbcFile::AddDefinedClass(std::unique_ptr<Class> &&def_class)
     def_class_list_.emplace_back(std::move(def_class));
 }
 
-void AbcFile::AddDefinedFunction(std::unique_ptr<Function> &&def_func)
+void AbcFile::AddMergedDefinedClass(std::shared_ptr<Class> &&def_class, std::string record_name)
+{
+    auto &class_name = def_class->GetClassName();
+    ASSERT(def_class_map_.find(class_name) == def_class_map_.end());
+    def_class_map_[class_name] = def_class.get();
+    if (merge_def_class_map_.find(record_name) == merge_def_class_map_.end()) {
+        merge_def_class_map_.emplace(record_name, std::vector<std::shared_ptr<Class>>());
+    }
+    merge_def_class_map_[record_name].push_back(def_class);
+    merged_def_class_list_.push_back(def_class);
+}
+
+void AbcFile::AddDefinedFunction(std::shared_ptr<Function> &&def_func)
 {
     const std::string &func_name = def_func->GetFunctionName();
     ASSERT(def_func_map_.find(func_name) == def_func_map_.end());
@@ -1079,8 +1378,25 @@ void AbcFile::AddDefinedFunction(std::unique_ptr<Function> &&def_func)
     if (func_name != ENTRY_FUNCTION_NAME) {
         def_func_list_.emplace_back(std::move(def_func));
     } else {
-        // make def_func_list_[0] the 'func_main_0'
         def_func_list_.insert(def_func_list_.begin(), std::move(def_func));
+    }
+}
+
+void AbcFile::AddMergedDefinedFunction(std::shared_ptr<Function> &&def_func)
+{
+    const std::string &record_name = def_func->GetRecordName();
+    const std::string &func_name = def_func->GetFunctionName();
+    ASSERT(def_func_map_.find(func_name) == def_func_map_.end());
+    def_func_map_[func_name] = def_func.get();
+    merged_def_func_list_.push_back(def_func);
+    if (merge_def_func_map_.find(record_name) == merge_def_func_map_.end()) {
+        merge_def_func_map_.emplace(record_name, std::vector<std::shared_ptr<Function>>());
+    }
+
+    if (func_name.find(ENTRY_FUNCTION_NAME) == std::string::npos) {
+        merge_def_func_map_[record_name].push_back(def_func);
+    } else {
+        merge_def_func_map_[record_name].insert(merge_def_func_map_[record_name].begin(), def_func);
     }
 }
 
@@ -1093,6 +1409,19 @@ Function *AbcFile::GetFunctionByNameImpl(std::string_view func_name) const
 {
     auto iter = def_func_map_.find(std::string(func_name));
     if (iter != def_func_map_.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
+const ModuleRecord *AbcFile::GetModuleRecordByName(std::string record_name) const
+{
+    if (!IsMergeAbc()) {
+        record_name = std::string(MODULE_CLASS);
+    }
+
+    auto iter = module_record_map_.find(record_name);
+    if (iter != module_record_map_.end()) {
         return iter->second;
     }
     return nullptr;

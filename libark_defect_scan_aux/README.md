@@ -50,8 +50,6 @@ flowchart LR;
 #### 3.4.2 使用DevEco Studio
 通过DevEco Studio编译应用，编译成功后，解压应用`hap`包，找到其中的`abc`文件。
 
-**注意：** 当前安全扫描工具仅支持`hap`包中以单文件为单位生成的`abc`文件扫描，不支持一个`hap`包中仅有一个合并多文件字节码信息的`modules.abc`文件扫描。
-
 ### 3.5 执行扫描
 
 将需要扫描的`abc`文件放到示例代码中指定的文件路径后，执行示例代码对应的可执行程序即可。
@@ -67,21 +65,24 @@ cd out/rk3568/clang_x64/arkcompiler/runtime_core
 
 | 接口名及参数 | 描述 |
 | ----------- | ---- |
-| static std::unique_ptr\<const AbcFile\> Open(std::string_view abc_filename)             | 根据文件名打开方舟字节码文件并返回该文件 |
-| const std::string &GetAbcFileName() const                                               | 返回方舟字节码文件的名称 |
-| const std::vector<std::unique_ptr\<Class\>> &GetClassList() const                       | 返回包含所有类的列表 |
-| size_t GetDefinedFunctionCount() const                                                  | 返回定义的函数个数 |
-| size_t GetDefinedClassCount() const                                                     | 返回定义的类的个数 |
-| const Function \*GetFunctionByName(std::string_view func_name) const                    | 根据名称返回指定函数 |
-| const Function \*GetExportFunctionByExportName(std::string_view export_func_name) const | 根据导出名返回指定的导出函数 |
-| const Class \*GetClassByName(std::string_view class_name) const                         | 根据类名返回指定类 |
-| const Class \*GetExportClassByExportName(std::string_view export_class_name) const      | 根据导出名返回指定的导出类 |
-| size_t GetLineNumberByInst(const Function \*func, const Inst &inst) const               | 根据指令返回该指令对应源码的行号 |
-| std::string GetLocalNameByExportName(std::string_view export_name) const                | 根据变量的导出名返回其本地的名称 |
-| std::string GetImportNameByExportName(std::string_view export_name) const               | 根据变量的导出名返回其导入的名称 |
-| std::string GetModuleNameByExportName(std::string_view export_name) const               | 根据变量的导出名返回导入该变量的模块名 |
-| std::string GetModuleNameByLocalName(std::string_view local_name) const                 | 根据变量的本地名返回导入该变量的模块名 |
-| std::string GetImportNameByLocalName(std::string_view local_name) const                 | 根据变量的本地名返回该变量的导入名 |
+| static std::unique_ptr\<const AbcFile\> Open(std::string_view abc_filename)                                                | 根据文件名打开方舟字节码文件并返回该文件 |
+| bool IsMergeAbc() const                                                                                                    | 返回方舟字节码文件是否为合并格式 |
+| const std::set\<std::string\> GetFileRecordList() const                                                                    | 若为合并abc，返回所有文件描述名 |
+| size_t GetFileRecordCount() const                                                                                          | 若为合并abc，返回abc中的文件个数 |
+| const std::string &GetAbcFileName() const                                                                                  | 返回方舟字节码文件的名称 |
+| const std::vector\<std::shared_ptr\<Class\>\> &GetClassList() const                                                        | 返回包含所有类的列表 |
+| size_t GetDefinedFunctionCount() const                                                                                     | 返回定义的函数个数 |
+| size_t GetDefinedClassCount() const                                                                                        | 返回定义的类的个数 |
+| const Function \*GetFunctionByName(std::string_view func_name) const                                                       | 根据名称返回指定函数 |
+| const Function \*GetExportFunctionByExportName(std::string_view export_func_name, std::string_view record_name = "") const | 根据导出名返回指定的导出函数，若为合并abc，需指定文件描述名 |
+| const Class \*GetClassByName(std::string_view class_name) const                                                            | 根据类名返回指定类 |
+| const Class \*GetExportClassByExportName(std::string_view export_class_name, std::string_view record_name = "") const      | 根据导出名返回指定的导出类，若为合并abc，需指定文件描述名 |
+| size_t GetLineNumberByInst(const Function \*func, const Inst &inst) const                                                  | 根据指令返回该指令对应源码的行号 |
+| std::string GetLocalNameByExportName(std::string_view export_name, std::string_view record_name = "") const                | 根据变量的导出名返回其本地的名称，若为合并abc，需指定文件描述名 |
+| std::string GetImportNameByExportName(std::string_view export_name, std::string_view record_name = "") const               | 根据变量的导出名返回其导入的名称，若为合并abc，需指定文件描述名 |
+| std::string GetModuleNameByExportName(std::string_view export_name, std::string_view record_name = "") const               | 根据变量的导出名返回导入该变量的模块名，若为合并abc，需指定文件描述名 |
+| std::string GetModuleNameByLocalName(std::string_view local_name, std::string_view record_name = "") const                 | 根据变量的本地名返回导入该变量的模块名，若为合并abc，需指定文件描述名 |
+| std::string GetImportNameByLocalName(std::string_view local_name, std::string_view record_name = "") const                 | 根据变量的本地名返回该变量的导入名，若为合并abc，需指定文件描述名 |
 
 ### 4.2 `Function`
 
@@ -89,6 +90,7 @@ cd out/rk3568/clang_x64/arkcompiler/runtime_core
 | ----------- | ---- |
 | const std::string &GetFunctionName() const                              | 返回函数名 |
 | const AbcFile \*GetAbcFileInstance() const                              | 返回该函数所在的方舟字节码文件 |
+| const std::string &GetRecordName() const                                | 若为合并abc，返回该函数所在的文件描述名 |
 | const Graph &GetGraph() const                                           | 返回该函数的构图 |
 | const Class \*GetClass() const                                          | 返回定义该函数的类 |
 | const Function \*GetParentFunction() const                              | 返回定义该函数的函数 |
@@ -104,6 +106,7 @@ cd out/rk3568/clang_x64/arkcompiler/runtime_core
 | ----------- | ---- |
 | const std::string &GetClassName() const                                   | 返回类名 |
 | const AbcFile *GetAbcFileInstance() const                                 | 返回该类所在的方舟字节码文件 |
+| const std::string &GetRecordName() const                                  | 若为合并abc，返回该类所在的文件描述名 |
 | Function *GetDefiningFunction() const                                     | 返回定义该类的函数 |
 | size_t GetMemberFunctionCount() const                                     | 返回成员函数的数量 |
 | const Function *GetMemberFunctionByName(std::string_view func_name) const | 根据名称返回成员函数 |
@@ -198,3 +201,9 @@ try {
                          |    End Block   | <-----
                          +----------------+
 ```
+
+### 5.2 接口所提供的类的继承关系和函数调用关系等不完全准确
+
+由于不存在完美的静态分析，本工具所提供的类的继承关系和函数调用关系接口（如`GetCaller`和`GetCalleee`）等为尽力分析的结果，但可能并不完全准确。
+
+开发者可根据构图和指令等确定的信息，定制化进行更准确地漏洞扫描分析。

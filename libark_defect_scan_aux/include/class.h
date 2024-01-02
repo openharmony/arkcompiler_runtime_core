@@ -34,8 +34,9 @@ struct ParentClassInfo {
 
 class Class final {
 public:
-    Class(std::string_view class_name, const AbcFile *abc_file, Function *def_func)
-        : class_name_(class_name), abc_file_(abc_file), def_func_(def_func)
+    Class(std::string_view class_name, std::string_view record_name,
+          const AbcFile *abc_file, Function *def_func)
+        : class_name_(class_name), record_name_(record_name), abc_file_(abc_file), def_func_(def_func)
     {
     }
     ~Class() = default;
@@ -43,6 +44,7 @@ public:
     NO_MOVE_SEMANTIC(Class);
 
     const std::string &GetClassName() const;
+    const std::string &GetRecordName() const;
     const AbcFile *GetAbcFileInstance() const;
     Function *GetDefiningFunction() const;
     size_t GetMemberFunctionCount() const;
@@ -62,6 +64,7 @@ private:
     void AddMemberFunction(const Function *func);
 
     std::string class_name_;
+    std::string record_name_;
     const AbcFile *abc_file_ {nullptr};
     Function *def_func_ {nullptr};
     std::vector<const Function *> member_func_list_;

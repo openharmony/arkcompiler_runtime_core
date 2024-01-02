@@ -62,9 +62,55 @@ host_unittest_action("LibArkDefectScanAuxTest") {
   }
 }
 
+defect_scan_aux_test_projects = [ "across_abc_test" ]
+
+foreach(project, defect_scan_aux_test_projects) {
+  es2abc_gen_abc("gen_${project}_abc") {
+    test_js = "${test_js_path}/${project}"
+    test_abc = "${target_out_dir}/${project}.abc"
+
+    src_js = rebase_path(test_js)
+    dst_file = rebase_path(test_abc)
+
+    extra_args = [
+      "--module",
+      "--merge-abc",
+    ]
+
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
+host_unittest_action("LibArkDefectScanAuxMergeTest") {
+  module_out_path = module_output_path
+  sources = [ "defect_scan_aux_merge_test.cpp" ]
+  configs = [ "$ark_root/libark_defect_scan_aux:defectscanaux_test_config" ]
+
+  deps = [
+    "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux_static_test",
+    sdk_libc_secshared_dep,
+  ]
+
+  print("target_out_dir", target_out_dir)
+  target_dir = rebase_path(target_out_dir)
+  print("target_dir", target_dir)
+  test_abc_dir = "${target_dir}"
+  print("test_abc_dir", test_abc_dir)
+
+  defines = [ "DEFECT_SCAN_AUX_TEST_MERGE_ABC_DIR=\"${test_abc_dir}/\"" ]
+
+  foreach(project, defect_scan_aux_test_projects) {
+    deps += [ ":gen_${project}_abc" ]
+  }
+}
+
 group("host_unittest") {
   testonly = true
-  deps = [ ":LibArkDefectScanAuxTestAction" ]
+  deps = [
+    ":LibArkDefectScanAuxMergeTestAction",
+    ":LibArkDefectScanAuxTestAction",
+  ]
 }
 
 ohos_executable("defect_scan_aux_demo") {

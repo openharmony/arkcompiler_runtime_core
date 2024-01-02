@@ -23,6 +23,11 @@ const std::string &Class::GetClassName() const
     return class_name_;
 }
 
+const std::string &Class::GetRecordName() const
+{
+    return record_name_;
+}
+
 const AbcFile *Class::GetAbcFileInstance() const
 {
     return abc_file_;
