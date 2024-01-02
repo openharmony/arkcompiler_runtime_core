@@ -19,14 +19,14 @@ $available_regs = $temps_mask + :arg0 + :arg1
 
 AllocateObjectTlabValidation = {
   spills_count_max: 2,  # TODO(msherstennikov): set to 0 once regalloc supports smart temps
-  code_size_max: { arm64: 108, x86_64: 460, arm32: 9999 }
+  code_size_max: { arm64: 108, riscv64: 108, x86_64: 460, arm32: 9999 }
   # TODO(msherstennikov): revert back code size values, once regalloc supports smart temps
   # code_size_max: { arm64: 100, x86_64: 125, arm32: 9999 }
 }
 
 AllocateArrayTlabValidation = {
   spills_count_max: 2,  # TODO(msherstennikov): set to 0 once regalloc supports smart temps
-  code_size_max: { arm64: 136, x86_64: 476, arm32: 9999 }
+  code_size_max: { arm64: 136, riscv64: 136, x86_64: 476, arm32: 9999 }
   # TODO(msherstennikov): revert back code size values, once regalloc supports smart temps
   # code_size_max: { arm64: 128, x86_64: 145, arm32: 9999 }
 }

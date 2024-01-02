@@ -30,8 +30,8 @@ config("arkcompiler_public_config") {
     defines = [ "ENABLE_BYTECODE_OPT" ]
   }
 
-  is_x64 =
-      current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64"
+  is_x64 = current_cpu == "amd64" || current_cpu == "x64" ||
+           current_cpu == "x86_64" || current_cpu == "riscv64"
 
   cflags_cc = []
   if (is_x64 || current_cpu == "arm64") {

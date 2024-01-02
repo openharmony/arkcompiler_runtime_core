@@ -15,7 +15,7 @@
 
 include_relative 'common.irt'
 
-if Options.arch == :arm64
+if Options.arch == :arm64 || Options.arch == :riscv64
     # In case of Aarch64 6 registers are enough: use 4 callee regs and 2 temp regs.
     $monitors_mask = RegMask.new($full_regmap, :tmp1, :tmp2, :callee0, :callee2, :callee3, :callee4)
 else

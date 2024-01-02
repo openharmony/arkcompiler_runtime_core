@@ -31,6 +31,8 @@
 #elif defined(PANDA_TARGET_AMD64)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define THREAD_REG r15
+#elif defined(PANDA_TARGET_RISCV64)
+#define THREAD_REG tp
 #else
 #error "Unsupported target"
 #endif

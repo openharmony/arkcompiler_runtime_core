@@ -23,6 +23,8 @@ class RegMask
     @value = 0
     if Options.arch == :arm64
       @size = 31
+    elsif Options.arch == :riscv64
+      @size = 16
     elsif Options.arch == :arm32
       @size = 16
     elsif Options.arch == :x86_64

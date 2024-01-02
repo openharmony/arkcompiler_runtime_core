@@ -1101,6 +1101,12 @@ arch_info:
   fp_regs_count: 32
   fp_temp_regs: [30, 31]
 
+- name: riscv64
+  regs_count: 32
+  temp_regs: [28, 29, 30, 31]
+  fp_regs_count: 32
+  fp_temp_regs: [5, 6, 7]
+
 - name: arm32
   regs_count: 16
   temp_regs: [8, 9, 12]

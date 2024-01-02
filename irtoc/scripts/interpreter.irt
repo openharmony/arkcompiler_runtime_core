@@ -18,6 +18,7 @@ include_relative 'common.irt'
 fixed_regmap = Regmap.new({
   arm32: { dispatch: 12, pc: 4, frame: 8 },
   arm64: { dispatch: 24, pc: 20, frame: 23 },
+  riscv64: { dispatch: 24, pc: 20, frame: 23 },
   x86_64: { dispatch: 8, pc: 4, frame: 5 },
 })
 handler_regmap = $full_regmap + fixed_regmap
