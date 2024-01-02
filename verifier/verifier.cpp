@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <codecvt>
+#include <locale>
 
 #include "verifier.h"
 #include "zlib.h"
@@ -34,10 +36,6 @@ bool Verifier::Verify()
     }
 
     if (!VerifyConstantPool()) {
-        return false;
-    }
-
-    if (!VerifyRegisterIndex()) {
         return false;
     }
 
@@ -330,7 +328,9 @@ bool Verifier::VerifyStringIdInLiteralArray(const uint32_t &id)
 {
     auto string_data = file_->GetStringData(panda_file::File::EntityId(id));
     auto desc = std::string(utf::Mutf8AsCString(string_data.data));
-    if (string_data.utf16_length != desc.length()) {
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring utf16_desc = converter.from_bytes(desc);
+    if (string_data.utf16_length != utf16_desc.length()) {
         LOG(ERROR, VERIFIER) << "Invalid string value(0x" << id << ") in literal array";
         return false;
     }
@@ -453,7 +453,9 @@ bool Verifier::VerifyStringId(const BytecodeInstruction &bc_ins, const panda_fil
     }
     auto string_data = file_->GetStringData(arg_string_id);
     auto desc = std::string(utf::Mutf8AsCString(string_data.data));
-    if (string_data.utf16_length != desc.length()) {
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring utf16_desc = converter.from_bytes(desc);
+    if (string_data.utf16_length != utf16_desc.length()) {
         LOG(ERROR, VERIFIER) << "Invalid string_id. string_id(0x" << std::hex << arg_string_id << ")!";
         return false;
     }

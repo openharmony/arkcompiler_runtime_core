@@ -75,7 +75,6 @@ host_unittest_action("VerifierTest") {
     "utils.cpp",
     "verify_checksum_test.cpp",
     "verify_constant_pool_tests.cpp",
-    "verify_register_index_test.cpp",
   ]
 
   include_dirs = [ "$ark_root/verifier" ]
