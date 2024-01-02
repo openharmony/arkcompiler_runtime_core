@@ -2273,7 +2273,6 @@
 # end of es2panda fails
 
 # es2panda fails: panda#13203
-09.classes/01.class_declaration/06.implementing_interface_properties/getter_setter_implementation.ets
 10.interfaces/05.interface_properties/getter_setter_form.ets
 10.interfaces/05.interface_properties/interface_property_declaration.ets
 10.interfaces/05.interface_properties/readonly_simple_form_0.ets
