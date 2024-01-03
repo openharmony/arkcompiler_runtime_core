@@ -87,7 +87,7 @@ void CalleeInfo::SetCallee(const Function *func)
     SetFunctionName(func->GetFunctionName());
     SetClass(func->GetClass());
     if (class_ != nullptr) {
-        SetClassName(class_->GetClassName());
+        SetClassName(func->GetRecordName() + class_->GetClassName());
     }
 }
 

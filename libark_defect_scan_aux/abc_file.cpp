@@ -118,7 +118,7 @@ const Function *AbcFile::GetDefinedFunctionByIndex(size_t index) const
 {
     if (IsMergeAbc()) {
         ASSERT(index < merged_def_func_list_.size());
-        return def_func_list_[index].get();
+        return merged_def_func_list_[index].get();
     }
     ASSERT(index < def_func_list_.size());
     return def_func_list_[index].get();
@@ -141,9 +141,18 @@ const Function *AbcFile::GetExportFunctionByExportName(std::string_view export_f
             "Failed to GetExportFunctionByExportName from merge abc, need to specify record name";
     }
     std::string inter_func_name = GetLocalNameByExportName(export_func_name, record_name);
-    for (auto export_func : export_func_list_) {
+    auto export_func_list = export_func_list_;
+    if (IsMergeAbc()) {
+        const std::string record_name_str = std::string(record_name);
+        auto it = merge_export_func_map_.find(record_name_str);
+        if (it == merge_export_func_map_.end()) {
+            return nullptr;
+        }
+        export_func_list = it->second;
+    }
+    for (auto &export_func : export_func_list) {
         const std::string &ex_func_name = export_func->GetFunctionName();
-        std::string_view no_hashtag_name = GetNameWithoutHashtag(ex_func_name);
+        std::string_view no_hashtag_name = GetNameWithoutHashtag(ex_func_name, record_name);
         if (no_hashtag_name == inter_func_name) {
             return export_func;
         }
@@ -181,9 +190,18 @@ const Class *AbcFile::GetExportClassByExportName(std::string_view export_class_n
         record_name = std::string(MODULE_CLASS);
     }
     std::string inter_class_name = GetLocalNameByExportName(export_class_name, record_name);
-    for (auto export_class : export_class_list_) {
+    auto export_class_list = export_class_list_;
+    if (IsMergeAbc()) {
+        const std::string record_name_str = std::string(record_name);
+        auto it = merge_export_class_map_.find(record_name_str);
+        if (it == merge_export_class_map_.end()) {
+            return nullptr;
+        }
+        export_class_list = it->second;
+    }
+    for (auto export_class : export_class_list) {
         const std::string &ex_class_name = export_class->GetClassName();
-        std::string_view no_hashtag_name = GetNameWithoutHashtag(ex_class_name);
+        std::string_view no_hashtag_name = GetNameWithoutHashtag(ex_class_name, record_name);
         if (no_hashtag_name == inter_class_name) {
             return export_class;
         }
@@ -294,8 +312,10 @@ std::string AbcFile::GetImportNameByLocalName(std::string_view local_name, std::
     return module_record->GetImportNameByLocalName(local_name);
 }
 
-std::string_view AbcFile::GetNameWithoutHashtag(std::string_view name) const
+std::string_view AbcFile::GetNameWithoutHashtag(std::string_view full_name, std::string_view record_name) const
 {
+    size_t pos = full_name.find(record_name);
+    std::string_view name = pos == std::string::npos ? full_name : full_name.substr(pos + record_name.length());
     if (name[0] == '#') {
         size_t sec_hashtag_idx = name.find_first_of('#', 1);
         if (sec_hashtag_idx != std::string::npos && (sec_hashtag_idx + 1) <= name.size()) {
@@ -782,13 +802,13 @@ void AbcFile::ExtractClassInheritInfo(Function *func) const
         if (last_delim_idx != std::string::npos) {
             par_class_name = ret_sym.substr(last_delim_idx + 1);
             var_name = ret_sym.substr(0, first_delim_idx);
-            cur_class->SetParentClassName(par_class_name);
+            cur_class->SetParentClassName(record_name + par_class_name);
         }
         std::string record_name = func->GetRecordName();
         if (ret_type == ResolveType::UNRESOLVED_MODULE) {
             std::string imp_par_class_name = GetImportNameByLocalName(par_class_name, record_name);
             if (!imp_par_class_name.empty()) {
-                cur_class->SetParentClassName(imp_par_class_name);
+                cur_class->SetParentClassName(record_name + imp_par_class_name);
             }
             std::string inter_name = var_name.empty() ? par_class_name : var_name;
             std::string module_name = GetModuleNameByLocalName(inter_name, record_name);
@@ -797,7 +817,7 @@ void AbcFile::ExtractClassInheritInfo(Function *func) const
             }
         }
         if (ret_type == ResolveType::UNRESOLVED_GLOBAL_VAR) {
-            cur_class->SetParentClassName(par_class_name);
+            cur_class->SetParentClassName(record_name + par_class_name);
             var_name = var_name.empty() ? var_name : ret_sym.substr(0, last_delim_idx);
             cur_class->SetParClassGlobalVarName(var_name);
         }
@@ -1081,7 +1101,7 @@ ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
         case InstType::LDOBJBYNAME_IMM16_ID16: {
             Inst ld_obj_input0 = inst.GetInputInsts()[0];
             auto resolve_res = ResolveInstCommon(func, ld_obj_input0);
-            return HandleLdObjByNameInstResolveResult(inst, resolve_res);
+            return HandleLdObjByNameInstResolveResult(inst, resolve_res, record_name);
         }
         case InstType::LDLEXVAR_IMM4_IMM4:
         case InstType::LDLEXVAR_IMM8_IMM8:
@@ -1170,7 +1190,8 @@ ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
 }
 
 ResolveResult AbcFile::HandleLdObjByNameInstResolveResult(const Inst &ldobjbyname_inst,
-                                                          const ResolveResult &resolve_res) const
+                                                          const ResolveResult &resolve_res,
+                                                          const std::string record_name) const
 {
     auto &[ret_ptr, ret_sym, ret_type] = resolve_res;
     std::string name = GetStringByInst(ldobjbyname_inst);
@@ -1190,7 +1211,8 @@ ResolveResult AbcFile::HandleLdObjByNameInstResolveResult(const Inst &ldobjbynam
         case ResolveType::CLASS_INSTANCE: {
             ASSERT(ret_ptr != nullptr);
             // TODO(wangyantian): distinguish static func from member func in a class
-            const void *member_func = reinterpret_cast<const Class *>(ret_ptr)->GetMemberFunctionByName(name);
+            const void *member_func =
+                reinterpret_cast<const Class *>(ret_ptr)->GetMemberFunctionByName(record_name + name);
             if (member_func != nullptr) {
                 return std::make_tuple(member_func, name, ResolveType::FUNCTION_OBJECT);
             }
@@ -1272,6 +1294,7 @@ std::unique_ptr<CalleeInfo> AbcFile::ResolveCallInstCommon(Function *func, const
 
     Inst call_input0 = call_inst.GetInputInsts()[func_obj_idx];
     auto [ret_ptr, ret_sym, ret_type] = ResolveInstCommon(func, call_input0);
+    std::string record_name = func->GetRecordName();
     if (ret_ptr != nullptr && ret_type == ResolveType::FUNCTION_OBJECT) {
         auto callee = reinterpret_cast<const Function *>(ret_ptr);
         callee_info->SetCallee(callee);
@@ -1283,13 +1306,12 @@ std::unique_ptr<CalleeInfo> AbcFile::ResolveCallInstCommon(Function *func, const
         if (first_delim_idx != std::string::npos) {
             callee_name = ret_sym.substr(last_delim_idx + 1);
             var_name = ret_sym.substr(0, first_delim_idx);
-            callee_info->SetFunctionName(callee_name);
+            callee_info->SetFunctionName(record_name + callee_name);
         }
         if (ret_type == ResolveType::UNRESOLVED_MODULE) {
-            std::string record_name = func->GetRecordName();
             std::string imp_callee_name = GetImportNameByLocalName(callee_name, record_name);
             if (!imp_callee_name.empty()) {
-                callee_info->SetFunctionName(imp_callee_name);
+                callee_info->SetFunctionName(record_name + imp_callee_name);
             }
             std::string inter_name = var_name.empty() ? callee_name : var_name;
             std::string module_name = GetModuleNameByLocalName(inter_name, record_name);
@@ -1297,7 +1319,7 @@ std::unique_ptr<CalleeInfo> AbcFile::ResolveCallInstCommon(Function *func, const
                 callee_info->SetExternalModuleName(module_name);
             }
         } else if (ret_type == ResolveType::UNRESOLVED_GLOBAL_VAR) {
-            callee_info->SetFunctionName(callee_name);
+            callee_info->SetFunctionName(record_name + callee_name);
             var_name = var_name.empty() ? var_name : ret_sym.substr(0, last_delim_idx);
             callee_info->SetGlobalVarName(var_name);
         }
