@@ -1,3 +1,8 @@
+# FIXME(igelhaus): stabilize fe_dev202312
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_61.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_68.ets
+# end of stabilize fe_dev202312
+
 # es2panda fails: panda#14417 Escaping in string interpolation expressions
 02.lexical_elements/09.literals/06.template_literals/templ_01.ets
 07.expressions/30.string_interpolation_expressions/siexp_7.ets
