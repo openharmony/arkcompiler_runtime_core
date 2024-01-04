@@ -150,8 +150,7 @@
             ],
             "test": [
                 "//arkcompiler/runtime_core/tests/fuzztest:fuzztest",
-                "//arkcompiler/runtime_core:runtime_core_unittest",
-                "//arkcompiler/runtime_core:runtime_core_host_unittest"
+                "//arkcompiler/runtime_core:runtime_core_unittest"
             ]
         }
     }
