@@ -434,7 +434,9 @@ set -e
 
 if [[ "x$ADD_TOOLCHAIN_REPOS" == "xyes" ]] ; then
     enable_llvm_repo 14
-    enable_test_toolchain_repo
+    if [[ $VERSION_ID == "18.04" ]]; then
+        enable_test_toolchain_repo
+    fi
     unpack_clang_rt 14
 fi
 

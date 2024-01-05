@@ -16,7 +16,6 @@ clang-14=1:14*
 clang-format-14=1:14*
 clang-tidy-14=1:14*
 
-g++-11=*
 ninja-build=1.10.*
 
 lcov=1.14-*                                  # For coverage calculation
