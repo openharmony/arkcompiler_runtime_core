@@ -151,7 +151,7 @@ endif ()
 
 if (PANDA_TARGET_ARM64)
   list(APPEND SOURCES ${PANDA_ROOT}/libpandabase/arch/aarch64/cpu_features.cpp)
-elseif (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM32)
+elseif (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM32 or PANDA_TARGET_RISCV64)
   list(APPEND SOURCES ${PANDA_ROOT}/libpandabase/arch/default/cpu_features.cpp)
 else()
   message(FATAL_ERROR "Arch ${CMAKE_SYSTEM_PROCESSOR} is not supported")

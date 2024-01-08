@@ -73,7 +73,7 @@ class << Options
 
     # Determine target architecture
     if self.arch.nil?
-      arch_str = self.definitions.marshal_dump.keys.grep(/PANDA_TARGET_(AMD64|ARM64|ARM32)/)[0]
+      arch_str = self.definitions.marshal_dump.keys.grep(/PANDA_TARGET_(AMD64|ARM64|ARM32|RISCV64)/)[0]
       self.arch = arch_str.to_s.sub('PANDA_TARGET_','').downcase
     end
     self.arch = self.arch.to_sym
@@ -83,7 +83,10 @@ class << Options
     if self.arch == :arm
       self.arch = :arm32
     end
-    possible_arch = %w[arm64 arm32 x86_64 x86]
+    if self.arch == :riscv64
+      self.arch = :riscv64
+    end
+    possible_arch = %w[arm64 arm32 x86_64 x86 riscv64]
     raise "Wrong arch: #{arch_str}" unless possible_arch.include?(self.arch.to_s)
 
     # Read compiler arch info
@@ -97,18 +100,23 @@ class << Options
   end
 
   def arch_64_bits?
-    self.arch == :x86_64 || self.arch == :arm64
+    self.arch == :x86_64 || self.arch == :arm64 || self.arch == :riscv64
   end
 
   def arm64?
     self.arch == :arm64
   end
 
+  def riscv64?
+    self.arch == :riscv64
+  end
+
   def cpp_arch
     @cpp_arch_map ||= {
       arm32: "Arch::AARCH32",
       arm64: "Arch::AARCH64",
-      x86_64: "Arch::X86_64"
+      x86_64: "Arch::X86_64",
+      riscv64:"Arch::RISCV64"
     }
     @cpp_arch_map[self.arch]
   end

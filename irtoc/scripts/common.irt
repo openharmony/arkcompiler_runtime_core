@@ -15,18 +15,21 @@
 
 $panda_regmap = Regmap.new({
   arm64: {tr: 28},
+  riscv64: {tr: 4},
   arm32: {tr: 10},
   x86_64: {tr: 15}
 })
 
 $arch_regmap = Regmap.new({
   arm64: {fp: 29, sp: 31, lr: 30},
+  riscv64: {fp: 29, sp: 2, lr: 8},
   arm32: {fp: 11, sp: 13, lr: 14, pc: 15},
   x86_64: {fp: 9, sp: 10}
 })
 
 $args_regmap = Regmap.new({
   arm64: {fp: 29, sp: 31, ret: 0, arg0: 0, arg1: 1, arg2: 2, arg3: 3, arg4: 4, arg5: 5, arg6: 6, arg7: 7},
+  riscv64: {fp: 29, sp: 2, ret: 1, arg0: 2, arg1: 3, arg2: 4, arg3: 5},
   arm32: {fp: 11, sp: 13, ret: 0, arg0: 0, arg1: 1, arg2: 2, arg3: 3},
   x86_64: {fp: 9, sp: 10, ret: 0, arg0: 7, arg1: 6, arg2: 2, arg3: 1, arg4: 8, arg5: 5}
 })
@@ -37,12 +40,14 @@ $temps_regmap = Regmap.new(Options.arch_info.temp_regs.each_with_index.map { |x,
 
 $callees_regmap = Regmap.new({
    arm64: (19..28).each_with_index.map { |x, i| ["callee#{i}".to_sym, x] }.to_h,
+   riscv64: (8..17).each_with_index.map { |x, i| ["callee#{i}".to_sym, x] }.to_h,
    arm32: (4..10).each_with_index.map { |x, i| ["callee#{i}".to_sym, x] }.to_h,
    x86_64: (11..15).each_with_index.map { |x, i| ["callee#{i}".to_sym, x] }.to_h,
 })
 
 $callers_regmap = Regmap.new({
   arm64: (0..18).each_with_index.map { |x, i| ["caller#{i}".to_sym, x] }.to_h,
+  riscv64: (6..7).each_with_index.map { |x, i| ["caller#{i}".to_sym, x] }.to_h,
   arm32: (0..3).each_with_index.map { |x, i| ["caller#{i}".to_sym, x] }.to_h,
   x86_64: (0..8).each_with_index.map { |x, i| ["caller#{i}".to_sym, x] }.to_h,
 })

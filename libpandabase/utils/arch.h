@@ -28,6 +28,7 @@ namespace panda {
     D(NONE)          \
     D(AARCH32)       \
     D(AARCH64)       \
+    D(RISCV64)       \
     D(X86)           \
     D(X86_64)
 
@@ -129,7 +130,27 @@ struct ArchTraits<Arch::X86_64> {
     static constexpr size_t DWARF_LR = 0;
     using WordType = uint64_t;
 };
-
+template <>
+struct ArchTraits<Arch::RISCV64> {
+    static constexpr size_t CODE_ALIGNMENT = 16;
+    static constexpr size_t INSTRUCTION_ALIGNMENT = 4;
+    static constexpr size_t INSTRUCTION_MAX_SIZE_BITS = 32;
+    static constexpr size_t POINTER_SIZE = 8;
+    static constexpr bool IS_64_BITS = true;
+    static constexpr size_t THREAD_REG = 28;
+    static constexpr size_t CALLER_REG_MASK = 0xdf3fc00f;
+    static constexpr size_t CALLEE_REG_MASK = 0x20c03ff0;
+    static constexpr size_t CALLER_FP_REG_MASK = 0xff3fc00f;
+    static constexpr size_t CALLEE_FP_REG_MASK = 0x00c03ff0;
+    static constexpr bool SUPPORT_OSR = false;
+    static constexpr bool SUPPORT_DEOPTIMIZATION = false;
+    static constexpr const char *ISA_NAME = "riscv64";
+    static constexpr size_t DWARF_SP = 31;
+    static constexpr size_t DWARF_RIP = 32;
+    static constexpr size_t DWARF_FP = 29;
+    static constexpr size_t DWARF_LR = 30;
+    using WordType = uint64_t;
+};
 template <>
 struct ArchTraits<Arch::NONE> {
     static constexpr size_t CODE_ALIGNMENT = 0;
@@ -163,6 +184,9 @@ struct ArchTraits<Arch::NONE> {
         }                                                                                             \
         if (arch == Arch::AARCH64) {                                                                  \
             return ArchTraits<Arch::AARCH64>::property;                                               \
+        }                                                                                             \
+        if (arch == Arch::RISCV64) {                                                                  \
+            return ArchTraits<Arch::RISCV64>::property;                                               \
         }                                                                                             \
         UNREACHABLE();                                                                                \
     }
@@ -202,6 +226,8 @@ inline constexpr RegMask GetCallerRegsMask(Arch arch, bool is_fp)
             return is_fp ? ArchTraits<Arch::AARCH32>::CALLER_FP_REG_MASK : ArchTraits<Arch::AARCH32>::CALLER_REG_MASK;
         case Arch::AARCH64:
             return is_fp ? ArchTraits<Arch::AARCH64>::CALLER_FP_REG_MASK : ArchTraits<Arch::AARCH64>::CALLER_REG_MASK;
+        case Arch::RISCV64:
+            return is_fp ? ArchTraits<Arch::RISCV64>::CALLER_FP_REG_MASK : ArchTraits<Arch::RISCV64>::CALLER_REG_MASK;
         case Arch::X86:
             return is_fp ? ArchTraits<Arch::X86>::CALLER_FP_REG_MASK : ArchTraits<Arch::X86>::CALLER_REG_MASK;
         case Arch::X86_64:
@@ -218,6 +244,8 @@ inline constexpr RegMask GetCalleeRegsMask(Arch arch, bool is_fp)
             return is_fp ? ArchTraits<Arch::AARCH32>::CALLEE_FP_REG_MASK : ArchTraits<Arch::AARCH32>::CALLEE_REG_MASK;
         case Arch::AARCH64:
             return is_fp ? ArchTraits<Arch::AARCH64>::CALLEE_FP_REG_MASK : ArchTraits<Arch::AARCH64>::CALLEE_REG_MASK;
+        case Arch::RISCV64:
+            return is_fp ? ArchTraits<Arch::RISCV64>::CALLEE_FP_REG_MASK : ArchTraits<Arch::RISCV64>::CALLEE_REG_MASK;
         case Arch::X86:
             return is_fp ? ArchTraits<Arch::X86>::CALLEE_FP_REG_MASK : ArchTraits<Arch::X86>::CALLEE_REG_MASK;
         case Arch::X86_64:
@@ -277,6 +305,8 @@ inline constexpr size_t GetRegsCount(Arch arch)
 static constexpr Arch RUNTIME_ARCH = Arch::AARCH32;
 #elif defined(PANDA_TARGET_ARM64)
 static constexpr Arch RUNTIME_ARCH = Arch::AARCH64;
+#elif defined(PANDA_TARGET_RISCV64)
+static constexpr Arch RUNTIME_ARCH = Arch::RISCV64;
 #elif defined(PANDA_TARGET_X86)
 static constexpr Arch RUNTIME_ARCH = Arch::X86;
 #elif defined(PANDA_TARGET_AMD64)
@@ -291,6 +321,9 @@ std::enable_if_t<is_stringable_v<String>, Arch> GetArchFromString(const String &
     // TODO(msherstennikov): implement using macro if "aarch64", "aarch32" and so on would be a proper choice
     if (str == "arm64") {
         return Arch::AARCH64;
+    }
+    if (str == "riscv64") {
+        return Arch::RISCV64;
     }
     if (str == "arm" || str == "arm32") {
         return Arch::AARCH32;
@@ -309,6 +342,9 @@ std::enable_if_t<is_stringable_v<String>, String> GetStringFromArch(const Arch &
 {
     if (arch == Arch::AARCH64) {
         return "arm64";
+    }
+    if (arch == Arch::RISCV64) {
+        return "riscv64";
     }
     if (arch == Arch::AARCH32) {
         return "arm";
