@@ -394,6 +394,8 @@ spec/generic/issue15380_2.ets
 spec/generic/issue15380_3.ets
 ### End of Generic
 ### Import-export issues
+### cannot create runtime (compound tests not supported)
+spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
 ### Issue 14586
 spec/import_export/03.import_directives/06.type_binding/to_export.ets
 spec/import_export/03.import_directives/06.type_binding/type_binding_01.ets

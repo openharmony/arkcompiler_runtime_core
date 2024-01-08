@@ -19,7 +19,7 @@
  tags: 
  ---*/
 
-import DefaultExportedItemBindedName from '../05.default_import_binding_additional/defaul_to_export'
+import DefaultExportedItemBindedName from '../05.default_import_binding_additional/default_to_export'
  
 function main () {
   let v = new DefaultExportedItemBindedName()
