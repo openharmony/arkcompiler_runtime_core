@@ -1,0 +1,5 @@
+### Issue 15184 begin
+spec/conditional-expression/nullish_expr/loop/undefined-expression-for-loop.ets
+spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-do-while.ets
+spec/rest-params/Issue14187.ets
+### Issue 15184 end
