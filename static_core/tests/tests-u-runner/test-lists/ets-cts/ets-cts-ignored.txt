@@ -2081,18 +2081,7 @@
 # end of es2panda fails
 
 # es2panda fails: panda#13130
-02.lexical_elements/07.keywords/types_0.ets
-02.lexical_elements/07.keywords/types_1.ets
-02.lexical_elements/07.keywords/types_3.ets
-02.lexical_elements/07.keywords/types_4.ets
-02.lexical_elements/07.keywords/types_5.ets
-02.lexical_elements/07.keywords/types_6.ets
-02.lexical_elements/07.keywords/types_7.ets
-02.lexical_elements/07.keywords/types_9.ets
 02.lexical_elements/07.keywords/types_11.ets
-02.lexical_elements/07.keywords/types_n_10.ets
-02.lexical_elements/07.keywords/types_n_2.ets
-02.lexical_elements/07.keywords/types_n_8.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14014
