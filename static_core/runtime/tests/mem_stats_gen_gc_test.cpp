@@ -482,7 +482,7 @@ typename MemStatsGenGCTest::MemOpReport MemStatsGenGCTest::MakeAllocations()
             UNREACHABLE();
     }
 
-    auto spaceCheck = [&](uintptr_t addr) -> bool {
+    auto spaceCheck = [this](uintptr_t addr) -> bool {
         if constexpr (SPACE == TargetSpace::YOUNG) {
             return IsInYoung(addr);
         } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {

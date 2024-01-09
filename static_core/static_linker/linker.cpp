@@ -22,7 +22,7 @@ namespace {
 
 void PrintTime(std::ostream &o, uint64_t micros)
 {
-    auto f = [&](uint64_t d, const auto suffix) {
+    auto f = [&micros, &o](uint64_t d, const auto suffix) {
         if (d == 1 || micros >= d) {
             auto full = micros / d;
             auto rem = double(micros - full * d) / d;
@@ -113,7 +113,7 @@ std::ostream &operator<<(std::ostream &o, const Result::Stats &s)
     o << "total: ";
     PrintTime(o, s.elapsed.total);
     o << "\n";
-    auto printTimeHist = [&](std::string_view name, const uint64_t t) {
+    auto printTimeHist = [&o, &s](std::string_view name, const uint64_t t) {
         constexpr size_t MAX_NAME_SIZE = 10;
         o << std::left << std::setw(MAX_NAME_SIZE) << name << std::internal;
 

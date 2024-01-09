@@ -338,8 +338,8 @@ TEST_F(G1GCFullGCTest, TestIntensiveAlloc)
         [[maybe_unused]] auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
         [[maybe_unused]] size_t maxYSize = g1Alloc->GetYoungAllocMaxSize();
 
-        [[maybe_unused]] auto ySpaceCheck = [&](uintptr_t addr) -> bool { return IsInYoung(addr); };
-        [[maybe_unused]] auto hSpaceCheck = [&](uintptr_t addr) -> bool { return !IsInYoung(addr); };
+        [[maybe_unused]] auto ySpaceCheck = [this](uintptr_t addr) -> bool { return IsInYoung(addr); };
+        [[maybe_unused]] auto hSpaceCheck = [this](uintptr_t addr) -> bool { return !IsInYoung(addr); };
         [[maybe_unused]] auto tFree =
             reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
         const size_t yObjSize = maxYSize / 10;
@@ -413,8 +413,8 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
         [[maybe_unused]] auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
         [[maybe_unused]] size_t maxYSize = g1Alloc->GetYoungAllocMaxSize();
 
-        [[maybe_unused]] auto ySpaceCheck = [&](uintptr_t addr) -> bool { return IsInYoung(addr); };
-        [[maybe_unused]] auto hSpaceCheck = [&](uintptr_t addr) -> bool { return !IsInYoung(addr); };
+        [[maybe_unused]] auto ySpaceCheck = [this](uintptr_t addr) -> bool { return IsInYoung(addr); };
+        [[maybe_unused]] auto hSpaceCheck = [this](uintptr_t addr) -> bool { return !IsInYoung(addr); };
         [[maybe_unused]] auto tFree =
             reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
         const size_t yObjSize = maxYSize / 10;
@@ -475,8 +475,8 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
         [[maybe_unused]] auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
         [[maybe_unused]] size_t maxYSize = g1Alloc->GetYoungAllocMaxSize();
 
-        [[maybe_unused]] auto ySpaceCheck = [&](uintptr_t addr) -> bool { return IsInYoung(addr); };
-        [[maybe_unused]] auto hSpaceCheck = [&](uintptr_t addr) -> bool { return !IsInYoung(addr); };
+        [[maybe_unused]] auto ySpaceCheck = [this](uintptr_t addr) -> bool { return IsInYoung(addr); };
+        [[maybe_unused]] auto hSpaceCheck = [this](uintptr_t addr) -> bool { return !IsInYoung(addr); };
         [[maybe_unused]] auto tFree =
             reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
         const size_t yObjSize = maxYSize / 10;

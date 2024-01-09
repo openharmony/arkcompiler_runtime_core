@@ -126,7 +126,7 @@ bool RunVerifier(const Options &cliOptions)
     {
         ScopedManagedCodeThread managedObjThread(ManagedThread::GetCurrent());
         if (classNames.empty() && methodNames.empty()) {
-            auto handleFile = [&](const panda_file::File &file) {
+            auto handleFile = [&result, &classLinker, &enqueueClass](const panda_file::File &file) {
                 LOG(INFO, VERIFIER) << "Processing file" << file.GetFilename();
                 for (auto id : file.GetClasses()) {
                     panda_file::File::EntityId entityId {id};

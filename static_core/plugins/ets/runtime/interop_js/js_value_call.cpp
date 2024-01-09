@@ -35,7 +35,7 @@ template <typename FClsResolv, typename FStorePrim, typename FStoreRef>
 {
     auto env = ctx->GetJSEnv();
 
-    auto unwrapVal = [&](auto convTag) {
+    auto unwrapVal = [&ctx, &env, &jsVal, &storeRef, &storePrim](auto convTag) {
         using Convertor = typename decltype(convTag)::type;  // convTag acts as lambda template parameter
         using cpptype = typename Convertor::cpptype;         // NOLINT(readability-identifier-naming)
         auto res = Convertor::Unwrap(ctx, env, jsVal);
@@ -119,7 +119,7 @@ template <typename FClsResolv, typename FStore, typename FRead>
 {
     auto env = ctx->GetJSEnv();
 
-    auto wrapPrim = [&](auto convTag) -> bool {
+    auto wrapPrim = [&env, &readVal, &storeRes](auto convTag) -> bool {
         using Convertor = typename decltype(convTag)::type;  // convTag acts as lambda template parameter
         using cpptype = typename Convertor::cpptype;         // NOLINT(readability-identifier-naming)
         napi_value res = Convertor::Wrap(env, readVal(helpers::TypeIdentity<cpptype>()));
@@ -127,7 +127,7 @@ template <typename FClsResolv, typename FStore, typename FRead>
         return res != nullptr;
     };
 
-    auto wrapRef = [&](auto convTag, ObjectHeader *ref) -> bool {
+    auto wrapRef = [&env, &storeRes](auto convTag, ObjectHeader *ref) -> bool {
         using Convertor = typename decltype(convTag)::type;  // convTag acts as lambda template parameter
         using cpptype = typename Convertor::cpptype;         // NOLINT(readability-identifier-naming)
         cpptype value = std::remove_pointer_t<cpptype>::FromEtsObject(EtsObject::FromCoreType(ref));
@@ -209,12 +209,12 @@ napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span
     panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
     pda.EnumerateTypes([](panda_file::Type /* unused */) {});  // preload reftypes span
 
-    auto resolveRefCls = [&](uint32_t idx) {
+    auto resolveRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
         auto klass = classLinker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
         ASSERT(klass != nullptr);
         return klass;
     };
-    auto loadRefCls = [&](uint32_t idx) {
+    auto loadRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
         return classLinker->GetClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
     };
 
@@ -248,9 +248,9 @@ napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span
         for (uint32_t argIdx = 0; argIdx < numArgs; ++argIdx, it.IncrementWithoutCheck()) {
             panda_file::Type type = *it;
             auto jsVal = jsargv[argIdx];
-            auto clsResolver = [&]() { return loadRefCls(refArgIdx++); };
-            auto storePrim = [&](uint64_t val) { etsBoxedArgs[argIdx] = val; };
-            auto storeRef = [&](ObjectHeader *obj) {
+            auto clsResolver = [&loadRefCls, &refArgIdx]() { return loadRefCls(refArgIdx++); };
+            auto storePrim = [&etsBoxedArgs, &argIdx](uint64_t val) { etsBoxedArgs[argIdx] = val; };
+            auto storeRef = [&coro, &etsBoxedArgs, &argIdx](ObjectHeader *obj) {
                 uintptr_t addr = VMHandle<ObjectHeader>(coro, obj).GetAddress();
                 etsBoxedArgs[argIdx] = reinterpret_cast<ObjectHeader **>(addr);
             };
@@ -292,9 +292,9 @@ napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span
     napi_value jsRes;
     {
         auto type = method->GetReturnType();
-        auto clsResolver = [&]() { return resolveRefCls(0); };
-        auto storeRes = [&](napi_value res) { jsRes = res; };
-        auto readVal = [&](auto typeTag) { return etsRes.GetAs<typename decltype(typeTag)::type>(); };
+        auto clsResolver = [&resolveRefCls]() { return resolveRefCls(0); };
+        auto storeRes = [&sRes](napi_value res) { jsRes = res; };
+        auto readVal = [&etsRes](auto typeTag) { return etsRes.GetAs<typename decltype(typeTag)::type>(); };
         if (UNLIKELY(!ConvertEtsVal(ctx, clsResolver, storeRes, type, readVal))) {
             ASSERT(ctx->SanityJSExceptionPending());
             return nullptr;
@@ -388,12 +388,12 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallImpl(FSetupArgs &setupArgs, 
     panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
     pda.EnumerateTypes([](panda_file::Type /* unused */) {});  // preload reftypes span
 
-    auto resolveRefCls = [&](uint32_t idx) {
+    auto resolveRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
         auto klass = classLinker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
         ASSERT(klass != nullptr);
         return klass;
     };
-    [[maybe_unused]] auto loadRefCls = [&](uint32_t idx) {
+    [[maybe_unused]] auto loadRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
         return classLinker->GetClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
     };
 
@@ -429,9 +429,9 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallImpl(FSetupArgs &setupArgs, 
     auto jsargs = ctx->GetTempArgs<napi_value>(numArgs);
 
     for (uint32_t argIdx = 0; argIdx < numArgs; ++argIdx, it.IncrementWithoutCheck()) {
-        auto clsResolver = [&]() { return resolveRefCls(refArgIdx++); };
-        auto storeRes = [&](napi_value res) { jsargs[argIdx] = res; };
-        auto readVal = [&](auto typeTag) { return argReader.Read<typename decltype(typeTag)::type>(); };
+        auto clsResolver = [&resolveRefCls, &refArgIdx]() { return resolveRefCls(refArgIdx++); };
+        auto storeRes = [&jsargs, &argIdx](napi_value res) { jsargs[argIdx] = res; };
+        auto readVal = [&argReader](auto typeTag) { return argReader.Read<typename decltype(typeTag)::type>(); };
         if (UNLIKELY(!ConvertEtsVal(ctx, clsResolver, storeRes, *it, readVal))) {
             ctx->ForwardJSException(coro);
             return 0;
@@ -470,9 +470,9 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallImpl(FSetupArgs &setupArgs, 
         etsRet = Value(res.value()->GetCoreType());
     } else {
         panda_file::Type type = method->GetReturnType();
-        auto clsResolver = [&]() { return loadRefCls(0); };
-        auto storePrim = [&](uint64_t val) { etsRet = Value(val); };
-        auto storeRef = [&](ObjectHeader *obj) { etsRet = Value(obj); };
+        auto clsResolver = [&loadRefCls]() { return loadRefCls(0); };
+        auto storePrim = [&etsRet](uint64_t val) { etsRet = Value(val); };
+        auto storeRef = [&etsRet](ObjectHeader *obj) { etsRet = Value(obj); };
         if (UNLIKELY(!ConvertNapiVal(ctx, clsResolver, storePrim, storeRef, type, jsRet))) {
             if (NapiIsExceptionPending(env)) {
                 ctx->ForwardJSException(coro);
@@ -492,7 +492,7 @@ static inline std::optional<std::pair<napi_value, napi_value>> CompilerResolveQu
     ASSERT(qnameStr->IsMUtf8());
     auto qname = std::string_view(utf::Mutf8AsCString(qnameStr->GetDataMUtf8()), qnameStr->GetMUtf8Length());
 
-    auto resolveName = [&](const std::string &name) -> bool {
+    auto resolveName = [&jsThis, &jsVal, &env](const std::string &name) -> bool {
         jsThis = jsVal;
         INTEROP_LOG(DEBUG) << "JSRuntimeJSCall: resolve name: " << name;
         napi_status rc = napi_get_named_property(env, jsVal, name.c_str(), &jsVal);

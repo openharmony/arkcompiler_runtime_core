@@ -387,7 +387,7 @@ void *CompilerResolveQualifiedJSCall(void *val, EtsString *qnameStr)
     auto jsVal = ToLocal(val);
     napi_value jsThis = jsVal;
     auto qname = std::string_view(utf::Mutf8AsCString(qnameStr->GetDataMUtf8()), qnameStr->GetMUtf8Length());
-    auto resolveName = [&](const std::string &name) -> bool {
+    auto resolveName = [&jsThis, &jsVal, &env, &ctx, &coro](const std::string &name) -> bool {
         jsThis = jsVal;
         napi_status rc = napi_get_named_property(env, jsVal, name.c_str(), &jsVal);
         if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {

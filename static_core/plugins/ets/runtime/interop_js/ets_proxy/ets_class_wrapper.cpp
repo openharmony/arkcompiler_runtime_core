@@ -419,7 +419,7 @@ static void SimulateJSInheritance(napi_env env, napi_value jsCtor, napi_value js
     NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), "Object", &builtinObject));
     NAPI_CHECK_FATAL(napi_get_named_property(env, builtinObject, "setPrototypeOf", &setprotoFn));
 
-    auto setproto = [&](napi_value obj, napi_value proto) {
+    auto setproto = [&env, &builtinObject, &setprotoFn](napi_value obj, napi_value proto) {
         std::array args = {obj, proto};
         NAPI_CHECK_FATAL(NapiCallFunction(env, builtinObject, setprotoFn, args.size(), args.data(), nullptr));
     };

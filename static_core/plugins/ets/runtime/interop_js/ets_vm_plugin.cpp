@@ -254,7 +254,7 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
         }
     }
 
-    auto addOpts = [&](base_options::Options *baseOptions, panda::RuntimeOptions *runtimeOptions) {
+    auto addOpts = [&argStrings](base_options::Options *baseOptions, panda::RuntimeOptions *runtimeOptions) {
         panda::PandArgParser paParser;
         baseOptions->AddOptions(&paParser);
         runtimeOptions->AddOptions(&paParser);

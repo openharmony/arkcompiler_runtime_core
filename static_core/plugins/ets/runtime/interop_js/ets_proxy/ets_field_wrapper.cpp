@@ -219,7 +219,7 @@ static napi_property_descriptor DoMakeNapiProperty(EtsFieldWrapper *wrapper)
     // NOTE(vpukhov): apply the same rule to instance fields?
     ASSERT(!IS_STATIC || wrapper->GetOwner()->GetEtsClass()->GetRuntimeClass() == field->GetClass());
 
-    auto setupAccessors = [&](auto accessorTag) {
+    auto setupAccessors = [&prop](auto accessorTag) {
         using Accessor = typename decltype(accessorTag)::type;
         prop.getter = EtsFieldGetter<Accessor, IS_STATIC>;
         prop.setter = EtsFieldSetter<Accessor, IS_STATIC>;

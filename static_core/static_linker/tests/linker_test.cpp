@@ -67,7 +67,7 @@ std::pair<int, std::string> ExecPanda(const std::string &file)
 
     std::stringstream strBuf;
     auto old = std::cout.rdbuf(strBuf.rdbuf());
-    auto reset = [&](auto *cout) { cout->rdbuf(old); };
+    auto reset = [&old](auto *cout) { cout->rdbuf(old); };
     auto guard = std::unique_ptr<std::ostream, decltype(reset)>(&std::cout, reset);
 
     auto res = runtime->ExecutePandaFile(file, "_GLOBAL::main", {});
@@ -202,7 +202,8 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
 
     std::optional<std::vector<char>> expectedFile;
 
-    auto performTest = [&](size_t iteration) {
+    auto performTest = [&out, &pathPrefix, &files, &perms, &conf, &isGood, &expected, &expectedFile,
+                        &gold](size_t iteration) {
         out = pathPrefix + "linked.";
         files.clear();
 

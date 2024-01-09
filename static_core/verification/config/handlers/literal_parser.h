@@ -35,7 +35,7 @@ const auto &LiteralParser(Handler &handler)
 
     using P = typename Parser::template Next<Literal>;
 
-    static const auto LITERAL_NAME_HANDLER = [&](Action a, typename P::Ctx &c, auto from, auto to) {
+    static const auto LITERAL_NAME_HANDLER = [&handler](Action a, typename P::Ctx &c, auto from, auto to) {
         if (a == Action::PARSED) {
             return handler(c, PandaString {from, to});
         }

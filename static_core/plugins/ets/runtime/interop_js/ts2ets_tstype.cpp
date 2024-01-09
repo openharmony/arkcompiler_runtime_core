@@ -145,7 +145,7 @@ void TSTypeNamespace::BindMethods()
             ep = reinterpret_cast<void *>(TSTypeCallStaticBridge);
         } else {
             auto methodName = method.GetName();
-            auto hasPrefix = [&](std::string_view const &pref) {
+            auto hasPrefix = [&methodName](std::string_view const &pref) {
                 return strncmp(pref.data(), utf::Mutf8AsCString(methodName.data), pref.size()) == 0;
             };
             if (hasPrefix(TSTYPE_PREFIX_GETTER)) {
@@ -233,7 +233,7 @@ ALWAYS_INLINE inline uint64_t TSTypeCall(Method *method, uint8_t *args, uint8_t 
     panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
     auto classLinker = coro->GetPandaVM()->GetRuntime()->GetClassLinker();
 
-    auto resolveRefCls = [&](uint32_t idx) -> Class * {
+    auto resolveRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) -> Class * {
         auto klass = classLinker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
         ASSERT(klass != nullptr);
         return klass;
@@ -378,7 +378,7 @@ static void *GetTSTypeGetterBridge(Method *method)
             panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
             auto classLinker = coro->GetPandaVM()->GetRuntime()->GetClassLinker();
 
-            auto resolveRefCls = [&](uint32_t idx) {
+            auto resolveRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
                 auto klass = classLinker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
                 ASSERT(klass != nullptr);
                 return klass;
