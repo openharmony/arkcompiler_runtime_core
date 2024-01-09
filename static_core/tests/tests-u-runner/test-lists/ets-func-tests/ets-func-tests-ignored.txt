@@ -537,14 +537,6 @@ spec/annotations/annotation_@Watch.ets
 spec/annotations/annotation_@Watch_2.ets
 ### End of Issue 14040
 ### End of Annotations
-### Issue 14738 begin
-spec/bigint/bigint-arithmetic-comparison-18.ets
-spec/bigint/bigint-arithmetic-comparison-19.ets
-### Issue 14738 end
-### Issue 14476 begin
-spec/bigint/bigint-arithmetic-dec-2.ets
-spec/bigint/bigint-arithmetic-inc-2.ets
-### Issue 14476 end
 ### Issue I8MB96 begin
 spec/bigint/bigint-arithmetic-mul-3-operands.ets
 spec/bigint/bigint-arithmetic-mul-4-operands.ets
