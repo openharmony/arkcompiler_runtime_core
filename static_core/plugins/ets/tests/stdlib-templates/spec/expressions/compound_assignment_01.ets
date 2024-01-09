@@ -13,25 +13,26 @@
  * limitations under the License.
  */
 
+{% for item in compound_assignment_01 %}
+
 /*---
-desc: >-
-    03.08.11 Union types
-name: union_14719.ets
-tags: [compile-only]
+desc: {function: {{.item.type1}}_{{.item.op_name}}_{{.item.type2}}}
+tags: []
 ---*/
 
-class Node {
-  protected onChildInserted: ((node: Node) => void) | undefined;
-  readonly kind: int;
+type EasingCurve = (value: {{.item.type1}}) => {{.item.type1}}
 
-  constructor() {}
-
-  check() {
-    assert this.onChildInserted == undefined
+function foo(count: {{.item.type2}}): EasingCurve {
+  return (value: {{.item.type1}}) => {
+    value {{.item.operation}}= count
+    return value
   }
 }
 
 function main(): void {
-  let node: Node = new Node()
-  node.check()
+  let curve: EasingCurve = foo({{.item.value2}} as {{.item.type2}})
+  let value = curve({{.item.value1}} as {{.item.type1}})
+  assert value {{.item.casting}} == {{.item.result}}: "value = " + value
 }
+
+{%- endfor %}

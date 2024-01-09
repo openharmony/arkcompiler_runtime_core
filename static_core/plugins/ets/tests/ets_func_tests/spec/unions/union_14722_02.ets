@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +17,19 @@
 desc: >-
     03.08.11 Union types
 name: union_14722_02.ets
-tags: [compile-only]
+tags: []
 ---*/
 
 const flag = false
 
 class A {
-    private static readonly map = flag ? new Map<int, Set<Object>>() : undefined;
+  private static readonly map = flag ? new Map<int, Set<Object>>() : undefined;
+  check() {
+    assert A.map == undefined
+  }
 }
 
 function main(): void {
+    let a: A = new A()
+    a.check()
 }
