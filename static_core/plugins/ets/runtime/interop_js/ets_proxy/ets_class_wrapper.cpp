@@ -448,9 +448,8 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     auto [fields, methods] = _this->CalculateProperties(overloads);
     auto jsProps = _this->BuildJSProperties({fields.data(), fields.size()}, {methods.data(), methods.size()});
 
-    // NOTE(vpukhov): restore no-public-fields check when escompat adopt accessors
+    // NOTE(vpukhov): fatal no-public-fields check when escompat adopt accessors
     if (_this->HasBuiltin() && !fields.empty()) {
-        // ctx->Fatal(std::string("built-in class ") + etsClass->GetDescriptor() + " has field properties");
         INTEROP_LOG(ERROR) << "built-in class " << etsClass->GetDescriptor() << " has field properties";
     }
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
@@ -464,7 +463,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
 
     auto base = _this->baseWrapper_;
     napi_value fakeSuper = _this->HasBuiltin() ? _this->GetBuiltin(env)
-                                                : (base->HasBuiltin() ? base->GetBuiltin(env) : base->GetJsCtor(env));
+                                               : (base->HasBuiltin() ? base->GetBuiltin(env) : base->GetJsCtor(env));
 
     SimulateJSInheritance(env, jsCtor, fakeSuper);
     NAPI_CHECK_FATAL(NapiObjectSeal(env, jsCtor));

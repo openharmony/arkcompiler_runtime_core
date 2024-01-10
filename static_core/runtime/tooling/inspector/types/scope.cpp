@@ -25,8 +25,10 @@ static const char *GetTypeString(Scope::Type type)
             return "global";
         case Scope::Type::LOCAL:
             return "local";
+        default:
+            UNREACHABLE();
+            break;
     }
-    UNREACHABLE();
 }
 
 Scope::Scope(Scope::Type type, RemoteObject object, std::optional<std::string> name)

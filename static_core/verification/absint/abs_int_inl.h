@@ -3527,7 +3527,6 @@ public:
             SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual, WARNING);
             return false;
         }
-        // if (method != nullptr && method->ptr == nullptr) {
         Sync();
         std::array<int, NUM_ARGS> regs {};
         if (accPos == 0) {
@@ -3578,7 +3577,6 @@ public:
             SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual, WARNING);
             return false;
         }
-        // if (method != nullptr && method->ptr == nullptr) {
         Sync();
         std::array<int, NUM_ARGS> regs {};
         auto regIdx = 0;

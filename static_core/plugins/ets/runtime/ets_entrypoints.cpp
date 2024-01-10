@@ -85,16 +85,12 @@ void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHe
 
 extern "C" void CreateLaunchStaticCoroutineEntrypoint(Method *method, ObjectHeader *obj, uint64_t *args)
 {
-    // BEGIN_ENTRYPOINT();
-
     LaunchCoroutine(method, obj, args, nullptr);
 }
 
 extern "C" void CreateLaunchVirtualCoroutineEntrypoint(Method *method, ObjectHeader *obj, uint64_t *args,
                                                        ObjectHeader *thisObj)
 {
-    // BEGIN_ENTRYPOINT();
-
     LaunchCoroutine(method, obj, args, thisObj);
 }
 

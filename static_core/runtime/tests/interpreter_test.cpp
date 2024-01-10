@@ -1037,6 +1037,10 @@ static void TestArray()
                 emitter.FldarrWide(1);
                 break;
             }
+            default: {
+                UNREACHABLE();
+                break;
+            }
         }
     } else {
         emitter.StarrObj(1, 2);

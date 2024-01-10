@@ -132,6 +132,9 @@ extern "C" uint32_t EtsNapiCalcStackArgsSpaceSize(Method *method, bool isCritica
             case TypeId::REFERENCE:
                 counter.Count<ObjectHeader *>();
                 break;
+            default:
+                UNREACHABLE();
+                break;
         }
     }
 

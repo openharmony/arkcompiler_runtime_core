@@ -136,6 +136,7 @@ panda::JsonArrayBuilder EtsArrayToJSON(panda::ets::EtsArray *arrPtr)
             case panda::panda_file::Type::TypeId::TAGGED:
             case panda::panda_file::Type::TypeId::INVALID:
             case panda::panda_file::Type::TypeId::VOID:
+            default:
                 UNREACHABLE();
                 break;
         }

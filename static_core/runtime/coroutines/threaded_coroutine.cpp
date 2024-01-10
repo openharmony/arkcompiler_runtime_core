@@ -95,8 +95,7 @@ bool ThreadedCoroutineContext::RetrieveStackInfo(void *&stackAddr, size_t &stack
     auto *co = ctx->GetCoroutine();
     Coroutine::SetCurrent(co);
     os::thread::SetThreadName(os::thread::GetNativeHandle(), co->GetName().c_str());
-    // NOTE(konstanting, #I67QXC): find a workaround to access this method
-    // co->UpdateId(os::thread::GetCurrentThreadId());
+    // NOTE(konstanting, #I67QXC): find a workaround to update ThreadId here
     co->NativeCodeBegin();
     {
         ctx->InitializationDone();

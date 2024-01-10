@@ -55,6 +55,7 @@ static TypedValue GetArrayElementValueStatic(const coretypes::Array &array, size
         case panda_file::Type::TypeId::REFERENCE:
             return TypedValue::Reference(array.GetObject(offset));
         case panda_file::Type::TypeId::TAGGED:
+        default:
             UNREACHABLE();
     }
     UNREACHABLE();
@@ -93,6 +94,7 @@ static TypedValue GetFieldValueStatic(T object, const Field &field)
         case panda_file::Type::TypeId::REFERENCE:
             return TypedValue::Reference(object->GetFieldObject(field.GetOffset()));
         case panda_file::Type::TypeId::TAGGED:
+        default:
             UNREACHABLE();
     }
     UNREACHABLE();

@@ -208,8 +208,10 @@ static TypedValue CreateTypedValueFromReg(uint64_t reg, panda_file::Type::TypeId
             return TypedValue::Reference(reinterpret_cast<ObjectHeader *>(reg));
         case panda_file::Type::TypeId::TAGGED:
             return TypedValue::Tagged(coretypes::TaggedValue(static_cast<coretypes::TaggedType>(reg)));
+        default:
+            UNREACHABLE();
+            break;
     }
-    UNREACHABLE();
 }
 // NOLINTEND(readability-magic-numbers)
 
@@ -267,6 +269,9 @@ std::map<std::string, TypedValue> DebugInfoCache::GetLocals(const PtFrame &frame
                     break;
                 case PtFrame::RegisterKind::TAGGED:
                     type = panda_file::Type::TypeId::TAGGED;
+                    break;
+                default:
+                    UNREACHABLE();
                     break;
             }
         }
