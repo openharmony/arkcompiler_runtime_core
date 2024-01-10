@@ -47,9 +47,9 @@ inline uintptr_t HandleStorage<T>::NewHandle(T value)
 }
 
 template <typename T>
-inline void HandleStorage<T>::FreeHandles(uint32_t begin_idx)
+inline void HandleStorage<T>::FreeHandles(uint32_t beginIdx)
 {
-    lastIndex_ = begin_idx;
+    lastIndex_ = beginIdx;
 #ifndef NDEBUG
     ZapFreedHandles();
 #endif

@@ -66,7 +66,7 @@ private:
 
     uintptr_t NewHandle(T value = 0);
 
-    void FreeHandles(uint32_t begin_idx);
+    void FreeHandles(uint32_t beginIdx);
 
     uintptr_t GetNodeAddress(uint32_t index) const;
 

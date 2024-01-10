@@ -73,7 +73,7 @@ VerificationContext PrepareVerificationContext(TypeSystem *typeSystem, Job const
     LOG_VERIFIER_DEBUG_METHOD_VERIFICATION(method->GetFullName());
 
     /*
-    1. build initial reg_context for the method entry
+    1. build initial regContext for the method entry
     */
     RegContext &regCtx = verifCtx.ExecCtx().CurrentRegContext();
     regCtx.Clear();
@@ -161,7 +161,7 @@ VerificationStatus VerifyEntryPoints(VerificationContext &verifCtx, ExecContext 
 bool ComputeRegContext(Method const *method, TryBlock const *tryBlock, VerificationContext &verifCtx,
                        RegContext *regContext)
 {
-    auto &cflow_info = verifCtx.CflowInfo();
+    auto &cflowInfo = verifCtx.CflowInfo();
     auto &execCtx = verifCtx.ExecCtx();
     auto *typeSystem = verifCtx.GetTypeSystem();
     auto start = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(method->GetInstructions()) +
@@ -174,7 +174,7 @@ bool ComputeRegContext(Method const *method, TryBlock const *tryBlock, Verificat
 
     bool first = true;
     execCtx.ForContextsOnCheckPointsInRange(start, end, [&](const uint8_t *pc, const RegContext &ctx) {
-        if (cflow_info.IsFlagSet(pc, CflowMethodInfo::EXCEPTION_SOURCE)) {
+        if (cflowInfo.IsFlagSet(pc, CflowMethodInfo::EXCEPTION_SOURCE)) {
             LOG_VERIFIER_DEBUG_REGISTERS("+", ctx.DumpRegs(typeSystem));
             if (first) {
                 first = false;
@@ -263,15 +263,15 @@ VerificationStatus VerifyMethod(VerificationContext &verifCtx)
     }
 
     // Need to have the try blocks sorted!
-    verifCtx.GetMethod()->EnumerateTryBlocks([&](TryBlock &try_block) {
+    verifCtx.GetMethod()->EnumerateTryBlocks([&](TryBlock &tryBlock) {
         bool tryBlockCanThrow = true;
-        RegContext reg_context;
-        tryBlockCanThrow = ComputeRegContext(verifCtx.GetMethod(), &try_block, verifCtx, &reg_context);
+        RegContext regContext;
+        tryBlockCanThrow = ComputeRegContext(verifCtx.GetMethod(), &tryBlock, verifCtx, &regContext);
         if (!tryBlockCanThrow) {
             // catch block is unreachable
         } else {
-            try_block.EnumerateCatchBlocks([&](CatchBlock const &catchBlock) {
-                worstSoFar = std::max(worstSoFar, VerifyExcHandler(&try_block, &catchBlock, &verifCtx, &reg_context));
+            tryBlock.EnumerateCatchBlocks([&](CatchBlock const &catchBlock) {
+                worstSoFar = std::max(worstSoFar, VerifyExcHandler(&tryBlock, &catchBlock, &verifCtx, &regContext));
                 return (worstSoFar != VerificationStatus::ERROR);
             });
         }

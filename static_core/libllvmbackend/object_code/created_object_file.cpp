@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/macros.h"
 #include "created_object_file.h"
 
 #include <llvm/Support/Debug.h>

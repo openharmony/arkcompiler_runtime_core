@@ -27,45 +27,45 @@
 
 namespace panda::verifier {
 
-static VerificationStatus CheckCode(Method const *method, CflowMethodInfo const *cflow_info)
+static VerificationStatus CheckCode(Method const *method, CflowMethodInfo const *cflowInfo)
 {
     uint8_t const *methodStart = method->GetInstructions();
-    uint8_t const *method_end =
+    uint8_t const *methodEnd =
         methodStart + method->GetCodeSize();  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic
-    auto handlerStarts = cflow_info->GetHandlerStartAddresses();
-    size_t nandler_index = (*handlerStarts)[0] == methodStart ? 0 : -1;
+    auto handlerStarts = cflowInfo->GetHandlerStartAddresses();
+    size_t nandlerIndex = (*handlerStarts)[0] == methodStart ? 0 : -1;
     return IterateOverInstructions(
-        methodStart, methodStart, method_end,
+        methodStart, methodStart, methodEnd,
         [&](auto type, uint8_t const *pc, size_t size, [[maybe_unused]] bool exceptionSource,
             auto target) -> std::optional<VerificationStatus> {
             if (target != nullptr) {  // a jump
-                if (!cflow_info->IsAddrValid(target)) {
+                if (!cflowInfo->IsAddrValid(target)) {
                     LOG_VERIFIER_CFLOW_INVALID_JUMP_OUTSIDE_METHOD_BODY(
                         method->GetFullName(), OffsetAsHexStr(methodStart, target), OffsetAsHexStr(methodStart, pc));
                     return VerificationStatus::ERROR;
                 }
-                if (!cflow_info->IsFlagSet(target, CflowMethodInfo::INSTRUCTION)) {
+                if (!cflowInfo->IsFlagSet(target, CflowMethodInfo::INSTRUCTION)) {
                     LOG_VERIFIER_CFLOW_INVALID_JUMP_INTO_MIDDLE_OF_INSTRUCTION(
                         method->GetFullName(), OffsetAsHexStr(methodStart, target), OffsetAsHexStr(methodStart, pc));
                     return VerificationStatus::ERROR;
                 }
-                if (cflow_info->IsFlagSet(target, CflowMethodInfo::EXCEPTION_HANDLER)) {
-                    if (!cflow_info->IsFlagSet(pc, CflowMethodInfo::EXCEPTION_HANDLER)) {
+                if (cflowInfo->IsFlagSet(target, CflowMethodInfo::EXCEPTION_HANDLER)) {
+                    if (!cflowInfo->IsFlagSet(pc, CflowMethodInfo::EXCEPTION_HANDLER)) {
                         // - jumps into body of exception handler from code is prohibited by Panda compiler.
                         LOG_VERIFIER_CFLOW_INVALID_JUMP_INTO_EXC_HANDLER(
                             method->GetFullName(), (OffsetAsHexStr(method->GetInstructions(), pc)));
                         return VerificationStatus::ERROR;
                     }
                     // Jump from handler to handler; need to make sure it's the same one.
-                    if (target < (*handlerStarts)[nandler_index] || target >= (*handlerStarts)[nandler_index + 1]) {
+                    if (target < (*handlerStarts)[nandlerIndex] || target >= (*handlerStarts)[nandlerIndex + 1]) {
                         LOG_VERIFIER_CFLOW_INVALID_JUMP_INTO_EXC_HANDLER(
                             method->GetFullName(), (OffsetAsHexStr(method->GetInstructions(), pc)));
                         return VerificationStatus::ERROR;
                     }
                 }
             }
-            uint8_t const *next_inst_pc = &pc[size];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic
-            if (next_inst_pc == method_end) {
+            uint8_t const *nextInstPc = &pc[size];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic
+            if (nextInstPc == methodEnd) {
                 if (type != InstructionType::THROW && type != InstructionType::JUMP &&
                     type != InstructionType::RETURN) {
                     LOG_VERIFIER_CFLOW_INVALID_LAST_INSTRUCTION(method->GetFullName());
@@ -73,7 +73,7 @@ static VerificationStatus CheckCode(Method const *method, CflowMethodInfo const 
                 }
                 return VerificationStatus::OK;
             }
-            if (next_inst_pc == (*handlerStarts)[nandler_index + 1]) {
+            if (nextInstPc == (*handlerStarts)[nandlerIndex + 1]) {
                 if (type != InstructionType::JUMP && type != InstructionType::RETURN &&
                     type != InstructionType::THROW) {
                     // - fallthrough on beginning of exception handler is prohibited by Panda compiler
@@ -81,7 +81,7 @@ static VerificationStatus CheckCode(Method const *method, CflowMethodInfo const 
                                                                   (OffsetAsHexStr(method->GetInstructions(), pc)));
                     return VerificationStatus::ERROR;
                 }
-                nandler_index++;
+                nandlerIndex++;
             }
             return std::nullopt;
         });

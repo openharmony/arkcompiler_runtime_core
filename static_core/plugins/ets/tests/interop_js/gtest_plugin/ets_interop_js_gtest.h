@@ -21,6 +21,8 @@
 #include <gtest/gtest.h>
 #include <node_api.h>
 
+#include "libpandabase/macros.h"
+
 namespace panda::ets::interop::js::testing {
 
 class EtsInteropTest : public ::testing::Test {

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/macros.h"
 #include "target_machine_builder.h"
 
 #include <llvm/MC/TargetRegistry.h>

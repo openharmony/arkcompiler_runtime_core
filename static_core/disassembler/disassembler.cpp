@@ -662,14 +662,14 @@ LabelTable Disassembler::GetExceptions(pandasm::Function *method, panda_file::Fi
 
     panda_file::CodeDataAccessor codeAccessor(*file_, codeId);
 
-    const auto bc_ins = BytecodeInstruction(codeAccessor.GetInstructions());
-    const auto bc_ins_last = bc_ins.JumpTo(codeAccessor.GetCodeSize());
+    const auto bcIns = BytecodeInstruction(codeAccessor.GetInstructions());
+    const auto bcInsLast = bcIns.JumpTo(codeAccessor.GetCodeSize());
 
     size_t tryIdx = 0;
     LabelTable labelTable {};
     codeAccessor.EnumerateTryBlocks([&](panda_file::CodeDataAccessor::TryBlock &tryBlock) {
         pandasm::Function::CatchBlock catchBlockPa {};
-        if (!LocateTryBlock(bc_ins, bc_ins_last, tryBlock, &catchBlockPa, &labelTable, tryIdx)) {
+        if (!LocateTryBlock(bcIns, bcInsLast, tryBlock, &catchBlockPa, &labelTable, tryIdx)) {
             return false;
         }
         size_t catchIdx = 0;
@@ -681,7 +681,7 @@ LabelTable Disassembler::GetExceptions(pandasm::Function *method, panda_file::Fi
                 const auto classId = file_->ResolveClassIndex(method_id, classIdx);
                 catchBlockPa.exceptionRecord = GetFullRecordName(classId);
             }
-            if (!LocateCatchBlock(bc_ins, bc_ins_last, catchBlock, &catchBlockPa, &labelTable, tryIdx, catchIdx)) {
+            if (!LocateCatchBlock(bcIns, bcInsLast, catchBlock, &catchBlockPa, &labelTable, tryIdx, catchIdx)) {
                 return false;
             }
 

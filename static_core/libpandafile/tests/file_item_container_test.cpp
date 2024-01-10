@@ -357,9 +357,9 @@ TEST(ItemContainer, TestMethods)
     MethodItem *methodItem = classItem->AddMethod(methodName, protoItem, ACC_PUBLIC | ACC_STATIC, params);
 
     std::vector<uint8_t> instructions {1, 2, 3, 4};
-    auto *code_item = container.CreateItem<CodeItem>(0, 2, instructions);
+    auto *codeItem = container.CreateItem<CodeItem>(0, 2, instructions);
 
-    methodItem->SetCode(code_item);
+    methodItem->SetCode(codeItem);
 
     MemoryWriter memWriter;
 
@@ -385,7 +385,7 @@ TEST(ItemContainer, TestMethods)
 
         auto codeId = dataAccessor.GetCodeId();
         EXPECT_TRUE(codeId.has_value());
-        EXPECT_EQ(codeId.value().GetOffset(), code_item->GetOffset());
+        EXPECT_EQ(codeId.value().GetOffset(), codeItem->GetOffset());
 
         CodeDataAccessor codeDataAccessor(*pandaFile, codeId.value());
         EXPECT_EQ(codeDataAccessor.GetNumVregs(), 0U);
@@ -395,7 +395,7 @@ TEST(ItemContainer, TestMethods)
                     ::testing::ElementsAreArray(codeDataAccessor.GetInstructions(), codeDataAccessor.GetCodeSize()));
 
         EXPECT_EQ(codeDataAccessor.GetTriesSize(), 0U);
-        EXPECT_EQ(codeDataAccessor.GetSize(), code_item->GetSize());
+        EXPECT_EQ(codeDataAccessor.GetSize(), codeItem->GetSize());
 
         codeDataAccessor.EnumerateTryBlocks([](const CodeDataAccessor::TryBlock &) {
             EXPECT_TRUE(false);
@@ -429,7 +429,7 @@ void TestProtos(size_t n)
     StringItem *methodName = container.GetOrCreateStringItem("foo");
 
     std::vector<Type::TypeId> types {Type::TypeId::VOID, Type::TypeId::I32};
-    std::vector<ClassItem *> ref_types;
+    std::vector<ClassItem *> refTypes;
 
     PrimitiveTypeItem *retType = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params;
@@ -439,7 +439,7 @@ void TestProtos(size_t n)
     for (size_t i = 0; i < ELEM_PER16 * 2 - 2; i++) {
         params.emplace_back(container.GetOrCreateClassItem("B"));
         types.push_back(Type::TypeId::REFERENCE);
-        ref_types.push_back(container.GetOrCreateClassItem("B"));
+        refTypes.push_back(container.GetOrCreateClassItem("B"));
         params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F64));
         types.push_back(Type::TypeId::F64);
     }
@@ -492,10 +492,10 @@ void TestProtos(size_t n)
 
         EXPECT_EQ(protoDataAccessor.GetReturnType().GetEncoding(), Type(types[0]).GetEncoding());
 
-        EXPECT_EQ(nref, ref_types.size());
+        EXPECT_EQ(nref, refTypes.size());
 
         for (size_t i = 0; i < nref; i++) {
-            EXPECT_EQ(protoDataAccessor.GetReferenceType(0).GetOffset(), ref_types[i]->GetOffset());
+            EXPECT_EQ(protoDataAccessor.GetReferenceType(0).GetOffset(), refTypes[i]->GetOffset());
         }
 
         size_t size = ((num + ELEM_PER16) / ELEM_PER16 + nref) * sizeof(uint16_t);
@@ -530,9 +530,9 @@ TEST(ItemContainer, TestDebugInfo)
     ProtoItem *protoItem = container.GetOrCreateProtoItem(retType, params);
     MethodItem *methodItem = classItem->AddMethod(methodName, protoItem, ACC_PUBLIC | ACC_STATIC, params);
 
-    StringItem *source_file_item = container.GetOrCreateStringItem("<source>");
-    StringItem *source_code_item = container.GetOrCreateStringItem("let a = 1;");
-    StringItem *param_string_item = container.GetOrCreateStringItem("a0");
+    StringItem *sourceFileItem = container.GetOrCreateStringItem("<source>");
+    StringItem *sourceCodeItem = container.GetOrCreateStringItem("let a = 1;");
+    StringItem *paramStringItem = container.GetOrCreateStringItem("a0");
 
     LineNumberProgramItem *lineNumberProgramItem = container.CreateLineNumberProgramItem();
     auto *debugInfoItem = container.CreateItem<DebugInfoItem>(lineNumberProgramItem);
@@ -552,18 +552,18 @@ TEST(ItemContainer, TestDebugInfo)
         static_cast<uint8_t>(LineNumberProgramItem::Opcode::END_SEQUENCE),
     };
 
-    auto *constant_pool = debugInfoItem->GetConstantPool();
+    auto *constantPool = debugInfoItem->GetConstantPool();
     debugInfoItem->SetLineNumber(5);
-    lineNumberProgramItem->EmitSetSourceCode(constant_pool, source_code_item);
-    lineNumberProgramItem->EmitSetFile(constant_pool, source_file_item);
+    lineNumberProgramItem->EmitSetSourceCode(constantPool, sourceCodeItem);
+    lineNumberProgramItem->EmitSetFile(constantPool, sourceFileItem);
     lineNumberProgramItem->EmitPrologEnd();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    lineNumberProgramItem->EmitAdvancePc(constant_pool, 10);
-    lineNumberProgramItem->EmitAdvanceLine(constant_pool, -5);
+    lineNumberProgramItem->EmitAdvancePc(constantPool, 10);
+    lineNumberProgramItem->EmitAdvanceLine(constantPool, -5);
     lineNumberProgramItem->EmitEpilogBegin();
     lineNumberProgramItem->EmitEnd();
 
-    debugInfoItem->AddParameter(param_string_item);
+    debugInfoItem->AddParameter(paramStringItem);
 
     methodItem->SetDebugInfo(debugInfoItem);
 
@@ -594,14 +594,14 @@ TEST(ItemContainer, TestDebugInfo)
         EXPECT_EQ(dda.GetLineStart(), 5U);
         EXPECT_EQ(dda.GetNumParams(), params.size());
 
-        dda.EnumerateParameters([&](File::EntityId id) { EXPECT_EQ(id.GetOffset(), param_string_item->GetOffset()); });
+        dda.EnumerateParameters([&](File::EntityId id) { EXPECT_EQ(id.GetOffset(), paramStringItem->GetOffset()); });
 
         auto cp = dda.GetConstantPool();
-        EXPECT_EQ(cp.size(), constant_pool->size());
-        EXPECT_THAT(*constant_pool, ::testing::ElementsAreArray(cp.data(), cp.Size()));
+        EXPECT_EQ(cp.size(), constantPool->size());
+        EXPECT_THAT(*constantPool, ::testing::ElementsAreArray(cp.data(), cp.Size()));
 
-        EXPECT_EQ(helpers::ReadULeb128(&cp), source_code_item->GetOffset());
-        EXPECT_EQ(helpers::ReadULeb128(&cp), source_file_item->GetOffset());
+        EXPECT_EQ(helpers::ReadULeb128(&cp), sourceCodeItem->GetOffset());
+        EXPECT_EQ(helpers::ReadULeb128(&cp), sourceFileItem->GetOffset());
         EXPECT_EQ(helpers::ReadULeb128(&cp), 10U);
         EXPECT_EQ(helpers::ReadLeb128(&cp), -5);
 

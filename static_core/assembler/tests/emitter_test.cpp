@@ -772,7 +772,7 @@ TEST(emittertests, function_overloading_1)
     size_t numMethods = 0;
 
     std::unordered_map<panda_file::File::EntityId, panda_file::Type> idToArgType {};
-    panda_file::File::EntityId id_f {};
+    panda_file::File::EntityId idF {};
 
     cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
         ++numMethods;
@@ -780,7 +780,7 @@ TEST(emittertests, function_overloading_1)
         panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
 
         if (pda.GetArgType(0) == panda_file::Type(panda_file::Type::TypeId::I32)) {
-            id_f = mda.GetMethodId();
+            idF = mda.GetMethodId();
 
             return;
         }
@@ -788,7 +788,7 @@ TEST(emittertests, function_overloading_1)
         idToArgType.emplace(mda.GetMethodId(), pda.GetArgType(0));
     });
 
-    panda_file::MethodDataAccessor mdaF(*pf, id_f);
+    panda_file::MethodDataAccessor mdaF(*pf, idF);
     panda_file::CodeDataAccessor cdaF(*pf, mdaF.GetCodeId().value());
 
     const auto insSz = cdaF.GetCodeSize();
@@ -799,7 +799,7 @@ TEST(emittertests, function_overloading_1)
 
     while (bcIns.GetAddress() != bcInsLast.GetAddress()) {
         const auto argMethodIdx = bcIns.GetId().AsIndex();
-        const auto argMethodId = pf->ResolveMethodIndex(id_f, argMethodIdx);
+        const auto argMethodId = pf->ResolveMethodIndex(idF, argMethodIdx);
 
         panda_file::MethodDataAccessor methodAccessor(*pf, argMethodId);
         panda_file::ProtoDataAccessor protoAccessor(*pf, methodAccessor.GetProtoId());

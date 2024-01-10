@@ -100,9 +100,9 @@ public:
     NO_MOVE_SEMANTIC(EventsMemory);
 
 % EventsData.events.each do |event|
-    void <%= event.name.camelize %>(<%= event.fields.map {|f| f.arg_type + ' ' + f.name }.join(', ') %>) override {
+    void <%= event.name.camelize %>(<%= event.fields.map {|f| f.arg_type + ' ' + f.name.camelizeback }.join(', ') %>) override {
         os::memory::LockHolder lock(GetLock());
-        auto event = new EventRecord(<%= event.name.camelize %>Event{<%= event.fields.map(&:name).join(', ') %>});
+        auto event = new EventRecord(<%= event.name.camelize %>Event{<%= event.fields.map {|f| f.name.camelizeback }.join(', ') %>});
         last_ = eventList_.InsertAfter(last_, *event);
     }
 % end
@@ -166,9 +166,9 @@ public:
     NO_MOVE_SEMANTIC(EventsCsv);
 
 % EventsData.events.each do |event|
-    void <%= event.name.camelize %>(<%= event.fields.map {|f| f.arg_type + ' ' + f.name }.join(', ') %>) override {
+    void <%= event.name.camelize %>(<%= event.fields.map {|f| f.arg_type + ' ' + f.name.camelizeback }.join(', ') %>) override {
         os::memory::LockHolder lock(GetLock());
-        file_ << "<%= event.name.camelize %>," << <%= event.fields.map(&:name).join(" << ',' << ") %> << std::endl;
+        file_ << "<%= event.name.camelize %>," << <%= event.fields.map{|f| f.name.camelizeback }.join(" << ',' << ") %> << std::endl;
     }
 % end
 
@@ -188,8 +188,8 @@ public:
     NO_MOVE_SEMANTIC(EventsLog);
 
 % EventsData.events.each do |event|
-    void <%= event.name.camelize %>(<%= event.fields.map {|f| f.arg_type + ' ' + f.name }.join(', ') %>) override {
-        LOG(INFO, EVENTS) << "<%= event.name.camelize %>," << <%= event.fields.map(&:name).join(" << ',' << ") %>;
+    void <%= event.name.camelize %>(<%= event.fields.map {|f| f.arg_type + ' ' + f.name.camelizeback }.join(', ') %>) override {
+        LOG(INFO, EVENTS) << "<%= event.name.camelize %>," << <%= event.fields.map {|f| f.name.camelizeback }.join(" << ',' << ") %>;
     }
 % end
 };

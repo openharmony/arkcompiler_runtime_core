@@ -18,6 +18,7 @@
 #include <llvm/ADT/STLExtras.h>
 #include <llvm/IR/Instructions.h>
 
+#include "libpandabase/macros.h"
 #include "llvm_ark_interface.h"
 
 #define DEBUG_TYPE "expand-atomics"

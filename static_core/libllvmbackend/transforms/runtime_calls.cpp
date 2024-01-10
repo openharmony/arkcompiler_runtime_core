@@ -18,6 +18,8 @@
 
 #include <llvm/IR/IRBuilder.h>
 
+#include "libpandabase/macros.h"
+
 namespace panda::llvmbackend::runtime_calls {
 
 llvm::Value *GetAddressToTLS(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface, uintptr_t tlsOffset)
