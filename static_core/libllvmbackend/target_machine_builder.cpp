@@ -21,7 +21,7 @@ namespace panda::llvmbackend {
 
 llvm::Expected<std::unique_ptr<llvm::TargetMachine>> TargetMachineBuilder::Build()
 {
-    assert(triple_.getArch() != llvm::Triple::UnknownArch && "Triple's arch must be set");
+    ASSERT(triple_.getArch() != llvm::Triple::UnknownArch && "Triple's arch must be set");
     std::string error;
     auto target = llvm::TargetRegistry::lookupTarget("", triple_, error);
     if (!error.empty()) {
@@ -29,12 +29,12 @@ llvm::Expected<std::unique_ptr<llvm::TargetMachine>> TargetMachineBuilder::Build
                                        llvm::StringRef {"Could not lookupTarget by triple = '"} + triple_.str() +
                                            "', error = '" + error + "'");
     }
-    assert(target != nullptr);
+    ASSERT(target != nullptr);
 
     llvm::TargetOptions targetOptions {};
     auto machine = target->createTargetMachine(triple_.getTriple(), cpu_, features_, targetOptions, llvm::Reloc::PIC_,
                                                llvm::CodeModel::Small, optlevel_);
-    assert(machine != nullptr);
+    ASSERT(machine != nullptr);
     return std::unique_ptr<llvm::TargetMachine>(machine);
 }
 

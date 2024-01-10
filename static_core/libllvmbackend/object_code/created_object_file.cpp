@@ -61,7 +61,7 @@ bool CreatedObjectFile::HasSection(const std::string &name) const
 std::vector<uint8_t> SectionReference::ContentToVector()
 {
     std::vector<uint8_t> vector;
-    assert(GetSize() != 0);
+    ASSERT(GetSize() != 0);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::copy(GetMemory(), GetMemory() + GetSize(), std::back_inserter(vector));
     return vector;
@@ -70,7 +70,7 @@ std::vector<uint8_t> SectionReference::ContentToVector()
 SectionReference CreatedObjectFile::GetSection(const std::string &name) const
 {
     LLVM_DEBUG(llvm::dbgs() << "Getting section = '" << name << "'\n");
-    assert(sectionIndex_.find(name) != sectionIndex_.end() && "Attempt to access an unknown section");
+    ASSERT(sectionIndex_.find(name) != sectionIndex_.end() && "Attempt to access an unknown section");
     const auto &section = sectionIndex_.at(name);
     auto contents = cantFail(section.getContents());
     auto memory = reinterpret_cast<const uint8_t *>(contents.data());
@@ -110,7 +110,7 @@ void CreatedObjectFile::WriteTo(std::string_view output) const
 }
 size_t CreatedObjectFile::Size() const
 {
-    assert(objectFile_ != nullptr && "Attempt to get size of empty CreatedObjectFile");
+    ASSERT(objectFile_ != nullptr && "Attempt to get size of empty CreatedObjectFile");
     return objectFile_->getData().size();
 }
 

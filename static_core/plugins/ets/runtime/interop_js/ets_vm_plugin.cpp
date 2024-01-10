@@ -33,7 +33,7 @@ static napi_value Version(napi_env env, [[maybe_unused]] napi_callback_info info
 
     napi_value result;
     [[maybe_unused]] napi_status status = napi_create_string_utf8(env, MSG.data(), MSG.size(), &result);
-    assert(status == napi_ok);
+    ASSERT(status == napi_ok);
 
     return result;
 }
@@ -97,14 +97,14 @@ static napi_value Call(napi_env env, napi_callback_info info)
     size_t argc = 0;
     [[maybe_unused]] napi_status status;
     status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    assert(status == napi_ok);
+    ASSERT(status == napi_ok);
 
     auto coro = EtsCoroutine::GetCurrent();
     auto argv = InteropCtx::Current(coro)->GetTempArgs<napi_value>(argc);
     napi_value thisArg {};
     void *data = nullptr;
     status = napi_get_cb_info(env, info, &argc, argv->data(), &thisArg, &data);
-    assert(status == napi_ok);
+    ASSERT(status == napi_ok);
 
     return CallEtsFunctionImpl(env, *argv);
 }
@@ -114,14 +114,14 @@ static napi_value CallWithCopy(napi_env env, napi_callback_info info)
     size_t argc = 0;
     [[maybe_unused]] napi_status status;
     status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    assert(status == napi_ok);
+    ASSERT(status == napi_ok);
 
     auto coro = EtsCoroutine::GetCurrent();
     auto argv = InteropCtx::Current(coro)->GetTempArgs<napi_value>(argc);
     napi_value thisArg {};
     void *data = nullptr;
     status = napi_get_cb_info(env, info, &argc, argv->data(), &thisArg, &data);
-    assert(status == napi_ok);
+    ASSERT(status == napi_ok);
 
     return InvokeEtsMethodImpl(env, argv->data(), argc, false);
 }
@@ -131,17 +131,17 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     [[maybe_unused]] napi_status status;
     napi_value napiFalse;
     status = napi_get_boolean(env, false, &napiFalse);
-    assert(status == napi_ok);
+    ASSERT(status == napi_ok);
 
     size_t argc = 0;
     status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    assert(status == napi_ok);
+    ASSERT(status == napi_ok);
 
     std::vector<napi_value> argv(argc);
     napi_value thisArg {};
     void *data = nullptr;
     status = napi_get_cb_info(env, info, &argc, argv.data(), &thisArg, &data);
-    assert(status == napi_ok);
+    ASSERT(status == napi_ok);
 
     if (argc != 4) {
         LogError("CreateEtsRuntime: exactly 4 arguments are required");
@@ -187,7 +187,7 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     }
     napi_value napiRes;
     status = napi_get_boolean(env, res, &napiRes);
-    assert(status == napi_ok);
+    ASSERT(status == napi_ok);
     return napiRes;
 }
 

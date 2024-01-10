@@ -55,7 +55,7 @@ llvm::PreservedAnalyses ExpandAtomics::run(llvm::Function &function,
 
 bool ExpandAtomics::InsertAddrSpaceCast(llvm::Instruction *atomicInstruction)
 {
-    assert(atomicInstruction->isAtomic());
+    ASSERT(atomicInstruction->isAtomic());
     if (llvm::isa<llvm::FenceInst>(atomicInstruction)) {
         // Fences do not have pointer operands
         return false;
@@ -65,7 +65,7 @@ bool ExpandAtomics::InsertAddrSpaceCast(llvm::Instruction *atomicInstruction)
         pointerIndex = 1U;
     }
     auto pointer = atomicInstruction->getOperand(pointerIndex);
-    assert(pointer->getType()->isPointerTy());
+    ASSERT(pointer->getType()->isPointerTy());
     if (pointer->getType()->getPointerAddressSpace() != LLVMArkInterface::GC_ADDR_SPACE) {
         return false;
     }

@@ -37,7 +37,7 @@ public:
     {
         bool hasPendingExc;
         [[maybe_unused]] napi_status status = napi_is_exception_pending(GetJsEnv(), &hasPendingExc);
-        assert(status == napi_ok && !hasPendingExc);
+        ASSERT(status == napi_ok && !hasPendingExc);
 
         interopJsTestPath_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
         // This object is used to save global js names
@@ -100,7 +100,7 @@ private:
         [[maybe_unused]] napi_status status;
         napi_value jsScript;
         status = napi_create_string_utf8(env, script.c_str(), script.length(), &jsScript);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
 
         napi_value jsResult;
         status = napi_run_script(env, jsScript, &jsResult);
@@ -108,10 +108,10 @@ private:
             std::cerr << "EtsInteropTest fired an exception" << std::endl;
             napi_value exc;
             status = napi_get_and_clear_last_exception(env, &exc);
-            assert(status == napi_ok);
+            ASSERT(status == napi_ok);
             napi_value jsStr;
             status = napi_coerce_to_string(env, exc, &jsStr);
-            assert(status == napi_ok);
+            ASSERT(status == napi_ok);
             std::cerr << "Exception string: " << GetString(env, jsStr) << std::endl;
             return false;
         }
@@ -142,7 +142,7 @@ private:
         [[maybe_unused]] napi_status status;
         napi_value jsRetValue {};
         status = napi_get_named_property(env, GetJsGtestObject(env), "ret", &jsRetValue);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
 
         // Get globalThis.gtest.ret
         return GetRetValue<T>(env, jsRetValue);
@@ -152,12 +152,12 @@ private:
     {
         size_t length;
         [[maybe_unused]] napi_status status = napi_get_value_string_utf8(env, jsStr, nullptr, 0, &length);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
         std::string v(length, '\0');
         size_t copied;
         status = napi_get_value_string_utf8(env, jsStr, v.data(), length + 1, &copied);
-        assert(status == napi_ok);
-        assert(length == copied);
+        ASSERT(status == napi_ok);
+        ASSERT(length == copied);
         return v;
     }
 
@@ -167,27 +167,27 @@ private:
         if constexpr (std::is_same_v<T, double>) {
             double v;
             [[maybe_unused]] napi_status status = napi_get_value_double(env, jsValue, &v);
-            assert(status == napi_ok);
+            ASSERT(status == napi_ok);
             return v;
         } else if constexpr (std::is_same_v<T, int32_t>) {
             int32_t v;
             [[maybe_unused]] napi_status status = napi_get_value_int32(env, jsValue, &v);
-            assert(status == napi_ok);
+            ASSERT(status == napi_ok);
             return v;
         } else if constexpr (std::is_same_v<T, uint32_t>) {
             uint32_t v;
             [[maybe_unused]] napi_status status = napi_get_value_uint32(env, jsValue, &v);
-            assert(status == napi_ok);
+            ASSERT(status == napi_ok);
             return v;
         } else if constexpr (std::is_same_v<T, int64_t>) {
             int64_t v;
             [[maybe_unused]] napi_status status = napi_get_value_int64(env, jsValue, &v);
-            assert(status == napi_ok);
+            ASSERT(status == napi_ok);
             return v;
         } else if constexpr (std::is_same_v<T, bool>) {
             bool v;
             [[maybe_unused]] napi_status status = napi_get_value_bool(env, jsValue, &v);
-            assert(status == napi_ok);
+            ASSERT(status == napi_ok);
             return v;
         } else if constexpr (std::is_same_v<T, std::string>) {
             return GetString(env, jsValue);
@@ -205,7 +205,7 @@ private:
     {
         napi_value v;
         [[maybe_unused]] napi_status status = napi_create_double(env, arg, &v);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
         return v;
     }
 
@@ -213,7 +213,7 @@ private:
     {
         napi_value v;
         [[maybe_unused]] napi_status status = napi_create_int32(env, arg, &v);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
         return v;
     }
 
@@ -221,7 +221,7 @@ private:
     {
         napi_value v;
         [[maybe_unused]] napi_status status = napi_create_uint32(env, arg, &v);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
         return v;
     }
 
@@ -229,7 +229,7 @@ private:
     {
         napi_value v;
         [[maybe_unused]] napi_status status = napi_create_int64(env, arg, &v);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
         return v;
     }
 
@@ -237,7 +237,7 @@ private:
     {
         napi_value v;
         [[maybe_unused]] napi_status status = napi_create_string_utf8(env, arg.data(), arg.length(), &v);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
         return v;
     }
 
@@ -253,12 +253,12 @@ private:
         // Get globalThis
         napi_value jsGlobalObject;
         status = napi_get_global(env, &jsGlobalObject);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
 
         // Get globalThis.gtest
         napi_value jsGtestObject;
         status = napi_get_named_property(env, jsGlobalObject, "gtest", &jsGtestObject);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
 
         return jsGtestObject;
     }
@@ -274,22 +274,22 @@ private:
         // Set globalThis.gtest.functionName
         napi_value jsFunctionName;
         status = napi_create_string_utf8(env, fnName.data(), fnName.length(), &jsFunctionName);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
         status = napi_set_named_property(env, jsGtestObject, "functionName", jsFunctionName);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
 
         // Set globalThis.gtest.args
         std::initializer_list<napi_value> napiArgs = {MakeJsArg(env, args)...};
         napi_value jsArgs;
         status = napi_create_array_with_length(env, napiArgs.size(), &jsArgs);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
         uint32_t i = 0;
         for (auto arg : napiArgs) {
             status = napi_set_element(env, jsArgs, i++, arg);
-            assert(status == napi_ok);
+            ASSERT(status == napi_ok);
         }
         status = napi_set_named_property(env, jsGtestObject, "args", jsArgs);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
 
         // Call ETS method via JS
         auto res = RunJsScript(R"(
@@ -302,7 +302,7 @@ private:
         // Get globalThis.gtest.ret
         napi_value jsRetValue {};
         status = napi_get_named_property(env, jsGtestObject, "ret", &jsRetValue);
-        assert(status == napi_ok);
+        ASSERT(status == napi_ok);
         return GetRetValue<R>(env, jsRetValue);
     }
 

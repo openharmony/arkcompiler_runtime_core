@@ -25,8 +25,8 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
     auto beg = text.find(header);
     auto end = text.find('}', beg);
 
-    assert(beg != std::string::npos);
-    assert(end != std::string::npos);
+    ASSERT(beg != std::string::npos);
+    ASSERT(end != std::string::npos);
 
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }

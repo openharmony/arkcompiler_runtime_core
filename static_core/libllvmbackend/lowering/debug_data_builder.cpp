@@ -38,7 +38,7 @@ DebugDataBuilder::DebugDataBuilder(llvm::Module *module, const std::string &file
 
 void DebugDataBuilder::BeginSubprogram(Function *function, const std::string &filename, uint32_t line)
 {
-    assert(builder_ != nullptr);
+    ASSERT(builder_ != nullptr);
     auto file = builder_->createFile(filename, "/");
     auto flags = DISubprogram::SPFlagDefinition | DISubprogram::SPFlagOptimized;
     auto type = builder_->createSubroutineType(builder_->getOrCreateTypeArray(llvm::None));
@@ -49,7 +49,7 @@ void DebugDataBuilder::BeginSubprogram(Function *function, const std::string &fi
 
 void DebugDataBuilder::EndSubprogram(Function *function)
 {
-    assert(builder_ != nullptr);
+    ASSERT(builder_ != nullptr);
     builder_->finalizeSubprogram(function->getSubprogram());
 }
 

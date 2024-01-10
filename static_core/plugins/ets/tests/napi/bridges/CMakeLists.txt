@@ -16,7 +16,7 @@ file(MAKE_DIRECTORY ${ETS_NAPI_LIB_TESTS})
 
 panda_add_library(EtsNapiTests SHARED ${CMAKE_CURRENT_SOURCE_DIR}/lib/EtsNapiTests.cpp)
 
-panda_target_include_directories(EtsNapiTests PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
+panda_target_include_directories(EtsNapiTests PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi ${PANDA_ROOT})
 panda_target_compile_options(EtsNapiTests PRIVATE -Wno-attributes)
 
 set_target_properties(EtsNapiTests PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${ETS_NAPI_LIB_TESTS})

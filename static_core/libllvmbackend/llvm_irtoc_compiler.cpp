@@ -230,7 +230,7 @@ size_t LLVMIrtocCompiler::GetObjectFileSize()
 
 CompiledCode LLVMIrtocCompiler::GetCompiledCode(std::string_view functionName)
 {
-    assert(objectFile_ != nullptr);
+    ASSERT(objectFile_ != nullptr);
     auto reference = objectFile_->GetSectionByFunctionName(std::string {functionName});
     CompiledCode code {};
     code.size = reference.GetSize();

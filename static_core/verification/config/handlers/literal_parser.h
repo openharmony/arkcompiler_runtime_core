@@ -35,15 +35,15 @@ const auto &LiteralParser(Handler &handler)
 
     using P = typename Parser::template Next<Literal>;
 
-    static const auto LiteralNameHandler = [&handler](Action a, typename P::Ctx &c, auto from, auto to) {
+    static const auto literalNameHandler = [&handler](Action a, typename P::Ctx &c, auto from, auto to) {
         if (a == Action::PARSED) {
             return handler(c, PandaString {from, to});
         }
         return true;
     };
 
-    static const auto LiteralName = P::OfCharset(Charset {"abcdefghijklmnopqrstuvwxyz_-"}) |= LiteralNameHandler;
-    return LiteralName;
+    static const auto literalName = P::OfCharset(Charset {"abcdefghijklmnopqrstuvwxyz_-"}) |= literalNameHandler;
+    return literalName;
 }
 
 inline const auto &LiteralsParser()

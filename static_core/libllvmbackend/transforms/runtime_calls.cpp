@@ -52,7 +52,7 @@ llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Val
 
 llvm::Value *GetThreadRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface)
 {
-    assert(!arkInterface->IsIrtocMode());
+    ASSERT(!arkInterface->IsIrtocMode());
     auto func = builder->GetInsertBlock()->getParent();
     auto &ctx = func->getContext();
     auto regMd = llvm::MDNode::get(ctx, {llvm::MDString::get(ctx, arkInterface->GetThreadRegister())});
@@ -64,7 +64,7 @@ llvm::Value *GetThreadRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *ark
 
 llvm::Value *GetRealFrameRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface)
 {
-    assert(!arkInterface->IsIrtocMode());
+    ASSERT(!arkInterface->IsIrtocMode());
     auto func = builder->GetInsertBlock()->getParent();
     auto &ctx = func->getContext();
     auto regMd = llvm::MDNode::get(ctx, {llvm::MDString::get(ctx, arkInterface->GetFramePointerRegister())});
