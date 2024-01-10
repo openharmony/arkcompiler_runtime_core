@@ -125,9 +125,9 @@ export final class Set<K> implements ReadonlySet<K> {
      * Constructs a Set with same elements
      * @param iterable collection of elements to add to a set
      */
-    constructor(iterable: Array<K>) {
+    constructor(iterable: Iterable<K>) {
         this()
-        iteratorForEach<K>(iterable.values(), (x: K): void => {
+        iteratorForEach<K>(iterable.iterator(), (x: K): void => {
             this.add(x)
         })
     }
@@ -291,7 +291,7 @@ export final class Set<K> implements ReadonlySet<K> {
      * @returns an iterable of [v,v] pairs for every value `v` in the set.
      */
     /* override */ entries(): IterableIterator<Entry<K, K>> {
-        return this.mappedIterator<Object>((x: ListNode): Object => {
+        return this.mappedIterator<Entry<K, K>>((x: ListNode): NullishType => {
             const v = x.val as K;
             return new Entry<K, K>(v, v)
         }) as IterableIterator<Entry<K, K>>

@@ -1001,7 +1001,7 @@
     method_return_type: String,
     expected_test_data_item_type: String,
     expected_data_type: "String[]",
-    expected_test_data: '["<bold></bold>", "<bold>Click me</bold>"]',
+    expected_test_data: '["<b></b>", "<b>Click me</b>"]',
     verify_test_result_function: compareStringTrivial
   }
 

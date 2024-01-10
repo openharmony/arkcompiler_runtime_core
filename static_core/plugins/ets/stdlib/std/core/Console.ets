@@ -216,9 +216,12 @@ export final class Console {
      *
      * @param i value to print
      */
-    public log(i: Object): void {
-        let s: String = i.toString()
-        this.println(s)
+    public log(...vals: NullishType[]): void {
+        const arr = new Array<NullishType>()
+        for (let i = 0; i < vals.length; i++) {
+            arr.push(vals[i])
+        }
+        this.println(arr.join(' '))
     }
 
     /**

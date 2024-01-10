@@ -324,7 +324,7 @@ EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *langTag
     return ToLowerCase(thisStr, locale);
 }
 
-ets_short StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsString *langTag)
+ets_double StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsString *langTag)
 {
     ASSERT(thisStr != nullptr && cmpStr != nullptr && langTag != nullptr);
 
@@ -385,10 +385,17 @@ ets_int StdCoreStringLastIndexOfString(EtsString *thisStr, EtsString *patternStr
     return thisStr->GetCoreType()->LastIndexOf(patternStr->GetCoreType(), std::max(fromIndex, 0));
 }
 
-ets_char StdCoreStringCodePointToChar(ets_int codePoint)
+ets_int StdCoreStringCodePointToChar(ets_int codePoint)
 {
     icu::UnicodeString uniStr((UChar32)codePoint);
-    return static_cast<ets_char>(uniStr.charAt(0));
+    uint32_t ret = bit_cast<uint16_t>(uniStr.charAt(0));
+    // if codepoint contains a surrogate pair
+    // encode it into int with higher bits being second char
+    if (uniStr.length() > 1) {
+        constexpr uint32_t BITS_IN_CHAR = 16;
+        ret |= static_cast<uint32_t>(bit_cast<uint16_t>(uniStr.charAt(1))) << BITS_IN_CHAR;
+    }
+    return bit_cast<ets_int>(ret);
 }
 
 int32_t StdCoreStringHashCode(EtsString *thisStr)

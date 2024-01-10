@@ -224,6 +224,17 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @param fn to apply
      */
+    forEach(fn: (v: V, k: K, map: Map<K, V>) => void): void {
+        iteratorForEach<Entry<K, V>>(this.entries(), (x: Entry<K, V>): void => {
+            fn(x.value, x.key, this)
+        })
+    }
+
+    /**
+     * Applies a function over all elements of the Map
+     *
+     * @param fn to apply
+     */
     override forEach(fn: (v: V, k: K) => void): void {
         iteratorForEach<Entry<K, V>>(this.entries(), (x: Entry<K, V>): void => {
             fn(x.value, x.key)

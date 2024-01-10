@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <type_traits>
-#include "macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
@@ -23,7 +21,6 @@
 #include "runtime/mem/local_object_handle.h"
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
-#include "types/ets_object.h"
 
 namespace ark::ets::interop::js {
 
@@ -215,6 +212,7 @@ private:
             {utf::CStringAsMutf8("isArray"), "Lstd/core/Object;:Z"},
             {utf::CStringAsMutf8("flatMap"), "Lstd/core/Function2;:Lescompat/Array;"},
             {utf::CStringAsMutf8("toLocaleString"), ":Lstd/core/String;"},
+            {utf::CStringAsMutf8("from"), "Lstd/core/Object;:Lescompat/Array;"},
         };
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
 

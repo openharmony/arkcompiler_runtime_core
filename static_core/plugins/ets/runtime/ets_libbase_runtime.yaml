@@ -644,7 +644,7 @@ intrinsics:
     method_name: localeCompare
     static: false
     signature:
-      ret: i16
+      ret: f64
       args: [ std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::StdCoreStringLocaleCmp
     clear_flags: [ ]
@@ -822,7 +822,7 @@ intrinsics:
     method_name: codePointToChar
     static: true
     signature:
-      ret: u16
+      ret: i32
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCodePointToChar
     clear_flags: [ ]

@@ -30,7 +30,7 @@ class ArrayKeysIterator<T> implements IterableIterator<number> {
         return new IteratorResult<number>(this.idx++ as number)
     }
 
-    override iterator(): IterableIterator<number> {
+    override iterator(): Iterator<number> {
         return this
     }
 }
@@ -44,13 +44,13 @@ class ArrayValuesIterator<T> implements IterableIterator<T> {
     }
 
     override next(): IteratorResult<T> {
-        if (this.idx >= this.parent.length) {
+        if (this.idx >= this.parent.actualLength) {
             return new IteratorResult<T>()
         }
-        return new IteratorResult<T>(this.parent.at(this.idx++) as T)
+        return new IteratorResult<T>(this.parent.$_get(this.idx++))
     }
 
-    override iterator(): IterableIterator<T> {
+    override iterator(): Iterator<T> {
         return this
     }
 }
@@ -71,7 +71,7 @@ function normalizeIndex(idx: int, len: int): int {
 class FromBuffer {}
 const FROM_BUFFER = new FromBuffer()
 
-function indexWithDefault(n: Number | undefined, def: int): int {
+function asIntOrDefault(n: Number | undefined, def: int): int {
     if (__runtimeIsSameReference(n, undefined)) {
         return def
     }
@@ -105,9 +105,18 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
     private buffer: NullishType[]
     internal actualLength: int
 
-    // TODO(kprokopenko): override
+    // NOTE(kprokopenko): override
     get length(): number {
         return this.actualLength as number
+    }
+
+    // NOTE(kprokopenko): rename
+    set lengthRename(newLen: number): void {
+        const len = newLen as int
+        if (len < 0 || len > this.actualLength) {
+            throw new RangeError("can't change length to bigger or negative")
+        }
+        this.actualLength = len
     }
 
     public /* override */ $_get(index: number): T {
@@ -153,9 +162,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         this.actualLength = buf.length
     }
 
-    // TODO(kprokopenko): remove when #14731 gets fixed and remove `first` from next overload
-    public constructor() {
-        this.buffer = new NullishType[4]
+    internal constructor() {
+        this.buffer = new NullishType[4];
         this.actualLength = 0
     }
 
@@ -168,7 +176,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         this.buffer = new NullishType[d.length + 1];
         this.actualLength = d.length + 1
 
-        this.$_set_unsafe(0, first);
+        this.buffer[0] = first
 
         for (let k: int = 0; k < d.length; k++) {
             this.$_set_unsafe(k + 1, d[k]);
@@ -301,8 +309,9 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: number, start: number, end: Number | undefined): Array<T> {
-        return this.copyWithin(target as int, start as int, indexWithDefault(end, this.actualLength));
+    public copyWithin(target: number, start: number, end?: Number): /* this */ Array<T> { // NOTE(kprokopenko) blocked by #15372
+        /* return */ this.copyWithin(target as int, start as int, asIntOrDefault(end, this.actualLength));
+        return this;
     }
 
     /**
@@ -316,7 +325,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: int, start: int, end: int): Array<T> {
+    public copyWithin(target: int, start: int, end: int): this {
         target = normalizeIndex(target, this.actualLength)
         start = normalizeIndex(start, this.actualLength)
         end = normalizeIndex(end, this.actualLength)
@@ -351,8 +360,9 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: int, start: int): Array<T> {
-        return this.copyWithin(target, start, this.actualLength);
+    public copyWithin(target: int, start: int): this {
+        /* return */ this.copyWithin(target, start, this.actualLength);
+        return this;
     }
 
     /**
@@ -362,8 +372,9 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: int): Array<T> {
-        return this.copyWithin(target, 0, this.actualLength);
+    public copyWithin(target: int): this {
+        /* return */ this.copyWithin(target, 0, this.actualLength);
+        return this;
     }
 
     /**
@@ -377,8 +388,9 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public fill(value: T, start: Number | undefined, end: Number | undefined): Array<T> {
-        return this.fill(value, indexWithDefault(start, 0), indexWithDefault(end, this.actualLength));
+    public fill(value: T, start?: Number, end?: Number): /* this */ Array<T> { // NOTE(kprokopenko) blocked by #15372
+        /* return */ this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.actualLength));
+        return this;
     }
 
     /**
@@ -392,7 +404,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public fill(value: T, start: int, end: int): Array<T> {
+    public fill(value: T, start: int, end: int): this {
         start = normalizeIndex(start, this.actualLength);
         end = normalizeIndex(end, this.actualLength)
 
@@ -508,7 +520,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
      */
-    public /* override */ join(sep: String | undefined): string {
+    public /* override */ join(sep?: String): string {
         const sepReal = __runtimeEquals(sep, undefined) ? "," : sep!
         let sb = new StringBuilder();
         for (let i: int = 0; i < this.actualLength; i++) {
@@ -699,7 +711,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @note Mutating method
      */
-    public reverse(): Array<T> {
+    public reverse(): this {
         for (let i = 0; i < this.actualLength / 2; i++) {
             const tmp = this.$_get_unsafe(i)
             this.$_set_unsafe(i, this.$_get_unsafe(this.actualLength - 1 - i))
@@ -708,7 +720,6 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return this;
     }
 
-/* // TODO(kprokopenko): blocked by #14713
     /**
      * Creates a new `Array` instance from `Object[]` primitive array.
      *
@@ -738,7 +749,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
             assert len >= 0
             const ret = new NullishType[len as int]
             for (let i = 0; i < len; i++) {
-                ret[i] = fn(arrLike.$_get(i) as T, i);
+                ret[i] = fn(arrLike.$_get(i) as T, i) as NullishType;
             }
             return new Array<U>(FROM_BUFFER, ret)
         }
@@ -751,7 +762,6 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         })
         return ret;
     }
-*/
 
     /**
      * Constructs a new `Array` instance and populates it with
@@ -811,9 +821,9 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
-    public /* override */ slice(start: Number | undefined, end: Number | undefined): Array<T> {
+    public /* override */ slice(start?: Number, end?: Number): Array<T> {
         const len: int = this.actualLength;
-        return this.slice(indexWithDefault(start, 0), indexWithDefault(end, len))
+        return this.slice(asIntOrDefault(start, 0), asIntOrDefault(end, len))
     }
 
     /**
@@ -886,7 +896,6 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return res;
     }
 
-    // NOTE: can't distinguish `=> number` and `=> int`
     /**
      * Reorders elements of `this` using comparator function.
      *
@@ -896,7 +905,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * NOTE clarify UTF-16 or UTF-8
      */
-    public sort(comparator: (a: T, b: T) => number): Array<T> {
+    public sort(comparator: (a: T, b: T) => number): this {
         sort(this.buffer, 0, this.actualLength, (l: NullishType, r: NullishType): boolean => {
             return comparator(l as T, r as T) < 0;
         });
@@ -912,7 +921,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * NOTE clarify UTF-16 or UTF-8
      */
-    public sort(): Array<T> {
+    public sort(): this {
         sort(this.buffer, 0, this.actualLength, (l: NullishType, r: NullishType): boolean => {
             return Array.defaultComparator(l, r) < 0;
         });
@@ -931,11 +940,11 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public /* override */ lastIndexOf(element: T, fromIndex: Number | undefined): number {
+    public /* override */ lastIndexOf(element: T, fromIndex?: Number): number {
         if (this.actualLength == 0) {
             return -1;
         }
-        let n = indexWithDefault(fromIndex, this.actualLength - 1);
+        let n = asIntOrDefault(fromIndex, this.actualLength - 1);
         let k: int;
         if (n >= 0) {
             k = min(this.actualLength - 1, n);
@@ -1070,7 +1079,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      * @returns an Array with deleted elements
      */
     public splice(start: number, delete: Number | undefined, ...items: T[]): Array<T> {
-        return this.splice(start as int, indexWithDefault(delete, this.actualLength), ...items)
+        return this.splice(start as int, asIntOrDefault(delete, this.actualLength), ...items)
     }
 
     /**
@@ -1204,13 +1213,13 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns true if val is in Array
      */
-    public /* override */ includes(val: T, fromIndex: Number | undefined): boolean {
-        const found = this.indexOfInt(val, indexWithDefault(fromIndex, 0));
+    public /* override */ includes(val: T, fromIndex?: Number): boolean {
+        const found = this.indexOfInt(val, asIntOrDefault(fromIndex, 0));
         if (found != -1) {
             return true;
         }
         if (val instanceof Number && isNaN(val as Object as Number)) {
-            const frm = normalizeIndex(indexWithDefault(fromIndex, 0), this.actualLength)
+            const frm = normalizeIndex(asIntOrDefault(fromIndex, 0), this.actualLength)
             return this.findIndex((v: T, idx: number): boolean => {
                 if (idx < frm) {
                     return false;
@@ -1254,7 +1263,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      * @returns index of val, -1 otherwise
      */
     public /* override */ indexOf(val: T, fromIndex: Number|undefined): number {
-        return this.indexOfInt(val, indexWithDefault(fromIndex, 0))
+        return this.indexOfInt(val, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -1363,7 +1372,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        let acc: T = this.$_get_unsafe(0)
+        let acc = this.$_get_unsafe(0)
         for(let i = 1; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i), i, this)
         }
@@ -1425,8 +1434,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      * @returns a result after applying fn over all elements of the Array
      */
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public /* override */ reduce(fn: (previousValue: T, currentValue: T, currentIndex: number, arr: Array<T>) => T, initialValue: T): T {
-        let acc: T = initialValue
+    public /* override */ reduce<U>(fn: (previousValue: U, currentValue: T, currentIndex: number, arr: Array<T>) => U, initialValue: U): U {
+        let acc = initialValue
         for(let i = 0; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i), i, this)
         }
@@ -1445,8 +1454,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public /* override */ reduce(fn: (previousValue: T, currentValue: T, currentIndex: number) => T, initialValue: T): T {
-        let acc: T = initialValue
+    public /* override */ reduce<U>(fn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U {
+        let acc = initialValue
         for(let i = 0; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i), i)
         }
@@ -1465,8 +1474,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public /* override */ reduce(fn: (previousValue: T, currentValue: T) => T, initialValue: T): T {
-        let acc: T = initialValue
+    public /* override */ reduce<U>(fn: (previousValue: U, currentValue: T) => U, initialValue: U): U {
+        let acc: U = initialValue
         for(let i = 0; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i))
         }
@@ -1484,7 +1493,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      * @returns a result after applying fn over all elements of the Array
      */
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduceRight(fn: (a: T, b: T, index: number, arr: Array<T>) => T): T {
+    public /* override */ reduceRight(fn: (a: T, b: T, index: number, arr: Array<T>) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
@@ -1550,10 +1559,10 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      * @returns a result after applying fn over all elements of the Array
      */
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public /* override */ reduceRight(fn: (a: T, b: T, index: number, arr: Array<T>) => T, initVal: T): T {
-        let acc: T = initVal
+    public /* override */ reduceRight<U>(fn: (a: U, b: T, index: number, arr: Array<T>) => U, initVal: U): U {
+        let acc = initVal
         for(let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
@@ -1570,8 +1579,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public /* override */ reduceRight(fn: (a: T, b: T, index: number) => T, initVal: T): T {
-        let acc: T = initVal
+    public /* override */ reduceRight<U>(fn: (a: U, b: T, index: number) => U, initVal: U): U {
+        let acc = initVal
         for(let i = this.actualLength - 1; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i), i)
         }
@@ -1590,8 +1599,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public /* override */ reduceRight(fn: (a: T, b: T) => T, initVal: T): T {
-        let acc: T = initVal
+    public /* override */ reduceRight<U>(fn: (a: U, b: T) => U, initVal: U): U {
+        let acc = initVal
         for(let i = this.actualLength - 1; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i))
         }
@@ -1835,7 +1844,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
     /**
      * Returns an iterator over all values
      */
-    public override iterator(): IterableIterator<T> {
+    public override iterator(): Iterator<T> {
         return this.values()
     }
 
