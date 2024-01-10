@@ -115,8 +115,7 @@ static napi_value Init(napi_env env, napi_value exports)
         napi_property_descriptor {"main", 0, Main, 0, 0, 0, napi_enumerable, 0},
     };
 
-    [[maybe_unused]] napi_status status;
-    status = napi_define_properties(env, exports, desc.size(), desc.data());
+    [[maybe_unused]] napi_status status = napi_define_properties(env, exports, desc.size(), desc.data());
     assert(status == napi_ok);
 
     return exports;

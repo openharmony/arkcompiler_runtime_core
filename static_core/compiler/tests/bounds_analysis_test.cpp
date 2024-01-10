@@ -96,8 +96,7 @@ TEST_F(BoundsAnalysisTest, MulTest)
     BoundsRange r6 = BoundsRange(1U, 4U);
 
     // All posible variations for GetLeft and GetRight
-    BoundsRange res;
-    res = r1.Mul(r1);
+    BoundsRange res = r1.Mul(r1);
     EXPECT_EQ(res.GetLeft(), -7L * 5L);    // min = ll * rr
     EXPECT_EQ(res.GetRight(), -7L * -7L);  // max = ll * rl
 

@@ -36,21 +36,21 @@
 
 namespace panda::mem {
 
-bool HeapManager::Initialize(GCType gcType, bool single_threaded, bool useTlab, MemStatsType *memStats,
-                             InternalAllocatorPtr internalAllocator, bool create_pygote_space)
+bool HeapManager::Initialize(GCType gcType, bool singleThreaded, bool useTlab, MemStatsType *memStats,
+                             InternalAllocatorPtr internalAllocator, bool createPygoteSpace)
 {
     trace::ScopedTrace scopedTrace("HeapManager::Initialize");
     bool ret = false;
     memStats_ = memStats;
     internalAllocator_ = internalAllocator;
     // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define FWD_GC_INIT(type, mem_stats)                                                \
-    case type:                                                                      \
-        if (single_threaded) {                                                      \
-            ret = Initialize<type, MT_MODE_SINGLE>(mem_stats, create_pygote_space); \
-        } else {                                                                    \
-            ret = Initialize<type, MT_MODE_MULTI>(mem_stats, create_pygote_space);  \
-        }                                                                           \
+#define FWD_GC_INIT(type, mem_stats)                                              \
+    case type:                                                                    \
+        if (singleThreaded) {                                                     \
+            ret = Initialize<type, MT_MODE_SINGLE>(mem_stats, createPygoteSpace); \
+        } else {                                                                  \
+            ret = Initialize<type, MT_MODE_MULTI>(mem_stats, createPygoteSpace);  \
+        }                                                                         \
         break
 
     switch (gcType) {

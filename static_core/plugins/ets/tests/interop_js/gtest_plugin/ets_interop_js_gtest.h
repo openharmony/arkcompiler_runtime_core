@@ -151,8 +151,7 @@ private:
     static std::string GetString(napi_env env, napi_value jsStr)
     {
         size_t length;
-        [[maybe_unused]] napi_status status;
-        status = napi_get_value_string_utf8(env, jsStr, nullptr, 0, &length);
+        [[maybe_unused]] napi_status status = napi_get_value_string_utf8(env, jsStr, nullptr, 0, &length);
         assert(status == napi_ok);
         std::string v(length, '\0');
         size_t copied;

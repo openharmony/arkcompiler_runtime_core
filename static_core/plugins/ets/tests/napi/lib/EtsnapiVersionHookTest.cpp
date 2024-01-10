@@ -33,8 +33,7 @@ static EtsNativeMethod gMethods[] = {
 
 static int registerNativeMethods(EtsEnv *env, const char *classname, EtsNativeMethod *methods, int countMethods)
 {
-    ets_class clazz;
-    clazz = env->FindClass(classname);
+    ets_class clazz = env->FindClass(classname);
     if (clazz == nullptr) {
         return ETS_FALSE;
     }

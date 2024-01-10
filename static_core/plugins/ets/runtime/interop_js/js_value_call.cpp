@@ -293,7 +293,7 @@ napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span
     {
         auto type = method->GetReturnType();
         auto clsResolver = [&resolveRefCls]() { return resolveRefCls(0); };
-        auto storeRes = [&sRes](napi_value res) { jsRes = res; };
+        auto storeRes = [&jsRes](napi_value res) { jsRes = res; };
         auto readVal = [&etsRes](auto typeTag) { return etsRes.GetAs<typename decltype(typeTag)::type>(); };
         if (UNLIKELY(!ConvertEtsVal(ctx, clsResolver, storeRes, type, readVal))) {
             ASSERT(ctx->SanityJSExceptionPending());

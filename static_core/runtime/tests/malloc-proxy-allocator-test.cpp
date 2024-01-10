@@ -58,8 +58,7 @@ TEST_F(MallocProxyAllocatorTest, SimpleTest)
     static constexpr size_t SIZE = 23;
     auto *memStats = new mem::MemStatsType();
     MallocProxyNonObjectAllocator allocator(memStats);
-    void *a1;
-    a1 = allocator.Alloc(SIZE);
+    void *a1 = allocator.Alloc(SIZE);
     allocator.Free(a1);
     delete memStats;
 }
