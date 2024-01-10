@@ -32,6 +32,20 @@ class Database {
   }
 }
 
+class DatabaseInterface extends Database {
+  getText() { }
+}
+
+export { DatabaseInterface as DBInterface };
+
 export function getDatabaseInstance() {
   return new Database();
 }
+
+function getblankInstance1() { }
+export { getblankInstance1 as getblankInstanceInterface };
+
+export default function getblankInstance2() { }
+
+let newDB = new Database();
+newDB.addData();

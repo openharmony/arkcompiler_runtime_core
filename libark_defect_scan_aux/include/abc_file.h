@@ -79,7 +79,7 @@ public:
     std::string GetModuleNameByLocalName(std::string_view local_name, std::string_view record_name = "") const;
     std::string GetImportNameByLocalName(std::string_view local_name, std::string_view record_name = "") const;
     // return a string without #xx# prefix
-    std::string_view GetNameWithoutHashtag(std::string_view name) const;
+    std::string_view GetNameWithoutHashtag(std::string_view full_name, std::string_view record_name = "") const;
     std::string GetStringByInst(const Inst &inst) const;
     std::optional<FuncInstPair> GetStLexInstByLdLexInst(FuncInstPair func_inst_pair) const;
     std::optional<FuncInstPair> GetStGlobalInstByLdGlobalInst(FuncInstPair func_inst_pair) const;
@@ -119,8 +119,8 @@ private:
     void ExtractMergedClassAndFunctionInfo(Function *func);
     compiler::Graph *GenerateFunctionGraph(const panda_file::MethodDataAccessor &mda, std::string_view func_name);
     ResolveResult ResolveInstCommon(Function *func, Inst inst) const;
-    ResolveResult HandleLdObjByNameInstResolveResult(const Inst &ldobjbyname_inst,
-                                                     const ResolveResult &resolve_res) const;
+    ResolveResult HandleLdObjByNameInstResolveResult(const Inst &ldobjbyname_inst, const ResolveResult &resolve_res,
+                                                     const std::string record_name = "") const;
     ResolveResult HandleNewObjInstResolveResultCommon(const ResolveResult &resolve_res) const;
     Function *ResolveDefineFuncInstCommon(const Function *func, const Inst &def_func_inst) const;
     std::unique_ptr<Class> ResolveDefineClassWithBufferInst(Function *func, const Inst &define_class_inst) const;
