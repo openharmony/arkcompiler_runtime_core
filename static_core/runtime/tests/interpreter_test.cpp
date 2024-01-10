@@ -19,6 +19,7 @@
 #include "assembly-parser.h"
 #include "libpandabase/mem/pool_manager.h"
 #include "libpandabase/utils/utf.h"
+#include "libpandabase/utils/utils.h"
 #include "libpandafile/bytecode_emitter.h"
 #include "libpandafile/file.h"
 #include "libpandafile/file_items.h"
@@ -188,22 +189,22 @@ TEST_F(InterpreterTest, TestMov)
     ObjectHeader *obj2 = panda::mem::AllocateNullifiedPayloadString(100);
     ObjectHeader *obj3 = panda::mem::AllocateNullifiedPayloadString(200);
 
-    emitter.Movi(0, IMM4_MAX);
-    emitter.Movi(1, IMM8_MAX);
-    emitter.Movi(2, IMM16_MAX);
-    emitter.Movi(3, IMM32_MAX);
-    emitter.MoviWide(4, IMM64_MAX);
+    emitter.Movi(0U, IMM4_MAX);
+    emitter.Movi(1U, IMM8_MAX);
+    emitter.Movi(2U, IMM16_MAX);
+    emitter.Movi(3U, IMM32_MAX);
+    emitter.MoviWide(4U, IMM64_MAX);
 
     emitter.Mov(V4_MAX, V4_MAX - 1);
     emitter.Mov(V8_MAX, V8_MAX - 1);
     emitter.Mov(V16_MAX, V16_MAX - 1);
 
-    emitter.MovWide(V4_MAX - 2, V4_MAX - 3);
-    emitter.MovWide(V16_MAX - 2, V16_MAX - 3);
+    emitter.MovWide(V4_MAX - 2U, V4_MAX - 3L);
+    emitter.MovWide(V16_MAX - 2U, V16_MAX - 3L);
 
-    emitter.MovObj(V4_MAX - 4, V4_MAX - 5);
-    emitter.MovObj(V8_MAX - 4, V8_MAX - 5);
-    emitter.MovObj(V16_MAX - 4, V16_MAX - 5);
+    emitter.MovObj(V4_MAX - 4U, V4_MAX - 5L);
+    emitter.MovObj(V8_MAX - 4U, V8_MAX - 5L);
+    emitter.MovObj(V16_MAX - 4U, V16_MAX - 5L);
 
     emitter.ReturnVoid();
 
@@ -219,16 +220,16 @@ TEST_F(InterpreterTest, TestMov)
     auto method = std::move(methodData.first);
     f->SetMethod(method.get());
 
-    frameHandler.GetVReg(V4_MAX - 1).SetPrimitive(IMM64_MAX - 1);
-    frameHandler.GetVReg(V8_MAX - 1).SetPrimitive(IMM64_MAX - 2);
-    frameHandler.GetVReg(V16_MAX - 1).SetPrimitive(IMM64_MAX - 3);
+    frameHandler.GetVReg(V4_MAX - 1).SetPrimitive(IMM64_MAX - 1L);
+    frameHandler.GetVReg(V8_MAX - 1).SetPrimitive(IMM64_MAX - 2L);
+    frameHandler.GetVReg(V16_MAX - 1).SetPrimitive(IMM64_MAX - 3L);
 
-    frameHandler.GetVReg(V4_MAX - 3).SetPrimitive(IMM64_MAX - 4);
-    frameHandler.GetVReg(V16_MAX - 3).SetPrimitive(IMM64_MAX - 5);
+    frameHandler.GetVReg(V4_MAX - 3U).SetPrimitive(IMM64_MAX - 4L);
+    frameHandler.GetVReg(V16_MAX - 3U).SetPrimitive(IMM64_MAX - 5L);
 
-    frameHandler.GetVReg(V4_MAX - 5).SetReference(obj1);
-    frameHandler.GetVReg(V8_MAX - 5).SetReference(obj2);
-    frameHandler.GetVReg(V16_MAX - 5).SetReference(obj3);
+    frameHandler.GetVReg(V4_MAX - 5U).SetReference(obj1);
+    frameHandler.GetVReg(V8_MAX - 5U).SetReference(obj2);
+    frameHandler.GetVReg(V16_MAX - 5U).SetReference(obj3);
 
     Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
 
@@ -240,44 +241,44 @@ TEST_F(InterpreterTest, TestMov)
     EXPECT_EQ(frameHandler.GetVReg(1).GetLong(), IMM8_MAX);
     EXPECT_FALSE(frameHandler.GetVReg(1).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(2).GetLong(), IMM16_MAX);
-    EXPECT_FALSE(frameHandler.GetVReg(2).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(2U).GetLong(), IMM16_MAX);
+    EXPECT_FALSE(frameHandler.GetVReg(2U).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(3).GetLong(), IMM32_MAX);
-    EXPECT_FALSE(frameHandler.GetVReg(3).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(3U).GetLong(), IMM32_MAX);
+    EXPECT_FALSE(frameHandler.GetVReg(3U).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(4).GetLong(), IMM64_MAX);
-    EXPECT_FALSE(frameHandler.GetVReg(4).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(4U).GetLong(), IMM64_MAX);
+    EXPECT_FALSE(frameHandler.GetVReg(4U).HasObject());
 
     // Check mov
 
     EXPECT_EQ(frameHandler.GetVReg(V4_MAX).Get(), static_cast<int32_t>(IMM64_MAX - 1));
     EXPECT_FALSE(frameHandler.GetVReg(V4_MAX).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(V8_MAX).Get(), static_cast<int32_t>(IMM64_MAX - 2));
+    EXPECT_EQ(frameHandler.GetVReg(V8_MAX).Get(), static_cast<int32_t>(IMM64_MAX - 2L));
     EXPECT_FALSE(frameHandler.GetVReg(V8_MAX).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(V16_MAX).Get(), static_cast<int32_t>(IMM64_MAX - 3));
+    EXPECT_EQ(frameHandler.GetVReg(V16_MAX).Get(), static_cast<int32_t>(IMM64_MAX - 3L));
     EXPECT_FALSE(frameHandler.GetVReg(V16_MAX).HasObject());
 
     // Check mov.64
 
-    EXPECT_EQ(frameHandler.GetVReg(V4_MAX - 2).GetLong(), IMM64_MAX - 4);
-    EXPECT_FALSE(frameHandler.GetVReg(V4_MAX - 2).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(V4_MAX - 2U).GetLong(), IMM64_MAX - 4L);
+    EXPECT_FALSE(frameHandler.GetVReg(V4_MAX - 2U).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(V16_MAX - 2).GetLong(), IMM64_MAX - 5);
-    EXPECT_FALSE(frameHandler.GetVReg(V16_MAX - 2).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(V16_MAX - 2U).GetLong(), IMM64_MAX - 5L);
+    EXPECT_FALSE(frameHandler.GetVReg(V16_MAX - 2U).HasObject());
 
     // Check mov.obj
 
-    EXPECT_EQ(frameHandler.GetVReg(V4_MAX - 4).GetReference(), obj1);
-    EXPECT_TRUE(frameHandler.GetVReg(V4_MAX - 4).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(V4_MAX - 4U).GetReference(), obj1);
+    EXPECT_TRUE(frameHandler.GetVReg(V4_MAX - 4U).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(V8_MAX - 4).GetReference(), obj2);
-    EXPECT_TRUE(frameHandler.GetVReg(V8_MAX - 4).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(V8_MAX - 4U).GetReference(), obj2);
+    EXPECT_TRUE(frameHandler.GetVReg(V8_MAX - 4U).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(V16_MAX - 4).GetReference(), obj3);
-    EXPECT_TRUE(frameHandler.GetVReg(V16_MAX - 4).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(V16_MAX - 4U).GetReference(), obj3);
+    EXPECT_TRUE(frameHandler.GetVReg(V16_MAX - 4U).HasObject());
 }
 
 TEST_F(InterpreterTest, TestLoadStoreAccumulator)
@@ -289,35 +290,35 @@ TEST_F(InterpreterTest, TestLoadStoreAccumulator)
     constexpr int64_t IMM32_MAX = std::numeric_limits<int32_t>::max();
     constexpr int64_t IMM64_MAX = std::numeric_limits<int64_t>::max();
 
-    ObjectHeader *obj = panda::mem::AllocateNullifiedPayloadString(10);
+    ObjectHeader *obj = panda::mem::AllocateNullifiedPayloadString(10U);
 
     emitter.Ldai(IMM8_MAX);
-    emitter.Sta(0);
+    emitter.Sta(0U);
 
     emitter.Ldai(IMM16_MAX);
-    emitter.Sta(1);
+    emitter.Sta(1U);
 
     emitter.Ldai(IMM32_MAX);
-    emitter.Sta(2);
+    emitter.Sta(2U);
 
     emitter.LdaiWide(IMM64_MAX);
-    emitter.StaWide(3);
+    emitter.StaWide(3U);
 
-    emitter.Lda(4);
-    emitter.Sta(5);
+    emitter.Lda(4U);
+    emitter.Sta(5U);
 
-    emitter.LdaWide(6);
-    emitter.StaWide(7);
+    emitter.LdaWide(6U);
+    emitter.StaWide(7U);
 
-    emitter.LdaObj(8);
-    emitter.StaObj(9);
+    emitter.LdaObj(8U);
+    emitter.StaObj(9U);
 
     emitter.ReturnVoid();
 
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
     auto frameHandler = StaticFrameHandler(f.get());
 
@@ -326,9 +327,9 @@ TEST_F(InterpreterTest, TestLoadStoreAccumulator)
     auto method = std::move(methodData.first);
     f->SetMethod(method.get());
 
-    frameHandler.GetVReg(4).SetPrimitive(IMM64_MAX - 1);
-    frameHandler.GetVReg(6).SetPrimitive(IMM64_MAX - 2);
-    frameHandler.GetVReg(8).SetReference(obj);
+    frameHandler.GetVReg(4U).SetPrimitive(IMM64_MAX - 1L);
+    frameHandler.GetVReg(6U).SetPrimitive(IMM64_MAX - 2L);
+    frameHandler.GetVReg(8U).SetReference(obj);
 
     Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
 
@@ -338,20 +339,20 @@ TEST_F(InterpreterTest, TestLoadStoreAccumulator)
     EXPECT_EQ(frameHandler.GetVReg(1).Get(), static_cast<int32_t>(IMM16_MAX));
     EXPECT_FALSE(frameHandler.GetVReg(1).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(2).Get(), static_cast<int32_t>(IMM32_MAX));
-    EXPECT_FALSE(frameHandler.GetVReg(2).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(2U).Get(), static_cast<int32_t>(IMM32_MAX));
+    EXPECT_FALSE(frameHandler.GetVReg(2U).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(3).GetLong(), IMM64_MAX);
-    EXPECT_FALSE(frameHandler.GetVReg(3).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(3U).GetLong(), IMM64_MAX);
+    EXPECT_FALSE(frameHandler.GetVReg(3U).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(5).Get(), static_cast<int32_t>(IMM64_MAX - 1));
-    EXPECT_FALSE(frameHandler.GetVReg(5).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(5U).Get(), static_cast<int32_t>(IMM64_MAX - 1));
+    EXPECT_FALSE(frameHandler.GetVReg(5U).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(7).GetLong(), IMM64_MAX - 2);
-    EXPECT_FALSE(frameHandler.GetVReg(7).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(7U).GetLong(), IMM64_MAX - 2L);
+    EXPECT_FALSE(frameHandler.GetVReg(7U).HasObject());
 
-    EXPECT_EQ(frameHandler.GetVReg(9).GetReference(), obj);
-    EXPECT_TRUE(frameHandler.GetVReg(9).HasObject());
+    EXPECT_EQ(frameHandler.GetVReg(9U).GetReference(), obj);
+    EXPECT_TRUE(frameHandler.GetVReg(9U).HasObject());
 }
 
 TEST_F(InterpreterTest, TestLoadString)
@@ -380,7 +381,7 @@ TEST_F(InterpreterTest, TestLoadString)
     Method *method = cls->GetClassMethod(utf::CStringAsMutf8("foo"));
     const uint8_t *methodData = method->GetInstructions();
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
     f->SetMethod(method);
 
@@ -406,7 +407,7 @@ void TestUnimpelemented(const std::function<void(BytecodeEmitter *)> &emit)
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -446,7 +447,7 @@ TEST_F(InterpreterTest, LoadType)
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -485,7 +486,7 @@ void TestFcmp(double v1, double v2, int64_t value, bool isCmpg = false)
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -508,16 +509,16 @@ TEST_F(InterpreterTest, TestFcmp)
     TestFcmp(nan(""), 1.0, 1, true);
     TestFcmp(1.0, nan(""), 1, true);
     TestFcmp(nan(""), nan(""), 1, true);
-    TestFcmp(1.0, 2.0, -1, true);
+    TestFcmp(1.0, 2.0F, -1, true);
     TestFcmp(1.0, 1.0, 0, true);
-    TestFcmp(3.0, 2.0, 1, true);
+    TestFcmp(3.0F, 2.0F, 1, true);
 
     TestFcmp(nan(""), 1.0, -1);
     TestFcmp(1.0, nan(""), -1);
     TestFcmp(nan(""), nan(""), -1);
-    TestFcmp(1.0, 2.0, -1);
+    TestFcmp(1.0, 2.0F, -1);
     TestFcmp(1.0, 1.0, 0);
-    TestFcmp(3.0, 2.0, 1);
+    TestFcmp(3.0F, 2.0F, 1);
 }
 
 void TestConditionalJmp(const std::string &mnemonic, int64_t v1, int64_t v2, int64_t r,
@@ -540,7 +541,7 @@ void TestConditionalJmp(const std::string &mnemonic, int64_t v1, int64_t v2, int
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -574,7 +575,7 @@ void TestConditionalJmp(const std::string &mnemonic, int64_t v1, int64_t v2, int
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -616,7 +617,7 @@ void TestConditionalJmpz(const std::string &mnemonic, int64_t v, int64_t r,
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -649,7 +650,7 @@ void TestConditionalJmpz(const std::string &mnemonic, int64_t v, int64_t r,
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -700,46 +701,46 @@ TEST_F(InterpreterTest, TestConditionalJumps)
 
     // Test jmp
 
-    TestConditionalJmp("jeq", 2, 2, 1,
+    TestConditionalJmp("jeq", 2L, 2L, 1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jeq(reg, label); });
-    TestConditionalJmp("jeq", 1, 2, -1,
+    TestConditionalJmp("jeq", 1L, 2L, -1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jeq(reg, label); });
-    TestConditionalJmp("jeq", 2, 1, -1,
+    TestConditionalJmp("jeq", 2L, 1L, -1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jeq(reg, label); });
 
-    TestConditionalJmp("jne", 2, 2, -1,
+    TestConditionalJmp("jne", 2L, 2L, -1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jne(reg, label); });
-    TestConditionalJmp("jne", 1, 2, 1,
+    TestConditionalJmp("jne", 1L, 2L, 1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jne(reg, label); });
-    TestConditionalJmp("jne", 2, 1, 1,
+    TestConditionalJmp("jne", 2L, 1L, 1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jne(reg, label); });
 
-    TestConditionalJmp("jlt", 2, 2, -1,
+    TestConditionalJmp("jlt", 2L, 2L, -1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jlt(reg, label); });
-    TestConditionalJmp("jlt", 1, 2, 1,
+    TestConditionalJmp("jlt", 1L, 2L, 1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jlt(reg, label); });
-    TestConditionalJmp("jlt", 2, 1, -1,
+    TestConditionalJmp("jlt", 2L, 1L, -1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jlt(reg, label); });
 
-    TestConditionalJmp("jgt", 2, 2, -1,
+    TestConditionalJmp("jgt", 2L, 2L, -1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jgt(reg, label); });
-    TestConditionalJmp("jgt", 1, 2, -1,
+    TestConditionalJmp("jgt", 1L, 2L, -1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jgt(reg, label); });
-    TestConditionalJmp("jgt", 2, 1, 1,
+    TestConditionalJmp("jgt", 2L, 1L, 1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jgt(reg, label); });
 
-    TestConditionalJmp("jle", 2, 2, 1,
+    TestConditionalJmp("jle", 2L, 2L, 1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jle(reg, label); });
-    TestConditionalJmp("jle", 1, 2, 1,
+    TestConditionalJmp("jle", 1L, 2L, 1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jle(reg, label); });
-    TestConditionalJmp("jle", 2, 1, -1,
+    TestConditionalJmp("jle", 2L, 1L, -1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jle(reg, label); });
 
-    TestConditionalJmp("jge", 2, 2, 1,
+    TestConditionalJmp("jge", 2L, 2L, 1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jge(reg, label); });
-    TestConditionalJmp("jge", 1, 2, -1,
+    TestConditionalJmp("jge", 1L, 2L, -1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jge(reg, label); });
-    TestConditionalJmp("jge", 2, 1, 1,
+    TestConditionalJmp("jge", 2L, 1L, 1L,
                        [](BytecodeEmitter *emitter, uint8_t reg, const Label &label) { emitter->Jge(reg, label); });
 }
 
@@ -757,7 +758,7 @@ void TestUnaryOp(const std::string &mnemonic, T v, R r, const std::function<void
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -792,14 +793,14 @@ TEST_F(InterpreterTest, TestUnaryOp)
 TEST_F(InterpreterTest, TestInci)
 {
     BytecodeEmitter emitter;
-    emitter.Inci(0, 2);
-    emitter.Inci(1, -3);
+    emitter.Inci(0, 2_I);
+    emitter.Inci(1, -3_I);
     emitter.ReturnWide();
 
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -808,8 +809,8 @@ TEST_F(InterpreterTest, TestInci)
     f->SetMethod(method.get());
 
     auto frameHandler = StaticFrameHandler(f.get());
-    frameHandler.GetVReg(0).SetPrimitive(-2);
-    frameHandler.GetVReg(1).SetPrimitive(3);
+    frameHandler.GetVReg(0).SetPrimitive(-2L);
+    frameHandler.GetVReg(1).SetPrimitive(3L);
 
     Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
 
@@ -973,7 +974,7 @@ static void TestArray()
     emitter.Newarr(1, 0, RuntimeInterface::TYPE_ID.AsIndex());
 
     if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::REFERENCE) {
-        emitter.LdaObj(4);
+        emitter.LdaObj(4U);
     } else if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::F32) {
         emitter.Fldai(bit_cast<int32_t>(storeValue));
     } else if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::F64) {
@@ -982,57 +983,57 @@ static void TestArray()
         emitter.LdaiWide(static_cast<int64_t>(storeValue));
     }
 
-    emitter.Movi(2, STORE_IDX);
+    emitter.Movi(2U, STORE_IDX);
 
     if constexpr (COMPONENT_TYPE_ID != panda_file::Type::TypeId::REFERENCE) {
         switch (COMPONENT_TYPE_ID) {
             case panda_file::Type::TypeId::U1:
             case panda_file::Type::TypeId::U8: {
-                emitter.Starr8(1, 2);
+                emitter.Starr8(1, 2U);
                 emitter.Ldai(LOAD_IDX);
                 emitter.Ldarru8(1);
                 break;
             }
             case panda_file::Type::TypeId::I8: {
-                emitter.Starr8(1, 2);
+                emitter.Starr8(1, 2U);
                 emitter.Ldai(LOAD_IDX);
                 emitter.Ldarr8(1);
                 break;
             }
             case panda_file::Type::TypeId::U16: {
-                emitter.Starr16(1, 2);
+                emitter.Starr16(1, 2U);
                 emitter.Ldai(LOAD_IDX);
                 emitter.Ldarru16(1);
                 break;
             }
             case panda_file::Type::TypeId::I16: {
-                emitter.Starr16(1, 2);
+                emitter.Starr16(1, 2U);
                 emitter.Ldai(LOAD_IDX);
                 emitter.Ldarr16(1);
                 break;
             }
             case panda_file::Type::TypeId::U32:
             case panda_file::Type::TypeId::I32: {
-                emitter.Starr(1, 2);
+                emitter.Starr(1, 2U);
                 emitter.Ldai(LOAD_IDX);
                 emitter.Ldarr(1);
                 break;
             }
             case panda_file::Type::TypeId::U64:
             case panda_file::Type::TypeId::I64: {
-                emitter.StarrWide(1, 2);
+                emitter.StarrWide(1, 2U);
                 emitter.Ldai(LOAD_IDX);
                 emitter.LdarrWide(1);
                 break;
             }
             case panda_file::Type::TypeId::F32: {
-                emitter.Fstarr32(1, 2);
+                emitter.Fstarr32(1, 2U);
                 emitter.Ldai(LOAD_IDX);
                 emitter.Fldarr32(1);
                 break;
             }
             case panda_file::Type::TypeId::F64: {
-                emitter.FstarrWide(1, 2);
+                emitter.FstarrWide(1, 2U);
                 emitter.Ldai(LOAD_IDX);
                 emitter.FldarrWide(1);
                 break;
@@ -1043,15 +1044,15 @@ static void TestArray()
             }
         }
     } else {
-        emitter.StarrObj(1, 2);
+        emitter.StarrObj(1, 2U);
         emitter.Ldai(LOAD_IDX);
         emitter.LdarrObj(1);
     }
 
     if constexpr (COMPONENT_TYPE_ID != panda_file::Type::TypeId::REFERENCE) {
-        emitter.StaWide(3);
+        emitter.StaWide(3U);
     } else {
-        emitter.StaObj(3);
+        emitter.StaObj(3U);
     }
 
     emitter.Lenarr(1);
@@ -1060,7 +1061,7 @@ static void TestArray()
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1070,7 +1071,7 @@ static void TestArray()
 
     auto frameHandler = StaticFrameHandler(f.get());
     if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::REFERENCE) {
-        frameHandler.GetVReg(4).SetReference(storeValue);
+        frameHandler.GetVReg(4U).SetReference(storeValue);
     }
 
     coretypes::Array *array = AllocArray(arrayClass, sizeof(StoredType), ARRAY_LENGTH);
@@ -1092,7 +1093,7 @@ static void TestArray()
     auto *result = static_cast<coretypes::Array *>(frameHandler.GetVReg(1).GetReference());
     EXPECT_EQ(result, array) << ss.str();
 
-    EXPECT_EQ(frameHandler.GetVReg(3).GetAs<ComponentType>(), loadValue) << ss.str();
+    EXPECT_EQ(frameHandler.GetVReg(3U).GetAs<ComponentType>(), loadValue) << ss.str();
 
     std::vector<StoredType> data(ARRAY_LENGTH);
     data[LOAD_IDX] = CastIfRef<COMPONENT_TYPE_ID>(loadValue);
@@ -1134,7 +1135,7 @@ TEST_F(InterpreterTest, TestNewobj)
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1181,13 +1182,13 @@ TEST_F(InterpreterTest, TestInitobj)
     {
         BytecodeEmitter emitter;
 
-        emitter.InitobjShort(0, 2, RuntimeInterface::METHOD_ID.AsIndex());
+        emitter.InitobjShort(0, 2U, RuntimeInterface::METHOD_ID.AsIndex());
         emitter.ReturnObj();
 
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1223,8 +1224,8 @@ TEST_F(InterpreterTest, TestInitobj)
         ObjectHeader *obj = AllocObject(objectClass);
 
         auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(0).Set(10);
-        frameHandler.GetVReg(2).Set(20);
+        frameHandler.GetVReg(0).Set(10L);
+        frameHandler.GetVReg(2U).Set(20L);
 
         bool hasErrors = false;
 
@@ -1246,7 +1247,7 @@ TEST_F(InterpreterTest, TestInitobj)
                     return Value(nullptr);
                 }
 
-                if (sp[2].GetAs<int32_t>() != frameHandler.GetVReg(2).Get()) {
+                if (sp[2U].GetAs<int32_t>() != frameHandler.GetVReg(2U).Get()) {
                     hasErrors = true;
                     return Value(nullptr);
                 }
@@ -1275,13 +1276,13 @@ TEST_F(InterpreterTest, TestInitobj)
     {
         BytecodeEmitter emitter;
 
-        emitter.Initobj(0, 2, 3, 5, RuntimeInterface::METHOD_ID.AsIndex());
+        emitter.Initobj(0U, 2U, 3U, 5U, RuntimeInterface::METHOD_ID.AsIndex());
         emitter.ReturnObj();
 
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1317,10 +1318,10 @@ TEST_F(InterpreterTest, TestInitobj)
         ObjectHeader *obj = AllocObject(objectClass);
 
         auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(0).Set(10);
-        frameHandler.GetVReg(2).Set(20);
-        frameHandler.GetVReg(3).Set(30);
-        frameHandler.GetVReg(5).Set(40);
+        frameHandler.GetVReg(0U).Set(10L);
+        frameHandler.GetVReg(2U).Set(20L);
+        frameHandler.GetVReg(3U).Set(30L);
+        frameHandler.GetVReg(5U).Set(40L);
 
         bool hasErrors = false;
 
@@ -1342,17 +1343,17 @@ TEST_F(InterpreterTest, TestInitobj)
                     return Value(nullptr);
                 }
 
-                if (sp[2].GetAs<int32_t>() != frameHandler.GetVReg(2).Get()) {
+                if (sp[2U].GetAs<int32_t>() != frameHandler.GetVReg(2U).Get()) {
                     hasErrors = true;
                     return Value(nullptr);
                 }
 
-                if (sp[3].GetAs<int32_t>() != frameHandler.GetVReg(3).Get()) {
+                if (sp[3U].GetAs<int32_t>() != frameHandler.GetVReg(3U).Get()) {
                     hasErrors = true;
                     return Value(nullptr);
                 }
 
-                if (sp[4].GetAs<int32_t>() != frameHandler.GetVReg(5).Get()) {
+                if (sp[4U].GetAs<int32_t>() != frameHandler.GetVReg(5U).Get()) {
                     hasErrors = true;
                     return Value(nullptr);
                 }
@@ -1381,13 +1382,13 @@ TEST_F(InterpreterTest, TestInitobj)
     {
         BytecodeEmitter emitter;
 
-        emitter.InitobjRange(2, RuntimeInterface::METHOD_ID.AsIndex());
+        emitter.InitobjRange(2U, RuntimeInterface::METHOD_ID.AsIndex());
         emitter.ReturnObj();
 
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1423,11 +1424,11 @@ TEST_F(InterpreterTest, TestInitobj)
         ObjectHeader *obj = AllocObject(objectClass);
 
         auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(2).Set(10);
-        frameHandler.GetVReg(3).Set(20);
-        frameHandler.GetVReg(4).Set(30);
-        frameHandler.GetVReg(5).Set(40);
-        frameHandler.GetVReg(6).Set(50);
+        frameHandler.GetVReg(2U).Set(10L);
+        frameHandler.GetVReg(3U).Set(20L);
+        frameHandler.GetVReg(4U).Set(30L);
+        frameHandler.GetVReg(5U).Set(40L);
+        frameHandler.GetVReg(6U).Set(50L);
 
         bool hasErrors = false;
 
@@ -1444,27 +1445,27 @@ TEST_F(InterpreterTest, TestInitobj)
                     return Value(nullptr);
                 }
 
-                if (sp[1].GetAs<int32_t>() != frameHandler.GetVReg(2).Get()) {
+                if (sp[1U].GetAs<int32_t>() != frameHandler.GetVReg(2U).Get()) {
                     hasErrors = true;
                     return Value(nullptr);
                 }
 
-                if (sp[2].GetAs<int32_t>() != frameHandler.GetVReg(3).Get()) {
+                if (sp[2U].GetAs<int32_t>() != frameHandler.GetVReg(3U).Get()) {
                     hasErrors = true;
                     return Value(nullptr);
                 }
 
-                if (sp[3].GetAs<int32_t>() != frameHandler.GetVReg(4).Get()) {
+                if (sp[3U].GetAs<int32_t>() != frameHandler.GetVReg(4U).Get()) {
                     hasErrors = true;
                     return Value(nullptr);
                 }
 
-                if (sp[4].GetAs<int32_t>() != frameHandler.GetVReg(5).Get()) {
+                if (sp[4U].GetAs<int32_t>() != frameHandler.GetVReg(5U).Get()) {
                     hasErrors = true;
                     return Value(nullptr);
                 }
 
-                if (sp[5].GetAs<int32_t>() != frameHandler.GetVReg(6).Get()) {
+                if (sp[5U].GetAs<int32_t>() != frameHandler.GetVReg(6U).Get()) {
                     hasErrors = true;
                     return Value(nullptr);
                 }
@@ -1497,14 +1498,14 @@ void TestLoadStoreField(bool isStatic)
 
     if (isStatic) {
         emitter.Ldstatic(RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.StaWide(1);
-        emitter.LdaWide(2);
+        emitter.StaWide(1U);
+        emitter.LdaWide(2U);
         emitter.Ststatic(RuntimeInterface::FIELD_ID.AsIndex());
         emitter.Ldstatic(RuntimeInterface::FIELD_ID.AsIndex());
     } else {
         emitter.Ldobj(0, RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.StaWide(1);
-        emitter.LdaWide(2);
+        emitter.StaWide(1U);
+        emitter.LdaWide(2U);
         emitter.Stobj(0, RuntimeInterface::FIELD_ID.AsIndex());
         emitter.Ldobj(0, RuntimeInterface::FIELD_ID.AsIndex());
     }
@@ -1513,7 +1514,7 @@ void TestLoadStoreField(bool isStatic)
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1591,61 +1592,61 @@ void TestLoadStoreField(bool isStatic)
         ss << "Test field " << reinterpret_cast<const char *>(field.GetName().data);
 
         constexpr float FLOAT_VALUE = 1.0;
-        constexpr double DOUBLE_VALUE = 2.0;
+        constexpr double DOUBLE_VALUE = 2.0F;
         int64_t value = 0;
 
         switch (field.GetTypeId()) {
             case panda_file::Type::TypeId::U1: {
                 value = std::numeric_limits<uint8_t>::max();
-                frameHandler.GetVReg(2).SetPrimitive(value);
+                frameHandler.GetVReg(2U).SetPrimitive(value);
                 break;
             }
             case panda_file::Type::TypeId::I8: {
                 value = std::numeric_limits<int8_t>::min();
-                frameHandler.GetVReg(2).SetPrimitive(value);
+                frameHandler.GetVReg(2U).SetPrimitive(value);
                 break;
             }
             case panda_file::Type::TypeId::U8: {
                 value = std::numeric_limits<uint8_t>::max();
-                frameHandler.GetVReg(2).SetPrimitive(value);
+                frameHandler.GetVReg(2U).SetPrimitive(value);
                 break;
             }
             case panda_file::Type::TypeId::I16: {
                 value = std::numeric_limits<int16_t>::min();
-                frameHandler.GetVReg(2).SetPrimitive(value);
+                frameHandler.GetVReg(2U).SetPrimitive(value);
                 break;
             }
             case panda_file::Type::TypeId::U16: {
                 value = std::numeric_limits<uint16_t>::max();
-                frameHandler.GetVReg(2).SetPrimitive(value);
+                frameHandler.GetVReg(2U).SetPrimitive(value);
                 break;
             }
             case panda_file::Type::TypeId::I32: {
                 value = std::numeric_limits<int32_t>::min();
-                frameHandler.GetVReg(2).SetPrimitive(value);
+                frameHandler.GetVReg(2U).SetPrimitive(value);
                 break;
             }
             case panda_file::Type::TypeId::U32: {
                 value = std::numeric_limits<uint32_t>::max();
-                frameHandler.GetVReg(2).SetPrimitive(value);
+                frameHandler.GetVReg(2U).SetPrimitive(value);
                 break;
             }
             case panda_file::Type::TypeId::I64: {
                 value = std::numeric_limits<int64_t>::min();
-                frameHandler.GetVReg(2).SetPrimitive(value);
+                frameHandler.GetVReg(2U).SetPrimitive(value);
                 break;
             }
             case panda_file::Type::TypeId::U64: {
                 value = std::numeric_limits<uint64_t>::max();
-                frameHandler.GetVReg(2).SetPrimitive(value);
+                frameHandler.GetVReg(2U).SetPrimitive(value);
                 break;
             }
             case panda_file::Type::TypeId::F32: {
-                frameHandler.GetVReg(2).SetPrimitive(FLOAT_VALUE);
+                frameHandler.GetVReg(2U).SetPrimitive(FLOAT_VALUE);
                 break;
             }
             case panda_file::Type::TypeId::F64: {
-                frameHandler.GetVReg(2).SetPrimitive(DOUBLE_VALUE);
+                frameHandler.GetVReg(2U).SetPrimitive(DOUBLE_VALUE);
                 break;
             }
             default: {
@@ -1692,14 +1693,14 @@ void TestLoadStoreObjectField(bool isStatic)
 
     if (isStatic) {
         emitter.LdstaticObj(RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.StaObj(1);
-        emitter.LdaObj(2);
+        emitter.StaObj(1U);
+        emitter.LdaObj(2U);
         emitter.StstaticObj(RuntimeInterface::FIELD_ID.AsIndex());
         emitter.LdstaticObj(RuntimeInterface::FIELD_ID.AsIndex());
     } else {
         emitter.LdobjObj(0, RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.StaObj(1);
-        emitter.LdaObj(2);
+        emitter.StaObj(1U);
+        emitter.LdaObj(2U);
         emitter.StobjObj(0, RuntimeInterface::FIELD_ID.AsIndex());
         emitter.LdobjObj(0, RuntimeInterface::FIELD_ID.AsIndex());
     }
@@ -1708,7 +1709,7 @@ void TestLoadStoreObjectField(bool isStatic)
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1759,7 +1760,7 @@ void TestLoadStoreObjectField(bool isStatic)
     Field *field = &fields[0];
     ObjectHeader *refValue = panda::mem::AllocateNullifiedPayloadString(1);
 
-    frameHandler.GetVReg(2).SetReference(refValue);
+    frameHandler.GetVReg(2U).SetReference(refValue);
 
     RuntimeInterface::SetupResolvedField(field);
 
@@ -1795,7 +1796,7 @@ TEST_F(InterpreterTest, TestReturns)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1819,7 +1820,7 @@ TEST_F(InterpreterTest, TestReturns)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1843,7 +1844,7 @@ TEST_F(InterpreterTest, TestReturns)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
 
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1917,7 +1918,7 @@ TEST_F(InterpreterTest, TestIsInstance)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -1944,7 +1945,7 @@ TEST_F(InterpreterTest, TestIsInstance)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -1975,7 +1976,7 @@ TEST_F(InterpreterTest, TestIsInstance)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -1985,7 +1986,7 @@ TEST_F(InterpreterTest, TestIsInstance)
         bool failed = false;
         auto classLinker = AddProgramToClassLinker(source, failed);
         ASSERT_FALSE(failed);
-        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("R", 2), failed);
+        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("R", 2_I), failed);
         ASSERT_FALSE(failed);
 
         f->GetAccAsVReg().SetReference(nullptr);
@@ -2001,7 +2002,7 @@ TEST_F(InterpreterTest, TestIsInstance)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2011,7 +2012,7 @@ TEST_F(InterpreterTest, TestIsInstance)
         bool failed = false;
         auto classLinker = AddProgramToClassLinker(source, failed);
         ASSERT_FALSE(failed);
-        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("R", 2), failed);
+        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("R", 2_I), failed);
         ASSERT_FALSE(failed);
 
         auto *obj = AllocArray(objectClass, sizeof(uint8_t), 0);
@@ -2052,7 +2053,7 @@ TEST_F(InterpreterTest, TestCheckCast)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2077,7 +2078,7 @@ TEST_F(InterpreterTest, TestCheckCast)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2087,7 +2088,7 @@ TEST_F(InterpreterTest, TestCheckCast)
         bool failed = false;
         auto classLinker = AddProgramToClassLinker(source, failed);
         ASSERT_FALSE(failed);
-        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("R", 2), failed);
+        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("R", 2_I), failed);
         ASSERT_FALSE(failed);
 
         auto *obj = AllocArray(objectClass, sizeof(uint8_t), 0);
@@ -2111,7 +2112,7 @@ TEST_F(InterpreterTest, TestCheckCast)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2142,7 +2143,7 @@ TEST_F(InterpreterTest, TestCheckCast)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2152,14 +2153,14 @@ TEST_F(InterpreterTest, TestCheckCast)
         bool failed = false;
         auto classLinker = AddProgramToClassLinker(source, failed);
         ASSERT_FALSE(failed);
-        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("C", 2), failed);
+        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("C", 2_I), failed);
         ASSERT_FALSE(failed);
 
         auto *obj = AllocArray(objectClass, sizeof(uint8_t), 0);
         f->GetAccAsVReg().SetReference(obj);
 
         auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        RuntimeInterface::SetupResolvedClass(classLinker->GetExtension(ctx)->GetClass(GetArrayDescriptor("A", 2)));
+        RuntimeInterface::SetupResolvedClass(classLinker->GetExtension(ctx)->GetClass(GetArrayDescriptor("A", 2_I)));
         Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
         RuntimeInterface::SetupResolvedClass(nullptr);
     }
@@ -2177,7 +2178,7 @@ TEST_F(InterpreterTest, TestCheckCast)
 
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2248,7 +2249,7 @@ TEST_F(InterpreterTest, TestIsInstanceInheritance)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2282,7 +2283,7 @@ TEST_F(InterpreterTest, TestIsInstanceInheritance)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2292,14 +2293,14 @@ TEST_F(InterpreterTest, TestIsInstanceInheritance)
         bool failed = false;
         auto classLinker = AddProgramToClassLinker(source, failed);
         ASSERT_FALSE(failed);
-        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("C", 2), failed);
+        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("C", 2_I), failed);
         ASSERT_FALSE(failed);
 
         auto *obj = AllocArray(objectClass, sizeof(uint8_t), 0);
         f->GetAccAsVReg().SetReference(obj);
 
         auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        RuntimeInterface::SetupResolvedClass(classLinker->GetExtension(ctx)->GetClass(GetArrayDescriptor("A", 2)));
+        RuntimeInterface::SetupResolvedClass(classLinker->GetExtension(ctx)->GetClass(GetArrayDescriptor("A", 2_I)));
         Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
         RuntimeInterface::SetupResolvedClass(nullptr);
 
@@ -2316,7 +2317,7 @@ TEST_F(InterpreterTest, TestIsInstanceInheritance)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2350,7 +2351,7 @@ TEST_F(InterpreterTest, TestIsInstanceInheritance)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter->Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2360,14 +2361,14 @@ TEST_F(InterpreterTest, TestIsInstanceInheritance)
         bool failed = false;
         auto classLinker = AddProgramToClassLinker(source, failed);
         ASSERT_FALSE(failed);
-        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("A", 2), failed);
+        auto objectClass = InitObjectClass(classLinker.get(), GetArrayDescriptor("A", 2_I), failed);
         ASSERT_FALSE(failed);
 
         auto *obj = AllocArray(objectClass, sizeof(uint8_t), 0);
         f->GetAccAsVReg().SetReference(obj);
 
         auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        RuntimeInterface::SetupResolvedClass(classLinker->GetExtension(ctx)->GetClass(GetArrayDescriptor("C", 2)));
+        RuntimeInterface::SetupResolvedClass(classLinker->GetExtension(ctx)->GetClass(GetArrayDescriptor("C", 2_I)));
         Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
         RuntimeInterface::SetupResolvedClass(nullptr);
 
@@ -2384,7 +2385,7 @@ TEST_F(InterpreterTest, TestVirtualCalls)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2426,17 +2427,17 @@ TEST_F(InterpreterTest, TestVirtualCalls)
         Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
         RuntimeInterface::SetupResolvedMethod(nullptr);
 
-        ASSERT_EQ(f->GetAccAsVReg().Get(), 3);
+        ASSERT_EQ(f->GetAccAsVReg().Get(), 3L);
     }
 
     {
         auto emitter = BytecodeEmitter {};
-        emitter.CallVirt(0, 1, 2, 3, RuntimeInterface::METHOD_ID.AsIndex());
+        emitter.CallVirt(0U, 1U, 2U, 3U, RuntimeInterface::METHOD_ID.AsIndex());
         emitter.Return();
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2473,16 +2474,16 @@ TEST_F(InterpreterTest, TestVirtualCalls)
         auto *obj = AllocObject(objectClass);
 
         auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(0).SetReference(obj);
-        frameHandler.GetVReg(1).Set(1);
-        frameHandler.GetVReg(2).Set(2);
-        frameHandler.GetVReg(3).Set(3);
+        frameHandler.GetVReg(0U).SetReference(obj);
+        frameHandler.GetVReg(1U).Set(1L);
+        frameHandler.GetVReg(2U).Set(2L);
+        frameHandler.GetVReg(3U).Set(3L);
 
         RuntimeInterface::SetupResolvedMethod(callee);
         Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
         RuntimeInterface::SetupResolvedMethod(nullptr);
 
-        ASSERT_EQ(f->GetAccAsVReg().Get(), 8);
+        ASSERT_EQ(f->GetAccAsVReg().Get(), 8L);
     }
 
     {
@@ -2492,7 +2493,7 @@ TEST_F(InterpreterTest, TestVirtualCalls)
         std::vector<uint8_t> bytecode;
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2530,17 +2531,17 @@ TEST_F(InterpreterTest, TestVirtualCalls)
         auto *obj = AllocObject(objectClass);
 
         auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(0).SetReference(obj);
-        frameHandler.GetVReg(1).Set(1);
-        frameHandler.GetVReg(2).Set(2);
-        frameHandler.GetVReg(3).Set(3);
-        frameHandler.GetVReg(4).Set(4);
+        frameHandler.GetVReg(0U).SetReference(obj);
+        frameHandler.GetVReg(1U).Set(1L);
+        frameHandler.GetVReg(2U).Set(2L);
+        frameHandler.GetVReg(3U).Set(3L);
+        frameHandler.GetVReg(4U).Set(4L);
 
         RuntimeInterface::SetupResolvedMethod(callee);
         Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
         RuntimeInterface::SetupResolvedMethod(nullptr);
 
-        ASSERT_EQ(f->GetAccAsVReg().Get(), 12);
+        ASSERT_EQ(f->GetAccAsVReg().Get(), 12L);
     }
 }
 
@@ -2554,7 +2555,7 @@ TEST_F(InterpreterTest, TestVirtualCallsExceptions)
         emitter.ReturnObj();
         ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-        auto f = CreateFrame(16, nullptr, nullptr);
+        auto f = CreateFrame(16U, nullptr, nullptr);
         InitializeFrame(f.get());
         auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2686,18 +2687,18 @@ static std::pair<PandaUniquePtr<Method>, std::unique_ptr<const panda_file::File>
 
 CompilerInterface::ReturnReason EntryPoint(CompilerInterface::ExecState *state)
 {
-    ASSERT(state->GetNumArgs() == 2);
+    ASSERT(state->GetNumArgs() == 2U);
 
-    ASSERT(state->GetFrame()->GetSize() == 16);
+    ASSERT(state->GetFrame()->GetSize() == 16U);
 
     [[maybe_unused]] auto frameHandler = StaticFrameHandler(state->GetFrame());
-    ASSERT(frameHandler.GetVReg(1).GetLong() == 1);
-    ASSERT(frameHandler.GetVReg(3).GetLong() == 2);
+    ASSERT(frameHandler.GetVReg(1U).GetLong() == 1L);
+    ASSERT(frameHandler.GetVReg(3U).GetLong() == 2L);
 
-    ASSERT(frameHandler.GetVReg(2).GetLong() == 3);
-    ASSERT(frameHandler.GetVReg(4).GetLong() == 4);
+    ASSERT(frameHandler.GetVReg(2U).GetLong() == 3L);
+    ASSERT(frameHandler.GetVReg(4U).GetLong() == 4L);
 
-    int64_t v = 100 + state->GetArg(0).GetLong() + state->GetArg(1).GetLong();
+    int64_t v = 100L + state->GetArg(0).GetLong() + state->GetArg(1).GetLong();
     interpreter::VRegister acc;
     acc.Set(0);
     acc.Set(v);
@@ -2711,15 +2712,15 @@ CompilerInterface::ReturnReason EntryPoint(CompilerInterface::ExecState *state)
 // NOTE (Baladurin, Udovichenko) change for new interop
 TEST_F(InterpreterTest, DISABLED_TestCallNative)
 {
-    size_t vregNum = 10;
+    size_t vregNum = 10U;
 
     BytecodeEmitter emitter;
 
     // first call hotness_counter is 0
-    emitter.CallShort(1, 3, RuntimeInterface::METHOD_ID.AsIndex());
-    emitter.StaWide(5);
+    emitter.CallShort(1U, 3U, RuntimeInterface::METHOD_ID.AsIndex());
+    emitter.StaWide(5U);
     // second call hotness counter is 1 -> native call
-    emitter.CallShort(5, 6, RuntimeInterface::METHOD_ID.AsIndex());
+    emitter.CallShort(5U, 6U, RuntimeInterface::METHOD_ID.AsIndex());
     // native call skips this return
     emitter.ReturnWide();
     emitter.Addi(1);
@@ -2728,17 +2729,17 @@ TEST_F(InterpreterTest, DISABLED_TestCallNative)
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
 
-    auto f = CreateFrame(16, nullptr, nullptr);
+    auto f = CreateFrame(16U, nullptr, nullptr);
     InitializeFrame(f.get());
 
     auto frameHandler = StaticFrameHandler(f.get());
-    std::vector<int64_t> args1 = {1, 2};
-    frameHandler.GetVReg(1).SetPrimitive(args1[0]);
-    frameHandler.GetVReg(3).SetPrimitive(args1[1]);
+    std::vector<int64_t> args1 = {1L, 2L};
+    frameHandler.GetVReg(1U).SetPrimitive(args1[0]);
+    frameHandler.GetVReg(3U).SetPrimitive(args1[1]);
 
-    std::vector<int64_t> args2 = {3, 4};
-    frameHandler.GetVReg(2).SetPrimitive(args2[0]);
-    frameHandler.GetVReg(4).SetPrimitive(args2[1]);
+    std::vector<int64_t> args2 = {3L, 4L};
+    frameHandler.GetVReg(2U).SetPrimitive(args2[0]);
+    frameHandler.GetVReg(4U).SetPrimitive(args2[1]);
 
     auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
     auto methodData = CreateMethod(cls, f.get(), bytecode);
@@ -2760,7 +2761,7 @@ TEST_F(InterpreterTest, DISABLED_TestCallNative)
 
     RuntimeInterface::SetupResolvedMethod(nullptr);
 
-    EXPECT_EQ(f->GetAccAsVReg().GetLong(), 102);
+    EXPECT_EQ(f->GetAccAsVReg().GetLong(), 102L);
 }
 
 class InterpreterWithSTWTest : public testing::Test {
@@ -2814,11 +2815,11 @@ DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    size_t vregNum1 = 16;
+    size_t vregNum1 = 16U;
 
     BytecodeEmitter emitter1;
 
-    emitter1.CallShort(1, 3, RuntimeInterface::METHOD_ID.AsIndex());
+    emitter1.CallShort(1U, 3U, RuntimeInterface::METHOD_ID.AsIndex());
     emitter1.ReturnWide();
 
     std::vector<uint8_t> bytecode1;
@@ -2832,8 +2833,8 @@ DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
     f1->SetMethod(method1.get());
 
     auto frameHandler1 = StaticFrameHandler(f1.get());
-    frameHandler1.GetVReg(1).SetPrimitive(1);
-    frameHandler1.GetVReg(3).SetPrimitive(2);
+    frameHandler1.GetVReg(1U).SetPrimitive(1L);
+    frameHandler1.GetVReg(3U).SetPrimitive(2L);
 
     size_t vregNum2 = 65535;
 

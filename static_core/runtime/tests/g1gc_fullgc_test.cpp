@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include "iostream"
+#include "libpandabase/utils/utils.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
@@ -350,12 +351,12 @@ TEST_F(G1GCFullGCTest, TestIntensiveAlloc)
             // Ordinary young shall not be broken when intermixed with explicits
             int i = 0;
             size_t allocated = 0;
-            while (allocated < 2 * heapSize) {
+            while (allocated < 2U * heapSize) {
                 ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
                                                                        ySpaceCheck);
                 allocated += bytes;
                 // NOLINTNEXTLINE(readability-magic-numbers)
-                if (i++ % 100 == 0) {
+                if (i++ % 100_I == 0) {
                     gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
                 }
             }
@@ -374,7 +375,7 @@ TEST_F(G1GCFullGCTest, TestIntensiveAlloc)
                 gcHappened = true;
             });
             gc->AddListener(&gchook);
-            while (allocated < 4 * heapSize) {
+            while (allocated < 4U * heapSize) {
                 ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
                                                                        ySpaceCheck);
                 MakeObjectsAlive(ov1, 1);
@@ -427,7 +428,7 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
             auto oldRootSize = rootSize;
             int i = 0;
             // NOLINTNEXTLINE(readability-magic-numbers)
-            while (tFree > 2.2 * youngSize) {
+            while (tFree > 2.2F * youngSize) {
                 ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
                                                                        ySpaceCheck);
                 MakeObjectsAlive(ov1, 1);
@@ -479,7 +480,7 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
         [[maybe_unused]] auto hSpaceCheck = [this](uintptr_t addr) -> bool { return !IsInYoung(addr); };
         [[maybe_unused]] auto tFree =
             reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
-        const size_t yObjSize = maxYSize / 10;
+        const size_t yObjSize = maxYSize / 10U;
         gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
         size_t initialHeap = ms->GetFootprintHeap();
 
@@ -489,7 +490,7 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
             auto oldRootSize = rootSize;
             int i = 0;
             // NOLINTNEXTLINE(readability-magic-numbers)
-            while (tFree > 2.2 * youngSize) {
+            while (tFree > 2.2F * youngSize) {
                 ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
                                                                        ySpaceCheck);
                 MakeObjectsAlive(ov1, 1);

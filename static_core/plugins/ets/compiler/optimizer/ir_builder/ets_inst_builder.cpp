@@ -14,6 +14,7 @@
  */
 
 #include <cstdint>
+#include "libpandabase/utils/utils.h"
 #include "compiler_logger.h"
 #include "optimizer/ir_builder/inst_builder.h"
 #include "optimizer/ir_builder/ir_builder.h"
@@ -89,7 +90,7 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, DataType::
             break;
     }
     auto intrinsic = GetGraph()->CreateInstIntrinsic(type, pc, id);
-    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
 
     intrinsic->AppendInput(nullCheck);
     intrinsic->AddInputType(DataType::REFERENCE);
@@ -158,7 +159,7 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::
             break;
     }
     auto intrinsic = GetGraph()->CreateInstIntrinsic(type, pc, id);
-    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3_I);
 
     intrinsic->AppendInput(nullCheck);
     intrinsic->AddInputType(DataType::REFERENCE);

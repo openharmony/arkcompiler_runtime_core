@@ -40,10 +40,7 @@ ArenaAllocatorT<USE_OOM_HANDLER>::ArenaAllocatorT(SpaceType spaceType, BaseMemSt
 template <bool USE_OOM_HANDLER>
 ArenaAllocatorT<USE_OOM_HANDLER>::ArenaAllocatorT(OOMHandler oomHandler, SpaceType spaceType, BaseMemStats *memStats,
                                                   bool limitAllocSizeByPool)
-    : memStats_(memStats),
-      spaceType_(spaceType),
-      oomHandler_(oomHandler),
-      limitAllocSizeByPool_(limitAllocSizeByPool)
+    : memStats_(memStats), spaceType_(spaceType), oomHandler_(oomHandler), limitAllocSizeByPool_(limitAllocSizeByPool)
 {
     ASSERT(USE_OOM_HANDLER);
     if (!ON_STACK_ALLOCATION_ENABLED) {

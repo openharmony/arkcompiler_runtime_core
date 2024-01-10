@@ -23,6 +23,7 @@
 #include "assembly-parser.h"
 #include "code_info/code_info_builder.h"
 #include "libpandabase/utils/cframe_layout.h"
+#include "libpandabase/utils/utils.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/stack_walker-inl.h"
@@ -172,7 +173,7 @@ TEST_F(StackWalkerTest, ModifyVreg)
             HOOK_ASSERT(!walker.IsCFrame(), return 1);
             success = walker.IterateVRegsWithInfo([&wasSet, &walker](const auto &regInfo, const auto &reg) {
                 if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == 27, return false);
+                    HOOK_ASSERT(reg.GetLong() == 27L, return false);
                     walker.SetVRegValue(regInfo, FRAME_VALUES[0]);
                     wasSet = true;
                 }
@@ -185,7 +186,7 @@ TEST_F(StackWalkerTest, ModifyVreg)
             HOOK_ASSERT(walker.IsCFrame(), return 1);
             success = walker.IterateVRegsWithInfo([&walker](const auto &regInfo, const auto &reg) {
                 if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == 27, return false);
+                    HOOK_ASSERT(reg.GetLong() == 27L, return false);
                     walker.SetVRegValue(regInfo, FRAME_VALUES[1]);
                 }
                 return true;
@@ -196,8 +197,8 @@ TEST_F(StackWalkerTest, ModifyVreg)
             HOOK_ASSERT(walker.IsCFrame(), return 1);
             success = walker.IterateVRegsWithInfo([&walker](const auto &regInfo, const auto &reg) {
                 if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == 27, return true;);
-                    walker.SetVRegValue(regInfo, FRAME_VALUES[2]);
+                    HOOK_ASSERT(reg.GetLong() == 27L, return true;);
+                    walker.SetVRegValue(regInfo, FRAME_VALUES[2U]);
                 }
                 return true;
             });
@@ -226,7 +227,7 @@ TEST_F(StackWalkerTest, ModifyVreg)
             HOOK_ASSERT(walker.IsCFrame(), return 1);
             success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
                 if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[2]), return true;);
+                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[2U]), return true;);
                 }
                 return true;
             });
@@ -237,7 +238,7 @@ TEST_F(StackWalkerTest, ModifyVreg)
         runCount++;
         return 0;
     });
-    ASSERT_EQ(runCount, 2);
+    ASSERT_EQ(runCount, 2_I);
 }
 
 void StackWalkerTest::TestModifyManyVregs(bool isCompiled)
@@ -357,14 +358,14 @@ void StackWalkerTest::TestModifyManyVregs(bool isCompiled)
                             HOOK_ASSERT(regIdx == reg.GetLong(), return false);
                         }
                         // NOLINTNEXTLINE(readability-magic-numbers)
-                        walker.SetVRegValue(regInfo, regIdx + 100000000000);
+                        walker.SetVRegValue(regInfo, regIdx + 100000000000L);
                     }
                     regIndex++;
                 }
                 return true;
             });
             HOOK_ASSERT(success, return 1);
-            HOOK_ASSERT(regIndex >= 32, return 1);
+            HOOK_ASSERT(regIndex >= 32_I, return 1);
             firstRun = false;
         } else {
             success = walker.IterateVRegsWithInfo([&regIndex, &obj](const auto &regInfo, const auto &reg) {
@@ -382,7 +383,7 @@ void StackWalkerTest::TestModifyManyVregs(bool isCompiled)
                 return true;
             });
             HOOK_ASSERT(success, return 1);
-            HOOK_ASSERT(regIndex >= 32, return 1);
+            HOOK_ASSERT(regIndex >= 32_I, return 1);
         }
 
         HOOK_ASSERT(success, return 1);

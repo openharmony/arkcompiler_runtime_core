@@ -45,7 +45,7 @@ public:
             // There is no room to store references.
             // Create a new vector and store everithing inside it
             auto *newRefVector = gc_->GetInternalAllocator()->template New<RefVector>();
-            newRefVector->reserve(refVector->capacity() * 2);
+            newRefVector->reserve(refVector->capacity() * 2U);
             refs_->push_back(newRefVector);
             refVector = newRefVector;
         }

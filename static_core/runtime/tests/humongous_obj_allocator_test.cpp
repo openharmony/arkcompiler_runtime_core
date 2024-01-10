@@ -129,7 +129,7 @@ TEST_F(HumongousObjAllocatorTest, SimpleAllocateDifferentObjSizeTest)
     NonObjectHumongousObjAllocator allocator(memStats);
     std::vector<void *> values;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (size_t i = 0; i < 20; i++) {
+    for (size_t i = 0; i < 20U; i++) {
         size_t poolSize = DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE * i;
         size_t allocSize = poolSize - sizeof(POOL_HEADER_SIZE) - GetAlignmentInBytes(LOG_ALIGN_MAX);
         AddMemoryPoolToAllocator(allocator, poolSize);
@@ -142,7 +142,7 @@ TEST_F(HumongousObjAllocatorTest, SimpleAllocateDifferentObjSizeTest)
         allocator.Free(i);
     }
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (size_t i = 0; i < 20; i++) {
+    for (size_t i = 0; i < 20U; i++) {
         void *mem = allocator.Alloc(MAX_ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr);
     }
@@ -165,7 +165,7 @@ TEST_F(HumongousObjAllocatorTest, AllocateRandomFreeTest)
 
 TEST_F(HumongousObjAllocatorTest, AlignmentAllocTest)
 {
-    static constexpr size_t MAX_ALLOC = MIN_ALLOC_SIZE + 10;
+    static constexpr size_t MAX_ALLOC = MIN_ALLOC_SIZE + 10U;
     static constexpr size_t POOLS_COUNT =
         (MAX_ALLOC - MIN_ALLOC_SIZE + 1) * (HUMONGOUS_LOG_MAX_ALIGN - LOG_ALIGN_MIN + 1);
     AlignedAllocFreeTest<MIN_ALLOC_SIZE, MAX_ALLOC, LOG_ALIGN_MIN, HUMONGOUS_LOG_MAX_ALIGN>(POOLS_COUNT);

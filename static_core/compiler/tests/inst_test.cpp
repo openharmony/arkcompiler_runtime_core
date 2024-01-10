@@ -14,6 +14,7 @@
  */
 
 #include "unit_test.h"
+#include "libpandabase/utils/utils.h"
 #include "optimizer/ir_builder/inst_builder-inl.h"
 
 namespace panda::compiler {
@@ -141,7 +142,7 @@ TEST_F(InstTest, Arithmetics)
     GRAPH(GetGraph())
     {
         CONSTANT(0U, 12U);
-        CONSTANT(1U, 17.23);
+        CONSTANT(1U, 17.23_D);
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -288,7 +289,7 @@ TEST_F(InstTest, ReturnDouble)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 1.1);
+        CONSTANT(0U, 1.1_D);
         BASIC_BLOCK(2U, -1L)
         {
             INST(1U, Opcode::Return).f64().Inputs(0U);

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 
@@ -64,7 +65,7 @@ static ets_int effective_types_foo_I(EtsEnv *, ets_class, ets_int v)
     if (v == 1) {
         return 0;
     }
-    return 99;
+    return 99_I;
 }
 
 static ets_int effective_types_foo_D(EtsEnv *, ets_class, ets_double v)
@@ -72,20 +73,20 @@ static ets_int effective_types_foo_D(EtsEnv *, ets_class, ets_double v)
     if (v == 1.0) {
         return 1;
     }
-    return 99;
+    return 99_I;
 }
 
 static ets_double effective_types_foo(EtsEnv *, ets_class)
 {
-    return 2.0;
+    return 2.0F;
 }
 
 static ets_double effective_types_fooUnity(EtsEnv *, ets_class, ets_double v)
 {
     if (v == 1.0) {
-        return 3.0;
+        return 3.0F;
     }
-    return 99;
+    return 99.0F;
 }
 
 TEST_F(EffectiveTypeTest, TestGetStaticMethod)

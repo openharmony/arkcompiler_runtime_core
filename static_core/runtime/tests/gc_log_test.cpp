@@ -17,6 +17,7 @@
 #include <cstring>
 #include <string>
 
+#include "libpandabase/utils/utils.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/class_linker.h"
@@ -176,13 +177,13 @@ TEST_F(GCTestLog, GenGCYoungCauseFullCollectionLogTest)
 
         uint32_t garbageRate = Runtime::GetOptions().GetG1RegionGarbageRateThreshold();
         // NOLINTNEXTLINE(readability-magic-numbers)
-        size_t stringLen = garbageRate * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
+        size_t stringLen = garbageRate * DEFAULT_REGION_SIZE / 100U + sizeof(coretypes::String);
 
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        VMHandle<coretypes::Array> arrays[3];
+        VMHandle<coretypes::Array> arrays[3U];
         {
             arrays[0] =
-                VMHandle<coretypes::Array>(thread, objectAllocator.AllocArray(2, ClassRoot::ARRAY_STRING, false));
+                VMHandle<coretypes::Array>(thread, objectAllocator.AllocArray(2U, ClassRoot::ARRAY_STRING, false));
             arrays[0]->Set(0, objectAllocator.AllocString(stringLen));
         }
     }
@@ -201,12 +202,12 @@ TEST_F(GCTestLog, G1GCMixedCollectionLogTest)
 
     uint32_t garbageRate = Runtime::GetOptions().GetG1RegionGarbageRateThreshold();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    size_t bigStringLen = garbageRate * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
+    size_t bigStringLen = garbageRate * DEFAULT_REGION_SIZE / 100U + sizeof(coretypes::String);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    size_t bigStringLen1 = (garbageRate + 1) * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
+    size_t bigStringLen1 = (garbageRate + 1) * DEFAULT_REGION_SIZE / 100U + sizeof(coretypes::String);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    size_t bigStringLen2 = (garbageRate + 2) * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
-    size_t smallLen = DEFAULT_REGION_SIZE / 2 + sizeof(coretypes::String);
+    size_t bigStringLen2 = (garbageRate + 2U) * DEFAULT_REGION_SIZE / 100U + sizeof(coretypes::String);
+    size_t smallLen = DEFAULT_REGION_SIZE / 2U + sizeof(coretypes::String);
 
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
@@ -220,11 +221,11 @@ TEST_F(GCTestLog, G1GCMixedCollectionLogTest)
 
     VMHandle<coretypes::Array> holder;
     VMHandle<ObjectHeader> young;
-    holder = VMHandle<coretypes::Array>(thread, objectAllocator.AllocArray(4, ClassRoot::ARRAY_STRING, false));
-    holder->Set(0, objectAllocator.AllocString(bigStringLen));
-    holder->Set(1, objectAllocator.AllocString(bigStringLen1));
-    holder->Set(2, objectAllocator.AllocString(bigStringLen2));
-    holder->Set(3, objectAllocator.AllocString(smallLen));
+    holder = VMHandle<coretypes::Array>(thread, objectAllocator.AllocArray(4U, ClassRoot::ARRAY_STRING, false));
+    holder->Set(0_I, objectAllocator.AllocString(bigStringLen));
+    holder->Set(1_I, objectAllocator.AllocString(bigStringLen1));
+    holder->Set(2_I, objectAllocator.AllocString(bigStringLen2));
+    holder->Set(3_I, objectAllocator.AllocString(smallLen));
 
     {
         ScopedNativeCodeThread sn(thread);
@@ -239,10 +240,10 @@ TEST_F(GCTestLog, G1GCMixedCollectionLogTest)
     VMHandle<ObjectHeader> current;
     current = VMHandle<ObjectHeader>(thread, objectAllocator.AllocArray(smallLen, ClassRoot::ARRAY_U8, false));
 
-    holder->Set(0, static_cast<ObjectHeader *>(nullptr));
-    holder->Set(1, static_cast<ObjectHeader *>(nullptr));
-    holder->Set(2, static_cast<ObjectHeader *>(nullptr));
-    holder->Set(3, static_cast<ObjectHeader *>(nullptr));
+    holder->Set(0_I, static_cast<ObjectHeader *>(nullptr));
+    holder->Set(1_I, static_cast<ObjectHeader *>(nullptr));
+    holder->Set(2_I, static_cast<ObjectHeader *>(nullptr));
+    holder->Set(3_I, static_cast<ObjectHeader *>(nullptr));
 
     {
         ScopedNativeCodeThread sn(thread);

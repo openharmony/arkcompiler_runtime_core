@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/tests/mock/mock_test_helper.h"
 
 namespace panda::ets::test {

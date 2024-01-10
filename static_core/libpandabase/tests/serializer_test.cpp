@@ -14,6 +14,7 @@
  */
 
 #include "serializer/serializer.h"
+#include "libpandabase/utils/utils.h"
 #include <gtest/gtest.h>
 
 namespace panda {
@@ -95,11 +96,11 @@ TEST_F(SerializatorTest, TestPodTypes)
     TestPod<int32_t>(0xfe52567fU);
     TestPod<int64_t>(0xff1234fdec57891bU);
 
-    TestPod<float>(0.234664);
-    TestPod<double>(22345.3453453);
-    TestPod<long double>(99453.64345);
+    TestPod<float>(0.234664_D);
+    TestPod<double>(22345.3453453_D);
+    TestPod<long double>(99453.64345_D);
 
-    TestPod<PodStruct>({0xffU, -23458L, 10345893U, -98343451L, -3.54634, 1.44e6});
+    TestPod<PodStruct>({0xffU, -23458L, 10345893U, -98343451L, -3.54634_D, 1.44e6});
 }
 
 TEST_F(SerializatorTest, TestString)

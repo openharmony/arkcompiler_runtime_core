@@ -643,7 +643,7 @@ extern "C" void UnresolvedStoreStaticBarrieredEntrypoint(Method *method, uint32_
     // Store
     // Atomic with release order reason: assume store can be volatile
     auto ref = reinterpret_cast<uintptr_t>(objHandle.GetPtr());
-    ASSERT(sizeof(ref) == 4 || (ref & 0xFFFFFFFF00000000UL) == 0);
+    ASSERT(sizeof(ref) == 4U || (ref & 0xFFFFFFFF00000000UL) == 0);
     __atomic_store_n(fieldAddr, static_cast<uint32_t>(ref), std::memory_order_release);
     // Post-barrier
     if (!mem::IsEmptyBarrier(barrierSet->GetPostType())) {
@@ -1192,13 +1192,13 @@ extern "C" coretypes::Array *CreateMultiDimensionalArrayById(ManagedThread *thre
                                                              int32_t formatIdx)
 {
     switch (formatIdx) {
-        case 0:
+        case 0U:
             return CreateMultiDimArray<BytecodeInstruction::Format::V4_V4_ID16>(thread, frame, klass, caller, methodId,
                                                                                 pc);
-        case 1:
+        case 1U:
             return CreateMultiDimArray<BytecodeInstruction::Format::V4_V4_V4_V4_ID16>(thread, frame, klass, caller,
                                                                                       methodId, pc);
-        case 2:
+        case 2U:
             return CreateMultiDimArray<BytecodeInstruction::Format::V8_ID16>(thread, frame, klass, caller, methodId,
                                                                              pc);
         default:

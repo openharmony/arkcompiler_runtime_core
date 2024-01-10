@@ -47,12 +47,12 @@ static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
 {
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
-    if (jsArgc != 2) {
+    if (jsArgc != 2U) {
         InteropCtx::ThrowJSError(env, "GetEtsFunction: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
 
-    std::array<napi_value, 2> jsArgv {};
+    std::array<napi_value, 2U> jsArgv {};
     ASSERT(jsArgc == jsArgv.size());
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv.data(), nullptr, nullptr));
 
@@ -143,7 +143,7 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     status = napi_get_cb_info(env, info, &argc, argv.data(), &thisArg, &data);
     ASSERT(status == napi_ok);
 
-    if (argc != 4) {
+    if (argc != 4U) {
         LogError("CreateEtsRuntime: exactly 4 arguments are required");
         return napiFalse;
     }
@@ -163,21 +163,21 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     }
     auto indexPath = GetString(env, argv[1]);
 
-    napi_typeof(env, argv[2], &type);
+    napi_typeof(env, argv[2U], &type);
     if (type != napi_boolean) {
         LogError("CreateEtsRuntime: third argument is not a boolean");
         return napiFalse;
     }
     bool useJit;
-    napi_get_value_bool(env, argv[2], &useJit);
+    napi_get_value_bool(env, argv[2U], &useJit);
 
-    napi_typeof(env, argv[3], &type);
+    napi_typeof(env, argv[3U], &type);
     if (type != napi_boolean) {
         LogError("CreateEtsRuntime: fourth argument is not a boolean");
         return napiFalse;
     }
     bool useAot;
-    napi_get_value_bool(env, argv[3], &useAot);
+    napi_get_value_bool(env, argv[3U], &useAot);
 
     bool res = panda::ets::CreateRuntime(stdlibPath, indexPath, useJit, useAot);
     if (res) {

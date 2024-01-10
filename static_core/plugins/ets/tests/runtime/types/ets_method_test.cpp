@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "libpandabase/utils/utils.h"
 #include "get_test_class.h"
 #include "ets_coroutine.h"
 
@@ -112,11 +113,11 @@ TEST_F(EtsMethodTest, Invoke)
     ASSERT(sumMethod);
 
     EtsValue res = fooMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
-    ASSERT_EQ(res.GetAs<int32_t>(), 111);
+    ASSERT_EQ(res.GetAs<int32_t>(), 111_I);
     res = gooMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
-    ASSERT_EQ(res.GetAs<int32_t>(), 222);
+    ASSERT_EQ(res.GetAs<int32_t>(), 222_I);
     res = sumMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
-    ASSERT_EQ(res.GetAs<int32_t>(), 333);
+    ASSERT_EQ(res.GetAs<int32_t>(), 333_I);
 }
 
 TEST_F(EtsMethodTest, GetNumArgSlots)
@@ -156,9 +157,9 @@ TEST_F(EtsMethodTest, GetNumArgSlots)
     ASSERT_FALSE(foo2Method->IsPublic());
     ASSERT_TRUE(foo3Method->IsPublic());
 
-    ASSERT_EQ(foo1Method->GetNumArgSlots(), 0);
-    ASSERT_EQ(foo2Method->GetNumArgSlots(), 1);
-    ASSERT_EQ(foo3Method->GetNumArgSlots(), 5);
+    ASSERT_EQ(foo1Method->GetNumArgSlots(), 0U);
+    ASSERT_EQ(foo2Method->GetNumArgSlots(), 1U);
+    ASSERT_EQ(foo3Method->GetNumArgSlots(), 5U);
 }
 
 TEST_F(EtsMethodTest, GetArgType)
@@ -282,24 +283,24 @@ TEST_F(EtsMethodTest, GetLineNumFromBytecodeOffset)
     EtsMethod *fooMethod = klass->GetMethod("foo");
     ASSERT(fooMethod);
 
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(0), 5);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(1), 5);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(0U), 5_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(1U), 5_I);
 
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(2), 6);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(3), 6);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(4), 6);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(5), 6);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(6), 6);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(2U), 6_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(3U), 6_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(4U), 6_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(5U), 6_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(6U), 6_I);
 
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(7), 7);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(8), 7);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(7U), 7_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(8U), 7_I);
 
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(9), 8);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(10), 8);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(11), 8);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(12), 8);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(9U), 8_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(10U), 8_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(11U), 8_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(12U), 8_I);
 
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(13), 9);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(13U), 9_I);
 }
 
 TEST_F(EtsMethodTest, GetName)

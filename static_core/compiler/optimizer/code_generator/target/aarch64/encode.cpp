@@ -752,7 +752,7 @@ void Aarch64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
     GetMasm()->Frinta(VixlVReg(tmp), VixlVReg(src));
     GetMasm()->Fsub(VixlVReg(tmp), VixlVReg(src), VixlVReg(tmp));
     // NOLINTNEXTLINE(readability-magic-numbers)
-    GetMasm()->Fcmp(VixlVReg(tmp), 0.5);
+    GetMasm()->Fcmp(VixlVReg(tmp), 0.5F);
     GetMasm()->Cinc(VixlReg(dst), VixlReg(dst), vixl::aarch64::Condition::eq);
     GetMasm()->Bind(done);
 }

@@ -83,7 +83,7 @@ TEST_F(SourceManagerTest, General)
     ASSERT_EQ(sm_.GetSourceFileName(test_id2.first), "test2.pa");
     ASSERT_EQ(sm_.GetSourceFileName(test_id3.first), "test3.pa");
 
-    ASSERT_EQ(sm_.GetSourceFileName(ScriptId(5)), "");
+    ASSERT_EQ(sm_.GetSourceFileName(ScriptId(5U)), "");
 
     sm_.RemoveThread(pt_thread0);
     ASSERT_EQ(sm_.GetSourceFileName(test_id2.first), "test2.pa");

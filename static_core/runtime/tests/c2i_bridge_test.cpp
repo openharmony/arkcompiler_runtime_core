@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "assembly-parser.h"
+#include "libpandabase/utils/utils.h"
 #include "libpandafile/bytecode_emitter.h"
 #include "libpandafile/bytecode_instruction.h"
 #include "libpandafile/file_items.h"
@@ -278,14 +279,14 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeVoidNoArg)
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeIntNoArg)
 {
-    auto method = MakeNoArgsMethod(TypeId::I32, 5);
+    auto method = MakeNoArgsMethod(TypeId::I32, 5L);
     auto res = InvokeEntryPoint<int32_t>(method);
     ASSERT_EQ(res, 5);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLongNoArg)
 {
-    auto method = MakeNoArgsMethod(TypeId::I64, 7);
+    auto method = MakeNoArgsMethod(TypeId::I64, 7L);
 
     auto res = InvokeEntryPoint<int64_t>(method);
     ASSERT_EQ(res, 7);
@@ -294,10 +295,10 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLongNoArg)
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeDoubleNoArg)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto method = MakeNoArgsMethod(TypeId::F64, bit_cast<int64_t>(3.0));
+    auto method = MakeNoArgsMethod(TypeId::F64, bit_cast<int64_t>(3.0_D));
 
     auto res = InvokeEntryPoint<double>(method);
-    ASSERT_EQ(res, 3.0);
+    ASSERT_EQ(res, 3.0_D);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeObjNoArg)
@@ -311,59 +312,60 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeObjNoArg)
 /// Args tests:
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeInt)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32}, {5});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32}, {5L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 5);
+    auto res = InvokeEntryPoint<int32_t>(method, 5L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeInstanceInt)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32}, {0, 5}, true);
+    auto method = MakeCheckArgsMethod({TypeId::I32}, {0, 5L}, true);
 
-    auto res = InvokeEntryPoint<int32_t>(method, nullptr, 5);
+    auto res = InvokeEntryPoint<int32_t>(method, nullptr, 5L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke3Int)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32}, {3, 2, 1});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32}, {3L, 2L, 1L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 3, 2, 1);
+    auto res = InvokeEntryPoint<int32_t>(method, 3L, 2L, 1L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLong)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I64}, {7});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I64}, {7L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 7);
+    auto res = InvokeEntryPoint<int32_t>(method, 7L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeDouble)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::F64}, {bit_cast<int64_t>(2.0)});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::F64}, {bit_cast<int64_t>(2.0_D)});
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto res = InvokeEntryPoint<int32_t>(method, 2.0);
+    auto res = InvokeEntryPoint<int32_t>(method, 2.0_D);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke4Int)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32}, {4, 3, 2, 1});
+    auto method =
+        MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32}, {4L, 3L, 2L, 1L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 4, 3, 2, 1);
+    auto res = InvokeEntryPoint<int32_t>(method, 4L, 3L, 2L, 1L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke2Long)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I64, TypeId::I64}, {7, 8});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I64, TypeId::I64}, {7L, 8L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 7, 8);
+    auto res = InvokeEntryPoint<int32_t>(method, 7L, 8L);
     ASSERT_EQ(res, 1);
 }
 
@@ -372,9 +374,9 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke2Long)
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke4IntDouble)
 {
     auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::F64},
-                                      {4, 3, 2, 1, bit_cast<int64_t>(8.0)});
+                                      {4L, 3L, 2L, 1L, bit_cast<int64_t>(8.0_D)});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 4, 3, 2, 1, 8.0);
+    auto res = InvokeEntryPoint<int32_t>(method, 4L, 3L, 2L, 1L, 8.0_D);
     ASSERT_EQ(res, 1);
 }
 
@@ -382,22 +384,23 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke7Int)
 {
     auto method = MakeCheckArgsMethod(
         {TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32},
-        {7, 6, 5, 4, 3, 2, 1});
+        {7L, 6L, 5L, 4L, 3L, 2L, 1L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 7, 6, 5, 4, 3, 2, 1);
+    auto res = InvokeEntryPoint<int32_t>(method, 7L, 6L, 5L, 4L, 3L, 2L, 1L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke7Int8Double)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,
-                                       TypeId::I32, TypeId::I32, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64,
-                                       TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64},
-                                      {7, 6, 5, 4, 3, 2, 1, bit_cast<int64_t>(10.0), bit_cast<int64_t>(11.0),
-                                       bit_cast<int64_t>(12.0), bit_cast<int64_t>(13.0), bit_cast<int64_t>(14.0),
-                                       bit_cast<int64_t>(15.0), bit_cast<int64_t>(16.0), bit_cast<int64_t>(17.0)});
+    auto method = MakeCheckArgsMethod(
+        {TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,
+         TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64},
+        {7L, 6L, 5L, 4L, 3L, 2L, 1L, bit_cast<int64_t>(10.0_D), bit_cast<int64_t>(11.0_D), bit_cast<int64_t>(12.0_D),
+         bit_cast<int64_t>(13.0_D), bit_cast<int64_t>(14.0_D), bit_cast<int64_t>(15.0_D), bit_cast<int64_t>(16.0_D),
+         bit_cast<int64_t>(17.0_D)});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 7, 6, 5, 4, 3, 2, 1, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0);
+    auto res = InvokeEntryPoint<int32_t>(method, 7L, 6L, 5L, 4L, 3L, 2L, 1L, 10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D,
+                                         15.0_D, 16.0_D, 17.0_D);
     ASSERT_EQ(res, 1);
 }
 
@@ -405,9 +408,9 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke8Int)
 {
     auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,
                                        TypeId::I32, TypeId::I32, TypeId::I32},
-                                      {8, 7, 6, 5, 4, 3, 2, 1});
+                                      {8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 8, 7, 6, 5, 4, 3, 2, 1);
+    auto res = InvokeEntryPoint<int32_t>(method, 8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L);
     ASSERT_EQ(res, 1);
 }
 
@@ -416,13 +419,13 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke8Int9Double)
     auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,
                                        TypeId::I32, TypeId::I32, TypeId::I32, TypeId::F64, TypeId::F64, TypeId::F64,
                                        TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64},
-                                      {8, 7, 6, 5, 4, 3, 2, 1, bit_cast<int64_t>(10.0), bit_cast<int64_t>(11.0),
-                                       bit_cast<int64_t>(12.0), bit_cast<int64_t>(13.0), bit_cast<int64_t>(14.0),
-                                       bit_cast<int64_t>(15.0), bit_cast<int64_t>(16.0), bit_cast<int64_t>(17.0),
-                                       bit_cast<int64_t>(18.0)});
+                                      {8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L, bit_cast<int64_t>(10.0_D),
+                                       bit_cast<int64_t>(11.0_D), bit_cast<int64_t>(12.0_D), bit_cast<int64_t>(13.0_D),
+                                       bit_cast<int64_t>(14.0_D), bit_cast<int64_t>(15.0_D), bit_cast<int64_t>(16.0_D),
+                                       bit_cast<int64_t>(17.0_D), bit_cast<int64_t>(18.0_D)});
 
-    auto res =
-        InvokeEntryPoint<int32_t>(method, 8, 7, 6, 5, 4, 3, 2, 1, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0);
+    auto res = InvokeEntryPoint<int32_t>(method, 8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L, 10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D,
+                                         15.0_D, 16.0_D, 17.0_D, 18.0_D);
     ASSERT_EQ(res, 1);
 }
 

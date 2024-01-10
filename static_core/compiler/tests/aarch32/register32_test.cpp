@@ -101,7 +101,7 @@ TEST_F(Register32Test, TmpReg)
         ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
         if (encoder.GetScratchRegistersCount() != 0) {
             ScopedTmpRegU32 reg2(&encoder);
-            ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count - 2);
+            ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count - 2U);
         }
         {
             ScopedTmpReg reg2(&encoder, float_type);

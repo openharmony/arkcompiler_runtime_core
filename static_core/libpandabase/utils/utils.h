@@ -13,10 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_UTILS_H_
-#define PANDA_LIBPANDABASE_UTILS_UTILS_H_
+#ifndef PANDA_LIBPANDABASE_UTILS_UTILS_H
+#define PANDA_LIBPANDABASE_UTILS_UTILS_H
+
+#include "libpandabase/macros.h"
+
+#include <limits>
+
 namespace panda {
 // ----------------------------------------------------------------------------
+// User-defined suffixes
+constexpr int operator""_I(unsigned long long v)
+{
+    if (v > static_cast<unsigned long long>(std::numeric_limits<int>::max())) {
+        UNREACHABLE_CONSTEXPR();
+    }
+    return static_cast<int>(v);
+}
+
+constexpr double operator""_D(long double v)
+{
+    if (v < static_cast<long double>(std::numeric_limits<double>::lowest()) ||
+        v > static_cast<long double>(std::numeric_limits<double>::max())) {
+        UNREACHABLE_CONSTEXPR();
+    }
+    return static_cast<double>(v);
+}
+
 // General helper functions
 
 // Returns the value (0 .. 15) of a hexadecimal character c.
@@ -40,4 +63,4 @@ inline uint32_t HexValue(uint32_t c)
 }
 
 }  // namespace panda
-#endif
+#endif  // PANDA_LIBPANDABASE_UTILS_UTILS_H

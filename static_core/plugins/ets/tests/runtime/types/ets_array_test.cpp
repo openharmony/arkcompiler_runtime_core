@@ -20,6 +20,7 @@
 
 #include "types/ets_array.h"
 #include "types/ets_class.h"
+#include "libpandabase/utils/utils.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -87,16 +88,16 @@ static void TestEtsPrimitiveArray(uint32_t arrayLength, ClassType element)
 
 TEST_F(EtsArrayTest, PrimitiveEtsArray)
 {
-    uint32_t arrayLength = 100;
+    uint32_t arrayLength = 100U;
 
-    TestEtsPrimitiveArray<EtsBoolean, EtsClassRoot::BOOLEAN_ARRAY>(arrayLength, 1U);      // EtsBooleanArray
-    TestEtsPrimitiveArray<EtsByte, EtsClassRoot::BYTE_ARRAY>(arrayLength, 127);           // EtsByteArray
-    TestEtsPrimitiveArray<EtsChar, EtsClassRoot::CHAR_ARRAY>(arrayLength, 65000U);        // EtsCharArray
-    TestEtsPrimitiveArray<EtsShort, EtsClassRoot::SHORT_ARRAY>(arrayLength, 150);         // EtsShortArray
-    TestEtsPrimitiveArray<EtsInt, EtsClassRoot::INT_ARRAY>(arrayLength, 65000);           // EtsIntArray
-    TestEtsPrimitiveArray<EtsLong, EtsClassRoot::LONG_ARRAY>(arrayLength, 65000);         // EtsLongArray
-    TestEtsPrimitiveArray<EtsFloat, EtsClassRoot::FLOAT_ARRAY>(arrayLength, 65000.0F);    // EtsFloatArray
-    TestEtsPrimitiveArray<EtsDouble, EtsClassRoot::DOUBLE_ARRAY>(arrayLength, 65000.0F);  // EtsDoubleArray
+    TestEtsPrimitiveArray<EtsBoolean, EtsClassRoot::BOOLEAN_ARRAY>(arrayLength, 1U);       // EtsBooleanArray
+    TestEtsPrimitiveArray<EtsByte, EtsClassRoot::BYTE_ARRAY>(arrayLength, 127_I);          // EtsByteArray
+    TestEtsPrimitiveArray<EtsChar, EtsClassRoot::CHAR_ARRAY>(arrayLength, 65000U);         // EtsCharArray
+    TestEtsPrimitiveArray<EtsShort, EtsClassRoot::SHORT_ARRAY>(arrayLength, 150_I);        // EtsShortArray
+    TestEtsPrimitiveArray<EtsInt, EtsClassRoot::INT_ARRAY>(arrayLength, 65000_I);          // EtsIntArray
+    TestEtsPrimitiveArray<EtsLong, EtsClassRoot::LONG_ARRAY>(arrayLength, 65000L);         // EtsLongArray
+    TestEtsPrimitiveArray<EtsFloat, EtsClassRoot::FLOAT_ARRAY>(arrayLength, 65000.0F);     // EtsFloatArray
+    TestEtsPrimitiveArray<EtsDouble, EtsClassRoot::DOUBLE_ARRAY>(arrayLength, 65000.0_D);  // EtsDoubleArray
 }
 
 static void TestEtsObjectArray(const char *className, const char *source, uint32_t arrayLength)
@@ -128,7 +129,7 @@ TEST_F(EtsArrayTest, EtsObjectArray)
             i64 COLOR <static>
         }
     )";
-    TestEtsObjectArray("LRectangle;", source, 100);
+    TestEtsObjectArray("LRectangle;", source, 100U);
 
     source = R"(
         .language eTS
@@ -139,7 +140,7 @@ TEST_F(EtsArrayTest, EtsObjectArray)
             i64 COLOR <static>
         }
     )";
-    TestEtsObjectArray("LTriangle;", source, 1000);
+    TestEtsObjectArray("LTriangle;", source, 1000U);
 
     source = R"(
         .language eTS
@@ -150,7 +151,7 @@ TEST_F(EtsArrayTest, EtsObjectArray)
             i32 vy
         }
     )";
-    TestEtsObjectArray("LBall;", source, 10000);
+    TestEtsObjectArray("LBall;", source, 10000U);
 }
 
 }  // namespace panda::ets::test

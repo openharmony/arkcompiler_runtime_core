@@ -132,7 +132,7 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
     size_t failsCount = 0;
 
     auto lazyVerify = [&heapObjects, &referentObjects, &failsCount](const ObjectHeader *objectHeader,
-                                                                      const ObjectHeader *referent) {
+                                                                    const ObjectHeader *referent) {
         // Lazy verify during heap objects collection
         if (heapObjects.find(referent) == heapObjects.end()) {
             referentObjects.push_back(ObjectCache({objectHeader, referent}));
@@ -260,9 +260,8 @@ bool HeapVerifierIntoGC<LanguageConfig>::InAliveSpace(const ObjectHeader *object
 }
 
 template <class LanguageConfig>
-void HeapVerifierIntoGC<LanguageConfig>::AddToVerificationInfo(RefsVerificationInfo &verificationInfo,
-                                                               size_t refNumber, ObjectHeader *objectHeader,
-                                                               ObjectHeader *referent)
+void HeapVerifierIntoGC<LanguageConfig>::AddToVerificationInfo(RefsVerificationInfo &verificationInfo, size_t refNumber,
+                                                               ObjectHeader *objectHeader, ObjectHeader *referent)
 {
     if (this->InCollectableSpace(referent)) {
         ObjectVerificationInfo objInfo(referent);

@@ -52,7 +52,7 @@ public:
             case GCType::EPSILON_G1_GC:
                 options.SetGcType("epsilon-g1");
                 options.SetGcWorkersCount(0);
-                options.SetG1PromotionRegionAliveRate(100);
+                options.SetG1PromotionRegionAliveRate(100U);
                 break;
             default:
                 UNREACHABLE();
@@ -81,13 +81,13 @@ public:
     {
         std::vector<ObjectHeader *> objVector;
 
-        objVector.emplace_back(ObjectAllocator::AllocArray(GetAllocator<T>()->GetRegularObjectMaxSize() * 0.8,
+        objVector.emplace_back(ObjectAllocator::AllocArray(GetAllocator<T>()->GetRegularObjectMaxSize() * 0.8F,
                                                            ClassRoot::ARRAY_U8, false));
         objVector.emplace_back(
             ObjectAllocator::AllocArray(GetAllocator<T>()->GetLargeObjectMaxSize(), ClassRoot::ARRAY_U8, false));
-        objVector.emplace_back(
-            ObjectAllocator::AllocArray(GetAllocator<T>()->GetRegularObjectMaxSize() * 0.5, ClassRoot::ARRAY_U8, true));
-        objVector.emplace_back(ObjectAllocator::AllocString(GetAllocator<T>()->GetRegularObjectMaxSize() * 0.8));
+        objVector.emplace_back(ObjectAllocator::AllocArray(GetAllocator<T>()->GetRegularObjectMaxSize() * 0.5F,
+                                                           ClassRoot::ARRAY_U8, true));
+        objVector.emplace_back(ObjectAllocator::AllocString(GetAllocator<T>()->GetRegularObjectMaxSize() * 0.8F));
         objVector.emplace_back(ObjectAllocator::AllocString(GetAllocator<T>()->GetLargeObjectMaxSize()));
 
         return objVector;
@@ -113,7 +113,7 @@ public:
     }
 
     static constexpr size_t YOUNG_OBJECT_SIZE =
-        AlignUp(static_cast<size_t>(G1_REGION_SIZE * 0.8), DEFAULT_ALIGNMENT_IN_BYTES);
+        AlignUp(static_cast<size_t>(G1_REGION_SIZE * 0.8F), DEFAULT_ALIGNMENT_IN_BYTES);
 };
 
 TEST_F(EpsilonGCTest, TestObjectsAllocation)
@@ -126,7 +126,7 @@ TEST_F(EpsilonGCTest, TestObjectsAllocation)
     std::vector<ObjectHeader *> allocatedObjects = AllocObjectsForTest<ObjectAllocatorNoGen<>>();
     for (size_t i = 0; i < allocatedObjects.size(); ++i) {
         ASSERT_NE(allocatedObjects[i], nullptr);
-        if (i < 3) {  // First 3 elements are coretypes::Array
+        if (i < 3U) {  // First 3 elements are coretypes::Array
             ASSERT_NE(static_cast<coretypes::Array *>(allocatedObjects[i])->GetLength(), 0);
         } else {
             ASSERT_NE(static_cast<coretypes::String *>(allocatedObjects[i])->GetLength(), 0);
@@ -149,7 +149,7 @@ TEST_F(EpsilonGCTest, TestOOMAndGCTriggering)
     // First NUM_OF_ELEMS_CHECKED objects are added to nonmovable array to check their addresses after triggered GC
     do {
         objString =
-            ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen<>>()->GetRegularObjectMaxSize() * 0.8);
+            ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen<>>()->GetRegularObjectMaxSize() * 0.8F);
         if (strings.size() < NUM_OF_ELEMS_CHECKED) {
             strings.emplace_back(thread, objString);
             size_t lastElemIndx = strings.size() - 1;
@@ -157,7 +157,7 @@ TEST_F(EpsilonGCTest, TestOOMAndGCTriggering)
         }
     } while (objString != nullptr);
     VMHandle<coretypes::String> objAfterOom = VMHandle<coretypes::String>(
-        thread, ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen<>>()->GetRegularObjectMaxSize() * 0.8));
+        thread, ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen<>>()->GetRegularObjectMaxSize() * 0.8F));
     ASSERT_EQ(objAfterOom.GetPtr(), nullptr) << "Expected OOM";
     ASSERT_EQ(strings.size(), NUM_OF_ELEMS_CHECKED);
 
@@ -188,7 +188,7 @@ TEST_F(EpsilonGCTest, TestOOMAndGCTriggering)
 
     // Trying to alloc after triggering GC
     VMHandle<coretypes::String> objAfterTriggeredGc = VMHandle<coretypes::String>(
-        thread, ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen<>>()->GetRegularObjectMaxSize() * 0.8));
+        thread, ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen<>>()->GetRegularObjectMaxSize() * 0.8F));
     ASSERT_EQ(objAfterOom.GetPtr(), nullptr) << "Expected OOM";
 }
 
@@ -206,12 +206,12 @@ TEST_F(EpsilonG1GCTest, TestObjectsAllocation)
         ASSERT_NE(allocatedObject, nullptr);
     }
 
-    ASSERT_TRUE(ObjectToRegion(allocatedObjects[0])->HasFlag(RegionFlag::IS_EDEN));
-    ASSERT_FALSE(ObjectToRegion(allocatedObjects[0])->HasFlag(RegionFlag::IS_NONMOVABLE));
-    ASSERT_TRUE(ObjectToRegion(allocatedObjects[1])->HasFlag(RegionFlag::IS_LARGE_OBJECT));
-    ASSERT_TRUE(ObjectToRegion(allocatedObjects[2])->HasFlag(RegionFlag::IS_NONMOVABLE));
-    ASSERT_TRUE(ObjectToRegion(allocatedObjects[3])->HasFlag(RegionFlag::IS_EDEN));
-    ASSERT_TRUE(ObjectToRegion(allocatedObjects[4])->HasFlag(RegionFlag::IS_LARGE_OBJECT));
+    ASSERT_TRUE(ObjectToRegion(allocatedObjects[0U])->HasFlag(RegionFlag::IS_EDEN));
+    ASSERT_FALSE(ObjectToRegion(allocatedObjects[0U])->HasFlag(RegionFlag::IS_NONMOVABLE));
+    ASSERT_TRUE(ObjectToRegion(allocatedObjects[1U])->HasFlag(RegionFlag::IS_LARGE_OBJECT));
+    ASSERT_TRUE(ObjectToRegion(allocatedObjects[2U])->HasFlag(RegionFlag::IS_NONMOVABLE));
+    ASSERT_TRUE(ObjectToRegion(allocatedObjects[3U])->HasFlag(RegionFlag::IS_EDEN));
+    ASSERT_TRUE(ObjectToRegion(allocatedObjects[4U])->HasFlag(RegionFlag::IS_LARGE_OBJECT));
 }
 
 TEST_F(EpsilonG1GCTest, TestOOM)
@@ -258,7 +258,7 @@ TEST_F(EpsilonG1GCTest, TestGCTriggering)
     uintptr_t objAddr;
     uintptr_t hugeObjAddr;
 
-    nonmovable = VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(2, ClassRoot::ARRAY_STRING, true));
+    nonmovable = VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(2U, ClassRoot::ARRAY_STRING, true));
     obj = ObjectAllocator::AllocObjectInYoung();
     hugeObj = ObjectAllocator::AllocString(GetHumongousStringLength());
     nonmovable->Set(0, obj);

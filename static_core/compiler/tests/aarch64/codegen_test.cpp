@@ -17,6 +17,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "libpandabase/utils/utils.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/code_generator/codegen.h"
@@ -210,32 +211,32 @@ TEST_F(CodegenCallerSavedRegistersTest, SaveOnlyLiveRegisters)
             PARAMETER(i + ARGS_COUNT, i + ARGS_COUNT).f64();
         }
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1)
         {
-            INST(16, Opcode::Add).u64().Inputs(0, 1);
-            INST(17, Opcode::Add).u64().Inputs(16, 2);
-            INST(18, Opcode::Add).u64().Inputs(17, 3);
-            INST(19, Opcode::Add).u64().Inputs(18, 4);
-            INST(20, Opcode::Add).u64().Inputs(19, 5);
-            INST(21, Opcode::Add).u64().Inputs(20, 6);
-            INST(22, Opcode::Add).u64().Inputs(21, 7);
-            INST(23, Opcode::Add).f64().Inputs(8, 9);
-            INST(24, Opcode::Add).f64().Inputs(23, 10);
-            INST(25, Opcode::Add).f64().Inputs(24, 11);
-            INST(26, Opcode::Add).f64().Inputs(25, 12);
-            INST(27, Opcode::Add).f64().Inputs(26, 13);
-            INST(28, Opcode::Add).f64().Inputs(27, 14);
-            INST(29, Opcode::Add).f64().Inputs(28, 15);
-            INST(30, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(29);
-            INST(31, Opcode::Add).u64().Inputs(30, 22);
+            INST(16U, Opcode::Add).u64().Inputs(0, 1U);
+            INST(17U, Opcode::Add).u64().Inputs(16U, 2U);
+            INST(18U, Opcode::Add).u64().Inputs(17U, 3U);
+            INST(19U, Opcode::Add).u64().Inputs(18U, 4U);
+            INST(20U, Opcode::Add).u64().Inputs(19U, 5U);
+            INST(21U, Opcode::Add).u64().Inputs(20U, 6U);
+            INST(22U, Opcode::Add).u64().Inputs(21U, 7U);
+            INST(23U, Opcode::Add).f64().Inputs(8U, 9U);
+            INST(24U, Opcode::Add).f64().Inputs(23U, 10U);
+            INST(25U, Opcode::Add).f64().Inputs(24U, 11U);
+            INST(26U, Opcode::Add).f64().Inputs(25U, 12U);
+            INST(27U, Opcode::Add).f64().Inputs(26U, 13U);
+            INST(28U, Opcode::Add).f64().Inputs(27U, 14U);
+            INST(29U, Opcode::Add).f64().Inputs(28U, 15U);
+            INST(30U, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(29U);
+            INST(31U, Opcode::Add).u64().Inputs(30U, 22U);
 
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(32, Opcode::NewArray).ref().TypeId(8).Inputs(44, 31);
-            INST(33, Opcode::Return).ref().Inputs(32);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(32U, Opcode::NewArray).ref().TypeId(8U).Inputs(44U, 31U);
+            INST(33U, Opcode::Return).ref().Inputs(32U);
         }
     }
 
-    SetNumArgs(ARGS_COUNT * 2);
+    SetNumArgs(ARGS_COUNT * 2U);
     SetNumVirtRegs(0);
     GraphChecker(GetGraph()).Check();
     RegAlloc(GetGraph());
@@ -270,24 +271,24 @@ public:
     {
         GRAPH(GetGraph())
         {
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
                 INST(0, Opcode::SpillFill);
                 INST(1, Opcode::ReturnVoid);
             }
         }
 
-        int alignmentOffset = aligned ? 1 : 0;
+        unsigned int alignmentOffset = aligned ? 1 : 0;
 
         auto sfInst = INS(0).CastToSpillFill();
-        sfInst->AddSpill(0, 0 + alignmentOffset, DataType::Type::INT64);
-        sfInst->AddSpill(1, 1 + alignmentOffset, DataType::Type::INT64);
-        sfInst->AddSpill(0, 2 + alignmentOffset, DataType::Type::FLOAT64);
-        sfInst->AddSpill(1, 3 + alignmentOffset, DataType::Type::FLOAT64);
-        sfInst->AddFill(4 + alignmentOffset, 3, DataType::Type::INT64);
-        sfInst->AddFill(5 + alignmentOffset, 2, DataType::Type::INT64);
-        sfInst->AddFill(6 + alignmentOffset, 3, DataType::Type::FLOAT64);
-        sfInst->AddFill(7 + alignmentOffset, 2, DataType::Type::FLOAT64);
+        sfInst->AddSpill(0U, 0U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(1U, 1U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(0U, 2U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddSpill(1U, 3U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddFill(4U + alignmentOffset, 3U, DataType::Type::INT64);
+        sfInst->AddFill(5U + alignmentOffset, 2U, DataType::Type::INT64);
+        sfInst->AddFill(6U + alignmentOffset, 3U, DataType::Type::FLOAT64);
+        sfInst->AddFill(7U + alignmentOffset, 2U, DataType::Type::FLOAT64);
 
         SetNumArgs(0);
         SetNumVirtRegs(0);
@@ -317,27 +318,27 @@ public:
         EXPECT_EQ(visitor.GetAccessedPairVRegisters() & TEST_REGS, RegMask {0xF});
     }
 
-    void FormSpillFillInst(SpillFillInst *sfInst, int alignmentOffset)
+    void FormSpillFillInst(SpillFillInst *sfInst, unsigned int alignmentOffset)
     {
-        sfInst->AddSpill(0, 0 + alignmentOffset, DataType::Type::INT64);
-        sfInst->AddSpill(1, 1 + alignmentOffset, DataType::Type::INT64);
-        sfInst->AddSpill(2, 2 + alignmentOffset, DataType::Type::INT64);
-        sfInst->AddSpill(0, 3 + alignmentOffset, DataType::Type::FLOAT64);
-        sfInst->AddSpill(1, 4 + alignmentOffset, DataType::Type::FLOAT64);
-        sfInst->AddSpill(2, 5 + alignmentOffset, DataType::Type::FLOAT64);
-        sfInst->AddFill(6 + alignmentOffset, 3, DataType::Type::INT64);
-        sfInst->AddFill(7 + alignmentOffset, 4, DataType::Type::INT64);
-        sfInst->AddFill(8 + alignmentOffset, 5, DataType::Type::INT64);
-        sfInst->AddFill(9 + alignmentOffset, 3, DataType::Type::FLOAT64);
-        sfInst->AddFill(10 + alignmentOffset, 4, DataType::Type::FLOAT64);
-        sfInst->AddFill(11 + alignmentOffset, 5, DataType::Type::FLOAT64);
+        sfInst->AddSpill(0U, 0U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(1U, 1U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(2U, 2U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(0U, 3U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddSpill(1U, 4U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddSpill(2U, 5U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddFill(6U + alignmentOffset, 3U, DataType::Type::INT64);
+        sfInst->AddFill(7U + alignmentOffset, 4U, DataType::Type::INT64);
+        sfInst->AddFill(8U + alignmentOffset, 5U, DataType::Type::INT64);
+        sfInst->AddFill(9U + alignmentOffset, 3U, DataType::Type::FLOAT64);
+        sfInst->AddFill(10U + alignmentOffset, 4U, DataType::Type::FLOAT64);
+        sfInst->AddFill(11U + alignmentOffset, 5U, DataType::Type::FLOAT64);
     }
 
     void CheckSpillFillCoalescingForOddRegsNumber(bool aligned)
     {
         GRAPH(GetGraph())
         {
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
                 INST(0, Opcode::SpillFill);
                 INST(1, Opcode::ReturnVoid);
@@ -421,15 +422,15 @@ public:
         GRAPH(GetGraph())
         {
             PARAMETER(0, 0).ref();
-            BASIC_BLOCK(2, 3)
+            BASIC_BLOCK(2U, 3_I)
             {
-                INST(1, Opcode::LoadObject).s64().Inputs(0).TypeId(208U).ObjField(i);
-                INST(2, Opcode::AddI).s64().Inputs(1).Imm(1);
-                INST(3, Opcode::StoreObject).s64().Inputs(0, 2).TypeId(208U).ObjField(i);
+                INST(1U, Opcode::LoadObject).s64().Inputs(0).TypeId(208U).ObjField(i);
+                INST(2U, Opcode::AddI).s64().Inputs(1).Imm(1);
+                INST(3U, Opcode::StoreObject).s64().Inputs(0, 2_I).TypeId(208U).ObjField(i);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1)
             {
-                INST(4, Opcode::ReturnVoid);
+                INST(4U, Opcode::ReturnVoid);
             }
         }
         SetNumArgs(1);
@@ -480,30 +481,30 @@ public:
         RuntimeInterface::FieldPtr i = reinterpret_cast<void *>(0xDEADBEEF);  // NOLINT(modernize-use-auto)
         GRAPH(GetGraph())
         {
-            PARAMETER(0, 0).ref();
-            PARAMETER(1, 1).s64();
-            PARAMETER(2, 2).s64();
-            PARAMETER(3, 3).s64();
-            PARAMETER(4, 4).s64();
-            PARAMETER(5, 5).s64();
-            PARAMETER(6, 6).s64();
-            PARAMETER(7, 7).s64();
-            PARAMETER(8, 8).s64();
+            PARAMETER(0U, 0_I).ref();
+            PARAMETER(1U, 1_I).s64();
+            PARAMETER(2U, 2_I).s64();
+            PARAMETER(3U, 3_I).s64();
+            PARAMETER(4U, 4_I).s64();
+            PARAMETER(5U, 5_I).s64();
+            PARAMETER(6U, 6_I).s64();
+            PARAMETER(7U, 7_I).s64();
+            PARAMETER(8U, 8_I).s64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(10, Opcode::Add).s64().Inputs(1, 2);
-                INST(11, Opcode::Add).s64().Inputs(3, 4);
-                INST(12, Opcode::Add).s64().Inputs(5, 6);
-                INST(13, Opcode::Add).s64().Inputs(7, 8);
-                INST(14, Opcode::Add).s64().Inputs(10, 11);
-                INST(15, Opcode::Add).s64().Inputs(12, 13);
-                INST(16, Opcode::Add).s64().Inputs(14, 15);
-                INST(17, Opcode::StoreObject).s64().Inputs(0, 16).TypeId(301U).ObjField(i);
-                INST(18, Opcode::ReturnVoid);
+                INST(10U, Opcode::Add).s64().Inputs(1U, 2_I);
+                INST(11U, Opcode::Add).s64().Inputs(3U, 4_I);
+                INST(12U, Opcode::Add).s64().Inputs(5U, 6_I);
+                INST(13U, Opcode::Add).s64().Inputs(7U, 8_I);
+                INST(14U, Opcode::Add).s64().Inputs(10U, 11_I);
+                INST(15U, Opcode::Add).s64().Inputs(12U, 13_I);
+                INST(16U, Opcode::Add).s64().Inputs(14U, 15_I);
+                INST(17U, Opcode::StoreObject).s64().Inputs(0, 16_I).TypeId(301U).ObjField(i);
+                INST(18U, Opcode::ReturnVoid);
             }
         }
-        SetNumArgs(9);
+        SetNumArgs(9U);
 
         // In this case two parameters are passed on stack,
         // thus to address them SP needs to be adjusted in prolog/epilog.
@@ -621,11 +622,11 @@ TEST_F(CodegenTest, CallVirtual)
     {
         PARAMETER(0, 0).ref();
         PARAMETER(1, 1).i32();
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::CallVirtual).v0id().InputsAutoType(0, 1, 2);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(2U, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
+            INST(3U, Opcode::CallVirtual).v0id().InputsAutoType(0_I, 1_I, 2_I);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
     EXPECT_TRUE(RegAlloc(graph));
@@ -642,13 +643,13 @@ TEST_F(CodegenTest, EncodeMemCopy)
     GRAPH(graph)
     {
         CONSTANT(0, 0).i32().DstReg(0U);
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1)
         {
-            INST(2, Opcode::SpillFill);
-            INST(3, Opcode::Return).i32().Inputs(0).DstReg(0U);
+            INST(2U, Opcode::SpillFill);
+            INST(3U, Opcode::Return).i32().Inputs(0).DstReg(0U);
         }
     }
-    auto spillFill = INS(2).CastToSpillFill();
+    auto spillFill = INS(2U).CastToSpillFill();
     // Add moves chain: R0 -> S0 -> S1 -> R0 [u32]
     spillFill->AddSpillFill(Location::MakeRegister(0), Location::MakeStackSlot(0), DataType::INT32);
     spillFill->AddSpillFill(Location::MakeStackSlot(0), Location::MakeStackSlot(1), DataType::INT32);
@@ -676,12 +677,12 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         {
             CONSTANT(0, 0).i64();
             PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MAdd).i64().Inputs(0, 1, 2);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MAdd).i64().Inputs(0U, 1_I, 2_I);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
@@ -699,13 +700,13 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         GRAPH(graph)
         {
             CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(1U, 0).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MAdd).i64().Inputs(1, 0, 2);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MAdd).i64().Inputs(1, 0, 2_I);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
@@ -723,13 +724,13 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         GRAPH(graph)
         {
             CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(1U, 0).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MAdd).i64().Inputs(1, 2, 0);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MAdd).i64().Inputs(1, 2_I, 0);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
@@ -749,13 +750,13 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         GRAPH(graph)
         {
             CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(1U, 0).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MSub).i64().Inputs(0, 1, 2);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MSub).i64().Inputs(0, 1, 2_I);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
@@ -773,13 +774,13 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         GRAPH(graph)
         {
             CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(1U, 0).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MSub).i64().Inputs(1, 0, 2);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MSub).i64().Inputs(1, 0, 2_I);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
@@ -798,12 +799,12 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         {
             CONSTANT(0, 0).i64();
             PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MSub).i64().Inputs(1, 2, 0);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MSub).i64().Inputs(1, 2_I, 0);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
@@ -825,10 +826,10 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
             CONSTANT(0, 0).i64();
             PARAMETER(1, 0).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MNeg).i64().Inputs(0, 1);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MNeg).i64().Inputs(0, 1);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
@@ -848,10 +849,10 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
             CONSTANT(0, 0).i64();
             PARAMETER(1, 0).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MNeg).i64().Inputs(1, 0);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MNeg).i64().Inputs(1, 0);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 

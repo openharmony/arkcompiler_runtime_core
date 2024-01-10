@@ -61,26 +61,29 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath5)
 
     // Call<type>Method part
     EXPECT_DEATH(
-        env_->CallNonvirtualVoidMethod(nullptr, cls, voidId, static_cast<ets_int>(1), static_cast<ets_int>(121)), "");
+        env_->CallNonvirtualVoidMethod(nullptr, cls, voidId, static_cast<ets_int>(1), static_cast<ets_int>(121_I)), "");
     EXPECT_DEATH(env_->CallNonvirtualObjectMethod(nullptr, cls, objectId), "");
     EXPECT_DEATH(env_->CallNonvirtualBooleanMethod(nullptr, cls, booleanId, static_cast<ets_boolean>(1),
-                                                   static_cast<ets_int>(121)),
+                                                   static_cast<ets_int>(121_I)),
                  "");
     EXPECT_DEATH(
-        env_->CallNonvirtualByteMethod(nullptr, cls, byteId, static_cast<ets_byte>(1), static_cast<ets_int>(121)), "");
+        env_->CallNonvirtualByteMethod(nullptr, cls, byteId, static_cast<ets_byte>(1), static_cast<ets_int>(121_I)),
+        "");
     EXPECT_DEATH(
-        env_->CallNonvirtualCharMethod(nullptr, cls, charId, static_cast<ets_char>(1), static_cast<ets_int>(121)), "");
+        env_->CallNonvirtualCharMethod(nullptr, cls, charId, static_cast<ets_char>(1), static_cast<ets_int>(121_I)),
+        "");
     EXPECT_DEATH(
-        env_->CallNonvirtualShortMethod(nullptr, cls, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121)),
+        env_->CallNonvirtualShortMethod(nullptr, cls, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121_I)),
         "");
     EXPECT_DEATH(env_->CallNonvirtualIntMethod(nullptr, cls, intId), "");
     EXPECT_DEATH(
-        env_->CallNonvirtualLongMethod(nullptr, cls, longId, static_cast<ets_long>(1), static_cast<ets_int>(121)), "");
-    EXPECT_DEATH(
-        env_->CallNonvirtualFloatMethod(nullptr, cls, floatId, static_cast<ets_float>(1.0F), static_cast<ets_int>(121)),
+        env_->CallNonvirtualLongMethod(nullptr, cls, longId, static_cast<ets_long>(1), static_cast<ets_int>(121_I)),
         "");
+    EXPECT_DEATH(env_->CallNonvirtualFloatMethod(nullptr, cls, floatId, static_cast<ets_float>(1.0F),
+                                                 static_cast<ets_int>(121_I)),
+                 "");
     EXPECT_DEATH(env_->CallNonvirtualDoubleMethod(nullptr, cls, doubleId, static_cast<ets_double>(1.0),
-                                                  static_cast<ets_int>(121)),
+                                                  static_cast<ets_int>(121_I)),
                  "");
 
     ets_class dCls = env_->FindClass("D");

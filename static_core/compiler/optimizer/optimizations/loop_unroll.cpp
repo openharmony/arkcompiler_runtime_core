@@ -155,7 +155,7 @@ bool LoopUnroll::TransformLoop(Loop *loop)
             // Increase instruction limit for unroll without branching
             // <= unroll_factor * 2 because unroll without side exits would create unroll_factor * 2 - 1 copies of loop
             noBranching = unrollParams.cloneableInsts <= instLimit_ &&
-                          (*optIterations <= unrollFactor * 2 || *optIterations <= unrollFactor_) &&
+                          (*optIterations <= unrollFactor * 2U || *optIterations <= unrollFactor_) &&
                           CountableLoopParser::HasPreHeaderCompare(loop, *loopInfo);
         }
     }
@@ -172,7 +172,7 @@ bool LoopUnroll::TransformLoop(Loop *loop)
         return true;
     }
 
-    if (unrollFactor <= 1) {
+    if (unrollFactor <= 1U) {
         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
             << "Loop isn't unrolled due to unroll factor = " << unrollFactor << ". Loop id = " << loop->GetId();
         return false;

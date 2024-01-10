@@ -64,7 +64,7 @@ TEST_F(CommonTest, RegEncoderF32)
         CONSTANT(31U, 0.0).f32();
 
         CONSTANT(32U, 1.0).f64();
-        CONSTANT(33U, 2.0).f64();
+        CONSTANT(33U, 2.0_D).f64();
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -83,7 +83,7 @@ TEST_F(CommonTest, RegEncoderF32)
     GRAPH(expected)
     {
         CONSTANT(32U, 1.0).f64();
-        CONSTANT(33U, 2.0).f64();
+        CONSTANT(33U, 2.0_D).f64();
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -140,8 +140,8 @@ TEST_F(CommonTest, RegEncoderHoldingSpillFillInst)
             INST(37U, Opcode::LoadAndInitClass).ref().Inputs(36U);
             INST(39U, Opcode::SaveState).NoVregs();
             INST(58U, Opcode::InitObject).ref().Inputs({{REFERENCE, 37U}, {REFERENCE, 0U}, {NO_TYPE, 39U}});
-            CONSTANT(55U, 0.0093026).f64();
-            CONSTANT(56U, 0.0098902).f64();
+            CONSTANT(55U, 0.0093026_D).f64();
+            CONSTANT(56U, 0.0098902_D).f64();
             CONSTANT(57U, 0x1388U).s64();
             INST(45U, Opcode::SaveState).NoVregs();
             INST(47U, Opcode::CallStatic)
@@ -204,8 +204,8 @@ TEST_F(CommonTest, RegEncoderHoldingSpillFillInst)
             INST(37U, Opcode::LoadAndInitClass).ref().Inputs(36U);
             INST(39U, Opcode::SaveState).NoVregs();
             INST(58U, Opcode::InitObject).ref().Inputs({{REFERENCE, 37U}, {REFERENCE, 0U}, {NO_TYPE, 39U}});
-            CONSTANT(55U, 0.0093026).f64();
-            CONSTANT(56U, 0.0098902).f64();
+            CONSTANT(55U, 0.0093026_D).f64();
+            CONSTANT(56U, 0.0098902_D).f64();
             CONSTANT(57U, 0x1388U).s64();
             INST(45U, Opcode::SaveState).NoVregs();
 

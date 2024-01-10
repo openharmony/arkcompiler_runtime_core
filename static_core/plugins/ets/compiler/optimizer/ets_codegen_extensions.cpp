@@ -45,7 +45,7 @@ bool Codegen::LaunchCallCodegen(CallInst *callInst)
 
         objReg = ConvertRegister(location1.GetValue(), DataType::REFERENCE);
         if (callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
-            thisReg = ConvertRegister(callInst->GetLocation(2).GetValue(), DataType::REFERENCE);
+            thisReg = ConvertRegister(callInst->GetLocation(2U).GetValue(), DataType::REFERENCE);
         }
     } else {
         auto location = callInst->GetLocation(0);

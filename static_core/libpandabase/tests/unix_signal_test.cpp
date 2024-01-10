@@ -223,7 +223,7 @@ TEST_F(UnixSignal, AfterThreadStartCallback)
     os::unix::SignalCatcherThread catcher_thread({SIGQUIT});
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    catcher_thread.SetupCallbacks([this]() { sig_action_count_ += 1000; }, nullptr);
+    catcher_thread.SetupCallbacks([this]() { sig_action_count_ += 1000U; }, nullptr);
 
     catcher_thread.StartThread(&UnixSignal::SigAction, this);
 
@@ -243,7 +243,7 @@ TEST_F(UnixSignal, BeforeThreadStopCallback)
     os::unix::SignalCatcherThread catcher_thread({SIGQUIT});
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    catcher_thread.SetupCallbacks(nullptr, [this]() { sig_action_count_ += 2000; });
+    catcher_thread.SetupCallbacks(nullptr, [this]() { sig_action_count_ += 2000U; });
 
     catcher_thread.StartThread(&UnixSignal::SigAction, this);
 
@@ -262,7 +262,7 @@ TEST_F(UnixSignal, ThreadCallbacks)
     os::unix::SignalCatcherThread catcher_thread({SIGQUIT});
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    catcher_thread.SetupCallbacks([this]() { sig_action_count_ += 1000; }, [this]() { sig_action_count_ += 2000; });
+    catcher_thread.SetupCallbacks([this]() { sig_action_count_ += 1000U; }, [this]() { sig_action_count_ += 2000U; });
 
     catcher_thread.StartThread(&UnixSignal::SigAction, this);
 

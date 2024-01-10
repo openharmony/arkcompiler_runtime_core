@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utils.h"
 #include "util/optional_ref.h"
 
 #include "util/tests/verifier_test.h"
@@ -31,8 +32,8 @@ TEST_F(VerifierTest, invalid_ref)
 
     ASSERT_TRUE(ref1.HasRef());
     ASSERT_TRUE(ref2.HasRef());
-    EXPECT_EQ(ref1.Get(), 2);
-    EXPECT_EQ(ref2.Get(), 2);
+    EXPECT_EQ(ref1.Get(), 2_I);
+    EXPECT_EQ(ref2.Get(), 2_I);
     EXPECT_TRUE(!invRef1.HasRef());
     EXPECT_TRUE(!invRef12.HasRef());
 }

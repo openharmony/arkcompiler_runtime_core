@@ -507,9 +507,9 @@ public:
             UNREACHABLE();
         } else if (value_.index() == 1) {
             return std::get<int64_t>(value_);
-        } else if (value_.index() == 2) {
+        } else if (value_.index() == 2U) {
             return static_cast<int64_t>(bit_cast<int32_t>(std::get<float>(value_)));
-        } else if (value_.index() == 3) {
+        } else if (value_.index() == 3U) {
             return bit_cast<int64_t>(std::get<double>(value_));
         }
         UNREACHABLE();

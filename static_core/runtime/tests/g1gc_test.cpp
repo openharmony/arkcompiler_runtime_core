@@ -63,12 +63,12 @@ public:
         options.SetCompilerEnableJit(false);
         options.SetGcWorkersCount(0);
         // NOLINTNEXTLINE(readability-magic-numbers)
-        options.SetG1PromotionRegionAliveRate(100);
+        options.SetG1PromotionRegionAliveRate(100U);
         options.SetGcTriggerType("debug-never");
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetExplicitConcurrentGcEnabled(false);
-        options.SetG1NumberOfTenuredRegionsAtMixedCollection(2);
+        options.SetG1NumberOfTenuredRegionsAtMixedCollection(2U);
         return options;
     }
 
@@ -638,9 +638,9 @@ TEST_F(G1GCTest, TestMixedCollections)
     // Allocate mini object after each of them for prevent clearing after concurrent
     // Mixed regions should be choosen according to the largest garbage.
     bigObjectHolder =
-        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(4, ClassRoot::ARRAY_STRING, false));
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(4U, ClassRoot::ARRAY_STRING, false));
     smallObjectHolder =
-        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(4, ClassRoot::ARRAY_STRING, false));
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(4U, ClassRoot::ARRAY_STRING, false));
     for (size_t i = 0; i < ARRAY_SIZE; i++) {
         bigObjectHolder->Set(i, ObjectAllocator::AllocString(lenthsArray[i]));
         smallObjectHolder->Set(i, ObjectAllocator::AllocString(miniObjLen));
@@ -784,7 +784,7 @@ public:
     {
         RuntimeOptions options = CreateDefaultOptions();
         // NOLINTNEXTLINE(readability-magic-numbers)
-        options.SetG1PromotionRegionAliveRate(50);
+        options.SetG1PromotionRegionAliveRate(PROMOTE_RATE);
         return options;
     }
 
@@ -798,13 +798,13 @@ TEST_F(G1GCPromotionTest, TestCorrectPromotionYoungRegion)
     static constexpr size_t HUMONGOUS_STRING_LEN = G1GCPromotionTest::GetHumongousStringLength();
     // Consume more than 50% of region size
     static constexpr size_t FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT =
-        DEFAULT_REGION_SIZE / sizeof(coretypes::String) * 2 / 3 + 1;
+        DEFAULT_REGION_SIZE / sizeof(coretypes::String) * 2U / 3U + 1;
     // Consume less than 50% of region size
     static constexpr size_t SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT = 1;
     ASSERT(FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT <= HUMONGOUS_STRING_LEN);
-    ASSERT((FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT * sizeof(coretypes::String) * 100 / DEFAULT_REGION_SIZE) >
+    ASSERT((FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT * sizeof(coretypes::String) * 100U / DEFAULT_REGION_SIZE) >
            G1GCPromotionTest::PROMOTE_RATE);
-    ASSERT((SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT * sizeof(coretypes::String) * 100 / DEFAULT_REGION_SIZE) <
+    ASSERT((SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT * sizeof(coretypes::String) * 100U / DEFAULT_REGION_SIZE) <
            G1GCPromotionTest::PROMOTE_RATE);
 
     Runtime *runtime = Runtime::GetCurrent();
@@ -1078,8 +1078,8 @@ TEST_F(G1GCTest, TestGarbageBytesCalculation)
     array = VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(2, ClassRoot::ARRAY_STRING, false));
     ASSERT_TRUE(ObjectToRegion(array.GetPtr())->HasFlag(RegionFlag::IS_EDEN));
     // The same for string. The instance size must be 8-bytes aligned.
-    array->Set(0, ObjectAllocator::AllocString(8));
-    array->Set(1, ObjectAllocator::AllocString(8));
+    array->Set(0, ObjectAllocator::AllocString(8U));
+    array->Set(1, ObjectAllocator::AllocString(8U));
     ASSERT_TRUE(ObjectToRegion(array->Get<ObjectHeader *>(0))->HasFlag(RegionFlag::IS_EDEN));
 
     size_t arraySize = GetObjectSize(array.GetPtr());
@@ -1442,8 +1442,8 @@ TEST_F(G1FullGCTest, TestFullGCGenericFlow)
     ASSERT_EQ(nullptr, ObjectAllocator::AllocObjectInYoung());
     uintptr_t tenuredAddrBeforeGc = ToUintPtr(holder->Get<ObjectHeader *>(0));
     // Forget two tenured regions
-    holder->Set(1, static_cast<ObjectHeader *>(nullptr));
-    holder->Set(2, static_cast<ObjectHeader *>(nullptr));
+    holder->Set(1U, static_cast<ObjectHeader *>(nullptr));
+    holder->Set(2U, static_cast<ObjectHeader *>(nullptr));
     // Now there should be enough space in tenured to move young
     gc->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
     ASSERT_NE(nullptr, ObjectAllocator::AllocObjectInYoung());
@@ -1484,7 +1484,7 @@ public:
     G1FullGCWithRegionFragmentationRate() : G1FullGCTest(REGION_FRAGMENTATION_RATE) {}
 };
 
-class FullGcRegionFragmentationRateOptionNever : public G1FullGCWithRegionFragmentationRate<100> {};
+class FullGcRegionFragmentationRateOptionNever : public G1FullGCWithRegionFragmentationRate<100U> {};
 
 TEST_F(FullGcRegionFragmentationRateOptionNever, TestG1FullGcRegionFragmentationRateOptionNever)
 {
@@ -1575,7 +1575,7 @@ protected:
 
 TEST_F(G1FullGCOOMTest, AllocateBy1Region)
 {
-    constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8), DEFAULT_ALIGNMENT_IN_BYTES);
+    constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8F), DEFAULT_ALIGNMENT_IN_BYTES);
     {
         [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread_);
         auto *g1Allocator =
@@ -1586,7 +1586,7 @@ TEST_F(G1FullGCOOMTest, AllocateBy1Region)
             ASSERT_NE(handle.GetPtr(), nullptr) << "Must be correctly allocated object in non-full heap";
             // Move new object to tenured
             Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-        } while (g1Allocator->HaveTenuredSize(2));
+        } while (g1Allocator->HaveTenuredSize(2U));
         ASSERT_TRUE(g1Allocator->HaveTenuredSize(1));
         // Allocate one young region
         VMHandle<ObjectHeader> handle1(thread_, ObjectAllocator::AllocString(OBJECT_SIZE));
@@ -1605,7 +1605,7 @@ TEST_F(G1FullGCOOMTest, AllocateBy1Region)
 
 TEST_F(G1FullGCOOMTest, PinUnpinObject)
 {
-    constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8), DEFAULT_ALIGNMENT_IN_BYTES);
+    constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8F), DEFAULT_ALIGNMENT_IN_BYTES);
     auto *g1Allocator =
         static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
     {
@@ -1616,7 +1616,7 @@ TEST_F(G1FullGCOOMTest, PinUnpinObject)
             ASSERT_NE(handle.GetPtr(), nullptr) << "Must be correctly allocated object in non-full heap";
             // Move new object to tenured
             Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-        } while (g1Allocator->HaveTenuredSize(2));
+        } while (g1Allocator->HaveTenuredSize(2U));
         ASSERT_TRUE(g1Allocator->HaveTenuredSize(1));
         // Allocate one young region
         VMHandle<ObjectHeader> handle1(thread_, ObjectAllocator::AllocString(OBJECT_SIZE));

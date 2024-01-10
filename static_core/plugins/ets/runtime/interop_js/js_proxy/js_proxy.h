@@ -40,7 +40,7 @@ public:
         // For class descriptor "Lname;" proxy descriptor is "L$name$;"
         const uint8_t *descriptor = klass->GetDescriptor();
         Span<const uint8_t> desc(descriptor, utf::Mutf8Size(descriptor));
-        return desc[0] == 'L' && desc[1] == '$' && desc[desc.size() - 1] == ';' && desc[desc.size() - 2] == '$';
+        return desc[0] == 'L' && desc[1] == '$' && desc[desc.size() - 1] == ';' && desc[desc.size() - 2U] == '$';
     }
 
     ~JSProxy() = default;

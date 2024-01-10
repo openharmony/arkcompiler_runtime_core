@@ -25,8 +25,7 @@ template <class LanguageConfig>
 UpdateRemsetTaskQueue<LanguageConfig>::UpdateRemsetTaskQueue(G1GC<LanguageConfig> *gc,
                                                              GCG1BarrierSet::ThreadLocalCardQueues *queue,
                                                              os::memory::Mutex *queueLock, size_t regionSize,
-                                                             bool updateConcurrent,
-                                                             size_t minConcurrentCardsToProcess)
+                                                             bool updateConcurrent, size_t minConcurrentCardsToProcess)
     : UpdateRemsetWorker<LanguageConfig>(gc, queue, queueLock, regionSize, updateConcurrent,
                                          minConcurrentCardsToProcess)
 {

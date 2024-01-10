@@ -106,19 +106,19 @@ TEST_F(SharedReferenceStorage1GTest, test_1)
     ASSERT_EQ(ref0, ref);
 
     // Check unaligned address);
-    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 1)), false);
-    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 2)), false);
-    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 3)), false);
-    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 4)), false);
-    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 5)), false);
-    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 6)), false);
-    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 7)), false);
+    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 1U)), false);
+    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 2U)), false);
+    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 3U)), false);
+    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 4U)), false);
+    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 5U)), false);
+    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 6U)), false);
+    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 7U)), false);
 
     // Check next unallocated reference
     ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + sizeof(SharedReference))), false);
 
     // Check virtually unmapped space
-    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 16 * 4096)), false);
+    ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 16U * 4096U)), false);
 
     RemoveReference(ref);
 }

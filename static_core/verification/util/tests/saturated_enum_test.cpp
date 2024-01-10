@@ -16,6 +16,7 @@
 #include "util/saturated_enum.h"
 
 #include "util/tests/verifier_test.h"
+#include "libpandabase/utils/utils.h"
 
 #include <gtest/gtest.h>
 
@@ -45,14 +46,14 @@ TEST_F(VerifierTest, saturated_enum)
         i++;
         return true;
     });
-    EXPECT_EQ(i, 3);
+    EXPECT_EQ(i, 3_I);
 
     i = 0;
     sEnum.EnumerateValues([&i](Numbers en) {
         i++;
         return en != Numbers::TWO;
     });
-    EXPECT_EQ(i, 2);
+    EXPECT_EQ(i, 2_I);
 }
 
 }  // namespace panda::verifier::test

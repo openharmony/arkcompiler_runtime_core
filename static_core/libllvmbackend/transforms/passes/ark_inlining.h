@@ -50,8 +50,7 @@ public:
 
     explicit InlinePrepare(llvm::InlineParams inlineParams) : inlineParams_ {inlineParams} {}
     static bool ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options);
-    static InlinePrepare Create(LLVMArkInterface *arkInterface,
-                                const panda::llvmbackend::LLVMCompilerOptions *options);
+    static InlinePrepare Create(LLVMArkInterface *arkInterface, const panda::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &module_am);

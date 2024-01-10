@@ -51,7 +51,7 @@ std::vector<ValueType> EtsArrToVec(ValueType *buf, ets_size sizeArr)
 
 bool Equal(double a1, double a2)
 {
-    return std::abs(a1 - a2) < 0.000001;
+    return std::abs(a1 - a2) < 0.000001F;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

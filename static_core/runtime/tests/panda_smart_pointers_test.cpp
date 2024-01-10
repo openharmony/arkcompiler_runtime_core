@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "libpandabase/utils/utils.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/runtime.h"
@@ -61,7 +62,7 @@ TEST_F(PandaSmartPointersTest, MakePandaUniqueTest)
     ASSERT_NE(uniqPtr.get(), nullptr);
 
     int res = ReturnValueFromUniqPtr(std::move(uniqPtr));
-    ASSERT_EQ(res, 5);
+    ASSERT_EQ(res, 5_I);
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move)
     ASSERT_EQ(uniqPtr.get(), nullptr);
 

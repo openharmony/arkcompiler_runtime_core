@@ -120,7 +120,7 @@ TEST_F(RunSlotsAllocatorTest, SimpleAllocateDifferentObjSizeTest)
     NonObjectAllocator allocator(&memStats);
     AddMemoryPoolToAllocator(allocator);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (size_t i = 23; i < 300; i++) {
+    for (size_t i = 23UL; i < 300UL; i++) {
         void *mem = allocator.Alloc(i);
         (void)mem;
         LOG(DEBUG, ALLOC) << "Allocate obj with size " << i << " at " << std::hex << mem;
@@ -179,7 +179,7 @@ TEST_F(RunSlotsAllocatorTest, AllocateAllPossibleSizesFreeTest)
 TEST_F(RunSlotsAllocatorTest, AllocateWriteFreeTest)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    AllocateAndFree(sizeof(uint64_t), 512);
+    AllocateAndFree(sizeof(uint64_t), 512UL);
 }
 
 TEST_F(RunSlotsAllocatorTest, AllocateRandomFreeTest)
@@ -187,7 +187,7 @@ TEST_F(RunSlotsAllocatorTest, AllocateRandomFreeTest)
     static constexpr size_t ALLOC_SIZE = sizeof(uint64_t);
     static constexpr size_t ELEMENTS_COUNT = 512;
     static constexpr size_t POOLS_COUNT = 1;
-    AllocateFreeDifferentSizesTest<ALLOC_SIZE / 2, 2 * ALLOC_SIZE>(ELEMENTS_COUNT, POOLS_COUNT);
+    AllocateFreeDifferentSizesTest<ALLOC_SIZE / 2UL, 2UL * ALLOC_SIZE>(ELEMENTS_COUNT, POOLS_COUNT);
 }
 
 TEST_F(RunSlotsAllocatorTest, CheckReuseOfRunSlotsTest)

@@ -735,7 +735,7 @@ MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId methodId
                         methodItem->AddIndexDependency(catchTypeItem);
                     }
                     catchBlocks.emplace_back(CodeItem::CatchBlock(methodItem, catchTypeItem, catchBlock.GetHandlerPc(),
-                                                                   catchBlock.GetCodeSize()));
+                                                                  catchBlock.GetCodeSize()));
                     return true;
                 });
             codeItem->AddTryBlock(

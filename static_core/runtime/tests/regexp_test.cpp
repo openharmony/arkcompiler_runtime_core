@@ -622,16 +622,16 @@ TEST_F(RegExpTest, ParseNoError4)
 TEST_F(RegExpTest, RangeSet1)
 {
     std::list<std::pair<uint32_t, uint32_t>> listInput = {
-        std::make_pair(1, 1),
-        std::make_pair(2, 2),
-        std::make_pair(3, 3),
+        std::make_pair(1U, 1U),
+        std::make_pair(2U, 2U),
+        std::make_pair(3U, 3U),
     };
     std::list<std::pair<uint32_t, uint32_t>> listExpected = {
-        std::make_pair(1, 5),
+        std::make_pair(1U, 5U),
     };
     RangeSet rangeResult(listInput);
     RangeSet rangeExpected(listExpected);
-    rangeResult.Insert(4, 5);
+    rangeResult.Insert(4U, 5U);
     rangeResult.Compress();
     EXPECT_EQ(rangeResult, rangeExpected);
 }
@@ -639,11 +639,11 @@ TEST_F(RegExpTest, RangeSet1)
 TEST_F(RegExpTest, RangeSet2)
 {
     std::list<std::pair<uint32_t, uint32_t>> listExpected = {
-        std::make_pair(4, 5),
+        std::make_pair(4U, 5U),
     };
     RangeSet rangeResult;
     RangeSet rangeExpected(listExpected);
-    rangeResult.Insert(4, 5);
+    rangeResult.Insert(4U, 5U);
     rangeResult.Compress();
     EXPECT_EQ(rangeResult, rangeExpected);
 }
@@ -651,14 +651,14 @@ TEST_F(RegExpTest, RangeSet2)
 TEST_F(RegExpTest, RangeSet3)
 {
     std::list<std::pair<uint32_t, uint32_t>> listInput = {
-        std::make_pair(2, 2),
+        std::make_pair(2U, 2U),
     };
     std::list<std::pair<uint32_t, uint32_t>> listExpected = {
-        std::make_pair(1, 5),
+        std::make_pair(1U, 5U),
     };
     RangeSet rangeResult(listInput);
     RangeSet rangeExpected(listExpected);
-    rangeResult.Insert(1, 5);
+    rangeResult.Insert(1U, 5U);
     rangeResult.Compress();
     EXPECT_EQ(rangeResult, rangeExpected);
 }
@@ -666,14 +666,14 @@ TEST_F(RegExpTest, RangeSet3)
 TEST_F(RegExpTest, RangeSet4)
 {
     std::list<std::pair<uint32_t, uint32_t>> listInput = {
-        std::make_pair(1, 5),
+        std::make_pair(1U, 5U),
     };
     std::list<std::pair<uint32_t, uint32_t>> listExpected = {
-        std::make_pair(1, 5),
+        std::make_pair(1U, 5U),
     };
     RangeSet rangeResult(listInput);
     RangeSet rangeExpected(listExpected);
-    rangeResult.Insert(2, 4);
+    rangeResult.Insert(2U, 4U);
     rangeResult.Compress();
     EXPECT_EQ(rangeResult, rangeExpected);
 }
@@ -681,17 +681,17 @@ TEST_F(RegExpTest, RangeSet4)
 TEST_F(RegExpTest, RangeSet5)
 {
     std::list<std::pair<uint32_t, uint32_t>> listInput = {
-        std::make_pair(1, 2),
-        std::make_pair(9, UINT16_MAX),
+        std::make_pair(1U, 2U),
+        std::make_pair(9U, UINT16_MAX),
     };
     std::list<std::pair<uint32_t, uint32_t>> listExpected = {
-        std::make_pair(1, 2),
-        std::make_pair(4, 7),
-        std::make_pair(9, UINT16_MAX),
+        std::make_pair(1U, 2U),
+        std::make_pair(4U, 7U),
+        std::make_pair(9U, UINT16_MAX),
     };
     RangeSet rangeResult(listInput);
     RangeSet rangeExpected(listExpected);
-    rangeResult.Insert(4, 7);
+    rangeResult.Insert(4U, 7U);
     rangeResult.Compress();
     EXPECT_EQ(rangeResult, rangeExpected);
 }
@@ -710,11 +710,11 @@ TEST_F(RegExpTest, RangeSet6)
 TEST_F(RegExpTest, RangeSet7)
 {
     std::list<std::pair<uint32_t, uint32_t>> listInput = {
-        std::make_pair(1, 5),
+        std::make_pair(1U, 5U),
     };
     std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(0, 0),
-        std::make_pair(6, UINT16_MAX),
+        std::make_pair(6U, UINT16_MAX),
     };
     RangeSet rangeResult(listInput);
     RangeSet rangeExpected(listExpected);
@@ -725,12 +725,12 @@ TEST_F(RegExpTest, RangeSet7)
 TEST_F(RegExpTest, RangeSet8)
 {
     std::list<std::pair<uint32_t, uint32_t>> listInput = {
-        std::make_pair(1, 5),
+        std::make_pair(1U, 5U),
         std::make_pair(0xfffe, UINT16_MAX),
     };
     std::list<std::pair<uint32_t, uint32_t>> listExpected = {
         std::make_pair(0, 0),
-        std::make_pair(6, 0xfffd),
+        std::make_pair(6U, 0xfffd),
     };
     RangeSet rangeResult(listInput);
     RangeSet rangeExpected(listExpected);
@@ -741,11 +741,11 @@ TEST_F(RegExpTest, RangeSet8)
 TEST_F(RegExpTest, RangeSet9)
 {
     std::list<std::pair<uint32_t, uint32_t>> listInput = {
-        std::make_pair(0, 5),
+        std::make_pair(0U, 5U),
         std::make_pair(0xfffe, 0xfffe),
     };
     std::list<std::pair<uint32_t, uint32_t>> listExpected = {
-        std::make_pair(6, 0xfffd),
+        std::make_pair(6U, 0xfffd),
         std::make_pair(UINT16_MAX, UINT16_MAX),
     };
     RangeSet rangeResult(listInput);

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utils.h"
 #include "common.h"
 #include "check_resolver.h"
 #include "compiler/optimizer/optimizations/cleanup.h"
@@ -47,7 +48,7 @@ TEST_F(IrBuilderTest, Lowering)
         // Specialize template source to the current opcode
         std::string source(templateSource);
         size_t startPos = source.find("OPCODE");
-        source.replace(startPos, 6 /* OPCODE */, opcode.first);
+        source.replace(startPos, 6U, opcode.first);
 
         ASSERT_TRUE(ParseToGraph(source, "main"));
 #ifndef NDEBUG
@@ -57,10 +58,10 @@ TEST_F(IrBuilderTest, Lowering)
         GetGraph()->RunPass<compiler::Lowering>();
         GetGraph()->RunPass<compiler::Cleanup>();
 
-        int32_t imm = -30;
+        int32_t imm = -30_I;
         // Note: `AddI -30` is handled as `SubI 30`. `SubI -30` is handled as `AddI 30`.
         if (opcode.second == compiler::Opcode::AddI || opcode.second == compiler::Opcode::SubI) {
-            imm = 30;
+            imm = 30_I;
         }
 
         auto expected = CreateEmptyGraph();

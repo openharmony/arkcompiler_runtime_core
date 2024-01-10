@@ -14,6 +14,7 @@
  */
 
 #include "unit_test.h"
+#include "libpandabase/utils/utils.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/live_registers.h"
 #include "optimizer/code_generator/codegen.h"
@@ -728,7 +729,7 @@ TEST_F(RegAllocLinearScanTest, CheckInputTypeInStore)
     {
         CONSTANT(0U, nullptr).ref();
         CONSTANT(1U, 0x2aU).s64();
-        CONSTANT(2U, 1.1).f64();
+        CONSTANT(2U, 1.1_D).f64();
         BASIC_BLOCK(2U, -1L)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 2U).SrcVregs({0U, 1U});
@@ -1288,10 +1289,10 @@ TEST_F(RegAllocLinearScanTest, RematConstants)
         CONSTANT(1U, 1U).s32();
         CONSTANT(2U, 2U).s32();
         CONSTANT(13U, 1000U).s32();
-        CONSTANT(3U, 0.5).f64();
-        CONSTANT(4U, 10.0).f64();
-        CONSTANT(5U, 26.66).f64();
-        CONSTANT(14U, 2.0).f64();
+        CONSTANT(3U, 0.5_D).f64();
+        CONSTANT(4U, 10.0_D).f64();
+        CONSTANT(5U, 26.66_D).f64();
+        CONSTANT(14U, 2.0_D).f64();
 
         BASIC_BLOCK(2U, -1L)
         {

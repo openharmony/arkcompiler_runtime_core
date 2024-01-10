@@ -23,6 +23,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 #include "libpandabase/macros.h"
+#include "libpandabase/utils/utils.h"
 #include "os/thread.h"
 #include "runtime/include/managed_thread.h"
 #include <sys/syscall.h>
@@ -45,8 +46,8 @@ static int g_counter = 0;
 void SigProfSamplingProfilerHandler([[maybe_unused]] int signum)
 {
     g_counter++;
-    std::array<volatile int, 100> a {};  // NOLINT(readability-magic-numbers)
-    for (int i = 0; i < 100; i++) {      // NOLINT(readability-magic-numbers)
+    std::array<volatile int, 100UL> a {};  // NOLINT(readability-magic-numbers)
+    for (int i = 0; i < 100_I; i++) {      // NOLINT(readability-magic-numbers)
         a[i] = i;
     }
 }

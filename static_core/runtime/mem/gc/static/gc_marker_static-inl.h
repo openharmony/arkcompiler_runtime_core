@@ -101,8 +101,7 @@ void GCMarker<Marker, LANG_TYPE_STATIC>::HandleArrayClass(GCMarkingStackType *ob
 
 template <typename Marker>
 void GCMarker<Marker, LANG_TYPE_STATIC>::MarkInstance(GCMarkingStackType *objectsStack, const ObjectHeader *object,
-                                                      const BaseClass *baseCls,
-                                                      const ReferenceCheckPredicateT &refPred)
+                                                      const BaseClass *baseCls, const ReferenceCheckPredicateT &refPred)
 {
     ASSERT(!baseCls->IsDynamicClass());
     auto cls = static_cast<const Class *>(baseCls);

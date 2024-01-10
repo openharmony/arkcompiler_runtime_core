@@ -35,13 +35,13 @@ TEST_F(EtsInteropJsTestFrontend, test_newcall)
 TEST_F(EtsInteropJsTestFrontend, test_dyncall)
 {
     auto ret = CallEtsMethod<uint32_t>("Test.test_dyncall");
-    ASSERT_EQ(ret, 10);
+    ASSERT_EQ(ret, 10U);
 }
 
 TEST_F(EtsInteropJsTestFrontend, test_dyncall_by_value)
 {
     auto ret = CallEtsMethod<uint32_t>("Test.test_dyncall_by_value");
-    ASSERT_EQ(ret, 43);
+    ASSERT_EQ(ret, 43U);
 }
 
 }  // namespace panda::ets::interop::js::testing

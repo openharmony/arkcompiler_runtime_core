@@ -90,7 +90,7 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
     // Add in queue counter_of_tasks new tasks-> Each add 2 to counter
     for (size_t i = 0; i < COUNT_OF_TASKS; i++) {
         queue->AddTask(Task::Create({TaskType::GC, VMType::DYNAMIC_VM, TaskExecutionMode::BACKGROUND},
-                                    [&counter]() { counter += 2; }));
+                                    [&counter]() { counter += 2U; }));
     }
     // After we have 2 * counter_of_tasks - counter_of_done_tasks objects in queue
     EXPECT_EQ(queue->GetTaskType(), TaskType::GC);
@@ -219,7 +219,7 @@ TEST_F(TaskTest, TaskQueueForegroundAndBackgroundTasks)
             Task::Create(FOREGROUND_PROPERTIES, [&modeQueue]() { modeQueue.push(TaskExecutionMode::FOREGROUND); }));
     }
 
-    for (size_t i = 0; i < 2 * TASKS_COUNT; i++) {
+    for (size_t i = 0; i < 2U * TASKS_COUNT; i++) {
         auto task = queue->PopTask();
         ASSERT_TRUE(task.has_value());
         task.value().RunTask();

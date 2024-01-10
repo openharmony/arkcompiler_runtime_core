@@ -47,8 +47,7 @@ void EmitPreWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, bool isVolatileMem
     auto callRuntimeBb = createBasicBlock("pre_wrb_call_runtime");
     auto threadStructPtr = builder->CreateIntToPtr(threadRegValue, builder->getPtrTy());
     auto entrypointOffset = arkInterface->GetTlsPreWrbEntrypointOffset();
-    auto entrypointPtr =
-        builder->CreateConstInBoundsGEP1_32(builder->getInt8Ty(), threadStructPtr, entrypointOffset);
+    auto entrypointPtr = builder->CreateConstInBoundsGEP1_32(builder->getInt8Ty(), threadStructPtr, entrypointOffset);
 
     // Check if entrypoint is null
     auto entrypoint =
@@ -101,8 +100,7 @@ void EmitPostWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, llvm::Value *offs
     }
     // X86_64 Irtoc, 5 params (add thread, fp)
     ASSERT(frameRegValue != nullptr);
-    auto funcTy =
-        llvm::FunctionType::get(builder->getVoidTy(), {gcPtrTy, int32Ty, gcPtrTy, ptrTy, ptrTy}, false);
+    auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {gcPtrTy, int32Ty, gcPtrTy, ptrTy, ptrTy}, false);
     auto frameRegPtr = builder->CreateIntToPtr(frameRegValue, ptrTy);
     auto call = builder->CreateCall(funcTy, callee, {mem, offset, value, threadRegPtr, frameRegPtr});
     call->setCallingConv(llvm::CallingConv::ArkFast3);

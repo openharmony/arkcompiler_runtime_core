@@ -92,55 +92,55 @@ Method *DebugInfoCacheTest::method_foo = nullptr;
 
 TEST_F(DebugInfoCacheTest, GetCurrentLineLocations)
 {
-    auto fr0 = TestFrame(method_foo, 2);   // offset 2, line 3 of function
-    auto fr1 = TestFrame(method_foo, 6);   // offset 6, line 4 of function
-    auto fr2 = TestFrame(method_foo, 10);  // offset 10, line 6 of function
+    auto fr0 = TestFrame(method_foo, 2U);   // offset 2, line 3 of function
+    auto fr1 = TestFrame(method_foo, 6U);   // offset 6, line 4 of function
+    auto fr2 = TestFrame(method_foo, 10U);  // offset 10, line 6 of function
 
     auto curr = cache.GetCurrentLineLocations(fr0);
-    ASSERT_EQ(curr.size(), 3);
-    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 2)), curr.end());
-    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 3)), curr.end());
-    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 4)), curr.end());
+    ASSERT_EQ(curr.size(), 3U);
+    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 2U)), curr.end());
+    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 3U)), curr.end());
+    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 4U)), curr.end());
 
     curr = cache.GetCurrentLineLocations(fr1);
-    ASSERT_EQ(curr.size(), 2);
-    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 5)), curr.end());
-    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 6)), curr.end());
+    ASSERT_EQ(curr.size(), 2U);
+    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 5U)), curr.end());
+    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 6U)), curr.end());
 
     curr = cache.GetCurrentLineLocations(fr2);
     ASSERT_EQ(curr.size(), 1);
-    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 10)), curr.end());
+    ASSERT_NE(curr.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 10U)), curr.end());
 }
 
 TEST_F(DebugInfoCacheTest, GetLocals)
 {
-    auto fr0 = TestFrame(method_foo, 2);  // offset 2, line 3 of function
+    auto fr0 = TestFrame(method_foo, 2U);  // offset 2, line 3 of function
 
-    fr0.SetArgument(0, 1);
-    fr0.SetArgument(1, 2);
+    fr0.SetArgument(0, 1U);
+    fr0.SetArgument(1, 2U);
     fr0.SetArgumentKind(0, PtFrame::RegisterKind::PRIMITIVE);
     fr0.SetArgumentKind(1, PtFrame::RegisterKind::PRIMITIVE);
 
-    for (size_t i = 0; i < 103; i++) {
+    for (size_t i = 0; i < 103U; i++) {
         fr0.SetVReg(i, i);
         fr0.SetVRegKind(i, PtFrame::RegisterKind::PRIMITIVE);
     }
     auto map_locals = cache.GetLocals(fr0);
-    ASSERT_EQ(105, map_locals.size());
+    ASSERT_EQ(105U, map_locals.size());
 
     EXPECT_NO_THROW(map_locals.at("a0"));
     EXPECT_NO_THROW(map_locals.at("a1"));
     EXPECT_NO_THROW(map_locals.at("v101"));
 
-    ASSERT_EQ(map_locals.at("a0").GetAsU64(), 1);
-    ASSERT_EQ(map_locals.at("a1").GetAsU64(), 2);
-    ASSERT_EQ(map_locals.at("v101").GetAsU64(), 101);
+    ASSERT_EQ(map_locals.at("a0").GetAsU64(), 1U);
+    ASSERT_EQ(map_locals.at("a1").GetAsU64(), 2U);
+    ASSERT_EQ(map_locals.at("v101").GetAsU64(), 101U);
 }
 
 TEST_F(DebugInfoCacheTest, GetSourceLocation)
 {
-    auto fr0 = TestFrame(method_foo, 2);  // offset 2, line 3 of function
-    auto fr1 = TestFrame(method_foo, 6);  // offset 6, line 4 of function
+    auto fr0 = TestFrame(method_foo, 2U);  // offset 2, line 3 of function
+    auto fr1 = TestFrame(method_foo, 6U);  // offset 6, line 4 of function
 
     std::string_view disasm_file;
     std::string_view method_name;
@@ -149,33 +149,33 @@ TEST_F(DebugInfoCacheTest, GetSourceLocation)
     cache.GetSourceLocation(fr0, disasm_file, method_name, line_number);
     ASSERT_NE(disasm_file.find(file_name), std::string::npos);
     ASSERT_EQ(method_name, "foo");
-    ASSERT_EQ(line_number, 3);
+    ASSERT_EQ(line_number, 3U);
 
     cache.GetSourceLocation(fr1, disasm_file, method_name, line_number);
     ASSERT_NE(disasm_file.find(file_name), std::string::npos);
     ASSERT_EQ(method_name, "foo");
-    ASSERT_EQ(line_number, 4);
+    ASSERT_EQ(line_number, 4U);
 
-    auto set_locs = cache.GetContinueToLocations(disasm_file, 4);
-    ASSERT_EQ(set_locs.size(), 2);
-    ASSERT_NE(set_locs.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 6)), set_locs.end());
-    ASSERT_NE(set_locs.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 5)), set_locs.end());
+    auto set_locs = cache.GetContinueToLocations(disasm_file, 4U);
+    ASSERT_EQ(set_locs.size(), 2U);
+    ASSERT_NE(set_locs.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 6U)), set_locs.end());
+    ASSERT_NE(set_locs.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 5U)), set_locs.end());
 
-    set_locs = cache.GetContinueToLocations(disasm_file, 6);
+    set_locs = cache.GetContinueToLocations(disasm_file, 6U);
     ASSERT_EQ(set_locs.size(), 1);
-    ASSERT_NE(set_locs.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 10)), set_locs.end());
+    ASSERT_NE(set_locs.find(PtLocation(file_name.c_str(), method_foo->GetFileId(), 10U)), set_locs.end());
 
     set_locs = cache.GetContinueToLocations(disasm_file, 1);
     ASSERT_EQ(set_locs.size(), 0);
 
-    auto valid_locs = cache.GetValidLineNumbers(disasm_file, 0, 100, false);
-    ASSERT_EQ(valid_locs.size(), 5);
+    auto valid_locs = cache.GetValidLineNumbers(disasm_file, 0U, 100U, false);
+    ASSERT_EQ(valid_locs.size(), 5U);
 
-    ASSERT_NE(valid_locs.find(2), valid_locs.end());
-    ASSERT_NE(valid_locs.find(3), valid_locs.end());
-    ASSERT_NE(valid_locs.find(4), valid_locs.end());
-    ASSERT_NE(valid_locs.find(5), valid_locs.end());
-    ASSERT_NE(valid_locs.find(6), valid_locs.end());
+    ASSERT_NE(valid_locs.find(2U), valid_locs.end());
+    ASSERT_NE(valid_locs.find(3U), valid_locs.end());
+    ASSERT_NE(valid_locs.find(4U), valid_locs.end());
+    ASSERT_NE(valid_locs.find(5U), valid_locs.end());
+    ASSERT_NE(valid_locs.find(6U), valid_locs.end());
 
     auto s = cache.GetSourceCode(disasm_file);
     ASSERT_NE(s.find(".function i32 Test.foo(u64 a0, u64 a1)"), std::string::npos);
@@ -184,12 +184,12 @@ TEST_F(DebugInfoCacheTest, GetSourceLocation)
     ASSERT_TRUE(s.empty());
 
     std::set<std::string_view> sets;
-    auto breaks = cache.GetBreakpointLocations([](auto) { return true; }, 4, sets);
+    auto breaks = cache.GetBreakpointLocations([](auto) { return true; }, 4U, sets);
     ASSERT_EQ(breaks.size(), 1);
     ASSERT_EQ(sets.size(), 1);
     ASSERT_EQ(*sets.begin(), disasm_file);
 
-    ASSERT_NE(std::find(breaks.begin(), breaks.end(), PtLocation(file_name.c_str(), method_foo->GetFileId(), 5)),
+    ASSERT_NE(std::find(breaks.begin(), breaks.end(), PtLocation(file_name.c_str(), method_foo->GetFileId(), 5U)),
               breaks.end());
 }
 

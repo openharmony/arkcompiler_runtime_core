@@ -110,8 +110,8 @@ void RootManager<LanguageConfig>::VisitNonHeapRoots(const GCRootVisitor &gcRootV
 template <class LanguageConfig>
 void RootManager<LanguageConfig>::VisitCardTableRoots(CardTable *cardTable, ObjectAllocatorBase *allocator,
                                                       GCRootVisitor rootVisitor, MemRangeChecker rangeChecker,
-                                                      ObjectChecker rangeObjectChecker,
-                                                      ObjectChecker fromObjectChecker, uint32_t processedFlag) const
+                                                      ObjectChecker rangeObjectChecker, ObjectChecker fromObjectChecker,
+                                                      uint32_t processedFlag) const
 {
     cardTable->VisitMarked(
         [&allocator, &rootVisitor, &rangeChecker, &rangeObjectChecker, &fromObjectChecker,
@@ -119,8 +119,8 @@ void RootManager<LanguageConfig>::VisitCardTableRoots(CardTable *cardTable, Obje
             if (rangeChecker(memRange)) {
                 auto objectsInRangeVisitor = [&rootVisitor, &rangeObjectChecker,
                                               &fromObjectChecker](ObjectHeader *objectHeader) {
-                    auto traverseObjectInRange = [&rootVisitor, &rangeObjectChecker](
-                                                     ObjectHeader *fromObject, ObjectHeader *objectToTraverse) {
+                    auto traverseObjectInRange = [&rootVisitor, &rangeObjectChecker](ObjectHeader *fromObject,
+                                                                                     ObjectHeader *objectToTraverse) {
                         if (rangeObjectChecker(objectToTraverse)) {
                             // The weak references from dynobjects should not be regarded as roots.
                             TaggedValue value(objectToTraverse);
@@ -175,8 +175,7 @@ void RootManager<LanguageConfig>::VisitLocalRoots(const GCRootVisitor &gcRootVis
 
 template <class LanguageConfig>
 template <class VRegRef>
-void RootManager<LanguageConfig>::VisitRegisterRoot(const VRegRef &vRegister,
-                                                    const GCRootVisitor &gcRootVisitor) const
+void RootManager<LanguageConfig>::VisitRegisterRoot(const VRegRef &vRegister, const GCRootVisitor &gcRootVisitor) const
 {
     if (UNLIKELY(vRegister.HasObject())) {
         ObjectHeader *objectHeader = vRegister.GetReference();
@@ -194,8 +193,7 @@ void RootManager<LanguageConfig>::VisitVmRoots(const GCRootVisitor &gcRootVisito
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitAotStringRoots(const GCRootVisitor &gcRootVisitor,
-                                                      VisitGCRootFlags flags) const
+void RootManager<LanguageConfig>::VisitAotStringRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) const
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG(DEBUG, GC) << "Start collecting AOT string slot roots";

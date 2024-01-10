@@ -126,7 +126,7 @@ protected:
 
     std::string GetLogIndent() const
     {
-        return std::string(depth_ * 2, ' ');
+        return std::string(depth_ * 2U, ' ');
     }
 
     bool IsIntrinsic(const InlineContext *ctx) const

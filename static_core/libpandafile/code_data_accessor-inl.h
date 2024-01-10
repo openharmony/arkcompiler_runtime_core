@@ -85,7 +85,7 @@ inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::En
     uint32_t dataPrefix;
     // with reading *reinterpret_cast<const uint32_t *>(sp.Data()) unaligned read occurs
     // according to decompiler memcpy is optimized to a single load
-    memcpy(&dataPrefix, sp.Data(), 4);
+    memcpy(&dataPrefix, sp.Data(), 4U);
     if (UNLIKELY(dataPrefix & 0x80808080)) {
         helpers::SkipULeb128(&sp);  // num_vregs
         helpers::SkipULeb128(&sp);  // num_args
@@ -94,7 +94,7 @@ inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::En
         return sp.data();
     }
 
-    return sp.SubSpan(4).data();
+    return sp.SubSpan(4U).data();
 }
 
 }  // namespace panda::panda_file

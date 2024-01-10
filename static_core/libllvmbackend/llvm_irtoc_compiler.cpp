@@ -57,11 +57,11 @@ LLVMIrtocCompiler::LLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime,
     auto llvmCompilerOptions = InitializeLLVMCompilerOptions();
 
     targetMachine_ = cantFail(panda::llvmbackend::TargetMachineBuilder {}
-                                   .SetCPU(GetCPUForArch(arch))
-                                   .SetOptLevel(static_cast<llvm::CodeGenOpt::Level>(llvmCompilerOptions.optlevel))
-                                   .SetFeatures(GetFeaturesForArch(GetArch()))
-                                   .SetTriple(GetTripleForArch(GetArch()))
-                                   .Build());
+                                  .SetCPU(GetCPUForArch(arch))
+                                  .SetOptLevel(static_cast<llvm::CodeGenOpt::Level>(llvmCompilerOptions.optlevel))
+                                  .SetFeatures(GetFeaturesForArch(GetArch()))
+                                  .SetTriple(GetTripleForArch(GetArch()))
+                                  .Build());
     mirCompiler_ = std::make_unique<MIRCompiler>(
         targetMachine_, [this](panda::llvmbackend::InsertingPassManager *manager) -> void {
             manager->InsertBefore(&llvm::FEntryInserterID,

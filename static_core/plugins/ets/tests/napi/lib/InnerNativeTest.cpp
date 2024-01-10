@@ -14,18 +14,19 @@
  */
 
 #include <ets_napi.h>
+#include "libpandabase/utils/utils.h"
 
 extern "C" {
 
 ETS_EXPORT ets_int ETS_CALL ETS_InnerNativeTest_Inner_innerNative([[maybe_unused]] EtsEnv *, [[maybe_unused]] ets_class)
 {
-    return 2;
+    return 2_I;
 }
 
 ETS_EXPORT ets_int ETS_CALL ETS_InnerNativeTest_Inner_InnerInner_innerNative([[maybe_unused]] EtsEnv *,
                                                                              [[maybe_unused]] ets_class)
 {
-    return 3;
+    return 3_I;
 }
 
 }  // extern "C"

@@ -2506,9 +2506,9 @@ public:
         : FixedInputsInst(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
     }
 };
 
@@ -2522,10 +2522,10 @@ public:
         : FixedInputsInst(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetInput(3, input3);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetInput(3U, input3);
     }
 };
 
@@ -4201,9 +4201,9 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
     }
 
     Inst *GetArray()
@@ -4286,9 +4286,9 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetNeedBarrier(needBarrier);
     }
 
@@ -4623,9 +4623,9 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetIsArray(isArray);
     }
 
@@ -5161,9 +5161,9 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
     }
 
     bool IsBarrier() const override
@@ -5184,10 +5184,10 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetInput(3, input3);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetInput(3U, input3);
     }
 
     bool IsBarrier() const override
@@ -5356,9 +5356,9 @@ public:
         : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5415,9 +5415,9 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5928,9 +5928,9 @@ public:
         : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetClassType(classType);
         SetNeedBarrier(needBarrier);
     }
@@ -5977,9 +5977,9 @@ public:
         : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetClassType(classType);
         SetNeedBarrier(needBarrier);
     }
@@ -6467,10 +6467,10 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetInput(3, input3);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetInput(3U, input3);
         SetOperandsType(operType);
         SetCc(cc);
         if (IsReferenceOrAny()) {
@@ -6515,9 +6515,9 @@ public:
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetOperandsType(operType);
         SetCc(cc);
         if (IsReferenceOrAny()) {
@@ -6776,10 +6776,10 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetInput(3, input3);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetInput(3U, input3);
         SetNeedBarrier(needBarrier);
     }
 
@@ -6895,9 +6895,9 @@ public:
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetNeedBarrier(needBarrier);
     }
 
@@ -7197,9 +7197,9 @@ public:
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetDeoptimizeType(deoptIf->GetDeoptimizeType());
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetOperandsType(compare->GetOperandsType());
         SetCc(compare->GetCc());
     }

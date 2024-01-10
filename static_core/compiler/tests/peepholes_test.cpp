@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utils.h"
 #include "macros.h"
 #include "unit_test.h"
 #include "optimizer/ir/graph_cloner.h"
@@ -2814,7 +2815,7 @@ TEST_F(PeepholesTest, TestMulCase4)
         CONSTANT(4U, 16U);
         CONSTANT(5U, 512U);
         CONSTANT(15U, 4.0F);
-        CONSTANT(16U, 16.0);
+        CONSTANT(16U, 16.0_D);
         BASIC_BLOCK(2U, -1L)
         {
             INST(6U, Opcode::Mul).u64().Inputs(0U, 3U);
@@ -2839,7 +2840,7 @@ TEST_F(PeepholesTest, TestMulCase4)
         PARAMETER(14U, 4U).f64();
         CONSTANT(3U, 4U);
         CONSTANT(15U, 4.0F);
-        CONSTANT(16U, 16.0);
+        CONSTANT(16U, 16.0_D);
         CONSTANT(23U, 2U);
         CONSTANT(24U, 9U);
         BASIC_BLOCK(2U, -1L)
@@ -6564,7 +6565,7 @@ TEST_F(PeepholesTest, MultiArrayWithLenArrayOfString)
             INST(4U, Opcode::LoadImmediate).ref().Class(class1);
             INST(5U, Opcode::MultiArray)
                 .ref()
-                .InputsAutoType(4, 1, 2,
+                .InputsAutoType(4U, 1U, 2U,
                                 3U);  // Will be create [ [ String, String ], [ String, String ], [ String, String ] ]
             INST(6U, Opcode::LenArray).Inputs(5U).s32();
 
@@ -6595,7 +6596,7 @@ TEST_F(PeepholesTest, MultiArrayWithLenArrayOfString)
             INST(4U, Opcode::LoadImmediate).ref().Class(class1);
             INST(5U, Opcode::MultiArray)
                 .ref()
-                .InputsAutoType(4, 1, 2,
+                .InputsAutoType(4U, 1U, 2U,
                                 3U);  // Will be create [ [ String, String ], [ String, String ], [ String, String ] ]
             INST(6U, Opcode::LenArray).Inputs(5U).s32();
 

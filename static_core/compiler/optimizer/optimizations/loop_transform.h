@@ -126,7 +126,7 @@ protected:
 
     BasicBlock *GetLoopOuterBlock(BasicBlock *exitBlock)
     {
-        ASSERT(exitBlock->GetSuccsBlocks().size() == 2);
+        ASSERT(exitBlock->GetSuccsBlocks().size() == 2U);
         auto loop = exitBlock->GetLoop();
         auto outer = exitBlock->GetTrueSuccessor();
         if (outer->GetLoop() == loop) {

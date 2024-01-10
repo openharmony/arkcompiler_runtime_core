@@ -139,9 +139,9 @@ TEST_F(HeapSpaceTest, AllocFreeAndCheckSizesTest)
 TEST_F(HeapSpaceTest, EmulateAllocBeforeAndAfterSTWGCTest)
 {
     static constexpr size_t INIT_HEAP_SIZE = 4_MB;
-    static constexpr size_t FIRST_POOL_SIZE = INIT_HEAP_SIZE / 2;
-    static constexpr size_t SECOND_POOL_SIZE = INIT_HEAP_SIZE * 3 / 4;
-    HeapSpaceHolder hsh(INIT_HEAP_SIZE, 2 * INIT_HEAP_SIZE, 0U, PERCENT_100_U32);
+    static constexpr size_t FIRST_POOL_SIZE = INIT_HEAP_SIZE / 2U;
+    static constexpr size_t SECOND_POOL_SIZE = INIT_HEAP_SIZE * 3U / 4U;
+    HeapSpaceHolder hsh(INIT_HEAP_SIZE, 2U * INIT_HEAP_SIZE, 0U, PERCENT_100_U32);
 
     ASSERT_EQ(GetCurrentMaxSize(), INIT_HEAP_SIZE) << "Current heap limit must be equal initial heap size";
     auto pool1 = heapSpace_->TryAllocPool(FIRST_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
@@ -174,7 +174,7 @@ TEST_F(HeapSpaceTest, EmulateAllocBeforeAndDuringGenGCTest)
     static constexpr size_t INIT_HEAP_SIZE = 16_MB;
     static constexpr size_t FIRST_POOL_SIZE = 4_MB;
     static constexpr size_t SECOND_POOL_SIZE = 10_MB;
-    GenerationalSpacesHolder gsh(DEFAULT_TEST_YOUNG_SIZE, DEFAULT_TEST_YOUNG_SIZE, INIT_HEAP_SIZE, INIT_HEAP_SIZE * 2);
+    GenerationalSpacesHolder gsh(DEFAULT_TEST_YOUNG_SIZE, DEFAULT_TEST_YOUNG_SIZE, INIT_HEAP_SIZE, INIT_HEAP_SIZE * 2U);
     auto youngPool = genSpaces_->AllocAlonePoolForYoung(SpaceType::SPACE_TYPE_OBJECT,
                                                         AllocatorType::BUMP_ALLOCATOR_WITH_TLABS, nullptr);
     // Check young pool allocation
@@ -208,7 +208,7 @@ TEST_F(HeapSpaceTest, EmulateAllocBeforeAndDuringGenGCTest)
     ASSERT_EQ(pool2.GetSize(), SECOND_POOL_SIZE) << "We can allocate pool during GC";
     ASSERT_EQ(GetCurrentTenuredMaxSize(), FIRST_POOL_SIZE + SECOND_POOL_SIZE);
     genSpaces_->ComputeNewSize();
-    ASSERT_EQ(GetCurrentTenuredMaxSize(), FIRST_POOL_SIZE + 2 * SECOND_POOL_SIZE);
+    ASSERT_EQ(GetCurrentTenuredMaxSize(), FIRST_POOL_SIZE + 2U * SECOND_POOL_SIZE);
     // --
     genSpaces_->FreePool(pool2.GetMem(), pool2.GetSize());
     genSpaces_->FreePool(pool1.GetMem(), pool1.GetSize());

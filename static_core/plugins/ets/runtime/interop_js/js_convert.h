@@ -269,7 +269,7 @@ JSCONVERT_WRAP(StdlibChar)
 {
     auto *val = reinterpret_cast<EtsBoxPrimitive<EtsChar> *>(etsVal);
     napi_value jsVal;
-    std::array<char16_t, 2> str = {static_cast<char16_t>(val->GetValue()), 0};
+    std::array<char16_t, 2U> str = {static_cast<char16_t>(val->GetValue()), 0};
     NAPI_CHECK_FATAL(napi_create_string_utf16(env, str.data(), 1, &jsVal));
     return jsVal;
 }

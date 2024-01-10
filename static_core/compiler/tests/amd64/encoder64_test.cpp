@@ -24,6 +24,7 @@
 #include "mem/pool_manager.h"
 #include "target/amd64/target.h"
 #include "mem/base_mem_stats.h"
+#include "libpandabase/utils/utils.h"
 
 template <typename T>
 const char *TypeName();
@@ -102,14 +103,14 @@ static T RandomGen()
         }
 
         // Uniform distribution floating value
-        std::uniform_real_distribution<T> disNum(1.0, 2.0);
-        int8_t sign = (gen % 2) == 0 ? 1 : -1;
+        std::uniform_real_distribution<T> disNum(1.0F, 2.0F);
+        int8_t sign = (gen % 2U) == 0 ? 1 : -1;
         if constexpr (std::is_same_v<T, float>) {
             std::uniform_real_distribution<float> dis(MIN_EXP_BASE2_FLOAT, MAX_EXP_BASE2_FLOAT);
             return sign * disNum(g_randomGenerator) * std::pow(2.0F, dis(g_randomGenerator));
         } else if constexpr (std::is_same_v<T, double>) {
             std::uniform_real_distribution<double> dis(MIN_EXP_BASE2_DOUBLE, MAX_EXP_BASE2_DOUBLE);
-            return sign * disNum(g_randomGenerator) * std::pow(2.0, dis(g_randomGenerator));
+            return sign * disNum(g_randomGenerator) * std::pow(2.0F, dis(g_randomGenerator));
         }
 
         UNREACHABLE();
@@ -2255,10 +2256,10 @@ bool TestFcmp(Encoder64Test *test, bool isFcmpg)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-        if (!test->CallCode<T, int32_t>(nan, 5.0, isFcmpg ? 1 : -1)) {
+        if (!test->CallCode<T, int32_t>(nan, 5.0_D, isFcmpg ? 1 : -1)) {
             return false;
         }
-        if (!test->CallCode<T, int32_t>(5.0, nan, isFcmpg ? 1 : -1)) {
+        if (!test->CallCode<T, int32_t>(5.0_D, nan, isFcmpg ? 1 : -1)) {
             return false;
         }
         if (!test->CallCode<T, int32_t>(nan, nan, isFcmpg ? 1 : -1)) {

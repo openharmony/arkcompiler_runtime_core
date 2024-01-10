@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/lambda_utils.h"
@@ -141,16 +142,16 @@ static inline size_t ClampToSizeT(EtsLong n)
 
 static GCTaskCause GCCauseFromInt(EtsInt cause)
 {
-    if (cause == 0) {
+    if (cause == 0_I) {
         return GCTaskCause::YOUNG_GC_CAUSE;
     }
-    if (cause == 1) {
+    if (cause == 1_I) {
         return GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE;
     }
-    if (cause == 2) {
+    if (cause == 2_I) {
         return GCTaskCause::MIXED;
     }
-    if (cause == 3) {
+    if (cause == 3_I) {
         return GCTaskCause::OOM_CAUSE;
     }
     return GCTaskCause::INVALID_CAUSE;

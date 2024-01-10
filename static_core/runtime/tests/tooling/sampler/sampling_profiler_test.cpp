@@ -231,7 +231,7 @@ TEST_F(SamplerTest, SamplerEventThreadNotificationTest)
     while (!syncFlag1 || !syncFlag2 || !syncFlag3) {
         ;
     }
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4);
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4UL);
 
     syncFlag1 = false;
     syncFlag2 = false;
@@ -269,7 +269,7 @@ TEST_F(SamplerTest, SamplerCheckThreadIdTest)
     while (!syncFlag1) {
         ;
     }
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 2);
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 2UL);
     bool isPassed = false;
 
     for (const auto &elem : ExtractManagedThreads(sp)) {
@@ -314,7 +314,7 @@ TEST_F(SamplerTest, SamplerCollectThreadTest)
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
 
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4);
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4UL);
 
     syncFlag1 = false;
     syncFlag2 = false;
@@ -353,13 +353,13 @@ TEST_F(SamplerTest, SamplerCollectNativeThreadTest)
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
 
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 3);
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 3UL);
     std::thread nativeThread3(RunNativeThread, &syncFlag3);
     while (!syncFlag3) {
         ;
     }
 
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4);
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4UL);
 
     syncFlag1 = false;
     syncFlag2 = false;
@@ -720,7 +720,7 @@ TEST_F(SamplerTest, ProfilerSamplerSignalHandlerTest)
 
         while (reader.GetNextSample(&sample)) {
             ++sampleCounter;
-            if (sample.stackInfo.managedStackSize == 2) {
+            if (sample.stackInfo.managedStackSize == 2U) {
                 isFind = true;
                 continue;
             }

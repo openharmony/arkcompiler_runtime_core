@@ -170,7 +170,7 @@ TEST_F(MemStatsTest, SimpleTest)
 
     AssertHeapStats(stats, initHeapBytes + BYTES_OBJECT1 + BYTES_OBJECT2, initHeapBytes + BYTES_OBJECT1 + BYTES_OBJECT2,
                     0);
-    AssertHeapObjectsStats(stats, initHeapObjects + 2, 0, 0, 0);
+    AssertHeapObjectsStats(stats, initHeapObjects + 2U, 0, 0, 0);
     ASSERT_EQ(initHeapBytes + BYTES_OBJECT1 + BYTES_OBJECT2, stats->GetFootprint(SpaceType::SPACE_TYPE_OBJECT));
     AssertRawStats(stats, BYTES_RAW_MEMORY_ALLOC1 + BYTES_RAW_MEMORY_ALLOC2, RAW_MEMORY_FREED,
                    BYTES_RAW_MEMORY_ALLOC1 + BYTES_RAW_MEMORY_ALLOC2 - RAW_MEMORY_FREED, rawStatsBeforeTest);
@@ -301,12 +301,12 @@ TEST_F(MemStatsTest, HumongousObject)
     ASSERT_TRUE(stringObject != nullptr);
     thread_->GetVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
     // NOLINTNEXTLINE(readability-magic-numbers)
-    AssertHeapHumongousStats(stats, initHeapBytes, initHeapBytes + 2359296, 2359296);
+    AssertHeapHumongousStats(stats, initHeapBytes, initHeapBytes + 2359296U, 2359296U);
     AssertHeapObjectsStats(stats, initHeapObjects, 0, 1, 1);
     ASSERT_EQ(rawStatsBeforeTest.GetRawBytesFootprintBeforeTest(), stats->GetFootprint(SpaceType::SPACE_TYPE_INTERNAL));
 
-    ASSERT_EQ(2359296, stats->GetAllocated(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT));
-    ASSERT_EQ(2359296, stats->GetFreed(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT));
+    ASSERT_EQ(2359296UL, stats->GetAllocated(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT));
+    ASSERT_EQ(2359296UL, stats->GetFreed(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT));
     ASSERT_EQ(0, stats->GetFootprint(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT));
 }
 
@@ -416,7 +416,7 @@ TEST_F(MemStatsTest, TestThreadSafety)
         threads[i].join();
     }
 
-    constexpr uint64_t SUM = (ITERATION + 1) * ITERATION / 2;
+    constexpr uint64_t SUM = (ITERATION + 1) * ITERATION / 2U;
     constexpr uint64_t TOTAL_ITERATION_COUNT = NUM_THREADS * ITERATION;
 
     for (size_t index = 0; index < SPACE_TYPE_SIZE; index++) {

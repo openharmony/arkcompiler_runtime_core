@@ -17,6 +17,7 @@
 #include <array>
 #include <map>
 
+#include "libpandabase/utils/utils.h"
 #include "util/struct_field.h"
 
 #include "util/tests/verifier_test.h"
@@ -50,26 +51,26 @@ struct MyArr final {
 
 TEST_F(VerifierTest, struct_field)
 {
-    std::vector<int32_t> vec(5);
-    vec[3] = 5;
-    int32_t &pos1 = vec[1];
-    StructField<int32_t, int32_t> sF1 {8};
+    std::vector<int32_t> vec(5U);
+    vec[3U] = 5_I;
+    int32_t &pos1 = vec[1U];
+    StructField<int32_t, int32_t> sF1 {8U};
     int32_t &pos2 = sF1.Of(pos1);
-    EXPECT_EQ(pos2, 5);
+    EXPECT_EQ(pos2, 5_I);
 
-    std::array<int64_t, 3> arr {};
-    arr[2] = 5;
+    std::array<int64_t, 3U> arr {};
+    arr[2U] = 5L;
     int64_t &pos3 = arr[0];
     // NOLINTNEXTLINE(readability-magic-numbers)
-    StructField<int64_t, int64_t> sF2 {16};
+    StructField<int64_t, int64_t> sF2 {16U};
     int64_t &pos4 = sF2.Of(pos3);
-    EXPECT_EQ(pos4, 5);
+    EXPECT_EQ(pos4, 5U);
 
     MyArr myArr;
-    EXPECT_EQ(myArr.Access('3'), 3);
+    EXPECT_EQ(myArr.Access('3'), 3_I);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    myArr.Access('4') = 44;
-    EXPECT_EQ(myArr.num4, 44);
+    myArr.Access('4') = 44_I;
+    EXPECT_EQ(myArr.num4, 44_I);
 }
 
 }  // namespace panda::verifier::test

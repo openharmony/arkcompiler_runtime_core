@@ -331,7 +331,7 @@ TEST_F(LoweringTest, SaveStateTest)
     EXPECT_EQ(saveState->GetImmediatesCount(), 4U);
     EXPECT_EQ((*saveState->GetImmediates())[0U].value, (bit_cast<uint64_t, uint64_t>(0U)));
     EXPECT_EQ((*saveState->GetImmediates())[1U].value, (bit_cast<uint64_t, uint64_t>(1U)));
-    EXPECT_EQ((*saveState->GetImmediates())[2U].value, (bit_cast<uint64_t, double>(0.5)));
+    EXPECT_EQ((*saveState->GetImmediates())[2U].value, (bit_cast<uint64_t, double>(0.5_D)));
     EXPECT_EQ((*saveState->GetImmediates())[3U].value, (bit_cast<uint64_t, uint64_t>(50U)));
     EXPECT_EQ(saveState->GetInput(0U).GetInst(), &INS(0U));
     EXPECT_EQ(saveState->GetInput(1U).GetInst(), &INS(5U));

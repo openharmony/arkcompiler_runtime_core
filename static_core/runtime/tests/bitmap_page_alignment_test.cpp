@@ -44,7 +44,7 @@ TEST_F(BitmapTest, ScanRange)
 
     MemBitmap<DEFAULT_ALIGNMENT_IN_BYTES> bm(ToVoidPtr(heapBegin), HEAP_CAPACITY, bmPtr.get());
 
-    constexpr size_t BIT_SET_RANGE_END = Bitmap::BITSPERWORD * 3;
+    constexpr size_t BIT_SET_RANGE_END = Bitmap::BITSPERWORD * 3U;
 
     for (size_t j = 0; j < BIT_SET_RANGE_END; ++j) {
         auto *obj = ToVoidPtr(heapBegin + j * DEFAULT_ALIGNMENT_IN_BYTES);
@@ -87,9 +87,9 @@ TEST_F(BitmapTest, TSANMultithreadingTest)
     std::srand(0xBADDEAD);
     size_t iterations;
 #ifdef PANDA_NIGHTLY_TEST_ON
-    iterations = 3000;
+    iterations = 3000U;
 #else
-    iterations = 1000;
+    iterations = 1000U;
 #endif
 
     auto iterate_thread = std::thread([&bm, &iterations] {

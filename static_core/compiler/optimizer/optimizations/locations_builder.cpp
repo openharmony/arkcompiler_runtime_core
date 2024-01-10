@@ -346,10 +346,10 @@ LOCATIONS_BUILDER(void)::VisitCallLaunchVirtual(GraphVisitor *visitor, Inst *ins
     // First input is second parameter(first is pointer to a method)
     locations->SetLocation(0, Location::MakeRegister(GetTarget().GetParamRegId(1)));
     // This object
-    locations->SetLocation(1, Location::MakeRegister(GetTarget().GetParamRegId(3)));
+    locations->SetLocation(1, Location::MakeRegister(GetTarget().GetParamRegId(3U)));
 
-    for (size_t i = 2; i < inst->GetInputsCount() - 1; i++) {
-        locations->SetLocation(i, Location::MakeStackArgument(i - 2));
+    for (size_t i = 2U; i < inst->GetInputsCount() - 1; i++) {
+        locations->SetLocation(i, Location::MakeStackArgument(i - 2U));
     }
     auto stackArgs = inst->GetInputsCount() - 3U;
     graph->UpdateStackSlotsCount(RoundUp(stackArgs, 2U));
@@ -366,8 +366,8 @@ LOCATIONS_BUILDER(void)::VisitCallResolvedLaunchStatic(GraphVisitor *visitor, In
     // Launch object
     locations->SetLocation(1, Location::MakeRegister(GetTarget().GetParamRegId(1)));
 
-    for (size_t i = 2; i < inst->GetInputsCount() - 1; i++) {
-        locations->SetLocation(i, Location::MakeStackArgument(i - 2));
+    for (size_t i = 2U; i < inst->GetInputsCount() - 1; i++) {
+        locations->SetLocation(i, Location::MakeStackArgument(i - 2U));
     }
     auto stackArgs = inst->GetInputsCount() - 3U;
     graph->UpdateStackSlotsCount(RoundUp(stackArgs, 2U));
@@ -384,10 +384,10 @@ LOCATIONS_BUILDER(void)::VisitCallResolvedLaunchVirtual(GraphVisitor *visitor, I
     // Launch object
     locations->SetLocation(1, Location::MakeRegister(GetTarget().GetParamRegId(1)));
     // This object
-    locations->SetLocation(2, Location::MakeRegister(GetTarget().GetParamRegId(3)));
+    locations->SetLocation(2U, Location::MakeRegister(GetTarget().GetParamRegId(3U)));
 
-    for (size_t i = 3; i < inst->GetInputsCount() - 1; i++) {
-        locations->SetLocation(i, Location::MakeStackArgument(i - 3));
+    for (size_t i = 3U; i < inst->GetInputsCount() - 1; i++) {
+        locations->SetLocation(i, Location::MakeStackArgument(i - 3U));
     }
     auto stackArgs = inst->GetInputsCount() - 4U;
     graph->UpdateStackSlotsCount(RoundUp(stackArgs, 2U));

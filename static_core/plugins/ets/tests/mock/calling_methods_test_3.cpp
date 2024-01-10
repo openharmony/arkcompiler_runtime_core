@@ -162,7 +162,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral3)
     ASSERT_EQ(doubleId, doubleIdNoSig);
 
     // CallStatic<type>Method part
-    env_->CallStaticVoidMethod(cls, voidId, static_cast<ets_int>(42));
+    env_->CallStaticVoidMethod(cls, voidId, static_cast<ets_int>(42_I));
 
     ets_class aCls = env_->FindClass("A");
     ASSERT_NE(aCls, nullptr);
@@ -183,7 +183,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral3)
 
     // CallStatic<Type>MethodArray part
     ets_value tmp;
-    tmp.i = static_cast<ets_int>(42);
+    tmp.i = static_cast<ets_int>(42_I);
     std::vector<ets_value> voidArgs = {tmp};
     env_->CallStaticVoidMethodArray(cls, voidId, voidArgs.data());
 
@@ -222,7 +222,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral3)
     EXPECT_DOUBLE_EQ(env_->CallStaticDoubleMethodArray(cls, doubleId, doubleArgs.data()), static_cast<ets_double>(0.0));
 
     // CallStatic<type>MethodList part
-    CallStaticVoidMethodListHelper(env_, cls, voidId, static_cast<ets_int>(42), static_cast<ets_int>(121));
+    CallStaticVoidMethodListHelper(env_, cls, voidId, static_cast<ets_int>(42_I), static_cast<ets_int>(121_I));
 
     ets_object aObjFromListFunc = CallObjectMethodListHelper(env_, cls, objectId);
     ASSERT_NE(aObjFromListFunc, nullptr);

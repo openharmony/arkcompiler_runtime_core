@@ -141,9 +141,9 @@ TEST_F(CompilerQueueTest, AddGet)
     ASSERT_NE(gMethod, nullptr);
 
     // Manual range
-    mainMethod->SetHotnessCounter(3);
-    fMethod->SetHotnessCounter(2);
-    gMethod->SetHotnessCounter(1);
+    mainMethod->SetHotnessCounter(3U);
+    fMethod->SetHotnessCounter(2U);
+    gMethod->SetHotnessCounter(1U);
 
     RuntimeOptions options;
     CompilerPriorityCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
@@ -169,9 +169,9 @@ TEST_F(CompilerQueueTest, EqualCounters)
     ASSERT_NE(gMethod, nullptr);
 
     // Manual range
-    mainMethod->SetHotnessCounter(3);
-    fMethod->SetHotnessCounter(3);
-    gMethod->SetHotnessCounter(3);
+    mainMethod->SetHotnessCounter(3U);
+    fMethod->SetHotnessCounter(3U);
+    gMethod->SetHotnessCounter(3U);
 
     RuntimeOptions options;
     CompilerPriorityCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
@@ -207,7 +207,7 @@ TEST_F(CompilerQueueTest, Expire)
     queue.AddTask(CompilerTask {fMethod, false});
     queue.AddTask(CompilerTask {gMethod, false});
 
-    WaitForExpire(1000);
+    WaitForExpire(1000U);
 
     // All tasks should expire after sleep
     auto method = queue.GetTask().GetMethod();
@@ -238,9 +238,9 @@ TEST_F(CompilerQueueTest, Reorder)
     Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
     ASSERT_NE(gMethod, nullptr);
 
-    mainMethod->SetHotnessCounter(3);
-    fMethod->SetHotnessCounter(2);
-    gMethod->SetHotnessCounter(1);
+    mainMethod->SetHotnessCounter(3U);
+    fMethod->SetHotnessCounter(2U);
+    gMethod->SetHotnessCounter(1U);
 
     RuntimeOptions options;
     CompilerPriorityCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
@@ -253,9 +253,9 @@ TEST_F(CompilerQueueTest, Reorder)
     queue.AddTask(CompilerTask {mainMethod, false});
 
     // Change the order
-    mainMethod->SetHotnessCounter(-6);
-    fMethod->SetHotnessCounter(-5);
-    gMethod->SetHotnessCounter(-4);
+    mainMethod->SetHotnessCounter(-6U);
+    fMethod->SetHotnessCounter(-5U);
+    gMethod->SetHotnessCounter(-4U);
 
     GetAndCheckMethodsIfExists(&queue, mainMethod, fMethod, gMethod);
 }
@@ -273,23 +273,23 @@ TEST_F(CompilerQueueTest, MaxLimit)
     Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
     ASSERT_NE(gMethod, nullptr);
 
-    mainMethod->SetHotnessCounter(1);
-    fMethod->SetHotnessCounter(2);
-    gMethod->SetHotnessCounter(3);
+    mainMethod->SetHotnessCounter(1U);
+    fMethod->SetHotnessCounter(2U);
+    gMethod->SetHotnessCounter(3U);
 
     RuntimeOptions options;
     constexpr int COMPILER_QUEUE_MAX_LENGTH1 = 100;
     CompilerPriorityCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                        COMPILER_QUEUE_MAX_LENGTH1, options.GetCompilerTaskLifeSpan());
 
-    for (int i = 0; i < 40; i++) {
+    for (size_t i = 0; i < 40U; i++) {
         queue.AddTask(CompilerTask {mainMethod, false});
         queue.AddTask(CompilerTask {fMethod, false});
         queue.AddTask(CompilerTask {gMethod, false});
     }
 
     // 100 as Max_Limit
-    for (int i = 0; i < 100; i++) {
+    for (size_t i = 0; i < 100U; i++) {
         queue.GetTask();
         // Can not check as the task may expire on an overloaded machine
     }
@@ -327,9 +327,9 @@ TEST_F(CompilerQueueTest, AgedAddGet)
     ASSERT_NE(gMethod, nullptr);
 
     // Manual range
-    mainMethod->SetHotnessCounter(-1000);
-    fMethod->SetHotnessCounter(-1200);
-    gMethod->SetHotnessCounter(-1300);
+    mainMethod->SetHotnessCounter(-1000U);
+    fMethod->SetHotnessCounter(-1200U);
+    gMethod->SetHotnessCounter(-1300U);
 
     RuntimeOptions options;
     CompilerPriorityAgedCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
@@ -356,9 +356,9 @@ TEST_F(CompilerQueueTest, AgedEqualCounters)
     ASSERT_NE(fMethod, nullptr);
 
     // Manual range
-    mainMethod->SetHotnessCounter(3000);
-    gMethod->SetHotnessCounter(3000);
-    fMethod->SetHotnessCounter(3000);
+    mainMethod->SetHotnessCounter(3000U);
+    gMethod->SetHotnessCounter(3000U);
+    fMethod->SetHotnessCounter(3000U);
 
     RuntimeOptions options;
     CompilerPriorityAgedCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
@@ -385,9 +385,9 @@ TEST_F(CompilerQueueTest, AgedExpire)
     Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
     ASSERT_NE(gMethod, nullptr);
 
-    mainMethod->SetHotnessCounter(1000);
-    fMethod->SetHotnessCounter(1000);
-    gMethod->SetHotnessCounter(1000);
+    mainMethod->SetHotnessCounter(1000U);
+    fMethod->SetHotnessCounter(1000U);
+    gMethod->SetHotnessCounter(1000U);
 
     RuntimeOptions options;
     constexpr int COMPILER_EPOCH_DURATION1 = 500;
@@ -398,7 +398,7 @@ TEST_F(CompilerQueueTest, AgedExpire)
     queue.AddTask(CompilerTask {fMethod, false});
     queue.AddTask(CompilerTask {gMethod, false});
 
-    WaitForExpire(1600);
+    WaitForExpire(1600U);
 
     // All tasks should expire after sleep
     auto method = queue.GetTask().GetMethod();
@@ -413,7 +413,7 @@ TEST_F(CompilerQueueTest, AgedExpire)
     queue2.AddTask(CompilerTask {fMethod, false});
     queue2.AddTask(CompilerTask {gMethod, false});
 
-    WaitForExpire(5);
+    WaitForExpire(5U);
 
     method = queue2.GetTask().GetMethod();
     ASSERT_EQ(method, nullptr);
@@ -432,9 +432,9 @@ TEST_F(CompilerQueueTest, AgedReorder)
     Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
     ASSERT_NE(gMethod, nullptr);
 
-    mainMethod->SetHotnessCounter(-1500);
-    fMethod->SetHotnessCounter(-2000);
-    gMethod->SetHotnessCounter(-3000);
+    mainMethod->SetHotnessCounter(-1500U);
+    fMethod->SetHotnessCounter(-2000U);
+    gMethod->SetHotnessCounter(-3000U);
 
     RuntimeOptions options;
     CompilerPriorityAgedCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
@@ -447,9 +447,9 @@ TEST_F(CompilerQueueTest, AgedReorder)
     queue.AddTask(CompilerTask {mainMethod, false});
 
     // Change the order
-    mainMethod->SetHotnessCounter(-6000);
-    fMethod->SetHotnessCounter(-5000);
-    gMethod->SetHotnessCounter(-4000);
+    mainMethod->SetHotnessCounter(-6000U);
+    fMethod->SetHotnessCounter(-5000U);
+    gMethod->SetHotnessCounter(-4000U);
 
     GetAndCheckMethodsIfExists(&queue, mainMethod, fMethod, gMethod);
 }
@@ -467,23 +467,23 @@ TEST_F(CompilerQueueTest, AgedMaxLimit)
     Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
     ASSERT_NE(gMethod, nullptr);
 
-    mainMethod->SetHotnessCounter(1000);
-    fMethod->SetHotnessCounter(2000);
-    gMethod->SetHotnessCounter(3000);
+    mainMethod->SetHotnessCounter(1000U);
+    fMethod->SetHotnessCounter(2000U);
+    gMethod->SetHotnessCounter(3000U);
 
     RuntimeOptions options;
     CompilerPriorityAgedCounterQueue queue(thread_->GetVM()->GetHeapManager()->GetInternalAllocator(),
                                            options.GetCompilerQueueMaxLength(), options.GetCompilerDeathCounterValue(),
                                            options.GetCompilerEpochDuration());
 
-    for (int i = 0; i < 40; i++) {
+    for (size_t i = 0; i < 40U; i++) {
         queue.AddTask(CompilerTask {mainMethod, false});
         queue.AddTask(CompilerTask {fMethod, false});
         queue.AddTask(CompilerTask {gMethod, false});
     }
 
     // 100 as Max_Limit
-    for (int i = 0; i < 100; i++) {
+    for (size_t i = 0; i < 100U; i++) {
         queue.GetTask();
         // Can not check as the task may expire on an overloaded machine
     }
@@ -519,9 +519,9 @@ TEST_F(CompilerQueueTest, AgedDeathCounter)
     Method *gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
     ASSERT_NE(gMethod, nullptr);
 
-    mainMethod->SetHotnessCounter(10);
-    fMethod->SetHotnessCounter(20);
-    gMethod->SetHotnessCounter(30000);
+    mainMethod->SetHotnessCounter(10U);
+    fMethod->SetHotnessCounter(20U);
+    gMethod->SetHotnessCounter(30000U);
 
     RuntimeOptions options;
     constexpr int COMPILER_DEATH_COUNTER_VALUE = 50;

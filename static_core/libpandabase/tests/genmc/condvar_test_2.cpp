@@ -14,6 +14,7 @@
  */
 
 #include "common.h"
+#include "libpandabase/utils/utils.h"
 
 // The test checks the work of Wait-SignalAll
 // There are two waiters (Thread1) and one waker (Thread2)
@@ -44,7 +45,7 @@ static void *Thread2(void *arg)
     // To be sure, the first thread is stopped on wait
     MutexLock(&g_x, false);
     // GenMC reports a race here without locks
-    __VERIFIER_assume(g_shared == 2);
+    __VERIFIER_assume(g_shared == 2_I);
     MutexUnlock(&g_x);
 
     MutexLock(&g_x, false);
@@ -72,7 +73,7 @@ int main()
     pthread_join(t3, nullptr);
 
     // Check that the threads were really waken
-    ASSERT(g_shared == 5);
+    ASSERT(g_shared == 5_I);
 
     ConditionVariableDestroy(&g_c);
     MutexDestroy(&g_x);

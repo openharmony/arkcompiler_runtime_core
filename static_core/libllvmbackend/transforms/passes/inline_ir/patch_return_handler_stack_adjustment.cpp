@@ -97,11 +97,10 @@ public:
                     ASSERT(stackAdjustment.isImm());
                     auto oldStackSize = stackAdjustment.getImm();
                     auto newStackSize = oldStackSize + stackSize;
-                    LLVM_DEBUG(llvm::dbgs()
-                               << "Replaced old_stack_size = " << oldStackSize
-                               << " with new_stack_size = " << newStackSize << " in inline_asm = '" << inlineAsm
-                               << "' because llvm used " << stackSize << " bytes of stack in function = '"
-                               << machineFunction.getName() << "'\n");
+                    LLVM_DEBUG(llvm::dbgs() << "Replaced old_stack_size = " << oldStackSize
+                                            << " with new_stack_size = " << newStackSize << " in inline_asm = '"
+                                            << inlineAsm << "' because llvm used " << stackSize
+                                            << " bytes of stack in function = '" << machineFunction.getName() << "'\n");
                     stackAdjustment.setImm(newStackSize);
                     changed = true;
                 }
@@ -137,4 +136,4 @@ MachineFunctionPass *CreatePatchReturnHandlerStackAdjustmentPass(LLVMArkInterfac
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static RegisterPass<PatchReturnHandlerStackAdjustment> g_p1(PatchReturnHandlerStackAdjustment::ARG_NAME,
-                                                          PatchReturnHandlerStackAdjustment::PASS_NAME, false, false);
+                                                            PatchReturnHandlerStackAdjustment::PASS_NAME, false, false);

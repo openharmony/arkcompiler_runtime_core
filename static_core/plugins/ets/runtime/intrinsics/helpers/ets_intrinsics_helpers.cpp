@@ -267,7 +267,7 @@ double StringToDoubleWithRadix(const uint8_t *start, const uint8_t *end, int rad
         uint32_t multiplier = 1;
         for (; p != end; ++p) {
             // The maximum value to ensure that uint32_t will not overflow
-            const uint32_t maxMultiper = 0xffffffffU / 36;
+            const uint32_t maxMultiper = 0xffffffffU / 36U;
             uint32_t m = multiplier * static_cast<uint32_t>(radix);
             if (m > maxMultiper) {
                 break;
@@ -305,8 +305,8 @@ EtsString *DoubleToExponential(double number, int digit)
     }
     PandaString result = ss.str();
     size_t found = result.find_last_of('e');
-    if (found != PandaString::npos && found < result.size() - 2 && result[found + 2] == '0') {
-        result.erase(found + 2, 1);  // 2:offset of e
+    if (found != PandaString::npos && found < result.size() - 2U && result[found + 2U] == '0') {
+        result.erase(found + 2U, 1);  // 2:offset of e
     }
     if (digit < 0) {
         size_t end = found;

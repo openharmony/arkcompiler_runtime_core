@@ -34,13 +34,13 @@ TEST_F(VerifierTest, Variables)
     {
         auto v3 = vars.NewVar();
         EXPECT_TRUE(v3 != v2 && v3 != v1 && v3 != v4);
-        EXPECT_EQ(vars.AmountOfUsedVars(), 4);
+        EXPECT_EQ(vars.AmountOfUsedVars(), 4UL);
         v4 = v3;
-        EXPECT_EQ(vars.AmountOfUsedVars(), 3);
+        EXPECT_EQ(vars.AmountOfUsedVars(), 3UL);
     }
 
     auto v5 = vars.NewVar();
-    EXPECT_EQ(vars.AmountOfUsedVars(), 4);
+    EXPECT_EQ(vars.AmountOfUsedVars(), 4UL);
     EXPECT_FALSE(v4 == v5);
 
     size_t count = 0;
@@ -50,7 +50,7 @@ TEST_F(VerifierTest, Variables)
         EXPECT_TRUE(v == v1 || v == v2 || v == v4 || v == v5);
     });
 
-    EXPECT_EQ(count, 4);
+    EXPECT_EQ(count, 4UL);
 }
 
 }  // namespace panda::verifier::test

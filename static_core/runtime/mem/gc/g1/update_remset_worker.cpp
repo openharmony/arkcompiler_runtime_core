@@ -125,8 +125,8 @@ void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffers(PandaUnorder
 }
 
 template <class LanguageConfig>
-void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(
-    GCG1BarrierSet::G1PostBarrierRingBufferType *postWrb, PandaUnorderedSet<CardTable::CardPtr> *cards)
+void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(GCG1BarrierSet::G1PostBarrierRingBufferType *postWrb,
+                                                                   PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
     if (postWrb == nullptr) {
         return;

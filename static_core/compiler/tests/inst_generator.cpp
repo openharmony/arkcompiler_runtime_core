@@ -1178,14 +1178,14 @@ void StatisticGenerator::GenerateHTMLPage(const std::string &fileName)
              << "\t<table>\n"
              << "\t\t<tr><th>Positive tests</th><td>" << positiveInstNumber_ << "</td></tr>\n"
              << "\t\t<tr><th>All generated tests</th><td>" << allInstNumber_ << "</td></tr>\n"
-             << "\t\t<tr><th></th><td>" << positiveInstNumber_ * 100.0 / allInstNumber_ << "%</td></tr>\n"
+             << "\t\t<tr><th></th><td>" << positiveInstNumber_ * 100.0F / allInstNumber_ << "%</td></tr>\n"
              << "\t</table>\n"
              << "\t<br>\n"
              << "\t<table>"
              << "\t\t<tr><th align=\"left\">Number of opcodes for which tests were generated</th><td>"
              << implementedOpcodeNumber_ << "</td></tr>"
              << "\t\t<tr><th align=\"left\">Full number of opcodes</th><td>" << allOpcodeNumber_ << "</td></tr>"
-             << "\t\t<tr><th></th><td>" << implementedOpcodeNumber_ * 100.0 / allOpcodeNumber_ << "%</td></tr>"
+             << "\t\t<tr><th></th><td>" << implementedOpcodeNumber_ * 100.0F / allOpcodeNumber_ << "%</td></tr>"
              << "\t</table>\n"
              << "\t<h3>Detailed information</h3>"
              << "\t\t<table>"
@@ -1226,7 +1226,7 @@ void StatisticGenerator::GenerateHTMLPage(const std::string &fileName)
                 htmlPage << "<td align=\"center\" " << color << ">" << flag << "</td>";
             }
             if (positivCount + negativCount != 0U) {
-                htmlPage << "<td align=\"right\">" << positivCount * 100.0 / (positivCount + negativCount) << "</td>";
+                htmlPage << "<td align=\"right\">" << positivCount * 100.0F / (positivCount + negativCount) << "</td>";
             }
         } else {
             for (auto j = tmplt_.begin(); j != tmplt_.end(); ++j) {

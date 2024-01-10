@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utils.h"
 #include "util/shifted_vector.h"
 
 #include "util/tests/verifier_test.h"
@@ -23,26 +24,26 @@ namespace panda::verifier::test {
 
 TEST_F(VerifierTest, shifted_vector)
 {
-    ShiftedVector<2, int> shiftVec {5};
-    ASSERT_EQ(shiftVec.BeginIndex(), -2);
-    ASSERT_EQ(shiftVec.EndIndex(), 3);
-    EXPECT_TRUE(shiftVec.InValidRange(-1));
-    EXPECT_FALSE(shiftVec.InValidRange(5));
+    ShiftedVector<2_I, int> shiftVec {5U};
+    ASSERT_EQ(shiftVec.BeginIndex(), -2_I);
+    ASSERT_EQ(shiftVec.EndIndex(), 3_I);
+    EXPECT_TRUE(shiftVec.InValidRange(-1_I));
+    EXPECT_FALSE(shiftVec.InValidRange(5_I));
 
-    shiftVec[0] = 7;
-    shiftVec.At(1) = 8;
-    EXPECT_EQ(shiftVec.At(0), 7);
-    EXPECT_EQ(shiftVec[1], 8);
+    shiftVec[0] = 7_I;
+    shiftVec.At(1) = 8_I;
+    EXPECT_EQ(shiftVec.At(0), 7_I);
+    EXPECT_EQ(shiftVec[1], 8_I);
 
-    shiftVec.ExtendToInclude(5);
-    ASSERT_EQ(shiftVec.BeginIndex(), -2);
-    ASSERT_EQ(shiftVec.EndIndex(), 6);
-    EXPECT_TRUE(shiftVec.InValidRange(-1));
-    EXPECT_TRUE(shiftVec.InValidRange(5));
-    EXPECT_EQ(shiftVec.At(0), 7);
-    EXPECT_EQ(shiftVec[1], 8);
-    shiftVec[4] = 4;
-    EXPECT_EQ(shiftVec.At(4), 4);
+    shiftVec.ExtendToInclude(5_I);
+    ASSERT_EQ(shiftVec.BeginIndex(), -2_I);
+    ASSERT_EQ(shiftVec.EndIndex(), 6_I);
+    EXPECT_TRUE(shiftVec.InValidRange(-1_I));
+    EXPECT_TRUE(shiftVec.InValidRange(5_I));
+    EXPECT_EQ(shiftVec.At(0), 7_I);
+    EXPECT_EQ(shiftVec[1], 8_I);
+    shiftVec[4U] = 4_I;
+    EXPECT_EQ(shiftVec.At(4U), 4_I);
 }
 
 }  // namespace panda::verifier::test

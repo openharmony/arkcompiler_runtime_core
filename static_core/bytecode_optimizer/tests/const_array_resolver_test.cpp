@@ -177,8 +177,8 @@ TEST_F(CommonTest, ConstArrayResolverFloat64)
         CONSTANT(0U, 0U).s32();
         CONSTANT(1U, 1U).s32();
         CONSTANT(2U, 2U).s32();
-        CONSTANT(3U, 100.0).f64();
-        CONSTANT(4U, 200.0).f64();
+        CONSTANT(3U, 100.0_D).f64();
+        CONSTANT(4U, 200.0_D).f64();
 
         BASIC_BLOCK(2U, -1L)
         {

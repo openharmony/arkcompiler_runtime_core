@@ -83,9 +83,9 @@ uint32_t EtsMethod::GetNumArgSlots() const
         auto argTypeId = shortyIt->GetId();
         // double and long arguments take two slots
         if (argTypeId == panda_file::Type::TypeId::I64 || argTypeId == panda_file::Type::TypeId::F64) {
-            numOfSlots += 2;
+            numOfSlots += 2U;
         } else {
-            numOfSlots += 1;
+            numOfSlots += 1U;
         }
     }
     if (!IsStatic()) {

@@ -20,6 +20,7 @@
 #include "assembly-parser.h"
 #include "mangling.h"
 #include "libpandafile/value.h"
+#include "libpandabase/utils/utils.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/method-inl.h"
@@ -204,7 +205,7 @@ TEST_F(MethodTest, Invoke)
     v = fMethod->Invoke(ManagedThread::GetCurrent(), args.data());
     EXPECT_EQ(v.GetAs<int64_t>(), 0);
     EXPECT_EQ(fMethod->GetHotnessCounter(),
-              Runtime::GetCurrent()->IsJitEnabled() ? 1498U : std::numeric_limits<int16_t>::max() - 2);
+              Runtime::GetCurrent()->IsJitEnabled() ? 1498U : std::numeric_limits<int16_t>::max() - 2U);
     EXPECT_EQ(ManagedThread::GetCurrent(), thread);
 }
 
@@ -237,7 +238,7 @@ TEST_F(MethodTest, VirtualMethod)
     ASSERT_NE(method, nullptr);
 
     ASSERT_FALSE(method->IsStatic());
-    ASSERT_EQ(method->GetNumArgs(), 2);
+    ASSERT_EQ(method->GetNumArgs(), 2U);
     ASSERT_EQ(method->GetArgType(0).GetId(), panda_file::Type::TypeId::REFERENCE);
     ASSERT_EQ(method->GetArgType(1).GetId(), panda_file::Type::TypeId::I32);
 }
@@ -273,14 +274,14 @@ TEST_F(MethodTest, GetLineNumFromBytecodeOffset1)
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("foo"));
     ASSERT_NE(method, nullptr);
 
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(0), 3);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(2), 4);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(5), 5);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(7), 6);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(10), 7);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(14), 8);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(0), 3_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(2U), 4_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(5U), 5_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(7U), 6_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(10U), 7_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(14U), 8_I);
 
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(20), 8);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(20U), 8_I);
 }
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -349,13 +350,13 @@ TEST_F(MethodTest, GetLineNumFromBytecodeOffset10)
     lv.signature = "I";
     lv.reg = 0;
     lv.start = 0;
-    lv.length = 5;
+    lv.length = 5U;
 
     function.localVariableDebug.push_back(lv);
 
     lv.name = "b";
-    lv.start = 5;
-    lv.length = 10;
+    lv.start = 5U;
+    lv.length = 10U;
 
     function.localVariableDebug.push_back(lv);
 
@@ -374,14 +375,14 @@ TEST_F(MethodTest, GetLineNumFromBytecodeOffset10)
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("foo"));
     ASSERT_NE(method, nullptr);
 
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(0), 3);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(2), 4);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(5), 5);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(7), 6);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(10), 7);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(14), 8);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(0U), 3_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(2U), 4_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(5U), 5_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(7U), 6_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(10U), 7_I);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(14U), 8_I);
 
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(20), 8);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(20U), 8_I);
 }
 
 TEST_F(MethodTest, GetClassSourceFile)

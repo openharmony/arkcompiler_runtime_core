@@ -81,7 +81,7 @@ TEST_F(ExplicitGC, TestG1GCPhases)
 
     uint32_t garbageRate = Runtime::GetOptions().GetG1RegionGarbageRateThreshold();
     // NOLINTNEXTLINE(readability-magic-numbers,-warnings-as-errors)
-    size_t bigLen = garbageRate * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
+    size_t bigLen = garbageRate * DEFAULT_REGION_SIZE / 100U + sizeof(coretypes::String);
 
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
@@ -94,7 +94,7 @@ TEST_F(ExplicitGC, TestG1GCPhases)
     std::string expectedLog;
     std::string log;
 
-    holder = VMHandle<coretypes::Array>(thread, allocator.AllocArray(2, ClassRoot::ARRAY_STRING, false));
+    holder = VMHandle<coretypes::Array>(thread, allocator.AllocArray(2U, ClassRoot::ARRAY_STRING, false));
     holder->Set(0, allocator.AllocString(bigLen));
     holder->Set(1, allocator.AllocString(bigLen));
 

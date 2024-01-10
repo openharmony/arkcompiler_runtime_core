@@ -64,7 +64,7 @@ public:
     NO_MOVE_SEMANTIC(ThreadCommunicator);
 
 private:
-    std::array<int, 2> listenerPipe_ {-1, -1};
+    std::array<int, 2U> listenerPipe_ {-1, -1};
 
     friend class test::SamplerTest;
 };

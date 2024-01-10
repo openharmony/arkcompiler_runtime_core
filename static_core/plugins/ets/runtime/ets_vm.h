@@ -261,7 +261,7 @@ public:
         return reinterpret_cast<PandaEtsVM *>(ToUintPtr(externalData) - MEMBER_OFFSET(PandaEtsVM, externalData_));
     }
 
-    struct alignas(16) ExternalData {  // NOLINT(readability-magic-numbers)
+    struct alignas(16U) ExternalData {  // NOLINT(readability-magic-numbers)
         static constexpr size_t SIZE = 512U;
         uint8_t data[SIZE];  // NOLINT(modernize-avoid-c-arrays)
     };

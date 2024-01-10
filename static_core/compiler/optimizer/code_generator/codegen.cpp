@@ -30,6 +30,7 @@ Codegen Hi-Level implementation
 #include "optimizer/code_generator/method_properties.h"
 #include "events/events.h"
 #include "libpandabase/utils/tsan_interface.h"
+#include "libpandabase/utils/utils.h"
 #include <iomanip>
 
 namespace panda::compiler {
@@ -1884,20 +1885,20 @@ void Codegen::CreatePostWRBForDynamic(Inst *inst, MemRef mem, Reg reg1, Reg reg2
     if (reg2 == INVALID_REGISTER) {
         if (inst->GetOpcode() == Opcode::StoreObject || inst->GetOpcode() == Opcode::StoreI ||
             inst->GetOpcode() == Opcode::StoreArrayI) {
-            storeIndex = 1;
+            storeIndex = 1_I;
         } else {
             ASSERT(inst->GetOpcode() == Opcode::StoreArray || inst->GetOpcode() == Opcode::Store);
-            storeIndex = 2;
+            storeIndex = 2_I;
         }
         if (StoreValueCanBeObject(inst->GetDataFlowInput(storeIndex))) {
             EncodePostWRB(inst, mem, reg1, reg2, true);
         }
     } else {
         if (inst->GetOpcode() == Opcode::StoreArrayPairI) {
-            storeIndex = 1;
+            storeIndex = 1_I;
         } else {
             ASSERT(inst->GetOpcode() == Opcode::StoreArrayPair);
-            storeIndex = 2;
+            storeIndex = 2_I;
         }
         bool firstIsObject = StoreValueCanBeObject(inst->GetDataFlowInput(storeIndex));
         bool secondIsObject = StoreValueCanBeObject(inst->GetDataFlowInput(storeIndex + 1));

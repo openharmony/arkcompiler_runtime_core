@@ -135,8 +135,8 @@ struct EtsFieldAccessorREFERENCE {
         return refconv->Wrap(ctx, etsValue);
     }
 
-    static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> etsObject,
-                       EtsFieldWrapper *etsFieldWrapper, napi_value jsValue)
+    static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> etsObject, EtsFieldWrapper *etsFieldWrapper,
+                       napi_value jsValue)
     {
         EtsObject *etsValue;
         if (IsNullOrUndefined(env, jsValue)) {
@@ -160,16 +160,15 @@ template <typename Convertor>
 struct EtsFieldAccessorPRIMITIVE {
     using PrimitiveType = typename Convertor::cpptype;
 
-    static napi_value Getter(InteropCtx * /*ctx*/, napi_env env, EtsObject *etsObject,
-                             EtsFieldWrapper *etsFieldWrapper)
+    static napi_value Getter(InteropCtx * /*ctx*/, napi_env env, EtsObject *etsObject, EtsFieldWrapper *etsFieldWrapper)
     {
         auto etsValue = etsObject->GetFieldPrimitive<PrimitiveType>(etsFieldWrapper->GetObjOffset());
         return Convertor::Wrap(env, etsValue);
     }
 
     // NOTE(vpukhov): elide etsObject handle
-    static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> etsObject,
-                       EtsFieldWrapper *etsFieldWrapper, napi_value jsValue)
+    static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> etsObject, EtsFieldWrapper *etsFieldWrapper,
+                       napi_value jsValue)
     {
         std::optional<PrimitiveType> etsValue = Convertor::Unwrap(ctx, env, jsValue);
         if (LIKELY(etsValue.has_value())) {
@@ -193,7 +192,7 @@ JSRefConvert *EtsFieldWrapper::GetRefConvert(InteropCtx *ctx)
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     Class *fieldClass =
         classLinker->GetClass(*pandaFile, panda_file::FieldDataAccessor::GetTypeId(*pandaFile, field->GetFileId()),
-                               ctx->LinkerCtx(), nullptr);
+                              ctx->LinkerCtx(), nullptr);
 
     JSRefConvert *refconv = JSRefConvertResolve<ALLOW_INIT>(ctx, fieldClass);
     if (UNLIKELY(refconv == nullptr)) {

@@ -102,8 +102,7 @@ public:
         catchOnlyCatcherThread_ = true;
     }
 
-    void SetupCallbacks(std::function<void()> afterThreadStartCallback,
-                        std::function<void()> beforeThreadStopCallback)
+    void SetupCallbacks(std::function<void()> afterThreadStartCallback, std::function<void()> beforeThreadStopCallback)
     {
         afterThreadStartCallback_ = std::move(afterThreadStartCallback);
         beforeThreadStopCallback_ = std::move(beforeThreadStopCallback);

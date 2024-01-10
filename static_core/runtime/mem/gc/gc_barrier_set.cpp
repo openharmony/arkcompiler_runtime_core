@@ -177,7 +177,7 @@ void GCG1BarrierSet::Enqueue(CardTable::CardPtr card)
         auto *buffer = thread->GetG1PostBarrierBuffer();
         ASSERT(buffer != nullptr);
         // try to push it twice
-        for (size_t i = 0; i < 2; i++) {
+        for (size_t i = 0; i < 2U; i++) {
             bool success = buffer->TryPush(card);
             if (success) {
                 return;

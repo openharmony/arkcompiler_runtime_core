@@ -180,10 +180,10 @@ TEST_F(RegionAllocatorTest, AllocateTooMuchRegularObject)
     NonObjectRegionAllocator allocator(memStats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
     size_t allocTimes = GetRegionsNumber();
     for (size_t i = 0; i < allocTimes; i++) {
-        ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize() / 2 + 1) != nullptr);
+        ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize() / 2UL + 1UL) != nullptr);
     }
     delete memStats;
-    ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize() / 2 + 1) == nullptr);
+    ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize() / 2UL + 1UL) == nullptr);
 }
 
 TEST_F(RegionAllocatorTest, AllocateTooMuchRandomRegularObject)
@@ -273,9 +273,10 @@ TEST_F(RegionAllocatorTest, AllocatedByRegionAllocatorTest)
 TEST_F(RegionAllocatorTest, OneAlignmentAllocTest)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    OneAlignedAllocFreeTest<NonObjectRegionAllocator::GetMaxRegularObjectSize() - 128,
+    OneAlignedAllocFreeTest<NonObjectRegionAllocator::GetMaxRegularObjectSize() - 128UL,
                             // NOLINTNEXTLINE(readability-magic-numbers)
-                            NonObjectRegionAllocator::GetMaxRegularObjectSize() + 128, DEFAULT_ALIGNMENT>(1, &spaces_);
+                            NonObjectRegionAllocator::GetMaxRegularObjectSize() + 128UL, DEFAULT_ALIGNMENT>(1UL,
+                                                                                                            &spaces_);
 }
 
 TEST_F(RegionAllocatorTest, AllocateFreeDifferentSizesTest)
@@ -283,10 +284,10 @@ TEST_F(RegionAllocatorTest, AllocateFreeDifferentSizesTest)
     static constexpr size_t ELEMENTS_COUNT = 256;
     static constexpr size_t POOLS_COUNT = 1;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    AllocateFreeDifferentSizesTest<NonObjectRegionAllocator::GetMaxRegularObjectSize() - 128,
+    AllocateFreeDifferentSizesTest<NonObjectRegionAllocator::GetMaxRegularObjectSize() - 128UL,
                                    // NOLINTNEXTLINE(readability-magic-numbers)
-                                   NonObjectRegionAllocator::GetMaxRegularObjectSize() + 128>(ELEMENTS_COUNT,
-                                                                                              POOLS_COUNT, &spaces_);
+                                   NonObjectRegionAllocator::GetMaxRegularObjectSize() + 128UL>(ELEMENTS_COUNT,
+                                                                                                POOLS_COUNT, &spaces_);
 }
 
 TEST_F(RegionAllocatorTest, RegionTLABAllocTest)
@@ -327,16 +328,16 @@ TEST_F(RegionAllocatorTest, RegionTLABAllocTest)
 TEST_F(RegionAllocatorTest, RegionPoolTest)
 {
     mem::MemStatsType memStats;
-    NonObjectRegionAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 2, true);
+    NonObjectRegionAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 2U, true);
 
     // alloc two small objects in a region
-    ASSERT_EQ(GetNumFreeRegions(allocator), 2);
-    auto *obj1 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(1));  // one byte
+    ASSERT_EQ(GetNumFreeRegions(allocator), 2U);
+    auto *obj1 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(1UL));  // one byte
     ASSERT_TRUE(obj1 != nullptr);
-    ASSERT_EQ(GetNumFreeRegions(allocator), 1);
-    auto *obj2 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(DEFAULT_ALIGNMENT_IN_BYTES + 2));  // two byte
+    ASSERT_EQ(GetNumFreeRegions(allocator), 1UL);
+    auto *obj2 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(DEFAULT_ALIGNMENT_IN_BYTES + 2U));  // two byte
     ASSERT_TRUE(obj2 != nullptr);
-    ASSERT_EQ(GetNumFreeRegions(allocator), 1);
+    ASSERT_EQ(GetNumFreeRegions(allocator), 1UL);
 
     // check that the two objects should be in a region
     ASSERT_EQ(ToUintPtr(obj2), ToUintPtr(obj1) + DEFAULT_ALIGNMENT_IN_BYTES);
@@ -345,14 +346,14 @@ TEST_F(RegionAllocatorTest, RegionPoolTest)
     auto *region2 = allocator.GetRegion(obj2);
     ASSERT_TRUE(region2 != nullptr);
     ASSERT_EQ(region1, region2);
-    ASSERT_EQ(region1->Top() - region1->Begin(), 3 * DEFAULT_ALIGNMENT_IN_BYTES);
+    ASSERT_EQ(region1->Top() - region1->Begin(), 3U * DEFAULT_ALIGNMENT_IN_BYTES);
 
     // allocate a large object in pool(not in initial block)
     ASSERT_EQ(GetNumFreeRegions(allocator), 1);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto *obj3 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize() + 200));
+    auto *obj3 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize() + 200U));
     ASSERT_TRUE(obj3 != nullptr);
-    ASSERT_EQ(GetNumFreeRegions(allocator), 1);
+    ASSERT_EQ(GetNumFreeRegions(allocator), 1UL);
     auto *region3 = allocator.GetRegion(obj3);
     ASSERT_TRUE(region3 != nullptr);
     ASSERT_NE(region2, region3);
@@ -618,7 +619,8 @@ TEST_F(RegionAllocatorTest, MTAllocTest)
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
         mem::MemStatsType memStats;
         // NOLINTNEXTLINE(readability-magic-numbers)
-        NonObjectRegionAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 128, true);
+        NonObjectRegionAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 128U,
+                                           true);
         MtAllocTest<MIN_MT_ALLOC_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(&allocator, MIN_ELEMENTS_COUNT,
                                                                          MAX_ELEMENTS_COUNT);
     }
@@ -633,14 +635,15 @@ TEST_F(RegionAllocatorTest, MTAllocLargeTest)
     static constexpr size_t THREADS_COUNT = 10;
 #endif
     static constexpr size_t MIN_MT_ALLOC_SIZE = 128;
-    static constexpr size_t MAX_MT_ALLOC_SIZE = NonObjectRegionAllocator::GetMaxRegularObjectSize() * 3;
+    static constexpr size_t MAX_MT_ALLOC_SIZE = NonObjectRegionAllocator::GetMaxRegularObjectSize() * 3U;
     static constexpr size_t MIN_ELEMENTS_COUNT = 10;
     static constexpr size_t MAX_ELEMENTS_COUNT = 30;
     static constexpr size_t MT_TEST_RUN_COUNT = 20;
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
         mem::MemStatsType memStats;
         // NOLINTNEXTLINE(readability-magic-numbers)
-        NonObjectRegionAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 256, true);
+        NonObjectRegionAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 256U,
+                                           true);
         MtAllocTest<MIN_MT_ALLOC_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(&allocator, MIN_ELEMENTS_COUNT,
                                                                          MAX_ELEMENTS_COUNT);
     }
@@ -650,7 +653,7 @@ TEST_F(RegionAllocatorTest, ConcurrentAllocRegular)
 {
     mem::MemStatsType memStats;
 
-    constexpr size_t SPACE_SIZE = RegionSize() * 1024;
+    constexpr size_t SPACE_SIZE = RegionSize() * 1024U;
     NonObjectRegionAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, SPACE_SIZE, true);
 
     auto allocateObjects = [&allocator, this](std::vector<void *> &vec) {
@@ -739,7 +742,7 @@ TEST_F(RegionNonmovableLargeObjectAllocatorTest, AllocatorTest)
     RegionNonmovableLargeObjectAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     size_t startObjectSize = RegionNonmovableObjectAllocator::GetMaxSize() + 1;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (uint32_t i = startObjectSize; i <= startObjectSize + 200; i++) {
+    for (uint32_t i = startObjectSize; i <= startObjectSize + 200U; i++) {
         ASSERT_TRUE(allocator.Alloc(i) != nullptr);
     }
     ASSERT_TRUE(allocator.Alloc(RegionNonmovableLargeObjectAllocator::GetMaxSize() - 1) != nullptr);
@@ -787,7 +790,7 @@ TEST_F(RegionNonmovableLargeObjectAllocatorTest, MemStatsAllocatorTest)
     mem = allocator.Alloc(ALLOC_SIZE);
     ASSERT_TRUE(mem != nullptr);
     auto objectAllocatedSize2 = memStats.GetAllocated(SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-    ASSERT_EQ(memStats.GetTotalObjectsAllocated(), 2);
+    ASSERT_EQ(memStats.GetTotalObjectsAllocated(), 2U);
     ASSERT_EQ(objectAllocatedSize2, objectAllocatedSize1 + objectAllocatedSize1);
 }
 

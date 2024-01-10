@@ -38,17 +38,17 @@ public:
             }
         } else if constexpr (BytecodeInstruction::IsVregArgs(FORMAT)) {
             switch (paramIdx) {
-                case 0: {
-                    return instn_.GetVReg<FORMAT, 0>();
+                case 0U: {
+                    return instn_.GetVReg<FORMAT, 0U>();
                 }
-                case 1: {
-                    return instn_.GetVReg<FORMAT, 1>();
+                case 1U: {
+                    return instn_.GetVReg<FORMAT, 1U>();
                 }
-                case 2: {
-                    return instn_.GetVReg<FORMAT, 2>();
+                case 2U: {
+                    return instn_.GetVReg<FORMAT, 2U>();
                 }
-                case 3: {
-                    return instn_.GetVReg<FORMAT, 3>();
+                case 3U: {
+                    return instn_.GetVReg<FORMAT, 3U>();
                 }
                 default:
                     UNREACHABLE();

@@ -190,7 +190,7 @@ std::array<ClassSubtypingFuns, Builtin::LAST> class_subtyping_funs {
     }
     if (tp.IsIntersection()) {
         auto members = tp.GetIntersectionMembers(tsys);
-        if (members.size() < 2) {
+        if (members.size() < 2UL) {
             return false;
         }
         for (auto mtp : members) {
@@ -202,7 +202,7 @@ std::array<ClassSubtypingFuns, Builtin::LAST> class_subtyping_funs {
     }
     if (tp.IsUnion()) {
         auto members = tp.GetUnionMembers(tsys);
-        if (members.size() < 2) {
+        if (members.size() < 2UL) {
             return false;
         }
         for (auto mtp : members) {

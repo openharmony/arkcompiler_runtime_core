@@ -62,7 +62,7 @@ std::string MangleMethodName(const std::string &className, const std::string &me
 {
     std::string name(className);
     if (name[0] == 'L') {
-        name = name.substr(1, name.size() - 2);
+        name = name.substr(1, name.size() - 2U);
     }
     name.append(".");
     name.append(methodName);

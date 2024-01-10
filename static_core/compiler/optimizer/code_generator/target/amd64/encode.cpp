@@ -18,6 +18,7 @@ Encoder (implementation of math and mem Low-level emitters)
 
 #include <iomanip>
 
+#include "libpandabase/utils/utils.h"
 #include "compiler/optimizer/code_generator/relocations.h"
 #include "operands.h"
 #include "target/amd64/target.h"
@@ -295,11 +296,11 @@ void Amd64Encoder::MakeCall([[maybe_unused]] compiler::RelocationInfo *relocatio
     LOG(FATAL, COMPILER) << "Not supported in Macos build";
 #else
     // NOLINTNEXTLINE(readability-magic-numbers)
-    std::array<uint8_t, 5> data = {0xe8, 0, 0, 0, 0};
+    std::array<uint8_t, 5U> data = {0xe8, 0, 0, 0, 0};
     GetMasm()->embed(data.data(), data.size());
 
-    relocation->offset = GetCursorOffset() - 4;
-    relocation->addend = -4;
+    relocation->offset = GetCursorOffset() - 4_I;
+    relocation->addend = -4_I;
     relocation->type = R_X86_64_PLT32;
 #endif
 }
@@ -2043,7 +2044,7 @@ void Amd64Encoder::EncodeCountTrailingZeroBits(Reg dst, Reg src)
 void Amd64Encoder::EncodeCeil(Reg dst, Reg src)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    GetMasm()->roundsd(ArchVReg(dst), ArchVReg(src), asmjit::imm(2));
+    GetMasm()->roundsd(ArchVReg(dst), ArchVReg(src), asmjit::imm(2_I));
 }
 
 void Amd64Encoder::EncodeFloor(Reg dst, Reg src)
@@ -2058,7 +2059,7 @@ void Amd64Encoder::EncodeRint(Reg dst, Reg src)
 
 void Amd64Encoder::EncodeTrunc(Reg dst, Reg src)
 {
-    GetMasm()->roundsd(ArchVReg(dst), ArchVReg(src), asmjit::imm(3));
+    GetMasm()->roundsd(ArchVReg(dst), ArchVReg(src), asmjit::imm(3_I));
 }
 
 void Amd64Encoder::EncodeRoundAway(Reg dst, Reg src)
@@ -2089,7 +2090,7 @@ void Amd64Encoder::EncodeRoundAway(Reg dst, Reg src)
     GetMasm()->orpd(ArchVReg(dest), ArchVReg(tv));
 
     GetMasm()->addsd(ArchVReg(dest), ArchVReg(src));
-    GetMasm()->roundsd(ArchVReg(dest), ArchVReg(dest), asmjit::imm(3));
+    GetMasm()->roundsd(ArchVReg(dest), ArchVReg(dest), asmjit::imm(3_I));
     if (shared) {
         GetMasm()->movapd(ArchVReg(dst), ArchVReg(dest));
     }
@@ -2151,7 +2152,7 @@ void Amd64Encoder::EncodeRoundToPInfDouble(Reg dst, Reg src)
     GetMasm()->roundsd(ArchVReg(t1), ArchVReg(src), asmjit::imm(1));
     GetMasm()->subsd(ArchVReg(t2), ArchVReg(t1));
     // NOLINTNEXTLINE(readability-magic-numbers)
-    GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int64_t, double>(0.5)));
+    GetMasm()->mov(ArchReg(t4), asmjit::imm(bit_cast<int64_t, double>(0.5F)));
     GetMasm()->movq(ArchVReg(t3), ArchReg(t4));
     GetMasm()->comisd(ArchVReg(t2), ArchVReg(t3));
     GetMasm()->j(asmjit::x86::Condition::Code::kB, *skipIncr);

@@ -221,8 +221,8 @@ public:
     [[nodiscard]] bool PushOntoFinalizationQueue(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg)
     {
         auto queue = Refstor()->Get(jsvalueFqueueRef_);
-        std::array<Value, 4> args = {Value(queue), Value(obj->GetCoreType()), Value(cbarg->GetCoreType()),
-                                     Value(static_cast<ObjectHeader *>(nullptr))};
+        std::array<Value, 4U> args = {Value(queue), Value(obj->GetCoreType()), Value(cbarg->GetCoreType()),
+                                      Value(static_cast<ObjectHeader *>(nullptr))};
         jsvalueFqueueRegister_->Invoke(coro, args.data());
         return !coro->HasPendingException();
     }

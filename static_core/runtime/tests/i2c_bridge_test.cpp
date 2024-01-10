@@ -20,6 +20,7 @@
 
 #include "libpandafile/bytecode_emitter.h"
 #include "libpandafile/bytecode_instruction.h"
+#include "libpandabase/utils/utils.h"
 #include "libpandafile/file_items.h"
 #include "libpandafile/value.h"
 #include "runtime/bridge/bridge.h"
@@ -175,9 +176,9 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeInstanceVoidNoArg)
     Frame *frame = CreateFrame(1, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
 
-    ObjectHeader *obj1 = panda::mem::AllocateNullifiedPayloadString(5);
+    ObjectHeader *obj1 = panda::mem::AllocateNullifiedPayloadString(5U);
     frameHandler.GetAccAsVReg().SetReference(obj1);
-    ObjectHeader *obj2 = panda::mem::AllocateNullifiedPayloadString(4);
+    ObjectHeader *obj2 = panda::mem::AllocateNullifiedPayloadString(4U);
     frameHandler.GetVReg(0).SetReference(obj2);
 
     uint8_t insn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x00, 0, 0, 0, 0};
@@ -201,7 +202,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeInstanceVoidNoArg)
 static uint8_t ByteNoArg(Method *method)
 {
     g_gCallResult = PrintFunc("uint8_t", __FUNCTION__, method);
-    return static_cast<uint8_t>(5);
+    return static_cast<uint8_t>(5U);
 }
 
 TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeByteNoArg)
@@ -215,19 +216,19 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeByteNoArg)
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(insn, frame, &callee, thread_);
     EXPECT_EQ(g_gCallResult, PrintFunc("uint8_t", "ByteNoArg", &callee));
-    EXPECT_EQ(frame->GetAcc().Get(), static_cast<uint8_t>(5));
+    EXPECT_EQ(frame->GetAcc().Get(), static_cast<uint8_t>(5U));
     EXPECT_EQ(frame->GetAcc().GetTag(), 0);
 
     uint8_t insnAcc[] = {static_cast<uint8_t>(Opcode::CALL_ACC_SHORT_V4_IMM4_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(insnAcc, frame, &callee, thread_);
     EXPECT_EQ(g_gCallResult, PrintFunc("uint8_t", "ByteNoArg", &callee));
-    EXPECT_EQ(frame->GetAcc().Get(), static_cast<uint8_t>(5));
+    EXPECT_EQ(frame->GetAcc().Get(), static_cast<uint8_t>(5U));
     EXPECT_EQ(frame->GetAcc().GetTag(), 0);
 
     g_gCallResult = "";
     uint64_t res = InvokeCompiledCodeWithArgArray(nullptr, frame, &callee, thread_);
-    EXPECT_EQ(static_cast<int32_t>(res), static_cast<uint8_t>(5));
+    EXPECT_EQ(static_cast<int32_t>(res), static_cast<uint8_t>(5U));
     EXPECT_EQ(g_gCallResult, PrintFunc("uint8_t", "ByteNoArg", &callee));
 
     FreeFrame(frame);
@@ -236,7 +237,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeByteNoArg)
 static int8_t SignedByteNoArg(Method *method)
 {
     g_gCallResult = PrintFunc("int8_t", __FUNCTION__, method);
-    return static_cast<int8_t>(-5);
+    return static_cast<int8_t>(-5_I);
 }
 
 TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeSignedByteNoArg)
@@ -250,19 +251,19 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeSignedByteNoArg)
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(insn, frame, &callee, thread_);
     EXPECT_EQ(g_gCallResult, PrintFunc("int8_t", "SignedByteNoArg", &callee));
-    EXPECT_EQ(frame->GetAcc().Get(), static_cast<int8_t>(-5));
+    EXPECT_EQ(frame->GetAcc().Get(), static_cast<int8_t>(-5_I));
     EXPECT_EQ(frame->GetAcc().GetTag(), 0);
 
     uint8_t insnAcc[] = {static_cast<uint8_t>(Opcode::CALL_ACC_SHORT_V4_IMM4_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(insnAcc, frame, &callee, thread_);
     EXPECT_EQ(g_gCallResult, PrintFunc("int8_t", "SignedByteNoArg", &callee));
-    EXPECT_EQ(frame->GetAcc().Get(), static_cast<int8_t>(-5));
+    EXPECT_EQ(frame->GetAcc().Get(), static_cast<int8_t>(-5_I));
     EXPECT_EQ(frame->GetAcc().GetTag(), 0);
 
     g_gCallResult = "";
     uint64_t res = InvokeCompiledCodeWithArgArray(nullptr, frame, &callee, thread_);
-    EXPECT_EQ(static_cast<int32_t>(res), static_cast<int8_t>(-5));
+    EXPECT_EQ(static_cast<int32_t>(res), static_cast<int8_t>(-5_I));
     EXPECT_EQ(g_gCallResult, PrintFunc("int8_t", "SignedByteNoArg", &callee));
 
     FreeFrame(frame);
@@ -299,7 +300,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeBoolNoArg)
 static uint16_t ShortNoArg(Method *method)
 {
     g_gCallResult = PrintFunc("uint16_t", __FUNCTION__, method);
-    return static_cast<uint16_t>(5);
+    return static_cast<uint16_t>(5U);
 }
 
 TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeShortNoArg)
@@ -313,12 +314,12 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeShortNoArg)
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(insn, frame, &callee, thread_);
     EXPECT_EQ(g_gCallResult, PrintFunc("uint16_t", "ShortNoArg", &callee));
-    EXPECT_EQ(frame->GetAcc().Get(), static_cast<uint16_t>(5));
+    EXPECT_EQ(frame->GetAcc().Get(), static_cast<uint16_t>(5U));
     EXPECT_EQ(frame->GetAcc().GetTag(), 0);
 
     g_gCallResult = "";
     uint64_t res = InvokeCompiledCodeWithArgArray(nullptr, frame, &callee, thread_);
-    EXPECT_EQ(static_cast<int32_t>(res), static_cast<uint16_t>(5));
+    EXPECT_EQ(static_cast<int32_t>(res), static_cast<uint16_t>(5U));
     EXPECT_EQ(g_gCallResult, PrintFunc("uint16_t", "ShortNoArg", &callee));
 
     FreeFrame(frame);
@@ -327,7 +328,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeShortNoArg)
 static int16_t SignedShortNoArg(Method *method)
 {
     g_gCallResult = PrintFunc("int16_t", __FUNCTION__, method);
-    return static_cast<int16_t>(-5);
+    return static_cast<int16_t>(-5_I);
 }
 
 TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeSignedShortNoArg)
@@ -341,12 +342,12 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeSignedShortNoArg)
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(insn, frame, &callee, thread_);
     EXPECT_EQ(g_gCallResult, PrintFunc("int16_t", "SignedShortNoArg", &callee));
-    EXPECT_EQ(frame->GetAcc().Get(), static_cast<int16_t>(-5));
+    EXPECT_EQ(frame->GetAcc().Get(), static_cast<int16_t>(-5_I));
     EXPECT_EQ(frame->GetAcc().GetTag(), 0);
 
     g_gCallResult = "";
     uint64_t res = InvokeCompiledCodeWithArgArray(nullptr, frame, &callee, thread_);
-    EXPECT_EQ(static_cast<int32_t>(res), static_cast<int16_t>(-5));
+    EXPECT_EQ(static_cast<int32_t>(res), static_cast<int16_t>(-5_I));
     EXPECT_EQ(g_gCallResult, PrintFunc("int16_t", "SignedShortNoArg", &callee));
 
     FreeFrame(frame);
@@ -355,7 +356,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeSignedShortNoArg)
 static int32_t IntNoArg(Method *method)
 {
     g_gCallResult = PrintFunc("int32_t", __FUNCTION__, method);
-    return 5;
+    return 5_I;
 }
 
 TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeIntNoArg)
@@ -369,12 +370,12 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeIntNoArg)
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(insn, frame, &callee, thread_);
     ASSERT_EQ(g_gCallResult, PrintFunc("int32_t", "IntNoArg", &callee));
-    ASSERT_EQ(frame->GetAcc().Get(), 5);
+    ASSERT_EQ(frame->GetAcc().Get(), 5_I);
     EXPECT_EQ(frame->GetAcc().GetTag(), 0);
 
     g_gCallResult = "";
     uint64_t res = InvokeCompiledCodeWithArgArray(nullptr, frame, &callee, thread_);
-    ASSERT_EQ(res, 5);
+    ASSERT_EQ(res, 5_I);
     ASSERT_EQ(g_gCallResult, PrintFunc("int32_t", "IntNoArg", &callee));
 
     FreeFrame(frame);
@@ -383,7 +384,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeIntNoArg)
 static int64_t LongNoArg(Method *method)
 {
     g_gCallResult = PrintFunc("int64_t", __FUNCTION__, method);
-    return 8;
+    return 8L;
 }
 
 TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeLongNoArg)
@@ -397,12 +398,12 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeLongNoArg)
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(insn, frame, &callee, thread_);
     ASSERT_EQ(g_gCallResult, PrintFunc("int64_t", "LongNoArg", &callee));
-    ASSERT_EQ(frame->GetAcc().Get(), 8);
+    ASSERT_EQ(frame->GetAcc().Get(), 8L);
     EXPECT_EQ(frame->GetAcc().GetTag(), 0);
 
     g_gCallResult = "";
     uint64_t res = InvokeCompiledCodeWithArgArray(nullptr, frame, &callee, thread_);
-    ASSERT_EQ(res, 8);
+    ASSERT_EQ(res, 8L);
     ASSERT_EQ(g_gCallResult, PrintFunc("int64_t", "LongNoArg", &callee));
 
     FreeFrame(frame);
@@ -411,7 +412,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeLongNoArg)
 static double DoubleNoArg(Method *method)
 {
     g_gCallResult = PrintFunc("double", __FUNCTION__, method);
-    return 3.0;
+    return 3.0F;
 }
 
 TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeDoubleNoArg)
@@ -425,12 +426,12 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeDoubleNoArg)
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(insn, frame, &callee, thread_);
     ASSERT_EQ(g_gCallResult, PrintFunc("double", "DoubleNoArg", &callee));
-    ASSERT_EQ(frame->GetAcc().GetDouble(), 3.0);
+    ASSERT_EQ(frame->GetAcc().GetDouble(), 3.0_D);
     EXPECT_EQ(frame->GetAcc().GetTag(), 0);
 
     g_gCallResult = "";
     uint64_t res = InvokeCompiledCodeWithArgArray(nullptr, frame, &callee, thread_);
-    ASSERT_EQ(bit_cast<double>(res), 3.0);
+    ASSERT_EQ(bit_cast<double>(res), 3.0_D);
     ASSERT_EQ(g_gCallResult, PrintFunc("double", "DoubleNoArg", &callee));
 
     FreeFrame(frame);
@@ -474,30 +475,30 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeInt)
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I32});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(VoidInt));
-    Frame *frame = CreateFrame(2, nullptr, nullptr);
-    frame->GetVReg(1).Set(5);
+    Frame *frame = CreateFrame(2U, nullptr, nullptr);
+    frame->GetVReg(1).Set(5L);
 
     uint8_t callShortInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x01, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callShortInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidInt", &callee, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidInt", &callee, 5_I));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x01, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidInt", &callee, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidInt", &callee, 5_I));
 
     g_gCallResult = "";
-    int64_t arg = 5;
+    int64_t arg = 5L;
     InvokeCompiledCodeWithArgArray(&arg, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidInt", &callee, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidInt", &callee, 5_I));
 
     frame->GetVReg(1).Set(0);
-    frame->GetAcc().SetValue(5);
+    frame->GetAcc().SetValue(5L);
     uint8_t callAccInsn[] = {static_cast<uint8_t>(Opcode::CALL_ACC_SHORT_V4_IMM4_ID16), 0x00, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callAccInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidInt", &callee, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidInt", &callee, 5_I));
 
     FreeFrame(frame);
 }
@@ -512,33 +513,33 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeInstanceInt)
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I32});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), 0, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(InstanceVoidInt));
-    Frame *frame = CreateFrame(2, nullptr, nullptr);
+    Frame *frame = CreateFrame(2U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
     ObjectHeader *obj = panda::mem::AllocateNullifiedPayloadString(1);
     frameHandler.GetVReg(0).SetReference(obj);
-    frameHandler.GetVReg(1).Set(5);
+    frameHandler.GetVReg(1).Set(5L);
 
     uint8_t callShortInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x10, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callShortInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "InstanceVoidInt", &callee, obj, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "InstanceVoidInt", &callee, obj, 5L));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "InstanceVoidInt", &callee, obj, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "InstanceVoidInt", &callee, obj, 5L));
 
     g_gCallResult = "";
-    int64_t args[] = {static_cast<int64_t>(ToUintPtr(obj)), 5};
+    int64_t args[] = {static_cast<int64_t>(ToUintPtr(obj)), 5L};
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "InstanceVoidInt", &callee, obj, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "InstanceVoidInt", &callee, obj, 5L));
 
     frameHandler.GetVReg(1).Set(0);
-    frameHandler.GetAcc().SetValue(5);
+    frameHandler.GetAcc().SetValue(5L);
     uint8_t callAccInsn[] = {static_cast<uint8_t>(Opcode::CALL_ACC_SHORT_V4_IMM4_ID16), 0x10, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callAccInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "InstanceVoidInt", &callee, obj, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "InstanceVoidInt", &callee, obj, 5L));
 
     FreeFrame(frame);
 }
@@ -553,31 +554,31 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeVReg)
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::TAGGED});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(VoidVReg));
-    Frame *frame = CreateFrame(2, nullptr, nullptr);
+    Frame *frame = CreateFrame(2U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(1).Set(5);
+    frameHandler.GetVReg(1).Set(5L);
 
     uint8_t callShortInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x01, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callShortInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidVReg", &callee, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidVReg", &callee, 5L));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x01, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidVReg", &callee, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidVReg", &callee, 5L));
 
     g_gCallResult = "";
-    int64_t arg[] = {5, 8};
+    int64_t arg[] = {5L, 8L};
     InvokeCompiledCodeWithArgArray(arg, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidVReg", &callee, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidVReg", &callee, 5L));
 
     frameHandler.GetVReg(1).Set(0);
-    frameHandler.GetAcc().SetValue(5);
+    frameHandler.GetAcc().SetValue(5L);
     uint8_t callAccShort[] = {static_cast<uint8_t>(Opcode::CALL_ACC_SHORT_V4_IMM4_ID16), 0x01, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callAccShort, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidVReg", &callee, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidVReg", &callee, 5L));
     FreeFrame(frame);
 }
 
@@ -591,32 +592,32 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeIntVReg)
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I32, TypeId::TAGGED});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(VoidIntVReg));
-    Frame *frame = CreateFrame(2, nullptr, nullptr);
+    Frame *frame = CreateFrame(2U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(2);
-    frameHandler.GetVReg(1).Set(5);
+    frameHandler.GetVReg(0).Set(2L);
+    frameHandler.GetVReg(1).Set(5L);
 
     uint8_t callShortInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x10, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callShortInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidIntVReg", &callee, 2, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidIntVReg", &callee, 2L, 5L));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidIntVReg", &callee, 2, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidIntVReg", &callee, 2L, 5L));
 
     g_gCallResult = "";
-    int64_t arg[] = {2, 5, 8};
+    int64_t arg[] = {2L, 5L, 8L};
     InvokeCompiledCodeWithArgArray(arg, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidIntVReg", &callee, 2, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidIntVReg", &callee, 2L, 5L));
 
-    frameHandler.GetAcc().SetValue(5);
+    frameHandler.GetAcc().SetValue(5L);
     frameHandler.GetVReg(1).Set(0);
     uint8_t callAccShortInsn[] = {static_cast<uint8_t>(Opcode::CALL_ACC_SHORT_V4_IMM4_ID16), 0x10, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callAccShortInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidIntVReg", &callee, 2, 5));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidIntVReg", &callee, 2L, 5L));
 
     FreeFrame(frame);
 }
@@ -632,33 +633,33 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke3Int)
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I32, TypeId::I32, TypeId::I32});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void3Int));
-    Frame *frame = CreateFrame(3, nullptr, nullptr);
+    Frame *frame = CreateFrame(3U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
     frameHandler.GetAcc().SetValue(0);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_V4_V4_V4_V4_ID16), 0x10, 0x02, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void3Int", &callee, 1, 2, 3));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void3Int", &callee, 1L, 2L, 3L));
 
     // callee(acc, v1, v2)
     uint8_t callAccInsn[] = {static_cast<uint8_t>(Opcode::CALL_ACC_V4_V4_V4_IMM4_ID16), 0x21, 0x00, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callAccInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void3Int", &callee, 0, 2, 3));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void3Int", &callee, 0L, 2L, 3L));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void3Int", &callee, 1, 2, 3));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void3Int", &callee, 1L, 2L, 3L));
 
-    int64_t args[] = {1, 2, 3};
+    int64_t args[] = {1L, 2L, 3L};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void3Int", &callee, 1, 2, 3));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void3Int", &callee, 1L, 2L, 3L));
 
     FreeFrame(frame);
 }
@@ -673,34 +674,34 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke2IntLongInt)
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I32, TypeId::I32, TypeId::I64, TypeId::I32});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void2IntLongInt));
-    Frame *frame = CreateFrame(4, nullptr, nullptr);
+    Frame *frame = CreateFrame(4U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
-    frameHandler.GetVReg(3).Set(4);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(3U).Set(4L);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_V4_V4_V4_V4_ID16), 0x10, 0x32, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2IntLongInt", &callee, 1, 2, 3, 4));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2IntLongInt", &callee, 1L, 2L, 3L, 4L));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2IntLongInt", &callee, 1, 2, 3, 4));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2IntLongInt", &callee, 1L, 2L, 3L, 4L));
 
-    int64_t args[] = {1, 2, 3, 4};
+    int64_t args[] = {1L, 2L, 3L, 4L};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2IntLongInt", &callee, 1, 2, 3, 4));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2IntLongInt", &callee, 1L, 2L, 3L, 4L));
 
-    frameHandler.GetVReg(2).Set(0);
-    frameHandler.GetAcc().SetValue(3);
+    frameHandler.GetVReg(2U).Set(0);
+    frameHandler.GetAcc().SetValue(3L);
     uint8_t callAccInsn[] = {static_cast<uint8_t>(Opcode::CALL_ACC_V4_V4_V4_IMM4_ID16), 0x10, 0x23, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callAccInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2IntLongInt", &callee, 1, 2, 3, 4));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2IntLongInt", &callee, 1L, 2L, 3L, 4L));
 
     FreeFrame(frame);
 }
@@ -717,22 +718,22 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeLong)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(VoidLong));
     Frame *frame = CreateFrame(1, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(9);
+    frameHandler.GetVReg(0).Set(9L);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidLong", &callee, 9));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidLong", &callee, 9L));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidLong", &callee, 9));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidLong", &callee, 9L));
 
-    int64_t args[] = {9};
+    int64_t args[] = {9L};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidLong", &callee, 9));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidLong", &callee, 9L));
 
     FreeFrame(frame);
 }
@@ -749,22 +750,22 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeDouble)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(VoidDouble));
     Frame *frame = CreateFrame(1, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(4.0);
+    frameHandler.GetVReg(0).Set(4.0_D);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidDouble", &callee, 4.0));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidDouble", &callee, 4.0_D));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidDouble", &callee, 4.0));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidDouble", &callee, 4.0_D));
 
-    int64_t args[] = {bit_cast<int64_t>(4.0)};
+    int64_t args[] = {bit_cast<int64_t>(4.0_D)};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidDouble", &callee, 4.0));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "VoidDouble", &callee, 4.0_D));
 
     FreeFrame(frame);
 }
@@ -779,34 +780,34 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke4Int)
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void4Int));
-    Frame *frame = CreateFrame(4, nullptr, nullptr);
+    Frame *frame = CreateFrame(4U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
-    frameHandler.GetVReg(3).Set(4);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(3U).Set(4L);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_V4_V4_V4_V4_ID16), 0x10, 0x32, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4Int", &callee, 1, 2, 3, 4));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4Int", &callee, 1L, 2L, 3L, 4L));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4Int", &callee, 1, 2, 3, 4));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4Int", &callee, 1L, 2L, 3L, 4L));
 
-    int64_t args[] = {1, 2, 3, 4};
+    int64_t args[] = {1L, 2L, 3L, 4L};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4Int", &callee, 1, 2, 3, 4));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4Int", &callee, 1L, 2L, 3L, 4L));
 
-    frameHandler.GetVReg(3).Set(0);
-    frameHandler.GetAcc().SetValue(4);
+    frameHandler.GetVReg(3U).Set(0);
+    frameHandler.GetAcc().SetValue(4L);
     uint8_t callAccInsn[] = {static_cast<uint8_t>(Opcode::CALL_ACC_V4_V4_V4_IMM4_ID16), 0x10, 0x32, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callAccInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4Int", &callee, 1, 2, 3, 4));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4Int", &callee, 1L, 2L, 3L, 4L));
 
     FreeFrame(frame);
 }
@@ -821,25 +822,25 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke2Long)
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I64, TypeId::I64});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void2Long));
-    Frame *frame = CreateFrame(2, nullptr, nullptr);
+    Frame *frame = CreateFrame(2U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(3);
-    frameHandler.GetVReg(1).Set(9);
+    frameHandler.GetVReg(0).Set(3L);
+    frameHandler.GetVReg(1).Set(9L);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x10, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2Long", &callee, 3, 9));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2Long", &callee, 3L, 9L));
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2Long", &callee, 3, 9));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2Long", &callee, 3L, 9L));
 
-    int64_t args[] = {3, 9};
+    int64_t args[] = {3L, 9L};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2Long", &callee, 3, 9));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void2Long", &callee, 3L, 9L));
 
     FreeFrame(frame);
 }
@@ -854,23 +855,23 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke4IntDouble)
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::F64});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void4IntDouble));
-    Frame *frame = CreateFrame(5, nullptr, nullptr);
+    Frame *frame = CreateFrame(5U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
-    frameHandler.GetVReg(3).Set(4);
-    frameHandler.GetVReg(4).Set(5.0);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(4U).Set(5.0_D);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4IntDouble", &callee, 1, 2, 3, 4, 5.0));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4IntDouble", &callee, 1L, 2L, 3L, 4L, 5.0_D));
 
-    int64_t args[] = {1, 2, 3, 4, bit_cast<int64_t>(5.0)};
+    int64_t args[] = {1L, 2L, 3L, 4L, bit_cast<int64_t>(5.0_D)};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4IntDouble", &callee, 1, 2, 3, 4, 5.0));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void4IntDouble", &callee, 1L, 2L, 3L, 4L, 5.0_D));
 
     FreeFrame(frame);
 }
@@ -887,25 +888,25 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke7Int)
         {TypeId::VOID, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void7Int));
-    Frame *frame = CreateFrame(7, nullptr, nullptr);
+    Frame *frame = CreateFrame(7U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
-    frameHandler.GetVReg(3).Set(4);
-    frameHandler.GetVReg(4).Set(5);
-    frameHandler.GetVReg(5).Set(6);
-    frameHandler.GetVReg(6).Set(7);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(4U).Set(5L);
+    frameHandler.GetVReg(5U).Set(6L);
+    frameHandler.GetVReg(6U).Set(7L);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7Int", &callee, 1, 2, 3, 4, 5, 6, 7));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7Int", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L));
 
-    int64_t args[] = {1, 2, 3, 4, 5, 6, 7};
+    int64_t args[] = {1L, 2L, 3L, 4L, 5L, 6L, 7L};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7Int", &callee, 1, 2, 3, 4, 5, 6, 7));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7Int", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L));
 
     FreeFrame(frame);
 }
@@ -924,49 +925,49 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke7Int8Double)
                                    TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void7Int8Double));
-    Frame *frame = CreateFrame(15, nullptr, nullptr);
+    Frame *frame = CreateFrame(15U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
-    frameHandler.GetVReg(3).Set(4);
-    frameHandler.GetVReg(4).Set(5);
-    frameHandler.GetVReg(5).Set(6);
-    frameHandler.GetVReg(6).Set(7);
-    frameHandler.GetVReg(7).Set(8.0);
-    frameHandler.GetVReg(8).Set(9.0);
-    frameHandler.GetVReg(9).Set(10.0);
-    frameHandler.GetVReg(10).Set(11.0);
-    frameHandler.GetVReg(11).Set(12.0);
-    frameHandler.GetVReg(12).Set(13.0);
-    frameHandler.GetVReg(13).Set(14.0);
-    frameHandler.GetVReg(14).Set(15.0);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(4U).Set(5L);
+    frameHandler.GetVReg(5U).Set(6L);
+    frameHandler.GetVReg(6U).Set(7L);
+    frameHandler.GetVReg(7U).Set(8.0_D);
+    frameHandler.GetVReg(8U).Set(9.0_D);
+    frameHandler.GetVReg(9U).Set(10.0_D);
+    frameHandler.GetVReg(10U).Set(11.0_D);
+    frameHandler.GetVReg(11U).Set(12.0_D);
+    frameHandler.GetVReg(12U).Set(13.0_D);
+    frameHandler.GetVReg(13U).Set(14.0_D);
+    frameHandler.GetVReg(14U).Set(15.0_D);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7Int8Double", &callee, 1, 2, 3, 4, 5, 6, 7, 8.0, 9.0, 10.0, 11.0,
-                                       12.0, 13.0, 14.0, 15.0));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7Int8Double", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8.0_D, 9.0_D,
+                                       10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D, 15.0_D));
 
-    int64_t args[] = {1,
-                      2,
-                      3,
-                      4,
-                      5,
-                      6,
-                      7,
-                      bit_cast<int64_t>(8.0),
-                      bit_cast<int64_t>(9.0),
-                      bit_cast<int64_t>(10.0),
-                      bit_cast<int64_t>(11.0),
-                      bit_cast<int64_t>(12.0),
-                      bit_cast<int64_t>(13.0),
-                      bit_cast<int64_t>(14.0),
-                      bit_cast<int64_t>(15.0)};
+    int64_t args[] = {1L,
+                      2L,
+                      3L,
+                      4L,
+                      5L,
+                      6L,
+                      7L,
+                      bit_cast<int64_t>(8.0_D),
+                      bit_cast<int64_t>(9.0_D),
+                      bit_cast<int64_t>(10.0_D),
+                      bit_cast<int64_t>(11.0_D),
+                      bit_cast<int64_t>(12.0_D),
+                      bit_cast<int64_t>(13.0_D),
+                      bit_cast<int64_t>(14.0_D),
+                      bit_cast<int64_t>(15.0_D)};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7Int8Double", &callee, 1, 2, 3, 4, 5, 6, 7, 8.0, 9.0, 10.0, 11.0,
-                                       12.0, 13.0, 14.0, 15.0));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7Int8Double", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8.0_D, 9.0_D,
+                                       10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D, 15.0_D));
 
     FreeFrame(frame);
 }
@@ -983,26 +984,26 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke8Int)
                                    TypeId::I32, TypeId::I32, TypeId::I32});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void8Int));
-    Frame *frame = CreateFrame(8, nullptr, nullptr);
+    Frame *frame = CreateFrame(8U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
-    frameHandler.GetVReg(3).Set(4);
-    frameHandler.GetVReg(4).Set(5);
-    frameHandler.GetVReg(5).Set(6);
-    frameHandler.GetVReg(6).Set(7);
-    frameHandler.GetVReg(7).Set(8);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(4U).Set(5L);
+    frameHandler.GetVReg(5U).Set(6L);
+    frameHandler.GetVReg(6U).Set(7L);
+    frameHandler.GetVReg(7U).Set(8L);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int", &callee, 1, 2, 3, 4, 5, 6, 7, 8));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
 
-    int64_t args[] = {1, 2, 3, 4, 5, 6, 7, 8};
+    int64_t args[] = {1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int", &callee, 1, 2, 3, 4, 5, 6, 7, 8));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
 
     FreeFrame(frame);
 }
@@ -1019,25 +1020,25 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke6IntVReg)
         {TypeId::VOID, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::TAGGED});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void6IntVReg));
-    Frame *frame = CreateFrame(8, nullptr, nullptr);
+    Frame *frame = CreateFrame(8U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
-    frameHandler.GetVReg(3).Set(4);
-    frameHandler.GetVReg(4).Set(5);
-    frameHandler.GetVReg(5).Set(6);
-    frameHandler.GetVReg(6).Set(7);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(4U).Set(5L);
+    frameHandler.GetVReg(5U).Set(6L);
+    frameHandler.GetVReg(6U).Set(7L);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void6IntVReg", &callee, 1, 2, 3, 4, 5, 6, 7));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void6IntVReg", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L));
 
-    int64_t args[] = {1, 2, 3, 4, 5, 6, 7, 8};
+    int64_t args[] = {1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void6IntVReg", &callee, 1, 2, 3, 4, 5, 6, 7));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void6IntVReg", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L));
 
     FreeFrame(frame);
 }
@@ -1054,26 +1055,26 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke7IntVReg)
                                    TypeId::I32, TypeId::I32, TypeId::TAGGED});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void7IntVReg));
-    Frame *frame = CreateFrame(8, nullptr, nullptr);
+    Frame *frame = CreateFrame(8U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
-    frameHandler.GetVReg(3).Set(4);
-    frameHandler.GetVReg(4).Set(5);
-    frameHandler.GetVReg(5).Set(6);
-    frameHandler.GetVReg(6).Set(7);
-    frameHandler.GetVReg(7).Set(8);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(4U).Set(5L);
+    frameHandler.GetVReg(5U).Set(6L);
+    frameHandler.GetVReg(6U).Set(7L);
+    frameHandler.GetVReg(7U).Set(8L);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7IntVReg", &callee, 1, 2, 3, 4, 5, 6, 7, 8));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7IntVReg", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
 
-    int64_t args[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int64_t args[] = {1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7IntVReg", &callee, 1, 2, 3, 4, 5, 6, 7, 8));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void7IntVReg", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
 
     FreeFrame(frame);
 }
@@ -1093,53 +1094,53 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke8Int9Double)
                                    TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64});
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void8Int9Double));
-    Frame *frame = CreateFrame(17, nullptr, nullptr);
+    Frame *frame = CreateFrame(17U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(1);
-    frameHandler.GetVReg(1).Set(2);
-    frameHandler.GetVReg(2).Set(3);
-    frameHandler.GetVReg(3).Set(4);
-    frameHandler.GetVReg(4).Set(5);
-    frameHandler.GetVReg(5).Set(6);
-    frameHandler.GetVReg(6).Set(7);
-    frameHandler.GetVReg(7).Set(8);
-    frameHandler.GetVReg(8).Set(9.0);
-    frameHandler.GetVReg(9).Set(10.0);
-    frameHandler.GetVReg(10).Set(11.0);
-    frameHandler.GetVReg(11).Set(12.0);
-    frameHandler.GetVReg(12).Set(13.0);
-    frameHandler.GetVReg(13).Set(14.0);
-    frameHandler.GetVReg(14).Set(15.0);
-    frameHandler.GetVReg(15).Set(16.0);
-    frameHandler.GetVReg(16).Set(17.0);
+    frameHandler.GetVReg(0U).Set(1L);
+    frameHandler.GetVReg(1U).Set(2L);
+    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(4U).Set(5L);
+    frameHandler.GetVReg(5U).Set(6L);
+    frameHandler.GetVReg(6U).Set(7L);
+    frameHandler.GetVReg(7U).Set(8L);
+    frameHandler.GetVReg(8U).Set(9.0_D);
+    frameHandler.GetVReg(9U).Set(10.0_D);
+    frameHandler.GetVReg(10U).Set(11.0_D);
+    frameHandler.GetVReg(11U).Set(12.0_D);
+    frameHandler.GetVReg(12U).Set(13.0_D);
+    frameHandler.GetVReg(13U).Set(14.0_D);
+    frameHandler.GetVReg(14U).Set(15.0_D);
+    frameHandler.GetVReg(15U).Set(16.0_D);
+    frameHandler.GetVReg(16U).Set(17.0_D);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
     InterpreterToCompiledCodeBridge(callRangeInsn, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int9Double", &callee, 1, 2, 3, 4, 5, 6, 7, 8, 9.0, 10.0, 11.0,
-                                       12.0, 13.0, 14.0, 15.0, 16.0, 17.0));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int9Double", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9.0_D,
+                                       10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D, 15.0_D, 16.0_D, 17.0_D));
 
-    int64_t args[] = {1,
-                      2,
-                      3,
-                      4,
-                      5,
-                      6,
-                      7,
-                      8,
-                      bit_cast<int64_t>(9.0),
-                      bit_cast<int64_t>(10.0),
-                      bit_cast<int64_t>(11.0),
-                      bit_cast<int64_t>(12.0),
-                      bit_cast<int64_t>(13.0),
-                      bit_cast<int64_t>(14.0),
-                      bit_cast<int64_t>(15.0),
-                      bit_cast<int64_t>(16.0),
-                      bit_cast<int64_t>(17.0)};
+    int64_t args[] = {1L,
+                      2L,
+                      3L,
+                      4L,
+                      5L,
+                      6L,
+                      7L,
+                      8L,
+                      bit_cast<int64_t>(9.0_D),
+                      bit_cast<int64_t>(10.0_D),
+                      bit_cast<int64_t>(11.0_D),
+                      bit_cast<int64_t>(12.0_D),
+                      bit_cast<int64_t>(13.0_D),
+                      bit_cast<int64_t>(14.0_D),
+                      bit_cast<int64_t>(15.0_D),
+                      bit_cast<int64_t>(16.0_D),
+                      bit_cast<int64_t>(17.0_D)};
     g_gCallResult = "";
     InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
-    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int9Double", &callee, 1, 2, 3, 4, 5, 6, 7, 8, 9.0, 10.0, 11.0,
-                                       12.0, 13.0, 14.0, 15.0, 16.0, 17.0));
+    ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int9Double", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9.0_D,
+                                       10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D, 15.0_D, 16.0_D, 17.0_D));
 
     FreeFrame(frame);
 }

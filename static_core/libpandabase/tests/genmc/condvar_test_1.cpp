@@ -14,6 +14,7 @@
  */
 
 #include "common.h"
+#include "libpandabase/utils/utils.h"
 
 // The test checks the work of Wait-SignalOne
 // Thread1 sets g_shared to 1, then waits,
@@ -71,7 +72,7 @@ int main()
     pthread_join(t2, nullptr);
 
     // Check that the thread was really waken
-    ASSERT(g_shared == 3 || g_shared == 2);
+    ASSERT(g_shared == 3_I || g_shared == 2_I);
 
     ConditionVariableDestroy(&g_c);
     MutexDestroy(&g_x);

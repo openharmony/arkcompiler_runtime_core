@@ -27,6 +27,7 @@
 #include "compiler/compiler_task_runner.h"
 
 #include "libpandabase/macros.h"
+#include "libpandabase/utils/utils.h"
 #include "gtest/gtest.h"
 #include "unit_test.h"
 #include "utils/bit_utils.h"
@@ -2047,7 +2048,7 @@ TEST_F(CodegenTest, BoundsCheckI)
         arrayData[i] = i;
     }
 
-    for (unsigned index = 4095; index <= 4097; index++) {
+    for (unsigned index = 4095U; index <= 4097U; index++) {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
@@ -2122,9 +2123,9 @@ TEST_F(CodegenTest, MultiplyAddFloat)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 10.0);
-        CONSTANT(1U, 42.0);
-        CONSTANT(2U, 13.0);
+        CONSTANT(0U, 10.0_D);
+        CONSTANT(1U, 42.0_D);
+        CONSTANT(2U, 13.0_D);
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -2133,7 +2134,7 @@ TEST_F(CodegenTest, MultiplyAddFloat)
         }
     }
 
-    CheckReturnValue(GetGraph(), 433.0);
+    CheckReturnValue(GetGraph(), 433.0_D);
 }
 
 TEST_F(CodegenTest, MultiplySubtractInteger)
@@ -2166,9 +2167,9 @@ TEST_F(CodegenTest, MultiplySubtractFloat)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 10.0);
-        CONSTANT(1U, 42.0);
-        CONSTANT(2U, 13.0);
+        CONSTANT(0U, 10.0_D);
+        CONSTANT(1U, 42.0_D);
+        CONSTANT(2U, 13.0_D);
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -2177,7 +2178,7 @@ TEST_F(CodegenTest, MultiplySubtractFloat)
         }
     }
 
-    CheckReturnValue(GetGraph(), -407.0);
+    CheckReturnValue(GetGraph(), -407.0_D);
 }
 
 TEST_F(CodegenTest, MultiplyNegateInteger)
@@ -2209,8 +2210,8 @@ TEST_F(CodegenTest, MultiplyNegateFloat)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 5.0);
-        CONSTANT(1U, 5.0);
+        CONSTANT(0U, 5.0_D);
+        CONSTANT(1U, 5.0_D);
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -2219,7 +2220,7 @@ TEST_F(CodegenTest, MultiplyNegateFloat)
         }
     }
 
-    CheckReturnValue(GetGraph(), -25.0);
+    CheckReturnValue(GetGraph(), -25.0_D);
 }
 
 TEST_F(CodegenTest, OrNot)

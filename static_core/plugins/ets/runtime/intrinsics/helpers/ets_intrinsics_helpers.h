@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <type_traits>
 #include "libpandabase/utils/bit_helpers.h"
+#include "libpandabase/utils/utils.h"
 #include "intrinsics.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -313,7 +314,7 @@ void GetBase(FpType d, int digits, int *decpt, char *buf, char *bufTmp, int size
     buf[0] = bufTmp[1];
     if (digits > 1) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (memcpy_s(buf + 1, digits, bufTmp + 2, digits) != EOK) {  // 2 means add the point char to buf
+        if (memcpy_s(buf + 1U, digits, bufTmp + 2U, digits) != EOK) {  // 2 means add the point char to buf
             LOG(FATAL, ETS) << "snprintf_s failed";
             UNREACHABLE();
         }
@@ -322,10 +323,10 @@ void GetBase(FpType d, int digits, int *decpt, char *buf, char *bufTmp, int size
     buf[digits + 1] = '\0';
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     char *endBuf = bufTmp + size;
-    const int positive = (digits > 1) ? 1 : 0;
+    const size_t positive = (digits > 1) ? 1 : 0;
     // exponent
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    *decpt = std::strtol(bufTmp + digits + 2 + positive, &endBuf, TEN) + 1;  // 2 means ignore the integer and point
+    *decpt = std::strtol(bufTmp + digits + 2U + positive, &endBuf, TEN) + 1;  // 2 means ignore the integer and point
 }
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
@@ -341,7 +342,7 @@ int GetMinmumDigits(FpType d, int *decpt, char *buf)
     int maxDigits = std::is_same_v<FpType, double> ? DOUBLE_MAX_PRECISION : FLOAT_MAX_PRECISION;
 
     while (minDigits < maxDigits) {
-        digits = (minDigits + maxDigits) / 2;
+        digits = (minDigits + maxDigits) / 2_I;
         GetBase(d, digits, decpt, buf, bufTmp, sizeof(bufTmp));
 
         bool same = StrToFp<FpType>(bufTmp, nullptr) == d;
@@ -349,7 +350,7 @@ int GetMinmumDigits(FpType d, int *decpt, char *buf)
         if (same) {
             // no need to keep the trailing zeros
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            while (digits >= 2 && buf[digits] == '0') {  // 2 means ignore the integer and point
+            while (digits >= 2_I && buf[digits] == '0') {  // 2 means ignore the integer and point
                 digits--;
             }
             maxDigits = digits;
@@ -409,7 +410,7 @@ EtsString *FpToStringDecimalRadix(FpType number)
     int n = 0;
     int k = GetMinmumDigits(number, &n, buffer);
     PandaString base = buffer;
-    if (n > 0 && n <= 21) {  // NOLINT(readability-magic-numbers)
+    if (n > 0 && n <= 21_I) {  // NOLINT(readability-magic-numbers)
         base.erase(1, 1);
         if (k <= n) {
             // 6. If k ≤ n ≤ 21, return the String consisting of the code units of the k digits of the decimal
@@ -422,7 +423,7 @@ EtsString *FpToStringDecimalRadix(FpType number)
             // the remaining k−n digits of the decimal representation of s.
             base.insert(n, 1, '.');
         }
-    } else if (-6 < n && n <= 0) {  // NOLINT(readability-magic-numbers)
+    } else if (-6_I < n && n <= 0) {  // NOLINT(readability-magic-numbers)
         // 8. If −6 < n ≤ 0, return the String consisting of the code unit 0x0030 (DIGIT ZERO), followed by the code
         // unit 0x002E (FULL STOP), followed by −n occurrences of the code unit 0x0030 (DIGIT ZERO), followed by the
         // code units of the k digits of the decimal representation of s.

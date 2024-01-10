@@ -15,6 +15,7 @@
 
 #include "plugins/ets/tests/mock/mock_test_helper.h"
 
+#include "libpandabase/utils/utils.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_options.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -43,12 +44,12 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, NewObjectsArrayDeathTest)
     ets_string str = env_->NewStringUTF(example.c_str());
     ASSERT_NE(str, nullptr);
 
-    EXPECT_DEATH(env_->NewObjectsArray(5, nullptr, nullptr), "");
-    EXPECT_DEATH(env_->NewObjectsArray(-5, nullptr, nullptr), "");
-    EXPECT_DEATH(env_->NewObjectsArray(-5, cls, nullptr), "");
-    EXPECT_DEATH(env_->NewObjectsArray(-5, nullptr, str), "");
-    EXPECT_DEATH(env_->NewObjectsArray(-5, cls, str), "");
-    EXPECT_DEATH(env_->NewObjectsArray(5, nullptr, str), "");
+    EXPECT_DEATH(env_->NewObjectsArray(5_I, nullptr, nullptr), "");
+    EXPECT_DEATH(env_->NewObjectsArray(-5_I, nullptr, nullptr), "");
+    EXPECT_DEATH(env_->NewObjectsArray(-5_I, cls, nullptr), "");
+    EXPECT_DEATH(env_->NewObjectsArray(-5_I, nullptr, str), "");
+    EXPECT_DEATH(env_->NewObjectsArray(-5_I, cls, str), "");
+    EXPECT_DEATH(env_->NewObjectsArray(5_I, nullptr, str), "");
 }
 
 TEST_F(EtsNativeInterfaceArrayTestDeath, GetObjectArrayElementDeathTest)
@@ -60,7 +61,7 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, GetObjectArrayElementDeathTest)
     const std::string example {"sample7"};
     ets_string str = env_->NewStringUTF(example.c_str());
     ASSERT_NE(str, nullptr);
-    ets_objectArray array = env_->NewObjectsArray(5, cls, str);
+    ets_objectArray array = env_->NewObjectsArray(5_I, cls, str);
     ASSERT_NE(array, nullptr);
 
     EXPECT_DEATH(env_->GetObjectArrayElement(nullptr, -1), "");
@@ -72,7 +73,7 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, SetObjectArrayElementDeathTest)
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
     EXPECT_DEATH(env_->SetObjectArrayElement(nullptr, 1, nullptr), "");
-    EXPECT_DEATH(env_->SetObjectArrayElement(nullptr, -5, nullptr), "");
+    EXPECT_DEATH(env_->SetObjectArrayElement(nullptr, -5_I, nullptr), "");
 }
 
 TEST_F(EtsNativeInterfaceArrayTestDeath, NewPrimitiveTypeArrayDeathTest)
@@ -104,14 +105,14 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, GetPrimitiveTypeArrayRegionDeathTests)
         EXPECT_DEATH(env_->GetDoubleArrayRegion(nullptr, 0, 1, nullptr), "");
     }
 
-    ets_booleanArray boolArray = env_->NewBooleanArray(10);
-    ets_byteArray byteArray = env_->NewByteArray(10);
-    ets_charArray charArray = env_->NewCharArray(10);
-    ets_shortArray shortArray = env_->NewShortArray(10);
-    ets_intArray intArray = env_->NewIntArray(10);
-    ets_longArray longArray = env_->NewLongArray(10);
-    ets_floatArray floatArray = env_->NewFloatArray(10);
-    ets_doubleArray doubleArray = env_->NewDoubleArray(10);
+    ets_booleanArray boolArray = env_->NewBooleanArray(10U);
+    ets_byteArray byteArray = env_->NewByteArray(10U);
+    ets_charArray charArray = env_->NewCharArray(10U);
+    ets_shortArray shortArray = env_->NewShortArray(10U);
+    ets_intArray intArray = env_->NewIntArray(10U);
+    ets_longArray longArray = env_->NewLongArray(10U);
+    ets_floatArray floatArray = env_->NewFloatArray(10U);
+    ets_doubleArray doubleArray = env_->NewDoubleArray(10U);
 
     {
         EXPECT_DEATH(env_->GetBooleanArrayRegion(boolArray, 0, 1, nullptr), "");
@@ -140,14 +141,14 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, SetPrimitiveTypeArrayRegionDeathTests)
         EXPECT_DEATH(env_->SetDoubleArrayRegion(nullptr, 0, 1, nullptr), "");
     }
 
-    ets_booleanArray boolArray = env_->NewBooleanArray(10);
-    ets_byteArray byteArray = env_->NewByteArray(10);
-    ets_charArray charArray = env_->NewCharArray(10);
-    ets_shortArray shortArray = env_->NewShortArray(10);
-    ets_intArray intArray = env_->NewIntArray(10);
-    ets_longArray longArray = env_->NewLongArray(10);
-    ets_floatArray floatArray = env_->NewFloatArray(10);
-    ets_doubleArray doubleArray = env_->NewDoubleArray(10);
+    ets_booleanArray boolArray = env_->NewBooleanArray(10U);
+    ets_byteArray byteArray = env_->NewByteArray(10U);
+    ets_charArray charArray = env_->NewCharArray(10U);
+    ets_shortArray shortArray = env_->NewShortArray(10U);
+    ets_intArray intArray = env_->NewIntArray(10U);
+    ets_longArray longArray = env_->NewLongArray(10U);
+    ets_floatArray floatArray = env_->NewFloatArray(10U);
+    ets_doubleArray doubleArray = env_->NewDoubleArray(10U);
 
     {
         EXPECT_DEATH(env_->SetBooleanArrayRegion(boolArray, 0, 1, nullptr), "");

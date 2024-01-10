@@ -153,7 +153,7 @@ TEST_F(StackLikeAllocatorTest, CycledAllocateFreeForHugeFramesTest)
                                         << " cycle, seed: " << seed_;
             vec.emplace_back(mem, SetBytesFromByteArray(mem, FRAME_SIZE));
         }
-        for (size_t i = 1; i <= ITERATIONS / 2; i++) {
+        for (size_t i = 1; i <= ITERATIONS / 2U; i++) {
             std::pair<void *, size_t> lastPair = vec.back();
             ASSERT_TRUE(CompareBytesWithByteArray(lastPair.first, FRAME_SIZE, lastPair.second))
                 << "iteration: " << i << ", size: " << FRAME_SIZE << ", address: " << std::hex << lastPair.first

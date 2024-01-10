@@ -2270,7 +2270,7 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
     if (edenLengthPredicate(maxEdenLength)) {
         return maxEdenLength;
     }
-    auto delta = (maxEdenLength - minEdenLength) / 2;
+    auto delta = (maxEdenLength - minEdenLength) / 2U;
     while (delta > 0) {
         auto edenLength = minEdenLength + delta;
         if (edenLengthPredicate(edenLength)) {
@@ -2279,7 +2279,7 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
             maxEdenLength = edenLength;
         }
         ASSERT(minEdenLength < maxEdenLength);
-        delta = (maxEdenLength - minEdenLength) / 2;
+        delta = (maxEdenLength - minEdenLength) / 2U;
     }
     return minEdenLength;
 }

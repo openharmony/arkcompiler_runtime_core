@@ -15,6 +15,7 @@
 
 #include "macros.h"
 #include "unit_test.h"
+#include "libpandabase/utils/utils.h"
 #include "optimizer/optimizations/cse.h"
 
 namespace panda::compiler {
@@ -84,8 +85,8 @@ TEST_F(CSETest, CSETestApply1)
             INST(35U, Opcode::SaveState).NoVregs();
             INST(32U, Opcode::CallStatic)
                 .b()
-                .InputsAutoType(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
-                                29U, 30U, 31U, 35U);
+                .InputsAutoType(6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U, 16U, 17U, 18U, 19U, 20U, 21U, 22U, 23U,
+                                24U, 25U, 26U, 27U, 28U, 29U, 30U, 31U, 35U);
             INST(33U, Opcode::ReturnVoid);
         }
     }
@@ -120,8 +121,8 @@ TEST_F(CSETest, CSETestApply1)
             INST(35U, Opcode::SaveState).NoVregs();
             INST(32U, Opcode::CallStatic)
                 .b()
-                .InputsAutoType(6, 7, 8, 9, 7, 9, 8, 6, 14, 15, 16, 17, 18, 19, 20, 21, 22, 14, 15, 16, 17, 18, 19, 20,
-                                21U, 22U, 35U);
+                .InputsAutoType(6U, 7U, 8U, 9U, 7U, 9U, 8U, 6U, 14U, 15U, 16U, 17U, 18U, 19U, 20U, 21U, 22U, 14U, 15U,
+                                16U, 17U, 18U, 19U, 20U, 21U, 22U, 35U);
             INST(33U, Opcode::ReturnVoid);
         }
     }

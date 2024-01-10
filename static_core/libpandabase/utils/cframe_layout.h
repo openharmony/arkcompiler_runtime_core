@@ -300,13 +300,13 @@ private:
     {
         // Allign by odd-number, because GetSpillsStartSlot begins from fp (+1 slot for lr)
         if (arch == Arch::AARCH64 || arch == Arch::X86_64) {
-            if (((GetSpillsStartSlot() + spillsCount) % 2) == 0) {
+            if (((GetSpillsStartSlot() + spillsCount) % 2U) == 0) {
                 spillsCount++;
             }
         } else if (arch == Arch::AARCH32) {
             // Additional slot for spill/fill <-> sf-registers ldrd miscorp
-            spillsCount = (spillsCount + 1) * 2;
-            if (((GetSpillsStartSlot() + spillsCount) % 2) == 0) {
+            spillsCount = (spillsCount + 1) * 2U;
+            if (((GetSpillsStartSlot() + spillsCount) % 2U) == 0) {
                 spillsCount++;
             }
         }

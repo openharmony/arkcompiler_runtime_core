@@ -118,7 +118,7 @@ TEST_F(EtsClassTest, GetStaticFieldsNumber)
 
         EtsClass *klass = GetTestClass(source, "LA;");
         ASSERT_NE(klass, nullptr);
-        ASSERT_EQ(klass->GetStaticFieldsNumber(), 3);
+        ASSERT_EQ(klass->GetStaticFieldsNumber(), 3U);
         ASSERT_EQ(klass->GetInstanceFieldsNumber(), 0);
     }
     {
@@ -151,7 +151,7 @@ TEST_F(EtsClassTest, GetInstanceFieldsNumber)
         EtsClass *klass = GetTestClass(source, "LA;");
         ASSERT_NE(klass, nullptr);
         ASSERT_EQ(klass->GetStaticFieldsNumber(), 0);
-        ASSERT_EQ(klass->GetInstanceFieldsNumber(), 4);
+        ASSERT_EQ(klass->GetInstanceFieldsNumber(), 4U);
     }
     {
         const char *source = R"(

@@ -951,7 +951,7 @@ void Aarch32Encoder::EncodeRoundToPInf(Reg dst, Reg src)
     // if input is a negative tie, change rounding direction to positive infinity, dst += 1.
     GetMasm()->Vrinta(vixl::aarch32::DataTypeValue::F32, temp1, VixlVReg(src).S());
     // NOLINTNEXTLINE(readability-magic-numbers)
-    GetMasm()->Vmov(temp2, 0.5);
+    GetMasm()->Vmov(temp2, 0.5F);
     GetMasm()->Vsub(vixl::aarch32::DataTypeValue::F32, temp1, VixlVReg(src).S(), temp1);
     GetMasm()->Vcmp(vixl::aarch32::DataTypeValue::F32, temp1, temp2);
     GetMasm()->Vmrs(vixl::aarch32::RegisterOrAPSR_nzcv(vixl::aarch32::kPcCode), vixl::aarch32::FPSCR);

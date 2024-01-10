@@ -890,7 +890,7 @@ public:
             if (!m.GetReturnType().IsVoid()) {
                 continue;
             }
-            if (m.GetNumArgs() != 2) {
+            if (m.GetNumArgs() != 2U) {
                 continue;
             }
             if (!m.GetArgType(0).IsReference()) {

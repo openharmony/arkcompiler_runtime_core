@@ -14,6 +14,7 @@
  */
 
 #include "macros.h"
+#include "libpandabase/utils/utils.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/graph_checker.h"
 #include "optimizer/ir/inst.h"
@@ -462,7 +463,7 @@ TEST_F(IrBuilderTest, IntrinsicAbs)
     GRAPH(graph)
     {
         PARAMETER(1U, 13U).f64();
-        CONSTANT(0U, 1.23).f64();
+        CONSTANT(0U, 1.23_D).f64();
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -492,7 +493,7 @@ TEST_F(IrBuilderTest, IntrinsicMathSqrt)
     GRAPH(graph)
     {
         PARAMETER(1U, 0U).f64();
-        CONSTANT(0U, 3.14).f64();
+        CONSTANT(0U, 3.14_D).f64();
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -756,7 +757,7 @@ TEST_F(IrBuilderTest, NoCheckForFloatDiv)
     GRAPH(graph)
     {
         PARAMETER(1U, 0U).f64();
-        CONSTANT(0U, 23.0).f64();
+        CONSTANT(0U, 23.0_D).f64();
 
         BASIC_BLOCK(2U, -1L)
         {

@@ -89,8 +89,8 @@ Thread::Thread(PandaVM *vm, ThreadType threadType)
 
 #ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    signalStack_.ss_sp = allocator->Alloc(SIGSTKSZ * 8);
-    signalStack_.ss_size = SIGSTKSZ * 8;
+    signalStack_.ss_sp = allocator->Alloc(SIGSTKSZ * 8U);
+    signalStack_.ss_size = SIGSTKSZ * 8U;
     signalStack_.ss_flags = 0;
     sigaltstack(&signalStack_, nullptr);
 #endif
@@ -398,7 +398,7 @@ void ManagedThread::DisableStackOverflowCheck()
 void ManagedThread::EnableStackOverflowCheck()
 {
     nativeStackEnd_ = nativeStackBegin_ + nativeStackProtectedSize_ + nativeStackReservedSize_;
-    iframeStackSize_ = nativeStackSize_ * 4;
+    iframeStackSize_ = nativeStackSize_ * 4U;
     if (nativeStackProtectedSize_ > 0) {
         panda::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_);
     }

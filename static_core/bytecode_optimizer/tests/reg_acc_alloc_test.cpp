@@ -41,7 +41,7 @@ public:
                     idx = 1;
                     break;
                 case compiler::Opcode::StoreArray:
-                    idx = 2;
+                    idx = 2U;
                     break;
                 default:
                     break;
@@ -270,7 +270,7 @@ TEST_F(RegAccAllocTest, AbsAndSqrtInstructions)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0U, 1.22).f64();
+        CONSTANT(0U, 1.22_D).f64();
         PARAMETER(1U, 10U).f64();
 
         BASIC_BLOCK(2U, -1L)

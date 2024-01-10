@@ -229,7 +229,7 @@ public:
         simulator_.WriteXRegister(0, 0xDEADC0DE);  // NOLINT(readability-magic-numbers)
         // Set x28 to the dummy thread, since prolog of the compiled method writes to it.
         static std::array<uint8_t, sizeof(ManagedThread)> dummy;
-        simulator_.WriteCPURegister(XRegister(28), dummy.data());  // NOLINT(readability-magic-numbers)
+        simulator_.WriteCPURegister(XRegister(28U), dummy.data());  // NOLINT(readability-magic-numbers)
 
         WriteParameters();
         simulator_.RunFrom(reinterpret_cast<const Instruction *>(startPointer_));

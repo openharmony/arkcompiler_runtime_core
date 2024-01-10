@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 #include "libpandabase/utils/span.h"
 #include "libpandabase/utils/utf.h"
+#include "libpandabase/utils/utils.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/coretypes/array-inl.h"
 #include "runtime/include/coretypes/string-inl.h"
@@ -92,12 +93,12 @@ TEST_F(StringTest, EqualStringWithNotCompressedRawUtf8Data)
 {
     std::vector<uint8_t> data {0xc2, 0xa7};
 
-    for (size_t i = 0; i < 20; i++) {
+    for (size_t i = 0; i < 20U; i++) {
         data.push_back(0x30 + i);
     }
     data.push_back(0);
 
-    uint32_t utf16Length = data.size() - 2;
+    uint32_t utf16Length = data.size() - 2U;
     auto *firstString =
         String::CreateFromMUtf8(data.data(), utf16Length, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
     ASSERT_TRUE(String::StringsAreEqualMUtf8(firstString, data.data(), utf16Length));
@@ -156,7 +157,7 @@ TEST_F(StringTest, CompareCompressedStringWithRawUtf16)
 {
     std::vector<uint16_t> data;
 
-    for (size_t i = 0; i < 30; i++) {
+    for (size_t i = 0; i < 30U; i++) {
         data.push_back(i + 1);
     }
     data.push_back(0);
@@ -204,7 +205,7 @@ TEST_F(StringTest, notCompressedHashCodeUtf8)
     std::vector<uint8_t> data {0xc2, 0xa7};
 
     size_t size = 1;
-    for (size_t i = 0; i < 20; i++) {
+    for (size_t i = 0; i < 20U; i++) {
         data.push_back(0x30 + i);
         size += 1;
     }
@@ -280,10 +281,10 @@ TEST_F(StringTest, ForeignLengthAndCopyTest1b0)
 {
     std::vector<uint8_t> data {'a', 'b', 'c', 'd', 'z', 0xc0, 0x80, 0x00};
     uint32_t utf16Length = data.size();
-    String *string = String::CreateFromMUtf8(data.data(), utf16Length - 2, GetLanguageContext(),
+    String *string = String::CreateFromMUtf8(data.data(), utf16Length - 2U, GetLanguageContext(),
                                              Runtime::GetCurrent()->GetPandaVM());  // c080 is U+0000
     ASSERT_EQ(string->GetMUtf8Length(), data.size());
-    ASSERT_EQ(string->GetUtf16Length(), data.size() - 2);  // \0 doesn't counts for UTF16
+    ASSERT_EQ(string->GetUtf16Length(), data.size() - 2U);  // \0 doesn't counts for UTF16
     std::vector<uint8_t> out8(data.size());
     ASSERT_EQ(string->CopyDataMUtf8(out8.data(), out8.size(), true), data.size());
     ASSERT_EQ(out8, data);
@@ -313,9 +314,10 @@ TEST_F(StringTest, ForeignLengthAndCopyTest1b)
 TEST_F(StringTest, ForeignLengthAndCopyTest2b)
 {
     std::vector<uint8_t> data {0xc2, 0xa7, 0x33, 0x00};  // UTF-16 size is 2
-    String *string = String::CreateFromMUtf8(data.data(), 2, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    String *string =
+        String::CreateFromMUtf8(data.data(), 2U, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
     ASSERT_EQ(string->GetMUtf8Length(), data.size());
-    ASSERT_EQ(string->GetUtf16Length(), 2);  // \0 doesn't counts for UTF16
+    ASSERT_EQ(string->GetUtf16Length(), 2U);  // \0 doesn't counts for UTF16
     std::vector<uint8_t> out8(data.size());
     ASSERT_EQ(string->CopyDataMUtf8(out8.data(), out8.size(), true), data.size());
     ASSERT_EQ(out8, data);
@@ -328,9 +330,10 @@ TEST_F(StringTest, ForeignLengthAndCopyTest2b)
 TEST_F(StringTest, ForeignLengthAndCopyTest3b)
 {
     std::vector<uint8_t> data {0xef, 0xbf, 0x83, 0x33, 0x00};  // UTF-16 size is 2
-    String *string = String::CreateFromMUtf8(data.data(), 2, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    String *string =
+        String::CreateFromMUtf8(data.data(), 2U, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
     ASSERT_EQ(string->GetMUtf8Length(), data.size());
-    ASSERT_EQ(string->GetUtf16Length(), 2);  // \0 doesn't counts for UTF16
+    ASSERT_EQ(string->GetUtf16Length(), 2U);  // \0 doesn't counts for UTF16
     std::vector<uint8_t> out8(data.size());
     ASSERT_EQ(string->CopyDataMUtf8(out8.data(), out8.size(), true), data.size());
     ASSERT_EQ(out8, data);
@@ -345,9 +348,10 @@ TEST_F(StringTest, ForeignLengthAndCopyTest6b)
     std::vector<uint8_t> data {0xed, 0xa0, 0x81, 0xed, 0xb0, 0xb7, 0x20, 0x00};  // UTF-16 size is 3
     // We support 4-byte utf-8 sequences, so {0xd801, 0xdc37} is encoded to 4 bytes instead of 6
     std::vector<uint8_t> utf8Data {0xf0, 0x90, 0x90, 0xb7, 0x20, 0x00};
-    String *string = String::CreateFromMUtf8(data.data(), 3, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    String *string =
+        String::CreateFromMUtf8(data.data(), 3U, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
     ASSERT_EQ(string->GetMUtf8Length(), utf8Data.size());
-    ASSERT_EQ(string->GetUtf16Length(), 3);  // \0 doesn't counts for UTF16
+    ASSERT_EQ(string->GetUtf16Length(), 3U);  // \0 doesn't counts for UTF16
     std::vector<uint8_t> out8(utf8Data.size());
     // ASSERT_EQ(string->CopyDataMUtf8(out8.data(), out8.size()), data.size());
     string->CopyDataMUtf8(out8.data(), out8.size(), true);
@@ -387,13 +391,13 @@ TEST_F(StringTest, RegionCopyTestUtf16)
     size_t start = 2;
     std::vector<uint8_t> res = {'c', 'd', 'z', 0x00};
     std::vector<uint8_t> out8(res.size());
-    ASSERT_EQ(string->CopyDataRegionMUtf8(out8.data(), start, 3, out8.size()), out8.size() - 1);
+    ASSERT_EQ(string->CopyDataRegionMUtf8(out8.data(), start, 3U, out8.size()), out8.size() - 1);
     out8[out8.size() - 1] = '\0';
     ASSERT_EQ(out8, res);
     size_t len16 = string->GetUtf16Length();
     std::vector<uint16_t> out16(len16 - start - 1);
     std::vector<uint16_t> res16 = {'c', 'd', 'z'};
-    ASSERT_EQ(string->CopyDataRegionUtf16(out16.data(), start, 3, out16.size()), out16.size());
+    ASSERT_EQ(string->CopyDataRegionUtf16(out16.data(), start, 3U, out16.size()), out16.size());
     ASSERT_EQ(out16, res16);
 }
 
@@ -429,9 +433,9 @@ TEST_F(StringTest, SameLengthStringCompareTest)
     // Set the last elements in strings with size more than 0x8 to disable compressing.
     // This will leads to count two MUtf-8 bytes as one UTF-16 so length = string_length - 1
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    fString[STRING_LENGTH - 2] = uint8_t(0x80);
+    fString[STRING_LENGTH - 2U] = uint8_t(0x80);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    sString[STRING_LENGTH - 2] = uint8_t(0x80);
+    sString[STRING_LENGTH - 2U] = uint8_t(0x80);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     fString[STRING_LENGTH - 1] = uint8_t(0x01);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -482,7 +486,7 @@ TEST_F(StringTest, ObjectSize)
 
     {
         std::vector<uint8_t> data {0x80, 0x01, 0x80, 0x02, 0x00};
-        uint32_t utf16Length = data.size() / 2;
+        uint32_t utf16Length = data.size() / 2U;
         String *string = String::CreateFromMUtf8(data.data(), utf16Length, GetLanguageContext(),
                                                  Runtime::GetCurrent()->GetPandaVM());
         ASSERT_EQ(string->ObjectSize(), String::ComputeSizeUtf16(utf16Length));
@@ -541,10 +545,10 @@ TEST_F(StringTest, IndexOfTest)
     std::cout << index << std::endl;
     ASSERT_EQ(index, index2);
     ASSERT_EQ(index1, index3);
-    index = string1->IndexOf(string2, 2);
-    index1 = string1->IndexOf(string4, 2);
-    index2 = string3->IndexOf(string2, 2);
-    index3 = string3->IndexOf(string4, 2);
+    index = string1->IndexOf(string2, 2_I);
+    index1 = string1->IndexOf(string4, 2_I);
+    index2 = string3->IndexOf(string2, 2_I);
+    index3 = string3->IndexOf(string4, 2_I);
     std::cout << index << std::endl;
     ASSERT_EQ(index, index2);
     ASSERT_EQ(index1, index3);
@@ -561,16 +565,16 @@ TEST_F(StringTest, IndexOfTest2)
                                                   Runtime::GetCurrent()->GetPandaVM());
         ASSERT_EQ(0, string->IndexOf(pattern, -1));
         ASSERT_EQ(0, string->IndexOf(pattern, 0));
-        ASSERT_EQ(4, string->IndexOf(pattern, 1));
-        ASSERT_EQ(4, string->IndexOf(pattern, 4));
-        ASSERT_EQ(-1, string->IndexOf(pattern, 5));
-        ASSERT_EQ(-1, string->IndexOf(pattern, 6));
+        ASSERT_EQ(4_I, string->IndexOf(pattern, 1));
+        ASSERT_EQ(4_I, string->IndexOf(pattern, 4_I));
+        ASSERT_EQ(-1, string->IndexOf(pattern, 5_I));
+        ASSERT_EQ(-1, string->IndexOf(pattern, 6_I));
 
         String *emptyString = String::CreateEmptyString(GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
         ASSERT_EQ(-1, emptyString->IndexOf(string, 0));
-        ASSERT_EQ(0, string->IndexOf(emptyString, -3));
-        ASSERT_EQ(2, string->IndexOf(emptyString, 2));
-        ASSERT_EQ(7, string->IndexOf(emptyString, 10));
+        ASSERT_EQ(0, string->IndexOf(emptyString, -3_I));
+        ASSERT_EQ(2_I, string->IndexOf(emptyString, 2_I));
+        ASSERT_EQ(7_I, string->IndexOf(emptyString, 10_I));
     }
     {
         std::vector<uint8_t> stringData {'a', 'b', 'c', 'd', 'e', 'f', 'g', 0};
@@ -579,7 +583,7 @@ TEST_F(StringTest, IndexOfTest2)
                                                  Runtime::GetCurrent()->GetPandaVM());
         String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
                                                   Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(3, string->IndexOf(pattern, 0));
+        ASSERT_EQ(3_I, string->IndexOf(pattern, 0));
     }
     {
         std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'a', 'a', 'a', 0};
@@ -588,11 +592,11 @@ TEST_F(StringTest, IndexOfTest2)
                                                  Runtime::GetCurrent()->GetPandaVM());
         String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
                                                   Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(2, string->IndexOf(pattern, 0));
-        ASSERT_EQ(2, string->IndexOf(pattern, 2));
-        ASSERT_EQ(3, string->IndexOf(pattern, 3));
-        ASSERT_EQ(4, string->IndexOf(pattern, 4));
-        ASSERT_EQ(-1, string->IndexOf(pattern, 5));
+        ASSERT_EQ(2_I, string->IndexOf(pattern, 0));
+        ASSERT_EQ(2_I, string->IndexOf(pattern, 2_I));
+        ASSERT_EQ(3_I, string->IndexOf(pattern, 3_I));
+        ASSERT_EQ(4_I, string->IndexOf(pattern, 4_I));
+        ASSERT_EQ(-1, string->IndexOf(pattern, 5_I));
     }
 }
 
@@ -656,24 +660,24 @@ TEST_F(StringTest, CompareTest)
 
     // long utf8 string vs long utf8 string
     // utf8
-    std::vector<uint8_t> data8(16, 'a');
+    std::vector<uint8_t> data8(16U, 'a');
     data8.push_back(0);
 
-    std::vector<uint8_t> data9(16, 'a');
+    std::vector<uint8_t> data9(16U, 'a');
     std::vector<uint8_t> tmp1 {'x', 'z'};
     data9.insert(data9.end(), tmp1.begin(), tmp1.end());
     data9.push_back(0);
 
-    std::vector<uint8_t> data10(16, 'a');
+    std::vector<uint8_t> data10(16U, 'a');
     std::vector<uint8_t> tmp2 {'x', 'x', 'x', 'y', 'y', 'a', 'a'};
     data10.insert(data10.end(), tmp2.begin(), tmp2.end());
-    data10.insert(data10.end(), 16, 'a');
+    data10.insert(data10.end(), 16U, 'a');
     data10.push_back(0);
 
-    std::vector<uint8_t> data11(16, 'a');
+    std::vector<uint8_t> data11(16U, 'a');
     std::vector<uint8_t> tmp3 {'x', 'x', 'x', 'y', 'y', 'y', 'y'};
     data11.insert(data11.end(), tmp3.begin(), tmp3.end());
-    data11.insert(data11.end(), 16, 'a');
+    data11.insert(data11.end(), 16U, 'a');
     data11.push_back(0);
 
     String *string8 = String::CreateFromMUtf8(data8.data(), data8.size() - 1, GetLanguageContext(),
@@ -701,24 +705,24 @@ TEST_F(StringTest, CompareTest)
 
     // long utf16 string vs long utf16 string
     // utf16
-    std::vector<uint16_t> data14(16, 0xab);
+    std::vector<uint16_t> data14(16U, 0xab);
     data14.push_back(0);
 
-    std::vector<uint16_t> data15(16, 0xab);
+    std::vector<uint16_t> data15(16U, 0xab);
     std::vector<uint16_t> tmp4 {'a', 0xbb};
     data15.insert(data15.end(), tmp4.begin(), tmp4.end());
     data15.push_back(0);
 
-    std::vector<uint16_t> data16(16, 0xab);
+    std::vector<uint16_t> data16(16U, 0xab);
     std::vector<uint16_t> tmp5 {'a', 'a', 0xcc, 0xcc, 0xdd, 0xdd, 0xdd};
     data16.insert(data16.end(), tmp5.begin(), tmp5.end());
-    data16.insert(data16.end(), 16, 0xab);
+    data16.insert(data16.end(), 16U, 0xab);
     data16.push_back(0);
 
-    std::vector<uint16_t> data17(16, 0xab);
+    std::vector<uint16_t> data17(16U, 0xab);
     std::vector<uint16_t> tmp6 {'a', 'a', 0xdd, 0xdd, 0xdd, 0xdd, 0xdd};
     data17.insert(data17.end(), tmp6.begin(), tmp6.end());
-    data17.insert(data17.end(), 16, 0xab);
+    data17.insert(data17.end(), 16U, 0xab);
     data17.push_back(0);
 
     String *string14 = String::CreateFromUtf16(data14.data(), data14.size() - 1, GetLanguageContext(),

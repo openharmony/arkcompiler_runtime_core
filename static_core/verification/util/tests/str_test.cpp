@@ -18,6 +18,7 @@
 #include "util/str.h"
 
 #include "util/tests/verifier_test.h"
+#include "libpandabase/utils/utils.h"
 
 #include <gtest/gtest.h>
 
@@ -43,7 +44,7 @@ TEST_F(VerifierTest, str)
     EXPECT_EQ(Join<std::string>(Generator), "G, e, n, e, r, a, t, o, r");
     EXPECT_EQ(Join<std::string>(Generator, "."), "G.e.n.e.r.a.t.o.r");
 
-    EXPECT_EQ(NumToStr(-1456), "-1456");
+    EXPECT_EQ(NumToStr(-1456_I), "-1456");
     EXPECT_EQ(NumToStr(0x1C, 0x10), "1c");
 }
 

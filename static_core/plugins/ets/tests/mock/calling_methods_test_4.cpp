@@ -60,17 +60,18 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath4)
     ASSERT_NE(doubleId, nullptr);
 
     // Call<Type>Method part
-    EXPECT_DEATH(env_->CallVoidMethod(nullptr, voidId, static_cast<ets_int>(42), static_cast<ets_int>(121)), "");
+    EXPECT_DEATH(env_->CallVoidMethod(nullptr, voidId, static_cast<ets_int>(42_I), static_cast<ets_int>(121_I)), "");
     EXPECT_DEATH(env_->CallObjectMethod(nullptr, objectId), "");
-    EXPECT_DEATH(env_->CallBooleanMethod(nullptr, booleanId, static_cast<ets_boolean>(1), static_cast<ets_int>(121)),
+    EXPECT_DEATH(env_->CallBooleanMethod(nullptr, booleanId, static_cast<ets_boolean>(1), static_cast<ets_int>(121_I)),
                  "");
-    EXPECT_DEATH(env_->CallByteMethod(nullptr, byteId, static_cast<ets_byte>(1), static_cast<ets_int>(121)), "");
-    EXPECT_DEATH(env_->CallCharMethod(nullptr, charId, static_cast<ets_char>(1), static_cast<ets_int>(121)), "");
-    EXPECT_DEATH(env_->CallShortMethod(nullptr, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121)), "");
+    EXPECT_DEATH(env_->CallByteMethod(nullptr, byteId, static_cast<ets_byte>(1), static_cast<ets_int>(121_I)), "");
+    EXPECT_DEATH(env_->CallCharMethod(nullptr, charId, static_cast<ets_char>(1), static_cast<ets_int>(121_I)), "");
+    EXPECT_DEATH(env_->CallShortMethod(nullptr, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121_I)), "");
     EXPECT_DEATH(env_->CallIntMethod(nullptr, intId), "");
-    EXPECT_DEATH(env_->CallLongMethod(nullptr, longId, static_cast<ets_long>(1), static_cast<ets_int>(121)), "");
-    EXPECT_DEATH(env_->CallFloatMethod(nullptr, floatId, static_cast<ets_float>(1.0F), static_cast<ets_int>(121)), "");
-    EXPECT_DEATH(env_->CallDoubleMethod(nullptr, doubleId, static_cast<ets_double>(1.0), static_cast<ets_int>(121)),
+    EXPECT_DEATH(env_->CallLongMethod(nullptr, longId, static_cast<ets_long>(1), static_cast<ets_int>(121_I)), "");
+    EXPECT_DEATH(env_->CallFloatMethod(nullptr, floatId, static_cast<ets_float>(1.0F), static_cast<ets_int>(121_I)),
+                 "");
+    EXPECT_DEATH(env_->CallDoubleMethod(nullptr, doubleId, static_cast<ets_double>(1.0), static_cast<ets_int>(121_I)),
                  "");
 
     EXPECT_DEATH(env_->CallVoidMethod(nullptr, voidId), "");
@@ -86,9 +87,9 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath4)
 
     // Call<Type>MethodArray part
     ets_value intTmp;
-    intTmp.i = 121;
+    intTmp.i = 121_I;
     ets_value tmp;
-    tmp.i = static_cast<ets_int>(42);
+    tmp.i = static_cast<ets_int>(42_I);
     const std::vector<ets_value> voidArgs = {tmp, intTmp};
     EXPECT_DEATH(env_->CallVoidMethodArray(nullptr, voidId, voidArgs.data()), "");
 
@@ -136,25 +137,26 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath4)
     EXPECT_DEATH(env_->CallDoubleMethodArray(nullptr, doubleId, nullptr), "");
 
     // Call<type>MethodList part
-    EXPECT_DEATH(CallVoidMethodListHelper(env_, nullptr, voidId, static_cast<ets_int>(42), static_cast<ets_int>(121)),
-                 "");
+    EXPECT_DEATH(
+        CallVoidMethodListHelper(env_, nullptr, voidId, static_cast<ets_int>(42_I), static_cast<ets_int>(121_I)), "");
     EXPECT_DEATH(CallObjectMethodListHelper(env_, nullptr, objectId), "");
     EXPECT_DEATH(
-        CallBooleanMethodListHelper(env_, nullptr, booleanId, static_cast<ets_boolean>(1), static_cast<ets_int>(121)),
+        CallBooleanMethodListHelper(env_, nullptr, booleanId, static_cast<ets_boolean>(1), static_cast<ets_int>(121_I)),
         "");
-    EXPECT_DEATH(CallByteMethodListHelper(env_, nullptr, byteId, static_cast<ets_byte>(1), static_cast<ets_int>(121)),
+    EXPECT_DEATH(CallByteMethodListHelper(env_, nullptr, byteId, static_cast<ets_byte>(1), static_cast<ets_int>(121_I)),
                  "");
-    EXPECT_DEATH(CallCharMethodListHelper(env_, nullptr, charId, static_cast<ets_char>(1), static_cast<ets_int>(121)),
+    EXPECT_DEATH(CallCharMethodListHelper(env_, nullptr, charId, static_cast<ets_char>(1), static_cast<ets_int>(121_I)),
                  "");
     EXPECT_DEATH(
-        CallShortMethodListHelper(env_, nullptr, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121)), "");
+        CallShortMethodListHelper(env_, nullptr, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121_I)), "");
     EXPECT_DEATH(CallIntMethodListHelper(env_, nullptr, intId), "");
-    EXPECT_DEATH(CallLongMethodListHelper(env_, nullptr, longId, static_cast<ets_long>(1), static_cast<ets_int>(121)),
+    EXPECT_DEATH(CallLongMethodListHelper(env_, nullptr, longId, static_cast<ets_long>(1), static_cast<ets_int>(121_I)),
                  "");
     EXPECT_DEATH(
-        CallFloatMethodListHelper(env_, nullptr, floatId, static_cast<ets_float>(1.0F), static_cast<ets_int>(121)), "");
+        CallFloatMethodListHelper(env_, nullptr, floatId, static_cast<ets_float>(1.0F), static_cast<ets_int>(121_I)),
+        "");
     EXPECT_DEATH(
-        CallDoubleMethodListHelper(env_, nullptr, doubleId, static_cast<ets_double>(1.0), static_cast<ets_int>(121)),
+        CallDoubleMethodListHelper(env_, nullptr, doubleId, static_cast<ets_double>(1.0), static_cast<ets_int>(121_I)),
         "");
 
     EXPECT_DEATH(CallVoidMethodListHelper(env_, nullptr, voidId), "");

@@ -342,7 +342,7 @@ void StackfulCoroutineWorker::FinalizeTerminatedCoros()
 
 void StackfulCoroutineWorker::UpdateLoadFactor()
 {
-    loadFactor_ = (loadFactor_ + runnables_.size()) / 2;
+    loadFactor_ = (loadFactor_ + runnables_.size()) / 2U;
 }
 
 void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()

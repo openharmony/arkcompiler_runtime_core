@@ -276,7 +276,7 @@ public:
     size_t GetStackSpaceSize() const
     {
         return RoundUp(ExtArchTraits<A>::FP_ARG_NUM_BYTES + ExtArchTraits<A>::GP_ARG_NUM_BYTES + stackSize_,
-                       2 * ArchTraits<A>::POINTER_SIZE);
+                       2U * ArchTraits<A>::POINTER_SIZE);
     }
 
 private:

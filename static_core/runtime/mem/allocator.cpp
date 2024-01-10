@@ -507,8 +507,7 @@ ObjectAllocatorGen<MT_MODE>::ObjectAllocatorGen(MemStatsType *memStats, bool cre
     objectAllocator_ = new (std::nothrow) ObjectAllocator(memStats);
     largeObjectAllocator_ = new (std::nothrow) LargeObjectAllocator(memStats);
     humongousObjectAllocator_ = new (std::nothrow) HumongousObjectAllocator(memStats);
-    nonMovableObjectAllocator_ =
-        new (std::nothrow) ObjectAllocator(memStats, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    nonMovableObjectAllocator_ = new (std::nothrow) ObjectAllocator(memStats, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     largeNonMovableObjectAllocator_ =
         new (std::nothrow) LargeObjectAllocator(memStats, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     memStats_ = memStats;

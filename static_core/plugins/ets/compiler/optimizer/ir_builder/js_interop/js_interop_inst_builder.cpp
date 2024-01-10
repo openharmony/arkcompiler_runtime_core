@@ -119,8 +119,8 @@ void InstBuilder::BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::Inte
                 // LoadClass returns ref, create a new SaveState
                 saveState = CreateSaveState(Opcode::SaveState, pc);
                 AddInstruction(saveState);
-                ret = BuildInteropIntrinsic<2>(pc, id, retType, {DataType::REFERENCE, DataType::POINTER},
-                                               {loadClass, jsCall, saveState});
+                ret = BuildInteropIntrinsic<2U>(pc, id, retType, {DataType::REFERENCE, DataType::POINTER},
+                                                {loadClass, jsCall, saveState});
             } else {
                 ret = BuildInteropIntrinsic<1>(pc, id, retType, {DataType::POINTER}, {jsCall, saveState});
             }
@@ -155,12 +155,12 @@ void InstBuilder::BuildInteropCall(const BytecodeInstruction *bcInst, RuntimeInt
         GetGraph()->GetLocalAllocator()->Adapter());
     GetGraph()->GetRuntime()->GetInfoForInteropCallArgsConversion(method, &intrinsicsIds);
     if (callKind != RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
-        jsCall->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsicsIds.size() + 4);
+        jsCall->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsicsIds.size() + 4U);
         jsCall->AppendInputs({{jsThis, DataType::POINTER},
                               {jsCallCheck, DataType::POINTER},
                               {GetGraph()->FindOrCreateConstant(intrinsicsIds.size()), DataType::UINT32}});
     } else {
-        jsCall->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsicsIds.size() + 3);
+        jsCall->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsicsIds.size() + 3U);
         jsCall->AppendInputs({{jsCallCheck, DataType::POINTER},
                               {GetGraph()->FindOrCreateConstant(intrinsicsIds.size()), DataType::UINT32}});
     }
@@ -171,7 +171,7 @@ void InstBuilder::BuildInteropCall(const BytecodeInstruction *bcInst, RuntimeInt
         Inst *arg = nullptr;
         if (type != DataType::NO_TYPE) {
             arg = BuildInteropIntrinsic<1>(pc, intrinsicId, DataType::POINTER, {type},
-                                           {GetArgDefinition(bcInst, argIdx + 2, accRead, isRange), saveState});
+                                           {GetArgDefinition(bcInst, argIdx + 2U, accRead, isRange), saveState});
         } else {
             arg = BuildInteropIntrinsic<0>(pc, intrinsicId, DataType::POINTER, {}, {saveState});
         }

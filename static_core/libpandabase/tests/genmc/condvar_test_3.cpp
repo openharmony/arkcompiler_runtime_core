@@ -14,6 +14,7 @@
  */
 
 #include "common.h"
+#include "libpandabase/utils/utils.h"
 
 // The test checks the work of TimedWait-SignalOne
 // Thread1 sets g_shared to 1, then waits with timeout,
@@ -33,7 +34,7 @@ static void *Thread1(void *arg)
 
     MutexLock(&g_x, false);
     g_shared = 1;
-    if (TimedWait(&g_c, &g_x, 100, 0, false)) {
+    if (TimedWait(&g_c, &g_x, 100_I, 0, false)) {
         // Timeout
         return nullptr;
     }

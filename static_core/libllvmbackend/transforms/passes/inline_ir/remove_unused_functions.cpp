@@ -73,8 +73,7 @@ llvm::PreservedAnalyses RemoveUnusedFunctions::run(llvm::Module &module, llvm::M
     changed |= panda::llvmbackend::RemoveDanglingAliases(module);
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
-void RemoveUnusedFunctions::VisitValue(DenseSet<Function *> &usedFunctions, Value &value,
-                                       DenseSet<Value *> &seenValues)
+void RemoveUnusedFunctions::VisitValue(DenseSet<Function *> &usedFunctions, Value &value, DenseSet<Value *> &seenValues)
 {
     if (seenValues.contains(&value)) {
         return;

@@ -93,7 +93,7 @@ void InstBuilder::SetCallArgs(const BytecodeInstruction *bcInst, bool isRange, b
                               Inst *nullCheck, SaveStateInst *saveState, bool hasImplicitArg, uint32_t methodId,
                               Inst *additionalInput)
 {
-    size_t hiddenArgsCount = hasImplicitArg ? 1 : 0;                 // +1 for non-static call
+    size_t hiddenArgsCount = hasImplicitArg ? 1 : 0;                  // +1 for non-static call
     size_t additionalArgsCount = additionalInput == nullptr ? 0 : 1;  // +1 for launch call
     size_t argsCount = GetMethodArgumentsCount(methodId);
     size_t totalArgsCount = hiddenArgsCount + argsCount + additionalArgsCount;

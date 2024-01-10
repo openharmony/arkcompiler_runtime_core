@@ -52,52 +52,52 @@ TEST_F(DynBufferTest, EmitAndGet)
 {
     DynChunk dynChunk = DynChunk();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    dynChunk.EmitChar(65);
+    dynChunk.EmitChar(65U);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    dynChunk.EmitU16(66);
+    dynChunk.EmitU16(66U);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    dynChunk.EmitU32(67);
-    ASSERT_EQ(dynChunk.GetSize(), 7);
+    dynChunk.EmitU32(67U);
+    ASSERT_EQ(dynChunk.GetSize(), 7U);
     ASSERT_EQ(dynChunk.GetAllocatedSize(), DynChunk::ALLOCATE_MIN_SIZE);
     ASSERT_EQ(dynChunk.GetError(), false);
     dynChunk.Insert(1, 1);
-    uint32_t val1 = dynChunk.GetU8(0);
-    uint32_t val2 = dynChunk.GetU16(2);
-    uint32_t val3 = dynChunk.GetU32(4);
-    ASSERT_EQ(val1, 65);
-    ASSERT_EQ(val2, 66);
-    ASSERT_EQ(val3, 67);
+    uint32_t val1 = dynChunk.GetU8(0U);
+    uint32_t val2 = dynChunk.GetU16(2U);
+    uint32_t val3 = dynChunk.GetU32(4U);
+    ASSERT_EQ(val1, 65U);
+    ASSERT_EQ(val2, 66U);
+    ASSERT_EQ(val3, 67U);
 }
 
 TEST_F(DynBufferTest, EmitSelfAndGet)
 {
     DynChunk dynChunk = DynChunk();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    dynChunk.EmitChar(65);
+    dynChunk.EmitChar(65U);
     dynChunk.EmitSelf(0, 1);
-    ASSERT_EQ(dynChunk.GetSize(), 2);
+    ASSERT_EQ(dynChunk.GetSize(), 2U);
     ASSERT_EQ(dynChunk.GetAllocatedSize(), DynChunk::ALLOCATE_MIN_SIZE);
     ASSERT_EQ(dynChunk.GetError(), false);
     uint32_t val1 = dynChunk.GetU8(0);
     uint32_t val2 = dynChunk.GetU8(1);
-    ASSERT_EQ(val1, 65);
-    ASSERT_EQ(val2, 65);
+    ASSERT_EQ(val1, 65U);
+    ASSERT_EQ(val2, 65U);
 }
 
 TEST_F(DynBufferTest, EmitStrAndGet)
 {
     DynChunk dynChunk = DynChunk();
     dynChunk.EmitStr("abc");
-    ASSERT_EQ(dynChunk.GetSize(), 4);
+    ASSERT_EQ(dynChunk.GetSize(), 4U);
     ASSERT_EQ(dynChunk.GetAllocatedSize(), DynChunk::ALLOCATE_MIN_SIZE);
     ASSERT_EQ(dynChunk.GetError(), false);
-    uint32_t val1 = dynChunk.GetU8(0);
-    uint32_t val2 = dynChunk.GetU8(1);
-    uint32_t val3 = dynChunk.GetU8(2);
-    uint32_t val4 = dynChunk.GetU8(3);
-    ASSERT_EQ(val1, 97);
-    ASSERT_EQ(val2, 98);
-    ASSERT_EQ(val3, 99);
+    uint32_t val1 = dynChunk.GetU8(0U);
+    uint32_t val2 = dynChunk.GetU8(1U);
+    uint32_t val3 = dynChunk.GetU8(2U);
+    uint32_t val4 = dynChunk.GetU8(3U);
+    ASSERT_EQ(val1, 97U);
+    ASSERT_EQ(val2, 98U);
+    ASSERT_EQ(val3, 99U);
     ASSERT_EQ(val4, 0);
 }
 }  // namespace panda::mem::test

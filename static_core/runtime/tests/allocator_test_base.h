@@ -27,6 +27,7 @@
 
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/os/thread.h"
+#include "libpandabase/utils/utils.h"
 #include "runtime/mem/bump-allocator.h"
 #include "runtime/mem/mem_stats_additional_info.h"
 #include "runtime/mem/mem_stats_default.h"
@@ -675,10 +676,10 @@ inline void AllocatorTest<Allocator>::AllocateFreeDifferentSizesTest(size_t elem
         }
         // Compare
         ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]),
-                                              std::get<2>(allocatedElements[i])))
+                                              std::get<2U>(allocatedElements[i])))
             << "Address: " << std::hex << std::get<0>(allocatedElements[i])
             << ", size: " << std::get<1>(allocatedElements[i])
-            << ", start index in byte array: " << std::get<2>(allocatedElements[i]) << ", seed: " << seed_;
+            << ", start index in byte array: " << std::get<2U>(allocatedElements[i]) << ", seed: " << seed_;
         allocator.Free(std::get<0>(allocatedElements[i]));
     }
     delete memStats;
@@ -1061,10 +1062,10 @@ void AllocatorTest<Allocator>::MtAllocRun(AllocatorTest<Allocator> *allocatorTes
         }
         ASSERT_TRUE(allocatorTestInstance->AllocatedByThisAllocator(*allocator, std::get<0>(allocatedElements[i])));
         ASSERT_TRUE(allocatorTestInstance->CompareBytesWithByteArray(
-            std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]), std::get<2>(allocatedElements[i])))
+            std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]), std::get<2U>(allocatedElements[i])))
             << "Address: " << std::hex << std::get<0>(allocatedElements[i])
             << ", size: " << std::get<1>(allocatedElements[i])
-            << ", start index in byte array: " << std::get<2>(allocatedElements[i])
+            << ", start index in byte array: " << std::get<2U>(allocatedElements[i])
             << ", seed: " << allocatorTestInstance->seed_;
     }
     // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
@@ -1112,10 +1113,10 @@ void AllocatorTest<Allocator>::MtAllocFreeRun(AllocatorTest<Allocator> *allocato
         // Compare
         ASSERT_TRUE(allocatorTestInstance->CompareBytesWithByteArray(std::get<0>(allocatedElements[index]),
                                                                      std::get<1>(allocatedElements[index]),
-                                                                     std::get<2>(allocatedElements[index])))
+                                                                     std::get<2U>(allocatedElements[index])))
             << "Address: " << std::hex << std::get<0>(allocatedElements[index])
             << ", size: " << std::get<1>(allocatedElements[index])
-            << ", start index in byte array: " << std::get<2>(allocatedElements[index])
+            << ", start index in byte array: " << std::get<2U>(allocatedElements[index])
             << ", seed: " << allocatorTestInstance->seed_;
         allocator->Free(std::get<0>(allocatedElements[index]));
     }
@@ -1132,10 +1133,10 @@ void AllocatorTest<Allocator>::MtAllocFreeRun(AllocatorTest<Allocator> *allocato
         }
         // Compare
         ASSERT_TRUE(allocatorTestInstance->CompareBytesWithByteArray(
-            std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]), std::get<2>(allocatedElements[i])))
+            std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]), std::get<2U>(allocatedElements[i])))
             << "Address: " << std::hex << std::get<0>(allocatedElements[i])
             << ", size: " << std::get<1>(allocatedElements[i])
-            << ", start index in byte array: " << std::get<2>(allocatedElements[i])
+            << ", start index in byte array: " << std::get<2U>(allocatedElements[i])
             << ", seed: " << allocatorTestInstance->seed_;
         allocator->Free(std::get<0>(allocatedElements[i]));
     }
@@ -1189,10 +1190,10 @@ void AllocatorTest<Allocator>::MtAllocIterateRun(AllocatorTest<Allocator> *alloc
         ASSERT_TRUE(allocatorTestInstance->AllocatedByThisAllocator(*allocator, std::get<0>(allocatedElements[i])));
         // Compare
         ASSERT_TRUE(allocatorTestInstance->CompareBytesWithByteArray(
-            std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]), std::get<2>(allocatedElements[i])))
+            std::get<0>(allocatedElements[i]), std::get<1>(allocatedElements[i]), std::get<2U>(allocatedElements[i])))
             << "Address: " << std::hex << std::get<0>(allocatedElements[i])
             << ", size: " << std::get<1>(allocatedElements[i])
-            << ", start index in byte array: " << std::get<2>(allocatedElements[i])
+            << ", start index in byte array: " << std::get<2U>(allocatedElements[i])
             << ", seed: " << allocatorTestInstance->seed_;
     }
     // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order

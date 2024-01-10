@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 
@@ -69,7 +70,7 @@ static bool IsInitialized(EtsEnv *env, ets_class cls)
 
     auto *field_id = internal_class->GetStaticFieldIDByName("value", "I");
     auto value = internal_class->GetStaticFieldPrimitive<int32_t>(field_id);
-    return value == 10;
+    return value == 10_I;
 }
 
 TEST_F(ClinitNativeTest, TestGetStaticMethod)

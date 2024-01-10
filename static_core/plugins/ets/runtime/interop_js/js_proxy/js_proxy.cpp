@@ -28,22 +28,22 @@ static std::unique_ptr<uint8_t[]> MakeProxyDescriptor(const uint8_t *descriptorP
 {
     Span<const uint8_t> descriptor(descriptorP, utf::Mutf8Size(descriptorP));
 
-    ASSERT(descriptor.size() > 2);
+    ASSERT(descriptor.size() > 2U);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     ASSERT(descriptor[0] == 'L');
     ASSERT(descriptor[descriptor.size() - 1] == ';');
 
-    size_t proxyDescriptorSize = descriptor.size() + 3;  // + $$\0
+    size_t proxyDescriptorSize = descriptor.size() + 3U;  // + $$\0
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     auto proxyDescriptorData = std::make_unique<uint8_t[]>(proxyDescriptorSize);
     Span<uint8_t> proxyDescriptor(proxyDescriptorData.get(), proxyDescriptorSize);
 
     proxyDescriptor[0] = 'L';
     proxyDescriptor[1] = '$';
-    memcpy(&proxyDescriptor[2], &descriptor[1], descriptor.size() - 2);
-    proxyDescriptor[proxyDescriptor.size() - 3] = '$';
-    proxyDescriptor[proxyDescriptor.size() - 2] = ';';
-    proxyDescriptor[proxyDescriptor.size() - 1] = '\0';
+    memcpy(&proxyDescriptor[2U], &descriptor[1], descriptor.size() - 2U);
+    proxyDescriptor[proxyDescriptor.size() - 3U] = '$';
+    proxyDescriptor[proxyDescriptor.size() - 2U] = ';';
+    proxyDescriptor[proxyDescriptor.size() - 1U] = '\0';
 
     return proxyDescriptorData;
 }

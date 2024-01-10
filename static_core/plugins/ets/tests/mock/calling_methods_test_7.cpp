@@ -65,9 +65,9 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath7)
 
     // CallNonvirtual<Type>MethodArray part
     ets_value intTmp;
-    intTmp.i = 121;
+    intTmp.i = 121_I;
     ets_value tmp;
-    tmp.i = static_cast<ets_int>(42);
+    tmp.i = static_cast<ets_int>(42_I);
     const std::vector<ets_value> voidArgs = {tmp, intTmp};
     EXPECT_DEATH(env_->CallNonvirtualVoidMethodArray(nullptr, cCls, voidId, voidArgs.data()), "");
 

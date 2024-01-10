@@ -38,7 +38,7 @@ public:
 
     LifeNumber GetMidpoint() const
     {
-        return (minValue_ + maxValue_) / 2;
+        return (minValue_ + maxValue_) / 2U;
     }
 
     LifeNumber GetMinValue() const

@@ -20,6 +20,7 @@
 #include "panda_runner.h"
 #include "events/events.h"
 #include <fstream>
+#include "libpandabase/utils/utils.h"
 
 namespace panda::test {
 class OsrTest : public testing::Test {
@@ -693,7 +694,7 @@ TEST_F(OsrTest, BoundTest)
 
     ScopeEvents scopeEvents;
 
-    runner.Run(boundTest, 123);
+    runner.Run(boundTest, 123_I);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
     ASSERT_EQ(osrEvents.size(), 1);

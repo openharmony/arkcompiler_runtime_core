@@ -411,7 +411,7 @@ coretypes::String *PandaEtsVM::CreateString(Method *ctor, ObjectHeader *obj)
     ASSERT(ctor->GetNumArgs() > 0);  // must be at list this argument
     if (ctor->GetNumArgs() == 1) {
         str = EtsString::CreateNewEmptyString();
-    } else if (ctor->GetNumArgs() == 2) {
+    } else if (ctor->GetNumArgs() == 2U) {
         ASSERT(ctor->GetArgType(1).GetId() == panda_file::Type::TypeId::REFERENCE);
         auto *strData = utf::Mutf8AsCString(ctor->GetRefArgType(1).data);
         if (std::strcmp("[C", strData) == 0) {

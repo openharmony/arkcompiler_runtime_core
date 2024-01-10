@@ -531,7 +531,7 @@ void GraphCloner::RemoveLoopPreHeader(const LoopUnrollData *unrollData)
     auto removedSucc = unrollData->backedge->GetSuccessor(0);
 
     for (auto phi : removedSucc->PhiInstsSafe()) {
-        if (removedSucc->GetPredsBlocks().size() == 2) {
+        if (removedSucc->GetPredsBlocks().size() == 2U) {
             auto remainingInst = phi->CastToPhi()->GetPhiInput(unrollData->backedge);
             phi->ReplaceUsers(remainingInst);
             removedSucc->RemoveInst(phi);

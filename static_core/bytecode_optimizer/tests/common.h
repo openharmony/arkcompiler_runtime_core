@@ -39,6 +39,7 @@
 #include "file_items.h"
 #include "ir_interface.h"
 #include "libpandabase/utils/logger.h"
+#include "libpandabase/utils/utils.h"
 #include "mem/arena_allocator.h"
 #include "mem/pool_manager.h"
 #include "method_data_accessor-inl.h"
@@ -467,7 +468,7 @@ public:
             PARAMETER(0, 0);
             INS(0).SetType(dataType);
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
                 INST(1, Opcode::Return).Inputs(0);
                 INS(1).SetType(dataType);
@@ -507,7 +508,7 @@ public:
             CONSTANT(0, 0);
             INS(0).SetType(dataType);
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
                 INST(1, Opcode::Return).Inputs(0);
                 INS(1).SetType(dataType);
@@ -543,10 +544,10 @@ public:
             PARAMETER(1, 1);
             INS(1).SetType(dataType);
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(2, Opcode::Cmp).s32().Inputs(0, 1);
-                INST(3, Opcode::Return).s32().Inputs(2);
+                INST(2U, Opcode::Cmp).s32().Inputs(0, 1);
+                INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -576,10 +577,10 @@ public:
             PARAMETER(1, 1);
             INS(1).SetType(dataType);
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(2, Opcode::Cmp).s32().SrcType(dataType).Fcmpg(fcmpg).Inputs(0, 1);
-                INST(3, Opcode::Return).s32().Inputs(2);
+                INST(2U, Opcode::Cmp).s32().SrcType(dataType).Fcmpg(fcmpg).Inputs(0, 1);
+                INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -635,21 +636,21 @@ public:
         {
             PARAMETER(0, 0);
             INS(0).SetType(type);
-            CONSTANT(2, 0).s64();
+            CONSTANT(2U, 0).s64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3_I, 4_I)
             {
-                INST(1, Opcode::Compare).b().CC(cc).Inputs(0, 2);
-                INST(3, Opcode::IfImm)
+                INST(1U, Opcode::Compare).b().CC(cc).Inputs(0, 2_I);
+                INST(3U, Opcode::IfImm)
                     .SrcType(compiler::DataType::BOOL)
                     .CC(compiler::ConditionCode::CC_NE)
                     .Inputs(1)
                     .Imm(0);
             }
-            BASIC_BLOCK(3, 4) {}
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(3U, 4_I) {}
+            BASIC_BLOCK(4U, -1)
             {
-                INST(4, Opcode::ReturnVoid).v0id();
+                INST(4U, Opcode::ReturnVoid).v0id();
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -707,17 +708,17 @@ public:
             PARAMETER(1, 1);
             INS(1).SetType(type);
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3_I, 4_I)
             {
-                INST(2, Opcode::Compare).b().CC(cc).Inputs(0, 1);
-                INST(3, Opcode::IfImm)
+                INST(2U, Opcode::Compare).b().CC(cc).Inputs(0, 1);
+                INST(3U, Opcode::IfImm)
                     .SrcType(compiler::DataType::BOOL)
                     .CC(compiler::ConditionCode::CC_NE)
                     .Imm(0)
-                    .Inputs(2);
+                    .Inputs(2U);
             }
-            BASIC_BLOCK(3, 4) {}
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(3U, 4_I) {}
+            BASIC_BLOCK(4U, -1)
             {
                 INST(4, Opcode::ReturnVoid).v0id();
             }
@@ -750,25 +751,25 @@ public:
                                 const std::string &funcName)
     {
         if (prog->literalarrayTable.size() == 1) {
-            EXPECT_TRUE(prog->literalarrayTable["0"].literals[0].tag == panda_file::LiteralTag::TAGVALUE);
-            EXPECT_TRUE(prog->literalarrayTable["0"].literals[1].tag == panda_file::LiteralTag::INTEGER);
-            EXPECT_TRUE(prog->literalarrayTable["0"].literals[2].tag == panda_file::LiteralTag::ARRAY_I32);
+            EXPECT_TRUE(prog->literalarrayTable["0"].literals[0U].tag == panda_file::LiteralTag::TAGVALUE);
+            EXPECT_TRUE(prog->literalarrayTable["0"].literals[1U].tag == panda_file::LiteralTag::INTEGER);
+            EXPECT_TRUE(prog->literalarrayTable["0"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I32);
             return;
         }
-        EXPECT_TRUE(prog->literalarrayTable.size() == 8);
+        EXPECT_TRUE(prog->literalarrayTable.size() == 8U);
         for (const auto &elem : prog->literalarrayTable) {
-            EXPECT_TRUE(elem.second.literals.size() == 5);
-            EXPECT_TRUE(elem.second.literals[0].tag == panda_file::LiteralTag::TAGVALUE);
-            EXPECT_TRUE(elem.second.literals[1].tag == panda_file::LiteralTag::INTEGER);
+            EXPECT_TRUE(elem.second.literals.size() == 5U);
+            EXPECT_TRUE(elem.second.literals[0U].tag == panda_file::LiteralTag::TAGVALUE);
+            EXPECT_TRUE(elem.second.literals[1U].tag == panda_file::LiteralTag::INTEGER);
         }
-        EXPECT_TRUE(prog->literalarrayTable["7"].literals[2].tag == panda_file::LiteralTag::ARRAY_U1);
-        EXPECT_TRUE(prog->literalarrayTable["6"].literals[2].tag == panda_file::LiteralTag::ARRAY_I8);
-        EXPECT_TRUE(prog->literalarrayTable["5"].literals[2].tag == panda_file::LiteralTag::ARRAY_I16);
-        EXPECT_TRUE(prog->literalarrayTable["4"].literals[2].tag == panda_file::LiteralTag::ARRAY_I32);
-        EXPECT_TRUE(prog->literalarrayTable["3"].literals[2].tag == panda_file::LiteralTag::ARRAY_I64);
-        EXPECT_TRUE(prog->literalarrayTable["2"].literals[2].tag == panda_file::LiteralTag::ARRAY_F32);
-        EXPECT_TRUE(prog->literalarrayTable["1"].literals[2].tag == panda_file::LiteralTag::ARRAY_F64);
-        EXPECT_TRUE(prog->literalarrayTable["0"].literals[2].tag == panda_file::LiteralTag::ARRAY_STRING);
+        EXPECT_TRUE(prog->literalarrayTable["7"].literals[2U].tag == panda_file::LiteralTag::ARRAY_U1);
+        EXPECT_TRUE(prog->literalarrayTable["6"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I8);
+        EXPECT_TRUE(prog->literalarrayTable["5"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I16);
+        EXPECT_TRUE(prog->literalarrayTable["4"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I32);
+        EXPECT_TRUE(prog->literalarrayTable["3"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I64);
+        EXPECT_TRUE(prog->literalarrayTable["2"].literals[2U].tag == panda_file::LiteralTag::ARRAY_F32);
+        EXPECT_TRUE(prog->literalarrayTable["1"].literals[2U].tag == panda_file::LiteralTag::ARRAY_F64);
+        EXPECT_TRUE(prog->literalarrayTable["0"].literals[2U].tag == panda_file::LiteralTag::ARRAY_STRING);
 
         EXPECT_TRUE(GetGraph()->RunPass<RegEncoder>());
         ASSERT_TRUE(prog->functionTable.find(funcName) != prog->functionTable.end());

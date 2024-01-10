@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utils.h"
 #include "util/function_traits.h"
 
 #include "util/tests/verifier_test.h"
@@ -51,20 +52,20 @@ TEST_F(VerifierTest, function_traits)
     SquareDiversity sqDiv;
     NAry<SquareSum> opSSum {sqSum};
     NAry<SquareDiversity> opSDiv {sqDiv};
-    EXPECT_EQ(opSSum(2, 2), 16);
-    EXPECT_EQ(opSDiv(2, 1), 1);
-    EXPECT_EQ(opSSum(2, 1, 2), 121);
-    EXPECT_EQ(opSDiv(2, 1, 2), 1);
+    EXPECT_EQ(opSSum(2_I, 2_I), 16_I);
+    EXPECT_EQ(opSDiv(2_I, 1_I), 1_I);
+    EXPECT_EQ(opSSum(2_I, 1_I, 2_I), 121_I);
+    EXPECT_EQ(opSDiv(2_I, 1_I, 2_I), 1_I);
 
-    MultByMod mod5 {5};
+    MultByMod mod5 {5_I};
     // NOLINTNEXTLINE(readability-magic-numbers)
-    MultByMod mod10 {10};
+    MultByMod mod10 {10_I};
     NAry<MultByMod> opMultMod5 {mod5};
     NAry<MultByMod> opMultMod10 {mod10};
-    EXPECT_EQ(opMultMod5(2, 4), 3);
-    EXPECT_EQ(opMultMod10(2, 4), 8);
-    EXPECT_EQ(opMultMod5(2, 4, 2), 1);
-    EXPECT_EQ(opMultMod10(2, 4, 2), 6);
+    EXPECT_EQ(opMultMod5(2_I, 4_I), 3_I);
+    EXPECT_EQ(opMultMod10(2_I, 4_I), 8_I);
+    EXPECT_EQ(opMultMod5(2_I, 4_I, 2_I), 1_I);
+    EXPECT_EQ(opMultMod10(2_I, 4_I, 2_I), 6_I);
 }
 
 }  // namespace panda::verifier::test

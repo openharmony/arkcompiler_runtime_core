@@ -26,6 +26,7 @@
 #include "method_data_accessor-inl.h"
 #include "modifiers.h"
 #include "proto_data_accessor-inl.h"
+#include "libpandabase/utils/utils.h"
 
 #include <cstdio>
 
@@ -52,8 +53,8 @@ void PreparePandaFile(ItemContainer *container)
     ProtoItem *protoItem = container->GetOrCreateProtoItem(retType, params);
     MethodItem *methodItem = classItem->AddMethod(methodName, protoItem, ACC_PUBLIC | ACC_STATIC, params);
 
-    std::vector<uint8_t> instructions {1, 2, 3, 4};
-    auto *codeItem = container->CreateItem<CodeItem>(4, 1, instructions);
+    std::vector<uint8_t> instructions {1U, 2U, 3U, 4U};
+    auto *codeItem = container->CreateItem<CodeItem>(4U, 1U, instructions);
 
     methodItem->SetCode(codeItem);
 
@@ -80,7 +81,7 @@ void PreparePandaFile(ItemContainer *container)
     ProtoItem *protoItemBar = container->GetOrCreateProtoItem(retTypeBar, paramsBar);
     MethodItem *methodItemBar = classItem->AddMethod(methodNameBar, protoItemBar, ACC_PUBLIC | ACC_STATIC, paramsBar);
 
-    auto *codeItemBar = container->CreateItem<CodeItem>(0, 2, instructions);
+    auto *codeItemBar = container->CreateItem<CodeItem>(0U, 2U, instructions);
 
     methodItemBar->SetCode(codeItemBar);
 
@@ -102,7 +103,7 @@ void PreparePandaFile(ItemContainer *container)
     ProtoItem *protoItemBaz = container->GetOrCreateProtoItem(retTypeBaz, paramsBaz);
     MethodItem *methodItemBaz = classItem->AddMethod(methodNameBaz, protoItemBaz, ACC_PUBLIC, paramsBaz);
 
-    auto *codeItemBaz = container->CreateItem<CodeItem>(0, 2, instructions);
+    auto *codeItemBaz = container->CreateItem<CodeItem>(0U, 2U, instructions);
 
     methodItemBaz->SetCode(codeItemBaz);
 
@@ -140,33 +141,33 @@ void PreparePandaFile(ItemContainer *container)
     // foo line number program
     auto *constantPool = debugInfoItem->GetConstantPool();
     // Line 3
-    debugInfoItem->SetLineNumber(3);
+    debugInfoItem->SetLineNumber(3U);
     lineNumberProgramItem->EmitSetFile(constantPool, sourceFileItem);
     lineNumberProgramItem->EmitAdvancePc(constantPool, 1);
     lineNumberProgramItem->EmitAdvanceLine(constantPool, 1);
     lineNumberProgramItem->EmitSpecialOpcode(0, 0);
-    lineNumberProgramItem->EmitColumn(constantPool, 0, 7);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 7U);
     // Line 4
     lineNumberProgramItem->EmitStartLocal(constantPool, 1, localVariableName0, localVariableTypeI32);
     lineNumberProgramItem->EmitSpecialOpcode(1, 1);
-    lineNumberProgramItem->EmitColumn(constantPool, 0, 8);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 8U);
     // Line 5
     lineNumberProgramItem->EmitSpecialOpcode(1, 1);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    lineNumberProgramItem->EmitColumn(constantPool, 0, 9);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 9U);
     // Line 6
-    lineNumberProgramItem->EmitStartLocalExtended(constantPool, 2, localVariableName1, localVariableTypeI32,
+    lineNumberProgramItem->EmitStartLocalExtended(constantPool, 2_I, localVariableName1, localVariableTypeI32,
                                                   localVariableSigTypeI32);
     lineNumberProgramItem->EmitEndLocal(1);
-    lineNumberProgramItem->EmitSpecialOpcode(1, 2);
+    lineNumberProgramItem->EmitSpecialOpcode(1, 2_I);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    lineNumberProgramItem->EmitColumn(constantPool, 0, 10);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 10U);
     // Line 8
-    lineNumberProgramItem->EmitStartLocal(constantPool, 3, localVariableName2, localVariableTypeI32);
-    lineNumberProgramItem->EmitAdvanceLine(constantPool, 2);
+    lineNumberProgramItem->EmitStartLocal(constantPool, 3_I, localVariableName2, localVariableTypeI32);
+    lineNumberProgramItem->EmitAdvanceLine(constantPool, 2_I);
     lineNumberProgramItem->EmitSpecialOpcode(0, 0);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    lineNumberProgramItem->EmitColumn(constantPool, 0, 11);
+    lineNumberProgramItem->EmitColumn(constantPool, 0, 11U);
     // Line 10
     lineNumberProgramItem->EmitEnd();
 
@@ -177,12 +178,12 @@ void PreparePandaFile(ItemContainer *container)
     // bar line number program
     auto *constantPoolBar = debugInfoItemBar->GetConstantPool();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    debugInfoItemBar->SetLineNumber(13);
+    debugInfoItemBar->SetLineNumber(13U);
     lineNumberProgramItemBar->EmitSetFile(constantPoolBar, sourceFileItem);
     lineNumberProgramItemBar->EmitAdvancePc(constantPoolBar, 1);
     lineNumberProgramItemBar->EmitAdvanceLine(constantPoolBar, 1);
     lineNumberProgramItemBar->EmitSpecialOpcode(0, 0);
-    lineNumberProgramItemBar->EmitColumn(constantPoolBar, 0, 5);
+    lineNumberProgramItemBar->EmitColumn(constantPoolBar, 0, 5U);
     lineNumberProgramItemBar->EmitEnd();
 
     debugInfoItemBar->AddParameter(paramStringItemBar1);
@@ -193,12 +194,12 @@ void PreparePandaFile(ItemContainer *container)
     // baz line number program
     auto *constantPoolBaz = debugInfoItemBaz->GetConstantPool();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    debugInfoItemBaz->SetLineNumber(15);
+    debugInfoItemBaz->SetLineNumber(15U);
     lineNumberProgramItemBaz->EmitSetFile(constantPoolBaz, sourceFileItem);
     lineNumberProgramItemBaz->EmitAdvancePc(constantPoolBaz, 1);
     lineNumberProgramItemBaz->EmitAdvanceLine(constantPoolBaz, 1);
     lineNumberProgramItemBaz->EmitSpecialOpcode(0, 0);
-    lineNumberProgramItemBaz->EmitColumn(constantPoolBaz, 0, 6);
+    lineNumberProgramItemBaz->EmitColumn(constantPoolBaz, 0, 6U);
     lineNumberProgramItemBaz->EmitEnd();
 
     debugInfoItemBaz->AddParameter(paramStringItemBaz1);
@@ -341,16 +342,16 @@ TEST_F(ExtractorTest, DebugInfoTest)
 
     auto breakpoint1Address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
     ASSERT_FALSE(breakpoint1Address.first.IsValid());
-    auto [method_id, bytecode_offset] = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 6});
+    auto [method_id, bytecode_offset] = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 6U});
     ASSERT_TRUE(method_id.IsValid());
     ASSERT_EQ(bytecode_offset, 3U);
 
-    auto sourceLocation = GetSourcePairLocationWrapper(extractor, method_id, 2);
+    auto sourceLocation = GetSourcePairLocationWrapper(extractor, method_id, 2U);
     ASSERT_EQ(sourceLocation.path, SOURCE_FILE);
     ASSERT_EQ(sourceLocation.line, 5U);
 
-    auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 4);
-    EXPECT_EQ(vars.size(), 2);
+    auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 4U);
+    EXPECT_EQ(vars.size(), 2U);
     ASSERT_EQ(vars[0].name, "local_1");
     ASSERT_EQ(vars[0].type, "I");
     ASSERT_EQ(vars[1].name, "local_2");
@@ -366,11 +367,11 @@ TEST_F(ExtractorTest, DebugInfoTestStaticWithRefArg)
     auto breakpoint1Address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
     ASSERT_FALSE(breakpoint1Address.first.IsValid());
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto methodId = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 14}).first;
+    auto methodId = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 14U}).first;
     ASSERT_TRUE(methodId.IsValid());
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto vars = GetLocalVariableInfoWrapper(extractor, methodId, 14);
+    auto vars = GetLocalVariableInfoWrapper(extractor, methodId, 14U);
     EXPECT_EQ(vars.size(), 0);
 }
 
@@ -383,11 +384,11 @@ TEST_F(ExtractorTest, DebugInfoTestNonStaticWithRefArg)
     auto breakpoint1Address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
     ASSERT_FALSE(breakpoint1Address.first.IsValid());
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto methodId = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 16}).first;
+    auto methodId = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 16U}).first;
     ASSERT_TRUE(methodId.IsValid());
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto vars = GetLocalVariableInfoWrapper(extractor, methodId, 16);
+    auto vars = GetLocalVariableInfoWrapper(extractor, methodId, 16U);
     EXPECT_EQ(vars.size(), 0);
 }
 
@@ -402,11 +403,11 @@ TEST_F(ExtractorTest, DebugInfoTestColumnNumber)
         auto &cnt = extractor.GetColumnNumberTable(methodId);
 
         ASSERT(!cnt.empty());
-        if (cnt[0].column == 5 || cnt[0].column == 6) {
+        if (cnt[0].column == 5U || cnt[0].column == 6U) {
             ASSERT(cnt.size() == 1);
         } else {
-            ASSERT(cnt[0].column == 7);
-            ASSERT(cnt.size() == 5);
+            ASSERT(cnt[0].column == 7U);
+            ASSERT(cnt.size() == 5U);
 
             auto i = 7;
             for (auto const &col : cnt) {

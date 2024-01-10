@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 
 #include "libpandabase/macros.h"
+#include "libpandabase/utils/utils.h"
 #include "runtime/fibers/fiber_context.h"
 
 namespace panda::fibers::test {
@@ -163,7 +164,7 @@ TEST_F(FibersTest, ChainSwitch)
     Fiber f3(*this, &f2, Entry);
     fibers::SwitchContext(fInit.GetContextPtr(), f3.GetContextPtr());
 
-    ASSERT_EQ(GetEntryExecCounter(), 3);
+    ASSERT_EQ(GetEntryExecCounter(), 3U);
 }
 
 /// Create the child fiber, then switch context back and forth several times in a loop
@@ -190,8 +191,8 @@ TEST_F(FibersTest, LoopedSwitch)
         fibers::SwitchContext(fInit.GetContextPtr(), fTarget.GetContextPtr());
 
         // check that no corruption occurred
-        ASSERT_DOUBLE_EQ(n1, 1.23);
-        ASSERT_DOUBLE_EQ(n2, 4.56);
+        ASSERT_DOUBLE_EQ(n1, 1.23_D);
+        ASSERT_DOUBLE_EQ(n2, 4.56_D);
 
         // counters should not be corrupted after a switch
         ASSERT_EQ(counterInt, i);

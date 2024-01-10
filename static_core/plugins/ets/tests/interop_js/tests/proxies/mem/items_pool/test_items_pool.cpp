@@ -26,7 +26,7 @@ class ItemsPoolTest {
 
 public:
     using Item = std::array<char, ARRAY_SIZE>;
-    using Pool = ItemsPool<Item, 3>;
+    using Pool = ItemsPool<Item, 3U>;
     using PaddedItem = Pool::PaddedItem;
     static_assert(sizeof(PaddedItem) == PADDED_ITEM_SIZE);
 
@@ -135,20 +135,20 @@ TEST_F(ItemsPoolGTest, test_2)
     ASSERT_EQ(item1, pool->GetItemByIndex(1));
     ASSERT_EQ(pool->GetIndexByItem(item1), 0b001);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 2 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 2U * PADDED_ITEM_SIZE);
 
     // Step3, Alloc
     auto item2 = pool->AllocItem();
     ASSERT_NE(item2, nullptr);
-    ASSERT_EQ(item2, pool->GetItemByIndex(2));
+    ASSERT_EQ(item2, pool->GetItemByIndex(2U));
     ASSERT_EQ(pool->GetIndexByItem(item2), 0b010);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 3 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 3U * PADDED_ITEM_SIZE);
 
     // Step4, Free
     pool->FreeItem(item1);
     ASSERT_EQ(freeList, data + 1 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(currentPos, data + 3 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 3U * PADDED_ITEM_SIZE);
 
     // Step5, Alloc
     auto item3 = pool->AllocItem();
@@ -156,93 +156,93 @@ TEST_F(ItemsPoolGTest, test_2)
     ASSERT_EQ(item3, pool->GetItemByIndex(1));
     ASSERT_EQ(pool->GetIndexByItem(item3), 0b001);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 3 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 3U * PADDED_ITEM_SIZE);
 
     // Step6, Alloc
     auto item4 = pool->AllocItem();
     ASSERT_NE(item4, nullptr);
-    ASSERT_EQ(item4, pool->GetItemByIndex(3));
+    ASSERT_EQ(item4, pool->GetItemByIndex(3U));
     ASSERT_EQ(pool->GetIndexByItem(item4), 0b011);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 4 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 4U * PADDED_ITEM_SIZE);
 
     // Step7, Alloc
     auto item5 = pool->AllocItem();
     ASSERT_NE(item5, nullptr);
-    ASSERT_EQ(item5, pool->GetItemByIndex(4));
+    ASSERT_EQ(item5, pool->GetItemByIndex(4U));
     ASSERT_EQ(pool->GetIndexByItem(item5), 0b100);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 5 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 5U * PADDED_ITEM_SIZE);
 
     // Step8, Alloc
     auto item6 = pool->AllocItem();
     ASSERT_NE(item6, nullptr);
-    ASSERT_EQ(item6, pool->GetItemByIndex(5));
+    ASSERT_EQ(item6, pool->GetItemByIndex(5U));
     ASSERT_EQ(pool->GetIndexByItem(item6), 0b101);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 6 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 6U * PADDED_ITEM_SIZE);
 
     // Step9, Alloc
     auto item7 = pool->AllocItem();
     ASSERT_NE(item7, nullptr);
-    ASSERT_EQ(item7, pool->GetItemByIndex(6));
+    ASSERT_EQ(item7, pool->GetItemByIndex(6U));
     ASSERT_EQ(pool->GetIndexByItem(item7), 0b110);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 7 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 7U * PADDED_ITEM_SIZE);
 
     // Step10, Alloc
     auto item8 = pool->AllocItem();
     ASSERT_NE(item8, nullptr);
-    ASSERT_EQ(item8, pool->GetItemByIndex(7));
+    ASSERT_EQ(item8, pool->GetItemByIndex(7U));
     ASSERT_EQ(pool->GetIndexByItem(item8), 0b111);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Step11, Alloc, out of memory
     auto item9 = pool->AllocItem();
     ASSERT_EQ(item9, nullptr);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Step12, Alloc, out of memory
     auto item10 = pool->AllocItem();
     ASSERT_EQ(item10, nullptr);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Step13, Free
     ASSERT_EQ(pool->GetIndexByItem(item0), 0b000);
     pool->FreeItem(item0);
     ASSERT_EQ(freeList, data + 0 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Step14, Free
     ASSERT_EQ(pool->GetIndexByItem(item5), 0b100);
     pool->FreeItem(item5);
-    ASSERT_EQ(freeList, data + 4 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(freeList, data + 4U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Step15, Free
     ASSERT_EQ(pool->GetIndexByItem(item4), 0b011);
     pool->FreeItem(item4);
-    ASSERT_EQ(freeList, data + 3 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(freeList, data + 3U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Step16, Alloc
     auto item11 = pool->AllocItem();
     ASSERT_NE(item11, nullptr);
-    ASSERT_EQ(item11, pool->GetItemByIndex(3));
+    ASSERT_EQ(item11, pool->GetItemByIndex(3U));
     ASSERT_EQ(pool->GetIndexByItem(item11), 0b011);
-    ASSERT_EQ(freeList, data + 4 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(freeList, data + 4U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Step17, Alloc
     auto item12 = pool->AllocItem();
     ASSERT_NE(item12, nullptr);
-    ASSERT_EQ(item12, pool->GetItemByIndex(4));
+    ASSERT_EQ(item12, pool->GetItemByIndex(4U));
     ASSERT_EQ(pool->GetIndexByItem(item12), 0b100);
     ASSERT_EQ(freeList, data + 0 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Step18, Alloc
     auto item13 = pool->AllocItem();
@@ -250,23 +250,23 @@ TEST_F(ItemsPoolGTest, test_2)
     ASSERT_EQ(item13, pool->GetItemByIndex(0));
     ASSERT_EQ(pool->GetIndexByItem(item13), 0b000);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Step19, Alloc, out of memory
     auto item14 = pool->AllocItem();
     ASSERT_EQ(item14, nullptr);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Check allocated items possitions
-    ASSERT_EQ(uintptr_t(item13), data + 0 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item3), data + 1 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item2), data + 2 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item11), data + 3 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item12), data + 4 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item6), data + 5 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item7), data + 6 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item8), data + 7 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item13), data + 0U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item3), data + 1U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item2), data + 2U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item11), data + 3U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item12), data + 4U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item6), data + 5U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item7), data + 6U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item8), data + 7U * PADDED_ITEM_SIZE);
 }
 
 TEST_F(ItemsPoolGTest, test_3)
@@ -309,91 +309,91 @@ TEST_F(ItemsPoolGTest, test_3)
     ASSERT_EQ(item1, pool->GetItemByIndex(1));
     ASSERT_EQ(pool->GetIndexByItem(item1), 0b001);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 2 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 2U * PADDED_ITEM_SIZE);
 
     auto item2 = pool->AllocItem();
     ASSERT_NE(item2, nullptr);
-    ASSERT_EQ(item2, pool->GetItemByIndex(2));
+    ASSERT_EQ(item2, pool->GetItemByIndex(2U));
     ASSERT_EQ(pool->GetIndexByItem(item2), 0b010);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 3 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 3U * PADDED_ITEM_SIZE);
 
     auto item3 = pool->AllocItem();
     ASSERT_NE(item3, nullptr);
-    ASSERT_EQ(item3, pool->GetItemByIndex(3));
+    ASSERT_EQ(item3, pool->GetItemByIndex(3U));
     ASSERT_EQ(pool->GetIndexByItem(item3), 0b011);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 4 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 4U * PADDED_ITEM_SIZE);
 
     auto item4 = pool->AllocItem();
     ASSERT_NE(item4, nullptr);
-    ASSERT_EQ(item4, pool->GetItemByIndex(4));
+    ASSERT_EQ(item4, pool->GetItemByIndex(4U));
     ASSERT_EQ(pool->GetIndexByItem(item4), 0b100);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 5 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 5U * PADDED_ITEM_SIZE);
 
     // Step2, Free item0 and item3
     ASSERT_EQ(pool->GetIndexByItem(item0), 0b000);
     pool->FreeItem(item0);
     ASSERT_EQ(freeList, data + 0 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(currentPos, data + 5 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 5U * PADDED_ITEM_SIZE);
 
     ASSERT_EQ(pool->GetIndexByItem(item3), 0b011);
     pool->FreeItem(item3);
-    ASSERT_EQ(freeList, data + 3 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(currentPos, data + 5 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(freeList, data + 3U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 5U * PADDED_ITEM_SIZE);
 
     // Step3, Alloc 3 items
     auto item5 = pool->AllocItem();
     ASSERT_NE(item5, nullptr);
-    ASSERT_EQ(item5, pool->GetItemByIndex(3));
+    ASSERT_EQ(item5, pool->GetItemByIndex(3U));
     ASSERT_EQ(pool->GetIndexByItem(item5), 0b011);
     ASSERT_EQ(freeList, data + 0 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(currentPos, data + 5 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 5U * PADDED_ITEM_SIZE);
 
     auto item6 = pool->AllocItem();
     ASSERT_NE(item6, nullptr);
     ASSERT_EQ(item6, pool->GetItemByIndex(0));
     ASSERT_EQ(pool->GetIndexByItem(item6), 0b000);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 5 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 5U * PADDED_ITEM_SIZE);
 
     auto item7 = pool->AllocItem();
     ASSERT_NE(item7, nullptr);
-    ASSERT_EQ(item7, pool->GetItemByIndex(5));
+    ASSERT_EQ(item7, pool->GetItemByIndex(5U));
     ASSERT_EQ(pool->GetIndexByItem(item7), 0b101);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 6 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 6U * PADDED_ITEM_SIZE);
 
     // Step4, Alloc 3 items
     auto item8 = pool->AllocItem();
     ASSERT_NE(item8, nullptr);
-    ASSERT_EQ(item8, pool->GetItemByIndex(6));
+    ASSERT_EQ(item8, pool->GetItemByIndex(6U));
     ASSERT_EQ(pool->GetIndexByItem(item8), 0b110);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 7 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 7U * PADDED_ITEM_SIZE);
 
     auto item9 = pool->AllocItem();
     ASSERT_NE(item9, nullptr);
-    ASSERT_EQ(item9, pool->GetItemByIndex(7));
+    ASSERT_EQ(item9, pool->GetItemByIndex(7U));
     ASSERT_EQ(pool->GetIndexByItem(item9), 0b111);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     auto item10 = pool->AllocItem();
     ASSERT_EQ(item10, nullptr);
     ASSERT_EQ(freeList, 0);
-    ASSERT_EQ(currentPos, data + 8 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(currentPos, data + 8U * PADDED_ITEM_SIZE);
 
     // Check allocated items possitions
-    ASSERT_EQ(uintptr_t(item6), data + 0 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item1), data + 1 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item2), data + 2 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item5), data + 3 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item4), data + 4 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item7), data + 5 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item8), data + 6 * PADDED_ITEM_SIZE);
-    ASSERT_EQ(uintptr_t(item9), data + 7 * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item6), data + 0U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item1), data + 1U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item2), data + 2U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item5), data + 3U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item4), data + 4U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item7), data + 5U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item8), data + 6U * PADDED_ITEM_SIZE);
+    ASSERT_EQ(uintptr_t(item9), data + 7U * PADDED_ITEM_SIZE);
 }
 
 TEST_F(ItemsPoolGTest, test_IsValidItem)

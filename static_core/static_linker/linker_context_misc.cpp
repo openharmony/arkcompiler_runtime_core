@@ -52,7 +52,7 @@ void DemangleName(std::ostream &o, std::string_view s)
     }
 
     if (s.front() == 'L' && s.back() == ';') {
-        s = s.substr(1, s.size() - 2);
+        s = s.substr(1, s.size() - 2UL);
         while (!s.empty()) {
             const auto to = s.find('/');
             o << s.substr(0, to);

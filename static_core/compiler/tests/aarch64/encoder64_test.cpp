@@ -103,14 +103,14 @@ static T RandomGen()
         }
 
         // Uniform distribution floating value
-        std::uniform_real_distribution<T> dis_num(1.0, 2.0);
-        int8_t sign = (gen % 2) == 0 ? 1 : -1;
+        std::uniform_real_distribution<T> dis_num(1.0F, 2.0F);
+        int8_t sign = (gen % 2U) == 0 ? 1 : -1;
         if constexpr (std::is_same_v<T, float>) {
             std::uniform_real_distribution<float> dis(MIN_EXP_BASE2_FLOAT, MAX_EXP_BASE2_FLOAT);
             return sign * dis_num(RANDOM_GENERATOR) * std::pow(2.0F, dis(RANDOM_GENERATOR));
         } else if constexpr (std::is_same_v<T, double>) {
             std::uniform_real_distribution<double> dis(MIN_EXP_BASE2_DOUBLE, MAX_EXP_BASE2_DOUBLE);
-            return sign * dis_num(RANDOM_GENERATOR) * std::pow(2.0, dis(RANDOM_GENERATOR));
+            return sign * dis_num(RANDOM_GENERATOR) * std::pow(2.0F, dis(RANDOM_GENERATOR));
         }
 
         UNREACHABLE();

@@ -595,7 +595,7 @@ TEST_F(ClassLinkerTest, ArrayClass)
     ASSERT_EQ(klass, nullptr);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (size_t i = 0; i < 256; i++) {
+    for (size_t i = 0; i < 256U; i++) {
         auto *cls = ext->GetClass(ClassHelper::GetArrayDescriptor(utf::CStringAsMutf8("R"), i, &descriptor));
         ASSERT_NE(cls, nullptr);
         EXPECT_EQ(utf::Mutf8AsCString(cls->GetDescriptor()), descriptor);
@@ -655,10 +655,10 @@ TEST_F(ClassLinkerTest, VTable)
         ASSERT_NE(classA, nullptr);
 
         auto smethods = classA->GetStaticMethods();
-        ASSERT_EQ(smethods.size(), 2);
+        ASSERT_EQ(smethods.size(), 2U);
 
         auto vmethods = classA->GetVirtualMethods();
-        ASSERT_EQ(vmethods.size(), 2);
+        ASSERT_EQ(vmethods.size(), 2U);
 
         {
             auto set = GetMethodsSet(smethods);
@@ -718,10 +718,10 @@ TEST_F(ClassLinkerTest, VTableInheritance)
         ASSERT_NE(classA, nullptr);
 
         auto vtableB = classB->GetVTable();
-        ASSERT_EQ(vtableB.size(), 4);
+        ASSERT_EQ(vtableB.size(), 4U);
 
         auto vtableA = classA->GetVTable();
-        ASSERT_EQ(vtableA.size(), 2);
+        ASSERT_EQ(vtableA.size(), 2U);
 
         {
             auto set = std::unordered_set<Method *> {};

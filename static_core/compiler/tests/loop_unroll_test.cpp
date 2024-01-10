@@ -757,7 +757,7 @@ TEST_F(LoopUnrollTest, ConstCountableLoopWithIncrement)
 {
     static constexpr uint32_t INC_STEP = 1;
     static constexpr uint32_t INC_STOP = 10;
-    for (size_t unrollFactor = 1; unrollFactor <= 10; unrollFactor++) {
+    for (size_t unrollFactor = 1; unrollFactor <= 10U; unrollFactor++) {
         auto graph = BuildLoopWithIncrement(CC_LT, ZERO_START, INC_STOP, INC_STEP);
         graph->RunPass<LoopUnroll>(INST_LIMIT, unrollFactor);
         EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, 45U));
@@ -1006,7 +1006,7 @@ TEST_F(LoopUnrollTest, NonConstCountableLoopWithIncrement)
 {
     static constexpr uint32_t INC_STEP = 1;
     static constexpr uint32_t INC_STOP = 10;
-    for (size_t unrollFactor = 1; unrollFactor <= 10; unrollFactor++) {
+    for (size_t unrollFactor = 1; unrollFactor <= 10U; unrollFactor++) {
         auto graph = BuildLoopWithIncrement(CC_LT, std::nullopt, INC_STOP, INC_STEP);
         graph->RunPass<LoopUnroll>(INST_LIMIT, unrollFactor);
         // 3 + 4 + ... + 9
@@ -1073,7 +1073,7 @@ TEST_F(LoopUnrollTest, ConstCountableLoopWithDecrement)
 {
     static constexpr uint32_t DEC_STEP = 1;
     static constexpr uint32_t DEC_START = 10;
-    for (size_t unrollFactor = 1; unrollFactor <= 10; unrollFactor++) {
+    for (size_t unrollFactor = 1; unrollFactor <= 10U; unrollFactor++) {
         auto graph = BuildLoopWithDecrement(CC_GT, DEC_START, ZERO_STOP, DEC_STEP);
         graph->RunPass<LoopUnroll>(INST_LIMIT, unrollFactor);
         EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, 55U));
@@ -1162,7 +1162,7 @@ TEST_F(LoopUnrollTest, SmallCountableLoopWithDecrement)
 TEST_F(LoopUnrollTest, NonConstCountableLoopWithDecrement)
 {
     static constexpr uint32_t DEC_STEP = 1;
-    for (size_t unrollFactor = 1; unrollFactor <= 10; unrollFactor++) {
+    for (size_t unrollFactor = 1; unrollFactor <= 10U; unrollFactor++) {
         auto graph = BuildLoopWithDecrement(CC_GT, std::nullopt, ZERO_STOP, DEC_STEP);
         graph->RunPass<LoopUnroll>(INST_LIMIT, unrollFactor);
         EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, 55U, 10U));
@@ -1229,7 +1229,7 @@ TEST_F(LoopUnrollTest, UnsignedCountableLoopWithIncrementConditionOverflow)
 {
     static constexpr uint32_t INC_STOP = 3;
     static constexpr uint32_t INC_STEP = 1;
-    for (size_t unrollFactor = 4; unrollFactor <= 8; unrollFactor++) {
+    for (size_t unrollFactor = 4U; unrollFactor <= 8U; unrollFactor++) {
         auto graph = BuildLoopWithIncrement(CC_LE, std::nullopt, INC_STOP, INC_STEP, DataType::UINT32);
         EXPECT_EQ(5U, graph->GetAliveBlocksCount());
         EXPECT_TRUE(graph->RunPass<LoopUnroll>(INST_LIMIT, unrollFactor));
@@ -1248,7 +1248,7 @@ TEST_F(LoopUnrollTest, UnsignedCountableLoopWithDecrementConditionOverflow)
 {
     static constexpr uint32_t DEC_STOP = std::numeric_limits<uint32_t>::max() - 3L;
     static constexpr uint32_t DEC_STEP = 2;
-    for (size_t unrollFactor = 3; unrollFactor <= 6; unrollFactor++) {
+    for (size_t unrollFactor = 3U; unrollFactor <= 6U; unrollFactor++) {
         auto graph = BuildLoopWithDecrement(CC_GT, std::nullopt, DEC_STOP, DEC_STEP, DataType::UINT32);
         EXPECT_EQ(5U, graph->GetAliveBlocksCount());
         EXPECT_TRUE(graph->RunPass<LoopUnroll>(INST_LIMIT, unrollFactor));
@@ -1262,7 +1262,7 @@ TEST_F(LoopUnrollTest, UnsignedCountableLoopWithDecrementSmallValues)
     static constexpr uint32_t DEC_START = 10;
     static constexpr uint32_t DEC_STOP = 2;
     static constexpr uint32_t DEC_STEP = 1;
-    for (size_t unrollFactor = 1; unrollFactor <= 10; unrollFactor++) {
+    for (size_t unrollFactor = 1U; unrollFactor <= 10U; unrollFactor++) {
         bool unrolled = unrollFactor > 1U;
         auto graph = BuildLoopWithDecrement(CC_GT, std::nullopt, std::nullopt, DEC_STEP, DataType::UINT32);
         EXPECT_EQ(unrolled, graph->RunPass<LoopUnroll>(INST_LIMIT, unrollFactor));
@@ -1285,7 +1285,7 @@ TEST_F(LoopUnrollTest, UnsignedCountableLoopWithDecrementLargeValues)
     }
     uint32_t resultGe = resultGt + DEC_STOP;
 
-    for (size_t unrollFactor = 1; unrollFactor <= 10; unrollFactor++) {
+    for (size_t unrollFactor = 1U; unrollFactor <= 10U; unrollFactor++) {
         bool unrolled = unrollFactor > 1U;
         auto graph = BuildLoopWithDecrement(CC_GT, std::nullopt, std::nullopt, DEC_STEP, DataType::UINT32);
         EXPECT_EQ(unrolled, graph->RunPass<LoopUnroll>(INST_LIMIT, unrollFactor));
@@ -1526,7 +1526,7 @@ TEST_F(LoopUnrollTest, LoopWithDifferentConstants)
 
     // Chech increment
     static constexpr uint32_t INC_STOP = 100;
-    for (size_t incStep = 1; incStep <= 10; incStep++) {
+    for (size_t incStep = 1U; incStep <= 10U; incStep++) {
         // CC_LT
         size_t result = 0;
         for (size_t i = 0; i < INC_STOP; i += incStep) {
@@ -1561,7 +1561,7 @@ TEST_F(LoopUnrollTest, LoopWithDifferentConstants)
 
     // Chech decrement
     static constexpr uint32_t DEC_START = 100;
-    for (size_t decStep = 1; decStep <= 10; decStep++) {
+    for (size_t decStep = 1U; decStep <= 10U; decStep++) {
         // CC_GT
         int result = 0;
         for (int i = DEC_START; i > 0; i -= decStep) {

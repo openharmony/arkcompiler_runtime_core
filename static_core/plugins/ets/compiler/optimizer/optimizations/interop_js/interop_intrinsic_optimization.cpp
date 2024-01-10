@@ -307,8 +307,7 @@ void InteropIntrinsicOptimization::MergeComponents(int32_t first, int32_t second
     }
 }
 
-void InteropIntrinsicOptimization::UpdateStatsForMerging(Inst *inst, int32_t otherEndComponent,
-                                                         uint32_t *scopeSwitches,
+void InteropIntrinsicOptimization::UpdateStatsForMerging(Inst *inst, int32_t otherEndComponent, uint32_t *scopeSwitches,
                                                          uint32_t *objectsInBlockAfterMerge)
 {
     if (IsScopeStart(inst) || IsScopeEnd(inst)) {
@@ -360,8 +359,7 @@ void InteropIntrinsicOptimization::IterateBlockFromBoundary(BasicBlock *block)
         if (components_[otherEndComponent].isForbidden) {
             canMerge_ = false;
         } else {
-            objectsInScopeAfterMerge_ +=
-                GetObjectCountIfUnused(components_[otherEndComponent], currentComponent_);
+            objectsInScopeAfterMerge_ += GetObjectCountIfUnused(components_[otherEndComponent], currentComponent_);
         }
     } else if (scopeSwitches > 2U || otherEndComponent != currentComponent_) {
         objectsInScopeAfterMerge_ += objectsInBlockAfterMerge;
@@ -817,8 +815,7 @@ void InteropIntrinsicOptimization::TryRemoveIntrinsic(Inst *inst)
         TryRemoveUnwrapAndWrap(inst, input);
     } else if (intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_JS_VALUE) {
         TryRemoveUnwrapToJSValue(inst);
-    } else if (intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_CALL_FUNCTION &&
-               !inst->HasUsers()) {
+    } else if (intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_JS_CALL_FUNCTION && !inst->HasUsers()) {
         // avoid creation of handle for return value in local scope if it is unused
         inst->SetType(DataType::VOID);
         inst->CastToIntrinsic()->SetIntrinsicId(
@@ -990,8 +987,7 @@ void InteropIntrinsicOptimization::HoistAndEliminateRec(BasicBlock *block, const
             continue;
         }
         // Fast IsDominate check
-        if (startInfo.domTreeIn <= GetInfo(succ).domTreeIn &&
-            GetInfo(succ).domTreeIn < startInfo.domTreeOut) {
+        if (startInfo.domTreeIn <= GetInfo(succ).domTreeIn && GetInfo(succ).domTreeIn < startInfo.domTreeOut) {
             HoistAndEliminateRec(succ, startInfo, newInst, insertAfter);
         } else {
             blocksToProcess_.push_back(succ);

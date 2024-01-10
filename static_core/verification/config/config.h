@@ -37,7 +37,7 @@ struct Section {
         PandaString spaces(align, ' ');
         PandaString result = spaces + name + " {\n";
         for (const auto &s : sections) {
-            result += s.Image(align + 2);
+            result += s.Image(align + 2UL);
         }
         for (const auto &i : items) {
             result += spaces;

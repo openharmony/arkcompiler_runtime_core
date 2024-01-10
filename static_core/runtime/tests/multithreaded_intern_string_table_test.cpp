@@ -168,7 +168,7 @@ void TestThreadEntry(MultithreadedInternStringTableTest *test)
     thisThread->Destroy();
 }
 
-void TestConcurrentInsertion(const std::array<std::array<uint8_t, 4>, TEST_ARRAY_SIZE> &strings, uint32_t &arrayItem,
+void TestConcurrentInsertion(const std::array<std::array<uint8_t, 4U>, TEST_ARRAY_SIZE> &strings, uint32_t &arrayItem,
                              MultithreadedInternStringTableTest *test)
 {
     auto *thisThread =
@@ -186,7 +186,7 @@ void TestConcurrentInsertion(const std::array<std::array<uint8_t, 4>, TEST_ARRAY
             }
             currentArrayItem = arrayItem++;
         }
-        table->GetOrInternString(strings[currentArrayItem].data(), 2, ctx);
+        table->GetOrInternString(strings[currentArrayItem].data(), 2U, ctx);
     }
 
     thisThread->ManagedCodeEnd();
@@ -196,11 +196,11 @@ void TestConcurrentInsertion(const std::array<std::array<uint8_t, 4>, TEST_ARRAY
 TEST_F(MultithreadedInternStringTableTest, ConcurrentInsertion)
 {
     std::array<std::thread, TEST_THREADS> threads;
-    std::array<std::array<uint8_t, 4>, TEST_ARRAY_SIZE> strings {};
+    std::array<std::array<uint8_t, 4U>, TEST_ARRAY_SIZE> strings {};
     std::random_device randomDevice;
     std::mt19937 engine {randomDevice()};
     // NOLINTNEXTLINE(readability-magic-numbers)
-    std::uniform_int_distribution<uint8_t> dist(0, 255);
+    std::uniform_int_distribution<uint8_t> dist(0, 255U);
     uint32_t arrayItem = 0;
 
     for (uint32_t i = 0; i < TEST_ARRAY_SIZE; i++) {

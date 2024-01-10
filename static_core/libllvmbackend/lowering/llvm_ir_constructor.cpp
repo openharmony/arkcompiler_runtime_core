@@ -383,7 +383,7 @@ bool LLVMIrConstructor::EmitInterpreterReturn()
         // Currently there is no vector regs usage in x86_64 handlers
         ASSERT(calleeVregsMask.count() == 0);
         auto regShift = DOUBLE_WORD_SIZE_BYTES *
-                         (fl.GetSpillsCount() + fl.GetCallerRegistersCount(false) + fl.GetCallerRegistersCount(true));
+                        (fl.GetSpillsCount() + fl.GetCallerRegistersCount(false) + fl.GetCallerRegistersCount(true));
         auto fpShift = DOUBLE_WORD_SIZE_BYTES * (2 + CFrameSlots::Start() - CFrameData::Start());
 
         std::string iasmStr =
@@ -749,8 +749,8 @@ llvm::Value *LLVMIrConstructor::CreateAArch64SignDivMod(Inst *inst, llvm::Instru
         // Inline asm "msub r, x, y, q" yields r = x - y * q
         std::string_view modAsm =
             target64 ? "msub ${0:x}, ${3:x}, ${2:x}, ${1:x}" : "msub ${0:w}, ${3:w}, ${2:w}, ${1:w}";
-        auto remainder = builder_.CreateCall(
-            modAsmType, llvm::InlineAsm::get(modAsmType, modAsm, "=r,r,r,r", false), {x, y, result});
+        auto remainder = builder_.CreateCall(modAsmType, llvm::InlineAsm::get(modAsmType, modAsm, "=r,r,r,r", false),
+                                             {x, y, result});
         result = remainder;
     }
     return result;
@@ -1892,8 +1892,7 @@ void LLVMIrConstructor::VisitDefault([[maybe_unused]] Inst *inst)
 }
 
 LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::LLVMContext *context,
-                                     LLVMArkInterface *arkInterface,
-                                     const std::unique_ptr<DebugDataBuilder> &debugData)
+                                     LLVMArkInterface *arkInterface, const std::unique_ptr<DebugDataBuilder> &debugData)
     : graph_(graph),
       builder_(llvm::IRBuilder<>(*context)),
       inputMap_(graph->GetLocalAllocator()->Adapter()),
@@ -1933,8 +1932,7 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
 
     auto klassId = graph_->GetRuntime()->GetClassIdForMethod(graph_->GetMethod());
     auto klassIdMd = llvm::ConstantAsMetadata::get(builder_.getInt32(klassId));
-    func_->addMetadata(llvmbackend::LLVMArkInterface::FUNCTION_MD_CLASS_ID,
-                       *llvm::MDNode::get(*context, {klassIdMd}));
+    func_->addMetadata(llvmbackend::LLVMArkInterface::FUNCTION_MD_CLASS_ID, *llvm::MDNode::get(*context, {klassIdMd}));
 }
 
 bool LLVMIrConstructor::BuildIr()

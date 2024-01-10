@@ -67,7 +67,7 @@ bool HeaderWriter::PrintFunction()
 
                 std::string className = utf::Mutf8AsCString(cda.GetDescriptor());
                 if (className[0] == 'L') {
-                    className = className.substr(1, className.size() - 2);
+                    className = className.substr(1, className.size() - 2U);
                 }
                 PrintPrototype(className, mda, CheckOverloading(cda, mda));
             }

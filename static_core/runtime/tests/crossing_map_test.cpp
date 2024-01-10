@@ -142,7 +142,7 @@ TEST_F(CrossingMapTest, OneSmallObjTest)
 
 TEST_F(CrossingMapTest, BigSmallObjTest)
 {
-    static constexpr size_t OBJ_SIZE = PAGE_SIZE * 2;
+    static constexpr size_t OBJ_SIZE = PAGE_SIZE * 2U;
     void *objAddr = GetRandomObjAddr(OBJ_SIZE);
     GetCrossingMap()->AddObject(objAddr, OBJ_SIZE);
     ASSERT_TRUE(GetCrossingMap()->FindFirstObject(objAddr, ToVoidPtr(ToUintPtr(objAddr) + OBJ_SIZE)) == objAddr)
@@ -241,7 +241,7 @@ TEST_F(CrossingMapTest, ThreeSequentialObjectsTest)
     static constexpr size_t SECOND_OBJ_SIZE = MIN_GAP_BETWEEN_OBJECTS;
     static constexpr size_t THIRD_OBJ_SIZE = 1_KB;
     // Add some extra memory for possible shifts
-    void *firstObjAddr = GetRandomObjAddr(FIRST_OBJ_SIZE + SECOND_OBJ_SIZE + THIRD_OBJ_SIZE + 3 * SECOND_OBJ_SIZE);
+    void *firstObjAddr = GetRandomObjAddr(FIRST_OBJ_SIZE + SECOND_OBJ_SIZE + THIRD_OBJ_SIZE + 3U * SECOND_OBJ_SIZE);
     void *secondObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE);
     void *thirdObjAddr = IncreaseAddr(secondObjAddr, SECOND_OBJ_SIZE);
 
@@ -257,7 +257,7 @@ TEST_F(CrossingMapTest, ThreeSequentialObjectsTest)
 
     // We must be sure that the second and the third object will be saved in the same locations
     if (GetMapNumFromAddr(secondObjAddr) != GetMapNumFromAddr(thirdObjAddr)) {
-        firstObjAddr = IncreaseAddr(firstObjAddr, 2 * SECOND_OBJ_SIZE);
+        firstObjAddr = IncreaseAddr(firstObjAddr, 2U * SECOND_OBJ_SIZE);
         secondObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE);
         thirdObjAddr = IncreaseAddr(secondObjAddr, SECOND_OBJ_SIZE);
         ASSERT_TRUE(GetMapNumFromAddr(GetLastObjectByte(firstObjAddr, FIRST_OBJ_SIZE)) ==
@@ -304,20 +304,20 @@ TEST_F(CrossingMapTest, InitializeCrosingMapForMemoryTest)
     static constexpr size_t POOL_COUNT = 6;
     static constexpr size_t GRANULARITY = 2;
     GetCrossingMap()->RemoveCrossingMapForMemory(ToVoidPtr(GetPoolMinAddress()), GetPoolSize());
-    void *startAddr =
-        GetRandomObjAddr((POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES) * POOL_COUNT + PANDA_POOL_ALIGNMENT_IN_BYTES);
+    void *startAddr = GetRandomObjAddr((POOLS_SIZE * 2U + PANDA_POOL_ALIGNMENT_IN_BYTES) * POOL_COUNT +
+                                       PANDA_POOL_ALIGNMENT_IN_BYTES);
     uintptr_t alignedStartAddr = AlignUp(ToUintPtr(startAddr), PANDA_POOL_ALIGNMENT_IN_BYTES);
 
     std::array<bool, POOL_COUNT> deletedPools {};
     for (size_t i = 0; i < POOL_COUNT; i++) {
-        void *poolAddr = ToVoidPtr(alignedStartAddr + i * (POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES));
-        GetCrossingMap()->InitializeCrossingMapForMemory(poolAddr, POOLS_SIZE * 2);
+        void *poolAddr = ToVoidPtr(alignedStartAddr + i * (POOLS_SIZE * 2U + PANDA_POOL_ALIGNMENT_IN_BYTES));
+        GetCrossingMap()->InitializeCrossingMapForMemory(poolAddr, POOLS_SIZE * 2U);
         deletedPools[i] = false;
     }
 
     for (size_t i = 0; i < POOL_COUNT; i += GRANULARITY) {
-        void *poolAddr = ToVoidPtr(alignedStartAddr + i * (POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES));
-        GetCrossingMap()->RemoveCrossingMapForMemory(poolAddr, POOLS_SIZE * 2);
+        void *poolAddr = ToVoidPtr(alignedStartAddr + i * (POOLS_SIZE * 2U + PANDA_POOL_ALIGNMENT_IN_BYTES));
+        GetCrossingMap()->RemoveCrossingMapForMemory(poolAddr, POOLS_SIZE * 2U);
         deletedPools[i] = true;
     }
 
@@ -325,8 +325,8 @@ TEST_F(CrossingMapTest, InitializeCrosingMapForMemoryTest)
         if (deletedPools[i]) {
             continue;
         }
-        void *poolAddr = ToVoidPtr(alignedStartAddr + i * (POOLS_SIZE * 2 + PANDA_POOL_ALIGNMENT_IN_BYTES));
-        GetCrossingMap()->RemoveCrossingMapForMemory(poolAddr, POOLS_SIZE * 2);
+        void *poolAddr = ToVoidPtr(alignedStartAddr + i * (POOLS_SIZE * 2U + PANDA_POOL_ALIGNMENT_IN_BYTES));
+        GetCrossingMap()->RemoveCrossingMapForMemory(poolAddr, POOLS_SIZE * 2U);
     }
 
     GetCrossingMap()->InitializeCrossingMapForMemory(ToVoidPtr(GetPoolMinAddress()), GetPoolSize());

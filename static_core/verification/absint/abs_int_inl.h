@@ -1798,7 +1798,7 @@ public:
         uint16_t vs3 = inst_.GetVReg<FORMAT, 0x02>();
         uint16_t vs4 = inst_.GetVReg<FORMAT, 0x03>();
         Sync();
-        std::array<int, 4> regs {vs1, vs2, vs3, vs4};
+        std::array<int, 4UL> regs {vs1, vs2, vs3, vs4};
         return CheckCtor<FORMAT>(Span {regs});
     }
 
@@ -1810,7 +1810,7 @@ public:
         uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
         uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
-        std::array<int, 2> regs {vs1, vs2};
+        std::array<int, 2UL> regs {vs1, vs2};
         return CheckCtor<FORMAT>(Span {regs});
     }
 
@@ -3355,7 +3355,7 @@ public:
         }
 
         Sync();
-        std::array<int, 2> regs {vs1, vs2};
+        std::array<int, 2UL> regs {vs1, vs2};
         return CheckCall<FORMAT>(method, Span {regs});
     }
 
@@ -3423,7 +3423,7 @@ public:
         }
 
         Sync();
-        std::array<int, 4> regs {vs1, vs2, vs3, vs4};
+        std::array<int, 4UL> regs {vs1, vs2, vs3, vs4};
         return CheckCall<FORMAT>(method, Span {regs});
     }
 
@@ -3506,7 +3506,7 @@ public:
         }
 
         Sync();
-        std::array<int, 2> regs {vs1, vs2};
+        std::array<int, 2UL> regs {vs1, vs2};
         return CheckCall<FORMAT>(method, Span {regs});
     }
 
@@ -3557,7 +3557,7 @@ public:
         }
 
         Sync();
-        std::array<int, 4> regs {vs1, vs2, vs3, vs4};
+        std::array<int, 4UL> regs {vs1, vs2, vs3, vs4};
         return CheckCall<FORMAT>(method, Span {regs});
     }
 

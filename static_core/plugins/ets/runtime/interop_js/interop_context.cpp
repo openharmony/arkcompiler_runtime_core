@@ -109,7 +109,7 @@ EtsObject *InteropCtx::CreateETSCoreJSError(EtsCoroutine *coro, JSValue *jsvalue
     }
     VMHandle<ObjectHeader> excHandle(coro, excObj);
 
-    std::array<Value, 2> args {Value(excHandle.GetPtr()), Value(jsvalueHandle.GetPtr())};
+    std::array<Value, 2U> args {Value(excHandle.GetPtr()), Value(jsvalueHandle.GetPtr())};
     ctor->InvokeVoid(coro, args.data());
     auto res = EtsObject::FromCoreType(excHandle.GetPtr());
     if (UNLIKELY(coro->HasPendingException())) {

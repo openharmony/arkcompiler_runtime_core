@@ -84,7 +84,7 @@ void MemStatsGCTest::MemStatsTest(uint64_t tries, size_t objectSize)
         aligmentDiff = aligmentSize - allocSize;
     } else {
         aligmentSize = AlignUp(allocSize, GetAlignmentInBytes(FREELIST_DEFAULT_ALIGNMENT));
-        aligmentDiff = 2 * (aligmentSize - allocSize);
+        aligmentDiff = 2U * (aligmentSize - allocSize);
     }
 
     uint64_t allocatedObjects = stats->GetTotalObjectsAllocated();
