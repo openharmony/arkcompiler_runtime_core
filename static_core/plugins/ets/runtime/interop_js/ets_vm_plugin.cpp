@@ -30,6 +30,7 @@ namespace ark::ets::interop::js {
 
 static napi_value Version(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
+    ASSERT_SCOPED_NATIVE_CODE();
     constexpr std::string_view MSG = "0.1";
 
     napi_value result;
@@ -47,6 +48,8 @@ static napi_value Fatal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_cal
 
 static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
 {
+    ASSERT_SCOPED_NATIVE_CODE();
+
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
     if (jsArgc != 2U && jsArgc != 1U) {
@@ -80,6 +83,8 @@ static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
 
 static napi_value GetEtsClass(napi_env env, napi_callback_info info)
 {
+    ASSERT_SCOPED_NATIVE_CODE();
+
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
@@ -141,6 +146,8 @@ static napi_value Call(napi_env env, napi_callback_info info)
 
 static napi_value CallWithCopy(napi_env env, napi_callback_info info)
 {
+    ASSERT_SCOPED_NATIVE_CODE();
+
     size_t argc = 0;
     [[maybe_unused]] napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     ASSERT(status == napi_ok);

@@ -29,7 +29,6 @@ file(WRITE ${ETS_CONFIG}
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/strict_equality/strict_equality.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/test_undefined/test_undefined.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_instanceof/dynamic_instanceof.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/scenarios.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/es_object/to_string/test_to_string_method.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/checked/example/strings.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
@@ -58,7 +57,9 @@ file(WRITE ${ETS_CONFIG_DECL}
     "    },\n"
     "    \"dynamicPaths\": {\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/number_subtypes/module\": {\"language\": \"js\", \"hasDecl\": true},\n"
-    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite\": {\"language\": \"js\", \"hasDecl\": true}\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite\": {\"language\": \"js\", \"hasDecl\": true},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/instanceof/js/instanceof\": {\"language\": \"js\", \"hasDecl\": true},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/instanceof/js/instanceof.js\": {\"language\": \"js\", \"hasDecl\": false}\n"
     "    }\n"
     "  }\n"
     "}\n"
@@ -137,12 +138,6 @@ panda_ets_interop_js_gtest(ets_interop_js_class_composite_decl
     ETS_CONFIG ${ETS_CONFIG_DECL}
 )
 
-#panda_ets_interop_js_gtest(ets_interop_js_dynamic_instanceof
-#    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_instanceof/dynamic_instanceof.cpp
-#    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_instanceof/dynamic_instanceof.ets
-#    ETS_CONFIG ${ETS_CONFIG}
-#)
-
 panda_ets_interop_js_gtest(ets_interop_dynamic_with_lambda
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_with_lambda/dynamic_with_lambda.cpp
     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_with_lambda/dynamic_with_lambda.ets
@@ -174,6 +169,7 @@ add_subdirectory(escompat_demo)
 add_subdirectory(escompat)
 add_subdirectory(es_object)
 add_subdirectory(generic_types)
+add_subdirectory(instanceof)
 add_subdirectory(proxies)
 add_subdirectory(checked)
 add_subdirectory(perf)

@@ -15,11 +15,11 @@ coretypes:
 - managed_class: std.core.Object
   mirror_class: ark::ets::EtsObject
 
+- managed_class: std.core.Type
+  mirror_class: ark::ets::EtsClass
+
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
-
-- managed_class: std.core.Class
-  mirror_class: ark::ets::EtsClass
 
 - managed_class: std.interop.js.JSValue
   mirror_class: ark::ets::interop::js::JSValue
@@ -133,6 +133,8 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
+      # NOTE(v.cherkashin):
+      #  Replace std.core.Object by std.core.Type when issue #15273 was resolved
       args: [ std.interop.js.JSValue, std.core.Object ] # 2nd argument is ClassClass
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueObjectIntrinsic
     clear_flags: [can_throw, heap_inv, no_cse]
@@ -291,15 +293,28 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateObjectIntrinsic
     clear_flags: [can_throw, heap_inv]
 
-  - name: JSRuntimeInstanceOf
+  - name: JSRuntimeInstanceOfDynamic
     space: ets
     class_name: std.interop.js.JSRuntime
-    method_name: instanceOf
+    method_name: instanceOfDynamic
     static: true
     signature:
       ret: u1
       args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
-    impl: ark::ets::interop::js::intrinsics::JSRuntimeInstanceOfIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeInstanceOfDynamicIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
+  - name: JSRuntimeInstanceOfStatic
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: instanceOfStatic
+    static: true
+    signature:
+      ret: u1
+      # NOTE(v.cherkashin):
+      #  Replace std.core.Object by std.core.Type when issue #15273 was resolved
+      args: [ std.interop.js.JSValue, std.core.Object ] # 2nd argument is ClassClass
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeInstanceOfStaticIntrinsic
     clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeInitJSCallClass

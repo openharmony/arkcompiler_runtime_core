@@ -626,6 +626,11 @@ bool EtsClass::IsUndefined() const
     return GetDescriptor() == panda_file_items::class_descriptors::INTERNAL_UNDEFINED;
 }
 
+bool EtsClass::IsClassClass() const
+{
+    return GetRuntimeClass()->IsClassClass();
+}
+
 bool EtsClass::IsInterface() const
 {
     return GetRuntimeClass()->IsInterface();

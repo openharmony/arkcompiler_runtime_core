@@ -89,7 +89,7 @@ public:
 
     void SetJSBuiltinMatcher(std::function<EtsObject *(InteropCtx *, napi_value, bool)> &&matcher)
     {
-        jsBuiltinMatcher_ = matcher;
+        jsBuiltinMatcher_ = std::move(matcher);
     }
 
     napi_value Wrap(InteropCtx *ctx, EtsObject *etsObject);

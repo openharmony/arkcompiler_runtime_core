@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,25 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
 
-class A {
+export declare class ADeclared {}
+export declare class BDeclared {}
+export declare class CDeclared {}
+export declare class DDeclared {}
 
-};
-
-class B {
-
-};
-
-class C extends A {
-
-};
-
-function jsfunc() {
-    return new A();
-}
-
-exports.A = A;
-exports.B = B;
-exports.C = C;
-exports.jsfunc = jsfunc;
+export declare function as_jsvalue(x: JSValue): JSValue;
+export declare function create_error(msg: String): Error;

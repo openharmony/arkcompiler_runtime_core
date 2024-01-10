@@ -184,7 +184,7 @@ public:
     bool IsLambdaClass() const;
     bool IsUnionClass() const;
     bool IsUndefined() const;
-    bool IsClassClass();
+    bool IsClassClass() const;
     bool IsInterface() const;
     PANDA_PUBLIC_API bool IsArrayClass() const;
     bool IsTupleClass() const;

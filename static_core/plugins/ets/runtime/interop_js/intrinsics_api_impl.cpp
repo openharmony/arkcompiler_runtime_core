@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/interop_js/intrinsics_api.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/include/class_linker-inl.h"
 
@@ -123,7 +124,7 @@ static EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
 
-    if (!clsObj->GetClass()->GetRuntimeClass()->IsClassClass()) {
+    if (!clsObj->GetClass()->IsClassClass()) {
         ctx->Fatal("GetValueObject parameter is not a ClassClass instance");
     }
     auto const cls = reinterpret_cast<EtsClass *>(clsObj);
@@ -252,7 +253,7 @@ static JSValue *JSRuntimeCreateObject()
     return JSValue::CreateRefValue(coro, ctx, obj, napi_object);
 }
 
-uint8_t JSRuntimeInstanceOf(JSValue *object, JSValue *ctor)
+static uint8_t JSRuntimeInstanceOfDynamic(JSValue *object, JSValue *ctor)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -269,6 +270,44 @@ uint8_t JSRuntimeInstanceOf(JSValue *object, JSValue *ctor)
         return 0;
     }
     return static_cast<uint8_t>(res);
+}
+
+static uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsClass)
+{
+    ASSERT(etsClass != nullptr);
+
+    if (etsJsValue == nullptr) {
+        return 0;
+    }
+
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto env = ctx->GetJSEnv();
+
+    Class *cls = etsClass->GetRuntimeClass();
+    if (!cls->IsInitialized() && !IsStdClass(cls)) {
+        // 'js_value' haven't been created from the uninitialized class
+        return 0;
+    }
+
+    // Check if object has SharedReference
+    ets_proxy::SharedReference *sharedRef = [=] {
+        NapiScope jsHandleScope(env);
+        napi_value jsValue = etsJsValue->GetNapiValue(env);
+        return ctx->GetSharedRefStorage()->GetReference(env, jsValue);
+    }();
+
+    if (sharedRef != nullptr) {
+        EtsObject *etsObject = sharedRef->GetEtsObject(ctx);
+        return static_cast<uint8_t>(etsClass->IsAssignableFrom(etsObject->GetClass()));
+    }
+
+    if (IsStdClass(cls)) {
+        // NOTE(v.cherkashin): Add support compat types, #13577
+        INTEROP_LOG(FATAL) << __func__ << " doesn't support compat types";
+    }
+
+    return 0;
 }
 
 static std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view module)
@@ -783,7 +822,8 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeGetNull,
     JSRuntimeGetGlobal,
     JSRuntimeCreateObject,
-    JSRuntimeInstanceOf,
+    JSRuntimeInstanceOfDynamic,
+    JSRuntimeInstanceOfStatic,
     JSRuntimeInitJSCallClass,
     JSRuntimeInitJSNewClass,
     JSRuntimeLoadModule,

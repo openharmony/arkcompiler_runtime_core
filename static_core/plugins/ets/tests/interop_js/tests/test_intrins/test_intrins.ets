@@ -210,7 +210,7 @@ function test_builtin_array_multidim(): boolean {
 function test_builtin_array_instanceof(): boolean {
     let v: int[] = [111, 222];
     let ctor = JSRuntime.getPropertyJSValue(jsvars.global, "Array");
-    return JSRuntime.instanceOf(jscall.any$Ai(jsvars.m, ".Identity", v), ctor);
+    return JSRuntime.instanceOfDynamic(jscall.any$Ai(jsvars.m, ".Identity", v), ctor);
 }
 function test_init_array_component(): boolean {
     let v: JSValue[] = [JSRuntime.getNull()];
