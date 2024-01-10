@@ -207,7 +207,7 @@ napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span
 
     auto pf = method->GetPandaFile();
     panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
-    pda.EnumerateTypes([](panda_file::Type /* unused */) {});  // preload reftypes span
+    pda.EnumerateTypes([](panda_file::Type) {});  // preload reftypes span
 
     auto resolveRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
         auto klass = classLinker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
@@ -386,7 +386,7 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallImpl(FSetupArgs &setupArgs, 
 
     auto pf = method->GetPandaFile();
     panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
-    pda.EnumerateTypes([](panda_file::Type /* unused */) {});  // preload reftypes span
+    pda.EnumerateTypes([](panda_file::Type) {});  // preload reftypes span
 
     auto resolveRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
         auto klass = classLinker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
@@ -540,13 +540,13 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallBase(Method *method, uint8_t
 
 extern "C" uint64_t JSRuntimeJSCall(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
-    return JSRuntimeJSCallBase</*IS_NEWCALL=*/false>(method, args, inStackArgs);
+    return JSRuntimeJSCallBase<false>(method, args, inStackArgs);  // IS_NEWCALL is false
 }
 extern "C" void JSRuntimeJSCallBridge(Method *method, ...);
 
 extern "C" uint64_t JSRuntimeJSNew(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
-    return JSRuntimeJSCallBase</*IS_NEWCALL=*/true>(method, args, inStackArgs);
+    return JSRuntimeJSCallBase<true>(method, args, inStackArgs);  // IS_NEWCALL is true
 }
 extern "C" void JSRuntimeJSNewBridge(Method *method, ...);
 
@@ -570,7 +570,7 @@ extern "C" uint64_t JSRuntimeJSCallByValue(Method *method, uint8_t *args, uint8_
 
         return std::make_tuple(jsThis, jsFn, it, numArgs, refArgIdx);
     };
-    return JSRuntimeJSCallImpl</*IS_NEWCALL=*/false>(argsetup, method, args, inStackArgs);
+    return JSRuntimeJSCallImpl<false>(argsetup, method, args, inStackArgs);  // IS_NEWCALL is false
 }
 extern "C" void JSRuntimeJSCallByValueBridge(Method *method, ...);
 
@@ -602,7 +602,7 @@ extern "C" uint64_t JSProxyCall(Method *method, uint8_t *args, uint8_t *inStackA
         }
         return std::make_tuple(jsThis, jsFn, it, numArgs, refArgIdx);
     };
-    return JSRuntimeJSCallImpl</*IS_NEWCALL=*/false>(argsetup, method, args, inStackArgs);
+    return JSRuntimeJSCallImpl<false>(argsetup, method, args, inStackArgs);  // IS_NEWCALL is false
 }
 extern "C" void JSProxyCallBridge(Method *method, ...);
 
@@ -628,7 +628,7 @@ static void InitJSCallSignatures(coretypes::String *clsStr)
         ASSERT(method.IsStatic());
         auto pf = method.GetPandaFile();
         panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method.GetFileId()));
-        pda.EnumerateTypes([](panda_file::Type /* unused */) {});  // preload reftypes span
+        pda.EnumerateTypes([](panda_file::Type) {});  // preload reftypes span
 
         void *methodEp = nullptr;
         if constexpr (IS_NEWCALL) {

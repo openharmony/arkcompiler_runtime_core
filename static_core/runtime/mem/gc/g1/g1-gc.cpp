@@ -1318,7 +1318,8 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
     auto internalAllocator = this->GetInternalAllocator();
     auto *updatedRefQueue =
         (ENABLE_WORKERS) ? internalAllocator->template New<GCG1BarrierSet::ThreadLocalCardQueues>() : updatedRefsQueue_;
-    auto refUpdater = this->CreateRefUpdater<FULL_GC, /* NEED_LOCK */ ENABLE_WORKERS>(updatedRefQueue);
+    // NEED_LOCK is true <=> when ENABLE_WORKERS is true
+    auto refUpdater = this->CreateRefUpdater<FULL_GC, ENABLE_WORKERS>(updatedRefQueue);
     //  update reference from objects which were moved while garbage collection
     LOG_DEBUG_GC << "=== Update ex-cset -> ex-cset references. START. ===";
     {

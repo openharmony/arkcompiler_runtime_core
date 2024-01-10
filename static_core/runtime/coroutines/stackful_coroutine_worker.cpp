@@ -25,7 +25,8 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
     : coroManager_(coroManager), id_(os::thread::GetCurrentThreadId()), name_(std::move(name))
 {
     if (type == ScheduleLoopType::THREAD) {
-        scheduleLoopCtx_ = coroManager->CreateEntrypointlessCoroutine(runtime, vm, /*make_current*/ false);
+        scheduleLoopCtx_ =
+            coroManager->CreateEntrypointlessCoroutine(runtime, vm, false);  // false value is make_current
         std::thread t(&StackfulCoroutineWorker::ThreadProc, this);
         os::thread::SetThreadName(t.native_handle(), name_.c_str());
         t.detach();

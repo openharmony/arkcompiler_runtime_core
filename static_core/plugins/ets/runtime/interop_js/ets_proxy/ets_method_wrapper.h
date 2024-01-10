@@ -58,7 +58,11 @@ public:
         return etsMethod_->GetPandaMethod();
     }
 
-    static inline EtsMethodWrapper *ResolveLazyLink(InteropCtx *ctx, /* in/out */ LazyEtsMethodWrapperLink &lazyLink)
+    /**
+     * @param ctx - interop context
+     * @param lazy_link in/out lazy  method wrapper link
+     */
+    static inline EtsMethodWrapper *ResolveLazyLink(InteropCtx *ctx, LazyEtsMethodWrapperLink &lazyLink)
     {
         if (LIKELY(lazyLink.IsResolved())) {
             return lazyLink.GetResolved();

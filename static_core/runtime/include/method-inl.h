@@ -306,7 +306,8 @@ inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const
 
     Frame *currentFrame = thread->GetCurrentFrame();
     PandaUniquePtr<Frame, FrameDeleter> frame(
-        interpreter::RuntimeInterface::CreateFrameWithActualArgs</*is_dynamic=*/true>(nregs, nregs, this, currentFrame),
+        // true value is is_dynamic
+        interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(nregs, nregs, this, currentFrame),
         FrameDeleter(thread));
     if (UNLIKELY(frame.get() == nullptr)) {
         panda::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
