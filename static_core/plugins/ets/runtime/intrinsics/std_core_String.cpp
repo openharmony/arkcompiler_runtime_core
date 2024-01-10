@@ -76,6 +76,9 @@ EtsString *StdCoreStringSubstring(EtsString *str, ets_int begin, ets_int end)
 {
     ASSERT(str != nullptr);
     auto indexes = coretypes::String::NormalizeSubStringIndexes(begin, end, str->GetCoreType());
+    if (UNLIKELY(indexes.first == 0 && indexes.second == str->GetLength())) {
+        return str;
+    }
     ets_int substrLength = indexes.second - indexes.first;
     return EtsString::FastSubString(str, static_cast<uint32_t>(indexes.first), static_cast<uint32_t>(substrLength));
 }

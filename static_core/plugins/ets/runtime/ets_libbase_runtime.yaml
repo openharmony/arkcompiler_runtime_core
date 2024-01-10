@@ -767,6 +767,7 @@ intrinsics:
     impl: panda::ets::intrinsics::StdCoreStringSubstring
     codegen_func: CreateStringSubstringTlab
     codegen_arch: [arm64, amd64]
+    peephole_func: PeepholeStringSubstring
     set_flags: [can_throw]
 
   - name: StdCoreStringCodePointToChar
