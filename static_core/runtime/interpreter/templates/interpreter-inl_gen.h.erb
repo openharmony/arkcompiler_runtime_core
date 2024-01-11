@@ -24,11 +24,11 @@ namespace panda::interpreter {
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_PROFILE_ENABLED>
 // NOLINTNEXTLINE(readability-function-size)
 % if mode == :debug
-void ExecuteImplDebug(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh) {
+void ExecuteImplDebug(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh) {
 % else
-void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh) {
+void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh) {
     if (UNLIKELY(Runtime::GetCurrent()->IsDebugMode())) {
-        ExecuteImplDebug<RuntimeIfaceT, IS_DYNAMIC>(thread, pc, frame, jump_to_eh);
+        ExecuteImplDebug<RuntimeIfaceT, IS_DYNAMIC>(thread, pc, frame, jumpToEh);
         return;
     }
 % end
@@ -154,7 +154,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     }
 
     InstructionHandlerState state(thread, pc, frame, thread->GetCurrentDispatchTable<IS_DEBUG>());
-    if (jump_to_eh) {
+    if (jumpToEh) {
         goto* state.GetDispatchTable()[DISPATCH_TABLE_LEN - 1];
     }
     ASSERT(frame->GetMethod()->GetPandaFile()->GetHeader()->quickenedFlag || state.IsPrimaryOpcodeValid());
@@ -339,7 +339,7 @@ INSTRUMENT_FRAME_HANDLER: {
 HANDLE_DEBUG_SWITCH: {
     state.GetFrame()->GetAcc() = state.GetAcc();
     ExecuteImplDebug<RuntimeIfaceT, IS_DYNAMIC>(state.GetThread(), state.GetInst().GetAddress(),
-                                                state.GetFrame(), jump_to_eh);
+                                                state.GetFrame(), jumpToEh);
     return;
 }
 % end

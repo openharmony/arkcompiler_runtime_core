@@ -40,7 +40,7 @@ namespace panda::verifier::plugin {
 static <%= plugin_opts["Verification"]["plugin_class"] %> <%= plugin_lang %>_PLUGIN;
 %   end
 % end
-static DefaultPlugin DFLT;
+static DefaultPlugin g_dflt;
 
 static std::unordered_map<panda_file::SourceLang, Plugin const *> const PLUGINS_MAP {
 % Common::plugins.each do |plugin_lang, plugin_opts|
@@ -51,7 +51,7 @@ static std::unordered_map<panda_file::SourceLang, Plugin const *> const PLUGINS_
     &<%= plugin_lang %>_PLUGIN },
 %   end
 % end
-  { panda_file::SourceLang::PANDA_ASSEMBLY, &DFLT}
+  { panda_file::SourceLang::PANDA_ASSEMBLY, &g_dflt}
 };
 
 // NOLINTEND(fuchsia-statically-constructed-objects)
@@ -60,7 +60,7 @@ Plugin const *GetLanguagePlugin(panda_file::SourceLang lang)
     if (PLUGINS_MAP.count(lang) > 0) {
         return PLUGINS_MAP.at(lang);
     }
-    return &DFLT;
+    return &g_dflt;
 }
 
 } // namespace panda::verifier::plugin

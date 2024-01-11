@@ -119,9 +119,9 @@ public:
 %                                 << "Jump instruction offset: " << std::hex << static_cast<uint32_t>(reinterpret_cast<uintptr_t>(pc) - reinterpret_cast<uintptr_t>(inst_.GetFrom()));
 %            return VerificationStatus::ERROR;
 %        }
-%        auto target_inst = inst_.JumpTo(imm);
-%        const uint8_t* jumpPc = target_inst.GetAddress();
-%        if (!target_inst.IsValid()) {
+%        auto targetInst = inst_.JumpTo(imm);
+%        const uint8_t* jumpPc = targetInst.GetAddress();
+%        if (!targetInst.IsValid()) {
 %            auto offset = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(pc) - reinterpret_cast<uintptr_t>(inst_.GetFrom()));
 %            LOG(ERROR, VERIFIER) << "Jump offset is out of bounds of method body. "
 %                                 << "Jump instruction offset: 0x" << std::hex << offset
@@ -164,7 +164,7 @@ private:
 
 template <typename CflowHandler>
 // NOLINTNEXTLINE(readability-function-size)
-VerificationStatus IterateOverInstructions(const uint8_t* pc, const uint8_t* from, const uint8_t* to, CflowHandler cflow_handler) {
+VerificationStatus IterateOverInstructions(const uint8_t* pc, const uint8_t* from, const uint8_t* to, CflowHandler cflowHandler) {
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wvoid-ptr-dereference"
@@ -181,7 +181,7 @@ VerificationStatus IterateOverInstructions(const uint8_t* pc, const uint8_t* fro
 % end
     };
 
-    CflowIterInstructionHandler handler(pc, from, to, std::move(cflow_handler));
+    CflowIterInstructionHandler handler(pc, from, to, std::move(cflowHandler));
     std::optional<VerificationStatus> status;
     uint8_t secondaryOpcode;
 

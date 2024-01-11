@@ -92,8 +92,8 @@ void InspectorServer::CallDebuggerPaused(
 
     server_.Call(sessionId, "Debugger.paused", [&](auto &params) {
         params.AddProperty("callFrames", [this, thread, &enumerateFrames](JsonArrayBuilder &callFrames) {
-            enumerateFrames([this, thread, &callFrames](auto frame_id, auto method_name, auto sourceFile,
-                                                        auto line_number, auto &scopeChain) {
+            enumerateFrames([this, thread, &callFrames](auto frameId, auto methodName, auto sourceFile, auto lineNumber,
+                                                        auto &scopeChain) {
                 callFrames.Add([&](JsonObjectBuilder &callFrame) {
                     auto [script_id, is_new] = sourceManager_.GetScriptId(thread, sourceFile);
 
@@ -101,9 +101,9 @@ void InspectorServer::CallDebuggerPaused(
                         CallDebuggerScriptParsed(thread, script_id, sourceFile);
                     }
 
-                    callFrame.AddProperty("callFrameId", std::to_string(frame_id));
-                    callFrame.AddProperty("functionName", method_name.data());
-                    callFrame.AddProperty("location", Location(script_id, line_number).ToJson());
+                    callFrame.AddProperty("callFrameId", std::to_string(frameId));
+                    callFrame.AddProperty("functionName", methodName.data());
+                    callFrame.AddProperty("location", Location(script_id, lineNumber).ToJson());
                     callFrame.AddProperty("url", sourceFile.data());
 
                     callFrame.AddProperty("scopeChain", [&](JsonArrayBuilder &scopeChainBuilder) {

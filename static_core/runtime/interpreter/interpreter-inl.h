@@ -67,7 +67,7 @@ namespace panda::interpreter {
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_PROFILE_ENABLED = false>
 void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh);
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_PROFILE_ENABLED = false>
-void ExecuteImplDebug(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh);
+void ExecuteImplDebug(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh);
 
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_PROFILE_ENABLED = false>
 void ExecuteImplInner(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh);
