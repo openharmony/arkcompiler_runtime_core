@@ -12,21 +12,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
+{%- for c in cases %}
 
 /*---
-desc: nullable Cast T | null -> T with ensure not-null expression. null value
+desc: >-
+    A tuple type is a reference type created as a fixed set of other types.
+    The value of a tuple type is a group of values of types that comprise
+    the tuple type.
 ---*/
+{{c.decl}}
 
-function main(): void {
-  let a: Int | null = null;
-  let res: int = 0;
-
-  try {
-    let b: Int = a!;
-    res = 0;
-  } catch (e: NullPointerException) {
-    res = 1;
-  }
-
-  assert res == 1;
+function main() {
+    let v: [{{c.type}}] = [{{c.val}}]
+    let q = v
+    assert v === q && v[0] == q[0]
 }
+{%- endfor %}

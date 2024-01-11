@@ -12,26 +12,8 @@
 # limitations under the License.
 
 ---
-function_decls:
-    - decl: |-
-        native function foo(); // CTE, native function without return type
-      call: |-
-        foo();
-
-    - decl: |-
-        let i = 1
-        function foo() {  // infer void
-            i += 1
-        }
-      call: |-
-        let x: number = foo();  // CTE, cannot assign void to number
-
-    - decl: |-
-        let i = 1
-        function foo() throws {  // infer void
-            i += 1
-            throw new Exception()
-            return i;   // CTE - unreachable stmt
-        }
-      call: |-
-        foo();
+cases:
+    - use: |-
+          let v: [number, number] = [1.0, 2.0]
+          let t: Object = v
+          let p: [boolean] = t as [boolean]  // ClassCastException is expected
