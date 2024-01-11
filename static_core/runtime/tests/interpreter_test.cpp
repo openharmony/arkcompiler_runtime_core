@@ -809,8 +809,8 @@ TEST_F(InterpreterTest, TestInci)
     f->SetMethod(method.get());
 
     auto frameHandler = StaticFrameHandler(f.get());
-    frameHandler.GetVReg(0).SetPrimitive(-2L);
-    frameHandler.GetVReg(1).SetPrimitive(3L);
+    frameHandler.GetVReg(0).SetPrimitive(-2_I);
+    frameHandler.GetVReg(1).SetPrimitive(3_I);
 
     Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
 
@@ -1224,8 +1224,8 @@ TEST_F(InterpreterTest, TestInitobj)
         ObjectHeader *obj = AllocObject(objectClass);
 
         auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(0).Set(10L);
-        frameHandler.GetVReg(2U).Set(20L);
+        frameHandler.GetVReg(0).Set(10U);
+        frameHandler.GetVReg(2U).Set(20U);
 
         bool hasErrors = false;
 
@@ -1318,10 +1318,10 @@ TEST_F(InterpreterTest, TestInitobj)
         ObjectHeader *obj = AllocObject(objectClass);
 
         auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(0U).Set(10L);
-        frameHandler.GetVReg(2U).Set(20L);
-        frameHandler.GetVReg(3U).Set(30L);
-        frameHandler.GetVReg(5U).Set(40L);
+        frameHandler.GetVReg(0U).Set(10U);
+        frameHandler.GetVReg(2U).Set(20U);
+        frameHandler.GetVReg(3U).Set(30U);
+        frameHandler.GetVReg(5U).Set(40U);
 
         bool hasErrors = false;
 
@@ -1424,11 +1424,11 @@ TEST_F(InterpreterTest, TestInitobj)
         ObjectHeader *obj = AllocObject(objectClass);
 
         auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(2U).Set(10L);
-        frameHandler.GetVReg(3U).Set(20L);
-        frameHandler.GetVReg(4U).Set(30L);
-        frameHandler.GetVReg(5U).Set(40L);
-        frameHandler.GetVReg(6U).Set(50L);
+        frameHandler.GetVReg(2U).Set(10U);
+        frameHandler.GetVReg(3U).Set(20U);
+        frameHandler.GetVReg(4U).Set(30U);
+        frameHandler.GetVReg(5U).Set(40U);
+        frameHandler.GetVReg(6U).Set(50U);
 
         bool hasErrors = false;
 
@@ -2475,9 +2475,9 @@ TEST_F(InterpreterTest, TestVirtualCalls)
 
         auto frameHandler = StaticFrameHandler(f.get());
         frameHandler.GetVReg(0U).SetReference(obj);
-        frameHandler.GetVReg(1U).Set(1L);
-        frameHandler.GetVReg(2U).Set(2L);
-        frameHandler.GetVReg(3U).Set(3L);
+        frameHandler.GetVReg(1U).Set(1U);
+        frameHandler.GetVReg(2U).Set(2U);
+        frameHandler.GetVReg(3U).Set(3U);
 
         RuntimeInterface::SetupResolvedMethod(callee);
         Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
@@ -2532,10 +2532,10 @@ TEST_F(InterpreterTest, TestVirtualCalls)
 
         auto frameHandler = StaticFrameHandler(f.get());
         frameHandler.GetVReg(0U).SetReference(obj);
-        frameHandler.GetVReg(1U).Set(1L);
-        frameHandler.GetVReg(2U).Set(2L);
-        frameHandler.GetVReg(3U).Set(3L);
-        frameHandler.GetVReg(4U).Set(4L);
+        frameHandler.GetVReg(1U).Set(1U);
+        frameHandler.GetVReg(2U).Set(2U);
+        frameHandler.GetVReg(3U).Set(3U);
+        frameHandler.GetVReg(4U).Set(4U);
 
         RuntimeInterface::SetupResolvedMethod(callee);
         Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
@@ -2833,8 +2833,8 @@ DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
     f1->SetMethod(method1.get());
 
     auto frameHandler1 = StaticFrameHandler(f1.get());
-    frameHandler1.GetVReg(1U).SetPrimitive(1L);
-    frameHandler1.GetVReg(3U).SetPrimitive(2L);
+    frameHandler1.GetVReg(1U).SetPrimitive(1_I);
+    frameHandler1.GetVReg(3U).SetPrimitive(2_I);
 
     size_t vregNum2 = 65535;
 
