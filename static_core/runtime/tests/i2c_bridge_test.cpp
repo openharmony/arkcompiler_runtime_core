@@ -476,7 +476,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeInt)
     Method callee(nullptr, nullptr, panda_file::File::EntityId(), panda_file::File::EntityId(), ACC_STATIC, 0, shorty);
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(VoidInt));
     Frame *frame = CreateFrame(2U, nullptr, nullptr);
-    frame->GetVReg(1).Set(5L);
+    frame->GetVReg(1).Set(5U);
 
     uint8_t callShortInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x01, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -517,7 +517,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeInstanceInt)
     auto frameHandler = StaticFrameHandler(frame);
     ObjectHeader *obj = panda::mem::AllocateNullifiedPayloadString(1);
     frameHandler.GetVReg(0).SetReference(obj);
-    frameHandler.GetVReg(1).Set(5L);
+    frameHandler.GetVReg(1).Set(5U);
 
     uint8_t callShortInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x10, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -556,7 +556,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeVReg)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(VoidVReg));
     Frame *frame = CreateFrame(2U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(1).Set(5L);
+    frameHandler.GetVReg(1).Set(5U);
 
     uint8_t callShortInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x01, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -594,8 +594,8 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeIntVReg)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(VoidIntVReg));
     Frame *frame = CreateFrame(2U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(2L);
-    frameHandler.GetVReg(1).Set(5L);
+    frameHandler.GetVReg(0).Set(2U);
+    frameHandler.GetVReg(1).Set(5U);
 
     uint8_t callShortInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x10, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -636,9 +636,9 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke3Int)
     Frame *frame = CreateFrame(3U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
     frameHandler.GetAcc().SetValue(0);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_V4_V4_V4_V4_ID16), 0x10, 0x02, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -676,10 +676,10 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke2IntLongInt)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void2IntLongInt));
     Frame *frame = CreateFrame(4U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
-    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
+    frameHandler.GetVReg(3U).Set(4U);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_V4_V4_V4_V4_ID16), 0x10, 0x32, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -718,7 +718,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeLong)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(VoidLong));
     Frame *frame = CreateFrame(1, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(9L);
+    frameHandler.GetVReg(0).Set(9U);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -782,10 +782,10 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke4Int)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void4Int));
     Frame *frame = CreateFrame(4U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
-    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
+    frameHandler.GetVReg(3U).Set(4U);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_V4_V4_V4_V4_ID16), 0x10, 0x32, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -824,8 +824,8 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke2Long)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void2Long));
     Frame *frame = CreateFrame(2U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0).Set(3L);
-    frameHandler.GetVReg(1).Set(9L);
+    frameHandler.GetVReg(0).Set(3U);
+    frameHandler.GetVReg(1).Set(9U);
 
     uint8_t callInsn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x10, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -857,10 +857,10 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke4IntDouble)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void4IntDouble));
     Frame *frame = CreateFrame(5U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
-    frameHandler.GetVReg(3U).Set(4L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
+    frameHandler.GetVReg(3U).Set(4U);
     frameHandler.GetVReg(4U).Set(5.0_D);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
@@ -890,13 +890,13 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke7Int)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void7Int));
     Frame *frame = CreateFrame(7U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
-    frameHandler.GetVReg(3U).Set(4L);
-    frameHandler.GetVReg(4U).Set(5L);
-    frameHandler.GetVReg(5U).Set(6L);
-    frameHandler.GetVReg(6U).Set(7L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
+    frameHandler.GetVReg(3U).Set(4U);
+    frameHandler.GetVReg(4U).Set(5U);
+    frameHandler.GetVReg(5U).Set(6U);
+    frameHandler.GetVReg(6U).Set(7U);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -927,13 +927,13 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke7Int8Double)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void7Int8Double));
     Frame *frame = CreateFrame(15U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
-    frameHandler.GetVReg(3U).Set(4L);
-    frameHandler.GetVReg(4U).Set(5L);
-    frameHandler.GetVReg(5U).Set(6L);
-    frameHandler.GetVReg(6U).Set(7L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
+    frameHandler.GetVReg(3U).Set(4U);
+    frameHandler.GetVReg(4U).Set(5U);
+    frameHandler.GetVReg(5U).Set(6U);
+    frameHandler.GetVReg(6U).Set(7U);
     frameHandler.GetVReg(7U).Set(8.0_D);
     frameHandler.GetVReg(8U).Set(9.0_D);
     frameHandler.GetVReg(9U).Set(10.0_D);
@@ -986,14 +986,14 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke8Int)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void8Int));
     Frame *frame = CreateFrame(8U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
-    frameHandler.GetVReg(3U).Set(4L);
-    frameHandler.GetVReg(4U).Set(5L);
-    frameHandler.GetVReg(5U).Set(6L);
-    frameHandler.GetVReg(6U).Set(7L);
-    frameHandler.GetVReg(7U).Set(8L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
+    frameHandler.GetVReg(3U).Set(4U);
+    frameHandler.GetVReg(4U).Set(5U);
+    frameHandler.GetVReg(5U).Set(6U);
+    frameHandler.GetVReg(6U).Set(7U);
+    frameHandler.GetVReg(7U).Set(8U);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -1022,13 +1022,13 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke6IntVReg)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void6IntVReg));
     Frame *frame = CreateFrame(8U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
-    frameHandler.GetVReg(3U).Set(4L);
-    frameHandler.GetVReg(4U).Set(5L);
-    frameHandler.GetVReg(5U).Set(6L);
-    frameHandler.GetVReg(6U).Set(7L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
+    frameHandler.GetVReg(3U).Set(4U);
+    frameHandler.GetVReg(4U).Set(5U);
+    frameHandler.GetVReg(5U).Set(6U);
+    frameHandler.GetVReg(6U).Set(7U);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -1057,14 +1057,14 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke7IntVReg)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void7IntVReg));
     Frame *frame = CreateFrame(8U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
-    frameHandler.GetVReg(3U).Set(4L);
-    frameHandler.GetVReg(4U).Set(5L);
-    frameHandler.GetVReg(5U).Set(6L);
-    frameHandler.GetVReg(6U).Set(7L);
-    frameHandler.GetVReg(7U).Set(8L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
+    frameHandler.GetVReg(3U).Set(4U);
+    frameHandler.GetVReg(4U).Set(5U);
+    frameHandler.GetVReg(5U).Set(6U);
+    frameHandler.GetVReg(6U).Set(7U);
+    frameHandler.GetVReg(7U).Set(8U);
 
     uint8_t callRangeInsn[] = {static_cast<uint8_t>(Opcode::CALL_RANGE_V8_ID16), 0x00, 0, 0, 0, 0};
     g_gCallResult = "";
@@ -1096,14 +1096,14 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke8Int9Double)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(Void8Int9Double));
     Frame *frame = CreateFrame(17U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    frameHandler.GetVReg(0U).Set(1L);
-    frameHandler.GetVReg(1U).Set(2L);
-    frameHandler.GetVReg(2U).Set(3L);
-    frameHandler.GetVReg(3U).Set(4L);
-    frameHandler.GetVReg(4U).Set(5L);
-    frameHandler.GetVReg(5U).Set(6L);
-    frameHandler.GetVReg(6U).Set(7L);
-    frameHandler.GetVReg(7U).Set(8L);
+    frameHandler.GetVReg(0U).Set(1U);
+    frameHandler.GetVReg(1U).Set(2U);
+    frameHandler.GetVReg(2U).Set(3U);
+    frameHandler.GetVReg(3U).Set(4U);
+    frameHandler.GetVReg(4U).Set(5U);
+    frameHandler.GetVReg(5U).Set(6U);
+    frameHandler.GetVReg(6U).Set(7U);
+    frameHandler.GetVReg(7U).Set(8U);
     frameHandler.GetVReg(8U).Set(9.0_D);
     frameHandler.GetVReg(9U).Set(10.0_D);
     frameHandler.GetVReg(10U).Set(11.0_D);

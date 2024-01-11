@@ -14,6 +14,7 @@
  */
 
 #include "unit_test.h"
+#include "libpandabase/utils/utils.h"
 #include "optimizer/ir/graph_cloner.h"
 #include "optimizer/code_generator/codegen.h"
 #include "optimizer/optimizations/cleanup.h"
