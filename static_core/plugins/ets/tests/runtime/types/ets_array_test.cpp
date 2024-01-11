@@ -145,8 +145,8 @@ TEST_F(EtsArrayTest, EtsObjectArray)
     source = R"(
         .language eTS
         .record Ball {
-	        f32 RADIUS <static>
-	        i32 SPEED <static>
+            f32 RADIUS <static>
+            i32 SPEED <static>
             f32 vx
             i32 vy
         }

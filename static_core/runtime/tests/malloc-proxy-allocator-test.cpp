@@ -79,9 +79,10 @@ TEST_F(MallocProxyAllocatorTest, AdapterTest)
 {
     auto *memStats = new mem::MemStatsType();
     MallocProxyNonObjectAllocator allocator(memStats);
-    // NOLINTNEXTLINE(readability-magic-numbers)
+    // NOLINTBEGIN(readability-magic-numbers)
     std::array<int, 20U> arr {{12_I, 14_I, 3_I,  5_I,  43_I, 12_I, 22_I, 42_I, 89_I, 10_I,
                                89_I, 32_I, 43_I, 12_I, 43_I, 12_I, 54_I, 89_I, 27_I, 84_I}};
+    // NOLINTEND(readability-magic-numbers)
 
     std::vector<void *> v;
     for (auto i : arr) {

@@ -99,8 +99,8 @@ TEST_F(EtsFieldTest, AllMethods)
     const char *source = R"(
         .language eTS
         .record Ball {
-	        f32 BALL_RADIUS <static>
-	        i32 BALL_SPEED <static>
+            f32 BALL_RADIUS <static>
+            i32 BALL_SPEED <static>
             f32 vx
             i32 vy
         }

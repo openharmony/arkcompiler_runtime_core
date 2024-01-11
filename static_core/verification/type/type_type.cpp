@@ -522,25 +522,27 @@ bool IsSubtypeImpl(Type lhs, Type rhs, TypeSystem *tsys)
 
 static bool IsIntersectionReasonable(Span<Type> members)
 {
-    // // We know that none of the members is a subtype of any other.
-    // bool have_builtins = false;
-    // bool have_classes = false;
+#ifdef UNCOMMENT_WHEN_READY
+    // We know that none of the members is a subtype of any other.
+    bool have_builtins = false;
+    bool have_classes = false;
 
-    // // Nothing is a subclass of both a class and a builtin (except NULL_POINTER and BOT).
-    // for (auto const &mtp : *members) {
-    //     if (mtp.IsBuiltin()) {
-    //         have_builtins = true;
-    //         if (have_classes) {
-    //             return false;
-    //         }
-    //     } else {
-    //         ASSERT(mtp.IsClass());
-    //         have_classes = true;
-    //         if (have_builtins) {
-    //             return false;
-    //         }
-    //     }
-    // }
+    // Nothing is a subclass of both a class and a builtin (except NULL_POINTER and BOT).
+    for (auto const &mtp : *members) {
+        if (mtp.IsBuiltin()) {
+            have_builtins = true;
+            if (have_classes) {
+                return false;
+            }
+        } else {
+            ASSERT(mtp.IsClass());
+            have_classes = true;
+            if (have_builtins) {
+                return false;
+            }
+        }
+    }
+#endif
 
     // Java specific?
     bool haveClass = false;

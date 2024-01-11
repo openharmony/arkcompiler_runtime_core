@@ -278,8 +278,8 @@ TEST_F(FreeListAllocatorTest, AllocateTheWholePoolFreeAndAllocateAgainTest)
     if ((FREELIST_ALLOCATOR_MIN_SIZE & (FREELIST_ALLOCATOR_MIN_SIZE - 1)) == 0U) {
         minSizePowerOfTwo = panda::helpers::math::GetIntLog2(FREELIST_ALLOCATOR_MIN_SIZE);
     } else {
-        minSizePowerOfTwo =
-            ceil(std::log(FREELIST_ALLOCATOR_MIN_SIZE) / std::log(2.0F));  // NOLINT(readability-magic-numbers)
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        minSizePowerOfTwo = ceil(std::log(FREELIST_ALLOCATOR_MIN_SIZE) / std::log(2.0F));
     }
     if (((1U << minSizePowerOfTwo) - sizeof(freelist::MemoryBlockHeader)) < FREELIST_ALLOCATOR_MIN_SIZE) {
         minSizePowerOfTwo++;

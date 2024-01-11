@@ -183,16 +183,16 @@ TEST_F(ESCompatTest, DISABLED_compat_array_from_async)
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_from_async.js"));
 }
 
-TEST_F(ESCompatTest, compat_boolean)
+// NOTE(vpukhov): fix boxed primitives casts
+TEST_F(ESCompatTest, DISABLED_compat_boolean)
 {
-    // NOTE(vpukhov): fix boxed primitives casts
-    // ASSERT_EQ(true, RunJsTestSuite("compat_boolean.js"));
+    ASSERT_EQ(true, RunJsTestSuite("compat_boolean.js"));
 }
 
-TEST_F(ESCompatTest, compat_error)
+// NOTE(vpukhov): compat accessors
+TEST_F(ESCompatTest, DISABLED_compat_error)
 {
-    // NOTE(vpukhov): compat accessors
-    // ASSERT_EQ(true, RunJsTestSuite("compat_error.js"));
+    ASSERT_EQ(true, RunJsTestSuite("compat_error.js"));
 }
 
 }  // namespace panda::ets::interop::js::testing

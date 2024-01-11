@@ -234,8 +234,8 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
 // NOTE(m.morozov): enable this test, when virtual calls will be implemented
 #ifdef ENABLE_THIS_CODE_IN_FUTURE
     // Call<type>Method part
-    env->CallVoidMethod(obj, void_id, static_cast<ets_int>(11), static_cast<ets_int>(121_I));
-    EXPECT_EQ(env->GetIntField(obj, d_member_id), static_cast<ets_int>(11));
+    env->CallVoidMethod(obj, void_id, static_cast<ets_int>(11_I), static_cast<ets_int>(121_I));
+    EXPECT_EQ(env->GetIntField(obj, d_member_id), static_cast<ets_int>(11_I));
 
     ets_object a_obj_from_direct_calls = env->CallObjectMethod(obj, object_id);
     ASSERT_NE(a_obj_from_direct_calls, nullptr);
@@ -277,8 +277,8 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     EXPECT_EQ(env->CallDoubleMethodArray(obj, double_id, double_args.data()), static_cast<ets_double>(1.0));
 
     // Call<type>MethodList part
-    CallVoidMethodListHelper(env, obj, void_id, static_cast<ets_int>(84), static_cast<ets_int>(121_I));
-    EXPECT_EQ(env->GetIntField(obj, d_member_id), static_cast<ets_int>(84));
+    CallVoidMethodListHelper(env, obj, void_id, static_cast<ets_int>(84_I), static_cast<ets_int>(121_I));
+    EXPECT_EQ(env->GetIntField(obj, d_member_id), static_cast<ets_int>(84_I));
 
     ets_object a_obj_from_List_direct_calls = CallObjectMethodListHelper(env, obj, object_id);
     ASSERT_NE(a_obj_from_List_direct_calls, nullptr);

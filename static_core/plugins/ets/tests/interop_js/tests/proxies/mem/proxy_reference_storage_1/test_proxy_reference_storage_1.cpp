@@ -105,7 +105,7 @@ TEST_F(SharedReferenceStorage1GTest, test_1)
     SharedReference *ref0 = GetReference((void *)(uintptr_t(ref) + 0));
     ASSERT_EQ(ref0, ref);
 
-    // Check unaligned address);
+    // Check unaligned address
     ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 1U)), false);
     ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 2U)), false);
     ASSERT_EQ(CheckAlive((void *)(uintptr_t(ref) + 3U)), false);

@@ -95,8 +95,7 @@ static napi_value GetEtsClass(napi_env env, napi_callback_info info)
 static napi_value Call(napi_env env, napi_callback_info info)
 {
     size_t argc = 0;
-    [[maybe_unused]] napi_status status;
-    status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
+    [[maybe_unused]] napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     ASSERT(status == napi_ok);
 
     auto coro = EtsCoroutine::GetCurrent();
@@ -112,8 +111,7 @@ static napi_value Call(napi_env env, napi_callback_info info)
 static napi_value CallWithCopy(napi_env env, napi_callback_info info)
 {
     size_t argc = 0;
-    [[maybe_unused]] napi_status status;
-    status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
+    [[maybe_unused]] napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     ASSERT(status == napi_ok);
 
     auto coro = EtsCoroutine::GetCurrent();
@@ -128,9 +126,8 @@ static napi_value CallWithCopy(napi_env env, napi_callback_info info)
 
 static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
 {
-    [[maybe_unused]] napi_status status;
     napi_value napiFalse;
-    status = napi_get_boolean(env, false, &napiFalse);
+    [[maybe_unused]] napi_status status = napi_get_boolean(env, false, &napiFalse);
     ASSERT(status == napi_ok);
 
     size_t argc = 0;
@@ -193,8 +190,6 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
 
 static napi_value CreateRuntime(napi_env env, napi_callback_info info)
 {
-    [[maybe_unused]] napi_status status;
-
     size_t constexpr ARGC = 1;
     std::array<napi_value, ARGC> argv {};
 

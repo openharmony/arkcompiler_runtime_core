@@ -253,7 +253,6 @@ public:
 
         pandasm::Parser p;
         auto res = p.Parse(out.str());
-        // ASSERT_TRUE(res.HasValue());
         std::unique_ptr<const panda_file::File> pf = pandasm::AsmEmitter::Emit(res.Value());
         classLinker->AddPandaFile(std::move(pf));
 

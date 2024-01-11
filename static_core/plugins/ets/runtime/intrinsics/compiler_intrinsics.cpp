@@ -160,7 +160,6 @@ T CompilerEtsLdObjByName(panda::Method *method, int32_t id, uint32_t pc, panda::
 
         auto callee = TryGetCallee<FIELD_TYPE, true>(method, rawField, pc, klass);
         if (callee != nullptr) {
-            // PandaVector<Value> args;
             Value val(handleObj.GetPtr());
             Value result = callee->Invoke(Coroutine::GetCurrent(), &val);
             return result.GetAs<T>();

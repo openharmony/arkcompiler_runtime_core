@@ -174,12 +174,10 @@ void Trace::RecordMethodsInfo(PandaOStringStream *os, const PandaSet<Method *> &
 void Trace::WriteInfoToBuf(const ManagedThread *thread, Method *method, EventFlag event, uint32_t threadTime,
                            uint32_t realTime)
 {
-    int32_t writeAfterOffset;
-    int32_t writeBeforeOffset;
-
     // Atomic with relaxed order reason: data race with buffer_offset_ with no synchronization or ordering constraints
     // imposed on other reads or writes
-    writeBeforeOffset = bufferOffset_.load(std::memory_order_relaxed);
+    int32_t writeBeforeOffset = bufferOffset_.load(std::memory_order_relaxed);
+    int32_t writeAfterOffset = 0;
     do {
         writeAfterOffset = writeBeforeOffset + TRACE_ITEM_SIZE;
         if (bufferSize_ < static_cast<size_t>(writeAfterOffset)) {
@@ -204,8 +202,7 @@ void Trace::WriteInfoToBuf(const ManagedThread *thread, Method *method, EventFla
     }
     uint32_t methodActionValue = EncodeMethodAndEventToId(method, flag);
 
-    uint8_t *ptr;
-    ptr = buffer_.get() + writeBeforeOffset;
+    uint8_t *ptr = buffer_.get() + writeBeforeOffset;
     WriteDataByte(ptr, thread->GetId(), numberOf2Bytes_);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     ptr += numberOf2Bytes_;
@@ -228,7 +225,7 @@ uint32_t Trace::EncodeMethodAndEventToId(Method *method, EventFlag flag)
 uint32_t Trace::EncodeMethodToId(Method *method)
 {
     os::memory::LockHolder lock(methodsLock_);
-    uint32_t methodIdValue;
+    uint32_t methodIdValue = 0;
     auto iter = methodIdPandamap_.find(method);
     if (iter != methodIdPandamap_.end()) {
         methodIdValue = iter->second;

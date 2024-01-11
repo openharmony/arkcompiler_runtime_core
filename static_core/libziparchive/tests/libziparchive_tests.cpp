@@ -234,7 +234,7 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
                 os::mem::UnmapRaw(mem, sizeToMmap);
                 CloseCurrentFile(zipfile);
                 CloseArchive(zipfile);
-                ASSERT_EQ(1, 0) << "ExtractToMemory() failed!, uncompressed_length is " << uncompressedLength - 1
+                ASSERT_EQ(1, 0) << "ExtractToMemory() failed!, uncompressed_length is " << (uncompressedLength - 1)
                                 << ", original strlen is " << dlen;
                 return;
             }

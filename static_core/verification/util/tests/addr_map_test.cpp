@@ -27,9 +27,9 @@ namespace panda::verifier::test {
 TEST_F(VerifierTest, AddrMap)
 {
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    char mem[123] = {};
+    char mem[123U] = {};
     AddrMap amap1 {&mem[0], &mem[122U]};
-    AddrMap amap2 {&mem[0], &mem[122u]};
+    AddrMap amap2 {&mem[0], &mem[122U]};
     amap1.Mark(&mem[50U], &mem[60U]);
     EXPECT_TRUE(amap1.HasMark(&mem[50U]));
     EXPECT_TRUE(amap1.HasMark(&mem[60U]));
