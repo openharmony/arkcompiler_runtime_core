@@ -164,7 +164,6 @@ spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-8.ets
 ### issue 14299 (incorrect behavior for tests with boxed type like new Short(0))
 spec/conditional-expression/numeric/expr/numeric-double-object-zero-expression.ets
 ### Trailing lambda issues
-### Negative tests
 ### Valid cases but not supported features
 spec/trailing_lambdas/trailing_only_fn_03_01.ets
 spec/trailing_lambdas/trailing_only_fn_03_03.ets
@@ -616,4 +615,30 @@ spec/expressions/compound_assignment_03_simple_assign_short_mult_double.ets
 spec/expressions/compound_assignment_03_simple_assign_short_mult_float.ets
 spec/expressions/compound_assignment_03_simple_assign_short_mult_long.ets
 spec/expressions/compound_assignment_03_simple_assign_short_mult_number.ets
+###
+
+### Issue 14536: usage of === with primitive types
+spec/expressions/equality/equality_primitive_01_byte_equal_byte.ets
+spec/expressions/equality/equality_primitive_01_byte_equal_byte_016.ets
+spec/expressions/equality/equality_primitive_01_double_equal_double.ets
+spec/expressions/equality/equality_primitive_01_double_equal_double_004.ets
+spec/expressions/equality/equality_primitive_01_double_equal_double_005.ets
+spec/expressions/equality/equality_primitive_01_double_equal_double_006.ets
+spec/expressions/equality/equality_primitive_01_float_equal_float.ets
+spec/expressions/equality/equality_primitive_01_float_equal_float_001.ets
+spec/expressions/equality/equality_primitive_01_float_equal_float_002.ets
+spec/expressions/equality/equality_primitive_01_float_equal_float_003.ets
+spec/expressions/equality/equality_primitive_01_int_equal_int.ets
+spec/expressions/equality/equality_primitive_01_int_equal_int_014.ets
+spec/expressions/equality/equality_primitive_01_long_equal_long.ets
+spec/expressions/equality/equality_primitive_01_long_equal_long_013.ets
+spec/expressions/equality/equality_primitive_01_number_equal_number.ets
+spec/expressions/equality/equality_primitive_01_number_equal_number_007.ets
+spec/expressions/equality/equality_primitive_01_number_equal_number_008.ets
+spec/expressions/equality/equality_primitive_01_number_equal_number_009.ets
+spec/expressions/equality/equality_primitive_01_number_equal_number_010.ets
+spec/expressions/equality/equality_primitive_01_number_equal_number_011.ets
+spec/expressions/equality/equality_primitive_01_number_equal_number_012.ets
+spec/expressions/equality/equality_primitive_01_short_equal_short.ets
+spec/expressions/equality/equality_primitive_01_short_equal_short_015.ets
 ###
