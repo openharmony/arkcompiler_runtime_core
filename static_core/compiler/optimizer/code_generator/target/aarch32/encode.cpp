@@ -2830,7 +2830,7 @@ void Aarch32Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool isFp, in
 }
 
 template <bool IS_STORE>
-void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask)
 {
     if (registers.none()) {
         return;
@@ -2842,7 +2842,7 @@ void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t s
     ScopedTmpRegU32 tmpReg(this);
     auto tmp = VixlReg(tmpReg);
     // Construct single add for big offset
-    if (is_fp) {
+    if (isFp) {
         if ((maxOffset < -VMEM_OFFSET) || (maxOffset > VMEM_OFFSET)) {
             GetMasm()->Add(tmp, baseReg, VixlImm(slot * WORD_SIZE_BYTES));
             slot = 0;
@@ -2855,11 +2855,11 @@ void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t s
             baseReg = tmp;
         }
     }
-    LoadStoreRegistersMainLoop<IS_STORE>(registers, is_fp, slot, base, mask);
+    LoadStoreRegistersMainLoop<IS_STORE>(registers, isFp, slot, base, mask);
 }
 
 template <bool IS_STORE>
-void Aarch32Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp)
+void Aarch32Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp)
 {
     if (registers.none()) {
         return;
@@ -2875,7 +2875,7 @@ void Aarch32Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
     ScopedTmpRegU32 tmpReg(this);
     auto tmp = VixlReg(tmpReg);
     // Construct single add for big offset
-    if (is_fp) {
+    if (isFp) {
         if ((maxOffset < -VMEM_OFFSET) || (maxOffset > VMEM_OFFSET)) {
             GetMasm()->Add(tmp, baseReg, VixlImm(slot * WORD_SIZE_BYTES));
             slot = 0;
@@ -2888,12 +2888,12 @@ void Aarch32Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
             baseReg = tmp;
         }
     }
-    for (auto i = start_reg; i < registers.size(); i++) {
+    for (auto i = startReg; i < registers.size(); i++) {
         if (!registers.test(i)) {
             continue;
         }
-        auto mem = MemOperand(baseReg, (slot + i - start_reg) * WORD_SIZE_BYTES);
-        if (is_fp) {
+        auto mem = MemOperand(baseReg, (slot + i - startReg) * WORD_SIZE_BYTES);
+        if (isFp) {
             auto reg = vixl::aarch32::SRegister(i);
             if constexpr (IS_STORE) {  // NOLINT
                 GetMasm()->Vstr(reg, mem);

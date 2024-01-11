@@ -95,7 +95,7 @@ private:
 #ifndef NDEBUG
     void InsertBreakpoints(PandaString const &methodName, Method::UniqId id);
 #else
-    void InsertBreakpoints([[maybe_unused]] PandaString const &method_name, [[maybe_unused]] Method::UniqId id) {}
+    void InsertBreakpoints([[maybe_unused]] PandaString const &methodName, [[maybe_unused]] Method::UniqId id) {}
 #endif
 
     void InsertIntoWhitelist(const PandaString &name, bool isClassName, Method::UniqId id);

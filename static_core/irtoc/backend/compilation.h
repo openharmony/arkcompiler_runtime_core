@@ -62,7 +62,7 @@ private:
     bool hasDebugInfo_ {false};
 #endif
 #ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
-    UsedRegisters used_registers_;
+    UsedRegisters usedRegisters_;
 #endif
 };
 }  // namespace panda::irtoc

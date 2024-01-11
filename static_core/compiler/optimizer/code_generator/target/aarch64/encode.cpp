@@ -2605,7 +2605,7 @@ void Aarch64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, const void *entryP
 }
 
 template <bool IS_STORE>
-void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp)
+void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp)
 {
     if (registers.none()) {
         return;
@@ -2618,7 +2618,7 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
     }
     // Construct single add for big offset
     size_t spOffset = 0;
-    auto lastOffset = (slot + lastReg - start_reg) * DOUBLE_WORD_SIZE_BYTES;
+    auto lastOffset = (slot + lastReg - startReg) * DOUBLE_WORD_SIZE_BYTES;
 
     if (!vixl::aarch64::Assembler::IsImmLSPair(lastOffset, vixl::aarch64::kXRegSizeInBytesLog2)) {
         ScopedTmpReg lrReg(this, true);
@@ -2631,9 +2631,9 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
             GetMasm()->Mov(tmp, VixlImm(spOffset));
             GetMasm()->Add(tmp, vixl::aarch64::sp, tmp);
         }
-        LoadStoreRegistersLoop<IS_STORE>(registers, slot, start_reg, is_fp, tmp);
+        LoadStoreRegistersLoop<IS_STORE>(registers, slot, startReg, isFp, tmp);
     } else {
-        LoadStoreRegistersLoop<IS_STORE>(registers, slot, start_reg, is_fp, vixl::aarch64::sp);
+        LoadStoreRegistersLoop<IS_STORE>(registers, slot, startReg, isFp, vixl::aarch64::sp);
     }
 }
 
@@ -2699,7 +2699,7 @@ void Aarch64Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool isFp, in
 }
 
 template <bool IS_STORE>
-void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask)
 {
     if (registers.none()) {
         return;
@@ -2726,19 +2726,19 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t s
         base = tmpReg;
     }
 
-    LoadStoreRegistersMainLoop<IS_STORE>(registers, is_fp, slot, base, mask);
+    LoadStoreRegistersMainLoop<IS_STORE>(registers, isFp, slot, base, mask);
 }
 
 template <bool IS_STORE>
-void Aarch64Encoder::LoadStoreRegistersLoop(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp,
+void Aarch64Encoder::LoadStoreRegistersLoop(RegMask registers, ssize_t slot, size_t startReg, bool isFp,
                                             const vixl::aarch64::Register &base_reg)
 {
     size_t i = 0;
-    const auto getNextReg = [&registers, &i, is_fp]() {
+    const auto getNextReg = [&registers, &i, isFp]() {
         for (; i < registers.size(); i++) {
             if (registers.test(i)) {
                 return CPURegister(i++, vixl::aarch64::kXRegSize,
-                                   is_fp ? CPURegister::kVRegister : CPURegister::kRegister);
+                                   isFp ? CPURegister::kVRegister : CPURegister::kRegister);
             }
         }
         return CPURegister();
@@ -2750,19 +2750,19 @@ void Aarch64Encoder::LoadStoreRegistersLoop(RegMask registers, ssize_t slot, siz
         if (nextReg.IsValid() && (nextReg.GetCode() - 1 == currReg.GetCode())) {
             if constexpr (IS_STORE) {  // NOLINT
                 GetMasm()->Stp(currReg, nextReg,
-                               MemOperand(base_reg, (slot + currReg.GetCode() - start_reg) * DOUBLE_WORD_SIZE_BYTES));
+                               MemOperand(base_reg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             } else {  // NOLINT
                 GetMasm()->Ldp(currReg, nextReg,
-                               MemOperand(base_reg, (slot + currReg.GetCode() - start_reg) * DOUBLE_WORD_SIZE_BYTES));
+                               MemOperand(base_reg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             }
             nextReg = getNextReg();
         } else {
             if constexpr (IS_STORE) {  // NOLINT
                 GetMasm()->Str(currReg,
-                               MemOperand(base_reg, (slot + currReg.GetCode() - start_reg) * DOUBLE_WORD_SIZE_BYTES));
+                               MemOperand(base_reg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             } else {  // NOLINT
                 GetMasm()->Ldr(currReg,
-                               MemOperand(base_reg, (slot + currReg.GetCode() - start_reg) * DOUBLE_WORD_SIZE_BYTES));
+                               MemOperand(base_reg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             }
         }
     }

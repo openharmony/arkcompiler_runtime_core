@@ -18,51 +18,51 @@
 namespace panda::disasm {
 
 pandasm::Type Disassembler::PFTypeToPandasmType(const panda_file::Type& type, panda_file::ProtoDataAccessor& pda,
-                                                size_t& ref_idx) const {
-    pandasm::Type pandasm_type;
+                                                size_t& refIdx) const {
+    pandasm::Type pandasmType;
 
     switch (type.GetId()) {
 % PandaFile::types.each do |type|
     case panda_file::Type::TypeId::<%= type.name.upcase %>:
 % if (type.name == "reference")
-        pandasm_type = pandasm::Type::FromDescriptor(StringDataToString(file_->GetStringData(pda.GetReferenceType(ref_idx++))));
+        pandasmType = pandasm::Type::FromDescriptor(StringDataToString(file_->GetStringData(pda.GetReferenceType(refIdx++))));
 % elsif (type.name == "tagged")
-        pandasm_type = pandasm::Type("any", 0);
+        pandasmType = pandasm::Type("any", 0);
 % else
-        pandasm_type = pandasm::Type("<%= type.name %>", 0);
+        pandasmType = pandasm::Type("<%= type.name %>", 0);
 % end
         break;
 % end
     }
 
-    return pandasm_type;
+    return pandasmType;
 }
 
 pandasm::Type Disassembler::FieldTypeToPandasmType(const uint32_t& type) const {
-    pandasm::Type field_type;
+    pandasm::Type fieldType;
 
-    auto pf_type = panda_file::Type::GetTypeFromFieldEncoding(type);
+    auto pfType = panda_file::Type::GetTypeFromFieldEncoding(type);
 
-    switch (pf_type.GetId()) {
+    switch (pfType.GetId()) {
 % PandaFile::types.each do |type|
 % if (type.name != "reference" && type.name != "tagged")
     case panda_file::Type::TypeId::<%= type.name.upcase %>:
-        field_type = pandasm::Type("<%= type.name %>", 0);
+        fieldType = pandasm::Type("<%= type.name %>", 0);
         break;
 % end
 % end
     case panda_file::Type::TypeId::TAGGED:
-        field_type = pandasm::Type("any", 0);
+        fieldType = pandasm::Type("any", 0);
         break;
     default:
         panda_file::File::EntityId field_id(type);
-        std::string type_name = StringDataToString(file_->GetStringData(field_id));
+        std::string typeName = StringDataToString(file_->GetStringData(field_id));
 
-        field_type = pandasm::Type::FromDescriptor(type_name);
+        fieldType = pandasm::Type::FromDescriptor(typeName);
         break;
     }
 
-    return field_type;
+    return fieldType;
 }
 
 } // namespace panda::disasm

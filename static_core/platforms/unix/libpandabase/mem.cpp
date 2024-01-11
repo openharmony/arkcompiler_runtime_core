@@ -204,8 +204,8 @@ void *MapRWAnonymousWithAlignmentRaw(size_t size, size_t aligmentInBytes, bool f
         PartiallyUnmapRaw(result, unusedInStart);
     }
     if (unusedInEnd != 0) {
-        auto end_part = reinterpret_cast<void *>(alignedMem + size);
-        PartiallyUnmapRaw(end_part, unusedInEnd);
+        auto endPart = reinterpret_cast<void *>(alignedMem + size);
+        PartiallyUnmapRaw(endPart, unusedInEnd);
     }
     return reinterpret_cast<void *>(alignedMem);
 }
@@ -229,15 +229,15 @@ void *MapRWAnonymousInFirst4GB(void *minMem, size_t size, [[maybe_unused]] size_
     }
     uintptr_t requestedAddr = ToUintPtr(minMem);
     for (; requestedAddr + size <= HIGH_BOUND_32BIT_ADDRESS; requestedAddr += iterativeStep) {
-        void *mmap_addr =
+        void *mmapAddr =
             mmap(ToVoidPtr(requestedAddr), size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (mmap_addr == MAP_FAILED) {
+        if (mmapAddr == MAP_FAILED) {
             continue;
         }
-        if (mmap_addr == ToVoidPtr(requestedAddr)) {
+        if (mmapAddr == ToVoidPtr(requestedAddr)) {
             break;
         }
-        if (munmap(mmap_addr, size) != 0) {
+        if (munmap(mmapAddr, size) != 0) {
             return nullptr;
         }
     }

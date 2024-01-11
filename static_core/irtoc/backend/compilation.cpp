@@ -138,7 +138,7 @@ void Compilation::CollectUsedRegisters([[maybe_unused]] panda::ArenaAllocator *a
         for (auto unit : units_) {
             if ((unit->GetGraph()->GetMode().IsInterpreter() || unit->GetGraph()->GetMode().IsInterpreterEntry()) &&
                 unit->GetCompilationResult() != CompilationResult::ARK) {
-                used_registers_ |= UsedRegistersCollector::CollectForCode(allocator, unit->GetCode());
+                usedRegisters_ |= UsedRegistersCollector::CollectForCode(allocator, unit->GetCode());
             }
         }
     }
@@ -148,26 +148,26 @@ void Compilation::CollectUsedRegisters([[maybe_unused]] panda::ArenaAllocator *a
 void Compilation::CheckUsedRegisters()
 {
 #ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
-    if (used_registers_.gpr.Count() > 0) {
-        LOG(INFO, IRTOC) << "LLVM Irtoc compilation: used registers " << used_registers_.gpr;
-        used_registers_.gpr &= GetCalleeRegsMask(arch_, false);
-        auto diff = used_registers_.gpr ^ GetCalleeRegsMask(arch_, false, true);
+    if (usedRegisters_.gpr.Count() > 0) {
+        LOG(INFO, IRTOC) << "LLVM Irtoc compilation: used registers " << usedRegisters_.gpr;
+        usedRegisters_.gpr &= GetCalleeRegsMask(arch_, false);
+        auto diff = usedRegisters_.gpr ^ GetCalleeRegsMask(arch_, false, true);
         if (diff.Any()) {
             LOG(FATAL, IRTOC) << "LLVM Irtoc compilation callee saved register usage is different from optimized set"
                               << std::endl
                               << "Expected: " << GetCalleeRegsMask(arch_, false, true) << std::endl
-                              << "Got: " << used_registers_.gpr;
+                              << "Got: " << usedRegisters_.gpr;
         }
     }
-    if (used_registers_.fp.Count() > 0) {
-        LOG(INFO, IRTOC) << "LLVM Irtoc compilation: used fp registers " << used_registers_.fp;
-        used_registers_.fp &= GetCalleeRegsMask(arch_, true);
-        auto diff = used_registers_.fp ^ GetCalleeRegsMask(arch_, true, true);
+    if (usedRegisters_.fp.Count() > 0) {
+        LOG(INFO, IRTOC) << "LLVM Irtoc compilation: used fp registers " << usedRegisters_.fp;
+        usedRegisters_.fp &= GetCalleeRegsMask(arch_, true);
+        auto diff = usedRegisters_.fp ^ GetCalleeRegsMask(arch_, true, true);
         if (diff.Any()) {
             LOG(FATAL, IRTOC) << "LLVM Irtoc compilation callee saved fp register usage is different from optimized set"
                               << std::endl
                               << "Expected: " << GetCalleeRegsMask(arch_, true, true) << std::endl
-                              << "Got: " << used_registers_.fp;
+                              << "Got: " << usedRegisters_.fp;
         }
     }
 #endif

@@ -45,10 +45,12 @@ FILE_BEGIN = %{
 using namespace panda::compiler;
 
 namespace panda::irtoc \{
+// NOLINTBEGIN(readability-identifier-naming)
 
 }
 
 FILE_END = %{
+// NOLINTEND(readability-identifier-naming)
 \} // namespace panda::irtoc
 
 #endif  // __clang_analyzer__

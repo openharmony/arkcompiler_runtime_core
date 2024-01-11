@@ -17,19 +17,19 @@
 // NOLINTNEXTLINE(readability-function-size)
 Graph* GenerateIntrinsicOperation(Inst* inst) {
     auto graph = CreateGraphWithOneBasicBlock();
-    auto intrinsic_inst = inst->CastToIntrinsic();
-    switch (intrinsic_inst->GetIntrinsicId()) {
+    auto intrinsicInst = inst->CastToIntrinsic();
+    switch (intrinsicInst->GetIntrinsicId()) {
 % Compiler::intrinsics.each do |intrinsic|
 %   next unless intrinsic.has_impl?
             case RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>: {
-                size_t inputs_count = <%= intrinsic.arguments.length() %>;
+                size_t inputsCount = <%= intrinsic.arguments.length() %>;
                 if (inst->RequireState()) {
-                    inputs_count++;
+                    inputsCount++;
                 }
-                intrinsic_inst->AllocateInputTypes(&allocator_, inputs_count);
+                intrinsicInst->AllocateInputTypes(&allocator_, inputsCount);
 % intrinsic.arguments.each_with_index do |arg, i|
-                    intrinsic_inst->AppendInput(CreateParamInst(graph, DataType::<%= arg %>, <%= i %>));
-                    intrinsic_inst->AddInputType(DataType::<%= arg %>);
+                    intrinsicInst->AppendInput(CreateParamInst(graph, DataType::<%= arg %>, <%= i %>));
+                    intrinsicInst->AddInputType(DataType::<%= arg %>);
 % end
                 break;
             }
@@ -37,7 +37,7 @@ Graph* GenerateIntrinsicOperation(Inst* inst) {
         default:
             UNREACHABLE();
     }
-    AdjustFlags(intrinsic_inst->GetIntrinsicId(), inst);
+    AdjustFlags(intrinsicInst->GetIntrinsicId(), inst);
     ASSERT(graph->GetVectorBlocks().size() > 2);
     auto block = graph->GetVectorBlocks()[2];
     if (inst->RequireState()) {

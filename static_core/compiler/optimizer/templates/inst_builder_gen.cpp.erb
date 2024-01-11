@@ -161,7 +161,7 @@ end
 #endif
 
 namespace panda::compiler {
-
+// NOLINTBEGIN(readability-identifier-naming)
 // NOLINTNEXTLINE(readability-function-size)
 void InstBuilder::BuildInstruction(const BytecodeInstruction* instruction) {
     switch(instruction->GetOpcode()) {
@@ -240,5 +240,5 @@ bool IrBuilderExternalInliningAnalysis::IsSuitableForInline(const BytecodeInstru
     }
     return false;
 }
-
+// NOLINTEND(readability-identifier-naming)
 }  // namespace panda::compiler

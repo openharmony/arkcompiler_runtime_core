@@ -23,9 +23,9 @@
 namespace panda {
 // ----------------------------------------------------------------------------
 // User-defined suffixes
-constexpr int operator""_I(unsigned long long v)
+constexpr int operator""_I(unsigned long long v)  // NOLINT(google-runtime-int)
 {
-    if (v > static_cast<unsigned long long>(std::numeric_limits<int>::max())) {
+    if (v > static_cast<unsigned long long>(std::numeric_limits<int>::max())) {  // NOLINT(google-runtime-int)
         UNREACHABLE_CONSTEXPR();
     }
     return static_cast<int>(v);

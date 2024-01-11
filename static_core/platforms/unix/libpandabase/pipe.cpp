@@ -59,11 +59,11 @@ int SetFdNonblocking(const UniqueFd &fd)
 
 Expected<size_t, Error> ReadFromPipe(const UniqueFd &pipeFd, void *buf, size_t size)
 {
-    ssize_t bytes_read = PANDA_FAILURE_RETRY(read(pipeFd.Get(), buf, size));
-    if (bytes_read < 0) {
+    ssize_t bytesRead = PANDA_FAILURE_RETRY(read(pipeFd.Get(), buf, size));
+    if (bytesRead < 0) {
         return Unexpected(Error(errno));
     }
-    return {static_cast<size_t>(bytes_read)};
+    return {static_cast<size_t>(bytesRead)};
 }
 
 Expected<size_t, Error> WriteToPipe(const UniqueFd &pipeFd, const void *buf, size_t size)
