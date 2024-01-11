@@ -167,7 +167,7 @@ StringItem::StringItem(File::StringData data)
 size_t StringItem::CalculateSize() const
 {
     size_t n = str_.size();
-    return leb128::UnsignedEncodingSize(utf16Length_ << 1U | isAscii_) + n;
+    return leb128::UnsignedEncodingSize((utf16Length_ << 1U) | isAscii_) + n;
 }
 
 bool StringItem::Write(Writer *writer)
@@ -179,7 +179,7 @@ bool StringItem::Write(Writer *writer)
         return false;
     }
 
-    if (!writer->WriteUleb128(utf16Length_ << 1U | isAscii_)) {
+    if (!writer->WriteUleb128((utf16Length_ << 1U) | isAscii_)) {
         return false;
     }
 

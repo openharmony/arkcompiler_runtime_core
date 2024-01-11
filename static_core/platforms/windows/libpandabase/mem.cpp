@@ -230,12 +230,14 @@ static size_t GetCacheLineSizeFromOs()
     SYSTEM_LOGICAL_PROCESSOR_INFORMATION *buffer = 0;
 
     GetLogicalProcessorInformation(0, &bufferSize);
-    /* if (bufferSize == 0) {
+#ifdef ENABLE_THIS_CODE_IN_FUTURE
+    if (bufferSize == 0) {
         // malloc behavior for zero bytes is implementation defined
         // So, check it here
         LOG_IF(lineSize == 0, FATAL, RUNTIME) << "Can't get cache line size from OS";
         UNREACHABLE();
-    } */
+    }
+#endif  // ENABLE_THIS_CODE_IN_FUTURE
     buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION *)malloc(bufferSize);
     GetLogicalProcessorInformation(&buffer[0], &bufferSize);
 

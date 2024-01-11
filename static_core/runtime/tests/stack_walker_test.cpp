@@ -197,7 +197,7 @@ TEST_F(StackWalkerTest, ModifyVreg)
             HOOK_ASSERT(walker.IsCFrame(), return 1);
             success = walker.IterateVRegsWithInfo([&walker](const auto &regInfo, const auto &reg) {
                 if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == 27L, return true;);
+                    HOOK_ASSERT(reg.GetLong() == 27L, return true);
                     walker.SetVRegValue(regInfo, FRAME_VALUES[2U]);
                 }
                 return true;
@@ -207,7 +207,7 @@ TEST_F(StackWalkerTest, ModifyVreg)
             HOOK_ASSERT(!walker.IsCFrame(), return 1);
             success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
                 if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[0]), return true;);
+                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[0]), return true);
                 }
                 return true;
             });
@@ -217,7 +217,7 @@ TEST_F(StackWalkerTest, ModifyVreg)
             HOOK_ASSERT(walker.IsCFrame(), return 1);
             success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
                 if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[1]), return true;);
+                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[1]), return true);
                 }
                 return true;
             });
@@ -227,7 +227,7 @@ TEST_F(StackWalkerTest, ModifyVreg)
             HOOK_ASSERT(walker.IsCFrame(), return 1);
             success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
                 if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[2U]), return true;);
+                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[2U]), return true);
                 }
                 return true;
             });

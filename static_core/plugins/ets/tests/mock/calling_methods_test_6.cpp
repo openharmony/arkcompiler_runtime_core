@@ -231,8 +231,8 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
                                                    static_cast<ets_int>(121_I)),
               static_cast<ets_double>(0.0));
 
-    // NOTE(m.morozov): Uncomment this test, when virtual calls will be implemented
-    /*
+// NOTE(m.morozov): enable this test, when virtual calls will be implemented
+#ifdef ENABLE_THIS_CODE_IN_FUTURE
     // Call<type>Method part
     env->CallVoidMethod(obj, void_id, static_cast<ets_int>(11), static_cast<ets_int>(121_I));
     EXPECT_EQ(env->GetIntField(obj, d_member_id), static_cast<ets_int>(11));
@@ -243,15 +243,20 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     EXPECT_EQ(env->GetIntField(obj, d_member_id), static_cast<ets_int>(42_I));
 
     EXPECT_EQ(env->CallBooleanMethod(obj, boolean_id, static_cast<ets_boolean>(1), static_cast<ets_int>(121_I)),
-    static_cast<ets_boolean>(1)); EXPECT_EQ(env->CallByteMethod(obj, byte_id, static_cast<ets_byte>(1),
-    static_cast<ets_int>(121_I)), static_cast<ets_byte>(1)); EXPECT_EQ(env->CallCharMethod(obj, char_id,
-    static_cast<ets_char>(1), static_cast<ets_int>(121_I)), static_cast<ets_char>(1));
+              static_cast<ets_boolean>(1));
+    EXPECT_EQ(env->CallByteMethod(obj, byte_id, static_cast<ets_byte>(1), static_cast<ets_int>(121_I)),
+              static_cast<ets_byte>(1));
+    EXPECT_EQ(env->CallCharMethod(obj, char_id, static_cast<ets_char>(1), static_cast<ets_int>(121_I)),
+              static_cast<ets_char>(1));
     EXPECT_EQ(env->CallShortMethod(obj, short_id, static_cast<ets_short>(1), static_cast<ets_int>(121_I)),
-    static_cast<ets_short>(1)); EXPECT_EQ(env->CallIntMethod(obj, int_id), static_cast<ets_int>(1));
+              static_cast<ets_short>(1));
+    EXPECT_EQ(env->CallIntMethod(obj, int_id), static_cast<ets_int>(1));
     EXPECT_EQ(env->CallLongMethod(obj, long_id, static_cast<ets_long>(1), static_cast<ets_int>(121_I)),
-    static_cast<ets_long>(1)); EXPECT_EQ(env->CallFloatMethod(obj, float_id, static_cast<ets_float>(1.0F),
-    static_cast<ets_int>(121_I)), static_cast<ets_float>(1.0F)); EXPECT_EQ(env->CallDoubleMethod(obj, double_id,
-    static_cast<ets_double>(1.0), static_cast<ets_int>(121_I)), static_cast<ets_double>(1.0));
+              static_cast<ets_long>(1));
+    EXPECT_EQ(env->CallFloatMethod(obj, float_id, static_cast<ets_float>(1.0F), static_cast<ets_int>(121_I)),
+              static_cast<ets_float>(1.0F));
+    EXPECT_EQ(env->CallDoubleMethod(obj, double_id, static_cast<ets_double>(1.0), static_cast<ets_int>(121_I)),
+              static_cast<ets_double>(1.0));
 
     // Call<type>MethodArray part
     env->CallVoidMethodArray(obj, void_id, void_args.data());
@@ -280,18 +285,24 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     EXPECT_EQ(env->IsInstanceOf(a_obj_from_List_direct_calls, a_cls), ETS_TRUE);
     EXPECT_EQ(env->GetIntField(obj, d_member_id), static_cast<ets_int>(42_I));
 
-    EXPECT_EQ(CallBooleanMethodListHelper(env, obj, boolean_id, static_cast<ets_boolean>(1),
-    static_cast<ets_int>(121_I)), static_cast<ets_boolean>(1)); EXPECT_EQ(CallByteMethodListHelper(env, obj, byte_id,
-    static_cast<ets_byte>(1), static_cast<ets_int>(121_I)), static_cast<ets_byte>(1));
+    EXPECT_EQ(
+        CallBooleanMethodListHelper(env, obj, boolean_id, static_cast<ets_boolean>(1), static_cast<ets_int>(121_I)),
+        static_cast<ets_boolean>(1));
+    EXPECT_EQ(CallByteMethodListHelper(env, obj, byte_id, static_cast<ets_byte>(1), static_cast<ets_int>(121_I)),
+              static_cast<ets_byte>(1));
     EXPECT_EQ(CallCharMethodListHelper(env, obj, char_id, static_cast<ets_char>(1), static_cast<ets_int>(121_I)),
-    static_cast<ets_char>(1)); EXPECT_EQ(CallShortMethodListHelper(env, obj, short_id, static_cast<ets_short>(1),
-    static_cast<ets_int>(121_I)), static_cast<ets_short>(1)); EXPECT_EQ(CallIntMethodListHelper(env, obj, int_id),
-    static_cast<ets_int>(1)); EXPECT_EQ(CallLongMethodListHelper(env, obj, long_id, static_cast<ets_long>(1),
-    static_cast<ets_int>(121_I)), static_cast<ets_long>(1)); EXPECT_EQ(CallFloatMethodListHelper(env, obj, float_id,
-    static_cast<ets_float>(1.0F), static_cast<ets_int>(121_I)), static_cast<ets_float>(1.0F));
-    EXPECT_EQ(CallDoubleMethodListHelper(env, obj, double_id, static_cast<ets_double>(1.0),
-    static_cast<ets_int>(121_I)), static_cast<ets_double>(1.0));
-    */
+              static_cast<ets_char>(1));
+    EXPECT_EQ(CallShortMethodListHelper(env, obj, short_id, static_cast<ets_short>(1), static_cast<ets_int>(121_I)),
+              static_cast<ets_short>(1));
+    EXPECT_EQ(CallIntMethodListHelper(env, obj, int_id), static_cast<ets_int>(1));
+    EXPECT_EQ(CallLongMethodListHelper(env, obj, long_id, static_cast<ets_long>(1), static_cast<ets_int>(121_I)),
+              static_cast<ets_long>(1));
+    EXPECT_EQ(CallFloatMethodListHelper(env, obj, float_id, static_cast<ets_float>(1.0F), static_cast<ets_int>(121_I)),
+              static_cast<ets_float>(1.0F));
+    EXPECT_EQ(
+        CallDoubleMethodListHelper(env, obj, double_id, static_cast<ets_double>(1.0), static_cast<ets_int>(121_I)),
+        static_cast<ets_double>(1.0));
+#endif  // ENABLE_THIS_CODE_IN_FUTURE
 }
 
 TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath6)
