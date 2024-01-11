@@ -67,6 +67,12 @@ config("arkruntime_config") {
   if (current_cpu == "arm64") {
     asmflags = [ "-march=armv8-a+crc" ]
   }
+
+  configs = [
+    "//build/config/compiler:optimize_speed",
+    "//build/config/compiler:no_exceptions",
+    "//build/config/compiler:no_rtti",
+  ]
 }
 
 group("arkruntime_header_deps") {
