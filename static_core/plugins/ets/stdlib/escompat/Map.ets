@@ -103,6 +103,8 @@ class MapEntry<K, V> extends Entry<K, V> {
     }
 }
 
+export type Record<K, V> = Map<K, V>;
+
 export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
     private s: Set<MapEntry<K, V>> = new Set<MapEntry<K, V>>()
 
@@ -111,6 +113,7 @@ export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
      */
     constructor() {
     }
+
 
     /**
      * Puts a pair of key and value into the Map
