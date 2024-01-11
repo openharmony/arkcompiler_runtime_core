@@ -216,7 +216,7 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
 #if defined(PANDA_USE_FUTEX)
                         lightlockRetryCount = 0;
 #else
-                        should_inflate = true;
+                        shouldInflate = true;
 #endif
                     }
                 }

@@ -22,7 +22,7 @@
     inst->ClearFlag(static_cast<inst_flags::Flags>(SET_FLAGS));
     inst->SetFlag(static_cast<inst_flags::Flags>(CLEAR_FLAGS));
     // expected flags after inverse flags adjustment
-    auto expected_flags = inst_flags::NO_DCE | inst_flags::NO_CSE | inst_flags::NO_HOIST | inst_flags::BARRIER | inst_flags::REQUIRE_STATE | inst_flags::RUNTIME_CALL;
-    ASSERT_EQ(expected_flags, inst->GetFlagsMask()) << "Fix <%= intrinsic.enum_name %> intrinsic flags";
+    auto expectedFlags = inst_flags::NO_DCE | inst_flags::NO_CSE | inst_flags::NO_HOIST | inst_flags::BARRIER | inst_flags::REQUIRE_STATE | inst_flags::RUNTIME_CALL;
+    ASSERT_EQ(expectedFlags, inst->GetFlagsMask()) << "Fix <%= intrinsic.enum_name %> intrinsic flags";
   }
 % end

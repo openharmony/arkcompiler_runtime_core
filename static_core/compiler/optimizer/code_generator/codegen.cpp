@@ -1097,8 +1097,8 @@ void Codegen::CreateDebugRuntimeCallsForNewObject(Inst *inst, [[maybe_unused]] R
                                                   RegMask preserved)
 {
 #if defined(PANDA_ASAN_ON) || defined(PANDA_TSAN_ON)
-    CallRuntime(inst, EntrypointId::ANNOTATE_SANITIZERS, INVALID_REGISTER, preserved, reg_tlab_start,
-                TypedImm(alloc_size));
+    CallRuntime(inst, EntrypointId::ANNOTATE_SANITIZERS, INVALID_REGISTER, preserved, regTlabStart,
+                TypedImm(allocSize));
 #endif
     if (GetRuntime()->IsTrackTlabAlloc()) {
         CallRuntime(inst, EntrypointId::WRITE_TLAB_STATS, INVALID_REGISTER, preserved, regTlabStart,

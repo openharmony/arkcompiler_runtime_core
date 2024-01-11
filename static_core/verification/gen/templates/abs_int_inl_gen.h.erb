@@ -14,7 +14,7 @@
  */
 // NOLINTBEGIN(cppcoreguidelines-avoid-goto)
 // NOLINTNEXTLINE(readability-function-size)
-inline VerificationStatus AbstractInterpret(VerificationContext& verif_ctx, const uint8_t* pc, EntryPointType code_type) {
+inline VerificationStatus AbstractInterpret(VerificationContext& verifCtx, const uint8_t* pc, EntryPointType codeType) {
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wvoid-ptr-dereference"
@@ -24,20 +24,20 @@ inline VerificationStatus AbstractInterpret(VerificationContext& verif_ctx, cons
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
     constexpr std::size_t DISPATCH_TABLE_HANDLER_NAMES_SIZE = <%= Panda::dispatch_table.handler_names.size %>;
-    std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
+    std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 % Panda::dispatch_table.handler_names.each do |name|
         &&HANDLE_<%= name %>,
 % end
     };
 
-    AbsIntInstructionHandler handler(verif_ctx, pc, code_type);
-    uint8_t secondary_opcode;
+    AbsIntInstructionHandler handler(verifCtx, pc, codeType);
+    uint8_t secondaryOpcode;
 
     if (!handler.IsPrimaryOpcodeValid()) {
         LOG(ERROR, VERIFIER) << "Incorrect opcode";
         return VerificationStatus::ERROR;
     }
-    goto* dispatch_table[handler.GetPrimaryOpcode()];
+    goto* dispatchTable[handler.GetPrimaryOpcode()];
 
 % Panda::instructions.each do |i|
 %   mnemonic = i.mnemonic.split('.').map { |p| p == '64' ? 'Wide' : p.capitalize }.join
@@ -64,22 +64,22 @@ COMMON_BODY:
         LOG(ERROR, VERIFIER) << "Incorrect opcode";
         return VerificationStatus::ERROR;
     }
-    goto* dispatch_table[handler.GetPrimaryOpcode()];    
+    goto* dispatchTable[handler.GetPrimaryOpcode()];    
 }
 HANDLE_INVALID:
     LOG(ERROR, VERIFIER) << "Incorrect opcode";
     return VerificationStatus::ERROR;
 % Panda::prefixes.each do |p|
 HANDLE_<%= p.handler_name %>:
-    secondary_opcode = handler.GetSecondaryOpcode();
-    LOG(DEBUG, VERIFIER) << "ABSINT: Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondary_opcode);
+    secondaryOpcode = handler.GetSecondaryOpcode();
+    LOG(DEBUG, VERIFIER) << "ABSINT: Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondaryOpcode);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    if (secondary_opcode > <%= Panda::dispatch_table.secondary_opcode_bound(p) %> ) {
+    if (secondaryOpcode > <%= Panda::dispatch_table.secondary_opcode_bound(p) %> ) {
         LOG(ERROR, VERIFIER) << "Incorrect opcode";
         return VerificationStatus::ERROR;
     }
     // NOLINTNEXTLINE(readability-magic-numbers)
-    goto *dispatch_table[<%= Panda::dispatch_table.secondary_opcode_offset(p) %> + secondary_opcode];
+    goto *dispatchTable[<%= Panda::dispatch_table.secondary_opcode_offset(p) %> + secondaryOpcode];
 % end
 
 #if defined(__clang__)

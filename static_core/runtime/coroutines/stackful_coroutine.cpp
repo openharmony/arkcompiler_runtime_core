@@ -84,11 +84,11 @@ void StackfulCoroutineContext::Destroy()
 void StackfulCoroutineContext::CleanUp()
 {
 #ifdef PANDA_ASAN_ON
-    void *context_stack_p;
-    size_t context_stack_size;
-    size_t context_guard_size;
-    RetrieveStackInfo(context_stack_p, context_stack_size, context_guard_size);
-    ASAN_UNPOISON_MEMORY_REGION(context_stack_p, context_stack_size);
+    void *contextStackP;
+    size_t contextStackSize;
+    size_t contextGuardSize;
+    RetrieveStackInfo(contextStackP, contextStackSize, contextGuardSize);
+    ASAN_UNPOISON_MEMORY_REGION(contextStackP, contextStackSize);
 #endif  // PANDA_ASAN_ON
 }
 

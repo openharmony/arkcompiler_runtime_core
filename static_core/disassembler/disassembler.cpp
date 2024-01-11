@@ -650,7 +650,7 @@ void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::
     }
 }
 
-LabelTable Disassembler::GetExceptions(pandasm::Function *method, panda_file::File::EntityId method_id,
+LabelTable Disassembler::GetExceptions(pandasm::Function *method, panda_file::File::EntityId methodId,
                                        panda_file::File::EntityId codeId) const
 {
     LOG(DEBUG, DISASSEMBLER) << "[getting exceptions]\ncode id: " << codeId << " (0x" << std::hex << codeId << ")";
@@ -678,7 +678,7 @@ LabelTable Disassembler::GetExceptions(pandasm::Function *method, panda_file::Fi
             if (classIdx == panda_file::INVALID_INDEX) {
                 catchBlockPa.exceptionRecord = "";
             } else {
-                const auto classId = file_->ResolveClassIndex(method_id, classIdx);
+                const auto classId = file_->ResolveClassIndex(methodId, classIdx);
                 catchBlockPa.exceptionRecord = GetFullRecordName(classId);
             }
             if (!LocateCatchBlock(bcIns, bcInsLast, catchBlock, &catchBlockPa, &labelTable, tryIdx, catchIdx)) {

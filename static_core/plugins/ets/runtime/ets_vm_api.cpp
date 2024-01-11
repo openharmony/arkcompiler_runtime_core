@@ -104,15 +104,15 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
     return true;
 }
 
-bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, const bool use_jit, const bool use_aot)
+bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, const bool useJit, const bool useAot)
 {
     auto addOpts = [&](base_options::Options *baseOptions, panda::RuntimeOptions *runtimeOptions) {
         baseOptions->SetLogLevel("info");
         runtimeOptions->SetBootPandaFiles({stdlibAbc, pathAbc});
         runtimeOptions->SetPandaFiles({pathAbc});
         runtimeOptions->SetGcTriggerType("heap-trigger");
-        runtimeOptions->SetCompilerEnableJit(use_jit);
-        runtimeOptions->SetEnableAn(use_aot);
+        runtimeOptions->SetCompilerEnableJit(useJit);
+        runtimeOptions->SetEnableAn(useAot);
         runtimeOptions->SetCoroutineJsMode(true);
         runtimeOptions->SetCoroutineImpl("stackful");
         return true;

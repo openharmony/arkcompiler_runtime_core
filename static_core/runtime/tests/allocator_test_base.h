@@ -981,8 +981,8 @@ inline void AllocatorTest<Allocator>::AsanTest(size_t freeGranularity, size_t po
     for (size_t i = 0; i < ALLOCATIONS_COUNT; ++i) {
         if (i % freeGranularity == 0) {
 #ifdef PANDA_ASAN_ON
-            EXPECT_DEATH(DeathWriteUint64(allocated_elements[i]), "")
-                << "Write " << sizeof(ElementType) << " bytes at address " << std::hex << allocated_elements[i];
+            EXPECT_DEATH(DeathWriteUint64(allocatedElements[i]), "")
+                << "Write " << sizeof(ElementType) << " bytes at address " << std::hex << allocatedElements[i];
 #else
             continue;
 #endif  // PANDA_ASAN_ON

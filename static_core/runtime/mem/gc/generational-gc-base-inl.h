@@ -39,7 +39,7 @@ void GenerationalGC<LanguageConfig>::MarkStack(Marker *marker, GCMarkingStackTyp
         ValidateObject(nullptr, object);
         auto *objectClass = object->template NotAtomicClassAddr<BaseClass>();
         // We need annotation here for the FullMemoryBarrier used in InitializeClassByIdEntrypoint
-        TSAN_ANNOTATE_HAPPENS_AFTER(object_class);
+        TSAN_ANNOTATE_HAPPENS_AFTER(objectClass);
         LOG_DEBUG_GC << "Current object: " << GetDebugInfoAboutObject(object);
 
         ASSERT(!object->IsForwarded());

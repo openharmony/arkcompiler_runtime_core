@@ -151,7 +151,7 @@ TEST_F(MMapFixedTest, MMapAsanTsanTest)
     }
 #if defined(PANDA_ASAN_ON)
     // Check Death:
-    EXPECT_DEATH(DeathWrite64(end_addr), "");
+    EXPECT_DEATH(DeathWrite64(endAddr), "");
 #else
     // Writing must be finished successfully
     DeathWrite64(endAddr);

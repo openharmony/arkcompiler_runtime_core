@@ -87,7 +87,7 @@ public:
             reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(methodCache_[index])));
         // Atomic with acquire order reason: fixes a data race with method_cache_
         auto pair = pairPtr->load(std::memory_order_acquire);
-        TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
+        TSAN_ANNOTATE_HAPPENS_AFTER(pairPtr);
         if (pair.id == id) {
             return pair.ptr;
         }
@@ -106,7 +106,7 @@ public:
         uint32_t index = GetMethodIndex(id);
         auto *pairPtr =
             reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(methodCache_[index])));
-        TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
+        TSAN_ANNOTATE_HAPPENS_BEFORE(pairPtr);
         // Atomic with release order reason: fixes a data race with method_cache_
         pairPtr->store(pair, std::memory_order_release);
 #endif
@@ -122,7 +122,7 @@ public:
             reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(fieldCache_[index])));
         // Atomic with acquire order reason: fixes a data race with field_cache_
         auto pair = pairPtr->load(std::memory_order_acquire);
-        TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
+        TSAN_ANNOTATE_HAPPENS_AFTER(pairPtr);
         if (pair.id == id) {
             return pair.ptr;
         }
@@ -141,7 +141,7 @@ public:
         FieldCachePair pair;
         pair.id = id;
         pair.ptr = field;
-        TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
+        TSAN_ANNOTATE_HAPPENS_BEFORE(pairPtr);
         // Atomic with release order reason: fixes a data race with field_cache_
         pairPtr->store(pair, std::memory_order_release);
 #endif
@@ -157,7 +157,7 @@ public:
             reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(classCache_[index])));
         // Atomic with acquire order reason: fixes a data race with class_cache_
         auto pair = pairPtr->load(std::memory_order_acquire);
-        TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
+        TSAN_ANNOTATE_HAPPENS_AFTER(pairPtr);
         if (pair.id == id) {
             return pair.ptr;
         }
@@ -176,7 +176,7 @@ public:
         uint32_t index = GetClassIndex(id);
         auto *pairPtr =
             reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(classCache_[index])));
-        TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
+        TSAN_ANNOTATE_HAPPENS_BEFORE(pairPtr);
         // Atomic with release order reason: fixes a data race with class_cache_
         pairPtr->store(pair, std::memory_order_release);
 #endif
@@ -201,7 +201,7 @@ public:
                 reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(classCache_[i])));
             // Atomic with acquire order reason: fixes a data race with class_cache_
             auto pair = pairPtr->load(std::memory_order_acquire);
-            TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
+            TSAN_ANNOTATE_HAPPENS_AFTER(pairPtr);
             if (pair.ptr != nullptr) {
                 if (!cb(pair.ptr)) {
                     return false;

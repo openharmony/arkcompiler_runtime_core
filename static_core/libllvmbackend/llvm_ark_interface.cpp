@@ -216,9 +216,9 @@ std::string LLVMArkInterface::GetUniqMethodName(LLVMArkInterface::MethodPtr meth
     uniqName.append("_id_");
     uniqName.append(std::to_string(runtime_->GetUniqMethodId(methodPtr)));
 #else
-    std::stringstream ss_uniq_name;
-    ss_uniq_name << "f_" << std::hex << method_ptr;
-    auto uniq_name = ss_uniq_name.str();
+    std::stringstream ssUniqName;
+    ssUniqName << "f_" << std::hex << methodPtr;
+    auto uniqName = ssUniqName.str();
 #endif
     return uniqName;
 }

@@ -36,6 +36,7 @@ namespace panda::verifier::plugin {
 % Common::plugins.each do |plugin_lang, plugin_opts|
 %   next unless plugin_opts["Verification"]
 %   if plugin_opts["Verification"]["header"]
+// NOLINTNEXTLINE(readability-identifier-naming)
 static <%= plugin_opts["Verification"]["plugin_class"] %> <%= plugin_lang %>_PLUGIN;
 %   end
 % end

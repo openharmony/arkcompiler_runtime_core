@@ -79,10 +79,10 @@ TEST_F(BitmapTest, OrderPageAlignment)
 TEST_F(BitmapTest, TSANMultithreadingTest)
 {
 #ifdef PANDA_TSAN_ON
-    const size_t heap_capacity = 1_MB;
-    auto bm_ptr = std::make_unique<BitmapWordType[]>(heap_capacity >> MemBitmap<>::LOG_BITSPERWORD);
-    auto heap_begin = BitmapTest::HEAP_STARTING_ADDRESS;
-    MemBitmap<> bm(ToVoidPtr(heap_begin), heap_capacity, bm_ptr.get());
+    const size_t heapCapacity = 1_MB;
+    auto bmPtr = std::make_unique<BitmapWordType[]>(heapCapacity >> MemBitmap<>::LOG_BITSPERWORD);
+    auto heapBegin = BitmapTest::HEAP_STARTING_ADDRESS;
+    MemBitmap<> bm(ToVoidPtr(heapBegin), heapCapacity, bm_ptr.get());
 
     std::srand(0xBADDEAD);
     size_t iterations;
@@ -92,28 +92,28 @@ TEST_F(BitmapTest, TSANMultithreadingTest)
     iterations = 1000U;
 #endif
 
-    auto iterate_thread = std::thread([&bm, &iterations] {
+    auto iterateThread = std::thread([&bm, &iterations] {
         // we do less iterations for IterateOverMarkedChunks
         for (size_t i = 0; i < iterations; i++) {
             bm.IterateOverMarkedChunks<true>([](const void *object) { ASSERT_NE(object, nullptr); });
         }
     });
 
-    auto set_thread = std::thread([&bm, &heap_begin, &iterations] {
+    auto setThread = std::thread([&bm, &heapBegin, &iterations] {
         for (size_t i = 0; i < iterations * iterations; i++) {
             bool value = std::rand() % 2 == 1;
-            size_t offset = FnRounddown(std::rand() % heap_capacity, 4_KB);
+            size_t offset = FnRounddown(std::rand() % heapCapacity, 4_KB);
 
             if (value) {
-                bm.AtomicTestAndSet(ToVoidPtr(heap_begin + offset));
+                bm.AtomicTestAndSet(ToVoidPtr(heapBegin + offset));
 
             } else {
-                bm.AtomicTestAndClear(ToVoidPtr(heap_begin + offset));
+                bm.AtomicTestAndClear(ToVoidPtr(heapBegin + offset));
             }
         }
     });
-    iterate_thread.join();
-    set_thread.join();
+    iterateThread.join();
+    setThread.join();
 #endif
 }
 

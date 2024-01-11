@@ -93,23 +93,23 @@ public:
 %        constexpr bool  EXC_SRC = false;
 %    ),
 %    "CondJump_" => %(
-%        const InstructionType inst_type = InstructionType::COND_JUMP;
+%        const InstructionType instType = InstructionType::COND_JUMP;
 %        LOG_INST();
 %    ),
 %    "NoncondJump_" => %(
-%        const InstructionType inst_type = InstructionType::JUMP;
+%        const InstructionType instType = InstructionType::JUMP;
 %        LOG_INST();
 %    ),
 %    "InstTypeThrow_" => %(
-%        const InstructionType inst_type = InstructionType::THROW;
+%        const InstructionType instType = InstructionType::THROW;
 %        LOG_INST();
 %    ),
 %    "InstTypeReturn_" => %(
-%        const InstructionType inst_type = InstructionType::RETURN;
+%        const InstructionType instType = InstructionType::RETURN;
 %        LOG_INST();
 %    ),
 %    "InstTypeNormal_" => %(
-%        const InstructionType inst_type = InstructionType::NORMAL;
+%        const InstructionType instType = InstructionType::NORMAL;
 %        LOG_INST() << (EXC_SRC ? " (exception source)" : "" );
 %    ),
 %    "HasJump_" => %(
@@ -120,7 +120,7 @@ public:
 %            return VerificationStatus::ERROR;
 %        }
 %        auto target_inst = inst_.JumpTo(imm);
-%        const uint8_t* jump_pc = target_inst.GetAddress();
+%        const uint8_t* jumpPc = target_inst.GetAddress();
 %        if (!target_inst.IsValid()) {
 %            auto offset = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(pc) - reinterpret_cast<uintptr_t>(inst_.GetFrom()));
 %            LOG(ERROR, VERIFIER) << "Jump offset is out of bounds of method body. "
@@ -130,11 +130,11 @@ public:
 %        }
 %    ),
 %    "HasNoJump_" => %(
-%        const uint8_t* jump_pc = nullptr;
+%        const uint8_t* jumpPc = nullptr;
 %    ),
 %    "GetNext_" => %(
 %        inst_ = inst_.GetNext<FORMAT>();
-%        return handler_(inst_type, pc, sz, EXC_SRC, jump_pc);
+%        return handler_(instType, pc, sz, EXC_SRC, jumpPc);
 %    )
 % }
 %
@@ -175,7 +175,7 @@ VerificationStatus IterateOverInstructions(const uint8_t* pc, const uint8_t* fro
 #endif
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    std::array<const void*, <%= Panda::dispatch_table.handler_names.size %>> dispatch_table{
+    std::array<const void*, <%= Panda::dispatch_table.handler_names.size %>> dispatchTable{
 % Panda::dispatch_table.handler_names.each do |name|
         &&HANDLE_<%= name %>,
 % end
@@ -183,14 +183,14 @@ VerificationStatus IterateOverInstructions(const uint8_t* pc, const uint8_t* fro
 
     CflowIterInstructionHandler handler(pc, from, to, std::move(cflow_handler));
     std::optional<VerificationStatus> status;
-    uint8_t secondary_opcode;
+    uint8_t secondaryOpcode;
 
     if (!handler.IsPrimaryOpcodeValid()) {
         LOG(ERROR, VERIFIER) << "Incorrect opcode";
         return VerificationStatus::ERROR;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-goto)
-    goto* dispatch_table[handler.GetPrimaryOpcode()];
+    goto* dispatchTable[handler.GetPrimaryOpcode()];
 
 % hash_handle_variants = Hash.new()
 % array_to_paste_zip = array_first_funcs_names.zip(dispatch_table_hash.values)
@@ -238,7 +238,7 @@ COMMON_BODY:
         return VerificationStatus::ERROR;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-goto)
-    goto* dispatch_table[handler.GetPrimaryOpcode()];
+    goto* dispatchTable[handler.GetPrimaryOpcode()];
 }
 HANDLE_INVALID:
     LOG(DEBUG, VERIFIER) << "Opcode value is out of range. "
@@ -249,16 +249,16 @@ HANDLE_INVALID:
     return VerificationStatus::ERROR;
 % Panda::prefixes.each do |p|
 HANDLE_<%= p.handler_name %>:
-    secondary_opcode = handler.GetSecondaryOpcode();
-    LOG(DEBUG, VERIFIER) << "CFLOW: Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondary_opcode);
+    secondaryOpcode = handler.GetSecondaryOpcode();
+    LOG(DEBUG, VERIFIER) << "CFLOW: Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondaryOpcode);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    if (secondary_opcode > <%= Panda::dispatch_table.secondary_opcode_bound(p) %> ) {
+    if (secondaryOpcode > <%= Panda::dispatch_table.secondary_opcode_bound(p) %> ) {
         LOG(ERROR, VERIFIER) << "Incorrect opcode";
         return VerificationStatus::ERROR;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-goto,readability-magic-numbers)
-    goto *dispatch_table[<%= Panda::dispatch_table.secondary_opcode_offset(p) %> + secondary_opcode];
+    goto *dispatchTable[<%= Panda::dispatch_table.secondary_opcode_offset(p) %> + secondaryOpcode];
 % end
 
 #if defined(__clang__)
