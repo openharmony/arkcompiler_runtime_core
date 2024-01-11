@@ -82,7 +82,7 @@ TEST_F(BitmapTest, TSANMultithreadingTest)
     const size_t heapCapacity = 1_MB;
     auto bmPtr = std::make_unique<BitmapWordType[]>(heapCapacity >> MemBitmap<>::LOG_BITSPERWORD);
     auto heapBegin = BitmapTest::HEAP_STARTING_ADDRESS;
-    MemBitmap<> bm(ToVoidPtr(heapBegin), heapCapacity, bm_ptr.get());
+    MemBitmap<> bm(ToVoidPtr(heapBegin), heapCapacity, bmPtr.get());
 
     std::srand(0xBADDEAD);
     size_t iterations;

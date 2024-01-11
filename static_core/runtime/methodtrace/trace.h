@@ -32,7 +32,8 @@
 namespace panda {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static os::memory::Mutex g_traceLock;
+extern os::memory::Mutex g_traceLock;
+
 enum EventFlag {
     TRACE_METHOD_ENTER = 0x00,
     TRACE_METHOD_EXIT = 0x01,

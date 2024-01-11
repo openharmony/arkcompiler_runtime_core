@@ -59,7 +59,7 @@ Logger::ComponentMask Logger::ComponentMaskFromString(std::string_view s)
 % end
 
     if (s == "all") {
-        return panda::g_loggerComponentMaskAll;
+        return panda::LOGGER_COMPONENT_MASK_ALL;
     }
 
     UNREACHABLE();

@@ -30,6 +30,12 @@
 
 namespace panda {
 
+namespace object_header_traits {
+
+std::atomic<uint32_t> g_hashSeed = std::atomic<uint32_t>(LINEAR_SEED + std::time(nullptr));
+
+}  // namespace object_header_traits
+
 /* static */
 ObjectHeader *ObjectHeader::CreateObject(ManagedThread *thread, panda::BaseClass *klass, bool nonMovable)
 {

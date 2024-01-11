@@ -109,7 +109,7 @@ TEST(DfxController, TestPrintDfxOptionValues)
     }
     EXPECT_FALSE(DfxController::IsInitialized());
 
-    Logger::InitializeStdLogging(Logger::Level::INFO, panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::Level::INFO, panda::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::DFX));
 
     DfxController::Initialize();

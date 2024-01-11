@@ -46,7 +46,7 @@ DEATH_TEST(Logger, Initialization)
 
     EXPECT_DEATH_IF_SUPPORTED(LOG(FATAL, COMMON) << "4", "");
 
-    Logger::InitializeStdLogging(Logger::Level::DEBUG, panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::Level::DEBUG, panda::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 
     testing::internal::CaptureStderr();
@@ -149,7 +149,7 @@ DEATH_TEST(Logger, LoggingExceptionsError)
 
 TEST(Logger, FilterInfo)
 {
-    Logger::InitializeStdLogging(Logger::Level::INFO, panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::Level::INFO, panda::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 
     testing::internal::CaptureStderr();
@@ -172,7 +172,7 @@ TEST(Logger, FilterInfo)
 
 TEST(Logger, FilterError)
 {
-    Logger::InitializeStdLogging(Logger::Level::ERROR, panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::Level::ERROR, panda::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 
     testing::internal::CaptureStderr();
@@ -192,7 +192,7 @@ TEST(Logger, FilterError)
 
 TEST(Logger, FilterFatal)
 {
-    Logger::InitializeStdLogging(Logger::Level::FATAL, panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::Level::FATAL, panda::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 
     testing::internal::CaptureStderr();
@@ -305,7 +305,7 @@ TEST(Logger, Multiline)
 
 TEST(Logger, PLog)
 {
-    Logger::InitializeStdLogging(Logger::Level::INFO, panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::Level::INFO, panda::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 
     testing::internal::CaptureStderr();
@@ -332,7 +332,7 @@ TEST(Logger, PLog)
 
 TEST(Logger, LogIf)
 {
-    Logger::InitializeStdLogging(Logger::Level::INFO, panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::Level::INFO, panda::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 
     testing::internal::CaptureStderr();
@@ -351,7 +351,7 @@ TEST(Logger, LogIf)
 
 TEST(Logger, LogOnce)
 {
-    Logger::InitializeStdLogging(Logger::Level::INFO, panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::Level::INFO, panda::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 
     testing::internal::CaptureStderr();
@@ -378,7 +378,7 @@ TEST(Logger, LogOnce)
 
 TEST(Logger, LogDfx)
 {
-    Logger::InitializeStdLogging(Logger::Level::ERROR, panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::Level::ERROR, panda::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 
     DfxController::Initialize();

@@ -45,7 +45,7 @@ constexpr const uint32_t LINEAR_X = 1103515245U;
 constexpr const uint32_t LINEAR_Y = 12345U;
 constexpr const uint32_t LINEAR_SEED = 987654321U;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static auto g_hashSeed = std::atomic<uint32_t>(LINEAR_SEED + std::time(nullptr));
+extern std::atomic<uint32_t> g_hashSeed;
 
 }  // namespace object_header_traits
 

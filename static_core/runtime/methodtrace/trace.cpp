@@ -26,6 +26,7 @@
 
 namespace panda {
 
+os::memory::Mutex g_traceLock;
 Trace *volatile Trace::singletonTrace_ = nullptr;
 bool Trace::isTracing_ = false;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)

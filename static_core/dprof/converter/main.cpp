@@ -74,7 +74,7 @@ int Main(panda::Span<const char *> args)
     }
     const Options &options = parser.GetOptionos();
 
-    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), panda::g_loggerComponentMaskAll);
+    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), panda::LOGGER_COMPONENT_MASK_ALL);
 
     auto storage = AppDataStorage::Create(options.GetStorageDir());
     if (!storage) {

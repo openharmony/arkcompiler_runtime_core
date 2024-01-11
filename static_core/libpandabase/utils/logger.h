@@ -17,6 +17,7 @@
 #define PANDA_LIBPANDABASE_UTILS_LOGGER_H_
 
 #include "macros.h"
+#include "globals.h"
 #include "os/error.h"
 #include "os/mutex.h"
 #include "os/thread.h"
@@ -39,7 +40,7 @@ namespace panda {
 #define LOG_COMPONENT_ELEM(D, NAME, STR) D(NAME, NAME, STR)
 
 using FuncMobileLogPrint = int (*)(int, int, const char *, const char *, const char *);
-static constexpr int LOG_ID_MAIN = 0;
+inline constexpr int LOG_ID_MAIN = 0;
 PANDA_PUBLIC_API extern FuncMobileLogPrint g_mlogBufPrint;
 
 namespace base_options {
@@ -334,7 +335,9 @@ private:
     NO_MOVE_SEMANTIC(Logger);
 };
 
-static Logger::ComponentMask g_loggerComponentMaskAll = ~Logger::ComponentMask();
+inline constexpr uint64_t MASK_ALL = 0xFFFF'FFFF'FFFF'FFFFUL;
+static_assert(sizeof(MASK_ALL) * BITS_PER_BYTE > Logger::Component::LAST);
+inline constexpr Logger::ComponentMask LOGGER_COMPONENT_MASK_ALL = Logger::ComponentMask(MASK_ALL);
 
 class FileLogger : public Logger {
 protected:
