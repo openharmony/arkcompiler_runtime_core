@@ -191,8 +191,7 @@ void *ObjectAllocatorG1<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe
                                            ObjMemInitPolicy objInit)
 {
     void *mem = nullptr;
-    size_t alignedSize;
-    alignedSize = AlignUp(size, GetAlignmentInBytes(align));
+    size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
     if (LIKELY(alignedSize <= GetYoungAllocMaxSize())) {
         mem = objectAllocator_->Alloc(size, align);
     } else {
@@ -216,8 +215,7 @@ void *ObjectAllocatorG1<MT_MODE>::AllocateNonMovable(size_t size, Alignment alig
     if (UNLIKELY(IsPygoteAllocEnabled() && pygoteSpaceAllocator_->CanAllocNonMovable(size, align))) {
         mem = pygoteSpaceAllocator_->Alloc(size, align);
     } else {
-        size_t alignedSize;
-        alignedSize = AlignUp(size, GetAlignmentInBytes(align));
+        size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
         if (alignedSize <= ObjectAllocator::GetMaxRegularObjectSize()) {
             // NOTE(dtrubenkov): check if we don't need to handle OOM
             mem = nonmovableAllocator_->Alloc(alignedSize, align);
