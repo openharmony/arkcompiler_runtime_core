@@ -46,6 +46,13 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
     public constructor(otherStr: String) {}
 
     /**
+     * Constructs String from NullishType
+     *
+     * @param object initializer
+     */
+    public constructor(object: NullishType) {}
+
+    /**
      * Checks equality of this string and another Object as String
      *
      * @param to another object to compare
