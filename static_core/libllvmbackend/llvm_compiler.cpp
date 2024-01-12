@@ -127,11 +127,11 @@ llvm::Triple LLVMCompiler::GetTripleForArch(Arch arch)
 #ifdef PANDA_TARGET_LINUX
             tripleName = g_options.WasSetLlvmTriple() ? g_options.GetLlvmTriple() : "x86_64-unknown-linux-gnu";
 #elif defined(PANDA_TARGET_MACOS)
-            triple_name = OPTIONS.WasSetLlvmTriple() ? OPTIONS.GetLlvmTriple() : "x86_64-apple-darwin-gnu";
+            tripleName = g_options.WasSetLlvmTriple() ? g_options.GetLlvmTriple() : "x86_64-apple-darwin-gnu";
 #elif defined(PANDA_TARGET_WINDOWS)
-            triple_name = OPTIONS.WasSetLlvmTriple() ? OPTIONS.GetLlvmTriple() : "x86_64-unknown-windows-unknown";
+            tripleName = g_options.WasSetLlvmTriple() ? g_options.GetLlvmTriple() : "x86_64-unknown-windows-unknown";
 #else
-            triple_name = OPTIONS.WasSetLlvmTriple() ? OPTIONS.GetLlvmTriple() : "x86_64-unknown-unknown-unknown";
+            tripleName = g_options.WasSetLlvmTriple() ? g_options.GetLlvmTriple() : "x86_64-unknown-unknown-unknown";
 #endif
             break;
 

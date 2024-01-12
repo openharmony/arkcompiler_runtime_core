@@ -17,12 +17,12 @@ namespace panda::libllvmbackend {
 
 void RegisterPasses(llvm::PassInstrumentationCallbacks &passInstrumentation)
 {
-    auto register_name = [&passInstrumentation](llvm::StringRef className, llvm::StringRef passName) {
+    auto registerName = [&passInstrumentation](llvm::StringRef className, llvm::StringRef passName) {
         passInstrumentation.addClassToPassName(className, passName);
     };
 
 % PassRegistry::llvm_passes.each do |pass|
-    register_name("<%= PassRegistry::passes_namespace %>::<%= pass.name %>", <%= PassRegistry::passes_namespace %>::<%= pass.name %>::ARG_NAME);
+    registerName("<%= PassRegistry::passes_namespace %>::<%= pass.name %>", <%= PassRegistry::passes_namespace %>::<%= pass.name %>::ARG_NAME);
 % end
 }
 

@@ -20,8 +20,8 @@ namespace panda::os::thread {
 constexpr int LOWEST_PRIORITY = -2;
 using DWORD = unsigned long;
 
-int GetPriority(DWORD thread_id);
-int SetPriority(DWORD thread_id, int prio);
+int GetPriority(DWORD threadId);
+int SetPriority(DWORD threadId, int prio);
 }  // namespace panda::os::thread
 
 #endif  // PANDA_LIBPANDABASE_OS_WINDOWS_THREAD_H_

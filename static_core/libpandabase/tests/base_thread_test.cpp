@@ -104,7 +104,7 @@ TEST_F(ThreadTest, SetOtherThreadPriorityTest)
     ASSERT(childPrioBefore <= childPrioAfter);
 #elif defined(PANDA_TARGET_WINDOWS)
     ASSERT_NE(ret, 0U);
-    ASSERT(child_prio_after <= child_prio_before);
+    ASSERT(childPrioAfter <= childPrioBefore);
 #endif
 }
 }  // namespace panda::os::thread

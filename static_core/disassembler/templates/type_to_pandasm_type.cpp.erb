@@ -55,8 +55,8 @@ pandasm::Type Disassembler::FieldTypeToPandasmType(const uint32_t& type) const {
         fieldType = pandasm::Type("any", 0);
         break;
     default:
-        panda_file::File::EntityId field_id(type);
-        std::string typeName = StringDataToString(file_->GetStringData(field_id));
+        panda_file::File::EntityId fieldId(type);
+        std::string typeName = StringDataToString(file_->GetStringData(fieldId));
 
         fieldType = pandasm::Type::FromDescriptor(typeName);
         break;

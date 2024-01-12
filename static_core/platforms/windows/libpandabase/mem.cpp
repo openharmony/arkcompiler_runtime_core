@@ -127,10 +127,10 @@ void *mmap([[maybe_unused]] void *addr, size_t len, uint32_t prot, int flags, in
         return MAP_FAILED;
     }
 
-    const auto prot_file = mem_protection_flags_for_file(prot, flags);
-    const auto file_off_low = mem_select_lower_bound(off);
-    const auto file_off_high = mem_select_upper_bound(off);
-    void *map = MapViewOfFile(fm, prot_file, file_off_high, file_off_low, len);
+    const auto protFile = mem_protection_flags_for_file(prot, flags);
+    const auto fileOffLow = mem_select_lower_bound(off);
+    const auto fileOffHigh = mem_select_upper_bound(off);
+    void *map = MapViewOfFile(fm, protFile, fileOffHigh, fileOffLow, len);
     CloseHandle(fm);
     if (map == nullptr) {
         errno = mem_errno(GetLastError(), EPERM);

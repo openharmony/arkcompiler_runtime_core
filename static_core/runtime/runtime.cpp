@@ -550,7 +550,7 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
     // NOTE(maksenov): Enable JIT for debug mode
     isJitEnabled_ = !this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit();
 #else
-    is_jit_enabled_ = false;
+    isJitEnabled_ = false;
 #endif
 
     verifierConfig_ = panda::verifier::NewConfig();

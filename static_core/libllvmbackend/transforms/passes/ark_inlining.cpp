@@ -84,11 +84,11 @@ void IrtocInlineChecker::CheckShouldInline(llvm::CallBase *callBase)
     // but not if PANDA_ENABLE_THREAD_SANITIZER)
     static constexpr std::array EXCLUSIONS = {StringRef("panda::coretypes::Array::CreateMultiDimensionalArray"),
                                               StringRef("panda::Class::IsAssignableFrom(panda::Class const*)")};
-    if (std::find_if(EXCLUSIONS.cbegin(), EXCLUSIONS.cend(), [dem_callee_name](StringRef pat) {
-            return dem_callee_name.find(pat) != std::string::npos;
+    if (std::find_if(EXCLUSIONS.cbegin(), EXCLUSIONS.cend(), [demCalleeName](StringRef pat) {
+            return demCalleeName.find(pat) != std::string::npos;
         }) == EXCLUSIONS.cend()) {
-        llvm::report_fatal_error(llvm::Twine("Can't inline with alwaysinline attr '") + dem_callee_name + "' into '" +
-                                 dem_caller_name + "' due to '" + msg + "'");
+        llvm::report_fatal_error(llvm::Twine("Can't inline with alwaysinline attr '") + demCalleeName + "' into '" +
+                                 demCallerName + "' due to '" + msg + "'");
     }
 #else
     llvm::report_fatal_error(llvm::Twine("Can't inline with alwaysinline attr '") + demCalleeName + "' into '" +
