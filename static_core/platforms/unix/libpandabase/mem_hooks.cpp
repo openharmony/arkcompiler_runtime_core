@@ -34,8 +34,8 @@ int FindLibDwarfCodeRegion(dl_phdr_info *info, [[maybe_unused]] size_t size, voi
 {
     auto arange = reinterpret_cast<PandaHooks::AddrRange *>(data);
     if (std::string_view(info->dlpi_name).find("libdwarf.so") != std::string_view::npos) {
-        Span<const ElfW(Phdr)> phdr_list(info->dlpi_phdr, info->dlpi_phnum);
-        for (ElfW(Phdr) phdr : phdr_list) {
+        Span<const ElfW(Phdr)> phdrList(info->dlpi_phdr, info->dlpi_phnum);
+        for (ElfW(Phdr) phdr : phdrList) {
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
             if (phdr.p_type == PT_LOAD && (phdr.p_flags & PF_X) != 0) {
                 *arange = PandaHooks::AddrRange(info->dlpi_addr + phdr.p_vaddr, phdr.p_memsz);

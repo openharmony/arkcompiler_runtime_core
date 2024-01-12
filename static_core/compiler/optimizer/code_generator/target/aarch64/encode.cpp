@@ -2731,7 +2731,7 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool isFp, int32_t sl
 
 template <bool IS_STORE>
 void Aarch64Encoder::LoadStoreRegistersLoop(RegMask registers, ssize_t slot, size_t startReg, bool isFp,
-                                            const vixl::aarch64::Register &base_reg)
+                                            const vixl::aarch64::Register &baseReg)
 {
     size_t i = 0;
     const auto getNextReg = [&registers, &i, isFp]() {
@@ -2750,19 +2750,19 @@ void Aarch64Encoder::LoadStoreRegistersLoop(RegMask registers, ssize_t slot, siz
         if (nextReg.IsValid() && (nextReg.GetCode() - 1 == currReg.GetCode())) {
             if constexpr (IS_STORE) {  // NOLINT
                 GetMasm()->Stp(currReg, nextReg,
-                               MemOperand(base_reg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
+                               MemOperand(baseReg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             } else {  // NOLINT
                 GetMasm()->Ldp(currReg, nextReg,
-                               MemOperand(base_reg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
+                               MemOperand(baseReg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             }
             nextReg = getNextReg();
         } else {
             if constexpr (IS_STORE) {  // NOLINT
                 GetMasm()->Str(currReg,
-                               MemOperand(base_reg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
+                               MemOperand(baseReg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             } else {  // NOLINT
                 GetMasm()->Ldr(currReg,
-                               MemOperand(base_reg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
+                               MemOperand(baseReg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             }
         }
     }

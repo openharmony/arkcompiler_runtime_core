@@ -53,7 +53,7 @@ public:
     static InlinePrepare Create(LLVMArkInterface *arkInterface, const panda::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
-    llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &module_am);
+    llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &moduleAm);
 };
 
 }  // namespace panda::llvmbackend::passes

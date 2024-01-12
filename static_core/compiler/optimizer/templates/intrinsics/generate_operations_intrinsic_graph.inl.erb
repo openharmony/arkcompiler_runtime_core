@@ -41,9 +41,9 @@ Graph* GenerateIntrinsicOperation(Inst* inst) {
     ASSERT(graph->GetVectorBlocks().size() > 2);
     auto block = graph->GetVectorBlocks()[2];
     if (inst->RequireState()) {
-        auto save_state = graph->CreateInstSaveState();
-        block->AppendInst(save_state);
-        inst->AppendInput(save_state);
+        auto saveState = graph->CreateInstSaveState();
+        block->AppendInst(saveState);
+        inst->AppendInput(saveState);
         inst->CastToIntrinsic()->AddInputType(DataType::NO_TYPE);
     }
     block->AppendInst(inst);

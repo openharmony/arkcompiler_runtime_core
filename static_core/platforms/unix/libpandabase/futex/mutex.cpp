@@ -201,9 +201,9 @@ bool RWLock::TryReadLock()
     auto curState = state_.load(std::memory_order_relaxed);
     while (!done) {
         if (curState >= UNLOCKED) {
-            auto new_state = curState + READ_INCREMENT;
+            auto newState = curState + READ_INCREMENT;
             // curState should be updated with fetched value on fail
-            done = state_.compare_exchange_weak(curState, new_state, std::memory_order_acquire);
+            done = state_.compare_exchange_weak(curState, newState, std::memory_order_acquire);
         } else {
             // RWLock is Write held, trylock failed.
             return false;

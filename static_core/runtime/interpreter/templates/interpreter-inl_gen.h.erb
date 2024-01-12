@@ -96,14 +96,14 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
 #endif
 
 % if mode == :nodebug
-    static std::array<const void*, DISPATCH_TABLE_LEN> inst_dispatch_table {
+    static std::array<const void*, DISPATCH_TABLE_LEN> instDispatchTable {
 %   Panda::dispatch_table.handler_names.each do |name|
         &&HANDLE_<%= name %>,
 %   end
         &&EXCEPTION_HANDLER,
     };
 
-    static std::array<const void*, DISPATCH_TABLE_LEN> debug_dispatch_table {
+    static std::array<const void*, DISPATCH_TABLE_LEN> debugDispatchTable {
 %   Panda::dispatch_table.handler_names.each do ||
         &&HANDLE_DEBUG_SWITCH,
 %   end
@@ -111,7 +111,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     };
 
 % else
-    static std::array<const void*, DISPATCH_TABLE_LEN> inst_dispatch_table {
+    static std::array<const void*, DISPATCH_TABLE_LEN> instDispatchTable {
 %   Panda::dispatch_table.handler_names.each do |name|
         &&DEBUG_HANDLE_<%= name %>,
 %   end
@@ -136,20 +136,20 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
 % end
 #endif
             default:
-                thread->SetCurrentDispatchTable<IS_DEBUG>(inst_dispatch_table.data());
+                thread->SetCurrentDispatchTable<IS_DEBUG>(instDispatchTable.data());
 % if mode == :debug
-                thread->SetDebugDispatchTable(inst_dispatch_table.data());
+                thread->SetDebugDispatchTable(instDispatchTable.data());
 % else
-                thread->SetDebugDispatchTable(debug_dispatch_table.data());
+                thread->SetDebugDispatchTable(debugDispatchTable.data());
 % end
                 break;
         }
     } else {
-        thread->SetCurrentDispatchTable<IS_DEBUG>(inst_dispatch_table.data());
+        thread->SetCurrentDispatchTable<IS_DEBUG>(instDispatchTable.data());
 % if mode == :debug
-        thread->SetDebugDispatchTable(inst_dispatch_table.data());
+        thread->SetDebugDispatchTable(instDispatchTable.data());
 % else
-        thread->SetDebugDispatchTable(debug_dispatch_table.data());
+        thread->SetDebugDispatchTable(debugDispatchTable.data());
 % end
     }
 
@@ -211,14 +211,14 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
 }
 % Panda::prefixes.each do |p|
 <%= prefix %><%= p.handler_name %>: {
-    const auto secondary_opcode = state.GetSecondaryOpcode();
+    const auto secondaryOpcode = state.GetSecondaryOpcode();
 
-    LOG(DEBUG, INTERPRETER) << "Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondary_opcode);
+    LOG(DEBUG, INTERPRETER) << "Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondaryOpcode);
 
-    ASSERT(secondary_opcode <= <%= Panda::dispatch_table.secondary_opcode_bound(p) %>);
-    const size_t dispatch_idx = <%= Panda::dispatch_table.secondary_opcode_offset(p) %> + secondary_opcode;
-    ASSERT(dispatch_idx < DISPATCH_TABLE_LEN);
-    DISPATCH(state.GetDispatchTable(), dispatch_idx);
+    ASSERT(secondaryOpcode <= <%= Panda::dispatch_table.secondary_opcode_bound(p) %>);
+    const size_t dispatchIdx = <%= Panda::dispatch_table.secondary_opcode_offset(p) %> + secondaryOpcode;
+    ASSERT(dispatchIdx < DISPATCH_TABLE_LEN);
+    DISPATCH(state.GetDispatchTable(), dispatchIdx);
 }
 % end
 
@@ -277,13 +277,13 @@ EXCEPTION_HANDLER: {
     ASSERT(thread->HasPendingException());
 
     InstructionHandler<RuntimeIfaceT, IS_DYNAMIC, IS_DEBUG> handler(&state);
-    uint32_t pc_offset = panda_file::INVALID_OFFSET;
+    uint32_t pcOffset = panda_file::INVALID_OFFSET;
 
 % if mode == :debug
-    RuntimeIfaceT::GetNotificationManager()->ExceptionThrowEvent(thread, handler.GetFrame()->GetMethod(), thread->GetException(), pc_offset);
+    RuntimeIfaceT::GetNotificationManager()->ExceptionThrowEvent(thread, handler.GetFrame()->GetMethod(), thread->GetException(), pcOffset);
 % end
-    pc_offset = handler.FindCatchBlockStackless();
-    if (pc_offset == panda_file::INVALID_OFFSET) {
+    pcOffset = handler.FindCatchBlockStackless();
+    if (pcOffset == panda_file::INVALID_OFFSET) {
         if constexpr (RUNTIME_ARCH == Arch::AARCH64 || RUNTIME_ARCH == Arch::AARCH32 || RUNTIME_ARCH == Arch::X86_64) {
             return FindCatchBlockInCallStack(thread);
         } else {
@@ -294,15 +294,15 @@ EXCEPTION_HANDLER: {
     auto *method = handler.GetFrame()->GetMethod();
     ASSERT(method != nullptr);
     LanguageContext ctx = RuntimeIfaceT::GetLanguageContext(*method);
-    ObjectHeader *exception_object = thread->GetException();
-    ctx.SetExceptionToVReg(handler.GetFrame()->GetAcc(), exception_object);
+    ObjectHeader *exceptionObject = thread->GetException();
+    ctx.SetExceptionToVReg(handler.GetFrame()->GetAcc(), exceptionObject);
 
     thread->ClearException();
 % if mode == :debug
-    RuntimeIfaceT::GetNotificationManager()->ExceptionCatchEvent(thread, handler.GetFrame()->GetMethod(), exception_object, pc_offset);
+    RuntimeIfaceT::GetNotificationManager()->ExceptionCatchEvent(thread, handler.GetFrame()->GetMethod(), exceptionObject, pcOffset);
 % end
 
-    Span<const uint8_t> sp(handler.GetFrame()->GetMethod()->GetInstructions(), pc_offset);
+    Span<const uint8_t> sp(handler.GetFrame()->GetMethod()->GetInstructions(), pcOffset);
     state = InstructionHandlerState(thread, sp.cend(), handler.GetFrame(), handler.GetDispatchTable());
 
     ASSERT(frame->GetMethod()->GetPandaFile()->GetHeader()->quickenedFlag || state.IsPrimaryOpcodeValid());

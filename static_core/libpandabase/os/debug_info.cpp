@@ -122,26 +122,26 @@ bool IterateDieRanges([[maybe_unused]] F func, [[maybe_unused]] Dwarf_Attribute 
 {
 #ifdef HAVE_DWARF_RNGLISTS_API
     Dwarf_Rnglists_Head rnglhead = nullptr;
-    Dwarf_Unsigned count_rnglists_entries = 0;
-    if (dwarf_rnglists_get_rle_head(attr, form, offset, &rnglhead, &count_rnglists_entries, nullptr, nullptr) ==
+    Dwarf_Unsigned countRnglistsEntries = 0;
+    if (dwarf_rnglists_get_rle_head(attr, form, offset, &rnglhead, &countRnglistsEntries, nullptr, nullptr) ==
         DW_DLV_OK) {
         AtReturn r([rnglhead]() { dwarf_dealloc_rnglists_head(rnglhead); });
-        for (Dwarf_Unsigned i = 0; i < count_rnglists_entries; i++) {
-            unsigned rle_code = 0;
-            Dwarf_Bool no_debug_addr_available = false;
+        for (Dwarf_Unsigned i = 0; i < countRnglistsEntries; i++) {
+            unsigned rleCode = 0;
+            Dwarf_Bool noDebugAddrAvailable = false;
             Dwarf_Unsigned cooked1 = 0;
             Dwarf_Unsigned cooked2 = 0;
 
-            if (dwarf_get_rnglists_entry_fields_a(rnglhead, i, nullptr, &rle_code, nullptr, nullptr,
-                                                  &no_debug_addr_available, &cooked1, &cooked2, nullptr) != DW_DLV_OK) {
+            if (dwarf_get_rnglists_entry_fields_a(rnglhead, i, nullptr, &rleCode, nullptr, nullptr,
+                                                  &noDebugAddrAvailable, &cooked1, &cooked2, nullptr) != DW_DLV_OK) {
                 return false;
             }
 
-            if (rle_code == DW_RLE_base_addressx || rle_code == DW_RLE_base_address || no_debug_addr_available) {
+            if (rleCode == DW_RLE_base_addressx || rleCode == DW_RLE_base_address || noDebugAddrAvailable) {
                 continue;
             }
 
-            if (rle_code == DW_RLE_end_of_list) {
+            if (rleCode == DW_RLE_end_of_list) {
                 break;
             }
 

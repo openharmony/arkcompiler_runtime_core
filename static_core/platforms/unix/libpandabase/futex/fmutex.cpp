@@ -33,7 +33,7 @@ namespace ark::os::unix::memory::futex {
 // This field is set to false in case of deadlock with daemon threads (only daemon threads
 // are not finished and they have state IS_BLOCKED). In this case we should terminate
 // those threads ignoring failures on lock structures destructors.
-static ATOMIC(bool) DEADLOCK_FLAG = false;
+static ATOMIC(bool) g_deadlockFlag = false;
 
 #ifdef MC_ON
 // GenMC does not support syscalls(futex)
@@ -63,12 +63,12 @@ static inline void FutexWake(void)
 
 bool MutexDoNotCheckOnTerminationLoop()
 {
-    return DEADLOCK_FLAG;
+    return g_deadlockFlag;
 }
 
 void MutexIgnoreChecksOnTerminationLoop()
 {
-    DEADLOCK_FLAG = true;
+    g_deadlockFlag = true;
 }
 
 int *GetStateAddr(struct fmutex *const m)
@@ -106,8 +106,8 @@ static void BackOff(uint32_t i)
     static constexpr uint32_t SPIN_MAX = 10;
     if (i <= SPIN_MAX) {
         volatile uint32_t x = 0;  // Volatile to make sure loop is not optimized out.
-        const uint32_t spin_count = 10 * i;
-        for (uint32_t spin = 0; spin < spin_count; spin++) {
+        const uint32_t spinCount = 10 * i;
+        for (uint32_t spin = 0; spin < spinCount; spin++) {
             ++x;
         }
     } else {
@@ -242,8 +242,8 @@ bool MutexLock(struct fmutex *const m, bool trylock)
 
 bool MutexTryLockWithSpinning(struct fmutex *const m)
 {
-    const int max_iter = 10;
-    for (int i = 0; i < max_iter; i++) {
+    const int maxIter = 10;
+    for (int i = 0; i < maxIter; i++) {
         if (MutexLock(m, true)) {
             return true;
         }

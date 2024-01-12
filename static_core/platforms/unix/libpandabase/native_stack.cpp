@@ -29,9 +29,9 @@ static constexpr int FIND_TID = 10;   // decimal number
 std::string GetNativeThreadNameForFile(pid_t tid)
 {
     std::string result;
-    std::ostringstream comm_file;
-    comm_file << "/proc/self/task/" << tid << "/comm";
-    if (native_stack::ReadOsFile(comm_file.str(), &result)) {
+    std::ostringstream commFile;
+    commFile << "/proc/self/task/" << tid << "/comm";
+    if (native_stack::ReadOsFile(commFile.str(), &result)) {
         result.resize(result.size() - 1);
     } else {
         result = "<unknown>";
@@ -57,32 +57,32 @@ void DumpKernelStack(std::ostream &os, pid_t tid, const char *tag, bool count)
     if (tid == static_cast<pid_t>(thread::GetCurrentThreadId())) {
         return;
     }
-    std::string kernel_stack;
-    std::ostringstream stack_file;
-    stack_file << "/proc/self/task/" << tid << "/stack";
-    if (!native_stack::ReadOsFile(stack_file.str(), &kernel_stack)) {
-        os << tag << "(couldn't read " << stack_file.str() << ")\n";
+    std::string kernelStack;
+    std::ostringstream stackFile;
+    stackFile << "/proc/self/task/" << tid << "/stack";
+    if (!native_stack::ReadOsFile(stackFile.str(), &kernelStack)) {
+        os << tag << "(couldn't read " << stackFile.str() << ")\n";
         return;
     }
 
     std::regex split("\n");
-    std::vector<std::string> kernel_stack_frames(
-        std::sregex_token_iterator(kernel_stack.begin(), kernel_stack.end(), split, -1), std::sregex_token_iterator());
+    std::vector<std::string> kernelStackFrames(
+        std::sregex_token_iterator(kernelStack.begin(), kernelStack.end(), split, -1), std::sregex_token_iterator());
 
-    if (!kernel_stack_frames.empty()) {
-        kernel_stack_frames.pop_back();
+    if (!kernelStackFrames.empty()) {
+        kernelStackFrames.pop_back();
     }
 
-    for (size_t i = 0; i < kernel_stack_frames.size(); ++i) {
-        const char *kernel_stack_build = kernel_stack_frames[i].c_str();
+    for (size_t i = 0; i < kernelStackFrames.size(); ++i) {
+        const char *kernelStackBuild = kernelStackFrames[i].c_str();
         // change the stack string, case:
         // kernel stack in linux file is : "[<0>] do_syscall_64+0x73/0x130"
         // kernel stack in Application Not Responding file is : "do_syscall_64+0x73/0x130"
 
-        const char *remove_bracket = strchr(kernel_stack_build, ']');
+        const char *removeBracket = strchr(kernelStackBuild, ']');
 
-        if (remove_bracket != nullptr) {
-            kernel_stack_build = remove_bracket + MOVE_2;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (removeBracket != nullptr) {
+            kernelStackBuild = removeBracket + MOVE_2;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
         // if need count, case: "do_syscall_64+0x73/0x130" --> "#00 do_syscall_64+0x73/0x130"
@@ -90,13 +90,13 @@ void DumpKernelStack(std::ostream &os, pid_t tid, const char *tag, bool count)
         if (count) {
             os << BuildNumber(static_cast<int>(i));
         }
-        os << kernel_stack_build << std::endl;
+        os << kernelStackBuild << std::endl;
     }
 }
 
-void DumpUnattachedThread::AddTid(pid_t tid_thread)
+void DumpUnattachedThread::AddTid(pid_t tidThread)
 {
-    threadManagerTids_.insert(tid_thread);
+    threadManagerTids_.insert(tidThread);
 }
 
 bool DumpUnattachedThread::InitKernelTidLists()
@@ -109,9 +109,9 @@ bool DumpUnattachedThread::InitKernelTidLists()
     }
     dirent *dir = nullptr;
     while ((dir = readdir(task)) != nullptr) {
-        char *dir_end = nullptr;
-        auto tid = static_cast<pid_t>(strtol(dir->d_name, &dir_end, FIND_TID));
-        if (*dir_end == 0) {
+        char *dirEnd = nullptr;
+        auto tid = static_cast<pid_t>(strtol(dir->d_name, &dirEnd, FIND_TID));
+        if (*dirEnd == 0) {
             kernelTid_.insert(tid);
         }
     }
@@ -177,15 +177,15 @@ std::string ChangeJaveStackFormat(const char *descriptor)
             LOG(ERROR, RUNTIME) << "Invalid descriptor: no scln at end";
             return "";
         }
-        std::string java_name = str.substr(1, end - 1);  // Remove 'L' and ';'
-        std::replace(java_name.begin(), java_name.end(), '/', '.');
-        return java_name;
+        std::string javaName = str.substr(1, end - 1);  // Remove 'L' and ';'
+        std::replace(javaName.begin(), javaName.end(), '/', '.');
+        return javaName;
     }
 
     if (descriptor[0] == '[') {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        std::string java_name(descriptor);
-        std::replace(java_name.begin(), java_name.end(), '/', '.');
-        return java_name;
+        std::string javaName(descriptor);
+        std::replace(javaName.begin(), javaName.end(), '/', '.');
+        return javaName;
     }
 
     const char *primitiveName = "";

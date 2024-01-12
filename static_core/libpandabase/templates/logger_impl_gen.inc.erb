@@ -66,9 +66,9 @@ Logger::ComponentMask Logger::ComponentMaskFromString(std::string_view s)
 }
 
 /* static */
-std::string Logger::StringfromDfxComponent(LogDfxComponent dfx_component)
+std::string Logger::StringfromDfxComponent(LogDfxComponent dfxComponent)
 {
-    switch (dfx_component) {
+    switch (dfxComponent) {
 % LoggerData.dfx_components.each do |c|
     case Logger::LogDfxComponent::<%= c.enum %>:
         return "<%= c.name %>";

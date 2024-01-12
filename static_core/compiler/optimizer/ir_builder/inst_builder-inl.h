@@ -82,10 +82,10 @@ void InstBuilder::BuildCall(const BytecodeInstruction *bcInst, bool isRange, boo
     }
 }
 
-template void InstBuilder::BuildCall<Opcode::CallLaunchStatic>(const BytecodeInstruction *bc_inst, bool is_range,
-                                                               bool acc_read, Inst *additional_input);
-template void InstBuilder::BuildCall<Opcode::CallLaunchVirtual>(const BytecodeInstruction *bc_inst, bool is_range,
-                                                                bool acc_read, Inst *additional_input);
+template void InstBuilder::BuildCall<Opcode::CallLaunchStatic>(const BytecodeInstruction *bcInst, bool isRange,
+                                                               bool accRead, Inst *additionalInput);
+template void InstBuilder::BuildCall<Opcode::CallLaunchVirtual>(const BytecodeInstruction *bcInst, bool isRange,
+                                                                bool accRead, Inst *additionalInput);
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 template <typename T>
@@ -319,8 +319,7 @@ BinaryOperation *CreateBinaryOperation<Opcode::Mod>(Graph *graph, DataType::Type
     return graph->CreateInstMod(returnType, pc);
 }
 
-template void InstBuilder::BuildBinaryOperationIntrinsic<Opcode::Mod>(const BytecodeInstruction *bc_inst,
-                                                                      bool acc_read);
+template void InstBuilder::BuildBinaryOperationIntrinsic<Opcode::Mod>(const BytecodeInstruction *bcInst, bool accRead);
 
 template <Opcode OPCODE>
 void InstBuilder::BuildBinaryOperationIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
@@ -593,48 +592,48 @@ void InstBuilder::BuildDefaultIntrinsic(bool isVirtual, const BytecodeInstructio
 
 // do not specify reason for tidy suppression because comment does not fit single line
 // NOLINTNEXTLINE
-void InstBuilder::BuildStaticCallIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read)
+void InstBuilder::BuildStaticCallIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead)
 {
-    auto methodIndex = bc_inst->GetId(0).AsIndex();
+    auto methodIndex = bcInst->GetId(0).AsIndex();
     auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
     auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
     auto intrinsicId = GetRuntime()->GetIntrinsicId(method);
     switch (intrinsicId) {
         case RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER:
         case RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_EXIT: {
-            BuildMonitorIntrinsic(bc_inst, intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER,
-                                  acc_read);
+            BuildMonitorIntrinsic(bcInst, intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER,
+                                  accRead);
             break;
         }
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_I32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_I64:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_F32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_F64: {
-            BuildAbsIntrinsic(bc_inst, acc_read);
+            BuildAbsIntrinsic(bcInst, accRead);
             break;
         }
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_SQRT_F32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_SQRT_F64: {
-            BuildSqrtIntrinsic(bc_inst, acc_read);
+            BuildSqrtIntrinsic(bcInst, accRead);
             break;
         }
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_I32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_I64:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_F32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_F64: {
-            BuildBinaryOperationIntrinsic<Opcode::Min>(bc_inst, acc_read);
+            BuildBinaryOperationIntrinsic<Opcode::Min>(bcInst, accRead);
             break;
         }
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_I32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_I64:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_F32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_F64: {
-            BuildBinaryOperationIntrinsic<Opcode::Max>(bc_inst, acc_read);
+            BuildBinaryOperationIntrinsic<Opcode::Max>(bcInst, accRead);
             break;
         }
 #include "intrinsics_ir_build_static_call.inl"
         default: {
-            BuildDefaultStaticIntrinsic(bc_inst, is_range, acc_read);
+            BuildDefaultStaticIntrinsic(bcInst, isRange, accRead);
         }
     }
 }

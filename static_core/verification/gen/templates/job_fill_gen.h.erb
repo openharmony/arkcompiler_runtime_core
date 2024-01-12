@@ -42,7 +42,7 @@ inline bool Job::ResolveIdentifiers() {
     LOG(DEBUG, VERIFIER) << "JOBFILL: Filling Job cache for method '" << method_->GetFullName() << "'";
 
 constexpr std::size_t DISPATCH_TABLE_HANDLER_NAMES_SIZE = <%= Panda::dispatch_table.handler_names.size %>;
-std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
+std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 % Panda::dispatch_table.handler_names.each do |name|
         &&HANDLE_<%= name %>,
 % end
@@ -64,7 +64,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
         LOG(ERROR, VERIFIER) << "Incorrect opcode";
         return false;
     }
-    goto* dispatch_table[inst.GetPrimaryOpcode()];
+    goto* dispatchTable[inst.GetPrimaryOpcode()];
 
 % dt_non_prefixed_min_minus = (Panda::dispatch_table.invalid_non_prefixed_interval.min - 1).to_s
 % dt_non_prefixed_max_plus = (Panda::dispatch_table.invalid_non_prefixed_interval.max + 1).to_s
@@ -190,7 +190,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
 %        Method *calledMethod = pf->GetPandaCache()->GetMethodFromCache(methodId);
 %        // Special case for array constructors, which are fake methods that other
 %        // Panda code treats in a special way
-%        bool is_array_constructor_call = false;
+%        bool isArrayConstructorCall = false;
 %        if (calledMethod == nullptr) {
 %            panda_file::MethodDataAccessor const mda(*pf, methodId);
 %            Class * cls = classLinker_->GetClass(*method_, mda.GetClassId());
@@ -200,7 +200,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
 %                          opcode == BytecodeInstructionSafe::Opcode::INITOBJ_V4_V4_V4_V4_ID16 ||
 %                          opcode == BytecodeInstructionSafe::Opcode::INITOBJ_RANGE_V8_ID16) &&
 %                         cls != nullptr && cls->IsArrayClass())) {
-%                is_array_constructor_call = true;
+%                isArrayConstructorCall = true;
 %                Type tp = Type {cls};
 %                AddType(inst.GetOffset(), &tp);
 %            } else {
@@ -211,7 +211,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
 %            AddMethod(inst.GetOffset(), calledMethod);
 %            auto classType = Type {calledMethod->GetClass()};
 %            AddType(inst.GetOffset(), &classType);
-%        } else if (!is_array_constructor_call) {
+%        } else if (!isArrayConstructorCall) {
 %            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve method with id " << id << " in method "
 %                                 << method_->GetFullName();
 %        }
@@ -230,9 +230,9 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
 %        }
 %    }),
 %    "TypeId_" => %({
-%        auto class_idx = method_->GetClass()->ResolveClassIndex(id.AsIndex());
+%        auto classIdx = method_->GetClass()->ResolveClassIndex(id.AsIndex());
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
-%        auto *cachedClass = classLinker_->GetClass(*method_, class_idx, &errorHandler);
+%        auto *cachedClass = classLinker_->GetClass(*method_, classIdx, &errorHandler);
 %        if (cachedClass != nullptr) {
 %            auto classType = Type {cachedClass};
 %            AddType(inst.GetOffset(), &classType);
@@ -256,8 +256,8 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
 %        // We are in lda.type bytecode handler. acc type is going to be java.lang.Class
 %        auto cachedClassClass = classLinker_->GetClass(langContext_.GetClassClassDescriptor(), false, classLinkerCtx_, &errorHandler);
 %        if (cachedClassClass != nullptr) {
-%            auto cachedClass_type = Type {cachedClassClass};
-%            AddType(inst.GetOffset(), &cachedClass_type);
+%            auto cachedClassType = Type {cachedClassClass};
+%            AddType(inst.GetOffset(), &cachedClassType);
 %        } else {
 %            LOG(ERROR, VERIFIER) << "JOBFILL: Cannot resolve Class class in method " << method_->GetFullName();
 %        }
@@ -284,7 +284,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
 %        }
 %        inst = nextInst;
 %    }
-%    goto* dispatch_table[inst.GetPrimaryOpcode()];
+%    goto* dispatchTable[inst.GetPrimaryOpcode()];
 %    )
 %}
 %
@@ -325,7 +325,7 @@ HANDLE_<%= p.handler_name %>:
     }
 
     // NOLINTNEXTLINE(readability-magic-numbers, cppcoreguidelines-avoid-goto)
-    goto *dispatch_table[<%= dt_sec_opcode_offset %> + secondaryOpcode];
+    goto *dispatchTable[<%= dt_sec_opcode_offset %> + secondaryOpcode];
 
 % end
 

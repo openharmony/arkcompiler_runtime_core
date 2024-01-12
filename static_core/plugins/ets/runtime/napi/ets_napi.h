@@ -480,9 +480,9 @@ extern "C" {
 #define ETS_IMPORT
 #define ETS_CALL
 
-ets_int ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vm_args);
-ets_int ETS_GetCreatedVMs(EtsVM **vm_buf, ets_size buf_len, ets_size *n_vms);
-ets_int ETS_CreateVM(EtsVM **p_vm, EtsEnv **p_env, EtsVMInitArgs *vm_args);
+ets_int ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vmArgs);
+ets_int ETS_GetCreatedVMs(EtsVM **vmBuf, ets_size bufLen, ets_size *nVms);
+ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArgs);
 
 #ifdef __cplusplus
 }
@@ -490,7 +490,7 @@ ets_int ETS_CreateVM(EtsVM **p_vm, EtsEnv **p_env, EtsVMInitArgs *vm_args);
 
 struct ETS_InvokeInterface {
     ets_int (*DestroyEtsVM)(EtsVM *vm);
-    ets_int (*GetEnv)(EtsVM *vm, EtsEnv **p_env, ets_int version);
+    ets_int (*GetEnv)(EtsVM *vm, EtsEnv **pEnv, ets_int version);
 };
 
 struct __EtsVM {
@@ -503,9 +503,9 @@ struct __EtsVM {
         return invoke_interface->DestroyEtsVM(this);
     }
 
-    ets_int GetEnv(EtsEnv **p_env, ets_int version)
+    ets_int GetEnv(EtsEnv **pEnv, ets_int version)
     {
-        return invoke_interface->GetEnv(this, p_env, version);
+        return invoke_interface->GetEnv(this, pEnv, version);
     }
 #endif
 };

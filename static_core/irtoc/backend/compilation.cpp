@@ -33,9 +33,9 @@ class UsedRegistersCollector : public vixl::aarch64::Disassembler {
 public:
     explicit UsedRegistersCollector(panda::ArenaAllocator *allocator) : Disassembler(allocator) {}
 
-    RegMask &GetUsedRegs(bool is_fp)
+    RegMask &GetUsedRegs(bool isFp)
     {
-        return is_fp ? vreg_mask_ : reg_mask_;
+        return isFp ? vregMask_ : regMask_;
     }
 
     static UsedRegisters CollectForCode(ArenaAllocator *allocator, Span<const uint8_t> code)
@@ -44,12 +44,12 @@ public:
         ASSERT(!code.Empty());
 
         vixl::aarch64::Decoder decoder(allocator);
-        UsedRegistersCollector used_regs_collector(allocator);
-        decoder.AppendVisitor(&used_regs_collector);
+        UsedRegistersCollector usedRegsCollector(allocator);
+        decoder.AppendVisitor(&usedRegsCollector);
         bool skipping = false;
 
-        auto start_instr = reinterpret_cast<const vixl::aarch64::Instruction *>(code.data());
-        auto end_instr = reinterpret_cast<const vixl::aarch64::Instruction *>(&(*code.end()));
+        auto startInstr = reinterpret_cast<const vixl::aarch64::Instruction *>(code.data());
+        auto endInstr = reinterpret_cast<const vixl::aarch64::Instruction *>(&(*code.end()));
         // To determine real registers usage we check each assembly instruction which has
         // destination register(s). There is a problem with handlers with `return` cause
         // there is an epilogue part with registers restoring. We need to separate both register
@@ -65,23 +65,23 @@ public:
         //      instructions (assuming they are related to epilogue part) but without adding their
         //      registers into the result set. If we meet another kind of intruction we unset
         //      the `skipping` flag.
-        for (auto instr = used_regs_collector.GetPrevInstruction(end_instr); instr >= start_instr;
-             instr = used_regs_collector.GetPrevInstruction(instr)) {
+        for (auto instr = usedRegsCollector.GetPrevInstruction(endInstr); instr >= startInstr;
+             instr = usedRegsCollector.GetPrevInstruction(instr)) {
             if (instr->Mask(vixl::aarch64::UnconditionalBranchToRegisterMask) == vixl::aarch64::RET) {
                 skipping = true;
                 continue;
             }
-            if (skipping && (instr->IsLoad() || used_regs_collector.CheckSPAdd(instr))) {
+            if (skipping && (instr->IsLoad() || usedRegsCollector.CheckSPAdd(instr))) {
                 continue;
             }
             skipping = false;
             decoder.Decode(instr);
         }
 
-        UsedRegisters used_registers;
-        used_registers.gpr |= used_regs_collector.GetUsedRegs(false);
-        used_registers.fp |= used_regs_collector.GetUsedRegs(true);
-        return used_registers;
+        UsedRegisters usedRegisters;
+        usedRegisters.gpr |= usedRegsCollector.GetUsedRegs(false);
+        usedRegisters.fp |= usedRegsCollector.GetUsedRegs(true);
+        return usedRegisters;
     }
 
 protected:
@@ -106,24 +106,24 @@ protected:
         }
         uint32_t code = reg.GetCode();
         // We need to account for both registers in case of a pair load
-        bool is_pair = instr->Mask(vixl::aarch64::LoadStorePairAnyFMask) == vixl::aarch64::LoadStorePairAnyFixed;
+        bool isPair = instr->Mask(vixl::aarch64::LoadStorePairAnyFMask) == vixl::aarch64::LoadStorePairAnyFixed;
         if (!(code == static_cast<uint32_t>(instr->GetRd()) ||
-              (is_pair && code == static_cast<uint32_t>(instr->GetRt2())))) {
+              (isPair && code == static_cast<uint32_t>(instr->GetRt2())))) {
             return;
         }
         if (reg.IsRegister()) {
             if (!reg.IsZero()) {
-                reg_mask_.Set(code);
+                regMask_.Set(code);
             }
         } else {
             ASSERT(reg.IsVRegister());
-            vreg_mask_.Set(code);
+            vregMask_.Set(code);
         }
     }
 
 private:
-    RegMask reg_mask_;
-    VRegMask vreg_mask_;
+    RegMask regMask_;
+    VRegMask vregMask_;
 };
 #endif  // ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
 

@@ -44,12 +44,12 @@ DfxOptionHandler::DfxOption DfxOptionHandler::DfxOptionFromString(const std::str
 }
 
 /* static */
-std::string DfxOptionHandler::StringFromDfxOption(DfxOptionHandler::DfxOption dfx_option)
+std::string DfxOptionHandler::StringFromDfxOption(DfxOptionHandler::DfxOption dfxOption)
 {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str)                                    \
-    if (dfx_option == DfxOptionHandler::DfxOption::e) { \
-        return (str);                                   \
+#define D(e, v, str)                                   \
+    if (dfxOption == DfxOptionHandler::DfxOption::e) { \
+        return (str);                                  \
     }
     DFX_OPTION_LIST(D)
 #undef D

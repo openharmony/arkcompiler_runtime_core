@@ -36,31 +36,31 @@
 
 namespace panda {
 
-static decltype(&sigaction) REAL_SIGACTION;
-static decltype(&sigprocmask) REAL_SIGPROCMASK;
-static bool IS_INIT_REALLY {false};
-static bool IS_INIT_KEY_CREATE {false};
+static decltype(&sigaction) g_realSigaction;
+static decltype(&sigprocmask) g_realSigProcMask;
+static bool g_isInitReally {false};
+static bool g_isInitKeyCreate {false};
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 #if PANDA_TARGET_MACOS
-__attribute__((init_priority(101))) static os::memory::Mutex REAL_LOCK;
+__attribute__((init_priority(101))) static os::memory::Mutex g_realLock;
 #else
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static os::memory::Mutex REAL_LOCK;
+static os::memory::Mutex g_realLock;
 #endif
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static os::memory::Mutex KEY_CREATE_LOCK;
+static os::memory::Mutex g_keyCreateLock;
 
 static os::memory::PandaThreadKey GetHandlingSignalKey()
 {
     static os::memory::PandaThreadKey key;
     {
-        os::memory::LockHolder lock(KEY_CREATE_LOCK);
-        if (!IS_INIT_KEY_CREATE) {
+        os::memory::LockHolder lock(g_keyCreateLock);
+        if (!g_isInitKeyCreate) {
             int rc = os::memory::PandaThreadKeyCreate(&key, nullptr);
             if (rc != 0) {
                 LOG(FATAL, RUNTIME) << "failed to create sigchain thread key: " << os::Error(rc).ToString();
             }
-            IS_INIT_KEY_CREATE = true;
+            g_isInitKeyCreate = true;
         }
     }
     return key;
@@ -101,19 +101,19 @@ public:
 
     void RegisterAction(int signo)
     {
-        struct sigaction handler_action = {};
-        sigfillset(&handler_action.sa_mask);
+        struct sigaction handlerAction = {};
+        sigfillset(&handlerAction.sa_mask);
         // SIGSEGV from signal handler must be handled as well
-        sigdelset(&handler_action.sa_mask, SIGSEGV);
+        sigdelset(&handlerAction.sa_mask, SIGSEGV);
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        handler_action.sa_sigaction = SignalHook::Handler;
+        handlerAction.sa_sigaction = SignalHook::Handler;
         // SA_NODEFER+: do not block signals from the signal handler
         // SA_ONSTACK-: call signal handler on the same stack
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        handler_action.sa_flags = SA_RESTART | SA_SIGINFO | SA_NODEFER;
-        REAL_SIGACTION(signo, nullptr, &oldAction_);
-        REAL_SIGACTION(signo, &handler_action, &userAction_);
+        handlerAction.sa_flags = SA_RESTART | SA_SIGINFO | SA_NODEFER;
+        g_realSigaction(signo, nullptr, &oldAction_);
+        g_realSigaction(signo, &handlerAction, &userAction_);
     }
 
     void RegisterHookAction(const SighookAction *sa)
@@ -202,48 +202,48 @@ private:
     bool userActionRegister_ {false};
 };
 
-static std::array<SignalHook, _NSIG + 1> SIGNAL_HOOKS;
+static std::array<SignalHook, _NSIG + 1> g_signalHooks;
 
 void SignalHook::CallOldAction(int signo, siginfo_t *siginfo, void *ucontextRaw)
 {
-    auto handlerFlags = static_cast<size_t>(SIGNAL_HOOKS[signo].oldAction_.sa_flags);
-    sigset_t mask = SIGNAL_HOOKS[signo].oldAction_.sa_mask;
-    REAL_SIGPROCMASK(SIG_SETMASK, &mask, nullptr);
+    auto handlerFlags = static_cast<size_t>(g_signalHooks[signo].oldAction_.sa_flags);
+    sigset_t mask = g_signalHooks[signo].oldAction_.sa_mask;
+    g_realSigProcMask(SIG_SETMASK, &mask, nullptr);
 
-    if ((handlerFlags & SA_SIGINFO)) {                                             // NOLINT
-        SIGNAL_HOOKS[signo].oldAction_.sa_sigaction(signo, siginfo, ucontextRaw);  // NOLINT
+    if ((handlerFlags & SA_SIGINFO)) {                                              // NOLINT
+        g_signalHooks[signo].oldAction_.sa_sigaction(signo, siginfo, ucontextRaw);  // NOLINT
     } else {
-        if (SIGNAL_HOOKS[signo].oldAction_.sa_handler == nullptr) {  // NOLINT
-            REAL_SIGACTION(signo, &SIGNAL_HOOKS[signo].oldAction_, nullptr);
+        if (g_signalHooks[signo].oldAction_.sa_handler == nullptr) {  // NOLINT
+            g_realSigaction(signo, &g_signalHooks[signo].oldAction_, nullptr);
             kill(getpid(), signo);  // send signal again
             return;
         }
-        SIGNAL_HOOKS[signo].oldAction_.sa_handler(signo);  // NOLINT
+        g_signalHooks[signo].oldAction_.sa_handler(signo);  // NOLINT
     }
 }
 
 bool SignalHook::SetHandlingSignal(int signo, siginfo_t *siginfo, void *ucontextRaw)
 {
-    for (const auto &handler : SIGNAL_HOOKS[signo].hookActionHandlers_) {
+    for (const auto &handler : g_signalHooks[signo].hookActionHandlers_) {
         if (handler.scSigaction == nullptr) {
             break;
         }
 
-        bool handler_noreturn = ((handler.scFlags & SIGHOOK_ALLOW_NORETURN) != 0);
+        bool handlerNoreturn = ((handler.scFlags & SIGHOOK_ALLOW_NORETURN) != 0);
         sigset_t previousMask;
-        REAL_SIGPROCMASK(SIG_SETMASK, &handler.scMask, &previousMask);
+        g_realSigProcMask(SIG_SETMASK, &handler.scMask, &previousMask);
 
-        bool old_handle_key = GetHandlingSignal();
-        if (!handler_noreturn) {
+        bool oldHandleKey = GetHandlingSignal();
+        if (!handlerNoreturn) {
             ::panda::SetHandlingSignal(true);
         }
         if (handler.scSigaction(signo, siginfo, ucontextRaw)) {
-            ::panda::SetHandlingSignal(old_handle_key);
+            ::panda::SetHandlingSignal(oldHandleKey);
             return false;
         }
 
-        REAL_SIGPROCMASK(SIG_SETMASK, &previousMask, nullptr);
-        ::panda::SetHandlingSignal(old_handle_key);
+        g_realSigProcMask(SIG_SETMASK, &previousMask, nullptr);
+        ::panda::SetHandlingSignal(oldHandleKey);
     }
 
     return true;
@@ -258,20 +258,20 @@ void SignalHook::Handler(int signo, siginfo_t *siginfo, void *ucontextRaw)
     }
 
     // if not set user handler,call linker handler
-    if (!SIGNAL_HOOKS[signo].IsUserActionRegister()) {
+    if (!g_signalHooks[signo].IsUserActionRegister()) {
         CallOldAction(signo, siginfo, ucontextRaw);
         return;
     }
 
     // call user handler
-    auto handlerFlags = static_cast<size_t>(SIGNAL_HOOKS[signo].userAction_.sa_flags);
+    auto handlerFlags = static_cast<size_t>(g_signalHooks[signo].userAction_.sa_flags);
     auto *ucontext = static_cast<ucontext_t *>(ucontextRaw);
     sigset_t mask;
     sigemptyset(&mask);
     constexpr int N = sizeof(sigset_t) * 2;
     for (int i = 0; i < N; ++i) {
         if (sigismember(&ucontext->uc_sigmask, i) == 1 ||
-            sigismember(&SIGNAL_HOOKS[signo].userAction_.sa_mask, i) == 1) {
+            sigismember(&g_signalHooks[signo].userAction_.sa_mask, i) == 1) {
             sigaddset(&mask, i);
         }
     }
@@ -279,13 +279,13 @@ void SignalHook::Handler(int signo, siginfo_t *siginfo, void *ucontextRaw)
     if ((handlerFlags & SA_NODEFER) == 0) {  // NOLINT
         sigaddset(&mask, signo);
     }
-    REAL_SIGPROCMASK(SIG_SETMASK, &mask, nullptr);
+    g_realSigProcMask(SIG_SETMASK, &mask, nullptr);
 
-    if ((handlerFlags & SA_SIGINFO)) {                                              // NOLINT
-        SIGNAL_HOOKS[signo].userAction_.sa_sigaction(signo, siginfo, ucontextRaw);  // NOLINT
+    if ((handlerFlags & SA_SIGINFO)) {                                               // NOLINT
+        g_signalHooks[signo].userAction_.sa_sigaction(signo, siginfo, ucontextRaw);  // NOLINT
     } else {
-        auto handler = SIGNAL_HOOKS[signo].userAction_.sa_handler;  // NOLINT
-        if (handler == SIG_IGN) {                                   // NOLINT
+        auto handler = g_signalHooks[signo].userAction_.sa_handler;  // NOLINT
+        if (handler == SIG_IGN) {                                    // NOLINT
             return;
         }
         if (handler == SIG_DFL) {  // NOLINT
@@ -324,13 +324,13 @@ __attribute__((constructor)) static bool InitRealSignalFun()
 #endif
 {
     {
-        os::memory::LockHolder lock(REAL_LOCK);
-        if (!IS_INIT_REALLY) {
+        os::memory::LockHolder lock(g_realLock);
+        if (!g_isInitReally) {
             bool isError = true;
-            isError = isError && FindRealSignal(&REAL_SIGACTION, sigaction, "sigaction");
-            isError = isError && FindRealSignal(&REAL_SIGPROCMASK, sigprocmask, "sigprocmask");
+            isError = isError && FindRealSignal(&g_realSigaction, sigaction, "sigaction");
+            isError = isError && FindRealSignal(&g_realSigProcMask, sigprocmask, "sigprocmask");
             if (isError) {
-                IS_INIT_REALLY = true;
+                g_isInitReally = true;
             }
             return isError;
         }
@@ -348,10 +348,10 @@ static int RegisterUserHandler(int signal, const struct sigaction *newAction, st
         return -1;
     }
 
-    if (SIGNAL_HOOKS[signal].IsHook()) {
-        auto userAction = SIGNAL_HOOKS[signal].SignalHook::GetUserAction();
+    if (g_signalHooks[signal].IsHook()) {
+        auto userAction = g_signalHooks[signal].SignalHook::GetUserAction();
         if (newAction != nullptr) {
-            SIGNAL_HOOKS[signal].RegisterUserAction(newAction);
+            g_signalHooks[signal].RegisterUserAction(newAction);
         }
         if (oldAction != nullptr) {
             *oldAction = userAction;
@@ -376,7 +376,7 @@ int RegisterUserMask(int how, const sigset_t *newSet, sigset_t *oldSet,
     sigset_t buildSigset = *newSet;
     if (how == SIG_BLOCK || how == SIG_SETMASK) {
         for (int i = 1; i < _NSIG; ++i) {
-            if (SIGNAL_HOOKS[i].IsHook() && (sigismember(&buildSigset, i) != 0)) {
+            if (g_signalHooks[i].IsHook() && (sigismember(&buildSigset, i) != 0)) {
                 sigdelset(&buildSigset, i);
             }
         }
@@ -395,7 +395,7 @@ extern "C" int sigaction([[maybe_unused]] int __sig, [[maybe_unused]] const stru
     if (!InitRealSignalFun()) {
         return -1;
     }
-    return RegisterUserHandler(__sig, __act, __oact, REAL_SIGACTION);
+    return RegisterUserHandler(__sig, __act, __oact, g_realSigaction);
 }
 #else
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -405,7 +405,7 @@ extern "C" int sigactionStub([[maybe_unused]] int __sig, [[maybe_unused]] const 
     if (!InitRealSignalFun()) {
         return -1;
     }
-    return RegisterUserHandler(__sig, __act, __oact, REAL_SIGACTION);
+    return RegisterUserHandler(__sig, __act, __oact, g_realSigaction);
 }
 #endif  // USE_ADDRESS_SANITIZER
 
@@ -415,7 +415,7 @@ extern "C" int sigprocmask(int how, const sigset_t *newSet, sigset_t *oldSet)  /
     if (!InitRealSignalFun()) {
         return -1;
     }
-    return RegisterUserMask(how, newSet, oldSet, REAL_SIGPROCMASK);
+    return RegisterUserMask(how, newSet, oldSet, g_realSigProcMask);
 }
 
 extern "C" void RegisterHookHandler(int signal, const SighookAction *sa)
@@ -428,8 +428,8 @@ extern "C" void RegisterHookHandler(int signal, const SighookAction *sa)
         LOG(FATAL, RUNTIME) << "illegal signal " << signal;
     }
 
-    SIGNAL_HOOKS[signal].RegisterHookAction(sa);
-    SIGNAL_HOOKS[signal].HookSig(signal);
+    g_signalHooks[signal].RegisterHookAction(sa);
+    g_signalHooks[signal].HookSig(signal);
 }
 
 extern "C" void RemoveHookHandler(int signal, bool (*action)(int, siginfo_t *, void *))
@@ -442,7 +442,7 @@ extern "C" void RemoveHookHandler(int signal, bool (*action)(int, siginfo_t *, v
         LOG(FATAL, RUNTIME) << "illegal signal " << signal;
     }
 
-    SIGNAL_HOOKS[signal].RemoveHookAction(action);
+    g_signalHooks[signal].RemoveHookAction(action);
 }
 
 extern "C" void CheckOldHookHandler(int signal)
@@ -457,12 +457,12 @@ extern "C" void CheckOldHookHandler(int signal)
 
     // get old action
     struct sigaction oldAction {};
-    REAL_SIGACTION(signal, nullptr, &oldAction);
+    g_realSigaction(signal, nullptr, &oldAction);
 
     if (oldAction.sa_sigaction != SignalHook::Handler) {  // NOLINT
         LOG(ERROR, RUNTIME) << "error: Check old hook handler found unexpected action "
                             << (oldAction.sa_sigaction != nullptr);  // NOLINT
-        SIGNAL_HOOKS[signal].RegisterAction(signal);
+        g_signalHooks[signal].RegisterAction(signal);
     }
 }
 
@@ -486,10 +486,10 @@ extern "C" void EnsureFrontOfChain(int signal)
 
 void ClearSignalHooksHandlersArray()
 {
-    IS_INIT_REALLY = false;
-    IS_INIT_KEY_CREATE = false;
+    g_isInitReally = false;
+    g_isInitKeyCreate = false;
     for (int i = 1; i < _NSIG; i++) {
-        SIGNAL_HOOKS[i].ClearHookActionHandlers();
+        g_signalHooks[i].ClearHookActionHandlers();
     }
 }
 

@@ -39,18 +39,18 @@ os::unique_fd::UniqueFd CreateUnixServerSocket(int backlog)
         return os::unique_fd::UniqueFd();
     }
 
-    struct sockaddr_un server_addr {};
-    if (memset_s(&server_addr, sizeof(server_addr), 0, sizeof(server_addr)) != EOK) {
+    struct sockaddr_un serverAddr {};
+    if (memset_s(&serverAddr, sizeof(serverAddr), 0, sizeof(serverAddr)) != EOK) {
         PLOG(ERROR, DPROF) << "CreateUnixServerSocket memset_s failed";
         UNREACHABLE();
     }
-    server_addr.sun_family = AF_UNIX;
-    if (memcpy_s(server_addr.sun_path, sizeof(SOCKET_NAME), SOCKET_NAME, sizeof(SOCKET_NAME)) != EOK) {
+    serverAddr.sun_family = AF_UNIX;
+    if (memcpy_s(serverAddr.sun_path, sizeof(SOCKET_NAME), SOCKET_NAME, sizeof(SOCKET_NAME)) != EOK) {
         PLOG(ERROR, DPROF) << "CreateUnixServerSocket memcpy_s failed";
         UNREACHABLE();
     }
-    if (PANDA_FAILURE_RETRY(
-            ::bind(sock.Get(), reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr))) == -1) {
+    if (PANDA_FAILURE_RETRY(::bind(sock.Get(), reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr))) ==
+        -1) {
         PLOG(ERROR, DPROF) << "bind() failed";
         return os::unique_fd::UniqueFd();
     }
@@ -71,18 +71,18 @@ os::unique_fd::UniqueFd CreateUnixClientSocket()
         return os::unique_fd::UniqueFd();
     }
 
-    struct sockaddr_un server_addr {};
-    if (memset_s(&server_addr, sizeof(server_addr), 0, sizeof(server_addr)) != EOK) {
+    struct sockaddr_un serverAddr {};
+    if (memset_s(&serverAddr, sizeof(serverAddr), 0, sizeof(serverAddr)) != EOK) {
         PLOG(ERROR, DPROF) << "CreateUnixClientSocket memset_s failed";
         UNREACHABLE();
     }
-    server_addr.sun_family = AF_UNIX;
-    if (memcpy_s(server_addr.sun_path, sizeof(SOCKET_NAME), SOCKET_NAME, sizeof(SOCKET_NAME)) != EOK) {
+    serverAddr.sun_family = AF_UNIX;
+    if (memcpy_s(serverAddr.sun_path, sizeof(SOCKET_NAME), SOCKET_NAME, sizeof(SOCKET_NAME)) != EOK) {
         PLOG(ERROR, DPROF) << "CreateUnixClientSocket memcpy_s failed";
         UNREACHABLE();
     }
     if (PANDA_FAILURE_RETRY(
-            ::connect(sock.Get(), reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr))) == -1) {
+            ::connect(sock.Get(), reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr))) == -1) {
         PLOG(ERROR, DPROF) << "connect() failed";
         return os::unique_fd::UniqueFd();
     }
@@ -107,13 +107,13 @@ bool SendAll(int fd, const void *buf, int len)
     return true;
 }
 
-bool WaitDataTimeout(int fd, int timeout_ms)
+bool WaitDataTimeout(int fd, int timeoutMs)
 {
     struct pollfd pfd {};
     pfd.fd = fd;
     pfd.events = POLLIN;
 
-    int rc = PANDA_FAILURE_RETRY(::poll(&pfd, 1, timeout_ms));
+    int rc = PANDA_FAILURE_RETRY(::poll(&pfd, 1, timeoutMs));
     if (rc == 1) {
         // Success
         return true;
@@ -133,9 +133,9 @@ bool WaitDataTimeout(int fd, int timeout_ms)
     return false;
 }
 
-int RecvTimeout(int fd, void *buf, int len, int timeout_ms)
+int RecvTimeout(int fd, void *buf, int len, int timeoutMs)
 {
-    if (!WaitDataTimeout(fd, timeout_ms)) {
+    if (!WaitDataTimeout(fd, timeoutMs)) {
         LOG(ERROR, DPROF) << "Cannot get access to data";
         return -1;
     }

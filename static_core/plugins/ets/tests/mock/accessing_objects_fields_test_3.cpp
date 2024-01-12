@@ -64,8 +64,8 @@ TEST_F(AccessingObjectsFieldsTest, DISABLED_GetBaseFieldID2)
     ets_class cls = env_->FindClass("F_sub");
     ASSERT_NE(cls, nullptr);
 
-    ets_field member_id = env_->Getp_field(cls, "member4", "I");
-    ASSERT_NE(member_id, nullptr);
+    ets_field memberId = env_->Getp_field(cls, "member4", "I");
+    ASSERT_NE(memberId, nullptr);
 }
 
 TEST_F(AccessingObjectsFieldsTest, GetTypeField)
@@ -361,41 +361,41 @@ TEST_F(AccessingObjectsFieldsTest, DISABLED_GetStaticTypeFieldBase)
     ets_class cls = env_->FindClass("F_static_sub");
     ASSERT_NE(cls, nullptr);
 
-    ets_field member0_id = env_->GetStaticp_field(cls, "member0", "Z");
-    ASSERT_NE(member0_id, nullptr);
-    ets_field member1_id = env_->GetStaticp_field(cls, "member1", "B");
-    ASSERT_NE(member1_id, nullptr);
-    ets_field member2_id = env_->GetStaticp_field(cls, "member2", "C");
-    ASSERT_NE(member2_id, nullptr);
-    ets_field member3_id = env_->GetStaticp_field(cls, "member3", "S");
-    ASSERT_NE(member3_id, nullptr);
-    ets_field member4_id = env_->GetStaticp_field(cls, "member4", "I");
-    ASSERT_NE(member4_id, nullptr);
-    ets_field member5_id = env_->GetStaticp_field(cls, "member5", "J");
-    ASSERT_NE(member5_id, nullptr);
-    ets_field member6_id = env_->GetStaticp_field(cls, "member6", "F");
-    ASSERT_NE(member6_id, nullptr);
-    ets_field member7_id = env_->GetStaticp_field(cls, "member7", "D");
-    ASSERT_NE(member7_id, nullptr);
-    ets_field member8_id = env_->GetStaticp_field(cls, "member8", "LA;");
-    ASSERT_NE(member8_id, nullptr);
+    ets_field member0Id = env_->GetStaticp_field(cls, "member0", "Z");
+    ASSERT_NE(member0Id, nullptr);
+    ets_field member1Id = env_->GetStaticp_field(cls, "member1", "B");
+    ASSERT_NE(member1Id, nullptr);
+    ets_field member2Id = env_->GetStaticp_field(cls, "member2", "C");
+    ASSERT_NE(member2Id, nullptr);
+    ets_field member3Id = env_->GetStaticp_field(cls, "member3", "S");
+    ASSERT_NE(member3Id, nullptr);
+    ets_field member4Id = env_->GetStaticp_field(cls, "member4", "I");
+    ASSERT_NE(member4Id, nullptr);
+    ets_field member5Id = env_->GetStaticp_field(cls, "member5", "J");
+    ASSERT_NE(member5Id, nullptr);
+    ets_field member6Id = env_->GetStaticp_field(cls, "member6", "F");
+    ASSERT_NE(member6Id, nullptr);
+    ets_field member7Id = env_->GetStaticp_field(cls, "member7", "D");
+    ASSERT_NE(member7Id, nullptr);
+    ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LA;");
+    ASSERT_NE(member8Id, nullptr);
 
-    EXPECT_EQ(env_->GetStaticBooleanField(cls, member0_id), static_cast<ets_boolean>(1));
-    EXPECT_EQ(env_->GetStaticByteField(cls, member1_id), static_cast<ets_byte>(2_I));
-    EXPECT_EQ(env_->GetStaticCharField(cls, member2_id), static_cast<ets_char>(3U));
-    EXPECT_EQ(env_->GetStaticShortField(cls, member3_id), static_cast<ets_short>(4_I));
-    EXPECT_EQ(env_->GetStaticIntField(cls, member4_id), static_cast<ets_int>(5_I));
-    EXPECT_EQ(env_->GetStaticLongField(cls, member5_id), static_cast<ets_long>(6L));
-    EXPECT_FLOAT_EQ(env_->GetStaticFloatField(cls, member6_id), static_cast<ets_float>(7.0F));
-    EXPECT_DOUBLE_EQ(env_->GetStaticDoubleField(cls, member7_id), static_cast<ets_double>(8.0_D));
+    EXPECT_EQ(env_->GetStaticBooleanField(cls, member0Id), static_cast<ets_boolean>(1));
+    EXPECT_EQ(env_->GetStaticByteField(cls, member1Id), static_cast<ets_byte>(2_I));
+    EXPECT_EQ(env_->GetStaticCharField(cls, member2Id), static_cast<ets_char>(3U));
+    EXPECT_EQ(env_->GetStaticShortField(cls, member3Id), static_cast<ets_short>(4_I));
+    EXPECT_EQ(env_->GetStaticIntField(cls, member4Id), static_cast<ets_int>(5_I));
+    EXPECT_EQ(env_->GetStaticLongField(cls, member5Id), static_cast<ets_long>(6L));
+    EXPECT_FLOAT_EQ(env_->GetStaticFloatField(cls, member6Id), static_cast<ets_float>(7.0F));
+    EXPECT_DOUBLE_EQ(env_->GetStaticDoubleField(cls, member7Id), static_cast<ets_double>(8.0_D));
 
-    ets_class a_cls = env_->FindClass("A");
-    ASSERT_NE(a_cls, nullptr);
-    ets_field a_member_id = env_->Getp_field(a_cls, "member", "I");
-    ASSERT_NE(a_member_id, nullptr);
-    ets_object a_obj = env_->GetStaticObjectField(cls, member8_id);
-    ASSERT_NE(a_obj, nullptr);
-    EXPECT_EQ(env_->GetIntField(a_obj, a_member_id), static_cast<ets_int>(1));
+    ets_class aCls = env_->FindClass("A");
+    ASSERT_NE(aCls, nullptr);
+    ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
+    ASSERT_NE(aMemberId, nullptr);
+    ets_object aObj = env_->GetStaticObjectField(cls, member8Id);
+    ASSERT_NE(aObj, nullptr);
+    EXPECT_EQ(env_->GetIntField(aObj, aMemberId), static_cast<ets_int>(1));
 }
 
 TEST_F(AccessingObjectsFieldsTestDeath, SetStaticTypeFieldDeathTests)
@@ -445,57 +445,57 @@ TEST_F(AccessingObjectsFieldsTest, DISABLED_SetStaticFieldBase)
     ets_class cls = env_->FindClass("F_static_sub");
     ASSERT_NE(cls, nullptr);
 
-    ets_field member0_id = env_->GetStaticp_field(cls, "member0", "Z");
-    ASSERT_NE(member0_id, nullptr);
-    ets_field member1_id = env_->GetStaticp_field(cls, "member1", "B");
-    ASSERT_NE(member1_id, nullptr);
-    ets_field member2_id = env_->GetStaticp_field(cls, "member2", "C");
-    ASSERT_NE(member2_id, nullptr);
-    ets_field member3_id = env_->GetStaticp_field(cls, "member3", "S");
-    ASSERT_NE(member3_id, nullptr);
-    ets_field member4_id = env_->GetStaticp_field(cls, "member4", "I");
-    ASSERT_NE(member4_id, nullptr);
-    ets_field member5_id = env_->GetStaticp_field(cls, "member5", "J");
-    ASSERT_NE(member5_id, nullptr);
-    ets_field member6_id = env_->GetStaticp_field(cls, "member6", "F");
-    ASSERT_NE(member6_id, nullptr);
-    ets_field member7_id = env_->GetStaticp_field(cls, "member7", "D");
-    ASSERT_NE(member7_id, nullptr);
-    ets_field member8_id = env_->GetStaticp_field(cls, "member8", "LA;");
-    ASSERT_NE(member8_id, nullptr);
+    ets_field member0Id = env_->GetStaticp_field(cls, "member0", "Z");
+    ASSERT_NE(member0Id, nullptr);
+    ets_field member1Id = env_->GetStaticp_field(cls, "member1", "B");
+    ASSERT_NE(member1Id, nullptr);
+    ets_field member2Id = env_->GetStaticp_field(cls, "member2", "C");
+    ASSERT_NE(member2Id, nullptr);
+    ets_field member3Id = env_->GetStaticp_field(cls, "member3", "S");
+    ASSERT_NE(member3Id, nullptr);
+    ets_field member4Id = env_->GetStaticp_field(cls, "member4", "I");
+    ASSERT_NE(member4Id, nullptr);
+    ets_field member5Id = env_->GetStaticp_field(cls, "member5", "J");
+    ASSERT_NE(member5Id, nullptr);
+    ets_field member6Id = env_->GetStaticp_field(cls, "member6", "F");
+    ASSERT_NE(member6Id, nullptr);
+    ets_field member7Id = env_->GetStaticp_field(cls, "member7", "D");
+    ASSERT_NE(member7Id, nullptr);
+    ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LA;");
+    ASSERT_NE(member8Id, nullptr);
 
-    ets_class a_cls = env_->FindClass("A");
-    ASSERT_NE(a_cls, nullptr);
-    ets_field a_member_id = env_->Getp_field(a_cls, "member", "I");
-    ASSERT_NE(a_member_id, nullptr);
-    ets_object a_obj = env_->GetStaticObjectField(cls, member8_id);
-    ASSERT_NE(a_obj, nullptr);
+    ets_class aCls = env_->FindClass("A");
+    ASSERT_NE(aCls, nullptr);
+    ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
+    ASSERT_NE(aMemberId, nullptr);
+    ets_object aObj = env_->GetStaticObjectField(cls, member8Id);
+    ASSERT_NE(aObj, nullptr);
 
-    env_->SetIntField(a_obj, a_member_id, static_cast<ets_int>(5_I));
+    env_->SetIntField(aObj, aMemberId, static_cast<ets_int>(5_I));
 
-    env_->SetStaticBooleanField(cls, member0_id, static_cast<ets_boolean>(1));
-    env_->SetStaticByteField(cls, member1_id, static_cast<ets_byte>(10_I));
-    env_->SetStaticCharField(cls, member2_id, static_cast<ets_char>(20U));
-    env_->SetStaticShortField(cls, member3_id, static_cast<ets_short>(30_I));
-    env_->SetStaticIntField(cls, member4_id, static_cast<ets_int>(40_I));
-    env_->SetStaticLongField(cls, member5_id, static_cast<ets_long>(50L));
-    env_->SetStaticFloatField(cls, member6_id, static_cast<ets_float>(60.0F));
-    env_->SetStaticDoubleField(cls, member7_id, static_cast<ets_double>(70.0F));
-    env_->SetStaticObjectField(cls, member8_id, a_obj);
+    env_->SetStaticBooleanField(cls, member0Id, static_cast<ets_boolean>(1));
+    env_->SetStaticByteField(cls, member1Id, static_cast<ets_byte>(10_I));
+    env_->SetStaticCharField(cls, member2Id, static_cast<ets_char>(20U));
+    env_->SetStaticShortField(cls, member3Id, static_cast<ets_short>(30_I));
+    env_->SetStaticIntField(cls, member4Id, static_cast<ets_int>(40_I));
+    env_->SetStaticLongField(cls, member5Id, static_cast<ets_long>(50L));
+    env_->SetStaticFloatField(cls, member6Id, static_cast<ets_float>(60.0F));
+    env_->SetStaticDoubleField(cls, member7Id, static_cast<ets_double>(70.0F));
+    env_->SetStaticObjectField(cls, member8Id, aObj);
 
-    EXPECT_EQ(env_->GetStaticBooleanField(cls, member0_id), static_cast<ets_boolean>(1));
-    EXPECT_EQ(env_->GetStaticByteField(cls, member1_id), static_cast<ets_byte>(10_I));
-    EXPECT_EQ(env_->GetStaticCharField(cls, member2_id), static_cast<ets_char>(20U));
-    EXPECT_EQ(env_->GetStaticShortField(cls, member3_id), static_cast<ets_short>(30_I));
-    EXPECT_EQ(env_->GetStaticIntField(cls, member4_id), static_cast<ets_int>(40_I));
-    EXPECT_EQ(env_->GetStaticLongField(cls, member5_id), static_cast<ets_long>(50L));
-    EXPECT_FLOAT_EQ(env_->GetStaticFloatField(cls, member6_id), static_cast<ets_float>(60.0F));
-    EXPECT_DOUBLE_EQ(env_->GetStaticDoubleField(cls, member7_id), static_cast<ets_double>(70.0F));
+    EXPECT_EQ(env_->GetStaticBooleanField(cls, member0Id), static_cast<ets_boolean>(1));
+    EXPECT_EQ(env_->GetStaticByteField(cls, member1Id), static_cast<ets_byte>(10_I));
+    EXPECT_EQ(env_->GetStaticCharField(cls, member2Id), static_cast<ets_char>(20U));
+    EXPECT_EQ(env_->GetStaticShortField(cls, member3Id), static_cast<ets_short>(30_I));
+    EXPECT_EQ(env_->GetStaticIntField(cls, member4Id), static_cast<ets_int>(40_I));
+    EXPECT_EQ(env_->GetStaticLongField(cls, member5Id), static_cast<ets_long>(50L));
+    EXPECT_FLOAT_EQ(env_->GetStaticFloatField(cls, member6Id), static_cast<ets_float>(60.0F));
+    EXPECT_DOUBLE_EQ(env_->GetStaticDoubleField(cls, member7Id), static_cast<ets_double>(70.0F));
 
-    ets_object set_a_obj = env_->GetStaticObjectField(cls, member8_id);
-    ASSERT_NE(set_a_obj, nullptr);
-    EXPECT_EQ(env_->IsInstanceOf(set_a_obj, a_cls), ETS_TRUE);
-    EXPECT_EQ(env_->GetIntField(set_a_obj, a_member_id), static_cast<ets_int>(5_I));
+    ets_object setAObj = env_->GetStaticObjectField(cls, member8Id);
+    ASSERT_NE(setAObj, nullptr);
+    EXPECT_EQ(env_->IsInstanceOf(setAObj, aCls), ETS_TRUE);
+    EXPECT_EQ(env_->GetIntField(setAObj, aMemberId), static_cast<ets_int>(5_I));
 }
 
 }  // namespace panda::ets::test
