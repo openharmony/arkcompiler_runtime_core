@@ -118,19 +118,21 @@ std::vector<PtLocation> DebugInfoCache::GetBreakpointLocations(
 {
     std::vector<PtLocation> locations;
     sourceFiles.clear();
+    // clang-format off
     EnumerateLineEntries([](auto, auto &) { return true; },
-                         [&sourceFileFilter](auto, auto &debugInfo, auto methodId) {
-                             return sourceFileFilter(debugInfo.GetSourceFile(methodId));
-                         },
-                         [lineNumber, &sourceFiles, &locations](auto pandaFile, auto &debugInfo, auto methodId,
-                                                                auto &entry, auto /* next */) {
-                             if (entry.line == lineNumber) {
-                                 sourceFiles.insert(debugInfo.GetSourceFile(methodId));
-                                 locations.emplace_back(pandaFile->GetFilename().data(), methodId, entry.offset);
-                             }
+                        [&sourceFileFilter](auto, auto &debugInfo, auto methodId) {
+                            return sourceFileFilter(debugInfo.GetSourceFile(methodId));
+                        },
+                        [lineNumber, &sourceFiles, &locations](auto pandaFile, auto &debugInfo, auto methodId,
+                                                               auto &entry, auto /* next */) {
+                            if (entry.line == lineNumber) {
+                                sourceFiles.insert(debugInfo.GetSourceFile(methodId));
+                                locations.emplace_back(pandaFile->GetFilename().data(), methodId, entry.offset);
+                            }
 
-                             return true;
-                         });
+                            return true;
+                        });
+    // clang-format on
     return locations;
 }
 
@@ -210,7 +212,7 @@ static TypedValue CreateTypedValueFromReg(uint64_t reg, panda_file::Type::TypeId
             return TypedValue::Tagged(coretypes::TaggedValue(static_cast<coretypes::TaggedType>(reg)));
         default:
             UNREACHABLE();
-            break;
+            return TypedValue::Invalid();
     }
 }
 // NOLINTEND(readability-magic-numbers)

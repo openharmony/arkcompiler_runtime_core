@@ -464,51 +464,53 @@ void Disassembler::GetLiteralArray(pandasm::LiteralArray *litArray, const size_t
 
     panda_file::LiteralDataAccessor litArrayAccessor(*file_, file_->GetLiteralArraysId());
 
+    // clang-format off
     litArrayAccessor.EnumerateLiteralVals(index,
-                                          [this, litArray](const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                                           const panda_file::LiteralTag &tag) {
-                                              switch (tag) {
-                                                  case panda_file::LiteralTag::ARRAY_U1: {
-                                                      FillLiteralArrayData<bool>(litArray, tag, value);
-                                                      break;
-                                                  }
-                                                  case panda_file::LiteralTag::ARRAY_I8:
-                                                  case panda_file::LiteralTag::ARRAY_U8: {
-                                                      FillLiteralArrayData<uint8_t>(litArray, tag, value);
-                                                      break;
-                                                  }
-                                                  case panda_file::LiteralTag::ARRAY_I16:
-                                                  case panda_file::LiteralTag::ARRAY_U16: {
-                                                      FillLiteralArrayData<uint16_t>(litArray, tag, value);
-                                                      break;
-                                                  }
-                                                  case panda_file::LiteralTag::ARRAY_I32:
-                                                  case panda_file::LiteralTag::ARRAY_U32: {
-                                                      FillLiteralArrayData<uint32_t>(litArray, tag, value);
-                                                      break;
-                                                  }
-                                                  case panda_file::LiteralTag::ARRAY_I64:
-                                                  case panda_file::LiteralTag::ARRAY_U64: {
-                                                      FillLiteralArrayData<uint64_t>(litArray, tag, value);
-                                                      break;
-                                                  }
-                                                  case panda_file::LiteralTag::ARRAY_F32: {
-                                                      FillLiteralArrayData<float>(litArray, tag, value);
-                                                      break;
-                                                  }
-                                                  case panda_file::LiteralTag::ARRAY_F64: {
-                                                      FillLiteralArrayData<double>(litArray, tag, value);
-                                                      break;
-                                                  }
-                                                  case panda_file::LiteralTag::ARRAY_STRING: {
-                                                      FillLiteralArrayData<uint32_t>(litArray, tag, value);
-                                                      break;
-                                                  }
-                                                  default: {
-                                                      FillLiteralData(litArray, value, tag);
-                                                  }
-                                              }
-                                          });
+                                        [this, litArray](const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                                         const panda_file::LiteralTag &tag) {
+                                            switch (tag) {
+                                                case panda_file::LiteralTag::ARRAY_U1: {
+                                                    FillLiteralArrayData<bool>(litArray, tag, value);
+                                                    break;
+                                                }
+                                                case panda_file::LiteralTag::ARRAY_I8:
+                                                case panda_file::LiteralTag::ARRAY_U8: {
+                                                    FillLiteralArrayData<uint8_t>(litArray, tag, value);
+                                                    break;
+                                                }
+                                                case panda_file::LiteralTag::ARRAY_I16:
+                                                case panda_file::LiteralTag::ARRAY_U16: {
+                                                    FillLiteralArrayData<uint16_t>(litArray, tag, value);
+                                                    break;
+                                                }
+                                                case panda_file::LiteralTag::ARRAY_I32:
+                                                case panda_file::LiteralTag::ARRAY_U32: {
+                                                    FillLiteralArrayData<uint32_t>(litArray, tag, value);
+                                                    break;
+                                                }
+                                                case panda_file::LiteralTag::ARRAY_I64:
+                                                case panda_file::LiteralTag::ARRAY_U64: {
+                                                    FillLiteralArrayData<uint64_t>(litArray, tag, value);
+                                                    break;
+                                                }
+                                                case panda_file::LiteralTag::ARRAY_F32: {
+                                                    FillLiteralArrayData<float>(litArray, tag, value);
+                                                    break;
+                                                }
+                                                case panda_file::LiteralTag::ARRAY_F64: {
+                                                    FillLiteralArrayData<double>(litArray, tag, value);
+                                                    break;
+                                                }
+                                                case panda_file::LiteralTag::ARRAY_STRING: {
+                                                    FillLiteralArrayData<uint32_t>(litArray, tag, value);
+                                                    break;
+                                                }
+                                                default: {
+                                                    FillLiteralData(litArray, value, tag);
+                                                }
+                                            }
+                                        });
+    // clang-format on
 }
 
 void Disassembler::GetLiteralArrays()

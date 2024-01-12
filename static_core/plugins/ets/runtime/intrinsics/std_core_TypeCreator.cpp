@@ -483,9 +483,11 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyDefault(EtsLong methodPtr)
     if (fn.metadata->IsCtor()) {
         auto selfName = m->GetFn().params.front().type.GetName();
         auto &recordTable = m->Ctx()->Program().recordTable;
+        // clang-format off
         auto superName = recordTable.find(selfName)
-                             ->second.metadata->GetAttributeValue(std::string {typeapi_create_consts::ATTR_EXTENDS})
-                             .value();
+                            ->second.metadata->GetAttributeValue(std::string {typeapi_create_consts::ATTR_EXTENDS})
+                            .value();
+        // clang-format on
         m->Ctx()->AddRefTypeAsExternal(superName);
         PandasmMethodCreator superCtor {superName + "." + panda_file::GetCtorName(panda_file::SourceLang::ETS),
                                         m->Ctx()};

@@ -27,7 +27,7 @@ static const char *GetTypeString(Scope::Type type)
             return "local";
         default:
             UNREACHABLE();
-            break;
+            return nullptr;
     }
 }
 

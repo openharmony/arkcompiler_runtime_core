@@ -32,9 +32,11 @@ inline StackLikeAllocator<ALIGNMENT, MAX_SIZE>::StackLikeAllocator(bool usePoolM
     ASSERT(RELEASE_PAGES_SIZE == AlignUp(RELEASE_PAGES_SIZE, os::mem::GetPageSize()));
     // MMAP!
     if (usePoolManager_) {
+        // clang-format off
         startAddr_ = PoolManager::GetMmapMemPool()
-                         ->AllocPool(MAX_SIZE, spaceType, AllocatorType::STACK_LIKE_ALLOCATOR, this)
-                         .GetMem();
+                        ->AllocPool(MAX_SIZE, spaceType, AllocatorType::STACK_LIKE_ALLOCATOR, this)
+                        .GetMem();
+        // clang-format on
     } else {
         startAddr_ = panda::os::mem::MapRWAnonymousWithAlignmentRaw(
             MAX_SIZE, std::max(GetAlignmentInBytes(ALIGNMENT), static_cast<size_t>(panda::os::mem::GetPageSize())));
